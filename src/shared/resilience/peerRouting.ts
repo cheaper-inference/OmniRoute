@@ -57,7 +57,7 @@ function normalizePeerUrl(value: string): URL | null {
 
 export function isConfiguredOmniRoutePeer(
   targetUrl: string,
-  env: PeerEnvironment = process.env
+  env: PeerEnvironment = process.env as PeerEnvironment
 ): boolean {
   const target = normalizePeerUrl(targetUrl);
   if (!target) return false;
@@ -76,7 +76,7 @@ export function isConfiguredOmniRoutePeer(
 /** Reject a request that has already visited this instance or exhausted its peer-hop budget. */
 export function inspectPeerRequest(
   headers: HeaderSource,
-  env: PeerEnvironment = process.env
+  env: PeerEnvironment = process.env as PeerEnvironment
 ): PeerRequestRejection | null {
   const instanceId = getInstanceId(env);
   if (!instanceId) return null;
@@ -117,7 +117,7 @@ export function applyPeerTraceHeader(
   outgoingHeaders: Record<string, string>,
   clientHeaders: HeaderSource,
   targetUrl: string,
-  env: PeerEnvironment = process.env
+  env: PeerEnvironment = process.env as PeerEnvironment
 ): boolean {
   const instanceId = getInstanceId(env);
   if (!instanceId || !isConfiguredOmniRoutePeer(targetUrl, env)) return false;

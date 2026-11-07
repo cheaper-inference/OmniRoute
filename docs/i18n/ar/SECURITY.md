@@ -1,159 +1,205 @@
 # Security Policy (العربية)
 
-🌐 **Languages:** 🇺🇸 [English](../../../SECURITY.md) · 🇸🇦 [ar](../ar/SECURITY.md) · 🇧🇬 [bg](../bg/SECURITY.md) · 🇧🇩 [bn](../bn/SECURITY.md) · 🇨🇿 [cs](../cs/SECURITY.md) · 🇩🇰 [da](../da/SECURITY.md) · 🇩🇪 [de](../de/SECURITY.md) · 🇪🇸 [es](../es/SECURITY.md) · 🇮🇷 [fa](../fa/SECURITY.md) · 🇫🇮 [fi](../fi/SECURITY.md) · 🇫🇷 [fr](../fr/SECURITY.md) · 🇮🇳 [gu](../gu/SECURITY.md) · 🇮🇱 [he](../he/SECURITY.md) · 🇮🇳 [hi](../hi/SECURITY.md) · 🇭🇺 [hu](../hu/SECURITY.md) · 🇮🇩 [id](../id/SECURITY.md) · 🇮🇹 [it](../it/SECURITY.md) · 🇯🇵 [ja](../ja/SECURITY.md) · 🇰🇷 [ko](../ko/SECURITY.md) · 🇮🇳 [mr](../mr/SECURITY.md) · 🇲🇾 [ms](../ms/SECURITY.md) · 🇳🇱 [nl](../nl/SECURITY.md) · 🇳🇴 [no](../no/SECURITY.md) · 🇵🇭 [phi](../phi/SECURITY.md) · 🇵🇱 [pl](../pl/SECURITY.md) · 🇵🇹 [pt](../pt/SECURITY.md) · 🇧🇷 [pt-BR](../pt-BR/SECURITY.md) · 🇷🇴 [ro](../ro/SECURITY.md) · 🇷🇺 [ru](../ru/SECURITY.md) · 🇸🇰 [sk](../sk/SECURITY.md) · 🇸🇪 [sv](../sv/SECURITY.md) · 🇰🇪 [sw](../sw/SECURITY.md) · 🇮🇳 [ta](../ta/SECURITY.md) · 🇮🇳 [te](../te/SECURITY.md) · 🇹🇭 [th](../th/SECURITY.md) · 🇹🇷 [tr](../tr/SECURITY.md) · 🇺🇦 [uk-UA](../uk-UA/SECURITY.md) · 🇵🇰 [ur](../ur/SECURITY.md) · 🇻🇳 [vi](../vi/SECURITY.md) · 🇨🇳 [zh-CN](../zh-CN/SECURITY.md)
+🌐 **Languages:** 🇺🇸 [English](../../../SECURITY.md) · 🇪🇹 [am](../am/SECURITY.md) · 🇦🇿 [az](../az/SECURITY.md) · 🇧🇬 [bg](../bg/SECURITY.md) · 🇧🇩 [bn](../bn/SECURITY.md) · 🇧🇦 [bs](../bs/SECURITY.md) · 🇨🇿 [cs](../cs/SECURITY.md) · 🇩🇰 [da](../da/SECURITY.md) · 🇩🇪 [de](../de/SECURITY.md) · 🇬🇷 [el](../el/SECURITY.md) · 🇪🇸 [es](../es/SECURITY.md) · 🇪🇪 [et](../et/SECURITY.md) · 🇮🇷 [fa](../fa/SECURITY.md) · 🇫🇮 [fi](../fi/SECURITY.md) · 🇫🇷 [fr](../fr/SECURITY.md) · 🇮🇪 [ga](../ga/SECURITY.md) · 🇮🇳 [gu](../gu/SECURITY.md) · 🇳🇬 [ha](../ha/SECURITY.md) · 🇮🇱 [he](../he/SECURITY.md) · 🇮🇳 [hi](../hi/SECURITY.md) · 🇭🇷 [hr](../hr/SECURITY.md) · 🇭🇺 [hu](../hu/SECURITY.md) · 🇦🇲 [hy](../hy/SECURITY.md) · 🇮🇩 [id](../id/SECURITY.md) · 🇳🇬 [ig](../ig/SECURITY.md) · 🇮🇹 [it](../it/SECURITY.md) · 🇯🇵 [ja](../ja/SECURITY.md) · 🇬🇪 [ka](../ka/SECURITY.md) · 🇰🇭 [km](../km/SECURITY.md) · 🇮🇳 [kn](../kn/SECURITY.md) · 🇰🇷 [ko](../ko/SECURITY.md) · 🇱🇹 [lt](../lt/SECURITY.md) · 🇱🇻 [lv](../lv/SECURITY.md) · 🇮🇳 [ml](../ml/SECURITY.md) · 🇮🇳 [mr](../mr/SECURITY.md) · 🇲🇾 [ms](../ms/SECURITY.md) · 🇲🇹 [mt](../mt/SECURITY.md) · 🇲🇲 [my](../my/SECURITY.md) · 🇳🇵 [ne](../ne/SECURITY.md) · 🇳🇱 [nl](../nl/SECURITY.md) · 🇳🇴 [no](../no/SECURITY.md) · 🇮🇳 [or](../or/SECURITY.md) · 🇮🇳 [pa](../pa/SECURITY.md) · 🇵🇭 [phi](../phi/SECURITY.md) · 🇵🇱 [pl](../pl/SECURITY.md) · 🇵🇹 [pt](../pt/SECURITY.md) · 🇧🇷 [pt-BR](../pt-BR/SECURITY.md) · 🇷🇴 [ro](../ro/SECURITY.md) · 🇷🇺 [ru](../ru/SECURITY.md) · 🇱🇰 [si](../si/SECURITY.md) · 🇸🇰 [sk](../sk/SECURITY.md) · 🇸🇮 [sl](../sl/SECURITY.md) · 🇷🇸 [sr](../sr/SECURITY.md) · 🇸🇪 [sv](../sv/SECURITY.md) · 🇰🇪 [sw](../sw/SECURITY.md) · 🇮🇳 [ta](../ta/SECURITY.md) · 🇮🇳 [te](../te/SECURITY.md) · 🇹🇭 [th](../th/SECURITY.md) · 🇹🇷 [tr](../tr/SECURITY.md) · 🇺🇦 [uk-UA](../uk-UA/SECURITY.md) · 🇵🇰 [ur](../ur/SECURITY.md) · 🇺🇿 [uz](../uz/SECURITY.md) · 🇻🇳 [vi](../vi/SECURITY.md) · 🇳🇬 [yo](../yo/SECURITY.md) · 🇨🇳 [zh-CN](../zh-CN/SECURITY.md) · 🇹🇼 [zh-TW](../zh-TW/SECURITY.md)
 
 ---
 
-## Reporting Vulnerabilities
+## الإبلاغ عن الثغرات الأمنية
 
-If you discover a security vulnerability in OmniRoute, please report it responsibly:
+إذا اكتشفت ثغرة أمنية في OmniRoute، فيُرجى الإبلاغ عنها بمسؤولية:
 
-1. **DO NOT** open a public GitHub issue
-2. Use [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Include: description, reproduction steps, and potential impact
+1. **لا تفتح** مشكلة عامة على GitHub
+2. استخدم [إشعارات الأمان في GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+3. ضمّن: الوصف، وخطوات إعادة الإنتاج، والتأثير المحتمل
 
-## Response Timeline
+## الجدول الزمني للاستجابة
 
-| Stage               | Target                      |
-| ------------------- | --------------------------- |
-| Acknowledgment      | 48 hours                    |
-| Triage & Assessment | 5 business days             |
-| Patch Release       | 14 business days (critical) |
+| المرحلة           | الهدف                       |
+| ----------------- | --------------------------- |
+| الإقرار بالاستلام | 48 ساعة                     |
+| الفرز والتقييم    | 5 أيام عمل                  |
+| إصدار التصحيح     | 14 يوم عمل (للثغرات الحرجة) |
 
-## Supported Versions
+## الإصدارات المدعومة
 
-| Version | Support Status |
-| ------- | -------------- |
-| 3.6.x   | ✅ Active      |
-| 3.5.x   | ✅ Security    |
-| < 3.5.0 | ❌ Unsupported |
+| الإصدار | حالة الدعم                                       |
+| ------- | ------------------------------------------------ |
+| 3.9.x   | 🗓️ مخطط له — مسار LTS ‏(`stable/v3`)، انظر أدناه |
+| 3.8.x   | ✅ نشط                                           |
+| 3.7.x   | ✅ أمني                                          |
+| < 3.7.0 | ❌ غير مدعوم                                     |
+
+## نافذة دعم LTS ‏(v3.9.x)
+
+بعد 3.8.59 سيكون الإصدار التالي هو **3.9.0**، الذي يفتتح مسار الدعم طويل الأمد على الفرع
+`stable/v3` (راجع [`ROADMAP.md`](ROADMAP.md) ← "المرحلة 3 — v3.9.0 LTS").
+
+- **ما يتلقاه `stable/v3`:** إصلاحات الأخطاء، وتصحيحات الأمان، وتحديثات مزوّدي الخدمة. تُضاف
+  الميزات الجديدة إلى قناة v4؛ إذ يعطي مسار LTS الأولوية للاستقرار. يظل `npm install omniroute`
+  (وسم التوزيع `latest`) على v3 طوال دورة v4 بأكملها.
+- **مدة النافذة:** يتلقى `stable/v3` **إصلاحات الأمان وإصلاحات التراجعات الحرجة لمدة
+  12 شهرًا بعد إصدار 3.9.0، أو حتى مرور 90 يومًا على نشر v4.0.0 بوسم `latest` —
+  أيهما أبعد**. يُسجَّل تاريخ الانتهاء الناتج في ملاحظات إصدار 3.9.0 وفي
+  [`ROADMAP.md`](ROADMAP.md) عند حدوث الإصدار.
+- **الإبلاغ عن ثغرة أمنية في مسار LTS:** استخدم القناة نفسها المتبعة لأي إصدار آخر —
+  [إشعار أمان خاص على GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)،
+  وليس مشكلة عامة مطلقًا. اذكر الإصدار الذي اختبرته (على سبيل المثال `3.9.2`)؛ تُدمج الإصلاحات في
+  `stable/v3` ثم تُنقل إلى v4.
+- **خط الأساس الأمني عند إصدار LTS:** تُسجَّل حالة أداة الفحص المقاسة، وأدلة حراسة المسارات
+  وبيانات الاعتماد العامة في
+  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 
-## Security Architecture
+## البنية الأمنية
 
-OmniRoute implements a multi-layered security model:
+يطبّق OmniRoute نموذجًا أمنيًا متعدد الطبقات:
 
 ```
-Request → CORS → API Key Auth → Prompt Injection Guard → Input Sanitizer → Rate Limiter → Circuit Breaker → Provider
+الطلب → CORS → مسار Authz (التصنيف → السياسات → الإنفاذ)
+       → ضوابط الحماية (إخفاء PII، حقن الموجّهات، جسر الرؤية)
+       → محدّد المعدل → قاطع الدائرة → التهدئة → حظر النموذج → المزوّد
 ```
 
-### 🔐 Authentication & Authorization
+### 🔐 المصادقة والتخويل
 
-| Feature              | Implementation                                             |
-| -------------------- | ---------------------------------------------------------- |
-| **Dashboard Login**  | Password-based auth with JWT tokens (HttpOnly cookies)     |
-| **API Key Auth**     | HMAC-signed keys with CRC validation                       |
-| **OAuth 2.0 + PKCE** | Secure provider auth (Claude, Codex, Gemini, Cursor, etc.) |
-| **Token Refresh**    | Automatic OAuth token refresh before expiry                |
-| **Secure Cookies**   | `AUTH_COOKIE_SECURE=true` for HTTPS environments           |
-| **MCP Scopes**       | 10 granular scopes for MCP tool access control             |
+| الميزة                              | التنفيذ                                                                                                                                                               |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **تسجيل الدخول إلى لوحة المعلومات** | مصادقة مستندة إلى كلمة مرور باستخدام رموز JWT ‏(ملفات تعريف ارتباط HttpOnly)                                                                                          |
+| **مصادقة مفتاح API**                | مفاتيح موقّعة باستخدام HMAC مع تحقق CRC                                                                                                                               |
+| **OAuth 2.0 + PKCE**                | يستخدم OAuth الخاص بالمتصفح/الجهاز لكل مزوّد PKCE حيثما كان مدعومًا؛ وتُعالَج بيانات اعتماد Devin المخصصة للاستيراد فقط بصورة منفصلة.                                 |
+| **تحديث الرمز**                     | تحديث تلقائي لرمز OAuth قبل انتهاء صلاحيته                                                                                                                            |
+| **ملفات تعريف الارتباط الآمنة**     | `AUTH_COOKIE_SECURE=true` لبيئات HTTPS                                                                                                                                |
+| **مسار Authz**                      | تصنيف المسارات (PUBLIC / CLIENT_API / MANAGEMENT) — راجع `docs/architecture/AUTHZ_GUIDE.md`                                                                           |
+| **مستويات حراسة المسارات**          | نموذج من 3 مستويات لمسارات الإدارة (LOCAL_ONLY / ALWAYS_PROTECTED / MANAGEMENT) — راجع `docs/security/ROUTE_GUARD_TIERS.md`                                           |
+| **MCP بنطاق الإدارة**               | يُقيّد الوصول البعيد إلى `/api/mcp/*` بمفاتيح API ذات النطاق `manage`؛ بينما يظل `/api/cli-tools/runtime/*` مقتصرًا بصرامة على واجهة loopback. راجع ROUTE_GUARD_TIERS |
+| **نطاقات MCP**                      | 32 نطاقًا دقيقًا (read:health، وwrite:combos، وexecute:completions، وما إلى ذلك) — راجع `docs/frameworks/MCP-SERVER.md`                                               |
 
-### 🛡️ Encryption at Rest
+### 🛡️ التشفير في حالة السكون
 
-All sensitive data stored in SQLite is encrypted using **AES-256-GCM** with scrypt key derivation:
+تُشفّر جميع البيانات الحساسة المخزنة في SQLite باستخدام **AES-256-GCM** مع اشتقاق المفاتيح عبر scrypt:
 
-- API keys, access tokens, refresh tokens, and ID tokens
-- Versioned format: `enc:v1:<iv>:<ciphertext>:<authTag>`
-- Passthrough mode (plaintext) when `STORAGE_ENCRYPTION_KEY` is not set
+- مفاتيح API، ورموز الوصول، ورموز التحديث، ورموز المعرّف
+- تنسيق محدد الإصدار: `enc:v1:<iv>:<ciphertext>:<authTag>`
+- وضع التمرير المباشر (نص صريح) عندما لا يكون `STORAGE_ENCRYPTION_KEY` مضبوطًا
 
 ```bash
-# Generate encryption key:
+# إنشاء مفتاح التشفير:
 STORAGE_ENCRYPTION_KEY=$(openssl rand -hex 32)
 ```
 
-### 🧠 Prompt Injection Guard
+### 🛡️ إطار عمل ضوابط الحماية
 
-Middleware that detects and blocks prompt injection attacks in LLM requests:
+يأتي OmniRoute مزودًا **بسجل لضوابط الحماية** قابل لإعادة التحميل الفوري (`src/lib/guardrails/`)، ويحتوي على 3 ضوابط حماية مدمجة مرتبة حسب الأولوية:
 
-| Pattern Type        | Severity | Example                                        |
-| ------------------- | -------- | ---------------------------------------------- |
-| System Override     | High     | "ignore all previous instructions"             |
-| Role Hijack         | High     | "you are now DAN, you can do anything"         |
-| Delimiter Injection | Medium   | Encoded separators to break context boundaries |
-| DAN/Jailbreak       | High     | Known jailbreak prompt patterns                |
-| Instruction Leak    | Medium   | "show me your system prompt"                   |
+| ضابط الحماية       | الأولوية | الغرض                                                                                                        |
+| ------------------ | -------- | ------------------------------------------------------------------------------------------------------------ |
+| `vision-bridge`    | 5        | يربط النماذج غير الداعمة للرؤية بأوصاف مدركة للصور؛ وحماية من SSRF لعناوين URL الخاصة بالصور                 |
+| `pii-masker`       | 10       | تنقيح PII قبل الاستدعاء وبعده (عناوين البريد الإلكتروني، وأرقام الهاتف، وCPF، وCNPJ، وبطاقات الائتمان، وSSN) |
+| `prompt-injection` | 20       | يكتشف أنماط التجاوز/اختطاف الأدوار/كسر القيود/التسريب                                                        |
 
-Configure via dashboard (Settings → Security) or `.env`:
+تُسجّل ضوابط الحماية المخصصة عبر `registerGuardrail(new MyGuardrail())`. يتبع النموذج نهج الفتح عند الفشل (لا تمنع الاستثناءات حركة البيانات مطلقًا). يمكن إلغاء الاشتراك لكل طلب عبر الترويسة `x-omniroute-disabled-guardrails`. ← راجع [`docs/security/GUARDRAILS.md`](docs/security/GUARDRAILS.md).
+
+### 🧠 حارس حقن الموجّهات
+
+برمجية وسيطة إرشادية بأفضل جهد ممكن تكتشف أنماط حقن الأوامر في طلبات نماذج اللغة الكبيرة.
+**ليست جدار حماية متكاملًا ضد حقن الأوامر** — قد تنتج عنها نتائج إيجابية كاذبة (أوامر
+الشخصيات/ألعاب تقمّص الأدوار الحميدة) ونتائج سلبية كاذبة (الكتابة بلغة leetspeak، والتباعد، والأنماط غير الإنجليزية).
+
+| نوع النمط        | الخطورة | المثال                                             |
+| ---------------- | ------- | -------------------------------------------------- |
+| تجاوز النظام     | عالية   | "تجاهل جميع التعليمات السابقة"                     |
+| اختطاف الدور     | متوسطة  | "أنت الآن DAN، ويمكنك فعل أي شيء"                  |
+| حقن الفواصل      | عالية   | فواصل مشفّرة لاختراق حدود السياق                   |
+| DAN/كسر الحماية  | متوسطة  | أنماط أوامر كسر الحماية المعروفة                   |
+| تسريب التعليمات  | عالية   | "أظهر لي أمر النظام الخاص بك"                      |
+| التحايل بالترميز | متوسطة  | فك ترميز base64/rot13/hex مع كلمات تعليمات مفتاحية |
+
+لا تُحظر إلا الاكتشافات ذات الخطورة **العالية** في وضع `block`. أما العائلات ذات الخطورة
+المتوسطة فتُسجَّل، ولكن لا يحظرها `sanitizeRequest` مطلقًا.
+
+يمكنك الإعداد عبر لوحة التحكم (الإعدادات ← الأمان) أو `.env`:
 
 ```env
 INPUT_SANITIZER_ENABLED=true
-INPUT_SANITIZER_MODE=block    # warn | block | redact
+INPUT_SANITIZER_MODE=block    # warn | block (سياسة الحقن؛ لا يزيل الخيار القديم "redact" نص الحقن)
+INPUT_SANITIZER_BLOCK_THRESHOLD=high  # high (الافتراضي) | medium | low — تُحظر درجات الخطورة الواقعة عند هذا الحد أو أعلى منه في وضع block
 ```
 
-### 🔒 PII Redaction
+### 🔒 تنقيح معلومات تحديد الهوية الشخصية
 
-Automatic detection and optional redaction of personally identifiable information:
+الكشف التلقائي عن معلومات تحديد الهوية الشخصية وتنقيحها اختياريًا:
 
-| PII Type      | Pattern               | Replacement        |
-| ------------- | --------------------- | ------------------ |
-| Email         | `user@domain.com`     | `[EMAIL_REDACTED]` |
-| CPF (Brazil)  | `123.456.789-00`      | `[CPF_REDACTED]`   |
-| CNPJ (Brazil) | `12.345.678/0001-00`  | `[CNPJ_REDACTED]`  |
-| Credit Card   | `4111-1111-1111-1111` | `[CC_REDACTED]`    |
-| Phone         | `+55 11 99999-9999`   | `[PHONE_REDACTED]` |
-| SSN (US)      | `123-45-6789`         | `[SSN_REDACTED]`   |
+| نوع معلومات تحديد الهوية الشخصية | النمط                 | الاستبدال          |
+| -------------------------------- | --------------------- | ------------------ |
+| البريد الإلكتروني                | `user@domain.com`     | `[EMAIL_REDACTED]` |
+| CPF (البرازيل)                   | `123.456.789-00`      | `[CPF_REDACTED]`   |
+| CNPJ (البرازيل)                  | `12.345.678/0001-00`  | `[CNPJ_REDACTED]`  |
+| بطاقة الائتمان                   | `4111-1111-1111-1111` | `[CC_REDACTED]`    |
+| الهاتف                           | `+55 11 99999-9999`   | `[PHONE_REDACTED]` |
+| SSN (الولايات المتحدة)           | `123-45-6789`         | `[SSN_REDACTED]`   |
 
 ```env
-PII_REDACTION_ENABLED=true
+PII_REDACTION_ENABLED=true   # إعادة كتابة معلومات تحديد الهوية الشخصية في الطلب؛ بصورة مستقلة عن INPUT_SANITIZER_MODE
+PII_RESPONSE_SANITIZATION=true  # اختياري: تنقيح معلومات تحديد الهوية الشخصية في استجابات المزوّد المُعادة إلى العملاء
 ```
 
-### 🌐 Network Security
+### 🌐 أمان الشبكة
 
-| Feature                  | Description                                                      |
-| ------------------------ | ---------------------------------------------------------------- |
-| **CORS**                 | Configurable origin control (`CORS_ORIGIN` env var, default `*`) |
-| **IP Filtering**         | Allowlist/blocklist IP ranges in dashboard                       |
-| **Rate Limiting**        | Per-provider rate limits with automatic backoff                  |
-| **Anti-Thundering Herd** | Mutex + per-connection locking prevents cascading 502s           |
-| **TLS Fingerprint**      | Browser-like TLS fingerprint spoofing to reduce bot detection    |
-| **CLI Fingerprint**      | Per-provider header/body ordering to match native CLI signatures |
+| الميزة                       | الوصف                                                                               |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| **CORS**                     | قائمة سماح صريحة عبر المصادر (`CORS_ALLOWED_ORIGINS`؛ والخيار القديم `CORS_ORIGIN`) |
+| **تصفية عناوين IP**          | نطاقات عناوين IP لقائمة السماح/الحظر في لوحة التحكم                                 |
+| **تحديد المعدل**             | حدود معدل لكل مزوّد مع تراجع تلقائي                                                 |
+| **مقاومة الاندفاع المتزامن** | يمنع Mutex مع القفل لكل اتصال حدوث أخطاء 502 متسلسلة                                |
+| **بصمة TLS**                 | انتحال بصمة TLS شبيهة بالمتصفح لتقليل اكتشاف الروبوتات                              |
+| **بصمة CLI**                 | ترتيب الترويسات/المحتوى لكل مزوّد لمطابقة توقيعات CLI الأصلية                       |
 
-### 🔌 Resilience & Availability
+### 🔌 المرونة والتوافر
 
-| Feature                 | Description                                                        |
-| ----------------------- | ------------------------------------------------------------------ |
-| **Circuit Breaker**     | 3-state (Closed → Open → Half-Open) per provider, SQLite-persisted |
-| **Request Idempotency** | 5-second dedup window for duplicate requests                       |
-| **Exponential Backoff** | Automatic retry with increasing delays                             |
-| **Health Dashboard**    | Real-time provider health monitoring                               |
+| الميزة                 | الوصف                                                                 |
+| ---------------------- | --------------------------------------------------------------------- |
+| **قاطع الدائرة**       | 3 حالات (مغلق ← مفتوح ← نصف مفتوح) لكل مزوّد، مع استمرارية عبر SQLite |
+| **عدم تكرار الطلبات**  | نافذة إزالة تكرار مدتها 5 ثوانٍ للطلبات المكررة                       |
+| **التراجع الأُسّي**    | إعادة محاولة تلقائية مع فترات تأخير متزايدة                           |
+| **لوحة معلومات الصحة** | مراقبة صحة المزوّد في الوقت الفعلي                                    |
 
-### 📋 Compliance
+### 📋 الامتثال
 
-| Feature            | Description                                                 |
-| ------------------ | ----------------------------------------------------------- |
-| **Log Retention**  | Automatic cleanup after `CALL_LOG_RETENTION_DAYS`           |
-| **No-Log Opt-out** | Per API key `noLog` flag disables request logging           |
-| **Audit Log**      | Administrative actions tracked in `audit_log` table         |
-| **MCP Audit**      | SQLite-backed audit logging for all MCP tool calls          |
-| **Zod Validation** | All API inputs validated with Zod v4 schemas at module load |
+| الميزة                        | الوصف                                                            |
+| ----------------------------- | ---------------------------------------------------------------- |
+| **الاحتفاظ بالسجلات**         | تنظيف تلقائي بعد `CALL_LOG_RETENTION_DAYS`                       |
+| **إلغاء الاشتراك في التسجيل** | تعطّل علامة `noLog` لكل مفتاح API تسجيل الطلبات                  |
+| **سجل التدقيق**               | تُتتبَّع الإجراءات الإدارية في جدول `audit_log`                  |
+| **تدقيق MCP**                 | تسجيل تدقيق مدعوم بـ SQLite لجميع استدعاءات أدوات MCP            |
+| **التحقق باستخدام Zod**       | تُتحقَّق جميع مدخلات API باستخدام مخططات Zod v4 عند تحميل الوحدة |
 
 ---
 
-## Required Environment Variables
+## متغيرات البيئة المطلوبة
 
-All secrets must be set before starting the server. The server will **fail fast** if they are missing or weak.
+يجب تعيين جميع الأسرار قبل تشغيل الخادم. سيفشل الخادم **فورًا** إذا كانت مفقودة أو ضعيفة.
 
 ```bash
-# REQUIRED — server will not start without these:
-JWT_SECRET=$(openssl rand -base64 48)     # min 32 chars
-API_KEY_SECRET=$(openssl rand -hex 32)    # min 16 chars
+# مطلوبة — لن يبدأ الخادم من دونها:
+JWT_SECRET=$(openssl rand -base64 48)     # 32 محرفًا على الأقل
+API_KEY_SECRET=$(openssl rand -hex 32)    # 16 محرفًا على الأقل
 
-# RECOMMENDED — enables encryption at rest:
+# موصى بها — تتيح تشفير البيانات المخزنة:
 STORAGE_ENCRYPTION_KEY=$(openssl rand -hex 32)
 ```
 
-The server actively rejects known-weak values like `changeme`, `secret`, or `password`.
+يرفض الخادم بشكل صريح القيم المعروفة بضعفها مثل `changeme` أو `secret` أو `password`.
 
 ---
 
-## Docker Security
+## أمان Docker
 
-- Use non-root user in production
-- Mount secrets as read-only volumes
-- Never copy `.env` files into Docker images
-- Use `.dockerignore` to exclude sensitive files
-- Set `AUTH_COOKIE_SECURE=true` when behind HTTPS
+- استخدم مستخدمًا غير جذر في بيئة الإنتاج
+- وصّل الأسرار كوحدات تخزين للقراءة فقط
+- لا تنسخ ملفات `.env` مطلقًا إلى صور Docker
+- استخدم `.dockerignore` لاستبعاد الملفات الحساسة
+- عيّن `AUTH_COOKIE_SECURE=true` عند استخدام HTTPS
 
 ```bash
 docker run -d \
@@ -170,10 +216,73 @@ docker run -d \
 
 ---
 
-## Dependencies
+## التبعيات
 
-- Run `npm audit` regularly
-- Keep dependencies updated
-- The project uses `husky` + `lint-staged` for pre-commit checks
-- CI pipeline runs ESLint security rules on every push
-- Provider constants validated at module load via Zod (`src/shared/validation/providerSchema.ts`)
+- شغّل `npm audit` بانتظام (`npm run audit:deps` يشمل التطبيق الرئيسي وelectron)
+- حافظ على تحديث التبعيات
+- يستخدم المشروع `husky` مع `lint-staged` لإجراء فحوصات ما قبل الالتزام (lint-staged + check-docs-sync + check:any-budget:t11)
+- يشغّل مسار CI قواعد أمان ESLint عند كل عملية دفع (`no-eval` و`no-implied-eval` و`no-new-func` = خطأ)
+- يجري التحقق من ثوابت المزوّد عند تحميل الوحدة باستخدام Zod (`src/shared/validation/schemas.ts`)
+- المكتبات الآمنة افتراضيًا المستخدمة: `dompurify` / `isomorphic-dompurify` (منع XSS)، و`jose` (JWT)، و`better-sqlite3` (لا يوجد خطر SQLi بفضل الاستعلامات ذات المعلمات)، و`bcryptjs` (تجزئة كلمات المرور)
+
+## قواعد الأمان الصارمة
+
+تفرض الأدوات والمراجعون هذه القواعد:
+
+1. **لا تُضمّن الأسرار في الالتزامات مطلقًا** — ملف `.env` مستبعد من git؛ و`.env.example` هو القالب (بلا قيم حرفية، تعليقات فقط — راجع PUBLIC_CREDS.md أدناه)
+2. **لا تستخدم `eval()` أو `new Function()` أو التقييم الضمني مطلقًا** — يفرض ESLint ذلك
+3. **لا تتجاوز خطافات Husky مطلقًا** (`--no-verify` و`--no-gpg-sign`) من دون موافقة صريحة من المشغّل
+4. **لا تكتب SQL خامًا في المسارات مطلقًا** — استخدم دائمًا `src/lib/db/` (بمعلمات)
+5. **تحقق دائمًا من المدخلات باستخدام Zod** — `src/shared/validation/schemas.ts`
+6. **نقِّ دائمًا ترويسات المصدر** — قائمة الحظر موجودة في `src/shared/constants/upstreamHeaders.ts`
+7. **شفّر بيانات الاعتماد المخزنة** — AES-256-GCM عبر `src/lib/db/encryption.ts`
+8. **مرّر معرّفات OAuth العامة للمصدر عبر `resolvePublicCred()`** — لا تُضمّن أبدًا قيمًا حرفية مثل `AIza…` / `GOCSPX-…` / `…apps.googleusercontent.com` في الشيفرة المصدرية. راجع [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md).
+9. **مرّر استجابات الأخطاء عبر `buildErrorBody()` / `sanitizeErrorMessage()`** — لا تضع مطلقًا `err.stack` / `err.message` خامًا في أجسام استجابات HTTP / SSE / executor / MCP. راجع [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md).
+10. **مرّر قيم وقت التشغيل الخاصة بـ`exec()` / `spawn()` عبر خيار `env`** — لا تُدرج مطلقًا المسارات الخارجية أو القيم غير الموثوقة نصيًا ضمن البرامج النصية الممررة إلى الصدفة. المرجع: `src/mitm/cert/install.ts::updateNssDatabases`.
+11. **فضّل المكتبات الآمنة افتراضيًا** — راجع [tldrsec/awesome-secure-defaults](https://github.com/tldrsec/awesome-secure-defaults) (Helmet.js وDOMPurify وssrf-req-filter وsafe-regex وGoogle Tink). استخدمها قبل إنشاء حل خاص بك.
+
+## نتائج فاحص سلسلة التوريد (Socket.dev / Snyk / أدوات مشابهة)
+
+> **ملاحظة حول النطاق:** لا يفعل ملف `socket.yml` الموجود في جذر المستودع سوى ضبط `projectIgnorePaths` لفحص Socket.dev اللاحق للنشر من جهة السجل لحزمة npm المنشورة — وهو ليس بوابة دمج مفروضة ضمن CI/PR. لا يستدعي Socket.dev أي سير عمل في `.github/workflows`، ولا أي برنامج نصي في `package.json`، ولا أي هدف في `Makefile`.
+
+تتضمن حزمة npm المنشورة `omniroute` بناء Next.js ذي الإعداد `output: "standalone"`،
+ما يعني أن كل معالج مسار — بما في ذلك الميزات الموثقة ذات الامتيازات
+(MITM، واستيراد Zed، وCloud Sync، ومشرف الخدمة المضمّن) — ينتهي به المطاف
+ضمن أجزاء `.next/server/*.js` المصغّرة. وكثيرًا ما تطابق فاحصات سلسلة
+التوريد الاستدلالية أنماط تلك الأجزاء مع تواقيع البرمجيات الخبيثة.
+
+يوجد إعداد الفاحص الذي نستخدمه في [`socket.yml`](socket.yml) ضمن جذر
+المستودع (بتنسيق v2 لتطبيق Socket.dev على GitHub — راجع
+<https://docs.socket.dev/docs/socket-yml>). وهو يستبعد صراحةً
+الأدلة غير المشمولة في الحزمة المنشورة (`tests/`، و`_tasks/`، و`_references/`، و`_ideia/`،
+و`_mono_repo/`، و`docs/`، وما إلى ذلك)، بحيث لا يُبلغ الفاحص إلا عن مسارات الشيفرة التي
+تصل فعليًا إلى المستخدمين عبر الحزمة المنشورة — ويُشغَّل الفحص نفسه بواسطة تطبيق Socket
+على GitHub الذي يقرأ هذا الملف، وليس بواسطة سير عمل في هذا المستودع.
+
+نحتفظ لكل فئة من النتائج بإقرار من المشرف خاص بكل نتيجة:
+
+- **[`docs/security/SOCKET_DEV_FINDINGS.md`](docs/security/SOCKET_DEV_FINDINGS.md)** —
+  خريطة لكل نتيجة: ملف المصدر ↔ الجزء المُعلَّم ↔ السلوك ↔ إجراء الحد من المخاطر
+  المُطبَّق في v3.8.6.
+- كتل `SECURITY-AUDITOR-NOTE:` داخل المصدر عند كل دالة مُعلَّمة
+  تشير إلى المستند نفسه.
+
+بالنسبة إلى المستخدمين الذين لا تسمح خطوط المعالجة لديهم بتخفيف التنبيه: ابنوا باستخدام
+`OMNIROUTE_BUILD_PROFILE=minimal npm run build`. يستبدل ذلك الوحدات الأربع
+الحساسة بعناصر بديلة تُرجع HTTP 503 مع `feature-disabled` في
+وقت التشغيل، بحيث تكون مسارات الشيفرة ذات الامتيازات غائبة فعليًا عن الحزمة.
+راجع [`docs/security/SOCKET_DEV_FINDINGS.md`](docs/security/SOCKET_DEV_FINDINGS.md)
+للاطلاع على وصفة النشر.
+
+## المراجع
+
+- [`docs/architecture/AUTHZ_GUIDE.md`](docs/architecture/AUTHZ_GUIDE.md) — خط معالجة التفويض
+- [`docs/security/GUARDRAILS.md`](docs/security/GUARDRAILS.md) — إطار ضوابط الحماية
+- [`docs/security/COMPLIANCE.md`](docs/security/COMPLIANCE.md) — سجل التدقيق والاحتفاظ
+- [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md) — النمط **الإلزامي** لبيانات اعتماد المصادر العامة
+- [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md) — النمط **الإلزامي** لاستجابات الأخطاء
+- [`docs/security/SOCKET_DEV_FINDINGS.md`](docs/security/SOCKET_DEV_FINDINGS.md) — إقرار المشرف بنتائج فاحص سلسلة التوريد
+- [`docs/architecture/RESILIENCE_GUIDE.md`](docs/architecture/RESILIENCE_GUIDE.md) — قاطع الدائرة + فترة التهدئة + الإقفال
+- [`docs/security/STEALTH_GUIDE.md`](docs/security/STEALTH_GUIDE.md) — بصمات TLS (إشعار قانوني/أخلاقي)
+- [`CLAUDE.md`](CLAUDE.md) — قواعد صارمة لوكلاء الذكاء الاصطناعي
+- [tldrsec/awesome-secure-defaults](https://github.com/tldrsec/awesome-secure-defaults) — مكتبات منتقاة وآمنة افتراضيًا

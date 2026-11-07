@@ -8,7 +8,8 @@
  *
  * Design
  * ──────
- * • Hash key: SHA-256 of the FIRST user message → first 16 hex chars.
+ * • Hash key: SHA-256 of the FIRST user message, namespaced by Combo identity
+ *   at production call sites → first 16 hex chars.
  *   Using only the first message gives a stable key that does not change as
  *   the conversation grows, yet still identifies the conversation reliably.
  * • Headroom gate: before reusing the sticky connection we re-check that its
@@ -76,15 +77,15 @@ interface StickyEntry {
   connectionId: string;
   createdAt: number;
   lastUsedAt: number;
+  /** Combo identity that owns this binding (matches `scopeMessageHash` namespace). */
+  namespace?: string;
 }
 
 /**
  * Injectable saturation fetcher seam (for unit tests).
  * Returns HeadroomSaturation or undefined when unknown.
  */
-export type SaturationFetcher = (
-  connectionId: string
-) => Promise<HeadroomSaturation | undefined>;
+export type SaturationFetcher = (connectionId: string) => Promise<HeadroomSaturation | undefined>;
 
 // ─── Saturation fetcher seam ─────────────────────────────────────────────────
 
@@ -143,11 +144,11 @@ async function resolveConnectionHealth(
   if (_connectionFetcherOverride) return _connectionFetcherOverride(connectionId, provider);
 
   try {
-    const mod = await import("../../../src/lib/db/readCache");
-    const getCachedProviderConnections = mod.getCachedProviderConnections as (
+    const mod = await import("../providerConnectionPool.ts");
+    const getCachedProviderPoolConnections = mod.getCachedProviderPoolConnections as (
       filter: Record<string, unknown>
     ) => Promise<StickyConnectionHealth[]>;
-    const connections = (await getCachedProviderConnections({
+    const connections = (await getCachedProviderPoolConnections({
       provider,
       isActive: true,
     })) as Array<StickyConnectionHealth & { id?: string }>;
@@ -184,9 +185,7 @@ export type QuotaExhaustionChecker = (connectionId: string) => boolean;
 let _quotaExhaustionOverride: QuotaExhaustionChecker | null = null;
 
 /** Test-only: inject the quota-exhaustion checker; pass null to restore default. */
-export function __setStickinessQuotaCheckerForTests(
-  checker: QuotaExhaustionChecker | null
-): void {
+export function __setStickinessQuotaCheckerForTests(checker: QuotaExhaustionChecker | null): void {
   _quotaExhaustionOverride = checker;
 }
 
@@ -317,6 +316,23 @@ export function deriveMessageHash(
   return createHash("sha256").update(text).digest("hex").slice(0, 16);
 }
 
+/**
+ * Keep one conversation's prompt-cache affinity local to the Combo that learned
+ * it. Without this namespace, two different Combos receiving the same first
+ * user message share a binding and can silently reorder each other's targets.
+ * The unscoped form remains available for direct callers and backwards-compatible
+ * unit seams; production dispatchers always provide their Combo name.
+ */
+function scopeMessageHash(messageHash: string, namespace?: string): string {
+  if (!namespace) return messageHash;
+  return createHash("sha256")
+    .update(namespace)
+    .update("\0")
+    .update(messageHash)
+    .digest("hex")
+    .slice(0, 16);
+}
+
 /** Evict expired entries and enforce the hard cap. */
 function evict(): void {
   const now = Date.now();
@@ -339,17 +355,23 @@ function evict(): void {
 }
 
 /** Record (or refresh) a sticky binding after a successful request. */
-export function recordStickyBinding(messageHash: string, connectionId: string): void {
+export function recordStickyBinding(
+  messageHash: string,
+  connectionId: string,
+  namespace?: string
+): void {
   const existing = stickyMap.get(messageHash);
   if (existing) {
     existing.connectionId = connectionId;
     existing.lastUsedAt = Date.now();
+    if (namespace) existing.namespace = namespace;
   } else {
     evict();
     stickyMap.set(messageHash, {
       connectionId,
       createdAt: Date.now(),
       lastUsedAt: Date.now(),
+      ...(namespace ? { namespace } : {}),
     });
   }
 }
@@ -357,6 +379,24 @@ export function recordStickyBinding(messageHash: string, connectionId: string): 
 /** Remove a binding (e.g. after the connection is confirmed unhealthy). */
 export function clearStickyBinding(messageHash: string): void {
   stickyMap.delete(messageHash);
+}
+
+/**
+ * Evict every in-memory sticky binding owned by a combo.
+ *
+ * Stale pins survive combo edits: `updateCombo` clears the persisted
+ * `session_model_history` rows, but the process-global sticky map is only
+ * bounded by TTL (15 min) — a binding recorded before the operator disabled
+ * stickiness or reordered models keeps promoting the old connection to
+ * position 0 for the remainder of the TTL window, silently defeating the
+ * combo's declared priority order (#XXXX). Combo writes call this so a
+ * config/model change takes effect immediately instead of after TTL expiry.
+ */
+export function clearStickyBindingsForCombo(namespace: string): void {
+  if (!namespace) return;
+  for (const [key, entry] of stickyMap) {
+    if (entry.namespace === namespace) stickyMap.delete(key);
+  }
 }
 
 /**
@@ -407,6 +447,16 @@ export interface ApplyStickinessResult {
 }
 
 /**
+ * #15241: when the caller needs to preserve the combo's declared first target,
+ * a sticky binding pointing at a mid-list connection must not silently become
+ * runtime try-slot #1. The binding's hygiene gates below still run; only the
+ * promotion is barred.
+ */
+export interface ApplyStickinessOptions {
+  respectDeclaredOrder?: boolean;
+}
+
+/**
  * Attempt to promote the sticky connection to the front of `orderedTargets`.
  *
  * Algorithm:
@@ -424,22 +474,32 @@ export interface ApplyStickinessResult {
  *
  * @param orderedTargets  Targets already ordered by the combo strategy.
  * @param messages        Request body.messages.
+ * @param namespace       Combo identity that owns this sticky binding.
+ * @param options         #15241 — `respectDeclaredOrder` bars a mid-list promotion
+ *                        for strategies whose first target is operator-declared.
  * @returns               Result with (possibly reordered) targets.
  */
 export async function applySessionStickiness(
   orderedTargets: ResolvedComboTarget[],
-  messages: Array<{ role?: string; content?: unknown }> | null | undefined
+  messages: Array<{ role?: string; content?: unknown }> | null | undefined,
+  namespace?: string,
+  options?: ApplyStickinessOptions
 ): Promise<ApplyStickinessResult> {
   const noOp: ApplyStickinessResult = { targets: orderedTargets, messageHash: null, stuck: false };
 
   try {
     if (orderedTargets.length <= 1) return noOp;
 
-    const messageHash = deriveMessageHash(messages);
-    if (!messageHash) return noOp;
+    const rawMessageHash = deriveMessageHash(messages);
+    if (!rawMessageHash) return noOp;
+    const messageHash = scopeMessageHash(rawMessageHash, namespace);
 
     const existing = stickyMap.get(messageHash);
     if (!existing) return { targets: orderedTargets, messageHash, stuck: false };
+
+    // Backfill the owning namespace so combo-scoped eviction (combo edit /
+    // stickiness disable) can find bindings recorded before this field existed.
+    if (namespace && existing.namespace !== namespace) existing.namespace = namespace;
 
     // Check TTL
     if (Date.now() - existing.lastUsedAt > TTL_MS) {
@@ -476,6 +536,12 @@ export async function applySessionStickiness(
     ) {
       // Connection saturated or durably unhealthy — rebind on next success
       clearStickyBinding(messageHash);
+      return { targets: orderedTargets, messageHash, stuck: false };
+    }
+
+    // #15241: a caller preserving an operator-declared head keeps its order —
+    // a mid-list sticky connection stays mid-list.
+    if (options?.respectDeclaredOrder && stickyIdx > 0) {
       return { targets: orderedTargets, messageHash, stuck: false };
     }
 

@@ -5,6 +5,7 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "api-manager",
   "endpoints",
   "providers",
+  "model-catalog",
   "embedded-services",
   "combos",
   "combos-live",
@@ -29,12 +30,15 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "cli-agents",
   "acp-agents",
   "cloud-agents",
+  "conductor",
+  "orchestration",
   "agent-bridge",
   "traffic-inspector",
   "discovery",
   // OmniProxy > Integrations
   "api-endpoints",
   "webhooks",
+  "log-export",
   // OmniProxy — proxy tools
   "mitm-proxy",
   "1proxy",
@@ -54,15 +58,21 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "logs-proxy",
   "logs-console",
   "logs-timeline",
+  "conversations",
   "logs-activity",
   "health",
   "runtime",
+  "resilience-connections",
+  "resilience-cooldowns",
   // Costs section
   "costs-pricing",
   "costs-budget",
   "costs-free-tiers",
   "costs-quota-share",
+  "costs-teams",
   "free-provider-rankings",
+  "radar",
+  "radar-admin",
   // Monitoring > Audit
   "audit",
   "audit-mcp",
@@ -83,6 +93,7 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "leaderboard",
   "profile",
   "tokens",
+  "gamification-admin",
   // Other Features — flat
   "media",
   // Other Features > Batch
@@ -92,6 +103,7 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "settings-general",
   "settings-appearance",
   "settings-ai",
+  "settings-modality-bridge",
   "settings-routing",
   "settings-resilience",
   "settings-advanced",
@@ -115,6 +127,7 @@ export type SidebarItemId = HideableSidebarItemId | AlwaysVisibleSidebarItemId;
 
 export type SidebarSectionId =
   | "home"
+  | "pinned"
   | "omni-proxy"
   | "analytics"
   | "costs"
@@ -137,6 +150,15 @@ export interface SidebarItemDefinition {
   icon: string;
   exact?: boolean;
   external?: boolean;
+  /**
+   * Opt-in feature-flag gate. When present, the item is only shown while the
+   * named flag resolves to `true` server-side. Sidebar.tsx has no built-in
+   * feature-flag awareness — the flag's resolved value is fetched once
+   * (piggy-backed on the existing `/api/settings` call) and passed through
+   * `isSidebarItemVisibleForFlags()` alongside the existing hidden-items
+   * filter. Add new flag keys to this union as new flag-gated items appear.
+   */
+  featureFlagKey?: "RADAR_ENABLED";
 }
 
 export interface SidebarItemGroup {
@@ -159,7 +181,7 @@ export interface SidebarSectionDefinition {
   defaultPinned?: boolean;
 }
 
-export type SidebarPresetId = "all" | "minimal" | "developer" | "admin";
+export type SidebarPresetId = "all" | "essentials" | "minimal" | "developer" | "admin";
 
 export interface SidebarPresetDefinition {
   id: SidebarPresetId;

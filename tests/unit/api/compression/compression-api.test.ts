@@ -9,6 +9,18 @@ import path from "node:path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Top-level awaits MUST run before any describe registers: under
+// --test-force-exit (the CI runner flag) the process exits when the already-
+// registered tests finish, so a mid-file `await import` raced the runner and the
+// whole second describe died as "Promise resolution is still pending" on slow
+// CI machines (base-reds round 3, #9985).
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-compression-route-"));
+const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
+process.env.DATA_DIR = TEST_DATA_DIR;
+
+const core = await import("../../../../src/lib/db/core.ts");
+const route = await import("../../../../src/app/api/settings/compression/route.ts");
+
 describe("Compression Settings API Schema Validation", () => {
   const compressionModeValues = [
     "off",
@@ -111,16 +123,9 @@ describe("Compression Settings API Schema Validation", () => {
   });
 });
 
-// ─── Route round-trip: engines map + activeComboId ─────────────────────────
+// ─── Route round-trip: engines map, activeComboId, cavemanOutputMode ───────
 // Mirrors the mcp-accessibility-config test harness: allocate a temp DATA_DIR,
 // import route + DB modules, tear down in after().
-
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-compression-route-"));
-const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
-process.env.DATA_DIR = TEST_DATA_DIR;
-
-const core = await import("../../../../src/lib/db/core.ts");
-const route = await import("../../../../src/app/api/settings/compression/route.ts");
 
 function makeRequest(method: string, body?: unknown): Request {
   return new Request("http://localhost/api/settings/compression", {
@@ -131,16 +136,16 @@ function makeRequest(method: string, body?: unknown): Request {
   }) as any;
 }
 
-describe("settings/compression route — engines + activeComboId", () => {
+describe("settings/compression route — engines, activeComboId, cavemanOutputMode", () => {
   beforeEach(() => {
     core.resetDbInstance();
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   });
 
   after(() => {
     core.resetDbInstance();
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
     else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
   });
@@ -219,5 +224,27 @@ describe("settings/compression route — engines + activeComboId", () => {
 
     const putRes2 = await route.PUT(makeRequest("PUT", { enabled: false, enginesExplicit: false }));
     assert.equal(putRes2.status, 200);
+  });
+
+  it("PUT a partial cavemanOutputMode keeps the stored fields it omits", async () => {
+    await route.PUT(
+      makeRequest("PUT", {
+        cavemanOutputMode: { enabled: true, intensity: "ultra", autoClarity: true },
+      })
+    );
+    core.resetDbInstance();
+
+    const putRes = await route.PUT(
+      makeRequest("PUT", { cavemanOutputMode: { autoClarity: false } })
+    );
+    assert.equal(putRes.status, 200);
+    core.resetDbInstance();
+
+    const body = await (await route.GET(makeRequest("GET"))).json();
+    assert.deepEqual(body.cavemanOutputMode, {
+      enabled: true,
+      intensity: "ultra",
+      autoClarity: false,
+    });
   });
 });

@@ -37,13 +37,13 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 
 type CatalogResponse = {
-  data?: Array<{ id: string }>;
+  data?: Array<{ id: string; visibility?: string }>;
 };
 
 async function resetStorage() {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -54,7 +54,7 @@ test.beforeEach(async () => {
 test.after(async () => {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("codex client (originator: codex_exec) receives a top-level `models` array so the catalog refresh decodes", async () => {
@@ -126,6 +126,8 @@ test("v1 models catalog exposes remote-only Codex IDs from the discovery cache",
       id: "codex-auto-review",
       name: "Codex Auto Review Remote",
       source: "imported",
+      visibility: "hide",
+      supportedInApi: true,
       supportedEndpoints: ["responses"],
     },
     {
@@ -150,6 +152,10 @@ test("v1 models catalog exposes remote-only Codex IDs from the discovery cache",
 
   assert.equal(response.status, 200);
   assert.equal(ids.has("cx/codex-auto-review"), true);
+  assert.equal(
+    (body.data || []).find((item) => item.id === "cx/codex-auto-review")?.visibility,
+    "hide"
+  );
   assert.equal(ids.has("cx/future-codex-model"), true);
   assert.equal(ids.has("codex/future-codex-model"), true);
   assert.equal(ids.has("cx/gpt-5.4-mini"), false);

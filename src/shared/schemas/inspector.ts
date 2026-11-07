@@ -24,10 +24,6 @@ export const InspectorSystemProxyActionSchema = z.object({
   guardMinutes: z.number().int().positive().optional(),
 });
 
-export const InspectorTlsInterceptToggleSchema = z.object({
-  enabled: z.boolean(),
-});
-
 export const InspectorAnnotationPutSchema = z.object({
   annotation: z.string().max(10_000),
 });
@@ -42,6 +38,8 @@ export const InspectorListQuerySchema = z.object({
   host: z.string().optional(),
   agent: z.string().optional(),
   status: z.enum(["2xx", "3xx", "4xx", "5xx", "error"]).optional(),
-  source: z.enum(["agent-bridge", "custom-host", "http-proxy", "system-proxy", "tproxy"]).optional(),
+  source: z
+    .enum(["agent-bridge", "custom-host", "http-proxy", "system-proxy", "tproxy"])
+    .optional(),
   sessionId: z.string().uuid().optional(),
 });

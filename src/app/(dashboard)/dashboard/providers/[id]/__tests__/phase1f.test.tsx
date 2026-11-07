@@ -52,6 +52,17 @@ const fetchStub = vi.fn().mockResolvedValue({
 } as any);
 vi.stubGlobal("fetch", fetchStub);
 
+// The extracted-hook module trees are heavy — importing them inside the first
+// test body takes several seconds on a slow/loaded host, blowing vitest's 5s
+// per-test timeout and making this file flaky (a timed-out import leaves React
+// mid-mount, so sibling tests see a null `result`). Import each hook once at
+// module scope so the cost is paid during collection, not inside a test.
+// (Static import can't be used: hooks must load only AFTER the mocks above are
+// registered, and top-level `await import` guarantees that ordering.)
+const { useProviderConnections } = await import("../hooks/useProviderConnections");
+const { useProviderSettings } = await import("../hooks/useProviderSettings");
+const { useProviderModels } = await import("../hooks/useProviderModels");
+
 // ---------------------------------------------------------------------------
 // useProviderConnections
 // ---------------------------------------------------------------------------
@@ -75,8 +86,6 @@ describe("useProviderConnections — initial state", () => {
   });
 
   it("exposes connections=[], loading=true, batchTesting=false on first render", async () => {
-    const { useProviderConnections } = await import("../hooks/useProviderConnections");
-
     type HookResult = ReturnType<typeof useProviderConnections>;
     let result: HookResult | null = null;
 
@@ -107,8 +116,6 @@ describe("useProviderConnections — initial state", () => {
   });
 
   it("exposes all expected handler functions", async () => {
-    const { useProviderConnections } = await import("../hooks/useProviderConnections");
-
     type HookResult = ReturnType<typeof useProviderConnections>;
     let result: HookResult | null = null;
 
@@ -179,8 +186,6 @@ describe("useProviderSettings — initial state", () => {
   });
 
   it("exposes codex defaults for a non-codex provider", async () => {
-    const { useProviderSettings } = await import("../hooks/useProviderSettings");
-
     type HookResult = ReturnType<typeof useProviderSettings>;
     let result: HookResult | null = null;
 
@@ -208,8 +213,6 @@ describe("useProviderSettings — initial state", () => {
   });
 
   it("exposes handler functions", async () => {
-    const { useProviderSettings } = await import("../hooks/useProviderSettings");
-
     type HookResult = ReturnType<typeof useProviderSettings>;
     let result: HookResult | null = null;
 
@@ -257,8 +260,6 @@ describe("useProviderModels — initial state", () => {
   });
 
   it("initialises with empty arrays and empty alias map", async () => {
-    const { useProviderModels } = await import("../hooks/useProviderModels");
-
     type HookResult = ReturnType<typeof useProviderModels>;
     let result: HookResult | null = null;
 
@@ -282,8 +283,6 @@ describe("useProviderModels — initial state", () => {
   });
 
   it("exposes handler functions", async () => {
-    const { useProviderModels } = await import("../hooks/useProviderModels");
-
     type HookResult = ReturnType<typeof useProviderModels>;
     let result: HookResult | null = null;
 

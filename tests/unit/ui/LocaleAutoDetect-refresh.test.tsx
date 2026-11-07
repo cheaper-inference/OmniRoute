@@ -23,9 +23,11 @@ describe("LocaleAutoDetect refresh gating", () => {
     (
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
     ).IS_REACT_ACT_ENVIRONMENT = true;
-    refresh.mockClear();
+    refresh.mockReset();
     // Fresh visit: no locale cookie.
     document.cookie = "NEXT_LOCALE=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    localStorage.removeItem("NEXT_LOCALE");
+    document.documentElement.dir = "ltr";
     Object.defineProperty(navigator, "languages", { value: ["en-US"], configurable: true });
   });
 
@@ -42,7 +44,7 @@ describe("LocaleAutoDetect refresh gating", () => {
       root.render(React.createElement(LocaleAutoDetect));
     });
     cleanups.push(() => {
-      root.unmount();
+      act(() => root.unmount());
       container.remove();
     });
   }
@@ -56,6 +58,44 @@ describe("LocaleAutoDetect refresh gating", () => {
   it("refreshes when the detected locale differs from the server-rendered <html lang>", async () => {
     document.documentElement.lang = "fr";
     await mount();
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("persists the detected locale before refreshing server content on a first visit", async () => {
+    document.documentElement.lang = "en";
+    Object.defineProperty(navigator, "languages", { value: ["ar"], configurable: true });
+    refresh.mockImplementation(() => {
+      expect(document.cookie).toContain("NEXT_LOCALE=ar");
+      expect(localStorage.getItem("NEXT_LOCALE")).toBe("ar");
+      expect(document.documentElement.lang).toBe("ar");
+      expect(document.documentElement.dir).toBe("rtl");
+    });
+
+    await mount();
+
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  // Alias wiring guard: the component must hand `LOCALE_ALIASES` to
+  // `detectBrowserLocale`. `fil` (Filipino) is the discriminating input — no
+  // locale code starts with `fil`, so with the real config it resolves to `phi`
+  // ONLY through the declared alias; a forgotten third argument yields null and
+  // no cookie is written.
+  it("persists the aliased locale for a Filipino browser (fil → phi)", async () => {
+    document.documentElement.lang = "en";
+    Object.defineProperty(navigator, "languages", { value: ["fil"], configurable: true });
+    await mount();
+    expect(document.cookie).toContain("NEXT_LOCALE=phi");
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  // Script-tagged Traditional Chinese must not fall through to zh-CN (Simplified,
+  // the first zh-* locale in config order): `zh-hant` is a declared alias of zh-TW.
+  it("persists zh-TW for a zh-Hant-TW browser, not zh-CN", async () => {
+    document.documentElement.lang = "en";
+    Object.defineProperty(navigator, "languages", { value: ["zh-Hant-TW"], configurable: true });
+    await mount();
+    expect(document.cookie).toContain("NEXT_LOCALE=zh-TW");
     expect(refresh).toHaveBeenCalledTimes(1);
   });
 });

@@ -13,7 +13,7 @@ const comboRoute = await import("../../src/app/api/combos/[id]/route.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -37,7 +37,7 @@ test.beforeEach(async () => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 // ---- quota-protected combos ----
@@ -90,7 +90,11 @@ test("PUT /api/combos/[id] returns 409 for a qtSd/* combo and does NOT mutate it
 
   // Verify the combo was NOT mutated
   const unchanged = await combosDb.getComboById(combo.id);
-  assert.equal(unchanged?.strategy, "priority", "Strategy must remain unchanged after rejected PUT");
+  assert.equal(
+    unchanged?.strategy,
+    "priority",
+    "Strategy must remain unchanged after rejected PUT"
+  );
 });
 
 // ---- non-quota combos still work ----
@@ -114,6 +118,43 @@ test("DELETE /api/combos/[id] succeeds for a regular (non-quota) combo", async (
   // Verify the combo was actually deleted
   const gone = await combosDb.getComboById(combo.id);
   assert.equal(gone, null, "Regular combo must be gone after DELETE");
+});
+
+test("PUT merged state rejects partial updates that leave protected priority refs in flatten mode", async () => {
+  const combo = await combosDb.createCombo({
+    name: "protected-ref-update",
+    strategy: "priority",
+    models: [{ kind: "combo-ref", comboName: "child", fallbackOnlyOnQuotaExhaustion: true }],
+    config: { nestedComboMode: "execute" },
+  });
+
+  for (const update of [
+    { config: { nestedComboMode: "flatten" } },
+    {
+      models: [{ kind: "combo-ref", comboName: "child", fallbackOnlyOnQuotaExhaustion: true }],
+      config: {},
+    },
+    { strategy: "priority", config: {} },
+  ]) {
+    const response = await comboRoute.PUT(makePutRequest(combo.id, update), {
+      params: Promise.resolve({ id: combo.id }),
+    });
+    assert.equal(response.status, 400);
+  }
+});
+
+test("PUT merged state accepts dormant weighted protected refs", async () => {
+  const combo = await combosDb.createCombo({
+    name: "dormant-protected-ref-update",
+    strategy: "priority",
+    models: [{ kind: "combo-ref", comboName: "child", fallbackOnlyOnQuotaExhaustion: true }],
+    config: { nestedComboMode: "execute" },
+  });
+  const response = await comboRoute.PUT(
+    makePutRequest(combo.id, { strategy: "weighted", config: { nestedComboMode: "flatten" } }),
+    { params: Promise.resolve({ id: combo.id }) }
+  );
+  assert.equal(response.status, 200);
 });
 
 test("PUT /api/combos/[id] succeeds for a regular (non-quota) combo", async () => {
@@ -152,10 +193,7 @@ test("DELETE /api/combos/[id] returns 404 when combo does not exist", async () =
 
 test("combos page source filters isHidden from rendered list", async () => {
   const pageSource = fs.readFileSync(
-    new URL(
-      "../../src/app/(dashboard)/dashboard/combos/page.tsx",
-      import.meta.url
-    ).pathname,
+    new URL("../../src/app/(dashboard)/dashboard/combos/page.tsx", import.meta.url).pathname,
     "utf8"
   );
   assert.ok(

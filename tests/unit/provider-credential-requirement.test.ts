@@ -12,12 +12,14 @@ import { FREE_MODEL_BUDGETS } from "@omniroute/open-sse/config/freeModelCatalog.
 
 test("classifies each credential model from the real registries", () => {
   // noAuth: the connect form never asks for a key.
-  assert.equal(getCredentialRequirement("opencode"), "none");
+  assert.equal(getCredentialRequirement("uncloseai"), "none");
   // Literal anonymous token: routable with no user credential, key still honoured.
   assert.equal(getCredentialRequirement("aihorde"), "optional");
   assert.equal(getCredentialRequirement("kilocode"), "optional");
   // Verified live 2026-07-20: answers with no Authorization header, 403s on a bad key.
   assert.equal(getCredentialRequirement("ovhcloud"), "optional");
+  // Verified live 2026-08-11: HTTP 200 with no Authorization header (#10068).
+  assert.equal(getCredentialRequirement("kilo-gateway"), "optional");
   // OAuth: nothing to paste, but the user still signs in.
   assert.equal(getCredentialRequirement("agy"), "oauth");
   // Ordinary key-gated provider.
@@ -36,7 +38,7 @@ test("worksWithoutCredential excludes oauth — signing in is still a barrier", 
 test("listNoCredentialProviders is derived, not a hand-kept list", () => {
   const ids = listNoCredentialProviders();
   assert.ok(ids.length > 0);
-  assert.ok(ids.includes("opencode"));
+  assert.ok(ids.includes("uncloseai"));
   assert.ok(ids.includes("ovhcloud"));
   assert.ok(ids.includes("aihorde"));
   assert.ok(!ids.includes("groq"), "key-gated providers must never be listed");
@@ -67,7 +69,7 @@ test("providers that reject anonymous calls are never advertised as key-free", (
   // freeType: "keyless" in the catalog (meaning "not token-quantifiable"), so a
   // UI section built on that field would invite users to call providers that
   // reject them. This is the regression guard for that bug.
-  for (const id of ["blackbox", "friendliai", "iflytek", "sparkdesk", "puter", "muse-spark-web"]) {
+  for (const id of ["blackbox", "friendliai", "iflytek", "sparkdesk", "muse-spark-web"]) {
     assert.equal(
       worksWithoutCredential(getCredentialRequirement(id)),
       false,

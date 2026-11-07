@@ -1,5 +1,6 @@
 "use client";
 import { useTranslations } from "next-intl";
+import { Kbd, KbdGroup } from "@omniroute/ui-kit/kbd";
 import { Modal } from "@/shared/components";
 
 type AdaptaTutorialModalProps = {
@@ -7,6 +8,9 @@ type AdaptaTutorialModalProps = {
   onClose: () => void;
 };
 
+// The Adapta CTA href used to go through our own link.omniroute.online shortener
+// for click metrics, but that domain no longer resolves after the move to
+// omniskill.online, so href and visible text are the real destination again.
 export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProps) {
   const t = useTranslations("providers.adaptaTutorial");
 
@@ -21,7 +25,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
 
         <ol className="flex flex-col gap-4 list-none">
           <li className="flex gap-3">
-            <span className="flex-none w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+            <span className="flex-none w-6 h-6 rounded-full bg-primary text-accent-foreground text-xs font-bold flex items-center justify-center">
               1
             </span>
             <div>
@@ -42,25 +46,23 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
           </li>
 
           <li className="flex gap-3">
-            <span className="flex-none w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+            <span className="flex-none w-6 h-6 rounded-full bg-primary text-accent-foreground text-xs font-bold flex items-center justify-center">
               2
             </span>
             <div>
               <p className="font-medium">{t("step2Title")}</p>
               <p className="text-text-muted mt-0.5">
-                {t("step2DescPrefix")}{" "}
-                <kbd className="bg-surface-2 px-1.5 py-0.5 rounded text-xs font-mono">F12</kbd>{" "}
-                {t("or")}{" "}
-                <kbd className="bg-surface-2 px-1.5 py-0.5 rounded text-xs font-mono">
-                  Cmd+Option+I
-                </kbd>{" "}
+                {t("step2DescPrefix")} <Kbd>F12</Kbd> {t("or")}{" "}
+                <KbdGroup>
+                  <Kbd>Cmd</Kbd>+<Kbd>Option</Kbd>+<Kbd>I</Kbd>
+                </KbdGroup>{" "}
                 {t("step2DescSuffix")}
               </p>
             </div>
           </li>
 
           <li className="flex gap-3">
-            <span className="flex-none w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+            <span className="flex-none w-6 h-6 rounded-full bg-primary text-accent-foreground text-xs font-bold flex items-center justify-center">
               3
             </span>
             <div>
@@ -78,7 +80,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
           </li>
 
           <li className="flex gap-3">
-            <span className="flex-none w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+            <span className="flex-none w-6 h-6 rounded-full bg-primary text-accent-foreground text-xs font-bold flex items-center justify-center">
               4
             </span>
             <div>
@@ -96,7 +98,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
           </li>
 
           <li className="flex gap-3">
-            <span className="flex-none w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+            <span className="flex-none w-6 h-6 rounded-full bg-primary text-accent-foreground text-xs font-bold flex items-center justify-center">
               5
             </span>
             <div>
@@ -110,10 +112,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
           </li>
         </ol>
 
-        <div
-          className="rounded-lg p-3 text-xs text-text-muted"
-          style={{ backgroundColor: "rgba(110,58,211,0.08)", borderLeft: "3px solid #6E3AD3" }}
-        >
+        <div className="rounded-lg border-l-[3px] border-info bg-info/10 p-3 text-xs text-text-muted">
           <strong>{t("tipLabel")}</strong> {t("tipPrefix")}{" "}
           <code className="font-mono">__client</code> {t("tipSuffix")}
         </div>

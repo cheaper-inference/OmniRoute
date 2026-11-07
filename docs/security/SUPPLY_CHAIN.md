@@ -49,6 +49,20 @@ Both gates **gracefully SKIP** (exit 0) when the tool is absent or the measureme
 fails (osv-scanner not in PATH, osv.dev/network unreachable, invalid JSON) — a
 **measurement** failure never blocks, only a **measured** regression blocks.
 
+## Retired dependency risk
+
+The root lockfile no longer includes `extract-zip` or a dependency edge to it after
+upgrading the pinned promptfoo development tool. This retires the previously accepted
+`promptfoo` → `@openai/codex-security` → `extract-zip` chain tracked in #14482.
+The regression checks in `tests/unit/extract-zip-14482-exposure.test.ts` reject its
+reintroduction and retain the prohibition on imports from production code.
+
+The current dependency repair also scopes compatibility overrides to Azure identity's
+MSAL client and get-uri's FTP client. Azure token acquisition and FTP retrieval are
+tested with controlled transports; both OpenCode packages run their own build and test
+suites. Registry advisory counts are measurements at a point in time and can change
+after the lockfile is committed.
+
 ## Backlog: Scorecard advisory → blocking
 
 After the 1st green release with Scorecard reporting:

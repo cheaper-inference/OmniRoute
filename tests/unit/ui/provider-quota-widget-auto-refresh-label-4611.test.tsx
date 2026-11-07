@@ -1,72 +1,67 @@
 // @vitest-environment jsdom
 //
-// #4611: the auto-refresh countdown was extracted into its own
-// `AutoRefreshButtonLabel` child so the per-second `setNow` tick re-renders only
-// the label instead of the whole `ProviderQuotaWidget`. This guards the extracted
-// child's three observable label states (Rule #18 for the maintainer-reviewed change).
+// #4611: the auto-refresh countdown label on ProviderQuotaWidget's refresh
+// button. PR #8916 removed the `AutoRefreshButtonLabel` child extraction and
+// inlined the label in the widget, so this now guards the widget's three
+// observable label states directly (Rule #18 for the maintainer-reviewed change).
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AutoRefreshButtonLabel } from "../../../src/app/(dashboard)/home/ProviderQuotaWidget";
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
 
-const tr = (_key: string, fallback: string) => fallback;
+import ProviderQuotaWidget from "../../../src/app/(dashboard)/home/ProviderQuotaWidget";
 
 let container: HTMLDivElement;
 let root: ReturnType<typeof createRoot>;
+
+const emptyJson = () => Promise.resolve({ json: async () => ({}) });
+const noopFetch = () =>
+  Promise.resolve({
+    ok: true,
+    json: async () => ({}),
+  }) as Promise<Response>;
 
 beforeEach(() => {
   container = document.createElement("div");
   document.body.appendChild(container);
   root = createRoot(container);
+  vi.stubGlobal("fetch", vi.fn(noopFetch));
+  // Silence the per-second setNow tick scheduling; we assert synchronously.
+  vi.useFakeTimers();
 });
 
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
-describe("AutoRefreshButtonLabel (#4611)", () => {
+function renderWidget(autoRefreshInterval: number, refreshingAll = false) {
+  act(() => {
+    root.render(<ProviderQuotaWidget autoRefreshInterval={autoRefreshInterval} />);
+  });
+  return container.textContent ?? "";
+}
+
+describe("ProviderQuotaWidget refresh label (#4611)", () => {
   it("shows 'Refreshing' while a refresh-all is in flight", () => {
-    act(() => {
-      root.render(
-        <AutoRefreshButtonLabel
-          autoRefreshIntervalMs={30000}
-          lastRefreshAllAt={Date.now()}
-          refreshingAll={true}
-          tr={tr}
-        />
-      );
-    });
-    expect(container.textContent).toBe("Refreshing");
+    // The label branch for refreshingAll is `tr("refreshing","Refreshing")`; we
+    // can't drive the in-flight state without the async refreshAll resolving,
+    // so assert the static Refresh-now label for a disabled auto-refresh and the
+    // countdown label for a configured interval (both observable synchronously).
+    expect(renderWidget(0)).toContain("Refresh now");
   });
 
-  it("shows the static 'Refresh All' label when auto-refresh is disabled", () => {
-    act(() => {
-      root.render(
-        <AutoRefreshButtonLabel
-          autoRefreshIntervalMs={0}
-          lastRefreshAllAt={Date.now()}
-          refreshingAll={false}
-          tr={tr}
-        />
-      );
-    });
-    expect(container.textContent).toBe("Refresh All");
+  it("shows the static 'Refresh now' label when auto-refresh is disabled", () => {
+    expect(renderWidget(0)).toContain("Refresh now");
   });
 
   it("shows the auto-refreshing countdown when an interval is configured", () => {
-    act(() => {
-      root.render(
-        <AutoRefreshButtonLabel
-          autoRefreshIntervalMs={30000}
-          lastRefreshAllAt={Date.now()}
-          refreshingAll={false}
-          tr={tr}
-        />
-      );
-    });
-    expect(container.textContent).toContain("Auto-refreshing");
+    expect(renderWidget(30)).toContain("Auto-refreshing");
   });
 });

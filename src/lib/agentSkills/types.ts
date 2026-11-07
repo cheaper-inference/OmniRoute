@@ -1,7 +1,7 @@
-export type SkillCategory = "api" | "cli" | "config";
+export type SkillCategory = "api" | "cli" | "config" | "external";
 
 export type SkillArea =
-  // API areas (22)
+  // API areas (23)
   | "auth"
   | "providers"
   | "models"
@@ -28,7 +28,7 @@ export type SkillArea =
   | "github-skills"
   // Config skills
   | "config-codex-cli"
-  // CLI families (20)
+  // CLI families (21)
   | "cli-serve"
   | "cli-health"
   | "cli-providers"
@@ -49,7 +49,9 @@ export type SkillArea =
   | "cli-eval"
   | "cli-plugins-skills"
   | "cli-setup"
-  | "cli-skill-collector";
+  | "cli-skill-collector"
+  // External (third-party) skills
+  | "external";
 
 export interface AgentSkill {
   id: string; // canonical id (e.g. "omni-providers", "cli-serve")
@@ -67,7 +69,7 @@ export interface AgentSkill {
 }
 
 export interface SkillCoverage {
-  // Totals are derived from the catalog id lists (literal types went stale the
+  // Totals are derived from the canonical catalog id lists (literal types went stale the
   // first time the catalog grew — cli-skill-collector, 2026-07-15).
   api: { have: number; total: number };
   cli: { have: number; total: number };

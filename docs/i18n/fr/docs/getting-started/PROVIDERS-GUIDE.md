@@ -1,0 +1,369 @@
+# Providers Guide: Connect AI Models to OmniRoute (Français)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../getting-started/PROVIDERS-GUIDE.md) · 🇪🇹 [am](../../../am/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/getting-started/PROVIDERS-GUIDE.md) · 🇦🇿 [az](../../../az/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/getting-started/PROVIDERS-GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/getting-started/PROVIDERS-GUIDE.md) · 🇩🇰 [da](../../../da/docs/getting-started/PROVIDERS-GUIDE.md) · 🇩🇪 [de](../../../de/docs/getting-started/PROVIDERS-GUIDE.md) · 🇬🇷 [el](../../../el/docs/getting-started/PROVIDERS-GUIDE.md) · 🇪🇸 [es](../../../es/docs/getting-started/PROVIDERS-GUIDE.md) · 🇪🇪 [et](../../../et/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/getting-started/PROVIDERS-GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇱 [he](../../../he/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/getting-started/PROVIDERS-GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇩 [id](../../../id/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇹 [it](../../../it/docs/getting-started/PROVIDERS-GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/getting-started/PROVIDERS-GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/getting-started/PROVIDERS-GUIDE.md) · 🇰🇭 [km](../../../km/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/getting-started/PROVIDERS-GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇲 [my](../../../my/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇴 [no](../../../no/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [or](../../../or/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇰 [si](../../../si/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/getting-started/PROVIDERS-GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [te](../../../te/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇭 [th](../../../th/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/getting-started/PROVIDERS-GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/getting-started/PROVIDERS-GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/getting-started/PROVIDERS-GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/getting-started/PROVIDERS-GUIDE.md)
+
+---
+
+> **En bref** : un fournisseur est une connexion à un service d’IA (comme OpenAI, Anthropic ou Google). Vous avez besoin d’au moins un fournisseur pour utiliser OmniRoute.
+
+---
+
+## Qu’est-ce qu’un fournisseur ?
+
+Considérez un fournisseur comme un **opérateur téléphonique**. Tout comme vous avez besoin d’un opérateur téléphonique pour passer des appels, vous avez besoin d’un fournisseur d’IA pour utiliser des modèles d’IA. OmniRoute est comme un téléphone compatible avec **tous les opérateurs** — vous pouvez passer automatiquement de l’un à l’autre.
+
+### Types de fournisseurs
+
+| Type           | Description                         | Exemples                        | Coût                      |
+| -------------- | ----------------------------------- | ------------------------------- | ------------------------- |
+| **Gratuit**    | Aucun paiement requis               | Kiro, Pollinations              | $0                        |
+| **Clé API**    | Vous avez besoin d’une clé API      | OpenAI, Anthropic, Google       | Paiement à l’utilisation  |
+| **OAuth**      | Connexion avec votre compte         | Claude Code, GitHub Copilot     | Abonnement                |
+| **Cookie Web** | Utilise votre session de navigateur | ChatGPT Web (Codex), Gemini Web | $0 (utilise votre compte) |
+
+### Fournisseurs utilisant des cookies Web
+
+Consultez **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** pour obtenir les instructions générales de configuration, les limitations, les conseils de dépannage et les instructions d’authentification propres à chaque fournisseur.
+---
+
+## Démarrage rapide : connectez votre premier fournisseur
+
+### Configuration facultative des fournisseurs gratuits lors du premier lancement
+
+L’assistant de premier lancement propose une carte explicite **Configurer des fournisseurs gratuits**. Il détermine la liste actuelle des fournisseurs
+éligibles à partir du registre des fournisseurs sans authentification d’OmniRoute, puis vous permet de vérifier et de désélectionner chaque
+fournisseur avant de confirmer. OmniRoute affiche l’avertissement du fournisseur ainsi qu’un lien vers son site
+afin que vous puissiez d’abord consulter les conditions d’utilisation, la politique de confidentialité, la disponibilité et les limites de débit du tiers.
+
+Cette action est facultative : terminer l’assistant ne crée jamais silencieusement de connexions à des fournisseurs gratuits.
+Il crée uniquement les fournisseurs qui sont encore manquants, laisse intactes les connexions existantes personnalisées
+et indique individuellement les fournisseurs créés, déjà configurés et ayant échoué. Après un résultat partiel, vous pouvez
+réessayer uniquement ceux qui ont échoué en toute sécurité.
+
+### Option A : fournisseur gratuit (aucune carte bancaire requise)
+
+1. Ouvrez le tableau de bord à l’adresse `http://localhost:20128`
+2. Accédez à **Fournisseurs** → **Ajouter un fournisseur**
+3. Sélectionnez l’un de ces fournisseurs gratuits :
+   - **Kiro AI** — Modèles Claude gratuits (aucune authentification requise)
+   - **Pollinations** — GPT-5, Claude et Gemini gratuits (aucune clé requise)
+   - **LongCat** — 10 millions de jetons gratuits (octroi unique, compte et vérification KYC requis)
+   - **Cloudflare AI** — Plus de 50 modèles, 10 000 neurones/jour
+   - **MLX Gemma 26B** — Modèle Apple Silicon local (~38,5 jetons/s, ~15,9 Go de RAM)
+   - **MLX Qwen 3.8 27B** — Modèle Apple Silicon local (~9,1 jetons/s, ~13,1 Go de RAM)
+4. Cliquez sur **Connecter**
+5. Terminé ! Vous disposez désormais d’un accès gratuit à l’IA.
+
+### Option B : fournisseur avec clé API (payant)
+
+1. Obtenez une clé API sur le site web du fournisseur :
+   - **OpenAI** : https://platform.openai.com/api-keys
+   - **Anthropic** : https://console.anthropic.com/
+   - **Google** : https://aistudio.google.com/apikey
+   - **DeepSeek** : https://platform.deepseek.com/
+   - **Groq** : https://console.groq.com/
+2. Ouvrez le tableau de bord à l’adresse `http://localhost:20128`
+3. Accédez à **Fournisseurs** → **Ajouter un fournisseur**
+4. Sélectionnez votre fournisseur
+5. Collez votre clé API
+6. Cliquez sur **Connecter**
+7. Terminé ! Vous avez désormais accès aux modèles de ce fournisseur.
+
+### Option C : fournisseur OAuth (abonnement)
+
+1. Ouvrez le tableau de bord à l’adresse `http://localhost:20128`
+2. Accédez à **Fournisseurs** → **Ajouter un fournisseur**
+3. Sélectionnez votre fournisseur (par exemple, Claude Code ou GitHub Copilot)
+4. Cliquez sur **Se connecter avec OAuth**
+5. Connectez-vous avec votre compte
+6. Terminé ! Vous avez désormais accès aux modèles inclus dans votre abonnement.
+
+### Option D : modèles MLX locaux (Apple Silicon)
+
+Pour les Mac Apple Silicon dotés d’une mémoire unifiée, OmniRoute permet de se connecter à des modèles MLX locaux exécutés via `mlx-lm.server` en tant que fournisseurs locaux ordinaires compatibles avec OpenAI.
+
+#### Prérequis
+
+- **Mac Apple Silicon** (M1/M2/M3/M4) avec au moins 24 Go de mémoire unifiée recommandés
+- Gestionnaire de paquets **uv** : `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **mlx-lm** : `uv pip install mlx-lm`
+
+#### Démarrage rapide
+
+1. **Installez les dépendances** :
+
+   ```bash
+   # Installer uv s’il n’est pas déjà installé
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+   # Installer mlx-lm
+   uv pip install mlx-lm
+   ```
+
+2. **Démarrez manuellement les serveurs MLX** (dans des terminaux distincts) :
+
+   ```bash
+   # Terminal 1 : Gemma 4 26B A4B IT-QAT (port 11435)
+   uv run mlx_lm.server --model mlx-community/gemma-4-26B-A4B-it-qat-q4_0-mlx-aligned --port 11435 --host 127.0.0.1
+
+   # Terminal 2 : Qwen 3.8 27B MLX Mixed (port 11436)
+   uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
+   ```
+
+3. **Connectez-vous depuis le tableau de bord OmniRoute** :
+   - Accédez à **Fournisseurs** → **Ajouter un fournisseur**
+   - Sélectionnez **MLX Gemma 26B** ou **MLX Qwen 3.8 27B**
+   - Cliquez sur **Connecter** (aucune clé API requise)
+
+4. **Utilisez-les avec OpenCode** :
+   ```bash
+   # Configurer OpenCode pour utiliser OmniRoute
+   opencode config set api.base_url http://localhost:20128/v1
+   opencode config set api.key <votre-clé-api-omniroute>
+
+   # Utiliser les modèles MLX
+   opencode run --model mlx-gemma/gemma-4-26b
+   opencode run --model mlx-qwen/qwen3.8-27b
+   ```
+
+#### Gestion de la mémoire
+
+**Important** : avec 24 Go de mémoire unifiée, **un seul grand modèle MLX peut être exécuté à la fois**.
+
+- Gemma 26B : ~15,9 Go de mémoire maximale
+- Qwen 3.8 27B : ~13,1 Go de mémoire maximale
+
+Vous devez gérer cela manuellement :
+
+- N’exécutez qu’un seul serveur MLX à la fois, ou
+- Exécutez-les sur deux machines distinctes, ou
+- Arrêtez-en un avant de démarrer l’autre
+
+OmniRoute ne gère pas automatiquement les processus des serveurs MLX — il se contente d’acheminer les requêtes vers les points de terminaison compatibles avec OpenAI que vous configurez.
+
+#### Prise en charge des appels d’outils
+
+Les deux modèles prennent en charge les appels d’outils compatibles avec OpenAI. Testez avec :
+
+```bash
+curl -X POST http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <clé>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "mlx-gemma/gemma-4-26b",
+    "messages": [{"role": "user", "content": "Combien font 2+2 ? Utilisez l’outil de calcul."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculer", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+  }'
+```
+
+#### Dépannage
+
+| Problème                  | Solution                                                                                                              |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Le serveur ne démarre pas | Consultez `uv run mlx_lm.server --help` et vérifiez les identifiants des modèles                                      |
+| Mémoire insuffisante      | Assurez-vous qu’un seul modèle est exécuté ; fermez les autres applications ; consultez le Moniteur d’activité        |
+| Connexion refusée         | Vérifiez que le serveur s’exécute sur le port approprié (11435/11436)                                                 |
+| Réponses lentes           | La première requête charge le modèle en mémoire (~30 à 60 s) ; les requêtes suivantes sont rapides                    |
+| Échec des appels d’outils | Vérifiez que le modèle prend en charge les outils ; consultez les journaux d’OmniRoute pour les erreurs de traduction |
+
+---
+
+## Meilleurs fournisseurs gratuits
+
+Ces fournisseurs offrent un **accès gratuit** sans carte bancaire :
+
+| Fournisseur       | Quota gratuit                 | Modèles                                  | Méthode de connexion            |
+| ----------------- | ----------------------------- | ---------------------------------------- | ------------------------------- |
+| **Kiro AI**       | 50 crédits/mois               | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Aucune authentification requise |
+| **Pollinations**  | Aucune clé requise            | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Aucune authentification requise |
+| **LongCat**       | 10 M, une seule fois          | LongCat-2.0                              | Clé API + KYC                   |
+| **Cloudflare AI** | 10 000 neurones/jour          | Plus de 50 modèles                       | Aucune authentification requise |
+| **NVIDIA NIM**    | Environ 40 RPM                | 129 modèles                              | Clé API requise                 |
+| **Cerebras**      | 5 $ de crédit à l’inscription | GLM 4.7, GPT-OSS 120B                    | Clé API + carte                 |
+
+**Astuce** : Connectez plusieurs fournisseurs gratuits pour bénéficier d’une **IA gratuite illimitée** avec basculement automatique !
+
+---
+
+## Meilleurs fournisseurs payants
+
+Ces fournisseurs proposent des **modèles de haute qualité** accessibles avec des clés API :
+
+| Fournisseur   | Meilleurs modèles           | Coût                        | Offre gratuite                |
+| ------------- | --------------------------- | --------------------------- | ----------------------------- |
+| **OpenAI**    | GPT-5, GPT-4o               | 2,50 $-10 $/1M de tokens    | 5 $ de crédits gratuits       |
+| **Anthropic** | Claude Opus 4.6, Sonnet 4.6 | 3 $-15 $/1M de tokens       | 5 $ de crédits gratuits       |
+| **Google**    | Gemini 2.5 Pro, Flash       | 0,075 $-1,25 $/1M de tokens | 1 500 requêtes/jour gratuites |
+| **DeepSeek**  | DeepSeek V4                 | 0,14 $-0,28 $/1M de tokens  | 5M de tokens gratuits         |
+| **Groq**      | Llama 4, Mixtral            | 0,05 $-0,27 $/1M de tokens  | 30 RPM gratuits               |
+| **xAI**       | Grok 3                      | 0,30 $-0,60 $/1M de tokens  | —                             |
+
+---
+
+## Comment connecter un fournisseur (étape par étape)
+
+### Étape 1 : ouvrir le tableau de bord
+
+Accédez à `http://localhost:20128` dans votre navigateur.
+
+### Étape 2 : accéder aux fournisseurs
+
+Cliquez sur **Fournisseurs** dans la barre latérale.
+
+### Étape 3 : cliquer sur Ajouter un fournisseur
+
+Cliquez sur le bouton **+ Ajouter un fournisseur**.
+
+### Étape 4 : sélectionner votre fournisseur
+
+Parcourez la liste ou recherchez votre fournisseur. Cliquez dessus.
+
+### Étape 5 : saisir les identifiants
+
+- **Fournisseurs gratuits** : aucun identifiant requis — cliquez simplement sur **Connecter**
+- **Fournisseurs avec clé API** : collez votre clé API
+- **Fournisseurs OAuth** : cliquez sur **Se connecter avec OAuth** et identifiez-vous
+
+### Étape 6 : tester la connexion
+
+Cliquez sur **Tester la connexion** pour vérifier qu’elle fonctionne.
+
+### Étape 7 : terminé !
+
+Votre fournisseur est maintenant connecté. Vous pouvez l’utiliser avec `model: "auto"` ou indiquer directement le fournisseur.
+
+---
+
+## Utilisation de plusieurs fournisseurs
+
+OmniRoute fonctionne de manière optimale avec **plusieurs fournisseurs**. Cela vous offre :
+
+- **Basculement automatique** — Si un fournisseur échoue, OmniRoute essaie le suivant
+- **Optimisation des coûts** — OmniRoute sélectionne le fournisseur le moins cher pour chaque requête
+- **Optimisation de la vitesse** — OmniRoute sélectionne le fournisseur le plus rapide pour chaque requête
+- **Optimisation de la qualité** — OmniRoute sélectionne le meilleur fournisseur pour chaque tâche
+
+### Configuration recommandée
+
+Connectez au moins **3 fournisseurs** pour une expérience optimale :
+
+1. **Un fournisseur gratuit** (Kiro ou Pollinations) — Toujours disponible
+2. **Un fournisseur rapide** (Groq, Cerebras) — Pour des réponses rapides
+3. **Un fournisseur de qualité** (OpenAI, Anthropic, Google) — Pour les tâches complexes
+
+Utilisez ensuite `model: "auto"` et OmniRoute sélectionnera automatiquement le meilleur fournisseur pour chaque requête.
+
+---
+
+## Configuration spécifique aux fournisseurs
+
+### OpenAI
+
+1. Obtenez une clé API : https://platform.openai.com/api-keys
+2. Dans OmniRoute : Fournisseurs → Ajouter un fournisseur → OpenAI
+3. Collez la clé API → Connecter
+
+### Anthropic
+
+1. Obtenez une clé API : https://console.anthropic.com/
+2. Dans OmniRoute : Fournisseurs → Ajouter un fournisseur → Anthropic
+3. Collez la clé API → Connecter
+
+### Google (Gemini)
+
+1. Obtenez une clé API : https://aistudio.google.com/apikey
+2. Dans OmniRoute : Fournisseurs → Ajouter un fournisseur → Gemini
+3. Collez la clé API → Connecter
+
+### DeepSeek
+
+1. Obtenez une clé API : https://platform.deepseek.com/
+2. Dans OmniRoute : Fournisseurs → Ajouter un fournisseur → DeepSeek
+3. Collez la clé API → Connecter
+
+### Qoder : choisissez le mode de transport des identifiants
+
+Qoder nécessite des identifiants. Ses deux modes de transport offrent des capacités différentes ; un nom de modèle
+ne suffit pas à déterminer les fonctionnalités disponibles pour une connexion donnée.
+
+| Identifiant                      | Transport OmniRoute                                      | Appel d’outils par l’appelant                                | Streaming                                                                                   |
+| -------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| PAT commençant par `pt-`         | Processus `qodercli` local sur l’hôte OmniRoute          | Non pris en charge                                           | Mis en mémoire tampon : le SSE n’est émis qu’après que la CLI a renvoyé la réponse complète |
+| Jeton d’accès non-PAT ou clé API | Point de terminaison HTTP compatible OpenAI de DashScope | Transmis tel quel, sous réserve du modèle/de la clé en amont | Chemin HTTP/SSE en amont                                                                    |
+
+Pour un PAT, installez la CLI Qoder sur le même hôte ou dans le même conteneur qu’OmniRoute. L’exécutable
+doit être détectable sous le nom `qodercli`, ou définissez `CLI_QODER_BIN` sur le chemin de son exécutable. Une CLI
+installée uniquement sur l’hôte Docker n’est pas automatiquement présente dans le conteneur. L’absence
+du binaire génère une erreur explicite vous indiquant de procéder à l’installation ou de configurer le chemin.
+
+Le chemin de chat PAT dispose d’un délai d’expiration de processus de 45 secondes. Il aplatit la conversation en une
+invite et appelle la CLI en mode d’impression sans streaming. Demander `stream: true` fait passer
+l’enveloppe de réponse au format SSE ; cela ne fournit pas une transmission incrémentielle des jetons en amont.
+La validation par la CLI et la liste des modèles utilisent un délai d’expiration distinct de 20 secondes. Il s’agit des valeurs par défaut
+actuelles du code, et non de paramètres configurables depuis le tableau de bord.
+
+Utilisez les connexions PAT pour les conversations simples. Les requêtes d’agent contenant `tools` ou l’ancien champ `functions`
+excluent les comptes PAT lors de la sélection des identifiants, y compris pour les cibles combinées épinglées. Un pool
+Qoder mixte peut tout de même sélectionner son compte HTTP. Les appels directs à l’exécuteur PAT échouent également
+de manière explicite avant le lancement de la CLI, au lieu d’ignorer silencieusement les définitions d’outils. Cette
+restriction concerne les outils fournis par l’appelant de l’API, et non les éventuels outils internes que la CLI Qoder
+pourrait elle-même utiliser. Une clé HTTP ne garantit pas que chaque modèle prenne en charge les outils ; les vérifications
+habituelles des capacités du modèle s’appliquent toujours.
+
+L’OAuth via navigateur est disponible uniquement lorsque l’administrateur configure les cinq paramètres suivants :
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID` et `QODER_OAUTH_CLIENT_SECRET`. Ils sont vides par défaut ; une
+installation non configurée doit utiliser une méthode d’importation d’identifiants prise en charge au lieu de supposer
+que le flux de connexion via navigateur est prêt.
+
+Références d’implémentation : [exécuteur Qoder](../../open-sse/executors/qoder.ts),
+[environnement d’exécution de la CLI](../../open-sse/services/qoderCli.ts) et
+[configuration OAuth](../../src/lib/oauth/constants/oauth.ts). Le streaming PAT incrémentiel
+et un délai d’expiration configurable constituent des améliorations distinctes ; ce comportement ne les garantit pas.
+
+### Groq
+
+1. Obtenez une clé API : https://console.groq.com/
+2. Dans OmniRoute : Fournisseurs → Ajouter un fournisseur → Groq
+3. Collez la clé API → Connecter
+
+---
+
+## Questions fréquentes
+
+### « Dois-je payer pour utiliser OmniRoute ? »
+
+**Non !** OmniRoute est gratuit et open source. Vous pouvez utiliser des fournisseurs gratuits (Kiro, Pollinations) sans rien payer. Vous ne payez que si vous choisissez d’utiliser des fournisseurs payants.
+
+### « Avec quel fournisseur devrais-je commencer ? »
+
+Commencez par **Kiro AI** : il est gratuit, ne nécessite aucune clé API et vous donne accès aux modèles Claude. Ajoutez ensuite d’autres fournisseurs selon vos besoins.
+
+### « Puis-je utiliser plusieurs fournisseurs en même temps ? »
+
+**Oui !** C’est tout l’intérêt d’OmniRoute. Connectez plusieurs fournisseurs et utilisez `model: "auto"` pour permettre à OmniRoute de choisir le plus adapté à chaque requête.
+
+### « Que se passe-t-il si un fournisseur tombe en panne ? »
+
+OmniRoute ignore automatiquement les fournisseurs défaillants et essaie le suivant. Vous n’avez rien à faire.
+
+### « Comment déconnecter un fournisseur ? »
+
+Accédez à Fournisseurs → cliquez sur le fournisseur → cliquez sur **Déconnecter**.
+
+### « Puis-je utiliser mes clés API existantes ? »
+
+**Oui !** Si vous possédez déjà des clés API pour OpenAI, Anthropic, Google, etc., vous pouvez les utiliser dans OmniRoute. Il vous suffit de les coller lors de la connexion au fournisseur.
+
+---
+
+## Et maintenant ?
+
+- **[Guide d'Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Laissez OmniRoute choisir la meilleure IA pour vous
+- **[Guide des offres gratuites](./FREE-TIERS-GUIDE.md)** — Accédez gratuitement à l'IA sans carte bancaire
+- **[Dépannage](../guides/TROUBLESHOOTING.md)** — Résolvez les problèmes courants
+- **[Référence des fournisseurs](../reference/PROVIDER_REFERENCE.md)** — Liste complète des 226 fournisseurs
+
+## Images Cursor
+
+Les images du forfait Cursor utilisent `IMAGE_PROVIDERS.cursor` (`cursor-agent-image`). Consultez [CURSOR_IMAGE.md](../providers/CURSOR_IMAGE.md).

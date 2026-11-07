@@ -35,7 +35,14 @@ test("sanitizeChatRequestBody: Responses target maps max_completion_tokens → m
 });
 
 test("sanitizeChatRequestBody: Responses target maps max_tokens → max_output_tokens", () => {
-  const out = sanitizeChatRequestBody({ max_tokens: 128 }, FORMATS.OPENAI_RESPONSES, FORMATS.OPENAI);
+  // #9161: token-field selection keys on the OUTBOUND (target) protocol only — a
+  // Responses-shaped SOURCE no longer forces max_output_tokens (see
+  // codex-responses-to-chat-9161.test.ts for that direction).
+  const out = sanitizeChatRequestBody(
+    { max_tokens: 128 },
+    FORMATS.OPENAI,
+    FORMATS.OPENAI_RESPONSES
+  );
   assert.equal(out.max_output_tokens, 128);
   assert.equal(out.max_tokens, undefined);
 });
@@ -49,6 +56,7 @@ test("sanitizeChatRequestBody: strips empty message name and filters nameless to
       ],
       tools: [
         { type: "function", function: { name: "real_tool", parameters: {} } },
+        { type: "web_search_preview" },
         { type: "function", function: { name: "" } }, // dropped — empty name
         { type: "function", function: {} }, // dropped — no name
       ],
@@ -62,8 +70,9 @@ test("sanitizeChatRequestBody: strips empty message name and filters nameless to
   assert.equal(messages[1].name, "keepme", "non-empty name kept");
 
   const tools = out.tools as Array<Record<string, unknown>>;
-  assert.equal(tools.length, 1, "only the named tool survives");
+  assert.equal(tools.length, 2, "the named function and built-in tool survive");
   assert.equal((tools[0].function as Record<string, unknown>).name, "real_tool");
+  assert.deepEqual(tools[1], { type: "web_search_preview" });
 });
 
 test("checkIdempotencyCache returns { hit:null, idempotencyKey } on a miss", async () => {
@@ -112,9 +121,36 @@ test("checkIdempotencyCache returns a hit Response reusing the same key after a 
     log: undefined,
   });
 
-  assert.equal(result.idempotencyKey, key, "the resolved key is returned for the save site to reuse");
+  assert.equal(
+    result.idempotencyKey,
+    key,
+    "the resolved key is returned for the save site to reuse"
+  );
   assert.ok(result.hit, "a cached entry produces a hit");
   assert.equal(result.hit!.response.headers.get("X-OmniRoute-Idempotent"), "true");
+});
+
+test("transcript-observed requests bypass idempotency reads and writes", async () => {
+  const rawKey = "idem-private-video-3821";
+  const key = composeIdempotencyKey({
+    rawKey,
+    provider: "openai",
+    model: "gpt-4.1",
+    messages: undefined,
+  })!;
+  saveIdempotency(key, { content: "PRIVATE_IDEMPOTENCY_TRANSCRIPT_SENTINEL" }, 200);
+  const observed = { videoTranscriptSensitive: true };
+  const result = await checkIdempotencyCache({
+    clientRawRequest: { headers: new Headers({ "idempotency-key": rawKey }) },
+    provider: "openai",
+    model: "gpt-4.1",
+    effectiveServiceTier: undefined,
+    startTime: 0,
+    log: undefined,
+    ...observed,
+  });
+  assert.equal(result.hit, null);
+  assert.equal(result.idempotencyKey, null, "the save site must have no key to write");
 });
 
 test("checkIdempotencyCache resolves a null key when no idempotency headers are present", async () => {

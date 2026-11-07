@@ -2,9 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 // Repro for #6571 — REST-fallback path of `omniroute compression` (hit only when
-// /api/mcp/tools/call is not mounted, i.e. mcpCall()'s 404/501 branch) uses the
+// the MCP surface is not mounted, i.e. mcpCall()'s 404/501 branch) uses the
 // nonexistent `engine` field instead of the canonical `defaultMode` field, and
 // the table renderer prints "[object Object]" for nested object cells.
+//
+// #10960 moved the MCP transport from the never-mounted `/api/mcp/tools/call`
+// to the real Streamable HTTP endpoint `/api/mcp/stream` (mcpClient.mjs ->
+// mcpCallTool()). The REST-fallback trigger in these mocks must match
+// that endpoint, not the retired one, or mcpCallTool() throws on an
+// unmocked fetch instead of exercising the fallback path this test targets.
 
 type MockResponse = Pick<Response, "ok" | "status" | "headers" | "json" | "text">;
 
@@ -45,7 +51,7 @@ test("restCompressionStatus (via runCompressionStatus REST fallback) should surf
   const origFetch = globalThis.fetch;
   globalThis.fetch = (async (url: string | URL | Request) => {
     const u = String(url);
-    if (u.includes("/api/mcp/tools/call")) return makeResp({ error: "not mounted" }, 404);
+    if (u.includes("/api/mcp/stream")) return makeResp({ error: "not mounted" }, 404);
     if (u.includes("/api/settings/compression")) {
       // Canonical server payload — NOTE: field is `defaultMode`, there is no `engine` key.
       // src/lib/db/compression.ts COMPRESSION_MODES / GET route just returns getCompressionSettings().
@@ -57,11 +63,12 @@ test("restCompressionStatus (via runCompressionStatus REST fallback) should surf
   }) as typeof fetch;
 
   try {
-    const { runCompressionStatus } = await import(
-      "../../bin/cli/commands/compression.mjs"
-    );
+    const { runCompressionStatus } = await import("../../bin/cli/commands/compression.mjs");
     const out = await captureStdout(() =>
-      runCompressionStatus({}, makeCmd("json") as unknown as Parameters<typeof runCompressionStatus>[1])
+      runCompressionStatus(
+        {},
+        makeCmd("json") as unknown as Parameters<typeof runCompressionStatus>[1]
+      )
     );
     const parsed = JSON.parse(out);
 
@@ -85,7 +92,7 @@ test("restSetEngine (via runCompressionEngineSet REST fallback) should PUT `defa
   const putBodies: Record<string, unknown>[] = [];
   globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
     const u = String(url);
-    if (u.includes("/api/mcp/tools/call")) return makeResp({ error: "not mounted" }, 404);
+    if (u.includes("/api/mcp/stream")) return makeResp({ error: "not mounted" }, 404);
     if (u.includes("/api/settings/compression") && init?.method === "PUT") {
       const body = init?.body ? JSON.parse(String(init.body)) : {};
       putBodies.push(body);
@@ -95,9 +102,7 @@ test("restSetEngine (via runCompressionEngineSet REST fallback) should PUT `defa
   }) as typeof fetch;
 
   try {
-    const { runCompressionEngineSet } = await import(
-      "../../bin/cli/commands/compression.mjs"
-    );
+    const { runCompressionEngineSet } = await import("../../bin/cli/commands/compression.mjs");
     await runCompressionEngineSet(
       "caveman",
       {},
@@ -119,7 +124,11 @@ test("restSetEngine (via runCompressionEngineSet REST fallback) should PUT `defa
       "standard",
       `expected PUT body to contain defaultMode:"standard" (caveman translated), got: ${JSON.stringify(body)}`
     );
-    assert.equal(body.engine, undefined, `PUT body must not contain a nonexistent "engine" key, got: ${JSON.stringify(body)}`);
+    assert.equal(
+      body.engine,
+      undefined,
+      `PUT body must not contain a nonexistent "engine" key, got: ${JSON.stringify(body)}`
+    );
   } finally {
     globalThis.fetch = origFetch;
   }
@@ -149,4 +158,48 @@ test("output.mjs emit() table renderer must not print [object Object] for nested
     !rendered.includes("[object Object]"),
     `table rendering must JSON-stringify nested object cells instead of printing "[object Object]"; got:\n${rendered}`
   );
+});
+
+test("REST fallback still fires when initialize returns HTTP 404 (sessionless continue must not swallow it)", async () => {
+  // mcpCallTool no longer throws on a missing Mcp-Session-Id after a
+  // successful initialize. The compression REST fallback keys off err.status
+  // === 404/501 from the HTTP layer. A 404 on initialize must still surface
+  // as err.status === 404 so mcpCall() takes the REST path — not a synthetic
+  // "no Mcp-Session-Id" 500 that would bypass the fallback.
+  const origFetch = globalThis.fetch;
+  let streamHits = 0;
+  let restHits = 0;
+  globalThis.fetch = (async (url: string | URL | Request) => {
+    const u = String(url);
+    if (u.includes("/api/mcp/stream")) {
+      streamHits += 1;
+      return makeResp({ error: "not mounted" }, 404);
+    }
+    if (u.includes("/api/settings/compression")) {
+      restHits += 1;
+      return makeResp({ enabled: true, defaultMode: "stacked" });
+    }
+    if (u.includes("/api/context/combos")) return makeResp({ combos: [] });
+    if (u.includes("/api/context/analytics")) return makeResp({ totalRequests: 0 });
+    throw new Error(`unexpected fetch: ${u}`);
+  }) as typeof fetch;
+
+  try {
+    const { runCompressionStatus } = await import("../../bin/cli/commands/compression.mjs");
+    const out = await captureStdout(() =>
+      runCompressionStatus(
+        {},
+        makeCmd("json") as unknown as Parameters<typeof runCompressionStatus>[1]
+      )
+    );
+    const parsed = JSON.parse(out);
+    assert.equal(parsed.strategy, "stacked");
+    assert.ok(streamHits >= 1, "initialize must hit /api/mcp/stream");
+    assert.ok(restHits >= 1, "REST fallback must hit /api/settings/compression");
+    // Critically: we must NOT have progressed to notifications/initialized or
+    // tools/call after a 404 initialize — only the one failing initialize.
+    assert.equal(streamHits, 1, "404 initialize must abort before further MCP RPCs");
+  } finally {
+    globalThis.fetch = origFetch;
+  }
 });

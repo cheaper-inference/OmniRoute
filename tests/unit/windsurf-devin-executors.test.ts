@@ -1,208 +1,48 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 
-// ─── Model alias resolution (windsurf) ───────────────────────────────────────
-// We exercise the alias map indirectly through the exported class because
-// resolveWsModelId is not exported. WindsurfExecutor.buildRequest() calls it.
+// ─── Devin Desktop raw model IDs ────────────────────────────────────────────
 
-describe("Windsurf MODEL_ALIAS_MAP", () => {
-  const ALIAS_CASES: [string, string][] = [
-    // SWE dot→dash conversions
-    ["swe-1.6-fast", "swe-1-6-fast"],
-    ["swe-1.6", "swe-1-6"],
-    ["swe-1.5", "swe-1p5"],
-    ["swe-1.5-fast", "swe-1p5"],
-    // GPT-5.5 default effort
-    ["gpt-5.5", "gpt-5-5-medium"],
-    // GPT-5.4 default effort
-    ["gpt-5.4", "gpt-5-4-medium"],
-    // GPT-5.3-codex default
-    ["gpt-5.3-codex", "gpt-5-3-codex-medium"],
-    // Claude aliases
-    ["claude-sonnet-4.6", "claude-sonnet-4-6"],
-    ["claude-opus-4.7-max", "claude-opus-4-7-max"],
-    // Gemini aliases
-    ["gemini-2.5-pro", "MODEL_GOOGLE_GEMINI_2_5_PRO"],
-  ];
+import { getExecutor } from "../../open-sse/executors/index.ts";
 
-  const PASSTHROUGH_CASES = [
-    "gpt-5",
-    "gpt-5-codex",
-    "grok-code-fast-1",
-    "deepseek-v4",
-    "some-unknown-model",
-    // These aliases were removed from MODEL_ALIAS_MAP in v3.8.x — pass through unchanged:
-    "claude-3.7-sonnet-thinking",
-    "gemini-3.0-pro",
-    "kimi-k2",
-  ];
-
-  // Load the alias map from the module source — we parse it at test time to
-  // avoid importing the full executor (which would require provider registry).
-  let aliasMap: Record<string, string>;
-
-  test("setup: parse MODEL_ALIAS_MAP from executor source", async () => {
-    const fs = await import("node:fs/promises");
-    const src = await fs.readFile(
-      new URL("../../open-sse/executors/windsurf.ts", import.meta.url),
-      "utf8"
-    );
-    const match = src.match(/const MODEL_ALIAS_MAP[^=]*=\s*(\{[\s\S]*?\n\})/);
-    assert.ok(match, "MODEL_ALIAS_MAP block should be found in source");
-    // Safe eval via Function constructor replacement — build a JS object literal
-    const objSrc = match[1]
-      .replace(/\/\/[^\n]*/g, "") // strip line comments
-      .trim();
-    // Parse using JSON after stripping trailing commas (simple approach)
-    const jsonLike = objSrc
-      .replace(/,\s*([\]}])/g, "$1") // trailing commas
-      .replace(/'/g, '"'); // single → double quotes
-    aliasMap = JSON.parse(jsonLike);
-    assert.ok(typeof aliasMap === "object");
-  });
-
-  for (const [input, expected] of ALIAS_CASES) {
-    test(`alias: "${input}" → "${expected}"`, () => {
-      const result = aliasMap[input] ?? input;
-      assert.equal(result, expected);
-    });
-  }
-
-  for (const model of PASSTHROUGH_CASES) {
-    test(`passthrough: "${model}" has no alias (returns itself)`, () => {
-      const result = aliasMap[model] ?? model;
-      assert.equal(result, model);
-    });
-  }
-});
-
-// ─── openAIMessagesToWs message conversion ────────────────────────────────────
-// Tests the message role/content extraction logic. Since the function is not
-// exported, we test via a re-implementation that mirrors the source exactly.
-
-function openAIMessagesToWsLocal(
-  messages: Array<{ role?: string; content?: unknown; tool_call_id?: string }>
-): Array<{ role: string; content: string; toolCallId?: string }> {
-  const out: Array<{ role: string; content: string; toolCallId?: string }> = [];
-  for (const m of messages) {
-    const role = String(m.role || "user");
-    let content = "";
-    if (typeof m.content === "string") {
-      content = m.content;
-    } else if (Array.isArray(m.content)) {
-      for (const part of m.content) {
-        if (part && typeof part === "object" && (part as Record<string, unknown>).type === "text") {
-          content += String((part as Record<string, unknown>).text || "");
-        }
-      }
+function containsBytes(haystack: Uint8Array, needle: Uint8Array): boolean {
+  outer: for (let i = 0; i <= haystack.length - needle.length; i++) {
+    for (let j = 0; j < needle.length; j++) {
+      if (haystack[i + j] !== needle[j]) continue outer;
     }
-    out.push({ role, content, toolCallId: m.tool_call_id });
+    return true;
   }
-  return out;
+  return false;
 }
 
-describe("openAIMessagesToWs", () => {
-  test("string content is passed through", () => {
-    const result = openAIMessagesToWsLocal([{ role: "user", content: "Hello" }]);
-    assert.equal(result[0].content, "Hello");
-    assert.equal(result[0].role, "user");
-  });
+test("Devin Desktop sends the curated raw model id without alias rewriting", async () => {
+  const executor = await getExecutor("devin-desktop");
+  const originalFetch = globalThis.fetch;
+  let requestBody: Uint8Array | null = null;
+  globalThis.fetch = async (url, init) => {
+    if (String(url).endsWith("/exa.auth_pb.AuthService/GetUserJwt")) {
+      const jwt = new TextEncoder().encode("test-jwt");
+      return new Response(new Uint8Array([0x0a, jwt.length, ...jwt]));
+    }
+    requestBody = new Uint8Array(init?.body as ArrayBuffer);
+    return new Response("expected test stop", { status: 418 });
+  };
 
-  test("multi-part array content: only text parts are concatenated", () => {
-    const result = openAIMessagesToWsLocal([
-      {
-        role: "user",
-        content: [
-          { type: "text", text: "Part A " },
-          { type: "image_url", url: "https://example.com/img.png" },
-          { type: "text", text: "Part B" },
-        ],
-      },
-    ]);
-    assert.equal(result[0].content, "Part A Part B");
-  });
+  try {
+    const model = "gpt-5-6-sol-high";
+    const result = await executor.execute({
+      model,
+      body: { messages: [{ role: "user", content: "hello" }] },
+      stream: true,
+      credentials: { accessToken: "test-devin-desktop-token" },
+    });
 
-  test("missing role defaults to 'user'", () => {
-    const result = openAIMessagesToWsLocal([{ content: "Hi" }]);
-    assert.equal(result[0].role, "user");
-  });
-
-  test("tool_call_id is mapped to toolCallId", () => {
-    const result = openAIMessagesToWsLocal([
-      { role: "tool", content: "result", tool_call_id: "call_abc" },
-    ]);
-    assert.equal(result[0].toolCallId, "call_abc");
-  });
-
-  test("null/undefined content yields empty string", () => {
-    const result = openAIMessagesToWsLocal([{ role: "assistant", content: undefined }]);
-    assert.equal(result[0].content, "");
-  });
-});
-
-// ─── gRPC-web frame parser (Windsurf) ────────────────────────────────────────
-
-function* parseGrpcWebFramesLocal(
-  buf: Uint8Array
-): Generator<{ flag: number; payload: Uint8Array }> {
-  let offset = 0;
-  while (offset + 5 <= buf.length) {
-    const flag = buf[offset];
-    const len =
-      (buf[offset + 1] << 24) | (buf[offset + 2] << 16) | (buf[offset + 3] << 8) | buf[offset + 4];
-    offset += 5;
-    if (len < 0 || offset + len > buf.length) break;
-    yield { flag, payload: buf.slice(offset, offset + len) };
-    offset += len;
+    assert.equal((result instanceof Response ? result : result.response).status, 418);
+    assert.ok(requestBody);
+    assert.equal(containsBytes(requestBody, new TextEncoder().encode(model)), true);
+  } finally {
+    globalThis.fetch = originalFetch;
   }
-}
-
-describe("parseGrpcWebFrames", () => {
-  function makeFrame(flag: number, payload: Uint8Array): Uint8Array {
-    const header = new Uint8Array(5);
-    header[0] = flag;
-    const len = payload.length;
-    header[1] = (len >>> 24) & 0xff;
-    header[2] = (len >>> 16) & 0xff;
-    header[3] = (len >>> 8) & 0xff;
-    header[4] = len & 0xff;
-    const frame = new Uint8Array(5 + payload.length);
-    frame.set(header);
-    frame.set(payload, 5);
-    return frame;
-  }
-
-  test("parses a single data frame (flag=0x00)", () => {
-    const payload = new TextEncoder().encode("hello");
-    const buf = makeFrame(0x00, payload);
-    const frames = [...parseGrpcWebFramesLocal(buf)];
-    assert.equal(frames.length, 1);
-    assert.equal(frames[0].flag, 0x00);
-    assert.deepEqual(frames[0].payload, payload);
-  });
-
-  test("parses multiple frames in sequence", () => {
-    const p1 = new TextEncoder().encode("frame1");
-    const p2 = new TextEncoder().encode("frame2");
-    const buf = new Uint8Array([...makeFrame(0x00, p1), ...makeFrame(0x80, p2)]);
-    const frames = [...parseGrpcWebFramesLocal(buf)];
-    assert.equal(frames.length, 2);
-    assert.equal(frames[0].flag, 0x00);
-    assert.equal(frames[1].flag, 0x80);
-  });
-
-  test("returns empty for truncated frame header", () => {
-    const buf = new Uint8Array([0x00, 0x00]); // only 2 bytes, needs 5
-    const frames = [...parseGrpcWebFramesLocal(buf)];
-    assert.equal(frames.length, 0);
-  });
-
-  test("stops if payload length exceeds buffer", () => {
-    // Frame claims 100 bytes of payload but buf only has 10
-    const buf = new Uint8Array([0x00, 0x00, 0x00, 0x00, 100, 0, 1, 2, 3, 4]);
-    const frames = [...parseGrpcWebFramesLocal(buf)];
-    assert.equal(frames.length, 0);
-  });
 });
 
 // ─── Devin CLI binary resolution ─────────────────────────────────────────────
@@ -235,24 +75,35 @@ describe("DevinCli binary resolution", () => {
   });
 });
 
-// ─── Phase 1 hotfix: windsurf/devin-cli import-token flow ────────────────────
+// ─── Devin Desktop / CLI import-token flow ───────────────────────────────────
 import { generateAuthData, getProvider } from "@/lib/oauth/providers";
 
-test("windsurf provider: flowType is import_token (PKCE disabled post-rebrand)", () => {
-  const provider = getProvider("windsurf");
+test("devin-desktop provider: flowType is import_token", () => {
+  const provider = getProvider("devin-desktop");
   assert.equal(provider.flowType, "import_token");
 });
 
-test("devin-cli provider: flowType is import_token (shares windsurf config)", () => {
+test("devin-cli provider: flowType is import_token (shares Devin token config)", () => {
   const provider = getProvider("devin-cli");
   assert.equal(provider.flowType, "import_token");
 });
 
-test("windsurf provider: generateAuthData returns no authUrl (PKCE flow disabled)", () => {
-  const data = generateAuthData("windsurf", "http://localhost:0/auth/callback");
-  assert.equal(data.authUrl, undefined);
-  assert.equal(data.supported, false);
-  assert.match(data.error ?? "", /import-token|disabled|app\.devin\.ai/i);
+test("legacy windsurf provider is no longer public", () => {
+  assert.throws(() => getProvider("windsurf"), /Unknown provider/i);
+});
+
+// contract changed by the Devin CLI browser sign-in: devin-desktop keeps import-token as its
+// default flowType but now also builds a PKCE authUrl. The disabled-flow guidance below is
+// still asserted, now on devin-cli, which stays import-only.
+test("devin-desktop provider: generateAuthData returns the Devin CLI browser authUrl", () => {
+  const data = generateAuthData("devin-desktop", "http://127.0.0.1:59653/callback");
+  assert.match(data.authUrl ?? "", /^https:\/\/app\.devin\.ai\/auth\/cli\/continue\?/);
+  assert.notEqual(data.supported, false);
+  assert.equal(data.error, undefined);
+  const cli = generateAuthData("devin-cli", "http://localhost:0/auth/callback");
+  assert.match(cli.error ?? "", /import-token|disabled/i);
+  assert.match(cli.error ?? "", /vary by Devin version and account/i);
+  assert.doesNotMatch(cli.error ?? "", /Copy API Key to Clipboard/i);
 });
 
 test("devin-cli provider: generateAuthData returns no authUrl", () => {
@@ -264,15 +115,19 @@ test("devin-cli provider: generateAuthData returns no authUrl", () => {
 // ─── Phase 1 hotfix: retired PKCE actions return 410 Gone ────────────────────
 import { GET as oauthGet, POST as oauthPost } from "@/app/api/oauth/[provider]/[action]/route";
 
-test("OAuth route: GET windsurf/start-callback-server returns 410 Gone", async () => {
-  const url = "http://localhost:20128/api/oauth/windsurf/start-callback-server";
+// devin-desktop left RETIRED_PKCE_PROVIDERS (browser sign-in); the 410 contract is pinned on
+// devin-cli, which still retires every PKCE action.
+test("OAuth route: GET devin-cli/start-callback-server returns Devin guidance", async () => {
+  const url = "http://localhost:20128/api/oauth/devin-cli/start-callback-server";
   const request = new Request(url, { method: "GET" });
   const response = await oauthGet(request, {
-    params: Promise.resolve({ provider: "windsurf", action: "start-callback-server" }),
+    params: Promise.resolve({ provider: "devin-cli", action: "start-callback-server" }),
   } as never);
   assert.equal(response.status, 410);
   const body = await response.json();
-  assert.match(body.error, /import-token|disabled|410|show-auth-token/i);
+  assert.match(body.error, /Paste an existing Devin API key/);
+  assert.match(body.error, /vary by Devin version and account/);
+  assert.doesNotMatch(body.error, /Devin: Copy API Key to Clipboard/);
 });
 
 test("OAuth route: GET devin-cli/authorize returns 410 Gone", async () => {
@@ -286,24 +141,24 @@ test("OAuth route: GET devin-cli/authorize returns 410 Gone", async () => {
   assert.match(body.error, /import-token|disabled|410|show-auth-token/i);
 });
 
-test("OAuth route: GET windsurf/poll-callback returns 410 Gone", async () => {
-  const url = "http://localhost:20128/api/oauth/windsurf/poll-callback";
+test("OAuth route: GET devin-cli/poll-callback returns 410 Gone", async () => {
+  const url = "http://localhost:20128/api/oauth/devin-cli/poll-callback";
   const request = new Request(url, { method: "GET" });
   const response = await oauthGet(request, {
-    params: Promise.resolve({ provider: "windsurf", action: "poll-callback" }),
+    params: Promise.resolve({ provider: "devin-cli", action: "poll-callback" }),
   } as never);
   assert.equal(response.status, 410);
 });
 
-test("OAuth route: POST windsurf/poll-callback returns 410 Gone", async () => {
-  const url = "http://localhost:20128/api/oauth/windsurf/poll-callback";
+test("OAuth route: POST devin-cli/poll-callback returns 410 Gone", async () => {
+  const url = "http://localhost:20128/api/oauth/devin-cli/poll-callback";
   const request = new Request(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
   });
   const response = await oauthPost(request, {
-    params: Promise.resolve({ provider: "windsurf", action: "poll-callback" }),
+    params: Promise.resolve({ provider: "devin-cli", action: "poll-callback" }),
   } as never);
   assert.equal(response.status, 410);
 });
@@ -322,8 +177,8 @@ test("OAuth route: GET codex/authorize is NOT retired (regression check)", async
 // bind layer when the route called `mapTokens({ accessToken })`: the object
 // got stored as accessToken and SQLite rejected it with
 //   "SQLite3 can only bind numbers, strings, bigints, buffers, and null".
-test("windsurf mapTokens: accepts object {accessToken} and returns string accessToken", () => {
-  const provider = getProvider("windsurf");
+test("devin-desktop mapTokens: accepts object {accessToken} and returns string accessToken", () => {
+  const provider = getProvider("devin-desktop");
   const mapped = provider.mapTokens({ accessToken: "sk-ws-test-token-1234567890" });
   assert.equal(typeof mapped.accessToken, "string");
   assert.equal(mapped.accessToken, "sk-ws-test-token-1234567890");
@@ -335,4 +190,175 @@ test("devin-cli mapTokens: accepts object {accessToken} and returns string acces
   const mapped = provider.mapTokens({ accessToken: "sk-devin-test-token-1234567890" });
   assert.equal(typeof mapped.accessToken, "string");
   assert.equal(mapped.accessToken, "sk-devin-test-token-1234567890");
+});
+
+// ─── Regression: Devin Desktop tool call arguments arrive fragmented ─────────
+// The Codeium upstream splits tool call arguments across repeated field-3
+// fragments, each inside an id-less field-6 submessage. The old decoder
+// overwrote arguments per fragment and dropped id-less submessages entirely,
+// so OpenAI clients always received `"arguments": ""` (reported as harness
+// errors like "must have required property" on every tool call).
+
+test("Devin Desktop reassembles fragmented tool call arguments", async () => {
+  const executor = await getExecutor("devin-desktop");
+  const enc = new TextEncoder();
+
+  // protobuf helpers: length-delimited string field
+  const pbStr = (field: number, s: string) => [
+    field * 8 + 2,
+    enc.encode(s).length,
+    ...enc.encode(s),
+  ];
+  // response field 6 = toolCall submessage
+  const toolSubmessage = (fields: number[][]) => {
+    const body = fields.flat();
+    return [6 * 8 + 2, body.length, ...body];
+  };
+  // Connect frame: [flags][4-byte big-endian length][payload]
+  const frame = (payload: number[]) => {
+    const len = payload.length;
+    return [0, (len >>> 24) & 255, (len >>> 16) & 255, (len >>> 8) & 255, len & 255, ...payload];
+  };
+
+  const callId = "call_fragmented_test";
+  const argsParts = ["{", '"timezone": "', "Asia", "/Shanghai", '"', "}"];
+  const wire = new Uint8Array([
+    // first submessage: id + name + first argument fragment
+    ...frame(toolSubmessage([pbStr(1, callId), pbStr(2, "get_time"), pbStr(3, argsParts[0])])),
+    // continuation fragments: no id, no name, only argument fragments
+    ...argsParts.slice(1).flatMap((part) => frame(toolSubmessage([pbStr(3, part)]))),
+    // end-stream trailer frame (flags=2, empty JSON error trailer)
+    ...frame([...enc.encode("{}")]).map((b, i) => (i === 0 ? 2 : b)),
+  ]);
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, _init) => {
+    if (String(url).endsWith("/exa.auth_pb.AuthService/GetUserJwt")) {
+      const jwt = enc.encode("test-jwt");
+      return new Response(new Uint8Array([0x0a, jwt.length, ...jwt]));
+    }
+    return new Response(wire, { status: 200 });
+  };
+
+  try {
+    const result = await executor.execute({
+      model: "swe-2-medium",
+      body: {
+        messages: [{ role: "user", content: "call get_time" }],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "get_time",
+              description: "get current time",
+              parameters: { type: "object", properties: { timezone: { type: "string" } } },
+            },
+          },
+        ],
+      },
+      stream: true,
+      credentials: { accessToken: "test-devin-desktop-token" },
+    });
+
+    const response = result instanceof Response ? result : result.response;
+    const sseText = await response.text();
+
+    const argDeltas: string[] = [];
+    let firstDeltaHasIdAndType = false;
+    let fragmentDeltaHasNoId = false;
+    for (const line of sseText.split("\n")) {
+      if (!line.startsWith("data: ") || line.includes("[DONE]")) continue;
+      const chunk = JSON.parse(line.slice(6));
+      for (const choice of chunk.choices ?? []) {
+        for (const tc of choice.delta?.tool_calls ?? []) {
+          if (tc.id) {
+            assert.equal(tc.id, callId);
+            assert.equal(tc.type, "function");
+            firstDeltaHasIdAndType = true;
+          } else {
+            fragmentDeltaHasNoId = true;
+          }
+          if (tc.function?.arguments) argDeltas.push(tc.function.arguments);
+        }
+      }
+    }
+
+    assert.equal(argDeltas.join(""), argsParts.join(""));
+    assert.equal(firstDeltaHasIdAndType, true);
+    assert.equal(fragmentDeltaHasNoId, true);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Devin Desktop folds an id-less fragment that precedes every id'd call into the first call", async () => {
+  const executor = await getExecutor("devin-desktop");
+  const enc = new TextEncoder();
+  const pbStr = (field: number, s: string) => [
+    field * 8 + 2,
+    enc.encode(s).length,
+    ...enc.encode(s),
+  ];
+  const toolSubmessage = (fields: number[][]) => {
+    const body = fields.flat();
+    return [6 * 8 + 2, body.length, ...body];
+  };
+  const frame = (payload: number[]) => {
+    const len = payload.length;
+    return [0, (len >>> 24) & 255, (len >>> 16) & 255, (len >>> 8) & 255, len & 255, ...payload];
+  };
+
+  const callId = "call_orphan_first";
+  const wire = new Uint8Array([
+    // orphan: an argument fragment before any tool call carried an id
+    ...frame(toolSubmessage([pbStr(3, '{"timezone": ')])),
+    ...frame(toolSubmessage([pbStr(1, callId), pbStr(2, "get_time"), pbStr(3, '"UTC"')])),
+    ...frame(toolSubmessage([pbStr(3, "}")])),
+    ...frame([...enc.encode("{}")]).map((b, i) => (i === 0 ? 2 : b)),
+  ]);
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, _init) => {
+    if (String(url).endsWith("/exa.auth_pb.AuthService/GetUserJwt")) {
+      const jwt = enc.encode("test-jwt");
+      return new Response(new Uint8Array([0x0a, jwt.length, ...jwt]));
+    }
+    return new Response(wire, { status: 200 });
+  };
+
+  try {
+    const result = await executor.execute({
+      model: "swe-2-medium",
+      body: { messages: [{ role: "user", content: "call get_time" }] },
+      stream: true,
+      credentials: { accessToken: "test-devin-desktop-token" },
+    });
+    const response = result instanceof Response ? result : result.response;
+    const sseText = await response.text();
+
+    const deltas: Array<{ index: number; id?: string; name?: string; arguments?: string }> = [];
+    for (const line of sseText.split("\n")) {
+      if (!line.startsWith("data: ") || line.includes("[DONE]")) continue;
+      const chunk = JSON.parse(line.slice(6));
+      for (const choice of chunk.choices ?? []) {
+        for (const tc of choice.delta?.tool_calls ?? []) {
+          deltas.push({
+            index: tc.index,
+            id: tc.id,
+            name: tc.function?.name,
+            arguments: tc.function?.arguments,
+          });
+        }
+      }
+    }
+
+    assert.ok(deltas.length > 0, "expected tool_call deltas");
+    // The very first delta must open the call (id + name), never a bare fragment.
+    assert.equal(deltas[0].id, callId);
+    assert.equal(deltas[0].name, "get_time");
+    assert.ok(deltas.every((d) => d.index === 0));
+    assert.equal(deltas.map((d) => d.arguments ?? "").join(""), '{"timezone": "UTC"}');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

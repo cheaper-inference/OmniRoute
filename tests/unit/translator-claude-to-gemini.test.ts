@@ -5,6 +5,15 @@ const { claudeToGeminiRequest } =
   await import("../../open-sse/translator/request/claude-to-gemini.ts");
 const { DEFAULT_SAFETY_SETTINGS } =
   await import("../../open-sse/translator/helpers/geminiHelper.ts");
+const {
+  buildGeminiThoughtSignatureKey,
+  storeGeminiThoughtSignature,
+  clearGeminiThoughtSignatures,
+} = await import("../../open-sse/services/geminiThoughtSignatureStore.ts");
+
+test.beforeEach(() => {
+  clearGeminiThoughtSignatures();
+});
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -30,10 +39,156 @@ function getFunctionResponse(part: unknown) {
   assert.ok(part && typeof part === "object", "expected Gemini part");
   const functionResponse = (part as UnknownRecord).functionResponse;
   assert.ok(functionResponse && typeof functionResponse === "object", "expected functionResponse");
-  return functionResponse as { name: string };
+  return functionResponse as UnknownRecord & {
+    name: string;
+    response: { result: string };
+  };
 }
 
+type TestGeminiTurn = { role: string; parts: unknown[] };
+
+function translateToolResultTurn(
+  toolUseId: string,
+  trailingBlocks: UnknownRecord[] = [],
+  trailingMessages: Array<{ role: string; content: string }> = [],
+  toolResultContent: unknown = "found"
+): TestGeminiTurn {
+  const namespace = `conn-${toolUseId}`;
+  storeGeminiThoughtSignature(
+    buildGeminiThoughtSignatureKey(namespace, toolUseId),
+    "SIG_TOOL_RESULT"
+  );
+
+  const result = claudeToGeminiRequest(
+    "gemini-3.8-flash",
+    {
+      messages: [
+        { role: "user", content: "run the tool" },
+        {
+          role: "assistant",
+          content: [{ type: "tool_use", id: toolUseId, name: "lookup", input: {} }],
+        },
+        {
+          role: "user",
+          content: [
+            { type: "tool_result", tool_use_id: toolUseId, content: toolResultContent },
+            ...trailingBlocks,
+          ],
+        },
+        ...trailingMessages,
+      ],
+    },
+    false,
+    { _signatureNamespace: namespace, _provider: "vertex" }
+  );
+
+  return result.contents.at(-1)!;
+}
+
+function assertFunctionResponseTurn(turn: TestGeminiTurn, expectedResult: string) {
+  assert.equal(turn.role, "user");
+  assert.equal(turn.parts.length, 1);
+  assert.equal(getFunctionResponse(turn.parts[0]).response.result, expectedResult);
+}
+
+test("Claude -> Gemini keeps text after tool_result inside the function response", () => {
+  const turn = translateToolResultTurn("tu_trailing_text", [
+    { type: "text", text: "first attachment note" },
+    { type: "text", text: "second attachment note" },
+  ]);
+
+  assertFunctionResponseTurn(turn, "found\nfirst attachment note\nsecond attachment note");
+});
+
+test("Claude -> Gemini keeps trailing text with an image-bearing tool result", () => {
+  const turn = translateToolResultTurn(
+    "tu_image_trailing_text",
+    [{ type: "text", text: "attachment note" }],
+    [],
+    [
+      {
+        type: "image",
+        source: { type: "base64", media_type: "image/png", data: "aW1hZ2U=" },
+      },
+    ]
+  );
+
+  assert.equal(turn.role, "user");
+  assert.equal(turn.parts.length, 2);
+  assert.equal(
+    getFunctionResponse(turn.parts[0]).response.result,
+    "[tool returned an image; see attached]\nattachment note"
+  );
+  assert.deepEqual(turn.parts[1], {
+    inlineData: { mimeType: "image/png", data: "aW1hZ2U=" },
+  });
+});
+
+test("Claude -> Gemini attaches text between parallel tool results to the preceding response", () => {
+  const namespace = "conn-tu_parallel_text";
+  for (const toolUseId of ["tu_parallel_first", "tu_parallel_second"]) {
+    storeGeminiThoughtSignature(
+      buildGeminiThoughtSignatureKey(namespace, toolUseId),
+      `SIG_${toolUseId}`
+    );
+  }
+
+  const result = claudeToGeminiRequest(
+    "gemini-3.8-flash",
+    {
+      messages: [
+        { role: "user", content: "run the tools" },
+        {
+          role: "assistant",
+          content: [
+            { type: "tool_use", id: "tu_parallel_first", name: "first", input: {} },
+            { type: "tool_use", id: "tu_parallel_second", name: "second", input: {} },
+          ],
+        },
+        {
+          role: "user",
+          content: [
+            { type: "tool_result", tool_use_id: "tu_parallel_first", content: "first result" },
+            { type: "text", text: "note between results" },
+            { type: "tool_result", tool_use_id: "tu_parallel_second", content: "second result" },
+          ],
+        },
+      ],
+    },
+    false,
+    { _signatureNamespace: namespace, _provider: "vertex" }
+  );
+
+  const turn = result.contents.at(-1)!;
+  assert.equal(turn.parts.length, 2);
+  assert.equal(
+    getFunctionResponse(turn.parts[0]).response.result,
+    "first result\nnote between results"
+  );
+  assert.equal(getFunctionResponse(turn.parts[1]).response.result, "second result");
+});
+
+test("Claude -> Gemini keeps a trailing system message inside the function response", () => {
+  const turn = translateToolResultTurn(
+    "tu_trailing_system",
+    [],
+    [{ role: "system", content: "attachment note" }]
+  );
+
+  assertFunctionResponseTurn(turn, "found\nattachment note");
+});
+
+test("Claude -> Gemini leaves a tool response unchanged without trailing text", () => {
+  const turn = translateToolResultTurn("tu_no_trailing_text");
+
+  assertFunctionResponseTurn(turn, "found");
+});
+
 test("Claude -> Gemini maps system, thinking, tool use, tool result and tools", () => {
+  // Native functionCall requires a cached thoughtSignature (#8979 / #3688).
+  const ns = "conn-claude-gemini-map";
+  storeGeminiThoughtSignature(buildGeminiThoughtSignatureKey(ns, "tu_1"), "SIG_MAP_WEATHER");
+
   const result = claudeToGeminiRequest(
     "gemini-2.5-pro",
     {
@@ -72,23 +227,30 @@ test("Claude -> Gemini maps system, thinking, tool use, tool result and tools", 
       top_p: 0.8,
       thinking: { type: "enabled", budget_tokens: 512 },
     },
-    false
+    false,
+    { _signatureNamespace: ns }
   );
 
   assert.deepEqual(result.systemInstruction, {
     role: "system",
     parts: [{ text: "Rules" }],
   });
-  assert.equal(result.contents[0].role, "model");
-  assert.deepEqual(result.contents[0].parts[0] as any, { thought: true, text: "need tool" });
-  assert.deepEqual(result.contents[0].parts[1] as any, {
+  // This fixture's messages start with an assistant tool_use and no leading
+  // user turn -- ensureHistoryDoesNotOpenWithFunctionCall (Gemini rejects a
+  // functionCall turn with nothing before it) prepends a synthetic user turn,
+  // shifting the mapped content this test cares about to index 1/2.
+  assert.equal(result.contents[0].role, "user");
+  assert.equal(result.contents[1].role, "model");
+  assert.deepEqual(result.contents[1].parts[0] as any, { thought: true, text: "need tool" });
+  assert.deepEqual(result.contents[1].parts[1] as any, {
+    thoughtSignature: "SIG_MAP_WEATHER",
     functionCall: { id: "tu_1", name: "weather", args: { city: "Tokyo" } },
   });
-  assert.deepEqual(result.contents[1].parts[0] as any, {
+  assert.deepEqual(result.contents[2].parts[0] as any, {
     functionResponse: {
       id: "tu_1",
       name: "weather",
-      response: { result: { result: "20C" } },
+      response: { result: "20C" },
     },
   });
   assert.equal(result.generationConfig.maxOutputTokens, 256);
@@ -162,7 +324,10 @@ test("Claude -> Gemini converts text and base64 images to Gemini parts", () => {
   ]);
 });
 
-test("Claude -> Gemini injects a fallback thoughtSignature on tool-call batches without thinking", () => {
+test("Claude -> Gemini omits unsigned functionCall instead of injecting a fake thoughtSignature (#8979)", () => {
+  // After #1410 / #8979: never inject a fake signature. Without a cached
+  // thoughtSignature, native functionCall parts are omitted (context mode)
+  // so Gemini 3+ does not return HTTP 400.
   const result = claudeToGeminiRequest(
     "gemini-2.5-flash",
     {
@@ -176,15 +341,30 @@ test("Claude -> Gemini injects a fallback thoughtSignature on tool-call batches 
     false
   );
 
-  assert.equal(result.contents.length, 1);
-  assert.equal(result.contents[0].role, "model");
-  assert.equal((result.contents[0].parts[0] as any).functionCall.name, "read_file");
-  assert.equal((result.contents[0].parts[0] as any).thoughtSignature, undefined);
+  assert.equal(result.contents.length, 0);
+  assert.equal(
+    JSON.stringify(result).includes('"functionCall"'),
+    false,
+    "signature-less tool_use must not become a native functionCall"
+  );
+  assert.equal(
+    JSON.stringify(result).includes('"thoughtSignature"'),
+    false,
+    "the translator must not synthesize a fake thought signature"
+  );
+  assert.equal(
+    JSON.stringify(result).includes("read_file"),
+    false,
+    "the omitted unsigned call must not leak its tool payload elsewhere"
+  );
 });
 
 test("Claude -> Gemini sanitizes long tool names and exposes a restore map", () => {
   const longToolName =
     "mcp__filesystem__read_multiple_files_with_validation_and_metadata_bundle_v2";
+  const ns = "conn-claude-gemini-long";
+  storeGeminiThoughtSignature(buildGeminiThoughtSignatureKey(ns, "tu_long_1"), "SIG_LONG_TOOL");
+
   const result = claudeToGeminiRequest(
     "gemini-2.5-pro",
     {
@@ -214,7 +394,8 @@ test("Claude -> Gemini sanitizes long tool names and exposes a restore map", () 
         },
       ],
     },
-    false
+    false,
+    { _signatureNamespace: ns }
   );
 
   const sanitizedToolName = (result as any).tools[0].functionDeclarations[0].name as string;
@@ -224,8 +405,11 @@ test("Claude -> Gemini sanitizes long tool names and exposes a restore map", () 
   assert.ok(longToolName.length > 64);
   assert.equal(sanitizedToolName.length, 64);
   assert.equal((result as any)._toolNameMap.get(sanitizedToolName), longToolName);
-  assert.equal(getFunctionCall(result.contents[0].parts[0] as any).name, sanitizedToolName);
-  assert.equal(getFunctionResponse(result.contents[1].parts[0] as any).name, sanitizedToolName);
+  // Same leading-user-turn shift as above: this fixture also opens on an
+  // assistant tool_use with no preceding user turn.
+  assert.equal(result.contents[0].role, "user");
+  assert.equal(getFunctionCall(result.contents[1].parts[0] as any).name, sanitizedToolName);
+  assert.equal(getFunctionResponse(result.contents[2].parts[0] as any).name, sanitizedToolName);
   assert.equal(parameters.examples, undefined);
   assert.equal(parameters.properties?.path?.["x-ui"], undefined);
 });
@@ -443,4 +627,35 @@ test("Claude -> Gemini non-numeric budget_tokens falls through to effort path", 
     thinkingBudget: 1024,
     includeThoughts: true,
   });
+});
+
+test("Claude -> Gemini maps stop_sequences and stop to generationConfig.stopSequences", () => {
+  const result1 = claudeToGeminiRequest(
+    "gemini-2.5-pro",
+    {
+      messages: [{ role: "user", content: [{ type: "text", text: "hi" }] }],
+      stop_sequences: ["STOP", "\nHuman:"],
+    },
+    false
+  );
+  assert.deepEqual(result1.generationConfig.stopSequences, ["STOP", "\nHuman:"]);
+
+  const result2 = claudeToGeminiRequest(
+    "gemini-2.5-pro",
+    {
+      messages: [{ role: "user", content: [{ type: "text", text: "hi" }] }],
+      stop: "SINGLE_STOP",
+    },
+    false
+  );
+  assert.deepEqual(result2.generationConfig.stopSequences, ["SINGLE_STOP"]);
+
+  const result3 = claudeToGeminiRequest(
+    "gemini-2.5-pro",
+    {
+      messages: [{ role: "user", content: [{ type: "text", text: "hi" }] }],
+    },
+    false
+  );
+  assert.strictEqual(result3.generationConfig.stopSequences, undefined);
 });

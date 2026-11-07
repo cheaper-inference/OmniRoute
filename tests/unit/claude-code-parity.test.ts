@@ -34,6 +34,7 @@ import {
   disableThinkingIfToolChoiceForced,
   enforceCacheControlLimit,
   ensureCacheControlOnLastUserMessage,
+  normalizeCacheControlTtl,
 } from "../../open-sse/services/claudeCodeConstraints.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -341,19 +342,190 @@ describe("enforceCacheControlLimit", () => {
 });
 
 describe("ensureCacheControlOnLastUserMessage", () => {
-  it("does not throw on a valid messages array", () => {
+  it("adds a breakpoint to the last user message when messages have none", () => {
     const body = {
+      system: [
+        { type: "text", text: "s1", cache_control: { type: "ephemeral" } },
+        { type: "text", text: "s2", cache_control: { type: "ephemeral" } },
+      ],
       messages: [
         { role: "user", content: [{ type: "text", text: "Hello" }] },
         { role: "assistant", content: [{ type: "text", text: "Hi!" }] },
         { role: "user", content: [{ type: "text", text: "Follow up" }] },
       ],
     };
-    assert.doesNotThrow(() => ensureCacheControlOnLastUserMessage(body));
+
+    ensureCacheControlOnLastUserMessage(body);
+
+    assert.deepEqual(body.messages[2].content[0].cache_control, { type: "ephemeral" });
+  });
+
+  it("keeps an existing message breakpoint and advances one to the last user message", () => {
+    const body = {
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Hello",
+              cache_control: { type: "ephemeral" },
+            },
+          ],
+        },
+        { role: "user", content: [{ type: "text", text: "Follow up" }] },
+      ],
+    };
+
+    ensureCacheControlOnLastUserMessage(body);
+    ensureCacheControlOnLastUserMessage(body);
+
+    assert.deepEqual(body.messages[0].content[0].cache_control, { type: "ephemeral" });
+    assert.deepEqual(body.messages[1].content[0].cache_control, { type: "ephemeral" });
+    assert.equal(
+      body.messages.flatMap((message) => message.content).filter((block) => block.cache_control)
+        .length,
+      2
+    );
+  });
+
+  it("keeps a new tail breakpoint at 5m after an existing 5m breakpoint", () => {
+    const body = {
+      system: [
+        { type: "text", text: "long", cache_control: { type: "ephemeral", ttl: "1h" } },
+        { type: "text", text: "short", cache_control: { type: "ephemeral", ttl: "5m" } },
+      ],
+      messages: [{ role: "user", content: [{ type: "text", text: "Follow up" }] }],
+    };
+
+    ensureCacheControlOnLastUserMessage(body);
+
+    assert.deepEqual(body.messages[0].content[0].cache_control, {
+      type: "ephemeral",
+      ttl: "5m",
+    });
+  });
+
+  it("does not exceed four surviving system and message breakpoints", () => {
+    const body = {
+      system: Array.from({ length: 4 }, (_, index) => ({
+        type: "text",
+        text: `s${index}`,
+        cache_control: { type: "ephemeral" },
+      })),
+      messages: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
+    };
+
+    ensureCacheControlOnLastUserMessage(body);
+
+    assert.equal(body.messages[0].content[0].cache_control, undefined);
+  });
+
+  it("counts tool breakpoints toward the limit only when the dispatch sends them", () => {
+    const marked = { cache_control: { type: "ephemeral" } };
+    const buildBody = () => ({
+      tools: [{ name: "Read", ...structuredClone(marked) }],
+      system: [{ type: "text", text: "s", ...structuredClone(marked) }],
+      messages: [
+        { role: "user", content: [{ type: "text", text: "a", ...structuredClone(marked) }] },
+        { role: "user", content: [{ type: "text", text: "b", ...structuredClone(marked) }] },
+        { role: "user", content: [{ type: "text", text: "c" }] },
+      ],
+    });
+
+    const sent = buildBody();
+    ensureCacheControlOnLastUserMessage(sent, { countTools: true });
+    assert.equal(sent.messages[2].content[0].cache_control, undefined);
+
+    const stripped = buildBody();
+    ensureCacheControlOnLastUserMessage(stripped);
+    assert.deepEqual(stripped.messages[2].content[0].cache_control, { type: "ephemeral" });
   });
 
   it("handles body without messages without throwing", () => {
     // chatCore always provides a valid body object — test empty but non-null object
     assert.doesNotThrow(() => ensureCacheControlOnLastUserMessage({}));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// normalizeCacheControlTtl tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("normalizeCacheControlTtl", () => {
+  it("defaults a missing ttl to 1h on the last system block", () => {
+    const body = {
+      system: [
+        { type: "text", text: "billing" },
+        { type: "text", text: "sentinel" },
+        { type: "text", text: "prompt", cache_control: { type: "ephemeral" } },
+      ],
+    };
+
+    normalizeCacheControlTtl(body);
+
+    assert.deepEqual(body.system[2].cache_control, { type: "ephemeral", ttl: "1h" });
+  });
+
+  it("does not touch a cache_control that already specifies a ttl", () => {
+    const body = {
+      system: [{ type: "text", text: "prompt", cache_control: { type: "ephemeral", ttl: "5m" } }],
+    };
+
+    normalizeCacheControlTtl(body);
+
+    assert.deepEqual(body.system[0].cache_control, { type: "ephemeral", ttl: "5m" });
+  });
+
+  it("defaults missing ttl in tools and message content blocks", () => {
+    const body = {
+      tools: [{ name: "bash", description: "run", cache_control: { type: "ephemeral" } }],
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "text", text: "hi", cache_control: { type: "ephemeral" } }],
+        },
+      ],
+    };
+
+    normalizeCacheControlTtl(body);
+
+    assert.deepEqual(body.tools[0].cache_control, { type: "ephemeral", ttl: "1h" });
+    assert.deepEqual(body.messages[0].content[0].cache_control, {
+      type: "ephemeral",
+      ttl: "1h",
+    });
+  });
+
+  it("defaults missing ttl to 5m after a 5m breakpoint", () => {
+    const body = {
+      system: [{ type: "text", text: "stable", cache_control: { type: "ephemeral", ttl: "5m" } }],
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "text", text: "follow up", cache_control: { type: "ephemeral" } }],
+        },
+      ],
+    };
+
+    normalizeCacheControlTtl(body);
+
+    assert.deepEqual(body.messages[0].content[0].cache_control, {
+      type: "ephemeral",
+      ttl: "5m",
+    });
+  });
+
+  it("leaves blocks without cache_control untouched", () => {
+    const body = {
+      system: [{ type: "text", text: "no cache_control here" }],
+    };
+
+    assert.doesNotThrow(() => normalizeCacheControlTtl(body));
+    assert.equal(body.system[0].cache_control, undefined);
+  });
+
+  it("handles a body with no system/tools/messages without throwing", () => {
+    assert.doesNotThrow(() => normalizeCacheControlTtl({}));
   });
 });

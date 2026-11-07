@@ -10,7 +10,7 @@
  *  - batch activate / deactivate / retest / delete (with MAX_BULK_IDS chunking)
  *  - single-connection handlers: delete, update status, proxy toggles,
  *    rate-limit, claude extra-usage, codex limit, cpa mode,
- *    retest, token refresh, swap priority
+ *    retest, clear-cooldown, token refresh, swap priority
  *  - selection state: selectedIds, handleToggleSelectOne/All, batchDeleteConfirmOpen
  *  - batch-test runner (runBatchTest / handleBatchTestAll / handleBatchRetest)
  *  - health/pagination filters (healthFilter, page)
@@ -21,15 +21,24 @@
  * providers constants) — never from ProviderDetailPageClient.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { z } from "zod";
 import { useNotificationStore } from "@/store/notificationStore";
 import { isClaudeCodeCompatibleProvider } from "@/shared/constants/providers";
 import type { ConnectionRowConnection } from "../components/ConnectionRow";
-import { connectionBelongsToProviderPage } from "../../providerPageUtils";
-import { normalizeCodexLimitPolicy } from "../providerPageHelpers";
+import {
+  buildSwapPriorityUpdates,
+  persistPriorityUpdates,
+} from "../components/connectionRowHelpers";
+import {
+  connectionBelongsToProviderPage,
+  getProviderConnectionsRequestUrl,
+} from "../../providerPageUtils";
+import { normalizeCodexLimitPolicy, providerText } from "../providerPageHelpers";
 import { useProviderQuotaVisibility } from "./useProviderQuotaVisibility";
 import { useReorderByAvailability } from "./useReorderByAvailability";
+import { useCodexPaidCreditsToggle } from "./useCodexPaidCreditsToggle";
 import {
   useConnectionDeleteConfirm,
   type ConnectionDeleteConfirmState,
@@ -39,7 +48,137 @@ import {
 const MAX_BULK_IDS = 100;
 const PAGE_SIZE = 50;
 
+// ──── module-level fetch helpers ────────────────────────────────────────────
+// The network/parse/retry concerns live outside the hook so the callbacks
+// below only set state after the await — the mount effect can then call them
+// without a synchronous setState (errors come back as values, not as state
+// writes inside catch/finally blocks).
+
+interface ProviderConnectionsFetchResult {
+  connections: ConnectionRowConnection[] | null;
+  node: any;
+  nodeResolved: boolean;
+}
+
+async function loadProviderConnectionsData(
+  providerId: string,
+  isCompatible: boolean
+): Promise<ProviderConnectionsFetchResult | null> {
+  try {
+    const connectionsUrl = getProviderConnectionsRequestUrl(providerId);
+    const [connectionsRes, nodesRes] = await Promise.all([
+      fetch(connectionsUrl, { cache: "no-store" }),
+      fetch("/api/provider-nodes", { cache: "no-store" }),
+    ]);
+    const connectionsData = await connectionsRes.json();
+    const nodesData = await nodesRes.json();
+    const connections = connectionsRes.ok
+      ? (connectionsData.connections || []).filter((c: any) =>
+          connectionBelongsToProviderPage(c.provider, providerId)
+        )
+      : null;
+    let node = null;
+    let nodeResolved = false;
+    if (nodesRes.ok) {
+      nodeResolved = true;
+      node = (nodesData.nodes || []).find((entry: any) => entry.id === providerId) || null;
+
+      // Newly created compatible nodes can be briefly unavailable on one worker.
+      if (!node && isCompatible) {
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          await new Promise((resolve) => setTimeout(resolve, 150));
+          const retryRes = await fetch("/api/provider-nodes", { cache: "no-store" });
+          if (!retryRes.ok) continue;
+          const retryData = await retryRes.json();
+          node = (retryData.nodes || []).find((entry: any) => entry.id === providerId) || null;
+          if (node) break;
+        }
+      }
+    }
+    return { connections, node, nodeResolved };
+  } catch (error) {
+    console.log("Error fetching connections:", error);
+    return null;
+  }
+}
+
+async function loadProxyConfigData(): Promise<{ config: any } | null> {
+  try {
+    const res = await fetch("/api/settings/proxy", { cache: "no-store" });
+    if (res.ok) return { config: await res.json() };
+    return { config: null };
+  } catch {
+    // Proxy indicators are best-effort — keep whatever is currently shown.
+    return null;
+  }
+}
+
+/** Cap matching the API's `?resolveIds=` limit; larger lists are batched. */
+const MAX_RESOLVE_IDS = 200;
+
+/**
+ * `?resolveIds=` response shape: one entry per requested connection, `null`
+ * when that connection resolves to no proxy.
+ */
+const resolvedProxiesSchema = z.object({
+  results: z.record(z.string(), z.object({ proxy: z.unknown(), level: z.string() }).nullable()),
+});
+type ResolvedConnectionProxy = { proxy: unknown; level: string } | null;
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let index = 0; index < items.length; index += size)
+    out.push(items.slice(index, index + size));
+  return out;
+}
+
+async function resolveProxyChunk(
+  ids: string[]
+): Promise<Record<string, ResolvedConnectionProxy> | null> {
+  try {
+    const res = await fetch(`/api/settings/proxy?resolveIds=${encodeURIComponent(ids.join(","))}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const parsed = resolvedProxiesSchema.safeParse(await res.json());
+    if (!parsed.success) return null;
+
+    const map: Record<string, ResolvedConnectionProxy> = {};
+    for (const id of ids) {
+      const entry = parsed.data.results[id];
+      map[id] = entry && entry.proxy ? entry : null;
+    }
+    return map;
+  } catch {
+    return null;
+  }
+}
+
+async function resolveConnectionProxies(
+  conns: { id?: string }[]
+): Promise<Record<string, ResolvedConnectionProxy> | null> {
+  const ids = [...new Set(conns.map((c) => c.id).filter((id): id is string => Boolean(id)))];
+  if (ids.length === 0) return {};
+
+  // One request per 200 connections: a request per connection was an O(n)
+  // burst against the same process that serves the LLM proxy. Batching keeps
+  // every connection covered, so no row is left without its proxy badge.
+  const chunks = await Promise.all(chunk(ids, MAX_RESOLVE_IDS).map(resolveProxyChunk));
+  if (chunks.some((result) => result === null)) return null;
+  return Object.assign({}, ...chunks);
+}
+
 // ──── types ─────────────────────────────────────────────────────────────────
+
+/**
+ * Upstream proxy routing mode for Claude-Code-compatible providers. `native`
+ * uses OmniRoute's own executor; `cliproxyapi`/`dario` route every request
+ * through that backend directly; `fallback` tries native first and retries
+ * via `fallbackBackend` on failure. Mirrors the `mode` enum in
+ * src/app/api/upstream-proxy/[providerId]/route.ts.
+ */
+export type UpstreamProxyMode = "native" | "cliproxyapi" | "dario" | "fallback";
+export type UpstreamProxyFallbackBackend = "cliproxyapi" | "dario";
 
 export type BatchTestResults = {
   error: string | null;
@@ -53,6 +192,8 @@ export interface UseProviderConnectionsReturn {
   providerNode: any;
   loading: boolean;
   retestingId: string | null;
+  /** Connection id whose cooldown-clear PUT is in flight (drives button spinners). */
+  clearingCooldownId: string | null;
   batchTesting: boolean;
   batchTestResults: BatchTestResults;
   selectedIds: Set<string>;
@@ -67,6 +208,8 @@ export interface UseProviderConnectionsReturn {
   proxyConfig: any;
   connProxyMap: Record<string, { proxy: any; level: string } | null>;
   cpaProviderEnabled: boolean;
+  upstreamProxyMode: UpstreamProxyMode;
+  upstreamProxyFallbackBackend: UpstreamProxyFallbackBackend;
   refreshingId: string | null;
 
   // Setters (minimal surface for UI)
@@ -85,6 +228,7 @@ export interface UseProviderConnectionsReturn {
   // Connection fetch
   fetchConnections: () => Promise<void>;
   fetchProxyConfig: () => Promise<void>;
+  refreshProxyState: () => Promise<void>;
 
   // Single-connection handlers
   deleteConfirm: ConnectionDeleteConfirmState;
@@ -92,14 +236,27 @@ export interface UseProviderConnectionsReturn {
   handleToggleRateLimit: (connectionId: string, enabled: boolean) => Promise<void>;
   handleToggleQuotaVisibility: (connectionId: string, visible: boolean) => Promise<void>;
   handleToggleClaudeExtraUsage: (connectionId: string, enabled: boolean) => Promise<void>;
+  handleToggleCodexPaidCredits: (connectionId: string, enabled: boolean) => Promise<void>;
   handleToggleCodexLimit: (connectionId: string, field: string, enabled: boolean) => Promise<void>;
   handleToggleCliproxyapiMode: (connectionId: string, enabled: boolean) => Promise<void>;
+  handleSetUpstreamProxyMode: (
+    mode: UpstreamProxyMode,
+    fallbackBackend?: UpstreamProxyFallbackBackend
+  ) => Promise<void>;
   handleToggleProxyEnabled: (connectionId: string, proxyEnabled: boolean) => Promise<void>;
   handleTogglePerKeyProxyEnabled: (
     connectionId: string,
     perKeyProxyEnabled: boolean
   ) => Promise<void>;
   handleRetestConnection: (connectionId: string) => Promise<void>;
+  /**
+   * Manually lifts a persisted 429 cooldown: PUTs `rateLimitedUntil: null`
+   * (plus backoff reset server-side) so the connection rejoins routing
+   * immediately. For the "quota already refreshed upstream but OmniRoute
+   * still benches the key" case — the cooldown timer is OmniRoute's own
+   * lesson, not upstream truth.
+   */
+  handleClearCooldown: (connectionId: string) => Promise<void>;
   handleRefreshToken: (connectionId: string) => Promise<void>;
   handleSwapPriority: (conn1: any, conn2: any) => Promise<void>;
   handleReorderByAvailability: () => Promise<void>;
@@ -130,7 +287,7 @@ export interface UseProviderConnectionsReturn {
 export function useProviderConnections(
   providerId: string,
   isCompatible: boolean,
-  isSearchProvider: boolean
+  _isSearchProvider: boolean
 ): UseProviderConnectionsReturn {
   const t = useTranslations("providers");
   const notify = useNotificationStore();
@@ -145,6 +302,7 @@ export function useProviderConnections(
 
   // ── test state ──────────────────────────────────────────────────────────
   const [retestingId, setRetestingId] = useState<string | null>(null);
+  const [clearingCooldownId, setClearingCooldownId] = useState<string | null>(null);
   const [batchTesting, setBatchTesting] = useState(false);
   const [batchTestResults, setBatchTestResults] = useState<BatchTestResults>(null);
 
@@ -174,8 +332,21 @@ export function useProviderConnections(
     Record<string, { proxy: any; level: string } | null>
   >({});
 
-  // ── CLIProxyAPI state ───────────────────────────────────────────────────
-  const [cpaProviderEnabled, setCpaProviderEnabled] = useState(false);
+  // Latest connections, readable from a stable callback without making that
+  // callback (and every consumer prop depending on it) change every fetch.
+  const connectionsRef = useRef<ConnectionRowConnection[]>(connections);
+  useEffect(() => {
+    connectionsRef.current = connections;
+  }, [connections]);
+
+  // ── Upstream proxy routing state (native / CLIProxyAPI / Dario / fallback) ─
+  const [upstreamProxyMode, setUpstreamProxyModeState] = useState<UpstreamProxyMode>("native");
+  const [upstreamProxyFallbackBackend, setUpstreamProxyFallbackBackendState] =
+    useState<UpstreamProxyFallbackBackend>("cliproxyapi");
+  // Legacy derived flag — kept for any consumer still reading a plain
+  // enabled/disabled signal instead of the full mode.
+  const cpaProviderEnabled =
+    upstreamProxyMode === "cliproxyapi" || upstreamProxyMode === "fallback";
 
   // ── token refresh state ─────────────────────────────────────────────────
   const [refreshingId, setRefreshingId] = useState<string | null>(null);
@@ -185,113 +356,94 @@ export function useProviderConnections(
   // ────────────────────────────────────────────────────────────────────────
 
   const fetchProxyConfig = useCallback(async () => {
-    try {
-      const res = await fetch("/api/settings/proxy", { cache: "no-store" });
-      if (res.ok) {
-        setProxyConfig(await res.json());
-      } else {
-        setProxyConfig(null);
-      }
-    } catch {
-      // Proxy indicators are best-effort.
-    }
+    const result = await loadProxyConfigData();
+    if (result) setProxyConfig(result.config);
+  }, []);
+
+  /**
+   * Refresh every proxy view the page renders after a proxy assignment is
+   * written elsewhere (ProxyConfigModal saves/clears through
+   * `/api/settings/proxies/assignments`).
+   *
+   * Two independent sources back those views and BOTH must be re-read:
+   *  - `proxyConfig`   ← GET /api/settings/proxy          (provider-level chip)
+   *  - `connProxyMap`  ← GET /api/settings/proxy?resolve= (per-connection badges)
+   *
+   * The `connProxyMap` effect below is keyed on [loading, connections], and a
+   * proxy save changes neither, so without this callback the account-row
+   * badges keep showing pre-save state until a manual reload.
+   */
+  const refreshProxyState = useCallback(async () => {
+    const [configResult, map] = await Promise.all([
+      loadProxyConfigData(),
+      resolveConnectionProxies(connectionsRef.current),
+    ]);
+    if (configResult) setProxyConfig(configResult.config);
+    if (map) setConnProxyMap(map);
   }, []);
 
   const fetchConnections = useCallback(async () => {
-    try {
-      const [connectionsRes, nodesRes] = await Promise.all([
-        fetch("/api/providers", { cache: "no-store" }),
-        fetch("/api/provider-nodes", { cache: "no-store" }),
-      ]);
-      const connectionsData = await connectionsRes.json();
-      const nodesData = await nodesRes.json();
-      if (connectionsRes.ok) {
-        const filtered = (connectionsData.connections || []).filter((c: any) =>
-          connectionBelongsToProviderPage(c.provider, providerId)
-        );
-        setConnections(filtered);
-      }
-      if (nodesRes.ok) {
-        let node = (nodesData.nodes || []).find((entry: any) => entry.id === providerId) || null;
-
-        // Newly created compatible nodes can be briefly unavailable on one worker.
-        if (!node && isCompatible) {
-          for (let attempt = 0; attempt < 3; attempt += 1) {
-            await new Promise((resolve) => setTimeout(resolve, 150));
-            const retryRes = await fetch("/api/provider-nodes", { cache: "no-store" });
-            if (!retryRes.ok) continue;
-            const retryData = await retryRes.json();
-            node = (retryData.nodes || []).find((entry: any) => entry.id === providerId) || null;
-            if (node) break;
-          }
-        }
-
-        setProviderNode(node);
-      }
-    } catch (error) {
-      console.log("Error fetching connections:", error);
-    } finally {
-      setLoading(false);
+    const result = await loadProviderConnectionsData(providerId, isCompatible);
+    if (result) {
+      if (result.connections) setConnections(result.connections);
+      if (result.nodeResolved) setProviderNode(result.node);
     }
+    setLoading(false);
   }, [providerId, isCompatible]);
 
-  const loadConnProxies = useCallback(async (conns: { id?: string }[]) => {
-    if (!conns.length) return;
-    try {
-      const results = await Promise.all(
-        conns
-          .filter((c) => c.id)
-          .map((c) =>
-            fetch(`/api/settings/proxy?resolve=${encodeURIComponent(c.id!)}`, { cache: "no-store" })
-              .then((r) => (r.ok ? r.json() : null))
-              .then((data) => [c.id!, data] as [string, any])
-              .catch(() => [c.id!, null] as [string, any])
-          )
-      );
-      const map: Record<string, { proxy: any; level: string } | null> = {};
-      for (const [id, data] of results) {
-        map[id] = data?.proxy ? data : null;
-      }
-      setConnProxyMap(map);
-    } catch {
-      // ignore
-    }
-  }, []);
-
   // ── effects ──────────────────────────────────────────────────────────────
+  // The async work is defined INSIDE each effect (a component-scope loader
+  // called synchronously from an effect is rejected by the compiler rules);
+  // every setState below runs after an await.
 
   useEffect(() => {
-    fetchConnections();
-    void fetchProxyConfig();
-  }, [fetchConnections, fetchProxyConfig]);
+    let active = true;
+    const run = async () => {
+      const result = await loadProviderConnectionsData(providerId, isCompatible);
+      if (!active) return;
+      if (result) {
+        if (result.connections) setConnections(result.connections);
+        if (result.nodeResolved) setProviderNode(result.node);
+      }
+      setLoading(false);
+    };
+    void run();
+    const runProxyConfig = async () => {
+      const result = await loadProxyConfigData();
+      if (!active) return;
+      if (result) setProxyConfig(result.config);
+    };
+    void runProxyConfig();
+    return () => {
+      active = false;
+    };
+  }, [providerId, isCompatible]);
 
   // Per-connection proxy (handles registry assignments)
   useEffect(() => {
-    if (!loading && connections.length > 0) {
-      void loadConnProxies(connections);
-    }
-  }, [loading, connections, loadConnProxies]);
+    if (loading || connections.length === 0) return;
+    const run = async () => {
+      const map = await resolveConnectionProxies(connections);
+      if (map) setConnProxyMap(map);
+    };
+    void run();
+  }, [loading, connections]);
 
-  // CLIProxyAPI upstream proxy config
+  // Upstream proxy routing config (native / CLIProxyAPI / Dario / fallback)
   useEffect(() => {
     if (!isCcCompatible) return;
 
-    fetch(`/api/settings`)
-      .then((r) => r.json())
-      .then(() => {
-        // Check if this provider has CLIProxyAPI routing enabled
-      })
-      .catch(() => {});
-
     fetch(`/api/upstream-proxy/${providerId}`)
-      .then((r) => {
-        if (!r.ok) return null;
-        return r.json();
-      })
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (data?.enabled && (data.mode === "cliproxyapi" || data.mode === "fallback")) {
-          setCpaProviderEnabled(true);
-        }
+        if (!data) return;
+        const validModes: UpstreamProxyMode[] = ["cliproxyapi", "dario", "fallback"];
+        const mode: UpstreamProxyMode =
+          data.enabled && validModes.includes(data.mode) ? data.mode : "native";
+        setUpstreamProxyModeState(mode);
+        setUpstreamProxyFallbackBackendState(
+          data.fallbackBackend === "dario" ? "dario" : "cliproxyapi"
+        );
       })
       .catch(() => {});
   }, [isCcCompatible, providerId]);
@@ -378,7 +530,14 @@ export function useProviderConnections(
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        notify.error(data.error || "Failed to update Claude extra-usage policy");
+        notify.error(
+          data.error ||
+            providerText(
+              t,
+              "failedUpdateClaudeExtraUsagePolicy",
+              "Failed to update Claude extra-usage policy"
+            )
+        );
         return;
       }
 
@@ -408,14 +567,37 @@ export function useProviderConnections(
       );
       notify.success(
         enabled
-          ? "Claude extra-usage blocking enabled (extra usage will be blocked)"
-          : "Claude extra-usage blocking disabled (extra usage is allowed)"
+          ? providerText(
+              t,
+              "claudeExtraUsageBlockingEnabled",
+              "Claude extra-usage blocking enabled (extra usage will be blocked)"
+            )
+          : providerText(
+              t,
+              "claudeExtraUsageBlockingDisabled",
+              "Claude extra-usage blocking disabled (extra usage is allowed)"
+            )
       );
     } catch (error) {
       console.error("Error toggling Claude extra-usage policy:", error);
-      notify.error("Failed to update Claude extra-usage policy");
+      notify.error(
+        providerText(
+          t,
+          "failedUpdateClaudeExtraUsagePolicy",
+          "Failed to update Claude extra-usage policy"
+        )
+      );
     }
   };
+
+  // Codex paid-credits toggle — extracted to its own hook (see
+  // useCodexPaidCreditsToggle.ts) to keep this file under the file-size cap.
+  const { handleToggleCodexPaidCredits } = useCodexPaidCreditsToggle({
+    connections,
+    setConnections,
+    notify,
+    t,
+  });
 
   const handleToggleCodexLimit = async (connectionId: string, field: string, enabled: boolean) => {
     try {
@@ -447,7 +629,10 @@ export function useProviderConnections(
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        notify.error(data.error || "Failed to update Codex limit policy");
+        notify.error(
+          data.error ||
+            providerText(t, "failedUpdateCodexLimitPolicy", "Failed to update Codex limit policy")
+        );
         return;
       }
 
@@ -464,36 +649,68 @@ export function useProviderConnections(
             : connection
         )
       );
-      notify.success("Codex limit policy updated");
+      notify.success(providerText(t, "codexLimitPolicyUpdated", "Codex limit policy updated"));
     } catch (error) {
       console.error("Error toggling Codex quota policy:", error);
-      notify.error("Failed to update Codex limit policy");
+      notify.error(
+        providerText(t, "failedUpdateCodexLimitPolicy", "Failed to update Codex limit policy")
+      );
     }
   };
 
-  const handleToggleCliproxyapiMode = async (_connectionId: string, enabled: boolean) => {
+  const UPSTREAM_PROXY_MODE_MESSAGES: Record<UpstreamProxyMode, string> = {
+    native: "Requests now use native OmniRoute (direct)",
+    cliproxyapi: "Requests now route through CLIProxyAPI (deeper emulation)",
+    dario: "Requests now route through Dario (Claude subscription proxy)",
+    fallback: "Requests try native first, retrying via the configured backend on failure",
+  };
+
+  const handleSetUpstreamProxyMode = async (
+    mode: UpstreamProxyMode,
+    fallbackBackend?: UpstreamProxyFallbackBackend
+  ) => {
     try {
       const res = await fetch(`/api/upstream-proxy/${providerId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: enabled ? "cliproxyapi" : "native", enabled }),
+        body: JSON.stringify({
+          mode,
+          enabled: mode !== "native",
+          ...(mode === "fallback"
+            ? { fallbackBackend: fallbackBackend ?? upstreamProxyFallbackBackend }
+            : {}),
+        }),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        notify.error(data.error || "Failed to update CLIProxyAPI routing");
+        notify.error(
+          data.error ||
+            providerText(
+              t,
+              "failedUpdateCliproxyRouting",
+              "Failed to update upstream proxy routing"
+            )
+        );
         return;
       }
 
-      setCpaProviderEnabled(enabled);
-      notify.success(
-        enabled
-          ? "Requests now route through CLIProxyAPI (deeper emulation)"
-          : "Requests now use native OmniRoute (direct)"
-      );
+      setUpstreamProxyModeState(mode);
+      if (mode === "fallback" && fallbackBackend) {
+        setUpstreamProxyFallbackBackendState(fallbackBackend);
+      }
+      notify.success(UPSTREAM_PROXY_MODE_MESSAGES[mode]);
     } catch {
-      notify.error("Failed to update CLIProxyAPI routing");
+      notify.error(
+        providerText(t, "failedUpdateCliproxyRouting", "Failed to update upstream proxy routing")
+      );
     }
+  };
+
+  // Legacy binary wrapper — kept so existing callers (and the "exposes all
+  // expected handler functions" hook test) keep working unchanged.
+  const handleToggleCliproxyapiMode = async (_connectionId: string, enabled: boolean) => {
+    await handleSetUpstreamProxyMode(enabled ? "cliproxyapi" : "native");
   };
 
   const handleToggleProxyEnabled = async (connectionId: string, proxyEnabled: boolean) => {
@@ -551,15 +768,64 @@ export function useProviderConnections(
     }
   };
 
+  // Manually lift a persisted 429 cooldown. Complements the automatic paths
+  // (Test-button success / Edit-modal key re-validation): those only clear the
+  // bench as a side effect of a successful upstream round-trip, so a user whose
+  // quota already refreshed upstream still waits out OmniRoute's local timer.
+  // PUT /api/providers/[id] applies updateProviderConnectionDefaults, which
+  // resets backoffLevel → 0 alongside rateLimitedUntil → null.
+  const handleClearCooldown = async (connectionId: string) => {
+    if (!connectionId || clearingCooldownId) return;
+    setClearingCooldownId(connectionId);
+    try {
+      const res = await fetch(`/api/providers/${connectionId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rateLimitedUntil: null }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        notify.error(data.error || t("failedClearConnectionCooldown"));
+        return;
+      }
+      // Optimistically drop the cooldown locally so the row leaves the cooling
+      // panel immediately; fetchConnections() reconciles with server truth.
+      setConnections((prev: any[]) =>
+        prev.map((c) =>
+          c.id === connectionId ? { ...c, rateLimitedUntil: null, backoffLevel: 0 } : c
+        )
+      );
+      notify.success(t("connectionCooldownCleared"));
+      await fetchConnections();
+    } catch (error) {
+      console.error("Error clearing cooldown:", error);
+      notify.error(t("failedClearConnectionCooldown"));
+    } finally {
+      setClearingCooldownId(null);
+    }
+  };
+
   const handleRefreshToken = async (connectionId: string) => {
     if (refreshingId) return;
     setRefreshingId(connectionId);
     try {
-      const res = await fetch(`/api/providers/${connectionId}/refresh`, { method: "POST" });
+      const conn = connections.find((c) => c.id === connectionId);
+      const isCursor = conn?.provider === "cursor";
+      // Cursor has no refresh_token by design — the generic /refresh route's
+      // getAccessToken() call always 502s for it. The dedicated route nudges
+      // cursor-agent and re-scrapes IDE/agent credential sources instead.
+      const url = isCursor
+        ? `/api/providers/${connectionId}/refresh-cursor`
+        : `/api/providers/${connectionId}/refresh`;
+      const res = await fetch(url, { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success) {
-        notify.success(t("tokenRefreshed"));
-        await fetchConnections();
+        if (isCursor && data.unchanged) {
+          notify.info(t("cursorSessionUnchanged"));
+        } else {
+          notify.success(t("tokenRefreshed"));
+          await fetchConnections();
+        }
       } else {
         notify.error(data.error || t("tokenRefreshFailed"));
       }
@@ -574,35 +840,13 @@ export function useProviderConnections(
   const handleSwapPriority = async (conn1: any, conn2: any) => {
     if (!conn1 || !conn2) return;
     try {
-      let p1 = conn2.priority;
-      let p2 = conn1.priority;
-
-      if (p1 === p2) {
-        const isConn1MovingUp =
-          (connections as any[]).indexOf(conn1) > (connections as any[]).indexOf(conn2);
-        if (isConn1MovingUp) {
-          p1 = conn2.priority - 0.5;
-        } else {
-          p1 = conn2.priority + 0.5;
-        }
-      }
-
-      await Promise.all([
-        fetch(`/api/providers/${conn1.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ priority: p1 }),
-        }),
-        fetch(`/api/providers/${conn2.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ priority: p2 }),
-        }),
-      ]);
-      await fetchConnections();
+      // 1-based integer writes only — a tie used to send `priority ± 0.5` (400).
+      await persistPriorityUpdates(buildSwapPriorityUpdates(connections, conn1, conn2));
     } catch (error) {
       console.log("Error swapping priority:", error);
+      notify.error(t("failedSaveConnectionRetry"));
     }
+    await fetchConnections();
   };
 
   // Reorder-by-availability toolbar action — extracted to its own hook
@@ -661,13 +905,14 @@ export function useProviderConnections(
         setSelectedIds(new Set());
         await fetchConnections();
         notify.success(t("batchDeleteSuccess", { count }));
-        if (onAfter) await onAfter();
+        // ConfirmModal's onClick forwards a MouseEvent; only a real callback runs.
+        if (typeof onAfter === "function") await onAfter();
       } else {
         const data = await res.json();
-        notify.error(data.error || "Batch delete failed");
+        notify.error(data.error || providerText(t, "batchDeleteFailed", "Batch delete failed"));
       }
     } catch {
-      notify.error("Network error during batch delete");
+      notify.error(providerText(t, "batchDeleteNetworkError", "Network error during batch delete"));
     } finally {
       setBatchDeleting(false);
     }
@@ -689,7 +934,11 @@ export function useProviderConnections(
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          throw new Error(data.error?.message || data.error || "Batch update failed");
+          throw new Error(
+            data.error?.message ||
+              data.error ||
+              providerText(t, "batchUpdateFailed", "Batch update failed")
+          );
         }
         const data = await res.json();
         updated += data.updated ?? 0;
@@ -710,7 +959,10 @@ export function useProviderConnections(
         );
       }
     } catch (error: any) {
-      notify.error(error?.message || "Network error during batch update");
+      notify.error(
+        error?.message ||
+          providerText(t, "batchUpdateNetworkError", "Network error during batch update")
+      );
     } finally {
       setBatchUpdating(null);
     }
@@ -805,7 +1057,13 @@ export function useProviderConnections(
       const proxiesData = await proxiesRes.json();
       const savedProxies = (proxiesData?.items || []).filter((p: any) => p.status === "active");
       if (savedProxies.length === 0) {
-        notify.error("No saved proxies found. Add proxies in Settings → Proxy first.");
+        notify.error(
+          providerText(
+            t,
+            "noSavedProxies",
+            "No saved proxies found. Add proxies in Settings → Proxy first."
+          )
+        );
         return;
       }
 
@@ -856,11 +1114,16 @@ export function useProviderConnections(
       await fetchConnections();
       const tagLabel = tagFilter ? `"${tagFilter}" ` : "";
       notify.success(
-        `Distributed ${assigned} proxy assignment(s) across ${tagLabel}${sorted.length} connection(s).`
+        providerText(
+          t,
+          "proxiesDistributed",
+          "Distributed {assigned} proxy assignment(s) across {tagLabel}{total} connection(s).",
+          { assigned, tagLabel, total: sorted.length }
+        )
       );
     } catch (err) {
       console.error("Error distributing proxies:", err);
-      notify.error("Failed to distribute proxies.");
+      notify.error(providerText(t, "failedDistributeProxies", "Failed to distribute proxies."));
     } finally {
       setDistributingProxies(false);
     }
@@ -888,6 +1151,8 @@ export function useProviderConnections(
     proxyConfig,
     connProxyMap,
     cpaProviderEnabled,
+    upstreamProxyMode,
+    upstreamProxyFallbackBackend,
     refreshingId,
     reorderingByAvailability,
 
@@ -904,6 +1169,7 @@ export function useProviderConnections(
     // Fetch
     fetchConnections,
     fetchProxyConfig,
+    refreshProxyState,
 
     // Single-connection handlers
     deleteConfirm,
@@ -911,11 +1177,15 @@ export function useProviderConnections(
     handleToggleRateLimit,
     handleToggleQuotaVisibility,
     handleToggleClaudeExtraUsage,
+    handleToggleCodexPaidCredits,
     handleToggleCodexLimit,
     handleToggleCliproxyapiMode,
+    handleSetUpstreamProxyMode,
     handleToggleProxyEnabled,
     handleTogglePerKeyProxyEnabled,
     handleRetestConnection,
+    handleClearCooldown,
+    clearingCooldownId,
     handleRefreshToken,
     handleSwapPriority,
     handleReorderByAvailability,

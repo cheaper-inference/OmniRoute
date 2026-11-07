@@ -1,20 +1,38 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { AntigravityExecutor } from "../../open-sse/executors/antigravity.ts";
-import { setCliCompatProviders } from "../../open-sse/config/cliFingerprints.ts";
-import { scrubProxyAndFingerprintHeaders } from "../../open-sse/services/antigravityHeaderScrub.ts";
-import { antigravityIdeUserAgent } from "../../open-sse/services/antigravityHeaders.ts";
-import {
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-ag-executor-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+process.env.API_KEY_SECRET = "test-antigravity-executor";
+
+const { AntigravityExecutor } = await import("../../open-sse/executors/antigravity.ts");
+const { setCliCompatProviders } = await import("../../open-sse/config/cliFingerprints.ts");
+const { scrubProxyAndFingerprintHeaders } =
+  await import("../../open-sse/services/antigravityHeaderScrub.ts");
+const { antigravityIdeUserAgent } = await import("../../open-sse/services/antigravityHeaders.ts");
+const {
   clearAntigravityVersionCaches,
   seedAntigravityIdeVersionCache,
   seedAntigravityCliVersionCache,
-} from "../../open-sse/services/antigravityVersion.ts";
-import { clearAntigravityProjectCache } from "../../open-sse/services/antigravityProjectBootstrap.ts";
-import { runWithCapture } from "../../open-sse/utils/providerRequestLogging.ts";
+} = await import("../../open-sse/services/antigravityVersion.ts");
+const { clearAntigravityProjectCache } =
+  await import("../../open-sse/services/antigravityProjectBootstrap.ts");
+const { runWithCapture } = await import("../../open-sse/utils/providerRequestLogging.ts");
+const { resetAntigravity429GuardForTests } =
+  await import("../../open-sse/services/antigravity429Guard.ts");
+const core = await import("../../src/lib/db/core.ts");
+
+test.after(() => {
+  core.resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
 
 type AntigravityTransformResult = Exclude<
-  Awaited<ReturnType<AntigravityExecutor["transformRequest"]>>,
+  Awaited<ReturnType<InstanceType<typeof AntigravityExecutor>["transformRequest"]>>,
   Response
 >;
 
@@ -36,6 +54,7 @@ type ChatCompletionPayload = {
     prompt_tokens: number;
     completion_tokens: number;
     total_tokens: number;
+    completion_tokens_details?: { reasoning_tokens: number };
   };
 };
 
@@ -64,6 +83,8 @@ async function withEnv<T>(
 
 test.afterEach(() => {
   clearAntigravityVersionCaches();
+  // The guard remembers bodies that spent their 429 budget; tests reuse the same body.
+  resetAntigravity429GuardForTests();
 });
 
 test("AntigravityExecutor.buildUrl always targets the streaming endpoint", () => {
@@ -87,6 +108,25 @@ test("AntigravityExecutor.buildHeaders includes native headers without OmniRoute
   assert.equal(headers.Accept, "text/event-stream");
   assert.equal(headers["User-Agent"], antigravityIdeUserAgent("2.1.1"));
   assert.equal(headers["X-OmniRoute-Source"], undefined);
+});
+
+test("AntigravityExecutor.buildHeaders omits Accept and x-goog-user-project on the CLI profile", () => {
+  // Live capture of the native Go CLI: streaming is requested by `?alt=sse` alone, and a
+  // consumer account carries no quota-project header. Emitting either is a fingerprint leak.
+  const executor = new AntigravityExecutor();
+  seedAntigravityCliVersionCache("1.4.4");
+  const headers = executor.buildHeaders(
+    { accessToken: "ag-token", providerSpecificData: { clientProfile: "cli" } },
+    true
+  );
+
+  assert.equal(headers.Authorization, "Bearer ag-token");
+  assert.equal(headers.Accept, undefined);
+  assert.equal(headers["x-goog-user-project"], undefined);
+  assert.match(headers["User-Agent"], /^antigravity\/cli\/1\.4\.4 \(aidev_client; os_type=/);
+  // The IDE profile keeps sending Accept.
+  const ideHeaders = executor.buildHeaders({ accessToken: "ag-token" }, true);
+  assert.equal(ideHeaders.Accept, "text/event-stream");
 });
 
 test("Antigravity header scrub removes OmniRoute internal headers", () => {
@@ -142,7 +182,7 @@ test("AntigravityExecutor.transformRequest normalizes model, project and content
     "requestType",
   ]);
   assert.equal(result.userAgent, "antigravity");
-  assert.match(result.requestId, /^agent\/\d+\/[0-9a-f]{8}$/);
+  assert.match(result.requestId, /^agent\/[0-9a-f-]{36}\/\d+\/[0-9a-f-]{36}\/2$/);
   assert.equal(result.enabledCreditTypes, undefined);
   assert.ok(result.request.sessionId);
   const request = result.request as { generationConfig?: { topK?: number; topP?: number } };
@@ -281,9 +321,11 @@ test("AntigravityExecutor.transformRequest auto-discovers a missing projectId vi
   }
 });
 
-// #2334: when loadCodeAssist also finds no project (truly un-onboarded account), the
-// structured 422 must still be returned so the dashboard can prompt a reconnect.
-test("AntigravityExecutor.transformRequest still 422s when loadCodeAssist finds no project (#2334)", async () => {
+// #8491: when loadCodeAssist also finds no project and Google marks the
+// account BYOP (no automatic project creation for standard-tier accounts),
+// the fast 422 GCP_PROJECT_REQUIRED must be returned so the dashboard can
+// prompt the user to enter a GCP Project ID.
+test("AntigravityExecutor.transformRequest fast-422s with GCP_PROJECT_REQUIRED when loadCodeAssist finds no project (#8491)", async () => {
   clearAntigravityProjectCache();
   seedAntigravityIdeVersionCache("2.1.1");
   const executor = new AntigravityExecutor();
@@ -305,7 +347,8 @@ test("AntigravityExecutor.transformRequest still 422s when loadCodeAssist finds 
     if (!(result instanceof Response)) throw new Error("Expected a 422 Response");
     assert.equal(result.status, 422);
     const payload = (await result.json()) as ErrorPayload;
-    assert.equal(payload.error.code, "missing_project_id");
+    assert.equal(payload.error.code, "gcp_project_required");
+    assert.match(payload.error.message, /GCP_PROJECT_REQUIRED/);
   } finally {
     globalThis.fetch = originalFetch;
     clearAntigravityProjectCache();
@@ -479,6 +522,33 @@ test("AntigravityExecutor.collectStreamToResponse turns SSE Gemini chunks into a
   });
 });
 
+test("AntigravityExecutor.collectStreamToResponse preserves upstream thought token usage", async () => {
+  const executor = new AntigravityExecutor();
+  const response = new Response(
+    'data: {"response":{"candidates":[{"content":{"parts":[{"text":"Done"}]},"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":5,"candidatesTokenCount":3,"thoughtsTokenCount":7,"totalTokenCount":15}}}\n\n',
+    {
+      status: 200,
+      headers: { "Content-Type": "text/event-stream" },
+    }
+  );
+
+  const result = await executor.collectStreamToResponse(
+    response,
+    "gemini-3.7-pro-high",
+    "https://example.com",
+    { Authorization: "Bearer ag-token" },
+    { request: {} }
+  );
+  const payload = (await result.response.json()) as ChatCompletionPayload;
+
+  assert.deepEqual(payload.usage, {
+    prompt_tokens: 5,
+    completion_tokens: 10,
+    total_tokens: 15,
+    completion_tokens_details: { reasoning_tokens: 7 },
+  });
+});
+
 test("AntigravityExecutor.collectStreamToResponse converts textual tool call SSE to structured tool_calls", async () => {
   const executor = new AntigravityExecutor();
   const response = new Response(
@@ -513,7 +583,7 @@ test("AntigravityExecutor.collectStreamToResponse converts textual tool call SSE
 
   const result = await executor.collectStreamToResponse(
     response,
-    "gemini-3.5-flash-low",
+    "gemini-3.8-flash-low",
     "https://example.com",
     { Authorization: "Bearer ag-token" },
     { request: {} }
@@ -837,16 +907,22 @@ test("AntigravityExecutor.execute embeds retryAfterMs when the upstream asks for
 
 test("AntigravityExecutor.execute bounds a persistent short-retry 429 instead of looping forever", async () => {
   const executor = new AntigravityExecutor();
+  executor.config = {
+    ...executor.config,
+    baseUrls: ["https://daily-cloudcode-pa.googleapis.com", "https://cloudcode-pa.googleapis.com"],
+  };
   const originalFetch = globalThis.fetch;
   const originalSetTimeout = globalThis.setTimeout;
   const calls: string[] = [];
+  const telemetry: string[] = [];
   seedAntigravityIdeVersionCache("2.1.1");
 
-  // "rate limited" classifies as rate_limited → decide429 returns 60s
-  // (≤ LONG_RETRY_THRESHOLD_MS), i.e. the short-retry branch. A persistent 429
-  // must NOT loop forever on one endpoint — it must exhaust MAX_AUTO_RETRIES per
-  // endpoint, advance through every base URL, then return the 429 so the
-  // account-fallback layer can switch accounts.
+  // "rate limited" with no parseable retry hint classifies as rate_limited →
+  // decide429 returns short_cooldown_switch_auth (60s default). Since #9351 the
+  // switchAuth signal is propagated to the retry guard, which declines the
+  // same-URL sleep branch entirely: one attempt per base URL, then the 429 is
+  // returned so the account-fallback layer can switch accounts immediately
+  // instead of sleeping 60s × MAX_AUTO_RETRIES against a rate-limited account.
   globalThis.fetch = async (url) => {
     calls.push(String(url));
     return new Response(JSON.stringify({ error: { message: "rate limited" } }), {
@@ -865,18 +941,90 @@ test("AntigravityExecutor.execute bounds a persistent short-retry 429 instead of
       body: { request: { contents: [] } },
       stream: true,
       credentials: { accessToken: "token", projectId: "project-1" },
-      log: { debug() {}, warn() {} },
+      log: {
+        debug(_scope, message) {
+          telemetry.push(String(message));
+        },
+        warn() {},
+      },
+      correlationId: "prompt194-physical-send-test",
     });
 
     // Returns the 429 rather than hanging.
     assert.equal(result.response.status, 429);
 
-    // Bounded: 2 live runtime endpoints × (1 initial + MAX_AUTO_RETRIES=3) = 8 attempts total.
-    assert.equal(calls.length, 8);
+    // Bounded: switchAuth declines same-URL retries → 2 explicitly configured endpoints
+    // × 1 attempt each = 2 attempts total (#9351).
+    assert.equal(calls.length, 2);
+    const physicalSends = telemetry.filter((line) => line.includes("[Antigravity] PhysicalSend"));
+    assert.equal(physicalSends.length, calls.length);
+    assert.match(physicalSends[0] ?? "", /RequestId: prompt194-physical-send-test/);
+    assert.match(physicalSends[0] ?? "", /PhysicalSend: 1/);
+    assert.match(physicalSends[1] ?? "", /PhysicalSend: 2/);
 
-    // Tried every distinct live runtime base URL before giving up.
+    // Tried every explicitly configured base URL before giving up.
     const distinctHosts = new Set(calls.map((u) => new URL(u).host));
     assert.equal(distinctHosts.size, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.setTimeout = originalSetTimeout;
+  }
+});
+
+test("AntigravityExecutor.execute does not resend a request Antigravity refused with a hintless 429", async () => {
+  const executor = new AntigravityExecutor();
+  const originalFetch = globalThis.fetch;
+  const originalSetTimeout = globalThis.setTimeout;
+  const calls: string[] = [];
+  seedAntigravityIdeVersionCache("2.1.1");
+
+  // Cloud Code answers some requests with no retry hint and no reason, so classify429
+  // says "unknown" (soft retry). That used to cost 4 tries on every host per execute,
+  // and the client re-sending the body paid them again each time.
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return new Response(
+      JSON.stringify({
+        error: {
+          code: 429,
+          message: "Resource has been exhausted (e.g. check quota).",
+          status: "RESOURCE_EXHAUSTED",
+        },
+      }),
+      { status: 429, headers: { "Content-Type": "application/json" } }
+    );
+  };
+  globalThis.setTimeout = ((callback) => {
+    (callback as () => void)();
+    return 0;
+  }) as typeof setTimeout;
+
+  const run = (text: string) =>
+    executor.execute({
+      model: "antigravity/gemini-2.5-flash",
+      body: { request: { contents: [{ role: "user", parts: [{ text }] }] } },
+      stream: true,
+      credentials: { accessToken: "token", projectId: "project-1", connectionId: "conn-429" },
+      log: { debug() {}, warn() {}, info() {} },
+    });
+
+  try {
+    const first = await run("refused body");
+    assert.equal(first.response.status, 429);
+    assert.equal(calls.length, 2, "the call plus one retry, then the 429 goes back");
+    assert.ok(calls.every((url) => new URL(url).hostname === "daily-cloudcode-pa.googleapis.com"));
+
+    // The client re-sends the same body: answered locally, nothing reaches Google.
+    const resend = await run("refused body");
+    assert.equal(resend.response.status, 429);
+    assert.equal(calls.length, 2, "an identical re-send must not reach the upstream");
+    assert.ok(Number(resend.response.headers.get("Retry-After")) > 60);
+    const payload = (await resend.response.json()) as ErrorPayload;
+    assert.match(payload.error.message, /not resending it to Antigravity/);
+
+    // A different request is not blocked by it.
+    await run("another body");
+    assert.equal(calls.length, 4);
   } finally {
     globalThis.fetch = originalFetch;
     globalThis.setTimeout = originalSetTimeout;

@@ -1,10 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { databaseSettingsSchema } from "@/shared/validation/settingsSchemas";
 import { getDatabaseSettings, updateDatabaseSettings } from "@/lib/db/databaseSettings";
+import { redactCacheSecrets } from "@/lib/db/cacheSecrets";
+import type { UserDatabaseSettings } from "@/lib/db/databaseSettings";
 
-const databaseSettingsPatchSchema = databaseSettingsSchema.partial().strict();
+function publicDatabaseSettings() {
+  const settings = getDatabaseSettings();
+  return { ...settings, cache: redactCacheSecrets(settings.cache) };
+}
+
+const databaseSettingsPatchSchema = z
+  .object({
+    logs: databaseSettingsSchema.shape.logs.partial(),
+    backup: databaseSettingsSchema.shape.backup.partial(),
+    cache: databaseSettingsSchema.shape.cache.partial(),
+    retention: databaseSettingsSchema.shape.retention.partial(),
+    aggregation: databaseSettingsSchema.shape.aggregation.partial(),
+    optimization: databaseSettingsSchema.shape.optimization.partial(),
+  })
+  .partial()
+  .strict();
 
 export async function GET(request: NextRequest) {
   if (!(await isAuthenticated(request))) {
@@ -12,7 +30,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    return NextResponse.json(getDatabaseSettings());
+    return NextResponse.json(publicDatabaseSettings());
   } catch (error) {
     console.error("Error getting database settings:", error);
     return NextResponse.json({ error: "Failed to load database settings" }, { status: 500 });
@@ -32,10 +50,10 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    updateDatabaseSettings(validation.data);
+    updateDatabaseSettings(validation.data as Partial<UserDatabaseSettings>);
 
     // Return merged settings (GET response pattern)
-    return NextResponse.json(getDatabaseSettings());
+    return NextResponse.json(publicDatabaseSettings());
   } catch (error) {
     console.error("Error updating database settings:", error);
     return NextResponse.json({ error: "Failed to update database settings" }, { status: 500 });

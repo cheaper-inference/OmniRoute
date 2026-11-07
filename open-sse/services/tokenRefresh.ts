@@ -7,16 +7,21 @@
 // cross-provider plumbing. The provider-module split was originally proposed
 // by KooshaPari in PR #7338, whose base was too old to merge as-is; this is an
 // independent implementation of the same idea against the current tip, not a
-// reuse of that diff. All previously-public exports are re-exported below so existing
+// reuse of that diff. Supported provider refresh exports are re-exported below so
 // importers (open-sse/index.ts, executors, src/sse/services/tokenRefresh.ts,
-// tests) are unaffected.
+// tests) keep a stable surface.
 import { AsyncLocalStorage } from "node:async_hooks";
+export { isPassiveCodex } from "./tokenRefresh/passiveCodex.ts";
+import { isPassiveCodex, resolvePassiveCodex } from "./tokenRefresh/passiveCodex.ts";
 import { PROVIDERS } from "../config/constants.ts";
+import { getCodexAuthIdentityHeaders } from "../config/codexClient.ts";
 import { runWithProxyContext } from "../utils/proxyFetch.ts";
 import { serializeRefresh } from "./refreshSerializer.ts";
+import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import {
   extractOAuthErrorCode,
   isUnrecoverableRefreshError,
+  NO_REFRESH_NEEDED,
   type RefreshLogger,
 } from "./tokenRefresh/shared.ts";
 import {
@@ -38,36 +43,47 @@ import {
   getCircuitBreakerStatus,
   refreshWithRetry,
 } from "./tokenRefresh/circuitBreaker.ts";
-import { refreshWindsurfToken } from "./tokenRefresh/providers/windsurf.ts";
 import { refreshCodebuddyCnToken } from "./tokenRefresh/providers/codebuddyCn.ts";
+import { refreshCodebuddyIntlToken } from "./tokenRefresh/providers/codebuddyIntl.ts";
+import { refreshWorkbuddyToken } from "./tokenRefresh/providers/workbuddy.ts";
 import { refreshClineToken } from "./tokenRefresh/providers/cline.ts";
 import { refreshKimiCodingToken } from "./tokenRefresh/providers/kimiCoding.ts";
+import { refreshMuseCodeToken } from "./tokenRefresh/providers/museCode.ts";
 import { refreshGitLabDuoToken } from "./tokenRefresh/providers/gitlabDuo.ts";
 import { refreshClaudeOAuthToken } from "./tokenRefresh/providers/claudeOAuth.ts";
 import { refreshGoogleToken } from "./tokenRefresh/providers/google.ts";
-import { ensureAntigravityProjectAssigned } from "./antigravityProjectBootstrap.ts";
+import { selectGoogleRefreshClient } from "./tokenRefresh/googleClientBinding.ts";
+import {
+  ensureAntigravityProjectAssigned,
+  isUsableAntigravityProjectId,
+} from "./antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "./antigravityProjectPersist.ts";
 import { refreshCodexToken } from "./tokenRefresh/providers/codex.ts";
+import { refreshCursorToken } from "./tokenRefresh/providers/cursor.ts";
+import { refreshOpenferenceToken } from "./tokenRefresh/providers/openference.ts";
 import { refreshKiroToken } from "./tokenRefresh/providers/kiro.ts";
 import { refreshQoderToken } from "./tokenRefresh/providers/qoder.ts";
 import { refreshGitHubToken } from "./tokenRefresh/providers/github.ts";
 import { refreshCopilotToken } from "./tokenRefresh/providers/copilot.ts";
 
 export {
-  refreshWindsurfToken,
   refreshCodebuddyCnToken,
   refreshClineToken,
   refreshKimiCodingToken,
+  refreshMuseCodeToken,
   refreshGitLabDuoToken,
   refreshClaudeOAuthToken,
   refreshGoogleToken,
   refreshCodexToken,
+  refreshCursorToken,
+  refreshOpenferenceToken,
   refreshKiroToken,
   refreshQoderToken,
   refreshGitHubToken,
   refreshCopilotToken,
   extractOAuthErrorCode,
   isUnrecoverableRefreshError,
+  NO_REFRESH_NEEDED,
   isProviderBlocked,
   getCircuitBreakerStatus,
   refreshWithRetry,
@@ -183,6 +199,20 @@ const refreshPromiseCache = new Map();
 // Primary dedup when credentials.connectionId is present; refreshPromiseCache is fallback.
 const connectionRefreshMutex = new Map();
 
+// #14970: upper bound on a shared refresh entry's lifetime. Provider refresh
+// fetches do not all carry an AbortSignal, so one hung upstream (e.g. a
+// blackholed proxy during an outage window) would otherwise keep the entry —
+// and every waiter joining it — stuck until process restart. 90s ≈ 3× the
+// 30s per-attempt budget used by refreshWithRetry, generous for a slow but
+// healthy refresh and short enough to unwedge a wedged connection.
+const REFRESH_MUTEX_MAX_MS_DEFAULT = 90_000;
+let refreshMutexMaxMs = REFRESH_MUTEX_MAX_MS_DEFAULT;
+
+/** Test seam: shrink the #14970 bound so unit tests do not wait 90s. */
+export function setRefreshMutexMaxMsForTest(ms: number | null) {
+  refreshMutexMaxMs = typeof ms === "number" ? ms : REFRESH_MUTEX_MAX_MS_DEFAULT;
+}
+
 // Token Rotation Map (codex-multi-auth pattern) lives in
 // ./tokenRefresh/rotationMap.ts — see that leaf for the in-memory rotation
 // cache + getRefreshCacheKey. Imported above and re-exported for tests.
@@ -217,10 +247,15 @@ export function getActiveOnPersist(): RefreshPersistFn | undefined {
 // ./tokenRefresh/shared.ts (imported above, re-exported below) — used both by
 // the generic orchestrator below and by every per-provider refresh module.
 
+export function refreshAccessToken(provider, token, creds, log, proxy: unknown = null) {
+  if (isPassiveCodex(provider)) return resolvePassiveCodex(creds);
+  return refreshActiveAccessToken(provider, token, creds, log, proxy);
+}
+
 /**
  * Refresh OAuth access token using refresh token
  */
-export async function refreshAccessToken(
+async function refreshActiveAccessToken(
   provider,
   refreshToken,
   credentials,
@@ -254,6 +289,12 @@ export async function refreshAccessToken(
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           Accept: "application/json",
+          // Credential face (auth.openai.com): the real Codex client sends only
+          // originator + User-Agent here — no version header (that gate exists
+          // only on the /backend-api/codex inference face). Refreshing with a
+          // bare/anonymous identity is a half-identity no real client emits.
+          // Mirrors sub2api v0.1.178 ApplyCodexCanonicalAuthIdentity.
+          ...(provider === "codex" ? getCodexAuthIdentityHeaders() : null),
         },
         body: params,
       })
@@ -323,10 +364,19 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     case "gemini":
     case "antigravity":
     case "agy": {
+      // Google binds each refresh token to the client that issued it. When
+      // the operator overrides the client via env, connections authorized by
+      // the built-in desktop client must not be refreshed against the custom
+      // one (401 unauthorized_client, 2026-08-30 incident).
+      const refreshClient = selectGoogleRefreshClient(
+        provider,
+        credentials.providerSpecificData?.oauthClient,
+        PROVIDERS[provider]
+      );
       const result = await refreshGoogleToken(
         credentials.refreshToken,
-        PROVIDERS[provider].clientId,
-        PROVIDERS[provider].clientSecret,
+        refreshClient.clientId,
+        refreshClient.clientSecret,
         log,
         proxyConfig
       );
@@ -336,18 +386,25 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
       if (
         result?.accessToken &&
         (provider === "antigravity" || provider === "agy") &&
-        !(credentials.projectId || credentials.providerSpecificData?.projectId)
+        !credentials.providerSpecificData?.isProjectIdManual &&
+        !(
+          isUsableAntigravityProjectId(credentials.projectId) ||
+          isUsableAntigravityProjectId(credentials.providerSpecificData?.projectId)
+        )
       ) {
         try {
-          const discovered = await ensureAntigravityProjectAssigned(
-            result.accessToken,
-            fetch
-          );
-          if (discovered) {
-            result.projectId = discovered;
-            result.providerSpecificData = {
+          const discovered = await ensureAntigravityProjectAssigned(result.accessToken, fetch);
+          if (isUsableAntigravityProjectId(discovered)) {
+            // The refresh result type declares only the token fields; the antigravity
+            // recovery adds these two alongside them.
+            const recovery = result as {
+              projectId?: string;
+              providerSpecificData?: Record<string, unknown>;
+            };
+            recovery.projectId = discovered;
+            recovery.providerSpecificData = {
               ...(credentials.providerSpecificData || {}),
-              ...(result.providerSpecificData || {}),
+              ...(recovery.providerSpecificData || {}),
               projectId: discovered,
             };
             if (credentials.connectionId) {
@@ -362,7 +419,8 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
             });
           }
         } catch (discoveryError) {
-          const msg = discoveryError instanceof Error ? discoveryError.message : String(discoveryError);
+          const msg =
+            discoveryError instanceof Error ? discoveryError.message : String(discoveryError);
           log?.warn?.("TOKEN", `Antigravity projectId discovery failed: ${msg}`);
         }
       }
@@ -375,6 +433,15 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
 
     case "codex":
       return await refreshCodexToken(credentials.refreshToken, log, proxyConfig);
+
+    case "cursor":
+      if (!credentials.refreshToken) {
+        return { error: "unrecoverable_refresh_error", code: "no_refresh_token" };
+      }
+      return await refreshCursorToken(credentials.refreshToken, log, proxyConfig);
+
+    case "openference":
+      return await refreshOpenferenceToken(credentials.refreshToken, log, proxyConfig);
 
     case "qoder":
       return await refreshQoderToken(credentials.refreshToken, log, proxyConfig);
@@ -403,6 +470,14 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
         proxyConfig
       );
 
+    case "muse-code":
+      return await refreshMuseCodeToken(
+        credentials.refreshToken,
+        credentials.providerSpecificData,
+        log,
+        proxyConfig
+      );
+
     case "gitlab-duo":
       return await refreshGitLabDuoToken(
         credentials.refreshToken,
@@ -411,17 +486,14 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
         proxyConfig
       );
 
-    case "windsurf":
-    case "devin-cli":
-      return await refreshWindsurfToken(
-        credentials.refreshToken,
-        credentials.providerSpecificData,
-        log,
-        proxyConfig
-      );
-
     case "codebuddy-cn":
       return await refreshCodebuddyCnToken(credentials.refreshToken, log, proxyConfig);
+
+    case "codebuddy-intl":
+      return await refreshCodebuddyIntlToken(credentials.refreshToken, log, proxyConfig);
+
+    case "workbuddy":
+      return await refreshWorkbuddyToken(credentials.refreshToken, log, proxyConfig);
 
     default:
       // Fallback to generic OAuth refresh for unknown providers
@@ -439,20 +511,24 @@ export function supportsTokenRefresh(provider) {
     "agy",
     "claude",
     "codex",
+    "openference",
     "qoder",
     "github",
     "kiro",
     "amazon-q",
     "cline",
     "kimi-coding",
-    "windsurf",
-    // #8407: do NOT list "devin-cli" here. It is import-token / local-CLI owned
-    // (`devin auth login`); connections never carry a refresh token. Leaving it
-    // in this set made tokenHealthCheck treat it as refresh-capable and force
-    // testStatus="expired" / errorCode="no_refresh_token". Keep it out of the
-    // explicit set (same idea as not listing non-refresh local-CLI providers).
+    "muse-code",
+    // Devin auth is not refreshable here: devin-desktop accepts an imported API
+    // key (#8228), while devin-cli is local-CLI owned via `devin auth login`
+    // (#8407). Neither connection carries a refresh token, so listing either
+    // provider would make tokenHealthCheck force a healthy connection to
+    // testStatus="expired" / errorCode="no_refresh_token".
     "gitlab-duo",
     "codebuddy-cn",
+    "codebuddy-intl",
+    "workbuddy",
+    "cursor",
   ]);
   if (explicitlySupported.has(provider)) return true;
   const config = PROVIDERS[provider];
@@ -490,6 +566,7 @@ export async function getAccessToken(
   proxyConfig: unknown = null,
   onPersist?: RefreshPersistFn
 ) {
+  if (isPassiveCodex(provider)) return resolvePassiveCodex(credentials);
   if (!credentials || !credentials.refreshToken || typeof credentials.refreshToken !== "string") {
     log?.warn?.("TOKEN_REFRESH", `No valid refresh token available for provider: ${provider}`);
     return null;
@@ -517,16 +594,23 @@ export async function getAccessToken(
     }
 
     const entry = { promise: null, waiters: 0 };
-    entry.promise = (async () => {
+    // The underlying work runs un-raced so a late-settling refresh can still
+    // reach onPersist (the CAS guard keeps a late write safe). The SHARED
+    // promise is what gets bounded: if it never settles, the race resolves
+    // null (refresh failure), the entry is evicted, and the next caller starts
+    // a fresh refresh instead of rejoining the wedge.
+    const work = (async () => {
       const result = await _getAccessTokenWithStalenessCheck(
         provider,
         credentials,
         log,
         proxyConfig
       );
+      // The refresh helpers return one of nine shapes; name the token once.
+      const token = result as { accessToken?: string } | null;
       // Invoke onPersist INSIDE the mutex so [network call + DB write] are one atomic step.
       // This prevents a concurrent waiter from reading stale credentials before the DB is updated.
-      if (result?.accessToken && effectiveOnPersist) {
+      if (token?.accessToken && effectiveOnPersist) {
         // #4038: skip the persist if a concurrent writer already rotated this row past the
         // refresh_token we presented (compare-and-swap) — overwriting would revert it.
         if (await casGuardShouldSkipPersist(log)) {
@@ -544,7 +628,22 @@ export async function getAccessToken(
         }
       }
       return result;
-    })().finally(() => {
+    })();
+    let mutexTimer: ReturnType<typeof setTimeout> | null = null;
+    entry.promise = Promise.race([
+      work,
+      new Promise((resolve) => {
+        mutexTimer = setTimeout(() => {
+          log?.error?.(
+            "TOKEN_REFRESH",
+            `Refresh for ${provider}/${connectionId} exceeded ${refreshMutexMaxMs}ms inside the per-connection mutex — evicting wedged entry (upstream fetch may still be hanging)`
+          );
+          resolve(null);
+        }, refreshMutexMaxMs);
+        (mutexTimer as { unref?: () => void })?.unref?.();
+      }),
+    ]).finally(() => {
+      if (mutexTimer) clearTimeout(mutexTimer);
       connectionRefreshMutex.delete(connectionId);
     });
     connectionRefreshMutex.set(connectionId, entry);
@@ -564,11 +663,11 @@ export async function getAccessToken(
   // the legacy `connectionId`-less path would silently swallow the callback,
   // leaving DB rows out of sync with rotated tokens (Codex/OpenAI). We still
   // resolve the promise to all waiters with the refreshed credentials.
-  const refreshPromise = serializeRefresh(provider, () =>
-    _getAccessTokenInternal(provider, credentials, log, proxyConfig)
-  )
+  const refreshPromise = _getAccessTokenWithStalenessCheck(provider, credentials, log, proxyConfig)
     .then(async (result) => {
-      if (result?.accessToken && effectiveOnPersist) {
+      // The refresh helpers return one of nine shapes; name the token once.
+      const token = result as { accessToken?: string } | null;
+      if (token?.accessToken && effectiveOnPersist) {
         // #4038: same compare-and-swap guard as Layer 1 — skip the persist if a concurrent
         // writer already rotated this row past the refresh_token we presented.
         if (await casGuardShouldSkipPersist(log)) {
@@ -584,7 +683,7 @@ export async function getAccessToken(
           );
           throw persistErr;
         }
-      } else if (result?.accessToken && !effectiveOnPersist) {
+      } else if (token?.accessToken && !effectiveOnPersist) {
         log?.warn?.(
           "TOKEN_REFRESH",
           `Layer 2 refresh succeeded for ${provider} without onPersist — DB row will not be updated with rotated token. Callers should pass connectionId for Layer 1 atomicity.`
@@ -601,17 +700,21 @@ export async function getAccessToken(
 }
 
 /**
- * Internal helper: performs the DB staleness check then calls the actual refresh.
- * Only called from the per-connection mutex path (Layer 1 above).
+ * Internal helper: waits for the rotation-group lane, then re-checks freshness
+ * BEFORE the network POST. Lookup/DB re-read must live inside serializeRefresh:
+ * a HealthCheck that snapshotted the old refresh_token can sit on the lane
+ * while Layer 2 consumes it; checking only before the wait still POSTs the
+ * consumed token and burns the family (Claude/Anthropic, Auth0 Codex).
  */
 async function _getAccessTokenWithStalenessCheck(provider, credentials, log, proxyConfig) {
-  // ROTATION MAP CHECK (codex-multi-auth pattern): if this refresh_token was
-  // rotated very recently (within ROTATION_MAP_TTL_MS), reuse the cached new
-  // tokens INSTEAD of hitting upstream. Auth0 treats re-use of a rotated token
-  // as a security event and revokes the entire token family — fatal for
-  // multi-account Codex setups. The in-memory rotation map catches this even
-  // when the caller bypasses the DB staleness path (no connectionId, stale
-  // in-memory credentials in retries, etc.).
+  return serializeRefresh(
+    provider,
+    () => _refreshWithFreshCredentials(provider, credentials, log, proxyConfig),
+    log
+  );
+}
+
+async function _refreshWithFreshCredentials(provider, credentials, log, proxyConfig) {
   const rotated = lookupRotation(provider, credentials.refreshToken);
   if (rotated) {
     log?.info?.(
@@ -621,18 +724,13 @@ async function _getAccessTokenWithStalenessCheck(provider, credentials, log, pro
     return rotated.result;
   }
 
-  // RACE CONDITION PREVENTION:
-  // If the credentials object in memory is stale (e.g. it waited in a semaphore while another
-  // request refreshed the token), using its OLD refreshToken will cause the provider (e.g. OpenAI)
-  // to reject it with 'refresh_token_reused' and revoke the new token family.
-  // We MUST check if the DB has a newer token before proceeding with a network refresh.
   if (credentials.connectionId) {
     try {
       const { getProviderConnectionById } = await import("@/lib/db/providers");
       const dbConnection = await getProviderConnectionById(credentials.connectionId);
       if (dbConnection && dbConnection.refreshToken) {
         const now = Date.now();
-        const dbExpiresAt = dbConnection.expiresAt ? new Date(dbConnection.expiresAt).getTime() : 0;
+        const dbExpiresAt = parseTokenExpiryMs(dbConnection.expiresAt);
 
         if (dbConnection.refreshToken !== credentials.refreshToken) {
           log?.info?.(
@@ -640,31 +738,17 @@ async function _getAccessTokenWithStalenessCheck(provider, credentials, log, pro
             `Stale token detected in memory for ${provider}. Using refreshed token from DB.`
           );
 
-          // If the DB token is not expired, we can just return it!
           if (dbExpiresAt > now + 60000) {
-            // 60 seconds buffer
             log?.info?.("TOKEN_REFRESH", `DB token is still valid. Skipping OAuth refresh.`);
             return {
               accessToken: dbConnection.accessToken,
               refreshToken: dbConnection.refreshToken,
-              // Return absolute expiresAt so downstream callers do NOT recompute lifetime
-              // from a relative expiresIn value (which would incorrectly extend the TTL).
-              // expiresIn intentionally omitted here.
               expiresAt: dbConnection.expiresAt,
             };
-          } else {
-            // DB token is also expired, but it's the NEWEST one. We must use it to refresh.
-            credentials.refreshToken = dbConnection.refreshToken;
-            credentials.accessToken = dbConnection.accessToken;
           }
+          credentials.refreshToken = dbConnection.refreshToken;
+          credentials.accessToken = dbConnection.accessToken;
         }
-        // NOTE: Fix F (skip when DB == memory and DB > now+60s) was intentionally
-        // removed. The caller (checkAndRefreshToken) already decided to refresh
-        // because the token is within TOKEN_EXPIRY_BUFFER_MS of expiry. Re-checking
-        // with a tighter 60-second window here would skip legitimate refreshes and
-        // let near-expired tokens hit the upstream. Layer-1 mutex (per-connection)
-        // and Layer-2 dedup (token-hash) already prevent concurrent refreshes for
-        // the import-burst scenario.
       }
     } catch (e) {
       log?.warn?.(
@@ -675,16 +759,8 @@ async function _getAccessTokenWithStalenessCheck(provider, credentials, log, pro
   }
 
   const oldRefreshToken = credentials.refreshToken;
-  // Front 1: serialize the network refresh across all connections of the same
-  // rotation group (e.g. Codex+openai share one Auth0 client) so two sibling
-  // accounts never refresh concurrently and trip Auth0 family revocation.
-  const result = await serializeRefresh(provider, () =>
-    _getAccessTokenInternal(provider, credentials, log, proxyConfig)
-  );
+  const result = await _getAccessTokenInternal(provider, credentials, log, proxyConfig);
 
-  // Record the rotation so subsequent stale callers can be redirected to the
-  // new tokens without re-hitting upstream (which would trigger Auth0 family
-  // revocation). Only records when the refresh actually rotated the token.
   if (
     result &&
     typeof result === "object" &&

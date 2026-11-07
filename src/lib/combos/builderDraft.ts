@@ -83,6 +83,7 @@ export function buildPrecisionComboModelStep({
   connectionLabel,
   allowedConnectionIds = null,
   weight = 0,
+  modelPrefix,
 }: {
   providerId: string;
   modelId: string;
@@ -91,9 +92,22 @@ export function buildPrecisionComboModelStep({
   /** #3266: account allowlist scoping round-robin to a subset of connections. */
   allowedConnectionIds?: string[] | null;
   weight?: number;
+  /**
+   * #11433: the routing-prefix segment to serialize into `model` (e.g. a
+   * no-auth provider's alias), when it differs from the canonical
+   * `providerId`. Some canonical provider ids collide with an
+   * unrelated manual `ALIAS_TO_PROVIDER_ID` routing override (`opencode` →
+   * `opencode-zen`), so reconstructing `model` from the raw `providerId`
+   * alone can round-trip to the wrong provider on request routing. Falls
+   * back to `providerId` when omitted/blank. `step.providerId` always stays
+   * the canonical id regardless, so routing/duplicate-detection identity is
+   * unaffected.
+   */
+  modelPrefix?: string | null;
 }): ComboModelStep {
   const normalizedProviderId = toTrimmedString(providerId) || "provider";
   const normalizedModelId = toTrimmedString(modelId) || "model";
+  const normalizedModelPrefix = toTrimmedString(modelPrefix) || normalizedProviderId;
   const normalizedConnectionId = toTrimmedString(connectionId);
   const normalizedConnectionLabel = toTrimmedString(connectionLabel);
   // A pinned single connection wins over an allowlist, so only carry the allowlist
@@ -110,7 +124,7 @@ export function buildPrecisionComboModelStep({
   return {
     kind: "model",
     providerId: normalizedProviderId,
-    model: `${normalizedProviderId}/${normalizedModelId}`,
+    model: `${normalizedModelPrefix}/${normalizedModelId}`,
     ...(normalizedConnectionId ? { connectionId: normalizedConnectionId } : {}),
     ...(normalizedConnectionLabel ? { label: normalizedConnectionLabel } : {}),
     ...(normalizedAllowed.length > 0 ? { allowedConnectionIds: normalizedAllowed } : {}),
@@ -160,10 +174,15 @@ export function buildManualComboModelStep({
   const providerId = resolveComboBuilderProviderId(parsed.providerId, providers);
   if (!providerId) return null;
 
+  // #11433: preserve the user-typed prefix as the routing prefix instead of
+  // letting buildPrecisionComboModelStep rebuild `model` from the resolved
+  // canonical providerId, which can collide with an unrelated manual alias
+  // override (e.g. "opencode" -> "opencode-zen").
   return buildPrecisionComboModelStep({
     providerId,
     modelId: parsed.modelId,
     weight,
+    modelPrefix: parsed.providerId,
   });
 }
 
@@ -208,6 +227,125 @@ export function findNextSuggestedConnectionId(
   }
 
   return COMBO_BUILDER_AUTO_CONNECTION;
+}
+
+export type ComboBuilderGlobalModelEntry = {
+  providerId: string;
+  providerName: string;
+  modelId: string;
+  modelName: string;
+  connectionCount: number;
+  connections: unknown[];
+  step: ComboModelStep;
+};
+
+type ComboBuilderGlobalProvider = {
+  providerId?: unknown;
+  displayName?: unknown;
+  connectionCount?: unknown;
+  connections?: unknown[];
+  models?: Array<{ id?: unknown; name?: unknown; qualifiedModel?: unknown }>;
+};
+
+/**
+ * Flattens the combo builder's provider→model tree into a single searchable
+ * list (one row per provider/model pair), used by the "global model search"
+ * selection mode in the combo builder (#8285). Each entry carries the exact
+ * `ComboModelStep` that would be added if the user picks it, pre-built with
+ * no pinned connection so the combo auto-selects at runtime.
+ */
+export function buildGlobalModelList(
+  providers: ComboBuilderGlobalProvider[] = []
+): ComboBuilderGlobalModelEntry[] {
+  const list: ComboBuilderGlobalModelEntry[] = [];
+
+  (providers || []).forEach((provider) => {
+    const providerId = toTrimmedString(provider?.providerId) || "";
+    if (!providerId) return;
+    const providerName = toTrimmedString(provider?.displayName) || providerId;
+    const connectionCount =
+      typeof provider?.connectionCount === "number" ? provider.connectionCount : 0;
+    const connections = Array.isArray(provider?.connections) ? provider.connections : [];
+
+    (provider?.models || []).forEach((model) => {
+      const modelId = toTrimmedString(model?.id);
+      if (!modelId) return;
+      const modelName = toTrimmedString(model?.name) || modelId;
+      // #11433: derive the routing prefix from the model's already-corrected
+      // `qualifiedModel` (e.g. "<alias>/<model>" for a no-auth provider)
+      // instead of defaulting to the raw providerId, which can collide with
+      // an unrelated manual alias override.
+      const modelPrefix = parseQualifiedModel(model?.qualifiedModel)?.providerId || providerId;
+      const step = buildPrecisionComboModelStep({
+        providerId,
+        modelId,
+        connectionId: null,
+        connectionLabel: null,
+        allowedConnectionIds: [],
+        modelPrefix,
+      });
+      list.push({
+        providerId,
+        providerName,
+        modelId,
+        modelName,
+        connectionCount,
+        connections,
+        step,
+      });
+    });
+  });
+
+  return list;
+}
+
+/**
+ * Case-insensitive substring filter over `buildGlobalModelList()` output,
+ * matching against provider display name, provider id, model name and model
+ * id combined. Empty/whitespace-only query returns the full list unfiltered.
+ */
+export function filterGlobalModelList(
+  entries: ComboBuilderGlobalModelEntry[],
+  query: string
+): ComboBuilderGlobalModelEntry[] {
+  const normalizedQuery = (query || "").trim().toLowerCase();
+  if (!normalizedQuery) return entries;
+  return entries.filter((item) => {
+    const text =
+      `${item.providerName} ${item.providerId} ${item.modelName} ${item.modelId}`.toLowerCase();
+    return text.includes(normalizedQuery);
+  });
+}
+
+/**
+ * Appends a single global-search step to the combo's model list, skipping it
+ * if an exact provider/model/account duplicate is already present. Returns
+ * the original array reference when nothing changed so callers can skip a
+ * state update.
+ */
+export function addGlobalModelStep(entries: unknown[], step: unknown): unknown[] {
+  if (hasExactModelStepDuplicate(entries, step)) return entries;
+  return [...entries, step];
+}
+
+/**
+ * Appends every non-duplicate step from a filtered global-search result set,
+ * de-duplicating against both the existing combo models and steps already
+ * queued earlier in the same batch (so two search matches that resolve to
+ * the same provider/model/account never get added twice). Returns the
+ * original array reference when nothing changed.
+ */
+export function addAllGlobalSearchMatches(
+  entries: unknown[],
+  matches: ComboBuilderGlobalModelEntry[]
+): unknown[] {
+  const newSteps: unknown[] = [];
+  (matches || []).forEach((item) => {
+    if (!hasExactModelStepDuplicate([...entries, ...newSteps], item.step)) {
+      newSteps.push(item.step);
+    }
+  });
+  return newSteps.length > 0 ? [...entries, ...newSteps] : entries;
 }
 
 export function getComboBuilderStageChecks({

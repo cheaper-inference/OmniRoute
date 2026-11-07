@@ -1,10 +1,25 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-claude-rendering-"));
+const previousDataDir = process.env.DATA_DIR;
+process.env.DATA_DIR = TEST_DATA_DIR;
 
 const { openaiResponsesToOpenAIResponse } =
   await import("../../open-sse/translator/response/openai-responses.ts");
 const { FORMATS } = await import("../../open-sse/translator/formats.ts");
 const { createSSETransformStreamWithLogger } = await import("../../open-sse/utils/stream.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+
+test.after(() => {
+  resetDbInstance();
+  if (previousDataDir === undefined) delete process.env.DATA_DIR;
+  else process.env.DATA_DIR = previousDataDir;
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
 
 test("Responses->Chat: output_item.done emits arguments when no delta chunks were sent", () => {
   const state = {
@@ -38,7 +53,7 @@ test("Responses->Chat: output_item.done emits arguments when no delta chunks wer
   assert.equal(state.toolCallIndex, 1);
 });
 
-test("Responses->Chat: output_item.done does not re-emit arguments already streamed via deltas", () => {
+test("Responses->Chat: buffered argument deltas emit once at output_item.done", () => {
   const state = {
     started: true,
     chatId: "chatcmpl-test",
@@ -46,8 +61,18 @@ test("Responses->Chat: output_item.done does not re-emit arguments already strea
     toolCallIndex: 0,
     finishReasonSent: false,
     currentToolCallId: "call_abc",
-    currentToolCallArgsBuffer: '{"query":"search"}',
+    currentToolCallArgsBuffer: "",
   };
+
+  const deltaResult = openaiResponsesToOpenAIResponse(
+    {
+      type: "response.function_call_arguments.delta",
+      delta: '{"query":"search"}',
+    },
+    state
+  );
+
+  assert.equal(deltaResult, null);
 
   const chunk = {
     type: "response.output_item.done",
@@ -62,7 +87,8 @@ test("Responses->Chat: output_item.done does not re-emit arguments already strea
 
   const result = openaiResponsesToOpenAIResponse(chunk, state);
 
-  assert.equal(result, null);
+  assert.ok(result);
+  assert.equal(result.choices[0].delta.tool_calls[0].function.arguments, '{"query":"search"}');
   assert.equal(state.toolCallIndex, 1);
 });
 

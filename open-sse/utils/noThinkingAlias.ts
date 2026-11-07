@@ -31,6 +31,15 @@ import { getModelSpec } from "@/shared/constants/modelSpecs";
 
 export const NO_THINKING_PREFIX = "no-think/";
 
+// Ids that already carry a Claude reasoning-effort suffix (see
+// claudeEffortVariants.ts's identical constant) — a no-think variant of an effort
+// variant would combine two independent OmniRoute catalog conventions on the same
+// id. Dispatch-time, applyNoThinkingAlias pre-sets reasoning_effort:"none" before
+// applyClaudeEffortVariant's hasExplicitClaudeEffort() check runs, so the pre-set
+// "none" is treated as explicit and the suffix's implied effort is silently
+// discarded — semantically incoherent, so never advertise the combination.
+const CLAUDE_EFFORT_SUFFIX_RE = /-(?:xhigh|high|medium|low)$/i;
+
 /** True when `modelId` carries the no-thinking gateway prefix. */
 export function isNoThinkingAlias(modelId: unknown): modelId is string {
   return typeof modelId === "string" && modelId.startsWith(NO_THINKING_PREFIX);
@@ -108,6 +117,7 @@ export function shouldExposeNoThinkingAlias(model: CatalogModelEntry): boolean {
   if (typeof id !== "string" || id.length === 0) return false;
   if (model.owned_by === "combo") return false; // combos are virtual
   if (isNoThinkingAlias(id)) return false; // never double-alias
+  if (CLAUDE_EFFORT_SUFFIX_RE.test(id)) return false; // never combine with an effort-suffix id
 
   const name = bareModelName(id);
   const spec = getModelSpec(name);
@@ -146,19 +156,26 @@ function normalizeProviderPrefix(
  * @param aliasToCanonical - When provided, the inner provider prefix of each variant id is
  *   normalized to its canonical form (e.g. "cc" → "claude"). Pass this when the catalog is
  *   emitting canonical-prefixed ids so no-think variants stay consistent with the prefix mode.
+ * @param options.featureEnabled - `false` returns the models untouched (feature flag off).
  */
 export function appendNoThinkingVariants<T extends CatalogModelEntry>(
   models: T[],
-  aliasToCanonical?: Record<string, string>
+  aliasToCanonical?: Record<string, string>,
+  options?: { featureEnabled?: boolean }
 ): T[] {
   if (!Array.isArray(models)) return models;
+  // #11971: the catalog passes the DISABLE_THINKING_LEVEL_VARIANTS feature flag here; when
+  // the alias feature is switched off no variant is appended (the call site typed this
+  // third argument before it existed — TS2554 on the release tip).
+  if (options?.featureEnabled === false) return models;
   const variants: T[] = [];
   for (const model of models) {
     if (!shouldExposeNoThinkingAlias(model)) continue;
     const rawId = model.id as string;
     const qualifiedId = aliasToCanonical ? normalizeProviderPrefix(rawId, aliasToCanonical) : rawId;
     const aliasId = toNoThinkingAlias(qualifiedId);
-    const variant: T = { ...model, id: aliasId, root: aliasId };
+    const bareRoot = toNoThinkingAlias(bareModelName(qualifiedId));
+    const variant: T = { ...model, id: aliasId, root: bareRoot };
     if (typeof model.name === "string" && model.name) {
       variant.name = `${model.name} (no thinking)`;
     }

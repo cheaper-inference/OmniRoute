@@ -13,10 +13,18 @@ import {
   type WebFetchCredentials,
   type WebFetchFormat,
   type WebFetchResponse,
+  WEB_FETCH_PROVIDERS,
+  EXPLICIT_ONLY_WEB_FETCH_PROVIDERS,
+  ANONYMOUS_CAPABLE_WEB_FETCH_PROVIDERS,
+  type WebFetchProviderId,
 } from "@omniroute/open-sse/handlers/webFetch.ts";
 
-const WEB_FETCH_PROVIDERS = ["firecrawl", "jina-reader", "tavily-search", "tinyfish"] as const;
-type WebFetchProviderId = (typeof WEB_FETCH_PROVIDERS)[number];
+// Providers that only understand their own URL shape (context7 takes a library
+// reference, not a generic web URL): explicit requests only, never auto-selected.
+const EXPLICIT_ONLY_PROVIDERS = EXPLICIT_ONLY_WEB_FETCH_PROVIDERS;
+
+// Providers whose upstream serves an anonymous tier: usable without a key.
+const ANONYMOUS_CAPABLE_PROVIDERS = ANONYMOUS_CAPABLE_WEB_FETCH_PROVIDERS;
 
 const FETCH_BACKEND_TO_PROVIDER: Record<FetchInterceptionBackend, WebFetchProviderId> = {
   firecrawl: "firecrawl",
@@ -61,11 +69,30 @@ function resolvePinnedBackend(input: ExecuteWebFetchInput): WebFetchProviderId |
   return backend ? FETCH_BACKEND_TO_PROVIDER[backend] : undefined;
 }
 
+export function normalizeWebFetchCredentials(value: unknown): WebFetchCredentials | null {
+  if (!value || typeof value !== "object") return null;
+  const credentials = value as Record<string, unknown>;
+  if (credentials.allRateLimited === true || credentials.allExpired === true) return null;
+
+  const providerSpecificData =
+    credentials.providerSpecificData &&
+    typeof credentials.providerSpecificData === "object" &&
+    !Array.isArray(credentials.providerSpecificData)
+      ? (credentials.providerSpecificData as Record<string, unknown>)
+      : undefined;
+
+  return {
+    ...(typeof credentials.apiKey === "string" && { apiKey: credentials.apiKey }),
+    ...(typeof credentials.baseUrl === "string" && { baseUrl: credentials.baseUrl }),
+    ...(providerSpecificData && { providerSpecificData }),
+  };
+}
+
 async function resolveCredentials(
   providerId: WebFetchProviderId
 ): Promise<WebFetchCredentials | null> {
   try {
-    return (await getProviderCredentialsWithQuotaPreflight(providerId)) ?? null;
+    return normalizeWebFetchCredentials(await getProviderCredentialsWithQuotaPreflight(providerId));
   } catch {
     return null;
   }
@@ -76,6 +103,7 @@ async function autoSelectProvider(): Promise<{
   credentials: WebFetchCredentials;
 } | null> {
   for (const providerId of WEB_FETCH_PROVIDERS) {
+    if (EXPLICIT_ONLY_PROVIDERS.has(providerId)) continue;
     const credentials = await resolveCredentials(providerId);
     if (credentials) return { provider: providerId, credentials };
   }
@@ -89,6 +117,12 @@ async function resolveProviderAndCredentials(
   const pinnedCredentials = pinnedProvider ? await resolveCredentials(pinnedProvider) : null;
   if (pinnedProvider && pinnedCredentials) {
     return { provider: pinnedProvider, credentials: pinnedCredentials };
+  }
+  if (pinnedProvider && ANONYMOUS_CAPABLE_PROVIDERS.has(pinnedProvider)) {
+    // Anonymous tier: no connection configured (or the credential resolution
+    // came back rate-limited — the anonymous tier does not consume key quota,
+    // so a rate-limited key must not block the anonymous attempt either).
+    return { provider: pinnedProvider, credentials: {} };
   }
 
   const auto = await autoSelectProvider();

@@ -2,12 +2,17 @@ import { spawn, type ChildProcess } from "child_process";
 import path from "path";
 import fs from "fs";
 import { resolveMitmDataDir } from "./dataDir.ts";
-import { removeDNSEntry, removeDNSEntries, checkDNSEntryForAgent } from "./dns/dnsConfig.ts";
+import {
+  removeDNSEntry,
+  removeDNSEntries,
+  checkDNSEntryForAgent,
+  checkDNSEntry,
+} from "./dns/dnsConfig.ts";
 import { provisionDnsEntries } from "./dns/provision.ts";
 import { generateCert } from "./cert/generate.ts";
 import { installCertResult, installCaCert } from "./cert/install.ts";
 import { loadOrCreateMitmCa, resolveMitmCertDir } from "./cert/rootCa.ts";
-import { decideCertMigration } from "./cert/migration.ts";
+import { resolveActiveCertPath } from "./cert/activeCert.ts";
 import { ALL_TARGETS } from "./targets/index.ts";
 import { detectAgent } from "./detection/index.ts";
 import type { AgentId, DetectionResult, MitmTarget } from "./types.ts";
@@ -23,7 +28,13 @@ import {
   type RepairPlan,
 } from "./repair.ts";
 import { runPrivilegedMitmStep } from "./privilegedMitmStep.ts";
-import { removeStopDnsEntries } from "./stopDnsTeardown.ts";
+import { removeDnsEntriesAfterFailedStart, removeStopDnsEntries } from "./stopDnsTeardown.ts";
+import {
+  deriveOrphanedState,
+  revertHostsAfterUnexpectedExit,
+  type UnexpectedExitDeps,
+} from "./childExitCleanup.ts";
+import { canRunPrivilegedMitmSteps } from "./sudoGate.ts";
 
 export { buildRepairPlan, collectManagedHosts, type RepairPlan };
 
@@ -111,6 +122,10 @@ export function releaseMitmStartLock(): void {
 // teardown). The dashboard surfaces this to offer a one-click Repair. Cleared
 // by repairMitm(). (Gap 7.)
 let _orphanedStateDetected = false;
+
+// Children this process killed on purpose (stopMitm / parent signal). Marked
+// BEFORE kill() so their later `exit` event is not mistaken for a crash.
+const _intentionallyStopped = new WeakSet<ChildProcess>();
 
 // Guards installCleanupHandlers() so the parent-process signal handlers are
 // registered at most once. (Gap 7.)
@@ -229,8 +244,12 @@ const urlPath =
     ? decodeURIComponent(MITM_SERVER_URL.pathname.slice(1))
     : decodeURIComponent(MITM_SERVER_URL.pathname);
 
-const cwdPath = path.join(process.cwd(), "src", "mitm", "server.cjs");
-const MITM_SERVER_PATH = fs.existsSync(cwdPath) ? cwdPath : urlPath;
+// Lazy-resolve to avoid module-level fs.existsSync + process.cwd() at module scope,
+// which causes Turbopack's NFT tracer to follow the path into the entire src/ tree.
+function resolveMitmServerPath(): string {
+  const cwdPath = path.join(/* turbopackIgnore: true */ process.cwd(), "src", "mitm", "server.cjs");
+  return fs.existsSync(cwdPath) ? cwdPath : urlPath;
+}
 
 // Check if a PID is alive
 function isProcessAlive(pid: number): boolean {
@@ -318,7 +337,10 @@ export async function handleExitCleanup(
   };
 
   try {
-    if (serverProcess && !serverProcess.killed) serverProcess.kill("SIGTERM");
+    if (serverProcess && !serverProcess.killed) {
+      _intentionallyStopped.add(serverProcess);
+      serverProcess.kill("SIGTERM");
+    }
   } catch {
     // ignore
   }
@@ -395,31 +417,82 @@ export async function getMitmStatus(agentId?: string): Promise<{
   }
 
   // Check DNS configuration. When an agentId is provided, check THAT agent's
-  // own hosts (#8466) instead of always checking the Antigravity host set —
-  // callers that don't pass agentId keep the legacy Antigravity-only check.
+  // own hosts (#8466) instead of always checking the Antigravity host set.
+  // Fix #8656: no-agentId path now uses checkDNSEntry() which is Windows-aware
+  // (reads HOSTS_FILE = C:\Windows\System32\drivers\etc\hosts on Windows).
   let dnsConfigured = false;
   try {
     if (agentId) {
       dnsConfigured = checkDNSEntryForAgent(agentId);
     } else {
-      const hostsContent = fs.readFileSync("/etc/hosts", "utf-8");
-      dnsConfigured = /\bdaily-cloudcode-pa\.googleapis\.com\b/.test(hostsContent);
+      // Use Windows-aware checkDNSEntry() instead of hardcoded /etc/hosts
+      dnsConfigured = checkDNSEntry();
     }
   } catch {
     // Ignore
   }
 
-  // Check cert
+  // Check cert. #14070: resolve the file the active migration decision
+  // actually installs (ca.crt under the root-CA model), not always the
+  // legacy server.crt — otherwise a root-CA install with no leaf ever
+  // generated would wrongly report certExists:false.
   const certDir = path.join(resolveMitmDataDir(), "mitm");
-  const certExists = fs.existsSync(path.join(certDir, "server.crt"));
+  const rootCaEnabledForStatus = process.env.MITM_ROOT_CA_ENABLED === "true";
+  const certExists = fs.existsSync(resolveActiveCertPath(certDir, rootCaEnabledForStatus).certPath);
 
   return {
     running,
     pid,
     dnsConfigured,
     certExists,
-    orphanedStateDetected: _orphanedStateDetected,
+    orphanedStateDetected: deriveOrphanedState({
+      flagged: _orphanedStateDetected,
+      running,
+      dnsConfigured,
+      starting: mitmStarting,
+    }),
   };
+}
+
+/**
+ * `exit` handler of the spawned MITM child. Clears the in-memory handle and PID
+ * file (only when the exiting child is still the current one, so a late exit of
+ * a previous child cannot orphan a freshly started one). When the child died on
+ * its own AFTER a confirmed start — not via stopMitm()/the signal handler, and
+ * not during startup, whose failure path already reverts DNS — revert the hosts
+ * entries with the cached sudo password, or flag orphaned state for Repair.
+ * @param _depsOverride - optional dependency override, used in tests for DI.
+ */
+export async function handleMitmChildExit(
+  proc: ChildProcess,
+  code: number | null,
+  opts: { startConfirmed: boolean },
+  _depsOverride?: Partial<UnexpectedExitDeps>
+): Promise<void> {
+  log.info({ exitCode: code }, "MITM server exited");
+  if (serverProcess === proc) {
+    serverProcess = null;
+    serverPid = null;
+    try {
+      fs.unlinkSync(PID_FILE);
+    } catch {
+      // Ignore
+    }
+  }
+
+  if (!opts.startConfirmed || _intentionallyStopped.has(proc)) return;
+
+  const reverted = await revertHostsAfterUnexpectedExit(
+    {
+      getCachedPassword: _depsOverride?.getCachedPassword ?? getCachedPassword,
+      canRunPrivileged: _depsOverride?.canRunPrivileged ?? canRunPrivilegedMitmSteps,
+      removeDNSEntry: _depsOverride?.removeDNSEntry ?? removeDNSEntry,
+      removeDNSEntries: _depsOverride?.removeDNSEntries ?? removeDNSEntries,
+      collectManagedHosts: _depsOverride?.collectManagedHosts ?? collectManagedHosts,
+    },
+    code
+  );
+  if (!reverted) _orphanedStateDetected = true;
 }
 
 /**
@@ -506,7 +579,7 @@ async function startMitmInternal(
   //    `tproxy/dynamicCert.ts`).
   const certDir = resolveMitmCertDir();
   const rootCaEnabled = process.env.MITM_ROOT_CA_ENABLED === "true";
-  const migrationDecision = decideCertMigration(certDir, rootCaEnabled);
+  const { mode: migrationDecision } = resolveActiveCertPath(certDir, rootCaEnabled);
   let certPath: string;
   if (migrationDecision === "use-legacy-leaf") {
     certPath = path.join(resolveMitmDataDir(), "mitm", "server.crt");
@@ -601,7 +674,7 @@ async function startMitmInternal(
     }
   }
 
-  serverProcess = spawn(process.execPath, [MITM_SERVER_PATH], {
+  serverProcess = spawn(process.execPath, [resolveMitmServerPath()], {
     windowsHide: true,
     env: {
       ...process.env,
@@ -645,17 +718,11 @@ async function startMitmInternal(
     log.error({ source: "mitm-server" }, chunk.trim());
   });
 
+  // Flipped once the startup check below passes; an exit before that is a
+  // failed start, whose own path reverts DNS.
+  let startConfirmed = false;
   proc.on("exit", (code) => {
-    log.info({ exitCode: code }, "MITM server exited");
-    serverProcess = null;
-    serverPid = null;
-
-    // Remove PID file
-    try {
-      fs.unlinkSync(PID_FILE);
-    } catch (error) {
-      // Ignore
-    }
+    void handleMitmChildExit(proc, code, { startConfirmed });
   });
 
   // Wait and verify server actually started
@@ -691,8 +758,23 @@ async function startMitmInternal(
   });
 
   if (!started) {
+    // Step 3 above already wrote the /etc/hosts entries. Leaving them behind
+    // points every AgentBridge target hostname at 127.0.0.1:<port>, where the
+    // service that actually owns the port answers with a TLS alert — so the
+    // hostnames fail machine-wide with the bridge down and no way to recover
+    // from the UI. Revert them before surfacing the startup error.
+    await runPrivilegedMitmStep(
+      sudoPassword,
+      "Skipping DNS rollback after a failed start — no sudo password available",
+      () =>
+        removeDnsEntriesAfterFailedStart(
+          { removeDNSEntry, removeDNSEntries, collectManagedHosts },
+          sudoPassword
+        )
+    );
     throw new Error(interpretMitmStartupError(stderrBuffer, port));
   }
+  startConfirmed = true;
 
   return {
     running: true,
@@ -712,6 +794,7 @@ async function killMitmServerProcessOnStop(): Promise<void> {
   const proc = serverProcess;
   if (proc && !proc.killed) {
     log.info("Stopping MITM server...");
+    _intentionallyStopped.add(proc);
     proc.kill("SIGTERM");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     if (!proc.killed) {

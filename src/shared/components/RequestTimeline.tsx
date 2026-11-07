@@ -2,134 +2,49 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { getHttpStatusStyle } from "@/shared/constants/colors";
+import { useTranslations } from "next-intl";
 import { copyToClipboard } from "@/shared/utils/clipboard";
+import { formatApiKeyLabel } from "@/shared/utils/formatting";
+import { MCP_TOOL_SCOPES } from "@/shared/constants/mcpScopes";
 import RequestLoggerDetail from "@/shared/components/RequestLoggerDetail";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
+import useEmailPrivacyStore from "@/store/emailPrivacyStore";
+import {
+  type TimelineLog,
+  type ViewMode,
+  VISIBLE_WINDOW_MS,
+  BAR_HEIGHT,
+  LANE_GAP,
+  LANE_HEIGHT,
+  HEADER_HEIGHT,
+  AXIS_HEIGHT,
+  MIN_BAR_WIDTH,
+  DEFAULT_LIST_POLL_SECONDS,
+  TIMELINE_LIST_POLL_STORAGE_KEY,
+  FOLLOW_LINE_X,
+  LIVE_LINE_FRACTION,
+  DRAG_THRESHOLD_PX,
+  computeBarRange,
+  MODE_META,
+  formatTimeAxis,
+  CONVERSATION_LANE_REUSE_STORAGE_KEY,
+  allocateLanes,
+  truncateModel,
+  formatDateLabel,
+  loadTimelineLogs,
+  mergeApiKeyOptions,
+  rememberApiKeysFromPoll,
+  nextTimelineLogs,
+  getTimelineBarColor,
+  MCP_BAR_COLOR,
+  TIMELINE_BAR_COLORS,
+} from "@/shared/components/RequestTimeline.utils";
 
-interface TimelineLog {
-  id: string;
-  timestamp: string;
-  status: number;
-  model: string | null;
-  provider: string | null;
-  account: string | null;
-  duration: number;
-  tokens: { in: number; out: number };
-  active?: boolean;
-  completed?: boolean;
-  error?: string | null;
-  path?: string | null;
-}
-
-interface Lane {
-  startMs: number;
-  endMs: number;
-}
-
-type ViewMode = "follow" | "live" | "pan";
-
-const VISIBLE_WINDOW_MS = 5 * 60 * 1000;
-const BAR_HEIGHT = 28;
-const LANE_GAP = 4;
-const LANE_HEIGHT = BAR_HEIGHT + LANE_GAP;
-const HEADER_HEIGHT = 48;
-const AXIS_HEIGHT = 32;
-const MIN_BAR_WIDTH = 3;
-const POLL_INTERVAL_MS = 2000;
-const FOLLOW_LINE_X = 0.75;
-const LIVE_LINE_FRACTION = 0.9;
-
-function computeBarRange(log: TimelineLog, nowMs: number): { startMs: number; endMs: number } {
-  const ts = new Date(log.timestamp).getTime();
-  if (log.active) return { startMs: ts, endMs: nowMs };
-  if (log.completed) return { startMs: ts, endMs: ts + (log.duration || 0) };
-  return { startMs: ts - (log.duration || 0), endMs: ts };
-}
-
-const MODE_META: Record<ViewMode, { label: string; description: string }> = {
-  follow: {
-    label: "Follow",
-    description: "Axis scrolls left, NOW line stays at 75%",
-  },
-  live: {
-    label: "Now",
-    description: "Jump to current time, NOW line resets to center",
-  },
-  pan: {
-    label: "Pan",
-    description: "Drag to explore, background is frozen",
-  },
-};
-
-function formatTimeAxis(ms: number): string {
-  const d = new Date(ms);
-  const h = d.getHours().toString().padStart(2, "0");
-  const m = d.getMinutes().toString().padStart(2, "0");
-  const s = d.getSeconds().toString().padStart(2, "0");
-  return `${h}:${m}:${s}`;
-}
-
-function getStatusColor(status: number, active: boolean | undefined): string {
-  if (active) return "#6366F1";
-  return getHttpStatusStyle(status).bg;
-}
-
-function allocateLanes(items: TimelineLog[], nowMs: number): Map<string, number> {
-  const lanes: Lane[] = [];
-  const laneMap = new Map<string, number>();
-
-  const sorted = [...items].sort((a, b) => {
-    const aStart = new Date(a.timestamp).getTime();
-    const bStart = new Date(b.timestamp).getTime();
-    return aStart - bStart;
-  });
-
-  for (const item of sorted) {
-    const { startMs, endMs } = computeBarRange(item, nowMs);
-
-    let placed = false;
-    for (let i = 0; i < lanes.length; i++) {
-      if (lanes[i].endMs < startMs) {
-        lanes[i] = { startMs, endMs };
-        laneMap.set(item.id, i);
-        placed = true;
-        break;
-      }
-    }
-    if (!placed) {
-      laneMap.set(item.id, lanes.length);
-      lanes.push({ startMs, endMs });
-    }
-  }
-
-  return laneMap;
-}
-
-function truncateModel(model: string | null): string {
-  if (!model) return "";
-  const parts = model.split("/");
-  const short = parts[parts.length - 1];
-  return short.length > 16 ? short.slice(0, 15) + "\u2026" : short;
-}
-
-function formatDateLabel(ms: number): string {
-  const d = new Date(ms);
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  return `${months[d.getMonth()]} ${d.getDate()}`;
-}
+export type { TimelineLog } from "@/shared/components/RequestTimeline.utils";
+export { allocateLanes } from "@/shared/components/RequestTimeline.utils";
 
 export default function RequestTimeline({
   initialSelectedId,
@@ -137,6 +52,7 @@ export default function RequestTimeline({
   initialSelectedId?: string | null;
 } = {}) {
   const router = useRouter();
+  const t = useTranslations("requestTimeline");
   const [logs, setLogs] = useState<TimelineLog[]>([]);
   const [mode, setMode] = useState<ViewMode>("follow");
   const [zoom, setZoom] = useState(1);
@@ -148,11 +64,35 @@ export default function RequestTimeline({
   const [panFrozenMs, setPanFrozenMs] = useState(0);
   const [liveBaseMs, setLiveBaseMs] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStartX, setDragStartX] = useState(0);
-  const [dragStartOffset, setDragStartOffset] = useState(0);
+  const { emailsVisible } = useEmailPrivacyStore();
   const [selectedLog, setSelectedLog] = useState<TimelineLog | null>(null);
   const [detailData, setDetailData] = useState<any>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [detailLoggingEnabled, setDetailLoggingEnabled] = useState(false);
+  const [conversationLaneReuseMinutes, setConversationLaneReuseMinutes] = useState(() => {
+    if (globalThis.window === undefined) return 2;
+    try {
+      const saved = localStorage.getItem(CONVERSATION_LANE_REUSE_STORAGE_KEY);
+      const parsed = saved ? Number(saved) : 2;
+      return Number.isFinite(parsed) && parsed > 0 ? parsed : 2;
+    } catch {
+      return 2;
+    }
+  });
+  const [listPollSeconds, setListPollSeconds] = useState(() => {
+    if (globalThis.window === undefined) return DEFAULT_LIST_POLL_SECONDS;
+    try {
+      const saved = localStorage.getItem(TIMELINE_LIST_POLL_STORAGE_KEY);
+      const parsed = saved ? Number(saved) : DEFAULT_LIST_POLL_SECONDS;
+      return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_LIST_POLL_SECONDS;
+    } catch {
+      return DEFAULT_LIST_POLL_SECONDS;
+    }
+  });
+  const [selectedApiKey, setSelectedApiKey] = useState("");
+  const [seenApiKeyOptions, setSeenApiKeyOptions] = useState<string[]>([]);
+  const knownApiKeyIdsRef = useRef<string[]>([]);
+  const seenApiKeyOptionsRef = useRef<string[]>([]);
   const canvasRef = useRef<HTMLDivElement>(null);
   const animRef = useRef<number>(0);
   // Guards the ?id= deep-link mount effect below. Also armed by any manual
@@ -163,28 +103,52 @@ export default function RequestTimeline({
   const initialOpenedRef = useRef(false);
 
   useEffect(() => {
-    let cancelled = false;
-    fetch("/api/usage/call-logs?limit=200")
-      .then((res) => (res.ok ? res.json() : []))
+    fetch("/api/logs/detail?limit=1")
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (!cancelled) setLogs(data);
+        if (!data) return;
+        setDetailLoggingEnabled(data.enabled === true);
       })
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = () => {
+      void loadTimelineLogs(
+        fetch,
+        selectedApiKey,
+        (tool) => MCP_TOOL_SCOPES[tool],
+        knownApiKeyIdsRef.current
+      ).then((data) => {
+        if (cancelled) return;
+        const remembered = rememberApiKeysFromPoll(
+          knownApiKeyIdsRef.current,
+          seenApiKeyOptionsRef.current,
+          data,
+          selectedApiKey
+        );
+        knownApiKeyIdsRef.current = remembered.knownIds;
+        seenApiKeyOptionsRef.current = remembered.seenOptions;
+        setSeenApiKeyOptions(remembered.seenOptions);
+        setLogs((current) => nextTimelineLogs(current, data));
+      });
+    };
+    refresh();
     const id = setInterval(() => {
-      // #8354: skip the poll while the tab is backgrounded (Page Visibility
-      // API), matching the pause-when-hidden pattern in RequestLoggerV2 and
-      // UsageStats so a background tab doesn't keep hammering the API.
       if (document.visibilityState !== "visible") return;
-      fetch("/api/usage/call-logs?limit=200")
-        .then((res) => (res.ok ? res.json() : []))
-        .then((data) => setLogs(data))
-        .catch(() => {});
-    }, POLL_INTERVAL_MS);
+      refresh();
+    }, listPollSeconds * 1000);
     return () => {
       cancelled = true;
       clearInterval(id);
     };
-  }, []);
+  }, [listPollSeconds, selectedApiKey]);
+
+  const apiKeyOptions = useMemo(
+    () => mergeApiKeyOptions(seenApiKeyOptions, logs, selectedApiKey),
+    [seenApiKeyOptions, logs, selectedApiKey]
+  );
 
   useEffect(() => {
     if (!canvasRef.current) return undefined;
@@ -250,7 +214,10 @@ export default function RequestTimeline({
     });
   }, [logs, timeStart, timeEnd, nowMs]);
 
-  const laneMap = useMemo(() => allocateLanes(logs, nowMs), [logs, nowMs]);
+  const laneMap = useMemo(
+    () => allocateLanes(logs, nowMs, conversationLaneReuseMinutes * 60 * 1000),
+    [logs, nowMs, conversationLaneReuseMinutes]
+  );
   const maxLane = useMemo(() => (laneMap.size > 0 ? Math.max(...laneMap.values()) : 0), [laneMap]);
 
   const barElements = useMemo(() => {
@@ -264,12 +231,45 @@ export default function RequestTimeline({
 
       const lane = laneMap.get(log.id) ?? 0;
       const topPx = lane * LANE_HEIGHT;
-      const color = getStatusColor(log.status, log.active);
+      const color = getTimelineBarColor(log);
       const opacity = log.active ? 0.9 : 0.7;
 
       return { log, leftPct, widthPct, topPx, color, opacity };
     });
   }, [visibleLogs, timeStart, timeEnd, nowMs, laneMap, canvasWidth]);
+
+  // One connector per consecutive pair of bars sharing a conversation id AND
+  // lane (i.e. allocateLanes actually treated them as one continuous
+  // conversation, not two bars that just happen to be adjacent).
+  const connectorElements = useMemo(() => {
+    const byConversation = new Map<string, typeof barElements>();
+    for (const el of barElements) {
+      const cid = el.log.sessionTag;
+      if (!cid) continue;
+      const list = byConversation.get(cid);
+      if (list) list.push(el);
+      else byConversation.set(cid, [el]);
+    }
+
+    const connectors: { id: string; x1: number; x2: number; y: number }[] = [];
+    for (const els of byConversation.values()) {
+      const sorted = [...els].sort(
+        (a, b) => new Date(a.log.timestamp).getTime() - new Date(b.log.timestamp).getTime()
+      );
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const a = sorted[i];
+        const b = sorted[i + 1];
+        if (a.topPx !== b.topPx) continue; // different lanes — reuse window lapsed
+        connectors.push({
+          id: `${a.log.id}-${b.log.id}`,
+          x1: a.leftPct + a.widthPct,
+          x2: b.leftPct,
+          y: a.topPx + BAR_HEIGHT / 2,
+        });
+      }
+    }
+    return connectors;
+  }, [barElements]);
 
   const axisTicks = useMemo(() => {
     const totalMs = timeEnd - timeStart;
@@ -335,6 +335,7 @@ export default function RequestTimeline({
 
   const handleBarClick = useCallback(
     (log: TimelineLog) => {
+      if (log.kind === "mcp") return;
       initialOpenedRef.current = true;
       setSelectedLog(log);
       setDetailData(null);
@@ -372,33 +373,43 @@ export default function RequestTimeline({
 
   // Deep-link support: open the request from ?id= on mount without waiting for
   // it to show up in the polled `logs` list (mirrors RequestLoggerV2's openDetail).
-  const openById = useCallback(async (id: string) => {
-    setDetailLoading(true);
-    try {
-      const res = await fetch(`/api/logs/${id}`, { cache: "no-store" });
-      const data = res.ok ? await res.json() : null;
-      if (data) {
-        setSelectedLog({
-          id: data.id ?? id,
-          timestamp: data.timestamp,
-          status: data.status ?? 0,
-          model: data.model ?? null,
-          provider: data.provider ?? null,
-          account: data.account ?? null,
-          duration: data.duration ?? 0,
-          tokens: data.tokens ?? { in: 0, out: 0 },
-          active: data.active,
-          error: data.error ?? null,
-          path: data.path ?? null,
-        });
-        setDetailData(data);
+  const openById = useCallback(
+    async (id: string) => {
+      try {
+        const url = new URL(globalThis.location.href);
+        url.searchParams.set("id", id);
+        router.replace(url.pathname + url.search);
+      } catch {
+        // ignore navigation errors
       }
-    } catch {
-      // ignore fetch errors
-    } finally {
-      setDetailLoading(false);
-    }
-  }, []);
+      setDetailLoading(true);
+      try {
+        const res = await fetch(`/api/logs/${id}`, { cache: "no-store" });
+        const data = res.ok ? await res.json() : null;
+        if (data) {
+          setSelectedLog({
+            id: data.id ?? id,
+            timestamp: data.timestamp,
+            status: data.status ?? 0,
+            model: data.model ?? null,
+            provider: data.provider ?? null,
+            account: data.account ?? null,
+            duration: data.duration ?? 0,
+            tokens: data.tokens ?? { in: 0, out: 0 },
+            active: data.active,
+            error: data.error ?? null,
+            path: data.path ?? null,
+          });
+          setDetailData(data);
+        }
+      } catch {
+        // ignore fetch errors
+      } finally {
+        setDetailLoading(false);
+      }
+    },
+    [router]
+  );
 
   useEffect(() => {
     if (!initialSelectedId || initialOpenedRef.current) return;
@@ -433,29 +444,44 @@ export default function RequestTimeline({
     [nowMs]
   );
 
+  // Mouse panning mirrors the touch path below: a plain click must NOT steal the
+  // user out of "follow" into "pan" — only a deliberate drag switches mode. A
+  // click with no movement falls through to the bar's onClick (detail modal).
+  const mouseDragRef = useRef<{ x: number; offset: number; moved: boolean } | null>(null);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    if (mode !== "pan") {
-      setMode("pan");
-      setPanFrozenMs(nowMs);
-      setLiveBaseMs(nowMs);
-    }
+    mouseDragRef.current = {
+      x: e.clientX,
+      offset: mode === "pan" ? panOffsetMs : 0,
+      // Already panning: any movement pans. From follow/live: wait for the threshold.
+      moved: mode === "pan",
+    };
     setIsDragging(true);
-    setDragStartX(e.clientX);
-    setDragStartOffset(mode === "pan" ? panOffsetMs : 0);
   };
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!isDragging) return;
-      const dx = e.clientX - dragStartX;
+      const start = mouseDragRef.current;
+      if (!start) return;
+      const dx = e.clientX - start.x;
+      if (!start.moved && Math.abs(dx) < DRAG_THRESHOLD_PX) return;
+      if (!start.moved) {
+        start.moved = true;
+        if (mode !== "pan") {
+          setMode("pan");
+          setPanFrozenMs(nowMs);
+          setLiveBaseMs(nowMs);
+        }
+      }
       const msPerPx = windowMs / canvasWidth;
-      setPanOffsetMs(dragStartOffset - dx * msPerPx);
+      setPanOffsetMs(start.offset - dx * msPerPx);
     },
-    [isDragging, dragStartX, dragStartOffset, windowMs, canvasWidth]
+    [mode, nowMs, windowMs, canvasWidth]
   );
 
   const handleMouseUp = useCallback(() => {
+    mouseDragRef.current = null;
     setIsDragging(false);
   }, []);
 
@@ -538,59 +564,136 @@ export default function RequestTimeline({
 
   return (
     <div className="flex flex-col h-full min-h-0 select-none">
-      {/* Header */}
+      {/* Header — HEADER_HEIGHT is a minimum, not a fixed height: below ~1100 px the controls
+          wrap to a second row instead of being clipped (390 px, F4). Nothing in the canvas
+          maths reads the header height (the canvas is the flex-1 sibling). */}
       <div
-        className="flex items-center justify-between px-4 py-2 border-b border-border shrink-0"
-        style={{ height: HEADER_HEIGHT }}
+        className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2 border-b border-border shrink-0"
+        style={{ minHeight: HEADER_HEIGHT }}
       >
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-semibold text-text-main">Request Timeline</h2>
+          <h2 className="text-sm font-semibold text-text-main">{t("title")}</h2>
           <span className="text-[10px] text-text-muted font-mono">
-            {visibleLogs.length} visible / {logs.length} total
+            {t("visibleCount", { visible: visibleLogs.length, total: logs.length })}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Mode selector */}
-          <div className="flex items-center rounded-lg border border-border overflow-hidden">
+          <div role="group" aria-label={t("modeLabel")} className="flex items-center gap-0.5">
             {(["follow", "live", "pan"] as ViewMode[]).map((m) => (
-              <button
+              <Button
                 key={m}
+                data-testid={`timeline-mode-${m}`}
+                variant={mode === m ? "primary" : "ghost"}
+                size="sm"
+                aria-pressed={mode === m}
                 onClick={() => handleModeChange(m)}
-                title={MODE_META[m].description}
-                className={`px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                  mode === m
-                    ? "bg-primary text-white"
-                    : "bg-bg-subtle text-text-muted hover:text-text-main"
-                }`}
+                title={t(`modes.${MODE_META[m].descriptionKey}`)}
+                className="h-7 min-h-7 px-2.5 text-[11px]"
               >
-                {MODE_META[m].label}
-              </button>
+                {t(`modes.${MODE_META[m].labelKey}`)}
+              </Button>
             ))}
           </div>
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleReset}
-            title={`Jump to current time, NOW line resets to position ${Math.round(nowLineX)}%`}
-            className="px-2 py-1 text-[11px] text-text-muted hover:text-text-main bg-bg-subtle rounded-md border border-border transition-colors"
+            title={t("jumpToNow", { position: Math.round(nowLineX) })}
+            className="h-7 min-h-7 px-2 text-[11px]"
           >
-            Reset
-          </button>
+            {t("reset")}
+          </Button>
+          <Select
+            value={selectedApiKey}
+            onChange={(e) => setSelectedApiKey(e.target.value)}
+            aria-label={t("apiKey")}
+            compact
+            className="w-auto"
+            data-testid="timeline-api-key-filter"
+          >
+            <option value="">{t("allApiKeys")}</option>
+            {apiKeyOptions.map((value) => {
+              const matched = logs.find((row) => (row.apiKeyId || row.apiKeyName) === value);
+              return (
+                <option key={value} value={value}>
+                  {formatApiKeyLabel(matched?.apiKeyName, matched?.apiKeyId || value)}
+                </option>
+              );
+            })}
+          </Select>
+          {/* Conversation lane-reuse window: how long a lane stays reserved
+              for its conversation before falling back to normal packing. */}
+          <div
+            className="flex items-center gap-1 whitespace-nowrap text-[11px] text-text-muted"
+            title={t("laneReuseHint")}
+          >
+            <span aria-hidden="true">{t("laneReuse")}</span>
+            <Input
+              type="number"
+              min={1}
+              step={1}
+              aria-label={t("laneReuseLabel")}
+              value={conversationLaneReuseMinutes}
+              onChange={(e) => {
+                const next = Math.max(1, Number(e.target.value) || 1);
+                setConversationLaneReuseMinutes(next);
+                try {
+                  localStorage.setItem(CONVERSATION_LANE_REUSE_STORAGE_KEY, String(next));
+                } catch {}
+              }}
+              className="w-auto min-w-0 shrink-0"
+              inputClassName="h-7 min-h-7 w-12 px-1 text-center font-mono text-[11px]"
+            />
+            <span aria-hidden="true">{t("laneReuseUnit")}</span>
+          </div>
+          {/* How often the timeline re-polls /api/usage/call-logs for new rows. */}
+          <div
+            className="flex items-center gap-1 whitespace-nowrap text-[11px] text-text-muted"
+            title={t("autoRefreshHint")}
+          >
+            <span aria-hidden="true">{t("autoRefresh")}</span>
+            <Input
+              type="number"
+              min={1}
+              step={1}
+              aria-label={t("autoRefreshLabel")}
+              value={listPollSeconds}
+              onChange={(e) => {
+                const next = Math.max(1, Number(e.target.value) || 1);
+                setListPollSeconds(next);
+                try {
+                  localStorage.setItem(TIMELINE_LIST_POLL_STORAGE_KEY, String(next));
+                } catch {}
+              }}
+              className="w-auto min-w-0 shrink-0"
+              inputClassName="h-7 min-h-7 w-12 px-1 text-center font-mono text-[11px]"
+            />
+            <span aria-hidden="true">{t("autoRefreshUnit")}</span>
+          </div>
           {/* Zoom */}
-          <div className="flex items-center gap-1 rounded-lg border border-border overflow-hidden">
-            <button
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setZoom((z) => Math.max(0.001, z * 0.5))}
-              className="px-2 py-1 text-[11px] text-text-muted hover:text-text-main bg-bg-subtle transition-colors"
+              aria-label={t("zoomOut")}
+              title={t("zoomOut")}
             >
-              -
-            </button>
-            <span className="px-1 text-[10px] text-text-muted font-mono min-w-[36px] text-center">
+              <span aria-hidden="true">-</span>
+            </Button>
+            <span className="min-w-[36px] px-1 text-center font-mono text-[10px] text-text-muted">
               {zoom >= 1 ? `${zoom}x` : `${zoom * 100}%`}
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setZoom((z) => Math.min(8, z * 2))}
-              className="px-2 py-1 text-[11px] text-text-muted hover:text-text-main bg-bg-subtle transition-colors"
+              aria-label={t("zoomIn")}
+              title={t("zoomIn")}
             >
-              +
-            </button>
+              <span aria-hidden="true">+</span>
+            </Button>
           </div>
         </div>
       </div>
@@ -598,6 +701,7 @@ export default function RequestTimeline({
       {/* Canvas */}
       <div
         ref={canvasRef}
+        data-testid="timeline-canvas"
         className={`flex-1 min-h-0 overflow-hidden relative bg-surface ${
           isDragging ? "cursor-grabbing" : mode === "pan" ? "cursor-grab" : ""
         }`}
@@ -643,7 +747,9 @@ export default function RequestTimeline({
             <div
               key={log.id}
               data-testid={`timeline-bar-${log.id}`}
-              className="absolute rounded-sm cursor-pointer transition-opacity duration-100"
+              className={`absolute rounded-sm transition-opacity duration-100 ${
+                log.kind === "mcp" ? "cursor-default" : "cursor-pointer"
+              }`}
               style={{
                 left: `${leftPct}%`,
                 width: `${widthPct}%`,
@@ -660,12 +766,55 @@ export default function RequestTimeline({
               onMouseLeave={handleBarLeave}
             >
               <div className="w-full h-full flex items-center px-1.5 overflow-hidden">
-                <span className="text-[11px] font-mono text-white/90 truncate whitespace-nowrap">
+                {/* text-bg inverts with the theme: light ink on the deep light-mode fills, dark ink
+                    on the pastel dark-mode fills (white on the pastels is ~1.5:1). */}
+                <span className="text-[11px] font-mono text-bg truncate whitespace-nowrap">
                   {truncateModel(log.model)}
                 </span>
               </div>
             </div>
           ))}
+
+          {/* Conversation connectors — one arrow per consecutive same-conversation
+              bar pair sharing a lane. */}
+          <svg
+            className="absolute left-0 right-0 pointer-events-none text-primary/60"
+            style={{
+              top: AXIS_HEIGHT,
+              height: (maxLane + 1) * LANE_HEIGHT,
+              width: "100%",
+              zIndex: 1,
+            }}
+            viewBox={`0 0 100 ${(maxLane + 1) * LANE_HEIGHT}`}
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <marker
+                id="conversation-connector-arrow"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="5"
+                markerHeight="5"
+                orient="auto-start-reverse"
+              >
+                <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+              </marker>
+            </defs>
+            {connectorElements.map(({ id, x1, x2, y }) => (
+              <line
+                key={id}
+                x1={x1}
+                y1={y}
+                x2={x2}
+                y2={y}
+                stroke="currentColor"
+                strokeWidth={2}
+                vectorEffect="non-scaling-stroke"
+                markerEnd="url(#conversation-connector-arrow)"
+              />
+            ))}
+          </svg>
         </div>
 
         {/* NOW line — full height of the canvas, outside content div */}
@@ -677,8 +826,8 @@ export default function RequestTimeline({
             bottom: 0,
           }}
         >
-          <div className="w-px h-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] -translate-x-1/2" />
-          <div className="absolute top-[2px] -translate-x-1/2 bg-red-500 text-white text-[8px] font-mono px-1.5 py-0.5 rounded-b-sm font-bold tracking-wider">
+          <div className="w-px h-full bg-error shadow-[0_0_8px_var(--color-error)] -translate-x-1/2" />
+          <div className="absolute top-[2px] -translate-x-1/2 bg-error text-bg text-[8px] font-mono px-1.5 py-0.5 rounded-b-sm font-bold tracking-wider">
             NOW
           </div>
         </div>
@@ -693,10 +842,10 @@ export default function RequestTimeline({
               width: axisTick.kind === "day" ? 2 : 1,
               backgroundColor:
                 axisTick.kind === "day"
-                  ? "rgba(99,102,241,0.5)"
+                  ? "color-mix(in srgb, var(--color-chart-3) 50%, transparent)"
                   : axisTick.kind === "hour"
-                    ? "rgba(148,163,184,0.45)"
-                    : "rgba(148,163,184,0.15)",
+                    ? "color-mix(in srgb, var(--color-text-muted) 45%, transparent)"
+                    : "color-mix(in srgb, var(--color-text-muted) 15%, transparent)",
               zIndex: 1,
             }}
           />
@@ -715,20 +864,22 @@ export default function RequestTimeline({
           <div className="flex items-center gap-2 mb-1.5">
             <div
               className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: getStatusColor(hoveredLog.status, hoveredLog.active) }}
+              style={{ backgroundColor: getTimelineBarColor(hoveredLog) }}
             />
             <span className="text-[11px] font-semibold text-text-main">
-              {hoveredLog.model || "unknown"}
+              {hoveredLog.kind === "mcp"
+                ? hoveredLog.toolName || t("mcpTool")
+                : hoveredLog.model || t("unknownModel")}
             </span>
             {hoveredLog.active && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium">
-                active
-              </span>
+              <Badge size="sm" className="border-chart-3/30 bg-chart-3/20 text-[9px] text-chart-3">
+                {t("active")}
+              </Badge>
             )}
           </div>
           <div className="space-y-0.5 text-[10px] text-text-muted font-mono">
             <div className="flex justify-between gap-4">
-              <span>Started</span>
+              <span>{t("started")}</span>
               <span>
                 {(() => {
                   const ts = new Date(hoveredLog.timestamp).getTime();
@@ -742,7 +893,7 @@ export default function RequestTimeline({
             </div>
             {!hoveredLog.active && (
               <div className="flex justify-between gap-4">
-                <span>Ended</span>
+                <span>{t("ended")}</span>
                 <span>
                   {new Date(
                     hoveredLog.completed
@@ -753,7 +904,7 @@ export default function RequestTimeline({
               </div>
             )}
             <div className="flex justify-between gap-4">
-              <span>Duration</span>
+              <span>{t("duration")}</span>
               <span>
                 {hoveredLog.active
                   ? `~${Math.round((nowMs - computeBarRange(hoveredLog, nowMs).startMs) / 1000).toLocaleString()}s`
@@ -761,23 +912,39 @@ export default function RequestTimeline({
               </span>
             </div>
             <div className="flex justify-between gap-4">
-              <span>Status</span>
-              <span>{hoveredLog.status || "pending"}</span>
+              <span>{t("status")}</span>
+              <span>{hoveredLog.status || t("pending")}</span>
             </div>
-            {hoveredLog.provider && (
-              <div className="flex justify-between gap-4">
-                <span>Provider</span>
-                <span>{hoveredLog.provider}</span>
-              </div>
+            {hoveredLog.kind === "mcp" ? (
+              <>
+                <div className="flex justify-between gap-4">
+                  <span>{t("scope")}</span>
+                  <span>{hoveredLog.scopes?.length ? hoveredLog.scopes.join(", ") : "—"}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span>{t("apiKey")}</span>
+                  <span>{formatApiKeyLabel(hoveredLog.apiKeyName, hoveredLog.apiKeyId)}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                {hoveredLog.provider && (
+                  <div className="flex justify-between gap-4">
+                    <span>{t("provider")}</span>
+                    <span>{hoveredLog.provider}</span>
+                  </div>
+                )}
+                <div className="flex justify-between gap-4">
+                  <span>{t("tokens")}</span>
+                  <span>
+                    {hoveredLog.tokens.in.toLocaleString()} /{" "}
+                    {hoveredLog.tokens.out.toLocaleString()}
+                  </span>
+                </div>
+              </>
             )}
-            <div className="flex justify-between gap-4">
-              <span>Tokens</span>
-              <span>
-                {hoveredLog.tokens.in.toLocaleString()} / {hoveredLog.tokens.out.toLocaleString()}
-              </span>
-            </div>
             {hoveredLog.error && (
-              <div className="mt-1 text-red-400 text-[9px] break-all">{hoveredLog.error}</div>
+              <div className="mt-1 text-error text-[9px] break-all">{hoveredLog.error}</div>
             )}
           </div>
         </div>
@@ -786,35 +953,57 @@ export default function RequestTimeline({
       {/* Legend */}
       <div className="flex items-center gap-3 px-4 py-1.5 border-t border-border text-[9px] shrink-0">
         <div className="flex items-center gap-1">
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "#059669" }} />
+          <div
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: TIMELINE_BAR_COLORS.success }}
+          />
           <span className="text-text-muted">2xx</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "#D97706" }} />
+          <div
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: TIMELINE_BAR_COLORS.warning }}
+          />
           <span className="text-text-muted">4xx</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "#DC2626" }} />
+          <div
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: TIMELINE_BAR_COLORS.error }}
+          />
           <span className="text-text-muted">5xx</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "#6366F1" }} />
-          <span className="text-text-muted">Active</span>
+          <div
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: TIMELINE_BAR_COLORS.active }}
+          />
+          <span className="text-text-muted">{t("active")}</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "#6B7280" }} />
-          <span className="text-text-muted">Other</span>
+          <div
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: TIMELINE_BAR_COLORS.other }}
+          />
+          <span className="text-text-muted">{t("other")}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: MCP_BAR_COLOR }} />
+          <span className="text-text-muted">{t("mcp")}</span>
         </div>
         <div className="ml-4 flex items-center gap-1.5 text-text-muted">
-          <div className="w-3 border-t border-dashed border-slate-400/40" />
-          <span>10min</span>
-          <div className="w-3 border-t border-slate-400/60 ml-2" />
-          <span>hour</span>
-          <div className="w-3 border-t-2 border-accent/40 ml-2" />
-          <span>day</span>
+          <div className="w-3 border-t border-dashed border-text-muted/40" />
+          <span>{t("tenMinutes")}</span>
+          <div className="w-3 border-t border-text-muted/60 ml-2" />
+          <span>{t("hour")}</span>
+          <div className="w-3 border-t-2 border-chart-3/50 ml-2" />
+          <span>{t("day")}</span>
         </div>
-        <div className="ml-auto text-text-muted italic" title={MODE_META[mode].description}>
-          {MODE_META[mode].description}
+        <div
+          className="ml-auto text-text-muted italic"
+          title={t(`modes.${MODE_META[mode].descriptionKey}`)}
+        >
+          {t(`modes.${MODE_META[mode].descriptionKey}`)}
         </div>
       </div>
 
@@ -823,8 +1012,8 @@ export default function RequestTimeline({
           log={selectedLog as any}
           detail={detailData}
           loading={detailLoading}
-          debugEnabled={false}
-          emailsVisible={false}
+          debugEnabled={selectedLog?.active ? true : detailLoggingEnabled}
+          emailsVisible={emailsVisible}
           onClose={closeDetail}
           onCopy={copyToClipboard}
           onPrevious={undefined}

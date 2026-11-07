@@ -66,7 +66,7 @@ test.after(async () => {
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
   try {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   } catch {
     /* ignore */
   }
@@ -134,8 +134,10 @@ await test("chave quota-exclusive não constrói o catálogo completo", async (t
     process.env.EXPOSE_CC_DISCOVERY_ALIASES = "1";
     // A chave do cache é `prefix|isCodex|apiKey|configuredOnly` — um query param
     // qualquer NÃO a invalida, então a resposta do subteste anterior seria servida.
+    // #9199 removed the injectable SWR window; age the entry past the fixed
+    // 30 s constant instead so the next read rebuilds rather than serving stale.
     v1ModelsCatalog.__expireCatalogCacheForTest(
-      v1ModelsCatalog.CATALOG_STALE_WHILE_REVALIDATE_MS + 1000
+      v1ModelsCatalog.CATALOG_STALE_WHILE_REVALIDATE_MS + 1_000
     );
     try {
       const res = await v1ModelsCatalog.getUnifiedModelsResponse(

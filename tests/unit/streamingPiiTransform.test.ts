@@ -84,6 +84,22 @@ test("createPiiSseTransform redacts PII split across chunk boundaries", async ()
   );
 });
 
+test("createPiiSseTransform isolates buffered content by choice index", async () => {
+  const transform = createPiiSseTransform({ windowSize: 10 });
+  const first =
+    'data: {"choices":[{"index":0,"delta":{"content":"alpha-user@"}},{"index":1,"delta":{"content":"beta-user@"}}]}\n\n';
+  const second =
+    'data: {"choices":[{"index":0,"delta":{"content":"example.com"}},{"index":1,"delta":{"content":"example.org"}}]}\n\n';
+  const done = "data: [DONE]\n\n";
+
+  const output = await testTransform(transform, [first, second, done]);
+
+  assert.ok(!output.includes("alpha-user@example.com"));
+  assert.ok(!output.includes("beta-user@example.org"));
+  assert.ok(output.includes('"index":0'));
+  assert.ok(output.includes('"index":1'));
+});
+
 test("createPiiSseTransform flushes final redacted content before [DONE] sentinel", async () => {
   const transform = createPiiSseTransform();
 
@@ -474,7 +490,7 @@ test.after(async () => {
 
   const coreDb = await import("../../src/lib/db/core.ts");
   coreDb.resetDbInstance();
-  fs.rmSync(tmpDir, { recursive: true, force: true });
+  fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("createPiiSseTransform preserves tool call arguments without buffering", async () => {

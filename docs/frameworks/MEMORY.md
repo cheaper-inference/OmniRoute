@@ -59,8 +59,11 @@ infrastructure and settings. Three tiers exist, applied in priority order:
 ```
   ┌─────────────────────────────────────────────────────────────┐
   │  TIER 0 — Keyword (FTS5)                                     │
-  │  Always available. SQLite FTS5 full-text search over         │
-  │  content + key. Used when strategy = "exact" or as fallback. │
+  │  Probe-driven availability: FTS5 when the SQLite build       │
+  │  supports it (better-sqlite3 / node:sqlite / bun:sqlite);    │
+  │  unavailable on FTS5-less builds (e.g. sql.js/WASM —         │
+  │  "no such module: fts5"). Used when strategy = "exact" or    │
+  │  as fallback; engine-status keyword reflects the probe.      │
   └──────────────────────────────────┬──────────────────────────┘
                                      │ strategy = semantic|hybrid?
                                      ▼
@@ -152,7 +155,7 @@ amortizes the backfill cost across real requests without blocking startup.
 `limit` pending entries per request. Progress can be polled via
 `GET /api/memory/engine-status` (`vectorStore.needsReindex`).
 
-The `memory_vec_meta` table (migration `073_memory_vec.sql`) stores:
+The `memory_vec_meta` table (migration `083_memory_vec.sql`) stores:
 
 - `active_dim` — current vector dimension (null = not yet calibrated).
 - `embedding_signature` — `${source}:${model}:${dim}` used to detect changes.
@@ -161,20 +164,32 @@ The `memory_vec_meta` table (migration `073_memory_vec.sql`) stores:
 
 ## Settings extension
 
-Seven new fields were added to `MemorySettingsExtended` (plan 21, D9) in
+Nine embedding and vector fields are available in `MemorySettingsExtended` in
 `src/shared/schemas/memory.ts`, persisted via `src/lib/db/settings.ts`:
 
 | Field                    | Type                                               | Default  | Description                                      |
 | ------------------------ | -------------------------------------------------- | -------- | ------------------------------------------------ |
 | `embeddingSource`        | `"remote" \| "static" \| "transformers" \| "auto"` | `"auto"` | Which embedding source to use                    |
 | `embeddingProviderModel` | `string \| null`                                   | `null`   | Provider/model in `provider/model` format        |
+| `customBaseUrl`          | `string \| null`                                   | `null`   | Memory-only OpenAI-compatible endpoint base URL  |
+| `customModelId`          | `string \| null`                                   | `null`   | Model ID sent to the custom endpoint             |
 | `transformersEnabled`    | `boolean`                                          | `false`  | Opt-in for Transformers.js (MiniLM, ~400MB)      |
 | `staticEnabled`          | `boolean`                                          | `false`  | Opt-in for static potion-base-8M local model     |
 | `rerankEnabled`          | `boolean`                                          | `false`  | Enable reranking step (adds +200-500ms/req)      |
 | `rerankProviderModel`    | `string \| null`                                   | `null`   | Rerank provider/model in `provider/model` format |
-| `vectorStore`            | `"sqlite-vec" \| "qdrant" \| "auto"`               | `"auto"` | Which vector backend to use                      |
+
+`rerankProviderModel` is resolved by `POST /v1/rerank` (called over loopback), so it accepts anything that route accepts: a curated cloud rerank model (`cohere/rerank-v3.5`, `jina-ai/jina-reranker-v3.5`, …) or an OpenAI-compatible provider node as `<node-prefix>/<model>` (e.g. `skilled-mini/bge-reranker-v2-m3` for a TEI/Infinity box). Loopback nodes, and hostnames listed in `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (e.g. a Docker/Compose service name), are always eligible; a node on another host (LAN, Tailscale) additionally requires the `RERANK_REMOTE_PROVIDER_NODES` feature flag and must pass the provider outbound URL policy — see [Feature Flags](../reference/FEATURE_FLAGS.md). The dashboard selector lists curated providers plus local nodes; any valid `provider/model` string can be set directly via `PUT /api/settings/memory`.
+| `vectorStore` | `"sqlite-vec" \| "qdrant" \| "auto"` | `"auto"` | Which vector backend to use |
 
 These are exposed via `GET /PUT /api/settings/memory` (schema `MemorySettingsExtendedSchema`).
+
+For the `remote` source, Memory also accepts the optional `customBaseUrl` and
+`customModelId` settings. Together they select an OpenAI-compatible `/embeddings`
+endpoint and model without changing the global embedding registry. The endpoint is
+normalized before use and checked by the provider outbound URL policy: HTTP(S) is
+required, embedded credentials and query strings are rejected, and cloud-metadata
+addresses remain blocked. Empty values preserve the selected registry provider. Errors
+returned to the dashboard are sanitized and endpoint credentials are never logged.
 
 > **TODO (D20):** Scope `global` (sharing memories across all API keys) is not
 > implemented in this release. It requires schema changes and a global retrieval
@@ -558,7 +573,7 @@ the legacy/global settings surface.
 ## Caching
 
 `src/lib/memory/store.ts` keeps an in-process LRU-ish cache
-(`MEMORY_CACHE_TTL = 5 min`, `MEMORY_MAX_CACHE_SIZE = 10 000`, with 20 %
+(`MEMORY_CACHE_TTL = 1 min`, `MEMORY_MAX_CACHE_SIZE = 500`, with 20 %
 oldest eviction) for `getMemory(id)` reads, plus a generic key/value
 `memoryCache` layer (`src/lib/memory/cache.ts`) with `get`/`set`/`invalidate`
 methods used by callers that want their own scoped cache (1 000-entry LRU,
@@ -598,7 +613,7 @@ default TTL 5 min).
   - `src/lib/db/memoryVec.ts` — CRUD for `memory_vec_meta`
   - `src/lib/db/migrations/015_create_memories.sql`,
     `022_add_memory_fts5.sql`, `023_fix_memory_fts_uuid.sql`,
-    `073_memory_vec.sql`
+    `083_memory_vec.sql`
   - `src/app/api/memory/route.ts`, `[id]/route.ts`, `health/route.ts`
   - `src/app/api/memory/retrieve-preview/route.ts`
   - `src/app/api/memory/engine-status/route.ts`
@@ -618,14 +633,15 @@ default TTL 5 min).
 
 OmniRoute's memory engine supports **four embedding sources** (`src/lib/memory/embedding/`). Each has different trade-offs in **latency, cost, model quality, and setup complexity**.
 
-### The Four Providers
+### The Embedding Sources
 
-| Provider       | Source                                     | Latency                         | Cost                 | Quality                    | Setup              |
-| -------------- | ------------------------------------------ | ------------------------------- | -------------------- | -------------------------- | ------------------ |
-| `transformers` | Local ONNX model (Xenova/all-MiniLM-L6-v2) | ~50-150ms (CPU)                 | Free                 | Good                       | `npm install` only |
-| `static`       | Pre-computed vectors (cached)              | <1ms                            | Free                 | N/A (depends on cache hit) | None               |
-| `remote`       | OpenAI / Cohere / Voyage API               | ~100-300ms                      | $0.02-0.10/1M tokens | Excellent                  | API key            |
-| `cache`        | In-memory LRU layer over any source        | <1ms (hit), full latency (miss) | Free                 | Same as underlying         | None               |
+| Provider       | Source                                     | Latency                         | Cost                 | Quality                    | Setup                               |
+| -------------- | ------------------------------------------ | ------------------------------- | -------------------- | -------------------------- | ----------------------------------- |
+| `transformers` | Local ONNX model (Xenova/all-MiniLM-L6-v2) | ~50-150ms (CPU)                 | Free                 | Good                       | `npm install` only                  |
+| `static`       | Pre-computed vectors (cached)              | <1ms                            | Free                 | N/A (depends on cache hit) | None                                |
+| `remote`       | OpenAI / Cohere / Voyage API               | ~100-300ms                      | $0.02-0.10/1M tokens | Excellent                  | API key                             |
+| `auto`         | Picks the best available source at runtime | Same as chosen source           | Free                 | Same as chosen source      | None                                |
+| _(cache)_      | In-memory LRU layer over any source        | <1ms (hit), full latency (miss) | Free                 | Same as underlying         | Always on (not a selectable source) |
 
 ### Decision Tree
 
@@ -878,3 +894,288 @@ To leave it off, simply keep `autoSummarize` at its default (`false`).
 0 3 * * * curl -X POST http://localhost:20128/api/memory/summarize \
   -H "Authorization: Bearer $OMNIROUTE_KEY"
 ```
+
+---
+
+## MemoryBackend Provider Pattern
+
+> **Source of truth:** `src/lib/memory/backend.ts`, `src/lib/memory/genericBackend.ts`, `src/lib/memory/manager.ts`
+> **Tests:** `src/lib/memory/__tests__/generic-backend.test.ts`
+
+The MemoryBackend provider pattern introduces a **pluggable backend abstraction layer** over the existing memory engine. Instead of being tied to a single storage implementation, the memory system now supports multiple backends (SQLite, Obsidian, Notion, custom HTTP backends) with configurable primary/fallback routing.
+
+### Architecture
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    API Routes                             │
+│            (src/app/api/memory/route.ts)                  │
+└──────────────────────┬───────────────────────────────────┘
+                       │
+┌──────────────────────▼───────────────────────────────────┐
+│                   MemoryManager                           │
+│           Singleton orchestrator (manager.ts)             │
+│                                                          │
+│  Primary ──► Backend A  (e.g. SQLite)                    │
+│  Fallback ─► Backend B  (e.g. Obsidian)                  │
+│             Backend C  (e.g. Notion via GenericBackend)   │
+└──────────────────────┬───────────────────────────────────┘
+                       │
+        ┌──────────────┼──────────────┐
+        ▼              ▼              ▼
+┌────────────┐ ┌────────────┐ ┌──────────────────┐
+│ SQLite     │ │ Obsidian   │ │ GenericMemory    │
+│ Backend    │ │ Backend    │ │ Backend (HTTP)   │
+└────────────┘ └────────────┘ └──────────────────┘
+```
+
+#### Core Interface (`backend.ts`)
+
+Every backend must implement the `MemoryBackend` interface:
+
+```typescript
+interface MemoryBackend {
+  readonly id: string;
+  readonly displayName: string;
+
+  // CRUD
+  create(input: CreateMemoryInput): Promise<Memory>;
+  get(id: string): Promise<Memory | null>;
+  update(id: string, updates: Partial<...>): Promise<boolean>;
+  delete(id: string): Promise<boolean>;
+  list(filter: MemoryFilter): Promise<{ data: Memory[]; total: number; byType: Record<string, number> }>;
+
+  // Search
+  search(config: SearchConfig): Promise<Memory[]>;
+
+  // Health
+  health(): Promise<HealthCheckResult>;
+
+  // Lifecycle (optional)
+  initialize?(): Promise<void>;
+  shutdown?(): Promise<void>;
+}
+```
+
+#### MemoryManager (`manager.ts`)
+
+Singleton orchestrator that:
+
+- **Registers** backends via `register(backend)` — called at boot from `index.ts`
+- **Configures** primary + fallback via `configure(primary, fallbacks)`
+- **Routes** CRUD/search to the primary, with fallback chain on failure
+- **Health checks** all backends periodically
+
+**Fallback behavior:**
+
+| Operation | Primary              | Fallbacks               |
+| --------- | -------------------- | ----------------------- |
+| `create`  | ✅ Primary only      | ❌                      |
+| `get`     | ✅ Try primary first | ✅ Fallback if null     |
+| `update`  | ✅ Primary only      | ✅ Fire-and-forget sync |
+| `delete`  | ✅ Primary only      | ✅ Fire-and-forget sync |
+| `list`    | ✅ Primary only      | ❌                      |
+| `search`  | ✅ Primary first     | ✅ Fallback on error    |
+
+#### GenericMemoryBackend (`genericBackend.ts`)
+
+A generic HTTP connector that adapts any REST API into a MemoryBackend. Useful for:
+
+- **Notion** — connect via Notion API
+- **Obsidian** — connect via Obsidian Local REST API
+- **Custom backends** — any service that exposes a RESTful memory API
+
+**Configuration:**
+
+```typescript
+interface GenericBackendConfig {
+  baseUrl: string;           // Base URL of the backend API
+  apiKey?: string;           // Bearer token for auth
+  headers?: Record<string, string>;  // Custom HTTP headers
+  timeout?: number;          // Request timeout (default: 30000ms)
+  backendType?: string;      // For logging
+
+  // Endpoint overrides (defaults use REST conventions)
+  endpoints?: {
+    search?: string;   // default: "/memories/search"
+    create?: string;   // default: "/memories"
+    list?: string;     // default: "/memories"
+    get?: string;      // default: "/memories/{id}"
+    update?: string;   // default: "/memories/{id}"
+    delete?: string;   // default: "/memories/{id}"
+    health?: string;   // default: "/health"
+  };
+
+  // Query parameter name mappings
+  queryParams?: {
+    query?/apiKeyId?/limit?/offset?/strategy?/maxTokens?/type?/sessionId?/orderBy?/orderDir?/options?
+  };
+
+  // Path parameter name mappings
+  pathParams?: {
+    id?/memoryId?
+  };
+}
+```
+
+**Known backends** are pre-configured in `KNOWN_BACKENDS`:
+
+```typescript
+createKnownBackend("obsidian"); // → GenericMemoryBackend pointed at localhost:27123
+createKnownBackend("notion"); // → GenericMemoryBackend pointed at api.notion.com/v1
+```
+
+#### Built-in Backends
+
+##### SQLiteBackend (`sqliteBackend.ts`)
+
+The default primary backend. Wraps the existing SQLite-based memory store using `src/lib/memory/store.ts`. Automatically registered at boot.
+
+```typescript
+import { sqliteBackend } from "./sqliteBackend";
+memoryManager.register(sqliteBackend);
+```
+
+##### ObsidianBackend (`obsidianBackend.ts`)
+
+Wraps the existing Obsidian integration (`src/lib/memory/obsidianBackend.ts`). Connects to an Obsidian vault via the Obsidian Local REST API.
+
+##### ClaudeMemBackend (`claudeMemBackend.ts`)
+
+Adapter for a local [claude-mem](https://github.com/thedotmack/claude-mem) worker — the
+Claude Code / Codex / Cursor memory plugin that captures coding sessions as "observations".
+With it registered, the `/api/memory` REST routes and A2A memory search can read and write
+the same store that claude-mem's hooks fill.
+
+The worker binds loopback only, which `GenericMemoryBackend`'s SSRF guard rejects on purpose.
+This adapter does not loosen that guard: the host is hard-coded to `127.0.0.1` and the config
+schema (`ClaudeMemBackendConfigSchema`, `.strict()`) accepts only:
+
+| Key         | Type   | Default | Notes                                                                                                  |
+| ----------- | ------ | ------- | ------------------------------------------------------------------------------------------------------ |
+| `port`      | number | —       | Required, 1024–65535. the claude-mem worker port from its settings file (default `37700 + uid % 100`). |
+| `project`   | string | —       | claude-mem project to use. Unset → each OmniRoute API key maps to its own project (the `apiKeyId`).    |
+| `timeoutMs` | number | `5000`  | Per-request timeout, 100–30000.                                                                        |
+
+Enable it through `PUT /api/settings/memory` and restart OmniRoute (backends are registered
+once, in `initMemoryBackends()`):
+
+```json
+{
+  "backendConfigs": { "claude-mem": { "port": 37701, "project": "OmniRoute" } },
+  "fallbackBackends": ["claude-mem"]
+}
+```
+
+Use `"primaryBackend": "claude-mem"` instead to make it the store for the REST API. An invalid
+config is logged (`claude-mem.backend.invalid_config`) and skipped, so SQLite stays primary.
+
+Mapping and limits:
+
+- IDs are `claude-mem:<observationId>`; `get`/`delete` ignore other backends' IDs without a
+  network call.
+- `create` → `POST /api/memory/save`; the OmniRoute fields (`apiKeyId`, `sessionId`, `type`,
+  `key`, `metadata`) ride in claude-mem's `metadata.omniroute` and round-trip on read.
+- `search` → `GET /api/search?format=json&type=observations`, trimmed to `maxTokens`
+  (chars / 4). `list` → the worker's paginated observations endpoint (`total` is a lower bound — the worker
+  returns `hasMore`, not a count).
+- Hook-captured observations map `discovery` → `factual`, `decision` → `procedural`, and
+  `bugfix`/`feature`/`refactor`/`change` → `episodic`.
+- **No updates** (`update()` returns `false`; observations are immutable) and **no TTL**
+  (`expiresAt` is ignored). claude-mem dedups identical saves instead of upserting by `key`.
+- Prompt injection (`retrieval.ts`) and the `omniroute_memory_*` MCP tools still read SQLite
+  directly — they do not go through `memoryManager`, so this backend does not feed them.
+
+**Routing claude-mem's own LLM calls through OmniRoute.** claude-mem compresses observations
+with an LLM (default: the Claude Agent SDK). Its `openai-compatible` provider can point at
+OmniRoute instead, picking up combo fallback and cost tracking. In `~/.claude-mem/settings.json`:
+
+```json
+{
+  "CLAUDE_MEM_PROVIDER": "openai-compatible",
+  "CLAUDE_MEM_OPENAI_COMPAT_BASE_URL": "http://localhost:20128/v1",
+  "CLAUDE_MEM_OPENAI_COMPAT_API_KEY": "<OmniRoute API key>",
+  "CLAUDE_MEM_OPENAI_COMPAT_MODEL": "<OmniRoute model or combo>"
+}
+```
+
+### Settings
+
+Memory backend settings are stored in the app settings table and managed via `src/lib/memory/settings.ts`:
+
+| Setting           | Env/Config Key           | Default    | Description                  |
+| ----------------- | ------------------------ | ---------- | ---------------------------- |
+| Primary backend   | `memoryPrimaryBackend`   | `"sqlite"` | ID of the primary backend    |
+| Fallback backends | `memoryFallbackBackends` | `[]`       | Ordered fallback backend IDs |
+| Backend configs   | `memoryBackendConfigs`   | `{}`       | Per-backend config overrides |
+
+Settings are normalized via `normalizeMemorySettings()` and cached at `getMemorySettings()`.
+
+### Initialization Flow
+
+```
+App bootstrap
+  → index.ts imports (side-effect): registers SQLiteBackend
+  → initMemoryBackends() called from app lifecycle:
+      1. Load settings (getMemorySettings)
+      1b. Register opt-in backends present in backendConfigs (claude-mem)
+      2. Configure primary + fallback
+      3. Initialize all backends (health check)
+      4. Ready for requests
+```
+
+### Adding a New Backend
+
+1. **Implement `MemoryBackend`** interface in `src/lib/memory/<name>Backend.ts`
+2. **Export** from `src/lib/memory/index.ts`
+3. **Register** with `memoryManager.register(yourBackend)` at boot
+4. **Configure** via settings: set `memoryPrimaryBackend` to your backend ID
+5. **Test** with `src/lib/memory/__tests__/generic-backend.test.ts` as reference
+
+#### Example: Brain Backend
+
+```typescript
+import { createGenericMemoryBackend } from "./genericBackend";
+
+const brainBackend = createGenericMemoryBackend("brain", "BK-Brain", {
+  baseUrl: process.env.BRAIN_API_URL || "http://localhost:9099",
+  apiKey: process.env.BRAIN_API_KEY,
+  endpoints: {
+    search: "/api/memory/search",
+    create: "/api/memory",
+    health: "/api/health",
+  },
+});
+
+memoryManager.register(brainBackend);
+```
+
+### Verification
+
+#### Unit tests
+
+```bash
+npx vitest run src/lib/memory/__tests__/generic-backend.test.ts --reporter=verbose
+```
+
+Expected output: **35 tests, all passing** covering:
+
+- Constructor (2)
+- Health check (4) — success, failure 500, network error, latency
+- Initialize (2) — success, failure
+- Create (2) — default endpoint, custom endpoint
+- Get (4) — success, 404 → null, non-404 throw, custom path params
+- Update (2) — success, 404 → false
+- Delete (2) — success, 404 → false
+- List (2) — query params, custom param names
+- Search (3) — query params, custom endpoint, options serialization
+- Auth headers (2) — Bearer token, custom headers
+- Factory (1)
+
+#### Type check
+
+```bash
+npm run typecheck:core
+```
+
+Expected: **0 errors**.

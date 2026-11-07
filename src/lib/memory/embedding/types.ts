@@ -19,6 +19,8 @@ export interface EmbeddingResolution {
   dimensions: number | null;
   /** Assinatura única usada como chave do vectorStore para detectar troca de modelo. */
   signature: string; // ${source}:${model}:${dim}
+  /** Cache/signature identity when the same model ID can exist at multiple custom endpoints. */
+  identity?: string;
   /** Motivo da escolha (UI exibe no Engine status). */
   reason: string; // e.g. "provider openai com key configurada"
 }
@@ -35,6 +37,7 @@ export interface EmbeddingResult {
 export interface EmbeddingError {
   source: "remote" | "static" | "transformers";
   model: string | null;
-  reason: "no_key" | "model_load_failed" | "request_failed" | "rate_limited" | "timeout" | "unknown";
+  reason:
+    "no_key" | "model_load_failed" | "request_failed" | "rate_limited" | "timeout" | "unknown";
   message: string; // ALWAYS via sanitizeErrorMessage()
 }

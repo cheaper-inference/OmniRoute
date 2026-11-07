@@ -12,6 +12,19 @@ import type { CompressionConfig } from "../../services/compression/types.ts";
 
 type LoggerLike = { warn?: (...args: unknown[]) => void } | null | undefined;
 
+export function createDisabledCompressionConfig(): CompressionConfig {
+  return {
+    enabled: false,
+    defaultMode: "off",
+    autoTriggerTokens: 0,
+    cacheMinutes: 5,
+    preserveSystemPrompt: true,
+    comboOverrides: {},
+    engines: {},
+    activeComboId: null,
+  };
+}
+
 export async function resolveCompressionSettings(log?: LoggerLike): Promise<{
   settings: CompressionConfig | null;
   enabled: boolean;

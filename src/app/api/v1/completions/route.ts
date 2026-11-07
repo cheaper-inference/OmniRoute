@@ -7,9 +7,13 @@ import {
   readCompressionRequestHeader,
   withCompressionHeaderEcho,
 } from "@/shared/utils/compressionHeaderEcho";
+import { withChatAdmission } from "@/shared/middleware/withChatAdmission";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 
 let initPromise = null;
-const injectionGuard = createInjectionGuard();
+// `logger: null` — the guardrail registry re-evaluates this request inside
+// handleChat with the pino logger (#11936 dedupe).
+const injectionGuard = createInjectionGuard({ logger: null });
 
 function ensureInitialized() {
   if (!initPromise) {
@@ -41,7 +45,13 @@ export async function OPTIONS() {
  *
  * @see https://platform.openai.com/docs/api-reference/completions
  */
-export async function POST(request: Request) {
+async function postHandler(request: Request) {
+  // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
+  // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
+  // handler enforces authentication independently.
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
+
   await ensureInitialized();
 
   // #6422 — capture the compression request header once so we can echo it back
@@ -82,6 +92,7 @@ export async function POST(request: Request) {
           method: request.method,
           headers: request.headers,
           body: JSON.stringify(normalized),
+          signal: request.signal,
         });
         // #3571 — translate the chat-pipeline response back to the legacy
         // text-completion shape so OpenAI Completion clients (e.g. TabbyML) work.
@@ -90,7 +101,7 @@ export async function POST(request: Request) {
         // echo the compression header on the way out.
         return withCompressionHeaderEcho(
           await asTextCompletionResponse(
-            await handleChat(newRequest, buildClientRawRequest(request, body)),
+            await handleChat(newRequest, () => buildClientRawRequest(request, body)),
             typeof body.model === "string" ? body.model : undefined
           ),
           compressionRequestHeader
@@ -106,7 +117,10 @@ export async function POST(request: Request) {
   // Re-read body.model so the response echoes the caller's requested identifier.
   let requestedModel: string | undefined;
   try {
-    const bodyForModel = await request.clone().json().catch(() => null);
+    const bodyForModel = await request
+      .clone()
+      .json()
+      .catch(() => null);
     if (bodyForModel && typeof bodyForModel.model === "string") {
       requestedModel = bodyForModel.model;
     }
@@ -118,3 +132,5 @@ export async function POST(request: Request) {
     compressionRequestHeader
   );
 }
+
+export const POST = withChatAdmission(postHandler);

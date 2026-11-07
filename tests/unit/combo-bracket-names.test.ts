@@ -14,7 +14,7 @@ const sseModelService = await import("../../src/sse/services/model.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -24,12 +24,13 @@ test.beforeEach(async () => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("combo schemas accept names with spaces and square brackets", () => {
   const createResult = schemas.createComboSchema.safeParse({
     name: "Claude [1m]",
+    models: ["anthropic/claude-3-opus"],
   });
   const updateResult = schemas.updateComboSchema.safeParse({
     name: "Claude [1m]",
@@ -65,7 +66,7 @@ test("getComboForModel treats an exact bracketed name as a combo before model su
   assert.equal(parsedAsModel.model, "Claude");
 });
 
-test("getComboForModel does not strip bracket suffix when no exact bracketed combo exists", async () => {
+test("getComboForModel falls back to the base combo when no exact context-tagged combo exists", async () => {
   await combosDb.createCombo({
     name: "Claude",
     models: [{ provider: "claude", model: "claude-sonnet-4-6" }],
@@ -74,7 +75,7 @@ test("getComboForModel does not strip bracket suffix when no exact bracketed com
   const resolved = await sseModelService.getComboForModel("Claude [1m]");
   const parsedAsModel = sseModelService.parseModel("Claude [1m]");
 
-  assert.equal(resolved, null);
+  assert.equal(resolved?.name, "Claude");
   assert.equal(parsedAsModel.extendedContext, true);
   assert.equal(parsedAsModel.model, "Claude");
 });

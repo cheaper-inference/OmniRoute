@@ -18,5 +18,11 @@
 #
 # Keep this list SHORT and reviewed every release. Prefer fixing (rebuild on a
 # patched base / bump the dep) over suppressing. Stale entries are debt.
-#
-# (No accepted-risk suppressions at present — ignore-unfixed covers the noise.)
+
+# CVE-2026-118764 (minimatch 10.2.5, fix 11.0.1) and CVE-2026-118773 (glob 13.0.6, fix 14.0.2)
+# live in the npm bundled in the image, and npm 12.2.1 (latest) still declares the
+# vulnerable lines. Medium; OmniRoute calls npm with fixed subcommands, so request input
+# does not reach npm as a glob. An overlay would cross majors outside npm's ranges.
+# Accepted by the maintainer (#18765); revisit when npm ships the fixed lines (2026-12-02).
+CVE-2026-118764
+CVE-2026-118773

@@ -2,8 +2,8 @@
  * Image resolution + security for Cursor vision input.
  *
  * Turns OpenAI `image_url` parts (base64 `data:` URIs or remote `http(s)`
- * URLs) into decoded bytes ready to inline into a cursor SelectedImage
- * (see ../utils/cursorAgentProtobuf.ts::encodeSelectedImageBody).
+ * URLs) into decoded, JPEG-prepped bytes ready for SelectedImage
+ * `blobIdWithData` encoding (see cursorAgentProtobuf.ts).
  *
  * Security (OmniRoute hard rules):
  *  - SSRF: remote fetches go through the repo's canonical outbound guard
@@ -12,9 +12,9 @@
  *    cloud-metadata hostnames. Client-supplied image URLs are always held to
  *    the strict public-only policy (never gated by the private-URL toggle that
  *    admin-configured provider URLs use).
- *  - Size cap: each image must decode to <= 1 MiB (matches composer-api).
- *    Enforced both before base64 decode (cheap pre-check) and while streaming
- *    a remote body (so a hostile server can't stream gigabytes).
+ *  - Size caps: inbound decode/fetch is bounded (16 MiB) so large clipboard
+ *    PNGs can shrink via JPEG soft-cap prep; the final wire image must be
+ *    <= 1 MiB. Soft target is ~100 KiB JPEG for reliable Cursor hydration.
  *  - Content type: data URIs and URL responses must be `image/*`.
  *  - Errors throw `CursorImageError` with a clean, path-free message; the
  *    executor routes it through the sanitized 400 path (hard rule #12).
@@ -30,14 +30,56 @@ import {
 } from "@/shared/network/outboundUrlGuard";
 import type { EncodedImage } from "./cursorAgentProtobuf.ts";
 
-// 1 MiB per image — matches composer-api's MAX_CURSOR_IMAGE_BYTES. Large
-// enough for a typical screenshot, small enough to bound request size and
-// memory.
+type SharpFactory = (typeof import("sharp"))["default"];
+
+let sharpFactoryPromise: Promise<SharpFactory> | undefined;
+
+function loadSharp(): Promise<SharpFactory> {
+  sharpFactoryPromise ??= import("sharp").then((module) => module.default);
+  return sharpFactoryPromise;
+}
+
+/** Final per-image byte cap after prep (composer-api / wire bound). */
 export const MAX_CURSOR_IMAGE_BYTES = 1024 * 1024;
 
-// Upper bound on the number of images per request. Each image triggers (at
-// most) one remote fetch, so an unbounded count is a DoS vector; 12 is well
-// above any realistic vision prompt.
+/**
+ * Inbound decode/fetch bomb ceiling before JPEG prep. Large clipboard PNGs may
+ * exceed {@link MAX_CURSOR_IMAGE_BYTES} raw but shrink under the wire cap after
+ * re-encode.
+ */
+export const MAX_CURSOR_IMAGE_DECODE_BYTES = 16 * 1024 * 1024;
+
+/**
+ * Soft target for Cursor vision hydration. Prefer JPEG at or under this size.
+ */
+export const CURSOR_VISION_SOFT_MAX_BYTES = 100 * 1024;
+
+/** Soft target when the client requests `detail: original` or `high`. */
+export const CURSOR_VISION_SOFT_MAX_BYTES_HIGH = 256 * 1024;
+
+/** Longest edge after Cursor vision prep. */
+export const CURSOR_VISION_MAX_EDGE = 2000;
+
+/** Decode bomb: reject images whose sniffed longest edge exceeds this. */
+export const MAX_CURSOR_IMAGE_DECODE_EDGE = 8192;
+
+/** Decode bomb: reject images whose sniffed pixel count exceeds this. */
+export const MAX_CURSOR_IMAGE_PIXELS = 25_000_000;
+
+const CURSOR_VISION_JPEG_QUALITIES_DEFAULT = [85, 70, 55, 40] as const;
+const CURSOR_VISION_JPEG_QUALITIES_HIGH = [90, 80, 65, 50] as const;
+const CURSOR_VISION_SOFT_MIN_EDGE = 256;
+const CURSOR_VISION_SOFT_SHRINK = 0.85;
+
+const CURSOR_VISION_PASSTHROUGH_MIME = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+]);
+
+/** Upper bound on images attached to one Cursor turn. */
 export const MAX_CURSOR_IMAGES = 12;
 
 // Wall-clock cap for a single remote image fetch. A malformed env value
@@ -64,6 +106,25 @@ export class CursorImageError extends Error {
   }
 }
 
+function estimatedBase64DecodedBytes(payload: string): number {
+  return Math.floor((payload.length * 3) / 4);
+}
+
+function isHighDetail(detail: string | undefined): boolean {
+  const normalized = (detail || "").toLowerCase();
+  return normalized === "high" || normalized === "original";
+}
+
+function softMaxBytesForDetail(detail: string | undefined): number {
+  return isHighDetail(detail) ? CURSOR_VISION_SOFT_MAX_BYTES_HIGH : CURSOR_VISION_SOFT_MAX_BYTES;
+}
+
+function jpegQualitiesForDetail(detail: string | undefined): readonly number[] {
+  return isHighDetail(detail)
+    ? CURSOR_VISION_JPEG_QUALITIES_HIGH
+    : CURSOR_VISION_JPEG_QUALITIES_DEFAULT;
+}
+
 function decodeDataUrl(url: string): { data: Buffer; mimeType: string } {
   // data:[<mediatype>][;base64],<data>
   const comma = url.indexOf(",");
@@ -86,16 +147,21 @@ function decodeDataUrl(url: string): { data: Buffer; mimeType: string } {
 
   // Reject on the raw payload length BEFORE the regex/normalize pass, so an
   // arbitrarily large data URL can't burn CPU on the whitespace strip. Base64
-  // expands ~4:3, so 2x the byte cap is a safe upper bound on the encoded text.
-  if (payload.length > MAX_CURSOR_IMAGE_BYTES * 2) {
-    throw new CursorImageError("Image input is too large (max 1 MiB). Resize and retry.");
+  // expands ~4:3, so 2x the decode ceiling is a safe upper bound on the text.
+  if (payload.length > MAX_CURSOR_IMAGE_DECODE_BYTES * 2) {
+    throw new CursorImageError("Image input is too large to process safely.");
   }
 
   const normalized = payload.replace(/\s/g, "");
-  // Cheap pre-check: 4 base64 chars -> 3 bytes. Reject obviously oversized
-  // payloads before allocating the decode buffer.
-  if (Math.floor((normalized.length * 3) / 4) > MAX_CURSOR_IMAGE_BYTES) {
-    throw new CursorImageError("Image input is too large (max 1 MiB). Resize and retry.");
+  if (normalized.length === 0) {
+    throw new CursorImageError("Image data URL contains invalid base64 data.");
+  }
+  // Reject lenient Buffer.from acceptances (wrong alphabet, bad padding).
+  if (normalized.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(normalized)) {
+    throw new CursorImageError("Image data URL contains invalid base64 data.");
+  }
+  if (estimatedBase64DecodedBytes(normalized) > MAX_CURSOR_IMAGE_DECODE_BYTES) {
+    throw new CursorImageError("Image input is too large to process safely.");
   }
 
   let data: Buffer;
@@ -104,10 +170,15 @@ function decodeDataUrl(url: string): { data: Buffer; mimeType: string } {
   } catch {
     throw new CursorImageError("Image data URL contains invalid base64 data.");
   }
-  // Buffer.from(base64) silently drops invalid trailing chars; guard against a
-  // payload that decoded to nothing despite being non-empty.
-  if (normalized.length > 0 && data.length === 0) {
+  if (data.length === 0) {
     throw new CursorImageError("Image data URL contains invalid base64 data.");
+  }
+  // Round-trip guard: Node can silently drop trailing garbage.
+  if (data.toString("base64").replace(/=+$/, "") !== normalized.replace(/=+$/, "")) {
+    throw new CursorImageError("Image data URL contains invalid base64 data.");
+  }
+  if (data.length > MAX_CURSOR_IMAGE_DECODE_BYTES) {
+    throw new CursorImageError("Image input is too large to process safely.");
   }
   return { data, mimeType };
 }
@@ -216,10 +287,10 @@ async function fetchImageBytes(url: string): Promise<{ data: Buffer; mimeType: s
       // Reject early on an oversized Content-Length, then still cap during read
       // (the header is advisory / may be absent).
       const declaredLen = Number(response.headers.get("content-length") || "0");
-      if (Number.isFinite(declaredLen) && declaredLen > MAX_CURSOR_IMAGE_BYTES) {
-        throw new CursorImageError("Image input is too large (max 1 MiB). Resize and retry.");
+      if (Number.isFinite(declaredLen) && declaredLen > MAX_CURSOR_IMAGE_DECODE_BYTES) {
+        throw new CursorImageError("Image input is too large to process safely.");
       }
-      const data = await readCapped(response, MAX_CURSOR_IMAGE_BYTES);
+      const data = await readCapped(response, MAX_CURSOR_IMAGE_DECODE_BYTES);
       return { data, mimeType };
     } finally {
       clearTimeout(timer);
@@ -249,7 +320,7 @@ async function readCapped(response: Response, cap: number): Promise<Buffer> {
   const pushCapped = (chunk: Uint8Array) => {
     total += chunk.byteLength;
     if (total > cap) {
-      throw new CursorImageError("Image input is too large (max 1 MiB). Resize and retry.");
+      throw new CursorImageError("Image input is too large to process safely.");
     }
     chunks.push(Buffer.from(chunk));
   };
@@ -284,22 +355,317 @@ async function readCapped(response: Response, cap: number): Promise<Buffer> {
   // Last resort: buffer then cap-check (only exotic non-stream bodies).
   const buf = Buffer.from(await response.arrayBuffer());
   if (buf.length > cap) {
-    throw new CursorImageError("Image input is too large (max 1 MiB). Resize and retry.");
+    throw new CursorImageError("Image input is too large to process safely.");
   }
   return buf;
 }
 
+/** Magic-byte format sniff (independent of declared MIME). */
+export function sniffCursorImageFormat(
+  data: Uint8Array
+): "png" | "jpeg" | "gif" | "webp" | undefined {
+  if (
+    data.byteLength >= 8 &&
+    data[0] === 0x89 &&
+    data[1] === 0x50 &&
+    data[2] === 0x4e &&
+    data[3] === 0x47 &&
+    data[4] === 0x0d &&
+    data[5] === 0x0a &&
+    data[6] === 0x1a &&
+    data[7] === 0x0a
+  ) {
+    return "png";
+  }
+  if (
+    data.byteLength >= 6 &&
+    data[0] === 0x47 &&
+    data[1] === 0x49 &&
+    data[2] === 0x46 &&
+    data[3] === 0x38
+  ) {
+    return "gif";
+  }
+  if (data.byteLength >= 4 && data[0] === 0xff && data[1] === 0xd8) return "jpeg";
+  if (
+    data.byteLength >= 12 &&
+    data[0] === 0x52 &&
+    data[1] === 0x49 &&
+    data[2] === 0x46 &&
+    data[3] === 0x46 &&
+    data[8] === 0x57 &&
+    data[9] === 0x45 &&
+    data[10] === 0x42 &&
+    data[11] === 0x50
+  ) {
+    return "webp";
+  }
+  return undefined;
+}
+
+/**
+ * Sniff PNG/JPEG/GIF/WebP dimensions from raw bytes when the header is present.
+ * Best-effort only — unknown formats return undefined (dimension is optional).
+ */
+export function sniffCursorImageDimensions(
+  data: Uint8Array
+): { width: number; height: number } | undefined {
+  // PNG: signature + IHDR chunk (width/height at bytes 16..23)
+  if (
+    data.byteLength >= 24 &&
+    data[0] === 0x89 &&
+    data[1] === 0x50 &&
+    data[2] === 0x4e &&
+    data[3] === 0x47 &&
+    data[4] === 0x0d &&
+    data[5] === 0x0a &&
+    data[6] === 0x1a &&
+    data[7] === 0x0a
+  ) {
+    const width = ((data[16]! << 24) | (data[17]! << 16) | (data[18]! << 8) | data[19]!) >>> 0;
+    const height = ((data[20]! << 24) | (data[21]! << 16) | (data[22]! << 8) | data[23]!) >>> 0;
+    if (width > 0 && height > 0) return { width, height };
+  }
+  // GIF: "GIF8" + width/height as little-endian u16 at bytes 6..9
+  if (
+    data.byteLength >= 10 &&
+    data[0] === 0x47 &&
+    data[1] === 0x49 &&
+    data[2] === 0x46 &&
+    data[3] === 0x38
+  ) {
+    const width = data[6]! | (data[7]! << 8);
+    const height = data[8]! | (data[9]! << 8);
+    if (width > 0 && height > 0) return { width, height };
+  }
+  // WebP: RIFF....WEBP + VP8X / VP8 / VP8L
+  if (
+    data.byteLength >= 30 &&
+    data[0] === 0x52 &&
+    data[1] === 0x49 &&
+    data[2] === 0x46 &&
+    data[3] === 0x46 &&
+    data[8] === 0x57 &&
+    data[9] === 0x45 &&
+    data[10] === 0x42 &&
+    data[11] === 0x50
+  ) {
+    const fourcc = String.fromCharCode(data[12]!, data[13]!, data[14]!, data[15]!);
+    if (fourcc === "VP8X") {
+      const width = 1 + (data[24]! | (data[25]! << 8) | (data[26]! << 16));
+      const height = 1 + (data[27]! | (data[28]! << 8) | (data[29]! << 16));
+      if (width > 0 && height > 0) return { width, height };
+    } else if (fourcc === "VP8 ") {
+      if (data[23] === 0x9d && data[24] === 0x01 && data[25] === 0x2a) {
+        const width = (data[26]! | (data[27]! << 8)) & 0x3fff;
+        const height = (data[28]! | (data[29]! << 8)) & 0x3fff;
+        if (width > 0 && height > 0) return { width, height };
+      }
+    } else if (fourcc === "VP8L" && data[20] === 0x2f) {
+      const raw = data[21]! | (data[22]! << 8) | (data[23]! << 16) | (data[24]! << 24);
+      const width = (raw & 0x3fff) + 1;
+      const height = ((raw >> 14) & 0x3fff) + 1;
+      if (width > 0 && height > 0) return { width, height };
+    }
+  }
+  // JPEG: scan for SOF0/SOF2 marker with dimensions
+  if (data.byteLength >= 4 && data[0] === 0xff && data[1] === 0xd8) {
+    let offset = 2;
+    while (offset + 8 < data.byteLength) {
+      if (data[offset] !== 0xff) break;
+      const marker = data[offset + 1]!;
+      // Standalone markers (TEM, RSTn, SOI, EOI) carry no length payload.
+      if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd9)) {
+        offset += 2;
+        continue;
+      }
+      const length = (data[offset + 2]! << 8) | data[offset + 3]!;
+      if (marker === 0xc0 || marker === 0xc2) {
+        const height = (data[offset + 5]! << 8) | data[offset + 6]!;
+        const width = (data[offset + 7]! << 8) | data[offset + 8]!;
+        if (width > 0 && height > 0) return { width, height };
+        break;
+      }
+      if (length < 2) break;
+      offset += 2 + length;
+    }
+  }
+  return undefined;
+}
+
+type PreparedImage = {
+  data: Buffer;
+  mimeType: string;
+  width?: number;
+  height?: number;
+};
+
+/**
+ * Re-encode toward a JPEG under the soft vision cap when sharp can decode the
+ * payload. Fail-closed with CursorImageError on unsupported MIME, decode bombs,
+ * or undecodable bytes. After the quality ladder, edges shrink iteratively
+ * until the soft byte cap is met (or the min edge floor is hit).
+ */
+export async function prepareCursorImageForWire(input: {
+  data: Buffer;
+  mimeType: string;
+  detail?: string;
+}): Promise<PreparedImage> {
+  const sharp = await loadSharp();
+  const mime = input.mimeType.toLowerCase();
+  const softMax = softMaxBytesForDetail(input.detail);
+  const qualities = jpegQualitiesForDetail(input.detail);
+  const lowestQuality = qualities[qualities.length - 1]!;
+
+  if (!CURSOR_VISION_PASSTHROUGH_MIME.has(mime)) {
+    throw new CursorImageError("Image input type is unsupported.");
+  }
+
+  const format = sniffCursorImageFormat(input.data);
+  const sniffed = sniffCursorImageDimensions(input.data);
+  if (sniffed) {
+    const edge = Math.max(sniffed.width, sniffed.height);
+    const pixels = sniffed.width * sniffed.height;
+    if (edge > MAX_CURSOR_IMAGE_DECODE_EDGE || pixels > MAX_CURSOR_IMAGE_PIXELS) {
+      throw new CursorImageError("Image input dimensions are too large.");
+    }
+  }
+
+  // Soft-cap skip: already soft-capped JPEG that has a real SOF (not SOI-only).
+  const declaredJpeg = mime === "image/jpeg" || mime === "image/jpg";
+  const alreadySmallJpeg =
+    declaredJpeg && format === "jpeg" && sniffed !== undefined && input.data.byteLength <= softMax;
+  if (alreadySmallJpeg) {
+    return {
+      data: input.data,
+      mimeType: "image/jpeg",
+      width: sniffed!.width,
+      height: sniffed!.height,
+    };
+  }
+
+  try {
+    // Force a full decode before accepting passthrough / encode.
+    await sharp(input.data, { failOn: "error" }).resize(1, 1).jpeg({ quality: 1 }).toBuffer();
+
+    // Passthrough only when declared MIME matches actual JPEG magic.
+    if (declaredJpeg && format === "jpeg" && input.data.byteLength <= softMax) {
+      const dims = sniffed ?? (await sharp(input.data).metadata());
+      const width = typeof dims.width === "number" ? dims.width : undefined;
+      const height = typeof dims.height === "number" ? dims.height : undefined;
+      return {
+        data: input.data,
+        mimeType: "image/jpeg",
+        ...(width && height && width > 0 && height > 0 ? { width, height } : {}),
+      };
+    }
+
+    const meta = await sharp(input.data).metadata();
+    const width = typeof meta.width === "number" ? meta.width : 0;
+    const height = typeof meta.height === "number" ? meta.height : 0;
+    if (width > 0 && height > 0) {
+      const edge = Math.max(width, height);
+      if (edge > MAX_CURSOR_IMAGE_DECODE_EDGE || width * height > MAX_CURSOR_IMAGE_PIXELS) {
+        throw new CursorImageError("Image input dimensions are too large.");
+      }
+    }
+
+    let targetW = width;
+    let targetH = height;
+    if (width > 0 && height > 0 && Math.max(width, height) > CURSOR_VISION_MAX_EDGE) {
+      const scale = CURSOR_VISION_MAX_EDGE / Math.max(width, height);
+      targetW = Math.max(1, Math.round(width * scale));
+      targetH = Math.max(1, Math.round(height * scale));
+    }
+
+    const encodeAt = async (w: number, h: number, quality: number): Promise<Buffer> => {
+      let pipeline = sharp(input.data, { failOn: "error" });
+      if (w > 0 && h > 0 && (w !== width || h !== height)) {
+        pipeline = pipeline.resize(w, h);
+      }
+      return pipeline.jpeg({ quality, mozjpeg: true }).toBuffer();
+    };
+
+    let best: Buffer | undefined;
+    for (const quality of qualities) {
+      const encoded = await encodeAt(targetW, targetH, quality);
+      if (!best || encoded.byteLength < best.byteLength) best = encoded;
+      if (encoded.byteLength <= softMax) {
+        const outDims = sniffCursorImageDimensions(encoded);
+        return {
+          data: encoded,
+          mimeType: "image/jpeg",
+          ...(outDims ?? (targetW > 0 && targetH > 0 ? { width: targetW, height: targetH } : {})),
+        };
+      }
+    }
+
+    while (
+      best &&
+      best.byteLength > softMax &&
+      targetW > 0 &&
+      targetH > 0 &&
+      Math.max(targetW, targetH) > CURSOR_VISION_SOFT_MIN_EDGE
+    ) {
+      const nextW = Math.max(1, Math.round(targetW * CURSOR_VISION_SOFT_SHRINK));
+      const nextH = Math.max(1, Math.round(targetH * CURSOR_VISION_SOFT_SHRINK));
+      if (Math.max(nextW, nextH) < CURSOR_VISION_SOFT_MIN_EDGE) {
+        const scale = CURSOR_VISION_SOFT_MIN_EDGE / Math.max(targetW, targetH);
+        targetW = Math.max(1, Math.round(targetW * scale));
+        targetH = Math.max(1, Math.round(targetH * scale));
+      } else {
+        targetW = nextW;
+        targetH = nextH;
+      }
+      const encoded = await encodeAt(targetW, targetH, lowestQuality);
+      if (!best || encoded.byteLength < best.byteLength) best = encoded;
+      if (encoded.byteLength <= softMax) {
+        const outDims = sniffCursorImageDimensions(encoded);
+        return {
+          data: encoded,
+          mimeType: "image/jpeg",
+          ...(outDims ?? { width: targetW, height: targetH }),
+        };
+      }
+      if (Math.max(targetW, targetH) <= CURSOR_VISION_SOFT_MIN_EDGE) break;
+    }
+
+    if (best) {
+      const outDims = sniffCursorImageDimensions(best);
+      return {
+        data: best,
+        mimeType: "image/jpeg",
+        ...(outDims ?? (targetW > 0 && targetH > 0 ? { width: targetW, height: targetH } : {})),
+      };
+    }
+
+    if (declaredJpeg && format !== "jpeg") {
+      throw new CursorImageError("Image input is not a valid JPEG.");
+    }
+    throw new CursorImageError("Image input could not be prepared for Cursor vision.");
+  } catch (err) {
+    if (err instanceof CursorImageError) throw err;
+    throw new CursorImageError("Image input is undecodable or unsupported.");
+  }
+}
+
 /**
  * Resolve OpenAI `image_url` URLs (data: or http(s):) into EncodedImage[]
- * ready to inline into a cursor request. Each image gets a stable random uuid.
- * Throws CursorImageError (clean message, sanitizable) on any invalid /
- * oversized / blocked input.
+ * ready for SelectedImage blobIdWithData encoding. Each image gets a stable
+ * random uuid. Throws CursorImageError (clean message, sanitizable) on any
+ * invalid / oversized / blocked / undecodable input.
  */
-export async function resolveCursorImages(imageUrls: string[]): Promise<EncodedImage[]> {
+export async function resolveCursorImages(
+  imageUrls: string[],
+  options?: { detail?: string; prepareForWire?: boolean }
+): Promise<EncodedImage[]> {
+  // Cursor's SelectedImage wire format needs the JPEG soft-cap prep (#9840).
+  // Browser-upload callers (zai-web, conol-web) upload the ORIGINAL bytes to
+  // their own web UIs, so they opt out and keep the pre-#9840 decode+validate
+  // behavior: raw data + declared mimeType, capped at MAX_CURSOR_IMAGE_BYTES.
+  const prepareForWire = options?.prepareForWire !== false;
   if (imageUrls.length > MAX_CURSOR_IMAGES) {
-    throw new CursorImageError(
-      `Too many images in one request (max ${MAX_CURSOR_IMAGES}).`
-    );
+    throw new CursorImageError(`Too many images in one request (max ${MAX_CURSOR_IMAGES}).`);
   }
   const out: EncodedImage[] = [];
   for (const url of imageUrls) {
@@ -314,10 +680,35 @@ export async function resolveCursorImages(imageUrls: string[]): Promise<EncodedI
     if (!data.length) {
       throw new CursorImageError("Image input is empty.");
     }
-    if (data.length > MAX_CURSOR_IMAGE_BYTES) {
+    if (data.length > MAX_CURSOR_IMAGE_DECODE_BYTES) {
+      throw new CursorImageError("Image input is too large to process safely.");
+    }
+
+    if (!prepareForWire) {
+      if (data.length > MAX_CURSOR_IMAGE_BYTES) {
+        throw new CursorImageError("Image input is too large (max 1 MiB). Resize and retry.");
+      }
+      out.push({ data, mimeType, uuid: crypto.randomUUID() });
+      continue;
+    }
+
+    const prepared = await prepareCursorImageForWire({
+      data,
+      mimeType,
+      detail: options?.detail,
+    });
+    if (prepared.data.length > MAX_CURSOR_IMAGE_BYTES) {
       throw new CursorImageError("Image input is too large (max 1 MiB). Resize and retry.");
     }
-    out.push({ data, mimeType, uuid: crypto.randomUUID() });
+
+    out.push({
+      data: prepared.data,
+      mimeType: prepared.mimeType,
+      uuid: crypto.randomUUID(),
+      ...(typeof prepared.width === "number" && typeof prepared.height === "number"
+        ? { width: prepared.width, height: prepared.height }
+        : {}),
+    });
   }
   return out;
 }
@@ -327,17 +718,11 @@ export async function resolveCursorImages(imageUrls: string[]): Promise<EncodedI
  * Returns the raw url strings (data: or http(s):) in order. Non-image parts
  * are ignored. A plain string content has no images.
  */
-export function extractImageUrls(
-  content: unknown
-): string[] {
+export function extractImageUrls(content: unknown): string[] {
   if (!Array.isArray(content)) return [];
   const urls: string[] = [];
   for (const part of content) {
-    if (
-      part &&
-      typeof part === "object" &&
-      (part as { type?: unknown }).type === "image_url"
-    ) {
+    if (part && typeof part === "object" && (part as { type?: unknown }).type === "image_url") {
       const imageUrl = (part as { image_url?: unknown }).image_url;
       if (typeof imageUrl === "string") {
         urls.push(imageUrl);

@@ -19,6 +19,7 @@ import os from "node:os";
 import path from "node:path";
 
 import { checkQueueAdmission } from "../../open-sse/services/rateLimitManager/admission.ts";
+import { getTrustedLocalRateLimitError } from "../../open-sse/services/rateLimitManager/errors.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-rl-admission-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -53,7 +54,7 @@ test.afterEach(async () => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 // --- Pure unit tests for the extracted admission check -------------------
@@ -78,6 +79,10 @@ test("#6593 checkQueueAdmission: rejects with a typed error at/over the cap", ()
   // also risks tripping the whole-provider circuit breaker for a purely local
   // admission decision.
   assert.equal(err?.status, 429);
+  assert.deepEqual(getTrustedLocalRateLimitError(err), {
+    code: "RATE_LIMIT_QUEUE_FULL",
+    status: 429,
+  });
   assert.match(err?.message ?? "", /maxQueueDepth/);
   assert.match(err?.message ?? "", /openai\/gpt-4o/);
 
@@ -106,16 +111,26 @@ test("#6593 withRateLimit: fast-fails once the queue is at the configured maxQue
   // Job 1 occupies the single concurrent slot. Poll (not a fixed sleep) until
   // Bottleneck has actually dispatched it, since QUEUED -> EXECUTING takes a
   // few event-loop ticks, not one.
-  const job1 = rateLimitManager.withRateLimit("openai", "conn-admission-cap", "gpt-4o", async () => {
-    await wait(150);
-    return "job1";
-  });
+  const job1 = rateLimitManager.withRateLimit(
+    "openai",
+    "conn-admission-cap",
+    "gpt-4o",
+    async () => {
+      await wait(150);
+      return "job1";
+    }
+  );
   await pollUntil(() => (status()?.executing ?? 0) + (status()?.running ?? 0) >= 1);
 
   // Job 2 has to wait behind job1 -> occupies the one allowed queue slot (QUEUED=1).
-  const job2 = rateLimitManager.withRateLimit("openai", "conn-admission-cap", "gpt-4o", async () => {
-    return "job2";
-  });
+  const job2 = rateLimitManager.withRateLimit(
+    "openai",
+    "conn-admission-cap",
+    "gpt-4o",
+    async () => {
+      return "job2";
+    }
+  );
   await pollUntil(() => (status()?.queued ?? 0) >= 1);
 
   // Job 3 arrives while QUEUED (1) is already at maxQueueDepth (1) -> fast-rejected.
@@ -124,6 +139,10 @@ test("#6593 withRateLimit: fast-fails once the queue is at the configured maxQue
     (err: Error & { code?: string; status?: number }) => {
       assert.equal(err.code, "RATE_LIMIT_QUEUE_FULL");
       assert.equal(err.status, 429);
+      assert.deepEqual(getTrustedLocalRateLimitError(err), {
+        code: "RATE_LIMIT_QUEUE_FULL",
+        status: 429,
+      });
       assert.match(err.message, /maxQueueDepth/);
       return true;
     }
@@ -156,15 +175,80 @@ test("#6593 withRateLimit: default maxQueueDepth=0 preserves unbounded-queue beh
   assert.deepEqual(results, ["job1", "job2", "job3", "job4"]);
 });
 
-// --- Default maxWaitMs lowered 120000 -> 15000 ----------------------------
+// --- Default maxWaitMs ----------------------------------------------------
 
-test("#6593 DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS is 15s absent RATE_LIMIT_MAX_WAIT_MS", () => {
+test("#6593 DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS is 30s absent RATE_LIMIT_MAX_WAIT_MS", () => {
   assert.equal(process.env.RATE_LIMIT_MAX_WAIT_MS, undefined);
-  assert.equal(resilienceSettings.DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS, 15000);
+  assert.equal(resilienceSettings.DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS, 30000);
+  assert.equal(resilienceSettings.DEFAULT_RESILIENCE_SETTINGS.requestQueue.maxWaitMs, 30000);
+});
+
+test("requestQueue.executionMaxWaitMs defaults to a 10-minute backstop, separate from maxWaitMs", () => {
+  assert.equal(resilienceSettings.DEFAULT_REQUEST_QUEUE_EXECUTION_MAX_WAIT_MS, 600000);
   assert.equal(
-    resilienceSettings.DEFAULT_RESILIENCE_SETTINGS.requestQueue.maxWaitMs,
-    15000
+    resilienceSettings.DEFAULT_RESILIENCE_SETTINGS.requestQueue.executionMaxWaitMs,
+    600000
   );
+});
+
+test("#6593 zai-web receives a provider-scoped 60s scheduling budget", () => {
+  assert.equal(rateLimitManager.resolveRequestQueueMaxWaitMs("openai", 15_000), 15_000);
+  assert.equal(rateLimitManager.resolveRequestQueueMaxWaitMs("zai-web", 15_000), 60_000);
+  assert.equal(rateLimitManager.resolveRequestQueueMaxWaitMs("ZAI-WEB", 90_000), 90_000);
+});
+
+test("#6593 connection maxWaitMs override takes priority over the zai-web scheduling budget", () => {
+  rateLimitManager.refreshConnectionRateLimits("conn-maxwait-override", { maxWaitMs: 45_000 });
+  try {
+    // Non-special provider: override wins over the passed-in configured default.
+    assert.equal(
+      rateLimitManager.resolveRequestQueueMaxWaitMs("openai", 15_000, "conn-maxwait-override"),
+      45_000
+    );
+    // zai-web: override wins over its hardcoded 60s floor too.
+    assert.equal(
+      rateLimitManager.resolveRequestQueueMaxWaitMs("zai-web", 15_000, "conn-maxwait-override"),
+      45_000
+    );
+  } finally {
+    rateLimitManager.refreshConnectionRateLimits("conn-maxwait-override", null);
+  }
+});
+
+test("#6593 a connection without a maxWaitMs override keeps the zai-web 60s floor", () => {
+  rateLimitManager.refreshConnectionRateLimits("conn-no-maxwait-override", { rpm: 10 });
+  try {
+    assert.equal(
+      rateLimitManager.resolveRequestQueueMaxWaitMs("zai-web", 15_000, "conn-no-maxwait-override"),
+      rateLimitManager.ZAI_WEB_REQUEST_QUEUE_MAX_WAIT_MS
+    );
+  } finally {
+    rateLimitManager.refreshConnectionRateLimits("conn-no-maxwait-override", null);
+  }
+});
+
+test("#6593 a maxWaitMs override of 0 is treated as no override", () => {
+  rateLimitManager.refreshConnectionRateLimits("conn-zero-maxwait-override", { maxWaitMs: 0 });
+  try {
+    assert.equal(
+      rateLimitManager.resolveRequestQueueMaxWaitMs("openai", 15_000, "conn-zero-maxwait-override"),
+      15_000
+    );
+  } finally {
+    rateLimitManager.refreshConnectionRateLimits("conn-zero-maxwait-override", null);
+  }
+});
+
+test("maxai receives a provider-scoped 5min execution budget (slow reasoning models)", () => {
+  // The default 15s Bottleneck expiration kills MaxAI reasoning turns (30s-min+)
+  // mid-think; maxai (and its mx alias) floor at 300s so they complete.
+  assert.equal(rateLimitManager.resolveRequestQueueMaxWaitMs("maxai", 15_000), 300_000);
+  assert.equal(rateLimitManager.resolveRequestQueueMaxWaitMs("MaxAI", 15_000), 300_000);
+  assert.equal(rateLimitManager.resolveRequestQueueMaxWaitMs("mx", 15_000), 300_000);
+  // A larger configured value is preserved (floor never lowers it).
+  assert.equal(rateLimitManager.resolveRequestQueueMaxWaitMs("maxai", 600_000), 600_000);
+  // Other providers are unaffected.
+  assert.equal(rateLimitManager.resolveRequestQueueMaxWaitMs("openai", 15_000), 15_000);
 });
 
 test("#6593 DEFAULT_REQUEST_QUEUE_MAX_DEPTH defaults to 0 (disabled) absent an env override", () => {

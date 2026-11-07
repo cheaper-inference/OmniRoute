@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+// KEA-7886: icons are Lucide <svg class="oi-icon" data-icon="<material name>"> via <Icon>.
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
@@ -6,18 +7,21 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Minimal i18n stub — returns the key so tests can assert on fallback rendering
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
+  useTranslations: () => {
+    const t = (key: string) => key;
+    t.has = () => false;
+    return t;
+  },
 }));
 
 // Minimal shared component stubs — Card wraps children, Tooltip passes through
 vi.mock("@/shared/components", () => ({
-  Card: ({
-    children,
-    className,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => <div data-testid="card" className={className}>{children}</div>,
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div data-testid="card" className={className}>
+      {children}
+    </div>
+  ),
 }));
 
 vi.mock("@/shared/components/Tooltip", () => ({
@@ -50,16 +54,14 @@ describe("TranslatorConceptCard", () => {
   });
 
   it("exports a default function component", { timeout: 30000 }, async () => {
-    const mod = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard"
-    );
+    const mod =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard");
     expect(typeof mod.default).toBe("function");
   });
 
   it("renders the card with info icon and headline", async () => {
-    const { default: TranslatorConceptCard } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard"
-    );
+    const { default: TranslatorConceptCard } =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -68,23 +70,22 @@ describe("TranslatorConceptCard", () => {
     // Card should be in the DOM
     expect(container.querySelector("[data-testid='card']")).toBeTruthy();
     // Info icon should be present
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts).toContain("info");
   });
 
   it("renders the flow diagram with 4 FlowNode elements (app, source, hub, target)", async () => {
-    const { default: TranslatorConceptCard } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard"
-    );
+    const { default: TranslatorConceptCard } =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
       root.render(<TranslatorConceptCard />);
     });
     // The diagram grid should contain 4 node icons (smart_toy, psychology, hub, auto_awesome)
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts).toContain("smart_toy");
     expect(iconTexts).toContain("psychology");
     expect(iconTexts).toContain("hub");
@@ -92,31 +93,29 @@ describe("TranslatorConceptCard", () => {
   });
 
   it("renders the diagram with arrow_forward separators", async () => {
-    const { default: TranslatorConceptCard } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard"
-    );
+    const { default: TranslatorConceptCard } =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
       root.render(<TranslatorConceptCard />);
     });
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     // Three arrows between 4 nodes
     expect(iconTexts.filter((t) => t === "arrow_forward").length).toBeGreaterThanOrEqual(3);
   });
 
   it("toggle button starts collapsed (aria-expanded=false)", async () => {
-    const { default: TranslatorConceptCard } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard"
-    );
+    const { default: TranslatorConceptCard } =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
       root.render(<TranslatorConceptCard />);
     });
     const toggleBtn = container.querySelector(
-      "button[aria-controls='translator-concept-how-it-works']",
+      "button[aria-controls='translator-concept-how-it-works']"
     );
     expect(toggleBtn).toBeTruthy();
     expect(toggleBtn?.getAttribute("aria-expanded")).toBe("false");
@@ -125,16 +124,15 @@ describe("TranslatorConceptCard", () => {
   });
 
   it("toggle expands 'Como funciona' section and sets aria-expanded=true", async () => {
-    const { default: TranslatorConceptCard } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard"
-    );
+    const { default: TranslatorConceptCard } =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
       root.render(<TranslatorConceptCard />);
     });
     const toggleBtn = container.querySelector(
-      "button[aria-controls='translator-concept-how-it-works']",
+      "button[aria-controls='translator-concept-how-it-works']"
     ) as HTMLButtonElement | null;
     expect(toggleBtn).toBeTruthy();
 
@@ -149,16 +147,15 @@ describe("TranslatorConceptCard", () => {
   });
 
   it("toggle collapses section on second click and restores aria-expanded=false", async () => {
-    const { default: TranslatorConceptCard } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard"
-    );
+    const { default: TranslatorConceptCard } =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
       root.render(<TranslatorConceptCard />);
     });
     const toggleBtn = container.querySelector(
-      "button[aria-controls='translator-concept-how-it-works']",
+      "button[aria-controls='translator-concept-how-it-works']"
     ) as HTMLButtonElement | null;
 
     // Expand
@@ -176,9 +173,8 @@ describe("TranslatorConceptCard", () => {
   });
 
   it("toggle button icon changes between expand_more and expand_less", async () => {
-    const { default: TranslatorConceptCard } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard"
-    );
+    const { default: TranslatorConceptCard } =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -186,12 +182,12 @@ describe("TranslatorConceptCard", () => {
     });
 
     const toggleBtn = container.querySelector(
-      "button[aria-controls='translator-concept-how-it-works']",
+      "button[aria-controls='translator-concept-how-it-works']"
     ) as HTMLButtonElement | null;
 
     // Initially collapsed: should show expand_more
-    const btnIcons = toggleBtn?.querySelectorAll(".material-symbols-outlined");
-    const btnIconTexts = Array.from(btnIcons ?? []).map((el) => el.textContent?.trim());
+    const btnIcons = toggleBtn?.querySelectorAll("svg.oi-icon");
+    const btnIconTexts = Array.from(btnIcons ?? []).map((el) => el.getAttribute("data-icon"));
     expect(btnIconTexts).toContain("expand_more");
     expect(btnIconTexts).not.toContain("expand_less");
 
@@ -199,8 +195,10 @@ describe("TranslatorConceptCard", () => {
     await act(async () => {
       toggleBtn?.click();
     });
-    const btnIconsAfter = toggleBtn?.querySelectorAll(".material-symbols-outlined");
-    const btnIconTextsAfter = Array.from(btnIconsAfter ?? []).map((el) => el.textContent?.trim());
+    const btnIconsAfter = toggleBtn?.querySelectorAll("svg.oi-icon");
+    const btnIconTextsAfter = Array.from(btnIconsAfter ?? []).map((el) =>
+      el.getAttribute("data-icon")
+    );
     expect(btnIconTextsAfter).toContain("expand_less");
     expect(btnIconTextsAfter).not.toContain("expand_more");
   });
@@ -221,23 +219,21 @@ describe("TranslateFlowDiagram", () => {
   });
 
   it("exports a default function component", async () => {
-    const mod = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslateFlowDiagram"
-    );
+    const mod =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslateFlowDiagram");
     expect(typeof mod.default).toBe("function");
   });
 
   it("renders all 4 flow node icons (app, source, hub, target)", async () => {
-    const { default: TranslateFlowDiagram } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslateFlowDiagram"
-    );
+    const { default: TranslateFlowDiagram } =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslateFlowDiagram");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
       root.render(<TranslateFlowDiagram />);
     });
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     // 4 nodes: app, source format, OpenAI hub, target provider
     expect(iconTexts).toContain("smart_toy");
     expect(iconTexts).toContain("psychology");
@@ -246,23 +242,21 @@ describe("TranslateFlowDiagram", () => {
   });
 
   it("renders exactly 3 arrow_forward separators between 4 nodes", async () => {
-    const { default: TranslateFlowDiagram } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslateFlowDiagram"
-    );
+    const { default: TranslateFlowDiagram } =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslateFlowDiagram");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
       root.render(<TranslateFlowDiagram />);
     });
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts.filter((t) => t === "arrow_forward")).toHaveLength(3);
   });
 
   it("renders a responsive grid container", async () => {
-    const { default: TranslateFlowDiagram } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslateFlowDiagram"
-    );
+    const { default: TranslateFlowDiagram } =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslateFlowDiagram");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -276,9 +270,8 @@ describe("TranslateFlowDiagram", () => {
   });
 
   it("i18n fallback: renders labels using fallback strings when translations return keys", async () => {
-    const { default: TranslateFlowDiagram } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/TranslateFlowDiagram"
-    );
+    const { default: TranslateFlowDiagram } =
+      await import("@/app/(dashboard)/dashboard/translator/components/TranslateFlowDiagram");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -287,13 +280,13 @@ describe("TranslateFlowDiagram", () => {
     // When mock returns key, tr() detects key === translation and uses fallback
     // The fallback text should appear in the DOM
     const text = container.textContent ?? "";
-    expect(text).toContain("Sua app");
+    expect(text).toContain("Your app");
     expect(text).toContain("ex: SDK Anthropic");
-    expect(text).toContain("Formato origem");
+    expect(text).toContain("Source format");
     expect(text).toContain("claude");
     // 4th node: OpenAI hub
     expect(text).toContain("OpenAI (hub)");
-    expect(text).toContain("Provider destino");
+    expect(text).toContain("Target provider");
     expect(text).toContain("Gemini");
   });
 });

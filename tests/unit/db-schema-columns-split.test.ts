@@ -4,10 +4,14 @@
 // columns and is safe to re-run; hasTable/hasColumn/getTableColumns/quoteIdentifier introspect.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import { tryOpenSync } from "../../src/lib/db/adapters/driverFactory.ts";
 import {
   ensureUsageHistoryColumns,
   ensureProviderConnectionsColumns,
+  ensureProxyLogsColumns,
+  ensureCallLogsColumns,
   hasColumn,
   hasTable,
   quoteIdentifier,
@@ -81,6 +85,147 @@ test("ensureProviderConnectionsColumns repairs quota visibility with a visible d
     assert.equal(column?.notnull, 1);
     assert.equal(column?.dflt_value, "1");
     assert.doesNotThrow(() => ensureProviderConnectionsColumns(db));
+  } finally {
+    db.close?.();
+  }
+});
+
+test("ensureProxyLogsColumns self-heals a bare proxy_logs (upgrade path)", () => {
+  const db = openMemoryDb();
+  try {
+    db.exec("CREATE TABLE proxy_logs (id TEXT PRIMARY KEY, timestamp TEXT NOT NULL)");
+    assert.equal(hasColumn(db, "proxy_logs", "egress_ip"), false);
+
+    ensureProxyLogsColumns(db);
+    assert.equal(hasColumn(db, "proxy_logs", "egress_ip"), true);
+    assert.doesNotThrow(() => ensureProxyLogsColumns(db));
+  } finally {
+    db.close?.();
+  }
+});
+
+test("migration 134 SQL applies egress_ip to a bare proxy_logs", () => {
+  const db = openMemoryDb();
+  try {
+    db.exec("CREATE TABLE proxy_logs (id TEXT PRIMARY KEY, timestamp TEXT NOT NULL)");
+    const sql = fs.readFileSync(
+      path.join(process.cwd(), "src/lib/db/migrations/134_proxy_logs_egress_ip.sql"),
+      "utf8"
+    );
+    db.exec(sql);
+    assert.equal(hasColumn(db, "proxy_logs", "egress_ip"), true);
+  } finally {
+    db.close?.();
+  }
+});
+
+test("ensureProviderConnectionsColumns restores base columns required by later migrations", () => {
+  const db = openMemoryDb();
+  try {
+    db.exec(`
+      CREATE TABLE provider_connections (
+        id TEXT PRIMARY KEY,
+        provider TEXT NOT NULL,
+        auth_type TEXT,
+        is_active INTEGER NOT NULL DEFAULT 1
+      )
+    `);
+    assert.equal(hasColumn(db, "provider_connections", "provider_specific_data"), false);
+    assert.equal(hasColumn(db, "provider_connections", "default_model"), false);
+
+    ensureProviderConnectionsColumns(db);
+
+    assert.equal(hasColumn(db, "provider_connections", "provider_specific_data"), true);
+    assert.equal(hasColumn(db, "provider_connections", "default_model"), true);
+    assert.equal(hasColumn(db, "provider_connections", "last_ping_at"), true);
+    assert.equal(hasColumn(db, "provider_connections", "last_pinged_reset_key"), true);
+    const columnsAfterFirstRun = getTableColumns(db, "provider_connections").sort();
+    const indexesAfterFirstRun = (
+      db.prepare("PRAGMA index_list(provider_connections)").all() as Array<{ name: string }>
+    )
+      .map((index) => index.name)
+      .sort();
+    const warnings: unknown[][] = [];
+    const originalWarn = console.warn;
+    try {
+      console.warn = (...args: unknown[]) => warnings.push(args);
+      ensureProviderConnectionsColumns(db);
+    } finally {
+      console.warn = originalWarn;
+    }
+
+    assert.deepEqual(getTableColumns(db, "provider_connections").sort(), columnsAfterFirstRun);
+    assert.deepEqual(
+      (db.prepare("PRAGMA index_list(provider_connections)").all() as Array<{ name: string }>)
+        .map((index) => index.name)
+        .sort(),
+      indexesAfterFirstRun
+    );
+    assert.deepEqual(warnings, []);
+  } finally {
+    db.close?.();
+  }
+});
+
+test("ensureProviderConnectionsColumns back-fills last_ping columns on a pre-123 lineage", () => {
+  const db = openMemoryDb();
+  try {
+    db.exec("CREATE TABLE provider_connections (id TEXT PRIMARY KEY, provider TEXT NOT NULL)");
+    assert.equal(hasColumn(db, "provider_connections", "last_ping_at"), false);
+    assert.equal(hasColumn(db, "provider_connections", "last_pinged_reset_key"), false);
+
+    ensureProviderConnectionsColumns(db);
+
+    assert.equal(hasColumn(db, "provider_connections", "last_ping_at"), true);
+    assert.equal(hasColumn(db, "provider_connections", "last_pinged_reset_key"), true);
+    assert.doesNotThrow(() => ensureProviderConnectionsColumns(db));
+  } finally {
+    db.close?.();
+  }
+});
+
+// #12150 P2b: `resolvePreviousResponseState` SELECTs `video_content_removed` on
+// every previous_response_id lookup. Migration 173 adds it, but a lineage that
+// skipped 173 would raise "no such column" there instead of failing closed, so
+// the reconciliation has to carry it too — the hole #12470 closed for
+// provider_connections.
+test("ensureCallLogsColumns back-fills video_content_removed on a pre-173 lineage", () => {
+  const db = openMemoryDb();
+  try {
+    db.exec("CREATE TABLE call_logs (id TEXT PRIMARY KEY, timestamp TEXT)");
+    assert.equal(hasColumn(db, "call_logs", "video_content_removed"), false);
+
+    ensureCallLogsColumns(db);
+
+    assert.equal(hasColumn(db, "call_logs", "video_content_removed"), true);
+    const row = db
+      .prepare("SELECT video_content_removed AS v FROM call_logs WHERE id = ?")
+      .get("missing") as { v: number } | undefined;
+    assert.equal(row, undefined, "empty table — the column just has to be selectable");
+    assert.doesNotThrow(() => ensureCallLogsColumns(db));
+  } finally {
+    db.close?.();
+  }
+});
+
+// #13130: migration 195 adds call_logs.ttft_ms (dashboard generation-time TPS
+// reads it via mapSummaryRow on every row). A lineage that skipped 195 must
+// still expose the column, same reconciliation pattern as #12150/#12470.
+test("ensureCallLogsColumns back-fills ttft_ms on a pre-195 lineage", () => {
+  const db = openMemoryDb();
+  try {
+    db.exec("CREATE TABLE call_logs (id TEXT PRIMARY KEY, timestamp TEXT)");
+    assert.equal(hasColumn(db, "call_logs", "ttft_ms"), false);
+
+    ensureCallLogsColumns(db);
+
+    assert.equal(hasColumn(db, "call_logs", "ttft_ms"), true);
+    db.prepare("INSERT INTO call_logs (id, timestamp) VALUES ('x', 't')").run();
+    const row = db.prepare("SELECT ttft_ms AS v FROM call_logs WHERE id = ?").get("x") as {
+      v: number | null;
+    };
+    assert.equal(row.v, null, "untimed rows stay NULL so TPS falls back to duration");
+    assert.doesNotThrow(() => ensureCallLogsColumns(db));
   } finally {
     db.close?.();
   }

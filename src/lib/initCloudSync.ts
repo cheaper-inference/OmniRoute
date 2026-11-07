@@ -1,11 +1,14 @@
 import initializeCloudSync from "@/shared/services/initializeCloudSync";
-import { startBudgetResetJob } from "@/lib/jobs/budgetResetJob";
 import { startModelSyncScheduler } from "@/shared/services/modelSyncScheduler";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
+import { getJobRegistry } from "@/lib/jobRegistry";
+import { registerBudgetResetJob } from "@/lib/jobs/budgetResetJob";
+import { registerTokenHealthCheck } from "@/lib/jobs/tokenHealthCheckJob";
+import { registerLogExportJob } from "@/lib/jobs/logExportJob";
+import { backfillVolcPlanAutoSync } from "@/lib/providers/volcPlanAutoSyncBackfill";
 
 // Initialize runtime background sync services once per server process.
 let initialized = false;
-
 
 export function shouldSkipCloudSyncInitialization(
   env: NodeJS.ProcessEnv = process.env,
@@ -29,11 +32,21 @@ export async function ensureCloudSyncInitialized() {
   }
   if (!initialized) {
     try {
-      const { initTokenHealthCheck } = await import("@/lib/tokenHealthCheck");
-      initTokenHealthCheck();
       await initializeCloudSync();
+      await backfillVolcPlanAutoSync();
       startModelSyncScheduler();
-      startBudgetResetJob();
+
+      // startAll() runs each interval job's first tick synchronously, so it has to
+      // come after initializeCloudSync(). The old wiring got that ordering two
+      // different ways: the budget reset was started right here, and the health
+      // check's first sweep sat behind a 10s timer. Awaiting the init is a firmer
+      // guarantee than the timer was.
+      const registry = getJobRegistry();
+      registerBudgetResetJob(registry);
+      registerTokenHealthCheck(registry);
+      registerLogExportJob(registry);
+      await registry.startAll();
+
       initialized = true;
     } catch (error) {
       console.error("[ServerInit] Error initializing background sync services:", error);

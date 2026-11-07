@@ -5,14 +5,38 @@
 import { getDbInstance } from "./core";
 import { backupDbFile } from "./backup";
 import { PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels.ts";
+import {
+  getProxyRefusalSeq,
+  hasProxyRefusals,
+  proxyEgressKey,
+  proxySetAsideSeq,
+} from "@omniroute/open-sse/utils/proxyRefusalMemory.ts";
+import { isProxySkipRecentlyFailedEnabled } from "@/shared/utils/featureFlags";
 import { invalidateDbCache } from "./readCache";
 import { encrypt, decrypt } from "./encryption";
 import { getProxyRegistryGeneration, resolveProxyForScopeFromRegistry } from "./proxies";
+import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { getComboModelProvider as getComboEntryProvider } from "@/lib/combos/steps";
-import { requestBodyLimitMbFromEnv } from "@/shared/constants/bodySize";
+import {
+  normalizeRequestBodyLimitMb,
+  requestBodyLimitMbFromEnv,
+} from "@/shared/constants/bodySize";
 import { DEFAULT_RESPONSES_PREVIOUS_RESPONSE_ID_MODE } from "@/shared/constants/responsesPreviousResponseId";
+import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
+import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
+
+/**
+ * Settings values stored encrypted at rest (AES-256-GCM via ./encryption).
+ * Read and write must stay in sync — a key that is encrypted on write but not
+ * decrypted on read hands ciphertext to the consumer, which fails as a silent
+ * auth error rather than a visible one. Both paths derive from this set.
+ */
+const ENCRYPTED_SETTING_KEYS: ReadonlySet<string> = new Set([
+  "oidcClientSecret",
+  "entraGraphClientSecret",
+]);
 
 type ProxyValue = JsonRecord | string | null;
 type ProxyResolutionResult = {
@@ -21,11 +45,14 @@ type ProxyResolutionResult = {
   levelId: string | null;
   source?: string;
 };
-type ProxyResolutionCacheEntry = {
+// State observed when a resolution started; an entry is stored only if it still holds.
+type ProxyResolutionStamp = {
   generation: number;
   registryGeneration: number;
-  result: ProxyResolutionResult;
+  // Proxy refusal memory sequence (see isCachedPoolMemberSetAside).
+  refusalSeq: number;
 };
+type ProxyResolutionCacheEntry = ProxyResolutionStamp & { result: ProxyResolutionResult };
 
 const PROXY_RESOLUTION_CACHE_MAX_ENTRIES = 100;
 
@@ -43,17 +70,16 @@ export function bumpProxyConfigGeneration() {
 
 function cacheProxyResolution(
   connectionId: string,
-  generation: number,
-  registryGeneration: number,
+  stamp: ProxyResolutionStamp,
   result: ProxyResolutionResult
 ) {
-  if (generation !== proxyConfigGeneration) return;
-  if (registryGeneration !== getProxyRegistryGeneration()) return;
+  if (stamp.generation !== proxyConfigGeneration) return;
+  if (stamp.registryGeneration !== getProxyRegistryGeneration()) return;
   if (proxyResolutionCache.size >= PROXY_RESOLUTION_CACHE_MAX_ENTRIES) {
     const oldestKey = proxyResolutionCache.keys().next().value;
     if (oldestKey) proxyResolutionCache.delete(oldestKey);
   }
-  proxyResolutionCache.set(connectionId, { generation, registryGeneration, result });
+  proxyResolutionCache.set(connectionId, { ...stamp, result });
 }
 type ProxyMap = Record<string, ProxyValue>;
 
@@ -142,32 +168,55 @@ export async function getSettings() {
   const db = getDbInstance();
   const rows = db.prepare("SELECT key, value FROM key_value WHERE namespace = 'settings'").all();
   const settings: Record<string, unknown> = {
-    cloudEnabled: true,
+    cloudEnabled: false,
     tailscaleEnabled: false,
     tailscaleUrl: "",
     stickyRoundRobinLimit: 3,
     disableSessionStickiness: false,
+    // Global connection-aware expansion fallback for group-B combo strategies is opt-in.
+    connectionAwareExpansion: false,
+    // Keep combo targets whose known output ceiling is below the request's
+    // max_tokens instead of treating output_tokens as a hard compatibility
+    // mismatch; the upstream then applies its own ceiling.
+    outputLimitAdvisory: false,
     promptCacheAffinityEnabled: true,
+    geminiPromptCacheMode: "off",
     comboStrategy: "fallback",
     comboStickyRoundRobinLimit: null, // null = inherit stickyRoundRobinLimit (a literal default here shadows the documented batched-rotation default of 3 — #6678 regression caught by the v3.8.47 release CI)
     providerStrategies: {},
     // Per-operator quota row visibility (dashboard usage tab). Keyed by
     // provider id → { hidden: [<quota visibility key>] }. Independent of the
-    // model catalog's isHidden/isDeleted flags (collectHiddenQuotaModelIds in
+    // model catalog's isHidden flag (collectHiddenQuotaModelIds in
     // ProviderLimits/utils.tsx) — this is a personal view preference, not an
     // admin model-catalog edit. Ported from upstream decolua/9router#2371.
     quotaVisibility: {},
+    // #13917: operator-configurable ceiling for POST /api/settings/proxies/bulk-import.
+    // Resolved through resolveProxyBulkImportLimit at both enforcement points.
+    proxyBulkImportLimit: PROXY_BULK_IMPORT_LIMIT_DEFAULT,
     requestRetry: 3,
     maxRetryIntervalSec: 30,
     antigravitySignatureCacheMode: "enabled",
     requireLogin: true,
     oidcEnabled: false,
+    oidcDisablePasswordLogin: false,
     oidcIssuer: "",
     oidcClientId: "",
     oidcClientSecret: "",
     oidcScopes: ["openid", "profile", "email"],
     oidcRedirectPath: "/api/auth/oidc/callback",
     oidcAllowedSubjects: [], // optional sub or email whitelist
+    oidcAdmissionClaim: null, // optional ID-token role/group admission policy
+    // Entra ID SSO for /v1/* (see docs/security/ENTRA_SSO.md). Off by default:
+    // enabling it only ADDS a way to authenticate — static API keys keep working.
+    entraSsoEnabled: false,
+    entraAuthorityHost: "",
+    entraTenantId: "",
+    entraClientId: "",
+    entraApiAudience: "",
+    entraGroupMappings: [],
+    entraDefaultKeyGroupId: null, // null = users matching no mapping are denied
+    entraGraphFallbackEnabled: false,
+    entraGraphClientSecret: "",
     mcpEnabled: false,
     a2aEnabled: false,
     hiddenSidebarItems: [],
@@ -196,6 +245,7 @@ export async function getSettings() {
       enabled: false,
       supportedModels: [
         "claude-fable-5",
+        "claude-opus-5-5",
         "claude-opus-5",
         "claude-opus-4-8",
         "claude-opus-4-7",
@@ -212,7 +262,9 @@ export async function getSettings() {
     idempotencyWindowMs: 5000,
     wsAuth: false,
     maxBodySizeMb: requestBodyLimitMbFromEnv(process.env.MAX_BODY_SIZE_BYTES),
-    debugMode: true,
+    // #10312: opt-in only — a fresh install (or one missing the persisted key)
+    // must not run in debug mode; installs that persisted `true` keep it.
+    debugMode: false,
     // Opt-in diagnostic: when true, the chat handler emits a `log.debug("TOOLS", …)`
     // line per request summarizing tool count + MCP/hosted/client source breakdown.
     logToolSources: false,
@@ -225,6 +277,7 @@ export async function getSettings() {
     localOnlyManageScopeBypassEnabled: true,
     localOnlyManageScopeBypassPrefixes: ["/api/mcp/"],
     customBannedSignals: [],
+    autoDisableBannedScope: "all",
     proxyEnabled: true,
     perKeyProxyEnabled: false,
     customSystemPromptEnabled: false,
@@ -234,6 +287,30 @@ export async function getSettings() {
     // (`:free` suffix, zero-price pricing, or FREE_MODEL_BUDGETS membership). Default
     // false preserves prior behaviour; opt-in only.
     hidePaidModels: false,
+    // Opt-in, default off: same shape as hidePaidModels above, but requires a
+    // live hard-stop-guaranteed quota check for non-keyless free candidates.
+    // See open-sse/services/autoCombo/strictZeroCostFilter.ts.
+    freeAccessPolicy: "off",
+    // #15059: ON by default — providers whose curated verdict is `tos: "avoid"` (e.g. Antigravity)
+    // must not receive `auto` traffic on a fresh install. Opt out with PATCH /api/settings.
+    excludeTosAvoid: true,
+    // #9418: Opt-in filter that hides auto/* virtual combos from the /v1/models catalog.
+    // User-defined combos are unaffected; routing still works for hidden ids sent explicitly.
+    hideAutoCombos: false,
+    // #9418: Opt-in filter that hides no-think/* gateway variants from the /v1/models catalog.
+    // Routing still works for hidden ids sent explicitly.
+    hideNoThinkVariants: false,
+    // Opt-in: the public /v1/models listing advertises only combos (user combos +
+    // auto/*). Catalog-only — explicit provider/model ids still route.
+    exposeCombosOnly: false,
+    // #11481: Opt-in explicit model exposure allow/deny list, mirrored into the
+    // auto/* combo candidate pool (open-sse/services/autoCombo/modelExposureFilter.ts)
+    // so a denied model can't sneak back in via combo routing — the same trap
+    // #6512 already fixed once for hidePaidModels. See
+    // src/shared/utils/modelExposureList.ts for the matching predicate. Empty
+    // arrays preserve prior behaviour; opt-in only.
+    modelVisibilityAllowlist: [],
+    modelVisibilityDenylist: [],
     // #6977: Opt-in per-connection auto-ping that warms a Codex OAuth connection's
     // quota window right after it resets, so the first real request doesn't land in
     // a cold window. `connections` maps connection id -> enabled. Default empty map
@@ -241,6 +318,12 @@ export async function getSettings() {
     // connection on, since pinging burns a small amount of real quota (Hard Rule #20
     // spirit: never mutate/consume on the operator's behalf by default).
     codexAutoPing: { connections: {} },
+    // #8848: opt-in per-connection Claude proactive warmup (empty = off for everyone).
+    claudeWarmup: { connections: {} },
+    // Operator-set CLI client-version overrides for the Claude Code / Codex
+    // identity presets (open-sse/config/cliVersions.ts). Empty record = no
+    // override: resolution falls back to the env var, then the captured pin.
+    cliVersionOverrides: {},
   };
   for (const row of rows) {
     const record = toRecord(row);
@@ -254,8 +337,10 @@ export async function getSettings() {
     }
   }
 
-  if (typeof settings.oidcClientSecret === "string") {
-    settings.oidcClientSecret = decrypt(settings.oidcClientSecret) ?? "";
+  for (const encryptedKey of ENCRYPTED_SETTING_KEYS) {
+    if (typeof settings[encryptedKey] === "string") {
+      settings[encryptedKey] = decrypt(settings[encryptedKey] as string) ?? "";
+    }
   }
   applySessionAffinityLegacyFallback(settings);
 
@@ -273,6 +358,23 @@ export async function getSettings() {
   }
 
   return settings;
+}
+
+/**
+ * The `maxBodySizeMb` an operator saved, or null if they never did. getSettings() cannot tell these
+ * apart because it fills the key with the default.
+ */
+export function getSavedRequestBodyLimitMb(): number | null {
+  const row = getDbInstance()
+    .prepare("SELECT value FROM key_value WHERE namespace = 'settings' AND key = 'maxBodySizeMb'")
+    .get();
+  const rawValue = toRecord(row).value;
+  if (typeof rawValue !== "string") return null;
+  try {
+    return normalizeRequestBodyLimitMb(JSON.parse(rawValue));
+  } catch {
+    return null;
+  }
 }
 
 export async function updateSettings(
@@ -296,14 +398,11 @@ export async function updateSettings(
   );
   const tx = db.transaction(() => {
     const currentRevision = readSettingsRevision(db);
-    if (
-      options?.expectedRevision !== undefined &&
-      options.expectedRevision !== currentRevision
-    ) {
+    if (options?.expectedRevision !== undefined && options.expectedRevision !== currentRevision) {
       throw new SettingsRevisionConflictError(currentRevision);
     }
     for (const [key, value] of Object.entries(updates)) {
-      const toStore = key === "oidcClientSecret" ? encrypt(value as string) : value;
+      const toStore = ENCRYPTED_SETTING_KEYS.has(key) ? encrypt(value as string) : value;
       insert.run(key, JSON.stringify(toStore));
     }
     insert.run(SETTINGS_REVISION_KEY, JSON.stringify(currentRevision + 1));
@@ -387,8 +486,8 @@ function migrateProxyEntry(value: unknown): JsonRecord | null {
       port:
         url.port ||
         (url.protocol === "socks5:" ? "1080" : url.protocol === "https:" ? "443" : "8080"),
-      username: url.username ? decodeURIComponent(url.username) : "",
-      password: url.password ? decodeURIComponent(url.password) : "",
+      username: url.username ? decodeUserinfo(url.username) : "",
+      password: url.password ? decodeUserinfo(url.password) : "",
     };
   } catch {
     const parts = value.split(":");
@@ -479,6 +578,55 @@ export async function deleteProxyForLevel(level: string, id: string | null) {
   return setProxyForLevel(level, id, null);
 }
 
+// With PROXY_SKIP_RECENTLY_FAILED on, a pool member set aside AFTER its resolution started is
+// not re-served from the cache: the cascade runs again so the pool can pick another member.
+// Once per set-aside event: the new entry records the sequence it started from, so a member
+// the pool hands back anyway (every member set aside) is then served from the cache instead
+// of costing a DB cascade on every request. Legacy single-proxy levels have no alternative
+// and stay cached, like a result without a proxy. The flag is read last, only on a real hit.
+function isCachedPoolMemberSetAside(entry: ProxyResolutionCacheEntry): boolean {
+  const { result } = entry;
+  if (!hasProxyRefusals() || result.source !== "registry" || result.proxy == null) return false;
+  const setAsideSeq = proxySetAsideSeq(proxyEgressKey(result.proxy));
+  if (setAsideSeq === null || setAsideSeq <= entry.refusalSeq) return false;
+  return isProxySkipRecentlyFailedEnabled();
+}
+
+// Providers that need a STABLE egress across requests, never rotated under them by this
+// cache-invalidation path (#13575): opencode's free-tier quota is bucketed by egress IP
+// (EGRESS_BUCKETED_LOCK_PROVIDERS — rotating would fragment one connection's quota across
+// several IPs), and grok-web's cf_clearance cookie is pinned to the IP/User-Agent/TLS
+// fingerprint that earned it (src/shared/providers/webSessionCredentials.ts "grok-web" —
+// rotating the egress would turn every subsequent request into a Cloudflare 403).
+function requiresStableEgress(provider: string | null): boolean {
+  if (!provider) return false;
+  return isEgressBucketedLockScope(provider) || provider.toLowerCase() === "grok-web";
+}
+
+// The chat-path cache (below) exists so a hot connection does not pay the full resolution
+// cascade on every request, but it must not FREEZE a rotating pool's choice: the registry
+// resolver (resolveProxyForScopeFromRegistry, called directly by every #6365 rotation test)
+// re-runs its strategy on every call and rotates correctly, while the cache here returned
+// the same first-resolved member forever (#13575). A cached member is stale whenever it came
+// from a live scope pool (source: "registry") and the connection is not in the two populations
+// above that need a pinned egress instead: the caller then falls through to the full cascade,
+// which re-invokes resolveProxyForScopeFromRegistry and applies the pool's own selection
+// strategy (round-robin advances, sticky holds until its window elapses, random reshuffles) —
+// no new strategy is introduced here.
+function isCachedPoolMemberDue(
+  entry: ProxyResolutionCacheEntry,
+  db: ReturnType<typeof getDbInstance>,
+  connectionId: string
+): boolean {
+  const { result } = entry;
+  if (result.source !== "registry" || result.proxy == null) return false;
+  const row = db
+    .prepare("SELECT provider FROM provider_connections WHERE id = ?")
+    .get(connectionId) as { provider?: string } | undefined;
+  const provider = typeof row?.provider === "string" ? row.provider : null;
+  return !requiresStableEgress(provider);
+}
+
 export async function resolveProxyForConnection(
   connectionId: string,
   apiKeyId?: string,
@@ -489,18 +637,22 @@ export async function resolveProxyForConnection(
     : apiKeyId
       ? `${connectionId}:${apiKeyId}`
       : connectionId;
-  const startGeneration = proxyConfigGeneration;
-  const startRegistryGeneration = getProxyRegistryGeneration();
+  const stamp: ProxyResolutionStamp = {
+    generation: proxyConfigGeneration,
+    registryGeneration: getProxyRegistryGeneration(),
+    refusalSeq: getProxyRefusalSeq(),
+  };
+  const db = getDbInstance();
   const cached = proxyResolutionCache.get(cacheKey);
   if (
     cached &&
-    cached.generation === startGeneration &&
-    cached.registryGeneration === startRegistryGeneration
+    cached.generation === stamp.generation &&
+    cached.registryGeneration === stamp.registryGeneration &&
+    !isCachedPoolMemberSetAside(cached) &&
+    !isCachedPoolMemberDue(cached, db, connectionId)
   ) {
     return cached.result;
   }
-
-  const db = getDbInstance();
 
   // Step 1: Check global proxyEnabled setting
   // Read only the proxyEnabled key for performance instead of loading all settings.
@@ -546,7 +698,7 @@ export async function resolveProxyForConnection(
   // fallback candidates from the proxy pool.
   if (connectionRecord && !connectionProxyEnabled) {
     const result: ProxyResolutionResult = { proxy: null, level: "direct", levelId: null };
-    cacheProxyResolution(cacheKey, startGeneration, startRegistryGeneration, result);
+    cacheProxyResolution(cacheKey, stamp, result);
     return result;
   }
 
@@ -607,7 +759,7 @@ export async function resolveProxyForConnection(
               levelId: apiKeyId,
               source: "api_key" as const,
             };
-            cacheProxyResolution(cacheKey, startGeneration, startRegistryGeneration, result);
+            cacheProxyResolution(cacheKey, stamp, result);
             return result;
           }
         }
@@ -620,7 +772,7 @@ export async function resolveProxyForConnection(
   // Step 3: Account-level registry
   const registryAccount = await resolveProxyForScopeFromRegistry("account", connectionId);
   if (registryAccount?.proxy) {
-    cacheProxyResolution(cacheKey, startGeneration, startRegistryGeneration, registryAccount);
+    cacheProxyResolution(cacheKey, stamp, registryAccount);
     return registryAccount;
   }
 
@@ -631,7 +783,7 @@ export async function resolveProxyForConnection(
       level: "key",
       levelId: connectionId,
     };
-    cacheProxyResolution(cacheKey, startGeneration, startRegistryGeneration, result);
+    cacheProxyResolution(cacheKey, stamp, result);
     return result;
   }
 
@@ -644,7 +796,7 @@ export async function resolveProxyForConnection(
         connectionProvider
       );
       if (registryProvider?.proxy) {
-        cacheProxyResolution(cacheKey, startGeneration, startRegistryGeneration, registryProvider);
+        cacheProxyResolution(cacheKey, stamp, registryProvider);
         return registryProvider;
       }
     }
@@ -674,7 +826,7 @@ export async function resolveProxyForConnection(
 
           const registryCombo = await resolveProxyForScopeFromRegistry("combo", comboId);
           if (registryCombo?.proxy) {
-            cacheProxyResolution(cacheKey, startGeneration, startRegistryGeneration, registryCombo);
+            cacheProxyResolution(cacheKey, stamp, registryCombo);
             return registryCombo;
           }
 
@@ -684,7 +836,7 @@ export async function resolveProxyForConnection(
               level: "combo",
               levelId: comboId,
             };
-            cacheProxyResolution(cacheKey, startGeneration, startRegistryGeneration, result);
+            cacheProxyResolution(cacheKey, stamp, result);
             return result;
           }
         } catch {
@@ -700,12 +852,12 @@ export async function resolveProxyForConnection(
         level: "provider",
         levelId: connectionProvider,
       };
-      cacheProxyResolution(cacheKey, startGeneration, startRegistryGeneration, result);
+      cacheProxyResolution(cacheKey, stamp, result);
       return result;
     }
   }
 
-  // Step 8.5 (#6272): no-auth providers (mimocode, opencode, ...) share a single
+  // Step 8.5 (#6272): no-auth providers share a single
   // synthetic connectionId that never matches a `provider_connections` row, so
   // `connectionRecord` above is null and Steps 5-8 (which require it) never run for
   // them — a provider-level proxy assigned to a no-auth provider was silently
@@ -713,7 +865,7 @@ export async function resolveProxyForConnection(
   if (!connectionRecord) {
     const noAuthFallback = await resolveNoAuthSharedProviderProxy(config.providers, providerId);
     if (noAuthFallback) {
-      cacheProxyResolution(cacheKey, startGeneration, startRegistryGeneration, noAuthFallback);
+      cacheProxyResolution(cacheKey, stamp, noAuthFallback);
       return noAuthFallback;
     }
   }
@@ -721,14 +873,14 @@ export async function resolveProxyForConnection(
   // Step 9: Global registry
   const registryGlobal = await resolveProxyForScopeFromRegistry("global");
   if (registryGlobal?.proxy) {
-    cacheProxyResolution(cacheKey, startGeneration, startRegistryGeneration, registryGlobal);
+    cacheProxyResolution(cacheKey, stamp, registryGlobal);
     return registryGlobal;
   }
 
   // Step 10: Legacy global
   if (config.global) {
     const result = { proxy: withFamilyDefault(config.global), level: "global", levelId: null };
-    cacheProxyResolution(cacheKey, startGeneration, startRegistryGeneration, result);
+    cacheProxyResolution(cacheKey, stamp, result);
     return result;
   }
 
@@ -744,12 +896,7 @@ export async function resolveProxyForConnection(
         fallback.proxy && typeof fallback.proxy === "object"
           ? { ...fallback, proxy: withFamilyDefault(fallback.proxy as ProxyValue) }
           : fallback;
-      cacheProxyResolution(
-        cacheKey,
-        startGeneration,
-        startRegistryGeneration,
-        normalizedFallback as ProxyResolutionResult
-      );
+      cacheProxyResolution(cacheKey, stamp, normalizedFallback as ProxyResolutionResult);
       return normalizedFallback;
     }
   } catch (err) {
@@ -810,7 +957,16 @@ export {
   resetAllPricing,
 } from "./settings/pricing";
 
-export { type LKGPRecord, getLKGP, setLKGP, clearAllLKGP } from "./settings/lkgp";
+export {
+  type LKGPRecord,
+  getLKGP,
+  setLKGP,
+  clearAllLKGP,
+  clearLKGP,
+  deleteLKGPByComboName,
+  deleteLKGPRowsByComboName,
+  deleteLKGPByConnectionIds,
+} from "./settings/lkgp";
 
 export {
   type CacheTrendPoint,

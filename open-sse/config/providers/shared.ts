@@ -6,7 +6,10 @@
  * is auto-generated from this registry.
  */
 
-import { ANTIGRAVITY_RUNTIME_BASE_URLS } from "../antigravityUpstream.ts";
+import {
+  ANTIGRAVITY_GENERATION_BASE_URLS,
+  ANTIGRAVITY_RUNTIME_BASE_URLS,
+} from "../antigravityUpstream.ts";
 import { ANTIGRAVITY_PUBLIC_MODELS } from "../antigravityModelAliases.ts";
 import { AGY_PUBLIC_MODELS } from "../agyModels.ts";
 import {
@@ -16,6 +19,7 @@ import {
   CLAUDE_CLI_STAINLESS_PACKAGE_VERSION,
   CLAUDE_CLI_STAINLESS_RUNTIME_VERSION,
   CLAUDE_CLI_USER_AGENT,
+  getClaudeCodeUserAgent,
 } from "../anthropicHeaders.ts";
 import { getCodexDefaultHeaders } from "../codexClient.ts";
 import {
@@ -25,6 +29,7 @@ import {
   GLMT_TIMEOUT_MS,
   GLM_SHARED_MODELS,
 } from "../glmProvider.ts";
+import { OPENCODE_ZEN_GO_SHARED_MODELS } from "../opencodeZenGoSharedModels.ts";
 import { MARITALK_DEFAULT_BASE_URL } from "../maritalk.ts";
 import {
   CURSOR_REGISTRY_VERSION,
@@ -46,9 +51,31 @@ export interface RegistryModel {
   id: string;
   name: string;
   aliases?: readonly string[];
+  /**
+   * Upstream model IDs that prove this static model is live when the provider
+   * has an authoritative synchronized catalog. Needed for curated IDs whose
+   * public name differs from the ID sent to the upstream service.
+   */
+  liveCatalogIds?: readonly string[];
   toolCalling?: boolean;
   supportsReasoning?: boolean;
+  /**
+   * Model reasons unconditionally (always-on reasoning). When true,
+   * ensureThinkingBudget treats it as implicit reasoning opt-in so a tiny
+   * caller max_tokens gets the 4096 floor even without explicit thinking
+   * settings (#13198).
+   */
+  alwaysReasons?: boolean;
+  supportedThinkingEfforts?: readonly string[];
+  /**
+   * Effort suffixes that must fold onto this base model even when the live
+   * catalog lists `<id>-<effort>` as its own model. Use only when that catalog
+   * id is a different billed SKU, not the reasoning tier clients expect.
+   */
+  effortSuffixesThatFoldDespiteLiveCatalog?: readonly string[];
   supportsVision?: boolean;
+  supportsAudio?: boolean;
+  supportsVideo?: boolean;
   supportsXHighEffort?: boolean;
   maxOutputTokens?: number;
   targetFormat?: string;
@@ -73,6 +100,17 @@ export interface RegistryModel {
   /** Per-model upstream header-response timeout override — precedes
    *  `RegistryEntry.timeoutMs` and the global `FETCH_TIMEOUT_MS` (#6354). */
   timeoutMs?: number;
+  /**
+   * Id whose QUALITY scores (task fitness / arena / user overrides) this id
+   * inherits (#11489). Operational fields (timeoutMs, cost, context) stay on
+   * this entry. One hop only; the target must itself be a catalog id.
+   *
+   * Only for relations suffix-stripping cannot express: forward vendor aliases
+   * (`gpt-5.6` → `gpt-5.6-sol`) and cross-provider spellings of the same model
+   * (cursor's `claude-4.6-opus-high` → `claude-opus-4-6`). Plain effort/`-free`
+   * variants are derived by `resolveScoresAs` and need no entry here.
+   */
+  scoresAs?: string;
 }
 
 // Reasoning models reject temperature, top_p, penalties, logprobs, n.
@@ -99,6 +137,8 @@ export interface RegistryOAuth {
   pollUrlBase?: string;
 }
 
+export type ReasoningTransport = "plaintext" | "opaque" | "none";
+
 export interface RegistryEntry {
   id: string;
   alias?: string;
@@ -111,6 +151,18 @@ export interface RegistryEntry {
   /** Override models URL used only for API key validation, not catalog discovery. */
   testKeyModelsUrl?: string;
   responsesBaseUrl?: string;
+  /** Provider-bound replay format; omitted providers accept portable plaintext reasoning. */
+  reasoningTransport?: ReasoningTransport;
+  /**
+   * Thinking-mode upstreams proxied by this provider require the assistant's
+   * prior-turn `reasoning_content` to be echoed back on every follow-up request
+   * (e.g. DeepSeek-reselling gateways such as `bai`). Standard OpenAI-shaped
+   * clients do not preserve that field when replaying history, so when this is
+   * `true`, DefaultExecutor injects a placeholder via
+   * `open-sse/utils/reasoningContentInjector.ts` for model ids matching
+   * `isThinkingMessageModel()`. See issue #13599.
+   */
+  requiresReasoningContentEcho?: boolean;
   /** Anthropic-native /v1/messages endpoint (e.g. GitHub Copilot's shim) used
    *  for models tagged `targetFormat: "claude"` on an otherwise openai-format
    *  provider — see registry/github/index.ts. */
@@ -125,6 +177,18 @@ export interface RegistryEntry {
   requestDefaults?: ProviderRequestDefaults;
   oauth?: RegistryOAuth;
   models: RegistryModel[];
+  /**
+   * Opt-in for unionRegistryDispatchModels: targetFormat-tagged models join
+   * authoritative live catalogs (dispatch AND listing) when this provider's
+   * discovery surface is known to under-report — z.ai's Anthropic-compat
+   * /models omitting the coding-plan glm-5.3-flash family is the motivating
+   * case. Providers whose discovery omissions instead mean per-account
+   * entitlement must NOT opt in: their #12137-style gating would be bypassed.
+   */
+  registryDispatchUnion?: boolean;
+  /** Provider-native reasoning vocabulary for reasoning-capable passthrough models
+   * that do not have an explicit per-model declaration. */
+  defaultSupportedThinkingEfforts?: readonly string[];
   modelsUrl?: string;
   /** Prefix to prepend to model IDs before upstream API calls (e.g. "accounts/fireworks/models/") */
   modelIdPrefix?: string;
@@ -137,9 +201,25 @@ export interface RegistryEntry {
   chatPath?: string;
   clientVersion?: string;
   timeoutMs?: number;
+  /** Headers-wait ceiling override for streaming requests (#11526). Gateways
+   *  that buffer entire generations (Console Go / Command Code) need this well
+   *  above the 110s global cap — generateLegacyProviders() copies it into the
+   *  executor's LegacyProvider config. */
+  fetchStartTimeoutCapMs?: number;
   passthroughModels?: boolean;
+  /**
+   * Whether a non-empty synchronized live model list is exhaustive enough
+   * to reject static registry IDs that it omits.
+   *
+   * Defaults to true. Set this explicitly to false for providers whose
+   * discovery endpoint is known to return only a partial subset of the models
+   * that the provider can route.
+   */
+  liveCatalogAuthoritative?: boolean;
   /** Default context window for all models in this provider (can be overridden per-model) */
   defaultContextLength?: number;
+  /** Maximum OpenAI-compatible function name length accepted by this provider. */
+  toolNameMaxLength?: number;
   /** Optional session pool config for rate limit management */
   poolConfig?: Record<string, unknown>;
   /**
@@ -148,6 +228,13 @@ export interface RegistryEntry {
    * OmniRoute accumulates the stream and converts it to a JSON body for the client. (#2081)
    */
   forceStream?: boolean;
+  /**
+   * Opt-in for providers that use prompt-emulated tool calling (e.g. web-session
+   * providers like opencode, duckduckgo-web, cloudflare-playground). When set to
+   * "emulated", the combo tool-calling filter will keep these providers eligible
+   * even though their registry/capability rows report toolCalling:false.
+   */
+  toolCalling?: "emulated" | boolean;
   /**
    * Literal API key sent as the bearer token when the request has no real
    * credential (synthetic noauth fallback). Lets a primarily-authenticated
@@ -176,6 +263,46 @@ export interface RegistryEntry {
    * standard OpenAI array-shaped content untouched (see openai-responses.ts).
    */
   requiresPlainStringContent?: boolean;
+  /**
+   * True for upstreams that accept a single-turn request but reject the
+   * replayed history an agent client sends from turn two on. Set this when the
+   * upstream reports a broken tool-call sequence or a missing reasoning
+   * passthrough for a history that is structurally valid Chat Completions.
+   *
+   * The repair, in `utils/strictChatHistory.ts`, coalesces a split assistant
+   * turn, keeps one result per tool call in call order, merges neighbouring
+   * user turns (upstreams that collapse them keep only the text, which silently
+   * drops a lifted image), and folds a trailing assistant message back onto the
+   * turn's tool results. Every step is a no-op on a body that already satisfies
+   * the shape, so this is safe to enable for any provider that needs one of them.
+   *
+   * WorkBuddy is the reference case: `11148 tool_call_sequence_broken` and
+   * `11155 reasoning content from the previous turn must be passed back`.
+   */
+  strictChatHistory?: boolean;
+  /**
+   * Literal string replacements applied to every string value in the outgoing
+   * request body, for upstreams that reject a request naming a competing client
+   * rather than rejecting a specific field. Keys, numbers, and structure are
+   * never touched.
+   *
+   * Order matters: list longer needles first so a shorter one cannot match
+   * inside them. WorkBuddy answers `11128 Illegal API invocation from an
+   * unapproved channel` for a body naming another agent client.
+   */
+  bodyStringReplacements?: ReadonlyArray<readonly [string, string]>;
+  /**
+   * Anthropic-compatible providers that omit the required `signature` field
+   * from streamed thinking block starts. The passthrough stream adds only an
+   * empty placeholder; later provider `signature_delta` events remain intact.
+   */
+  ensureThinkingSignature?: boolean;
+  /**
+   * Timezone offset to assume for zone-less (naive) reset timestamps in 429 error bodies
+   * (e.g. "+08:00" for Z.AI/GLM which outputs local Asia/Shanghai time).
+   * Defaults to "Z" (UTC).
+   */
+  naiveResetTimezone?: string;
   /**
    * Protocolos alternativos que este provedor aceita (ex.: um endpoint
    * Anthropic-compatible alem do OpenAI-compatible padrao). A conexao escolhe
@@ -218,6 +345,7 @@ export interface LegacyProvider {
   chatPath?: string;
   clientVersion?: string;
   timeoutMs?: number;
+  fetchStartTimeoutCapMs?: number;
 }
 
 export const buildModels = (ids: readonly string[]): RegistryModel[] =>
@@ -248,21 +376,27 @@ export const GPT_5_6_API_CAPABILITIES = {
   supportsReasoning: true,
   supportsVision: true,
   supportsXHighEffort: true,
+  supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
   contextLength: 1050000,
   maxInputTokens: 922000,
   maxOutputTokens: 128000,
 } as const;
 
-// Codex's live catalog reports a 272K input context window for GPT-5.6.
-// Keep the input and output limits explicit for catalog consumers that expose them separately.
+// Codex OAuth catalog limits. The live OAuth `/codex/models` endpoint reports
+// `context_window` (~272K, the first pricing tier) alongside
+// `max_context_window` (~872K, the real usable window); requests past the
+// pricing tier succeed upstream (verified: gpt-5.6-luna-xhigh served 380-390K
+// input tokens with HTTP 200). The static catalog must advertise the usable
+// window so the conservative discovery merge (`Math.min`) does not cap the
+// live value at the pricing tier.
 export const GPT_5_6_CODEX_CAPABILITIES = {
   targetFormat: "openai-responses",
   toolCalling: true,
   supportsReasoning: true,
   supportsVision: true,
   supportsXHighEffort: true,
-  contextLength: 272000,
-  maxInputTokens: 272000,
+  contextLength: 872000,
+  maxInputTokens: 872000,
   maxOutputTokens: 128000,
 } as const;
 
@@ -303,12 +437,22 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "llama3.3-70b-instruct-fp8",
     "qwen25-coder-32b-instruct",
   ]),
+  runcrate: buildModels([
+    "deepseek-ai/DeepSeek-V4.1-Flash",
+    "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+    "zai-org/GLM-5.3",
+    "zai-org/GLM-5.3-Flash",
+    "Qwen/Qwen3.8-Flash",
+    "openai/gpt-oss-120b",
+  ]),
   sambanova: buildModels([
     "MiniMax-M2.7",
     "DeepSeek-V3.2",
     "Llama-4-Maverick-17B-128E-Instruct",
     "Meta-Llama-3.3-70B-Instruct",
     "gpt-oss-120b",
+    "DeepSeek-V3.1",
+    "gemma-4-31B-it",
   ]),
   nscale: buildModels([
     "moonshotai/Kimi-K2.5",
@@ -323,14 +467,37 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "Qwen2.5-Coder-32B-Instruct",
     "Mistral-Small-3.2-24B-Instruct-2506",
   ]),
-  baseten: buildModels([
-    "moonshotai/Kimi-K2.6",
-    "deepseek-ai/DeepSeek-V4-Pro",
-    "zai-org/GLM-5",
-    "MiniMaxAI/MiniMax-M2.5",
-    "nvidia/Nemotron-120B-A12B",
-    "openai/gpt-oss-120b",
-  ]),
+  // Offline seed from Baseten's supported-models table; live discovery is authoritative.
+  baseten: [
+    { id: "zai-org/GLM-5.3", name: "GLM 5.3", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.3-Fast", name: "GLM 5.3 Fast", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.3-Flash", name: "GLM 5.3 Flash", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.2", name: "GLM 5.2", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.2-Fast", name: "GLM 5.2 Fast", contextLength: 1048576 },
+    { id: "zai-org/GLM-4.7", name: "GLM 4.7", contextLength: 200000 },
+    { id: "deepseek-ai/DeepSeek-V4-Pro", name: "DeepSeek V4 Pro", contextLength: 1048576 },
+    {
+      id: "deepseek-ai/DeepSeek-V4-Pro-0813",
+      name: "DeepSeek V4 Pro 0813",
+      contextLength: 1048576,
+    },
+    {
+      id: "deepseek-ai/DeepSeek-V4-Flash-0731",
+      name: "DeepSeek V4 Flash 0731",
+      contextLength: 1048576,
+    },
+    { id: "moonshotai/Kimi-K3", name: "Kimi K3", contextLength: 1048576 },
+    { id: "moonshotai/Kimi-K2.6", name: "Kimi K2.6", contextLength: 262144 },
+    { id: "moonshotai/Kimi-K2.7-Code", name: "Kimi K2.7 Code", contextLength: 262144 },
+    { id: "openai/gpt-oss-120b", name: "GPT OSS 120B", contextLength: 131072 },
+    {
+      id: "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B",
+      name: "Nemotron 3 Ultra",
+      contextLength: 202000,
+    },
+    { id: "thinkingmachines/inkling", name: "Inkling", contextLength: 1048576 },
+    { id: "thinkingmachines/inkling-small", name: "Inkling Small", contextLength: 1048576 },
+  ],
   publicai: buildModels([
     "swiss-ai/apertus-70b-instruct",
     "swiss-ai/Apertus-8B-Instruct-2509",
@@ -410,6 +577,13 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     { id: "mimo-v2.5", name: "MiMo-V2.5", contextLength: 1048576, maxOutputTokens: 131072 },
   ],
   "xiaomi-mimo-token-plan": [
+    { id: "mimo-v2.6-pro", name: "MiMo-V2.6-Pro", contextLength: 1048576, maxOutputTokens: 131072 },
+    {
+      id: "mimo-v2.6-flash",
+      name: "MiMo-V2.6-Flash",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+    },
     { id: "mimo-v2.5-pro", name: "MiMo-V2.5-Pro", contextLength: 1048576, maxOutputTokens: 131072 },
     { id: "mimo-v2.5", name: "MiMo-V2.5", contextLength: 1048576, maxOutputTokens: 131072 },
   ],
@@ -642,18 +816,62 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
   cerebrium: buildModels(["meta-llama/Meta-Llama-3.1-8B-Instruct"]),
   grokified: buildModels(["grok-4.6", "grok-4.3", "grok-build-0.1"]),
   nanogpt: buildModels(["chatgpt-4o-latest", "claude-3.5-sonnet", "gpt-4o-mini"]),
+  // Seed catalog mirrors apmix.ai/models (2026-09-25). The catalog is
+  // plan-scoped per key — live discovery via GET https://api.apmix.ai/v1/models
+  // serves what the key can actually reach; this list is the union fallback.
+  apmix: [
+    ...buildModels([
+      "claude-haiku-4-5",
+      "claude-sonnet-5",
+      "claude-opus-5",
+      "claude-opus-4-8",
+      "claude-opus-4-7",
+      "claude-opus-4-6",
+      "claude-fable-5",
+      "claude-sonnet-4-6",
+      "gpt-5.6-terra",
+      "gpt-5.6-sol",
+      "gpt-5.6-luna",
+      "gpt-5.5",
+      "gpt-6-astra",
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-6-luna-free",
+      "gemini-3.8-flash",
+      "gemini-3.7-flash",
+      "gemini-3.6-flash",
+      "gemini-3.1-pro",
+      "grok-4.5",
+      "grok-4.6",
+      "grok-4.7",
+      "deepseek-v4-pro",
+      "deepseek-v4-flash",
+      "deepseek-v4.1-flash",
+      "deepseek-v4-flash-free",
+      "qwen3.8-flash",
+      "qwen3.8-max",
+      "glm-5.3-flash",
+      "glm-5.3",
+      "glm-5.2",
+      "glm-5-turbo",
+      "kimi-k2.7-code",
+      "kimi-k3",
+      "mimo-v2.5-pro",
+      "mimo-v2.5",
+      "hy4-preview",
+      "composer-2.5-fast",
+    ]),
+    // MiniMax M3 is multimodal (bazaarlink entry shape) — LEDGER-4 requires
+    // every seeded minimax-m3 outside promptql to carry supportsVision: true.
+    { id: "minimax-m3", name: "MiniMax M3", contextLength: 1048576, supportsVision: true },
+    ...buildModels(["muse-spark-1.3"]),
+  ],
   predibase: buildModels(["llama-3.3-70b"]),
   bytez: buildModels([
     "meta-llama/Llama-3.3-70B-Instruct",
     "mistralai/Mistral-7B-Instruct-v0.3",
     "Qwen/Qwen2.5-72B-Instruct",
   ]),
-  // Restored after the registry modularization (#3993) dropped the mimocode key
-  // referenced by the mimocode provider plugin. Source of truth: pre-#3993
-  // providerRegistry.ts (commit 1ed01dd90^).
-  mimocode: [
-    { id: "mimo-auto", name: "MiMo Auto", contextLength: 1000000, maxOutputTokens: 128000 },
-  ],
 };
 
 export function mapStainlessOs() {
@@ -685,6 +903,7 @@ export function mapStainlessArch() {
 // ── Registry ──────────────────────────────────────────────────────────────
 
 export {
+  ANTIGRAVITY_GENERATION_BASE_URLS,
   ANTIGRAVITY_RUNTIME_BASE_URLS,
   ANTIGRAVITY_PUBLIC_MODELS,
   AGY_PUBLIC_MODELS,
@@ -700,6 +919,7 @@ export {
   GLM_TIMEOUT_MS,
   GLMT_TIMEOUT_MS,
   GLM_SHARED_MODELS,
+  OPENCODE_ZEN_GO_SHARED_MODELS,
   MARITALK_DEFAULT_BASE_URL,
   CURSOR_REGISTRY_VERSION,
   getAntigravityProviderHeaders,
@@ -719,7 +939,7 @@ export function getClaudeCliHeaders(): Record<string, string> {
     "Anthropic-Version": ANTHROPIC_VERSION_HEADER,
     "Anthropic-Beta": ANTHROPIC_BETA_CLAUDE_OAUTH,
     "Anthropic-Dangerous-Direct-Browser-Access": "true",
-    "User-Agent": CLAUDE_CLI_USER_AGENT,
+    "User-Agent": getClaudeCodeUserAgent("cli"),
     "X-App": "cli",
     "X-Stainless-Helper-Method": "stream",
     "X-Stainless-Retry-Count": "0",
@@ -742,4 +962,21 @@ export function getAnthropicCompatHeaders(): Record<string, string> {
 export function buildAntigravityUrl(base: string, model: string, stream: boolean): string {
   const path = stream ? "/v1internal:streamGenerateContent?alt=sse" : "/v1internal:generateContent";
   return `${base}${path}`;
+}
+
+/**
+ * Gemini protocol `generateContent` route: the model goes in the path, not the body.
+ *
+ * Shared because the format has two consumers: the native `gemini` provider
+ * (RegistryEntry.urlBuilder) and gateways that expose Gemini as an alternate
+ * protocol (AlternateFormat.urlBuilder, see alternateFormats.ts). One copy per
+ * consumer would leave the streaming `?alt=sse` suffix free to diverge.
+ */
+export function buildGeminiGenerateContentUrl(
+  base: string,
+  model: string,
+  stream: boolean
+): string {
+  const action = stream ? "streamGenerateContent?alt=sse" : "generateContent";
+  return `${base}/${model}:${action}`;
 }

@@ -14,7 +14,6 @@ import {
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
 
-
 export const pricingFieldsSchema = z
   .object({
     input: z.number().min(0).optional(),
@@ -22,6 +21,36 @@ export const pricingFieldsSchema = z
     cached: z.number().min(0).optional(),
     reasoning: z.number().min(0).optional(),
     cache_creation: z.number().min(0).optional(),
+    // Long-context tier carried by default rows (e.g. OpenAI >272K, xAI >=200K) and echoed
+    // back by the dashboard's GET → PATCH round-trip (#12494).
+    long_context: z
+      .object({
+        threshold: z.number().positive(),
+        inclusive: z.boolean().optional(),
+        input: z.number().min(0).optional(),
+        output: z.number().min(0).optional(),
+        cached: z.number().min(0).optional(),
+        reasoning: z.number().min(0).optional(),
+        cache_creation: z.number().min(0).optional(),
+      })
+      .strict()
+      .optional(),
+    // Written by pricingSync alongside the token fields and echoed back by the
+    // dashboard's GET → PATCH round-trip; strict() would otherwise reject the
+    // API's own output with an unrecognized-keys 400 (#12494).
+    mode: z.string().min(1).optional(),
+    input_cost_per_second: z.number().min(0).optional(),
+    output_cost_per_second: z.number().min(0).optional(),
+    input_cost_per_image: z.number().min(0).optional(),
+    output_cost_per_image: z.number().min(0).optional(),
+    input_cost_per_pixel: z.number().min(0).optional(),
+    output_cost_per_pixel: z.number().min(0).optional(),
+    input_cost_per_character: z.number().min(0).optional(),
+    output_cost_per_character: z.number().min(0).optional(),
+    input_cost_per_video_per_second: z.number().min(0).optional(),
+    output_cost_per_video_per_second: z.number().min(0).optional(),
+    search_unit_cost: z.number().min(0).optional(),
+    ocr_cost_per_page: z.number().min(0).optional(),
   })
   .strict();
 

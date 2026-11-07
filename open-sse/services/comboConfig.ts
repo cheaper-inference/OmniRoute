@@ -20,12 +20,26 @@ export const PRE_SCREEN_CONCURRENCY = 5;
  * `targetTimeoutMs`. Combos exist to fail over fast, so inheriting the full upstream
  * request timeout (FETCH_TIMEOUT_MS, 600s by default) made a single hung target stall
  * the whole combo for up to 10 minutes before falling through to the next model
- * (escalated cmqlrhd7c). For STREAMING requests this only bounds the time-to-first-headers
- * — token generation streams after the response resolves, so it is NOT cut short. Operators
- * can still raise it per-combo via `targetTimeoutMs` (capped at the upstream ceiling), or set
- * a longer value for slow non-streaming reasoning combos.
+ * (escalated cmqlrhd7c). For STREAMING requests this bounds the time to the first output
+ * frame, not the time to response headers: a target that opens the stream and then produces
+ * nothing is abandoned at the same budget, while token generation that has started streams
+ * to completion and is NOT cut short. A target that declares a longer budget of its own
+ * (connection, per-model or provider-level `timeoutMs`) may wait longer for its first output,
+ * up to DECLARED_FIRST_OUTPUT_WAIT_CAP_MS (see resolveDeclaredTargetBudgetMs in combo.ts).
+ * An explicit `targetTimeoutMs` in the resolved combo config (the combo's own config or the
+ * global `comboDefaults`) overrides the declared budgets.
  */
 export const DEFAULT_COMBO_TARGET_TIMEOUT_MS = 120_000;
+
+/**
+ * Upper bound on how far a declared budget may stretch a combo target's first-output wait.
+ * Declared budgets are total-lifetime budgets (Codex high/xhigh declare 20 minutes, GLM 50),
+ * so using them unbounded as a time-to-first-output wait would let one silent target hold the
+ * combo for that long before failing over. 180s matches the default
+ * STREAM_READINESS_MAX_TIMEOUT_MS. A longer floor (an explicit `targetTimeoutMs`, a connection
+ * timeout or the cooldown-wait floor) is never lowered by this cap.
+ */
+export const DECLARED_FIRST_OUTPUT_WAIT_CAP_MS = 180_000;
 
 /**
  * Small buffer added on top of the combo-cooldown-wait budget (see below) when deriving
@@ -47,13 +61,15 @@ export const COMBO_TARGET_TIMEOUT_WAIT_BUFFER_MS = 10_000;
  *
  * `strategy` is retained in the signature for call-site clarity; eligibility is
  * strategy-agnostic (the wait path in combo.ts already uses the real model-lockout
- * reason for every strategy).
+ * reason for every strategy). Only literal per-combo false opts out; no config
+ * can enable waiting when the global feature is disabled.
  */
 export function isComboCooldownWaitEligible(
   _strategy: string,
-  comboCooldownWait: Pick<ComboCooldownWaitSettings, "enabled">
+  comboCooldownWait: Pick<ComboCooldownWaitSettings, "enabled">,
+  config?: Record<string, unknown> | null
 ): boolean {
-  return comboCooldownWait.enabled;
+  return comboCooldownWait.enabled && config?.comboCooldownWaitEnabled !== false;
 }
 
 /**
@@ -61,8 +77,8 @@ export function isComboCooldownWaitEligible(
  * When the combo is wait-eligible (see isComboCooldownWaitEligible), a single target's
  * dispatch can legitimately wait out cooldowns for up to `comboCooldownWait.budgetMs`
  * before it resolves — so the per-target timeout must never be shorter than that budget,
- * or the wait gets cut off mid-retry and the target times out with a synthetic 524
- * (open-sse/services/combo/targetTimeoutRunner.ts) instead of completing the wait. This
+ * or the wait gets cut off mid-retry and the target times out with a synthetic 504
+ * (`combo_target_timeout`, open-sse/services/combo/targetTimeoutRunner.ts) instead of completing the wait. This
  * only raises the *default* floor; an operator's explicit `targetTimeoutMs` on the combo
  * still wins (see resolveComboTargetTimeoutMs).
  */
@@ -72,7 +88,7 @@ export function resolveComboTargetTimeoutMsForCombo(
   strategy: string,
   comboCooldownWait: Pick<ComboCooldownWaitSettings, "enabled" | "budgetMs">
 ): number {
-  const defaultTimeoutMs = isComboCooldownWaitEligible(strategy, comboCooldownWait)
+  const defaultTimeoutMs = isComboCooldownWaitEligible(strategy, comboCooldownWait, config)
     ? Math.max(
         DEFAULT_COMBO_TARGET_TIMEOUT_MS,
         comboCooldownWait.budgetMs + COMBO_TARGET_TIMEOUT_WAIT_BUFFER_MS
@@ -98,26 +114,55 @@ const DEFAULT_COMBO_CONFIG = {
   maxRetries: 1,
   retryDelayMs: 2000,
   fallbackDelayMs: 0,
-  concurrencyPerModel: 3, // max simultaneous requests per model (round-robin)
-  queueTimeoutMs: 30000, // max wait time in semaphore queue (round-robin)
+  // #9100: round-robin combo concurrency was hard-capped at 3 concurrent
+  // requests per model with no override — 5 concurrent requests through a
+  // round-robin combo serialized behind that cap. Now configurable via
+  // COMBO_CONCURRENCY_PER_MODEL (validated to >= 1, clamped to <= 32; default
+  // 3 preserves the historical behavior).
+  concurrencyPerModel: Math.min(
+    Math.max(Number(process.env.COMBO_CONCURRENCY_PER_MODEL) || 3, 1),
+    32
+  ),
+  queueTimeoutMs: 120000, // max wait time in semaphore queue (round-robin); raised from 30s for browser-automation providers like gemini-web (#9407)
   queueDepth: DEFAULT_COMBO_QUEUE_DEPTH, // pre-cascade semaphore queue depth (round-robin, #3872)
   handoffThreshold: 0.85,
   handoffModel: "",
   handoffProviders: ["codex"],
   maxMessagesForSummary: 30,
   maxComboDepth: 3,
+  // #11134: shared per-request combo attempt budget. Previously the hardcoded
+  // MAX_GLOBAL_ATTEMPTS with no override — operators could neither fail fast on
+  // a dead pool nor raise it for large combos. Clamped by clampGlobalAttempts to
+  // [1, MAX_GLOBAL_ATTEMPTS_HARD_CAP] at every read site.
+  maxGlobalAttempts: 30,
   nestedComboMode: "flatten",
   trackMetrics: true,
   reasoningTokenBufferEnabled: true,
   manifestRouting: false,
-  // Complexity-aware auto routing (2026): when on, the auto router scores
-  // candidates by how well their tier matches the request's classified
-  // difficulty (feeds tierAffinity/specificityMatch). Opt-in — off by default.
-  complexityAwareRouting: false,
+  // Complexity-aware auto routing is always-on since #13386 — the
+  // config.complexityAwareRouting flag was removed (it was orphaned by
+  // migration 103 which stripped it as a legacy key).
   resetAwareSessionWeight: 0.35,
   resetAwareWeeklyWeight: 0.65,
   resetAwareTieBandPercent: 5,
   resetAwareExhaustionGuardPercent: 10,
+  quotaWeightedFloorPercent: 1,
+  // Historical default (predates #2417/#10217) — true. This value feeds TWO
+  // independent mechanisms and must stay true-by-default for one of them:
+  //   1. skipUpstreamRetry (src/sse/handlers/chat.ts:859,1126) — the
+  //      lower-level executor retry skip. Always default-on; changing this
+  //      default flips that mechanism's behavior for every combo, not just
+  //      opted-in ones.
+  //   2. The #10217 same-model retry guard in this file's combo.ts callers
+  //      (priority/auto + round-robin loops) — meant to be OPT-IN only. That
+  //      guard must NOT read this field directly; it consults the sibling
+  //      `failoverBeforeRetryExplicit` flag computed below in
+  //      resolveComboConfig/resolveComboSetupConfig, which is true only when
+  //      an actual cascade layer (combo/provider/global) set the flag to
+  //      true, not merely inherited from this default. See round-4 base-red
+  //      bisect (06f41cda63 vs d2fd88dfbc) — flipping THIS default to false
+  //      "fixed" mechanism 2 but silently broke mechanism 1's default-on
+  //      behavior for every combo without an explicit opt-in.
   failoverBeforeRetry: true,
   // Feature 4985: configurable response-body validation predicate (per-combo). When set,
   // a 200 OK whose body fails the predicate fails over to the next target.
@@ -165,12 +210,16 @@ const DEFAULT_COMBO_CONFIG = {
     latencyWeight: 0.15,
     cacheTtlMs: 60000,
   },
+  // Connection-aware expansion for group-B combo strategies is opt-in.
+  connectionAwareExpansion: false,
+  connectionAwareExpansionMaxPerTarget: 8,
   // Context window requirements for combo target filtering/sorting (undefined by
   // default — declared here so resolveComboSetupConfig's inferred return type
   // includes the key; combo.ts reads config.contextRequirements).
   contextRequirements: undefined as
     | {
         minContextWindow?: number;
+        maxContextWindow?: number;
         preferLargeContext?: boolean;
         contextFilterMode?: "strict" | "lenient";
       }
@@ -210,6 +259,18 @@ function normalizePositiveTimeoutMs(value: unknown): number {
   return Math.min(Math.floor(numericValue), MAX_TIMER_TIMEOUT_MS);
 }
 
+/**
+ * True when `targetTimeoutMs` is set explicitly in the resolved combo config: the combo's own
+ * config or the global `comboDefaults`. An explicit value outranks every declared budget.
+ * `providerOverrides` only join the cascade when resolveComboConfig is given a provider; the
+ * combo setup (resolveComboSetupConfig) resolves it without one, so they never reach here.
+ */
+export function hasExplicitComboTargetTimeout(
+  config: Record<string, unknown> | null | undefined
+): boolean {
+  return isRecord(config) && normalizePositiveTimeoutMs(config.targetTimeoutMs) > 0;
+}
+
 export function resolveComboTargetTimeoutMs(
   config: Record<string, unknown> | null | undefined,
   upstreamTimeoutMs: number,
@@ -220,10 +281,10 @@ export function resolveComboTargetTimeoutMs(
     ? normalizePositiveTimeoutMs(config.targetTimeoutMs)
     : 0;
 
-  // Explicit per-combo config: honour it, but never extend past the upstream ceiling.
+  // Explicit per-combo config is authoritative. The upstream request deadline, when
+  // enabled, remains enforced separately by the request/executor timeout.
   if (configuredTimeoutMs > 0) {
-    if (ceilingTimeoutMs <= 0) return configuredTimeoutMs;
-    return Math.min(configuredTimeoutMs, ceilingTimeoutMs);
+    return configuredTimeoutMs;
   }
 
   // Unset config: fall back to the saner combo default (when provided) so a hung target
@@ -275,15 +336,32 @@ export function resolveComboConfig(
       )
     );
 
+  const cleanGlobal = clean(global);
+  const cleanProviderOverride = clean(providerOverride);
+  const cleanComboConfig = clean(comboConfig);
+
   const merged = {
     ...DEFAULT_COMBO_CONFIG,
-    ...clean(global),
-    ...clean(providerOverride),
-    ...clean(comboConfig),
+    ...cleanGlobal,
+    ...cleanProviderOverride,
+    ...cleanComboConfig,
   };
+
+  // #10217 round-4 fix: `failoverBeforeRetry` defaults to true (see comment on
+  // DEFAULT_COMBO_CONFIG above) and feeds two independent mechanisms. Callers
+  // that gate the OPT-IN same-model retry guard (combo.ts) must NOT read
+  // `merged.failoverBeforeRetry` directly — that stays true unless a layer
+  // explicitly disables it, which can't distinguish "inherited default" from
+  // "operator opted in". This flag is true only when some cascade layer
+  // literally set the value to true, i.e. a genuine opt-in.
+  const failoverBeforeRetryExplicit =
+    cleanComboConfig.failoverBeforeRetry === true ||
+    cleanProviderOverride.failoverBeforeRetry === true ||
+    cleanGlobal.failoverBeforeRetry === true;
 
   return {
     ...merged,
+    failoverBeforeRetryExplicit,
     shadowRouting: {
       ...DEFAULT_COMBO_CONFIG.shadowRouting,
       ...(isRecord(global.shadowRouting) ? clean(global.shadowRouting) : {}),
@@ -303,7 +381,13 @@ export function resolveComboConfig(
  * Get the default combo config (used when no overrides exist)
  */
 export function getDefaultComboConfig() {
-  return { ...DEFAULT_COMBO_CONFIG };
+  return {
+    ...DEFAULT_COMBO_CONFIG,
+    // Mirror resolveComboConfig's opt-in flag so a deepEqual against the
+    // default stays consistent (#10217 round-4 fix). With no cascade layer
+    // setting the flag, it is a genuine non-opt-in → false.
+    failoverBeforeRetryExplicit: false,
+  };
 }
 
 /**
@@ -313,7 +397,14 @@ export function getDefaultComboConfig() {
  * return type is the single source of truth for ComboContext.config (combo/context.ts).
  */
 export function resolveComboSetupConfig(combo: ComboConfigLike, settings: ComboSettingsLike) {
-  return settings
-    ? resolveComboConfig(combo, settings)
-    : { ...getDefaultComboConfig(), ...((combo?.config as Record<string, unknown>) || {}) };
+  if (settings) return resolveComboConfig(combo, settings);
+  const comboConfig = (combo?.config as Record<string, unknown>) || {};
+  return {
+    ...getDefaultComboConfig(),
+    ...comboConfig,
+    // See resolveComboConfig's failoverBeforeRetryExplicit comment — same
+    // distinction applies here (no `settings`, so only the combo's own config
+    // can opt in).
+    failoverBeforeRetryExplicit: comboConfig.failoverBeforeRetry === true,
+  };
 }

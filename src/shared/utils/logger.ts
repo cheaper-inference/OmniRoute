@@ -14,10 +14,15 @@
  * as JSON lines to the file specified by APP_LOG_FILE_PATH.
  */
 import pino from "pino";
+import { EventEmitter } from "events";
 import { resolve } from "path";
-import { getLogConfig, initLogRotation } from "@/lib/logRotation";
+import { getLogConfig, initLogRotation, onLogRotation } from "@/lib/logRotation";
 import { getAppLogLevel } from "@/lib/logEnv";
 import { redactLogArgs } from "@/shared/utils/logRedaction";
+import {
+  getOrCreateSharedLoggerResource,
+  type SharedLoggerResource,
+} from "@/shared/utils/loggerResource";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -61,25 +66,204 @@ function getTransportCompatibleConfig(): pino.LoggerOptions {
  * vanished, so failed writes are dropped (best-effort stderr notice) instead of
  * escalating.
  */
-function buildFileTransportStream(targets: NonNullable<pino.TransportMultiOptions["targets"]>) {
+function reportTransportWriteFailure(err: unknown): void {
+  try {
+    process.stderr.write(
+      `[logger] log transport write failed, dropping log line: ${(err as Error)?.message || err}\n`
+    );
+  } catch {
+    // Nothing more we can do — never let a logging failure crash the process.
+  }
+}
+
+function buildTransportStream(targets: NonNullable<pino.TransportMultiOptions["targets"]>) {
   const stream = pino.transport({ targets });
-  stream.on("error", (err: unknown) => {
+  stream.on("error", reportTransportWriteFailure);
+  return stream;
+}
+
+type TransportStream = ReturnType<typeof buildTransportStream>;
+
+interface OwnedLogStream {
+  flushSync?: () => void;
+  end?: () => void;
+  once?: (event: string, listener: () => void) => unknown;
+}
+
+async function closeOwnedStream(stream: OwnedLogStream | null): Promise<void> {
+  if (!stream) return;
+
+  try {
+    stream.flushSync?.();
+  } catch {
+    // Best-effort shutdown: a missing log destination must not block process exit.
+  }
+
+  if (!stream.end) return;
+
+  await new Promise<void>((resolveClose) => {
+    let resolved = false;
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      resolveClose();
+    };
+    const fallback = setTimeout(finish, 1_000);
+
+    stream.once?.("close", () => {
+      clearTimeout(fallback);
+      finish();
+    });
+
     try {
-      process.stderr.write(
-        `[logger] log transport write failed, dropping log line: ${(err as Error)?.message || err}\n`
-      );
+      stream.end?.();
+      if (!stream.once) {
+        clearTimeout(fallback);
+        finish();
+      }
     } catch {
-      // Nothing more we can do — never let a logging failure crash the process.
+      clearTimeout(fallback);
+      finish();
     }
   });
-  return stream;
+}
+
+function createLoggerResource(
+  logger: pino.Logger,
+  stream: OwnedLogStream | null
+): SharedLoggerResource {
+  return {
+    logger,
+    close: () => closeOwnedStream(stream),
+  };
+}
+
+function reportReopenFailure(err: unknown): void {
+  try {
+    process.stderr.write(
+      `[logger] failed to reopen log file after rotation, continuing on rotated file: ${(err as Error)?.message || err}\n`
+    );
+  } catch {
+    // Nothing more we can do — never let a logging failure crash the process.
+  }
+}
+
+/**
+ * The stable stream pino holds for the file transport; the worker-thread
+ * transport behind it can be rebuilt after a log rotation.
+ *
+ * pino keeps the stream it was built with (children included) and the
+ * `pino.transport()` worker keeps the descriptor of the file it opened, so after
+ * `rotateIfNeeded()` renames app.log it would keep appending to the rotated file.
+ * `reopen()` builds a fresh transport (which opens the configured path again),
+ * makes it current, then flushes and ends the previous one: lines written before
+ * the swap stay in the rotated file, lines written after it reach app.log.
+ *
+ * Every call delegates synchronously to the current transport — this class
+ * buffers nothing of its own — so backpressure (`write()`'s return value and the
+ * current transport's "drain"), `flushSync()`/`flush()`, and pino's exit-time
+ * flush of the live transport (registered by `pino.transport()` itself) behave
+ * exactly as with the bare transport.
+ */
+export class ReopenableTransportStream extends EventEmitter {
+  private current: TransportStream;
+  private ended = false;
+  private configMessage: unknown[] | null = null;
+
+  constructor(private readonly build: () => TransportStream) {
+    super();
+    // Keep the #6360 guarantee on the object pino holds: an "error" emitted on it
+    // is reported, never re-thrown as an uncaught exception. Each transport
+    // generation keeps its own listener from buildTransportStream().
+    this.on("error", reportTransportWriteFailure);
+    // pino announces its level/message-key config with a "message" event; a
+    // pino.transport() stream forwards that to its worker. Forward it to the
+    // current transport and replay it to every reopened one.
+    this.on("message", (...args: unknown[]) => {
+      this.configMessage = args;
+      this.current.emit("message", ...args);
+    });
+    this.current = this.adopt(build());
+  }
+
+  private adopt(stream: TransportStream): TransportStream {
+    stream.on("drain", () => {
+      if (stream === this.current) this.emit("drain");
+    });
+    stream.on("close", () => {
+      if (stream === this.current) this.emit("close");
+    });
+    return stream;
+  }
+
+  write(chunk: string): boolean {
+    return this.current.write(chunk);
+  }
+
+  flushSync(): void {
+    this.current.flushSync();
+  }
+
+  flush(callback: (err?: Error | null) => void): void {
+    // thread-stream implements flush(cb) at runtime but omits it from its typings.
+    const target = this.current as unknown as { flush?: (cb: typeof callback) => void };
+    if (typeof target.flush === "function") target.flush(callback);
+    else callback();
+  }
+
+  end(): void {
+    this.ended = true;
+    this.current.end();
+  }
+
+  /** Swap in a fresh transport for the configured path; no-op once ended. */
+  async reopen(): Promise<void> {
+    if (this.ended) return;
+    let next: TransportStream;
+    try {
+      next = this.build();
+    } catch (err) {
+      reportReopenFailure(err);
+      return;
+    }
+    if (this.configMessage) next.emit("message", ...this.configMessage);
+    const previous = this.current;
+    this.current = this.adopt(next);
+    await closeOwnedStream(previous);
+  }
+}
+
+/**
+ * Logger resource whose file writer reopens the configured path after each
+ * rotation of that path. Reopen failures are best-effort (stderr notice): the
+ * writer keeps its previous descriptor, exactly as before rotation support.
+ */
+function createRotationAwareLoggerResource(
+  logger: pino.Logger,
+  stream: OwnedLogStream,
+  absLogPath: string,
+  reopen: () => void | Promise<void>
+): SharedLoggerResource {
+  const unsubscribe = onLogRotation((currentPath: string) => {
+    if (resolve(currentPath) !== absLogPath) return;
+    Promise.resolve()
+      .then(reopen)
+      .catch((err: unknown) => reportReopenFailure(err));
+  });
+  return {
+    logger,
+    close: async () => {
+      unsubscribe();
+      await closeOwnedStream(stream);
+    },
+  };
 }
 
 /**
  * Build the logger with optional file transport.
  * Uses pino transport targets for all destinations.
  */
-function buildLogger(): pino.Logger {
+function buildLoggerResource(): SharedLoggerResource {
   const logConfig = getLogConfig();
   const logLevel = (baseConfig.level as string) || "info";
   const transportConfig = getTransportCompatibleConfig();
@@ -95,42 +279,56 @@ function buildLogger(): pino.Logger {
 
       if (isDev) {
         // Dev: pino-pretty → stdout, JSON → file
-        const stream = buildFileTransportStream([
-          {
-            target: "pino-pretty",
-            options: {
-              colorize: true,
-              translateTime: "HH:MM:ss.l",
-              ignore: "pid,hostname,service",
-              messageFormat: "[{module}] {msg}",
-              destination: 1,
+        const stream = new ReopenableTransportStream(() =>
+          buildTransportStream([
+            {
+              target: "pino-pretty",
+              options: {
+                colorize: true,
+                translateTime: "HH:MM:ss.l",
+                ignore: "pid,hostname,service",
+                messageFormat: "[{module}] {msg}",
+                destination: 1,
+              },
+              level: logLevel,
             },
-            level: logLevel,
-          },
-          {
-            target: "pino/file",
-            options: { destination: absLogPath, mkdir: true },
-            level: logLevel,
-          },
-        ]);
-        return pino(transportConfig, stream);
+            {
+              target: "pino/file",
+              options: { destination: absLogPath, mkdir: true },
+              level: logLevel,
+            },
+          ])
+        );
+        return createRotationAwareLoggerResource(
+          pino(transportConfig, stream),
+          stream,
+          absLogPath,
+          () => stream.reopen()
+        );
       }
 
       // Production: JSON → stdout + JSON → file
       {
-        const stream = buildFileTransportStream([
-          {
-            target: "pino/file",
-            options: { destination: 1 }, // stdout
-            level: logLevel,
-          },
-          {
-            target: "pino/file",
-            options: { destination: absLogPath, mkdir: true },
-            level: logLevel,
-          },
-        ]);
-        return pino(transportConfig, stream);
+        const stream = new ReopenableTransportStream(() =>
+          buildTransportStream([
+            {
+              target: "pino/file",
+              options: { destination: 1 }, // stdout
+              level: logLevel,
+            },
+            {
+              target: "pino/file",
+              options: { destination: absLogPath, mkdir: true },
+              level: logLevel,
+            },
+          ])
+        );
+        return createRotationAwareLoggerResource(
+          pino(transportConfig, stream),
+          stream,
+          absLogPath,
+          () => stream.reopen()
+        );
       }
     } catch (err) {
       // Log the actual error for diagnostics (issue #165)
@@ -155,13 +353,19 @@ function buildLogger(): pino.Logger {
           }
         });
 
-        // Production fallback: JSON to both stdout and file via multistream
-        return pino(
-          baseConfig,
-          pino.multistream([
-            { stream: process.stdout, level: logLevel as pino.Level },
-            { stream: fileDestination, level: logLevel as pino.Level },
-          ])
+        // Production fallback: JSON to both stdout and file via multistream.
+        // The sync destination reopens the configured path in place after rotation.
+        return createRotationAwareLoggerResource(
+          pino(
+            baseConfig,
+            pino.multistream([
+              { stream: process.stdout, level: logLevel as pino.Level },
+              { stream: fileDestination, level: logLevel as pino.Level },
+            ])
+          ),
+          fileDestination,
+          absLogPath,
+          () => fileDestination.reopen()
         );
       } catch (fallbackErr) {
         try {
@@ -175,9 +379,8 @@ function buildLogger(): pino.Logger {
 
   // Console-only (no file logging)
   if (isDev) {
-    return pino({
-      ...baseConfig,
-      transport: {
+    const stream = buildTransportStream([
+      {
         target: "pino-pretty",
         options: {
           colorize: true,
@@ -185,14 +388,18 @@ function buildLogger(): pino.Logger {
           ignore: "pid,hostname,service",
           messageFormat: "[{module}] {msg}",
         },
+        level: logLevel,
       },
-    });
+    ]);
+    return createLoggerResource(pino(transportConfig, stream), stream);
   }
 
-  return pino(baseConfig);
+  return createLoggerResource(pino(baseConfig), null);
 }
 
-export const logger = buildLogger();
+const sharedLoggerResource = getOrCreateSharedLoggerResource(buildLoggerResource);
+
+export const logger = sharedLoggerResource.logger;
 
 /**
  * Create a child logger with a module tag.

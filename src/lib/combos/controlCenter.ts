@@ -1,4 +1,5 @@
 import { normalizeComboModels, type ComboStep } from "./steps";
+import { resolveProviderAlias } from "../../../open-sse/services/providerAlias.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -10,7 +11,13 @@ export interface ComboControlCenterCombo {
   strategy?: string | null;
   models?: unknown[];
   isActive?: boolean | null;
+  type?: string | null;
   config?: JsonRecord | null;
+  /**
+   * #17393: connectionId → account display name, resolved server-side by the
+   * combo route (the browser cannot read the connection table itself).
+   */
+  connectionLabels?: Record<string, string> | null;
 }
 
 export interface ComboControlCenterMetrics {
@@ -31,10 +38,10 @@ export interface ComboControlCenterHealth {
     totalRequests?: number;
   };
   quotaHealth?: {
-    worstRemainingPct?: number;
+    worstRemainingPct?: number | null;
     providers?: Array<{
       provider: string;
-      remainingPct: number;
+      remainingPct: number | null;
       isExhausted: boolean;
       trend: "improving" | "stable" | "declining";
     }>;
@@ -66,12 +73,17 @@ export interface ComboControlCenterTargetHealth {
 
 export interface ComboControlCenterTarget {
   id: string;
-  kind: "model" | "combo-ref";
+  kind: "model" | "combo-ref" | "provider-wildcard";
   index: number;
   label: string;
   model: string;
   provider: string | null;
   connectionId: string | null;
+  /**
+   * #17393: the account this target is pinned to, rendered in full. `null`
+   * means no connection is pinned (the UI shows the "dynamic" placeholder).
+   */
+  accountLabel: string | null;
   weight: number;
   tags: string[];
   health: ComboControlCenterTargetHealth | null;
@@ -108,9 +120,13 @@ function toString(value: unknown): string | null {
 
 function providerFromModel(model: string | null | undefined): string | null {
   if (!model) return null;
+  // Resolve through the general alias table that target resolution applies
+  // before dispatch, so this label matches what actually executed upstream
+  // instead of a raw, un-aliased prefix slice.
   const slashIndex = model.indexOf("/");
   if (slashIndex <= 0) return null;
-  return model.slice(0, slashIndex);
+  const prefix = model.slice(0, slashIndex);
+  return resolveProviderAlias(prefix) || prefix;
 }
 
 function normalizeSuccessRate(value: unknown): number {
@@ -134,12 +150,39 @@ function getStepTags(step: ComboStep): string[] {
 function getStepLabel(step: ComboStep): string {
   if (step.label) return step.label;
   if (step.kind === "combo-ref") return `Combo → ${step.comboName}`;
+  if (step.kind === "provider-wildcard") {
+    return `All ${step.providerId}/${step.modelPattern}`;
+  }
   return step.model;
+}
+
+/**
+ * #17393: the account a target is pinned to, rendered in full.
+ *
+ * Resolution order: the connection's display name (resolved server-side from
+ * the connection row, so a renamed account shows its current name) → the
+ * step's stored label (the combo builder stores the account label there) →
+ * the full, untruncated connection id. `null` means the target is not pinned
+ * to a connection at all.
+ */
+export function resolveComboTargetAccountLabel(input: {
+  label?: string | null;
+  connectionId?: string | null;
+  connectionLabels?: Record<string, string> | null;
+}): string | null {
+  const connectionId = toString(input.connectionId);
+  if (!connectionId) return null;
+  const resolved = toString(input.connectionLabels?.[connectionId]);
+  if (resolved) return resolved;
+  const label = toString(input.label);
+  if (label) return label;
+  return connectionId;
 }
 
 export function getComboControlCenterTargets(
   combo: ComboControlCenterCombo,
-  health?: ComboControlCenterHealth | null
+  health?: ComboControlCenterHealth | null,
+  connectionLabels?: Record<string, string> | null
 ): ComboControlCenterTarget[] {
   const steps = normalizeComboModels(combo.models || [], { comboName: combo.name || null });
   const healthByStepId = new Map<string, ComboControlCenterTargetHealth>();
@@ -153,12 +196,21 @@ export function getComboControlCenterTargets(
   }
 
   return steps.map((step, index) => {
-    const model = step.kind === "combo-ref" ? step.comboName : step.model;
+    const model =
+      step.kind === "combo-ref"
+        ? step.comboName
+        : step.kind === "provider-wildcard"
+          ? `${step.providerId}/${step.modelPattern}`
+          : step.model;
     const healthEntry = healthByStepId.get(step.id) || healthByModel.get(model) || null;
     const provider =
       step.kind === "model"
         ? step.providerId || providerFromModel(step.model) || healthEntry?.provider || null
-        : null;
+        : step.kind === "provider-wildcard"
+          ? step.providerId
+          : null;
+    const connectionId =
+      step.kind === "model" || step.kind === "provider-wildcard" ? step.connectionId || null : null;
 
     return {
       id: step.id,
@@ -167,7 +219,12 @@ export function getComboControlCenterTargets(
       label: getStepLabel(step),
       model,
       provider,
-      connectionId: step.kind === "model" ? step.connectionId || null : null,
+      connectionId,
+      accountLabel: resolveComboTargetAccountLabel({
+        label: step.label,
+        connectionId,
+        connectionLabels,
+      }),
       weight: step.weight || 0,
       tags: getStepTags(step),
       health: healthEntry,
@@ -252,7 +309,9 @@ export function summarizeComboControlCenter(
     strategy: combo.strategy || "priority",
     isActive: combo.isActive !== false,
     targetCount: targets.length,
-    modelTargetCount: targets.filter((target) => target.kind === "model").length,
+    modelTargetCount: targets.filter(
+      (target) => target.kind === "model" || target.kind === "provider-wildcard"
+    ).length,
     nestedComboCount: targets.filter((target) => target.kind === "combo-ref").length,
     providerCount: providers.size,
     totalRequests,
@@ -267,5 +326,32 @@ export function summarizeComboControlCenter(
 }
 
 export function extractComboRuntimeConfig(combo: ComboControlCenterCombo): JsonRecord {
-  return isRecord(combo.config) ? combo.config : {};
+  const config = isRecord(combo.config) ? combo.config : {};
+  // Virtual auto combos nest the resolved router knobs under `config.auto`
+  // (virtualFactory.ts). Unwrapping one level keeps each setting on its own
+  // row instead of a single `auto` row holding a stringified mega-object.
+  if (combo.type === "auto" && isRecord(config.auto)) {
+    const { auto, ...rest } = config;
+    return { ...auto, ...rest };
+  }
+  return config;
+}
+
+/**
+ * Resolved targets for a virtual auto combo. The UUID-keyed combo-health
+ * endpoint can't serve auto/* ids, so the materialized `models` steps — the
+ * runtime-resolved candidate set — stand in, with every metric left absent
+ * (no fabricated health numbers).
+ */
+export function getVirtualComboResolvedTargets(
+  combo: ComboControlCenterCombo
+): ComboControlCenterTargetHealth[] {
+  return getComboControlCenterTargets(combo, null).map((target) => ({
+    stepId: target.id,
+    model: target.model,
+    provider: target.provider ?? undefined,
+    connectionId: target.connectionId,
+    label: target.label,
+    quotaScope: "none" as const,
+  }));
 }

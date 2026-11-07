@@ -12,8 +12,11 @@
  * the thinking step actually ran, so this is a valid completion, not an empty one.
  *
  * The detector must understand the Claude shape: text blocks with text, thinking blocks
- * with a signature, and tool_use blocks count as output; a genuinely empty `content:[]`
- * (or thinking with neither text nor signature) is still flagged.
+ * (with or without a signature), redacted_thinking, and tool_use blocks count as output;
+ * a genuinely empty terminal `content:[]` (or a terminal `(empty response)` text sentinel)
+ * is still flagged. #9971 refined #5108's rule: an empty thinking block is also valid
+ * structural output (the upstream can truncate a thinking-only generation before any
+ * text/signature lands), so it is no longer flagged — only content-less *terminal* bodies are.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -48,9 +51,20 @@ test("#5108 genuinely empty Claude content:[] is still flagged malformed", () =>
   assert.equal(detectMalformedNonStream(claudeMsg([])), "empty_choices");
 });
 
-test("#5108 Claude thinking block with neither text nor signature is still flagged", () => {
+test("Claude Code /model probe: content:[] + max_tokens is not empty_choices", () => {
+  const body = {
+    ...claudeMsg([]),
+    stop_reason: "max_tokens",
+  };
+  assert.equal(detectMalformedNonStream(body), null);
+});
+
+test("#5108/#9971 Claude thinking block with neither text nor signature is valid output (was empty_choices)", () => {
   const body = claudeMsg([{ type: "thinking", thinking: "", signature: "" }]);
-  assert.equal(detectMalformedNonStream(body), "empty_choices");
+  // #9971: an empty thinking block is valid structural output — the upstream can
+  // truncate a thinking-only generation before any text/signature lands, and a
+  // content-less thinking-only body must not turn into an empty_choices 502.
+  assert.equal(detectMalformedNonStream(body), null);
 });
 
 // Existing OpenAI / Responses behavior must be unchanged.

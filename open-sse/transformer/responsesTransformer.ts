@@ -1,11 +1,25 @@
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
+import { ToolCallLifecycle } from "../translator/response/openai-responses/toolCallLifecycle.ts";
 import { shouldParseTextualReasoningTags } from "../handlers/responseSanitizer.ts";
+import { getReadableReasoningValue } from "../utils/reasoningFields.ts";
 import {
   isInternalReasoningPlaceholder,
   stripInternalReasoningPlaceholder,
 } from "../utils/reasoningPlaceholder.ts";
 import * as fs from "fs";
 import * as path from "path";
+import { plaintextCollaborationFields } from "../translator/response/openai-responses/collaborationPlaintextMarker.ts";
+import { finalizeResponsesTerminalStatus } from "../translator/helpers/responsesTerminalStatus.ts";
+import { normalizeResponsesContextUsage } from "../utils/normalizeResponsesContextUsage.ts";
+
+// #10223: threshold for detecting corrupted request_id fields. Normal
+// request IDs are <100 chars. DeepSeek's SSE encoder bug produces 200+
+// char values with response-ID fragments. The 100-char gap between normal
+// (<100) and threshold (200) provides safety margin for providers that
+// use moderately longer IDs. The transformer never reads request_id, so
+// stripping it has no functional impact on the output.
+const CORRUPTED_REQUEST_ID_THRESHOLD = 200;
+
 /**
  * Responses API Transformer
  * Converts OpenAI Chat Completions SSE to Codex Responses API SSE format
@@ -34,6 +48,118 @@ async function getPath() {
     }
   }
   return _path || null;
+}
+
+type UsageRecord = Record<string, unknown>;
+
+function usageRecord(value: unknown): UsageRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as UsageRecord)
+    : {};
+}
+
+function usageNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function usageDetails(record: UsageRecord, ...keys: string[]): UsageRecord {
+  for (const key of keys) {
+    const value = usageRecord(record[key]);
+    if (Object.keys(value).length > 0) return value;
+  }
+  return {};
+}
+
+/** Normalize Chat Completions and Responses usage into the Responses API shape. */
+function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageRecord | null {
+  const source = usageRecord(raw);
+  if (Object.keys(source).length === 0) return usageRecord(previous);
+
+  const before = usageRecord(previous);
+  const beforeInputDetails = usageDetails(before, "input_tokens_details", "prompt_tokens_details");
+  const beforeOutputDetails = usageDetails(
+    before,
+    "output_tokens_details",
+    "completion_tokens_details"
+  );
+  const inputDetails = usageDetails(
+    source,
+    "input_tokens_details",
+    "prompt_tokens_details",
+    "inputTokenDetails",
+    "input_token_details"
+  );
+  const outputDetails = usageDetails(
+    source,
+    "output_tokens_details",
+    "completion_tokens_details",
+    "outputTokenDetails",
+    "output_token_details",
+    "reasoningTokenDetails",
+    "reasoning_token_details"
+  );
+
+  const inputTokens =
+    usageNumber(source.input_tokens) ??
+    usageNumber(source.prompt_tokens) ??
+    usageNumber(source.inputTokens) ??
+    usageNumber(source.promptTokens) ??
+    usageNumber(before.input_tokens) ??
+    usageNumber(before.prompt_tokens) ??
+    0;
+  const cachedTokens =
+    usageNumber(source.cache_read_input_tokens) ??
+    usageNumber(source.cached_input_tokens) ??
+    usageNumber(source.cachedInputTokens) ??
+    usageNumber(source.cached_tokens) ??
+    usageNumber(inputDetails.cached_tokens) ??
+    usageNumber(inputDetails.cachedTokens) ??
+    usageNumber(inputDetails.cacheReadTokens) ??
+    usageNumber(beforeInputDetails.cached_tokens) ??
+    0;
+  const cacheCreationTokens =
+    usageNumber(source.cache_creation_input_tokens) ??
+    usageNumber(source.cache_write_tokens) ??
+    usageNumber(inputDetails.cache_creation_tokens) ??
+    usageNumber(inputDetails.cache_write_tokens) ??
+    usageNumber(beforeInputDetails.cache_creation_tokens) ??
+    usageNumber(beforeInputDetails.cache_write_tokens);
+  const cacheCreationInPrompt = [inputDetails, beforeInputDetails]
+    .map((details) => details.cache_creation_in_prompt)
+    .find((flag): flag is boolean => typeof flag === "boolean");
+  const outputTokens =
+    usageNumber(source.output_tokens) ??
+    usageNumber(source.completion_tokens) ??
+    usageNumber(source.outputTokens) ??
+    usageNumber(source.completionTokens) ??
+    usageNumber(before.output_tokens) ??
+    usageNumber(before.completion_tokens) ??
+    0;
+  const reasoningTokens =
+    usageNumber(source.reasoning_tokens) ??
+    usageNumber(source.reasoningTokens) ??
+    usageNumber(outputDetails.reasoning_tokens) ??
+    usageNumber(outputDetails.reasoningTokens) ??
+    usageNumber(beforeOutputDetails.reasoning_tokens) ??
+    0;
+  const totalTokens =
+    usageNumber(source.total_tokens) ??
+    usageNumber(source.totalTokens) ??
+    inputTokens + outputTokens;
+
+  return {
+    input_tokens: inputTokens,
+    input_tokens_details: {
+      cached_tokens: cachedTokens,
+      ...(cacheCreationTokens !== undefined ? { cache_creation_tokens: cacheCreationTokens } : {}),
+      ...(cacheCreationTokens !== undefined && cacheCreationInPrompt !== undefined
+        ? { cache_creation_in_prompt: cacheCreationInPrompt }
+        : {}),
+    },
+    output_tokens: outputTokens,
+    output_tokens_details: { reasoning_tokens: reasoningTokens },
+    total_tokens: totalTokens,
+  };
 }
 
 // Create log directory for responses (Node.js only)
@@ -86,9 +212,13 @@ export function createResponsesLogger(model, logsDir = null) {
 export function createResponsesApiTransformStream(
   logger = null,
   keepaliveIntervalMs = 3000,
-  options = {}
+  options: {
+    customToolNames?: Iterable<string>;
+    toolSchemas?: ReadonlyMap<string, unknown> | null;
+    requestToolIdentityMap?: ReadonlyMap<string, unknown> | null;
+  } = {}
 ) {
-  const customToolNames = new Set(options.customToolNames || []);
+  const lifecycle = new ToolCallLifecycle(options);
   const state = {
     seq: 0,
     responseId: `resp_${Date.now()}`,
@@ -109,9 +239,14 @@ export function createResponsesApiTransformStream(
     funcNames: {},
     funcCallIds: {},
     funcItemAdded: {},
-    funcItemTypes: {},
     funcArgsDone: {},
     funcItemDone: {},
+    // Cached at first computation (see toolCallOutputIndexBase) so every
+    // added/delta/done event for a given tool call — including ones emitted
+    // later from the finish_reason handler or flush(), where the reasoning/
+    // message state used to derive the base is no longer meaningful to
+    // recompute — shares exactly the same output_index.
+    funcOutputIndex: {} as Record<string, number>,
     completedOutputItems: [] as Array<{
       output_index: number;
       item: Record<string, unknown>;
@@ -120,6 +255,7 @@ export function createResponsesApiTransformStream(
     buffer: "",
     completedSent: false,
     usage: null,
+    finishReason: null as string | null,
     keepaliveTimer: null,
     // #6906: true once a finish_reason chunk closed all output items but deferred
     // response.completed — a trailing usage-only chunk (choices: [], usage: {...}) may
@@ -128,6 +264,11 @@ export function createResponsesApiTransformStream(
   };
 
   const encoder = new TextEncoder();
+  // #10223: a stream:false TextDecoder recreated per transform() chunk has no
+  // cross-call state, so a multi-byte UTF-8 character (CJK/emoji) split across
+  // two TCP chunks got truncated to U+FFFD, corrupting the deltas. A single
+  // persistent decoder with { stream: true } carries pending bytes between chunks.
+  const decoder = new TextDecoder();
   const nextSeq = () => ++state.seq;
 
   // Normalize output_index to a non-negative integer (replaces fragile parseInt calls)
@@ -180,6 +321,7 @@ export function createResponsesApiTransformStream(
           id: state.reasoningId,
           type: "reasoning",
           summary: [],
+          status: "in_progress",
         },
       });
 
@@ -230,6 +372,7 @@ export function createResponsesApiTransformStream(
         id: state.reasoningId,
         type: "reasoning",
         summary: [{ type: "summary_text", text: state.reasoningBuf }],
+        status: "completed",
       };
 
       emit(controller, "response.output_item.done", {
@@ -240,6 +383,24 @@ export function createResponsesApiTransformStream(
 
       recordCompletedItem(state.reasoningIndex, reasoningItem);
     }
+  };
+
+  // #13693: post-close content (deepseek/Kimi upstreams interleave text after
+  // a real tool_call) must not land on an already-done message item — Codex
+  // CLI aborts on "OutputTextDelta without active item". Allocate the next
+  // free output_index instead, avoiding reasoning, messages and cached
+  // tool-call indexes.
+  const nextFreeMessageIndex = (requestedIdx) => {
+    let candidate = normalizeOutputIndex(requestedIdx);
+    const allocatedToolIndexes = new Set(
+      Object.values(state.funcOutputIndex || {}).map((v) => normalizeOutputIndex(v))
+    );
+    const claimed = (i) =>
+      state.msgItemAdded[i] ||
+      allocatedToolIndexes.has(i) ||
+      (state.reasoningId && i === normalizeOutputIndex(state.reasoningIndex));
+    while (claimed(candidate)) candidate += 1;
+    return candidate;
   };
 
   const closeMessage = (controller, idx) => {
@@ -271,6 +432,7 @@ export function createResponsesApiTransformStream(
         type: "message",
         content: [{ type: "output_text", annotations: [], logprobs: [], text: fullText }],
         role: "assistant",
+        status: "completed",
       };
 
       emit(controller, "response.output_item.done", {
@@ -283,37 +445,63 @@ export function createResponsesApiTransformStream(
     }
   };
 
-  const emitToolCallAdded = (controller, idx) => {
-    if (state.funcItemAdded[idx] || !state.funcCallIds[idx]) return false;
+  // Tool calls sit after reasoning (if any) AND after a text message (if one
+  // was actually emitted this turn). The provider's own tool_calls[].index is
+  // scoped only to the tool_calls array and legitimately restarts at 0 — using
+  // it directly as the Responses API output_index collides with whatever
+  // reasoning/message item already claimed that slot, and a client that
+  // tracks response items by output_index silently drops the tool call.
+  //
+  // Computed once per tcIdx (from the chunk's own choice index, `chunkIdx`)
+  // and cached in state.funcOutputIndex so every added/delta/done event for
+  // that call — including ones emitted later from the finish_reason handler
+  // or flush(), which have no fresh chunk/reasoning/message state to
+  // recompute from — shares exactly the same output_index.
+  const computeToolCallOutputIndex = (chunkIdx, tcIdx) => {
+    if (state.funcOutputIndex[tcIdx] === undefined) {
+      const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : chunkIdx;
+      const base = state.msgItemAdded[msgIdx] ? msgIdx + 1 : msgIdx;
+      state.funcOutputIndex[tcIdx] = base + normalizeOutputIndex(tcIdx);
+    }
+    return state.funcOutputIndex[tcIdx];
+  };
 
-    const customTool = customToolNames.has(state.funcNames[idx] || "");
-    const itemType = customTool ? "custom_tool_call" : "function_call";
-    state.funcItemTypes[idx] = itemType;
+  const emitToolCallAdded = (controller, idx, terminal = false) => {
+    if (state.funcItemAdded[idx] || !state.funcCallIds[idx]) return;
+    const selection = lifecycle.select(idx, state.funcNames[idx] || "", terminal);
+    if (!selection) return;
     state.funcItemAdded[idx] = true;
-
     emit(controller, "response.output_item.added", {
       type: "response.output_item.added",
-      output_index: idx,
+      output_index: state.funcOutputIndex[idx],
       item: {
         id: `fc_${state.funcCallIds[idx]}`,
-        type: itemType,
-        ...(customTool ? { input: "" } : { arguments: "" }),
+        type: selection.custom ? "custom_tool_call" : "function_call",
+        ...(selection.custom ? { input: "" } : { arguments: "" }),
         call_id: state.funcCallIds[idx],
-        name: state.funcNames[idx] || "",
-        ...(customTool ? { status: "in_progress" } : {}),
+        name: selection.name,
+        ...(selection.namespace ? { namespace: selection.namespace } : {}),
+        status: "in_progress",
       },
     });
-    return true;
+    if (state.funcArgsBuf[idx] && !selection.custom) {
+      emit(controller, "response.function_call_arguments.delta", {
+        type: "response.function_call_arguments.delta",
+        item_id: `fc_${state.funcCallIds[idx]}`,
+        output_index: state.funcOutputIndex[idx],
+        delta: state.funcArgsBuf[idx],
+      });
+    }
   };
 
   const closeToolCall = (controller, idx, recordAsCompleted = true) => {
     const callId = state.funcCallIds[idx];
     if (callId && !state.funcItemDone[idx]) {
-      const normalizedIndex = normalizeOutputIndex(idx);
+      const normalizedIndex = state.funcOutputIndex[idx];
       let args = state.funcArgsBuf[idx] || "{}";
-      const toolName = state.funcNames[idx] || "";
-      emitToolCallAdded(controller, idx);
-      const isCustomTool = state.funcItemTypes[idx] === "custom_tool_call";
+      emitToolCallAdded(controller, idx, true);
+      const selection = lifecycle.get(idx)!;
+      const isCustomTool = selection.custom;
 
       // Fix #1674 & #1852: Final cleanup of empty string and empty array placeholders.
       // Custom-tool input is intentionally allowed to be an empty string.
@@ -365,7 +553,8 @@ export function createResponsesApiTransformStream(
           type: "custom_tool_call",
           input: rawInput,
           call_id: callId,
-          name: toolName,
+          name: selection.name,
+          ...(selection.namespace ? { namespace: selection.namespace } : {}),
           status: "completed",
         };
       } else {
@@ -380,9 +569,14 @@ export function createResponsesApiTransformStream(
           type: "function_call",
           arguments: args,
           call_id: callId,
-          name: toolName,
+          name: selection.name,
+          ...(selection.namespace ? { namespace: selection.namespace } : {}),
+          status: "completed",
         };
       }
+
+      // Preserve the published identity when adding the collaboration plaintext marker.
+      Object.assign(funcItem, plaintextCollaborationFields(funcItem.namespace, funcItem.name));
 
       emit(controller, "response.output_item.done", {
         type: "response.output_item.done",
@@ -420,15 +614,22 @@ export function createResponsesApiTransformStream(
       };
 
       if (state.usage) {
-        response.usage = state.usage;
+        // Keep aggregation in upstream units; only emitted Responses usage includes cache writes.
+        response.usage = normalizeResponsesContextUsage(state.usage);
       }
 
-      emit(controller, "response.completed", {
-        type: "response.completed",
+      const eventType = finalizeResponsesTerminalStatus(response, state.finishReason);
+      emit(controller, eventType, {
+        type: eventType,
         response,
       });
     }
   };
+
+  // Fed to transform() from flush() so a message left in the buffer without its
+  // blank-line terminator (upstream closed right after the last `data:` line) still
+  // goes through the normal per-message path instead of being silently dropped.
+  const SSE_MESSAGE_TERMINATOR = encoder.encode("\n\n");
 
   return new TransformStream(
     {
@@ -453,8 +654,8 @@ export function createResponsesApiTransformStream(
         (state.keepaliveTimer as { unref?: () => void })?.unref?.();
       },
       transform(chunk, controller) {
-        const text = new TextDecoder().decode(chunk);
-        logger?.logInput(text.trim());
+        const text = decoder.decode(chunk, { stream: true });
+        if (text.trim()) logger?.logInput(text.trim());
         state.buffer += text;
 
         const messages = state.buffer.split("\n\n");
@@ -476,10 +677,26 @@ export function createResponsesApiTransformStream(
             continue;
           }
 
+          // #10223: strip request_id when it looks corrupted (suspiciously
+          // long — normal request IDs are <100 chars). Some providers
+          // (DeepSeek) have SSE encoder bugs that leak response-ID fragments
+          // into this field, producing 200+ char values. Well-behaved
+          // providers' request_id is preserved.
+          if (
+            typeof parsed.request_id === "string" &&
+            parsed.request_id.length >= CORRUPTED_REQUEST_ID_THRESHOLD
+          ) {
+            logger?.logInput(
+              `[ResponsesTransformer] stripped corrupted request_id (${parsed.request_id.length} chars)`
+            );
+            delete parsed.request_id;
+          }
+
+          if (parsed.usage) {
+            state.usage = normalizeResponsesUsage(state.usage, parsed.usage);
+          }
+
           if (!parsed.choices?.length) {
-            if (parsed.usage) {
-              state.usage = parsed.usage;
-            }
             // #6906: trailing usage-only chunk after finish_reason already deferred
             // completion — send it now with the usage just captured above.
             if (state.awaitingTrailingUsage && !state.completedSent) {
@@ -524,14 +741,20 @@ export function createResponsesApiTransformStream(
                 object: "response",
                 created_at: state.created,
                 status: "in_progress",
+                background: false,
+                error: null,
+                output: [],
               },
             });
           }
 
-          // Handle reasoning_content (OpenAI native format)
-          if (delta.reasoning_content && !isInternalReasoningPlaceholder(delta.reasoning_content)) {
+          // Handle OpenAI-compatible reasoning fields. Some providers use the
+          // standard `reasoning_content` key while others use the string alias
+          // `reasoning`; prefer the standard key when both are present.
+          const reasoning = getReadableReasoningValue(delta);
+          if (reasoning && !isInternalReasoningPlaceholder(reasoning)) {
             startReasoning(controller, idx);
-            emitReasoningDelta(controller, delta.reasoning_content);
+            emitReasoningDelta(controller, reasoning);
           }
 
           // Handle text content. Generic prompt-format tags are visible text;
@@ -579,9 +802,9 @@ export function createResponsesApiTransformStream(
 
                 if (state.inThinking && content) {
                   emitReasoningDelta(controller, content);
-                  // Pre-existing behaviour (unrelated to #8081): a still-open
-                  // textual <think> block ends this message's handling early.
-                  continue;
+                  // Keep processing this chunk: reasoning text can arrive in
+                  // the same delta as a tool call and/or finish_reason.
+                  content = "";
                 }
               }
 
@@ -590,7 +813,12 @@ export function createResponsesApiTransformStream(
                 // Use a distinct output_index for the message when reasoning was
                 // emitted, so the message item does not collide with the
                 // reasoning item's output_index.
-                const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
+                let msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
+                // #13693: a done item must never receive new deltas — re-home
+                // the text on a fresh message item instead.
+                if (state.msgItemDone[msgIdx]) {
+                  msgIdx = nextFreeMessageIndex(msgIdx);
+                }
 
                 // Fix for #1211: Strip leading double-newlines / blank spaces from the very first text chunk
                 if (!state.msgTextBuf[msgIdx]) {
@@ -606,7 +834,13 @@ export function createResponsesApiTransformStream(
                   emit(controller, "response.output_item.added", {
                     type: "response.output_item.added",
                     output_index: msgIdx,
-                    item: { id: msgId, type: "message", content: [], role: "assistant" },
+                    item: {
+                      id: msgId,
+                      type: "message",
+                      content: [],
+                      role: "assistant",
+                      status: "in_progress",
+                    },
                   });
                 }
 
@@ -638,7 +872,7 @@ export function createResponsesApiTransformStream(
           }
 
           // Handle tool_calls
-          if (delta.tool_calls) {
+          if (delta.tool_calls?.length) {
             // Close reasoning first so tool calls do not collide with an
             // open reasoning item, then close the message at its real index.
             if (state.reasoningId && !state.reasoningDone) {
@@ -649,6 +883,7 @@ export function createResponsesApiTransformStream(
 
             for (const tc of delta.tool_calls) {
               const tcIdx = tc.index ?? 0;
+              const outputIndex = computeToolCallOutputIndex(idx, tcIdx);
               const newCallId = tc.id;
               const funcName = tc.function?.name;
 
@@ -661,35 +896,24 @@ export function createResponsesApiTransformStream(
                 delete state.funcNames[tcIdx];
                 delete state.funcArgsBuf[tcIdx];
                 delete state.funcItemAdded[tcIdx];
-                delete state.funcItemTypes[tcIdx];
+                lifecycle.reset(tcIdx);
                 delete state.funcArgsDone[tcIdx];
                 delete state.funcItemDone[tcIdx];
+                // Deliberately keep funcOutputIndex[tcIdx]: the replacement call
+                // reuses the same positional slot, so it should keep the same
+                // output_index rather than recomputing (which could drift if
+                // msgItemAdded state shifted mid-turn).
               }
 
-              if (funcName) state.funcNames[tcIdx] = funcName;
-
-              if (!state.funcCallIds[tcIdx] && newCallId) {
-                state.funcCallIds[tcIdx] = newCallId;
+              if (funcName) {
+                state.funcNames[tcIdx] = lifecycle.appendName(
+                  tcIdx,
+                  state.funcNames[tcIdx],
+                  funcName
+                );
               }
-
-              // The provider may send the call id before the function name. Defer the
-              // lifecycle item until the name is available so custom calls are not first
-              // announced as function calls.
-              if (state.funcCallIds[tcIdx] && state.funcNames[tcIdx]) {
-                const itemAdded = emitToolCallAdded(controller, tcIdx);
-                if (
-                  itemAdded &&
-                  state.funcItemTypes[tcIdx] !== "custom_tool_call" &&
-                  state.funcArgsBuf[tcIdx]
-                ) {
-                  emit(controller, "response.function_call_arguments.delta", {
-                    type: "response.function_call_arguments.delta",
-                    item_id: `fc_${state.funcCallIds[tcIdx]}`,
-                    output_index: tcIdx,
-                    delta: state.funcArgsBuf[tcIdx],
-                  });
-                }
-              }
+              if (!state.funcCallIds[tcIdx] && newCallId) state.funcCallIds[tcIdx] = newCallId;
+              emitToolCallAdded(controller, tcIdx);
 
               if (!state.funcArgsBuf[tcIdx]) state.funcArgsBuf[tcIdx] = "";
 
@@ -719,12 +943,12 @@ export function createResponsesApiTransformStream(
                   refCallId &&
                   emittedDelta &&
                   state.funcItemAdded[tcIdx] &&
-                  state.funcItemTypes[tcIdx] !== "custom_tool_call"
+                  lifecycle.get(tcIdx)?.custom !== true
                 ) {
                   emit(controller, "response.function_call_arguments.delta", {
                     type: "response.function_call_arguments.delta",
                     item_id: `fc_${refCallId}`,
-                    output_index: tcIdx,
+                    output_index: outputIndex,
                     delta: emittedDelta,
                   });
                 }
@@ -734,6 +958,8 @@ export function createResponsesApiTransformStream(
 
           // Handle finish_reason
           if (choice.finish_reason) {
+            // Read by sendCompleted() → finalizeResponsesTerminalStatus (length/filter → incomplete).
+            state.finishReason = choice.finish_reason;
             for (const i in state.msgItemAdded) closeMessage(controller, i);
             closeReasoning(controller);
             for (const i in state.funcCallIds) closeToolCall(controller, i);
@@ -754,6 +980,18 @@ export function createResponsesApiTransformStream(
       },
 
       flush(controller) {
+        // #10223: stream-end flush — drain any bytes the persistent decoder is
+        // still holding. With { stream:true } complete multi-byte chars are
+        // emitted within transform(), so normally there is nothing left; this
+        // only releases a terminating truncated byte and frees the decoder.
+        state.buffer += decoder.decode();
+        // Drain a final message that arrived without its "\n\n" terminator — typically
+        // the last text delta, the finish_reason chunk or the usage chunk. Must run
+        // BEFORE the close/complete calls below; sendCompleted() is idempotent
+        // (completedSent guard), so a drained finish_reason+usage chunk that already
+        // completes the response does not produce a second response.completed.
+        // Web Streams invokes transformer methods with `this` = the transformer object.
+        if (state.buffer.trim()) this.transform(SSE_MESSAGE_TERMINATOR, controller);
         // Clear keepalive timer
         if (state.keepaliveTimer) {
           clearInterval(state.keepaliveTimer);

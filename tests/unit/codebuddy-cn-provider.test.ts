@@ -4,17 +4,124 @@ import assert from "node:assert/strict";
 import {
   AI_PROVIDERS,
   USAGE_SUPPORTED_PROVIDERS,
-  FREE_APIKEY_PROVIDER_IDS,
+  supportsDualAuthProvider,
 } from "../../src/shared/constants/providers.ts";
 import { REGISTRY } from "../../open-sse/config/providerRegistry.ts";
 import { getExecutor } from "../../open-sse/executors/index.ts";
 import { CodeBuddyCnExecutor } from "../../open-sse/executors/codebuddy-cn.ts";
+import { PROVIDER_MODELS_CONFIG } from "../../src/app/api/providers/[id]/models/discovery/providerModelsConfig.ts";
 import {
   PROVIDERS as OAUTH_PROVIDER_IDS,
   CODEBUDDY_CN_CONFIG,
 } from "../../src/lib/oauth/constants/oauth.ts";
 import PROVIDERS_MAP from "../../src/lib/oauth/providers/index.ts";
 import { supportsTokenRefresh } from "../../open-sse/services/tokenRefresh.ts";
+
+const SENSITIVE_CONTENT_REJECTION =
+  "抱歉，系统检测到您当前输入的信息存在敏感内容，我无法响应您的请求，请检查后重新输入";
+
+type CapturedRequest = {
+  url: string;
+  init?: RequestInit;
+  body: Record<string, unknown>;
+};
+
+type ToolDefinition = {
+  type: string;
+  function: {
+    name: string;
+    description?: string;
+    parameters: unknown;
+  };
+};
+
+type UsageResult = {
+  plan: string;
+  quotas: Record<string, { total: number; used: number }>;
+};
+
+async function executeWithMockedUpstream(
+  body: Record<string, unknown>,
+  responses: Response[]
+): Promise<{ calls: CapturedRequest[]; responseBody: string; status: number }> {
+  const originalFetch = globalThis.fetch;
+  const calls: CapturedRequest[] = [];
+  globalThis.fetch = async (url: string | URL | Request, init?: RequestInit) => {
+    calls.push({
+      url: String(url),
+      init,
+      body: JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>,
+    });
+    const response = responses.shift();
+    assert.ok(response, "unexpected extra upstream dispatch");
+    return response;
+  };
+
+  try {
+    const executor = new CodeBuddyCnExecutor();
+    const result = await executor.execute({
+      model: "glm-5.2",
+      body,
+      stream: false,
+      credentials: { accessToken: "test-token" },
+    });
+    const response = result instanceof Response ? result : result.response;
+    return { calls, responseBody: await response.clone().text(), status: response.status };
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+function rejectionResponse(message = SENSITIVE_CONTENT_REJECTION): Response {
+  return new Response(JSON.stringify({ error: { message } }), {
+    status: 400,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+function successResponse(): Response {
+  return new Response("data: [DONE]\n\n", {
+    status: 200,
+    headers: { "Content-Type": "text/event-stream" },
+  });
+}
+
+function toolRequestBody(reasoningEffort?: string): Record<string, unknown> {
+  return {
+    model: "glm-5.2",
+    messages: [{ role: "user", content: "Use one of the tools" }],
+    stream: false,
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: "read_file",
+          description: "Read a file from disk. ".repeat(2000),
+          parameters: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "The file path" },
+            },
+            required: ["path"],
+          },
+        },
+      },
+      {
+        type: "function",
+        function: {
+          name: "run_workflow",
+          description: "Run a named workflow. ".repeat(2000),
+          parameters: {
+            type: "object",
+            properties: { name: { type: "string" } },
+          },
+        },
+      },
+    ],
+    tool_choice: { type: "function", function: { name: "read_file" } },
+    ...(reasoningEffort ? { reasoning_effort: reasoningEffort } : {}),
+  };
+}
 
 test("codebuddy-cn is registered as an OAuth provider in the UI catalog", () => {
   const p = AI_PROVIDERS["codebuddy-cn"];
@@ -37,28 +144,85 @@ test("codebuddy-cn registry entry has expected shape", () => {
   assert.equal(r.headers?.["X-IDE-Name"], "CLI");
   assert.equal(r.headers?.["x-requested-with"], "XMLHttpRequest");
   assert.equal(r.headers?.["x-codebuddy-request"], "1");
-  // 15 models from the upstream catalog
   const ids = r.models.map((m) => m.id);
-  for (const expected of [
+  assert.deepEqual(ids, [
+    "default",
+    "deepseek-v4-pro",
+    "deepseek-v4-flash",
+    "deepseek-v4.1-flash",
+    "deepseek-v3-2-volc",
+    "minimax-m2.5",
+    "minimax-m2.7",
+    "minimax-m3-pay",
+    "glm-5.3",
+    "glm-5.3-flash",
+    "glm-5.3-flashx",
     "glm-5.2",
     "glm-5.1",
     "glm-5.0",
     "glm-5.0-turbo",
     "glm-5v-turbo",
     "glm-4.7",
-    "minimax-m3",
-    "minimax-m2.7",
+    "glm-4.6",
+    "glm-4.6v",
+    "kimi-k3-2",
+    "kimi-k2.8-preview",
     "kimi-k2.7",
     "kimi-k2.6",
     "kimi-k2.5",
-    "hy3-preview",
-    "deepseek-v4-pro",
-    "deepseek-v4-flash",
-    "deepseek-v3-2-volc",
-  ]) {
-    assert.ok(ids.includes(expected), `model ${expected} must be registered`);
-  }
-  assert.equal(r.models.length, 15);
+    "kimi-k2-thinking",
+    "hy3",
+    "hy3-x",
+    "hy4-preview",
+    "hy4-preview-x",
+    "hunyuan-chat",
+  ]);
+  assert.equal(r.models.length, 30);
+  assert.equal(r.passthroughModels, true);
+});
+
+test("codebuddy-cn discovers its authenticated live catalog and excludes media models", () => {
+  const config = PROVIDER_MODELS_CONFIG["codebuddy-cn"];
+  assert.ok(config, "codebuddy-cn must have live model discovery");
+  assert.equal(config.url, "https://copilot.tencent.com/v3/config");
+  assert.equal(config.method, "GET");
+  assert.equal(config.authHeader, "Authorization");
+  assert.equal(config.authPrefix, "Bearer ");
+  assert.equal(config.headers["X-Product"], "SaaS");
+  assert.equal(config.headers["x-codebuddy-request"], "1");
+
+  const models = config.parseResponse({
+    code: 0,
+    data: {
+      models: [
+        {
+          id: "glm-5.3",
+          name: "GLM-5.3",
+          maxInputTokens: 1000000,
+          maxOutputTokens: 64000,
+          supportsToolCall: true,
+          supportsImages: true,
+          supportsReasoning: true,
+        },
+        { id: "hunyuan-image-alpha", name: "Hunyuan Image Alpha", tags: ["text-to-image"] },
+      ],
+    },
+  });
+
+  assert.deepEqual(models, [
+    {
+      id: "glm-5.3",
+      name: "GLM-5.3",
+      owned_by: "codebuddy-cn",
+      modelType: "chat",
+      contextWindow: 1000000,
+      inputTokenLimit: 1000000,
+      outputTokenLimit: 64000,
+      supportsTools: true,
+      supportsVision: true,
+      supportsThinking: true,
+    },
+  ]);
 });
 
 test("codebuddy-cn glm-5.2 carries 1M context and openai-style reasoning that cannot be disabled", () => {
@@ -72,17 +236,17 @@ test("codebuddy-cn glm-5.2 carries 1M context and openai-style reasoning that ca
 
 test("codebuddy-cn vision flag is set on the visual models", () => {
   const r = REGISTRY["codebuddy-cn"];
-  for (const id of ["glm-5v-turbo", "minimax-m3", "kimi-k2.7", "deepseek-v4-pro"]) {
+  for (const id of ["glm-5v-turbo", "minimax-m3-pay", "kimi-k2.7", "deepseek-v4-pro"]) {
     const m = r.models.find((x) => x.id === id);
     assert.ok(m, `${id} must exist`);
     assert.equal(m.supportsVision, true, `${id} should have vision`);
   }
 });
 
-test("getExecutor returns the CodeBuddyCnExecutor for 'codebuddy-cn' and the 'cbcn' alias", () => {
-  const e = getExecutor("codebuddy-cn");
+test("getExecutor returns the CodeBuddyCnExecutor for 'codebuddy-cn' and the 'cbcn' alias", async () => {
+  const e = await getExecutor("codebuddy-cn");
   assert.ok(e instanceof CodeBuddyCnExecutor, "executor must be CodeBuddyCnExecutor");
-  const aliasExec = getExecutor("cbcn");
+  const aliasExec = await getExecutor("cbcn");
   assert.ok(aliasExec instanceof CodeBuddyCnExecutor, "alias 'cbcn' must resolve to same executor");
 });
 
@@ -105,7 +269,11 @@ test("CodeBuddyCnExecutor.transformRequest forces stream:true and leaves reasoni
     false,
     "plain request must not inject reasoning_effort (opt-in only)"
   );
-  assert.notEqual(body.reasoning_summary, "auto", "plain request must not inject reasoning_summary");
+  assert.notEqual(
+    body.reasoning_summary,
+    "auto",
+    "plain request must not inject reasoning_summary"
+  );
 });
 
 test("CodeBuddyCnExecutor preserves explicit reasoning_effort", () => {
@@ -136,14 +304,224 @@ test("CodeBuddyCnExecutor strips reasoning_effort when caller asks for none/off"
       false,
       `reasoning_effort must be omitted for ${effort}`
     );
-    assert.notEqual(body.reasoning_summary, "auto", `reasoning_summary must not be auto for ${effort}`);
+    assert.notEqual(
+      body.reasoning_summary,
+      "auto",
+      `reasoning_summary must not be auto for ${effort}`
+    );
+  }
+});
+
+test("CodeBuddyCnExecutor retries a sensitive-content rejection with compact tools", async () => {
+  const input = toolRequestBody();
+  const { calls, status } = await executeWithMockedUpstream(input, [
+    rejectionResponse(),
+    successResponse(),
+  ]);
+
+  assert.equal(status, 200);
+  assert.equal(calls.length, 2, "known rejection should dispatch exactly one compact retry");
+  // #9723 (55c2b35eb7): transformRequest now proactively strips descriptions from
+  // oversized (>=64KB) tool payloads BEFORE the first dispatch, so the first
+  // request already ships compact tools — it is no longer sent unchanged.
+  const firstTools = calls[0].body.tools as ToolDefinition[];
+  assert.deepEqual(
+    firstTools.map((tool) => tool.function.name),
+    ["read_file", "run_workflow"],
+    "the first request must preserve tool order and names"
+  );
+  assert.equal("description" in firstTools[0].function, false);
+  assert.equal("description" in firstTools[1].function, false);
+
+  const retryTools = calls[1].body.tools as ToolDefinition[];
+  assert.deepEqual(
+    retryTools.map((tool) => tool.function.name),
+    ["read_file", "run_workflow"],
+    "the retry must preserve tool order and names"
+  );
+  assert.equal("description" in retryTools[0].function, false);
+  assert.equal("description" in retryTools[1].function, false);
+  assert.deepEqual(
+    retryTools.map((tool) => tool.function.parameters),
+    (input.tools as ToolDefinition[]).map((tool) => tool.function.parameters),
+    "parameter schemas, including nested descriptions, must remain unchanged"
+  );
+  assert.deepEqual(calls[1].body.tool_choice, input.tool_choice);
+  assert.deepEqual(calls[1].body.messages, input.messages);
+  assert.equal(calls[1].body.stream, true);
+  for (const call of calls) {
+    assert.equal(call.body.reasoning_effort, undefined);
+    assert.equal(call.body.reasoning_summary, undefined);
+  }
+});
+
+test("CodeBuddyCnExecutor sends successful oversized tool requests once, proactively compacted (#9723)", async () => {
+  const input = toolRequestBody();
+  const { calls, status } = await executeWithMockedUpstream(input, [successResponse()]);
+
+  assert.equal(status, 200);
+  assert.equal(calls.length, 1, "a successful request must not trigger the rejection retry");
+  // #9723: >=64KB of tool metadata is stripped up-front to dodge the content
+  // filter — names, order and parameter schemas survive; descriptions do not.
+  const sentTools = calls[0].body.tools as ToolDefinition[];
+  assert.deepEqual(
+    sentTools.map((tool) => tool.function.name),
+    ["read_file", "run_workflow"]
+  );
+  assert.equal("description" in sentTools[0].function, false);
+  assert.equal("description" in sentTools[1].function, false);
+  assert.deepEqual(
+    sentTools.map((tool) => tool.function.parameters),
+    (input.tools as ToolDefinition[]).map((tool) => tool.function.parameters)
+  );
+});
+
+test("CodeBuddyCnExecutor sends normal-sized tool requests once and unchanged", async () => {
+  const input = toolRequestBody();
+  for (const tool of input.tools as ToolDefinition[]) {
+    tool.function.description = "A normal-sized tool description";
+  }
+  const { calls, status } = await executeWithMockedUpstream(input, [successResponse()]);
+
+  assert.equal(status, 200);
+  assert.equal(calls.length, 1);
+  assert.deepEqual(
+    calls[0].body.tools,
+    input.tools,
+    "sub-64KB tool payloads must pass through untouched"
+  );
+});
+
+test("CodeBuddyCnExecutor does not retry the rejection without tools", async () => {
+  const input = {
+    model: "glm-5.2",
+    messages: [{ role: "user", content: "hello" }],
+  };
+  const { calls, status } = await executeWithMockedUpstream(input, [rejectionResponse()]);
+
+  assert.equal(status, 400);
+  assert.equal(calls.length, 1);
+});
+
+test("CodeBuddyCnExecutor does not retry unrelated 400 responses with tools", async () => {
+  const { calls, status } = await executeWithMockedUpstream(toolRequestBody(), [
+    rejectionResponse("Invalid tool schema"),
+  ]);
+
+  assert.equal(status, 400);
+  assert.equal(calls.length, 1);
+});
+
+test("CodeBuddyCnExecutor does not retry sensitive rejection for normal-sized tools", async () => {
+  const input = toolRequestBody();
+  for (const tool of input.tools as ToolDefinition[]) {
+    tool.function.description = "A normal-sized tool description";
+  }
+  const { calls, status } = await executeWithMockedUpstream(input, [rejectionResponse()]);
+
+  assert.equal(status, 400);
+  assert.equal(calls.length, 1);
+});
+
+test("CodeBuddyCnExecutor does not retry an already-compacted tool request", async () => {
+  const input = toolRequestBody();
+  for (const tool of input.tools as ToolDefinition[]) {
+    delete tool.function.description;
+  }
+  const { calls, status } = await executeWithMockedUpstream(input, [rejectionResponse()]);
+
+  assert.equal(status, 400);
+  assert.equal(calls.length, 1);
+});
+
+test("CodeBuddyCnExecutor stops after a rejected compact retry", async () => {
+  const secondRejection = new Response(
+    JSON.stringify({ error: { message: SENSITIVE_CONTENT_REJECTION }, request_id: "second" }),
+    { status: 400, headers: { "Content-Type": "application/json" } }
+  );
+  const { calls, responseBody, status } = await executeWithMockedUpstream(toolRequestBody(), [
+    rejectionResponse(),
+    secondRejection,
+  ]);
+
+  assert.equal(status, 400);
+  assert.equal(calls.length, 2);
+  assert.equal(JSON.parse(responseBody).request_id, "second");
+});
+
+test("CodeBuddyCnExecutor reuses refreshed credentials for the compact retry", async () => {
+  const originalFetch = globalThis.fetch;
+  let refreshCalls = 0;
+  const chatAuthorizations: string[] = [];
+  globalThis.fetch = async (url: string | URL | Request, init?: RequestInit) => {
+    if (String(url).includes("/auth/token/refresh")) {
+      refreshCalls++;
+      return new Response(
+        JSON.stringify({
+          code: 0,
+          data: {
+            accessToken: "fresh-access-token",
+            refreshToken: "rotated-refresh-token",
+            expiresIn: 3600,
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const headers = init?.headers as Record<string, string>;
+    chatAuthorizations.push(headers.Authorization);
+    return chatAuthorizations.length === 1 ? rejectionResponse() : successResponse();
+  };
+
+  try {
+    const executor = new CodeBuddyCnExecutor();
+    const result = await executor.execute({
+      model: "glm-5.2",
+      body: toolRequestBody(),
+      stream: false,
+      credentials: {
+        accessToken: "expired-access-token",
+        refreshToken: "original-refresh-token",
+        expiresAt: "2000-01-01T00:00:00.000Z",
+      },
+    });
+    const response = result instanceof Response ? result : result.response;
+
+    assert.equal(response.status, 200);
+    assert.equal(refreshCalls, 1, "the compact retry must not rotate credentials again");
+    assert.deepEqual(chatAuthorizations, [
+      "Bearer fresh-access-token",
+      "Bearer fresh-access-token",
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("CodeBuddyCnExecutor preserves reasoning transformations on compact retries", async () => {
+  for (const [effort, expectedEffort, expectedSummary] of [
+    ["high", "high", "auto"],
+    ["none", undefined, undefined],
+    ["off", undefined, undefined],
+  ] as const) {
+    const { calls, status } = await executeWithMockedUpstream(toolRequestBody(effort), [
+      rejectionResponse(),
+      successResponse(),
+    ]);
+
+    assert.equal(status, 200);
+    assert.equal(calls.length, 2);
+    for (const call of calls) {
+      assert.equal(call.body.reasoning_effort, expectedEffort, `${effort} reasoning_effort`);
+      assert.equal(call.body.reasoning_summary, expectedSummary, `${effort} reasoning_summary`);
+    }
   }
 });
 
 test("codebuddy-cn OAuth provider is wired with device_code flow and GET-poll on state", async () => {
   assert.equal(OAUTH_PROVIDER_IDS.CODEBUDDY_CN, "codebuddy-cn");
-  const map = (PROVIDERS_MAP as Record<string, any>);
-  const cb = map["codebuddy-cn"];
+  const cb = PROVIDERS_MAP["codebuddy-cn"];
   assert.ok(cb, "PROVIDERS map must include 'codebuddy-cn'");
   assert.equal(cb.flowType, "device_code");
   assert.equal(typeof cb.requestDeviceCode, "function");
@@ -153,7 +531,7 @@ test("codebuddy-cn OAuth provider is wired with device_code flow and GET-poll on
   // with the state as a query param (upstream's distinguishing detail).
   const origFetch = globalThis.fetch;
   const calls: { url: string; init?: RequestInit }[] = [];
-  globalThis.fetch = async (url: any, init?: RequestInit) => {
+  globalThis.fetch = async (url: string | URL | Request, init?: RequestInit) => {
     calls.push({ url: String(url), init });
     return new Response(
       JSON.stringify({
@@ -187,9 +565,7 @@ test("codebuddy-cn token refresh handler is wired in tokenRefresh.ts", () => {
 
 test("codebuddy-cn is in USAGE_SUPPORTED_PROVIDERS and quota handler parses Tencent accounts", async () => {
   assert.ok(USAGE_SUPPORTED_PROVIDERS.includes("codebuddy-cn"));
-  const { getCodeBuddyCnUsage } = await import(
-    "../../open-sse/services/usage/codebuddy-cn.ts"
-  );
+  const { getCodeBuddyCnUsage } = await import("../../open-sse/services/usage/codebuddy-cn.ts");
 
   const origFetch = globalThis.fetch;
   // Compose a mixed payload: one refill (CycleEndTime << DeductionEndTime) and
@@ -242,7 +618,7 @@ test("codebuddy-cn is in USAGE_SUPPORTED_PROVIDERS and quota handler parses Tenc
   try {
     const result = await getCodeBuddyCnUsage("ACCESS_TOKEN", undefined, undefined);
     assert.ok(result && typeof result === "object");
-    const r = result as Record<string, any>;
+    const r = result as UsageResult;
     assert.equal(r.plan, "Refill Pack");
     assert.ok(r.quotas);
     // Refill (Monthly) uses CycleCapacity*; Bonus packs use plain Capacity*; soonest-expiring first.
@@ -260,10 +636,45 @@ test("codebuddy-cn is in USAGE_SUPPORTED_PROVIDERS and quota handler parses Tenc
 });
 
 test("codebuddy-cn is treated as a managed dual-auth provider (oauth + apikey accepted by POST /api/providers)", async () => {
-  // The provider creation gate trusts FREE_APIKEY_PROVIDER_IDS to admit
-  // OAuth-category providers that also accept a direct API key (like qoder).
+  // OAuth-category providers that also accept a direct API key use the
+  // dedicated dual-auth gate so their primary dashboard action remains OAuth.
   assert.ok(
-    FREE_APIKEY_PROVIDER_IDS.has("codebuddy-cn"),
+    supportsDualAuthProvider("codebuddy-cn"),
     "codebuddy-cn must be admitted by the dual-auth gate"
   );
+});
+
+test("#12702: codebuddy-cn presents the same CLI/CodeBuddy version across OAuth, chat and usage calls", async () => {
+  // A mismatched version string across a single account's auth vs. chat calls is exactly the
+  // kind of internally-inconsistent client fingerprint Tencent's WAF flags as anomalous
+  // (code 11128 "request illegal" / "blocked by security policy"). All three surfaces must
+  // read from the same CODEBUDDY_CN_USER_AGENT constant so they can never drift apart again.
+  const oauthUserAgent = CODEBUDDY_CN_CONFIG.userAgent;
+  const chatUserAgent = REGISTRY["codebuddy-cn"].headers?.["User-Agent"];
+  assert.equal(
+    oauthUserAgent,
+    chatUserAgent,
+    `codebuddy-cn OAuth User-Agent (${oauthUserAgent}) must match the chat User-Agent (${chatUserAgent})`
+  );
+
+  const { CODEBUDDY_CN_USER_AGENT } = await import("../../src/lib/oauth/constants/oauth.ts");
+  assert.equal(oauthUserAgent, CODEBUDDY_CN_USER_AGENT);
+
+  const origFetch = globalThis.fetch;
+  let capturedUserAgent: string | undefined;
+  globalThis.fetch = (async (_url: unknown, init?: RequestInit) => {
+    capturedUserAgent = (init?.headers as Record<string, string> | undefined)?.["User-Agent"];
+    return new Response(JSON.stringify({}), { status: 200 });
+  }) as typeof fetch;
+  try {
+    const { getCodeBuddyCnUsage } = await import("../../open-sse/services/usage/codebuddy-cn.ts");
+    await getCodeBuddyCnUsage("ACCESS_TOKEN", undefined, undefined);
+    assert.equal(
+      capturedUserAgent,
+      CODEBUDDY_CN_USER_AGENT,
+      "codebuddy-cn usage/quota User-Agent must match the shared constant"
+    );
+  } finally {
+    globalThis.fetch = origFetch;
+  }
 });

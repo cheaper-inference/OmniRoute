@@ -42,6 +42,70 @@ test("provider schemas reject non-boolean openaiStoreEnabled values", () => {
   assert.equal(updated.success, false);
 });
 
+test("provider schemas accept boolean preserveEncryptedReasoning in providerSpecificData", () => {
+  const created = createProviderSchema.safeParse({
+    provider: "codex",
+    apiKey: "token",
+    name: "Codex",
+    providerSpecificData: { preserveEncryptedReasoning: true },
+  });
+  const updated = updateProviderConnectionSchema.safeParse({
+    providerSpecificData: { preserveEncryptedReasoning: false },
+  });
+
+  assert.equal(created.success, true);
+  assert.equal(updated.success, true);
+});
+
+test("provider schemas reject non-boolean preserveEncryptedReasoning values", () => {
+  const created = createProviderSchema.safeParse({
+    provider: "codex",
+    apiKey: "token",
+    name: "Codex",
+    providerSpecificData: { preserveEncryptedReasoning: "yes" },
+  });
+  const updated = updateProviderConnectionSchema.safeParse({
+    providerSpecificData: { preserveEncryptedReasoning: 1 },
+  });
+
+  assert.equal(created.success, false);
+  assert.equal(updated.success, false);
+});
+
+for (const reasoningControl of ["chat-template", "openai", null] as const) {
+  test(`provider schemas accept reasoningControl=${String(reasoningControl)}`, () => {
+    const created = createProviderSchema.safeParse({
+      provider: "openai-compatible-chat-test",
+      apiKey: "token",
+      name: "Compatible",
+      providerSpecificData: { reasoningControl },
+    });
+    const updated = updateProviderConnectionSchema.safeParse({
+      providerSpecificData: { reasoningControl },
+    });
+
+    assert.equal(created.success, true);
+    assert.equal(updated.success, true);
+  });
+}
+
+for (const reasoningControl of ["auto", "template", true, 1]) {
+  test(`provider schemas reject invalid reasoningControl=${String(reasoningControl)}`, () => {
+    const created = createProviderSchema.safeParse({
+      provider: "openai-compatible-chat-test",
+      apiKey: "token",
+      name: "Compatible",
+      providerSpecificData: { reasoningControl },
+    });
+    const updated = updateProviderConnectionSchema.safeParse({
+      providerSpecificData: { reasoningControl },
+    });
+
+    assert.equal(created.success, false);
+    assert.equal(updated.success, false);
+  });
+}
+
 test("provider schemas accept boolean CC-compatible request defaults", () => {
   const created = createProviderSchema.safeParse({
     provider: "anthropic-compatible-cc-demo",
@@ -131,6 +195,27 @@ test("provider schemas accept max but reject ultra as a server-side Codex defaul
 
   assert.equal(max.success, true);
   assert.equal(ultra.success, false);
+});
+
+test("provider schemas accept Codex fingerprint modes and reject unknown values", () => {
+  for (const mode of ["off", "device", "session", "full"]) {
+    const created = createProviderSchema.safeParse({
+      provider: "codex",
+      apiKey: "token",
+      name: "Codex",
+      providerSpecificData: { codexFingerprintMode: mode },
+    });
+    const updated = updateProviderConnectionSchema.safeParse({
+      providerSpecificData: { codexFingerprintMode: mode },
+    });
+    assert.equal(created.success, true, mode);
+    assert.equal(updated.success, true, mode);
+  }
+
+  const rejected = updateProviderConnectionSchema.safeParse({
+    providerSpecificData: { codexFingerprintMode: "aggressive" },
+  });
+  assert.equal(rejected.success, false);
 });
 
 test("provider schemas reject unknown Codex service tiers", () => {
@@ -274,4 +359,91 @@ test("provider schemas reject incomplete GLM team quota provider-specific values
 
   assert.equal(created.success, false);
   assert.equal(updated.success, false);
+});
+
+test("provider schemas accept newApiAggregatorBalance boolean in providerSpecificData", () => {
+  const created = createProviderSchema.safeParse({
+    provider: "openai-compatible-chat-abc",
+    apiKey: "token",
+    name: "My Aggregator",
+    providerSpecificData: {
+      newApiAggregatorBalance: true,
+      quotaPerUnit: 500000,
+    },
+  });
+  const updated = updateProviderConnectionSchema.safeParse({
+    providerSpecificData: {
+      newApiAggregatorBalance: false,
+    },
+  });
+
+  assert.equal(created.success, true);
+  assert.equal(updated.success, true);
+});
+
+test("provider schemas reject non-boolean newApiAggregatorBalance", () => {
+  const created = createProviderSchema.safeParse({
+    provider: "openai-compatible-chat-abc",
+    apiKey: "token",
+    name: "My Aggregator",
+    providerSpecificData: {
+      newApiAggregatorBalance: "yes",
+    },
+  });
+
+  assert.equal(created.success, false);
+});
+
+test("provider schemas reject invalid quotaPerUnit values", () => {
+  const zero = createProviderSchema.safeParse({
+    provider: "openai-compatible-chat-abc",
+    apiKey: "token",
+    name: "My Aggregator",
+    providerSpecificData: {
+      quotaPerUnit: 0,
+    },
+  });
+  const negative = createProviderSchema.safeParse({
+    provider: "openai-compatible-chat-abc",
+    apiKey: "token",
+    name: "My Aggregator",
+    providerSpecificData: {
+      quotaPerUnit: -100,
+    },
+  });
+  const string = createProviderSchema.safeParse({
+    provider: "openai-compatible-chat-abc",
+    apiKey: "token",
+    name: "My Aggregator",
+    providerSpecificData: {
+      quotaPerUnit: "500000",
+    },
+  });
+
+  assert.equal(zero.success, false);
+  assert.equal(negative.success, false);
+  assert.equal(string.success, false);
+});
+
+test("provider schemas accept integer timeoutMs in providerSpecificData", () => {
+  const created = createProviderSchema.safeParse({
+    provider: "openai",
+    apiKey: "token",
+    name: "OpenAI",
+    providerSpecificData: { timeoutMs: 1_800_000 },
+  });
+  const updated = updateProviderConnectionSchema.safeParse({
+    providerSpecificData: { timeoutMs: 900_000 },
+  });
+  assert.equal(created.success, true);
+  assert.equal(updated.success, true);
+});
+
+test("provider schemas reject invalid timeoutMs values", () => {
+  for (const bad of [-1, 0, 1.5, "60000", 86_400_001]) {
+    const updated = updateProviderConnectionSchema.safeParse({
+      providerSpecificData: { timeoutMs: bad },
+    });
+    assert.equal(updated.success, false, `timeoutMs=${String(bad)} must be rejected`);
+  }
 });

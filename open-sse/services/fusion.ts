@@ -20,7 +20,8 @@
  */
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { extractTextContent } from "../translator/helpers/geminiHelper.ts";
-import type { ComboLogger, HandleSingleModel } from "./combo/types.ts";
+import type { PerTargetAdmissionHook } from "./admission/types.ts";
+import type { ComboLogger, HandleSingleModel, ResolvedComboTarget } from "./combo/types.ts";
 
 // Fusion tuning. Overridable per-combo via combo.config.fusionTuning.
 export const FUSION_DEFAULTS = {
@@ -72,8 +73,7 @@ export function extractPanelText(json: unknown): string {
   // Gemini (parts carry .text without a type discriminator)
   const candidates = j.candidates as Array<Record<string, unknown>> | undefined;
   const parts = (candidates?.[0]?.content as Record<string, unknown> | undefined)?.parts as
-    | Array<{ text?: unknown }>
-    | undefined;
+    Array<{ text?: unknown }> | undefined;
   if (Array.isArray(parts)) {
     const t = parts.map((p) => (typeof p?.text === "string" ? p.text : "")).join("");
     if (t.trim()) return t;
@@ -108,10 +108,7 @@ export function appendUserTurn(body: Body, text: string): Body {
   } else if (Array.isArray(body.input)) {
     next.input = [...(body.input as unknown[]), { role: "user", content: text }];
   } else if (Array.isArray(body.contents)) {
-    next.contents = [
-      ...(body.contents as unknown[]),
-      { role: "user", parts: [{ text }] },
-    ];
+    next.contents = [...(body.contents as unknown[]), { role: "user", parts: [{ text }] }];
   } else {
     next.messages = [{ role: "user", content: text }];
   }
@@ -159,10 +156,7 @@ export function isToolBearingRequest(body: Body): boolean {
 type Sentinel = { __timeout?: true; __error?: unknown };
 
 // Resolve a Response (or sentinel) within ms; the loser keeps running but is ignored.
-function withTimeout(
-  promise: Promise<Response>,
-  ms: number
-): Promise<Response | Sentinel> {
+function withTimeout(promise: Promise<Response>, ms: number): Promise<Response | Sentinel> {
   return new Promise((resolve) => {
     const t = setTimeout(() => resolve({ __timeout: true }), ms);
     Promise.resolve(promise)
@@ -224,15 +218,34 @@ export function collectPanel(
   });
 }
 
+export type FusionModel = ResolvedComboTarget | string;
+
 export type HandleFusionChatOptions = {
   body: Body;
-  models: string[];
+  models: FusionModel[];
   handleSingleModel: HandleSingleModel;
   log: ComboLogger;
   comboName?: string;
   judgeModel?: string | null;
+  judgeTarget?: ResolvedComboTarget | null;
   tuning?: FusionTuning | null;
+  /** #9654 Wave 2: per-target lane-aware admission probe (see HandleComboChatOptions). */
+  perTargetAdmission?: PerTargetAdmissionHook | null;
 };
+
+function getFusionModelString(model: FusionModel): string {
+  return typeof model === "string" ? model : model.modelStr;
+}
+
+function dispatchFusionModel(
+  handleSingleModel: HandleSingleModel,
+  body: Body,
+  model: FusionModel
+): Promise<Response> {
+  return typeof model === "string"
+    ? handleSingleModel(body, model)
+    : handleSingleModel(body, model.modelStr, model);
+}
 
 /**
  * Handle a fusion combo: fan the prompt out to every panel model in parallel,
@@ -260,7 +273,9 @@ export async function handleFusionChat({
   log,
   comboName,
   judgeModel,
+  judgeTarget,
   tuning,
+  perTargetAdmission,
 }: HandleFusionChatOptions): Promise<Response> {
   const panel = Array.isArray(models) ? models.filter(Boolean) : [];
   if (panel.length === 0) {
@@ -269,7 +284,7 @@ export async function handleFusionChat({
 
   // A single-model fusion has nothing to fuse — just answer directly.
   if (panel.length === 1) {
-    return handleSingleModel(body, panel[0]);
+    return dispatchFusionModel(handleSingleModel, body, panel[0]);
   }
 
   // Reject an oversized panel BEFORE fan-out (issue #1905): fanning out N
@@ -292,14 +307,57 @@ export async function handleFusionChat({
     stragglerGraceMs: tuning?.stragglerGraceMs ?? FUSION_DEFAULTS.stragglerGraceMs,
     panelHardTimeoutMs: tuning?.panelHardTimeoutMs ?? FUSION_DEFAULTS.panelHardTimeoutMs,
   };
+  // Tools-stripped panel body (we want prose from panel members) — computed
+  // early so the per-target probe can estimate cost from the real fan-out body.
+  const { tools: _tools, tool_choice: _tc, ...rest } = body;
+  void _tools;
+  void _tc;
+  const panelBody: Body = { ...rest, stream: false };
+  // #9654 Wave 2: per-target lane-aware admission probe — drop lane-full panel
+  // members before fan-out (strictly non-blocking; no-op when lanes off). See
+  // createPerTargetAdmissionHook for the full contract. Runs BEFORE minPanel /
+  // judge selection so quorum and the judge fallback only consider survivors.
+  let panelToDispatch = panel;
+  if (perTargetAdmission) {
+    const gates = await Promise.all(
+      panel.map(async (target) => ({
+        target,
+        ok: await perTargetAdmission({
+          modelStr: getFusionModelString(target),
+          executionKey: typeof target === "string" ? target : target.executionKey,
+          body: panelBody,
+        }),
+      }))
+    );
+    const dropped = gates.filter((g) => !g.ok);
+    if (dropped.length > 0) {
+      log.info(
+        "FUSION",
+        `Skipping ${dropped.length} panel member(s) — admission lane full: ${dropped
+          .map((g) => getFusionModelString(g.target))
+          .join(", ")}`
+      );
+    }
+    panelToDispatch = gates.filter((g) => g.ok).map((g) => g.target);
+    if (panelToDispatch.length === 0) {
+      log.warn("FUSION", "All panel members skipped by admission lanes — nothing to fan out");
+      return errorResponse(503, "All fusion panel members were skipped by admission lanes");
+    }
+  }
   // Honor user-supplied minPanel down to 1: with 1 survivor we still degrade
   // gracefully via the answers.length===1 branch below (issue #6454).
-  const minPanel = Math.min(Math.max(1, cfg.minPanel), panel.length);
+  const minPanel = Math.min(Math.max(1, cfg.minPanel), panelToDispatch.length);
   const hasExplicitJudge = Boolean(judgeModel && judgeModel.trim());
-  const judge = hasExplicitJudge ? (judgeModel as string).trim() : panel[0];
+  // Judge fallback prefers the first SURVIVING panel member — a lane-full
+  // member dropped by the probe is never selected as the synthesis judge.
+  const judge = hasExplicitJudge
+    ? (judgeModel as string).trim()
+    : getFusionModelString(panelToDispatch[0]);
   log.info(
     "FUSION",
-    `Combo "${comboName ?? ""}" | panel=${panel.length} [${panel.join(", ")}] | judge=${judge} | quorum=${minPanel}`
+    `Combo "${comboName ?? ""}" | panel=${panelToDispatch.length} [${panelToDispatch
+      .map(getFusionModelString)
+      .join(", ")}] | judge=${judge} | quorum=${minPanel}`
   );
 
   // Tool-bearing requests get no value from panel synthesis — panel members
@@ -316,14 +374,9 @@ export async function handleFusionChat({
     return handleSingleModel(body, judge);
   }
 
-  // 1. Fan out to the panel in parallel: non-streaming, tools stripped (we want prose).
-  const { tools: _tools, tool_choice: _tc, ...rest } = body;
-  void _tools;
-  void _tc;
-  const panelBody: Body = { ...rest, stream: false };
   const t0 = Date.now();
-  const calls = panel.map((m) =>
-    withTimeout(handleSingleModel(panelBody, m), cfg.panelHardTimeoutMs)
+  const calls = panelToDispatch.map((target) =>
+    withTimeout(dispatchFusionModel(handleSingleModel, panelBody, target), cfg.panelHardTimeoutMs)
   );
   const settled = await collectPanel(calls, { ...cfg, minPanel });
   log.info("FUSION", `fan-out collected in ${Date.now() - t0}ms`);
@@ -333,7 +386,7 @@ export async function handleFusionChat({
   const failures: Array<{ model: string; reason: string }> = [];
   for (let i = 0; i < settled.length; i++) {
     const res = settled[i];
-    const model = panel[i];
+    const model = getFusionModelString(panelToDispatch[i]);
     if (!res) {
       log.warn("FUSION", `Panel ${model} dropped (straggler/timeout)`);
       failures.push({ model, reason: "straggler_dropped" });
@@ -399,10 +452,7 @@ export async function handleFusionChat({
     // synthesizing from a single source through itself would be redundant —
     // answer directly with the lone survivor (issue #6454).
     if (!hasExplicitJudge) {
-      log.info(
-        "FUSION",
-        `Only ${answers[0].model} succeeded — answering directly (no fusion)`
-      );
+      log.info("FUSION", `Only ${answers[0].model} succeeded — answering directly (no fusion)`);
       return handleSingleModel(body, answers[0].model);
     }
     // An explicit judgeModel IS configured: honor it even with a single
@@ -421,8 +471,8 @@ export async function handleFusionChat({
   // SURVIVOR: prefer panel[0] when it survived, otherwise the first survivor.
   const effectiveJudge = hasExplicitJudge
     ? judge
-    : answers.some((a) => a.model === panel[0])
-      ? panel[0]
+    : answers.some((a) => a.model === getFusionModelString(panel[0]))
+      ? getFusionModelString(panel[0])
       : answers[0].model;
 
   if (answers.length === 1) {
@@ -435,5 +485,7 @@ export async function handleFusionChat({
   // 4. Judge analyzes + writes one final answer (streams to client if requested).
   const judgeBody = appendUserTurn(body, buildJudgePrompt(answers));
   log.info("FUSION", `Judging ${answers.length} answers with ${effectiveJudge}`);
-  return handleSingleModel(judgeBody, effectiveJudge);
+  return judgeTarget
+    ? handleSingleModel(judgeBody, judgeTarget.modelStr, judgeTarget)
+    : handleSingleModel(judgeBody, effectiveJudge);
 }

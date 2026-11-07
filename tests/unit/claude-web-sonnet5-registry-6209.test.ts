@@ -9,6 +9,7 @@ test("claude-web registry matches the current selectable model set", () => {
   assert.deepEqual(
     ids,
     [
+      "claude-fable-5-1",
       "claude-fable-5",
       "claude-haiku-4-5-20251001",
       "claude-opus-5",
@@ -17,6 +18,8 @@ test("claude-web registry matches the current selectable model set", () => {
       "claude-opus-4-6",
       "claude-sonnet-4-6",
       "claude-sonnet-5",
+      // contract changed by #15035: Claude Sonnet 5.5 was added to the claude-web registry.
+      "claude-sonnet-5-5",
     ].sort()
   );
 });

@@ -28,8 +28,11 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isManagedProviderConnectionId } from "@/lib/providers/catalog";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { validateProviderApiKey } from "@/lib/providers/validation";
-import { getProxyForLevel, resolveProxyForProvider } from "@/lib/localDb";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
+import { getProxyForLevel } from "@/lib/db/settings";
+import { resolveProxyForProvider } from "@/lib/db/proxies";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
+import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
 
 // POST /api/providers/bulk — create multiple API-key connections for a single provider.
 // Partial-failure semantics: each entry succeeds or fails independently; the
@@ -61,6 +64,9 @@ export async function POST(request: Request) {
     providerSpecificData: incomingPsd,
     validateKeys,
   } = validation.data;
+
+  const retirementResponse = rejectRetiredCommonChatGptWebProvider(provider);
+  if (retirementResponse) return retirementResponse;
 
   const isManagedOrCompatible =
     isManagedProviderConnectionId(provider) ||
@@ -144,6 +150,8 @@ export async function POST(request: Request) {
             provider,
             apiKey: entry.apiKey,
             providerSpecificData: entryProviderSpecificData,
+            // S-01 (#15159, #15766 shape): devin CLI-spawn fallback is loopback/LAN-only.
+            allowLocalSpawn: getRequestPeerLocality(request) !== "remote",
           })
         );
         testStatus = probe?.valid ? "active" : "failed";

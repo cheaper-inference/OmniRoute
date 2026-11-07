@@ -16,14 +16,63 @@
  * pool to one provider and producing a hard 503 with no fallback once that
  * provider's quota is exhausted. An operator-set or auto-discovered override
  * reflects the real capacity, so it supersedes both catalog limits. Uses the
- * raw override (`getModelContextOverride` returns `null` when none is set) —
+ * resolved exact override (`getResolvedModelContextOverride` returns `null` when none is set) —
  * NOT `getModelContextLimitForModelString`, which falls back to
  * `contextWindow` and would therefore bypass the `maxInputTokens` cap for
  * every model, not just overridden ones.
  */
 
-import { getModelContextOverride } from "../../../src/lib/db/modelContextOverrides";
+import { getResolvedModelContextOverride } from "../../../src/lib/modelCapabilities";
 import { parseModel } from "../model.ts";
+
+/**
+ * Longest-first so `-xhigh` is not eaten by `-high`. Mirrors
+ * `stripKnownEffortSuffix` in modelCapabilities.ts, but that helper's array
+ * order still matches `-high` first (`"…-xhigh".endsWith("-high")`).
+ */
+const EFFORT_SUFFIXES_LONGEST_FIRST = [
+  "minimal",
+  "medium",
+  "xhigh",
+  "none",
+  "high",
+  "max",
+  "low",
+] as const;
+
+function stripTrailingEffortSuffix(modelId: string): string | null {
+  const normalized = String(modelId || "").trim();
+  if (!normalized) return null;
+  const lowered = normalized.toLowerCase();
+  for (const suffix of EFFORT_SUFFIXES_LONGEST_FIRST) {
+    const token = `-${suffix}`;
+    if (lowered.length > token.length && lowered.endsWith(token)) {
+      return normalized.slice(0, -token.length);
+    }
+  }
+  return null;
+}
+
+/**
+ * Exact override first; if missing, inherit the base id after stripping a
+ * trailing effort tier (#12475). Combo members are stored as
+ * `provider/GLM-5.3-high` while `model_context_overrides` is keyed on
+ * `GLM-5.3`. Dispatcher already strips the suffix; the compat filter did not.
+ */
+function lookupOverrideWithEffortInheritance(modelStr: string): number | null {
+  const exact = getResolvedModelContextOverride(modelStr);
+  if (exact != null) return exact;
+
+  const parsed = parseModel(modelStr);
+  const modelId = typeof parsed.model === "string" ? parsed.model.trim() : "";
+  const base = stripTrailingEffortSuffix(modelId);
+  if (!base || base === modelId) return null;
+
+  if (parsed.provider) {
+    return getResolvedModelContextOverride({ provider: parsed.provider, model: base });
+  }
+  return getResolvedModelContextOverride(base);
+}
 
 /**
  * Resolve the context-fit verdict from a persisted per-model override, if one
@@ -36,10 +85,25 @@ function resolveContextOverrideVerdict(
   requiredContextTokens: number
 ): boolean | undefined {
   if (!modelStr) return undefined;
-  const parsed = parseModel(modelStr);
-  const override = getModelContextOverride(parsed.provider, parsed.model);
+  const override = lookupOverrideWithEffortInheritance(modelStr);
   if (override == null) return undefined;
   return override >= requiredContextTokens;
+}
+
+/**
+ * Resolve a target's raw persisted `model_context_override` value (effort-suffix
+ * inheritance included), or `null` when none is set.
+ *
+ * #13870: exposed so the combo compat-filter reorder step (comboStructure.ts)
+ * can tell an operator-verified override apart from a catalog-advisory limit —
+ * an override is a stronger trust signal than an unconfirmed catalog number,
+ * so it must not be unconditionally outranked by one when the chars/4 estimate
+ * that rejected it is itself known to overstate real usage (issue #13870
+ * measured a ~3.7x overestimate on a repetitive agent-session body).
+ */
+export function getModelContextOverrideValue(modelStr: string | undefined): number | null {
+  if (!modelStr) return null;
+  return lookupOverrideWithEffortInheritance(modelStr);
 }
 
 /**

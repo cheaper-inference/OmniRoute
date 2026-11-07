@@ -22,14 +22,17 @@
  * chunk — safer than assuming unverified incremental-delta semantics.
  *
  * Auth: Cookie-based (token_v2 [+ optional space_id, notion_browser_id, user_id])
- * Method: Browser-TLS impersonation via tls-client-node (Chrome JA3). Plain
+ * Method: Browser-TLS impersonation via pinned wreq-js (Chrome JA3/JA4). Plain
  * Node/undici fetch is rejected by Notion's edge with in-band
  * `temporarily-unavailable` (HTTP 200, empty assistant text) — curl/Schannel
  * and Chrome work with the same cookie + body. See services/notionTlsClient.ts.
  */
 import { randomUUID } from "node:crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
-import { makeExecutorErrorResult as makeErrorResult } from "../utils/error.ts";
+import {
+  makeExecutorErrorResult as makeErrorResult,
+  sanitizeErrorMessage,
+} from "../utils/error.ts";
 import {
   BROWSER_HEADERS,
   extractNotionUserIdFromCookie,
@@ -57,13 +60,11 @@ import {
 } from "../services/notionStreamParser.ts";
 import {
   buildNotionTranscript,
-  messagesForNotionTranscript,
   type NotionAgentOptions,
 } from "../services/notionTranscriptBuilder.ts";
-import {
-  tlsFetchNotion,
-  TlsClientUnavailableError,
-} from "../services/notionTlsClient.ts";
+import { tlsFetchNotion } from "../services/notionTlsClient.ts";
+import { chromeUserAgent, newestChromeVersion } from "../utils/browserProfiles.ts";
+import { currentAppliedProxySink } from "../utils/proxyFetch.ts";
 
 // Re-exported for unit tests that destructure `mod.<name>` on this module.
 export {
@@ -86,8 +87,11 @@ export {
 // Both app.notion.com and www.notion.so work; prefer the AI surface host.
 const BASE_URL = "https://app.notion.com";
 const NOTION_URL = `${BASE_URL}/api/v3/runInferenceTranscript`;
-const USER_AGENT =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36";
+// Resolved lazily: computing the UA at module scope would throw at import
+// time when the wreq-js runtime is unavailable.
+function notionUserAgent(): string {
+  return chromeUserAgent("Windows NT 10.0; Win64; x64", newestChromeVersion());
+}
 // Match a recent live browser capture (web_providers/notion.txt, 2026-07-20).
 const NOTION_CLIENT_VERSION = "23.13.20260720.1949";
 
@@ -225,7 +229,6 @@ function extractUserIdFromCookie(cookie: string): string {
   return extractNotionUserIdFromCookie(cookie);
 }
 
-
 /**
  * Notion's undocumented inference API does not return token usage.
  * Emit a cheap char-based estimate so clients don't see a constant
@@ -236,9 +239,7 @@ export function estimateNotionUsage(
   messages: NotionMessage[] | undefined,
   content: string
 ): { prompt_tokens: number; completion_tokens: number; total_tokens: number; estimated: true } {
-  const promptText = (messages || [])
-    .map((m) => extractNotionMessageText(m?.content))
-    .join("\n");
+  const promptText = (messages || []).map((m) => extractNotionMessageText(m?.content)).join("\n");
   // ~4 chars/token (English-ish); at least 1 when there is any text.
   const prompt_tokens = promptText ? Math.max(1, Math.ceil(promptText.length / 4)) : 0;
   const completion_tokens = content ? Math.max(1, Math.ceil(content.length / 4)) : 0;
@@ -317,6 +318,16 @@ function clientFacingModelId(model: unknown): string {
   return clientFacingModel;
 }
 
+function sanitizeNotionTransportError(error: unknown): string {
+  let candidate = error;
+  try {
+    if (error instanceof Error) candidate = error.message;
+  } catch {
+    // Keep the unknown value for the canonical fail-closed sanitizer.
+  }
+  return sanitizeErrorMessage(candidate).trim() || "unknown error";
+}
+
 /** Resolves workspace + user (cached). Required for createThread payloads. */
 async function resolveExecuteWorkspace(
   cookie: string,
@@ -393,12 +404,11 @@ function buildNotionExecuteHeaders(opts: {
   const isCustom = Boolean(opts.agent?.workflowId);
   // Browser uses /agent/<workflowId without dashes>?wfv=chat for custom agents.
   const agentPathId = (opts.agent?.workflowId || "").replace(/-/g, "");
-  const referer = isCustom && agentPathId
-    ? `${BASE_URL}/agent/${agentPathId}?wfv=chat`
-    : `${BASE_URL}/ai`;
+  const referer =
+    isCustom && agentPathId ? `${BASE_URL}/agent/${agentPathId}?wfv=chat` : `${BASE_URL}/ai`;
   const reqHeaders: Record<string, string> = {
     "Content-Type": "application/json",
-    "User-Agent": USER_AGENT,
+    "User-Agent": notionUserAgent(),
     Accept: "application/x-ndjson",
     Cookie: opts.cookie,
     Origin: BASE_URL,
@@ -453,11 +463,8 @@ export function resolveNotionAgentOptions(
       "agent_id",
     ]) || "";
   const pageFromPs =
-    readProviderSpecificString(ps, [
-      "contextPageId",
-      "context_page_id",
-      "notionContextPageId",
-    ]) || "";
+    readProviderSpecificString(ps, ["contextPageId", "context_page_id", "notionContextPageId"]) ||
+    "";
 
   const readCookie = (name: string): string => {
     const m = cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`, "i"));
@@ -477,10 +484,7 @@ export function resolveNotionAgentOptions(
       readCookie("agent_id")
   );
   const contextPageId =
-    pageFromPs ||
-    readCookie("context_page_id") ||
-    readCookie("notion_context_page_id") ||
-    "";
+    pageFromPs || readCookie("context_page_id") || readCookie("notion_context_page_id") || "";
 
   return {
     workflowId: workflowId || undefined,
@@ -496,7 +500,11 @@ async function sendNotionInferenceRequest(opts: {
   reqBody: Record<string, unknown>;
   reqHeaders: Record<string, string>;
   signal: ExecuteInput["signal"];
-}): Promise<{ rawText?: string; errorResult?: ReturnType<typeof makeErrorResult> }> {
+}): Promise<{
+  rawText?: string;
+  errorResult?: ReturnType<typeof makeErrorResult>;
+  receivedStatus?: number;
+}> {
   const { reqBody, reqHeaders, signal } = opts;
   // Notion's edge rejects Node/undici TLS fingerprints with in-band
   // temporarily-unavailable (HTTP 200, no assistant text). Always use the
@@ -510,48 +518,27 @@ async function sendNotionInferenceRequest(opts: {
       body: JSON.stringify(reqBody),
       signal: signal ?? undefined,
       // Inference can take a while (tool-autoload + LLM first token).
-      timeoutMs:
-        Number.parseInt(process.env.OMNIROUTE_NOTION_TLS_TIMEOUT_MS || "", 10) || 180_000,
+      timeoutMs: Number.parseInt(process.env.OMNIROUTE_NOTION_TLS_TIMEOUT_MS || "", 10) || 180_000,
     });
     status = tlsRes.status;
     rawText = tlsRes.text ?? "";
   } catch (err) {
-    if (err instanceof TlsClientUnavailableError) {
-      // Fall back to plain fetch only when the native TLS sidecar is missing —
-      // better a degraded path than a hard crash on platforms without the binary.
-      try {
-        const upstream = await fetch(NOTION_URL, {
-          method: "POST",
-          headers: reqHeaders,
-          body: JSON.stringify(reqBody),
-          signal: signal ?? undefined,
-        });
-        status = upstream.status;
-        rawText = await upstream.text().catch(() => "");
-      } catch (fallbackErr) {
-        return {
-          errorResult: makeErrorResult(
-            502,
-            `Notion fetch failed: ${fallbackErr instanceof Error ? fallbackErr.message : "unknown error"}`,
-            reqBody,
-            NOTION_URL
-          ),
-        };
-      }
-    } else {
-      return {
-        errorResult: makeErrorResult(
-          502,
-          `Notion fetch failed: ${err instanceof Error ? err.message : "unknown error"}`,
-          reqBody,
-          NOTION_URL
-        ),
-      };
-    }
+    // Fail closed: plain fetch would bypass the resolved proxy and Notion rejects
+    // undici's fingerprint anyway. A missing native binding is a packaging error,
+    // not permission to leak a direct request.
+    return {
+      errorResult: makeErrorResult(
+        502,
+        `Notion fetch failed: ${sanitizeNotionTransportError(err)}`,
+        reqBody,
+        NOTION_URL
+      ),
+    };
   }
 
   if (status === 401 || status === 403) {
     return {
+      receivedStatus: status,
       errorResult: makeErrorResult(
         status,
         "Notion session expired or invalid — re-paste token_v2 from notion.so",
@@ -563,6 +550,7 @@ async function sendNotionInferenceRequest(opts: {
 
   if (status < 200 || status >= 300) {
     return {
+      receivedStatus: status,
       errorResult: makeErrorResult(
         status || 502,
         `Notion error: ${rawText.slice(0, 500)}`,
@@ -634,8 +622,7 @@ export class NotionWebExecutor extends BaseExecutor {
     const inboundHeaders =
       (input.clientHeaders as Record<string, string> | null | undefined) ??
       ((input as { headers?: Record<string, string> }).headers as
-        | Record<string, string>
-        | undefined);
+        Record<string, string> | undefined);
     const clientThreadId = readClientThreadId(requestBody, inboundHeaders ?? undefined);
     // Namespace the thread cache PER CALLER (hash of the caller's cookie) AND by custom
     // agent, so (a) two users of the same Notion space never share a cached thread
@@ -656,6 +643,7 @@ export class NotionWebExecutor extends BaseExecutor {
           errorResult: ReturnType<typeof makeErrorResult>;
           retryable: boolean;
           reqBody: Record<string, unknown>;
+          receivedStatus?: number;
         };
 
     // `strictNullChecks: false` narrows a boolean-literal discriminant on the positive
@@ -689,7 +677,7 @@ export class NotionWebExecutor extends BaseExecutor {
         notionThreadMarkCreateAttempted(rootKey, opts.threadId);
       }
 
-      const { rawText, errorResult } = await sendNotionInferenceRequest({
+      const { rawText, errorResult, receivedStatus } = await sendNotionInferenceRequest({
         reqBody,
         reqHeaders,
         signal,
@@ -699,7 +687,7 @@ export class NotionWebExecutor extends BaseExecutor {
         // HTTP-level failure — keep sticky binding so the next turn reuses threadId
         const status = errorResult.response?.status ?? 502;
         const retryable = status === 429 || status === 503 || status >= 500;
-        return { ok: false, errorResult, retryable, reqBody };
+        return { ok: false, errorResult, retryable, reqBody, receivedStatus };
       }
 
       const raw = rawText || "";
@@ -738,12 +726,19 @@ export class NotionWebExecutor extends BaseExecutor {
 
     // One automatic retry for transient Notion faults — same threadId, never create again
     if (isFailedAttempt(attempt) && attempt.retryable) {
-      const delayMs = process.env.NODE_ENV === "test" || process.env.VITEST ? 20 : 700 + Math.floor(Math.random() * 400);
+      const delayMs =
+        process.env.NODE_ENV === "test" || process.env.VITEST
+          ? 20
+          : 700 + Math.floor(Math.random() * 400);
       await new Promise((r) => setTimeout(r, delayMs));
       attempt = await runOnce({ createThread: false, threadId });
     }
 
     if (isFailedAttempt(attempt)) {
+      const sink = currentAppliedProxySink();
+      if (sink && attempt.receivedStatus !== undefined && attempt.receivedStatus >= 400) {
+        sink.upstreamStatus = attempt.receivedStatus;
+      }
       return attempt.errorResult;
     }
 

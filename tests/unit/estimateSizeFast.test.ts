@@ -1,9 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { estimateSizeFast, isSmallEnoughForSemanticCache } = await import(
-  "../../open-sse/utils/estimateSize.ts"
-);
+const {
+  estimateSizeFast,
+  isSmallEnoughForSemanticCache,
+  ESTIMATE_SIZE_BYTE_LIMIT,
+  ESTIMATE_SIZE_NODE_BUDGET,
+} = await import("../../open-sse/utils/estimateSize.ts");
 
 test("estimateSizeFast returns 0 for null/undefined", () => {
   assert.equal(estimateSizeFast(null), 0);
@@ -65,6 +68,71 @@ test("estimateSizeFast early-exits at 262144 bytes (256KB)", () => {
   assert.ok(result >= 262144, `Should early-exit, got ${result}`);
 });
 
+/**
+ * Real bug: the byte early-exit was unconditionally ESTIMATE_SIZE_BYTE_LIMIT
+ * (256 KiB) with no way for a caller to raise it, so any caller comparing
+ * against a bigger configured threshold (e.g. logTruncation.ts's
+ * getChatLogMaxBodyBytes(), default 1 MiB) could never see a size above
+ * ~256 KiB — every payload up to their real threshold looked "under
+ * threshold" and truncation never fired for anything between 256 KiB and
+ * the caller's actual limit, silently letting oversized bodies through.
+ */
+test("estimateSizeFast respects a caller-supplied byteLimit above the 256KB default", () => {
+  const oneMiB = 1024 * 1024;
+  // Multiple 200KB elements: the 2nd element alone already crosses the
+  // default 256KB limit, so a hardcoded-256KB implementation early-exits
+  // there and never accumulates the 3rd/4th elements — only a truly
+  // caller-configurable limit reports the full, accurate total.
+  const payload = Array.from({ length: 4 }, () => "x".repeat(200_000));
+  const trueTotal = payload.reduce((sum, s) => sum + s.length, 0);
+
+  const withDefaultLimit = estimateSizeFast(payload);
+  assert.ok(
+    withDefaultLimit < trueTotal,
+    `sanity: default 256KB limit must early-exit before the true total, got ${withDefaultLimit}`
+  );
+
+  const withCustomLimit = estimateSizeFast(payload, oneMiB);
+  assert.equal(
+    withCustomLimit,
+    trueTotal,
+    "must report the true accumulated size instead of early-exiting at the default 256KB"
+  );
+  assert.ok(withCustomLimit <= oneMiB, "payload must be recognized as under the caller's own limit");
+});
+
+test("estimateSizeFast node-budget fail-closed return respects a caller-supplied byteLimit", () => {
+  const oneMiB = 1024 * 1024;
+  const hugeSparseArray = new Proxy([] as unknown[], {
+    get(target, prop, receiver) {
+      if (prop === "length") return 5_000_000;
+      if (typeof prop === "string" && /^[0-9]+$/.test(prop)) return null;
+      return Reflect.get(target, prop, receiver);
+    },
+  });
+  const result = estimateSizeFast(hugeSparseArray, oneMiB);
+  assert.ok(
+    result > oneMiB,
+    `node-budget exhaustion must fail closed above the CALLER's limit (${oneMiB}), not the default 256KB — got ${result}`
+  );
+});
+
+test("estimateSizeFast checks byte limit after numbers and booleans", () => {
+  const almostForNumber = "x".repeat(ESTIMATE_SIZE_BYTE_LIMIT - 4);
+  const withNumber = estimateSizeFast([almostForNumber, 1]);
+  assert.ok(
+    withNumber > ESTIMATE_SIZE_BYTE_LIMIT,
+    `number contribution must trip byte limit, got ${withNumber}`
+  );
+  // boolean is 4 bytes: start 3 under the limit so adding true exceeds (not merely equals).
+  const almostForBool = "x".repeat(ESTIMATE_SIZE_BYTE_LIMIT - 3);
+  const withBool = estimateSizeFast([almostForBool, true]);
+  assert.ok(
+    withBool > ESTIMATE_SIZE_BYTE_LIMIT,
+    `boolean contribution must trip byte limit, got ${withBool}`
+  );
+});
+
 test("estimateSizeFast handles mixed object/array nesting", () => {
   const data = {
     choices: [
@@ -108,4 +176,71 @@ test("estimateSizeFast handles Map-like objects (no infinite loop on iterables)"
   // Maps are objects but have no enumerable own properties via for-in
   const result = estimateSizeFast(map);
   assert.ok(typeof result === "number");
+});
+
+/**
+ * Mutation-sensitive bound: a huge logical length with null/empty-object elements
+ * must not pre-touch every index or allocate all references. Node-budget exhaustion
+ * fails closed above 256 KiB so semantic-cache/admission never treat it as small.
+ */
+test("estimateSizeFast node budget fails closed on huge sparse null array without full traversal", () => {
+  let elementAccesses = 0;
+  const sparseNulls = new Proxy([] as unknown[], {
+    get(target, prop, receiver) {
+      if (prop === "length") return 5_000_000;
+      if (prop === Symbol.iterator) {
+        throw new Error("iterator must not be used");
+      }
+      if (typeof prop === "string" && /^[0-9]+$/.test(prop)) {
+        elementAccesses += 1;
+        return null;
+      }
+      return Reflect.get(target, prop, receiver);
+    },
+  });
+
+  const result = estimateSizeFast(sparseNulls);
+  assert.ok(
+    result > ESTIMATE_SIZE_BYTE_LIMIT,
+    `node-budget exhaustion must return >256KiB, got ${result}`
+  );
+  assert.ok(
+    elementAccesses <= ESTIMATE_SIZE_NODE_BUDGET + 8,
+    `must not access far beyond node budget; accesses=${elementAccesses}`
+  );
+  assert.ok(elementAccesses > 100, `expected many bounded visits, got ${elementAccesses}`);
+  assert.equal(isSmallEnoughForSemanticCache(sparseNulls), false);
+});
+
+test("estimateSizeFast node budget fails closed on empty-object / getter proxy array", () => {
+  let elementAccesses = 0;
+  let farGetterHits = 0;
+  const emptyObjectArray = new Proxy([] as unknown[], {
+    get(target, prop, receiver) {
+      if (prop === "length") return 2_000_000;
+      if (typeof prop === "string" && /^[0-9]+$/.test(prop)) {
+        const index = Number(prop);
+        elementAccesses += 1;
+        if (index >= ESTIMATE_SIZE_NODE_BUDGET) {
+          farGetterHits += 1;
+        }
+        // Fresh empty object per access — old impl would stack-push every reference.
+        return {};
+      }
+      return Reflect.get(target, prop, receiver);
+    },
+  });
+
+  const result = estimateSizeFast(emptyObjectArray);
+  assert.ok(result > ESTIMATE_SIZE_BYTE_LIMIT, `expected fail-closed, got ${result}`);
+  assert.ok(
+    elementAccesses <= ESTIMATE_SIZE_NODE_BUDGET + 8,
+    `accesses must stay near node budget; got ${elementAccesses}`
+  );
+  assert.equal(
+    farGetterHits,
+    0,
+    `entries beyond the node budget must not be touched; far hits=${farGetterHits}`
+  );
+  assert.equal(isSmallEnoughForSemanticCache(emptyObjectArray), false);
 });

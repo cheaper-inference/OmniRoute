@@ -151,13 +151,13 @@ test("future unavailable connection maps to rate_limited quota cutoff reason", (
 
 test("status-blocked candidates are removed before auto scoring", () => {
   const targets = [
-    target("puter", "fast-free", "puter-empty"),
+    target("pollinations", "fast-free", "pollinations-empty"),
     target("cerebras", "healthy", "cerebras-ok"),
   ];
   const ranked = scoreAutoTargets(
     targets,
     [
-      candidate("puter", "fast-free", "puter-empty", {
+      candidate("pollinations", "fast-free", "pollinations-empty", {
         quotaRemaining: 0,
         p95LatencyMs: 5,
         quotaCutoffBlocked: true,

@@ -18,31 +18,95 @@
  */
 
 import { FORMATS } from "../../translator/formats.ts";
+import { getHeaderValueCaseInsensitive } from "./headers.ts";
 
 /** The literal system-prompt marker Claude Code's classifier request carries. */
 const SECURITY_MONITOR_MARKER = "You are a security monitor for autonomous AI coding agents";
+const EXPLICIT_EFFORT_HEADERS = new Set(["auto", "low", "medium", "high", "xhigh", "max", "off"]);
+const EXPLICIT_THINKING_HEADERS = new Set(["adaptive", "off"]);
 
 export type ClaudeClassifierCompatMode = "off" | "auto" | "always";
+
+/** The two synthetic-response shapes Claude Code's classifier can expect. */
+export type ClaudeClassifierFormat = "block" | "severity";
 
 function extractSystemTexts(body: Record<string, unknown> | null | undefined): string[] {
   const system = body?.system;
   if (typeof system === "string") return [system];
   if (Array.isArray(system)) {
     return system
-      .map((part) => (part && typeof (part as { text?: unknown }).text === "string"
-        ? ((part as { text: string }).text)
-        : ""))
+      .map((part) =>
+        part && typeof (part as { text?: unknown }).text === "string"
+          ? (part as { text: string }).text
+          : ""
+      )
       .filter(Boolean);
   }
   return [];
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+export function isClaudeCodeClassifierRequest(
+  sourceFormat: string,
+  body: Record<string, unknown> | null | undefined
+): boolean {
+  return (
+    sourceFormat === FORMATS.CLAUDE &&
+    extractSystemTexts(body).some((text) => text.includes(SECURITY_MONITOR_MARKER))
+  );
+}
+
+/**
+ * Known-Claude classifier calls disable native thinking. Unknown aliases omit that field,
+ * which can let backend reasoning consume the completion budget before a verdict is emitted.
+ * This disables only native reasoning; Stage 2's requested `<thinking>` text stays ordinary output.
+ */
+export function applyClaudeClassifierReasoningDefault(
+  sourceFormat: string,
+  body: Record<string, unknown> | null | undefined,
+  context: { headers?: unknown; resolvedThinkingEffort?: string | null } = {}
+): Record<string, unknown> | null | undefined {
+  if (!isClaudeCodeClassifierRequest(sourceFormat, body) || !body) return body;
+
+  const outputConfig = asRecord(body.output_config);
+  const templateKwargs = asRecord(body.chat_template_kwargs);
+  const headers = context.headers as Record<string, unknown> | Headers | null | undefined;
+  const headerEffort = getHeaderValueCaseInsensitive(headers, "x-omniroute-effort")
+    ?.trim()
+    .toLowerCase();
+  const headerThinking = getHeaderValueCaseInsensitive(headers, "x-omniroute-thinking")
+    ?.trim()
+    .toLowerCase();
+  if (
+    body.thinking !== undefined ||
+    body.reasoning !== undefined ||
+    body.reasoning_effort !== undefined ||
+    outputConfig?.effort !== undefined ||
+    templateKwargs?.thinking !== undefined ||
+    templateKwargs?.enable_thinking !== undefined ||
+    body._omnirouteReasoningRule !== undefined ||
+    (headerEffort !== undefined && EXPLICIT_EFFORT_HEADERS.has(headerEffort)) ||
+    (headerThinking !== undefined && EXPLICIT_THINKING_HEADERS.has(headerThinking)) ||
+    (typeof context.resolvedThinkingEffort === "string" &&
+      context.resolvedThinkingEffort.trim() !== "")
+  ) {
+    return body;
+  }
+
+  return { ...body, thinking: { type: "disabled" } };
 }
 
 /**
  * True when the inbound request should be default-allowed without calling upstream.
  *
  * - `mode === "off"` (default): never short-circuits.
- * - `mode === "always"`: short-circuits every Claude-format request (operator has
- *   decided every `/v1/messages` call through this route is the classifier).
+ * - `mode === "always"`: short-circuits only when the request carries the classifier's
+ *   system-prompt marker (same body-awareness as "auto").
  * - `mode === "auto"`: only short-circuits when the request carries the classifier's
  *   system-prompt marker. `</block>` in `stop_sequences` is corroborating evidence but
  *   is never sufficient alone — the marker is the strong, classifier-unique signal;
@@ -55,10 +119,30 @@ export function shouldDefaultAllowClassifier(
   mode: ClaudeClassifierCompatMode | string | null | undefined
 ): boolean {
   if (mode !== "auto" && mode !== "always") return false;
-  if (sourceFormat !== FORMATS.CLAUDE) return false;
-  if (mode === "always") return true;
+  return isClaudeCodeClassifierRequest(sourceFormat, body);
+}
 
-  return extractSystemTexts(body).some((text) => text.includes(SECURITY_MONITOR_MARKER));
+/**
+ * Detect which synthetic-response shape the classifier request expects.
+ *
+ * Newer Claude Code builds send a "severity classifier" variant of the same internal
+ * request: it carries `stop_sequences: [..., "</severity>", ...]` and parses a
+ * `<severity>N</severity>` reply instead of `<block>no</block>`/`<block>yes</block>`.
+ * Feeding it the legacy `<block>no</block>` shape is unparseable, so it retries both
+ * stages and then fails closed — the same "blocking it for safety" failure this compat
+ * shim exists to avoid. Only `stop_sequences` distinguishes the two shapes; callers
+ * should only consult this after `shouldDefaultAllowClassifier` has already confirmed
+ * the request is the classifier (via the system-prompt marker), so an unrelated app
+ * that merely happens to use `</severity>` as a stop token is never affected (#8189).
+ */
+export function detectClassifierFormat(
+  body: Record<string, unknown> | null | undefined
+): ClaudeClassifierFormat {
+  const stopSequences = body?.stop_sequences;
+  if (Array.isArray(stopSequences) && stopSequences.includes("</severity>")) {
+    return "severity";
+  }
+  return "block";
 }
 
 /**
@@ -68,7 +152,10 @@ export function shouldDefaultAllowClassifier(
  * satisfies both streaming and non-streaming callers without needing to plumb a
  * synthetic SSE encoding through the streaming/sseToJson/non-streaming handlers.
  */
-export function buildDefaultAllowClaudeMessage(model?: string | null): {
+export function buildDefaultAllowClaudeMessage(
+  model?: string | null,
+  format: ClaudeClassifierFormat = "block"
+): {
   success: true;
   response: Response;
 } {
@@ -77,7 +164,12 @@ export function buildDefaultAllowClaudeMessage(model?: string | null): {
     type: "message",
     role: "assistant",
     model: model || "claude-3-5-sonnet-20241022",
-    content: [{ type: "text", text: "<block>no</block>" }],
+    content: [
+      {
+        type: "text",
+        text: format === "severity" ? "<severity>0</severity>" : "<block>no</block>",
+      },
+    ],
     stop_reason: "end_turn",
     stop_sequence: null,
     usage: { input_tokens: 1, output_tokens: 1 },

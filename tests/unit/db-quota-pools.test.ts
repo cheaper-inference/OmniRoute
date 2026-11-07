@@ -27,7 +27,7 @@ async function resetStorage() {
   for (let attempt = 0; attempt < 10; attempt++) {
     try {
       if (fs.existsSync(TEST_DATA_DIR)) {
-        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
       }
       break;
     } catch (err: any) {
@@ -47,7 +47,7 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 // ---------------------------------------------------------------------------
@@ -137,15 +137,15 @@ test("updatePool returns null for unknown id", () => {
   assert.equal(result, null);
 });
 
-test("deletePool removes pool and returns true", () => {
+test("deletePool removes pool and returns true", async () => {
   const pool = poolsDb.createPool({ connectionId: "c6", name: "Deletable" });
-  const deleted = poolsDb.deletePool(pool.id);
+  const deleted = await poolsDb.deletePool(pool.id);
   assert.equal(deleted, true);
   assert.equal(poolsDb.getPool(pool.id), null);
 });
 
-test("deletePool returns false for unknown id", () => {
-  const result = poolsDb.deletePool("ghost-pool");
+test("deletePool returns false for unknown id", async () => {
+  const result = await poolsDb.deletePool("ghost-pool");
   assert.equal(result, false);
 });
 
@@ -190,14 +190,14 @@ test("upsertAllocations with empty array removes all allocations", () => {
 // FK CASCADE: delete pool → allocations gone
 // ---------------------------------------------------------------------------
 
-test("deletePool cascades to allocations", () => {
+test("deletePool cascades to allocations", async () => {
   const pool = poolsDb.createPool({
     connectionId: "c9",
     name: "With Allocs",
     allocations: [{ apiKeyId: "k-cascade", weight: 100, policy: "hard" }],
   });
 
-  poolsDb.deletePool(pool.id);
+  await poolsDb.deletePool(pool.id);
 
   // After pool is deleted, listAllocationsForApiKey should find nothing for k-cascade
   const remaining = poolsDb.listAllocationsForApiKey("k-cascade");

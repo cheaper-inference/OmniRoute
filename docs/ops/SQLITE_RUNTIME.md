@@ -71,6 +71,26 @@ omniroute  # will reinstall on next start
 omniroute config db-info  # (if CLI command exists)
 ```
 
+## Diagnosing synchronous stalls
+
+With `better-sqlite3`, set `OMNIROUTE_SQLITE_SLOW_MS=200` before startup to opt
+into synchronous adapter timing. The default is off. A completed operation taking
+at least that many milliseconds emits a `[SQLITE-SLOW]` warning, at most once per
+ten seconds per adapter. The warning contains only the driver, operation class
+(`prepare`, `get`, `all`, `run`, `exec`, `pragma`, transaction or maintenance), and
+elapsed milliseconds: no SQL, bindings, rows, paths or exception text.
+
+This is a diagnostic aid, not a timeout or query optimization. It cannot report
+an operation that never returns, distinguish CPU work from disk waits, identify
+the exact SQL, or observe operations performed through the raw driver handle.
+Async backup duration is deliberately excluded; other SQLite drivers are not
+instrumented by this opt-in. Disabling the variable restores the original adapter
+without timing wrappers. No database schema or stored configuration changes.
+
+The `/healthz` lag warning reports the event-loop peak since the previous sample,
+not the lifetime average. Correlate its timestamps with slow-operation warnings
+and host/storage metrics before attributing a stall to SQLite or disk failure.
+
 ## Reference
 
 Implementation:
@@ -80,3 +100,16 @@ Implementation:
 - `bin/cli/runtime/index.mjs` — startup orchestrator (`warmUpRuntimes()`)
 - `scripts/postinstall.mjs` — npm post-install hook (non-fatal warm-up)
 - `src/lib/db/core.ts` — `ensureDbInitialized()` / `getDriverInfo()` exports
+
+## Single-writer topology (HA unsupported)
+
+The driver fallback chain above still runs in **one process**. Default SQLite
+OmniRoute is a **single writer**:
+
+- Do not attach two OmniRoute replicas to the same `storage.sqlite` file.
+- A container restart, Recreate deploy, OOM kill, or HEALTHCHECK restart drops
+  every in-flight SSE session. There is no session drain on the stock path.
+- Orchestrator liveness that treats a slow `/healthz` as dead will kill the only
+  replica. Prefer TCP liveness + HTTP `/healthz` readiness. See
+  [Docker Guide — availability](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
+  and [Kubernetes probe recommendations](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).

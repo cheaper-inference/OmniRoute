@@ -5,7 +5,9 @@ import {
   MAX_BODY_BYTES_AUDIO,
   MAX_BODY_BYTES_FILE,
   MAX_BODY_BYTES_IMAGE_EDIT,
+  MAX_BODY_BYTES_MEDIA,
   MAX_BODY_BYTES_LLM_API,
+  MAX_BODY_BYTES_VIDEO_BRIDGE_BROKER,
   RequestBodyTooLargeError,
   readRequestBodyWithLimit,
   getBodySizeLimit,
@@ -45,8 +47,46 @@ test("body size guard keeps dedicated upload limits as lower bounds", () => {
   );
   assert.equal(
     getBodySizeLimit("/api/v1/images/edits", { maxBodySizeMb: 10 }),
-    MAX_BODY_BYTES_IMAGE_EDIT
+    MAX_BODY_BYTES_MEDIA
   );
+});
+
+test("Video Bridge broker admission is exactly 50 MiB before policy and route handling", async () => {
+  const pathname = "/api/modality-bridge/video/extract";
+  const admittedBytes = 20 * 1024 * 1024;
+  const rejectedBytes = MAX_BODY_BYTES_VIDEO_BRIDGE_BROKER + 1;
+
+  assert.equal(
+    getBodySizeLimit(pathname, { maxBodySizeMb: 10 }),
+    MAX_BODY_BYTES_VIDEO_BRIDGE_BROKER
+  );
+  assert.equal(
+    getBodySizeLimit(pathname, { maxBodySizeMb: 100 }),
+    MAX_BODY_BYTES_VIDEO_BRIDGE_BROKER,
+    "a broader global setting must not widen the local spawn broker"
+  );
+  assert.equal(
+    checkBodySize(
+      new Request(`http://localhost${pathname}`, {
+        method: "POST",
+        headers: { "content-length": String(admittedBytes) },
+      }),
+      getBodySizeLimit(pathname, { maxBodySizeMb: 10 })
+    ),
+    null,
+    ">10 MiB and <=50 MiB must continue to auth policy and the streamed route cap"
+  );
+
+  const rejection = checkBodySize(
+    new Request(`http://localhost${pathname}`, {
+      method: "POST",
+      headers: { "content-length": String(rejectedBytes) },
+    }),
+    getBodySizeLimit(pathname, { maxBodySizeMb: 100 })
+  );
+  assert.ok(rejection);
+  assert.equal(rejection.status, 413);
+  assert.equal((await rejection.json()).error.code, "PAYLOAD_TOO_LARGE");
 });
 
 test("/api/v1/images/edits admits a 20 MiB image in multipart or base64 JSON envelopes", () => {
@@ -170,4 +210,96 @@ test("/api/v1/files route guard allows 15 MB (10 MB+ real-world scenario)", () =
     headers: { "content-length": String(fifteenMb) },
   });
   assert.equal(checkBodySize(request, getBodySizeLimit("/api/v1/files")), null);
+});
+
+test("media routes bypass OmniRoute's configured body-size limit", () => {
+  assert.equal(MAX_BODY_BYTES_MEDIA, Number.POSITIVE_INFINITY);
+  assert.equal(MAX_BODY_BYTES_IMAGE_EDIT, MAX_BODY_BYTES_MEDIA);
+  assert.equal(
+    getBodySizeLimit("/api/v1/images/generations", { maxBodySizeMb: 10 }),
+    MAX_BODY_BYTES_MEDIA
+  );
+  assert.equal(
+    getBodySizeLimit("/api/v1/images/edits", { maxBodySizeMb: 10 }),
+    MAX_BODY_BYTES_MEDIA
+  );
+  assert.equal(
+    getBodySizeLimit("/api/v1/images/upscale", { maxBodySizeMb: 10 }),
+    MAX_BODY_BYTES_MEDIA
+  );
+  assert.equal(
+    getBodySizeLimit("/api/v1/videos/generations", { maxBodySizeMb: 10 }),
+    MAX_BODY_BYTES_MEDIA
+  );
+  assert.equal(
+    getBodySizeLimit("/api/v1/providers/openai/images/generations", { maxBodySizeMb: 10 }),
+    MAX_BODY_BYTES_MEDIA
+  );
+});
+
+test("media routes never return OmniRoute's PAYLOAD_TOO_LARGE response", () => {
+  for (const pathname of [
+    "/api/v1/images/generations",
+    "/api/v1/videos/generations",
+    "/api/v1/providers/openai/images/generations",
+  ]) {
+    const request = new Request(`http://localhost${pathname}`, {
+      method: "POST",
+      headers: { "content-length": String(Number.MAX_SAFE_INTEGER) },
+    });
+    assert.equal(checkBodySize(request, getBodySizeLimit(pathname, { maxBodySizeMb: 10 })), null);
+  }
+});
+
+test("provider media matching does not unbound adjacent provider routes", () => {
+  const configuredLimit = requestBodyLimitMbToBytes(10);
+  for (const pathname of [
+    "/api/v1/providers/openai/chat/completions",
+    "/api/v1/providers/openai/embeddings",
+    "/api/v1/providers/openai/images/generations-extra",
+  ]) {
+    assert.equal(getBodySizeLimit(pathname, { maxBodySizeMb: 10 }), configuredLimit);
+  }
+});
+
+test("image edit body reader does not enforce an OmniRoute media limit", async () => {
+  const request = new Request("http://localhost/api/v1/images/edits", {
+    method: "POST",
+    headers: { "content-length": String(Number.MAX_SAFE_INTEGER) },
+    body: new Uint8Array([1, 2, 3, 4]),
+  });
+
+  const body = await readRequestBodyWithLimit(
+    request,
+    getBodySizeLimit("/api/v1/images/edits", { maxBodySizeMb: 10 })
+  );
+  assert.deepEqual(body, new Uint8Array([1, 2, 3, 4]));
+});
+
+test("a saved limit replaces the LLM route default, up or down", () => {
+  for (const pathname of ["/api/v1/responses", "/api/v1/chat/completions"]) {
+    assert.equal(
+      getBodySizeLimit(pathname, { maxBodySizeMb: 10, savedMaxBodySizeMb: 10 }),
+      requestBodyLimitMbToBytes(10)
+    );
+    assert.equal(
+      getBodySizeLimit(pathname, { maxBodySizeMb: 100, savedMaxBodySizeMb: 100 }),
+      requestBodyLimitMbToBytes(100)
+    );
+    assert.equal(
+      getBodySizeLimit(pathname, { maxBodySizeMb: 10, savedMaxBodySizeMb: null }),
+      MAX_BODY_BYTES_LLM_API
+    );
+  }
+});
+
+test("a saved limit stays a lower bound for the dedicated upload routes", () => {
+  assert.equal(
+    getBodySizeLimit("/api/v1/audio/transcriptions", { maxBodySizeMb: 1, savedMaxBodySizeMb: 1 }),
+    MAX_BODY_BYTES_AUDIO
+  );
+  assert.equal(
+    getBodySizeLimit("/api/v1/files", { maxBodySizeMb: 1, savedMaxBodySizeMb: 1 }),
+    MAX_BODY_BYTES_FILE
+  );
 });

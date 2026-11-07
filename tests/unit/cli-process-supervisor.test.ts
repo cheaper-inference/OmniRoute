@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
+import fs from "node:fs";
+import path from "node:path";
 
 // #4425: the supervisor now waits for the listen port to free up before respawning.
 // Point that probe at the no-op port 0 so the restart tests don't open real sockets.
@@ -275,4 +277,173 @@ test("writePidFile/readPidFile/cleanupPidFile operam por service", async () => {
 
   cleanupPidFile("mitm");
   delete process.env.DATA_DIR;
+});
+
+// --- #11980: Bun --preload must resolve against the package root, never dist/ ---
+
+const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
+
+function withBunRuntime<T>(fn: () => T): T {
+  const versions = process.versions as Record<string, string | undefined>;
+  const hadBun = Object.prototype.hasOwnProperty.call(versions, "bun");
+  const previous = versions.bun;
+  versions.bun = "1.2.0";
+  try {
+    return fn();
+  } finally {
+    if (hadBun) versions.bun = previous;
+    else delete versions.bun;
+  }
+}
+
+test("buildServerSpawnArgs under Bun preloads the package-root polyfill, not dist/ (#11980)", async () => {
+  const { buildServerSpawnArgs } = await import("../../bin/cli/runtime/processSupervisor.mjs");
+  // The published layout: bin/ + open-sse/ + dist/server.js are siblings under the package root.
+  const serverPath = path.join(REPO_ROOT, "dist", "server.js");
+
+  const args = withBunRuntime(() => buildServerSpawnArgs(serverPath, 512));
+
+  const expectedPreload = path.join(REPO_ROOT, "open-sse", "utils", "setupPolyfill.ts");
+  assert.deepEqual(args, ["--preload", expectedPreload, serverPath]);
+  assert.ok(fs.existsSync(args[1]), `Bun --preload target must exist on disk: ${args[1]}`);
+});
+
+test("buildServerSpawnArgs under Node keeps the runtime args and never passes --preload (#11980)", async () => {
+  const { buildServerSpawnArgs } = await import("../../bin/cli/runtime/processSupervisor.mjs");
+  const { buildNodeRuntimeArgs } = await import("../../scripts/build/runtime-env.mjs");
+  const serverPath = "/fake/dist/server.js";
+  const env = {};
+
+  const args = buildServerSpawnArgs(serverPath, 512, env);
+
+  assert.deepEqual(args, buildNodeRuntimeArgs(env, 512, serverPath));
+  assert.ok(!args.includes("--preload"));
+});
+
+test("every Bun server spawn (supervisor, --daemon, --no-recovery) uses the shared package-root preload (#11980)", () => {
+  const supervisorSrc = fs.readFileSync(
+    path.join(REPO_ROOT, "bin/cli/runtime/processSupervisor.mjs"),
+    "utf8"
+  );
+  const serveSrc = fs.readFileSync(path.join(REPO_ROOT, "bin/cli/commands/serve.mjs"), "utf8");
+
+  assert.match(supervisorSrc, /spawn\(\s*process\.execPath,\s*buildServerSpawnArgs\(/);
+  assert.equal(
+    (serveSrc.match(/"--preload",\s*BUN_PRELOAD_PATH\b/g) ?? []).length,
+    2,
+    "serve.mjs --daemon and --no-recovery must both preload BUN_PRELOAD_PATH"
+  );
+  assert.doesNotMatch(serveSrc, /join\(APP_DIR,\s*"open-sse/);
+});
+
+test("#13992: supervised server spawn hides the console window on Windows", () => {
+  const supervisorSrc = fs.readFileSync(
+    path.join(REPO_ROOT, "bin/cli/runtime/processSupervisor.mjs"),
+    "utf8"
+  );
+
+  assert.match(
+    supervisorSrc,
+    /spawn\(process\.execPath,\s*buildServerSpawnArgs\([\s\S]*?\),\s*\{[\s\S]*?windowsHide:\s*true[\s\S]*?\}\)/,
+    "the supervised server spawn() must pass windowsHide: true so a tray-mode restart never " +
+      "flashes a visible console on Windows"
+  );
+});
+
+// --- #16030: shutdown intent marker ---
+
+test("consumeShutdownIntent honors only a marker carrying the exited child's pid", async () => {
+  const os = await import("node:os");
+  const tmpDir = path.join(os.default.tmpdir(), `omniroute-intent-test-${Date.now()}`);
+  process.env.DATA_DIR = tmpDir;
+  try {
+    const { consumeShutdownIntent } = await import("../../bin/cli/utils/pid.mjs");
+    const markerDir = path.join(tmpDir, "supervisor");
+    fs.mkdirSync(markerDir, { recursive: true });
+    const marker = path.join(markerDir, ".shutdown-intent");
+
+    fs.writeFileSync(marker, "4242", "utf8");
+    assert.equal(consumeShutdownIntent(4242), true, "matching pid is honored");
+    assert.equal(fs.existsSync(marker), false, "marker is single-shot");
+
+    fs.writeFileSync(marker, "4242", "utf8");
+    assert.equal(consumeShutdownIntent(7777), false, "a stale/foreign pid is not honored");
+    assert.equal(consumeShutdownIntent(4242), false, "marker is gone after the read");
+
+    fs.writeFileSync(marker, "4242", "utf8");
+    assert.equal(consumeShutdownIntent(null), false, "unknown child pid never honors a marker");
+    fs.writeFileSync(marker, "4242", "utf8");
+    assert.equal(consumeShutdownIntent(0), false, "pid 0 never honors a marker");
+  } finally {
+    delete process.env.DATA_DIR;
+  }
+});
+
+test("ServerSupervisor.handleExit exits instead of restarting when the child wrote a shutdown intent", async () => {
+  const os = await import("node:os");
+  const tmpDir = path.join(os.default.tmpdir(), `omniroute-intent-exit-${Date.now()}`);
+  process.env.DATA_DIR = tmpDir;
+  process.env.PORT = "0";
+
+  const exits: number[] = [];
+  const origExit = process.exit.bind(process);
+  // @ts-ignore
+  process.exit = (code?: number) => exits.push(code ?? 0);
+
+  try {
+    const { ServerSupervisor } = await import("../../bin/cli/runtime/processSupervisor.mjs");
+    const markerDir = path.join(tmpDir, "supervisor");
+    fs.mkdirSync(markerDir, { recursive: true });
+    // The child (pid 4242) asked to shut down, then died from its own SIGTERM (143).
+    fs.writeFileSync(path.join(markerDir, ".shutdown-intent"), "4242", "utf8");
+
+    const supervisor = new ServerSupervisor({
+      serverPath: "/fake/server.js",
+      env: {},
+      maxRestarts: 2,
+      onCrashCallback: undefined,
+    });
+    supervisor.lastChildPid = 4242;
+    supervisor.handleExit(143);
+
+    assert.deepEqual(exits, [143], "supervisor exits with the child's code");
+    assert.equal(supervisor.restartCount, 0, "no restart is scheduled");
+  } finally {
+    // @ts-ignore
+    process.exit = origExit;
+    delete process.env.DATA_DIR;
+  }
+});
+
+test("ServerSupervisor.handleExit still restarts a spontaneous 143 with no intent marker", async () => {
+  const os = await import("node:os");
+  const tmpDir = path.join(os.default.tmpdir(), `omniroute-intent-crash-${Date.now()}`);
+  process.env.DATA_DIR = tmpDir;
+  process.env.PORT = "0";
+
+  const exits: number[] = [];
+  const origExit = process.exit.bind(process);
+  // @ts-ignore
+  process.exit = (code?: number) => exits.push(code ?? 0);
+
+  try {
+    const { ServerSupervisor } = await import("../../bin/cli/runtime/processSupervisor.mjs");
+    const supervisor = new ServerSupervisor({
+      serverPath: "/fake/server.js",
+      env: {},
+      maxRestarts: 2,
+      onCrashCallback: undefined,
+    });
+    supervisor.lastChildPid = 4242;
+    supervisor.start = () => null as never;
+    supervisor.handleExit(143);
+
+    assert.equal(exits.length, 0, "no intent marker: must NOT exit");
+    assert.equal(supervisor.restartCount, 1, "spontaneous exit still restarts");
+    await new Promise((r) => setTimeout(r, 1100));
+  } finally {
+    // @ts-ignore
+    process.exit = origExit;
+    delete process.env.DATA_DIR;
+  }
 });

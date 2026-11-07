@@ -100,8 +100,7 @@ export function resolveStreamFlag(
   // header as a streaming opt-in; otherwise default to non-stream so
   // spec-compliant upstreams that return JSON don't trigger STREAM_EARLY_EOF.
   if (sourceFormat === "claude" || sourceFormat === "openai-responses") {
-    if (acceptsEventStream) return true;
-    return false;
+    return acceptsEventStream;
   }
 
   // Nextcloud's OpenAI/LocalAI integration sends synchronous JSON requests and
@@ -128,6 +127,15 @@ export function resolveStreamFlag(
   // with no application/json) and clients with no/`*/*` Accept still stream.
   if (typeof acceptHeader === "string" && /application\/json/i.test(acceptHeader)) {
     return false;
+  }
+
+  // OpenAI Chat Completions: omitted `stream` defaults to false per the OpenAI
+  // contract. A client that says nothing is asking for a JSON object, not an
+  // SSE event stream. Honor a pure text/event-stream Accept as an explicit SSE
+  // opt-in; otherwise default to non-stream. The application/json check above
+  // already handles the Vercel/OpenAI SDK mixed-signature case.
+  if (sourceFormat === "openai") {
+    return acceptsEventStream;
   }
 
   // No explicit stream param — preserve OmniRoute's streaming default unless

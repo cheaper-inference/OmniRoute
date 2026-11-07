@@ -98,6 +98,102 @@ describe("compressToolResults", () => {
     const result = compressToolResults(body);
     assert.equal(result.applied, false);
   });
+
+  it("honors an explicit maxToolLength instead of the 2000-char default", () => {
+    const body = { messages: [{ role: "tool", content: "x".repeat(800) }] };
+    const result = compressToolResults(body, { maxToolLength: 500 });
+    assert.equal(result.applied, true);
+    const content = result.body.messages![0].content as string;
+    assert.ok(content.endsWith("\n...[truncated]"));
+    assert.ok(content.length < 800);
+    assert.ok(content.length <= 500 + "\n...[truncated]".length);
+  });
+
+  it("keeps a 1500-char tool result when maxToolLength is 4000", () => {
+    const body = { messages: [{ role: "tool", content: "x".repeat(1500) }] };
+    const result = compressToolResults(body, { maxToolLength: 4000 });
+    assert.equal(result.applied, false);
+    assert.equal(result.body.messages![0].content, "x".repeat(1500));
+  });
+  // A head-only cut deletes the lines an agent is about to edit, so it rebuilds the anchor from
+  // memory and the edit is rejected as stale.
+  it("keeps the tail of a long line-addressed tool result so its anchors survive", () => {
+    const lines = Array.from(
+      { length: 95 },
+      (_, i) => `${i + 1}:ab|export function getQueue${i + 1}(wid: string): QueuedMutation[] {`
+    );
+    const body = { messages: [{ role: "tool", content: lines.join("\n") }] };
+    const result = compressToolResults(body);
+    assert.equal(result.applied, true);
+    const content = result.body.messages![0].content as string;
+    assert.ok(content.includes(`${lines[0]}`), "first line must survive the cut");
+    assert.ok(content.includes(`${lines[94]}`), "last line must survive the cut");
+    assert.match(content, /\.\.\. \[\d+ lines elided\] \.\.\./);
+    assert.ok(content.length < lines.join("\n").length);
+  });
+
+  // The tail must fit its share of the cap: rounding the tail start back to a newline made long
+  // lines (minified JS, JSONL, long log lines) overshoot maxToolLength by up to one whole line.
+  it("keeps a long-line tool result within the cap when it keeps the tail", () => {
+    const lines = Array.from({ length: 50 }, (_, i) =>
+      `${String(i + 1).padStart(2, "0")}:`.padEnd(200, "x")
+    );
+    const body = { messages: [{ role: "tool", content: lines.join("\n") }] };
+    const result = compressToolResults(body);
+    assert.equal(result.applied, true);
+    const content = result.body.messages![0].content as string;
+    assert.ok(content.length <= 2000 + 64, `output is ${content.length} chars, cap is 2000`);
+    assert.ok(content.startsWith("01:"), "the head of the result must survive the cut");
+    assert.ok(content.includes(`\n${lines[49]}\n`), "the last line survives whole");
+    assert.match(content, /\.\.\. \[\d+ lines elided\] \.\.\./);
+    assert.ok(content.endsWith("...[truncated]"), "the trailing truncation marker stays");
+  });
+
+  it("falls back to the head-only cut when no complete line fits the tail budget", () => {
+    for (const [count, width] of [
+      [30, 1000],
+      [11, 20000],
+    ]) {
+      const original = Array.from({ length: count }, (_, i) => `${i + 1}:`.padEnd(width, "y"));
+      const body = { messages: [{ role: "tool", content: original.join("\n") }] };
+      const result = compressToolResults(body);
+      assert.equal(result.applied, true);
+      const content = result.body.messages![0].content as string;
+      const label = `${count} lines x ${width}`;
+      assert.ok(content.length <= 2000 + 64, `${label}: output is ${content.length} chars`);
+      assert.ok(content.startsWith("1:"), `${label}: the head must survive the cut`);
+      assert.doesNotMatch(content, /lines elided/, `${label}: no partial tail line is kept`);
+    }
+  });
+
+  it("reads OMNIROUTE_LITE_MAX_TOOL_LENGTH when no option is passed", () => {
+    const previous = process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+    process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = "400";
+    try {
+      const body = { messages: [{ role: "tool", content: "x".repeat(800) }] };
+      const result = compressToolResults(body);
+      assert.equal(result.applied, true);
+      const content = result.body.messages![0].content as string;
+      assert.ok(content.endsWith("\n...[truncated]"));
+      assert.ok(content.length <= 400 + "\n...[truncated]".length);
+    } finally {
+      if (previous === undefined) delete process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+      else process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = previous;
+    }
+  });
+
+  it("an explicit maxToolLength wins over the env fallback", () => {
+    const previous = process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+    process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = "400";
+    try {
+      const body = { messages: [{ role: "tool", content: "x".repeat(800) }] };
+      const result = compressToolResults(body, { maxToolLength: 4000 });
+      assert.equal(result.applied, false);
+    } finally {
+      if (previous === undefined) delete process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+      else process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = previous;
+    }
+  });
 });
 
 describe("removeRedundantContent", () => {
@@ -194,6 +290,131 @@ describe("replaceImageUrls", () => {
   });
 });
 
+describe("stacked Lite precedence (global config vs explicit step)", () => {
+  const toolContent = `${"word ".repeat(500)}TAIL`;
+  const liteStep = { engine: "lite" };
+  const baseConfig = {
+    enabled: true,
+    defaultMode: "lite",
+    autoTriggerTokens: 0,
+    cacheMinutes: 5,
+    preserveSystemPrompt: true,
+    comboOverrides: {},
+    engines: {},
+    activeComboId: null,
+  };
+
+  it("global compressToolResults=false disables truncation when no step override", () => {
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "stacked",
+      {
+        config: {
+          ...baseConfig,
+          lite: { compressToolResults: false },
+          stackedPipeline: [liteStep],
+        },
+      }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+    assert.equal(messages[0].content, toolContent.trimEnd());
+    assert.ok(messages[0].content.length > 2000);
+    assert.doesNotMatch(messages[0].content, /\[truncated\]/);
+    assert.ok(!result.stats?.techniquesUsed.includes("tool-compress"));
+  });
+
+  it("explicit step compressToolResults=true overrides global false", () => {
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "stacked",
+      {
+        config: {
+          ...baseConfig,
+          lite: { compressToolResults: false },
+          stackedPipeline: [{ engine: "lite", config: { compressToolResults: true } }],
+        },
+      }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+    assert.match(messages[0].content, /\.\.\.\[truncated\]$/);
+    assert.ok(messages[0].content.length < toolContent.length);
+    assert.ok(result.stats?.techniquesUsed.includes("tool-compress"));
+  });
+
+  it("explicit step compressToolResults=false overrides global true/default", () => {
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "stacked",
+      {
+        config: {
+          ...baseConfig,
+          lite: { compressToolResults: true },
+          stackedPipeline: [{ engine: "lite", config: { compressToolResults: false } }],
+        },
+      }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+    assert.equal(messages[0].content, toolContent.trimEnd());
+    assert.doesNotMatch(messages[0].content, /\[truncated\]/);
+    assert.ok(!result.stats?.techniquesUsed.includes("tool-compress"));
+  });
+
+  it("non-boolean step compressToolResults falls through to global config", () => {
+    // stepConfig is Record<string, unknown> — a malformed (non-boolean) step value must
+    // not override; it falls through to global config.lite (false → no truncation).
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "stacked",
+      {
+        config: {
+          ...baseConfig,
+          lite: { compressToolResults: false },
+          stackedPipeline: [{ engine: "lite", config: { compressToolResults: "yes" } }],
+        },
+      }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+    assert.equal(messages[0].content, toolContent.trimEnd());
+    assert.doesNotMatch(messages[0].content, /\[truncated\]/);
+    assert.ok(!result.stats?.techniquesUsed.includes("tool-compress"));
+  });
+
+  it("stacked default (no lite config) keeps truncation enabled", () => {
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "stacked",
+      { config: { ...baseConfig, stackedPipeline: [liteStep] } }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+    assert.match(messages[0].content, /\.\.\.\[truncated\]$/);
+  });
+
+  it("an out-of-range step maxToolLength does not hide a valid global cap", () => {
+    const previous = process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+    process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = "400";
+    try {
+      const longTool = "x".repeat(3000);
+      const result = applyCompression(
+        { messages: [{ role: "tool", content: longTool }] },
+        "stacked",
+        {
+          config: {
+            ...baseConfig,
+            lite: { compressToolResults: true, maxToolLength: 8000 },
+            stackedPipeline: [{ engine: "lite", config: { maxToolLength: 10 } }],
+          },
+        }
+      );
+      const messages = result.body.messages as Array<{ content: string }>;
+      assert.equal(messages[0].content, longTool);
+      assert.ok(!result.stats?.techniquesUsed.includes("tool-compress"));
+    } finally {
+      if (previous === undefined) delete process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+      else process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = previous;
+    }
+  });
+});
+
 describe("applyLiteCompression", () => {
   it("applies all techniques that match", () => {
     const body = {
@@ -209,6 +430,43 @@ describe("applyLiteCompression", () => {
     assert.ok(result.stats);
     assert.ok(result.stats.techniquesUsed.length >= 2);
     assert.ok(result.stats.savingsPercent > 0);
+  });
+
+  it("keeps proactive tool-result truncation enabled when Lite detail config is missing", () => {
+    const toolContent = `${"word ".repeat(500)}TAIL`;
+    const result = applyCompression({ messages: [{ role: "tool", content: toolContent }] }, "lite");
+    const messages = result.body.messages as Array<{ content: string }>;
+
+    assert.match(messages[0].content, /\.\.\.\[truncated\]$/);
+    assert.ok(messages[0].content.length < toolContent.length);
+  });
+
+  it("can disable only proactive tool-result truncation while other Lite transforms still apply", () => {
+    const toolContent = `${"word ".repeat(500)}TAIL   `;
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "lite",
+      {
+        config: {
+          enabled: true,
+          defaultMode: "lite",
+          autoTriggerTokens: 0,
+          cacheMinutes: 5,
+          preserveSystemPrompt: true,
+          comboOverrides: {},
+          engines: {},
+          activeComboId: null,
+          lite: { compressToolResults: false },
+        },
+      }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+
+    assert.equal(messages[0].content, toolContent.trimEnd());
+    assert.ok(messages[0].content.length > 2000);
+    assert.doesNotMatch(messages[0].content, /\[truncated\]/);
+    assert.ok(result.stats?.techniquesUsed.includes("whitespace"));
+    assert.ok(!result.stats?.techniquesUsed.includes("tool-compress"));
   });
 
   it("preserves system prompt text when preserveSystemPrompt is enabled", () => {

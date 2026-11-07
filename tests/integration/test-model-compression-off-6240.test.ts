@@ -14,11 +14,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { createTempDataDir } from "../_setup/tempDataDir.ts";
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-testmodel-compression-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
+const { dir: TEST_DATA_DIR, cleanup } = createTempDataDir("omniroute-testmodel-compression-");
 process.env.REQUIRE_API_KEY = "false";
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "test-testmodel-compression-secret";
 
@@ -28,6 +26,9 @@ const readCacheDb = await import("../../src/lib/db/readCache.ts");
 const compressionDb = await import("../../src/lib/db/compression.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
 const { resetAllCircuitBreakers } = await import("../../src/shared/utils/circuitBreaker.ts");
+const { OUTPUT_STYLE_MARKER } =
+  await import("../../open-sse/services/compression/outputStyles/apply.ts");
+const { waitForCallLogSaves, closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 
 const originalFetch = globalThis.fetch;
 
@@ -36,8 +37,10 @@ async function resetStorage() {
   resetAllCircuitBreakers();
   readCacheDb.invalidateDbCache();
   await new Promise((resolve) => setTimeout(resolve, 20));
+  // The previous test's call log is saved in the background; it must land before the reset.
+  assert.ok(await waitForCallLogSaves(30_000), "the previous test's call-log saves should finish");
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -47,12 +50,11 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   globalThis.fetch = originalFetch;
-  core.closeDbInstance();
-  try {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
-  } catch {
-    // best-effort cleanup
-  }
+  // Drain the last test's in-flight save before closing, so it lands instead of erroring.
+  assert.ok(await waitForCallLogSaves(30_000), "the last test's call-log save should finish");
+  // Stops the call-log writer too, which otherwise keeps the process alive for its idle timeout.
+  await closeCallLogSaves(2_000);
+  await cleanup();
 });
 
 async function runChatCore(opts: {
@@ -60,6 +62,8 @@ async function runChatCore(opts: {
   model: string;
   connectionId: string;
   headers: Headers;
+  apiKeyInfo?: { id?: string; name?: string; compressionEnabled?: boolean };
+  messageContent?: string;
 }) {
   let capturedBody: { messages?: Array<{ role?: string; content?: string }> } | null = null;
   globalThis.fetch = async (_url: string | URL | Request, init?: RequestInit) => {
@@ -80,13 +84,14 @@ async function runChatCore(opts: {
       body: {
         model: opts.model,
         stream: false,
-        messages: [{ role: "user", content: "ping" }],
+        messages: [{ role: "user", content: opts.messageContent ?? "ping" }],
       },
       modelInfo: { provider: opts.provider, model: opts.model },
       credentials: { apiKey: "test-key" },
       log: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} },
       clientRawRequest: { endpoint: "/v1/chat/completions", headers: opts.headers },
       connectionId: opts.connectionId,
+      apiKeyInfo: opts.apiKeyInfo,
       onCredentialsRefreshed: () => {},
       onRequestSuccess: () => {},
       onStreamFailure: () => {},
@@ -95,7 +100,7 @@ async function runChatCore(opts: {
       comboName: null,
     });
     assert.ok(result.success, "Request should succeed");
-    return capturedBody;
+    return { capturedBody, response: result.response as Response };
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -130,9 +135,11 @@ test("chatCore: x-omniroute-compression: off suppresses Output Styles injection 
     connectionId: connection.id,
     headers: new Headers(),
   });
-  const plainFirstMessage = withoutOptOut?.messages?.[0];
-  assert.equal(plainFirstMessage?.role, "system");
-  assert.match(plainFirstMessage?.content ?? "", /OmniRoute Output Styles/);
+  // #13383: preserve the initial user turn; inject the style after it.
+  assert.equal(withoutOptOut.capturedBody?.messages?.[0]?.role, "user");
+  const styleMessage = withoutOptOut.capturedBody?.messages?.at(-1);
+  assert.equal(styleMessage?.role, "system");
+  assert.match(styleMessage?.content ?? "", /OmniRoute Output Styles/);
 
   // The "Test model" connection test sends x-omniroute-compression: off — must be clean.
   const testModelBody = await runChatCore({
@@ -141,17 +148,108 @@ test("chatCore: x-omniroute-compression: off suppresses Output Styles injection 
     connectionId: connection.id,
     headers: new Headers({ "x-omniroute-compression": "off" }),
   });
-  const testModelFirstMessage = testModelBody?.messages?.[0];
-  assert.ok(
-    !testModelFirstMessage || testModelFirstMessage.role !== "system",
-    "Test-model request (compression:off) must not receive an injected Output Styles system message"
-  );
-  const anyMessageHasMarker = (testModelBody?.messages ?? []).some((m) =>
-    (m?.content ?? "").includes("OmniRoute Output Styles")
+  assert.deepEqual(
+    testModelBody.capturedBody?.messages,
+    [{ role: "user", content: "ping" }],
+    "Test-model request (compression:off) must reach upstream with its messages untouched"
   );
   assert.equal(
-    anyMessageHasMarker,
+    JSON.stringify(testModelBody.capturedBody).includes(OUTPUT_STYLE_MARKER),
     false,
-    "No message in the compression:off request should carry the Output Styles marker"
+    "No part of the compression:off request should carry the Output Styles marker"
+  );
+});
+
+test("chatCore: a per-key opt-out wins over request headers and Output Styles (#2101)", async () => {
+  const provider = "openai";
+  const model = "gpt-4";
+  const originalContent = "Keep these trailing spaces   \n\n\nand this newline run.";
+
+  await compressionDb.updateCompressionSettings({
+    enabled: true,
+    defaultMode: "lite",
+    autoTriggerTokens: 0,
+    // Force the adaptive planner to escalate any non-empty prompt. The per-key opt-out must
+    // remain a hard kill even when a context budget would otherwise select a stacked plan.
+    contextBudget: {
+      mode: "floor",
+      policy: "absolute",
+      outputReserve: 0,
+      safetyMargin: 0,
+      pct: 1,
+      absoluteBudget: 1,
+    },
+    cavemanOutputMode: {
+      enabled: true,
+      intensity: "full",
+      autoClarity: true,
+    },
+  });
+
+  const connection = await providersDb.createProviderConnection({
+    provider,
+    apiKey: "test-key",
+    isActive: true,
+  });
+
+  const enabled = await runChatCore({
+    provider,
+    model,
+    connectionId: connection.id,
+    headers: new Headers({ "x-omniroute-compression": "default" }),
+    apiKeyInfo: { compressionEnabled: true },
+    messageContent: originalContent,
+  });
+  assert.equal(enabled.capturedBody?.messages?.[0]?.role, "user");
+  assert.equal(enabled.capturedBody?.messages?.at(-1)?.role, "system");
+  assert.match(enabled.capturedBody?.messages?.at(-1)?.content ?? "", /OmniRoute Output Styles/);
+
+  const disabled = await runChatCore({
+    provider,
+    model,
+    connectionId: connection.id,
+    headers: new Headers({ "x-omniroute-compression": "default" }),
+    apiKeyInfo: { compressionEnabled: false },
+    messageContent: originalContent,
+  });
+
+  assert.deepEqual(disabled.capturedBody?.messages, [{ role: "user", content: originalContent }]);
+  assert.equal(disabled.response.headers.get("x-omniroute-compression"), "off; source=off");
+});
+
+test("chatCore: caveman output mode skipped when compression is globally disabled", async () => {
+  await compressionDb.updateCompressionSettings({
+    enabled: false,
+    defaultMode: "off",
+    autoTriggerTokens: 0,
+    cavemanOutputMode: {
+      enabled: true,
+      intensity: "full",
+      autoClarity: true,
+    },
+  });
+
+  const connection = await providersDb.createProviderConnection({
+    provider: "openai",
+    apiKey: "test-key",
+    isActive: true,
+  });
+
+  const { capturedBody } = await runChatCore({
+    provider: "openai",
+    model: "gpt-4",
+    connectionId: connection.id,
+    headers: new Headers(),
+    messageContent: "Summarize this implementation.",
+  });
+  assert.deepEqual(
+    capturedBody?.messages,
+    [{ role: "user", content: "Summarize this implementation." }],
+    "The messages should reach upstream untouched when compression is disabled"
+  );
+  assert.equal(
+    JSON.stringify(capturedBody).includes(OUTPUT_STYLE_MARKER),
+    false,
+    "No output-style instruction should reach upstream when compression is disabled"
   );
 });

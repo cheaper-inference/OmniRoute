@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import vm from "node:vm";
 
 // Port of upstream decolua/9router PR #1360: Cloudflare Workers as proxy relay.
 //
@@ -66,10 +67,7 @@ test("buildCloudflareWorkerScript rejects requests without a valid x-relay-auth 
   // a 401 short-circuit when x-relay-auth does not match the embedded token.
   // We don't run the worker here — we check the source contains the guard.
   const src = buildCloudflareWorkerScript("the-secret");
-  assert.ok(
-    /x-relay-auth/.test(src),
-    "worker source must reference the x-relay-auth header"
-  );
+  assert.ok(/x-relay-auth/.test(src), "worker source must reference the x-relay-auth header");
   assert.ok(
     /401|Unauthorized/.test(src),
     "worker source must short-circuit unauthorised requests with 401"
@@ -77,14 +75,36 @@ test("buildCloudflareWorkerScript rejects requests without a valid x-relay-auth 
 });
 
 test("buildCloudflareWorkerScript blocks loopback / RFC1918 / link-local hosts (SSRF guard)", () => {
-  // Mirrors the Vercel relay's inlined SSRF guard. A leaked workers.dev URL
-  // must not be usable to scan internal networks.
+  // A leaked workers.dev URL must not be usable to scan internal networks.
+  //
+  // Asserted on the guard's BEHAVIOUR rather than on literal substrings of the
+  // emitted source. The guard is now embedded from
+  // `src/lib/proxyRelay/privateHostname.ts` and travels through the
+  // transpiler, so comments are stripped and `169.254` is expressed as an
+  // octet comparison — a substring grep stopped tracking what is actually
+  // blocked, while the classes below are the property that matters.
   const src = buildCloudflareWorkerScript("tok");
-  // The guard recognises private CIDRs / loopback by literal substrings in
-  // the inline function. These specific tokens are load-bearing.
-  assert.ok(/127\.0\.0\.1|localhost/.test(src), "blocks loopback hosts");
-  assert.ok(/192\.168|10\.|172/.test(src), "blocks RFC1918 hosts");
-  assert.ok(/169\.254|link-local|fe80/.test(src), "blocks link-local hosts");
+  const binding = src.match(/const isPrivateHostname = [\s\S]*?;\s/);
+  assert.ok(binding, "worker must embed the private-host guard");
+
+  // node:vm, not new Function — Hard Rule #3 bans the Function constructor.
+  const context: Record<string, unknown> = {};
+  vm.createContext(context);
+  vm.runInContext(`${binding[0]} globalThis.__guard = isPrivateHostname;`, context);
+  const isPrivate = (context as { __guard?: (h: string) => boolean }).__guard;
+  assert.equal(typeof isPrivate, "function", "embedded guard must be reachable");
+  if (!isPrivate) return;
+
+  for (const host of ["127.0.0.1", "localhost", "0.0.0.0"]) {
+    assert.equal(isPrivate(host), true, `blocks loopback host ${host}`);
+  }
+  for (const host of ["10.0.0.1", "192.168.1.1", "172.16.0.1"]) {
+    assert.equal(isPrivate(host), true, `blocks RFC1918 host ${host}`);
+  }
+  for (const host of ["169.254.169.254", "fe80::1"]) {
+    assert.equal(isPrivate(host), true, `blocks link-local host ${host}`);
+  }
+  assert.equal(isPrivate("api.example.com"), false, "a public host stays reachable");
 });
 
 test("buildCloudflareWorkerScript uses Service Worker syntax, not an ES module (#6416/#6496)", () => {
@@ -116,11 +136,18 @@ const CLOUDFLARE_CTX = {
 };
 
 test("proxyFetch routes a cloudflare-type context through the relay endpoint with relay headers", async () => {
+  // #9100: the relay branch now egresses through the pooled undici Agent
+  // (deps.undiciFetch) instead of `originalFetch`, so the test injects the
+  // relay sink via deps to keep the dispatch hermetic.
   const response = await runWithProxyContext(CLOUDFLARE_CTX, () =>
-    proxyFetch("https://api.anthropic.com/v1/messages?x=1", {
-      method: "POST",
-      headers: { "x-existing": "keep-me" },
-    })
+    proxyFetch(
+      "https://api.anthropic.com/v1/messages?x=1",
+      {
+        method: "POST",
+        headers: { "x-existing": "keep-me" },
+      },
+      { undiciFetch: relaySink as never }
+    )
   );
 
   assert.deepEqual(await response.json(), { via: "cloudflare-relay" });
@@ -180,10 +207,7 @@ test("proxyConfigToUrl returns the cloudflare worker URL (no HTTP-proxy dispatch
 // --------------------------------------------------------------------------
 
 test("buildVercelRelayHeaders is the shared relay-header builder used for cloudflare too", () => {
-  const headers = buildVercelRelayHeaders(
-    "https://api.openai.com/v1/chat/completions",
-    "cf-tok"
-  );
+  const headers = buildVercelRelayHeaders("https://api.openai.com/v1/chat/completions", "cf-tok");
   assert.deepEqual(headers, {
     "x-relay-target": "https://api.openai.com",
     "x-relay-path": "/v1/chat/completions",

@@ -33,13 +33,15 @@ test("resolveModelAlias: resolves deprecated Gemini model", () => {
 });
 
 test("resolveModelAlias: resolves deprecated Claude model", () => {
-  assert.equal(resolveModelAlias("claude-3-opus-20240229"), "claude-opus-4-20250514");
-  assert.equal(resolveModelAlias("claude-3-5-sonnet-latest"), "claude-sonnet-4-20250514");
+  // #11503: the previous targets (claude-opus-4-20250514 / claude-sonnet-4-20250514)
+  // were themselves retired on 2026-06-15. These are the replacements Anthropic publishes.
+  assert.equal(resolveModelAlias("claude-3-opus-20240229"), "claude-opus-4-8");
+  assert.equal(resolveModelAlias("claude-3-5-sonnet-latest"), "claude-sonnet-4-6");
 });
 
-test("resolveModelAlias: resolves deprecated OpenAI model", () => {
-  assert.equal(resolveModelAlias("gpt-4-turbo-preview"), "gpt-4-turbo");
-  assert.equal(resolveModelAlias("gpt-3.5-turbo-0125"), "gpt-3.5-turbo");
+test("resolveModelAlias: does not silently reroute retired OpenAI models", () => {
+  assert.equal(resolveModelAlias("gpt-4-turbo-preview"), "gpt-4-turbo-preview");
+  assert.equal(resolveModelAlias("gpt-3.5-turbo-0125"), "gpt-3.5-turbo-0125");
 });
 
 test("resolveModelAlias: handles null/empty", () => {

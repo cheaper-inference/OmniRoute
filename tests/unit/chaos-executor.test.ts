@@ -28,7 +28,7 @@ const chaosExecutor = await import("../../src/lib/chaos/chaosExecutor.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -42,7 +42,7 @@ test.afterEach(() => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   if (ORIGINAL_DATA_DIR === undefined) {
     delete process.env.DATA_DIR;
   } else {
@@ -114,7 +114,7 @@ test("executeChaosRun forwards the caller's apiKey as a Bearer Authorization hea
   assert.equal(capturedAuth, "Bearer sk-caller-key");
 });
 
-test("executeChaosRun omits Authorization header when no apiKey is provided (dashboard/local mode)", async () => {
+test("executeChaosRun authenticates internally when no apiKey is provided (dashboard mode)", async () => {
   await providersDb.createProviderConnection({
     provider: "openai",
     authType: "apikey",
@@ -131,7 +131,7 @@ test("executeChaosRun omits Authorization header when no apiKey is provided (das
 
   await chaosExecutor.executeChaosRun({ task: "task" });
 
-  assert.equal(capturedAuth, null);
+  assert.equal(capturedAuth?.startsWith("Bearer "), true);
 });
 
 test("executeChaosRun surfaces upstream errors per-model instead of throwing", async () => {

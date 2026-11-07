@@ -28,7 +28,7 @@ async function readTransformed(chunks: string[], options: Record<string, unknown
 test.after(() => {
   core.resetDbInstance();
   if (fs.existsSync(TEST_DATA_DIR)) {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -97,4 +97,41 @@ test("empty choices WITH valid usage are forwarded (preserve #3422)", async () =
 
   assert.doesNotMatch(text, /Upstream returned an empty response/);
   assert.match(text, /"total_tokens":8/);
+});
+
+// Some OpenAI-compatible providers use a single empty `delta` object instead
+// of the standard `choices: []` for their final usage chunk. Keep its usage
+// while leaving the preceding ordinary content delta untouched.
+test("single empty delta final chunk WITH usage is forwarded without changing content (#9938)", async () => {
+  const text = await readTransformed(
+    [
+      `data: ${JSON.stringify({
+        id: "chatcmpl_z",
+        object: "chat.completion.chunk",
+        created: 1,
+        model: "gpt-4.1-mini",
+        choices: [{ index: 0, delta: { role: "assistant", content: "hello" } }],
+      })}\n\n`,
+      `data: ${JSON.stringify({
+        id: "chatcmpl_z",
+        object: "chat.completion.chunk",
+        created: 1,
+        model: "gpt-4.1-mini",
+        choices: [{ index: 0, delta: {} }],
+        usage: { prompt_tokens: 5, completion_tokens: 3, total_tokens: 8 },
+      })}\n\n`,
+      `data: [DONE]\n\n`,
+    ],
+    {
+      mode: "passthrough",
+      sourceFormat: FORMATS.OPENAI,
+      provider: "openai",
+      model: "gpt-4.1-mini",
+      body: { messages: [{ role: "user", content: "hi" }] },
+    }
+  );
+
+  assert.match(text, /"content":"hello"/);
+  assert.match(text, /"total_tokens":8/);
+  assert.doesNotMatch(text, /Upstream returned an empty response/);
 });

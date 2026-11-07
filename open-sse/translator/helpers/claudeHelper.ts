@@ -3,6 +3,86 @@ import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingS
 import { lookupReasoning, recordReplay } from "../../services/reasoningCache.ts";
 import { getModelTargetFormat } from "../../config/providerModels.ts";
 import { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
+import { sanitizeToolId } from "./schemaCoercion.ts";
+import { isRestoredClaudeThinkingBlock } from "../../services/claudeThinkingStore.ts";
+import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
+
+/**
+ * The DEFAULT blob is a real encrypted thought from an unrelated
+ * session; Claude decrypts it as its own reasoning. Drop every thinking-ish block Anthropic
+ * never issued (no signature/data, or the blob itself) instead of replaying the blob.
+ * Docs (build-with-claude/thinking, "Thinking with tool use"): adaptive mode needs no
+ * thinking block on any assistant turn; manual mode needs one on the final assistant
+ * turn, so when that turn has none, thinking is disabled for this request.
+ */
+function isReplayableValue(value: unknown): boolean {
+  return (
+    typeof value === "string" && value.length > 0 && value !== DEFAULT_THINKING_CLAUDE_SIGNATURE
+  );
+}
+
+function isThinkingLike(block: ClaudeContentBlock | null | undefined): boolean {
+  return block?.type === "thinking" || block?.type === "redacted_thinking";
+}
+
+/**
+ * A thinking-ish block Anthropic cannot have issued: no signature/data, or the blob itself.
+ * On historical turns a `thinking` block with empty text and a signature ("signed-empty",
+ * the #15534 shape relayed by non-Anthropic legs) is foreign as well, unless OmniRoute
+ * restored it from claudeThinkingStore.
+ */
+function isUnsignedAnthropicThinking(block: ClaudeContentBlock, historical = false): boolean {
+  if (!block || typeof block !== "object") return false;
+  if (block.type === "redacted_thinking") return !isReplayableValue(block.data);
+  if (block.type !== "thinking") return false;
+  if (!isReplayableValue(block.signature)) return true;
+  const signedEmpty = historical && !block.thinking && !isRestoredClaudeThinkingBlock(block);
+  return signedEmpty;
+}
+
+function lastAssistantIndex(messages: ClaudeMessage[]): number {
+  for (let k = messages.length - 1; k >= 0; k--) {
+    if (messages[k]?.role === "assistant") return k;
+  }
+  return -1;
+}
+
+function dropClearThinkingEdits(body: ClaudeRequestBody): void {
+  const cm = body.context_management as { edits?: Array<{ type?: unknown }> } | undefined;
+  if (!cm || !Array.isArray(cm.edits)) return;
+  const edits = cm.edits.filter((e) => !String(e?.type || "").startsWith("clear_thinking"));
+  if (edits.length) body.context_management = { ...cm, edits };
+  else delete body.context_management;
+}
+
+export function disableManualThinkingWithoutFinalBlock(body: ClaudeRequestBody): void {
+  const messages = body.messages;
+  if (!Array.isArray(messages) || body.thinking?.type !== "enabled") return;
+  if (messages[messages.length - 1]?.role !== "user") return;
+  const content = messages[lastAssistantIndex(messages)]?.content;
+  const blocks = Array.isArray(content) ? content : [];
+  const hasToolUse = blocks.some((b) => b?.type === "tool_use");
+  if (!hasToolUse || blocks.some(isThinkingLike)) return;
+  delete body.thinking;
+  dropClearThinkingEdits(body);
+}
+
+function dropUnsignedAnthropicThinking(body: ClaudeRequestBody): void {
+  const messages = body.messages;
+  if (!Array.isArray(messages)) return;
+  const latest = lastAssistantIndex(messages);
+  for (let k = messages.length - 1; k >= 0; k--) {
+    const msg = messages[k];
+    if (!msg || msg.role !== "assistant" || !Array.isArray(msg.content)) continue;
+    const historical = k !== latest;
+    const unsigned = (b: ClaudeContentBlock) => isUnsignedAnthropicThinking(b, historical);
+    if (!msg.content.some(unsigned)) continue;
+    const kept = msg.content.filter((b) => !unsigned(b));
+    if (kept.length) msg.content = kept;
+    else messages.splice(k, 1);
+  }
+  disableManualThinkingWithoutFinalBlock(body);
+}
 
 export { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 
@@ -45,7 +125,7 @@ type ClaudeTool = {
   [key: string]: unknown;
 };
 
-type ClaudeRequestBody = {
+export type ClaudeRequestBody = {
   system?: Array<Record<string, unknown> & { cache_control?: unknown }>;
   messages?: ClaudeMessage[];
   tools?: ClaudeTool[];
@@ -77,20 +157,28 @@ export function applyKimiCodingThinking(
   }
 }
 
+// Only text/thinking/redacted_thinking blocks can be blank; every other typed
+// block is real content. #7777: media-only turns (image/document) must count.
+// container_upload and newer block types must count too — an allowlist here
+// silently deleted those turns (possibly leaving `messages: []`).
+function isNonEmptyClaudeBlock(block: ClaudeContentBlock): boolean {
+  switch (block?.type) {
+    case "text":
+      return !!block.text?.trim();
+    case "thinking":
+      return !!block.thinking?.trim();
+    case "redacted_thinking":
+      return typeof block.data === "string" && !!block.data.trim();
+    default:
+      return typeof block?.type === "string" && block.type.length > 0;
+  }
+}
+
 // Check if message has valid non-empty content
 export function hasValidContent(msg: ClaudeMessage): boolean {
   if (typeof msg.content === "string" && msg.content.trim()) return true;
   if (Array.isArray(msg.content)) {
-    return msg.content.some(
-      (block) =>
-        (block.type === "text" && block.text?.trim()) ||
-        block.type === "tool_use" ||
-        block.type === "tool_result" ||
-        // #7777: media-only user turns are real content — dropping them
-        // silently deletes vision input on the CC bridge / Claude paths.
-        block.type === "image" ||
-        block.type === "document"
-    );
+    return msg.content.some(isNonEmptyClaudeBlock);
   }
   return false;
 }
@@ -153,8 +241,18 @@ export function splitMisplacedToolResults(messages: ClaudeMessage[]): ClaudeMess
 // Fix tool_use/tool_result ordering for Claude API
 // 1. Assistant message with tool_use: remove text AFTER tool_use (Claude doesn't allow)
 // 2. Merge consecutive same-role messages
+// 3. Reconcile tool_result blocks against the immediately previous tool_use message
 export function fixToolUseOrdering(messages: ClaudeMessage[]): ClaudeMessage[] {
-  if (messages.length <= 1) return messages;
+  if (messages.length === 0) return messages;
+  if (
+    messages.length === 1 &&
+    !(
+      Array.isArray(messages[0]?.content) &&
+      messages[0].content.some((block) => block.type === "tool_result")
+    )
+  ) {
+    return messages;
+  }
 
   // Pass 1: Fix assistant messages with tool_use - remove text after tool_use
   for (const msg of messages) {
@@ -218,6 +316,53 @@ export function fixToolUseOrdering(messages: ClaudeMessage[]): ClaudeMessage[] {
     }
   }
 
+  // Claude accepts tool_result only for a tool_use in the immediately previous
+  // assistant message. Compacted cross-model history can retain an output after
+  // dropping its call; keep that output as user text instead of sending an
+  // invalid structured reference or discarding useful context.
+  for (let i = 0; i < merged.length; i++) {
+    const msg = merged[i];
+    if (msg.role !== "user" || !Array.isArray(msg.content)) continue;
+
+    const previous = merged[i - 1];
+    const validIds = new Set<string>(
+      previous?.role === "assistant" && Array.isArray(previous.content)
+        ? previous.content.flatMap((block) =>
+            block.type === "tool_use" && typeof block.id === "string" && block.id ? [block.id] : []
+          )
+        : []
+    );
+    const pairedById = new Map<string, ClaudeContentBlock>();
+    const otherContent: ClaudeContentBlock[] = [];
+
+    for (const block of msg.content) {
+      if (block.type !== "tool_result") {
+        otherContent.push(block);
+        continue;
+      }
+
+      const toolUseId = typeof block.tool_use_id === "string" ? block.tool_use_id : "";
+      if (validIds.has(toolUseId) && !pairedById.has(toolUseId)) {
+        pairedById.set(toolUseId, block);
+        continue;
+      }
+
+      const serialized =
+        typeof block.content === "string"
+          ? block.content
+          : (JSON.stringify(block.content ?? "") ?? "");
+      otherContent.push({
+        type: "text",
+        text: `[Unpaired tool result ${toolUseId || "unknown"}]\n${serialized}`,
+      });
+    }
+
+    const pairedResults = [...validIds].map(
+      (id) => pairedById.get(id) ?? { type: "tool_result", tool_use_id: id, content: "" }
+    );
+    msg.content = [...pairedResults, ...otherContent];
+  }
+
   return merged;
 }
 
@@ -230,6 +375,81 @@ function ensureMessageContentArray(msg: ClaudeMessage): ClaudeContentBlock[] {
   return [];
 }
 
+const MAX_CACHE_CONTROL_BLOCKS = 4;
+
+/**
+ * Anthropic rejects `cache_control` nested INSIDE `tool_result.content[]` blocks
+ * ("cache_control may not be specified within 'tool_result.content'. Instead,
+ * place it directly on 'tool_result'"). The nesting only ever appears when a
+ * client (or a prior non-Anthropic leg of a combo) sent markers inside the tool
+ * result payload — never valid for any Anthropic model — so hoist the first
+ * inner marker onto the `tool_result` block itself and strip the rest.
+ */
+export function hoistToolResultCacheControl(body: ClaudeRequestBody): number {
+  let hoisted = 0;
+  if (!Array.isArray(body?.messages)) return hoisted;
+  for (const msg of body.messages) {
+    if (!msg || !Array.isArray(msg.content)) continue;
+    for (const block of msg.content) {
+      if (!block || block.type !== "tool_result" || !Array.isArray(block.content)) continue;
+      let hoistedValue: { type: string; ttl?: string } | undefined;
+      for (const inner of block.content) {
+        if (inner && typeof inner === "object" && inner.cache_control !== undefined) {
+          hoistedValue ??= normalizeCacheControl(inner.cache_control);
+          delete inner.cache_control;
+        }
+      }
+      if (hoistedValue !== undefined && block.cache_control === undefined) {
+        block.cache_control = hoistedValue;
+        hoisted++;
+      }
+    }
+  }
+  return hoisted;
+}
+
+function normalizeCacheControl(value: unknown): { type: string; ttl?: string } {
+  if (value && typeof value === "object") {
+    const v = value as { type?: unknown; ttl?: unknown };
+    return {
+      type: typeof v.type === "string" && v.type ? v.type : "ephemeral",
+      ...(typeof v.ttl === "string" && v.ttl ? { ttl: v.ttl } : {}),
+    };
+  }
+  return { type: "ephemeral" };
+}
+
+/**
+ * Anthropic allows at most 4 `cache_control` blocks per request ("A maximum of
+ * 4 blocks with cache_control may be provided"). Count markers across system
+ * blocks, tools, and message content in request order and remove the EARLIEST
+ * ones beyond the limit — later breakpoints sit deeper in the prefix and cache
+ * more tokens, so the last 4 are the most valuable. Returns the number culled.
+ */
+export function enforceCacheControlBlockLimit(
+  body: ClaudeRequestBody,
+  limit = MAX_CACHE_CONTROL_BLOCKS
+): number {
+  const holders: Array<{ obj: Record<string, unknown> }> = [];
+  const push = (block: unknown) => {
+    if (block && typeof block === "object" && "cache_control" in block) {
+      holders.push({ obj: block as Record<string, unknown> });
+    }
+  };
+  if (Array.isArray(body?.system)) body.system.forEach(push);
+  if (Array.isArray(body?.tools)) body.tools.forEach(push);
+  if (Array.isArray(body?.messages)) {
+    for (const msg of body.messages) {
+      if (Array.isArray(msg?.content)) msg.content.forEach(push);
+    }
+  }
+  const marked = holders.filter((h) => h.obj.cache_control !== undefined);
+  if (marked.length <= limit) return 0;
+  const toRemove = marked.length - limit;
+  for (let i = 0; i < toRemove; i++) delete marked[i].obj.cache_control;
+  return toRemove;
+}
+
 function markMessageCacheControl(msg: ClaudeMessage, ttl?: string): boolean {
   const content = ensureMessageContentArray(msg);
   if (content.length === 0) return false;
@@ -237,6 +457,38 @@ function markMessageCacheControl(msg: ClaudeMessage, ttl?: string): boolean {
   content[lastIndex].cache_control =
     ttl !== undefined ? { type: "ephemeral", ttl } : { type: "ephemeral" };
   return true;
+}
+
+/**
+ * Build the cache marker OmniRoute adds when the client did not provide one.
+ * Vertex defaults to five minutes when ttl is omitted; unlike 1h, that mode is
+ * supported by every cache-capable Claude model on Vertex and has cheaper writes.
+ */
+export function createDefaultClaudeCacheControl(provider?: string | null): {
+  type: string;
+  ttl?: string;
+} {
+  return provider === "vertex" || provider === "vertex-partner"
+    ? { type: "ephemeral" }
+    : { type: "ephemeral", ttl: "1h" };
+}
+
+export const CLAUDE_CACHE_TAIL_TTL_1H_FLAG = "CLAUDE_CACHE_TAIL_TTL_1H";
+
+/**
+ * Cache marker for the conversation tail (second-to-last user turn and last
+ * assistant turn). Defaults to the 5m TTL (no ttl field), so cost and wire shape
+ * stay as before. With the opt-in CLAUDE_CACHE_TAIL_TTL_1H flag the tail takes the
+ * same TTL as system/tools: 1h, or 5m on Vertex. A 1h write costs 2x input vs
+ * 1.25x for 5m, but survives pauses longer than five minutes.
+ */
+export function createClaudeTailCacheControl(provider?: string | null): {
+  type: string;
+  ttl?: string;
+} {
+  return isRegisteredFeatureFlagEnabled(CLAUDE_CACHE_TAIL_TTL_1H_FLAG)
+    ? createDefaultClaudeCacheControl(provider)
+    : { type: "ephemeral" };
 }
 
 /** True when the body carries at least one cache_control marker anywhere
@@ -299,10 +551,16 @@ export function prepareClaudeRequest(
     preserveCacheControl = false;
   }
 
-  // 1. System: remove all cache_control, add only to last block with ttl 1h
+  // 1. System: remove all cache_control, add only to the last block with the provider TTL
   // In passthrough mode, preserve existing cache_control markers
+  const isVertexClaudeProvider = provider === "vertex" || provider === "vertex-partner";
   const supportsPromptCaching =
-    provider === "claude" || provider?.startsWith?.("anthropic-compatible-");
+    provider === "claude" ||
+    provider === "anthropic" ||
+    isVertexClaudeProvider ||
+    provider?.startsWith?.("anthropic-compatible-");
+  // Vertex's documented default is a five-minute ephemeral cache. Omitting ttl is
+  // both cheaper and compatible with Claude models that reject the optional 1h TTL.
   const isKimiCoding = provider === "kimi-coding" || provider === "kimi-coding-apikey";
 
   // Non-Anthropic Claude-shape providers (kimi-coding, glmt, zai, …) cannot
@@ -327,7 +585,7 @@ export function prepareClaudeRequest(
     body.system = systemBlocks.map((block, i) => {
       const { cache_control, ...rest } = block;
       if (i === systemBlocks.length - 1 && supportsPromptCaching) {
-        return { ...rest, cache_control: { type: "ephemeral", ttl: "1h" } };
+        return { ...rest, cache_control: createDefaultClaudeCacheControl(provider) };
       }
       return rest;
     });
@@ -368,6 +626,22 @@ export function prepareClaudeRequest(
         msg.content = msg.content.filter(
           (block) => block.type !== "tool_result" || block.tool_use_id
         );
+        // Anthropic-shape upstreams enforce `^[a-zA-Z0-9_-]+$` on tool ids. Client
+        // histories can carry ids with `.`/`:`/`#` (e.g. replayed from another
+        // provider), which 400s as TOOL_SCHEMA_INVALID. Rewrite both sides with the
+        // same function so tool_use/tool_result pairing survives — the later
+        // ordering passes match on these ids.
+        for (const block of msg.content) {
+          if (block.type === "tool_use" && typeof block.id === "string" && block.id) {
+            block.id = sanitizeToolId(block.id);
+          } else if (
+            block.type === "tool_result" &&
+            typeof block.tool_use_id === "string" &&
+            block.tool_use_id
+          ) {
+            block.tool_use_id = sanitizeToolId(block.tool_use_id);
+          }
+        }
       }
     }
 
@@ -422,6 +696,7 @@ export function prepareClaudeRequest(
     // - cache the second-to-last user turn for conversation reuse
     // - cache the last assistant turn so the next user turn can reuse it
     // Skip in passthrough mode to preserve client's cache_control markers
+    const tailCacheTtl = createClaudeTailCacheControl(provider).ttl;
     if (!preserveCacheControl && supportsPromptCaching) {
       const userMessageIndexes = filtered.reduce<number[]>((indexes, msg, index) => {
         if (msg?.role === "user") indexes.push(index);
@@ -430,7 +705,7 @@ export function prepareClaudeRequest(
       const secondToLastUserIndex =
         userMessageIndexes.length >= 2 ? userMessageIndexes[userMessageIndexes.length - 2] : -1;
       if (secondToLastUserIndex >= 0) {
-        markMessageCacheControl(filtered[secondToLastUserIndex]);
+        markMessageCacheControl(filtered[secondToLastUserIndex], tailCacheTtl);
       }
     }
 
@@ -438,14 +713,29 @@ export function prepareClaudeRequest(
 
     // Index of the LAST assistant message in the filtered array. Anthropic
     // enforces the latest assistant message's thinking blocks cannot be
-    // modified — preserve them verbatim. Older assistant messages can be
-    // rewritten to redacted_thinking { data } as before.
+    // modified — preserve them verbatim. Bound store-restored blocks in the
+    // trailing tool cycle are protected below too; completed history is unchanged.
     let latestAssistantIndex = -1;
     for (let k = filtered.length - 1; k >= 0; k--) {
       if (filtered[k]?.role === "assistant") {
         latestAssistantIndex = k;
         break;
       }
+    }
+
+    // A tool loop remains one active assistant cycle until an ordinary user
+    // turn. Signed blocks from every assistant/tool-result pair are immutable.
+    const activeAssistantIndexes = new Set<number>();
+    let cursor = filtered.length - 1;
+    if (filtered[cursor]?.role === "assistant") {
+      activeAssistantIndexes.add(cursor--);
+    }
+    while (cursor >= 0 && filtered[cursor]?.role === "user") {
+      const userContent = ensureMessageContentArray(filtered[cursor]);
+      if (!userContent.length || userContent.some((block) => block.type !== "tool_result")) break;
+      cursor -= 1;
+      if (cursor < 0 || filtered[cursor]?.role !== "assistant") break;
+      activeAssistantIndexes.add(cursor--);
     }
 
     let lastAssistantProcessed = false;
@@ -460,7 +750,7 @@ export function prepareClaudeRequest(
           !preserveCacheControl &&
           supportsPromptCaching &&
           !lastAssistantProcessed &&
-          markMessageCacheControl(msg)
+          markMessageCacheControl(msg, tailCacheTtl)
         ) {
           lastAssistantProcessed = true;
         }
@@ -483,16 +773,23 @@ export function prepareClaudeRequest(
         // message when sending to an Anthropic-native upstream. Anthropic returns
         // 400 "blocks in the latest assistant message cannot be modified" if any
         // field changes. Injecting a NEW thinking block (when none exists) is fine.
-        // Older assistant messages can still be rewritten.
+        // Older assistant messages can still be rewritten unless their thinking
+        // came from the bound store and belongs to the active tool cycle.
         // For non-Anthropic providers: only the text replacement is skipped
         // for the latest assistant (if it already has non-empty thinking text);
         // field cleanup (signature strip, type normalization) still runs.
         const isLatestAssistant = i === latestAssistantIndex;
-        const latestThinkingBlocks: ClaudeContentBlock[] = isLatestAssistant
-          ? content.filter(
-              (b: ClaudeContentBlock) => b.type === "thinking" || b.type === "redacted_thinking"
-            )
-          : [];
+        const hasRestoredActiveThinking =
+          activeAssistantIndexes.has(i) &&
+          content
+            .filter((block) => block.type === "thinking" || block.type === "redacted_thinking")
+            .every(isRestoredClaudeThinkingBlock);
+        const latestThinkingBlocks: ClaudeContentBlock[] =
+          isLatestAssistant || hasRestoredActiveThinking
+            ? content.filter(
+                (b: ClaudeContentBlock) => b.type === "thinking" || b.type === "redacted_thinking"
+              )
+            : [];
         const latestHasExistingThinking = latestThinkingBlocks.length > 0;
         // #6953: a synthetic thinking block with an EMPTY signature/data (fabricated by a
         // non-Anthropic provider leg, e.g. codex reasoning_content) is NOT a genuine Claude
@@ -567,10 +864,8 @@ export function prepareClaudeRequest(
               delete block.data;
               delete block.signature;
             } else if (supportsRedactedThinking) {
-              block.type = "redacted_thinking";
-              block.data = DEFAULT_THINKING_CLAUDE_SIGNATURE;
-              delete block.thinking;
-              delete block.signature;
+              // Keep verbatim: genuine signed blocks (e.g. restored by claudeThinkingStore)
+              // must reach Anthropic unchanged; unsigned ones are dropped after this pass.
             } else {
               const existing =
                 typeof block.thinking === "string" && block.thinking.length > 0
@@ -614,10 +909,7 @@ export function prepareClaudeRequest(
         // tool_use. Use the same provider-aware shape selection as above.
         if (thinkingEnabled && !hasThinking && hasToolUse) {
           if (supportsRedactedThinking) {
-            content.unshift({
-              type: "redacted_thinking",
-              data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-            });
+            // Inject nothing (see dropUnsignedAnthropicThinking below).
           } else if (isKimiCoding) {
             content.unshift({
               type: "thinking",
@@ -643,7 +935,9 @@ export function prepareClaudeRequest(
     }
   }
 
-  // 3. Tools: remove all cache_control, add only to last non-deferred tool with ttl 1h
+  if (supportsRedactedThinking) dropUnsignedAnthropicThinking(body);
+
+  // 3. Tools: remove all cache_control, add only to the last non-deferred tool
   // Tools with defer_loading=true cannot have cache_control (API rejects it)
   // In passthrough mode, preserve existing cache_control markers
   if (body.tools && Array.isArray(body.tools) && !preserveCacheControl) {
@@ -654,11 +948,21 @@ export function prepareClaudeRequest(
     if (supportsPromptCaching) {
       for (let i = body.tools.length - 1; i >= 0; i--) {
         if (!body.tools[i].defer_loading) {
-          body.tools[i].cache_control = { type: "ephemeral", ttl: "1h" };
+          body.tools[i].cache_control = createDefaultClaudeCacheControl(provider);
           break;
         }
       }
     }
+  }
+
+  // Anthropic-API hard rules, applied in every mode (including client-marker
+  // passthrough): cache_control may never live inside tool_result.content[] and
+  // at most 4 blocks may carry cache_control. These are shape requirements of
+  // the upstream API, not caching policy, so preserveCacheControl does not
+  // exempt them (they were the 400 sources on claude 5.x since 2026-09-29).
+  hoistToolResultCacheControl(body);
+  if (supportsPromptCaching) {
+    enforceCacheControlBlockLimit(body);
   }
 
   return body;

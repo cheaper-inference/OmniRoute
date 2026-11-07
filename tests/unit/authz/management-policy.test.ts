@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { SignJWT } from "jose";
+import { cleanupTempDataDir } from "../../_setup/tempDataDir.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omr-mgmt-policy-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -16,6 +17,7 @@ const core = await import("../../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../../src/lib/db/apiKeys.ts");
 const settingsDb = await import("../../../src/lib/db/settings.ts");
 const modelSync = await import("../../../src/shared/services/modelSyncScheduler.ts");
+const internalServiceAuth = await import("../../../src/lib/api/internalServiceAuth.ts");
 
 const ORIGINAL_JWT = process.env.JWT_SECRET;
 const ORIGINAL_INITIAL = process.env.INITIAL_PASSWORD;
@@ -23,7 +25,7 @@ const ORIGINAL_INITIAL = process.env.INITIAL_PASSWORD;
 function reset() {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   delete process.env.JWT_SECRET;
   delete process.env.INITIAL_PASSWORD;
@@ -33,8 +35,8 @@ test.beforeEach(() => {
   reset();
 });
 
-test.after(() => {
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+test.after(async () => {
+  await cleanupTempDataDir(TEST_DATA_DIR);
   if (ORIGINAL_JWT === undefined) delete process.env.JWT_SECRET;
   else process.env.JWT_SECRET = ORIGINAL_JWT;
   if (ORIGINAL_INITIAL === undefined) delete process.env.INITIAL_PASSWORD;
@@ -111,7 +113,12 @@ function remoteCtx(headers: Headers, method = "GET", path = "/api/keys") {
 test("managementPolicy: allows when auth not required (no password set)", async () => {
   await settingsDb.updateSettings({ requireLogin: true, password: null });
   const policy = await loadPolicy();
-  const out = await policy.evaluate(ctx(new Headers()));
+  // Fresh-bootstrap anonymous allow is loopback-only, and loopback is decided
+  // from the real peer (socket.remoteAddress / stamped peer), never from the
+  // `http://localhost` URL the ctx() helper carries (GHSA-7pq4-8pvv-rx7r).
+  const out = await policy.evaluate(
+    ctx(new Headers(), "GET", "/api/keys", { socket: { remoteAddress: "127.0.0.1" } })
+  );
   assert.equal(out.allow, true);
   if (out.allow) {
     assert.equal(out.subject.kind, "anonymous");
@@ -132,6 +139,94 @@ test("managementPolicy: rejects remote fresh bootstrap without a password", asyn
   }
 });
 
+// ─── GHSA-7pq4-8pvv-rx7r — bootstrap first-password write is loopback-only ────
+//
+// `POST /api/settings/require-login` in the bootstrap window used to be an
+// unconditional anonymous allow (apiAuth.isAuthRequired returned false before
+// the loopback check), and the loopback check itself read the client-controlled
+// Host header. A remote caller could flip requireLogin=false, then read
+// JWT_SECRET through the Obsidian WebDAV file service and forge a durable admin
+// session. The policy must decide from the token-stamped real peer.
+
+const BOOTSTRAP_WRITE_PATH = "/api/settings/require-login";
+const POLICY_STAMP_TOKEN = "mgmt-policy-test-peer-stamp-token";
+
+function stampedHeaders(peerIp: string, extra: Record<string, string> = {}): Headers {
+  process.env.OMNIROUTE_PEER_STAMP_TOKEN = POLICY_STAMP_TOKEN;
+  return new Headers({
+    ...extra,
+    "x-omniroute-peer-ip": `${POLICY_STAMP_TOKEN}|${peerIp}`,
+    "x-omniroute-via-proxy": `${POLICY_STAMP_TOKEN}|0`,
+  });
+}
+
+test("managementPolicy: rejects an anonymous remote POST /api/settings/require-login in the bootstrap window (GHSA-7pq4-8pvv-rx7r)", async () => {
+  await settingsDb.updateSettings({ requireLogin: true, password: null });
+  const policy = await loadPolicy();
+  try {
+    // Plain remote peer, no stamp at all → fail closed.
+    const unstamped = await policy.evaluate(remoteCtx(new Headers(), "POST", BOOTSTRAP_WRITE_PATH));
+    assert.equal(unstamped.allow, false);
+    if (!unstamped.allow) {
+      assert.equal(unstamped.status, 401);
+      assert.equal(unstamped.code, "AUTH_001");
+    }
+
+    // Host-spoof: the URL / Host header say localhost, the stamped real peer is
+    // a public address, and the client even forged the pipeline's locality
+    // verdict header. None of that is loopback.
+    const spoofed = await policy.evaluate(
+      ctx(
+        stampedHeaders("203.0.113.9", {
+          host: "localhost:20128",
+          "x-omniroute-peer-locality": "loopback",
+        }),
+        "POST",
+        BOOTSTRAP_WRITE_PATH
+      )
+    );
+    assert.equal(spoofed.allow, false);
+    if (!spoofed.allow) {
+      assert.equal(spoofed.status, 401);
+      assert.equal(spoofed.code, "AUTH_001");
+    }
+  } finally {
+    delete process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+  }
+});
+
+test("managementPolicy: keeps the bootstrap first-password write open for the stamped loopback peer (GHSA-7pq4-8pvv-rx7r)", async () => {
+  await settingsDb.updateSettings({ requireLogin: true, password: null, setupComplete: true });
+  const policy = await loadPolicy();
+  try {
+    const local = await policy.evaluate(
+      ctx(stampedHeaders("127.0.0.1"), "POST", BOOTSTRAP_WRITE_PATH)
+    );
+    assert.equal(local.allow, true);
+    if (local.allow) {
+      assert.equal(local.subject.kind, "anonymous");
+      assert.equal(local.subject.label, "auth-disabled");
+    }
+
+    // A loopback socket that is really a reverse-proxy hop (via-proxy marker
+    // set by the custom server) is NOT the local operator.
+    process.env.OMNIROUTE_PEER_STAMP_TOKEN = POLICY_STAMP_TOKEN;
+    const viaProxy = await policy.evaluate(
+      ctx(
+        new Headers({
+          "x-omniroute-peer-ip": `${POLICY_STAMP_TOKEN}|127.0.0.1`,
+          "x-omniroute-via-proxy": `${POLICY_STAMP_TOKEN}|1`,
+        }),
+        "POST",
+        BOOTSTRAP_WRITE_PATH
+      )
+    );
+    assert.equal(viaProxy.allow, false);
+  } finally {
+    delete process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+  }
+});
+
 test("managementPolicy: rejects 401 when auth required and no credentials", async () => {
   process.env.JWT_SECRET = "test-jwt-secret-for-mgmt-policy";
   process.env.INITIAL_PASSWORD = "initial-pass";
@@ -144,6 +239,26 @@ test("managementPolicy: rejects 401 when auth required and no credentials", asyn
     assert.equal(out.status, 401);
     assert.equal(out.code, "AUTH_001");
   }
+});
+
+test("managementPolicy: allows a valid internal service token only from loopback", async () => {
+  process.env.JWT_SECRET = "test-jwt-secret-for-mgmt-policy";
+  process.env.INITIAL_PASSWORD = "initial-pass";
+  process.env.OMNIROUTE_INTERNAL_SERVICE_TOKEN = "internal-service-token-0123456789";
+  await settingsDb.updateSettings({ requireLogin: true });
+  const policy = await loadPolicy();
+  const headers = new Headers({
+    [internalServiceAuth.INTERNAL_SERVICE_AUTH_HEADER]: "internal-service-token-0123456789",
+  });
+
+  const loopback = await policy.evaluate(
+    ctx(headers, "GET", "/api/combos", { socket: { remoteAddress: "127.0.0.1" } })
+  );
+  assert.equal(loopback.allow, true);
+
+  const remote = await policy.evaluate(remoteCtx(headers, "GET", "/api/combos"));
+  assert.equal(remote.allow, false);
+  delete process.env.OMNIROUTE_INTERNAL_SERVICE_TOKEN;
 });
 
 test("managementPolicy: rejects client API keys for dashboard access", async () => {

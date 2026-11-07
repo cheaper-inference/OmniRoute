@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { validateBody, isValidationFailure } from "@/shared/validation/helpers";
-import { skillRegistry } from "@/lib/skills/registry";
+import { GLOBAL_SKILL_OWNER_ID, skillRegistry } from "@/lib/skills/registry";
 import { getSkillsProviderSetting } from "@/lib/skills/providerSettings";
 
 import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
 const marketplaceInstallSchema = z.object({
   name: z.string().min(1).max(64),
@@ -30,7 +31,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const rawBody = await request.json();
+    let rawBody: unknown;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
     const validation = validateBody(marketplaceInstallSchema, rawBody);
     if (isValidationFailure(validation)) {
       return NextResponse.json(validation.error, { status: 400 });
@@ -43,7 +49,7 @@ export async function POST(request: Request) {
       description,
       schema: { input: { content: "string" }, output: { result: "string" } },
       handler: `// Installed from SkillsMP\n// SKILL.md content:\n${skillMdContent}`,
-      apiKeyId: provider,
+      apiKeyId: GLOBAL_SKILL_OWNER_ID,
       enabled: true,
       mode: "auto",
       sourceProvider: "skillsmp",
@@ -53,7 +59,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, id: skill.id });
   } catch (err: unknown) {
-    const error = err instanceof Error ? err.message : String(err);
+    const error = sanitizeErrorMessage(err instanceof Error ? err.message : String(err));
     return NextResponse.json({ error }, { status: 500 });
   }
 }

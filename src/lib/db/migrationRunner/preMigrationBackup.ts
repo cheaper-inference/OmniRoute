@@ -1,0 +1,318 @@
+import fs from "fs";
+import path from "path";
+
+import { hashFileSync } from "../backupFileHash";
+import { resolveBackupFile } from "../backupPaths";
+import type { SqliteAdapter } from "../adapters/types";
+import { tryOpenSync } from "../adapters/driverFactory";
+import { chmodQuiet, DB_SECRET_DIR_MODE, DB_SECRET_FILE_MODE } from "../filePermissions";
+import { migrationConsole as console } from "./logger";
+
+export type PreMigrationBackupReceipt = {
+  path: string;
+  sha256: string;
+};
+
+function fsyncDirectoryEntry(directory: string): void {
+  let fd: number | null = null;
+  try {
+    fd = fs.openSync(directory, "r");
+    fs.fsyncSync(fd);
+  } catch (error: unknown) {
+    const code = (error as NodeJS.ErrnoException | null)?.code;
+    const windowsDirectoryHandleUnsupported =
+      process.platform === "win32" &&
+      (code === "EACCES" || code === "EPERM" || code === "EISDIR" || code === "EINVAL");
+    if (!windowsDirectoryHandleUnsupported) throw error;
+  } finally {
+    if (fd !== null) fs.closeSync(fd);
+  }
+}
+
+export { hashFileSync } from "../backupFileHash";
+
+function getReusablePreMigrationBackup(
+  candidatePath: string,
+  expectedSha256: string
+): PreMigrationBackupReceipt | null {
+  candidatePath = resolveBackupFile(path.dirname(candidatePath), path.basename(candidatePath));
+  if (!fs.existsSync(candidatePath)) return null;
+
+  const before = fs.lstatSync(candidatePath);
+  if (!before.isFile() || hashFileSync(candidatePath) !== expectedSha256) {
+    throw new Error(
+      `[Migration] Content-addressed snapshot path exists with unexpected content: ${candidatePath}`
+    );
+  }
+  const after = fs.lstatSync(candidatePath);
+  if (
+    before.dev !== after.dev ||
+    before.ino !== after.ino ||
+    before.size !== after.size ||
+    before.mtimeMs !== after.mtimeMs
+  ) {
+    throw new Error(
+      `[Migration] Content-addressed snapshot changed while it was being validated: ${candidatePath}`
+    );
+  }
+
+  return { path: candidatePath, sha256: expectedSha256 };
+}
+
+function publishSnapshotWithoutOverwrite(tempPath: string, destination: string): string {
+  try {
+    fs.linkSync(tempPath, destination);
+  } catch (error: unknown) {
+    const code = (error as NodeJS.ErrnoException | null)?.code ?? "";
+    if (!["EACCES", "EPERM", "ENOTSUP", "EOPNOTSUPP", "EXDEV", "ENOSYS"].includes(code))
+      throw error;
+    destination = publishSnapshotDirectory(tempPath, destination);
+  }
+  const publishedFd = fs.openSync(destination, "r+");
+  try {
+    // Flush through the published name as well as the already-fsynced temp handle.
+    // On Windows this maps to FlushFileBuffers and is the strongest file-level
+    // durability proof available when directory handles are unsupported by Node.
+    fs.fsyncSync(publishedFd);
+  } finally {
+    fs.closeSync(publishedFd);
+  }
+  fsyncDirectoryEntry(path.dirname(destination));
+  return destination;
+}
+
+/**
+ * Directory rename cannot replace a complete (nonempty) backup. Node has no general
+ * rename-no-replace primitive: reject an existing empty directory too, but require
+ * trusted DATA_DIR ownership against hostile ancestor/empty-directory replacement.
+ */
+function publishSnapshotDirectory(tempPath: string, destination: string): string {
+  const tempDir = path.dirname(tempPath);
+  const directory = `${destination}.snapshot`;
+  fsyncDirectoryEntry(tempDir);
+  if (fs.lstatSync(directory, { throwIfNoEntry: false })) {
+    throw Object.assign(new Error("Snapshot directory already exists"), { code: "EEXIST" });
+  }
+  try {
+    fs.renameSync(tempDir, directory);
+  } catch (error: unknown) {
+    // POSIX returns ENOTEMPTY for a concurrent complete directory; Windows may use EPERM.
+    const code = (error as NodeJS.ErrnoException | null)?.code ?? "";
+    if (["EEXIST", "ENOTEMPTY", "EPERM", "EACCES"].includes(code) && fs.existsSync(directory)) {
+      throw Object.assign(new Error("Concurrent snapshot publication"), { code: "EEXIST" });
+    }
+    throw error;
+  }
+  fsyncDirectoryEntry(path.dirname(directory));
+  return path.join(directory, "snapshot.sqlite");
+}
+
+function fsyncReusableSnapshot(snapshotPath: string): void {
+  const fd = fs.openSync(snapshotPath, "r+");
+  try {
+    fs.fsyncSync(fd);
+  } finally {
+    fs.closeSync(fd);
+  }
+  fsyncDirectoryEntry(path.dirname(snapshotPath));
+}
+
+type SqlJsSnapshotClone = {
+  run(sql: string): void;
+  export(): Uint8Array;
+  close(): void;
+};
+
+const SQLITE_HEADER_MIN_BYTES = 100;
+const SQLITE_HEADER_MAGIC = "SQLite format 3\0";
+const SQLITE_CHANGE_COUNTER_OFFSET = 24;
+const SQLITE_VERSION_VALID_FOR_OFFSET = 92;
+const SQLITE_STANDALONE_CHANGE_COUNTER = 1;
+
+function exportCanonicalSqlJsSnapshot(raw: { export: () => Uint8Array }): Buffer {
+  const RawDatabase = (
+    raw as unknown as { constructor: new (data: Uint8Array) => SqlJsSnapshotClone }
+  ).constructor;
+  let clone: SqlJsSnapshotClone | null = null;
+
+  try {
+    // A rolled-back sql.js SAVEPOINT can leave SQLite's physical change counter advanced
+    // even though every logical row/schema change was undone. Canonicalize only a detached
+    // clone: VACUUM removes rollback-only page artifacts without touching the live database.
+    clone = new RawDatabase(raw.export());
+    clone.run("VACUUM");
+    const canonical = Buffer.from(clone.export());
+
+    if (
+      canonical.length < SQLITE_HEADER_MIN_BYTES ||
+      canonical.subarray(0, SQLITE_HEADER_MAGIC.length).toString("binary") !== SQLITE_HEADER_MAGIC
+    ) {
+      throw new Error("sql.js export did not produce a valid SQLite file header");
+    }
+
+    // SQLite file-header offsets 24 and 92 are the change counter and
+    // version-valid-for number. VACUUM keeps the two equal, but seeds them from the
+    // source image, so an otherwise identical rolled-back retry still gets a different
+    // byte hash. A standalone snapshot has no open readers to invalidate; assigning the
+    // same stable value to both fields preserves a valid/restorable header while making
+    // the complete canonical image deterministic.
+    canonical.writeUInt32BE(SQLITE_STANDALONE_CHANGE_COUNTER, SQLITE_CHANGE_COUNTER_OFFSET);
+    canonical.writeUInt32BE(SQLITE_STANDALONE_CHANGE_COUNTER, SQLITE_VERSION_VALID_FOR_OFFSET);
+    return canonical;
+  } finally {
+    clone?.close();
+  }
+}
+
+function writeSqlJsSnapshot(raw: { export: () => Uint8Array }, tempPath: string): void {
+  let fd: number | null = null;
+
+  try {
+    fd = fs.openSync(tempPath, "wx");
+    fs.writeFileSync(fd, exportCanonicalSqlJsSnapshot(raw));
+    fs.fsyncSync(fd);
+    fs.closeSync(fd);
+    fd = null;
+  } catch (error: unknown) {
+    if (fd !== null) {
+      try {
+        fs.closeSync(fd);
+      } catch {
+        // The original snapshot error remains authoritative.
+      }
+    }
+    throw error;
+  }
+}
+
+function cleanupOwnedSnapshotTemp(tempDir: string | null, tempPath: string | null): void {
+  if (!tempDir || !fs.existsSync(tempDir)) return;
+
+  try {
+    // `tempDir` comes only from mkdtempSync below. Removing that exact owned directory
+    // lets Node retry Windows/AV EBUSY and EPERM failures without touching canonical backups.
+    fs.rmSync(tempDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 25 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(
+      `[Migration] Failed to remove owned snapshot temp directory` +
+        `${tempPath ? ` (${tempPath})` : ""}: ${message}`
+    );
+  }
+}
+
+function ensureBackupDirectory(backupDir: string): void {
+  if (!fs.existsSync(backupDir)) {
+    fs.mkdirSync(backupDir, { recursive: true, mode: DB_SECRET_DIR_MODE });
+    fsyncDirectoryEntry(path.dirname(backupDir));
+  }
+  if (!fs.lstatSync(backupDir).isDirectory()) {
+    throw new Error("Backup directory must not be a symlink or non-directory");
+  }
+}
+
+/**
+ * Create a synchronous pre-migration snapshot.
+ *
+ * Native SQLite drivers use VACUUM INTO. sql.js has an in-memory VFS, so a host
+ * path passed to VACUUM INTO is not writable; export its current database image
+ * directly instead. The SHA-256 content address lives in the first portion of the
+ * canonical `db_<snapshot-id>_<reason>.sqlite` shape, preserving reason parsing while
+ * making unchanged retries an O(1) lookup even with tens of thousands of old backups.
+ * Work happens inside an exclusively-created
+ * temp directory, so failure cleanup has exact ownership. Publication uses a no-overwrite
+ * hard link, or atomically publishes the nonempty directory when links are unavailable.
+ * Failure of both publication strategies or synchronization fails closed. A content hash
+ * reuses an identical prior snapshot, so repeated zero-progress startups retain one
+ * restore point for that database state without ever deleting a published backup.
+ */
+export function createPreMigrationBackup(db: SqliteAdapter): PreMigrationBackupReceipt | null {
+  let backupPath: string | null = null;
+  let tempPath: string | null = null;
+  let tempDir: string | null = null;
+
+  try {
+    const sqliteFile = db.name;
+    if (!sqliteFile || sqliteFile === ":memory:") return null;
+
+    const backupDir = path.join(path.dirname(sqliteFile), "db_backups");
+    ensureBackupDirectory(backupDir);
+
+    tempDir = fs.mkdtempSync(path.join(backupDir, ".migration-snapshot-"));
+    tempPath = path.join(tempDir, "snapshot.sqlite");
+
+    if (db.driver === "sql.js") {
+      const raw = db.raw as { export?: () => Uint8Array } | null;
+      if (!raw || typeof raw.export !== "function") {
+        throw new Error("sql.js adapter does not expose database export()");
+      }
+      writeSqlJsSnapshot(raw as { export: () => Uint8Array }, tempPath);
+    } else {
+      const escapedTempPath = tempPath.replace(/'/g, "''");
+      const snapshotDb = tryOpenSync(sqliteFile, { readonly: true, fileMustExist: true });
+      if (!snapshotDb) {
+        throw new Error("no synchronous read-only SQLite driver is available for snapshotting");
+      }
+      try {
+        snapshotDb.exec(`VACUUM INTO '${escapedTempPath}'`);
+      } finally {
+        snapshotDb.close();
+      }
+      const fd = fs.openSync(tempPath, "r+");
+      try {
+        fs.fsyncSync(fd);
+      } finally {
+        fs.closeSync(fd);
+      }
+    }
+
+    // Owner-only before publication: the hard link / rename keeps this inode's mode.
+    chmodQuiet(tempPath, DB_SECRET_FILE_MODE);
+    const sha256 = hashFileSync(tempPath);
+    backupPath = path.join(backupDir, `db_state-${sha256}_pre-migration.sqlite`);
+    const reusable = getReusablePreMigrationBackup(backupPath, sha256);
+    if (reusable) {
+      fsyncReusableSnapshot(reusable.path);
+      fsyncDirectoryEntry(backupDir);
+      cleanupOwnedSnapshotTemp(tempDir, tempPath);
+      tempDir = null;
+      tempPath = null;
+      console.log(`[Migration] Reusing identical pre-migration backup: ${reusable.path}`);
+      return reusable;
+    }
+
+    try {
+      backupPath = publishSnapshotWithoutOverwrite(tempPath, backupPath);
+    } catch (error: unknown) {
+      if ((error as NodeJS.ErrnoException | null)?.code !== "EEXIST") throw error;
+      const racedReusable = getReusablePreMigrationBackup(backupPath, sha256);
+      if (!racedReusable) throw error;
+      fsyncReusableSnapshot(racedReusable.path);
+      fsyncDirectoryEntry(backupDir);
+      cleanupOwnedSnapshotTemp(tempDir, tempPath);
+      tempDir = null;
+      tempPath = null;
+      console.log(`[Migration] Reusing concurrently published backup: ${racedReusable.path}`);
+      return racedReusable;
+    }
+    cleanupOwnedSnapshotTemp(tempDir, tempPath);
+    tempDir = null;
+    tempPath = null;
+    console.log(`[Migration] Pre-migration backup created: ${backupPath}`);
+
+    return { path: backupPath, sha256 };
+  } catch (error: unknown) {
+    // Never unlink a canonical backup here: publication may have failed because another
+    // actor created it first. The exclusive temp directory is the only cleanup authority.
+    cleanupOwnedSnapshotTemp(tempDir, tempPath);
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`[Migration] Failed to create pre-migration backup: ${message}`);
+    throw new Error(
+      `[Migration] Refusing to migrate an existing database without a durable snapshot. ` +
+        `Snapshot creation failed: ${message}. The DATA_DIR filesystem must support atomic ` +
+        `hard links or directory rename, durable file synchronization, and directory synchronization ` +
+        `where the platform exposes it.`,
+      { cause: error instanceof Error ? error : undefined }
+    );
+  }
+}

@@ -21,7 +21,9 @@ export const ProviderSchema = z.object({
   website: z.string().url().optional(),
   passthroughModels: z.boolean().optional(),
   subscriptionRisk: z.boolean().optional(),
-  riskNoticeVariant: z.enum(["oauth", "webCookie", "deprecated", "embedded-service"]).optional(),
+  riskNoticeVariant: z
+    .enum(["oauth", "webCookie", "deprecated", "embedded-service", "official-client-only"])
+    .optional(),
   isEmbeddedService: z.boolean().optional(),
   deprecated: z.boolean().optional(),
   deprecationReason: z.string().optional(),
@@ -30,7 +32,8 @@ export const ProviderSchema = z.object({
   freeNote: z.string().optional(),
   authHint: z.string().optional(),
   apiHint: z.string().optional(),
-  serviceKinds: z.array(z.enum(SERVICE_KIND_VALUES)).optional(),
+  oauthProviderId: z.string().min(1).optional(),
+  serviceKinds: z.array(z.enum(SERVICE_KIND_VALUES)),
   noAuth: z.boolean().optional(),
   anonymousFallback: z.boolean().optional(),
   managedAccount: z.boolean().optional(),

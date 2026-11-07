@@ -6,9 +6,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-const { storeSemanticCacheResponse } = await import(
-  "../../open-sse/handlers/chatCore/semanticCacheStore.ts"
-);
+const { storeSemanticCacheResponse } =
+  await import("../../open-sse/handlers/chatCore/semanticCacheStore.ts");
 
 type Stored = { sig: unknown; model: string; response: unknown; tokens: number };
 
@@ -50,6 +49,33 @@ function baseArgs(overrides: Record<string, unknown> = {}) {
   } as Parameters<typeof storeSemanticCacheResponse>[0];
 }
 
+function assertNumericSignatureInputs(
+  deps: Parameters<typeof storeSemanticCacheResponse>[1]
+): void {
+  if (process.env.NODE_ENV === "__semantic_cache_type_contract__") {
+    storeSemanticCacheResponse(
+      {
+        enabled: true,
+        body: {
+          messages: [],
+          // @ts-expect-error temperature is a numeric producer field
+          temperature: "0",
+          top_p: 1,
+        },
+        headers: undefined,
+        translatedResponse: {},
+        model: "gpt-x",
+      },
+      deps
+    );
+  }
+}
+
+test("signature input contract keeps temperature numeric", () => {
+  const { deps } = makeDeps();
+  assertNumericSignatureInputs(deps);
+});
+
 test("happy path → stores under a signature, tokensSaved = prompt + completion", () => {
   const { deps, stored } = makeDeps();
   storeSemanticCacheResponse(baseArgs(), deps);
@@ -57,11 +83,26 @@ test("happy path → stores under a signature, tokensSaved = prompt + completion
   assert.equal(stored[0].model, "gpt-x");
   assert.deepEqual(stored[0].response, { id: "resp-1" });
   assert.equal(stored[0].tokens, 15);
+  const signatureArgs = JSON.parse(String(stored[0].sig).slice("sig:".length)) as unknown[];
+  assert.deepEqual(signatureArgs.slice(2, 4), [0, 1]);
 });
 
 test("disabled → no store, no gate calls past enabled", () => {
   const { deps, stored, calls } = makeDeps();
   storeSemanticCacheResponse(baseArgs({ enabled: false }), deps);
+  assert.equal(stored.length, 0);
+  assert.equal(calls.cacheable, 0);
+});
+
+test("transcript-observed responses never enter the semantic cache", () => {
+  const { deps, stored, calls } = makeDeps();
+  storeSemanticCacheResponse(
+    baseArgs({
+      translatedResponse: { choices: [{ message: { content: "PRIVATE_NONSTREAM_SENTINEL" } }] },
+      videoTranscriptSensitive: true,
+    }),
+    deps
+  );
   assert.equal(stored.length, 0);
   assert.equal(calls.cacheable, 0);
 });
@@ -106,4 +147,39 @@ test("missing usage → tokensSaved coerces to 0 (NaN || 0)", () => {
   const { deps, stored } = makeDeps();
   storeSemanticCacheResponse(baseArgs({ usage: undefined }), deps);
   assert.equal(stored[0].tokens, 0);
+});
+
+// #12734: tool_choice/tools/response_format must reach generateSignature so a cached
+// tool_calls response cannot be replayed under a stricter tool policy.
+test("signature is called with tool_choice/tools/response_format from body (#12734)", () => {
+  let captured: unknown[] = [];
+  const { deps } = makeDeps({
+    generateSignature: (...a: unknown[]) => {
+      captured = a;
+      return "sig";
+    },
+  });
+  const tools = [{ type: "function", function: { name: "get_weather" } }];
+  storeSemanticCacheResponse(
+    baseArgs({
+      body: {
+        messages: [{ role: "user", content: "hi" }],
+        temperature: 0,
+        top_p: 1,
+        tool_choice: "none",
+        tools,
+        response_format: { type: "json_object" },
+      },
+    }),
+    deps
+  );
+  // args: (model, messages ?? input, temperature, top_p, apiKeyId, constraints)
+  const constraints = captured[5] as {
+    toolChoice: unknown;
+    tools: unknown;
+    responseFormat: unknown;
+  };
+  assert.equal(constraints.toolChoice, "none");
+  assert.deepEqual(constraints.tools, tools);
+  assert.deepEqual(constraints.responseFormat, { type: "json_object" });
 });

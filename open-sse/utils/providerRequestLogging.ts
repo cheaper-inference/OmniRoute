@@ -1,4 +1,14 @@
-import { AsyncLocalStorage } from "node:async_hooks";
+import {
+  captureState,
+  dispatchContext,
+  type CaptureHolder,
+} from "./providerRequestCaptureContext.ts";
+export {
+  currentHttpAttemptCollector,
+  isProviderRequestCaptureActive,
+} from "./providerRequestCaptureContext.ts";
+export { observeProviderHttpSend } from "./providerHttpAttempts.ts";
+import { HttpAttemptCollector } from "./providerHttpAttempts.ts";
 
 import { updatePendingScope, type PendingRequestScope } from "@/lib/usage/pendingRequestScope";
 
@@ -10,6 +20,7 @@ export type ProviderRequestPrepared = {
 };
 
 export type Capture = {
+  httpAttempts?: HttpAttemptCollector;
   capture: (request: ProviderRequestPrepared) => Promise<void> | void;
   body: (fallback: unknown) => unknown;
   latest?: () => ProviderRequestPrepared | null;
@@ -26,30 +37,6 @@ type WarnLog = {
 type FetchInput = Parameters<typeof fetch>[0];
 type FetchInit = Parameters<typeof fetch>[1];
 
-type CaptureState = {
-  context: AsyncLocalStorage<Capture>;
-  wrappedFetch: typeof fetch | null;
-  wrappedInnerFetch: typeof fetch | null;
-};
-
-const CAPTURE_STATE_KEY = Symbol.for("omniroute.providerRequestCapture.state");
-
-function getCaptureState(): CaptureState {
-  const scopedGlobal = globalThis as typeof globalThis & {
-    [CAPTURE_STATE_KEY]?: CaptureState;
-  };
-
-  if (!scopedGlobal[CAPTURE_STATE_KEY]) {
-    scopedGlobal[CAPTURE_STATE_KEY] = {
-      context: new AsyncLocalStorage<Capture>(),
-      wrappedFetch: null,
-      wrappedInnerFetch: null,
-    };
-  }
-  return scopedGlobal[CAPTURE_STATE_KEY];
-}
-
-const captureState = getCaptureState();
 const BODY_METHODS = new Set(["POST", "PUT", "PATCH"]);
 const AUTH_BODY_KEYS = new Set([
   "access_token",
@@ -88,16 +75,26 @@ async function capturePreparedRequest(
   log?: WarnLog | null
 ) {
   if (!requestCapture) return;
-  const latest = requestCapture.latest?.();
-  if (latest?.url === url && latest.bodyString === bodyString) return;
-
   try {
+    const headerEntries = Array.from(new Headers(headers).entries());
+    const latest = requestCapture.latest?.();
+    if (latest?.url === url && latest.bodyString === bodyString) {
+      const latestEntries = Array.from(new Headers(latest.headers).entries());
+      if (
+        headerEntries.length === latestEntries.length &&
+        headerEntries.every(
+          ([name, value], index) =>
+            name === latestEntries[index][0] && value === latestEntries[index][1]
+        )
+      ) {
+        return;
+      }
+    }
     await requestCapture.capture({ url, headers, body, bodyString });
-  } catch (error) {
-    log?.warn?.(
-      "REQUEST_LOG",
-      `Provider request logging hook failed: ${error instanceof Error ? error.message : String(error)}`
-    );
+  } catch {
+    // Capture hooks can fail while processing a provider payload. The thrown
+    // value may echo request content, so never copy it into application logs.
+    log?.warn?.("REQUEST_LOG", "Provider request logging hook failed");
   }
 }
 
@@ -109,7 +106,7 @@ export function captureCurrentProviderRequest(
   log?: WarnLog | null
 ) {
   return capturePreparedRequest(
-    captureState.context.getStore(),
+    captureState.context.getStore()?.capture,
     url,
     headers,
     body,
@@ -127,9 +124,45 @@ export function captureCurrentProviderBody(
   return captureCurrentProviderRequest(url, headers, parseBody(bodyString), bodyString, log);
 }
 
+type DispatchStartListener = () => void;
+
+const DISPATCH_LISTENERS_KEY = Symbol.for(
+  "omniroute.providerRequestCapture.dispatchStartListeners"
+);
+
+function getDispatchStartListeners(): Set<DispatchStartListener> {
+  const scopedGlobal = globalThis as typeof globalThis & {
+    [DISPATCH_LISTENERS_KEY]?: Set<DispatchStartListener>;
+  };
+  return (scopedGlobal[DISPATCH_LISTENERS_KEY] ??= new Set<DispatchStartListener>());
+}
+
+/**
+ * Run listeners at the entry of every provider dispatch, before fn starts. A
+ * listener resolves what it needs through its own closure (usually an ALS
+ * reader), so a dispatch for another request never touches this request's
+ * state. Listeners must stay synchronous and side-effect free beyond the
+ * request's own sink.
+ */
+export function onDispatchStart(listener: DispatchStartListener): void {
+  getDispatchStartListeners().add(listener);
+}
+
 export function runWithCapture<T>(requestCapture: Capture, fn: () => Promise<T>): Promise<T> {
   installFetchCapture();
-  return captureState.context.run(requestCapture, fn);
+  const dispatch = { settled: false };
+  return dispatchContext.run(dispatch, () => {
+    for (const listener of getDispatchStartListeners()) listener();
+    const holder: CaptureHolder = { capture: requestCapture };
+    return captureState.context.run(holder, fn).finally(() => {
+      dispatch.settled = true;
+      // Detach the Capture from the ALS store as soon as the dispatch is over: the
+      // async resources that outlive the call (sockets, streams) would otherwise pin
+      // it, and its captured request body, through the store (heap leak, ~80 MB/h in
+      // prod). Late work from those resources now finds no capture at all.
+      holder.capture = null;
+    });
+  });
 }
 
 function installFetchCapture() {
@@ -137,7 +170,7 @@ function installFetchCapture() {
 
   captureState.wrappedInnerFetch = globalThis.fetch.bind(globalThis);
   captureState.wrappedFetch = (async (input: FetchInput, init?: FetchInit) => {
-    const activeCapture = captureState.context.getStore();
+    const activeCapture = captureState.context.getStore()?.capture;
     if (activeCapture) {
       await captureFetchRequest(activeCapture, input, init);
     }
@@ -224,12 +257,17 @@ export function createPreparedRequestLogger(
 ): Capture {
   let latest: ProviderRequestPrepared | null = null;
   return {
+    httpAttempts: new HttpAttemptCollector(),
     capture(request) {
-      latest = request;
-      reqLogger.logTargetRequest(request.url, request.headers, request.body);
+      // Defense in depth: the ALS holder is already emptied when a dispatch settles, but
+      // a direct call from a settled dispatch's async resource must not overwrite the
+      // body of a fresh retry on this same Capture.
+      if (dispatchContext.getStore()?.settled) return;
+      latest = { ...request, headers: { ...request.headers } };
+      reqLogger.logTargetRequest(latest.url, latest.headers, latest.body);
       updatePendingScope(scope, {
-        providerRequest: request.body,
-        providerUrl: request.url,
+        providerRequest: latest.body,
+        providerUrl: latest.url,
         stage: "sending_to_provider",
       });
     },

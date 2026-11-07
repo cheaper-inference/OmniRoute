@@ -1,3 +1,9 @@
+---
+title: "Providers Guide: Connect AI Models to OmniRoute"
+version: 3.8.50
+lastUpdated: 2026-08-06
+---
+
 # Providers Guide: Connect AI Models to OmniRoute
 
 > **TL;DR**: A provider is a connection to an AI service (like OpenAI, Anthropic, Google). You need at least one provider to use OmniRoute.
@@ -10,12 +16,12 @@ Think of a provider like a **phone carrier**. Just as you need a phone carrier t
 
 ### Types of Providers
 
-| Type           | What It Is                | Examples                          | Cost                   |
-| -------------- | ------------------------- | --------------------------------- | ---------------------- |
-| **Free**       | No payment required       | Kiro, OpenCode Free, Pollinations | $0                     |
-| **API Key**    | You need an API key       | OpenAI, Anthropic, Google         | Pay per use            |
-| **OAuth**      | Login with your account   | Claude Code, GitHub Copilot       | Subscription           |
-| **Web Cookie** | Uses your browser session | ChatGPT Web, Gemini Web           | $0 (uses your account) |
+| Type           | What It Is                | Examples                        | Cost                   |
+| -------------- | ------------------------- | ------------------------------- | ---------------------- |
+| **Free**       | No payment required       | Kiro, Pollinations              | $0                     |
+| **API Key**    | You need an API key       | OpenAI, Anthropic, Google       | Pay per use            |
+| **OAuth**      | Login with your account   | Claude Code, GitHub Copilot     | Subscription           |
+| **Web Cookie** | Uses your browser session | ChatGPT Web (Codex), Gemini Web | $0 (uses your account) |
 
 ### Web Cookie Providers
 
@@ -24,16 +30,29 @@ See **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** for general setup instructi
 
 ## Quick Start: Connect Your First Provider
 
+### Optional first-run free-provider setup
+
+The first-run wizard offers an explicit **Set up free providers** card. It derives the current
+eligible list from OmniRoute's no-auth provider registry, then lets you review and deselect each
+provider before confirming. OmniRoute shows the provider's caution notice and a link to its site
+so you can review third-party terms, privacy, availability, and rate limits first.
+
+This action is optional: finishing the wizard never creates free-provider connections silently.
+It creates only providers that are still missing, leaves existing customized connections
+untouched, and reports created, already-configured, and failed providers individually. You can
+safely retry only the failures after a partial result.
+
 ### Option A: Free Provider (No Credit Card)
 
 1. Open the dashboard at `http://localhost:20128`
 2. Go to **Providers** → **Add Provider**
 3. Select one of these free providers:
    - **Kiro AI** — Free Claude models (no auth needed)
-   - **OpenCode Free** — Free GPT models (no auth needed)
    - **Pollinations** — Free GPT-5, Claude, Gemini (no key needed)
    - **LongCat** — 10M tokens free (one-time grant, requires account + KYC)
    - **Cloudflare AI** — 50+ models, 10K neurons/day
+   - **MLX Gemma 26B** — Local Apple Silicon model (~38.5 tok/s, ~15.9GB RAM)
+   - **MLX Qwen 3.8 27B** — Local Apple Silicon model (~9.1 tok/s, ~13.1GB RAM)
 4. Click **Connect**
 5. Done! You now have free AI access.
 
@@ -61,6 +80,94 @@ See **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** for general setup instructi
 5. Login with your account
 6. Done! You now have access to your subscription models.
 
+### Option D: Local MLX Models (Apple Silicon)
+
+For Apple Silicon Macs with unified memory, OmniRoute supports connecting to local MLX models running via `mlx-lm.server` as regular OpenAI-compatible local providers.
+
+#### Prerequisites
+
+- **Apple Silicon Mac** (M1/M2/M3/M4) with 24GB+ unified memory recommended
+- **uv** package manager: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **mlx-lm**: `uv pip install mlx-lm`
+
+#### Quick Start
+
+1. **Install dependencies**:
+
+   ```bash
+   # Install uv if not already installed
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+   # Install mlx-lm
+   uv pip install mlx-lm
+   ```
+
+2. **Start MLX servers manually** (in separate terminals):
+
+   ```bash
+   # Terminal 1: Gemma 4 26B A4B IT-QAT (port 11435)
+   uv run mlx_lm.server --model mlx-community/gemma-4-26B-A4B-it-qat-q4_0-mlx-aligned --port 11435 --host 127.0.0.1
+
+   # Terminal 2: Qwen 3.8 27B MLX Mixed (port 11436)
+   uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
+   ```
+
+3. **Connect in OmniRoute Dashboard**:
+   - Go to **Providers** → **Add Provider**
+   - Select **MLX Gemma 26B** or **MLX Qwen 3.8 27B**
+   - Click **Connect** (no API key needed)
+
+4. **Use with OpenCode**:
+   ```bash
+   # Configure OpenCode to use OmniRoute
+   opencode config set api.base_url http://localhost:20128/v1
+   opencode config set api.key <your-omniroute-api-key>
+
+   # Use MLX models
+   opencode run --model mlx-gemma/gemma-4-26b
+   opencode run --model mlx-qwen/qwen3.8-27b
+   ```
+
+#### Memory Management
+
+**Important**: With 24GB unified memory, only **one large MLX model can run at a time**.
+
+- Gemma 26B: ~15.9GB peak memory
+- Qwen 3.8 27B: ~13.1GB peak memory
+
+You must manage this manually:
+
+- Run only one MLX server at a time, or
+- Run both on separate machines, or
+- Stop one before starting the other
+
+OmniRoute does not automatically manage MLX server processes — it only routes requests to the OpenAI-compatible endpoints you configure.
+
+#### Tool Calling Support
+
+Both models support OpenAI-compatible tool calling. Test with:
+
+```bash
+curl -X POST http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "mlx-gemma/gemma-4-26b",
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+  }'
+```
+
+#### Troubleshooting
+
+| Issue              | Solution                                                                      |
+| ------------------ | ----------------------------------------------------------------------------- |
+| Server won't start | Check `uv run mlx_lm.server --help` and verify model IDs                      |
+| Out of memory      | Ensure only one model runs; close other apps; check Activity Monitor          |
+| Connection refused | Verify server is running on correct port (11435/11436)                        |
+| Slow responses     | First request loads model into memory (~30-60s); subsequent requests are fast |
+| Tool calling fails | Ensure model supports tools; check OmniRoute logs for translation errors      |
+
 ---
 
 ## Best Free Providers
@@ -70,14 +177,11 @@ These providers offer **free access** with no credit card:
 | Provider          | Free Quota       | Models                                   | How to Connect |
 | ----------------- | ---------------- | ---------------------------------------- | -------------- |
 | **Kiro AI**       | 50 credits/month | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | No auth needed |
-| **OpenCode Free** | Unlimited        | GPT-4o, Claude, Gemini                   | No auth needed |
 | **Pollinations**  | No key needed    | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | No auth needed |
 | **LongCat**       | 10M one-time     | LongCat-2.0                              | API key + KYC  |
 | **Cloudflare AI** | 10K neurons/day  | 50+ models                               | No auth needed |
 | **NVIDIA NIM**    | ~40 RPM          | 129 models                               | API key needed |
-| **Cerebras**      | 1M tokens/day    | Qwen3 235B, GPT-OSS 120B                 | API key needed |
-| **Qwen**          | Unlimited        | Qwen3-coder-plus/flash/next              | No auth needed |
-| **Qoder**         | Unlimited        | Kimi-K2, DeepSeek-R1, Qwen3-coder        | No auth needed |
+| **Cerebras**      | $5 signup credit | GLM 4.7, GPT-OSS 120B                    | API key + card |
 
 **Tip**: Connect multiple free providers for **unlimited free AI** with automatic fallback!
 
@@ -145,7 +249,7 @@ OmniRoute works best with **multiple providers**. This gives you:
 
 Connect at least **3 providers** for the best experience:
 
-1. **One free provider** (Kiro, OpenCode Free, or Pollinations) — Always available
+1. **One free provider** (Kiro or Pollinations) — Always available
 2. **One fast provider** (Groq, Cerebras) — For quick responses
 3. **One quality provider** (OpenAI, Anthropic, Google) — For complex tasks
 
@@ -179,6 +283,46 @@ Then use `model: "auto"` and OmniRoute will automatically pick the best one for 
 2. In OmniRoute: Providers → Add Provider → DeepSeek
 3. Paste API key → Connect
 
+### Qoder: choose the credential transport
+
+Qoder requires credentials. Its two transports have different capabilities; a model name
+alone does not identify what a particular connection can do.
+
+| Credential                      | OmniRoute transport                            | Caller tool calling                               | Streaming                                                          |
+| ------------------------------- | ---------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
+| PAT beginning with `pt-`        | Local `qodercli` process on the OmniRoute host | Unsupported                                       | Buffered: SSE is emitted only after the CLI returns the full reply |
+| Non-PAT access token or API key | DashScope OpenAI-compatible HTTP endpoint      | Passed through, subject to the upstream model/key | Upstream HTTP/SSE path                                             |
+
+For a PAT, install the Qoder CLI on the same host or container as OmniRoute. The executable
+must be discoverable as `qodercli`, or set `CLI_QODER_BIN` to its executable path. A CLI
+installed only on the Docker host is not automatically present in the container. Missing
+binaries produce an explicit error directing you to the installation or path setting.
+
+The PAT chat path has a 45-second process timeout. It flattens the conversation into a
+prompt and invokes the CLI in non-streaming print mode. Requesting `stream: true` changes
+the response envelope to SSE; it does not provide incremental upstream token delivery.
+CLI validation/model listing uses a separate 20-second timeout. These are current code
+defaults, not configurable dashboard settings.
+
+Use PAT connections for plain chat. Agent requests carrying `tools` or legacy `functions`
+exclude PAT accounts during credential selection, including pinned combo targets. A mixed
+Qoder pool can still select its HTTP account. Direct calls to the PAT executor also fail
+explicitly before launching the CLI instead of silently dropping tool definitions. This
+restriction concerns tools supplied by the API caller, not any internal tools the Qoder
+CLI might use itself. An HTTP key does not guarantee every model supports tools; normal
+model capability checks still apply.
+
+Browser OAuth is available only when the administrator configures all five settings:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID`, and `QODER_OAUTH_CLIENT_SECRET`. They default to empty; an
+unconfigured installation should use a supported credential import instead of assuming
+that the browser sign-in flow is ready.
+
+Implementation references: [Qoder executor](../../open-sse/executors/qoder.ts),
+[CLI runtime](../../open-sse/services/qoderCli.ts), and
+[OAuth configuration](../../src/lib/oauth/constants/oauth.ts). Incremental PAT streaming
+and a configurable timeout are separate enhancements; this behavior does not promise them.
+
 ### Groq
 
 1. Get API key: https://console.groq.com/
@@ -191,7 +335,7 @@ Then use `model: "auto"` and OmniRoute will automatically pick the best one for 
 
 ### "Do I need to pay to use OmniRoute?"
 
-**No!** OmniRoute is free and open-source. You can use free providers (Kiro, OpenCode Free, Pollinations) without paying anything. You only pay if you choose to use paid providers.
+**No!** OmniRoute is free and open-source. You can use free providers (Kiro, Pollinations) without paying anything. You only pay if you choose to use paid providers.
 
 ### "Which provider should I start with?"
 
@@ -219,5 +363,9 @@ Go to Providers → click on the provider → click **Disconnect**.
 
 - **[Auto-Combo Guide](./AUTO-COMBO-GUIDE.md)** — Let OmniRoute pick the best AI for you
 - **[Free Tiers Guide](./FREE-TIERS-GUIDE.md)** — Get free AI with no credit card
-- **[Troubleshooting](./TROUBLESHOOTING.md)** — Fix common issues
+- **[Troubleshooting](../guides/TROUBLESHOOTING.md)** — Fix common issues
 - **[Provider Reference](../reference/PROVIDER_REFERENCE.md)** — Full list of 226 providers
+
+## Cursor images
+
+Cursor plan images use `IMAGE_PROVIDERS.cursor` (`cursor-agent-image`). See [CURSOR_IMAGE.md](../providers/CURSOR_IMAGE.md).

@@ -131,6 +131,38 @@ test("cleanJSONSchemaForAntigravity handles nested schema", () => {
   assert.ok(typeof result === "object");
 });
 
+test("cleanJSONSchemaForAntigravity deduplicates required array entries (#14083)", () => {
+  const schema = {
+    type: "object",
+    properties: {
+      query: { type: "string" },
+    },
+    required: ["query", "query", "query"],
+  };
+  const result = gemini.cleanJSONSchemaForAntigravity(schema) as Record<string, unknown>;
+  assert.deepEqual(result.required, ["query"]);
+});
+
+test("cleanJSONSchemaForAntigravity normalizes protobuf types (dict, bool, int, float, list) (#14083)", () => {
+  const schema = {
+    type: "object",
+    properties: {
+      a: { type: "dict", properties: { key: { type: "string" } } },
+      b: { type: "bool" },
+      c: { type: "int32" },
+      d: { type: "float" },
+      e: { type: "list", items: { type: "string" } },
+    },
+  };
+  const result = gemini.cleanJSONSchemaForAntigravity(schema) as Record<string, unknown>;
+  const props = result.properties as Record<string, Record<string, unknown>>;
+  assert.equal(props.a.type, "object");
+  assert.equal(props.b.type, "boolean");
+  assert.equal(props.c.type, "integer");
+  assert.equal(props.d.type, "number");
+  assert.equal(props.e.type, "array");
+});
+
 test("convertOpenAIContentToParts maps OpenAI Chat Completions file (PDF) to inlineData", () => {
   const content = [
     { type: "text", text: "read this" },
@@ -163,4 +195,73 @@ test("convertOpenAIContentToParts still maps image_url data URIs (regression)", 
   const inline = parts.find((p) => p.inlineData);
   assert.ok(inline, "image_url must still convert to inlineData");
   assert.equal(inline.inlineData.mimeType, "image/png");
+});
+
+test("convertOpenAIContentToParts forwards per-image ultra-high media resolution", () => {
+  const content = [
+    {
+      type: "image_url",
+      image_url: {
+        url: "data:image/jpeg;base64,/9j/4AAQ",
+        media_resolution: "ultra_high",
+      },
+    },
+  ];
+  const parts = gemini.convertOpenAIContentToParts(content);
+  const inline = parts.find((p) => p.inlineData);
+  assert.ok(inline);
+  assert.deepEqual(inline.mediaResolution, { level: "MEDIA_RESOLUTION_ULTRA_HIGH" });
+});
+
+test("convertOpenAIContentToParts accepts enum-style media resolution on the content part", () => {
+  const content = [
+    {
+      type: "image_url",
+      media_resolution: "MEDIA_RESOLUTION_HIGH",
+      image_url: { url: "https://example.com/image.jpg" },
+    },
+  ];
+  const parts = gemini.convertOpenAIContentToParts(content);
+  const remote = parts.find((p) => p.fileData);
+  assert.ok(remote);
+  assert.deepEqual(remote.mediaResolution, { level: "MEDIA_RESOLUTION_HIGH" });
+});
+
+test("convertOpenAIContentToParts ignores invalid media resolution instead of forwarding garbage", () => {
+  const content = [
+    {
+      type: "image_url",
+      image_url: {
+        url: "data:image/png;base64,iVBORw0KGgo=",
+        media_resolution: "gigantic",
+      },
+    },
+  ];
+  const parts = gemini.convertOpenAIContentToParts(content);
+  const inline = parts.find((p) => p.inlineData);
+  assert.ok(inline);
+  assert.equal(inline.mediaResolution, undefined);
+});
+
+test("convertOpenAIContentToParts accepts the camelCase mediaResolution key on both carriers", () => {
+  const onPart = gemini.convertOpenAIContentToParts([
+    {
+      type: "image_url",
+      mediaResolution: "low",
+      image_url: { url: "data:image/png;base64,iVBORw0KGgo=" },
+    },
+  ]);
+  assert.deepEqual(onPart.find((p) => p.inlineData).mediaResolution, {
+    level: "MEDIA_RESOLUTION_LOW",
+  });
+
+  const onImageUrl = gemini.convertOpenAIContentToParts([
+    {
+      type: "image_url",
+      image_url: { url: "https://example.com/image.jpg", mediaResolution: "medium" },
+    },
+  ]);
+  assert.deepEqual(onImageUrl.find((p) => p.fileData).mediaResolution, {
+    level: "MEDIA_RESOLUTION_MEDIUM",
+  });
 });

@@ -1,8 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createChatPipelineHarness } from "./_chatPipelineHarness.ts";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const harness = await createChatPipelineHarness("reasoning-routing-pipeline");
+// Imported only AFTER the harness has set DATA_DIR and opened the DB: a static
+// import is evaluated before any module body runs, and this module touches the
+// settings/DB layer at load time.
+const { getResolvedModelCapabilities } = await import("../../src/lib/modelCapabilities.ts");
 const {
   BaseExecutor,
   buildOpenAIResponse,
@@ -79,7 +84,12 @@ test("chat pipeline applies a reasoning model/effort rule once and records route
     })
   );
   await response.json();
-  const callLog = await waitFor(() => getLatestCallLog());
+  // #15608: the call-log row is visible as detail_state = 'pending' before its artifact (which
+  // carries pipelinePayloads) is written; wait for the published detail, not just the row.
+  const callLog = await waitFor(async () => {
+    const log = await getLatestCallLog();
+    return log?.detailState === "ready" ? log : null;
+  }, CALL_LOG_SETTLE_TIMEOUT_MS);
 
   assert.equal(response.status, 200);
   assert.equal(fetchCalls.length, 1);
@@ -346,10 +356,20 @@ test("reasoning routing filters incompatible combo targets and rejects an empty 
   await reasoningRulesDb.deleteReasoningRoutingRule(
     (await reasoningRulesDb.getReasoningRoutingRules())[0].id
   );
+  // The target must be a model that DECLARES it cannot think (supportsThinking:
+  // false). `unknown` capability is deliberately kept by
+  // filterComboForReasoningDecision, so a model whose thinking support later
+  // becomes true/unknown silently stops exercising this path — assert the premise.
+  const INCOMPATIBLE_TARGET = "openai/gpt-4o";
+  assert.equal(
+    getResolvedModelCapabilities(INCOMPATIBLE_TARGET).supportsThinking,
+    false,
+    `${INCOMPATIBLE_TARGET} must declare supportsThinking:false for this test to mean anything`
+  );
   const incompatibleCombo = await combosDb.createCombo({
     name: "incompatible-reasoning-combo",
     strategy: "priority",
-    models: ["antigravity/gemini-3-pro"],
+    models: [INCOMPATIBLE_TARGET],
   });
   await reasoningRulesDb.createReasoningRoutingRule({
     name: "Empty combo target",

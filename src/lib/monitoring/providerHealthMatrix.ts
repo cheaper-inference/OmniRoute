@@ -1,9 +1,13 @@
+import { logicalCallSql } from "@/lib/db/logicalCallSql";
+import { registerDbStateResetter } from "@/lib/db/stateReset";
 import { getSyncedAvailableModelsByConnection } from "@/lib/db/models";
 import { getProviderConnections } from "@/lib/db/providers";
 import { getDbInstance } from "@/lib/db/core";
 import { getAllCircuitBreakerStatuses } from "@/shared/utils/circuitBreaker";
 import { getAllModelLockouts } from "@omniroute/open-sse/services/accountFallback";
+import { resolveProviderAlias } from "@omniroute/open-sse/services/model";
 import { getWebSessionPoolHealth } from "@omniroute/open-sse/services/webSessionPoolHealth";
+import { createHealthSnapshotCache } from "./healthSnapshotCache";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -15,6 +19,7 @@ export interface ProviderHealthMatrixOptions {
   provider?: string | null;
   range?: ProviderHealthMatrixRange | string | null;
   includeHealthy?: boolean;
+  includeIdleModels?: boolean;
 }
 
 export interface ProviderHealthMatrixModel {
@@ -46,6 +51,7 @@ export interface ProviderHealthMatrixAccount {
   errorCode: string | null;
   backoffLevel: number;
   modelCount: number;
+  omittedIdleModelCount: number;
   issueCount: number;
   models: ProviderHealthMatrixModel[];
 }
@@ -120,7 +126,11 @@ interface CallLogTargetStats {
   lastErrorStatus: number | null;
 }
 
-const RANGE_MS: Record<ProviderHealthMatrixRange, number> = {
+const statsCache = createHealthSnapshotCache<{ rows: CallLogTargetStats[]; cutoff: string }>();
+registerDbStateResetter(() => statsCache.clear());
+
+/** Exported so other surfaces reporting over a window use the same scale. */
+export const RANGE_MS: Record<ProviderHealthMatrixRange, number> = {
   "1h": 60 * 60 * 1000,
   "24h": 24 * 60 * 60 * 1000,
   "7d": 7 * 24 * 60 * 60 * 1000,
@@ -131,6 +141,11 @@ const TERMINAL_STATUSES = new Set(["banned", "expired", "credits_exhausted"]);
 
 function toString(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function canonicalProviderId(value: unknown): string | null {
+  const provider = toString(value);
+  return provider ? (resolveProviderAlias(provider) ?? provider) : null;
 }
 
 function toNumber(value: unknown): number {
@@ -226,7 +241,7 @@ function queryCallLogTargetStats(
           c.id,
           c.error_summary
         FROM call_logs c
-        WHERE c.provider IS NOT NULL
+        WHERE ${logicalCallSql("c")} AND c.provider IS NOT NULL
           AND c.provider != '-'
           AND c.timestamp >= @cutoff
           ${providerClause}
@@ -345,40 +360,46 @@ export async function buildProviderHealthMatrix(
   const checkedAt = new Date(now).toISOString();
   const range = normalizeRange(options.range);
   const cutoff = new Date(now - RANGE_MS[range]).toISOString();
-  const providerFilter = toString(options.provider);
+  const providerFilter = canonicalProviderId(options.provider);
   const includeHealthy = options.includeHealthy !== false;
 
-  const [connections, breakers, lockouts, stats] = await Promise.all([
-    getProviderConnections(providerFilter ? { provider: providerFilter } : {}),
+  // Connections use canonical ids while circuit breakers, lockouts, and historical
+  // call logs can retain the alias used at dispatch time. Normalize all sources here
+  // so a provider has one health row with every related signal attached.
+  const [connections, breakers, lockouts, statsSnapshot] = await Promise.all([
+    getProviderConnections({}),
     getAllCircuitBreakerStatuses(),
     getAllModelLockouts(),
-    Promise.resolve(queryCallLogTargetStats(cutoff, providerFilter)),
+    statsCache.get(range, () => ({ rows: queryCallLogTargetStats(cutoff, null), cutoff })),
   ]);
 
-  const connectionRows = (connections as JsonRecord[]).filter((connection) => {
-    const provider = toString(connection.provider);
+  const connectionRows = (connections as unknown as JsonRecord[]).filter((connection) => {
+    const provider = canonicalProviderId(connection.provider);
     return provider && (!providerFilter || provider === providerFilter);
   });
-  const breakerRows = (breakers as JsonRecord[]).filter((breaker) => {
-    const provider = toString(breaker.name);
+  const breakerRows = (breakers as unknown as JsonRecord[]).filter((breaker) => {
+    const provider = canonicalProviderId(breaker.name);
     return provider && (!providerFilter || provider === providerFilter);
   });
-  const lockoutRows = (lockouts as JsonRecord[]).filter((lockout) => {
-    const provider = toString(lockout.provider);
+  const lockoutRows = (lockouts as unknown as JsonRecord[]).filter((lockout) => {
+    const provider = canonicalProviderId(lockout.provider);
     return provider && (!providerFilter || provider === providerFilter);
   });
+  const stats = statsSnapshot.rows
+    .map((row) => ({ ...row, provider: canonicalProviderId(row.provider) ?? row.provider }))
+    .filter((row) => !providerFilter || row.provider === providerFilter);
 
   const providerIds = new Set<string>();
   for (const connection of connectionRows) {
-    const provider = toString(connection.provider);
+    const provider = canonicalProviderId(connection.provider);
     if (provider) providerIds.add(provider);
   }
   for (const breaker of breakerRows) {
-    const provider = toString(breaker.name);
+    const provider = canonicalProviderId(breaker.name);
     if (provider) providerIds.add(provider);
   }
   for (const lockout of lockoutRows) {
-    const provider = toString(lockout.provider);
+    const provider = canonicalProviderId(lockout.provider);
     if (provider) providerIds.add(provider);
   }
   for (const row of stats) providerIds.add(row.provider);
@@ -407,7 +428,7 @@ export async function buildProviderHealthMatrix(
   const lockoutsByTarget = new Map<string, JsonRecord>();
   const lockoutCountByProvider = new Map<string, number>();
   for (const lockout of lockoutRows) {
-    const provider = toString(lockout.provider);
+    const provider = canonicalProviderId(lockout.provider);
     const connectionId = toString(lockout.connectionId);
     const model = toString(lockout.model);
     if (!provider || !model) continue;
@@ -418,10 +439,12 @@ export async function buildProviderHealthMatrix(
   const providers: ProviderHealthMatrixProvider[] = [];
   for (const provider of [...providerIds].sort()) {
     const providerConnections = connectionRows.filter(
-      (connection) => toString(connection.provider) === provider
+      (connection) => canonicalProviderId(connection.provider) === provider
     );
     const providerStats = stats.filter((row) => row.provider === provider);
-    const providerBreaker = breakerRows.find((breaker) => toString(breaker.name) === provider);
+    const providerBreaker = breakerRows.find(
+      (breaker) => canonicalProviderId(breaker.name) === provider
+    );
     const circuitBreaker = providerBreaker
       ? {
           state: toString(providerBreaker.state) || "CLOSED",
@@ -443,7 +466,7 @@ export async function buildProviderHealthMatrix(
       if (!accountRows.has(key)) accountRows.set(key, null);
     }
     for (const lockout of lockoutRows) {
-      if (toString(lockout.provider) !== provider) continue;
+      if (canonicalProviderId(lockout.provider) !== provider) continue;
       const key = accountKey(provider, toString(lockout.connectionId));
       if (!accountRows.has(key)) accountRows.set(key, null);
     }
@@ -466,13 +489,17 @@ export async function buildProviderHealthMatrix(
         modelIds.add(stat.model);
       }
       for (const lockout of lockoutRows) {
-        if (toString(lockout.provider) !== provider) continue;
+        if (canonicalProviderId(lockout.provider) !== provider) continue;
         if ((toString(lockout.connectionId) ?? "") !== (connectionId ?? "")) continue;
         const model = toString(lockout.model);
         if (model) modelIds.add(model);
       }
 
-      const models = [...modelIds].sort().map((model): ProviderHealthMatrixModel => {
+      // Idle lines (no traffic in the window and no live lockout) stay out of the
+      // default payload but remain counted, so large catalogs transfer only
+      // the models with activity.
+      const includeIdleModels = options.includeIdleModels === true;
+      const builtModels = [...modelIds].sort().map((model): ProviderHealthMatrixModel => {
         const stat = statsByTarget.get(statsKey(provider, connectionId, model)) ?? null;
         const lockout = lockoutsByTarget.get(modelLockKey(provider, connectionId, model)) ?? null;
         const isLockedOut = Boolean(lockout);
@@ -493,6 +520,10 @@ export async function buildProviderHealthMatrix(
           lastErrorAt: stat?.lastErrorAt ?? null,
         };
       });
+      const models = includeIdleModels
+        ? builtModels
+        : builtModels.filter((model) => model.status !== "idle");
+      const omittedIdleModelCount = includeIdleModels ? 0 : modelIds.size - models.length;
 
       const cooldownUntil = connection ? parseTimeMs(connection.rateLimitedUntil) : null;
       const cooldownRemainingMs = cooldownUntil ? Math.max(0, cooldownUntil - now) : 0;
@@ -514,7 +545,8 @@ export async function buildProviderHealthMatrix(
         lastErrorType: connection ? toString(connection.lastErrorType) : null,
         errorCode: connection ? toString(connection.errorCode) : null,
         backoffLevel: connection ? toNumber(connection.backoffLevel) : 0,
-        modelCount: models.length,
+        modelCount: modelIds.size,
+        omittedIdleModelCount,
         issueCount,
         models,
       });
@@ -587,7 +619,7 @@ export async function buildProviderHealthMatrix(
   return {
     checkedAt,
     range,
-    cutoff,
+    cutoff: statsSnapshot.cutoff,
     summary: {
       providerCount: providers.length,
       connectionCount: providers.reduce((sum, provider) => sum + provider.connections.total, 0),
@@ -611,9 +643,9 @@ export async function buildProviderHealthMatrix(
       pools: poolReport.providers.map((p) => ({
         provider: p.provider,
         health: p.health,
-        pool: p.pool as Record<string, unknown> | null,
-        breaker: p.breaker as Record<string, unknown> | null,
-        sessions: p.sessions as Array<Record<string, unknown>>,
+        pool: p.pool as unknown as Record<string, unknown> | null,
+        breaker: p.breaker as unknown as Record<string, unknown> | null,
+        sessions: p.sessions as unknown as Array<Record<string, unknown>>,
         issues: p.issues,
       })),
     },

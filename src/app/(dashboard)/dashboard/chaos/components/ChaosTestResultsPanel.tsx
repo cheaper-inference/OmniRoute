@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { chaosText, type ChaosTranslator } from "../chaosI18n";
+
 export interface ChaosModelResult {
   providerId: string;
   providerName: string;
@@ -26,29 +29,37 @@ export interface ChaosTestResult {
  * complexity/size ratchet (config/quality/complexity-baseline.json).
  */
 export function ChaosTestResultsPanel({ result }: { result: ChaosTestResult }) {
+  const t = useTranslations("chaosConfig") as ChaosTranslator;
+  const resultsTitle = chaosText(
+    t,
+    "testResults",
+    `Test Results — ${result.mode} mode (${result.totalProviders} providers)`,
+    { mode: result.mode, count: result.totalProviders }
+  );
+  const startedLabel = chaosText(
+    t,
+    "started",
+    `Started: ${new Date(result.startedAt).toLocaleTimeString()}`,
+    { time: new Date(result.startedAt).toLocaleTimeString() }
+  );
+
   return (
-    <div className="p-3 rounded-lg border border-border bg-surface/40 space-y-3">
-      <h3 className="text-sm font-bold text-text-main">
-        Test Results — {result.mode} mode ({result.totalProviders} providers)
-      </h3>
-      <div className="text-xs text-text-muted">
-        Started: {new Date(result.startedAt).toLocaleTimeString()}
-      </div>
+    <div className="p-3 rounded-lg border border-border bg-surface space-y-3">
+      <h3 className="text-sm font-bold text-text-main">{resultsTitle}</h3>
+      <div className="text-xs text-text-muted">{startedLabel}</div>
       {result.models.map((model, idx) => (
         <div
           key={idx}
           className={`p-2 rounded-md text-xs ${
             model.status === "success"
-              ? "bg-green-500/5 border border-green-500/20"
-              : "bg-red-500/5 border border-red-500/20"
+              ? "bg-success-bg border border-success/30"
+              : "bg-error-bg border border-error/30"
           }`}
         >
           <div className="font-medium text-text-main">
             [{idx + 1}] {model.providerName} / {model.modelId}
             <span className="ml-2 text-text-muted">({model.durationMs}ms)</span>
-            <span
-              className={`ml-2 ${model.status === "success" ? "text-green-500" : "text-red-500"}`}
-            >
+            <span className={`ml-2 ${model.status === "success" ? "text-success" : "text-error"}`}>
               {model.status}
             </span>
           </div>
@@ -58,7 +69,7 @@ export function ChaosTestResultsPanel({ result }: { result: ChaosTestResult }) {
               {model.content.length > 300 ? "..." : ""}
             </div>
           )}
-          {model.error && <div className="mt-1 text-red-500">{model.error}</div>}
+          {model.error && <div className="mt-1 text-error">{model.error}</div>}
         </div>
       ))}
     </div>

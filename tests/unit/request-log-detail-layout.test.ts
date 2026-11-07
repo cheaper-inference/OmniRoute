@@ -1,10 +1,32 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
 import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderToStaticMarkup as reactRenderToStaticMarkup } from "react-dom/server";
+import { NextIntlClientProvider } from "next-intl";
 
 const { default: RequestLoggerDetail } =
   await import("../../src/shared/components/RequestLoggerDetail.tsx");
+
+// #9245 localized RequestLoggerDetail (useTranslations("requestLogger.detail")), so the
+// component must render inside NextIntlClientProvider. Use the REAL English messages —
+// the assertions below pin the actual en.json copy, not a stub.
+const here = dirname(fileURLToPath(import.meta.url));
+const enMessages = JSON.parse(
+  readFileSync(resolve(here, "../../src/i18n/messages/en.json"), "utf8")
+);
+
+function renderToStaticMarkup(element: React.ReactElement) {
+  return reactRenderToStaticMarkup(
+    React.createElement(
+      NextIntlClientProvider,
+      { locale: "en", timeZone: "UTC", messages: { requestLogger: enMessages.requestLogger } },
+      element
+    )
+  );
+}
 
 function renderDetailWithSourceFormat(sourceFormat: string) {
   return renderToStaticMarkup(

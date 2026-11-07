@@ -22,8 +22,6 @@ declare namespace NodeJS {
     API_HOST?: string;
     DASHBOARD_PORT?: string;
     OMNIROUTE_PUBLIC_BASE_URL?: string;
-    OMNIROUTE_CGPT_WEB_IMAGE_TIMEOUT_MS?: string;
-    OMNIROUTE_CGPT_WEB_IMAGE_CACHE_MAX_MB?: string;
     OMNIROUTE_BASE_URL?: string;
     OMNIROUTE_DISABLE_BACKGROUND_SERVICES?: string;
     OMNIROUTE_PORT?: string;
@@ -116,7 +114,9 @@ declare module "yazl" {
   export class ZipFile {
     addFile(realPath: string, metadataPath: string): void;
     addBuffer(buffer: Buffer, metadataPath: string): void;
+    addEmptyDirectory(metadataPath: string, options?: Record<string, unknown>): void;
     end(options?: Record<string, unknown>, callback?: () => void): void;
+    on(event: string, listener: (...args: unknown[]) => void): this;
     outputStream: NodeJS.ReadableStream;
   }
 }

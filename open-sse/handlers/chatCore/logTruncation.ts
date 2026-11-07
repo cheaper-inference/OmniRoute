@@ -3,11 +3,12 @@ import {
   getChatLogMaxDepth,
   getChatLogArrayTailItems,
   getChatLogMaxObjectKeys,
+  getChatLogMaxBodyBytes,
 } from "@/lib/logEnv";
+import { createHash } from "node:crypto";
 import { estimateSizeFast } from "../../utils/estimateSize.ts";
 
 export const MEMORY_EXTRACTION_TEXT_LIMIT = 64 * 1024;
-const MAX_LOG_BODY_CHARS = 8 * 1024; // 8KB cap for logged request/response bodies
 
 export function capMemoryExtractionText(value: string): string {
   if (value.length <= MEMORY_EXTRACTION_TEXT_LIMIT) return value;
@@ -22,9 +23,30 @@ export function truncateChatLogText(value: string): string {
   return `${head}\n[...truncated ${value.length - limit} chars...]\n${tail}`;
 }
 
+/**
+ * An oversized `data:image/*;base64,...` URL would otherwise be head/tail
+ * truncated into a corrupt half-image that no viewer or decoder can read —
+ * dead weight in the persisted log. Replace it with a compact reference:
+ * mime, base64 byte count, a 16-hex sha256 fingerprint (stable identity for
+ * dedup/correlation across rows) and a 64-char head. Strings under the limit
+ * and non-image oversize strings keep their existing behavior.
+ */
+export function collapseOversizedDataUrlForLog(value: string): string | Record<string, unknown> {
+  if (value.length <= getChatLogTextLimit()) return value;
+  const match = /^data:(image\/[-\w.+/]+);base64,([\s\S]*)$/.exec(value);
+  if (!match) return truncateChatLogText(value);
+  return {
+    _omniroute_image_ref: true,
+    mime: match[1],
+    base64Bytes: match[2].length,
+    sha256: createHash("sha256").update(match[2]).digest("hex").slice(0, 16),
+    head: value.slice(0, 64),
+  };
+}
+
 export function cloneBoundedChatLogPayload(value: unknown, depth = 0): unknown {
   if (value === null || value === undefined) return value;
-  if (typeof value === "string") return truncateChatLogText(value);
+  if (typeof value === "string") return collapseOversizedDataUrlForLog(value);
   if (typeof value !== "object") return value;
   if (depth >= getChatLogMaxDepth()) return "[MaxDepth]";
 
@@ -60,9 +82,10 @@ export function cloneBoundedChatLogPayload(value: unknown, depth = 0): unknown {
 
 /**
  * Truncate a large object for logging. If its JSON representation exceeds
- * MAX_LOG_BODY_CHARS, return a lightweight summary instead of the full clone.
- * This prevents persistAttemptLogs from holding multi-MB references to
- * translatedBody across 17 call sites per request.
+ * getChatLogMaxBodyBytes() (default 1MB; CHAT_LOG_MAX_BODY_KB env override),
+ * return a lightweight summary instead of the full clone. This prevents
+ * persistAttemptLogs from holding unbounded references to translatedBody
+ * across 17 call sites per request.
  *
  * When the summarized object carries a `tools` definition, re-attach it
  * (bounded via `cloneBoundedChatLogPayload`) so the request-details view can
@@ -75,8 +98,12 @@ export function cloneBoundedChatLogPayload(value: unknown, depth = 0): unknown {
 export function truncateForLog(value: unknown): Record<string, unknown> | null | undefined {
   if (value === null || value === undefined) return value as null | undefined;
   if (typeof value !== "object") return value as unknown as Record<string, unknown>;
-  const estimatedSize = estimateSizeFast(value);
-  if (estimatedSize <= MAX_LOG_BODY_CHARS) return value as Record<string, unknown>;
+  const maxBodyBytes = getChatLogMaxBodyBytes();
+  // Pass maxBodyBytes as the early-exit point — otherwise estimateSizeFast's
+  // own default 256KB early-exit caps what it can ever report, silently
+  // making any configured threshold above 256KB unreachable (#trunc-limit-config).
+  const estimatedSize = estimateSizeFast(value, maxBodyBytes);
+  if (estimatedSize <= maxBodyBytes) return value as Record<string, unknown>;
   // Object is too large — return a summary instead of a deep clone
   const obj = value as Record<string, unknown>;
   const summary: Record<string, unknown> = {
@@ -86,6 +113,11 @@ export function truncateForLog(value: unknown): Record<string, unknown> | null |
   if (typeof obj.model === "string") summary.model = obj.model;
   if (typeof obj.provider === "string") summary.provider = obj.provider;
   if (Array.isArray(obj.messages)) summary.messageCount = obj.messages.length;
+  // Responses API bodies use `input[]`, not `messages[]` (OpenAI-chat/Gemini-only
+  // field name) — without this, a large /v1/responses request got summarized
+  // with no count at all, leaving the dashboard's "Full Conversation" panel
+  // nothing to base its "N messages not shown" placeholder on.
+  else if (Array.isArray(obj.input)) summary.messageCount = obj.input.length;
   if (Array.isArray(obj.contents)) summary.contentCount = obj.contents.length;
   if (typeof obj.stream === "boolean") summary.stream = obj.stream;
   if (Array.isArray(obj.tools)) summary.tools = cloneBoundedChatLogPayload(obj.tools);

@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
+import Icon from "./Icon";
+import { Spinner } from "./Loading";
 import Modal from "./Modal";
 import Button from "./Button";
 import { copyToClipboard } from "@/shared/utils/clipboard";
 import { getNextKiroSocialPollInterval } from "@/lib/oauth/kiroSocialPoll";
+import { errorMessageFromBody } from "@/shared/utils/fetchError";
 
 type KiroSocialOAuthModalProps = {
   isOpen: boolean;
@@ -23,6 +27,7 @@ export default function KiroSocialOAuthModal({
   onSuccess,
   onClose,
 }: KiroSocialOAuthModalProps) {
+  const t = useTranslations("kiroSocialOAuthModal");
   const [step, setStep] = useState<"loading" | "polling" | "success" | "error">("loading");
   const [error, setError] = useState<string | null>(null);
   const [userCode, setUserCode] = useState("");
@@ -60,7 +65,7 @@ export default function KiroSocialOAuthModal({
         if (cancelled) return;
 
         if (!res.ok) {
-          throw new Error(data.error || "Failed to start authorization");
+          throw new Error(errorMessageFromBody(data, t("errorStartAuthorization")));
         }
 
         setUserCode(data.userCode || "");
@@ -80,7 +85,7 @@ export default function KiroSocialOAuthModal({
           pollRef.current = null;
           if (cancelled) return;
           if (Date.now() >= expiresAt) {
-            fail("Authorization expired. Start the login flow again.");
+            fail(t("errorAuthorizationExpired"));
             return;
           }
 
@@ -101,7 +106,7 @@ export default function KiroSocialOAuthModal({
             }
 
             if (!pollData.pending) {
-              fail(pollData.error || "Authorization failed");
+              fail(errorMessageFromBody(pollData, t("errorAuthorizationFailed")));
               return;
             }
 
@@ -124,7 +129,7 @@ export default function KiroSocialOAuthModal({
       cancelled = true;
       stopPolling();
     };
-  }, [isOpen, provider, targetProvider]);
+  }, [isOpen, provider, targetProvider, t]);
 
   const handleClose = () => {
     if (pollRef.current) {
@@ -139,7 +144,7 @@ export default function KiroSocialOAuthModal({
   return (
     <Modal
       isOpen={isOpen}
-      title={`Connect ${providerLabel} via ${providerName}`}
+      title={t("title", { providerLabel, providerName })}
       onClose={handleClose}
       size="lg"
     >
@@ -147,26 +152,20 @@ export default function KiroSocialOAuthModal({
         {step === "loading" && (
           <div className="text-center py-6">
             <div className="size-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-primary animate-spin">
-                progress_activity
-              </span>
+              <Spinner size="lg" label={t("initializing")} />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Initializing...</h3>
-            <p className="text-sm text-text-muted">Setting up {providerName} authentication</p>
+            <h3 className="text-lg font-semibold mb-2">{t("initializing")}</h3>
+            <p className="text-sm text-text-muted">{t("settingUp", { providerName })}</p>
           </div>
         )}
 
         {step === "polling" && (
           <div className="text-center py-6">
             <div className="size-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-primary animate-pulse">
-                open_in_browser
-              </span>
+              <Icon name="open_in_browser" size={30} className="text-primary animate-pulse" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Open this link in an Incognito window</h3>
-            <p className="text-sm text-text-muted mb-3">
-              Use an Incognito/Private window to avoid session conflicts with existing accounts.
-            </p>
+            <h3 className="text-lg font-semibold mb-2">{t("openIncognito")}</h3>
+            <p className="text-sm text-text-muted mb-3">{t("incognitoDescription")}</p>
             {authUrl && (
               <div className="mb-4">
                 <div className="flex items-center gap-2 justify-center">
@@ -178,31 +177,35 @@ export default function KiroSocialOAuthModal({
                   >
                     {authUrl.length > 80 ? authUrl.slice(0, 80) + "..." : authUrl}
                   </a>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => copyToClipboard(authUrl)}
-                    className="shrink-0 p-1 rounded hover:bg-sidebar"
-                    title="Copy link"
+                    className="shrink-0"
+                    title={t("copyLink")}
+                    aria-label={t("copyLink")}
                   >
-                    <span className="material-symbols-outlined text-base">content_copy</span>
-                  </button>
+                    <Icon name="content_copy" size={16} />
+                  </Button>
                 </div>
               </div>
             )}
             {userCode && (
               <div className="mb-4">
-                <p className="text-xs text-text-muted mb-1">Verification code</p>
+                <p className="text-xs text-text-muted mb-1">{t("verificationCode")}</p>
                 <p className="font-mono text-2xl font-bold tracking-widest">{userCode}</p>
               </div>
             )}
-            <div className="flex items-center justify-center gap-2 text-sm text-text-muted">
-              <span className="material-symbols-outlined text-base animate-spin">
-                progress_activity
-              </span>
-              Waiting for authorization...
+            <div
+              role="status"
+              className="flex items-center justify-center gap-2 text-sm text-text-muted"
+            >
+              <Spinner decorative size="sm" />
+              {t("waiting")}
             </div>
             <div className="mt-6">
               <Button onClick={handleClose} variant="ghost" fullWidth>
-                Cancel
+                {t("cancel")}
               </Button>
             </div>
           </div>
@@ -210,31 +213,29 @@ export default function KiroSocialOAuthModal({
 
         {step === "success" && (
           <div className="text-center py-6">
-            <div className="size-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-green-600">
-                check_circle
-              </span>
+            <div className="size-16 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
+              <Icon name="check_circle" size={30} className="text-success" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Connected Successfully!</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("successTitle")}</h3>
             <p className="text-sm text-text-muted mb-4">
-              Your {providerLabel} account via {providerName} has been connected.
+              {t("successMessage", { providerLabel, providerName })}
             </p>
             <Button onClick={handleClose} fullWidth>
-              Done
+              {t("done")}
             </Button>
           </div>
         )}
 
         {step === "error" && (
           <div className="text-center py-6">
-            <div className="size-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-red-600">error</span>
+            <div className="size-16 mx-auto mb-4 rounded-full bg-error/10 flex items-center justify-center">
+              <Icon name="error" size={30} className="text-error" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Connection Failed</h3>
-            <p className="text-sm text-red-600 mb-4">{error}</p>
+            <h3 className="text-lg font-semibold mb-2">{t("errorTitle")}</h3>
+            <p className="text-sm text-error mb-4">{error}</p>
             <div className="flex gap-2">
               <Button onClick={handleClose} variant="ghost" fullWidth>
-                Close
+                {t("close")}
               </Button>
             </div>
           </div>

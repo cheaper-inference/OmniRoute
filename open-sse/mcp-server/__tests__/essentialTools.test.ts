@@ -1,7 +1,7 @@
 /**
  * Unit tests for MCP Essential Tools (Phase 1)
  *
- * Tests all 10 essential tool handlers via the tool handler functions.
+ * Tests the essential tool handlers via the tool handler functions.
  * The omniroute_web_search tests use InMemoryTransport + Client to exercise
  * the actual registered handler (not mockFetch directly).
  */
@@ -22,9 +22,10 @@ describe("MCP Essential Tools", () => {
   });
 
   describe("Tool schema validation", () => {
-    it("should have exactly 11 essential tools (includes web_search + web_fetch + tool_search)", () => {
+    it("should have exactly 14 essential tools (including Radar catalog + x_search)", () => {
+      // 13 -> 14: #10985 shipped omniroute_x_search as a phase-1 tool.
       const schemas = MCP_ESSENTIAL_TOOLS;
-      expect(schemas).toHaveLength(11);
+      expect(schemas).toHaveLength(14);
     });
 
     it("all tools should have omniroute_ prefix", () => {
@@ -293,5 +294,321 @@ describe("omniroute_web_search handler (via MCP dispatch)", () => {
     });
 
     expect(result.isError).toBe(true);
+  });
+});
+
+describe("omniroute_x_search handler (via MCP dispatch)", () => {
+  let client: Client;
+
+  beforeEach(async () => {
+    mockFetch.mockReset();
+
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createMcpServer();
+    await server.connect(serverTransport);
+    client = new Client({ name: "test-client", version: "1.0.0" });
+    await client.connect(clientTransport);
+  });
+
+  afterEach(async () => {
+    await client.close();
+  });
+
+  it("should appear in tools/list after registration", async () => {
+    const { tools } = await client.listTools();
+    const xSearch = tools.find((t) => t.name === "omniroute_x_search");
+    expect(xSearch).toBeDefined();
+    expect(xSearch?.description).toMatch(/X \(Twitter\)/i);
+  });
+
+  it("should POST to /v1/search with provider x-search and search_type x", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        id: "xs1",
+        provider: "x-search",
+        query: "SuperGrok",
+        results: [
+          {
+            title: "@xai",
+            url: "https://x.com/xai/status/1",
+            snippet: "Cited SuperGrok discussion.",
+            position: 1,
+          },
+        ],
+        cached: false,
+        usage: { queries_used: 1, search_cost_usd: 0 },
+      }),
+    });
+
+    const result = await client.callTool({
+      name: "omniroute_x_search",
+      arguments: { query: "SuperGrok", max_results: 5 },
+    });
+
+    expect(result.isError).toBeFalsy();
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/v1/search"),
+      expect.objectContaining({ method: "POST" })
+    );
+    const [, options] = mockFetch.mock.calls[0];
+    const body = JSON.parse(options.body as string);
+    expect(body.query).toBe("SuperGrok");
+    expect(body.max_results).toBe(5);
+    expect(body.search_type).toBe("x");
+    expect(body.provider).toBe("x-search");
+  });
+
+  it("should route an explicit Xquik search through xquik-search", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        id: "xs2",
+        provider: "xquik-search",
+        query: "agents sdk",
+        results: [
+          {
+            title: "@openai",
+            url: "https://x.com/openai/status/1912345678901234567",
+            snippet: "Agents SDK update",
+            position: 1,
+          },
+        ],
+        cached: false,
+        usage: { queries_used: 1, search_cost_usd: 0.00015 },
+      }),
+    });
+
+    const result = await client.callTool({
+      name: "omniroute_x_search",
+      arguments: { query: "agents sdk", max_results: 5, provider: "xquik-search" },
+    });
+
+    expect(result.isError).toBeFalsy();
+    const [, options] = mockFetch.mock.calls[0];
+    const body = JSON.parse(options.body as string);
+    expect(body.search_type).toBe("x");
+    expect(body.provider).toBe("xquik-search");
+  });
+});
+
+// ── omniroute_get_health: handler dispatch tests ──────────────────────────────
+// These tests use InMemoryTransport + Client to exercise the actual registered
+// handler (not mockFetch directly), so they catch the real bug the original
+// mock-only tests above (lines 39-56) could never catch: process.uptime()
+// returns a *number*, and a naive toString() guard silently discards it.
+
+describe("omniroute_get_health handler (via MCP dispatch)", () => {
+  let client: Client;
+
+  beforeEach(async () => {
+    mockFetch.mockReset();
+
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createMcpServer();
+    await server.connect(serverTransport);
+    client = new Client({ name: "test-client", version: "1.0.0" });
+    await client.connect(clientTransport);
+  });
+
+  afterEach(async () => {
+    await client.close();
+  });
+
+  function mockHealthSources(opts: {
+    health?: unknown;
+    healthError?: Error;
+    resilience?: unknown;
+    resilienceError?: Error;
+    rateLimits?: unknown;
+    rateLimitsError?: Error;
+  }) {
+    mockFetch.mockImplementation(async (url: string) => {
+      if (url.includes("/api/monitoring/health")) {
+        if (opts.healthError) throw opts.healthError;
+        return { ok: true, json: async () => opts.health ?? {} };
+      }
+      if (url.includes("/api/resilience")) {
+        if (opts.resilienceError) throw opts.resilienceError;
+        return { ok: true, json: async () => opts.resilience ?? {} };
+      }
+      if (url.includes("/api/rate-limits")) {
+        if (opts.rateLimitsError) throw opts.rateLimitsError;
+        return { ok: true, json: async () => opts.rateLimits ?? {} };
+      }
+      throw new Error(`unexpected fetch: ${url}`);
+    });
+  }
+
+  it("should render a real numeric uptime as a string, not fall back to unknown", async () => {
+    mockHealthSources({
+      health: {
+        uptime: 4731.9817064,
+        version: "3.8.50",
+        memoryUsage: { heapUsed: 746337096, heapTotal: 765358080 },
+      },
+      resilience: { circuitBreakers: [] },
+      rateLimits: { limits: [] },
+    });
+
+    const result = await client.callTool({ name: "omniroute_get_health", arguments: {} });
+
+    expect(result.isError).toBeFalsy();
+    const content = result.content as Array<{ type: string; text: string }>;
+    const data = JSON.parse(content[0].text);
+    expect(data.uptime).toBe("4731.9817064");
+    expect(data.version).toBe("3.8.50");
+  });
+
+  it("should surface a degraded entry when one source fetch fails, instead of silently faking success", async () => {
+    mockHealthSources({
+      health: { uptime: 100, version: "3.8.50" },
+      resilience: { circuitBreakers: [] },
+      rateLimitsError: new Error("connect ECONNREFUSED 127.0.0.1:20128"),
+    });
+
+    const result = await client.callTool({ name: "omniroute_get_health", arguments: {} });
+
+    expect(result.isError).toBeFalsy();
+    const content = result.content as Array<{ type: string; text: string }>;
+    const data = JSON.parse(content[0].text);
+    // The two healthy sources still come through untouched.
+    expect(data.uptime).toBe("100");
+    expect(data.rateLimits).toEqual([]);
+    // But the failure is visible instead of being indistinguishable from "no rate limits".
+    expect(Array.isArray(data.degraded)).toBe(true);
+    expect(data.degraded).toHaveLength(1);
+    expect(data.degraded[0].source).toBe("rateLimits");
+    expect(data.degraded[0].error).toContain("ECONNREFUSED");
+  });
+
+  it("should omit degraded entirely when every source succeeds", async () => {
+    mockHealthSources({
+      health: { uptime: 1, version: "3.8.50" },
+      resilience: { circuitBreakers: [] },
+      rateLimits: { limits: [] },
+    });
+
+    const result = await client.callTool({ name: "omniroute_get_health", arguments: {} });
+
+    const content = result.content as Array<{ type: string; text: string }>;
+    const data = JSON.parse(content[0].text);
+    expect(data.degraded).toBeUndefined();
+  });
+
+  it("should surface the curated adaptive-admission lane block when health carries it", async () => {
+    mockHealthSources({
+      health: {
+        uptime: 100,
+        version: "3.8.50",
+        adaptiveAdmission: {
+          virtualLanes: true,
+          pressure: "high",
+          utilization: 0.72,
+          laneCount: 3,
+          laneQueuedCount: 12,
+          laneQueuedCost: 340,
+          laneTenants: [
+            { tenantKey: "lane-a", queuedCount: 6, queuedCost: 200 },
+            { tenantKey: "lane-b", queuedCount: 4, queuedCost: 90 },
+            { tenantKey: "lane-c", queuedCount: 2, queuedCost: 50 },
+          ],
+          admittedCount: 900,
+          rejectedCount: 7,
+          wouldRejectCount: 3,
+          shutdown: false,
+        },
+      },
+      resilience: { circuitBreakers: [] },
+      rateLimits: { limits: [] },
+    });
+
+    const result = await client.callTool({ name: "omniroute_get_health", arguments: {} });
+
+    expect(result.isError).toBeFalsy();
+    const content = result.content as Array<{ type: string; text: string }>;
+    const data = JSON.parse(content[0].text);
+    expect(data.adaptiveAdmission.virtualLanes).toBe(true);
+    expect(data.adaptiveAdmission.pressure).toBe("high");
+    expect(data.adaptiveAdmission.utilization).toBe(0.72);
+    expect(data.adaptiveAdmission.laneTenants).toHaveLength(3);
+    expect(data.adaptiveAdmission.laneTenants[0]).toEqual({
+      tenantKey: "lane-a",
+      queuedCount: 6,
+      queuedCost: 200,
+    });
+    expect(data.adaptiveAdmission.admittedCount).toBe(900);
+    expect(data.adaptiveAdmission.rejectedCount).toBe(7);
+    expect(data.adaptiveAdmission.wouldRejectCount).toBe(3);
+    expect(data.adaptiveAdmission.shutdown).toBe(false);
+  });
+
+  it("should coerce string lane flags and malformed lane entries defensively", async () => {
+    mockHealthSources({
+      health: {
+        uptime: 1,
+        version: "x",
+        adaptiveAdmission: {
+          virtualLanes: "true",
+          shutdown: "false",
+          laneTenants: ["garbage", { tenantKey: "ok", queuedCount: 2, queuedCost: 7 }],
+        },
+      },
+      resilience: {},
+      rateLimits: {},
+    });
+
+    const result = await client.callTool({ name: "omniroute_get_health", arguments: {} });
+
+    const content = result.content as Array<{ type: string; text: string }>;
+    const data = JSON.parse(content[0].text);
+    // "true" string counts as on; "false" string must NOT invert to on.
+    expect(data.adaptiveAdmission.virtualLanes).toBe(true);
+    expect(data.adaptiveAdmission.shutdown).toBe(false);
+    // Malformed entries degrade to zeroed records instead of throwing.
+    expect(data.adaptiveAdmission.laneTenants).toEqual([
+      { tenantKey: "ok", queuedCount: 2, queuedCost: 7 },
+      { tenantKey: "", queuedCount: 0, queuedCost: 0 },
+    ]);
+  });
+
+  it("should cap laneTenants at the top 10 by queued cost", async () => {
+    const laneTenants = Array.from({ length: 12 }, (_, i) => ({
+      tenantKey: `tenant-${i}`,
+      queuedCount: i,
+      queuedCost: i * 10,
+    }));
+    mockHealthSources({
+      health: {
+        uptime: 1,
+        version: "x",
+        adaptiveAdmission: { virtualLanes: true, laneTenants },
+      },
+      resilience: {},
+      rateLimits: {},
+    });
+
+    const result = await client.callTool({ name: "omniroute_get_health", arguments: {} });
+
+    const content = result.content as Array<{ type: string; text: string }>;
+    const data = JSON.parse(content[0].text);
+    expect(data.adaptiveAdmission.laneTenants).toHaveLength(10);
+    // Highest queued cost first, lowest dropped from the cap.
+    expect(data.adaptiveAdmission.laneTenants[0].tenantKey).toBe("tenant-11");
+    expect(data.adaptiveAdmission.laneTenants[9].tenantKey).toBe("tenant-2");
+  });
+
+  it("should omit adaptiveAdmission entirely when the health payload has none", async () => {
+    mockHealthSources({
+      health: { uptime: 1, version: "x" },
+      resilience: { circuitBreakers: [] },
+      rateLimits: { limits: [] },
+    });
+
+    const result = await client.callTool({ name: "omniroute_get_health", arguments: {} });
+
+    const content = result.content as Array<{ type: string; text: string }>;
+    const data = JSON.parse(content[0].text);
+    expect(data).not.toHaveProperty("adaptiveAdmission");
   });
 });

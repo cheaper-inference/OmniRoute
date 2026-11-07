@@ -16,6 +16,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { shouldTripProviderBreakerForResult } from "../../src/sse/handlers/chat.ts";
+import { isProviderBreakerFailureStatus } from "../../src/sse/handlers/chatPredicates.ts";
 import { shouldRecordProviderBreakerFailure } from "../../open-sse/services/combo/comboPredicates.ts";
 
 // The exact abort shape described in the PR body / issue #7907: no upstream
@@ -25,6 +26,11 @@ const ABORT_RESULT = {
   status: 502,
   error: "request_signal_aborted",
 } as const;
+
+test("single-model breaker status guard accepts only provider-level failures", () => {
+  assert.equal(isProviderBreakerFailureStatus(502), true);
+  assert.equal(isProviderBreakerFailureStatus(429), false);
+});
 
 test("chat.ts single-model path: breaker stays CLOSED on a client abort (502 default, no errorCode)", () => {
   assert.equal(shouldTripProviderBreakerForResult(ABORT_RESULT, false, false), false);

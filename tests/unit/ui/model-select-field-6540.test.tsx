@@ -7,8 +7,12 @@
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, afterEach } from "vitest";
+// The shared Select renders the kit (Radix) Select for `options` since KEA-7886: no DOM
+// <select>/<option>; the helpers read the menu items (data-value) and the controlled value.
+import { kitSelectOptions, kitSelectTriggers, kitSelectValue } from "../../helpers/kitSelect";
 
-const { default: ModelSelectField } = await import("../../../src/shared/components/ModelSelectField");
+const { default: ModelSelectField } =
+  await import("../../../src/shared/components/ModelSelectField");
 
 function okJson(data: unknown) {
   return Promise.resolve({ ok: true, json: () => Promise.resolve(data) } as Response);
@@ -58,12 +62,11 @@ describe("ModelSelectField (#6540)", () => {
     );
 
     const el = render(<ModelSelectField value="" onChange={() => {}} />);
-    const select = () => el.querySelector("select");
-    await waitFor(() => (select()?.querySelectorAll("option").length ?? 0) >= 3); // placeholder + 2
+    const select = () => el.querySelector<HTMLButtonElement>("[data-slot=select-trigger]");
+    // the picker is disabled while the catalog loads
+    await waitFor(() => !!select() && !select()!.disabled);
 
-    const optionValues = Array.from(select()!.querySelectorAll("option")).map(
-      (o) => (o as HTMLOptionElement).value
-    );
+    const optionValues = kitSelectOptions(select()!).map((o) => o.value);
     expect(optionValues).toContain("openrouter/auto");
     expect(optionValues).toContain("openai/gpt-5");
   });
@@ -72,19 +75,20 @@ describe("ModelSelectField (#6540)", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(() =>
-        okJson({ models: [{ provider: "openrouter", model: "auto", fullModel: "openrouter/auto" }] })
+        okJson({
+          models: [{ provider: "openrouter", model: "auto", fullModel: "openrouter/auto" }],
+        })
       )
     );
 
     const el = render(<ModelSelectField value="legacy/deprecated-model" onChange={() => {}} />);
-    const select = () => el.querySelector("select") as HTMLSelectElement | null;
-    await waitFor(() => (select()?.querySelectorAll("option").length ?? 0) >= 2);
+    const select = () => el.querySelector<HTMLButtonElement>("[data-slot=select-trigger]");
+    await waitFor(() => !!select() && !select()!.disabled);
 
-    const options = Array.from(select()!.querySelectorAll("option")).map(
-      (o) => (o as HTMLOptionElement).value
-    );
+    const options = kitSelectOptions(select()!).map((o) => o.value);
     expect(options).toContain("legacy/deprecated-model");
-    expect(select()!.value).toBe("legacy/deprecated-model");
+    expect(kitSelectValue(select()!)).toBe("legacy/deprecated-model");
+    expect(select()!.textContent).toContain("legacy/deprecated-model");
   });
 
   it("falls back to a text input when the /api/models fetch fails", async () => {
@@ -97,6 +101,7 @@ describe("ModelSelectField (#6540)", () => {
     await waitFor(() => el.querySelector("input") !== null);
 
     expect(el.querySelector("select")).toBeNull();
+    expect(kitSelectTriggers(el)).toHaveLength(0);
     expect((el.querySelector("input") as HTMLInputElement).value).toBe("some-value");
   });
 });

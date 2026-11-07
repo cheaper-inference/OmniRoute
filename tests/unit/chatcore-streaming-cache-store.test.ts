@@ -6,9 +6,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-const { storeStreamingSemanticCacheResponse } = await import(
-  "../../open-sse/handlers/chatCore/streamingSemanticCacheStore.ts"
-);
+const { storeStreamingSemanticCacheResponse } =
+  await import("../../open-sse/handlers/chatCore/streamingSemanticCacheStore.ts");
 
 type Stored = { sig: unknown; model: string; body: Record<string, unknown>; tokens: number };
 
@@ -18,8 +17,12 @@ function makeDeps(overrides: Record<string, unknown> = {}) {
     isCacheableForWrite: () => true,
     isSmallEnoughForSemanticCache: () => true,
     generateSignature: (...a: unknown[]) => `sig:${JSON.stringify(a)}`,
-    setCachedResponse: (sig: unknown, model: string, body: Record<string, unknown>, tokens: number) =>
-      stored.push({ sig, model, body, tokens }),
+    setCachedResponse: (
+      sig: unknown,
+      model: string,
+      body: Record<string, unknown>,
+      tokens: number
+    ) => stored.push({ sig, model, body, tokens }),
     ...overrides,
   } as Parameters<typeof storeStreamingSemanticCacheResponse>[1];
   return { deps, stored };
@@ -40,6 +43,34 @@ function baseArgs(overrides: Record<string, unknown> = {}) {
   } as Parameters<typeof storeStreamingSemanticCacheResponse>[0];
 }
 
+function assertNumericSignatureInputs(
+  deps: Parameters<typeof storeStreamingSemanticCacheResponse>[1]
+): void {
+  if (process.env.NODE_ENV === "__semantic_cache_type_contract__") {
+    storeStreamingSemanticCacheResponse(
+      {
+        enabled: true,
+        streamStatus: 200,
+        streamResponseBody: {},
+        body: {
+          messages: [],
+          temperature: 0,
+          // @ts-expect-error top_p is a numeric producer field
+          top_p: "1",
+        },
+        headers: undefined,
+        model: "gpt-x",
+      },
+      deps
+    );
+  }
+}
+
+test("signature input contract keeps top_p numeric", () => {
+  const { deps } = makeDeps();
+  assertNumericSignatureInputs(deps);
+});
+
 test("happy path → stores cleaned body (no _streamed), tokens = prompt + completion", () => {
   const { deps, stored } = makeDeps();
   storeStreamingSemanticCacheResponse(baseArgs(), deps);
@@ -48,6 +79,8 @@ test("happy path → stores cleaned body (no _streamed), tokens = prompt + compl
   assert.equal(stored[0].tokens, 20);
   assert.equal("_streamed" in stored[0].body, false);
   assert.equal(stored[0].body.id, "resp-1");
+  const signatureArgs = JSON.parse(String(stored[0].sig).slice("sig:".length)) as unknown[];
+  assert.deepEqual(signatureArgs.slice(2, 4), [0, 1]);
 });
 
 test("non-200 stream status → no store", () => {
@@ -59,6 +92,18 @@ test("non-200 stream status → no store", () => {
 test("disabled → no store", () => {
   const { deps, stored } = makeDeps();
   storeStreamingSemanticCacheResponse(baseArgs({ enabled: false }), deps);
+  assert.equal(stored.length, 0);
+});
+
+test("transcript-observed streams never enter the semantic cache", () => {
+  const { deps, stored } = makeDeps();
+  storeStreamingSemanticCacheResponse(
+    baseArgs({
+      streamResponseBody: { choices: [{ message: { content: "PRIVATE_STREAM_SENTINEL" } }] },
+      videoTranscriptSensitive: true,
+    }),
+    deps
+  );
   assert.equal(stored.length, 0);
 });
 
@@ -93,4 +138,39 @@ test("a throwing dep is swallowed (fail-open, non-critical)", () => {
     },
   });
   assert.doesNotThrow(() => storeStreamingSemanticCacheResponse(baseArgs(), deps));
+});
+
+// #12734: tool_choice/tools/response_format must reach generateSignature so a cached
+// tool_calls streaming response cannot be replayed under a stricter tool policy.
+test("signature is called with tool_choice/tools/response_format from body (#12734)", () => {
+  let captured: unknown[] = [];
+  const { deps } = makeDeps({
+    generateSignature: (...a: unknown[]) => {
+      captured = a;
+      return "sig";
+    },
+  });
+  const tools = [{ type: "function", function: { name: "get_weather" } }];
+  storeStreamingSemanticCacheResponse(
+    baseArgs({
+      body: {
+        messages: [{ role: "user", content: "hi" }],
+        temperature: 0,
+        top_p: 1,
+        tool_choice: "none",
+        tools,
+        response_format: { type: "json_object" },
+      },
+    }),
+    deps
+  );
+  // args: (model, messages ?? input, temperature, top_p, apiKeyId, constraints)
+  const constraints = captured[5] as {
+    toolChoice: unknown;
+    tools: unknown;
+    responseFormat: unknown;
+  };
+  assert.equal(constraints.toolChoice, "none");
+  assert.deepEqual(constraints.tools, tools);
+  assert.deepEqual(constraints.responseFormat, { type: "json_object" });
 });

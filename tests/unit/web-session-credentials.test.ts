@@ -42,6 +42,18 @@ test("web session credential metadata identifies cookie, token, and no-auth prov
     acceptsFullCookieHeader: false,
     storageKeys: ["token", "userToken"],
   });
+  {
+    const req = webSessionCredentials.getWebSessionCredentialRequirement("zai-web");
+    assert.ok(req && req.kind === "token");
+    assert.equal(req.credentialName, 'Local Storage value named "token"');
+    assert.equal(req.acceptsFullCookieHeader, false);
+    assert.deepEqual(req.storageKeys, ["token"]);
+    assert.equal(req.hintKey, "zaiWebCredentialHint");
+    assert.ok(req.hintFallback?.includes("Do not copy a Cookie header"));
+    assert.equal(req.guideSteps?.length, 4);
+    assert.ok(req.guideSteps?.some((step) => step.includes("Local Storage")));
+    assert.ok(req.guideSteps?.some((step) => step.includes("browser transport")));
+  }
   // Arena (lmarena): assert contract/intent only — do not freeze UX copy.
   // #3810 chunk name, #4271 split SSR cookies, full Cookie header paste.
   {
@@ -71,8 +83,20 @@ test("web session credential metadata identifies cookie, token, and no-auth prov
     acceptsFullCookieHeader: true,
     storageKeys: ["cookie", "hf-chat"],
   });
-  // veoaifree-web is now a NOAUTH provider — not in WEB_SESSION_CREDENTIAL_REQUIREMENTS
-  assert.equal(webSessionCredentials.getWebSessionCredentialRequirement("veoaifree-web"), null);
+  assert.deepEqual(webSessionCredentials.getWebSessionCredentialRequirement("veoaifree-web"), {
+    kind: "cookie",
+    credentialName: "wordpress_logged_in cookie",
+    placeholder: "wordpress_logged_in_...=... or full Cookie header from veoaifree.com",
+    acceptsFullCookieHeader: true,
+    storageKeys: ["cookie", "wordpress_logged_in"],
+  });
+  assert.deepEqual(webSessionCredentials.getWebSessionCredentialRequirement("veo-free"), {
+    kind: "cookie",
+    credentialName: "wordpress_logged_in cookie",
+    placeholder: "wordpress_logged_in_...=... or full Cookie header from veoaifree.com",
+    acceptsFullCookieHeader: true,
+    storageKeys: ["cookie", "wordpress_logged_in"],
+  });
   assert.deepEqual(webSessionCredentials.getWebSessionCredentialRequirement("t3-web"), {
     kind: "cookie",
     credentialName: "convex-session-id + Cookie header",
@@ -82,35 +106,88 @@ test("web session credential metadata identifies cookie, token, and no-auth prov
     // #5465 — t3.chat ships a step-by-step DevTools copy hint (localStorage + Cookie header).
     hintKey: "t3ChatWebCookieHint",
   });
+  assert.deepEqual(webSessionCredentials.getWebSessionCredentialRequirement("conol-web"), {
+    kind: "cookie",
+    credentialName: "__Secure-better-auth.session_token",
+    placeholder: "__Secure-better-auth.session_token=... or full Cookie header from conol.ai",
+    acceptsFullCookieHeader: true,
+    // #8974 defines storageKeys on the conol-web entry (src/shared/providers/webSessionCredentials.ts)
+    storageKeys: ["cookie", "__Secure-better-auth.session_token"],
+  });
+});
+
+test("MaxAI and UC keep independent top-level credential contracts", () => {
+  assert.deepEqual(webSessionCredentials.getWebSessionCredentialRequirement("maxai"), {
+    kind: "token",
+    credentialName: "MaxAI access token (Bearer) + device id",
+    placeholder:
+      "Use browser sign-in — OmniRoute mints the MaxAI access token, device id, and user id for you",
+    acceptsFullCookieHeader: false,
+    storageKeys: [
+      "accessToken",
+      "access_token",
+      "maxaiAccessToken",
+      "deviceId",
+      "maxaiDeviceId",
+      "userId",
+      "maxaiUserId",
+    ],
+  });
+
+  const uc = webSessionCredentials.getWebSessionCredentialRequirement("uc");
+  assert.ok(uc && uc.kind === "cookie");
+  assert.equal(uc.credentialName, "Clerk __client cookie + session id + user id");
+  assert.equal(uc.acceptsFullCookieHeader, true);
+  assert.ok(uc.storageKeys.includes("__client"));
+  assert.ok(uc.storageKeys.includes("sid"));
+  assert.ok(uc.storageKeys.includes("uid"));
 });
 
 test("web session credential validator requires provider-specific non-empty values", () => {
   assert.equal(
-    webSessionCredentials.hasUsableWebSessionCredential("qwen-web", { token: "qwen-token" }),
+    webSessionCredentials.hasUsableWebSessionCredential("kimi-web", { token: "kimi-token" }),
     true
   );
   assert.equal(
-    webSessionCredentials.hasUsableWebSessionCredential("qwen-web", { token: "   " }),
+    webSessionCredentials.hasUsableWebSessionCredential("kimi-web", { token: "   " }),
     false
   );
   assert.equal(
-    webSessionCredentials.hasUsableWebSessionCredential("qwen-web", { unrelated: "value" }),
+    webSessionCredentials.hasUsableWebSessionCredential("kimi-web", { unrelated: "value" }),
     false
   );
   assert.equal(
-    webSessionCredentials.hasUsableWebSessionCredential("chatgpt-web", {
+    webSessionCredentials.hasUsableWebSessionCredential("perplexity-web", {
       cookie: "__Secure-next-auth.session-token=session",
     }),
     true
   );
   assert.equal(
-    webSessionCredentials.hasUsableWebSessionCredential("chatgpt-web", { unrelated: "value" }),
+    webSessionCredentials.hasUsableWebSessionCredential("perplexity-web", { unrelated: "value" }),
+    false
+  );
+  assert.equal(
+    webSessionCredentials.hasUsableWebSessionCredential("veoaifree-web", {
+      wordpress_logged_in_hash: "user|123|session",
+    }),
+    true
+  );
+  assert.equal(
+    webSessionCredentials.hasUsableWebSessionCredential("veo-free", {
+      cookie: "wordpress_logged_in_hash=user%7C123",
+    }),
+    true
+  );
+  assert.equal(
+    webSessionCredentials.hasUsableWebSessionCredential("veoaifree-web", { unrelated: "value" }),
     false
   );
 });
 
 test("no-auth web providers can be saved without an API key", () => {
   assert.equal(providers.providerAllowsOptionalApiKey("veoaifree-web"), true);
-  assert.equal(webSessionCredentials.requiresWebSessionCredential("veoaifree-web"), false);
-  assert.equal(webSessionCredentials.requiresWebSessionCredential("chatgpt-web"), true);
+  assert.equal(webSessionCredentials.requiresWebSessionCredential("veoaifree-web"), true);
+  assert.equal(webSessionCredentials.requiresWebSessionCredential("perplexity-web"), true);
+  assert.equal(providers.providerAllowsOptionalApiKey("aihorde"), true);
+  assert.equal(webSessionCredentials.requiresWebSessionCredential("aihorde"), false);
 });

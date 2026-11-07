@@ -15,7 +15,7 @@ const { DEFAULT_MODEL_ALIAS_SEED, seedDefaultModelAliases } =
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -25,7 +25,7 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("default model alias seed writes missing aliases and is idempotent", async () => {
@@ -44,10 +44,12 @@ test("default model alias seed writes missing aliases and is idempotent", async 
   const routed = await sseModelService.getModelInfo("gemini-3.1-pro");
   // The stored alias target is "agy/gemini-pro-agent", but getModelInfo canonicalizes
   // the "agy" alias to its provider id "antigravity" (ALIAS_TO_PROVIDER_ID, #8013).
+  // supportsThinking is surfaced from the registry's supportsReasoning flag since #9485.
   assert.deepEqual(routed, {
     provider: "antigravity",
     model: "gemini-pro-agent",
     extendedContext: false,
+    supportsThinking: true,
   });
 
   const second = await seedDefaultModelAliases();

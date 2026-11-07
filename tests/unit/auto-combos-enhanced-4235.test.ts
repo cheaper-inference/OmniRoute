@@ -20,11 +20,12 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "auto-4235-test-secret";
 
 const core = await import("../../src/lib/db/core.ts");
+const advertisedAuto = await import("../../src/app/api/v1/models/autoCatalogIds.ts");
 const builtinCatalog = await import("../../open-sse/services/autoCombo/builtinCatalog.ts");
 
 function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -34,16 +35,16 @@ test.beforeEach(() => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("#4235 Phase A: README-advertised cheap/offline/smart are in the built-in catalog", () => {
-  const ids = Object.keys(builtinCatalog.AUTO_TEMPLATE_VARIANTS);
+  const ids = advertisedAuto.getAdvertisedAutoIds();
   for (const id of ["auto/cheap", "auto/offline", "auto/smart"]) {
-    assert.ok(
-      ids.includes(id),
-      `expected ${id} in AUTO_TEMPLATE_VARIANTS (advertised in /v1/models)`
-    );
+    assert.ok(ids.includes(id), `expected ${id} advertised in /v1/models`);
+  }
+  for (const id of Object.keys(builtinCatalog.AUTO_TEMPLATE_VARIANTS)) {
+    assert.ok(ids.includes(id), `expected template ${id} still advertised`);
   }
 });
 

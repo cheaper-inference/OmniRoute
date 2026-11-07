@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 // Import BEFORE mocking global.fetch — open-sse/utils/proxyFetch.ts overwrites
 // globalThis.fetch as a module-load side effect, so a mock installed before the
-// import gets clobbered (same pattern as tests/unit/provider-models-qwen-web-redirect-6267.test.ts).
+// import gets clobbered (the same pattern used by other proxy-fetch regression tests).
 const { validateWebCookieProvider } = await import("../../src/lib/providers/validation.ts");
 
 const originalFetch = globalThis.fetch;
@@ -11,7 +11,7 @@ test.after(() => {
   globalThis.fetch = originalFetch;
 });
 
-test("should_not_report_Invalid_when_lmarena_models_probe_307_redirects", async () => {
+test("should_not_report_Invalid_when_lmarena_pulse_probe_307_redirects", async () => {
   const fetchCalls: string[] = [];
   globalThis.fetch = (async (input: RequestInfo | URL) => {
     const url = typeof input === "string" ? input : input.toString();
@@ -26,7 +26,7 @@ test("should_not_report_Invalid_when_lmarena_models_probe_307_redirects", async 
   });
 
   assert.equal(fetchCalls.length, 1);
-  assert.equal(fetchCalls[0], "https://arena.ai/nextjs-api/stream/create-evaluation/models");
+  assert.equal(fetchCalls[0], "https://arena.ai/api/me/pulse");
   assert.equal(result.valid, false);
   assert.equal(
     result.unsupported,

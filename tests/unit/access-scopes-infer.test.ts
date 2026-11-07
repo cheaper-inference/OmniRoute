@@ -9,10 +9,8 @@ test("read methods default to read", () => {
 });
 
 test("mutating methods default to write", () => {
-  assert.equal(inferRequiredScope("POST", "/api/keys"), "write");
   assert.equal(inferRequiredScope("PUT", "/api/config"), "write");
   assert.equal(inferRequiredScope("PATCH", "/api/combo/x"), "write");
-  assert.equal(inferRequiredScope("DELETE", "/api/keys/abc"), "write");
 });
 
 test("admin-prefix routes require admin for ANY method", () => {
@@ -45,4 +43,26 @@ test("prefix matching does not over-match unrelated paths", () => {
   assert.equal(inferRequiredScope("GET", "/api/authz-inventory"), "read");
   // "/api/services" itself and its children are admin, but a lookalike is not
   assert.equal(inferRequiredScope("GET", "/api/services-catalog"), "read");
+});
+
+test("API-key management needs admin: a write token cannot mint a manage-scoped key (GHSA-35gq)", () => {
+  assert.equal(inferRequiredScope("POST", "/api/keys"), "admin");
+  assert.equal(inferRequiredScope("PATCH", "/api/keys/abc"), "admin");
+  assert.equal(inferRequiredScope("DELETE", "/api/keys/abc"), "admin");
+  assert.equal(inferRequiredScope("POST", "/api/keys/abc/regenerate"), "admin");
+  // listing stays readable, but the plaintext reveal is admin even though it is a GET
+  assert.equal(inferRequiredScope("GET", "/api/keys"), "read");
+  assert.equal(inferRequiredScope("GET", "/api/keys/abc/reveal"), "admin");
+  assert.equal(inferRequiredScope("GET", "/api/keys-catalog"), "read");
+});
+
+test("the global system prompt is operator-only: a write token cannot rewrite it", () => {
+  // The prompt is injected into every request through the gateway, for every client.
+  for (const method of ["PUT", "POST", "PATCH", "DELETE"]) {
+    assert.equal(inferRequiredScope(method, "/api/settings/system-prompt"), "admin", method);
+    assert.equal(inferRequiredScope(method, "/api/settings/system-prompt/"), "admin", method);
+  }
+  assert.equal(inferRequiredScope("GET", "/api/settings/system-prompt"), "read");
+  // Exact path only: the other settings sub-routes keep the method-inferred scope.
+  assert.equal(inferRequiredScope("PUT", "/api/settings/combo-defaults"), "write");
 });

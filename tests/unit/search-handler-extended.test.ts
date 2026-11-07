@@ -123,7 +123,7 @@ test("handleSearch builds Brave news requests and normalizes favicon metadata", 
   }
 });
 
-test("handleSearch builds Exa requests with include/exclude domains and preserves rich result fields", async () => {
+test("handleSearch builds Exa requests with contents-nested options, include/exclude domains, and preserves rich result fields", async () => {
   const originalFetch = globalThis.fetch;
   let captured;
 
@@ -165,8 +165,7 @@ test("handleSearch builds Exa requests with include/exclude domains and preserve
       query: "agentic workflows",
       numResults: 5,
       type: "auto",
-      text: true,
-      highlights: true,
+      contents: { text: true, highlights: true },
       includeDomains: ["allowed.com"],
       excludeDomains: ["blocked.com"],
       category: "news",

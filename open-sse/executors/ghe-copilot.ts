@@ -15,6 +15,10 @@ export class GheCopilotExecutor extends GithubExecutor {
       format: "openai",
       baseUrl: "https://api.githubcopilot.com/chat/completions",
       responsesBaseUrl: "https://api.githubcopilot.com/responses",
+      // Static default only; the executor's getMessagesBase() derives the real
+      // per-connection host from copilotApiUrl/gheUrl at request time. Its
+      // presence enables Claude -> /v1/messages routing in the buildUrl override.
+      messagesUrl: "https://api.githubcopilot.com/v1/messages",
       authType: "oauth",
       authHeader: "bearer",
       ...config,
@@ -38,14 +42,20 @@ export class GheCopilotExecutor extends GithubExecutor {
       (typeof psd?.copilotApiUrl === "string" ? psd.copilotApiUrl : undefined) ||
       (typeof psd?.copilotProxyUrl === "string" ? psd.copilotProxyUrl : undefined);
     if (apiOrProxy) {
-      const base = apiOrProxy.replace(/\/chat\/completions\/?$/, "").replace(/\/responses\/?$/, "").replace(/\/+$/, "");
+      const base = apiOrProxy
+        .replace(/\/chat\/completions\/?$/, "")
+        .replace(/\/responses\/?$/, "")
+        .replace(/\/+$/, "");
       return base.endsWith("/chat/completions") ? base : `${base}/chat/completions`;
     }
     const gheUrl = psd?.gheUrl as string | undefined;
     if (!gheUrl) {
       throw new Error("GHE Copilot executor requires gheUrl in providerSpecificData");
     }
-    const base = gheUrl.replace(/\/chat\/completions\/?$/, "").replace(/\/responses\/?$/, "").replace(/\/+$/, "");
+    const base = gheUrl
+      .replace(/\/chat\/completions\/?$/, "")
+      .replace(/\/responses\/?$/, "")
+      .replace(/\/+$/, "");
     return base.endsWith("/chat/completions") ? base : `${base}/chat/completions`;
   }
 
@@ -59,15 +69,46 @@ export class GheCopilotExecutor extends GithubExecutor {
       (typeof psd?.copilotApiUrl === "string" ? psd.copilotApiUrl : undefined) ||
       (typeof psd?.copilotProxyUrl === "string" ? psd.copilotProxyUrl : undefined);
     if (apiOrProxy) {
-      const base = apiOrProxy.replace(/\/chat\/completions\/?$/, "").replace(/\/responses\/?$/, "").replace(/\/+$/, "");
+      const base = apiOrProxy
+        .replace(/\/chat\/completions\/?$/, "")
+        .replace(/\/responses\/?$/, "")
+        .replace(/\/+$/, "");
       return `${base}/responses`;
     }
     const gheUrl = psd?.gheUrl as string | undefined;
     if (!gheUrl) {
       throw new Error("GHE Copilot executor requires gheUrl in providerSpecificData");
     }
-    const base = gheUrl.replace(/\/chat\/completions\/?$/, "").replace(/\/responses\/?$/, "").replace(/\/+$/, "");
+    const base = gheUrl
+      .replace(/\/chat\/completions\/?$/, "")
+      .replace(/\/responses\/?$/, "")
+      .replace(/\/+$/, "");
     return `${base}/responses`;
+  }
+
+  /**
+   * Derive the base URL for the Anthropic-native /v1/messages shim from the GHE
+   * host in providerSpecificData. Claude models use this endpoint (prompt-cache
+   * token counts + lossless tool_use/tool_result/thinking blocks) rather than
+   * the OpenAI-shaped /chat/completions. Appends /v1/messages if not present.
+   */
+  private getMessagesBase(credentials: ProviderCredentials | null): string {
+    const psd = credentials?.providerSpecificData;
+    const apiOrProxy =
+      (typeof psd?.copilotApiUrl === "string" ? psd.copilotApiUrl : undefined) ||
+      (typeof psd?.copilotProxyUrl === "string" ? psd.copilotProxyUrl : undefined);
+    const host = apiOrProxy || (psd?.gheUrl as string | undefined);
+    if (!host) {
+      throw new Error(
+        "GHE Copilot executor requires copilotApiUrl or gheUrl in providerSpecificData"
+      );
+    }
+    const base = host
+      .replace(/\/v1\/messages\/?$/, "")
+      .replace(/\/chat\/completions\/?$/, "")
+      .replace(/\/responses\/?$/, "")
+      .replace(/\/+$/, "");
+    return `${base}/v1/messages`;
   }
 
   /**
@@ -80,11 +121,35 @@ export class GheCopilotExecutor extends GithubExecutor {
       : model;
   }
 
-  override buildUrl(model: string, stream: boolean, urlIndex = 0, credentials: ProviderCredentials | null = null): string {
+  override buildUrl(
+    model: string,
+    stream: boolean,
+    urlIndex = 0,
+    credentials: ProviderCredentials | null = null
+  ): string {
     const bareModel = this.stripPrefix(model);
-    const targetFormat = getModelTargetFormat("ghe-copilot", bareModel);
+    // Honor the per-request targetFormat (synced catalog / custom model)
+    // threaded by chatCore/executionCredentials.ts, same as GithubExecutor.buildUrl.
+    const overrideTargetFormat = (
+      credentials as { providerSpecificData?: { targetFormat?: unknown } } | null
+    )?.providerSpecificData?.targetFormat;
+    const targetFormat =
+      typeof overrideTargetFormat === "string"
+        ? overrideTargetFormat
+        : getModelTargetFormat("ghe-copilot", bareModel);
+    // Claude models: ALWAYS route to the Anthropic-native /v1/messages shim
+    // (same as github.com Copilot), matched on the model NAME so a Claude id
+    // that is missing its registry targetFormat tag still gets the native shim
+    // instead of the lossy /chat/completions path.
+    if ((targetFormat === "claude" || /claude/i.test(bareModel)) && this.config.messagesUrl) {
+      return this.getMessagesBase(credentials);
+    }
+    const hasExplicitNonResponsesOverride =
+      typeof overrideTargetFormat === "string" && overrideTargetFormat !== "openai-responses";
     if (
-      (targetFormat === "openai-responses" || /codex/i.test(bareModel)) &&
+      (targetFormat === "openai-responses" ||
+        (!hasExplicitNonResponsesOverride &&
+          (/codex/i.test(bareModel) || /^gpt-(?:[6-9]|5\.[5-9])/i.test(bareModel)))) &&
       this.supportsResponsesEndpoint(bareModel)
     ) {
       return this.getResponsesBase(credentials);
@@ -170,13 +235,13 @@ export class GheCopilotExecutor extends GithubExecutor {
       // GHE OAuth token endpoint
       const baseUrl = gheUrl.replace(/\/chat\/completions\/?$/, "").replace(/\/responses\/?$/, "");
       const tokenUrl = `${baseUrl}/login/oauth/access_token`;
-      
+
       const params = new URLSearchParams({
         grant_type: "refresh_token",
         refresh_token: refreshToken,
         client_id: this.config.clientId,
       });
-      
+
       if (this.config.clientSecret) {
         params.set("client_secret", this.config.clientSecret);
       }
@@ -189,7 +254,7 @@ export class GheCopilotExecutor extends GithubExecutor {
         },
         body: params,
       });
-      
+
       if (!response.ok) return null;
       const tokens = await response.json();
       log?.info?.("TOKEN", "GHE GitHub token refreshed");
@@ -237,7 +302,11 @@ export class GheCopilotExecutor extends GithubExecutor {
     );
     if (!githubTokens?.accessToken) return null;
 
-    const copilotResult = await this.refreshCopilotToken(githubTokens.accessToken, log, credentials);
+    const copilotResult = await this.refreshCopilotToken(
+      githubTokens.accessToken,
+      log,
+      credentials
+    );
     if (!copilotResult) return githubTokens;
 
     return {
@@ -254,7 +323,11 @@ export class GheCopilotExecutor extends GithubExecutor {
    * buildUrl routes chat/responses traffic to the correct enterprise host.
    */
   override async refreshCredentials(credentials: ProviderCredentials, log?: ExecutorLog | null) {
-    const copilotResult = await this.refreshCopilotToken(credentials?.accessToken, log, credentials);
+    const copilotResult = await this.refreshCopilotToken(
+      credentials?.accessToken,
+      log,
+      credentials
+    );
 
     if (!copilotResult && credentials?.refreshToken) {
       return this.refreshViaGitHubToken(credentials, log);

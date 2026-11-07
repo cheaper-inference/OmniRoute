@@ -12,7 +12,7 @@
 
 import { getPool } from "@/lib/db/quotaPools";
 import { getGroupName } from "@/lib/db/quotaGroups";
-import { getCachedProviderConnectionById } from "@/lib/localDb";
+import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import {
   getCombos,
   createCombo,
@@ -20,6 +20,7 @@ import {
   getComboByName,
   updateCombo,
 } from "@/lib/db/combos";
+import { getCustomModels, getSyncedAvailableModelsForConnection } from "@/lib/db/models";
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry";
 import {
   quotaModelName,
@@ -108,6 +109,48 @@ function getProviderModelIds(provider: string): string[] {
     .filter((id): id is string => id !== null && id.length > 0);
 }
 
+/**
+ * Return the list of model IDs for a provider by unioning:
+ * 1. Provider REGISTRY (same source /v1/models uses)
+ * 2. Custom models configured for this provider in the database
+ * 3. Synced models discovered from upstream for this connection
+ */
+async function resolveProviderModelIds(provider: string, connId: string): Promise<string[]> {
+  const modelIds = new Set<string>(getProviderModelIds(provider));
+
+  try {
+    const custom = await getCustomModels(provider);
+    if (Array.isArray(custom)) {
+      for (const m of custom) {
+        if (m && typeof m === "object" && typeof (m as { id?: unknown }).id === "string") {
+          const id = (m as { id: string }).id.trim();
+          if (id) modelIds.add(id);
+        }
+      }
+    }
+  } catch (err) {
+    log.warn(
+      { err: (err as Error)?.message, provider },
+      "failed to load custom models for quota combos"
+    );
+  }
+
+  try {
+    const synced = await getSyncedAvailableModelsForConnection(provider, connId);
+    for (const model of synced) {
+      const id = model.id.trim();
+      if (id) modelIds.add(id);
+    }
+  } catch (err) {
+    log.warn(
+      { err: (err as Error)?.message, provider, connId },
+      "failed to load synced models for quota combos"
+    );
+  }
+
+  return Array.from(modelIds);
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -152,7 +195,10 @@ export async function syncQuotaCombos(poolId: string): Promise<void> {
   for (const connId of pool.connectionIds) {
     let connection: Record<string, unknown> | null = null;
     try {
-      connection = (await getCachedProviderConnectionById(connId)) as Record<string, unknown> | null;
+      connection = (await getCachedProviderConnectionById(connId)) as Record<
+        string,
+        unknown
+      > | null;
     } catch {
       // Connection lookup failure — skip this connection.
       continue;
@@ -162,8 +208,7 @@ export async function syncQuotaCombos(poolId: string): Promise<void> {
     const provider = connection.provider;
     if (typeof provider !== "string" || provider.length === 0) continue;
 
-    const modelIds = getProviderModelIds(provider);
-    if (modelIds.length === 0) continue;
+    const modelIds = await resolveProviderModelIds(provider, connId);
 
     for (const modelId of modelIds) {
       // B4: use groupName (not pool.name) as the first arg so combos carry the group slug.
@@ -202,6 +247,10 @@ export async function syncQuotaCombos(poolId: string): Promise<void> {
     }));
     try {
       const existing = await getComboByName(comboName);
+      // A pool may be deleted while this fire-and-forget sync is awaiting combo
+      // lookups. Re-check immediately before the synchronous DB upsert so stale
+      // create/update work cannot recreate managed combos after delete cleanup.
+      if (!getPool(poolId)) return;
       const payload = {
         name: comboName,
         models: steps,

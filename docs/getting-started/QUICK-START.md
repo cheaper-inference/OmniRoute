@@ -1,6 +1,12 @@
+---
+title: "Quick Start: Get OmniRoute Running in 3 Minutes"
+version: 3.8.50
+lastUpdated: 2026-08-06
+---
+
 # Quick Start: Get OmniRoute Running in 3 Minutes
 
-> **TL;DR**: Install → Connect a free provider → Point your IDE to OmniRoute. Done.
+> **TL;DR**: Install → Connect an eligible provider → Point your IDE to OmniRoute. Done.
 
 ---
 
@@ -19,6 +25,8 @@ npm install -g omniroute
 ```bash
 docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ```
+
+`:latest` is the highest **published** stable SemVer. It does **not** track git `main`. Pin `diegosouzapw/omniroute:X.Y.Z` for GitOps. See [Image Tags / Release Channels](../guides/DOCKER_GUIDE.md#release-channels).
 
 ### Option C: From Source
 
@@ -41,33 +49,11 @@ OmniRoute starts at `http://localhost:20128`. The dashboard opens automatically.
 
 ---
 
-## Step 3: Connect a Free Provider
+## Step 3: Connect an Eligible Provider
 
-You can use OmniRoute **without paying anything** by connecting a free provider.
+Choose a provider whose terms and quota fit your needs. In **Dashboard → Providers**, connect your own account or API key, then test the connection. Free access and keyless availability are not guaranteed.
 
-### Option A: Kiro (Free Claude — No Credit Card)
-
-1. Open the dashboard at `http://localhost:20128`
-2. Go to **Providers** → **Add Provider**
-3. Select **Kiro AI**
-4. Click **Connect** (no API key needed!)
-5. Done! You now have free access to Claude models.
-
-### Option B: OpenCode Free (No Auth)
-
-1. Open the dashboard at `http://localhost:20128`
-2. Go to **Providers** → **Add Provider**
-3. Select **OpenCode Free**
-4. Click **Connect** (no API key needed!)
-5. Done! You now have free access to multiple models.
-
-### Option C: Pollinations (No Key Needed)
-
-1. Open the dashboard at `http://localhost:20128`
-2. Go to **Providers** → **Add Provider**
-3. Select **Pollinations**
-4. Click **Connect** (no API key needed!)
-5. Done! You now have free access to GPT-5, Claude, Gemini, and more.
+`auto` excludes providers marked `tos: avoid`, including Kiro, by default. Connecting an account does not change that policy. The opt-in in **Dashboard → Combos** applies to all auto combos. Review the [Free Tiers Guide](./FREE-TIERS-GUIDE.md) before choosing a provider.
 
 ---
 
@@ -134,6 +120,8 @@ omniroute launch-codex --model auto
 
 You can do this manually via `codex` and command line parameters to specify endpoint and api key, but with the above command, OmniRoute takes care of everything for you.
 
+The same one-command launch works for other CLIs via the generic launcher — `omniroute run <target>` supports `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, and `gemini` (see [CLI Integrations](../guides/CLI-INTEGRATIONS.md)).
+
 3. The CLI should be sending requests to OmniRoute now.
 
 ### Confirm your tool is routing to OmniRoute
@@ -146,8 +134,8 @@ You can see the details of the request by clicking [Monitoring/Logs](http://loca
 
 - **[Auto-Combo Guide](./AUTO-COMBO-GUIDE.md)** — Let OmniRoute pick the best AI for you
 - **[Providers Guide](./PROVIDERS-GUIDE.md)** — Connect more providers (free and paid)
-- **[Free Tiers Guide](./FREE-TIERS-GUIDE.md)** — Get free AI with no credit card
-- **[Troubleshooting](./TROUBLESHOOTING.md)** — Fix common issues
+- **[Free Tiers Guide](./FREE-TIERS-GUIDE.md)** — Review provider terms and free-tier limits
+- **[Troubleshooting](../guides/TROUBLESHOOTING.md)** — Fix common issues
 
 ---
 
@@ -155,7 +143,7 @@ You can see the details of the request by clicking [Monitoring/Logs](http://loca
 
 ### "Do I need an API key?"
 
-**No!** You can use free providers (Kiro, OpenCode Free, Pollinations) without any API key. Just connect them in the dashboard.
+The OmniRoute API key authenticates your tools. Upstream credentials depend on the provider: some require an API key or account login. Free access is not guaranteed.
 
 ### "What is `auto`?"
 
@@ -177,6 +165,6 @@ OmniRoute automatically skips failed providers and tries the next one. You don't
 
 ## Need Help?
 
-- **[Troubleshooting](./TROUBLESHOOTING.md)** — Common issues and fixes
+- **[Troubleshooting](../guides/TROUBLESHOOTING.md)** — Common issues and fixes
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Community support
 - **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — Report bugs

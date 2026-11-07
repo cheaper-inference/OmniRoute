@@ -54,7 +54,12 @@ export function planFromHeader(
   }
 
   const combo = combos[lower] ?? combos[h];
-  return combo ? withSource({ mode: "stacked", stackedPipeline: combo }, "request-header") : null;
+  // Only a real, non-empty pipeline is a chosen plan: an empty-array combo would otherwise win
+  // the precedence race and let the builtin fallback pipeline run lossy unrequested, and the
+  // plain-object lookup resolves prototype keys (constructor, toString) to truthy garbage.
+  return Array.isArray(combo) && combo.length > 0
+    ? withSource({ mode: "stacked", stackedPipeline: combo }, "request-header")
+    : null;
 }
 
 /** Renders the X-OmniRoute-Compression response header value. */
@@ -128,8 +133,18 @@ export function buildNamedComboLookup(
  * silent behaviour change for installs whose backfilled engine flags don't exactly match
  * their old defaultMode.
  */
+/** The config fields the default-plan derivation reads (the dashboard preview passes its own
+ *  panel-shaped config, so the full server CompressionConfig is not required — #14700). */
+export type DefaultPlanConfig = Pick<CompressionConfig, "enabled" | "engines" | "activeComboId"> &
+  Partial<
+    Pick<
+      CompressionConfig,
+      "enginesExplicit" | "defaultMode" | "stackedPipeline" | "comboOverrides"
+    >
+  >;
+
 export function deriveDefaultPlanFromConfig(
-  config: CompressionConfig,
+  config: DefaultPlanConfig,
   comboId: string | null,
   combos: NamedCombos = {}
 ): DerivedPlan {
@@ -141,10 +156,17 @@ export function deriveDefaultPlanFromConfig(
 
   // Legacy path: defaultMode carries the effective mode (the engines map is display-only here).
   const legacyMode = config.defaultMode;
+  if (legacyMode === "stacked") {
+    // #18637: the backfilled map is what the dashboard renders. Single-mode defaultModes always
+    // backfill their own engine, but "stacked" can derive ZERO enabled engines (lossy-only
+    // default combo, caveman/rtk off) — then the panel shows everything off while dispatch
+    // would still run a pipeline. Nothing legacy is left to preserve: match the display.
+    const anyEngineOn = Object.values(config.engines ?? {}).some((toggle) => toggle?.enabled);
+    if (!anyEngineOn) return { mode: "off", stackedPipeline: [] };
+    return { mode: legacyMode, stackedPipeline: config.stackedPipeline ?? [] };
+  }
   if (legacyMode && legacyMode !== "off") {
-    return legacyMode === "stacked"
-      ? { mode: legacyMode, stackedPipeline: config.stackedPipeline ?? [] }
-      : { mode: legacyMode, stackedPipeline: [] };
+    return { mode: legacyMode, stackedPipeline: [] };
   }
 
   return { mode: "off", stackedPipeline: [] };

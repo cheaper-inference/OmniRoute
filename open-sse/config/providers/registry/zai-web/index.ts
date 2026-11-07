@@ -10,10 +10,31 @@ export const zai_webProvider: RegistryEntry = {
   // Distinct from the API-key `zai`/`glm` providers (api.z.ai).
   baseUrl: "https://chat.z.ai",
   authType: "apikey",
-  authHeader: "cookie",
+  authHeader: "bearer",
+  // Z.ai's visible "Tools" switch enables its internal VLM/MCP tools. It does
+  // not accept caller-supplied OpenAI `tools`, which remains disabled here.
   models: [
-    { id: "glm-4.6", name: "GLM-4.6", toolCalling: false },
-    { id: "glm-4.5", name: "GLM-4.5", toolCalling: false },
-    { id: "glm-4.5v", name: "GLM-4.5V (Vision)", toolCalling: false },
+    {
+      id: "glm-5.3-flash",
+      name: "GLM-5.3-Flash",
+      toolCalling: false,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "high", "max"],
+      supportsVision: true,
+    },
+    {
+      id: "glm-5.3",
+      name: "GLM-5.3",
+      toolCalling: false,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "high", "max"],
+    },
+    {
+      id: "glm-5.2",
+      name: "GLM-5.2",
+      toolCalling: false,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["high", "max"],
+    },
   ],
 };

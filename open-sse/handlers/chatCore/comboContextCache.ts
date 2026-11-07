@@ -1,4 +1,4 @@
-import { getUpstreamProxyConfig } from "@/lib/localDb";
+import { FallbackBackend, getUpstreamProxyConfig } from "@/lib/db/upstreamProxy";
 
 /**
  * Module-level cache for upstream proxy config (shared across all requests).
@@ -8,6 +8,8 @@ type UpstreamProxyConfigCacheEntry = {
   mode: string;
   enabled: boolean;
   cliproxyapiModelMapping: Record<string, unknown> | null;
+  // #dario: retry-leg backend when mode === "fallback".
+  fallbackBackend: FallbackBackend;
   ts: number;
 };
 
@@ -26,7 +28,8 @@ const COMBOS_CACHE_TTL = 10_000;
 
 export async function getCombosCached(): Promise<unknown[]> {
   const now = Date.now();
-  const { getCombos, getCombosCacheVersion } = await import("@/lib/localDb");
+  const { getCombos } = await import("@/lib/db/combos");
+  const { getCombosCacheVersion } = await import("@/lib/db/readCache");
   const version = getCombosCacheVersion();
   // A combo write (create/update/delete/reorder) bumps the shared version via
   // invalidateDbCache("combos"); when it no longer matches our snapshot we drop
@@ -67,9 +70,16 @@ export async function getUpstreamProxyConfigCached(providerId: string) {
         mode: cfg.mode,
         enabled: cfg.enabled,
         cliproxyapiModelMapping: cfg.cliproxyapiModelMapping ?? null,
+        fallbackBackend: cfg.fallbackBackend,
         ts: Date.now(),
       }
-    : { mode: "native" as const, enabled: false, cliproxyapiModelMapping: null, ts: Date.now() };
+    : {
+        mode: "native" as const,
+        enabled: false,
+        cliproxyapiModelMapping: null,
+        fallbackBackend: "cliproxyapi" as const,
+        ts: Date.now(),
+      };
   _proxyConfigCache.set(providerId, result);
   return result;
 }

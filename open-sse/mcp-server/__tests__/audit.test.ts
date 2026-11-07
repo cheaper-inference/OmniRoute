@@ -18,6 +18,19 @@ function createStatementMock() {
   };
 }
 
+// The production path must use runtimeRequire(): a dynamic node:module import is
+// compiled incorrectly in the standalone webpack bundle (`createRequire` becomes
+// a non-function), disabling every MCP audit write at runtime.
+it("uses the bundle-safe runtime loader for better-sqlite3", () => {
+  const source = fs.readFileSync(path.join(process.cwd(), "open-sse/mcp-server/audit.ts"), "utf8");
+  expect(source).toContain('runtimeRequire("better-sqlite3")');
+  expect(source).not.toContain('await import("node:module")');
+  expect(source).not.toContain("createRequire(import.meta.url)");
+});
+
+// The shutdown tests inject through the audit connection cache
+// (globalThis.__omnirouteMcpAuditDb), and the fallback test uses the
+// __setBetterSqliteLoaderForTests seam.
 describe("MCP audit shutdown", () => {
   let dataDir: string;
   let dbFile: string;
@@ -34,42 +47,31 @@ describe("MCP audit shutdown", () => {
   afterEach(() => {
     delete process.env.DATA_DIR;
     globalThis.__omnirouteMcpAuditDb = undefined;
+    vi.doUnmock("../../../src/lib/db/adapters/runtimeRequire.ts");
     vi.restoreAllMocks();
   });
 
-  it(
-    "checkpoints and closes the audit database during shutdown",
-    async () => {
-      const mockDb: MockAuditDb = {
-        prepare: vi.fn(() => createStatementMock()),
-        pragma: vi.fn(),
-        close: vi.fn(),
-        open: true,
-      };
-      const MockDatabase = vi.fn(function MockDatabase() {
-        return mockDb;
-      });
+  it("checkpoints and closes the audit database during shutdown", async () => {
+    const mockDb: MockAuditDb = {
+      prepare: vi.fn(() => createStatementMock()),
+      pragma: vi.fn(),
+      close: vi.fn(),
+      open: true,
+    };
 
-      vi.doMock("better-sqlite3", () => ({
-        default: MockDatabase,
-      }));
+    const audit = await import("../audit.ts");
+    // Inject through the connection cache — the seam the module itself uses.
+    globalThis.__omnirouteMcpAuditDb = mockDb as unknown as typeof globalThis.__omnirouteMcpAuditDb;
 
-      const audit = await import("../audit.ts");
+    await audit.logToolCall("omniroute_get_health", { ok: true }, { ok: true }, 12, true);
+    expect(mockDb.prepare).toHaveBeenCalledTimes(1);
 
-      await audit.logToolCall("omniroute_get_health", { ok: true }, { ok: true }, 12, true);
-      expect(mockDb.prepare).toHaveBeenCalledTimes(1);
-
-      expect(audit.closeAuditDb()).toBe(true);
-      expect(mockDb.pragma).toHaveBeenCalledWith("wal_checkpoint(TRUNCATE)");
-      expect(mockDb.close).toHaveBeenCalledTimes(1);
-      expect(audit.closeAuditDb()).toBe(false);
-    },
-    // Explicit generous timeout (vitest default is 5000ms): under contended
-    // CI-runner load, vi.resetModules() + a fresh dynamic import + mocked DB
-    // calls can exceed the default budget though the behavior is correct
-    // (issue #6803).
-    30000
-  );
+    expect(audit.closeAuditDb()).toBe(true);
+    expect(mockDb.pragma).toHaveBeenCalledWith("wal_checkpoint(TRUNCATE)");
+    expect(mockDb.close).toHaveBeenCalledTimes(1);
+    expect(audit.closeAuditDb()).toBe(false);
+  }, // (issue #6803). // calls can exceed the default budget though the behavior is correct // CI-runner load, vi.resetModules() + a fresh dynamic import + mocked DB // Explicit generous timeout (vitest default is 5000ms): under contended
+  30000);
 
   it("still closes the audit database when checkpoint fails", async () => {
     const mockDb: MockAuditDb = {
@@ -80,19 +82,48 @@ describe("MCP audit shutdown", () => {
       close: vi.fn(),
       open: true,
     };
-    const MockDatabase = vi.fn(function MockDatabase() {
-      return mockDb;
-    });
-
-    vi.doMock("better-sqlite3", () => ({
-      default: MockDatabase,
-    }));
 
     const audit = await import("../audit.ts");
+    globalThis.__omnirouteMcpAuditDb = mockDb as unknown as typeof globalThis.__omnirouteMcpAuditDb;
 
     await audit.logToolCall("omniroute_get_health", {}, {}, 5, true);
     expect(audit.closeAuditDb()).toBe(true);
     expect(mockDb.close).toHaveBeenCalledTimes(1);
+  });
+
+  it("loads the native audit database through the standalone-safe runtime loader", async () => {
+    class FakeDatabase {
+      open = true;
+
+      prepare(sql: string) {
+        if (sql.includes("COUNT(*) as total") && sql.includes("AVG(duration_ms)")) {
+          return {
+            ...createStatementMock(),
+            get: vi.fn(() => ({ total: 7, successRate: 0.75, avgDuration: 12 })),
+          };
+        }
+        return {
+          ...createStatementMock(),
+          all: vi.fn(() => [{ tool: "omniroute_get_health", count: 7 }]),
+        };
+      }
+
+      pragma() {}
+      close() {}
+    }
+
+    vi.doMock("../../../src/lib/db/adapters/runtimeRequire.ts", () => ({
+      runtimeRequire: () => FakeDatabase,
+    }));
+
+    const audit = await import("../audit.ts");
+
+    await expect(audit.getAuditStats()).resolves.toEqual({
+      totalCalls: 7,
+      successRate: 0.75,
+      avgDurationMs: 12,
+      topTools: [{ tool: "omniroute_get_health", count: 7 }],
+    });
   });
 
   it("falls back to node:sqlite when better-sqlite3 binding is missing", async () => {
@@ -103,26 +134,15 @@ describe("MCP audit shutdown", () => {
 
     // Simulate a global-install scenario where the bundled native binary
     // never landed in dist/node_modules/better-sqlite3/build/Release/.
+    // Thrown from the loader seam so the test does not depend on a native binding.
     const bindingErr = new Error(
       "Could not locate the bindings file. Tried: …/better_sqlite3.node"
     ) as Error & { code?: string };
     bindingErr.code = "MODULE_NOT_FOUND";
-    // Simulate the binding-missing failure as the better-sqlite3 default
-    // constructor throwing — this matches reality (`new Database()` throws
-    // "Could not locate the bindings file" when the prebuilt .node is absent)
-    // and reaches the adapter's `catch (nativeErr)`. A factory that itself
-    // throws is reported by vitest as a mock-setup error and never reaches
-    // the code under test.
-    const ThrowingDatabase = vi.fn(function ThrowingDatabase() {
-      throw bindingErr;
-    });
-    vi.doMock("better-sqlite3", () => ({
-      default: ThrowingDatabase,
-    }));
 
-    // node:sqlite's DatabaseSync does not expose a boolean `open` property,
-    // so the mock intentionally omits it — the adapter tracks open state in
-    // a local closure and exposes it via a getter.
+    // node:sqlite IS loaded via dynamic import(), so doMock works for it.
+    // Its DatabaseSync does not expose a boolean `open` property — the
+    // adapter tracks open state in a local closure.
     const mockNodeDb = {
       prepare: vi.fn(() => createStatementMock()),
       exec: vi.fn(),
@@ -134,17 +154,112 @@ describe("MCP audit shutdown", () => {
     vi.doMock("node:sqlite", () => ({ DatabaseSync }));
 
     const audit = await import("../audit.ts");
+    audit.__setBetterSqliteLoaderForTests(() => {
+      throw bindingErr;
+    });
 
-    await audit.logToolCall("omniroute_get_health", { ok: true }, { ok: true }, 4, true);
-    expect(DatabaseSync).toHaveBeenCalledWith(dbFile);
-    expect(mockNodeDb.prepare).toHaveBeenCalled();
+    try {
+      await audit.logToolCall("omniroute_get_health", { ok: true }, { ok: true }, 4, true);
+      expect(DatabaseSync).toHaveBeenCalledWith(dbFile);
+      expect(mockNodeDb.prepare).toHaveBeenCalled();
 
-    expect(audit.closeAuditDb()).toBe(true);
-    expect(mockNodeDb.exec).toHaveBeenCalledWith("PRAGMA wal_checkpoint(TRUNCATE)");
-    expect(mockNodeDb.close).toHaveBeenCalledTimes(1);
+      expect(audit.closeAuditDb()).toBe(true);
+      expect(mockNodeDb.exec).toHaveBeenCalledWith("PRAGMA wal_checkpoint(TRUNCATE)");
+      expect(mockNodeDb.close).toHaveBeenCalledTimes(1);
 
-    // Cache is cleared after close, so a second close is a no-op.
-    expect(audit.closeAuditDb()).toBe(false);
-    expect(mockNodeDb.close).toHaveBeenCalledTimes(1);
+      // Cache is cleared after close, so a second close is a no-op.
+      expect(audit.closeAuditDb()).toBe(false);
+      expect(mockNodeDb.close).toHaveBeenCalledTimes(1);
+    } finally {
+      audit.__setBetterSqliteLoaderForTests(null);
+    }
+  });
+
+  it("falls back to node:sqlite when better-sqlite3 export is not a function", async () => {
+    const [maj, min] = process.versions.node.split(".").map(Number);
+    if (maj < 22 || (maj === 22 && min < 5)) {
+      return;
+    }
+
+    const mockNodeDb = {
+      prepare: vi.fn(() => createStatementMock()),
+      exec: vi.fn(),
+      close: vi.fn(),
+    };
+    const DatabaseSync = vi.fn(function DatabaseSync() {
+      return mockNodeDb;
+    });
+    vi.doMock("node:sqlite", () => ({ DatabaseSync }));
+
+    const audit = await import("../audit.ts");
+    // Webpack/standalone stub: require("better-sqlite3") returns a non-callable
+    // object, so the loader rejects it with "better-sqlite3 export is not a function"
+    // (the minified runtime form is "a is not a function"; both classify the same).
+    audit.__setBetterSqliteLoaderForTests(() => ({ default: { notAConstructor: true } }));
+
+    try {
+      await audit.logToolCall("omniroute_get_health", { ok: true }, { ok: true }, 4, true);
+      expect(DatabaseSync).toHaveBeenCalledWith(dbFile);
+      expect(mockNodeDb.prepare).toHaveBeenCalled();
+    } finally {
+      audit.closeAuditDb();
+      audit.__setBetterSqliteLoaderForTests(null);
+    }
+  });
+
+  it("retries once the database file appears instead of caching the miss forever", async () => {
+    // An MCP server started before the app created ~/.omniroute/storage.sqlite must
+    // pick the database up on a later call. Caching the "not found" miss would leave
+    // that process without audit logging for its whole lifetime.
+    fs.rmSync(dbFile);
+
+    const mockDb: MockAuditDb = {
+      prepare: vi.fn(() => createStatementMock()),
+      pragma: vi.fn(),
+      close: vi.fn(),
+      open: true,
+    };
+    const audit = await import("../audit.ts");
+    audit.__setBetterSqliteLoaderForTests(
+      () =>
+        function Database() {
+          return mockDb;
+        }
+    );
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      await audit.logToolCall("omniroute_get_health", { ok: true }, { ok: true }, 1, true);
+      expect(mockDb.prepare).not.toHaveBeenCalled();
+
+      fs.writeFileSync(dbFile, "");
+      await audit.logToolCall("omniroute_get_health", { ok: true }, { ok: true }, 1, true);
+      expect(mockDb.prepare).toHaveBeenCalledTimes(1);
+    } finally {
+      errorSpy.mockRestore();
+      audit.closeAuditDb();
+      audit.__setBetterSqliteLoaderForTests(null);
+    }
+  });
+
+  it("caches a failed audit connection so dashboard polls do not reconnect", async () => {
+    const connectErr = new Error("permission denied");
+    const audit = await import("../audit.ts");
+    audit.__setBetterSqliteLoaderForTests(() => {
+      throw connectErr;
+    });
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      await audit.queryAuditEntries({ limit: 1 });
+      await audit.queryAuditEntries({ limit: 1 });
+      const connectLogs = errorSpy.mock.calls.filter((args) =>
+        String(args[0]).includes("Failed to connect to database")
+      );
+      expect(connectLogs).toHaveLength(1);
+    } finally {
+      errorSpy.mockRestore();
+      audit.__setBetterSqliteLoaderForTests(null);
+    }
   });
 });

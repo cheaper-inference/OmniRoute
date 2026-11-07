@@ -1,0 +1,102 @@
+---
+title: "OmniRoute Roadmap"
+version: 3.8.52
+lastUpdated: 2026-10-16
+---
+
+# OmniRoute Roadmap
+
+> Version-gated, not date-gated: each milestone ships when its quality gates pass.
+> Current line: **v3.8.52** (`release/v3.8.52`). Last updated: 2026-10-16.
+> Status legend: ✅ landed · 🟡 partly landed / in review · ⏳ pending (owner action).
+
+OmniRoute is heading from a monolithic router to a **modular AI platform**: a lightweight
+core engine, a typed SDK, and everything else as installable modules and plugins. The path
+runs through a stabilization rail (3.8.50 → 3.8.59), an LTS anchor (**3.9.0**), and the
+modular **4.0**.
+
+## The rail at a glance
+
+```
+3.8.50 ─ 3.8.54   PREPARE   non-breaking structural prep (all PRs welcome)
+3.8.55 ─ 3.8.59   VALIDATE  stabilization (fixes / docs / i18n / providers only)
+3.9.0             LTS       stable/v3 branch · long-term support line
+4.0.0-nightly/rc  MODULAR   core + SDK + modules + marketplace (develop branch)
+4.0.0             GA        latest switches to v4 · v3 stays supported as LTS
+```
+
+## Phase 1 — Preparation (3.8.50 → 3.8.54)
+
+Non-breaking structural work that de-risks the modular split. Every version closes with a
+mandatory quality-gate battery before new merges open.
+
+| Version | Focus                                                                                                                                                                                                           | Status                                                                                                                            |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 3.8.50  | CI safety net on release branches · dead-code cleanup · community-reported catalog/topology bug fixes · contributor "golden path" guide                                                                         | ✅ shipped                                                                                                                        |
+| 3.8.51  | Executor registry (in-place) · end-to-end provider-journey contract test becomes a CI gate · official scoped-test dev loop · CI lane consolidation (shared install/setup across gate jobs, #8084)               | ✅ shipped (#10633, #12353, #12408)                                                                                               |
+| 3.8.52  | `combo.ts` decomposition · routing-strategy registry · unified model-catalog contract for `/v1/models` · one CI policy for PRs to `release/**` and `main` (#8084)                                               | ✅ structural work landed (#12746, #12811, #16206 registry, #16078 classifier step 1); one CI policy deferred (RFC #16075 closed) |
+| 3.8.53  | `chatCore.ts` decomposition · headless mode (`OMNIROUTE_HEADLESS=1`) · local candidate build/promote loop                                                                                                       | ✅ landed early (#14725, #16079, #16180); further `chatCore.ts` slices unowned (#15709 closed by its author)                      |
+| 3.8.54  | Release infrastructure (dormant): channels, labels, PR templates, merge queue · full-regression authority moves to the merge queue once TIA shadow evidence clears (#8084) · public feature-freeze announcement | 🟡 infra landed (#16073, #16172, #16066); freeze announcement ⏳ owner                                                            |
+
+## Phase 2 — Validation (3.8.55 → 3.8.59)
+
+**External feature PRs pause here** (they get the `v4-feature` label and are re-targeted to
+the v4 channel when it opens). Fixes, docs, i18n, and provider updates keep flowing.
+
+| Version | Focus                                                                                                                                        | Status                                                                                                                                                                                                     |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3.8.55  | Characterization tests for every extraction candidate · coupling re-measurement                                                              | ✅ prepared early (#16179, #16192, #16205); coupling re-measured 2026-10-16: `open-sse → src` 768 edges (745 on 10-10), still growing                                                                      |
+| 3.8.56  | Extended canary · performance baselines (heap, TTFB, build)                                                                                  | 🟡 script + preliminary report (#16211); VPS canary/baseline ⏳ (needs an idle dedicated host)                                                                                                             |
+| 3.8.57  | Security & compliance sweep · publish provenance (OIDC) rehearsal                                                                            | 🟡 sweep landed (#16209); nightly LLM-security eval restored (#16847); OIDC registry rehearsal ⏳                                                                                                          |
+| 3.8.58  | Full dry-run of the 3.9.0 cut (branches, channels, forward-port) — includes the PR preview-artifact + build-once promotion rehearsal (#8084) | ✅ tooling (#16210) · cut rehearsed 2026-10-16 on a private scratch remote (`stable/v3` + `develop` 4.0.0 created and rolled back; shallow-clone guard #16875) · real cut needs a full clone + open freeze |
+| 3.8.59  | Final freeze · full-suite audit · GO/NO-GO                                                                                                   | ⏳ pending (owner GO/NO-GO; checklist in #16210)                                                                                                                                                           |
+
+## Phase 3 — v3.9.0 LTS
+
+After 3.8.59 the next version is **3.9.0** (there is no 3.8.60). It creates the long-lived
+branch model:
+
+- **`stable/v3`** — the LTS line (3.9.x). Receives fixes, security patches, and provider
+  updates. `npm install omniroute` (aka `latest`) stays on v3 during the whole v4 cycle.
+- **`develop`** — v4 development, published as `4.0.0-nightly.*`.
+- **`main`** — v4 release candidates (`next`) and, eventually, GA.
+- Fixes merged to `stable/v3` are automatically forward-ported to `develop` with full
+  contributor credit (`Co-authored-by`).
+
+New features land in the v4 channel. The LTS line is stability-first.
+
+See also: [LTS GO/NO-GO checklist](docs/ops/LTS_GO_NO_GO.md), the [3.9.0 cut runbook](docs/ops/RELEASE_CHECKLIST.md#390-lts-cut-rehearsed-in-3858) (dry-run, fork rehearsal, PR preview artifact), the [LTS security baseline](docs/security/LTS_SECURITY_BASELINE.md) and the [LTS performance baseline](docs/ops/PERF_BASELINE.md).
+
+## Phase 4 — v4.0: the modular platform
+
+The monolith is intentionally disassembled on `develop`:
+
+- **`@omniroute/core`** (npm name stays `omniroute`) — just the engine: `/v1/*`, routing,
+  combo/fallback, providers.
+- **`@omniroute/sdk`** — one typed contract: hooks, extension points, two-phase lifecycle,
+  UI contributions. The five extension systems that exist today (plugins, CLI plugins,
+  skills, MCP tools, A2A skills) collapse into one declarative manifest.
+- **Modules** (`@omniroute/mod-*`) — cloud agents, traffic inspection (MITM), evals,
+  webhooks, memory, guardrails, observability and more move out of the core, each with its
+  own version and lifecycle.
+- **Providers as plugins** — adding a provider stops touching the core.
+- **Marketplace** — one-click install with verified integrity (hash pinning, signing,
+  sandbox). Free in v1; a paid tier later with revenue share for creators.
+- Ships as `4.0.0-nightly.*` → `4.0.0-rc.N` (soak in production) → **4.0.0 GA**, when
+  `latest` switches to v4 and v3 enters its announced LTS support window.
+
+**The core is MIT and free, forever.**
+
+## For contributors
+
+| You are sending... | Target today            | From 3.8.55                  | After 3.9.0    |
+| ------------------ | ----------------------- | ---------------------------- | -------------- |
+| Bug fix / security | active `release/v3.8.x` | same                         | `stable/v3`    |
+| Provider update    | active `release/v3.8.x` | same                         | `stable/v3`    |
+| Docs / i18n        | active `release/v3.8.x` | same                         | `stable/v3`    |
+| New feature        | active `release/v3.8.x` | held with `v4-feature` label | `develop` (v4) |
+
+See `CONTRIBUTING.md` and the [contribution golden path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) per change type.
+
+See also: [Release Strategy](docs/ops/RELEASE_STRATEGY.md) — branches, npm channels, forward-port
+and the `v4-feature` label rule for the LTS rail.

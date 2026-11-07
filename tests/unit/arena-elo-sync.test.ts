@@ -38,8 +38,10 @@ const {
   initArenaEloSync,
   stopArenaEloSync,
 } = await import("../../src/lib/arenaEloSync.ts");
+const { applyArenaEloRefresh } = await import("../../src/lib/db/modelIntelligence.ts");
 const { setFeatureFlagOverride, removeFeatureFlagOverride } =
   await import("../../src/lib/db/featureFlags.ts");
+const { resolveScoresAs } = await import("../../open-sse/services/autoCombo/scoresAs.ts");
 
 import type {
   ArenaLeaderboardData,
@@ -328,7 +330,7 @@ describe("transformToModelIntelligence()", () => {
     }
   });
 
-  it("expands model aliases for known models", () => {
+  it("does not copy a variant's score onto a different generation (MODEL_ALIAS_MAP removed, #11504)", () => {
     const data = makeLeaderboardMap({
       text: [
         makeModelEntry({
@@ -344,8 +346,10 @@ describe("transformToModelIntelligence()", () => {
     const models = entries.map((e) => e.model);
 
     assert.ok(models.includes("claude-opus-4-6-thinking"));
-    assert.ok(models.includes("claude-opus-4"));
-    assert.ok(models.includes("anthropic/claude-opus-4"));
+    // Was asserted the other way round while MODEL_ALIAS_MAP existed: it copied this
+    // score onto `claude-opus-4`, so a claude-opus-4 request read a 4.6-thinking ELO.
+    assert.ok(!models.includes("claude-opus-4"));
+    assert.ok(!models.includes("anthropic/claude-opus-4"));
   });
 
   it("empty leaderboard → no entries", () => {
@@ -406,6 +410,131 @@ describe("transformToModelIntelligence()", () => {
         assert.ok(str.length - dot - 1 <= 4, `score ${entry.score} > 4 decimals`);
       }
     }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// 2b. Variant → base row synthesis (#11504)
+// ═══════════════════════════════════════════════════════════
+
+describe("transformToModelIntelligence() — base-model synthesis", () => {
+  it("normalizeModelName strips a trailing harness annotation", () => {
+    assert.strictEqual(
+      normalizeModelName("gpt-5.6-sol-xhigh (codex-harness)"),
+      "gpt-5.6-sol-xhigh"
+    );
+  });
+
+  it("normalizeModelName strips vendor prefix and harness annotation together", () => {
+    assert.strictEqual(
+      normalizeModelName("OpenAI/GPT-5.6-Sol-xhigh (Codex-Harness)"),
+      "gpt-5.6-sol-xhigh"
+    );
+  });
+
+  it("harness-annotated variant yields both the variant row and a base row", () => {
+    const data = makeLeaderboardMap({
+      code: [
+        makeModelEntry({
+          model: "gpt-5.6-sol-xhigh (codex-harness)",
+          score: 1700,
+          votes: 5000,
+          rank: 1,
+        }),
+      ],
+    });
+
+    const entries = transformToModelIntelligence(data);
+    const coding = entries.filter((e) => e.category === "coding").map((e) => e.model);
+
+    assert.ok(coding.includes("gpt-5.6-sol-xhigh"), "variant row is kept");
+    assert.ok(coding.includes("gpt-5.6-sol"), "base row is synthesized");
+    // `gpt-5.6` is a vendor alias of `gpt-5.6-sol`, resolved at lookup time — never stored here.
+    assert.ok(!coding.includes("gpt-5.6"));
+  });
+
+  it("base row carries the best variant's score and eloRaw", () => {
+    const data = makeLeaderboardMap({
+      code: [
+        makeModelEntry({ model: "claude-opus-5-max", score: 1691, votes: 5000, rank: 1 }),
+        makeModelEntry({ model: "claude-opus-5-high", score: 1663, votes: 5000, rank: 2 }),
+      ],
+    });
+
+    const entries = transformToModelIntelligence(data);
+    const base = entries.find((e) => e.model === "claude-opus-5" && e.category === "coding");
+    const max = entries.find((e) => e.model === "claude-opus-5-max" && e.category === "coding");
+
+    assert.ok(base, "synthesized base row exists");
+    assert.ok(max);
+    assert.strictEqual(base.eloRaw, 1691);
+    assert.strictEqual(base.score, max.score);
+  });
+
+  it("never lowers an explicitly measured base row", () => {
+    const data = makeLeaderboardMap({
+      code: [
+        makeModelEntry({ model: "claude-opus-5", score: 1700, votes: 5000, rank: 1 }),
+        makeModelEntry({ model: "claude-opus-5-max", score: 1691, votes: 5000, rank: 2 }),
+      ],
+    });
+
+    const entries = transformToModelIntelligence(data);
+    const base = entries.filter((e) => e.model === "claude-opus-5" && e.category === "coding");
+
+    assert.strictEqual(base.length, 1);
+    assert.strictEqual(base[0].eloRaw, 1700);
+  });
+
+  it("does not collapse generations (regression guard for the deleted alias map)", () => {
+    const data = makeLeaderboardMap({
+      text: [makeModelEntry({ model: "openai/gpt-5.5", score: 1600, votes: 5000, rank: 1 })],
+    });
+
+    const entries = transformToModelIntelligence(data);
+    const models = entries.map((e) => e.model);
+
+    assert.ok(models.includes("gpt-5.5"));
+    assert.ok(!models.includes("gpt-5"), "gpt-5.5 must never emit a gpt-5 row");
+  });
+
+  it("synthesizes nothing when the stripped base is not a routable catalog id", () => {
+    // Catalog-anchored by construction: assert the premise instead of a frozen catalog fact.
+    assert.strictEqual(resolveScoresAs("grok-4.6-fast-high").via, null);
+
+    const data = makeLeaderboardMap({
+      code: [makeModelEntry({ model: "grok-4.6-fast-high", score: 1600, votes: 5000, rank: 1 })],
+    });
+
+    const entries = transformToModelIntelligence(data);
+    const models = entries.map((e) => e.model);
+
+    assert.deepStrictEqual(models, ["grok-4.6-fast-high"]);
+  });
+
+  it("is idempotent and emits no duplicate (model, category) keys", () => {
+    const data = makeLeaderboardMap({
+      code: [
+        makeModelEntry({ model: "claude-opus-5-max", score: 1691, votes: 5000, rank: 1 }),
+        makeModelEntry({ model: "claude-opus-5-high", score: 1663, votes: 5000, rank: 2 }),
+        makeModelEntry({
+          model: "gpt-5.6-sol-xhigh (codex-harness)",
+          score: 1700,
+          votes: 5000,
+          rank: 3,
+        }),
+      ],
+    });
+
+    const first = transformToModelIntelligence(data);
+    const second = transformToModelIntelligence(data);
+
+    const strip = (entries: ReturnType<typeof transformToModelIntelligence>) =>
+      entries.map(({ expiresAt: _expiresAt, ...rest }) => rest);
+    assert.deepStrictEqual(strip(second), strip(first));
+
+    const keys = first.map((e) => `${e.model}|${e.category}`);
+    assert.strictEqual(new Set(keys).size, keys.length);
   });
 });
 
@@ -693,7 +822,7 @@ describe("syncArenaElo()", () => {
     assert.ok(status.lastSyncModelCount > 0);
   });
 
-  it("model aliases are stored in DB alongside canonical names", async () => {
+  it("stores no cross-generation alias rows in the DB (MODEL_ALIAS_MAP removed, #11504)", async () => {
     const textData = makeLeaderboardData(
       [
         makeModelEntry({
@@ -718,7 +847,7 @@ describe("syncArenaElo()", () => {
     const models = entries.map((e) => String(e.model));
 
     assert.ok(models.includes("claude-opus-4-6-thinking"));
-    assert.ok(models.includes("claude-opus-4"));
+    assert.ok(!models.includes("claude-opus-4"));
   });
 });
 
@@ -799,6 +928,117 @@ describe("getArenaEloSyncStatus()", () => {
 
     const status = getArenaEloSyncStatus();
     assert.strictEqual(status.enabled, false);
+  });
+
+  it("serves the persisted date after a restart (memory empty)", () => {
+    const FRESH = "2026-10-14 12:00:00";
+    const FRESH_ISO = "2026-10-14T12:00:00.000Z";
+    const entries = transformToModelIntelligence(
+      makeLeaderboardMap({
+        text: [makeModelEntry({ model: "persisted-model", score: 1300, votes: 5000, rank: 1 })],
+      })
+    );
+    assert.ok(entries.length > 0);
+    applyArenaEloRefresh(entries);
+    testAdapter
+      .prepare("UPDATE model_intelligence SET synced_at = ? WHERE source = 'arena_elo'")
+      .run(FRESH);
+    const status = getArenaEloSyncStatus();
+    assert.strictEqual(status.lastSync, FRESH_ISO);
+  });
+
+  it("normalizes persisted ISO offsets to UTC", () => {
+    testAdapter.prepare("DELETE FROM model_intelligence WHERE source = 'arena_elo'").run();
+    const entries = transformToModelIntelligence(
+      makeLeaderboardMap({
+        text: [makeModelEntry({ model: "offset-model", score: 1300, votes: 5000, rank: 1 })],
+      })
+    );
+    assert.ok(entries.length > 0);
+    applyArenaEloRefresh(entries);
+    testAdapter
+      .prepare("UPDATE model_intelligence SET synced_at = ? WHERE source = 'arena_elo'")
+      .run("2026-10-14T07:20:30-03:00");
+    const status = getArenaEloSyncStatus();
+    assert.strictEqual(status.lastSync, "2026-10-14T10:20:30.000Z");
+  });
+
+  it("falls back to memory when the persisted date is malformed", () => {
+    const before = getArenaEloSyncStatus().lastSync;
+    testAdapter.prepare("DELETE FROM model_intelligence WHERE source = 'arena_elo'").run();
+    testAdapter
+      .prepare(
+        "INSERT INTO model_intelligence (model, source, category, score, synced_at) VALUES (?, ?, ?, ?, ?)"
+      )
+      .run("invalid-model", "arena_elo", "text", 80, "not-a-date");
+    let status: ReturnType<typeof getArenaEloSyncStatus> | undefined;
+    assert.doesNotThrow(() => {
+      status = getArenaEloSyncStatus();
+    });
+    assert.strictEqual(status!.lastSync, before);
+  });
+
+  it("ignores rows from other sources when serving freshness", () => {
+    testAdapter.prepare("DELETE FROM model_intelligence WHERE source = 'arena_elo'").run();
+    const entries = transformToModelIntelligence(
+      makeLeaderboardMap({
+        text: [makeModelEntry({ model: "isolation-model", score: 1300, votes: 5000, rank: 1 })],
+      })
+    );
+    assert.ok(entries.length > 0);
+    applyArenaEloRefresh(entries);
+    testAdapter
+      .prepare("UPDATE model_intelligence SET synced_at = ? WHERE source = 'arena_elo'")
+      .run("2026-10-14 10:20:30");
+    testAdapter
+      .prepare(
+        "INSERT INTO model_intelligence (model, source, category, score, synced_at) VALUES (?, ?, ?, ?, ?)"
+      )
+      .run("other-model", "other-source", "text", 90, "2026-10-15 10:20:30");
+    const status = getArenaEloSyncStatus();
+    assert.strictEqual(status.lastSync, "2026-10-14T10:20:30.000Z");
+  });
+
+  it("falls back to memory without error when no arena_elo row exists", () => {
+    const before = getArenaEloSyncStatus().lastSync;
+    testAdapter.prepare("DELETE FROM model_intelligence WHERE source = 'arena_elo'").run();
+    let status: ReturnType<typeof getArenaEloSyncStatus> | undefined;
+    assert.doesNotThrow(() => {
+      status = getArenaEloSyncStatus();
+    });
+    assert.strictEqual(status!.lastSync, before);
+  });
+
+  it("falls back to memory without error when arena_elo rows are removed", () => {
+    testAdapter.prepare("DELETE FROM model_intelligence WHERE source = 'arena_elo'").run();
+    const emptyBaseline = getArenaEloSyncStatus().lastSync;
+    const entries = transformToModelIntelligence(
+      makeLeaderboardMap({
+        text: [makeModelEntry({ model: "removed-model", score: 1300, votes: 5000, rank: 1 })],
+      })
+    );
+    assert.ok(entries.length > 0);
+    applyArenaEloRefresh(entries);
+    testAdapter
+      .prepare("UPDATE model_intelligence SET synced_at = ? WHERE source = 'arena_elo'")
+      .run("2026-10-14 10:20:30");
+    assert.strictEqual(getArenaEloSyncStatus().lastSync, "2026-10-14T10:20:30.000Z");
+    testAdapter.prepare("DELETE FROM model_intelligence WHERE source = 'arena_elo'").run();
+    let status: ReturnType<typeof getArenaEloSyncStatus> | undefined;
+    assert.doesNotThrow(() => {
+      status = getArenaEloSyncStatus();
+    });
+    assert.strictEqual(status!.lastSync, emptyBaseline);
+  });
+
+  it("public health exposes no arena freshness (liveness only)", async () => {
+    const { GET } = await import("../../src/app/api/health/route.ts");
+    const res = await GET();
+    const body = (await res.json()) as Record<string, unknown>;
+    assert.ok(
+      !("lastSync" in body) && !("synced_at" in body) && !JSON.stringify(body).includes("arena")
+    );
+    assert.ok(typeof body.timestamp === "string");
   });
 });
 

@@ -23,7 +23,7 @@ const { normalizeComboStep } = await import("../../src/lib/combos/steps.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -85,7 +85,7 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   await resetStorage();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 
   if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
   else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
@@ -210,4 +210,52 @@ test("combo forecast API requires management auth and validates query", async ()
   assert.equal(authenticated.status, 200);
   const body = await authenticated.json();
   assert.equal(body.combos.length, 1);
+});
+
+test("combo forecast reports credit-metered providers as unpriced, not as a zero tariff", async () => {
+  // A tariff this high makes any token-based charge unmistakable: the row must still
+  // come out unpriced, because credits are the bill and `call_logs` carries no cost.
+  await settingsDb.updatePricing({ kiro: { "gpt-5.6-luna": { input: 999, output: 999 } } });
+  const comboInput = {
+    name: "combo-forecast-credit",
+    strategy: "weighted",
+    models: [
+      {
+        kind: "model",
+        providerId: "kiro",
+        model: "kiro/gpt-5.6-luna",
+        connectionId: "forecast-credit-conn",
+        label: "Credit",
+      },
+    ],
+  };
+  const combo = await combosDb.createCombo(comboInput);
+  const step = normalizeComboStep(comboInput.models[0], {
+    comboName: comboInput.name,
+    index: 0,
+  });
+
+  await callLogs.saveCallLog({
+    id: "combo-forecast-credit-1",
+    timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+    status: 200,
+    model: "kiro/gpt-5.6-luna",
+    requestedModel: comboInput.name,
+    provider: "kiro",
+    connectionId: "forecast-credit-conn",
+    tokens: { prompt_tokens: 1_000_000, completion_tokens: 0 },
+    comboName: comboInput.name,
+    comboStepId: step.id,
+    comboExecutionKey: step.id,
+  });
+
+  const forecast = await comboForecast.buildComboForecastResponse({
+    range: "7d",
+    horizon: "7d",
+    comboId: String(combo.id),
+  });
+
+  assert.equal(forecast.combos.length, 1);
+  assert.equal(forecast.combos[0].history.costUsd, 0);
+  assert.equal(forecast.combos[0].dataQuality.pricingCoveragePct, 0);
 });

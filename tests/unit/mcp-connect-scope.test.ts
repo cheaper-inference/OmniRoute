@@ -19,17 +19,13 @@ const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const { managementPolicy } = await import("../../src/server/authz/policies/management.ts");
-const {
-  isLocalOnlyPath,
-  isLocalOnlyBypassableByManageScope,
-} = await import("../../src/server/authz/routeGuard.ts");
-const { MCP_CONNECT_SCOPE, hasMcpConnectOrManageScope } = await import(
-  "../../src/shared/constants/managementScopes.ts"
-);
+const { isLocalOnlyPath, isLocalOnlyBypassableByManageScope } =
+  await import("../../src/server/authz/routeGuard.ts");
+const { MCP_CONNECT_SCOPE, hasMcpConnectOrManageScope } =
+  await import("../../src/shared/constants/managementScopes.ts");
 const { resolveMcpCallerAuthInfo } = await import("../../open-sse/mcp-server/httpAuthContext.ts");
-const { resolveCallerScopeContext, evaluateToolScopes } = await import(
-  "../../open-sse/mcp-server/scopeEnforcement.ts"
-);
+const { resolveCallerScopeContext, evaluateToolScopes } =
+  await import("../../open-sse/mcp-server/scopeEnforcement.ts");
 
 const ORIGINAL_JWT = process.env.JWT_SECRET;
 const ORIGINAL_INITIAL = process.env.INITIAL_PASSWORD;
@@ -37,7 +33,7 @@ const ORIGINAL_INITIAL = process.env.INITIAL_PASSWORD;
 function reset() {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   delete process.env.JWT_SECRET;
   delete process.env.INITIAL_PASSWORD;
@@ -49,20 +45,21 @@ test.beforeEach(() => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   if (ORIGINAL_JWT === undefined) delete process.env.JWT_SECRET;
   else process.env.JWT_SECRET = ORIGINAL_JWT;
   if (ORIGINAL_INITIAL === undefined) delete process.env.INITIAL_PASSWORD;
   else process.env.INITIAL_PASSWORD = ORIGINAL_INITIAL;
 });
 
-function mgmtCtx(headers: Headers, method = "GET", pathname = "/api/keys") {
+function mgmtCtx(headers: Headers, method = "GET", pathname = "/api/keys", peerAddress?: string) {
   return {
     request: {
       method,
       headers,
       url: `http://localhost${pathname}`,
       nextUrl: { pathname },
+      socket: peerAddress ? { remoteAddress: peerAddress } : undefined,
     },
     classification: {
       routeClass: "MANAGEMENT" as const,
@@ -192,20 +189,14 @@ test("per-key authInfo.scopes takes precedence over the env fallback once resolv
   assert.equal(scopeContext.source, "authInfo");
   assert.deepEqual(scopeContext.scopes, ["read:health"]);
 
-  const allowedCheck = evaluateToolScopes(
-    "irrelevant-tool-name",
-    scopeContext.scopes,
-    true,
-    ["read:health"]
-  );
+  const allowedCheck = evaluateToolScopes("irrelevant-tool-name", scopeContext.scopes, true, [
+    "read:health",
+  ]);
   assert.equal(allowedCheck.allowed, true);
 
-  const deniedCheck = evaluateToolScopes(
-    "irrelevant-tool-name",
-    scopeContext.scopes,
-    true,
-    ["write:combos"]
-  );
+  const deniedCheck = evaluateToolScopes("irrelevant-tool-name", scopeContext.scopes, true, [
+    "write:combos",
+  ]);
   assert.equal(deniedCheck.allowed, false, "per-key scopes must gate, not the wider env fallback");
 });
 
@@ -267,4 +258,38 @@ test("mcp:connect key is still rejected for the non-bypassable /api/cli-tools/ru
     assert.equal(out.status, 403);
     assert.equal(out.code, "LOCAL_ONLY");
   }
+});
+
+// ─── 7. #9159 — loopback/LAN mcp:connect with requireLogin ──────────────────
+
+test("#9159 mcp:connect-only key must pass /api/mcp/ from loopback when login is required", async () => {
+  await seedAuthRequired();
+  const created = await apiKeysDb.createApiKey("mcp-loopback-only", "machine-mcp-loopback", [
+    MCP_CONNECT_SCOPE,
+  ]);
+  const out = await managementPolicy.evaluate(
+    mgmtCtx(
+      new Headers({ authorization: `Bearer ${created.key}` }),
+      "POST",
+      "/api/mcp/stream",
+      "127.0.0.1"
+    )
+  );
+  assert.equal(out.allow, true, JSON.stringify(out));
+});
+
+test("#9159 mcp:connect-only key must pass /api/mcp/ from private LAN when login is required", async () => {
+  await seedAuthRequired();
+  const created = await apiKeysDb.createApiKey("mcp-lan-only", "machine-mcp-lan", [
+    MCP_CONNECT_SCOPE,
+  ]);
+  const out = await managementPolicy.evaluate(
+    mgmtCtx(
+      new Headers({ authorization: `Bearer ${created.key}` }),
+      "POST",
+      "/api/mcp/stream",
+      "192.168.1.20"
+    )
+  );
+  assert.equal(out.allow, true, JSON.stringify(out));
 });

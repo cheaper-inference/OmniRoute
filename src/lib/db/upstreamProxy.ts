@@ -1,5 +1,14 @@
 /** Upstream proxy config persistence for upstream_proxy_config table. */
 import { getDbInstance } from "./core";
+import {
+  isCloudMetadataHost,
+  isPrivateHost as isPrivateNetworkHost,
+  mappedIpv4Host,
+} from "@/shared/network/outboundUrlGuard";
+import { normalizeHost } from "@/shared/network/privateHost";
+
+/** Which embedded proxy handles the retry leg when mode === "fallback". */
+export type FallbackBackend = "cliproxyapi" | "dario";
 
 interface UpstreamProxyConfig {
   id: number;
@@ -10,6 +19,8 @@ interface UpstreamProxyConfig {
   cliproxyapiPriority: number;
   enabled: boolean;
   family: string;
+  // #dario: retry-leg backend for mode="fallback" ("cliproxyapi" default).
+  fallbackBackend: FallbackBackend;
   createdAt: string;
   updatedAt: string;
 }
@@ -23,6 +34,7 @@ interface UpstreamProxyRow {
   cliproxyapi_priority: unknown;
   enabled: unknown;
   family: unknown;
+  fallback_backend: unknown;
   created_at: unknown;
   updated_at: unknown;
 }
@@ -31,26 +43,31 @@ function toRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
 
-const BLOCKED_HOSTNAMES = ["metadata.google.internal", "169.254.169.254", "metadata.aws.internal"];
+const LOOPBACK_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
 
+/**
+ * Reject a proxy target that is private or cloud-metadata, judging the ADDRESS
+ * rather than its spelling.
+ *
+ * This module used to carry its own prefix regexes, which matched only the
+ * dotted form: `http://169.254.169.254` was refused while
+ * `http://[::ffff:169.254.169.254]` — the same address, serialised by WHATWG
+ * URL as `::ffff:a9fe:a9fe` — was accepted, as were `::ffff:10.0.0.5`,
+ * `fd00::/8`, `fe80::/10` and CGNAT `100.64.0.0/10`. #10843 fixed exactly that
+ * class in the shared guard; routing this copy through the same helpers keeps
+ * the two from drifting apart again.
+ *
+ * The deliberate exception stays: CLIProxyAPI runs on localhost:8317, so
+ * loopback is allowed — and now so is its mapped spelling, for the same
+ * address-not-spelling reason.
+ */
 function isPrivateHost(hostname: string): boolean {
-  // CLIProxyAPI runs on localhost:8317 — allow loopback explicitly
-  if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") return false;
-  if (BLOCKED_HOSTNAMES.includes(hostname)) return true;
-  if (
-    /^10\./.test(hostname) ||
-    /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) ||
-    /^192\.168\./.test(hostname)
-  )
-    return true;
-  if (
-    /^0\./.test(hostname) ||
-    /^127\./.test(hostname) ||
-    /^224\./.test(hostname) ||
-    /^169\.254\./.test(hostname)
-  )
-    return true;
-  return false;
+  const normalized = normalizeHost(hostname);
+  const asIpv4 = mappedIpv4Host(normalized) ?? normalized;
+
+  if (LOOPBACK_HOSTNAMES.has(normalized) || LOOPBACK_HOSTNAMES.has(asIpv4)) return false;
+
+  return isCloudMetadataHost(normalized) || isPrivateNetworkHost(normalized);
 }
 
 export function validateProxyUrl(
@@ -76,6 +93,11 @@ export function validateProxyUrl(
   }
 }
 
+/** Normalize an arbitrary stored/user value to a valid FallbackBackend. */
+function normalizeFallbackBackend(value: unknown): FallbackBackend {
+  return value === "dario" ? "dario" : "cliproxyapi";
+}
+
 function rowToConfig(record: Record<string, unknown>): UpstreamProxyConfig {
   let mapping: Record<string, unknown> | null = null;
   if (record.cliproxyapi_model_mapping && typeof record.cliproxyapi_model_mapping === "string") {
@@ -94,19 +116,11 @@ function rowToConfig(record: Record<string, unknown>): UpstreamProxyConfig {
     cliproxyapiPriority: record.cliproxyapi_priority as number,
     enabled: record.enabled === 1 || record.enabled === true,
     family: typeof record.family === "string" ? record.family : "auto",
+    fallbackBackend: normalizeFallbackBackend(record.fallback_backend),
     createdAt: record.created_at as string,
     updatedAt: record.updated_at as string,
   };
 }
-
-export async function getUpstreamProxyConfigs() {
-  const db = getDbInstance();
-  const rows = db
-    .prepare("SELECT * FROM upstream_proxy_config ORDER BY provider_id")
-    .all() as UpstreamProxyRow[];
-  return rows.map((row) => rowToConfig(toRecord(row)));
-}
-
 export async function getUpstreamProxyConfig(providerId: string) {
   const db = getDbInstance();
   const row = db
@@ -124,6 +138,7 @@ export async function upsertUpstreamProxyConfig(data: {
   cliproxyapiPriority?: number;
   enabled?: boolean;
   family?: string;
+  fallbackBackend?: FallbackBackend;
 }) {
   const db = getDbInstance();
   const mode = data.mode ?? "native";
@@ -135,11 +150,12 @@ export async function upsertUpstreamProxyConfig(data: {
   const cliproxyapiPriority = data.cliproxyapiPriority ?? 2;
   const enabled = data.enabled !== false ? 1 : 0;
   const family = data.family ?? "auto";
+  const fallbackBackend = normalizeFallbackBackend(data.fallbackBackend);
 
   db.prepare(
     `INSERT INTO upstream_proxy_config
-     (provider_id, mode, cliproxyapi_model_mapping, native_priority, cliproxyapi_priority, enabled, family, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+     (provider_id, mode, cliproxyapi_model_mapping, native_priority, cliproxyapi_priority, enabled, family, fallback_backend, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
      ON CONFLICT(provider_id) DO UPDATE SET
        mode = excluded.mode,
        cliproxyapi_model_mapping = excluded.cliproxyapi_model_mapping,
@@ -147,6 +163,7 @@ export async function upsertUpstreamProxyConfig(data: {
        cliproxyapi_priority = excluded.cliproxyapi_priority,
        enabled = excluded.enabled,
        family = excluded.family,
+       fallback_backend = excluded.fallback_backend,
        updated_at = datetime('now')`
   ).run(
     data.providerId,
@@ -155,7 +172,8 @@ export async function upsertUpstreamProxyConfig(data: {
     nativePriority,
     cliproxyapiPriority,
     enabled,
-    family
+    family,
+    fallbackBackend
   );
 
   return getUpstreamProxyConfig(data.providerId);
@@ -202,6 +220,10 @@ export async function updateUpstreamProxyConfig(
     sets.push("family = ?");
     params.push(updates.family);
   }
+  if (updates.fallbackBackend !== undefined) {
+    sets.push("fallback_backend = ?");
+    params.push(normalizeFallbackBackend(updates.fallbackBackend));
+  }
 
   params.push(providerId);
   db.prepare(`UPDATE upstream_proxy_config SET ${sets.join(", ")} WHERE provider_id = ?`).run(
@@ -233,12 +255,16 @@ export async function getFallbackChainForProvider(providerId: string) {
   const config = await getUpstreamProxyConfig(providerId);
   if (!config) return [];
 
-  const chain: { executor: "native" | "cliproxyapi"; priority: number }[] = [];
+  const chain: { executor: "native" | "cliproxyapi" | "dario"; priority: number }[] = [];
 
   if (config.enabled) {
     chain.push({ executor: "native", priority: config.nativePriority });
-    if (config.mode === "cliproxyapi" || config.mode === "fallback") {
+    if (config.mode === "cliproxyapi") {
       chain.push({ executor: "cliproxyapi", priority: config.cliproxyapiPriority });
+    } else if (config.mode === "dario") {
+      chain.push({ executor: "dario", priority: config.cliproxyapiPriority });
+    } else if (config.mode === "fallback") {
+      chain.push({ executor: config.fallbackBackend, priority: config.cliproxyapiPriority });
     }
   }
 

@@ -9,6 +9,7 @@ const {
   computeCoverage,
   refreshCatalog,
   API_SKILL_IDS,
+  CONFIG_SKILL_IDS,
   CLI_SKILL_IDS,
 } = await import("../../src/lib/agentSkills/catalog.ts");
 const agentSkillsConstants = await import("../../src/shared/constants/agentSkills.ts");
@@ -18,18 +19,18 @@ const agentSkillsConstants = await import("../../src/shared/constants/agentSkill
 test("getCatalog() returns exactly 45 entries", () => {
   refreshCatalog();
   const catalog = getCatalog();
-  assert.equal(catalog.length, 45, `Expected 45 but got ${catalog.length}`);
+  assert.equal(catalog.length, 46, `Expected 46 but got ${catalog.length}`);
 });
 
 test("API_SKILL_IDS has exactly 23 entries", () => {
   assert.equal(API_SKILL_IDS.length, 23);
 });
 
-test("CLI_SKILL_IDS has exactly 20 entries", () => {
+test("CLI_SKILL_IDS has exactly 21 entries", () => {
   assert.equal(CLI_SKILL_IDS.length, 21);
 });
 
-test("getCatalog() contains exactly 22 api skills", () => {
+test("getCatalog() contains exactly 23 api skills", () => {
   const apiSkills = getCatalog().filter((s) => s.category === "api");
   assert.equal(apiSkills.length, 23);
 });
@@ -37,6 +38,15 @@ test("getCatalog() contains exactly 22 api skills", () => {
 test("getCatalog() contains exactly 21 cli skills", () => {
   const cliSkills = getCatalog().filter((s) => s.category === "cli");
   assert.equal(cliSkills.length, 21);
+});
+
+test("CONFIG_SKILL_IDS has exactly 1 entry", () => {
+  assert.equal(CONFIG_SKILL_IDS.length, 1);
+});
+
+test("getCatalog() contains exactly 1 config skill", () => {
+  const configSkills = getCatalog().filter((s) => s.category === "config");
+  assert.equal(configSkills.length, 1);
 });
 
 // ─── ID format ────────────────────────────────────────────────────────────────
@@ -185,9 +195,9 @@ test("filterCatalog({ area: 'nonexistent' }) returns empty array", () => {
   assert.equal(skills.length, 0);
 });
 
-test("filterCatalog({}) returns full catalog (45 entries)", () => {
+test("filterCatalog({}) returns full catalog (46 entries)", () => {
   const skills = filterCatalog({});
-  assert.equal(skills.length, 45);
+  assert.equal(skills.length, 46);
 });
 
 // ─── refreshCatalog ───────────────────────────────────────────────────────────
@@ -218,6 +228,11 @@ test("computeCoverage() returns valid SkillCoverage shape", () => {
   assert.ok(typeof cov.cli.have === "number");
   assert.ok(cov.cli.have >= 0 && cov.cli.have <= 21);
 
+  assert.ok(typeof cov.config === "object");
+  assert.equal(cov.config.total, 1);
+  assert.ok(typeof cov.config.have === "number");
+  assert.ok(cov.config.have >= 0 && cov.config.have <= 1);
+
   assert.equal(cov.totalSkills, cov.api.have + cov.cli.have + (cov.config?.have ?? 0));
 
   // generatedAt must be a valid ISO datetime string
@@ -227,7 +242,7 @@ test("computeCoverage() returns valid SkillCoverage shape", () => {
   );
 });
 
-test("computeCoverage() api.have + cli.have = totalSkills", () => {
+test("computeCoverage() category totals add up to totalSkills", () => {
   const cov = computeCoverage();
   assert.equal(cov.totalSkills, cov.api.have + cov.cli.have + (cov.config?.have ?? 0));
 });

@@ -3,16 +3,32 @@
 // separate from executor-antigravity.test.ts to respect its frozen file-size cap.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { getEventListeners } from "node:events";
 
-import {
-  AntigravityExecutor,
-  createCreditsExtractionTransform,
-} from "../../open-sse/executors/antigravity.ts";
-import {
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-ag-passthrough-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+process.env.API_KEY_SECRET = "test-antigravity-passthrough";
+
+const { AntigravityExecutor, createCreditsExtractionTransform } =
+  await import("../../open-sse/executors/antigravity.ts");
+const {
   clearAntigravityVersionCaches,
   seedAntigravityIdeVersionCache,
   seedAntigravityCliVersionCache,
-} from "../../open-sse/services/antigravityVersion.ts";
+} = await import("../../open-sse/services/antigravityVersion.ts");
+const { bindAbortLifecycle } =
+  await import("../../open-sse/executors/antigravity/streamingPassthrough.ts");
+const { createByteLengthQueueStrategy } = await import("../../open-sse/utils/byteQueueStrategy.ts");
+const core = await import("../../src/lib/db/core.ts");
+
+test.after(() => {
+  core.resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
 
 type ChatCompletionPayload = {
   object?: string;
@@ -36,6 +52,7 @@ test("AntigravityExecutor.execute auto-retries short 429 responses and collects 
   const originalFetch = globalThis.fetch;
   const originalSetTimeout = globalThis.setTimeout;
   const calls = [];
+  const telemetry: string[] = [];
   seedAntigravityIdeVersionCache("2026.04.17-test");
   seedAntigravityCliVersionCache("2026.04.17-test");
 
@@ -45,7 +62,7 @@ test("AntigravityExecutor.execute auto-retries short 429 responses and collects 
     if (calls.length === 1) {
       return new Response(JSON.stringify({ error: { message: "rate limited" } }), {
         status: 429,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Retry-After": "1" },
       });
     }
 
@@ -60,7 +77,12 @@ test("AntigravityExecutor.execute auto-retries short 429 responses and collects 
       }
     );
   };
-  globalThis.setTimeout = ((callback) => {
+  // Skip only the short 429 retry backoff; the first-SSE-event readiness watchdog
+  // (tens of seconds) must keep its real timer or it fires instantly.
+  globalThis.setTimeout = ((callback, ms, ...args) => {
+    if (typeof ms === "number" && ms >= 30_000) {
+      return originalSetTimeout(callback, ms, ...args);
+    }
     (callback as () => void)();
     return 0;
   }) as typeof setTimeout;
@@ -71,7 +93,13 @@ test("AntigravityExecutor.execute auto-retries short 429 responses and collects 
       body: { request: { contents: [] } },
       stream: false,
       credentials: { accessToken: "token", projectId: "project-1" },
-      log: { debug() {}, warn() {} },
+      log: {
+        debug(_scope, message) {
+          telemetry.push(String(message));
+        },
+        warn() {},
+      },
+      correlationId: "prompt194-native-retry-test",
     });
     // Non-streaming collects the upstream SSE and returns the already-converted
     // OpenAI chat.completion payload — no further SSE parsing on the caller side.
@@ -79,6 +107,11 @@ test("AntigravityExecutor.execute auto-retries short 429 responses and collects 
     assert.equal(payload.object, "chat.completion");
 
     assert.equal(calls.length, 2);
+    assert.ok(calls.every((url) => new URL(url).hostname === "daily-cloudcode-pa.googleapis.com"));
+    const physicalSends = telemetry.filter((line) => line.includes("[Antigravity] PhysicalSend"));
+    assert.equal(physicalSends.length, calls.length);
+    assert.match(physicalSends[0] ?? "", /RequestId: prompt194-native-retry-test/);
+    assert.match(physicalSends[1] ?? "", /PhysicalSend: 2/);
     assert.equal(result.response.status, 200);
     assert.equal(payload.choices[0].message.content, "Hello again");
     assert.deepEqual(payload.usage, {
@@ -198,4 +231,37 @@ test("createCreditsExtractionTransform handles malformed SSE gracefully", async 
   // Data passes through unmodified, no crash on malformed input
   const collected = new TextDecoder().decode(Buffer.concat(chunks));
   assert.ok(collected.includes("not valid sse"));
+});
+
+test("Antigravity SSE queue budgets are measured in bytes, not chunk count", () => {
+  const strategy = createByteLengthQueueStrategy(16 * 1024);
+  assert.equal(strategy.highWaterMark, 16 * 1024);
+  assert.equal(strategy.size?.(new Uint8Array(1)), 1);
+  assert.equal(strategy.size?.(new Uint8Array(4096)), 4096);
+});
+
+test("bindAbortLifecycle releases the client abort listener after normal EOF", async () => {
+  const controller = new AbortController();
+  const before = getEventListeners(controller.signal, "abort").length;
+  const wrapped = bindAbortLifecycle(
+    new ReadableStream<Uint8Array>({
+      start(stream) {
+        stream.enqueue(new Uint8Array([1, 2, 3]));
+        stream.close();
+      },
+    }),
+    controller.signal
+  );
+
+  const reader = wrapped.getReader();
+  while (!(await reader.read()).done) {
+    // drain
+  }
+
+  const after = getEventListeners(controller.signal, "abort").length;
+  assert.equal(
+    after,
+    before,
+    "completed streams must not retain the request body via abort listeners"
+  );
 });

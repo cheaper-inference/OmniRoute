@@ -144,10 +144,17 @@ test("Responses -> OpenAI: response.completed without function_call in output[] 
     state
   );
 
-  // Should return a single chunk (not array) with finish_reason: "stop"
-  assert.ok(!Array.isArray(result), "should return single chunk, not array");
-  assert.equal(result.choices[0].finish_reason, "stop");
-  assert.equal(result.usage.prompt_tokens, 5);
+  assert.ok(Array.isArray(result), "should recover text before the terminal chunk");
+  assert.equal(result.length, 2);
+  assert.equal(result[0].choices[0].delta.content, "Hello!");
+  assert.equal(result[0].choices[0].delta.role, "assistant");
+  assert.equal(result[0].choices[0].finish_reason, null);
+  assert.equal(result[1].choices[0].finish_reason, "stop");
+  assert.deepEqual(result[1].usage, {
+    prompt_tokens: 5,
+    completion_tokens: 2,
+    total_tokens: 7,
+  });
 });
 
 test("Responses -> OpenAI: response.completed with function_call in output[] sets assistant role on first delta", () => {
@@ -203,7 +210,8 @@ test("Responses -> OpenAI: incremental tool call events + response.completed sna
     },
     state
   );
-  assert.ok(args, "should emit args delta chunk");
+  // #9168: arguments deltas are buffered until output_item.done for schema normalization
+  assert.equal(args, null, "args delta should buffer until output_item.done");
 
   openaiResponsesToOpenAIResponse(
     {

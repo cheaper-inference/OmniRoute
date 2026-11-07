@@ -18,6 +18,7 @@ import {
 } from "../../../src/domain/pipeline.ts";
 import { renderPrompt } from "../../../src/domain/prompts.ts";
 import { getTaskFitness } from "./taskFitness.ts";
+import { mapIntentToTaskFitnessKey } from "./intentTaskFitnessMap.ts";
 
 // ---------------------------------------------------------------------------
 // Fitness tiers — map pipeline behavior to model fitness thresholds
@@ -54,6 +55,7 @@ const INTENT_TO_TASK: Record<IntentType, TaskType> = {
 export interface PipelineComboParams {
   body: Record<string, unknown>;
   combo: Record<string, unknown>;
+  availableModels?: readonly string[];
   handleChatCore: (body: Record<string, unknown>, modelStr?: string) => Promise<Response>;
   log: {
     info: (...args: unknown[]) => void;
@@ -83,16 +85,21 @@ export interface StageExecutorResult {
  * Resolve a fitness tier to a concrete model string using the available models
  * from the combo's candidate pool. Falls back to sensible defaults.
  */
-function resolveModelForTier(
+export function resolveModelForTier(
   tier: FitnessTier,
-  availableModels: string[],
+  availableModels: readonly string[],
   taskType: string
 ): string {
+  // `taskType` here is INTENT_TO_TASK[intent] — i.e. still IntentType's vocabulary
+  // ('code'|'math'|'reasoning'|'creative'|'simple'|'medium'), not taskFitness.ts's
+  // ('coding'|'review'|'planning'|'analysis'|'debugging'|'documentation'|'default').
+  // Bridge it the same way engine.ts::selectProvider does — see intentTaskFitnessMap.ts.
+  const fitnessTaskType = mapIntentToTaskFitnessKey(taskType as IntentType);
   // Score each available model for this task type and tier
   const scored = availableModels
     .map((model) => ({
       model,
-      fitness: getTaskFitness(model, taskType),
+      fitness: getTaskFitness(model, fitnessTaskType),
     }))
     .sort((a, b) => b.fitness - a.fitness);
 
@@ -125,7 +132,7 @@ function createStageExecutor(
   body: Record<string, unknown>,
   handleChatCore: (body: Record<string, unknown>, modelStr?: string) => Promise<Response>,
   log: { info: (...args: unknown[]) => void; warn: (...args: unknown[]) => void },
-  availableModels: string[],
+  availableModels: readonly string[],
   taskType: string
 ): (args: StageExecutorArgs & { fitnessTier?: FitnessTier }) => Promise<StageExecutorResult> {
   return async ({
@@ -222,6 +229,7 @@ function estimateTokens(messages: Array<{ role: string; content: unknown }>): nu
 export async function handlePipelineCombo({
   body,
   combo,
+  availableModels: routedModels,
   handleChatCore,
   log,
   settings,
@@ -291,7 +299,13 @@ export async function handlePipelineCombo({
         })
         .filter((model): model is string => typeof model === "string" && model.length > 0)
     : [];
-  const availableModels = comboModels.length ? comboModels : ["deepseek-chat"];
+  const availableModels =
+    routedModels === undefined
+      ? comboModels.length
+        ? comboModels
+        : ["deepseek-chat"]
+      : routedModels;
+  if (availableModels.length === 0) throw new Error("PIPELINE_NO_MODELS");
 
   // ── Create stage executor ─────────────────────────────────────────────────
   const stageExecutor = createStageExecutor(body, handleChatCore, log, availableModels, taskType);
@@ -333,6 +347,17 @@ export async function handlePipelineCombo({
       result = retryResult;
       break;
     }
+  }
+
+  // G6 (silent-stop fix): if the reflection loop burned its retry budget and the
+  // verdict is still "fail", the fall-through below returns a FAILED result
+  // indistinguishable from a first-attempt failure. Surface it loudly so the
+  // caller (and operator logs) can tell "retries exhausted" apart.
+  if (result.reflectVerdict === "fail" && reflectionCount > 0) {
+    log.warn(
+      "PIPELINE",
+      `Reflection retries exhausted (${reflectionCount}/${maxReflectionLoops}) — pipeline verdict still "fail", returning the original failed result`
+    );
   }
 
   // ── Return result ─────────────────────────────────────────────────────────

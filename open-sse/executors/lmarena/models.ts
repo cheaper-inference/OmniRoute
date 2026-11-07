@@ -2,21 +2,28 @@
  * LMArena live model list parsing, catalog normalization, and name→UUID resolution.
  */
 
+import { sanitizeLMArenaError } from "./error.ts";
+import { chromeUserAgent, newestChromeVersion } from "../../utils/browserProfiles.ts";
+
 export const LMARENA_API_BASE = "https://arena.ai";
 export const LMARENA_STREAM_URL = `${LMARENA_API_BASE}/nextjs-api/stream/create-evaluation`;
 /**
- * Current Chrome stable UA (header surface).
- * TLS JA3 profile is separate: tls-client-node tops out at chrome_146 — see
- * LMARENA_PROFILE in lmarenaTlsClient.ts. Headers track the live browser string;
- * fingerprint stays at the newest native profile we can actually impersonate.
+ * Chrome UA for the header surface, derived from the same wreq-js catalog
+ * version that services/lmarenaTlsClient.ts uses for the TLS profile, so the
+ * handshake and the headers cannot drift apart on a library upgrade.
+ * Resolved lazily: computing it at module scope would throw at import time
+ * when the wreq-js runtime is unavailable.
  */
-export const LMARENA_USER_AGENT =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36";
+export function lmarenaUserAgent(): string {
+  return chromeUserAgent("Windows NT 10.0; Win64; x64", newestChromeVersion());
+}
 export const LMARENA_MODEL_ID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Browser-like CORS headers for arena.ai same-origin API calls. */
 export function buildLmarenaBrowserHeaders(extra?: Record<string, string>): Record<string, string> {
+  const chromeVersion = newestChromeVersion();
+  const secChUa = `"Chromium";v="${chromeVersion}", "Google Chrome";v="${chromeVersion}", "Not-A.Brand";v="24"`;
   return {
     Accept: "text/event-stream, application/json, text/plain, */*",
     "Accept-Language": "en-US,en;q=0.9",
@@ -24,13 +31,13 @@ export function buildLmarenaBrowserHeaders(extra?: Record<string, string>): Reco
     Pragma: "no-cache",
     Origin: LMARENA_API_BASE,
     Referer: `${LMARENA_API_BASE}/`,
-    "Sec-Ch-Ua": '"Chromium";v="150", "Google Chrome";v="150", "Not-A.Brand";v="24"',
+    "Sec-Ch-Ua": secChUa,
     "Sec-Ch-Ua-Mobile": "?0",
     "Sec-Ch-Ua-Platform": '"Windows"',
     "Sec-Fetch-Dest": "empty",
     "Sec-Fetch-Mode": "cors",
     "Sec-Fetch-Site": "same-origin",
-    "User-Agent": LMARENA_USER_AGENT,
+    "User-Agent": lmarenaUserAgent(),
     ...extra,
   };
 }
@@ -297,10 +304,9 @@ export async function resolveLMArenaModelId(model: string, log?: LogFn): Promise
     if (fromSeed) return fromSeed;
     return pickLMArenaModelId(requested, await getLMArenaModels(log));
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
     log?.warn?.(
       "LMArenaExecutor",
-      `Using raw model id after static catalog lookup failed: ${message}`
+      `Using raw model id after static catalog lookup failed: ${sanitizeLMArenaError(error, "Arena catalog lookup error")}`
     );
     return requested;
   }

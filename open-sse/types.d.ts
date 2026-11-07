@@ -19,6 +19,12 @@ export interface ProviderCredentials {
   connectionId: string;
   /** Optional per-account concurrency cap */
   maxConcurrent?: number | null;
+  /**
+   * Optional per-model concurrency ceilings for this connection, keyed by
+   * the exact model string passed to the executor after routing resolution
+   * (normally the bare upstream model id). Absent/null means no model gate.
+   */
+  modelConcurrency?: Record<string, number> | null;
   /** User email associated with the connection */
   email?: string;
   /** API key (for apikey auth type) */
@@ -69,7 +75,7 @@ export interface ChatCoreParams {
   /** Connection ID for usage tracking */
   connectionId: string;
   /** API key metadata for usage attribution */
-  apiKeyInfo?: { id?: string; name?: string } | null;
+  apiKeyInfo?: { id?: string; name?: string; compressionEnabled?: boolean } | null;
   /** Client User-Agent header */
   userAgent?: string;
   /** Callback when credentials are refreshed mid-request */

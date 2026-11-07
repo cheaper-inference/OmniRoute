@@ -6,6 +6,8 @@ import {
   hasStreamReadinessSignal,
   hasUsefulStreamContent,
 } from "../../open-sse/utils/streamReadiness.ts";
+import { checkFallbackError } from "../../open-sse/services/accountFallback.ts";
+import { resolveStreamReadinessClassificationError } from "../../src/sse/handlers/chatPredicates.ts";
 
 const encoder = new TextEncoder();
 
@@ -449,6 +451,123 @@ test("ensureStreamReadiness preserves buffered chunks when stream starts", async
   assert.match(text, / world/);
 });
 
+test("ensureStreamReadiness replays buffered chunks before a subsequent source error", async () => {
+  let reads = 0;
+  const response = new Response(
+    new ReadableStream<Uint8Array>({
+      pull(controller) {
+        reads += 1;
+        if (reads === 1) {
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({
+                object: "chat.completion.chunk",
+                choices: [{ index: 0, delta: { role: "assistant", content: "prefix" } }],
+              })}\n\n`
+            )
+          );
+          return;
+        }
+        controller.error(Object.assign(new Error("terminal source failure"), { statusCode: 502 }));
+      },
+    }),
+    { status: 200, headers: { "Content-Type": "text/event-stream" } }
+  );
+
+  const result = await ensureStreamReadiness(response, { timeoutMs: 100 });
+  assert.equal(result.ok, true);
+  assert.ok(result.response.body);
+  const reader = result.response.body.getReader();
+  const first = await reader.read();
+
+  assert.equal(first.done, false);
+  assert.match(new TextDecoder().decode(first.value), /prefix/);
+  await assert.rejects(reader.read(), /terminal source failure/);
+});
+
+test("ensureStreamReadiness replays multiple buffered chunks in order before an error", async () => {
+  let reads = 0;
+  const response = new Response(
+    new ReadableStream<Uint8Array>({
+      pull(controller) {
+        reads += 1;
+        if (reads === 1) {
+          controller.enqueue(encoder.encode(": keepalive\n\n"));
+          return;
+        }
+        if (reads === 2) {
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({
+                object: "chat.completion.chunk",
+                choices: [{ index: 0, delta: { role: "assistant", content: "ready" } }],
+              })}\n\n`
+            )
+          );
+          return;
+        }
+        controller.error(new Error("failure after buffered prefix"));
+      },
+    }),
+    { status: 200, headers: { "Content-Type": "text/event-stream" } }
+  );
+
+  const result = await ensureStreamReadiness(response, { timeoutMs: 100 });
+  assert.equal(result.ok, true);
+  assert.ok(result.response.body);
+  const reader = result.response.body.getReader();
+  const first = await reader.read();
+  const second = await reader.read();
+
+  assert.equal(first.done, false);
+  assert.equal(second.done, false);
+  assert.match(new TextDecoder().decode(first.value), /keepalive/);
+  assert.match(new TextDecoder().decode(second.value), /ready/);
+  await assert.rejects(reader.read(), /failure after buffered prefix/);
+});
+
+test("ensureStreamReadiness cancellation is bounded when upstream cancel never settles", async () => {
+  let cancelCalls = 0;
+  const response = new Response(
+    new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              object: "chat.completion.chunk",
+              choices: [{ index: 0, delta: { role: "assistant", content: "prefix" } }],
+            })}\n\n`
+          )
+        );
+      },
+      pull() {
+        return new Promise<void>(() => {});
+      },
+      cancel() {
+        cancelCalls += 1;
+        return new Promise<void>(() => {});
+      },
+    }),
+    { status: 200, headers: { "Content-Type": "text/event-stream" } }
+  );
+
+  const result = await ensureStreamReadiness(response, { timeoutMs: 100 });
+  assert.equal(result.ok, true);
+  assert.ok(result.response.body);
+  const reader = result.response.body.getReader();
+  const first = await reader.read();
+  assert.equal(first.done, false);
+
+  await Promise.race([
+    reader.cancel("client disconnected"),
+    new Promise<never>((_resolve, reject) =>
+      setTimeout(() => reject(new Error("readiness cancellation stayed pending")), 500)
+    ),
+  ]);
+  await reader.cancel("duplicate cancellation");
+  assert.equal(cancelCalls, 1);
+});
+
 test("ensureStreamReadiness honors configured timeouts above 2000ms", async () => {
   const response = new Response(
     streamFromChunks(
@@ -576,7 +695,133 @@ test("ensureStreamReadiness returns 502 when stream ends without a non-ping SSE 
 
   const result = await ensureStreamReadiness(response, { timeoutMs: 100 });
   assert.equal(result.ok, false);
+  if (result.ok) assert.fail("keepalive-only SSE payload must remain a readiness failure");
   assert.equal(result.response.status, 502);
+  assert.equal(result.reason, "Stream ended before producing a non-ping SSE event");
+  assert.equal(result.classificationReason, result.reason);
+  const body = (await result.response.json()) as Record<string, unknown>;
+  assert.equal("upstream_details" in body, false);
+});
+
+test("ensureStreamReadiness preserves sanitized error-only diagnostics on early EOF (#8972)", async () => {
+  const warnings: string[] = [];
+  const response = new Response(
+    streamFromChunks([
+      `data: ${JSON.stringify({
+        error: {
+          message:
+            "UPSTREAM_DETAIL quota exhausted; retry after 2s; empty content " +
+            "Bearer TOP_SECRET /srv/omniroute/handler.ts:42",
+        },
+      })}\n\n`,
+      `data: ${JSON.stringify({ error: { message: "SECOND_DETAIL" } })}\n\n`,
+    ]),
+    { status: 200, headers: { "Content-Type": "text/event-stream" } }
+  );
+
+  const result = await ensureStreamReadiness(response, {
+    timeoutMs: 100,
+    provider: "test-provider",
+    model: "test-model",
+    log: {
+      warn: (_tag, message) => warnings.push(message),
+    },
+  });
+
+  assert.equal(result.ok, false);
+  if (result.ok) assert.fail("error-only SSE payload must remain a readiness failure");
+  assert.equal(result.response.status, 502);
+  assert.equal(result.code, "STREAM_EARLY_EOF");
+  assert.equal(result.type, "stream_early_eof");
+  assert.equal(result.classificationReason, "Stream ended before producing a non-ping SSE event");
+  assert.equal(
+    result.upstreamDiagnostic,
+    "UPSTREAM_DETAIL quota exhausted; retry after 2s; empty content Bearer [REDACTED] <path>"
+  );
+
+  const body = (await result.response.json()) as {
+    error: { message: string; code: string; type: string };
+    upstream_details: { error: { message: string } };
+  };
+  assert.equal(body.error.message, result.classificationReason);
+  assert.doesNotMatch(body.error.message, /quota|retry after|empty content/i);
+  assert.equal(body.error.code, "STREAM_EARLY_EOF");
+  assert.equal(body.error.type, "stream_early_eof");
+  assert.equal(body.upstream_details.error.message, result.upstreamDiagnostic);
+  assert.equal(warnings.length, 1);
+
+  for (const surfaced of [result.reason, body.upstream_details.error.message, warnings[0]]) {
+    assert.match(surfaced, /UPSTREAM_DETAIL/);
+    assert.doesNotMatch(surfaced, /SECOND_DETAIL|TOP_SECRET|\/srv\/omniroute\/handler\.ts/);
+  }
+});
+
+function failingStream(error: Error, prefix: string[] = []): ReadableStream<Uint8Array> {
+  return new ReadableStream<Uint8Array>({
+    async start(controller) {
+      for (const chunk of prefix) controller.enqueue(encoder.encode(chunk));
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      controller.error(error);
+    },
+  });
+}
+
+test("ensureStreamReadiness reports the real upstream stream error instead of a timeout", async () => {
+  const warnings: string[] = [];
+  const response = new Response(
+    failingStream(
+      new Error("cursor-agent stream stalled: no progress for 60s at /srv/omniroute/cursor.ts:9"),
+      [": keepalive\n\n"]
+    ),
+    { status: 200, headers: { "Content-Type": "text/event-stream" } }
+  );
+
+  const result = await ensureStreamReadiness(response, {
+    timeoutMs: 5_000,
+    provider: "cursor",
+    model: "gemini-3.8-flash",
+    log: { warn: (_tag, message) => warnings.push(message) },
+  });
+
+  assert.equal(result.ok, false);
+  if (result.ok) assert.fail("an errored stream must be a readiness failure");
+  // Routing class is unchanged: STREAM_EARLY_EOF would add a same-connection retry (#3758)
+  // and delay the combo fallback on a stream the executor already gave up on.
+  assert.equal(result.response.status, 504);
+  assert.equal(result.code, "STREAM_READINESS_TIMEOUT");
+  assert.equal(result.type, "stream_timeout");
+  assert.equal(result.classificationReason, "Stream failed before producing a non-ping SSE event");
+  assert.match(result.upstreamDiagnostic ?? "", /stalled: no progress for 60s/);
+  assert.doesNotMatch(result.reason, /within \d+ms|\/srv\/omniroute/);
+  assert.match(result.reason, /stalled/);
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /stalled/);
+
+  const body = (await result.response.json()) as {
+    error: { message: string; code: string };
+    upstream_details: { error: { message: string } };
+  };
+  assert.equal(body.error.code, "STREAM_READINESS_TIMEOUT");
+  assert.equal(body.error.message, result.classificationReason);
+  assert.equal(body.upstream_details.error.message, result.upstreamDiagnostic);
+});
+
+test("stream-readiness diagnostics cannot reclassify Antigravity account exhaustion (#8972)", () => {
+  const classificationError = "Stream ended before producing a non-ping SSE event";
+  const diagnostic = "UPSTREAM_DETAIL quota exhausted; retry after 2s; empty content";
+  const routedError = resolveStreamReadinessClassificationError({
+    classificationError,
+    error: `${classificationError}: ${diagnostic}`,
+    errorCode: "STREAM_EARLY_EOF",
+  });
+
+  assert.equal(routedError, classificationError);
+  assert.equal(checkFallbackError(502, routedError, 0, null, "antigravity").reason, "server_error");
+  assert.equal(
+    checkFallbackError(502, diagnostic, 0, null, "antigravity").reason,
+    "quota_exhausted",
+    "the regression fixture must prove that leaking the operator diagnostic changes routing"
+  );
 });
 
 test("ensureStreamReadiness accepts a final event without a trailing blank line", async () => {

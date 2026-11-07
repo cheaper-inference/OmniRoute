@@ -1,4 +1,5 @@
 import { getDbInstance } from "./core";
+import { invalidateDbCache } from "./readCache";
 
 /**
  * Feature 5004 — self-correcting context-window overrides.
@@ -36,7 +37,10 @@ function isPositiveInteger(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value) && value > 0;
 }
 
-function normalizeKey(provider: unknown, modelId: unknown): { provider: string; modelId: string } | null {
+function normalizeKey(
+  provider: unknown,
+  modelId: unknown
+): { provider: string; modelId: string } | null {
   const p = typeof provider === "string" ? provider.trim() : "";
   const m = typeof modelId === "string" ? modelId.trim() : "";
   if (!p || !m) return null;
@@ -74,13 +78,31 @@ export function getModelContextOverrideRecord(
   }
 }
 
+/** Nested provider → model → context map used by build-local snapshots. */
+export type NestedContextOverrideMap = ReadonlyMap<string, ReadonlyMap<string, number>>;
+
 /** The overridden context window (tokens) for (provider, modelId), or null. Never throws. */
 export function getModelContextOverride(
   provider: string | null | undefined,
-  modelId: string | null | undefined
+  modelId: string | null | undefined,
+  bulkContextOverrides?: NestedContextOverrideMap | null
 ): number | null {
+  if (bulkContextOverrides) {
+    const key = normalizeKey(provider, modelId);
+    if (!key) return null;
+    return bulkContextOverrides.get(key.provider)?.get(key.modelId) ?? null;
+  }
   const record = getModelContextOverrideRecord(provider, modelId);
   return record ? record.realContext : null;
+}
+
+/**
+ * Batch writers (the context-window reconciler) pass `invalidate: false` and
+ * invalidate once at the end, so one pass does not bump the catalog version
+ * once per row.
+ */
+export interface ModelContextOverrideWriteOptions {
+  invalidate?: boolean;
 }
 
 /**
@@ -91,7 +113,8 @@ export function setModelContextOverride(
   provider: string,
   modelId: string,
   realContext: number,
-  source: ModelContextOverrideSource = "manual"
+  source: ModelContextOverrideSource = "manual",
+  options: ModelContextOverrideWriteOptions = {}
 ): boolean {
   const key = normalizeKey(provider, modelId);
   if (!key || !isPositiveInteger(realContext)) return false;
@@ -104,16 +127,22 @@ export function setModelContextOverride(
         "VALUES (?, ?, ?, ?, datetime('now'))"
     )
     .run(key.provider, key.modelId, realContext, normalizedSource);
+  if (options.invalidate !== false) invalidateDbCache("model-capabilities");
   return true;
 }
 
 /** Remove an override. Returns true when a row was deleted. */
-export function removeModelContextOverride(provider: string, modelId: string): boolean {
+export function removeModelContextOverride(
+  provider: string,
+  modelId: string,
+  options: ModelContextOverrideWriteOptions = {}
+): boolean {
   const key = normalizeKey(provider, modelId);
   if (!key) return false;
   const info = getDbInstance()
     .prepare("DELETE FROM model_context_overrides WHERE provider = ? AND model_id = ?")
     .run(key.provider, key.modelId);
+  if (info.changes > 0 && options.invalidate !== false) invalidateDbCache("model-capabilities");
   return info.changes > 0;
 }
 

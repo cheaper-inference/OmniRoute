@@ -102,6 +102,15 @@ test("P1: _getAccessTokenInternal passes providerSpecificData to refreshKimiCodi
   );
 });
 
+test("P1: _getAccessTokenInternal passes providerSpecificData to refreshMuseCodeToken", async () => {
+  const src = await read("open-sse/services/tokenRefresh.ts");
+  assert.match(
+    src,
+    /case\s+["']muse-code["']:[\s\S]{1,300}providerSpecificData/,
+    "muse-code case must pass providerSpecificData"
+  );
+});
+
 // ─── P1: GitHub Copilot sub-token health check ────────────────────────────────
 
 test("P1: GitHub Copilot sub-token is refreshed by tokenHealthCheck", async () => {
@@ -114,7 +123,18 @@ test("P1: GitHub Copilot sub-token is refreshed by tokenHealthCheck", async () =
 test("P1: tokenHealthCheck checks copilotTokenExpiresAt before refreshing", async () => {
   const src = await read("src/lib/tokenHealthCheck.ts");
   assert.match(src, /copilotTokenExpiresAt/, "must check copilotTokenExpiresAt");
-  assert.match(src, /toLowerCase\(\)\s*===\s*["']github["']/, "must be gated on github provider");
+  // The gate must still lowercase-normalize conn.provider (#6947), but it is no
+  // longer a single `=== "github"` literal: GHE Copilot shares the exact same
+  // shape (GitHub-style access token, no refresh_token, short-lived Copilot
+  // sub-token), so the branch is now driven by a provider Set. Accept either
+  // form — the invariant under test is the normalized provider gate, not which
+  // syntax expresses it.
+  assert.match(
+    src,
+    /toLowerCase\(\)\s*===\s*["']github["']|_PROVIDERS\.has\(\s*String\([^)]*\)\s*\.toLowerCase\(\)\s*\)/,
+    'must be gated on a lowercase-normalized provider check (=== "github" literal ' +
+      "or a *_PROVIDERS Set membership test covering github/ghe-copilot)"
+  );
 });
 
 // ─── P1: case-insensitive provider comparisons (regression for #6947) ────────
@@ -220,22 +240,6 @@ test("P3: refreshClaudeOAuthToken normalizes invalid_grant to unrecoverable_refr
     /code:\s*`http_\$\{response\.status\}`/,
     "must NOT return http_NNN code format for invalid_grant"
   );
-});
-
-// ─── P3: Windsurf Firebase errors ────────────────────────────────────────────
-
-test("P3: refreshWindsurfToken parses Firebase USER_DISABLED/TOKEN_EXPIRED errors", async () => {
-  // refreshWindsurfToken lives in its own co-located provider module since the
-  // tokenRefresh.ts provider-extraction (#7338, redone on tip).
-  const src = await read("open-sse/services/tokenRefresh/providers/windsurf.ts");
-  const fnMatch = src.match(/export\s+async\s+function\s+refreshWindsurfToken\([\s\S]+?\n\}/);
-  assert.ok(fnMatch, "refreshWindsurfToken function body not found");
-  assert.match(
-    fnMatch[0],
-    /USER_DISABLED|TOKEN_EXPIRED|INVALID_REFRESH_TOKEN/,
-    "must detect Firebase error codes"
-  );
-  assert.match(fnMatch[0], /unrecoverable_refresh_error/, "must return unrecoverable sentinel");
 });
 
 // ─── isUnrecoverableRefreshError consistency ──────────────────────────────────

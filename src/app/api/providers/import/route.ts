@@ -10,7 +10,10 @@ import {
   getProviderNodeById,
   isCloudEnabled,
 } from "@/models";
-import { isAnthropicCompatibleProvider, isOpenAICompatibleProvider } from "@/shared/constants/providers";
+import {
+  isAnthropicCompatibleProvider,
+  isOpenAICompatibleProvider,
+} from "@/shared/constants/providers";
 import { isManagedProviderConnectionId } from "@/lib/providers/catalog";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { resolveBulkNameCollisions } from "@/shared/utils/bulkApiKeyParser";
@@ -24,8 +27,11 @@ import {
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { validateProviderApiKey } from "@/lib/providers/validation";
-import { getProxyForLevel, resolveProxyForProvider } from "@/lib/localDb";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
+import { getProxyForLevel } from "@/lib/db/settings";
+import { resolveProxyForProvider } from "@/lib/db/proxies";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
+import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
 
 type ImportEntry = {
   provider: string;
@@ -76,7 +82,8 @@ function isKnownImportProvider(provider: string): boolean {
 
 async function importOneEntry(
   entry: ImportEntry,
-  validateKeys: boolean
+  validateKeys: boolean,
+  allowLocalSpawn: boolean
 ): Promise<{ created: Record<string, unknown> } | { error: string }> {
   // Reject unknown providers per-row, preserving the partial-failure contract of /bulk.
   if (!isKnownImportProvider(entry.provider)) {
@@ -105,6 +112,8 @@ async function importOneEntry(
         provider: entry.provider,
         apiKey: entry.apiKey,
         providerSpecificData: providerSpecificData || undefined,
+        // S-01 (#15159, #15766 shape): devin CLI-spawn fallback is loopback/LAN-only.
+        allowLocalSpawn,
       })
     );
     testStatus = probe?.valid ? "active" : "failed";
@@ -164,7 +173,10 @@ async function resolveImportNameCollisions(entries: ImportEntry[]): Promise<Impo
     const resolvedProviderEntries = resolveBulkNameCollisions(providerEntries, existingNames);
 
     indices.forEach((originalIndex, i) => {
-      resolved[originalIndex] = { ...entries[originalIndex], name: resolvedProviderEntries[i].name };
+      resolved[originalIndex] = {
+        ...entries[originalIndex],
+        name: resolvedProviderEntries[i].name,
+      };
     });
   }
 
@@ -205,6 +217,10 @@ export async function POST(request: Request) {
   }
 
   const { entries, validateKeys } = validation.data;
+  for (const entry of entries) {
+    const retirementResponse = rejectRetiredCommonChatGptWebProvider(entry.provider);
+    if (retirementResponse) return retirementResponse;
+  }
   const resolvedEntries = await resolveImportNameCollisions(entries);
 
   const created: Array<Record<string, unknown>> = [];
@@ -213,9 +229,19 @@ export async function POST(request: Request) {
   for (let i = 0; i < resolvedEntries.length; i++) {
     const entry = resolvedEntries[i];
     try {
-      const result = await importOneEntry(entry, !!validateKeys);
+      const result = await importOneEntry(
+        entry,
+        !!validateKeys,
+        // S-01 (#15159, #15766 shape): devin CLI-spawn fallback is loopback/LAN-only.
+        getRequestPeerLocality(request) !== "remote"
+      );
       if ("error" in result) {
-        errors.push({ index: i, name: entry.name, provider: entry.provider, message: result.error });
+        errors.push({
+          index: i,
+          name: entry.name,
+          provider: entry.provider,
+          message: result.error,
+        });
         continue;
       }
       created.push(result.created);

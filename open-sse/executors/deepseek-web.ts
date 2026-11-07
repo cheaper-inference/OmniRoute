@@ -4,8 +4,12 @@ import { type OpenAIToolCall } from "../translator/webTools.ts";
 import {
   serializeDeepSeekToolPrompt,
   parseDeepSeekToolCalls,
+  hasMalformedDeepSeekToolIntent,
+  hasMalformedDeepSeekToolMarkup,
   buildToolConversationPrompt,
 } from "../translator/deepseekWebTools.ts";
+import { requestDeepSeekPowChallenge, type PowChallenge } from "./deepseek-web/pow.ts";
+import { DeepSeekImageError, uploadDeepSeekImages } from "./deepseek-web/image-upload.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import {
   isThinkingModel,
@@ -48,17 +52,6 @@ const FAKE_HEADERS: Record<string, string> = {
 
 // ── Types ────────────────────────────────────────────────────────────────
 
-interface PowChallenge {
-  algorithm: string;
-  challenge: string;
-  salt: string;
-  signature: string;
-  difficulty: number;
-  expire_at: number;
-  expire_after: number;
-  target_path: string;
-}
-
 interface TokenInfo {
   accessToken: string;
   expiresAt: number;
@@ -96,7 +89,11 @@ export function extractUserToken(credentials: Record<string, unknown>): string |
 function errorResponse(status: number, message: string, dsCode?: number): Response {
   return new Response(
     JSON.stringify({
-      error: { message, type: "upstream_error", code: dsCode ?? `HTTP_${status}` },
+      error: {
+        message: sanitizeErrorMessage(message),
+        type: "upstream_error",
+        code: dsCode ?? `HTTP_${status}`,
+      },
     }),
     { status, headers: { "Content-Type": "application/json" } }
   );
@@ -141,13 +138,14 @@ function generateFakeCookie(): string {
 
 // ── PoW Solver (DeepSeekHashV1) ─────────────────────────────────────────
 
-async function solvePow(challenge: PowChallenge): Promise<string> {
+async function solvePow(challenge: PowChallenge, signal?: AbortSignal | null): Promise<string> {
   const answer = await solveDeepSeekPowAsync(
     challenge.algorithm,
     challenge.challenge,
     challenge.salt,
     challenge.difficulty,
-    challenge.expire_at
+    challenge.expire_at,
+    { signal }
   );
   if (answer < 0) throw new Error("PoW solver failed");
   return Buffer.from(
@@ -163,6 +161,27 @@ async function solvePow(challenge: PowChallenge): Promise<string> {
 }
 
 // ── SSE Transform (DeepSeek → OpenAI) ───────────────────────────────────
+
+class DeepSeekUpstreamHintError extends Error {
+  readonly status: 429 | 502;
+
+  constructor(rateLimited: boolean) {
+    super(
+      rateLimited
+        ? "DeepSeek upstream rate limit reached"
+        : "DeepSeek upstream rejected the request"
+    );
+    this.name = "DeepSeekUpstreamHintError";
+    this.status = rateLimited ? 429 : 502;
+  }
+}
+
+function upstreamHintError(payload: unknown): DeepSeekUpstreamHintError | undefined {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return;
+  const hint = payload as Record<string, unknown>;
+  if (hint.type !== "error") return;
+  return new DeepSeekUpstreamHintError(hint.finish_reason === "rate_limit_reached");
+}
 
 function transformSSE(deepseekStream: ReadableStream, model: string): ReadableStream {
   const encoder = new TextEncoder();
@@ -180,6 +199,7 @@ function transformSSE(deepseekStream: ReadableStream, model: string): ReadableSt
       async start(controller) {
         const reader = deepseekStream.getReader();
         let buffer = "";
+        let eventName = "";
 
         const emit = (obj: object) => {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
@@ -262,8 +282,16 @@ function transformSSE(deepseekStream: ReadableStream, model: string): ReadableSt
             buffer = lines.pop() || "";
 
             for (const line of lines) {
-              if (!line.startsWith("data: ") && !line.startsWith("data:")) continue;
-              const payload = line.replace(/^data:\s*/, "").trim();
+              if (line.trim() === "") {
+                eventName = "";
+                continue;
+              }
+              if (line.startsWith("event:")) {
+                eventName = line.slice("event:".length).trim();
+                continue;
+              }
+              if (!line.startsWith("data:")) continue;
+              const payload = line.slice("data:".length).trim();
 
               if (payload === "[DONE]") {
                 finishStream();
@@ -274,6 +302,12 @@ function transformSSE(deepseekStream: ReadableStream, model: string): ReadableSt
               try {
                 data = JSON.parse(payload);
               } catch {
+                continue;
+              }
+
+              if (eventName === "hint") {
+                const error = upstreamHintError(data);
+                if (error) throw error;
                 continue;
               }
 
@@ -373,9 +407,17 @@ async function collectSSEContent(
   const decoder = new TextDecoder();
   const reader = deepseekStream.getReader();
   let buffer = "";
+  let eventName = "";
+  let hintError: DeepSeekUpstreamHintError | undefined;
   let content = "";
   let reasoningContent = "";
   let currentPath: "thinking" | "content" | "" = "";
+  // Track whether DeepSeek actually signalled completion (`response/status: "FINISHED"`).
+  // Without this, an upstream session drop (expired cookie, anti-bot challenge, network
+  // hiccup) mid-stream was silently reported as a normal "stop" completion with whatever
+  // partial content had arrived so far — e.g. just "I'll check that..." with no follow-up,
+  // HTTP 200, finish_reason "stop". Confirmed in production call logs.
+  let sawFinished = false;
   const streamModel = model || "deepseek-web";
   const thinkingModel = isThinkingModel(streamModel);
   const searchResults: DeepSeekSearchResult[] = [];
@@ -415,12 +457,26 @@ async function collectSSEContent(
     buffer = lines.pop() || "";
 
     for (const line of lines) {
-      if (!line.startsWith("data: ") && !line.startsWith("data:")) continue;
-      const payload = line.replace(/^data:\s*/, "").trim();
+      if (line.trim() === "") {
+        eventName = "";
+        continue;
+      }
+      if (line.startsWith("event:")) {
+        eventName = line.slice("event:".length).trim();
+        continue;
+      }
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice("data:".length).trim();
       try {
         const data = JSON.parse(payload);
+        if (eventName === "hint") {
+          hintError ??= upstreamHintError(data);
+          continue;
+        }
         const p = data?.p;
         const v = data?.v;
+
+        if (p === "response/status" && v === "FINISHED") sawFinished = true;
 
         if (v && typeof v === "object" && v.response) {
           if (v.response.thinking_enabled === true) currentPath = "thinking";
@@ -480,8 +536,22 @@ async function collectSSEContent(
     }
   }
 
+  // Preserve typed rejections outside the malformed-frame catch above.
+  if (hintError) throw hintError;
   const citations = appendSearchCitations(searchResults, streamModel);
   if (citations) content += `\n\n${citations}`;
+
+  // The upstream HTTP body closed without ever sending `response/status: "FINISHED"`.
+  // That means the DeepSeek web session was cut off mid-generation (expired cookie,
+  // anti-bot challenge, network drop, etc.) rather than genuinely completing. Surface
+  // this as an error (caught by execute()'s try/catch -> 502) instead of returning the
+  // partial stub as a successful "stop" response.
+  if (!sawFinished) {
+    throw new Error(
+      "DeepSeek web session ended before completion (no FINISHED signal received) — " +
+        "likely a dropped cookie session or network interruption upstream. Retry the request."
+    );
+  }
 
   return { content, reasoningContent };
 }
@@ -498,24 +568,37 @@ function extractMessageText(content: unknown): string {
   return String(content || "");
 }
 
+// #10527 — with no explicit `historyWindow`, genuinely multi-turn conversations (any
+// assistant turn present, or more than one user turn) now auto-replay a bounded
+// trajectory instead of only the last user message, so agentic clients that never send
+// OpenAI-native `tools[]` (e.g. Cline, which embeds its own XML tool convention) don't
+// silently lose the original task after a couple of tool-result turns. This cap keeps
+// the auto-replay bounded for very long agent sessions; set `historyWindow` explicitly
+// on the connection to raise or lower it.
+const DEFAULT_AUTO_HISTORY_WINDOW = 20;
+
 /**
  * Build the single prompt string the DeepSeek web API accepts.
  *
  * The web endpoint (`/api/v0/chat/completion`) takes only a `prompt` string, not a
- * `messages` array. With `historyWindow <= 0` (default) we keep the legacy behavior —
- * system prompt(s) + the last user message only — which is fine for plain chat.
+ * `messages` array. For a genuinely single-turn request (one user message, no prior
+ * assistant turns) we keep the minimal behavior — system prompt(s) + the last user
+ * message only — which is fine for plain chat and avoids inflating token usage.
  *
- * With `historyWindow > 0` we stitch the last N non-system messages into a role-tagged
- * transcript so agentic multi-turn clients keep context across turns (rolling-window
- * memory, #2942). The system prompt(s) still lead the prompt and the newest user turn
- * is the last line of the transcript.
+ * For a multi-turn conversation, `historyWindow > 0` stitches the last N non-system
+ * messages into a role-tagged transcript so agentic multi-turn clients keep context
+ * across turns (rolling-window memory, #2942). With `historyWindow` unset/`<= 0` we now
+ * auto-apply a bounded window (`DEFAULT_AUTO_HISTORY_WINDOW`) instead of dropping every
+ * earlier turn (#10527) — the previous default silently discarded the original task
+ * after a couple of turns for clients (Cline) that never send `tools[]`. The system
+ * prompt(s) still lead the prompt and the newest user turn is the last line of the
+ * transcript.
  */
 export function messagesToPrompt(
   messages: Array<{ role: string; content: string; tool_call_id?: string; name?: string }>,
   historyWindow = 0
 ): string {
   if (messages.length === 0) return "";
-
   const systemParts: string[] = [];
   const conversation: Array<{ role: string; text: string }> = [];
   const callNameById = new Map<string, string>();
@@ -527,8 +610,9 @@ export function messagesToPrompt(
     } else if (m.role === "user" || m.role === "assistant") {
       if (text) conversation.push({ role: m.role, text });
       if (m.role === "user") lastUserContent = text;
-      const calls = Array.isArray((m as { tool_calls?: unknown }).tool_calls)
-        ? (m as { tool_calls: Array<{ id?: string; function?: { name?: string } }> }).tool_calls
+      const toolCalls = (m as { tool_calls?: unknown }).tool_calls;
+      const calls = Array.isArray(toolCalls)
+        ? (toolCalls as Array<{ id?: string; function?: { name?: string } }>)
         : [];
       for (const c of calls) {
         if (c?.id && typeof c.function?.name === "string") callNameById.set(c.id, c.function.name);
@@ -551,9 +635,14 @@ export function messagesToPrompt(
     parts.push(systemParts.join("\n\n"));
   }
 
-  if (historyWindow > 0 && conversation.length > 1) {
-    // Rolling-window transcript of the most recent turns (#2942).
-    const recent = conversation.slice(-historyWindow);
+  const effectiveWindow =
+    historyWindow > 0 ? historyWindow : conversation.length > 1 ? DEFAULT_AUTO_HISTORY_WINDOW : 0;
+
+  if (effectiveWindow > 0 && conversation.length > 1) {
+    // Rolling-window transcript of the most recent turns (#2942, auto-applied per
+    // #10527 when no explicit historyWindow is configured and the conversation is
+    // genuinely multi-turn).
+    const recent = conversation.slice(-effectiveWindow);
     const transcript = recent
       .map((turn) =>
         turn.role === "assistant"
@@ -698,23 +787,10 @@ function wrapStreamWithCleanup(
 
 async function getPowChallenge(
   accessToken: string,
-  signal?: AbortSignal | null
+  signal?: AbortSignal | null,
+  targetPath = "/api/v0/chat/completion"
 ): Promise<PowChallenge> {
-  const resp = await fetch(`${DEEPSEEK_API_BASE}/v0/chat/create_pow_challenge`, {
-    method: "POST",
-    headers: {
-      ...FAKE_HEADERS,
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({ target_path: "/api/v0/chat/completion" }),
-    signal: signal ?? undefined,
-  });
-  if (!resp.ok) throw new Error(`create_pow_challenge HTTP ${resp.status}`);
-  const json = await resp.json();
-  const bizData = json?.data?.biz_data || json?.biz_data;
-  if (!bizData?.challenge?.challenge) throw new Error(`No PoW challenge: code=${json?.code}`);
-  return bizData.challenge as PowChallenge;
+  return requestDeepSeekPowChallenge({ accessToken, headers: FAKE_HEADERS, signal, targetPath });
 }
 
 // ── Tool-call response builder (#2820) ──────────────────────────────────
@@ -868,8 +944,8 @@ export class DeepSeekWebExecutor extends BaseExecutor {
       return {
         response: errorResponse(
           400,
-          "Invalid credentials: paste your userToken from DeepSeek localStorage " +
-            "(DevTools → Application → Local Storage → chat.deepseek.com → userToken)"
+          "Missing userToken \u2014 paste it from DeepSeek localStorage " +
+            "(DevTools \u2192 Application \u2192 Local Storage \u2192 chat.deepseek.com \u2192 userToken)"
         ),
         url: COMPLETION_URL,
         headers: {},
@@ -900,16 +976,28 @@ export class DeepSeekWebExecutor extends BaseExecutor {
       const prompt = hasTools
         ? buildToolConversationPrompt(messages, toolSystemPrompt)
         : messagesToPrompt(promptMessages, historyWindow);
-      const refFileIds = Array.isArray(bodyObj.ref_file_ids) ? bodyObj.ref_file_ids : [];
+      const uploadedFileIds = await uploadDeepSeekImages({
+        messages,
+        headers: { ...FAKE_HEADERS, Authorization: `Bearer ${accessToken}` },
+        signal,
+        createPowHeader: async (targetPath, uploadSignal) =>
+          solvePow(await getPowChallenge(accessToken, uploadSignal, targetPath), uploadSignal),
+      });
+      const refFileIds = [
+        ...new Set([
+          ...(Array.isArray(bodyObj.ref_file_ids) ? bodyObj.ref_file_ids : []),
+          ...uploadedFileIds,
+        ]),
+      ];
       log?.info?.(
         "DEEPSEEK-WEB",
         `model_type=${modelType}, thinking=${thinkingEnabled}, search=${searchEnabled}, files=${refFileIds.length}, stream=${stream !== false}, persist=${persistSession}, window=${historyWindow}`
       );
 
       // One completion attempt against a given session id (fresh PoW per attempt).
-      const performCompletion = async (sid: string) => {
+      const performCompletion = async (sid: string, completionPrompt = prompt) => {
         const powChallenge = await getPowChallenge(accessToken, signal);
-        const powAnswer = await solvePow(powChallenge);
+        const powAnswer = await solvePow(powChallenge, signal);
         const reqHeaders: Record<string, string> = {
           ...FAKE_HEADERS,
           "Content-Type": "application/json",
@@ -922,7 +1010,7 @@ export class DeepSeekWebExecutor extends BaseExecutor {
           chat_session_id: sid,
           parent_message_id: null,
           model_type: modelType,
-          prompt,
+          prompt: completionPrompt,
           ref_file_ids: refFileIds,
           thinking_enabled: thinkingEnabled,
           search_enabled: searchEnabled,
@@ -1059,19 +1147,53 @@ export class DeepSeekWebExecutor extends BaseExecutor {
       // OpenAI tool_calls. Buffering (even for stream clients) is acceptable because
       // tool invocations are short and need the complete block to parse. (#2820)
       if (hasTools) {
-        const { content, reasoningContent } = await collectSSEContent(resp.body!, clientModel);
+        let { content, reasoningContent } = await collectSSEContent(resp.body!, clientModel);
+        let parsed = parseDeepSeekToolCalls(content, `call-${Date.now()}`, requestedTools);
+
+        // DSML / malformed envelopes are explicit tool intent, not plain answers: retry once in a
+        // fresh session. The reply goes through the same parser (fork DSML dialects stay nonce-
+        // and schema-bound; the canonical <tool> envelope keeps the shared #9343 policy).
+        const repairFailed = async (message: string) => {
+          await cleanupFn();
+          const response = errorResponse(502, message);
+          return {
+            response,
+            url: COMPLETION_URL,
+            headers: reqHeaders,
+            transformedBody: requestPayload,
+          };
+        };
+        if (hasMalformedDeepSeekToolIntent(parsed.content, requestedTools)) {
+          log?.warn?.("DEEPSEEK-WEB", "Malformed tool envelope — retrying once with nonce binding");
+          sessionCache.delete(userToken);
+          await deleteSessionOnDeepSeek(accessToken, sessionId).catch(() => {});
+          sessionId = await createSession(accessToken, signal);
+          if (persistSession) {
+            evictOldest(sessionCache);
+            sessionCache.set(userToken, { sessionId, createdAt: Date.now() });
+          }
+          const repairPrompt = [
+            prompt,
+            "Your previous response used an invalid tool envelope and was rejected.",
+            "Retry the requested next action from scratch. Follow the client tool contract exactly, " +
+              "including its _nonce binding and argument schema. Do not emit bare JSON or unbound DSML.",
+          ].join("\n\n");
+          ({ resp, reqHeaders, requestPayload } = await performCompletion(sessionId, repairPrompt));
+          if (!resp.ok) return repairFailed("DeepSeek tool-call repair request failed.");
+          ({ content, reasoningContent } = await collectSSEContent(resp.body!, clientModel));
+          parsed = parseDeepSeekToolCalls(content, `call-${Date.now()}`, requestedTools);
+          if (hasMalformedDeepSeekToolMarkup(parsed.content)) {
+            return repairFailed("DeepSeek emitted an invalid tool call after repair.");
+          }
+        }
+
         await cleanupFn();
-        const { content: cleanedContent, toolCalls } = parseDeepSeekToolCalls(
-          content,
-          `call-${Date.now()}`,
-          requestedTools
-        );
         return buildToolAwareResult({
           stream: stream !== false,
           clientModel,
-          content: cleanedContent,
+          content: parsed.content,
           reasoningContent,
-          toolCalls,
+          toolCalls: parsed.toolCalls,
           reqHeaders,
           requestPayload,
         });
@@ -1120,9 +1242,9 @@ export class DeepSeekWebExecutor extends BaseExecutor {
       };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      log?.error?.("DEEPSEEK-WEB", `Execute failed: ${msg}`);
+      log?.error?.("DEEPSEEK-WEB", `Execute failed: ${sanitizeErrorMessage(msg)}`);
 
-      if (err instanceof DOMException && err.name === "AbortError") {
+      if (err instanceof Error && err.name === "AbortError") {
         return {
           response: errorResponse(499, "Request cancelled"),
           url: COMPLETION_URL,
@@ -1132,7 +1254,12 @@ export class DeepSeekWebExecutor extends BaseExecutor {
       }
 
       return {
-        response: errorResponse(502, `DeepSeek error: ${sanitizeErrorMessage(msg)}`),
+        response: errorResponse(
+          err instanceof DeepSeekUpstreamHintError || err instanceof DeepSeekImageError
+            ? err.status
+            : 502,
+          `DeepSeek error: ${sanitizeErrorMessage(msg)}`
+        ),
         url: COMPLETION_URL,
         headers: {},
         transformedBody: body,

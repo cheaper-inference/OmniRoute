@@ -1,9 +1,13 @@
-import { getProviderConnectionById, resolveProxyForConnection } from "@/lib/localDb";
+import { getProviderConnectionById } from "@/lib/db/providers";
+import { resolveProxyForConnection } from "@/lib/db/settings";
+import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import {
   fetchAndPersistProviderLimits,
   refreshAndUpdateCredentials,
 } from "@/lib/usage/providerLimits";
+import { releaseCodexCooldownAfterResetCredit } from "@/lib/usage/resetCreditCooldownRelease";
 import { invalidateCodexQuotaCache } from "@omniroute/open-sse/services/codexQuotaFetcher.ts";
+import { getCodexBackendIdentityHeaders } from "@omniroute/open-sse/config/codexClient.ts";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 
@@ -290,6 +294,9 @@ function buildCodexResetCreditHeaders(connection: CodexConnectionLike): Record<s
     Authorization: `Bearer ${connection.accessToken}`,
     "Content-Type": "application/json",
     Accept: "application/json",
+    // Canonical Codex backend identity (UA + originator + version), same
+    // chain as inference — see getCodexUsage.
+    ...getCodexBackendIdentityHeaders(),
   };
 
   const workspaceId = getWorkspaceId(connection);
@@ -299,6 +306,13 @@ function buildCodexResetCreditHeaders(connection: CodexConnectionLike): Record<s
 }
 
 async function loadCodexConnection(connectionId: string): Promise<CodexConnectionLike> {
+  if (await isConnectionUnavailableToAuxiliaryActivity(connectionId)) {
+    throw new CodexResetCreditError(
+      409,
+      "exclusive_lease_active",
+      "Reset-credit operations are deferred while an exclusive lease is active."
+    );
+  }
   const connection = (await getProviderConnectionById(
     connectionId
   )) as unknown as CodexConnectionLike | null;
@@ -495,6 +509,12 @@ export async function consumeCodexResetCredit(
 
     const refreshed = await fetchAndPersistProviderLimits(connectionId, "manual", {
       allowRotatingRefresh: true,
+    });
+    // The credit is already spent upstream: a failed local release must not turn it into a 500.
+    await releaseCodexCooldownAfterResetCredit(connectionId, refreshed.usage).catch((error) => {
+      console.warn(
+        `[CodexResetCredits] Cooldown release failed for ${connectionId}: ${sanitizeErrorMessage(error)}`
+      );
     });
 
     return { outcome, usage: refreshed.usage };

@@ -11,6 +11,10 @@ title: "Quality Gate Playbook"
 >
 > Benchmarks: OWASP DSOMM · OpenSSF Scorecard · SLSA · SonarQube "Clean as You Code" ·
 > Quality-Ratchet pattern · DORA 2024 · OWASP LLM Top 10 (2025) · mutation-testing best practices.
+>
+> For the gate-by-gate authoritative reference (what each gate validates, CI job, ratchet vs
+> policy, blocking vs advisory), see the
+> [Quality Gates Reference](../architecture/QUALITY_GATES.md).
 
 ---
 

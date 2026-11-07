@@ -1,6 +1,12 @@
 import { setTimeout as sleep } from "node:timers/promises";
 import { getCliToken, CLI_TOKEN_HEADER } from "./utils/cliToken.mjs";
-import { resolveActiveContext } from "./contexts.mjs";
+import {
+  contextCredentialForRequest,
+  resolveActiveContext,
+  resolveActiveContextAsync,
+} from "./contexts.mjs";
+
+export { isContextOrigin } from "./contexts.mjs";
 
 export const RETRY_DEFAULTS = Object.freeze({
   maxAttempts: 3,
@@ -52,6 +58,19 @@ function resolveUrl(path, opts) {
   return `${getBaseUrl(opts)}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+/** The machine-derived token is valid only for the local loopback server. */
+export function isLoopbackUrl(value) {
+  try {
+    const hostname = new URL(value).hostname.replace(/^\[|\]$/g, "").toLowerCase();
+    if (hostname === "localhost" || hostname === "::1") return true;
+    if (/^127(?:\.[0-9]{1,3}){3}$/.test(hostname)) return true;
+    if (/^::ffff:(?:127\.|7f[0-9a-f]{2}:)/i.test(hostname)) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export async function buildHeaders(opts) {
   const headers = new Headers(opts.headers || {});
   if (!headers.has("accept")) headers.set("accept", "application/json");
@@ -72,13 +91,19 @@ export async function buildHeaders(opts) {
   // key — a real `--api-key <x>` flag or a command-supplied token like
   // `connect --key` — counts as explicit and wins. Within a context the scoped
   // accessToken wins over the legacy apiKey.
+  //
+  // A context credential belongs to the server it was issued by, so it is only
+  // attached when the request goes to that context's own origin. A --base-url,
+  // OMNIROUTE_BASE_URL or absolute URL that points somewhere else (including
+  // `connect` probing a new server) falls through to the explicit/ambient key.
+  const destinationUrl = opts.destinationUrl ?? getBaseUrl(opts);
   const ambientKey = process.env.OMNIROUTE_API_KEY || null;
   const explicitKey = opts.apiKey && opts.apiKey !== ambientKey ? opts.apiKey : null;
   let auth = explicitKey;
   if (!auth) {
     try {
-      const ctx = resolveActiveContext(opts.context ?? process.env.OMNIROUTE_CONTEXT);
-      auth = ctx?.accessToken || ctx?.apiKey || null;
+      const ctx = await resolveActiveContextAsync(opts.context ?? process.env.OMNIROUTE_CONTEXT);
+      auth = contextCredentialForRequest(ctx, destinationUrl) || null;
     } catch {
       // No context credential available — fall through to the ambient fallback.
     }
@@ -87,10 +112,16 @@ export async function buildHeaders(opts) {
   if (auth && !headers.has("authorization")) {
     headers.set("authorization", `Bearer ${auth}`);
   }
-  // Inject machine-id derived CLI token; env var override for testing.
-  const cliToken = opts.cliToken ?? process.env.OMNIROUTE_CLI_TOKEN ?? (await getCliToken());
-  if (cliToken && !headers.has(CLI_TOKEN_HEADER)) {
-    headers.set(CLI_TOKEN_HEADER, cliToken);
+  // Inject the machine-derived credential only for an explicit local loopback
+  // destination. Remote contexts and absolute remote URLs use scoped access
+  // tokens and must never receive this machine-bound local credential.
+  if (!isLoopbackUrl(destinationUrl)) {
+    headers.delete(CLI_TOKEN_HEADER);
+  } else {
+    const cliToken = opts.cliToken ?? process.env.OMNIROUTE_CLI_TOKEN ?? (await getCliToken());
+    if (cliToken && !headers.has(CLI_TOKEN_HEADER)) {
+      headers.set(CLI_TOKEN_HEADER, cliToken);
+    }
   }
   if (opts.idempotencyKey && !headers.has("idempotency-key")) {
     headers.set("idempotency-key", opts.idempotencyKey);
@@ -139,6 +170,21 @@ export function shouldRetryError(err, opts = {}) {
   return false;
 }
 
+/**
+ * True when a non-2xx status means "this server does not serve this route"
+ * rather than "your request was wrong".
+ *
+ * Commands that keep a local SQLite fallback must not treat these as fatal:
+ * a CLI newer (or older) than the server it is talking to will hit routes that
+ * simply are not mounted, and aborting there strands the user with an
+ * unactionable `HTTP 404` even though the local path would have worked.
+ * Genuine client errors (400/401/403/409/422 …) stay fatal — retrying them
+ * locally would paper over a real problem.
+ */
+export function isRouteUnavailableStatus(status) {
+  return status === 404 || status === 405 || status === 501;
+}
+
 export function statusToExitCode(status) {
   if (status >= 200 && status < 300) return 0;
   if (status === 408) return 124;
@@ -169,19 +215,25 @@ async function readResponseBody(res) {
   }
 }
 
-function fetchOnce(url, init, timeoutMs) {
-  if (!timeoutMs) return fetch(url, init);
+// `signal` (opts.signal) lets a caller cancel the request; it combines with the
+// per-attempt timeout when both are set.
+function fetchOnce(url, init, timeoutMs, signal) {
+  if (!timeoutMs) return fetch(url, signal ? { ...init, signal } : init);
   const ac = new AbortController();
   const t = setTimeout(() => ac.abort(), timeoutMs);
-  const merged = { ...init, signal: ac.signal };
+  const merged = { ...init, signal: signal ? AbortSignal.any([signal, ac.signal]) : ac.signal };
   return fetch(url, merged).finally(() => clearTimeout(t));
 }
 
 export async function apiFetch(path, opts = {}) {
   const method = String(opts.method || "GET").toUpperCase();
   const url = resolveUrl(path, opts);
-  const headers = await buildHeaders(opts);
+  const headers = await buildHeaders({ ...opts, destinationUrl: url });
   const body = serializeBody(opts.body, headers);
+  // Undici preserves custom headers across cross-origin redirects. A local server
+  // redirect must never turn the loopback machine credential into an outbound
+  // secret, so fail redirects whenever this header is present.
+  const redirect = headers.has(CLI_TOKEN_HEADER) ? "error" : opts.redirect;
   const timeout =
     opts.timeout ?? (Number.parseInt(process.env.OMNIROUTE_HTTP_TIMEOUT_MS || "", 10) || 30000);
   const maxAttempts = opts.retry === false ? 1 : (opts.retryMax ?? RETRY_DEFAULTS.maxAttempts);
@@ -190,7 +242,7 @@ export async function apiFetch(path, opts = {}) {
   let lastErr;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const res = await fetchOnce(url, { method, headers, body }, timeout);
+      const res = await fetchOnce(url, { method, headers, body, redirect }, timeout, opts.signal);
       if (res.ok) return enrichResponse(res, opts);
       if (attempt < maxAttempts && shouldRetryStatus(res.status, method, opts)) {
         const delay = computeBackoff(attempt, res.headers.get("retry-after"));
@@ -205,7 +257,8 @@ export async function apiFetch(path, opts = {}) {
       return enrichResponse(res, opts);
     } catch (err) {
       lastErr = err;
-      if (attempt < maxAttempts && shouldRetryError(err, opts)) {
+      // A caller that aborted its own signal wants the request stopped, not retried.
+      if (attempt < maxAttempts && !opts.signal?.aborted && shouldRetryError(err, opts)) {
         const delay = computeBackoff(attempt, null);
         if (verbose) {
           process.stderr.write(

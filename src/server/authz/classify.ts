@@ -1,14 +1,21 @@
 import {
-  PUBLIC_READONLY_API_ROUTE_PREFIXES,
-  PUBLIC_READONLY_METHODS,
   isPublicApiRoute,
+  isPublicReadonlyCorsRoute,
 } from "../../shared/constants/publicApiRoutes";
 import type { ClassificationReason, RouteClassification } from "./types";
 
-const CLIENT_API_ALIAS_PREFIXES: ReadonlyArray<{ alias: string; canonical: string }> = [
-  { alias: "/chat/completions", canonical: "/api/v1/chat/completions" },
-  { alias: "/responses", canonical: "/api/v1/responses" },
-  { alias: "/models", canonical: "/api/v1/models" },
+const ALIAS_PREFIXES: ReadonlyArray<{
+  alias: string;
+  canonical: string;
+  reason: ClassificationReason;
+}> = [
+  { alias: "/chat/completions", canonical: "/api/v1/chat/completions", reason: "client_api_alias" },
+  { alias: "/responses", canonical: "/api/v1/responses", reason: "client_api_alias" },
+  { alias: "/models", canonical: "/api/v1/models", reason: "client_api_alias" },
+  // CLIProxyAPI management compatibility: next.config.mjs rewrites /v0/management/* to
+  // /api/v0/management/*. Normalize here so the policy (and the ALWAYS_PROTECTED entry in
+  // routeGuard.ts) sees the same path for both spellings. Still MANAGEMENT, never client API.
+  { alias: "/v0/management", canonical: "/api/v0/management", reason: "cliproxy_management_alias" },
 ];
 
 function normalizePathname(rawPath: string): { path: string; reason?: ClassificationReason } {
@@ -16,31 +23,40 @@ function normalizePathname(rawPath: string): { path: string; reason?: Classifica
   if (!path.startsWith("/")) path = "/" + path;
   if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
 
-  if (path === "/codex" || path.startsWith("/codex/")) {
+  // Client-API aliases are matched case-insensitively on the control segment.
+  // Next's rewrite layer accepts `/V1/...`, `/CODEX`, etc. and routes them to
+  // the client handler, so the classifier must recognize the same casing —
+  // otherwise an uppercase alias falls through to the management fallback and
+  // the request is treated as a different route class than it is actually
+  // dispatched to (GHSA-jvqc-mp9f-q936). Only the leading control segment is
+  // lowercased for detection; the original-case tail is preserved.
+  const lower = path.toLowerCase();
+
+  if (lower === "/codex" || lower.startsWith("/codex/")) {
     return { path: "/api/v1/responses", reason: "client_api_codex_alias" };
   }
 
-  if (path === "/v1/v1" || path.startsWith("/v1/v1/")) {
+  if (lower === "/v1/v1" || lower.startsWith("/v1/v1/")) {
     const tail = path.slice("/v1/v1".length) || "";
     return { path: "/api/v1" + tail, reason: "client_api_double_prefix" };
   }
 
-  if (path === "/v1beta" || path.startsWith("/v1beta/")) {
+  if (lower === "/v1beta" || lower.startsWith("/v1beta/")) {
     const tail = path.slice("/v1beta".length) || "";
     return { path: "/api/v1beta" + tail, reason: "client_api_alias" };
   }
 
-  if (path === "/v1" || path.startsWith("/v1/")) {
+  if (lower === "/v1" || lower.startsWith("/v1/")) {
     const tail = path.slice("/v1".length) || "";
     return { path: "/api/v1" + tail, reason: "client_api_alias" };
   }
 
-  for (const { alias, canonical } of CLIENT_API_ALIAS_PREFIXES) {
-    if (path === alias) {
-      return { path: canonical, reason: "client_api_alias" };
+  for (const { alias, canonical, reason } of ALIAS_PREFIXES) {
+    if (lower === alias) {
+      return { path: canonical, reason };
     }
-    if (path.startsWith(alias + "/")) {
-      return { path: canonical + path.slice(alias.length), reason: "client_api_alias" };
+    if (lower.startsWith(alias + "/")) {
+      return { path: canonical + path.slice(alias.length), reason };
     }
   }
 
@@ -113,7 +129,7 @@ export function classifyRoute(rawPath: string, method: string = "GET"): RouteCla
 
     return {
       routeClass: "MANAGEMENT",
-      reason: "management_api",
+      reason: managementApiReason(aliasReason),
       normalizedPath,
     };
   }
@@ -125,9 +141,15 @@ export function classifyRoute(rawPath: string, method: string = "GET"): RouteCla
   };
 }
 
+// The CLIProxyAPI alias keeps its own reason so audit logs show which spelling was used.
+function managementApiReason(aliasReason?: ClassificationReason): ClassificationReason {
+  return aliasReason === "cliproxy_management_alias" ? aliasReason : "management_api";
+}
+
 function matchesReadonlyPublic(path: string, method: string): boolean {
-  if (!PUBLIC_READONLY_METHODS.has(String(method).toUpperCase())) return false;
-  return PUBLIC_READONLY_API_ROUTE_PREFIXES.some((p) => path.startsWith(p));
+  // Exact match, not startsWith: a prefix here would hand the CORS origin
+  // relaxation to every adjacent path too (GHSA-74g9-q8f6-793h).
+  return isPublicReadonlyCorsRoute(path, method);
 }
 
 function isClassifiedAsPublic(path: string, method: string): boolean {

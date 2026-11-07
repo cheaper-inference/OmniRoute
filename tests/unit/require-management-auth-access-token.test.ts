@@ -31,9 +31,30 @@ test.after(() => {
     core.resetDbInstance();
   } catch {}
   try {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   } catch {}
   delete process.env.INITIAL_PASSWORD;
+  delete process.env.OMNIROUTE_INTERNAL_SERVICE_TOKEN;
+});
+
+test("internal service token requires the trusted loopback locality marker", async () => {
+  process.env.OMNIROUTE_INTERNAL_SERVICE_TOKEN = "internal-service-token-0123456789";
+  const tokenHeader = "x-omniroute-internal-service-token";
+  const local = new Request(`${BASE}/api/combos`, {
+    headers: {
+      [tokenHeader]: "internal-service-token-0123456789",
+      "x-omniroute-peer-locality": "loopback",
+    },
+  });
+  assert.equal(await requireManagementAuth(local), null);
+
+  const remote = new Request(`${BASE}/api/combos`, {
+    headers: {
+      [tokenHeader]: "internal-service-token-0123456789",
+      "x-omniroute-peer-locality": "remote",
+    },
+  });
+  assert.equal((await requireManagementAuth(remote))?.status, 401);
 });
 
 test("read token: allowed on GET, rejected (403) on a write route", async () => {
@@ -47,11 +68,14 @@ test("read token: allowed on GET, rejected (403) on a write route", async () => 
 
 test("write token: allowed on write route, rejected (403) on admin route", async () => {
   const { secret } = at.createAccessToken({ name: "write-tok", scope: "write" });
-  assert.equal(await requireManagementAuth(req("POST", "/api/keys", secret)), null);
+  assert.equal(await requireManagementAuth(req("POST", "/api/combos", secret)), null);
   assert.equal(await requireManagementAuth(req("GET", "/api/v1/models", secret)), null);
 
   const denied = await requireManagementAuth(req("POST", "/api/cli/tokens", secret));
   assert.equal(denied?.status, 403);
+  // GHSA-35gq-52m5-wgw2: API-key management can mint a manage-scoped key, so it is admin-only.
+  const keysDenied = await requireManagementAuth(req("POST", "/api/keys", secret));
+  assert.equal(keysDenied?.status, 403);
 });
 
 test("admin token: allowed on admin route", async () => {
@@ -61,7 +85,9 @@ test("admin token: allowed on admin route", async () => {
 });
 
 test("invalid/expired access token is rejected with 401", async () => {
-  const bad = await requireManagementAuth(req("GET", "/api/v1/models", "oma_live_not_a_real_token"));
+  const bad = await requireManagementAuth(
+    req("GET", "/api/v1/models", "oma_live_not_a_real_token")
+  );
   assert.equal(bad?.status, 401);
 
   const past = new Date(Date.now() - 60_000).toISOString();

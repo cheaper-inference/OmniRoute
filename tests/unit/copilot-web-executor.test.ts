@@ -1,8 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { getCopilotMode, extractAccessToken, sessionPoolKey, solveHashcash } =
-  await import("../../open-sse/executors/copilot-web.ts");
+const {
+  buildCopilotWebSocketHeaders,
+  buildCopilotWebSocketUrl,
+  CopilotWebExecutor,
+  getCopilotMode,
+  extractAccessToken,
+  sessionPoolKey,
+  solveHashcash,
+} = await import("../../open-sse/executors/copilot-web.ts");
 
 test("getCopilotMode maps known models to their Copilot modes", () => {
   assert.equal(getCopilotMode("copilot"), "chat");
@@ -34,6 +41,22 @@ test("extractAccessToken extracts token from cookie string", () => {
   assert.equal(extractAccessToken(`session=xyz; access_token=${token}; other=1`), token);
 });
 
+test("extractAccessToken parses access_token before classifying a long cookie string", () => {
+  const token = `eyJhbGciOiJSUzI1NiJ9.${"x".repeat(120)}`;
+  const cookie = `${"padding=value; ".repeat(12)}access_token=${token}; other=1`;
+  assert.ok(cookie.length > 100);
+  assert.equal(extractAccessToken(cookie), token);
+});
+
+test("extractAccessToken reads Authorization captured by browser login", () => {
+  const token = `eyJhbGciOiJSUzI1NiJ9.${"x".repeat(120)}`;
+  assert.equal(extractAccessToken(JSON.stringify({ Authorization: `Bearer ${token}` })), token);
+});
+
+test("extractAccessToken rejects an unrelated session cookie", () => {
+  assert.equal(extractAccessToken(`RPSCAuth=${"x".repeat(160)}`), null);
+});
+
 test("extractAccessToken extracts Bearer token from Authorization header", () => {
   const token = "my-bearer-token";
   assert.equal(extractAccessToken(`Bearer ${token}`), token);
@@ -41,6 +64,38 @@ test("extractAccessToken extracts Bearer token from Authorization header", () =>
 
 test("extractAccessToken returns null for empty input", () => {
   assert.equal(extractAccessToken(""), null);
+});
+
+test("Copilot WebSocket credentials use the Authorization header", () => {
+  assert.deepEqual(buildCopilotWebSocketHeaders("access-token"), {
+    Authorization: "Bearer access-token",
+  });
+});
+
+test("buildCopilotWebSocketUrl follows Copilot's authenticated query contract", () => {
+  const url = new URL(buildCopilotWebSocketUrl("token with symbols/+", "session-id"));
+  assert.equal(url.origin, "wss://copilot.microsoft.com");
+  assert.equal(url.pathname, "/c/api/chat");
+  assert.equal(url.searchParams.get("api-version"), "2");
+  assert.equal(url.searchParams.get("clientSessionId"), "session-id");
+  assert.equal(url.searchParams.get("accessToken"), "token with symbols/+");
+});
+
+test("Copilot session failures do not return a credential-bearing header projection", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response("unauthorized", { status: 401 });
+
+  try {
+    const result = await new CopilotWebExecutor().execute({
+      body: { messages: [{ role: "user", content: "hello" }] },
+      credentials: { apiKey: `ey${"x".repeat(120)}` },
+      model: "copilot",
+    });
+
+    assert.deepEqual(result.headers, {});
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test("sessionPoolKey produces unique keys per token preventing session sharing", () => {

@@ -12,6 +12,7 @@
 
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "crypto";
+import { getProcessStore } from "@/shared/utils/processSingleton";
 
 type HeaderReader = {
   get?: (name: string) => string | null | undefined;
@@ -21,7 +22,9 @@ type RequestLike = {
   headers?: HeaderReader | null;
 } | null;
 
-const requestIdStore = new AsyncLocalStorage<string>();
+function getRequestIdStore(): AsyncLocalStorage<string> {
+  return getProcessStore("requestId.store", () => new AsyncLocalStorage<string>());
+}
 
 function getHeaderValue(request: RequestLike, name: string): string | null {
   const value = request?.headers?.get?.(name);
@@ -35,7 +38,7 @@ function getHeaderValue(request: RequestLike, name: string): string | null {
  * @returns {string | null}
  */
 export function getRequestId() {
-  return requestIdStore.getStore() || null;
+  return getRequestIdStore().getStore() || null;
 }
 
 /**
@@ -54,7 +57,7 @@ export async function withRequestId<T>(
 ): Promise<T> {
   const existingId = getHeaderValue(request, "x-request-id");
   const requestId = existingId || randomUUID();
-  return requestIdStore.run(requestId, handler);
+  return getRequestIdStore().run(requestId, handler);
 }
 
 /**

@@ -8,7 +8,8 @@
  *   - Quota status queries for rate-limiting decisions
  */
 
-import { createHash, randomBytes } from "crypto";
+import { randomBytes } from "crypto";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import { v4 as uuidv4 } from "uuid";
 import { getDbInstance, rowToCamel } from "./core";
 
@@ -89,7 +90,7 @@ function nowHour(): string {
 
 function hashKey(raw: string): string {
   if (!raw || typeof raw !== "string") return "";
-  return createHash("sha256").update(raw).digest("hex");
+  return opaqueTokenFingerprint(raw);
 }
 
 function generateRawKey(): string {
@@ -318,8 +319,7 @@ export function issueRegisteredKey(
 export function getRegisteredKey(id: string): RegisteredKey | null {
   const db = getDbInstance();
   const row = db.prepare("SELECT * FROM registered_keys WHERE id = ?").get(id) as
-    | RegisteredKeyRow
-    | undefined;
+    RegisteredKeyRow | undefined;
   return row ? (rowToCamel(row) as unknown as RegisteredKey) : null;
 }
 
@@ -384,6 +384,8 @@ export function validateRegisteredKey(rawKey: string): RegisteredKey | null {
   const today = nowDay();
   const hour = nowHour();
   if (row.last_reset_day !== today || row.last_reset_hour !== hour) {
+    const dailyReset = row.last_reset_day !== today;
+    const hourlyReset = row.last_reset_hour !== hour;
     db.prepare(
       `
       UPDATE registered_keys
@@ -393,6 +395,10 @@ export function validateRegisteredKey(rawKey: string): RegisteredKey | null {
       WHERE id = ?
     `
     ).run(today, hour, today, hour, row.id);
+    if (dailyReset) row.daily_used = 0;
+    if (hourlyReset) row.hourly_used = 0;
+    row.last_reset_day = today;
+    row.last_reset_hour = hour;
   }
 
   // Budget check
@@ -471,16 +477,14 @@ export function setAccountKeyLimit(
 export function getProviderKeyLimit(provider: string): ProviderKeyLimit | null {
   const db = getDbInstance();
   const row = db.prepare("SELECT * FROM provider_key_limits WHERE provider = ?").get(provider) as
-    | ProviderKeyLimitRow
-    | undefined;
+    ProviderKeyLimitRow | undefined;
   return row ? (rowToCamel(row) as unknown as ProviderKeyLimit) : null;
 }
 
 export function getAccountKeyLimit(accountId: string): AccountKeyLimit | null {
   const db = getDbInstance();
   const row = db.prepare("SELECT * FROM account_key_limits WHERE account_id = ?").get(accountId) as
-    | AccountKeyLimitRow
-    | undefined;
+    AccountKeyLimitRow | undefined;
   return row ? (rowToCamel(row) as unknown as AccountKeyLimit) : null;
 }
 

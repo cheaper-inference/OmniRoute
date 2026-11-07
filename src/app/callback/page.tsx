@@ -1,5 +1,9 @@
 "use client";
 
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
+
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -16,17 +20,25 @@ import { useEffect, useState } from "react";
  */
 export default function CallbackPage() {
   const [status, setStatus] = useState<"processing" | "success" | "done" | "manual">("processing");
-  const [currentUrl] = useState(() =>
-    typeof window === "undefined" ? "" : window.location.href
-  );
+  const [currentUrl] = useState(() => (typeof window === "undefined" ? "" : window.location.href));
   const t = useTranslations("auth");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
+    let code = params.get("code");
     const state = params.get("state");
     const error = params.get("error");
     const errorDescription = params.get("error_description");
+
+    // Zed native-app sign-in: the redirect carries user_id + access_token and no
+    // ?code= — the FULL URL is the exchange payload (zed-hosted's exchangeToken
+    // parses and RSA-decrypts it server-side). Rewritten here from `/` by the
+    // root page handler so the waiting OAuth modal receives it via the same
+    // postMessage/BroadcastChannel/localStorage relay as every other provider.
+    const zedAccessToken = params.get("access_token") || params.get("accessToken");
+    if (!code && zedAccessToken && (params.get("user_id") || params.get("userId"))) {
+      code = window.location.href;
+    }
 
     const callbackData = {
       code,
@@ -63,16 +75,20 @@ export default function CallbackPage() {
     // same-origin fallback when the opener was severed by COOP.
     const trustedTargetOrigins = [
       window.location.origin, // Same origin (dashboard popup mode).
+      // Loopback hostname variants of the same port: the dashboard may be open
+      // on 127.0.0.1:PORT while Zed's redirect (or vice versa) lands on
+      // localhost:PORT — both names are the operator's own machine, so the
+      // callback may be delivered to either. Same rationale as the 1455 entries.
+      ...(window.location.port
+        ? [`http://localhost:${window.location.port}`, `http://127.0.0.1:${window.location.port}`]
+        : []),
       "http://localhost:1455", // Codex helper (fixed loopback port).
       "http://127.0.0.1:1455", // Same Codex helper, IPv4 literal form.
     ];
     if (window.opener) {
       for (const origin of trustedTargetOrigins) {
         try {
-          window.opener.postMessage(
-            { type: "oauth_callback", data: callbackData },
-            origin
-          );
+          window.opener.postMessage({ type: "oauth_callback", data: callbackData }, origin);
           sent = true;
         } catch (e) {
           console.log("postMessage failed:", e);
@@ -124,28 +140,24 @@ export default function CallbackPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center p-8 max-w-md">
+    <main className="min-h-screen flex items-center justify-center p-6">
+      <Card padding="lg" className="w-full max-w-md text-center">
         {status === "processing" && (
           <>
-            <div className="size-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-primary animate-spin">
-                progress_activity
-              </span>
+            <div className="size-16 mx-auto mb-4 rounded-full bg-bg-subtle flex items-center justify-center">
+              <Spinner size="lg" label={t("processing")} className="text-text-muted" />
             </div>
-            <h1 className="text-xl font-semibold mb-2">{t("processing")}</h1>
+            <h1 className="ci-heading text-xl mb-2">{t("processing")}</h1>
             <p className="text-text-muted">{t("pleaseWait")}</p>
           </>
         )}
 
         {(status === "success" || status === "done") && (
           <>
-            <div className="size-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-green-600">
-                check_circle
-              </span>
+            <div className="size-16 mx-auto mb-4 rounded-full bg-success-bg flex items-center justify-center">
+              <Icon name="check_circle" size={30} className="text-success" />
             </div>
-            <h1 className="text-xl font-semibold mb-2">{t("authSuccess")}</h1>
+            <h1 className="ci-heading text-xl mb-2">{t("authSuccess")}</h1>
             <p className="text-text-muted">
               {status === "success" ? t("windowWillClose") : t("closeTabNow")}
             </p>
@@ -154,17 +166,17 @@ export default function CallbackPage() {
 
         {status === "manual" && (
           <>
-            <div className="size-16 mx-auto mb-4 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-yellow-600">info</span>
+            <div className="size-16 mx-auto mb-4 rounded-full bg-warning-bg flex items-center justify-center">
+              <Icon name="info" size={30} className="text-warning" />
             </div>
-            <h1 className="text-xl font-semibold mb-2">{t("copyUrl")}</h1>
+            <h1 className="ci-heading text-xl mb-2">{t("copyUrl")}</h1>
             <p className="text-text-muted mb-4">{t("copyUrlManual")}</p>
-            <div className="bg-surface border border-border rounded-lg p-3 text-left">
+            <div className="bg-bg-subtle border border-border rounded-lg p-3 text-left">
               <code className="text-xs break-all">{currentUrl}</code>
             </div>
           </>
         )}
-      </div>
-    </div>
+      </Card>
+    </main>
   );
 }

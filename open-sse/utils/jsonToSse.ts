@@ -55,11 +55,49 @@ function buildReasoningDelta(message: JsonRecord): JsonRecord | null {
     delta.reasoning_details = message.reasoning_details;
   }
 
-  if (!addReadableReasoning(message, delta)) {
+  // Always emit the readable field (reasoning_content, else the reasoning
+  // alias) WITHOUT short-circuiting the unsupported-alias mirror below.
+  addReadableReasoning(message, delta);
+
+  // Mirror unsupported reasoning aliases (reasoning_text / thinking / thought /
+  // reasoning_details[].text) into reasoning_content unless reasoning_content
+  // itself is present — same gate as copyOpenAICompatibleReasoningFields
+  // (#12665). A populated `reasoning` string must NOT skip this: OpenRouter
+  // thinking models send BOTH `reasoning` and `reasoning_details[].text`.
+  if (!nonEmptyString(message.reasoning_content)) {
     addUnsupportedReasoning(message, delta);
   }
 
   return Object.keys(delta).length > 0 ? delta : null;
+}
+
+function isToolCallIndex(value: unknown): value is number {
+  return Number.isInteger(value) && (value as number) >= 0;
+}
+
+/**
+ * Stream deltas need a distinct `index` per tool call: non-stream tool_calls have
+ * none, and readers default a missing one to 0, so calls sharing a slot merge or
+ * evict each other. Keep the first use of each valid index; every missing, invalid
+ * or repeated one takes the lowest free slot. Non-object entries pass through.
+ */
+function withToolCallIndexes(toolCalls: unknown[]): unknown[] {
+  const used = new Set<number>();
+  const kept = new Set<unknown>();
+  for (const tc of toolCalls) {
+    if (isRecord(tc) && isToolCallIndex(tc.index) && !used.has(tc.index)) {
+      used.add(tc.index);
+      kept.add(tc);
+    }
+  }
+
+  let nextFree = 0;
+  return toolCalls.map((tc) => {
+    if (!isRecord(tc) || kept.has(tc)) return tc;
+    while (used.has(nextFree)) nextFree += 1;
+    used.add(nextFree);
+    return { ...tc, index: nextFree };
+  });
 }
 
 function sseEvent(payload: JsonRecord): string {
@@ -110,7 +148,7 @@ export function synthesizeOpenAiSseFromJson(jsonText: string): string {
       emitDelta({ content: message.content });
     }
     if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
-      emitDelta({ tool_calls: message.tool_calls });
+      emitDelta({ tool_calls: withToolCallIndexes(message.tool_calls) });
     }
 
     const finishReason = normalizeOpenAICompatibleFinishReasonString(choice.finish_reason);

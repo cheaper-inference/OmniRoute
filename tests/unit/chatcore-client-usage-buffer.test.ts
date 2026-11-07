@@ -6,9 +6,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-const { applyClientUsageBuffer } = await import(
-  "../../open-sse/handlers/chatCore/clientUsageBuffer.ts"
-);
+const { applyClientUsageBuffer } =
+  await import("../../open-sse/handlers/chatCore/clientUsageBuffer.ts");
+const { resolveChatCoreRequestFormat } =
+  await import("../../open-sse/handlers/chatCore/requestFormat.ts");
+const { invalidateBufferTokensCache } = await import("../../open-sse/utils/usageTracking.ts");
 
 function makeDeps(overrides: Record<string, unknown> = {}) {
   const calls = { buffer: [] as unknown[], estimate: [] as unknown[], filter: [] as unknown[] };
@@ -30,6 +32,25 @@ function makeDeps(overrides: Record<string, unknown> = {}) {
   return { deps, calls };
 }
 
+test("request format producer forwards its string contract to usage estimation", () => {
+  const { clientResponseFormat } = resolveChatCoreRequestFormat({
+    clientRawRequest: { endpoint: "/v1/chat/completions" },
+    body: { messages: [] },
+    provider: "openai",
+    userAgent: null,
+  });
+  const { deps, calls } = makeDeps();
+  const resp: Record<string, unknown> = {
+    choices: [{ message: { content: "hello" } }],
+  };
+
+  applyClientUsageBuffer(resp, { messages: [] }, clientResponseFormat, {}, deps);
+
+  const args = calls.estimate[0] as unknown[];
+  assert.equal(typeof clientResponseFormat, "string");
+  assert.equal(args[2], clientResponseFormat);
+});
+
 test("usage present → buffer then filter, mutates in place", () => {
   const { deps, calls } = makeDeps();
   const resp: Record<string, unknown> = { usage: { prompt_tokens: 5 } };
@@ -40,16 +61,18 @@ test("usage present → buffer then filter, mutates in place", () => {
   assert.equal((resp.usage as Record<string, unknown>)._filtered, true);
 });
 
-test("all-zero usage stub → estimate (not constant buffer-only 2000)", () => {
+test("all-zero usage stub → sanitize then buffer (not a constant 2000 estimate)", () => {
   const { deps, calls } = makeDeps();
   const resp: Record<string, unknown> = {
     usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
     choices: [{ message: { content: "PONG" } }],
   };
   applyClientUsageBuffer(resp, { messages: [{ role: "user", content: "hi" }] }, "openai", {}, deps);
-  assert.equal(calls.buffer.length, 0, "must not buffer zeros into USAGE_TOKEN_BUFFER");
-  assert.equal(calls.estimate.length, 1);
-  assert.equal((resp.usage as Record<string, unknown>)._estimated, true);
+  // #10705 repairs provider-reported zeros on a non-trivial request, so the
+  // block is no longer empty and takes the buffer path (never the old 2000 stub).
+  assert.equal(calls.buffer.length, 1);
+  assert.equal(calls.estimate.length, 0);
+  assert.equal((resp.usage as Record<string, unknown>)._buffered, true);
 });
 
 test("no usage but content present → estimate then filter", () => {
@@ -107,9 +130,15 @@ test("preserveContextBudgetInVisibleUsage folds context_budget_* back into visib
     usage: { prompt_tokens: 5, input_tokens: 5, total_tokens: 10 },
   };
 
-  applyClientUsageBuffer(resp, { messages: [] }, "openai", {
-    preserveContextBudgetInVisibleUsage: true,
-  }, deps);
+  applyClientUsageBuffer(
+    resp,
+    { messages: [] },
+    "openai",
+    {
+      preserveContextBudgetInVisibleUsage: true,
+    },
+    deps
+  );
 
   const filtered = calls.filter[0] as Record<string, unknown>;
   assert.equal(filtered.prompt_tokens, 2005, "Claude-Code path re-folds the buffered value");
@@ -130,4 +159,45 @@ test("without the option the visible usage keeps the real unbuffered #8331 numbe
 
   const filtered = calls.filter[0] as Record<string, unknown>;
   assert.equal(filtered.prompt_tokens, 5, "default path must not inflate client-visible metering");
+});
+
+test("real client-visible usage is not inflated by the context safety buffer", () => {
+  const saved = process.env.USAGE_TOKEN_BUFFER;
+  process.env.USAGE_TOKEN_BUFFER = "2000";
+  invalidateBufferTokensCache();
+
+  try {
+    const response: Record<string, unknown> = {
+      usage: { prompt_tokens: 69, completion_tokens: 5, total_tokens: 74 },
+    };
+    applyClientUsageBuffer(response, { messages: [{ role: "user", content: "hello" }] }, "openai");
+
+    assert.deepEqual(response.usage, {
+      prompt_tokens: 69,
+      completion_tokens: 5,
+      total_tokens: 74,
+    });
+  } finally {
+    if (saved === undefined) delete process.env.USAGE_TOKEN_BUFFER;
+    else process.env.USAGE_TOKEN_BUFFER = saved;
+    invalidateBufferTokensCache();
+  }
+});
+
+test("usage is validated against the provider-bound body with injected context", () => {
+  const providerBody = {
+    system: "x".repeat(10_000),
+    messages: [{ role: "user", content: "hello" }],
+  };
+  const response: Record<string, unknown> = {
+    usage: { prompt_tokens: 15_000, completion_tokens: 5, total_tokens: 15_005 },
+  };
+
+  applyClientUsageBuffer(response, providerBody, "openai");
+
+  assert.deepEqual(response.usage, {
+    prompt_tokens: 15_000,
+    completion_tokens: 5,
+    total_tokens: 15_005,
+  });
 });

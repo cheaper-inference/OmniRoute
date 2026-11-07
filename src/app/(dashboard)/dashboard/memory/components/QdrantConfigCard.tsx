@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useId, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import { Switch } from "@omniroute/ui-kit/switch";
+import Icon from "@/shared/components/Icon";
 import { Card } from "@/shared/components";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
+import Modal from "@/shared/components/Modal";
+import Select from "@/shared/components/Select";
 
 interface QdrantSettings {
   enabled: boolean;
@@ -21,6 +28,8 @@ interface EmbeddingModelOption {
 
 export default function QdrantConfigCard() {
   const t = useTranslations("memory");
+  const embeddingModelId = useId();
+  const apiKeyId = useId();
   const [qdrant, setQdrant] = useState<QdrantSettings>({
     enabled: false,
     host: "",
@@ -33,9 +42,14 @@ export default function QdrantConfigCard() {
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"" | "saved" | "error">("");
-  const [health, setHealth] = useState<{ ok: boolean; latencyMs: number; error?: string } | null>(
-    null,
-  );
+  const [health, setHealth] = useState<{
+    ok: boolean;
+    latencyMs: number;
+    error?: string;
+    collection?: { exists: boolean; vectorSize?: number; vectorName?: string | null };
+  } | null>(null);
+  const [searchValidated, setSearchValidated] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
   const [checking, setChecking] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
@@ -46,6 +60,24 @@ export default function QdrantConfigCard() {
   const [cleanupMsg, setCleanupMsg] = useState("");
   const [embeddingOptions, setEmbeddingOptions] = useState<EmbeddingModelOption[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Generation counter for health checks. Bumping it invalidates any in-flight
+  // or already-resolved check so a stale result (for example one that raced a
+  // settings save and read the pre-save configuration) can never be applied
+  // out of order.
+  const healthSeqRef = useRef(0);
+  const saveStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      healthSeqRef.current += 1;
+      if (saveStatusTimerRef.current !== null) clearTimeout(saveStatusTimerRef.current);
+      saveStatusTimerRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -65,10 +97,45 @@ export default function QdrantConfigCard() {
       .finally(() => setLoading(false));
   }, []);
 
+  const checkHealth = useCallback(async () => {
+    const seq = ++healthSeqRef.current;
+    setChecking(true);
+    try {
+      const res = await fetch("/api/settings/qdrant/health");
+      if (res.ok) {
+        const data = await res.json();
+        // Drop the result if a newer save/check invalidated this one.
+        if (healthSeqRef.current !== seq) return;
+        setHealth(data);
+      } else {
+        if (healthSeqRef.current !== seq) return;
+        setHealth({ ok: false, latencyMs: 0, error: "HTTP error" });
+      }
+    } catch (e) {
+      if (healthSeqRef.current !== seq) return;
+      setHealth({
+        ok: false,
+        latencyMs: 0,
+        error: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      if (healthSeqRef.current === seq) setChecking(false);
+    }
+  }, []);
+
   const save = useCallback(
     async (updates: Partial<QdrantSettings> & { apiKey?: string }) => {
+      if (saveStatusTimerRef.current !== null) {
+        clearTimeout(saveStatusTimerRef.current);
+        saveStatusTimerRef.current = null;
+      }
       const prev = qdrant;
       const next = { ...qdrant, ...updates };
+      // Settings are changing, so any prior health result is stale: drop it and
+      // invalidate in-flight checks so they cannot overwrite the new state.
+      healthSeqRef.current += 1;
+      setHealth(null);
+      setSearchValidated(false);
       setQdrant(next);
       setSaving(true);
       setSaveStatus("");
@@ -86,42 +153,53 @@ export default function QdrantConfigCard() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
+        if (!mountedRef.current) return;
         if (res.ok) {
           const data = await res.json().catch(() => next);
+          if (!mountedRef.current) return;
           setQdrant(data);
           setApiKeyInput("");
           setSaveStatus("saved");
-          setTimeout(() => setSaveStatus(""), 2000);
+          // A health check started during the optimistic window (enabled just
+          // flipped and health was null) can race the PUT and read the OLD
+          // persisted settings -> not_configured/failed. Invalidate it and
+          // schedule a fresh check against the just-persisted settings. This
+          // must be explicit: if health was still null the mount effect bails
+          // on the setHealth(null) no-op, so a healthy Qdrant would stay red
+          // until a manual test.
+          healthSeqRef.current += 1;
+          setHealth(null);
+          void checkHealth();
+          saveStatusTimerRef.current = setTimeout(() => {
+            saveStatusTimerRef.current = null;
+            setSaveStatus("");
+          }, 2000);
         } else {
           setQdrant(prev);
           setSaveStatus("error");
         }
       } catch {
+        if (!mountedRef.current) return;
         setQdrant(prev);
         setSaveStatus("error");
       } finally {
-        setSaving(false);
+        if (mountedRef.current) setSaving(false);
       }
     },
-    [qdrant],
+    [qdrant, checkHealth]
   );
 
-  const checkHealth = useCallback(async () => {
-    setChecking(true);
-    try {
-      const res = await fetch("/api/settings/qdrant/health");
-      if (res.ok) setHealth(await res.json());
-      else setHealth({ ok: false, latencyMs: 0, error: "HTTP error" });
-    } catch (e) {
-      setHealth({
-        ok: false,
-        latencyMs: 0,
-        error: e instanceof Error ? e.message : String(e),
-      });
-    } finally {
-      setChecking(false);
+  // Auto-check on mount once settings load: without this the status badge
+  // renders red after a page refresh because `health` starts as null and the
+  // old code treated "not checked yet" the same as "failed". The Test
+  // connection button still drives the same check manually.
+  useEffect(() => {
+    if (!loading && qdrant.enabled && health === null) {
+      void (async () => {
+        await checkHealth();
+      })();
     }
-  }, []);
+  }, [loading, qdrant.enabled, health, checkHealth]);
 
   const runSearch = useCallback(async () => {
     const q = searchQuery.trim();
@@ -137,9 +215,13 @@ export default function QdrantConfigCard() {
       const data = await res.json().catch(() => null);
       if (res.ok && data?.ok) {
         setSearchResults(Array.isArray(data.results) ? data.results : []);
+        setSearchValidated(true);
+      } else {
+        setSearchValidated(false);
       }
     } catch {
       setSearchResults([]);
+      setSearchValidated(false);
     } finally {
       setSearching(false);
     }
@@ -174,228 +256,267 @@ export default function QdrantConfigCard() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            database
-          </span>
+        <div className="p-2 rounded-lg bg-success/10 text-success shrink-0">
+          <Icon name="database" size={20} />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold text-text-main">{t("qdrant.title")}</h3>
           <p className="text-xs text-text-muted">{t("qdrant.description")}</p>
+          <Button
+            variant="ghost"
+            size="sm"
+            data-testid="qdrant-setup-tutorial"
+            onClick={() => setTutorialOpen(true)}
+            className="mt-1 h-auto px-0 text-xs font-medium text-success hover:underline"
+          >
+            Como configurar o Qdrant corretamente
+          </Button>
         </div>
         <span
           className={`inline-flex items-center gap-1.5 text-xs font-medium ${
-            qdrant.enabled
-              ? health?.ok
-                ? "text-emerald-500"
-                : "text-red-500"
-              : "text-text-muted"
+            !qdrant.enabled
+              ? "text-text-muted"
+              : health === null
+                ? "text-text-muted"
+                : health.ok
+                  ? "text-success"
+                  : "text-error"
           }`}
         >
           <span
             className={`inline-block w-2.5 h-2.5 rounded-full ${
-              qdrant.enabled ? (health?.ok ? "bg-emerald-500" : "bg-red-500") : "bg-border"
+              !qdrant.enabled
+                ? "bg-border"
+                : health === null
+                  ? "bg-border"
+                  : health.ok
+                    ? "bg-success"
+                    : "bg-error"
             }`}
           />
           {qdrant.enabled
-            ? health?.ok
-              ? t("qdrant.statusActive")
-              : t("qdrant.statusError")
+            ? health === null
+              ? t("qdrant.testing")
+              : health.ok
+                ? t("qdrant.statusActive")
+                : t("qdrant.statusError")
             : t("qdrant.statusDisabled")}
         </span>
       </div>
 
       {/* Tier 1 vs Tier 2 guidance */}
-      <div className="mb-4 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 text-xs text-text-muted leading-relaxed">
+      <div className="mb-4 p-3 rounded-lg bg-success/10 border border-success/20 text-xs text-text-muted leading-relaxed">
         {t("qdrant.banner")}
       </div>
 
       {/* Enable toggle + test connection */}
-      <div className="flex items-center justify-between p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+      <div className="flex items-center justify-between p-4 rounded-lg bg-bg-subtle border border-border/30 mb-4">
         <div>
           <p className="text-sm font-medium">{t("qdrant.enableLabel")}</p>
           <p className="text-xs text-text-muted mt-0.5">{t("qdrant.enableDesc")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             data-testid="qdrant-test-connection"
             onClick={checkHealth}
             disabled={checking || saving}
-            className="px-3 h-8 text-xs font-medium rounded-lg bg-white/5 border border-border/60 hover:bg-white/10 disabled:opacity-50 transition-colors"
+            className="text-xs"
           >
             {checking ? t("qdrant.testing") : t("qdrant.testConnection")}
-          </button>
-          <button
+          </Button>
+          <Switch
             data-testid="qdrant-enabled-switch"
-            onClick={() => save({ enabled: !qdrant.enabled })}
-            disabled={saving}
-            role="switch"
+            aria-label={t("qdrant.enableLabel")}
+            checked={qdrant.enabled}
             aria-checked={qdrant.enabled}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              qdrant.enabled ? "bg-emerald-500" : "bg-border"
-            }`}
-          >
-            <span
-              className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                qdrant.enabled ? "translate-x-5" : "translate-x-0"
-              }`}
-            />
-          </button>
+            onCheckedChange={() => save({ enabled: !qdrant.enabled })}
+            disabled={saving || (!qdrant.enabled && !searchValidated)}
+          />
         </div>
       </div>
 
+      {!qdrant.enabled && !searchValidated && (
+        <p className="-mt-2 mb-4 text-xs text-warning">
+          Execute um teste de busca bem-sucedido antes de ativar. Ele valida o modelo de embedding e
+          a dimensão da coleção.
+        </p>
+      )}
+
       {health && (
         <div
-          className={`mb-4 text-xs font-medium flex items-center gap-1 ${health.ok ? "text-emerald-500" : "text-red-500"}`}
+          className={`mb-4 text-xs font-medium flex items-center gap-1 ${health.ok ? "text-success" : "text-error"}`}
         >
-          <span className="material-symbols-outlined text-[14px]">
-            {health.ok ? "check_circle" : "error"}
-          </span>
+          <Icon name={health.ok ? "check_circle" : "error"} size={14} />
           {health.ok
             ? t("qdrant.healthOk", { latencyMs: health.latencyMs })
             : (health.error ?? t("qdrant.healthError"))}
         </div>
       )}
+      {health?.collection && (
+        <div className="mb-4 rounded-lg border border-border/50 bg-bg-subtle p-3 text-xs text-text-muted">
+          {health.collection.exists ? (
+            <>
+              Coleção compatível com vetores de dimensão{" "}
+              <strong>{health.collection.vectorSize}</strong>
+              {health.collection.vectorName ? ` (vetor: ${health.collection.vectorName})` : ""}. O
+              modelo configurado deve gerar a mesma dimensão.
+            </>
+          ) : (
+            <>
+              A coleção ainda não existe. Ela será criada na primeira gravação com o modelo
+              validado.
+            </>
+          )}
+        </div>
+      )}
 
       {saveStatus === "saved" && (
-        <div className="mb-4 text-xs font-medium text-emerald-500 flex items-center gap-1">
-          <span className="material-symbols-outlined text-[14px]">check_circle</span>
+        <div className="mb-4 text-xs font-medium text-success flex items-center gap-1">
+          <Icon name="check_circle" size={14} />
           {t("qdrant.saved")}
         </div>
       )}
       {saveStatus === "error" && (
-        <div className="mb-4 text-xs font-medium text-red-500">{t("qdrant.saveError")}</div>
+        <div className="mb-4 text-xs font-medium text-error">{t("qdrant.saveError")}</div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-        <div className="p-3 rounded-lg bg-surface/30 border border-border/30">
-          <label className="text-xs font-medium block mb-1.5">Host</label>
-          <input
+        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
+          <Input
+            label={t("qdrant.hostLabel")}
+            hint={t("qdrant.hostHelp")}
             value={qdrant.host}
             onChange={(e) => setQdrant((s) => ({ ...s, host: e.target.value }))}
             placeholder="http://127.0.0.1"
-            className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            inputClassName="font-mono"
           />
-          <p className="text-[11px] text-text-muted mt-1.5">{t("qdrant.hostHelp")}</p>
         </div>
-        <div className="p-3 rounded-lg bg-surface/30 border border-border/30">
-          <label className="text-xs font-medium block mb-1.5">{t("qdrant.portLabel")}</label>
-          <input
+        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
+          <Input
+            label={t("qdrant.portLabel")}
             value={qdrant.port}
             type="number"
             onChange={(e) =>
-              setQdrant((s) => ({ ...s, port: Math.max(1, Math.min(65535, Number(e.target.value) || 1)) }))
+              setQdrant((s) => ({
+                ...s,
+                port: Math.max(1, Math.min(65535, Number(e.target.value) || 1)),
+              }))
             }
             placeholder="6333"
-            className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            inputClassName="font-mono"
           />
         </div>
-        <div className="p-3 rounded-lg bg-surface/30 border border-border/30">
-          <label className="text-xs font-medium block mb-1.5">Collection</label>
-          <input
+        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
+          <Input
+            label={t("qdrant.collectionLabel")}
+            hint={t("qdrant.collectionHelp")}
             value={qdrant.collection}
             onChange={(e) => setQdrant((s) => ({ ...s, collection: e.target.value }))}
             placeholder="omniroute_memory"
-            className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            inputClassName="font-mono"
           />
-          <p className="text-[11px] text-text-muted mt-1.5">{t("qdrant.collectionHelp")}</p>
         </div>
-        <div className="p-3 rounded-lg bg-surface/30 border border-border/30">
-          <label className="text-xs font-medium block mb-1.5">
-            {t("qdrant.embeddingModelLabel")}
-          </label>
-          {embeddingOptions.length > 0 && (
-            <select
-              value=""
-              onChange={(e) => {
-                if (e.target.value) setQdrant((s) => ({ ...s, embeddingModel: e.target.value }));
-              }}
-              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm mb-2 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="">{t("qdrant.quickSelectModel")}</option>
-              {embeddingOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.value}
-                </option>
-              ))}
-            </select>
-          )}
-          <input
-            value={qdrant.embeddingModel}
-            onChange={(e) => setQdrant((s) => ({ ...s, embeddingModel: e.target.value }))}
-            placeholder="openai/text-embedding-3-small"
-            className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          />
-          <p className="text-[11px] text-text-muted mt-1.5">{t("qdrant.embeddingModelHelp")}</p>
-        </div>
-        <div className="p-3 rounded-lg bg-surface/30 border border-border/30 md:col-span-2">
-          <label className="text-xs font-medium block mb-1.5">
-            API Key ({t("qdrant.optional")}){" "}
-            {qdrant.hasApiKey && qdrant.apiKeyMasked ? (
-              <span className="text-text-muted font-mono">{qdrant.apiKeyMasked}</span>
-            ) : null}
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="password"
-              value={apiKeyInput}
-              onChange={(e) => setApiKeyInput(e.target.value)}
-              placeholder={
-                qdrant.hasApiKey ? t("qdrant.apiKeyKeepPlaceholder") : t("qdrant.apiKeyOptional")
-              }
-              className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
-            {qdrant.hasApiKey && (
-              <button
-                onClick={() => save({ apiKey: "" })}
-                disabled={saving}
-                className="px-3 py-2 text-sm font-medium rounded-lg bg-white/5 border border-border/60 hover:bg-white/10 disabled:opacity-50"
+        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
+          <Field label={t("qdrant.embeddingModelLabel")} htmlFor={embeddingModelId}>
+            {embeddingOptions.length > 0 && (
+              <Select
+                value=""
+                aria-label={t("qdrant.quickSelectModel")}
+                onChange={(e) => {
+                  if (e.target.value) setQdrant((s) => ({ ...s, embeddingModel: e.target.value }));
+                }}
+                className="mb-2"
               >
-                {t("qdrant.removeApiKey")}
-              </button>
+                <option value="">{t("qdrant.quickSelectModel")}</option>
+                {embeddingOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.value}
+                  </option>
+                ))}
+              </Select>
             )}
-            <button
-              onClick={() =>
-                save(apiKeyInput.trim() ? { apiKey: apiKeyInput } : {})
-              }
-              disabled={saving}
-              className="px-4 py-2 text-sm font-medium rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50"
-            >
-              {saving ? t("saving") : t("save")}
-            </button>
-          </div>
+            <Input
+              id={embeddingModelId}
+              hint={t("qdrant.embeddingModelHelp")}
+              value={qdrant.embeddingModel}
+              onChange={(e) => setQdrant((s) => ({ ...s, embeddingModel: e.target.value }))}
+              placeholder="openai/text-embedding-3-small"
+              inputClassName="font-mono"
+            />
+          </Field>
+        </div>
+        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30 md:col-span-2">
+          <Field
+            htmlFor={apiKeyId}
+            label={
+              <>
+                API Key ({t("qdrant.optional")}){" "}
+                {qdrant.hasApiKey && qdrant.apiKeyMasked ? (
+                  <span className="text-text-muted font-mono">{qdrant.apiKeyMasked}</span>
+                ) : null}
+              </>
+            }
+          >
+            <div className="flex gap-2">
+              <Input
+                id={apiKeyId}
+                type="password"
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+                placeholder={
+                  qdrant.hasApiKey ? t("qdrant.apiKeyKeepPlaceholder") : t("qdrant.apiKeyOptional")
+                }
+                className="flex-1"
+                inputClassName="font-mono"
+              />
+              {qdrant.hasApiKey && (
+                <Button variant="outline" onClick={() => save({ apiKey: "" })} disabled={saving}>
+                  {t("qdrant.removeApiKey")}
+                </Button>
+              )}
+              <Button
+                onClick={() => save(apiKeyInput.trim() ? { apiKey: apiKeyInput } : {})}
+                disabled={saving}
+              >
+                {saving ? t("saving") : t("save")}
+              </Button>
+            </div>
+          </Field>
         </div>
       </div>
 
       {/* Search test */}
-      <div className="p-4 rounded-lg bg-surface/30 border border-border/30 mb-3">
+      <div className="p-4 rounded-lg bg-bg-subtle border border-border/30 mb-3">
         <p className="text-sm font-medium mb-2">{t("qdrant.searchTestTitle")}</p>
         <div className="flex gap-2">
-          <input
+          <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("qdrant.searchPlaceholder")}
+            aria-label={t("qdrant.searchTestTitle")}
             onKeyDown={(e) => e.key === "Enter" && runSearch()}
-            className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="flex-1"
           />
-          <button
+          <Button
+            variant="outline"
             data-testid="qdrant-search-test"
             onClick={runSearch}
             disabled={searching || !searchQuery.trim()}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-white/5 border border-border/60 hover:bg-white/10 disabled:opacity-50"
           >
             {searching ? t("qdrant.searching") : t("qdrant.search")}
-          </button>
+          </Button>
         </div>
         {searchResults.length > 0 && (
           <div className="mt-3 space-y-2">
             {searchResults.map((r) => (
               <div
                 key={r.id}
-                className="p-2 rounded bg-background/40 border border-border/40 flex items-center justify-between"
+                className="p-2 rounded bg-bg/40 border border-border/40 flex items-center justify-between"
               >
                 <span className="text-xs font-mono text-text-muted truncate">{r.id}</span>
-                <span className="text-xs font-mono text-emerald-400 shrink-0">
+                <span className="text-xs font-mono text-success shrink-0">
                   {r.score.toFixed(4)}
                 </span>
               </div>
@@ -405,23 +526,42 @@ export default function QdrantConfigCard() {
       </div>
 
       {/* Cleanup */}
-      <div className="p-4 rounded-lg bg-surface/30 border border-border/30">
+      <div className="p-4 rounded-lg bg-bg-subtle border border-border/30">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium">{t("qdrant.cleanupTitle")}</p>
             <p className="text-xs text-text-muted mt-0.5">{t("qdrant.cleanupDesc")}</p>
           </div>
-          <button
+          <Button
+            variant="outline"
             data-testid="qdrant-cleanup"
             onClick={runCleanup}
             disabled={cleanupLoading}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-white/5 border border-border/60 hover:bg-white/10 disabled:opacity-50"
           >
             {cleanupLoading ? t("qdrant.cleaning") : t("qdrant.cleanNow")}
-          </button>
+          </Button>
         </div>
         {cleanupMsg && <p className="mt-2 text-xs text-text-muted">{cleanupMsg}</p>}
       </div>
+      <Modal
+        isOpen={tutorialOpen}
+        onClose={() => setTutorialOpen(false)}
+        size="full"
+        className="max-w-2xl"
+        title={t("qdrantTutorialTitle")}
+      >
+        <p className="text-sm text-text-muted">{t("qdrantTutorialIntro")}</p>
+        <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm text-text-muted">
+          <li>{t("qdrantTutorialStep1")}</li>
+          <li>{t("qdrantTutorialStep2")}</li>
+          <li>{t("qdrantTutorialStep3")}</li>
+          <li>{t("qdrantTutorialStep4")}</li>
+        </ol>
+        <pre className="mt-5 overflow-x-auto rounded-lg bg-bg-subtle p-3 text-xs">
+          {t("qdrantTutorialCode")}
+        </pre>
+        <p className="mt-5 text-xs text-text-muted">{t("qdrantTutorialCredits")}</p>
+      </Modal>
     </Card>
   );
 }

@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { generateGlobalErrorMessages } from "../i18n/generate-global-error-messages.mjs";
 import {
   assembleStandalone,
   syncStandaloneNativeAssets as _syncNativeAssets,
@@ -13,9 +14,14 @@ import {
 } from "./assembleStandalone.mjs";
 import {
   isBackendOnlyBuild,
+  isContributorBuild,
+  shouldBuildStandalone,
+  stubContributorInstrumentation,
   stubDashboardPages,
   restoreDashboardPages,
 } from "./backendOnlyPages.mjs";
+
+export { shouldBuildStandalone } from "./backendOnlyPages.mjs";
 
 /**
  * Layer 1: `app/` has been renamed to `dist/` and the App-Router collision is gone.
@@ -91,12 +97,61 @@ export function ensureWindowsBuildProfileDirs(env, mkdirImpl = mkdirSync) {
   mkdirImpl(env.LOCALAPPDATA, { recursive: true });
 }
 
+/**
+ * Return the RAM limit visible to a build process, including container quotas.
+ * Node 22+/24+ exposes cgroup/job-object limits through constrainedMemory().
+ * Ignore zero (unconstrained) and unsafe values rather than taking them as RAM.
+ */
+export function getEffectiveBuildMemoryBytes(
+  physicalBytes = os.totalmem(),
+  constrainedBytes = process.constrainedMemory?.()
+) {
+  const usable = [physicalBytes, constrainedBytes].filter(
+    (value) => Number.isSafeInteger(value) && value > 0
+  );
+  return usable.length ? Math.min(...usable) : null;
+}
+
+/**
+ * #18184: the default Turbopack build can exceed a 16 GiB machine's available
+ * RAM; webpack has completed on that machine. Only choose a different default
+ * when the operator has not set OMNIROUTE_USE_TURBOPACK.
+ */
+export function getLowMemoryBuildWarning(
+  baseEnv = process.env,
+  memoryBytes = getEffectiveBuildMemoryBytes()
+) {
+  if (baseEnv.OMNIROUTE_USE_TURBOPACK === "0") return null;
+  if (Number.isSafeInteger(memoryBytes) && memoryBytes > 16 * 1024 ** 3) return null;
+  const memory =
+    Number.isSafeInteger(memoryBytes) && memoryBytes > 0
+      ? `${(memoryBytes / 1024 ** 3).toFixed(1)} GiB`
+      : "unknown";
+  if (resolveNextBuildBundlerFlag(baseEnv, memoryBytes) === "--webpack") {
+    return `[build-next-isolated] #18184: build RAM limit ${memory}; selecting webpack automatically to avoid Turbopack OOM. Set OMNIROUTE_USE_TURBOPACK=1 to force Turbopack.`;
+  }
+  return `[build-next-isolated] #18184: build RAM limit ${memory}; Turbopack explicitly selected despite OOM risk. Set OMNIROUTE_USE_TURBOPACK=0 to use webpack.`;
+}
+
 function runNextBuild() {
   return new Promise((resolve) => {
     const nextBin = path.join(projectRoot, "node_modules", "next", "dist", "bin", "next");
     const buildEnv = resolveNextBuildEnv(process.env);
+    const memoryBytes = getEffectiveBuildMemoryBytes();
+    const bundlerFlag = resolveNextBuildBundlerFlag(process.env, memoryBytes);
+    const memoryWarning = getLowMemoryBuildWarning(process.env, memoryBytes);
+    if (memoryWarning) console.warn(memoryWarning);
     ensureWindowsBuildProfileDirs(buildEnv);
-    const child = spawn(process.execPath, [nextBin, "build", resolveNextBuildBundlerFlag()], {
+    const nextArgs = process.versions.bun
+      ? [
+          "--preload",
+          path.join(projectRoot, "open-sse", "utils", "setupPolyfill.ts"),
+          nextBin,
+          "build",
+          bundlerFlag,
+        ]
+      : [nextBin, "build", bundlerFlag];
+    const child = spawn(process.execPath, nextArgs, {
       cwd: projectRoot,
       stdio: "inherit",
       env: buildEnv,
@@ -121,13 +176,22 @@ function runNextBuild() {
   });
 }
 
-export function resolveNextBuildBundlerFlag(baseEnv = process.env) {
-  // Turbopack is the default production bundler (Next 16 stable). Benchmarked on
-  // this codebase: 2-3x faster than the single-threaded webpack pass (17min -> 9min
-  // on a 32-core box; ~20min -> 7min on ubuntu-latest), artifact validated
-  // end-to-end (standalone smoke + e2e/package/electron CI jobs). Webpack stays as
-  // the explicit escape hatch (=0) for bundler-compat regressions.
-  return baseEnv.OMNIROUTE_USE_TURBOPACK === "0" ? "--webpack" : "--turbopack";
+export function resolveNextBuildBundlerFlag(
+  baseEnv = process.env,
+  memoryBytes = getEffectiveBuildMemoryBytes()
+) {
+  // A blank value is common when Compose forwards an unset shell variable.
+  // Treat it like an absent opt-in instead of accidentally forcing Turbopack
+  // on a RAM-constrained host. Keep "0" and all NONEMPTY overrides authoritative.
+  const override = baseEnv.OMNIROUTE_USE_TURBOPACK;
+  if (override !== undefined && override !== "") {
+    return override === "0" ? "--webpack" : "--turbopack";
+  }
+  // Default to the build path confirmed to work at 16 GiB (#18184). A bad RAM
+  // reading also prefers webpack; on sufficiently large hosts keep Turbopack.
+  return Number.isSafeInteger(memoryBytes) && memoryBytes > 16 * 1024 ** 3
+    ? "--turbopack"
+    : "--webpack";
 }
 
 /**
@@ -145,6 +209,15 @@ export function resolveNextBuildEnv(baseEnv = process.env, platform = process.pl
   const env = {
     ...baseEnv,
     NEXT_PRIVATE_BUILD_WORKER: baseEnv.NEXT_PRIVATE_BUILD_WORKER || "0",
+    // Reliable build signal inherited by every spawned `next build` worker.
+    // Next.js workers sometimes drop NEXT_PHASE, so DB entry points key off
+    // OMNIROUTE_BUILDING=1 to stub out SQLite and never load the native
+    // better-sqlite3 addon (its Statement destructor SIGABRTs at worker
+    // teardown: node::RemoveEnvironmentCleanupHook). (#10060)
+    OMNIROUTE_BUILDING: "1",
+    // No telemetry, anywhere: disable Next.js's anonymous build-time telemetry
+    // on every build path (local, CI, Docker), not just the image build.
+    NEXT_TELEMETRY_DISABLED: baseEnv.NEXT_TELEMETRY_DISABLED || "1",
   };
 
   // Windows-only: `next build`'s static-generation glob scan and framework cache
@@ -167,6 +240,19 @@ export function resolveNextBuildEnv(baseEnv = process.env, platform = process.pl
     env.USERPROFILE = buildHomeDir;
     env.APPDATA = path.join(buildHomeDir, "AppData", "Roaming");
     env.LOCALAPPDATA = path.join(buildHomeDir, "AppData", "Local");
+    // Next 16.3.8+'s SWC loader validates the DACL of the native-binding cache
+    // root and refuses one under os.tmpdir(): the sandbox inherits BUILTIN\Users
+    // replacement rights from the temp ancestor, and the build dies with
+    // "Failed to load native binding / swc.win32-x64-msvc.node" (observed
+    // 2026-10-14 on local Windows builds; upstream CI is Linux-only, unreported).
+    // Pin the cache to the real per-user LOCALAPPDATA — outside the sandbox,
+    // tight DACL. The loader's own error names SWC_NATIVE_BINDING_CACHE.
+    env.SWC_NATIVE_BINDING_CACHE =
+      baseEnv.SWC_NATIVE_BINDING_CACHE ||
+      path.join(
+        baseEnv.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"),
+        "swc-native-cache-omniroute"
+      );
   }
 
   // Raise the Node heap for the spawned `next build`. The webpack production pass
@@ -177,9 +263,10 @@ export function resolveNextBuildEnv(baseEnv = process.env, platform = process.pl
   // was left unprotected. Respect an existing --max-old-space-size (Docker already
   // sets one — don't clobber/duplicate) and let OMNIROUTE_BUILD_MEMORY_MB override.
   // NOTE (#6409): --max-old-space-size only bounds V8's JS heap — it does NOT bound
-  // Turbopack's native (Rust, off-V8-heap) memory, which is the default bundler as of
-  // #6283. On memory-constrained machines, set OMNIROUTE_USE_TURBOPACK=0 (webpack
-  // fallback) instead of raising this heap value; see docs/reference/ENVIRONMENT.md.
+  // Turbopack's native (Rust, off-V8-heap) memory. Since #18184 an unset
+  // OMNIROUTE_USE_TURBOPACK already selects webpack at <= 16 GiB of effective RAM
+  // (resolveNextBuildBundlerFlag); if Turbopack still OOMs, set OMNIROUTE_USE_TURBOPACK=0
+  // instead of raising this heap value; see docs/reference/ENVIRONMENT.md.
   if (!/--max-old-space-size/.test(env.NODE_OPTIONS || "")) {
     // Default 8 GB (was 4 GB): the clean module graph peaks ~3.9 GB during the webpack
     // production pass, which brushed the old 4 GB ceiling on a borderline OOM. 8 GB gives
@@ -262,6 +349,7 @@ export async function main() {
   };
 
   try {
+    generateGlobalErrorMessages(projectRoot);
     for (const entry of transientBuildPaths) {
       if (!(await exists(entry.sourcePath))) continue;
       await movePath(entry.sourcePath, entry.backupPath);
@@ -273,6 +361,12 @@ export async function main() {
         "[build-next-isolated] OMNIROUTE_BUILD_BACKEND_ONLY set — building API only (dashboard UI stubbed)"
       );
       stubbedPages = stubDashboardPages(projectRoot);
+      if (isContributorBuild()) {
+        stubbedPages.push(...stubContributorInstrumentation(projectRoot));
+        console.log(
+          "[build-next-isolated] Contributor profile: instrumentation entrypoint stubbed for compile-only validation"
+        );
+      }
       process.once("SIGINT", onFatalSignal);
       process.once("SIGTERM", onFatalSignal);
     }
@@ -281,7 +375,7 @@ export async function main() {
 
     const result = await runNextBuild();
     const standaloneDir = path.join(distDir, "standalone");
-    if (result.code === 0 && (await exists(standaloneDir))) {
+    if (result.code === 0 && (await exists(standaloneDir)) && shouldBuildStandalone()) {
       try {
         await fs.cp(path.join(projectRoot, "docs"), path.join(standaloneDir, "docs"), {
           recursive: true,
@@ -327,7 +421,12 @@ export async function main() {
           distDir,
           outDir: standaloneDir,
           projectRoot,
+          // Match the hardened packaging path used by Electron builds:
+          // Turbopack can emit hashed external-package references and
+          // standalone symlinks that break after the bundle is moved/copied.
+          patchTurbopackChunks: true,
           copyNatives: true,
+          materializeSymlinks: true,
         });
         const { spawnSync } = await import("node:child_process");
         const basePathWrite = spawnSync(
@@ -343,6 +442,10 @@ export async function main() {
       } catch (assembleErr) {
         console.warn("[build-next-isolated] Non-fatal error assembling standalone:", assembleErr);
       }
+    } else if (result.code === 0 && !shouldBuildStandalone()) {
+      console.log(
+        "[build-next-isolated] Skipped standalone packaging (standalone disabled for fast compile)"
+      );
     }
     process.exitCode = result.code;
   } catch (error) {

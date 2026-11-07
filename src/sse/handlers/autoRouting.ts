@@ -3,6 +3,7 @@ import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import type { AutoVariant } from "@omniroute/open-sse/services/autoCombo/autoPrefix.ts";
 import {
   AUTO_TEMPLATE_VARIANTS,
+  FLAT_TIER_OVERLAY_IDS,
   VALID_AUTO_VARIANTS,
 } from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
 import {
@@ -14,7 +15,13 @@ import {
   isValidModelFamily,
   type ModelFamily,
 } from "@omniroute/open-sse/services/autoCombo/modelFamily.ts";
-import { getCachedSettings } from "@/lib/localDb";
+import { getCachedSettings } from "@/lib/db/readCache";
+import { isAutoRequestResolvedCapabilitiesEnabled } from "@/shared/utils/featureFlags";
+import {
+  createInvocationId,
+  startAutoEvaluationTrace,
+  startComboTrace,
+} from "@omniroute/open-sse/services/combo/decisionTrace.ts";
 import * as log from "../utils/logger";
 
 export type AutoRoutingState = {
@@ -32,7 +39,9 @@ function classifyAutoModel(
   const recognizedBuiltInAuto =
     model === "auto" || Object.prototype.hasOwnProperty.call(AUTO_TEMPLATE_VARIANTS, model);
   if (Object.prototype.hasOwnProperty.call(AUTO_TEMPLATE_VARIANTS, model)) {
-    return { variant: AUTO_TEMPLATE_VARIANTS[model], recognizedBuiltInAuto: true };
+    const tier = FLAT_TIER_OVERLAY_IDS[model];
+    const spec = tier ? { tier } : undefined;
+    return { variant: AUTO_TEMPLATE_VARIANTS[model], spec, recognizedBuiltInAuto: true };
   }
   if (!model.startsWith("auto/")) return { recognizedBuiltInAuto };
 
@@ -65,14 +74,13 @@ async function applyAutoPrefix(
     const { parseAutoPrefix } =
       await import("@omniroute/open-sse/services/autoCombo/autoPrefix.ts");
     const parsed = parseAutoPrefix(model);
-    if (!parsed.valid) {
+    const recognizedBuiltIn = Object.prototype.hasOwnProperty.call(AUTO_TEMPLATE_VARIANTS, model);
+    if (!parsed.valid && !recognizedBuiltIn) {
       if (!state.spec) log.warn("AUTO", `Invalid auto prefix format: ${model}`);
       return state;
     }
 
-    const variant = Object.prototype.hasOwnProperty.call(AUTO_TEMPLATE_VARIANTS, model)
-      ? state.variant
-      : parsed.variant;
+    const variant = recognizedBuiltIn ? state.variant : parsed.variant;
     const defaultVariant =
       model === "auto" && variant === undefined
         ? (settings.autoRoutingDefaultVariant as AutoVariant | undefined)
@@ -133,9 +141,21 @@ export async function createVirtualAutoCombo(
     // #7819 (Level 2): scope candidate exclusions to this API key + the
     // requested auto channel (e.g. "auto/best-coding"). Omitted for any
     // caller that doesn't pass apiKeyId — routing stays unfiltered.
-    const virtualCombo = await createVirtual(state.variant, state.spec, apiKeyId, state.model);
+    const invocationId = createInvocationId();
+    startComboTrace(invocationId, { strategy: "auto", comboName: state.model });
+    startAutoEvaluationTrace(invocationId);
+    const virtualCombo = await createVirtual(
+      state.variant,
+      state.spec,
+      apiKeyId,
+      state.model,
+      invocationId,
+      // #16419 opt-in: resolved capabilities also feed the snapshot weights.
+      isAutoRequestResolvedCapabilitiesEnabled()
+    );
     virtualCombo.name = state.model;
     virtualCombo.id = state.model;
+    virtualCombo.traceInvocationId = invocationId;
     log.info(
       "AUTO",
       `Virtual auto-combo created: ${virtualCombo.name} (${virtualCombo.candidatePool?.length || 0} candidates)`

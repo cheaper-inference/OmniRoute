@@ -12,6 +12,20 @@ export interface ClinepassEnvelopeResult {
   error: ClinepassEnvelopeError | null;
 }
 
+function extractEnvelopeError(record: Record<string, unknown>): ClinepassEnvelopeError {
+  const rawError = record.error;
+  const message =
+    typeof rawError === "string"
+      ? rawError
+      : (rawError && typeof rawError === "object"
+          ? ((rawError as Record<string, unknown>).message as string | undefined)
+          : undefined) ||
+        (typeof record.message === "string" ? record.message : undefined) ||
+        "Upstream error";
+  const status = typeof record.statusCode === "number" ? record.statusCode : null;
+  return { message, status };
+}
+
 /**
  * Unwrap a ClinePass {success, data} envelope.
  *
@@ -33,17 +47,7 @@ export function unwrapClinepassEnvelope(
   if (!("success" in record)) return { body, error: null };
 
   if (record.success === false) {
-    const rawError = record.error;
-    const message =
-      typeof rawError === "string"
-        ? rawError
-        : (rawError && typeof rawError === "object"
-            ? ((rawError as Record<string, unknown>).message as string | undefined)
-            : undefined) ||
-          (typeof record.message === "string" ? record.message : undefined) ||
-          "Upstream error";
-    const statusCode = typeof record.statusCode === "number" ? record.statusCode : null;
-    return { body: null, error: { message, status: statusCode } };
+    return { body: null, error: extractEnvelopeError(record) };
   }
 
   if (

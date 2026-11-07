@@ -12,9 +12,8 @@ const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-comp-settings-te
 process.env.DATA_DIR = testDataDir;
 
 const coreDb = await import("../../src/lib/db/core.ts");
-const { resolveCompressionSettings } = await import(
-  "../../open-sse/handlers/chatCore/compressionSettings.ts"
-);
+const { createDisabledCompressionConfig, resolveCompressionSettings } =
+  await import("../../open-sse/handlers/chatCore/compressionSettings.ts");
 
 before(async () => {
   await coreDb.ensureDbInitialized();
@@ -23,7 +22,7 @@ before(async () => {
 after(() => {
   coreDb.resetDbInstance();
   try {
-    fs.rmSync(testDataDir, { recursive: true, force: true });
+    fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   } catch {
     // best-effort cleanup
   }
@@ -32,6 +31,19 @@ after(() => {
 test("returns the settings object from the DB", async () => {
   const result = await resolveCompressionSettings();
   assert.ok(result.settings, "expected a settings object from the seeded DB");
+});
+
+test("builds a complete disabled compression fallback", () => {
+  assert.deepEqual(createDisabledCompressionConfig(), {
+    enabled: false,
+    defaultMode: "off",
+    autoTriggerTokens: 0,
+    cacheMinutes: 5,
+    preserveSystemPrompt: true,
+    comboOverrides: {},
+    engines: {},
+    activeComboId: null,
+  });
 });
 
 test("derives enabled and contextEditingEnabled from the settings", async () => {

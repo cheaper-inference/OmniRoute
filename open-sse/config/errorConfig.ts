@@ -25,9 +25,10 @@ export const ERROR_TYPES: Record<number, ErrorInfo> = {
   400: { type: "invalid_request_error", code: "bad_request" },
   401: { type: "authentication_error", code: "invalid_api_key" },
   402: { type: "billing_error", code: "payment_required" },
-  403: { type: "permission_error", code: "insufficient_quota" },
+  403: { type: "permission_error", code: "permission_denied" },
   404: { type: "invalid_request_error", code: "model_not_found" },
   406: { type: "invalid_request_error", code: "model_not_supported" },
+  410: { type: "invalid_request_error", code: "model_shutdown" },
   429: { type: "rate_limit_error", code: "rate_limit_exceeded" },
   499: { type: "client_disconnected", code: "client_disconnected" },
   500: { type: "server_error", code: "internal_server_error" },
@@ -41,9 +42,10 @@ export const DEFAULT_ERROR_MESSAGES: Record<number, string> = {
   400: "Bad request",
   401: "Invalid API key provided",
   402: "Payment required",
-  403: "You exceeded your current quota",
+  403: "Permission denied",
   404: "Model not found",
   406: "Model not supported",
+  410: "Model has been shut down",
   429: "Rate limit exceeded",
   499: "Client disconnected",
   500: "Internal server error",
@@ -72,9 +74,24 @@ export const COOLDOWN_MS = {
   transientMax: 60 * 1000,
   transient: TRANSIENT_COOLDOWN_MS,
   requestNotAllowed: 5 * 1000,
+  // Anthropic OAuth 403 "Request not allowed" (#12859): a per-request refusal
+  // on a healthy token. chatCore excludes the model for requestRejected after
+  // the first refusal, requestRejectedRepeat after the second, and a longer
+  // capped cooldown on the third consecutive one; it never bans the connection
+  // (services/requestRejectedStreak.ts).
+  requestRejected: 5 * 60 * 1000,
+  requestRejectedRepeat: 15 * 60 * 1000,
   rateLimit: 2 * 60 * 1000,
   serviceUnavailable: 2 * 1000,
   authExpired: 2 * 60 * 1000,
+  // Google regional-availability refusal: nothing changes region-wise on the
+  // account, so re-probe only after a long window (or when the operator routes
+  // egress through a supported-region proxy).
+  geoBlocked: 24 * 60 * 60 * 1000,
+  // Antigravity BYOP (GCP_PROJECT_REQUIRED): nothing changes on the account
+  // until the operator enters a Project ID, so keep the connection excluded
+  // from selection for a long window (mirrors the geo-blocked treatment).
+  gcpProjectRequired: 24 * 60 * 60 * 1000,
 };
 
 /**
@@ -89,6 +106,10 @@ export const ERROR_RULES: ErrorRule[] = [
     reason: "auth_error",
   },
   {
+    // For provider `claude` this text is classified REQUEST_REJECTED and the
+    // connection-level cooldown is written by chatCore before the fallback
+    // layer runs (#12859); markAccountUnavailable then keeps the longer
+    // cooldown. This 5 s rule still serves every other provider.
     id: "request_not_allowed",
     text: "request not allowed",
     cooldownMs: COOLDOWN_MS.requestNotAllowed,
@@ -149,12 +170,24 @@ export const ERROR_RULES: ErrorRule[] = [
     backoff: true,
     reason: "quota_exhausted",
   },
+  {
+    id: "out_of_extra_usage",
+    text: "out of extra usage",
+    backoff: true,
+    reason: "quota_exhausted",
+  },
+  {
+    id: "extra_usage_required",
+    text: "extra usage required",
+    backoff: true,
+    reason: "quota_exhausted",
+  },
   { id: "capacity", text: "capacity", backoff: true, reason: "model_capacity" },
   { id: "overloaded", text: "overloaded", backoff: true, reason: "model_capacity" },
   { id: "high_demand", text: "high demand", backoff: true, reason: "model_capacity" },
   { id: "status_401", status: 401, cooldownMs: 0, reason: "auth_error" },
   { id: "status_402", status: 402, cooldownMs: 0, reason: "quota_exhausted" },
-  { id: "status_403", status: 403, cooldownMs: 0, reason: "quota_exhausted" },
+  { id: "status_403", status: 403, cooldownMs: 0, reason: "unknown" },
   { id: "status_404", status: 404, cooldownMs: COOLDOWN_MS.notFound, reason: "unknown" },
   { id: "status_406", status: 406, backoff: true, reason: "server_error" },
   { id: "status_408", status: 408, backoff: true, reason: "server_error" },

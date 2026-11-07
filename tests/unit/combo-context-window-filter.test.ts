@@ -5,9 +5,8 @@ import os from "node:os";
 import path from "node:path";
 
 // Regression tests for the context-aware combo compatibility filter.
-// Unknown context metadata is only safe as a fallback. Once the context filter
-// has rejected known-too-small targets and a known-capacity target remains,
-// unknown-context targets must not survive over it.
+// Context metadata is advisory: known-fitting targets are preferred, while
+// unknown and catalog-too-small targets remain available for runtime fallback.
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-combo-context-filter-"));
 const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
@@ -16,7 +15,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const { saveModelsDevCapabilities, clearModelsDevCapabilities } =
   await import("../../src/lib/modelsDevSync.ts");
-const { filterTargetsByRequestCompatibility, getKnownContextOverflow, handleComboChat } =
+const { filterTargetsByRequestCompatibility, handleComboChat } =
   await import("../../open-sse/services/combo.ts");
 const { setModelContextOverride, removeModelContextOverride } =
   await import("../../src/lib/db/modelContextOverrides.ts");
@@ -28,7 +27,7 @@ test.after(() => {
   } else {
     process.env.DATA_DIR = ORIGINAL_DATA_DIR;
   }
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test.beforeEach(() => {
@@ -57,7 +56,11 @@ function capabilityEntry(limitContext: number | null) {
   };
 }
 
-function capabilityEntryWithLimits(limitInput: number | null, limitContext: number | null, limitOutput = 4096) {
+function capabilityEntryWithLimits(
+  limitInput: number | null,
+  limitContext: number | null,
+  limitOutput = 4096
+) {
   return {
     ...capabilityEntry(limitContext),
     limit_input: limitInput,
@@ -97,7 +100,7 @@ function bigContextBody(tokens: number) {
 
 const noopLog = { info() {}, warn() {}, error() {}, debug() {} };
 
-test("known compatible context target wins over unknown-context targets", () => {
+test("known compatible context target is preferred while unknown targets remain fallback", () => {
   saveModelsDevCapabilities({
     "unit-known-context": {
       tiny: capabilityEntry(8_000),
@@ -118,7 +121,12 @@ test("known compatible context target wins over unknown-context targets", () => 
 
   assert.deepEqual(
     out.map((entry) => entry.modelStr),
-    ["unit-known-context/million"]
+    [
+      "unit-known-context/million",
+      "unit-unknown-context/mystery-a",
+      "unit-known-context/tiny",
+      "unit-unknown-context/mystery-b",
+    ]
   );
 });
 
@@ -184,62 +192,27 @@ test("all known-too-small context targets still fall back to strategy order", ()
   );
 });
 
-test("known context overflow reports the largest target limit", () => {
+test("output-token limits remain a hard compatibility requirement", () => {
   saveModelsDevCapabilities({
-    "unit-known-context": {
-      tiny: capabilityEntry(8_000),
-      small: capabilityEntry(16_000),
+    "unit-output-limit": {
+      insufficient: capabilityEntryWithLimits(128_000, 128_000, 128),
+      sufficient: capabilityEntryWithLimits(128_000, 128_000, 4_096),
     },
   });
 
-  const overflow = getKnownContextOverflow(
-    [target("unit-known-context/tiny"), target("unit-known-context/small")],
-    largeContextBody()
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-output-limit/insufficient"), target("unit-output-limit/sufficient")],
+    { messages: [{ role: "user", content: "hello" }], max_tokens: 512 },
+    noopLog
   );
 
-  assert.ok(overflow);
-  assert.ok(overflow.requiredContextTokens > overflow.maxKnownContextTokens);
-  assert.equal(overflow.maxKnownContextTokens, 16_000);
-  assert.equal(overflow.targetCount, 2);
-});
-
-test("#7177 an empty messages array is not counted as real content at an exact-boundary limit", () => {
-  // Regression: some combo entrypoints default a caller-omitted `messages` to `[]`. The
-  // estimator used to JSON.stringify whatever keys were merely *present* on the body,
-  // so an empty array still contributed a few phantom "structural" tokens (JSON braces/
-  // brackets), which was enough to trip a false-positive overflow when max_tokens exactly
-  // equals the target's context window (a common config where limit_input === limit_output
-  // === limit_context) even though there is no real input to account for.
-  saveModelsDevCapabilities({
-    "unit-known-context": {
-      exact: capabilityEntry(4_096),
-    },
-  });
-
-  const overflow = getKnownContextOverflow([target("unit-known-context/exact")], {
-    messages: [],
-    max_tokens: 4_096,
-  });
-
-  assert.equal(overflow, null);
-});
-
-test("unknown context metadata keeps overflow detection fail-open", () => {
-  saveModelsDevCapabilities({
-    "unit-known-context": {
-      tiny: capabilityEntry(8_000),
-    },
-  });
-
-  const overflow = getKnownContextOverflow(
-    [target("unit-known-context/tiny"), target("unit-unknown-context/mystery")],
-    largeContextBody()
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-output-limit/sufficient"]
   );
-
-  assert.equal(overflow, null);
 });
 
-test("combo rejects a known oversized request before upstream dispatch", async () => {
+test("combo dispatches requests that only an approximate estimate marks oversized", async () => {
   saveModelsDevCapabilities({
     "unit-known-context": {
       tiny: capabilityEntry(8_000),
@@ -257,17 +230,74 @@ test("combo rejects a known oversized request before upstream dispatch", async (
     },
     handleSingleModel: async () => {
       dispatches += 1;
-      return new Response("unexpected", { status: 200 });
+      return new Response(JSON.stringify({ choices: [{ message: { content: "ok" } }] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     },
     log: noopLog,
   });
 
-  assert.equal(response.status, 400);
-  assert.equal(dispatches, 0);
-  const body = await response.json();
-  assert.equal(body.error.code, "context_length_exceeded");
-  assert.equal(body.diagnostics.terminalReason, "context_length_exceeded");
-  assert.equal(body.diagnostics.attempted, 0);
+  assert.equal(response.status, 200);
+  assert.equal(dispatches, 1);
+});
+
+test("round-robin dispatches requests that only an approximate estimate marks oversized", async () => {
+  saveModelsDevCapabilities({
+    "unit-known-context": {
+      tiny: capabilityEntry(8_000),
+      small: capabilityEntry(16_000),
+    },
+  });
+  let dispatches = 0;
+
+  const response = await handleComboChat({
+    body: largeContextBody(),
+    combo: {
+      name: "known-context-overflow-round-robin",
+      strategy: "round-robin",
+      models: ["unit-known-context/tiny", "unit-known-context/small"],
+    },
+    handleSingleModel: async () => {
+      dispatches += 1;
+      return new Response(JSON.stringify({ choices: [{ message: { content: "ok" } }] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+    log: noopLog,
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(dispatches, 1);
+});
+
+test("native Responses context reaches an all-Codex target beyond its catalog hint (#8932)", async () => {
+  saveModelsDevCapabilities({
+    codex: {
+      large: capabilityEntry(272_000),
+    },
+  });
+  let dispatches = 0;
+
+  const response = await handleComboChat({
+    body: bigContextBody(275_000),
+    combo: {
+      name: "native-codex-overflow",
+      strategy: "priority",
+      models: ["codex/large"],
+    },
+    clientManagedResponsesContext: true,
+    isModelAvailable: async () => true,
+    handleSingleModel: async () => {
+      dispatches += 1;
+      return new Response("ok", { status: 200 });
+    },
+    log: noopLog,
+  });
+
+  assert.notEqual(response.status, 400);
+  assert.equal(dispatches, 1);
 });
 
 test("input-only maxInputTokens is not double-counted against the output reserve (#7039)", () => {
@@ -321,10 +351,12 @@ test("small input-only maxInputTokens keeps a target whose input fits even thoug
   );
 });
 
-test("input-only maxInputTokens still rejects when the input itself exceeds the cap", () => {
-  // The fix must not let a genuinely-too-small input cap pass. `too-small` has
-  // maxInputTokens = 1, which cannot even hold the ~11-token input, so it must
-  // still be dropped while the compatible target survives.
+test("input-only maxInputTokens is demoted when the input itself exceeds the cap", () => {
+  // #8944 made context metadata ADVISORY: a catalog-too-small target is no longer
+  // removed (a stale catalog entry must never delete the only target that could
+  // accept the request at runtime), it is ordered AFTER the known-fitting ones.
+  // `too-small` has maxInputTokens = 1, which cannot hold the ~11-token input, so
+  // it must lose the ordering to `huge` while remaining available as a fallback.
   saveModelsDevCapabilities({
     "unit-7039-too-small": {
       "too-small": capabilityEntryWithLimits(1, 1_000_000, 500),
@@ -340,14 +372,14 @@ test("input-only maxInputTokens still rejects when the input itself exceeds the 
 
   assert.deepEqual(
     out.map((entry) => entry.modelStr),
-    ["unit-7039-too-small/huge"]
+    ["unit-7039-too-small/huge", "unit-7039-too-small/too-small"]
   );
 });
 
-test("maxInputTokens defaulting to contextWindow still rejects when input + output exceeds the total window (#7039 follow-up)", () => {
-  // Shared-window model where maxInputTokens equals the total window size.
-  // The input alone fits the input cap, but input + output overflows the
-  // window, so the target must be rejected instead of passing on the input cap.
+test("maxInputTokens defaulting to contextWindow is demoted when input + output exceeds the total window (#7039 follow-up)", () => {
+  // Shared-window model where maxInputTokens equals the total window size. The
+  // input alone fits the input cap but input + output overflows the window, so the
+  // target must not be PREFERRED — since #8944 it is demoted rather than dropped.
   saveModelsDevCapabilities({
     "unit-7039-window": {
       "shared-window": capabilityEntryWithLimits(400_000, 400_000, 200_000),
@@ -363,7 +395,7 @@ test("maxInputTokens defaulting to contextWindow still rejects when input + outp
 
   assert.deepEqual(
     out.map((entry) => entry.modelStr),
-    ["unit-7039-window/huge"]
+    ["unit-7039-window/huge", "unit-7039-window/shared-window"]
   );
 });
 
@@ -387,24 +419,26 @@ test("model_context_override lets a small-catalog target survive a large-context
       largeContextBody(),
       noopLog
     );
-    assert.deepEqual(
-      out.map((entry) => entry.modelStr).sort(),
-      ["unit-override/big", "unit-override/capped"]
-    );
+    assert.deepEqual(out.map((entry) => entry.modelStr).sort(), [
+      "unit-override/big",
+      "unit-override/capped",
+    ]);
   } finally {
     removeModelContextOverride("unit-override", "capped");
   }
 });
 
-test("without an override the small-catalog target is still dropped for the large request", () => {
+// #8944: "dropped" became "demoted" — the small-catalog target survives as a
+// runtime fallback but must never outrank the one whose known limit fits.
+test("without an override the small-catalog target is ordered last for the large request", () => {
   saveModelsDevCapabilities({
     "unit-override": {
       big: capabilityEntry(1_000_000),
       capped: capabilityEntry(8_000),
     },
   });
-  // No override: capped (8K) is genuinely too small and must be filtered out,
-  // guarding the override read-path from masking a real too-small target.
+  // No override: capped (8K) is catalog-too-small, so it stays behind the
+  // known-compatible target while remaining available as a runtime fallback.
   const out = filterTargetsByRequestCompatibility(
     [target("unit-override/capped"), target("unit-override/big")],
     largeContextBody(),
@@ -413,6 +447,217 @@ test("without an override the small-catalog target is still dropped for the larg
 
   assert.deepEqual(
     out.map((entry) => entry.modelStr),
-    ["unit-override/big"]
+    ["unit-override/big", "unit-override/capped"]
   );
+});
+
+// #12273: real Claude Code requests always carry `tools`, and the auto/coding
+// pool mixes coding-capable providers with providers whose catalog marks
+// toolCalling=false. Those non-coding targets are HARD-rejected (tools), so the
+// compat filter can collapse the whole pool to a single too-small-context
+// coding model (e.g. mimo-v2.5-free at 200k) for a much larger request — the
+// larger-context model was never assembled into the candidate pool. Routing to
+// that sole survivor is a guaranteed context_length_exceeded, so the filter
+// must fall back to the full pool instead of silently pinning the request.
+test("#12273 single known-too-small survivor falls back to the full pool", () => {
+  saveModelsDevCapabilities({
+    "unit-collapse": {
+      small: capabilityEntry(200_000),
+    },
+    "unit-noncoding": {
+      nocoder: { ...capabilityEntry(1_000_000), tool_call: false },
+    },
+  });
+  const body = {
+    ...bigContextBody(300_000),
+    tools: [{ type: "function" }], // Claude Code always sends tools
+  };
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-collapse/small"), target("unit-noncoding/nocoder")],
+    body,
+    noopLog
+  );
+
+  // nocoder is hard-rejected (toolCalling=false); small (200k) is the only
+  // compatible survivor but is known to be too small for a 300k request, so the
+  // filter returns the full pool rather than dispatch to a guaranteed failure.
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-collapse/small", "unit-noncoding/nocoder"]
+  );
+});
+
+// Guard against regression: when the single survivor's window DOES fit the
+// request, the filter still collapses (existing behavior preserved).
+test("#12273 single compatible target that fits is still collapsed", () => {
+  saveModelsDevCapabilities({
+    "unit-collapse": {
+      big: capabilityEntry(1_000_000),
+    },
+    "unit-noncoding": {
+      nocoder: { ...capabilityEntry(1_000_000), tool_call: false },
+    },
+  });
+  const body = {
+    ...bigContextBody(300_000),
+    tools: [{ type: "function" }],
+  };
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-collapse/big"), target("unit-noncoding/nocoder")],
+    body,
+    noopLog
+  );
+
+  // big (1M) fits the 300k request, so the collapse is legitimate.
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-collapse/big"]
+  );
+});
+
+// #12278: unknown context is advisory, not "known too small". Collapsing to a
+// single survivor whose context limit is unknown must NOT restore hard-rejected
+// targets (output_tokens here; vision is covered by combo-vision-aware-routing).
+test("#12273 unknown-context sole survivor does not restore hard-rejected targets", () => {
+  saveModelsDevCapabilities({
+    "unit-output": {
+      tiny: capabilityEntryWithLimits(128_000, 128_000, 4096),
+    },
+  });
+  const body = {
+    messages: [{ role: "user", content: "hello" }],
+    max_tokens: 32_000,
+  };
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-unknown/mystery"), target("unit-output/tiny")],
+    body,
+    noopLog
+  );
+
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-unknown/mystery"]
+  );
+});
+
+// Opt-in `outputLimitAdvisory`: a known output ceiling below `max_tokens` keeps a
+// target in its strategy position instead of removing it. Clients such as Claude Code send max_tokens as a
+// generous ceiling (128000), which otherwise strips every 64k-output model.
+test("outputLimitAdvisory keeps output-limited targets in strategy order instead of removing them", () => {
+  saveModelsDevCapabilities({
+    "unit-output-limit": {
+      insufficient: capabilityEntryWithLimits(128_000, 128_000, 128),
+      sufficient: capabilityEntryWithLimits(128_000, 128_000, 4_096),
+    },
+  });
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-output-limit/insufficient"), target("unit-output-limit/sufficient")],
+    { messages: [{ role: "user", content: "hello" }], max_tokens: 512 },
+    noopLog,
+    undefined,
+    { outputLimitAdvisory: true }
+  );
+
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-output-limit/insufficient", "unit-output-limit/sufficient"]
+  );
+});
+
+test("outputLimitAdvisory keeps strategy order when every target is output-limited", () => {
+  saveModelsDevCapabilities({
+    "unit-output-limit": {
+      a: capabilityEntryWithLimits(128_000, 128_000, 128),
+      b: capabilityEntryWithLimits(128_000, 128_000, 256),
+    },
+  });
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-output-limit/a"), target("unit-output-limit/b")],
+    { messages: [{ role: "user", content: "hello" }], max_tokens: 512 },
+    noopLog,
+    undefined,
+    { outputLimitAdvisory: true }
+  );
+
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-output-limit/a", "unit-output-limit/b"]
+  );
+});
+
+test("outputLimitAdvisory does not soften tool-calling mismatches", () => {
+  saveModelsDevCapabilities({
+    "unit-output-limit": {
+      notools: { ...capabilityEntryWithLimits(128_000, 128_000, 4_096), tool_call: false },
+      tools: capabilityEntryWithLimits(128_000, 128_000, 128),
+    },
+  });
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-output-limit/notools"), target("unit-output-limit/tools")],
+    {
+      messages: [{ role: "user", content: "hello" }],
+      max_tokens: 512,
+      tools: [{ type: "function", function: { name: "lookup", parameters: {} } }],
+    },
+    noopLog,
+    undefined,
+    { outputLimitAdvisory: true }
+  );
+
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-output-limit/tools"]
+  );
+});
+
+test("combo config outputLimitAdvisory keeps an output-limited target in its priority slot", async () => {
+  saveModelsDevCapabilities({
+    // Separate providers: a 503 from one provider must not skip the other.
+    "unit-output-a": { insufficient: capabilityEntryWithLimits(128_000, 128_000, 128) },
+    "unit-output-b": { sufficient: capabilityEntryWithLimits(128_000, 128_000, 4_096) },
+  });
+  const run = async (config?: Record<string, unknown>) => {
+    const calls: string[] = [];
+    const response = await handleComboChat({
+      body: { messages: [{ role: "user", content: "hello" }], max_tokens: 512 },
+      combo: {
+        name: "output-limit-advisory",
+        strategy: "priority",
+        models: ["unit-output-a/insufficient", "unit-output-b/sufficient"],
+        ...(config ? { config } : {}),
+      },
+      handleSingleModel: async (_body: Record<string, unknown>, modelStr: string) => {
+        calls.push(modelStr);
+        const ok = modelStr.endsWith("/insufficient");
+        return new Response(
+          JSON.stringify(ok ? { choices: [{ message: { content: "ok" } }] } : { error: "down" }),
+          { status: ok ? 200 : 503, headers: { "Content-Type": "application/json" } }
+        );
+      },
+      log: noopLog,
+    });
+    return { status: response.status, calls };
+  };
+
+  // The failing target may be retried, so assert on which targets are reached.
+  const strict = await run();
+  assert.notEqual(strict.status, 200);
+  assert.ok(!strict.calls.includes("unit-output-a/insufficient"));
+
+  const advisory = await run({ outputLimitAdvisory: true });
+  assert.equal(advisory.status, 200);
+  // Operator priority wins: the output-limited first step is tried first.
+  assert.deepEqual(advisory.calls, ["unit-output-a/insufficient"]);
+});
+
+test("combo config schema accepts boolean outputLimitAdvisory and rejects other types", async () => {
+  const { comboRuntimeConfigSchema } = await import("../../src/shared/validation/schemas/combo.ts");
+  assert.equal(comboRuntimeConfigSchema.safeParse({ outputLimitAdvisory: true }).success, true);
+  assert.equal(comboRuntimeConfigSchema.safeParse({ outputLimitAdvisory: "yes" }).success, false);
 });

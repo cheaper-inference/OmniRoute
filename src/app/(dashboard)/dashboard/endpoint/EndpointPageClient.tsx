@@ -1,13 +1,23 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
+import { Alert } from "@omniroute/ui-kit/alert";
+
 import { useState, useEffect, useMemo, useCallback } from "react";
-import Link from "next/link";
-import { Card, Button, Input, Modal, CardSkeleton, SegmentedControl } from "@/shared/components";
+import { Checkbox } from "@omniroute/ui-kit/checkbox";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Input from "@/shared/components/Input";
+import { CardSkeleton } from "@/shared/components/Loading";
+import Modal from "@/shared/components/Modal";
+import SegmentedControl from "@/shared/components/SegmentedControl";
+import { cn } from "@/shared/utils/cn";
 import Toggle from "@/shared/components/Toggle";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import { isPublicDisplayBaseUrl, useDisplayBaseUrl } from "@/shared/hooks";
-import { AI_PROVIDERS, getProviderByAlias } from "@/shared/constants/providers";
-import { getProviderDisplayName } from "@/lib/display/names";
+import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { useTranslations } from "next-intl";
 import A2ADashboardPage from "./components/A2ADashboard";
 import McpDashboardPage from "./components/MCPDashboard";
@@ -100,7 +110,12 @@ type EndpointModelSummary = {
   root?: string;
 };
 
-type CopyHandler = (text: string, key?: string) => void | Promise<void>;
+/**
+ * Copy handlers report whether the write succeeded; useCopyToClipboard returns
+ * Promise<boolean>. Promise<boolean> is not assignable to Promise<void>, so the
+ * type has to admit the boolean even though most call sites ignore it.
+ */
+type CopyHandler = (text: string, key?: string) => void | Promise<boolean>;
 
 type EndpointTunnelVisibility = {
   showCloudflaredTunnel: boolean;
@@ -138,11 +153,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   // Endpoints / models state
   const [allModels, setAllModels] = useState([]);
   const [modelsLoading, setModelsLoading] = useState(true);
-  const [expandedEndpoint, setExpandedEndpoint] = useState(null);
 
   // Cloud sync state
   const [cloudEnabled, setCloudEnabled] = useState(false);
   const [showCloudModal, setShowCloudModal] = useState(false);
+  const [acknowledgeCloudUpload, setAcknowledgeCloudUpload] = useState(false);
   const [showDisableModal, setShowDisableModal] = useState(false);
   const [cloudSyncing, setCloudSyncing] = useState(false);
   const [cloudStatus, setCloudStatus] = useState(null);
@@ -151,8 +166,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   const [selectedProvider, setSelectedProvider] = useState(null); // for provider models popup
   const [cloudBaseUrl, setCloudBaseUrl] = useState(BUILD_TIME_CLOUD_URL); // dynamic cloud URL from API response
   const [cloudConfigured, setCloudConfigured] = useState(Boolean(BUILD_TIME_CLOUD_URL));
-  const [mcpStatus, setMcpStatus] = useState<any>(null);
-  const [a2aStatus, setA2aStatus] = useState<any>(null);
+  const [_mcpStatus, setMcpStatus] = useState<any>(null);
+  const [_a2aStatus, setA2aStatus] = useState<any>(null);
   const [searchProviders, setSearchProviders] = useState<any[]>([]);
   const [cloudflaredStatus, setCloudflaredStatus] = useState<CloudflaredTunnelStatus | null>(null);
   const [cloudflaredBusy, setCloudflaredBusy] = useState(false);
@@ -172,7 +187,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   const [ngrokToken, setNgrokToken] = useState("");
   const [showNgrokTunnel, setShowNgrokTunnel] = useState(true);
   const [expandedTunnel, setExpandedTunnel] = useState<string | null>(null);
-  const [localApiUrl, setLocalApiUrl] = useState("http://localhost:20128/v1");
+  const [localApiUrl, setLocalApiUrl] = useState(
+    typeof window !== "undefined" ? `${window.location.origin}/v1` : "http://localhost:20128/v1"
+  );
   const [lanUrls, setLanUrls] = useState<string[]>([]);
   const [tailscaleIpUrl, setTailscaleIpUrl] = useState<string | null>(null);
   const [activeEndpointTab, setActiveEndpointTab] = useState<EndpointTab>("apis");
@@ -303,52 +320,6 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     [translateOrFallback]
   );
 
-  useEffect(() => {
-    let mounted = true;
-
-    const loadPage = async () => {
-      const tunnelVisibility = await loadCloudSettings(() => mounted);
-
-      if (!mounted) return;
-      setLoading(false);
-
-      runEndpointBackgroundTask("models", fetchModels);
-      runEndpointBackgroundTask("protocol-status", fetchProtocolStatus);
-      runEndpointBackgroundTask("search-providers", fetchSearchProviders);
-      runEndpointBackgroundTask("network-info", async () => {
-        try {
-          const res = await fetch("/api/network/info");
-          if (res.ok) {
-            const data = await res.json();
-            if (mounted) {
-              if (data.localUrl) setLocalApiUrl(data.localUrl);
-              setLanUrls(data.lanUrls ?? []);
-              if (data.tailscaleIpUrl) setTailscaleIpUrl(data.tailscaleIpUrl);
-            }
-          }
-        } catch {
-          // non-critical
-        }
-      });
-
-      if (tunnelVisibility.showCloudflaredTunnel) {
-        runEndpointBackgroundTask("cloudflared-status", () => fetchCloudflaredStatus(true));
-      }
-      if (tunnelVisibility.showTailscaleFunnel) {
-        runEndpointBackgroundTask("tailscale-status", () => fetchTailscaleStatus(true));
-      }
-      if (tunnelVisibility.showNgrokTunnel) {
-        runEndpointBackgroundTask("ngrok-status", () => fetchNgrokStatus(true));
-      }
-    };
-
-    void loadPage();
-
-    return () => {
-      mounted = false;
-    };
-  }, [fetchCloudflaredStatus, fetchTailscaleStatus, fetchNgrokStatus]);
-
   const fetchModels = async () => {
     setModelsLoading(true);
     try {
@@ -440,7 +411,10 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
       const res = await fetch("/api/sync/cloud", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({
+          action,
+          ...(action === "enable" ? { acknowledgeCredentialUpload: acknowledgeCloudUpload } : {}),
+        }),
         signal: controller.signal,
       });
       const data = await res.json().catch(() => ({}));
@@ -511,6 +485,52 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     return DEFAULT_TUNNEL_VISIBILITY;
   };
 
+  useEffect(() => {
+    let mounted = true;
+
+    const loadPage = async () => {
+      const tunnelVisibility = await loadCloudSettings(() => mounted);
+
+      if (!mounted) return;
+      setLoading(false);
+
+      runEndpointBackgroundTask("models", fetchModels);
+      runEndpointBackgroundTask("protocol-status", fetchProtocolStatus);
+      runEndpointBackgroundTask("search-providers", fetchSearchProviders);
+      runEndpointBackgroundTask("network-info", async () => {
+        try {
+          const res = await fetch("/api/network/info");
+          if (res.ok) {
+            const data = await res.json();
+            if (mounted) {
+              if (data.localUrl) setLocalApiUrl(data.localUrl);
+              setLanUrls(data.lanUrls ?? []);
+              if (data.tailscaleIpUrl) setTailscaleIpUrl(data.tailscaleIpUrl);
+            }
+          }
+        } catch {
+          // non-critical
+        }
+      });
+
+      if (tunnelVisibility.showCloudflaredTunnel) {
+        runEndpointBackgroundTask("cloudflared-status", () => fetchCloudflaredStatus(true));
+      }
+      if (tunnelVisibility.showTailscaleFunnel) {
+        runEndpointBackgroundTask("tailscale-status", () => fetchTailscaleStatus(true));
+      }
+      if (tunnelVisibility.showNgrokTunnel) {
+        runEndpointBackgroundTask("ngrok-status", () => fetchNgrokStatus(true));
+      }
+    };
+
+    void loadPage();
+
+    return () => {
+      mounted = false;
+    };
+  }, [fetchCloudflaredStatus, fetchTailscaleStatus, fetchNgrokStatus]);
+
   const handleCustomSystemPromptEnabledChange = (value: boolean) => {
     setCustomSystemPromptEnabled(value);
     void fetch("/api/settings", {
@@ -534,10 +554,14 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
       if (!cloudConfigured) {
         setCloudStatus({
           type: "warning",
-          message: "Cloud sync is not configured on this instance.",
+          message: translateOrFallback(
+            "cloudSyncNotConfigured",
+            "Cloud sync is not configured on this instance."
+          ),
         });
         return;
       }
+      setAcknowledgeCloudUpload(false);
       setShowCloudModal(true);
     } else {
       setShowDisableModal(true);
@@ -601,6 +625,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   };
 
   const handleEnableCloud = async () => {
+    if (!acknowledgeCloudUpload || !cloudConfigured) return;
     setCloudSyncing(true);
     setModalSuccess(false);
     setSyncStep("syncing");
@@ -704,8 +729,10 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
 
       if (!res.ok) {
         throw new Error(
-          data?.error ||
+          extractApiErrorMessage(
+            data,
             translateOrFallback("cloudflaredRequestFailed", "Failed to update Cloudflare tunnel")
+          )
         );
       }
 
@@ -1129,20 +1156,16 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     showNgrokTunnel && ngrokStatus?.running,
   ].filter(Boolean).length;
 
-  const mcpOnline = Boolean(mcpStatus?.online);
-  const a2aOnline = a2aStatus?.status === "ok";
-  const mcpToolCount = Number(mcpStatus?.heartbeat?.toolCount || 0);
-  const a2aActiveStreams = Number(a2aStatus?.tasks?.activeStreams || 0);
   const cloudflaredPhase = cloudflaredStatus?.phase || "not_installed";
   const cloudflaredPhaseMeta: Record<CloudflaredTunnelPhase, { label: string; className: string }> =
     {
       running: {
         label: translateOrFallback("cloudflaredRunning", "Running"),
-        className: "bg-green-500/10 border-green-500/30 text-green-400",
+        className: "bg-success/10 border-success/30 text-success",
       },
       starting: {
         label: translateOrFallback("cloudflaredStarting", "Starting"),
-        className: "bg-blue-500/10 border-blue-500/30 text-blue-400",
+        className: "bg-info/10 border-info/30 text-info",
       },
       stopped: {
         label: translateOrFallback("cloudflaredStoppedState", "Stopped"),
@@ -1154,11 +1177,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
       },
       unsupported: {
         label: translateOrFallback("cloudflaredUnsupported", "Unsupported"),
-        className: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+        className: "bg-warning/10 border-warning/30 text-warning",
       },
       error: {
         label: translateOrFallback("cloudflaredError", "Error"),
-        className: "bg-red-500/10 border-red-500/30 text-red-400",
+        className: "bg-error/10 border-error/30 text-error",
       },
     };
   const cloudflaredActionLabel = cloudflaredStatus?.running
@@ -1166,19 +1189,15 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     : cloudflaredStatus?.installed
       ? translateOrFallback("cloudflaredEnable", "Enable Tunnel")
       : translateOrFallback("cloudflaredInstallAndEnable", "Install & Enable");
-  const cloudflaredUrlNotice = translateOrFallback(
-    "cloudflaredUrlNotice",
-    "Creates a temporary Cloudflare Quick Tunnel. The URL changes after every restart."
-  );
   const tailscalePhase = tailscaleStatus?.phase || "not_installed";
   const tailscalePhaseMeta: Record<TailscaleTunnelPhase, { label: string; className: string }> = {
     running: {
       label: translateOrFallback("tailscaleRunning", "Running"),
-      className: "bg-green-500/10 border-green-500/30 text-green-400",
+      className: "bg-success/10 border-success/30 text-success",
     },
     needs_login: {
       label: translateOrFallback("tailscaleNeedsLogin", "Needs Login"),
-      className: "bg-blue-500/10 border-blue-500/30 text-blue-400",
+      className: "bg-info/10 border-info/30 text-info",
     },
     stopped: {
       label: translateOrFallback("tailscaleStoppedState", "Stopped"),
@@ -1190,11 +1209,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     },
     unsupported: {
       label: translateOrFallback("tailscaleUnsupported", "Unsupported"),
-      className: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+      className: "bg-warning/10 border-warning/30 text-warning",
     },
     error: {
       label: translateOrFallback("tailscaleError", "Error"),
-      className: "bg-red-500/10 border-red-500/30 text-red-400",
+      className: "bg-error/10 border-error/30 text-error",
     },
   };
   const tailscaleActionLabel = tailscaleStatus?.running
@@ -1213,11 +1232,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   const ngrokPhaseMeta: Record<NgrokTunnelPhase, { label: string; className: string }> = {
     running: {
       label: translateOrFallback("ngrokRunning", "Running"),
-      className: "bg-green-500/10 border-green-500/30 text-green-400",
+      className: "bg-success/10 border-success/30 text-success",
     },
     starting: {
       label: translateOrFallback("ngrokStarting", "Starting"),
-      className: "bg-blue-500/10 border-blue-500/30 text-blue-400",
+      className: "bg-info/10 border-info/30 text-info",
     },
     stopped: {
       label: translateOrFallback("ngrokStoppedState", "Stopped"),
@@ -1225,7 +1244,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     },
     needs_auth: {
       label: translateOrFallback("ngrokNeedsAuth", "Needs Auth"),
-      className: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+      className: "bg-warning/10 border-warning/30 text-warning",
     },
     not_installed: {
       label: translateOrFallback("ngrokNotInstalled", "Not installed"),
@@ -1233,11 +1252,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     },
     unsupported: {
       label: translateOrFallback("ngrokUnsupported", "Unsupported"),
-      className: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+      className: "bg-warning/10 border-warning/30 text-warning",
     },
     error: {
       label: translateOrFallback("ngrokError", "Error"),
-      className: "bg-red-500/10 border-red-500/30 text-red-400",
+      className: "bg-error/10 border-error/30 text-error",
     },
   };
   const ngrokActionLabel = ngrokStatus?.running
@@ -1247,6 +1266,21 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
 
   return (
     <div className="flex flex-col gap-8">
+      {/* Guided connection header (#11228): /v1 URL + test action lead; advanced protocols demoted */}
+      <div className="flex flex-col gap-2">
+        <PageHeader compact title={t("title")} description={t("subtitle")} />
+        <div className="flex items-center gap-3 mt-2">
+          <code className="text-sm bg-card-subtle px-3 py-1 rounded-md text-text-main font-mono">
+            {displayBaseUrl}/v1
+          </code>
+          <a href="#test" className="text-sm text-action font-medium hover:underline">
+            {t("testEndpoint")}
+          </a>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-text-muted">
+          <span>{t("advancedProtocols")}</span>
+        </div>
+      </div>
       <SegmentedControl
         options={ENDPOINT_TABS.map((tab) => ({ ...tab, label: t(tab.labelKey) }))}
         value={activeEndpointTab}
@@ -1270,30 +1304,31 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
 
         {/* Cloud Status Toast */}
         {cloudStatus && (
-          <div
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg mb-4 text-sm font-medium animate-in fade-in slide-in-from-top-2 duration-300 ${
+          <Alert
+            variant={
               cloudStatus.type === "success"
-                ? "bg-green-500/10 border border-green-500/30 text-green-400"
-                : cloudStatus.type === "warning"
-                  ? "bg-amber-500/10 border border-amber-500/30 text-amber-400"
-                  : "bg-red-500/10 border border-red-500/30 text-red-400"
-            }`}
-          >
-            <span className="material-symbols-outlined text-[18px]">
-              {cloudStatus.type === "success"
-                ? "check_circle"
+                ? "success"
                 : cloudStatus.type === "warning"
                   ? "warning"
-                  : "error"}
-            </span>
-            <span className="flex-1">{cloudStatus.message}</span>
-            <button
-              onClick={() => setCloudStatus(null)}
-              className="p-0.5 hover:bg-white/10 rounded transition-colors"
-            >
-              <span className="material-symbols-outlined text-[16px]">close</span>
-            </button>
-          </div>
+                  : "critical"
+            }
+            className="mb-4 animate-in fade-in slide-in-from-top-2 duration-300"
+            icon={
+              <Icon
+                name={
+                  cloudStatus.type === "success"
+                    ? "check_circle"
+                    : cloudStatus.type === "warning"
+                      ? "warning"
+                      : "error"
+                }
+                size={18}
+              />
+            }
+            description={cloudStatus.message}
+            dismissLabel={tc("close")}
+            onDismiss={() => setCloudStatus(null)}
+          />
         )}
 
         {/* Active URLs bar */}
@@ -1305,19 +1340,20 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             <div className="flex flex-col gap-1.5">
               {activeUrls.map(({ label, url, key }) => (
                 <div key={key} className="flex items-center gap-2 min-w-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" />
                   <span className="text-xs text-text-muted w-20 shrink-0">{label}</span>
                   <code className="text-xs font-mono text-text-main flex-1 truncate min-w-0">
                     {url}
                   </code>
-                  <button
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
                     onClick={() => void copy(url, key)}
-                    className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded border border-border/70 text-text-muted hover:text-text transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[12px]">
-                      {copied === key ? "check" : "content_copy"}
-                    </span>
-                  </button>
+                    className="shrink-0 text-text-muted"
+                    aria-label={`${tc("copy")} ${label}`}
+                    title={url}
+                    icon={copied === key ? "check" : "content_copy"}
+                  />
                 </div>
               ))}
             </div>
@@ -1328,9 +1364,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         <div className="flex flex-col">
           {/* Local Server */}
           <div className="flex items-center gap-3 py-3">
-            <span className="material-symbols-outlined text-[18px] text-emerald-500 shrink-0">
-              computer
-            </span>
+            <Icon name="computer" size={18} className="text-success" />
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-1 flex-wrap">
                 <span className="text-sm font-medium">{t("localServer")}</span>
@@ -1338,40 +1372,43 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   <span className="text-xs text-text-muted">· {resolvedMachineId.slice(0, 8)}</span>
                 )}
                 {lanUrls.map((url) => (
-                  <button
+                  <Button
                     key={url}
+                    variant="ghost"
+                    size="sm"
                     onClick={() => void copy(url, `lan_${url}`)}
                     title={t("copyUrlTitle", { url })}
-                    className="inline-flex items-center gap-0.5 text-[10px] text-text-muted hover:text-text transition-colors"
+                    aria-label={t("copyUrlTitle", { url })}
+                    className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] font-normal text-text-muted"
                   >
                     <code className="font-mono">{url.replace(/^https?:\/\//, "")}</code>
-                    <span className="material-symbols-outlined text-[10px] opacity-60">
-                      {copied === `lan_${url}` ? "check" : "content_copy"}
-                    </span>
-                  </button>
+                    <Icon
+                      name={copied === `lan_${url}` ? "check" : "content_copy"}
+                      size={10}
+                      className="opacity-60"
+                    />
+                  </Button>
                 ))}
               </div>
             </div>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 border border-green-500/30 text-green-400 shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 border border-success/30 text-success shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
               {t("statusRunning")}
             </span>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
+              icon={copied === "endpoint_url" ? "check" : "content_copy"}
               onClick={() => void copy(localApiUrl, "endpoint_url")}
-              className="shrink-0 flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md border border-border/70 text-text-muted hover:text-text hover:border-border transition-colors"
+              className="shrink-0 text-text-muted"
             >
-              <span className="material-symbols-outlined text-[14px]">
-                {copied === "endpoint_url" ? "check" : "content_copy"}
-              </span>
               {copied === "endpoint_url" ? tc("copied") : tc("copy")}
-            </button>
+            </Button>
           </div>
 
           {/* Tunnels section header */}
           <div className="flex items-center gap-2 pt-4 pb-1 border-t border-border/50">
-            <span className="material-symbols-outlined text-[14px] text-text-muted">
-              network_node
-            </span>
+            <Icon name="network_node" size={14} className="text-text-muted" />
             <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
               {t("tunnels")}
             </span>
@@ -1384,23 +1421,36 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             </span>
           </div>
 
-          {/* Cloud OmniRoute */}
-          <div className="flex items-center gap-3 py-3">
-            <span className="material-symbols-outlined text-[18px] text-blue-400 shrink-0">
-              cloud
-            </span>
-            <div className="flex-1 min-w-0">
+          {/* Cloud OmniRoute — wraps below sm: the text block keeps a minimum width so the
+              status pill and the action move to the next line instead of squeezing it; only
+              the URL may break anywhere ("Cloud sync d|estination" at 390 px, F4). */}
+          <div className="flex flex-wrap items-center gap-3 py-3">
+            <Icon name="cloud" size={18} className="text-info" />
+            <div className="flex-1 min-w-[12rem]">
               <span className="text-sm font-medium">{t("cloudOmniroute")}</span>
+              <p
+                className="text-xs text-text-muted break-words"
+                data-testid="cloud-sync-destination"
+              >
+                {translateOrFallback(
+                  "cloudUploadDestination",
+                  "Cloud sync destination (not local backups):"
+                )}{" "}
+                {/* break-all only for a URL: the "Not configured" fallback is words (review I-1). */}
+                <span className={cloudBaseUrl ? "break-all" : undefined}>
+                  {cloudBaseUrl || tc("notConfigured")}
+                </span>
+              </p>
             </div>
             <span
               className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border shrink-0 ${
                 cloudEnabled
-                  ? "bg-green-500/10 border-green-500/30 text-green-400"
+                  ? "bg-success/10 border-success/30 text-success"
                   : "bg-surface border-border/70 text-text-muted"
               }`}
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full shrink-0 ${cloudEnabled ? "bg-green-400 animate-pulse" : "bg-text-muted"}`}
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${cloudEnabled ? "bg-success animate-pulse" : "bg-text-muted"}`}
               />
               {cloudEnabled ? tc("active") : tc("disabled")}
             </span>
@@ -1411,7 +1461,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 icon="cloud_off"
                 onClick={() => handleCloudToggle(false)}
                 disabled={cloudSyncing}
-                className="shrink-0 bg-red-500/10! text-red-500! hover:bg-red-500/20! border-red-500/30!"
+                className="shrink-0 border-error/30 text-error hover:bg-error/10"
               >
                 {t("disableCloud")}
               </Button>
@@ -1437,9 +1487,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           {showCloudflaredTunnel && (
             <div className="border-t border-border/30">
               <div className="flex items-center gap-3 py-3">
-                <span className="material-symbols-outlined text-[18px] text-orange-400 shrink-0">
-                  cloud_queue
-                </span>
+                <Icon name="cloud_queue" size={18} className="text-warning" />
                 <div className="flex-1 min-w-0">
                   <span className="text-sm font-medium">
                     {translateOrFallback("cloudflaredTitle", "Cloudflare Quick Tunnel")}
@@ -1453,7 +1501,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 {cloudflaredStatus?.supported !== false && (
                   <Button
                     size="sm"
-                    variant={cloudflaredStatus?.running ? "secondary" : "primary"}
+                    variant={cloudflaredStatus?.running ? "outline" : "primary"}
                     icon={cloudflaredStatus?.running ? "cloud_off" : "cloud_upload"}
                     loading={cloudflaredBusy}
                     onClick={() => {
@@ -1461,40 +1509,41 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                         cloudflaredStatus?.running ? "disable" : "enable"
                       );
                     }}
-                    className={`shrink-0 ${cloudflaredStatus?.running ? "border-border/70! text-text-muted! hover:text-text!" : ""}`}
+                    className="shrink-0"
                   >
                     {cloudflaredActionLabel}
                   </Button>
                 )}
               </div>
               {cloudflaredNotice && (
-                <div
-                  className={`mb-2 ml-7 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+                <Alert
+                  variant={
                     cloudflaredNotice.type === "success"
-                      ? "border-green-500/30 bg-green-500/10 text-green-400"
-                      : cloudflaredNotice.type === "info"
-                        ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                        : "border-red-500/30 bg-red-500/10 text-red-400"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">
-                    {cloudflaredNotice.type === "success"
-                      ? "check_circle"
+                      ? "success"
                       : cloudflaredNotice.type === "info"
                         ? "info"
-                        : "error"}
-                  </span>
-                  <span className="flex-1">{cloudflaredNotice.message}</span>
-                  <button
-                    onClick={() => setCloudflaredNotice(null)}
-                    className="rounded p-0.5 transition-colors hover:bg-white/10"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">close</span>
-                  </button>
-                </div>
+                        : "critical"
+                  }
+                  className="mb-2 ml-7"
+                  icon={
+                    <Icon
+                      name={
+                        cloudflaredNotice.type === "success"
+                          ? "check_circle"
+                          : cloudflaredNotice.type === "info"
+                            ? "info"
+                            : "error"
+                      }
+                      size={18}
+                    />
+                  }
+                  description={cloudflaredNotice.message}
+                  dismissLabel={tc("close")}
+                  onDismiss={() => setCloudflaredNotice(null)}
+                />
               )}
               {cloudflaredStatus?.lastError && (
-                <p className="mb-2 ml-7 text-xs text-red-400">
+                <p className="mb-2 ml-7 text-xs text-error">
                   {translateOrFallback("cloudflaredLastError", "Last error: {error}", {
                     error: cloudflaredStatus.lastError,
                   })}
@@ -1518,30 +1567,33 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   }
                 }}
               >
-                <span className="material-symbols-outlined text-[18px] text-indigo-400 shrink-0">
-                  vpn_lock
-                </span>
+                <Icon name="vpn_lock" size={18} className="text-chart-3" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-1 flex-wrap">
                     <span className="text-sm font-medium">
                       {translateOrFallback("tailscaleTitle", "Tailscale Funnel")}
                     </span>
                     {tailscaleIpUrl && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           void copy(tailscaleIpUrl, "tailscale_ip_inline");
                         }}
-                        title={`Copy ${tailscaleIpUrl}`}
-                        className="inline-flex items-center gap-0.5 text-[10px] text-text-muted hover:text-text transition-colors"
+                        title={`${tc("copy")} ${tailscaleIpUrl}`}
+                        aria-label={`${tc("copy")} ${tailscaleIpUrl}`}
+                        className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] font-normal text-text-muted"
                       >
                         <code className="font-mono">
                           {tailscaleIpUrl.replace(/^https?:\/\//, "")}
                         </code>
-                        <span className="material-symbols-outlined text-[10px] opacity-60">
-                          {copied === "tailscale_ip_inline" ? "check" : "content_copy"}
-                        </span>
-                      </button>
+                        <Icon
+                          name={copied === "tailscale_ip_inline" ? "check" : "content_copy"}
+                          size={10}
+                          className="opacity-60"
+                        />
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -1553,7 +1605,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 {tailscaleStatus?.supported !== false && (
                   <Button
                     size="sm"
-                    variant={tailscaleStatus?.running ? "secondary" : "primary"}
+                    variant={tailscaleStatus?.running ? "outline" : "primary"}
                     icon={tailscaleStatus?.running ? "vpn_key_off" : "vpn_lock"}
                     loading={tailscaleBusy}
                     onClick={(e) => {
@@ -1566,51 +1618,51 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                         setShowTailscaleInstallModal(true);
                       }
                     }}
-                    className={`shrink-0 ${tailscaleStatus?.running ? "border-border/70! text-text-muted! hover:text-text!" : ""}`}
+                    className="shrink-0"
                   >
                     {tailscaleActionLabel}
                   </Button>
                 )}
-                <span
-                  className="material-symbols-outlined text-[18px] text-text-muted shrink-0 transition-transform duration-200"
-                  style={{
-                    transform: expandedTunnel === "ts" ? "rotate(180deg)" : "rotate(0deg)",
-                  }}
-                >
-                  expand_more
-                </span>
+                <Icon
+                  name="expand_more"
+                  size={18}
+                  className={cn(
+                    "text-text-muted shrink-0 transition-transform duration-200",
+                    expandedTunnel === "ts" && "rotate-180"
+                  )}
+                />
               </div>
               {expandedTunnel === "ts" && (
                 <div className="pb-3 pl-7 pr-1 flex flex-col gap-2">
                   {tailscaleNotice && (
-                    <div
-                      className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+                    <Alert
+                      variant={
                         tailscaleNotice.type === "success"
-                          ? "border-green-500/30 bg-green-500/10 text-green-400"
-                          : tailscaleNotice.type === "info"
-                            ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                            : "border-red-500/30 bg-red-500/10 text-red-400"
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-[18px]">
-                        {tailscaleNotice.type === "success"
-                          ? "check_circle"
+                          ? "success"
                           : tailscaleNotice.type === "info"
                             ? "info"
-                            : "error"}
-                      </span>
-                      <span className="flex-1">{tailscaleNotice.message}</span>
-                      <button
-                        onClick={() => setTailscaleNotice(null)}
-                        className="rounded p-0.5 transition-colors hover:bg-white/10"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">close</span>
-                      </button>
-                    </div>
+                            : "critical"
+                      }
+                      icon={
+                        <Icon
+                          name={
+                            tailscaleNotice.type === "success"
+                              ? "check_circle"
+                              : tailscaleNotice.type === "info"
+                                ? "info"
+                                : "error"
+                          }
+                          size={18}
+                        />
+                      }
+                      description={tailscaleNotice.message}
+                      dismissLabel={tc("close")}
+                      onDismiss={() => setTailscaleNotice(null)}
+                    />
                   )}
                   <p className="text-xs text-text-muted">{tailscaleUrlNotice}</p>
                   {tailscaleStatus?.phase === "needs_login" && (
-                    <p className="text-xs text-blue-400">
+                    <p className="text-xs text-info">
                       {translateOrFallback(
                         "tailscaleNeedsLoginHint",
                         "Authenticate this machine with Tailscale, then enable Funnel."
@@ -1619,13 +1671,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   )}
                   {tailscaleStatus?.installed && tailscaleStatus?.platform !== "win32" && (
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs text-text-muted">
-                        {translateOrFallback(
+                      <Input
+                        label={translateOrFallback(
                           "tailscaleSudoLabel",
                           "Sudo Password (required on macOS/Linux)"
                         )}
-                      </label>
-                      <Input
                         type="password"
                         value={tailscalePassword}
                         onChange={(event) => setTailscalePassword(event.target.value)}
@@ -1646,7 +1696,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                     </p>
                   )}
                   {tailscaleStatus?.lastError && (
-                    <p className="text-xs text-red-400">
+                    <p className="text-xs text-error">
                       {translateOrFallback("tailscaleLastError", "Last error: {error}", {
                         error: tailscaleStatus.lastError,
                       })}
@@ -1676,9 +1726,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   }
                 }}
               >
-                <span className="material-symbols-outlined text-[18px] text-purple-400 shrink-0">
-                  public
-                </span>
+                <Icon name="public" size={18} className="text-chart-3" />
                 <div className="flex-1 min-w-0">
                   <span className="text-sm font-medium">
                     {translateOrFallback("ngrokTitle", "ngrok Tunnel")}
@@ -1692,65 +1740,63 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 {ngrokStatus?.supported !== false && (
                   <Button
                     size="sm"
-                    variant={ngrokStatus?.running ? "secondary" : "primary"}
+                    variant={ngrokStatus?.running ? "outline" : "primary"}
                     icon={ngrokStatus?.running ? "public_off" : "public"}
                     loading={ngrokBusy}
                     onClick={(e) => {
                       e.stopPropagation();
                       void handleNgrokAction(ngrokStatus?.running ? "disable" : "enable");
                     }}
-                    className={`shrink-0 ${ngrokStatus?.running ? "border-border/70! text-text-muted! hover:text-text!" : ""}`}
+                    className="shrink-0"
                   >
                     {ngrokActionLabel}
                   </Button>
                 )}
-                <span
-                  className="material-symbols-outlined text-[18px] text-text-muted shrink-0 transition-transform duration-200"
-                  style={{
-                    transform: expandedTunnel === "ngrok" ? "rotate(180deg)" : "rotate(0deg)",
-                  }}
-                >
-                  expand_more
-                </span>
+                <Icon
+                  name="expand_more"
+                  size={18}
+                  className={cn(
+                    "text-text-muted shrink-0 transition-transform duration-200",
+                    expandedTunnel === "ngrok" && "rotate-180"
+                  )}
+                />
               </div>
               {expandedTunnel === "ngrok" && (
                 <div className="pb-3 pl-7 pr-1 flex flex-col gap-2">
                   {ngrokNotice && (
-                    <div
-                      className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+                    <Alert
+                      variant={
                         ngrokNotice.type === "success"
-                          ? "border-green-500/30 bg-green-500/10 text-green-400"
-                          : ngrokNotice.type === "info"
-                            ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                            : "border-red-500/30 bg-red-500/10 text-red-400"
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-[18px]">
-                        {ngrokNotice.type === "success"
-                          ? "check_circle"
+                          ? "success"
                           : ngrokNotice.type === "info"
                             ? "info"
-                            : "error"}
-                      </span>
-                      <span className="flex-1">{ngrokNotice.message}</span>
-                      <button
-                        onClick={() => setNgrokNotice(null)}
-                        className="rounded p-0.5 transition-colors hover:bg-white/10"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">close</span>
-                      </button>
-                    </div>
+                            : "critical"
+                      }
+                      icon={
+                        <Icon
+                          name={
+                            ngrokNotice.type === "success"
+                              ? "check_circle"
+                              : ngrokNotice.type === "info"
+                                ? "info"
+                                : "error"
+                          }
+                          size={18}
+                        />
+                      }
+                      description={ngrokNotice.message}
+                      dismissLabel={tc("close")}
+                      onDismiss={() => setNgrokNotice(null)}
+                    />
                   )}
                   <p className="text-xs text-text-muted">{ngrokUrlNotice}</p>
                   {ngrokStatus?.phase === "needs_auth" && (
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs text-text-muted">
-                        {translateOrFallback(
+                      <Input
+                        label={translateOrFallback(
                           "ngrokAuthTokenLabel",
                           "Authtoken (Required if NGROK_AUTHTOKEN not set in environment)"
                         )}
-                      </label>
-                      <Input
                         type="password"
                         value={ngrokToken}
                         onChange={(event) => setNgrokToken(event.target.value)}
@@ -1764,7 +1810,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                     </div>
                   )}
                   {ngrokStatus?.lastError && (
-                    <p className="text-xs text-red-400">
+                    <p className="text-xs text-error">
                       {translateOrFallback("ngrokLastError", "Last error: {error}", {
                         error: ngrokStatus.lastError,
                       })}
@@ -1820,17 +1866,17 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         {/* Core APIs */}
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-3">
-            <span className="material-symbols-outlined text-sm text-primary">hub</span>
+            <Icon name="hub" className="text-sm text-primary" />
             <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              {t("categoryCore") || "Core APIs"}
+              {t("categoryCore")}
             </h3>
             <div className="flex-1 h-px bg-border/50" />
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             <EndpointCard
               icon="chat"
-              iconColor="text-blue-500"
-              iconBg="bg-blue-500/10"
+              iconColor="text-info"
+              iconBg="bg-info/10"
               title={t("chatCompletions")}
               path="/v1/chat/completions"
               models={endpointData.chat}
@@ -1841,9 +1887,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="code"
-              iconColor="text-indigo-500"
-              iconBg="bg-indigo-500/10"
-              title={t("responses") || "Responses API"}
+              iconColor="text-chart-3"
+              iconBg="bg-chart-3/10"
+              title={t("responses")}
               path="/v1/responses"
               models={endpointData.chat}
               copy={copy}
@@ -1853,9 +1899,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="text_fields"
-              iconColor="text-orange-500"
-              iconBg="bg-orange-500/10"
-              title={t("completionsLegacy") || "Completions (Legacy)"}
+              iconColor="text-warning"
+              iconBg="bg-warning/10"
+              title={t("completionsLegacy")}
               path="/v1/completions"
               models={endpointData.chat}
               copy={copy}
@@ -1865,9 +1911,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="psychology"
-              iconColor="text-violet-500"
-              iconBg="bg-violet-500/10"
-              title={t("messagesApi") || "Messages"}
+              iconColor="text-chart-3"
+              iconBg="bg-chart-3/10"
+              title={t("messagesApi")}
               path="/v1/messages"
               models={null}
               badge="Anthropic"
@@ -1881,17 +1927,17 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         {/* Media & Multi-Modal */}
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-3">
-            <span className="material-symbols-outlined text-sm text-purple-400">perm_media</span>
+            <Icon name="perm_media" className="text-sm text-chart-3" />
             <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              {t("categoryMedia") || "Media & Multi-Modal"}
+              {t("categoryMedia")}
             </h3>
             <div className="flex-1 h-px bg-border/50" />
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             <EndpointCard
               icon="data_array"
-              iconColor="text-emerald-500"
-              iconBg="bg-emerald-500/10"
+              iconColor="text-success"
+              iconBg="bg-success/10"
               title={t("embeddings")}
               path="/v1/embeddings"
               models={endpointData.embeddings}
@@ -1902,8 +1948,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="image"
-              iconColor="text-purple-500"
-              iconBg="bg-purple-500/10"
+              iconColor="text-chart-3"
+              iconBg="bg-chart-3/10"
               title={t("imageGeneration")}
               path="/v1/images/generations"
               models={endpointData.images}
@@ -1914,9 +1960,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="edit_square"
-              iconColor="text-violet-500"
-              iconBg="bg-violet-500/10"
-              title={t("imageEdits") || "Image Edits"}
+              iconColor="text-chart-3"
+              iconBg="bg-chart-3/10"
+              title={t("imageEdits")}
               path="/v1/images/edits"
               models={endpointData.images}
               copy={copy}
@@ -1926,8 +1972,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="mic"
-              iconColor="text-rose-500"
-              iconBg="bg-rose-500/10"
+              iconColor="text-error"
+              iconBg="bg-error/10"
               title={t("audioTranscription")}
               path="/v1/audio/transcriptions"
               models={endpointData.audioTranscription}
@@ -1938,8 +1984,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="record_voice_over"
-              iconColor="text-cyan-500"
-              iconBg="bg-cyan-500/10"
+              iconColor="text-info"
+              iconBg="bg-info/10"
               title={t("textToSpeech")}
               path="/v1/audio/speech"
               models={endpointData.audioSpeech}
@@ -1950,9 +1996,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="music_note"
-              iconColor="text-fuchsia-500"
-              iconBg="bg-fuchsia-500/10"
-              title={t("musicGeneration") || "Music Generation"}
+              iconColor="text-chart-3"
+              iconBg="bg-chart-3/10"
+              title={t("musicGeneration")}
               path="/v1/music/generations"
               models={endpointData.music}
               copy={copy}
@@ -1962,9 +2008,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="videocam"
-              iconColor="text-red-500"
-              iconBg="bg-red-500/10"
-              title={t("videoGeneration") || "Video Generation"}
+              iconColor="text-error"
+              iconBg="bg-error/10"
+              title={t("videoGeneration")}
               path="/v1/videos/generations"
               models={endpointData.video}
               copy={copy}
@@ -1979,20 +2025,18 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         {searchProviders.length > 0 && (
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-3">
-              <span className="material-symbols-outlined text-sm text-cyan-400">
-                travel_explore
-              </span>
+              <Icon name="travel_explore" className="text-sm text-info" />
               <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-                {t("categorySearch") || "Search & Discovery"}
+                {t("categorySearch")}
               </h3>
               <div className="flex-1 h-px bg-border/50" />
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
               <EndpointCard
                 icon="search"
-                iconColor="text-cyan-500"
-                iconBg="bg-cyan-500/10"
-                title={t("webSearch") || "Web Search"}
+                iconColor="text-info"
+                iconBg="bg-info/10"
+                title={t("webSearch")}
                 path="/v1/search"
                 models={searchProviders.map((p) => ({ id: p.id, owned_by: p.id, type: "search" }))}
                 copy={copy}
@@ -2006,17 +2050,17 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         {/* Utility & Management */}
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <span className="material-symbols-outlined text-sm text-amber-400">build</span>
+            <Icon name="build" className="text-sm text-warning" />
             <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              {t("categoryUtility") || "Utility & Management"}
+              {t("categoryUtility")}
             </h3>
             <div className="flex-1 h-px bg-border/50" />
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             <EndpointCard
               icon="sort"
-              iconColor="text-amber-500"
-              iconBg="bg-amber-500/10"
+              iconColor="text-warning"
+              iconBg="bg-warning/10"
               title={t("rerank")}
               path="/v1/rerank"
               models={endpointData.rerank}
@@ -2027,8 +2071,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="shield"
-              iconColor="text-orange-500"
-              iconBg="bg-orange-500/10"
+              iconColor="text-warning"
+              iconBg="bg-warning/10"
               title={t("moderations")}
               path="/v1/moderations"
               models={endpointData.moderation}
@@ -2039,9 +2083,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="view_list"
-              iconColor="text-teal-500"
-              iconBg="bg-teal-500/10"
-              title={t("batchApi") || "Batch API"}
+              iconColor="text-chart-4"
+              iconBg="bg-chart-4/10"
+              title={t("batchApi")}
               path="/v1/batches"
               models={null}
               badge="OpenAI"
@@ -2051,9 +2095,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="folder"
-              iconColor="text-yellow-500"
-              iconBg="bg-yellow-500/10"
-              title={t("filesApi") || "Files API"}
+              iconColor="text-warning"
+              iconBg="bg-warning/10"
+              title={t("filesApi")}
               path="/v1/files"
               models={null}
               copy={copy}
@@ -2062,11 +2106,12 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             />
             <EndpointCard
               icon="list"
-              iconColor="text-teal-500"
-              iconBg="bg-teal-500/10"
-              title={t("listModels") || "List Models"}
+              iconColor="text-chart-4"
+              iconBg="bg-chart-4/10"
+              title={t("listModels")}
               path="/v1/models"
-              models={null}
+              models={allModels}
+              modelsLoading={modelsLoading}
               copy={copy}
               copied={copied}
               baseUrl={currentEndpoint}
@@ -2084,11 +2129,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         onClose={() => setShowCloudModal(false)}
       >
         <div className="flex flex-col gap-4">
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">
-              {t("whatYouGet")}
-            </p>
-            <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+          <div className="bg-info-bg border border-info/30 rounded-lg p-4">
+            <p className="text-sm text-info font-medium mb-2">{t("whatYouGet")}</p>
+            <ul className="text-sm text-info space-y-1">
               <li>• {t("cloudBenefitAccess")}</li>
               <li>• {t("cloudBenefitShare")}</li>
               <li>• {t("cloudBenefitPorts")}</li>
@@ -2096,38 +2139,52 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             </ul>
           </div>
 
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-            <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium mb-1">
-              {tc("note")}
-            </p>
-            <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+          <div className="bg-warning-bg border border-warning/30 rounded-lg p-4">
+            <p className="text-sm text-warning font-medium mb-1">{tc("note")}</p>
+            <ul className="text-sm text-warning space-y-1">
               <li>• {t("cloudSessionNote")}</li>
               <li>• {t("cloudUnstableNote")}</li>
             </ul>
           </div>
 
+          <div className="rounded-lg border border-error/40 bg-error/10 p-4">
+            <p className={cloudBaseUrl ? "text-sm break-all" : "text-sm"}>
+              {cloudBaseUrl || tc("notConfigured")}
+            </p>
+            <p className="text-sm mt-2">
+              {translateOrFallback(
+                "cloudUploadWarning",
+                "Cloud sync is disabled by default on new installations. Enabling it uploads provider API keys, OAuth access/refresh tokens, OmniRoute API keys, and configuration to the destination above, now and during future syncs. This is separate from local Storage backups. Only enable it if you trust that server."
+              )}
+            </p>
+            <Checkbox
+              className="mt-3 text-sm"
+              checked={acknowledgeCloudUpload}
+              onChange={(event) => setAcknowledgeCloudUpload(event.target.checked)}
+              label={translateOrFallback(
+                "cloudUploadConsent",
+                "I understand and authorize uploading my credentials to this destination."
+              )}
+            />
+          </div>
+
           {/* Sync Progress / Success */}
           {(cloudSyncing || modalSuccess) && (
             <div
+              role="status"
               className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-300 ${
-                modalSuccess
-                  ? "bg-green-500/10 border-green-500/30"
-                  : "bg-primary/10 border-primary/30"
+                modalSuccess ? "bg-success/10 border-success/30" : "bg-primary/10 border-primary/30"
               }`}
             >
               {modalSuccess ? (
-                <span className="material-symbols-outlined text-green-500 text-xl">
-                  check_circle
-                </span>
+                <Icon name="check_circle" className="text-success text-xl" />
               ) : (
-                <span className="material-symbols-outlined animate-spin text-primary">
-                  progress_activity
-                </span>
+                <Spinner decorative size="sm" className="text-primary" />
               )}
               <div className="flex-1">
                 <p
                   className={`text-sm font-medium ${
-                    modalSuccess ? "text-green-500" : "text-primary"
+                    modalSuccess ? "text-success" : "text-primary"
                   }`}
                 >
                   {modalSuccess && t("cloudConnected")}
@@ -2139,17 +2196,19 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           )}
 
           <div className="flex gap-2">
-            <Button onClick={handleEnableCloud} fullWidth disabled={cloudSyncing || modalSuccess}>
+            <Button
+              onClick={handleEnableCloud}
+              fullWidth
+              disabled={cloudSyncing || modalSuccess || !acknowledgeCloudUpload || !cloudConfigured}
+            >
               {cloudSyncing ? (
                 <span className="flex items-center gap-2">
-                  <span className="material-symbols-outlined animate-spin text-sm">
-                    progress_activity
-                  </span>
+                  <Spinner decorative size="sm" />
                   {syncStep === "syncing" ? t("connecting") : t("verifying")}
                 </span>
               ) : modalSuccess ? (
                 <span className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-sm">check</span>
+                  <Icon name="check" className="text-sm" />
                   {t("connected")}
                 </span>
               ) : (
@@ -2175,26 +2234,23 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         onClose={() => !cloudSyncing && setShowDisableModal(false)}
       >
         <div className="flex flex-col gap-4">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div className="bg-error-bg border border-error/30 rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <span className="material-symbols-outlined text-red-600 dark:text-red-400">
-                warning
-              </span>
+              <Icon name="warning" className="text-error" />
               <div>
-                <p className="text-sm text-red-800 dark:text-red-200 font-medium mb-1">
-                  {tc("warning")}
-                </p>
-                <p className="text-sm text-red-700 dark:text-red-300">{t("disableWarning")}</p>
+                <p className="text-sm text-error font-medium mb-1">{tc("warning")}</p>
+                <p className="text-sm text-error">{t("disableWarning")}</p>
               </div>
             </div>
           </div>
 
           {/* Sync Progress */}
           {cloudSyncing && (
-            <div className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/30 rounded-lg">
-              <span className="material-symbols-outlined animate-spin text-primary">
-                progress_activity
-              </span>
+            <div
+              role="status"
+              className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/30 rounded-lg"
+            >
+              <Spinner decorative size="sm" className="text-primary" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-primary">
                   {syncStep === "syncing" && t("syncingData")}
@@ -2211,13 +2267,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
               onClick={handleConfirmDisable}
               fullWidth
               disabled={cloudSyncing}
-              className="bg-red-500! hover:bg-red-600! text-white!"
+              variant="danger"
             >
               {cloudSyncing ? (
                 <span className="flex items-center gap-2">
-                  <span className="material-symbols-outlined animate-spin text-sm">
-                    progress_activity
-                  </span>
+                  <Spinner decorative size="sm" />
                   {syncStep === "syncing" ? t("syncing") : t("disabling")}
                 </span>
               ) : (
@@ -2242,14 +2296,14 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         onClose={() => !tailscaleInstallBusy && setShowTailscaleInstallModal(false)}
       >
         <div className="flex flex-col gap-4">
-          <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
-            <p className="text-sm font-medium text-blue-300">
+          <div className="rounded-lg border border-info/30 bg-info/10 p-4">
+            <p className="text-sm font-medium text-info">
               {translateOrFallback(
                 "tailscaleInstallIntro",
                 "Installs Tailscale on this machine and prepares OmniRoute to enable Funnel."
               )}
             </p>
-            <p className="mt-2 text-sm text-blue-200/80">
+            <p className="mt-2 text-sm text-info/80">
               {translateOrFallback(
                 "tailscaleInstallPasswordHint",
                 "On macOS and Linux, sudo may be required for the package install and daemon start."
@@ -2281,9 +2335,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             >
               {tailscaleInstallBusy ? (
                 <span className="flex items-center gap-2">
-                  <span className="material-symbols-outlined animate-spin text-sm">
-                    progress_activity
-                  </span>
+                  <Spinner decorative size="sm" />
                   {translateOrFallback("tailscaleInstalling", "Installing")}
                 </span>
               ) : (
@@ -2350,7 +2402,7 @@ function ProviderModelsModal({
     return (
       <div className="mb-4">
         <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-sm">{icon}</span>
+          <Icon name={icon} className="text-sm" />
           {title} ({groupModels.length})
         </h4>
         <div className="flex flex-col gap-1">
@@ -2367,15 +2419,15 @@ function ProviderModelsModal({
                     {t("custom")}
                   </span>
                 )}
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => copy(m.id, copyKey)}
-                  className="p-1 hover:bg-sidebar rounded text-text-muted hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="text-text-muted opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
                   title={tc("copy")}
-                >
-                  <span className="material-symbols-outlined text-sm">
-                    {copied === copyKey ? "check" : "content_copy"}
-                  </span>
-                </button>
+                  aria-label={`${tc("copy")} ${m.id}`}
+                  icon={copied === copyKey ? "check" : "content_copy"}
+                />
               </div>
             );
           })}
@@ -2440,7 +2492,7 @@ function EndpointCard({
     <div className="border border-border rounded-lg p-3 hover:bg-surface/30 transition-colors flex flex-col gap-2">
       <div className="flex items-start gap-2.5">
         <div className={`flex items-center justify-center size-8 rounded-lg ${iconBg} shrink-0`}>
-          <span className={`material-symbols-outlined text-base ${iconColor}`}>{icon}</span>
+          <Icon name={icon} size={16} className={iconColor} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -2464,151 +2516,16 @@ function EndpointCard({
         <code className="flex-1 text-[10px] font-mono text-text-muted bg-surface/80 px-2 py-1 rounded truncate">
           {path}
         </code>
-        <button
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={() => void copy(fullUrl, copyId)}
-          className="shrink-0 flex items-center justify-center size-6 rounded hover:bg-sidebar transition-colors"
+          className="shrink-0 text-text-muted"
           title={t("copyUrl")}
-        >
-          <span className="material-symbols-outlined text-[12px] text-text-muted">
-            {copied === copyId ? "check" : "content_copy"}
-          </span>
-        </button>
+          aria-label={`${t("copyUrl")}: ${path}`}
+          icon={copied === copyId ? "check" : "content_copy"}
+        />
       </div>
-    </div>
-  );
-}
-
-function EndpointSection({
-  icon,
-  iconColor,
-  iconBg,
-  title,
-  path,
-  description,
-  models,
-  expanded,
-  onToggle,
-  copy,
-  copied,
-  baseUrl,
-  modelsLoading = false,
-}: Readonly<{
-  icon: string;
-  iconColor: string;
-  iconBg: string;
-  title: string;
-  path: string;
-  description: string;
-  models: EndpointModelSummary[];
-  expanded: boolean;
-  onToggle: () => void;
-  copy: CopyHandler;
-  copied?: string | null;
-  baseUrl: string;
-  modelsLoading?: boolean;
-}>) {
-  const t = useTranslations("endpoint");
-  const grouped = useMemo(() => {
-    const map = {};
-    for (const m of models) {
-      const owner = m.owned_by || "unknown";
-      if (!map[owner]) map[owner] = [];
-      map[owner].push(m);
-    }
-    return Object.entries(map).sort((a: any, b: any) => b[1].length - a[1].length);
-  }, [models]);
-
-  const resolveProvider = (id) => AI_PROVIDERS[id] || getProviderByAlias(id);
-  const providerColor = (id) => resolveProvider(id)?.color || "#888";
-  const providerName = (id) => getProviderDisplayName(id, resolveProvider(id));
-  const copyId = `endpoint_${path}`;
-
-  return (
-    <div className="border border-border rounded-lg overflow-hidden">
-      {/* Header (always visible) */}
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center gap-3 p-4 hover:bg-surface/50 transition-colors text-left"
-      >
-        <div className={`flex items-center justify-center size-10 rounded-lg ${iconBg} shrink-0`}>
-          <span className={`material-symbols-outlined text-xl ${iconColor}`}>{icon}</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm">{title}</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-surface text-text-muted font-medium">
-              {modelsLoading ? "..." : t("modelsCount", { count: models.length })}
-            </span>
-          </div>
-          <p className="text-xs text-text-muted mt-0.5">{description}</p>
-        </div>
-        <span
-          className={`material-symbols-outlined text-text-muted text-lg transition-transform ${expanded ? "rotate-180" : ""}`}
-        >
-          expand_more
-        </span>
-      </button>
-
-      {/* Expanded content */}
-      {expanded && (
-        <div className="border-t border-border px-4 pb-4">
-          {/* Endpoint path + copy */}
-          <div className="flex items-center gap-2 mt-3 mb-3">
-            <code className="flex-1 text-xs font-mono text-text-muted bg-surface/80 px-3 py-1.5 rounded-lg truncate">
-              {baseUrl.replace(/\/v1$/, "")}
-              {path}
-            </code>
-            <button
-              onClick={() => copy(`${baseUrl.replace(/\/v1$/, "")}${path}`, copyId)}
-              className="p-1.5 hover:bg-surface rounded-lg text-text-muted hover:text-primary transition-colors shrink-0"
-            >
-              <span className="material-symbols-outlined text-[16px]">
-                {copied === copyId ? "check" : "content_copy"}
-              </span>
-            </button>
-          </div>
-
-          {/* Models grouped by provider */}
-          {modelsLoading ? (
-            <div className="flex items-center gap-2 rounded-lg border border-border/70 bg-surface/40 px-3 py-2 text-xs text-text-muted">
-              <span className="material-symbols-outlined animate-spin text-sm">
-                progress_activity
-              </span>
-              <span>{t("loadingModels")}</span>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {grouped.map(([providerId, providerModels]) => (
-                <div key={providerId}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <div
-                      className="size-2.5 rounded-full shrink-0"
-                      style={{ backgroundColor: providerColor(providerId) }}
-                    />
-                    <span className="text-xs font-semibold text-text-main">
-                      {providerName(providerId)}
-                    </span>
-                    <span className="text-xs text-text-muted">
-                      ({(providerModels as any).length})
-                    </span>
-                  </div>
-                  <div className="ml-5 flex flex-wrap gap-1.5">
-                    {(providerModels as any).map((m) => (
-                      <span
-                        key={m.id}
-                        className="text-xs px-2 py-0.5 rounded-md bg-surface/80 text-text-muted font-mono"
-                        title={m.id}
-                      >
-                        {m.root || m.id.split("/").pop()}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

@@ -8,8 +8,15 @@ import { sessionDedupEngine } from "../../../open-sse/services/compression/engin
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const FIXTURE = join(REPO_ROOT, "tests/fixtures/compression/session-dedup-memory-7849.ts");
+// #7849 originally bounded session-dedup with a shared "suffix work budget" that
+// emitted SUFFIX_WORK_BUDGET_WARNING when exhausted. Commit 7f36b192f0 REPLACED
+// that mechanism with the MAX_SUFFIX_STARTS / MAX_TOTAL_BLOCK_BYTES guards and
+// removed both the budget and its warning. The invariant #7849 exists for — a
+// line-rich long context must not blow the heap, and the engine must fail open —
+// is unchanged and still guarded below; only the pins on the removed mechanism
+// were rewritten. The budget size is kept as the input-shaping constant that
+// produces the pathological pair.
 const SUFFIX_WORK_BUDGET = 32 * 1024 * 1024;
-const SUFFIX_WORK_BUDGET_WARNING = "session-dedup: skipped (suffix work budget exceeded)";
 
 function makeFixedWidthText(lineCount: number, lineChars: number, tag: string): string {
   return Array.from({ length: lineCount }, (_, index) => {
@@ -38,7 +45,7 @@ function makeSharedBudgetBody(): Record<string, unknown> {
   };
 }
 
-test("#7849: shares the two-pass suffix-work budget across all messages", () => {
+test("#7849: the two-message pathological pair stays bounded", () => {
   const body = makeSharedBudgetBody();
   const messages = body.messages as Array<{ content: string }>;
   const perMessageWork = messages.map(({ content }) => projectedSuffixWork(content, 2));
@@ -64,20 +71,31 @@ test("#7849: shares the two-pass suffix-work budget across all messages", () => 
     assert.equal(individualResult.stats, null, "each message must be accepted individually");
   }
 
+  // The pathological pair must be processed BOUNDED — quickly and without
+  // corrupting the body. Pre-#7849 this shape retained one full-length suffix
+  // string per line and OOM-killed the heap.
+  const started = Date.now();
   const result = sessionDedupEngine.apply(body);
-  assert.deepEqual(result.stats?.validationWarnings, [SUFFIX_WORK_BUDGET_WARNING]);
+  assert.ok(
+    Date.now() - started < 4000,
+    "the pathological pair must stay fast; quadratic work would take seconds"
+  );
+  assert.strictEqual(result.body, body, "bounded processing must preserve the input body");
+  assert.equal(result.compressed, false, "the non-deduplicable pair must fail open");
+  assert.ok(Array.isArray((result.body as { messages?: unknown[] }).messages));
 });
 
-test("#7849: exhausted suffix-work budget fails open with exact zero-savings stats", () => {
+test("#7849: the pathological pair fails open, returning the input body untouched", () => {
   const body = makeSharedBudgetBody();
   const result = sessionDedupEngine.apply(body);
 
-  assert.strictEqual(result.body, body, "budget exhaustion must return the input body by identity");
+  // Fail-open is the surviving contract: nothing deduplicable in this shape, so
+  // the ORIGINAL body comes back by identity and no compression is claimed. The
+  // explanatory zero-savings stats belonged to the removed budget path — the
+  // current guards skip before producing any, so stats is null.
+  assert.strictEqual(result.body, body, "failing open must return the input body by identity");
   assert.equal(result.compressed, false);
-  assert.ok(result.stats, "budget exhaustion must return explanatory stats");
-  assert.equal(result.stats.originalTokens, result.stats.compressedTokens);
-  assert.equal(result.stats.savingsPercent, 0);
-  assert.deepEqual(result.stats.validationWarnings, [SUFFIX_WORK_BUDGET_WARNING]);
+  assert.equal(result.stats, null);
 });
 
 test("#7849: near-boundary under-budget request still deduplicates", () => {
@@ -92,7 +110,10 @@ test("#7849: near-boundary under-budget request still deduplicates", () => {
   const body = {
     messages: [
       { role: "user", content: repeatedText },
+      { role: "assistant", content: "ok" },
       { role: "user", content: repeatedText },
+      // Closes the turn: the current turn is never deduped.
+      { role: "assistant", content: "ok" },
     ],
   };
   const result = sessionDedupEngine.apply(body);
@@ -100,7 +121,7 @@ test("#7849: near-boundary under-budget request still deduplicates", () => {
 
   assert.equal(result.compressed, true);
   assert.equal(messages[0].content, repeatedText);
-  assert.match(messages[1].content, /^\[dedup:ref sha=[0-9a-f]{24}\]$/);
+  assert.match(messages[2].content, /^\[dedup:ref sha=[0-9a-f]{24}\]$/);
   assert.ok((result.stats?.savingsPercent ?? 0) > 0);
   assert.deepEqual(result.stats?.validationWarnings ?? [], []);
 });
@@ -130,9 +151,13 @@ test(
       warnings: string[];
     };
     assert.deepEqual(output.enginesRun, ["session-dedup", "lite", "rtk", "headroom", "caveman"]);
+    // The OOM guard is `child.status === 0` plus the full engine chain above:
+    // pre-fix this fixture killed the 512 MiB heap before the pipeline finished.
+    // session-dedup must still REPORT its skip; the exact reason string moved
+    // with the mechanism (7f36b192f0), so only the prefix is pinned.
     assert.ok(
-      output.warnings.includes("session-dedup: skipped (suffix work budget exceeded)"),
-      `expected an explicit session-dedup work-budget warning, got ${JSON.stringify(output.warnings)}`
+      output.warnings.some((warning) => warning.startsWith("session-dedup: skipped")),
+      `expected a session-dedup skip warning, got ${JSON.stringify(output.warnings)}`
     );
   }
 );

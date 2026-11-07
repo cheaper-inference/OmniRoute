@@ -20,6 +20,10 @@ type CredentialsLike =
   | null
   | undefined;
 
+type ResolvedExecutionCredentials = Record<string, unknown> & {
+  providerSpecificData: Record<string, unknown>;
+};
+
 function buildKimiThinkingMetadata(
   modelInfo: Record<string, unknown> | null | undefined,
   staticThinkingPolicy: ReturnType<typeof getKimiCodeStaticThinkingPolicy>
@@ -71,6 +75,40 @@ function applyKimiExecutionMetadata(
   );
 }
 
+/** Claude Messages `output_config.effort`; blank or non-string values do not count. */
+function claudeOutputEffort(requestBody: Record<string, unknown> | undefined): string | undefined {
+  const outputConfig = requestBody?.output_config;
+  if (!outputConfig || typeof outputConfig !== "object") return undefined;
+  const effort = (outputConfig as Record<string, unknown>).effort;
+  return typeof effort === "string" && effort.trim() ? effort : undefined;
+}
+
+/** OpenAI Responses `reasoning.effort`. */
+function nestedReasoningEffort(requestBody: Record<string, unknown> | undefined): unknown {
+  const reasoning = requestBody?.reasoning;
+  if (!reasoning || typeof reasoning !== "object") return undefined;
+  return (reasoning as Record<string, unknown>).effort;
+}
+
+/** Catalog reasoning metadata for the Codex executor (discovered tiers + the caller's raw effort). */
+function buildCodexThinkingMetadata(
+  provider: string | null | undefined,
+  modelInfo: Record<string, unknown> | null | undefined,
+  requestBody: Record<string, unknown> | undefined
+): Record<string, unknown> | null {
+  if (provider !== "codex" || !Array.isArray(modelInfo?.supportedThinkingEfforts)) return null;
+  const claudeEffort = claudeOutputEffort(requestBody);
+  const nestedEffort = nestedReasoningEffort(requestBody);
+  const requestedThinkingEffort = claudeEffort ?? nestedEffort ?? requestBody?.reasoning_effort;
+  return {
+    model: modelInfo.model,
+    supportedThinkingEfforts: modelInfo.supportedThinkingEfforts,
+    defaultThinkingEffort: modelInfo.defaultThinkingEffort,
+    resolvedThinkingEffort: modelInfo.resolvedThinkingEffort,
+    ...(requestedThinkingEffort !== undefined ? { requestedThinkingEffort } : {}),
+  };
+}
+
 export function resolveExecutionCredentials(opts: {
   credentials: CredentialsLike;
   nativeCodexPassthrough: boolean;
@@ -79,7 +117,8 @@ export function resolveExecutionCredentials(opts: {
   provider: string | null | undefined;
   ccSessionId: string | null;
   modelInfo?: Record<string, unknown> | null;
-}) {
+  requestBody?: Record<string, unknown>;
+}): ResolvedExecutionCredentials {
   const {
     credentials,
     nativeCodexPassthrough,
@@ -88,6 +127,7 @@ export function resolveExecutionCredentials(opts: {
     provider,
     ccSessionId,
     modelInfo,
+    requestBody,
   } = opts;
 
   const nextCredentials = nativeCodexPassthrough
@@ -118,6 +158,18 @@ export function resolveExecutionCredentials(opts: {
     providerSpecificData._omnirouteForceResponsesUpstream = true;
   }
 
+  // #8969: Poe's native /v1/responses surface — DefaultExecutor.buildUrl("poe")
+  // reads this marker so Responses requests do not land on chat/completions.
+  if (targetFormat === FORMATS.OPENAI_RESPONSES && provider === "poe") {
+    providerSpecificData._omnirouteForceResponsesUpstream = true;
+  }
+
+  // #8969: Claude-tagged Poe models speak Anthropic Messages wire format. Keep
+  // DefaultExecutor from injecting OpenAI stream_options onto that body.
+  if (targetFormat === FORMATS.CLAUDE && provider === "poe") {
+    providerSpecificData.disableStreamOptions = true;
+  }
+
   // #7364: "zai"/"glm-coding-apikey" default to the Anthropic Messages wire format
   // (registry format:"claude"), but a per-model targetFormat override (custom-model
   // dropdown, #2905) can resolve targetFormat to "openai" — e.g. for a vision model
@@ -138,8 +190,24 @@ export function resolveExecutionCredentials(opts: {
     providerSpecificData.targetFormat = targetFormat;
   }
 
-  applyKimiExecutionMetadata(providerSpecificData, provider, targetFormat, modelInfo);
+  // GitHub Copilot custom models (custom-model dropdown, #2905) can carry a
+  // per-model targetFormat override resolving to "openai-responses" so a
+  // Codex-family custom model routes through Copilot's native /responses
+  // endpoint. GithubExecutor.buildUrl() only consults the static
+  // PROVIDER_MODELS registry via getModelTargetFormat() and has no other way
+  // to see a custom model's override — mirrors the zai/glm-coding-apikey fix
+  // (#7364) for the same class of bug.
+  if (
+    targetFormat === FORMATS.OPENAI_RESPONSES &&
+    (provider === "github" || provider === "ghe-copilot")
+  ) {
+    providerSpecificData.targetFormat = targetFormat;
+  }
 
+  applyKimiExecutionMetadata(providerSpecificData, provider, targetFormat, modelInfo);
+  // Request-local resolved catalog metadata; never persist this on the connection.
+  const codexThinking = buildCodexThinkingMetadata(provider, modelInfo, requestBody);
+  if (codexThinking) providerSpecificData._omnirouteCodexThinking = codexThinking;
   const withApiType = {
     ...nextCredentials,
     providerSpecificData,
@@ -154,4 +222,10 @@ export function resolveExecutionCredentials(opts: {
       ccSessionId,
     },
   };
+}
+
+export function getExecutionConnectionId(credentials: unknown): string | null {
+  if (!credentials || typeof credentials !== "object") return null;
+  const connectionId = (credentials as Record<string, unknown>).connectionId;
+  return typeof connectionId === "string" && connectionId.trim() ? connectionId.trim() : null;
 }

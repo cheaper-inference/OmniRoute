@@ -104,16 +104,6 @@ const RAW_CONFIGS: TokenExtractionConfig[] = [
     "Log in to your Claude account at claude.ai. After login, the session cookie will be extracted automatically."
   ),
 
-  // ── ChatGPT Web ───────────────────────────────────────────
-  config(
-    "chatgpt-web",
-    "ChatGPT Web",
-    "https://chatgpt.com/auth/login",
-    "https://chatgpt.com",
-    [{ type: "cookie", name: "__Secure-next-auth.session-token", domain: ".chatgpt.com" }],
-    "Log in to ChatGPT. The __Secure-next-auth.session-token cookie will be extracted after login."
-  ),
-
   // ── Gemini Web ────────────────────────────────────────────
   config(
     "gemini-web",
@@ -163,26 +153,24 @@ const RAW_CONFIGS: TokenExtractionConfig[] = [
     { cookieDomain: ".deepseek.com" }
   ),
 
-  // ── Qwen Web ──────────────────────────────────────────────
-  // The v2 API sits behind Alibaba's "baxia" WAF, which needs the full browser
-  // cookie jar (cna + ssxmod_itna/itna2 + token), not just the bearer token.
-  // Capture the WAF cookies alongside the localStorage token (#3288).
+  // ── Volcano Engine Ark Console ───────────────────────────
   config(
-    "qwen-web",
-    "Qwen Web (Tongyi)",
-    "https://chat.qwen.ai/",
-    "https://chat.qwen.ai",
+    "volcengine-console",
+    "Volcano Engine Ark Console",
+    "https://console.volcengine.com/ark/region:cn-beijing/subscription/coding-plan",
+    "https://console.volcengine.com",
     [
-      { type: "localStorage", key: "token" },
-      { type: "cookie", name: "token", domain: ".chat.qwen.ai" },
-      { type: "cookie", name: "cna", domain: ".chat.qwen.ai" },
-      { type: "cookie", name: "ssxmod_itna", domain: ".chat.qwen.ai" },
-      { type: "cookie", name: "ssxmod_itna2", domain: ".chat.qwen.ai" },
-      { type: "cookie", name: "XSRF_TOKEN", domain: ".chat.qwen.ai" },
+      { type: "cookie", name: "digest", domain: ".volcengine.com" },
+      { type: "cookie", name: "AccountID", domain: ".volcengine.com" },
+      { type: "cookie", name: "csrfToken", domain: ".volcengine.com" },
+      { type: "cookie", name: "userInfo", domain: ".volcengine.com" },
     ],
-    "Log in to Qwen at chat.qwen.ai using your Alibaba account. The session token and the " +
-      "Alibaba WAF cookies (cna, ssxmod_itna) will be extracted — all are required by the v2 API.",
-    { cookieDomain: ".chat.qwen.ai" }
+    "Log in to the Volcano Engine Ark console. The console session is used to discover Agent/Coding Plan API keys and live quota usage.",
+    {
+      cookieDomain: ".volcengine.com",
+      successUrlPattern: /console\.volcengine\.com\/ark/i,
+      pollingConfig: { timeout: 300_000, minLoginTime: 3000 },
+    }
   ),
 
   // ── Kimi Web ──────────────────────────────────────────────
@@ -230,9 +218,8 @@ const RAW_CONFIGS: TokenExtractionConfig[] = [
     "Microsoft Copilot",
     "https://copilot.microsoft.com/",
     "https://copilot.microsoft.com",
-    [{ type: "cookie", name: "RPSCAuth", domain: ".microsoft.com" }],
-    "Log in with your Microsoft account at copilot.microsoft.com. The session auth cookie will be extracted.",
-    { cookieDomain: ".microsoft.com" }
+    [{ type: "header", name: "Authorization" }],
+    "Log in with your Microsoft account at copilot.microsoft.com. The bearer access token will be extracted from an authenticated request."
   ),
 
   // ── DuckDuckGo Web ────────────────────────────────────────
@@ -381,12 +368,11 @@ const RAW_CONFIGS: TokenExtractionConfig[] = [
   // ── Z.ai Web (#4056) ────────────────────────────────────────
   config(
     "zai-web",
-    "Z.ai Web (Free)",
+    "Z.ai Web",
     "https://chat.z.ai/",
     "https://chat.z.ai",
-    [{ type: "cookie", name: "token", domain: ".z.ai" }],
-    "Log in to Z.ai at chat.z.ai. The session token will be extracted.",
-    { cookieDomain: ".z.ai" }
+    [{ type: "localStorage", key: "token" }],
+    'Log in to Z.ai at chat.z.ai. OmniRoute extracts the Local Storage value named "token"; chat CAPTCHA is handled by the browser transport.'
   ),
 ];
 
@@ -408,5 +394,5 @@ export function listExtractionConfigs(): TokenExtractionConfig[] {
   return [...RAW_CONFIGS];
 }
 
-/** The shared config map — used by LoginManager and InAppLoginService */
+/** The shared config map — used by InAppLoginService */
 export const TOKEN_EXTRACTION_CONFIGS = CONFIG_MAP;

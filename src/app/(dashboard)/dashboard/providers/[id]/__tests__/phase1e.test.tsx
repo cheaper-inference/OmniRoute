@@ -21,6 +21,7 @@ import {
   anyNormalizeCompatBadge,
   anyNoPreserveCompatBadge,
   formatProviderModelsErrorResponse,
+  endpointsForApiFormatChange,
 } from "../providerPageHelpers";
 
 // ---------------------------------------------------------------------------
@@ -51,9 +52,10 @@ vi.mock("@/store/notificationStore", () => ({
   }),
 }));
 
-vi.mock("@/shared/components", () => ({
+vi.mock("@/shared/components", async () => ({
+  // KEA-7886: form adapters (Button/Input/Checkbox/Select/FilterPills) as DOM-faithful stubs
+  ...(await import("../../../../../../../tests/helpers/sharedComponentStubs")).formStubs,
   Badge: ({ children }: any) => <span>{children}</span>,
-  Button: ({ children, onClick }: any) => <button onClick={onClick}>{children}</button>,
 }));
 
 // ---------------------------------------------------------------------------
@@ -83,14 +85,10 @@ describe("providerPageHelpers — model-compat pure functions", () => {
     expect(isModelHiddenFn("unknown-model", customMap, overrideMap)).toBe(false);
   });
 
-  it("isModelHiddenFn ignores deleted tombstones when reading visibility", () => {
+  it("isModelHiddenFn reads hidden compatibility overrides", () => {
     const customMap = buildCompatMap([]);
-    const overrideMap = buildCompatMap([
-      { id: "gpt-4o-2024-11-20", isHidden: true, isDeleted: true },
-      { id: "gpt-5-mini", isHidden: true },
-    ]);
+    const overrideMap = buildCompatMap([{ id: "gpt-5-mini", isHidden: true }]);
 
-    expect(isModelHiddenFn("gpt-4o-2024-11-20", customMap, overrideMap)).toBe(false);
     expect(isModelHiddenFn("gpt-5-mini", customMap, overrideMap)).toBe(true);
   });
 
@@ -147,6 +145,23 @@ describe("providerPageHelpers — model-compat pure functions", () => {
 // ---------------------------------------------------------------------------
 // Component render smoke tests
 // ---------------------------------------------------------------------------
+
+describe("endpointsForApiFormatChange (#17071)", () => {
+  it("replaces the endpoint ticks with the generation format's endpoint", () => {
+    expect(endpointsForApiFormatChange("chat-completions", "images-generations")).toEqual([
+      "images",
+    ]);
+    expect(endpointsForApiFormatChange("chat-completions", "video")).toEqual(["videos"]);
+  });
+
+  it("restores the chat default when leaving a generation format", () => {
+    expect(endpointsForApiFormatChange("images-generations", "chat-completions")).toEqual(["chat"]);
+  });
+
+  it("keeps the ticks between non-generation formats", () => {
+    expect(endpointsForApiFormatChange("chat-completions", "embeddings")).toBeNull();
+  });
+});
 
 describe("ModelRow — render smoke test", () => {
   let container: HTMLElement;

@@ -36,7 +36,6 @@ const DOCS_ROOT = path.join(REPO_ROOT, "docs");
 const EXCLUDE_PREFIXES = [
   path.join(DOCS_ROOT, "i18n") + path.sep,
   path.join(DOCS_ROOT, "screenshots") + path.sep,
-  path.join(DOCS_ROOT, "superpowers") + path.sep,
   path.join(DOCS_ROOT, "diagrams", "exported") + path.sep,
 ];
 

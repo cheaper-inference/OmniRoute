@@ -24,7 +24,7 @@ async function resetStorage() {
   core.resetDbInstance();
   delete process.env.INITIAL_PASSWORD;
   delete process.env.REQUIRE_API_KEY;
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -51,7 +51,7 @@ test.afterEach(() => {
 test.after(async () => {
   globalThis.fetch = originalFetch;
   await resetStorage();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 
   if (ORIGINAL_DATA_DIR === undefined) {
     delete process.env.DATA_DIR;
@@ -145,4 +145,22 @@ test("model test route ignores forwarded hosts and works in strict API-key mode"
   assert.equal(body.responseText, "OK");
   assert.equal(fetchCalls.length, 1);
   assert.match(fetchCalls[0], /\/chat\/completions$/);
+});
+
+test("#17071 model test route forwards the skipped flag for image-only models", async () => {
+  globalThis.fetch = async () => {
+    throw new Error("an image-only model must not be dispatched");
+  };
+
+  const response = await route.POST(
+    await makeManagementSessionRequest("http://localhost/api/models/test", {
+      method: "POST",
+      body: { providerId: "agnes", modelId: "agnes-image-2.5-flash" },
+    })
+  );
+  const body = (await response.json()) as { status: string; skipped?: boolean };
+
+  assert.equal(response.status, 422);
+  assert.equal(body.status, "error");
+  assert.equal(body.skipped, true);
 });

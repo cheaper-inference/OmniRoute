@@ -1,9 +1,37 @@
-import { NOAUTH_PROVIDERS, getProviderById } from "@/shared/constants/providers";
+import {
+  NOAUTH_PROVIDERS,
+  WEB_COOKIE_PROVIDERS,
+  getProviderById,
+  resolveProviderId,
+  getProviderAlias,
+} from "@/shared/constants/providers";
 
 type ProviderWithAlias = { alias?: string };
 type NoAuthProviderEntry = { id: string; alias?: string };
 
 const noAuthProviderEntries = Object.values(NOAUTH_PROVIDERS) as NoAuthProviderEntry[];
+
+// Entries dispatch resolves through the synthetic no-auth credential path —
+// the same map-keyed, flag-based test auth.ts uses to decide whether
+// `blockedProviders` refusal applies (providerMaps.some((map) => map[id]?.noAuth)).
+// Keyed off the maps themselves (not entry scanning) so bridge-side checks and
+// dispatch cannot drift apart if an entry moves between the maps.
+const syntheticNoAuthReferralMaps = [
+  NOAUTH_PROVIDERS as Record<string, { noAuth?: boolean } | undefined>,
+  WEB_COOKIE_PROVIDERS as Record<string, { noAuth?: boolean } | undefined>,
+];
+
+/**
+ * True when dispatch would resolve `keys` through the synthetic no-auth
+ * credential path, i.e. when a `blockedProviders` entry makes dispatch refuse
+ * the provider outright. Callers pass canonical ids, mirroring dispatch's
+ * `map[resolvedId]` lookup.
+ */
+export function isSyntheticNoAuthPathKey(...keys: Array<string | null | undefined>): boolean {
+  return keys.some(
+    (key) => key != null && syntheticNoAuthReferralMaps.some((map) => Boolean(map[key]?.noAuth))
+  );
+}
 
 export function normalizeBlockedProviderSet(blockedProviders: unknown): Set<string> {
   const entries = blockedProviders instanceof Set ? Array.from(blockedProviders) : blockedProviders;
@@ -22,8 +50,10 @@ export function isProviderBlockedByIdOrAlias(
 ): boolean {
   const blockedProviderSet = normalizeBlockedProviderSet(blockedProviders);
   const provider = getProviderById(providerId) as ProviderWithAlias | undefined;
+  const baseId = providerId.replace(/-search$/, "");
   return (
     blockedProviderSet.has(providerId) ||
+    blockedProviderSet.has(baseId) ||
     (typeof provider?.alias === "string" && blockedProviderSet.has(provider.alias))
   );
 }
@@ -76,4 +106,38 @@ export function isNoAuthRawProviderPrefix(providerId: string, prefix: string): b
   return (
     typeof provider?.alias === "string" && provider.alias !== providerId && prefix === providerId
   );
+}
+
+/**
+ * Compute the next `blockedProviders` list when enabling or disabling one or more providers.
+ * - When `enable` is true (unblock): removes target provider IDs and their aliases.
+ * - When `enable` is false (block): cleans any existing alias and adds canonical provider IDs.
+ */
+export function computeNextBlockedProviders(
+  currentBlocked: unknown,
+  targetIds: string | string[],
+  enable: boolean
+): string[] {
+  const current = normalizeBlockedProviderSet(currentBlocked);
+  const targets = (Array.isArray(targetIds) ? targetIds : [targetIds]).filter(
+    (rawId): rawId is string => typeof rawId === "string" && rawId.length > 0
+  );
+
+  for (const rawId of targets) {
+    for (const key of blockedKeysFor(rawId)) current.delete(key);
+  }
+
+  if (!enable) {
+    for (const rawId of targets) current.add(resolveProviderId(rawId));
+  }
+
+  return Array.from(current);
+}
+
+/** Every `blockedProviders` key that can refer to `rawId`: itself, canonical id, alias, base id. */
+function blockedKeysFor(rawId: string): string[] {
+  const canonicalId = resolveProviderId(rawId);
+  const alias = getProviderAlias(canonicalId);
+  const baseId = canonicalId.replace(/-search$/, "");
+  return [rawId, canonicalId, alias, baseId].filter((key): key is string => Boolean(key));
 }

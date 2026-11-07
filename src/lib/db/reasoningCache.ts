@@ -81,6 +81,8 @@ export function setReasoningCache(
   reasoning: string,
   ttlMs: number = DEFAULT_TTL_MS
 ): void {
+  const PLACEHOLDER = "(prior reasoning summary unavailable)";
+  if (!reasoning || reasoning.trim() === PLACEHOLDER) return; // ponytail: never store the internal placeholder
   if (reasoning.length > MAX_ENTRY_BYTES) {
     reasoning = reasoning.slice(0, MAX_ENTRY_BYTES);
   }
@@ -101,16 +103,32 @@ export function setReasoningCache(
  */
 export function getReasoningCache(
   toolCallId: string
-): { reasoning: string; provider: string; model: string } | null {
+): { reasoning: string; provider: string; model: string; expiresAt: string } | null {
   const db = getDbInstance();
   const row = db
     .prepare(
-      `SELECT reasoning, provider, model FROM reasoning_cache
+      `SELECT reasoning, provider, model, expires_at FROM reasoning_cache
        WHERE tool_call_id = ? AND ${EXPIRES_AT_EPOCH_SQL} > unixepoch('now')`
     )
-    .get(toolCallId) as { reasoning: string; provider: string; model: string } | undefined;
+    .get(toolCallId) as
+    | {
+        reasoning: string;
+        provider: string;
+        model: string;
+        expires_at: number | string;
+      }
+    | undefined;
 
-  return row ?? null;
+  const PLACEHOLDER = "(prior reasoning summary unavailable)";
+  if (row && row.reasoning && row.reasoning.trim() === PLACEHOLDER) return null;
+  return row
+    ? {
+        reasoning: row.reasoning,
+        provider: row.provider,
+        model: row.model,
+        expiresAt: epochSecondsToIso(row.expires_at),
+      }
+    : null;
 }
 
 /**

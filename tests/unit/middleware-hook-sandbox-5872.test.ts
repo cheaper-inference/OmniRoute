@@ -20,7 +20,9 @@ import {
 } from "../../src/lib/middleware/registry.ts";
 import { HookPriority, type HookConfig } from "../../src/lib/middleware/types.ts";
 
-function baseConfig(overrides: Partial<HookConfig> & Pick<HookConfig, "name" | "code">): HookConfig {
+function baseConfig(
+  overrides: Partial<HookConfig> & Pick<HookConfig, "name" | "code">
+): HookConfig {
   return {
     description: "test hook",
     priority: HookPriority.NORMAL,
@@ -40,6 +42,19 @@ function ctx() {
     model: "gpt-4o",
   });
 }
+
+test("createHookContext copies typed API-key metadata into the hook context", () => {
+  const apiKeyInfo = { id: "key-1", name: "test key", scopes: ["chat"] };
+  const context = createHookContext({
+    body: { messages: [] },
+    headers: {},
+    model: "gpt-4o",
+    apiKeyInfo,
+  });
+
+  assert.deepEqual(context.apiKeyInfo, apiKeyInfo);
+  assert.notStrictEqual(context.apiKeyInfo, apiKeyInfo);
+});
 
 beforeEach(() => {
   clearAllHooks();

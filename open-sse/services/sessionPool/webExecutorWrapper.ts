@@ -6,7 +6,7 @@
  * headers (fingerprint-based User-Agent, Sec-CH-UA, etc.) and handles
  * 429/5xx responses with pool-level cooldown management.
  *
- * Future: For cookie-based providers (ChatGPT Web, DeepSeek Web, etc.)
+ * Future: For browser-session providers (DeepSeek Web, etc.)
  * the wrapper will also inject cookies from the Playwright-authenticated
  * session.
  */
@@ -44,7 +44,7 @@ export interface WebExecutorFn {
  *   2. Merges session headers (UA + Sec-CH-UA) into the request
  *   3. Handles 429 → pool cooldown, 5xx → session death
  *
- * For zero-auth providers like Pollinations, Puter, etc. this is all
+ * For zero-auth providers like Pollinations this is all
  * that's needed for "truly unlimited" — the fingerprint rotation alone
  * defeats burst-based rate limiting.
  */
@@ -54,7 +54,7 @@ export function withSessionPool(
   options?: {
     /** When true, wraps the response body for error handling */
     wrapResponse?: boolean;
-  },
+  }
 ): WebExecutorFn {
   const wrapResponse = options?.wrapResponse ?? true;
 

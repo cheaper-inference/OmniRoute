@@ -6,10 +6,80 @@ import { appendRequestLog } from "@/lib/usageDb";
 import {
   getLoggedInputTokens,
   getLoggedOutputTokens,
+  getNoCacheTokens,
   getPromptCacheCreationTokens,
   getPromptCacheReadTokens,
 } from "@/lib/usage/tokenAccounting";
 import { FORMATS } from "../translator/formats.ts";
+import { pickCacheCreationTokens } from "./pickCacheCreationTokens.ts";
+import { sharedSymbol } from "@/shared/utils/processSingleton";
+
+export { pickCacheCreationTokens };
+
+/** Nested `*_tokens_details` containers ({ cached_tokens, reasoning_tokens, … }). */
+interface UsageTokenDetail {
+  cached_tokens?: number;
+  cache_creation_tokens?: number;
+  cache_write_tokens?: number;
+  reasoning_tokens?: number;
+  thinking_tokens?: number;
+  [field: string]: unknown;
+}
+
+/**
+ * Loosely-shaped usage object accepted from any provider wire format.
+ * Declared fields cover the numeric counters this module reads/writes;
+ * everything else passes through untouched via the index signature.
+ */
+export interface UsageLike {
+  estimated?: boolean;
+  input_tokens?: number;
+  output_tokens?: number;
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+  cached_tokens?: number;
+  no_cache_tokens?: number;
+  reasoning_tokens?: number;
+  cost_in_usd_ticks?: number;
+  provider_credits?: number;
+  /** Internal normalized provider-billed USD cost (from OpenRouter's `usage.cost`). */
+  cost_usd?: number;
+  cache_read_input_tokens?: number;
+  cache_creation_input_tokens?: number;
+  /** OpenRouter / Devin Desktop / codex-chatgpt-web alias for cache creation. */
+  cache_write_tokens?: number;
+  prompt_cache_hit_tokens?: number;
+  prompt_cache_miss_tokens?: number;
+  promptTokenCount?: number;
+  candidatesTokenCount?: number;
+  totalTokenCount?: number;
+  cachedContentTokenCount?: number;
+  /** Internal Gemini cache evidence; removed by filterUsageForFormat. */
+  cache_evidence?: "hit" | "miss" | "unreported" | "invalid";
+  thoughtsTokenCount?: number;
+  context_budget_input_tokens?: number;
+  context_budget_prompt_tokens?: number;
+  context_budget_total_tokens?: number;
+  prompt_tokens_details?: UsageTokenDetail;
+  input_tokens_details?: UsageTokenDetail;
+  completion_tokens_details?: UsageTokenDetail;
+  output_tokens_details?: UsageTokenDetail;
+  [field: string]: unknown;
+}
+
+/** SSE/JSON chunk shapes this module inspects for embedded usage containers. */
+interface UsagePayloadLike {
+  type?: string;
+  done?: boolean;
+  prompt_eval_count?: number;
+  eval_count?: number;
+  usage?: UsageLike;
+  usageMetadata?: UsageLike;
+  message?: { usage?: UsageLike; [field: string]: unknown };
+  response?: { usage?: UsageLike; usageMetadata?: UsageLike; [field: string]: unknown };
+  [field: string]: unknown;
+}
 
 // ANSI color codes
 export const COLORS = {
@@ -74,8 +144,8 @@ function getBufferTokens(): number {
 
 async function _loadBufferFromDb(): Promise<void> {
   try {
-    const { getSettings } = await import("@/lib/db/settings");
-    const settings = await getSettings();
+    const { getCachedSettings } = await import("@/lib/db/readCache");
+    const settings = await getCachedSettings();
     const val = settings.usageTokenBuffer;
     if (typeof val === "number" && val >= 0) {
       _cachedBuffer = val;
@@ -104,12 +174,8 @@ export function setBufferTokensCache(value: number): void {
 
 // Get HH:MM:SS timestamp
 function getTimeString() {
-  return new Date().toLocaleTimeString("en-US", {
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
 }
 
 /**
@@ -126,7 +192,7 @@ function getTimeString() {
  * @param {object} usage - Usage object (supported format)
  * @returns {object} Usage with context_budget_* fields added (metering fields unchanged)
  */
-export function addBufferToUsage(usage) {
+export function addBufferToUsage(usage: UsageLike | null | undefined) {
   if (!usage || typeof usage !== "object") return usage;
 
   // Heuristic estimates (web/cookie providers with no upstream metering) should
@@ -151,11 +217,11 @@ export function addBufferToUsage(usage) {
     result.context_budget_prompt_tokens = result.prompt_tokens + buffer;
   }
 
-  // Calculate or update the context-budget total
+  // Keep real total_tokens intact and calculate separate context-budget headroom.
   if (result.total_tokens !== undefined) {
     result.context_budget_total_tokens = result.total_tokens + buffer;
   } else if (result.prompt_tokens !== undefined && result.completion_tokens !== undefined) {
-    // Calculate total_tokens if not exists (real value — not buffered)
+    // Calculate a real total if the provider omitted it.
     result.total_tokens = result.prompt_tokens + result.completion_tokens;
     result.context_budget_total_tokens = result.total_tokens + buffer;
   }
@@ -163,7 +229,47 @@ export function addBufferToUsage(usage) {
   return result;
 }
 
-export function filterUsageForFormat(usage, targetFormat) {
+/** Keep `cache_creation_in_prompt` when a rebuilt usage with the same prompt total replaces `from`. */
+export function carryCacheCreationMarker<T>(from: unknown, to: T): T {
+  if (!from || typeof from !== "object" || !to || typeof to !== "object") return to;
+  const source = from as Record<string, unknown>;
+  const target = to as Record<string, unknown>;
+  const promptTotal = (usage: Record<string, unknown>) => usage.prompt_tokens ?? usage.input_tokens;
+  if (promptTotal(source) === undefined || promptTotal(source) !== promptTotal(target)) return to;
+  for (const key of ["prompt_tokens_details", "input_tokens_details"]) {
+    const sourceDetails = source[key] as Record<string, unknown> | undefined;
+    const flag = sourceDetails?.cache_creation_in_prompt;
+    if (typeof flag !== "boolean") continue;
+    const targetDetails = target[key];
+    target[key] = {
+      ...(targetDetails && typeof targetDetails === "object" ? targetDetails : {}),
+      cache_creation_in_prompt: flag,
+    };
+  }
+  return to;
+}
+
+/**
+ * Provider-reported USD cost of a request, when the upstream supplied one.
+ * OpenRouter (and compatible resellers) send `usage.cost` as a bare USD number;
+ * a `{ total }` object is tolerated too, and an already-normalized `cost_usd`
+ * wins. Returns undefined for anything that is not a finite number >= 0.
+ */
+export function pickReportedCostUsd(usage: UsageLike | null | undefined): number | undefined {
+  if (!usage || typeof usage !== "object") return undefined;
+  const raw = usage.cost;
+  const candidates = [
+    usage.cost_usd,
+    raw,
+    raw && typeof raw === "object" ? (raw as { total?: unknown }).total : undefined,
+  ];
+  for (const value of candidates) {
+    if (typeof value === "number" && Number.isFinite(value) && value >= 0) return value;
+  }
+  return undefined;
+}
+
+export function filterUsageForFormat(usage: UsageLike | null | undefined, targetFormat: string) {
   if (!usage || typeof usage !== "object") return usage;
 
   // Cross-map between Claude-style and OpenAI-style field names before filtering.
@@ -199,11 +305,19 @@ export function filterUsageForFormat(usage, targetFormat) {
     ) {
       convertedUsage.total_tokens = convertedUsage.prompt_tokens + convertedUsage.completion_tokens;
     }
+    // Rebuild prompt_tokens_details.cached_tokens from flat cached_tokens / cache_read_input_tokens (#8171)
+    const flatCached = convertedUsage.cached_tokens ?? convertedUsage.cache_read_input_tokens;
+    if (flatCached !== undefined && !convertedUsage.prompt_tokens_details?.cached_tokens) {
+      convertedUsage.prompt_tokens_details = {
+        ...convertedUsage.prompt_tokens_details,
+        cached_tokens: flatCached,
+      };
+    }
   }
 
   // Helper to pick only defined fields from usage
-  const pickFields = (fields) => {
-    const filtered = {};
+  const pickFields = (fields: string[]) => {
+    const filtered: Record<string, unknown> = {};
     for (const field of fields) {
       if (convertedUsage[field] !== undefined) {
         filtered[field] = convertedUsage[field];
@@ -213,13 +327,15 @@ export function filterUsageForFormat(usage, targetFormat) {
   };
 
   // Define allowed fields for each format
-  const formatFields = {
+  const formatFields: Record<string, string[]> = {
     [FORMATS.CLAUDE]: [
       "input_tokens",
       "output_tokens",
+      "output_tokens_details",
       "cache_read_input_tokens",
       "cache_creation_input_tokens",
       "estimated",
+      "tokens_per_second",
     ],
     [FORMATS.GEMINI]: [
       "promptTokenCount",
@@ -228,13 +344,20 @@ export function filterUsageForFormat(usage, targetFormat) {
       "cachedContentTokenCount",
       "thoughtsTokenCount",
       "estimated",
+      "tokens_per_second",
     ],
     [FORMATS.OPENAI_RESPONSES]: [
       "input_tokens",
       "output_tokens",
+      "total_tokens",
       "input_tokens_details",
       "output_tokens_details",
       "estimated",
+      "cost_in_usd_ticks",
+      "provider_credits",
+      "server_side_tool_usage_details",
+      "server_side_tool_usage",
+      "tokens_per_second",
     ],
     // OpenAI format (default for OPENAI, CODEX, KIRO, etc.)
     default: [
@@ -245,7 +368,16 @@ export function filterUsageForFormat(usage, targetFormat) {
       "reasoning_tokens",
       "prompt_tokens_details",
       "completion_tokens_details",
+      "prompt_cache_hit_tokens",
+      "prompt_cache_miss_tokens",
+      "cache_read_input_tokens",
+      "cache_creation_input_tokens",
       "estimated",
+      "cost_in_usd_ticks",
+      "provider_credits",
+      "tokens_per_second",
+      // Provider-billed USD cost (OpenRouter), only when the upstream sent one.
+      "cost",
     ],
   };
 
@@ -261,17 +393,285 @@ export function filterUsageForFormat(usage, targetFormat) {
     fields = formatFields.default;
   }
 
+  if (fields === formatFields.default) {
+    // Re-emit the provider-billed cost as a bare USD number (OpenRouter's own shape),
+    // also when only the normalized `cost_usd` survived extraction. Never estimated.
+    const reportedCostUsd = pickReportedCostUsd(convertedUsage);
+    if (reportedCostUsd === undefined) delete convertedUsage.cost;
+    else convertedUsage.cost = reportedCostUsd;
+  }
+
   return pickFields(fields);
+}
+
+// Provider usage is normally authoritative, but compatibility gateways can return
+// stale/cumulative cache counters. A token cannot encode less than one UTF-8 byte,
+// so a stateless request's input count must remain related to the complete wire
+// body. The 2x multiplier plus fixed allowance deliberately tolerates provider
+// templates, tokenization differences, and format translation while still catching
+// catastrophic values such as 336k tokens for a 115 KB request.
+const INPUT_USAGE_BYTE_MULTIPLIER = 2;
+const INPUT_USAGE_FIXED_ALLOWANCE = 8192;
+
+const REMOTE_CONTEXT_REFERENCE_KEYS = new Set([
+  "previous_response_id",
+  "previousResponseId",
+  "conversation_id",
+  "conversationId",
+  "thread_id",
+  "threadId",
+  "parent_message_id",
+  "parentMessageId",
+  "cached_content",
+  "cachedContent",
+  "file_id",
+  "fileId",
+  "image_url",
+  "imageUrl",
+  "audio_url",
+  "audioUrl",
+  "video_url",
+  "videoUrl",
+]);
+
+function hasValue(value: unknown): boolean {
+  if (value === null || value === undefined || value === false) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "object") return Object.keys(value).length > 0;
+  return true;
+}
+
+function hasRemoteContextReference(value: unknown, depth = 0): boolean {
+  if (!value || typeof value !== "object" || depth > 8) return false;
+
+  if (Array.isArray(value)) {
+    return value.some((item) => hasRemoteContextReference(item, depth + 1));
+  }
+
+  for (const [key, nested] of Object.entries(value)) {
+    if (REMOTE_CONTEXT_REFERENCE_KEYS.has(key) && hasValue(nested)) {
+      return true;
+    }
+    if (hasRemoteContextReference(nested, depth + 1)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function getSerializedBodyBytes(body: unknown): number | null {
+  if (!body || typeof body !== "object" || hasRemoteContextReference(body)) return null;
+  try {
+    const serialized = JSON.stringify(body);
+    if (!serialized) return null;
+    return Buffer.byteLength(serialized, "utf8");
+  } catch {
+    return null;
+  }
+}
+
+function tokenNumber(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+/**
+ * Return true when a provider-reported input count is plausible for this request.
+ * `null`/unserializable bodies and server-side context references fail open.
+ */
+export function isInputTokenCountPlausible(inputTokens: unknown, body: unknown): boolean {
+  if (typeof inputTokens !== "number" || !Number.isFinite(inputTokens) || inputTokens < 0) {
+    return false;
+  }
+
+  const bodyBytes = getSerializedBodyBytes(body);
+  if (bodyBytes === null) return true;
+  const maximum = bodyBytes * INPUT_USAGE_BYTE_MULTIPLIER + INPUT_USAGE_FIXED_ALLOWANCE;
+  return inputTokens <= maximum;
+}
+
+function resolveUsageFormat(usage: UsageLike | null | undefined, targetFormat: string | null) {
+  if (targetFormat === FORMATS.CLAUDE) return FORMATS.CLAUDE;
+  if (targetFormat === FORMATS.GEMINI || targetFormat === FORMATS.ANTIGRAVITY) {
+    return FORMATS.GEMINI;
+  }
+  if (targetFormat === FORMATS.OPENAI_RESPONSES || targetFormat === FORMATS.OPENAI_RESPONSE) {
+    return FORMATS.OPENAI_RESPONSES;
+  }
+  if (targetFormat === FORMATS.OPENAI) return FORMATS.OPENAI;
+
+  if (usage?.promptTokenCount !== undefined || usage?.candidatesTokenCount !== undefined) {
+    return FORMATS.GEMINI;
+  }
+  if (
+    usage?.cache_read_input_tokens !== undefined ||
+    usage?.cache_creation_input_tokens !== undefined
+  ) {
+    return FORMATS.CLAUDE;
+  }
+  if (usage?.input_tokens_details !== undefined) return FORMATS.OPENAI_RESPONSES;
+  return FORMATS.OPENAI;
+}
+
+function getReportedInputTokens(usage: UsageLike, format: string): number {
+  if (format === FORMATS.CLAUDE) {
+    return (
+      tokenNumber(usage.input_tokens) +
+      tokenNumber(usage.cache_read_input_tokens) +
+      tokenNumber(usage.cache_creation_input_tokens)
+    );
+  }
+  if (format === FORMATS.GEMINI) {
+    return tokenNumber(usage.promptTokenCount);
+  }
+  if (format === FORMATS.OPENAI_RESPONSES) {
+    return tokenNumber(usage.input_tokens ?? usage.prompt_tokens);
+  }
+  return tokenNumber(usage.prompt_tokens ?? usage.input_tokens);
+}
+
+function clearCachedTokenDetail<T extends UsageTokenDetail | null | undefined>(value: T): T {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const result = { ...value };
+  if (result.cached_tokens !== undefined) result.cached_tokens = 0;
+  if (result.cache_creation_tokens !== undefined) result.cache_creation_tokens = 0;
+  if (result.cache_write_tokens !== undefined) result.cache_write_tokens = 0;
+  return result;
+}
+
+/**
+ * Replace only physically implausible provider input/cache usage with the local
+ * request estimate. Valid usage is returned by reference and remains untouched.
+ */
+export function sanitizeProviderUsageForRequest(
+  usage: UsageLike | null | undefined,
+  body: unknown,
+  targetFormat: string | null = null
+) {
+  if (!usage || typeof usage !== "object" || Array.isArray(usage)) return usage;
+
+  const format = resolveUsageFormat(usage, targetFormat);
+  const reportedInput = getReportedInputTokens(usage, format);
+  // #10705: reportedInput === 0 was always accepted, on the theory this guard only
+  // needed to catch providers over-reporting huge counts. But a real, non-trivial
+  // request body can legitimately have its input tokens under-reported to exactly 0
+  // by a relay provider. Only treat 0 as plausible when the request body itself is
+  // trivial (no serialized body, or a body too small to plausibly need any tokens);
+  // otherwise fall through to the same local-estimate repair used for over-reports.
+  const bodyBytesForZeroCheck = reportedInput === 0 ? getSerializedBodyBytes(body) : null;
+  const zeroIsPlausible =
+    reportedInput === 0 && (bodyBytesForZeroCheck === null || bodyBytesForZeroCheck === 0);
+  if (zeroIsPlausible || (reportedInput > 0 && isInputTokenCountPlausible(reportedInput, body))) {
+    return usage;
+  }
+
+  const estimatedInput = Math.max(1, estimateInputTokens(body));
+  const result = { ...usage };
+
+  if (format === FORMATS.CLAUDE) {
+    result.input_tokens = estimatedInput;
+    result.prompt_tokens_details = clearCachedTokenDetail(result.prompt_tokens_details);
+    result.input_tokens_details = clearCachedTokenDetail(result.input_tokens_details);
+    result.cache_read_input_tokens = 0;
+    result.cache_creation_input_tokens = 0;
+    return result;
+  }
+
+  if (format === FORMATS.GEMINI) {
+    const output =
+      tokenNumber(result.candidatesTokenCount) + tokenNumber(result.thoughtsTokenCount);
+    result.promptTokenCount = estimatedInput;
+    result.cachedContentTokenCount = 0;
+    if (result.totalTokenCount !== undefined) {
+      result.totalTokenCount = estimatedInput + output;
+    }
+    return result;
+  }
+
+  if (format === FORMATS.OPENAI_RESPONSES) {
+    result.input_tokens = estimatedInput;
+    result.prompt_tokens_details = clearCachedTokenDetail(result.prompt_tokens_details);
+    result.input_tokens_details = clearCachedTokenDetail(result.input_tokens_details);
+    result.cache_read_input_tokens = 0;
+    result.cache_creation_input_tokens = 0;
+    if (result.total_tokens !== undefined) {
+      result.total_tokens = estimatedInput + tokenNumber(result.output_tokens);
+    }
+    return result;
+  }
+
+  result.prompt_tokens = estimatedInput;
+  result.cached_tokens = 0;
+  result.cache_read_input_tokens = 0;
+  result.cache_creation_input_tokens = 0;
+  result.prompt_tokens_details = clearCachedTokenDetail(result.prompt_tokens_details);
+  if (result.total_tokens !== undefined) {
+    result.total_tokens = estimatedInput + tokenNumber(result.completion_tokens);
+  }
+  return result;
+}
+
+/**
+ * Sanitize the usage container used by native provider responses/SSE events.
+ * Returns true only when the payload was changed and must be re-serialized.
+ */
+export function sanitizeUsagePayloadForRequest(
+  payload: UsagePayloadLike | null | undefined,
+  body: unknown,
+  targetFormat: string | null = null
+): boolean {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
+
+  const replaceUsage = (
+    owner: Record<string, unknown> | null | undefined,
+    key: string,
+    format: string | null
+  ) => {
+    if (!owner || typeof owner !== "object" || !owner[key]) return false;
+    const sanitized = sanitizeProviderUsageForRequest(owner[key] as UsageLike, body, format);
+    if (sanitized === owner[key]) return false;
+    owner[key] = sanitized;
+    return true;
+  };
+
+  if (payload.type === "message_start" && payload.message?.usage) {
+    return replaceUsage(payload.message, "usage", FORMATS.CLAUDE);
+  }
+  if (payload.type === "message_delta" && payload.usage) {
+    // message_delta is output-only by spec. #10705 0-input repair would
+    // overwrite a valid message_start input count with an estimate.
+    const delta = payload.usage;
+    const deltaInput =
+      tokenNumber(delta.input_tokens) +
+      tokenNumber(delta.cache_read_input_tokens) +
+      tokenNumber(delta.cache_creation_input_tokens);
+    if (deltaInput === 0) return false;
+    return replaceUsage(payload, "usage", FORMATS.CLAUDE);
+  }
+  if (payload.response?.usage) {
+    return replaceUsage(payload.response, "usage", FORMATS.OPENAI_RESPONSES);
+  }
+  if (payload.response?.usageMetadata) {
+    return replaceUsage(payload.response, "usageMetadata", FORMATS.GEMINI);
+  }
+  if (payload.usageMetadata) {
+    return replaceUsage(payload, "usageMetadata", FORMATS.GEMINI);
+  }
+  if (payload.usage) {
+    const format = payload.type === "message" ? FORMATS.CLAUDE : targetFormat;
+    return replaceUsage(payload, "usage", format);
+  }
+  return false;
 }
 
 /**
  * Normalize usage object - ensure all values are valid numbers
  */
-export function normalizeUsage(usage) {
+export function normalizeUsage(usage: UsageLike | null | undefined) {
   if (!usage || typeof usage !== "object" || Array.isArray(usage)) return null;
 
   const normalized: Record<string, number> = {};
-  const assignNumber = (key, value) => {
+  const assignNumber = (key: string, value: unknown) => {
     if (value === undefined || value === null) return;
     const numeric = Number(value);
     if (Number.isFinite(numeric)) normalized[key] = numeric;
@@ -283,9 +683,25 @@ export function normalizeUsage(usage) {
   assignNumber("input_tokens", usage?.input_tokens);
   assignNumber("output_tokens", usage?.output_tokens);
   assignNumber("cache_read_input_tokens", usage?.cache_read_input_tokens);
-  assignNumber("cache_creation_input_tokens", usage?.cache_creation_input_tokens);
-  assignNumber("cached_tokens", usage?.cached_tokens);
+  assignNumber("cache_creation_input_tokens", pickCacheCreationTokens(usage));
+  const reportedCachedTokens =
+    usage?.cached_tokens ??
+    usage?.prompt_tokens_details?.cached_tokens ??
+    usage?.input_tokens_details?.cached_tokens;
+  if (reportedCachedTokens !== undefined) assignNumber("cached_tokens", reportedCachedTokens);
+  if (
+    usage?.cache_evidence === "hit" ||
+    usage?.cache_evidence === "miss" ||
+    usage?.cache_evidence === "unreported" ||
+    usage?.cache_evidence === "invalid"
+  ) {
+    (normalized as UsageLike).cache_evidence = usage.cache_evidence;
+  }
+  assignNumber("no_cache_tokens", usage?.no_cache_tokens);
   assignNumber("reasoning_tokens", usage?.reasoning_tokens);
+  // Credits metered by a credit-metered provider (see
+  // src/lib/usage/creditMeteredProviders.ts); provenance for cost_in_usd_ticks.
+  assignNumber("provider_credits", usage?.provider_credits);
   // xAI's exact provider-reported cost (port of decolua/9router#2453, capability A —
   // @ryanngit). Ticks → USD conversion happens in costCalculator.ts, not here.
   const exactCostTicks = usage?.cost_in_usd_ticks;
@@ -296,9 +712,41 @@ export function normalizeUsage(usage) {
   ) {
     normalized.cost_in_usd_ticks = exactCostTicks;
   }
+  // OpenRouter's provider-billed USD cost (`usage.cost`), kept under a distinct
+  // name so it is never conflated with xAI ticks; costCalculator prefers it over
+  // the token × pricing estimate.
+  const reportedCostUsd = pickReportedCostUsd(usage);
+  if (reportedCostUsd !== undefined) normalized.cost_usd = reportedCostUsd;
 
   if (Object.keys(normalized).length === 0) return null;
   return normalized;
+}
+
+// Internal marker for usage that was estimated locally (a web/cookie executor with no
+// upstream metering). A NON-enumerable symbol: JSON.stringify, object spread and
+// filterUsageForFormat never copy it, so it cannot reach a client payload or change any
+// usage field, cost or budget — it only lets the call-log sink tell estimated usage apart
+// after extraction rebuilt the object without the provider's `estimated` flag.
+const ESTIMATED_USAGE_MARKER = sharedSymbol("usage.estimated");
+
+export function carryEstimatedUsageMarker<T>(source: unknown, rebuilt: T): T {
+  const estimated =
+    !!source && typeof source === "object" && (source as UsageLike).estimated === true;
+  if (estimated && rebuilt && typeof rebuilt === "object") {
+    Object.defineProperty(rebuilt, ESTIMATED_USAGE_MARKER, { value: true, enumerable: false });
+  }
+  return rebuilt;
+}
+
+/**
+ * True when token usage was estimated locally instead of reported by the provider: either
+ * the usage still carries `estimated: true` (OmniRoute's own estimateUsage fallback) or
+ * extraction kept the internal marker. Observability only — billing does not read it.
+ */
+export function isEstimatedUsage(usage: unknown): boolean {
+  if (!usage || typeof usage !== "object") return false;
+  if ((usage as UsageLike).estimated === true) return true;
+  return Reflect.get(usage, ESTIMATED_USAGE_MARKER) === true;
 }
 
 /**
@@ -306,8 +754,21 @@ export function normalizeUsage(usage) {
  * Valid = has at least one token field with value > 0
  * Invalid = empty object {}, null, undefined, no token fields, or all zeros
  */
-export function hasValidUsage(usage) {
+export function hasValidUsage(usage: UsageLike | null | undefined) {
   if (!usage || typeof usage !== "object") return false;
+
+  // A credit measurement with its exact cost is billable usage even when the
+  // provider reported no tokens and no visible text.
+  if (
+    typeof usage.provider_credits === "number" &&
+    Number.isFinite(usage.provider_credits) &&
+    usage.provider_credits >= 0 &&
+    typeof usage.cost_in_usd_ticks === "number" &&
+    Number.isFinite(usage.cost_in_usd_ticks) &&
+    usage.cost_in_usd_ticks >= 0
+  ) {
+    return true;
+  }
 
   // Check for known token fields with value > 0
   const tokenFields = [
@@ -318,6 +779,7 @@ export function hasValidUsage(usage) {
     "output_tokens", // Claude
     "promptTokenCount",
     "candidatesTokenCount", // Gemini
+    "totalTokenCount", // Gemini (was missing — caused !hasValid to misfire on {totalTokenCount:15})
   ];
 
   for (const field of tokenFields) {
@@ -329,11 +791,52 @@ export function hasValidUsage(usage) {
   return false;
 }
 
+/** True when present but every token field zero/absent — web relays emit `{prompt_tokens:0, ...}`. */
+export function isEmptyUsage(usage: unknown): boolean {
+  if (!usage || typeof usage !== "object" || Array.isArray(usage)) return true;
+  const u = usage as Record<string, unknown>;
+  for (const k of [
+    "prompt_tokens",
+    "completion_tokens",
+    "total_tokens",
+    "input_tokens",
+    "output_tokens",
+    "promptTokenCount",
+    "candidatesTokenCount",
+    "totalTokenCount",
+  ]) {
+    const v = u[k];
+    if (typeof v === "number" && Number.isFinite(v)) {
+      if (v > 0) return false;
+    }
+  }
+  return true;
+}
+
 /**
  * Extract usage from supported formats (Claude, OpenAI, Gemini, Responses API)
+ * Fast-path: return early for chunks without any usage-related fields.
+ * Most streaming chunks (content deltas) have no usage — avoids property checks.
  */
-export function extractUsage(chunk) {
+export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
   if (!chunk || typeof chunk !== "object") return null;
+
+  // Fast-path: check for any usage-like fields before doing full extraction
+  // Most chunks are content deltas with no usage — return null immediately.
+  const c = chunk as Record<string, unknown>;
+  const response = c.response as Record<string, unknown> | undefined;
+  const message = c.message as Record<string, unknown> | undefined;
+  if (
+    !c.type &&
+    c.usage === undefined &&
+    c.usageMetadata === undefined &&
+    response?.usage === undefined &&
+    response?.usageMetadata === undefined &&
+    message?.usage === undefined &&
+    c.done !== true
+  ) {
+    return null;
+  }
 
   // Claude/Antigravity streaming: message_start event carries INPUT tokens
   // FIX #74: This event was not handled — input_tokens were being dropped
@@ -371,6 +874,7 @@ export function extractUsage(chunk) {
       output_tokens: chunk.usage.output_tokens || 0,
       cache_read_input_tokens: chunk.usage.cache_read_input_tokens,
       cache_creation_input_tokens: chunk.usage.cache_creation_input_tokens,
+      reasoning_tokens: chunk.usage.output_tokens_details?.thinking_tokens,
     });
   }
 
@@ -382,13 +886,15 @@ export function extractUsage(chunk) {
   ) {
     const usage = chunk.response.usage;
     return normalizeUsage({
+      provider_credits: usage.provider_credits,
+      cost_in_usd_ticks: usage.cost_in_usd_ticks,
       prompt_tokens: usage.input_tokens || usage.prompt_tokens || 0,
       completion_tokens: usage.output_tokens || usage.completion_tokens || 0,
       cached_tokens:
         usage.input_tokens_details?.cached_tokens ??
         usage.prompt_tokens_details?.cached_tokens ??
         usage.cache_read_input_tokens,
-      cache_creation_input_tokens: usage.cache_creation_input_tokens,
+      cache_creation_input_tokens: pickCacheCreationTokens(usage),
       reasoning_tokens:
         usage.output_tokens_details?.reasoning_tokens ??
         usage.completion_tokens_details?.reasoning_tokens ??
@@ -402,7 +908,7 @@ export function extractUsage(chunk) {
     typeof chunk.usage === "object" &&
     (chunk.usage.prompt_tokens !== undefined || chunk.usage.input_tokens !== undefined)
   ) {
-    return normalizeUsage({
+    const normalized = normalizeUsage({
       prompt_tokens: chunk.usage.prompt_tokens ?? chunk.usage.input_tokens ?? 0,
       completion_tokens: chunk.usage.completion_tokens ?? chunk.usage.output_tokens ?? 0,
       cached_tokens:
@@ -410,13 +916,20 @@ export function extractUsage(chunk) {
         chunk.usage.input_tokens_details?.cached_tokens ??
         chunk.usage.prompt_cache_hit_tokens ??
         chunk.usage.cached_tokens,
+      cache_read_input_tokens: chunk.usage.cache_read_input_tokens,
+      cache_creation_input_tokens: pickCacheCreationTokens(chunk.usage),
+      no_cache_tokens: chunk.usage.no_cache_tokens,
       reasoning_tokens:
         chunk.usage.completion_tokens_details?.reasoning_tokens ??
         chunk.usage.output_tokens_details?.reasoning_tokens ??
         chunk.usage.reasoning_tokens,
       // xAI's exact provider-reported cost (port of decolua/9router#2453, capability A).
       cost_in_usd_ticks: chunk.usage.cost_in_usd_ticks,
+      provider_credits: chunk.usage.provider_credits,
+      // OpenRouter's provider-billed USD cost (bare number in `usage.cost`).
+      cost_usd: pickReportedCostUsd(chunk.usage),
     });
+    return carryEstimatedUsageMarker(chunk.usage, normalized);
   }
 
   // Gemini format (Antigravity)
@@ -425,12 +938,31 @@ export function extractUsage(chunk) {
   // chunks do not silently drop token usage.
   const usageMeta = chunk.usageMetadata || chunk.response?.usageMetadata;
   if (usageMeta && typeof usageMeta === "object") {
+    // Gemini reports thoughts outside candidates. Fold them into completion so
+    // every provider keeps reasoning as a subset of completion tokens.
+    const thoughts = usageMeta.thoughtsTokenCount || 0;
+    const promptTokens = usageMeta.promptTokenCount || 0;
+    const reportedCachedTokens = usageMeta.cachedContentTokenCount;
+    const cachedTokens =
+      typeof reportedCachedTokens === "number" &&
+      Number.isFinite(reportedCachedTokens) &&
+      reportedCachedTokens >= 0 &&
+      reportedCachedTokens <= promptTokens
+        ? reportedCachedTokens
+        : undefined;
     return normalizeUsage({
-      prompt_tokens: usageMeta.promptTokenCount || 0,
-      completion_tokens: usageMeta.candidatesTokenCount || 0,
+      prompt_tokens: promptTokens,
+      completion_tokens: (usageMeta.candidatesTokenCount || 0) + thoughts,
       total_tokens: usageMeta.totalTokenCount,
-      cached_tokens: usageMeta.cachedContentTokenCount,
-      reasoning_tokens: usageMeta.thoughtsTokenCount,
+      ...(cachedTokens !== undefined ? { cached_tokens: cachedTokens } : {}),
+      cache_evidence: !Object.prototype.hasOwnProperty.call(usageMeta, "cachedContentTokenCount")
+        ? "unreported"
+        : cachedTokens === undefined
+          ? "invalid"
+          : cachedTokens > 0
+            ? "hit"
+            : "miss",
+      reasoning_tokens: thoughts,
     });
   }
 
@@ -463,7 +995,7 @@ const CHARS_PER_TOKEN_SCHEMA = 6; // ~6 chars/token for JSON schemas (more verbo
  * @param {string} text - Text to estimate tokens for
  * @returns {number} Estimated token count
  */
-function estimateTokenCount(text) {
+function estimateTokenCount(text: unknown) {
   if (!text || typeof text !== "string") return 0;
 
   // Count CJK ideographs separately — each is roughly 1 token
@@ -491,26 +1023,27 @@ function estimateTokenCount(text) {
  * for more accurate estimation since JSON schemas are more verbose but
  * compress into fewer tokens than plain text.
  */
-export function estimateInputTokens(body) {
+export function estimateInputTokens(body: unknown) {
   if (!body || typeof body !== "object") return 0;
+  const record = body as Record<string, unknown>;
 
   try {
     let toolTokens = 0;
     let messageTokens = 0;
 
     // Separate tool definitions from the rest of the body
-    if (body.tools && Array.isArray(body.tools)) {
-      const toolStr = JSON.stringify(body.tools);
+    if (record.tools && Array.isArray(record.tools)) {
+      const toolStr = JSON.stringify(record.tools);
       toolTokens = Math.ceil(toolStr.length / CHARS_PER_TOKEN_SCHEMA);
       // Estimate messages without tools
-      const { tools, ...bodyWithoutTools } = body;
+      const { tools, ...bodyWithoutTools } = record;
       messageTokens = estimateTokenCount(JSON.stringify(bodyWithoutTools));
     } else {
-      messageTokens = estimateTokenCount(JSON.stringify(body));
+      messageTokens = estimateTokenCount(JSON.stringify(record));
     }
 
     return messageTokens + toolTokens;
-  } catch (err) {
+  } catch {
     // Fallback if stringify fails
     return 0;
   }
@@ -520,7 +1053,7 @@ export function estimateInputTokens(body) {
  * Estimate output tokens from content length.
  * Uses improved heuristic when possible, falls back to length-based estimation.
  */
-export function estimateOutputTokens(contentLength) {
+export function estimateOutputTokens(contentLength: number | null | undefined) {
   if (!contentLength || contentLength <= 0) return 0;
   // When we only have a character count, use 4 chars/token with sub-word correction
   return Math.max(1, Math.ceil(contentLength / 3.5));
@@ -532,7 +1065,7 @@ export function estimateOutputTokens(contentLength) {
  * @param {number} outputTokens - Output/completion tokens
  * @param {string} targetFormat - Target format from FORMATS
  */
-export function formatUsage(inputTokens, outputTokens, targetFormat) {
+export function formatUsage(inputTokens: number, outputTokens: number, targetFormat: string) {
   // Claude format uses input_tokens/output_tokens
   if (targetFormat === FORMATS.CLAUDE) {
     return addBufferToUsage({
@@ -557,7 +1090,11 @@ export function formatUsage(inputTokens, outputTokens, targetFormat) {
  * @param {number} contentLength - Content length for output token estimation
  * @param {string} targetFormat - Target format from FORMATS constant
  */
-export function estimateUsage(body, contentLength, targetFormat = FORMATS.OPENAI) {
+export function estimateUsage(
+  body: unknown,
+  contentLength: number | null | undefined,
+  targetFormat: string = FORMATS.OPENAI
+) {
   return formatUsage(estimateInputTokens(body), estimateOutputTokens(contentLength), targetFormat);
 }
 
@@ -565,8 +1102,8 @@ export function estimateUsage(body, contentLength, targetFormat = FORMATS.OPENAI
  * Log usage with cache info (green color)
  */
 export function logUsage(
-  provider,
-  usage,
+  provider: string | null | undefined,
+  usage: UsageLike | null | undefined,
   model: string | null = null,
   connectionId: string | null = null,
   apiKeyInfo = null
@@ -599,6 +1136,11 @@ export function logUsage(
 
   const cacheCreation = getPromptCacheCreationTokens(usage);
   if (cacheCreation) msg += ` | cache_create=${cacheCreation}`;
+
+  // Non-cached (fresh) input tokens — informational only, already included in
+  // prompt_tokens (Command Code reports inputTokenDetails.noCacheTokens).
+  const noCache = getNoCacheTokens(usage);
+  if (noCache) msg += ` | no_cache=${noCache}`;
 
   const reasoning = usage.reasoning_tokens;
   if (reasoning) msg += ` | reasoning=${reasoning}`;

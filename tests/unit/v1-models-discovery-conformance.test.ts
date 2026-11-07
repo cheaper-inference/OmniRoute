@@ -31,7 +31,7 @@ const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 async function resetStorage() {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
 }
@@ -43,7 +43,7 @@ test.beforeEach(async () => {
 test.after(async () => {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("1. GET /v1/models never returns a 3xx redirect status (regression guard)", async () => {
@@ -108,27 +108,32 @@ test("3. stale-first: an expired 200 entry within the staleness window is served
   );
 });
 
-test("4. beyond the staleness window, the response waits for a fresh build again", async () => {
+test("4. an ordinary TTL expiry inside the SWR window remains stale-first", async () => {
   const makeRequest = () => new Request("http://localhost/v1/models");
 
   const res1 = await v1ModelsCatalog.getUnifiedModelsResponse(makeRequest());
   assert.equal(res1.status, 200);
+  const body1 = await res1.text();
   const runsAfterFirst = v1ModelsCatalog.__getCatalogBuilderRunsForTest();
   assert.equal(runsAfterFirst, 1);
 
-  // Push the entry's age past CATALOG_STALE_WHILE_REVALIDATE_MS.
-  v1ModelsCatalog.__expireCatalogCacheForTest(
-    v1ModelsCatalog.CATALOG_STALE_WHILE_REVALIDATE_MS + 5_000
-  );
+  // #9199/#10198 bounded the stale window (CATALOG_STALE_WHILE_REVALIDATE_MS = 30s)
+  // so a refresh that keeps failing cannot pin an old catalog forever — the old
+  // "stale-first regardless of snapshot age" contract is gone (the past-the-window
+  // rebuild path is pinned by model-catalog-cache-swr-8728.test.ts). Inside the
+  // window, expiry must stay stale-first and never impose a cold-build wait.
+  v1ModelsCatalog.__expireCatalogCacheForTest();
 
   const res2 = await v1ModelsCatalog.getUnifiedModelsResponse(makeRequest());
   assert.equal(res2.status, 200);
+  assert.equal(await res2.text(), body1);
   assert.equal(
     v1ModelsCatalog.__getCatalogBuilderRunsForTest(),
-    runsAfterFirst + 1,
-    "past the staleness window, the builder must run again BEFORE the response is returned " +
-      "(a refresh that keeps failing must not pin a stale catalog forever)"
+    runsAfterFirst,
+    "ordinary TTL expiry must return the last successful snapshot before refreshing"
   );
+  await v1ModelsCatalog.__flushCatalogBackgroundRefreshForTest();
+  assert.equal(v1ModelsCatalog.__getCatalogBuilderRunsForTest(), runsAfterFirst + 1);
 });
 
 test("5. a cached non-200 entry is never served as stale", async () => {

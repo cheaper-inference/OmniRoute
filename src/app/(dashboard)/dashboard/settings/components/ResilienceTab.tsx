@@ -1,19 +1,29 @@
 "use client";
 
 import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { Button, Card } from "@/shared/components";
+import { Button, Card, Select } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
 import AutoDisableCard from "./AutoDisableCard";
 import ModelLockoutCard from "./ModelLockoutCard";
+import TokenRefreshBreakerCard, { type TokenRefreshBreakerValue } from "./TokenRefreshBreakerCard";
 import { NumberField, BooleanField } from "./ResilienceFields";
+import { throwIfResilienceSaveFailed } from "./resilienceSaveError";
 
 type RequestQueueSettings = {
   autoEnableApiKeyProviders: boolean;
   requestsPerMinute: number;
   minTimeBetweenRequestsMs: number;
   concurrentRequests: number;
+  globalConcurrentRequests: number;
   maxWaitMs: number;
+  executionMaxWaitMs: number;
+};
+
+type CredentialHealthCheckSettings = {
+  intervalMinutes: number;
 };
 
 type ConnectionCooldownProfileSettings = {
@@ -68,6 +78,8 @@ type ResilienceResponse = {
   comboCooldownWait: ComboCooldownWaitSettings;
   quotaShareConcurrencyLimit: QuotaShareConcurrencyLimitSettings;
   providerCooldown: ProviderCooldownSettings;
+  credentialHealthCheck?: CredentialHealthCheckSettings;
+  tokenRefreshBreaker?: TokenRefreshBreakerValue;
 };
 
 function toResilienceResponse(json: ResilienceResponse): ResilienceResponse {
@@ -79,6 +91,12 @@ function toResilienceResponse(json: ResilienceResponse): ResilienceResponse {
     comboCooldownWait: json.comboCooldownWait,
     quotaShareConcurrencyLimit: json.quotaShareConcurrencyLimit,
     providerCooldown: json.providerCooldown,
+    // Older servers do not send the token-refresh section; keep undefined
+    // so the card can hide itself instead of showing a bogus default.
+    tokenRefreshBreaker: json.tokenRefreshBreaker,
+    // Older servers do not send the credential-health section; keep undefined
+    // so the card can hide itself instead of showing a bogus default.
+    credentialHealthCheck: json.credentialHealthCheck,
   };
 }
 
@@ -124,7 +142,7 @@ function ProfileColumn({
   return (
     <div className="rounded-xl border border-border bg-bg-subtle p-4">
       <div className="mb-4 flex items-center gap-2">
-        <span className="material-symbols-outlined text-base text-primary">{icon}</span>
+        <Icon name={icon} size={16} className="text-primary" />
         <h3 className="text-sm font-semibold uppercase tracking-wide text-text-main">{title}</h3>
       </div>
       <div className="space-y-3">{children}</div>
@@ -178,17 +196,19 @@ function RequestQueueCard({
   const t = useTranslations("settings");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (prevValue !== value) {
+    setPrevValue(value);
     setDraft(value);
-  }, [value]);
+  }
 
   return (
     <Card className="p-6">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">speed</span>
+            <Icon name="speed" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("resilienceRequestQueueTitle")}</h2>
           </div>
           <SectionDescription
@@ -240,11 +260,19 @@ function RequestQueueCard({
               }
             />
             <NumberField
-              label={t("resilienceConcurrentRequests")}
+              label={t("resilienceConnectionScopeConcurrentRequests")}
               value={draft.concurrentRequests}
               min={1}
               onChange={(concurrentRequests) =>
                 setDraft((prev) => ({ ...prev, concurrentRequests }))
+              }
+            />
+            <NumberField
+              label={t("resilienceGlobalConcurrentRequests")}
+              value={draft.globalConcurrentRequests}
+              min={0}
+              onChange={(globalConcurrentRequests) =>
+                setDraft((prev) => ({ ...prev, globalConcurrentRequests }))
               }
             />
             <NumberField
@@ -253,6 +281,15 @@ function RequestQueueCard({
               min={1}
               suffix="ms"
               onChange={(maxWaitMs) => setDraft((prev) => ({ ...prev, maxWaitMs }))}
+            />
+            <NumberField
+              label={t("resilienceMaxExecutionWait")}
+              value={draft.executionMaxWaitMs}
+              min={1}
+              suffix="ms"
+              onChange={(executionMaxWaitMs) =>
+                setDraft((prev) => ({ ...prev, executionMaxWaitMs }))
+              }
             />
           </>
         ) : (
@@ -278,15 +315,31 @@ function RequestQueueCard({
               </div>
             </div>
             <div className="rounded-xl border border-border bg-bg-subtle p-4">
-              <div className="text-xs text-text-muted">{t("resilienceConcurrentRequests")}</div>
+              <div className="text-xs text-text-muted">
+                {t("resilienceConnectionScopeConcurrentRequests")}
+              </div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.concurrentRequests}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">
+                {t("resilienceGlobalConcurrentRequests")}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {value.globalConcurrentRequests || t("statusDisabled")}
               </div>
             </div>
             <div className="rounded-xl border border-border bg-bg-subtle p-4">
               <div className="text-xs text-text-muted">{t("resilienceMaxQueueWait")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.maxWaitMs)}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceMaxExecutionWait")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {formatMs(value.executionMaxWaitMs)}
               </div>
             </div>
           </>
@@ -308,10 +361,12 @@ function ConnectionCooldownCard({
   const t = useTranslations("settings");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (prevValue !== value) {
+    setPrevValue(value);
     setDraft(value);
-  }, [value]);
+  }
 
   const renderProfile = (key: "oauth" | "apikey", title: string, icon: string) => {
     const current = editing ? draft[key] : value[key];
@@ -339,45 +394,40 @@ function ConnectionCooldownCard({
                 }))
               }
             />
-            <div className="flex flex-col gap-1">
-              <label className="flex items-center justify-between gap-2 text-sm">
-                <span className="text-text-muted">{t("resilienceUseUpstream429BreakerHints")}</span>
-                <select
-                  className="rounded border border-border-default bg-surface-1 px-2 py-1 text-sm font-mono"
-                  value={
-                    current.useUpstream429BreakerHints === true
-                      ? "on"
-                      : current.useUpstream429BreakerHints === false
-                        ? "off"
-                        : "default"
+            <Select
+              compact
+              label={t("resilienceUseUpstream429BreakerHints")}
+              hint={t("resilienceUseUpstream429BreakerHintsDesc")}
+              value={
+                current.useUpstream429BreakerHints === true
+                  ? "on"
+                  : current.useUpstream429BreakerHints === false
+                    ? "off"
+                    : "default"
+              }
+              onChange={(e) => {
+                const v = e.target.value;
+                const next: boolean | undefined =
+                  v === "on" ? true : v === "off" ? false : undefined;
+                setDraft((prev) => {
+                  const profile = { ...prev[key] };
+                  if (next === undefined) {
+                    delete (profile as { useUpstream429BreakerHints?: boolean })
+                      .useUpstream429BreakerHints;
+                  } else {
+                    (
+                      profile as { useUpstream429BreakerHints?: boolean }
+                    ).useUpstream429BreakerHints = next;
                   }
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    const next: boolean | undefined =
-                      v === "on" ? true : v === "off" ? false : undefined;
-                    setDraft((prev) => {
-                      const profile = { ...prev[key] };
-                      if (next === undefined) {
-                        delete (profile as { useUpstream429BreakerHints?: boolean })
-                          .useUpstream429BreakerHints;
-                      } else {
-                        (
-                          profile as { useUpstream429BreakerHints?: boolean }
-                        ).useUpstream429BreakerHints = next;
-                      }
-                      return { ...prev, [key]: profile };
-                    });
-                  }}
-                >
-                  <option value="default">{t("resilienceDefaultPerProvider")}</option>
-                  <option value="on">{t("resilienceAlwaysOn")}</option>
-                  <option value="off">{t("resilienceAlwaysOff")}</option>
-                </select>
-              </label>
-              <p className="text-xs text-text-muted">
-                {t("resilienceUseUpstream429BreakerHintsDesc")}
-              </p>
-            </div>
+                  return { ...prev, [key]: profile };
+                });
+              }}
+              options={[
+                { value: "default", label: t("resilienceDefaultPerProvider") },
+                { value: "on", label: t("resilienceAlwaysOn") },
+                { value: "off", label: t("resilienceAlwaysOff") },
+              ]}
+            />
             <NumberField
               label={t("resilienceMaxBackoffSteps")}
               value={current.maxBackoffSteps}
@@ -426,7 +476,7 @@ function ConnectionCooldownCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">timer_off</span>
+            <Icon name="timer_off" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("resilienceConnectionCooldownTitle")}</h2>
           </div>
           <SectionDescription
@@ -491,10 +541,12 @@ function ProviderBreakerCard({
   const t = useTranslations("settings");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (prevValue !== value) {
+    setPrevValue(value);
     setDraft(value);
-  }, [value]);
+  }
 
   const renderProfile = (key: "oauth" | "apikey", title: string, icon: string) => {
     const current = editing ? draft[key] : value[key];
@@ -553,9 +605,7 @@ function ProviderBreakerCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">
-              electrical_services
-            </span>
+            <Icon name="electrical_services" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("resilienceProviderBreakerTitle")}</h2>
           </div>
           <SectionDescription
@@ -601,17 +651,19 @@ function WaitForCooldownCard({
   const t = useTranslations("settings");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (prevValue !== value) {
+    setPrevValue(value);
     setDraft(value);
-  }, [value]);
+  }
 
   return (
     <Card className="p-6">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">hourglass_top</span>
+            <Icon name="hourglass_top" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("resilienceWaitForCooldownTitle")}</h2>
           </div>
           <SectionDescription
@@ -697,12 +749,14 @@ function ComboCooldownWaitCard({
   const t = useTranslations("settings");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (prevValue !== value) {
+    setPrevValue(value);
     setDraft(value);
-  }, [value]);
+  }
 
-  const title = t("resilienceComboCooldownWaitTitle") || "Combo cooldown wait";
+  const title = t("resilienceComboCooldownWaitTitle");
   const desc =
     t("resilienceComboCooldownWaitDesc") ||
     "For all combo strategies: wait out a short transient cooldown and re-dispatch instead of returning a 429 immediately. Never waits on quota_exhausted.";
@@ -711,7 +765,7 @@ function ComboCooldownWaitCard({
     <Card className="p-6">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-xl text-primary">timer</span>
+          <Icon name="timer" size={20} className="text-primary" />
           <h2 className="text-lg font-bold">{title}</h2>
         </div>
         <ActionRow
@@ -735,7 +789,7 @@ function ComboCooldownWaitCard({
         {editing ? (
           <>
             <BooleanField
-              label={t("resilienceEnableServerWait") || "Enabled"}
+              label={t("resilienceEnableServerWait")}
               description={
                 t("resilienceComboCooldownWaitToggleDesc") ||
                 "All combo strategies; never waits on quota_exhausted."
@@ -744,20 +798,20 @@ function ComboCooldownWaitCard({
               onChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
             />
             <NumberField
-              label={t("resilienceComboCooldownMaxWaitMs") || "Max wait per attempt"}
+              label={t("resilienceComboCooldownMaxWaitMs")}
               value={draft.maxWaitMs}
               min={0}
               suffix="ms"
               onChange={(maxWaitMs) => setDraft((prev) => ({ ...prev, maxWaitMs }))}
             />
             <NumberField
-              label={t("resilienceMaxAttempts") || "Max attempts"}
+              label={t("resilienceMaxAttempts")}
               value={draft.maxAttempts}
               min={0}
               onChange={(maxAttempts) => setDraft((prev) => ({ ...prev, maxAttempts }))}
             />
             <NumberField
-              label={t("resilienceComboCooldownBudgetMs") || "Total wait budget"}
+              label={t("resilienceComboCooldownBudgetMs")}
               value={draft.budgetMs}
               min={0}
               suffix="ms"
@@ -767,31 +821,23 @@ function ComboCooldownWaitCard({
         ) : (
           <>
             <div className="rounded-xl border border-border bg-bg-subtle p-4">
-              <div className="text-xs text-text-muted">
-                {t("resilienceEnableServerWait") || "Enabled"}
-              </div>
+              <div className="text-xs text-text-muted">{t("resilienceEnableServerWait")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.enabled ? t("statusEnabled") : t("statusDisabled")}
               </div>
             </div>
             <div className="rounded-xl border border-border bg-bg-subtle p-4">
-              <div className="text-xs text-text-muted">
-                {t("resilienceComboCooldownMaxWaitMs") || "Max wait per attempt"}
-              </div>
+              <div className="text-xs text-text-muted">{t("resilienceComboCooldownMaxWaitMs")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.maxWaitMs)}
               </div>
             </div>
             <div className="rounded-xl border border-border bg-bg-subtle p-4">
-              <div className="text-xs text-text-muted">
-                {t("resilienceMaxAttempts") || "Max attempts"}
-              </div>
+              <div className="text-xs text-text-muted">{t("resilienceMaxAttempts")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">{value.maxAttempts}</div>
             </div>
             <div className="rounded-xl border border-border bg-bg-subtle p-4">
-              <div className="text-xs text-text-muted">
-                {t("resilienceComboCooldownBudgetMs") || "Total wait budget"}
-              </div>
+              <div className="text-xs text-text-muted">{t("resilienceComboCooldownBudgetMs")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.budgetMs)}
               </div>
@@ -815,13 +861,14 @@ function QuotaShareConcurrencyLimitCard({
   const t = useTranslations("settings");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (prevValue !== value) {
+    setPrevValue(value);
     setDraft(value);
-  }, [value]);
+  }
 
-  const title =
-    t("resilienceQuotaShareConcurrencyTitle") || "Quota-share per-connection concurrency";
+  const title = t("resilienceQuotaShareConcurrencyTitle");
   const desc =
     t("resilienceQuotaShareConcurrencyDesc") ||
     "For quota-share combos only: when a connection sets a Max Concurrent cap, serialize concurrent requests to that subscription account so it is never flooded past its ceiling — excess requests wait in the queue instead of getting a 429. The cap comes from each connection's Max Concurrent field; this switch only enables/disables honoring it.";
@@ -830,7 +877,7 @@ function QuotaShareConcurrencyLimitCard({
     <Card className="p-6">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-xl text-primary">filter_list</span>
+          <Icon name="filter_list" size={20} className="text-primary" />
           <h2 className="text-lg font-bold">{title}</h2>
         </div>
         <ActionRow
@@ -853,7 +900,7 @@ function QuotaShareConcurrencyLimitCard({
       <div className="grid grid-cols-1 gap-3">
         {editing ? (
           <BooleanField
-            label={t("resilienceEnableServerWait") || "Enabled"}
+            label={t("resilienceEnableServerWait")}
             description={
               t("resilienceQuotaShareConcurrencyToggleDesc") ||
               "Quota-share combos only; honors each connection's Max Concurrent cap."
@@ -863,9 +910,7 @@ function QuotaShareConcurrencyLimitCard({
           />
         ) : (
           <div className="rounded-xl border border-border bg-bg-subtle p-4">
-            <div className="text-xs text-text-muted">
-              {t("resilienceEnableServerWait") || "Enabled"}
-            </div>
+            <div className="text-xs text-text-muted">{t("resilienceEnableServerWait")}</div>
             <div className="mt-1 text-sm font-semibold text-text-main">
               {value.enabled ? t("statusEnabled") : t("statusDisabled")}
             </div>
@@ -888,17 +933,19 @@ export function ProviderCooldownCard({
   const t = useTranslations("settings");
   const [editing, setEditing] = useState(value);
   const [isEditing, setIsEditing] = useState(false);
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (prevValue !== value) {
+    setPrevValue(value);
     setEditing(value);
-  }, [value]);
+  }
 
   return (
     <Card className="p-6">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">timer</span>
+            <Icon name="timer" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("resilienceProviderCooldownTitle")}</h2>
           </div>
           <SectionDescription
@@ -983,6 +1030,97 @@ export function ProviderCooldownCard({
   );
 }
 
+function CredentialHealthCheckCard({
+  value,
+  onSave,
+  saving,
+}: {
+  value: CredentialHealthCheckSettings;
+  onSave: (next: CredentialHealthCheckSettings) => Promise<void>;
+  saving: boolean;
+}) {
+  const t = useTranslations("settings");
+  const [editing, setEditing] = useState(value);
+  const [isEditing, setIsEditing] = useState(false);
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setEditing(value);
+  }
+
+  const disabled = editing.intervalMinutes <= 0;
+
+  return (
+    <Card className="p-6">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Icon name="health_and_safety" size={20} className="text-primary" />
+            <h2 className="text-lg font-bold">{t("resilienceCredentialHealthTitle")}</h2>
+          </div>
+          <SectionDescription
+            scope={t("resilienceCredentialHealthScope")}
+            trigger={t("resilienceCredentialHealthTrigger")}
+            effect={t("resilienceCredentialHealthEffect")}
+          />
+        </div>
+        <ActionRow
+          editing={isEditing}
+          saving={saving}
+          onEdit={() => setIsEditing(true)}
+          onCancel={() => {
+            setEditing(value);
+            setIsEditing(false);
+          }}
+          onSave={async () => {
+            await onSave(editing);
+            setIsEditing(false);
+          }}
+        />
+      </div>
+
+      <p className="mb-4 text-sm text-text-muted">{t("resilienceCredentialHealthDesc")}</p>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {isEditing ? (
+          <>
+            <NumberField
+              label={t("resilienceCredentialHealthInterval")}
+              value={editing.intervalMinutes}
+              min={0}
+              max={1440}
+              suffix="min"
+              onChange={(intervalMinutes) => setEditing((prev) => ({ ...prev, intervalMinutes }))}
+            />
+            <div className="rounded-xl border border-border bg-bg-subtle p-4 text-xs text-text-muted">
+              {t("resilienceCredentialHealthHint")}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">
+                {t("resilienceCredentialHealthInterval")}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {disabled
+                  ? t("statusDisabled")
+                  : t("resilienceCredentialHealthEveryMinutes", {
+                      minutes: value.intervalMinutes,
+                    })}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4 text-xs text-text-muted">
+              {t("resilienceCredentialHealthHint")}
+            </div>
+          </>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 export default function ResilienceTab() {
   const notify = useNotificationStore();
   const t = useTranslations("settings");
@@ -1037,9 +1175,7 @@ export default function ResilienceTab() {
         body: JSON.stringify(payload),
       });
       const json = await response.json();
-      if (!response.ok) {
-        throw new Error(json?.error?.message || json?.error || `HTTP ${response.status}`);
-      }
+      /* prettier-ignore */ throwIfResilienceSaveFailed(response.ok, json, tx("saveFailed", "Failed to save resilience settings"));
       setData(toResilienceResponse(json));
       notify.success(tx("savedSuccessfully", "Resilience settings updated."));
     } catch (error) {
@@ -1057,8 +1193,8 @@ export default function ResilienceTab() {
   if (loading && !data) {
     return (
       <Card className="p-6">
-        <div className="flex items-center gap-2 text-sm text-text-muted">
-          <span className="material-symbols-outlined animate-spin">progress_activity</span>
+        <div role="status" className="flex items-center gap-2 text-sm text-text-muted">
+          <Spinner decorative size="sm" />
           {tx("loadingResilience", "Loading resilience settings...")}
         </div>
       </Card>
@@ -1116,6 +1252,24 @@ export default function ResilienceTab() {
         saving={savingSection === "providerCooldown"}
         onSave={(providerCooldown) => savePatch("providerCooldown", { providerCooldown })}
       />
+      {data.tokenRefreshBreaker && (
+        <TokenRefreshBreakerCard
+          value={data.tokenRefreshBreaker}
+          saving={savingSection === "tokenRefreshBreaker"}
+          onSave={(tokenRefreshBreaker) =>
+            savePatch("tokenRefreshBreaker", { tokenRefreshBreaker })
+          }
+        />
+      )}
+      {data.credentialHealthCheck && (
+        <CredentialHealthCheckCard
+          value={data.credentialHealthCheck}
+          saving={savingSection === "credentialHealthCheck"}
+          onSave={(credentialHealthCheck) =>
+            savePatch("credentialHealthCheck", { credentialHealthCheck })
+          }
+        />
+      )}
       <ModelLockoutCard />
     </div>
   );

@@ -4,15 +4,28 @@
  *
  * Extracted from handleChatCore: resolves the executor for a provider honoring the configured
  * upstream proxy mode. `native` / disabled → the provider's own executor; `cliproxyapi` → the
- * CLIProxyAPI passthrough executor; `fallback` → a wrapper that tries the native executor first and
- * retries via CLIProxyAPI on configured failure codes (default 5xx + 429 + network) or on a thrown
- * error. Behaviour is byte-identical to the previous inline closure (it only captured `log`).
+ * CLIProxyAPI passthrough executor; `dario` → the Dario passthrough executor; `fallback` → a
+ * wrapper that tries the native executor first and retries via the configured fallback backend
+ * (CLIProxyAPI by default, or Dario) on configured failure codes (default 5xx + 429 + network)
+ * or on a thrown error.
+ *
+ * Dario (@askalf/dario) is wired as a parallel, independent backend choice at both levels
+ * (per-connection `darioMode` + provider `mode`/`fallbackBackend`) WITHOUT changing any existing
+ * CLIProxyAPI behaviour. Dario needs neither the dedicated-credential substitution nor the
+ * per-provider model-mapping wrappers CLIProxyAPI uses: it authenticates via its own OAuth
+ * account pool (not a configured bearer key) and has its own server-side model-alias mechanism.
  */
+
+import { assertRuntimeProviderAvailable } from "@/shared/constants/providerRetirement";
 
 import { getExecutor } from "../../executors/index.ts";
 import { isCliproxyapiDeepModeEnabled } from "../../executors/cliproxyapi.ts";
+import { isDarioDeepModeEnabled } from "../../executors/dario.ts";
 import { getCachedSettings } from "@/lib/db/readCache";
+import { assertMicrosoftDesignerWebProviderAvailable } from "@/shared/constants/designerWebRetirement";
+import { assertCommonChatGptWebProviderAvailable } from "@/shared/constants/chatgptWebRetirement";
 import { getUpstreamProxyConfigCached } from "./comboContextCache.ts";
+import type { FallbackBackend } from "@/lib/db/upstreamProxy";
 import { wrapExecutorWithCliproxyapiModelMapping } from "./cliproxyModelMapping.ts";
 import {
   resolveDedicatedCliproxyapiApiKey,
@@ -30,6 +43,24 @@ type LoggerLike =
 
 const DEFAULT_FALLBACK_CODES = [429, 500, 502, 503, 504];
 
+/** Trusted request-local validation may inspect the fully resolved executor, never a client flag. */
+export function createExecutorResolver(
+  log: LoggerLike,
+  credentials: { providerSpecificData?: Record<string, unknown> },
+  validationFence?: (
+    executor: Awaited<ReturnType<typeof resolveExecutorWithProxy>>
+  ) => Awaited<ReturnType<typeof resolveExecutorWithProxy>>
+) {
+  return async (provider: string) => {
+    const executor = await resolveExecutorWithProxy(
+      provider,
+      log,
+      credentials?.providerSpecificData ?? null
+    );
+    return validationFence ? validationFence(executor) : executor;
+  };
+}
+
 function parseFallbackCodes(raw: unknown): number[] | null {
   if (typeof raw !== "string" || !raw.trim()) return null;
   const parsed = raw
@@ -43,7 +74,7 @@ function parseFallbackCodes(raw: unknown): number[] | null {
  * Reads the CLIProxyAPI-related settings shared by both the direct
  * `mode: "cliproxyapi"` passthrough leg and the `mode: "fallback"` retry leg:
  * the custom fallback status codes and the dedicated credential (#7645).
- * Falls back to defaults / no dedicated key on any read failure.
+ * Falls back to defaults and the environment key on any read failure.
  */
 async function loadCliproxyapiSettings(): Promise<{
   fallbackCodes: number[];
@@ -58,8 +89,29 @@ async function loadCliproxyapiSettings(): Promise<{
       dedicatedApiKey: resolveDedicatedCliproxyapiApiKey(allSettings),
     };
   } catch {
-    return { fallbackCodes: [...DEFAULT_FALLBACK_CODES], dedicatedApiKey: null };
+    return {
+      fallbackCodes: [...DEFAULT_FALLBACK_CODES],
+      dedicatedApiKey: resolveDedicatedCliproxyapiApiKey(null),
+    };
   }
+}
+
+/**
+ * Resolve the CLIProxyAPI passthrough executor with its model-mapping +
+ * dedicated-credential wrappers applied. Used by the direct `cliproxyapi` leg
+ * and the CLIProxyAPI branch of `fallback`.
+ */
+async function resolveCliproxyapiExecutor(
+  cliproxyapiModelMapping: Record<string, unknown> | null,
+  dedicatedApiKey: string | null
+) {
+  return wrapExecutorWithCliproxyapiCredentials(
+    wrapExecutorWithCliproxyapiModelMapping(
+      await getExecutor("cliproxyapi"),
+      cliproxyapiModelMapping
+    ),
+    dedicatedApiKey
+  );
 }
 
 export async function resolveExecutorWithProxy(
@@ -67,6 +119,10 @@ export async function resolveExecutorWithProxy(
   log?: LoggerLike,
   providerSpecificData?: Record<string, unknown> | null
 ) {
+  assertMicrosoftDesignerWebProviderAvailable(prov);
+  assertRuntimeProviderAvailable(prov);
+  assertCommonChatGptWebProviderAvailable(prov);
+
   // Per-connection routing override (#6339): the resolved connection can opt itself
   // into the CLIProxyAPI passthrough executor via providerSpecificData.cliproxyapiMode
   // === "claude-native" (UI toggle). This takes precedence over the provider-level
@@ -78,7 +134,24 @@ export async function resolveExecutorWithProxy(
       "UPSTREAM_PROXY",
       `${prov} routed through CLIProxyAPI (per-connection claude-native override)`
     );
-    return getExecutor("cliproxyapi");
+    const [cfg, { dedicatedApiKey }] = await Promise.all([
+      getUpstreamProxyConfigCached(prov),
+      loadCliproxyapiSettings(),
+    ]);
+    return resolveCliproxyapiExecutor(cfg.cliproxyapiModelMapping, dedicatedApiKey);
+  }
+
+  // Sibling per-connection override for Dario (#dario). Checked AFTER the
+  // CLIProxyAPI check above by deliberate design: if a connection somehow sets
+  // BOTH cliproxyapiMode and darioMode to "claude-native", CLIProxyAPI's
+  // existing behaviour keeps winning — the least-surprising precedence for
+  // configs that predate this field, and the simplest to reason about.
+  if (isDarioDeepModeEnabled(providerSpecificData)) {
+    log?.info?.(
+      "UPSTREAM_PROXY",
+      `${prov} routed through Dario (per-connection claude-native override)`
+    );
+    return getExecutor("dario");
   }
 
   const cfg = await getUpstreamProxyConfigCached(prov);
@@ -87,23 +160,31 @@ export async function resolveExecutorWithProxy(
   if (cfg.mode === "cliproxyapi") {
     log?.info?.("UPSTREAM_PROXY", `${prov} routed through CLIProxyAPI (passthrough)`);
     const { dedicatedApiKey } = await loadCliproxyapiSettings();
-    return wrapExecutorWithCliproxyapiCredentials(
-      wrapExecutorWithCliproxyapiModelMapping(getExecutor("cliproxyapi"), cfg.cliproxyapiModelMapping),
-      dedicatedApiKey
-    );
+    return resolveCliproxyapiExecutor(cfg.cliproxyapiModelMapping, dedicatedApiKey);
   }
 
-  // mode === "fallback": try native first, retry via CLIProxyAPI on specific failures.
-  // The model mapping applies only to the CLIProxyAPI retry leg (proxyExec) — the
-  // native leg must keep seeing the original, unmapped model.
-  const nativeExec = getExecutor(prov);
+  if (cfg.mode === "dario") {
+    // Direct Dario passthrough. No credential/model-mapping wrappers: Dario
+    // authenticates via its own OAuth pool and has its own model-alias layer.
+    log?.info?.("UPSTREAM_PROXY", `${prov} routed through Dario (passthrough)`);
+    return getExecutor("dario");
+  }
+
+  // mode === "fallback": try native first, retry via the configured fallback
+  // backend on specific failures. The backend defaults to CLIProxyAPI so every
+  // pre-existing fallback config behaves exactly as before; fallbackBackend
+  // === "dario" opts the retry leg over to Dario instead.
+  const nativeExec = await getExecutor(prov);
+  const fallbackBackend: FallbackBackend = cfg.fallbackBackend;
   const { fallbackCodes, dedicatedApiKey } = await loadCliproxyapiSettings();
-  // #7645: the CLIProxyAPI retry leg must authenticate with the dedicated
-  // key, never the native provider's own (already-failed) credential.
-  const proxyExec = wrapExecutorWithCliproxyapiCredentials(
-    wrapExecutorWithCliproxyapiModelMapping(getExecutor("cliproxyapi"), cfg.cliproxyapiModelMapping),
-    dedicatedApiKey
-  );
+
+  // The model mapping applies only to the CLIProxyAPI retry leg (proxyExec) —
+  // the native leg must keep seeing the original, unmapped model.
+  const proxyExec =
+    fallbackBackend === "dario"
+      ? await getExecutor("dario")
+      : await resolveCliproxyapiExecutor(cfg.cliproxyapiModelMapping, dedicatedApiKey);
+  const backendLabel = fallbackBackend === "dario" ? "Dario" : "CLIProxyAPI";
   const isRetryableStatus = (s: number) => fallbackCodes.includes(s) || s === 0;
 
   const wrapper = Object.create(nativeExec);
@@ -121,12 +202,15 @@ export async function resolveExecutorWithProxy(
       result = await nativeExec.execute(input);
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);
-      log?.info?.("UPSTREAM_PROXY", `${prov} native error (${errMsg}), retrying via CLIProxyAPI`);
+      log?.info?.(
+        "UPSTREAM_PROXY",
+        `${prov} native error (${errMsg}), retrying via ${backendLabel}`
+      );
       try {
         return await proxyExec.execute(input);
       } catch (proxyErr) {
         const proxyMsg = proxyErr instanceof Error ? proxyErr.message : String(proxyErr);
-        log?.error?.("UPSTREAM_PROXY", `${prov} CLIProxyAPI fallback also failed: ${proxyMsg}`);
+        log?.error?.("UPSTREAM_PROXY", `${prov} ${backendLabel} fallback also failed: ${proxyMsg}`);
         throw proxyErr;
       }
     }
@@ -136,13 +220,13 @@ export async function resolveExecutorWithProxy(
     }
     log?.info?.(
       "UPSTREAM_PROXY",
-      `${prov} native failed (${result.response.status}), retrying via CLIProxyAPI`
+      `${prov} native failed (${result.response.status}), retrying via ${backendLabel}`
     );
     try {
       return await proxyExec.execute(input);
     } catch (proxyErr) {
       const proxyMsg = proxyErr instanceof Error ? proxyErr.message : String(proxyErr);
-      log?.error?.("UPSTREAM_PROXY", `${prov} CLIProxyAPI fallback also failed: ${proxyMsg}`);
+      log?.error?.("UPSTREAM_PROXY", `${prov} ${backendLabel} fallback also failed: ${proxyMsg}`);
       throw proxyErr;
     }
   };

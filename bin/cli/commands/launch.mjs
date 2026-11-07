@@ -1,9 +1,10 @@
-import { spawn } from "node:child_process";
+import { spawn, execFileSync } from "node:child_process";
 import { join } from "node:path";
 import os from "node:os";
 import { t } from "../i18n.mjs";
-import { resolveActiveContext } from "../contexts.mjs";
-import { quoteShellArgs } from "../utils/winShellArgs.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
+import { quoteShellArgs, quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
+import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
 
 function stripTrailingSlash(value) {
   let s = String(value);
@@ -25,7 +26,7 @@ function stripTrailingSlash(value) {
  * @returns {Record<string,string>}
  */
 export function buildClaudeEnv(baseEnv, baseUrlOrPort, authToken, opts = {}) {
-  const env = { ...baseEnv };
+  const env = buildSafeCliLaunchEnv(baseEnv, { inheritEnv: Boolean(opts.inheritEnv) });
   for (const key of Object.keys(env)) {
     if (key.startsWith("ANTHROPIC_")) delete env[key];
   }
@@ -82,7 +83,7 @@ export function resolveLaunchTarget(opts = {}) {
   if (!authToken) {
     try {
       const ctx = resolveActiveContext(opts.context ?? process.env.OMNIROUTE_CONTEXT);
-      authToken = ctx?.accessToken || ctx?.apiKey || undefined;
+      authToken = contextCredentialFor(ctx, baseUrl);
     } catch {
       /* no context auth */
     }
@@ -92,17 +93,61 @@ export function resolveLaunchTarget(opts = {}) {
 }
 
 /**
- * #8246: on Windows, npm installs claude as a `.cmd` shim — spawn() without a
- * shell cannot resolve PATHEXT shims (and Node refuses to exec `.cmd` directly
- * since CVE-2024-27980), so the Windows path must go through cmd.exe.
+ * Probe PATH for a Windows executable via `where.exe`, preferring a `.exe` over
+ * a `.cmd`/`.bat` shim. Returns the absolute path to the preferred binary, or
+ * `null` when `where.exe` finds nothing (or cannot run).
+ *
+ * The native Anthropic installer (#9454) creates only `claude.exe` (no npm
+ * `.cmd` shim), so the launcher must look for the real PE and spawn it without
+ * a shell. Mirrors the existing `locateCommand()` probe in
+ * `src/shared/services/cliRuntime.ts`.
+ *
+ * @param {string} command  bare command name to look up
+ * @returns {Promise<string|null>} absolute path to the preferred match, or null
+ */
+function probeWindowsBinary(command) {
+  try {
+    const out = execFileSync("where.exe", [command], {
+      stdio: ["ignore", "pipe", "ignore"],
+      encoding: "utf8",
+      timeout: 3000,
+      windowsHide: true,
+    });
+    const lines = out
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean);
+    if (lines.length === 0) return null;
+    const winExt = /\.(exe|cmd|bat|com)$/i;
+    return lines.find((l) => winExt.test(l)) || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * #8246 / #9454: on Windows, npm installs claude as a `.cmd` shim — spawn()
+ * without a shell cannot resolve PATHEXT shims (and Node refuses to exec `.cmd`
+ * directly since CVE-2024-27980), so the npm-shim path must go through cmd.exe.
+ * But the native installer creates only `claude.exe`, which is a real PE that
+ * must NOT go through a shell (cmd.exe would split an absolute path with spaces).
+ *
+ * So probe PATH for `claude` first: when `where.exe` resolves a `.exe`, spawn it
+ * directly (no shell); otherwise fall back to the npm `claude.cmd` + shell. Off
+ * Windows the bare binary is spawned unchanged (no shell, no probe).
  *
  * @param {NodeJS.Platform|string} platform
- * @returns {{ command: string, shell: true|undefined }}
+ * @param {{ probe?: (command: string) => Promise<string|null> }} [opts]  injectable probe for tests
+ * @returns {Promise<{ command: string, shell: true|undefined }>}
  */
-export function resolveClaudeSpawn(platform) {
-  return platform === "win32"
-    ? { command: "claude.cmd", shell: true }
-    : { command: "claude", shell: undefined };
+export async function resolveClaudeSpawn(platform, opts = {}) {
+  if (platform !== "win32") return { command: "claude", shell: undefined };
+  const probe = opts.probe ?? probeWindowsBinary;
+  const located = await probe("claude");
+  if (located && /\.exe$/i.test(located)) {
+    return { command: located, shell: undefined };
+  }
+  return { command: "claude.cmd", shell: true };
 }
 
 /**
@@ -146,26 +191,75 @@ export async function runLaunchCommand(opts = {}, claudeArgs = []) {
   const configDir = opts.profile
     ? join(opts.claudeHome || join(os.homedir(), ".claude"), "profiles", opts.profile)
     : undefined;
-  const env = buildClaudeEnv(process.env, baseUrl, authToken, { configDir });
+  const env = buildClaudeEnv(process.env, baseUrl, authToken, {
+    configDir,
+    model: opts.model,
+    inheritEnv: opts.inheritEnv,
+  });
+
+  const { command, shell } = await resolveClaudeSpawn(process.platform);
 
   return await new Promise((resolve) => {
-    const { command, shell } = resolveClaudeSpawn(process.platform);
-    const child = spawn(command, quoteClaudeArgs(claudeArgs, process.platform), {
+    const child = spawn(command, quoteShellArgsForSpawn(claudeArgs, process.platform, shell), {
       env,
       stdio: "inherit",
       shell,
       ...(process.platform === "win32" ? { windowsHide: true } : {}),
     });
+    let settled = false;
+    let requestedSignalCode;
+    let escalationTimer;
+    const signalExitCode = { SIGINT: 130, SIGTERM: 143, SIGHUP: 129 };
+    const signalHandlers = {};
+    const cleanupSignalHandlers = () => {
+      for (const signal of Object.keys(signalExitCode)) {
+        process.removeListener(signal, signalHandlers[signal]);
+      }
+    };
+    const finish = (code) => {
+      if (settled) return;
+      settled = true;
+      if (escalationTimer) clearTimeout(escalationTimer);
+      cleanupSignalHandlers();
+      resolve(code);
+    };
+    for (const signal of Object.keys(signalExitCode)) {
+      signalHandlers[signal] = () => {
+        if (requestedSignalCode !== undefined) return;
+        requestedSignalCode = signalExitCode[signal];
+        try {
+          child.kill(signal);
+        } catch {
+          // The child may have already exited; its close event will settle.
+        }
+        const configuredTimeout = Number(
+          opts.signalTimeoutMs ?? process.env.OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS
+        );
+        const timeoutMs =
+          Number.isFinite(configuredTimeout) && configuredTimeout > 0 ? configuredTimeout : 5000;
+        escalationTimer = setTimeout(() => {
+          try {
+            child.kill("SIGKILL");
+          } catch {
+            // A close event may have raced with escalation.
+          }
+        }, timeoutMs);
+        escalationTimer.unref?.();
+      };
+      process.once(signal, signalHandlers[signal]);
+    }
     child.on("error", (err) => {
       if (err && err.code === "ENOENT") {
         console.error(t("launch.notFound") || "The 'claude' CLI was not found in PATH.");
-        resolve(127);
+        finish(127);
       } else {
         console.error(String(err?.message || err));
-        resolve(1);
+        finish(1);
       }
     });
-    child.on("exit", (code) => resolve(code ?? 0));
+    child.on("close", (code, signalName) => {
+      finish(requestedSignalCode ?? code ?? signalExitCode[signalName] ?? 0);
+    });
   });
 }
 
@@ -183,6 +277,10 @@ export function registerLaunch(program) {
     )
     .option("--token <token>", t("launch.token") || "Token Claude sends (ANTHROPIC_AUTH_TOKEN)")
     .option("--api-key <key>", "Alias for --token (OmniRoute access token / API key)")
+    .option(
+      "--inherit-env",
+      "Explicitly pass the full parent environment to Claude Code (may expose credentials)"
+    )
     .allowUnknownOption(true)
     .allowExcessArguments(true)
     .argument("[claudeArgs...]", "arguments passed through to the claude binary")

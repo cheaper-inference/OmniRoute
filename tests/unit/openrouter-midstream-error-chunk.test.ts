@@ -2,30 +2,84 @@
  * Regression test: OpenRouter mid-stream error chunk silently swallowed.
  *
  * OpenRouter (and other OpenAI-compatible aggregators) can send an HTTP 200 SSE
- * stream whose body carries a `chat.completion.chunk` with an empty `choices`
- * array and a top-level `error` object instead of any delta — e.g. when the
+ * stream whose body carries a `chat.completion.chunk` with a top-level `error`
+ * object and either empty or populated `choices` — e.g. when the
  * underlying provider (Nvidia, hosting a free model) hits its own capacity limit
  * mid-request:
  *   {"choices":[],"error":{"code":502,"message":"Upstream error from Nvidia: ...
  *   Worker local total request limit reached (33/32)","metadata":{"error_type":
  *   "provider_unavailable"}}}
  *
- * Before this fix, `openaiToOpenAIResponsesResponse()`'s `!chunk.choices?.length`
- * branch treated this exactly like a legitimate trailing-usage/no-op chunk and
- * dropped it, so the stream ended with `response.completed` / `error: null` /
- * `output: []` — a false "successful but empty" response instead of surfacing
- * the real 502 upstream failure. Mirrors the Gemini mid-stream error fix (#4177).
+ * Empty-choice errors already have coverage. Populated-choice errors must use
+ * the same failure path, not emit their delta or a false response.completed.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { registerHooks } from "node:module";
+
+const importGuard = registerHooks({
+  resolve(specifier, context, nextResolve) {
+    const resolved = nextResolve(specifier, context);
+    assert.ok(
+      !/\/credentialLoader\.[cm]?[jt]s$/.test(resolved.url),
+      "offline translator tests must not import the external credential loader"
+    );
+    return resolved;
+  },
+});
+const originalFetch = globalThis.fetch;
+let unexpectedFetches = 0;
+globalThis.fetch = async () => {
+  unexpectedFetches++;
+  throw new Error("Unexpected fetch in offline OpenRouter translator tests");
+};
+test.after(() => {
+  importGuard.deregister();
+  globalThis.fetch = originalFetch;
+  assert.equal(unexpectedFetches, 0, "translator tests must not make network requests");
+});
 
 const { openaiToOpenAIResponsesResponse } =
   await import("../../open-sse/translator/response/openai-responses.ts");
-const { initState } = await import("../../open-sse/translator/index.ts");
-const { FORMATS } = await import("../../open-sse/translator/formats.ts");
+
+// Responses-only fixture: importing translator/index also loads request-side provider state.
+function initState() {
+  return {
+    seq: 0,
+    responseId: "resp_offline_openrouter",
+    created: 1,
+    model: null,
+    started: false,
+    toolCalls: new Map(),
+    finishReason: null,
+    usage: null,
+    msgTextBuf: {},
+    msgItemAdded: {},
+    msgContentAdded: {},
+    msgItemDone: {},
+    reasoningId: "",
+    reasoningIndex: -1,
+    reasoningBuf: "",
+    reasoningPartAdded: false,
+    reasoningDone: false,
+    inThinking: false,
+    parseTextualReasoningTags: false,
+    funcArgsBuf: {},
+    funcArgsEscapeState: {},
+    funcNames: {},
+    funcCallIds: {},
+    funcArgsDone: {},
+    funcItemAdded: {},
+    funcItemDone: {},
+    completedOutputItems: [],
+    completedSent: false,
+    upstreamError: undefined as
+      { status: number; type: string; code: string; message: string } | undefined,
+  };
+}
 
 test("OpenRouter mid-stream 502 provider_unavailable is surfaced as upstreamError, not dropped", () => {
-  const state = initState(FORMATS.OPENAI_RESPONSES);
+  const state = initState();
 
   const errorChunk = {
     id: "gen-1784726796-AJw13XXRnwqcRL2kieNm",
@@ -47,8 +101,8 @@ test("OpenRouter mid-stream 502 provider_unavailable is surfaced as upstreamErro
 
   // End of stream (chunk === null) flushes the deferred completion.
   const flushEvents = openaiToOpenAIResponsesResponse(null, state);
-  const completedEvent = flushEvents.find((e) => e.event === "response.completed");
-  assert.ok(completedEvent, "should have a response.completed event");
+  const completedEvent = flushEvents.find((e) => e.event === "response.failed");
+  assert.ok(completedEvent, "should have a response.failed event");
   assert.equal(
     completedEvent.data.response.status,
     "failed",
@@ -63,7 +117,7 @@ test("OpenRouter mid-stream 502 provider_unavailable is surfaced as upstreamErro
 });
 
 test("OpenRouter mid-stream error with a rate-limit code maps to a 429 upstreamError", () => {
-  const state = initState(FORMATS.OPENAI_RESPONSES);
+  const state = initState();
 
   openaiToOpenAIResponsesResponse(
     {
@@ -78,8 +132,90 @@ test("OpenRouter mid-stream error with a rate-limit code maps to a 429 upstreamE
   );
 
   const flushEvents = openaiToOpenAIResponsesResponse(null, state);
-  const completedEvent = flushEvents.find((e) => e.event === "response.completed");
+  const completedEvent = flushEvents.find((e) => e.event === "response.failed");
   assert.ok(completedEvent);
   assert.equal(completedEvent.data.response.status, "failed");
   assert.equal(completedEvent.data.response.error.code, "429");
+});
+
+for (const populatedChoices of [false, true]) {
+  for (const midstream of [false, true]) {
+    test(`OpenRouter 500 fails with ${populatedChoices ? "populated" : "empty"} choices ${midstream ? "after partial output" : "as the first chunk"}`, () => {
+      const state = initState();
+      const partialContent = "Partial answer before failure";
+      const errorContent = "This error-chunk content must not become output";
+      const events = midstream
+        ? openaiToOpenAIResponsesResponse(
+            {
+              id: "gen-offline-openrouter",
+              model: "openai/gpt-6.1-sol",
+              choices: [{ index: 0, delta: { content: partialContent }, finish_reason: null }],
+            },
+            state
+          )
+        : [];
+
+      const errorEvents = openaiToOpenAIResponsesResponse(
+        {
+          id: "gen-offline-openrouter",
+          object: "chat.completion.chunk",
+          model: "openai/gpt-6.1-sol",
+          error: {
+            code: 500,
+            message: "Internal server error",
+            metadata: { error_type: "server" },
+          },
+          choices: populatedChoices
+            ? [{ index: 0, delta: { content: errorContent }, finish_reason: "error" }]
+            : [],
+        },
+        state
+      );
+      events.push(...errorEvents, ...openaiToOpenAIResponsesResponse(null, state));
+
+      assert.deepEqual(errorEvents, [], "error chunks must not emit content or success events");
+      assert.equal(state.upstreamError?.status, 500);
+      assert.equal(state.upstreamError?.code, "server", "retain metadata.error_type internally");
+      assert.equal(state.upstreamError?.type, "server_error");
+      assert.ok(!events.some((event) => event.event === "response.completed"));
+      const failures = events.filter((event) => event.event === "response.failed");
+      assert.equal(failures.length, 1, "emit exactly one failed terminal");
+      const response = failures[0].data.response;
+      assert.equal(response.status, "failed");
+      assert.equal(response.error.message, "Internal server error");
+      assert.ok(response.error.code === "500" || response.error.code === "server");
+      assert.ok(!JSON.stringify(events).includes(errorContent));
+      if (midstream) {
+        assert.ok(JSON.stringify(response.output).includes(partialContent));
+      } else {
+        assert.deepEqual(response.output, []);
+      }
+      assert.deepEqual(openaiToOpenAIResponsesResponse(null, state), [], "flush is idempotent");
+    });
+  }
+}
+
+test("OpenRouter healthy output still completes after trailing usage", () => {
+  const state = initState();
+  const events = openaiToOpenAIResponsesResponse(
+    {
+      id: "gen-offline-healthy",
+      choices: [{ index: 0, delta: { content: "Healthy answer" }, finish_reason: "stop" }],
+    },
+    state
+  );
+  events.push(
+    ...openaiToOpenAIResponsesResponse(
+      { choices: [], usage: { prompt_tokens: 2, completion_tokens: 3, total_tokens: 5 } },
+      state
+    ),
+    ...openaiToOpenAIResponsesResponse(null, state)
+  );
+  const completed = events.filter((event) => event.event === "response.completed");
+  assert.equal(completed.length, 1);
+  assert.equal(completed[0].data.response.status, "completed");
+  assert.equal(completed[0].data.response.error, null);
+  assert.equal(completed[0].data.response.usage.total_tokens, 5);
+  assert.ok(JSON.stringify(completed[0].data.response.output).includes("Healthy answer"));
+  assert.ok(!events.some((event) => event.event === "response.failed"));
 });

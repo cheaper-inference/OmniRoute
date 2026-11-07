@@ -32,6 +32,15 @@ import {
   parseKieResultJson,
 } from "../utils/kieTask.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import {
+  UPSTREAM_MEDIA_LIMITS,
+  downloadUpstreamMedia,
+  upstreamMediaErrorText,
+} from "@/shared/network/remoteImageFetch";
+import { handleFalMusicGeneration } from "./mediaGeneration/fal.ts";
+import { handleSyntxMusicGeneration } from "./syntxAudio.ts";
+import { handleMinimaxMusicGeneration } from "./mediaGeneration/minimaxMusic.ts";
+import { handleElevenLabsMusicGeneration } from "./mediaGeneration/elevenLabsMusic.ts";
 
 function normalizeKieSunoModel(model: string): string {
   const map: Record<string, string> = {
@@ -81,7 +90,7 @@ function normalizeKieMusicTracks(recordData: unknown): Array<Record<string, unkn
 /**
  * Handle music generation request
  */
-export async function handleMusicGeneration({ body, credentials, log }) {
+export async function handleMusicGeneration({ body, credentials, log, signal = null }) {
   const { provider, model } = parseMusicModel(body.model);
 
   if (!provider) {
@@ -124,6 +133,14 @@ export async function handleMusicGeneration({ body, credentials, log }) {
     }
   }
 
+  if (providerConfig.format === "fal-ai-music") {
+    return handleFalMusicGeneration({ model, provider, providerConfig, body, credentials, log });
+  }
+
+  if (providerConfig.format === "elevenlabs-music") {
+    return handleElevenLabsMusicGeneration({ model, body, credentials });
+  }
+
   if (providerConfig.format === "comfyui") {
     return handleComfyUIMusicGeneration({
       model,
@@ -141,11 +158,31 @@ export async function handleMusicGeneration({ body, credentials, log }) {
     return handleKieMusicGeneration({ model, provider, providerConfig, body, credentials, log });
   }
 
-  if (providerConfig.format === "suno-music") {
-    return handleSunoMusicGeneration({ model, provider, providerConfig, body, credentials, log });
-  }
   if (providerConfig.format === "udio-music") {
-    return handleUdioMusicGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleUdioMusicGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
+  }
+
+  if (providerConfig.format === "minimax-music") {
+    return handleMinimaxMusicGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+    });
+  }
+
+  if (providerConfig.format === "syntx-music") {
+    return handleSyntxMusicGeneration({ model, provider, body, credentials, log, signal });
   }
 
   return {
@@ -418,127 +455,6 @@ async function handleKieMusicGeneration({
   }
 }
 
-async function handleSunoMusicGeneration({
-  model,
-  provider,
-  providerConfig,
-  body,
-  credentials,
-  log,
-}) {
-  const startTime = Date.now();
-  const cookie = credentials?.apiKey || credentials?.providerSpecificData?.cookie || "";
-  if (!cookie) {
-    return { success: false, status: 401, error: "Suno session cookie is required" };
-  }
-  const prompt = typeof body.prompt === "string" ? body.prompt : String(body.prompt ?? "");
-  if (log) {
-    log.info("MUSIC", `${provider}/${model} (suno) | prompt: "${prompt.slice(0, 60)}..."`);
-  }
-  try {
-    const res = await fetch(providerConfig.baseUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Cookie: cookie },
-      body: JSON.stringify({
-        gpt_description_prompt: prompt,
-        mv: model || "chirp-v3-5",
-        prompt: body.lyrics || "",
-        title: body.title || "",
-        tags: body.tags || "",
-        make_instrumental: body.instrumental || false,
-      }),
-    });
-    if (!res.ok) {
-      const errorText = await res.text();
-      saveCallLog({
-        method: "POST",
-        path: "/v1/music/generations",
-        status: res.status,
-        model: `${provider}/${model}`,
-        provider,
-        duration: Date.now() - startTime,
-        error: errorText.slice(0, 500),
-      }).catch(() => {});
-      return { success: false, status: res.status, error: errorText };
-    }
-    const clips = await res.json();
-    const ids = clips.map((c) => c.id).filter(Boolean);
-    if (ids.length === 0) {
-      saveCallLog({
-        method: "POST",
-        path: "/v1/music/generations",
-        status: 502,
-        model: `${provider}/${model}`,
-        provider,
-        duration: Date.now() - startTime,
-        error: "No clips returned from Suno",
-      }).catch(() => {});
-      return { success: false, status: 502, error: "No clips returned from Suno" };
-    }
-    const deadline = Date.now() + 300000;
-    while (Date.now() < deadline) {
-      await new Promise((r) => setTimeout(r, 5000));
-      const feedRes = await fetch(`${providerConfig.statusUrl}?ids=${ids.join(",")}`, {
-        headers: { Cookie: cookie },
-      });
-      const songs = await feedRes.json();
-      const ready = songs.filter((s) => s.audio_url);
-      if (ready.length > 0) {
-        const audioRes = await fetch(ready[0].audio_url);
-        if (!audioRes.ok) {
-          return {
-            success: false,
-            status: audioRes.status,
-            error: `Failed to download audio: ${audioRes.status}`,
-          };
-        }
-        const buf = await audioRes.arrayBuffer();
-        saveCallLog({
-          method: "POST",
-          path: "/v1/music/generations",
-          status: 200,
-          model: `${provider}/${model}`,
-          provider,
-          duration: Date.now() - startTime,
-        }).catch(() => {});
-        return {
-          success: true,
-          data: {
-            created: Math.floor(Date.now() / 1000),
-            data: [{ b64_json: Buffer.from(buf).toString("base64"), format: "mp3" }],
-          },
-        };
-      }
-    }
-    saveCallLog({
-      method: "POST",
-      path: "/v1/music/generations",
-      status: 504,
-      model: `${provider}/${model}`,
-      provider,
-      duration: Date.now() - startTime,
-      error: "Suno music generation timed out",
-    }).catch(() => {});
-    return { success: false, status: 504, error: "Suno music generation timed out" };
-  } catch (err) {
-    if (log) log.error("MUSIC", `${provider} suno error: ${err.message}`);
-    saveCallLog({
-      method: "POST",
-      path: "/v1/music/generations",
-      status: 502,
-      model: `${provider}/${model}`,
-      provider,
-      duration: Date.now() - startTime,
-      error: err.message,
-    }).catch(() => {});
-    return {
-      success: false,
-      status: 502,
-      error: sanitizeErrorMessage(err) || "Music provider error",
-    };
-  }
-}
-
 async function handleUdioMusicGeneration({
   model,
   provider,
@@ -546,6 +462,7 @@ async function handleUdioMusicGeneration({
   body,
   credentials,
   log,
+  signal = null,
 }) {
   const startTime = Date.now();
   const cookie = credentials?.apiKey || credentials?.providerSpecificData?.cookie || "";
@@ -599,15 +516,19 @@ async function handleUdioMusicGeneration({
       const songs = await statusRes.json();
       const ready = songs.filter((s) => s.finished && s.song_path);
       if (ready.length > 0) {
-        const audioRes = await fetch(ready[0].song_path);
-        if (!audioRes.ok) {
+        let buf: Buffer;
+        try {
+          ({ buffer: buf } = await downloadUpstreamMedia(ready[0].song_path, {
+            ...UPSTREAM_MEDIA_LIMITS.audio,
+            signal,
+          }));
+        } catch (err) {
           return {
             success: false,
-            status: audioRes.status,
-            error: `Failed to download audio: ${audioRes.status}`,
+            status: 502,
+            error: `Failed to download audio: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
           };
         }
-        const buf = await audioRes.arrayBuffer();
         saveCallLog({
           method: "POST",
           path: "/v1/music/generations",
@@ -620,7 +541,7 @@ async function handleUdioMusicGeneration({
           success: true,
           data: {
             created: Math.floor(Date.now() / 1000),
-            data: [{ b64_json: Buffer.from(buf).toString("base64"), format: "mp3" }],
+            data: [{ b64_json: buf.toString("base64"), format: "mp3" }],
           },
         };
       }

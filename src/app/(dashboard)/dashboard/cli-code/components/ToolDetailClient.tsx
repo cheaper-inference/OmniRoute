@@ -3,6 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Skeleton } from "@omniroute/ui-kit/skeleton";
+import Badge from "@/shared/components/Badge";
+import Icon from "@/shared/components/Icon";
 import { CLI_TOOLS } from "@/shared/constants/cliTools";
 import { PROVIDER_ID_TO_ALIAS, getModelsByProviderId } from "@/shared/constants/models";
 import {
@@ -15,8 +19,10 @@ import {
   DefaultToolCard,
   DroidToolCard,
   HermesAgentToolCard,
+  GrokBuildToolCard,
   KiloToolCard,
   OpenClawToolCard,
+  PiToolCard,
 } from "./index";
 
 export interface ToolDetailClientProps {
@@ -133,10 +139,55 @@ export default function ToolDetailClient({ toolId, category }: ToolDetailClientP
           });
         }
       });
+
+      if (providerModels.length === 0) {
+        const prefix =
+          typeof conn.providerSpecificData?.prefix === "string" &&
+          conn.providerSpecificData.prefix.trim()
+            ? conn.providerSpecificData.prefix.trim()
+            : alias;
+        const fallbackModels: Array<{ id: string; name: string }> = [];
+        const addFallbackModel = (model: any) => {
+          const id = typeof model?.id === "string" ? model.id.trim() : "";
+          if (!id || fallbackModels.some((candidate) => candidate.id === id)) return;
+          fallbackModels.push({
+            id,
+            name: typeof model?.name === "string" && model.name.trim() ? model.name.trim() : id,
+          });
+        };
+
+        if (typeof conn.defaultModel === "string" && conn.defaultModel.trim()) {
+          addFallbackModel({ id: conn.defaultModel });
+        }
+        if (Array.isArray(conn.providerSpecificData?.customModels)) {
+          conn.providerSpecificData.customModels.forEach(addFallbackModel);
+        }
+        if (fallbackModels.length === 0 && conn.testStatus === "active") {
+          addFallbackModel({ id: "model-id", name: `${prefix}/model-id` });
+        }
+
+        fallbackModels.forEach((model) => {
+          const modelValue = `${prefix}/${model.id}`;
+          if (seenModels.has(modelValue)) return;
+          seenModels.add(modelValue);
+          models.push({
+            value: modelValue,
+            label: modelValue,
+            provider: conn.provider,
+            alias: prefix,
+            connectionName: conn.name,
+            modelId: model.id,
+          });
+        });
+      }
     });
 
     const activeAliases = new Set(
-      activeProviders.map((c) => PROVIDER_ID_TO_ALIAS[c.provider] || c.provider)
+      activeProviders.flatMap((connection) => {
+        const alias = PROVIDER_ID_TO_ALIAS[connection.provider] || connection.provider;
+        const prefix = connection.providerSpecificData?.prefix;
+        return typeof prefix === "string" && prefix.trim() ? [alias, prefix.trim()] : [alias];
+      })
     );
     const activeProviderIds = new Set(activeProviders.map((c) => c.provider));
     dynamicModels.forEach((dm) => {
@@ -188,7 +239,8 @@ export default function ToolDetailClient({ toolId, category }: ToolDetailClientP
   const cardProps: any = {
     tool,
     isExpanded: true,
-    onToggle: () => {},
+    // No collapse on the detail page: without a toggle the card header is not a button.
+    onToggle: undefined,
     baseUrl: getBaseUrl(),
     apiKeys,
     batchStatus: null,
@@ -197,6 +249,7 @@ export default function ToolDetailClient({ toolId, category }: ToolDetailClientP
     hasActiveProviders,
     cloudEnabled,
     availableModels,
+    catalog: dynamicModels,
   };
 
   const renderCard = () => {
@@ -219,10 +272,14 @@ export default function ToolDetailClient({ toolId, category }: ToolDetailClientP
         return <ClineToolCard {...cardProps} />;
       case "kilo":
         return <KiloToolCard {...cardProps} />;
+      case "pi":
+        return <PiToolCard {...cardProps} />;
       case "copilot":
         return <CopilotToolCard {...cardProps} />;
       case "hermes-agent":
         return <HermesAgentToolCard {...cardProps} />;
+      case "grok-build":
+        return <GrokBuildToolCard {...cardProps} />;
       case "antigravity":
         return <AntigravityToolCard {...cardProps} />;
       case "custom":
@@ -237,41 +294,37 @@ export default function ToolDetailClient({ toolId, category }: ToolDetailClientP
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Back navigation */}
-      <div className="flex items-center gap-2">
-        <Link
-          href={backCategory}
-          className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-primary transition-colors"
-        >
-          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          {category === "code" ? t("concept.code.title") : t("concept.agent.title")}
-        </Link>
-        <span className="text-text-muted">/</span>
-        <span className="text-sm font-medium">{tool.name}</span>
-      </div>
-
-      {/* Tool header */}
-      <div className="flex items-center gap-3 flex-wrap">
-        {tool.vendor && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-surface border border-border text-text-muted">
-            {tool.vendor}
+      <PageHeader
+        compact
+        eyebrow={
+          <Link
+            href={backCategory}
+            className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-primary transition-colors"
+          >
+            <Icon name="arrow_back" size={16} />
+            {category === "code" ? t("concept.code.title") : t("concept.agent.title")}
+          </Link>
+        }
+        title={tool.name}
+        description={
+          <span className="flex flex-wrap items-center gap-2">
+            {tool.vendor && <Badge>{tool.vendor}</Badge>}
+            <Badge variant="primary">
+              {category === "code" ? t("comparison.code.title") : t("comparison.agent.title")}
+            </Badge>
+            {tool.baseUrlSupport && tool.baseUrlSupport !== "none" && (
+              <Badge variant="success" icon="link">
+                {tool.baseUrlSupport === "full" ? t("card.baseUrlFull") : t("card.baseUrlPartial")}
+              </Badge>
+            )}
           </span>
-        )}
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-          {category === "code" ? t("comparison.code.title") : t("comparison.agent.title")}
-        </span>
-        {tool.baseUrlSupport && tool.baseUrlSupport !== "none" && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-600 dark:text-green-400">
-            <span className="material-symbols-outlined text-[12px]">link</span>
-            {tool.baseUrlSupport === "full" ? t("card.baseUrlFull") : t("card.baseUrlPartial")}
-          </span>
-        )}
-      </div>
+        }
+      />
 
       {/* Specialized card — always expanded */}
       {loading ? (
         <div className="flex flex-col gap-4">
-          <div className="h-24 rounded-xl bg-surface animate-pulse" />
+          <Skeleton className="h-24 rounded-xl" />
         </div>
       ) : (
         renderCard()

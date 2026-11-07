@@ -103,12 +103,16 @@ const VALID_CHANNELS = {
     "get-autostart-status",
     "enable-autostart",
     "disable-autostart",
-    "login:start",
-    "login:cancel",
-    "login:status",
+    "remote-server-prompt:get-initial-url",
   ],
-  send: ["window-minimize", "window-maximize", "window-close"],
-  receive: ["server-status", "port-changed", "update-status", "login:status"],
+  send: [
+    "window-minimize",
+    "window-maximize",
+    "window-close",
+    "remote-server-prompt:submit",
+    "remote-server-prompt:cancel",
+  ],
+  receive: ["server-status", "port-changed", "update-status"],
 };
 
 // ── Fix #16: Generic IPC wrappers ──────────────────────────
@@ -160,15 +164,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // ── Receive (event listeners) ────────────────────────────
   // Fix #6: Returns a disposer function for precise cleanup
+  // "server-status" payloads include remoteUrl when running in Remote Server
+  // Mode (see electron/main.js setRemoteServerUrl) — surfaced here read-only;
+  // the actual URL is configured via the tray menu, not the renderer.
   onServerStatus: (callback) => safeOn("server-status", callback),
   onPortChanged: (callback) => safeOn("port-changed", callback),
   onUpdateStatus: (callback) => safeOn("update-status", callback),
-
-  // ── Web-Cookie Login ──────────────────────────────────────
-  startLogin: (providerId, options) => safeInvoke("login:start", providerId, options),
-  cancelLogin: () => safeInvoke("login:cancel"),
-  getLoginStatus: () => safeInvoke("login:status"),
-  onLoginStatus: (callback) => safeOn("login:status", callback),
 
   // ── Static Properties ────────────────────────────────────
   isElectron: true,

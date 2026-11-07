@@ -4,9 +4,14 @@
 // to the original inline defs. The host dispatcher still owns the SPECIALTY_VALIDATORS map
 // construction + dispatch — these are just the leaf validator bodies.
 import { validateQoderCliPat } from "@omniroute/open-sse/services/qoderCli.ts";
+import {
+  resolveKiroApiKeyRegion,
+  resolveKiroRuntimeRegion,
+} from "@omniroute/open-sse/services/kiroRegion.ts";
 import { KiroService } from "@/lib/oauth/services/kiro";
 import { resolveNvidiaValidationModel } from "@/lib/providers/nvidiaValidationModel";
 import { normalizeBaseUrl } from "./urlHelpers";
+import { resolveXiaomiTokenPlanBaseUrl } from "@/shared/constants/xiaomiTokenPlanRegions";
 import { buildBearerHeaders, directHttpsRequest } from "./headers";
 import { toValidationErrorResult, validationRead, validationWrite } from "./transport";
 import { validateKiroApiKeyRuntimeProbe } from "./kiro";
@@ -48,7 +53,21 @@ export async function validateV0VercelProvider({ apiKey, providerSpecificData, i
 // auggie is a fully local, credential-less CLI passthrough — there is no API
 // key to check upstream. The only meaningful validation is confirming the
 // `auggie` binary is installed and runnable on this machine.
-export async function validateAuggieProvider() {
+//
+// The probe starts the `auggie` binary, so it only runs when this caller may make the host
+// start a process: remote-reachable routes pass `allowLocalSpawn: false` for non-loopback
+// callers (Hard Rules #15/#17); internal callers keep the default.
+export async function validateAuggieProvider({
+  allowLocalSpawn = true,
+}: { allowLocalSpawn?: boolean } = {}) {
+  if (!allowLocalSpawn) {
+    return {
+      valid: false,
+      error:
+        "Auggie is a local CLI; its validation runs only for requests from this machine. Validate the connection locally.",
+      unsupported: false,
+    };
+  }
   const { checkAuggieCliVersion } = await import("@omniroute/open-sse/executors/auggie.ts");
   const result = await checkAuggieCliVersion();
   if (!result.ok) {
@@ -61,11 +80,47 @@ export async function validateAuggieProvider() {
   return { valid: true, error: null, unsupported: false, method: result.version };
 }
 
-export async function validateQoderProvider({ apiKey, providerSpecificData }: any) {
+export async function validateCursorApiProvider({ apiKey }: { apiKey?: string }) {
+  const { exchangeCursorApiKey, CursorApiKeyExchangeError, isCursorApiKey } =
+    await import("@omniroute/open-sse/services/cursorApiKeyAuth.ts");
+  const key = (apiKey || "").trim();
+  if (!isCursorApiKey(key)) {
+    return {
+      valid: false,
+      error: "Cursor user API keys start with crsr_ or grok_ (cursor.com/dashboard/api)",
+      unsupported: false,
+      statusCode: 400,
+    };
+  }
+  try {
+    await exchangeCursorApiKey(key);
+    return { valid: true, error: null, unsupported: false, method: "exchange_user_api_key" };
+  } catch (error) {
+    const statusCode = error instanceof CursorApiKeyExchangeError ? error.status : 502;
+    const message = error instanceof Error ? error.message : "Cursor API key exchange failed";
+    return { valid: false, error: message, unsupported: false, statusCode };
+  }
+}
+
+export async function validateQoderProvider({
+  apiKey,
+  providerSpecificData,
+  allowLocalSpawn = true,
+}: any) {
   // Bifurcate validation: PAT tokens use Cosy auth against api1.qoder.sh;
   // regular API keys validate against dashscope (OpenAI-compatible endpoint).
   const key = (apiKey || "").trim();
   if (key.startsWith("pt-")) {
+    // The PAT probe runs the local `qodercli`; remote-reachable routes pass
+    // `allowLocalSpawn: false` for non-loopback callers (Hard Rules #15/#17).
+    if (!allowLocalSpawn) {
+      return {
+        valid: false,
+        error:
+          "Qoder Personal Access Tokens are validated with the local qodercli, which runs only for requests from this machine. Validate the connection locally.",
+        unsupported: false,
+      };
+    }
     return validateQoderCliPat({ apiKey: key, providerSpecificData });
   }
   // Non-PAT token → validate against dashscope (Alibaba Cloud).
@@ -100,7 +155,8 @@ export async function validateQoderProvider({ apiKey, providerSpecificData }: an
 
 export async function validateKiroProvider({ apiKey, providerSpecificData }: any) {
   try {
-    const region = providerSpecificData?.region || "us-east-1";
+    // Validate in the exact region the executor will route this connection to.
+    const region = resolveKiroApiKeyRegion(resolveKiroRuntimeRegion(providerSpecificData));
     const credential = await new KiroService().validateApiKey(apiKey, region);
     if (!credential.profileArn) {
       return await validateKiroApiKeyRuntimeProbe({
@@ -201,6 +257,19 @@ export async function validateLongcatProvider({ apiKey, providerSpecificData, is
   }
 }
 
+export function normalizeNvidiaValidationFailure(error: unknown) {
+  const failure = toValidationErrorResult(error);
+  if (failure.timeout) {
+    return {
+      valid: true,
+      error: null,
+      warning: "NVIDIA auth probe timed out; credential validity is inconclusive",
+      method: "chat_probe_inconclusive",
+    };
+  }
+  return failure;
+}
+
 // NVIDIA NIM (#2463) — bypass the /models probe in favor of a direct
 // chat/completions probe. NVIDIA NIM's /models endpoint returns model
 // catalogs that vary by region and key-tier, and some keys 404 on it,
@@ -240,7 +309,7 @@ export async function validateNvidiaProvider({ apiKey, providerSpecificData }: a
     // Any non-auth response (200, 400, 422, 429) means auth passed
     return { valid: true, error: null };
   } catch (error: any) {
-    return toValidationErrorResult(error);
+    return normalizeNvidiaValidationFailure(error);
   }
 }
 
@@ -285,6 +354,41 @@ export async function validateZaiProvider({ apiKey, providerSpecificData }: any)
     }
     // Any non-auth response (200, 400, 422, 429, 502) means auth passed;
     // 502 "job timed out" is z.ai's own server-side queue limit, not an auth error.
+    return { valid: true, error: null };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+export async function validateXiaomiMimoTokenPlanProvider({
+  apiKey,
+  providerSpecificData,
+  isLocal,
+}: any) {
+  try {
+    const baseUrl = normalizeBaseUrl(
+      resolveXiaomiTokenPlanBaseUrl(
+        providerSpecificData,
+        "https://token-plan-sgp.xiaomimimo.com/v1"
+      )
+    );
+    const chatUrl = `${baseUrl.replace(/\/chat\/completions$/, "")}/chat/completions`;
+    const res = await validationWrite(
+      chatUrl,
+      {
+        method: "POST",
+        headers: buildBearerHeaders(apiKey, providerSpecificData),
+        body: JSON.stringify({
+          model: "mimo-v2.5-pro",
+          messages: [{ role: "user", content: "test" }],
+          max_tokens: 1,
+        }),
+      },
+      isLocal
+    );
+    if (res.status === 401 || res.status === 403) {
+      return { valid: false, error: "Invalid API key" };
+    }
     return { valid: true, error: null };
   } catch (error: any) {
     return toValidationErrorResult(error);

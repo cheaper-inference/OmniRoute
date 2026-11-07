@@ -15,7 +15,7 @@ import { NextResponse } from "next/server";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { PoolUpdateSchema } from "@/shared/schemas/quota";
-import { getPool, updatePool, deletePool } from "@/lib/localDb";
+import { getPool, updatePool, deletePool } from "@/lib/db/quotaPools";
 import { logAuditEvent, getAuditRequestContext } from "@/lib/compliance/index";
 import { reconcilePoolExclusivity } from "@/lib/quota/quotaKey";
 
@@ -73,9 +73,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     // helpers. Without the pre-update removal, a group/provider switch would leave
     // orphan qtSd/ combos a quota key still sees. Guarded + non-fatal.
     const combosNeedResync =
-      body !== null &&
-      typeof body === "object" &&
-      ("connectionIds" in body || "groupId" in body);
+      body !== null && typeof body === "object" && ("connectionIds" in body || "groupId" in body);
     if (combosNeedResync) {
       try {
         const { removeQuotaCombosForPool } = await import("@/lib/quota/quotaCombos");
@@ -106,7 +104,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
         id,
         prevApiKeyIds,
         nextApiKeyIds,
-        parsed.data.exclusive ?? false,
+        parsed.data.exclusive ?? false
       );
     }
 
@@ -132,7 +130,7 @@ export async function DELETE(request: Request, { params }: RouteParams): Promise
 
   try {
     const { id } = await params;
-    const existed = deletePool(id);
+    const existed = await deletePool(id);
     if (!existed) {
       return NextResponse.json(buildErrorBody(404, "Pool not found"), { status: 404 });
     }

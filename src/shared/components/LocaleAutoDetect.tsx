@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LOCALES, LOCALE_COOKIE } from "@/i18n/config";
+import { LOCALES, LOCALE_ALIASES, LOCALE_COOKIE } from "@/i18n/config";
 import type { Locale } from "@/i18n/config";
 import { detectBrowserLocale } from "@/i18n/detectBrowserLocale";
 import { persistLocale } from "@/shared/lib/persistLocale";
@@ -23,15 +23,19 @@ export function LocaleAutoDetect() {
   useEffect(() => {
     if (typeof navigator === "undefined" || hasLocaleCookie()) return;
 
-    const detected = detectBrowserLocale(navigator.languages ?? [navigator.language], LOCALES);
+    const detected = detectBrowserLocale(
+      navigator.languages ?? [navigator.language],
+      LOCALES,
+      LOCALE_ALIASES
+    );
     if (!detected) return;
 
+    const renderedLocale = document.documentElement.lang || null;
     persistLocale(detected as Locale);
     // Only refresh when the detected locale DIFFERS from the one the server
     // just rendered (<html lang>): refreshing on every first visit re-navigated
     // the page mid-interaction (flaky e2e "execution context destroyed" + a
     // visible flash for every new visitor whose browser already matches).
-    const renderedLocale = document.documentElement.lang || null;
     if (renderedLocale === detected) return;
     router.refresh();
     // Run once on mount only — this is a first-visit detection, not a

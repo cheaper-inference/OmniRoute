@@ -18,7 +18,7 @@
  * CI job (see .github/workflows/ci.yml).
  */
 import React from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import { act } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import ProviderCard from "@/app/(dashboard)/dashboard/providers/components/ProviderCard";
@@ -26,13 +26,18 @@ import ProviderCard from "@/app/(dashboard)/dashboard/providers/components/Provi
 vi.mock("next-intl", () => ({ useTranslations: () => (k: string) => k }));
 vi.mock("@/shared/components/ProviderTestSlideOver", () => ({ default: () => null }));
 vi.mock("@/shared/components/ProviderIcon", () => ({ default: () => null }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => {} }) }));
 
 describe("ProviderCard — Kimi (Moonshot AI) founding-friend accent", () => {
   let container: HTMLDivElement | null = null;
+  const mounted: { root: Root; container: HTMLDivElement }[] = [];
 
-  afterEach(() => {
+  afterEach(async () => {
+    for (const instance of mounted.splice(0)) {
+      await act(async () => instance.root.unmount());
+      instance.container.remove();
+    }
     if (container) {
-      document.body.removeChild(container);
       container = null;
     }
   });
@@ -41,6 +46,7 @@ describe("ProviderCard — Kimi (Moonshot AI) founding-friend accent", () => {
     container = document.createElement("div");
     document.body.appendChild(container);
     const root = createRoot(container);
+    mounted.push({ root, container });
     act(() => {
       root.render(
         <ProviderCard
@@ -62,11 +68,22 @@ describe("ProviderCard — Kimi (Moonshot AI) founding-friend accent", () => {
     // so the rendered text is the hardcoded English fallback.
     expect(el.textContent).toContain("Founding Friend");
 
-    // The card's own accent border/glow (KIMI_BRAND_COLOR = #1783FF) must be
-    // present on some element in the tree — both the outer Card border classes
-    // and the badge chip carry it.
-    const accented = el.querySelector("[class*='1783FF']");
-    expect(accented).not.toBeNull();
+    // The card's own tint (KIMI_BRAND_COLOR = #1783FF) must be present: the kit Card takes the
+    // brand through `brandColor`, and the badge chip carries the same brand tint.
+    const card = el.querySelector<HTMLElement>("[data-slot='card']");
+    expect(card?.classList.contains("ci-brand-tint")).toBe(true);
+    expect(card?.style.getPropertyValue("--ci-brand")).toBe("#1783ff");
+    const chip = Array.from(el.querySelectorAll<HTMLElement>("span.ci-brand-tint")).find((node) =>
+      node.textContent?.includes("Founding Friend")
+    );
+    expect(chip?.style.getPropertyValue("--ci-brand")).toBe("#1783ff");
+  });
+
+  it("tints the Cheaper Inference card with its own brand, not the catalog fallback", () => {
+    const el = renderCard("cheaperinference", "Cheaper Inference");
+    const card = el.querySelector<HTMLElement>("[data-slot='card']");
+    expect(card?.classList.contains("ci-brand-tint")).toBe(true);
+    expect(card?.style.getPropertyValue("--ci-brand")).toBe("#31f889");
   });
 
   it("renders the Founding Friend badge for kimi-web and moonshot too", () => {
@@ -80,7 +97,7 @@ describe("ProviderCard — Kimi (Moonshot AI) founding-friend accent", () => {
   it("does NOT render the Kimi badge or accent for an unrelated provider", () => {
     const el = renderCard("openai", "OpenAI");
     expect(el.textContent).not.toContain("Founding Friend");
-    expect(el.querySelector("[class*='1783FF']")).toBeNull();
+    expect(el.querySelector(".ci-brand-tint")).toBeNull();
   });
 
   it("does NOT render the Kimi badge for the hidden kimi-coding-apikey alias id", () => {

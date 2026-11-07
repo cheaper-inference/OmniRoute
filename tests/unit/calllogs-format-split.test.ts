@@ -17,7 +17,6 @@
 
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-
 import {
   asRecord,
   toNumber,
@@ -96,6 +95,15 @@ describe("callLogs/format — toStoredErrorSummary", () => {
     assert.ok(out.includes("kaboom"));
     assert.ok(out.includes("message"));
   });
+  it("removes credentials, filesystem paths, and stack frames before persistence", () => {
+    const out = toStoredErrorSummary(
+      "Provider failed access_token=persisted-secret at /srv/private/provider.json\n" +
+        "    at dispatch (/srv/private/dispatcher.ts:42:7)"
+    );
+
+    assert.equal(typeof out, "string");
+    assert.doesNotMatch(out, /persisted-secret|srv\/private|dispatcher\.ts|\bat dispatch\b/i);
+  });
 });
 
 describe("callLogs/format — buildRequestSummary", () => {
@@ -157,5 +165,48 @@ describe("format.ts exports its helpers directly", () => {
     ]) {
       assert.equal(typeof fmt[fn], "function", fn);
     }
+  });
+});
+
+describe("callLogs/format - diagnostic projections survive error protection (#3229)", () => {
+  it("keeps every allowlisted diagnostic field on a 4xx, including names containing 'key'", async () => {
+    const { protectPipelinePayloads } = await import("../../src/lib/usage/callLogs/format.ts");
+    const diagnostic = {
+      antigravityValidation: {
+        httpStatus: 400,
+        providerCode: 400,
+        providerStatus: "INVALID_ARGUMENT",
+        validationCategory: "tool_schema",
+        validationField: "tools",
+        // Name contains "key": the raw-body scrubber's BLOCKED_KEYS heuristic used to
+        // delete this field, leaving a diagnostic that looked complete but had lost the
+        // one detail identifying WHICH schema keyword the provider rejected.
+        schemaKeyword: "additionalProperties",
+      },
+    };
+
+    const out = protectPipelinePayloads(
+      { providerResponse: { timestamp: "2026-01-01T00:00:00.000Z", diagnostic } },
+      400
+    );
+
+    assert.deepEqual(out?.providerResponse?.diagnostic, diagnostic);
+  });
+
+  it("still scrubs a providerResponse that carries a real upstream body", async () => {
+    const { protectPipelinePayloads } = await import("../../src/lib/usage/callLogs/format.ts");
+
+    const out = protectPipelinePayloads(
+      {
+        providerResponse: {
+          timestamp: "2026-01-01T00:00:00.000Z",
+          status: 400,
+          body: { error: { message: "boom", authorization: "Bearer super-secret-value" } },
+        },
+      },
+      400
+    );
+
+    assert.doesNotMatch(JSON.stringify(out ?? {}), /super-secret-value/);
   });
 });

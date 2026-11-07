@@ -21,7 +21,7 @@ const sseModelService = await import("../../src/sse/services/model.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -31,7 +31,7 @@ test.beforeEach(async () => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("#4446 getComboForModel resolves a combo by a case-insensitive name (lowercased slug)", async () => {
@@ -81,4 +81,14 @@ test("#4446 exact name match still wins and unknown slugs still return null", as
 
   const unknown = await sseModelService.getComboForModel("no-such-combo-xyz");
   assert.equal(unknown, null, "an unknown slug must not resolve to any combo");
+});
+
+test("getComboForModel ignores combos without a populated model array", async () => {
+  await combosDb.createCombo({
+    name: "EMPTY-COMBO",
+    models: [],
+  });
+
+  const resolved = await sseModelService.getComboForModel("EMPTY-COMBO");
+  assert.equal(resolved, null, "an empty combo must not be selected for routing");
 });

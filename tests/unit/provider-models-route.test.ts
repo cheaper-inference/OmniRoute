@@ -26,7 +26,7 @@ async function resetStorage() {
   }
   antigravityVersion.clearAntigravityVersionCaches();
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -58,7 +58,7 @@ test.beforeEach(async () => {
 test.after(async () => {
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("provider models route returns a static local catalog for non-LLM search/agent providers (#5569/#5571/#5573/#5575)", async () => {
@@ -84,7 +84,10 @@ test("provider models route returns a static local catalog for non-LLM search/ag
 });
 
 test("provider models route fetches the live AI/ML API catalog from the auth-free /models endpoint (#5570)", async () => {
-  const connection = await seedConnection("aimlapi", { apiKey: "aiml-key" });
+  const connection = await seedConnection("aimlapi", {
+    providerSpecificData: { autoFetchModels: true },
+    apiKey: "aiml-key",
+  });
   let calledUrl = "";
   globalThis.fetch = async (url) => {
     calledUrl = String(url);
@@ -143,6 +146,7 @@ test("provider models route rejects connections with an empty provider id", asyn
 
 test("provider models route rejects OpenAI-compatible providers without a base URL", async () => {
   const connection = await seedConnection("openai-compatible-demo", {
+    providerSpecificData: { autoFetchModels: true },
     apiKey: "sk-openai-compatible",
   });
 
@@ -163,9 +167,7 @@ test("provider models route allows private/LAN OpenAI-compatible base URLs under
 
   const connection = await seedConnection("openai-compatible-private", {
     apiKey: "sk-openai-compatible",
-    providerSpecificData: {
-      baseUrl: "http://127.0.0.1:11434/v1",
-    },
+    providerSpecificData: { autoFetchModels: true, baseUrl: "http://127.0.0.1:11434/v1" },
   });
 
   let called = false;
@@ -184,6 +186,7 @@ test("provider models route returns auth failures from OpenAI-compatible upstrea
   const connection = await seedConnection("openai-compatible-auth", {
     apiKey: "sk-openai-compatible",
     providerSpecificData: {
+      autoFetchModels: true,
       baseUrl: "https://proxy.example.com/v1/chat/completions",
     },
   });
@@ -204,9 +207,7 @@ test("provider models route returns auth failures from OpenAI-compatible upstrea
 test("provider models route falls back after OpenAI-compatible endpoint probes all fail", async () => {
   const connection = await seedConnection("openai-compatible-fallback", {
     apiKey: "sk-openai-compatible",
-    providerSpecificData: {
-      baseUrl: "https://proxy.example.com/v1",
-    },
+    providerSpecificData: { autoFetchModels: true, baseUrl: "https://proxy.example.com/v1" },
   });
   const seenUrls = [];
 
@@ -227,9 +228,7 @@ test("provider models route falls back after OpenAI-compatible endpoint probes a
 test("provider models route retries transient OpenAI-compatible probe failures before succeeding", async () => {
   const connection = await seedConnection("openai-compatible-retry", {
     apiKey: "sk-openai-compatible",
-    providerSpecificData: {
-      baseUrl: "https://proxy.example.com/v1",
-    },
+    providerSpecificData: { autoFetchModels: true, baseUrl: "https://proxy.example.com/v1" },
   });
   const seenUrls = [];
 
@@ -307,9 +306,7 @@ test("provider models route discovers SiliconFlow models from configured China b
 test("provider models route handles local hostnames named 'v1' correctly", async () => {
   const connection = await seedConnection("openai-compatible-local-v1", {
     apiKey: "sk-local",
-    providerSpecificData: {
-      baseUrl: "http://v1/chat/completions",
-    },
+    providerSpecificData: { autoFetchModels: true, baseUrl: "http://v1/chat/completions" },
   });
   const seenUrls: string[] = [];
 
@@ -331,9 +328,7 @@ test("provider models route handles local hostnames named 'v1' correctly", async
 test("provider models route correctly strips standard /v1 paths", async () => {
   const connection = await seedConnection("openai-compatible-standard-v1", {
     apiKey: "sk-standard",
-    providerSpecificData: {
-      baseUrl: "https://api.openai.com/v1",
-    },
+    providerSpecificData: { autoFetchModels: true, baseUrl: "https://api.openai.com/v1" },
   });
   const seenUrls: string[] = [];
 
@@ -361,6 +356,7 @@ test("provider models route strips /v1 when it precedes /chat/completions (#5899
   const connection = await seedConnection("openai-compatible-airforce-v1", {
     apiKey: "sk-airforce",
     providerSpecificData: {
+      autoFetchModels: true,
       baseUrl: "https://api.airforce/v1/chat/completions",
     },
   });
@@ -392,9 +388,7 @@ test("provider models route continues probing past a REDIRECT_BLOCKED endpoint (
   // endpoint instead of surfacing an empty catalog.
   const connection = await seedConnection("openai-compatible-redirect-v1", {
     apiKey: "sk-redirect",
-    providerSpecificData: {
-      baseUrl: "https://redirect.example",
-    },
+    providerSpecificData: { autoFetchModels: true, baseUrl: "https://redirect.example" },
   });
   const seenUrls: string[] = [];
 
@@ -486,14 +480,10 @@ test("provider models route discovers local OpenAI-style models without requirin
   process.env.OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS = "true";
 
   const lmStudioConnection = await seedConnection("lm-studio", {
-    providerSpecificData: {
-      baseUrl: "http://localhost:1234/v1",
-    },
+    providerSpecificData: { autoFetchModels: true, baseUrl: "http://localhost:1234/v1" },
   });
   const lemonadeConnection = await seedConnection("lemonade", {
-    providerSpecificData: {
-      baseUrl: "http://localhost:13305/api/v1",
-    },
+    providerSpecificData: { autoFetchModels: true, baseUrl: "http://localhost:13305/api/v1" },
   });
 
   globalThis.fetch = async (url, init = {}) => {
@@ -545,7 +535,7 @@ test("provider models route returns the local catalog for built-in image provide
     {
       id: "topaz-enhance",
       name: "topaz-enhance",
-      apiFormat: "images",
+      apiFormat: "images-generations",
       supportedEndpoints: ["images"],
     },
   ]);
@@ -655,10 +645,33 @@ test("provider models route does NOT flag a degraded remote-fetch fallback as in
   const connection = await seedConnection("aimlapi", { apiKey: "aiml-key" });
   globalThis.fetch = async () => new Response("upstream down", { status: 500 });
 
-  const body = (await (await callRoute(connection.id)).json()) as any;
+  // refresh=true is the live attempt; without it the discovery never leaves the
+  // operator's "auto-fetch off" setting (see the next test).
+  const body = (await (await callRoute(connection.id, "?refresh=true")).json()) as any;
 
   assert.equal(body.source, "local_catalog");
   assert.notEqual(body.intentional, true, "degraded fallback must not be flagged intentional");
+  assert.equal(body.degraded, true, "a failed live discovery is a degraded discovery");
+  assert.equal(body.error, "HTTP 500", "the degraded fallback reports the reason");
+});
+
+test("provider models route flags a discovery the operator turned off as intentional", async () => {
+  // Auto-fetch is opt-in: with it off, the built-in catalog is the expected
+  // source, so the response is NOT a degraded discovery.
+  const connection = await seedConnection("aimlapi", { apiKey: "aiml-key" });
+  globalThis.fetch = async () => new Response("upstream down", { status: 500 });
+
+  const body = (await (await callRoute(connection.id)).json()) as {
+    source?: string;
+    intentional?: unknown;
+    degraded?: unknown;
+    error?: unknown;
+  };
+
+  assert.equal(body.source, "local_catalog");
+  assert.equal(body.intentional, true, "a discovery the operator turned off is not a failure");
+  assert.notEqual(body.degraded, true);
+  assert.equal(body.error, undefined);
 });
 
 test("provider models route returns the local catalog for Runway video models", async () => {
@@ -693,9 +706,9 @@ test("provider models route returns the updated local catalog for GitHub Copilot
   assert.equal(response.status, 200);
   assert.equal(body.provider, "github");
   assert.equal(body.source, "local_catalog");
-  assert.ok(body.models.some((model) => model.id === "gpt-5.4"));
-  assert.ok(body.models.some((model) => model.id === "gpt-5.3-codex"));
-  assert.ok(body.models.some((model) => model.id === "claude-opus-4.7"));
+  assert.ok(body.models.some((model) => model.id === "gpt-6-astra"));
+  assert.ok(body.models.some((model) => model.id === "gpt-5.6-sol"));
+  assert.ok(body.models.some((model) => model.id === "claude-opus-5"));
   assert.equal(
     body.models.some((model) => model.id === "gpt-5.1"),
     false
@@ -762,6 +775,7 @@ test("provider models route merges Upstage chat and embedding catalogs", async (
 
 test("provider models route caches discovered opencode-go models per connection", async () => {
   const connection = await seedConnection("opencode-go", {
+    providerSpecificData: { autoFetchModels: true },
     apiKey: "opencode-go-key",
   });
   let fetchCalls = 0;
@@ -827,13 +841,17 @@ test("provider models route falls back to cached models when a refresh fails", a
   assert.equal(fetchCalls, 2);
 });
 
-test("provider models route clears cached discovery when a refresh returns no remote models", async () => {
+// #19143: an empty answer may be transient, so it never clears a catalog or refreshes its
+// timestamp. A provider that really lost its models reports a degraded discovery until the
+// operator uses Clear All; a smaller non-empty list still replaces the catalog.
+test("provider models route keeps cached discovery when a refresh returns no remote models", async () => {
   const connection = await seedConnection("opencode-go", {
     apiKey: "opencode-go-key",
   });
   await modelsDb.replaceSyncedAvailableModelsForConnection("opencode-go", connection.id, [
     { id: "cached-go", name: "Cached Go", source: "imported" },
   ]);
+  const before = await providersDb.getProviderConnectionById(connection.id);
 
   globalThis.fetch = async () => {
     return Response.json({ data: [] });
@@ -845,20 +863,51 @@ test("provider models route clears cached discovery when a refresh returns no re
     "opencode-go",
     connection.id
   );
+  const after = await providersDb.getProviderConnectionById(connection.id);
 
   assert.equal(response.status, 200);
-  assert.equal(body.source, "local_catalog");
+  assert.equal(body.source, "cache");
   assert.match(body.warning, /no remote models discovered/i);
-  assert.ok(body.models.every((model) => model.id !== "cached-go"));
-  assert.deepEqual(cachedModels, []);
+  assert.equal(body.degraded, true);
+  assert.equal(body.error, "EMPTY_CATALOG");
+  assert.ok(body.models.some((model) => model.id === "cached-go"));
+  assert.deepEqual(
+    cachedModels.map((model) => model.id),
+    ["cached-go"]
+  );
+  assert.equal(after?.syncedModelsAt, before?.syncedModelsAt);
 });
 
-test("provider models route honors autoFetchModels=false and skips remote discovery", async () => {
+test("provider models route answers a degraded empty list when no fallback exists", async () => {
+  const connection = await seedConnection("openai-compatible-no-fallback", {
+    apiKey: "sk-openai-compatible",
+    providerSpecificData: { autoFetchModels: true, baseUrl: "https://proxy.example.com/v1" },
+  });
+
+  globalThis.fetch = async () => {
+    return Response.json({ data: [] });
+  };
+
+  const response = await callRoute(connection.id);
+  const body = (await response.json()) as {
+    source: string;
+    degraded: boolean;
+    error: string;
+    models: unknown[];
+  };
+  const stored = await providersDb.getProviderConnectionById(connection.id);
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(body.models, []);
+  assert.equal(body.source, "local_catalog");
+  assert.equal(body.degraded, true);
+  assert.equal(body.error, "EMPTY_CATALOG");
+  assert.ok(!stored?.syncedModelsAt);
+});
+
+test("provider models route keeps upstream discovery off until autoFetchModels is explicitly enabled", async () => {
   const connection = await seedConnection("opencode-go", {
     apiKey: "opencode-go-key",
-    providerSpecificData: {
-      autoFetchModels: false,
-    },
   });
   let called = false;
 
@@ -922,6 +971,7 @@ test("provider models route uses synced models as the authoritative local catalo
 
 test("provider models route retries Antigravity discovery endpoints before returning remote models", async () => {
   const connection = await seedConnection("antigravity", {
+    providerSpecificData: { autoFetchModels: true },
     authType: "oauth",
     accessToken: "ag-access",
     apiKey: null,
@@ -934,7 +984,8 @@ test("provider models route retries Antigravity discovery endpoints before retur
     // After PR #2219, the discovery flow calls loadCodeAssist first as a project
     // bootstrap; treat all bootstrap calls as non-fatal failures so the test
     // exercises the discovery retry path.
-    if (urlString.includes("/v1internal:loadCodeAssist")) {
+    // onboardUser is a bootstrap hop too (ff012ff420) — else it eats the single 503 below.
+    if (urlString.includes(":loadCodeAssist") || urlString.includes(":onboardUser")) {
       return new Response("nope", { status: 503 });
     }
     seenUrls.push(urlString);
@@ -953,6 +1004,9 @@ test("provider models route retries Antigravity discovery endpoints before retur
       models: [
         { id: "gemini-3.1-pro-high", displayName: "Gemini 3.1 Pro (High)" },
         { id: "gemini-pro-agent", displayName: "Gemini 3.1 Pro (High)" },
+        { id: "gemini-3.8-flash-high", displayName: "Gemini 3.8 Flash High" },
+        { id: "gemini-3.8-flash-medium", displayName: "Gemini 3.8 Flash Medium" },
+        { id: "gemini-3.8-flash-high", displayName: "Gemini 3.8 Flash High" },
         { id: "gemini-3.6-flash-high", displayName: "upstream-3.6-high" },
         { id: "gemini-3.6-flash-medium", displayName: "upstream-3.6-medium" },
         { id: "gemini-3.6-flash-low", displayName: "upstream-3.6-low" },
@@ -983,19 +1037,21 @@ test("provider models route retries Antigravity discovery endpoints before retur
     "https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels",
   ]);
   assert.deepEqual(body.models, [
+    // Callable aliases and repeated upstream IDs keep their shared catalog display names.
+    { id: "gemini-3.1-pro-high", name: "Gemini 3.1 Pro (High)" },
     { id: "gemini-pro-agent", name: "Gemini 3.1 Pro (High)" },
-    { id: "gemini-3.6-flash-high", name: "Gemini 3.6 Flash (High)" },
-    { id: "gemini-3.6-flash-medium", name: "Gemini 3.6 Flash (Medium)" },
-    { id: "gemini-3.6-flash-low", name: "Gemini 3.6 Flash (Low)" },
-    { id: "gemini-3.5-flash-extra-low", name: "Gemini 3.5 Flash (Low)" },
-    { id: "gemini-3.5-flash-low", name: "Gemini 3.5 Flash (Medium)" },
-    { id: "gemini-3-flash-agent", name: "Gemini 3.5 Flash (High)" },
-    { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash" },
+    { id: "gemini-3.8-flash-high", name: "Gemini 3.8 Flash (High)" },
+    { id: "gemini-3.8-flash-medium", name: "Gemini 3.8 Flash (Medium)" },
+    { id: "gemini-3.8-flash-high", name: "Gemini 3.8 Flash (High)" },
   ]);
 });
 
 test("provider models route discovers newly announced agy models without exposing internal models", async () => {
-  const connection = await seedConnection("agy", { authType: "oauth", accessToken: "agy-access" });
+  const connection = await seedConnection("agy", {
+    providerSpecificData: { autoFetchModels: true },
+    authType: "oauth",
+    accessToken: "agy-access",
+  });
   antigravityVersion.seedAntigravityIdeVersionCache("1.22.2");
   antigravityVersion.seedAntigravityCliVersionCache("1.22.2");
   globalThis.fetch = async (url) => {
@@ -1023,6 +1079,7 @@ test("provider models route discovers newly announced agy models without exposin
 
 test("provider models route falls back through all Antigravity discovery endpoints when needed", async () => {
   const connection = await seedConnection("antigravity", {
+    providerSpecificData: { autoFetchModels: true },
     authType: "oauth",
     accessToken: "ag-access",
     apiKey: null,
@@ -1084,6 +1141,7 @@ test("provider models route filters hidden models from the static Claude catalog
 
 test("provider models route rejects Anthropic-compatible providers without a base URL", async () => {
   const connection = await seedConnection("anthropic-compatible-demo", {
+    providerSpecificData: { autoFetchModels: true },
     apiKey: "sk-anthropic-compatible",
   });
 
@@ -1100,6 +1158,7 @@ test("provider models route trims Anthropic-compatible message URLs and filters 
     apiKey: "sk-anthropic-compatible",
     accessToken: "anthropic-access",
     providerSpecificData: {
+      autoFetchModels: true,
       baseUrl: "https://proxy.example.com/v1/messages",
     },
   });
@@ -1134,6 +1193,7 @@ test("provider models route forwards Anthropic-compatible upstream failures", as
   const connection = await seedConnection("anthropic-compatible-demo", {
     apiKey: "sk-anthropic-compatible",
     providerSpecificData: {
+      autoFetchModels: true,
       baseUrl: "https://proxy.example.com/v1/messages",
     },
   });
@@ -1150,6 +1210,7 @@ test("provider models route forwards Anthropic-compatible upstream failures", as
 
 test("provider models route paginates generic providers and filters hidden models when requested", async () => {
   const connection = await seedConnection("gemini", {
+    providerSpecificData: { autoFetchModels: true },
     apiKey: "gm-key",
   });
   modelsDb.mergeModelCompatOverride("gemini", "gemini-hidden", { isHidden: true });
@@ -1203,6 +1264,7 @@ test("provider models route paginates generic providers and filters hidden model
 
 test("provider models route stops pagination when the upstream repeats the next page token", async () => {
   const connection = await seedConnection("gemini", {
+    providerSpecificData: { autoFetchModels: true },
     apiKey: "gm-key",
   });
   let calls = 0;
@@ -1290,9 +1352,7 @@ test("provider models route rejects generic providers without any configured tok
 test("provider models route discovers active DataRobot gateway models from the catalog endpoint", async () => {
   const connection = await seedConnection("datarobot", {
     apiKey: "dr-key",
-    providerSpecificData: {
-      baseUrl: "https://app.datarobot.com",
-    },
+    providerSpecificData: { autoFetchModels: true, baseUrl: "https://app.datarobot.com" },
   });
 
   globalThis.fetch = async (url, init = {}) => {
@@ -1331,6 +1391,7 @@ test("provider models route discovers active DataRobot gateway models from the c
 
 test("provider models route discovers Clarifai OpenAI-compatible models with Key auth", async () => {
   const connection = await seedConnection("clarifai", {
+    providerSpecificData: { autoFetchModels: true },
     apiKey: "clarifai-pat",
   });
 
@@ -1374,6 +1435,7 @@ test("provider models route discovers Azure AI Foundry deployments through the v
   const connection = await seedConnection("azure-ai", {
     apiKey: "azure-ai-key",
     providerSpecificData: {
+      autoFetchModels: true,
       baseUrl: "https://my-foundry.services.ai.azure.com",
     },
   });
@@ -1404,6 +1466,7 @@ test("provider models route discovers Azure OpenAI deployments from the resource
   const connection = await seedConnection("azure-openai", {
     apiKey: "azure-openai-key",
     providerSpecificData: {
+      autoFetchModels: true,
       baseUrl: "https://my-resource.openai.azure.com/openai",
       apiVersion: "2024-12-01-preview",
     },
@@ -1440,9 +1503,7 @@ test("provider models route discovers Azure OpenAI deployments from the resource
 test("provider models route discovers native Bedrock foundation models and inference profiles", async () => {
   const connection = await seedConnection("bedrock", {
     apiKey: "bedrock-key",
-    providerSpecificData: {
-      region: "eu-west-2",
-    },
+    providerSpecificData: { autoFetchModels: true, region: "eu-west-2" },
   });
   const seenUrls: string[] = [];
 
@@ -1527,9 +1588,7 @@ test("provider models route discovers native Bedrock foundation models and infer
 test("provider models route discovers watsonx gateway models from the v1 models endpoint", async () => {
   const connection = await seedConnection("watsonx", {
     apiKey: "watsonx-key",
-    providerSpecificData: {
-      baseUrl: "https://ca-tor.ml.cloud.ibm.com",
-    },
+    providerSpecificData: { autoFetchModels: true, baseUrl: "https://ca-tor.ml.cloud.ibm.com" },
   });
 
   globalThis.fetch = async (url, init = {}) => {
@@ -1570,6 +1629,7 @@ test("provider models route discovers OCI OpenAI-compatible models and forwards 
     apiKey: "oci-key",
     projectId: "ocid1.generativeaiproject.oc1.us-chicago-1.demo",
     providerSpecificData: {
+      autoFetchModels: true,
       baseUrl: "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
     },
   });
@@ -1614,9 +1674,7 @@ test("provider models route discovers OCI OpenAI-compatible models and forwards 
 test("provider models route discovers Modal models from the configured OpenAI-compatible /v1 endpoint", async () => {
   const connection = await seedConnection("modal", {
     apiKey: "modal-key",
-    providerSpecificData: {
-      baseUrl: "https://alice--demo.modal.run/v1",
-    },
+    providerSpecificData: { autoFetchModels: true, baseUrl: "https://alice--demo.modal.run/v1" },
   });
 
   globalThis.fetch = async (url, init = {}) => {
@@ -1703,6 +1761,7 @@ test("provider models route discovers SAP models from AI_API_URL derived from de
   const connection = await seedConnection("sap", {
     apiKey: "sap-key",
     providerSpecificData: {
+      autoFetchModels: true,
       baseUrl: "https://sap.example.com/v2/lm/deployments/demo-deployment",
       resourceGroup: "shared",
     },
@@ -1758,6 +1817,7 @@ test("provider models route rejects unsupported providers without a models confi
 test("provider models route uses provider-specific auth headers for Kimi Coding", async () => {
   const connection = await seedConnection("kimi-coding", {
     apiKey: "kimi-coding-key",
+    providerSpecificData: { autoFetchModels: true },
   });
 
   globalThis.fetch = async (url, init = {}) => {

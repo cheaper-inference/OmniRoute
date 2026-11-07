@@ -6,21 +6,20 @@
  * (explicit daily/monthly token cap, or documented RPD × ~800 tokens × 30).
  *
  * Deliberately EXCLUDED (rate-limit-only, no published token cap — theoretical,
- * not granted): tencent, siliconflow, nvidia, baidu, publicai, sparkdesk.
+ * not granted): tencent, siliconflow, nvidia, baidu, publicai, sparkdesk,
+ * gemini (no per-model limits published since 2025-12), ollama-cloud (starter
+ * credits, no figure).
  * One-time signup credits and discontinued tiers are excluded (do not recur).
  */
 export type TosVerdict = "ok" | "caution" | "ambiguous" | "avoid" | "unknown";
 
 export const FREE_TIER_BUDGETS: Record<string, number> = {
   mistral: 1_000_000_000,
+  nara: 210_000_000,
   "cloudflare-ai": 122_000_000,
-  gemini: 60_000_000,
   doubao: 60_000_000,
-  cerebras: 30_000_000,
+  groq: 30_000_000,
   "api-airforce": 24_000_000,
-  "ollama-cloud": 20_000_000,
-  "github-models": 18_000_000,
-  groq: 15_000_000,
   bluesminds: 7_200_000,
   sambanova: 6_000_000,
   "arcee-ai": 4_800_000,
@@ -39,15 +38,13 @@ export const FREE_TIER_BUDGETS: Record<string, number> = {
  * non-personal use. Source: ToS attention table in docs/reference/FREE_TIERS.md.
  */
 export const FREE_TIER_TOS: Record<string, TosVerdict> = {
-  opencode: "avoid",
   "duckduckgo-web": "avoid",
-  "felo-web": "avoid",
   agy: "avoid",
+  antigravity: "avoid", // Both registered IDs use the same Antigravity integration.
   kiro: "avoid",
   "amazon-q": "avoid",
   "muse-spark-web": "avoid",
   "t3-web": "avoid",
-  "qwen-web": "avoid",
   modal: "avoid",
   nlpcloud: "avoid",
   blackbox: "avoid",
@@ -58,6 +55,16 @@ export const FREE_TIER_TOS: Record<string, TosVerdict> = {
   ai21: "avoid",
   iflytek: "avoid",
   coze: "avoid",
+  // GitHub Copilot: OmniRoute uses api.githubcopilot.com endpoints that are not
+  // published as a general third-party inference API. Personal use via a self-hosted
+  // proxy is neither expressly permitted nor expressly forbidden in GitHub's terms
+  // (GitHub Terms for Additional Products and Features — GitHub Copilot section,
+  // effective 2026-04-27). Classified "ambiguous" pending explicit authorization.
+  // Source: github.com/customer-terms/github-copilot-product-specific-terms
+  // and docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features
+  // (accessed 2026-09-02).
+  github: "ambiguous",
+  "ghe-copilot": "ambiguous",
 };
 
 export interface FreeTierTotals {

@@ -1,0 +1,41 @@
+{
+  "language": "ru",
+  "category": "context",
+  "rules": [
+    {
+      "name": "subject_omission",
+      "pattern": "^(?:Я |Мы |Вы )(?:можем|должны|будем|хотим|нужно)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "context",
+      "minIntensity": "full",
+      "flags": "giu"
+    },
+    {
+      "name": "known_fact_hedging",
+      "pattern": "(?<=\\.)\\s*(?:Возможно|Наверное|Может быть),\\s+",
+      "replacement": "",
+      "context": "assistant",
+      "category": "context",
+      "minIntensity": "full"
+    },
+    {
+      "name": "redundant_clarification",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:как я уже говорил|как уже упоминалось|как было сказано)(?![\\p{L}\\p{N}_])[,.!?\\s]*",
+      "replacement": "",
+      "context": "all",
+      "category": "context",
+      "minIntensity": "full",
+      "flags": "giu"
+    },
+    {
+      "name": "obvious_continuation",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:далее|затем|после этого|в итоге)(?![\\p{L}\\p{N}_])[,.!?\\s]*",
+      "replacement": "",
+      "context": "all",
+      "category": "context",
+      "minIntensity": "ultra",
+      "flags": "giu"
+    }
+  ]
+}

@@ -3,6 +3,7 @@
  *
  * Handles POST /v1/web/fetch requests.
  * Dispatches to a web-fetch provider executor (Firecrawl, Jina Reader, Tavily, or TinyFish).
+ * Also AnySearch extract for free public fetch, and Parallel Extract (markdown only).
  *
  * Request format:
  * {
@@ -16,16 +17,28 @@
  */
 
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
+import { context7Fetch } from "../executors/context7-fetch.ts";
 import { firecrawlFetch } from "../executors/firecrawl-fetch.ts";
 import { jinaReaderFetch } from "../executors/jina-reader-fetch.ts";
 import { tavilyFetch } from "../executors/tavily-fetch.ts";
 import { tinyfishFetch } from "../executors/tinyfish-fetch.ts";
+import { nimbleFetch } from "../executors/nimble-fetch.ts";
+import { anysearchFetch } from "../executors/anysearch-fetch.ts";
+import { parallelFetch } from "../executors/parallel-fetch.ts";
 
 export type WebFetchFormat = "markdown" | "html" | "links" | "screenshot";
 
 export interface WebFetchRequest {
   url: string;
-  provider?: "firecrawl" | "jina-reader" | "tavily-search" | "tinyfish";
+  provider?:
+    | "firecrawl"
+    | "jina-reader"
+    | "tavily-search"
+    | "tinyfish"
+    | "context7"
+    | "nimble-search"
+    | "anysearch-search"
+    | "parallel-search";
   format?: WebFetchFormat;
   depth?: 0 | 1 | 2;
   wait_for_selector?: string;
@@ -37,7 +50,7 @@ export interface WebFetchResponse {
   url: string;
   content: string;
   links: string[];
-  metadata: { title: string | null; description: string | null } | null;
+  metadata: { title: string | null; description: string | null; truncated?: boolean } | null;
   screenshot_url: string | null;
 }
 
@@ -50,10 +63,43 @@ export interface WebFetchResult {
 
 export interface WebFetchCredentials {
   apiKey?: string;
+  baseUrl?: string;
+  providerSpecificData?: Record<string, unknown>;
 }
 
-const WEB_FETCH_PROVIDERS = ["firecrawl", "jina-reader", "tavily-search", "tinyfish"] as const;
-type WebFetchProviderId = (typeof WEB_FETCH_PROVIDERS)[number];
+export const WEB_FETCH_PROVIDERS = Object.freeze([
+  "firecrawl",
+  "jina-reader",
+  "tavily-search",
+  "tinyfish",
+  "anysearch-search",
+  "context7",
+  "nimble-search",
+  "parallel-search",
+] as const);
+// Derived from the array — adding a provider to WEB_FETCH_PROVIDERS
+// automatically widens the union; they cannot drift apart.
+export type WebFetchProviderId = (typeof WEB_FETCH_PROVIDERS)[number];
+
+/**
+ * Providers that only run when the caller names them explicitly — they are not
+ * candidates for generic URL auto-select or fallback walks.
+ *
+ * The ReadonlySet type is compile-time protection only: Object.freeze cannot
+ * seal a Set's internal slots, so a determined JS caller could still mutate it.
+ * All repo consumers go through TypeScript, which is the threat model here.
+ */
+export const EXPLICIT_ONLY_WEB_FETCH_PROVIDERS: ReadonlySet<WebFetchProviderId> =
+  new Set<WebFetchProviderId>(["context7"]);
+
+/**
+ * Providers whose upstream serves a usable anonymous tier, so an explicit
+ * request succeeds even with no configured connection.
+ *
+ * Compile-time protection only (see the note above on ReadonlySet).
+ */
+export const ANONYMOUS_CAPABLE_WEB_FETCH_PROVIDERS: ReadonlySet<WebFetchProviderId> =
+  new Set<WebFetchProviderId>(["context7"]);
 
 /**
  * Execute a web fetch request against the specified (or auto-selected) provider.
@@ -104,6 +150,46 @@ export async function handleWebFetch(
         return await tinyfishFetch({
           url: req.url,
           format,
+          includeMetadata,
+          credentials,
+        });
+      case "anysearch-search":
+        return await anysearchFetch({
+          url: req.url,
+          format,
+          includeMetadata,
+          credentials,
+        });
+
+      case "nimble-search":
+        return await nimbleFetch({
+          url: req.url,
+          format,
+          includeMetadata,
+          credentials,
+        });
+
+      case "parallel-search":
+        // Parallel Extract is markdown-only; parallelFetch rejects other formats with 400.
+        return await parallelFetch({
+          url: req.url,
+          format,
+          includeMetadata,
+          credentials,
+        });
+
+      case "context7":
+        // Context7 returns llms.txt text only: html/links/screenshot formats are
+        // unsupported, and the format field is validated/ignored below.
+        if (req.format && req.format !== "markdown") {
+          const body = buildErrorBody(
+            400,
+            `Provider 'context7' only supports format 'markdown' (llms.txt), got '${req.format}'`
+          );
+          return { success: false, status: 400, error: body.error.message };
+        }
+        return await context7Fetch({
+          url: req.url,
           includeMetadata,
           credentials,
         });

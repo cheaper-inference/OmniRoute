@@ -1,6 +1,6 @@
 import { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
-import { parseModel } from "@omniroute/open-sse/services/model";
+import { parseModel, resolveCanonicalProviderModel } from "@omniroute/open-sse/services/model";
 
 // Alias <-> providerId resolution maps for the unified model catalog. Extracted
 // verbatim from ./catalog.ts. `FALLBACK_ALIAS_TO_PROVIDER` is also consumed directly by
@@ -77,6 +77,7 @@ export type AliasMaps = ReturnType<typeof buildAliasMaps>;
 export type ProviderPrefixedTarget = {
   modelStr?: string;
   provider?: string | null;
+  providerId?: string | null;
 };
 
 /**
@@ -99,10 +100,35 @@ export function resolveCanonicalProviderId(
   );
 }
 
-/** True when `${prefix}/__omniroute_probe__` parses back to the given providerId. */
+/**
+ * True when `${prefix}/__omniroute_probe__` parses back to the given
+ * providerId EXACTLY. Kept strict on purpose: this is the anti-collision
+ * guard (catalog.ts, #11433/7db430a3) that stops the catalog from publishing
+ * a provider-prefixed model id that would actually route to a DIFFERENT
+ * provider at request time — loosening it here would let a provider whose id
+ * collides with a manual alias override pass a check that was specifically
+ * built to fail for it (#13994).
+ */
 export function prefixRoutesToProvider(prefix: string, providerId: string): boolean {
   const parsed = parseModel(`${prefix}/__omniroute_probe__`);
   return parsed.provider === providerId;
+}
+
+/**
+ * Alias-aware variant of `prefixRoutesToProvider`, for the combo prefix-
+ * stripping path ONLY (`getProviderPrefixes` below). Also accepts a prefix
+ * that resolves to `providerId`'s CANONICAL routing target — e.g. an
+ * "opencode/" step canonically routes to "opencode-zen", so this recognizes
+ * "opencode" as a valid prefix for the "opencode-zen" provider even though
+ * `prefixRoutesToProvider("opencode", "opencode-zen")` is false. Never use
+ * this for the catalog.ts anti-collision guard: that check must stay strict.
+ */
+export function prefixRoutesToCanonicalProvider(prefix: string, providerId: string): boolean {
+  if (prefixRoutesToProvider(prefix, providerId)) return true;
+  const parsed = parseModel(`${prefix}/__omniroute_probe__`);
+  if (!parsed.provider) return false;
+  const canonicalTarget = resolveCanonicalProviderModel(providerId, "__omniroute_probe__");
+  return parsed.provider === canonicalTarget.provider;
 }
 
 /**
@@ -123,8 +149,22 @@ export function getProviderPrefixes(
   }
   return [...prefixes].filter(
     (prefix): prefix is string =>
-      typeof prefix === "string" && prefix.length > 0 && prefixRoutesToProvider(prefix, providerId)
+      typeof prefix === "string" &&
+      prefix.length > 0 &&
+      prefixRoutesToCanonicalProvider(prefix, providerId)
   );
+}
+
+function normalizeProviderNodeModelPrefix(
+  modelStr: string,
+  providerId: string,
+  providerNodeIdByPrefix: Record<string, string>
+): string {
+  const slashIndex = modelStr.indexOf("/");
+  if (slashIndex > 0 && providerNodeIdByPrefix[modelStr.slice(0, slashIndex)] === providerId) {
+    return `${providerId}${modelStr.slice(slashIndex)}`;
+  }
+  return modelStr;
 }
 
 /**
@@ -140,22 +180,38 @@ export function getProviderPrefixes(
  */
 export function getComboTargetModelId(
   maps: AliasMaps,
-  target: ProviderPrefixedTarget
+  target: ProviderPrefixedTarget,
+  providerNodeIdByPrefix: Record<string, string> = {}
 ): { providerId: string; modelId: string } | null {
-  const rawProvider = typeof target.provider === "string" ? target.provider.trim() : "";
-  const modelStr = typeof target.modelStr === "string" ? target.modelStr.trim() : "";
+  const rawProvider =
+    typeof target.providerId === "string"
+      ? target.providerId.trim()
+      : typeof target.provider === "string"
+        ? target.provider.trim()
+        : "";
+  let modelStr = typeof target.modelStr === "string" ? target.modelStr.trim() : "";
   if (!rawProvider || rawProvider === "unknown" || !modelStr) return null;
+
+  // Builder steps retain the node ID for connection selection but use its public
+  // model prefix. Normalize only a prefix whose selected node matches that ID.
+  // Keep the model qualified so the existing resolver strips exactly one prefix.
+  modelStr = normalizeProviderNodeModelPrefix(modelStr, rawProvider, providerNodeIdByPrefix);
 
   const providerId = resolveCanonicalProviderId(maps.aliasToProviderId, rawProvider);
   if (!providerId || providerId === "unknown") return null;
 
+  let modelId = modelStr;
   for (const prefix of getProviderPrefixes(maps, providerId, rawProvider)) {
     const prefixWithSlash = `${prefix}/`;
     if (modelStr.startsWith(prefixWithSlash)) {
-      const modelId = modelStr.slice(prefixWithSlash.length).trim();
-      return modelId ? { providerId, modelId } : null;
+      modelId = modelStr.slice(prefixWithSlash.length).trim();
+      break;
     }
   }
 
-  return { providerId, modelId: modelStr };
+  if (!modelId) return null;
+  const canonical = resolveCanonicalProviderModel(providerId, modelId);
+  return canonical.provider && canonical.model
+    ? { providerId: canonical.provider, modelId: canonical.model }
+    : null;
 }

@@ -1,15 +1,18 @@
-import { createHash } from "node:crypto";
+import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
 import {
   analyzePrefix,
   generatePromptCacheKey,
 } from "../../../src/lib/promptCache/prefixAnalyzer.ts";
-import { getCachedProviderConnections } from "../../../src/lib/db/readCache";
+import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import { parseModel } from "../model.ts";
 import type { ResolvedComboTarget } from "./types.ts";
+import { getStrategyTraits } from "./strategyRegistry.ts";
+import { getOAuthSessionAvailability } from "../oauthSessionOccupancy.ts";
 
 interface PromptCacheAffinityTarget {
   executionKey: string;
   connectionId?: string | null;
+  authType?: string | null;
 }
 
 export type PromptCacheAffinitySource = "explicit" | "prefix";
@@ -111,7 +114,7 @@ export function resolvePromptCacheAffinityKey(
   if (!key) return null;
 
   const source: PromptCacheAffinitySource = explicit ? "explicit" : "prefix";
-  const fingerprint = createHash("sha256").update(key).digest("hex").slice(0, 12);
+  const fingerprint = opaqueTokenFingerprint(key, { length: 12 });
   return { key, source, fingerprint };
 }
 
@@ -122,8 +125,25 @@ export function promptCacheTargetIdentity(target: PromptCacheAffinityTarget): st
 }
 
 function rendezvousScore(key: string, identity: string): bigint {
-  const digest = createHash("sha256").update(key).update("\0").update(identity).digest("hex");
-  return BigInt(`0x${digest.slice(0, 32)}`);
+  const digest = opaqueTokenFingerprint(`${key}\0${identity}`, { length: 32 });
+  return BigInt(`0x${digest}`);
+}
+
+const MAX_RENDEZVOUS_HIGH_BITS = (1n << 64n) - 1n;
+
+function normalizedRendezvousScore(key: string, identity: string): number {
+  return Number(rendezvousScore(key, identity) >> 64n) / Number(MAX_RENDEZVOUS_HIGH_BITS);
+}
+
+function combinedAffinityScore(
+  key: string,
+  target: PromptCacheAffinityTarget,
+  sessionKey?: string | null
+): number {
+  const cacheScore = normalizedRendezvousScore(key, promptCacheTargetIdentity(target));
+  const availability =
+    target.authType === "oauth" ? getOAuthSessionAvailability(target.connectionId, sessionKey) : 1;
+  return cacheScore * 0.75 + availability * 0.25;
 }
 
 /**
@@ -133,15 +153,16 @@ function rendezvousScore(key: string, identity: string): bigint {
  */
 export function calculatePromptCacheAffinityScores(
   targets: PromptCacheAffinityTarget[],
-  body: Record<string, unknown> | null | undefined
+  body: Record<string, unknown> | null | undefined,
+  sessionKey?: string | null
 ): Map<string, number> {
   const resolution = resolvePromptCacheAffinityKey(body);
   if (!resolution || targets.length === 0) return new Map();
   let winnerIdentity = "";
-  let winnerScore = -1n;
+  let winnerScore = -1;
   for (const target of targets) {
     const identity = promptCacheTargetIdentity(target);
-    const score = rendezvousScore(resolution.key, identity);
+    const score = combinedAffinityScore(resolution.key, target, sessionKey);
     if (score > winnerScore || (score === winnerScore && identity < winnerIdentity)) {
       winnerIdentity = identity;
       winnerScore = score;
@@ -166,22 +187,20 @@ export async function expandPromptCacheAffinityTargets(
 ): Promise<ResolvedComboTarget[]> {
   const providers = Array.from(
     new Set(
-      targets
-        .filter((target) => !target.connectionId)
-        .map(
-          (target) =>
-            target.provider ||
-            parseModel(target.modelStr).provider ||
-            parseModel(target.modelStr).providerAlias ||
-            "unknown"
-        )
+      targets.map(
+        (target) =>
+          target.provider ||
+          parseModel(target.modelStr).provider ||
+          parseModel(target.modelStr).providerAlias ||
+          "unknown"
+      )
     )
   );
   const connectionsByProvider = new Map<string, Array<Record<string, unknown>>>();
   await Promise.all(
     providers.map(async (provider) => {
       try {
-        const connections = (await getCachedProviderConnections({
+        const connections = (await getCachedProviderPoolConnections({
           provider,
           isActive: true,
         })) as Array<Record<string, unknown>>;
@@ -201,7 +220,18 @@ export function expandPromptCacheAffinityTargetsFromConnections(
   const expandedTargets: ResolvedComboTarget[] = [];
   for (const target of targets) {
     if (target.connectionId) {
-      expandedTargets.push(target);
+      const provider =
+        target.provider ||
+        parseModel(target.modelStr).provider ||
+        parseModel(target.modelStr).providerAlias ||
+        "unknown";
+      const connection = (connectionsByProvider.get(provider) || []).find(
+        (candidate) => candidate?.id === target.connectionId
+      );
+      expandedTargets.push({
+        ...target,
+        authType: typeof connection?.authType === "string" ? connection.authType : target.authType,
+      });
       continue;
     }
     const parsed = parseModel(target.modelStr);
@@ -227,9 +257,13 @@ export function expandPromptCacheAffinityTargetsFromConnections(
       continue;
     }
     for (const connectionId of scopedConnectionIds) {
+      const connection = (connectionsByProvider.get(provider) || []).find(
+        (candidate) => candidate?.id === connectionId
+      );
       expandedTargets.push({
         ...target,
         connectionId,
+        authType: typeof connection?.authType === "string" ? connection.authType : null,
         executionKey: `${target.executionKey}@${connectionId}`,
       });
     }
@@ -247,7 +281,9 @@ export function expandPromptCacheAffinityTargetsFromConnections(
  * reorder must not silently override, even though affinity is still free to
  * pick among the remaining/fallback targets. `quota-share` and `weighted`
  * were already protected before this fix; session stickiness and an explicit
- * auto-router pin remain independently protected via their own flags.
+ * auto-router pin remain independently protected via their own flags. The protected set
+ * (auto / quota-share / quota-weighted / weighted / priority / fill-first / lkgp) is the
+ * `protectsFirstTargetFromAffinity` trait in the strategy registry.
  */
 export function shouldProtectOriginalFirst(
   stickyStuck: boolean,
@@ -257,23 +293,38 @@ export function shouldProtectOriginalFirst(
   return (
     stickyStuck ||
     autoUsedExplicitRouter ||
-    strategy === "quota-share" ||
-    strategy === "weighted" ||
-    strategy === "priority" ||
-    strategy === "fill-first" ||
-    strategy === "lkgp"
+    getStrategyTraits(strategy).protectsFirstTargetFromAffinity
   );
 }
 
 /**
- * Order eligible targets using rendezvous hashing. The original order is used
- * as the final tie-breaker, so targets sharing one account identity remain
- * stable without using modelStr as the affinity identity.
+ * Extract the base model identity from a target's executionKey or modelStr.
+ * This strips any per-connection suffix (@connectionId) to identify the model itself.
+ */
+function getBaseModelIdentity(target: ResolvedComboTarget): string {
+  // executionKey format: "stepId@connectionId" when expanded, or just "stepId"
+  const executionKey = target.executionKey || "";
+  const baseExecutionKey = executionKey.split("@")[0];
+
+  // modelStr format: "provider/model" or "provider/model:version"
+  const modelStr = target.modelStr || "";
+
+  // Use executionKey as primary (preserves stepId grouping), fall back to modelStr
+  return baseExecutionKey || modelStr;
+}
+
+/**
+ * Order eligible targets using rendezvous hashing.
+ * @param scope - "model": sort only within same-model groups, preserving inter-model order;
+ *               "global": sort across all targets (original behavior).
+ *               Defaults to "global" for backward compatibility.
  */
 export function applyPromptCacheAffinity(
   targets: ResolvedComboTarget[],
   body: Record<string, unknown> | null | undefined,
-  enabled: boolean = true
+  enabled: boolean = true,
+  scope: "model" | "global" = "global",
+  sessionKey?: string | null
 ): PromptCacheAffinityResult {
   const resolution = enabled ? resolvePromptCacheAffinityKey(body) : null;
   if (!resolution || targets.length <= 1) {
@@ -289,20 +340,62 @@ export function applyPromptCacheAffinity(
     target,
     index,
     identity: promptCacheTargetIdentity(target),
-    score: rendezvousScore(resolution.key, promptCacheTargetIdentity(target)),
+    score: combinedAffinityScore(resolution.key, target, sessionKey),
+    baseModel: scope === "model" ? getBaseModelIdentity(target) : null,
   }));
 
-  ranked.sort((a, b) => {
-    if (a.score > b.score) return -1;
-    if (a.score < b.score) return 1;
-    const identityOrder = a.identity.localeCompare(b.identity);
-    return identityOrder !== 0 ? identityOrder : a.index - b.index;
-  });
+  if (scope === "model") {
+    // Group by base model identity, preserving original group order
+    const groups = new Map<string, typeof ranked>();
+    const groupOrder: string[] = [];
 
-  return {
-    targets: ranked.map((entry) => entry.target),
-    applied: true,
-    source: resolution.source,
-    fingerprint: resolution.fingerprint,
-  };
+    for (const entry of ranked) {
+      // baseModel is guaranteed non-null when scope === "model" (see map above)
+      const baseModel = entry.baseModel as string;
+      if (!groups.has(baseModel)) {
+        groups.set(baseModel, []);
+        groupOrder.push(baseModel);
+      }
+      groups.get(baseModel)!.push(entry);
+    }
+
+    // Sort within each group by score, then identity, then original index
+    const sortedGroups = groupOrder.map((baseModel) => {
+      const group = groups.get(baseModel)!;
+      return group.sort((a, b) => {
+        if (a.score > b.score) return -1;
+        if (a.score < b.score) return 1;
+        const identityOrder = a.identity.localeCompare(b.identity);
+        return identityOrder !== 0 ? identityOrder : a.index - b.index;
+      });
+    });
+
+    // Flatten groups in original order
+    const sortedTargets = sortedGroups.flatMap((group) => group.map((entry) => entry.target));
+
+    // Check if the order actually changed (for applied flag)
+    const orderChanged = !targets.every((target, i) => target === sortedTargets[i]);
+
+    return {
+      targets: sortedTargets,
+      applied: orderChanged, // Only true if the order actually changed
+      source: resolution.source,
+      fingerprint: resolution.fingerprint,
+    };
+  } else {
+    // Original global sorting behavior
+    ranked.sort((a, b) => {
+      if (a.score > b.score) return -1;
+      if (a.score < b.score) return 1;
+      const identityOrder = a.identity.localeCompare(b.identity);
+      return identityOrder !== 0 ? identityOrder : a.index - b.index;
+    });
+
+    return {
+      targets: ranked.map((entry) => entry.target),
+      applied: true,
+      source: resolution.source,
+      fingerprint: resolution.fingerprint,
+    };
+  }
 }

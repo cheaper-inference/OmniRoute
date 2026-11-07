@@ -14,16 +14,20 @@ const core = await import("../../src/lib/db/core.ts");
 // Seeding the real cache (no mock.module under the Stryker tap-runner) lets us drive the
 // HIT branch deterministically: setCachedResponse populates the in-memory cache that
 // getCachedResponse checks first, so the signature checkSemanticCache rebuilds resolves.
-const { generateSignature, setCachedResponse, clearCache } = await import(
-  "../../src/lib/semanticCache.ts"
-);
+const { storeSemanticCacheResponse } =
+  await import("../../open-sse/handlers/chatCore/semanticCacheStore.ts");
+const { generateSignature, setCachedResponse, getCachedResponse, clearCache } =
+  await import("../../src/lib/semanticCache.ts");
 const { OMNIROUTE_RESPONSE_HEADERS } = await import("../../src/shared/constants/headers.ts");
 const { calculateCost } = await import("../../src/lib/usage/costCalculator.ts");
 const { formatOmniRouteCost } = await import("../../src/domain/omnirouteResponseMeta.ts");
+const { translateNonStreamingResponse } =
+  await import("../../open-sse/handlers/responseTranslator.ts");
+const { extractUsageFromResponse } = await import("../../open-sse/handlers/usageExtractor.ts");
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 // A reusable persistAttemptLogs spy + base args. The functions below should NEVER be
@@ -43,7 +47,12 @@ function makeBaseArgs(overrides: Record<string, unknown> = {}) {
       },
     },
     effectiveServiceTier: undefined,
-    connectionId: null as string | null,
+    pendingScope: {
+      id: null,
+      model: "gpt-4o",
+      provider: "openai",
+      connectionId: null,
+    },
     startTime: Date.now(),
     log: {
       debug: () => {
@@ -135,6 +144,59 @@ test("checkSemanticCache MISS also works for the Responses-API `input` body shap
   assert.equal(persistCalls.length, 0);
 });
 
+test("Muse fresh sessions neither reuse cached opaque output nor store their own", async () => {
+  const model = "muse-spark";
+  const apiKeyId = "muse-cache-regression";
+  const input = [{ role: "user", content: "Muse cache ownership regression" }];
+  const signature = generateSignature(model, input, 0, undefined, apiKeyId);
+  const staleOutput = {
+    output: [{ type: "reasoning", encrypted_content: "another-account-opaque" }],
+  };
+  setCachedResponse(signature, model, staleOutput, 0);
+
+  const served: unknown[] = [];
+  for (const sessionId of ["fresh-account-a", "fresh-account-b"]) {
+    const body = { input, temperature: 0, session_id: sessionId };
+    const { args } = makeBaseArgs({
+      semanticCacheEnabled: true,
+      provider: "muse-code",
+      model,
+      apiKeyId,
+      body,
+    });
+    const hit = await checkSemanticCache(args as Parameters<typeof checkSemanticCache>[0]);
+    assert.equal(hit, null, "each fresh session must dispatch instead of serving cached reasoning");
+    const upstreamOutput = {
+      output: [{ type: "reasoning", encrypted_content: `${sessionId}-opaque` }],
+    };
+    storeSemanticCacheResponse({
+      enabled: true,
+      provider: "muse-code",
+      model,
+      apiKeyId,
+      body,
+      headers: {},
+      translatedResponse: upstreamOutput,
+    });
+    served.push(upstreamOutput);
+    assert.deepEqual(getCachedResponse(signature), staleOutput, "Muse must not overwrite cache");
+  }
+  assert.notDeepEqual(served[0], served[1]);
+
+  const uncachedInput = [{ role: "user", content: "uncached Muse reasoning" }];
+  const uncachedSignature = generateSignature(model, uncachedInput, 0, undefined, apiKeyId);
+  storeSemanticCacheResponse({
+    enabled: true,
+    provider: "muse-code",
+    model,
+    apiKeyId,
+    body: { input: uncachedInput, temperature: 0 },
+    headers: {},
+    translatedResponse: served[0],
+  });
+  assert.equal(getCachedResponse(uncachedSignature), null, "Muse must not create cache entries");
+});
+
 // ─── HIT path ────────────────────────────────────────────────────────────────
 // The guard-false / miss tests above only exercise the `return null` branches. These
 // seed the real cache so the `if (cached)` block actually runs end-to-end, killing
@@ -148,7 +210,11 @@ function makeHitArgs(overrides: Record<string, unknown> = {}) {
   const debugCalls: unknown[][] = [];
   const args = {
     semanticCacheEnabled: true,
-    body: { model: "gpt-4o", messages: [{ role: "user", content: "cached query" }], temperature: 0 },
+    body: {
+      model: "gpt-4o",
+      messages: [{ role: "user", content: "cached query" }],
+      temperature: 0,
+    },
     clientRawRequest: { headers: {} },
     model: "gpt-4o",
     provider: "openai",
@@ -159,7 +225,12 @@ function makeHitArgs(overrides: Record<string, unknown> = {}) {
       },
     },
     effectiveServiceTier: undefined,
-    connectionId: null as string | null,
+    pendingScope: {
+      id: null,
+      model: "gpt-4o",
+      provider: "openai",
+      connectionId: null,
+    },
     startTime: Date.now() - 5,
     log: {
       debug: (...a: unknown[]) => {
@@ -177,16 +248,36 @@ function makeHitArgs(overrides: Record<string, unknown> = {}) {
 
 // Seed the cache under the EXACT signature checkSemanticCache rebuilds for `args`.
 function seedHit(args: ReturnType<typeof makeHitArgs>["args"], response: unknown) {
+  const body = args.body as Record<string, unknown>;
   const signature = generateSignature(
     args.model,
-    args.body.messages ?? (args.body as Record<string, unknown>).input,
+    body.messages ?? body.input,
     args.body.temperature,
-    (args.body as Record<string, unknown>).top_p,
-    args.apiKeyId ?? undefined
+    body.top_p,
+    args.apiKeyId ?? undefined,
+    { toolChoice: body.tool_choice, tools: body.tools, responseFormat: body.response_format }
   );
   setCachedResponse(signature, args.model, response);
   return signature;
 }
+
+test("transcript-observed requests bypass existing semantic-cache hits", async () => {
+  clearCache();
+  const { args, persistCalls, convertedCalls } = makeHitArgs({
+    semanticCacheEnabled: true,
+    body: {
+      model: "gpt-4o",
+      messages: [{ role: "user", content: "sensitive cached query" }],
+      temperature: 0,
+    },
+    videoTranscriptSensitive: true,
+  });
+  seedHit(args, { choices: [{ message: { content: "PRIVATE_VIDEO_CACHE_SENTINEL" } }] });
+  const result = await checkSemanticCache(args as Parameters<typeof checkSemanticCache>[0]);
+  assert.equal(result, null);
+  assert.equal(persistCalls.length, 0);
+  assert.equal(convertedCalls.length, 0);
+});
 
 test("checkSemanticCache returns a non-streaming JSON HIT with cache headers + logging side effects", async () => {
   clearCache();
@@ -198,7 +289,11 @@ test("checkSemanticCache returns a non-streaming JSON HIT with cache headers + l
     usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
   };
   const { args, persistCalls, convertedCalls, debugCalls } = makeHitArgs({
-    body: { model: "gpt-4o", messages: [{ role: "user", content: "hit query one" }], temperature: 0 },
+    body: {
+      model: "gpt-4o",
+      messages: [{ role: "user", content: "hit query one" }],
+      temperature: 0,
+    },
     stream: false,
   });
   seedHit(args, cached);
@@ -251,7 +346,11 @@ test("checkSemanticCache returns a streaming SSE HIT (text/event-stream) when st
     usage: { prompt_tokens: 3, completion_tokens: 4, total_tokens: 7 },
   };
   const { args, persistCalls } = makeHitArgs({
-    body: { model: "gpt-4o", messages: [{ role: "user", content: "hit query stream" }], temperature: 0 },
+    body: {
+      model: "gpt-4o",
+      messages: [{ role: "user", content: "hit query stream" }],
+      temperature: 0,
+    },
     stream: true,
   });
   seedHit(args, cached);
@@ -279,7 +378,11 @@ test("checkSemanticCache HITs even when the cached body has no usage (cost falls
   const cached = {
     id: "chatcmpl-cached-no-usage",
     choices: [
-      { index: 0, message: { role: "assistant", content: "no-usage answer" }, finish_reason: "stop" },
+      {
+        index: 0,
+        message: { role: "assistant", content: "no-usage answer" },
+        finish_reason: "stop",
+      },
     ],
   };
   const { args, persistCalls } = makeHitArgs({
@@ -363,6 +466,60 @@ test("checkSemanticCache HIT bills 0 incremental cost and reports the original c
   );
 });
 
+test("checkSemanticCache replays the full prompt total of an OpenAI answer cached for a Claude client", async () => {
+  clearCache();
+  // A non-streaming Claude client served by an OpenAI provider: the cache stores the
+  // client-format body, where responseTranslator split prompt_tokens into
+  // input_tokens (fresh only) + cache_read/cache_creation counters.
+  const openAiAnswer = {
+    id: "chatcmpl-claude-client",
+    object: "chat.completion",
+    model: "gpt-4o",
+    choices: [
+      { index: 0, message: { role: "assistant", content: "cached answer" }, finish_reason: "stop" },
+    ],
+    usage: {
+      prompt_tokens: 10_000,
+      completion_tokens: 50,
+      total_tokens: 10_050,
+      prompt_tokens_details: { cached_tokens: 9_000, cache_creation_tokens: 900 },
+    },
+  };
+  const cached = translateNonStreamingResponse(openAiAnswer, "openai", "claude");
+  assert.equal(cached.type, "message", "sanity: the cached body is Claude-shaped");
+  assert.equal(cached.usage.input_tokens, 100, "sanity: input_tokens excludes the cache");
+
+  const { args } = makeHitArgs({
+    body: {
+      model: "gpt-4o",
+      messages: [{ role: "user", content: "hit query claude client" }],
+      temperature: 0,
+    },
+    stream: false,
+  });
+  seedHit(args, cached);
+
+  const expectedSaved = formatOmniRouteCost(
+    await calculateCost(
+      args.provider,
+      args.model,
+      extractUsageFromResponse(openAiAnswer, args.provider) as Record<string, number>
+    )
+  );
+
+  const result = await checkSemanticCache(args as Parameters<typeof checkSemanticCache>[0]);
+  assert.ok(result, "HIT -> non-null result");
+  const res = result.response as Response;
+
+  assert.equal(res.headers.get(OMNIROUTE_RESPONSE_HEADERS.tokensIn), "10000");
+  assert.equal(res.headers.get(OMNIROUTE_RESPONSE_HEADERS.savingsTokens), "10050");
+  assert.equal(
+    res.headers.get(OMNIROUTE_RESPONSE_HEADERS.costSaved),
+    expectedSaved,
+    "the avoided cost matches the original OpenAI usage, fresh input included"
+  );
+});
+
 test("checkSemanticCache isolates HITs per apiKeyId (no cross-key cache sharing) [#3740 edge]", async () => {
   clearCache();
   const cached = {
@@ -391,4 +548,295 @@ test("checkSemanticCache isolates HITs per apiKeyId (no cross-key cache sharing)
   const { args: argsA2 } = makeHitArgs({ body: sharedBody(), apiKeyId: "keyA" });
   const hitA = await checkSemanticCache(argsA2 as Parameters<typeof checkSemanticCache>[0]);
   assert.ok(hitA, "keyA must resolve its own cached entry");
+});
+
+// ─── cacheDefaultMode: per-key bypass (W3 fix) ──────────────────────────────
+
+test("checkSemanticCache returns null when cacheDefaultMode is 'bypass' (even with cacheable body)", async () => {
+  clearCache();
+  const cached = {
+    id: "chatcmpl-bypass",
+    choices: [
+      { index: 0, message: { role: "assistant", content: "bypassed" }, finish_reason: "stop" },
+    ],
+    usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+  };
+  const { args } = makeHitArgs({
+    semanticCacheEnabled: true,
+    body: {
+      model: "gpt-4o",
+      messages: [{ role: "user", content: "bypass query" }],
+      temperature: 0,
+    },
+    cacheDefaultMode: "bypass",
+  });
+  seedHit(args, cached);
+
+  const result = await checkSemanticCache(args as Parameters<typeof checkSemanticCache>[0]);
+
+  assert.equal(result, null, "cacheDefaultMode=bypass -> cache lookup skipped -> null");
+});
+
+test("checkSemanticCache returns a HIT when cacheDefaultMode is 'legacy' (default behavior preserved)", async () => {
+  clearCache();
+  const cached = {
+    id: "chatcmpl-legacy",
+    choices: [
+      { index: 0, message: { role: "assistant", content: "legacy hit" }, finish_reason: "stop" },
+    ],
+    usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+  };
+  const { args } = makeHitArgs({
+    semanticCacheEnabled: true,
+    body: {
+      model: "gpt-4o",
+      messages: [{ role: "user", content: "legacy query" }],
+      temperature: 0,
+    },
+    cacheDefaultMode: "legacy",
+  });
+  seedHit(args, cached);
+
+  const result = await checkSemanticCache(args as Parameters<typeof checkSemanticCache>[0]);
+
+  assert.ok(result, "cacheDefaultMode=legacy -> normal cache lookup -> HIT");
+  assert.equal(result.success, true);
+});
+
+// ─── cacheLatency marker header (W3 fix) ─────────────────────────────────────
+
+test("checkSemanticCache HIT includes X-OmniRoute-Cache-Latency: synthetic header", async () => {
+  clearCache();
+  const cached = {
+    id: "chatcmpl-latency",
+    choices: [
+      { index: 0, message: { role: "assistant", content: "latency test" }, finish_reason: "stop" },
+    ],
+    usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+  };
+  const { args } = makeHitArgs({
+    semanticCacheEnabled: true,
+    body: {
+      model: "gpt-4o",
+      messages: [{ role: "user", content: "latency query" }],
+      temperature: 0,
+    },
+  });
+  seedHit(args, cached);
+
+  const result = await checkSemanticCache(args as Parameters<typeof checkSemanticCache>[0]);
+
+  assert.ok(result, "HIT -> non-null result");
+  const res = result.response as Response;
+  assert.equal(
+    res.headers.get(OMNIROUTE_RESPONSE_HEADERS.cacheLatency),
+    "synthetic",
+    "HIT response carries X-OmniRoute-Cache-Latency: synthetic marker"
+  );
+});
+
+test("checkSemanticCache HIT finalizes the exact pending request by id", async () => {
+  clearCache();
+  const { clearPendingRequests, getPendingById, trackPendingRequest } =
+    await import("../../src/lib/usage/usageHistory.ts");
+  const { getCompletedDetails } = await import("../../src/lib/usage/completedRequestDetails.ts");
+  clearPendingRequests();
+  try {
+    const cached = {
+      id: "chatcmpl-cached-finalize",
+      choices: [
+        {
+          index: 0,
+          message: { role: "assistant", content: "finalize answer" },
+          finish_reason: "stop",
+        },
+      ],
+      usage: { prompt_tokens: 5, completion_tokens: 5, total_tokens: 10 },
+    };
+    const pendingId = trackPendingRequest("gpt-4o", "openai", "account-a", true);
+    assert.ok(pendingId);
+    const { args } = makeHitArgs({
+      body: {
+        model: "gpt-4o",
+        messages: [{ role: "user", content: "hit query finalize" }],
+        temperature: 0,
+      },
+      pendingScope: {
+        id: pendingId,
+        model: "gpt-4o",
+        provider: "openai",
+        connectionId: "account-a",
+      },
+    });
+    seedHit(args, cached);
+
+    const result = await checkSemanticCache(args as Parameters<typeof checkSemanticCache>[0]);
+    assert.ok(result);
+    assert.equal(getPendingById().has(pendingId as string), false);
+    const completed = getCompletedDetails().get(pendingId as string);
+    assert.ok(completed);
+    assert.equal(completed.status, 200);
+    assert.deepEqual(completed.clientResponse, cached);
+  } finally {
+    clearPendingRequests();
+  }
+});
+
+// ─── tool_choice / tools / response_format must be part of the signature (#12734) ────────────
+
+test("#12734: cached tool_calls response must NOT be replayed for tool_choice: 'none'", async () => {
+  clearCache();
+  const messages = [{ role: "user", content: "what is 2+2?" }];
+  const toolCallResponse = {
+    id: "chatcmpl-tool-calls",
+    choices: [
+      {
+        index: 0,
+        finish_reason: "tool_calls",
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            {
+              id: "call_1",
+              type: "function",
+              function: { name: "memory_search", arguments: "{}" },
+            },
+          ],
+        },
+      },
+    ],
+    usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+  };
+  // Stored under a body with NO tool_choice (mirrors the real pipeline: the cache check
+  // runs before memory/skill tool injection, so the signature it stores under never saw
+  // tool_choice at all).
+  const { args: storeArgs } = makeHitArgs({ body: { model: "gpt-4o", messages, temperature: 0 } });
+  seedHit(storeArgs, toolCallResponse);
+
+  const { args: forbidArgs } = makeHitArgs({
+    body: { model: "gpt-4o", messages, temperature: 0, tool_choice: "none" },
+  });
+  const result = await checkSemanticCache(forbidArgs as Parameters<typeof checkSemanticCache>[0]);
+
+  assert.equal(
+    result,
+    null,
+    "a tool_choice:'none' request must be a cache MISS against a tool_calls response cached without tool_choice"
+  );
+});
+
+test("#12734: identical tool_choice/tools/response_format across requests still HITs", async () => {
+  clearCache();
+  const messages = [{ role: "user", content: "what is the weather?" }];
+  const tools = [
+    {
+      type: "function",
+      function: {
+        name: "get_weather",
+        description: "Get the weather",
+        parameters: { type: "object" },
+      },
+    },
+  ];
+  const cached = {
+    id: "chatcmpl-tool-config-hit",
+    choices: [
+      { index: 0, message: { role: "assistant", content: "sunny" }, finish_reason: "stop" },
+    ],
+    usage: { prompt_tokens: 8, completion_tokens: 2, total_tokens: 10 },
+  };
+  const body = {
+    model: "gpt-4o",
+    messages,
+    temperature: 0,
+    tool_choice: "auto",
+    tools,
+    response_format: { type: "json_object" },
+  };
+  const { args: storeArgs } = makeHitArgs({ body });
+  seedHit(storeArgs, cached);
+
+  const { args: readArgs } = makeHitArgs({ body: { ...body } });
+  const result = await checkSemanticCache(readArgs as Parameters<typeof checkSemanticCache>[0]);
+
+  assert.ok(result, "identical tool_choice/tools/response_format must still HIT");
+});
+
+test("Muse successful streaming completions never create or overwrite cache entries", async () => {
+  const { storeStreamingSemanticCacheResponse } =
+    await import("../../open-sse/handlers/chatCore/streamingSemanticCacheStore.ts");
+  for (const seeded of [false, true]) {
+    const input = [{ role: "user", content: `stream muse ${seeded}` }];
+    const signature = generateSignature("muse-spark", input, 0, undefined, "stream-client");
+    const old = { choices: [{ message: { content: "old opaque output" }, finish_reason: "stop" }] };
+    if (seeded) setCachedResponse(signature, "muse-spark", old, 1);
+    storeStreamingSemanticCacheResponse({
+      enabled: true,
+      provider: "muse-code",
+      model: "muse-spark",
+      apiKeyId: "stream-client",
+      body: { input, temperature: 0 },
+      headers: {},
+      streamStatus: 200,
+      streamResponseBody: {
+        choices: [{ message: { content: "new opaque output" }, finish_reason: "stop" }],
+      },
+    });
+    assert.deepEqual(getCachedResponse(signature), seeded ? old : null);
+  }
+});
+
+test("read path isolates response controls written by either cache store", async () => {
+  const { storeSemanticCacheResponse } =
+    await import("../../open-sse/handlers/chatCore/semanticCacheStore.ts");
+  const { storeStreamingSemanticCacheResponse } =
+    await import("../../open-sse/handlers/chatCore/streamingSemanticCacheStore.ts");
+  for (const streaming of [false, true]) {
+    clearCache();
+    const body = {
+      messages: [{ role: "user", content: "Synthetic cache identity check." }],
+      temperature: 0,
+      max_tokens: 4096,
+    };
+    const complete = {
+      choices: [
+        { finish_reason: "stop", message: { role: "assistant", content: "Synthetic answer." } },
+      ],
+    };
+    const common = {
+      enabled: true,
+      model: "synthetic-cache-model",
+      body,
+      headers: undefined,
+      apiKeyId: "synthetic-key",
+    };
+    if (streaming)
+      storeStreamingSemanticCacheResponse({
+        ...common,
+        streamStatus: 200,
+        streamResponseBody: complete,
+      });
+    else storeSemanticCacheResponse({ ...common, translatedResponse: complete });
+    const read = async (requestBody: Record<string, unknown>) => {
+      const { args } = makeBaseArgs({
+        semanticCacheEnabled: true,
+        model: common.model,
+        body: requestBody,
+        apiKeyId: common.apiKeyId,
+        reqLogger: { logConvertedResponse: () => {} },
+        log: null,
+      });
+      return checkSemanticCache(args as Parameters<typeof checkSemanticCache>[0]);
+    };
+    assert.ok(await read(body), "identical request must hit");
+    for (const change of [
+      { reasoning_effort: "low" },
+      { max_tokens: 2048 },
+      { max_output_tokens: 2048 },
+      { parallel_tool_calls: false },
+    ]) {
+      assert.equal(await read({ ...body, ...change }), null, JSON.stringify(change));
+    }
+  }
 });

@@ -1,8 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Button } from "@/shared/components";
+import { SectionHeader } from "@omniroute/ui-kit/page-header";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import EmptyState from "@/shared/components/EmptyState";
+import Icon from "@/shared/components/Icon";
 import MediaProviderHeader from "../../components/MediaProviderHeader";
 import MediaProviderKindNav from "../../components/MediaProviderKindNav";
 import type { MediaKind } from "../../components/mediaKinds";
@@ -39,7 +44,10 @@ interface MediaProviderPageClientProps {
 function renderPlayground(
   kind: MediaKind,
   providerId: string,
-  imageToTextCopy: { title: string; description: React.ReactNode }
+  bridgeCopy: {
+    imageToText: { title: string; description: React.ReactNode; cta: string };
+    sttCta: string;
+  }
 ) {
   switch (kind) {
     case "embedding":
@@ -49,7 +57,17 @@ function renderPlayground(
     case "tts":
       return <TtsExampleCard providerId={providerId} />;
     case "stt":
-      return <SttExampleCard providerId={providerId} />;
+      return (
+        <div className="flex flex-col gap-3">
+          <SttExampleCard providerId={providerId} />
+          <Link
+            href="/dashboard/settings/modality-bridge?tab=audio"
+            className="text-xs text-primary hover:underline"
+          >
+            {bridgeCopy.sttCta}
+          </Link>
+        </div>
+      );
     case "webSearch":
       return <WebSearchExampleCard providerId={providerId} />;
     case "webFetch":
@@ -65,10 +83,16 @@ function renderPlayground(
       return (
         <div className="flex flex-col gap-2 border border-dashed border-border rounded-xl p-6">
           <div className="flex items-center gap-2 text-text-muted">
-            <span className="material-symbols-outlined text-[20px]">image_search</span>
-            <h3 className="text-sm font-medium">{imageToTextCopy.title}</h3>
+            <Icon name="image_search" size={20} />
+            <h3 className="text-sm font-medium">{bridgeCopy.imageToText.title}</h3>
           </div>
-          <p className="text-xs text-text-muted">{imageToTextCopy.description}</p>
+          <p className="text-xs text-text-muted">{bridgeCopy.imageToText.description}</p>
+          <Link
+            href="/dashboard/settings/modality-bridge?tab=vision"
+            className="text-xs text-primary hover:underline"
+          >
+            {bridgeCopy.imageToText.cta}
+          </Link>
         </div>
       );
     default:
@@ -117,10 +141,9 @@ export default function MediaProviderPageClient({
     <div className="flex flex-col gap-6">
       {activeKind === "stt" && providerId === "openrouter" && (
         <div className="text-xs text-text-muted border border-border rounded-lg p-3 flex items-start gap-2">
-          <span className="material-symbols-outlined text-[16px] text-blue-500 mt-0.5">info</span>
+          <Icon name="info" size={16} className="text-info mt-0.5" />
           <span>
-            <strong>Existing connection:</strong> OpenRouter speech-to-text models use your
-            configured OpenRouter connection. No separate credential is required.
+            <strong>{t("existingConnection")}:</strong> {t("openrouterSttDescription")}
           </span>
         </div>
       )}
@@ -139,27 +162,9 @@ export default function MediaProviderPageClient({
 
       {/* Connections */}
       <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">
-            {t("connections", { count: connections.length })}
-          </h2>
-          <Button
-            size="sm"
-            icon="add"
-            onClick={() => {
-              window.location.href = `/dashboard/providers/${providerId}`;
-            }}
-          >
-            {t("addConnection")}
-          </Button>
-        </div>
-
-        {loading ? (
-          <div className="py-8 text-center text-sm text-text-muted">{t("loading")}</div>
-        ) : connections.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-12 border border-dashed border-border rounded-xl text-text-muted text-sm">
-            <span className="material-symbols-outlined text-[28px]">key_off</span>
-            <span>{t("noConnections")}</span>
+        <SectionHeader
+          title={t("connections", { count: connections.length })}
+          actions={
             <Button
               size="sm"
               icon="add"
@@ -169,7 +174,20 @@ export default function MediaProviderPageClient({
             >
               {t("addConnection")}
             </Button>
-          </div>
+          }
+        />
+
+        {loading ? (
+          <div className="py-8 text-center text-sm text-text-muted">{t("loading")}</div>
+        ) : connections.length === 0 ? (
+          <EmptyState
+            icon="key_off"
+            title={t("noConnections")}
+            actionLabel={t("addConnection")}
+            onAction={() => {
+              window.location.href = `/dashboard/providers/${providerId}`;
+            }}
+          />
         ) : (
           <div className="flex flex-col divide-y divide-border rounded-xl border border-border overflow-hidden">
             {connections.map((conn) => (
@@ -177,18 +195,14 @@ export default function MediaProviderPageClient({
                 <span
                   className={`size-2 rounded-full shrink-0 ${
                     conn.testStatus === "active" || conn.testStatus === "success"
-                      ? "bg-green-500"
+                      ? "bg-success"
                       : conn.testStatus === "error" || conn.testStatus === "unavailable"
-                        ? "bg-red-500"
+                        ? "bg-error"
                         : "bg-text-muted"
                   }`}
                 />
                 <span className="text-sm font-medium flex-1 truncate">{conn.name ?? conn.id}</span>
-                {conn.isActive === false && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-bg-subtle border border-border text-text-muted">
-                    {t("disabled")}
-                  </span>
-                )}
+                {conn.isActive === false && <Badge size="sm">{t("disabled")}</Badge>}
               </div>
             ))}
           </div>
@@ -197,10 +211,14 @@ export default function MediaProviderPageClient({
 
       {/* Playground */}
       {renderPlayground(activeKind, providerId, {
-        title: t("imageToText"),
-        description: t.rich("imageToTextComingSoon", {
-          code: (chunks) => <code className="font-mono bg-bg-subtle px-1 rounded">{chunks}</code>,
-        }),
+        imageToText: {
+          title: t("imageToText"),
+          description: t.rich("imageToTextBridgeAvailable", {
+            code: (chunks) => <code className="rounded bg-bg-subtle px-1 font-mono">{chunks}</code>,
+          }),
+          cta: t("imageToTextBridgeCta"),
+        },
+        sttCta: t("sttBridgeCta"),
       })}
     </div>
   );

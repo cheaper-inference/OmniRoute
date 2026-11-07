@@ -157,7 +157,7 @@ test("handleChat treats a pure Accept: text/event-stream as stream=true and retu
 
   const raw = await response.text();
   assert.equal(response.status, 200);
-  assert.equal(response.headers.get("Content-Type"), "text/event-stream");
+  assert.equal(response.headers.get("Content-Type"), "text/event-stream; charset=utf-8");
   assert.ok(response.headers.get("X-OmniRoute-Session-Id"));
   assert.match(raw, /Accept header stream/);
   assert.match(raw, /\[DONE\]/);
@@ -202,6 +202,8 @@ test("handleChat rejects requests without a model", async () => {
 test("handleChat applies task-aware routing when a semantic override is enabled", async () => {
   await seedConnection("deepseek", { apiKey: "sk-deepseek-task-route" });
   const seenAuthHeaders = [];
+  const seenRequestBodies = [];
+  const seenUrls = [];
   setTaskRoutingConfig({
     enabled: true,
     detectionEnabled: true,
@@ -212,9 +214,11 @@ test("handleChat applies task-aware routing when a semantic override is enabled"
   });
 
   globalThis.fetch = async (_url, init = {}) => {
+    seenUrls.push(String(_url));
     const headers = toPlainHeaders(init.headers);
     seenAuthHeaders.push(headers.Authorization ?? headers.authorization);
-    return buildOpenAIResponse("Task-routed response", "deepseek/deepseek-chat");
+    seenRequestBodies.push(JSON.parse(String(init.body)));
+    return buildOpenAIResponse("Task-routed response");
   };
 
   const response = await handleChat(
@@ -230,37 +234,55 @@ test("handleChat applies task-aware routing when a semantic override is enabled"
 
   assert.equal(response.status, 200);
   assert.deepEqual(seenAuthHeaders, ["Bearer sk-deepseek-task-route"]);
+  assert.deepEqual(seenUrls, ["https://api.deepseek.com/chat/completions"]);
+  assert.equal(seenRequestBodies[0].input, undefined);
+  assert.equal(seenRequestBodies[0].messages[0].role, "user");
+  assert.equal(seenRequestBodies[0].model, "deepseek-v4-flash");
   assert.equal(json.choices[0].message.content, "Task-routed response");
 });
 
-test("handleChat routes exact combo names and can recover via global fallback", async () => {
+test("handleChat keeps protected combo fallback separate from Global Fallback Model", async () => {
   await seedConnection("openai", { apiKey: "sk-openai-combo-route" });
+  const ordinaryTarget = await seedConnection("deepseek", {
+    apiKey: "sk-deepseek-combo-backup",
+  });
   await seedConnection("claude", { apiKey: "sk-claude-global-fallback" });
   await combosDb.createCombo({
     name: "router-global-fallback",
     strategy: "priority",
     config: { maxRetries: 0, retryDelayMs: 0 },
-    models: ["openai/gpt-4.1"],
+    models: [
+      {
+        kind: "model",
+        model: "openai/gpt-4.1",
+        fallbackOnlyOnQuotaExhaustion: true,
+      },
+      {
+        kind: "model",
+        model: "deepseek/deepseek-v4-flash",
+        connectionId: ordinaryTarget.id,
+      },
+    ],
   });
   await settingsDb.updateSettings({
-    globalFallbackModel: "claude/claude-3-5-sonnet-20241022",
+    globalFallbackModel: "claude/claude-sonnet-4.6",
   });
 
-  let attempts = 0;
-  globalThis.fetch = async (_url, init = {}) => {
-    attempts += 1;
-    const headers = toPlainHeaders(init.headers);
-    if (attempts === 1) {
-      assert.equal(headers.Authorization ?? headers.authorization, "Bearer sk-openai-combo-route");
+  const attemptedKeys: string[] = [];
+  globalThis.fetch = async (_url, init) => {
+    const headers = toPlainHeaders(init?.headers);
+    const key = headers["x-api-key"] ?? headers.Authorization ?? headers.authorization ?? "";
+    attemptedKeys.push(key);
+    if (key === "sk-deepseek-combo-backup") {
+      assert.fail("protected primary must not invoke the ordinary combo target");
+    }
+    if (key === "Bearer sk-openai-combo-route") {
       return new Response(JSON.stringify({ error: { message: "primary combo failed" } }), {
         status: 503,
         headers: { "Content-Type": "application/json" },
       });
     }
-    assert.equal(
-      headers["x-api-key"] ?? headers.Authorization ?? headers.authorization,
-      "sk-claude-global-fallback"
-    );
+    assert.equal(key, "sk-claude-global-fallback");
     return buildClaudeResponse("Global fallback answered");
   };
 
@@ -276,8 +298,93 @@ test("handleChat routes exact combo names and can recover via global fallback", 
   const json = (await response.json()) as any;
 
   assert.equal(response.status, 200);
-  assert.equal(attempts, 2);
+  assert.deepEqual(attemptedKeys, ["Bearer sk-openai-combo-route", "sk-claude-global-fallback"]);
   assert.equal(json.choices[0].message.content, "Global fallback answered");
+});
+
+test("handleChat defaults a Combo's incompatible reasoning fallback to drop", async () => {
+  await seedConnection("deepseek", {
+    apiKey: "sk-deepseek-reasoning-drop",
+    providerSpecificData: { targetFormat: "openai-responses" },
+  });
+  await combosDb.createCombo({
+    name: "reasoning-transport-drop",
+    strategy: "priority",
+    config: {
+      maxRetries: 0,
+      retryDelayMs: 0,
+    },
+    models: ["deepseek/deepseek-v4-flash"],
+  });
+
+  let upstreamBody: { input?: unknown } | null = null;
+  globalThis.fetch = async (_url, init = {}) => {
+    assert.equal(String(_url), "https://api.deepseek.com/responses");
+    upstreamBody = JSON.parse(String(init.body));
+    return new Response(
+      JSON.stringify({
+        id: "resp_reasoning_drop",
+        object: "response",
+        status: "completed",
+        model: "deepseek-v4-flash",
+        output: [
+          {
+            id: "msg_reasoning_drop",
+            type: "message",
+            role: "assistant",
+            content: [
+              {
+                type: "output_text",
+                text: "continued without prior reasoning",
+                annotations: [],
+              },
+            ],
+          },
+        ],
+        usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 },
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  };
+
+  const response = await handleChat(
+    buildRequest({
+      url: "http://localhost/v1/responses",
+      body: {
+        model: "reasoning-transport-drop",
+        stream: false,
+        input: [
+          { id: "rs_opaque", type: "reasoning", encrypted_content: "provider-state" },
+          {
+            id: "fc_call",
+            type: "function_call",
+            call_id: "call_1",
+            name: "search",
+            arguments: "{}",
+          },
+          { type: "function_call_output", call_id: "call_1", output: "done" },
+        ],
+      },
+    })
+  );
+
+  assert.equal(response.status, 200);
+  assert.ok(upstreamBody && Array.isArray(upstreamBody.input));
+  const upstreamInput = upstreamBody.input;
+  assert.equal(
+    upstreamInput.some(
+      (item) =>
+        item !== null && typeof item === "object" && "type" in item && item.type === "reasoning"
+    ),
+    false
+  );
+  assert.equal(
+    upstreamInput.some(
+      (item) =>
+        item !== null && typeof item === "object" && "type" in item && item.type === "function_call"
+    ),
+    true
+  );
 });
 
 test("handleChat keeps the combo error when the global fallback throws", async () => {
@@ -290,7 +397,7 @@ test("handleChat keeps the combo error when the global fallback throws", async (
     models: ["openai/gpt-4.1"],
   });
   await settingsDb.updateSettings({
-    globalFallbackModel: "claude/claude-3-5-sonnet-20241022",
+    globalFallbackModel: "claude/claude-sonnet-4.6",
   });
 
   let attempts = 0;
@@ -321,11 +428,13 @@ test("handleChat keeps the combo error when the global fallback throws", async (
   assert.match(json.error.message, /primary combo failed/i);
 });
 
-test("handleChat returns 404 when no provider credentials exist", async () => {
+test("handleChat returns 401 when no provider credentials exist (single-model)", async () => {
   // Upstream port decolua/9router#336 (Ibrahim Ryan): the no-credentials branch
-  // of handleNoCredentials now surfaces 404 NOT_FOUND so combo routing can fall
-  // through to the next target instead of being killed by the combo 400-hard-stop
-  // guard (open-sse/services/combo.ts, PR #4316 / issue #4279).
+  // of handleNoCredentials originally surfaced 404 NOT_FOUND unconditionally so
+  // combo routing could fall through to the next target (open-sse/services/combo.ts,
+  // PR #4316 / issue #4279). #10797 remaps that 404 to 401 for single-model
+  // (non-combo) requests — a direct client should see an auth/credential failure,
+  // not "not found"; combo routing still gets the 404 (see combo-routing-e2e.test.ts).
   const response = await handleChat(
     buildRequest({
       body: {
@@ -337,7 +446,7 @@ test("handleChat returns 404 when no provider credentials exist", async () => {
   );
   const json = (await response.json()) as any;
 
-  assert.equal(response.status, 404);
+  assert.equal(response.status, 401);
   assert.match(json.error.message, /No active credentials for provider: openai/);
 });
 
@@ -425,7 +534,7 @@ test("handleChat uses the emergency fallback model on budget exhaustion", async 
       });
     }
 
-    return buildOpenAIResponse("Emergency fallback answered", "gpt-oss-120b");
+    return buildOpenAIResponse("Emergency fallback answered", "nemotron-3.5-super-vl-120b-a12b");
   };
 
   const response = await handleChat(
@@ -442,7 +551,7 @@ test("handleChat uses the emergency fallback model on budget exhaustion", async 
 
   assert.equal(response.status, 200);
   assert.equal(seenBodies.length, 2);
-  assert.equal(seenBodies[1].model, "openai/gpt-oss-120b");
+  assert.equal(seenBodies[1].model, "nvidia/nemotron-3.5-super-vl-120b-a12b");
   assert.equal(seenBodies[1].max_tokens, 4096);
   // nvidia supports the legacy `max_tokens` field (#6912 symmetric normalization in
   // chatCore.ts), so the redundant `max_completion_tokens` is renamed away rather than
@@ -491,14 +600,14 @@ test("handleChat returns the primary budget error when emergency fallback also f
   // tries the free model once. (The second hop used to come from the executor-level
   // fallback inside chatCore, which re-sent the OpenAI credentials to the nvidia
   // endpoint — removed as a cross-provider credential leak.)
-  assert.deepEqual(seenModels, ["gpt-4.1", "openai/gpt-oss-120b"]);
+  assert.deepEqual(seenModels, ["gpt-4.1", "nvidia/nemotron-3.5-super-vl-120b-a12b"]);
   assert.match(json.error.message, /quota exceeded/i);
 });
 
 test("handleChat rejects models that are not allowed by the caller API key policy", async () => {
   await seedConnection("openai", { apiKey: "sk-openai-policy" });
   const apiKey = await seedApiKey({
-    allowedModels: ["claude/claude-3-5-sonnet-20241022"],
+    allowedModels: ["claude/claude-sonnet-4.6"],
   });
 
   const response = await handleChat(

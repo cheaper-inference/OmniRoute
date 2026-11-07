@@ -1,9 +1,13 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Card, Badge } from "@/shared/components";
 import Collapsible from "@/shared/components/Collapsible";
+// Direct module import: tests stub the barrel (Card/Badge) only.
+import StepButton from "@/shared/components/Button";
 import { FORMAT_META } from "../../exampleTemplates";
 import type { AdvancedAccordionProps, FormatId } from "../../types";
 
@@ -24,11 +28,12 @@ export interface PipelineViewProps extends Omit<AdvancedAccordionProps, "slug"> 
 }
 
 /** Default demo steps shown when no real pipeline is running. */
-const DEMO_STEPS: PipelineStep[] = [
+const DEMO_STEP_CONTENT: Array<
+  Pick<PipelineStep, "id" | "format" | "content" | "status"> & { translationKey: string }
+> = [
   {
     id: "1",
-    name: "Client Request",
-    description: "Request received in client format",
+    translationKey: "pipelineStepClientRequest",
     format: "claude",
     content:
       '{\n  "model": "claude-sonnet-4-20250514",\n  "messages": [\n    { "role": "user", "content": "Hello!" }\n  ]\n}',
@@ -36,16 +41,14 @@ const DEMO_STEPS: PipelineStep[] = [
   },
   {
     id: "2",
-    name: "Format Detected",
-    description: "Auto-detected source format",
+    translationKey: "pipelineStepFormatDetected",
     format: "claude",
     content: '{\n  "detectedFormat": "claude",\n  "confidence": "high"\n}',
     status: "done",
   },
   {
     id: "3",
-    name: "OpenAI Intermediate",
-    description: "Translated to OpenAI hub format",
+    translationKey: "pipelineStepOpenAIIntermediate",
     format: "openai",
     content:
       '{\n  "model": "claude-sonnet-4-20250514",\n  "messages": [\n    { "role": "user", "content": "Hello!" }\n  ],\n  "stream": true\n}',
@@ -53,8 +56,7 @@ const DEMO_STEPS: PipelineStep[] = [
   },
   {
     id: "4",
-    name: "Provider Format",
-    description: "Translated to provider target format",
+    translationKey: "pipelineStepProviderFormat",
     format: "gemini",
     content:
       '{\n  "model": "gemini-2.5-flash",\n  "contents": [\n    { "role": "user", "parts": [{ "text": "Hello!" }] }\n  ]\n}',
@@ -62,8 +64,7 @@ const DEMO_STEPS: PipelineStep[] = [
   },
   {
     id: "5",
-    name: "Provider Response",
-    description: "Streaming response from provider",
+    translationKey: "pipelineStepProviderResponse",
     format: "openai",
     content:
       'data: {"choices":[{"delta":{"content":"Hello! How can I help you today?"}}]}\ndata: [DONE]',
@@ -93,9 +94,9 @@ function statusNumberClass(status: PipelineStep["status"]): string {
     case "active":
       return "bg-primary/10 text-primary";
     case "done":
-      return "bg-emerald-500/10 text-emerald-500";
+      return "bg-success/10 text-success";
     case "error":
-      return "bg-red-500/10 text-red-500";
+      return "bg-error/10 text-error";
     default:
       return "bg-bg-subtle text-text-muted";
   }
@@ -151,7 +152,13 @@ export default function PipelineView({
     [onOpenChange]
   );
 
-  const steps = pipelineSteps ?? DEMO_STEPS;
+  const steps =
+    pipelineSteps ??
+    DEMO_STEP_CONTENT.map((step) => ({
+      ...step,
+      name: t(step.translationKey as Parameters<typeof t>[0]),
+      description: t(`${step.translationKey}Desc` as Parameters<typeof t>[0]),
+    }));
 
   const tr = (key: string, fallback: string): string => {
     try {
@@ -169,7 +176,7 @@ export default function PipelineView({
       subtitle={tr("advancedPipelineSubtitle", "Visualize cada passo da tradução (hub-and-spoke).")}
       icon="route"
       defaultOpen={defaultOpen || forceOpen}
-      className="border-black/5 dark:border-white/5"
+      className="border-border"
     >
       {/* D7 lazy-render container */}
       <div
@@ -187,9 +194,7 @@ export default function PipelineView({
             {/* Demo badge when showing placeholder data */}
             {!pipelineSteps && (
               <div className="flex items-center gap-2 text-xs text-text-muted px-1">
-                <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                  info
-                </span>
+                <Icon name="info" size={14} />
                 <span>
                   {tr(
                     "pipelineVisualizationHint",
@@ -225,7 +230,7 @@ export default function PipelineView({
                     <Card
                       className={
                         step.status === "error"
-                          ? "border-red-500/30"
+                          ? "border-error/30"
                           : isExpanded
                             ? "border-primary/30"
                             : step.status === "pending"
@@ -233,10 +238,10 @@ export default function PipelineView({
                               : ""
                       }
                     >
-                      <button
-                        type="button"
+                      <StepButton
+                        variant="ghost"
                         onClick={() => setExpandedStepId(isExpanded ? null : step.id)}
-                        className="w-full p-3 flex items-center gap-3 text-left"
+                        className="h-auto w-full justify-start gap-3 p-3 text-left"
                         aria-expanded={isExpanded}
                         aria-controls={`pipeline-step-content-${step.id}`}
                       >
@@ -272,13 +277,12 @@ export default function PipelineView({
                         </div>
 
                         {/* Expand chevron */}
-                        <span
-                          className="material-symbols-outlined text-[18px] text-text-muted shrink-0"
-                          aria-hidden="true"
-                        >
-                          {isExpanded ? "expand_less" : "expand_more"}
-                        </span>
-                      </button>
+                        <Icon
+                          name={isExpanded ? "expand_less" : "expand_more"}
+                          size={18}
+                          className="text-text-muted"
+                        />
+                      </StepButton>
 
                       {/* Expanded content — pre-formatted JSON/SSE */}
                       {isExpanded && (

@@ -9,6 +9,7 @@
 
 export const DEFAULT_MAIN_SERVER_KEEPALIVE_TIMEOUT_MS = 65_000;
 export const DEFAULT_MAIN_SERVER_HEADERS_TIMEOUT_MS = 66_000;
+export const DEFAULT_MAIN_SERVER_TCP_KEEPALIVE_MS = 30_000;
 
 function readTimeoutMs(env, name, defaultValue, { allowZero = false, logger } = {}) {
   const raw = env[name];
@@ -35,6 +36,12 @@ export function getMainServerTimeoutConfig(env = process.env, logger) {
     DEFAULT_MAIN_SERVER_HEADERS_TIMEOUT_MS,
     { allowZero: true, logger }
   );
+  const tcpKeepAliveInitialDelayMs = readTimeoutMs(
+    env,
+    "MAIN_SERVER_TCP_KEEPALIVE_MS",
+    DEFAULT_MAIN_SERVER_TCP_KEEPALIVE_MS,
+    { allowZero: true, logger }
+  );
   return {
     keepAliveTimeoutMs,
     // Node requires headersTimeout > keepAliveTimeout; keep both configurable
@@ -43,5 +50,6 @@ export function getMainServerTimeoutConfig(env = process.env, logger) {
       headersTimeoutMs > 0 && keepAliveTimeoutMs > 0
         ? Math.max(headersTimeoutMs, keepAliveTimeoutMs + 1_000)
         : headersTimeoutMs,
+    tcpKeepAliveInitialDelayMs,
   };
 }

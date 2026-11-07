@@ -1,0 +1,369 @@
+# Providers Guide: Connect AI Models to OmniRoute (العربية)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../getting-started/PROVIDERS-GUIDE.md) · 🇪🇹 [am](../../../am/docs/getting-started/PROVIDERS-GUIDE.md) · 🇦🇿 [az](../../../az/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/getting-started/PROVIDERS-GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/getting-started/PROVIDERS-GUIDE.md) · 🇩🇰 [da](../../../da/docs/getting-started/PROVIDERS-GUIDE.md) · 🇩🇪 [de](../../../de/docs/getting-started/PROVIDERS-GUIDE.md) · 🇬🇷 [el](../../../el/docs/getting-started/PROVIDERS-GUIDE.md) · 🇪🇸 [es](../../../es/docs/getting-started/PROVIDERS-GUIDE.md) · 🇪🇪 [et](../../../et/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/getting-started/PROVIDERS-GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇱 [he](../../../he/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/getting-started/PROVIDERS-GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇩 [id](../../../id/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇹 [it](../../../it/docs/getting-started/PROVIDERS-GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/getting-started/PROVIDERS-GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/getting-started/PROVIDERS-GUIDE.md) · 🇰🇭 [km](../../../km/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/getting-started/PROVIDERS-GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇲 [my](../../../my/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇴 [no](../../../no/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [or](../../../or/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇰 [si](../../../si/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/getting-started/PROVIDERS-GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [te](../../../te/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇭 [th](../../../th/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/getting-started/PROVIDERS-GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/getting-started/PROVIDERS-GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/getting-started/PROVIDERS-GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/getting-started/PROVIDERS-GUIDE.md)
+
+---
+
+> **باختصار**: المزوّد هو اتصال بخدمة ذكاء اصطناعي (مثل OpenAI أو Anthropic أو Google). تحتاج إلى مزوّد واحد على الأقل لاستخدام OmniRoute.
+
+---
+
+## ما هو المزوّد؟
+
+فكّر في المزوّد باعتباره **شركة اتصالات**. فكما تحتاج إلى شركة اتصالات لإجراء المكالمات، تحتاج إلى مزوّد ذكاء اصطناعي لاستخدام نماذج الذكاء الاصطناعي. يشبه OmniRoute هاتفًا يعمل مع **جميع شركات الاتصالات** — ويمكنك التبديل بينها تلقائيًا.
+
+### أنواع المزوّدين
+
+| النوع                      | ماهيته                      | أمثلة                           | التكلفة             |
+| -------------------------- | --------------------------- | ------------------------------- | ------------------- |
+| **مجاني**                  | لا يتطلب الدفع              | Kiro، Pollinations              | $0                  |
+| **مفتاح API**              | تحتاج إلى مفتاح API         | OpenAI، Anthropic، Google       | الدفع حسب الاستخدام |
+| **OAuth**                  | تسجيل الدخول باستخدام حسابك | Claude Code، GitHub Copilot     | اشتراك              |
+| **ملف تعريف ارتباط الويب** | يستخدم جلسة متصفحك          | ChatGPT Web (Codex)، Gemini Web | $0 (يستخدم حسابك)   |
+
+### مزوّدو ملفات تعريف ارتباط الويب
+
+راجع **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** للحصول على إرشادات الإعداد العامة والقيود واستكشاف الأخطاء وإصلاحها وإرشادات المصادقة الخاصة بكل مزوّد.
+---
+
+## البدء السريع: توصيل مزوّدك الأول
+
+### إعداد اختياري لمزوّدي الخدمات المجانية عند التشغيل الأول
+
+يوفّر معالج التشغيل الأول بطاقة صريحة بعنوان **إعداد المزوّدين المجانيين**. ويستخرج القائمة الحالية
+للمزوّدين المؤهلين من سجل مزوّدي OmniRoute الذين لا يتطلبون مصادقة، ثم يتيح لك مراجعة كل
+مزوّد وإلغاء تحديده قبل التأكيد. يعرض OmniRoute تنبيه الحذر الخاص بالمزوّد ورابطًا إلى موقعه
+حتى تتمكن أولًا من مراجعة شروط الجهة الخارجية وخصوصيتها ومدى توفّرها وحدود معدّل الاستخدام.
+
+هذا الإجراء اختياري: لا يؤدي إكمال المعالج مطلقًا إلى إنشاء اتصالات بالمزوّدين المجانيين دون علمك.
+ولا ينشئ سوى المزوّدين الذين لا يزالون غير موجودين، ويترك الاتصالات الحالية المخصّصة
+دون تغيير، ويعرض كلًا من المزوّدين الذين تم إنشاؤهم والمهيّئين مسبقًا والذين فشلوا بشكل منفصل. ويمكنك
+بأمان إعادة محاولة الحالات الفاشلة فقط بعد الحصول على نتيجة جزئية.
+
+### الخيار A: مزوّد مجاني (لا يتطلب بطاقة ائتمان)
+
+1. افتح لوحة المعلومات على `http://localhost:20128`
+2. انتقل إلى **المزوّدون** → **إضافة مزوّد**
+3. حدّد أحد هؤلاء المزوّدين المجانيين:
+   - **Kiro AI** — نماذج Claude مجانية (لا تتطلب مصادقة)
+   - **Pollinations** — نماذج GPT-5 وClaude وGemini مجانية (لا تتطلب مفتاحًا)
+   - **LongCat** — 10M من الرموز مجانًا (منحة لمرة واحدة، تتطلب حسابًا وإجراءات KYC)
+   - **Cloudflare AI** — أكثر من 50 نموذجًا، و10K من العصبونات يوميًا
+   - **MLX Gemma 26B** — نموذج محلي لأجهزة Apple Silicon (نحو 38.5 رمزًا/ث، ونحو 15.9GB من RAM)
+   - **MLX Qwen 3.8 27B** — نموذج محلي لأجهزة Apple Silicon (نحو 9.1 رمزًا/ث، ونحو 13.1GB من RAM)
+4. انقر على **اتصال**
+5. تم! أصبح لديك الآن وصول مجاني إلى الذكاء الاصطناعي.
+
+### الخيار B: مزوّد يستخدم مفتاح API (مدفوع)
+
+1. احصل على مفتاح API من موقع المزوّد:
+   - **OpenAI**: https://platform.openai.com/api-keys
+   - **Anthropic**: https://console.anthropic.com/
+   - **Google**: https://aistudio.google.com/apikey
+   - **DeepSeek**: https://platform.deepseek.com/
+   - **Groq**: https://console.groq.com/
+2. افتح لوحة المعلومات على `http://localhost:20128`
+3. انتقل إلى **المزوّدون** → **إضافة مزوّد**
+4. حدّد مزوّدك
+5. الصق مفتاح API الخاص بك
+6. انقر على **اتصال**
+7. تم! أصبح بإمكانك الآن الوصول إلى نماذج ذلك المزوّد.
+
+### الخيار C: مزوّد OAuth (اشتراك)
+
+1. افتح لوحة المعلومات على `http://localhost:20128`
+2. انتقل إلى **المزوّدون** → **إضافة مزوّد**
+3. حدّد مزوّدك (مثل Claude Code أو GitHub Copilot)
+4. انقر على **الاتصال باستخدام OAuth**
+5. سجّل الدخول باستخدام حسابك
+6. تم! أصبح بإمكانك الآن الوصول إلى النماذج المتاحة ضمن اشتراكك.
+
+### الخيار D: نماذج MLX المحلية (Apple Silicon)
+
+بالنسبة إلى أجهزة Mac المزودة بمعالجات Apple Silicon وذاكرة موحّدة، يدعم OmniRoute الاتصال بنماذج MLX المحلية التي تعمل عبر `mlx-lm.server` باعتبارها مزوّدين محليين عاديين متوافقين مع OpenAI.
+
+#### المتطلبات الأساسية
+
+- جهاز **Apple Silicon Mac** ‏(M1/M2/M3/M4) مع ذاكرة موحّدة بسعة 24GB+ موصى بها
+- مدير الحزم **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **mlx-lm**: `uv pip install mlx-lm`
+
+#### البدء السريع
+
+1. **ثبّت التبعيات**:
+
+   ```bash
+   # ثبّت uv إذا لم يكن مثبتًا بالفعل
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+   # ثبّت mlx-lm
+   uv pip install mlx-lm
+   ```
+
+2. **شغّل خوادم MLX يدويًا** (في طرفيات منفصلة):
+
+   ```bash
+   # الطرفية 1: Gemma 4 26B A4B IT-QAT (المنفذ 11435)
+   uv run mlx_lm.server --model mlx-community/gemma-4-26B-A4B-it-qat-q4_0-mlx-aligned --port 11435 --host 127.0.0.1
+
+   # الطرفية 2: Qwen 3.8 27B MLX Mixed (المنفذ 11436)
+   uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
+   ```
+
+3. **اتصل من لوحة معلومات OmniRoute**:
+   - انتقل إلى **المزوّدون** → **إضافة مزوّد**
+   - حدّد **MLX Gemma 26B** أو **MLX Qwen 3.8 27B**
+   - انقر على **اتصال** (لا يلزم مفتاح API)
+
+4. **استخدمه مع OpenCode**:
+   ```bash
+   # اضبط OpenCode لاستخدام OmniRoute
+   opencode config set api.base_url http://localhost:20128/v1
+   opencode config set api.key <your-omniroute-api-key>
+
+   # استخدم نماذج MLX
+   opencode run --model mlx-gemma/gemma-4-26b
+   opencode run --model mlx-qwen/qwen3.8-27b
+   ```
+
+#### إدارة الذاكرة
+
+**مهم**: عند استخدام ذاكرة موحّدة بسعة 24GB، لا يمكن تشغيل أكثر من **نموذج MLX كبير واحد في الوقت نفسه**.
+
+- Gemma 26B: ذروة استخدام للذاكرة تبلغ نحو 15.9GB
+- Qwen 3.8 27B: ذروة استخدام للذاكرة تبلغ نحو 13.1GB
+
+يجب عليك إدارة ذلك يدويًا:
+
+- شغّل خادم MLX واحدًا فقط في كل مرة، أو
+- شغّلهما على جهازين منفصلين، أو
+- أوقف أحدهما قبل تشغيل الآخر
+
+لا يدير OmniRoute عمليات خادم MLX تلقائيًا — بل يوجّه الطلبات فقط إلى نقاط النهاية المتوافقة مع OpenAI التي تضبطها.
+
+#### دعم استدعاء الأدوات
+
+يدعم كلا النموذجين استدعاء الأدوات المتوافق مع OpenAI. اختبر ذلك باستخدام:
+
+```bash
+curl -X POST http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "mlx-gemma/gemma-4-26b",
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+  }'
+```
+
+#### استكشاف الأخطاء وإصلاحها
+
+| المشكلة             | الحل                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| الخادم لا يبدأ      | تحقّق من `uv run mlx_lm.server --help` وتأكد من معرّفات النماذج                      |
+| نفاد الذاكرة        | تأكد من تشغيل نموذج واحد فقط؛ وأغلق التطبيقات الأخرى؛ وتحقق من Activity Monitor      |
+| تم رفض الاتصال      | تأكد من أن الخادم يعمل على المنفذ الصحيح (11435/11436)                               |
+| الاستجابات بطيئة    | يحمّل الطلب الأول النموذج إلى الذاكرة (نحو 30-60 ثانية)؛ وتكون الطلبات اللاحقة سريعة |
+| فشل استدعاء الأدوات | تأكد من أن النموذج يدعم الأدوات؛ وتحقق من سجلات OmniRoute بحثًا عن أخطاء الترجمة     |
+
+---
+
+## أفضل المزوّدين المجانيين
+
+يقدّم هؤلاء المزوّدون **وصولًا مجانيًا** من دون بطاقة ائتمان:
+
+| المزوّد           | الحصة المجانية          | النماذج                                  | كيفية الاتصال                |
+| ----------------- | ----------------------- | ---------------------------------------- | ---------------------------- |
+| **Kiro AI**       | 50 رصيدًا شهريًا        | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | لا حاجة إلى المصادقة         |
+| **Pollinations**  | لا حاجة إلى مفتاح       | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | لا حاجة إلى المصادقة         |
+| **LongCat**       | 10M لمرة واحدة          | LongCat-2.0                              | مفتاح API + التحقق من الهوية |
+| **Cloudflare AI** | 10K عصبون يوميًا        | أكثر من 50 نموذجًا                       | لا حاجة إلى المصادقة         |
+| **NVIDIA NIM**    | نحو 40 طلبًا في الدقيقة | 129 نموذجًا                              | يلزم مفتاح API               |
+| **Cerebras**      | رصيد تسجيل بقيمة $5     | GLM 4.7, GPT-OSS 120B                    | مفتاح API + بطاقة            |
+
+**نصيحة**: صِل عدة مزوّدين مجانيين للحصول على **ذكاء اصطناعي مجاني غير محدود** مع التبديل الاحتياطي التلقائي!
+
+---
+
+## أفضل المزوّدين المدفوعين
+
+يقدّم هؤلاء المزوّدون **نماذج عالية الجودة** باستخدام مفاتيح API:
+
+| المزوّد       | أفضل النماذج                | التكلفة             | الفئة المجانية          |
+| ------------- | --------------------------- | ------------------- | ----------------------- |
+| **OpenAI**    | GPT-5, GPT-4o               | $2.50-$10/1M رمز    | أرصدة مجانية بقيمة $5   |
+| **Anthropic** | Claude Opus 4.6, Sonnet 4.6 | $3-$15/1M رمز       | أرصدة مجانية بقيمة $5   |
+| **Google**    | Gemini 2.5 Pro, Flash       | $0.075-$1.25/1M رمز | 1,500 طلب/يوميًا مجانًا |
+| **DeepSeek**  | DeepSeek V4                 | $0.14-$0.28/1M رمز  | 5M رمز مجاني            |
+| **Groq**      | Llama 4, Mixtral            | $0.05-$0.27/1M رمز  | 30 طلبًا/دقيقة مجانًا   |
+| **xAI**       | Grok 3                      | $0.30-$0.60/1M رمز  | —                       |
+
+---
+
+## كيفية ربط مزوّد (خطوة بخطوة)
+
+### الخطوة 1: افتح لوحة التحكم
+
+انتقل إلى `http://localhost:20128` في متصفحك.
+
+### الخطوة 2: انتقل إلى المزوّدين
+
+انقر على **المزوّدون** في الشريط الجانبي.
+
+### الخطوة 3: انقر على إضافة مزوّد
+
+انقر على زر **+ إضافة مزوّد**.
+
+### الخطوة 4: اختر المزوّد
+
+تصفّح القائمة أو ابحث عن المزوّد. انقر عليه.
+
+### الخطوة 5: أدخل بيانات الاعتماد
+
+- **المزوّدون المجانيون**: لا حاجة إلى بيانات اعتماد — ما عليك سوى النقر على **اتصال**
+- **المزوّدون الذين يستخدمون مفتاح API**: الصق مفتاح API الخاص بك
+- **مزوّدو OAuth**: انقر على **الاتصال باستخدام OAuth** وسجّل الدخول
+
+### الخطوة 6: اختبر الاتصال
+
+انقر على **اختبار الاتصال** للتحقق من أنه يعمل.
+
+### الخطوة 7: تم!
+
+أصبح المزوّد متصلًا الآن. يمكنك استخدامه مع `model: "auto"` أو تحديد المزوّد مباشرةً.
+
+---
+
+## استخدام مزوّدين متعددين
+
+يعمل OmniRoute بأفضل صورة مع **مزوّدين متعددين**. يوفّر لك ذلك:
+
+- **التبديل التلقائي** — إذا فشل أحد المزوّدين، يجرّب OmniRoute المزوّد التالي
+- **تحسين التكلفة** — يختار OmniRoute المزوّد الأقل تكلفة لكل طلب
+- **تحسين السرعة** — يختار OmniRoute المزوّد الأسرع لكل طلب
+- **تحسين الجودة** — يختار OmniRoute أفضل مزوّد لكل مهمة
+
+### الإعداد الموصى به
+
+اربط ما لا يقل عن **3 مزوّدين** للحصول على أفضل تجربة:
+
+1. **مزوّد مجاني واحد** (Kiro أو Pollinations) — متاح دائمًا
+2. **مزوّد سريع واحد** (Groq، Cerebras) — للحصول على استجابات سريعة
+3. **مزوّد عالي الجودة واحد** (OpenAI، Anthropic، Google) — للمهام المعقدة
+
+بعد ذلك، استخدم `model: "auto"`، وسيختار OmniRoute تلقائيًا أفضل مزوّد لكل طلب.
+
+---
+
+## الإعداد الخاص بكل مزوّد
+
+### OpenAI
+
+1. احصل على مفتاح API: https://platform.openai.com/api-keys
+2. في OmniRoute: المزوّدون → إضافة مزوّد → OpenAI
+3. الصق مفتاح API → اتصال
+
+### Anthropic
+
+1. احصل على مفتاح API: https://console.anthropic.com/
+2. في OmniRoute: المزوّدون → إضافة مزوّد → Anthropic
+3. الصق مفتاح API → اتصال
+
+### Google (Gemini)
+
+1. احصل على مفتاح API: https://aistudio.google.com/apikey
+2. في OmniRoute: المزوّدون → إضافة مزوّد → Gemini
+3. الصق مفتاح API → اتصال
+
+### DeepSeek
+
+1. احصل على مفتاح API: https://platform.deepseek.com/
+2. في OmniRoute: المزوّدون → إضافة مزوّد → DeepSeek
+3. الصق مفتاح API → اتصال
+
+### Qoder: اختيار وسيلة نقل بيانات الاعتماد
+
+يتطلب Qoder بيانات اعتماد. وتتميز وسيلتا النقل الخاصتان به بقدرات مختلفة؛ فلا يكفي اسم النموذج
+وحده لتحديد ما يمكن لاتصال معين فعله.
+
+| بيانات الاعتماد               | وسيلة النقل في OmniRoute                       | استدعاء الأدوات من جهة المستدعي                 | البث                                                        |
+| ----------------------------- | ---------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------- |
+| PAT يبدأ بـ `pt-`             | عملية `qodercli` محلية على مضيف OmniRoute      | غير مدعوم                                       | مخزّن مؤقتًا: لا يُرسل SSE إلا بعد أن تُرجع CLI الرد الكامل |
+| رمز وصول غير PAT أو مفتاح API | نقطة نهاية HTTP متوافقة مع OpenAI في DashScope | يُمرر كما هو، وفقًا للنموذج/المفتاح لدى المزوّد | مسار HTTP/SSE لدى المزوّد                                   |
+
+بالنسبة إلى PAT، ثبّت Qoder CLI على المضيف أو الحاوية نفسها التي يعمل عليها OmniRoute. يجب أن يكون الملف التنفيذي
+قابلاً للاكتشاف باسم `qodercli`، أو اضبط `CLI_QODER_BIN` على مسار الملف التنفيذي الخاص به. إن تثبيت CLI
+على مضيف Docker فقط لا يجعله متاحًا تلقائيًا داخل الحاوية. يؤدي فقدان
+الملفات التنفيذية إلى ظهور خطأ صريح يوجّهك إلى التثبيت أو إعداد المسار.
+
+يبلغ حد مهلة عملية مسار محادثة PAT ‏45 ثانية. وهو يحوّل المحادثة إلى
+موجّه واحد ويستدعي CLI في وضع الطباعة دون بث. يؤدي طلب `stream: true` إلى تغيير
+غلاف الاستجابة إلى SSE؛ لكنه لا يوفّر تسليمًا تزايديًا للرموز من المزوّد.
+يستخدم التحقق عبر CLI/سرد النماذج مهلة منفصلة تبلغ 20 ثانية. هذه هي القيم الافتراضية الحالية في الشيفرة،
+وليست إعدادات قابلة للتهيئة من لوحة التحكم.
+
+استخدم اتصالات PAT للمحادثة النصية العادية. تستبعد طلبات الوكيل التي تحمل `tools` أو `functions`
+القديمة حسابات PAT أثناء اختيار بيانات الاعتماد، بما في ذلك أهداف المجموعات المثبّتة. ومع ذلك،
+يمكن لمجموعة Qoder مختلطة اختيار حساب HTTP الخاص بها. كما تفشل الاستدعاءات المباشرة
+لمنفّذ PAT بصورة صريحة قبل تشغيل CLI، بدلًا من إسقاط تعريفات الأدوات بصمت. يتعلق هذا
+القيد بالأدوات التي يقدّمها مستدعي API، وليس بأي أدوات داخلية قد تستخدمها Qoder
+CLI بنفسها. لا يضمن مفتاح HTTP أن كل نموذج يدعم الأدوات؛ إذ تظل
+عمليات التحقق المعتادة من قدرات النموذج سارية.
+
+لا تتوفر مصادقة OAuth عبر المتصفح إلا عندما يهيئ المسؤول الإعدادات الخمسة جميعها:
+`QODER_OAUTH_AUTHORIZE_URL`، و`QODER_OAUTH_TOKEN_URL`، و`QODER_OAUTH_USERINFO_URL`،
+و`QODER_OAUTH_CLIENT_ID`، و`QODER_OAUTH_CLIENT_SECRET`. تكون قيمها الافتراضية فارغة؛ ويجب على
+أي تثبيت غير مهيأ استخدام طريقة استيراد مدعومة لبيانات الاعتماد بدلًا من افتراض
+أن تدفق تسجيل الدخول عبر المتصفح جاهز.
+
+مراجع التنفيذ: [منفّذ Qoder](../../open-sse/executors/qoder.ts)،
+و[بيئة تشغيل CLI](../../open-sse/services/qoderCli.ts)، و
+[تهيئة OAuth](../../src/lib/oauth/constants/oauth.ts). يُعد البث التزايدي عبر PAT
+والمهلة القابلة للتهيئة تحسينين منفصلين؛ وهذا السلوك لا يَعِد بتوفّرهما.
+
+### Groq
+
+1. احصل على مفتاح API: https://console.groq.com/
+2. في OmniRoute: المزوّدون → إضافة مزوّد → Groq
+3. الصق مفتاح API → اتصال
+
+---
+
+## الأسئلة الشائعة
+
+### "هل أحتاج إلى الدفع لاستخدام OmniRoute؟"
+
+**لا!** OmniRoute مجاني ومفتوح المصدر. يمكنك استخدام مزوّدين مجانيين (Kiro وPollinations) دون دفع أي شيء. لن تدفع إلا إذا اخترت استخدام مزوّدين مدفوعي الأجر.
+
+### "بأي مزوّد ينبغي أن أبدأ؟"
+
+ابدأ بـ **Kiro AI** — فهو مجاني، ولا يتطلب مفتاح API، ويمنحك إمكانية الوصول إلى نماذج Claude. ثم أضف المزيد من المزوّدين حسب الحاجة.
+
+### "هل يمكنني استخدام عدة مزوّدين في الوقت نفسه؟"
+
+**نعم!** هذه هي الفكرة الأساسية من OmniRoute. اربط عدة مزوّدين واستخدم `model: "auto"` للسماح لـ OmniRoute باختيار الأفضل لكل طلب.
+
+### "ماذا يحدث إذا تعطل أحد المزوّدين؟"
+
+يتخطى OmniRoute تلقائيًا المزوّدين الذين فشلوا ويحاول استخدام المزوّد التالي. لا تحتاج إلى فعل أي شيء.
+
+### "كيف أفصل مزوّدًا؟"
+
+انتقل إلى المزوّدون → انقر على المزوّد → انقر على **قطع الاتصال**.
+
+### "هل يمكنني استخدام مفاتيح API الحالية لديّ؟"
+
+**نعم!** إذا كانت لديك بالفعل مفاتيح API لخدمات OpenAI وAnthropic وGoogle وغيرها، فيمكنك استخدامها في OmniRoute. ما عليك سوى لصقها عند ربط المزوّد.
+
+---
+
+## ما التالي؟
+
+- **[دليل Auto-Combo](./AUTO-COMBO-GUIDE.md)** — دع OmniRoute يختار أفضل ذكاء اصطناعي لك
+- **[دليل الخطط المجانية](./FREE-TIERS-GUIDE.md)** — احصل على ذكاء اصطناعي مجاني دون بطاقة ائتمان
+- **[استكشاف الأخطاء وإصلاحها](../guides/TROUBLESHOOTING.md)** — أصلح المشكلات الشائعة
+- **[مرجع المزوّدين](../reference/PROVIDER_REFERENCE.md)** — القائمة الكاملة التي تضم 226 مزوّدًا
+
+## صور Cursor
+
+تستخدم صور خطة Cursor القيمة `IMAGE_PROVIDERS.cursor` ‏(`cursor-agent-image`). راجع [CURSOR_IMAGE.md](../providers/CURSOR_IMAGE.md).

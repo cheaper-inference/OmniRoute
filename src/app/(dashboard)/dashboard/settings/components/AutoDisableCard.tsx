@@ -1,13 +1,42 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, Button, Input } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
+import { Card, Button, Checkbox, Input } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
+import {
+  AUTO_DISABLE_BANNED_SCOPES,
+  normalizeAutoDisableBannedScope,
+  type AutoDisableBannedScope,
+} from "@/shared/utils/autoDisableBanned";
+
+type AutoDisableForm = {
+  enabled: boolean;
+  threshold: number;
+  scope: AutoDisableBannedScope;
+};
+
+function normalizeForm(json: Partial<AutoDisableForm> | null | undefined): AutoDisableForm {
+  return {
+    enabled: Boolean(json?.enabled),
+    threshold: typeof json?.threshold === "number" ? json.threshold : 3,
+    scope: normalizeAutoDisableBannedScope(json?.scope),
+  };
+}
 
 export default function AutoDisableCard() {
-  const [data, setData] = useState({ enabled: false, threshold: 3 });
-  const [draft, setDraft] = useState({ enabled: false, threshold: 3 });
+  const [data, setData] = useState<AutoDisableForm>({
+    enabled: false,
+    threshold: 3,
+    scope: "all",
+  });
+  const [draft, setDraft] = useState<AutoDisableForm>({
+    enabled: false,
+    threshold: 3,
+    scope: "all",
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -19,8 +48,9 @@ export default function AutoDisableCard() {
     fetch("/api/settings/auto-disable-accounts")
       .then((res) => res.json())
       .then((json) => {
-        setData(json);
-        setDraft(json);
+        const next = normalizeForm(json);
+        setData(next);
+        setDraft(next);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -35,10 +65,10 @@ export default function AutoDisableCard() {
         body: JSON.stringify(draft),
       });
       if (!res.ok) throw new Error("Failed to save auto-disable config");
-      const savedData = await res.json();
+      const savedData = normalizeForm(await res.json());
       setData(savedData);
       setEditMode(false);
-      notify.success(t("savedSuccessfully") || "Saved successfully");
+      notify.success(t("savedSuccessfully"));
     } catch (err) {
       notify.error(err instanceof Error ? err.message : "Error saving");
     } finally {
@@ -48,14 +78,15 @@ export default function AutoDisableCard() {
 
   if (loading) return null;
 
+  const current = editMode ? draft : data;
+  const scopes = AUTO_DISABLE_BANNED_SCOPES;
+
   return (
     <Card className="p-0 overflow-hidden">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary" aria-hidden="true">
-              block
-            </span>
+            <Icon name="block" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("autoDisableBannedAccounts")}</h2>
           </div>
           {editMode ? (
@@ -90,26 +121,21 @@ export default function AutoDisableCard() {
         <p className="text-sm text-text-muted mb-4">{t("autoDisableDescription")}</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="rounded-lg bg-black/5 dark:bg-white/5 p-4 flex flex-col justify-center">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={editMode ? draft.enabled : data.enabled}
-                onChange={(e) => setDraft((prev) => ({ ...prev, enabled: e.target.checked }))}
-                disabled={!editMode}
-                className="w-4 h-4 text-primary bg-surface/50 border-white/20 rounded focus:ring-primary/50"
-              />
-              <span className="text-sm font-medium">{t("autoDisableBannedAccounts")}</span>
-            </label>
+          <div className="rounded-lg bg-bg-subtle p-4 flex flex-col justify-center">
+            <Checkbox
+              checked={current.enabled}
+              onChange={(e) => setDraft((prev) => ({ ...prev, enabled: e.target.checked }))}
+              disabled={!editMode}
+              label={t("autoDisableBannedAccounts")}
+            />
           </div>
 
-          <div className="rounded-lg bg-black/5 dark:bg-white/5 p-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
-              {t("autoDisableThreshold")}
-            </h3>
+          <div className="rounded-lg bg-bg-subtle p-4">
             {editMode ? (
               <Input
                 type="number"
+                label={t("autoDisableThreshold")}
+                hint={t("autoDisableThresholdDesc")}
                 min="1"
                 max="10"
                 value={draft.threshold}
@@ -118,12 +144,49 @@ export default function AutoDisableCard() {
                 }
               />
             ) : (
-              <span className={`text-sm font-mono ${!data.enabled && "opacity-50"}`}>
-                {t("failures", { count: data.threshold })}
-              </span>
+              <>
+                <h3 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
+                  {t("autoDisableThreshold")}
+                </h3>
+                <span className={`text-sm font-mono ${data.enabled ? "" : "text-text-muted"}`}>
+                  {t("failures", { count: data.threshold })}
+                </span>
+                <p className="text-xs text-text-muted mt-2">{t("autoDisableThresholdDesc")}</p>
+              </>
             )}
-            <p className="text-xs text-text-muted mt-2">{t("autoDisableThresholdDesc")}</p>
           </div>
+        </div>
+
+        <div className="mt-4 rounded-lg bg-bg-subtle p-4">
+          <RadioGroup
+            name="auto-disable-banned-scope"
+            label={t("autoDisableBannedScope")}
+            description={t("autoDisableBannedScopeDesc")}
+            value={current.scope}
+            onValueChange={(next) =>
+              setDraft((prev) => ({ ...prev, scope: next as (typeof scopes)[number] }))
+            }
+            disabled={!editMode || !current.enabled}
+            orientation="horizontal"
+          >
+            {scopes.map((scope) => (
+              <RadioGroupItem
+                key={scope}
+                card
+                value={scope}
+                label={
+                  scope === "all"
+                    ? t("autoDisableBannedScopeAll")
+                    : t("autoDisableBannedScopeSubscription")
+                }
+                description={
+                  scope === "all"
+                    ? t("autoDisableBannedScopeAllDesc")
+                    : t("autoDisableBannedScopeSubscriptionDesc")
+                }
+              />
+            ))}
+          </RadioGroup>
         </div>
       </div>
     </Card>

@@ -8,7 +8,7 @@ export type VscodeCatalogModel = {
   name?: string;
   root?: string;
   owned_by?: string;
-  capabilities?: Record<string, boolean>;
+  capabilities?: Record<string, boolean | string[]>;
   supportsReasoningEffort?: string[];
   supportedReasoningEfforts?: string[];
   supports_reasoning_effort?: string[];
@@ -17,7 +17,8 @@ export type VscodeCatalogModel = {
 };
 
 const STANDARD_EFFORT_SUFFIX_PATTERN = /-(xhigh|high|medium|low|none)$/i;
-const GPT_5_6_EXTENDED_EFFORT_SUFFIX_PATTERN = /^(.*gpt-5\.6-(?:sol|terra|luna))-(max|ultra)$/i;
+const CODEX_EXTENDED_EFFORT_SUFFIX_PATTERN =
+  /^(.*gpt-(?:5\.6-(?:sol|terra|luna)|6(?:\.1)?-(?:astra|sol|luna)))-(max|ultra)$/i;
 const DEFAULT_REASONING_EFFORT = "none";
 const KNOWN_REASONING_EFFORTS = new Set(["none", "low", "medium", "high", "xhigh", "max", "ultra"]);
 
@@ -41,7 +42,7 @@ export function getCatalogModelName(model: VscodeCatalogModel) {
 }
 
 function matchReasoningEffortSuffix(modelId: string) {
-  const extendedMatch = modelId.match(GPT_5_6_EXTENDED_EFFORT_SUFFIX_PATTERN);
+  const extendedMatch = modelId.match(CODEX_EXTENDED_EFFORT_SUFFIX_PATTERN);
   if (extendedMatch?.[1] && extendedMatch[2]) {
     return { baseModelId: extendedMatch[1], effort: extendedMatch[2].toLowerCase() };
   }
@@ -66,6 +67,9 @@ function normalizeReasoningEffortValue(value: string) {
 
 function getNativeReasoningEffortValues(model: VscodeCatalogModel) {
   const candidates = [
+    model.owned_by !== "combo" && Array.isArray(model.capabilities?.effort_tiers)
+      ? model.capabilities.effort_tiers
+      : undefined,
     model.supportsReasoningEffort,
     model.supportedReasoningEfforts,
     model.supports_reasoning_effort,
@@ -111,7 +115,7 @@ export function getReasoningEffortValues(model: VscodeCatalogModel) {
   if (!isReasoningCapableModel(model)) return undefined;
 
   const modelId = getCatalogModelName(model);
-  const parsed = parseModel(modelId, "");
+  const parsed = parseModel(modelId);
   const providerId = parsed.provider || model.owned_by || "";
   const providerModelId = parsed.model || model.root || modelId.split("/").pop() || modelId;
   const values = ["none", "low", "medium", "high"];
@@ -179,7 +183,7 @@ export function getReasoningVariantBaseModelId(modelId: string) {
 
 function getCodexGpt56DefaultReasoningEffort(model: VscodeCatalogModel) {
   const modelId = getCatalogModelName(model);
-  const parsed = parseModel(modelId, "");
+  const parsed = parseModel(modelId);
   const providerId = (parsed.provider || model.owned_by || "").trim().toLowerCase();
   if (providerId !== "codex" && providerId !== "cx") return undefined;
 
@@ -187,16 +191,26 @@ function getCodexGpt56DefaultReasoningEffort(model: VscodeCatalogModel) {
     .trim()
     .toLowerCase();
   const match = providerModelId.match(
-    /^gpt-5\.6-(sol|terra|luna)(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/
+    /^gpt-(?:5\.6-(sol|terra|luna)|6(?:\.1)?-(?:astra|sol|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/
   );
   if (!match) return undefined;
+  // The live catalog defaults GPT-5.6 Sol to low and every other model here to medium.
   return match[1] === "sol" ? "low" : "medium";
 }
 
 export function getDefaultReasoningEffort(model: VscodeCatalogModel, supportedValues?: string[]) {
+  const nativeDefault = normalizeReasoningEffortValue(
+    model.defaultReasoningEffort || model.default_reasoning_effort || ""
+  );
   return (
     inferSelectedReasoningEffort(model, supportedValues) ||
+    (nativeDefault && (!supportedValues?.length || supportedValues.includes(nativeDefault))
+      ? nativeDefault
+      : undefined) ||
     getCodexGpt56DefaultReasoningEffort(model) ||
+    (supportedValues?.includes(DEFAULT_REASONING_EFFORT)
+      ? DEFAULT_REASONING_EFFORT
+      : supportedValues?.[0]) ||
     DEFAULT_REASONING_EFFORT
   );
 }

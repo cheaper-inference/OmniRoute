@@ -21,8 +21,10 @@ import assert from "node:assert/strict";
 import {
   ensureAntigravityProjectAssigned,
   clearAntigravityProjectCache,
+  clearAntigravityOnboardBackoff,
   getAntigravityProjectFromCache,
   getAntigravityLoadCodeAssistUrls,
+  ANTIGRAVITY_REQUIRES_MANUAL_PROJECT,
 } from "../../open-sse/services/antigravityProjectBootstrap.ts";
 
 // Reset the module-level memoization cache between tests.
@@ -141,7 +143,7 @@ describe("ensureAntigravityProjectAssigned", () => {
 
     assert.match(
       capturedHeaders?.get("User-Agent") || "",
-      /^antigravity\/cli\/1\.1\.5 \(aidev_client; os_type=.+; arch=.+; auth_method=consumer\)$/
+      /^antigravity\/cli\/1\.3\.4 \(aidev_client; os_type=.+; arch=.+; auth_method=consumer\)$/
     );
     assert.equal(capturedHeaders?.get("X-Goog-Api-Client"), null);
     assert.equal(capturedHeaders?.get("Client-Metadata"), null);
@@ -156,12 +158,12 @@ describe("ensureAntigravityProjectAssigned", () => {
 
     await ensureAntigravityProjectAssigned("ide-token", mockFetch);
 
-    assert.match(capturedHeaders?.get("User-Agent") || "", /^antigravity\/ide\/2\.1\.1 /);
+    assert.match(capturedHeaders?.get("User-Agent") || "", /^antigravity\/ide\/2\.5\.5 /);
     assert.equal(capturedHeaders?.get("X-Goog-Api-Client"), null);
     assert.equal(capturedHeaders?.get("Client-Metadata"), null);
   });
 
-  test("bootstrap uses the single stable production loadCodeAssist endpoint and stays non-fatal on 404", async () => {
+  test("bootstrap tries loadCodeAssist then onboardUser on 404, non-fatal", async () => {
     const hitUrls: string[] = [];
 
     const mockFetch = async (url: string, _init?: RequestInit): Promise<Response> => {
@@ -171,13 +173,12 @@ describe("ensureAntigravityProjectAssigned", () => {
 
     const projectId = await ensureAntigravityProjectAssigned("bootstrap-404-token", mockFetch);
 
-    // #8098 narrowed the bootstrap to the single stable production endpoint (no
-    // daily/sandbox fallback), so a 404 has no next URL to try — the call fails closed
-    // (undefined) and the caller proceeds with any DB-stored project id.
-    assert.equal(hitUrls.length, 1, "bootstrap tries exactly the one dedicated production URL");
-    // Exact hostname match (not substring .includes) so the check can't be fooled by a
-    // look-alike host (CodeQL js/incomplete-url-substring-sanitization).
-    assert.equal(new URL(hitUrls[0]).hostname, "cloudcode-pa.googleapis.com");
+    // loadCodeAssist returns no project on 404, so the fallback calls
+    // onboardUser (also 404). Total: 2 URLs (loadCodeAssist + onboardUser).
+    assert.equal(hitUrls.length, 2, "must try loadCodeAssist then onboardUser");
+    for (const url of hitUrls) {
+      assert.equal(new URL(url).hostname, "cloudcode-pa.googleapis.com");
+    }
     assert.equal(projectId, undefined, "a 404 bootstrap is non-fatal and returns undefined");
   });
 
@@ -235,5 +236,209 @@ describe("ordering guarantee: loadCodeAssist before :models", () => {
     assert.ok(loadIdx >= 0, ":loadCodeAssist must be called");
     assert.ok(modelsIdx >= 0, ":models must be called");
     assert.ok(loadIdx < modelsIdx, ":loadCodeAssist must be called BEFORE :models");
+  });
+});
+
+// ── onboardUser fallback when loadCodeAssist returns no project ──────────
+
+describe("onboardUser fallback", () => {
+  test("calls onboardUser when loadCodeAssist returns empty, then retries loadCodeAssist", async () => {
+    let loadCalls = 0;
+    let onboardCalls = 0;
+
+    const mockFetch = async (url: string, _init?: RequestInit): Promise<Response> => {
+      if (url.endsWith(":loadCodeAssist")) {
+        loadCalls++;
+        // First call returns empty, second returns project after onboarding.
+        if (loadCalls >= 2) {
+          return new Response(JSON.stringify({ cloudaicompanionProject: "proj-after-onboard" }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({}), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (url.endsWith(":onboardUser")) {
+        onboardCalls++;
+        // Google's LRO returns the created project inside the response — a body
+        // WITHOUT cloudaicompanionProject means BYOP (manual project required).
+        return new Response(
+          JSON.stringify({ done: true, cloudaicompanionProject: "proj-onboarded" }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+      return new Response("Not Found", { status: 404 });
+    };
+
+    const projectId = await ensureAntigravityProjectAssigned("onboard-test-token", mockFetch);
+
+    assert.equal(projectId, "proj-after-onboard");
+    assert.equal(onboardCalls, 1, "onboardUser must be called exactly once");
+    assert.ok(loadCalls >= 2, "loadCodeAssist must be called twice (before and after onboard)");
+  });
+
+  test("returns undefined when both loadCodeAssist and onboardUser fail", async () => {
+    const mockFetch = async (url: string, _init?: RequestInit): Promise<Response> => {
+      if (url.endsWith(":loadCodeAssist")) {
+        return new Response(JSON.stringify({}), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (url.endsWith(":onboardUser")) {
+        return new Response("Forbidden", { status: 403 });
+      }
+      return new Response("Not Found", { status: 404 });
+    };
+
+    const projectId = await ensureAntigravityProjectAssigned("both-fail-token", mockFetch);
+    assert.equal(projectId, undefined, "must return undefined when both fail");
+  });
+
+  test("does not re-attempt onboardUser within the failure backoff window", async () => {
+    let onboardCalls = 0;
+
+    const mockFetch = async (url: string, _init?: RequestInit): Promise<Response> => {
+      if (url.endsWith(":loadCodeAssist")) {
+        return new Response(JSON.stringify({}), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (url.endsWith(":onboardUser")) {
+        onboardCalls++;
+        // Transient upstream failure (500) — NOT the BYOP signal, so the
+        // failure-backoff semantics are what is under test here.
+        return new Response("Upstream error", {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response("Not Found", { status: 404 });
+    };
+
+    await ensureAntigravityProjectAssigned("dedup-token", mockFetch);
+    await ensureAntigravityProjectAssigned("dedup-token", mockFetch);
+
+    assert.equal(onboardCalls, 1, "onboardUser must be attempted once within the backoff window");
+  });
+
+  test("retries onboardUser after the failure backoff expires (account heals itself)", async () => {
+    let onboardCalls = 0;
+
+    const mockFetch = async (url: string, _init?: RequestInit): Promise<Response> => {
+      if (url.endsWith(":loadCodeAssist")) {
+        // Only the retry AFTER the second (healed) onboard attempt yields a project.
+        if (onboardCalls >= 2) {
+          return new Response(JSON.stringify({ cloudaicompanionProject: "proj-healed" }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({}), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (url.endsWith(":onboardUser")) {
+        onboardCalls++;
+        if (onboardCalls === 1) {
+          // First attempt: transient upstream failure -> failure backoff.
+          return new Response("Upstream error", {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        // Second (healed) attempt: Google returns the created project.
+        return new Response(
+          JSON.stringify({ done: true, cloudaicompanionProject: "proj-healed-onboard" }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+      return new Response("Not Found", { status: 404 });
+    };
+
+    // First attempt: onboard fails transiently -> failure recorded.
+    const first = await ensureAntigravityProjectAssigned("heal-token", mockFetch);
+    assert.equal(first, undefined);
+    assert.equal(onboardCalls, 1);
+
+    // Immediately after: backoff blocks a re-attempt.
+    const second = await ensureAntigravityProjectAssigned("heal-token", mockFetch);
+    assert.equal(second, undefined);
+    assert.equal(onboardCalls, 1, "no re-attempt inside the backoff window");
+
+    // Simulate the backoff expiring: the next request heals the account.
+    clearAntigravityOnboardBackoff();
+    const healed = await ensureAntigravityProjectAssigned("heal-token", mockFetch);
+    assert.equal(healed, "proj-healed");
+    assert.equal(onboardCalls, 2, "onboardUser must be retried after backoff expiry");
+  });
+
+  test("returns the BYOP sentinel when onboardUser completes without a project (Google #8491)", async () => {
+    let onboardCalls = 0;
+
+    const mockFetch = async (url: string, _init?: RequestInit): Promise<Response> => {
+      if (url.endsWith(":loadCodeAssist")) {
+        return new Response(JSON.stringify({}), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (url.endsWith(":onboardUser")) {
+        onboardCalls++;
+        // 200 done WITHOUT cloudaicompanionProject = BYOP: Google deprecated
+        // automatic project creation for standard-tier personal accounts.
+        return new Response(JSON.stringify({ done: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response("Not Found", { status: 404 });
+    };
+
+    const first = await ensureAntigravityProjectAssigned("byop-token", mockFetch);
+    assert.equal(first, ANTIGRAVITY_REQUIRES_MANUAL_PROJECT);
+
+    // The account is cached as BYOP — a second call must NOT re-run the
+    // pointless ~18s onboard round-trip (no extra fetch, same sentinel).
+    const second = await ensureAntigravityProjectAssigned("byop-token", mockFetch);
+    assert.equal(second, ANTIGRAVITY_REQUIRES_MANUAL_PROJECT);
+    assert.equal(onboardCalls, 1, "onboardUser must not be re-attempted for a cached BYOP account");
+  });
+
+  test("skips onboardUser when loadCodeAssist succeeds on first try", async () => {
+    let onboardCalls = 0;
+
+    const mockFetch = async (url: string, _init?: RequestInit): Promise<Response> => {
+      if (url.endsWith(":loadCodeAssist")) {
+        return new Response(JSON.stringify({ cloudaicompanionProject: "proj-exists" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (url.endsWith(":onboardUser")) {
+        onboardCalls++;
+        return new Response(JSON.stringify({ done: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response("Not Found", { status: 404 });
+    };
+
+    const projectId = await ensureAntigravityProjectAssigned("already-ok-token", mockFetch);
+
+    assert.equal(projectId, "proj-exists");
+    assert.equal(onboardCalls, 0, "onboardUser must NOT be called when loadCodeAssist succeeds");
   });
 });

@@ -13,6 +13,7 @@ import {
 import { encryptCredential } from "../encryption.mjs";
 import { openOmniRouteDb } from "../sqlite.mjs";
 import { t } from "../i18n.mjs";
+import { registerProviderCrud } from "./provider-crud.mjs";
 
 function publicConnection(connection) {
   return {
@@ -128,10 +129,65 @@ function buildTestInput(connection, apiKey) {
   };
 }
 
-async function runProviderTest(db, connection) {
+async function testProviderConnectionThroughServer(connection) {
+  try {
+    const res = await apiFetch(`/api/providers/${encodeURIComponent(connection.id)}/test`, {
+      method: "POST",
+      body: {},
+      retry: false,
+      timeout: 30000,
+      acceptNotOk: true,
+    });
+    const data = res.ok ? await res.json() : { valid: false, error: `HTTP ${res.status}` };
+    return {
+      connection: publicConnection(connection),
+      ...data,
+      valid: data.valid === true,
+      skipped: false,
+    };
+  } catch (error) {
+    return {
+      connection: publicConnection(connection),
+      valid: false,
+      skipped: false,
+      error: error instanceof Error ? error.message : String(error),
+      statusCode: null,
+    };
+  }
+}
+
+async function runProviderTest(db, connection, { serverUp = false } = {}) {
+  // Only API-key connections can be probed with a stored credential. OAuth /
+  // no-auth connections have nothing for testProviderApiKey() to send, and
+  // getProviderApiKey() throws for them by design — reporting that as a FAILED
+  // test marked perfectly healthy OAuth connections as broken *and* persisted
+  // that verdict to provider_connections.test_status.
+  if (connection.authType !== "apikey") {
+    return {
+      connection: publicConnection(connection),
+      valid: false,
+      skipped: true,
+      error: `No API-key probe for ${connection.authType || "unknown"} connections`,
+    };
+  }
+
   try {
     const apiKey = getProviderApiKey(connection);
     const result = await testProviderApiKey(buildTestInput(connection, apiKey));
+    // PROVIDER_TEST_CONFIGS only knows a handful of providers; "unsupported"
+    // means the CLI has no probe recipe, not that the provider is unhealthy.
+    // Persisting it would overwrite a good test_status with a failure.
+    if (result.unsupported) {
+      if (serverUp) {
+        return testProviderConnectionThroughServer(connection);
+      }
+      return {
+        connection: publicConnection(connection),
+        ...result,
+        skipped: true,
+        error: "No local probe for this provider; start OmniRoute to run its server-owned test",
+      };
+    }
     updateProviderTestResult(db, connection.id, result);
     return {
       connection: publicConnection(connection),
@@ -226,21 +282,24 @@ export async function runTestCommand(selector, opts = {}) {
       return 1;
     }
 
-    const result = await runProviderTest(db, connection);
+    const result = await runProviderTest(db, connection, { serverUp: await isServerUp() });
     if (opts.json) {
       console.log(JSON.stringify(result, null, 2));
+    } else if (result.skipped) {
+      console.log(`\x1b[33mSKIP\x1b[0m ${connection.name}: ${result.error}`);
     } else if (result.valid) {
       console.log(`\x1b[32mOK\x1b[0m ${connection.name}: provider test passed`);
     } else {
       console.log(`\x1b[31mFAIL\x1b[0m ${connection.name}: ${result.error}`);
     }
-    return result.valid ? 0 : 1;
+    return result.skipped ? 3 : result.valid ? 0 : 1;
   } finally {
     db.close();
   }
 }
 
 export async function runTestAllCommand(opts = {}) {
+  const serverUp = await isServerUp();
   const { db } = await openOmniRouteDb();
   try {
     const connections = listProviderConnections(db);
@@ -255,7 +314,7 @@ export async function runTestAllCommand(opts = {}) {
         });
         continue;
       }
-      results.push(await runProviderTest(db, connection));
+      results.push(await runProviderTest(db, connection, { serverUp }));
     }
 
     if (opts.json) {
@@ -453,14 +512,38 @@ export async function runProvidersStatusCommand(opts = {}) {
     return 3;
   }
 
-  const res = await apiFetch("/api/providers/expiration", { acceptNotOk: true, retry: false });
+  const res = await apiFetch("/api/providers", { acceptNotOk: true, retry: false });
   if (!res.ok) {
     console.error(t("common.error", { message: `HTTP ${res.status}` }));
     return 1;
   }
 
   const data = await res.json();
-  const list = data.list || [];
+  const expirationRes = await apiFetch("/api/providers/expiration", {
+    acceptNotOk: true,
+    retry: false,
+  }).catch(() => null);
+  const expirationData = expirationRes?.ok ? await expirationRes.json().catch(() => ({})) : {};
+  const expirations = new Map(
+    (expirationData.list || []).map((entry) => [entry.connectionId, entry])
+  );
+  // Expiration is optional metadata, not the inventory of configured connections.
+  // Project public fields explicitly: the management API may reveal API keys by policy.
+  const list = (data.connections || []).map((connection) => {
+    const expiration = expirations.get(connection.id);
+    return {
+      ...publicConnection(connection),
+      connectionId: connection.id,
+      connectionName: connection.name ?? expiration?.connectionName ?? "",
+      expiryType: expiration?.expiryType ?? null,
+      alertDays: expiration?.alertDays ?? null,
+      lastChecked: expiration?.lastChecked ?? null,
+      note: expiration?.note ?? null,
+      expiresAt: expiration?.expiresAt ?? connection.expiresAt ?? null,
+      status: expiration?.status ?? "unknown",
+      rateLimitedUntil: connection.rateLimitedUntil ?? null,
+    };
+  });
 
   // Optional provider filter
   const filter = opts.provider ? String(opts.provider).toLowerCase() : null;
@@ -579,6 +662,8 @@ export function registerProviders(program) {
       const exitCode = await runProvidersStatusCommand({ ...opts, output: globalOpts.output });
       if (exitCode !== 0) process.exit(exitCode);
     });
+
+  registerProviderCrud(providers);
 
   extendProvidersMetrics(providers);
 }

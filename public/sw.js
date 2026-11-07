@@ -1,12 +1,29 @@
-const CACHE_NAME = "omniroute-pwa-v2";
-const APP_SHELL = [
-  "/",
-  "/offline",
-  "/manifest.webmanifest",
-  "/icon-512.png",
-  "/apple-touch-icon.png",
+const CACHE_NAME = "omniroute-pwa-v3";
+const APP_SHELL = ["/", "/manifest.webmanifest", "/icon-512.png", "/apple-touch-icon.png"];
+// Never cache API / proxy surfaces: client-API aliases (/v1, /v1beta, /models, /chat,
+// /responses, /codex) return per-key data, and dashboard/auth pages are session-bound.
+const EXCLUDED_PATH_PREFIXES = [
+  "/api/",
+  "/a2a",
+  "/dashboard",
+  "/v1",
+  "/v1beta",
+  "/models",
+  "/chat",
+  "/responses",
+  "/codex",
+  "/callback",
+  "/login",
 ];
-const EXCLUDED_PATH_PREFIXES = ["/api/", "/a2a", "/dashboard/endpoint"];
+
+function pathIsExcluded(rawPathname) {
+  // The server routes /V1/... like /v1/... (classify.ts lowercases), so match the same way.
+  const pathname = rawPathname.toLowerCase();
+  return EXCLUDED_PATH_PREFIXES.some((prefix) => {
+    const base = prefix.endsWith("/") ? prefix.slice(0, -1) : prefix;
+    return pathname === base || pathname.startsWith(`${base}/`);
+  });
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -24,29 +41,12 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
       )
-      .then(() => caches.open(CACHE_NAME))
-      .then((cache) =>
-        cache.keys().then((entries) => {
-          const currentBuildId = extractBuildId(self.location.href);
-          const deletions = entries
-            .map((req) => {
-              const entryBuildId = extractBuildId(req.url);
-              return entryBuildId && currentBuildId && entryBuildId !== currentBuildId
-                ? cache.delete(req)
-                : null;
-            })
-            .filter(Boolean);
-          return Promise.all(deletions);
-        })
-      )
+      // Build identity lives in CACHE_NAME itself (stamped at build time),
+      // so deleting every other cache name above already drops all stale
+      // generations. No per-entry build-id comparison is needed.
       .then(() => self.clients.claim())
   );
 });
-
-function extractBuildId(url) {
-  const match = String(url).match(/\/_next\/static\/([^/]+)\//);
-  return match ? match[1] : null;
-}
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") {
@@ -55,34 +55,22 @@ self.addEventListener("fetch", (event) => {
 
   const requestUrl = new URL(event.request.url);
   const isSameOrigin = requestUrl.origin === self.location.origin;
-  const isExcludedPath = EXCLUDED_PATH_PREFIXES.some((prefix) =>
-    requestUrl.pathname.startsWith(prefix)
-  );
+  const excluded = pathIsExcluded(requestUrl.pathname);
   const isNextAsset = requestUrl.pathname.startsWith("/_next/");
   const destination = event.request.destination;
   const isStaticAsset = ["style", "script", "image", "font"].includes(destination);
   const isNavigateRequest = event.request.mode === "navigate";
 
+  // Never intercept navigations. Chrome owns HTTP/3→HTTP/2 fallback after a
+  // stale Alt-Svc advertisement; respondWith(Response.error()) on a dead QUIC
+  // socket made F5 hang until a new tab opened a fresh connection.
   // Never cache API/dashboard traffic with potentially auth-sensitive content.
-  if (!isSameOrigin || isExcludedPath) {
+  if (!isSameOrigin || excluded || isNavigateRequest) {
     return;
   }
 
   event.respondWith(
     (async () => {
-      if (isNavigateRequest) {
-        try {
-          const networkResponse = await fetch(event.request);
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            void caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-          }
-          return networkResponse;
-        } catch {
-          return (await navigationFallback(event.request)) || Response.error();
-        }
-      }
-
       if (!isStaticAsset) {
         return fetch(event.request);
       }
@@ -114,10 +102,6 @@ self.addEventListener("fetch", (event) => {
     })()
   );
 });
-
-async function navigationFallback(request) {
-  return (await caches.match(request)) || (await caches.match("/")) || (await caches.match("/offline"));
-}
 
 // ── Push Notifications ───────────────────────────────────────────────────────
 

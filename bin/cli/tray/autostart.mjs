@@ -1,23 +1,36 @@
-import { existsSync, writeFileSync, unlinkSync, mkdirSync, realpathSync } from "node:fs";
+import {
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  unlinkSync,
+  mkdirSync,
+  realpathSync,
+  renameSync,
+} from "node:fs";
 import { execFileSync, execSync } from "node:child_process";
 import { homedir } from "node:os";
-import { join, dirname } from "node:path";
+import { join, dirname, win32 } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveTrayPreference, saveTrayPreference } from "./preferences.mjs";
 
 const APP_LABEL = "com.omniroute.autostart";
 const WIN_REG_VALUE = "OmniRoute";
 const WIN_STARTUP_FILE = "OmniRoute.vbs";
 const LINUX_SERVICE_NAME = "omniroute.service";
 const LINUX_DESKTOP_NAME = "omniroute.desktop";
+const INSTALLED_CLI_SUFFIX =
+  win32.sep + win32.join("node_modules", "omniroute", "bin", "omniroute.mjs");
 
 function resolveCliPath() {
   const candidates = [];
   if (process.argv[1]) candidates.push(process.argv[1]);
-  try {
-    const which = execSync("command -v omniroute 2>/dev/null", { encoding: "utf8" }).trim();
-    if (which) candidates.push(which);
-  } catch {
-    // command -v unavailable
+  if (process.platform !== "win32") {
+    try {
+      const which = execSync("command -v omniroute 2>/dev/null", { encoding: "utf8" }).trim();
+      if (which) candidates.push(which);
+    } catch {
+      // command -v unavailable
+    }
   }
   candidates.push(join(dirname(fileURLToPath(import.meta.url)), "..", "..", "omniroute.mjs"));
 
@@ -42,7 +55,7 @@ function quoteExecArg(value) {
 
 function buildServeExecLine(cliPath, { tray = false } = {}) {
   const parts = [quoteExecArg(process.execPath), quoteExecArg(cliPath), "serve", "--no-open"];
-  if (tray) parts.push("--tray");
+  parts.push(tray ? "--tray" : "--no-tray");
   return parts.join(" ");
 }
 
@@ -110,42 +123,61 @@ function tryEnableLinger() {
   }
 }
 
-function writeLinuxSystemdUnit(cliPath) {
-  const unitDir = dirname(linuxSystemdUnitPath());
-  mkdirSync(unitDir, { recursive: true });
+export function buildLinuxSystemdUnitContent(cliPath) {
   const envFile = join(userHomeDir(), ".omniroute", ".env");
+  const nodeBinDir = dirname(process.execPath);
+  const userLocalBin = join(userHomeDir(), ".local", "bin");
+  const pathEnv = `${nodeBinDir}:${userLocalBin}:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin`;
   const lines = [
     "[Unit]",
     "Description=OmniRoute AI proxy router",
-    "After=network-online.target",
+    "After=network-online.target graphical-session.target",
     "Wants=network-online.target",
     "",
     "[Service]",
-    "Type=simple",
+    // Type=notify + WatchdogSec: the server sends READY=1 once listening and
+    // WATCHDOG=1 every 60s; if its event loop ever blocks (frozen process),
+    // the pings stop and systemd kills+restarts the service. NotifyAccess=all
+    // because the pings come from the server child, not the serve supervisor.
+    // Foreground serve only: `--daemon` escapes the cgroup and would break
+    // the notify handshake.
+    "Type=notify",
+    "NotifyAccess=all",
+    "WatchdogSec=180",
+    "TimeoutStartSec=300",
     `ExecStart=${buildServeExecLine(cliPath, { tray: false })}`,
     "Restart=on-failure",
     "RestartSec=5",
+    `Environment="PATH=${pathEnv}"`,
   ];
   if (existsSync(envFile)) lines.push(`EnvironmentFile=-${envFile}`);
   lines.push("", "[Install]", "WantedBy=default.target", "");
-  writeFileSync(linuxSystemdUnitPath(), `${lines.join("\n")}\n`, { mode: 0o644 });
+  return `${lines.join("\n")}\n`;
 }
 
-function writeLinuxDesktopEntry(cliPath) {
-  const dir = dirname(linuxDesktopPath());
-  mkdirSync(dir, { recursive: true });
-  const desktop =
+function writeLinuxSystemdUnit(cliPath) {
+  mkdirSync(dirname(linuxSystemdUnitPath()), { recursive: true });
+  writeFileSync(linuxSystemdUnitPath(), buildLinuxSystemdUnitContent(cliPath), { mode: 0o644 });
+}
+
+export function buildLinuxDesktopContent(cliPath, { tray = true } = {}) {
+  return (
     [
       "[Desktop Entry]",
       "Type=Application",
       "Name=OmniRoute",
       "Comment=AI proxy router with auto fallback",
-      `Exec=${buildServeExecLine(cliPath, { tray: true })}`,
+      `Exec=${buildServeExecLine(cliPath, { tray })}`,
       "Terminal=false",
       "Hidden=false",
       "X-GNOME-Autostart-enabled=true",
-    ].join("\n") + "\n";
-  writeFileSync(linuxDesktopPath(), desktop, { mode: 0o644 });
+    ].join("\n") + "\n"
+  );
+}
+
+function writeLinuxDesktopEntry(cliPath, options) {
+  mkdirSync(dirname(linuxDesktopPath()), { recursive: true });
+  writeFileSync(linuxDesktopPath(), buildLinuxDesktopContent(cliPath, options), { mode: 0o644 });
 }
 
 export function getAutostartStatus() {
@@ -167,6 +199,10 @@ export function getAutostartStatus() {
       linger: tryReadLingerEnabled(),
     };
   }
+  if (process.platform === "win32") {
+    const winMechanism = isAutostartEnabled() ? "vbs-startup" : null;
+    return { enabled: isAutostartEnabled(), mechanism: winMechanism };
+  }
   return { enabled: isAutostartEnabled(), mechanism: null };
 }
 
@@ -184,11 +220,24 @@ function tryReadLingerEnabled() {
   }
 }
 
-export function enable() {
-  if (process.platform === "darwin") return enableMac();
-  if (process.platform === "win32") return enableWin();
-  if (process.platform === "linux") return enableLinux();
-  return false;
+export function enable(options = {}) {
+  const tray = resolveTrayPreference(options, true);
+  let enabled = false;
+  if (process.platform === "darwin") enabled = enableMac({ tray });
+  if (process.platform === "win32") enabled = enableWin({ tray });
+  if (process.platform === "linux") enabled = enableLinux({ tray });
+  if (enabled && typeof options.tray === "boolean") {
+    try {
+      saveTrayPreference(options.tray);
+    } catch {
+      throw new Error(
+        "Autostart was enabled, but the tray preference could not be saved. " +
+          "Use `omniroute autostart status` to inspect registration, fix access to " +
+          "tray-preferences.json, then retry `omniroute autostart enable` with the desired tray flag."
+      );
+    }
+  }
+  return enabled;
 }
 
 export function disable() {
@@ -263,33 +312,50 @@ function isAgentSelfMac() {
   }
 }
 
-function enableMac() {
-  const plistDir = join(homedir(), "Library", "LaunchAgents");
-  mkdirSync(plistDir, { recursive: true });
-  const plistPath = join(plistDir, `${APP_LABEL}.plist`);
-  const cliPath = resolveCliPath();
-  if (!cliPath) return false;
-  const plist = `<?xml version="1.0" encoding="UTF-8"?>
+function isDetachedTrayWorker() {
+  return process.argv.includes("--tray-worker");
+}
+
+function escapeXml(value) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
+}
+
+export function buildMacPlistContent(cliPath, { tray = true } = {}) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>${APP_LABEL}</string>
   <key>ProgramArguments</key><array>
-    <string>${process.execPath}</string>
-    <string>${cliPath}</string>
+    <string>${escapeXml(process.execPath)}</string>
+    <string>${escapeXml(cliPath)}</string>
     <string>serve</string>
-    <string>--tray</string>
+    <string>${tray ? "--tray" : "--no-tray"}</string>
     <string>--no-open</string>
   </array>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><false/>
 </dict></plist>`;
+}
+
+function enableMac({ tray }) {
+  const plistDir = join(homedir(), "Library", "LaunchAgents");
+  mkdirSync(plistDir, { recursive: true });
+  const plistPath = join(plistDir, `${APP_LABEL}.plist`);
+  const cliPath = resolveCliPath();
+  if (!cliPath) return false;
+  const plist = buildMacPlistContent(cliPath, { tray });
   writeFileSync(plistPath, plist, { mode: 0o644 });
   // If we're already the running agent, launchctl load/unload would SIGTERM us.
   // The plist is updated on disk and launchd already has us loaded under our own
   // PID — nothing more to do for the current session.
-  if (isAgentSelfMac()) return existsSync(plistPath);
+  if (isAgentSelfMac() || isDetachedTrayWorker()) return existsSync(plistPath);
   try {
-    execSync("launchctl load -w " + JSON.stringify(plistPath), { stdio: "ignore" });
+    execFileSync("launchctl", ["load", "-w", plistPath], { stdio: "ignore" });
   } catch {}
   return existsSync(plistPath);
 }
@@ -300,9 +366,9 @@ function disableMac() {
   // `launchctl unload` sends SIGTERM and a user clicking "Disable Autostart"
   // from the tray would lose the tray icon instead of just flipping the label.
   // Removing the plist file is enough to stop the agent at the next login.
-  if (!isAgentSelfMac()) {
+  if (!isAgentSelfMac() && !isDetachedTrayWorker()) {
     try {
-      execSync("launchctl unload -w " + JSON.stringify(plistPath), { stdio: "ignore" });
+      execFileSync("launchctl", ["unload", "-w", plistPath], { stdio: "ignore" });
     } catch {}
   }
   try {
@@ -343,6 +409,10 @@ function winStartupPath() {
   return dir ? join(dir, WIN_STARTUP_FILE) : null;
 }
 
+function quoteWindowsArg(value) {
+  return `"${value.replace(/(\\*)"/g, '$1$1\\"').replace(/(\\+)$/g, "$1$1")}"`;
+}
+
 /**
  * Builds the VBScript source that launches OmniRoute with WSH's Run method
  * using SW_HIDE (0) so no console window appears.
@@ -351,8 +421,14 @@ function winStartupPath() {
  * WScript.Shell.Run with window style 0 (hidden). This avoids the console
  * window flash that HKCU\Run causes for console-mode node.exe.
  */
-function buildWinVbsContent(cliPath) {
-  const execLine = buildServeExecLine(cliPath, { tray: true });
+export function buildWinVbsContent(cliPath, { tray = true } = {}) {
+  const execLine = [
+    quoteWindowsArg(process.execPath),
+    quoteWindowsArg(cliPath),
+    "serve",
+    "--no-open",
+    tray ? "--tray" : "--no-tray",
+  ].join(" ");
   // VBScript doubles `"` inside a string to escape them. The execLine already
   // contains quoted paths; escape each `"` to `""` so the VBS parser reads
   // them as literal quote characters in the command string passed to Run().
@@ -380,18 +456,131 @@ function cleanLegacyWinReg() {
   }
 }
 
-function enableWin() {
+function enableWin({ tray }) {
   const cliPath = resolveCliPath();
   if (!cliPath) return false;
   const vbsPath = winStartupPath();
   if (!vbsPath) return false;
   const dir = dirname(vbsPath);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(vbsPath, buildWinVbsContent(cliPath), { mode: 0o644 });
+  writeFileSync(vbsPath, buildWinVbsContent(cliPath, { tray }), { mode: 0o644 });
   // Migrate away from the legacy HKCU\Run entry — it launches node.exe with
   // a visible console window. The VBS approach is the replacement.
   cleanLegacyWinReg();
   return existsSync(vbsPath);
+}
+
+/**
+ * Swaps the CLI script in an OmniRoute.vbs written by buildWinVbsContent (any
+ * release; older ones escaped every backslash) for `cliPath`, keeping the node
+ * binary, every flag and the line endings as they are. Returns null for a VBS
+ * this module did not write.
+ */
+export function rewriteWinVbsCliPath(vbs, cliPath) {
+  const run = vbs.match(/^WshShell\.Run "(.*)", 0, False(\r?)$/m);
+  const exec = run && run[1].replace(/""/g, '"').match(/^("[^"]*"|\S+)(\s+)("[^"]*"|\S+)(.*)$/);
+  if (!exec) return null;
+  const [, node, sep, previous, rest] = exec;
+  const execLine = `${node}${sep}${quoteWindowsArg(cliPath)}${rest}`;
+  const runLine = `WshShell.Run "${execLine.replace(/"/g, '""')}", 0, False${run[2]}`;
+  return {
+    previousCliPath: win32.normalize(previous.replace(/^"|"$/g, "")),
+    content: vbs.replace(run[0], () => runLine),
+  };
+}
+
+function installedVersion(cliPath) {
+  try {
+    return JSON.parse(readFileSync(join(dirname(cliPath), "..", "package.json"), "utf8")).version;
+  } catch {
+    return null;
+  }
+}
+
+function isInstalledCli(cliPath) {
+  return win32.normalize(cliPath).toLowerCase().endsWith(INSTALLED_CLI_SUFFIX);
+}
+
+const SEMVER_RE = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/;
+
+/**
+ * Orders two release versions: -1 when `a` is older than `b`, 0 when equal, 1 when
+ * newer, null when either is not major.minor.patch[-prerelease]. A prerelease ranks
+ * below its release; two prereleases of one release compare by their tag, numbers
+ * numerically ("rc.2" < "rc.10").
+ */
+export function compareCliVersions(a, b) {
+  const [x, y] = [a, b].map((v) => (typeof v === "string" ? SEMVER_RE.exec(v.trim()) : null));
+  if (!x || !y) return null;
+  for (let i = 1; i <= 3; i++) {
+    const diff = Number(x[i]) - Number(y[i]);
+    if (diff) return Math.sign(diff);
+  }
+  if (!x[4] || !y[4]) return Math.sign(Number(!x[4]) - Number(!y[4]));
+  return Math.sign(x[4].localeCompare(y[4], "en", { numeric: true }));
+}
+
+/** True for a CLI inside an npx cache (a `_npx` path segment): a throwaway copy. */
+export function isNpxCachePath(cliPath) {
+  return win32.normalize(cliPath).toLowerCase().split(win32.sep).includes("_npx");
+}
+
+/**
+ * Stale means the VBS target is gone, or strictly older than the running install.
+ * Same version, a newer target and unparsable versions are left alone, so a
+ * downgrade or two coexisting installs can't flip the file back and forth. A
+ * removed target reads as 0.0.0. The running CLI must be a regular install, not an
+ * npx cache copy.
+ */
+function isStaleInstalledCli(previous, current) {
+  if (!isInstalledCli(previous) || !isInstalledCli(current) || isNpxCachePath(current)) {
+    return false;
+  }
+  // A package.json left behind without the script it describes is a removed target.
+  const target = (existsSync(previous) && installedVersion(previous)) || "0.0.0";
+  return compareCliVersions(target, installedVersion(current)) === -1;
+}
+
+/**
+ * Scratch file for replacing the VBS, in the same folder so the rename stays on one
+ * volume. Windows runs everything in the Startup folder at login, so a leftover must
+ * not be a script: `.tmp` has no handler.
+ */
+export function winVbsTempPath(vbsPath) {
+  return `${vbsPath}.${process.pid}.tmp`;
+}
+
+/**
+ * #18601: the VBS pins the real path of the CLI that enabled autostart, and pnpm
+ * installs every version under its own directory, so after an upgrade each login
+ * kept booting the old version. `serve` calls this to point the VBS at the
+ * running install when it launches an older version of an installed copy, or one
+ * that is gone or unreadable, never from an npx cache. Source checkouts and VBS
+ * files we did not write are left alone.
+ * Returns true when the file was rewritten.
+ */
+export function refreshWinAutostartCliPath({
+  cliPath = resolveCliPath(),
+  vbsPath = winStartupPath(),
+} = {}) {
+  if (process.platform !== "win32" || !cliPath || !vbsPath || !existsSync(vbsPath)) return false;
+  const rewritten = rewriteWinVbsCliPath(readFileSync(vbsPath, "utf8"), cliPath);
+  if (!rewritten || !isStaleInstalledCli(rewritten.previousCliPath, cliPath)) return false;
+  // Write beside the VBS and rename over it: a failed write must not leave a
+  // truncated entry that later refreshes reject as foreign.
+  const tempPath = winVbsTempPath(vbsPath);
+  try {
+    writeFileSync(tempPath, rewritten.content, { mode: 0o644 });
+    renameSync(tempPath, vbsPath);
+  } catch (err) {
+    try {
+      unlinkSync(tempPath);
+    } catch {
+      // never written, or already renamed away
+    }
+    throw err;
+  }
+  return true;
 }
 
 function disableWin() {
@@ -426,7 +615,7 @@ function isEnabledWin() {
   }
 }
 
-function enableLinux() {
+function enableLinux({ tray }) {
   const cliPath = resolveCliPath();
   if (!cliPath) return false;
 
@@ -440,7 +629,7 @@ function enableLinux() {
   let ok = false;
 
   if (graphicalSession) {
-    writeLinuxDesktopEntry(cliPath);
+    writeLinuxDesktopEntry(cliPath, { tray });
     ok = true;
   } else if (systemdAvailable) {
     writeLinuxSystemdUnit(cliPath);

@@ -17,6 +17,8 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("next-intl", () => ({
   useTranslations: () => (k: string) => k,
+  // ConnectionRow formats timestamps with the active locale since #16947.
+  useLocale: () => "en",
 }));
 
 // Minimal store stubs
@@ -177,6 +179,8 @@ describe("phase-1d extractions (#3501)", () => {
     const c = renderComponent(
       <ModelCompatPopover
         t={(k: string) => k}
+        providerId="openai"
+        modelId="gpt-test"
         effectiveModelNormalize={() => false}
         effectiveModelPreserveDeveloper={() => true}
         getUpstreamHeadersRecord={() => ({})}
@@ -190,6 +194,8 @@ describe("phase-1d extractions (#3501)", () => {
     const c = renderComponent(
       <ModelCompatPopover
         t={(k: string) => k}
+        providerId="openai"
+        modelId="gpt-test"
         effectiveModelNormalize={() => true}
         effectiveModelPreserveDeveloper={() => false}
         getUpstreamHeadersRecord={() => ({ "X-Custom": "value" })}

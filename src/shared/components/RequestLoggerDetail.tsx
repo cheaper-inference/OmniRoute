@@ -1,70 +1,186 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import {
-  PROVIDER_COLORS,
-  getHttpStatusStyle as getStatusStyle,
-  getProtocolColor,
-} from "@/shared/constants/colors";
+import { classifyHttpLog, parseUpstreamHttp } from "@/shared/utils/upstreamHttp";
+import { sortRelatedLogs } from "./requestLoggerGroups";
+
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import JsonTree from "@/shared/components/JsonTree";
+import { PROVIDER_COLORS, getProtocolColor, neutralBadge } from "@/shared/constants/colors";
 import { formatDuration, formatApiKeyLabel, maskAccount } from "@/shared/utils/formatting";
-import { formatErrorForDisplay } from "@/shared/utils/formatting";
+import { formatErrorForDisplay, formatReasoningStat } from "@/shared/utils/formatting";
+import { useTimestampTitles } from "@/shared/hooks/useTimestampTitles";
+import { JsonTreeExpandControls } from "@/shared/components/JsonTreeExpandControls";
+import { CallContentProvenanceBadges } from "@/shared/components/CallContentProvenanceBadges";
+import { useJsonTreeExpandLevel } from "@/store/jsonTreeExpandStore";
+import {
+  PayloadSection,
+  ConversationContextSection,
+  buildPipelinePayloadSections,
+  isBodySizeLimitOmission,
+} from "@/shared/components/RequestLoggerDetail.sections";
+import { getResilienceBadges } from "@/shared/components/requestLoggerResilience";
+import { cn } from "@/shared/utils/cn";
+import Badge from "./Badge";
+import Button from "./Button";
+import Icon from "./Icon";
+import { computeBarRange, type TimelineLog } from "./RequestTimeline.utils";
 
-// ─── Payload Code Block ─────────────────────────────────────────────────────
+// HTTP status → kit Badge tone (2xx success, 4xx warning, 5xx error).
+function httpStatusTone(status: number) {
+  if (status >= 200 && status < 300) return "success" as const;
+  if (status >= 400 && status < 500) return "warning" as const;
+  if (status >= 500) return "error" as const;
+  if (status === 0) return "info" as const;
+  return "default" as const;
+}
 
-function PayloadSection({ title, json, onCopy, collapsible = true, defaultOpen = true }) {
-  const [copied, setCopied] = useState(false);
-  const [open, setOpen] = useState(defaultOpen);
+// ─── Copy-all composition ────────────────────────────────────────────────────
+// Compose every visible payload section + stream chunk into a single block so
+// users can copy the whole request/response transcript with one click instead
+// of copying each section individually. Pure function, exported for tests.
+type CopyAllSection = { title: string; json: string };
+type CopyAllInput = {
+  sections: CopyAllSection[];
+  streamChunks?: Record<string, string | string[]>;
+  legacyResponse?: string | null;
+  legacyRequest?: string | null;
+  legacyResponseTitle?: string;
+  legacyRequestTitle?: string;
+};
 
-  const handleCopy = async () => {
-    const success = await onCopy();
-    if (success !== false) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
+export function buildCopyAllText({
+  sections,
+  streamChunks,
+  legacyResponse,
+  legacyRequest,
+  legacyResponseTitle = "Response",
+  legacyRequestTitle = "Request",
+}: CopyAllInput): string {
+  const parts: string[] = [];
+  const streamNames: Array<[string, string | string[] | undefined]> = [
+    ["provider", streamChunks?.provider],
+    ["client", streamChunks?.client],
+    ["openai", streamChunks?.openai],
+  ];
 
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-3">
-          <h3 className="text-[11px] text-text-muted uppercase tracking-wider font-bold">
-            {title}
-          </h3>
-          {collapsible && (
-            <button
-              onClick={() => setOpen((v) => !v)}
-              className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
-              aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
-            >
-              <span className="material-symbols-outlined text-[16px]">
-                {open ? "expand_less" : "expand_more"}
-              </span>
-            </button>
-          )}
-        </div>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1 px-2 py-1 text-xs text-text-muted hover:text-text-primary transition-colors"
-          aria-label={`Copy ${title}`}
-        >
-          <span className="material-symbols-outlined text-[14px]">
-            {copied ? "check" : "content_copy"}
-          </span>
-          {copied ? "Copied!" : "Copy"}
-        </button>
-      </div>
-      {open && (
-        <pre className="p-4 rounded-xl bg-black/5 dark:bg-black/30 border border-border overflow-x-auto text-xs font-mono text-text-main max-h-150 overflow-y-auto leading-relaxed whitespace-pre-wrap break-words">
-          {json}
-        </pre>
-      )}
-    </div>
-  );
+  for (const [name, value] of streamNames) {
+    if (value == null) continue;
+    const body = Array.isArray(value) ? value.join("") : String(value);
+    if (!body) continue;
+    parts.push(`### ${name.toUpperCase()} STREAM\n${body}`);
+  }
+
+  for (const section of sections) {
+    parts.push(`### ${section.title}\n${section.json}`);
+  }
+
+  if (sections.length === 0 && legacyResponse) {
+    parts.push(`### ${legacyResponseTitle}\n${legacyResponse}`);
+  }
+  if (sections.length === 0 && legacyRequest) {
+    parts.push(`### ${legacyRequestTitle}\n${legacyRequest}`);
+  }
+
+  return parts.join("\n\n---\n\n");
 }
 
 // ─── Stream section + Detail Modal ───────────────────────────────────────────────────────────
 
-function StreamSection({ title, json, onCopy }) {
+// Raw stream chunks are captured at the network level (see streamChunks
+// capture) with a `[HH:MM:SS.mmm] ` prefix inserted per chunk boundary, which
+// can land mid-token inside an SSE event's JSON payload once chunks are
+// joined. Strip those markers first so a `data:` line isn't interrupted.
+const STREAM_TIMESTAMP_PREFIX = /\[\d{2}:\d{2}:\d{2}\.\d{3}\] /g;
+
+type StreamSegment =
+  { type: "text"; value: string } | { type: "json"; value: unknown; raw: string };
+
+// Gemini's own stream-chunk capture concatenates multiple complete JSON
+// objects back-to-back with no separator between them ("}{"), unlike the
+// SSE blank-line-per-event framing every other provider's capture uses
+// here. A `data:` payload can therefore hold several complete top-level
+// JSON values, not one -- JSON.parse correctly rejects the whole thing
+// ("Unexpected non-whitespace character after JSON") and used to make the
+// entire payload fall back to plain text. Recover by scanning bracket/
+// string depth to split the payload into individual JSON values instead of
+// assuming exactly one JSON.parse per payload; each recovered value renders
+// as its own collapsible node.
+export function splitConcatenatedJsonValues(payload: string): unknown[] | null {
+  const values: unknown[] = [];
+  let i = 0;
+  const len = payload.length;
+  while (i < len) {
+    while (i < len && /\s/.test(payload[i])) i++;
+    if (i >= len) break;
+    const start = i;
+    if (payload[i] !== "{" && payload[i] !== "[") return null; // not a bare-value stream
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+    for (; i < len; i++) {
+      const ch = payload[i];
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (ch === "\\") escaped = true;
+        else if (ch === '"') inString = false;
+        continue;
+      }
+      if (ch === '"') inString = true;
+      else if (ch === "{" || ch === "[") depth++;
+      else if (ch === "}" || ch === "]") {
+        depth--;
+        if (depth === 0) {
+          i++;
+          break;
+        }
+      }
+    }
+    if (depth !== 0) return null; // unterminated -- a genuinely incomplete capture, not this case
+    try {
+      values.push(JSON.parse(payload.slice(start, i)));
+    } catch {
+      return null;
+    }
+  }
+  return values.length > 1 ? values : null;
+}
+
+// Splits a raw joined SSE capture into renderable segments: each `data:`
+// line that parses as JSON becomes its own segment (rendered as a
+// collapsible tree), everything else (comments, keep-alives, [DONE],
+// non-JSON payloads) stays as plain text, byte-identical to the raw capture.
+export function parseStreamIntoSegments(joined: string): StreamSegment[] {
+  const text = joined.replace(STREAM_TIMESTAMP_PREFIX, "");
+  const events = text.split(/(?<=\n\n)/); // keep event boundaries, preserve exact text
+  const segments: StreamSegment[] = [];
+  for (const event of events) {
+    if (!event) continue;
+    const dataLines = event
+      .split("\n")
+      .filter((line) => line.startsWith("data:"))
+      .map((line) => line.slice(5).trim());
+    const payload = dataLines.join("");
+    if (dataLines.length === 0 || !payload || payload === "[DONE]") {
+      segments.push({ type: "text", value: event });
+      continue;
+    }
+    try {
+      segments.push({ type: "json", value: JSON.parse(payload), raw: event });
+    } catch {
+      const values = splitConcatenatedJsonValues(payload);
+      if (values) {
+        for (const value of values) segments.push({ type: "json", value, raw: event });
+      } else {
+        segments.push({ type: "text", value: event });
+      }
+    }
+  }
+  return segments;
+}
+
+function StreamSection({ title, sectionId, json, onCopy }) {
+  const t = useTranslations("requestLogger.detail");
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(true);
   const [autoscroll, setAutoscroll] = useState(() => {
@@ -75,7 +191,21 @@ function StreamSection({ title, json, onCopy }) {
       return true;
     }
   });
+  // Default to the rendered/parsed view (segments below) -- raw is an
+  // explicit opt-in for inspecting exactly what was captured on the wire,
+  // timestamp markers and all, when the rendered tree hides something the
+  // parser got wrong (e.g. a chunk-boundary split like this PR fixes).
+  const [showRaw, setShowRaw] = useState(() => {
+    try {
+      return localStorage.getItem("pref:stream:raw") === "1";
+    } catch {
+      return false;
+    }
+  });
   const ref = useRef(null);
+  const resolvedSectionId = sectionId || title;
+  const expandLevel = useJsonTreeExpandLevel(resolvedSectionId);
+  const segments = useMemo(() => parseStreamIntoSegments(json), [json]);
 
   const handleCopy = async () => {
     const success = await onCopy();
@@ -105,6 +235,16 @@ function StreamSection({ title, json, onCopy }) {
     } catch {}
   };
 
+  const toggleRaw = () => {
+    const next = !showRaw;
+    setShowRaw(next);
+    try {
+      localStorage.setItem("pref:stream:raw", next ? "1" : "0");
+    } catch {}
+  };
+
+  useTimestampTitles(ref, open);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
@@ -112,43 +252,80 @@ function StreamSection({ title, json, onCopy }) {
           <h3 className="text-[11px] text-text-muted uppercase tracking-wider font-bold">
             {title}
           </h3>
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => setOpen((v) => !v)}
-            className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
-            aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
+            className="size-6 min-h-6 text-text-muted"
+            aria-expanded={open}
+            aria-label={open ? t("collapse", { title }) : t("expand", { title })}
           >
-            <span className="material-symbols-outlined text-[16px]">
-              {open ? "expand_less" : "expand_more"}
-            </span>
-          </button>
+            <Icon name={open ? "expand_less" : "expand_more"} size={16} />
+          </Button>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={toggleRaw}
+            title={showRaw ? t("rawViewOn") : t("rawViewOff")}
+            aria-label={showRaw ? t("rawViewOn") : t("rawViewOff")}
+            className={cn("size-7 min-h-7", showRaw ? "text-primary" : "text-text-muted")}
+            aria-pressed={showRaw}
+          >
+            <Icon name="code" size={18} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={toggleAutoscroll}
-            title={autoscroll ? "Autoscroll: on" : "Autoscroll: off"}
-            className={`p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors ${autoscroll ? "text-primary" : ""}`}
+            title={autoscroll ? t("autoscrollOn") : t("autoscrollOff")}
+            aria-label={autoscroll ? t("autoscrollOn") : t("autoscrollOff")}
+            className={cn("size-7 min-h-7", autoscroll ? "text-primary" : "text-text-muted")}
             aria-pressed={autoscroll}
           >
-            <span className="material-symbols-outlined text-[18px]">vertical_align_bottom</span>
-          </button>
-          <button
+            <Icon name="vertical_align_bottom" size={18} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleCopy}
-            className="flex items-center gap-1 px-2 py-1 text-xs text-text-muted hover:text-text-primary transition-colors"
-            aria-label={`Copy ${title}`}
+            className="h-7 min-h-7 px-2 text-xs text-text-muted"
+            aria-label={t("copyTitle", { title })}
           >
-            <span className="material-symbols-outlined text-[14px]">
-              {copied ? "check" : "content_copy"}
-            </span>
-            {copied ? "Copied!" : "Copy"}
-          </button>
+            <Icon name={copied ? "check" : "content_copy"} size={14} />
+            {copied ? t("copied") : t("copy")}
+          </Button>
+          {!showRaw && segments.some((s) => s.type === "json") && (
+            <JsonTreeExpandControls sectionId={resolvedSectionId} />
+          )}
         </div>
       </div>
       {open && (
         <div
           ref={ref}
-          className="p-4 rounded-xl bg-black/5 dark:bg-black/30 border border-border overflow-x-auto text-xs font-mono text-text-main max-h-150 overflow-y-auto leading-relaxed whitespace-pre-wrap break-words"
+          className="max-h-150 overflow-x-auto overflow-y-auto rounded-xl border border-border bg-surface-2 p-4 font-mono text-xs leading-relaxed text-text-main"
         >
-          {json}
+          {showRaw ? (
+            <pre className="whitespace-pre-wrap break-words">{json}</pre>
+          ) : (
+            segments.map((segment, i) =>
+              segment.type === "json" ? (
+                <div key={i} className="my-1">
+                  <JsonTree
+                    value={segment.value}
+                    expandDepth={expandLevel}
+                    showControls={false}
+                    aria-label={title}
+                  />
+                </div>
+              ) : (
+                <span key={i} className="whitespace-pre-wrap break-words">
+                  {segment.value}
+                </span>
+              )
+            )
+          )}
         </div>
       )}
     </div>
@@ -183,6 +360,18 @@ function formatConnectionId(value) {
   return value.length > 8 ? `${value.slice(0, 8)}...` : value;
 }
 
+function getRequestTimeRange(log: TimelineLog & { detailState?: string }) {
+  return computeBarRange(
+    {
+      ...log,
+      timestamp: log.timestamp ?? "",
+      // Fetched detail state takes precedence over a preview flag retained by the modal merge.
+      completed: log.detailState ? log.detailState === "in-memory" : log.completed,
+    },
+    Date.now()
+  );
+}
+
 export default function RequestLoggerDetail({
   log,
   detail,
@@ -196,6 +385,12 @@ export default function RequestLoggerDetail({
   relatedLogs = [],
   onSelectRelated,
 }) {
+  const t = useTranslations("requestLogger.detail");
+  // #13130: the grid's TTFT column label doubles as the detail-tile label
+  // (the key already ships in every locale under requestLogger.columns).
+  const tColumns = useTranslations("requestLogger.columns");
+  const locale = useLocale();
+  const modalScrollRef = useRef(null);
   // Close on Escape key
   useEffect(() => {
     const handler = (e) => {
@@ -205,18 +400,32 @@ export default function RequestLoggerDetail({
     return () => globalThis.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  const statusStyle = getStatusStyle(log.status);
+  // The overlay is full-viewport, but the modal panel itself is centered and
+  // narrower than the viewport (max-w-225), leaving backdrop margin on every
+  // side. A wheel event there has no scrollable target under the cursor, so
+  // scrolling only worked once the pointer happened to be over the panel's
+  // own content. Forward wheel scrolling from anywhere in the overlay to the
+  // panel instead, so the backdrop margin scrolls it too.
+  const handleOverlayWheel = (e) => {
+    const panel = modalScrollRef.current;
+    // Let native scrolling handle wheel events that already land inside the
+    // panel -- only forward the ones from the backdrop margin around it.
+    if (!panel || panel.contains(e.target)) return;
+    panel.scrollTop += e.deltaY;
+    e.preventDefault();
+  };
+
+  const timingLog = { ...log, ...detail };
+  const { startMs, endMs } = getRequestTimeRange(timingLog);
   const protocolKey = log.sourceFormat || log.provider;
   const protocol = getProtocolColor(protocolKey, log.provider);
-  const providerColor = PROVIDER_COLORS[log.provider] || {
-    bg: "#374151",
-    text: "#fff",
-    label: (log.provider || "-").toUpperCase(),
-  };
+  const providerColor =
+    PROVIDER_COLORS[log.provider] || neutralBadge((log.provider || "-").toUpperCase());
   const providerLabel = log.providerDisplay || providerColor.label;
 
   const [unblocking, setUnblocking] = useState(false);
   const [cleared, setCleared] = useState(false);
+  const [copiedAll, setCopiedAll] = useState(false);
 
   // #7920 gave this component formatErrorForDisplay for structured error objects, but the
   // #8213 combo/cooldown checks below went straight to the raw field and call
@@ -262,7 +471,9 @@ export default function RequestLoggerDetail({
     }
   };
 
-  const providerStatus = detail?.pipelinePayloads?.providerResponse?.status;
+  const upstreamHttp = parseUpstreamHttp(detail?.upstreamHttp ?? log.upstreamHttp);
+  const providerStatus =
+    upstreamHttp?.send?.status ?? detail?.pipelinePayloads?.providerResponse?.status;
   const hasStatusDiscrepancy = providerStatus && providerStatus !== log.status;
 
   const formatDate = (iso) => {
@@ -270,9 +481,11 @@ export default function RequestLoggerDetail({
     try {
       const d = new Date(iso);
       if (!Number.isFinite(d.getTime())) return "\u2014";
-      return (
-        d.toLocaleDateString("pt-BR") + ", " + d.toLocaleTimeString("en-US", { hour12: false })
-      );
+      return d.toLocaleString(locale, {
+        dateStyle: "short",
+        timeStyle: "medium",
+        hour12: false,
+      });
     } catch {
       return "\u2014";
     }
@@ -289,22 +502,21 @@ export default function RequestLoggerDetail({
 
   const pipelinePayloads = detail?.pipelinePayloads || null;
   const payloadSections = pipelinePayloads
-    ? [
-        ["clientRawRequest", "Client Raw Request"],
-        ["clientRequest", "Client Request"],
-        ["openaiRequest", "OpenAI Request"],
-        ["providerRequest", "Provider Request"],
-        ["providerResponse", "Provider Response"],
-        ["clientResponse", "Client Response"],
-        ["error", "Pipeline Error"],
-      ]
-        .map(([key, title]) => ({
-          key,
-          title,
-          json: toPrettyJson(pipelinePayloads[key]),
-        }))
-        .filter((section) => section.json)
+    ? buildPipelinePayloadSections(
+        [
+          ["clientRawRequest", t("payload.clientRawRequest")],
+          ["clientRequest", t("payload.clientRequest")],
+          ["openaiRequest", t("payload.openaiRequest")],
+          ["providerRequest", t("payload.providerRequest")],
+          ["providerResponse", t("payload.providerResponse")],
+          ["clientResponse", t("payload.clientResponse")],
+          ["error", t("payload.pipelineError")],
+        ],
+        pipelinePayloads
+      )
     : [];
+  const requestBodyOmitted = isBodySizeLimitOmission(detail?.requestBody);
+  const responseBodyOmitted = isBodySizeLimitOmission(detail?.responseBody);
   const requestJson = detail?.requestBody ? toPrettyJson(detail.requestBody) : null;
   const responseJson = detail?.responseBody ? toPrettyJson(detail.responseBody) : null;
   const streamChunks = (() => {
@@ -320,11 +532,31 @@ export default function RequestLoggerDetail({
     if (chunks && typeof chunks === "object") return chunks;
     return null;
   })();
+
+  // Compose every visible payload section + stream chunk into a single block so
+  // users can copy the whole request/response transcript with one click instead
+  // of copying each section individually.
+  const handleCopyAll = async () => {
+    const text = buildCopyAllText({
+      sections: payloadSections,
+      streamChunks: streamChunks || undefined,
+      legacyResponse: payloadSections.length === 0 ? responseJson : null,
+      legacyRequest: payloadSections.length === 0 ? requestJson : null,
+      legacyResponseTitle: t("responsePayloadLegacy"),
+      legacyRequestTitle: t("requestPayloadLegacy"),
+    });
+    if (!text) return;
+    const success = await onCopy(text);
+    if (success !== false) {
+      setCopiedAll(true);
+      setTimeout(() => setCopiedAll(false), 2000);
+    }
+  };
   const detailIssue =
     detail?.detailState === "missing"
-      ? "Detailed payload artifact is no longer available for this log entry."
+      ? t("payloadMissing")
       : detail?.detailState === "corrupt"
-        ? "Detailed payload artifact could not be parsed."
+        ? t("payloadCorrupt")
         : null;
   const tokenStats = {
     totalIn: detail?.tokens?.in ?? log.tokens?.in ?? null,
@@ -332,64 +564,82 @@ export default function RequestLoggerDetail({
     cacheRead: detail?.tokens?.cacheRead ?? log.tokens?.cacheRead,
     cacheWrite: detail?.tokens?.cacheWrite ?? log.tokens?.cacheWrite,
     reasoning: detail?.tokens?.reasoning ?? log.tokens?.reasoning,
+    reasoningChars: detail?.reasoningChars ?? log.reasoningChars,
     compressed: detail?.tokens?.compressed ?? log.tokens?.compressed,
   };
 
-  const formatTokenValue = (value) => (value != null ? value.toLocaleString() : "N/A");
+  const formatTokenValue = (value) => (value != null ? value.toLocaleString() : t("notAvailable"));
 
   const cacheSource = detail?.cacheSource || log.cacheSource || "upstream";
-  const cacheSourceLabel =
-    cacheSource === "semantic" ? "Semantic (OmniRoute)" : "Upstream (Provider)";
+  const cacheSourceLabel = cacheSource === "semantic" ? t("semanticCache") : t("upstreamCache");
   const cacheSourceClassName =
     cacheSource === "semantic"
-      ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
-      : "bg-sky-500/20 text-sky-700 dark:text-sky-300 border-sky-500/30";
+      ? "bg-success/20 text-success border-success/30"
+      : "bg-info/20 text-info border-info/30";
+  // resilience badges (flag alone decides, whatever the status).
+  const resilienceBadges = getResilienceBadges(
+    log.resilienceActions || detail?.resilienceActions || null,
+    (key, values) => t(key as never, values as never)
+  );
   const accountLabel = maskAccount(detail?.account || log.account, emailsVisible);
   const codexAccountRotation = getCodexAccountRotation(detail);
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-[5vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center px-2 pt-[5vh] sm:px-4"
       onClick={onClose}
+      onWheel={handleOverlayWheel}
       role="dialog"
       aria-modal="true"
-      aria-label="Request log detail"
+      aria-label={t("ariaLabel")}
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-[var(--ci-color-overlay)] backdrop-blur-sm" />
       <div
-        className="relative bg-bg-primary border border-border rounded-xl w-full max-w-225 max-h-[90vh] overflow-y-auto shadow-2xl"
+        ref={modalScrollRef}
+        className="relative w-full max-w-225 max-h-[90vh] overflow-x-hidden overflow-y-auto rounded-xl border border-border bg-bg-primary shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-border bg-bg-primary/95 backdrop-blur-sm rounded-t-xl">
-          <div className="flex items-center gap-3">
+        <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3 border-b border-border bg-bg-primary/95 backdrop-blur-sm rounded-t-xl sm:px-6 sm:py-4">
+          <div className="flex flex-wrap items-center gap-2 min-w-0 sm:gap-3">
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                {log.active ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                {timingLog.active ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold bg-warning/20 text-warning border border-warning/30">
                     <span className="inline-block h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
                   </span>
+                ) : classifyHttpLog(log) === "transport_error" ||
+                  classifyHttpLog(log) === "no_response" ? (
+                  <Badge variant={classifyHttpLog(log) === "transport_error" ? "error" : "info"}>
+                    {t(
+                      classifyHttpLog(log) === "transport_error"
+                        ? "transportError"
+                        : "noHttpResponse"
+                    )}
+                  </Badge>
                 ) : log.status === 0 ? (
-                  <span className="inline-block px-2.5 py-1 rounded text-xs font-bold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                    Completed
+                  <span className="inline-block px-2.5 py-1 rounded text-xs font-bold bg-success/20 text-success border border-success/30">
+                    {t("completed")}
                   </span>
                 ) : (
-                  <span
-                    className="inline-block px-2.5 py-1 rounded text-xs font-bold"
-                    style={{ backgroundColor: statusStyle.bg, color: statusStyle.text }}
-                  >
+                  <Badge variant={httpStatusTone(log.status)} className="font-bold">
                     {log.status}
-                  </span>
+                  </Badge>
                 )}
                 {hasStatusDiscrepancy && (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-bg-subtle border border-border text-text-muted">
-                    Upstream: {providerStatus}
+                    {t("upstreamStatus", { status: providerStatus })}
                   </span>
+                )}
+                {upstreamHttp?.role === "logical" && upstreamHttp.omitted > 0 && (
+                  <Badge variant="info">
+                    {t("omittedHttpAttempts", { count: upstreamHttp.omitted })}
+                  </Badge>
                 )}
                 {log.method && <span className="font-bold text-lg">{log.method}</span>}
               </div>
               {hasStatusDiscrepancy && (
-                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium mt-0.5">
-                  OmniRoute returned {log.status} even though provider returned {providerStatus}
+                <span className="text-[10px] text-warning font-medium mt-0.5">
+                  {t("statusDiscrepancy", { status: log.status, provider: providerStatus })}
                 </span>
               )}
             </div>
@@ -402,64 +652,101 @@ export default function RequestLoggerDetail({
             {log.correlationId && (
               <span
                 className="text-[10px] text-text-muted/50 font-mono self-center ml-2 px-1.5 py-0.5 rounded bg-bg-subtle border border-border/40 select-all"
-                title="Correlation ID"
+                title={t("correlationId")}
               >
-                cid: {log.correlationId}
+                {t("correlationIdValue", { id: log.correlationId })}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={onPrevious}
-              disabled={!onPrevious}
-              className="p-1.5 rounded-lg hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
-              aria-label="Previous request"
+          <div className="flex items-center gap-1 shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopyAll}
+              className="text-text-muted"
+              aria-label={t("copyAll")}
+              title={t("copyAll")}
             >
-              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-            </button>
-            <button
-              onClick={onNext}
-              disabled={!onNext}
-              className="p-1.5 rounded-lg hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
-              aria-label="Next request"
-            >
-              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-            </button>
-            <button
+              <Icon name={copiedAll ? "check" : "content_copy"} size={16} />
+              <span className="text-xs font-medium">
+                {copiedAll ? t("copiedAll") : t("copyAll")}
+              </span>
+            </Button>
+            {/* Only rendered when a caller actually wires up navigation (RequestLoggerV2's
+                list view) — a caller with no ordered-list context to navigate through
+                (conversations page, RequestTimeline) passes neither, so there's nothing
+                to show instead of a permanently-disabled dead button. */}
+            {(onPrevious || onNext) && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={onPrevious}
+                  disabled={!onPrevious}
+                  className="text-text-muted"
+                  aria-label={t("previousRequest")}
+                >
+                  <Icon name="chevron_left" size={18} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={onNext}
+                  disabled={!onNext}
+                  className="text-text-muted"
+                  aria-label={t("nextRequest")}
+                >
+                  <Icon name="chevron_right" size={18} />
+                </Button>
+              </>
+            )}
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
-              aria-label="Close detail modal"
+              className="text-text-muted"
+              aria-label={t("close")}
             >
-              <span className="material-symbols-outlined">close</span>
-            </button>
+              <Icon name="close" />
+            </Button>
           </div>
         </div>
 
-        <div className="p-6 flex flex-col gap-6">
+        <div className="p-4 flex flex-col gap-6 sm:p-6">
           {/* Metadata Grid */}
-          {log.active ? (
+          {timingLog.active ? (
             <div className="flex flex-wrap gap-4 p-4 bg-bg-subtle rounded-xl border border-border">
               <div className="min-w-[140px] flex-1">
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Started At
+                  {t("startedAt")}
                 </div>
-                <div className="text-sm font-medium">{formatDate(log.timestamp)}</div>
+                <div className="text-sm font-medium">{formatDate(startMs)}</div>
               </div>
               <div className="min-w-[100px] flex-1">
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Duration
+                  {t("duration")}
                 </div>
-                <div className="text-sm font-medium">{formatDuration(log.duration)}</div>
+                <div className="text-sm font-medium">{formatDuration(timingLog.duration)}</div>
+              </div>
+              <div className="min-w-[100px] flex-1">
+                <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+                  {t("addedWait")}
+                </div>
+                <div className="text-sm font-medium">
+                  {typeof log.addedWaitMs === "number" && log.addedWaitMs > 0
+                    ? `${formatDuration(log.addedWaitMs)}${log.addedWaitCause ? ` (${log.addedWaitCause})` : ""}`
+                    : "—"}
+                </div>
               </div>
               <div className="min-w-[140px] flex-1">
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Model
+                  {t("model")}
                 </div>
                 <div className="text-sm font-medium text-primary font-mono">{log.model}</div>
               </div>
               <div className="min-w-[120px] flex-1">
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Provider
+                  {t("provider")}
                 </div>
                 <span
                   className="inline-block px-2.5 py-1 rounded text-[10px] font-bold uppercase"
@@ -470,7 +757,7 @@ export default function RequestLoggerDetail({
               </div>
               <div className="min-w-[120px] flex-1">
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Account
+                  {t("account")}
                 </div>
                 <div className="text-sm font-medium">{accountLabel}</div>
               </div>
@@ -482,48 +769,49 @@ export default function RequestLoggerDetail({
             >
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Started At
+                  {t("startedAt")}
                 </div>
-                <div className="text-sm font-medium">
-                  {(() => {
-                    try {
-                      const ts = new Date(log.timestamp).getTime();
-                      if (!Number.isFinite(ts)) return "\u2014";
-                      return formatDate(new Date(ts - (log.duration || 0)).toISOString());
-                    } catch {
-                      return "\u2014";
-                    }
-                  })()}
-                </div>
+                <div className="text-sm font-medium">{formatDate(startMs)}</div>
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Ended At
+                  {t("endedAt")}
                 </div>
-                <div className="text-sm font-medium">{formatDate(log.timestamp)}</div>
+                <div className="text-sm font-medium">{formatDate(endMs)}</div>
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Duration
+                  {t("duration")}
                 </div>
-                <div className="text-sm font-medium">{formatDuration(log.duration)}</div>
+                <div className="text-sm font-medium">{formatDuration(timingLog.duration)}</div>
               </div>
+              {typeof log.ttft === "number" && log.ttft > 0 && (
+                <div>
+                  <div
+                    className="text-[10px] text-text-muted uppercase tracking-wider mb-1"
+                    title={`${tColumns("ttft")}: time to first forwarded stream token; generation ran for ${formatDuration(Math.max(0, (log.duration || 0) - log.ttft))} (#13130)`}
+                  >
+                    {tColumns("ttft")}
+                  </div>
+                  <div className="text-sm font-medium">{formatDuration(log.ttft)}</div>
+                </div>
+              )}
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Input
+                  {t("input")}
                 </div>
                 <div
                   className="flex flex-wrap items-center gap-1.5"
                   data-testid="token-group-input"
                 >
                   <span className="px-2 py-0.5 rounded bg-primary/20 text-primary text-xs font-bold">
-                    Total In: {formatTokenValue(tokenStats.totalIn)}
+                    {t("totalIn", { value: formatTokenValue(tokenStats.totalIn) })}
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-sky-500/20 text-sky-700 dark:text-sky-400 text-xs font-bold">
-                    Cache Read: {formatTokenValue(tokenStats.cacheRead)}
+                  <span className="px-2 py-0.5 rounded bg-info/20 text-info text-xs font-bold">
+                    {t("cacheRead", { value: formatTokenValue(tokenStats.cacheRead) })}
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-bold">
-                    Cache Write: {formatTokenValue(tokenStats.cacheWrite)}
+                  <span className="px-2 py-0.5 rounded bg-warning/20 text-warning text-xs font-bold">
+                    {t("cacheWrite", { value: formatTokenValue(tokenStats.cacheWrite) })}
                   </span>
                   {tokenStats.compressed != null &&
                     tokenStats.compressed > 0 &&
@@ -535,9 +823,12 @@ export default function RequestLoggerDetail({
                           ? Math.max(0, Math.min(100, Math.round((saved / fromTokens) * 100)))
                           : 100;
                       return (
-                        <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs font-bold">
-                          Compressed: {fromTokens.toLocaleString()} →{" "}
-                          {Math.max(0, tokenStats.totalIn).toLocaleString()} ({pct}% saved)
+                        <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3 text-xs font-bold">
+                          {t("compressed", {
+                            from: fromTokens.toLocaleString(),
+                            to: Math.max(0, tokenStats.totalIn).toLocaleString(),
+                            percent: pct,
+                          })}
                         </span>
                       );
                     })()}
@@ -545,35 +836,35 @@ export default function RequestLoggerDetail({
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Output
+                  {t("output")}
                 </div>
                 <div
                   className="flex flex-wrap items-center gap-1.5"
                   data-testid="token-group-output"
                 >
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold">
-                    Total Out: {formatTokenValue(tokenStats.totalOut)}
+                  <span className="px-2 py-0.5 rounded bg-success/20 text-success text-xs font-bold">
+                    {t("totalOut", { value: formatTokenValue(tokenStats.totalOut) })}
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-violet-500/20 text-violet-700 dark:text-violet-400 text-xs font-bold">
-                    Reasoning: {formatTokenValue(tokenStats.reasoning)}
+                  <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3 text-xs font-bold">
+                    {t("reasoning", { value: formatReasoningStat(tokenStats, t) })}
                   </span>
                 </div>
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Model
+                  {t("model")}
                 </div>
                 <div className="text-sm font-medium text-primary font-mono">{log.model}</div>
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Requested Model
+                  {t("requestedModel")}
                 </div>
                 <div
                   className={`text-sm font-medium font-mono ${
                     (detail?.requestedModel || log.requestedModel) &&
                     (detail?.requestedModel || log.requestedModel) !== log.model
-                      ? "text-amber-600 dark:text-amber-400"
+                      ? "text-warning"
                       : "text-text-muted"
                   }`}
                 >
@@ -582,7 +873,7 @@ export default function RequestLoggerDetail({
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Provider
+                  {t("provider")}
                 </div>
                 <span
                   className="inline-block px-2.5 py-1 rounded text-[10px] font-bold uppercase"
@@ -593,7 +884,7 @@ export default function RequestLoggerDetail({
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Req Protocol
+                  {t("requestProtocol")}
                 </div>
                 <span
                   className="inline-block px-2.5 py-1 rounded text-[10px] font-bold uppercase"
@@ -604,45 +895,54 @@ export default function RequestLoggerDetail({
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Cache Source
+                  {t("cacheSource")}
                 </div>
                 <span
                   className={`inline-block px-2.5 py-1 rounded text-[10px] font-bold border ${cacheSourceClassName}`}
                 >
                   {cacheSourceLabel}
                 </span>
+                {resilienceBadges.map((badge) => (
+                  <span key={badge.key} title={badge.title}>
+                    {badge.label}
+                  </span>
+                ))}
               </div>
+              <CallContentProvenanceBadges
+                hasContent={detail?.hasContent ?? log.hasContent}
+                usageProvenance={detail?.usageProvenance ?? log.usageProvenance}
+              />
               {(detail?.modelPinned || log.modelPinned) && (
                 <div>
                   <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                    Model Pinning
+                    {t("modelPinning")}
                   </div>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/25">
-                    <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor">
-                      <path d="M4.5 2A1.5 1.5 0 003 3.5v1.9l-1.4 2.8A.5.5 0 002 9h4v4.5a.5.5 0 00.5.5h3a.5.5 0 00.5-.5V9h4a.5.5 0 00.44-.73L13 5.4V3.5A1.5 1.5 0 0011.5 2h-7z" />
-                    </svg>
-                    Active — model selected via session pinning
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold bg-chart-3/15 text-chart-3 border border-chart-3/25">
+                    <Icon name="push_pin" size={12} />
+                    {t("activeModelPinning")}
                   </span>
                 </div>
               )}
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Account
+                  {t("account")}
                 </div>
                 <div className="text-sm font-medium">{accountLabel}</div>
                 {codexAccountRotation && (
                   <div
-                    className="mt-1 text-[10px] text-amber-600 dark:text-amber-400 font-mono"
+                    className="mt-1 text-[10px] text-warning font-mono"
                     title={`${codexAccountRotation.initialConnectionId} -> ${codexAccountRotation.finalConnectionId}`}
                   >
-                    Rotated: {formatConnectionId(codexAccountRotation.initialConnectionId)} -&gt;{" "}
-                    {formatConnectionId(codexAccountRotation.finalConnectionId)}
+                    {t("rotated", {
+                      initial: formatConnectionId(codexAccountRotation.initialConnectionId),
+                      final: formatConnectionId(codexAccountRotation.finalConnectionId),
+                    })}
                   </div>
                 )}
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  API Key
+                  {t("apiKey")}
                 </div>
                 <div
                   className="text-sm font-medium"
@@ -651,7 +951,7 @@ export default function RequestLoggerDetail({
                     detail?.apiKeyId ||
                     log.apiKeyName ||
                     log.apiKeyId ||
-                    "No API key"
+                    t("noApiKey")
                   }
                 >
                   {formatApiKeyLabel(
@@ -662,14 +962,30 @@ export default function RequestLoggerDetail({
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  Combo
+                  {t("combo")}
                 </div>
                 {detail?.comboName || log.comboName ? (
-                  <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold bg-violet-500/20 text-violet-700 dark:text-violet-300 border border-violet-500/30">
+                  <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold bg-chart-3/20 text-chart-3 border border-chart-3/30">
                     {detail?.comboName || log.comboName}
                   </span>
                 ) : (
-                  <div className="text-sm text-text-muted">\u2014</div>
+                  <div className="text-sm text-text-muted">{"\u2014"}</div>
+                )}
+              </div>
+              <div>
+                <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+                  {tColumns("conversation")}
+                </div>
+                {detail?.sessionTag || log.sessionTag ? (
+                  <div
+                    className="text-sm font-mono select-all"
+                    title={detail?.sessionTag || log.sessionTag}
+                  >
+                    {(detail?.sessionTag || log.sessionTag).slice(0, 20)}
+                    {"\u2026"}
+                  </div>
+                ) : (
+                  <div className="text-sm text-text-muted">{"\u2014"}</div>
                 )}
               </div>
             </div>
@@ -677,93 +993,49 @@ export default function RequestLoggerDetail({
 
           {/* Error Message */}
           {(detail?.error || log.error) && (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30">
+            <div className="p-4 rounded-xl bg-error/10 border border-error/30">
               <div className="flex items-center justify-between mb-1">
-                <div className="text-[10px] text-red-600 dark:text-red-400 uppercase tracking-wider font-bold">
-                  Error
+                <div className="text-[10px] text-error uppercase tracking-wider font-bold">
+                  {t("error")}
                 </div>
                 {isCombo503 && !cleared && (
-                  <button
+                  <Button
+                    variant="warning"
+                    size="sm"
                     onClick={handleUnblockAll}
                     disabled={unblockAllBusy}
-                    className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-lg
-                      bg-amber-500/10 border border-amber-500/30 text-amber-600
-                      hover:bg-amber-500/15 hover:border-amber-500/50
-                      dark:text-amber-400 transition-all duration-200
-                      disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-7 min-h-7 px-2.5 text-[10px]"
                   >
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    >
-                      <rect x="3" y="6" width="10" height="8" rx="1" />
-                      <path d="M5 6V4a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v1" />
-                      <circle cx="8" cy="10" r="1" fill="currentColor" stroke="none" />
-                    </svg>
-                    {unblockAllBusy ? "..." : "Unblock all"}
-                  </button>
+                    <Icon name="lock_open" size={12} />
+                    {unblockAllBusy ? "..." : t("unblockAll")}
+                  </Button>
                 )}
                 {isCombo503 && cleared && (
-                  <span className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-lg bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400">
-                    <svg
-                      width="10"
-                      height="10"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <polyline points="4 8 7 11 12 4" />
-                    </svg>
-                    Cleared
+                  <span className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-lg bg-success/10 border border-success/30 text-success">
+                    <Icon name="check" size={10} />
+                    {t("cleared")}
                   </span>
                 )}
                 {isModelCooldown && !cleared && (
-                  <button
+                  <Button
+                    variant="warning"
+                    size="sm"
                     onClick={handleUnblockModel}
                     disabled={unblocking}
-                    className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-lg
-                      bg-amber-500/10 border border-amber-500/30 text-amber-600
-                      hover:bg-amber-500/15 hover:border-amber-500/50
-                      dark:text-amber-400 transition-all duration-200
-                      disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-7 min-h-7 px-2.5 text-[10px]"
                   >
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    >
-                      <rect x="3" y="6" width="10" height="8" rx="1" />
-                      <path d="M5 6V4a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v1" />
-                      <circle cx="8" cy="10" r="1" fill="currentColor" stroke="none" />
-                    </svg>
-                    {unblocking ? "..." : "Unblock"}
-                  </button>
+                    <Icon name="lock_open" size={12} />
+                    {unblocking ? "..." : t("unblock")}
+                  </Button>
                 )}
                 {isModelCooldown && cleared && (
-                  <span className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-lg bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400">
-                    <svg
-                      width="10"
-                      height="10"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <polyline points="4 8 7 11 12 4" />
-                    </svg>
-                    Cleared
+                  <span className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-lg bg-success/10 border border-success/30 text-success">
+                    <Icon name="check" size={10} />
+                    {t("cleared")}
                   </span>
                 )}
               </div>
-              <div className="text-sm text-red-600 dark:text-red-300 font-mono whitespace-pre-wrap break-words">
+              <div className="text-sm text-error font-mono whitespace-pre-wrap break-words">
                 {formatErrorForDisplay(detail?.error || log.error)}
               </div>
             </div>
@@ -773,76 +1045,87 @@ export default function RequestLoggerDetail({
           {relatedLogs.length > 1 && (
             <div className="p-4 rounded-xl bg-bg-subtle border border-border">
               <div className="text-[10px] text-text-muted uppercase tracking-wider mb-2 font-bold">
-                Related Requests ({relatedLogs.length})
+                {t("relatedRequests", { count: relatedLogs.length })}
               </div>
               <div className="flex flex-col gap-1">
-                {[...relatedLogs]
-                  .sort((a, b) => {
-                    const aStart = new Date(a.timestamp).getTime() - (a.duration || 0);
-                    const bStart = new Date(b.timestamp).getTime() - (b.duration || 0);
-                    return aStart - bStart;
-                  })
-                  .map((r) => {
-                    const rStatusStyle = r.active ? null : getStatusStyle(r.status);
+                {sortRelatedLogs(relatedLogs, (row) => getRequestTimeRange(row).startMs).map(
+                  (r) => {
                     const isCurrent = r.id === log.id;
-                    const startTime = new Date(new Date(r.timestamp).getTime() - (r.duration || 0));
+                    const { startMs } = getRequestTimeRange(r);
                     return (
-                      <button
+                      <Button
                         key={r.id}
+                        variant="ghost"
+                        size="sm"
                         onClick={() => !isCurrent && onSelectRelated?.(r)}
                         disabled={isCurrent}
-                        className={`flex items-center gap-2 px-2 py-1.5 rounded text-left text-xs transition-colors ${
-                          isCurrent
-                            ? "bg-primary/10 border border-primary/30 cursor-default"
-                            : "hover:bg-bg-hover cursor-pointer"
-                        }`}
+                        aria-current={isCurrent ? "true" : undefined}
+                        className={cn(
+                          "h-auto w-full justify-start gap-2 px-2 py-1.5 text-left text-xs font-normal",
+                          isCurrent && "border border-primary/30 bg-primary/10 disabled:opacity-100"
+                        )}
                       >
-                        <span
-                          className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold min-w-[28px] text-center"
-                          style={
-                            rStatusStyle
-                              ? { backgroundColor: rStatusStyle.bg, color: rStatusStyle.text }
-                              : { backgroundColor: "#374151", color: "#fff" }
+                        <Badge
+                          size="sm"
+                          variant={
+                            r.active
+                              ? "default"
+                              : classifyHttpLog(r) === "transport_error"
+                                ? "error"
+                                : httpStatusTone(r.status)
                           }
+                          className="min-w-[28px] justify-center text-[9px] font-bold"
                         >
-                          {r.status || "..."}
-                        </span>
+                          {classifyHttpLog(r) === "transport_error"
+                            ? t("transportError")
+                            : classifyHttpLog(r) === "no_response"
+                              ? t("noHttpResponse")
+                              : r.status || "..."}
+                        </Badge>
                         <span className="font-mono text-text-muted">{r.id}</span>
                         <span className="text-text-muted">{r.model}</span>
                         <span className="text-text-muted text-[10px]">
-                          {startTime.toLocaleTimeString("en-US", { hour12: false })}
+                          {Number.isFinite(startMs)
+                            ? new Date(startMs).toLocaleTimeString(locale, { hour12: false })
+                            : "—"}
                         </span>
                         <span className="text-text-muted ml-auto">
                           {formatDuration(r.duration)}
                         </span>
                         {isCurrent && (
-                          <span className="text-[9px] text-primary font-bold ml-1">current</span>
+                          <span className="text-[9px] text-primary font-bold ml-1">
+                            {t("current")}
+                          </span>
                         )}
-                      </button>
+                      </Button>
                     );
-                  })}
+                  }
+                )}
               </div>
             </div>
           )}
 
           {detailIssue && (
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
-              <div className="text-[10px] text-amber-700 dark:text-amber-400 uppercase tracking-wider mb-1 font-bold">
-                Detail Status
+            <div className="p-4 rounded-xl bg-warning/10 border border-warning/30">
+              <div className="text-[10px] text-warning uppercase tracking-wider mb-1 font-bold">
+                {t("detailStatus")}
               </div>
-              <div className="text-sm text-amber-700 dark:text-amber-200">{detailIssue}</div>
+              <div className="text-sm text-warning">{detailIssue}</div>
             </div>
           )}
 
           {loading ? (
             <div className="p-8 text-center text-text-muted animate-pulse">
-              Loading request details...
+              {t("loadingDetails")}
             </div>
           ) : (
             <>
+              <ConversationContextSection key={log.id} log={log} detail={detail} />
+
               {streamChunks && streamChunks.provider && (
                 <StreamSection
-                  title="Provider Event Stream"
+                  title={t("providerEventStream")}
+                  sectionId="providerEventStream"
                   json={
                     Array.isArray(streamChunks.provider)
                       ? streamChunks.provider.join("")
@@ -860,7 +1143,8 @@ export default function RequestLoggerDetail({
 
               {streamChunks && streamChunks.client && (
                 <StreamSection
-                  title="Client Event Stream"
+                  title={t("clientEventStream")}
+                  sectionId="clientEventStream"
                   json={
                     Array.isArray(streamChunks.client)
                       ? streamChunks.client.join("")
@@ -881,7 +1165,8 @@ export default function RequestLoggerDetail({
                 !streamChunks.provider &&
                 !streamChunks.client && (
                   <StreamSection
-                    title="Event Stream"
+                    title={t("eventStream")}
+                    sectionId="eventStream"
                     json={
                       Array.isArray(streamChunks.openai)
                         ? streamChunks.openai.join("")
@@ -902,37 +1187,38 @@ export default function RequestLoggerDetail({
                   <PayloadSection
                     key={section.key}
                     title={section.title}
+                    sectionId={section.key}
                     json={section.json}
+                    notice={section.notice}
                     onCopy={() => onCopy(section.json)}
                   />
                 ))}
 
               {payloadSections.length === 0 && responseJson && (
                 <PayloadSection
-                  title="Response Payload (Legacy)"
+                  title={t("responsePayloadLegacy")}
+                  sectionId="responsePayloadLegacy"
                   json={responseJson}
+                  notice={responseBodyOmitted}
                   onCopy={() => onCopy(responseJson)}
                 />
               )}
 
               {payloadSections.length === 0 && requestJson && (
                 <PayloadSection
-                  title="Request Payload (Legacy)"
+                  title={t("requestPayloadLegacy")}
+                  sectionId="requestPayloadLegacy"
                   json={requestJson}
+                  notice={requestBodyOmitted}
                   onCopy={() => onCopy(requestJson)}
                 />
               )}
 
               {payloadSections.length === 0 && !requestJson && !responseJson && !loading && (
                 <div className="p-6 text-center text-text-muted">
-                  <span className="material-symbols-outlined text-[32px] mb-2 block opacity-40">
-                    info
-                  </span>
-                  <p className="text-sm">No payload data available for this log entry.</p>
-                  <p className="text-xs mt-1">
-                    Enable detailed logging first if you want the four-stage client/provider payload
-                    view for new requests.
-                  </p>
+                  <Icon name="info" size={32} className="mb-2 block opacity-40" />
+                  <p className="text-sm">{t("noPayload")}</p>
+                  <p className="text-xs mt-1">{t("detailedPayloadInfo")}</p>
                 </div>
               )}
             </>

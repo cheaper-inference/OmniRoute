@@ -1,12 +1,13 @@
 import {
   EMBEDDING_PROVIDERS,
-  buildDynamicEmbeddingProvider,
   getEmbeddingDimension,
-  type EmbeddingProviderNodeRow,
 } from "@omniroute/open-sse/config/embeddingRegistry.ts";
 import { getProviderCredentials } from "@/sse/services/auth";
-import { getCachedProviderNodes } from "@/lib/localDb";
 import type { MemorySettingsExtended } from "@/shared/schemas/memory";
+import {
+  getEmbeddingProvider,
+  deriveEmbeddingProviderForChatProvider,
+} from "@omniroute/open-sse/config/embeddingRegistry.ts";
 import type {
   EmbeddingResolution,
   EmbeddingResult,
@@ -17,6 +18,8 @@ import { embedRemote } from "./remote";
 import { embedStatic } from "./staticPotion";
 import { embedTransformers } from "./transformersLocal";
 import { buildCacheKey, get as cacheGet, set as cacheSet } from "./cache";
+import { resolveMemoryCustomEmbeddingProvider } from "./customProvider";
+import { listProviderNodeModalityListings } from "./nodeModalityListings";
 
 const STATIC_MODEL = process.env.MEMORY_STATIC_MODEL || "minishlab/potion-base-8M";
 const TRANSFORMERS_MODEL = process.env.MEMORY_TRANSFORMERS_MODEL || "Xenova/all-MiniLM-L6-v2";
@@ -51,6 +54,39 @@ function resolveRemoteDimensions(model: string): number | null {
   return typeof dim === "number" ? dim : null;
 }
 
+/**
+ * Fill in the vector width the lazy probe was waiting for.
+ *
+ * `dimensions` is null for every source the hard-coded registry does not
+ * describe — a self-hosted endpoint by definition — and the only thing that can
+ * answer it is an embedding that has actually come back. Callers that hold one
+ * pass its length here; the signature is rebuilt the same way the resolution
+ * built it, so reindex detection still sees a model change as a change. (#12154)
+ */
+export function withMeasuredDimensions(
+  resolution: EmbeddingResolution,
+  dimensions: number
+): EmbeddingResolution {
+  if (
+    resolution.dimensions !== null ||
+    !resolution.source ||
+    !Number.isInteger(dimensions) ||
+    dimensions <= 0
+  ) {
+    return resolution;
+  }
+  return {
+    ...resolution,
+    dimensions,
+    signature: makeSignature(
+      resolution.source,
+      resolution.identity ?? resolution.model,
+      dimensions
+    ),
+    reason: `${resolution.reason} [dim=${dimensions} measured]`,
+  };
+}
+
 /** Build the remote EmbeddingResolution used by both explicit + auto paths. */
 function remoteResolution(model: string, reasonPrefix: string): EmbeddingResolution {
   const dimensions = resolveRemoteDimensions(model);
@@ -66,12 +102,33 @@ function remoteResolution(model: string, reasonPrefix: string): EmbeddingResolut
   };
 }
 
+function customRemoteResolution(settings: MemorySettingsExtended): EmbeddingResolution | null {
+  const customBaseUrl = settings.customBaseUrl?.trim() ?? "";
+  const customModelId = settings.customModelId?.trim() ?? "";
+  if (!customBaseUrl && !customModelId) return null;
+  if (!customBaseUrl || !customModelId) return noSource("custom embedding endpoint is incomplete");
+  const identity = `${customBaseUrl.replace(/\/+$/, "")}|${customModelId}`;
+  return {
+    source: "remote",
+    model: `memory-custom/${customModelId}`,
+    dimensions: null,
+    identity,
+    signature: makeSignature("remote", identity, null),
+    reason: "custom remote provider configured (dim=unknown, will probe at embed time)",
+  };
+}
+
 /**
  * Resolve which embedding source is active for the given settings (D4).
  * Pure: no heavy I/O. Provider key check done via synchronous registry lookup.
  */
 export function resolveEmbeddingSource(settings: MemorySettingsExtended): EmbeddingResolution {
   const source = settings.embeddingSource ?? "auto";
+
+  const customResolution = customRemoteResolution(settings);
+  if (customResolution && (source === "remote" || source === "auto")) {
+    return customResolution;
+  }
 
   if (source === "remote") {
     // Explicit remote — check if the configured model has a key
@@ -194,7 +251,12 @@ export async function embed(
     };
   }
 
-  const cacheKey = buildCacheKey(resolution.source, resolution.model, resolution.dimensions, text);
+  const cacheKey = buildCacheKey(
+    resolution.source,
+    resolution.identity ?? resolution.model,
+    resolution.dimensions,
+    text
+  );
 
   const cached = cacheGet(cacheKey);
   if (cached) {
@@ -211,7 +273,21 @@ export async function embed(
   let result: EmbeddingResult | EmbeddingError;
 
   if (resolution.source === "remote") {
-    result = await embedRemote(text, resolution.model ?? "");
+    let customProvider;
+    try {
+      customProvider = resolveMemoryCustomEmbeddingProvider(settings);
+    } catch (error: unknown) {
+      return {
+        source: "remote",
+        model: resolution.model,
+        reason: "request_failed",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Custom embedding endpoint is invalid or blocked",
+      };
+    }
+    result = await embedRemote(text, resolution.model ?? "", customProvider);
   } else if (resolution.source === "static") {
     result = await embedStatic(text);
   } else {
@@ -226,30 +302,40 @@ export async function embed(
 }
 
 /**
+ * Embed with a single retry (#13601).
+ *
+ * A failed embedding write used to skip vectorization immediately — one
+ * transient failure (slow potion load, brief remote 5xx) left the memory
+ * stored but never vectorized until the next reindex sweep. The retry covers
+ * error results only; a thrown error still propagates to the caller's catch
+ * (scheduleVectorUpsert marks needs_reindex there, as before).
+ */
+export async function embedWithRetry(
+  text: string,
+  settings: MemorySettingsExtended,
+  embedFn: (
+    text: string,
+    settings: MemorySettingsExtended
+  ) => Promise<EmbeddingResult | EmbeddingError> = embed,
+  maxAttempts = 2
+): Promise<EmbeddingResult | EmbeddingError> {
+  let last: EmbeddingResult | EmbeddingError | null = null;
+  for (let attempt = 1; attempt <= Math.max(1, maxAttempts); attempt++) {
+    const result = await embedFn(text, settings);
+    if ("vector" in result) return result;
+    last = result;
+  }
+  return last as EmbeddingResult | EmbeddingError;
+}
+
+/**
  * List providers that have embedding models, marking which ones have a configured API key.
  * Aggregates from EMBEDDING_PROVIDERS + local provider_nodes.
  */
 export async function listEmbeddingProviders(): Promise<EmbeddingProviderListing[]> {
-  // Get dynamic local providers
-  let dynamicProviders: ReturnType<typeof buildDynamicEmbeddingProvider>[] = [];
-  try {
-    const nodes = (await getCachedProviderNodes()) as unknown as EmbeddingProviderNodeRow[];
-    dynamicProviders = (Array.isArray(nodes) ? nodes : [])
-      .filter((n) => {
-        const validTypes = ["chat", "responses", "embeddings"];
-        return validTypes.includes(n.apiType || "");
-      })
-      .map((n) => {
-        try {
-          return buildDynamicEmbeddingProvider(n);
-        } catch {
-          return null;
-        }
-      })
-      .filter((p): p is NonNullable<typeof p> => p !== null);
-  } catch {
-    // Ignore failures — just return static providers
-  }
+  // Local provider nodes, listed with the embedding-typed models they expose
+  // (synced + custom rows; see nodeModalityListings.ts).
+  const nodeListings = await listProviderNodeModalityListings("embeddings");
 
   const result: EmbeddingProviderListing[] = [];
 
@@ -279,18 +365,52 @@ export async function listEmbeddingProviders(): Promise<EmbeddingProviderListing
     });
   }
 
-  // Process dynamic providers (local nodes)
-  for (const dp of dynamicProviders) {
-    // Dynamic local providers typically have authType="none"
-    result.push({
-      provider: dp.id,
-      hasKey: true, // local providers don't need keys
-      models: dp.models.map((m) => ({
-        id: `${dp.id}/${m.id}`,
-        name: m.name,
-        dimensions: m.dimensions ?? null,
-      })),
-    });
+  // Local provider nodes (curated entries win on prefix collisions).
+  const curatedIds = new Set(result.map((p) => p.provider));
+  for (const listing of nodeListings) {
+    if (curatedIds.has(listing.provider)) continue;
+    curatedIds.add(listing.provider);
+    result.push(listing);
+  }
+
+  // Generic fallback: configured OpenAI-compatible chat providers without a
+  // curated embedding entry (groq, mistral, vercel-ai-gateway, ...) expose a
+  // derivable /embeddings endpoint. They appear with an empty model catalog —
+  // the UI offers free-text input for the model id. Curated + local nodes win.
+  try {
+    const { REGISTRY } = await import("@omniroute/open-sse/config/providerRegistry.ts");
+    const chatRegistry = REGISTRY as Record<string, { baseUrl?: string } | undefined>;
+    // Cheap sync pass first: which providers CAN derive an endpoint at all.
+    const derivable: string[] = [];
+    for (const id of Object.keys(chatRegistry)) {
+      if (
+        !getEmbeddingProvider(id) &&
+        deriveEmbeddingProviderForChatProvider(id, chatRegistry[id])
+      ) {
+        derivable.push(id);
+      }
+    }
+    // Credential lookups only for derivable candidates (a handful), not the
+    // whole registry.
+    for (const id of derivable) {
+      let hasKey = false;
+      try {
+        const creds = await getProviderCredentials(id);
+        hasKey = !!(
+          creds &&
+          !("allRateLimited" in creds && creds.allRateLimited) &&
+          (("apiKey" in creds ? creds.apiKey : undefined) ||
+            ("accessToken" in creds ? creds.accessToken : undefined))
+        );
+      } catch {
+        hasKey = false;
+      }
+      if (hasKey) {
+        result.push({ provider: id, hasKey: true, models: [] });
+      }
+    }
+  } catch {
+    // Listing enhancement is best-effort; never fail the endpoint.
   }
 
   return result;

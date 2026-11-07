@@ -24,11 +24,14 @@ test("system sidebar items: monitoring has activity at top then logs/audit/syste
       "logs-proxy",
       "logs-console",
       "logs-timeline",
+      "conversations",
       "audit",
       "audit-mcp",
       "audit-a2a",
       "health",
       "runtime",
+      "resilience-connections",
+      "resilience-cooldowns",
     ]
   );
 });
@@ -41,6 +44,7 @@ test("primary sidebar items place limits after cache", () => {
       "endpoints",
       "api-manager",
       "providers",
+      "model-catalog",
       "embedded-services",
       "combos",
       "combos-live",
@@ -64,11 +68,14 @@ test("primary sidebar items place limits after cache", () => {
       "cli-agents",
       "acp-agents",
       "cloud-agents",
+      "conductor",
+      "orchestration", // +1: orchestration (PR-2 of the orchestration canvas)
       "agent-bridge",
       "traffic-inspector",
       "discovery",
       "api-endpoints",
       "webhooks",
+      "log-export",
       "proxy",
     ]
   );
@@ -132,7 +139,7 @@ test("help sidebar exposes changelog after docs and issues", () => {
       { id: "docs", href: "/docs", i18nKey: "docs" },
       {
         id: "issues",
-        href: "https://github.com/diegosouzapw/OmniRoute/issues",
+        href: "https://github.com/cheaper-inference/OmniRoute/issues",
         i18nKey: "issues",
       },
       { id: "changelog", href: "/dashboard/changelog", i18nKey: "changelog" },
@@ -156,6 +163,13 @@ test("plugins has a discoverable sidebar entry (#3656 follow-up)", async () => {
   assert.doesNotMatch(pluginsPage, /^\s*redirect\(/m);
   // R0.2: marketplace tab removed (dead code) — verify the page still has plugin management UI.
   assert.match(pluginsPage, /scanForPlugins|installedTab|fetchPlugins/i);
+});
+
+test("model catalog is available from the OmniProxy sidebar and can be hidden", () => {
+  const item = sectionItems("omni-proxy").find((candidate) => candidate.id === "model-catalog");
+  assert.ok(item, "expected the model catalog sidebar item to exist");
+  assert.equal(item.href, "/dashboard/models");
+  assert.equal(sidebarVisibility.HIDEABLE_SIDEBAR_ITEM_IDS.includes("model-catalog"), true);
 });
 
 test("legacy dashboard routes redirect to their consolidated surfaces", async () => {

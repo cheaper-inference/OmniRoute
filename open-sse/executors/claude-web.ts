@@ -8,10 +8,11 @@
  */
 import { normalizeSessionCookieHeader } from "@/lib/providers/webCookieAuth";
 
-import { CLAUDE_WEB_FINGERPRINT } from "../config/claudeWebFingerprint.ts";
+import { claudeWebFingerprint } from "../config/claudeWebFingerprint.ts";
 import { FETCH_TIMEOUT_MS } from "../config/constants.ts";
 import { tlsFetchClaude } from "../services/claudeTlsClient.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
+import { currentAppliedProxySink } from "../utils/proxyFetch.ts";
 import {
   BaseExecutor,
   mergeAbortSignals,
@@ -39,7 +40,9 @@ const CLAUDE_WEB_API_BASE = "https://claude.ai/api";
 const CLAUDE_WEB_ORGS_URL = `${CLAUDE_WEB_API_BASE}/organizations`;
 const CLAUDE_SESSION_COOKIE_NAME = "sessionKey";
 const MAX_ERROR_BODY_BYTES = 64 * 1024;
-const CLAUDE_USER_AGENT = CLAUDE_WEB_FINGERPRINT.userAgent;
+const MAX_FORWARDED_RETRY_AFTER_SECONDS = 24 * 60 * 60;
+const HTTP_DATE_PATTERN =
+  /^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$/;
 
 type SendClaudeWebTransport = (
   request: ClaudeWebTransportRequest
@@ -91,6 +94,7 @@ function getBrowserHeaders(
   referer = "https://claude.ai/new",
   locale = "en-US"
 ): Record<string, string> {
+  const fingerprint = claudeWebFingerprint();
   const headers: Record<string, string> = {
     Accept: "text/event-stream",
     "Accept-Encoding": "gzip, deflate, br, zstd",
@@ -101,13 +105,13 @@ function getBrowserHeaders(
     Pragma: "no-cache",
     Priority: "u=1, i",
     Referer: referer,
-    "Sec-Ch-Ua": CLAUDE_WEB_FINGERPRINT.secChUa,
+    "Sec-Ch-Ua": fingerprint.secChUa,
     "Sec-Ch-Ua-Mobile": "?0",
-    "Sec-Ch-Ua-Platform": CLAUDE_WEB_FINGERPRINT.secChUaPlatform,
+    "Sec-Ch-Ua-Platform": fingerprint.secChUaPlatform,
     "Sec-Fetch-Dest": "empty",
     "Sec-Fetch-Mode": "cors",
     "Sec-Fetch-Site": "same-origin",
-    "User-Agent": CLAUDE_USER_AGENT,
+    "User-Agent": fingerprint.userAgent,
     "anthropic-client-platform": "web_claude_ai",
   };
   if (deviceId) headers["anthropic-device-id"] = deviceId;
@@ -149,6 +153,8 @@ async function getOrganizationId(
       timeoutMs: FETCH_TIMEOUT_MS,
       signal: combineWithTimeout(signal),
     });
+    const sink = currentAppliedProxySink();
+    if (sink && response.status >= 400) sink.upstreamStatus = response.status;
     if (response.status === 401) {
       return { organizationId: null, failure: "authentication" };
     }
@@ -213,14 +219,22 @@ function makeErrorResponse(
     details?: unknown;
     type?: string;
     code?: string;
+    extraHeaders?: Record<string, string>;
   }
 ): Response {
-  const body = buildErrorBody(status, message, options?.details);
-  if (options?.type) body.error.type = options.type;
-  if (options?.code) body.error.code = options.code;
+  const body = buildErrorBody(status, message, options?.details, {
+    type: options?.type,
+    code: options?.code,
+  });
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (options?.extraHeaders) {
+    for (const [key, value] of Object.entries(options.extraHeaders)) {
+      headers[key] = value;
+    }
+  }
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers,
   });
 }
 
@@ -283,7 +297,9 @@ async function readTransportErrorText(result: ClaudeWebTransportResult): Promise
     output += decoder.decode();
     return output;
   } finally {
-    await reader.cancel().catch(() => {});
+    await reader.cancel().catch(() => {
+      // The bounded error body is already captured; cancel can race an upstream close.
+    });
     try {
       reader.releaseLock();
     } catch {
@@ -292,17 +308,44 @@ async function readTransportErrorText(result: ClaudeWebTransportResult): Promise
   }
 }
 
+function normalizeForwardedRetryAfter(value: string | null): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+
+  if (/^\d{1,9}$/.test(trimmed)) {
+    const seconds = Number(trimmed);
+    return Number.isSafeInteger(seconds) && seconds <= MAX_FORWARDED_RETRY_AFTER_SECONDS
+      ? String(seconds)
+      : null;
+  }
+
+  if (!HTTP_DATE_PATTERN.test(trimmed)) return null;
+  const timestamp = Date.parse(trimmed);
+  if (!Number.isFinite(timestamp)) return null;
+  const normalized = new Date(timestamp).toUTCString();
+  if (normalized !== trimmed) return null;
+  if (Math.abs(timestamp - Date.now()) > MAX_FORWARDED_RETRY_AFTER_SECONDS * 1000) return null;
+  return normalized;
+}
+
 async function errorResponseForTransport(
   result: ClaudeWebTransportResult,
   turn: PreparedClaudeWebTurn
 ): Promise<Response> {
+  const sink = currentAppliedProxySink();
+  if (sink && result.status >= 400) sink.upstreamStatus = result.status;
   const bodyText = await readTransportErrorText(result);
   if (result.status === 401) {
     invalidateClaudeWebTurn(turn, "conversation");
     return makeErrorResponse(401, "Session expired or invalid");
   }
   if (result.status === 429) {
-    return makeErrorResponse(429, "Rate limited by Claude Web API");
+    const extraHeaders: Record<string, string> = {};
+    const upstreamRetryAfter = normalizeForwardedRetryAfter(result.headers.get("retry-after"));
+    if (upstreamRetryAfter) {
+      extraHeaders["Retry-After"] = upstreamRetryAfter;
+    }
+    return makeErrorResponse(429, "Rate limited by Claude Web API", { extraHeaders });
   }
   if (isClaudeWebChallenge({ ...result, bodyText })) {
     return makeErrorResponse(403, "Claude Web returned a Cloudflare browser challenge", {
@@ -336,6 +379,7 @@ export class ClaudeWebExecutor extends BaseExecutor {
       const cookieHeader = normalizeClaudeSessionCookie(rawCookie);
       return verifyCookieValidity(cookieHeader, readClaudeWebDeviceId(credentials), signal);
     } catch {
+      // Connection checks deliberately collapse malformed credentials and transport failures to false.
       return false;
     }
   }

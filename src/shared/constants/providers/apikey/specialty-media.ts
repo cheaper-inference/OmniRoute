@@ -5,6 +5,7 @@
 export const APIKEY_PROVIDERS_SPECIALTY = {
   nlpcloud: {
     id: "nlpcloud",
+    serviceKinds: ["llm"],
     alias: "nlpc",
     name: "NLP Cloud",
     icon: "psychology",
@@ -20,6 +21,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   runwayml: {
     id: "runwayml",
+    serviceKinds: [],
     alias: "runway",
     name: "Runway",
     icon: "movie",
@@ -33,6 +35,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   kie: {
     id: "kie",
+    serviceKinds: [],
     alias: "kie",
     name: "KIE.AI",
     icon: "hub",
@@ -42,6 +45,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   pollinations: {
     id: "pollinations",
+    serviceKinds: ["llm"],
     alias: "pol",
     name: "Pollinations AI",
     icon: "local_florist",
@@ -50,11 +54,14 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     website: "https://pollinations.ai",
     hasFree: true,
     anonymousFallback: true,
+    authHint:
+      "Anonymous/keyless access to the documented free models is best-effort. Local v3.8.50 verification (2026-07-31) returned 401 via OmniRoute and Cloudflare 1010 on direct upstream probes from the same network. Premium models still require a Pollinations API key from enter.pollinations.ai.",
     freeNote:
       "Free keyless tier: openai, openai-fast, openai-large, qwen-coder, mistral, deepseek, grok, gemini-flash-lite-3.1, perplexity-fast, perplexity-reasoning. Premium models (claude, gemini, midijourney) require a Pollinations API key from enter.pollinations.ai.",
   },
   haiper: {
     id: "haiper",
+    serviceKinds: [],
     alias: "hp",
     name: "Haiper",
     icon: "videocam",
@@ -65,6 +72,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   leonardo: {
     id: "leonardo",
+    serviceKinds: [],
     alias: "leo",
     name: "Leonardo AI",
     icon: "palette",
@@ -75,6 +83,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   ideogram: {
     id: "ideogram",
+    serviceKinds: [],
     alias: "ideo",
     name: "Ideogram",
     icon: "image",
@@ -83,30 +92,23 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     website: "https://ideogram.ai",
     authHint: "Get API key at ideogram.ai/docs/api",
   },
-  freepik: {
-    id: "freepik",
-    alias: "fpk",
-    name: "Freepik (Mystic)",
+  magnific: {
+    id: "magnific",
+    serviceKinds: [],
+    alias: "freepik",
+    name: "Magnific",
     icon: "image",
     color: "#1B9E7F",
-    textIcon: "FP",
-    website: "https://freepik.com",
-    authHint: "Get API key at freepik.com/developers (Mystic image endpoint)",
+    textIcon: "MG",
+    website: "https://www.magnific.com",
+    authHint:
+      "Get an API key at magnific.com/user/api-keys (header x-magnific-api-key). Legacy Freepik developer keys still work.",
     hasFree: true,
     freeNote: "One-time ~€5 API credit for new accounts; pay-per-use afterward.",
   },
-  suno: {
-    id: "suno",
-    alias: "suno",
-    name: "Suno",
-    icon: "music_note",
-    color: "#F59E0B",
-    textIcon: "SU",
-    website: "https://suno.ai",
-    authHint: "Paste session cookie from suno.ai (Clerk auth)",
-  },
   udio: {
     id: "udio",
+    serviceKinds: [],
     alias: "udio",
     name: "Udio",
     icon: "music_note",
@@ -117,6 +119,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   "v0-vercel": {
     id: "v0-vercel",
+    serviceKinds: ["llm"],
     alias: "v0",
     name: "v0 (Vercel)",
     icon: "code_blocks",
@@ -126,6 +129,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   gitlab: {
     id: "gitlab",
+    serviceKinds: ["llm"],
     alias: "gitlab",
     name: "GitLab Duo PAT",
     icon: "hub",
@@ -137,6 +141,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   "voyage-ai": {
     id: "voyage-ai",
+    serviceKinds: [],
     alias: "voyage",
     name: "Voyage AI",
     icon: "blur_on",
@@ -149,18 +154,38 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   "jina-ai": {
     id: "jina-ai",
+    serviceKinds: [],
     alias: "jina",
-    name: "Jina AI",
+    name: "Jina AI (Foundation API)",
     icon: "sort",
     color: "#2563EB",
     textIcon: "JA",
     website: "https://jina.ai",
-    authHint: "Bearer API key for the Jina AI rerank API.",
+    authHint:
+      "Bearer API key for api.jina.ai — embeddings, rerank, classify, segment, and search. Dashboard keys take precedence over JINA_AI_API_KEY. This is not the Reader / r.jina.ai card and does not fetch URLs.",
     hasFree: true,
     freeNote: "10M free tokens on signup (non-commercial), no credit card required",
   },
+  // Decision / evaluation API (System One / Jev). Not a chat provider — no
+  // chat models in the registry. Used by the jev combo strategy (#15276) and
+  // by any future System One passthrough (#13987).
+  typesafe: {
+    id: "typesafe",
+    serviceKinds: [],
+    alias: "typesafe",
+    name: "TypeSafe AI",
+    icon: "psychology",
+    color: "#4F46E5",
+    textIcon: "TS",
+    website: "https://docs.typesafe.ai",
+    authHint:
+      "Bearer API key for api.typesafe.ai. OmniRoute uses it for System One evaluation (Jev) — not chat completions. Store the key here; the jev combo strategy reads it at request time.",
+    apiHint:
+      "TypeSafe System One answers typed questions (noul / choice / score) against a state. OmniRoute does not expose TypeSafe models in chat pickers or combos.",
+  },
   "fal-ai": {
     id: "fal-ai",
+    serviceKinds: [],
     alias: "fal",
     name: "Fal.ai",
     icon: "image",
@@ -170,6 +195,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   "stability-ai": {
     id: "stability-ai",
+    serviceKinds: [],
     alias: "stability",
     name: "Stability AI",
     icon: "image",
@@ -179,6 +205,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   "black-forest-labs": {
     id: "black-forest-labs",
+    serviceKinds: [],
     alias: "bfl",
     name: "Black Forest Labs",
     icon: "image",
@@ -188,6 +215,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   recraft: {
     id: "recraft",
+    serviceKinds: [],
     alias: "recraft",
     name: "Recraft",
     icon: "image",
@@ -197,6 +225,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   topaz: {
     id: "topaz",
+    serviceKinds: [],
     alias: "topaz",
     name: "Topaz",
     icon: "image",
@@ -206,6 +235,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   segmind: {
     id: "segmind",
+    serviceKinds: [],
     alias: "segmind",
     name: "Segmind",
     icon: "image",
@@ -221,6 +251,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   dify: {
     id: "dify",
+    serviceKinds: ["llm"],
     alias: "dify",
     name: "Dify",
     icon: "smart_toy",
@@ -234,6 +265,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   nomic: {
     id: "nomic",
+    serviceKinds: [],
     alias: "nomic",
     name: "Nomic",
     icon: "hub",
@@ -247,6 +279,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   },
   mixedbread: {
     id: "mixedbread",
+    serviceKinds: [],
     alias: "mxbai",
     name: "Mixedbread AI",
     icon: "hub",
@@ -260,14 +293,16 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   "jina-reader": {
     id: "jina-reader",
     alias: "jr",
-    name: "Jina Reader",
+    name: "Jina Reader (r.jina.ai)",
     icon: "menu_book",
     color: "#0EA5E9",
     textIcon: "JR",
     website: "https://jina.ai/reader",
+    authHint:
+      "Bearer API key for r.jina.ai URL-to-markdown (/v1/web/fetch only). Does not serve /v1/embeddings or /v1/rerank. The same Jina token as Foundation API works; OmniRoute reuses a jina-ai dashboard key or JINA_AI_API_KEY when this card is empty.",
     hasFree: true,
     notice: {
-      text: "Free tier: 1M fetches/month.",
+      text: "Reader / r.jina.ai only — not embeddings or rerank. Free tier: 1M fetches/month.",
       apiKeyUrl: "https://jina.ai/api-dashboard",
     },
     serviceKinds: ["webFetch"],
@@ -286,5 +321,35 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     },
     authHint: "X-API-Key from agent.tinyfish.ai/api-keys",
     serviceKinds: ["webFetch"],
+  },
+  deepai: {
+    id: "deepai",
+    serviceKinds: [],
+    alias: "deepai",
+    name: "DeepAI",
+    icon: "psychology",
+    color: "#4A90D9",
+    textIcon: "DA",
+    website: "https://deepai.org",
+    authHint:
+      "Use your DeepAI API key. Get one at deepai.org — requires a Pro subscription ($9.99/mo).",
+    apiHint:
+      "DeepAI uses per-endpoint REST calls (e.g. /api/text2img) instead of OpenAI chat/completions. OmniRoute adapts OpenAI image generation requests to DeepAI's /api/{slug} endpoints.",
+  },
+  "cursor-api": {
+    id: "cursor-api",
+    serviceKinds: ["llm"],
+    alias: "cua",
+    name: "Cursor API",
+    icon: "edit_note",
+    color: "#00D4AA",
+    textIcon: "CA",
+    website: "https://cursor.com/dashboard/api",
+    subscriptionRisk: true,
+    riskNoticeVariant: "oauth",
+    authHint:
+      "Paste a Cursor user API key (crsr_... or grok_...) from cursor.com/dashboard/api. OmniRoute exchanges it for a session token on demand; no IDE or cursor-agent install is needed. Usage bills to the Cursor plan that owns the key.",
+    apiHint:
+      "Same agent protocol and model catalog as the Cursor IDE provider. The Cursor CLI can also be pointed at /api/cursor-cli on this instance and authenticated with an OmniRoute API key.",
   },
 };

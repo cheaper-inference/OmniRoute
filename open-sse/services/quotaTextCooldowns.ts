@@ -11,6 +11,7 @@
  */
 
 import { RateLimitReason } from "../config/constants.ts";
+import { parseDayGranularityResetMs } from "./quotaResetParsing.ts";
 
 type RateLimitReasonValue = (typeof RateLimitReason)[keyof typeof RateLimitReason];
 
@@ -28,6 +29,21 @@ export interface QuotaTextFallback {
 // for the 5-hour subscription quota. Without a dedicated branch the request
 // falls through to the generic 429 retry path (~5s base cooldown).
 
+/** #18058: an explicit model entitlement is not depleted account-wide credits. */
+export function isClaudeModelCreditEntitlementText(errorText: string | null | undefined): boolean {
+  return errorText?.toLowerCase().includes("usage credits are required for this model") ?? false;
+}
+
+/** Claude-only subscription wording, isolated to keep the generic classifier bounded. */
+function isClaudeSubscriptionQuotaText(lower: string, provider?: string | null): boolean {
+  return (
+    provider === "claude" &&
+    (lower.includes("this request would exceed your account's rate limit") ||
+      lower.includes("monthly spend limit") ||
+      isClaudeModelCreditEntitlementText(lower))
+  );
+}
+
 export function isSubscriptionQuotaText(lower: string, provider?: string | null): boolean {
   return (
     lower.includes("usage limit reached") ||
@@ -35,15 +51,17 @@ export function isSubscriptionQuotaText(lower: string, provider?: string | null)
     lower.includes("claude pro usage limit") ||
     lower.includes("you've reached your usage limit") ||
     lower.includes("you have reached your usage limit") ||
-    // Native Claude OAuth uses this otherwise-generic 429 wording for an
-    // exhausted subscription window. Keep it provider-scoped: other upstreams
-    // can use the same phrase for a short RPM throttle.
-    (provider === "claude" &&
-      lower.includes("this request would exceed your account's rate limit"))
+    lower.includes("exceeds your plan") ||
+    lower.includes("plan limit") ||
+    lower.includes("plan's set usage limit") ||
+    lower.includes("plan limit exceeded") ||
+    lower.includes("usage limit exceeded") ||
+    // Model and account subscription limits are Claude-only, not generic RPM.
+    isClaudeSubscriptionQuotaText(lower, provider)
   );
 }
 
-const SUBSCRIPTION_QUOTA_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
+export const SUBSCRIPTION_QUOTA_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
 
 /**
  * Builds the QUOTA_EXHAUSTED fallback for the subscription-quota text above.
@@ -60,12 +78,12 @@ const SUBSCRIPTION_QUOTA_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
 export function buildSubscriptionQuotaFallback(
   errorStr: string,
   getUpstreamRetryHintMs: () => number | null,
-  parseRetryFromErrorText: (text: string) => number | null,
+  parseRetryFromErrorText: (text: string, provider?: string | null) => number | null,
   provider?: string | null
 ): QuotaTextFallback | null {
   if (!isSubscriptionQuotaText(errorStr.toLowerCase(), provider)) return null;
   const hintMs = getUpstreamRetryHintMs();
-  const bodyHint = parseRetryFromErrorText(errorStr);
+  const bodyHint = parseRetryFromErrorText(errorStr, provider);
   return {
     shouldFallback: true,
     cooldownMs: hintMs ?? SUBSCRIPTION_QUOTA_COOLDOWN_MS,
@@ -97,16 +115,39 @@ export function isWeeklyUsageLimitText(lower: string): boolean {
   return (
     lower.includes("weekly usage limit") ||
     lower.includes("weekly limit reached") ||
-    lower.includes("reached your weekly")
+    lower.includes("reached your weekly") ||
+    lower.includes("1-week quota") ||
+    lower.includes("week quota") ||
+    lower.includes("weekly/monthly limit") ||
+    (lower.includes("weekly") && lower.includes("quota") && lower.includes("exhaust"))
   );
 }
 
-export function buildWeeklyQuotaFallback(errorStr: string): QuotaTextFallback | null {
+const MAX_WEEKLY_QUOTA_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
+
+export function buildWeeklyQuotaFallback(
+  errorStr: string,
+  nowMs: number = Date.now(),
+  provider?: string | null
+): QuotaTextFallback | null {
   if (!isWeeklyUsageLimitText(errorStr.toLowerCase())) return null;
+  const parsedResetMs = parseDayGranularityResetMs(
+    errorStr,
+    MAX_WEEKLY_QUOTA_COOLDOWN_MS,
+    nowMs,
+    provider
+  );
+  const cooldownMs =
+    typeof parsedResetMs === "number" && parsedResetMs > 0
+      ? parsedResetMs
+      : WEEKLY_QUOTA_COOLDOWN_MS;
   return {
     shouldFallback: true,
-    cooldownMs: WEEKLY_QUOTA_COOLDOWN_MS,
+    cooldownMs,
     reason: RateLimitReason.QUOTA_EXHAUSTED,
+    usedUpstreamRetryHint: typeof parsedResetMs === "number" && parsedResetMs > 0,
+    quotaResetHintMs:
+      typeof parsedResetMs === "number" && parsedResetMs > 0 ? parsedResetMs : undefined,
   };
 }
 
@@ -141,5 +182,30 @@ export function buildSessionQuotaFallback(errorStr: string): QuotaTextFallback |
     shouldFallback: true,
     cooldownMs: SESSION_QUOTA_COOLDOWN_MS,
     reason: RateLimitReason.QUOTA_EXHAUSTED,
+  };
+}
+
+// xAI Grok Build free-tier per-model rolling 24h token cap. Live 429:
+// "You've used all the included free usage for model grok-4.6 for now.
+//  Usage resets over a rolling 24-hour window — tokens (actual/limit): N/M."
+// Grok Build is passthroughModels, so this stays a model lockout (not a
+// connection park). Combo must treat it as quota_exhausted so it does not
+// wait comboCooldownWait.maxWaitMs (~30s) and retry the same login.
+const ROLLING_24H_QUOTA_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+export function isRolling24hUsageLimitText(lower: string): boolean {
+  return (
+    lower.includes("used all the included free usage") ||
+    (lower.includes("rolling 24-hour window") && lower.includes("tokens (actual/limit)"))
+  );
+}
+
+export function buildRolling24hQuotaFallback(errorStr: string): QuotaTextFallback | null {
+  if (!isRolling24hUsageLimitText(errorStr.toLowerCase())) return null;
+  return {
+    shouldFallback: true,
+    cooldownMs: ROLLING_24H_QUOTA_COOLDOWN_MS,
+    reason: RateLimitReason.QUOTA_EXHAUSTED,
+    quotaResetHintMs: ROLLING_24H_QUOTA_COOLDOWN_MS,
   };
 }

@@ -1,57 +1,62 @@
-# Free Tiers Guide: Get Free AI Without a Credit Card
+---
+title: "Free Tiers Guide: Understand and Combine Free AI Access"
+version: 3.8.52
+lastUpdated: 2026-10-11
+---
 
-> **TL;DR**: OmniRoute aggregates free tiers from 50+ providers. Connect multiple free providers for unlimited free AI with automatic fallback.
+# Free Tiers Guide: Understand and Combine Free AI Access
+
+> **TL;DR**: Bring your own eligible provider accounts. OmniRoute combines the connections you configure; it does not issue the advertised aggregate token budget. Free access can require signup, an API key, approval, or a payment method. Provider limits, privacy policies, and terms still apply.
 
 ---
 
 ## What Are Free Tiers?
 
-Many AI providers offer **free usage** — no credit card required. Think of it like free samples at a grocery store. You can try the product without paying.
+Many AI providers offer some form of **free access**. Depending on the provider, that may
+mean a no-auth endpoint, recurring quota, rate-limited uncapped access, a signup grant,
+manual approval, or a temporary promotion. Some options require an account, API key,
+credit card, KYC, or acceptance of provider-specific terms.
 
-OmniRoute **aggregates** these free tiers into one endpoint. Instead of signing up for 10 different services, you connect them all to OmniRoute and use `model: "auto"` to automatically pick the best free option for each request.
+OmniRoute **aggregates** configured connections into one endpoint. You still sign up separately for each provider that requires an account. Connect those accounts and use `model: "auto"` to route among eligible targets. A fresh installation can have no eligible keyless target; installing OmniRoute alone does not guarantee a successful chat response.
 
 ---
 
-## Best Free Providers (No Credit Card)
+## Representative Free-Access Providers
 
-### Tier 1: Free Forever (Unlimited)
+### Recurring, Keyless, or Uncapped Access
 
-These providers are **always free** with no limits:
+These providers have a recurring, keyless, or uncapped free-access path in the audited catalog. “Uncapped” means no published token cap; rate, concurrency, account, regional, and policy limits can still apply:
 
-| Provider | Models | Quota | How to Connect |
-|----------|--------|-------|----------------|
-| **Kiro AI** | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6 | 50 credits/month | No auth needed |
-| **OpenCode Free** | GPT-4o, Claude, Gemini | Unlimited | No auth needed |
-| **Pollinations** | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | No key needed | No auth needed |
-| **LongCat** | LongCat-2.0 | 10M tokens (one-time) | API key + KYC |
-| **Cloudflare AI** | 50+ models | 10K neurons/day | No auth needed |
-| **Qwen** | Qwen3-coder-plus/flash/next | Unlimited | No auth needed |
-| **Qoder** | Kimi-K2, DeepSeek-R1, Qwen3-coder | Unlimited | No auth needed |
+| Provider          | Models                                                                         | Quota                                                                                                            | How to Connect                                                                           |
+| ----------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, and others                        | Audited catalog estimates a 25K-token shared monthly pool                                                        | OAuth/account flow; ToS flagged `avoid` in the catalog                                   |
+| **Pollinations**  | Current keyless model set; some former models are discontinued or key-required | Keyless; no published token cap                                                                                  | No provider credential for the keyless models                                            |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, and more          | Free API key (no rate limits, no card); **every request is logged** for research (opt out at logfare.ai/consent) | Instant key at logfare.ai/register; ToS/privacy at logfare.ai/tos and logfare.ai/privacy |
+| **Cloudflare AI** | Workers AI catalog                                                             | Audited pool estimates ~30M tokens/month from published usage units                                              | Cloudflare account and API credentials                                                   |
+| **Gemini**        | Gemini Flash family                                                            | Variable project/model rate limits; no fixed monthly token grant is included in the headline                     | Google AI Studio API key; check the project’s active limits                              |
+| **Groq**          | Llama, GPT-OSS, and Qwen models                                                | Audited pool estimates ~15M tokens/month                                                                         | Groq API key; rate limits apply                                                          |
 
-### Tier 2: Free with Signup (Generous)
+### Signup Grants and Provider-Specific Credits
 
-These providers give you **free credits** when you sign up:
+These providers offer signup grants or promotional credits, subject to their eligibility rules. As verified on 2026-10-08, [Cerebras pricing](https://www.cerebras.ai/pricing) requires a payment method for a one-time $5 credit that expires after 30 days; it is not a recurring token quota. [Gemini rate limits](https://ai.google.dev/gemini-api/docs/rate-limits) vary by project, model, and tier, so they are not converted into a guaranteed monthly token grant.
 
-| Provider | Free Credits | Models | How to Get |
-|----------|-------------|--------|------------|
-| **NVIDIA NIM** | ~40 RPM | 129 models | Sign up at build.nvidia.com |
-| **Cerebras** | 1M tokens/day | Qwen3 235B, GPT-OSS 120B | Sign up at cerebras.ai |
-| **DeepSeek** | 5M free tokens | DeepSeek V4 | Sign up at platform.deepseek.com |
-| **Groq** | 30 RPM free | Llama 4, Mixtral | Sign up at console.groq.com |
-| **OpenAI** | $5 free credits | GPT-5, GPT-4o | Sign up at platform.openai.com |
-| **Anthropic** | $5 free credits | Claude Opus 4.6, Sonnet 4.6 | Sign up at console.anthropic.com |
-| **Google** | 1,500 req/day | Gemini 2.5 Pro, Flash | Sign up at aistudio.google.com |
+| Provider      | Free Credits                                                       | Models                    | How to Get                                                |
+| ------------- | ------------------------------------------------------------------ | ------------------------- | --------------------------------------------------------- |
+| **Cerebras**  | One-time $5 promotional credit; expires after 30 days              | Current inference catalog | Account and valid payment method                          |
+| **DeepSeek**  | 5M free tokens                                                     | DeepSeek V4               | Sign up at platform.deepseek.com                          |
+| **LongCat**   | 10M-token one-time grant                                           | LongCat 2.0               | API key + KYC; pay-as-you-go after the grant              |
+| **Vertex AI** | $300 signup credit represented as ~300M tokens in the budget model | Gemini and partner models | Google Cloud account; billing and eligibility rules apply |
 
-### Tier 3: Free with Limits (Specific Use Cases)
+### Other Limited Access
 
 These providers have **free tiers** with specific limits:
 
-| Provider | Free Limit | Models | Best For |
-|----------|-----------|--------|----------|
-| **Cerebras** | 1M tokens/day | Qwen3 235B | Fast inference |
-| **NVIDIA NIM** | ~40 RPM | 129 models | Variety |
-| **Groq** | 30 RPM | Llama 4, Mixtral | Speed |
-| **Cloudflare AI** | 10K neurons/day | 50+ models | Variety |
+| Provider                   | Free Limit                                                                              | Models                              | Best For |
+| -------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------- | -------- |
+| **GitHub Models**          | Audited shared pool estimates ~18M tokens/month                                         | Broad model evaluation              |
+| **Hugging Face**           | Small recurring monthly pool                                                            | Experiments and model variety       |
+| **OpenRouter free models** | Shared request-limited pool; optional one-time top-up increases the recurring allowance | Broad fallback catalog              |
+| **AI Horde**               | Keyless community capacity; availability varies                                         | Opportunistic distributed inference |
 
 ---
 
@@ -59,22 +64,23 @@ These providers have **free tiers** with specific limits:
 
 The magic of OmniRoute is **stacking free tiers**. Instead of relying on one provider, you connect multiple free providers and let OmniRoute automatically pick the best one for each request.
 
-### Example: Unlimited Free AI
+### Example: Broader Free-Tier Coverage
 
-Connect these 4 providers for **unlimited free AI**:
+Connect several providers to reduce dependence on any single quota:
 
-1. **Kiro AI** — 50 credits/month (Claude models)
-2. **OpenCode Free** — Unlimited (GPT models)
-3. **Pollinations** — No key needed (multiple models)
-4. **LongCat** — 10M tokens one-time (backup, requires KYC)
+1. **Gemini** — recurring API-key quota
+2. **Groq** — recurring API-key quota
+3. **Pollinations** — keyless, rate-limited access
+4. **LongCat** — one-time signup grant (requires KYC)
 
 Then use `model: "auto"` and OmniRoute will:
-- Try Kiro first (best quality)
-- If Kiro is busy → try OpenCode Free
-- If OpenCode Free is slow → try Pollinations
-- If all fail → use LongCat as backup
 
-**Result**: Unlimited free AI with automatic fallback!
+- Try the highest-ranked eligible connection first
+- If its quota or health check fails → try the next configured provider
+- If the keyless provider is unavailable → continue through the remaining targets
+- If no eligible connection succeeds → return an error; signup credits are only usable while valid and available
+
+**Result**: broader free-tier coverage with automatic fallback — not a guarantee of unlimited capacity.
 
 ---
 
@@ -94,87 +100,33 @@ Click the **+ Add Provider** button.
 
 ### Step 4: Select a Free Provider
 
-Browse the list and select one of these free providers:
-- **Kiro AI** — Free Claude models
-- **OpenCode Free** — Free GPT models
-- **Pollinations** — Free GPT-5, Claude, Gemini
-- **LongCat** — 10M tokens free (one-time, requires KYC)
-- **Cloudflare AI** — 50+ models, 10K neurons/day
+Browse the catalog and inspect each provider's current `hasFree`, auth, quota, privacy,
+and ToS metadata. The provider card and the
+[Free Tiers Reference](../reference/FREE_TIERS.md) distinguish recurring pools,
+uncapped/keyless access, signup credits, discontinued entries, and higher-risk sources.
 
 ### Step 5: Click Connect
 
-No API key needed — just click **Connect**.
+For a `NOAUTH` provider, OmniRoute does not request an upstream credential. This does not guarantee that the upstream accepts third-party clients or has available capacity. OAuth and API-key providers must be connected through their documented account flow. Your client still uses the OmniRoute API key shown in **Dashboard → Endpoints** when router authentication is enabled.
 
 ### Step 6: Repeat
 
-Connect 3-4 free providers for the best experience.
+Connect several providers whose terms and privacy model fit your use case.
 
 ---
 
-## Free Provider Details
+## Reading the Catalog Correctly
 
-### Kiro AI
-
-- **Models**: Claude Sonnet 4.5, Haiku 4.5, Opus 4.6
-- **Quota**: 50 credits/month
-- **Auth**: No auth needed
-- **Best for**: High-quality Claude models
-
-### OpenCode Free
-
-- **Models**: GPT-4o, Claude, Gemini
-- **Quota**: Unlimited
-- **Auth**: No auth needed
-- **Best for**: General-purpose AI
-
-### Pollinations
-
-- **Models**: GPT-5, Claude, Gemini, DeepSeek, Llama 4
-- **Quota**: No key needed
-- **Auth**: No auth needed
-- **Best for**: Variety of models
-
-### LongCat
-
-- **Models**: LongCat-2.0
-- **Quota**: 10M tokens, one-time grant on signup (not recurring daily/monthly)
-- **Auth**: API key + KYC verification required to unlock the free grant
-- **Best for**: A one-off free allowance; pay-as-you-go beyond it
-
-### Cloudflare AI
-
-- **Models**: 50+ models
-- **Quota**: 10K neurons/day
-- **Auth**: No auth needed
-- **Best for**: Variety and reliability
-
-### NVIDIA NIM
-
-- **Models**: 129 models
-- **Quota**: ~40 RPM
-- **Auth**: Sign up at build.nvidia.com
-- **Best for**: Variety and speed
-
-### Cerebras
-
-- **Models**: Qwen3 235B, GPT-OSS 120B
-- **Quota**: 1M tokens/day
-- **Auth**: Sign up at cerebras.ai
-- **Best for**: Fast inference
-
-### Qwen
-
-- **Models**: Qwen3-coder-plus/flash/next
-- **Quota**: Unlimited
-- **Auth**: No auth needed
-- **Best for**: Coding tasks
-
-### Qoder
-
-- **Models**: Kimi-K2, DeepSeek-R1, Qwen3-coder
-- **Quota**: Unlimited
-- **Auth**: No auth needed
-- **Best for**: Coding tasks
+- `NOAUTH` means OmniRoute does not ask you for a provider credential; it does not
+  guarantee uptime, privacy, or unlimited capacity.
+- `hasFree` is discovery metadata. It can represent a recurring quota, keyless access,
+  signup credit, approval program, or promotion.
+- `recurring-uncapped` means no published token ceiling was available; rate and
+  concurrency limits still apply.
+- `one-time-initial` does not recur after the signup grant is consumed.
+- `tos: avoid` providers are excluded from automatic routing by default (`excludeTosAvoid`). Connecting an account does not bypass this filter. Any operator override should follow a review of provider terms and account risk.
+- Entries marked `discontinued` remain historical evidence and must not be presented as
+  currently free.
 
 ---
 
@@ -187,47 +139,37 @@ If one free provider is busy or down, OmniRoute automatically tries the next one
 ### 2. Smart Routing
 
 OmniRoute picks the **best free provider** for each request based on:
+
 - Speed — Which provider is fastest right now?
 - Quality — Which provider is best for this task?
 - Capacity — Which provider has quota remaining?
 
 ### 3. Token Savings
 
-OmniRoute's **compression** feature saves 15-95% of tokens. This means your free quota lasts **5-20x longer**.
+OmniRoute's compression pipeline can reduce eligible prompt and tool-output tokens. The
+actual savings depend on content, selected engines, provider accounting, and fidelity
+settings; compression does not multiply every provider quota by a fixed amount.
 
 ### 4. Multi-Account Support
 
-If you have multiple accounts for the same provider, OmniRoute treats each as a separate candidate. This doubles or triples your free quota.
+If provider terms permit multiple accounts or credentials, OmniRoute can treat each
+connection as a separate routing candidate. Do not create extra accounts to evade a
+provider's quota or access policy.
 
 ---
 
 ## Free Tier Math
 
-Let's calculate how much free AI you can get:
+The live, pool-deduplicated catalog currently reports:
 
-### Conservative Estimate (3 providers)
+| Metric                         |   Current audited value | Interpretation                                                      |
+| ------------------------------ | ----------------------: | ------------------------------------------------------------------- |
+| Recurring quantified grant     | **~1.62B tokens/month** | Shared pools counted once; excludes uncapped providers from the sum |
+| First month with signup grants |       **~2.22B tokens** | Recurring total plus one-time and recurring credits                 |
 
-| Provider | Daily Quota | Monthly Quota |
-|----------|-------------|---------------|
-| Kiro AI | ~1.7 credits | 50 credits |
-| OpenCode Free | Unlimited | Unlimited |
-| Pollinations | Unlimited | Unlimited |
-
-**Total**: Unlimited free AI
-
-### Aggressive Estimate (7 providers)
-
-| Provider | Daily Quota | Monthly Quota |
-|----------|-------------|---------------|
-| Kiro AI | ~1.7 credits | 50 credits |
-| OpenCode Free | Unlimited | Unlimited |
-| Pollinations | Unlimited | Unlimited |
-| LongCat | — (one-time) | 10M tokens (one-time, KYC) |
-| Cloudflare AI | 10K neurons | 300K neurons |
-| NVIDIA NIM | ~40 RPM | ~1.7M requests |
-| Cerebras | 1M tokens | 30M tokens |
-
-**Total**: ~1.6B documented free tokens/month — up to ~2.1B in your first month with signup credits (with compression: ~7.5B+ effective tokens)
+These are catalog-wide estimates across separate eligible accounts, not an allowance supplied by OmniRoute or a prediction for a fresh installation. Your usable capacity depends on the providers you connect and their current conditions. The values are computed from `open-sse/config/freeModelCatalog.ts`; see the
+[Free Tiers Reference](../reference/FREE_TIERS.md) for pool deduplication, ToS flags,
+discontinued entries, and signup-credit methodology.
 
 ---
 
@@ -235,30 +177,37 @@ Let's calculate how much free AI you can get:
 
 ### "Is this really free?"
 
-**Yes!** These are official free tiers from the providers. OmniRoute just makes it easier to use them all at once.
+The catalog records provider-published terms and project research, but offers can change.
+Verify the provider's current pricing, quota, privacy policy, and eligibility before use.
 
 ### "Will the free tier run out?"
 
-Some providers have limits (like Kiro's 50 credits/month), but others are unlimited (like OpenCode Free and Pollinations). By connecting multiple providers, you always have a backup.
+Every provider can rate-limit, change models, suspend access, or go offline. Multiple
+connections improve fallback coverage but do not guarantee an available free route.
 
 ### "Can I use free providers for production?"
 
-**Yes!** Many free providers are production-ready. However, for critical applications, consider adding a paid provider as a backup.
+Only if the provider's SLA, data handling, limits, and terms meet your production
+requirements. Critical workloads should have monitored, contractually suitable fallback.
 
 ### "What's the catch?"
 
-No catch! Providers offer free tiers to attract users. OmniRoute just makes it easier to use them all at once.
+Tradeoffs may include strict limits, waitlists, KYC, credit-card verification, training on
+prompts, weaker privacy, no SLA, model churn, geographic restrictions, paid overage, or
+account-policy risk. OmniRoute surfaces the available metadata; you choose what to enable.
 
 ### "How do I get more free quota?"
 
 1. Connect more free providers
-2. Use compression to save tokens (15-95% savings)
+2. Enable appropriate compression engines and measure savings for your workload
 3. Use `auto/cheap` to prioritize free/cheap providers
-4. Create multiple accounts for the same provider
+4. Add additional permitted providers or credentials without violating provider terms
 
 ### "Do free providers have worse quality?"
 
-**Not necessarily!** Many free providers offer the same models as paid providers. For example, Kiro gives you access to Claude Sonnet 4.5 — the same model you'd get with a paid Anthropic subscription.
+Not necessarily. Some providers expose the same model families available through paid
+routes, but limits, latency, privacy, reliability, and model versions can differ. Use the
+Free Provider Rankings page as a quality signal and verify the actual model served.
 
 ---
 
@@ -266,5 +215,5 @@ No catch! Providers offer free tiers to attract users. OmniRoute just makes it e
 
 - **[Auto-Combo Guide](./AUTO-COMBO-GUIDE.md)** — Let OmniRoute pick the best AI for you
 - **[Providers Guide](./PROVIDERS-GUIDE.md)** — Connect more providers
-- **[Troubleshooting](./TROUBLESHOOTING.md)** — Fix common issues
+- **[Troubleshooting](../guides/TROUBLESHOOTING.md)** — Fix common issues
 - **[Free Tiers Reference](../reference/FREE_TIERS.md)** — Full list of free tiers

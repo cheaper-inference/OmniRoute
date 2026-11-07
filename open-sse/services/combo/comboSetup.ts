@@ -16,12 +16,14 @@ import {
   SKIP_UNIVERSAL_HANDOFF_FLAG,
 } from "../contextHandoff.ts";
 import { getLastSessionModel } from "../../../src/lib/db/contextHandoffs.ts";
+import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
 import { applyComboAgentMiddleware } from "../comboAgentMiddleware.ts";
 import { resolveComboSetupConfig, resolveComboTargetTimeoutMsForCombo } from "../comboConfig.ts";
 import { resolveResilienceSettings } from "../../../src/lib/resilience/settings";
 import { FETCH_TIMEOUT_MS } from "../../config/constants.ts";
 import { deriveComboSessionKey } from "./autoStrategy.ts";
 import type { ComboContext } from "./context.ts";
+import { getStrategyTraits } from "./strategyRegistry.ts";
 
 export interface ComboSetup {
   strategy: ReturnType<typeof normalizeRoutingStrategy>;
@@ -56,7 +58,10 @@ function resolveContextCachePin(ctx: ComboContext): {
 } {
   const { combo, relayOptions, log } = ctx;
   const effectiveSessionId: string | null = combo.context_cache_protection
-    ? (relayOptions?.sessionId ?? deriveComboSessionKey(ctx.body))
+    ? scopeHandoffSessionId(
+        relayOptions?.sessionId ?? deriveComboSessionKey(ctx.body),
+        relayOptions?.apiKeyId
+      )
     : null;
   let pinnedModel: string | null = null;
   if (
@@ -78,8 +83,9 @@ export function phaseComboSetup(ctx: ComboContext): ComboSetup {
   const { combo, settings, relayOptions } = ctx;
 
   const strategy = normalizeRoutingStrategy(combo.strategy || "priority");
-  const relayConfig =
-    strategy === "context-relay" ? resolveContextRelayConfig(relayOptions?.config || null) : null;
+  const relayConfig = getStrategyTraits(strategy).contextRelay
+    ? resolveContextRelayConfig(relayOptions?.config || null)
+    : null;
 
   const resilienceSettings = settings
     ? resolveResilienceSettings(settings)
@@ -103,6 +109,7 @@ export function phaseComboSetup(ctx: ComboContext): ComboSetup {
     "" // provider/model not yet known — resolved per-model in loop
   );
   ctx.body = agentBody;
+
   const clientRequestedStream = ctx.body?.stream === true;
 
   // Use config cascade before dispatch so all strategies, pinned context routes,

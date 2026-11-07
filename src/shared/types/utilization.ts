@@ -19,11 +19,18 @@ export interface ProviderUtilizationPoint {
   windowKey: string;
 }
 
+export interface ConnectionMetaEntry {
+  email: string | null;
+  name: string | null;
+  displayName: string | null;
+}
+
 export interface ProviderUtilizationResponse {
   timeRange: "1h" | "24h" | "7d" | "30d";
   bucketSizeMinutes: number;
   providers: string[];
   data: ProviderUtilizationPoint[];
+  connectionMeta?: Record<string, ConnectionMetaEntry>;
 }
 
 export interface ComboHealthMetrics {
@@ -51,11 +58,17 @@ export interface ComboHealthMetrics {
   quotaHealth: {
     providers: Array<{
       provider: string;
-      remainingPct: number;
+      remainingPct: number | null;
       isExhausted: boolean;
       trend: "improving" | "stable" | "declining";
+      dropReason?:
+        | import("../../../open-sse/services/autoCombo/strictZeroCostFilter").StrictZeroCostExclusionReason
+        | "hidePaidModels"
+        | "modelLockout"
+        | "no-snapshot"
+        | null;
     }>;
-    worstRemainingPct: number;
+    worstRemainingPct: number | null;
   };
   usageSkew: {
     modelDistribution: Array<{
@@ -253,7 +266,9 @@ export interface ComboAutopilotReport {
     degradedCount: number;
     downCount: number;
     issueCount: number;
-    actionableCount: number;
+    suggestionCount: number;
+    /** @deprecated Use suggestionCount instead. Kept as an alias for backward compatibility; remove after 2 releases. */
+    actionableCount?: number;
   };
   combos: ComboAutopilotCombo[];
 }
@@ -269,7 +284,12 @@ export type ComboScoringInspectorFactorKey =
   | "tierAffinity"
   | "specificityMatch"
   | "contextAffinity"
-  | "resetWindowAffinity";
+  | "cacheAffinity"
+  | "sessionAvailability"
+  | "resetWindowAffinity"
+  | "connectionDensity"
+  | "quality"
+  | "reliability";
 
 export type ComboScoringInspectorSource =
   "combo_health" | "combo_forecast" | "combo_autopilot" | "runtime" | "default";

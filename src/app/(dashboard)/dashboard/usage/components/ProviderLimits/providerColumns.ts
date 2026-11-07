@@ -21,14 +21,15 @@ const PROVIDER_COLUMNS: Record<string, string[]> = {
     "banked_reset_credits",
   ],
   claude: ["session", "weekly"],
-  glm: ["session", "weekly", "mcp_monthly"],
-  "glm-cn": ["session", "weekly", "mcp_monthly"],
-  glmt: ["session", "weekly", "mcp_monthly"],
-  zai: ["session", "weekly", "mcp_monthly"],
+  glm: ["session", "weekly", "mcp_monthly", "banked_reset_credits"],
+  "glm-cn": ["session", "weekly", "mcp_monthly", "banked_reset_credits"],
+  glmt: ["session", "weekly", "mcp_monthly", "banked_reset_credits"],
+  zai: ["session", "weekly", "mcp_monthly", "banked_reset_credits"],
   github: ["chat", "completions", "premium_interactions"],
   minimax: ["session"],
   "minimax-cn": ["session"],
   "kimi-coding": ["session", "weekly"],
+  "command-code": ["five_hour", "weekly", "credits"],
 };
 
 /** Hard cap for the dynamic schema (Antigravity and fallback providers). */

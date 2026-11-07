@@ -1,7 +1,7 @@
 ---
 title: "📖 Setup Guide — OmniRoute"
-version: 3.8.40
-lastUpdated: 2026-06-28
+version: 3.8.50
+lastUpdated: 2026-08-18
 ---
 
 # 📖 Setup Guide — OmniRoute
@@ -31,6 +31,8 @@ omniroute
 
 Dashboard opens at `http://localhost:20128` and API base URL is `http://localhost:20128/v1`.
 
+> **npm users:** If npm warns that install scripts were blocked (e.g., `omniroute`, `better-sqlite3`), see [Troubleshooting — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+
 ### pnpm
 
 ```bash
@@ -55,6 +57,8 @@ The [AUR package](https://aur.archlinux.org/packages/omniroute-bin) installs Omn
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
+
+> **Windows note:** By default, OmniRoute uses `%APPDATA%\omniroute` when the legacy `%USERPROFILE%\.omniroute` directory is not present. Set `DATA_DIR` to choose a different data-directory location.
 
 > **Note:** `npm install` auto-generates `.env` from `.env.example` on first run. Subsequent installs will not overwrite an existing `.env`, so customizations are preserved. To re-seed, delete `.env` before re-running.
 
@@ -178,15 +182,18 @@ omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # prints Cursor's in-app steps
 omniroute setup-roo          # Roo Code import + autoImport pointer
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
 Each accepts `--remote <url> --api-key <key>` to configure a local tool against a
-**remote** OmniRoute, plus `--dry-run` to preview. The launchers
-`omniroute launch` (Claude Code) and `omniroute launch-codex` (Codex) spawn the CLI
-with the right env injected, writing no config at all.
+**remote** OmniRoute, plus `--dry-run` to preview. To launch a CLI with the right
+env injected and no config written at all, use the generic launcher
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
+the legacy per-tool launchers `omniroute launch` (Claude Code) and
+`omniroute launch-codex` (Codex) remain available.
 
 For the full table (what each command writes, every flag, local vs remote, base-URL
 `/v1` conventions), see **[CLI Integrations](./CLI-INTEGRATIONS.md)**.
@@ -243,7 +250,7 @@ Add to your MCP settings:
 }
 ```
 
-**Full MCP documentation:** [MCP Server README](../../open-sse/mcp-server/README.md) — 87 tools, IDE configs, Python/TS/Go clients.
+**Full MCP documentation:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 tools, IDE configs, Python/TS/Go clients.
 
 ### A2A Setup (Agent-to-Agent Protocol)
 

@@ -1,17 +1,79 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getModelAliases, setModelAlias, getProviderConnections } from "@/models";
 import { AI_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { updateModelAliasSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { hasEligibleConnectionForModel } from "@/domain/connectionModelRules";
 import { getSettings } from "@/lib/db/settings";
+import {
+  createModelCapabilityResolutionSnapshot,
+  getResolvedModelCapabilities,
+  getResolvedModelCapabilitiesWithLimitSources,
+  type ModelCapabilityResolutionSnapshot,
+} from "@/lib/modelCapabilities";
 import { isFreeModel, providerHasFreeModels } from "@/shared/utils/freeModels";
+import { getAllActiveSyncedModels } from "@/lib/db/models/activeSyncedCatalog";
+import { providerUsesExclusiveSyncedListing } from "@/lib/providers/modelListingCapability";
+import {
+  buildSyncedModelIdsByCanonicalProvider,
+  shouldSuppressStaticModelForExclusiveListing,
+} from "@/app/api/v1/models/catalogSyncedCoverage";
+import {
+  isModelInLiveCatalog,
+  loadAuthoritativeLiveCatalogs,
+} from "@/app/api/models/liveCatalogAvailability";
+import { buildAliasMaps } from "@/app/api/v1/models/catalogProviderMaps";
+import { resolveCanonicalProviderId as resolveCanonicalProviderIdFromMaps } from "@/app/api/v1/models/catalogProviderMaps";
+
+interface GetModelsDependencies {
+  createCapabilitySnapshot?: typeof createModelCapabilityResolutionSnapshot;
+}
+
+// `withLimits=1` opts into per-model token limits plus their provenance (`capsSource`).
+const getModelsQuerySchema = z.object({
+  withLimits: z
+    .enum(["1", "true", "0", "false"])
+    .optional()
+    .transform((value) => value === "1" || value === "true"),
+});
+
+function resolveModelCapabilityFields(
+  fullModel: string,
+  snapshot: ModelCapabilityResolutionSnapshot,
+  withLimits: boolean
+) {
+  if (!withLimits) {
+    return {
+      supportsVision:
+        getResolvedModelCapabilities(fullModel, undefined, snapshot).supportsVision === true,
+    };
+  }
+  const { capabilities, limitSources } = getResolvedModelCapabilitiesWithLimitSources(
+    fullModel,
+    snapshot
+  );
+  return {
+    supportsVision: capabilities.supportsVision === true,
+    contextWindow: capabilities.contextWindow,
+    maxInputTokens: capabilities.maxInputTokens,
+    maxOutputTokens: capabilities.maxOutputTokens,
+    capsSource: limitSources,
+  };
+}
 
 // GET /api/models - Get models with aliases (only from active providers by default)
-export async function GET(request: Request) {
+export async function handleGetModels(request: Request, dependencies: GetModelsDependencies = {}) {
   try {
     const { searchParams } = new URL(request.url);
     const showAll = searchParams.get("all") === "true";
+    const query = validateBody(getModelsQuerySchema, {
+      withLimits: searchParams.get("withLimits") ?? undefined,
+    });
+    if (isValidationFailure(query)) {
+      return NextResponse.json({ error: query.error }, { status: 400 });
+    }
+    const { withLimits } = query.data;
 
     const modelAliases = await getModelAliases();
 
@@ -76,17 +138,6 @@ export async function GET(request: Request) {
       }
     }
 
-    const models = AI_MODELS.map((m: any) => {
-      const fullModel = `${m.provider}/${m.model}`;
-      const available = !activeProviders || activeProviders.has(m.provider);
-      return {
-        ...m,
-        fullModel,
-        alias: modelAliases[fullModel] || m.model,
-        available,
-      };
-    }).filter((m: any) => showAll || m.available);
-
     // #6328 (follow-up to #6495): REMOVE — not just hide — paid models from the
     // dashboard model picker when the operator opts into hidePaidModels. Mirrors
     // the `shouldHidePaid` guard in `src/app/api/v1/models/catalog.ts` (public
@@ -96,17 +147,92 @@ export async function GET(request: Request) {
       const settings = await getSettings();
       hidePaid = settings?.hidePaidModels === true;
     } catch {}
-    const filtered = hidePaid
-      ? models.filter(
-          (m: { provider: string; model: string }) => providerHasFreeModels(m.provider) && isFreeModel(m.provider, { id: m.model })
-        )
-      : models;
 
-    return NextResponse.json({ models: filtered });
+    // Filter before capability resolution so unavailable/paid rows cannot trigger
+    // needless capability work. One request-local snapshot supplies all persisted
+    // capability and custom-vision rows to the remaining resolutions.
+    const candidates = AI_MODELS.filter((model: any) => {
+      if (!showAll && activeProviders && !activeProviders.has(model.provider)) return false;
+      return (
+        !hidePaid ||
+        (providerHasFreeModels(model.provider) && isFreeModel(model.provider, { id: model.model }))
+      );
+    });
+    const capabilitySnapshot = (
+      dependencies.createCapabilitySnapshot ?? createModelCapabilityResolutionSnapshot
+    )();
+
+    // #10615: a static row can be `available: true` here while /v1/models has already
+    // dropped it because a provider's live-synced catalog covers it (or, for
+    // exclusive-listing providers like Cursor, replaces the static list entirely).
+    // Recompute the same suppression /v1/models applies so the two endpoints agree.
+    let syncedModelIdsByCanonicalProvider = new Map<string, Set<string>>();
+    let resolveCanonicalProviderIdForStatic: (alias: string) => string = (alias) => alias;
+    try {
+      const syncedModelsByProvider = await getAllActiveSyncedModels({
+        customModelsByProvider: capabilitySnapshot.customModelsByProvider,
+      });
+      const { aliasToProviderId, providerIdToAlias } = buildAliasMaps();
+      const resolve = (aliasOrId: string, fallbackProviderId?: string) =>
+        resolveCanonicalProviderIdFromMaps(aliasToProviderId, aliasOrId, fallbackProviderId);
+      resolveCanonicalProviderIdForStatic = (alias: string) => resolve(alias);
+      syncedModelIdsByCanonicalProvider = buildSyncedModelIdsByCanonicalProvider(
+        syncedModelsByProvider,
+        resolve,
+        {},
+        providerIdToAlias
+      );
+    } catch {
+      // Synced catalog unavailable — fall through with static-only availability.
+    }
+
+    // #15585: for providers with an authoritative live catalog, dispatch rejects any
+    // model the catalog omits — so that verdict overrides the static-coverage heuristic.
+    // Only providers with an active synced catalog can be authoritative, so skip the rest
+    // (avoids a per-provider catalog + customModels read for every static provider).
+    const authoritativeLive = await loadAuthoritativeLiveCatalogs(
+      candidates
+        .map((m: any) => m.provider as string)
+        .filter(
+          (provider: string) =>
+            (syncedModelIdsByCanonicalProvider.get(resolveCanonicalProviderIdForStatic(provider))
+              ?.size ?? 0) > 0
+        )
+    );
+
+    const models = candidates.map((m: any) => {
+      const fullModel = `${m.provider}/${m.model}`;
+      const canonicalProviderId = resolveCanonicalProviderIdForStatic(m.provider);
+      const syncedForProvider = syncedModelIdsByCanonicalProvider.get(canonicalProviderId);
+      const providerHasSynced = syncedForProvider !== undefined && syncedForProvider.size > 0;
+      const suppressedBySync = shouldSuppressStaticModelForExclusiveListing({
+        exclusiveListing: providerUsesExclusiveSyncedListing(canonicalProviderId),
+        providerHasSynced,
+        staticModelId: m.model,
+        syncedModelIds: syncedForProvider ? [...syncedForProvider] : [],
+      });
+      const liveIds = authoritativeLive.get(m.provider);
+      const available =
+        (!activeProviders || activeProviders.has(m.provider)) &&
+        (liveIds ? isModelInLiveCatalog(m.provider, m.model, liveIds) : !suppressedBySync);
+      return {
+        ...m,
+        fullModel,
+        alias: modelAliases[fullModel] || m.model,
+        available,
+        ...resolveModelCapabilityFields(fullModel, capabilitySnapshot, withLimits),
+      };
+    });
+
+    return NextResponse.json({ models });
   } catch (error) {
     console.log("Error fetching models:", error);
     return NextResponse.json({ error: "Failed to fetch models" }, { status: 500 });
   }
+}
+
+export async function GET(request: Request) {
+  return handleGetModels(request);
 }
 
 // PUT /api/models - Update model alias

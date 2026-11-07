@@ -1,34 +1,21 @@
 "use client";
 
 import { Input } from "@/shared/components";
+import { getProviderConnectionFamilyIds } from "@/shared/constants/providers";
 import { providerText, type ProviderMessageTranslator } from "../../providerPageHelpers";
 
-export type QuotaScrapingFieldValues = {
-  opencodeGoWorkspaceId: string;
-  opencodeGoAuthCookie: string;
-  ollamaCloudUsageCookie: string;
-};
+import {
+  assignQuotaScrapingProviderData,
+  EMPTY_QUOTA_SCRAPING_FIELDS,
+  QWEN_TOKEN_PLAN_PROVIDERS,
+  VOLCENGINE_PLAN_PROVIDERS,
+  XIAOMI_MIMO_PROVIDERS,
+  type QuotaScrapingFieldValues,
+} from "./quotaScrapingFieldValues";
 
-export const EMPTY_QUOTA_SCRAPING_FIELDS: QuotaScrapingFieldValues = {
-  opencodeGoWorkspaceId: "",
-  opencodeGoAuthCookie: "",
-  ollamaCloudUsageCookie: "",
-};
-
-export function assignQuotaScrapingProviderData(
-  provider: string | undefined,
-  values: QuotaScrapingFieldValues,
-  target: Record<string, unknown>
-) {
-  if (provider === "opencode-go") {
-    target.opencodeGoWorkspaceId = values.opencodeGoWorkspaceId.trim() || undefined;
-    if (values.opencodeGoAuthCookie.trim()) {
-      target.opencodeGoAuthCookie = values.opencodeGoAuthCookie.trim();
-    }
-  } else if (provider === "ollama-cloud" && values.ollamaCloudUsageCookie.trim()) {
-    target.ollamaCloudUsageCookie = values.ollamaCloudUsageCookie.trim();
-  }
-}
+// Re-exported so existing importers (modals, tests) keep their current paths.
+export { assignQuotaScrapingProviderData, EMPTY_QUOTA_SCRAPING_FIELDS };
+export type { QuotaScrapingFieldValues };
 
 type QuotaScrapingFieldsProps = {
   provider?: string;
@@ -45,48 +32,9 @@ export default function QuotaScrapingFields({
   t,
   editMode = false,
 }: QuotaScrapingFieldsProps) {
-  if (provider === "opencode-go") {
-    return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border/50 bg-surface/20 p-4">
-        <Input
-          label={providerText(t, "opencodeGoWorkspaceIdLabel", "OpenCode Go workspace ID")}
-          name="opencodeGoWorkspaceId"
-          value={values.opencodeGoWorkspaceId}
-          onChange={(e) => onChange({ opencodeGoWorkspaceId: e.target.value })}
-          placeholder="workspace_..."
-          hint={providerText(
-            t,
-            "opencodeGoWorkspaceIdHint",
-            "Required for quota scraping. Copy it from the OpenCode Go workspace URL."
-          )}
-          autoComplete="off"
-          spellCheck={false}
-        />
-        <Input
-          label={providerText(t, "opencodeGoAuthCookieLabel", "OpenCode Go auth cookie")}
-          name="opencodeGoAuthCookie"
-          type="password"
-          value={values.opencodeGoAuthCookie}
-          onChange={(e) => onChange({ opencodeGoAuthCookie: e.target.value })}
-          placeholder="auth=..."
-          hint={providerText(
-            t,
-            "opencodeGoAuthCookieHint",
-            editMode
-              ? "Leave blank to keep the stored cookie. Paste auth=... or only the cookie value to replace it."
-              : "Paste the auth cookie value from opencode.ai. The auth= prefix is accepted."
-          )}
-          autoComplete="off"
-          spellCheck={false}
-          autoCapitalize="off"
-        />
-      </div>
-    );
-  }
-
   if (provider === "ollama-cloud") {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border/50 bg-surface/20 p-4">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
         <Input
           label={providerText(t, "ollamaCloudUsageCookieLabel", "Ollama Cloud usage cookie")}
           name="ollamaCloudUsageCookie"
@@ -100,6 +48,157 @@ export default function QuotaScrapingFields({
             editMode
               ? "Leave blank to keep the stored cookie. Paste the __Secure-session cookie value from ollama.com/settings to replace it."
               : "Required for quota scraping. Paste the __Secure-session cookie value from ollama.com/settings."
+          )}
+          autoComplete="off"
+          spellCheck={false}
+          autoCapitalize="off"
+        />
+      </div>
+    );
+  }
+
+  if (getProviderConnectionFamilyIds("alibaba").includes(provider)) {
+    return (
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+        <Input
+          label={providerText(
+            t,
+            "alibabaConsoleCookieLabel",
+            "Alibaba console cookie (free-tier sync)"
+          )}
+          name="alibabaConsoleCookie"
+          type="password"
+          value={values.alibabaConsoleCookie}
+          onChange={(e) => onChange({ alibabaConsoleCookie: e.target.value })}
+          placeholder="login_aliyunid_ticket=..."
+          hint={providerText(
+            t,
+            "alibabaConsoleCookieHint",
+            editMode
+              ? "Leave blank to keep the stored cookie. Paste login_aliyunid_ticket or the full Cookie header from modelstudio.console.alibabacloud.com."
+              : "Paste login_aliyunid_ticket or the full Cookie header from the Model Studio console Free Quota page."
+          )}
+          autoComplete="off"
+          spellCheck={false}
+          autoCapitalize="off"
+        />
+        <Input
+          label={providerText(
+            t,
+            "alibabaConsoleSecTokenLabel",
+            "Alibaba console sec_token (optional)"
+          )}
+          name="alibabaConsoleSecToken"
+          type="password"
+          value={values.alibabaConsoleSecToken}
+          onChange={(e) => onChange({ alibabaConsoleSecToken: e.target.value })}
+          placeholder="KmdQ..."
+          hint={providerText(
+            t,
+            "alibabaConsoleSecTokenHint",
+            "Optional. Copy sec_token from the Free Quota network request if cookie-only sync fails."
+          )}
+          autoComplete="off"
+          spellCheck={false}
+          autoCapitalize="off"
+        />
+      </div>
+    );
+  }
+
+  if (QWEN_TOKEN_PLAN_PROVIDERS.has(provider ?? "")) {
+    return (
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+        <Input
+          label={providerText(t, "qwenCloudCookieLabel", "Qwen / Model Studio console cookie")}
+          name="qwenCloudCookie"
+          type="password"
+          value={values.qwenCloudCookie}
+          onChange={(e) => onChange({ qwenCloudCookie: e.target.value })}
+          placeholder="cna=...; login_qwencloud_ticket=...; ..."
+          hint={providerText(
+            t,
+            "qwenCloudCookieHint",
+            (editMode ? "Leave blank to keep the stored cookie. " : "") +
+              "Required for Token Plan quota — the inference API key cannot read it. " +
+              "How to get it: open home.qwencloud.com › Billing › Subscription while logged in, " +
+              "press F12 › Network, reload the page, filter by api.json, click any request to " +
+              "cs-data.qwencloud.com, then under Request Headers copy the WHOLE Cookie value " +
+              "(it contains login_qwencloud_ticket). It expires with the browser session — " +
+              "re-paste it when the quota reports an expired session."
+          )}
+          autoComplete="off"
+          spellCheck={false}
+          autoCapitalize="off"
+        />
+        <Input
+          label={providerText(t, "qwenCloudSecTokenLabel", "Qwen console sec_token (optional)")}
+          name="qwenCloudSecToken"
+          type="password"
+          value={values.qwenCloudSecToken}
+          onChange={(e) => onChange({ qwenCloudSecToken: e.target.value })}
+          placeholder="GjRV..."
+          hint={providerText(
+            t,
+            "qwenCloudSecTokenHint",
+            "Optional — resolved automatically from the dashboard. Set it only if quota sync reports a permission error."
+          )}
+          autoComplete="off"
+          spellCheck={false}
+          autoCapitalize="off"
+        />
+      </div>
+    );
+  }
+
+  if (VOLCENGINE_PLAN_PROVIDERS.has(provider ?? "")) {
+    return (
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+        <Input
+          label={providerText(t, "volcConsoleCookieLabel", "Volcano Engine console cookie")}
+          name="volcConsoleCookie"
+          type="password"
+          value={values.volcConsoleCookie}
+          onChange={(e) => onChange({ volcConsoleCookie: e.target.value })}
+          placeholder="session=...; AccountID=..."
+          hint={providerText(
+            t,
+            "volcConsoleCookieHint",
+            editMode
+              ? "Leave blank to keep the stored cookie. To rotate, paste the updated cookie string from console.volcengine.com."
+              : "Required for Volcano Ark Plan quota -- the inference API key cannot read it. " +
+                  "How to get it: log in to console.volcengine.com, open Developer Tools (F12), " +
+                  "run document.cookie (or inspect Network headers), and paste the cookie string here. " +
+                  "It expires with your browser session; re-paste when quota reports an expired session."
+          )}
+          autoComplete="off"
+          spellCheck={false}
+          autoCapitalize="off"
+        />
+      </div>
+    );
+  }
+
+  if (XIAOMI_MIMO_PROVIDERS.has(provider ?? "")) {
+    return (
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+        <Input
+          label={providerText(t, "xiaomiMimoConsoleCookieLabel", "Xiaomi MiMo console cookie")}
+          name="xiaomiMimoConsoleCookie"
+          type="password"
+          value={values.xiaomiMimoConsoleCookie}
+          onChange={(e) => onChange({ xiaomiMimoConsoleCookie: e.target.value })}
+          placeholder="api-platform_serviceToken=...; userId=..."
+          hint={providerText(
+            t,
+            "xiaomiMimoConsoleCookieHint",
+            (editMode ? "Leave blank to keep the stored cookie. " : "") +
+              "Required for live Token Plan quota — the inference API key cannot read it. " +
+              "How to get it: open platform.xiaomimimo.com (logged in) on the Token Plan page, " +
+              "press F12 › Network, reload, click any request to platform.xiaomimimo.com, then " +
+              "under Request Headers copy the WHOLE Cookie value (it contains " +
+              "api-platform_serviceToken and userId). It expires with the browser session — " +
+              "re-paste it when the quota reports an expired session."
           )}
           autoComplete="off"
           spellCheck={false}

@@ -1,13 +1,29 @@
 import { NextResponse } from "next/server";
-import { getCachedProviderConnectionById } from "@/lib/localDb";
+import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
+import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { updateProviderConnection } from "@/lib/db/providers";
-import { getAccessToken, updateProviderCredentials } from "@/sse/services/tokenRefresh";
+import {
+  getAccessToken,
+  updateProviderCredentials,
+  refreshCopilotToken,
+  resolveCopilotTokenBaseUrl,
+} from "@/sse/services/tokenRefresh";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
 
 type RefreshResult = {
   accessToken?: string;
   expiresIn?: number;
+  /** Absolute expiry, preferred over expiresIn when the provider returns one. */
+  expiresAt?: string;
   error?: string;
+  /**
+   * Set when the provider has been retired upstream. The caller surfaces a
+   * migration hint instead of asking the operator to re-authenticate in a loop
+   * against something that no longer exists.
+   */
+  code?: string;
+  reason?: string;
+  migrateTo?: string;
 };
 
 /**
@@ -46,6 +62,12 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     }
 
     const provider = connection.provider;
+    if (passive.isPassiveCodex(provider)) {
+      return NextResponse.json(
+        { error: passive.PASSIVE_REFRESH_MESSAGE, code: "refresh_disabled" },
+        { status: 409 }
+      );
+    }
 
     // Codex/OpenAI multi-account family-revocation cascade guard.
     // These two providers share the same Auth0 client_id and can revoke sibling
@@ -76,6 +98,68 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
       idToken: connection.idToken,
       providerSpecificData: connection.providerSpecificData,
     };
+
+    // github.com Copilot and GHE Copilot (device-code flow) never receive a
+    // refresh_token — only a GitHub access token plus a short-lived Copilot
+    // sub-token (providerSpecificData.copilotToken). The generic access-token
+    // helper below requires credentials.refreshToken and returns null
+    // immediately without one, which always surfaced as "Token refresh failed
+    // — provider returned no new token" for these connections. Refresh the
+    // Copilot sub-token directly instead, mirroring the health-check sweep's
+    // dedicated path.
+    //
+    // NB: keep the generic helper's name out of the comments above its real
+    // call site. tests/unit/codex-manual-refresh-rotating-guard.test.ts finds
+    // that call with a plain substring search and asserts the openai-auth0
+    // rotation guard precedes it, so an earlier textual mention would become
+    // the match instead of the actual invocation.
+    if (
+      (provider === "github" || provider === "ghe-copilot") &&
+      !connection.refreshToken &&
+      connection.accessToken
+    ) {
+      const copilotResult = await refreshCopilotToken(
+        connection.accessToken,
+        credentials,
+        resolveCopilotTokenBaseUrl(provider, credentials)
+      );
+      if (!copilotResult?.token) {
+        return NextResponse.json(
+          { error: "Token refresh failed — provider returned no new token" },
+          { status: 502 }
+        );
+      }
+
+      const refreshedProviderSpecificData = {
+        ...(connection.providerSpecificData || {}),
+        copilotToken: copilotResult.token,
+        copilotTokenExpiresAt: copilotResult.expiresAt,
+      };
+      await updateProviderConnection(id, {
+        providerSpecificData: refreshedProviderSpecificData,
+        testStatus: "active",
+        lastError: null,
+        lastErrorAt: null,
+        lastErrorType: null,
+        lastErrorSource: null,
+        errorCode: null,
+      });
+
+      const expiresAtMs =
+        typeof copilotResult.expiresAt === "number" && copilotResult.expiresAt < 1e12
+          ? copilotResult.expiresAt * 1000
+          : typeof copilotResult.expiresAt === "string"
+            ? new Date(copilotResult.expiresAt).getTime()
+            : (copilotResult.expiresAt as number | undefined);
+
+      return NextResponse.json({
+        success: true,
+        connectionId: id,
+        provider,
+        expiresAt: expiresAtMs ? new Date(expiresAtMs).toISOString() : null,
+        refreshedAt: new Date().toISOString(),
+      });
+    }
 
     // Use the existing getAccessToken helper which knows how to refresh
     // tokens for each provider type (Claude, GitHub, Gemini, etc.).

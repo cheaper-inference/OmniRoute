@@ -32,9 +32,12 @@ const {
 
 const { replaceSyncedAvailableModelsForConnection, getSyncedAvailableModels } =
   await import("../../src/lib/db/models.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
 
 const core = await import("../../src/lib/db/core.ts");
 core.getDbInstance(); // initialise DB + run migrations
+
+const { normalizeComboRecord } = await import("../../src/lib/combos/steps.ts");
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -43,7 +46,28 @@ function makeCombo(models: unknown[], name = "test-combo") {
 }
 
 // Seed synced models for a provider into the DB.
-async function seedSyncedModels(providerId: string, connectionId: string, modelIds: string[]) {
+async function seedSyncedModels(
+  providerId: string,
+  connectionId: string,
+  modelIds: string[],
+  isActive = true
+) {
+  const db = core.getDbInstance();
+  const now = new Date().toISOString();
+
+  // Upsert, not REPLACE: REPLACE deletes+reinserts the whole row, silently wiping
+  // provider_specific_data on connections pre-created via createProviderConnection()
+  // (which the Alibaba drained-models test depends on).
+  db.prepare(
+    `INSERT INTO provider_connections
+       (id, provider, is_active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+       provider = excluded.provider,
+       is_active = excluded.is_active,
+       updated_at = excluded.updated_at`
+  ).run(connectionId, providerId, isActive ? 1 : 0, now, now);
+
   await replaceSyncedAvailableModelsForConnection(
     providerId,
     connectionId,
@@ -345,4 +369,145 @@ test("expandProviderWildcardsInCombo: three providers mixed with explicit entrie
   assert.equal((result.models[2] as any).model, `${p1}/m-b`);
   assert.equal((result.models[3] as any).model, `${p2}/m-c`);
   assert.equal(result.models[4], "openai/gpt-4o");
+});
+
+test("#8926: active synced catalog replaces static wildcard entries", async () => {
+  const providerId = "github";
+  const liveModelId = "live-only-model-8926";
+
+  await seedSyncedModels(providerId, "github-live-8926", [liveModelId]);
+
+  const result = await expandProviderWildcardsInCombo(
+    makeCombo([`${providerId}/*`], "github-live-authority-8926")
+  );
+
+  assert.deepEqual(
+    result.models.map((entry) => (entry as { model: string }).model),
+    [`${providerId}/${liveModelId}`],
+    "an active non-empty synced catalog must replace, not union with, static models"
+  );
+
+  const aliasResult = await expandProviderWildcardsInCombo(
+    makeCombo(["gh/*"], "github-live-alias-8926")
+  );
+
+  assert.deepEqual(
+    aliasResult.models.map((entry) => (entry as { model: string }).model),
+    [`gh/${liveModelId}`],
+    "the public provider alias must use the canonical provider's active catalog"
+  );
+});
+
+test("#8926: inactive synced catalog does not override static wildcard fallback", async () => {
+  const providerId = "openai";
+  const inactiveModelId = "inactive-only-model-8926";
+
+  await seedSyncedModels(providerId, "openai-inactive-8926", [inactiveModelId], false);
+
+  const result = await expandProviderWildcardsInCombo(
+    makeCombo([`${providerId}/*`], "openai-static-fallback-8926")
+  );
+
+  const expanded = result.models.map((entry) => (entry as { model: string }).model);
+
+  assert.ok(expanded.length > 0, "static fallback should remain available");
+  assert.ok(
+    !expanded.includes(`${providerId}/${inactiveModelId}`),
+    "an inactive connection must not make its synced catalog authoritative"
+  );
+});
+test("expandProviderWildcardsInCombo: skips Alibaba free-tier drained models for pinned connections", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "alibaba",
+    authType: "apikey",
+    name: "alibaba-free-wildcard",
+    apiKey: "test-dashscope-key",
+    providerSpecificData: {
+      alibabaBillingMode: "free",
+      alibabaFreeDrainedModels: ["qwen3.7-max-preview"],
+    },
+  });
+  await seedSyncedModels("alibaba", connection.id, [
+    "qwen3.7-max-preview",
+    "qwen3.6-plus",
+    "glm-5.2",
+  ]);
+
+  const combo = makeCombo([
+    {
+      kind: "provider-wildcard",
+      providerId: "alibaba",
+      modelPattern: "*",
+      connectionId: connection.id,
+    },
+  ]);
+  const result = await expandProviderWildcardsInCombo(combo);
+  const models = result.models.map((entry) => (entry as { model: string }).model);
+
+  assert.equal(models.includes("alibaba/qwen3.7-max-preview"), false);
+  assert.ok(models.includes("alibaba/qwen3.6-plus"));
+  assert.ok(models.includes("alibaba/glm-5.2"));
+  assert.equal(models.includes("alibaba/kimi-k2.7-code"), false);
+});
+
+test("expandProviderWildcardsInCombo: alibabafree combo uses strict console allowlist only", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "alibaba",
+    authType: "apikey",
+    name: "alibaba-free-strict",
+    apiKey: "test-dashscope-key-strict-allowlist",
+    providerSpecificData: {
+      alibabaBillingMode: "free",
+      alibabaFreeTierCapableModels: ["qwen3.6-plus"],
+      alibabaNoFreeTierModels: ["glm-5.2-fast-preview", "qwen3.7-max"],
+    },
+  });
+  await seedSyncedModels("alibaba", connection.id, [
+    "qwen3.6-plus",
+    "qwen3.7-max",
+    "glm-5.2-fast-preview",
+    "glm-5.2",
+  ]);
+
+  const combo = makeCombo(
+    [
+      {
+        kind: "provider-wildcard",
+        providerId: "alibaba",
+        modelPattern: "*",
+        connectionId: connection.id,
+      },
+    ],
+    "alibabafree"
+  );
+  const result = await expandProviderWildcardsInCombo(combo);
+  const models = result.models.map((entry) => (entry as { model: string }).model);
+
+  assert.ok(models.includes("alibaba/qwen3.6-plus"));
+  assert.ok(models.includes("alibaba/glm-5.2"));
+  assert.equal(models.includes("alibaba/qwen3.7-max"), false);
+  assert.equal(models.includes("alibaba/glm-5.2-fast-preview"), false);
+});
+
+test("normalizeComboRecord: preserves provider-wildcard steps for DB round-trip", () => {
+  const normalized = normalizeComboRecord({
+    name: "alibabafree",
+    models: [
+      {
+        kind: "provider-wildcard",
+        providerId: "alibaba",
+        modelPattern: "*",
+        connectionId: "conn-main",
+        label: "main",
+      },
+      "alibaba/qwen*",
+    ],
+  });
+
+  assert.equal(normalized.models.length, 2);
+  assert.equal(normalized.models[0].kind, "provider-wildcard");
+  assert.equal((normalized.models[0] as { providerId: string }).providerId, "alibaba");
+  assert.equal((normalized.models[0] as { connectionId?: string }).connectionId, "conn-main");
+  assert.equal(normalized.models[1].kind, "provider-wildcard");
+  assert.equal((normalized.models[1] as { modelPattern: string }).modelPattern, "qwen*");
 });

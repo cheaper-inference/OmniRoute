@@ -25,8 +25,18 @@ import {
   type PooledContext,
 } from "./browserPool.ts";
 import tlsClient from "../utils/tlsClient.ts";
+import { discardResponseBody } from "../executors/opencodeResponseBody.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import { resolveHttpBackedChatFingerprint } from "./httpBackedChatFingerprint.ts";
+import type {
+  BrowserBackedChatRequest,
+  BrowserBackedChatResult,
+} from "./browserBackedChat/types.ts";
+
+export type {
+  BrowserBackedChatRequest,
+  BrowserBackedChatResult,
+} from "./browserBackedChat/types.ts";
 
 // Safety constants
 const MAX_RESPONSE_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -88,9 +98,23 @@ export function __resetHttpBackedChatOverrideForTesting(): void {
   cookieCache.clear();
 }
 
-// Helper to make Playwright waitForTimeout abortable via AbortSignal
+async function withAbort<T>(promise: Promise<T>, signal?: AbortSignal | null): Promise<T> {
+  if (!signal) return promise;
+  if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+  let abortListener: (() => void) | undefined;
+  const aborted = new Promise<never>((_, reject) => {
+    abortListener = () => reject(new DOMException("Aborted", "AbortError"));
+    signal.addEventListener("abort", abortListener, { once: true });
+  });
+  try {
+    return await Promise.race([promise, aborted]);
+  } finally {
+    if (abortListener) signal.removeEventListener("abort", abortListener);
+  }
+}
+
 function waitWithSignal(ms: number, signal?: AbortSignal | null): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     if (signal?.aborted) return reject(new DOMException("Aborted", "AbortError"));
     const onAbort = () => {
       clearTimeout(timer);
@@ -101,102 +125,51 @@ function waitWithSignal(ms: number, signal?: AbortSignal | null): Promise<void> 
       resolve();
     }, ms);
     signal?.addEventListener("abort", onAbort, { once: true });
-  }).catch((err) => {
-    if (err instanceof DOMException && err.name === "AbortError") throw err;
   });
 }
 
-export interface BrowserBackedChatRequest {
-  /**
-   * Pool key — typically a provider id like "duckduckgo-web" or
-   * "claude-web", optionally suffixed by user/account id if cookies
-   * differ.
-   */
-  poolKey: string;
-  /**
-   * Chat URL the page should submit to. The page's `fetch` will hit
-   * this URL when the user clicks Send, and we capture the response.
-   */
-  chatUrl: string;
-  /**
-   * Chat page URL to navigate to before typing. The page must already
-   * have its chat UI rendered for the input/button selectors to work.
-   */
-  chatPageUrl: string;
-  /**
-   * The text the user wants to send. Combined with the model message
-   * prefix (e.g. "Reply with exactly: ...") so the user message is the
-   * literal text typed into the chat box.
-   */
-  userMessage: string;
-  /**
-   * Cookie string (raw) to inject into the browser context. Used by
-   * Claude web (cookies from `docs/CLAUDE_COOKIE.md` or similar).
-   * For DDG this is empty — the browser is anonymous.
-   */
-  cookieString?: string | null;
-  /**
-   * Cookie domain. Used together with cookieString.
-   */
-  cookieDomain?: string;
-  /**
-   * Domain for the page's `fetch` to identify which path on the
-   * upstream is the chat endpoint. e.g. "duckduckgo.com" for DDG,
-   * "claude.ai" for Claude.
-   */
-  chatUrlMatchDomain: string;
-  /**
-   * User-Agent string for the browser context.
-   */
-  userAgent?: string;
-  /**
-   * Locale (BCP 47). Defaults to en-US.
-   */
-  locale?: string;
-  /**
-   * IANA timezone. Defaults to America/New_York.
-   */
-  timezone?: string;
-  /**
-   * Selector for the chat input. DDG uses `textarea` with the "Ask
-   * anything privately" placeholder; Claude uses a contenteditable
-   * div. Override per provider.
-   */
-  inputSelector: string;
-  /**
-   * Selector for the submit button. If the page exposes one, click
-   * it. Otherwise the helper falls back to pressing Enter in the
-   * input.
-   */
-  submitButtonSelector?: string;
-  /**
-   * Wait after submit for SSE/JSON to arrive. Default 15 seconds.
-   */
-  postSubmitWaitMs?: number;
-  /**
-   * Optional AbortSignal. Cancels navigation/submit.
-   */
-  signal?: AbortSignal | null;
-  /**
-   * Reuse the same context across requests when true. When false, a
-   * fresh context is opened each time (slower but bypasses
-   * per-context rate limits). Default true.
-   */
-  reuseContext?: boolean;
-}
+async function uploadBrowserAttachments(
+  page: import("playwright").Page,
+  attachments: NonNullable<BrowserBackedChatRequest["attachments"]>,
+  chatUrlMatchDomain: string,
+  signal?: AbortSignal | null
+): Promise<void> {
+  if (attachments.length === 0) return;
 
-export interface BrowserBackedChatResult {
-  status: number;
-  contentType: string | null;
-  body: Buffer;
-  isStealth: boolean;
-  timing: {
-    acquireContextMs: number;
-    navigateMs: number;
-    submitMs: number;
-    captureResponseMs: number;
-    totalMs: number;
-  };
+  const fileInput = page.locator('input[type="file"]').first();
+  await withAbort(fileInput.waitFor({ state: "attached", timeout: 10_000 }), signal);
+
+  for (const attachment of attachments) {
+    const uploadResponsePromise = page.waitForResponse(
+      (response) => {
+        if (response.request().method() !== "POST") return false;
+        try {
+          const url = new URL(response.url());
+          return (
+            url.hostname.endsWith(chatUrlMatchDomain) && /\/api\/v1\/files\/?$/.test(url.pathname)
+          );
+        } catch {
+          return false;
+        }
+      },
+      { timeout: 30_000 }
+    );
+
+    const [uploadResponse] = await Promise.all([
+      uploadResponsePromise,
+      fileInput.setInputFiles({
+        name: attachment.name,
+        mimeType: attachment.mimeType,
+        buffer: attachment.buffer,
+      }),
+    ]);
+    if (!uploadResponse.ok()) {
+      throw new Error(`attachment upload returned HTTP ${uploadResponse.status()}`);
+    }
+    // Let the provider commit its uploaded-file state before another file or
+    // the chat submission is triggered.
+    await waitWithSignal(150, signal);
+  }
 }
 
 async function settlePoolKey(
@@ -257,13 +230,19 @@ export async function browserBackedChat(
     chatPageUrl,
     userMessage,
     cookieString,
+    localStorage,
+    localStorageOrigin,
     cookieDomain,
     chatUrlMatchDomain,
     userAgent,
     locale,
     timezone,
+    headless,
     inputSelector,
     submitButtonSelector,
+    submitButtonMode = "playwright",
+    attachments = [],
+    beforeSubmit,
     postSubmitWaitMs = 15000,
     signal,
     reuseContext = true,
@@ -274,26 +253,62 @@ export async function browserBackedChat(
   const pooled: PooledContext = await acquireBrowserContext(key, {
     cookieDomain: cookieDomain || chatUrlMatchDomain,
     cookieString: cookieString || null,
+    localStorage,
+    localStorageOrigin,
     warmupUrl: chatPageUrl,
     userAgent,
     locale,
     timezone,
+    headless,
   });
   const acquireContextMs = Date.now() - tAcquireStart;
 
   const page = await openPage(pooled);
+  const observedPostUrls: string[] = [];
+  const observedPostResponses: Array<{ url: string; status: number }> = [];
+  page.on("request", (request) => {
+    if (request.method() !== "POST") return;
+    try {
+      const url = new URL(request.url());
+      if (!url.hostname.endsWith(chatUrlMatchDomain)) return;
+      const sanitized = `${url.origin}${url.pathname}`;
+      if (!observedPostUrls.includes(sanitized)) observedPostUrls.push(sanitized);
+    } catch {
+      // Ignore malformed/non-HTTP request URLs.
+    }
+  });
+  page.on("response", (response) => {
+    if (response.request().method() !== "POST") return;
+    try {
+      const url = new URL(response.url());
+      if (!url.hostname.endsWith(chatUrlMatchDomain)) return;
+      observedPostResponses.push({
+        url: `${url.origin}${url.pathname}`,
+        status: response.status(),
+      });
+    } catch {
+      // Ignore malformed/non-HTTP response URLs.
+    }
+  });
   try {
     const tNavStart = Date.now();
-    await page.goto(chatPageUrl, {
-      waitUntil: "domcontentloaded",
-      timeout: 60000,
-      signal: signal ?? undefined,
-    });
+    await withAbort(
+      page.goto(chatPageUrl, {
+        waitUntil: "domcontentloaded",
+        timeout: 60000,
+      }),
+      signal
+    );
     await waitWithSignal(2500, signal);
     const navigateMs = Date.now() - tNavStart;
 
+    if (beforeSubmit) {
+      await beforeSubmit(page);
+    }
+    await uploadBrowserAttachments(page, attachments, chatUrlMatchDomain, signal);
+
     const inputLocator = page.locator(inputSelector).first();
-    await inputLocator.waitFor({ state: "visible", timeout: 10000, signal: signal ?? undefined });
+    await withAbort(inputLocator.waitFor({ state: "visible", timeout: 10000 }), signal);
     await inputLocator.fill(userMessage);
     await waitWithSignal(800, signal);
 
@@ -318,7 +333,11 @@ export async function browserBackedChat(
       const btn = page.locator(submitButtonSelector).first();
       if ((await btn.count()) > 0) {
         try {
-          await btn.click({ timeout: 2000 });
+          if (submitButtonMode === "dom") {
+            await btn.evaluate((element) => (element as HTMLElement).click());
+          } else {
+            await btn.click({ timeout: 2000 });
+          }
         } catch {
           await page.keyboard.press("Enter");
         }
@@ -336,10 +355,13 @@ export async function browserBackedChat(
       signal.removeEventListener("abort", abortListener);
     }
     if (response) {
-      // Wait for the upstream SSE to finish streaming
-      await waitWithSignal(Math.min(postSubmitWaitMs, 30000), signal);
-    } else {
-      await waitWithSignal(postSubmitWaitMs, signal);
+      // Most provider streams finish well before the safety window. Return as
+      // soon as Playwright reports completion instead of always paying the
+      // full fixed delay before reading the already-buffered body.
+      await Promise.race([
+        response.finished().then(() => undefined),
+        waitWithSignal(Math.min(postSubmitWaitMs, 30000), signal),
+      ]);
     }
     const captureResponseMs = Date.now() - tCaptureStart;
     const submitMs = captureResponseMs;
@@ -373,6 +395,8 @@ export async function browserBackedChat(
       contentType,
       body,
       isStealth: pooled.isStealth,
+      observedPostUrls,
+      observedPostResponses,
       timing: {
         acquireContextMs,
         navigateMs,
@@ -397,6 +421,8 @@ export async function browserBackedChat(
       contentType: "application/json",
       body,
       isStealth: pooled.isStealth,
+      observedPostUrls,
+      observedPostResponses,
       timing: {
         acquireContextMs,
         navigateMs: 0,
@@ -422,8 +448,8 @@ export async function browserBackedChat(
 /**
  * httpBackedChat — Lightweight HTTP-backed alternative to browserBackedChat.
  *
- * Same interface, zero browser overhead. Uses tlsClient (Chrome 124 TLS
- * fingerprint) to make direct HTTP POST requests to the provider's chat
+ * Same interface, zero browser overhead. Uses tlsClient (newest chrome
+ * profile from the installed wreq-js catalog) to make direct HTTP POST requests to the provider's chat
  * endpoint with browser-emulated headers.
  *
  * ~0.5-2s per request vs 10-25s for Playwright. The trade-off: the HTTP
@@ -517,6 +543,7 @@ export async function httpBackedChat(
       headers,
       body,
       signal: signal ?? undefined,
+      sessionScope: req.poolKey,
     });
 
     const fetchMs = Date.now() - fetchStart;
@@ -526,6 +553,7 @@ export async function httpBackedChat(
     if (contentLengthHeader) {
       const contentLength = parseInt(contentLengthHeader, 10);
       if (contentLength > MAX_RESPONSE_BYTES) {
+        discardResponseBody(response);
         throw new Error("Response too large");
       }
     }
@@ -611,11 +639,13 @@ async function doCookieRefreshOnContext(
 ): Promise<string | null> {
   const page = await openPage(pooled);
   try {
-    await page.goto(chatPageUrl, {
-      waitUntil: "domcontentloaded",
-      timeout: 60000,
-      signal: signal ?? undefined,
-    });
+    await withAbort(
+      page.goto(chatPageUrl, {
+        waitUntil: "domcontentloaded",
+        timeout: 60000,
+      }),
+      signal
+    );
     return await waitForCookiesWithPolling(pooled.context, cookieDomain, signal);
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") throw err;

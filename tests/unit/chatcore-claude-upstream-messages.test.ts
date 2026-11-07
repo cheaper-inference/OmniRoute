@@ -10,6 +10,7 @@ import {
   extractSystemMessagesToBody,
   normalizeClaudeUpstreamMessages,
 } from "../../open-sse/handlers/chatCore/claudeUpstreamMessages.ts";
+import type { ClaudeMessage } from "../../open-sse/handlers/chatCore/claudeMessageTypes.ts";
 
 test("extractSystemMessagesToBody lifts system/developer roles into top-level system", () => {
   const payload: Record<string, unknown> = {
@@ -51,12 +52,31 @@ test("extractSystemMessagesToBody is a no-op without system messages or a messag
 test("normalizeClaudeUpstreamMessages drops empty text blocks", () => {
   const payload: Record<string, unknown> = {
     messages: [
-      { role: "user", content: [{ type: "text", text: "" }, { type: "text", text: "keep" }] },
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "" },
+          { type: "text", text: "keep" },
+        ],
+      },
     ],
   };
   normalizeClaudeUpstreamMessages(payload);
   const msg = (payload.messages as Record<string, unknown>[])[0];
   assert.deepEqual(msg.content, [{ type: "text", text: "keep" }]);
+});
+
+test("shared Claude message contract preserves structured content", () => {
+  const message: ClaudeMessage = {
+    role: "user",
+    content: [{ type: "text", text: "keep", cache_control: { type: "ephemeral" } }],
+    metadata: { source: "test" },
+  };
+  const payload: Record<string, unknown> = { messages: [message] };
+
+  normalizeClaudeUpstreamMessages(payload);
+
+  assert.deepEqual(payload.messages, [message]);
 });
 
 test("normalizeClaudeUpstreamMessages collapses tool_result to text by default", () => {

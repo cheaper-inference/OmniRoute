@@ -40,11 +40,7 @@ async function writeCodexConfig(opts: {
 
   if (opts.authApiKey !== undefined) {
     const authPath = path.join(tmpDir, "auth.json");
-    await fs.writeFile(
-      authPath,
-      JSON.stringify({ OPENAI_API_KEY: opts.authApiKey }),
-      "utf-8"
-    );
+    await fs.writeFile(authPath, JSON.stringify({ OPENAI_API_KEY: opts.authApiKey }), "utf-8");
   }
 
   return configPath;
@@ -62,10 +58,7 @@ test("claude: returns 'configured' when ANTHROPIC_BASE_URL is set", async () => 
 });
 
 test("claude: returns 'not_configured' when ANTHROPIC_BASE_URL is absent", async () => {
-  const configPath = await writeTempFile(
-    "settings.json",
-    JSON.stringify({ env: {} })
-  );
+  const configPath = await writeTempFile("settings.json", JSON.stringify({ env: {} }));
   const result = await checkToolConfigStatus("claude", configPath);
   assert.equal(result, "not_configured");
 });
@@ -114,6 +107,67 @@ test("hermes: returns 'not_configured' when config points elsewhere", async () =
   );
   const result = await checkToolConfigStatus("hermes", configPath);
   assert.equal(result, "not_configured");
+});
+
+test("whycodes: returns 'configured' when providers.omniroute has a base_url", async () => {
+  const configPath = await writeTempFile(
+    "whycodes.toml",
+    `[providers.omniroute]\nname = "omniroute"\nbase_url = "http://localhost:20128/v1"\napi_key = "sk-x"\n`
+  );
+  const result = await checkToolConfigStatus("whycodes", configPath);
+  assert.equal(result, "configured");
+});
+
+test("whycodes: returns 'not_configured' without an omniroute provider", async () => {
+  const configPath = await writeTempFile(
+    "whycodes.toml",
+    `[providers.openai]\nbase_url = "https://api.openai.com/v1"\n`
+  );
+  const result = await checkToolConfigStatus("whycodes", configPath);
+  assert.equal(result, "not_configured");
+});
+
+// ── Oh My Pi (omp) tests ──────────────────────────────────────────────────
+
+test("omp: returns 'configured' when models.yml contains OmniRoute provider", async () => {
+  const configPath = await writeTempFile(
+    "models.yml",
+    `providers:\n  omniroute:\n    baseUrl: http://localhost:20128/v1\n    api: openai-completions\n`
+  );
+  const result = await checkToolConfigStatus("omp", configPath);
+  assert.equal(result, "configured");
+});
+
+test("omp: returns 'not_configured' when models.yml points elsewhere", async () => {
+  const configPath = await writeTempFile(
+    "models.yml",
+    `providers:\n  openai:\n    baseUrl: https://api.openai.com/v1\n`
+  );
+  const result = await checkToolConfigStatus("omp", configPath);
+  assert.equal(result, "not_configured");
+});
+
+test("grok-build: requires the managed default and chat completions backend", async () => {
+  const configured = await writeTempFile(
+    "config.toml",
+    [
+      "[models]",
+      'default = "omniroute"',
+      "",
+      "[model.omniroute]",
+      'model = "openai/gpt-5.5"',
+      'base_url = "https://gateway.example/v1"',
+      'api_backend = "chat_completions"',
+      "",
+    ].join("\n")
+  );
+  assert.equal(await checkToolConfigStatus("grok-build", configured), "configured");
+
+  const inactive = await writeTempFile(
+    "config.toml",
+    '[models]\ndefault = "custom"\n\n[model.omniroute]\nbase_url = "https://gateway.example/v1"\n'
+  );
+  assert.equal(await checkToolConfigStatus("grok-build", inactive), "not_configured");
 });
 
 // ── Droid / Openclaw / Kilo ───────────────────────────────────────────────────
@@ -195,6 +249,77 @@ test("qwen: does not misclassify an unrelated custom OpenAI endpoint", async () 
   assert.equal(await checkToolConfigStatus("qwen", configPath), "not_configured");
 });
 
+// ── Pi tests ─────────────────────────────────────────────────────────────────
+
+/** Fresh temp agent dir; checkToolConfigStatus reads PI_CODING_AGENT_DIR. */
+async function makePiAgentDir(): Promise<string> {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "omniroute-pi-check-"));
+  process.env.PI_CODING_AGENT_DIR = tmpDir;
+  return tmpDir;
+}
+
+test("pi: returns 'not_configured' when models.json has no omniroute provider", async () => {
+  const dir = await makePiAgentDir();
+  assert.equal(await checkToolConfigStatus("pi", path.join(dir, "models.json")), "not_configured");
+});
+
+test("pi: returns 'configured' when an OmniRoute-owned provider exists", async () => {
+  const dir = await makePiAgentDir();
+  await fs.writeFile(
+    path.join(dir, "models.json"),
+    JSON.stringify({
+      providers: {
+        omniroute: {
+          baseUrl: "http://127.0.0.1:20128/v1",
+          api: "openai-completions",
+          apiKey: "sk",
+          omnirouteManaged: true,
+          models: [{ id: "auto/best-coding" }],
+        },
+      },
+    }),
+    "utf-8"
+  );
+  assert.equal(await checkToolConfigStatus("pi", path.join(dir, "models.json")), "configured");
+});
+
+test("pi: reports a hand-edited local omniroute entry as configured", async () => {
+  const dir = await makePiAgentDir();
+  await fs.writeFile(
+    path.join(dir, "models.json"),
+    JSON.stringify({
+      providers: {
+        omniroute: {
+          baseUrl: "http://localhost:20128/v1",
+          api: "openai-completions",
+          piGuiCustomEndpoint: true,
+          models: [{ id: "direct-model-combo" }],
+        },
+      },
+    }),
+    "utf-8"
+  );
+  assert.equal(await checkToolConfigStatus("pi", path.join(dir, "models.json")), "configured");
+});
+
+test("pi: a remote omniroute-named endpoint on another port is not ours", async () => {
+  const dir = await makePiAgentDir();
+  await fs.writeFile(
+    path.join(dir, "models.json"),
+    JSON.stringify({
+      providers: {
+        omniroute: {
+          baseUrl: "https://omniroute.example.com:9443/v1",
+          api: "openai-completions",
+          models: [{ id: "auto/best-coding" }],
+        },
+      },
+    }),
+    "utf-8"
+  );
+  assert.equal(await checkToolConfigStatus("pi", path.join(dir, "models.json")), "not_configured");
+});
+
 // ── Edge cases ────────────────────────────────────────────────────────────────
 
 test("error path: non-existent file returns 'not_configured' (no throw)", async () => {
@@ -205,10 +330,7 @@ test("error path: non-existent file returns 'not_configured' (no throw)", async 
 test("unknown toolId: returns 'unknown' (no configPath for unknown tool)", async () => {
   // unknown tool has no config path via getCliPrimaryConfigPath — configPathOverride not needed
   // but we can also test via override with a valid JSON file to hit the default branch
-  const configPath = await writeTempFile(
-    "unknown.json",
-    JSON.stringify({ foo: "bar" })
-  );
+  const configPath = await writeTempFile("unknown.json", JSON.stringify({ foo: "bar" }));
   const result = await checkToolConfigStatus("totally-unknown-tool-id", configPath);
   assert.equal(result, "unknown");
 });

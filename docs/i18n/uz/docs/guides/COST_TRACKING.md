@@ -1,0 +1,259 @@
+# Cost & Spend Tracking (Oʻzbekcha)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/COST_TRACKING.md) · 🇪🇹 [am](../../../am/docs/guides/COST_TRACKING.md) · 🇸🇦 [ar](../../../ar/docs/guides/COST_TRACKING.md) · 🇦🇿 [az](../../../az/docs/guides/COST_TRACKING.md) · 🇧🇬 [bg](../../../bg/docs/guides/COST_TRACKING.md) · 🇧🇩 [bn](../../../bn/docs/guides/COST_TRACKING.md) · 🇧🇦 [bs](../../../bs/docs/guides/COST_TRACKING.md) · 🇨🇿 [cs](../../../cs/docs/guides/COST_TRACKING.md) · 🇩🇰 [da](../../../da/docs/guides/COST_TRACKING.md) · 🇩🇪 [de](../../../de/docs/guides/COST_TRACKING.md) · 🇬🇷 [el](../../../el/docs/guides/COST_TRACKING.md) · 🇪🇸 [es](../../../es/docs/guides/COST_TRACKING.md) · 🇪🇪 [et](../../../et/docs/guides/COST_TRACKING.md) · 🇮🇷 [fa](../../../fa/docs/guides/COST_TRACKING.md) · 🇫🇮 [fi](../../../fi/docs/guides/COST_TRACKING.md) · 🇫🇷 [fr](../../../fr/docs/guides/COST_TRACKING.md) · 🇮🇪 [ga](../../../ga/docs/guides/COST_TRACKING.md) · 🇮🇳 [gu](../../../gu/docs/guides/COST_TRACKING.md) · 🇳🇬 [ha](../../../ha/docs/guides/COST_TRACKING.md) · 🇮🇱 [he](../../../he/docs/guides/COST_TRACKING.md) · 🇮🇳 [hi](../../../hi/docs/guides/COST_TRACKING.md) · 🇭🇷 [hr](../../../hr/docs/guides/COST_TRACKING.md) · 🇭🇺 [hu](../../../hu/docs/guides/COST_TRACKING.md) · 🇦🇲 [hy](../../../hy/docs/guides/COST_TRACKING.md) · 🇮🇩 [id](../../../id/docs/guides/COST_TRACKING.md) · 🇳🇬 [ig](../../../ig/docs/guides/COST_TRACKING.md) · 🇮🇹 [it](../../../it/docs/guides/COST_TRACKING.md) · 🇯🇵 [ja](../../../ja/docs/guides/COST_TRACKING.md) · 🇬🇪 [ka](../../../ka/docs/guides/COST_TRACKING.md) · 🇰🇭 [km](../../../km/docs/guides/COST_TRACKING.md) · 🇮🇳 [kn](../../../kn/docs/guides/COST_TRACKING.md) · 🇰🇷 [ko](../../../ko/docs/guides/COST_TRACKING.md) · 🇱🇹 [lt](../../../lt/docs/guides/COST_TRACKING.md) · 🇱🇻 [lv](../../../lv/docs/guides/COST_TRACKING.md) · 🇮🇳 [ml](../../../ml/docs/guides/COST_TRACKING.md) · 🇮🇳 [mr](../../../mr/docs/guides/COST_TRACKING.md) · 🇲🇾 [ms](../../../ms/docs/guides/COST_TRACKING.md) · 🇲🇹 [mt](../../../mt/docs/guides/COST_TRACKING.md) · 🇲🇲 [my](../../../my/docs/guides/COST_TRACKING.md) · 🇳🇵 [ne](../../../ne/docs/guides/COST_TRACKING.md) · 🇳🇱 [nl](../../../nl/docs/guides/COST_TRACKING.md) · 🇳🇴 [no](../../../no/docs/guides/COST_TRACKING.md) · 🇮🇳 [or](../../../or/docs/guides/COST_TRACKING.md) · 🇮🇳 [pa](../../../pa/docs/guides/COST_TRACKING.md) · 🇵🇭 [phi](../../../phi/docs/guides/COST_TRACKING.md) · 🇵🇱 [pl](../../../pl/docs/guides/COST_TRACKING.md) · 🇵🇹 [pt](../../../pt/docs/guides/COST_TRACKING.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/COST_TRACKING.md) · 🇷🇴 [ro](../../../ro/docs/guides/COST_TRACKING.md) · 🇷🇺 [ru](../../../ru/docs/guides/COST_TRACKING.md) · 🇱🇰 [si](../../../si/docs/guides/COST_TRACKING.md) · 🇸🇰 [sk](../../../sk/docs/guides/COST_TRACKING.md) · 🇸🇮 [sl](../../../sl/docs/guides/COST_TRACKING.md) · 🇷🇸 [sr](../../../sr/docs/guides/COST_TRACKING.md) · 🇸🇪 [sv](../../../sv/docs/guides/COST_TRACKING.md) · 🇰🇪 [sw](../../../sw/docs/guides/COST_TRACKING.md) · 🇮🇳 [ta](../../../ta/docs/guides/COST_TRACKING.md) · 🇮🇳 [te](../../../te/docs/guides/COST_TRACKING.md) · 🇹🇭 [th](../../../th/docs/guides/COST_TRACKING.md) · 🇹🇷 [tr](../../../tr/docs/guides/COST_TRACKING.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/COST_TRACKING.md) · 🇵🇰 [ur](../../../ur/docs/guides/COST_TRACKING.md) · 🇻🇳 [vi](../../../vi/docs/guides/COST_TRACKING.md) · 🇳🇬 [yo](../../../yo/docs/guides/COST_TRACKING.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/COST_TRACKING.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/COST_TRACKING.md)
+
+---
+
+OmniRoute har bir soʻrov narxini qanday hisoblaydi, qayd etadi va hisobot qiladi — hamda nega
+boshqaruv panelidagi raqam hisob-kitob emas, balki **tejash kuzatuvchisi** hisoblanadi.
+
+Shuningdek qarang: [Foydalanuvchi qoʻllanmasi](./USER_GUIDE.md) · [Imkoniyatlar galereyasi](./FEATURES.md)
+
+---
+
+## Bu nima (va nima emas)
+
+OmniRoute tokenlar sonini modelning narx stavkalariga koʻpaytirish orqali har bir yakunlash
+soʻroviga USD hisobidagi narxni belgilaydi. Bu raqamlar **Xarajatlar** boshqaruv paneli,
+`omniroute cost` / `omniroute usage` CLI buyruqlari, CSV/JSON eksportlari va har bir API kaliti
+uchun byudjetlarda ishlatiladi.
+
+> **Boshqaruv panelidagi «xarajat» hisob-kitob emas, balki tejash kuzatuvchisidir.** OmniRoute
+> sizdan hech qachon haq olmaydi — u soʻrovlaringizni siz allaqachon ulagan provayderlarga
+> (oʻzingizning obunalaringiz, bepul tariflaringiz va API kalitlaringizga) yoʻnaltiradi.
+> Toʻliq bepul modellarda yigʻilgan «$290 umumiy xarajat» pulli API xizmatiga taxminan
+> **$290 _toʻlamaganingizni_** anglatadi. Bu raqam xuddi shu trafik standart roʻyxat
+> narxlarida qancha turishining _taxminiy_ qiymatidir; shu orqali foydalanishingiz qayerda
+> jamlanganini va arzonroq/bepul provayderlarga yoʻnaltirish sizga qancha mablagʻ tejayotganini koʻrishingiz mumkin.
+
+Bu yondashuv loyiha [README](../../README.md) faylida toʻgʻridan-toʻgʻri bayon qilingan
+(«boshqaruv panelidagi “xarajat” hisob-kitob emas, balki tejash kuzatuvchisidir»).
+
+Raqam taxminiy boʻlgani sababli:
+
+- U OmniRoute har bir model uchun ega boʻlgan narxlar jadvaliga bogʻliq. Narxi
+  kiritilmagan model `0` xarajat qoʻshadi (u kuzatuv vositasida «Eski / Bepul» qator sifatida koʻrsatiladi).
+- Bepul tarif va obuna trafigi uchun ham _taxminiy_ xarajat hisoblanadi — bu
+  qarzdorlik emas, balki siz tejayotgan summadir.
+
+---
+
+## Xarajatlar qanday baholanadi
+
+### Narxlar manbai
+
+Xarajatlar [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) dagi birlashtirilgan narxlar jadvalidan kelib chiqadi, bu ustuvorlik tartibida (** birinchi navbatda eng yuqori** ):
+
+1. **Foydalanuvchi bekor qiladi** — narxlari asboblar panelida yoki `PATCH /api/pricing` ( `pricing` nom maydoni) orqali o'rnatiladi.
+2. **models.dev sinxronlash** — narxi `https://models.dev/api.json` ( `models_dev_pricing` nom maydoni) dan olingan.
+3. **LiteLLM sinxronlash** — narxlari LiteLLM ning umumiy `model_prices_and_context_window.json` ( `pricing_synced` nom maydoni) dan olingan.
+4. **Qattiq kodlangan standart sozlamalar** — stavkalari [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) da yuboriladi.
+
+Xuddi shu provider/model uchun yuqoriroq qatlamlardagi qiymatlar pastki qatlamlardagi mos keladigan maydonlarning ustiga yoziladi; Yuqori qatlamda mavjud bo'lmagan maydonlar pastki qatlamdan ham paydo bo'lishi mumkin. Har ikkala mustaqil sinxronlash ishlari bir vaqtning o'zida bajarilganda ham tartib o'rnatiladi. `GET /api/pricing?includeSources=1` `pricing` va `sourceMap` ni qaytaradi, ularning har bir modeldagi teglari (`user`, `modelsDev`, `litellm`, `default`) ushbu modelni o‘z ichiga olgan eng yuqori ustuvor qatlamni aniqlaydi.
+
+**LiteLLM sinxronlash** qo'shilgan, sukut bo'yicha o'chirilgan. Uning muhit o'zgaruvchilari (qarang: [`.env.example`](../../.env.example) ) :
+
+| Env var                 | Standart  | Maqsad                                                                                   |
+| ----------------------- | --------- | ---------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Fon LiteLLM narxlari sinxronlashni yoqing.                                               |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Sinxronlash oralig'i soniyalarda (kunlik).                                               |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Faqat shu sinxronlash uchun manba tanlash; hozirda faqat `litellm` qo'llab-quvvatlanadi. |
+
+**models.dev sinxronlash** LiteLLM sinxronlashdan alohida va sukut bo'yicha ham o'chirilgan. Uni Sozlamalar (models.dev sync) orqali yoqing yoki quyidagi o‘zgaruvchilardan foydalaning:
+
+| Env var                    | Standart          | Maqsad                                                                                                                                                     |
+| -------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(o'rnatilmagan)_ | Sozlamalarni oʻchirish tugmasidan keyin bekor qilinadi; `1/true/on/yes` kuchlarini yoqadi va `0/false/off/no` o‘chiradi (hatto Sozlamalar buni yoqsa ham). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Standart models.dev sinxronlash oralig'i soniyalarda (kunlik).                                                                                             |
+
+`PRICING_SYNC_SOURCES` qiladi** emas** models.devni yoqish; u faqat LiteLLM sinxronlashni boshqaradi. Foydalanuvchining bekor qilinishini o'chirish sinxronlangan nom maydonini ham tozalamaydi; keyingi mavjud narxlash qatlami kuchga kiradi. Narxsiz model uchun qo'lda bekor qilishni qo'shishdan oldin sinxronlash sozlamalarini va `sourceMap` tekshiring.
+
+### Narx formulasi
+
+Xarajat so'rov bo'yicha tokenlar soni va [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) dagi million token stavkalari bo'yicha hisoblanadi:
+
+- **Kirish belgilari** (minus kesh o'qishlari va kesh yaratish tokenlari) × `input` tezligi.
+- **Kesh-o'qish tokenlari** × `cached` tezligi (kirish tezligiga qaytadi).
+- **Kesh yaratish tokenlari** × `cache_creation` tezligi (kirish tezligiga qaytadi).
+- **Chiqish belgilari** × `output` darajasi.
+- **Fikrlash belgilari** × `reasoning` tezligi (chiqish tezligiga qaytadi).
+
+Barcha kurslar 1 000 000 token uchun USD sifatida talqin qilinadi. Codex "tezkor"/"prioritet" yoki "moslashuvchan" xizmat darajasi xarajat multiplikatorini (`getCodexFastCostMultiplier`) qo'llaydi —, masalan, flex 50% token chegirmasi bilan to'lanadi.** moslashuvchan tejash** asboblar panelida.
+
+Model nomlari avval normallashtiriladi ( `openai/` yoki `accounts/fireworks/models/` kabi provayder yo‘li prefikslari olib tashlanadi), shuning uchun tarixiy qatorlar narxga mos keladi.
+
+### Qanday sarflanganligi qayd etiladi
+
+- Har bir so'rovning narxi javobdan so'ng hisoblab chiqiladi va "yong'in va unut" qayd etiladi, shuning uchun u hech qachon mijozga kechikishni qo'shmaydi. Birgalikda kvota iste'moli [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) orqali keyingi voqea-loop belgisiga rejalashtirilgan.
+- API kaliti sarfi buferlanadi va [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tomonidan to'plamlarda tozalanadi (standart 60-yillarni tozalash oralig'i, 1000 kirish buferi). Quyidagi orqali sozlash mumkin:
+
+  | Env var                             | Standart | Maqsad                                           |
+  | ----------------------------------- | -------- | ------------------------------------------------ |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Yuvish oralig'i millisekundlarda.                |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Tozalashdan oldin maksimal buferlangan yozuvlar. |
+
+Boshqaruv panelidagi xarajatlar ko'rsatkichlari** emas** Har bir satrda saqlangan dollar miqdoridan o'qing — ular tokenlar soni va joriy narxlar jadvalidan har safar tahlil so'nggi nuqtasi ishga tushganda qayta hisoblab chiqiladi. Bu noto'g'ri narxni to'g'irlash (va qayta sinxronlash) tarixiy xarajatlar smetasini orqaga qarab yangilashni anglatadi.
+
+---
+
+## Boshqaruv paneli: Xarajatlar sahifasi
+
+**Xarajatlar** sahifasi `/dashboard/costs`
+(`src/app/(dashboard)/dashboard/costs/`) manzilida joylashgan.
+Uning asosiy ko‘rinishi **Xarajatlar sharhi** ichki sahifasi
+(`src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx`) bo‘lib,
+barcha ma’lumotlarni `GET /api/usage/analytics` orqali yuklaydi.
+
+Unda quyidagilar ko‘rsatiladi:
+
+- **Xarajat kartochkalari** — _Bugun (1d)_, _7d_, _30d_ va tanlangan vaqt
+  oralig‘i uchun taxminiy xarajat. Oraliq selektori: `7d`, `30d`, `90d`, `all`.
+- **Asosiy ko‘rsatkichlar** — vaqt oralig‘idagi so‘rovlar, faol provayderlar, faol modellar,
+  har bir so‘rov uchun o‘rtacha xarajat.
+- **Xarajatlar tahlilchisi** — **provayder**, **model**, **API kaliti**,
+  **hisob**, yoki **xizmat darajasi** bo‘yicha guruhlangan, saralash va filtrlash mumkin bo‘lgan
+  jadval; unda xarajat, so‘rovlar, tokenlar, o‘rtacha xarajat/so‘rov va umumiy miqdordagi
+  ulush % ko‘rsatiladi.
+- **Tokenlardan foydalanish** — jami / kirish / chiqish tokenlari va kirish:chiqish nisbati.
+- **Marshrutlash samaradorligi** — zaxira yo‘nalishga o‘tishlar soni, zaxira yo‘nalishga
+  o‘tish darajasi va so‘ralgan modellar qamrovi.
+- **Oylik prognoz** — so‘nggi kunlik o‘rtacha qiymat asosida oy oxiridagi xarajatni
+  prognoz qiladi.
+- **Davrlarni taqqoslash** — vaqt oralig‘ining birinchi va ikkinchi yarmi o‘rtasidagi
+  % o‘zgarish.
+- **Diagrammalar** — kunlik xarajat tendensiyasi, provayderlar ulushi (doiraviy diagramma),
+  yetakchi provayderlar, yetakchi modellar, API kaliti bo‘yicha xarajat, hisob bo‘yicha
+  xarajat, haftalik foydalanish namunasi va faollik issiqlik xaritasi.
+- **Eksport** — joriy vaqt oralig‘ini **CSV** yoki **JSON** formatida yuklab olish
+  (tugmalar xarajat qiymati noldan katta bo‘lganda paydo bo‘ladi).
+
+Tariflangan trafik mavjud bo‘lmaganda, tejamkorlikni kuzatish modelini aks ettirish uchun
+qatorlarda `$0` o‘rniga "Eski / Bepul" yorlig‘i ko‘rsatiladi.
+
+### Xarajatlarga oid ichki sahifalar
+
+Xarajatlar bo‘limida quyidagi sahifalar ham mavjud (barchasi `/dashboard/costs/` ostida):
+
+- **Narxlash** (`/dashboard/costs/pricing`) — har bir model uchun narxlarni ko‘rish va
+  qayta belgilash (umumiy Narxlash ichki sahifasini ko‘rsatadi).
+- **Budjet** (`/dashboard/costs/budget`) — har bir qamrov uchun xarajat limitlarini
+  belgilash (umumiy Budjet ichki sahifasini ko‘rsatadi).
+- **Kvotani ulashish** (`/dashboard/costs/quota-share`) — umumiy kvota havzalari va
+  sarflanish tezligi ko‘rinishlari.
+
+---
+
+## API oxirgi nuqtalari
+
+Bularning barchasi, agar qayd qilinmasa, boshqaruv authini (loopback/JWT, `requireManagementAuth` orqali) talab qiladi.
+
+### Foydalanish va xarajatlar tahlili
+
+| Usul  | Yakuniy nuqta            | Maqsad                                                                                                                                                          |
+| ----- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/usage/analytics`   | Toʻliq cost/usage tahlili: xulosa, kunlik trend, provider/model/API key/account/tier. boʻyicha Soʻrov: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET` | `/api/usage/utilization` | Vaqt o'tishi bilan provayder uchun kvotadan foydalanish. So'rov: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                   |
+| `GET` | `/api/usage/history`     | Xom foydalanish tarixi qatorlari.                                                                                                                               |
+| `GET` | `/api/usage/call-logs`   | Har bir so'rov bo'yicha qo'ng'iroq jurnallari (model, tokenlar, narx, kechikish, holat).                                                                        |
+| `GET` | `/api/usage/quota`       | Provayder kvotasi holati.                                                                                                                                       |
+| `GET` | `/api/usage/proxy-logs`  | Proksi so'rov jurnallari.                                                                                                                                       |
+
+### Byudjetlar
+
+| Usul   | Yakuniy nuqta            | Maqsad                                                                                                |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Bitta API kaliti uchun xarajatlar sarhisobi + budjet tekshiruvi (`apiKeyId` so‘rovi parametri kerak). |
+| `POST` | `/api/usage/budget`      | API kaliti uchun daily/weekly/monthly USD limitlari + ogohlantirish chegarasini o‘rnating.            |
+| `GET`  | `/api/usage/budget/bulk` | API kalitlari boʻyicha ommaviy byudjet xulosalari.                                                    |
+
+> Byudjet API boshiga qamrovlangan**API kaliti** (`apiKeyId`). `GET /api/usage/budget` tomonidan qaytariladigan chegaralar `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` va bajariladigan jami (`totalCostToday`, `totalCostMonth`, …) ni o‘z ichiga oladi.
+
+### Narxlash
+
+| Usul     | Yakuniy nuqta           | Maqsad                                                                                                                                                                                                     |
+| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Birlashtirilgan to'rt qavatli narxlash (foydalanuvchi, models.dev, LiteLLM, sukut bo'yicha). `?includeSources=1` `pricing` + `sourceMap` qaytaradi.                                                        |
+| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` uchun narxlarni bekor qilish.                                                                                                                      |
+| `DELETE` | `/api/pricing`          | Foydalanuvchi narxini bekor qilishni olib tashlash (ixtiyoriy ravishda `?provider=&model=` tomonidan qamrab olingan); sinxronlangan stavkalar yoki o'rnatilgan standart sozlamalar zaxira sifatida qoladi. |
+| `GET`    | `/api/pricing/defaults` | Standart per-1M qaytarilish stavkalarini ko‘rsatish.                                                                                                                                                       |
+| `GET`    | `/api/pricing/models`   | Narxlar modelga qarab belgilanadi.                                                                                                                                                                         |
+| `POST`   | `/api/pricing/sync`     | Tashqi manbalardan qo'lda sinxronlashni ishga tushiring (LiteLLM).                                                                                                                                         |
+| `GET`    | `/api/pricing/sync`     | Joriy sinxronlash holati.                                                                                                                                                                                  |
+| `DELETE` | `/api/pricing/sync`     | Faqat LiteLLM bilan sinxronlangan narxlarni tozalash (`pricing_synced`); models.dev ma'lumotlari alohida.                                                                                                  |
+
+### Xarajat bilan bog'liq boshqa so'nggi nuqtalar
+
+| Usul  | Yakuniy nuqta                 | Maqsad                                                                         |
+| ----- | ----------------------------- | ------------------------------------------------------------------------------ |
+| `GET` | `/api/free-tier/summary`      | Bepul namunadagi tokenlar jami, shu oyda foydalanilgan va qolgan bepul nafaqa. |
+| `GET` | `/api/quota/pools/[id]/usage` | Umumiy kvotali hovuz uchun foydalanish.                                        |
+
+---
+
+## CLI
+
+OmniRoute CLI interfeysi xarajatlar, foydalanish va narxlash buyruqlarini taqdim etadi (ular
+[`bin/cli/commands/registry.mjs`](../../bin/cli/commands/registry.mjs) faylida roʻyxatdan oʻtkazilgan).
+
+### `omniroute cost`
+
+`/api/usage/analytics` maʼlumotlari asosida jamlangan xarajatlar hisoboti.
+
+```bash
+omniroute cost                          # oxirgi 30 kun, provayder bo‘yicha guruhlangan
+omniroute cost --period 7d              # oxirgi 7 kun
+omniroute cost --group-by model         # provider | model | combo | api-key | day bo‘yicha guruhlash
+omniroute cost --since 2026-06-01 --until 2026-06-13
+omniroute cost --api-key <key> --limit 50
+```
+
+Ustunlar: guruh, soʻrovlar, kirish/chiqish tokenlari, xarajat (USD) va umumiy miqdorning foizi. Yakunda
+umumiy jami qatori chiqariladi (`--quiet` yoki `--output json` bilan chiqarilmaydi).
+
+### `omniroute usage`
+
+```bash
+omniroute usage analytics --period 30d [--provider <id>]   # har bir provayder bo‘yicha xarajatlar xulosasi
+omniroute usage logs [--limit 100] [--follow] [--api-key <k>] [--search <q>]
+omniroute usage quota [--provider <id>] [--check]
+omniroute usage utilization [--api-key <k>]
+omniroute usage history [--limit 100]
+omniroute usage proxy-logs [--limit 100]
+
+# Budjetlar
+omniroute usage budget list
+omniroute usage budget get [scope]
+omniroute usage budget set <amount> [--scope global] [--period monthly]
+omniroute usage budget reset [scope]
+```
+
+### `omniroute pricing`
+
+```bash
+omniroute pricing list [--provider <p>] [--model <m>] [--limit 200]
+omniroute pricing get <model>
+omniroute pricing sync [--provider <p>] [--force]   # POST /api/pricing/sync
+omniroute pricing diff [--model <m>]
+omniroute pricing defaults show
+omniroute pricing defaults set [--input <p>] [--output <p>] [--cache-read <p>] [--cache-write <p>]
+```
+
+> `pricing defaults show` buyrugʻi `GET /api/pricing/defaults` maʼlumotlarini oʻqiydi. Buning oʻrniga alohida model
+> narxlarini tahrirlash uchun boshqaruv panelidagi **Narxlash** sahifasi yoki `PATCH /api/pricing` dan foydalaning.
+
+---
+
+## Muammolarni bartaraf etish
+
+- **Barcha xarajatlar $0 / "Legacy / Free" sifatida ko‘rsatilmoqda.** Foydalanilayotgan modellar uchun narx yozuvi mavjud emas.
+  Tashqi sinxronlashni yoqing (`PRICING_SYNC_ENABLED=true`) va `omniroute pricing sync` buyrugʻini ishga tushiring yoki
+  Narxlash sahifasi / `PATCH /api/pricing` orqali narxlarni qoʻlda belgilang.
+- **Tarixiy model narxi notoʻgʻri hisoblangan.** Narxni tuzating (ustuvor qiymat belgilang yoki qayta sinxronlang) — har bir tahliliy maʼlumot oʻqilganda xarajat
+  tokenlar sonidan qayta hisoblanadi, shu sababli taxminiy qiymatlar retrospektiv tarzda yangilanadi.
+- **Xarajatlar real vaqtdan ortda qolmoqda.** Har bir kalit boʻyicha xarajatlar paketlab qayta ishlanadi; yangiroq raqamlar kerak boʻlsa,
+  `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` qiymatini kamaytiring.
+
+---
+
+Bu kengroq boshqaruv panelining qaysi qismiga tegishli ekanini bilish uchun [Foydalanuvchi qoʻllanmasi](./USER_GUIDE.md) va
+[Imkoniyatlar galereyasi](./FEATURES.md) bilan tanishing.

@@ -1,5 +1,34 @@
 import { z } from "zod";
+import { MemoryType } from "@/lib/memory/types";
 
+const optionalCustomEmbeddingValue = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? null : value),
+  z.string().trim().max(2048).nullable().optional()
+);
+
+const optionalCustomEmbeddingUrl = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? null : value),
+  z
+    .string()
+    .trim()
+    .max(2048)
+    .refine((value) => {
+      try {
+        const url = new URL(value);
+        return (
+          (url.protocol === "http:" || url.protocol === "https:") &&
+          !url.username &&
+          !url.password &&
+          !url.search &&
+          !url.hash
+        );
+      } catch {
+        return false;
+      }
+    }, "Custom embedding endpoint must be an HTTP(S) URL without credentials or query data")
+    .nullable()
+    .optional()
+);
 /** Schema estendido para PUT /api/settings/memory (D9). */
 export const MemorySettingsExtendedSchema = z
   .object({
@@ -12,18 +41,24 @@ export const MemorySettingsExtendedSchema = z
     // Campos novos (D9)
     embeddingSource: z.enum(["remote", "static", "transformers", "auto"]).optional(),
     embeddingProviderModel: z.string().nullable().optional(), // formato `provider/model`
+    customBaseUrl: optionalCustomEmbeddingUrl,
+    customModelId: optionalCustomEmbeddingValue,
     transformersEnabled: z.boolean().optional(),
     staticEnabled: z.boolean().optional(),
     rerankEnabled: z.boolean().optional(),
     rerankProviderModel: z.string().nullable().optional(),
     vectorStore: z.enum(["sqlite-vec", "qdrant", "auto"]).optional(),
+    // Phase 1-2: MemoryBackend provider pattern
+    primaryBackend: z.string().optional(),
+    fallbackBackends: z.array(z.string()).optional(),
+    backendConfigs: z.record(z.string(), z.record(z.string(), z.unknown())).optional(),
   })
   .strict();
 
 /** PUT /api/memory/[id] body (D6 plano §5.3). */
 export const MemoryUpdatePutSchema = z
   .object({
-    type: z.enum(["factual", "episodic", "procedural", "semantic"]).optional(),
+    type: z.nativeEnum(MemoryType).optional(),
     key: z.string().min(1).optional(),
     content: z.string().min(1).optional(),
     metadata: z.record(z.string(), z.unknown()).optional(),
@@ -77,8 +112,9 @@ export const EmbeddingProviderListingSchema = z.object({
 /** Response shape do GET /api/memory/engine-status (UI Engine tab — D11). */
 export const MemoryEngineStatusSchema = z.object({
   keyword: z.object({
-    available: z.literal(true),
-    backend: z.literal("FTS5"),
+    available: z.boolean(),
+    backend: z.enum(["FTS5", "none"]),
+    reason: z.string(),
   }),
   embedding: z.object({
     source: z.enum(["remote", "static", "transformers"]).nullable(),

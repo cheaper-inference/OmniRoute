@@ -56,6 +56,7 @@ export const COMBO_COOLDOWN_RETRYABLE_REASONS: ReadonlySet<string> = new Set([
   "transient",
   "overloaded",
   "server_error",
+  "circuit_open",
 ]);
 
 export interface ComboCooldownWaitSettings {
@@ -98,7 +99,13 @@ function toFiniteWaitMs(value: unknown): number {
   return 0;
 }
 
-function isRetryableComboCooldownReason(reason: unknown): boolean {
+/**
+ * Whether a model-lockout reason qualifies as a short/transient cooldown:
+ * allow-listed (unknown or empty reasons fail closed) and not in the
+ * non-retryable set. Exported for the pre-dispatch retry-after scan
+ * (#16319), which must exclude the same reasons the wait decision does.
+ */
+export function isTransientComboCooldownReason(reason: unknown): boolean {
   if (typeof reason !== "string" || reason.length === 0) return false;
   if (COMBO_COOLDOWN_NON_RETRYABLE_REASONS.has(reason)) return false;
   return COMBO_COOLDOWN_RETRYABLE_REASONS.has(reason);
@@ -124,7 +131,7 @@ export function shouldWaitForComboCooldown(
 
   const wait =
     settings.enabled === true &&
-    isRetryableComboCooldownReason(reason) &&
+    isTransientComboCooldownReason(reason) &&
     waitMs > 0 &&
     waitMs <= settings.maxWaitMs &&
     attempt < settings.maxAttempts &&
@@ -255,4 +262,37 @@ export function resolveComboCooldownWaitDecision(
     ...decision,
     reason: typeof best.reason === "string" ? best.reason : null,
   };
+}
+
+export interface ResolveCircuitOpenWaitInput {
+  skippedForCircuitOpen: unknown;
+  retryAfterMs: unknown;
+  attempt: number;
+  budgetLeftMs: number;
+  settings: ComboCooldownWaitSettings;
+}
+
+/**
+ * When every combo target was pre-skipped because the whole-provider breaker is
+ * OPEN, wait out a SHORT reset instead of crystallizing ALL_TARGETS_SKIPPED.
+ * Same ceilings as model-lockout waits. Live incident 2026-09-03: offical-fable
+ * (single claude target) returned 43ms 503 while the breaker reset was 60s.
+ */
+export function resolveCircuitOpenWaitDecision(
+  input: ResolveCircuitOpenWaitInput
+): ResolveComboCooldownDecisionResult {
+  if (input.settings.enabled !== true || input.skippedForCircuitOpen !== true) {
+    return { wait: false, waitMs: 0, reason: null };
+  }
+  const retryAfterMs = toFiniteWaitMs(input.retryAfterMs);
+  if (retryAfterMs <= 0) return { wait: false, waitMs: 0, reason: null };
+  const waitMs = retryAfterMs + COMBO_COOLDOWN_WAIT_MARGIN_MS;
+  const decision = shouldWaitForComboCooldown({
+    reason: "circuit_open",
+    waitMs,
+    attempt: input.attempt,
+    budgetLeftMs: input.budgetLeftMs,
+    settings: input.settings,
+  });
+  return { ...decision, reason: "circuit_open" };
 }

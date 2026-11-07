@@ -32,14 +32,12 @@ const vscodeV1ChatCompletionsRoute =
 const vscodeChatCompletionsRoute =
   await import("../../src/app/api/v1/vscode/[token]/chat/completions/route.ts");
 const vscodeResponsesRoute = await import("../../src/app/api/v1/vscode/[token]/responses/route.ts");
-const serviceTierVariants =
-  await import("../../src/app/api/v1/vscode/[token]/serviceTierVariants.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -63,7 +61,7 @@ test.beforeEach(async () => {
 test.after(async () => {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("vscode tokenized root route mirrors the grouped VS Code catalog without combos", async () => {
@@ -255,7 +253,9 @@ test("vscode combos route resolves combo names through Ollama api/show", async (
   assert.equal(body.model, "show-combo");
   assert.equal(body.modelfile, "FROM show-combo");
   assert.equal(body.details.family, "show-combo");
-  assert.equal(body.model_info.context_length, 272000);
+  // #11179: codex static catalog advertises the usable 872K window (max_context_window),
+  // not the old 272K pricing tier.
+  assert.equal(body.model_info.context_length, 872000);
   assert.deepEqual(body.supportsReasoningEffort, ["none", "low", "medium", "high", "xhigh"]);
   assert.equal(body.model_info.capabilities.reasoning, true);
 });
@@ -290,7 +290,8 @@ test("vscode tokenized combos root route exposes importable combo metadata", asy
   assert.equal(response.status, 200);
   assert.ok(combo, "expected balanced-load in combo root response");
   assert.equal(combo.url.includes("/responses#models.ai.azure.com"), true);
-  assert.equal(combo.maxInputTokens, 272000);
+  // #11179: codex static catalog maxInputTokens is now the usable 872K window.
+  assert.equal(combo.maxInputTokens, 872000);
   assert.equal(combo.toolCalling, true);
   assert.deepEqual(combo.supportsReasoningEffort, ["none", "low", "medium", "high", "xhigh"]);
 });
@@ -316,19 +317,27 @@ test("vscode tokenized models route exposes reasoning effort metadata for import
     new Request(`http://localhost/api/v1/vscode/${encodeURIComponent(key.key)}/models`)
   );
   const body = (await response.json()) as any;
-  const model = (body.data || []).find((entry: any) => entry.id === "gpt-5.4__provider_gh");
+  const model = (body.data || []).find((entry: any) => entry.id === "gpt-5.6-sol__provider_gh");
 
   assert.equal(response.status, 200);
-  assert.ok(model, "missing gpt-5.4__provider_gh in tokenized VS Code models route");
-  assert.equal(model.family, "gpt-5.4");
-  assert.deepEqual(model.supportsReasoningEffort, ["none", "low", "medium", "high"]);
-  assert.deepEqual(model.supportedReasoningEfforts, ["none", "low", "medium", "high", "xhigh"]);
+  assert.ok(model, "missing gpt-5.6-sol__provider_gh in tokenized VS Code models route");
+  assert.equal(model.family, "gpt-5.6-sol");
+  assert.deepEqual(model.supportsReasoningEffort, ["none", "low", "medium", "high", "max"]);
+  assert.deepEqual(model.supportedReasoningEfforts, [
+    "none",
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max",
+  ]);
   assert.deepEqual(model.configurationSchema?.properties?.reasoningEffort?.enum, [
     "none",
     "low",
     "medium",
     "high",
     "xhigh",
+    "max",
   ]);
   assert.equal(model.configurationSchema?.properties?.reasoningEffort?.default, "none");
   assert.equal(
@@ -767,9 +776,7 @@ test("vscode tokenized tags route only exposes usable canonical chat models", as
     );
     assert.ok(
       !catalogModel.api_format ||
-        ["chat-completions", "responses", "openai-responses"].includes(
-          catalogModel.api_format
-        ),
+        ["chat-completions", "responses", "openai-responses"].includes(catalogModel.api_format),
       `tag ${tagModel.name} should use a text-generation API format`
     );
     assert.ok(
@@ -1075,7 +1082,9 @@ test("vscode tokenized api/show route exposes explicit reasoning effort metadata
   assert.equal(body.configurationSchema?.properties?.reasoningEffort?.default, "low");
   assert.equal(body.model_info["general.basename"], "Codex GPT 5.6 Sol (Default)");
   assert.equal(body.model_info["general.architecture"], "codex");
-  assert.equal(body.model_info["codex.context_length"], 272000);
+  // #11179: codex static catalog advertises the usable 872K window (max_context_window),
+  // not the old 272K pricing tier.
+  assert.equal(body.model_info["codex.context_length"], 872000);
   assert.deepEqual(body.model_info.supports_reasoning_effort, [
     "low",
     "medium",
@@ -1122,15 +1131,6 @@ test("vscode tokenized api/show route exposes service tier variants with suffixe
   assert.equal(body.details.family, "gpt-5.6-sol");
 });
 
-test("vscode tokenized chat routes rewrite family-first ids back to the codex provider id", async () => {
-  const payload = serviceTierVariants.resolveVscodeServiceTierRequest({
-    model: "gpt-5.6-sol__provider_cx__tier_priority",
-  });
-
-  assert.equal(payload.model, "cx/gpt-5.6-sol");
-  assert.equal(payload.service_tier, "priority");
-});
-
 test("vscode tokenized /chat/completions route applies the path token and codex tier rewrite", async () => {
   await settingsDb.updateSettings({
     requireLogin: true,
@@ -1156,12 +1156,13 @@ test("vscode tokenized /chat/completions route applies the path token and codex 
   );
   const body = (await response.json()) as any;
 
-  // Upstream port decolua/9router#336: zero-active-credentials now surfaces as
-  // 404 (combo-fallbackable) instead of 400 (combo hard-stop). The 404 OpenAI
-  // error code mapping is "model_not_found" (open-sse/config/errorConfig.ts:29).
-  assert.equal(response.status, 404);
-  assert.equal(body.error?.code, "model_not_found");
-  assert.equal(body.error?.message, "No active credentials for provider: codex");
+  // #10797: zero-active-credentials for a single-model (non-combo) request now
+  // remaps to 401 instead of leaking the combo-fallback 404 to a direct client.
+  // The code is "provider_not_configured" (not the 401 default "invalid_api_key"):
+  // the fix is connecting an account in the dashboard, not a new OmniRoute key.
+  assert.equal(response.status, 401);
+  assert.equal(body.error?.code, "provider_not_configured");
+  assert.equal(body.error?.message, "No active credentials for provider: codex.");
 });
 
 test("vscode tokenized /responses route applies the path token and codex tier rewrite", async () => {
@@ -1189,10 +1190,10 @@ test("vscode tokenized /responses route applies the path token and codex tier re
   );
   const body = (await response.json()) as any;
 
-  // Upstream port decolua/9router#336: see chat/completions sibling test above.
-  assert.equal(response.status, 404);
-  assert.equal(body.error?.code, "model_not_found");
-  assert.equal(body.error?.message, "No active credentials for provider: codex");
+  // #10797: see chat/completions sibling test above.
+  assert.equal(response.status, 401);
+  assert.equal(body.error?.code, "provider_not_configured");
+  assert.equal(body.error?.message, "No active credentials for provider: codex.");
 });
 
 test("vscode tokenized api/show route preserves the selected reasoning effort for codex variants", async () => {

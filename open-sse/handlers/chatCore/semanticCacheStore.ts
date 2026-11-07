@@ -10,24 +10,29 @@
  */
 import {
   generateSignature as defaultGenerateSignature,
+  outputContractOf,
   setCachedResponse as defaultSetCachedResponse,
   isCacheableForWrite as defaultIsCacheableForWrite,
+  isTruncatedCompletion as defaultIsTruncatedCompletion,
 } from "@/lib/semanticCache";
 import { isSmallEnoughForSemanticCache as defaultIsSmallEnough } from "../../utils/estimateSize.ts";
+import { getSemanticCacheManager } from "../../services/cache/semanticCacheManager.ts";
 
 type LoggerLike = { debug?: (...args: unknown[]) => void } | null | undefined;
 
 type CacheBody = {
   messages?: unknown;
   input?: unknown;
-  temperature?: unknown;
-  top_p?: unknown;
+  temperature?: number;
+  top_p?: number;
 };
 
 type UsageLike = { prompt_tokens?: number; completion_tokens?: number } | null | undefined;
 
 export interface SemanticCacheStoreDeps {
   isCacheableForWrite: typeof defaultIsCacheableForWrite;
+  /** Optional so pre-existing callers/tests with partial deps keep working. */
+  isTruncatedCompletion?: typeof defaultIsTruncatedCompletion;
   isSmallEnoughForSemanticCache: typeof defaultIsSmallEnough;
   generateSignature: typeof defaultGenerateSignature;
   setCachedResponse: typeof defaultSetCachedResponse;
@@ -35,6 +40,7 @@ export interface SemanticCacheStoreDeps {
 
 const DEFAULT_DEPS: SemanticCacheStoreDeps = {
   isCacheableForWrite: defaultIsCacheableForWrite,
+  isTruncatedCompletion: defaultIsTruncatedCompletion,
   isSmallEnoughForSemanticCache: defaultIsSmallEnough,
   generateSignature: defaultGenerateSignature,
   setCachedResponse: defaultSetCachedResponse,
@@ -47,15 +53,20 @@ export function storeSemanticCacheResponse(
     headers: unknown;
     translatedResponse: unknown;
     model: string;
-    apiKeyId?: string | number;
+    provider?: string;
+    apiKeyId?: string;
     usage?: UsageLike;
     log?: LoggerLike;
+    videoTranscriptSensitive?: boolean;
   },
   deps: SemanticCacheStoreDeps = DEFAULT_DEPS
 ): void {
   if (
+    args.provider === "muse-code" ||
+    args.videoTranscriptSensitive ||
     !args.enabled ||
     !deps.isCacheableForWrite(args.body, args.headers) ||
+    (deps.isTruncatedCompletion ?? defaultIsTruncatedCompletion)(args.translatedResponse) ||
     !deps.isSmallEnoughForSemanticCache(args.translatedResponse)
   ) {
     return;
@@ -65,9 +76,28 @@ export function storeSemanticCacheResponse(
     args.body.messages ?? args.body.input,
     args.body.temperature,
     args.body.top_p,
-    args.apiKeyId ?? undefined
+    args.apiKeyId ?? undefined,
+    outputContractOf(args.body)
   );
   const tokensSaved = args.usage?.prompt_tokens + args.usage?.completion_tokens || 0;
   deps.setCachedResponse(signature, args.model, args.translatedResponse, tokensSaved);
   args.log?.debug?.("CACHE", `Stored response for ${args.model} (${tokensSaved} tokens)`);
+
+  if (args.translatedResponse && typeof args.translatedResponse === "object") {
+    getSemanticCacheManager()
+      .store({
+        body: args.body as Record<string, unknown>,
+        headers: args.headers,
+        response: args.translatedResponse as Record<string, unknown>,
+        model: args.model,
+        provider:
+          args.provider ||
+          ((args.translatedResponse as Record<string, unknown>).provider as string) ||
+          "",
+        apiKeyId: args.apiKeyId,
+        signature,
+        tokensSaved,
+      })
+      .catch(() => {});
+  }
 }

@@ -16,6 +16,8 @@ const {
   handleComboChat,
 } = await import("../../open-sse/services/combo.ts");
 const { resolveComboTargets } = await import("../../open-sse/services/combo/comboStructure.ts");
+const { getComboFailureCount, __resetComboFailureTrackerForTests } =
+  await import("../../open-sse/services/combo/failureTracker.ts");
 const { applyPromptCacheAffinity } =
   await import("../../open-sse/services/combo/promptCacheAffinity.ts");
 const { resolveReasoningBufferedMaxTokens } =
@@ -23,6 +25,8 @@ const { resolveReasoningBufferedMaxTokens } =
 const { normalizeComboStep } = await import("../../src/lib/combos/steps.ts");
 const { registerStrategy } = await import("../../open-sse/services/autoCombo/routerStrategy.ts");
 const { touchSession, clearSessions } = await import("../../open-sse/services/sessionManager.ts");
+const { scopeHandoffSessionId } =
+  await import("../../open-sse/services/combo/handoffSessionScope.ts");
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
@@ -126,7 +130,7 @@ async function cleanupTestDataDir() {
   for (let attempt = 0; attempt < 5; attempt += 1) {
     try {
       core.resetDbInstance();
-      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
       return;
     } catch (error: any) {
       lastError = error;
@@ -185,6 +189,14 @@ test("getComboFromData and getComboModelsFromData resolve combos from array and 
   assert.equal(fromArray.name, "alpha");
   assert.equal(fromObject.name, "alpha");
   assert.deepEqual(models, ["openai/gpt-4o-mini", "claude/sonnet"]);
+});
+
+test("getComboModelsFromData strips context-window tags before matching a combo", () => {
+  const combos = [{ name: "alpha", models: ["openai/gpt-4o-mini"] }];
+
+  assert.deepEqual(getComboModelsFromData("alpha[500k]", combos), ["openai/gpt-4o-mini"]);
+  assert.deepEqual(getComboModelsFromData("alpha[1M]", combos), ["openai/gpt-4o-mini"]);
+  assert.equal(getComboModelsFromData("alpha[beta]", combos), null);
 });
 
 test("validateComboDAG rejects circular references and resolveNestedComboModels expands nested combos", () => {
@@ -581,6 +593,62 @@ test("handleComboChat preserves the weighted primary before prompt-cache affinit
   }
 });
 
+test("prompt-cache affinity falls through when its preferred account becomes runtime-ineligible", async () => {
+  const combo = {
+    name: "affinity-runtime-ineligible",
+    strategy: "round-robin",
+    models: [
+      {
+        kind: "model",
+        providerId: "openai",
+        model: "openai/gpt-4o-mini",
+        connectionId: "affinity-account-a",
+      },
+      {
+        kind: "model",
+        providerId: "openai",
+        model: "openai/gpt-4o-mini",
+        connectionId: "eligible-account-b",
+      },
+    ],
+    config: { maxRetries: 0 },
+  };
+  const resolvedTargets = resolveComboTargets(combo, null);
+  const cacheKey = Array.from({ length: 100 }, (_, index) => `affinity-cache-${index}`).find(
+    (key) =>
+      applyPromptCacheAffinity(resolvedTargets, { prompt_cache_key: key }).targets[0]
+        ?.connectionId === "affinity-account-a"
+  );
+  assert.ok(cacheKey, "fixture must prefer affinity account A");
+
+  const availabilityChecks: string[] = [];
+  const dispatches: string[] = [];
+  const result = await handleComboChat({
+    body: { prompt_cache_key: cacheKey },
+    combo,
+    handleSingleModel: async (
+      _body: unknown,
+      _modelStr: string,
+      target: { connectionId?: string }
+    ) => {
+      dispatches.push(target.connectionId || "none");
+      return okResponse();
+    },
+    isModelAvailable: async (_modelStr: string, target: { connectionId?: string }) => {
+      availabilityChecks.push(target.connectionId || "none");
+      return target.connectionId !== "affinity-account-a";
+    },
+    log: createLog(),
+    settings: { promptCacheAffinityEnabled: true },
+    relayOptions: null,
+    allCombos: null,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(availabilityChecks[0], "affinity-account-a");
+  assert.deepEqual(dispatches, ["eligible-account-b"]);
+});
+
 test("handleComboChat weighted strategy falls back to uniform random when all weights are zero", async () => {
   const calls: any[] = [];
   _setSecureRandomFloatSource(() => 0.75);
@@ -889,7 +957,15 @@ test("handleComboChat records per-target metrics separately when the same model 
   assert.equal(metrics.byTarget[secondStep.id].connectionId, "conn-openai-b");
 });
 
-test("handleComboChat surfaces the last failing target's status AND error message together, not a cross-target mismatch (#8486)", async () => {
+// #10314/#10501: superseded the original "last writer wins" contract (a single
+// `lastError` + raw `[model (status), ...]` suffix). Combo terminal aggregation
+// now lists every distinct per-target reason separately (comboErrorAggregation.ts
+// ::formatComboOutcomes) and derives the terminal status from an explicit policy
+// instead of whichever target happened to fail LAST — a provider 500 mixed with a
+// rate_limit 429 is a heterogeneous, non-client-fault outcome, so it normalizes to
+// a 5xx (::resolveComboTerminalStatus), never a bare 429 that would misrepresent
+// model-a's real 500 as "the client should retry the rate limit".
+test("handleComboChat surfaces EVERY failing target's reason (never drops one) and normalizes a heterogeneous 500+429 mix to 5xx (#8486/#10314/#10501)", async () => {
   const result = await handleComboChat({
     body: {},
     combo: {
@@ -910,11 +986,12 @@ test("handleComboChat surfaces the last failing target's status AND error messag
 
   const payload = (await result.json()) as any;
 
-  assert.equal(result.status, 429); // #8486: status/message from the SAME (last) failing target
-  // The last error message is preserved and now carries an aggregated
-  // per-model diagnostics suffix (status codes for every target attempted
-  // in this set try), added alongside the global comboTimeoutMs feature.
-  assert.equal(payload.error.message, "fail:model-b [model-a (500), model-b (429)]");
+  assert.ok(
+    result.status >= 500,
+    `heterogeneous provider(500)+rate_limit(429) must normalize to a 5xx status, got ${result.status}`
+  );
+  assert.match(payload.error.message, /model-a.*fail:model-a.*HTTP 500/);
+  assert.match(payload.error.message, /model-b.*fail:model-b.*HTTP 429/);
 });
 
 interface ComboErrorPayload {
@@ -1310,6 +1387,42 @@ test("handleComboChat returns 404 model_not_found when a combo has no executable
   assert.match(payload.error.message, /Combo has no executable targets/);
 });
 
+test("#11408 guard: no-executable-targets early exit still records the combo failure (silent-stop counter, #5923)", async () => {
+  __resetComboFailureTrackerForTests();
+  const result = await handleComboChat({
+    body: {},
+    combo: {
+      name: "guard-empty-11408",
+      strategy: "priority",
+      models: [],
+      context_cache_protection: true,
+    },
+    handleSingleModel: async () => {
+      throw new Error("handleSingleModel should not run for empty combos");
+    },
+    isModelAvailable: async () => true,
+    log: createLog(),
+    settings: {
+      comboDefaults: {
+        maxRetries: 0,
+        retryDelayMs: 1,
+      },
+    },
+    relayOptions: { sessionId: "sess-guard-11408" },
+    allCombos: null,
+  });
+
+  assert.equal(result.status, 404);
+  // The quota-share slot release must not replace the #5923 silent-stop
+  // bookkeeping: the consecutive-failure counter must still advance so the
+  // session pin auto-clears after COMBO_FAILURE_THRESHOLD no-target failures.
+  assert.equal(
+    getComboFailureCount(scopeHandoffSessionId("sess-guard-11408", null), "guard-empty-11408"),
+    1,
+    "recordComboFailure must run on the no-executable-targets early exit"
+  );
+});
+
 test("handleComboChat round-robin returns 404 when no models are configured", async () => {
   const result = await handleComboChat({
     body: {},
@@ -1633,6 +1746,44 @@ test("handleComboChat starts hedged fallback only after explicit zero-latency op
   assert.deepEqual(calls, ["model-a", "model-b"]);
 });
 
+test("handleComboChat does not hedge a body that would double the native send buffer", async () => {
+  const calls: string[] = [];
+  const oversized = "x".repeat(256 * 1024 + 1);
+
+  const result = await handleComboChat({
+    body: { messages: [{ role: "user", content: oversized }] },
+    combo: {
+      name: "hedging-skipped-for-large-body",
+      strategy: "priority",
+      models: ["model-a", "model-b"],
+      config: {
+        maxRetries: 0,
+        retryDelayMs: 1,
+        zeroLatencyOptimizationsEnabled: true,
+        hedging: true,
+        hedgeDelayMs: 1,
+      },
+    },
+    handleSingleModel: async (_body: unknown, modelStr: string) => {
+      calls.push(modelStr);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return okResponse({ choices: [{ message: { content: modelStr } }] });
+    },
+    isModelAvailable: async () => true,
+    log: createLog(),
+    settings: null,
+    relayOptions: null,
+    allCombos: null,
+  });
+
+  const payload = (await result.json()) as {
+    choices: { message: { content: string } }[];
+  };
+  assert.equal(result.status, 200);
+  assert.equal(payload.choices[0].message.content, "model-a");
+  assert.deepEqual(calls, ["model-a"]);
+});
+
 test("handleComboChat round-robin falls through generic 400s when a later model succeeds", async () => {
   const calls: any[] = [];
 
@@ -1671,7 +1822,12 @@ test("handleComboChat round-robin falls through generic 400s when a later model 
   assert.deepEqual(calls, ["model-a", "model-b"]);
 });
 
-test("handleComboChat round-robin falls through 400s and returns the LAST target's status+message together, not a cross-target mismatch (#8486)", async () => {
+// #10314/#10501: same policy update as the priority-strategy test above, applied
+// to the round-robin twin. model-a's 400 is a genuine request-shape/model-class
+// error, but model-b's 500 is an infra/provider failure — since NOT every target
+// failed with a "model" (request-is-invalid) reason, this is a heterogeneous mix
+// and must normalize to a 5xx, never a bare "trust the last target's status" 500.
+test("handleComboChat round-robin surfaces EVERY target's reason and normalizes a heterogeneous 400+500 mix to 5xx (#8486/#10314/#10501)", async () => {
   const calls: any[] = [];
 
   const result = await handleComboChat({
@@ -1709,8 +1865,12 @@ test("handleComboChat round-robin falls through 400s and returns the LAST target
   });
 
   const payload = (await result.json()) as any;
-  assert.equal(result.status, 500); // #8486: status/message from the SAME (last) failing target
-  assert.equal(payload.error.message, "rr-final-fail");
+  assert.ok(
+    result.status >= 500,
+    `heterogeneous model(400)+provider(500) mix must normalize to a 5xx status, got ${result.status}`
+  );
+  assert.match(payload.error.message, /model-a.*unsupported message role.*HTTP 400/);
+  assert.match(payload.error.message, /model-b.*rr-final-fail.*HTTP 500/);
   assert.deepEqual(calls, ["model-a", "model-b"]);
 });
 
@@ -2310,7 +2470,7 @@ test("handleComboChat returns a 503 when every model is unavailable before execu
 
   const payload = (await result.json()) as any;
   assert.equal(result.status, 503);
-  assert.equal(payload.error.code, "ALL_ACCOUNTS_INACTIVE");
+  assert.equal(payload.error.code, "ALL_TARGETS_SKIPPED");
 });
 
 test("handleComboChat treats provider circuit breaker responses as ordinary target failures", async () => {
@@ -2532,8 +2692,57 @@ test("handleComboChat standalone lkgp strategy updates LKGP after a successful c
   }
 
   assert.equal(result.ok, true);
-  // getLKGP now returns LKGPRecord | null — source: src/lib/db/settings.ts getLKGP()
   assert.equal(persistedProvider?.provider, "openai");
+});
+
+test("handleComboChat standalone lkgp strategy clears LKGP after the last-known-good target fails", async () => {
+  // A prior successful request pinned "openai" as the last known good provider —
+  // exactly the state left behind by the previous (success) test's own scenario.
+  await settingsDb.setLKGP("standalone-lkgp-clear", "standalone-lkgp-clear", "openai");
+
+  const calls: string[] = [];
+  const result = await handleComboChat({
+    body: {},
+    combo: {
+      id: "standalone-lkgp-clear",
+      name: "standalone-lkgp-clear",
+      strategy: "lkgp",
+      // maxRetries: 0 below means this single target is tried exactly once,
+      // then the combo loop gives up on it (and on the whole combo, since it's
+      // the only model) — the exact "Done retrying this model" failure path.
+      models: ["openai/gpt-4o-mini"],
+      config: { maxRetries: 0 },
+    },
+    handleSingleModel: async (_body: Record<string, unknown>, modelStr: string) => {
+      calls.push(modelStr);
+      return errorResponse(504, "Stream produced no non-ping SSE event within 95000ms");
+    },
+    isModelAvailable: async () => true,
+    log: createLog(),
+    settings: null,
+    relayOptions: null,
+    allCombos: null,
+  });
+
+  // Give the async fire-and-forget LKGP clear a chance to execute
+  let persistedProvider: Awaited<ReturnType<typeof settingsDb.getLKGP>> = null;
+  for (let i = 0; i < 20; i++) {
+    persistedProvider = await settingsDb.getLKGP("standalone-lkgp-clear", "standalone-lkgp-clear");
+    if (persistedProvider === null) {
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+
+  assert.equal(result.ok, false, "the only target failed, so the whole combo call fails");
+  assert.deepEqual(calls, ["openai/gpt-4o-mini"]);
+  // The bug this guards: without clearing, a *separate* subsequent request would
+  // keep re-selecting "openai" via LKGP reordering even though it just failed.
+  assert.equal(
+    persistedProvider,
+    null,
+    "LKGP must be cleared after its target fails, not left pointing at a just-failed provider"
+  );
 });
 
 test("handleComboChat auto strategy falls back to the full pool when tool filtering empties candidates", async () => {
@@ -2839,7 +3048,7 @@ test("handleComboChat round-robin resolves nested combos and returns inactive wh
 
   const payload = (await result.json()) as any;
   assert.equal(result.status, 503);
-  assert.equal(payload.error.code, "ALL_ACCOUNTS_INACTIVE");
+  assert.equal(payload.error.code, "ALL_TARGETS_SKIPPED");
 });
 
 test("handleComboChat round-robin treats provider circuit breaker responses as ordinary target failures", async () => {
@@ -2897,6 +3106,69 @@ test("handleComboChat round-robin retries a transient failure on the same model 
 
   assert.equal(result.ok, true);
   assert.deepEqual(calls, ["model-a", "model-a"]);
+});
+
+test("handleComboChat round-robin: failoverBeforeRetry skips the same-model retry and goes straight to the sibling", async () => {
+  // #2417's whole point: failoverBeforeRetry should prefer a sibling model
+  // over hammering a rate-limited one again. Same shape as the test above
+  // (maxRetries: 1, a transient 429 on the first call) but with a second
+  // model available and failoverBeforeRetry set — calls must show a single
+  // model-a attempt followed directly by model-b, never a same-model retry.
+  const calls = [];
+
+  const result = await handleComboChat({
+    body: {},
+    combo: {
+      name: "rr-failover-before-retry",
+      strategy: "round-robin",
+      models: ["model-a", "model-b"],
+      config: {
+        maxRetries: 1,
+        retryDelayMs: 1,
+        failoverBeforeRetry: true,
+        concurrencyPerModel: 1,
+        queueTimeoutMs: 5,
+      },
+    },
+    handleSingleModel: async (_body, modelStr) => {
+      calls.push(modelStr);
+      if (modelStr === "model-a") return errorResponse(429, "rate limited");
+      return okResponse();
+    },
+    isModelAvailable: async () => true,
+    log: createLog(),
+    settings: null,
+    relayOptions: null,
+    allCombos: null,
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(calls, ["model-a", "model-b"]);
+});
+
+test("handleComboChat priority strategy: failoverBeforeRetry skips the same-model retry and goes straight to the sibling", async () => {
+  const calls = [];
+
+  const result = await handleComboChat({
+    body: {},
+    combo: {
+      name: "priority-failover-before-retry",
+      models: ["model-a", "model-b"],
+      config: { maxRetries: 1, retryDelayMs: 1, failoverBeforeRetry: true },
+    },
+    handleSingleModel: async (_body, modelStr) => {
+      calls.push(modelStr);
+      if (modelStr === "model-a") return errorResponse(429, "rate limited");
+      return okResponse();
+    },
+    isModelAvailable: async () => true,
+    log: createLog(),
+    settings: null,
+    allCombos: null,
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(calls, ["model-a", "model-b"]);
 });
 
 test("handleComboChat round-robin recovers from 400s when a later model succeeds", async () => {
@@ -3136,8 +3408,8 @@ test("#3587 reasoning model gets max_tokens buffer applied", async () => {
 
   assert.equal(result.ok, true);
   assert.equal(bodies.length, 1, "should have called handleSingleModel once");
-  // 4096 * 1.5 = 6144; max(4096+1000, 6144) = 6144
-  assert.equal(bodies[0].max_tokens, 6144, "max_tokens should be buffered for reasoning model");
+  // #9507: buffer never enlarges an explicit client max_tokens; pass-through 4096.
+  assert.equal(bodies[0].max_tokens, 4096, "max_tokens forwarded verbatim (#9507)");
 });
 
 test("#3587 reasoning buffer preserves max_tokens when the full buffer exceeds model cap", async () => {
@@ -3154,8 +3426,8 @@ test("#3587 reasoning buffer preserves max_tokens when the full buffer exceeds m
   );
   assert.equal(
     resolveReasoningBufferedMaxTokens("openai/gemini-high-cap", "4096"),
-    6144,
-    "numeric string max_tokens should be normalized before applying a safe buffer"
+    4096,
+    "numeric string max_tokens is normalized and forwarded verbatim (#9507)"
   );
   assert.equal(
     resolveReasoningBufferedMaxTokens("openai/gemini-high-cap", "not-a-number"),
@@ -3218,8 +3490,8 @@ test("#3587 reasoning buffer is disabled without explicit model capability data"
   );
   assert.equal(
     resolveReasoningBufferedMaxTokens("openai/default-cap-reasoning", 300),
-    1300,
-    "explicit default-sized caps are treated as real capability data"
+    300,
+    "explicit default-sized caps are treated as real capability data, forwarded verbatim (#9507)"
   );
 });
 
@@ -3302,7 +3574,7 @@ test("#3587 round-robin buffer does NOT compound across reasoning models", async
   // Two reasoning models in a round-robin combo. The first fails (400) so the
   // loop falls through to the second. The buffer must be computed from the
   // ORIGINAL max_tokens for each attempt — never from an already-buffered value —
-  // so both attempts see 6144 (4096 * 1.5), not [6144, 9216, ...]. Regression for
+  // so both attempts see the original 4096 (no enlargement per #9507), not a compounded value. Regression for
   // the shared-`body` mutation that compounded the buffer on every RR iteration.
   saveModelsDevCapabilities({
     openai: {
@@ -3345,12 +3617,12 @@ test("#3587 round-robin buffer does NOT compound across reasoning models", async
 
   assert.equal(result.status, 200);
   assert.equal(seen.length, 2, "both reasoning models should have been attempted");
-  // Each attempt buffers from the original 4096 → 6144. No compounding.
-  assert.equal(seen[0].maxTokens, 6144, "first reasoning model buffered from original");
+  // #9507: buffer never enlarges, so each attempt sees the original 4096; no compounding.
+  assert.equal(seen[0].maxTokens, 4096, "first reasoning model forwards original (#9507)");
   assert.equal(
     seen[1].maxTokens,
-    6144,
-    "second reasoning model must ALSO buffer from original 4096, not 6144"
+    4096,
+    "second reasoning model must ALSO forward original 4096, not a buffered value (#9507)"
   );
 });
 

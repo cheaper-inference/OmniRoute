@@ -1,11 +1,19 @@
 import os from "os";
 import path from "path";
-import { createRequire } from "node:module";
+import { runtimeRequire as _require } from "./adapters/runtimeRequire";
 
-const _require = createRequire(import.meta.url);
-const Database = process.versions.bun
-  ? (_require("bun:sqlite").Database as typeof import("better-sqlite3"))
-  : (_require("better-sqlite3") as typeof import("better-sqlite3"));
+type DatabaseConstructor = typeof import("better-sqlite3");
+
+function getDatabaseClass(): DatabaseConstructor | null {
+  try {
+    if (process.versions.bun) {
+      return (_require("bun:sqlite") as { Database: DatabaseConstructor }).Database;
+    }
+    return _require("better-sqlite3") as DatabaseConstructor;
+  } catch {
+    return null;
+  }
+}
 
 function databaseOptions(readonly = false) {
   return readonly ? { readonly: true } : { readwrite: true, create: true };
@@ -15,6 +23,8 @@ const getOmpDir = () => path.join(os.homedir(), ".omp", "agent");
 const getOmpDbPath = () => path.join(getOmpDir(), "agent.db");
 
 export function getOmpCredentials(providerId: string) {
+  const Database = getDatabaseClass();
+  if (!Database) return { hasOmniRoute: false, baseUrl: null, apiKey: null };
   const dbPath = getOmpDbPath();
   try {
     const db = new Database(dbPath, databaseOptions(true));
@@ -36,6 +46,8 @@ export function getOmpCredentials(providerId: string) {
 }
 
 export function saveOmpCredentials(providerId: string, apiKey: string, baseUrl: string) {
+  const Database = getDatabaseClass();
+  if (!Database) return;
   const dbPath = getOmpDbPath();
   const db = new Database(dbPath, databaseOptions());
 
@@ -54,6 +66,8 @@ export function saveOmpCredentials(providerId: string, apiKey: string, baseUrl: 
 }
 
 export function deleteOmpCredentials(providerId: string) {
+  const Database = getDatabaseClass();
+  if (!Database) return;
   const dbPath = getOmpDbPath();
   const db = new Database(dbPath, databaseOptions());
   db.prepare("DELETE FROM auth_credentials WHERE provider = ?").run(providerId);

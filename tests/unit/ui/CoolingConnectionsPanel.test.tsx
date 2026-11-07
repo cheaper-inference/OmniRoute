@@ -30,7 +30,10 @@ function makeContainer(): HTMLElement {
 
 const PANEL_PATH = "@/app/(dashboard)/dashboard/providers/[id]/components/CoolingConnectionsPanel";
 
-describe("CoolingConnectionsPanel", () => {
+// The panel's dynamic import pulls a heavy dependency graph, so the cold
+// module load exceeds vitest's default 5s per-test timeout (same pattern as
+// agent-card.test.tsx). Budget the transform/import overhead here.
+describe("CoolingConnectionsPanel", { timeout: 30_000 }, () => {
   beforeEach(() => {
     (
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }

@@ -7,6 +7,14 @@
  * - /v1/audio/speech (TTS API)
  */
 
+import { getProviderAlias } from "@/shared/constants/providers";
+import { isLoopbackNodeHost } from "@/shared/network/loopbackNodeHost";
+import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
+import {
+  toRegistrySpeechModels as toSyntxSpeechModels,
+  toRegistryTranscriptionModels as toSyntxTranscriptionModels,
+} from "../services/syntxMediaCatalog.ts";
+
 interface AudioModel {
   id: string;
   name: string;
@@ -14,16 +22,44 @@ interface AudioModel {
 
 export interface AudioProvider {
   id: string;
+  /**
+   * Provider key to look credentials up under. Dynamic provider nodes are exposed
+   * to callers under their `prefix` (that is what appears in `provider/model`),
+   * but their connections are stored under the node **id** — without this the
+   * credential lookup silently misses. Absent for hardcoded providers, where the
+   * id already is the credential key.
+   */
+  credentialProviderId?: string;
+  alias?: string;
   baseUrl: string;
   authType: string;
   authHeader: string;
   format?: string;
   supportedFormats?: string[];
   async?: boolean;
+  /**
+   * Voice sent by the OpenAI-compatible speech path when the request omits `voice`.
+   * Absent means the OpenAI stock default ("alloy").
+   */
+  defaultVoice?: string;
+  /**
+   * The adapter can only run the models listed in `models` (e.g. Gemini Live's
+   * BidiGenerateContent socket), not every model the provider tags with this
+   * endpoint. Endpoint-adapter evidence (#16929) is then scoped per model.
+   */
+  modelScoped?: boolean;
   models: AudioModel[];
 }
 
 export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
+  "grok-cli": {
+    id: "grok-cli",
+    baseUrl: "https://api.x.ai/v1/stt",
+    authType: "oauth",
+    authHeader: "bearer",
+    format: "grok-stt",
+    models: [{ id: "grok-voice-transcribe-2.0", name: "Grok Voice Transcribe 2.0 (OAuth)" }],
+  },
   vertex: {
     id: "vertex",
     baseUrl: "https://us-central1-aiplatform.googleapis.com/v1",
@@ -45,6 +81,18 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     models: [
       { id: "whisper-1", name: "Whisper 1" },
       { id: "gpt-4o-transcription", name: "GPT-4o Transcription" },
+    ],
+  },
+
+  mistral: {
+    id: "mistral",
+    baseUrl: "https://api.mistral.ai/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [
+      { id: "voxtral-mini-latest", name: "Voxtral Mini Transcribe 2" },
+      { id: "voxtral-mini-2602", name: "Voxtral Mini Transcribe 2" },
+      { id: "voxtral-mini-transcribe-3", name: "Voxtral Mini Transcribe 3" },
     ],
   },
 
@@ -128,12 +176,26 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     id: "assemblyai",
     baseUrl: "https://api.assemblyai.com/v2/transcript",
     authType: "apikey",
-    authHeader: "bearer",
+    // AssemblyAI expects `Authorization: <API_KEY>` with no "Bearer" scheme.
+    authHeader: "authorization",
     async: true,
     format: "assemblyai",
     models: [
       { id: "universal-3-pro", name: "Universal 3 Pro" },
       { id: "universal-2", name: "Universal 2" },
+    ],
+  },
+
+  soniox: {
+    id: "soniox",
+    baseUrl: "https://api.soniox.com/v1/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    async: true,
+    format: "soniox",
+    models: [
+      { id: "stt-async-v5", name: "Soniox STT Async v5" },
+      { id: "stt-async-v4", name: "Soniox STT Async v4" },
     ],
   },
 
@@ -226,6 +288,48 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     format: "speechmatics",
     models: [{ id: "enhanced", name: "Enhanced" }],
   },
+
+  nanogpt: {
+    id: "nanogpt",
+    baseUrl: "https://nano-gpt.com/api/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [
+      { id: "whisper-1", name: "Whisper 1" },
+      { id: "gpt-4o-transcription", name: "GPT-4o Transcription" },
+    ],
+  },
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "whisper", name: "Whisper" }],
+  },
+  syntx: {
+    id: "syntx",
+    alias: "stx",
+    baseUrl: "https://api.syntx.ai/api/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "syntx-audio",
+    models: toSyntxTranscriptionModels(),
+  },
+  // Kept last on purpose: the audio/video bridges auto-pick the FIRST catalog
+  // model with usable credentials (selectAudioBridgeModel), so a Gemini key must
+  // not pre-empt the established STT providers' auto-selection order.
+  gemini: {
+    id: "gemini",
+    baseUrl:
+      "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent",
+    authType: "apikey",
+    authHeader: "x-goog-api-key",
+    format: "gemini-live",
+    // Only Live-capable models run over BidiGenerateContent; other Gemini models
+    // tagged audio-transcriptions keep having no adapter (#16929).
+    modelScoped: true,
+    models: [{ id: "gemini-3.5-transcribe-live", name: "Gemini 3.5 Transcribe Live" }],
+  },
 };
 
 /**
@@ -253,6 +357,29 @@ export const AUDIO_TRANSLATION_PROVIDERS: Record<string, AudioProvider> = {
 };
 
 export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
+  "grok-cli": {
+    id: "grok-cli",
+    baseUrl: "https://api.x.ai/v1/tts",
+    authType: "oauth",
+    authHeader: "bearer",
+    format: "grok-tts",
+    models: [{ id: "grok-tts", name: "Grok Text to Speech (OAuth)" }],
+  },
+  google: {
+    id: "google",
+    credentialProviderId: "gemini",
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta/models",
+    authType: "apikey",
+    authHeader: "x-goog-api-key",
+    format: "gemini-tts",
+    models: [
+      { id: "gemini-3.1-flash-tts-preview", name: "Gemini 3.1 Flash TTS" },
+      { id: "gemini-2.5-flash-preview-tts", name: "Gemini 2.5 Flash TTS" },
+      { id: "gemini-2.5-pro-preview-tts", name: "Gemini 2.5 Pro TTS" },
+      { id: "gemini-3.8-flash-tts", name: "Gemini 3.8 Flash TTS" },
+      { id: "gemini-3.8-flash-lite-tts", name: "Gemini 3.8 Flash-Lite TTS" },
+    ],
+  },
   vertex: {
     id: "vertex",
     baseUrl: "https://us-central1-aiplatform.googleapis.com/v1",
@@ -263,6 +390,8 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gemini-3.1-flash-tts-preview", name: "Gemini 3.1 Flash TTS (Vertex)" },
       { id: "gemini-2.5-flash-preview-tts", name: "Gemini 2.5 Flash TTS (Vertex)" },
       { id: "gemini-2.5-pro-preview-tts", name: "Gemini 2.5 Pro TTS (Vertex)" },
+      { id: "gemini-3.8-flash-tts", name: "Gemini 3.8 Flash TTS (Vertex)" },
+      { id: "gemini-3.8-flash-lite-tts", name: "Gemini 3.8 Flash-Lite TTS (Vertex)" },
     ],
   },
 
@@ -277,6 +406,10 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gpt-4o-mini-tts", name: "GPT-4o Mini TTS" },
     ],
   },
+
+  // Mistral is deliberately absent. Its /v1/audio/speech takes `voice_id` and answers
+  // JSON `{ "audio_data": "<base64>" }`, while the default path below sends `voice` and
+  // streams the body back as audio. Listing it needs a dedicated format handler.
 
   hyperbolic: {
     id: "hyperbolic",
@@ -309,6 +442,20 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     models: [
       { id: "nvidia/fastpitch", name: "FastPitch" },
       { id: "nvidia/tacotron2", name: "Tacotron2" },
+    ],
+  },
+
+  soniox: {
+    id: "soniox",
+    baseUrl: "https://tts-rt.soniox.com/tts",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "soniox-tts",
+    // tts-rt-v1 is deprecated upstream (2026-08-31) and now served by tts-rt-v2;
+    // kept so existing clients that pin v1 still resolve.
+    models: [
+      { id: "tts-rt-v2", name: "Soniox TTS RT v2" },
+      { id: "tts-rt-v1", name: "Soniox TTS RT v1" },
     ],
   },
 
@@ -364,6 +511,20 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     models: [{ id: "qwen3-tts", name: "Qwen3 TTS" }],
   },
 
+  // Qwen Cloud Token Plan — DashScope SpeechSynthesizer (JSON → inline base64 or an
+  // expiring audio URL). The host follows the connection's region (Singapore/Beijing).
+  "qwen-cloud-token-plan": {
+    id: "qwen-cloud-token-plan",
+    alias: "qct",
+    baseUrl:
+      "https://token-plan.ap-southeast-1.maas.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "dashscope-tts",
+    supportedFormats: ["mp3"],
+    models: [{ id: "qwen-audio-3.0-tts-plus", name: "Qwen Audio 3.0 TTS Plus" }],
+  },
+
   // ── Cloud TTS Providers (#248) ────────────────────────────────────────────
 
   inworld: {
@@ -407,9 +568,14 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     authHeader: "bearer",
     format: "fishaudio",
     models: [
+      { id: "s2.1-pro-free", name: "Fish Speech S2.1 Pro Free" },
+      { id: "s2.1-pro", name: "Fish Speech S2.1 Pro" },
+      { id: "s2-pro", name: "Fish Speech S2 Pro" },
       { id: "s1", name: "Fish Speech S1" },
-      { id: "speech-1.6", name: "Fish Speech 1.6" },
-      { id: "speech-1.5", name: "Fish Speech 1.5" },
+      // Legacy ids kept for existing clients even though Fish no longer lists them
+      // in the current public model enum.
+      { id: "speech-1.6", name: "Fish Speech 1.6 (legacy)" },
+      { id: "speech-1.5", name: "Fish Speech 1.5 (legacy)" },
     ],
   },
 
@@ -488,31 +654,6 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     ],
   },
 
-  edgetts: {
-    id: "edgetts",
-    // Microsoft Edge "Read Aloud" — reverse-engineered, no API key required.
-    // WebSocket transport (unlike every other entry here) — handled by
-    // open-sse/executors/edgeTts.ts, dispatched via the "edgetts" format.
-    baseUrl: "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1",
-    authType: "none",
-    authHeader: "none",
-    format: "edgetts",
-    supportedFormats: ["mp3"],
-    models: [
-      { id: "en-US-AriaNeural", name: "Aria (EN-US, Female)" },
-      { id: "en-US-GuyNeural", name: "Guy (EN-US, Male)" },
-      { id: "en-GB-SoniaNeural", name: "Sonia (EN-GB, Female)" },
-      { id: "en-GB-RyanNeural", name: "Ryan (EN-GB, Male)" },
-      { id: "es-ES-ElviraNeural", name: "Elvira (ES-ES, Female)" },
-      { id: "pt-BR-FranciscaNeural", name: "Francisca (PT-BR, Female)" },
-      { id: "pt-BR-AntonioNeural", name: "Antonio (PT-BR, Male)" },
-      { id: "fr-FR-DeniseNeural", name: "Denise (FR-FR, Female)" },
-      { id: "de-DE-KatjaNeural", name: "Katja (DE-DE, Female)" },
-      { id: "ja-JP-NanamiNeural", name: "Nanami (JA-JP, Female)" },
-      { id: "zh-CN-XiaoxiaoNeural", name: "Xiaoxiao (ZH-CN, Female)" },
-    ],
-  },
-
   gtts: {
     id: "gtts",
     // Google Translate TTS — reverse-engineered, no API key required.
@@ -540,6 +681,51 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
       { id: "mimo-v2.5-tts-voiceclone", name: "MiMo V2.5 Voice Clone" },
     ],
   },
+
+  nanogpt: {
+    id: "nanogpt",
+    baseUrl: "https://nano-gpt.com/api/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [
+      { id: "tts-1-hd", name: "TTS 1 HD" },
+      { id: "tts-1", name: "TTS 1" },
+    ],
+  },
+
+  // Kokoro has no OpenAI stock voices, so a request without `voice` must not fall
+  // back to "alloy" — defaultVoice supplies a Kokoro voice id instead.
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    defaultVoice: "af_heart",
+    models: [{ id: "kokoro", name: "Kokoro" }],
+  },
+
+  // UC (uncensored.com) voice synthesis over its dedicated TTS WebSocket. Auth is
+  // a Clerk session JWT minted per-connect from the durable connection cred; the
+  // `format: "uc-tts"` branch in audioSpeech.ts drives the socket. The baseUrl is
+  // a synthetic marker (the real transport is wss://tts-stream.chatuncensored.ai)
+  // and is never fetched.
+  uc: {
+    id: "uc",
+    baseUrl: "wss://tts-stream.chatuncensored.ai",
+    authType: "web-cookie",
+    authHeader: "none",
+    format: "uc-tts",
+    models: [{ id: "jade", name: "UC Voice (Jade)" }],
+  },
+  syntx: {
+    id: "syntx",
+    alias: "stx",
+    baseUrl: "https://api.syntx.ai/api/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "syntx-audio",
+    models: toSyntxSpeechModels(),
+  },
 };
 
 /**
@@ -564,6 +750,8 @@ export function getSpeechProvider(providerId: string): AudioProvider | null {
 }
 
 export interface ProviderNodeRow {
+  /** provider_node row id — the key its connections (and credentials) are stored under. */
+  id?: string;
   prefix: string;
   name: string;
   baseUrl: string;
@@ -571,20 +759,35 @@ export interface ProviderNodeRow {
 }
 
 /**
+ * Hosts reachable only from the operator's machine/Docker network.
+ * Re-exported from the shared module so the audio, rerank, and local-health-check paths
+ * agree on one definition (the shared version additionally rejects `user@host` URLs).
+ */
+export { isLoopbackNodeHost };
+
+/**
  * Build a dynamic AudioProvider from a provider_node DB entry.
- * Only used for local providers (localhost/127.0.0.1) — remote nodes are
- * excluded by the caller to prevent auth bypass and SSRF.
+ *
+ * Loopback nodes keep `authType: "none"` — a local Ollama/LM Studio has no key and
+ * must not be blocked on a missing credential. Every other node — a remote node the
+ * operator opted into, or a hostname listed in `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`
+ * (#14635) — must present the credential stored on its connection, so it is built as an
+ * api-key provider keyed by the node id (`credentialProviderId`) rather than by the
+ * caller-facing prefix.
  */
 export function buildDynamicAudioProvider(node: ProviderNodeRow, audioPath: string): AudioProvider {
   if (!node.prefix || !node.baseUrl) {
     throw new Error(`Invalid provider_node: missing prefix or baseUrl`);
   }
   const baseUrl = node.baseUrl.replace(/\/+$/, "");
+  // Auth follows the built-in loopback class only (see above).
+  const isLocal = isLoopbackNodeHost(node.baseUrl);
   return {
     id: node.prefix,
+    ...(node.id ? { credentialProviderId: node.id } : {}),
     baseUrl: `${baseUrl}${audioPath}`,
-    authType: "none",
-    authHeader: "none",
+    authType: isLocal ? "none" : "apikey",
+    authHeader: isLocal ? "none" : "bearer",
     models: [],
   };
 }
@@ -594,12 +797,22 @@ function parseAudioModel(
   registry: Record<string, AudioProvider>,
   dynamicProviders?: AudioProvider[]
 ): { provider: string | null; model: string | null } {
-  if (!modelStr) return { provider: null, model: null };
+  if (!modelStr || hasUnsafeModelIdSyntax(modelStr)) return { provider: null, model: null };
 
   // Phase 1: prefix match in hardcoded registry
   for (const [providerId] of Object.entries(registry)) {
     if (modelStr.startsWith(providerId + "/")) {
       return { provider: providerId, model: modelStr.slice(providerId.length + 1) };
+    }
+  }
+
+  // Phase 1.5: prefix match against the short provider alias the catalog itself
+  // advertises (e.g. "el/eleven_multilingual_v2" for elevenlabs) when it differs
+  // from the canonical registry key already tried in Phase 1.
+  for (const [providerId] of Object.entries(registry)) {
+    const alias = getProviderAlias(providerId);
+    if (alias && alias !== providerId && modelStr.startsWith(alias + "/")) {
+      return { provider: providerId, model: modelStr.slice(alias.length + 1) };
     }
   }
 
@@ -635,6 +848,85 @@ export function parseSpeechModel(modelStr: string | null, dynamicProviders?: Aud
 
 export function parseTranslationModel(modelStr: string | null, dynamicProviders?: AudioProvider[]) {
   return parseAudioModel(modelStr, AUDIO_TRANSLATION_PROVIDERS, dynamicProviders);
+}
+
+export interface AudioProviderMatch {
+  provider: string;
+  model: string;
+  config: AudioProvider;
+}
+
+/**
+ * Candidate model ids to try when the prefix-matched provider has no credentials.
+ * Includes the raw request string (a gateway may list `deepgram/nova-3` as its
+ * own model id) plus the parsed native id and `provider/model`.
+ */
+export function audioModelAliasCandidates(
+  originalModel: string,
+  failedProvider: string,
+  resolvedModel: string | null
+): string[] {
+  const candidates = [originalModel];
+  if (resolvedModel) {
+    candidates.push(resolvedModel);
+    candidates.push(`${failedProvider}/${resolvedModel}`);
+  }
+  return [...new Set(candidates.filter(Boolean))];
+}
+
+/**
+ * Find another registry provider that lists one of the candidate model ids.
+ * Used when `deepgram/nova-3` prefix-matches native Deepgram but only a
+ * gateway such as OpenRouter has credentials for that model id.
+ */
+export function findAlternateAudioProvider(
+  registry: Record<string, AudioProvider>,
+  failedProvider: string,
+  candidates: string[]
+): AudioProviderMatch | null {
+  const seen = new Set<string>();
+  for (const candidate of candidates) {
+    if (!candidate || seen.has(candidate)) continue;
+    seen.add(candidate);
+    for (const [providerId, config] of Object.entries(registry)) {
+      if (providerId === failedProvider) continue;
+      if (config.models.some((m) => m.id === candidate)) {
+        return { provider: providerId, model: candidate, config };
+      }
+    }
+  }
+  return null;
+}
+
+/** Qualified catalog ids (`gateway/model`) that list the same nested model. */
+export function listAlternateAudioModelIds(
+  registry: Record<string, AudioProvider>,
+  failedProvider: string,
+  candidates: string[]
+): string[] {
+  const ids: string[] = [];
+  const seen = new Set<string>();
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    for (const [providerId, config] of Object.entries(registry)) {
+      if (providerId === failedProvider) continue;
+      if (!config.models.some((m) => m.id === candidate)) continue;
+      const id = `${providerId}/${candidate}`;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      ids.push(id);
+    }
+  }
+  return ids;
+}
+
+export function missingAudioProviderCredentialsMessage(
+  provider: string,
+  alternateIds: string[] = []
+): string {
+  const base = `No credentials for provider: ${provider}`;
+  if (alternateIds.length === 0) return base;
+  return `${base}. The catalog also lists this model as ${alternateIds.join(", ")}`;
 }
 
 /**

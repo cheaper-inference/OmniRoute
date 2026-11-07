@@ -1,8 +1,18 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { DiscoveryPageClient } from "../DiscoveryPageClient";
+
+// The results now render in the kit Table (KEA-7886), whose persistent scrollbar measures the
+// table with ResizeObserver — jsdom does not implement it.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 // Stable `t` reference: useTranslations must return the SAME function across
 // renders, otherwise the `load` useCallback (dep [t]) changes every render and
@@ -15,11 +25,12 @@ vi.mock("next-intl", () => ({
 }));
 
 function mockFetchOnce(results: unknown[]) {
-  const fetchMock = vi.fn(async () =>
-    new Response(JSON.stringify({ results }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
-    })
+  const fetchMock = vi.fn(
+    async () =>
+      new Response(JSON.stringify({ results }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })
   );
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
@@ -50,10 +61,10 @@ describe("DiscoveryPageClient", () => {
     render(<DiscoveryPageClient />);
 
     await waitFor(() => {
-      expect(screen.getByText("huggingchat")).toBeInTheDocument();
+      expect(screen.getByText("huggingchat")).toBeTruthy();
     });
     // status + risk badges render (mocked t returns the key)
-    expect(screen.getByText("verified")).toBeInTheDocument();
+    expect(screen.getByText("verified")).toBeTruthy();
   });
 
   it("shows the empty state when there are no results", async () => {
@@ -62,7 +73,7 @@ describe("DiscoveryPageClient", () => {
     render(<DiscoveryPageClient />);
 
     await waitFor(() => {
-      expect(screen.getByText("emptyTitle")).toBeInTheDocument();
+      expect(screen.getByText("emptyTitle")).toBeTruthy();
     });
   });
 

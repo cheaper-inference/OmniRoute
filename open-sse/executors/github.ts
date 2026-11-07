@@ -1,12 +1,38 @@
-import { BaseExecutor, ExecuteInput, type ProviderCredentials } from "./base.ts";
+import { randomBytes } from "node:crypto";
+
+import {
+  BaseExecutor,
+  ExecuteInput,
+  type ProviderConfig,
+  type ProviderCredentials,
+} from "./base.ts";
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../config/constants.ts";
 import { getModelTargetFormat } from "../config/providerModels.ts";
+import { containsMediaKind } from "../utils/mediaParts.ts";
 import {
   getGitHubCopilotChatHeaders,
   getGitHubCopilotRefreshHeaders,
 } from "../config/providerHeaderProfiles.ts";
 import { sanitizeResponsesInputItems } from "../services/responsesInputSanitizer.ts";
-import { stripUnsupportedParams } from "../translator/paramSupport.ts";
+import {
+  isGithubTemperatureUnsupportedModel,
+  stripUnsupportedParams,
+} from "../translator/paramSupport.ts";
+import {
+  COPILOT_AUTO_API_VERSION,
+  COPILOT_AUTO_TIMEOUT_MS,
+  buildAutoSessionKey,
+  copilotAutoSessions,
+  extractAutoPrompt,
+  hasAutoImageInput,
+  parseAutoDecision,
+  type CopilotAutoDecision,
+} from "./github/autoModel.ts";
+
+/** Correlation-id fallback for runtimes without crypto.randomUUID — still CSPRNG-backed. */
+function randomIdFallback(): string {
+  return `${Date.now()}-${randomBytes(9).toString("hex")}`;
+}
 
 /**
  * What a Copilot credential refresh resolves to.
@@ -28,9 +54,16 @@ export interface RefreshedCopilotCredentials {
   providerSpecificData?: Record<string, unknown>;
 }
 
+type GithubExecutorConfig = ProviderConfig & Record<string, unknown>;
+
+/** Outcome of a Copilot `/auto` model selection (see ./github/autoModel.ts). */
+export type CopilotAutoResolution =
+  | { ok: true; decision: CopilotAutoDecision; cached: boolean }
+  | { ok: false; status: number; message: string };
+
 export class GithubExecutor extends BaseExecutor {
-  constructor() {
-    super("github", PROVIDERS.github);
+  constructor(provider = "github", config?: GithubExecutorConfig) {
+    super(provider, config ?? PROVIDERS.github);
   }
 
   getCopilotToken(credentials: Record<string, any> | null | undefined) {
@@ -59,16 +92,35 @@ export class GithubExecutor extends BaseExecutor {
     return !(m.includes("gemini") || m.includes("claude"));
   }
 
-  buildUrl(model: string, _stream: boolean, _urlIndex = 0) {
-    const targetFormat = getModelTargetFormat("gh", model);
-    // Claude models: route to Copilot's Anthropic-native /v1/messages shim — the
-    // only Copilot endpoint that surfaces prompt-cache token counts for Claude and
-    // avoids a lossy round-trip of tool_use/tool_result/thinking content blocks
-    // through the OpenAI shape. Driven by the registry's per-model targetFormat
-    // (see registry/github/index.ts), which chatCore.ts also uses to translate the
-    // request to Claude shape before the executor ever sees it.
+  buildUrl(
+    model: string,
+    _stream: boolean,
+    _urlIndex = 0,
+    credentials?: ProviderCredentials | null
+  ) {
+    // #2905/#7364-pattern: a custom Copilot model's per-model targetFormat
+    // override isn't in the static PROVIDER_MODELS registry, so
+    // getModelTargetFormat() can't see it. chatCore/executionCredentials.ts
+    // threads the resolved override onto providerSpecificData.targetFormat
+    // for exactly this case — prefer it when present.
+    const overrideTargetFormat = (
+      credentials as { providerSpecificData?: { targetFormat?: unknown } }
+    )?.providerSpecificData?.targetFormat;
+    const targetFormat =
+      typeof overrideTargetFormat === "string"
+        ? overrideTargetFormat
+        : getModelTargetFormat("gh", model);
+    // Claude models: ALWAYS route to Copilot's Anthropic-native /v1/messages
+    // shim — the only Copilot endpoint that surfaces prompt-cache token counts
+    // for Claude and avoids a lossy round-trip of tool_use/tool_result/thinking
+    // content blocks through the OpenAI shape. Matched on the model NAME (not
+    // only the registry's per-model targetFormat) so a Claude model that is
+    // missing its targetFormat tag, or a custom Claude id, still gets the native
+    // shim rather than silently falling through to /chat/completions. Mirrors
+    // the Hermes copilot routing (`if "claude" in model: return CAPI_MESSAGES_URL`).
     // Port of decolua/9router#2608 (author: yidecode).
-    if (targetFormat === "claude" && this.config.messagesUrl) {
+    const isClaudeModel = /claude/i.test(model || "");
+    if ((targetFormat === "claude" || isClaudeModel) && this.config.messagesUrl) {
       return this.config.messagesUrl;
     }
     // 9router#102: Copilot Codex models advertise supported_endpoints: ["/responses"]
@@ -153,17 +205,14 @@ export class GithubExecutor extends BaseExecutor {
       modifiedBody.tools = modifiedBody.tools.slice(0, 128);
     }
 
-    // GitHub Copilot's gpt-5.4 family rejects requests carrying `temperature` with HTTP 400:
-    //   "Unsupported parameter: 'temperature' is not supported with this model."
+    // GitHub Copilot's GPT-5.4+ and GPT-6.x models reject requests carrying `temperature`
+    // with HTTP 400: "Unsupported parameter: 'temperature' is not supported with this model."
     // OmniRoute's existing `stripGpt5SamplingWhenReasoning` guard only fires for
     // provider==="openai" (raw api.openai.com Chat Completions), so GitHub Copilot routes
-    // never hit it. Strip temperature here unconditionally for gpt-5.4 so the 400 cannot
-    // reach the user. Port from 9router#612 (closes upstream #536).
-    if (
-      typeof model === "string" &&
-      /gpt-5\.4/i.test(model) &&
-      modifiedBody.temperature !== undefined
-    ) {
+    // never hit it. Strip temperature here unconditionally (chat and Responses bodies) so the
+    // 400 cannot reach the user. Same predicate as the "github" rule in paramSupport.ts so
+    // the two can't drift. Port from 9router#612 (closes upstream #536) and 9router#4706.
+    if (isGithubTemperatureUnsupportedModel(model) && modifiedBody.temperature !== undefined) {
       delete modifiedBody.temperature;
     }
 
@@ -294,26 +343,187 @@ export class GithubExecutor extends BaseExecutor {
     credentials: ProviderCredentials,
     stream = true,
     clientHeaders?: Record<string, string> | null,
-    model?: string
+    model?: string,
+    _health?: unknown,
+    body?: unknown
   ): Record<string, string> {
     const token = this.getCopilotToken(credentials) || credentials.accessToken;
     const initiator = this.resolveInitiatorHeader(clientHeaders);
+    const clientIntegrationId =
+      this.readClientHeader(clientHeaders, "copilot-integration-id") || undefined;
 
     const headers: Record<string, string> = {
-      ...getGitHubCopilotChatHeaders(stream ? "text/event-stream" : "application/json", initiator),
+      ...getGitHubCopilotChatHeaders(
+        stream ? "text/event-stream" : "application/json",
+        initiator,
+        clientIntegrationId ? { integrationId: clientIntegrationId } : undefined
+      ),
       Authorization: `Bearer ${token}`,
-      "x-request-id":
-        crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      "x-request-id": crypto.randomUUID?.() || randomIdFallback(),
     };
+
+    // Per-call / per-conversation / per-turn correlation ids the @github/copilot
+    // CLI 1.0.88 puts on every inference request (MITM-captured). The machine
+    // id (getGitHubCopilotMachineId) is stable per-install; these three are
+    // fresh uuids. A Copilot-aware client may pin the session/task ids across a
+    // conversation via its own headers — honor those when present, else mint.
+    const genId = () => crypto.randomUUID?.() || randomIdFallback();
+    headers["x-interaction-id"] =
+      this.readClientHeader(clientHeaders, "x-interaction-id") || genId();
+    headers["x-client-session-id"] =
+      this.readClientHeader(clientHeaders, "x-client-session-id") || genId();
+    headers["x-agent-task-id"] = this.readClientHeader(clientHeaders, "x-agent-task-id") || genId();
+    // Repository correlation sentinels. The CLI sends the working repo's nwo/host
+    // or these literals when there is no repository context. OmniRoute is not
+    // repo-scoped, so forward a client-supplied value when present, else sentinel.
+    headers["x-github-repository-nwo"] =
+      this.readClientHeader(clientHeaders, "x-github-repository-nwo") || "__no_repository__";
+    headers["x-github-repository-host"] =
+      this.readClientHeader(clientHeaders, "x-github-repository-host") || "__no_repository__";
+    // OpenAI-SDK (stainless) signature the CLI carries on streamed turns only.
+    if (stream) {
+      headers["x-stainless-helper-method"] = "stream";
+    }
 
     // Claude models routed to the Anthropic-native /v1/messages shim require the
     // anthropic-version header (harmless no-op on /chat/completions and /responses,
-    // but /v1/messages rejects the request without it). Port of decolua/9router#2608.
-    if (model && getModelTargetFormat("gh", model) === "claude") {
+    // but /v1/messages rejects the request without it). Match on the model NAME so
+    // it fires for every claude-* id (tagged or not), consistent with buildUrl.
+    // Port of decolua/9router#2608.
+    if (model && /claude/i.test(model)) {
       headers["anthropic-version"] = "2023-06-01";
     }
 
+    // Forward a vision signal when the client already set it. Copilot's
+    // /v1/messages proxy returns an empty content block for image turns unless
+    // copilot-vision-request:true is present; a Copilot-aware harness that sends
+    // it should have it honored rather than stripped.
+    // Also set it ourselves when the turn carries an image (chat
+    // `messages` or Responses `input`), so plain OpenAI-SDK clients get vision too.
+    const turns = (body as { messages?: unknown; input?: unknown } | null | undefined) || {};
+    const bodyHasImage =
+      containsMediaKind(turns.messages as Parameters<typeof containsMediaKind>[0], "image") ||
+      containsMediaKind(turns.input as Parameters<typeof containsMediaKind>[0], "image");
+    if (
+      bodyHasImage ||
+      (this.readClientHeader(clientHeaders, "copilot-vision-request") || "").toLowerCase() ===
+        "true"
+    ) {
+      headers["copilot-vision-request"] = "true";
+    }
+
+    // Copilot "auto": a request whose model was picked by /auto must carry the
+    // session token that decision returned, on the API version that issued it.
+    const sessionToken = (credentials as { copilotSessionToken?: unknown }).copilotSessionToken;
+    if (typeof sessionToken === "string" && sessionToken) {
+      headers["Copilot-Session-Token"] = sessionToken;
+      headers["x-github-api-version"] = COPILOT_AUTO_API_VERSION;
+    }
+
     return headers;
+  }
+
+  /** Copilot's `/auto` endpoint lives next to /chat/completions on the same host. */
+  getAutoUrl(): string {
+    const base = this.config.baseUrl || "https://api.githubcopilot.com/chat/completions";
+    return base.replace(/\/chat\/completions\/?$/, "/auto");
+  }
+
+  /**
+   * Ask Copilot which concrete model should serve an `auto` request. Decisions are
+   * cached per (account, conversation) until shortly before their session token
+   * expires, and re-resolved when an image turn arrives on a non-vision pick.
+   */
+  async resolveAutoModel({
+    body,
+    credentials,
+    sessionKey,
+    signal,
+    log,
+  }: {
+    body: unknown;
+    credentials: ProviderCredentials;
+    sessionKey?: string | null;
+    signal?: AbortSignal | null;
+    log?: { info?: (tag: string, message: string) => void } | null;
+  }): Promise<CopilotAutoResolution> {
+    const cacheKey = buildAutoSessionKey(credentials as Record<string, unknown>, sessionKey);
+    const hasImage = hasAutoImageInput(body);
+    const cached = copilotAutoSessions.getUsable(cacheKey, hasImage);
+    if (cached) return { ok: true, decision: cached, cached: true };
+
+    const prompt = extractAutoPrompt(body);
+    if (!prompt) {
+      return { ok: false, status: 400, message: "GitHub Copilot auto requires a user text prompt" };
+    }
+    const url = this.getAutoUrl();
+    this.assertOutboundUrlAllowed(url);
+    const headers = this.buildHeaders(credentials, false);
+    headers["x-github-api-version"] = COPILOT_AUTO_API_VERSION;
+    const timeout = AbortSignal.timeout(COPILOT_AUTO_TIMEOUT_MS);
+    const requestSignal = signal ? AbortSignal.any([signal, timeout]) : timeout;
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(hasImage ? { prompt, has_image: true } : { prompt }),
+        signal: requestSignal,
+      });
+    } catch (error) {
+      const timedOut = timeout.aborted && !signal?.aborted;
+      return {
+        ok: false,
+        status: timedOut ? 504 : 502,
+        message: `GitHub Copilot auto model selection failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      };
+    }
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      return {
+        ok: false,
+        status: response.status,
+        message: `GitHub Copilot auto model selection failed (${response.status})${
+          detail ? `: ${detail}` : ""
+        }`,
+      };
+    }
+
+    const decision = parseAutoDecision(await response.json().catch(() => null));
+    if (!decision) {
+      return {
+        ok: false,
+        status: 502,
+        message: "GitHub Copilot auto returned no selected model or session token",
+      };
+    }
+    copilotAutoSessions.set(cacheKey, decision);
+    log?.info?.("GITHUB", `Copilot auto selected ${decision.model}`);
+    return { ok: true, decision, cached: false };
+  }
+
+  // Case-insensitive read of a single client header value. Client header maps
+  // arrive with inconsistent casing depending on the transport, so match on the
+  // lowercased key rather than assuming a canonical form.
+  private readClientHeader(
+    clientHeaders: Record<string, string> | null | undefined,
+    name: string
+  ): string | null {
+    if (!clientHeaders) return null;
+    const target = name.toLowerCase();
+    const direct = clientHeaders[name] ?? clientHeaders[target];
+    if (typeof direct === "string") return direct;
+    for (const key in clientHeaders) {
+      if (key.toLowerCase() === target) {
+        const val = clientHeaders[key];
+        return typeof val === "string" ? val : null;
+      }
+    }
+    return null;
   }
 
   // Forward the client's x-initiator header when present. OpenCode and other

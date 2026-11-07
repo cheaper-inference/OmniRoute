@@ -45,6 +45,51 @@ describe("Cache Control Policy", () => {
       assert.equal(providerSupportsCaching("openai"), true);
       assert.equal(providerSupportsCaching("codex"), true);
       assert.equal(providerSupportsCaching("azure"), true);
+      assert.equal(
+        providerSupportsCaching("antigravity", "gemini", null, "gemini-3.7-flash"),
+        true
+      );
+      assert.equal(providerSupportsCaching("agy", "gemini", null, "gemini-3.7-flash"), true);
+      assert.equal(
+        providerSupportsCaching(
+          "antigravity",
+          "gemini",
+          { supportsPromptCaching: true },
+          "claude-opus-4-6"
+        ),
+        false
+      );
+      assert.equal(
+        providerSupportsCaching(
+          "antigravity",
+          "gemini",
+          null,
+          "antigravity/gemini-3.7-flash-tiered"
+        ),
+        true
+      );
+      assert.equal(
+        providerSupportsCaching(
+          "antigravity",
+          "gemini",
+          null,
+          "antigravity/antigravity/gemini-3.8-flash-tiered"
+        ),
+        true
+      );
+      assert.equal(
+        providerSupportsCaching("antigravity", "claude", null, "claude-opus-4-6"),
+        false
+      );
+      assert.equal(
+        providerSupportsCaching("antigravity", "openai", null, "gpt-oss-120b-medium"),
+        false
+      );
+      // Vertex is mixed-format: only Claude partner models use cache_control.
+      assert.equal(providerSupportsCaching("vertex", "claude"), true);
+      assert.equal(providerSupportsCaching("vertex-partner", "claude"), true);
+      assert.equal(providerSupportsCaching("vertex", "gemini"), false);
+      assert.equal(providerSupportsCaching("vertex-partner", "gemini"), false);
     });
 
     test("rejects non-caching providers", () => {
@@ -106,6 +151,20 @@ describe("Cache Control Policy", () => {
         }),
         true
       );
+    });
+
+    test("preserves Claude Code cache markers for both Vertex provider IDs", () => {
+      for (const targetProvider of ["vertex", "vertex-partner"]) {
+        assert.equal(
+          shouldPreserveCacheControl({
+            userAgent: "claude-code/0.1.0",
+            isCombo: false,
+            targetProvider,
+            targetFormat: "claude",
+          }),
+          true
+        );
+      }
     });
 
     test("preserves for combo with priority strategy + Claude client + caching provider", () => {

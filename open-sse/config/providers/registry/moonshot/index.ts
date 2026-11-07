@@ -5,6 +5,12 @@ import { REASONING_UNSUPPORTED, type RegistryEntry, type RegistryModel } from ".
 export const KIMI_K3_MODEL: RegistryModel = {
   id: "kimi-k3",
   name: "Kimi K3",
+  // Moonshot's LIVE catalogue serves this model as `k3` and `k3-256k` (the
+  // 256K-context cut), NOT as `kimi-k3`. Both spellings must resolve to this
+  // entry or `getUnsupportedParams` returns [] and temperature reaches an
+  // upstream that hard-400s ("invalid temperature: only 1 is allowed for this
+  // model") — which silently drops the target out of every combo it sits in.
+  aliases: ["k3", "k3-256k"],
   contextLength: 1048576,
   maxOutputTokens: 1048576,
   supportsVision: true,
@@ -45,7 +51,39 @@ export const KIMI_K27_MODELS: RegistryModel[] = [
   },
 ];
 
+export const KIMI_K31_MODELS: RegistryModel[] = [
+  {
+    id: "kimi-k3.1-pro",
+    name: "Kimi K3.1 Pro",
+    contextLength: 1048576,
+    maxOutputTokens: 1048576,
+    supportsVision: true,
+    supportsVideo: true,
+    supportsReasoning: true,
+    supportedThinkingEfforts: ["low", "high", "max"],
+    supportsXHighEffort: false,
+    toolCalling: true,
+    interleavedField: "reasoning_content",
+    unsupportedParams: REASONING_UNSUPPORTED,
+  },
+  {
+    id: "kimi-k3.1-pro-highspeed",
+    name: "Kimi K3.1 Pro Highspeed",
+    contextLength: 1048576,
+    maxOutputTokens: 1048576,
+    supportsVision: true,
+    supportsVideo: true,
+    supportsReasoning: true,
+    supportedThinkingEfforts: ["low", "high", "max"],
+    supportsXHighEffort: false,
+    toolCalling: true,
+    interleavedField: "reasoning_content",
+    unsupportedParams: REASONING_UNSUPPORTED,
+  },
+];
+
 export const MOONSHOT_KIMI_MODELS: RegistryModel[] = [
+  ...KIMI_K31_MODELS,
   KIMI_K3_MODEL,
   ...KIMI_K27_MODELS,
   {

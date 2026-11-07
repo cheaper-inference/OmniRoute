@@ -17,7 +17,8 @@ import {
   mergeQwenCodeSettings,
   normalizeQwenCodeBaseUrl,
 } from "../../../src/shared/services/qwenCodeConfig.ts";
-import { resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
+import { guardHostConfigTarget } from "../utils/config-home-guard.mjs";
 import { createPrompt, printError, printHeading, printInfo, printSuccess } from "../io.mjs";
 
 /** Resolve base URL and key from flags, active context, then local defaults. */
@@ -42,8 +43,7 @@ export function resolveQwenTarget(opts = {}) {
   const apiKey =
     opts.apiKey ??
     opts["api-key"] ??
-    context?.accessToken ??
-    context?.apiKey ??
+    contextCredentialFor(context, root) ??
     process.env.OMNIROUTE_API_KEY ??
     "sk_omniroute";
 
@@ -102,6 +102,16 @@ export async function runSetupQwenCommand(opts = {}) {
   printHeading("OmniRoute → Qwen Code (OpenAI-compatible)");
   printInfo(`baseUrl: ${baseUrl}`);
 
+  for (const target of [settingsPath, envPath]) {
+    const guard = await guardHostConfigTarget(target, {
+      toolLabel: "Qwen Code",
+      hostCommand: "omniroute setup-qwen",
+      allowContainerWrite: Boolean(opts.allowContainerWrite ?? opts["allow-container-write"]),
+      dryRun,
+    });
+    if (guard !== 0) return guard;
+  }
+
   let model = String(opts.model || "").trim();
   if (!model && !opts.yes) {
     const modelIds = await fetchModelIds(baseUrl, apiKey);
@@ -159,6 +169,10 @@ export function registerSetupQwen(program) {
     .option("--env-path <path>", "Qwen Code .env path")
     .option("--yes", "Non-interactive; requires --model")
     .option("--dry-run", "Print settings without writing files or secrets")
+    .option(
+      "--allow-container-write",
+      "Write even when the target is inside a container and not mounted from the host"
+    )
     .action(async (opts) => {
       const code = await runSetupQwenCommand(opts);
       if (code !== 0) process.exitCode = code;

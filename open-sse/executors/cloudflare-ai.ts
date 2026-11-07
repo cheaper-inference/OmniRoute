@@ -1,21 +1,56 @@
 import { BaseExecutor } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
 
-type CloudflareCredentials = {
+export type CloudflareProviderSpecificData = {
+  accountId?: string;
+  authType?: string;
+  email?: string;
+};
+
+export type CloudflareCredentials = {
   apiKey?: string;
   accessToken?: string;
   accountId?: string;
-  providerSpecificData?: {
-    accountId?: string;
-  } | null;
+  providerSpecificData?: CloudflareProviderSpecificData | null;
 } | null;
+
+export const CLOUDFLARE_ACCOUNT_ID_REQUIRED =
+  "Cloudflare Workers AI requires an Account ID. " +
+  "Add it in provider settings under 'Account ID'. " +
+  "Find it at: https://dash.cloudflare.com (right sidebar).";
+
+/** Share the executor's account selection with the read-only credential probe. */
+export function resolveCloudflareAccountBase(credentials: CloudflareCredentials) {
+  const accountId =
+    credentials?.providerSpecificData?.accountId ||
+    credentials?.accountId ||
+    process.env.CLOUDFLARE_ACCOUNT_ID;
+  return {
+    accountUrl: accountId
+      ? `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}`
+      : null,
+  };
+}
+
+/** API tokens use Bearer; explicitly selected legacy Global API Keys need both headers. */
+export function buildCloudflareAuthHeaders(
+  credentials: CloudflareCredentials
+): Record<string, string> {
+  const key = credentials?.apiKey || credentials?.accessToken;
+  if (credentials?.providerSpecificData?.authType === "global") {
+    const email = credentials.providerSpecificData.email;
+    if (!email) throw new Error("Cloudflare Global API Key authentication requires an email.");
+    return { "X-Auth-Email": email, "X-Auth-Key": key || "" };
+  }
+  return { Authorization: `Bearer ${key}` };
+}
 
 /**
  * CloudflareAIExecutor — handles dynamic URL construction with accountId.
  * Cloudflare Workers AI uses the authenticated user's account ID in the URL.
  *
  * URL pattern: https://api.cloudflare.com/client/v4/accounts/{accountId}/ai/v1/chat/completions
- * Auth: Bearer <API Token>
+ * Auth: Bearer <API Token>, or X-Auth-Email + X-Auth-Key for a Global API Key
  * Docs: https://developers.cloudflare.com/workers-ai/
  *
  * Free tier: 10,000 Neurons/day = ~150 LLM responses or 500s Whisper audio
@@ -33,27 +68,15 @@ export class CloudflareAIExecutor extends BaseExecutor {
     _urlIndex = 0,
     credentials: CloudflareCredentials = null
   ): string {
-    // Account ID can be stored in providerSpecificData or at top level credentials
-    const accountId =
-      credentials?.providerSpecificData?.accountId ||
-      credentials?.accountId ||
-      process.env.CLOUDFLARE_ACCOUNT_ID;
-
-    if (!accountId) {
-      throw new Error(
-        "Cloudflare Workers AI requires an Account ID. " +
-          "Add it in provider settings under 'Account ID'. " +
-          "Find it at: https://dash.cloudflare.com (right sidebar)."
-      );
-    }
-
-    return `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1/chat/completions`;
+    const { accountUrl } = resolveCloudflareAccountBase(credentials);
+    if (!accountUrl) throw new Error(CLOUDFLARE_ACCOUNT_ID_REQUIRED);
+    return `${accountUrl}/ai/v1/chat/completions`;
   }
 
   buildHeaders(credentials: CloudflareCredentials, stream = true): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${credentials.apiKey || credentials.accessToken}`,
+      ...buildCloudflareAuthHeaders(credentials),
     };
 
     if (stream) {
@@ -70,36 +93,37 @@ export class CloudflareAIExecutor extends BaseExecutor {
     _credentials: CloudflareCredentials
   ): Record<string, unknown> {
     // Cloudflare uses full model paths like @cf/meta/llama-3.3-70b-instruct — the model id
-    // needs no transformation. But the Workers AI /ai/v1/chat/completions endpoint requires
-    // each message `content` to be a plain string; it rejects the OpenAI content-part array
-    // shape (`[{ type:"text", text }]`) with HTTP 400 (#2539). Flatten text parts to a string.
+    // needs no transformation. The `content` shape, however, is validated against the
+    // *model's* schema and not the endpoint's: text-only models declare `content: string`
+    // and reject the OpenAI content-part array with HTTP 400 (#2539), while multimodal
+    // models declare `content: string | array` and accept it. Flattening an all-text array
+    // to a plain string is therefore still right — it is the one shape every model accepts.
     if (!Array.isArray(body.messages)) return body;
 
-    // #6390: the endpoint has no way to carry image/non-text parts once flattened to a
-    // string, so previously any non-text part (e.g. image_url) was silently mapped to ""
-    // and the image quietly disappeared from the outgoing request. Refuse instead of
-    // silently dropping data — this throws a plain Error which the caller (chatCore.ts)
-    // already routes through buildErrorBody()/sanitizeErrorMessage() before it reaches
-    // the client, matching the existing buildUrl() missing-accountId error above.
-    const flattenContent = (content: unknown): unknown => {
-      if (typeof content === "string" || !Array.isArray(content)) return content;
-      return content
-        .map((part) => {
-          if (!part || typeof part !== "object") return "";
-          const p = part as Record<string, unknown>;
-          if (p.type === "text" && typeof p.text === "string") return p.text;
-          throw new Error(
-            "Cloudflare Workers AI chat endpoint does not accept image/non-text content parts " +
-              `(got type "${typeof p.type === "string" ? p.type : "unknown"}"). ` +
-              "Remove image/file attachments or route this request to a vision-capable provider."
-          );
-        })
-        .join("");
+    // #6390 refused any non-text part instead of letting it vanish into a flattened string,
+    // and refusing did beat dropping. Passing the array through is better still: an image is
+    // only meaningful to a multimodal model, and those accept the array shape. When the
+    // target model is text-only, Cloudflare answers with its own 400, which is more useful
+    // than a gateway refusal that pre-empts every model alike.
+    const isTextPart = (part: unknown): boolean => {
+      if (!part || typeof part !== "object") return false;
+      const p = part as Record<string, unknown>;
+      return p.type === "text" && typeof p.text === "string";
     };
 
-    const messages = (body.messages as Array<Record<string, unknown>>).map((msg) =>
-      msg && Array.isArray(msg.content) ? { ...msg, content: flattenContent(msg.content) } : msg
-    );
+    const flattenTextParts = (content: unknown[]): string =>
+      content.map((part) => (part as Record<string, unknown>).text as string).join("");
+
+    // Workers AI also requires `content` on every message (#4838). Assistant turns that only
+    // carry tool_calls arrive with the key absent (the Claude→OpenAI translator omits it) or
+    // set to null (standard OpenAI clients); both are rejected with HTTP 400, so fill "".
+    const messages = (body.messages as Array<Record<string, unknown>>).map((msg) => {
+      if (!msg || typeof msg !== "object") return msg;
+      if (msg.content === undefined || msg.content === null) return { ...msg, content: "" };
+      return Array.isArray(msg.content) && msg.content.every(isTextPart)
+        ? { ...msg, content: flattenTextParts(msg.content) }
+        : msg;
+    });
 
     return { ...body, messages };
   }

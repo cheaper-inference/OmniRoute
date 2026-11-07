@@ -1,14 +1,20 @@
+import { getSettings } from "@/lib/db/settings";
+import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { getProviderCredentials } from "@/sse/services/auth";
-import { recordCost } from "@/domain/costRules";
+import { isCredentialDiagnosticSentinel } from "@/sse/services/credentialSentinel";
+import { recordSearchUsageCost } from "@omniroute/open-sse/handlers/search/reportedCost.ts";
 import * as defaultLog from "@/sse/utils/logger";
 import {
   getAllSearchProviders,
   getSearchProvider,
+  resolveSearchProvider,
   selectProvider,
   supportsSearchType,
-  SEARCH_CREDENTIAL_FALLBACKS,
+  getSearchCredentialFallbacks,
   SEARCH_PROVIDERS,
   type SearchProviderConfig,
+  autoSearchCandidates,
+  admitsAutoCandidate,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { handleSearch, type SearchResponse } from "@omniroute/open-sse/handlers/search.ts";
 import {
@@ -24,7 +30,7 @@ export interface ExecuteWebSearchInput {
   provider?: string;
   max_results?: number;
   limit?: number;
-  search_type?: "web" | "news";
+  search_type?: "web" | "news" | "x";
   offset?: number;
   country?: string;
   language?: string;
@@ -62,10 +68,19 @@ export class WebSearchExecutionError extends Error {
 
 async function resolveSearchCredentials(providerId: string) {
   const creds = await getProviderCredentials(providerId).catch(() => null);
-  if (creds) return creds;
-  const fallbackId = SEARCH_CREDENTIAL_FALLBACKS[providerId];
-  if (fallbackId) return getProviderCredentials(fallbackId).catch(() => null);
+  if (creds && !isCredentialDiagnosticSentinel(creds)) return creds;
+  for (const fallbackId of getSearchCredentialFallbacks(providerId)) {
+    const fallback = await getProviderCredentials(fallbackId).catch(() => null);
+    if (fallback && !isCredentialDiagnosticSentinel(fallback)) return fallback;
+  }
   return null;
+}
+
+/** The blockedProviders policy /v1/search applies to everything auto-select may pick. */
+async function loadAutoSelectPolicy() {
+  const settings = await getSettings().catch(() => null);
+  return (provider: SearchProviderConfig) =>
+    !isProviderBlockedByIdOrAlias(provider.id, settings?.blockedProviders);
 }
 
 function buildDomainFilter(filters?: {
@@ -107,7 +122,12 @@ function assertValidSearchInput(input: ExecuteWebSearchInput) {
   if (input.query.trim().length > 500) {
     throw new WebSearchExecutionError("Query must be 500 characters or fewer", 400);
   }
-  if (input.search_type && input.search_type !== "web" && input.search_type !== "news") {
+  if (
+    input.search_type &&
+    input.search_type !== "web" &&
+    input.search_type !== "news" &&
+    input.search_type !== "x"
+  ) {
     throw new WebSearchExecutionError(`Unsupported search_type: ${String(input.search_type)}`, 400);
   }
 }
@@ -118,10 +138,18 @@ export async function executeWebSearch(
   assertValidSearchInput(input);
 
   const log = input.log || defaultLog;
+  if (input.provider === "x_search") input.provider = "x-search";
+  if (input.provider === "xquik" || input.provider === "xquik_search") {
+    input.provider = "xquik-search";
+  }
+  if (input.provider === "anysearch" || input.provider === "anysearch_search") {
+    input.provider = "anysearch-search";
+  }
+  if (input.provider === "x-search" || input.provider === "xquik-search") input.search_type = "x";
   const searchType = input.search_type || "web";
 
   if (input.provider) {
-    const explicitProvider = getSearchProvider(input.provider);
+    const explicitProvider = resolveSearchProvider(input.provider);
     if (!explicitProvider) {
       throw new WebSearchExecutionError(`Unknown search provider: ${input.provider}`, 400);
     }
@@ -170,21 +198,39 @@ export async function executeWebSearch(
       );
     }
   } else {
-    credentials = await resolveSearchCredentials(providerConfig.id);
+    // Auto-select: prefer the cheapest admitted provider that actually has
+    // credentials. Fallback-only free providers are a last resort, so a
+    // configured paid provider is never skipped just because a cheaper
+    // no-credentials provider appears first in the cost sort (issue #11524).
+    const isAllowed = await loadAutoSelectPolicy();
+    const candidateProviders = autoSearchCandidates(searchType).filter(isAllowed);
+
+    for (const candidate of candidateProviders) {
+      const candidateCredentials = await resolveSearchCredentials(candidate.id);
+      if (admitsAutoCandidate(candidate, candidateCredentials)) {
+        providerConfig = candidate;
+        credentials = candidateCredentials;
+        break;
+      }
+    }
 
     if (!credentials) {
-      const sortedIds = Object.values(SEARCH_PROVIDERS)
-        .filter((provider) => supportsSearchType(provider, searchType))
-        .sort((a, b) => a.costPerQuery - b.costPerQuery)
-        .map((provider) => provider.id);
+      // Last resort: fallback-only providers so out-of-the-box search
+      // still works when no credentialed provider is configured.
+      const fallbackProviders = Object.values(SEARCH_PROVIDERS)
+        .filter((provider) => provider.fallbackOnly && supportsSearchType(provider, searchType))
+        .filter(isAllowed)
+        .sort((a, b) => a.costPerQuery - b.costPerQuery);
 
-      for (const providerId of sortedIds) {
-        if (providerId === providerConfig.id) continue;
-        const altConfig = getSearchProvider(providerId);
-        const altCreds = await resolveSearchCredentials(providerId);
-        if (altConfig && altCreds) {
-          providerConfig = altConfig;
-          credentials = altCreds;
+      for (const fallbackProvider of fallbackProviders) {
+        providerConfig = fallbackProvider;
+        if (fallbackProvider.id === "duckduckgo-free") {
+          credentials = {};
+          break;
+        }
+        const fallbackCredentials = await resolveSearchCredentials(fallbackProvider.id);
+        if (fallbackCredentials) {
+          credentials = fallbackCredentials;
           break;
         }
       }
@@ -199,17 +245,18 @@ export async function executeWebSearch(
       );
     }
 
-    const otherIds = Object.values(SEARCH_PROVIDERS)
-      .filter((provider) => supportsSearchType(provider, searchType))
-      .sort((a, b) => a.costPerQuery - b.costPerQuery)
+    // Alternates come from the same unblocked candidates. The other fallback-only
+    // providers are reserved for last-resort primary selection.
+    const otherIds = candidateProviders
       .map((provider) => provider.id)
-      .filter((providerId) => providerId !== providerConfig.id);
+      .filter((providerId) => providerId !== providerConfig!.id);
 
     for (const providerId of otherIds) {
-      const creds = await resolveSearchCredentials(providerId);
-      if (creds) {
+      const altConfig = getSearchProvider(providerId);
+      const altCreds = await resolveSearchCredentials(providerId);
+      if (altConfig && admitsAutoCandidate(altConfig, altCreds)) {
         alternateProviderId = providerId;
-        alternateCredentials = creds;
+        alternateCredentials = altCreds;
         break;
       }
     }
@@ -249,6 +296,8 @@ export async function executeWebSearch(
       alternateProvider: alternateProviderId,
       alternateCredentials,
       log,
+      connectionId: credentials?.connectionId || undefined,
+      apiKeyId: input.apiKeyId || undefined,
     });
 
     if (!result.success || !result.data) {
@@ -258,11 +307,15 @@ export async function executeWebSearch(
     return result.data;
   });
 
-  if (!cached && input.apiKeyId && input.apiKeyId !== "local" && data.usage?.search_cost_usd > 0) {
+  if (!cached) {
     try {
-      recordCost(input.apiKeyId, data.usage.search_cost_usd);
-    } catch (error: any) {
-      log.warn("SEARCH", `Cost recording failed: ${error?.message || String(error)}`);
+      const apiKeyId = input.apiKeyId === "local" ? null : input.apiKeyId;
+      recordSearchUsageCost(apiKeyId, data.provider, data.usage);
+    } catch (error: unknown) {
+      log.warn(
+        "SEARCH",
+        `Cost recording failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 

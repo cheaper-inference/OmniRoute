@@ -1,4 +1,9 @@
+# Obsidian Context Source (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇹 [am](../../../am/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇿 [az](../../../az/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇰 [da](../../../da/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇪 [de](../../../de/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇷 [el](../../../el/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇸 [es](../../../es/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇪 [et](../../../et/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇱 [he](../../../he/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇩 [id](../../../id/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇹 [it](../../../it/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇭 [km](../../../km/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇲 [my](../../../my/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇴 [no](../../../no/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [or](../../../or/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇰 [si](../../../si/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [te](../../../te/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇭 [th](../../../th/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OBSIDIAN_CONTEXT.md)
+
 ---
+
 title: "Źródło kontekstu Obsidian"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -34,73 +39,89 @@ Klient (`src/lib/obsidian/api.ts`) opakowuje Local REST API z:
 
 ## Konfiguracja
 
-**Nie ma zmiennej środowiskowej** na token Obsidian ani base URL — oba są
-przechowywane w tabeli SQLite `key_value` (namespace `obsidian`) przez
-`src/lib/db/obsidian.ts`. Token jest **szyfrowany w spoczynku** (AES-256-GCM, z
-fallbackiem kompatybilności wstecznej dla plaintext). Konfiguruj z zakładki
-**Context Sources** dashboardu Endpoint (`ObsidianSourceCard`) albo przez REST API ustawień.
+Nie istnieje **żadna zmienna środowiskowa** dla tokenu Obsidian ani bazowego adresu URL — oba są
+przechowywane w tabeli SQLite `key_value` (przestrzeń nazw `obsidian`) za pośrednictwem
+`src/lib/db/obsidian.ts`. Token jest **szyfrowany podczas przechowywania** (AES-256-GCM,
+z mechanizmem zgodności wstecznej pozwalającym na użycie tekstu jawnego). Konfigurację można
+przeprowadzić na karcie **Context Sources** panelu Endpoint (`ObsidianSourceCard`) lub za
+pośrednictwem interfejsu REST API ustawień.
 
 > [!IMPORTANT]
-> Wtyczka **Obsidian Local REST API** musi być zainstalowana i uruchomiona. Jej
-> interfejs REST nasłuchuje na **HTTP `127.0.0.1:27123`** (domyślny base URL). Port `27124`
-> to _osobny_ endpoint MCP/HTTPS i jest jawnie odrzucany przez route ustawień.
-> Przy połączeniu z innego urządzenia użyj `http://<tailscale-ip>:27123`.
+> Wtyczka **Obsidian Local REST API** musi być zainstalowana i uruchomiona. Jej interfejs
+> REST nasłuchuje pod adresem **HTTP `127.0.0.1:27123`** (domyślny bazowy adres URL). Port
+> `27124` jest _oddzielnym_ punktem końcowym MCP/HTTPS i jest jawnie odrzucany przez trasę
+> ustawień. W przypadku łączenia z innego urządzenia użyj `http://<tailscale-ip>:27123`.
 
-### Klucze konfiguracji (SQLite `key_value`, namespace `obsidian`)
+### Klucze konfiguracji (SQLite `key_value`, przestrzeń nazw `obsidian`)
 
-| Key               | Purpose                                             | Encrypted |
-| ----------------- | --------------------------------------------------- | --------- |
-| `api_key`         | Bearer token Local REST API                         | yes       |
-| `base_url`        | REST base URL (domyślnie `http://127.0.0.1:27123`)  | no        |
-| `vault_path`      | Bezwzględna ścieżka do katalogu vaultu (do sync)    | no        |
-| `webdav_username` | Wygenerowana nazwa użytkownika WebDAV (sync vaultu) | no        |
-| `webdav_password` | Wygenerowane hasło WebDAV (sync vaultu)             | yes       |
-| `webdav_enabled`  | Czy synchronizacja vaultu WebDAV jest włączona      | no        |
+| Klucz             | Przeznaczenie                                                  | Szyfrowany |
+| ----------------- | -------------------------------------------------------------- | ---------- |
+| `api_key`         | Token bearer lokalnego interfejsu REST API                     | tak        |
+| `base_url`        | Bazowy adres URL REST (domyślnie `http://127.0.0.1:27123`)     | nie        |
+| `vault_path`      | Bezwzględna ścieżka do katalogu skarbca (do synchronizacji)    | nie        |
+| `webdav_username` | Wygenerowana nazwa użytkownika WebDAV (synchronizacja skarbca) | nie        |
+| `webdav_password` | Wygenerowane hasło WebDAV (synchronizacja skarbca)             | tak        |
+| `webdav_enabled`  | Określa, czy synchronizacja skarbca przez WebDAV jest włączona | nie        |
 
-### Konfiguracja przez REST
+### Konfiguracja za pośrednictwem REST
 
 ```bash
-# Save + validate the Local REST API token (POST validates via a status check)
+# Zapisanie i zweryfikowanie tokenu Local REST API (żądanie POST weryfikuje go przez sprawdzenie stanu)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
 
-# Check connection status (returns connected, hasToken, baseUrl, vaultPath)
+# Sprawdzenie stanu połączenia (zwraca connected, hasToken, baseUrl, vaultPath)
 curl http://localhost:20128/api/settings/obsidian
 
-# Disconnect (clears the stored token)
+# Rozłączenie (usuwa zapisany token)
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Wszystkie metody wymagają uwierzytelnienia dashboardu. `POST` odrzuca każdy URL na porcie `27124`
-i waliduje token, wywołując endpoint statusu Local REST API przed zapisem.
+Wszystkie metody wymagają uwierzytelnienia w panelu. `POST` odrzuca każdy adres URL na
+porcie `27124` i przed zapisaniem tokenu weryfikuje go, wywołując punkt końcowy stanu
+Local REST API.
 
-### Synchronizacja vaultu WebDAV
+### Synchronizacja skarbca przez WebDAV
 
 `src/app/api/settings/obsidian/webdav/route.ts` zarządza opcjonalną synchronizacją
-vaultu opartą na WebDAV (sterowaną przez `src/lib/obsidianSync.ts`). Włączenie
-wskazuje OmniRoute na lokalny katalog vaultu i generuje losową parę username/password WebDAV:
+skarbca opartą na WebDAV (obsługiwaną przez `src/lib/obsidianSync.ts`). Jej włączenie
+wskazuje OmniRoute lokalny katalog skarbca i generuje losową parę nazwy użytkownika
+oraz hasła WebDAV:
 
 ```bash
-# Enable WebDAV sync for a vault directory (mints username/password)
+# Włączenie synchronizacji WebDAV dla katalogu skarbca (generuje nazwę użytkownika i hasło)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# Get WebDAV sync status (credentials returned only while enabled)
+# Pobranie stanu synchronizacji WebDAV (dane uwierzytelniające są zwracane tylko wtedy, gdy funkcja jest włączona)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# Disable WebDAV sync (clears credentials + managed .stignore)
+# Wyłączenie synchronizacji WebDAV (usuwa dane uwierzytelniające i zarządzany plik .stignore)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
-### Źródło kontekstu per klucz API (opcjonalne)
+### Źródło kontekstu dla poszczególnych kluczy API (opcjonalne)
 
-Konfiguracja Obsidian może być zawężona **per klucz API** przez tabelę `api_key_context_sources`
-(`src/lib/db/apiKeyContextSources.ts`). Gdy wywołanie MCP niesie uwierzytelnione id
-klucza API, `getObsidianConfigForApiKey()` preferuje własny token/base-URL/vault-path
-tego klucza (`source: "api_key"`), a w przeciwnym razie spada do konfiguracji globalnej
+Konfiguracja Obsidian może być określana **dla każdego klucza API osobno** za pomocą
+tabeli `api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Gdy wywołanie
+MCP zawiera identyfikator uwierzytelnionego klucza API, `getObsidianConfigForApiKey()`
+preferuje własny token, bazowy adres URL i ścieżkę skarbca tego klucza
+(`source: "api_key"`), a w przeciwnym razie używa konfiguracji globalnej
 (`source: "global"`).
+
+Narzędzia MCP niezwiązane z synchronizacją wymagają ustalenia tożsamości wywołującego
+przed odczytaniem tej konfiguracji. Wywołujący bez ustalonej tożsamości otrzymuje
+komunikat `Obsidian API token not configured`, a żadne żądanie do skarbca nie jest
+wysyłane. Tożsamość wywołujących HTTP jest ustalana na podstawie danych uwierzytelniających
+ich żądań; w przypadku wywołujących przez stdio może zostać ustalona za pomocą
+`OMNIROUTE_API_KEY` lub `ROUTER_API_KEY`. Wywołujący HTTP bez ustalonej tożsamości nie
+może odziedziczyć tożsamości środowiskowej serwera. Same identyfikatory zastępcze nie
+uprawniają do dostępu; nadal obsługiwane są prawidłowe środowiskowe dane uwierzytelniające,
+które są rozpoznawane jako `env-key`. Uwierzytelnione klucze bez własnej konfiguracji
+Obsidian nadal korzystają z globalnej konfiguracji zapasowej. Cztery narzędzia
+`obsidian_sync_*` zachowują swoje odrębne zachowanie dotyczące tokenów synchronizacji.
 
 ## Narzędzia MCP (22)
 

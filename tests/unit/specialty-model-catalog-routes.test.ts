@@ -15,12 +15,10 @@ const embeddingsRoute = await import("../../src/app/api/v1/embeddings/route.ts")
 const videoRoute = await import("../../src/app/api/v1/videos/generations/route.ts");
 const musicRoute = await import("../../src/app/api/v1/music/generations/route.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
-const providerModelsRoute =
-  await import("../../src/app/api/v1/providers/[provider]/models/route.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   // These routes all derive from the shared unified catalog (getUnifiedModelsResponse),
   // which #6408 wrapped in a 1.5s TTL response cache keyed only by (prefix, isCodex
@@ -59,20 +57,36 @@ test.beforeEach(async () => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("image catalog GET uses the unified active-credential model list", async () => {
-  await seedConnection("codex");
+test(
+  "image catalog GET uses the unified active-credential model list",
+  { timeout: 10000 },
+  async () => {
+    await seedConnection("codex");
 
-  const ids = await listedIds(imageRoute, "/v1/images/generations");
+    const ids = await listedIds(imageRoute, "/v1/images/generations");
 
-  assert.deepEqual(
-    ids.filter((id) => id.startsWith("codex/")),
-    ["codex/gpt-5.6-sol", "codex/gpt-5.6-terra", "codex/gpt-5.6-luna"]
-  );
-  assert.ok(!ids.includes("openai/gpt-image-2"));
-});
+    // #14976 added the Codex GPT Image models (dedicated Codex Images API route)
+    // after the GPT-5.6 hosted-tool ids; see tests/unit/image-registry-gpt56.test.ts.
+    assert.deepEqual(
+      ids.filter((id) => id.startsWith("codex/")),
+      [
+        "codex/gpt-6.1-sol-image",
+        "codex/gpt-5.6-sol-image",
+        "codex/gpt-5.6-terra-image",
+        "codex/gpt-5.6-luna-image",
+        "codex/gpt-image-2.5-flare",
+        "codex/gpt-image-2.5-sunburst",
+        "codex/gpt-image-2",
+      ]
+    );
+    assert.ok(!ids.includes("codex/gpt-5.5"));
+    assert.ok(!ids.includes("openai/gpt-image-2"));
+    assert.ok(!ids.some((id) => id.startsWith("xai/")));
+  }
+);
 
 test("specialty catalog GET preserves unified catalog headers", async () => {
   await seedConnection("codex");
@@ -96,34 +110,6 @@ test("embedding catalog GET hides providers without active credentials", async (
 
   assert.ok(ids.includes("cohere/embed-v4.0"));
   assert.ok(!ids.includes("openai/text-embedding-3-small"));
-});
-
-test("provider-scoped GitHub Models catalog preserves nested embedding IDs", async () => {
-  await seedConnection("github-models");
-
-  const response = await providerModelsRoute.GET(
-    new Request("http://localhost/v1/providers/github-models/models"),
-    { params: Promise.resolve({ provider: "github-models" }) }
-  );
-  const body = (await response.json()) as {
-    data?: Array<{ id: string; root?: string; type?: string }>;
-  };
-  assert.equal(response.status, 200);
-
-  const embeddings = (body.data || []).filter((model) => model.type === "embedding");
-  assert.deepEqual(
-    embeddings.map((model) => ({ id: model.id, root: model.root })),
-    [
-      {
-        id: "openai/text-embedding-3-large",
-        root: "openai/text-embedding-3-large",
-      },
-      {
-        id: "openai/text-embedding-3-small",
-        root: "openai/text-embedding-3-small",
-      },
-    ]
-  );
 });
 
 test("video catalog GET hides credential-backed providers without credentials", async () => {

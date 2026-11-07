@@ -84,9 +84,9 @@ function ensureLegacyMemoryTable() {
   `);
 }
 
-async function waitForAsyncMemoryFlush() {
-  await new Promise((resolve) => setImmediate(resolve));
-  await new Promise((resolve) => setTimeout(resolve, 10));
+async function flushAsyncSideEffects() {
+  // setImmediate rounds drain the event loop more reliably than setTimeout under CI load.
+  for (let i = 0; i < 5; i++) await new Promise((resolve) => setImmediate(resolve));
 }
 
 async function invokeChatCore({
@@ -152,7 +152,7 @@ test.after(() => {
     db.close();
   } catch {}
 
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("chatCore sanitization normalizes max_output_tokens into max_tokens", async () => {
@@ -284,6 +284,112 @@ test("chatCore sanitization preserves max_output_tokens for openai-responses tar
   );
 });
 
+test("chatCore preserves Chat max_tokens as max_output_tokens for Perplexity Agent Anthropic models", async () => {
+  const { call, result } = await invokeChatCore({
+    endpoint: "/v1/chat/completions",
+    provider: "perplexity-agent",
+    model: "anthropic/claude-opus-4-5",
+    body: {
+      model: "anthropic/claude-opus-4-5",
+      max_tokens: 32,
+      messages: [{ role: "user", content: "Reply with OK only." }],
+    },
+    responseFactory: () =>
+      new Response(
+        JSON.stringify({
+          id: "resp_pplx_agent",
+          object: "response",
+          status: "completed",
+          model: "anthropic/claude-opus-4-5",
+          output: [
+            { type: "message", role: "assistant", content: [{ type: "output_text", text: "OK" }] },
+          ],
+          usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      ),
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(call.url, "https://api.perplexity.ai/v1/responses");
+  assert.equal(call.body.model, "anthropic/claude-opus-4-5");
+  assert.equal(call.body.max_output_tokens, 32);
+  assert.equal("max_tokens" in call.body, false);
+  assert.equal("max_completion_tokens" in call.body, false);
+});
+
+test("chatCore defaults max_output_tokens for Perplexity Agent Anthropic chat requests", async () => {
+  const { call, result } = await invokeChatCore({
+    endpoint: "/v1/chat/completions",
+    provider: "perplexity-agent",
+    model: "anthropic/claude-opus-4-5",
+    body: {
+      model: "anthropic/claude-opus-4-5",
+      messages: [{ role: "user", content: "hi" }],
+    },
+    responseFactory: () =>
+      new Response(
+        JSON.stringify({
+          id: "resp_pplx_agent_default_tokens",
+          object: "response",
+          status: "completed",
+          model: "anthropic/claude-opus-4-5",
+          output: [
+            {
+              type: "message",
+              role: "assistant",
+              content: [{ type: "output_text", text: "Hello!" }],
+            },
+          ],
+          usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      ),
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(call.url, "https://api.perplexity.ai/v1/responses");
+  assert.equal(call.body.max_output_tokens, 4096);
+  assert.equal("max_tokens" in call.body, false);
+  assert.equal("max_completion_tokens" in call.body, false);
+});
+
+test("chatCore defaults max_output_tokens for Perplexity Agent Kimi chat requests", async () => {
+  const { call, result } = await invokeChatCore({
+    endpoint: "/v1/chat/completions",
+    provider: "perplexity-agent",
+    model: "perplexity/kimi-k3",
+    body: {
+      model: "perplexity/kimi-k3",
+      messages: [{ role: "user", content: "hi" }],
+    },
+    responseFactory: () =>
+      new Response(
+        JSON.stringify({
+          id: "resp_pplx_agent_kimi_default_tokens",
+          object: "response",
+          status: "completed",
+          model: "perplexity/kimi-k3",
+          output: [
+            {
+              type: "message",
+              role: "assistant",
+              content: [{ type: "output_text", text: "Hello!" }],
+            },
+          ],
+          usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      ),
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(call.url, "https://api.perplexity.ai/v1/responses");
+  assert.equal(call.body.max_output_tokens, 4096);
+  assert.equal("max_tokens" in call.body, false);
+  assert.equal("max_completion_tokens" in call.body, false);
+});
+
 test("chatCore sanitization strips empty message names and filters empty tool names", async () => {
   // Note: `input` field is tested separately because its presence triggers
   // Responses format detection (PR #1002), which changes message handling.
@@ -307,13 +413,14 @@ test("chatCore sanitization strips empty message names and filters empty tool na
   assert.equal(call.body.messages[0].name, undefined);
   assert.equal(call.body.messages[1].name, "valid-name");
   // 3 invalid tools removed: 2 empty function names + 1 empty anthropic name
-  // 2 valid remain: lookup_weather (function) + anthropic_lookup (anthropic-format)
+  // 2 valid remain in the client's own order: lookup_weather + anthropic_lookup.
+  // Client tools are no longer sorted alphabetically — only gateway-injected tools are —
+  // because a later tool cap keeps the head of the list (#18120).
   assert.equal(call.body.tools.length, 2);
-  assert.equal(call.body.tools[0].function.name, "lookup_weather");
-  // The second tool (anthropic-format) may be wrapped in .function by the translator
-  // or preserved as-is with .name; check whichever is available
-  const tool2Name = call.body.tools[1].function?.name ?? call.body.tools[1].name;
-  assert.equal(tool2Name, "anthropic_lookup");
+  const tool0Name = call.body.tools[0].function?.name ?? call.body.tools[0].name;
+  assert.equal(tool0Name, "lookup_weather");
+  const tool1Name = call.body.tools[1].function?.name ?? call.body.tools[1].name;
+  assert.equal(tool1Name, "anthropic_lookup");
 });
 
 test("chatCore sanitization strips empty input item names on responses endpoint", async () => {
@@ -621,6 +728,59 @@ test("chatCore skips memory injection when memory is disabled or apiKeyInfo is m
   assert.equal(noApiKey.call.body.messages[0].content, "Hello");
 });
 
+test("chatCore keeps a Claude Code classifier turn out of memory, in both directions", async () => {
+  await settingsDb.updateSettings({
+    memoryEnabled: true,
+    memoryMaxTokens: 1024,
+    memoryRetentionDays: 30,
+    memoryStrategy: "recent",
+  });
+  invalidateMemorySettingsCache();
+  ensureLegacyMemoryTable();
+
+  const apiKeyId = `key-classifier-${Date.now()}`;
+  await createMemory({
+    apiKeyId,
+    sessionId: "session-1",
+    type: "factual",
+    key: "preference",
+    content: "User prefers concise Rust examples.",
+    metadata: {},
+    expiresAt: null,
+  });
+  const claudeTurn = (system, content) => ({
+    apiKeyInfo: { id: apiKeyId, name: "Memory Key" },
+    endpoint: "/v1/messages",
+    body: {
+      model: "gpt-4o-mini",
+      max_tokens: 16,
+      stream: false,
+      system,
+      messages: [{ role: "user", content }],
+    },
+  });
+  const storedContents = async () => {
+    await flushAsyncSideEffects();
+    const listed = await listMemories({ apiKeyId });
+    return (Array.isArray(listed) ? listed : (listed.data ?? [])).map((row) => row.content);
+  };
+
+  // Control: an ordinary Claude-format turn still reads and writes memory.
+  const ordinary = await invokeChatCore(claudeTurn("You are helpful.", "I prefer blue themes."));
+  assert.match(JSON.stringify(ordinary.call.body), /Memory context: User prefers concise Rust/);
+  const afterOrdinary = await storedContents();
+  assert.ok(afterOrdinary.some((content) => /blue themes/.test(content)));
+
+  const classifier = await invokeChatCore(
+    claudeTurn(
+      "You are a security monitor for autonomous AI coding agents. Reply with <block>no</block>.",
+      "I prefer green themes."
+    )
+  );
+  assert.doesNotMatch(JSON.stringify(classifier.call.body), /Memory context/);
+  assert.deepEqual(await storedContents(), afterOrdinary);
+});
+
 test("chatCore does not share or persist memories when apiKeyInfo is missing", async () => {
   await settingsDb.updateSettings({
     memoryEnabled: true,
@@ -647,7 +807,7 @@ test("chatCore does not share or persist memories when apiKeyInfo is missing", a
     },
   });
 
-  await waitForAsyncMemoryFlush();
+  await flushAsyncSideEffects();
 
   const localMemoriesResult = await listMemories({ apiKeyId: "local" });
   const localMemories = Array.isArray(localMemoriesResult)
@@ -751,7 +911,7 @@ test("chatCore extracts memories from Claude content arrays and Responses output
 
   assert.equal(responsesResult.result.success, true);
 
-  await waitForAsyncMemoryFlush();
+  await flushAsyncSideEffects();
 
   const claudeMemoriesResult = await listMemories({ apiKeyId: claudeKeyId });
   const responsesMemoriesResult = await listMemories({ apiKeyId: responsesKeyId });
@@ -819,7 +979,7 @@ test("chatCore request memory extraction for responses input ignores assistant i
 
   assert.equal(responsesResult.result.success, true);
 
-  await waitForAsyncMemoryFlush();
+  await flushAsyncSideEffects();
 
   const memoriesResult = await listMemories({ apiKeyId: responsesKeyId });
   const memories = Array.isArray(memoriesResult) ? memoriesResult : (memoriesResult.data ?? []);

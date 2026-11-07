@@ -50,7 +50,7 @@ test("unknown strategy -> input order unchanged (same reference contents)", asyn
   const input = [target("openai", "gpt-4o"), target("anthropic", "claude-3")];
   const out = await applyStrategyOrdering("no-such-strategy", input, deps());
   assert.deepEqual(
-    out.map((t: { executionKey: string }) => t.executionKey),
+    out.orderedTargets.map((t: { executionKey: string }) => t.executionKey),
     ["openai>gpt-4o", "anthropic>claude-3"]
   );
 });
@@ -59,7 +59,7 @@ test("fill-first -> preserves priority order", async () => {
   const input = [target("a", "m1"), target("b", "m2"), target("c", "m3")];
   const out = await applyStrategyOrdering("fill-first", input, deps());
   assert.deepEqual(
-    out.map((t: { executionKey: string }) => t.executionKey),
+    out.orderedTargets.map((t: { executionKey: string }) => t.executionKey),
     ["a>m1", "b>m2", "c>m3"]
   );
 });
@@ -67,6 +67,33 @@ test("fill-first -> preserves priority order", async () => {
 test("random -> same multiset of targets (a permutation)", async () => {
   const input = [target("a", "m1"), target("b", "m2"), target("c", "m3")];
   const out = await applyStrategyOrdering("random", input, deps());
-  assert.equal(out.length, 3);
-  assert.deepEqual(keys(out), keys(input));
+  assert.equal(out.orderedTargets.length, 3);
+  assert.deepEqual(keys(out.orderedTargets), keys(input));
+});
+
+test("cost-optimized manifest routing logs through the canonical strategy path", async () => {
+  const debugCalls: unknown[][] = [];
+  const log = {
+    info() {},
+    warn() {},
+    error() {},
+    debug(...args: unknown[]) {
+      debugCalls.push(args);
+    },
+  } as never;
+  const input = [target("openai", "gpt-4o"), target("anthropic", "claude-3")];
+
+  const out = await applyStrategyOrdering("cost-optimized", input, {
+    ...deps(),
+    config: { manifestRouting: true },
+    body: { messages: [{ role: "user", content: "hello" }] },
+    log,
+  } as never);
+
+  assert.equal(out.orderedTargets.length, 2);
+  assert.equal(
+    debugCalls.some((args) => args[1] === "manifest routing applied"),
+    true,
+    "manifest routing must log from applyStrategyOrdering"
+  );
 });

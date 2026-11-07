@@ -15,6 +15,8 @@ import {
   intersectStringArrays,
   minKnownNumber,
   maybeOmitCatalogModelName,
+  getThinkingCapabilityFields,
+  getConnectionScopedEffortTiers,
 } from "../../src/app/api/v1/models/catalogHelpers.ts";
 import {
   qualifyOpenRouterModelId,
@@ -71,6 +73,83 @@ test("catalogHelpers: intersectStringArrays (dedup + common)", () => {
   );
   assert.deepEqual(intersectStringArrays([]), []);
   assert.deepEqual(intersectStringArrays([["a"], []]), []);
+});
+
+test("catalogHelpers: Kiro GPT-5.6 models expose the native Max tier", () => {
+  for (const model of ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"]) {
+    assert.deepEqual(getThinkingCapabilityFields("kr", model, true), {
+      thinking: true,
+      supportsThinking: true,
+      effort_tiers: ["none", "low", "medium", "high", "xhigh", "max"],
+    });
+  }
+});
+
+test("catalogHelpers: connection-scoped combo efforts honor dynamic, pinned, and allowlisted scopes", () => {
+  const modelsByConnection = {
+    first: [{ id: "grok-4.6", supportedThinkingEfforts: ["low", "medium", "high"] }],
+    second: [{ id: "grok-4.6", supportedThinkingEfforts: ["medium", "high"] }],
+    unknown: [{ id: "other-model", supportedThinkingEfforts: ["low"] }],
+  };
+
+  assert.deepEqual(
+    getConnectionScopedEffortTiers("grok-4.6", {}, ["first", "second"], modelsByConnection),
+    ["medium", "high"]
+  );
+  assert.deepEqual(
+    getConnectionScopedEffortTiers(
+      "grok-4.6",
+      { connectionId: "first" },
+      ["first", "second"],
+      modelsByConnection
+    ),
+    ["low", "medium", "high"]
+  );
+  assert.deepEqual(
+    getConnectionScopedEffortTiers(
+      "grok-4.6",
+      { allowedConnectionIds: ["second"] },
+      ["first", "second"],
+      modelsByConnection
+    ),
+    ["medium", "high"]
+  );
+  assert.deepEqual(
+    getConnectionScopedEffortTiers("grok-4.6", {}, undefined, modelsByConnection),
+    [],
+    "a dynamic target fails closed when any catalog-backed connection lacks the model"
+  );
+  assert.deepEqual(
+    getConnectionScopedEffortTiers("grok-4.6", {}, ["first", "unknown"], modelsByConnection),
+    []
+  );
+  assert.deepEqual(
+    getConnectionScopedEffortTiers("grok-4.6", {}, ["first", "no-tiers"], {
+      ...modelsByConnection,
+      "no-tiers": [{ id: "grok-4.6" }],
+    }),
+    []
+  );
+  assert.deepEqual(
+    getConnectionScopedEffortTiers("grok-4.6", {}, ["unknown"], modelsByConnection),
+    []
+  );
+  assert.deepEqual(
+    getConnectionScopedEffortTiers("missing-model", {}, undefined, {
+      nodeCatalog: [{ id: "other-model" }],
+    }),
+    []
+  );
+  assert.equal(getConnectionScopedEffortTiers("grok-4.6", {}, ["first"], {}), undefined);
+  assert.deepEqual(
+    getConnectionScopedEffortTiers("grok-4.6", { connectionId: "stale" }, ["first"], {}),
+    []
+  );
+  assert.deepEqual(
+    getConnectionScopedEffortTiers("grok-4.6", { allowedConnectionIds: ["stale"] }, ["first"], {}),
+    []
+  );
+  assert.deepEqual(getConnectionScopedEffortTiers("grok-4.6", {}, [], {}), []);
 });
 
 test("catalogHelpers: minKnownNumber ignores non-positive/unknown", () => {
@@ -130,6 +209,12 @@ test("catalogVision: re-exports isVisionModelId and derives capability fields", 
   // id-based heuristic
   const visionFields = getVisionCapabilityFields("gpt-4o");
   assert.ok(visionFields, "gpt-4o must be detected as vision-capable");
+  const typedVisionFields: {
+    capabilities: { vision: true };
+    input_modalities: string[];
+    output_modalities: string[];
+  } | null = visionFields;
+  assert.equal(typedVisionFields?.capabilities.vision, true);
   assert.equal(visionFields?.capabilities.vision, true);
   assert.equal(getVisionCapabilityFields("kimi-k2"), null);
 });

@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 
 import { buildErrorBody } from "../../utils/error.ts";
+import { sanitizeErrorMessage } from "../../utils/errorSanitization.ts";
 import type { ExecutorLog } from "../base.ts";
 
 export interface ClaudeWebStreamOptions {
@@ -10,16 +11,38 @@ export interface ClaudeWebStreamOptions {
   onComplete(result: { assistantText: string; stopReason: string }): void;
   onFailure(): void;
   log?: ExecutorLog | null;
+  /**
+   * How long (ms) to wait for further upstream activity after a `tool_use` content block
+   * closes with no other block still open before synthesizing a turn finish. claude.ai's
+   * custom (non-native) tool flow can hold the assistant message open and send only
+   * keepalive `ping`/metadata events while it waits for the client to execute the tool and
+   * reply, never sending `message_delta`/`message_stop` on that same stream (#14711). The
+   * timer resets on every received upstream event (including keepalives), so it only fires
+   * once the connection has gone genuinely idle. Overridable for tests; defaults to
+   * `DEFAULT_TOOL_USE_IDLE_FINISH_MS`.
+   */
+  toolUseIdleFinishMs?: number;
 }
 
+/** Default idle window (ms) — see `ClaudeWebStreamOptions.toolUseIdleFinishMs`. */
+export const DEFAULT_TOOL_USE_IDLE_FINISH_MS = 3000;
+
 type StreamPhase = "awaiting_message" | "in_message" | "stopped" | "failed";
-type BlockKind = "thinking" | "text" | "other";
+type BlockKind = "thinking" | "text" | "tool_use" | "other";
 const MAX_CLAUDE_WEB_SSE_PENDING_CHARS = 1024 * 1024;
 type SemanticEvent =
   | { kind: "content"; text: string }
   | { kind: "reasoning"; text: string }
+  | { kind: "tool_call"; index: number; id: string; name: string; input: string }
   | { kind: "metadata"; eventType: string; data: Record<string, unknown> }
   | { kind: "finish"; stopReason: string };
+
+interface ToolBlockInfo {
+  id: string;
+  name: string;
+  inputParts: string[];
+  initialInput: string;
+}
 
 const KNOWN_METADATA_EVENTS = new Set([
   "ping",
@@ -140,7 +163,8 @@ async function* decodeSseData(
 }
 
 function safeMetadataValue(value: unknown): string | number | boolean | null | undefined {
-  if (value === null || typeof value === "boolean") return value;
+  if (value === null) return null;
+  if (typeof value === "boolean") return value;
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.length <= 128 && /^[A-Za-z0-9._:+/@-]+$/.test(value)) {
     return value;
@@ -193,6 +217,7 @@ function thinkingSummaryText(delta: Record<string, unknown>): string {
 interface ProtocolState {
   phase: StreamPhase;
   openBlocks: Map<number, BlockKind>;
+  toolBlocks: Map<number, ToolBlockInfo>;
   stopReason: string;
 }
 
@@ -241,6 +266,7 @@ function handleMessageStart(state: ProtocolState): null {
 function blockKind(block: Record<string, unknown>): BlockKind {
   if (block.type === "thinking") return "thinking";
   if (block.type === "text") return "text";
+  if (block.type === "tool_use") return "tool_use";
   return "other";
 }
 
@@ -252,17 +278,35 @@ function handleContentBlockStart(
   const index = requireBlockIndex(event);
   if (state.openBlocks.has(index)) protocolFailure(state, "Content block was opened twice");
 
-  const kind = blockKind(requireRecord(event.content_block, "content_block"));
+  const contentBlock = requireRecord(event.content_block, "content_block");
+  const kind = blockKind(contentBlock);
   state.openBlocks.set(index, kind);
+
+  if (kind === "tool_use") {
+    const id = typeof contentBlock.id === "string" ? contentBlock.id : "";
+    const name = typeof contentBlock.name === "string" ? contentBlock.name : "";
+    let initialInput = "";
+    if (contentBlock.input !== undefined) {
+      try {
+        initialInput = JSON.stringify(contentBlock.input);
+      } catch {
+        initialInput = "";
+      }
+    }
+    state.toolBlocks.set(index, { id, name, inputParts: [], initialInput });
+    return null;
+  }
+
   return kind === "thinking" ? { kind: "reasoning", text: "" } : null;
 }
 
 function handleContentBlockDelta(
   event: Record<string, unknown>,
   state: ProtocolState
-): SemanticEvent {
+): SemanticEvent | null {
   assertInMessage(state, "content_block_delta");
-  const block = state.openBlocks.get(requireBlockIndex(event));
+  const index = requireBlockIndex(event);
+  const block = state.openBlocks.get(index);
   if (!block) protocolFailure(state, "Content delta has no open block");
 
   const delta = requireRecord(event.delta, "delta");
@@ -275,14 +319,42 @@ function handleContentBlockDelta(
   if (delta.type === "thinking_summary_delta" && block === "thinking") {
     return { kind: "reasoning", text: thinkingSummaryText(delta) };
   }
+  if (delta.type === "input_json_delta" && block === "tool_use") {
+    const toolBlock = state.toolBlocks.get(index);
+    if (!toolBlock) protocolFailure(state, "input_json_delta has no tool block state");
+    if (typeof delta.partial_json === "string") {
+      toolBlock.inputParts.push(delta.partial_json);
+    }
+    return null;
+  }
   return protocolFailure(state, "Content delta type does not match its block");
 }
 
-function handleContentBlockStop(event: Record<string, unknown>, state: ProtocolState): null {
+function handleContentBlockStop(
+  event: Record<string, unknown>,
+  state: ProtocolState
+): SemanticEvent | null {
   assertInMessage(state, "content_block_stop");
-  if (!state.openBlocks.delete(requireBlockIndex(event))) {
-    protocolFailure(state, "Content block stop has no open block");
+  const index = requireBlockIndex(event);
+  const kind = state.openBlocks.get(index);
+  if (!kind) protocolFailure(state, "Content block stop has no open block");
+  state.openBlocks.delete(index);
+
+  if (kind === "tool_use") {
+    const toolBlock = state.toolBlocks.get(index);
+    state.toolBlocks.delete(index);
+    if (!toolBlock) protocolFailure(state, "Tool block stop has no tool state");
+
+    let inputStr = "";
+    if (toolBlock.inputParts.length > 0) {
+      inputStr = toolBlock.inputParts.join("");
+    } else if (toolBlock.initialInput) {
+      inputStr = toolBlock.initialInput;
+    }
+
+    return { kind: "tool_call", index, id: toolBlock.id, name: toolBlock.name, input: inputStr };
   }
+
   return null;
 }
 
@@ -329,35 +401,134 @@ function dispatchProtocolEvent(
   }
 }
 
+const IDLE_TIMEOUT = Symbol("claude-web-idle-timeout");
+
+/**
+ * Races the next upstream SSE frame against an idle timer. Resolves to the timeout sentinel
+ * when no frame arrives within `ms`; otherwise resolves to the iterator result. Used only
+ * while a synthetic tool_use finish is pending (see `ClaudeWebStreamOptions.toolUseIdleFinishMs`).
+ */
+function raceNextFrame(
+  sseIterator: AsyncIterator<string, void, void>,
+  ms: number
+): Promise<IteratorResult<string, void> | typeof IDLE_TIMEOUT> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => resolve(IDLE_TIMEOUT), ms);
+    sseIterator.next().then(
+      (result) => {
+        clearTimeout(timer);
+        resolve(result);
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        reject(error as Error);
+      }
+    );
+  });
+}
+
+/**
+ * Updates whether a synthetic tool_use finish is owed: armed when a `tool_call` semantic
+ * event closes with no other content block still open, and disarmed the moment real
+ * follow-up activity (a new block, or an upstream `message_delta`/`message_stop`) arrives.
+ */
+function updateToolFinishArmed(
+  armed: boolean,
+  eventType: string,
+  semanticEvent: SemanticEvent | null,
+  state: ProtocolState
+): boolean {
+  if (eventType === "content_block_start" || eventType === "message_delta") return false;
+  if (semanticEvent?.kind === "tool_call") return state.openBlocks.size === 0;
+  return armed;
+}
+
+type NextFrameOutcome = { kind: "data"; value: string } | { kind: "idle-finish" } | { kind: "eof" };
+
+/**
+ * Pulls the next upstream SSE frame, racing it against the idle-finish timer only while one
+ * is armed. On an idle timeout it also cancels the now-useless upstream reader directly (see
+ * `parseClaudeWebEvents`'s own `finally` for why: a generator-close alone can hang forever
+ * against a reader that never resolves).
+ */
+async function readNextFrame(
+  control: StreamControl,
+  sseIterator: AsyncIterator<string, void, void>,
+  toolFinishArmed: boolean,
+  toolUseIdleFinishMs: number
+): Promise<NextFrameOutcome> {
+  const next = toolFinishArmed
+    ? await raceNextFrame(sseIterator, toolUseIdleFinishMs)
+    : await sseIterator.next();
+
+  if (next === IDLE_TIMEOUT) {
+    // The upstream connection is still open with no `message_stop` coming (claude.ai's
+    // tool_use hold-open, #14711) — cancel it directly so decodeSseData's pending
+    // `reader.read()` settles promptly instead of leaving the generator blocked on a read
+    // that would otherwise never resolve.
+    if (control.reader) await control.reader.cancel().catch(() => {});
+    return { kind: "idle-finish" };
+  }
+  // `IteratorResult<string, void>`'s `value` widens to `string | void` (the `TReturn = void`
+  // arm), even though `next.done` being falsy already rules that arm out at runtime — narrow
+  // it explicitly rather than casting.
+  if (next.done || typeof next.value !== "string") return { kind: "eof" };
+  return { kind: "data", value: next.value };
+}
+
 async function* parseClaudeWebEvents(
   source: ReadableStream<Uint8Array>,
-  control: StreamControl
+  control: StreamControl,
+  toolUseIdleFinishMs: number = DEFAULT_TOOL_USE_IDLE_FINISH_MS
 ): AsyncGenerator<SemanticEvent, void, void> {
   const state: ProtocolState = {
     phase: "awaiting_message",
     openBlocks: new Map(),
+    toolBlocks: new Map(),
     stopReason: "end_turn",
   };
+  // Manually driven (not `for await`) so a tool_use idle finish can race the next upstream
+  // frame against a timer. That gives up the language's automatic IteratorClose-on-exit, so
+  // every exit path below (return, throw, or the caller cancelling us mid-`yield`) must close
+  // `sseIterator` itself in `finally` — otherwise the underlying reader's pending `read()` is
+  // never cancelled/released (leaked lock, and a dangling unsettled promise in tests).
+  const sseIterator = decodeSseData(source, control)[Symbol.asyncIterator]();
+  let toolFinishArmed = false;
 
-  for await (const data of decodeSseData(source, control)) {
-    if (data === "[DONE]") {
-      protocolFailure(state, "DONE arrived before message_stop");
+  try {
+    while (true) {
+      const frame = await readNextFrame(control, sseIterator, toolFinishArmed, toolUseIdleFinishMs);
+      if (frame.kind === "idle-finish") {
+        state.phase = "stopped";
+        yield { kind: "finish", stopReason: "tool_use" };
+        return;
+      }
+      if (frame.kind === "eof") break;
+
+      const data = frame.value;
+      if (data === "[DONE]") {
+        protocolFailure(state, "DONE arrived before message_stop");
+      }
+
+      const { event, eventType } = parseProtocolEvent(data, state);
+      if (KNOWN_METADATA_EVENTS.has(eventType)) {
+        toolFinishArmed = updateToolFinishArmed(toolFinishArmed, eventType, null, state);
+        yield { kind: "metadata", eventType, data: projectMetadataEvent(eventType, event) };
+        continue;
+      }
+
+      const semanticEvent = dispatchProtocolEvent(eventType, event, state);
+      toolFinishArmed = updateToolFinishArmed(toolFinishArmed, eventType, semanticEvent, state);
+      if (!semanticEvent) continue;
+      yield semanticEvent;
+      if (semanticEvent.kind === "finish") return;
     }
 
-    const { event, eventType } = parseProtocolEvent(data, state);
-    if (KNOWN_METADATA_EVENTS.has(eventType)) {
-      yield { kind: "metadata", eventType, data: projectMetadataEvent(eventType, event) };
-      continue;
-    }
-
-    const semanticEvent = dispatchProtocolEvent(eventType, event, state);
-    if (!semanticEvent) continue;
-    yield semanticEvent;
-    if (semanticEvent.kind === "finish") return;
+    if (control.cancelled) return;
+    throw new ClaudeWebProtocolError("Claude Web stream ended before message_stop");
+  } finally {
+    await sseIterator.return?.().catch(() => {});
   }
-
-  if (control.cancelled) return;
-  throw new ClaudeWebProtocolError("Claude Web stream ended before message_stop");
 }
 
 function openAiFinishReason(stopReason: string): string {
@@ -395,15 +566,19 @@ function makeChunk(
 }
 
 function protocolErrorBody(): Record<string, unknown> {
-  const body = buildErrorBody(502, "Claude Web stream protocol error");
-  body.error.type = "upstream_protocol_error";
-  body.error.code = "claude_web_protocol_error";
+  const body = buildErrorBody(502, "Claude Web stream protocol error", undefined, {
+    type: "upstream_protocol_error",
+    code: "claude_web_protocol_error",
+  });
   return body as unknown as Record<string, unknown>;
 }
 
 function responseHeaders(contentType: string, metadata: Record<string, string>): Headers {
+  const charsetAware = contentType.includes("charset")
+    ? contentType
+    : `${contentType}; charset=utf-8`;
   const headers = new Headers({
-    "Content-Type": contentType,
+    "Content-Type": charsetAware,
     "Cache-Control": "no-cache",
   });
   const headerNames: Record<string, string> = {
@@ -447,19 +622,38 @@ async function createBufferedResponse(
   let assistantText = "";
   let reasoningText = "";
   let stopReason = "end_turn";
+  const toolCalls: Array<{ id: string; name: string; input: string }> = [];
   const metadataEvents: Array<{ type: string; data: Record<string, unknown> }> = [];
   const control: StreamControl = { reader: null, cancelled: false };
 
   try {
-    for await (const event of parseClaudeWebEvents(source, control)) {
+    for await (const event of parseClaudeWebEvents(source, control, options.toolUseIdleFinishMs)) {
       if (event.kind === "content") assistantText += event.text;
       if (event.kind === "reasoning") reasoningText += event.text;
+      if (event.kind === "tool_call") {
+        toolCalls.push({ id: event.id, name: event.name, input: event.input });
+      }
       if (event.kind === "metadata") {
         metadataEvents.push({ type: event.eventType, data: event.data });
       }
       if (event.kind === "finish") stopReason = event.stopReason;
     }
     notifyComplete(options, { assistantText, stopReason });
+
+    const message: Record<string, unknown> = {
+      role: "assistant",
+      content: assistantText || null,
+      ...(reasoningText ? { reasoning_content: reasoningText } : {}),
+    };
+
+    if (toolCalls.length > 0) {
+      message.tool_calls = toolCalls.map((tc) => ({
+        id: tc.id,
+        type: "function",
+        function: { name: tc.name, arguments: tc.input },
+      }));
+    }
+
     return new Response(
       JSON.stringify({
         id,
@@ -469,11 +663,7 @@ async function createBufferedResponse(
         choices: [
           {
             index: 0,
-            message: {
-              role: "assistant",
-              content: assistantText,
-              ...(reasoningText ? { reasoning_content: reasoningText } : {}),
-            },
+            message,
             finish_reason: openAiFinishReason(stopReason),
             logprobs: null,
           },
@@ -488,8 +678,11 @@ async function createBufferedResponse(
         headers: responseHeaders("application/json", options.responseMetadata),
       }
     );
-  } catch {
-    options.log?.error?.("CLAUDE-WEB-STREAM", "Claude Web stream protocol validation failed");
+  } catch (error) {
+    options.log?.error?.(
+      "CLAUDE-WEB-STREAM",
+      `Claude Web stream protocol validation failed: ${sanitizeErrorMessage(error)}`
+    );
     notifyFailure(options);
     return new Response(JSON.stringify(protocolErrorBody()), {
       status: 502,
@@ -569,6 +762,31 @@ async function queueSemanticEvent(
     );
     return;
   }
+  if (event.kind === "tool_call") {
+    state.pendingChunks.push(
+      encodeStreamEvent(
+        state,
+        makeChunk(
+          state.id,
+          state.created,
+          options,
+          {
+            tool_calls: [
+              {
+                index: event.index,
+                id: event.id,
+                type: "function",
+                function: { name: event.name, arguments: event.input },
+              },
+            ],
+          },
+          null
+        )
+      )
+    );
+    return;
+  }
+
   if (event.kind === "metadata") {
     state.pendingChunks.push(
       encodeStreamEvent(
@@ -595,8 +813,15 @@ async function queueSemanticEvent(
   state.terminal = true;
 }
 
-function queueStreamFailure(state: StreamingState, options: ClaudeWebStreamOptions): void {
-  options.log?.error?.("CLAUDE-WEB-STREAM", "Claude Web stream protocol validation failed");
+function queueStreamFailure(
+  state: StreamingState,
+  options: ClaudeWebStreamOptions,
+  error: unknown
+): void {
+  options.log?.error?.(
+    "CLAUDE-WEB-STREAM",
+    `Claude Web stream protocol validation failed: ${sanitizeErrorMessage(error)}`
+  );
   failStreamOnce(state, options);
   state.pendingChunks.push(encodeStreamEvent(state, protocolErrorBody()));
   state.pendingChunks.push(state.encoder.encode("data: [DONE]\n\n"));
@@ -618,7 +843,7 @@ async function pullStreamingChunk(
     while (!state.terminal) {
       const next = await state.iterator.next();
       if (state.control.cancelled) return;
-      if (next.done) {
+      if (next.done === true) {
         throw new ClaudeWebProtocolError("Claude Web stream ended without a terminal event");
       }
       await queueSemanticEvent(state, next.value, options);
@@ -627,9 +852,9 @@ async function pullStreamingChunk(
         return;
       }
     }
-  } catch {
+  } catch (error) {
     if (state.control.cancelled) return;
-    queueStreamFailure(state, options);
+    queueStreamFailure(state, options, error);
     flushStreamChunk(state, controller);
   }
 }
@@ -662,7 +887,9 @@ function createStreamingResponse(
     id: `chatcmpl-${randomUUID()}`,
     created: Math.floor(Date.now() / 1000),
     control,
-    iterator: parseClaudeWebEvents(source, control)[Symbol.asyncIterator](),
+    iterator: parseClaudeWebEvents(source, control, options.toolUseIdleFinishMs)[
+      Symbol.asyncIterator
+    ](),
     pendingChunks: [],
     assistantText: "",
     outcome: "pending",

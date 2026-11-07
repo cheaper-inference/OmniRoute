@@ -3,6 +3,7 @@ import type {
   CompressionEngineId,
   CompressionPipelineStep,
 } from "@omniroute/open-sse/services/compression/types.ts";
+import type { OutputStyleSelectionEntry } from "@omniroute/open-sse/services/compression/outputStyles/apply.ts";
 
 import { backupDbFile } from "./backup";
 import { getDbInstance, rowToCamel } from "./core";
@@ -15,6 +16,7 @@ export interface CompressionCombo {
   languagePacks: string[];
   outputMode: boolean;
   outputModeIntensity: string;
+  outputStyles: OutputStyleSelectionEntry[];
   isDefault: boolean;
   createdAt: string;
   updatedAt: string;
@@ -31,18 +33,22 @@ type JsonRecord = Record<string, unknown>;
 
 const DEFAULT_COMPRESSION_COMBO_ID = "default-caveman";
 const DEFAULT_COMPRESSION_COMBO_NAME = "Standard Savings";
-const DEFAULT_COMPRESSION_COMBO_DESCRIPTION = "Default RTK + Caveman compression pipeline";
+const DEFAULT_COMPRESSION_COMBO_DESCRIPTION = "Default lossless dedup and whitespace compression";
+const LEGACY_RTK_CAVEMAN_DESCRIPTION = "Default RTK + Caveman compression pipeline";
 const LEGACY_DEFAULT_COMPRESSION_COMBO_DESCRIPTION = "Default Caveman compression pipeline";
 
 function defaultCompressionComboPipeline(): CompressionPipelineStep[] {
-  return [
-    { engine: "rtk", intensity: "standard" },
-    { engine: "caveman", intensity: "full" },
-  ];
+  return [{ engine: "session-dedup" }, { engine: "lite" }];
 }
 
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+function isPreviousLossySeedPipeline(pipeline: CompressionPipelineStep[]): boolean {
+  return (
+    pipeline.length === 2 &&
+    pipeline[0]?.engine === "rtk" &&
+    pipeline[0]?.intensity === "standard" &&
+    pipeline[1]?.engine === "caveman" &&
+    pipeline[1]?.intensity === "full"
+  );
 }
 
 function parseJsonArray<T>(value: unknown, fallback: T[]): T[] {
@@ -84,6 +90,17 @@ function normalizeLanguagePacks(value: unknown): string[] {
   return [...new Set(packs.length > 0 ? packs.map((pack) => pack.trim()) : ["en"])];
 }
 
+function normalizeOutputStyles(value: unknown): OutputStyleSelectionEntry[] {
+  return parseJsonArray<OutputStyleSelectionEntry>(value, []).filter(
+    (entry): entry is OutputStyleSelectionEntry =>
+      Boolean(entry) &&
+      typeof entry === "object" &&
+      typeof entry.id === "string" &&
+      entry.id.trim().length > 0 &&
+      ["lite", "full", "ultra"].includes(entry.level)
+  );
+}
+
 function isLegacySeededDefaultPipeline(pipeline: CompressionPipelineStep[]): boolean {
   if (pipeline.length !== 1) return false;
   const [step] = pipeline;
@@ -103,9 +120,13 @@ function upgradeLegacySeededDefaultCompressionCombo(): void {
   const isSeededMetadata =
     String(row.name ?? "") === DEFAULT_COMPRESSION_COMBO_NAME &&
     (description === LEGACY_DEFAULT_COMPRESSION_COMBO_DESCRIPTION ||
+      description === LEGACY_RTK_CAVEMAN_DESCRIPTION ||
       description === DEFAULT_COMPRESSION_COMBO_DESCRIPTION);
 
-  if (!isSeededMetadata || !isLegacySeededDefaultPipeline(normalizePipeline(row.pipeline))) return;
+  const pipeline = normalizePipeline(row.pipeline);
+  const untouchedSeed =
+    isLegacySeededDefaultPipeline(pipeline) || isPreviousLossySeedPipeline(pipeline);
+  if (!isSeededMetadata || !untouchedSeed) return;
 
   db.prepare(
     `
@@ -132,6 +153,7 @@ function ensureCompressionComboTables(): void {
       language_packs TEXT DEFAULT '["en"]',
       output_mode INTEGER DEFAULT 0,
       output_mode_intensity TEXT DEFAULT 'full',
+      output_styles TEXT DEFAULT '[]',
       is_default INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
@@ -183,6 +205,7 @@ function rowToCompressionCombo(row: unknown): CompressionCombo | null {
     languagePacks: normalizeLanguagePacks(camel.languagePacks),
     outputMode: Boolean(camel.outputMode),
     outputModeIntensity: String(camel.outputModeIntensity ?? "full"),
+    outputStyles: normalizeOutputStyles(camel.outputStyles),
     isDefault: Boolean(camel.isDefault),
     createdAt: String(camel.createdAt ?? ""),
     updatedAt: String(camel.updatedAt ?? ""),
@@ -220,6 +243,9 @@ function buildComboPayload(data: Partial<CompressionCombo>, existing?: Compressi
           : ["en"],
     outputMode: data.outputMode ?? existing?.outputMode ?? false,
     outputModeIntensity: data.outputModeIntensity ?? existing?.outputModeIntensity ?? "full",
+    // Explicit [] clears the combo's own selection (back to inheriting the global panel);
+    // undefined leaves an existing selection untouched.
+    outputStyles: data.outputStyles ?? existing?.outputStyles ?? [],
     isDefault: data.isDefault ?? existing?.isDefault ?? false,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
@@ -262,9 +288,9 @@ export function createCompressionCombo(data: Partial<CompressionCombo>): Compres
       `
       INSERT INTO compression_combos (
         id, name, description, pipeline, language_packs, output_mode, output_mode_intensity,
-        is_default, created_at, updated_at
+        output_styles, is_default, created_at, updated_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
     ).run(
       combo.id,
@@ -274,6 +300,7 @@ export function createCompressionCombo(data: Partial<CompressionCombo>): Compres
       JSON.stringify(combo.languagePacks),
       combo.outputMode ? 1 : 0,
       combo.outputModeIntensity,
+      JSON.stringify(combo.outputStyles),
       combo.isDefault ? 1 : 0,
       combo.createdAt,
       combo.updatedAt
@@ -299,7 +326,7 @@ export function updateCompressionCombo(
       `
       UPDATE compression_combos
       SET name = ?, description = ?, pipeline = ?, language_packs = ?, output_mode = ?,
-          output_mode_intensity = ?, is_default = ?, updated_at = ?
+          output_mode_intensity = ?, output_styles = ?, is_default = ?, updated_at = ?
       WHERE id = ?
     `
     ).run(
@@ -309,6 +336,7 @@ export function updateCompressionCombo(
       JSON.stringify(combo.languagePacks),
       combo.outputMode ? 1 : 0,
       combo.outputModeIntensity,
+      JSON.stringify(combo.outputStyles),
       combo.isDefault ? 1 : 0,
       combo.updatedAt,
       id
@@ -389,18 +417,6 @@ export function assignRoutingCombo(compressionComboId: string, routingComboId: s
   backupDbFile("pre-write");
   return true;
 }
-
-export function unassignRoutingCombo(compressionComboId: string, routingComboId: string): boolean {
-  ensureCompressionComboTables();
-  const result = getDbInstance()
-    .prepare(
-      "DELETE FROM compression_combo_assignments WHERE compression_combo_id = ? AND routing_combo_id = ?"
-    )
-    .run(compressionComboId, routingComboId);
-  if (result.changes > 0) backupDbFile("pre-write");
-  return result.changes > 0;
-}
-
 // Static stackPriority map — mirrors the values defined in each engine file.
 // Using a static map avoids cross-workspace imports (open-sse → src/lib/db) that
 // would introduce a circular dependency detected by check:cycles.

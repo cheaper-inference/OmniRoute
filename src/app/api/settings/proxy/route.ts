@@ -4,10 +4,12 @@ import {
   getProxyForLevel,
   deleteProxyForLevel,
   resolveProxyForConnection,
-  getProxyAssignments,
-  getProxyById,
-} from "../../../../lib/localDb";
-import { clearDispatcherCache } from "@omniroute/open-sse/utils/proxyDispatcher";
+} from "@/lib/db/settings";
+import { getProxyAssignments, getProxyById } from "@/lib/db/proxies";
+import {
+  clearDispatcherCache,
+  isSocks5ProxyEnabled,
+} from "@omniroute/open-sse/utils/proxyDispatcher";
 import { updateProxyConfigSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import {
@@ -30,21 +32,15 @@ const PROXY_LEVEL_TO_REGISTRY_SCOPE = {
   key: "account",
 } as const;
 
-function isSocks5Enabled() {
-  // Default ON (opt-out): only an explicit falsey value disables SOCKS5.
-  const raw = (process.env.ENABLE_SOCKS5_PROXY ?? "").trim().toLowerCase();
-  return !["false", "0", "no", "off"].includes(raw);
-}
-
 function getSupportedProxyTypes() {
-  if (isSocks5Enabled()) {
+  if (isSocks5ProxyEnabled()) {
     return new Set([...BASE_SUPPORTED_PROXY_TYPES, "socks5"]);
   }
   return BASE_SUPPORTED_PROXY_TYPES;
 }
 
 function supportedTypesMessage() {
-  return isSocks5Enabled() ? "http, https, or socks5" : "http or https";
+  return isSocks5ProxyEnabled() ? "http, https, or socks5" : "http or https";
 }
 
 function createInvalidProxyError(message: string): ApiRouteError {
@@ -68,9 +64,7 @@ function getRegistryScopeForLevel(
     return undefined;
   }
 
-  return PROXY_LEVEL_TO_REGISTRY_SCOPE[
-    level as keyof typeof PROXY_LEVEL_TO_REGISTRY_SCOPE
-  ];
+  return PROXY_LEVEL_TO_REGISTRY_SCOPE[level as keyof typeof PROXY_LEVEL_TO_REGISTRY_SCOPE];
 }
 
 async function getRegistryProxyForLevel(level: string, id: string | null) {
@@ -107,7 +101,7 @@ function normalizeAndValidateProxy(
   }
 
   const type = String(proxy.type || "http").toLowerCase() as NonNullable<ProxyConfigInput["type"]>;
-  if (type === "socks5" && !isSocks5Enabled()) {
+  if (type === "socks5" && !isSocks5ProxyEnabled()) {
     throw createInvalidProxyError(
       "SOCKS5 proxy is disabled (remove ENABLE_SOCKS5_PROXY=false to enable — it is ON by default)"
     );
@@ -159,15 +153,64 @@ function normalizeProxyPayload(body: UpdateProxyConfigInput): UpdateProxyConfigI
   return normalized;
 }
 
+/** Cap on `?resolveIds=` entries: bounds one request's resolve fan-out. */
+const MAX_RESOLVE_IDS = 200;
+
+/**
+ * Parse the comma-separated `resolveIds` query value into a de-duplicated,
+ * capped id list. Returns null when the parameter is absent or empty so the
+ * request falls through to the existing single-resolve/full-config branches.
+ */
+function parseResolveIds(raw: string | null): string[] | null {
+  if (!raw) return null;
+  const ids = [
+    ...new Set(
+      raw
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean)
+    ),
+  ];
+  if (ids.length === 0) return null;
+  return ids.slice(0, MAX_RESOLVE_IDS);
+}
+
+/** Resolve every requested connection, mapping failures to `null`. */
+async function resolveProxyBatch(ids: string[]): Promise<Response> {
+  const results = await Promise.all(
+    ids.map(async (connectionId) => {
+      try {
+        const resolved = await resolveProxyForConnection(connectionId);
+        return [connectionId, resolved?.proxy ? resolved : null] as const;
+      } catch {
+        return [connectionId, null] as const;
+      }
+    })
+  );
+  return Response.json({ results: Object.fromEntries(results) });
+}
+
 /**
  * GET /api/settings/proxy — get proxy configuration
  * Optional query params: ?level=global|provider|combo|key&id=xxx
  * Or: ?resolve=connectionId to resolve effective proxy
+ * Or: ?resolveIds=id1,id2,... to resolve effective proxies for many connections
  */
 export async function GET(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
 
+  // Batch resolution runs before the config path so the dashboard can refresh
+  // every connection's badge in one request instead of one request per
+  // connection (that burst slowed both the UI and the shared proxy process).
+  const resolveIds = parseResolveIds(new URL(request.url).searchParams.get("resolveIds"));
+  if (resolveIds) return resolveProxyBatch(resolveIds);
+
+  return readProxyConfig(request);
+}
+
+/** Single-resolve, level-scoped and full-config reads. */
+async function readProxyConfig(request: Request): Promise<Response> {
   try {
     const { searchParams } = new URL(request.url);
     const level = searchParams.get("level");

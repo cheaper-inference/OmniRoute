@@ -69,9 +69,17 @@ test("#8688 OAuthModal skips auto-start and renders GitlabDuoSetupStep (#8688)",
   );
 
   const setup = read("../../src/shared/components/oauthModal/GitlabDuoSetupStep.tsx");
-  assert.match(setup, /GITLAB_DUO_OAUTH_SETUP_MESSAGE/);
+  // #9245 localized the step: the literal GITLAB_DUO_OAUTH_SETUP_MESSAGE became
+  // t("gitlabDuoSetupMessage", {...}) interpolating the same shared constants —
+  // still the single source of truth for the recipe values.
+  assert.match(setup, /gitlabDuoSetupMessage/);
+  assert.match(setup, /GITLAB_DUO_OAUTH_APPLICATIONS_URL/);
+  assert.match(setup, /GITLAB_DUO_OAUTH_DEFAULT_REDIRECT_URI/);
+  assert.match(setup, /GITLAB_DUO_OAUTH_SCOPES/);
+  assert.match(setup, /GITLAB_DUO_OAUTH_CLIENT_ID/);
+  assert.match(setup, /GITLAB_DUO_OAUTH_CLIENT_SECRET/);
   assert.match(setup, /LinkifiedText/);
-  assert.match(setup, /Continue/);
+  assert.match(setup, /onContinue/);
 });
 
 test("#8688 error Try Again returns gitlab-duo to the setup step", () => {

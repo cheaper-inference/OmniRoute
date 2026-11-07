@@ -40,4 +40,60 @@ describe("CodeBuddyCnExecutor reasoning params are opt-in (#2071)", () => {
     assert.equal(out.reasoning_effort, undefined);
     assert.equal(out.reasoning_summary, undefined);
   });
+
+  it("replaces agent system prompts in top-level system field", () => {
+    const out = exec.transformRequest(
+      "glm-5.2",
+      {
+        system: "You are Claude Code, Anthropic's official CLI for software engineering",
+        messages: [{ role: "user", content: "check this" }],
+      },
+      false,
+      {}
+    ) as Record<string, unknown>;
+
+    assert.equal(
+      out.system,
+      "You are a helpful AI assistant that helps with software engineering tasks.",
+    );
+  });
+
+  it("preserves non-agent system prompts in top-level system field", () => {
+    const out = exec.transformRequest(
+      "glm-5.2",
+      {
+        system: "You are a helpful coding tutor for beginner developers.",
+        messages: [{ role: "user", content: "check this" }],
+      },
+      false,
+      {}
+    ) as Record<string, unknown>;
+
+    assert.equal(out.system, "You are a helpful coding tutor for beginner developers.");
+  });
+
+  it("replaces agent system prompts in messages array preserving typed content shape", () => {
+    const out = exec.transformRequest(
+      "glm-5.2",
+      {
+        messages: [
+          {
+            role: "system",
+            content: [{ type: "text", text: "You are Cursor, an AI coding agent" }],
+          },
+          { role: "user", content: "Hello" },
+        ],
+      },
+      false,
+      {}
+    ) as Record<string, unknown>;
+
+    const msgs = out.messages as Array<{ role: string; content?: unknown }>;
+    const system = msgs.find((m) => m.role === "system");
+    assert.deepEqual(system, {
+      role: "system",
+      content: [{ type: "text", text: "You are a helpful AI assistant that helps with software engineering tasks." }],
+    });
+    assert.equal(system && (system as { content?: unknown }).content, msgs[0].content);
+  });
 });

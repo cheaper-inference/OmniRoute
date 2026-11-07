@@ -15,7 +15,7 @@ async function resetStorage() {
   for (let attempt = 0; attempt < 10; attempt++) {
     try {
       if (fs.existsSync(TEST_DATA_DIR)) {
-        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
       }
       break;
     } catch {
@@ -211,6 +211,34 @@ test("validateRegisteredKey respects budget limits", async () => {
   rk.incrementRegisteredKeyUsage(created.id);
   // After 3 increments, daily_used == daily_budget == 3
   assert.equal(rk.validateRegisteredKey(created.rawKey), null);
+});
+
+test("validateRegisteredKey resets budget counters on a fresh window", async () => {
+  await resetStorage();
+  const issued = rk.issueRegisteredKey({
+    name: "Window Reset",
+    dailyBudget: 3,
+  });
+  assert.ok("rawKey" in issued);
+  if (!("rawKey" in issued)) return;
+
+  const db = core.getDbInstance();
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const previousHour = new Date(Date.now() - 60 * 60 * 1000).toISOString().slice(0, 13);
+
+  rk.incrementRegisteredKeyUsage(issued.id);
+  rk.incrementRegisteredKeyUsage(issued.id);
+  rk.incrementRegisteredKeyUsage(issued.id);
+  db.prepare(
+    `UPDATE registered_keys SET daily_used = ?, hourly_used = ?, last_reset_day = ?, last_reset_hour = ? WHERE id = ?`
+  ).run(3, 3, yesterday, previousHour, issued.id);
+
+  // First validation of the new window must be accepted (not rejected against the
+  // stale pre-reset counters) and must return the freshly-reset counters.
+  const validated = rk.validateRegisteredKey(issued.rawKey);
+  assert.ok(validated !== null);
+  assert.equal(validated.dailyUsed, 0);
+  assert.equal(validated.hourlyUsed, 0);
 });
 
 // ──────────────── checkQuota ────────────────

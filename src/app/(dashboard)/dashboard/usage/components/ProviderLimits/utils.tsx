@@ -1,5 +1,5 @@
 export { parseQuotaData } from "./quotaParsing";
-import { hasFixedQuotaOrder } from "./quotaParsing";
+import { hasFixedQuotaOrder, hasCanonicalWindowOrder, sortQuotasByWindow } from "./quotaParsing";
 
 const PROVIDER_PLAN_FALLBACKS = new Set([
   "claude code",
@@ -98,7 +98,7 @@ export function formatQuotaLabel(name: string) {
     return `Weekly ${toTitleCaseWords(weeklyModelMatch[1])}`;
   }
 
-  return trimmed;
+  return toTitleCaseWords(trimmed.replace(/_/g, " "));
 }
 
 /**
@@ -141,28 +141,6 @@ export function formatResetTime(date) {
 }
 
 /**
- * Get Tailwind color class based on percentage
- * @param {number} percentage - Remaining percentage (0-100)
- * @returns {string} Color name: "green" | "yellow" | "red"
- */
-export function getStatusColor(percentage) {
-  if (percentage > 70) return "green";
-  if (percentage >= 30) return "yellow";
-  return "red"; // 0-29% including 0% (out of quota) - show red
-}
-
-/**
- * Get status emoji based on percentage
- * @param {number} percentage - Remaining percentage (0-100)
- * @returns {string} Emoji: "🟢" | "🟡" | "🔴"
- */
-export function getStatusEmoji(percentage) {
-  if (percentage > 70) return "🟢";
-  if (percentage >= 30) return "🟡";
-  return "🔴"; // 0-29% including 0% (out of quota) - show red
-}
-
-/**
  * Calculate remaining percentage
  * @param {number} used - Used amount
  * @param {number} total - Total amount
@@ -180,9 +158,11 @@ export function calculatePercentage(used, total) {
  * Resolve the best available plan label using live usage first, then persisted
  * provider-specific connection metadata.
  */
-export function resolvePlanValue(plan, providerSpecificData) {
-  const psd = toRecord(providerSpecificData);
+export function resolvePlanValue(plan, providerSpecificData, providerId) {
   const livePlan = normalizePlanCandidate(plan);
+  if (String(providerId || "").toLowerCase() === "grok-cli") return livePlan || null;
+
+  const psd = toRecord(providerSpecificData);
   const persistedCandidates = [
     psd.workspacePlanType,
     psd.plan,
@@ -191,8 +171,9 @@ export function resolvePlanValue(plan, providerSpecificData) {
     psd.tier,
     psd.accountTier,
     // Claude OAuth bootstrap: rate_limit_tier has the Max 5x/20x multiplier.
-    psd.organizationRateLimitTier,
+    // The account's own (seat) tier first: a Team org's base tier is not the seat's.
     psd.rateLimitTier,
+    psd.organizationRateLimitTier,
     psd.organizationType,
     // Codex OAuth bootstrap: chatgpt_plan_type is captured at import time
     // (src/lib/oauth/services/codexImport.ts) and is the only source of the
@@ -214,6 +195,29 @@ export function resolvePlanValue(plan, providerSpecificData) {
   return livePlan || null;
 }
 
+/**
+ * Page-level Provider Limits plan map used by tier stats/filters.
+ * Always passes provider so grok-cli never classifies from persisted PSD tiers.
+ */
+export function buildProviderLimitsResolvedPlans(
+  connections: Array<{
+    id: string;
+    provider?: string | null;
+    providerSpecificData?: unknown;
+  }>,
+  quotaData: Record<string, { plan?: unknown } | null | undefined>
+): Record<string, string | null> {
+  const out: Record<string, string | null> = {};
+  for (const conn of connections) {
+    out[conn.id] = resolvePlanValue(
+      quotaData[conn.id]?.plan,
+      conn.providerSpecificData,
+      conn.provider
+    );
+  }
+  return out;
+}
+
 function unknownPlanTier(raw: string | null = null) {
   return { key: "unknown", label: "Unknown", variant: "default", rank: 0, raw };
 }
@@ -224,6 +228,19 @@ function formatUnknownPlanLabel(raw: string) {
     .split(/[\s_-]+/)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function matchCodexPlanTier(raw: string, upper: string) {
+  if (upper === "PROLITE") {
+    return { key: "pro", label: "Pro Standard", variant: "success", rank: 3, raw };
+  }
+  if (upper === "PRO" || upper === "PROEXTRA" || upper === "PRO_EXTRA") {
+    return { key: "pro", label: "Pro Extra", variant: "success", rank: 3, raw };
+  }
+  if (upper === "PROMAX" || upper === "PRO_MAX") {
+    return { key: "pro", label: "Pro Max", variant: "success", rank: 3, raw };
+  }
+  return null;
 }
 
 function matchClaudePlanTier(raw: string, upper: string) {
@@ -283,8 +300,10 @@ function matchFreePlanTier(raw: string, upper: string) {
 /**
  * Normalize provider-specific plan labels into a shared tier taxonomy.
  * Supported tiers: enterprise, business, team, ultra, pro, plus, lite, free, unknown.
+ * Codex's Pro Standard/Extra/Max variants are only recognized when `provider === "codex"`;
+ * a plain "Pro" of any other provider keeps the generic "Pro" label.
  */
-export function normalizePlanTier(plan) {
+export function normalizePlanTier(plan, provider?: string | null) {
   const raw = typeof plan === "string" ? plan.trim() : "";
   if (!raw) return unknownPlanTier(null);
 
@@ -296,6 +315,7 @@ export function normalizePlanTier(plan) {
   // Match Anthropic bootstrap strings (claude_max, default_claude_max_20x, etc.)
   // before the generic PRO/TEAM checks so underscored values don't fall through.
   const matched =
+    (provider === "codex" ? matchCodexPlanTier(raw, upper) : null) ||
     matchClaudePlanTier(raw, upper) ||
     matchKeywordPlanTier(raw, upper) ||
     matchTokenPlanTier(raw, upper) ||
@@ -312,11 +332,70 @@ export function computeCanEditCutoff(quotas: any[]): boolean {
   return quotas.some((q: any) => q && typeof q.name === "string" && !q.isCredits);
 }
 
-export function computeCanRedeemResetCredit(provider: string, quotas: any[]): boolean {
-  return (
-    provider === "codex" &&
-    quotas.some((q: any) => q?.isResetCredits && Number(q.creditCount ?? q.remaining ?? 0) > 0)
-  );
+/**
+ * Providers that can redeem a banked reset credit: Codex reset credits and the GLM
+ * Coding Plan Reset Cards, which share the list/redeem contract behind different routes.
+ */
+export const RESET_CREDIT_PROVIDERS = [
+  "codex",
+  // grok-cli redeems through the same codex-reset-credit endpoint (tip of
+  // release/v3.8.51); kept here so the generalized gate below covers it.
+  "grok-cli",
+  "claude",
+  "glm",
+  "glm-cn",
+  "glmt",
+  "zai",
+] as const;
+
+/** The redemption API backing a provider's reset credits, if supported. */
+export function getResetCreditEndpoint(provider: string): string | null {
+  if (provider === "codex" || provider === "grok-cli" || provider === "claude") {
+    return "/api/usage/codex-reset-credit";
+  }
+  if (["glm", "glm-cn", "glmt", "zai"].includes(provider)) {
+    return "/api/usage/glm-reset-card";
+  }
+  return null;
+}
+
+export function canProviderRedeemResetCredit(provider: string): boolean {
+  return (RESET_CREDIT_PROVIDERS as readonly string[]).includes(provider);
+}
+
+export interface ResetCreditGateContext {
+  /** The raw usage payload behind the card (carries `bankedResetCredits` when known). */
+  raw?: unknown;
+  authType?: string;
+}
+
+/**
+ * The regular Claude usage poll cannot see banked reset credits; only the reset-credit list
+ * (opened by the user) or the opt-in auto-reset learns the count. Until then the count is
+ * unknown and a Claude OAuth card keeps its entry point — only an authoritative 0 hides it.
+ */
+function isClaudeResetCreditCountUnknown(
+  provider: string,
+  context?: ResetCreditGateContext
+): boolean {
+  if (provider !== "claude" || context?.authType !== "oauth") return false;
+  const raw =
+    context.raw && typeof context.raw === "object"
+      ? (context.raw as Record<string, unknown>)
+      : null;
+  return typeof raw?.bankedResetCredits !== "number";
+}
+
+export function computeCanRedeemResetCredit(
+  provider: string,
+  quotas: any[],
+  context?: ResetCreditGateContext
+): boolean {
+  if (!canProviderRedeemResetCredit(provider)) return false;
+  if (quotas.some((q: any) => q?.isResetCredits && Number(q.creditCount ?? q.remaining ?? 0) > 0)) {
+    return true;
+  }
+  return isClaudeResetCreditCountUnknown(provider, context);
 }
 
 export function hasQuotaCutoffOverrides(connection: any): boolean {
@@ -333,18 +412,26 @@ export const STATUS_EMOJI = {
 
 export type CardStatus = keyof typeof STATUS_EMOJI;
 
-const QUOTA_BAR_GREEN_THRESHOLD = 50;
-const QUOTA_BAR_YELLOW_THRESHOLD = 20;
+/** Remaining % strictly above this is healthy (green). */
+export const QUOTA_STATUS_HEALTHY_ABOVE = 50;
+/** Remaining % at or below this is critical (red); in between is an alert (yellow). */
+export const QUOTA_STATUS_CRITICAL_AT_OR_BELOW = 20;
+
+export type QuotaStatusLevel = "critical" | "alert" | "ok";
+
+/** Single source of the quota colour policy — every bar, tone and card status maps from it. */
+export function quotaStatusLevel(remainingPercentage: number): QuotaStatusLevel {
+  if (remainingPercentage <= QUOTA_STATUS_CRITICAL_AT_OR_BELOW) return "critical";
+  if (remainingPercentage <= QUOTA_STATUS_HEALTHY_ABOVE) return "alert";
+  return "ok";
+}
 
 function quotaRemainingPercent(q: any): number {
   return getQuotaRemainingPercentage(q);
 }
 
-function quotaStatus(q: any): "critical" | "alert" | "ok" {
-  const pct = quotaRemainingPercent(q);
-  if (pct <= QUOTA_BAR_YELLOW_THRESHOLD) return "critical";
-  if (pct <= QUOTA_BAR_GREEN_THRESHOLD) return "alert";
-  return "ok";
+function quotaStatus(q: any): QuotaStatusLevel {
+  return quotaStatusLevel(quotaRemainingPercent(q));
 }
 
 export function worstStatus(quotas: any[] | undefined): CardStatus {
@@ -367,12 +454,21 @@ const STATUS_ORDER: Record<"critical" | "alert" | "ok", number> = {
 export function topQuotas(quotas: any[], n = 3, providerId?: string): any[] {
   const filtered = quotas.filter(Boolean);
 
-  // Providers with a deterministic fixed-window order (codex, glm family — see
-  // quotaParsing.ts's sortCodexOrder()/sortGlmOrder()) must keep the order
+  // Providers with a deterministic fixed-window order (Codex, GLM family,
+  // Kimi Coding — see quotaParsing.ts) must keep the order
   // parseQuotaData() already established rather than being re-sorted by
   // status/remaining-%, which would undo it (#6687's collapsed-card sibling, #7764).
   if (hasFixedQuotaOrder(providerId)) {
     return filtered.slice(0, n);
+  }
+
+  // #7764 residual: any OTHER provider reporting rolling time windows (claude,
+  // minimax, zai, command-code, ...) has an equally inherent session→weekly→
+  // monthly order. Re-sorting those by remaining % makes two accounts of the
+  // same provider render the bars in opposite positions. Detected from the
+  // quota keys, so a new provider needs no list update.
+  if (hasCanonicalWindowOrder(filtered)) {
+    return sortQuotasByWindow(filtered).slice(0, n);
   }
 
   return [...filtered]
@@ -405,13 +501,29 @@ export function getBarColor(remainingPercentage: number): {
   text: string;
   bg: string;
 } {
-  if (remainingPercentage > QUOTA_BAR_GREEN_THRESHOLD) {
-    return { bar: "#22c55e", text: "#22c55e", bg: "rgba(34,197,94,0.12)" };
+  // A non-numeric value has always rendered red here (the old `>` checks both failed).
+  const level = Number.isNaN(remainingPercentage)
+    ? "critical"
+    : quotaStatusLevel(remainingPercentage);
+  if (level === "ok") {
+    return {
+      bar: "var(--color-success)",
+      text: "var(--color-success)",
+      bg: "color-mix(in srgb, var(--color-success) 12%, transparent)",
+    };
   }
-  if (remainingPercentage > QUOTA_BAR_YELLOW_THRESHOLD) {
-    return { bar: "#eab308", text: "#eab308", bg: "rgba(234,179,8,0.12)" };
+  if (level === "alert") {
+    return {
+      bar: "var(--color-warning)",
+      text: "var(--color-warning)",
+      bg: "color-mix(in srgb, var(--color-warning) 12%, transparent)",
+    };
   }
-  return { bar: "#ef4444", text: "#ef4444", bg: "rgba(239,68,68,0.12)" };
+  return {
+    bar: "var(--color-error)",
+    text: "var(--color-error)",
+    bg: "color-mix(in srgb, var(--color-error) 12%, transparent)",
+  };
 }
 
 export function formatCountdown(resetAt: string | null | undefined): string | null {
@@ -471,7 +583,7 @@ export function collectHiddenQuotaModelIds(provider: string, payload: unknown): 
     if (!Array.isArray(entries)) return;
     for (const entry of entries) {
       const record = toRecord(entry);
-      if (record.isHidden !== true && record.isDeleted !== true) continue;
+      if (record.isHidden !== true) continue;
       if (typeof record.id === "string") addQuotaModelIdVariants(hidden, provider, record.id);
     }
   };
@@ -512,11 +624,10 @@ export function filterHiddenModelQuotas(
 
 // --- Per-user quota row visibility (upstream 9router#2371 port) ---------
 // Distinct from collectHiddenQuotaModelIds()/filterHiddenModelQuotas() above:
-// those hide rows for models the ADMIN marked isHidden/isDeleted in the model
-// catalog. These hide rows the OPERATOR clicked "hide" on for their own view
-// (persisted per-provider in settings.quotaVisibility), independent of model
-// catalog state — e.g. temporarily decluttering a quota card without editing
-// the catalog. Both mechanisms can apply to the same row.
+// those hide rows for models the ADMIN hid in the model catalog. These hide rows
+// the OPERATOR clicked "hide" on for their own view (persisted per-account in
+// settings.quotaVisibility), independent of model catalog state — e.g.
+// temporarily decluttering a quota card without editing the catalog.
 
 /** Stable identity for a quota row: prefer modelKey (survives displayName i18n), fall back to name. */
 export function getQuotaVisibilityKey(quota: any): string {
@@ -524,34 +635,87 @@ export function getQuotaVisibilityKey(quota: any): string {
   return String(quota.modelKey || quota.name || "").trim();
 }
 
-function getProviderHiddenQuotaSet(
-  provider: string,
-  quotaVisibility: Record<string, { hidden?: string[] }> | undefined
+export type QuotaVisibilityMap = Record<string, { hidden?: string[] }>;
+
+/**
+ * Which visibility entry applies to a quota card. Rows are hidden PER ACCOUNT
+ * (connection id) so two accounts of the same provider with identically named
+ * rows (e.g. "Bonus Pack 1") stay independent (upstream 9router#4767). The
+ * provider id is only a legacy read fallback for preferences saved before the
+ * per-account keying. A bare string is treated as a legacy provider-only scope.
+ */
+export type QuotaVisibilityScope =
+  string | { connectionId?: string | null; provider?: string | null };
+
+function normalizeVisibilityScope(scope: QuotaVisibilityScope): {
+  connectionId: string;
+  provider: string;
+} {
+  if (typeof scope === "string") return { connectionId: "", provider: scope };
+  return {
+    connectionId: String(scope?.connectionId || "").trim(),
+    provider: String(scope?.provider || "").trim(),
+  };
+}
+
+/** Hidden row keys for `scope`: the account's own entry wins; else the legacy provider entry. */
+function getHiddenQuotaSet(
+  scope: QuotaVisibilityScope,
+  quotaVisibility: QuotaVisibilityMap | undefined
 ): Set<string> {
-  const hidden = quotaVisibility?.[provider]?.hidden;
+  const { connectionId, provider } = normalizeVisibilityScope(scope);
+  const entry =
+    (connectionId && quotaVisibility?.[connectionId]) ||
+    (provider && quotaVisibility?.[provider]) ||
+    undefined;
+  const hidden = entry?.hidden;
   return new Set(Array.isArray(hidden) ? hidden.map(String) : []);
 }
 
-/** Returns quotas for `provider` with any operator-hidden rows removed. */
+/**
+ * Returns the next visibility map after hiding/showing `key` for `scope`. Writes
+ * go to the account (connection id) entry, seeded from whatever currently
+ * applies (incl. the legacy provider entry) so the account's view does not jump,
+ * while other accounts keep reading the untouched legacy entry.
+ */
+export function buildNextQuotaVisibility(
+  quotaVisibility: QuotaVisibilityMap,
+  scope: QuotaVisibilityScope,
+  key: string,
+  hide: boolean
+): QuotaVisibilityMap {
+  const { connectionId, provider } = normalizeVisibilityScope(scope);
+  const targetKey = connectionId || provider;
+  if (!targetKey || !key) return quotaVisibility;
+  const hidden = getHiddenQuotaSet(scope, quotaVisibility);
+  if (hide) hidden.add(key);
+  else hidden.delete(key);
+  return {
+    ...quotaVisibility,
+    [targetKey]: { ...(quotaVisibility?.[targetKey] || {}), hidden: [...hidden] },
+  };
+}
+
+/** Returns quotas for `scope` with any operator-hidden rows removed. */
 export function filterQuotasByVisibility(
-  provider: string,
+  scope: QuotaVisibilityScope,
   quotas: any[] = [],
-  quotaVisibility: Record<string, { hidden?: string[] }> = {}
+  quotaVisibility: QuotaVisibilityMap = {}
 ): any[] {
   if (!Array.isArray(quotas) || quotas.length === 0) return [];
-  const hidden = getProviderHiddenQuotaSet(provider, quotaVisibility);
+  const hidden = getHiddenQuotaSet(scope, quotaVisibility);
   if (hidden.size === 0) return quotas;
   return quotas.filter((quota) => !hidden.has(getQuotaVisibilityKey(quota)));
 }
 
-/** Returns the subset of `quotas` for `provider` the operator hid (for the "Hidden: …" chip row). */
+/** Returns the subset of `quotas` for `scope` the operator hid (for the "Hidden: …" chip row). */
 export function getHiddenQuotaRows(
-  provider: string,
+  scope: QuotaVisibilityScope,
   quotas: any[] = [],
-  quotaVisibility: Record<string, { hidden?: string[] }> = {}
+  quotaVisibility: QuotaVisibilityMap = {}
 ): any[] {
   if (!Array.isArray(quotas) || quotas.length === 0) return [];
-  const hidden = getProviderHiddenQuotaSet(provider, quotaVisibility);
+  const hidden = getHiddenQuotaSet(scope, quotaVisibility);
   if (hidden.size === 0) return [];
   return quotas.filter((quota) => hidden.has(getQuotaVisibilityKey(quota)));
 }
@@ -594,4 +758,111 @@ export function buildProviderOptions(
     }
   }
   return Array.from(seen).sort(compare);
+}
+
+// --- Deterministic quota-card ordering -------------------------------------
+// Mirrors the dashboard/providers rule (`providerPageUtils.ts::
+// sortProviderEntriesByName`): every level of ordering must end in a stable,
+// data-independent tiebreak so cards never re-flow between refreshes.
+//
+// Before this, `visibleConnections` globally sorted ALL connections by
+// status then soonest reset, and QuotaCardGrid grouped by first-appearance —
+// so each provider group's position was decided by whichever of its accounts
+// happened to sort first (status/reset change every refresh → groups
+// shuffled). Provider rank is now a sort key again, so a group's position is
+// fixed by PROVIDER_ORDER and account status/reset only orders accounts
+// inside their own group.
+
+export interface QuotaOrderConnection {
+  id?: unknown;
+  provider?: unknown;
+  name?: unknown;
+  email?: unknown;
+  displayName?: unknown;
+}
+
+/** Label/name key: providers-page `getProviderSortLabel` — case-insensitive display name. */
+function quotaConnLabel(conn: QuotaOrderConnection): string {
+  const name = typeof conn.name === "string" ? conn.name : "";
+  const provider = typeof conn.provider === "string" ? conn.provider : "";
+  return (name || provider).toLowerCase();
+}
+
+/** Technical tiebreak key: providers-page `providerId.localeCompare(...)` — ASCII on purpose. */
+function quotaConnTiebreak(conn: QuotaOrderConnection): string {
+  const email = typeof conn.email === "string" ? conn.email : "";
+  const id = typeof conn.id === "string" ? conn.id : String(conn.id ?? "");
+  return email || id;
+}
+
+function providerRank(provider: unknown, providerOrder: Record<string, number>): number {
+  const key = typeof provider === "string" ? provider : "";
+  return providerOrder[key] ?? 99;
+}
+
+/**
+ * Order connections for the quota card grid. Levels (first non-zero wins):
+ *   1. `PROVIDER_ORDER` rank — keeps each provider group glued to its fixed slot.
+ *   2. Provider label (locale-aware, case-insensitive) — orders unranked providers.
+ *   3. Provider key ASCII — deterministic tiebreak between aliased/equal labels.
+ *   4. `accountCompare` (optional) — in-group intent (critical-first, soonest reset).
+ *   5. Account label, then email/id ASCII — so equal-status accounts never shuffle.
+ */
+export function compareQuotaConnections<T extends QuotaOrderConnection>(
+  a: T,
+  b: T,
+  opts: {
+    providerOrder: Record<string, number>;
+    providerLabels?: Record<string, string>;
+    accountCompare?: (a: T, b: T) => number;
+    compare?: (a: string, b: string) => number;
+  }
+): number {
+  const cmp = opts.compare ?? ((x: string, y: string) => x.localeCompare(y));
+  const labels = opts.providerLabels ?? {};
+
+  const ra = providerRank(a.provider, opts.providerOrder);
+  const rb = providerRank(b.provider, opts.providerOrder);
+  if (ra !== rb) return ra - rb;
+
+  const pa = typeof a.provider === "string" ? a.provider : "";
+  const pb = typeof b.provider === "string" ? b.provider : "";
+  const providerLabelCmp = cmp(labels[pa] ?? pa, labels[pb] ?? pb);
+  if (providerLabelCmp !== 0) return providerLabelCmp;
+  if (pa !== pb) return pa < pb ? -1 : 1;
+
+  if (opts.accountCompare) {
+    const acc = opts.accountCompare(a, b);
+    if (acc !== 0) return acc;
+  }
+
+  const accountLabelCmp = cmp(quotaConnLabel(a), quotaConnLabel(b));
+  if (accountLabelCmp !== 0) return accountLabelCmp;
+  const ta = quotaConnTiebreak(a);
+  const tb = quotaConnTiebreak(b);
+  return ta < tb ? -1 : ta > tb ? 1 : 0;
+}
+
+/**
+ * Order provider group keys for rendering. Same provider-level rule as
+ * `compareQuotaConnections` (rank → label → key), used by QuotaCardGrid to
+ * place group headers deterministically.
+ */
+export function compareProviderGroups(
+  a: string,
+  b: string,
+  opts: {
+    providerOrder: Record<string, number>;
+    providerLabels?: Record<string, string>;
+    compare?: (a: string, b: string) => number;
+  }
+): number {
+  const cmp = opts.compare ?? ((x: string, y: string) => x.localeCompare(y));
+  const labels = opts.providerLabels ?? {};
+  const ra = providerRank(a, opts.providerOrder);
+  const rb = providerRank(b, opts.providerOrder);
+  if (ra !== rb) return ra - rb;
+  const labelCmp = cmp(labels[a] ?? a, labels[b] ?? b);
+  if (labelCmp !== 0) return labelCmp;
+  return a < b ? -1 : a > b ? 1 : 0;
 }

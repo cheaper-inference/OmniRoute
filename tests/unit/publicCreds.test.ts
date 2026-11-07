@@ -1,7 +1,7 @@
 /**
  * Covers the public credentials helper (XOR mask wrapper) used to embed
- * Gemini / Antigravity OAuth client_id/secret and Windsurf Firebase Web API
- * key without tripping pattern-based secret scanners.
+ * public OAuth client_id/secret values without tripping pattern-based secret
+ * scanners.
  *
  * Tests validate the *shape* of the resolved values instead of the literal
  * plaintext, so this file itself never embeds known secret patterns. Use the
@@ -46,17 +46,24 @@ test("resolvePublicCred('antigravity_alt') returns a GOCSPX-style client secret"
   assert.ok(v.startsWith("G" + "OCSPX-"));
 });
 
-test("resolvePublicCred('windsurf_fb') returns an AIza-style Google API key", () => {
-  const v = resolvePublicCred("windsurf_fb");
-  assert.match(v, /^A[I]za[A-Za-z0-9_-]{20,}$/);
-});
-
 // Gap-fix (#7013): grok_id already backs GROK_CLI_CONFIG/GROK_BUILD_OAUTH_CONFIG/
 // XAI_OAUTH_CONFIG's clientId in production, but had no shape assertion here.
 test("resolvePublicCred('grok_id') returns a UUID-shaped xAI OAuth client id", () => {
   const v = resolvePublicCred("grok_id");
   assert.match(v, /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
   assert.equal(v.length, 36);
+});
+
+test("resolvePublicCred('openference_id') returns the public PKCE client id shape", () => {
+  const v = resolvePublicCred("openference_id");
+  assert.match(v, /^[a-z]+$/);
+  assert.equal(v.length, 9);
+});
+
+test("resolvePublicCred('muse_id') returns the public Meta Muse CLI numeric client id", () => {
+  const v = resolvePublicCred("muse_id");
+  assert.match(v, /^\d+$/);
+  assert.ok(v.length >= 12);
 });
 
 test("encode/decode roundtrip is stable across arbitrary plaintexts", () => {
@@ -87,11 +94,11 @@ test("resolvePublicCred prefers env override over embedded default", () => {
   const ENV_NAME = "OMNIROUTE_TEST_PUBLIC_CRED_OVERRIDE";
   const original = process.env[ENV_NAME];
   try {
-    process.env[ENV_NAME] = FAKE_AIZA;
-    assert.equal(resolvePublicCred("windsurf_fb", ENV_NAME), FAKE_AIZA);
+    process.env[ENV_NAME] = FAKE_GOCSPX;
+    assert.equal(resolvePublicCred("gemini_alt", ENV_NAME), FAKE_GOCSPX);
     process.env[ENV_NAME] = "";
-    assert.notEqual(resolvePublicCred("windsurf_fb", ENV_NAME), "");
-    assert.match(resolvePublicCred("windsurf_fb", ENV_NAME), /^A[I]za/);
+    assert.notEqual(resolvePublicCred("gemini_alt", ENV_NAME), "");
+    assert.match(resolvePublicCred("gemini_alt", ENV_NAME), /^GOCSPX-/);
   } finally {
     if (original === undefined) delete process.env[ENV_NAME];
     else process.env[ENV_NAME] = original;

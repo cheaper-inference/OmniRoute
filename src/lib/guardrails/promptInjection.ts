@@ -1,6 +1,6 @@
 import { BaseGuardrail, type GuardrailContext, type GuardrailResult } from "./base";
 import {
-  MAX_INJECTION_SCAN_BYTES,
+  buildInjectionScanText,
   extractMessageContents,
   sanitizeRequest,
 } from "@/shared/utils/inputSanitizer";
@@ -89,6 +89,36 @@ function normalizePatternEntry(entry: PatternLike, index: number) {
   };
 }
 
+function normalizeGuardPatterns(customPatterns: PatternLike[], logger: GuardrailContext["log"]) {
+  const patterns = DEFAULT_GUARD_PATTERNS.map(normalizePatternEntry).filter(Boolean);
+  let invalidPatternCount = 0;
+  let firstInvalidPatternIndex: number | undefined;
+
+  for (const [index, entry] of customPatterns.entries()) {
+    try {
+      const rule = normalizePatternEntry(entry, DEFAULT_GUARD_PATTERNS.length + index);
+      if (rule) patterns.push(rule);
+    } catch (error) {
+      if (!(error instanceof SyntaxError)) throw error;
+      invalidPatternCount++;
+      firstInvalidPatternIndex ??= index;
+    }
+  }
+
+  if (invalidPatternCount > 0) {
+    try {
+      emitGuardrailLog(logger, "warn", "Prompt injection guard ignored invalid custom patterns", {
+        invalidPatternCount,
+        firstInvalidPatternIndex,
+      });
+    } catch {
+      // A diagnostic sink failure must not discard the remaining valid protection.
+    }
+  }
+
+  return patterns;
+}
+
 function detectWithPatterns(text: string, patterns: ReturnType<typeof normalizePatternEntry>[]) {
   const detections: Detection[] = [];
 
@@ -111,7 +141,11 @@ function shouldBlock(detections: Detection[], threshold: "low" | "medium" | "hig
 }
 
 function getLogger(options: PromptInjectionGuardrailOptions, context: GuardrailContext) {
-  return options.logger || context.log || console;
+  // `logger: null` is an explicit opt-out (chat-family routes are re-evaluated by the
+  // guardrail registry with the request's pino logger — #11936 dedupe). An omitted
+  // logger defers to the context log so middleware-only routes keep their trace.
+  if (options.logger !== undefined) return options.logger;
+  return context.log ?? null;
 }
 
 function emitGuardrailLog(
@@ -178,23 +212,17 @@ export function evaluatePromptInjection(
   const logger = getLogger(options, context);
   const mode = getMode(options);
   const threshold = getThreshold(options);
-  const patterns = [...DEFAULT_GUARD_PATTERNS, ...(options.customPatterns || [])]
-    .map(normalizePatternEntry)
-    .filter(Boolean);
+  const patterns = normalizeGuardPatterns(options.customPatterns || [], logger);
 
   const sanitizerResult = sanitizeRequest(body, {
     info() {},
     warn() {},
   } as Console);
   const contents = extractMessageContents(body);
-  // Bound the custom-pattern scan to the first 16 KB, matching detectInjection's
-  // cap inside sanitizeRequest above (hot-path perf, #3932 / #4041). Injection
-  // directives sit near the top; scanning the full join buys only CPU/GC.
-  const joinedContents = contents.join("\n");
-  const scanText =
-    joinedContents.length > MAX_INJECTION_SCAN_BYTES
-      ? joinedContents.slice(0, MAX_INJECTION_SCAN_BYTES)
-      : joinedContents;
+  // Same 16 KB budget as detectInjection, and now the same bytes: custom
+  // patterns and built-in ones disagreeing about what was scanned would be its
+  // own bug (hot-path perf, #3932 / #4041).
+  const scanText = buildInjectionScanText(contents.join("\n"));
   const customDetections = detectWithPatterns(scanText, patterns);
   const existingDetections = new Set(
     sanitizerResult.detections.map((d: Detection) => `${d.pattern}:${d.match}:${d.severity}`)

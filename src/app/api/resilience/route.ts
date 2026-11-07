@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
-import { getCachedSettings, getSettings, updateSettings } from "@/lib/localDb";
+import { getCachedSettings } from "@/lib/db/readCache";
+import { getSettings, updateSettings } from "@/lib/db/settings";
 import {
   buildLegacyResilienceCompat,
   mergeResilienceSettings,
+  pruneResilienceSettingsToProvided,
   resolveResilienceSettings,
   type ResilienceSettings,
   type ResilienceSettingsPatch,
@@ -22,6 +24,27 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return sanitizeErrorMessage(error) || fallback;
 }
 
+function buildLegacyRequestQueuePatch(
+  defaults: JsonRecord
+): NonNullable<ResilienceSettingsPatch["requestQueue"]> {
+  return {
+    ...(typeof defaults.requestsPerMinute === "number"
+      ? { requestsPerMinute: defaults.requestsPerMinute }
+      : {}),
+    ...(typeof defaults.minTimeBetweenRequests === "number"
+      ? { minTimeBetweenRequestsMs: defaults.minTimeBetweenRequests }
+      : {}),
+    ...(typeof defaults.concurrentRequests === "number"
+      ? { concurrentRequests: defaults.concurrentRequests }
+      : {}),
+    // #18390: the legacy schema has accepted this key since the global gate landed,
+    // but it was never mapped, so the value was silently dropped.
+    ...(typeof defaults.globalConcurrentRequests === "number"
+      ? { globalConcurrentRequests: defaults.globalConcurrentRequests }
+      : {}),
+  };
+}
+
 function normalizeLegacyPatch(body: JsonRecord): ResilienceSettingsPatch {
   const profiles = asRecord(body.profiles);
   const defaults = asRecord(body.defaults);
@@ -31,17 +54,7 @@ function normalizeLegacyPatch(body: JsonRecord): ResilienceSettingsPatch {
   const patch: ResilienceSettingsPatch = {};
 
   if (Object.keys(defaults).length > 0) {
-    patch.requestQueue = {
-      ...(typeof defaults.requestsPerMinute === "number"
-        ? { requestsPerMinute: defaults.requestsPerMinute }
-        : {}),
-      ...(typeof defaults.minTimeBetweenRequests === "number"
-        ? { minTimeBetweenRequestsMs: defaults.minTimeBetweenRequests }
-        : {}),
-      ...(typeof defaults.concurrentRequests === "number"
-        ? { concurrentRequests: defaults.concurrentRequests }
-        : {}),
-    };
+    patch.requestQueue = buildLegacyRequestQueuePatch(defaults);
   }
 
   if (Object.keys(oauth).length > 0 || Object.keys(apikey).length > 0) {
@@ -111,9 +124,15 @@ function normalizeLegacyPatch(body: JsonRecord): ResilienceSettingsPatch {
 }
 
 async function syncRuntimeSettings(resilienceSettings: ResilienceSettings) {
-  const { applyRequestQueueSettings } =
-    await import("@omniroute/open-sse/services/rateLimitManager");
+  const [{ applyRequestQueueSettings }, { setProviderQuotaOverrides }] = await Promise.all([
+    import("@omniroute/open-sse/services/rateLimitManager"),
+    import("@omniroute/open-sse/services/providerDefaultRateLimit"),
+  ]);
   await applyRequestQueueSettings(resilienceSettings.requestQueue);
+  // #6846 Phase 2: re-apply per-provider RPM/concurrency overrides on the hot
+  // path so a PATCH takes effect without a process restart. Mirrors the call in
+  // rateLimitManager.ts::initializeRateLimits() (startup).
+  setProviderQuotaOverrides(resilienceSettings.providerQuotaOverrides);
 }
 
 /**
@@ -128,6 +147,7 @@ export async function GET() {
       requestQueue: resilience.requestQueue,
       connectionCooldown: resilience.connectionCooldown,
       providerBreaker: resilience.providerBreaker,
+      tokenRefreshBreaker: resilience.tokenRefreshBreaker,
       waitForCooldown: {
         enabled: resilience.waitForCooldown.enabled,
         maxRetries: resilience.waitForCooldown.maxRetries,
@@ -135,7 +155,13 @@ export async function GET() {
       },
       comboCooldownWait: resilience.comboCooldownWait,
       quotaShareConcurrencyLimit: resilience.quotaShareConcurrencyLimit,
+      streamStallCooldown: resilience.streamStallCooldown,
+      p2cLatency: resilience.p2cLatency,
+      streamRecovery: resilience.streamRecovery,
       providerCooldown: resilience.providerCooldown,
+      quotaPreflight: resilience.quotaPreflight,
+      providerQuotaOverrides: resilience.providerQuotaOverrides,
+      credentialHealthCheck: resilience.credentialHealthCheck,
       legacy: buildLegacyResilienceCompat(resilience),
     });
   } catch (err: unknown) {
@@ -174,8 +200,16 @@ export async function PATCH(request) {
 
     const body = validation.data as JsonRecord;
     const currentSettings = await getSettings();
-    const currentResilience = resolveResilienceSettings(currentSettings);
-    const nextResilience = mergeResilienceSettings(currentResilience, {
+    // Store only operator-provided values: merge the patch over the resolved
+    // view of the stored partial (legacy top-level keys included), then prune
+    // every leaf that still equals the fresh default so absent keys keep
+    // following the environment and flags on every read.
+    const storedResilience = asRecord(currentSettings.resilienceSettings);
+    const sparseBase = resolveResilienceSettings({
+      ...currentSettings,
+      resilienceSettings: storedResilience,
+    });
+    const mergedFull = mergeResilienceSettings(sparseBase, {
       ...(body.requestQueue
         ? { requestQueue: body.requestQueue as ResilienceSettingsPatch["requestQueue"] }
         : {}),
@@ -187,6 +221,12 @@ export async function PATCH(request) {
         : {}),
       ...(body.providerBreaker
         ? { providerBreaker: body.providerBreaker as ResilienceSettingsPatch["providerBreaker"] }
+        : {}),
+      ...(body.tokenRefreshBreaker
+        ? {
+            tokenRefreshBreaker:
+              body.tokenRefreshBreaker as ResilienceSettingsPatch["tokenRefreshBreaker"],
+          }
         : {}),
       ...(body.waitForCooldown
         ? { waitForCooldown: body.waitForCooldown as ResilienceSettingsPatch["waitForCooldown"] }
@@ -203,16 +243,53 @@ export async function PATCH(request) {
               body.quotaShareConcurrencyLimit as ResilienceSettingsPatch["quotaShareConcurrencyLimit"],
           }
         : {}),
+      ...(body.streamStallCooldown
+        ? {
+            streamStallCooldown:
+              body.streamStallCooldown as ResilienceSettingsPatch["streamStallCooldown"],
+          }
+        : {}),
+      ...(body.p2cLatency
+        ? { p2cLatency: body.p2cLatency as ResilienceSettingsPatch["p2cLatency"] }
+        : {}),
+      ...(body.streamRecovery
+        ? {
+            streamRecovery: body.streamRecovery as ResilienceSettingsPatch["streamRecovery"],
+          }
+        : {}),
       ...(body.providerCooldown
         ? {
             providerCooldown: body.providerCooldown as ResilienceSettingsPatch["providerCooldown"],
           }
         : {}),
+      ...(body.quotaPreflight
+        ? { quotaPreflight: body.quotaPreflight as ResilienceSettingsPatch["quotaPreflight"] }
+        : {}),
+      ...(body.providerQuotaOverrides
+        ? {
+            providerQuotaOverrides:
+              body.providerQuotaOverrides as ResilienceSettingsPatch["providerQuotaOverrides"],
+          }
+        : {}),
+      ...(body.credentialHealthCheck
+        ? {
+            credentialHealthCheck:
+              body.credentialHealthCheck as ResilienceSettingsPatch["credentialHealthCheck"],
+          }
+        : {}),
       ...normalizeLegacyPatch(body),
+    });
+    const nextSparse = pruneResilienceSettingsToProvided(
+      mergedFull,
+      resolveResilienceSettings(null)
+    );
+    const nextResilience = resolveResilienceSettings({
+      ...currentSettings,
+      resilienceSettings: nextSparse,
     });
 
     await updateSettings({
-      resilienceSettings: nextResilience,
+      resilienceSettings: nextSparse,
       requestRetry: nextResilience.waitForCooldown.maxRetries,
       maxRetryIntervalSec: nextResilience.waitForCooldown.maxRetryWaitSec,
     });
@@ -224,9 +301,9 @@ export async function PATCH(request) {
     // `null` (PATCH input) → undefined (stored) is correctly detected as
     // "unset request" when the previous stored value was a boolean.
     const breakerHintsChanged =
-      currentResilience.connectionCooldown.oauth.useUpstream429BreakerHints !==
+      sparseBase.connectionCooldown.oauth.useUpstream429BreakerHints !==
         nextResilience.connectionCooldown.oauth.useUpstream429BreakerHints ||
-      currentResilience.connectionCooldown.apikey.useUpstream429BreakerHints !==
+      sparseBase.connectionCooldown.apikey.useUpstream429BreakerHints !==
         nextResilience.connectionCooldown.apikey.useUpstream429BreakerHints;
     if (breakerHintsChanged) {
       resetAllCircuitBreakers();
@@ -237,6 +314,7 @@ export async function PATCH(request) {
       requestQueue: nextResilience.requestQueue,
       connectionCooldown: nextResilience.connectionCooldown,
       providerBreaker: nextResilience.providerBreaker,
+      tokenRefreshBreaker: nextResilience.tokenRefreshBreaker,
       waitForCooldown: {
         enabled: nextResilience.waitForCooldown.enabled,
         maxRetries: nextResilience.waitForCooldown.maxRetries,
@@ -244,7 +322,13 @@ export async function PATCH(request) {
       },
       comboCooldownWait: nextResilience.comboCooldownWait,
       quotaShareConcurrencyLimit: nextResilience.quotaShareConcurrencyLimit,
+      streamStallCooldown: nextResilience.streamStallCooldown,
+      p2cLatency: nextResilience.p2cLatency,
+      streamRecovery: nextResilience.streamRecovery,
       providerCooldown: nextResilience.providerCooldown,
+      quotaPreflight: nextResilience.quotaPreflight,
+      providerQuotaOverrides: nextResilience.providerQuotaOverrides,
+      credentialHealthCheck: nextResilience.credentialHealthCheck,
       legacy: buildLegacyResilienceCompat(nextResilience),
     });
   } catch (err: unknown) {

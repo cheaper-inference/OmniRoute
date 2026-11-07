@@ -58,6 +58,18 @@ test("delegates byte-identically for a normal model (no apiFormat / no custom ov
   assert.deepEqual(r, expected("openai", "gpt-4o", undefined, undefined, undefined));
 });
 
+test("provider-local target format does not leak from another provider", () => {
+  const r = resolveChatCoreTargetFormat({
+    provider: "openai-compatible-chat-example",
+    resolvedModel: "gpt-5.6-sol",
+    apiFormat: undefined,
+    sourceFormat: FORMATS.OPENAI_RESPONSES,
+    customModelTargetFormat: undefined,
+    providerSpecificData: undefined,
+  });
+  assert.equal(r.targetFormat, FORMATS.OPENAI);
+});
+
 test("customModelTargetFormat is used when the model has no registry target format", () => {
   const customModel = "totally-unknown-custom-model-xyz";
   // precondition: the registry has no target format for this unknown model
@@ -91,6 +103,124 @@ test("AgentRouter explicit connection protocol overrides the inferred inbound pr
     provider: "agentrouter",
     resolvedModel: "gpt-5.6-sol",
     apiFormat: undefined,
+    sourceFormat: FORMATS.OPENAI_RESPONSES,
+    customModelTargetFormat: undefined,
+    providerSpecificData: { targetFormat: FORMATS.CLAUDE },
+  });
+  assert.equal(r.targetFormat, FORMATS.CLAUDE);
+});
+
+for (const resolvedModel of ["gpt-6-astra", "gpt-6.1-sol", "gpt-5.6-sol"]) {
+  test(`#17997 AgentRouter ${resolvedModel} automatic input defaults to Responses`, () => {
+    for (const sourceFormat of [
+      FORMATS.OPENAI,
+      FORMATS.CLAUDE,
+      undefined,
+      FORMATS.OPENAI_RESPONSES,
+    ]) {
+      for (const providerSpecificData of [undefined, null, {}, { targetFormat: "" }]) {
+        const result = resolveChatCoreTargetFormat({
+          provider: "agentrouter",
+          resolvedModel,
+          apiFormat: undefined,
+          sourceFormat,
+          customModelTargetFormat: undefined,
+          providerSpecificData,
+        });
+        assert.equal(result.alias, "agentrouter");
+        assert.equal(result.targetFormat, FORMATS.OPENAI_RESPONSES);
+      }
+    }
+  });
+
+  test(`#17997 AgentRouter ${resolvedModel} explicit formats beat automatic Responses`, () => {
+    for (const targetFormat of [FORMATS.OPENAI, FORMATS.CLAUDE, FORMATS.OPENAI_RESPONSES]) {
+      const result = resolveChatCoreTargetFormat({
+        provider: "agentrouter",
+        resolvedModel,
+        apiFormat: undefined,
+        sourceFormat: FORMATS.OPENAI_RESPONSES,
+        customModelTargetFormat: undefined,
+        providerSpecificData: { targetFormat },
+      });
+      assert.equal(result.targetFormat, targetFormat);
+    }
+  });
+
+  test(`#17997 AgentRouter ${resolvedModel} custom-model format beats automatic Responses`, () => {
+    const result = resolveChatCoreTargetFormat({
+      provider: "agentrouter",
+      resolvedModel,
+      apiFormat: "responses",
+      sourceFormat: FORMATS.OPENAI,
+      customModelTargetFormat: FORMATS.CLAUDE,
+      providerSpecificData: {},
+    });
+    assert.equal(result.targetFormat, FORMATS.CLAUDE);
+  });
+}
+
+test("#17997 automatic Responses does not change unrelated models or providers", () => {
+  for (const { provider, resolvedModel, sourceFormat, targetFormat } of [
+    {
+      provider: "agentrouter",
+      resolvedModel: "claude-opus-4-8",
+      sourceFormat: FORMATS.CLAUDE,
+      targetFormat: FORMATS.CLAUDE,
+    },
+    {
+      provider: "agentrouter",
+      resolvedModel: "unknown-gpt-model",
+      sourceFormat: FORMATS.OPENAI,
+      targetFormat: FORMATS.OPENAI,
+    },
+    {
+      provider: "agentrouter",
+      resolvedModel: "gpt-6-astra-preview",
+      sourceFormat: FORMATS.OPENAI,
+      targetFormat: FORMATS.OPENAI,
+    },
+    {
+      provider: "openai-compatible-chat-example",
+      resolvedModel: "gpt-6-astra",
+      sourceFormat: FORMATS.OPENAI,
+      targetFormat: FORMATS.OPENAI,
+    },
+  ]) {
+    const result = resolveChatCoreTargetFormat({
+      provider,
+      resolvedModel,
+      apiFormat: undefined,
+      sourceFormat,
+      customModelTargetFormat: undefined,
+      providerSpecificData: {},
+    });
+    assert.equal(result.targetFormat, targetFormat);
+  }
+});
+
+test("#8994: customModelTargetFormat takes precedence over apiFormat='responses'", () => {
+  // When a Vertex Claude model has customModelTargetFormat="claude" and the
+  // handler also receives apiFormat="responses", the model-level override
+  // must win — otherwise the request body is translated to OpenAI Responses
+  // format (which Vertex's Claude endpoint cannot parse).
+  const r = resolveChatCoreTargetFormat({
+    provider: "vertex",
+    resolvedModel: "claude-sonnet-4-6",
+    apiFormat: "responses",
+    sourceFormat: FORMATS.OPENAI,
+    customModelTargetFormat: "claude",
+    providerSpecificData: undefined,
+  });
+  // BUG: apiFormat short-circuits before customModelTargetFormat is checked
+  assert.equal(r.targetFormat, "claude", "model-level targetFormat must win over apiFormat");
+});
+
+test("a declared connection alternate overrides the inbound Responses protocol", () => {
+  const r = resolveChatCoreTargetFormat({
+    provider: "deepseek",
+    resolvedModel: "deepseek-v4-pro",
+    apiFormat: "responses",
     sourceFormat: FORMATS.OPENAI_RESPONSES,
     customModelTargetFormat: undefined,
     providerSpecificData: { targetFormat: FORMATS.CLAUDE },

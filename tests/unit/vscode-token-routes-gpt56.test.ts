@@ -25,7 +25,7 @@ interface RawModel {
 async function resetStorage() {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -36,7 +36,53 @@ test.beforeEach(async () => {
 test.after(() => {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
+
+test("vscode models route preserves gateway-owned Ollama Cloud effort tiers", async () => {
+  await settingsDb.updateSettings({
+    requireLogin: true,
+    password: "hashed-password",
+    requireAuthForModels: true,
+  });
+  await providersDb.createProviderConnection({
+    provider: "ollama-cloud",
+    authType: "apikey",
+    name: "ollama-cloud-vscode-efforts",
+    apiKey: "ollama-test-key",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  const key = await apiKeysDb.createApiKey(
+    "vscode-ollama-cloud-efforts",
+    "machine-vscode-ollama-cloud-efforts"
+  );
+  const vscodeModelsRoute = await import("../../src/app/api/v1/vscode/[token]/models/route.ts");
+
+  const response = await vscodeModelsRoute.GET(
+    new Request(`http://localhost/api/v1/vscode/${encodeURIComponent(key.key)}/models`)
+  );
+  const body = (await response.json()) as {
+    data?: Array<{
+      id?: string;
+      root?: string;
+      supportsReasoningEffort?: string[];
+      supportedReasoningEfforts?: string[];
+      defaultReasoningEffort?: string;
+      capabilities?: { effort_tiers?: string[] };
+    }>;
+  };
+  const model = (body.data || []).find(
+    (entry) => entry.root === "gpt-oss:20b" || entry.id === "ollamacloud/gpt-oss:20b"
+  );
+
+  assert.equal(response.status, 200);
+  assert.ok(model, "missing Ollama Cloud GPT-OSS model");
+  assert.deepEqual(model.capabilities?.effort_tiers, ["low", "medium", "high"]);
+  assert.deepEqual(model.supportsReasoningEffort, ["low", "medium", "high"]);
+  assert.deepEqual(model.supportedReasoningEfforts, ["low", "medium", "high"]);
+  assert.equal(model.defaultReasoningEffort, "low");
 });
 
 test("vscode raw models route exposes native GPT-5.6 IDs and effort tiers", async () => {
@@ -82,16 +128,20 @@ test("vscode raw models route exposes native GPT-5.6 IDs and effort tiers", asyn
   assert.equal(typeof defaultModel.created, "number");
   assert.equal(defaultModel.owned_by, "codex");
   assert.equal(defaultModel.name, "Codex GPT 5.6 Sol");
-  assert.equal(defaultModel.context_length, 272000);
+  // #11179: codex static catalog advertises the usable 872K window (max_context_window),
+  // not the old 272K pricing tier.
+  assert.equal(defaultModel.context_length, 872000);
   assert.equal(defaultModel.max_output_tokens, 128000);
-  assert.equal(defaultModel.max_input_tokens, 272000);
+  assert.equal(defaultModel.max_input_tokens, 872000);
   assert.deepEqual(defaultModel.capabilities, {
+    audio_input: false,
+    video_input: false,
+    file_input: false,
     vision: true,
     tool_calling: true,
     reasoning: true,
     thinking: true,
     supportsThinking: true,
-    effort_tiers: ["low", "medium", "high", "xhigh", "max", "ultra"],
   });
   for (const field of [
     "url",

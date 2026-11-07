@@ -16,13 +16,14 @@
 import { secureRandomFloat } from "../../../src/shared/utils/secureRandom";
 import { recordComboShadowRequest } from "../comboMetrics.ts";
 import { isRecord } from "./comboData.ts";
-import { resolveNestedComboTargets } from "./comboStructure.ts";
+import { filterVisibleComboTargets, resolveNestedComboTargets } from "./comboStructure.ts";
 import { toRecordedTarget } from "./comboPredicates.ts";
 import type {
   ComboLike,
   ComboCollectionLike,
   ComboLogger,
   HandleSingleModel,
+  HiddenModelsByProvider,
   IsModelAvailable,
   ResolvedComboTarget,
   ShadowRoutingConfig,
@@ -47,7 +48,8 @@ function normalizeShadowRoutingConfig(config: Record<string, unknown>): ShadowRo
 export function resolveShadowTargets(
   combo: ComboLike,
   config: Record<string, unknown>,
-  allCombos: ComboCollectionLike
+  allCombos: ComboCollectionLike,
+  hiddenModelsByProvider?: HiddenModelsByProvider
 ): ResolvedComboTarget[] {
   const shadowConfig = normalizeShadowRoutingConfig(config);
   if (!shadowConfig.enabled || shadowConfig.targets.length === 0) return [];
@@ -58,7 +60,10 @@ export function resolveShadowTargets(
     name: `${combo.name}:shadow`,
     models: shadowConfig.targets,
   };
-  return resolveNestedComboTargets(shadowCombo, allCombos, new Set([combo.name]), 0, ["shadow"])
+  return filterVisibleComboTargets(
+    resolveNestedComboTargets(shadowCombo, allCombos, new Set([combo.name]), 0, ["shadow"]),
+    hiddenModelsByProvider
+  )
     .slice(0, shadowConfig.maxTargets)
     .map((target) => ({
       ...target,
@@ -66,12 +71,29 @@ export function resolveShadowTargets(
     }));
 }
 
-async function drainShadowResponse(response: Response): Promise<void> {
+/**
+ * A shadow response is never forwarded to a client. Consume its original
+ * stream one chunk at a time rather than teeing it with Response.clone() and
+ * buffering the entire body with arrayBuffer(). The latter retains both a
+ * growing byte buffer and an unread tee branch for large model outputs.
+ */
+export async function drainShadowResponse(response: Response): Promise<void> {
+  if (!response.body) return;
+  let reader: ReadableStreamDefaultReader<Uint8Array>;
   try {
-    if (!response.body) return;
-    await response.arrayBuffer();
+    reader = response.body.getReader();
   } catch {
-    // Shadow draining is best-effort and must never affect the production response.
+    return; // A locked or already consumed body is best-effort.
+  }
+  try {
+    while (true) {
+      const { done } = await reader.read();
+      if (done) break;
+    }
+  } catch {
+    // Shadow draining must not affect production routing.
+  } finally {
+    reader.releaseLock();
   }
 }
 
@@ -125,14 +147,12 @@ export function scheduleShadowRouting(
       targets.map(async (target) => {
         const startedAt = Date.now();
         try {
-          const shadowBody = {
-            ...cloneRequestBodyForShadowRouting(shadowBaseBody),
-            model: target.modelStr,
-            stream: false,
-          };
+          // Check availability before allocating another full history copy.
+          // The synchronous snapshot above already isolates the incoming
+          // request from mutations while this background task is deferred.
           if (isModelAvailable) {
             const available = await isModelAvailable(target.modelStr, target);
-            if (!available) {
+            if (available !== true) {
               recordComboShadowRequest(combo.name, target.modelStr, {
                 success: false,
                 latencyMs: Date.now() - startedAt,
@@ -143,6 +163,16 @@ export function scheduleShadowRouting(
             }
           }
 
+          // A single shadow target owns the snapshot exclusively: avoid the
+          // second deep clone. With multiple targets, retain an independent
+          // copy for each so an executor cannot mutate another target's body.
+          const shadowBody = {
+            ...(targets.length === 1
+              ? shadowBaseBody
+              : cloneRequestBodyForShadowRouting(shadowBaseBody)),
+            model: target.modelStr,
+            stream: false,
+          };
           const response = await withTimeout(
             handleSingleModel(shadowBody, target.modelStr, {
               ...target,
@@ -151,7 +181,7 @@ export function scheduleShadowRouting(
             }),
             shadowConfig.timeoutMs
           );
-          await drainShadowResponse(response.clone());
+          await drainShadowResponse(response);
           recordComboShadowRequest(combo.name, target.modelStr, {
             success: response.ok,
             latencyMs: Date.now() - startedAt,

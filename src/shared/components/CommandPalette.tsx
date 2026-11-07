@@ -4,12 +4,27 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@omniroute/ui-kit/command";
+import { Dialog, DialogContent, DialogTitle } from "@omniroute/ui-kit/dialog";
+import {
   SIDEBAR_SECTIONS,
   HIDDEN_SIDEBAR_ITEMS_SETTING_KEY,
+  SIDEBAR_PRESET_KEY,
+  ESSENTIALS_ADVANCED_TOOL_IDS,
   normalizeHiddenSidebarItems,
+  resolveRuntimeSidebarSections,
+  type HideableSidebarItemId,
   type SidebarItemDefinition,
   type SidebarSectionChild,
 } from "@/shared/constants/sidebarVisibility";
+import Button from "./Button";
+import Icon from "./Icon";
 
 function isSidebarGroup(
   child: SidebarSectionChild
@@ -43,7 +58,7 @@ interface PaletteItem {
 interface PaletteSubgroup {
   subgroupId: string | null;
   subgroupLabel: string | null;
-  items: { item: PaletteItem; flatIndex: number }[];
+  items: PaletteItem[];
 }
 
 interface PaletteGroup {
@@ -52,14 +67,44 @@ interface PaletteGroup {
   subgroups: PaletteSubgroup[];
 }
 
+function PaletteOption({
+  item,
+  onNavigate,
+}: {
+  item: PaletteItem;
+  onNavigate: (href: string, external: boolean) => void;
+}) {
+  return (
+    <CommandItem
+      value={item.label}
+      keywords={[item.subtitle, item.sectionLabel, item.subgroupLabel].filter(
+        (keyword): keyword is string => Boolean(keyword)
+      )}
+      icon={<Icon name={item.icon} size={18} />}
+      description={item.subtitle || undefined}
+      shortcut={item.external ? <Icon name="open_in_new" size={14} /> : undefined}
+      onSelect={() => onNavigate(item.href, item.external)}
+    >
+      {item.label}
+    </CommandItem>
+  );
+}
+
 function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const t = useTranslations("sidebar");
   const inputRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
   const [query, setQuery] = useState("");
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
+  const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [radarAdminUrl, setRadarAdminUrl] = useState<unknown>(null);
+  // The palette has no DialogTrigger (Radix's own focus return target) and mounts fresh on
+  // open, so the element focused before the first render is the one to return to on close.
+  const [opener] = useState<HTMLElement | null>(() => {
+    if (typeof document === "undefined") return null;
+    const active = document.activeElement;
+    return active instanceof HTMLElement && active !== document.body ? active : null;
+  });
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -69,6 +114,10 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
         setHiddenItems(
           new Set(normalizeHiddenSidebarItems(data?.[HIDDEN_SIDEBAR_ITEMS_SETTING_KEY]))
         );
+        setActivePreset(
+          typeof data?.[SIDEBAR_PRESET_KEY] === "string" ? data[SIDEBAR_PRESET_KEY] : null
+        );
+        setRadarAdminUrl(data?.radarAdminUrl ?? null);
       })
       .catch(() => {
         // ignore aborts and fetch failures; palette still works with empty hidden set
@@ -76,14 +125,10 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
     return () => ctrl.abort();
   }, []);
 
-  useEffect(() => {
-    const id = setTimeout(() => inputRef.current?.focus(), 30);
-    return () => clearTimeout(id);
-  }, []);
-
   const safeTranslate = useCallback(
     (key: string, fallback: string) => {
       try {
+        if (typeof t.has === "function" && !t.has(key)) return fallback;
         return t(key);
       } catch {
         return fallback;
@@ -94,19 +139,27 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
 
   const allItems = useMemo<PaletteItem[]>(
     () =>
-      SIDEBAR_SECTIONS.flatMap((section) => {
+      resolveRuntimeSidebarSections(SIDEBAR_SECTIONS, { radarAdminUrl }).flatMap((section) => {
         const sectionLabel = safeTranslate(section.titleKey, section.titleFallback);
         return section.children.flatMap<PaletteItem>((child) => {
           if (isSidebarGroup(child)) {
             const subgroupLabel = safeTranslate(child.titleKey, child.titleFallback);
             return child.items
-              .filter((item) => !hiddenItems.has(item.id))
+              .filter((item) => {
+                if (!hiddenItems.has(item.id)) return true;
+                return (
+                  activePreset === "essentials" &&
+                  ESSENTIALS_ADVANCED_TOOL_IDS.has(item.id as HideableSidebarItemId)
+                );
+              })
               .map<PaletteItem>((item) => ({
                 id: item.id,
                 href: item.href,
                 icon: item.icon,
-                label: safeTranslate(item.i18nKey, item.id),
-                subtitle: item.subtitleKey ? safeTranslate(item.subtitleKey, "") : undefined,
+                label: safeTranslate(item.i18nKey, item.labelFallback ?? item.id),
+                subtitle: item.subtitleKey
+                  ? safeTranslate(item.subtitleKey, item.subtitleFallback ?? "")
+                  : item.subtitleFallback,
                 external: item.external ?? false,
                 sectionId: section.id,
                 sectionLabel,
@@ -115,14 +168,21 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
               }));
           }
           const item = child as SidebarItemDefinition;
-          if (hiddenItems.has(item.id)) return [];
+          if (hiddenItems.has(item.id)) {
+            const keepForEssentials =
+              activePreset === "essentials" &&
+              ESSENTIALS_ADVANCED_TOOL_IDS.has(item.id as HideableSidebarItemId);
+            if (!keepForEssentials) return [];
+          }
           return [
             {
               id: item.id,
               href: item.href,
               icon: item.icon,
-              label: safeTranslate(item.i18nKey, item.id),
-              subtitle: item.subtitleKey ? safeTranslate(item.subtitleKey, "") : undefined,
+              label: safeTranslate(item.i18nKey, item.labelFallback ?? item.id),
+              subtitle: item.subtitleKey
+                ? safeTranslate(item.subtitleKey, item.subtitleFallback ?? "")
+                : item.subtitleFallback,
               external: item.external ?? false,
               sectionId: section.id,
               sectionLabel,
@@ -130,25 +190,13 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
           ];
         });
       }),
-    [hiddenItems, safeTranslate]
+    [hiddenItems, radarAdminUrl, safeTranslate, activePreset]
   );
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return allItems;
-    return allItems.filter(
-      (item) =>
-        item.label.toLowerCase().includes(q) ||
-        item.subtitle?.toLowerCase().includes(q) ||
-        item.sectionLabel.toLowerCase().includes(q) ||
-        item.subgroupLabel?.toLowerCase().includes(q)
-    );
-  }, [allItems, query]);
 
   const grouped = useMemo<PaletteGroup[]>(() => {
     const groups: PaletteGroup[] = [];
     const sectionById = new Map<string, PaletteGroup>();
-    filtered.forEach((item, flatIndex) => {
+    allItems.forEach((item) => {
       // Look up the section/subgroup by id across the whole list, not just the
       // previous item — a section's children can interleave root items and
       // groups (e.g. "omni-proxy" has a trailing root item after its groups),
@@ -174,10 +222,10 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
         };
         section.subgroups.push(subgroup);
       }
-      subgroup.items.push({ item, flatIndex });
+      subgroup.items.push(item);
     });
     return groups;
-  }, [filtered]);
+  }, [allItems]);
 
   const handleNavigate = useCallback(
     (href: string, external: boolean) => {
@@ -191,192 +239,97 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
     [onClose, router]
   );
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-        return;
-      }
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev + 1) % Math.max(1, filtered.length));
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIndex(
-          (prev) => (prev - 1 + Math.max(1, filtered.length)) % Math.max(1, filtered.length)
-        );
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        const item = filtered[selectedIndex];
-        if (item) {
-          handleNavigate(item.href, item.external);
-        }
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [filtered, selectedIndex, onClose, handleNavigate]);
-
-  useEffect(() => {
-    const list = listRef.current;
-    if (!list) return;
-    const el = list.querySelector<HTMLElement>(`[data-flat-index="${selectedIndex}"]`);
-    el?.scrollIntoView({ block: "nearest" });
-  }, [selectedIndex]);
-
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[10vh] px-4">
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <div
-        className="relative w-full max-w-3xl bg-surface border border-black/10 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Command palette"
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      {/* Opens near the top like the legacy palette: the kit centres with translate(-50%, -50%),
+          so the transform and the slide-in keyframes are overridden (fade only). */}
+      <DialogContent
+        showCloseButton={false}
+        aria-describedby={undefined}
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          if (opener?.isConnected) opener.focus();
+        }}
+        className="top-[10vh] max-w-3xl [animation-name:ci-fade-in] [transform:translateX(-50%)]"
       >
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-black/5 dark:border-white/5">
-          <span className="material-symbols-outlined text-[20px] text-text-muted shrink-0">
-            search
-          </span>
-          <input
+        <DialogTitle className="ci-sr-only">{t("commandPalette.title")}</DialogTitle>
+        <Command
+          query={query}
+          onQueryChange={setQuery}
+          className="[--ci-command-list-max-height:60vh]"
+        >
+          <CommandInput
             ref={inputRef}
-            type="text"
-            className="flex-1 bg-transparent text-text placeholder:text-text-muted outline-none text-base"
-            placeholder="Search pages, settings, tools..."
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setSelectedIndex(0);
-            }}
-            autoComplete="off"
-            spellCheck={false}
+            placeholder={t("commandPalette.searchPlaceholder")}
+            aria-label={t("commandPalette.searchPlaceholder")}
+            trailing={
+              <>
+                {query && (
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    tabIndex={-1}
+                    aria-label={t("commandPalette.clearSearch")}
+                    onClick={() => {
+                      setQuery("");
+                      // The press took focus here, and this button unmounts with the query.
+                      inputRef.current?.focus();
+                    }}
+                  >
+                    <Icon name="close" size={16} />
+                  </Button>
+                )}
+                <kbd className="hidden shrink-0 rounded border border-border bg-bg-subtle px-1.5 py-0.5 font-mono text-[10px] text-text-muted sm:inline-flex">
+                  Esc
+                </kbd>
+              </>
+            }
           />
-          {query && (
-            <button
-              className="text-text-muted hover:text-text transition-colors"
-              onClick={() => {
-                setQuery("");
-                setSelectedIndex(0);
-              }}
-              tabIndex={-1}
-              aria-label="Clear search"
-            >
-              <span className="material-symbols-outlined text-[16px]">close</span>
-            </button>
-          )}
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-black/5 dark:bg-white/5 text-text-muted border border-black/10 dark:border-white/10 shrink-0">
-            Esc
-          </kbd>
-        </div>
-
-        {grouped.length > 0 ? (
-          <ul
-            ref={listRef}
-            className="py-2 max-h-[60vh] overflow-y-auto custom-scrollbar"
-            role="listbox"
-          >
+          <CommandList aria-label={t("commandPalette.title")} className="custom-scrollbar">
             {grouped.map((group) => (
-              <li key={group.sectionId} role="presentation">
-                <div className="sticky top-0 z-10 bg-surface/95 backdrop-blur-sm px-6 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-text-muted border-b border-black/5 dark:border-white/5">
-                  {group.sectionLabel}
-                </div>
-                <ul role="group" aria-label={group.sectionLabel}>
-                  {group.subgroups.map((subgroup) => (
-                    <li
-                      key={`${group.sectionId}::${subgroup.subgroupId ?? "_root"}`}
-                      role="presentation"
-                    >
-                      {subgroup.subgroupLabel && (
-                        <div className="px-6 pt-2 pb-1 text-[10px] font-medium uppercase tracking-wide text-text-muted/70">
-                          {subgroup.subgroupLabel}
-                        </div>
-                      )}
-                      <ul
-                        role={subgroup.subgroupLabel ? "group" : "presentation"}
-                        aria-label={subgroup.subgroupLabel ?? undefined}
-                      >
-                        {subgroup.items.map(({ item, flatIndex }) => (
-                          <li
-                            key={item.id}
-                            role="option"
-                            aria-selected={flatIndex === selectedIndex}
-                            data-flat-index={flatIndex}
-                          >
-                            <button
-                              className={`w-full flex items-center gap-3 ${
-                                subgroup.subgroupLabel ? "pl-10 pr-6" : "px-6"
-                              } py-2.5 text-left transition-colors ${
-                                flatIndex === selectedIndex
-                                  ? "bg-accent/10 text-accent ring-1 ring-inset ring-accent/20"
-                                  : "text-text hover:bg-black/5 dark:hover:bg-white/5"
-                              }`}
-                              onClick={() => handleNavigate(item.href, item.external)}
-                              onMouseEnter={() => setSelectedIndex(flatIndex)}
-                            >
-                              <span
-                                className={`material-symbols-outlined text-[18px] shrink-0 ${
-                                  flatIndex === selectedIndex ? "text-accent" : "text-text-muted"
-                                }`}
-                              >
-                                {item.icon}
-                              </span>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{item.label}</p>
-                                {item.subtitle && (
-                                  <p
-                                    className={`text-xs truncate ${
-                                      flatIndex === selectedIndex
-                                        ? "text-accent/70"
-                                        : "text-text-muted"
-                                    }`}
-                                  >
-                                    {item.subtitle}
-                                  </p>
-                                )}
-                              </div>
-                              {item.external && (
-                                <span className="material-symbols-outlined text-[14px] text-text-muted shrink-0">
-                                  open_in_new
-                                </span>
-                              )}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  ))}
-                </ul>
-              </li>
+              <CommandGroup key={group.sectionId} heading={group.sectionLabel}>
+                {group.subgroups.map((subgroup) => {
+                  const options = subgroup.items.map((item) => (
+                    <PaletteOption key={item.id} item={item} onNavigate={handleNavigate} />
+                  ));
+                  return subgroup.subgroupLabel ? (
+                    <CommandGroup key={subgroup.subgroupId} heading={subgroup.subgroupLabel}>
+                      {options}
+                    </CommandGroup>
+                  ) : (
+                    options
+                  );
+                })}
+              </CommandGroup>
             ))}
-          </ul>
-        ) : (
-          <div className="py-10 text-center text-text-muted text-sm">No results</div>
-        )}
+          </CommandList>
+          <CommandEmpty>{t("noResults")}</CommandEmpty>
+        </Command>
 
-        <div className="flex items-center gap-4 px-4 py-2 border-t border-black/5 dark:border-white/5 text-[11px] text-text-muted">
+        <div className="flex items-center gap-4 border-t border-border px-5 py-2 text-[11px] text-text-muted">
           <span className="flex items-center gap-1">
-            <kbd className="px-1 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 font-mono">
+            <kbd className="rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono">
               ↑↓
             </kbd>
-            navigate
+            {t("commandPalette.navigate")}
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="px-1 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 font-mono">
-              ↵
-            </kbd>
-            open
+            <kbd className="rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono">↵</kbd>
+            {t("commandPalette.open")}
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="px-1 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 font-mono">
+            <kbd className="rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono">
               Esc
             </kbd>
-            close
+            {t("commandPalette.close")}
           </span>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

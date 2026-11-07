@@ -14,14 +14,16 @@
  *      the persisted settings layer.
  *
  * The middleware applies the resolved value via `applyCorsHeaders()`.
- * Per-route handlers no longer set `Access-Control-Allow-Origin` themselves.
+ * Per-route handlers no longer set `Access-Control-Allow-Origin` themselves,
+ * except for a 401 that refuses a presented API key
+ * (`credentialRejectionCorsHeaders()`).
  */
 const ENV_ALLOW_ALL = "CORS_ALLOW_ALL";
 const ENV_ALLOWED = "CORS_ALLOWED_ORIGINS";
 const LEGACY_ENV_SINGLE = "CORS_ORIGIN";
 
 const STANDARD_ALLOW_HEADERS =
-  "Content-Type, Authorization, x-api-key, anthropic-version, x-omniroute-connection, x-internal-test, accept";
+  "Content-Type, Authorization, x-api-key, anthropic-version, x-omniroute-connection, X-OmniRoute-Lease-Owner, X-OmniRoute-Lease-Generation, x-internal-test, accept";
 const STANDARD_ALLOW_METHODS = "GET, POST, PUT, DELETE, PATCH, OPTIONS";
 
 let runtimeAllowedOrigins: ReadonlySet<string> = new Set();
@@ -144,6 +146,26 @@ export function getCorsStatus(): CorsStatus {
  * compression middleware only appends it conditionally, so shared caches can't
  * otherwise reliably tell compressed vs uncompressed variants apart.
  */
+function requestCarriesTokenOrPreflight(request: Request): boolean {
+  // Preflight (OPTIONS) never carries the Authorization / x-api-key header, so it
+  // must be allowed through — the actual request that follows is re-evaluated by
+  // this same check and only gets the permissive Origin if it presents a token.
+  if (request.method === "OPTIONS") return true;
+  if (
+    request.headers.get("authorization") ||
+    request.headers.get("x-api-key") ||
+    request.headers.get("x-goog-api-key")
+  ) {
+    return true;
+  }
+  // A dashboard session cookie is a credential too (#5242 browser/Electron
+  // clients). auth_token is HttpOnly + SameSite, so a cross-site attacker page
+  // cannot get it auto-attached — only a truly credential-less request (the
+  // GHSA-7px7 anonymous case on a keyless install) falls through to fail-closed.
+  const cookie = request.headers.get("cookie");
+  return Boolean(cookie && /(?:^|;\s*)auth_token=/.test(cookie));
+}
+
 export function applyCorsHeaders(
   response: Response,
   request: Request,
@@ -151,7 +173,15 @@ export function applyCorsHeaders(
 ): void {
   const requestOrigin = request.headers.get("origin");
   let allowed = resolveAllowedOrigin(requestOrigin);
-  if (allowed === null && relaxForTokenAuth) {
+  if (allowed === null && relaxForTokenAuth && requestCarriesTokenOrPreflight(request)) {
+    // GHSA-7px7-29v2-m97p: the permissive Origin echo is only safe on the
+    // assumption that these routes are token-authenticated (browsers never
+    // auto-attach Authorization/x-api-key). On a keyless install that assumption
+    // breaks — an anonymous cross-origin page would be echoed its own Origin and
+    // could read the response. Only relax for a request that actually carries a
+    // credential, plus CORS preflights (OPTIONS never carries the header — the
+    // real request that follows is re-checked), so authenticated browser/Electron
+    // clients (#5242) keep working while credential-less cross-origin reads do not.
     allowed = requestOrigin && requestOrigin.length > 0 ? requestOrigin : "*";
   }
   if (allowed !== null) {
@@ -174,6 +204,31 @@ export function applyCorsHeaders(
   if (requestedHeaders) {
     response.headers.set("Access-Control-Allow-Headers", requestedHeaders);
   }
+}
+
+/**
+ * Origin echo for a route-level credential rejection on the client API surface.
+ *
+ * With `REQUIRE_API_KEY=false`, `clientApiPolicy` serves a request whose key did
+ * not validate as anonymous, so the middleware keeps the fail-closed origin
+ * policy for it (no echo). A route that then refuses that key with its own 401
+ * (the `/v1/models` catalog when management auth is configured, the
+ * owner-scoped batches/files/media routes) would otherwise be unreadable to a
+ * browser/Electron client, which needs the 401 to report a mistyped or revoked
+ * key (#5242). The body is a fixed error envelope, so echoing the Origin here
+ * exposes nothing; a 2xx served to an anonymous caller never gets this header.
+ *
+ * Returns the extra headers for that 401: the caller's `Origin` plus
+ * `Vary: Origin`, only when the request carries a token credential. Never
+ * paired with `Access-Control-Allow-Credentials`. When the middleware already
+ * set `Access-Control-Allow-Origin` (allowlisted origin), Next.js keeps the
+ * middleware value and does not duplicate the header.
+ */
+export function credentialRejectionCorsHeaders(request: Request): Record<string, string> {
+  const requestOrigin = request.headers.get("origin");
+  if (!requestOrigin || request.method === "OPTIONS") return {};
+  if (!requestCarriesTokenOrPreflight(request)) return {};
+  return { "Access-Control-Allow-Origin": requestOrigin, Vary: "Origin" };
 }
 
 /**

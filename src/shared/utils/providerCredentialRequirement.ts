@@ -10,7 +10,7 @@
  *   2. **Can the user call it with nothing configured?** That is this module.
  *
  * Reading (1) as (2) is not academic: probing the endpoints on 2026-07-20 showed
- * blackbox, friendliai, iflytek, sparkdesk and puter answering 401, and
+ * blackbox, friendliai, iflytek and sparkdesk answering 401, and
  * muse-spark-web 403, with no credential — yet all are `freeType: "keyless"`.
  * A UI section built on (1) would invite users to call providers that reject
  * them. So anything user-facing about API keys must come from here.
@@ -85,8 +85,6 @@ export const NOT_TOKEN_QUANTIFIABLE_BUT_CREDENTIALED: readonly string[] = [
   "iflytek", // probed -> 401 Unauthorized
   "liquid", // probed -> 404: endpoint moved; config needs a separate audit
   "muse-spark-web", // probed -> 403; authHeader is a session cookie, not a key
-  "puter", // probed -> 401 "Missing authentication token"
-  "qwen-web", // probed -> 200 but serves the WAF HTML page, not the API
   "sparkdesk", // probed -> 401 Unauthorized
 ];
 

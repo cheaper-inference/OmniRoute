@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { cleanupTempDataDir } from "../_setup/tempDataDir.ts";
 
 // providerLimits.ts touches the DB singleton at import time; give it a scratch dir.
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-rotating-expired-guard-"));
@@ -12,8 +13,8 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "rotating-expired-gua
 const { quotaPathShouldMarkExpired, shouldAttemptRotatingRefresh } =
   await import("../../src/lib/usage/providerLimits.ts");
 
-test.after(() => {
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+test.after(async () => {
+  await cleanupTempDataDir(TEST_DATA_DIR);
 });
 
 // Regression: the quota sync reuses a rotating provider's (possibly expired)
@@ -22,7 +23,15 @@ test.after(() => {
 // flagging it expired hid freshly-added Codex accounts from the quota page even
 // though a providers-page refresh turned them green.
 test("rotating providers are NEVER flagged expired from the quota path", () => {
-  for (const provider of ["codex", "openai", "claude", "kiro", "gitlab-duo"]) {
+  for (const provider of [
+    "codex",
+    "openai",
+    "claude",
+    "kiro",
+    "gitlab-duo",
+    "amazon-q",
+    "openference",
+  ]) {
     assert.equal(
       quotaPathShouldMarkExpired(provider, "Token expired, please re-authenticate", "active"),
       false,
@@ -53,7 +62,15 @@ test("an already-expired connection is left untouched (no redundant write)", () 
 // expired token (cascade-safe via serializeRefresh), so its live quota shows;
 // the bulk scheduler (allowRotatingRefresh falsy) must keep #3019 and never do it.
 test("bulk path never refreshes rotating providers (preserves #3019)", () => {
-  for (const provider of ["codex", "openai", "claude", "kiro", "gitlab-duo"]) {
+  for (const provider of [
+    "codex",
+    "openai",
+    "claude",
+    "kiro",
+    "gitlab-duo",
+    "amazon-q",
+    "openference",
+  ]) {
     assert.equal(shouldAttemptRotatingRefresh(provider, undefined), false, `${provider} bulk`);
     assert.equal(
       shouldAttemptRotatingRefresh(provider, false),

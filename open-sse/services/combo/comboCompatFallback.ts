@@ -1,4 +1,11 @@
-import type { ComboLogger, HandleSingleModel, IsModelAvailable, ResolvedComboTarget } from "./types";
+import { readAttemptFailure } from "./attemptFailure.ts";
+import { isLocalProcessPressureResponse } from "./comboPredicates.ts";
+import type {
+  ComboLogger,
+  HandleSingleModel,
+  IsModelAvailable,
+  ResolvedComboTarget,
+} from "./types";
 
 /**
  * Last-resort fallback tier for combo routing (#6238).
@@ -32,6 +39,7 @@ export interface CompatFallbackContext {
  * upstream `Response`. Targets that are unavailable, in cooldown, or return a non-ok
  * response are skipped. Returns `null` when no rejected target yields a success, so the
  * caller can fall through to its existing error/503 path with an unchanged error surface.
+ * Process-wide pressure instead returns its original terminal response, never a success.
  */
 export async function attemptCompatRejectedFallback(
   rejectedTargets: ResolvedComboTarget[],
@@ -40,10 +48,11 @@ export async function attemptCompatRejectedFallback(
 ): Promise<Response | null> {
   if (rejectedTargets.length === 0) return null;
 
-  for (const target of rejectedTargets) {
+  for (let i = 0; i < rejectedTargets.length; i++) {
+    const target = rejectedTargets[i];
     if (ctx.isModelAvailable) {
       const available = await ctx.isModelAvailable(target.modelStr, target);
-      if (!available) {
+      if (available !== true) {
         ctx.log.debug(
           "COMBO",
           `Last-resort compat fallback: ${target.modelStr} still unavailable — skipping`
@@ -67,7 +76,13 @@ export async function attemptCompatRejectedFallback(
     const result = await ctx.handleSingleModel(body, target.modelStr, {
       ...target,
       effectiveComboStrategy: ctx.strategy,
+      fallbackAttempts: i,
     });
+    if (
+      result.status === 503 &&
+      isLocalProcessPressureResponse(result, (await readAttemptFailure(result)).errorBody)
+    )
+      return result;
     if (result.ok) {
       ctx.log.info("COMBO", `Last-resort compat fallback succeeded via ${target.modelStr}`);
       return result;

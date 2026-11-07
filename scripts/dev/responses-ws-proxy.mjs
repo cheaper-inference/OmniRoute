@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { STATUS_CODES } from "node:http";
+import { relayForwardingHeaders, stampPeerIp } from "./peer-stamp.mjs";
 
 const _wreqRequire = createRequire(import.meta.url);
 
@@ -17,6 +18,36 @@ function getWebSocketTransport() {
     _websocketFn = null;
   }
   return _websocketFn;
+}
+
+// Newest plain chrome profile the installed wreq-js ships, mirroring
+// newestChromeProfile() in open-sse/utils/tlsClient.ts (kept dependency-free
+// here because this dev proxy is plain .mjs).
+let _newestChrome = null;
+function newestChromeBrowser() {
+  if (_newestChrome) return _newestChrome;
+  let best = null;
+  let bestVersion = -1;
+  try {
+    const mod = _wreqRequire("wreq-js");
+    const profiles = typeof mod.getProfiles === "function" ? mod.getProfiles() : [];
+    for (const profile of profiles) {
+      if (!profile.startsWith("chrome_")) continue;
+      const versionStr = profile.slice("chrome_".length);
+      const version = Number(versionStr);
+      if (versionStr !== "" && Number.isInteger(version) && version > bestVersion) {
+        best = profile;
+        bestVersion = version;
+      }
+    }
+  } catch (err) {
+    throw new Error(`wreq-js browser profiles unavailable: ${err?.message ?? err}`);
+  }
+  if (best === null) {
+    throw new Error("wreq-js exposes no chrome_* browser profiles");
+  }
+  _newestChrome = best;
+  return _newestChrome;
 }
 
 export const RESPONSES_WS_PUBLIC_PATHS = new Set([
@@ -119,6 +150,41 @@ function getResponseErrorStatus(error) {
     if (Number.isInteger(status) && status >= 400 && status <= 599) return status;
   }
   return null;
+}
+
+const RESPONSES_TOOL_ITEM_TYPES = new Set([
+  "function_call",
+  "custom_tool_call",
+  "local_shell_call",
+  "mcp_call",
+  "computer_call",
+]);
+
+/**
+ * True when an upstream Responses event carries output the user sees: a non-empty text,
+ * reasoning or tool-argument delta, or a tool call item (first-output timing).
+ */
+function responsesEventCarriesOutput(data) {
+  if (
+    typeof data !== "string" ||
+    (!data.includes(".delta") && !data.includes("output_item.added"))
+  ) {
+    return false;
+  }
+  let event;
+  try {
+    event = JSON.parse(data);
+  } catch {
+    return false;
+  }
+  const type = typeof event?.type === "string" ? event.type : "";
+  if (type.startsWith("response.") && type.endsWith(".delta")) {
+    return typeof event.delta === "string" ? event.delta.length > 0 : Boolean(event.delta);
+  }
+  if (type === "response.output_item.added") {
+    return RESPONSES_TOOL_ITEM_TYPES.has(event.item?.type);
+  }
+  return false;
 }
 
 function getTerminalResponseEvent(rawData) {
@@ -297,7 +363,7 @@ export function writeHttpError(socket, status, body, headers = {}) {
   socket.end(bodyBuffer);
 }
 
-function getAuthHeaders(requestUrl, requestHeaders) {
+function getAuthHeaders(requestUrl, requestHeaders, forwarding) {
   const headers = {};
   if (isText(requestHeaders.authorization)) {
     headers.authorization = requestHeaders.authorization;
@@ -314,8 +380,38 @@ function getAuthHeaders(requestUrl, requestHeaders) {
 
   if (isText(requestHeaders.cookie)) headers.cookie = requestHeaders.cookie;
   if (isText(requestHeaders.origin)) headers.origin = requestHeaders.origin;
-  if (isText(requestHeaders["x-forwarded-for"])) {
-    headers["x-forwarded-for"] = requestHeaders["x-forwarded-for"];
+  Object.assign(headers, forwarding);
+  for (const key of [
+    "session-id",
+    "session_id",
+    "x-codex-installation-id",
+    "x-codex-window-id",
+    "x-codex-turn-metadata",
+    "originator",
+    "user-agent",
+  ]) {
+    if (isText(requestHeaders[key])) headers[key] = requestHeaders[key];
+  }
+  return headers;
+}
+
+// Handshake headers the bridge's Origin check needs (see src/server/origin/wsOrigin.ts).
+// Keep in sync with HANDSHAKE_ORIGIN_HEADERS in src/app/api/internal/codex-responses-ws/route.ts.
+const HANDSHAKE_ORIGIN_HEADERS = [
+  "host",
+  "x-forwarded-host",
+  "x-forwarded-proto",
+  "forwarded",
+  "x-omniroute-peer-ip",
+];
+
+/** Host, forwarding headers and a token-stamped peer IP, read from a copy of the upgrade request. */
+export function getHandshakeOriginHeaders(req) {
+  const copy = { headers: { ...req.headers }, socket: req.socket };
+  stampPeerIp(copy);
+  const headers = {};
+  for (const name of HANDSHAKE_ORIGIN_HEADERS) {
+    if (isText(copy.headers[name])) headers[name] = copy.headers[name];
   }
   return headers;
 }
@@ -362,12 +458,13 @@ function withPreparedResponseCreate(message, preparedBody) {
   return next;
 }
 
-async function callInternal(fetchImpl, baseUrl, bridgeSecret, action, payload) {
+async function callInternal(fetchImpl, baseUrl, bridgeSecret, action, payload, forwarding) {
   const response = await fetchImpl(new URL(INTERNAL_ROUTE, baseUrl), {
     method: "POST",
     headers: {
       "content-type": "application/json",
       "x-omniroute-ws-bridge-secret": bridgeSecret,
+      ...forwarding,
     },
     body: JSON.stringify({ action, ...payload }),
   });
@@ -388,6 +485,7 @@ class ResponsesWsSession {
     fetchImpl,
     socket,
     requestHeaders,
+    forwarding,
     requestUrl,
     wsFactory,
     pingIntervalMs,
@@ -400,6 +498,8 @@ class ResponsesWsSession {
     this.fetchImpl = fetchImpl;
     this.socket = socket;
     this.requestHeaders = requestHeaders;
+    // Fails closed: a session built without it reports its client as unknown, never as local.
+    this.forwarding = forwarding ?? { "x-forwarded-for": "unknown" };
     this.requestUrl = requestUrl;
     this.wsFactory = wsFactory;
     this.pingIntervalMs = pingIntervalMs;
@@ -408,6 +508,10 @@ class ResponsesWsSession {
     this.maxMessageBytes = normalizePositiveInteger(maxMessageBytes, DEFAULT_MAX_WS_MESSAGE_BYTES);
     this.sessionId = randomUUID();
     this.startedAt = Date.now();
+    // Per-turn timing. A reused connection serves many response.create turns, so
+    // history must measure each turn from its own request, not from the connection open.
+    this.turnStartedAt = this.startedAt;
+    this.turnFirstOutputAt = null;
     this.closed = false;
     this.buffer = Buffer.alloc(0);
     this.fragmentOpcode = null;
@@ -419,6 +523,9 @@ class ResponsesWsSession {
     this.firstResponseBody = null;
     this.currentRequestBody = null;
     this.preparedContext = null;
+    this.leaseId = null;
+    this.leaseReleased = false;
+    this.leaseReleaseInFlight = false;
     // #7388: logging must be scoped per logical turn (one `response.create`
     // through its terminal event), not once for the lifetime of the WS
     // connection — a single boolean here silently dropped every turn after
@@ -585,12 +692,19 @@ class ResponsesWsSession {
   // preparedContext, but never touches this.upstream/this.upstreamReady; the caller decides
   // whether a new upstream socket is needed.
   async runPrepare(message, responseBody) {
-    const prepared = await callInternal(this.fetchImpl, this.baseUrl, this.bridgeSecret, "prepare", {
-      requestUrl: this.requestUrl,
-      headers: getAuthHeaders(this.requestUrl, this.requestHeaders),
-      message,
-      response: responseBody,
-    });
+    const prepared = await callInternal(
+      this.fetchImpl,
+      this.baseUrl,
+      this.bridgeSecret,
+      "prepare",
+      {
+        requestUrl: this.requestUrl,
+        headers: getAuthHeaders(this.requestUrl, this.requestHeaders, this.forwarding),
+        message,
+        response: responseBody,
+      },
+      this.forwarding
+    );
 
     if (!prepared.ok) {
       const message2 =
@@ -602,6 +716,7 @@ class ResponsesWsSession {
       const error = new Error(message2);
       error.code = code;
       error.status = prepared.status;
+      if (code === "responses_websocket_http_fallback") error.httpFallback = true;
       throw error;
     }
 
@@ -622,6 +737,23 @@ class ResponsesWsSession {
         toStringOrNull(responseBody.service_tier) || toStringOrNull(responseBody.serviceTier),
     };
 
+    // A reused WS connection re-runs prepare per logical turn, and each prepare
+    // acquires a fresh per-account lease. Release the previous turn before
+    // adopting the new lease so one session cannot hoard account slots.
+    const previousLeaseId = this.leaseId;
+    const newLeaseId = toStringOrNull(prepared.json?.leaseId);
+    if (this.closed) {
+      this.leaseId = null;
+      this.releaseLeaseId(newLeaseId);
+      return prepared;
+    }
+    this.leaseId = newLeaseId;
+    if (previousLeaseId && previousLeaseId !== newLeaseId) {
+      this.releaseLeaseId(previousLeaseId);
+    }
+    this.leaseReleased = false;
+    this.leaseReleaseInFlight = false;
+
     return prepared;
   }
 
@@ -639,9 +771,9 @@ class ResponsesWsSession {
       const prepared = await this.runPrepare(firstMessage, responseBody);
 
       const wsOptions = {
-        // #5591: chrome_149 is not a wreq-js 2.3.1 profile (max chrome_147); the
-        // prepare route now sends chrome_142, this fallback matches it.
-        browser: prepared.json.browser || "chrome_142",
+        // Match the prepare route (src/app/api/internal/codex-responses-ws/route.ts),
+        // which resolves the newest profile from the installed wreq-js catalog.
+        browser: prepared.json.browser || newestChromeBrowser(),
         os: prepared.json.os || "windows",
         headers: prepared.json.headers || {},
       };
@@ -654,9 +786,16 @@ class ResponsesWsSession {
         if (this.closed) return;
         const data =
           typeof event.data === "string" ? event.data : Buffer.from(event.data).toString("utf8");
+        if (this.turnFirstOutputAt === null && responsesEventCarriesOutput(data)) {
+          this.turnFirstOutputAt = Date.now();
+        }
         const terminalEvent = getTerminalResponseEvent(data);
         if (terminalEvent) {
+          // persistHistory reads the turn timing synchronously before its first await.
           void this.persistHistory(terminalEvent);
+          // The turn is over; a later session-level failure row must not reuse its timing.
+          this.turnStartedAt = null;
+          this.turnFirstOutputAt = null;
         }
         this.sendFrame(0x1, Buffer.from(data, "utf8"));
       };
@@ -698,6 +837,10 @@ class ResponsesWsSession {
   }
 
   async forwardClientMessage(message) {
+    if (getResponseCreatePayload(message) !== null) {
+      this.turnStartedAt = Date.now();
+      this.turnFirstOutputAt = null;
+    }
     try {
       if (!this.upstream) {
         const { upstream, firstMessage } = await this.ensureUpstream(message);
@@ -716,14 +859,34 @@ class ResponsesWsSession {
         // otherwise every turn after the first bypasses the whole pipeline. This reuses
         // the already-established upstream transport; it must NOT recreate the socket.
         const prepared = await this.runPrepare(message, nextTurnBody);
-        this.upstream.send(jsonStringifySafe(withPreparedResponseCreate(message, prepared.json.response)));
+        this.upstream.send(
+          jsonStringifySafe(withPreparedResponseCreate(message, prepared.json.response))
+        );
         return;
       }
       this.upstream.send(jsonStringifySafe(message));
     } catch (error) {
+      if (error?.httpFallback) {
+        const failurePayload = this.sendFailure(
+          "responses_websocket_http_fallback",
+          "Retry this request over HTTP/SSE Responses"
+        );
+        void this.persistHistory({
+          status: 426,
+          success: false,
+          errorCode: "responses_websocket_http_fallback",
+          errorMessage: "HTTP/SSE Responses transport required",
+          terminalMessage: failurePayload,
+        });
+        this.close(1013, "http_fallback_required");
+        return;
+      }
       const code = error?.code || "upstream_websocket_connect_failed";
       const messageText = error instanceof Error ? error.message : String(error);
-      const failurePayload = this.sendFailure(code, messageText);
+      // Hard Rule #12: the connect error can carry the upstream proxy URL (with its
+      // credentials) or internal addresses. The client gets a fixed message; the raw text
+      // stays in the server-side request history below.
+      const failurePayload = this.sendFailure(code, "Upstream WebSocket connection failed");
       void this.persistHistory({
         status: Number.isInteger(error?.status) ? error.status : 502,
         success: false,
@@ -733,6 +896,49 @@ class ResponsesWsSession {
       });
       this.close(1011, "upstream_connect_failed");
     }
+  }
+
+  releaseLease() {
+    if (this.leaseReleased || this.leaseReleaseInFlight || !this.leaseId) return;
+    this.leaseReleaseInFlight = true;
+    const leaseId = this.leaseId;
+    void callInternal(
+      this.fetchImpl,
+      this.baseUrl,
+      this.bridgeSecret,
+      "release",
+      { leaseId },
+      this.forwarding
+    )
+      .then((response) => {
+        if (!response.ok) throw new Error("lease release rejected");
+        this.leaseReleased = true;
+        this.leaseId = null;
+      })
+      .catch(() => {
+        this.leaseReleaseInFlight = false;
+        const retry = setTimeout(() => this.releaseLease(), 1000);
+        retry.unref?.();
+      });
+  }
+
+  releaseLeaseId(leaseId) {
+    if (!leaseId) return;
+    void callInternal(
+      this.fetchImpl,
+      this.baseUrl,
+      this.bridgeSecret,
+      "release",
+      { leaseId },
+      this.forwarding
+    )
+      .then((response) => {
+        if (!response.ok) throw new Error("lease release rejected");
+      })
+      .catch(() => {
+        const retry = setTimeout(() => this.releaseLeaseId(leaseId), 1000);
+        retry.unref?.();
+      });
   }
 
   async persistHistory({
@@ -756,27 +962,40 @@ class ResponsesWsSession {
     this.loggedTurnIds.add(turnId);
 
     const finishedAt = Date.now();
+    // No turn in flight (e.g. upstream closed after the last turn finished): the row covers
+    // no request, so it gets no duration or TTFT instead of the previous turn's.
+    const turnStartedAt = this.turnStartedAt ?? finishedAt;
+    const firstOutputMs =
+      this.turnFirstOutputAt === null ? null : Math.max(0, this.turnFirstOutputAt - turnStartedAt);
     try {
-      await callInternal(this.fetchImpl, this.baseUrl, this.bridgeSecret, "log", {
-        sessionId: this.sessionId,
-        transport: "responses_websocket",
-        requestUrl: this.requestUrl,
-        headers: getAuthHeaders(this.requestUrl, this.requestHeaders),
-        path: new URL(this.requestUrl || "/v1/responses", "http://omniroute.local").pathname,
-        startedAt: new Date(this.startedAt).toISOString(),
-        completedAt: new Date(finishedAt).toISOString(),
-        durationMs: Math.max(0, finishedAt - this.startedAt),
-        status: toFiniteNumber(status),
-        success,
-        errorCode,
-        errorMessage,
-        clientRequest: this.currentRequestBody || this.firstResponseBody,
-        terminalMessage,
-        responseBody,
-        sourceFormat: "openai-responses",
-        targetFormat: "openai-responses",
-        ...this.preparedContext,
-      });
+      await callInternal(
+        this.fetchImpl,
+        this.baseUrl,
+        this.bridgeSecret,
+        "log",
+        {
+          sessionId: this.sessionId,
+          transport: "responses_websocket",
+          requestUrl: this.requestUrl,
+          headers: getAuthHeaders(this.requestUrl, this.requestHeaders, this.forwarding),
+          path: new URL(this.requestUrl || "/v1/responses", "http://omniroute.local").pathname,
+          startedAt: new Date(turnStartedAt).toISOString(),
+          completedAt: new Date(finishedAt).toISOString(),
+          durationMs: Math.max(0, finishedAt - turnStartedAt),
+          firstOutputMs,
+          status: toFiniteNumber(status),
+          success,
+          errorCode,
+          errorMessage,
+          clientRequest: this.currentRequestBody || this.firstResponseBody,
+          terminalMessage,
+          responseBody,
+          sourceFormat: "openai-responses",
+          targetFormat: "openai-responses",
+          ...this.preparedContext,
+        },
+        this.forwarding
+      );
     } catch {
       // History logging must never break an already-established WebSocket session.
     }
@@ -785,6 +1004,7 @@ class ResponsesWsSession {
   close(code = 1000, reason = "normal_closure") {
     if (this.closed) return;
     this.closed = true;
+    this.releaseLease();
 
     clearInterval(this.pingTimer);
     this.cleanupBuffers();
@@ -812,6 +1032,7 @@ class ResponsesWsSession {
   dispose() {
     if (this.closed) return;
     this.closed = true;
+    this.releaseLease();
     clearInterval(this.pingTimer);
     this.cleanupBuffers();
     try {
@@ -879,10 +1100,22 @@ export function createResponsesWsProxy({
       }
 
       try {
-        const auth = await callInternal(fetchImpl, baseUrl, bridgeSecret, "authenticate", {
-          requestUrl: req.url || pathname,
-          headers: getAuthHeaders(req.url || pathname, req.headers),
-        });
+        const forwarding = relayForwardingHeaders(
+          req.socket && req.socket.remoteAddress,
+          req.headers
+        );
+        const auth = await callInternal(
+          fetchImpl,
+          baseUrl,
+          bridgeSecret,
+          "authenticate",
+          {
+            requestUrl: req.url || pathname,
+            headers: getAuthHeaders(req.url || pathname, req.headers, forwarding),
+            handshake: getHandshakeOriginHeaders(req),
+          },
+          forwarding
+        );
         if (!auth.ok) {
           // Do NOT forward the internal fetch's response headers onto the raw
           // upgrade socket — they carry chunked transfer-encoding + Next security
@@ -929,6 +1162,7 @@ export function createResponsesWsProxy({
           socket,
           requestUrl: req.url || pathname,
           requestHeaders: req.headers,
+          forwarding,
           wsFactory,
           pingIntervalMs,
           idleTimeoutMs,
@@ -937,12 +1171,18 @@ export function createResponsesWsProxy({
         });
         return true;
       } catch (error) {
+        // Hard Rule #12: the exception text can carry filesystem paths and stack frames —
+        // keep it in the server log and give the client a fixed message.
+        console.error(
+          "[responses-ws-proxy] upgrade failed:",
+          error instanceof Error ? error.message : String(error)
+        );
         writeHttpError(
           socket,
           500,
           JSON.stringify({
             error: {
-              message: error instanceof Error ? error.message : String(error),
+              message: "Responses WebSocket proxy failed",
               code: "responses_websocket_proxy_failed",
             },
           })

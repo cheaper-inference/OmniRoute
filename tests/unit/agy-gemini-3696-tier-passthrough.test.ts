@@ -14,7 +14,7 @@ test("(#3696) resolveAntigravityModelId passes gemini-3.1-pro-low through unchan
   assert.equal(resolveAntigravityModelId("gemini-3.1-pro-low"), "gemini-3.1-pro-low");
 });
 
-test("(#3696) no two ANTIGRAVITY_PUBLIC_MODELS entries resolve to the same upstream id", () => {
+test("(#3696) ANTIGRAVITY_PUBLIC_MODELS entries resolve to distinct upstream ids", () => {
   const seen = new Map<string, string>();
   const collisions: string[] = [];
   for (const model of ANTIGRAVITY_PUBLIC_MODELS) {

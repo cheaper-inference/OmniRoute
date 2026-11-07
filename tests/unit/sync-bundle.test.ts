@@ -22,7 +22,7 @@ const syncBundle = await import("../../src/lib/sync/bundle.ts");
 function resetStorage() {
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -33,7 +33,7 @@ test.beforeEach(() => {
 test.after(() => {
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 
   if (ORIGINAL_DATA_DIR === undefined) {
     delete process.env.DATA_DIR;
@@ -69,7 +69,11 @@ test("config sync bundle is deterministic, strips auth settings, and ignores vol
     models: ["openai/gpt-4o-mini"],
     strategy: "priority",
   });
-  await apiKeysDb.createApiKey("Desktop", "machine-sync-1");
+  const apiKey = await apiKeysDb.createApiKey("Desktop", "machine-sync-1");
+  await apiKeysDb.updateApiKeyPermissions(apiKey.id, {
+    modelAccessMode: "restricted",
+    allowedModels: [],
+  });
 
   const first = await syncBundle.buildConfigSyncEnvelope();
   const second = await syncBundle.buildConfigSyncEnvelope();
@@ -81,6 +85,8 @@ test("config sync bundle is deterministic, strips auth settings, and ignores vol
   assert.equal(first.bundle.settings.cloudEnabled, undefined);
   assert.equal(first.bundle.providerConnections[0].apiKey, "sk-live-secret");
   assert.equal(first.bundle.modelAliases["smart-default"], "openai/gpt-4o-mini");
+  assert.equal(first.bundle.apiKeys[0].modelAccessMode, "restricted");
+  assert.deepEqual(first.bundle.apiKeys[0].allowedModels, []);
   assert.deepEqual(first.bundle.reasoningRoutingRules, []);
 
   await providersDb.updateProviderConnection((connection as any).id, {

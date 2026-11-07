@@ -3,24 +3,95 @@ import {
   finalizePendingRequestById,
   updatePendingRequest,
   updatePendingRequestById,
+  type PendingRequestIdentity,
   type PendingRequestMetadata,
+  type PendingRequestOwner,
 } from "./usageHistory";
 
 export type PendingRequestScope = {
   id: string | null | undefined;
+  owner?: PendingRequestOwner;
   model: string;
   provider: string;
   connectionId: string | null;
+  videoTranscriptSensitive?: boolean;
 };
 
+const OMITTED_VIDEO_TRANSCRIPT = "[omitted: video transcript]";
+const PENDING_PAYLOAD_KEYS = [
+  "clientRequest",
+  "providerRequest",
+  "providerResponse",
+  "clientResponse",
+] as const;
+
+function omitVideoSensitivePendingPayload(payload: unknown, sensitive: boolean): unknown {
+  return sensitive ? { _omniroute_omitted: "video-transcript" } : payload;
+}
+
+export function initialPendingBody(
+  body: unknown,
+  effectiveModel: string,
+  sensitive: boolean
+): unknown {
+  const initial =
+    body && typeof body === "object" && !Array.isArray(body)
+      ? {
+          ...(body as Record<string, unknown>),
+          model:
+            typeof (body as Record<string, unknown>).model === "string"
+              ? (body as Record<string, unknown>).model
+              : effectiveModel,
+        }
+      : body;
+  return omitVideoSensitivePendingPayload(initial, sensitive);
+}
+
+function protectPendingMetadata(
+  scope: PendingRequestScope,
+  metadata: PendingRequestMetadata
+): PendingRequestMetadata {
+  if (!scope.videoTranscriptSensitive) return metadata;
+
+  // A provider request or reply may contain rendered transcript prose without
+  // any structured cue boundary. Omit only the retained preview; callers keep
+  // their original values for dispatch, response handling and classification.
+  const protectedMetadata = { ...metadata };
+  for (const key of PENDING_PAYLOAD_KEYS) {
+    protectedMetadata[key] = omitVideoSensitivePendingPayload(metadata[key], true);
+  }
+  if (metadata.providerUrl !== undefined) protectedMetadata.providerUrl = OMITTED_VIDEO_TRANSCRIPT;
+  if (metadata.error !== undefined) protectedMetadata.error = OMITTED_VIDEO_TRANSCRIPT;
+  if (metadata.errorCode !== undefined) protectedMetadata.errorCode = OMITTED_VIDEO_TRANSCRIPT;
+  if (metadata.sessionTag !== undefined) protectedMetadata.sessionTag = OMITTED_VIDEO_TRANSCRIPT;
+  return protectedMetadata;
+}
+
+/**
+ * The exact attempt this scope owns: the captured owner first, then its ID. A scope with an
+ * identity never falls back to the most-recent lookup, so a late completion cannot finalize
+ * another request (#17891).
+ */
+function pendingScopeIdentity(scope: PendingRequestScope): PendingRequestIdentity | null {
+  return scope.owner ?? (scope.id || null);
+}
+
 export function updatePendingScope(scope: PendingRequestScope, metadata: PendingRequestMetadata) {
-  if (!updatePendingRequestById(scope.id || null, metadata)) {
-    updatePendingRequest(scope.model, scope.provider, scope.connectionId, metadata);
+  const retainedMetadata = protectPendingMetadata(scope, metadata);
+  const identity = pendingScopeIdentity(scope);
+  if (identity) {
+    updatePendingRequestById(identity, retainedMetadata);
+  } else {
+    updatePendingRequest(scope.model, scope.provider, scope.connectionId, retainedMetadata);
   }
 }
 
 export function finalizePendingScope(scope: PendingRequestScope, metadata: PendingRequestMetadata) {
-  if (!finalizePendingRequestById(scope.id, metadata)) {
-    finalizePendingRequest(scope.model, scope.provider, scope.connectionId, metadata);
+  const retainedMetadata = protectPendingMetadata(scope, metadata);
+  const identity = pendingScopeIdentity(scope);
+  if (identity) {
+    finalizePendingRequestById(identity, retainedMetadata);
+  } else {
+    finalizePendingRequest(scope.model, scope.provider, scope.connectionId, retainedMetadata);
   }
 }

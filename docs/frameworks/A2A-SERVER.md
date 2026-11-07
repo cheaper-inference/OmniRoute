@@ -67,6 +67,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+For `smart-routing`, `metadata.combo` is an explicit override of
+`metadata.model` for the gateway request; it is sent as the real `model`,
+not as an ignored `x-combo` JSON field. The gateway's normal API-key and
+per-target authorization still applies. An invalid or empty combo is rejected.
+
+The result exposes `requested_combo` (caller intent), `dispatched_model`
+(the actual gateway request), `response_model` (gateway response) and
+`confirmed_combo`. The last field is `null` unless the gateway explicitly
+identifies a combo. A2A decision logs attribute execution only to a
+confirmed combo, retaining an unconfirmed request as `requestedCombo`.
+
 **Response:**
 
 ```json
@@ -78,6 +89,10 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
       "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
         { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
@@ -141,16 +156,16 @@ curl -X POST http://localhost:20128/a2a \
 
 OmniRoute exposes 6 A2A skills wired in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Each skill module lives in `src/lib/a2a/skills/`.
 
-| Skill              | ID                   | Description                                                                                                     | Tags                       | Examples                               |
-| :----------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------- |
-| Smart Routing      | `smart-routing`      | Routes a prompt through the optimal provider/combo using OmniRoute's combo engine + scoring                     | routing, providers         | "Route this prompt via the best model" |
-| Quota Management   | `quota-management`   | Reports per-provider quota state, helps callers decide when to throttle/switch                                  | quota, providers           | "Check quota for anthropic"            |
-| Provider Discovery | `provider-discovery` | Lists installed providers with capabilities, free-tier flags, OAuth status                                      | providers, discovery       | "What providers are available?"        |
-| Cost Analysis      | `cost-analysis`      | Estimates cost of a request/conversation given the catalog + recent usage                                       | cost, usage                | "Estimate cost for this conversation"  |
-| Health Report      | `health-report`      | Aggregates circuit breaker, cooldown, lockout state per provider                                                | health, resilience         | "Show health status of all providers"  |
-| List Capabilities  | `list-capabilities`  | Returns the full 42-entry Agent Skills catalog as a markdown table with raw SKILL.md URLs for context injection | catalog, discovery, skills | "List all OmniRoute capabilities"      |
+| Skill              | ID                   | Description                                                                                                                                  | Tags                       | Examples                               |
+| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------- |
+| Smart Routing      | `smart-routing`      | Routes a prompt through the optimal provider/combo using OmniRoute's combo engine + scoring                                                  | routing, providers         | "Route this prompt via the best model" |
+| Quota Management   | `quota-management`   | Reports per-provider quota state, helps callers decide when to throttle/switch                                                               | quota, providers           | "Check quota for anthropic"            |
+| Provider Discovery | `provider-discovery` | Lists installed providers with capabilities, free-tier flags, OAuth status                                                                   | providers, discovery       | "What providers are available?"        |
+| Cost Analysis      | `cost-analysis`      | Estimates cost of a request/conversation given the catalog + recent usage                                                                    | cost, usage                | "Estimate cost for this conversation"  |
+| Health Report      | `health-report`      | Aggregates circuit breaker, cooldown, lockout state per provider                                                                             | health, resilience         | "Show health status of all providers"  |
+| List Capabilities  | `list-capabilities`  | Returns the full 45-entry Agent Skills catalog (23 API + 21 CLI + 1 config) as a markdown table with raw SKILL.md URLs for context injection | catalog, discovery, skills | "List all OmniRoute capabilities"      |
 
-> Note: the Agent Card description currently advertises "36+ providers" (`src/app/.well-known/agent.json/route.ts:26` and `:55`). The actual catalog has grown to 180+ providers — the string should be updated in a follow-up change (tracked as a separate doc/code TODO; not modified here).
+> The Agent Card should be kept aligned with the live 384-provider catalog; provider counts and free/no-auth metadata are sourced from the runtime registry.
 
 ### `list-capabilities` Skill Detail
 
@@ -163,7 +178,7 @@ The `list-capabilities` skill is particularly useful for external agents that ne
 ...
 ```
 
-Each row includes the `rawUrl` column so agents can immediately fetch the full SKILL.md. The `metadata.totalSkills` field is always `42`. Implementation: `src/lib/a2a/skills/listCapabilities.ts`. See also [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Each row includes the `rawUrl` column so agents can immediately fetch the full SKILL.md. The `metadata.totalSkills` field mirrors the catalog size (45 today). Implementation: `src/lib/a2a/skills/listCapabilities.ts`. See also [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -171,13 +186,24 @@ Each row includes the `rawUrl` column so agents can immediately fetch the full S
 
 The JSON-RPC endpoint `/a2a` is the canonical A2A entry point. The REST endpoints below provide auxiliary access for dashboards and external tooling:
 
-| Endpoint                     | Method | Description                      | Auth                   |
-| :--------------------------- | :----- | :------------------------------- | :--------------------- |
-| `/api/a2a/status`            | GET    | Server status, registered skills | (public)               |
-| `/api/a2a/tasks`             | GET    | List tasks with filters          | management             |
-| `/api/a2a/tasks/[id]`        | GET    | Get task by ID                   | management             |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Cancel running task              | management             |
-| `/.well-known/agent.json`    | GET    | Agent Card (A2A discovery)       | (public, cached 3600s) |
+| Endpoint                     | Method | Description                                                       | Auth                                                                                        |
+| :--------------------------- | :----- | :---------------------------------------------------------------- | :------------------------------------------------------------------------------------------ |
+| `/api/a2a/status`            | GET    | Server status, registered skills                                  | (public)                                                                                    |
+| `/api/a2a/tasks`             | GET    | List tasks with filters                                           | management or API key (see below)                                                           |
+| `/api/a2a/tasks/[id]`        | GET    | Get task by ID                                                    | management or API key (see below)                                                           |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Cancel running task                                               | management or API key (see below)                                                           |
+| `/.well-known/agent.json`    | GET    | Agent Card (A2A discovery)                                        | (public, cached 3600s)                                                                      |
+| `/api/a2a/tasks`             | POST   | Inbound delegation to the OmniConductor fleet (Conductor PRD RF5) | same as `GET`, plus `OMNIROUTE_API_KEY` if set while `REQUIRE_API_KEY` is off; `a2aEnabled` |
+
+Who gets through to the `/api/a2a/tasks*` routes depends on the login and API-key settings:
+
+- `requireLogin=true` (default): the middleware only admits management credentials (dashboard session, `manage`-scope API key, `oma_` access token) and `OMNIROUTE_API_KEY`. A plain inference key gets `403`. In the `Authorization` header the middleware only takes `OMNIROUTE_API_KEY` as `Bearer <key>`; a bare key or a tab after `Bearer` gets `401`.
+- `requireLogin=false`, or the loopback window before onboarding: with `REQUIRE_API_KEY=true` any valid OmniRoute API key or management credential is accepted and anonymous callers get `401`; with `REQUIRE_API_KEY` off the routes are open.
+- `POST /api/a2a/tasks` additionally requires `OMNIROUTE_API_KEY` in the `Authorization` header when that variable is set and `REQUIRE_API_KEY` is off. Other headers, such as `x-api-key`, do not count there. With login off or before onboarding the key passes with or without a `Bearer` prefix; with login on, only `Bearer <key>` gets past the middleware.
+
+Where a credential is required, a `read`-scope `oma_` token only works for `GET`.
+
+**Inbound Conductor delegation (`POST /api/a2a/tasks`):** external A2A agents delegate coding work to the OmniConductor fleet through OmniRoute. Body: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — only Conductor fleet skills (the ones announced on the Agent Card) are delegable; `metadata.conductor.repo.url` is required (the fleet works on git repos). The route translates to the hub's `POST /v1/tasks` using the server-side `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) and returns `201 { conductor_task_id, state: "submitted" }`; task states flow back through the SSE→A2A mirror (RF1) and are visible via `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
@@ -199,7 +225,7 @@ The JSON-RPC endpoint `/a2a` is the canonical A2A entry point. The REST endpoint
    };
    ```
 
-3. **Expose in Agent Card:** in `src/app/.well-known/agent.json/route.ts`, append to the `skills` array:
+3. **Expose in Agent Card:** in `src/lib/a2a/agentCardMetadata.ts` (shared by `/.well-known/agent.json` and `/.well-known/agent-card.json`), append to the `skills` array:
 
    ```json
    {

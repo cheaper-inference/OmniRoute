@@ -14,17 +14,33 @@ import { buildErrorBody } from "@omniroute/open-sse/utils/error";
  * Returns a 424 (Failed Dependency) response with a clear, sanitized message
  * when the connection carries that flag; otherwise null (proceed normally).
  */
-const STALE_ENCRYPTION_MESSAGE =
-  "Stored API key cannot be decrypted (STORAGE_ENCRYPTION_KEY changed or unset). Re-enter the API key.";
-
 export function buildStaleEncryptionKeyResponse(
-  connection: { credentialDecryptFailed?: unknown } | null | undefined
+  connection:
+    | {
+        credentialDecryptFailed?: unknown;
+        id?: unknown;
+        provider?: unknown;
+      }
+    | null
+    | undefined
 ): NextResponse | null {
   if (!connection || connection.credentialDecryptFailed !== true) return null;
 
-  // buildErrorBody sanitizes the message (Rule #12); override the type so the
-  // client can key off the specific stale-encryption cause.
-  const body = buildErrorBody(424, STALE_ENCRYPTION_MESSAGE);
-  body.error.type = "storage_encryption_stale";
+  // #9927 — surface WHICH credential failed plus the recovery path so the
+  // dashboard points the operator at the account to re-authenticate instead of
+  // a generic "API key cannot be decrypted".
+  const provider = typeof connection.provider === "string" ? connection.provider : "";
+  const id = typeof connection.id === "string" ? connection.id : "";
+  const identity = [provider && `provider "${provider}"`, id && `connection ${id}`]
+    .filter(Boolean)
+    .join(", ");
+
+  const message =
+    `Stored credential${identity ? ` for ${identity}` : ""} cannot be decrypted ` +
+    `(STORAGE_ENCRYPTION_KEY changed or unset). Re-authenticate this account, or verify ` +
+    `STORAGE_ENCRYPTION_KEY matches the key used to store it.`;
+
+  // buildErrorBody sanitizes the message and projects the client-visible classification.
+  const body = buildErrorBody(424, message, undefined, { type: "storage_encryption_stale" });
   return NextResponse.json(body, { status: 424 });
 }

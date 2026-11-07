@@ -16,11 +16,12 @@ export function buildNonStreamingResponseHeaders(
     provider: string | null | undefined;
     model: string | null | undefined;
     startTime: number;
-    responseUsage: unknown;
+    responseUsage: Record<string, unknown> | null | undefined;
     estimatedCost: number;
-    requestId: unknown;
+    requestId: string | null | undefined;
     compressionResponseMeta?: string | null | undefined;
     comboStrategy?: string | null | undefined;
+    fallbackAttempts?: number;
   },
   deps: { attachOmniRouteMetaHeaders: typeof defaultAttachMeta; now: () => number } = {
     attachOmniRouteMetaHeaders: defaultAttachMeta,
@@ -40,6 +41,7 @@ export function buildNonStreamingResponseHeaders(
     costUsd: args.estimatedCost,
     requestId: args.requestId,
     strategy: args.comboStrategy ?? "single",
+    ...(args.fallbackAttempts !== undefined ? { fallbackAttempts: args.fallbackAttempts } : {}),
   });
   if (args.compressionResponseMeta) {
     responseHeaders[OMNIROUTE_RESPONSE_HEADERS.compression] = args.compressionResponseMeta;

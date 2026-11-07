@@ -67,6 +67,11 @@ interface CopilotWsEvent {
   [key: string]: unknown;
 }
 
+type NodeWebSocketConstructor = new (
+  url: string | URL,
+  options?: { headers?: Record<string, string> }
+) => WebSocket;
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 export function getCopilotMode(model?: string): string {
@@ -94,16 +99,47 @@ export function solveHashcash(parameter: string, difficulty: number): number | n
 }
 
 export function extractAccessToken(credential: string): string | null {
-  if (!credential) return null;
-  // Direct token
-  if (credential.startsWith("ey") || credential.length > 100) return credential;
-  // Try parsing as cookie string — look for _EDGE_S or similar
-  const match = credential.match(/access_token=([^;]+)/);
-  if (match) return match[1];
-  // Try HAR-extracted bearer
-  const bearerMatch = credential.match(/[Bb]earer\s+(.+)/);
+  const trimmed = credential?.trim();
+  if (!trimmed) return null;
+
+  // Parse structured input before applying the direct-token heuristic. Real
+  // DevTools cookie/HAR exports routinely exceed 100 characters.
+  const accessTokenMatch = trimmed.match(
+    /(?:^|[\s;,{"'])access_token\s*[=:]\s*["']?([^\s;,}"']+)/i
+  );
+  if (accessTokenMatch) return accessTokenMatch[1];
+
+  const bearerMatch = trimmed.match(/(?:^|[\s:{"'])bearer\s+([^\s,}"';]+)/i);
   if (bearerMatch) return bearerMatch[1];
-  return credential;
+
+  // A named cookie is not an OAuth access token. Reject it instead of sending
+  // the full cookie value as `Authorization: Bearer ...`.
+  if (/^(?:[^=;\s]+=[^;]*)(?:;|$)/.test(trimmed) || /^(?:\{|\[)/.test(trimmed)) {
+    return null;
+  }
+
+  return trimmed;
+}
+
+export function buildCopilotWebSocketUrl(
+  accessToken?: string,
+  clientSessionId = crypto.randomUUID()
+): string {
+  const url = new URL(COPILOT_WS_URL);
+  url.searchParams.set("clientSessionId", clientSessionId);
+  if (accessToken) {
+    // Copilot's browser client authenticates the WebSocket with this query
+    // parameter. Node's browser-compatible global WebSocket cannot set custom
+    // headers, so the previous header-only fallback silently lost auth on Node 22+.
+    url.searchParams.set("accessToken", accessToken);
+  }
+  return url.toString();
+}
+
+/* @testonly */ export function buildCopilotWebSocketHeaders(
+  accessToken: string
+): Record<string, string> {
+  return { Authorization: `Bearer ${accessToken}` };
 }
 
 /**
@@ -244,8 +280,7 @@ export class CopilotWebExecutor extends BaseExecutor {
     accessToken?: string,
     signal?: AbortSignal
   ): Promise<ReadableStream<Uint8Array>> {
-    // Build WebSocket URL without credentials in query string
-    const wsUrl = `${COPILOT_WS_URL}&clientSessionId=${crypto.randomUUID()}`;
+    const wsUrl = buildCopilotWebSocketUrl(accessToken);
 
     return new ReadableStream(
       {
@@ -289,22 +324,19 @@ export class CopilotWebExecutor extends BaseExecutor {
           signal?.addEventListener("abort", () => abort("Request aborted"), { once: true });
 
           try {
-            // Use Node.js built-in WebSocket if available, else dynamic import.
-            // Pass the access token via Authorization header (not URL) to avoid
-            // credential exposure in server logs.
-            let WS = globalThis.WebSocket;
-            if (!WS) {
+            // Authentication is present in wsUrl for both transports. The Node
+            // fallback also preserves the Authorization header where supported.
+            const BrowserWebSocket = globalThis.WebSocket;
+            if (BrowserWebSocket) {
+              ws = new BrowserWebSocket(wsUrl);
+            } else {
               // @ts-ignore — ws module has no type declarations in this project
-              WS = (await import("ws")).default as unknown as typeof WebSocket;
-              if (accessToken) {
-                // @ts-ignore — ws module supports headers option in second arg
-                ws = new WS(wsUrl, {
-                  headers: { Authorization: `Bearer ${accessToken}` },
-                }) as WebSocket;
-              }
-            }
-            if (!ws) {
-              ws = new WS(wsUrl) as WebSocket;
+              const NodeWebSocket = (await import("ws"))
+                .default as unknown as NodeWebSocketConstructor;
+              ws = new NodeWebSocket(
+                wsUrl,
+                accessToken ? { headers: buildCopilotWebSocketHeaders(accessToken) } : undefined
+              );
             }
 
             const timeout = setTimeout(() => abort("Copilot WebSocket timeout"), FETCH_TIMEOUT_MS);
@@ -525,7 +557,9 @@ export class CopilotWebExecutor extends BaseExecutor {
 
             ws.onerror = (err: Event) => {
               clearTimeout(timeout);
-              const msg = (err as ErrorEvent).message || "Copilot WebSocket error";
+              const msg = sanitizeErrorMessage(
+                (err as ErrorEvent).message || "Copilot WebSocket error"
+              );
               abort(msg);
             };
 
@@ -534,7 +568,11 @@ export class CopilotWebExecutor extends BaseExecutor {
               finish();
             };
           } catch (err) {
-            abort(err instanceof Error ? err.message : "Failed to connect to Copilot");
+            abort(
+              sanitizeErrorMessage(
+                err instanceof Error ? err.message : "Failed to connect to Copilot"
+              )
+            );
           }
         },
       },
@@ -608,7 +646,7 @@ export class CopilotWebExecutor extends BaseExecutor {
           headers: { "Content-Type": "application/json" },
         }),
         url: COPILOT_START_URL,
-        headers: accessToken ? { Authorization: `Bearer ${accessToken.slice(0, 20)}...` } : {},
+        headers: {},
         transformedBody: { conversationId: null, mode, prompt: fullPrompt.slice(0, 100) },
       };
     }

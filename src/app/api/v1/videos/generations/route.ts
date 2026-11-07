@@ -1,27 +1,43 @@
 import { handleVideoGeneration } from "@omniroute/open-sse/handlers/videoGeneration.ts";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
+import { runWithCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
+import { createRequestMediaSink } from "@/app/api/v1/_helpers/mediaSink";
 import { resolveVideoCredentialProvider } from "@omniroute/open-sse/handlers/videoGeneration/googleFlow.ts";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import {
   getProviderCredentialsWithQuotaPreflight,
   clearRecoveredProviderState,
 } from "@/sse/services/auth";
-import { parseVideoModel, getVideoProvider } from "@omniroute/open-sse/config/videoRegistry.ts";
+import { getVideoProvider } from "@omniroute/open-sse/config/videoRegistry.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  createComboTargetKeyGate,
+  isKeyScopeBlockedCredentials,
+  keyScopeBlockedResponse,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
 import {
   isAllRateLimitedCredentials,
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
 import {
   failedMediaGenerationResponse,
+  isMediaGenerationFailure,
   mediaGenerationOptionsResponse,
   promptRequiredResponse,
   readMediaGenerationBody,
   successfulMediaGenerationResponse,
 } from "@/app/api/v1/_shared/mediaGenerationRoute";
+import type { MediaGenerationResultLike } from "@/app/api/v1/_shared/mediaGenerationRoute";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
+import {
+  isVideoPromptOptional,
+  resolveLocalOverrideCredentials,
+  resolveVideoModelTarget,
+} from "@/app/api/v1/_shared/videoModelResolution";
 
 export const dynamic = "force-dynamic";
 
@@ -44,18 +60,6 @@ export async function GET(request?: Request) {
 }
 
 /**
- * #6928: best-effort per-connection base-URL override lookup for local no-auth
- * media providers (ComfyUI). Returns null instead of failing when no connection
- * exists — local providers must keep working with zero configuration.
- */
-async function resolveLocalOverrideCredentials(provider) {
-  const localCredentials = await getProviderCredentialsWithQuotaPreflight(provider);
-  return localCredentials && !isAllRateLimitedCredentials(localCredentials)
-    ? localCredentials
-    : null;
-}
-
-/**
  * POST /v1/videos/generations — generate videos
  */
 async function postHandler(request, context) {
@@ -65,33 +69,82 @@ async function postHandler(request, context) {
   }
   const body = parsed.body;
   const startTime = Date.now();
-  const parsedModel = parseVideoModel(body.model);
-
-  const promptOptional =
-    (parsedModel.model === "happyhorse-1.1-i2v" &&
-      (parsedModel.provider === "alibaba" ||
-        parsedModel.provider === "bailian-coding-plan" ||
-        parsedModel.provider === "qwen-cloud-token-plan" ||
-        parsedModel.provider === "qwen-cloud")) ||
-    (parsedModel.provider === "qwen-cloud" && parsedModel.model === "wan2.7-i2v") ||
-    (parsedModel.provider === "alibaba" &&
-      (parsedModel.model === "wan2.7-i2v-2026-04-25" || parsedModel.model === "wan2.6-i2v-flash"));
-  if (!promptOptional) {
-    const promptError = promptRequiredResponse(body);
-    if (promptError) return promptError;
-  }
 
   // Enforce API key policies (model restrictions + budget limits)
   const policy = await enforceApiKeyPolicy(request, body.model);
   if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: credential selection (direct and per combo target) stays inside
+  // the key's connection scope, the same scope chat applies.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+  // Respect API key scope before rejecting incompatible model endpoints.
+  const endpointMismatch = await getRequestedModelEndpointMismatch(body.model, "videos");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
+  const { allowedConnections } = scope;
 
-  // Parse model to get provider
-  const { provider } = parsedModel;
+  // #16372 — where auth-gated job results (OpenRouter video) are stored and served from.
+  const mediaSink = await createRequestMediaSink(request, policy.apiKeyInfo);
+
+  // Bind API-key identity for every call log and usage row this request emits.
+  // Without it every video row lands with api_key_id NULL, which mis-buckets per-key
+  // usage into "unknown" and makes the row unmatchable against recorded per-key costs.
+  // Handlers fan out into provider helpers that write their own logs, so request-scoped
+  // storage is what keeps attribution attached without threading identity through every
+  // handler.
+  const withApiKeyContext = <TResult>(callback: () => TResult): TResult =>
+    runWithCallLogApiKeyContext(
+      {
+        apiKeyId: policy.apiKeyInfo?.id ?? null,
+        apiKeyName: policy.apiKeyInfo?.name ?? null,
+      },
+      callback
+    );
+
+  // Detect a combo name and divert to full video combo execution, mirroring
+  // the images route. Checks before the provider lookup — and before the
+  // prompt-required check below — so a combo name is never rejected as an
+  // invalid `provider/model` id or against the wrong model's prompt rules:
+  // /v1/models advertises these names, and prompt requirements depend on the
+  // resolved target, which for a combo is only known after expansion.
+  if (body.model && typeof body.model === "string" && !body.model.includes("/")) {
+    const { getComboByName } = await import("@/lib/db/combos");
+    const combo = await getComboByName(body.model);
+    if (combo) {
+      const { executeVideoCombo } = await import("@omniroute/open-sse/services/videoCombo");
+      return withApiKeyContext(() =>
+        executeVideoCombo(
+          body.model,
+          body,
+          {
+            request,
+            policy,
+            mediaSink,
+            keyScope: {
+              allowedConnections,
+              isTargetAllowed: createComboTargetKeyGate(policy, body.model),
+            },
+          },
+          startTime,
+          log
+        )
+      );
+    }
+  }
+
+  // Parse model to get provider — checks the built-in registry, then custom
+  // OpenAI-compatible provider nodes tagged with the "videos" endpoint.
+  const resolvedTarget = await resolveVideoModelTarget(body.model);
+  const { provider, model: requestedModel, isCustomModel } = resolvedTarget;
   if (!provider) {
     return errorResponse(
       HTTP_STATUS.BAD_REQUEST,
       `Invalid video model: ${body.model}. Use format: provider/model`
     );
+  }
+
+  if (!isVideoPromptOptional(resolvedTarget)) {
+    const promptError = promptRequiredResponse(body);
+    if (promptError) return promptError;
   }
 
   // Check provider config for auth bypass
@@ -103,7 +156,9 @@ async function postHandler(request, context) {
   let credentials = null;
   if (providerConfig && providerConfig.authType !== "none") {
     credentials = await getProviderCredentialsWithQuotaPreflight(
-      resolveVideoCredentialProvider(provider)
+      resolveVideoCredentialProvider(provider),
+      null,
+      allowedConnections
     );
     if (!credentials) {
       return errorResponse(
@@ -111,28 +166,64 @@ async function postHandler(request, context) {
         `No credentials for video provider: ${provider}`
       );
     }
+    if (isKeyScopeBlockedCredentials(credentials)) {
+      return keyScopeBlockedResponse(provider, credentials);
+    }
+    if (isAllRateLimitedCredentials(credentials)) {
+      return rateLimitedProviderResponse(provider, credentials);
+    }
+  } else if (isCustomModel) {
+    credentials = await getProviderCredentialsWithQuotaPreflight(
+      provider,
+      null,
+      allowedConnections,
+      requestedModel
+    );
+    if (!credentials) {
+      return errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `No credentials for custom video provider: ${provider}`
+      );
+    }
+    if (isKeyScopeBlockedCredentials(credentials)) {
+      return keyScopeBlockedResponse(provider, credentials);
+    }
     if (isAllRateLimitedCredentials(credentials)) {
       return rateLimitedProviderResponse(provider, credentials);
     }
   } else if (providerConfig?.authType === "none") {
-    credentials = await resolveLocalOverrideCredentials(provider);
+    const local = await resolveLocalOverrideCredentials(provider, allowedConnections);
+    if (local.rejection) return local.rejection;
+    credentials = local.credentials;
   }
 
-  const result = await handleVideoGeneration({ body, credentials, log });
+  const result: MediaGenerationResultLike = await withApiKeyContext(() =>
+    handleVideoGeneration({
+      body,
+      credentials,
+      log,
+      // #16372 — auth-gated job results are stored under this caller's owner and served
+      // from the caller-facing origin (configured public URL / trusted proxy / Host).
+      mediaSink,
+      ...(isCustomModel && { resolvedProvider: provider }),
+      signal: request.signal,
+    })
+  );
 
-  if (result.success) {
-    await clearRecoveredProviderState(credentials);
-    return successfulMediaGenerationResponse({
-      result,
-      billingMode: "video",
-      provider,
-      model: body.model,
-      startTime,
-      duration: body.duration,
-    });
+  if (isMediaGenerationFailure(result)) {
+    return failedMediaGenerationResponse(result, "Video generation provider error");
   }
 
-  return failedMediaGenerationResponse(result, "Video generation provider error");
+  await clearRecoveredProviderState(credentials);
+  return successfulMediaGenerationResponse({
+    result: { data: result.data },
+    billingMode: "video",
+    provider,
+    model: body.model,
+    startTime,
+    duration: body.duration,
+    apiKeyId: policy.apiKeyInfo?.id,
+  });
 }
 
 export const POST = withInjectionGuard(postHandler);

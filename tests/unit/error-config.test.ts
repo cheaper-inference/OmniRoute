@@ -20,6 +20,11 @@ test("errorConfig exposes centralized client-facing status metadata", () => {
     code: "payment_required",
   });
   assert.equal(DEFAULT_ERROR_MESSAGES[406], "Model not supported");
+  assert.deepEqual(ERROR_TYPES[499], {
+    type: "client_disconnected",
+    code: "client_disconnected",
+  });
+  assert.equal(DEFAULT_ERROR_MESSAGES[499], "Client disconnected");
   assert.equal(getDefaultErrorMessage(999), "An error occurred");
   assert.deepEqual(getErrorInfo(504), {
     type: "server_error",
@@ -52,6 +57,21 @@ test("errorConfig resolves text rules before status rules", () => {
   const combinedRule = findMatchingErrorRule(429, "Request not allowed by upstream");
   assert.equal(combinedRule?.id, "request_not_allowed");
   assert.equal(combinedRule?.cooldownMs, COOLDOWN_MS.requestNotAllowed);
+});
+
+test("errorConfig maps a bare 403 to a neutral permission code (not quota)", () => {
+  assert.deepEqual(getErrorInfo(403), {
+    type: "permission_error",
+    code: "permission_denied",
+  });
+  assert.equal(getDefaultErrorMessage(403), "Permission denied");
+  // A bare 403 (no quota text) resolves to the neutral status rule.
+  const bare = findMatchingErrorRule(403, "not allowed for this key");
+  assert.equal(bare?.id, "status_403");
+  assert.equal(bare?.reason, "unknown");
+  // A 403 carrying a quota signal still resolves to quota_exhausted via text-first rules.
+  const quota = findMatchingErrorRule(403, "hour quota exceeded for today");
+  assert.equal(quota?.reason, "quota_exhausted");
 });
 
 test("errorConfig preserves the existing exponential backoff policy", () => {

@@ -1,4 +1,4 @@
-// Tool-call translation for web-cookie providers (deepseek-web, chatgpt-web, ...).
+// Tool-call translation for web-cookie providers (DeepSeek Web, Perplexity Web, etc.).
 //
 // The web UIs accept only a single plain prompt string and have no native function
 // calling — they reply with tool invocations as raw text. To let agentic clients use
@@ -12,6 +12,8 @@ export interface OpenAIToolCall {
   function: { name: string; arguments: string };
 }
 
+import { findTagBlocks } from "../utils/tagBlocks.ts";
+
 interface OpenAIToolDef {
   type?: string;
   function?: {
@@ -21,11 +23,90 @@ interface OpenAIToolDef {
   };
 }
 
-const TOOL_BLOCK_RE = /<tool>\s*([\s\S]*?)\s*<\/tool>/g;
+const TOOL_OPEN_RE = /<tool>/g;
+const TOOL_CLOSE_RE = /<\/tool>/g;
+
+export interface SerializeToolsToPromptOptions {
+  /** Retained for callers that opt into the nonce-bound contract. */
+  hardened?: boolean;
+  /** Limit verbose client-tool descriptions without changing their parameter schemas. */
+  descriptionMaxChars?: number;
+}
+
 // Some web-cookie models (e.g. ds-web) wrap calls as `<tool_call name="...">{json}</tool_call>`
 // instead of the canonical `<tool>{json}</tool>`. Capture the JSON body — the real tool name
 // lives there, never in the tag's `name="..."` attribute (#3260).
-const TOOL_CALL_TAG_RE = /<tool_call(?:\s+[^>]*)?\s*>\s*([\s\S]*?)\s*<\/tool_call>/g;
+// The attribute run stops at `<` as well as `>`: with `[^>]*` an unterminated `<tool_call ` scanned
+// to the end of the text from every such tag, so a run of them was quadratic again.
+const TOOL_CALL_OPEN_RE = /<tool_call(?:\s[^<>]*)?>/g;
+const TOOL_CALL_CLOSE_RE = /<\/tool_call>/g;
+
+const DSML_INVOKE_RE =
+  /<(?<dsml>｜｜DSML｜｜|\|DSML\|)\s*invoke\s+name=["']([^"']+)["']\s*>([\s\S]*?)<\/\k<dsml>\s*invoke\s*>/g;
+
+function normalizeDsmlToolCalls(text: string): string {
+  DSML_INVOKE_RE.lastIndex = 0;
+  return text
+    .replace(DSML_INVOKE_RE, (_match, _dsml: string, name: string, body: string) => {
+      const parameters: Record<string, unknown> = {};
+      const parameterRe =
+        /<(?:｜｜DSML｜｜|\|DSML\|)\s*parameter\s+name=["']([^"']+)["'][^>]*>([\s\S]*?)(?:<\/?(?:｜｜DSML｜｜|\|DSML\|)\s*parameter\s*>|(?=<(?:｜｜DSML｜｜|\|DSML\|)\s*parameter\s+name=|<\/(?:｜｜DSML｜｜|\|DSML\|)\s*invoke\s*>))/g;
+      let parameter: RegExpExecArray | null;
+      while ((parameter = parameterRe.exec(body)) !== null) {
+        const raw = parameter[2].trim();
+        try {
+          parameters[parameter[1]] = JSON.parse(raw);
+        } catch {
+          parameters[parameter[1]] = raw;
+        }
+      }
+      if (Object.keys(parameters).length === 0) {
+        try {
+          const parsed = JSON.parse(body.trim() || "{}");
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            Object.assign(parameters, parsed);
+          }
+        } catch {
+          // Leave malformed arguments empty; the surrounding parser remains fail-safe.
+        }
+      }
+      return `<tool>{"name":${JSON.stringify(name)},"arguments":${JSON.stringify(parameters)}}</tool>`;
+    })
+    .replace(/<\/?(?:｜｜DSML｜｜|\|DSML\|)\s*calls\s*>/g, "");
+}
+
+// Per-request nonce binding for tool envelopes (#9343). Associates a random nonce
+// with each tools[] array reference so the serializer and parser can share it
+// without threading extra parameters through executor call chains.
+const toolNonceMap = new WeakMap<object, string>();
+
+/**
+ * Recently issued bindings. Agentic clients resend the previous contract inside the conversation
+ * history, so on a continuation turn the model echoes the PREVIOUS turn's nonce while the parser
+ * (keyed on the new `tools[]` reference) expects a fresh one. Without this window every
+ * continuation tool call was rejected as a nonce mismatch and degraded to plain text — the tool
+ * never ran. A binding that was never issued is still rejected, so the #9343 copy-attack guard
+ * keeps its value.
+ */
+const recentToolNonces: string[] = [];
+const RECENT_TOOL_NONCE_LIMIT = 12;
+
+export function getToolNonce(tools: unknown): string {
+  if (!Array.isArray(tools) || tools.length === 0) return "";
+  let nonce = toolNonceMap.get(tools);
+  if (!nonce) {
+    nonce = Math.random().toString(36).slice(2, 10);
+    toolNonceMap.set(tools, nonce);
+    recentToolNonces.push(nonce);
+    if (recentToolNonces.length > RECENT_TOOL_NONCE_LIMIT) recentToolNonces.shift();
+  }
+  return nonce;
+}
+
+/** True when the binding was issued recently (current or a previous turn). */
+export function isRecentToolNonce(value: unknown): boolean {
+  return typeof value === "string" && recentToolNonces.includes(value);
+}
 
 interface ToolParseCandidate {
   raw: string;
@@ -230,9 +311,160 @@ function normalizeLooseJson(value: string): string {
     .replace(/,\s*([}\]])/g, "$1");
 }
 
+/**
+ * Recover the top-level string arguments of a malformed envelope by delimiting each value with the
+ * NEXT key marker instead of by quotes (see repairToolEnvelopeJson, shape 2).
+ */
+function parseRepairedArguments(argsText: string): Record<string, unknown> {
+  const args: Record<string, unknown> = {};
+  // Top-level keys are exactly the quoted names that follow `{` or `","`, i.e. the object's
+  // own structure. Scanning for that literal shape avoids matching HTML attributes like
+  // `lang="en"` that live inside a string value.
+  const keyRe = /(?:\{|",)\s*"([^"]+)"\s*:/g;
+  const marks: Array<{ key: string; valueStart: number; next: number }> = [];
+  let match: RegExpExecArray | null;
+  while ((match = keyRe.exec(argsText)) !== null) {
+    if (match[1] === "arguments") continue;
+    marks.push({
+      key: match[1],
+      valueStart: match.index + match[0].length,
+      next: argsText.length,
+    });
+  }
+  for (let index = 0; index + 1 < marks.length; index += 1) {
+    // The next key's `","name":"` marker ends this value: everything up to the `"` that
+    // closes the value belongs to it.
+    const nextKeyMarker = argsText.indexOf(
+      `","${marks[index + 1].key}":"`,
+      marks[index].valueStart
+    );
+    if (nextKeyMarker !== -1) marks[index].next = nextKeyMarker + 1;
+  }
+  for (let index = 0; index < marks.length; index += 1) {
+    const mark = marks[index];
+    const rawValue = argsText.slice(mark.valueStart, mark.next);
+    // The LAST key's value always runs to the end of the object body, whatever junk a
+    // mis-detected key left behind: cut it at its delimiter quote so structural characters
+    // (`"}`, `},`) cannot leak into the payload and break consumers like apply_patch.
+    args[mark.key] = decodeToolStringValue(rawValue, index === marks.length - 1);
+  }
+  return args;
+}
+
+/**
+ * Repair the two malformations ChatGPT Web reliably produces when it copies a tool contract
+ * that carries a large payload (for example a whole HTML file):
+ *
+ *   1. the binding is emitted *after* the object instead of inside it —
+ *      `{"name":"write","arguments":{…}}_nonce":"abc"}`;
+ *   2. string values contain unescaped quotes — `"content":"<!doctype html><html lang="en">"`.
+ *
+ * Both make the payload invalid JSON, so the call would otherwise degrade to plain text and the
+ * client would never execute the tool. The binding is preserved (and still validated by the
+ * caller) rather than discarded, so the #9343 copy-attack guard keeps working.
+ */
+export function repairToolEnvelopeJson(raw: string): string | null {
+  let text = stripCodeFence(raw).trim();
+
+  // Shape 1: the binding emitted after the object instead of inside it.
+  const nonceAt = text.lastIndexOf("_nonce");
+  let trailingNonce: string | null = null;
+  if (nonceAt > 0) {
+    const binding = text.slice(nonceAt).match(/^_nonce"?\s*:\s*"([^"]*)"/);
+    if (binding) {
+      trailingNonce = binding[1];
+      text = text.slice(0, nonceAt).replace(/[,\s]+$/, "");
+    }
+  }
+
+  // Only repair a structurally COMPLETE envelope. A body cut off mid-value (no closing
+  // brace) is a truncated reply, not a malformed one: "repairing" it fabricates a call with
+  // half-empty arguments (e.g. `{"filePath":""}`) and suppresses the parse-failure retry.
+  if (!text.endsWith("}")) return null;
+
+  const name = text.match(/"name"\s*:\s*"([^"]+)"/)?.[1];
+  if (!name) return null;
+
+  // Shape 2: string arguments contain unescaped quotes (a whole HTML document, a shell
+  // command). Delimit each value by the NEXT KEY rather than by quotes, so stray `"` inside a
+  // value cannot truncate or desynchronise it.
+  const argsAt = text.search(/"arguments"\s*:\s*\{/);
+  let argsText = argsAt === -1 ? "" : text.slice(text.indexOf("{", argsAt));
+  if (argsText) {
+    // End the arguments object at its FIRST closing quote (`"}` / `"}}`). Using the last match
+    // picked up the tail of a key that follows `arguments`, which is how `*** End Patch"},`
+    // reached OpenCode and broke apply_patch verification.
+    const firstClose = argsText.search(/"\}{1,3}/);
+    if (firstClose > 0) argsText = argsText.slice(0, firstClose + 1);
+  }
+  const args = argsText ? parseRepairedArguments(argsText) : {};
+
+  const envelope: Record<string, unknown> = { name, arguments: args };
+  if (trailingNonce) envelope._nonce = trailingNonce;
+  return JSON.stringify(envelope);
+}
+
+/**
+ * Decode one raw string value from a repaired envelope.
+ *
+ * The value is delimited by the NEXT KEY (or the object's closing brace) rather than by quotes,
+ * because stray quotes inside the payload cannot be told apart from a terminator. Decoding is
+ * then a normal JSON string decode, so `***`/backslashes/newlines survive byte-for-byte instead
+ * of being mangled by regex unescaping (which corrupted `apply_patch` payloads).
+ */
+function decodeToolStringValue(rawValue: string, isFinal: boolean): string {
+  let body = rawValue.trim();
+  // The final value runs to the end of the object body, so it carries the object's closing
+  // braces: cut at the delimiter quote (the last one) to discard them.
+  if (isFinal) {
+    const lastQuote = body.lastIndexOf('"');
+    if (lastQuote !== -1) body = body.slice(0, lastQuote + 1);
+  }
+  body = body.replace(/,\s*$/, "").trim();
+  if (body.startsWith('"')) body = body.slice(1);
+  if (body.endsWith('"')) body = body.slice(0, -1);
+  // A mis-detected key after this value lets the object's tail (`"},` / `"}`) leak in. Only the
+  // structural characters that follow a quote are removed, so payloads that merely end with a
+  // brace (HTML, JSON bodies) are untouched.
+  const structuralTail = body.match(/"[,\s}\]]*$/);
+  if (structuralTail && structuralTail.index !== undefined && structuralTail.index > 0) {
+    body = body.slice(0, structuralTail.index);
+  }
+
+  // Preferred: the model escaped its inner quotes, so this is already valid JSON.
+  const direct = tryJsonString(body);
+  if (direct !== null) return direct;
+
+  // Otherwise escape the quotes that are not valid terminators, then decode.
+  let escaped = "";
+  let backslashes = 0;
+  for (const char of body) {
+    if (char === "\\") {
+      backslashes += 1;
+      escaped += char;
+      continue;
+    }
+    if (char === '"' && backslashes % 2 === 0) escaped += '\\"';
+    else escaped += char;
+    backslashes = 0;
+  }
+  return tryJsonString(escaped) ?? body;
+}
+
+function tryJsonString(value: string): string | null {
+  try {
+    const parsed = JSON.parse(`"${value}"`);
+    return typeof parsed === "string" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export function parseLooseJsonObject(raw: string): Record<string, unknown> | null {
   const trimmed = stripCodeFence(raw);
-  for (const candidate of [trimmed, normalizeLooseJson(trimmed)]) {
+  const repaired = repairToolEnvelopeJson(trimmed);
+  for (const candidate of [trimmed, normalizeLooseJson(trimmed), repaired]) {
+    if (candidate === null) continue;
     try {
       return toRecord(JSON.parse(candidate));
     } catch {
@@ -240,70 +472,6 @@ export function parseLooseJsonObject(raw: string): Record<string, unknown> | nul
     }
   }
   return null;
-}
-
-function findBareJsonCandidates(text: string): ToolParseCandidate[] {
-  const candidates: ToolParseCandidate[] = [];
-  let start = -1;
-  let depth = 0;
-  let quote: '"' | "'" | "" = "";
-  let escaped = false;
-
-  for (let i = 0; i < text.length; i += 1) {
-    const ch = text[i];
-
-    if (depth === 0 && ch !== "{") {
-      continue;
-    }
-
-    if (escaped) {
-      escaped = false;
-      continue;
-    }
-
-    if (quote) {
-      if (ch === "\\") {
-        escaped = true;
-      } else if (ch === quote) {
-        quote = "";
-      }
-      continue;
-    }
-
-    if (ch === '"' || ch === "'") {
-      quote = ch;
-      continue;
-    }
-
-    if (ch === "{") {
-      if (depth === 0) start = i;
-      depth += 1;
-      continue;
-    }
-
-    if (ch === "}" && depth > 0) {
-      depth -= 1;
-      if (depth === 0 && start >= 0) {
-        const raw = text.slice(start, i + 1);
-        if (
-          /[{,]\s*["']?(name|command)["']?\s*:/i.test(raw) &&
-          /[{,]\s*["']?arguments["']?\s*:/i.test(raw)
-        ) {
-          candidates.push({ raw, start, end: i + 1, requireRequestedTool: true });
-        }
-        start = -1;
-      }
-    }
-  }
-
-  return candidates;
-}
-
-function rangesOverlap(
-  a: { start: number; end: number },
-  b: { start: number; end: number }
-): boolean {
-  return a.start < b.end && b.start < a.end;
 }
 
 export function stripRanges(text: string, ranges: Array<{ start: number; end: number }>): string {
@@ -341,36 +509,70 @@ export function toArgumentsString(value: unknown): string {
   }
 }
 
+/** One `- name: description\n  parameters: {...}` entry of the serialized tool list. */
+function formatToolPromptLine(
+  fn: NonNullable<OpenAIToolDef["function"]>,
+  descriptionMaxChars: number | undefined
+): string {
+  const rawDescription = typeof fn.description === "string" && fn.description ? fn.description : "";
+  const desc =
+    descriptionMaxChars !== undefined && rawDescription.length > descriptionMaxChars
+      ? `${rawDescription.slice(0, Math.max(0, descriptionMaxChars - 32))}\n…[description trimmed]`
+      : rawDescription;
+  let params = "";
+  try {
+    params = fn.parameters ? JSON.stringify(fn.parameters) : "";
+  } catch {
+    params = "";
+  }
+  return `- ${fn.name}${desc ? `: ${desc}` : ""}${params ? `\n  parameters: ${params}` : ""}`;
+}
+
 /**
  * Serialize an OpenAI `tools` array into a system-prompt block that instructs the
  * web UI model how to invoke a tool (emit a `<tool>{...}</tool>` block). Returns an
  * empty string when there are no usable tools.
+ *
+ * Each invocation generates a per-request nonce that is embedded in the tool format
+ * instructions. The parser (parseToolCallsFromText) requires this nonce in the model's
+ * `<tool>` JSON to distinguish legitimate tool calls from bare JSON, code-fenced JSON,
+ * or copy-attacked envelopes (#9343).
  */
-export function serializeToolsToPrompt(tools: unknown): string {
+export function serializeToolsToPrompt(
+  tools: unknown,
+  options: SerializeToolsToPromptOptions = {}
+): string {
   if (!Array.isArray(tools) || tools.length === 0) return "";
+
+  const nonce = getToolNonce(tools);
+  if (!nonce) return "";
 
   const lines: string[] = [];
   for (const t of tools as OpenAIToolDef[]) {
     const fn = t?.function;
     if (!fn?.name) continue;
-    const desc = typeof fn.description === "string" && fn.description ? fn.description : "";
-    let params = "";
-    try {
-      params = fn.parameters ? JSON.stringify(fn.parameters) : "";
-    } catch {
-      params = "";
-    }
-    lines.push(
-      `- ${fn.name}${desc ? `: ${desc}` : ""}${params ? `\n  parameters: ${params}` : ""}`
-    );
+    lines.push(formatToolPromptLine(fn, options.descriptionMaxChars));
   }
 
   if (lines.length === 0) return "";
 
   return [
-    "You can call tools. To call a tool, reply with a single line containing a <tool> block",
-    'with JSON: <tool>{"name": "<tool_name>", "arguments": { ... }}</tool>',
-    "Only emit the <tool> block when you actually want to call a tool; otherwise answer normally.",
+    "The client application provides tools beyond your built-in ones. They are NOT in your " +
+      "native tool registry; they are invoked via a plain-text protocol: the client parses " +
+      "your reply and executes the tool on the user machine. Treat these client tools as " +
+      "fully available to you; never claim they are unavailable. To invoke one, reply with " +
+      "a single line containing a <tool> block",
+    `with JSON that includes the secret binding "_nonce": "${nonce}":`,
+    `<tool>{"name": "<tool_name>", "arguments": { ... }, "_nonce": "${nonce}"}</tool>`,
+    "These client tools ARE available to you in this conversation. If the user asks you " +
+      "to inspect, create, edit, or verify files, you MUST invoke the relevant client tool " +
+      "before answering. Do not claim that the tools are unavailable and do not describe " +
+      "steps instead of invoking them.",
+    // Without this, the model reaches for a tool on every turn — including a bare greeting —
+    // which costs the client a full extra round trip per unnecessary tool call.
+    "Use a tool ONLY when the request genuinely needs workspace action. For greetings, small " +
+      "talk, thanks, or any question you can answer from your own knowledge, reply directly " +
+      "with the answer and NO <tool> block; calling a tool there is a protocol violation.",
     "",
     "Available tools:",
     ...lines,
@@ -378,11 +580,19 @@ export function serializeToolsToPrompt(tools: unknown): string {
 }
 
 /**
- * Parse `<tool>{...}</tool>` blocks out of upstream text into OpenAI `tool_calls`.
- * When a requested `tools[]` set is provided, also accepts bare JSON tool-call
- * objects emitted by web models that ignored the `<tool>` wrapper contract.
- * Returns the content with the blocks stripped, plus the tool calls (or null when
- * there are none). `arguments` is always a JSON *string*, matching the OpenAI API.
+ * Parse `<tool>{...}</tool>` or `<tool_call>{...}</tool_call>` blocks out of
+ * upstream text into OpenAI `tool_calls`.
+ *
+ * **Security hardening (#9343):** Bare JSON with name+arguments keys is NEVER
+ * promoted to tool_calls — only explicit `<tool>` or `<tool_call>` envelopes are
+ * accepted. When a nonce was embedded via serializeToolsToPrompt (stored from the
+ * same tools[] reference), it MUST be present in the parsed JSON body as `_nonce`.
+ * This prevents code-fenced JSON, prose JSON, and copy-attacked user envelopes from
+ * triggering tool execution.
+ *
+ * Returns the content with the recognized blocks stripped, plus the tool calls
+ * (or null when there are none). `arguments` is always a JSON *string*, matching
+ * the OpenAI API.
  *
  * `idSeed` makes generated ids deterministic for callers that need stability; when
  * omitted, ids are still unique within a single call (index-based).
@@ -392,49 +602,30 @@ export function parseToolCallsFromText(
   idSeed = "call",
   requestedTools?: unknown
 ): { content: string; toolCalls: OpenAIToolCall[] | null } {
+  const normalizedText = typeof text === "string" ? normalizeDsmlToolCalls(text) : text;
   const requestedToolNames = getRequestedToolNames(requestedTools);
-  const canParseBareJson = requestedToolNames.length > 0;
   if (
-    typeof text !== "string" ||
-    (!text.includes("<tool>") && !text.includes("<tool_call") && !canParseBareJson)
+    typeof normalizedText !== "string" ||
+    (!normalizedText.includes("<tool>") && !normalizedText.includes("<tool_call"))
   ) {
     return { content: text ?? "", toolCalls: null };
   }
 
+  const nonce = getToolNonce(requestedTools);
   const candidates: ToolParseCandidate[] = [];
-  const toolBlockRanges: Array<{ start: number; end: number }> = [];
 
-  let blockMatch: RegExpExecArray | null;
-  TOOL_BLOCK_RE.lastIndex = 0;
-  while ((blockMatch = TOOL_BLOCK_RE.exec(text)) !== null) {
-    const range = { start: blockMatch.index, end: TOOL_BLOCK_RE.lastIndex };
-    toolBlockRanges.push(range);
+  // Candidate extraction runs on the DSML-normalized text: normalizeDsmlToolCalls rewrites
+  // DeepSeek's native dialect into canonical <tool> blocks first, so both shapes are collected.
+  for (const block of [
+    ...findTagBlocks(normalizedText, TOOL_OPEN_RE, TOOL_CLOSE_RE),
+    ...findTagBlocks(normalizedText, TOOL_CALL_OPEN_RE, TOOL_CALL_CLOSE_RE),
+  ]) {
     candidates.push({
-      raw: blockMatch[1].trim(),
-      start: range.start,
-      end: range.end,
+      raw: block.inner.trim(),
+      start: block.start,
+      end: block.end,
       requireRequestedTool: false,
     });
-  }
-
-  TOOL_CALL_TAG_RE.lastIndex = 0;
-  while ((blockMatch = TOOL_CALL_TAG_RE.exec(text)) !== null) {
-    const range = { start: blockMatch.index, end: TOOL_CALL_TAG_RE.lastIndex };
-    toolBlockRanges.push(range);
-    candidates.push({
-      raw: blockMatch[1].trim(),
-      start: range.start,
-      end: range.end,
-      requireRequestedTool: false,
-    });
-  }
-
-  if (canParseBareJson) {
-    for (const candidate of findBareJsonCandidates(text)) {
-      if (!toolBlockRanges.some((range) => rangesOverlap(range, candidate))) {
-        candidates.push(candidate);
-      }
-    }
   }
 
   candidates.sort((a, b) => a.start - b.start);
@@ -450,6 +641,24 @@ export function parseToolCallsFromText(
           ? parsed.command
           : null;
     if (!emittedName) continue;
+    // The contract's illustrative `<tool_name>` placeholder is not an invocation.
+    if (emittedName === "<tool_name>") continue;
+
+    // Nonce binding check (#9343): when the tool prompt embedded a nonce, check
+    // that any _nonce present in the JSON body matches. A wrong nonce (present but
+    // does not match) means this is a copy-attack or hallucination — treat it as text
+    // instead of executing it. A missing _nonce is tolerated for backward compatibility
+    // with models that do not (yet) follow the nonce instruction.
+    if (
+      nonce &&
+      parsed &&
+      parsed._nonce !== undefined &&
+      parsed._nonce !== nonce &&
+      !isRecentToolNonce(parsed._nonce)
+    ) {
+      continue;
+    }
+
     const name =
       resolveRequestedToolName(emittedName, requestedToolNames) ||
       (candidate.requireRequestedTool ? null : emittedName);
@@ -467,7 +676,7 @@ export function parseToolCallsFromText(
     return { content: text, toolCalls: null };
   }
 
-  const content = stripRanges(text, acceptedRanges);
+  const content = stripRanges(normalizedText, acceptedRanges);
   return { content, toolCalls };
 }
 
@@ -479,11 +688,37 @@ interface ToolPrepResult {
   effectiveMessages: Array<{ role: string; content: unknown }>;
 }
 
+/** One-line nudge appended to the latest user message. Web-UI models weigh the
+ *  current user turn far more heavily than a large system block, and ChatGPT's
+ *  injection heuristics distrust long instructions embedded in user content —
+ *  so the full contract stays in the system block (trailing, see below) and the
+ *  user turn only carries a short pointer back to it, naming the tools. */
+function buildToolReminder(toolPrompt: string): string {
+  const names = (toolPrompt.match(/^- [^:\n]+/gm) || []).map((s) => s.slice(2).trim()).join(", ");
+  return (
+    "\n\n[Client protocol reminder: the client-tool contract in the system instructions " +
+    "is active in this conversation. These client tools ARE available via the <tool> " +
+    "block protocol" +
+    (names ? ": " + names : "") +
+    ".]"
+  );
+}
+
 /**
- * Extract tools from an OpenAI request body and prepend a tool-system-prompt
- * to the messages array when tools are present.  Every web-cookie executor
- * that wants tool-call support calls this once before building its upstream
- * request body.
+ * Extract tools from an OpenAI request body and inject the tool contract when
+ * tools are present. Every web-cookie executor that wants tool-call support
+ * calls this once before building its upstream request body.
+ *
+ * Placement matters: the contract used to be PREPENDED as the first system
+ * message. Executors fold all system messages into one block, so with agentic
+ * clients whose system prompts exceed ~28K chars the contract sat at the head
+ * of a huge block and observed web models ignored it, answering
+ * "tool X is not in my tool set" instead of emitting <tool> blocks. Dual
+ * placement fixes it: the full contract goes AFTER the client messages (folds
+ * to the tail of the system block) and a one-line reminder rides at the end of
+ * the latest user message. Captured long-context trials showed prepend 0/3 tool
+ * calls and dual placement 16/17 across
+ * 30K-250K prompts, 30-tool sets, multi-turn tool history, and streaming.
  */
 export function prepareToolMessages(
   bodyObj: Record<string, unknown>,
@@ -494,11 +729,25 @@ export function prepareToolMessages(
   if (!hasTools) return { hasTools: false, requestedTools, effectiveMessages: messages };
 
   const toolPrompt = serializeToolsToPrompt(requestedTools);
-  return {
-    hasTools: true,
-    requestedTools,
-    effectiveMessages: [{ role: "system", content: toolPrompt }, ...messages],
-  };
+  if (!toolPrompt) return { hasTools: true, requestedTools, effectiveMessages: messages };
+
+  const effectiveMessages = [...messages];
+  const reminder = buildToolReminder(toolPrompt);
+  for (let i = effectiveMessages.length - 1; i >= 0; i--) {
+    const msg = effectiveMessages[i];
+    if (msg?.role !== "user") continue;
+    if (typeof msg.content === "string") {
+      effectiveMessages[i] = { ...msg, content: msg.content + reminder };
+    } else if (Array.isArray(msg.content)) {
+      effectiveMessages[i] = {
+        ...msg,
+        content: [...msg.content, { type: "text", text: reminder }],
+      };
+    }
+    break;
+  }
+  effectiveMessages.push({ role: "system", content: toolPrompt });
+  return { hasTools: true, requestedTools, effectiveMessages };
 }
 
 interface ToolCompletionResult {

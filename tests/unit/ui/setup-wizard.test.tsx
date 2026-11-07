@@ -21,6 +21,18 @@ function makeContainer(): HTMLElement {
   return container;
 }
 
+const mockServerState = {
+  running: false,
+  port: 443,
+  certTrusted: false,
+  upstreamCa: null,
+  lastStartedAt: null,
+  activeConns: 0,
+  interceptedCount: 0,
+  dnsConfigured: false,
+  orphanedStateDetected: false,
+};
+
 const mockTarget = {
   id: "kiro" as const,
   name: "Kiro",
@@ -64,8 +76,11 @@ describe("SetupWizard", { timeout: 30000 }, () => {
           target: mockTarget,
           agentState: undefined,
           serverRunning: false,
+          serverState: mockServerState,
+          currentMappings: [],
           onClose: vi.fn(),
           onDnsToggle: vi.fn(),
+          onMappingsSave: vi.fn(),
         })
       );
     });
@@ -88,8 +103,11 @@ describe("SetupWizard", { timeout: 30000 }, () => {
           target: mockTarget,
           agentState: undefined,
           serverRunning: true,
+          serverState: mockServerState,
+          currentMappings: [],
           onClose: vi.fn(),
           onDnsToggle: vi.fn(),
+          onMappingsSave: vi.fn(),
         })
       );
     });
@@ -128,6 +146,8 @@ describe("SetupWizard", { timeout: 30000 }, () => {
             last_error: null,
           },
           serverRunning: true,
+          serverState: mockServerState,
+          currentMappings: [],
           onClose: vi.fn(),
           onDnsToggle,
         })
@@ -169,8 +189,11 @@ describe("SetupWizard", { timeout: 30000 }, () => {
           target: mockTarget,
           agentState: undefined,
           serverRunning: false,
+          serverState: mockServerState,
+          currentMappings: [],
           onClose,
           onDnsToggle: vi.fn(),
+          onMappingsSave: vi.fn(),
         })
       );
     });

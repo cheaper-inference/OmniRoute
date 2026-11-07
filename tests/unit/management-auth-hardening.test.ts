@@ -21,8 +21,19 @@ test("admin concurrency route requires management authentication before read or 
   const content = fs.readFileSync("src/app/api/admin/concurrency/route.ts", "utf8");
 
   assert.ok(content.includes('from "@/lib/api/requireManagementAuth"'));
-  assert.ok(content.includes("const authError = await requireManagementAuth(request);"));
-  assert.ok(content.includes("if (authError) return authError;"));
+  // contract changed by #15092: the early return now also stamps
+  // `Cache-Control: private, no-store` on the auth error — both GET and POST
+  // must still return it before touching any limiter state.
+  assert.equal(
+    content.match(/const authError = await requireManagementAuth\(request\);/g)?.length,
+    2
+  );
+  assert.equal(
+    content.match(
+      /if \(authError\) \{\s*authError\.headers\.set\("Cache-Control", "private, no-store"\);\s*return authError;\s*\}/g
+    )?.length,
+    2
+  );
   assert.ok(
     content.indexOf("requireManagementAuth(request)") < content.indexOf("getAllRateLimitStatus()")
   );
@@ -215,6 +226,9 @@ test("MCP transport and inspection routes require management authentication", ()
   // route must self-enforce. requireManagementAuth covers: CLI machine
   // token (loopback), dashboard session cookie, and manage-scope API key —
   // matching the documented bypasses in LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES.
+  // The transport routes (stream/sse/status/tools) pass
+  // { acceptMcpConnectScope: true }, the route-layer half of the #9159
+  // mcp:connect carve-out; audit/audit/stats stay manage-only.
   const routePaths = [
     "src/app/api/mcp/status/route.ts",
     "src/app/api/mcp/tools/route.ts",
@@ -227,11 +241,52 @@ test("MCP transport and inspection routes require management authentication", ()
   for (const routePath of routePaths) {
     const content = fs.readFileSync(routePath, "utf8");
     assert.ok(content.includes('from "@/lib/api/requireManagementAuth"'), routePath);
-    assert.ok(
-      content.includes("const authError = await requireManagementAuth(request);"),
-      routePath
+    // Transport routes must use the carve-out form; audit routes must use
+    // the bare form. The per-route shape is pinned exactly — reverting a
+    // transport route to the bare call fails here.
+    const isAudit = routePath.includes("/audit");
+    const hasOption = content.includes(
+      "const authError = await requireManagementAuth(request, { acceptMcpConnectScope: true });"
     );
+    // Audit routes must use the BARE call — any second argument at all
+    // (even an unrelated option) widens their auth surface.
+    const hasAnyOption = /requireManagementAuth\(request,\s*\{/.test(content);
+    const hasBare = content.includes("const authError = await requireManagementAuth(request);");
+    assert.equal(
+      hasOption,
+      !isAudit,
+      `${routePath} carve-out shape mismatch (hasOption=${hasOption}, audit=${isAudit})`
+    );
+    if (isAudit) {
+      assert.ok(hasBare, `${routePath} must keep the bare guard call`);
+      assert.ok(!hasAnyOption, `${routePath} must not pass ANY options to the guard (manage-only)`);
+    }
     assert.ok(content.includes("if (authError) return authError;"), routePath);
+  }
+
+  // Carve-out hygiene: only the four transport routes may accept
+  // mcp:connect; the audit inspection routes remain manage-only.
+  for (const routePath of [
+    "src/app/api/mcp/audit/route.ts",
+    "src/app/api/mcp/audit/stats/route.ts",
+  ]) {
+    const content = fs.readFileSync(routePath, "utf8");
+    assert.ok(
+      !content.includes("acceptMcpConnectScope"),
+      `${routePath} must stay manage-only (no mcp:connect carve-out)`
+    );
+  }
+  for (const routePath of [
+    "src/app/api/mcp/status/route.ts",
+    "src/app/api/mcp/tools/route.ts",
+    "src/app/api/mcp/sse/route.ts",
+    "src/app/api/mcp/stream/route.ts",
+  ]) {
+    const content = fs.readFileSync(routePath, "utf8");
+    assert.ok(
+      content.includes("acceptMcpConnectScope: true"),
+      `${routePath} must enable the mcp:connect carve-out`
+    );
   }
 });
 

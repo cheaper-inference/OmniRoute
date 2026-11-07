@@ -18,6 +18,43 @@ function collectEvents(chunks) {
   return events;
 }
 
+test("OpenAI -> Responses: accepts the reasoning alias without duplicating the canonical field", () => {
+  const events = collectEvents([
+    {
+      id: "chatcmpl-1",
+      model: "gpt-oss:20b",
+      choices: [
+        {
+          index: 0,
+          delta: { reasoning: "alias ", reasoning_content: "canonical " },
+          finish_reason: null,
+        },
+      ],
+    },
+    {
+      id: "chatcmpl-1",
+      model: "gpt-oss:20b",
+      choices: [{ index: 0, delta: { reasoning: "continued" }, finish_reason: null }],
+    },
+    {
+      id: "chatcmpl-1",
+      model: "gpt-oss:20b",
+      choices: [{ index: 0, delta: { content: "answer" }, finish_reason: "stop" }],
+      usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+    },
+  ]);
+
+  assert.deepEqual(
+    events
+      .filter((event) => event.event === "response.reasoning_summary_text.delta")
+      .map((event) => event.data.delta),
+    ["canonical ", "continued"]
+  );
+  const completed = events.find((event) => event.event === "response.completed").data.response;
+  assert.equal(completed.output[0].summary[0].text, "canonical continued");
+  assert.equal(completed.output[1].content[0].text, "answer");
+});
+
 test("OpenAI -> Responses: emits lifecycle, reasoning, text, tool calls and completed usage", () => {
   const events = collectEvents([
     {
@@ -148,7 +185,7 @@ test("OpenAI -> Responses: closing a tool call also records it in the shared sta
   assert.equal(recorded.function.arguments, '{"message":"hi"}');
 });
 
-test("OpenAI -> Responses: flush on null closes text content and emits response.completed", () => {
+test("OpenAI -> Responses: premature flush closes text content and emits response.failed", () => {
   const events = collectEvents([
     {
       id: "chatcmpl-2",
@@ -160,7 +197,7 @@ test("OpenAI -> Responses: flush on null closes text content and emits response.
 
   assert.ok(events.some((event) => event.event === "response.output_text.done"));
   assert.ok(events.some((event) => event.event === "response.content_part.done"));
-  assert.ok(events.some((event) => event.event === "response.completed"));
+  assert.ok(events.some((event) => event.event === "response.failed"));
 });
 
 test("OpenAI -> Responses: prompt-format <think> tags remain text by default", () => {
@@ -386,6 +423,52 @@ test("Responses -> OpenAI: preserves non-object Read JSON-string arguments", () 
   assert.equal(done.choices[0].delta.tool_calls[0].function.arguments, "null");
 });
 
+test("Responses -> OpenAI: mixed plaintext + encrypted_content reasoning replays its plaintext (#10949)", () => {
+  const state = {};
+  const done = openaiResponsesToOpenAIResponse(
+    {
+      type: "response.output_item.done",
+      item: {
+        type: "reasoning",
+        id: "rs_mixed",
+        content: [
+          {
+            type: "reasoning_text",
+            text: "Let me start by reading the directory to understand the structure of the corpus.",
+          },
+        ],
+        encrypted_content: "<opaque state>",
+        summary: [],
+      },
+    },
+    state
+  );
+
+  assert.ok(done, "mixed reasoning item must surface a delta");
+  assert.equal(
+    done.choices[0].delta.reasoning_content,
+    "Let me start by reading the directory to understand the structure of the corpus."
+  );
+});
+
+test("Responses -> OpenAI: opaque-only reasoning still emits no fabricated plaintext", () => {
+  const state = {};
+  const done = openaiResponsesToOpenAIResponse(
+    {
+      type: "response.output_item.done",
+      item: {
+        type: "reasoning",
+        id: "rs_opaque_only",
+        encrypted_content: "<opaque state>",
+        summary: [],
+      },
+    },
+    state
+  );
+
+  assert.equal(done, null);
+});
+
 test("Responses -> OpenAI: strips empty optional args from JSON-string output_item.done arguments", () => {
   const state = {};
   openaiResponsesToOpenAIResponse(
@@ -437,7 +520,7 @@ test("Responses -> OpenAI: tool-call delta, reasoning delta and completed usage 
     },
     state
   );
-  openaiResponsesToOpenAIResponse(
+  const done = openaiResponsesToOpenAIResponse(
     {
       type: "response.output_item.done",
       item: { type: "function_call", call_id: "call_2", name: "weather" },
@@ -460,7 +543,10 @@ test("Responses -> OpenAI: tool-call delta, reasoning delta and completed usage 
   );
 
   assert.equal(added.choices[0].delta.tool_calls[0].function.name, "weather");
-  assert.equal(args.choices[0].delta.tool_calls[0].function.arguments, '{"city":"SP"}');
+  // #9168: function_call_arguments.delta is buffered and returns null;
+  // arguments are emitted by output_item.done instead.
+  assert.equal(args, null);
+  assert.equal(done.choices[0].delta.tool_calls[0].function.arguments, '{"city":"SP"}');
   assert.equal(reasoning.choices[0].delta.reasoning_content, "Need weather info.");
   assert.equal(completed.choices[0].finish_reason, "tool_calls");
   const comp = completed as {
@@ -628,6 +714,139 @@ test("OpenAI -> Responses: Python multi-line content with indentation survives t
   assert.ok(newlineCount > 5, "should have many actual newlines in Python code");
 });
 
+test("OpenAI -> Responses: a raw newline byte split across two tool-call argument deltas (fragment boundary lands mid-string, not on a quote/escape) is still escaped correctly", () => {
+  // Real reported bug: escapeJsonStringValues used to track "are we inside a
+  // JSON string" as a LOCAL variable reset on every call instead of state
+  // persisted across chunks for the same tool call. A provider that sends a
+  // raw newline byte (0x0A, not a proper \n escape — Gemini/Gemma-style) mid
+  // fragment worked fine when the whole arguments string arrived in one
+  // chunk, but broke the moment the SSE stream happened to split the
+  // fragment somewhere that wasn't a quote or a complete escape sequence:
+  // the second fragment's call started fresh with inString=false even
+  // though the true position was still inside the "content" string value,
+  // so the raw newline in fragment 2 was never escaped — producing invalid
+  // JSON that JSON.parse rejects outright ("Bad control character in
+  // string literal").
+  const events = collectEvents([
+    {
+      id: "chatcmpl-split-nl",
+      model: "gemma-4-26b-a4b-it",
+      choices: [
+        {
+          index: 0,
+          delta: {
+            tool_calls: [
+              {
+                index: 0,
+                id: "call_split_nl",
+                type: "function",
+                function: {
+                  name: "write",
+                  // Fragment 1 ends mid-string (no closing quote, no
+                  // trailing backslash) — this is the boundary that
+                  // exposed the bug.
+                  arguments: '{"path":"/tmp/x.txt","content":"line1',
+                },
+              },
+            ],
+          },
+          finish_reason: null,
+        },
+      ],
+    },
+    {
+      id: "chatcmpl-split-nl",
+      model: "gemma-4-26b-a4b-it",
+      choices: [
+        {
+          index: 0,
+          delta: {
+            // Fragment 2 starts with a RAW newline byte (real \n, not the
+            // two-char escape) while still inside the "content" string.
+            tool_calls: [{ index: 0, function: { arguments: '\nline2\nline3"}' } }],
+          },
+          finish_reason: "tool_calls",
+        },
+      ],
+      usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+    },
+  ]);
+
+  const done = events.find(
+    (e) => e.event === "response.output_item.done" && e.data.item?.type === "function_call"
+  );
+  assert.ok(done, "should emit output_item.done for function_call");
+
+  const argsStr = done.data.item.arguments;
+  // The bug produced invalid JSON here (raw control character in a JSON
+  // string) — JSON.parse must succeed and round-trip the real newlines.
+  const parsed = JSON.parse(argsStr);
+  assert.equal(parsed.path, "/tmp/x.txt");
+  assert.equal(parsed.content, "line1\nline2\nline3");
+});
+
+test("OpenAI -> Responses: a properly-escaped \\n split exactly between its backslash and the 'n' across two deltas is not corrupted", () => {
+  // Second half of the same bug class as the test above, exercising the
+  // OTHER new state field (pendingEscape, not just inString): a model that
+  // correctly escaped a newline as the two characters `\` + `n` can still
+  // have that pair split across an SSE chunk boundary — fragment 1 ends
+  // with the lone backslash, fragment 2 starts with the "n". The old code's
+  // per-call reset meant fragment 2 saw a bare "n" with no idea it was the
+  // second half of an escape sequence; a naive re-implementation could
+  // easily re-escape or mis-handle it. This must reassemble to exactly one
+  // real newline, not a literal backslash-n or a doubled escape.
+  const events = collectEvents([
+    {
+      id: "chatcmpl-split-esc",
+      model: "gemma-4-26b-a4b-it",
+      choices: [
+        {
+          index: 0,
+          delta: {
+            tool_calls: [
+              {
+                index: 0,
+                id: "call_split_esc",
+                type: "function",
+                function: {
+                  name: "write",
+                  // Ends right after the backslash of a "\n" escape — the "n"
+                  // itself is not yet in this fragment.
+                  arguments: '{"path":"/tmp/y.txt","content":"before\\',
+                },
+              },
+            ],
+          },
+          finish_reason: null,
+        },
+      ],
+    },
+    {
+      id: "chatcmpl-split-esc",
+      model: "gemma-4-26b-a4b-it",
+      choices: [
+        {
+          index: 0,
+          delta: {
+            tool_calls: [{ index: 0, function: { arguments: 'nafter"}' } }],
+          },
+          finish_reason: "tool_calls",
+        },
+      ],
+      usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+    },
+  ]);
+
+  const done = events.find(
+    (e) => e.event === "response.output_item.done" && e.data.item?.type === "function_call"
+  );
+  assert.ok(done, "should emit output_item.done for function_call");
+
+  const parsed = JSON.parse(done.data.item.arguments);
+  assert.equal(parsed.path, "/tmp/y.txt");
+  assert.equal(parsed.content, "before\nafter");
+});
+
 test("OpenAI -> Responses: parallel tool calls with mixed content survive translation", () => {
   const events = collectEvents([
     {
@@ -685,4 +904,233 @@ test("OpenAI -> Responses: parallel tool calls with mixed content survive transl
   assert.ok(completed, "should emit response.completed");
   const outputFcs = completed.data.response.output.filter((item) => item.type === "function_call");
   assert.equal(outputFcs.length, 2, "completed output should have both function_calls");
+});
+
+// Live incident (2026-08-08): an OpenClaw agent ("Ping") sent a preamble line
+// ("Kör nu, på riktigt — apply_patch på vibe-scriptet:") followed by an
+// apply_patch tool call in the same turn, with reasoning ahead of both. The
+// text message and the tool call both computed to output_index=1 — the tool
+// call's own index math (`reasoningIndex + 1 + tcIdx`) never accounted for
+// the message item also claiming `reasoningIndex + 1`, so a completed
+// message and a freshly-added tool call collided on the same output_index.
+// A client that tracks response items by output_index (as Responses-API
+// clients are expected to) sees the tool call's added/delta/done events land
+// on an index it already marked complete, and can silently drop or ignore
+// them — exactly the observed symptom: the agent spoke the preamble and
+// never executed the patch.
+test("OpenAI -> Responses: a text message and a following tool call in the same turn get distinct output_index values", () => {
+  const events = collectEvents([
+    {
+      id: "chatcmpl-1",
+      model: "big-pickle",
+      choices: [
+        { index: 0, delta: { reasoning_content: "thinking about the patch" }, finish_reason: null },
+      ],
+    },
+    {
+      id: "chatcmpl-1",
+      model: "big-pickle",
+      choices: [
+        {
+          index: 0,
+          delta: { content: "Kör nu, på riktigt — apply_patch på vibe-scriptet:" },
+          finish_reason: null,
+        },
+      ],
+    },
+    {
+      id: "chatcmpl-1",
+      model: "big-pickle",
+      choices: [
+        {
+          index: 0,
+          delta: {
+            tool_calls: [
+              {
+                index: 0,
+                id: "call_apply_patch",
+                type: "function",
+                function: { name: "apply_patch", arguments: '{"input":"*** Begin Patch ***"}' },
+              },
+            ],
+          },
+          finish_reason: "tool_calls",
+        },
+      ],
+    },
+    null,
+  ]);
+
+  const itemDoneEvents = events.filter((e) => e.event === "response.output_item.done");
+  const messageDone = itemDoneEvents.find((e) => e.data.item?.type === "message");
+  const toolCallDone = itemDoneEvents.find(
+    (e) => e.data.item?.type === "function_call" || e.data.item?.type === "custom_tool_call"
+  );
+  assert.ok(messageDone, "message output_item.done should be present");
+  assert.ok(toolCallDone, "tool call output_item.done should be present");
+  assert.notEqual(
+    messageDone.data.output_index,
+    toolCallDone.data.output_index,
+    "message and tool call must not collide on the same output_index"
+  );
+
+  // The tool call's own added/delta events (what a streaming client actually
+  // keys its per-item state on) must also use the tool call's real index,
+  // not the message's.
+  const toolCallAdded = events.find(
+    (e) =>
+      e.event === "response.output_item.added" &&
+      (e.data.item?.type === "function_call" || e.data.item?.type === "custom_tool_call")
+  );
+  assert.ok(toolCallAdded, "tool call output_item.added should be present");
+  assert.equal(toolCallAdded.data.output_index, toolCallDone.data.output_index);
+  assert.notEqual(toolCallAdded.data.output_index, messageDone.data.output_index);
+
+  const completed = events.find((e) => e.event === "response.completed");
+  const outputTypes = completed.data.response.output.map((item) => item.type);
+  assert.ok(outputTypes.includes("message"), "completed output must include the message");
+  assert.ok(
+    outputTypes.includes("function_call") || outputTypes.includes("custom_tool_call"),
+    "completed output must include the tool call"
+  );
+});
+
+// Live incident (2026-09-02): a free-tier streaming model, after a short text
+// preamble, opened two tool calls whose upstream `tool_calls[].index` was 1
+// and 2 -- never 0. toolCallOutputIndexBase()+index therefore emitted
+// output_index 0 (message), 2, 3 -- skipping 1 entirely. A spec-following
+// Responses-API client reads response.completed's final `output[]` array by
+// ARRAY POSITION and expects position === output_index (the API's own
+// contract): output[1] (this turn's first call, real output_index 2) gets
+// looked up under output_index 1 and missed, then output[2] (the second
+// call, real output_index 3) gets looked up under output_index 2 and
+// collides with the FIRST call's tracked slot -- two different call_ids on
+// what the client thinks is one identity, which it correctly refuses to
+// treat as anything but a broken stream. Reproduced verbatim (anonymized
+// content, same index/id shape) against OpenClaw's own
+// createResponsesOutputTracker before this fix; content and tool/model names
+// below are placeholders, not the real incident's.
+test("OpenAI -> Responses: tool-call output_index stays gap-free when the upstream's own index doesn't start at 0", () => {
+  const events = collectEvents([
+    {
+      id: "chatcmpl-gap1",
+      model: "stub-model",
+      choices: [
+        { index: 0, delta: { content: "Status:", role: "assistant" }, finish_reason: null },
+      ],
+    },
+    {
+      id: "chatcmpl-gap1",
+      model: "stub-model",
+      choices: [
+        { index: 0, delta: { content: " all clear.", role: "assistant" }, finish_reason: null },
+      ],
+    },
+    {
+      id: "chatcmpl-gap1",
+      model: "stub-model",
+      choices: [
+        {
+          index: 0,
+          delta: {
+            content: null,
+            role: "assistant",
+            tool_calls: [
+              {
+                index: 1,
+                id: "call_stub_1",
+                type: "function",
+                function: { name: "notify", arguments: "" },
+              },
+            ],
+          },
+          finish_reason: null,
+        },
+      ],
+    },
+    {
+      id: "chatcmpl-gap1",
+      model: "stub-model",
+      choices: [
+        {
+          index: 0,
+          delta: {
+            content: null,
+            role: "assistant",
+            tool_calls: [{ index: 1, function: { arguments: '{"a":1}' } }],
+          },
+          finish_reason: null,
+        },
+      ],
+    },
+    {
+      id: "chatcmpl-gap1",
+      model: "stub-model",
+      choices: [
+        {
+          index: 0,
+          delta: {
+            content: null,
+            role: "assistant",
+            tool_calls: [
+              {
+                index: 2,
+                id: "call_stub_2",
+                type: "function",
+                function: { name: "notify", arguments: "" },
+              },
+            ],
+          },
+          finish_reason: null,
+        },
+      ],
+    },
+    {
+      id: "chatcmpl-gap1",
+      model: "stub-model",
+      choices: [
+        {
+          index: 0,
+          delta: {
+            content: null,
+            role: "assistant",
+            tool_calls: [{ index: 2, function: { arguments: '{"a":2}' } }],
+          },
+          finish_reason: null,
+        },
+      ],
+    },
+    {
+      id: "chatcmpl-gap1",
+      model: "stub-model",
+      choices: [
+        { index: 0, delta: { content: "", role: "assistant" }, finish_reason: "tool_calls" },
+      ],
+      usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+    },
+    null,
+  ]);
+
+  const addedEvents = events.filter((e) => e.event === "response.output_item.added");
+  const indexes = addedEvents.map((e) => e.data.output_index).sort((a, b) => a - b);
+  const sequential = indexes.map((_, i) => i);
+  assert.deepEqual(
+    indexes,
+    sequential,
+    `output_index values must be a gap-free 0..n-1 sequence (position === output_index is the Responses API's own contract); got ${JSON.stringify(indexes)}`
+  );
+
+  // The exact client-observable symptom: response.completed's output[]
+  // array, read by array position, must match each item's own tracked
+  // output_index -- otherwise a client keying by array position resolves
+  // the wrong item.
+  const completedGap = events.find((e) => e.event === "response.completed");
+  completedGap.data.response.output.forEach((item, position) => {
+    const addedEvent = addedEvents.find((e) => e.data.item?.id === item.id);
+    assert.equal(
+      addedEvent?.data.output_index,
+      position,
+      `item ${item.id} (type ${item.type}) streamed at output_index ${addedEvent?.data.output_index} but sits at array position ${position} in the completed output`
+    );
+  });
 });

@@ -15,9 +15,15 @@ const execFileAsync = promisify(execFile);
 
 const WINDOWS_TAILSCALE_BIN = "C:\\Program Files\\Tailscale\\tailscale.exe";
 const WINDOWS_TAILSCALED_BIN = "C:\\Program Files\\Tailscale\\tailscaled.exe";
-const IS_MAC = process.platform === "darwin";
-const IS_LINUX = process.platform === "linux";
-const IS_WINDOWS = process.platform === "win32";
+
+// Runtime platform getter. A bundler (Turbopack in `next build`) constant-folds
+// `process.platform` to the BUILD machine's value on a non-Windows runner and prunes
+// the other branches as dead code (#10293). `os.platform()` is a runtime call a
+// bundler cannot fold, so Windows/macOS/Linux branches survive on any build machine.
+function getCurrentPlatform(): NodeJS.Platform {
+  return os.platform();
+}
+
 const EXTENDED_PATH = `/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:${process.env.PATH || ""}`;
 const LOGIN_TIMEOUT_MS = 15000;
 const FUNNEL_TIMEOUT_MS = 30000;
@@ -35,12 +41,7 @@ type JsonRecord = Record<string, unknown>;
 
 export type TailscaleTunnelInstallSource = "managed" | "path" | "env" | "windows-default";
 export type TailscaleTunnelPhase =
-  | "unsupported"
-  | "not_installed"
-  | "needs_login"
-  | "stopped"
-  | "running"
-  | "error";
+  "unsupported" | "not_installed" | "needs_login" | "stopped" | "running" | "error";
 
 type PersistedTailscaleState = {
   binaryPath?: string | null;
@@ -61,8 +62,7 @@ type BinaryResolution = {
 type TailscaleLoginResult = { alreadyLoggedIn: true } | { authUrl: string };
 
 type TailscaleFunnelResult =
-  | { tunnelUrl: string }
-  | { funnelNotEnabled: true; enableUrl: string | null };
+  { tunnelUrl: string } | { funnelNotEnabled: true; enableUrl: string | null };
 
 export type TailscaleCheckStatus = {
   supported: boolean;
@@ -79,6 +79,23 @@ export type TailscaleCheckStatus = {
   brewAvailable: boolean;
   lastError: string | null;
   pid: number | null;
+  /**
+   * Present (and `false`) only when the host-side probes were skipped for a remote
+   * caller: no PATH lookup, no `tailscale status/funnel --json`, no `which brew`.
+   * Install/login/funnel fields then come from persisted state, not a live check.
+   * A probed status omits the field so the local response shape is unchanged.
+   */
+  probed?: false;
+};
+
+/**
+ * Whether the caller may spawn the host-side probes. Route handlers pass the trusted
+ * peer-locality verdict (loopback/LAN only); status routes stay remote-reachable for
+ * the dashboard, so the spawn is gated here at its call site (GHSA-35fw-cv32-2373
+ * class, GHSA-jmq6-8j86-8xqj pattern). Defaults to true for in-process callers.
+ */
+export type TailscaleStatusOptions = {
+  allowLocalProbe?: boolean;
 };
 
 export type TailscaleTunnelStatus = TailscaleCheckStatus & {
@@ -124,7 +141,7 @@ function shellEscape(value: string) {
   return `'${value.replace(/'/g, `'\"'\"'`)}'`;
 }
 
-function isSupportedPlatform(platform = process.platform) {
+function isSupportedPlatform(platform = os.platform()) {
   return platform === "darwin" || platform === "linux" || platform === "win32";
 }
 
@@ -132,7 +149,7 @@ function getTailscaleDir() {
   return path.join(resolveDataDir(), "tailscale");
 }
 
-function getManagedBinaryPath(platform = process.platform) {
+function getManagedBinaryPath(platform = os.platform()) {
   return path.join(getTailscaleDir(), "bin", platform === "win32" ? "tailscale.exe" : "tailscale");
 }
 
@@ -212,7 +229,7 @@ function getTailscaleApiUrl(tunnelUrl: string | null) {
 }
 
 async function resolvePathCommand(command: string) {
-  const lookupCommand = process.platform === "win32" ? "where" : "which";
+  const lookupCommand = os.platform() === "win32" ? "where" : "which";
   try {
     const { stdout } = await execFileAsync(lookupCommand, [command], {
       timeout: 3000,
@@ -232,7 +249,9 @@ async function resolvePathCommand(command: string) {
   }
 }
 
-async function resolveBinary(): Promise<BinaryResolution> {
+async function resolveBinary({
+  allowPathLookup = true,
+}: { allowPathLookup?: boolean } = {}): Promise<BinaryResolution> {
   const envPath = toNonEmptyString(process.env.TAILSCALE_BIN);
   if (envPath && fs.existsSync(envPath)) {
     return { binaryPath: envPath, installSource: "env", managedInstall: false };
@@ -243,12 +262,13 @@ async function resolveBinary(): Promise<BinaryResolution> {
     return { binaryPath: managedPath, installSource: "managed", managedInstall: true };
   }
 
-  const pathBinary = await resolvePathCommand("tailscale");
+  // The PATH lookup spawns `which`/`where`; the other candidates are plain fs checks.
+  const pathBinary = allowPathLookup ? await resolvePathCommand("tailscale") : null;
   if (pathBinary) {
     return { binaryPath: pathBinary, installSource: "path", managedInstall: false };
   }
 
-  if (IS_WINDOWS && fs.existsSync(WINDOWS_TAILSCALE_BIN)) {
+  if (getCurrentPlatform() === "win32" && fs.existsSync(WINDOWS_TAILSCALE_BIN)) {
     return {
       binaryPath: WINDOWS_TAILSCALE_BIN,
       installSource: "windows-default",
@@ -263,7 +283,7 @@ async function resolveDaemonBinary(tailscaleBinaryPath: string | null) {
   const envPath = toNonEmptyString(process.env.TAILSCALED_BIN);
   if (envPath && fs.existsSync(envPath)) return envPath;
 
-  const daemonFilename = process.platform === "win32" ? "tailscaled.exe" : "tailscaled";
+  const daemonFilename = os.platform() === "win32" ? "tailscaled.exe" : "tailscaled";
   const siblingDir = tailscaleBinaryPath ? path.dirname(tailscaleBinaryPath) : null;
   // path.format avoids the path.join/resolve pattern flagged by CWE-22 linters;
   // siblingDir is path.dirname of a trusted system binary from resolveBinary(), not user input.
@@ -273,7 +293,8 @@ async function resolveDaemonBinary(tailscaleBinaryPath: string | null) {
   const pathBinary = await resolvePathCommand("tailscaled");
   if (pathBinary) return pathBinary;
 
-  if (IS_WINDOWS && fs.existsSync(WINDOWS_TAILSCALED_BIN)) return WINDOWS_TAILSCALED_BIN;
+  if (getCurrentPlatform() === "win32" && fs.existsSync(WINDOWS_TAILSCALED_BIN))
+    return WINDOWS_TAILSCALED_BIN;
 
   return null;
 }
@@ -298,7 +319,9 @@ async function getActiveSocketPath(): Promise<string> {
   }
 
   // Check system sockets first
-  const systemSocket = IS_LINUX ? SYSTEM_SOCKET_LINUX : IS_MAC ? SYSTEM_SOCKET_MAC : null;
+  const platform = getCurrentPlatform();
+  const systemSocket =
+    platform === "linux" ? SYSTEM_SOCKET_LINUX : platform === "darwin" ? SYSTEM_SOCKET_MAC : null;
   if (systemSocket && fs.existsSync(systemSocket)) {
     _cachedActiveSocket = systemSocket;
     _cachedActiveSocketTimestamp = now;
@@ -314,7 +337,9 @@ async function getActiveSocketPath(): Promise<string> {
 
 /** Synchronous check: is the system daemon socket available? */
 function isSystemDaemonAvailable(): boolean {
-  const systemSocket = IS_LINUX ? SYSTEM_SOCKET_LINUX : IS_MAC ? SYSTEM_SOCKET_MAC : null;
+  const platform = getCurrentPlatform();
+  const systemSocket =
+    platform === "linux" ? SYSTEM_SOCKET_LINUX : platform === "darwin" ? SYSTEM_SOCKET_MAC : null;
   return Boolean(systemSocket && fs.existsSync(systemSocket));
 }
 
@@ -341,19 +366,20 @@ export function tailscaleUpArgs(hostname?: string, authKey?: string): string[] {
 }
 
 async function buildTailscaleArgs(...args: string[]) {
-  if (IS_WINDOWS) return args;
+  if (getCurrentPlatform() === "win32") return args;
   const socket = await getActiveSocketPath();
   return ["--socket", socket, ...args];
 }
 
 /** Synchronous variant for places that cannot await */
 function buildTailscaleArgsSync(...args: string[]) {
-  if (IS_WINDOWS) return args;
+  if (getCurrentPlatform() === "win32") return args;
   // Use cached socket or default to system socket if available
+  const platform = getCurrentPlatform();
   const socket =
     _cachedActiveSocket ||
     (isSystemDaemonAvailable()
-      ? IS_LINUX
+      ? platform === "linux"
         ? SYSTEM_SOCKET_LINUX
         : SYSTEM_SOCKET_MAC
       : getTailscaleSocketPath());
@@ -443,7 +469,7 @@ function getLastError(state: PersistedTailscaleState) {
 }
 
 async function hasBrew() {
-  if (!IS_MAC) return false;
+  if (getCurrentPlatform() !== "darwin") return false;
   try {
     await execFileAsync("which", ["brew"], {
       timeout: 3000,
@@ -461,7 +487,41 @@ async function getLiveTunnelUrl(binaryPath: string | null) {
   return getTailscaleUrlFromStatusPayload(payload);
 }
 
-export async function getTailscaleCheckStatus(): Promise<TailscaleCheckStatus> {
+/**
+ * Status without any child process (remote callers): binary from the fs-only
+ * candidates, tunnel URL / pid / last error from the persisted state. Login and
+ * funnel state are not checked, so they report false here.
+ */
+async function getUnprobedTailscaleCheckStatus(): Promise<TailscaleCheckStatus> {
+  const resolution = await resolveBinary({ allowPathLookup: false });
+  const state = await readStateFile();
+  const tunnelUrl = toNonEmptyString(state.tunnelUrl);
+  const pid = await readPidFile();
+
+  return {
+    supported: isSupportedPlatform(),
+    installed: Boolean(resolution.binaryPath),
+    managedInstall: resolution.managedInstall,
+    installSource: resolution.installSource,
+    binaryPath: resolution.binaryPath,
+    loggedIn: false,
+    daemonRunning: isProcessAlive(pid || null),
+    running: false,
+    tunnelUrl,
+    apiUrl: getTailscaleApiUrl(tunnelUrl),
+    platform: os.platform(),
+    brewAvailable: false,
+    lastError: getLastError(state),
+    pid,
+    probed: false,
+  };
+}
+
+export async function getTailscaleCheckStatus({
+  allowLocalProbe = true,
+}: TailscaleStatusOptions = {}): Promise<TailscaleCheckStatus> {
+  if (!allowLocalProbe) return getUnprobedTailscaleCheckStatus();
+
   const resolution = await resolveBinary();
   const [state, statusPayload, funnelPayload, brewAvailable] = await Promise.all([
     readStateFile(),
@@ -487,20 +547,48 @@ export async function getTailscaleCheckStatus(): Promise<TailscaleCheckStatus> {
     running: isFunnelRunning(funnelPayload),
     tunnelUrl,
     apiUrl: getTailscaleApiUrl(tunnelUrl),
-    platform: process.platform,
+    platform: os.platform(),
     brewAvailable,
     lastError: getLastError(state),
     pid: await readPidFile(),
   };
 }
 
-export async function getTailscaleTunnelStatus(): Promise<TailscaleTunnelStatus> {
-  const [check, settings] = await Promise.all([getTailscaleCheckStatus(), getSettings()]);
+export async function getTailscaleTunnelStatus({
+  allowLocalProbe = true,
+}: TailscaleStatusOptions = {}): Promise<TailscaleTunnelStatus> {
+  const [check, settings] = await Promise.all([
+    getTailscaleCheckStatus({ allowLocalProbe }),
+    getSettings(),
+  ]);
   const storedSettingUrl =
     typeof settings.tailscaleUrl === "string" && settings.tailscaleUrl.trim()
       ? settings.tailscaleUrl
       : null;
   const tunnelUrl = check.tunnelUrl || storedSettingUrl;
+
+  if (!allowLocalProbe) {
+    // Nothing was checked live, so the funnel state is the operator's persisted intent
+    // (enableTailscaleTunnel sets tailscaleEnabled + the URL; disable clears them) —
+    // the same source the probed path already falls back to. The phase never claims
+    // not_installed / needs_login, which would require a probe to know.
+    const running = settings.tailscaleEnabled === true && Boolean(tunnelUrl);
+    let phase: TailscaleTunnelPhase = "stopped";
+    if (!check.supported) phase = "unsupported";
+    else if (running) phase = "running";
+    else if (check.lastError) phase = "error";
+
+    return {
+      ...check,
+      loggedIn: running,
+      running,
+      enabled: running,
+      tunnelUrl,
+      apiUrl: getTailscaleApiUrl(tunnelUrl),
+      phase,
+    };
+  }
+
   // If live funnel detection fails (e.g. older CLI or socket permission), fall back to
   // settings.tailscaleEnabled as the authoritative source (set by enableTailscaleTunnel).
   const funnelActive = check.running || (settings.tailscaleEnabled === true && check.loggedIn);
@@ -561,7 +649,7 @@ export async function startTailscaleDaemon({
     return { started: false };
   }
 
-  if (IS_WINDOWS) {
+  if (getCurrentPlatform() === "win32") {
     try {
       await execFileAsync("net", ["start", "Tailscale"], {
         timeout: 10000,
@@ -816,7 +904,7 @@ export async function stopTailscaleDaemon({
     }
   }
 
-  if (!IS_WINDOWS) {
+  if (getCurrentPlatform() !== "win32") {
     try {
       await execFileAsync("pkill", ["-x", "tailscaled"], {
         timeout: 3000,
@@ -1098,6 +1186,11 @@ async function installTailscaleLinux(password: string, onProgress?: (message: st
   });
 }
 
+export function buildWindowsTailscaleInstallCommand(msiPath: string): string {
+  const escapedMsiPath = msiPath.replace(/'/g, "''");
+  return `Start-Process msiexec -ArgumentList '/i','${escapedMsiPath}','TS_NOLAUNCH=true','/quiet','/norestart' -Verb RunAs -Wait`;
+}
+
 async function installTailscaleWindows(onProgress?: (message: string) => void) {
   const msiUrl = "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi";
   const msiPath = path.join(os.tmpdir(), "tailscale-setup.msi");
@@ -1119,12 +1212,7 @@ async function installTailscaleWindows(onProgress?: (message: string) => void) {
   await new Promise<void>((resolve, reject) => {
     const child = spawn(
       "powershell",
-      [
-        "-NoProfile",
-        "-NonInteractive",
-        "-Command",
-        `Start-Process msiexec -ArgumentList '/i','${msiPath}','TS_NOLAUNCH=true','/quiet','/norestart' -Verb RunAs -Wait`,
-      ],
+      ["-NoProfile", "-NonInteractive", "-Command", buildWindowsTailscaleInstallCommand(msiPath)],
       {
         windowsHide: true,
         stdio: ["ignore", "pipe", "pipe"],
@@ -1155,7 +1243,7 @@ export async function installTailscale({
   onProgress?: (message: string) => void;
 } = {}) {
   if (!isSupportedPlatform()) {
-    throw new Error(`Unsupported platform for Tailscale install: ${process.platform}`);
+    throw new Error(`Unsupported platform for Tailscale install: ${os.platform()}`);
   }
 
   const password = toNonEmptyString(sudoPassword) || getCachedPassword() || "";
@@ -1167,13 +1255,13 @@ export async function installTailscale({
   const existingBinary = await resolveBinary();
   if (existingBinary.binaryPath) {
     onProgress?.("Tailscale is already installed.");
-  } else if (IS_WINDOWS) {
+  } else if (getCurrentPlatform() === "win32") {
     onProgress?.("Downloading and installing Tailscale for Windows...");
     await installTailscaleWindows(onProgress);
-  } else if (IS_MAC) {
+  } else if (getCurrentPlatform() === "darwin") {
     onProgress?.("Installing Tailscale on macOS...");
     await installTailscaleMac(password, onProgress);
-  } else if (IS_LINUX) {
+  } else if (getCurrentPlatform() === "linux") {
     onProgress?.("Installing Tailscale on Linux...");
     await installTailscaleLinux(password, onProgress);
   }

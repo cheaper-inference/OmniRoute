@@ -23,6 +23,7 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   "openadapter",
   "dit",
   "tokenrouter",
+  "token-kiosk",
   // provider-model-sweep (2026-06-19): same class as #3976/#4202/#4249 — keyed
   // openai-style providers with a real live `<baseUrl>/models` catalog, served
   // their small hardcoded seed because unclassified. Seed stays as offline fallback.
@@ -44,6 +45,7 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   "ovhcloud",
   "sambanova",
   "orcarouter",
+  "unorouter",
   "uncloseai",
   "opencode-go",
   "baseten",
@@ -72,9 +74,15 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // discovered live from https://api.openvecta.com/v1/models; the registry seed
   // (registry/openvecta) covers the most-used LLMs as the offline fallback.
   "openvecta",
+  // Openference (https://openference.com/) — OAuth JWT or API key on the same
+  // OpenAI-compatible gateway. Live catalog from api.openference.com/v1/models.
+  "openference",
+  "openference-api",
   // Typhoon (SCB 10X, Thailand) and Inception Labs (Mercury diffusion models) are
   // OpenAI-compatible providers whose /v1/models endpoint exists and is used for
-  // catalog discovery/key validation (verified 2026-07-22).
+  // catalog discovery (verified 2026-07-22). Inception's /v1/models is public (200 for
+  // any key), so its key validation probes the chat route instead
+  // (src/lib/providers/validation/inception.ts).
   "typhoon",
   "inception",
   // Sarvam AI (India), Writer Palmyra, and PLaMo (Preferred Networks, Japan) are
@@ -90,6 +98,48 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   "clova-studio",
   "internlm",
   "ant-ling",
+  "nanogpt",
+  // NaN.Builders — GET https://api.nan.builders/v1/models is key-gated; the registry
+  // seed is only the offline fallback for its frequently-renamed model aliases.
+  "nan",
+  "nara",
+  // Logfare (https://logfare.ai) — free OpenAI-compatible gateway live-verified
+  // 2026-08-21: GET https://logfare.ai/v1/models returns a real 20-model catalog
+  // (11 chat-capable). Live fetch keeps it fresh; the registry seed stays as the
+  // offline fallback.
+  "logfare",
+  // Token Market is an OpenAI-compatible multi-model gateway. Its catalog is
+  // discovered from the authenticated https://api.tokensmarket.ai/v1/models endpoint.
+  "tokenmarket",
+  // Agnes hosts a live OpenAI-style /v1/models catalog on both the
+  // international (apihub.agnes-ai.com) and CN (api.agnes-ai.cn) hosts.
+  // Without this, sync-models serves the static registry seed and CN
+  // connections never discover 2.5/3.0 Flash.
+  "agnes",
+  // Agnes CN /v1/models is not the intl catalog; this discovers that host only.
+  "agnes-cn",
+  // #15307: xiaomi-mimo / xiaomi-mimo-token-plan are keyed OpenAI-style providers
+  // whose real catalog lives on the upstream `/v1/models` list (the token-plan host
+  // serves 8 models including v2.6-pro/v2.6-flash and the ASR/TTS variants, while the
+  // registry seed only has 2). Unclassified, import never probed the upstream and
+  // fell through to the hardcoded seed with "API unavailable — using local catalog".
+  // Same case as #4249 (vercel-ai-gateway). Seed stays as the offline fallback.
+  "xiaomi-mimo",
+  "xiaomi-mimo-token-plan",
+  // Apmix (https://apmix.ai) — subscription gateway, live-verified 2026-09-25:
+  // GET https://api.apmix.ai/v1/models is key-scoped (every plan sees a
+  // different slice of the catalog), so live discovery is the only way a
+  // connection's model list matches what its key can reach. The registry seed
+  // (41-model union of apmix.ai/models) stays as the offline fallback.
+  "apmix",
+  // Demon Route has a key-scoped /v1/models endpoint. Without this classification,
+  // the dashboard only shows static seeds and cannot synchronize the live catalog
+  // of vendor-qualified open-weight model IDs (#16979).
+  "demonroute",
+  // Token Harbor is an OpenAI-compatible API-key gateway whose live catalog is
+  // served from its key-gated /v1/models endpoint; the registry seed stays as the
+  // offline fallback.
+  "tokenharbor",
 ]);
 
 export function isNamedOpenAIStyleProvider(provider: string): boolean {

@@ -14,7 +14,20 @@ import { test, expect } from "@playwright/test";
 import { gotoDashboardRoute } from "./helpers/dashboardAuth";
 
 test.describe("Group B — Quota Plans Config", () => {
+  // Client-side exception capture. Without it a page that falls into the error
+  // boundary only shows up as "Internal Server Error" in the HTML, with no stack
+  // trace anywhere in the CI log — which is exactly how this spec's failure went
+  // undiagnosed for two CI rounds.
+  const pageErrors: string[] = [];
+
   test.beforeEach(async ({ page }) => {
+    pageErrors.length = 0;
+    page.on("pageerror", (err) => {
+      pageErrors.push(`[pageerror] ${err.message}\n${err.stack ?? ""}`);
+    });
+    page.on("console", (msg) => {
+      if (msg.type() === "error") pageErrors.push(`[console.error] ${msg.text()}`);
+    });
     // Mock the plans list endpoint
     await page.route("**/api/quota/plans**", async (route) => {
       const url = new URL(route.request().url());
@@ -105,10 +118,9 @@ test.describe("Group B — Quota Plans Config", () => {
   test("quota share page exists and returns 200", async ({ page }) => {
     // /dashboard/costs/quota-share/plans does not exist as a standalone route;
     // the plans wizard is embedded in /dashboard/costs/quota-share.
-    const response = await page.goto(
-      "http://localhost:20128/dashboard/costs/quota-share",
-      { waitUntil: "domcontentloaded" }
-    );
+    const response = await page.goto("/dashboard/costs/quota-share", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.status()).not.toBe(404);
     expect(response?.status()).not.toBe(500);
   });
@@ -143,12 +155,25 @@ test.describe("Group B — Quota Plans Config", () => {
     }
 
     // After selection, the page should not be in a broken state.
-    // Note: page.content() includes the full HTML source, which contains Next.js
-    // chunk filenames — those hashes can legitimately contain the string "500".
-    // Checking for "500" in raw HTML is unreliable; instead check for the actual
-    // error boundary text that OmniRoute renders on unrecoverable errors
-    // (src/app/error.tsx heading: "Internal Server Error").
-    const pageContent = await page.content();
-    expect(pageContent).not.toContain("Internal Server Error");
+    //
+    // Assert on RENDERED TEXT, not on page.content(). The raw HTML always contains
+    // the string, on every route, so the old assertion could never pass: layout.tsx
+    // hands the whole message catalogue to NextIntlClientProvider, React serialises
+    // that prop into the RSC payload, and en.json carries "Internal Server Error"
+    // twice (publicSystem.error.title and errors.500.title). Probing /dashboard,
+    // /dashboard/costs, /dashboard/settings and even /login all showed the string
+    // present in the source with the page rendering perfectly.
+    //
+    // This is the same trap that killed the sibling `not.toContain("500")` here in
+    // fc77100c3f ("Checking for '500' in raw HTML is unreliable") — that one was
+    // removed, this one was kept, and it has the identical flaw.
+    //
+    // The error boundary renders the title as visible text (src/app/error.tsx
+    // `<h1>{t("error.title")}</h1>`), so innerText still catches the real defect
+    // while ignoring the serialised dictionary.
+    const bodyText = await page.locator("body").innerText();
+    expect(bodyText, `client errors:\n${pageErrors.join("\n---\n")}`).not.toContain(
+      "Internal Server Error"
+    );
   });
 });

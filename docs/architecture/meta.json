@@ -6,6 +6,14 @@
     "CODEBASE_DOCUMENTATION",
     "REPOSITORY_MAP",
     "RESILIENCE_GUIDE",
-    "QUALITY_GATES"
+    "QUALITY_GATES",
+    "DESIGN_SYSTEM",
+    "MONITORING_SECTIONS",
+    "ROUTER_BACKENDS",
+    "admission-lanes",
+    "cluster-decisions",
+    "persistence-backend-boundary",
+    "ADAPTIVE_ROUTING",
+    "MODIFICATION_SCENARIOS"
   ]
 }

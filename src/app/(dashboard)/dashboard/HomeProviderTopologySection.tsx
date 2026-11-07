@@ -29,12 +29,9 @@ export function HomeProviderTopologySection({
   enabled?: boolean;
 }) {
   const t = useTranslations("home");
-  const tCommon = useTranslations("common");
-  const tSettings = useTranslations("settings");
-  const tAnalytics = useTranslations("analytics");
   // #4596: gate the live-WS connection so it only opens while the topology
   // section is actually shown on the home page.
-  const { activeRequests: liveActiveRequests } = useLiveRequests({ enabled });
+  const { activeRequests: liveActiveRequests, completedRequests } = useLiveRequests({ enabled });
   const activeRequests = selectActiveRequests(liveActiveRequests);
   const activeProviderCount = new Set(activeRequests.map(({ provider }) => provider)).size;
 
@@ -49,22 +46,23 @@ export function HomeProviderTopologySection({
         </div>
         <div className="flex items-center gap-3 text-[11px] text-text-muted">
           <span className="flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-green-500" />
-            {tCommon("active")}
+            <span className="size-2 rounded-full bg-success" />
+            {t("topologyLegendActive")}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-amber-500" />
-            {tSettings("recent")}
+            <span className="size-2 rounded-full bg-warning" />
+            {t("topologyLegendRecent")}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-red-500" />
-            {tAnalytics("modelStatusError")}
+            <span className="size-2 rounded-full bg-error" />
+            {t("topologyLegendError")}
           </span>
         </div>
       </div>
       <ProviderTopology
         providers={providers}
         activeRequests={activeRequests}
+        recentRequests={completedRequests}
         lastProvider={lastProvider}
         errorProvider={errorProvider}
       />

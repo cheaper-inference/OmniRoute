@@ -3,12 +3,24 @@ import type { Dispatcher } from "undici";
 const DISPATCHER_CACHE_KEY = Symbol.for("omniroute.proxyDispatcher.cache");
 const DEFAULT_DISPATCHER_KEY = Symbol.for("omniroute.proxyDispatcher.default");
 const RETRY_DISPATCHER_KEY = Symbol.for("omniroute.proxyDispatcher.retry");
+// Local-egress dispatchers: separate cache for hostnames like
+// host.docker.internal / *.internal / *.local, where Docker Desktop's NAT
+// silently drops idle keep-alive sockets within the global pool's
+// keepAliveMaxTimeout window. Kept on their own cache so a wider keep-alive
+// for cloud upstreams cannot pull the .internal sockets down with it.
+const LOCAL_DEFAULT_DISPATCHER_KEY = Symbol.for("omniroute.proxyDispatcher.localDefault");
+const LOCAL_RETRY_DISPATCHER_KEY = Symbol.for("omniroute.proxyDispatcher.localRetry");
+
+/** Upper bound on cached per-URL proxy dispatchers; oldest entries are evicted first. */
+const MAX_DISPATCHER_CACHE_ENTRIES = 512;
 
 type DispatcherCache = Map<string, Dispatcher>;
 type GlobalWithDispatcherCache = typeof globalThis & {
   [DISPATCHER_CACHE_KEY]?: DispatcherCache;
   [DEFAULT_DISPATCHER_KEY]?: Dispatcher;
   [RETRY_DISPATCHER_KEY]?: Dispatcher;
+  [LOCAL_DEFAULT_DISPATCHER_KEY]?: Dispatcher;
+  [LOCAL_RETRY_DISPATCHER_KEY]?: Dispatcher;
 };
 
 /**
@@ -91,6 +103,22 @@ export function setRetryCachedDispatcher(dispatcher: Dispatcher): void {
   (globalThis as GlobalWithDispatcherCache)[RETRY_DISPATCHER_KEY] = dispatcher;
 }
 
+export function getLocalDefaultCachedDispatcher(): Dispatcher | undefined {
+  return (globalThis as GlobalWithDispatcherCache)[LOCAL_DEFAULT_DISPATCHER_KEY];
+}
+
+export function setLocalDefaultCachedDispatcher(dispatcher: Dispatcher): void {
+  (globalThis as GlobalWithDispatcherCache)[LOCAL_DEFAULT_DISPATCHER_KEY] = dispatcher;
+}
+
+export function getLocalRetryCachedDispatcher(): Dispatcher | undefined {
+  return (globalThis as GlobalWithDispatcherCache)[LOCAL_RETRY_DISPATCHER_KEY];
+}
+
+export function setLocalRetryCachedDispatcher(dispatcher: Dispatcher): void {
+  (globalThis as GlobalWithDispatcherCache)[LOCAL_RETRY_DISPATCHER_KEY] = dispatcher;
+}
+
 function closeDispatcher(dispatcher: Dispatcher | undefined): void {
   if (!dispatcher) return;
   try {
@@ -115,10 +143,59 @@ export function clearDispatcherCache(): void {
   const globalWithCache = globalThis as GlobalWithDispatcherCache;
   closeDispatcher(globalWithCache[DEFAULT_DISPATCHER_KEY]);
   closeDispatcher(globalWithCache[RETRY_DISPATCHER_KEY]);
+  closeDispatcher(globalWithCache[LOCAL_DEFAULT_DISPATCHER_KEY]);
+  closeDispatcher(globalWithCache[LOCAL_RETRY_DISPATCHER_KEY]);
   delete globalWithCache[DEFAULT_DISPATCHER_KEY];
   delete globalWithCache[RETRY_DISPATCHER_KEY];
+  delete globalWithCache[LOCAL_DEFAULT_DISPATCHER_KEY];
+  delete globalWithCache[LOCAL_RETRY_DISPATCHER_KEY];
+}
+
+/**
+ * Pool scope for a selective dispatcher eviction.
+ */
+export type DispatcherPoolScope = "local" | "cloud";
+
+/**
+ * Close and drop the slots of one pool, leaving the other pool untouched.
+ * Never throws: the failure path that calls this is already handling an
+ * error, so a failed close must not replace it. Slots are dropped even when
+ * closing fails, so a broken dispatcher is never served again.
+ */
+export function evictDispatcherPool(scope: DispatcherPoolScope): void {
+  const globalWithCache = globalThis as GlobalWithDispatcherCache;
+  const keys =
+    scope === "local"
+      ? ([LOCAL_DEFAULT_DISPATCHER_KEY, LOCAL_RETRY_DISPATCHER_KEY] as const)
+      : ([DEFAULT_DISPATCHER_KEY, RETRY_DISPATCHER_KEY] as const);
+  for (const key of keys) {
+    try {
+      closeDispatcher(globalWithCache[key]);
+    } finally {
+      delete globalWithCache[key];
+    }
+  }
 }
 
 export function __cacheProxyDispatcherForTest(key: string, dispatcher: Dispatcher): void {
   getDispatcherCache().set(key, dispatcher);
+}
+
+/**
+ * Insert a dispatcher into the per-URL cache, evicting the oldest entry (and
+ * closing it) first when the cache is at capacity. This keeps the cache bounded
+ * on proxies that rotate through many URLs while guaranteeing that
+ * `clearDispatcherCache()` can still close every registered dispatcher.
+ */
+export function setDispatcherCacheEntry(key: string, dispatcher: Dispatcher): void {
+  const cache = getDispatcherCache();
+  if (cache.size >= MAX_DISPATCHER_CACHE_ENTRIES) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) {
+      const evicted = cache.get(oldest);
+      cache.delete(oldest);
+      closeDispatcher(evicted);
+    }
+  }
+  cache.set(key, dispatcher);
 }

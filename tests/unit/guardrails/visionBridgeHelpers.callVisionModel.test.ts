@@ -6,6 +6,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import dns from "node:dns";
 import { callVisionModel, type VisionModelConfig } from "@/lib/guardrails/visionBridgeHelpers";
+import { createProviderConnection } from "@/lib/db/providers";
+import { resetDbInstance } from "@/lib/db/core";
 
 // Store original fetch
 const originalFetch = globalThis.fetch;
@@ -28,6 +30,37 @@ const originalDnsLookup = dns.promises.lookup;
 }) as typeof dns.promises.lookup;
 process.on("exit", () => {
   (dns.promises as { lookup: unknown }).lookup = originalDnsLookup;
+});
+
+// (#8430) getBestVisionModel now validates that a `fixedModel` has a usable
+// connection (via hasUsableCredentialsForModel, which queries the real DB)
+// before returning it — an unreachable fixedModel falls through to
+// auto-selection and, with nothing else configured either, resolves to `null`,
+// which callVisionModel turns into a hard "No vision-capable provider
+// connected" error before it ever reaches the HTTP call these tests mock.
+// The router/credential-selection logic itself is already covered by
+// visionBridgeRouter.test.ts and repro-8430.test.ts; these tests exercise
+// callVisionModel's own request/response handling, so they just need one
+// usable connection seeded per provider they use ("openai/gpt-4o-mini",
+// "anthropic/claude-3-haiku") so getBestVisionModel resolves the requested
+// fixedModel unchanged instead of null.
+test.before(async () => {
+  await createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "vision-bridge-test-openai",
+    apiKey: "sk-test-openai",
+  });
+  await createProviderConnection({
+    provider: "anthropic",
+    authType: "apikey",
+    name: "vision-bridge-test-anthropic",
+    apiKey: "sk-test-anthropic",
+  });
+});
+
+test.after(() => {
+  resetDbInstance();
 });
 
 test("callVisionModel returns description on success", async () => {
@@ -58,6 +91,35 @@ test("callVisionModel returns description on success", async () => {
     // Restore original fetch
     globalThis.fetch = originalFetch;
   }
+});
+
+test("callVisionModel can route a catalog model through the OmniRoute self-loop", async () => {
+  let capturedUrl = "";
+  let capturedBody: Record<string, unknown> = {};
+  let capturedHeaders: Record<string, string> = {};
+  const fetchImpl: typeof fetch = async (input, init) => {
+    capturedUrl = String(input);
+    capturedBody = JSON.parse(String(init?.body));
+    capturedHeaders = (init?.headers ?? {}) as Record<string, string>;
+    return Response.json({ choices: [{ message: { content: "GREEN_SCENE_2" } }] });
+  };
+
+  const result = await callVisionModel("data:image/png;base64,iVBORw0KGgo", {
+    model: "openai/gpt-4o-mini",
+    prompt: "Describe this frame",
+    timeoutMs: 30000,
+    maxImages: 1,
+    routeThroughOmniRoute: true,
+    fetchImpl,
+  });
+
+  const url = new URL(capturedUrl);
+  assert.equal(url.hostname, "localhost");
+  assert.equal(url.pathname, "/v1/chat/completions");
+  assert.equal(capturedBody.model, "openai/gpt-4o-mini");
+  assert.equal(capturedHeaders["x-omniroute-admission-bypass"], "internal");
+  assert.match(capturedHeaders["x-omniroute-disabled-guardrails"], /video-bridge/);
+  assert.equal(result, "GREEN_SCENE_2");
 });
 
 test("callVisionModel throws on HTTP error", async () => {
@@ -224,6 +286,11 @@ test("callVisionModel uses correct request body format", async () => {
 
     // Verify request structure
     assert.strictEqual(capturedBody.model, "gpt-4o-mini");
+    assert.strictEqual(
+      capturedBody.stream,
+      false,
+      "the JSON parser requires the internal vision request to opt out of SSE"
+    );
     assert.ok(Array.isArray(capturedBody.messages));
     assert.strictEqual((capturedBody.messages as unknown[]).length, 1);
 
@@ -239,7 +306,7 @@ test("callVisionModel uses correct request body format", async () => {
     };
     assert.strictEqual(imagePart.type, "image_url");
     assert.strictEqual(imagePart.image_url.url, imageUri);
-    assert.strictEqual(imagePart.image_url.detail, "low");
+    assert.strictEqual(imagePart.image_url.detail, "high");
 
     // Second content is text prompt
     const textPart = message.content[1] as { type: string; text: string };
@@ -291,11 +358,105 @@ test("callVisionModel fetches remote images before Anthropic requests", async ()
     assert.strictEqual(fetchCalls[1].url, "https://api.anthropic.com/v1/messages");
 
     const anthropicBody = JSON.parse(fetchCalls[1].init?.body as string);
-    const imageSource = anthropicBody.messages[0].content[0].source;
+    const imagePart = anthropicBody.messages[0].content[0];
+    const imageSource = imagePart.source;
     assert.strictEqual(imageSource.type, "base64");
     assert.strictEqual(imageSource.media_type, "image/png");
     assert.strictEqual(imageSource.data, Buffer.from("cat-image-bytes").toString("base64"));
+    // Compatibility guard for the global (not OpenCode-scoped) `detail: "high"`
+    // default added to the OpenAI-compatible describe path: Anthropic's wire
+    // format has no `detail` concept, so the describe self-loop must not leak
+    // an OpenAI-only field into the Anthropic request body.
+    assert.strictEqual(imagePart.detail, undefined);
+    assert.strictEqual(imageSource.detail, undefined);
   } finally {
     globalThis.fetch = originalFetch;
   }
 });
+
+test("callVisionModel propagates an external abort to fetch and stops before fallback", async () => {
+  const controller = new AbortController();
+  let fetchCalls = 0;
+  let fetchSignal: AbortSignal | null = null;
+
+  globalThis.fetch = async (_url: URL | RequestInfo, init?: RequestInit) => {
+    fetchCalls += 1;
+    fetchSignal = init?.signal instanceof AbortSignal ? init.signal : null;
+    controller.abort();
+    const error = new Error("private aborted request detail");
+    error.name = "AbortError";
+    throw error;
+  };
+
+  try {
+    const config: VisionModelConfig = {
+      model: "openai/gpt-4o-mini",
+      prompt: "Describe this image",
+      timeoutMs: 30_000,
+      maxImages: 10,
+      signal: controller.signal,
+    };
+
+    await assert.rejects(
+      () =>
+        callVisionModel(
+          "data:image/png;base64,iVBORw0KGgo",
+          config,
+          "sk-test",
+          { maxFallbackAttempts: 2 },
+          {
+            hasUsableCredentials: async (model) =>
+              model === "openai/gpt-4o-mini" || model.startsWith("anthropic/"),
+          }
+        ),
+      /timed out|aborted/i
+    );
+    assert.equal(fetchCalls, 1, "an aborted parent request must not try a fallback model");
+    assert.equal(fetchSignal?.aborted, true, "the parent abort must reach the active fetch");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+// GHSA-34rg-3pqj-35g9 — the Anthropic describe self-call inlines the user's image URL to
+// base64 through the same `fetchRemoteImageAsDataUri()` sink as the claude-wire reroute.
+// The DNS stub at the top of this file answers a public IP for every hostname, so only the
+// `public-only` string check stands between the request body and a loopback/RFC-1918 fetch.
+for (const privateUrl of ["http://127.0.0.1:1/x.png", "http://192.168.1.50/x.png"]) {
+  test(`callVisionModel never fetches a private image URL (${privateUrl}) for the Anthropic describe path (GHSA-34rg-3pqj-35g9)`, async () => {
+    const fetchedUrls: string[] = [];
+    const fetchImpl: typeof fetch = async (url) => {
+      const requestUrl = String(url);
+      fetchedUrls.push(requestUrl);
+      if (requestUrl === privateUrl) {
+        // Canary: on the vulnerable code these bytes are inlined into the Anthropic body.
+        return new Response(Buffer.from("intranet-bytes"), {
+          status: 200,
+          headers: { "Content-Type": "image/png" },
+        });
+      }
+      return new Response(JSON.stringify({ content: [{ type: "text", text: "described" }] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    };
+
+    const config: VisionModelConfig = {
+      model: "anthropic/claude-3-haiku",
+      prompt: "Describe this image",
+      timeoutMs: 30000,
+      maxImages: 10,
+      fetchImpl,
+    };
+
+    await assert.rejects(
+      () => callVisionModel(privateUrl, config, "sk-ant", { maxFallbackAttempts: 1 }),
+      /blocked/i
+    );
+    assert.deepStrictEqual(
+      fetchedUrls,
+      [],
+      "neither the private download nor the self-call may happen"
+    );
+  });
+}

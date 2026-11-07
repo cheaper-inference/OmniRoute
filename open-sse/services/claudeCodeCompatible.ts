@@ -5,10 +5,15 @@ import { ANTHROPIC_VERSION_HEADER } from "../config/anthropicHeaders.ts";
 import {
   CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION,
   CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION,
-  CLAUDE_CODE_COMPATIBLE_USER_AGENT,
+  getClaudeCodeUserAgent,
 } from "../config/claudeCodeCompatibleIdentity.ts";
 import { supportsClaudeMaxEffort, supportsXHighEffort } from "../config/providerModels.ts";
 import { prepareClaudeRequest } from "../translator/helpers/claudeHelper.ts";
+import {
+  normalizeClaudeToolInputSchema,
+  sanitizeToolId,
+} from "../translator/helpers/schemaCoercion.ts";
+import { sanitizeToolResultId } from "../translator/request/openai-to-claude/sanitizeToolResultId.ts";
 import { signRequestBody } from "./claudeCodeCCH.ts";
 import { resolveClaudeCodeCompatibleAnthropicBeta } from "./claudeCodeCompatibleBeta.ts";
 import { remapToolNamesInRequest } from "./claudeCodeToolRemapper.ts";
@@ -55,14 +60,6 @@ const CLAUDE_CODE_COMPATIBLE_DEFAULT_SYSTEM_BLOCKS = [
     type: "text",
     text: "You are a Claude agent, built on Anthropic's Claude Agent SDK.",
   },
-];
-const CONTEXT_1M_SUPPORTED_MODELS = [
-  "claude-fable-5",
-  "claude-sonnet-5",
-  "claude-sonnet-4-6",
-  "claude-opus-4-8",
-  "claude-opus-4-7",
-  "claude-opus-4-6",
 ];
 export const CLAUDE_CODE_COMPATIBLE_STAINLESS_TIMEOUT_SECONDS = getStainlessTimeoutSeconds(
   process.env
@@ -148,36 +145,18 @@ export function joinClaudeCodeCompatibleUrl(baseUrl: string, path: string): stri
   return joinNormalizedBaseUrlAndPath(stripClaudeCodeCompatibleEndpointSuffix(baseUrl), path);
 }
 
-export function appendAnthropicBetaHeader(
-  headers: Record<string, string>,
-  betaHeader: string
-): void {
-  const existingKey = Object.keys(headers).find((key) => key.toLowerCase() === "anthropic-beta");
-  if (!existingKey) {
-    headers["anthropic-beta"] = betaHeader;
-    return;
-  }
+export {
+  appendAnthropicBetaHeader,
+  removeAnthropicBetaHeader,
+  hasCodeExecutionTool,
+  maybeAppendSkillsBeta,
+  syncSkillsBeta,
+  SKILLS_BETA_HEADER,
+} from "../config/anthropicHeaders.ts";
 
-  const existingValues = String(headers[existingKey] || "")
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
-
-  if (!existingValues.includes(betaHeader)) {
-    headers[existingKey] = [...existingValues, betaHeader].join(",");
-  }
-}
-
-export function modelSupportsContext1mBeta(model: string | null | undefined): boolean {
-  const normalizedModel = String(model || "")
-    .trim()
-    .toLowerCase()
-    .replace(/-\d{8}$/, "");
-
-  return CONTEXT_1M_SUPPORTED_MODELS.some(
-    (supported) => normalizedModel === supported || normalizedModel.startsWith(`${supported}-`)
-  );
-}
+// Re-exported from the shared context1m module so existing importers of this
+// helper (base.ts) keep working; the eligibility list now has one source of truth.
+export { modelSupportsContext1mBeta } from "../config/context1m.ts";
 
 export function buildClaudeCodeCompatibleHeaders(
   apiKey: string,
@@ -198,7 +177,7 @@ export function buildClaudeCodeCompatibleHeaders(
     }),
     "anthropic-dangerous-direct-browser-access": "true",
     "x-app": "cli",
-    "User-Agent": CLAUDE_CODE_COMPATIBLE_USER_AGENT,
+    "User-Agent": getClaudeCodeUserAgent("sdk-cli"),
     "X-Stainless-Retry-Count": "0",
     "X-Stainless-Timeout": String(CLAUDE_CODE_COMPATIBLE_STAINLESS_TIMEOUT_SECONDS),
     "X-Stainless-Lang": "js",
@@ -418,6 +397,7 @@ export { computeFingerprint } from "./claudeCodeFingerprint.ts";
 export { obfuscateSensitiveWords, setSensitiveWords } from "./claudeCodeObfuscation.ts";
 export {
   enforceThinkingTemperature,
+  finalizeClaudeBodyConstraints,
   disableThinkingIfToolChoiceForced,
   enforceCacheControlLimit,
 } from "./claudeCodeConstraints.ts";
@@ -540,7 +520,13 @@ function buildClaudeCodeCompatibleMessages(messages: MessageLike[]) {
   // CC-compatible sites we tested reject assistant-prefill shaped requests even
   // when Anthropic would normally allow them. Keep assistant/model history, but
   // drop trailing assistant turns so the upstream request ends on a user turn.
+  // #15229: never trim an assistant turn that carries tool_use — its result
+  // already lives in the following user tool_result turn mid-history, and in a
+  // truncated history dropping the pair's first half would strand that result
+  // (an orphan tool_result Anthropic refuses).
   while (merged.length > 0 && merged[merged.length - 1].role === "assistant") {
+    const last = merged[merged.length - 1];
+    if (last.content.some((block) => block.type === "tool_use")) break;
     merged.pop();
   }
 
@@ -709,6 +695,42 @@ function containsDefaultSystemSkeleton(blocks: Array<Record<string, unknown>>) {
   );
 }
 
+// #15229: OpenAI tool loops carry the assistant's calls as `tool_calls` and the
+// results as `role:"tool"` messages. The CC bridge used to drop both, so the
+// upstream re-saw turn 1 on every turn and the loop never converged (silent
+// 200-OK stall). Same shapes the openai-to-claude translator accepts.
+function collectToolUseBlocks(message: MessageLike | null | undefined) {
+  const rawCalls = (message as Record<string, unknown> | null | undefined)?.tool_calls;
+  if (!Array.isArray(rawCalls)) return [];
+  const blocks: Array<Record<string, unknown>> = [];
+  for (const call of rawCalls) {
+    const record = readRecord(call);
+    if (!record) continue;
+    const fn = readRecord(record.function);
+    if (!fn) continue;
+    const name = toNonEmptyString(fn.name);
+    if (!name) continue;
+    let input: unknown = {};
+    const rawArguments = fn.arguments;
+    if (typeof rawArguments === "string" && rawArguments.trim()) {
+      try {
+        input = JSON.parse(rawArguments);
+      } catch {
+        input = {};
+      }
+    } else if (readRecord(rawArguments)) {
+      input = rawArguments;
+    }
+    blocks.push({
+      type: "tool_use",
+      id: sanitizeToolId(typeof record.id === "string" ? record.id : String(record.id ?? "")),
+      name,
+      input,
+    });
+  }
+  return blocks;
+}
+
 function convertClaudeCodeCompatibleMessage(message: MessageLike | null | undefined) {
   const rawRole = String(message?.role || "").toLowerCase();
   const role =
@@ -718,12 +740,30 @@ function convertClaudeCodeCompatibleMessage(message: MessageLike | null | undefi
         ? "assistant"
         : null;
 
+  // #15229: a tool result becomes a user tool_result turn. Results without a
+  // usable id are skipped (never fabricated — they could never pair with a
+  // tool_use and Anthropic would refuse the orphan).
+  if (!role && rawRole === "tool") {
+    const toolUseId = sanitizeToolResultId(
+      (message as Record<string, unknown> | null | undefined)?.tool_call_id
+    );
+    if (!toolUseId) return null;
+    const text = contentToText(message?.content);
+    return {
+      role: "user" as const,
+      content: [
+        { type: "tool_result", tool_use_id: toolUseId, ...(text ? { content: text } : {}) },
+      ],
+    };
+  }
+
   if (!role) return null;
 
   const text = contentToText(message?.content);
   // #7777: keep the user-turn media parts that contentToText() above drops.
   const media = role === "user" ? collectClaudeMediaBlocks(message?.content) : [];
-  const content = [...(text ? [{ type: "text", text }] : []), ...media];
+  const toolUses = role === "assistant" ? collectToolUseBlocks(message) : [];
+  const content = [...(text ? [{ type: "text", text }] : []), ...toolUses, ...media];
   if (content.length === 0) return null;
 
   return { role, content };
@@ -771,10 +811,13 @@ function convertClaudeCodeCompatibleTool(tool: unknown) {
 
   const rawSchema = readRecord(toolData.parameters) ||
     readRecord(toolData.input_schema) || { type: "object", properties: {}, required: [] };
-  const inputSchema =
+  const withProperties =
     rawSchema.type === "object" && !readRecord(rawSchema.properties)
       ? { ...rawSchema, properties: {} }
       : rawSchema;
+  // Flatten a root-level anyOf/oneOf/allOf: Anthropic refuses it outright with
+  // "input_schema does not support oneOf, allOf, or anyOf at the top level" (#13552).
+  const inputSchema = normalizeClaudeToolInputSchema(withProperties);
 
   const converted: Record<string, unknown> = {
     name,

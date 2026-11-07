@@ -33,6 +33,7 @@ import {
   createOmniRouteProviderHook,
   OmniRoutePlugin,
   resolveOmniRoutePluginOptions,
+  _resetInflightRefresh,
   type OmniRouteCombosFetcher,
   type OmniRouteEnrichmentEntry,
   type OmniRouteEnrichmentFetcher,
@@ -46,6 +47,16 @@ import {
   type OmniRouteReadAuthJson,
   type OmniRouteStaticProviderEntry,
 } from "../src/index.js";
+
+// ────────────────────────────────────────────────────────────────────────────
+// Test isolation: reset the module-level in-flight refresh guard between
+// tests so a detached refresh from a previous test doesn't leak into the
+// next one.
+// ────────────────────────────────────────────────────────────────────────────
+
+test.beforeEach(() => {
+  _resetInflightRefresh();
+});
 
 // ────────────────────────────────────────────────────────────────────────────
 // Fixtures
@@ -227,7 +238,7 @@ test("config: with valid auth.json + apiKey + baseURL → mutates input.provider
   // Stripped per-model shape: name + cap flags + modalities + (optional)
   // cost. OC's SDK static schema accepts only `limit.{context,output}` —
   // `limit.input` is NOT in the SDK shape and gets dropped silently.
-  const claude = entry.models["opencode-omniroute/claude-sonnet-4-6"];
+  const claude = entry.models["claude-sonnet-4-6"];
   assert.ok(claude, "claude model surfaced");
   assert.equal(claude.name, "claude-sonnet-4-6");
   assert.equal(claude.attachment, true);
@@ -248,7 +259,7 @@ test("config: with valid auth.json + apiKey + baseURL → mutates input.provider
 
   // Combo surfaces under bare key + LCD'd
   // (gemini's reasoning=false → combo reasoning=false).
-  const combo = entry.models["omniroute/claude-tier"];
+  const combo = entry.models["claude-tier"];
   assert.ok(combo, "combo surfaced under bare key");
   assert.equal(combo.name, "Claude Tier");
   assert.equal(combo.reasoning, false, "LCD: any member reasoning=false → combo reasoning=false");
@@ -450,6 +461,31 @@ test("config: fetchers throw → warn + emit stub entry with models: {}", async 
 // 6. Combos fetcher throws → models-only catalog (no combos in models block)
 // ────────────────────────────────────────────────────────────────────────────
 
+test("config: features.combos=false skips /api/combos fetch", async () => {
+  const readAuthJson = stubReadAuthJson({
+    "opencode-omniroute": { type: "api", key: "sk-test", baseURL: "https://or.example/v1" },
+  });
+  const fetcher = stubModelsFetcher([MODEL_CLAUDE]);
+  const combosFetcher = stubCombosFetcher([COMBO_CLAUDE_TIER]);
+  const logger = captureWarn();
+
+  const hook = createOmniRouteConfigHook(
+    { providerId: "omniroute", features: { combos: false } },
+    { readAuthJson, fetcher, combosFetcher, logger }
+  );
+  const input = makeInput();
+  await hook(input);
+
+  assert.equal(fetcher.callCount(), 1, "models fetch still runs");
+  assert.equal(combosFetcher.callCount(), 0, "combos fetch suppressed by feature flag");
+  const entry = (input as { provider: Record<string, OmniRouteStaticProviderEntry> }).provider[
+    "opencode-omniroute"
+  ];
+  assert.ok(entry);
+  assert.equal(entry.models["claude-tier"], undefined, "no combo entry when combos are off");
+  assert.ok(entry.models["claude-sonnet-4-6"]);
+});
+
 test("config: combos fetcher throws → emit models-only catalog (no combos in models block)", async () => {
   const readAuthJson = stubReadAuthJson({
     "opencode-omniroute": { type: "api", key: "sk-test", baseURL: "https://or.example/v1" },
@@ -470,11 +506,8 @@ test("config: combos fetcher throws → emit models-only catalog (no combos in m
   ];
   assert.ok(entry);
   const ids = Object.keys(entry.models).sort();
-  assert.deepEqual(ids, [
-    "opencode-omniroute/claude-sonnet-4-6",
-    "opencode-omniroute/gemini-3-flash",
-  ]);
-  assert.equal(entry.models["omniroute/claude-tier"], undefined, "no combo entry");
+  assert.deepEqual(ids, ["claude-sonnet-4-6", "gemini-3-flash"]);
+  assert.equal(entry.models["claude-tier"], undefined, "no combo entry");
   assert.ok(
     logger.entries.some((e) => String(e[0]).includes("/api/combos fetch failed")),
     "combos-fetch breadcrumb emitted"
@@ -723,7 +756,7 @@ test("buildStaticProviderEntry: stripped per-model shape matches sibling @omniro
   }
 
   // Sanity: claude entry has all expected stripped fields.
-  const claude = block.models["opencode-omniroute/claude-sonnet-4-6"];
+  const claude = block.models["claude-sonnet-4-6"];
   assert.equal(typeof claude.name, "string");
   assert.equal(typeof claude.attachment, "boolean");
   assert.equal(typeof claude.reasoning, "boolean");
@@ -748,8 +781,8 @@ test("buildStaticProviderEntry: hidden combos are excluded", () => {
     "https://or.example/v1",
     "sk-test"
   );
-  assert.equal(block.models["omniroute/claude-tier"], undefined);
-  assert.ok(block.models["opencode-omniroute/claude-sonnet-4-6"]);
+  assert.equal(block.models["claude-tier"], undefined);
+  assert.ok(block.models["claude-sonnet-4-6"]);
 });
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -765,7 +798,7 @@ test("buildStaticProviderEntry: emits modalities.input from raw.input_modalities
     "https://or.example/v1",
     "sk-test"
   );
-  const claude = block.models["opencode-omniroute/claude-sonnet-4-6"];
+  const claude = block.models["claude-sonnet-4-6"];
   assert.deepEqual(claude.modalities?.input, ["text", "image"]);
   assert.deepEqual(claude.modalities?.output, ["text"]);
 });
@@ -779,7 +812,7 @@ test("buildStaticProviderEntry: never emits limit.input (OC SDK rejects it)", ()
     "https://or.example/v1",
     "sk-test"
   );
-  const claude = block.models["opencode-omniroute/claude-sonnet-4-6"];
+  const claude = block.models["claude-sonnet-4-6"];
   assert.equal((claude.limit as Record<string, unknown>).input, undefined);
   assert.equal(typeof claude.limit?.context, "number");
   assert.equal(typeof claude.limit?.output, "number");
@@ -807,7 +840,7 @@ test("buildStaticProviderEntry: emits cost when enrichment carries pricing", () 
     "sk-test",
     enrichment
   );
-  const claude = block.models["opencode-omniroute/claude-sonnet-4-6"];
+  const claude = block.models["claude-sonnet-4-6"];
   assert.equal(claude.cost?.input, 3);
   assert.equal(claude.cost?.output, 15);
   assert.equal(claude.cost?.cache_read, 0.3);
@@ -828,8 +861,8 @@ test("buildStaticProviderEntry: emits release_date when raw carries it; omits wh
     "https://or.example/v1",
     "sk-test"
   );
-  assert.equal(block.models["opencode-omniroute/claude-with-date"].release_date, "2026-02-19");
-  assert.equal(block.models["opencode-omniroute/gemini-3-flash"].release_date, undefined);
+  assert.equal(block.models["claude-with-date"].release_date, "2026-02-19");
+  assert.equal(block.models["gemini-3-flash"].release_date, undefined);
 });
 
 test("buildStaticProviderEntry: combo modalities = intersection of members (LCD)", () => {
@@ -858,7 +891,7 @@ test("buildStaticProviderEntry: combo modalities = intersection of members (LCD)
     "https://or.example/v1",
     "sk-test"
   );
-  const combo = block.models["omniroute/mixed-tier"];
+  const combo = block.models["mixed-tier"];
   assert.ok(combo, "combo emitted under slug key");
   // claude has text+image, text-only has text → intersection drops image.
   assert.deepEqual(combo.modalities?.input, ["text"]);
@@ -967,10 +1000,10 @@ test("config: enrichment fetched + name overlaid on raw-model entries", async ()
     "opencode-omniroute"
   ];
   assert.ok(entry);
-  assert.equal(entry.models["opencode-omniroute/claude-sonnet-4-6"].name, "Claude Sonnet 4.6");
-  assert.equal(entry.models["opencode-omniroute/gemini-3-flash"].name, "Gemini 3 Flash");
+  assert.equal(entry.models["claude-sonnet-4-6"].name, "Claude Sonnet 4.6");
+  assert.equal(entry.models["gemini-3-flash"].name, "Gemini 3 Flash");
   // Combo names still come from /api/combos — enrichment overlay does NOT touch combos.
-  assert.equal(entry.models["omniroute/claude-tier"].name, "Claude Tier");
+  assert.equal(entry.models["claude-tier"].name, "Claude Tier");
   assert.equal(enrichmentFetcher.callCount(), 1);
 });
 
@@ -999,11 +1032,7 @@ test("config: features.enrichment=false skips enrichment fetch + keeps raw-id na
   ];
   assert.ok(entry);
   assert.equal(enrichmentFetcher.callCount(), 0, "enrichment fetch suppressed by feature flag");
-  assert.equal(
-    entry.models["opencode-omniroute/claude-sonnet-4-6"].name,
-    "claude-sonnet-4-6",
-    "raw id retained"
-  );
+  assert.equal(entry.models["claude-sonnet-4-6"].name, "claude-sonnet-4-6", "raw id retained");
 });
 
 test("config: enrichment fetcher throws → soft-fail (warn + raw-id static catalog)", async () => {
@@ -1026,11 +1055,7 @@ test("config: enrichment fetcher throws → soft-fail (warn + raw-id static cata
     "opencode-omniroute"
   ];
   assert.ok(entry, "static block still published on enrichment failure");
-  assert.equal(
-    entry.models["opencode-omniroute/claude-sonnet-4-6"].name,
-    "claude-sonnet-4-6",
-    "raw id retained"
-  );
+  assert.equal(entry.models["claude-sonnet-4-6"].name, "claude-sonnet-4-6", "raw id retained");
   assert.equal(enrichmentFetcher.callCount(), 1);
   assert.ok(
     logger.entries.some((e) => String(e[0]).includes("/api/pricing/models fetch failed")),
@@ -1228,19 +1253,157 @@ test("config: diskCache hydrates stale snapshot when /v1/models throws", async (
   const entry = (input as { provider: Record<string, OmniRouteStaticProviderEntry> }).provider[
     "opencode-omniroute"
   ];
-  assert.ok(
-    entry.models["opencode-omniroute/claude-sonnet-4-6"],
-    "stale snapshot hydrated into static block"
-  );
+  assert.ok(entry.models["claude-sonnet-4-6"], "stale snapshot hydrated into static block");
   assert.equal(
-    entry.models["opencode-omniroute/claude-sonnet-4-6"].name,
+    entry.models["claude-sonnet-4-6"].name,
     "Claude Sonnet 4.6 (cached)",
     "stale enrichment also reused"
   );
   assert.equal(writes, 0, "disk write skipped when live fetch failed");
   assert.ok(
-    logger.entries.some((e) => String(e[0]).includes("using stale disk cache")),
+    logger.entries.some(
+      (e) =>
+        String(e[0]).includes("using stale disk cache") ||
+        String(e[0]).includes("warm startup from disk snapshot")
+    ),
     "disk-cache hydration breadcrumb emitted"
+  );
+});
+
+// The stale-fallback branch (`modelsFetchThrew && wantDiskCache && !warmSnapshot`)
+// only runs when the warm-startup read found nothing — a snapshot can appear on
+// disk between that first read and the live fetch failing (e.g. another OC
+// process instance wrote one concurrently). A stateful reader simulates that:
+// empty on the warm-startup read, populated by the time the fallback re-reads.
+function emptyThenSnapshotReader(
+  snapshot: Omit<
+    Awaited<ReturnType<typeof import("../src/index.js").defaultDiskSnapshotReader>> & object,
+    never
+  >
+): typeof import("../src/index.js").defaultDiskSnapshotReader {
+  let calls = 0;
+  return (async () => {
+    calls++;
+    return calls === 1 ? undefined : snapshot;
+  }) as typeof import("../src/index.js").defaultDiskSnapshotReader;
+}
+
+test("config: stale-fallback warning reports the disk snapshot age in hours", async () => {
+  const readAuthJson = stubReadAuthJson({
+    "opencode-omniroute": { type: "api", key: "sk-test", baseURL: "https://or.example/v1" },
+  });
+  const fetcher = throwingModelsFetcher();
+  const combosFetcher = stubCombosFetcher([]);
+  const logger = captureWarn();
+
+  const writtenAt = Date.now() - 2 * 3_600_000; // 2h old
+  const diskSnapshotReader = emptyThenSnapshotReader({
+    rawModels: [MODEL_CLAUDE],
+    rawCombos: [],
+    rawEnrichment: new Map(),
+    rawCompressionCombos: [],
+    rawConnections: [],
+    writtenAt,
+  });
+
+  const hook = createOmniRouteConfigHook(
+    { providerId: "omniroute", features: { diskCache: true } },
+    { readAuthJson, fetcher, combosFetcher, diskSnapshotReader, logger }
+  );
+
+  await hook(makeInput());
+
+  assert.ok(
+    logger.entries.some((e) => String(e[0]).includes("using stale disk cache (1 models, age 2h)")),
+    "stale-fallback warning includes the computed snapshot age"
+  );
+});
+
+test('config: stale-fallback warning falls back to "unknown" age without writtenAt', async () => {
+  const readAuthJson = stubReadAuthJson({
+    "opencode-omniroute": { type: "api", key: "sk-test", baseURL: "https://or.example/v1" },
+  });
+  const fetcher = throwingModelsFetcher();
+  const combosFetcher = stubCombosFetcher([]);
+  const logger = captureWarn();
+
+  const diskSnapshotReader = emptyThenSnapshotReader({
+    rawModels: [MODEL_CLAUDE],
+    rawCombos: [],
+    rawEnrichment: new Map(),
+    rawCompressionCombos: [],
+    rawConnections: [],
+  });
+
+  const hook = createOmniRouteConfigHook(
+    { providerId: "omniroute", features: { diskCache: true } },
+    { readAuthJson, fetcher, combosFetcher, diskSnapshotReader, logger }
+  );
+
+  await hook(makeInput());
+
+  assert.ok(
+    logger.entries.some((e) =>
+      String(e[0]).includes("using stale disk cache (1 models, age unknown)")
+    ),
+    'stale-fallback warning falls back to "unknown" when writtenAt is absent'
+  );
+});
+
+test("config: diskCacheMaxAgeMs escalates the fallback log but still serves the snapshot", async () => {
+  const readAuthJson = stubReadAuthJson({
+    "opencode-omniroute": { type: "api", key: "sk-test", baseURL: "https://or.example/v1" },
+  });
+  const fetcher = throwingModelsFetcher();
+  const combosFetcher = stubCombosFetcher([]);
+  const levels: string[] = [];
+  const logger = {
+    warn: (message: string) => {
+      levels.push(`warn:${message}`);
+    },
+    error: (message: string) => {
+      levels.push(`error:${message}`);
+    },
+  };
+  const writtenAt = 1_700_000_000_000;
+  const maxAgeMs = 24 * 3_600_000;
+  const diskSnapshotReader = emptyThenSnapshotReader({
+    rawModels: [MODEL_CLAUDE],
+    rawCombos: [],
+    rawEnrichment: new Map([["claude-sonnet-4-6", { name: "Claude Sonnet 4.6 (cached)" }]]),
+    rawCompressionCombos: [],
+    rawConnections: [],
+    writtenAt,
+  });
+
+  const hook = createOmniRouteConfigHook(
+    { providerId: "omniroute", features: { diskCache: true, diskCacheMaxAgeMs: maxAgeMs } },
+    {
+      readAuthJson,
+      fetcher,
+      combosFetcher,
+      diskSnapshotReader,
+      logger,
+      now: () => writtenAt + 48 * 3_600_000,
+    }
+  );
+  const input = makeInput();
+  await hook(input);
+
+  const entry = (input as { provider: Record<string, OmniRouteStaticProviderEntry> }).provider[
+    "opencode-omniroute"
+  ];
+  assert.ok(entry.models["claude-sonnet-4-6"], "snapshot past the bound is still served");
+  assert.ok(
+    levels.some(
+      (line) => line.startsWith("error:") && line.includes(`past diskCacheMaxAgeMs=${maxAgeMs}`)
+    ),
+    "past-bound fallback escalates to error"
+  );
+  assert.equal(
+    levels.some((line) => line.startsWith("warn:") && line.includes("using stale disk cache")),
+    false,
+    "past-bound fallback is not only a warning"
   );
 });
 
@@ -1281,7 +1444,7 @@ test("config: cached rawEnrichment from earlier provider hook is reused (no refe
   const entry = (input as { provider: Record<string, OmniRouteStaticProviderEntry> }).provider[
     "opencode-omniroute"
   ];
-  assert.equal(entry.models["opencode-omniroute/claude-sonnet-4-6"].name, "Claude Sonnet 4.6");
+  assert.equal(entry.models["claude-sonnet-4-6"].name, "Claude Sonnet 4.6");
 });
 
 // ─────────────────────────────────────────────────────────────────────
@@ -1331,13 +1494,10 @@ test("config: providerTag (default-on) prepends '<provider> - ' to enriched raw-
     "opencode-omniroute"
   ];
   assert.ok(entry);
-  assert.equal(
-    entry.models["opencode-omniroute/claude-sonnet-4-6"].name,
-    "Claude - Claude Sonnet 4.6"
-  );
-  assert.equal(entry.models["opencode-omniroute/gemini-3-flash"].name, "Gemini - Gemini 3 Flash");
+  assert.equal(entry.models["claude-sonnet-4-6"].name, "Claude - Claude Sonnet 4.6");
+  assert.equal(entry.models["gemini-3-flash"].name, "Gemini - Gemini 3 Flash");
   // Combos stay untouched — `Combo: ` prefix already conveys multi-upstream.
-  assert.equal(entry.models["omniroute/claude-tier"].name, "Claude Tier");
+  assert.equal(entry.models["claude-tier"].name, "Claude Tier");
 });
 
 test("config: providerTag=false suppresses the suffix", async () => {
@@ -1364,7 +1524,7 @@ test("config: providerTag=false suppresses the suffix", async () => {
     "opencode-omniroute"
   ];
   assert.equal(
-    entry.models["opencode-omniroute/claude-sonnet-4-6"].name,
+    entry.models["claude-sonnet-4-6"].name,
     "Claude Sonnet 4.6",
     "enriched name kept, provider tag suppressed"
   );
@@ -1396,7 +1556,7 @@ test("config: providerTag falls back to UPPER(alias) when providerDisplayName mi
   const entry = (input as { provider: Record<string, OmniRouteStaticProviderEntry> }).provider[
     "opencode-omniroute"
   ];
-  assert.equal(entry.models["opencode-omniroute/claude-sonnet-4-6"].name, "CC - Claude Sonnet 4.6");
+  assert.equal(entry.models["claude-sonnet-4-6"].name, "CC - Claude Sonnet 4.6");
 });
 
 test("config: providerTag skipped entirely when neither providerDisplayName nor providerAlias set", async () => {
@@ -1423,7 +1583,7 @@ test("config: providerTag skipped entirely when neither providerDisplayName nor 
   const entry = (input as { provider: Record<string, OmniRouteStaticProviderEntry> }).provider[
     "opencode-omniroute"
   ];
-  assert.equal(entry.models["opencode-omniroute/claude-sonnet-4-6"].name, "Claude Sonnet 4.6");
+  assert.equal(entry.models["claude-sonnet-4-6"].name, "Claude Sonnet 4.6");
 });
 
 test("config: providerTag is idempotent — second hook call doesn't double-suffix", async () => {
@@ -1450,10 +1610,7 @@ test("config: providerTag is idempotent — second hook call doesn't double-suff
   const entryA = (inputA as { provider: Record<string, OmniRouteStaticProviderEntry> }).provider[
     "opencode-omniroute"
   ];
-  assert.equal(
-    entryA.models["opencode-omniroute/claude-sonnet-4-6"].name,
-    "Claude - Claude Sonnet 4.6"
-  );
+  assert.equal(entryA.models["claude-sonnet-4-6"].name, "Claude - Claude Sonnet 4.6");
 
   // Second invocation (cache hit) — name must still be single-suffixed.
   const inputB = makeInput();
@@ -1461,10 +1618,7 @@ test("config: providerTag is idempotent — second hook call doesn't double-suff
   const entryB = (inputB as { provider: Record<string, OmniRouteStaticProviderEntry> }).provider[
     "opencode-omniroute"
   ];
-  assert.equal(
-    entryB.models["opencode-omniroute/claude-sonnet-4-6"].name,
-    "Claude - Claude Sonnet 4.6"
-  );
+  assert.equal(entryB.models["claude-sonnet-4-6"].name, "Claude - Claude Sonnet 4.6");
 });
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -1516,7 +1670,7 @@ test("buildStaticProviderEntry: nested combo-ref context is the bottleneck acros
   );
   // Pre-fix: Parent would advertise 200_000 (only raw-big counted).
   // Post-fix: Parent should advertise 8_000 (TinyCombo bottleneck).
-  const parent = block.models["omniroute/parent"];
+  const parent = block.models["parent"];
   assert.ok(parent, "Parent combo must be in the static catalog");
   assert.equal(parent.limit?.context, 8_000);
 });

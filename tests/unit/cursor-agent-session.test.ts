@@ -1,10 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  CursorSessionManager,
-  type CursorSession,
-} from "../../open-sse/services/cursorSessionManager";
+import { CursorSessionManager } from "../../open-sse/services/cursorSessionManager";
 import { flattenMessages } from "../../open-sse/utils/cursorAgentProtobuf";
+import { decodeFields } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
 
 // ─── Test doubles for h2 ───────────────────────────────────────────────────
 //
@@ -41,6 +39,73 @@ function mockClient() {
     closed,
   };
 }
+
+test("a failed client write must not tell Cursor that the existing file was overwritten", () => {
+  const { req, calls } = mockReq();
+  const { client } = mockClient();
+  const manager = new CursorSessionManager();
+  const session = manager.open("write-error", client, req, new Map());
+  session.pendingBuiltinExecs.set("write-1", {
+    kind: "write",
+    execMsgId: 4,
+    execId: "exec-w",
+    path: "/tmp/existing.txt",
+    fileText: "replacement",
+    command: "",
+    workingDir: "",
+    pattern: "",
+  });
+  assert.equal(manager.sendToolResult(session, "write-1", "File already exists", true), true);
+  const frame = (calls.find((call) => call.kind === "write") as { data: Buffer }).data;
+  const envelope = decodeFields(frame.subarray(5)).find((field) => field.fieldNumber === 2);
+  assert.ok(envelope);
+  const result = decodeFields(envelope.bytes).find((field) => field.fieldNumber === 3);
+  assert.ok(result, "ExecClientMessage.write_result");
+  const reply = decodeFields(result.bytes);
+  assert.ok(
+    reply.some((field) => field.fieldNumber === 5),
+    "WriteResult.error"
+  );
+  assert.equal(
+    reply.some((field) => field.fieldNumber === 1),
+    false,
+    "never report success"
+  );
+  manager.close(session);
+});
+
+test("OpenAI tool errors without an isError flag do not become WriteResult.success", () => {
+  const { req, calls } = mockReq();
+  const { client } = mockClient();
+  const manager = new CursorSessionManager();
+  const session = manager.open("write-error-text", client, req, new Map());
+  session.pendingBuiltinExecs.set("write-2", {
+    kind: "write",
+    execMsgId: 5,
+    execId: "exec-write",
+    path: "/tmp/existing.txt",
+    fileText: "replacement",
+    command: "",
+    workingDir: "",
+    pattern: "",
+  });
+  assert.equal(
+    manager.sendToolResult(
+      session,
+      "write-2",
+      "Error: You must read the file before writing it.",
+      false
+    ),
+    true
+  );
+  const frame = (calls.find((call) => call.kind === "write") as { data: Buffer }).data;
+  const envelope = decodeFields(frame.subarray(5)).find((field) => field.fieldNumber === 2);
+  assert.ok(envelope);
+  const result = decodeFields(envelope.bytes).find((field) => field.fieldNumber === 3);
+  assert.ok(result);
+  assert.ok(decodeFields(result.bytes).some((field) => field.fieldNumber === 5));
+  manager.close(session);
+});
 
 // ─── flattenMessages: Phase 6 cold-resume support ──────────────────────────
 
@@ -228,6 +293,126 @@ test("CursorSessionManager.sendToolResult writes ExecMcpResult on the session's 
   assert.equal(session.pendingToolCalls.has("call_x"), false);
 });
 
+test("shell_stream follow-up sends stream events and closes the exec stream", () => {
+  const manager = new CursorSessionManager();
+  const { req, calls } = mockReq();
+  const { client } = mockClient();
+  const session = manager.open("conv-shell-stream", client, req, new Map());
+  session.pendingBuiltinExecs.set("call_shell", {
+    execMsgId: 9,
+    execId: "exec-shell",
+    kind: "shell_stream",
+    path: "",
+    command: "pwd",
+    workingDir: "/tmp",
+    fileText: "",
+    pattern: "",
+  });
+
+  assert.equal(manager.sendToolResult(session, "call_shell", "/tmp\n", false), true);
+  const written = calls.filter(
+    (call): call is Extract<WriteCall, { kind: "write" }> => call.kind === "write"
+  );
+  assert.equal(written.length, 1);
+  const data = written[0].data;
+  const messages: Buffer[] = [];
+  for (let offset = 0; offset < data.length;) {
+    const length = data.readUInt32BE(offset + 1);
+    messages.push(data.subarray(offset + 5, offset + 5 + length));
+    offset += 5 + length;
+  }
+  assert.equal(messages.length, 4, "start, stdout, exit, stream_close");
+  for (const [index, variant] of [4, 1, 3].entries()) {
+    const exec = decodeFields(messages[index]).find((field) => field.fieldNumber === 2);
+    assert.ok(exec, "AgentClientMessage.exec_client_message");
+    const fields = decodeFields(exec.bytes);
+    assert.equal(fields.find((field) => field.fieldNumber === 1)?.varint, 9n);
+    assert.equal(fields.find((field) => field.fieldNumber === 15)?.bytes.toString(), "exec-shell");
+    assert.equal(
+      fields.some((field) => field.fieldNumber === 2),
+      false,
+      "not shell_result"
+    );
+    const shellStream = fields.find((field) => field.fieldNumber === 14);
+    assert.ok(shellStream, "ExecClientMessage.shell_stream");
+    assert.ok(decodeFields(shellStream.bytes).some((field) => field.fieldNumber === variant));
+  }
+  assert.ok(messages[1].includes(Buffer.from("/tmp\n")));
+  const control = decodeFields(messages[3]).find((field) => field.fieldNumber === 5);
+  assert.ok(control, "AgentClientMessage.exec_client_control_message");
+  assert.equal(session.pendingBuiltinExecs.has("call_shell"), false);
+  manager.close(session);
+});
+
+test("a multipart tool result is forwarded as file contents instead of an empty read", () => {
+  const manager = new CursorSessionManager();
+  const { req, calls } = mockReq();
+  const { client } = mockClient();
+  const session = manager.open("conv-multipart", client, req, new Map());
+  session.pendingBuiltinExecs.set("call_read", {
+    execMsgId: 3,
+    execId: "exec-read",
+    kind: "read",
+    path: "/tmp/snake.c",
+    command: "",
+    workingDir: "",
+    fileText: "",
+    pattern: "",
+  });
+  assert.equal(
+    manager.sendToolResult(
+      session,
+      "call_read",
+      [{ type: "text", text: "int main(void) {}" }],
+      false
+    ),
+    true
+  );
+  const sent = calls.find(
+    (call): call is Extract<WriteCall, { kind: "write" }> => call.kind === "write"
+  );
+  assert.ok(sent);
+  assert.ok(sent.data.includes(Buffer.from("int main(void) {}")));
+  manager.close(session);
+});
+
+test("a bridged web fetch returns FetchResult.success rather than a shell result", () => {
+  const manager = new CursorSessionManager();
+  const { req, calls } = mockReq();
+  const { client } = mockClient();
+  const session = manager.open("conv-fetch", client, req, new Map());
+  session.pendingBuiltinExecs.set("call_fetch", {
+    execMsgId: 5,
+    execId: "exec-fetch",
+    kind: "fetch",
+    path: "",
+    command: "",
+    workingDir: "",
+    fileText: "",
+    pattern: "",
+    url: "https://example.com/docs",
+  });
+  assert.equal(manager.sendToolResult(session, "call_fetch", "Article text", false), true);
+  const written = calls.find(
+    (call): call is Extract<WriteCall, { kind: "write" }> => call.kind === "write"
+  );
+  assert.ok(written);
+  const ecm = decodeFields(
+    decodeFields(written.data.subarray(5)).find((field) => field.fieldNumber === 2)!.bytes
+  );
+  const result = ecm.find((field) => field.fieldNumber === 20);
+  assert.ok(result, "ExecClientMessage.fetch_result");
+  const success = decodeFields(result.bytes).find((field) => field.fieldNumber === 1);
+  assert.ok(success, "FetchResult.success");
+  const fields = decodeFields(success.bytes);
+  assert.equal(
+    fields.find((field) => field.fieldNumber === 1)?.bytes.toString(),
+    "https://example.com/docs"
+  );
+  assert.equal(fields.find((field) => field.fieldNumber === 2)?.bytes.toString(), "Article text");
+  manager.close(session);
+});
+
 test("CursorSessionManager.sendToolResult returns false when openAIToolCallId not pending", () => {
   const m = new CursorSessionManager();
   const { req } = mockReq();
@@ -251,6 +436,111 @@ test("CursorSessionManager.close clears unanswered pendingToolCalls", () => {
   // close() drops the unanswered mapping so it isn't pinned on the dead session.
   assert.equal(session.pendingToolCalls.size, 0);
   assert.equal(m.size(), 0);
+});
+
+// ─── findByToolCallIds — content-based session matching ────────────────────
+//
+// These tests validate the fix for #9029: when the client does not provide
+// conversation_id, every turn gets a random UUID and acquire() fails. The
+// fallback findByToolCallIds matches by tool_call_id content instead.
+
+test("CursorSessionManager.findByToolCallIds finds an awaiting session by tool call ID", () => {
+  const m = new CursorSessionManager();
+  const { req } = mockReq();
+  const { client } = mockClient();
+  const session = m.open("conv-find", client, req, new Map());
+  session.pendingToolCalls.set("call_abc", {
+    execMsgId: 1,
+    execId: "exec-1",
+    toolName: "get_weather",
+  });
+  m.release(session, "awaiting_tool_result");
+
+  const found = m.findByToolCallIds(["call_abc", "call_other"]);
+  assert.equal(found, session);
+  // Must transition to "running" (same as acquire() does)
+  assert.equal(found?.state, "running");
+});
+
+test("CursorSessionManager.findByToolCallIds returns undefined when no IDs match", () => {
+  const m = new CursorSessionManager();
+  const { req } = mockReq();
+  const { client } = mockClient();
+  const session = m.open("conv-nomatch", client, req, new Map());
+  session.pendingToolCalls.set("call_xyz", {
+    execMsgId: 1,
+    execId: "exec-1",
+    toolName: "tool",
+  });
+  m.release(session, "awaiting_tool_result");
+
+  const found = m.findByToolCallIds(["call_nonexistent"]);
+  assert.equal(found, undefined);
+});
+
+test("CursorSessionManager.findByToolCallIds returns undefined for running session", () => {
+  const m = new CursorSessionManager();
+  const { req } = mockReq();
+  const { client } = mockClient();
+  const session = m.open("conv-running", client, req, new Map());
+  session.pendingToolCalls.set("call_abc", {
+    execMsgId: 1,
+    execId: "exec-1",
+    toolName: "tool",
+  });
+  // NOT released, so state is still "running" — not eligible
+
+  const found = m.findByToolCallIds(["call_abc"]);
+  assert.equal(found, undefined);
+});
+
+test("findByToolCallIds matches session even when acquire fails due to different conversation_id (#9029)", () => {
+  const m = new CursorSessionManager();
+
+  // Turn 1: session opens with conv-a and releases awaiting tool result
+  const r1 = mockReq();
+  const c1 = mockClient();
+  const s1 = m.open("conv-a", c1.client, r1.req, new Map());
+  s1.pendingToolCalls.set("call_p1", {
+    execMsgId: 1,
+    execId: "exec-1",
+    toolName: "tool_a",
+  });
+  m.release(s1, "awaiting_tool_result");
+
+  // Turn 2: client sends tool result with a DIFFERENT conversation_id
+  // (random UUID because OpenAI client doesn't provide conversation_id).
+  // acquire() fails — this is the bug.
+  const acquired = m.acquire("random-uuid-xyz");
+  assert.equal(acquired, undefined, "acquire with different ID must return undefined (the bug)");
+
+  // findByToolCallIds finds the session by tool_call_id content matching
+  const found = m.findByToolCallIds(["call_p1"]);
+  assert.equal(found, s1, "findByToolCallIds must find session by tool call ID");
+  assert.equal(found.state, "running", "found session must transition to running");
+});
+
+test("findByToolCallIds matches first matching session across multiple sessions", () => {
+  const m = new CursorSessionManager();
+
+  const r1 = mockReq();
+  const c1 = mockClient();
+  const s1 = m.open("conv-1", c1.client, r1.req, new Map());
+  s1.pendingToolCalls.set("call_1", { execMsgId: 1, execId: "e1", toolName: "t1" });
+  m.release(s1, "awaiting_tool_result");
+
+  const r2 = mockReq();
+  const c2 = mockClient();
+  const s2 = m.open("conv-2", c2.client, r2.req, new Map());
+  s2.pendingToolCalls.set("call_2", { execMsgId: 2, execId: "e2", toolName: "t2" });
+  m.release(s2, "awaiting_tool_result");
+
+  // Should find conv-1 first because it has "call_1"
+  const found = m.findByToolCallIds(["call_1", "call_2"]);
+  assert.equal(found, s1);
+  // conv-2 session should still be available
+  const found2 = m.findByToolCallIds(["call_2"]);
+  assert.equal(found2, s2);
 });
 
 test("CursorSessionManager.open replaces an existing session for the same conversation", () => {

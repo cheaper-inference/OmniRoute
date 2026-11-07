@@ -11,12 +11,19 @@
  *   Server → Client: { type: "pong" }
  *   Server → Client: { type: "welcome", version, sessionId, channels, backlog }
  *   Server → Client: { type: "error", code, message }
+ *
+ * Liveness: besides the application ping/pong above, the server sends a protocol-level
+ * ping (RFC 6455 §5.5.2) each HEARTBEAT_INTERVAL_MS. Conformant clients answer it with a
+ * pong control frame automatically, so a quiet-but-alive subscriber survives.
  */
 
 import { WebSocketServer, WebSocket } from "ws";
-import { jwtVerify } from "jose";
 import { createServer, type IncomingMessage, type ServerResponse } from "http";
 import { randomUUID } from "crypto";
+import {
+  verifyDashboardSessionToken,
+  DASHBOARD_SESSION_COOKIE,
+} from "@/shared/utils/dashboardSessionToken";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -28,6 +35,15 @@ import type { DashboardEventName, DashboardEventMap, DashboardChannel } from "@/
 
 import { CHANNEL_EVENTS, getChannelForEvent } from "@/lib/events/types";
 import { isAutomatedTestProcess, isBuildProcess } from "@/shared/utils/testProcess";
+import { hasProxyHopHeader } from "@/server/authz/proxyHeaders";
+// Pure constant module (no DB / Next.js imports) — safe to load statically here.
+import { hasManageScope } from "@/shared/constants/managementScopes";
+import { warnIfNonLoopbackWithoutApiKey } from "@/lib/startup/nonLoopbackApiKeyGuard";
+
+import {
+  attachRequestStreamGuards,
+  installProcessCrashGuard,
+} from "@/shared/utils/httpClientAbortGuard.mjs";
 
 import {
   buildAllowedOrigins,
@@ -48,6 +64,46 @@ const MAX_CLIENTS = 500;
 const MAX_EVENTS_PER_SECOND = 100;
 const MAX_PENDING_MESSAGES_PER_CLIENT = 32;
 const MAX_PENDING_MESSAGE_BYTES = 16_384;
+/**
+ * Outbound bytes a connection may have queued (ws userland buffer plus the socket's
+ * write queue, i.e. `ws.bufferedAmount`) before it is dropped. A dashboard that reads
+ * normally stays far below this; a client that stopped reading, or that keeps sending
+ * "subscribe" to replay the backlog, reaches it and is closed instead of growing the
+ * server's memory. Dropping (not skipping frames) tells the client it is out of date
+ * instead of leaving it to miss frames silently. On reconnect it gets the welcome backlog
+ * again: the newest events that fit in MAX_WELCOME_BACKLOG_BYTES, at most BACKLOG_MAX. That
+ * can repeat events the client already had, and it can still miss events that were queued
+ * but never read if larger events after them filled the byte limit.
+ */
+const MAX_BUFFERED_BYTES_PER_CLIENT = 4 * 1024 * 1024;
+/**
+ * Serialized size of the backlog replayed in one welcome frame. The newest events are
+ * kept. Without a bound, one welcome could be larger than MAX_BUFFERED_BYTES_PER_CLIENT,
+ * and a client on a slow link would be dropped before it ever received a full welcome.
+ */
+const MAX_WELCOME_BACKLOG_BYTES = 1024 * 1024;
+let slowClientDrops = 0;
+
+/** Whether a connection with this much queued output is dropped (exported for tests). */
+export function isOverOutboundLimit(bufferedAmount: number): boolean {
+  return bufferedAmount > MAX_BUFFERED_BYTES_PER_CLIENT;
+}
+
+/**
+ * The newest entries whose JSON fits in maxBytes, oldest first (exported for tests).
+ * Stops at the first entry that does not fit, so the result has no gaps. If the newest
+ * entry alone is larger than maxBytes, the result is empty.
+ */
+export function newestWithinBytes<T>(entries: T[], maxBytes = MAX_WELCOME_BACKLOG_BYTES): T[] {
+  let total = 0;
+  let start = entries.length;
+  while (start > 0) {
+    total += Buffer.byteLength(JSON.stringify(entries[start - 1]));
+    if (total > maxBytes) break;
+    start--;
+  }
+  return entries.slice(start);
+}
 
 const ALLOWED_ORIGINS = buildAllowedOrigins();
 const ALLOWED_HOSTS = buildAllowedHosts();
@@ -78,6 +134,10 @@ interface ClientState {
   eventCounterReset: number;
   /** Current IP for rate limiting */
   remoteAddress: string;
+  /** Upgrade request, kept so the heartbeat can re-check its credential */
+  request: IncomingMessage;
+  /** True while a heartbeat re-check of the credential is in flight */
+  revalidating: boolean;
 }
 
 const clients = new Map<string, ClientState>();
@@ -118,8 +178,88 @@ function loadAuthModule(): Promise<typeof import("../../sse/services/auth.ts")> 
   return authModulePromise;
 }
 
+// Same treatment for the API-key store: the scope lookup after validation needs
+// `getApiKeyMetadata`, and the auth graph above already pulls this module in, so
+// warming both together costs nothing extra while keeping the sidecar free of a
+// static dependency on the DB layer.
+let apiKeysModulePromise: Promise<typeof import("@/lib/db/apiKeys")> | null = null;
+function loadApiKeysModule(): Promise<typeof import("@/lib/db/apiKeys")> {
+  if (!apiKeysModulePromise) {
+    apiKeysModulePromise = import("@/lib/db/apiKeys");
+  }
+  return apiKeysModulePromise;
+}
+
+/**
+ * True when the upgrade's real TCP peer is this machine. Forwarding headers
+ * (x-forwarded-*, x-real-ip, forwarded, via) mark a reverse-proxy or tunnel hop: the socket
+ * peer is the proxy, not the local dashboard user, so fail closed — same
+ * discipline as isLoopbackRequest() on the HTTP routes, which never trusts a
+ * client-controllable header for locality.
+ */
+function isLocalWsPeer(request: import("http").IncomingMessage): boolean {
+  if (hasProxyHopHeader(request.headers)) return false;
+  let peer = request.socket?.remoteAddress ?? null;
+  if (!peer) return false;
+  peer = peer.replace(/^::ffff:/i, "");
+  return peer === "127.0.0.1" || peer === "::1" || peer === "localhost";
+}
+
+/**
+ * Return true when the dashboard is in open/anonymous mode — i.e. the operator
+ * has explicitly disabled login (requireLogin=false) or this is a fresh
+ * single-user install with no password configured running on the default
+ * loopback interface. Mirrors the semantics of isAuthRequired() from
+ * shared/utils/apiAuth.ts without importing Next.js-only modules.
+ */
+async function isLiveWsAuthRequired(request: import("http").IncomingMessage): Promise<boolean> {
+  try {
+    const { getSettings } = await import("@/lib/db/settings");
+    const settings = await getSettings();
+
+    // Operator explicitly disabled login.
+    if (settings.requireLogin === false) return false;
+
+    // Fresh install: no password, no OIDC, no INITIAL_PASSWORD, and the server
+    // is loopback-bound (default) → allow unauthenticated dashboard access just
+    // like the Next.js routes do in this mode.
+    const hasPassword = typeof settings.password === "string" && settings.password.length > 0;
+    const hasOidc =
+      settings.oidcEnabled === true &&
+      typeof settings.oidcIssuer === "string" &&
+      settings.oidcIssuer.trim().length > 0;
+    if (!hasPassword && !hasOidc && !process.env.INITIAL_PASSWORD) {
+      const host = process.env.LIVE_WS_HOST || DEFAULT_HOST;
+      const isLoopback = host === "127.0.0.1" || host === "::1" || host === "localhost";
+      if (isLoopback && settings.setupComplete !== true && isLocalWsPeer(request)) return false;
+    }
+
+    return true;
+  } catch {
+    // Fail-closed: if we cannot read settings, require auth.
+    return true;
+  }
+}
+
+/**
+ * The API-key checks read SQLite, not this process's key cache, on the upgrade and on
+ * every heartbeat re-check. The cache is only cleared in the process that changed the
+ * key, and the sidecar runs separately (scripts/start-ws-server.mjs), so a cached
+ * entry could still say valid after a revoke made elsewhere.
+ */
 async function authorizeConnection(request: import("http").IncomingMessage): Promise<WsAuthResult> {
   const sessionId = randomUUID().slice(0, 8);
+
+  // Skip all credential checks when the dashboard is running in open/anonymous
+  // mode (requireLogin=false or a fresh loopback-bound install without a
+  // password). Every other authenticated surface in the app grants anonymous
+  // access in this mode; the WebSocket must behave consistently. Without this
+  // bypass, a no-password deployment can never establish a Live Dashboard
+  // connection because no auth_token cookie is ever issued (there is no login
+  // flow to mint one). See issue #14256.
+  if (!(await isLiveWsAuthRequired(request))) {
+    return { authorized: true, sessionId };
+  }
 
   // Token MUST come from the Authorization header (or X-Live-WS-Token).
   // Query-string tokens leak into access logs, browser history, and Referer
@@ -144,8 +284,18 @@ async function authorizeConnection(request: import("http").IncomingMessage): Pro
       allowUrl: false,
     });
 
-    if (!apiKey || !(await isValidApiKey(apiKey))) {
+    if (!apiKey || !(await isValidApiKey(apiKey, { bypassCache: true }))) {
       return { authorized: false, sessionId, error: "Invalid API key" };
+    }
+
+    // The live channels carry operator telemetry for every tenant of the instance
+    // (requests, combo routing, credential health, …), so a bearer key must hold a
+    // management scope — an inference-only key is not an operator credential. The
+    // env master key is materialised with `manage`, so it keeps working.
+    const { getApiKeyMetadata } = await loadApiKeysModule();
+    const metadata = await getApiKeyMetadata(apiKey, { bypassCache: true });
+    if (!metadata || !hasManageScope(metadata.scopes ?? [])) {
+      return { authorized: false, sessionId, error: "API key lacks management scope" };
     }
 
     return { authorized: true, sessionId };
@@ -179,15 +329,9 @@ export function getCookieValueFromHeader(
 async function isDashboardCookieAuthenticated(
   request: import("http").IncomingMessage
 ): Promise<boolean> {
-  const token = getCookieValueFromHeader(request.headers, "auth_token");
+  const token = getCookieValueFromHeader(request.headers, DASHBOARD_SESSION_COOKIE);
   if (!token || !process.env.JWT_SECRET) return false;
-  try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    await jwtVerify(token, secret);
-    return true;
-  } catch {
-    return false;
-  }
+  return (await verifyDashboardSessionToken(token)) !== null;
 }
 
 function extractBearerToken(request: import("http").IncomingMessage): string | null {
@@ -223,31 +367,44 @@ function handleMessage(clientId: string, raw: string): void {
     return;
   }
 
-  client.lastActivity = now;
-
+  // Inbound messages do not count as liveness: a client can keep writing while it has
+  // stopped reading. Only a protocol pong refreshes lastActivity (see startHeartbeat).
   switch (msg.type) {
     case "subscribe": {
-      client.subscribedChannels = new Set(msg.channels);
+      // Keep only known channel names: the welcome echoes them, so a client-supplied
+      // array would otherwise make the welcome as large as the inbound frame.
+      const requested: unknown[] = Array.isArray(msg.channels) ? msg.channels : [];
+      const channels = [
+        ...new Set(
+          requested.filter(
+            (c): c is DashboardChannel => typeof c === "string" && Object.hasOwn(CHANNEL_EVENTS, c)
+          )
+        ),
+      ];
+      client.subscribedChannels = new Set(channels);
 
       // Send buffered events that match subscribed channels
       const relevantHistory = eventHistoryBacklog.filter((h) => {
         const ch = getChannelForEvent(h.event as DashboardEventName);
-        return ch && msg.channels.includes(ch);
+        return ch && channels.includes(ch);
       });
+      const replay = newestWithinBytes(
+        relevantHistory.map((h) => ({
+          event: h.event,
+          channel: getChannelForEvent(h.event as DashboardEventName),
+          data: h.payload,
+          timestamp: h.timestamp,
+        }))
+      );
 
       sendTo(client.ws, {
         type: "welcome",
         version: "1.0.0",
         sessionId: client.sessionId,
         serverTime: now,
-        channels: msg.channels,
-        backlog: relevantHistory.length,
-        data: relevantHistory.map((h) => ({
-          event: h.event,
-          channel: getChannelForEvent(h.event as DashboardEventName),
-          data: h.payload,
-          timestamp: h.timestamp,
-        })),
+        channels,
+        backlog: replay.length,
+        data: replay,
       } as any);
       break;
     }
@@ -261,9 +418,27 @@ function handleMessage(clientId: string, raw: string): void {
 // ── Send ──────────────────────────────────────────────────────────────────
 
 function sendTo(ws: WebSocket, msg: WsServerMessage | Record<string, unknown>): void {
-  if (ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify(msg));
+  if (ws.readyState !== WebSocket.OPEN) return;
+  // Every outbound frame, including the subscribe replay in the welcome, passes here,
+  // so this one check bounds both a slow reader and replay amplification. terminate()
+  // fires "close", which removes the client from the map.
+  if (isOverOutboundLimit(ws.bufferedAmount)) {
+    slowClientDrops++;
+    let clientId = "unauthenticated";
+    for (const [id, client] of clients) {
+      if (client.ws === ws) clientId = id;
+    }
+    // One line per dropped connection: after terminate() readyState is no longer OPEN.
+    console.warn(
+      "[LiveWS] Dropping slow client %s: %d bytes queued [%d dropped since start]",
+      clientId,
+      ws.bufferedAmount,
+      slowClientDrops
+    );
+    ws.terminate();
+    return;
   }
+  ws.send(JSON.stringify(msg));
 }
 
 // ── Event Bus → WebSocket Bridge ──────────────────────────────────────────
@@ -309,6 +484,10 @@ function subscribeToEventBus(): () => void {
 }
 
 function isLoopbackRequest(req: IncomingMessage): boolean {
+  // A same-host reverse proxy also connects from loopback; its forwarding headers are
+  // what tells its remote callers apart from the local publisher — same discipline as
+  // isLocalWsPeer() on the upgrade path. The publisher posts without such headers.
+  if (hasProxyHopHeader(req.headers)) return false;
   const addr = req.socket.remoteAddress;
   return addr === "127.0.0.1" || addr === "::1" || addr === "::ffff:127.0.0.1";
 }
@@ -414,6 +593,58 @@ async function seedLatestCompressionRunFromDb(): Promise<void> {
 
 // ── Heartbeat ─────────────────────────────────────────────────────────────
 
+/**
+ * Begin a heartbeat credential re-check. Returns false when one is already in
+ * flight for this client, so overlapping heartbeats do not stack authorize calls.
+ */
+export function beginClientRevalidation(client: { revalidating: boolean }): boolean {
+  if (client.revalidating) return false;
+  client.revalidating = true;
+  return true;
+}
+
+/**
+ * True when a finished re-check should close this client. Skip when the
+ * credential still passes, or when the map entry for `clientId` was removed or
+ * replaced while the check was in flight (closing the old socket would then
+ * hit the wrong connection).
+ */
+export function shouldCloseClientAfterRevalidation<T extends object>(
+  authorized: boolean,
+  clientId: string,
+  client: T,
+  map: Map<string, T>
+): boolean {
+  return !authorized && map.get(clientId) === client;
+}
+
+/**
+ * Re-run the upgrade-time authorization for an open connection. The credential is
+ * otherwise only checked once, so a key revoked, disabled, expired, deleted or cut
+ * below `manage` — or a dashboard session ended by sign-out or a password change —
+ * would keep streaming operator telemetry for as long as the socket stays up. A
+ * credential that no longer passes gets the same 4001 a new connection would, and so
+ * does a check that fails because the database cannot be read (fail closed).
+ */
+function revalidateClient(clientId: string, client: ClientState): void {
+  if (!beginClientRevalidation(client)) return;
+  authorizeConnection(client.request)
+    .catch((): WsAuthResult => ({ authorized: false, sessionId: clientId }))
+    .then((auth) => {
+      if (!shouldCloseClientAfterRevalidation(auth.authorized, clientId, client, clients)) return;
+      clients.delete(clientId);
+      sendTo(client.ws, {
+        type: "error",
+        code: "UNAUTHORIZED",
+        message: auth.error || "Unauthorized",
+      });
+      client.ws.close(4001, "Unauthorized");
+    })
+    .finally(() => {
+      client.revalidating = false;
+    });
+}
+
 function startHeartbeat(server: WebSocketServer): void {
   const interval = setInterval(() => {
     const now = Date.now();
@@ -428,8 +659,14 @@ function startHeartbeat(server: WebSocketServer): void {
         clients.delete(clientId);
         continue;
       }
-      // Send ping
+      // Send the application-level heartbeat response for clients that still rely on it.
       sendTo(client.ws, { type: "pong" } as WsServerMessage);
+      // Protocol-level ping: the client's automatic pong reply is what keeps a
+      // silent-but-alive subscriber alive, while a half-open socket stays silent and is
+      // still reaped. Nothing here refreshes lastActivity — only a received pong does,
+      // so #10452 holds.
+      client.ws.ping();
+      revalidateClient(clientId, client);
     }
   }, HEARTBEAT_INTERVAL_MS);
   // Don't keep the process alive solely for the heartbeat (it is also cleared on close).
@@ -451,6 +688,11 @@ export async function startLiveDashboardServer(
   port = DEFAULT_PORT,
   host = DEFAULT_HOST
 ): Promise<import("http").Server> {
+  // Safety net: a client aborting a connection can emit `Error: aborted`/
+  // ECONNRESET on the request stream; without this the single missed listener
+  // becomes an uncaughtException that kills the server. Benign aborts are
+  // swallowed; genuine errors still crash loudly (#fix-dev-server-aborted).
+  installProcessCrashGuard();
   if (!process.env.JWT_SECRET) {
     console.warn(
       "  \x1b[33m⚠ Warning: JWT_SECRET is not set in the environment.\x1b[0m\n" +
@@ -460,6 +702,10 @@ export async function startLiveDashboardServer(
   }
 
   const server = createServer((req, res) => {
+    // Absorb client-abort errors (browser closes the socket during navigation/
+    // HMR/bfcache) on the request/response streams so they never surface as an
+    // uncaughtException that kills the server (#fix-dev-server-aborted).
+    attachRequestStreamGuards(req, res);
     handleInternalEventRequest(req, res);
   });
   const wss = new WebSocketServer({ server });
@@ -473,6 +719,7 @@ export async function startLiveDashboardServer(
   // WebSocket handshakes (see loadAuthModule). A failed warm is non-fatal: the
   // handler retries the import lazily.
   await loadAuthModule().catch(() => {});
+  await loadApiKeysModule().catch(() => {});
 
   wss.on("connection", async (ws, request) => {
     const pendingMessages: string[] = [];
@@ -535,6 +782,8 @@ export async function startLiveDashboardServer(
       eventCounter: 0,
       eventCounterReset: Date.now(),
       remoteAddress: request.socket?.remoteAddress || "unknown",
+      request,
+      revalidating: false,
     };
 
     clients.set(clientId, client);
@@ -564,6 +813,13 @@ export async function startLiveDashboardServer(
     ws.on("error", (err) => {
       console.error("[LiveWS] Client error %s: %s", clientId, err.message);
       clients.delete(clientId);
+    });
+
+    // A control-frame pong (RFC 6455 §5.5.3) from the client is the only signal that
+    // proves the socket is not half-open (see startHeartbeat).
+    ws.on("pong", () => {
+      const current = clients.get(clientId);
+      if (current) current.lastActivity = Date.now();
     });
   });
 
@@ -608,9 +864,7 @@ export async function startLiveDashboardServer(
 // Build/test environments never auto-start regardless of the flag.
 
 function isBuildOrTest(): boolean {
-  return (
-    isBuildProcess() || isAutomatedTestProcess()
-  );
+  return isBuildProcess() || isAutomatedTestProcess();
 }
 
 export function isLiveWsEnabled(): boolean {
@@ -622,6 +876,7 @@ export function isLiveWsEnabled(): boolean {
 if (!isBuildOrTest() && isLiveWsEnabled()) {
   const port = parseInt(process.env.LIVE_WS_PORT || String(DEFAULT_PORT), 10);
   const host = process.env.LIVE_WS_HOST || DEFAULT_HOST;
+  warnIfNonLoopbackWithoutApiKey("Live dashboard WebSocket", host);
   startLiveDashboardServer(port, host).catch((err) => {
     console.error("[LiveWS] Failed to start: %s", err instanceof Error ? err.message : String(err));
   });

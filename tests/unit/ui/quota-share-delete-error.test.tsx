@@ -18,9 +18,23 @@
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
 
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
+
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+  // #14466 / #14807: PoolSchedulesCard and ProxyHealthCell now call useLocale().
+  useLocale: () => "en",
+}));
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
 
 vi.mock("@/shared/components", () => ({
@@ -77,11 +91,13 @@ vi.mock(
 
 const fetchMock = vi.fn();
 vi.stubGlobal("fetch", fetchMock);
-vi.stubGlobal("confirm", vi.fn(() => true));
 
-const { default: QuotaSharePageClient } = await import(
-  "../../../src/app/(dashboard)/dashboard/costs/quota-share/QuotaSharePageClient"
-);
+// The delete asks through the kit confirm dialog (#19066); the mocked `common` labels are
+// "confirmAction" / "cancel". Each test sets how the user answers it.
+let confirmAnswer: "confirmAction" | "cancel" = "confirmAction";
+
+const { default: QuotaSharePageClient } =
+  await import("../../../src/app/(dashboard)/dashboard/costs/quota-share/QuotaSharePageClient");
 
 let container: HTMLDivElement | null = null;
 let root: ReturnType<typeof createRoot> | null = null;
@@ -101,11 +117,19 @@ async function renderComponent() {
 /** Clicks the delete button of the first pool card. */
 async function clickDelete() {
   const btn = [...document.querySelectorAll("button")].find(
-    (b) => b.querySelector("span.material-symbols-outlined")?.textContent?.trim() === "delete"
+    // KEA-7886: icons are Lucide <svg class="oi-icon" data-icon="…"> via <Icon>.
+    (b) => b.querySelector('svg.oi-icon[data-icon="delete"]') !== null
   );
   if (!btn) throw new Error("delete button not rendered");
   await act(async () => {
     btn.click();
+  });
+  const answer = [
+    ...document.body.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button'),
+  ].find((b) => b.textContent?.trim() === confirmAnswer);
+  if (!answer) throw new Error("confirm dialog not rendered");
+  await act(async () => {
+    answer.click();
   });
   // let the awaited fetch + state update flush
   await act(async () => {
@@ -122,7 +146,7 @@ describe("quota-share — deleting a pool", { timeout: 15000 }, () => {
       error: null,
       mutate: mockMutate,
     });
-    (globalThis.confirm as ReturnType<typeof vi.fn>).mockReturnValue(true);
+    confirmAnswer = "confirmAction";
   });
 
   afterEach(() => {
@@ -159,7 +183,11 @@ describe("quota-share — deleting a pool", { timeout: 15000 }, () => {
   });
 
   it("shows nothing and still refreshes when the DELETE succeeds", async () => {
-    fetchMock.mockResolvedValue({ ok: true, status: 204, json: () => Promise.resolve({}) } as unknown as Response);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 204,
+      json: () => Promise.resolve({}),
+    } as unknown as Response);
 
     await renderComponent();
     await clickDelete();
@@ -169,7 +197,7 @@ describe("quota-share — deleting a pool", { timeout: 15000 }, () => {
   });
 
   it("does not call the API at all when the confirmation is dismissed", async () => {
-    (globalThis.confirm as ReturnType<typeof vi.fn>).mockReturnValue(false);
+    confirmAnswer = "cancel";
 
     await renderComponent();
     await clickDelete();
@@ -193,7 +221,11 @@ describe("quota-share — deleting a pool", { timeout: 15000 }, () => {
     await clickDelete();
     expect(document.body.innerHTML).toContain("removeFailed");
 
-    fetchMock.mockResolvedValue({ ok: true, status: 204, json: () => Promise.resolve({}) } as unknown as Response);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 204,
+      json: () => Promise.resolve({}),
+    } as unknown as Response);
     await clickDelete();
     expect(document.body.innerHTML).not.toContain("removeFailed");
   });

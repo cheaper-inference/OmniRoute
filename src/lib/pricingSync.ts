@@ -11,8 +11,9 @@
  */
 
 import { getDbInstance } from "./db/core";
-import { invalidateDbCache } from "./db/readCache";
+import { invalidateDbCache, getModelCatalogCacheVersion } from "./db/readCache";
 import { backupDbFile } from "./db/backup";
+import { LITELLM_PROVIDER_MAP, remapHistoricalLitellmRows } from "./litellmProviderMap";
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -96,30 +97,6 @@ const SYNC_SOURCES = (process.env.PRICING_SYNC_SOURCES || "litellm")
 
 const LITELLM_PRICING_URL =
   "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json";
-
-// ─── Provider mapping: LiteLLM provider → OmniRoute aliases ─────
-
-const LITELLM_PROVIDER_MAP: Record<string, string[]> = {
-  openai: ["openai", "cx"],
-  anthropic: ["anthropic", "cc"],
-  vertex_ai: ["gemini"],
-  "vertex_ai-anthropic_models": ["anthropic"],
-  google: ["gemini"],
-  deepseek: ["if"],
-  groq: ["groq"],
-  together_ai: ["openrouter"],
-  bedrock: ["kiro"],
-  fireworks_ai: ["fireworks"],
-  cerebras: ["cerebras"],
-  nvidia_nim: ["nvidia"],
-  siliconflow: ["siliconflow"],
-  "vertex_ai-language_models": ["gemini"],
-  "vertex_ai-mistral_models": ["mistral"],
-  gemini: ["gemini"],
-  bedrock_converse: ["kiro"],
-  cloudflare: ["cloudflare-ai"],
-  stability: ["stability-ai"],
-};
 
 // ─── Periodic sync state ─────────────────────────────────
 
@@ -232,10 +209,27 @@ function toRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
 
+// getSyncedPricing() re-ran the SELECT + JSON.parse of the pricing_synced
+// blobs on every call — resolveCatalogPricing() calls it per model lookup, so
+// each call rebuilt a fresh object and findInsensitive() (WeakMap keyed by
+// object identity) rebuilt its lowercase index per lookup, emitting hundreds
+// of 'case-insensitive key collision' warnings per second and pinning CPU.
+// Memoized here, invalidated via the same modelCatalogCacheVersion signal
+// saveSyncedPricing/clearSyncedPricing already bump through
+// invalidateDbCache("pricing") — mirrors getModelsDevPricing() in
+// modelsDevSync.ts.
+let pricingMemo: PricingByProvider | null = null;
+let pricingMemoVersion = -1; // -1: never equals a real cacheVersion (starts at 0), guarantees a miss on the first call
+
 /**
  * Read synced pricing from `pricing_synced` namespace.
  */
 export function getSyncedPricing(): PricingByProvider {
+  const currentVersion = getModelCatalogCacheVersion();
+  if (pricingMemo !== null && pricingMemoVersion === currentVersion) {
+    return pricingMemo;
+  }
+
   const db = getDbInstance();
   const rows = db
     .prepare("SELECT key, value FROM key_value WHERE namespace = 'pricing_synced'")
@@ -252,6 +246,9 @@ export function getSyncedPricing(): PricingByProvider {
       console.warn(`[PRICING_SYNC] Corrupted data for provider "${key}", skipping`);
     }
   }
+  remapHistoricalLitellmRows(synced);
+  pricingMemo = synced;
+  pricingMemoVersion = currentVersion;
   return synced;
 }
 
@@ -496,7 +493,7 @@ export function getSyncStatus(): SyncStatus {
   };
 }
 
-// ─── Init (called from server-init.ts) ───────────────────
+// ─── Init (called from instrumentation-node.ts) ───────────────────
 
 /**
  * Initialize pricing sync if enabled.

@@ -28,6 +28,24 @@ function normalizeResponsesOutputItemIds(item: unknown): unknown {
   return changed ? normalized : item;
 }
 
+function normalizeNestedResponseIds(response: JsonRecord): JsonRecord {
+  let changed = false;
+  const normalized = { ...response };
+  const responseId = stringifyIdValue(response.id);
+  if (responseId !== null && response.id !== responseId) {
+    normalized.id = responseId;
+    changed = true;
+  }
+  if (Array.isArray(response.output)) {
+    const output = response.output.map(normalizeResponsesOutputItemIds);
+    if (output.some((item, index) => item !== response.output[index])) {
+      normalized.output = output;
+      changed = true;
+    }
+  }
+  return changed ? normalized : response;
+}
+
 export function normalizeResponsesSseIds(payload: JsonRecord): boolean {
   let changed = false;
 
@@ -53,24 +71,8 @@ export function normalizeResponsesSseIds(payload: JsonRecord): boolean {
     !Array.isArray(payload.response)
   ) {
     const response = payload.response as JsonRecord;
-    let responseChanged = false;
-    const normalizedResponse = { ...response };
-
-    const responseId = stringifyIdValue(response.id);
-    if (responseId !== null && response.id !== responseId) {
-      normalizedResponse.id = responseId;
-      responseChanged = true;
-    }
-
-    if (Array.isArray(response.output)) {
-      const normalizedOutput = response.output.map(normalizeResponsesOutputItemIds);
-      if (normalizedOutput.some((item, index) => item !== response.output[index])) {
-        normalizedResponse.output = normalizedOutput;
-        responseChanged = true;
-      }
-    }
-
-    if (responseChanged) {
+    const normalizedResponse = normalizeNestedResponseIds(response);
+    if (normalizedResponse !== response) {
       payload.response = normalizedResponse;
       changed = true;
     }
@@ -98,27 +100,54 @@ function buildResponsesOutputItemKey(item: unknown): string | null {
   return `${type}:${id}:${callId}:${outputIndex}:${name}`;
 }
 
+// Module-level Set reused across calls to avoid allocation per event
+const _seenResponsesKeys = new Set<string>();
+
 export function pushUniqueResponsesOutputItems(target: unknown[], items: readonly unknown[]) {
-  const seen = new Set<string>();
+  // Clear the reused Set instead of allocating new one
+  _seenResponsesKeys.clear();
 
   for (const existingItem of target) {
     const key = buildResponsesOutputItemKey(existingItem);
     if (key) {
-      seen.add(key);
+      _seenResponsesKeys.add(key);
     }
   }
 
   for (const item of items) {
     const key = buildResponsesOutputItemKey(item);
-    if (key && seen.has(key)) {
+    if (key && _seenResponsesKeys.has(key)) {
       continue;
     }
 
     target.push(item);
     if (key) {
-      seen.add(key);
+      _seenResponsesKeys.add(key);
     }
   }
+}
+
+/**
+ * #10156 — strip items matched by `isCommentaryItem` (the same predicate used
+ * to drop live commentary-phase SSE frames, #6199) from a `response.completed`
+ * output array before it is forwarded or buffered for backfill. Upstreams may
+ * echo an already-dropped commentary item back inside a non-empty terminal
+ * `output` array; without this, the live stream and the terminal snapshot
+ * silently disagree about what the client actually saw.
+ */
+export function filterResponsesCommentaryFromItems(
+  items: readonly unknown[],
+  isCommentaryItem: (item: unknown) => boolean
+): { items: unknown[]; changed: boolean } {
+  let changed = false;
+  const filtered = items.filter((item) => {
+    if (isCommentaryItem(item)) {
+      changed = true;
+      return false;
+    }
+    return true;
+  });
+  return { items: filtered, changed };
 }
 
 export function backfillResponsesCompletedOutput(
@@ -201,7 +230,10 @@ export function stripResponsesLifecycleEcho(parsed: unknown): boolean {
     delete r.instructions;
     changed = true;
   }
-  if ("tools" in r) {
+  // Preserve tools on the terminal snapshot: response.completed is what
+  // Codex CLI rebuilds its tool list from (#8990). Same special-case as
+  // backfillResponsesCompletedOutput. Still stripped on created/in_progress.
+  if (obj.type !== "response.completed" && "tools" in r) {
     delete r.tools;
     changed = true;
   }

@@ -9,7 +9,9 @@ import {
   mergeUpstreamExtraHeaders,
   setUserAgentHeader,
 } from "../../open-sse/executors/base.ts";
+import { shouldForceResponsesUpstream } from "../../open-sse/executors/forceResponsesUpstream.ts";
 import { DefaultExecutor } from "../../open-sse/executors/default.ts";
+import { NO_REFRESH_NEEDED } from "../../open-sse/services/tokenRefresh/shared.ts";
 import { PROVIDERS } from "../../open-sse/config/constants.ts";
 import {
   CLAUDE_CODE_COMPATIBLE_ANTHROPIC_VERSION,
@@ -18,6 +20,7 @@ import {
   CONTEXT_1M_BETA_HEADER,
 } from "../../open-sse/services/claudeCodeCompatible.ts";
 import { runWithCapture } from "../../open-sse/utils/providerRequestLogging.ts";
+import { CLAUDE_CODE_CLIENT_BILLING_VERSION } from "../../src/shared/constants/claudeCodeClient.ts";
 
 class TestExecutor extends BaseExecutor {
   constructor(config = {}) {
@@ -220,10 +223,10 @@ test("DefaultExecutor.buildUrl normalizes configurable chat-openai-compat base U
   assert.equal(
     bailian.buildUrl("qwen3-coder-plus", true, 0, {
       providerSpecificData: {
-        baseUrl: "https://coding-intl.dashscope.aliyuncs.com/apps/anthropic/v1",
+        baseUrl: "https://token-plan.ap-southeast-1.maas.aliyuncs.com/apps/anthropic/v1",
       },
     }),
-    "https://coding-intl.dashscope.aliyuncs.com/apps/anthropic/v1/messages"
+    "https://token-plan.ap-southeast-1.maas.aliyuncs.com/apps/anthropic/v1/messages"
   );
   assert.equal(
     heroku.buildUrl("claude-4-sonnet", true, 0, {
@@ -600,9 +603,8 @@ test("DefaultExecutor.execute uses CC-compatible connection defaults to append 1
       stream: false,
       credentials: {
         apiKey: "cc-key",
-        providerSpecificData: {
-          ccSessionId: "session-1",
-        },
+        // #13452: buildUrl() now requires a hydrated baseUrl.
+        providerSpecificData: { ccSessionId: "session-1", baseUrl: "https://cc.test/v1" },
       },
       clientHeaders: {
         "x-app": "cli",
@@ -622,6 +624,7 @@ test("DefaultExecutor.execute uses CC-compatible connection defaults to append 1
         apiKey: "cc-key",
         providerSpecificData: {
           ccSessionId: "session-1",
+          baseUrl: "https://cc.test/v1",
           requestDefaults: { context1m: true, redactThinking: true },
         },
       },
@@ -657,6 +660,7 @@ test("DefaultExecutor.execute uses CC-compatible connection defaults to append 1
         apiKey: "cc-key",
         providerSpecificData: {
           ccSessionId: "session-1",
+          baseUrl: "https://cc-proxy.example.test/v1",
           requestDefaults: { context1m: true },
         },
       },
@@ -669,9 +673,9 @@ test("DefaultExecutor.execute uses CC-compatible connection defaults to append 1
   assert.equal(calls[0].headers["anthropic-beta"].includes(CONTEXT_1M_BETA_HEADER), false);
   assert.equal(
     calls[0].headers["anthropic-beta"].includes(CLAUDE_CODE_COMPATIBLE_REDACT_THINKING_BETA),
-    true
+    false
   );
-  assert.equal(calls[1].headers["anthropic-beta"].includes(CONTEXT_1M_BETA_HEADER), false);
+  assert.equal(calls[1].headers["anthropic-beta"].includes(CONTEXT_1M_BETA_HEADER), true);
   assert.equal(
     calls[1].headers["anthropic-beta"].includes(CLAUDE_CODE_COMPATIBLE_REDACT_THINKING_BETA),
     true
@@ -733,9 +737,7 @@ test("DefaultExecutor.execute reports the exact serialized provider request befo
         stream: false,
         credentials: {
           apiKey: "cc-key",
-          providerSpecificData: {
-            ccSessionId: "session-1",
-          },
+          providerSpecificData: { ccSessionId: "session-1", baseUrl: "https://cc.test/v1" }, // #13452
         },
       })
     );
@@ -744,8 +746,8 @@ test("DefaultExecutor.execute reports the exact serialized provider request befo
     assert.equal(preparedBeforeFetch, true);
     assert.deepEqual(prepared.body, fetchBody);
     assert.deepEqual(result.transformedBody, fetchBody);
-    assert.equal(prepared.body.reasoning_effort, "high");
-    assert.equal(fetchBody.reasoning_effort, "high");
+    assert.equal(prepared.body.reasoning_effort, "max");
+    assert.equal(fetchBody.reasoning_effort, "max");
     assert.match(JSON.stringify(fetchBody), /\bcch=(?!00000)[0-9a-f]{5};/);
   } finally {
     globalThis.fetch = originalFetch;
@@ -1063,6 +1065,68 @@ test("DefaultExecutor.transformRequest appends the json_schema prompt to an exis
   assert.equal(body.messages[0].content, "You are concise.");
 });
 
+// kilocode's DeepSeek V4 Flash rejects ANY `response_format` with HTTP 400
+// (verified live 2026-08-15: both json_schema AND json_object 400 with
+// `param: response_format`) — same class as the opencode #9992 fix, but the
+// default executor's gate only covered `openai-compatible-*`, so kilocode
+// forwarded the unsupported format raw. For kilocode the format must be
+// STRIPPED entirely (schema injected into the system prompt), because even
+// the json_object downgrade is rejected.
+test("DefaultExecutor.transformRequest strips response_format for kilocode (DeepSeek 400 regression)", () => {
+  const executor = new DefaultExecutor("kilocode");
+  const schema = {
+    type: "object",
+    properties: { answer: { type: "string" } },
+    required: ["answer"],
+  };
+  const body = {
+    model: "deepseek/deepseek-v4-flash",
+    messages: [{ role: "user", content: "give me JSON" }],
+    response_format: {
+      type: "json_schema",
+      json_schema: { name: "answer_schema", schema },
+    },
+  };
+
+  const result = executor.transformRequest("deepseek/deepseek-v4-flash", body, true, {
+    providerSpecificData: { baseUrl: "https://api.kilo.ai/v1" },
+  }) as unknown as {
+    response_format?: { type?: string };
+    messages: Array<{ role: string; content: string }>;
+  };
+
+  // response_format is REMOVED entirely (kilocode rejects json_object too).
+  assert.equal(result.response_format, undefined);
+  assert.equal(result.messages[0].role, "system");
+  assert.match(result.messages[0].content, /strictly follows this JSON schema/);
+  assert.ok(result.messages[0].content.includes('"answer"'));
+  assert.equal(result.messages[1].role, "user");
+  assert.equal(result.messages[1].content, "give me JSON");
+  // Original body is not mutated.
+  assert.equal(body.response_format.type, "json_schema");
+  assert.equal(body.messages.length, 1);
+});
+
+test("DefaultExecutor.transformRequest strips response_format for kilocode json_object requests too", () => {
+  const executor = new DefaultExecutor("kilocode");
+  const body = {
+    model: "deepseek/deepseek-v4-flash",
+    messages: [{ role: "user", content: "give me JSON" }],
+    response_format: { type: "json_object" },
+  };
+
+  const result = executor.transformRequest("deepseek/deepseek-v4-flash", body, true, {
+    providerSpecificData: { baseUrl: "https://api.kilo.ai/v1" },
+  }) as unknown as {
+    response_format?: { type?: string };
+    messages: Array<{ role: string; content: string }>;
+  };
+
+  assert.equal(result.response_format, undefined);
+  assert.equal(result.messages[0].role, "system");
+  assert.match(result.messages[0].content, /valid JSON only/);
+});
+
 test("DefaultExecutor.transformRequest leaves json_schema response_format untouched for native providers", () => {
   const executor = new DefaultExecutor("openai");
   const responseFormat = {
@@ -1141,7 +1205,7 @@ test("BaseExecutor helpers manage custom user agents and upstream extra headers"
 
   setUserAgentHeader(headers, "MyAgent/2.0");
   assert.equal(headers["User-Agent"], "MyAgent/2.0");
-  assert.equal(headers["user-agent"], "MyAgent/2.0");
+  assert.equal(headers["user-agent"], undefined);
 
   applyConfiguredUserAgent(headers, { customUserAgent: "MyAgent/3.0" });
   assert.equal(headers["User-Agent"], "MyAgent/3.0");
@@ -1153,7 +1217,7 @@ test("BaseExecutor helpers manage custom user agents and upstream extra headers"
   });
   assert.equal(headers.Authorization, "Bearer override");
   assert.equal(headers["User-Agent"], "Merged/4.0");
-  assert.equal(headers["user-agent"], "Merged/4.0");
+  assert.equal(headers["user-agent"], undefined);
   assert.equal(headers["X-Upstream"], "1");
 });
 
@@ -1188,10 +1252,63 @@ test("BaseExecutor.needsRefresh returns true only when expiry is near", () => {
   assert.equal(executor.needsRefresh({}), false);
 });
 
-test("DefaultExecutor.refreshCredentials returns null without refresh token", async () => {
+test("DefaultExecutor.refreshCredentials signals nothing to refresh without refresh token", async () => {
   const executor = new DefaultExecutor("gemini");
   const result = await executor.refreshCredentials({}, null);
-  assert.equal(result, null);
+  assert.equal(result, NO_REFRESH_NEEDED);
+});
+
+test("NO_REFRESH_NEEDED is a frozen shared sentinel", () => {
+  assert.equal(Object.isFrozen(NO_REFRESH_NEEDED), true);
+  assert.throws(() => {
+    "use strict";
+    (NO_REFRESH_NEEDED as { error: string }).error = "invalid_grant";
+  }, TypeError);
+  assert.equal(NO_REFRESH_NEEDED.error, "no_refresh_needed");
+});
+
+test("proactive refresh of an API-key connection logs no unrecoverable-sentinel warning", async () => {
+  const originalFetch = globalThis.fetch;
+  const warnings: string[] = [];
+  const sentAuth: string[] = [];
+  globalThis.fetch = async (_url, init = {}) => {
+    sentAuth.push(String(new Headers(init.headers).get("Authorization") ?? ""));
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+  try {
+    const executor = new DefaultExecutor("openai-compatible-test");
+    // Near expiry → needsRefresh() is true, but there is no refresh token.
+    const credentials = {
+      apiKey: "test-key",
+      expiresAt: new Date(Date.now() + 1_000).toISOString(),
+      providerSpecificData: { baseUrl: "https://proxy.example/v1/" },
+    };
+    assert.equal(executor.needsRefresh(credentials), true);
+    await executor.execute({
+      model: "gpt-4.1",
+      body: { model: "gpt-4.1", messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials,
+      log: {
+        debug: () => {},
+        info: () => {},
+        warn: (_tag: string, msg: string) => warnings.push(String(msg)),
+        error: () => {},
+      },
+    } as unknown as Parameters<DefaultExecutor["execute"]>[0]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  assert.deepEqual(
+    warnings.filter((w) => w.includes("unrecoverable sentinel")),
+    [],
+    "an API-key connection has nothing to refresh — no sentinel warning"
+  );
+  assert.equal(sentAuth.length, 1);
+  assert.equal(sentAuth[0], "Bearer test-key");
 });
 
 test("DefaultExecutor.needsRefresh requests a proactive token for GigaChat", () => {
@@ -1249,7 +1366,7 @@ test("DefaultExecutor.refreshCredentials swallows refresh errors and logs them",
 
   try {
     const result = await executor.refreshCredentials(
-      { refreshToken: "refresh-me" },
+      { refreshToken: "refresh-me-unrotated" },
       { error: (tag, message) => messages.push({ tag, message }) }
     );
     assert.equal(result, null);
@@ -1508,11 +1625,61 @@ test("DefaultExecutor.execute does not produce duplicate anthropic-version heade
   assert.equal(versionKeys.length, 1, "Duplicate anthropic-version header keys found");
   assert.equal(capturedHeaders[versionKeys[0]], "2023-06-01");
   assert.equal(capturedHeaders["X-Stainless-Runtime-Version"], "v26.3.0");
-  assert.equal(capturedHeaders["X-Stainless-Package-Version"], "0.94.0");
+  assert.equal(capturedHeaders["X-Stainless-Package-Version"], "0.112.1");
 
   const sentBody = JSON.parse(capturedBody) as { system?: Array<{ text?: string }> };
-  assert.match(
-    sentBody.system?.[0]?.text ?? "",
-    /^x-anthropic-billing-header: cc_version=2\.1\.220\.1f2; cc_entrypoint=cli; cch=[0-9a-f]{5};$/
+  const cc = `x-anthropic-billing-header: cc_version=${CLAUDE_CODE_CLIENT_BILLING_VERSION}; `;
+  const billing = sentBody.system?.[0]?.text ?? "";
+  assert.equal(billing.slice(0, cc.length), cc, "cc_version tracks the constant (#14627)");
+  assert.match(billing.slice(cc.length), /^cc_entrypoint=cli; cch=[0-9a-f]{5};$/);
+});
+
+test('shouldForceResponsesUpstream respects explicit apiType="chat" even when namespace tools are present', () => {
+  const body = {
+    input: "hi",
+    tools: [
+      {
+        type: "namespace",
+        name: "collaboration",
+        tools: [
+          {
+            name: "spawn_agent",
+            description: "Spawn an agent",
+            parameters: { type: "object", properties: { task: { type: "string" } } },
+          },
+        ],
+      },
+    ],
+  };
+  const credentials = {
+    providerSpecificData: {
+      baseUrl: "https://ark.cn-beijing.volces.com/api/coding/v3",
+      apiType: "chat",
+    },
+  };
+  assert.equal(
+    shouldForceResponsesUpstream("openai-compatible-responses-demo", body, credentials),
+    false
   );
+});
+
+test("shouldForceResponsesUpstream still forces /responses for untyped OpenAI-compatible providers with namespace tools", () => {
+  const body = {
+    input: "hi",
+    tools: [
+      {
+        type: "namespace",
+        name: "collaboration",
+        tools: [
+          { name: "spawn_agent", description: "Spawn an agent", parameters: { type: "object" } },
+        ],
+      },
+    ],
+  };
+  const credentials = {
+    providerSpecificData: {
+      baseUrl: "https://proxy.example/v1",
+    },
+  };
+  assert.equal(shouldForceResponsesUpstream("openai-compatible-test", body, credentials), true);
 });

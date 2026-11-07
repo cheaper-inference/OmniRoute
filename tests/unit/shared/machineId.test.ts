@@ -30,6 +30,10 @@ function disableWindowsRegistryStrategy(): () => void {
   process.env.SystemRoot = "Z:\\NonExistent";
   process.env.windir = "Z:\\NonExistent";
 
+  // Also disable macOS ioreg strategy so Strategy 4/5 can be reached on darwin.
+  const origDisableIoreg = process.env.DISABLE_IOREG_STRATEGY;
+  process.env.DISABLE_IOREG_STRATEGY = "1";
+
   const origReadFileSync = fs.readFileSync;
   fs.readFileSync = (filePath: string, encoding: string) => {
     if (filePath === "/etc/machine-id" || filePath === "/var/lib/dbus/machine-id") {
@@ -37,6 +41,14 @@ function disableWindowsRegistryStrategy(): () => void {
     }
     return origReadFileSync(filePath, encoding);
   };
+
+  const origExecSync = childProcess.execSync;
+  childProcess.execSync = ((cmd: Parameters<typeof childProcess.execSync>[0], opts: Parameters<typeof childProcess.execSync>[1]) => {
+    if (String(cmd ?? "").includes("ioreg")) {
+      throw new Error("ENOENT: mocked ioreg not available");
+    }
+    return origExecSync(cmd, opts);
+  }) as typeof childProcess.execSync;
 
   return () => {
     if (origSysRoot !== undefined) {
@@ -49,7 +61,13 @@ function disableWindowsRegistryStrategy(): () => void {
     } else {
       delete process.env.windir;
     }
+    if (origDisableIoreg !== undefined) {
+      process.env.DISABLE_IOREG_STRATEGY = origDisableIoreg;
+    } else {
+      delete process.env.DISABLE_IOREG_STRATEGY;
+    }
     fs.readFileSync = origReadFileSync;
+    childProcess.execSync = origExecSync;
   };
 }
 

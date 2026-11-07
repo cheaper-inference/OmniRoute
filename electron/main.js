@@ -33,10 +33,24 @@ const { spawn } = require("child_process");
 const fs = require("fs");
 const { autoUpdater } = require("electron-updater");
 const { hasEncryptedCredentials } = require("./sqlite-inspection");
-const { loginManager } = require("./loginManager");
 const { killProcessTree } = require("./processTree");
 const { resolveServerEntry } = require("./lib/resolveServerEntry");
 const { resolveDarwinHelperExecutable } = require("./lib/resolveNodeHelper");
+const { resolveRemoteServerUrl, isValidHttpUrl } = require("./lib/resolveRemoteServerUrl");
+const {
+  readPreferences,
+  writeRemoteServerUrl,
+  writeCloseBehavior,
+} = require("./lib/remoteServerPreferences");
+const { buildReadinessUrl, probeServer, waitForServer } = require("./lib/serverReadiness");
+const { shouldRestartHealthCheck } = require("./lib/healthWatchdog");
+const { shouldStartHidden, showOrCreateWindow } = require("./lib/windowLifecycle");
+const {
+  CLOSE_BEHAVIOR_KEEP_LOADED,
+  CLOSE_BEHAVIOR_UNLOAD,
+  normalizeCloseBehavior,
+  resolveRendererUrl,
+} = require("./lib/windowClosePolicy");
 
 // ── Single Instance Lock ───────────────────────────────────
 const gotTheLock = app.requestSingleInstanceLock();
@@ -46,11 +60,12 @@ if (!gotTheLock) {
 }
 
 app.on("second-instance", () => {
-  if (mainWindow) {
-    if (mainWindow.isMinimized()) mainWindow.restore();
-    mainWindow.show();
-    mainWindow.focus();
-  }
+  const isHeadless =
+    process.argv.includes("--headless") ||
+    process.argv.includes("--cli") ||
+    process.env.OMNIROUTE_HEADLESS === "true";
+  if (isHeadless) return;
+  showMainWindow();
 });
 
 // ── Environment Detection ──────────────────────────────────
@@ -67,8 +82,28 @@ let tray = null;
 let nextServer = null;
 let serverPort = 20128;
 let isServerStopped = false;
+let remoteServerPromptWindow = null;
+let keepAliveWithoutWindows = false;
+let lastRendererUrl = null;
 
-const getServerUrl = () => `http://localhost:${serverPort}`;
+// ── Remote Server Mode ──────────────────────────────────────
+// Lets the desktop shell attach to an already-running OmniRoute server (e.g. a
+// Docker/OrbStack container, or another machine) instead of spawning its own
+// bundled Next.js server. See lib/resolveRemoteServerUrl.js for precedence
+// (OMNIROUTE_REMOTE_URL env var, then the persisted prefs file below).
+const REMOTE_SERVER_PREFS_PATH = path.join(
+  resolveDataDir(null, process.env),
+  "electron-preferences.json"
+);
+const electronPreferences = readPreferences(REMOTE_SERVER_PREFS_PATH);
+let closeBehavior = electronPreferences.closeBehavior;
+let remoteServerUrl = resolveRemoteServerUrl({
+  env: process.env,
+  prefsPath: REMOTE_SERVER_PREFS_PATH,
+});
+
+const getServerUrl = () => remoteServerUrl || `http://localhost:${serverPort}`;
+const getServerReadinessUrl = () => buildReadinessUrl(getServerUrl());
 
 function resolveNodeExecutable(env = process.env) {
   // #1081: Ensure Next.js standalone runs using Electron's Node runtime
@@ -95,7 +130,32 @@ function resolveNodeExecutable(env = process.env) {
   return process.execPath;
 }
 
-function resolveServerNodePath(env = process.env) {
+// Stage 7 (issue #10321): optional runtime packs are installed under
+// `${DATA_DIR}/packs/<name>/node_modules` (see open-sse/utils/optionalPacks.ts —
+// this is the plain-JS mirror; keep semantics identical). Prepending their
+// node_modules to NODE_PATH lets the server's dynamic imports (playwright, the
+// LLMLingua closure) resolve pack members while the default bundle stays slim.
+function resolvePackNodePaths(dataDir) {
+  const packsRoot = path.join(dataDir, "packs");
+  let names;
+  try {
+    names = fs.readdirSync(packsRoot);
+  } catch {
+    return []; // No packs dir yet — nothing installed.
+  }
+  const dirs = [];
+  for (const name of names) {
+    const candidate = path.join(packsRoot, name, "node_modules");
+    try {
+      if (fs.statSync(candidate).isDirectory()) dirs.push(candidate);
+    } catch {
+      // Unreadable entry — treat as not installed.
+    }
+  }
+  return dirs;
+}
+
+function resolveServerNodePath(env = process.env, extraDirs = []) {
   const seen = new Set();
   const entries = [];
 
@@ -117,6 +177,12 @@ function resolveServerNodePath(env = process.env) {
     addEntry(existing);
   }
 
+  // Optional packs take precedence over bundle-resident copies so an installed
+  // pack can never be shadowed by a stale bundled duplicate.
+  for (const packDir of extraDirs) {
+    addEntry(packDir);
+  }
+
   // Electron-builder installs native modules like better-sqlite3 under
   // app.asar.unpacked, while the standalone bundle still carries helper deps
   // such as bindings/file-uri-to-path inside resources/app/node_modules.
@@ -126,11 +192,48 @@ function resolveServerNodePath(env = process.env) {
   return entries.join(path.delimiter);
 }
 
+// Private modes for the generated secrets (GHSA-mh4f-3xj9-4gc4) — same contract as
+// scripts/build/bootstrap-env.mjs and bin/cli/privateDataDir.mjs. Best-effort: a no-op on
+// Windows, and a data dir owned by someone else must not stop the app.
+function chmodQuietly(target, mode) {
+  try {
+    fs.chmodSync(target, mode);
+  } catch {
+    /* best-effort */
+  }
+}
+
+function tightenServerEnv(dataDir, serverEnvPath) {
+  try {
+    if (fs.existsSync(dataDir)) {
+      const current = fs.statSync(dataDir).mode & 0o777;
+      if (current & 0o007) chmodQuietly(dataDir, current & ~0o007);
+    }
+    if (fs.existsSync(serverEnvPath)) chmodQuietly(serverEnvPath, 0o600);
+  } catch {
+    /* best-effort */
+  }
+}
+
+// Mirrors src/lib/dataPaths.ts::getDefaultDataDir (and scripts/build/bootstrap-env.mjs).
+// Electron's main process is CJS and cannot import those ESM modules, so the order is
+// copied verbatim: explicit DATA_DIR → an EXISTING legacy ~/.omniroute → %APPDATA%
+// (Windows) → $XDG_CONFIG_HOME (when set) → ~/.omniroute. Without the legacy check the
+// desktop app persisted server.env under $XDG_CONFIG_HOME while the server it spawns
+// opened ~/.omniroute/storage.sqlite.
 function resolveDataDir(overridePath, env = process.env) {
   if (overridePath && overridePath.trim()) return path.resolve(overridePath);
 
   const configured = env.DATA_DIR?.trim();
   if (configured) return path.resolve(configured);
+
+  // Preserve an existing legacy dir so an upgrade never splits secrets from the database.
+  const legacyDir = path.join(require("os").homedir(), ".omniroute");
+  try {
+    if (fs.statSync(legacyDir).isDirectory()) return legacyDir;
+  } catch {
+    // absent or unreadable — fall through to the platform default
+  }
 
   if (process.platform === "win32") {
     const appData = env.APPDATA || path.join(require("os").homedir(), "AppData", "Roaming");
@@ -140,7 +243,7 @@ function resolveDataDir(overridePath, env = process.env) {
   const xdg = env.XDG_CONFIG_HOME?.trim();
   if (xdg) return path.join(path.resolve(xdg), "omniroute");
 
-  return path.join(require("os").homedir(), ".omniroute");
+  return legacyDir;
 }
 
 function getPreferredEnvFilePath(env = process.env) {
@@ -166,26 +269,6 @@ function sendToRenderer(channel, data) {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send(channel, data);
   }
-}
-
-// ── Helper: Wait for server readiness (#1, #10) ────────────
-// Default raised to 180s: the first launch after an upgrade can run long DB
-// migrations, during which the server accepts the TCP connection but holds the
-// HTTP response until handlers initialize. The previous 30s cap timed out and
-// left the window stuck on a hanging connection (#2460).
-async function waitForServer(url, timeoutMs = 180000) {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const res = await fetch(url);
-      if (res.ok || res.status < 500) return true;
-    } catch {
-      /* server not ready yet */
-    }
-    await new Promise((r) => setTimeout(r, 500));
-  }
-  console.warn("[Electron] Server readiness timeout — showing window anyway");
-  return false;
 }
 
 // ── Helper: Wait for server process exit with timeout (#2) ─
@@ -335,14 +418,18 @@ function setupContentSecurityPolicy() {
 }
 
 // ── Create Window ──────────────────────────────────────────
-function createWindow() {
+function createWindow({ showWhenReady = true } = {}) {
+  if (mainWindow && !mainWindow.isDestroyed()) return mainWindow;
+
+  const rendererStartedAt = Date.now();
+
   // Platform-conditional options (#9)
   const platformWindowOptions =
     process.platform === "darwin"
       ? { titleBarStyle: "hiddenInset", trafficLightPosition: { x: 16, y: 16 } }
       : { titleBarStyle: "default" };
 
-  mainWindow = new BrowserWindow({
+  const window = new BrowserWindow({
     width: 1400,
     height: 900,
     minWidth: 1024,
@@ -360,28 +447,28 @@ function createWindow() {
     backgroundColor: "#0a0a0a",
     ...platformWindowOptions,
   });
+  mainWindow = window;
 
   // Load the Next.js app
-  mainWindow.loadURL(getServerUrl());
+  window.loadURL(resolveRendererUrl(lastRendererUrl, getServerUrl()));
   if (isDev) {
-    mainWindow.webContents.openDevTools({ mode: "detach" });
+    window.webContents.openDevTools({ mode: "detach" });
   }
 
-  // Show window when ready (unless starting minimized/hidden in tray)
-  mainWindow.once("ready-to-show", () => {
-    const startHidden =
-      process.argv.includes("--hidden") ||
-      process.argv.includes("--minimized") ||
-      app.getLoginItemSettings().wasOpenedAsHidden;
-    if (!startHidden) {
-      mainWindow.show();
+  // Hidden startup (createWindow({ showWhenReady: false })) skips the initial
+  // show(); the window stays created (so tray/dock interactions work) but the
+  // renderer only becomes visible on the next explicit showMainWindow() call.
+  window.once("ready-to-show", () => {
+    console.log(`[Electron] Renderer ready in ${Date.now() - rendererStartedAt}ms`);
+    if (showWhenReady) {
+      window.show();
     } else {
       console.log("[Electron] Launched hidden in background tray");
     }
   });
 
   // Handle external links — validate URL protocol to prevent RCE
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+  window.webContents.setWindowOpenHandler(({ url }) => {
     try {
       const parsedUrl = new URL(url);
       if (["http:", "https:"].includes(parsedUrl.protocol)) {
@@ -395,18 +482,44 @@ function createWindow() {
     return { action: "deny" };
   });
 
-  // Handle window close — minimize to tray
-  mainWindow.on("close", (event) => {
+  // Keep the server alive while either hiding the renderer for a fast reopen or
+  // unloading it to reclaim memory, according to the persisted tray preference.
+  window.on("close", (event) => {
     if (!app.isQuitting) {
       event.preventDefault();
-      mainWindow.hide();
+      lastRendererUrl = resolveRendererUrl(window.webContents.getURL(), getServerUrl());
+      if (closeBehavior === CLOSE_BEHAVIOR_UNLOAD) {
+        console.log("[Electron] Dashboard renderer unloaded; server remains running");
+        window.destroy();
+      } else {
+        console.log("[Electron] Dashboard hidden; renderer kept loaded");
+        window.hide();
+      }
     }
     return false;
   });
 
-  mainWindow.on("closed", () => {
-    mainWindow = null;
+  window.on("closed", () => {
+    if (mainWindow === window) mainWindow = null;
   });
+
+  return window;
+}
+
+function showMainWindow() {
+  return showOrCreateWindow({
+    appReady: app.isReady(),
+    getWindow: () => mainWindow,
+    createWindow,
+  });
+}
+
+function setCloseBehavior(nextBehavior) {
+  const normalized = normalizeCloseBehavior(nextBehavior);
+  if (!normalized || normalized === closeBehavior) return;
+  closeBehavior = normalized;
+  writeCloseBehavior(REMOTE_SERVER_PREFS_PATH, closeBehavior);
+  createTray();
 }
 
 // ── System Tray ────────────────────────────────────────────
@@ -435,12 +548,7 @@ function createTray() {
   const contextMenu = Menu.buildFromTemplate([
     {
       label: "Open OmniRoute",
-      click: () => {
-        if (mainWindow) {
-          mainWindow.show();
-          mainWindow.focus();
-        }
-      },
+      click: () => showMainWindow(),
     },
     {
       label: "Open Dashboard",
@@ -455,6 +563,40 @@ function createTray() {
         { label: "20128", click: () => changePort(20128) },
         { label: "3000", click: () => changePort(3000) },
         { label: "8080", click: () => changePort(8080) },
+      ],
+      enabled: !remoteServerUrl,
+    },
+    {
+      label: "Remote Server",
+      submenu: [
+        {
+          label: remoteServerUrl ? `Connected: ${remoteServerUrl}` : "Using local embedded server",
+          enabled: false,
+        },
+        { type: "separator" },
+        { label: "Connect to Remote Server…", click: () => showRemoteServerPrompt() },
+        {
+          label: "Disconnect (use Local Server)",
+          enabled: Boolean(remoteServerUrl),
+          click: () => setRemoteServerUrl(null),
+        },
+      ],
+    },
+    {
+      label: "When Dashboard Closes",
+      submenu: [
+        {
+          label: "Keep Loaded (Faster Reopen)",
+          type: "radio",
+          checked: closeBehavior === CLOSE_BEHAVIOR_KEEP_LOADED,
+          click: () => setCloseBehavior(CLOSE_BEHAVIOR_KEEP_LOADED),
+        },
+        {
+          label: "Unload Renderer (Lower Memory)",
+          type: "radio",
+          checked: closeBehavior === CLOSE_BEHAVIOR_UNLOAD,
+          click: () => setCloseBehavior(CLOSE_BEHAVIOR_UNLOAD),
+        },
       ],
     },
     { type: "separator" },
@@ -475,12 +617,7 @@ function createTray() {
   tray.setToolTip("OmniRoute");
   tray.setContextMenu(contextMenu);
 
-  tray.on("double-click", () => {
-    if (mainWindow) {
-      mainWindow.show();
-      mainWindow.focus();
-    }
-  });
+  tray.on("double-click", () => showMainWindow());
 }
 
 // ── Change Port (#3: now restarts server) ──────────────────
@@ -499,9 +636,10 @@ async function changePort(newPort) {
 
   // Start server on new port
   startNextServer();
-  await waitForServer(getServerUrl());
+  await waitForServer(getServerReadinessUrl());
 
   // Reload window and update tray
+  lastRendererUrl = getServerUrl();
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.loadURL(getServerUrl());
   }
@@ -512,8 +650,98 @@ async function changePort(newPort) {
   console.log(`[Electron] Port changed: ${oldPort} → ${serverPort}`);
 }
 
+// ── Remote Server Mode: prompt window ──────────────────────
+function showRemoteServerPrompt() {
+  if (remoteServerPromptWindow && !remoteServerPromptWindow.isDestroyed()) {
+    remoteServerPromptWindow.show();
+    remoteServerPromptWindow.focus();
+    return;
+  }
+
+  remoteServerPromptWindow = new BrowserWindow({
+    width: 480,
+    height: 210,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    title: "Connect to Remote Server",
+    parent: mainWindow || undefined,
+    modal: Boolean(mainWindow),
+    webPreferences: {
+      preload: path.join(__dirname, "remoteServerPromptPreload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+    },
+  });
+
+  remoteServerPromptWindow.setMenuBarVisibility(false);
+  remoteServerPromptWindow.loadFile(path.join(__dirname, "assets", "remoteServerPrompt.html"));
+
+  remoteServerPromptWindow.on("closed", () => {
+    remoteServerPromptWindow = null;
+  });
+}
+
+// ── Remote Server Mode: apply a new URL (or clear it) ──────
+async function setRemoteServerUrl(nextUrl) {
+  const normalized = (nextUrl || "").trim() || null;
+  if (normalized === remoteServerUrl) return;
+
+  // Reject invalid URLs — only http:// and https:// are accepted.
+  if (normalized !== null && !isValidHttpUrl(normalized)) {
+    console.warn("[Electron] Rejected invalid remote server URL:", normalized);
+    return;
+  }
+
+  sendToRenderer("server-status", { status: "restarting", port: serverPort });
+
+  // Stop any locally-spawned server before switching modes in either direction.
+  const serverToStop = nextServer;
+  stopNextServer();
+  await waitForServerExit(serverToStop);
+
+  remoteServerUrl = normalized;
+  writeRemoteServerUrl(REMOTE_SERVER_PREFS_PATH, remoteServerUrl);
+  lastRendererUrl = getServerUrl();
+
+  startNextServer();
+  try {
+    await waitForServer(getServerReadinessUrl());
+  } catch (err) {
+    console.warn("[Electron] Server did not become ready after remote-server change:", err.message);
+  }
+
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.loadURL(getServerUrl());
+  }
+  createTray();
+
+  sendToRenderer("server-status", {
+    status: "running",
+    port: serverPort,
+    remoteUrl: remoteServerUrl,
+  });
+  console.log(
+    remoteServerUrl
+      ? `[Electron] Now connected to remote server: ${remoteServerUrl}`
+      : "[Electron] Disconnected from remote server — spawning local server again"
+  );
+}
+
 // ── Server Lifecycle (#1, #5, #10) ─────────────────────────
 function startNextServer() {
+  if (remoteServerUrl) {
+    console.log("[Electron] Remote server mode — connecting to", remoteServerUrl);
+    sendToRenderer("server-status", {
+      status: "running",
+      port: serverPort,
+      remoteUrl: remoteServerUrl,
+    });
+    return;
+  }
+
   if (isDev) {
     console.log("[Electron] Dev mode — connect to existing Next.js server");
     sendToRenderer("server-status", { status: "running", port: serverPort });
@@ -557,6 +785,11 @@ function startNextServer() {
   const preferredEnv = preferredEnvPath ? parseEnvFile(preferredEnvPath) : {};
   const dataDir = resolveDataDir(null, { ...preferredEnv, ...process.env });
   const serverEnvPath = path.join(dataDir, "server.env");
+  // GHSA-mh4f-3xj9-4gc4: server.env holds JWT_SECRET / STORAGE_ENCRYPTION_KEY /
+  // API_KEY_SECRET. Repair a file an earlier version wrote world-readable (and the
+  // data dir's "other" bits) on every start — the write below only runs when a secret
+  // is missing. Best-effort: never block the app on a chmod failure.
+  tightenServerEnv(dataDir, serverEnvPath);
   const persisted = parseEnvFile(serverEnvPath);
   const serverEnv = { ...persisted, ...preferredEnv, ...process.env };
   let changed = false;
@@ -592,14 +825,18 @@ function startNextServer() {
   if (changed) {
     serverEnv.OMNIROUTE_BOOTSTRAPPED = "true";
     try {
-      fs.mkdirSync(dataDir, { recursive: true });
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true, mode: 0o700 });
+        chmodQuietly(dataDir, 0o700);
+      }
       const lines = [
         "# Auto-generated by OmniRoute bootstrap",
         "",
         ...Object.entries(persisted).map(([k, v]) => `${k}=${v}`),
         "",
       ];
-      fs.writeFileSync(serverEnvPath, lines.join("\n"), "utf8");
+      fs.writeFileSync(serverEnvPath, lines.join("\n"), { encoding: "utf8", mode: 0o600 });
+      chmodQuietly(serverEnvPath, 0o600);
       console.log("[Electron] 📁 Secrets persisted to:", serverEnvPath);
     } catch (e) {
       console.warn("[Electron] Could not persist secrets:", e.message);
@@ -645,9 +882,17 @@ function startNextServer() {
       ...serverEnv,
       DATA_DIR: dataDir,
       PORT: String(serverPort),
+      // Pin the embedded server to loopback. Next.js standalone binds to
+      // `process.env.HOSTNAME || '0.0.0.0'`, and Windows always exports
+      // HOSTNAME as the machine name — which resolves to the LAN address, so
+      // the server listens only there and 127.0.0.1 stays closed. The renderer
+      // then fails to load `http://localhost:<port>`, "ready-to-show" never
+      // fires, and the window (created with `show: false`) is never shown.
+      // Mirrors scripts/dev/run-next-playwright.mjs, which already pins this.
+      HOSTNAME: "127.0.0.1",
       NODE_ENV: "production",
       ELECTRON_RUN_AS_NODE: "1",
-      NODE_PATH: resolveServerNodePath(serverEnv),
+      NODE_PATH: resolveServerNodePath(serverEnv, resolvePackNodePaths(dataDir)),
       NODE_OPTIONS: serverNodeOptions,
     },
     stdio: "pipe",
@@ -701,6 +946,63 @@ function stopNextServer() {
     killProcessTree(nextServer, { signal: "SIGTERM" });
     nextServer = null;
   }
+}
+
+// ── Health Watchdog ─────────────────────────────────────────
+// The embedded server can die on its own (OOM kill, user SIGTERM, port stolen by a
+// stale process) and never come back — the tray keeps running with a dead backend
+// and every dashboard call fails. Probe the cheap /api/health/ping on a LOW frequency
+// (5 min — not a hot loop) and restart the server only after N consecutive misses,
+// so one slow/loaded response can never trigger a restart. Remote mode and dev are
+// skipped: the server isn't ours to respawn.
+const HEALTH_WATCHDOG_INTERVAL_MS = 5 * 60 * 1000;
+let healthWatchdogTimer = null;
+let healthWatchdogFailures = 0;
+let lastHealthRestartAt = 0;
+
+async function runHealthWatchdogTick() {
+  if (app.isQuitting || isServerStopped || isDev || remoteServerUrl) return;
+
+  if (await probeServer(getServerReadinessUrl())) {
+    healthWatchdogFailures = 0;
+    return;
+  }
+
+  healthWatchdogFailures += 1;
+  if (
+    !shouldRestartHealthCheck(
+      { consecutiveFailures: healthWatchdogFailures, lastRestartAt: lastHealthRestartAt },
+      { now: Date.now() }
+    )
+  ) {
+    return;
+  }
+  healthWatchdogFailures = 0;
+  lastHealthRestartAt = Date.now();
+
+  console.warn("[Electron] Health check failed — restarting embedded server");
+  sendToRenderer("server-status", { status: "restarting", port: serverPort });
+
+  const serverToStop = nextServer;
+  stopNextServer();
+  await waitForServerExit(serverToStop);
+  startNextServer();
+
+  const ready = await waitForServer(getServerReadinessUrl());
+  sendToRenderer("server-status", {
+    status: ready ? "running" : "error",
+    port: serverPort,
+  });
+  if (ready && mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.reload();
+  }
+}
+
+function startHealthWatchdog() {
+  if (healthWatchdogTimer) return;
+  healthWatchdogTimer = setInterval(() => {
+    void runHealthWatchdogTick();
+  }, HEALTH_WATCHDOG_INTERVAL_MS);
 }
 
 // Linux-specific autostart helpers using standard .desktop entry placement
@@ -777,7 +1079,21 @@ function setupIpcHandlers() {
     platform: process.platform,
     isDev,
     port: serverPort,
+    remoteServerUrl,
   }));
+
+  // ── Remote Server Mode: prompt window IPC (main-process-only trust
+  // boundary — this window never loads remote/untrusted content) ──
+  ipcMain.handle("remote-server-prompt:get-initial-url", () => remoteServerUrl || "");
+
+  ipcMain.on("remote-server-prompt:submit", (_event, url) => {
+    remoteServerPromptWindow?.close();
+    void setRemoteServerUrl(url);
+  });
+
+  ipcMain.on("remote-server-prompt:cancel", () => {
+    remoteServerPromptWindow?.close();
+  });
 
   ipcMain.handle("open-external", (_event, url) => {
     try {
@@ -798,7 +1114,7 @@ function setupIpcHandlers() {
     stopNextServer();
     await waitForServerExit(serverToStop);
     startNextServer();
-    await waitForServer(getServerUrl());
+    await waitForServer(getServerReadinessUrl());
     return { success: true };
   });
 
@@ -843,48 +1159,6 @@ function setupIpcHandlers() {
 
   ipcMain.handle("get-app-version", () => app.getVersion());
 
-  // ── Web-Cookie Login IPC Handlers ──────────────────────────
-  // Forward login status events to the renderer. Registered ONCE here — never
-  // inside the login:start handler, which would attach a fresh listener (and
-  // duplicate every subsequent status event) on each invocation.
-  loginManager.on("status", (status) => {
-    sendToRenderer("login:status", status);
-  });
-
-  ipcMain.handle("login:start", async (_event, providerId, options) => {
-    const result = await loginManager.startLogin(providerId, options);
-
-    // Persist extracted credentials
-    if (result.success && result.credentials) {
-      try {
-        // Store as JSON blob under the provider ID
-        const { persistSecret: ps } = require("../src/lib/db/secrets");
-        if (typeof ps === "function") {
-          ps(providerId, JSON.stringify(result.credentials));
-        }
-        sendToRenderer("login:status", {
-          providerId,
-          status: "persisted",
-          message: "Credentials saved",
-        });
-      } catch (err) {
-        console.error("[Electron] Failed to persist credentials:", err);
-        return { success: false, error: "Extracted but failed to save credentials" };
-      }
-    }
-
-    return result;
-  });
-
-  ipcMain.handle("login:cancel", async () => {
-    loginManager.cancel();
-    return { success: true };
-  });
-
-  ipcMain.handle("login:status", async () => {
-    return { active: loginManager.getActiveProvider() !== null };
-  });
-
   // Autostart management handlers
   ipcMain.handle("get-autostart-status", () => {
     if (process.platform === "linux") {
@@ -900,7 +1174,6 @@ function setupIpcHandlers() {
     try {
       app.setLoginItemSettings({
         openAtLogin: true,
-        openAsHidden: true,
         args: ["--hidden"],
       });
       return true;
@@ -936,29 +1209,41 @@ app.whenReady().then(async () => {
     process.argv.includes("--headless") ||
     process.argv.includes("--cli") ||
     process.env.OMNIROUTE_HEADLESS === "true";
+  const startHidden =
+    !isHeadless &&
+    shouldStartHidden({
+      argv: process.argv,
+    });
+  keepAliveWithoutWindows = startHidden;
 
   // Fix #1: Start server and WAIT for readiness before showing window
   startNextServer();
+  if (!isHeadless) {
+    createTray();
+  }
+
   let serverReady = true;
   if (!isDev) {
-    // Probe the auth-exempt health endpoint (not the root URL, which may redirect).
-    serverReady = await waitForServer(`${getServerUrl()}/api/monitoring/health`);
+    // Probe the lightweight auth-exempt endpoint instead of aggregating full monitoring state.
+    serverReady = await waitForServer(getServerReadinessUrl());
   }
 
   if (isHeadless) {
     console.log("[Electron] Headless mode active — UI window and tray icon skipped");
+  } else if (startHidden) {
+    console.log("[Electron] Launched hidden in background tray without a renderer");
   } else {
-    createWindow();
-    createTray();
+    showMainWindow();
   }
 
   setupIpcHandlers();
   setupAutoUpdater();
+  startHealthWatchdog();
 
   // If readiness timed out (e.g. very long first-launch migrations), don't leave the
   // window stuck on a hanging connection — keep polling and reload once it responds (#2460).
-  if (!isDev && !serverReady && !isHeadless) {
-    void waitForServer(`${getServerUrl()}/api/monitoring/health`, 300000).then((ready) => {
+  if (!isDev && !serverReady && !isHeadless && !startHidden) {
+    void waitForServer(getServerReadinessUrl(), 300000).then((ready) => {
       if (ready && mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.loadURL(getServerUrl());
       }
@@ -975,11 +1260,7 @@ app.whenReady().then(async () => {
   // macOS: recreate window when dock icon clicked
   app.on("activate", () => {
     if (isHeadless) return;
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    } else if (mainWindow) {
-      mainWindow.show();
-    }
+    showMainWindow();
   });
 });
 
@@ -989,13 +1270,24 @@ app.on("window-all-closed", () => {
     process.argv.includes("--headless") ||
     process.argv.includes("--cli") ||
     process.env.OMNIROUTE_HEADLESS === "true";
-  if (process.platform !== "darwin" && !isHeadless) {
+  if (
+    process.platform !== "darwin" &&
+    !isHeadless &&
+    !keepAliveWithoutWindows &&
+    closeBehavior !== CLOSE_BEHAVIOR_UNLOAD
+  ) {
     app.quit();
   }
 });
 
 // Clean up before quit
 app.on("before-quit", async (event) => {
+  app.isQuitting = true;
+  if (healthWatchdogTimer) {
+    clearInterval(healthWatchdogTimer);
+    healthWatchdogTimer = null;
+  }
+
   if (nextServer && !isServerStopped) {
     event.preventDefault(); // Stop immediate quit
     app.isQuitting = true;

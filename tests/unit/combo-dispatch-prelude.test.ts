@@ -89,7 +89,7 @@ function setup(combo: ComboInput) {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
   else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
   if (ORIGINAL_API_KEY_SECRET === undefined) delete process.env.API_KEY_SECRET;
@@ -457,8 +457,41 @@ test("tryPinnedModelDispatch: serves the pinned response when the pin is healthy
   );
 });
 
+test("tryPinnedModelDispatch: expands the combo system_message template on the pinned path (#5501)", async () => {
+  const ctx = setup({
+    name: "pinned-combo",
+    strategy: "priority",
+    models: [{ model: `${HEALTHY_PROVIDER}/live` }],
+    config: {},
+    system_message: "Model: {{MODEL_ID}}",
+  });
+  ctx.body = {
+    messages: [
+      { role: "system", content: "Model: {{MODEL_ID}}" },
+      { role: "user", content: "hi" },
+    ],
+  };
+  await seedHealthyPinProvider();
+  const seen: string[] = [];
+  const res = await tryPinnedModelDispatch({
+    body: ctx.body,
+    combo: ctx.combo,
+    pinnedModel: `${HEALTHY_PROVIDER}/live`,
+    allCombos: [],
+    config: ctx.config,
+    clientRequestedStream: false,
+    handleSingleModelWithTimeout: async (received: Record<string, unknown>) => {
+      seen.push((received.messages as { content: string }[])[0].content);
+      return okResponse("pinned answer");
+    },
+    log: ctx.log,
+  });
+  assert.ok(res, "the healthy pin must be served");
+  assert.deepEqual(seen, [`Model: ${HEALTHY_PROVIDER}/live`]);
+});
+
 test("tryPinnedModelDispatch: fails over when the pinned model returns a transient status", async () => {
-  for (const status of [408, 429, 500, 502, 503, 504]) {
+  for (const status of [401, 408, 429, 500, 502, 503, 504]) {
     const ctx = pinCtx();
     const { res } = await dispatchHealthyPin(
       ctx,
@@ -571,6 +604,82 @@ test("tryRuntimeUnitDispatch: round-robin rotates across successive dispatches",
     ["leafA", "leafB"],
     "both units must be reachable through the rotation"
   );
+});
+
+test("tryRuntimeUnitDispatch: sticky weighted keeps quota-only fallback dormant", async () => {
+  const combo = {
+    ...twoRefCombo("weighted-quota-dormant", "weighted", { stickyWeightedLimit: 5 }),
+    models: [
+      { kind: "combo-ref", comboName: "leafA", fallbackOnlyOnQuotaExhaustion: true },
+      { kind: "combo-ref", comboName: "leafB" },
+    ],
+  };
+  const ctx = setup(combo);
+  const units = resolveComboRuntimeUnits(ctx.combo, [ctx.combo, LEAF_A, LEAF_B], "execute", 3);
+  const protectedUnit = units.find(
+    (unit) => unit.kind === "combo-ref" && unit.fallbackOnlyOnQuotaExhaustion === true
+  );
+  assert.ok(protectedUnit);
+  recordStickyWeightedSuccess(combo.name, protectedUnit.executionKey, 5);
+
+  const recursedInto: string[] = [];
+  const result = await tryRuntimeUnitDispatch({
+    body: ctx.body,
+    combo: ctx.combo,
+    config: ctx.config,
+    strategy: "weighted",
+    allCombos: [ctx.combo, LEAF_A, LEAF_B],
+    handleSingleModel: async () => okResponse("raw"),
+    handleSingleModelWithTimeout: async () => okResponse("wrapped"),
+    log: ctx.log,
+    settings: {},
+    runCombo: async (options) => {
+      recursedInto.push(options.combo.name);
+      return options.combo.name === "leafA"
+        ? new Response("unavailable", { status: 503 })
+        : okResponse("backup");
+    },
+  });
+  assert.equal(result?.status, 200);
+  assert.deepEqual(recursedInto, [protectedUnit.comboName, protectedUnit.comboName, "leafB"]);
+});
+
+test("tryRuntimeUnitDispatch: protected execute response validation returns local 502", async () => {
+  const combo = {
+    name: "protected-quality-execute",
+    strategy: "priority",
+    models: [
+      { kind: "model", model: "p/invalid", fallbackOnlyOnQuotaExhaustion: true },
+      COMBO_REF_STEP,
+    ],
+    config: {
+      nestedComboMode: "execute",
+      maxRetries: 0,
+      responseValidation: { minContentLength: 100 },
+    },
+  };
+  const ctx = setup(combo);
+  const calls: string[] = [];
+  const result = await tryRuntimeUnitDispatch({
+    body: ctx.body,
+    combo: ctx.combo,
+    config: ctx.config,
+    strategy: "priority",
+    allCombos: [ctx.combo, LEAF_COMBO],
+    handleSingleModel: async () => okResponse("raw"),
+    handleSingleModelWithTimeout: async (_body, modelStr) => {
+      calls.push(modelStr);
+      return okResponse("short");
+    },
+    log: ctx.log,
+    settings: {},
+    runCombo: async () => {
+      calls.push("backup");
+      return okResponse("backup");
+    },
+  });
+  assert.equal(result?.status, 502);
+  assert.deepEqual(calls, ["p/invalid"]);
 });
 
 test("tryRuntimeUnitDispatch: weighted honors a previously recorded sticky unit", async () => {

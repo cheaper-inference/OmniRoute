@@ -10,11 +10,14 @@ const ORIGINAL_API_KEY_SECRET = process.env.API_KEY_SECRET;
 process.env.API_KEY_SECRET = "test-usage-analytics-secret";
 
 const core = await import("../../src/lib/db/core.ts");
-const localDb = await import("../../src/lib/localDb.ts");
+const { updatePricing } = await import("@/lib/db/settings");
+const localDb = { updatePricing };
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
+const aggregateHistory = await import("../../src/lib/usage/aggregateHistory.ts");
 const analyticsRoute = await import("../../src/app/api/usage/analytics/route.ts");
+const analyticsCache = await import("../../src/lib/usage/analyticsResponseCache.ts");
 
 const clearPendingRequests = usageHistory.clearPendingRequests;
 const EXPECTED_TOTAL_COST = 0.020925;
@@ -22,9 +25,13 @@ const EXPECTED_TOTAL_COST = 0.020925;
 async function resetStorage() {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   clearPendingRequests();
+  // The route caches any response that took >= 1 s to build, keyed only by the
+  // query string. On a loaded runner one slow build would serve the previous
+  // test's data to the next one, so every test starts from an empty cache.
+  analyticsCache.clearAnalyticsResponseCache();
 }
 
 async function seedAnalyticsData() {
@@ -76,7 +83,7 @@ test.beforeEach(async () => {
 test.after(() => {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 
   if (ORIGINAL_API_KEY_SECRET === undefined) {
     delete process.env.API_KEY_SECRET;
@@ -116,6 +123,37 @@ test("GET /api/usage/analytics includes dailyTrend array with cost data", async 
   assertClose(dailyCostTotal, body.summary.totalCost);
 });
 
+test("GET /api/usage/analytics zero-fills inactive models in dailyByModel", async () => {
+  const db = core.getDbInstance();
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const dates = [yesterday, today].map((date) => date.toISOString().slice(0, 10));
+
+  db.prepare(
+    `INSERT INTO usage_history (provider, model, connection_id, tokens_input, tokens_output, success, latency_ms, timestamp)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run("openai", "model-a", "openai-conn", 100, 50, 1, 200, `${dates[0]}T12:00:00.000Z`);
+  db.prepare(
+    `INSERT INTO usage_history (provider, model, connection_id, tokens_input, tokens_output, success, latency_ms, timestamp)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run("anthropic", "model-b", "anthropic-conn", 200, 20, 1, 250, `${dates[1]}T12:00:00.000Z`);
+
+  const response = await analyticsRoute.GET(makeRequest("http://localhost/api/usage/analytics"));
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(body.modelNames, ["model-a", "model-b"]);
+  assert.deepEqual(body.dailyByModel, [
+    { date: dates[0], "model-a": 150, "model-b": 0 },
+    { date: dates[1], "model-a": 0, "model-b": 220 },
+  ]);
+  assert.deepEqual(
+    body.dailyByModel.map((row) => body.modelNames.reduce((sum, model) => sum + row[model], 0)),
+    body.dailyTrend.map((row) => row.totalTokens)
+  );
+});
+
 test("GET /api/usage/analytics includes byModel array with cost calculations", async () => {
   await seedAnalyticsData();
 
@@ -149,6 +187,126 @@ test("GET /api/usage/analytics resolves Codex GPT-5.5 pricing through provider a
   assertClose(body.byProvider[0].cost, 0.02);
   assert.equal(body.byModel[0].model, "gpt-5.5");
   assertClose(body.byModel[0].cost, 0.02);
+});
+
+test("GET /api/usage/analytics can include flat-rate provider estimates for the costs page", async () => {
+  const db = core.getDbInstance();
+  db.prepare(
+    `INSERT INTO usage_history (provider, model, connection_id, tokens_input, tokens_output, success, latency_ms, timestamp)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(
+    "claude",
+    "claude-opus-5",
+    "claude-code-conn",
+    1_000_000,
+    1_000_000,
+    1,
+    250,
+    new Date().toISOString()
+  );
+
+  const defaultResponse = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?presets=1d")
+  );
+  const defaultBody = await defaultResponse.json();
+  assert.equal(defaultResponse.status, 200);
+  assertClose(defaultBody.summary.totalCost, 0);
+  assertClose(defaultBody.byProvider[0].cost, 0);
+  assertClose(defaultBody.byModel[0].cost, 0);
+  assertClose(defaultBody.presetSummaries["1d"].totalCost, 0);
+  assertClose(
+    defaultBody.byProvider.reduce((sum: number, row: { cost: number }) => sum + row.cost, 0),
+    defaultBody.summary.totalCost
+  );
+
+  const estimatedResponse = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?presets=1d&includeFlatRateEstimates=true")
+  );
+  const estimatedBody = await estimatedResponse.json();
+  assert.equal(estimatedResponse.status, 200);
+  assert.equal(estimatedBody.includesFlatRateEstimates, true);
+  assertClose(estimatedBody.summary.totalCost, 30);
+  assert.equal(estimatedBody.byProvider[0].provider, "Claude Code");
+  assertClose(estimatedBody.byProvider[0].cost, 30);
+  assertClose(estimatedBody.byModel[0].cost, 30);
+  assertClose(estimatedBody.byAccount[0].cost, 30);
+  assertClose(estimatedBody.byServiceTier[0].cost, 30);
+  assertClose(estimatedBody.presetSummaries["1d"].totalCost, 30);
+  assertClose(
+    estimatedBody.byProvider.reduce((sum: number, row: { cost: number }) => sum + row.cost, 0),
+    estimatedBody.summary.totalCost
+  );
+});
+
+test("GET /api/usage/analytics preserves archived flat-rate estimates without changing billed cost", async () => {
+  const db = core.getDbInstance();
+  db.prepare(
+    `INSERT INTO daily_usage_summary
+      (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cost)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  ).run("claude", "claude-opus-5", "2024-01-01", 2, 1_000_000, 1_000_000, 42.5);
+
+  const billedResponse = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?range=all")
+  );
+  const billedBody = await billedResponse.json();
+  assert.equal(billedResponse.status, 200);
+  assertClose(billedBody.summary.totalCost, 0);
+  assertClose(billedBody.byProvider[0].cost, 0);
+
+  const estimatedResponse = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?range=all&includeFlatRateEstimates=true")
+  );
+  const estimatedBody = await estimatedResponse.json();
+  assert.equal(estimatedResponse.status, 200);
+  assertClose(estimatedBody.summary.totalCost, 42.5);
+  assertClose(estimatedBody.byProvider[0].cost, 42.5);
+  assertClose(estimatedBody.byModel[0].cost, 42.5);
+});
+
+test("rollupUsageHistoryBeforeDate stores API-equivalent cost before deleting raw usage", async () => {
+  const db = core.getDbInstance();
+  db.prepare(
+    `INSERT INTO usage_history
+      (provider, model, connection_id, tokens_input, tokens_output, tokens_cache_read,
+       tokens_cache_creation, tokens_reasoning, service_tier, success, latency_ms, timestamp)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(
+    "claude",
+    "claude-opus-5",
+    "archived-claude",
+    1_000_000,
+    1_000_000,
+    0,
+    0,
+    0,
+    "standard",
+    1,
+    250,
+    "2024-01-01T12:00:00.000Z"
+  );
+
+  const result = await aggregateHistory.rollupUsageHistoryBeforeDate("2024-02-01");
+  assert.equal(result.errors, 0);
+  const retryResult = await aggregateHistory.rollupUsageHistoryBeforeDate("2024-02-01");
+  assert.equal(retryResult.errors, 0);
+
+  const archived = db
+    .prepare(
+      `SELECT total_requests, total_input_tokens, total_output_tokens, total_cost
+       FROM daily_usage_summary
+       WHERE provider = ? AND model = ? AND date = ?`
+    )
+    .get("claude", "claude-opus-5", "2024-01-01") as {
+    total_requests: number;
+    total_input_tokens: number;
+    total_output_tokens: number;
+    total_cost: number;
+  };
+  assert.equal(archived.total_requests, 1);
+  assert.equal(archived.total_input_tokens, 1_000_000);
+  assert.equal(archived.total_output_tokens, 1_000_000);
+  assertClose(archived.total_cost, 30);
 });
 
 test("GET /api/usage/analytics applies Codex Fast tier multipliers and exposes tier split", async () => {
@@ -507,6 +665,52 @@ test("GET /api/usage/analytics does not persist guessed API key attribution", as
   assert.equal(row.api_key_name, null);
 });
 
+test("GET /api/usage/analytics?view=apiKeys returns only lifetime totals per API key", async () => {
+  const usedKey = await apiKeysDb.createApiKey("Used Key", "machine1234567890");
+  const idleKey = await apiKeysDb.createApiKey("Idle Key", "machine1234567890");
+  const db = core.getDbInstance();
+  const now = Date.now();
+  const at = (msAgo: number) => new Date(now - msAgo).toISOString();
+  const insertUsage = db.prepare(
+    `INSERT INTO usage_history (provider, model, connection_id, api_key_id, api_key_name, tokens_input, tokens_output, success, latency_ms, timestamp)
+     VALUES (?, ?, 'c1', ?, ?, ?, ?, 1, 200, ?)`
+  );
+  insertUsage.run("openai", "gpt-4o", usedKey.id, "Used Key", 100, 50, at(86_400_000));
+  insertUsage.run("openai", "gpt-4o", usedKey.id, "Old Name", 200, 100, at(60_000));
+  insertUsage.run("anthropic", "claude-sonnet", usedKey.id, "Used Key", 300, 30, at(120_000));
+  // Rows recorded before per-key ids carry only the key name.
+  insertUsage.run("openai", "gpt-4o", null, "Idle Key", 1000, 1000, at(30_000));
+
+  const response = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?range=all&view=apiKeys")
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(Object.keys(body), ["byApiKey"]);
+  const totalsById = new Map(body.byApiKey.map((entry) => [entry.apiKeyId, entry]));
+  const used = totalsById.get(usedKey.id);
+  assert.equal(used.apiKeyName, "Used Key");
+  assert.equal(used.requests, 3);
+  // gpt-4o: 300 in × $2.50 + 150 out × $10; claude-sonnet: 300 in × $3 + 30 out × $15 (per 1M).
+  assertClose(used.cost, 0.0036);
+  assert.equal(used.lastUsed, at(60_000));
+  assert.deepEqual(totalsById.get(idleKey.id), {
+    apiKeyId: idleKey.id,
+    apiKeyName: "Idle Key",
+    requests: 0,
+    cost: 0,
+    lastUsed: at(30_000),
+  });
+
+  const fullReport = await (
+    await analyticsRoute.GET(makeRequest("http://localhost/api/usage/analytics?range=all"))
+  ).json();
+  const fullEntry = fullReport.byApiKey.find((entry) => entry.apiKeyId === usedKey.id);
+  assert.equal(fullEntry.requests, used.requests);
+  assertClose(fullEntry.cost, used.cost);
+});
+
 test("GET /api/usage/analytics returns weeklyPattern for the costs dashboard", async () => {
   await seedAnalyticsData();
 
@@ -589,4 +793,228 @@ test("GET /api/usage/analytics does not throw Unknown named parameter with apiKe
   // The exact count depends on raw-vs-aggregated boundary; we only need to
   // confirm the endpoint returns 200 without throwing.
   assert.ok(typeof body.summary.totalRequests === "number");
+});
+
+test("rollupUsageHistoryBeforeDate prices each request, not the day's summed tokens", async () => {
+  const db = core.getDbInstance();
+  const costCalculator = await import("../../src/lib/usage/costCalculator.ts");
+
+  // Two requests, same provider/model/day/tier, so the rollup's
+  // GROUP BY provider, model, date, serviceTier collapses them into one row.
+  //
+  // The first request is cache-heavy: cache_read exceeds tokens_input. Pricing
+  // clamps non-cached input at zero per request (costCalculator "nonCachedInput"),
+  // so that surplus must NOT be allowed to absorb another request's billable
+  // input. Summing tokens first and pricing once lets exactly that happen.
+  const rows = [
+    { input: 1_000, output: 0, cacheRead: 5_000 },
+    { input: 9_000, output: 0, cacheRead: 0 },
+  ];
+
+  for (const row of rows) {
+    db.prepare(
+      `INSERT INTO usage_history
+        (provider, model, connection_id, tokens_input, tokens_output, tokens_cache_read,
+         tokens_cache_creation, tokens_reasoning, service_tier, success, latency_ms, timestamp)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      "openai",
+      "gpt-4o",
+      "clamp-conn",
+      row.input,
+      row.output,
+      row.cacheRead,
+      0,
+      0,
+      "standard",
+      1,
+      200,
+      "2024-03-01T12:00:00.000Z"
+    );
+  }
+
+  // Ground truth: price every request individually, exactly as the live
+  // analytics path does for raw (non-archived) usage.
+  let expectedCost = 0;
+  for (const row of rows) {
+    expectedCost += await costCalculator.calculateCost(
+      "openai",
+      "gpt-4o",
+      {
+        input: row.input,
+        output: row.output,
+        cacheRead: row.cacheRead,
+        cacheCreation: 0,
+        reasoning: 0,
+      },
+      {
+        provider: "openai",
+        model: "gpt-4o",
+        serviceTier: "standard",
+        flatRateAsZero: false,
+      }
+    );
+  }
+
+  const result = await aggregateHistory.rollupUsageHistoryBeforeDate("2024-04-01");
+  assert.equal(result.errors, 0);
+
+  const archived = db
+    .prepare(
+      `SELECT total_cost FROM daily_usage_summary
+       WHERE provider = ? AND model = ? AND date = ?`
+    )
+    .get("openai", "gpt-4o", "2024-03-01") as { total_cost: number };
+
+  // Retention must preserve the billed value. Archiving a day may not silently
+  // discount it just because the day's requests were grouped before pricing.
+  assertClose(archived.total_cost, expectedCost);
+});
+
+test("GET /api/usage/analytics uses per-row provider_cost_usd instead of re-pricing its tokens", async () => {
+  // A row carrying a provider-reported cost (credit-metered providers such as Kiro,
+  // xAI's exact cost) is billed by that cost on every breakdown; its tokens are
+  // display-only and must not be charged again through the pricing table.
+  await localDb.updatePricing({
+    kiro: { "gpt-5.6-luna": { input: 999, output: 999 } },
+  });
+  const apiKey = await apiKeysDb.createApiKey("Metered key", "test-machine");
+  const db = core.getDbInstance();
+  db.prepare(
+    `INSERT INTO usage_history (provider, model, connection_id, account_key, api_key_id, api_key_name,
+       tokens_input, tokens_output, provider_credits, provider_cost_usd, success, latency_ms, timestamp)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(
+    "kiro",
+    "gpt-5.6-luna",
+    "metered-conn",
+    "metered-account",
+    apiKey.id,
+    apiKey.name,
+    100000,
+    50000,
+    0.5,
+    0.01,
+    1,
+    200,
+    new Date().toISOString()
+  );
+
+  const response = await analyticsRoute.GET(makeRequest("http://localhost/api/usage/analytics"));
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assertClose(body.summary.totalCost, 0.01);
+  const kiroProvider = body.byProvider.find((row: { provider: string }) =>
+    row.provider.toLowerCase().includes("kiro")
+  );
+  assert.ok(kiroProvider);
+  assertClose(kiroProvider.cost, 0.01);
+  assert.equal(body.byAccount.length, 1);
+  assertClose(body.byAccount[0].cost, 0.01);
+  assert.equal(body.byApiKey.length, 1);
+  assertClose(body.byApiKey[0].cost, 0.01);
+  const kiroModel = body.byModel.find((row: { provider: string }) =>
+    row.provider.toLowerCase().includes("kiro")
+  );
+  assert.ok(kiroModel);
+  assertClose(kiroModel.cost, 0.01);
+  assert.equal(kiroModel.promptTokens, 100000);
+  const dailyCostTotal = body.dailyTrend.reduce(
+    (sum: number, row: { cost: number }) => sum + row.cost,
+    0
+  );
+  assertClose(dailyCostTotal, 0.01);
+
+  // The API Manager's lightweight per-key totals view bills the same reported cost.
+  const totalsResponse = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?view=apiKeys")
+  );
+  const totals = await totalsResponse.json();
+  assert.equal(totalsResponse.status, 200);
+  const meteredKey = totals.byApiKey.find(
+    (row: { apiKeyId: string }) => row.apiKeyId === apiKey.id
+  );
+  assert.ok(meteredKey);
+  assert.equal(meteredKey.requests, 1);
+  assertClose(meteredKey.cost, 0.01);
+});
+
+test("GET /api/usage/analytics keeps measured and token-priced usage apart after rollup", async () => {
+  await localDb.updatePricing({
+    xai: { "grok-reported": { input: 1, output: 2 } },
+  });
+  const db = core.getDbInstance();
+  const timestamp = new Date(Date.now() - 400 * 86_400_000).toISOString();
+  const insert = db.prepare(
+    `INSERT INTO usage_history
+       (provider, model, tokens_input, tokens_output, provider_cost_usd, success, timestamp)
+     VALUES (?, ?, ?, ?, ?, 1, ?)`
+  );
+  // Same token shape, one with a reported cost and one without.
+  insert.run("xai", "grok-reported", 100000, 50000, 0.01, timestamp);
+  insert.run("xai", "grok-reported", 100000, 50000, null, timestamp);
+  insert.run("openai", "gpt-4o", 100000, 0, null, timestamp);
+
+  assert.equal((await aggregateHistory.rollupUsageHistoryBeforeDate("2100-01-01")).errors, 0);
+
+  const response = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?range=all")
+  );
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  // xai: 0.01 reported + (100k × $1 + 50k × $2)/M = 0.21; openai: 100k × $2.5/M = 0.25.
+  assertClose(body.summary.totalCost, 0.46);
+  assertClose(
+    body.byProvider.find((row: { provider: string }) => row.provider.toLowerCase().includes("xai"))
+      .cost,
+    0.21
+  );
+  assertClose(
+    body.byProvider.find((row: { provider: string }) =>
+      row.provider.toLowerCase().includes("openai")
+    ).cost,
+    0.25
+  );
+  const grok = body.byModel.find((row: { model: string }) => row.model === "grok-reported");
+  assertClose(grok.cost, 0.21);
+  assert.equal(grok.promptTokens, 200000);
+  assertClose(
+    body.dailyTrend.reduce((sum: number, row: { cost: number }) => sum + row.cost, 0),
+    0.46
+  );
+});
+
+test("GET /api/usage/analytics bills a failed credit-metered request only by its measurement", async () => {
+  await localDb.updatePricing({ kiro: { "gpt-5.6-luna": { input: 999, output: 999 } } });
+  const apiKey = await apiKeysDb.createApiKey("Failed dashboard", "machine-failed-dash");
+
+  await usageHistory.saveRequestUsage({
+    provider: "kiro",
+    model: "gpt-5.6-luna",
+    apiKeyId: apiKey.id,
+    timestamp: new Date().toISOString(),
+    tokens: { prompt_tokens: 100000, completion_tokens: 0 },
+    success: false,
+    status: "502",
+  });
+  await usageHistory.saveRequestUsage({
+    provider: "kiro",
+    model: "gpt-5.6-luna",
+    apiKeyId: apiKey.id,
+    timestamp: new Date(Date.now() + 1000).toISOString(),
+    tokens: { prompt_tokens: 100000, completion_tokens: 0, cost_in_usd_ticks: 100000000 },
+    success: false,
+    status: "502",
+  });
+
+  const response = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?range=all")
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assertClose(body.summary.totalCost, 0.01);
+  assert.equal(body.byApiKey.length, 1);
+  assertClose(body.byApiKey[0].cost, 0.01);
 });

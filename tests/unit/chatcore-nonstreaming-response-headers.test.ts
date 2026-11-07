@@ -6,14 +6,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-const { buildNonStreamingResponseHeaders } = await import(
-  "../../open-sse/handlers/chatCore/nonStreamingResponseHeaders.ts"
-);
+const { buildNonStreamingResponseHeaders } =
+  await import("../../open-sse/handlers/chatCore/nonStreamingResponseHeaders.ts");
 
 function makeDeps(now = 1000) {
   const metaCalls: Array<{ headers: Record<string, string>; meta: Record<string, unknown> }> = [];
   const deps = {
-    attachOmniRouteMetaHeaders: (headers: Record<string, string>, meta: Record<string, unknown>) => {
+    attachOmniRouteMetaHeaders: (
+      headers: Record<string, string>,
+      meta: Record<string, unknown>
+    ) => {
       metaCalls.push({ headers, meta });
       headers["x-omniroute-meta"] = "attached";
     },
@@ -34,6 +36,17 @@ function baseArgs(overrides: Record<string, unknown> = {}) {
     ...overrides,
   } as Parameters<typeof buildNonStreamingResponseHeaders>[0];
 }
+
+function acceptsAttachMetaInputContract(args: {
+  responseUsage: Record<string, unknown> | null | undefined;
+  requestId: string | null | undefined;
+}) {
+  return args;
+}
+
+test("builder input types match the metadata attachment contract", () => {
+  acceptsAttachMetaInputContract(baseArgs());
+});
 
 test("static headers: Content-Type json + cache MISS", () => {
   const { deps } = makeDeps();
@@ -59,7 +72,10 @@ test("meta receives provider/model/cacheHit false/latency/usage/cost/requestId",
 
 test("no compression meta → no compression header", () => {
   const { deps } = makeDeps();
-  const h = buildNonStreamingResponseHeaders(baseArgs({ compressionResponseMeta: undefined }), deps);
+  const h = buildNonStreamingResponseHeaders(
+    baseArgs({ compressionResponseMeta: undefined }),
+    deps
+  );
   assert.ok(!Object.values(h).includes("engine:x"));
 });
 
@@ -70,4 +86,17 @@ test("compression meta present → compression header set to that value", () => 
     deps
   );
   assert.ok(Object.values(h).includes("engine:x; source=header"));
+});
+
+test("forwards fallbackAttempts into the non-streaming meta payload", () => {
+  const { deps, metaCalls } = makeDeps();
+  buildNonStreamingResponseHeaders(baseArgs({ fallbackAttempts: 3 }), deps);
+  assert.equal(metaCalls.length, 1);
+  assert.equal(metaCalls[0].meta.fallbackAttempts, 3);
+});
+
+test("omitted fallbackAttempts does not invent a count", () => {
+  const { deps, metaCalls } = makeDeps();
+  buildNonStreamingResponseHeaders(baseArgs(), deps);
+  assert.equal("fallbackAttempts" in metaCalls[0].meta, false);
 });

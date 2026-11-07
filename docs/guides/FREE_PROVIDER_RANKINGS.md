@@ -1,7 +1,7 @@
 ---
 title: "Free Provider Rankings (Arena ELO)"
-version: 3.8.40
-lastUpdated: 2026-06-28
+version: 3.8.50
+lastUpdated: 2026-08-02
 ---
 
 # Free Provider Rankings (Arena ELO)
@@ -15,7 +15,8 @@ lastUpdated: 2026-06-28
 
 ## What It Is
 
-OmniRoute aggregates 160+ providers, many of which expose a **free tier** (no-auth,
+OmniRoute registers 384 providers, including 155 catalog entries marked **free/no-auth**
+(no-auth,
 free-tier OAuth, or free-tier API key — see the
 [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) and the full
 [Free Tiers directory](../reference/FREE_TIERS.md)). The catch: free providers vary
@@ -127,7 +128,11 @@ Response shape:
 
 The Arena ELO sync engine (`src/lib/arenaEloSync.ts`) fetches two leaderboards — `text`
 and `code` — from the Arena AI leaderboard API
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Each leaderboard entry
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). When that API returns no
+usable board, the engine falls back to the official `lmarena-ai/leaderboard-dataset` on the
+Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` reports `activeSource`, `lastError` and
+`lastFailedAt`. Each leaderboard entry
 carries a model name, vendor, ELO `score`, confidence interval, and vote count.
 
 Leaderboard categories map to OmniRoute task categories:
@@ -168,7 +173,7 @@ stale data.
 The sync runs **on by default**:
 
 - It runs once at server startup and then on a periodic timer
-  (`src/lib/arenaEloSync.ts`, wired from `src/server-init.ts`).
+  (`src/lib/arenaEloSync.ts`, wired from `src/instrumentation-node.ts`).
 - It is **non-blocking and never fatal** — if the upstream fetch fails, OmniRoute keeps
   running and the rankings simply show the last good data (or an empty state).
 
@@ -237,7 +242,7 @@ provider that ships at least one strong free model.
    `user_override → arena_elo → models_dev_tier → static table`). So after you connect
    the top free providers, routing with `model: "auto"` (e.g. `auto/coding`) will
    automatically prefer the higher-quality free models per request. See
-   [Auto-Combo](../routing/AUTO-COMBO.md) for the full 9-factor scoring.
+   [Auto-Combo](../routing/AUTO-COMBO.md) for the full 16-factor scoring.
 
 ---
 
@@ -247,7 +252,7 @@ provider that ships at least one strong free model.
   providers, no credit card required.
 - [Free Tiers directory](../reference/FREE_TIERS.md) — full catalog of free providers
   and their limits.
-- [Auto-Combo](../routing/AUTO-COMBO.md) — the 9-factor routing engine that consumes the
+- [Auto-Combo](../routing/AUTO-COMBO.md) — the 16-factor routing engine that consumes the
   same Arena ELO task-fitness data.
 - [Environment variables](../reference/ENVIRONMENT.md) — `ARENA_ELO_SYNC_ENABLED` /
   `ARENA_ELO_SYNC_INTERVAL` reference.

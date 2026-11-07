@@ -26,6 +26,9 @@
 
 import { Buffer } from "node:buffer";
 
+import { connectObscuraBrowser } from "./obscura.ts";
+import { ensureVirtualDisplay, stopVirtualDisplay } from "./virtualDisplay.ts";
+
 type Browser = import("playwright").Browser;
 type BrowserContext = import("playwright").BrowserContext;
 type Page = import("playwright").Page;
@@ -33,12 +36,24 @@ type Page = import("playwright").Page;
 export interface BrowserPoolContextOptions {
   cookieDomain: string;
   cookieString?: string | null;
+  storageState?: import("playwright").BrowserContextOptions["storageState"];
+  localStorage?: Record<string, string>;
+  localStorageOrigin?: string;
   warmupUrl?: string | null;
   userAgent?: string;
   locale?: string;
   timezone?: string;
   preferCloakbrowser?: boolean;
   proxyProviderKey?: string;
+  /** Some first-party anti-bot flows reject Chromium's headless mode even with valid cookies. */
+  headless?: boolean;
+  /**
+   * Optional system Chrome/Chromium path. Applied in BOTH modes: headless installs
+   * frequently have no Playwright-managed `chromium_headless_shell`, and an executor
+   * that resolved a working system Chrome must not be overridden by a missing
+   * bundled binary (that mismatch surfaced as a launch error rather than a fallback).
+   */
+  executablePath?: string;
 }
 
 export interface PooledContext {
@@ -79,11 +94,23 @@ function createBrowserPoolMetrics(): BrowserPoolMetrics {
   };
 }
 
+type PoolEngine = "obscura" | "cloakbrowser" | "chromium";
+
+interface PendingContextEntry {
+  promise: Promise<PooledContext>;
+  createdAt: number;
+}
+
 interface PoolState {
   browser: Browser | null;
+  /** Engine backing the headless browser, for metrics and stealth detection. */
+  engine: PoolEngine | null;
+  headedBrowser: Browser | null;
   contexts: Map<string, PooledContext>;
-  pendingContexts: Map<string, Promise<PooledContext>>;
+  pendingContexts: Map<string, PendingContextEntry>;
   launching: Promise<Browser> | null;
+  headedLaunching: Promise<Browser> | null;
+  generation: number;
   lastActivity: number;
   idleTimer: NodeJS.Timeout | null;
   evictTimer: NodeJS.Timeout | null;
@@ -100,9 +127,13 @@ const DEFAULT_USER_AGENT =
 
 const state: PoolState = {
   browser: null,
+  engine: null,
+  headedBrowser: null,
   contexts: new Map(),
-  pendingContexts: new Map(),
+  pendingContexts: new Map<string, { promise: Promise<PooledContext>; createdAt: number }>(),
   launching: null,
+  headedLaunching: null,
+  generation: 0,
   lastActivity: 0,
   idleTimer: null,
   evictTimer: null,
@@ -121,7 +152,10 @@ async function resolveCloakLaunch(): Promise<((opts: unknown) => Promise<Browser
   if (state.cloakLaunchResolved) return state.cloakLaunch;
   state.cloakLaunchResolved = true;
   try {
-    const mod = (await import(getCloakbrowserModuleId())) as unknown as {
+    const mod = (await import(
+      /* webpackIgnore: true */
+      getCloakbrowserModuleId()
+    )) as unknown as {
       launch?: (opts: unknown) => Promise<Browser>;
     };
     state.cloakLaunch = mod.launch ?? null;
@@ -159,7 +193,21 @@ function evictStaleContexts(): void {
       pooled.context.close().catch(() => {});
     }
   }
-  if (state.contexts.size === 0 && !state.launching) {
+  // #12179: also evict pendingContexts entries that never resolved, so a hung
+  // launch cannot pin the map (and the pool) open forever.
+  const PENDING_TTL_MS = 5 * 60 * 1000;
+  for (const [key, pending] of state.pendingContexts) {
+    if (now - pending.createdAt > PENDING_TTL_MS) {
+      state.pendingContexts.delete(key);
+      state.metrics.contextsEvicted++;
+    }
+  }
+  if (
+    state.contexts.size === 0 &&
+    state.pendingContexts.size === 0 &&
+    !state.launching &&
+    !state.headedLaunching
+  ) {
     void shutdownPool("all-contexts-evicted");
   }
 }
@@ -209,8 +257,11 @@ export async function resolvePlaywrightProxy(
     }
     return proxy;
   } catch (err) {
-    console.warn("[BrowserPool] Failed to resolve proxy from DB:", err);
-    return undefined;
+    throw new Error(
+      `[BrowserPool] Proxy resolution failed for ${providerKey}; refusing direct connection (fail-closed): ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
   }
 }
 
@@ -222,39 +273,117 @@ export async function resolveBrowserContextProxy(
   return resolvePlaywrightProxy(options.proxyProviderKey ?? contextKey, deps);
 }
 
-async function launchBrowser(): Promise<Browser> {
-  if (state.browser) return state.browser;
-  if (state.launching) return state.launching;
-  state.launching = (async () => {
-    const cloakLaunch = await resolveCloakLaunch();
-    let browser: Browser;
-    if (cloakLaunch) {
-      browser = await cloakLaunch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-dev-shm-usage"],
-      });
-    } else {
-      // Fallback: plain Playwright. Works for Claude web (cookie-only
-      // auth) but DDG's VQD challenge will detect this Chromium build.
-      const { chromium } = await import("playwright");
-      browser = await chromium.launch({
-        headless: true,
-        args: [
-          "--no-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-blink-features=AutomationControlled",
-        ],
-      });
+function currentBrowser(headless: boolean): Browser | null {
+  const browser = headless ? state.browser : state.headedBrowser;
+  if (browser?.isConnected()) return browser;
+  if (browser) setCurrentBrowser(headless, null);
+  return null;
+}
+
+function setCurrentBrowser(headless: boolean, browser: Browser | null): void {
+  if (headless) state.browser = browser;
+  else state.headedBrowser = browser;
+}
+
+function currentBrowserLaunch(headless: boolean): Promise<Browser> | null {
+  return headless ? state.launching : state.headedLaunching;
+}
+
+function setBrowserLaunch(headless: boolean, launch: Promise<Browser> | null): void {
+  if (headless) state.launching = launch;
+  else state.headedLaunching = launch;
+}
+
+function clearBrowserLaunch(headless: boolean, launch: Promise<Browser>): void {
+  if (currentBrowserLaunch(headless) === launch) setBrowserLaunch(headless, null);
+}
+
+export function resolvePlainBrowserLaunchOptions(
+  options: Pick<BrowserPoolContextOptions, "headless" | "executablePath">
+): import("playwright").LaunchOptions {
+  const headless = options.headless !== false;
+  return {
+    headless,
+    // Honour an explicit system Chrome in headless mode too. Without this, a host
+    // that has Chrome installed but no Playwright-managed headless shell fails to
+    // launch at all, even though the executor already resolved a working binary.
+    ...(options.executablePath ? { executablePath: options.executablePath } : {}),
+    args: [
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-blink-features=AutomationControlled",
+      ...(!headless ? ["--window-position=-32000,-32000"] : []),
+    ],
+  };
+}
+
+async function launchBrowserInstance(
+  options: BrowserPoolContextOptions,
+  headless: boolean
+): Promise<Browser> {
+  // A headed browser must be a real windowed Chromium, so the engine
+  // preference below applies to the headless path only.
+  if (!headless) {
+    const { chromium } = await import("playwright");
+    // #15300: no X server (Docker -web image / bare VPS) → start a private Xvfb.
+    const display = await ensureVirtualDisplay();
+    return chromium.launch({
+      ...resolvePlainBrowserLaunchOptions(options),
+      ...(display ? { env: { ...process.env, DISPLAY: display } as Record<string, string> } : {}),
+    });
+  }
+
+  // #12274: prefer Obscura (lightweight, browser-grade CDP) over a full
+  // Chromium; fall back to cloakbrowser, then plain Chromium. Obscura's
+  // lifecycle (one shared `obscura serve` per process) lives in ./obscura.ts,
+  // so executors like cloudflare-playground reuse the same server.
+  const obscura = await connectObscuraBrowser();
+  if (obscura) {
+    state.engine = "obscura";
+    return obscura.browser;
+  }
+
+  const cloakLaunch = await resolveCloakLaunch();
+  if (cloakLaunch) {
+    state.engine = "cloakbrowser";
+    return cloakLaunch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-dev-shm-usage"],
+    });
+  }
+
+  // Fallback: plain Playwright. Works for Claude web (cookie-only auth) but
+  // DDG's VQD challenge will detect this Chromium build.
+  state.engine = "chromium";
+  const { chromium } = await import("playwright");
+  return chromium.launch(resolvePlainBrowserLaunchOptions(options));
+}
+
+async function launchBrowser(options: BrowserPoolContextOptions): Promise<Browser> {
+  const headless = options.headless !== false;
+  const existing = currentBrowser(headless);
+  if (existing) return existing;
+  const pending = currentBrowserLaunch(headless);
+  if (pending) return pending;
+  const generation = state.generation;
+  const launch = (async () => {
+    const browser = await launchBrowserInstance(options, headless);
+
+    if (state.generation !== generation) {
+      await browser.close().catch(() => {});
+      throw new Error("Pool shut down during browser launch");
     }
-    state.browser = browser;
-    state.launching = null;
+    setCurrentBrowser(headless, browser);
     state.metrics.browserLaunches++;
     return browser;
   })();
+  setBrowserLaunch(headless, launch);
   try {
-    return await state.launching;
+    const browser = await launch;
+    clearBrowserLaunch(headless, launch);
+    return browser;
   } catch (err) {
-    state.launching = null;
+    clearBrowserLaunch(headless, launch);
     state.metrics.browserLaunchFailures++;
     throw err;
   }
@@ -314,6 +443,57 @@ function settlePendingContext(key: string, failed: boolean): void {
   state.pendingContexts.delete(key);
 }
 
+// Seed a freshly created context with whatever session material the caller
+// supplied — cookies for cookie-auth providers, localStorage for the ones (zai-web)
+// whose session is a Bearer JWT the page reads at boot. Kept as a leaf helper so
+// the creation closure stays under the complexity ceiling.
+async function seedContextSession(
+  context: BrowserContext,
+  options: BrowserPoolContextOptions
+): Promise<void> {
+  if (options.cookieString) {
+    const cookies = parseCookieString(options.cookieString, options.cookieDomain);
+    if (cookies.length > 0) {
+      await context.addCookies(cookies);
+    }
+  }
+
+  if (!options.localStorage || Object.keys(options.localStorage).length === 0) return;
+
+  const origin = new URL(options.localStorageOrigin || options.warmupUrl || "").origin;
+  await context.addInitScript(
+    ({ expectedOrigin, entries }) => {
+      if (window.location.origin !== expectedOrigin) return;
+      for (const [name, value] of entries) {
+        window.localStorage.setItem(name, value);
+      }
+    },
+    {
+      expectedOrigin: origin,
+      entries: Object.entries(options.localStorage),
+    }
+  );
+}
+
+async function createWarmupPage(
+  context: BrowserContext,
+  warmupUrl: string | null | undefined
+): Promise<Page | null> {
+  if (!warmupUrl) return null;
+  let page: Page | null = null;
+  try {
+    page = await context.newPage();
+    await page.goto(warmupUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+    // Give the warmup a moment for upstream status/auth/country requests. The
+    // first chat request otherwise pays this cost on the hot path.
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return page;
+  } catch {
+    await page?.close().catch(() => {});
+    return null;
+  }
+}
+
 export async function acquireBrowserContext(
   key: string,
   options: BrowserPoolContextOptions
@@ -323,7 +503,9 @@ export async function acquireBrowserContext(
       "browserPool: OMNIROUTE_BROWSER_POOL=off — context requested but pool is disabled"
     );
   }
-  const existing = state.contexts.get(key);
+  const headless = options.headless !== false;
+  const poolKey = `${headless ? "headless" : "headed"}:${key}`;
+  const existing = state.contexts.get(poolKey);
   if (existing) {
     existing.lastUsed = Date.now();
     state.lastActivity = Date.now();
@@ -333,57 +515,31 @@ export async function acquireBrowserContext(
   }
 
   // Dedup concurrent creations for the same key
-  const pending = state.pendingContexts.get(key);
-  if (pending) return pending;
+  const pending = state.pendingContexts.get(poolKey);
+  if (pending) return pending.promise;
 
   const createPromise = (async (): Promise<PooledContext> => {
     const [browser, proxy] = await Promise.all([
-      launchBrowser(),
+      launchBrowser(options),
       resolveBrowserContextProxy(key, options),
     ]);
-    const isStealth = state.cloakLaunch !== null;
+    const isStealth = headless && (state.engine === "obscura" || state.cloakLaunch !== null);
     const context = await browser.newContext({
       userAgent: options.userAgent || DEFAULT_USER_AGENT,
       locale: options.locale || "en-US",
       timezoneId: options.timezone || "America/New_York",
       viewport: { width: 1280, height: 800 },
+      ...(options.storageState ? { storageState: options.storageState } : {}),
       ...(proxy ? { proxy } : {}),
     });
 
-    if (options.cookieString) {
-      const cookies = parseCookieString(options.cookieString, options.cookieDomain);
-      if (cookies.length > 0) {
-        await context.addCookies(cookies);
-      }
-    }
-
-    let warmupPage: Page | null = null;
-    if (options.warmupUrl) {
-      try {
-        warmupPage = await context.newPage();
-        await warmupPage.goto(options.warmupUrl, {
-          waitUntil: "domcontentloaded",
-          timeout: 30000,
-        });
-        // Give the warmup a moment for the upstream's status/auth/country
-        // JSON endpoints to fire. Without this, the first chat request would
-        // pay the warmup cost on the hot path.
-        await new Promise((r) => setTimeout(r, 1500));
-      } catch (err) {
-        try {
-          await warmupPage?.close();
-        } catch {
-          /* ignore */
-        }
-        warmupPage = null;
-        void err;
-      }
-    }
+    await seedContextSession(context, options);
+    const warmupPage = await createWarmupPage(context, options.warmupUrl);
 
     // Guard: if shutdownPool() ran while we were creating this context,
     // the browser we obtained is now closed. Close our temp context and
     // throw so the caller knows to retry.
-    if (state.browser !== browser) {
+    if (currentBrowser(headless) !== browser) {
       await context.close().catch(() => {});
       if (warmupPage) {
         await warmupPage.close().catch(() => {});
@@ -392,13 +548,13 @@ export async function acquireBrowserContext(
     }
 
     const pooled: PooledContext = {
-      id: key,
+      id: poolKey,
       context,
       warmupPage,
       lastUsed: Date.now(),
       isStealth,
     };
-    state.contexts.set(key, pooled);
+    state.contexts.set(poolKey, pooled);
     state.metrics.contextsCreated++;
     state.lastActivity = Date.now();
     resetIdleTimer();
@@ -406,10 +562,10 @@ export async function acquireBrowserContext(
     return pooled;
   })();
 
-  state.pendingContexts.set(key, createPromise);
+  state.pendingContexts.set(poolKey, { promise: createPromise, createdAt: Date.now() });
   createPromise
-    .then(() => settlePendingContext(key, false))
-    .catch(() => settlePendingContext(key, true));
+    .then(() => settlePendingContext(poolKey, false))
+    .catch(() => settlePendingContext(poolKey, true));
 
   return createPromise;
 }
@@ -419,9 +575,13 @@ export async function openPage(pooled: PooledContext): Promise<Page> {
 }
 
 export async function releaseBrowserContext(key: string): Promise<void> {
-  const pooled = state.contexts.get(key);
+  const resolvedKey = [key, `headless:${key}`, `headed:${key}`].find((candidate) =>
+    state.contexts.has(candidate)
+  );
+  if (!resolvedKey) return;
+  const pooled = state.contexts.get(resolvedKey);
   if (!pooled) return;
-  state.contexts.delete(key);
+  state.contexts.delete(resolvedKey);
   state.metrics.contextsReleased++;
   try {
     await pooled.context.close();
@@ -434,6 +594,7 @@ export async function releaseBrowserContext(key: string): Promise<void> {
 }
 
 export async function shutdownPool(reason: string): Promise<void> {
+  state.generation++;
   state.metrics.shutdowns++;
   state.metrics.lastShutdownReason = reason;
   if (state.idleTimer) {
@@ -461,6 +622,21 @@ export async function shutdownPool(reason: string): Promise<void> {
     }
     state.browser = null;
   }
+  if (state.headedBrowser) {
+    try {
+      await state.headedBrowser.close();
+    } catch {
+      /* ignore */
+    }
+    state.headedBrowser = null;
+  }
+  state.launching = null;
+  state.headedLaunching = null;
+  stopVirtualDisplay();
+  // #12274: the shared Obscura server is owned by ./obscura.ts and reused by
+  // executors (cloudflare-playground), so closing the pool's CDP connection is
+  // enough — never kill the server here.
+  state.engine = null;
   state.lastActivity = Date.now();
   // Avoid unused-parameter lint: log reason via debug if anyone hooks
   // process.on('exit') and prints state.
@@ -471,14 +647,16 @@ export function getBrowserPoolStatus(): {
   enabled: boolean;
   contexts: number;
   browserRunning: boolean;
+  engine: PoolEngine | null;
   stealthAvailable: boolean;
   lastActivityAgoMs: number;
 } {
   return {
     enabled: isPoolEnabled(),
     contexts: state.contexts.size,
-    browserRunning: state.browser !== null,
-    stealthAvailable: state.cloakLaunch !== null,
+    browserRunning: state.browser !== null || state.headedBrowser !== null,
+    engine: state.engine,
+    stealthAvailable: state.engine === "obscura" || state.cloakLaunch !== null,
     lastActivityAgoMs: state.lastActivity === 0 ? -1 : Date.now() - state.lastActivity,
   };
 }
