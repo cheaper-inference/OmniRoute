@@ -1,0 +1,1 @@
+- Add a bounded, trusted-internal-only request header to shorten the upstream response-start deadline without changing configured connection timeouts or allowing public clients to override it.
