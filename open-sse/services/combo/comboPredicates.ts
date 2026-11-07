@@ -285,6 +285,15 @@ export function shouldRecordProviderBreakerFailure(args: {
   );
 }
 
+const CREDENTIAL_AUTH_ERROR_CODES = new Set([
+  "token_expired",
+  "expired_token",
+  "invalid_token",
+  "invalid_api_key",
+  "authentication_error",
+  "unauthorized",
+]);
+
 const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   context_length_exceeded: true,
   context_window_exceeded: true,
@@ -351,6 +360,14 @@ export function isRequestScopedUpstreamFailure(error?: {
 }): boolean {
   const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
   const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
+
+  // OpenAI/Codex wraps some credential failures in the generic
+  // `invalid_request_error` type (notably `code=token_expired`). Those are
+  // connection-scoped auth failures: the current account must be excluded so
+  // sibling-account fallback can continue. Letting the generic type win here
+  // stops rotation after the first such account and leaks its 401 to the client.
+  if (CREDENTIAL_AUTH_ERROR_CODES.has(code)) return false;
+
   return (
     REQUEST_SCOPED_UPSTREAM_ERROR_CODES[code] === true ||
     isContentPolicyRefusal(error) ||
