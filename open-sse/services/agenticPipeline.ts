@@ -326,7 +326,10 @@ export async function handleAgenticPipelineChat({
 
   let decisionText = "";
   try {
-    decisionText = extractPanelText(await decisionResponse.clone().json());
+    // The internal planner decision is never returned to the client. Reading
+    // the original response avoids teeing its stream and leaving an unread
+    // clone branch retained until the response is collected.
+    decisionText = extractPanelText(await decisionResponse.json());
   } catch {
     return errorResponse(502, `Agentic planner (${plannerModel}) returned an unparseable response`);
   }
