@@ -9,16 +9,25 @@
  *
  * Both behaviors are opt-in per connection (`providerSpecificData.lowPriorityMode` /
  * `autoLimitReset`) and only ever act on a real 5-hour usage wall — see the module header of
- * claudeLowPriority.ts for the wire contract and the lifecycle.
+ * claudeLowPriority.ts for the wire contract and the lifecycle. When an operator policy is
+ * registered (`setClaudeLimitResetPolicy`, "auto-apply banked resets"), it may take over the
+ * reset decision; with the feature off it answers `null` and the toggle decides as before.
  */
 
-import { attemptClaudeLimitReset } from "../services/claudeLimitReset.ts";
 import {
+  attemptClaudeLimitReset,
+  consultClaudeLimitResetPolicy,
+  hasClaudeLimitResetPolicy,
+  type ClaudeLimitResetPolicyVerdict,
+} from "../services/claudeLimitReset.ts";
+import {
+  CLAUDE_UNIFIED_HEADERS,
   CLAUDE_USAGE_LIMIT_HEADER,
   CLAUDE_USAGE_LIMIT_SLOW,
   createClaudeLowPriorityWait,
   handleClaudeUsageLimitResponse,
   isClaudeLowPriorityActive,
+  parseClaudeHeaderNumber,
   readClaudeUsageLimitConfig,
   resolveClaudeUsageLimitKey,
   type ClaudeLowPriorityWait,
@@ -47,6 +56,16 @@ function isClaudeOAuth(provider: string, credentials?: ProviderCredentials | nul
     credentials.accessToken.startsWith("sk-ant-oat") &&
     !credentials?.apiKey
   );
+}
+
+/** The wall's announced session-window reset (unix seconds in the headers) as ISO, if any. */
+function readWallSessionResetAt(headers: Headers): string | null {
+  const seconds =
+    parseClaudeHeaderNumber(headers, CLAUDE_UNIFIED_HEADERS.reset5h) ??
+    parseClaudeHeaderNumber(headers, CLAUDE_UNIFIED_HEADERS.reset);
+  if (seconds === undefined || seconds <= 0) return null;
+  const date = new Date(seconds * 1000);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : null;
 }
 
 /** Sleep that rejects as soon as the request is aborted, so a lane wait never outlives it. */
@@ -102,6 +121,9 @@ export class ClaudeUsageLimitGuard {
     if (this.key === null) return false;
     const key = this.key;
     const credentials = input.credentials;
+    // The operator policy's verdict: onSettled reports a claim's outcome, release frees a
+    // reservation the attempt never used.
+    let verdict: ClaudeLimitResetPolicyVerdict | null = null;
     const decision = await handleClaudeUsageLimitResponse({
       key,
       config: readClaudeUsageLimitConfig(credentials?.providerSpecificData),
@@ -109,14 +131,38 @@ export class ClaudeUsageLimitGuard {
       wait: this.wait,
       sentSlow: input.sentSlow,
       waitCeilingMs: this.waitCeilingMs(input.budgetMs),
-      claimLimitReset: () =>
-        attemptClaudeLimitReset({
-          key,
-          connectionId: credentials?.connectionId ?? null,
-          accessToken: credentials?.accessToken ?? "",
-          providerSpecificData: credentials?.providerSpecificData,
-          log: this.log,
-        }).then((attempt) => attempt.reset),
+      limitResetGate: hasClaudeLimitResetPolicy()
+        ? async () => {
+            verdict = await consultClaudeLimitResetPolicy({
+              connectionId: credentials?.connectionId ?? null,
+              sessionResetAt: readWallSessionResetAt(response.headers),
+              now: Date.now(),
+            });
+            return verdict ? verdict.allow : null;
+          }
+        : undefined,
+      claimLimitReset: async () => {
+        try {
+          const attempt = await attemptClaudeLimitReset({
+            key,
+            connectionId: credentials?.connectionId ?? null,
+            accessToken: credentials?.accessToken ?? "",
+            providerSpecificData: credentials?.providerSpecificData,
+            log: this.log,
+            onSettled: (settled) => verdict?.onSettled?.(settled),
+          });
+          return attempt.reset;
+        } finally {
+          // No claim POST (memo, recent reset, a sibling's in-flight claim, not on offer), or
+          // the attempt rejected: onSettled never ran, so free the reservation now instead of
+          // holding the caps.
+          try {
+            verdict?.release?.();
+          } catch {
+            // Releasing is best-effort and must never change the attempt's outcome.
+          }
+        }
+      },
     });
 
     if (decision.kind === "ended") {

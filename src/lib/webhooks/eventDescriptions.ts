@@ -4,6 +4,7 @@ export type WebhookEvent =
   | "quota.exceeded"
   | "proxy.set_aside"
   | "proxy.pool.exhausted"
+  | "provider.reset_redeemed"
   | "test.ping";
 
 export const WEBHOOK_EVENT_VALUES = [
@@ -12,6 +13,7 @@ export const WEBHOOK_EVENT_VALUES = [
   "quota.exceeded",
   "proxy.set_aside",
   "proxy.pool.exhausted",
+  "provider.reset_redeemed",
   "test.ping",
 ] as const;
 
@@ -74,6 +76,19 @@ export const EVENT_DESCRIPTIONS: Record<WebhookEvent, EventDescription> = {
       poolSize: 3,
       setAsideCount: 3,
       fallback: "fail-closed-serve",
+    },
+  },
+  "provider.reset_redeemed": {
+    label: "Banked Reset Redeemed",
+    emoji: "🔄",
+    description:
+      "Triggered when auto-apply banked resets successfully redeems a reset credit or the Claude weekly session reset for an account.",
+    exampleData: {
+      connectionId: "conn-a",
+      provider: "codex",
+      creditType: "codexCredits",
+      mode: "eager",
+      trigger: "walled-session",
     },
   },
   "test.ping": {
