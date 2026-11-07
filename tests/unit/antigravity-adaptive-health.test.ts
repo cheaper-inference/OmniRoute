@@ -230,3 +230,34 @@ test("adaptive health follows each connection's dispatched legacy default model"
     else process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = prior;
   }
 });
+
+test("successive health and lease response wrappers preserve probe and empty-turn provenance", async () => {
+  const { getRegistryEntry } = await import("../../open-sse/config/providerRegistry.ts");
+  const { markEmptyTurnExecution, getEmptyTurnDiagnostics } =
+    await import("../../open-sse/utils/emptyTurnPolicy.ts");
+  const { markProviderProbeResponse, isProviderProbeResponse } =
+    await import("../../src/shared/utils/providerProbeResult.ts");
+  const { inheritResponsePolicies } =
+    await import("../../src/sse/handlers/chat/responsePolicies.ts");
+
+  const upstreamUrl = getRegistryEntry("openai")?.baseUrl;
+  assert.ok(upstreamUrl);
+  const executed = markEmptyTurnExecution(
+    new Response('data: {"choices":[{"delta":{"content":"hello"}}]}\n\n', {
+      headers: { "Content-Type": "text/event-stream" },
+    }),
+    upstreamUrl,
+    { connectionId: "policy-test", apiKey: "test-only" }
+  );
+  assert.equal(getEmptyTurnDiagnostics(executed).nativeExecutionObserved, true);
+  markProviderProbeResponse(executed);
+  const tracker = new AntigravityHealthTracker(() => 1000);
+  const held = holdAntigravityHealthThroughResponse(executed, tracker.begin("policy-test", MODEL)!);
+  const leaseWrapper = inheritResponsePolicies(
+    held,
+    new Response(held.body, { status: held.status, headers: held.headers })
+  );
+  assert.equal(isProviderProbeResponse(leaseWrapper), true);
+  assert.equal(getEmptyTurnDiagnostics(leaseWrapper).nativeExecutionObserved, true);
+  await leaseWrapper.text();
+});

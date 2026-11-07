@@ -146,7 +146,7 @@ import {
 import { markAntigravityMissingCloudCodeProject } from "@omniroute/open-sse/services/antigravityProjectPersistence.ts";
 import { connectionHasExtraKeys } from "@omniroute/open-sse/services/apiKeyRotator.ts";
 import { wrapResponseWithOAuthSessionRelease } from "@omniroute/open-sse/services/oauthSessionOccupancy.ts";
-import { inheritProviderProbeResponse, inheritResponsePolicies } from "./chat/responsePolicies.ts";
+import { inheritResponsePolicies } from "./chat/responsePolicies.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
   extractReasoningIntent,
@@ -2259,7 +2259,7 @@ async function handleSingleModelChat(
       }
       if (!result.success) releaseOAuthSession();
       if (result.success && agyLease.isStreamingAntigravityResponse(result.response))
-        result.response = inheritProviderProbeResponse(
+        result.response = inheritResponsePolicies(
           result.response,
           agyLease.holdAntigravityLeaseThroughResponse(
             result.response,
