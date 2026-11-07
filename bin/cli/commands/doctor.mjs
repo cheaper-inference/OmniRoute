@@ -8,6 +8,7 @@ import { isLoopbackUrl } from "../api.mjs";
 import { resolveDataDir, resolveStoragePath } from "../data-dir.mjs";
 import { getCliToken, CLI_TOKEN_HEADER } from "../utils/cliToken.mjs";
 import { printHeading } from "../io.mjs";
+import { printablePath } from "../utils/untrustedCwdEnv.mjs";
 import { t } from "../i18n.mjs";
 import { readDatabaseHealth, readEncryptedCredentialSamples } from "../sqlite.mjs";
 import { getCrashLogPath } from "../runtime/processSupervisor.mjs";
@@ -69,17 +70,21 @@ function checkConfig(dataDir) {
     return fail(
       "Config",
       `Invalid port setting: ${invalidPorts.map((item) => item.name).join(", ")}`,
-      { envFile: envFile || null, invalidPorts }
+      { envFile: envFile ? printablePath(envFile) : null, invalidPorts }
     );
   }
 
   if (!envFile) {
     return warn("Config", ".env file not found; using defaults and process environment", {
-      checked: envCandidates,
+      checked: envCandidates.map(printablePath),
     });
   }
 
-  return ok("Config", `.env found at ${envFile}`, { envFile });
+  // The working directory's name is chosen by whoever made it. JSON.stringify
+  // leaves bidi, C1 and zero-width characters as they are, so the details for
+  // `--output json` carry the escaped path too.
+  const shownEnvFile = printablePath(envFile);
+  return ok("Config", `.env found at ${shownEnvFile}`, { envFile: shownEnvFile });
 }
 
 function resolveMigrationsDir(rootDir) {

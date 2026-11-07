@@ -31,6 +31,13 @@ import { isVersionFastPath } from "./cli/utils/versionFastPath.mjs";
 import { parseEnvValue } from "./cli/utils/parseEnvValue.mjs";
 import { describeVolatileEnvWarning } from "./cli/utils/volatileEnvPath.mjs";
 import {
+  cwdEnvRejection,
+  isPlainEnvKey,
+  printableEnvKey,
+  printablePath,
+  UNTRUSTED_CWD_ENV_ALLOWLIST,
+} from "./cli/utils/untrustedCwdEnv.mjs";
+import {
   ensurePrivateDataDir,
   tightenDataDirSecrets,
   writePrivateFile,
@@ -162,7 +169,14 @@ function loadEnvFile() {
     addEnvPath(join(getDefaultDataDir(), ".env"));
   }
 
-  addEnvPath(join(process.cwd(), ".env"));
+  // The working directory may belong to someone else (a cloned repo, an
+  // unpacked archive). Its .env still loads, but it may set only the keys in
+  // bin/cli/utils/untrustedCwdEnv.mjs. When the cwd is the data dir or the
+  // package root, that file is already trusted and keeps its full effect.
+  const cwdEnvPath = join(process.cwd(), ".env");
+  const untrustedEnvPath =
+    seenEnvPaths.has(cwdEnvPath) || cwdEnvPath === join(ROOT, ".env") ? null : cwdEnvPath;
+  addEnvPath(cwdEnvPath);
   // Skip the repo-checkout .env when explicitly requested (used by isolation tests
   // that need a deterministic environment without the development repo's defaults).
   if (process.env.OMNIROUTE_CLI_SKIP_REPO_ENV !== "1") {
@@ -171,6 +185,10 @@ function loadEnvFile() {
 
   const keyOrigin = new Map();
   const shadowed = new Map();
+  const skippedKeys = new Set();
+  // Allowed keys the file wrote with a bad value or in the wrong case, each
+  // with what it should have been.
+  const rejectedKeys = new Map();
 
   for (const envPath of envPaths) {
     try {
@@ -182,8 +200,28 @@ function loadEnvFile() {
           const eqIdx = trimmed.indexOf("=");
           if (eqIdx > 0) {
             const key = trimmed.slice(0, eqIdx).trim();
+            const untrusted = envPath === untrustedEnvPath;
+            if (untrusted && !isPlainEnvKey(key)) {
+              skippedKeys.add(printableEnvKey(key));
+              continue;
+            }
             if (process.env[key] === undefined) {
-              process.env[key] = parseEnvValue(trimmed.slice(eqIdx + 1));
+              const value = parseEnvValue(trimmed.slice(eqIdx + 1));
+              const rejection = untrusted ? cwdEnvRejection(key, value) : null;
+              if (rejection?.kind === "name") {
+                skippedKeys.add(key);
+                continue;
+              }
+              if (rejection) {
+                rejectedKeys.set(
+                  key,
+                  rejection.kind === "case"
+                    ? `write the name as ${rejection.name}`
+                    : `expected ${rejection.expected}`
+                );
+                continue;
+              }
+              process.env[key] = value;
               keyOrigin.set(key, envPath);
             } else if (!shadowed.has(key)) {
               // The line is inert: something set this key first. Report it once
@@ -197,17 +235,41 @@ function loadEnvFile() {
         loadedEnvPaths.push(envPath);
       }
     } catch (err) {
-      console.warn(`  \x1b[33m⚠ Could not read ${envPath}: ${err?.message ?? err}\x1b[0m`);
+      // The error message can repeat the path, so it is escaped the same way.
+      console.warn(
+        `  \x1b[33m⚠ Could not read ${printablePath(envPath)}: ` +
+          `${printablePath(err?.message ?? err)}\x1b[0m`
+      );
     }
   }
 
   for (const envPath of loadedEnvPaths) {
-    console.log(`  \x1b[2m📋 Loaded env from ${envPath}\x1b[0m`);
+    console.log(`  \x1b[2m📋 Loaded env from ${printablePath(envPath)}\x1b[0m`);
   }
 
   for (const [key, { winner, loser }] of shadowed) {
-    const setter = winner ? winner : "the environment";
-    console.warn(`  \x1b[33m⚠ ${key} in ${loser} is ignored, ${setter} set it first\x1b[0m`);
+    const setter = winner ? printablePath(winner) : "the environment";
+    console.warn(
+      `  \x1b[33m⚠ ${key} in ${printablePath(loser)} is ignored, ${setter} set it first\x1b[0m`
+    );
+  }
+
+  // Name the keys, never the values: the file may be hostile, and the value
+  // of an ignored key is not something the user needs to see on screen.
+  if (skippedKeys.size > 0) {
+    const durableEnvPath = join(process.env.DATA_DIR || getDefaultDataDir(), ".env");
+    console.warn(
+      `  \x1b[33m⚠ ${printablePath(untrustedEnvPath)} cannot set ` +
+        `${[...skippedKeys].join(", ")}; ignored. A .env in the working directory may ` +
+        `set only ${UNTRUSTED_CWD_ENV_ALLOWLIST.join(", ")}. If you wrote these lines ` +
+        `yourself, set them in the shell or in ${printablePath(durableEnvPath)}.\x1b[0m`
+    );
+  }
+  if (rejectedKeys.size > 0) {
+    const reasons = [...rejectedKeys].map(([key, why]) => `${key} (${why})`);
+    console.warn(
+      `  \x1b[33m⚠ ${printablePath(untrustedEnvPath)}: ignored ${reasons.join(", ")}.\x1b[0m`
+    );
   }
 
   // The package directory is replaced by the next `npm i -g`, so a .env kept

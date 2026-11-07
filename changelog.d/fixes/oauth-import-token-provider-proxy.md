@@ -1,1 +1,0 @@
-- **fix(oauth):** importing a token (for example a Claude setup-token) now verifies it through the proxy assigned to the provider, as the OAuth code exchange already did, instead of calling the provider directly
