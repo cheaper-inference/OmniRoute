@@ -122,6 +122,19 @@ async function readJsonResponse(response: Response): Promise<{
   }
 }
 
+/** The ids `after` holds and `before` lacks, in the order `after` lists them. */
+function modelIdsMissingFrom(before: unknown[], after: unknown[]): string[] {
+  const known = new Set(
+    before.map((model) => toNonEmptyString(asRecord(model).id)).filter(Boolean) as string[]
+  );
+  const ids: string[] = [];
+  for (const model of after) {
+    const id = toNonEmptyString(asRecord(model).id);
+    if (id && !known.has(id) && !ids.includes(id)) ids.push(id);
+  }
+  return ids;
+}
+
 function summarizeModelChanges(previousModels: unknown, nextModels: unknown) {
   const previousList = Array.isArray(previousModels) ? previousModels : [];
   const nextList = Array.isArray(nextModels) ? nextModels : [];
@@ -838,10 +851,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       });
     }
 
+    // What the import changed, by model id, across both stores it writes: the
+    // synced list and the imported custom rows.
+    const catalogBefore = [...previousSyncedAvailableModels, ...previousModels];
+    const catalogAfter = [...effectiveAvailableModels, ...persistedModels];
+
     return NextResponse.json({
       ok: true,
       provider: logProvider,
       mode,
+      source: modelSource,
+      ...(modelsData.intentional === true ? { intentional: true } : {}),
+      ...(modelWarning ? { warning: modelWarning } : {}),
+      addedModelIds: modelIdsMissingFrom(catalogBefore, catalogAfter),
+      removedModelIds: modelIdsMissingFrom(catalogAfter, catalogBefore),
       importFreeOnly,
       freeFilterEmpty,
       syncedModels: syncedModelsCount,
