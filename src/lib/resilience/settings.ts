@@ -7,6 +7,7 @@ import {
 import type { JsonRecord, ResilienceSettings, ResilienceSettingsPatch } from "./settings/types";
 import {
   asRecord,
+  toBoolean,
   toInteger,
   resolveStreamRecoveryDefaults,
   normalizeLegacyConnectionCooldownProfile,
@@ -374,11 +375,13 @@ export function resolveResilienceSettings(
 
   const resolved: ResilienceSettings = {
     antigravityAdaptiveHealth: {
-      enabled: typeof asRecord(current.antigravityAdaptiveHealth).enabled === "boolean"
-        ? asRecord(current.antigravityAdaptiveHealth).enabled as boolean
-        : typeof legacyAntigravitySettings.adaptiveHealthEnabled === "boolean"
-          ? legacyAntigravitySettings.adaptiveHealthEnabled as boolean
-          : fallback.antigravityAdaptiveHealth.enabled,
+      enabled: toBoolean(
+        asRecord(current.antigravityAdaptiveHealth).enabled,
+        toBoolean(
+          legacyAntigravitySettings.adaptiveHealthEnabled,
+          fallback.antigravityAdaptiveHealth.enabled
+        )
+      ),
     },
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {
@@ -454,9 +457,10 @@ export function mergeResilienceSettings(
 ): ResilienceSettings {
   return {
     antigravityAdaptiveHealth: {
-      enabled: typeof updates.antigravityAdaptiveHealth?.enabled === "boolean"
-        ? updates.antigravityAdaptiveHealth.enabled
-        : current.antigravityAdaptiveHealth.enabled,
+      enabled: toBoolean(
+        updates.antigravityAdaptiveHealth?.enabled,
+        current.antigravityAdaptiveHealth.enabled
+      ),
     },
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
     connectionCooldown: {
