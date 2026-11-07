@@ -134,6 +134,10 @@ interface ClientState {
   eventCounterReset: number;
   /** Current IP for rate limiting */
   remoteAddress: string;
+  /** Upgrade request, kept so the heartbeat can re-check its credential */
+  request: IncomingMessage;
+  /** True while a heartbeat re-check of the credential is in flight */
+  revalidating: boolean;
 }
 
 const clients = new Map<string, ClientState>();
@@ -237,6 +241,12 @@ async function isLiveWsAuthRequired(request: import("http").IncomingMessage): Pr
   }
 }
 
+/**
+ * The API-key checks read SQLite, not this process's key cache, on the upgrade and on
+ * every heartbeat re-check. The cache is only cleared in the process that changed the
+ * key, and the sidecar runs separately (scripts/start-ws-server.mjs), so a cached
+ * entry could still say valid after a revoke made elsewhere.
+ */
 async function authorizeConnection(request: import("http").IncomingMessage): Promise<WsAuthResult> {
   const sessionId = randomUUID().slice(0, 8);
 
@@ -274,7 +284,7 @@ async function authorizeConnection(request: import("http").IncomingMessage): Pro
       allowUrl: false,
     });
 
-    if (!apiKey || !(await isValidApiKey(apiKey))) {
+    if (!apiKey || !(await isValidApiKey(apiKey, { bypassCache: true }))) {
       return { authorized: false, sessionId, error: "Invalid API key" };
     }
 
@@ -283,7 +293,7 @@ async function authorizeConnection(request: import("http").IncomingMessage): Pro
     // management scope — an inference-only key is not an operator credential. The
     // env master key is materialised with `manage`, so it keeps working.
     const { getApiKeyMetadata } = await loadApiKeysModule();
-    const metadata = await getApiKeyMetadata(apiKey);
+    const metadata = await getApiKeyMetadata(apiKey, { bypassCache: true });
     if (!metadata || !hasManageScope(metadata.scopes ?? [])) {
       return { authorized: false, sessionId, error: "API key lacks management scope" };
     }
@@ -583,6 +593,58 @@ async function seedLatestCompressionRunFromDb(): Promise<void> {
 
 // ── Heartbeat ─────────────────────────────────────────────────────────────
 
+/**
+ * Begin a heartbeat credential re-check. Returns false when one is already in
+ * flight for this client, so overlapping heartbeats do not stack authorize calls.
+ */
+export function beginClientRevalidation(client: { revalidating: boolean }): boolean {
+  if (client.revalidating) return false;
+  client.revalidating = true;
+  return true;
+}
+
+/**
+ * True when a finished re-check should close this client. Skip when the
+ * credential still passes, or when the map entry for `clientId` was removed or
+ * replaced while the check was in flight (closing the old socket would then
+ * hit the wrong connection).
+ */
+export function shouldCloseClientAfterRevalidation<T extends object>(
+  authorized: boolean,
+  clientId: string,
+  client: T,
+  map: Map<string, T>
+): boolean {
+  return !authorized && map.get(clientId) === client;
+}
+
+/**
+ * Re-run the upgrade-time authorization for an open connection. The credential is
+ * otherwise only checked once, so a key revoked, disabled, expired, deleted or cut
+ * below `manage` — or a dashboard session ended by sign-out or a password change —
+ * would keep streaming operator telemetry for as long as the socket stays up. A
+ * credential that no longer passes gets the same 4001 a new connection would, and so
+ * does a check that fails because the database cannot be read (fail closed).
+ */
+function revalidateClient(clientId: string, client: ClientState): void {
+  if (!beginClientRevalidation(client)) return;
+  authorizeConnection(client.request)
+    .catch((): WsAuthResult => ({ authorized: false, sessionId: clientId }))
+    .then((auth) => {
+      if (!shouldCloseClientAfterRevalidation(auth.authorized, clientId, client, clients)) return;
+      clients.delete(clientId);
+      sendTo(client.ws, {
+        type: "error",
+        code: "UNAUTHORIZED",
+        message: auth.error || "Unauthorized",
+      });
+      client.ws.close(4001, "Unauthorized");
+    })
+    .finally(() => {
+      client.revalidating = false;
+    });
+}
+
 function startHeartbeat(server: WebSocketServer): void {
   const interval = setInterval(() => {
     const now = Date.now();
@@ -604,6 +666,7 @@ function startHeartbeat(server: WebSocketServer): void {
       // still reaped. Nothing here refreshes lastActivity — only a received pong does,
       // so #10452 holds.
       client.ws.ping();
+      revalidateClient(clientId, client);
     }
   }, HEARTBEAT_INTERVAL_MS);
   // Don't keep the process alive solely for the heartbeat (it is also cleared on close).
@@ -719,6 +782,8 @@ export async function startLiveDashboardServer(
       eventCounter: 0,
       eventCounterReset: Date.now(),
       remoteAddress: request.socket?.remoteAddress || "unknown",
+      request,
+      revalidating: false,
     };
 
     clients.set(clientId, client);
