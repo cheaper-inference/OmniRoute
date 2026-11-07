@@ -1000,7 +1000,7 @@ export function openaiToAntigravityRequest(model, body, stream, credentials = nu
 
   // Requests without an explicit limit use the native upstream default.
   const clientRequestedMaxTokens = body.max_tokens ?? body.max_completion_tokens;
-  if (clientRequestedMaxTokens === undefined && envelope.request?.generationConfig) {
+  if (clientRequestedMaxTokens == null && envelope.request?.generationConfig) {
     delete envelope.request.generationConfig.maxOutputTokens;
   }
 

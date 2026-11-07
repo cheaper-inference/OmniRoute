@@ -1090,6 +1090,23 @@ for (const [model, effort] of [
   }
 }
 
+for (const [name, limits] of [
+  ["max_tokens", { max_tokens: null }],
+  ["max_completion_tokens", { max_completion_tokens: null }],
+  ["each limit", { max_tokens: null, max_completion_tokens: null }],
+] as const) {
+  // `null` is how many OpenAI-compatible clients serialize "no limit".
+  test(`OpenAI -> Antigravity Claude omits the output limit when ${name} is null`, () => {
+    const result = openaiToAntigravityRequest(
+      "claude-opus-5-5-high",
+      { messages: [{ role: "user", content: "Hello" }], ...limits, reasoning_effort: "high" },
+      false
+    );
+    assert.equal(result.request.generationConfig.maxOutputTokens, undefined);
+    assert.equal(result.request.generationConfig.thinkingConfig, undefined);
+  });
+}
+
 for (const [name, limits, expected] of [
   ["max_tokens", { max_tokens: 2048 }, 2048],
   ["max_completion_tokens", { max_completion_tokens: 4096 }, 4096],
