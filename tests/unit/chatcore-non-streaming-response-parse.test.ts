@@ -100,15 +100,21 @@ test("SSE detected by body heuristic even with non-stream content-type", async (
   assert.equal(res.looksLikeSSE, true);
 });
 
-test("error-only SSE (no choices) → invalid_sse surfacing the upstream error (#3324)", async () => {
+test("error-only SSE preserves the failed upstream response for provider-error classification", async () => {
   const sse = 'data: {"error":{"message":"Devin CLI not found in PATH"}}\n\n';
   const res = await parseNonStreamingResponseBody({
     ...baseOpts,
     providerResponse: makeResponse(sse, "text/event-stream"),
   });
-  assert.equal(res.kind, "invalid_sse");
-  if (res.kind !== "invalid_sse") return;
-  assert.equal(res.message, "Devin CLI not found in PATH");
+  // #17198 preserves bare error frames as failed Responses payloads; parsing
+  // succeeds, but the provider leg must classify the failed body as an error.
+  assert.equal(res.kind, "ok");
+  if (res.kind !== "ok") return;
+  assert.equal(res.responsePayloadFormat, "openai-responses");
+  assert.equal(res.responseBody.object, "response");
+  assert.equal(res.responseBody.status, "failed");
+  assert.deepEqual(res.responseBody.output, []);
+  assert.deepEqual(res.responseBody.error, { message: "Devin CLI not found in PATH" });
   assert.equal(res.looksLikeSSE, true);
 });
 
