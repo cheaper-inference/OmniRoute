@@ -150,7 +150,7 @@ export default function ProviderDetailPageClient() {
     setBatchDeleteConfirmOpen,
     setBatchTestResults,
     setProviderNode,
-    fetchConnections,
+    fetchConnections: fetchConnectionsWithResult,
     refreshProxyState,
     deleteConfirm,
     handleUpdateConnectionStatus,
@@ -180,6 +180,9 @@ export default function ProviderDetailPageClient() {
     getAttachmentFilename,
     PAGE_SIZE,
   } = useProviderConnections(providerId, isCompatible, isSearchProvider);
+  const fetchConnections = useCallback(async () => {
+    await fetchConnectionsWithResult();
+  }, [fetchConnectionsWithResult]);
 
   const {
     codexGlobalServiceMode,
@@ -219,8 +222,15 @@ export default function ProviderDetailPageClient() {
   const {
     quotaByConnectionId,
     refreshingIds: quotaRefreshingIds,
+    refreshStates: quotaRefreshStates,
     refreshConnection,
-  } = useProviderQuota();
+  } = useProviderQuota({
+    providerId,
+    connectionIds: connections
+      .map((connection) => connection.id)
+      .filter((id): id is string => !!id),
+    refreshConnections: providerId === "codex" ? fetchConnectionsWithResult : undefined,
+  });
   const handleRefreshQuota = useCallback(
     (connectionId: string) => {
       void refreshConnection(connectionId);
@@ -776,6 +786,7 @@ export default function ProviderDetailPageClient() {
                 cpaProviderEnabled={cpaProviderEnabled}
                 quotaByConnectionId={quotaByConnectionId}
                 quotaRefreshingIds={quotaRefreshingIds}
+                quotaRefreshStates={quotaRefreshStates}
                 handleRefreshQuota={handleRefreshQuota}
                 onOpenEditModal={(conn) => {
                   setSelectedConnection(conn);

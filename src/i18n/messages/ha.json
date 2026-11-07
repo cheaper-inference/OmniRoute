@@ -7036,7 +7036,16 @@
     "chatgptConnectorLabel": "Mahaɗin ChatGPT na musamman",
     "doctorChecking": "Ana duban yanke…",
     "doctorCheck": "Duba yanke doctor",
-    "fallbackRetryBackendTitle": "Baya mara da maganin maimaitawa"
+    "fallbackRetryBackendTitle": "Baya mara da maganin maimaitawa",
+    "quotaRefreshCurrent": "Sabunta iyakar amfani ta yanzu",
+    "quotaRefreshCurrentHint": "Yana duba iyakar amfani ta wannan asusun ta yanzu ba tare da kashe maki na sake saiti ba.",
+    "quotaRefreshing": "Ana duba iyakar amfani…",
+    "quotaRefreshFresh": "An duba iyakar amfani. Sabar ce ke tantance samuwar asusun.",
+    "quotaRefreshFailed": "An kasa duba iyakar amfani. Bayanai na baya ba su canza ba.",
+    "quotaRefreshStale": "Sabar ta dawo da tsoffin bayanan iyakar amfani. Wannan ba sabon bayani ba ne.",
+    "quotaRefreshPartial": "Wani ɓangare na bayanan iyakar amfani kaɗai yake samuwa.",
+    "quotaWindowUnavailable": "Babu bayanin iyakar amfani na {window}",
+    "quotaConnectionRefreshFailed": "An gama duba iyakar amfani, amma an kasa sabunta jerin asusu."
   },
   "settings": {
     "title": "Saituna",
