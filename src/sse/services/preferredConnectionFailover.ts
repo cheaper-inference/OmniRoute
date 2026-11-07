@@ -137,7 +137,9 @@ export function resolvePreferredConnectionUpstreamStartTimeoutMs(
   const p = canonicalProvider(provider);
   const m = canonicalModelKey(p, modelId ?? "");
   const modelOverride = findModelOverride(settings.modelTimeoutsMs, m);
-  const providerOverride = settings.providerTimeoutsMs[p];
+  const providerOverride = Object.prototype.hasOwnProperty.call(settings.providerTimeoutsMs, p)
+    ? settings.providerTimeoutsMs[p]
+    : p === "antigravity" ? settings.providerTimeoutsMs.agy : undefined;
 
   // Keep the proven Antigravity fast-path defaults; other providers start
   // conservatively at 20s to avoid penalizing legitimately slow providers.

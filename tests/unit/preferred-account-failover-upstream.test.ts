@@ -119,7 +119,7 @@ test("normalization bounds defaults and replaces entire override maps for cleari
   const next = normalizePreferredFailoverSettings({
     enabled: true,
     defaultTimeoutMs: -1,
-    providerTimeoutsMs: { codex: 30000, "__proto__": 1000, test: 10 },
+    providerTimeoutsMs: { codex: 30000, ["__proto__"]: 1000, test: 10 },
     modelTimeoutsMs: { "anthropic/claude-*": 40000, "bad*model": 10000 },
   });
   assert.equal(next.defaultTimeoutMs, 20000);
