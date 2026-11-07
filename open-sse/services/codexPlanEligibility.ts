@@ -1,11 +1,13 @@
 type JsonRecord = Record<string, unknown>;
 
-const CODEX_SOL_MODEL_RE = /^(?:codex\/|cx\/)?gpt-(?:5\.6|6(?:\.1)?)-sol(?:-(?:ultra|max|xhigh|high|medium|low)|\((?:ultra|max|xhigh|high|medium|low)\))?$/i;
-const CODEX_ASTRA_MODEL_RE = /^(?:codex\/|cx\/)?gpt-6(?:\.1)?-astra(?:-(?:ultra|max|xhigh|high|medium|low)|\((?:ultra|max|xhigh|high|medium|low)\))?$/i;
+const CODEX_SOL_MODEL_RE = /^(?:codex\/|cx\/)?gpt-(?:5\.6|6(?:\.1)?)-sol(?:-(?:ultra|max|xhigh|high|medium|low|none)|\((?:ultra|max|xhigh|high|medium|low|none)\))?$/i;
+const CODEX_ASTRA_MODEL_RE = /^(?:codex\/|cx\/)?gpt-6(?:\.1)?-astra(?:-(?:ultra|max|xhigh|high|medium|low|none)|\((?:ultra|max|xhigh|high|medium|low|none)\))?$/i;
 
 const CODEX_SOL_PAID_PLANS = new Set([
   "plus",
   "pro",
+  "prolite",
+  "promax",
   "team",
   "chatgptteam",
   "business",
