@@ -5,6 +5,7 @@ import {
 } from "../utils/chatgptWebExecutorAdapter.ts";
 import { makeExecutorErrorResult, sanitizeErrorMessage } from "../utils/error.ts";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
+import type { ChatProbeIsolatingExecutor } from "./chatProbeIsolation.ts";
 
 const CHATGPT_WEB_URL = "https://chatgpt.com";
 
@@ -25,7 +26,10 @@ function statusForAdapterError(message: string): number {
 }
 
 /** Common ChatGPT Web executor rebuilt solely from first-party UI/network observations. */
-export class ChatGptWebExecutor extends BaseExecutor {
+export class ChatGptWebExecutor extends BaseExecutor implements ChatProbeIsolatingExecutor {
+  /** Every turn runs on CHATGPT_WEB_PAGE_URL, ChatGPT's temporary chat, which keeps no history. */
+  readonly chatProbeIsolation = "temporary-chat" as const;
+
   constructor(private readonly deps: ChatGptWebExecutorAdapterDeps = {}) {
     super("chatgpt-web", {
       id: chatgpt_webProvider.id,
