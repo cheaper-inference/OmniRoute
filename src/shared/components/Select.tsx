@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
+import { NativeSelect as KitNativeSelect } from "@omniroute/ui-kit/native-select";
 import { Select as KitSelect, SelectItem as KitSelectItem } from "@omniroute/ui-kit/select";
 import { cn } from "@/shared/utils/cn";
 
@@ -23,6 +24,8 @@ interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>
   placeholderDisabled?: boolean;
   /** Label and select on one line, with a shorter select (settings rows, cards). */
   compact?: boolean;
+  /** Height of the native branch without `compact`'s one-line layout (`<option>` children). */
+  nativeSize?: "xs" | "sm" | "md";
 }
 
 // Radix Select reserves the empty string for "no value" (it shows the placeholder), so an
@@ -36,8 +39,9 @@ const fromKitValue = (value: string) => (value === EMPTY_VALUE ? "" : value);
  *
  * - `options` → the kit (Radix) Select; `onValueChange` is turned into the legacy
  *   `onChange({ target: { value, name } })` shape every caller reads.
- * - `<option>` children → a native `<select className="ci-select-native">`, because Radix
- *   Select has no DOM `<option>`s; the real change event is passed through untouched.
+ * - `<option>` children → the kit NativeSelect, because Radix Select has no DOM `<option>`s;
+ *   the real change event is passed through untouched. `selectClassName` lands on its wrapper,
+ *   which sets the width and the type of the `<select>`.
  */
 export default function Select({
   label,
@@ -54,6 +58,7 @@ export default function Select({
   selectClassName,
   placeholderDisabled = true,
   compact = false,
+  nativeSize,
   id: externalId,
   name,
   children,
@@ -146,7 +151,7 @@ export default function Select({
     }
   } else {
     control = (
-      <select
+      <KitNativeSelect
         id={selectId}
         name={name}
         value={value}
@@ -155,15 +160,11 @@ export default function Select({
         disabled={disabled}
         required={required}
         aria-required={required || undefined}
-        aria-invalid={error ? true : undefined}
+        error={Boolean(error)}
         aria-describedby={describedBy}
-        className={cn(
-          "ci-select-native",
-          compact && "ci-select-native--sm",
-          error && "ci-select-native--error",
-          selectClassName
-        )}
-        {...props}
+        size={nativeSize ?? (compact ? "sm" : "md")}
+        className={selectClassName}
+        {...(props as Omit<typeof props, "multiple">)}
       >
         {!children && resolvedPlaceholder && (
           <option value="" disabled={placeholderDisabled}>
@@ -171,7 +172,7 @@ export default function Select({
           </option>
         )}
         {children}
-      </select>
+      </KitNativeSelect>
     );
   }
 

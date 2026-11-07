@@ -923,6 +923,8 @@
     "batchListTitle": "バッチ",
     "batchListCount": "{count}件のバッチ",
     "batchListRemovingCompleted": "削除中…",
+    "batchListRemoveCompletedPartial": "多数のバッチを削除しました。残りをクリアするには、もう一度クリックしてください。",
+    "batchListRemoveCompletedFailed": "バッチの削除中にエラーが発生しました。",
     "batchListRemoveCompleted": "完了済みを削除",
     "batchListTableStatus": "ステータス",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "更新中…",
     "batchListRefresh": "更新",
     "uploadFileModalRemove": "削除",
+    "fileInputChoose": "ファイルを選択",
+    "fileInputChooseMultiple": "ファイルを選択",
+    "fileInputEmpty": "ファイルが選択されていません",
+    "fileInputSelectedCount": "{count, plural, one {#件のファイルを選択済み} other {#件のファイルを選択済み}}",
+    "fileDropLabel": "ここにファイルをドロップするか、選択してください",
+    "fileDropLabelMultiple": "ここにファイルをドロップするか、選択してください",
     "uploadFileModalUploading": "アップロード中…",
     "wizardInputReading": "ファイルを読み込み中…",
     "wizardInputReady": "準備完了",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go リクエストで OpenCode v2 CLI クライアントフィンガープリントを送信します。具体的には、opencode/latest/<2.x>/cli User-Agent と x-opencode-client cli を送信し、無料枠のリクエストでは v2 セッションヘッダーと v2 CLI の read/shell ツールスキーマを使用し、tool_choice \"none\" は使用しません。デフォルトではオフです。すべての OpenCode リクエストで、現在の ID、ヘッダー、本文が変更されずに維持されます。",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "自動コンボの候補プールがツール呼び出しの事前フィルター実行前にすでに空の場合（クールダウン、ロックアウト、または枯渇によりすべてのターゲットがスキップされた場合）、従来の 400「ツール呼び出しをサポートするターゲットがありません」という capability_mismatch の代わりに、503 no_eligible_targets を返します。デフォルトではオフです。オフの場合、候補プールが空でも従来の 400 が維持されます。",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "信頼済みモデルエンドポイントタグ（プロバイダーカタログで宣言されたもの、特殊用途モデルIDから推論されたもの、または運用者が設定したもの）を適用します。モデルを提供していないエンドポイントに送信されたリクエストは、/v1/chat/completions、/v1/embeddings、/v1/rerank、/v1/images/generations、/v1/videos/generations、/v1/music/generations、/v1/audio/* へのディスパッチ前に HTTP 400 で拒否します。タグ付けされたエンドポイントに対応する OmniRoute アダプターがないモデルは /v1/models で非表示にし、そのようなモデルに対するダッシュボードのモデルテストには 422 を返します。デフォルトではオフです。エンドポイントタグは引き続き参考情報としてのみ扱われ、リクエストは従来どおりディスパッチされます。",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "標準の anthropic 互換リレーでは、会話途中のシステムターンをトップレベルのシステムプロンプトへ移動せず、メッセージリスト内に保持します。これにより、キャッシュされたプロンプトのプレフィックスがターン間で安定します。クライアント自身が mid-conversation-system-2026-04-07 ベータを送信した場合にのみ適用されます。デフォルトでは無効です。そのベータに対応していないリレーはメッセージリスト内のシステムターンを拒否するため、従来どおり、すべてのシステムターンがシステムプロンプトへ移動されます。",
   "featureFlagModelsDevEffortTiersEnabledDescription": "オペレーターによる上書きもプロバイダーレジストリによる宣言もない場合は、models.dev が公開する推論エフォートのティアを使用し、既知のエフォートレベルのみを保持します。また、宣言されたティアのリストが空の場合は「ティアなし」として扱います。デフォルトでは無効です。モデルカタログと解決済みのエフォートティアは従来どおり変更されません。",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* リクエストが、解決済みのモデル機能（ビジョン、推論、思考）と観測された品質スコアを使って候補プールを構築できるようにします。これらは一括読み込みで取得されます。既定ではオフ：リクエスト時の候補の重みは以前とまったく同じままです。オン：これらのシグナルがスナップショットの重みに反映されるため、候補の重みと選択が変わる可能性があります。",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "認証情報の健全性スイープが、ゲートウェイによって自動的にオフにされた接続を再テストし（各接続につき最大6時間に1回、1回のスイープにつき5件）、再テストに合格した接続を再びオンにできるようにします。デフォルトではオフです。この場合、オペレーターが対応するまで該当する接続はオフのままになります。オペレーターによって無効化された接続と、恒久的に禁止された接続は再テストされません。",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, other {#件のリクエスト}}、{keys, plural, other {上限付きキー #個}}",
     "unpricedUsageMore": "…ほか {count} 件",
     "unpricedUsageConfigure": "価格を設定",
-    "unpricedUsageDismiss": "閉じる"
+    "unpricedUsageDismiss": "閉じる",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "分析",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "一時的なクールダウンをスキップし、回復可能なエラーの後でもこの接続を対象として維持します (banned/expired などの終端状態は引き続き適用されます)。",
     "disableCoolingLabel": "この接続のクールダウンを無効化",
+    "keepMidConversationSystemDescription": "会話中に送信されたシステム メッセージを最上位のシステム プロンプトに移動するのではなく、メッセージ リスト内に残しておきます。これにより、プロンプト キャッシュはターンを超えてヒットし続けます。このアップストリームがメッセージ内で役割「システム」を受け入れる場合にのみ有効にします (そうでない場合は 400 と応答します)。",
+    "keepMidConversationSystemLabel": "会話中のシステム メッセージを適切な位置に維持する",
+    "requireUserLastMessageDescription": "アシスタントの事前入力を拒否するアップストリームの場合: 送信前に後続のアシスタント ターンを削除します (tool_use なし)。モデルは以前の答えを再生成する場合があります。",
+    "requireUserLastMessageLabel": "会話はユーザーメッセージで終了する必要があります",
     "bulkPasteAdded": "{count, plural, one {1件のキーを追加しました} other {#件のキーを追加しました}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {重複した1件をスキップしました} other {重複した#件をスキップしました}}",
     "bulkPasteHint": "1行につき1つのAPIキーを貼り付けてください。空行は無視され、重複するキーはスキップされます。",
@@ -6363,6 +6383,9 @@
     "localProviders": "ローカルプロバイダー",
     "maxConcurrentWholeNumberError": "最大同時実行数には整数を指定してください",
     "m365TierLabel": "Copilot ティア",
+    "m365RefreshTokenLabel": "リフレッシュトークン(オプション)",
+    "m365RefreshTokenHint": "Microsoft 365 アクセス トークンを自動的に更新するために使用されます。",
+    "m365RefreshTokenEditHint": "既存のトークンを保持するには、空白のままにします。新しいトークンを貼り付けて置き換えます。",
     "m365TierHint": "この接続で使用する Microsoft 365 Copilot サーフェスを選択します。Individual はデフォルトのコンシューマー向け BizChat です。Education および Enterprise (職場) はそれぞれのテナントサーフェスを選択します。",
     "m365TierIndividualOption": "Individual (デフォルト)",
     "m365TierEduOption": "教育",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "プロキシセクション",
     "requestBodyLimitTitle": "リクエスト本文の上限",
     "requestBodyLimitDescription": "リクエスト本文が解析される前に受け付けるAPIペイロードの最大サイズ。専用のアップロードルートでは、少なくとも組み込みの100 MBの上限が維持されます。",
+    "requestBodyLimitChatHint": "ここで上限を保存するまでは、Chat Completions と Responses は最大 50 MB を受け付けます。保存した上限は、これより小さくても大きくても両方に適用されます。",
     "requestBodyLimitInputLabel": "リクエスト本文の上限（MB）",
     "requestBodyLimitEmptyError": "上限をMB単位で入力",
     "requestBodyLimitWholeNumberError": "整数を使用してください",
@@ -12282,7 +12306,9 @@
       "failedTitle": "すべての{count}回の試行が失敗しました",
       "failed": "失敗しました",
       "pinnedTitle": "コンテキストキャッシュセッションピンニングを介して選択されたモデル",
-      "pinned": "ピン留めされた"
+      "pinned": "ピン留めされた",
+      "recoveredAttemptsTitle": "{count} 回の試行でリクエストが復旧しました",
+      "latestOutcomeFailed": "最新のリクエスト結果は失敗でした"
     },
     "attempts": "試行回数",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "親からの続き",
       "continuesFrom": "{id} からの続き",
       "viewConversation": "会話を表示",
-      "openConversation": "会話 {id} を開く"
+      "openConversation": "会話 {id} を開く",
+      "omittedHttpAttempts": "{count} 件の HTTP 送信は保持されていません",
+      "noHttpResponse": "HTTP 応答は確認されていません",
+      "transportError": "トランスポートエラー"
     },
     "tableLabel": "リクエストログ",
     "throughputPostFirstToken": "初回トークン以降",
     "throughputEndToEnd": "エンドツーエンド",
     "throughputRate": "{value} トークン/秒",
-    "throughputExplanation": "どちらのレートも、出力トークン数と推論トークン数のうち大きい方を使用します。初回トークン以降は、有効な TTFT を除外します。それ以外の場合は全体の時間を使用します。エンドツーエンドは常に全体の時間を使用します。バッファリングされたレスポンスでは、モデルの生成が速くなくても、高いバースト配信レートになることがあります。"
+    "throughputExplanation": "どちらのレートも、出力トークン数と推論トークン数のうち大きい方を使用します。初回トークン以降は、有効な TTFT を除外します。それ以外の場合は全体の時間を使用します。エンドツーエンドは常に全体の時間を使用します。バッファリングされたレスポンスでは、モデルの生成が速くなくても、高いバースト配信レートになることがあります。",
+    "omittedHttpAttempts": "{count} 件の HTTP 送信は保持されていません",
+    "upstreamStatus": "上流サーバー {status}",
+    "noHttpResponse": "HTTP 応答は確認されていません",
+    "transportError": "トランスポートエラー"
   },
   "proxyLogger": {
     "filterAll": "すべて",
@@ -14157,6 +14190,14 @@
         "label": "共有イグレスプールの順序",
         "description": "イグレスアドレスごとにクォータが割り当てられているプロバイダーにおいて、最近拒否されたメンバーと観測されたイグレスアドレスを共有するプールメンバーの順位を、正常なメンバーの直下に配置します。並び替えのみで、除外されることはありません。読み取り対象となる拒否シグナルを生成する PROXY_SKIP_RECENTLY_FAILED が必要です。デフォルトで無効: 選択順序は通常のローテーションとまったく同じになります。"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "モデルスコープのクォータの拒否",
+        "description": "opencodeクォータ 429 をヒットしたモデルにのみ適用することで、同じ出力が他のモデルに提供され続け、そのモデルが成功した場合にのみクリアされます。モデル (プールのローテーション、パークとリプレイ、管理者の可視性、セレクター トリガー、ヘルス スイープ) を持たないコンシューマーには、依然としてそれが表示されます。拒否を生成するPROXY_SKIP_RECENTLY_FAILEDが必要です。デフォルトではオフ: 1 つのモデルのクォータ 429 により、すべてのモデルの出力が確保されます。"
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "プロキシフェッチ: 厳密なPOSTリプレイ",
+        "description": "非冪等リクエスト (POST、 PUT、 PATCH、 DELETE) の場合、トランスポート エラー (フレッシュ ソケット、プロキシ フォールバック、ネイティブ フォールバック) の後に、何も送信されていないことがエラーによって証明される場合 ( ECONNREFUSED、 ENOTFOUND、 EAI_AGAIN、 ENETUNREACH 、または接続タイムアウト) にのみ再送信します。書き込み後のソケット エラーは、アップストリームがリクエストを受け入れたことを意味する可能性があるため、再送信によりリクエストが生成され、二重に請求される可能性があります。デフォルトではオフ: トランスポート エラーが発生すると、再生可能な本文が 1 回再送信され、古いプールされたソケットも回復されます。"
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ローテーション帰属のログ記録",
         "description": "Opencodeのローテーションにおいて、どのアカウントが処理したか、またはスキップされたかを記録し（完全なアカウントIDではなくマスクされたIDのみ）、プロキシログのエントリをリクエストに関連付けることで、オペレーターがスキップされたアカウントと未使用のアカウントを識別できるようにします。デフォルトで無効: 追加のログ行やカラムは書き込まれません。"
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 プール再選択",
         "description": "OpenCode のマルチアカウントローテーションにおいて、アンビエントプールコンテキスト下のプロキシなしアカウントで送信元（egress）ごとにバケット化されたプロバイダーから429を受信した後、同じ送信元アドレスを再試行する代わりに接続プールに対して次の試行用の別メンバーを要求します。順序付けを行うのみで除外はしません。プールが枯渇した場合は現在の動作を維持します。デフォルトでは無効: 従来通り、すべての429で次のアカウントへローテーションされます。"
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode無料層出力プローブ",
+        "description": "OpenCodeエグゼキュータの場合、プロキシされたリクエストが 403 または 451 FreeTierErrorで応答され、監視されたツールの再試行が失敗したか適用されなかった場合、リクエストを別のプロキシ (別のアカウント プロキシまたは別のプール メンバー。決して直接接続しないでください) 経由で一度送信します。そのプローブが 200 と応答した場合にのみ、最初の出力がプロキシ拒否メモリに確保され、プローブ応答が提供されます。両方が拒否した場合、元の拒否が返され、何も記録されません。同じ拒否テキストがフラグ付き出力IPと拒否されたリクエスト シェイプをカバーしているため、プローブは証拠によってそれらを区別します。デフォルトではオフ: 拒否は変更されずに返されます。"
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 クライアントフィンガープリント",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "コンボ: コンテンツポリシー拒否時に停止",
         "description": "コンボターゲットが完全一致するコンテンツポリシー拒否（コードまたはタイプが cyber_policy / content_policy_violation）を返した場合、残りのターゲットが別のモデルであっても次のターゲットには進まず、コンボを停止してその拒否を返します。デフォルトはオフ: この拒否によってアカウントがクールダウンされたりプロバイダーブレーカーが作動したりすることはなく、コンボはこれまでと同様に次のターゲットへ進みます。"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "応答: トランスポートのみを介したキープアライブ",
+        "description": "Responses のキープアライブを response.in_progress イベントではなく空行として送信します。これにより、合成スナップショットが公式SDK内の実際のレスポンスを置き換えることは決してありません。空白行はSSEイベントを送出しないため、イベント時にのみリセットされるクライアント ウォッチドッグは、長いサイレント フェーズ中にリセットされません。デフォルトではオフ: タイマーは仕様有効なresponse.in_progressイベントを送信します。"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "クールダウン再試行: 403/410拒否をスキップ",
