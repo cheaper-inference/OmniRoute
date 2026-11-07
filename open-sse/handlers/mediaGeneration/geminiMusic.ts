@@ -106,12 +106,33 @@ function failGeminiMusicCall(
   return { success: false as const, status, error };
 }
 
-/** `x-goog-api-key` for an API key, a bearer header for an access token. */
-function buildGeminiMusicHeaders(apiKey?: string, accessToken?: string): Record<string, string> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (apiKey) headers["x-goog-api-key"] = apiKey;
-  else headers.Authorization = `Bearer ${accessToken}`;
-  return headers;
+/**
+ * `x-goog-api-key` for an API key, a bearer header for an access token, `null` when the
+ * connection carries neither.
+ */
+function buildGeminiMusicHeaders(
+  credentials?: GeminiMusicCredentials | null
+): Record<string, string> | null {
+  const apiKey = stringValue(credentials?.apiKey);
+  if (apiKey) return { "Content-Type": "application/json", "x-goog-api-key": apiKey };
+  const accessToken = stringValue(credentials?.accessToken);
+  if (accessToken) {
+    return { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` };
+  }
+  return null;
+}
+
+/** A thrown fetch: 499 when the client aborted, 502 otherwise. */
+function failGeminiMusicRequest(
+  err: unknown,
+  signal: AbortSignal | null,
+  call: GeminiMusicCall,
+  log?: GeminiMusicLog | null
+) {
+  if (signal?.aborted) return failGeminiMusicCall(call, 499, "Request aborted");
+  const message = sanitizeErrorMessage(err) || "Gemini music generation failed";
+  log?.error?.("MUSIC", `${call.modelLabel} gemini-lyria failed: ${message}`);
+  return failGeminiMusicCall(call, 502, message);
 }
 
 async function readGeminiMusicResponse(
@@ -161,9 +182,8 @@ export async function handleGeminiMusicGeneration({
   log,
   signal = null,
 }: GeminiMusicArgs) {
-  const apiKey = stringValue(credentials?.apiKey);
-  const accessToken = stringValue(credentials?.accessToken);
-  if (!apiKey && !accessToken) {
+  const headers = buildGeminiMusicHeaders(credentials);
+  if (!headers) {
     return { success: false as const, status: 401, error: "Gemini API key is required" };
   }
 
@@ -182,15 +202,12 @@ export async function handleGeminiMusicGeneration({
   try {
     const response = await fetch(url, {
       method: "POST",
-      headers: buildGeminiMusicHeaders(apiKey, accessToken),
+      headers,
       body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] }),
       ...(signal ? { signal } : {}),
     });
     return await readGeminiMusicResponse(response, call, log);
   } catch (err) {
-    if (signal?.aborted) return failGeminiMusicCall(call, 499, "Request aborted");
-    const message = sanitizeErrorMessage(err) || "Gemini music generation failed";
-    log?.error?.("MUSIC", `${call.modelLabel} gemini-lyria failed: ${message}`);
-    return failGeminiMusicCall(call, 502, message);
+    return failGeminiMusicRequest(err, signal, call, log);
   }
 }
