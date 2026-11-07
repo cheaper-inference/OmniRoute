@@ -440,6 +440,31 @@ export async function getActiveSyncedCatalog(
 }
 
 /**
+ * Active connections that feed the /v1/models listing, grouped by provider, with
+ * the free-only admission reference of each.
+ */
+function groupListableConnections(connections: unknown[]) {
+  const connectionIdsByProvider = new Map<string, Set<string>>();
+  const admissionRefsByProvider = new Map<string, ConnectionAdmissionRef[]>();
+  for (const rawConnection of connections) {
+    const connection = readConnectionRef(rawConnection);
+    // Search providers have no chat models: their synced rows are the
+    // static-import UI's searchTypes (web/news/x), not routable catalog
+    // entries. Keep them out of the /v1/models live source.
+    if (!connection || getSearchProvider(connection.provider)) continue;
+    const ids = connectionIdsByProvider.get(connection.provider) ?? new Set<string>();
+    ids.add(connection.id);
+    connectionIdsByProvider.set(connection.provider, ids);
+    const admissionRef = readConnectionAdmissionRef(rawConnection);
+    if (!admissionRef) continue;
+    const refs = admissionRefsByProvider.get(connection.provider) ?? [];
+    refs.push(admissionRef);
+    admissionRefsByProvider.set(connection.provider, refs);
+  }
+  return { connectionIdsByProvider, admissionRefsByProvider };
+}
+
+/**
  * Return non-empty synced catalogs grouped by provider, restricted to active
  * connections. This is the authoritative live source for /v1/models.
  */
@@ -463,30 +488,8 @@ export async function getAllActiveSyncedModels(
       "provider_specific_data",
     ]);
 
-    const connectionIdsByProvider = new Map<string, Set<string>>();
-    const admissionRefsByProvider = new Map<string, ConnectionAdmissionRef[]>();
-
-    for (const rawConnection of connections) {
-      const connection = readConnectionRef(rawConnection);
-      if (!connection) continue;
-
-      // Search providers have no chat models: their synced rows are the
-      // static-import UI's searchTypes (web/news/x), not routable catalog
-      // entries. Keep them out of the /v1/models live source.
-      if (getSearchProvider(connection.provider)) continue;
-
-      if (!connectionIdsByProvider.has(connection.provider)) {
-        connectionIdsByProvider.set(connection.provider, new Set());
-      }
-
-      connectionIdsByProvider.get(connection.provider)!.add(connection.id);
-      const admissionRef = readConnectionAdmissionRef(rawConnection);
-      if (admissionRef) {
-        const refs = admissionRefsByProvider.get(connection.provider) ?? [];
-        refs.push(admissionRef);
-        admissionRefsByProvider.set(connection.provider, refs);
-      }
-    }
+    const { connectionIdsByProvider, admissionRefsByProvider } =
+      groupListableConnections(connections);
 
     const result: Record<string, SyncedAvailableModel[]> = {};
 
