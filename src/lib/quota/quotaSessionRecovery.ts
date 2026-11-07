@@ -9,6 +9,7 @@ import {
   failQuotaRecoveryTicket,
   listDueQuotaRecoveryTickets,
   markQuotaRecoveryNeedsConfirmation,
+  purgeFinishedQuotaRecoveryTickets,
   readQuotaRecoveryRequest,
   reconcileInterruptedQuotaRecoveries,
   reconcileStaleRunningQuotaRecoveries,
@@ -23,6 +24,13 @@ const POLL_INTERVAL_MS = 60_000;
 const TICKET_TTL_MS = 24 * 60 * 60_000;
 const MAX_REQUEST_BYTES = 512 * 1024;
 const MAX_RESULT_BYTES = 1024 * 1024;
+const DEFAULT_MAX_TICKETS_PER_KEY = 64;
+
+/** Active (pending, running, needs-confirmation) tickets one API key may hold. */
+export function quotaRecoveryMaxTicketsPerKey(): number {
+  const parsed = Number(process.env.OMNIROUTE_QUOTA_RECOVERY_MAX_PER_KEY);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_TICKETS_PER_KEY;
+}
 
 type RecoverableEndpoint = "chat/completions" | "responses";
 type StoredRequest = { apiKey: string; sessionId: string; body: Record<string, unknown> };
@@ -165,6 +173,7 @@ export async function maybeQueueQuotaSessionRecovery(input: {
       requestPayload: payload,
       nextAttemptAt: new Date(now + quotaRecoveryDelayMs(response, now)).toISOString(),
       expiresAt: new Date(now + TICKET_TTL_MS).toISOString(),
+      maxActivePerKey: quotaRecoveryMaxTicketsPerKey(),
     });
   } catch {
     return response;
@@ -237,6 +246,7 @@ export async function runQuotaSessionRecoveryTick(now = new Date()): Promise<voi
   try {
     expireQuotaRecoveryTickets(now);
     reconcileStaleRunningQuotaRecoveries(now);
+    purgeFinishedQuotaRecoveryTickets(now, TICKET_TTL_MS);
     for (const ticket of listDueQuotaRecoveryTickets(now)) {
       await dispatchTicket(ticket);
     }
