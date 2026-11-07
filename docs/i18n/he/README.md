@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                             |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
+|                             |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------- | :-------------------: | :---------: | :-------------------: |
 | 🌐 ספקים                    |          352          |   **358**   |          380          |
 | 🧠 מזהי מודלי צ'אט ייחודיים |         1320          |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar הוא שירות אופציונלי המבוסס על GET בלבד. לק�
 
 </div>
 
-> נקודות עיקריות מהגרסה **v3.8.20 → v3.8.53**. היסטוריה מלאה ב-[`CHANGELOG.md`](CHANGELOG.md).
+> נקודות עיקריות מהגרסה **v3.8.20 → v3.8.54**. היסטוריה מלאה ב-[`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ ניתוב `quota-weighted`** — אסטרטגיית הקומבו ה-20 מדלגת על חשבונות שמיצו את המכסה, ואז בוחרת בין השאר לפי יחס מכסה שנותרה חלקי עומס פעיל, תוך שמירה על שיחות קיימות מוצמדות. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 מצב Headless** — `omniroute serve --headless` (או `OMNIROUTE_HEADLESS=1`) מריץ רק את מנוע הפרוקסי `/v1/*`, עם לוח הבקרה ותתי-מערכות ייעודיות ללוח כבויים. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 רואה `npm warn ERESOLVE` או אזהרות peer-dep? [הן בלתי מזיקות](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **משתמשים ב-npm 11 ואילך?** ייתכן ש-npm יחסום סקריפטים של מחזור חיים של חבילות אלא אם הם מורשים. ה-`postinstall` של OmniRoute (`node scripts/build/postinstall.mjs`) נדרש כדי להכין את קבצי ה-runtime המקוריים שלו. אפשרו את החבילות הנקובות באזהרה של npm בעת התקנה גלובלית. עבור סט החבילות שדווח על ידי OmniRoute 3.8.53:
+> **משתמשים ב-npm 11 ואילך?** ייתכן ש-npm יחסום סקריפטים של מחזור חיים של חבילות אלא אם הם מורשים. ה-`postinstall` של OmniRoute (`node scripts/build/postinstall.mjs`) נדרש כדי להכין את קבצי ה-runtime המקוריים שלו. אפשרו את החבילות הנקובות באזהרה של npm בעת התקנה גלובלית. עבור סט החבילות שדווח על ידי OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1291,7 +1291,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 מדלג ע�
   <tr><td nowrap><b>סביבת ריצה</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>שפה</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> בכל <code>src/</code> ו-<code>open-sse/</code> (אפס <code>any</code> בליבה מאז v2.0)</td></tr>
   <tr><td nowrap><b>מסגרת</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, יומן WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 222 מיגרציות</td></tr>
+  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, יומן WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 223 מיגרציות</td></tr>
   <tr><td nowrap><b>זיכרון</b></td><td>חיפוש טקסט מלא SQLite FTS5 + הטמעות וקטוריות עם כימות int8, דעיכה עם טיפוסים</td></tr>
   <tr><td nowrap><b>סכמות</b></td><td>Zod 4 — אימות קלט/פלט של כלי MCP + חוזי API</td></tr>
   <tr><td nowrap><b>פרוטוקולים</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1804,7 +1804,7 @@ OmniRoute עומד על כתפי ענקים. הוא התחיל כ-fork של **[9
 
 **[⬆ חזרה לראש העמוד](#-omniroute)** · נבנה ❤️ עבור קהילת הבינה המלאכותית בקוד פתוח.
 
-<sub>נוצר על ידי <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>נוצר על ידי <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- דיונים ב-GitHub מופעלים לשאלות ותשובות של הקהילה -->

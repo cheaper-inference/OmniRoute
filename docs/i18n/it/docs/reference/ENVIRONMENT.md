@@ -1366,9 +1366,9 @@ Render disattiva un servizio Web gratuito dopo circa 15 minuti senza traffico in
 
 Un servizio tenuto attivo per un mese intero utilizza circa 744 ore di istanza, quindi confrontalo con l'attuale indennità del livello gratuito di Render.
 
-## Scenari di distribuzione
+## Scenari di deployment
 
-Per le indicazioni SRE sul backend relay (comportamento ts/bifrost/auto, posizionamento di 9router rispetto a CLIProxyAPI e strategia di fallback ad alto throughput), consulta [Strategia del backend relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Per indicazioni SRE sul backend relay (comportamento ts/bifrost/auto, posizionamento di 9router rispetto a CLIProxyAPI e strategia di fallback ad alto throughput), consulta [Strategia del backend relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Sviluppo locale minimo
 
@@ -1380,7 +1380,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Produzione con Docker
+### Docker in produzione
 
 ```bash
 JWT_SECRET=<generated>
@@ -1399,7 +1399,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Ambiente isolato dalla rete / CI
+### Ambiente isolato / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1410,7 +1410,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS con proxy inverso (nginx + Cloudflare)
+### VPS con reverse proxy (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1872,3 +1872,14 @@ Utilizzato da `open-sse/services/combo.ts` e `src/lib/quota/quotaScheduler.ts` p
 | Variabile                      | Predefinito | File di origine                              | Descrizione                                                                                                                                                                                                                                                             |
 | ------------------------------ | ----------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`         | `src/lib/providerModels/modelSyncTimings.ts` | Impostato su `1` per registrare i tempi di fase, una richiesta generata ID e i risultati della fase success/error durante la sincronizzazione del modello. Disabilitato per tutti gli altri valori. I log omettono i payload di richieste, account, catalogo ed errori. |
+
+## Strumento di analisi dei contenuti multimediali OpenCode locale
+
+Utilizzato da `scripts/cli/omniroute-media-mcp.mjs`. Impostare questi valori nell'ambiente del processo dello strumento locale.
+
+| Variabile                  | Predefinito                                                                      | Descrizione                                                                                                                    |
+| -------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (o `~/.config/opencode/opencode.json`) | Configurazione di OpenCode letta dallo strumento multimediale e dal programma di installazione.                                |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                      | Voce del provider letta dalla configurazione di OpenCode dallo strumento multimediale.                                         |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                           | Modello inviato dallo strumento multimediale. Il relativo provider deve supportare i tipi di contenuti multimediali richiesti. |
+| `OMNIROUTE_MEDIA_API_KEY`  | Chiave API del provider configurato o relativo riferimento all'ambiente          | Credenziale sostitutiva facoltativa. Mantenerla nell'ambiente del processo locale; non eseguirne mai il commit.                |
