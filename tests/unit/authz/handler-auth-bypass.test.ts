@@ -42,6 +42,8 @@ test.beforeEach(() => {
 });
 
 test.after(() => {
+  core.resetDbInstance();
+  apiKeysDb.resetApiKeyState();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   if (ORIGINAL_REQUIRE_API_KEY === undefined) delete process.env.REQUIRE_API_KEY;
   else process.env.REQUIRE_API_KEY = ORIGINAL_REQUIRE_API_KEY;

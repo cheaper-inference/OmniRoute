@@ -18,7 +18,7 @@
  * path (omp CLI never run yet), which each exported function must handle
  * gracefully without throwing.
  */
-import { describe, it, beforeEach, afterEach } from "node:test";
+import { describe, it, beforeEach, afterEach, mock } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -45,7 +45,6 @@ function openNativeDb(file: string, options?: Database.Options): Database.Databa
 const PROVIDER_ID = "omniroute";
 
 let tmpHome: string;
-let origHome: string | undefined;
 
 function getOmpDbPath() {
   return path.join(tmpHome, ".omp", "agent", "agent.db");
@@ -72,12 +71,11 @@ function seedOmpDb() {
 
 beforeEach(() => {
   tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), "omp-db-test-"));
-  origHome = process.env.HOME;
-  process.env.HOME = tmpHome;
+  mock.method(os, "homedir", () => tmpHome);
 });
 
 afterEach(() => {
-  process.env.HOME = origHome;
+  mock.restoreAll();
   fs.rmSync(tmpHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
@@ -158,4 +156,27 @@ describe("db/omp.ts — deleteOmpCredentials", { skip }, () => {
     seedOmpDb();
     assert.doesNotThrow(() => deleteOmpCredentials(PROVIDER_ID));
   });
+});
+
+describe("db/omp.ts � failed writes release the database", { skip }, () => {
+  for (const operation of ["save", "delete"] as const) {
+    it(`closes the connection after ${operation} encounters a missing table`, () => {
+      const dbPath = getOmpDbPath();
+      fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+      const db = openNativeDb(dbPath);
+      db.exec("CREATE TABLE unrelated (id INTEGER)");
+      db.close();
+
+      assert.throws(() => {
+        if (operation === "save") {
+          saveOmpCredentials(PROVIDER_ID, "sk-test-omp-key", "http://localhost:20128/v1");
+        } else {
+          deleteOmpCredentials(PROVIDER_ID);
+        }
+      }, /no such table/);
+      // Windows refuses to delete the file if an exception leaked the connection.
+      fs.unlinkSync(dbPath);
+      assert.equal(fs.existsSync(dbPath), false);
+    });
+  }
 });
