@@ -103,6 +103,8 @@ const STRIP_RULES: StripRule[] = [
   { provider: "nvidia", match: /minimax-m2\.7/i, drop: ["thinking"] },
   // Mistral GLM 5.2 rejects Claude-style thinking payloads.
   { provider: "mistral", match: /(?:^|\/)zai-glm-5(?:[.-])2\b/i, drop: ["thinking", "reasoning"] },
+  // Mistral chat completions rejects OpenAI-specific parallel_tool_calls with 422 extra_forbidden.
+  { provider: "mistral", match: /.*/, drop: ["parallel_tool_calls"] },
   // NVIDIA NIM: OpenAI-compatible wrapper 400s on `prompt_cache_key` (Codex CLI
   // injects it natively for its own prompt caching). NIM has no documented
   // support for this field (providerSupportsCaching already treats nvidia as

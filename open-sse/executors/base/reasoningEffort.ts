@@ -349,6 +349,17 @@ function stripEffortValue(b: Record<string, unknown>, c: EffortCarriers): Record
   return next;
 }
 
+/**
+ * Normalizes, caps, or strips `reasoning_effort` across carriers (`reasoning_effort`,
+ * `reasoningEffort`, `reasoning.effort`, `output_config.effort`) according to the
+ * resolved upstream provider and model capabilities.
+ *
+ * @param body - The request payload to sanitize.
+ * @param provider - The upstream provider ID (e.g. "mistral", "openai").
+ * @param model - The resolved model ID string.
+ * @param log - Optional logger for sanitize events.
+ * @returns The sanitized request body with unsupported effort values clamped or stripped.
+ */
 export function sanitizeReasoningEffortForProvider(
   body: unknown,
   provider: string,
@@ -401,8 +412,11 @@ export function sanitizeReasoningEffortForProvider(
 
   const githubOptIn =
     provider === "github" && GITHUB_REASONING_EFFORT_OPT_IN_PATTERN.test(modelStr);
+  const mistralModel = provider === "mistral" ? getProviderModel(provider, modelStr) : undefined;
   const rejecting =
-    (provider === "mistral" && MISTRAL_NO_REASONING_EFFORT_PATTERN.test(modelStr)) ||
+    (provider === "mistral" &&
+      (MISTRAL_NO_REASONING_EFFORT_PATTERN.test(modelStr) ||
+        (mistralModel !== undefined && mistralModel.supportsReasoning !== true))) ||
     (provider === "github" && !githubOptIn && GITHUB_NO_REASONING_EFFORT_PATTERN.test(modelStr));
   if (rejecting) {
     log?.info?.(
