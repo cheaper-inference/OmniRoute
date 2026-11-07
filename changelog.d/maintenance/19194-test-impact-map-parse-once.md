@@ -1,0 +1,1 @@
+- **perf(quality):** The test-impact map reads and resolves each file once per build instead of once per test that reaches it, so building it takes seconds instead of half an hour on the current unit suite; the map itself is byte-identical ([#19194](https://github.com/cheaper-inference/OmniRoute/pull/19194)) — thanks @aldoeliacim
