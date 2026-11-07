@@ -1,1 +1,0 @@
-- **fix(dashboard):** Add an optional masked Microsoft 365 refresh-token field to connection Advanced Settings, safely persist replacements, and preserve stored credentials when left blank ([#18492](https://github.com/cheaper-inference/OmniRoute/pull/18492)) — thanks @trespassmk
