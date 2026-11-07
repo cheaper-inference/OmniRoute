@@ -36,4 +36,4 @@ fi
 
 echo "Starting OmniRoute on ${URL}"
 echo "Keep this window open while you use it. Close it to stop the server."
-omniroute
+omniroute serve --no-open

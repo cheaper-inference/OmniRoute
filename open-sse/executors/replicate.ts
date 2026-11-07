@@ -260,15 +260,15 @@ function outputToText(output: unknown): string {
 function sleep(ms: number, signal?: AbortSignal | null): Promise<void> {
   return new Promise((resolve, reject) => {
     if (signal?.aborted) return reject(signal.reason ?? new Error("aborted"));
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener(
-      "abort",
-      () => {
-        clearTimeout(timer);
-        reject(signal.reason ?? new Error("aborted"));
-      },
-      { once: true }
-    );
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(signal.reason ?? new Error("aborted"));
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", onAbort, { once: true });
   });
 }
 
@@ -323,7 +323,7 @@ export class ReplicateExecutor extends BaseExecutor {
     super("replicate", PROVIDERS.replicate || { format: "openai" });
   }
 
-  private resolveBaseUrl(credentials: ProviderCredentials | null): string {
+  private resolvePredictionsBaseUrl(credentials: ProviderCredentials | null): string {
     const custom = credentials?.providerSpecificData?.baseUrl;
     return String(typeof custom === "string" && custom.trim() ? custom : DEFAULT_BASE_URL)
       .trim()
@@ -336,7 +336,7 @@ export class ReplicateExecutor extends BaseExecutor {
     _urlIndex = 0,
     credentials: ProviderCredentials | null = null
   ): string {
-    const baseUrl = this.resolveBaseUrl(credentials);
+    const baseUrl = this.resolvePredictionsBaseUrl(credentials);
     const parsed = parseModel(model);
     // Pinned/community versions go through the generic endpoint with a `version` field;
     // official models use /models/{owner}/{name}/predictions.
@@ -389,6 +389,17 @@ export class ReplicateExecutor extends BaseExecutor {
     };
   }
 
+  // Every Replicate call leaves through here: this executor owns its fetch path, so it has to
+  // apply the same outbound guards BaseExecutor applies (GHSA-4f49 and GHSA-cmhj).
+  private send(
+    url: string,
+    init: RequestInit,
+    credentials: ProviderCredentials
+  ): Promise<Response> {
+    this.assertOutboundUrlAllowed(url);
+    return this.dispatchRequest(url, init, credentials);
+  }
+
   private withoutPrefer(headers: Record<string, string>): Record<string, string> {
     const copy = { ...headers };
     delete copy.Prefer;
@@ -399,6 +410,7 @@ export class ReplicateExecutor extends BaseExecutor {
     prediction: JsonRecord,
     requestUrl: string,
     headers: Record<string, string>,
+    credentials: ProviderCredentials,
     signal?: AbortSignal | null
   ): Promise<JsonRecord> {
     if (TERMINAL_STATUSES.has(String(prediction.status))) return prediction;
@@ -414,7 +426,11 @@ export class ReplicateExecutor extends BaseExecutor {
 
     while (!TERMINAL_STATUSES.has(String(current.status)) && Date.now() < deadline) {
       await sleep(this.pollIntervalMs, signal);
-      const res = await fetch(urls.get, { method: "GET", headers: pollHeaders, signal });
+      const res = await this.send(
+        urls.get,
+        { method: "GET", headers: pollHeaders, signal },
+        credentials
+      );
       if (!res.ok) {
         const detail = asRecord(await res.json().catch(() => ({}))).detail;
         throw new ReplicateHttpError(
@@ -427,7 +443,7 @@ export class ReplicateExecutor extends BaseExecutor {
     }
 
     if (!TERMINAL_STATUSES.has(String(current.status))) {
-      await this.cancelPrediction(current, requestUrl, pollHeaders);
+      await this.cancelPrediction(current, requestUrl, pollHeaders, credentials);
     }
     return current;
   }
@@ -437,12 +453,17 @@ export class ReplicateExecutor extends BaseExecutor {
   private async cancelPrediction(
     prediction: JsonRecord,
     requestUrl: string,
-    headers: Record<string, string>
+    headers: Record<string, string>,
+    credentials: ProviderCredentials
   ): Promise<void> {
     const cancelUrl = asRecord(prediction.urls).cancel;
     if (!sameOrigin(cancelUrl, requestUrl)) return;
     try {
-      await fetch(cancelUrl, { method: "POST", headers: this.withoutPrefer(headers) });
+      await this.send(
+        cancelUrl,
+        { method: "POST", headers: this.withoutPrefer(headers) },
+        credentials
+      );
     } catch {
       // Nothing more to do; the caller still reports the timeout.
     }
@@ -452,16 +473,21 @@ export class ReplicateExecutor extends BaseExecutor {
   private async fetchFinalPrediction(
     prediction: JsonRecord,
     requestUrl: string,
-    headers: Record<string, string>
+    headers: Record<string, string>,
+    credentials: ProviderCredentials
   ): Promise<JsonRecord> {
     const getUrl = asRecord(prediction.urls).get;
     if (!sameOrigin(getUrl, requestUrl)) return prediction;
     try {
-      const res = await fetch(getUrl, {
-        method: "GET",
-        headers: this.withoutPrefer(headers),
-        signal: AbortSignal.timeout(USAGE_LOOKUP_TIMEOUT_MS),
-      });
+      const res = await this.send(
+        getUrl,
+        {
+          method: "GET",
+          headers: this.withoutPrefer(headers),
+          signal: AbortSignal.timeout(USAGE_LOOKUP_TIMEOUT_MS),
+        },
+        credentials
+      );
       return res.ok ? asRecord(await res.json()) : prediction;
     } catch {
       return prediction;
@@ -477,6 +503,7 @@ export class ReplicateExecutor extends BaseExecutor {
     model: string,
     promptText: string,
     maxTokens: number | null,
+    credentials: ProviderCredentials,
     signal?: AbortSignal | null
   ): Response {
     const write = chunkWriter(model);
@@ -491,11 +518,15 @@ export class ReplicateExecutor extends BaseExecutor {
         const push = (frame: string) => controller.enqueue(encoder.encode(frame));
         let content = "";
         try {
-          const res = await fetch(streamUrl, {
-            method: "GET",
-            headers: { Accept: "text/event-stream", "Cache-Control": "no-store" },
-            signal: upstreamAbort.signal,
-          });
+          const res = await this.send(
+            streamUrl,
+            {
+              method: "GET",
+              headers: { Accept: "text/event-stream", "Cache-Control": "no-store" },
+              signal: upstreamAbort.signal,
+            },
+            credentials
+          );
           if (!res.ok || !res.body) {
             throw new ReplicateHttpError(
               res.ok ? 502 : res.status,
@@ -529,7 +560,12 @@ export class ReplicateExecutor extends BaseExecutor {
             return;
           }
 
-          const final = await this.fetchFinalPrediction(prediction, requestUrl, headers);
+          const final = await this.fetchFinalPrediction(
+            prediction,
+            requestUrl,
+            headers,
+            credentials
+          );
           const usage = resolveUsage(final, promptText, content);
           push(
             write([{ index: 0, delta: {}, finish_reason: resolveFinishReason(usage, maxTokens) }])
@@ -558,7 +594,7 @@ export class ReplicateExecutor extends BaseExecutor {
       cancel: async () => {
         upstreamAbort.abort();
         signal?.removeEventListener("abort", onAbort);
-        if (!finished) await this.cancelPrediction(prediction, requestUrl, headers);
+        if (!finished) await this.cancelPrediction(prediction, requestUrl, headers, credentials);
       },
     });
 
@@ -595,12 +631,11 @@ export class ReplicateExecutor extends BaseExecutor {
     const { payload, promptText, maxTokens } = built;
 
     try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload),
-        signal,
-      });
+      const res = await this.send(
+        url,
+        { method: "POST", headers, body: JSON.stringify(payload), signal },
+        credentials
+      );
 
       if (!res.ok) {
         const detail = asRecord(await res.json().catch(() => ({}))).detail;
@@ -630,6 +665,7 @@ export class ReplicateExecutor extends BaseExecutor {
               model,
               promptText,
               maxTokens,
+              credentials,
               signal
             ),
             url,
@@ -639,7 +675,7 @@ export class ReplicateExecutor extends BaseExecutor {
         }
       }
 
-      const prediction = await this.pollUntilDone(created, url, headers, signal);
+      const prediction = await this.pollUntilDone(created, url, headers, credentials, signal);
 
       if (prediction.status !== "succeeded") {
         const failed = prediction.status === "failed" || prediction.status === "canceled";

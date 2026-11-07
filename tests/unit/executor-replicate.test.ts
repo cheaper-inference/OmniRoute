@@ -30,9 +30,63 @@ async function withFetch<T>(
   }
 }
 
-test("ReplicateExecutor is registered in the executor index", () => {
+test("ReplicateExecutor is registered in the executor index", async () => {
   assert.equal(hasSpecializedExecutor("replicate"), true);
-  assert.ok(getExecutor("replicate") instanceof ReplicateExecutor);
+  assert.ok((await getExecutor("replicate")) instanceof ReplicateExecutor);
+});
+
+test("ReplicateExecutor refuses a metadata base URL before anything reaches the network (GHSA-4f49)", async () => {
+  const executor = new ReplicateExecutor();
+  const calls: string[] = [];
+
+  const result = await withFetch(
+    (url) => {
+      calls.push(url);
+      return jsonResponse({ status: "succeeded", output: "leaked" });
+    },
+    () =>
+      executor.execute({
+        model: MODEL,
+        body: { messages: [{ role: "user", content: "hi" }] },
+        stream: false,
+        credentials: {
+          ...credentials,
+          providerSpecificData: { baseUrl: "http://169.254.169.254/latest" },
+        },
+      })
+  );
+
+  assert.deepEqual(calls, []);
+  assert.equal(result.response.status, 502);
+});
+
+test("ReplicateExecutor does not auto-follow a redirect with the Bearer token", async () => {
+  const executor = new ReplicateExecutor();
+  const seen: Array<{ url: string; authorization: string | null }> = [];
+
+  await withFetch(
+    (url, init) => {
+      seen.push({ url, authorization: new Headers(init.headers).get("Authorization") });
+      if (seen.length === 1) {
+        return new Response(null, {
+          status: 307,
+          headers: { Location: "https://collector.example.com/steal" },
+        });
+      }
+      return jsonResponse({ status: "succeeded", output: "ok" });
+    },
+    () =>
+      executor.execute({
+        model: MODEL,
+        body: { messages: [{ role: "user", content: "hi" }] },
+        stream: false,
+        credentials,
+      })
+  );
+
+  assert.equal(seen[0].authorization, "Bearer r8_test");
+  assert.equal(seen[1].url, "https://collector.example.com/steal");
+  assert.equal(seen[1].authorization, null);
 });
 
 test("ReplicateExecutor posts to the official-model predictions URL and wraps array output", async () => {
@@ -82,6 +136,50 @@ test("ReplicateExecutor posts to the official-model predictions URL and wraps ar
   const json = await result.response.json();
   assert.equal(json.object, "chat.completion");
   assert.equal(json.choices[0].message.content, "Hello, world");
+});
+
+test("polling does not leave an abort listener behind per tick", async () => {
+  class QuickPollExecutor extends ReplicateExecutor {
+    protected pollIntervalMs = 1;
+  }
+  const controller = new AbortController();
+  const { signal } = controller;
+  const live = new Set<unknown>();
+  const add = signal.addEventListener.bind(signal);
+  const remove = signal.removeEventListener.bind(signal);
+  signal.addEventListener = ((type: string, listener: EventListener, options?: unknown) => {
+    live.add(listener);
+    add(type, listener, options as AddEventListenerOptions);
+  }) as typeof signal.addEventListener;
+  signal.removeEventListener = ((type: string, listener: EventListener) => {
+    live.delete(listener);
+    remove(type, listener);
+  }) as typeof signal.removeEventListener;
+
+  let polls = 0;
+  await withFetch(
+    (url) => {
+      if (!url.endsWith("/predictions/p1")) {
+        return jsonResponse({
+          status: "starting",
+          urls: { get: "https://api.replicate.com/v1/predictions/p1" },
+        });
+      }
+      polls += 1;
+      return jsonResponse({ status: polls < 3 ? "processing" : "succeeded", output: "ok" });
+    },
+    () =>
+      new QuickPollExecutor().execute({
+        model: MODEL,
+        body: { messages: [{ role: "user", content: "hi" }] },
+        stream: false,
+        credentials,
+        signal,
+      })
+  );
+
+  assert.equal(polls, 3);
+  assert.equal(live.size, 0);
 });
 
 test("ReplicateExecutor polls urls.get until the prediction finishes", async () => {
@@ -238,7 +336,7 @@ test("Replicate does not cancel through a foreign-origin cancel URL", async () =
   const hosts = new Set<string>();
 
   await withFetch(
-    (url, init) => {
+    (url, _init) => {
       hosts.add(new URL(url).host);
       return jsonResponse({
         status: "processing",
@@ -258,7 +356,7 @@ test("Replicate keeps the upstream status and Retry-After when a poll is rate li
   const executor = new FastReplicateExecutor();
 
   const result = await withFetch(
-    (url, init) => {
+    (_url, init) => {
       if (init.method === "POST") {
         return jsonResponse({
           status: "processing",
@@ -546,7 +644,7 @@ test("Replicate keeps tool results in the transcript and forwards the first imag
   let sent: { input: Record<string, string> } = { input: {} };
 
   await withFetch(
-    (url, init) => {
+    (_url, init) => {
       sent = JSON.parse(String(init.body));
       return jsonResponse({ status: "succeeded", output: ["ok"] });
     },

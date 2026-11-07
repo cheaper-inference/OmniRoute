@@ -28,7 +28,7 @@ start "" /min powershell -NoProfile -Command "for($i=0;$i -lt 60;$i++){ try{ (Ne
 echo Starting OmniRoute on %OMNI_URL%
 echo Keep this window open while you use it. Close it to stop the server.
 echo.
-omniroute
+omniroute serve --no-open
 echo.
 echo OmniRoute stopped.
 pause

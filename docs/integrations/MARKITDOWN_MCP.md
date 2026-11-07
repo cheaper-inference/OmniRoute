@@ -1,7 +1,7 @@
 ---
 title: "MarkItDown MCP Integration"
-version: 3.8.50
-lastUpdated: 2026-09-13
+version: 3.8.54
+lastUpdated: 2026-11-07
 ---
 
 # MarkItDown MCP Server Integration
@@ -74,6 +74,7 @@ npx @modelcontextprotocol/inspector
 ```
 
 In the Inspector UI:
+
 1. Select **Streamable HTTP** as the transport type
 2. Enter `http://127.0.0.1:3001/mcp` as the URL
 3. Click **Connect**
@@ -176,19 +177,23 @@ data:text/plain;base64,SGVsbG8gV29ybGQ=
 
 ### Output (Success)
 
+The tool returns the converted markdown as a string, so it arrives as MCP text content:
+
 ```json
 {
-  "markdown": "# Document Title\n\nContent converted to markdown...",
-  "uri": "https://example.com/document.pdf"
+  "content": [{ "type": "text", "text": "# Document Title\n\nContent converted to markdown..." }],
+  "isError": false
 }
 ```
 
 ### Output (Error)
 
+A failed conversion is reported as an MCP tool error:
+
 ```json
 {
-  "error": "Failed to fetch resource: 404 Not Found",
-  "uri": "https://example.com/missing.pdf"
+  "content": [{ "type": "text", "text": "Failed to fetch resource: 404 Not Found" }],
+  "isError": true
 }
 ```
 
@@ -260,77 +265,35 @@ If the server cannot read local files:
 
 ## Performance Tuning
 
-### Timeout Configuration
-
-The default timeout for document conversion is **30 seconds**. For large files, increase it:
-
-```bash
-# Run with custom timeout (in seconds)
-python3 -m markitdown_mcp --timeout 120 --http
-```
-
 ### Memory Usage
 
 Large PDF conversions can consume significant memory. If you encounter out-of-memory errors:
 
 1. Process files one at a time (avoid parallel batch conversions)
-2. Use Python's memory limits: `python3 -m markitdown_mcp --max-memory 2G`
-3. Run in a container with memory constraints
+2. Run in a container with memory constraints
 
 ## Examples
 
+The HTTP endpoint speaks MCP, so a client has to send `initialize` and
+`notifications/initialized` before `tools/call`. Use MCP Inspector or any MCP client rather than
+a single `curl` request. These are the `convert_to_markdown` arguments for common inputs.
+
 ### Convert a PDF to Markdown
 
-```bash
-curl -X POST http://127.0.0.1:3001/mcp \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "tools/call",
-    "params": {
-      "name": "convert_to_markdown",
-      "arguments": {
-        "uri": "https://example.com/whitepaper.pdf"
-      }
-    }
-  }'
+```json
+{ "uri": "https://example.com/whitepaper.pdf" }
 ```
 
 ### Convert an Image with OCR
 
-```bash
-curl -X POST http://127.0.0.1:3001/mcp \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "tools/call",
-    "params": {
-      "name": "convert_to_markdown",
-      "arguments": {
-        "uri": "file:///home/user/screenshot.png"
-      }
-    }
-  }'
+```json
+{ "uri": "file:///home/user/screenshot.png" }
 ```
 
 ### Convert a Web Page
 
-```bash
-curl -X POST http://127.0.0.1:3001/mcp \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "tools/call",
-    "params": {
-      "name": "convert_to_markdown",
-      "arguments": {
-        "uri": "https://docs.python.org/3/library/asyncio.html"
-      }
-    }
-  }'
+```json
+{ "uri": "https://docs.python.org/3/library/asyncio.html" }
 ```
 
 ## References

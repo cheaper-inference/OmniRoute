@@ -52,14 +52,23 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# STDIO mode reserves stdout for MCP protocol frames, so launcher status goes to stderr there.
+say() {
+  if [ "$USE_HTTP" = true ]; then
+    echo -e "$@"
+  else
+    echo -e "$@" >&2
+  fi
+}
+
 # Check if markitdown-mcp is installed
-echo -e "${YELLOW}Checking markitdown-mcp installation...${NC}"
+say "${YELLOW}Checking markitdown-mcp installation...${NC}"
 if ! $PYTHON_CMD -m markitdown_mcp --help >/dev/null 2>&1; then
-  echo -e "${RED}Error: markitdown-mcp is not installed.${NC}"
-  echo "Install it with: pip3 install markitdown-mcp"
+  say "${RED}Error: markitdown-mcp is not installed.${NC}"
+  say "Install it with: pip3 install markitdown-mcp"
   exit 1
 fi
-echo -e "${GREEN}✓ markitdown-mcp is installed${NC}"
+say "${GREEN}✓ markitdown-mcp is installed${NC}"
 
 # Start the server
 if [ "$USE_HTTP" = true ]; then
@@ -75,8 +84,8 @@ if [ "$USE_HTTP" = true ]; then
   echo ""
   $PYTHON_CMD -m markitdown_mcp --http --host 127.0.0.1 --port $MCP_PORT
 else
-  echo -e "${GREEN}Starting MarkItDown MCP Server (STDIO transport)${NC}"
-  echo "Use this for IDE integrations (Claude Desktop, Cursor, Cline)"
-  echo ""
+  say "${GREEN}Starting MarkItDown MCP Server (STDIO transport)${NC}"
+  say "Use this for IDE integrations (Claude Desktop, Cursor, Cline)"
+  say ""
   $PYTHON_CMD -m markitdown_mcp
 fi

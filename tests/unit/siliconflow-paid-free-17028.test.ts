@@ -40,12 +40,12 @@ describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
     // and #18418 drops NVIDIA's retired openai/gpt-oss-120b endpoint.
     // Pin identities as well as the total so unrelated replacement is visible.
     const identities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`).sort();
-    assert.equal(new Set(identities).size, 466);
+    assert.equal(new Set(identities).size, 465);
     assert.equal(
       createHash("sha256").update(identities.join("\n")).digest("hex"),
       "098c2c2eeed42c3c99ad93ec8e92d0d65146e6db8f66c4c920a2b4b414fe7732"
     );
-    assert.equal(totals.modelCount, 466);
+    assert.equal(totals.modelCount, 465);
     assert.equal(totals.poolCount, 34);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
   });

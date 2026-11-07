@@ -1,3 +1,9 @@
+---
+title: "Replicate and Cerebrium chat providers"
+version: 3.8.54
+lastUpdated: 2026-11-07
+---
+
 # Replicate and Cerebrium chat providers
 
 Added from the [Free-LLM](https://github.com/nejib1/Free-LLM) directory. Replicate does not speak the
@@ -20,7 +26,8 @@ OpenAI wire format, and Cerebrium needs a per-deployment URL, so each has its ow
 - **Input mapping:** system prompt becomes `system_prompt`; `tool` results and assistant
   `tool_calls` are kept in the transcript as text; the first image part is sent as `image`
   for vision models.
-- **Safety:** the Bearer token is only sent to the origin of the original request. Poll or
+- **Safety:** every call goes through the same outbound URL guards as the other executors. The
+  Bearer token is only sent to the origin of the original request. Poll or
   cancel URLs on another origin are refused, and stream URLs must be https on `replicate.com`.
   On timeout the prediction is cancelled. Errors keep the upstream status and `Retry-After`
   and go through `buildErrorBody`.

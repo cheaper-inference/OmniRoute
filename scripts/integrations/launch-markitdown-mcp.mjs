@@ -9,7 +9,7 @@
  * Use --http to enable HTTP/SSE transport for OmniRoute integration.
  */
 
-import { spawn, execSync } from "child_process";
+import { spawn, execFileSync } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -23,8 +23,13 @@ const colors = {
   reset: "\x1b[0m",
 };
 
+// STDIO mode reserves stdout for MCP protocol frames, so launcher status goes to stderr there.
+function status(...args) {
+  (useHttp ? console.log : console.error)(...args);
+}
+
 function log(color, ...args) {
-  console.log(`${color}${args.join(" ")}${colors.reset}`);
+  status(`${color}${args.join(" ")}${colors.reset}`);
 }
 
 // Parse command-line arguments
@@ -57,12 +62,12 @@ Options:
 // Check if markitdown-mcp is installed
 log(colors.yellow, "Checking markitdown-mcp installation...");
 try {
-  execSync(`${pythonCmd} -m markitdown_mcp --help`, {
+  execFileSync(pythonCmd, ["-m", "markitdown_mcp", "--help"], {
     stdio: "pipe",
   });
 } catch (error) {
   log(colors.red, "Error: markitdown-mcp is not installed.");
-  console.log("Install it with: pip3 install markitdown-mcp");
+  status("Install it with: pip3 install markitdown-mcp");
   process.exit(1);
 }
 log(colors.green, "✓ markitdown-mcp is installed");
@@ -80,7 +85,6 @@ if (useHttp) {
 // Start the server
 const server = spawn(pythonCmd, ["-m", "markitdown_mcp", ...args], {
   stdio: "inherit",
-  shell: true,
 });
 
 // Handle process signals
@@ -106,9 +110,9 @@ if (useHttp) {
   console.log("  npx @modelcontextprotocol/inspector");
 } else {
   log(colors.green, "Starting MarkItDown MCP Server (STDIO transport)");
-  console.log("Use this for IDE integrations (Claude Desktop, Cursor, Cline)");
+  status("Use this for IDE integrations (Claude Desktop, Cursor, Cline)");
 }
-console.log("");
+status("");
 
 // Handle server exit
 server.on("close", (code) => {
