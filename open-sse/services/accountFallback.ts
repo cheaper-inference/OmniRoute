@@ -471,10 +471,23 @@ export const PARAM_VALIDATION_PATTERNS = [
 ];
 
 /**
+ * Google Cloud Code's `TOS_VIOLATION` ErrorInfo, recognized by its reason plus its
+ * `cloudcode-pa` domain. The reason alone is not enough: isAccountDeactivated() has no
+ * provider or status input, so another provider's per-request refusal (or a prompt
+ * echoed into an error) could otherwise park a healthy connection for a year.
+ */
+function isGoogleCloudCodeTosViolation(lowerText: string): boolean {
+  return lowerText.includes("tos_violation") && lowerText.includes("cloudcode-pa");
+}
+
+/**
  * T06: Returns true if response body indicates the account is permanently deactivated.
  */
 export function isAccountDeactivated(errorText: string): boolean {
   const lower = String(errorText || "").toLowerCase();
+  if (isGoogleCloudCodeTosViolation(lower)) {
+    return true;
+  }
   return getMergedBannedSignals().some((sig) => lower.includes(sig));
 }
 
