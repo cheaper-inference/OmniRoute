@@ -1299,23 +1299,23 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
 
 <table>
   <tr><th align="left">அடுக்கு</th><th align="left">தொழில்நுட்பம்</th></tr>
-  <tr><td nowrap><b>இயக்க நேரம்</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>மொழி</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> மற்றும் <code>open-sse/</code> முழுவதும் (v2.0 முதல் மையத்தில் பூஜ்ஜியம் <code>any</code> )</td></tr>
+  <tr><td nowrap><b>இயக்கநேரம்</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>மொழி</b></td><td>TypeScript 6.0 — <code>src/</code> மற்றும் <code>open-sse/</code> முழுவதும் <b>100% TypeScript</b> (v2.0 முதல் core-இல் பூஜ்ஜிய <code>any</code>)</td></tr>
   <tr><td nowrap><b>கட்டமைப்பு</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL ஜர்னலிங்) + LowDB (JSON மரபு) — 147 டொமைன் தொகுதிகள், 227 இடம்பெயர்வுகள்</td></tr>
-  <tr><td nowrap><b>நினைவகம்</b></td><td>SQLite FTS5 முழு உரை + int8-quantized திசையன் உட்பொதிப்புகள், தட்டச்சு செய்யப்பட்ட சிதைவு</td></tr>
-  <tr><td nowrap><b>திட்டங்கள்</b></td><td>Zod 4 — MCP கருவி I/O சரிபார்ப்பு + API ஒப்பந்தங்கள்</td></tr>
+  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 டொமைன் தொகுதிகள், 228 இடம்பெயர்வுகள்</td></tr>
+  <tr><td nowrap><b>நினைவகம்</b></td><td>SQLite FTS5 முழு-உரை + int8-quantized vector embeddings, வகைமைக்கப்பட்ட சிதைவு</td></tr>
+  <tr><td nowrap><b>ஸ்கீமாக்கள்</b></td><td>Zod 4 — MCP tool I/O சரிபார்ப்பு + API ஒப்பந்தங்கள்</td></tr>
   <tr><td nowrap><b>நெறிமுறைகள்</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>ஸ்ட்ரீமிங்</b></td><td>சேவையகம் அனுப்பிய நிகழ்வுகள் (SSE) + WebSocket பாலம் (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>சுருக்கம்</b></td><td>12-இயந்திர பைப்லைன் — RTK, கேவ்மேன், LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>அங்கீகாரம் &amp; பாதுகாப்பு</b></td><td>OAuth 2.0 (PKCE) + JWT + API விசைகள் + MCP ஸ்கோப்டு அங்கீகாரம் · AES-256-GCM ஓய்வில் · DOMPurify</td></tr>
-  <tr><td nowrap><b>திருட்டுத்தனம்</b></td><td>wreq-js — JA3 / JA4 TLS கைரேகை ஆள்மாறாட்டம், 3-நிலை ப்ராக்ஸி</td></tr>
-  <tr><td nowrap><b>மீள்தன்மை</b></td><td>சர்க்யூட் பிரேக்கர், அதிவேக பின்னடைவு, இடி எதிர்ப்பு-மந்தை, ஆட்டோ-காம்போ சுய-குணப்படுத்துதல்</td></tr>
-  <tr><td nowrap><b>பதிவு செய்தல்</b></td><td>கோரிக்கை சூழலுடன் pino — கட்டமைக்கப்பட்ட JSON பதிவுகள்</td></tr>
-  <tr><td nowrap><b>சோதனை</b></td><td>Node.js டெஸ்ட் ரன்னர் + Vitest — <b>60,000 + நிலையான சோதனை அறிவிப்புகள்</b> 8,400 + கண்காணிக்கப்பட்ட சோதனைக் கோப்புகளில் (அலகு, ஒருங்கிணைப்பு, E2E, பாதுகாப்பு, சுற்றுச்சூழல் அமைப்பு)</td></tr>
-  <tr><td nowrap><b>மேடைகள்</b></td><td>டெஸ்க்டாப் (Electron) · Android (Termux) · PWA (எந்த உலாவியும்)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub செயல்கள் — auto npm வெளியிடப்பட்டது + Docker Hub</td></tr>
-  <tr><td nowrap><b>இணைப்புகள்</b></td><td><a href="https://omniroute.online">இணையதளம்</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker ஹப்</a></td></tr>
+  <tr><td nowrap><b>ஸ்ட்ரீமிங்</b></td><td>Server-Sent Events (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>சுருக்கம்</b></td><td>12-engine pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>அங்கீகாரம் &amp; பாதுகாப்பு</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM at rest · DOMPurify</td></tr>
+  <tr><td nowrap><b>மறைநிலை</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint impersonation, 3-level proxy</td></tr>
+  <tr><td nowrap><b>மீள்திறன்</b></td><td>Circuit breaker, exponential backoff, anti-thundering-herd, auto-combo self-healing</td></tr>
+  <tr><td nowrap><b>பதிவேற்றம்</b></td><td>pino — request context உடனான கட்டமைக்கப்பட்ட JSON பதிவுகள்</td></tr>
+  <tr><td nowrap><b>சோதனை</b></td><td>Node.js test runner + Vitest — 8,400+ கண்காணிக்கப்படும் சோதனைக் கோப்புகளில் (unit, integration, E2E, security, ecosystem) <b>60,000+ நிலையான சோதனை அறிவிப்புகள்</b></td></tr>
+  <tr><td nowrap><b>தளங்கள்</b></td><td>Desktop (Electron) · Android (Termux) · PWA (any browser)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — வெளியீட்டின்போது தானியங்கி npm publish + Docker Hub</td></tr>
+  <tr><td nowrap><b>இணைப்புகள்</b></td><td><a href="https://omniroute.online">வலைத்தளம்</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

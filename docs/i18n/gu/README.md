@@ -1290,24 +1290,24 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 પણ તેન�
 </div>
 
 <table>
-  <tr><th align="left">સ્તર</th><th align="left">ટેકનોલોજી</th></tr>
+  <tr><th align="left">સ્તર</th><th align="left">ટેક્નોલોજી</th></tr>
   <tr><td nowrap><b>રનટાઇમ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ભાષા</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> સમગ્ર <code>src/</code> અને <code>open-sse/</code> (v2.0 થી મૂળમાં શૂન્ય <code>any</code> )</td></tr>
+  <tr><td nowrap><b>ભાષા</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> અને <code>open-sse/</code>માં (v2.0થી કોરમાં શૂન્ય <code>any</code>)</td></tr>
   <tr><td nowrap><b>ફ્રેમવર્ક</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ડેટાબેઝ</b></td><td>better-sqlite3 (SQLite, WAL જર્નલિંગ) + LowDB (JSON વારસો) — 147 ડોમેન મોડ્યુલ્સ, 227 સ્થળાંતર</td></tr>
-  <tr><td nowrap><b>સ્મૃતિ</b></td><td>SQLite FTS5 પૂર્ણ-ટેક્સ્ટ + int8-quantized વેક્ટર એમ્બેડિંગ્સ, ટાઇપ કરેલ સડો</td></tr>
-  <tr><td nowrap><b>સ્કીમા</b></td><td>Zod 4 — MCP ટૂલ I/O માન્યતા + API કરાર</td></tr>
+  <tr><td nowrap><b>ડેટાબેઝ</b></td><td>better-sqlite3 (SQLite, WAL જર્નલિંગ) + LowDB (JSON લેગસી) — 147 ડોમેન મોડ્યુલ, 228 માઇગ્રેશન</td></tr>
+  <tr><td nowrap><b>મેમરી</b></td><td>SQLite FTS5 ફુલ-ટેક્સ્ટ + int8-ક્વાન્ટાઇઝ્ડ વેક્ટર એમ્બેડિંગ્સ, ટાઇપ્ડ ડિકે</td></tr>
+  <tr><td nowrap><b>સ્કીમા</b></td><td>Zod 4 — MCP ટૂલ I/O માન્યતા + API કોન્ટ્રાક્ટ્સ</td></tr>
   <tr><td nowrap><b>પ્રોટોકોલ્સ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>સ્ટ્રીમિંગ</b></td><td>સર્વર દ્વારા મોકલેલ ઇવેન્ટ્સ (SSE) + WebSocket બ્રિજ (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>સંકોચન</b></td><td>12-એન્જિન પાઇપલાઇન — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>ઓથ &amp; સુરક્ષા</b></td><td>OAuth + AES-256-GCM PKCEDOMPurify+ JWT + API MCP</td></tr>
-  <tr><td nowrap><b>સ્ટીલ્થ</b></td><td>wreq-js — JA3 / JA4 TLS ફિંગરપ્રિન્ટ ઢોંગ, 3-સ્તરની પ્રોક્સી</td></tr>
-  <tr><td nowrap><b>સ્થિતિસ્થાપકતા</b></td><td>સર્કિટ બ્રેકર, ઘાતાંકીય બેકઓફ, એન્ટી થંડરિંગ-હર્ડ, ઓટો-કોમ્બો સ્વ-હીલિંગ</td></tr>
-  <tr><td nowrap><b>લોગીંગ</b></td><td>વિનંતી સંદર્ભ સાથે pino — સંરચિત JSON લૉગ્સ</td></tr>
-  <tr><td nowrap><b>પરીક્ષણ</b></td><td>Node.js ટેસ્ટ રનર + Vitest — <b>60,000 + સ્ટેટિક ટેસ્ટ ઘોષણાઓ</b> સમગ્ર 8,400 + ટ્રૅક કરેલ પરીક્ષણ ફાઇલો (યુનિટ, એકીકરણ, E2E, સુરક્ષા, ઇકોસિસ્ટમ)</td></tr>
-  <tr><td nowrap><b>પ્લેટફોર્મ્સ</b></td><td>ડેસ્કટોપ (Electron) · Android (Termux) · PWA (કોઈપણ બ્રાઉઝર)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub એક્શન્સ — ઓટો npm પ્રકાશન પર + Docker હબ પ્રકાશિત કરે છે</td></tr>
-  <tr><td nowrap><b>લિંક્સ</b></td><td><a href="https://omniroute.online">વેબસાઈટ</a> · <a href="https://www.npmjs.com/package/omniroute">એનપીએમ</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker હબ</a></td></tr>
+  <tr><td nowrap><b>સ્ટ્રીમિંગ</b></td><td>Server-Sent Events (SSE) + WebSocket બ્રિજ (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>કમ્પ્રેશન</b></td><td>12-એન્જિન પાઇપલાઇન — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>ઑથેન્ટિકેશન અને સુરક્ષા</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP સ્કોપ્ડ ઑથેન્ટિકેશન · AES-256-GCM at rest · DOMPurify</td></tr>
+  <tr><td nowrap><b>સ્ટેલ્થ</b></td><td>wreq-js — JA3 / JA4 TLS ફિંગરપ્રિન્ટ ઇમ્પર્સોનેશન, 3-સ્તરીય પ્રોક્સી</td></tr>
+  <tr><td nowrap><b>સ્થિતિસ્થાપકતા</b></td><td>સર્કિટ બ્રેકર, એક્સ્પોનેન્શિયલ બૅકઑફ, એન્ટિ-થંડરિંગ-હર્ડ, ઑટો-કૉમ્બો સેલ્ફ-હીલિંગ</td></tr>
+  <tr><td nowrap><b>લૉગિંગ</b></td><td>pino — રિક્વેસ્ટ કોન્ટેક્સ્ટ સાથે સ્ટ્રક્ચર્ડ JSON લૉગ્સ</td></tr>
+  <tr><td nowrap><b>ટેસ્ટિંગ</b></td><td>Node.js ટેસ્ટ રનર + Vitest — 8,400+ ટ્રૅક કરેલી ટેસ્ટ ફાઇલોમાં (યુનિટ, ઇન્ટિગ્રેશન, E2E, સુરક્ષા, ઇકોસિસ્ટમ) <b>60,000+ સ્ટેટિક ટેસ્ટ ઘોષણાઓ</b></td></tr>
+  <tr><td nowrap><b>પ્લેટફૉર્મ્સ</b></td><td>ડેસ્કટૉપ (Electron) · Android (Termux) · PWA (કોઈપણ બ્રાઉઝર)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — રિલીઝ સમયે ઑટો npm પબ્લિશ + Docker Hub</td></tr>
+  <tr><td nowrap><b>લિંક્સ</b></td><td><a href="https://omniroute.online">વેબસાઇટ</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

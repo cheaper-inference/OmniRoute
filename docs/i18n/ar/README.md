@@ -1287,28 +1287,28 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
 <br/>
 <div align="center">
 
-## 🛠️ التقنيات المستخدمة
+## 🛠️ حزمة التقنيات
 
 </div>
 
 <table>
   <tr><th align="left">الطبقة</th><th align="left">التقنية</th></tr>
   <tr><td nowrap><b>بيئة التشغيل</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>لغة البرمجة</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> عبر مسارات <code>src/</code> و <code>open-sse/</code> (عدم وجود أي استخدام لـ <code>any</code> في النواة منذ الإصدار v2.0)</td></tr>
-  <tr><td nowrap><b>الإطار</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، سجل WAL) + LowDB (توريث JSON) — 147 وحدة مجال، 227 هجرة (migration)</td></tr>
-  <tr><td nowrap><b>الذاكرة</b></td><td>بحث نصي كامل SQLite FTS5 + تضمينات متجهية مكمّزة بعمق int8، وتراجع مخصص الأنواع</td></tr>
-  <tr><td nowrap><b>المخططات (Schemas)</b></td><td>Zod 4 — التحقق من مدخلات ومخروات أدوات MCP + عقود واجهة البرمجة (API contracts)</td></tr>
+  <tr><td nowrap><b>اللغة</b></td><td>TypeScript 6.0 — <b>TypeScript بنسبة 100%</b> عبر <code>src/</code> و<code>open-sse/</code> (لا توجد <code>any</code> في النواة منذ v2.0)</td></tr>
+  <tr><td nowrap><b>إطار العمل</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، تسجيل WAL) + LowDB (JSON قديم) — 147 وحدة نطاق، و228 عملية ترحيل</td></tr>
+  <tr><td nowrap><b>الذاكرة</b></td><td>بحث SQLite FTS5 في النصوص الكاملة + تضمينات متجهية بكمّية int8، وتلاشي مُنظَّم حسب النوع</td></tr>
+  <tr><td nowrap><b>المخططات</b></td><td>Zod 4 — التحقق من إدخال/إخراج أدوات MCP + عقود API</td></tr>
   <tr><td nowrap><b>البروتوكولات</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>البث</b></td><td>أحداث الخادم المرسل (SSE) + جسر WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>الضغط</b></td><td>خط أنابيب من 12 محركًا — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>المصادقة والأمان</b></td><td>OAuth 2.0 (PKCE) + JWT + مفاتيح API + مصادقة MCP محدودة النطاق · تشفير AES-256-GCM عند التخزين · DOMPurify</td></tr>
-  <tr><td nowrap><b>التخفي (Stealth)</b></td><td>wreq-js — تقليد بصمة TLS من نوع JA3 / JA4، وكيل بثلاث مستويات</td></tr>
-  <tr><td nowrap><b>المرونة</b></td><td>قاضي دوائر (Circuit breaker)، تراجع أسي، منع ازدحام القطيع (anti-thundering-herd)، التشفير الذاتي الآلي للتوليفات</td></tr>
-  <tr><td nowrap><b>السجلات (Logging)</b></td><td>pino — سجلات JSON منظمة مع سياق الطلب</td></tr>
-  <tr><td nowrap><b>الاختبار</b></td><td>مدير اختبار Node.js + Vitest — <b>أكثر من 60,000 إعلان اختبار ثابت</b> عبر أكثر من 8,400 ملف اختبار مُتتبع (وحدات، تكامل، E2E، أمان، نظام بيئي)</td></tr>
-  <tr><td nowrap><b>المنصات</b></td><td>سطح المكتب (Electron) · أندرويد (Termux) · PWA (أي متصفح)</td></tr>
-  <tr><td nowrap><b>التكامل والنشر (CI/CD)</b></td><td>GitHub Actions — نشر npm تلقائي + Docker Hub عند الإصدار</td></tr>
+  <tr><td nowrap><b>البث</b></td><td>الأحداث المرسلة من الخادم (SSE) + جسر WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>الضغط</b></td><td>مسار معالجة يضم 12 محرّكًا — RTK وCaveman وLLMLingua-2 (MobileBERT ONNX) وGCF وOmniGlyph</td></tr>
+  <tr><td nowrap><b>المصادقة والأمان</b></td><td>OAuth 2.0 (PKCE) + JWT + مفاتيح API + مصادقة MCP محددة النطاق · AES-256-GCM للبيانات الساكنة · DOMPurify</td></tr>
+  <tr><td nowrap><b>التخفي</b></td><td>wreq-js — انتحال بصمة JA3 / JA4 لـ TLS، ووكيل من 3 مستويات</td></tr>
+  <tr><td nowrap><b>المرونة</b></td><td>قاطع الدائرة، والتراجع الأسي، ومكافحة اندفاع الطلبات، والشفاء الذاتي التلقائي للمجموعات</td></tr>
+  <tr><td nowrap><b>التسجيل</b></td><td>pino — سجلات JSON منظَّمة مع سياق الطلب</td></tr>
+  <tr><td nowrap><b>الاختبار</b></td><td>مشغّل اختبارات Node.js + Vitest — <b>أكثر من 60,000 تصريح اختبار ثابت</b> عبر أكثر من 8,400 ملف اختبار متعقَّب (وحدات، وتكامل، وE2E، وأمان، ومنظومة بيئية)</td></tr>
+  <tr><td nowrap><b>المنصات</b></td><td>سطح المكتب (Electron) · Android (Termux) · PWA (أي متصفح)</td></tr>
+  <tr><td nowrap><b>التكامل والنشر المستمران</b></td><td>GitHub Actions — نشر تلقائي إلى npm + Docker Hub عند الإصدار</td></tr>
   <tr><td nowrap><b>الروابط</b></td><td><a href="https://omniroute.online">الموقع الإلكتروني</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

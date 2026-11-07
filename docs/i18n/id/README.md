@@ -1286,28 +1286,28 @@ Metrik kanonis pada 2026-10-18: **1.976 video unik** · **20.220.289 tayangan ya
 <br/>
 <div align="center">
 
-## 🛠️ Teknologi Stack
+## 🛠️ Tumpukan Teknologi
 
 </div>
 
 <table>
   <tr><th align="left">Lapisan</th><th align="left">Teknologi</th></tr>
-  <tr><td nowrap><b>Waktu proses</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> melintasi <code>src/</code> dan <code>open-sse/</code> (nol <code>any</code> di inti sejak v2.0)</td></tr>
-  <tr><td nowrap><b>Kerangka</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Basis data</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 modul domain, 227 migrasi</td></tr>
-  <tr><td nowrap><b>Ingatan</b></td><td>SQLite FTS5 penyematan vektor teks lengkap + int8-quantized, peluruhan yang diketik</td></tr>
-  <tr><td nowrap><b>Skema</b></td><td>Zod 4 — MCP alat validasi I/O kontrak + API</td></tr>
+  <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> di seluruh <code>src/</code> dan <code>open-sse/</code> (tanpa <code>any</code> di inti sejak v2.0)</td></tr>
+  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Basis data</b></td><td>better-sqlite3 (SQLite, jurnal WAL) + LowDB (JSON lama) — 147 modul domain, 228 migrasi</td></tr>
+  <tr><td nowrap><b>Memori</b></td><td>teks penuh SQLite FTS5 + embedding vektor terkuantisasi int8, peluruhan bertipe</td></tr>
+  <tr><td nowrap><b>Skema</b></td><td>Zod 4 — validasi I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Mengalir</b></td><td>Peristiwa Terkirim Server (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Kompresi</b></td><td>Pipa 12 mesin — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Keamanan autentikasi &amp;</b></td><td>OAuth 2.0 (PKCE) + JWT + API + MCP cakupan autentikasi · AES-256-GCM saat istirahat · DOMPurify</td></tr>
-  <tr><td nowrap><b>Diam-diam</b></td><td>wreq-js — JA3 / JA4 TLS peniruan sidik jari, proksi 3 tingkat</td></tr>
-  <tr><td nowrap><b>Ketangguhan</b></td><td>Pemutus sirkuit, backoff eksponensial, anti-gemuruh-kawanan, penyembuhan diri kombo otomatis</td></tr>
-  <tr><td nowrap><b>Pencatatan</b></td><td>log JSON terstruktur pino — dengan konteks permintaan</td></tr>
-  <tr><td nowrap><b>Pengujian</b></td><td>pelari tes Node.js + Vitest — <b>60.000 deklarasi uji statis +</b> di 8.400 file pengujian yang dilacak + (unit, integrasi, E2E, keamanan, ekosistem)</td></tr>
-  <tr><td nowrap><b>Platform</b></td><td>Desktop (Electron) · Android (Termux) · PWA (browser apa saja)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Tindakan — auto npm publikasikan + Docker Hub saat rilis</td></tr>
+  <tr><td nowrap><b>Streaming</b></td><td>Server-Sent Events (SSE) + jembatan WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Kompresi</b></td><td>pipeline 12 mesin — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autentikasi &amp; keamanan</b></td><td>OAuth 2.0 (PKCE) + JWT + Kunci API + autentikasi terlingkup MCP · AES-256-GCM saat tersimpan · DOMPurify</td></tr>
+  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — impersonasi sidik jari TLS JA3 / JA4, proksi 3 tingkat</td></tr>
+  <tr><td nowrap><b>Ketahanan</b></td><td>pemutus sirkuit, backoff eksponensial, pencegahan thundering herd, pemulihan otomatis auto-combo</td></tr>
+  <tr><td nowrap><b>Pencatatan log</b></td><td>pino — log JSON terstruktur dengan konteks permintaan</td></tr>
+  <tr><td nowrap><b>Pengujian</b></td><td>Node.js test runner + Vitest — <b>lebih dari 60.000 deklarasi pengujian statis</b> di lebih dari 8.400 file pengujian yang dilacak (unit, integrasi, E2E, keamanan, ekosistem)</td></tr>
+  <tr><td nowrap><b>Platform</b></td><td>Desktop (Electron) · Android (Termux) · PWA (browser apa pun)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publikasi npm otomatis + Docker Hub saat rilis</td></tr>
   <tr><td nowrap><b>Tautan</b></td><td><a href="https://omniroute.online">Situs web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

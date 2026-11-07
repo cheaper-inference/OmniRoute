@@ -1286,29 +1286,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
 <br/>
 <div align="center">
 
-## 🛠️ ଟେକ୍ ଷ୍ଟାକ।
+## 🛠️ ଟେକ୍ ଷ୍ଟାକ୍
 
 </div>
 
 <table>
-  <tr><th align="left">ସ୍ତର</th><th align="left">ଟେକ୍ନୋଲୋଜି।</th></tr>
-  <tr><td nowrap><b>ଚାଲିବା ସମୟ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ଭାଷା</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> ଏବଂ <code>open-sse/</code> ଉପରେ (v2.0 ପରଠାରୁ କୋରରେ ଶୂନ୍ୟ <code>any</code> )</td></tr>
-  <tr><td nowrap><b>Fr ାଞ୍ଚା</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL ଜର୍ଣ୍ଣାଲିଂ) + LowDB (JSON ଉତ୍ତରାଧିକାରୀ) — 147 ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 227 ସ୍ଥାନାନ୍ତରଣ।</td></tr>
-  <tr><td nowrap><b>ସ୍ମୃତି</b></td><td>SQLite FTS5 ପୂର୍ଣ୍ଣ-ପାଠ୍ୟ + int8-quantized ଭେକ୍ଟର ଏମ୍ବେଡିଂ, ଟାଇପ୍ ହୋଇଥିବା କ୍ଷୟ।</td></tr>
-  <tr><td nowrap><b>ସ୍କିମା</b></td><td>Zod 4 — MCP ଉପକରଣ I/O ବ valid ଧତା + API ଚୁକ୍ତିନାମା।</td></tr>
+  <tr><th align="left">ସ୍ତର</th><th align="left">ପ୍ରଯୁକ୍ତି</th></tr>
+  <tr><td nowrap><b>ରନ୍ଟାଇମ୍</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>ଭାଷା</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> across <code>src/</code> and <code>open-sse/</code> (v2.0 ଠାରୁ କୋର୍ରେ ଶୂନ୍ୟ <code>any</code>)</td></tr>
+  <tr><td nowrap><b>ଫ୍ରେମ୍ୱର୍କ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 228 ମାଇଗ୍ରେସନ୍</td></tr>
+  <tr><td nowrap><b>ମେମୋରି</b></td><td>SQLite FTS5 ଫୁଲ୍-ଟେକ୍ସ୍ଟ + int8-quantized ଭେକ୍ଟର୍ ଏମ୍ବେଡିଂ, ଟାଇପ୍ଡ୍ ଡିକେ</td></tr>
+  <tr><td nowrap><b>ସ୍କିମା</b></td><td>Zod 4 — MCP ଟୁଲ୍ I/O ଭ୍ୟାଲିଡେସନ୍ + API କନ୍ଟ୍ରାକ୍ଟ</td></tr>
   <tr><td nowrap><b>ପ୍ରୋଟୋକଲ୍</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>ଷ୍ଟ୍ରିମିଂ</b></td><td>ସର୍ଭର-ପ୍ରେରିତ ଇଭେଣ୍ଟସ (SSE) + WebSocket ବ୍ରିଜ (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>ସଙ୍କୋଚନ।</b></td><td>12-ଇଞ୍ଜିନ୍ ପାଇପଲାଇନ — RTK, ଗୁମ୍ଫା, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Auth &amp; ସୁରକ୍ଷା।</b></td><td>OAuth 2.0 (PKCE) + JWT + API କିଗୁଡ଼ିକ + MCP ସ୍କୋପିଡ୍ auth · AES-256-GCM ବିଶ୍ରାମ ସମୟରେ · DOMPurify</td></tr>
-  <tr><td nowrap><b>ଚୋରି</b></td><td>wreq-js — JA3 / JA4 TLS ଫିଙ୍ଗର ପ୍ରିଣ୍ଟ ଛଦ୍ମନାମ, 3-ସ୍ତରୀୟ ପ୍ରକ୍ସି।</td></tr>
-  <tr><td nowrap><b>ସ୍ଥିରତା।</b></td><td>ସର୍କିଟ ବ୍ରେକର୍, ଏକ୍ସପୋନ୍ସନାଲ୍ ବ୍ୟାକଅଫ୍, ଆଣ୍ଟି-ବଜ୍ର-ଗୋରୁ, ଅଟୋ-କମ୍ବୋ ଆତ୍ମ-ଆରୋଗ୍ୟ।</td></tr>
-  <tr><td nowrap><b>ଲଗିଂ</b></td><td>ଅନୁରୋଧ ପ୍ରସଙ୍ଗ ସହିତ pino — ସଂରଚନା JSON ଲଗ୍।</td></tr>
-  <tr><td nowrap><b>ପରୀକ୍ଷା</b></td><td>Node.js ପରୀକ୍ଷା ରନର୍ + Vitest — <b>60,000 + ଷ୍ଟାଟିକ୍ ପରୀକ୍ଷା ଘୋଷଣା।</b> 8,400 + ଟ୍ରାକ୍ ହୋଇଥିବା ପରୀକ୍ଷା ଫାଇଲଗୁଡିକ (ୟୁନିଟ୍, ଏକୀକରଣ, E2E, ସୁରକ୍ଷା, ଇକୋସିଷ୍ଟମ୍)</td></tr>
-  <tr><td nowrap><b>ପ୍ଲାଟଫର୍ମଗୁଡିକ</b></td><td>ଡେସ୍କଟପ୍ (Electron) · ଆଣ୍ଡ୍ରଏଡ୍ (ଟର୍ମକ୍ସ) · PWA (ଯେକ any ଣସି ବ୍ରାଉଜର୍)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub କ୍ରିୟାଗୁଡ଼ିକ — ଅଟୋ npm ପ୍ରକାଶନରେ + Docker ହବ୍ ପ୍ରକାଶ କରେ।</td></tr>
-  <tr><td nowrap><b>ଲିଙ୍କ୍</b></td><td><a href="https://omniroute.online">ୱେବସାଇଟ୍</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker ହବ୍।</a></td></tr>
+  <tr><td nowrap><b>ଷ୍ଟ୍ରିମିଂ</b></td><td>Server-Sent Events (SSE) + WebSocket ବ୍ରିଜ୍ (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>କମ୍ପ୍ରେସନ୍</b></td><td>12-ଇଞ୍ଜିନ୍ ପାଇପ୍ଲାଇନ୍ — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>ପ୍ରମାଣୀକରଣ ଏବଂ ସୁରକ୍ଷା</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM at rest · DOMPurify</td></tr>
+  <tr><td nowrap><b>ଷ୍ଟେଲ୍ଥ୍</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint impersonation, 3-ସ୍ତରୀୟ ପ୍ରକ୍ସି</td></tr>
+  <tr><td nowrap><b>ସ୍ଥିରତା</b></td><td>Circuit breaker, exponential backoff, anti-thundering-herd, auto-combo self-healing</td></tr>
+  <tr><td nowrap><b>ଲଗିଂ</b></td><td>pino — ଅନୁରୋଧ ପ୍ରସଙ୍ଗ ସହିତ ସଂରଚିତ JSON ଲଗ୍</td></tr>
+  <tr><td nowrap><b>ପରୀକ୍ଷଣ</b></td><td>Node.js test runner + Vitest — 8,400+ ଟ୍ରାକ୍ ହୋଇଥିବା ପରୀକ୍ଷଣ ଫାଇଲ୍ରେ <b>60,000+ ସ୍ଥିର ପରୀକ୍ଷଣ ଘୋଷଣା</b> (ୟୁନିଟ୍, ଇଣ୍ଟିଗ୍ରେସନ୍, E2E, ସୁରକ୍ଷା, ଇକୋସିଷ୍ଟମ୍)</td></tr>
+  <tr><td nowrap><b>ପ୍ଲାଟଫର୍ମ</b></td><td>ଡେସ୍କଟପ୍ (Electron) · Android (Termux) · PWA (ଯେକୌଣସି ବ୍ରାଉଜର୍)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ରିଲିଜ୍ ସମୟରେ ସ୍ୱୟଂଚାଳିତ npm ପବ୍ଲିଶ୍ + Docker Hub</td></tr>
+  <tr><td nowrap><b>ଲିଙ୍କ୍</b></td><td><a href="https://omniroute.online">ୱେବସାଇଟ୍</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

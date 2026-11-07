@@ -1286,29 +1286,29 @@ Métricas canónicas al 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
 <br/>
 <div align="center">
 
-## Pila de tecnología 🛠️
+## 🛠️ Pila tecnológica
 
 </div>
 
 <table>
   <tr><th align="left">Capa</th><th align="left">Tecnología</th></tr>
-  <tr><td nowrap><b>Tiempo de ejecución</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Idioma</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> en <code>src/</code> y <code>open-sse/</code> (cero <code>any</code> en el núcleo desde v2.0)</td></tr>
-  <tr><td nowrap><b>Estructura</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Base de datos</b></td><td>better-sqlite3 (SQLite, WAL diario) + LowDB (JSON legado) — 147 módulos de dominio, 227 migraciones</td></tr>
-  <tr><td nowrap><b>Memoria</b></td><td>SQLite FTS5 texto completo + int8-quantized incrustaciones de vectores, decaimiento mecanografiado</td></tr>
-  <tr><td nowrap><b>esquemas</b></td><td>Zod 4 — MCP herramienta I/O validación + API contratos</td></tr>
-  <tr><td nowrap><b>Protocolos</b></td><td>MCP (stdio/ HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
+  <tr><td nowrap><b>Entorno de ejecución</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Lenguaje</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> en <code>src/</code> y <code>open-sse/</code> (cero <code>any</code> en el núcleo desde v2.0)</td></tr>
+  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Base de datos</b></td><td>better-sqlite3 (SQLite, registro WAL) + LowDB (JSON heredado) — 147 módulos de dominio, 228 migraciones</td></tr>
+  <tr><td nowrap><b>Memoria</b></td><td>Búsqueda de texto completo con SQLite FTS5 + embeddings vectoriales cuantizados a int8, decaimiento tipado</td></tr>
+  <tr><td nowrap><b>Esquemas</b></td><td>Zod 4 — validación de E/S de herramientas MCP + contratos de API</td></tr>
+  <tr><td nowrap><b>Protocolos</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Transmisión</b></td><td>Eventos enviados por el servidor (SSE) + puente WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Compresión</b></td><td>Tubería de 12 motores — RTK, cavernícola, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>seguridad de autenticación &amp;</b></td><td>OAuth 2.0 (PKCE) + JWT + API Claves + MCP autenticación con alcance · AES-256-GCM en reposo · DOMPurify</td></tr>
-  <tr><td nowrap><b>Sigilo</b></td><td>wreq-js — JA3 / JA4 TLS suplantación de huellas dactilares, proxy de 3 niveles</td></tr>
-  <tr><td nowrap><b>Resiliencia</b></td><td>Disyuntor, retroceso exponencial, rebaño anti-truenos, autocuración combinada automática</td></tr>
-  <tr><td nowrap><b>Explotación florestal</b></td><td>pino — registros JSON estructurados con contexto de solicitud</td></tr>
-  <tr><td nowrap><b>Pruebas</b></td><td>corredor de pruebas Node.js + Vitest — <b>60.000 declaraciones de pruebas estáticas +</b> en 8400 archivos de prueba rastreados por + (unidad, integración, E2E, seguridad, ecosistema)</td></tr>
+  <tr><td nowrap><b>Compresión</b></td><td>Pipeline de 12 motores — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autenticación y seguridad</b></td><td>OAuth 2.0 (PKCE) + JWT + claves de API + autenticación con ámbito MCP · AES-256-GCM en reposo · DOMPurify</td></tr>
+  <tr><td nowrap><b>Sigilo</b></td><td>wreq-js — suplantación de huellas digitales TLS JA3 / JA4, proxy de 3 niveles</td></tr>
+  <tr><td nowrap><b>Resiliencia</b></td><td>Disyuntor, retroceso exponencial, protección contra estampida de solicitudes, autocuración automática de combinaciones</td></tr>
+  <tr><td nowrap><b>Registro</b></td><td>pino — registros JSON estructurados con contexto de solicitud</td></tr>
+  <tr><td nowrap><b>Pruebas</b></td><td>Ejecutor de pruebas de Node.js + Vitest — <b>más de 60.000 declaraciones de pruebas estáticas</b> en más de 8.400 archivos de prueba registrados (unitarias, de integración, E2E, de seguridad y del ecosistema)</td></tr>
   <tr><td nowrap><b>Plataformas</b></td><td>Escritorio (Electron) · Android (Termux) · PWA (cualquier navegador)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>Acciones GitHub — auto npm publicar + Docker Hub en el lanzamiento</td></tr>
-  <tr><td nowrap><b>Campo de golf</b></td><td><a href="https://omniroute.online">Sitio web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Centro Docker</a></td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publicación automática en npm + Docker Hub en cada versión</td></tr>
+  <tr><td nowrap><b>Enlaces</b></td><td><a href="https://omniroute.online">Sitio web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

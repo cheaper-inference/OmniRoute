@@ -1283,29 +1283,29 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
 <br/>
 <div align="center">
 
-## ngăn xếp công nghệ 🛠️
+## 🛠️ Ngăn xếp công nghệ
 
 </div>
 
 <table>
-  <tr><th align="left">Lớp</th><th align="left">Công nghệ</th></tr>
-  <tr><td nowrap><b>Thời gian chạy</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><th align="left">Tầng</th><th align="left">Công nghệ</th></tr>
+  <tr><td nowrap><b>Môi trường chạy</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Ngôn ngữ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> trên <code>src/</code> và <code>open-sse/</code> (không có <code>any</code> trong lõi kể từ v2.0)</td></tr>
-  <tr><td nowrap><b>Khung</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, WAL ghi nhật ký) + LowDB (JSON kế thừa) — 147 mô-đun miền, 227 lần di chuyển</td></tr>
-  <tr><td nowrap><b>Ký ức</b></td><td>SQLite FTS5 toàn văn + int8-quantized vector, phân rã được gõ</td></tr>
-  <tr><td nowrap><b>Lược đồ</b></td><td>Zod 4 — công cụ MCP xác thực I/O hợp đồng + API</td></tr>
+  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON kế thừa) — 147 mô-đun miền, 228 migration</td></tr>
+  <tr><td nowrap><b>Bộ nhớ</b></td><td>Tìm kiếm toàn văn SQLite FTS5 + các vector embedding được lượng tử hóa int8, suy giảm có kiểu</td></tr>
+  <tr><td nowrap><b>Lược đồ</b></td><td>Zod 4 — xác thực I/O công cụ MCP + hợp đồng API</td></tr>
   <tr><td nowrap><b>Giao thức</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Truyền phát</b></td><td>Sự kiện do máy chủ gửi (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>nén</b></td><td>Đường ống 12 động cơ — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Xác thực bảo mật &amp;</b></td><td>OAuth 2.0 (PKCE) + JWT + API Khóa + MCP xác thực trong phạm vi · AES-256-GCM ở trạng thái nghỉ · DOMPurify</td></tr>
-  <tr><td nowrap><b>tàng hình</b></td><td>wreq-js — JA3 / JA4 TLS danh dấu vân tay, proxy 3 cấp</td></tr>
-  <tr><td nowrap><b>khả năng phục hồi</b></td><td>Ngắt mạch, lùi theo cấp số nhân, chống sấm sét bầy đàn, tự động kết hợp tự phục hồi</td></tr>
-  <tr><td nowrap><b>Ghi nhật ký</b></td><td>nhật ký JSON có cấu trúc pino — với ngữ cảnh yêu cầu</td></tr>
-  <tr><td nowrap><b>Kiểm tra</b></td><td>người chạy thử Node.js + Vitest — <b>60.000 + khai báo kiểm tra tĩnh</b> trên 8.400 tệp thử nghiệm được theo dõi + (đơn vị, tích hợp, E2E, bảo mật, hệ sinh thái)</td></tr>
-  <tr><td nowrap><b>Nền tảng</b></td><td>Máy tính để bàn (Electron) · Android (Termux) · PWA (bất kỳ trình duyệt nào)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Hành động — auto npm xuất bản + Docker Hub khi phát hành</td></tr>
-  <tr><td nowrap><b>Liên kết</b></td><td><a href="https://omniroute.online">Trang web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">trung tâm Docker</a></td></tr>
+  <tr><td nowrap><b>Truyền dữ liệu</b></td><td>Server-Sent Events (SSE) + cầu nối WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Nén</b></td><td>Pipeline 12 engine — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Xác thực &amp; bảo mật</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + xác thực MCP theo phạm vi · AES-256-GCM khi lưu trữ · DOMPurify</td></tr>
+  <tr><td nowrap><b>Ẩn danh</b></td><td>wreq-js — giả mạo dấu vân tay TLS JA3 / JA4, proxy 3 cấp</td></tr>
+  <tr><td nowrap><b>Khả năng phục hồi</b></td><td>Circuit breaker, exponential backoff, chống thundering herd, tự phục hồi auto-combo</td></tr>
+  <tr><td nowrap><b>Ghi nhật ký</b></td><td>pino — nhật ký JSON có cấu trúc cùng ngữ cảnh yêu cầu</td></tr>
+  <tr><td nowrap><b>Kiểm thử</b></td><td>Trình chạy kiểm thử Node.js + Vitest — <b>hơn 60.000 khai báo kiểm thử tĩnh</b> trên hơn 8.400 tệp kiểm thử được theo dõi (unit, tích hợp, E2E, bảo mật, hệ sinh thái)</td></tr>
+  <tr><td nowrap><b>Nền tảng</b></td><td>Máy tính để bàn (Electron) · Android (Termux) · PWA (mọi trình duyệt)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — tự động xuất bản npm + Docker Hub khi phát hành</td></tr>
+  <tr><td nowrap><b>Liên kết</b></td><td><a href="https://omniroute.online">Trang web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

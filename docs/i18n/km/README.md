@@ -1284,28 +1284,28 @@ process ដូចគ្នានៅលើ port តែមួយ ដូច្ន�
 <br/>
 <div align="center">
 
-## 🛠️ Tech Stack
+## 🛠️ បច្ចេកវិទ្យាដែលប្រើប្រាស់
 
 </div>
 
 <table>
   <tr><th align="left">ស្រទាប់</th><th align="left">បច្ចេកវិទ្យា</th></tr>
-  <tr><td nowrap><b>ពេលដំណើរការ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ភាសា</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> ឆ្លងកាត់ <code>src/</code> និង <code>open-sse/</code> (សូន្យ <code>any</code> នៅក្នុងស្នូលចាប់តាំងពី v2.0)</td></tr>
-  <tr><td nowrap><b>ក្របខ័ណ្ឌ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 domain modules, 227 migrations</td></tr>
-  <tr><td nowrap><b>ការចងចាំ</b></td><td>SQLite FTS5 អត្ថបទពេញលេញ + int8-quantized ការបង្កប់វ៉ិចទ័រ វាយបំបែក</td></tr>
-  <tr><td nowrap><b>គ្រោងការណ៍</b></td><td>Zod 4 — MCP ឧបករណ៍ I/O សុពលភាព + API កិច្ចសន្យា</td></tr>
+  <tr><td nowrap><b>បរិស្ថានដំណើរការ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>ភាសា</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> នៅទូទាំង <code>src/</code> និង <code>open-sse/</code> (គ្មាន <code>any</code> នៅក្នុងស្នូល ចាប់ពី v2.0)</td></tr>
+  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, កំណត់ហេតុ WAL) + LowDB (JSON ចាស់) — ម៉ូឌុលដែន 147, migration 228</td></tr>
+  <tr><td nowrap><b>អង្គចងចាំ</b></td><td>អត្ថបទពេញ SQLite FTS5 + vector embeddings ដែលបាន quantize ជា int8, ការថយចុះតាមប្រភេទ</td></tr>
+  <tr><td nowrap><b>គ្រោងទិន្នន័យ</b></td><td>Zod 4 — ការផ្ទៀងផ្ទាត់ I/O របស់ឧបករណ៍ MCP + កិច្ចសន្យា API</td></tr>
   <tr><td nowrap><b>ពិធីការ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>ស្ទ្រីម</b></td><td>ព្រឹត្តិការណ៍ដែលផ្ញើដោយម៉ាស៊ីនមេ (SSE) + WebSocket Bridge (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>ការបង្ហាប់</b></td><td>12- បំពង់បង្ហូរម៉ាស៊ីន — RTK, Caveman , LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Auth &amp; សុវត្ថិភាព</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM at rest · DOMPurify</td></tr>
-  <tr><td nowrap><b>បំបាំងកាយ</b></td><td>wreq-js — JA3 / JA4 TLS ការក្លែងបន្លំស្នាមម្រាមដៃ ប្រូកស៊ី 3 កម្រិត</td></tr>
-  <tr><td nowrap><b>ភាពធន់</b></td><td>ឧបករណ៍បំលែងសៀគ្វី, ការបិទឡើងវិញអិចស្ប៉ូណង់ស្យែល, ប្រឆាំងនឹងផ្គរលាន់ - ហ្វូង, បន្សំដោយស្វ័យប្រវត្តិ ការព្យាបាលដោយខ្លួនឯង</td></tr>
-  <tr><td nowrap><b>ការកាប់ឈើ</b></td><td>pino — កំណត់រចនាសម្ព័ន្ធ JSON ជាមួយនឹងបរិបទសំណើ</td></tr>
-  <tr><td nowrap><b>ការធ្វើតេស្ត</b></td><td>Node.js អ្នករត់ការសាកល្បង + Vitest — <b>ការប្រកាសតេស្តឋិតិវន្ត 60,000 +</b> នៅទូទាំង 8,400 + ឯកសារសាកល្បងដែលបានតាមដាន (ឯកតា ការរួមបញ្ចូល E2E សន្តិសុខ ប្រព័ន្ធអេកូ)</td></tr>
-  <tr><td nowrap><b>វេទិកា</b></td><td>ផ្ទៃតុ (Electron) · Android (Termux) · PWA (កម្មវិធីរុករកណាមួយ)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub សកម្មភាព — ស្វ័យប្រវត្តិ npm បោះផ្សាយ + Docker Hub នៅលើការចេញផ្សាយ</td></tr>
+  <tr><td nowrap><b>ការផ្សាយទិន្នន័យ</b></td><td>Server-Sent Events (SSE) + ស្ពាន WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>ការបង្ហាប់</b></td><td>បំពង់ដំណើរការ 12 ម៉ាស៊ីន — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ និងសុវត្ថិភាព</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM ពេលរក្សាទុក · DOMPurify</td></tr>
+  <tr><td nowrap><b>ការលាក់អត្តសញ្ញាណ</b></td><td>wreq-js — ការក្លែងធ្វើស្នាមម្រាមដៃ JA3 / JA4 TLS, proxy 3 កម្រិត</td></tr>
+  <tr><td nowrap><b>ភាពធន់</b></td><td>ឧបករណ៍បំបែកសៀគ្វី, exponential backoff, ការប្រឆាំងនឹង thundering herd, ការជួសជុលដោយខ្លួនឯង auto-combo</td></tr>
+  <tr><td nowrap><b>ការកត់ត្រា</b></td><td>pino — កំណត់ហេតុ JSON មានរចនាសម្ព័ន្ធ ជាមួយបរិបទសំណើ</td></tr>
+  <tr><td nowrap><b>ការធ្វើតេស្ត</b></td><td>Node.js test runner + Vitest — <b>ការប្រកាសតេស្តឋិតិវន្តជាង 60,000</b> នៅទូទាំងឯកសារតេស្តដែលបានតាមដានជាង 8,400 (unit, integration, E2E, សុវត្ថិភាព, ecosystem)</td></tr>
+  <tr><td nowrap><b>វេទិកា</b></td><td>កុំព្យូទ័រលើតុ (Electron) · Android (Termux) · PWA (កម្មវិធីរុករកណាមួយ)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — បោះពុម្ព npm ដោយស្វ័យប្រវត្តិ + Docker Hub នៅពេលចេញផ្សាយ</td></tr>
   <tr><td nowrap><b>តំណភ្ជាប់</b></td><td><a href="https://omniroute.online">គេហទំព័រ</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

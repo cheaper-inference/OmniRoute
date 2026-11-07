@@ -1219,28 +1219,28 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
 <br/>
 <div align="center">
 
-## 🛠️ Tech Stack
+## 🛠️ Teknolojia
 
 </div>
 
 <table>
   <tr><th align="left">Tabaka</th><th align="left">Teknolojia</th></tr>
-  <tr><td nowrap><b>Muda wa kukimbia</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Lugha</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kote <code>src/</code> na <code>open-sse/</code> (sifuri <code>any</code> msingi tangu v2.0)</td></tr>
+  <tr><td nowrap><b>Mazingira ya uendeshaji</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Lugha</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> katika <code>src/</code> na <code>open-sse/</code> (<code>any</code> sifuri kwenye msingi tangu v2.0)</td></tr>
   <tr><td nowrap><b>Mfumo</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa habari WAL ) + LowDB ( urithi wa JSON ) — moduli za kikoa 147, uhamiaji 227</td></tr>
-  <tr><td nowrap><b>Kumbukumbu</b></td><td>SQLite FTS5 maandishi kamili + int8-quantized upachikaji wa vekta, uozo ulioandikwa</td></tr>
-  <tr><td nowrap><b>Miradi</b></td><td>Zod 4 — MCP zana I/O uthibitishaji wa mikataba + API</td></tr>
+  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa WAL) + LowDB (JSON ya zamani) — moduli 147 za kikoa, uhamishaji 228</td></tr>
+  <tr><td nowrap><b>Kumbukumbu</b></td><td>Utafutaji wa maandishi kamili wa SQLite FTS5 + embeddings za vekta zilizopunguzwa kwa int8, uozo wenye aina</td></tr>
+  <tr><td nowrap><b>Miundo</b></td><td>Zod 4 — uthibitishaji wa I/O wa zana za MCP + mikataba ya API</td></tr>
   <tr><td nowrap><b>Itifaki</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Kutiririsha</b></td><td>Matukio Yanayotumwa Na Seva (SSE) + WebSocket daraja (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Mfinyazo</b></td><td>bomba la injini 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Auth &amp; usalama</b></td><td>OAuth 2.0 (PKCE) + JWT + API Vifunguo + MCP maandishi yaliyochapishwa · AES-256-GCM katika mapumziko · DOMPurify</td></tr>
-  <tr><td nowrap><b>Ujanja</b></td><td>wreq-js — JA3 / JA4 TLS uigaji wa alama za vidole, wakala wa ngazi 3</td></tr>
-  <tr><td nowrap><b>Ustahimilivu</b></td><td>Kivunja mzunguko, kurudi nyuma kwa kasi, kundi la kuzuia ngurumo, kujiponya kiotomatiki</td></tr>
-  <tr><td nowrap><b>Kuweka magogo</b></td><td>pino — kumbukumbu za JSON zilizo na muktadha wa ombi</td></tr>
-  <tr><td nowrap><b>Kupima</b></td><td>Node.js mtihani mkimbiaji + Vitest — <b>60,000 + matamko ya mtihani tuli</b> katika faili 8,400 za majaribio + (kitengo, ujumuishaji, E2E, usalama, mfumo ikolojia)</td></tr>
-  <tr><td nowrap><b>Majukwaa</b></td><td>Eneo-kazi (Electron) · Android (Termux) · PWA (kivinjari chochote)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Vitendo — otomatiki npm kuchapisha + Docker Hub inapotolewa</td></tr>
+  <tr><td nowrap><b>Utiririshaji</b></td><td>Matukio Yanayotumwa na Seva (SSE) + daraja la WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Ukandamizaji</b></td><td>Bomba la injini 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Uthibitishaji &amp; usalama</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + uthibitishaji wenye upeo wa MCP · AES-256-GCM wakati wa kuhifadhi · DOMPurify</td></tr>
+  <tr><td nowrap><b>Usiri</b></td><td>wreq-js — uigaji wa alama za vidole za TLS za JA3 / JA4, proksi ya viwango 3</td></tr>
+  <tr><td nowrap><b>Ustahimilivu</b></td><td>Kikatiza mzunguko, kurudia kwa muda unaoongezeka kwa kielelezo, kuzuia msongamano wa maombi, kujiponya kiotomatiki kwa mchanganyiko</td></tr>
+  <tr><td nowrap><b>Uwekaji kumbukumbu</b></td><td>pino — kumbukumbu za JSON zenye muundo na muktadha wa ombi</td></tr>
+  <tr><td nowrap><b>Upimaji</b></td><td>Kiendesha majaribio cha Node.js + Vitest — <b>matangazo tuli ya majaribio 60,000+</b> katika faili za majaribio 8,400+ zinazofuatiliwa (kitengo, muunganisho, E2E, usalama, mfumo ikolojia)</td></tr>
+  <tr><td nowrap><b>Mifumo</b></td><td>Kompyuta ya mezani (Electron) · Android (Termux) · PWA (kivinjari chochote)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — uchapishaji wa npm kiotomatiki + Docker Hub wakati wa toleo</td></tr>
   <tr><td nowrap><b>Viungo</b></td><td><a href="https://omniroute.online">Tovuti</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

@@ -1285,29 +1285,29 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
 <br/>
 <div align="center">
 
-## 🛠️ ടെക് സ്റ്റാക്ക്
+## 🛠️ സാങ്കേതിക സ്റ്റാക്ക്
 
 </div>
 
 <table>
   <tr><th align="left">പാളി</th><th align="left">സാങ്കേതികവിദ്യ</th></tr>
-  <tr><td nowrap><b>പ്രവർത്തനസമയം</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ഭാഷ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code>, <code>open-sse/</code> എന്നിവയിലുടനീളം (v2.0 മുതൽ കോറിൽ പൂജ്യം <code>any</code> )</td></tr>
-  <tr><td nowrap><b>ചട്ടക്കൂട്</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL ജേണലിംഗ്) + LowDB (JSON ലെഗസി) — 147 ഡൊമെയ്ൻ മൊഡ്യൂളുകൾ, 227 മൈഗ്രേഷനുകൾ</td></tr>
-  <tr><td nowrap><b>മെമ്മറി</b></td><td>SQLite FTS5 ഫുൾ-ടെക്സ്റ്റ് + int8-quantized വെക്റ്റർ എംബെഡ്ഡിംഗുകൾ, ടൈപ്പ് ചെയ്ത ക്ഷയം</td></tr>
-  <tr><td nowrap><b>സ്കീമുകൾ</b></td><td>Zod 4 — MCP ടൂൾ I/O മൂല്യനിർണ്ണയം + API കരാറുകൾ</td></tr>
+  <tr><td nowrap><b>റൺടൈം</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>ഭാഷ</b></td><td>TypeScript 6.0 — <code>src/</code>, <code>open-sse/</code> എന്നിവയിലുടനീളം <b>100% TypeScript</b> (v2.0 മുതൽ കോറിൽ പൂജ്യം <code>any</code>)</td></tr>
+  <tr><td nowrap><b>ഫ്രെയിംവർക്ക്</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 ഡൊമെയ്ൻ മൊഡ്യൂളുകൾ, 228 മൈഗ്രേഷനുകൾ</td></tr>
+  <tr><td nowrap><b>മെമ്മറി</b></td><td>SQLite FTS5 പൂർണ്ണ-ടെക്സ്റ്റ് + int8-quantized വെക്റ്റർ എംബെഡ്ഡിംഗുകൾ, ടൈപ്പ് ചെയ്ത ക്ഷയം</td></tr>
+  <tr><td nowrap><b>സ്കീമകൾ</b></td><td>Zod 4 — MCP ടൂൾ I/O സാധുതാ പരിശോധന + API കരാറുകൾ</td></tr>
   <tr><td nowrap><b>പ്രോട്ടോക്കോളുകൾ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>സ്ട്രീമിംഗ്</b></td><td>സെർവർ അയച്ച ഇവൻ്റുകൾ (SSE) + WebSocket ബ്രിഡ്ജ് (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>കംപ്രഷൻ</b></td><td>12-എൻജിൻ പൈപ്പ്ലൈൻ — RTK, കേവ്മാൻ, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Auth &amp; സുരക്ഷ</b></td><td>OAuth 2.0 (PKCE) + JWT + API കീകൾ + MCP സ്കോപ്പ്ഡ് ഓത്ത് · AES-256-GCM വിശ്രമത്തിൽ · DOMPurify</td></tr>
-  <tr><td nowrap><b>സ്റ്റെൽത്ത്</b></td><td>wreq-js — JA3 / JA4 TLS ഫിംഗർപ്രിൻ്റ് ആൾമാറാട്ടം, 3-ലെവൽ പ്രോക്സി</td></tr>
-  <tr><td nowrap><b>പ്രതിരോധശേഷി</b></td><td>സർക്യൂട്ട് ബ്രേക്കർ, എക്സ്പോണൻഷ്യൽ ബാക്ക്ഓഫ്, ആൻ്റി-തണ്ടറിംഗ്-ഹർഡ്, ഓട്ടോ-കോംബോ സെൽഫ് ഹീലിംഗ്</td></tr>
-  <tr><td nowrap><b>ലോഗിംഗ്</b></td><td>അഭ്യർത്ഥന സന്ദർഭത്തോടുകൂടിയ pino — ഘടനാപരമായ JSON ലോഗുകൾ</td></tr>
-  <tr><td nowrap><b>ടെസ്റ്റിംഗ്</b></td><td>Node.js ടെസ്റ്റ് റണ്ണർ + Vitest — <b>60,000 + സ്റ്റാറ്റിക് ടെസ്റ്റ് ഡിക്ലറേഷനുകൾ</b> 8,400 + ട്രാക്ക് ചെയ്ത ടെസ്റ്റ് ഫയലുകളിലുടനീളം (യൂണിറ്റ്, ഇൻ്റഗ്രേഷൻ, E2E, സുരക്ഷ, ഇക്കോസിസ്റ്റം)</td></tr>
-  <tr><td nowrap><b>പ്ലാറ്റ്ഫോമുകൾ</b></td><td>ഡെസ്ക്ടോപ്പ് (Electron) · Android (Termux) · PWA (ഏത് ബ്രൗസർ)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub പ്രവർത്തനങ്ങൾ — ഓട്ടോ npm റിലീസ് ചെയ്യുമ്പോൾ + Docker ഹബ് പ്രസിദ്ധീകരിക്കുന്നു</td></tr>
-  <tr><td nowrap><b>ലിങ്കുകൾ</b></td><td><a href="https://omniroute.online">വെബ്സൈറ്റ്</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker ഹബ്</a></td></tr>
+  <tr><td nowrap><b>സ്ട്രീമിംഗ്</b></td><td>Server-Sent Events (SSE) + WebSocket ബ്രിഡ്ജ് (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>കംപ്രഷൻ</b></td><td>12-എഞ്ചിൻ പൈപ്പ്ലൈൻ — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>പ്രാമാണീകരണവും സുരക്ഷയും</b></td><td>OAuth 2.0 (PKCE) + JWT + API കീകൾ + MCP സ്കോപ്പ്ഡ് ഓത്ത് · വിശ്രമാവസ്ഥയിൽ AES-256-GCM · DOMPurify</td></tr>
+  <tr><td nowrap><b>സ്റ്റെൽത്ത്</b></td><td>wreq-js — JA3 / JA4 TLS ഫിംഗർപ്രിന്റ് ഇംപേഴ്സണേഷൻ, 3-ലെവൽ പ്രോക്സി</td></tr>
+  <tr><td nowrap><b>പ്രതിരോധശേഷി</b></td><td>സർക്യൂട്ട് ബ്രേക്കർ, എക്സ്പോണൻഷ്യൽ ബാക്ക്ഓഫ്, ആന്റി-തണ്ടറിംഗ്-ഹെർഡ്, ഓട്ടോ-കോംബോ സ്വയം-പരിഹാരം</td></tr>
+  <tr><td nowrap><b>ലോഗിംഗ്</b></td><td>pino — റിക്വസ്റ്റ് കോൺടെക്സ്റ്റോടുകൂടിയ ഘടനാപരമായ JSON ലോഗുകൾ</td></tr>
+  <tr><td nowrap><b>ടെസ്റ്റിംഗ്</b></td><td>Node.js ടെസ്റ്റ് റണ്ണർ + Vitest — 8,400-ലധികം ട്രാക്ക് ചെയ്ത ടെസ്റ്റ് ഫയലുകളിലായി <b>60,000-ലധികം സ്റ്റാറ്റിക് ടെസ്റ്റ് ഡിക്ലറേഷനുകൾ</b> (യൂണിറ്റ്, ഇന്റഗ്രേഷൻ, E2E, സുരക്ഷ, ഇക്കോസിസ്റ്റം)</td></tr>
+  <tr><td nowrap><b>പ്ലാറ്റ്ഫോമുകൾ</b></td><td>ഡെസ്ക്ടോപ്പ് (Electron) · Android (Termux) · PWA (ഏത് ബ്രൗസറും)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — റിലീസിൽ സ്വയമേവ npm പ്രസിദ്ധീകരണം + Docker Hub</td></tr>
+  <tr><td nowrap><b>ലിങ്കുകൾ</b></td><td><a href="https://omniroute.online">വെബ്സൈറ്റ്</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

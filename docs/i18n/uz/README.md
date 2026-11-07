@@ -1286,28 +1286,28 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
 <br/>
 <div align="center">
 
-## 🛠️ Tech Stack
+## 🛠️ Texnologiyalar to‘plami
 
 </div>
 
 <table>
   <tr><th align="left">Qatlam</th><th align="left">Texnologiya</th></tr>
-  <tr><td nowrap><b>Ish vaqti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Til</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> va <code>open-sse/</code> bo'ylab (v2.0 dan boshlab yadroda nol <code>any</code> )</td></tr>
-  <tr><td nowrap><b>Ramka</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma'lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnali) + LowDB (JSON legacy) — 147 domen moduli, 227 migratsiya</td></tr>
-  <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli + int8-quantized vektor qo‘shish, terilgan parchalanish</td></tr>
-  <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositasi I/O tekshiruvi + API shartnomalari</td></tr>
+  <tr><td nowrap><b>Ishlash muhiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Dasturlash tili</b></td><td>TypeScript 6.0 — <code>src/</code> va <code>open-sse/</code> bo‘ylab <b>100% TypeScript</b> (v2.0 dan beri yadroda nolta <code>any</code>)</td></tr>
+  <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON legacy) — 147 ta domen moduli, 228 ta migratsiya</td></tr>
+  <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli qidiruvi + int8-kvantlangan vektorli embeddinglar, tiplashtirilgan so‘nish</td></tr>
+  <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalari I/O validatsiyasi + API shartnomalari</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Oqim</b></td><td>Server tomonidan yuborilgan hodisalar (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Siqish</b></td><td>12 dvigatelli quvur liniyasi — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Auth &amp; xavfsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API Tugmalar + MCP qamrovli auth · AES-256-GCM dam olishda · DOMPurify</td></tr>
-  <tr><td nowrap><b>Yashirinlik</b></td><td>wreq-js — JA3 / JA4 TLS barmoq izini taqlid qilish, 3 darajali proksi-server</td></tr>
-  <tr><td nowrap><b>Chidamlilik</b></td><td>O'chirish to'xtatuvchisi, eksponensial orqaga qaytish, momaqaldiroqqa qarshi poda, avtomatik kombinatsiyalangan o'z-o'zini davolash</td></tr>
-  <tr><td nowrap><b>Jurnal yozish</b></td><td>so'rov kontekstiga ega pino — tuzilgan JSON jurnallari</td></tr>
-  <tr><td nowrap><b>Sinov</b></td><td>Node.js test yuguruvchisi + Vitest — <b>60 000 + statik test deklaratsiyasi</b> 8400 + kuzatilgan test fayllari bo'ylab (birlik, integratsiya, E2E, xavfsizlik, ekotizim)</td></tr>
-  <tr><td nowrap><b>Platformalar</b></td><td>Ish stoli (Electron) · Android (Termux) · PWA (har qanday brauzer)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — auto npm nashr qilish + Docker Hub chiqarilganda</td></tr>
+  <tr><td nowrap><b>Oqim uzatish</b></td><td>Server tomonidan yuboriladigan hodisalar (SSE) + WebSocket ko‘prigi (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Siqish</b></td><td>12 dvigatelli pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autentifikatsiya va xavfsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP doirasidagi autentifikatsiya · saqlanayotgan ma’lumotlar uchun AES-256-GCM · DOMPurify</td></tr>
+  <tr><td nowrap><b>Yashirinlik</b></td><td>wreq-js — JA3 / JA4 TLS fingerprintini taqlid qilish, 3 darajali proksi</td></tr>
+  <tr><td nowrap><b>Barqarorlik</b></td><td>Avtomatik uzgich, eksponensial kechikish, bir vaqtdagi ortiqcha so‘rovlarning oldini olish, avtomatik kombinatsiyali o‘z-o‘zini tiklash</td></tr>
+  <tr><td nowrap><b>Jurnallash</b></td><td>pino — so‘rov konteksti bilan tuzilmaviy JSON jurnallari</td></tr>
+  <tr><td nowrap><b>Testlash</b></td><td>Node.js test runner + Vitest — 8 400 dan ortiq kuzatiladigan test fayllari bo‘ylab <b>60 000+ statik test deklaratsiyalari</b> (unit, integratsion, E2E, xavfsizlik, ekotizim)</td></tr>
+  <tr><td nowrap><b>Platformalar</b></td><td>Desktop (Electron) · Android (Termux) · PWA (istalgan brauzer)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — relizda avtomatik npm publish + Docker Hub</td></tr>
   <tr><td nowrap><b>Havolalar</b></td><td><a href="https://omniroute.online">Veb-sayt</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

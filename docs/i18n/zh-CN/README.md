@@ -1283,29 +1283,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
 <br/>
 <div align="center">
 
-## 🛠️技术栈
+## 🛠️ 技术栈
 
 </div>
 
 <table>
   <tr><th align="left">层</th><th align="left">技术</th></tr>
   <tr><td nowrap><b>运行时</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>语言</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> 跨<code>src/</code>和<code>open-sse/</code> （自 v2.0 以来核心中的<code>any</code>为零）</td></tr>
+  <tr><td nowrap><b>语言</b></td><td>TypeScript 6.0 — <code>src/</code> 和 <code>open-sse/</code> 中均为 <b>100% TypeScript</b>（自 v2.0 起核心代码中不存在 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>数据库</b></td><td>better-sqlite3 （SQLite、 WAL日志） + LowDB （JSON旧版） — 147 个域模块，227 个迁移</td></tr>
-  <tr><td nowrap><b>记忆</b></td><td>SQLite FTS5全文+ int8-quantized向量嵌入，类型化衰减</td></tr>
-  <tr><td nowrap><b>模式</b></td><td>Zod 4 — MCP工具I/O验证+ API合约</td></tr>
-  <tr><td nowrap><b>协议</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>流媒体</b></td><td>服务器发送的事件 (SSE) + WebSocket桥 (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>压缩</b></td><td>12 引擎管道— RTK、 Caveman 、 LLMLingua-2 (MobileBERT ONNX) 、 GCF、 OmniGlyph</td></tr>
-  <tr><td nowrap><b>授权&amp;安全</b></td><td>OAuth 2.0 (PKCE) + JWT + API密钥+ MCP范围身份验证 · AES-256-GCM静态 · DOMPurify</td></tr>
-  <tr><td nowrap><b>隐身</b></td><td>wreq-js — JA3 / JA4 TLS指纹模拟，三级代理</td></tr>
-  <tr><td nowrap><b>弹力</b></td><td>断路器、指数退避、防雷群、自动组合自愈</td></tr>
-  <tr><td nowrap><b>记录</b></td><td>pino —带有请求上下文的结构化JSON日志</td></tr>
-  <tr><td nowrap><b>测试</b></td><td>Node.js测试运行者+ Vitest — <b>60,000 个+静态测试声明</b> 跨越 8,400 个+跟踪测试文件（单元、集成、 E2E、安全、生态系统）</td></tr>
-  <tr><td nowrap><b>平台</b></td><td>桌面 (Electron) · Android (Termux) · PWA （任何浏览器）</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub操作— auto npm 发布+ Docker Hub 发布</td></tr>
-  <tr><td nowrap><b>链接</b></td><td><a href="https://omniroute.online">网站</a> · <a href="https://www.npmjs.com/package/omniroute">新项目管理</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker中心</a></td></tr>
+  <tr><td nowrap><b>数据库</b></td><td>better-sqlite3（SQLite，WAL 日志记录）+ LowDB（JSON 遗留存储）— 147 个领域模块，228 个迁移</td></tr>
+  <tr><td nowrap><b>内存</b></td><td>SQLite FTS5 全文搜索 + int8 量化向量嵌入，类型化衰减</td></tr>
+  <tr><td nowrap><b>架构</b></td><td>Zod 4 — MCP 工具 I/O 验证 + API 契约</td></tr>
+  <tr><td nowrap><b>协议</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
+  <tr><td nowrap><b>流式传输</b></td><td>服务器发送事件（SSE）+ WebSocket 桥接（<code>/v1/ws</code>）</td></tr>
+  <tr><td nowrap><b>压缩</b></td><td>12 引擎流水线 — RTK、Caveman、LLMLingua-2（MobileBERT ONNX）、GCF、OmniGlyph</td></tr>
+  <tr><td nowrap><b>身份验证与安全</b></td><td>OAuth 2.0（PKCE）+ JWT + API 密钥 + MCP 作用域身份验证 · 静态存储采用 AES-256-GCM · DOMPurify</td></tr>
+  <tr><td nowrap><b>隐匿性</b></td><td>wreq-js — JA3 / JA4 TLS 指纹模拟，三级代理</td></tr>
+  <tr><td nowrap><b>弹性</b></td><td>熔断器、指数退避、防惊群、自动组合自愈</td></tr>
+  <tr><td nowrap><b>日志记录</b></td><td>pino — 带请求上下文的结构化 JSON 日志</td></tr>
+  <tr><td nowrap><b>测试</b></td><td>Node.js 测试运行器 + Vitest — 在 8,400+ 个已跟踪测试文件中包含 <b>60,000+ 个静态测试声明</b>（单元、集成、E2E、安全、生态系统）</td></tr>
+  <tr><td nowrap><b>平台</b></td><td>桌面端（Electron）· Android（Termux）· PWA（任意浏览器）</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — 发布时自动发布到 npm + Docker Hub</td></tr>
+  <tr><td nowrap><b>链接</b></td><td><a href="https://omniroute.online">网站</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

@@ -1285,29 +1285,29 @@ Kanonické metriky k 2026-10-18: **1.976 jedinečných videí** · **20.220.289 
 <br/>
 <div align="center">
 
-## 🛠️ Tech Stack
+## 🛠️ Technologický stack
 
 </div>
 
 <table>
   <tr><th align="left">Vrstva</th><th align="left">Technológia</th></tr>
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> cez <code>src/</code> a <code>open-sse/</code> (nula <code>any</code> v jadre od verzie 2.0)</td></tr>
-  <tr><td nowrap><b>Rámec</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databáza</b></td><td>better-sqlite3 (SQLite, WAL žurnálovanie) + LowDB (JSON legacy) — 147 doménových modulov, 227 migrácií</td></tr>
-  <tr><td nowrap><b>pamäť</b></td><td>SQLite FTS5 fulltextové + int8-quantized vektorové vloženie, zadaný rozklad</td></tr>
-  <tr><td nowrap><b>Schémy</b></td><td>Zod 4 — MCP nástroj I/O validácia zmlúv + API</td></tr>
+  <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> v <code>src/</code> a <code>open-sse/</code> (v jadre od v2.0 žiadne <code>any</code>)</td></tr>
+  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Databáza</b></td><td>better-sqlite3 (SQLite, žurnálovanie WAL) + LowDB (starší JSON) — 147 doménových modulov, 228 migrácií</td></tr>
+  <tr><td nowrap><b>Pamäť</b></td><td>Fulltextové vyhľadávanie SQLite FTS5 + vektorové embeddingy kvantizované na int8, typovaný útlm</td></tr>
+  <tr><td nowrap><b>Schémy</b></td><td>Zod 4 — validácia I/O nástrojov MCP + kontrakty API</td></tr>
   <tr><td nowrap><b>Protokoly</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Streamovanie</b></td><td>Udalosti odoslané serverom (SSE) + WebSocket most (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Kompresia</b></td><td>12-motorové potrubie — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Zabezpečenie Auth &amp;</b></td><td>OAuth 2.0 (PKCE) + JWT + API Klávesy + MCP scoped auth · AES-256-GCM v pokoji · DOMPurify</td></tr>
-  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — JA3 / JA4 TLS odcudzenie odtlačku prsta, 3-úrovňový proxy</td></tr>
-  <tr><td nowrap><b>Odolnosť</b></td><td>Istič, exponenciálne ustupovanie, stádo hromu, automatické kombinované samoliečenie</td></tr>
-  <tr><td nowrap><b>Ťažba dreva</b></td><td>pino — štruktúrované protokoly JSON s kontextom požiadavky</td></tr>
-  <tr><td nowrap><b>Testovanie</b></td><td>Node.js skúšobný bežec + Vitest — <b>60 000 deklarácií statických testov +</b> cez 8 400 sledovaných testovacích súborov + (jednotka, integrácia, E2E, bezpečnosť, ekosystém)</td></tr>
+  <tr><td nowrap><b>Streamovanie</b></td><td>Server-Sent Events (SSE) + most WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Kompresia</b></td><td>12-jadrový pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autentifikácia a bezpečnosť</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + autentifikácia MCP s obmedzeným rozsahom · AES-256-GCM v pokoji · DOMPurify</td></tr>
+  <tr><td nowrap><b>Utajenie</b></td><td>wreq-js — impersonácia odtlačkov TLS JA3 / JA4, 3-úrovňový proxy</td></tr>
+  <tr><td nowrap><b>Odolnosť</b></td><td>Istič, exponenciálne oneskorenie, ochrana pred efektom hromu, automatická kombinovaná samooprava</td></tr>
+  <tr><td nowrap><b>Zaznamenávanie</b></td><td>pino — štruktúrované JSON protokoly s kontextom požiadavky</td></tr>
+  <tr><td nowrap><b>Testovanie</b></td><td>Testovací runner Node.js + Vitest — <b>viac než 60 000 statických deklarácií testov</b> vo viac než 8 400 sledovaných súboroch s testami (unit, integračné, E2E, bezpečnostné, ekosystémové)</td></tr>
   <tr><td nowrap><b>Platformy</b></td><td>Desktop (Electron) · Android (Termux) · PWA (ľubovoľný prehliadač)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — auto npm publikovať + Docker Hub pri vydaní</td></tr>
-  <tr><td nowrap><b>Odkazy</b></td><td><a href="https://omniroute.online">webové stránky</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatické publikovanie npm + Docker Hub pri vydaní</td></tr>
+  <tr><td nowrap><b>Odkazy</b></td><td><a href="https://omniroute.online">Webová stránka</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

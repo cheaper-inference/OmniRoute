@@ -1285,29 +1285,29 @@ Ma'aunai na asali a 2026-10-18: **bidiyoyi na musamman 1.976** · **sanannun kal
 <br/>
 <div align="center">
 
-## 🛠️ Tech Stack
+## 🛠️ Tarin Fasaha
 
 </div>
 
 <table>
-  <tr><th align="left">Layer</th><th align="left">Fasaha</th></tr>
-  <tr><td nowrap><b>Lokacin gudu</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Harshe</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> a fadin <code>src/</code> da <code>open-sse/</code> (sifili <code>any</code> a cikin ainihin tun v2.0)</td></tr>
-  <tr><td nowrap><b>Tsarin tsari</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB ( gadon JSON ) — 147 modules domain, 227 hijira</td></tr>
-  <tr><td nowrap><b>Ƙwaƙwalwar ajiya</b></td><td>SQLite FTS5 cikakken-rubutu + int8-quantized vector embeddings, ruɓaɓɓen rubutu</td></tr>
-  <tr><td nowrap><b>Tsare-tsare</b></td><td>Zod 4 — MCP kayan aiki I/O ingantattun kwangilolin + API</td></tr>
-  <tr><td nowrap><b>Ka'idoji</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Yawo</b></td><td>Abubuwan da Aka Aika Sabar (SSE) WebSocket + (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Matsi</b></td><td>12-inji bututun — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Auth &amp; tsaro</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM a hutawa · DOMPurify</td></tr>
-  <tr><td nowrap><b>Steelth</b></td><td>wreq-js — JA3 / JA4 TLS alamar yatsa, wakili na matakin 3</td></tr>
-  <tr><td nowrap><b>Juriya</b></td><td>Mai watsewar kewayawa, koma bayan fage, anti-thundering-garken, auto-combo mai warkarwa</td></tr>
-  <tr><td nowrap><b>Shiga</b></td><td>pino — tsarin rajistan ayyukan JSON tare da mahallin buƙatar</td></tr>
-  <tr><td nowrap><b>Gwaji</b></td><td>Node.js test runner + Vitest — <b>60,000 + shedar gwaji a tsaye</b> a fadin fayilolin gwaji 8,400 + (naúrar, haɗin kai, E2E, tsaro, yanayin muhalli)</td></tr>
-  <tr><td nowrap><b>Dandalin</b></td><td>Desktop (Electron) · Android (Termux) · PWA (kowane mai bincike)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Ayyuka — auto npm buga + Docker Hub akan saki</td></tr>
-  <tr><td nowrap><b>Hanyoyin haɗi</b></td><td><a href="https://omniroute.online">Yanar Gizo</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><th align="left">Mataki</th><th align="left">Fasaha</th></tr>
+  <tr><td nowrap><b>Lokacin gudana</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Harshe</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> a faɗin <code>src/</code> da <code>open-sse/</code> (babu <code>any</code> ko ɗaya a cikin core tun v2.0)</td></tr>
+  <tr><td nowrap><b>Tsarin aiki</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Ma’adanar bayanai</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON na gado) — modules 147 na yanki, migrations 228</td></tr>
+  <tr><td nowrap><b>Ƙwaƙwalwa</b></td><td>Cikakken rubutu na SQLite FTS5 + vector embeddings masu int8-quantized, tare da raguwar da aka tsara da nau’i</td></tr>
+  <tr><td nowrap><b>Tsare-tsare</b></td><td>Zod 4 — ingancin MCP tool I/O + kwangilolin API</td></tr>
+  <tr><td nowrap><b>Ka’idoji</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
+  <tr><td nowrap><b>Yawo</b></td><td>Server-Sent Events (SSE) + gadar WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Matse bayanai</b></td><td>Bututun injuna 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Tantancewa &amp; tsaro</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + ingantaccen MCP mai iyakantaccen faɗi · AES-256-GCM yayin ajiya · DOMPurify</td></tr>
+  <tr><td nowrap><b>ɓoyewa</b></td><td>wreq-js — kwaikwayon sawun yatsa na JA3 / JA4 TLS, wakili mai matakai 3</td></tr>
+  <tr><td nowrap><b>Juriya</b></td><td>Mai katse da’ira, jinkirin exponential, kariya daga cunkoson buƙatu, gyaran kai ta atomatik na auto-combo</td></tr>
+  <tr><td nowrap><b>Rajista</b></td><td>pino — rajistar JSON mai tsari tare da mahallin buƙata</td></tr>
+  <tr><td nowrap><b>Gwaji</b></td><td>Mai gudanar da gwajin Node.js + Vitest — <b>bayyanannun sanarwar gwaji sama da 60,000</b> a cikin fayilolin gwaji sama da 8,400 da aka bi diddigi (unit, integration, E2E, tsaro, ecosystem)</td></tr>
+  <tr><td nowrap><b>Dandamali</b></td><td>Kwamfuta (Electron) · Android (Termux) · PWA (kowane burauza)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — wallafa npm ta atomatik + Docker Hub yayin fitarwa</td></tr>
+  <tr><td nowrap><b>Hanyoyi</b></td><td><a href="https://omniroute.online">Gidan yanar gizo</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

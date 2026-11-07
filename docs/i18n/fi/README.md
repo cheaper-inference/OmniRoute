@@ -1292,28 +1292,28 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
 <br/>
 <div align="center">
 
-## 🛠️ Tech Stack
+## 🛠️ Teknologiapino
 
 </div>
 
 <table>
-  <tr><th align="left">Kerros</th><th align="left">Tekniikka</th></tr>
-  <tr><td nowrap><b>Suoritusaika</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Kieli</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> ja <code>open-sse/</code> välillä (nolla <code>any</code> ytimessä v2.0:n jälkeen)</td></tr>
-  <tr><td nowrap><b>puitteet</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL kirjaus) + LowDB (JSON legacy) — 147 verkkotunnusmoduulia, 227 siirtoa</td></tr>
-  <tr><td nowrap><b>Muisti</b></td><td>SQLite FTS5 kokoteksti + int8-quantized vektori upotukset, kirjoitettu hajoaminen</td></tr>
-  <tr><td nowrap><b>Kaaviot</b></td><td>Zod 4 — MCP työkalu I/O validointi + API sopimukset</td></tr>
+  <tr><th align="left">Kerroksella</th><th align="left">Teknologia</th></tr>
+  <tr><td nowrap><b>Ajonaikainen ympäristö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Kieli</b></td><td>TypeScript 6.0 — <b>100 % TypeScriptiä</b> hakemistoissa <code>src/</code> ja <code>open-sse/</code> (ei <code>any</code>-tyyppejä ytimessä versiosta v2.0 lähtien)</td></tr>
+  <tr><td nowrap><b>Kehys</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-kirjaus) + LowDB (JSON-perintö) — 147 toimialamoduulia, 228 migraatiota</td></tr>
+  <tr><td nowrap><b>Muisti</b></td><td>SQLite FTS5 -kokotekstihaku + int8-kvantisoinnit vektoriupotuksille, tyypitetty vaimeneminen</td></tr>
+  <tr><td nowrap><b>Skeemat</b></td><td>Zod 4 — MCP-työkalujen I/O-validointi + API-sopimukset</td></tr>
   <tr><td nowrap><b>Protokollat</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Suoratoisto</b></td><td>Palvelimen lähettämät tapahtumat (SSE) + WebSocket silta (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Puristus</b></td><td>12-moottorinen putkisto — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Auth &amp; turvallisuus</b></td><td>OAuth 2.0 (PKCE) + JWT + API + MCP Scod auth · AES-256-GCM levossa · DOMPurify</td></tr>
-  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — JA3 / JA4 TLS sormenjälkijälki, 3-tason välityspalvelin</td></tr>
-  <tr><td nowrap><b>Joustavuus</b></td><td>Katkaisija, eksponentiaalinen takaisku, ukkosen esto, automaattinen yhdistelmä itsekorjaava</td></tr>
-  <tr><td nowrap><b>Kirjaaminen</b></td><td>pino — strukturoidut JSON -lokit pyyntökontekstilla</td></tr>
-  <tr><td nowrap><b>Testaus</b></td><td>Node.js testijuoksija + Vitest — <b>60 000 + staattisen testauksen ilmoitusta</b> 8 400 + -seuraavalla testitiedostolla (yksikkö, integraatio, E2E, turvallisuus, ekosysteemi)</td></tr>
+  <tr><td nowrap><b>Suoratoisto</b></td><td>Server-Sent Events (SSE) + WebSocket-silta (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Pakkaus</b></td><td>12 moottorin putki — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Todennus ja tietoturva</b></td><td>OAuth 2.0 (PKCE) + JWT + API-avaimet + MCP:n rajattu todennus · AES-256-GCM levossa oleville tiedoille · DOMPurify</td></tr>
+  <tr><td nowrap><b>Huomaamattomuus</b></td><td>wreq-js — JA3 / JA4 TLS -sormenjälki-imitaatio, 3-tasoinen välityspalvelin</td></tr>
+  <tr><td nowrap><b>Vikasietoisuus</b></td><td>Piirikatkaisin, eksponentiaalinen perääntyminen, samanaikaisuuspiikkien esto, automaattinen yhdistelmäpohjainen itsekorjaus</td></tr>
+  <tr><td nowrap><b>Lokitus</b></td><td>pino — jäsennellyt JSON-lokit pyyntökontekstilla</td></tr>
+  <tr><td nowrap><b>Testaus</b></td><td>Node.js-testisuorittaja + Vitest — <b>yli 60 000 staattista testimäärittelyä</b> yli 8 400 seuratun testitiedoston joukossa (yksikkö-, integraatio-, E2E-, tietoturva- ja ekosysteemitestit)</td></tr>
   <tr><td nowrap><b>Alustat</b></td><td>Työpöytä (Electron) · Android (Termux) · PWA (mikä tahansa selain)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — auto npm julkaise + Docker Hub julkaisussa</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automaattinen npm-julkaisu + Docker Hub -julkaisu julkaisuversioiden yhteydessä</td></tr>
   <tr><td nowrap><b>Linkit</b></td><td><a href="https://omniroute.online">Verkkosivusto</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

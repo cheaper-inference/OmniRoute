@@ -1295,29 +1295,29 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 <br/>
 <div align="center">
 
-## 🛠️ Tech Stack
+## 🛠️ Àkójọpọ̀ Ìmọ̀-ẹ̀rọ
 
 </div>
 
 <table>
-  <tr><th align="left">Layer</th><th align="left">Imọ ọna ẹrọ</th></tr>
-  <tr><td nowrap><b>Akoko ṣiṣe</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Ede</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kọja <code>src/</code> ati <code>open-sse/</code> (odo <code>any</code> ni mojuto lati v2.0)</td></tr>
-  <tr><td nowrap><b>Ilana</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Aaye data</b></td><td>better-sqlite3 (SQLite, WAL iwe iroyin) + LowDB (ogún JSON ) — 147 awọn modulu agbegbe, awọn iṣikiri 227</td></tr>
-  <tr><td nowrap><b>Iranti</b></td><td>SQLite FTS5 kikun-ọrọ + int8-quantized fekito ifibọ, ti tẹ ibajẹ</td></tr>
-  <tr><td nowrap><b>Awọn eto</b></td><td>Zod 4 — MCP ọpa I/O afọwọsi + API siwe</td></tr>
-  <tr><td nowrap><b>Ilana</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Sisanwọle</b></td><td>Awọn iṣẹlẹ ti a firanṣẹ olupin (SSE) + WebSocket afara (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Funmorawon</b></td><td>12-engine opo — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Auth &amp; aabo</b></td><td>OAuth 2.0 (PKCE) + JWT API + bọtini + MCP scoped auth · AES-256-GCM ni isinmi · DOMPurify</td></tr>
-  <tr><td nowrap><b>Lilọ ni ifura</b></td><td>wreq-js — JA3 / JA4 TLS afarawe ika ika, aṣoju ipele mẹta</td></tr>
-  <tr><td nowrap><b>Resilience</b></td><td>Fifọ Circuit, ipadasẹhin ti o pọju, agbo-ẹran-agbo-ara-agutan, iwosan-ara-ara-konbo laifọwọyi</td></tr>
-  <tr><td nowrap><b>wíwọlé</b></td><td>pino — ti eleto JSON àkọọlẹ pẹlu ibeere ti o tọ</td></tr>
-  <tr><td nowrap><b>Idanwo</b></td><td>Node.js olusare igbeyewo + Vitest — <b>60,000 + awọn ikede idanwo aimi</b> kọja 8,400 + awọn faili idanwo tọpa (ẹyọkan, iṣọpọ, E2E, aabo, ilolupo)</td></tr>
-  <tr><td nowrap><b>Awọn iru ẹrọ</b></td><td>Ojú-iṣẹ (Electron) · Android (Termux) · PWA (eyikeyi ẹrọ aṣawakiri)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — auto npm ṣe atẹjade + Docker Hub lori itusilẹ</td></tr>
-  <tr><td nowrap><b>Awọn ọna asopọ</b></td><td><a href="https://omniroute.online">Aaye ayelujara</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><th align="left">Àpá</th><th align="left">Ìmọ̀-ẹ̀rọ</th></tr>
+  <tr><td nowrap><b>Àkókò ìṣiṣẹ́</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> ní gbogbo <code>src/</code> àti <code>open-sse/</code> (àìsí <code>any</code> nínú mojú-kókó láti v2.0)</td></tr>
+  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Àkójọpọ̀ data</b></td><td>better-sqlite3 (SQLite, ìkọ̀wé WAL) + LowDB (JSON ogún àtijọ́) — àwọn modulu àgbègbè 147, àwọn ìṣípadà 228</td></tr>
+  <tr><td nowrap><b>Ìrántí</b></td><td>Ìṣàwárí ọ̀rọ̀-kíkún SQLite FTS5 + àwọn ìṣàpẹẹrẹ fekito tí a ṣe quantization sí int8, ìdínkù tí a tẹ̀</td></tr>
+  <tr><td nowrap><b>Àwọn àwòṣe</b></td><td>Zod 4 — ìmúdájú I/O irinṣẹ́ MCP + àwọn àdéhùn API</td></tr>
+  <tr><td nowrap><b>Àwọn ìlànà ibánisọ̀rọ̀</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
+  <tr><td nowrap><b>Ṣíṣàn data</b></td><td>Àwọn ìṣẹ̀lẹ̀ tí a rán láti olupin (SSE) + afárá WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Dídínkù data</b></td><td>Pipeline ẹ́ńjìnì 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Ìfàṣẹsí &amp; ààbò</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + ìfàṣẹsí MCP tó ní ààlà · AES-256-GCM nígbà tí data wà ní ìsinmi · DOMPurify</td></tr>
+  <tr><td nowrap><b>Ìfarapamọ́</b></td><td>wreq-js — àfarawé ìka TLS JA3 / JA4, aṣojú ipele 3</td></tr>
+  <tr><td nowrap><b>Ìfaradà</b></td><td>Aláfọ̀wọ́kù àyíká, ìdádúró tí ń pọ̀ sí i, ìdènà ọ̀pọ̀ ìbéèrè lẹ́ẹ̀kan náà, ìmúláradá ara ẹni auto-combo</td></tr>
+  <tr><td nowrap><b>Ìkọ̀wé àkọsílẹ̀</b></td><td>pino — àwọn àkọsílẹ̀ JSON tó ní àgbékalẹ̀ pẹ̀lú àyíká ìbéèrè</td></tr>
+  <tr><td nowrap><b>Ìdánwò</b></td><td>Olùṣiṣẹ́ ìdánwò Node.js + Vitest — <b>ó ju àwọn ìkéde ìdánwò aimi 60,000 lọ</b> káàkiri àwọn fáìlì ìdánwò tí a tọpinpin tí ó ju 8,400 lọ (ẹyọkan, ìṣọ̀kan, E2E, ààbò, àyíká-ẹ̀rọ)</td></tr>
+  <tr><td nowrap><b>Àwọn pèpéle</b></td><td>Kọ̀ǹpútà (Electron) · Android (Termux) · PWA (àṣàwákiri èyíkéyìí)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ìtẹ̀jáde npm aládàáṣiṣẹ́ + Docker Hub nígbà ìtúsílẹ̀</td></tr>
+  <tr><td nowrap><b>Àwọn ìjápọ̀</b></td><td><a href="https://omniroute.online">Ojúlé wẹ́ẹ̀bù</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

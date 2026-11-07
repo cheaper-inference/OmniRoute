@@ -1295,29 +1295,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 такође га
 <br/>
 <div align="center">
 
-## 🛠️ Тецх Стацк
+## 🛠️ Технолошки стек
 
 </div>
 
 <table>
-  <tr><th align="left">Лаиер</th><th align="left">Технологија</th></tr>
-  <tr><td nowrap><b>Рунтиме</b></td><td>Node.js 22.к / 24.к LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Језик</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> преко <code>src/</code> и <code>open-sse/</code> (нула <code>any</code> у језгру од в2.0)</td></tr>
-  <tr><td nowrap><b>Фрамеворк</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL јоурналинг) + LowDB (JSON легаци) — 147 модула домена, 227 миграција</td></tr>
-  <tr><td nowrap><b>Меморија</b></td><td>SQLite FTS5 пун текст + int8-quantized векторска уградња, откуцани распад</td></tr>
-  <tr><td nowrap><b>Шеме</b></td><td>Zod 4 — MCP алат I/O валидација + API уговори</td></tr>
-  <tr><td nowrap><b>Протоколи</b></td><td>MCP (стдио / HTTP / SSE) + A2A в0.3 (ЈСОН-РПЦ 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Стреаминг</b></td><td>Догађаји послани сервером (SSE) + WebSocket мост (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Компресија</b></td><td>цевовод са 12 мотора — RTK, Цавеман, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Аутх &amp; сецурити</b></td><td>OAuth 2.0 (PKCE) + JWT + Кључеви API + сцопед аутх · MCP у мировању DOMPurifyAES-256-GCM</td></tr>
-  <tr><td nowrap><b>Стеалтх</b></td><td>врек-јс JA3 — JA4 TLS представљање отиска прста, прокси на 3 нивоа</td></tr>
-  <tr><td nowrap><b>Отпорност</b></td><td>Прекидач струјног кола, експоненцијално повлачење, против грмљавине, ауто-комбо самоизлечење</td></tr>
-  <tr><td nowrap><b>Логгинг</b></td><td>пино — структурирани JSON дневники са контекстом захтева</td></tr>
-  <tr><td nowrap><b>Тестирање</b></td><td>Node.js тест руннер + Vitest — <b>60.000 + статичких тестних декларација</b> преко 8.400 + праћених тест фајлова (јединица, интеграција, E2E, безбедност, екосистем)</td></tr>
-  <tr><td nowrap><b>Платформе</b></td><td>Десктоп (Electron) · Андроид (Термук) · PWA (било који прегледач)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Ацтионс — ауто нпм објави + Docker Хуб након издавања</td></tr>
-  <tr><td nowrap><b>Линкови</b></td><td><a href="https://omniroute.online">Вебсите</a> · <a href="https://www.npmjs.com/package/omniroute">нпм</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Хуб</a></td></tr>
+  <tr><th align="left">Слој</th><th align="left">Технологија</th></tr>
+  <tr><td nowrap><b>Окружење за извршавање</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Језик</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у <code>src/</code> и <code>open-sse/</code> (без <code>any</code> у језгру од верзије v2.0)</td></tr>
+  <tr><td nowrap><b>Оквир</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 доменских модула, 228 миграције</td></tr>
+  <tr><td nowrap><b>Меморија</b></td><td>SQLite FTS5 претраживање целог текста + векторски ембединг квантизован на int8, типизовано опадање</td></tr>
+  <tr><td nowrap><b>Шеме</b></td><td>Zod 4 — валидација улаза/излаза MCP алата + API уговори</td></tr>
+  <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
+  <tr><td nowrap><b>Стримовање</b></td><td>Server-Sent Events (SSE) + WebSocket мост (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Компресија</b></td><td>цевовод са 12 механизама — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Аутентификација и безбедност</b></td><td>OAuth 2.0 (PKCE) + JWT + API кључеви + MCP аутентификација са ограниченим опсегом · AES-256-GCM при мировању · DOMPurify</td></tr>
+  <tr><td nowrap><b>Прикривеност</b></td><td>wreq-js — опонашање JA3 / JA4 TLS отиска, прокси са 3 нивоа</td></tr>
+  <tr><td nowrap><b>Отпорност</b></td><td>прекидач кола, експоненцијално повратно чекање, заштита од истовременог налета захтева, аутоматско комбиновано самопоправљање</td></tr>
+  <tr><td nowrap><b>Евидентирање</b></td><td>pino — структурирани JSON дневници са контекстом захтева</td></tr>
+  <tr><td nowrap><b>Тестирање</b></td><td>Node.js покретач тестова + Vitest — <b>60.000+ статичких декларација тестова</b> у више од 8.400 праћених датотека тестова (јединствени, интеграциони, E2E, безбедносни, екосистемски)</td></tr>
+  <tr><td nowrap><b>Платформе</b></td><td>десктоп (Electron) · Android (Termux) · PWA (било који прегледач)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — аутоматско објављивање на npm и Docker Hub приликом објављивања издања</td></tr>
+  <tr><td nowrap><b>Везе</b></td><td><a href="https://omniroute.online">Веб-сајт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

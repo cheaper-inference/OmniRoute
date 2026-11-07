@@ -1283,29 +1283,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 نیز از آن 
 <br/>
 <div align="center">
 
-## 🛠️ Tech Stack
+## 🛠️ پشتهٔ فنی
 
 </div>
 
 <table>
-  <tr><th align="left">لایه</th><th align="left">تکنولوژی</th></tr>
-  <tr><td nowrap><b>زمان اجرا</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> در سراسر <code>src/</code> و <code>open-sse/</code> (صفر <code>any</code> در هسته از نسخه 2.0)</td></tr>
+  <tr><th align="left">لایه</th><th align="left">فناوری</th></tr>
+  <tr><td nowrap><b>محیط اجرا</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>۱۰۰٪ TypeScript</b> در سراسر <code>src/</code> و <code>open-sse/</code> (از نسخهٔ 2.0 در هسته هیچ <code>any</code>ای وجود ندارد)</td></tr>
   <tr><td nowrap><b>چارچوب</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، WAL journaling) + LowDB (میراث JSON ) — 147 ماژول دامنه، 227 مهاجرت</td></tr>
-  <tr><td nowrap><b>حافظه</b></td><td>SQLite FTS5 متن کامل + int8-quantized embeddings vector, typed cay</td></tr>
-  <tr><td nowrap><b>طرحواره ها</b></td><td>Zod 4 — MCP ابزار I/O اعتبار سنجی قراردادهای + API</td></tr>
-  <tr><td nowrap><b>پروتکل ها</b></td><td>MCP (stdio / HTTP / SSE) + A2A 0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>پخش جریانی</b></td><td>رویدادهای ارسال شده توسط سرور (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>فشرده سازی</b></td><td>خط لوله 12 موتوره — RTK, غارنشین, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>امنیت &amp;</b></td><td>OAuth 2.0 (PKCE) + JWT + API کلیدهای + MCP scoped auth · AES-256-GCM در حالت استراحت · DOMPurify</td></tr>
-  <tr><td nowrap><b>مخفی کاری</b></td><td>جعل هویت اثر انگشت wreq-js — JA3 / JA4 TLS ، پروکسی 3 سطحی</td></tr>
-  <tr><td nowrap><b>تاب آوری</b></td><td>مدار شکن، عقب نشینی نمایی، ضد رعد و برق، گله، خود ترمیم خودکار ترکیبی</td></tr>
-  <tr><td nowrap><b>ورود به سیستم</b></td><td>سیاهههای مربوط JSON ساختار یافته pino — با زمینه درخواست</td></tr>
-  <tr><td nowrap><b>تست کردن</b></td><td>Node.js test runner + Vitest — <b>60000 اعلامیه تست استاتیک +</b> در سراسر 8400 فایل آزمایشی ردیابی شده + (واحد، ادغام، E2E، امنیت، اکوسیستم)</td></tr>
-  <tr><td nowrap><b>پلتفرم ها</b></td><td>دسکتاپ (Electron) · اندروید (Termux) · PWA (هر مرورگر)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — auto npm + Docker Hub را در زمان انتشار منتشر می کند</td></tr>
-  <tr><td nowrap><b>پیوندها</b></td><td><a href="https://omniroute.online">وب سایت</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، ثبت وقایع WAL) + LowDB (JSON قدیمی) — ۱۴۷ ماژول دامنه، ۲۲۸ مهاجرت</td></tr>
+  <tr><td nowrap><b>حافظه</b></td><td>جستوجوی تماممتن SQLite FTS5 + embeddingهای برداری کمّیشده با int8، زوال نوعدار</td></tr>
+  <tr><td nowrap><b>طرحوارهها</b></td><td>Zod 4 — اعتبارسنجی ورودی/خروجی ابزار MCP + قراردادهای API</td></tr>
+  <tr><td nowrap><b>پروتکلها</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
+  <tr><td nowrap><b>جریانسازی</b></td><td>رویدادهای ارسالی از سرور (SSE) + پل WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>فشردهسازی</b></td><td>خط لولهٔ ۱۲ موتوره — RTK، Caveman، LLMLingua-2 (MobileBERT ONNX)، GCF، OmniGlyph</td></tr>
+  <tr><td nowrap><b>احراز هویت و امنیت</b></td><td>OAuth 2.0 (PKCE) + JWT + کلیدهای API + احراز هویت محدودهدار MCP · رمزنگاری AES-256-GCM در حالت سکون · DOMPurify</td></tr>
+  <tr><td nowrap><b>پنهانکاری</b></td><td>wreq-js — جعل اثرانگشت TLS با JA3 / JA4، پروکسی ۳ سطحی</td></tr>
+  <tr><td nowrap><b>تابآوری</b></td><td>مدارشکن، عقبنشینی نمایی، مقابله با هجوم همزمان، خودترمیمی ترکیبی خودکار</td></tr>
+  <tr><td nowrap><b>گزارشگیری</b></td><td>pino — گزارشهای JSON ساختاریافته با زمینهٔ درخواست</td></tr>
+  <tr><td nowrap><b>آزمایش</b></td><td>اجراکنندهٔ آزمون Node.js + Vitest — <b>بیش از ۶۰٬۰۰۰ اعلان آزمون ایستا</b> در بیش از ۸٬۴۰۰ فایل آزمون ردیابیشده (واحد، یکپارچهسازی، E2E، امنیت، اکوسیستم)</td></tr>
+  <tr><td nowrap><b>سکوها</b></td><td>رومیزی (Electron) · Android (Termux) · PWA (هر مرورگری)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — انتشار خودکار npm + انتشار در Docker Hub هنگام انتشار نسخه</td></tr>
+  <tr><td nowrap><b>پیوندها</b></td><td><a href="https://omniroute.online">وبسایت</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

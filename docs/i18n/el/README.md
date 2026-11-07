@@ -1295,29 +1295,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 επίσης τη
 <br/>
 <div align="center">
 
-## 🛠️ Tech Stack
+## 🛠️ Τεχνολογικό Stack
 
 </div>
 
 <table>
-  <tr><th align="left">Στρώμα</th><th align="left">Τεχνολογία</th></tr>
-  <tr><td nowrap><b>Χρόνος εκτέλεσης</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Γλώσσα</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> σε <code>src/</code> και <code>open-sse/</code> (μηδέν <code>any</code> στον πυρήνα από την έκδοση 2.0)</td></tr>
-  <tr><td nowrap><b>Σκελετός</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Βάση δεδομένων</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 λειτουργικές μονάδες τομέα, 227 μετεγκαταστάσεις</td></tr>
-  <tr><td nowrap><b>Μνήμη</b></td><td>SQLite FTS5 πλήρες κείμενο + int8-quantized διανυσματικές ενσωματώσεις, τυπωμένη αποσύνθεση</td></tr>
-  <tr><td nowrap><b>Σχήματα</b></td><td>Zod 4 — MCP εργαλείο I/O επικύρωση + API συμβόλαια</td></tr>
+  <tr><th align="left">Επίπεδο</th><th align="left">Τεχνολογία</th></tr>
+  <tr><td nowrap><b>Περιβάλλον εκτέλεσης</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Γλώσσα</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> σε <code>src/</code> και <code>open-sse/</code> (μηδέν <code>any</code> στον πυρήνα από την έκδοση v2.0)</td></tr>
+  <tr><td nowrap><b>Πλαίσιο</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Βάση δεδομένων</b></td><td>better-sqlite3 (SQLite, καταγραφή WAL) + LowDB (JSON παλαιού τύπου) — 147 λειτουργικές μονάδες, 228 μεταναστεύσεις</td></tr>
+  <tr><td nowrap><b>Μνήμη</b></td><td>Πλήρες κείμενο SQLite FTS5 + διανυσματικές ενσωματώσεις κβαντισμένες σε int8, τυποποιημένη φθορά</td></tr>
+  <tr><td nowrap><b>Σχήματα</b></td><td>Zod 4 — επικύρωση I/O εργαλείων MCP + συμβάσεις API</td></tr>
   <tr><td nowrap><b>Πρωτόκολλα</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Ροή</b></td><td>Συμβάντα απεσταλμένα από διακομιστή (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Συμπίεση</b></td><td>Pipeline 12 κινητήρων — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Auth &amp; ασφάλεια</b></td><td>OAuth 2.0 (PKCE) + JWT + API Πλήκτρα + MCP scoped auth · AES-256-GCM σε ηρεμία · DOMPurify</td></tr>
-  <tr><td nowrap><b>Λαθραία</b></td><td>wreq-js — JA3 / JA4 TLS πλαστοπροσωπία δακτυλικών αποτυπωμάτων, διακομιστής μεσολάβησης 3 επιπέδων</td></tr>
-  <tr><td nowrap><b>Ελαστικότητα</b></td><td>Διακόπτης κυκλώματος, εκθετική οπισθοδρόμηση, αγέλη κατά της βροντής, αυτο-θεραπεία αυτόματης συνδυασμού</td></tr>
-  <tr><td nowrap><b>Ξύλευση</b></td><td>pino — δομημένα αρχεία καταγραφής JSON με πλαίσιο αιτήματος</td></tr>
-  <tr><td nowrap><b>Δοκιμές</b></td><td>Node.js δοκιμαστικός δρομέας + Vitest — <b>60.000 δηλώσεις στατικής δοκιμής +</b> σε 8.400 αρχεία δοκιμής παρακολούθησης + (μονάδα, ενοποίηση, E2E, ασφάλεια, οικοσύστημα)</td></tr>
+  <tr><td nowrap><b>Ροή δεδομένων</b></td><td>Αποστολή συμβάντων από τον διακομιστή (SSE) + γέφυρα WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Συμπίεση</b></td><td>Αγωγός 12 μηχανών — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Έλεγχος ταυτότητας &amp; ασφάλεια</b></td><td>OAuth 2.0 (PKCE) + JWT + κλειδιά API + ελεγχόμενος έλεγχος ταυτότητας MCP · AES-256-GCM σε κατάσταση ηρεμίας · DOMPurify</td></tr>
+  <tr><td nowrap><b>Απόκρυψη</b></td><td>wreq-js — πλαστοπροσωπία αποτυπωμάτων TLS JA3 / JA4, διακομιστής μεσολάβησης 3 επιπέδων</td></tr>
+  <tr><td nowrap><b>Ανθεκτικότητα</b></td><td>Αυτόματος διακόπτης κυκλώματος, εκθετική υποχώρηση, αντιμετώπιση του φαινομένου thundering herd, αυτοθεραπεία auto-combo</td></tr>
+  <tr><td nowrap><b>Καταγραφή</b></td><td>pino — δομημένα αρχεία καταγραφής JSON με πλαίσιο αιτήματος</td></tr>
+  <tr><td nowrap><b>Έλεγχος</b></td><td>Εκτελεστής δοκιμών Node.js + Vitest — <b>πάνω από 60.000 στατικές δηλώσεις δοκιμών</b> σε περισσότερα από 8.400 παρακολουθούμενα αρχεία δοκιμών (μονάδας, ενοποίησης, E2E, ασφάλειας, οικοσυστήματος)</td></tr>
   <tr><td nowrap><b>Πλατφόρμες</b></td><td>Επιτραπέζιος υπολογιστής (Electron) · Android (Termux) · PWA (οποιοδήποτε πρόγραμμα περιήγησης)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — auto npm δημοσιεύει + Docker Hub κατά την κυκλοφορία</td></tr>
-  <tr><td nowrap><b>Εδαφος διά παιγνίδι γκολφ</b></td><td><a href="https://omniroute.online">Δικτυακός τόπος</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — αυτόματη δημοσίευση στο npm + Docker Hub κατά την κυκλοφορία</td></tr>
+  <tr><td nowrap><b>Σύνδεσμοι</b></td><td><a href="https://omniroute.online">Ιστότοπος</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

@@ -1286,29 +1286,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
 <br/>
 <div align="center">
 
-## Технічний стек 🛠️
+## 🛠️ Технологічний стек
 
 </div>
 
 <table>
-  <tr><th align="left">Шар</th><th align="left">технології</th></tr>
-  <tr><td nowrap><b>Час виконання</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Мова</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> через <code>src/</code> та <code>open-sse/</code> (нульовий <code>any</code> у ядрі з версії 2.0)</td></tr>
-  <tr><td nowrap><b>Каркас</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База даних</b></td><td>better-sqlite3 (SQLite, журналювання WAL ) + LowDB (спадок JSON ) — 147 модулів домену, 227 міграцій</td></tr>
-  <tr><td nowrap><b>Пам'ять</b></td><td>SQLite FTS5 повнотекстовий + int8-quantized векторні вкладення, типізоване розпад</td></tr>
-  <tr><td nowrap><b>Схеми</b></td><td>Zod 4 — MCP інструмент I/O перевірка + API контракти</td></tr>
+  <tr><th align="left">Рівень</th><th align="left">Технологія</th></tr>
+  <tr><td nowrap><b>Середовище виконання</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Мова</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у <code>src/</code> та <code>open-sse/</code> (нуль <code>any</code> у ядрі, починаючи з v2.0)</td></tr>
+  <tr><td nowrap><b>Фреймворк</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>База даних</b></td><td>better-sqlite3 (SQLite, журналювання WAL) + LowDB (застарілий JSON) — 147 доменних модулів, 228 міграції</td></tr>
+  <tr><td nowrap><b>Пам’ять</b></td><td>Повнотекстовий пошук SQLite FTS5 + векторні embedding, квантизовані до int8, із типізованим згасанням</td></tr>
+  <tr><td nowrap><b>Схеми</b></td><td>Zod 4 — перевірка введення/виведення інструментів MCP + контракти API</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Потокове передавання</b></td><td>Події, надіслані сервером (SSE) + WebSocket міст (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Компресія</b></td><td>12-моторний трубопровід — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Безпека авторизації &amp;</b></td><td>OAuth 2.0 (PKCE) + JWT + API Ключі + MCP автентифікація з областю · AES-256-GCM у стані спокою · DOMPurify</td></tr>
-  <tr><td nowrap><b>Стелс</b></td><td>wreq-js — JA3 / JA4 TLS імітація відбитків пальців, 3-рівневий проксі</td></tr>
-  <tr><td nowrap><b>Стійкість</b></td><td>Автоматичний вимикач, експоненціальна віддача, анти-громовий стад, автоматичне комбо, самовідновлення</td></tr>
-  <tr><td nowrap><b>Лісозаготівля</b></td><td>pino — структуровані журнали JSON з контекстом запиту</td></tr>
-  <tr><td nowrap><b>Тестування</b></td><td>Node.js тестовий бігун + Vitest — <b>60 000 декларацій статичних тестів +</b> у 8400 файлах тестування, що відстежуються + (модуль, інтеграція, E2E, безпека, екосистема)</td></tr>
-  <tr><td nowrap><b>Платформи</b></td><td>Робочий стіл (Electron) · Android (Termux) · PWA (будь-який браузер)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>Дії GitHub — auto npm public + Docker Hub після випуску</td></tr>
-  <tr><td nowrap><b>Посилання</b></td><td><a href="https://omniroute.online">Веб-сайт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Потокова передача</b></td><td>Server-Sent Events (SSE) + міст WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Стиснення</b></td><td>Конвеєр із 12 рушіїв — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Автентифікація та безпека</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + автентифікація MCP з обмеженою областю · AES-256-GCM для даних у стані спокою · DOMPurify</td></tr>
+  <tr><td nowrap><b>Прихованість</b></td><td>wreq-js — імітація TLS-відбитків JA3 / JA4, проксі з 3 рівнями</td></tr>
+  <tr><td nowrap><b>Відмовостійкість</b></td><td>Автоматичний вимикач, експоненційна затримка, захист від ефекту натовпу, автоматичне комбіноване самовідновлення</td></tr>
+  <tr><td nowrap><b>Журналювання</b></td><td>pino — структуровані журнали JSON із контекстом запиту</td></tr>
+  <tr><td nowrap><b>Тестування</b></td><td>Тест-раннер Node.js + Vitest — <b>понад 60 000 статичних оголошень тестів</b> у понад 8 400 відстежуваних файлах тестів (модульні, інтеграційні, E2E, безпекові, екосистемні)</td></tr>
+  <tr><td nowrap><b>Платформи</b></td><td>Комп’ютер (Electron) · Android (Termux) · PWA (будь-який браузер)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автоматична публікація в npm + Docker Hub під час випуску</td></tr>
+  <tr><td nowrap><b>Посилання</b></td><td><a href="https://omniroute.online">Вебсайт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
