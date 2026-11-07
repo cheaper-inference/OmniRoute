@@ -234,13 +234,14 @@ function project(account: HealthAccount, now: number, poolId?: string): DisplayA
   // serve; it does not refill the plan window. Report what the windows actually
   // carry. `bypassed` requires at least one ignored cell, and every cell carries
   // a finite percentage, so this never needs a "full" fallback.
+  // The account meter follows account-level windows; a model-scoped window
+  // (Sonnet, Spark, code review) says nothing about the pool the account is
+  // spending from, unless the account has no other window to report.
+  const accountCells = cells.filter((cell) => cell.scope !== "scoped");
   const remainingPct = percentages.length
     ? lowestPercent(percentages)
     : bypassed
-      ? // The account meter follows account-level windows; a model-scoped
-        // window (Sonnet, Spark, code review) says nothing about the pool the
-        // account is spending from.
-        reportedPercent(cells.filter((cell) => cell.scope !== "scoped"))
+      ? reportedPercent(accountCells.length ? accountCells : cells)
       : null;
   const fill = displayFill(state.kind, remainingPct, state.waitMs, state.waitDuration);
   return {

@@ -318,6 +318,38 @@ table.push({
   meter: 0,
   bypass: "extraUsage",
 });
+test("Claude extra usage reports the scoped window when it is the only one", () => {
+  const raw = { ...f.claudeScopedOnly(40), extraUsage: { is_enabled: true, utilization: 10 } };
+  const connection: HealthConnection = {
+    id: "synthetic",
+    provider: "claude",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: { blockExtraUsage: false },
+  };
+  const account = buildHealthAccount(
+    connection,
+    { raw, quotas: parseQuotaData("claude", raw) },
+    {},
+    f.now,
+    {
+      availability: buildConnectionQuotaAvailability(
+        connection,
+        { ...raw, fetchedAt: new Date(f.now).toISOString() } as Partial<ProviderLimitsCacheEntry>,
+        f.policy
+      ),
+      availabilityObservedAt: f.now,
+    }
+  );
+  assert.deepEqual(
+    account.cells.map((cell) => [cell.scope, cell.quotaIgnored]),
+    [["scoped", true]]
+  );
+  const view = displayAccount(account, f.now);
+  assert.equal(view.kind, "ok");
+  assert.equal(view.remainingPct, 40);
+  assert.equal(view.fill, 40);
+});
 for (const fixture of table)
   test(fixture.name, async () => {
     const raw = await fixture.raw();
