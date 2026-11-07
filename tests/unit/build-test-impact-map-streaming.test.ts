@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { after, test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -6,8 +6,15 @@ import path from "node:path";
 
 import { writeTestImpactMap } from "../../scripts/quality/build-test-impact-map.mjs";
 
+const tmpDirs: string[] = [];
+
+after(() => {
+  for (const dir of tmpDirs) fs.rmSync(dir, { recursive: true, force: true });
+});
+
 function tmpFile(name: string): string {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "impact-map-"));
+  tmpDirs.push(dir);
   return path.join(dir, name);
 }
 
@@ -60,11 +67,7 @@ test("writes an empty map as valid JSON", () => {
   assert.deepEqual(readBack(out), {});
 });
 
-test("never serialises the whole map as one string", () => {
-  const out = tmpFile("map-big.json");
-  // The shape that failed in CI: the release map is about 502 MiB when
-  // serialised in one piece, so a map large enough to matter must not reach
-  // JSON.stringify as a single argument.
+function bigMap() {
   const sources: Record<string, string[]> = {};
   for (let i = 0; i < 20000; i += 1) {
     sources[`open-sse/generated/module-${i}.ts`] = [
@@ -72,7 +75,15 @@ test("never serialises the whole map as one string", () => {
       `tests/unit/generated-${i}-b.test.ts`,
     ];
   }
-  const big = { generatedFrom: "import-graph", sources, artifacts: {} };
+  return { generatedFrom: "import-graph", sources, artifacts: {} };
+}
+
+test("never serialises the whole map as one string", () => {
+  const out = tmpFile("map-big.json");
+  // The shape that failed in CI: the release map is about 502 MiB when
+  // serialised in one piece, so a map large enough to matter must not reach
+  // JSON.stringify as a single argument.
+  const big = bigMap();
 
   const original = JSON.stringify;
   let wholeMapCalls = 0;
@@ -105,4 +116,37 @@ test("never serialises the whole map as one string", () => {
     "tests/unit/generated-19999-a.test.ts",
     "tests/unit/generated-19999-b.test.ts",
   ]);
+});
+
+test("batches its writes without holding the whole document", () => {
+  const out = tmpFile("map-writes.json");
+  const big = bigMap();
+
+  // The real map has millions of edges and this step runs on every PR, so one
+  // write per array element costs minutes of syscalls.
+  const sizes: number[] = [];
+  const writers = fs as unknown as Record<"writeSync" | "writeFileSync", typeof fs.writeSync>;
+  const originals = { writeSync: writers.writeSync, writeFileSync: writers.writeFileSync };
+  for (const name of ["writeSync", "writeFileSync"] as const) {
+    writers[name] = ((target: unknown, data: unknown, ...rest: unknown[]) => {
+      sizes.push(Buffer.byteLength(data as string));
+      return (originals[name] as (...args: unknown[]) => number)(target, data, ...rest);
+    }) as typeof fs.writeSync;
+  }
+  try {
+    writeTestImpactMap(out, big);
+  } finally {
+    Object.assign(writers, originals);
+  }
+
+  const total = fs.statSync(out).size;
+  const chunk = 1024 * 1024;
+  assert.ok(total > 2 * chunk, `fixture too small to prove batching: ${total} bytes`);
+  assert.equal(
+    sizes.reduce((sum, size) => sum + size, 0),
+    total,
+    "every byte must go through the counted writers"
+  );
+  assert.ok(sizes.length <= Math.ceil(total / chunk) + 1, `${sizes.length} writes for ${total} B`);
+  assert.ok(Math.max(...sizes) < 2 * chunk, "one write grew with the document");
 });

@@ -91,38 +91,42 @@ export function buildTestImpactMap(root = ROOT) {
   };
 }
 
+// Large enough that a map with millions of edges takes hundreds of writes rather
+// than one per element, small enough that the pending text stays negligible.
+const WRITE_CHUNK_CHARS = 1024 * 1024;
+
 /**
  * Write one JSON value, streaming arrays and objects entry by entry.
  *
  * Only scalars ever reach `JSON.stringify`, so no single allocation grows with
  * the document.
  */
-function writeJsonValue(fd, value) {
+function writeJsonValue(write, value) {
   if (Array.isArray(value)) {
-    fs.writeSync(fd, "[");
+    write("[");
     for (let i = 0; i < value.length; i += 1) {
-      if (i > 0) fs.writeSync(fd, ",");
-      writeJsonValue(fd, value[i]);
+      if (i > 0) write(",");
+      writeJsonValue(write, value[i]);
     }
-    fs.writeSync(fd, "]");
+    write("]");
     return;
   }
   if (value !== null && typeof value === "object") {
     const entries = Object.entries(value);
     if (entries.length === 0) {
-      fs.writeSync(fd, "{}");
+      write("{}");
       return;
     }
-    fs.writeSync(fd, "{");
+    write("{");
     entries.forEach(([key, entryValue], index) => {
-      if (index > 0) fs.writeSync(fd, ",");
-      fs.writeSync(fd, JSON.stringify(key) + ":");
-      writeJsonValue(fd, entryValue);
+      if (index > 0) write(",");
+      write(JSON.stringify(key) + ":");
+      writeJsonValue(write, entryValue);
     });
-    fs.writeSync(fd, "}");
+    write("}");
     return;
   }
-  fs.writeSync(fd, JSON.stringify(value));
+  write(JSON.stringify(value));
 }
 
 /**
@@ -131,21 +135,37 @@ function writeJsonValue(fd, value) {
  * `JSON.stringify` refuses to produce a string longer than V8's limit, and this
  * map is already close to it: the release map serialises to about 502 MiB, so a
  * branch that adds a few hundred edges made the whole gate die with
- * "RangeError: Invalid string length" before it could report anything. Streaming
- * one entry at a time keeps memory flat and removes the ceiling.
+ * "RangeError: Invalid string length" before it could report anything. Writing
+ * entry by entry through a small buffer means no string here grows with the map.
  *
- * Top-level entries are separated by newlines so the file stays diffable; nested
- * values stay compact because the readers parse the whole thing anyway.
+ * That removes the limit from the writer only. `select-impacted-tests.mjs` and
+ * `check-forgotten-sibling-tests.mjs` still load the file with
+ * `readFileSync(path, "utf8")`, which throws ERR_STRING_TOO_LONG once the file
+ * passes the same limit (512 MiB). The compact output below only buys headroom
+ * until then; the readers have to stream for the ceiling to go away.
+ *
+ * Top-level entries are separated by newlines; nested values stay compact
+ * because the readers parse the whole thing anyway.
  */
 export function writeTestImpactMap(out, map) {
   const fd = fs.openSync(out, "w");
+  let pending = "";
+  const flush = () => {
+    if (pending) fs.writeFileSync(fd, pending);
+    pending = "";
+  };
+  const write = (text) => {
+    pending += text;
+    if (pending.length >= WRITE_CHUNK_CHARS) flush();
+  };
   try {
-    fs.writeSync(fd, "{");
+    write("{");
     Object.entries(map).forEach(([key, value], index) => {
-      fs.writeSync(fd, (index > 0 ? ",\n" : "\n") + JSON.stringify(key) + ":");
-      writeJsonValue(fd, value);
+      write((index > 0 ? ",\n" : "\n") + JSON.stringify(key) + ":");
+      writeJsonValue(write, value);
     });
-    fs.writeSync(fd, "\n}\n");
+    write("\n}\n");
+    flush();
   } finally {
     fs.closeSync(fd);
   }
