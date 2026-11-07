@@ -36,6 +36,7 @@ import { isMicrosoftDesignerWebRetiredProviderId } from "@/shared/constants/desi
 import { reconcileCodexUsageHistory } from "./providers/usageIdentityReconciliation";
 import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
 import { applyCodexChildCooldownClearOnUpdate } from "./providers/codexAccountState";
+import { sameM365Account } from "@/lib/providers/m365Identity";
 
 import {
   withNullableMaxConcurrent,
@@ -485,7 +486,20 @@ export async function createProviderConnection(data: JsonRecord) {
   const workspaceId = toStringOrNull(providerSpecificData.workspaceId);
   const chatgptUserId = toStringOrNull(providerSpecificData.chatgptUserId);
 
-  if (data.authType === "oauth" && data.provider === "codex" && chatgptUserId) {
+  if (data.authType === "oauth" && data.provider === "copilot-m365-web") {
+    const candidates = db
+      .prepare("SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth'")
+      .all(data.provider) as JsonRecord[];
+    existing =
+      candidates.find((row) =>
+        sameM365Account(
+          {
+            providerSpecificData: parseProviderSpecificData(row.provider_specific_data),
+          },
+          data
+        )
+      ) || null;
+  } else if (data.authType === "oauth" && data.provider === "codex" && chatgptUserId) {
     const strongSql = workspaceId
       ? "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth' AND json_extract(provider_specific_data, '$.workspaceId') = ? AND json_extract(provider_specific_data, '$.chatgptUserId') = ?"
       : "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth' AND (json_extract(provider_specific_data, '$.workspaceId') IS NULL OR json_extract(provider_specific_data, '$.workspaceId') = '') AND json_extract(provider_specific_data, '$.chatgptUserId') = ?";
