@@ -9,11 +9,16 @@ import {
   requiresReasoningContentPresence,
 } from "../../../utils/reasoningPlaceholder.ts";
 import { getReadableReasoningValue } from "../../../utils/reasoningFields.ts";
+import { generateToolCallId } from "../../helpers/toolCallHelper.ts";
 import {
   coerceHistoricalToolCallArguments,
+  coerceToolCallArguments,
   createToolHistoryError,
 } from "../../helpers/toolArguments.ts";
-import { requireResponsesCallId } from "../../helpers/responsesToolHistory.ts";
+import {
+  isStrictResponsesToolHistoryEnabled,
+  requireResponsesCallId,
+} from "../../helpers/responsesToolHistory.ts";
 import { chatStrictForResponses } from "../../helpers/toolStrict.ts";
 import {
   JsonRecord,
@@ -22,6 +27,7 @@ import {
   toRecord,
   toArray,
   toString,
+  clampCallId,
   imageUrlToText,
   normalizeVerbosity,
   normalizeResponsesReasoningEffort,
@@ -141,7 +147,95 @@ function buildResponsesTextParts(content: unknown): unknown[] {
   return [{ type: "input_text", text: "" }];
 }
 
-/** Encode Chat history as Responses input without fabricating tool completion or ownership. */
+type ToolHistoryEncoding = {
+  toolCallId: (value: unknown) => string;
+  outputCallId: (value: unknown) => string;
+  namedCallId: (value: string) => string;
+  toolArguments: (value: unknown) => string;
+  finishInput: (input: JsonRecord[], root: JsonRecord) => JsonRecord[];
+};
+
+/**
+ * Drop outputs with no matching call, then pair every unanswered call with an empty output.
+ * Claude Code compaction removes messages but leaves tool results; a truncated history or a
+ * client crash mid-tool-loop leaves a call with no output, which strict Responses upstreams
+ * reject with 400 "No tool output found for function call <id>" (#15216). The call stays, so
+ * the model still sees that it happened.
+ */
+function repairToolHistory(input: JsonRecord[]): JsonRecord[] {
+  const knownCallIds = new Set(
+    input.filter((item) => item.type === "function_call" && item.call_id).map((i) => i.call_id)
+  );
+  const kept = input.filter(
+    (item) =>
+      item.type !== "function_call_output" || !item.call_id || knownCallIds.has(item.call_id)
+  );
+  const pairedCallIds = new Set(
+    kept
+      .filter((item) => item.type === "function_call_output" && item.call_id)
+      .map((i) => i.call_id)
+  );
+  const paired: JsonRecord[] = [];
+  for (const item of kept) {
+    paired.push(item);
+    if (item.type === "function_call" && item.call_id && !pairedCallIds.has(item.call_id)) {
+      paired.push({
+        type: "function_call_output",
+        call_id: item.call_id,
+        output: "",
+        status: "completed",
+      });
+      pairedCallIds.add(item.call_id);
+    }
+  }
+  return paired;
+}
+
+/**
+ * Strict mode: a compacted orphan is still supplied history, so reject it even alongside a valid
+ * local pair. Pending calls stay as they are; the handler validates complete history after
+ * continuation policy has selected the actual wire body.
+ */
+function rejectOrphanToolOutputs(input: JsonRecord[], root: JsonRecord): JsonRecord[] {
+  const knownCallIds = new Set(
+    input.filter((item) => item.type === "function_call").map((item) => item.call_id)
+  );
+  const hasPreviousResponse =
+    typeof root.previous_response_id === "string" && root.previous_response_id.trim() !== "";
+  for (const item of input) {
+    if (
+      item.type === "function_call_output" &&
+      !knownCallIds.has(item.call_id) &&
+      !hasPreviousResponse
+    ) {
+      throw createToolHistoryError(
+        "Tool output does not match a local tool call",
+        "invalid_tool_call_output"
+      );
+    }
+  }
+  return input;
+}
+
+// The Responses API rejects call_id values over 64 characters, so the default encoding clamps
+// them identically on a call and its output; strict mode refuses them instead.
+const REPAIRING_TOOL_HISTORY: ToolHistoryEncoding = {
+  toolCallId: (value) => clampCallId(toString(value).trim() || generateToolCallId()),
+  outputCallId: (value) => clampCallId(toString(value).trim()),
+  namedCallId: clampCallId,
+  toolArguments: coerceToolCallArguments,
+  finishInput: repairToolHistory,
+};
+
+const STRICT_TOOL_HISTORY: ToolHistoryEncoding = {
+  toolCallId: requireResponsesCallId,
+  outputCallId: requireResponsesCallId,
+  namedCallId: requireResponsesCallId,
+  toolArguments: (value) => coerceHistoricalToolCallArguments(value, ""),
+  finishInput: rejectOrphanToolOutputs,
+};
+
+/** Encode Chat history as Responses input, repairing or rejecting inconsistent tool history. */
 export function openaiToOpenAIResponsesRequest(
   model: unknown,
   body: unknown,
@@ -162,9 +256,10 @@ export function openaiToOpenAIResponsesRequest(
     result.store = false;
   }
 
-  if (root.previous_response_id !== undefined)
-    result.previous_response_id = root.previous_response_id;
   const input = result.input as JsonRecord[];
+  const toolHistory = isStrictResponsesToolHistoryEnabled()
+    ? STRICT_TOOL_HISTORY
+    : REPAIRING_TOOL_HISTORY;
 
   // Extract first system message as instructions
   let hasSystemMessage = false;
@@ -348,9 +443,9 @@ export function openaiToOpenAIResponsesRequest(
           }
           input.push({
             type: "function_call",
-            call_id: requireResponsesCallId(toolCall.id),
+            call_id: toolHistory.toolCallId(toolCall.id),
             name: fnName,
-            arguments: coerceHistoricalToolCallArguments(fn.arguments, ""),
+            arguments: toolHistory.toolArguments(fn.arguments),
             status: "completed",
           });
         }
@@ -363,9 +458,9 @@ export function openaiToOpenAIResponsesRequest(
         if (fnName) {
           input.push({
             type: "function_call",
-            call_id: requireResponsesCallId(`call_${fnName}`),
+            call_id: toolHistory.namedCallId(`call_${fnName}`),
             name: fnName,
-            arguments: coerceHistoricalToolCallArguments(fc.arguments, ""),
+            arguments: toolHistory.toolArguments(fc.arguments),
             status: "completed",
           });
         }
@@ -376,7 +471,7 @@ export function openaiToOpenAIResponsesRequest(
     if (role === "tool") {
       input.push({
         type: "function_call_output",
-        call_id: requireResponsesCallId(msg.tool_call_id),
+        call_id: toolHistory.outputCallId(msg.tool_call_id),
         output:
           typeof msg.content === "string"
             ? msg.content
@@ -396,37 +491,14 @@ export function openaiToOpenAIResponsesRequest(
     if (role === "function") {
       input.push({
         type: "function_call_output",
-        call_id: requireResponsesCallId(`call_${toString(msg.name).trim()}`),
+        call_id: toolHistory.namedCallId(`call_${toString(msg.name).trim()}`),
         output: typeof msg.content === "string" ? msg.content : String(msg.content ?? ""),
         status: "completed",
       });
     }
   }
 
-  // A compacted orphan is still supplied history. Reject it even alongside a
-  // valid local pair, rather than silently deleting the caller's tool output.
-  const knownCallIds = new Set(
-    input
-      .filter((item: JsonRecord) => item.type === "function_call")
-      .map((item: JsonRecord) => item.call_id)
-  );
-  const hasPreviousResponse =
-    typeof root.previous_response_id === "string" && root.previous_response_id.trim() !== "";
-  for (const item of input as JsonRecord[]) {
-    if (
-      item.type === "function_call_output" &&
-      !knownCallIds.has(item.call_id) &&
-      !hasPreviousResponse
-    ) {
-      throw createToolHistoryError(
-        "Tool output does not match a local tool call",
-        "invalid_tool_call_output"
-      );
-    }
-  }
-  // Preserve pending calls without inventing completion. The handler validates
-  // complete history after continuation policy has selected the actual wire body.
-  result.input = input;
+  result.input = toolHistory.finishInput(input, root);
 
   // If no system message, keep empty instructions
   if (!hasSystemMessage) {

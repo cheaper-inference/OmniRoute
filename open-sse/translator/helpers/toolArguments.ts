@@ -7,9 +7,11 @@
 //   - `undefined` / `null` / `""`, an unparseable string (partial streamed fragment,
 //     freeform text) or an unserializable value collapse to `"{}"`.
 //
-// This permissive helper also repairs streamed fragments for existing callers.
-// It is not historical request admission: replacing supplied arguments loses
-// execution history. Use the historical helper below at the Responses boundary.
+// Clients replay zero-argument calls with the field missing/null/"" and Codex replays
+// raw streamed fragments verbatim; strict upstreams reject the whole request with a 400
+// ("missing required field arguments" / "function.arguments must be valid JSON"). The
+// call already executed, so dropping an unparseable payload only loses cosmetic history.
+// Strict tool-history mode replaces this repair with the historical helper below.
 /** Construct a 400 admission error preserving the caller-provided message and classification. */
 export function createToolHistoryError(message: string, errorType: string) {
   return Object.assign(new Error(message), { statusCode: 400, errorType });
@@ -34,7 +36,7 @@ export function coerceToolCallArguments(value: unknown): string {
   }
 }
 
-// Historical zero-argument compatibility is intentional: missing/null/empty values
+// Strict tool-history mode only. Historical zero-argument compatibility is intentional: missing/null/empty values
 // become "{}", and serializable nonstrings are encoded once. Valid JSON strings,
 // including scalars and arrays, retain their exact bytes. Supplied malformed or
 // unserializable values must never be rewritten as a successful empty argument set.

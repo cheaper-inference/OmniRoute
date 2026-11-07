@@ -4,7 +4,7 @@ import type {
 } from "../utils/providerHttpAttempts.ts";
 import { finalizeTranslatedRequest } from "./chatCore/translatedRequestFinalize.ts";
 import { isPassiveCodex } from "../services/tokenRefresh/passiveCodex.ts";
-import { validateResponsesToolHistory } from "../translator/helpers/responsesToolHistory.ts";
+import { enforceResponsesToolHistory } from "../translator/helpers/responsesToolHistory.ts";
 import {
   injectMemoryAndSkills,
   mergeInjectedFallbackOwnerNames,
@@ -2221,7 +2221,7 @@ async function handleChatCoreInner({
 
   try {
     if (sourceFormat === FORMATS.OPENAI_RESPONSES) {
-      validateResponsesToolHistory(body as Record<string, unknown>);
+      enforceResponsesToolHistory(body as Record<string, unknown>);
     }
     if (nativeResponsesPassthrough) {
       translatedBody = stampNativeResponsesPassthroughBody(

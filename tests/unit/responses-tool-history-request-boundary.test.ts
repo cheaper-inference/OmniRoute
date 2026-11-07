@@ -63,8 +63,18 @@ async function postContinuation(stream: boolean) {
   return { response, text, upstreamAttempts, wireBody, input };
 }
 
-test.beforeEach(async () => resetStorage());
-test.after(async () => harness.cleanup());
+const strictFlag = "OMNIROUTE_RESPONSES_STRICT_TOOL_HISTORY";
+const originalStrictFlag = process.env[strictFlag];
+
+test.beforeEach(async () => {
+  process.env[strictFlag] = "true";
+  await resetStorage();
+});
+test.after(async () => {
+  if (originalStrictFlag === undefined) delete process.env[strictFlag];
+  else process.env[strictFlag] = originalStrictFlag;
+  await harness.cleanup();
+});
 
 for (const stream of [false, true]) {
   test(`malformed historical arguments fail locally for stream=${stream}`, async () => {
@@ -354,5 +364,60 @@ for (const stream of [false, true]) {
         "  exact output \n "
       );
     }
+  });
+}
+
+/** Dispatch native history with the strict flag off and capture the upstream body. */
+async function postRepaired(input: unknown[], stream: boolean) {
+  delete process.env[strictFlag];
+  await seedConnection("codex", {
+    apiKey: "synthetic-repair-key",
+    providerSpecificData: { planType: "plus" },
+  });
+  let wire: Record<string, unknown> | undefined;
+  globalThis.fetch = async (_url, init) => {
+    wire = JSON.parse(String(init?.body));
+    return new Response(
+      'data: {"type":"response.completed","response":{"id":"resp_ok","object":"response","status":"completed","output":[]}}\n\ndata: [DONE]\n\n',
+      { status: 200, headers: { "content-type": "text/event-stream" } }
+    );
+  };
+  const response = await handleChat(
+    buildRequest({
+      url: "http://localhost/v1/responses",
+      body: { model: "codex/gpt-5.6-sol", input, stream },
+    })
+  );
+  await response.text();
+  return { status: response.status, input: wire?.input as Array<Record<string, unknown>> };
+}
+
+for (const stream of [false, true]) {
+  test(`default mode repairs an unanswered call and still dispatches stream=${stream}`, async () => {
+    const call = { type: "function_call", call_id: "call_pending", name: "probe", arguments: "{}" };
+    const result = await postRepaired([call], stream);
+    assert.equal(result.status, 200);
+    assert.deepEqual(
+      result.input.map((item) => [item.type, item.call_id, item.output]),
+      [
+        ["function_call", "call_pending", undefined],
+        ["function_call_output", "call_pending", ""],
+      ]
+    );
+  });
+
+  test(`default mode drops an orphan output and still dispatches stream=${stream}`, async () => {
+    const result = await postRepaired(
+      [
+        { type: "message", role: "user", content: [{ type: "input_text", text: "go" }] },
+        { type: "function_call_output", call_id: "call_orphan", output: "stale" },
+      ],
+      stream
+    );
+    assert.equal(result.status, 200);
+    assert.equal(
+      result.input.some((item) => item.call_id === "call_orphan"),
+      false
+    );
   });
 }

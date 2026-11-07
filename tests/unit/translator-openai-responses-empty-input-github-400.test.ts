@@ -51,28 +51,19 @@ test("chat→Responses: empty messages array still ships continuity", () => {
 });
 
 test("chat→Responses: orphan-only tool results that filter to empty still ship continuity", () => {
-  // Historical identity retained: orphan history is now explicitly refused, not
-  // filtered into a fabricated continuity placeholder.
-  assert.throws(
-    () =>
-      openaiToOpenAIResponsesRequest(
-        "gpt-5.5",
-        {
-          messages: [
-            { role: "system", content: "Rules" },
-            { role: "tool", tool_call_id: "call_orphan_x", content: "stale" },
-          ],
-        },
-        true,
-        null
-      ),
-    (error: unknown) => {
-      const invalid = error as Error & { statusCode?: number };
-      assert.equal(invalid.statusCode, 400);
-      assert.match(invalid.message, /does not match a local tool call/i);
-      return true;
-    }
-  );
+  const result = openaiToOpenAIResponsesRequest(
+    "gpt-5.5",
+    {
+      messages: [
+        { role: "system", content: "Rules" },
+        { role: "tool", tool_call_id: "call_orphan_x", content: "stale" },
+      ],
+    },
+    true,
+    null
+  ) as Record<string, unknown>;
+
+  assert.ok(hasContinuity(result), "orphan-filtered empty input must not ship bare input:[]");
 });
 
 test("chat→Responses: empty input + previous_response_id keeps the id (no placeholder needed)", () => {

@@ -12,6 +12,15 @@ type ToolItem = {
 const CALL_TYPES = new Set<ToolCallType>(["function_call", "custom_tool_call"]);
 const OUTPUT_TYPES = new Set<ToolOutputType>(["function_call_output", "custom_tool_call_output"]);
 
+/**
+ * Whether inconsistent Responses tool history is rejected with a 400 instead of repaired.
+ * Off by default: the repairs (#15216) stay in place unless the operator opts in.
+ */
+export function isStrictResponsesToolHistoryEnabled(): boolean {
+  const raw = process.env.OMNIROUTE_RESPONSES_STRICT_TOOL_HISTORY?.trim().toLowerCase();
+  return raw === "true" || raw === "1";
+}
+
 /** Throw a tool-history admission error with the requested classification. */
 function invalid(message: string, errorType = "invalid_tool_call_output"): never {
   throw createToolHistoryError(message, errorType);
@@ -101,7 +110,7 @@ function requireOutputsMatchCalls(
   }
 }
 
-/** Validate a Responses input history before routing or executor repair can alter it. */
+/** Validate a Responses input history, throwing a 400 on the first inconsistency. */
 export function validateResponsesToolHistory(body: Record<string, unknown>): void {
   if (!Array.isArray(body.input)) return;
 
@@ -112,4 +121,9 @@ export function validateResponsesToolHistory(body: Record<string, unknown>): voi
   for (const callId of calls.keys()) {
     if (!outputs.has(callId)) invalid("Historical tool call is missing its output");
   }
+}
+
+/** Apply the validator when strict mode is on; otherwise later stages repair the history. */
+export function enforceResponsesToolHistory(body: Record<string, unknown>): void {
+  if (isStrictResponsesToolHistoryEnabled()) validateResponsesToolHistory(body);
 }

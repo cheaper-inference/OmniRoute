@@ -55,17 +55,10 @@ test("openaiToOpenAIResponsesRequest: filters orphaned function_call_output", ()
       { role: "tool", tool_call_id: "call_valid_2", content: "files" },
     ],
   };
-  // Historical identity retained; silently filtering a supplied orphan is no
-  // longer permitted, even when an unrelated local pair is otherwise valid.
-  assert.throws(
-    () => openaiToOpenAIResponsesRequest("gpt-4", body, true, null),
-    (error: unknown) => {
-      const invalid = error as Error & { statusCode?: number };
-      assert.equal(invalid.statusCode, 400);
-      assert.match(invalid.message, /does not match a local tool call/i);
-      return true;
-    }
-  );
+  const result = openaiToOpenAIResponsesRequest("gpt-4", body, true, null);
+  const outputs = (result as any).input.filter((i) => i.type === "function_call_output");
+  assert.equal(outputs.length, 1, "should have exactly 1 function_call_output");
+  assert.equal(outputs[0].call_id, "call_valid_2");
 });
 
 test("openaiToOpenAIResponsesRequest: preserves all items when no orphans", () => {
