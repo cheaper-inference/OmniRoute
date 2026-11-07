@@ -13,6 +13,7 @@ import {
 import { encryptCredential } from "../encryption.mjs";
 import { openOmniRouteDb } from "../sqlite.mjs";
 import { t } from "../i18n.mjs";
+import { parsePositiveInt } from "../utils/positiveInteger.mjs";
 import { registerProviderCrud } from "./provider-crud.mjs";
 
 function publicConnection(connection) {
@@ -778,7 +779,7 @@ export function extendProvidersMetrics(providers) {
     .option("--period <p>", t("providers.metrics.period"), "24h")
     .option("--metric <m>", t("providers.metrics.metric"))
     .option("--sort-by <field>", t("providers.metrics.sort"))
-    .option("--limit <n>", t("providers.metrics.limit"), parseInt, 50)
+    .option("--limit <n>", t("providers.metrics.limit"), parsePositiveInt, 50)
     .option("--watch", t("providers.metrics.watch"))
     .option("--compare <list>", t("providers.metrics.compare"))
     .action(runProvidersMetrics);

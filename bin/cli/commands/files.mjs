@@ -4,6 +4,7 @@ import { createInterface } from "node:readline";
 import { apiFetch, getBaseUrl } from "../api.mjs";
 import { emit } from "../output.mjs";
 import { t } from "../i18n.mjs";
+import { parsePositiveInt } from "../utils/positiveInteger.mjs";
 
 function fmtTs(v) {
   if (!v) return "-";
@@ -49,7 +50,7 @@ export function registerFiles(program) {
   files
     .command("list")
     .option("--purpose <p>", t("files.list.purpose"))
-    .option("--limit <n>", t("files.list.limit"), parseInt, 100)
+    .option("--limit <n>", t("files.list.limit"), parsePositiveInt, 100)
     .action(async (opts, cmd) => {
       const params = new URLSearchParams({ limit: String(opts.limit) });
       if (opts.purpose) params.set("purpose", opts.purpose);

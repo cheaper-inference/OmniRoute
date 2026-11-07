@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] would {action}",
     "cancelled": "Cancelled.",
     "jsonOpt": "Output as JSON",
-    "yesOpt": "Skip confirmation prompt"
+    "yesOpt": "Skip confirmation prompt",
+    "positiveIntegerRequired": "Limit must be a positive integer."
   },
   "setup": {
     "title": "OmniRoute Setup",
