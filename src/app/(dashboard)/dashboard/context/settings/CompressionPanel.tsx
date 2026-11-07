@@ -730,7 +730,8 @@ export default function CompressionPanel() {
                     value={level}
                     onChange={(e) => setEngine(id, { level: e.target.value })}
                     disabled={!config.enabled || !engine.enabled || saving}
-                    selectClassName="ci-select-native--sm w-28 text-xs"
+                    nativeSize="sm"
+                    selectClassName="w-28 text-xs"
                   >
                     {levels.map((lvl) => (
                       <option key={lvl} value={lvl}>
@@ -785,7 +786,8 @@ export default function CompressionPanel() {
               <div className="flex shrink-0 items-center gap-2">
                 <Select
                   aria-label={styleLabel}
-                  selectClassName="ci-select-native--sm w-28 text-xs"
+                  nativeSize="sm"
+                  selectClassName="w-28 text-xs"
                   data-testid={`output-style-level-${id}`}
                   value={sel?.level ?? "full"}
                   onChange={(e) =>

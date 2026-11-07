@@ -1,3 +1,4 @@
+import { copyCodexRequestForMutation } from "./codex/requestCopy.ts";
 import { isResponsesTerminalLine, RESPONSES_TERMINAL_EVENT_TYPES } from "./opencodeMuseSpark.ts";
 import { newestChromeProfile } from "../utils/browserProfiles.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
@@ -52,9 +53,7 @@ import {
   buildSyntheticResponsesFailureId,
   buildSyntheticResponsesFailedEvent,
 } from "../utils/responsesSequence.ts";
-import { hasCodexSsePeekProgress } from "./codex/ssePeekProgress.ts";
-import * as overloadedOutput from "./codex/sseOverloadedOutput.ts";
-import * as modelUnavailable from "./codex/sseModelUnavailable.ts";
+import { inspectCodexSsePeek } from "./codex/ssePeekFailure.ts";
 import { normalizeCodexResponsesInput } from "../utils/responsesInputNormalization.ts";
 import * as prl from "../utils/providerRequestLogging.ts";
 import { createRequire } from "module";
@@ -73,7 +72,10 @@ import {
   isCodexCompactionWebReplay,
 } from "./codex/compactionReplay.ts";
 import { CODEX_ULTRA_ALIAS_MODELS, splitCodexReasoningSuffix } from "./codex/reasoningSuffix.ts";
-import { applyCodexReasoningSelection } from "./codex/reasoningPolicy.ts";
+import {
+  applyCodexReasoningSelection,
+  normalizeCodexSummaryStreamOptions,
+} from "./codex/reasoningPolicy.ts";
 import { repairMissingCodexToolCallOutputs } from "./codex/toolCallRepair.ts";
 import { recoverCodexReasoningReplayRejection } from "./codex/reasoningReplayRejection.ts";
 import { resolveAppServerConfig } from "./codex/appServerConfig.ts";
@@ -635,11 +637,6 @@ export function terminateCodexHttpStreamOnTerminal(response: Response): Response
 // signature is found, convert the response into a real 503 so account rotation
 // kicks in. Otherwise re-assemble the stream from the peeked prefix + the
 // remaining upstream body so the passthrough stays byte-identical.
-const CODEX_SSE_TRANSIENT_ERROR_PATTERNS = [
-  "selected model is at capacity",
-  "server_is_overloaded",
-  "service_unavailable_error",
-] as const;
 // A capacity/overloaded rejection is delivered as the very first SSE event, so a
 // small peek window is enough — this bounds how much of a legitimate response we
 // buffer before giving up and passing the stream through unchanged.
@@ -688,31 +685,30 @@ export async function peekCodexSseTransientError(
   const decoder = new TextDecoder();
   const chunks: Uint8Array[] = [];
   let text = "";
-  let matched: string | null = null;
+  let peekedBytes = 0;
+  let decision: ReturnType<typeof inspectCodexSsePeek> = null;
 
   try {
-    while (text.length < CODEX_SSE_PEEK_MAX_BYTES) {
+    while (peekedBytes < CODEX_SSE_PEEK_MAX_BYTES) {
       const { done, value, timedOut } = await readCodexPeekChunk(reader, timeoutMs);
       if (timedOut) {
         return { matched: null, message: null, replacementBody: null, timedOut: true };
       }
-      if (done) break;
-      if (!value) continue;
-      chunks.push(value);
-      text += decoder.decode(value, { stream: true });
-      const lower = text.toLowerCase();
-      const hit = CODEX_SSE_TRANSIENT_ERROR_PATTERNS.find((pattern) => lower.includes(pattern));
-      matched = hit ?? modelUnavailable.matchCodexSseModelUnavailable(text);
-      if (matched) break;
-      // Fake-200 overload delivered as output text (decolua/9router#3232).
-      const overloadStep = overloadedOutput.codexOverloadedOutputPeekStep(text);
-      if (overloadStep === "settled") break;
-      if (overloadStep === "wait") continue;
-      // Hand off actual text/reasoning/tool progress, but retain the early
-      // error window across lifecycle-only frames such as response.created.
-      if (hasCodexSsePeekProgress(text)) {
+      if (done) {
+        // Preserve the existing EOF-only model-unavailable/fake-output handling,
+        // but never inspect an unfinished JSON prefix as a failure declaration.
+        decision = inspectCodexSsePeek(text + decoder.decode(), true);
         break;
       }
+      if (!value) continue;
+      chunks.push(value);
+      // A single upstream chunk can exceed the peek budget. Retain its original
+      // bytes for passthrough, but do not inspect or decode beyond that budget.
+      const prefix = value.subarray(0, CODEX_SSE_PEEK_MAX_BYTES - peekedBytes);
+      peekedBytes += prefix.byteLength;
+      text += decoder.decode(prefix, { stream: true });
+      decision = inspectCodexSsePeek(text);
+      if (decision) break;
     }
   } catch (err) {
     console.warn(
@@ -722,18 +718,18 @@ export async function peekCodexSseTransientError(
     );
   }
 
-  matched ??=
-    modelUnavailable.matchCodexSseModelUnavailable(text, true) ??
-    overloadedOutput.matchCodexOverloadedOutput(text);
-  if (matched) {
+  if (decision?.kind === "failure") {
     try {
       await reader.cancel();
     } catch {
       // Upstream socket may already be closing; nothing to clean up.
     }
-    const message = overloadedOutput.extractCodexSseErrorMessage(text, matched);
-    const isModelUnavailable = modelUnavailable.isCodexSseModelUnavailableMatch(matched);
-    return { matched, message, replacementBody: null, modelUnavailable: isModelUnavailable };
+    return {
+      matched: decision.matched,
+      message: decision.message,
+      replacementBody: null,
+      modelUnavailable: decision.modelUnavailable === true,
+    };
   }
 
   // Re-assemble the stream: peeked prefix chunks, then continue draining the
@@ -1354,12 +1350,9 @@ export class CodexExecutor extends BaseExecutor {
     credentials: ProviderCredentials
   ) {
     void stream;
-    // Do not mutate the caller's payload in place. Combo quality checks and
-    // other post-execute paths still inspect the original request body.
-    const body: Record<string, unknown> =
-      bodyInput && typeof bodyInput === "object"
-        ? structuredClone(bodyInput as Record<string, unknown>)
-        : {};
+    // Preserve caller-owned inputs while avoiding a deep clone of large histories.
+    // normalizeCodexResponsesInput below makes fresh input items before mutation.
+    const body = copyCodexRequestForMutation(bodyInput);
 
     const nativeCodexPassthrough = body?._nativeCodexPassthrough === true;
     const isCompactRequest = isCompactResponsesEndpoint(credentials?.requestEndpointPath);
@@ -1378,6 +1371,7 @@ export class CodexExecutor extends BaseExecutor {
       delete body.include;
     } else {
       body.stream = true;
+      normalizeCodexSummaryStreamOptions(body);
     }
     delete body._nativeCodexPassthrough;
 
@@ -1603,6 +1597,7 @@ export class CodexExecutor extends BaseExecutor {
       "tools",
       "tool_choice",
       "stream",
+      "stream_options",
       "store",
       "reasoning",
       "service_tier",

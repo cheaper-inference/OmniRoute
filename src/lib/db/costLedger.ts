@@ -1,3 +1,4 @@
+import { logicalCallSql } from "./logicalCallSql";
 /**
  * db/costLedger.ts — Per-request cost ledger (RIC-741 / M3 D2).
  *
@@ -300,7 +301,7 @@ export function getCostBySessionTag(sessionTag: string): RunCostRow[] {
               r.amount_usd, r.request_id, r.timestamp
        FROM call_logs c
        JOIN request_cost_ledger r ON r.request_id = c.correlation_id
-       WHERE c.session_tag = ?
+       WHERE ${logicalCallSql("c")} AND c.session_tag = ?
        ORDER BY r.timestamp DESC`
     )
     .all(sessionTag) as unknown as Array<Record<string, unknown>>;
