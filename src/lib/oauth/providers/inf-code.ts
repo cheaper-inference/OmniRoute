@@ -1,3 +1,4 @@
+import { infCodeJwtExpiresIn } from "@omniroute/open-sse/services/tokenRefresh/providers/infcode.ts";
 import { INF_CODE_CONFIG } from "../constants/oauth";
 
 /**
@@ -75,7 +76,9 @@ export const infCode = {
     return {
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
-      expiresIn: tokens.expires_in,
+      // The exchange answers with only { access_token, refresh_token }, like the
+      // refresh endpoint, so the expiry comes from the access token's exp claim.
+      expiresIn: tokens.expires_in ?? infCodeJwtExpiresIn(tokens.access_token),
       email,
       name,
       providerSpecificData: {

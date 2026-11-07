@@ -48,6 +48,7 @@ const {
   TRAE_CONFIG,
   XAI_OAUTH_CONFIG,
   OPENFERENCE_CONFIG,
+  INF_CODE_CONFIG,
   ZED_HOSTED_CONFIG,
   MUSE_CODE_CONFIG,
 } = oauthModule;
@@ -82,6 +83,7 @@ const EXPECTED_PROVIDER_KEYS = [
   "grok-cli",
   "xai-oauth",
   "openference",
+  "inf-code",
   "codebuddy-cn",
   "freebuff",
   "codebuddy-intl",
@@ -120,6 +122,7 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   "grok-cli": GROK_BUILD_OAUTH_CONFIG,
   "xai-oauth": XAI_OAUTH_CONFIG,
   openference: OPENFERENCE_CONFIG,
+  "inf-code": INF_CODE_CONFIG,
   "codebuddy-cn": CODEBUDDY_CN_CONFIG,
   freebuff: FREEBUFF_CONFIG,
   "codebuddy-intl": CODEBUDDY_INTL_CONFIG,

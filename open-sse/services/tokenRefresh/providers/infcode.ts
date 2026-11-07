@@ -1,4 +1,3 @@
-// @ts-nocheck
 // InfCode (Token Infinity) OAuth token refresh.
 //
 // Verified live contract (2026-11-02, Tokfinity.infcode v2.8.0):
@@ -13,7 +12,7 @@
 // token is consumed and a new one issued on every refresh.
 import { OAUTH_ENDPOINTS } from "../../../config/constants.ts";
 import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
-import { extractOAuthErrorCode } from "../shared.ts";
+import { extractOAuthErrorCode, type RefreshLogger } from "../shared.ts";
 
 /**
  * Remaining lifetime (seconds) of an InfCode access token, read from the JWT
@@ -66,7 +65,11 @@ function normalizeExpiresIn(value: unknown): number | undefined {
 /**
  * Specialized refresh for InfCode OAuth tokens.
  */
-export async function refreshInfCodeToken(refreshToken, log, proxyConfig: unknown = null) {
+export async function refreshInfCodeToken(
+  refreshToken: string,
+  log?: RefreshLogger,
+  proxyConfig: unknown = null
+) {
   const endpoint = OAUTH_ENDPOINTS.infcode.token;
   if (!endpoint) {
     log?.warn?.("TOKEN_REFRESH", "InfCode OAuth refresh skipped: token endpoint is not configured");
@@ -131,7 +134,8 @@ export async function refreshInfCodeToken(refreshToken, log, proxyConfig: unknow
       expiresIn,
     };
   } catch (error) {
-    log?.error?.("TOKEN_REFRESH", `Network error refreshing InfCode token: ${error.message}`);
+    const message = error instanceof Error ? error.message : String(error);
+    log?.error?.("TOKEN_REFRESH", `Network error refreshing InfCode token: ${message}`);
     return null;
   }
 }

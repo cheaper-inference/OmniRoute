@@ -32,6 +32,20 @@ export function resolveInfCodeBase(): string {
   return DEFAULT_INF_CODE_BASE;
 }
 
+/** Resolve the login/refresh base, which is separate from the inference base. */
+function resolveInfCodeAuthBase(): string {
+  const fromEnv = process.env.INF_CODE_OAUTH_BASE_URL?.trim();
+  return fromEnv ? fromEnv.replace(/\/+$/, "") : DEFAULT_INF_CODE_BASE;
+}
+
+/** Refresh endpoint. INF_CODE_OAUTH_TOKEN_URL names the auth-code exchange, not this. */
+function resolveInfCodeRefreshUrl(): string {
+  return (
+    process.env.INF_CODE_OAUTH_REFRESH_URL?.trim() ||
+    resolveInfCodeAuthBase() + "/acode/v1/refresh_token"
+  );
+}
+
 /**
  * OpenAI-compatible inference endpoint under the chosen base.
  * Kept as a function so the env override is read lazily (registry is
@@ -57,14 +71,11 @@ export const inf_codeProvider: RegistryEntry = {
   oauth: {
     clientIdEnv: "INF_CODE_OAUTH_CLIENT_ID",
     clientIdDefault: resolvePublicCred("infcode_id"),
-    tokenUrl:
-      process.env.INF_CODE_OAUTH_TOKEN_URL?.trim() ||
-      resolveInfCodeBase() + "/acode/v1/refresh_token",
+    tokenUrl: resolveInfCodeRefreshUrl(),
     authUrl:
-      process.env.INF_CODE_OAUTH_AUTHORIZE_URL?.trim() || resolveInfCodeBase() + "/infcode/login",
-    refreshUrl:
-      process.env.INF_CODE_OAUTH_REFRESH_URL?.trim() ||
-      resolveInfCodeBase() + "/acode/v1/refresh_token",
+      process.env.INF_CODE_OAUTH_AUTHORIZE_URL?.trim() ||
+      resolveInfCodeAuthBase() + "/infcode/login",
+    refreshUrl: resolveInfCodeRefreshUrl(),
   },
   models: [
     // Static model catalog. The live gateway is auth-gated (401) so we seed
