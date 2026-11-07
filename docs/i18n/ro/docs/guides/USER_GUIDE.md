@@ -629,11 +629,11 @@ Pentru referința completă a variabilelor de mediu, consultați [README](../REA
 ## 📊 Modele disponibile
 
 <details>
-<summary><b>Afișați toate modelele disponibile</b></summary>
+<summary><b>Vizualizați toate modelele disponibile</b></summary>
 
-> Lista de mai jos este selectată din `open-sse/config/providerRegistry.ts` pentru v3.8.0. Cataloagele cloud (Gemini, OpenRouter etc.) sunt sincronizate dinamic — pentru catalogul live complet, deschideți **Dashboard → Providers → [provider] → Available Models** sau apelați `GET /api/models/catalog`.
+> Lista de mai jos este preluată din `open-sse/config/providerRegistry.ts` pentru v3.8.0. Cataloagele cloud (Gemini, OpenRouter etc.) sunt sincronizate dinamic — pentru catalogul live complet, deschideți **Dashboard → Providers → [provider] → Available Models** sau apelați `GET /api/models/catalog`.
 >
-> Dacă lista încorporată a unui furnizor nu mai este actualizată, utilizați **Import from /models** pe pagina respectivă (sau activați **Auto-Sync**) pentru a prelua catalogul live din sursa upstream. Acest lucru a fost verificat în v3.8.50 pentru LLM7.io (`gemini-3.1-flash-lite`) și UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); accesul anonim Pollinations a rămas limitat de sursa upstream în timpul aceleiași serii de teste.
+> Dacă lista încorporată a unui furnizor a devenit neactualizată, folosiți **Import from /models** pe pagina respectivă (sau activați **Auto-Sync**) pentru a prelua catalogul live din sursa upstream. Acest lucru a fost verificat în v3.8.50 pentru LLM7.io (`gemini-3.1-flash-lite`) și UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); accesul anonim Pollinations a rămas limitat de sursa upstream în timpul aceleiași serii de teste.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -641,7 +641,7 @@ Pentru referința completă a variabilelor de mediu, consultați [README](../REA
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth GRATUIT: utilizați catalogul live afișat în **Dashboard → Providers → Kiro → Available Models**. Disponibilitatea depinde de cont și de plan.
+**Kiro (`kr/`)** — OAuth GRATUIT: folosiți catalogul live afișat în **Dashboard → Providers → Kiro → Available Models**. Disponibilitatea depinde de cont și de plan.
 
 **Qoder (`if/`)** — OAuth GRATUIT: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -651,35 +651,35 @@ Pentru referința completă a variabilelor de mediu, consultați [README](../REA
 
 **Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 USD/lună, tarif fix sau per utilizare: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — Cheie API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — cheie API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ultra-rapid: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — ultra-rapid: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok nativ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Găzduit în UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — găzduit în UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Cu căutare augmentată: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — cu căutare augmentată: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratuit), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratuit), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Inferență rapidă: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — inferență rapidă: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — La scară de plăcuță: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — la scară de plachetă: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Axat pe RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — axat pe RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Pentru companii: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — pentru companii: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sincronizat live pentru fiecare cheie API de la Google — fără listă statică. Conectați o cheie în **Dashboard → Providers**, apoi utilizați **Available Models** pentru a importa catalogul actual (de exemplu, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: sincronizat live pentru fiecare cheie API de la Google — nu există o listă statică. Conectați o cheie în **Dashboard → Providers**, apoi folosiți **Available Models** pentru a importa catalogul actual (de exemplu, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Alți furnizori compatibili** (selectați): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (prin `aws-bedrock`), `azure-ai`, `openrouter` (catalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Fiecare își menține propria listă de modele în `providerRegistry.ts` și poate fi sincronizat automat atunci când furnizorul expune un endpoint `/models`.
+**Alți furnizori compatibili** (selectați): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (prin `aws-bedrock`), `azure-ai`, `openrouter` (catalog redirecționat), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Fiecare își menține propria listă de modele în `providerRegistry.ts` și poate fi sincronizat automat atunci când furnizorul expune un endpoint `/models`.
 
-**Notă privind ID-urile modelelor:** OmniRoute utilizează ID-uri native furnizorilor (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Unele ID-uri includ versiuni cu punct, deoarece acesta este formatul așteptat de API-ul upstream. Dacă un model nu este listat mai sus, rulați `omniroute models --search <term>` sau accesați `GET /api/models/catalog` pentru a confirma disponibilitatea.
+**Notă privind ID-urile modelelor:** OmniRoute folosește ID-uri native ale furnizorului (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Unele ID-uri includ versiuni cu puncte, deoarece acesta este formatul așteptat de API-ul upstream. Dacă un model nu este listat mai sus, rulați `omniroute models --search <term>` sau apelați `GET /api/models/catalog` pentru a confirma disponibilitatea.
 
 </details>
 

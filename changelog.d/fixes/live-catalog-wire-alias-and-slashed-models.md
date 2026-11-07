@@ -1,1 +1,1 @@
-- Accept live wire IDs declared by provider models during authoritative catalog reconciliation, while preserving slash-containing model IDs and recognizing only genuine provider prefixes.
+- **fix(models):** Reconcile legacy Antigravity Gemini 3.7 tier aliases against their shared live `-tiered` wire model while preserving existing provider-prefix and slash-ID checks.

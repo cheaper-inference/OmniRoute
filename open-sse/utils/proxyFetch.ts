@@ -14,6 +14,11 @@ import {
   proxyConfigToUrl,
   proxyUrlForLogs,
 } from "./proxyDispatcher.ts";
+import {
+  getGuardedDispatcher,
+  isConnectGuardRefusal,
+  type ConnectGuardMode,
+} from "./connectGuardDispatcher.ts";
 import { maybeReapDispatcherPool } from "./proxyDispatcherReap.ts";
 import tlsClient, { type TlsFetchOptions, guardTlsFirstByte } from "./tlsClient.ts";
 import { withUpstreamStatusCapture } from "./upstreamStatusCapture.ts";
@@ -26,10 +31,7 @@ import { sanitizeTransportError } from "./proxyTransportError.ts";
 import { isProxyReachable } from "@/lib/proxyHealth";
 import { isDirectBypassHost } from "./proxyDirectBypass.ts";
 import { noProxyMatch, resolveEnvProxyUrl } from "./proxyEnv.ts";
-import {
-  isControlPlaneProxyDirectFallbackEnabled,
-  isFeatureFlagEnabled,
-} from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 import {
   directFetchWithBoundedResponseStart,
   isDirectResponseStartTimeout,
@@ -317,7 +319,11 @@ export function queueWaitMsFromDispatch(
   return Math.max(0, Math.round(upstreamDispatchedAt - startTime));
 }
 
-type FetchWithDispatcherOptions = RequestInit & { dispatcher?: unknown };
+type FetchWithDispatcherOptions = RequestInit & {
+  dispatcher?: unknown;
+  /** Direct route only: validate the addresses of the lookup the connection itself makes. */
+  connectGuard?: ConnectGuardMode;
+};
 type FetchWithDispatcher = (
   input: RequestInfo | URL,
   init?: FetchWithDispatcherOptions
@@ -433,6 +439,53 @@ function isAmbiguousFailureReplaySafe(
     (method === "GET" || method === "HEAD" || method === "OPTIONS") &&
     !requestHasNonReplayableBody(input, options)
   );
+}
+
+// Transport errors raised while still connecting: no request byte left this host, so a resend
+// cannot deliver the request twice, whatever the method. ETIMEDOUT stays out because it can also
+// fire on an established socket after the body was written.
+const PRE_SEND_ERROR_CODES = new Set([
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "ENETUNREACH",
+  "UND_ERR_CONNECT_TIMEOUT",
+]);
+
+function isPreSendConnectionError(error: unknown): boolean {
+  let current = error;
+  for (let depth = 0; depth < 4 && current && typeof current === "object"; depth++) {
+    const { code, cause } = current as { code?: unknown; cause?: unknown };
+    if (typeof code === "string" && PRE_SEND_ERROR_CODES.has(code)) return true;
+    current = cause;
+  }
+  return false;
+}
+
+function isStrictPostReplayEnabled(): boolean {
+  try {
+    return isRegisteredFeatureFlagEnabled("PROXY_STRICT_POST_REPLAY_ENABLED");
+  } catch {
+    // no-effect: an unreadable flag store keeps the legacy resend policy
+    return false;
+  }
+}
+
+/**
+ * Whether this transport error allows another delivery attempt (fresh socket, proxy fallback or
+ * native fallback). A consumed body can never be resent. With PROXY_STRICT_POST_REPLAY_ENABLED on
+ * (default off), a non-idempotent request also needs proof that nothing was sent: a socket error
+ * after the write can mean the upstream accepted the request, and a resend generates and bills it
+ * twice. Off, a replayable body is resent, which is what recovers a stale pooled socket (#4252).
+ */
+function canResendAfterTransportError(
+  input: RequestInfo | URL,
+  options: FetchWithDispatcherOptions,
+  error: unknown
+): boolean {
+  if (requestHasNonReplayableBody(input, options)) return false;
+  if (!isStrictPostReplayEnabled()) return true;
+  return isAmbiguousFailureReplaySafe(input, options) || isPreSendConnectionError(error);
 }
 
 function getEffectiveSignal(
@@ -580,7 +633,8 @@ export async function runWithProxyContext(
   // The caller must opt in, and the runtime feature flag must also be enabled.
   // This fallback changes egress IP, so upgrades must not silently turn it on.
   const directFallbackOnUnreachable =
-    opts?.directFallbackOnUnreachable === true && isControlPlaneProxyDirectFallbackEnabled();
+    opts?.directFallbackOnUnreachable === true &&
+    isRegisteredFeatureFlagEnabled("OMNIROUTE_CONTROL_PLANE_PROXY_DIRECT_FALLBACK");
   // Keep an explicit direct sentinel so resolveProxyForRequest cannot re-read
   // HTTPS_PROXY/HTTP_PROXY after the control-plane route decision.
   const runDirect = () => proxyContext.run(DIRECT_PROXY_CONTEXT, fn);
@@ -746,6 +800,11 @@ async function patchedFetchUnrecorded(
   options: FetchWithDispatcherOptions = {},
   deps: ProxyFetchDeps = {}
 ) {
+  const connectGuard = options?.connectGuard;
+  if (connectGuard) {
+    options = { ...options };
+    delete options.connectGuard;
+  }
   // Drop invisible characters (ZWSP, BOM, stray controls) a pasted key can carry;
   // undici would otherwise reject every request. Clean headers keep the same object.
   const cleanHeaders = options?.headers ? sanitizeHeaderValues(options.headers) : undefined;
@@ -875,8 +934,9 @@ async function patchedFetchUnrecorded(
           input,
           {
             ...directOptions,
-            dispatcher:
-              attempt === 0
+            dispatcher: connectGuard
+              ? getGuardedDispatcher(connectGuard)
+              : attempt === 0
                 ? getDefaultDispatcher(hostnameForDispatcher)
                 : getRetryDispatcher(hostnameForDispatcher),
           },
@@ -885,6 +945,7 @@ async function patchedFetchUnrecorded(
         );
       } catch (dispatcherError) {
         if (isCallerAbort(dispatcherError, directOptions.signal)) throw dispatcherError;
+        if (isConnectGuardRefusal(dispatcherError)) throw dispatcherError;
         if (isDirectResponseStartTimeout(dispatcherError)) {
           if (attempt === 0 && maxAttempts > 1 && canReplayResponseStartTimeout) {
             console.warn(
@@ -903,6 +964,8 @@ async function patchedFetchUnrecorded(
           );
           throw dispatcherError;
         }
+        // Read before tagging: the tag overwrites the transport code the policy reads.
+        const canResend = canResendAfterTransportError(input, options, dispatcherError);
         // Retry/fallback only for connection errors, never HTTP errors.
         tagProxyUnreachable(dispatcherError);
         const errCode = (dispatcherError as { code?: unknown })?.code;
@@ -919,31 +982,36 @@ async function patchedFetchUnrecorded(
           (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
           msg.includes("UND_ERR")
         ) {
-          if (attempt === 0 && maxAttempts > 1) {
+          if (attempt === 0 && canResend) {
             // Retry after a short fixed backoff on a fresh socket.
             lastDispatcherError = dispatcherError;
             await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS));
             continue;
           }
-          if (hasNonReplayableBody) {
+          if (!canResend) {
+            const reason = hasNonReplayableBody
+              ? "non-replayable request body"
+              : "request may already have been delivered";
             const detail = describeFallbackFailure(
               describeFetchCause(dispatcherError),
-              "skipped: non-replayable request body"
+              `skipped: ${reason}`
             );
-            console.warn(
-              `[ProxyFetch] skipping native fetch fallback for non-replayable body: ${detail}`
-            );
+            console.warn(`[ProxyFetch] skipping native fetch fallback, ${reason}: ${detail}`);
             if (dispatcherError instanceof Error) {
               (dispatcherError as Error & { proxyFetchDetail?: string }).proxyFetchDetail = detail;
             }
             throw tagProxyUnreachable(dispatcherError);
           }
 
+          // A proxy fallback or native fetch would resolve the name with no guard, so a guarded
+          // request ends here.
+          if (connectGuard) throw dispatcherError;
+
           // Exhausted attempts: try proxy fallback before native fetch.
           if (
             !tlsDirectFallback &&
             source === "direct" &&
-            isFeatureFlagEnabled("PROXY_AUTO_SELECT_ENABLED")
+            isRegisteredFeatureFlagEnabled("PROXY_AUTO_SELECT_ENABLED")
           ) {
             let targetHostname = "";
             try {
@@ -1087,7 +1155,12 @@ async function patchedFetchUnrecorded(
           msg.includes("ECONNREFUSED") ||
           (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
           msg.includes("UND_ERR");
-        if (attempt === 0 && maxRelayAttempts > 1 && isTransportFailure) {
+        if (
+          attempt === 0 &&
+          maxRelayAttempts > 1 &&
+          isTransportFailure &&
+          canResendAfterTransportError(input, options, relayError)
+        ) {
           lastRelayError = relayError;
           // #9158: fixed OMNIROUTE_RETRY_BACKOFF_MS backoff — the retry uses a
           // FRESH no-keep-alive RELAY_RETRY_AGENT (connections: 1, keepAliveTimeout:
@@ -1180,7 +1253,12 @@ async function patchedFetchUnrecorded(
         msg.includes("ECONNREFUSED") ||
         (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
         msg.includes("UND_ERR");
-      if (attempt === 0 && maxProxyAttempts > 1 && isTransportFailure) {
+      if (
+        attempt === 0 &&
+        maxProxyAttempts > 1 &&
+        isTransportFailure &&
+        canResendAfterTransportError(input, options, error)
+      ) {
         lastProxyError = error;
         // #9158: fixed OMNIROUTE_RETRY_BACKOFF_MS backoff — the retry uses a
         // fresh no-keep-alive dispatcher (getProxyRetryDispatcher), so the old
