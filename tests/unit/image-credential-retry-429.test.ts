@@ -16,6 +16,47 @@ interface MockImageResult {
   retryable?: boolean;
 }
 
+test("executeImageWithCredentialFallback rotates to sibling account on Google Flow quota exhausted (#14112)", async () => {
+  const attempts: string[] = [];
+  const conn1 = { connectionId: "conn-gf-1" };
+  const conn2 = { connectionId: "conn-gf-2" };
+
+  const selectNextCredentials = async (
+    _provider: string,
+    _model: string | null,
+    excluded: Set<string>
+  ) => {
+    if (excluded.has("conn-gf-1") && !excluded.has("conn-gf-2")) return conn2;
+    return null;
+  };
+
+  const { credentials, result } = await executeImageWithCredentialFallback({
+    provider: "googleflow-web",
+    requestedModel: "veo-3.1-fast",
+    credentials: conn1,
+    selectNextCredentials,
+    execute: async (creds) => {
+      attempts.push(creds.connectionId);
+      if (creds.connectionId === "conn-gf-1") {
+        return {
+          success: false,
+          status: 429,
+          error: "Google Flow quota exhausted (15 Veo credits remaining, 20 required for video generation)",
+        };
+      }
+      return {
+        success: true,
+        status: 200,
+        data: [{ url: "https://flow-content.google/video/abc" }],
+      };
+    },
+  });
+
+  assert.deepEqual(attempts, ["conn-gf-1", "conn-gf-2"]);
+  assert.equal(credentials.connectionId, "conn-gf-2");
+  assert.equal(result.success, true);
+});
+
 test("executeImageWithCredentialFallback rotates to sibling account on Antigravity's quota-exhausted 429 (#14112)", async () => {
   const account1: MockImageCredentials = {
     connectionId: "conn-antigravity-1",
