@@ -1,4 +1,5 @@
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
+import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import {
   getProviderConnectionById,
   getProviderConnections,
@@ -1037,7 +1038,8 @@ async function fetchLiveProviderLimitsWithOptions(
         connectionId,
         connection.provider,
         usage.quotas,
-        isRecord(usage.modelQuotas) ? usage.modelQuotas : {}
+        isRecord(usage.modelQuotas) ? usage.modelQuotas : {},
+        { complete: isCompleteUsageReading(usage) }
       );
     }
     connection = await syncExpiredStatusIfNeeded(connection, usage);
@@ -1178,7 +1180,8 @@ async function fetchLiveProviderLimitsWithOptions(
       connectionId,
       connection.provider,
       result.usage.quotas,
-      isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {}
+      isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {},
+      { complete: isCompleteUsageReading(result.usage) }
     );
   }
   connection = await syncExpiredStatusIfNeeded(connection, result.usage);

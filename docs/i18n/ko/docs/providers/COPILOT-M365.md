@@ -56,32 +56,37 @@ OmniRoute는 HAR에서 Chathub WebSocket URL을 검색하고 `access_token`과 `
 
 > **실제 HAR 내보내기 파일, 액세스 토큰 또는 새로 고침 토큰을 절대로 커밋하지 마세요.** 테스트 및 문서 값에는 항상 자리 표시자를 사용해야 합니다.
 
-## 토큰 수명 및 새로 고침
+## 토큰 수명 및 갱신
 
-`access_token`은 수명이 짧습니다(일반적으로 **약 75분**). 만료되면 공급자가 연결 오류를 보고하며 자격 증명을 다시 캡처해야 합니다.
+`access_token`은 수명이 짧습니다(일반적으로 **약 75분**). 사용할 수 있는 갱신
+토큰이 없으면 만료 후 자격 증명을 다시 캡처해야 합니다.
 
-### `refreshToken`을 사용한 자동 새로 고침
+### `refreshToken`을 사용한 자동 갱신
 
-수동으로 다시 캡처하지 않으려면 연결의 **Advanced Settings → providerSpecificData**에 Microsoft 새로 고침 토큰을 저장할 수 있습니다.
+Microsoft 365 공급자의 **연결 추가** 또는 **연결 편집** 대화 상자에서
+**고급 설정 → 갱신 토큰(선택 사항)**을 엽니다. `substrate.office.com/sydney`
+범위에 대한 Microsoft OAuth 갱신 토큰을 붙여 넣고 저장합니다. 입력 내용은 마스킹되며 저장된 토큰으로 미리 채워지지 않습니다. 편집할 때 비워 두면 기존 토큰이 유지되고,
+새 토큰을 붙여 넣으면 기존 토큰이 대체됩니다.
 
-| 필드           | 설명                                                                     |
-| -------------- | ------------------------------------------------------------------------ |
-| `refreshToken` | `substrate.office.com/sydney` 범위에 대한 Microsoft OAuth 새로 고침 토큰 |
-| `tier`         | `individual`(기본값), `edu` 또는 `enterprise`                            |
+`substrate.office.com/sydney` 범위로 지정된 Microsoft 디바이스 코드 또는 인증 코드 흐름에서
+갱신 토큰을 가져옵니다. 대시보드에서는 갱신 토큰을 가져오지 않습니다.
+갱신 토큰이 구성되어 있으면 OmniRoute는 요청 전에 `access_token`을 확인하고
+갱신이 필요한 경우에만 갱신합니다. 갱신에 성공하면 교체된 갱신 토큰도 저장되므로,
+갱신 토큰이 유효한 동안 수동으로 다시 캡처할 필요가 없습니다.
 
-`substrate.office.com/sydney` 범위로 설정된 Microsoft 디바이스 코드 또는 인증 코드 흐름에서 새로 고침 토큰을 가져옵니다. `refreshToken`이 설정되어 있으면 OmniRoute가 각 요청 전에 `access_token`을 미리 새로 고치므로 약 75분마다 만료된 후 다시 캡처할 필요가 없습니다.
-
-`refreshToken`이 설정되어 있지 않으면 만료될 때마다 WebSocket 자격 증명을 수동으로 다시 캡처해야 합니다.
+`refreshToken`이 설정되지 않은 경우 만료될 때마다 WebSocket 자격 증명을
+수동으로 다시 캡처해야 합니다.
 
 ### 계층 선택
 
-| 계층         | 별칭       | 서비스                |
+| 계층         | 별칭       | 사용 영역             |
 | ------------ | ---------- | --------------------- |
 | `individual` | _(기본값)_ | 소비자용 M365 Copilot |
 | `edu`        | `included` | 교육용 M365 Copilot   |
 | `enterprise` | `work`     | 업무용 M365 Copilot   |
 
-**Advanced Settings → providerSpecificData → tier**에서 계층을 설정합니다. 계층은 BizChat 라우팅 및 모델 액세스에 영향을 줍니다.
+**고급 설정 → Copilot 계층**에서 계층을 설정합니다. 계층은
+BizChat 라우팅 및 모델 액세스에 영향을 줍니다.
 
 ## 보안 모델
 
@@ -94,23 +99,23 @@ OmniRoute는 HAR에서 Chathub WebSocket URL을 검색하고 `access_token`과 `
 
 ### 인증이 즉시 실패하는 경우
 
-- XHR/Fetch 요청이 아니라 **WebSocket URL**에서 복사했는지 확인하세요. 자격 증명은 `Authorization: Bearer` 헤더가 아니라 Chathub WebSocket 연결의 `access_token` 쿼리 매개변수에 있습니다.
+- XHR/Fetch 요청이 아닌 **WebSocket URL**에서 복사했는지 확인하세요. 자격 증명은 `Authorization: Bearer` 헤더가 아니라 Chathub WebSocket 연결의 `access_token` 쿼리 매개변수에 있습니다.
 - `chathubPath`에 URL 경로의 전체 `<oid>@<tenant>` 세그먼트가 포함되어 있는지 확인하세요.
 
-### 토큰이 약 75분 후 만료되는 경우
+### 약 75분 후 토큰이 만료되는 경우
 
-이는 정상적인 동작입니다. `refreshToken`이 없으면 액세스 토큰의 수명이 짧습니다. 다음 중 하나를 수행하세요.
+이는 예상된 동작입니다. `refreshToken`이 없으면 액세스 토큰의 수명이 짧습니다. 다음 중 하나를 수행하세요.
 
-- DevTools에서 자격 증명을 다시 캡처하거나
-- 자동 갱신을 위해 고급 설정에서 `refreshToken`을 구성하세요.
+- DevTools에서 자격 증명을 다시 캡처하거나,
+- 자동 새로 고침을 위해 연결 추가 또는 편집 대화 상자에서 **고급 설정 → Refresh token (optional)**을 구성하세요.
 
 ### 연결 테스트는 통과하지만 채팅에서 401이 반환되는 경우
 
-검증과 첫 번째 요청 사이에 토큰이 만료되었을 수 있습니다. 새로운 자격 증명을 다시 캡처하세요.
+검증 후 첫 번째 요청을 보내기 전에 토큰이 만료되었을 수 있습니다. 새 자격 증명을 다시 캡처하세요.
 
 ### 공급자 목록에 Copilot이 표시되지 않는 경우
 
-**대시보드 → 공급자**에서 `copilot-m365-web`이 활성화되어 있는지 확인하세요. 일부 티어에서는 이 공급자가 기본적으로 숨겨져 있을 수 있습니다.
+**대시보드 → 공급자**에서 `copilot-m365-web`이 활성화되어 있는지 확인하세요. 일부 요금제에서는 기본적으로 공급자가 숨겨져 있을 수 있습니다.
 
 ## 참고 자료
 
