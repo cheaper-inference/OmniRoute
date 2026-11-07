@@ -45,14 +45,9 @@ function formatDate(value: string): string {
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString();
 }
 
-/**
- * Providers-page button for the "New models" inbox: models that a model sync found
- * for the first time. Shows an unread badge and opens a modal grouped by provider.
- */
-export default function NewModelsButton() {
-  const t = useTranslations("providers");
-  const tc = useTranslations("common");
-  const [open, setOpen] = useState(false);
+type Translator = ReturnType<typeof useTranslations>;
+
+function useNewModelsInbox() {
   const [unseenCount, setUnseenCount] = useState(0);
   const [groups, setGroups] = useState<NewModelsInboxGroup[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,11 +81,6 @@ export default function NewModelsButton() {
     };
   }, []);
 
-  const handleOpen = () => {
-    setOpen(true);
-    void load();
-  };
-
   const markRead = async (body: Record<string, unknown>) => {
     try {
       await acknowledge(body);
@@ -101,8 +91,118 @@ export default function NewModelsButton() {
     await load();
   };
 
+  return { unseenCount, groups, loading, error, load, markRead };
+}
+
+function NewModelsGroupCard({
+  group,
+  t,
+  onMarkRead,
+}: {
+  group: NewModelsInboxGroup;
+  t: Translator;
+  onMarkRead: (group: NewModelsInboxGroup) => void;
+}) {
+  return (
+    <div className="border border-border rounded-lg overflow-hidden">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 bg-bg-subtle border-b border-border">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-sm font-medium text-text-main truncate">{group.providerName}</span>
+          <span className="text-[10px] text-text-muted rounded-full px-1.5 py-0.5 border border-border">
+            {group.models.length}
+          </span>
+        </div>
+        <Button size="sm" variant="ghost" onClick={() => onMarkRead(group)}>
+          {t("newModelsMarkProviderRead")}
+        </Button>
+      </div>
+      <div className="divide-y divide-border">
+        {group.models.map((model) => (
+          <div key={model.modelId} className="flex items-center gap-2 px-3 py-1.5">
+            {model.isFree && (
+              <Badge variant="success" size="sm" className="shrink-0">
+                {t("freeBadge")}
+              </Badge>
+            )}
+            <code className="text-xs font-mono text-text-muted truncate flex-1">
+              {model.modelId}
+            </code>
+            <span className="text-[10px] text-text-muted shrink-0">
+              {t("newModelsFirstSeen", { date: formatDate(model.firstSeenAt) })}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function NewModelsModalBody({
+  groups,
+  loading,
+  error,
+  t,
+  tc,
+  onRetry,
+  onMarkProviderRead,
+}: {
+  groups: NewModelsInboxGroup[];
+  loading: boolean;
+  error: boolean;
+  t: Translator;
+  tc: Translator;
+  onRetry: () => void;
+  onMarkProviderRead: (group: NewModelsInboxGroup) => void;
+}) {
+  if (loading && groups.length === 0) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-6 text-sm text-text-muted">
+        <Spinner size="sm" decorative />
+        {tc("loading")}
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-6 text-sm text-error">
+        <span>{t("newModelsLoadError")}</span>
+        <Button size="sm" variant="secondary" icon="refresh" onClick={onRetry}>
+          {tc("retry")}
+        </Button>
+      </div>
+    );
+  }
+  if (groups.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-8 text-sm text-text-muted text-center">
+        <Icon name="new_releases" size={28} />
+        <span className="font-medium text-text-main">{t("newModelsEmpty")}</span>
+        <span className="text-xs">{t("newModelsEmptyDesc")}</span>
+      </div>
+    );
+  }
+  return groups.map((group) => (
+    <NewModelsGroupCard key={group.provider} group={group} t={t} onMarkRead={onMarkProviderRead} />
+  ));
+}
+
+/**
+ * Providers-page button for the "New models" inbox: models that a model sync found
+ * for the first time. Shows an unread badge and opens a modal grouped by provider.
+ */
+export default function NewModelsButton() {
+  const t = useTranslations("providers");
+  const tc = useTranslations("common");
+  const [open, setOpen] = useState(false);
+  const { unseenCount, groups, loading, error, load, markRead } = useNewModelsInbox();
+
+  const handleOpen = () => {
+    setOpen(true);
+    void load();
+  };
+
   const markProviderRead = (group: NewModelsInboxGroup) =>
-    markRead({
+    void markRead({
       models: group.models.map((m) => ({ provider: group.provider, modelId: m.modelId })),
     });
 
@@ -152,60 +252,15 @@ export default function NewModelsButton() {
         }
       >
         <div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
-          {loading && groups.length === 0 ? (
-            <div className="flex items-center justify-center gap-2 py-6 text-sm text-text-muted">
-              <Spinner size="sm" decorative />
-              {tc("loading")}
-            </div>
-          ) : error ? (
-            <div className="flex flex-col items-center gap-2 py-6 text-sm text-error">
-              <span>{t("newModelsLoadError")}</span>
-              <Button size="sm" variant="secondary" icon="refresh" onClick={() => void load()}>
-                {tc("retry")}
-              </Button>
-            </div>
-          ) : groups.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-8 text-sm text-text-muted text-center">
-              <Icon name="new_releases" size={28} />
-              <span className="font-medium text-text-main">{t("newModelsEmpty")}</span>
-              <span className="text-xs">{t("newModelsEmptyDesc")}</span>
-            </div>
-          ) : (
-            groups.map((group) => (
-              <div key={group.provider} className="border border-border rounded-lg overflow-hidden">
-                <div className="flex items-center justify-between gap-2 px-3 py-2 bg-bg-subtle border-b border-border">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-sm font-medium text-text-main truncate">
-                      {group.providerName}
-                    </span>
-                    <span className="text-[10px] text-text-muted rounded-full px-1.5 py-0.5 border border-border">
-                      {group.models.length}
-                    </span>
-                  </div>
-                  <Button size="sm" variant="ghost" onClick={() => void markProviderRead(group)}>
-                    {t("newModelsMarkProviderRead")}
-                  </Button>
-                </div>
-                <div className="divide-y divide-border">
-                  {group.models.map((model) => (
-                    <div key={model.modelId} className="flex items-center gap-2 px-3 py-1.5">
-                      {model.isFree && (
-                        <Badge variant="success" size="sm" className="shrink-0">
-                          {t("freeBadge")}
-                        </Badge>
-                      )}
-                      <code className="text-xs font-mono text-text-muted truncate flex-1">
-                        {model.modelId}
-                      </code>
-                      <span className="text-[10px] text-text-muted shrink-0">
-                        {t("newModelsFirstSeen", { date: formatDate(model.firstSeenAt) })}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))
-          )}
+          <NewModelsModalBody
+            groups={groups}
+            loading={loading}
+            error={error}
+            t={t}
+            tc={tc}
+            onRetry={() => void load()}
+            onMarkProviderRead={markProviderRead}
+          />
         </div>
       </Modal>
     </>

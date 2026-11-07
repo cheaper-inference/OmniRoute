@@ -129,6 +129,32 @@ describe("NewModelsButton", () => {
     expect(text.match(/freeBadge/g)).toHaveLength(1);
   });
 
+  it("shows the error over loaded groups when mark-read fails, and recovers on retry", async () => {
+    const container = await renderButton();
+    await click(container.querySelector('[data-testid="new-models-button"]') as HTMLElement);
+    expect(document.body.textContent).toContain("groq/three");
+
+    vi.mocked(fetch).mockImplementationOnce(async () => new Response("{}", { status: 500 }));
+    await click(button("newModelsMarkAllRead"));
+
+    expect(document.body.textContent).toContain("newModelsLoadError");
+    expect(document.body.textContent).not.toContain("groq/three");
+
+    await click(button("retry"));
+
+    expect(document.body.textContent).not.toContain("newModelsLoadError");
+    expect(document.body.textContent).toContain("groq/three");
+  });
+
+  it("shows the load error when the inbox request fails on open", async () => {
+    const container = await renderButton();
+    vi.mocked(fetch).mockImplementationOnce(async () => new Response("{}", { status: 500 }));
+    await click(container.querySelector('[data-testid="new-models-button"]') as HTMLElement);
+
+    expect(document.body.textContent).toContain("newModelsLoadError");
+    expect(document.body.textContent).not.toContain("newModelsEmpty");
+  });
+
   it("marks everything read with { all: true } and clears the badge", async () => {
     const container = await renderButton();
     await click(container.querySelector('[data-testid="new-models-button"]') as HTMLElement);
