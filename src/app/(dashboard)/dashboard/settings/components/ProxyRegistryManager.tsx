@@ -29,6 +29,7 @@ import {
   Textarea,
 } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useProxyBatchOperations } from "./useProxyBatchOperations";
 import { ProxyStatusBadge } from "./ProxyStatusBadge";
 import { ProxyHealthCell } from "./ProxyHealthCell";
@@ -70,6 +71,7 @@ export default function ProxyRegistryManager({
   onOpenCloudflareRelay,
 }: ProxyRegistryManagerProps = {}) {
   const t = useTranslations("proxyRegistry");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const settingsT = useTranslations("settings");
   const [items, setItems] = useState<ProxyItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -354,7 +356,7 @@ export default function ProxyRegistryManager({
       const payload = await res.json().catch(() => ({}));
       const inUse = res.status === 409;
       if (inUse) {
-        const ok = window.confirm(t("errorForceDeleteConfirm"));
+        const ok = await requestConfirm(t("errorForceDeleteConfirm"));
         if (!ok) return;
 
         const forceRes = await fetch(`/api/settings/proxies?id=${encodeURIComponent(id)}&force=1`, {
@@ -1375,6 +1377,7 @@ export default function ProxyRegistryManager({
           </div>
         </div>
       </Modal>
+      {confirmDialog}
     </>
   );
 }

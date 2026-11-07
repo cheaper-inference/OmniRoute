@@ -62,122 +62,205 @@ OmniRoute 에는 서로 다르지만 관련된 세 가지 탄력성 메커니즘
 임계값 미만에서는 프로바이더가 쿨다운 중으로 간주되지 **않으며**, 성공하면 윈도우가 초기화됩니다. 연결 수준 항목(`provider:connectionId`)은 대신 지수적 `minRetryCooldownMs → maxRetryCooldownMs` 백오프를 유지합니다. 재정의: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 회귀 방지 테스트: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. 연결 쿨타임
+## 2. 연결 쿨다운
 
-**범위:** 단일 공급자 connection/account/key.
+**범위:** 단일 공급자 연결/계정/키.
 
-**목적:** 동일한 공급자에 대한 다른 연결이 계속 제공되는 동안 잘못된 키 하나를 건너뜁니다.
+**목적:** 동일한 공급자의 다른 연결은 계속 서비스를 제공하는 동안 문제가 있는 키 하나를 건너뜁니다.
 
 **구현:**
 
-- 사용할 수 없는 것으로 표시: `src/sse/services/auth.ts::markAccountUnavailable()`
+- 사용 불가로 표시: `src/sse/services/auth.ts::markAccountUnavailable()`
 - 선택: 동일한 파일의 `getProviderCredentials*`
 - 쿨다운 계산: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - 설정: `src/lib/resilience/settings.ts`
 
-**연결당 필드:**
+**연결별 필드:**
 
-- 쿨다운이 만료될 때까지 `rateLimitedUntil` — 타임스탬프
+- `rateLimitedUntil` — 쿨다운이 만료되는 시점의 타임스탬프
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
 - `backoffLevel` — 지수 백오프 카운터
 
 **기본 쿨다운:**
 
-- OAuth 베이스: 5초
-- API 키 기반: 3초
-- API 키 429: 업스트림 `Retry-After`/reset headers/parseable 재설정 텍스트를 선호합니다.
+- OAuth 기본값: 5초
+- API 키 기본값: 3초
+- API 키 429: 업스트림 `Retry-After`/재설정 헤더/파싱 가능한 재설정 텍스트를 우선 사용
 - 백오프: `baseCooldownMs * 2 ** failureIndex`
 
-**공급자별 재시도 지연.** 공급자 세부정보 페이지에는** 재시도 지연** (자동, 15초~1시간)을 선택합니다. `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, `PATCH /api/resilience` 통해)를 저장합니다. 속도 제한 오류에 업스트림 재시도 힌트가 없으면 해당 값이 공급자에 대한 확장된 백오프를 대체하고 `backoffLevel` 0(`open-sse/services/rotationConfig.ts::overrideFor`)으로 재설정합니다. 속도 제한 오류에 대한 우선순위가 가장 높습니다. 업스트림 재시도 힌트, 연결별 `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, 공급자별 재시도 지연, env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, 확장된 백오프 순입니다. 자동으로 필드를 제거합니다. 속도 제한 이유에만 영향을 미치며 최종 상태에는 영향을 미치지 않습니다.
+**공급자별 재시도 지연.** 공급자 세부 정보 페이지에는 **재시도 지연** 선택 메뉴가 있습니다(자동,
+15초부터 1시간까지). 이 값은
+`resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`에 저장됩니다
+(1–21600, `PATCH /api/resilience`를 통해). 비율 제한 오류에 업스트림 재시도 힌트가 없는 경우, 이 값이
+해당 공급자의 조정된 백오프를 대체하고 `backoffLevel`을 0으로 재설정합니다
+(`open-sse/services/rotationConfig.ts::overrideFor`). 비율 제한 오류의 우선순위는 다음과 같습니다(높은 순서부터):
+업스트림 재시도 힌트, 연결별 `providerSpecificData.rotationOverrides.rateLimitResetSeconds`,
+공급자별 재시도 지연, 환경 변수 `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, 조정된 백오프 순입니다.
+자동을 선택하면 해당 필드가 제거됩니다. 이는 비율 제한 사유에만 영향을 주며, terminal 상태에는 영향을 주지 않습니다.
 
-**천둥 방지 무리 보호대:** 쿨타임을 과도하게 연장하거나 `backoffLevel` 두 배로 증가시키는 동시 오류를 방지합니다.
+**동시 폭주 방지 보호:** 동시 오류로 인해 쿨다운이 과도하게 연장되거나 `backoffLevel`이 두 번 증가하는 것을 방지합니다.
 
-**동시성 제한 429는 백오프 사다리를 오르지 않습니다.** 본문에서 동시성 제한("동시 요청이 너무 많음", "동시성 제한", "병렬 요청 제한", GLM `并发数过高`)을 보고하는 `429` 는 계정이 정상이지만 사용 중임을 의미합니다. `checkFallbackError()` 이유 `concurrency_limited` 반환합니다. 지금 다음 연결로 장애 조치하고, 고정된 `CONCURRENCY_LIMIT_COOLDOWN_MS` (1초) 또는 업스트림 재시도 힌트에 대해 이 연결을 냉각하고, `backoffLevel` 변경하지 않고 유지하고, `skipProviderBreaker` 설정합니다. 명시적인 할당량 본문이 여전히 우선하므로 할당량 패턴과 일치하는 본문도 할당량 결과를 유지합니다. 감지: `looksLikeConcurrencyLimit()` 의 `src/shared/utils/classify429.ts`; 평결 : `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (차단기의 `FailureKind`)은 변경되지 않았으며 여전히 이러한 본문에 대해 `rate_limit` 읽습니다.
+**동시성 제한 429는 백오프 단계를 증가시키지 않습니다.** 본문에 동시성 제한을 나타내는 문구
+("too many concurrent requests", "concurrency limit", "parallel request
+limit", GLM `并发数过高`)가 포함된 `429`는 계정이 정상 상태이지만 사용 중임을 의미합니다.
+`checkFallbackError()`는 `concurrency_limited` 사유를 반환합니다. 즉시 다음 연결로 장애 조치하고,
+이 연결은 고정된 `CONCURRENCY_LIMIT_COOLDOWN_MS`(1초) 또는 업스트림 재시도 힌트만큼 쿨다운하며,
+`backoffLevel`은 변경하지 않고 `skipProviderBreaker`를 설정합니다.
+명시적인 할당량 본문이 있으면 그것이 우선하므로, 할당량 패턴에도 일치하는 본문은 할당량 판정을 유지합니다.
+감지: `src/shared/utils/classify429.ts`의 `looksLikeConcurrencyLimit()`;
+판정: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()`(브레이커의
+`FailureKind`)는 변경되지 않으며 이러한 본문에 대해서도 여전히 `rate_limit`을 읽습니다.
 
-**스트림 콘텐츠 중단으로 인해 계정이 냉각되지는 않습니다.** 콘텐츠 지연 감시 장치(`open-sse/utils/streamHandler.ts`)가 시간 내에 모델 출력을 보내지 않은 스트림을 포기하면 `markAccountUnavailable()` 연결에 대한 오류를 기록하지만 쿨다운을 설정하지 않습니다. 지연은 해당 요청에 속하며 대부분 아직 출력이 없는 긴 추론 차례입니다. 운영자는 `resilienceSettings.streamStallCooldown.enabled` (기본값 `false`)를 사용하여 다시 선택할 수 있습니다.
+**스트림 콘텐츠 정지는 계정을 쿨다운하지 않습니다.** 콘텐츠 정지 감시자
+(`open-sse/utils/streamHandler.ts`)가 정해진 시간 내에 모델 출력을 전혀 보내지 않은 스트림을
+포기할 때, `markAccountUnavailable()`은 연결에 오류를 기록하지만 쿨다운은 설정하지 않습니다.
+이 정지는 해당 요청에 속하며, 대부분 아직 출력이 없는 긴 추론 단계에서 발생합니다.
+운영자는 `resilienceSettings.streamStallCooldown.enabled`를 통해 다시 활성화할 수 있습니다
+(기본값 `false`).
 
-**`p2c` 계정 선택을 위한 옵트인 대기 시간 신호입니다.** 각각의 발송된 시도는 메모리 내 롤링 윈도우에 연결당(및 연결 + 모델당) 첫 번째 바이트까지의 시간과 결과를 기록합니다. 즉, 15분 이내의 마지막 20개 샘플(`open-sse/services/connectionLatencyTracker.ts`, `src/sse/handlers/chatHelpers.ts` 의 `safeLogEvents()` 에서 기록됨)입니다. `resilienceSettings.p2cLatency.weight` `0` 보다 높으면(범위 0-20, 기본 `0` = 꺼짐), `src/sse/services/auth.ts` 의 `compareP2CConnections()` 쌍의 각 후보에 최대 `weight` 포인트를 추가합니다. 그 중 절반은 더 빠른 후보에 대한 비율로 대기 시간에서 발생하고(느린 속도의 2배가 전체 절반을 차지함) 나머지 절반은 롤링 오류율에서 발생합니다. 이 용어는 두 후보자 모두 최소 3개의 샘플을 가지고 있는 경우에만 적용되므로 새 계정에 불이익이 적용되지 않으며 상한선이 할당량 차단 및 할당량 소진 벌금 미만으로 유지됩니다. 자체 회로를 추가하지 않습니다. 실패한 계정은 여전히 휴지, 잠금 및 차단 계층에 의해 처리됩니다. `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }` 으로 설정하세요.
+**`p2c` 계정 선택을 위한 선택적 지연 시간 신호.** 디스패치된 각 시도는 연결별(및 연결 + 모델별)로
+첫 바이트까지 걸린 시간과 결과를 메모리 내 롤링 윈도우에 기록합니다. 윈도우에는 15분 이내의
+최근 20개 샘플이 포함됩니다
+(`open-sse/services/connectionLatencyTracker.ts`, `src/sse/handlers/chatHelpers.ts`의
+`safeLogEvents()`에서 기록). `resilienceSettings.p2cLatency.weight`가 `0`보다 큰 경우
+(범위 0-20, 기본값 `0` = 비활성), `src/sse/services/auth.ts`의
+`compareP2CConnections()`는 쌍의 각 후보에 최대 `weight`점까지 추가합니다. 절반은 더 빠른 후보 대비
+지연 시간 비율에서 나오며(두 배 느리면 전체 절반을 받음), 나머지 절반은 롤링 오류율에서 나옵니다.
+이 항은 두 후보 모두 최소 3개의 샘플을 가진 경우에만 적용되므로 새 계정에는 불이익이 없으며,
+상한은 할당량 차단 및 할당량 소진 패널티보다 낮게 유지됩니다. 자체 회로 차단기를 추가하지는 않습니다.
+실패하는 계정은 여전히 쿨다운, 잠금 및 브레이커 계층에서 처리됩니다.
+`PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`으로 설정합니다.
 
-**추론 프레임은 콘텐츠 중단 예산을 다시 시작합니다.** 추론 모델은 첫 번째 표시 토큰이 나타나기 몇 분 전에 생각할 수 있습니다. Claude 생각 텍스트가 비어 있을 수 있는 `thinking_delta` 프레임을 스트리밍하고 응답 API 는 추론 항목을 하나씩 스트리밍합니다. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`)는 이러한 프레임을 인식하고 감시자는 차례를 취소하는 대신 각 프레임에 대한 예산을 다시 시작합니다. 이는 여전히 모델 출력이 아니므로 추론만으로 끝나는 회전은 여전히 비어 있는 것으로 보고되며 추론을 중지하고 하트비트만 보내는 회전은 여전히 감시 장치를 작동시킵니다.
+**추론 프레임은 콘텐츠 정지 예산을 다시 시작합니다.** 추론 모델은 첫 번째 표시 토큰을 보내기 전에
+몇 분 동안 사고할 수 있습니다. Claude는 사고 텍스트가 비어 있을 수 있는 `thinking_delta` 프레임을
+스트리밍하고, Responses API는 하나의 추론 항목 다음에 또 다른 추론 항목을 스트리밍합니다.
+`isReasoningProgressFrame()`(`open-sse/utils/streamReadiness.ts`)는 이러한 프레임을 인식하며,
+감시자는 턴을 취소하는 대신 각 프레임에서 예산을 다시 시작합니다. 이러한 프레임은 여전히 모델
+출력이 아니므로 추론만으로 종료되는 턴은 여전히 빈 결과로 보고되며, 추론을 중단하고 하트비트만
+보내는 턴은 여전히 감시자를 작동시킵니다.
 
-비어 있지 않은 서명이 있는 Kiro 의 바이너리 `reasoningContentEvent` 프레임은 실행기를 통해 이 추론 활동을 빈 `reasoning_content` 델타로 유지합니다. 서명은 전달되지 않습니다. 메타데이터, 불완전한 프레임 및 빈 서명은 콘텐츠 예산을 다시 시작하지 않습니다. 독립적인 활성 스트림 시간 초과 및 클라이언트 취소는 계속 적용됩니다(`open-sse/executors/kiro/reasoning.ts`).
+서명이 비어 있지 않은 Kiro의 바이너리 `reasoningContentEvent` 프레임은 실행기를 거치는 동안
+빈 `reasoning_content` 델타로 이 추론 활동을 보존합니다. 서명은 전달되지 않습니다. 메타데이터,
+불완전한 프레임 및 빈 서명은 콘텐츠 예산을 다시 시작하지 않습니다. 독립적인 활성 스트림 타임아웃과
+클라이언트 취소는 여전히 적용됩니다(`open-sse/executors/kiro/reasoning.ts`).
 
-**터미널 상태(NOT 쿨다운):**
+**최종 상태(쿨다운이 아님):**
 
-- `banned` — 금지 키워드/계정 금지 감지( [BAN_DETECTION](../security/BAN_DETECTION.md) 참조) 및 3번의 연속적인 업스트림 요청별 거부(`request_rejected`, 예: Anthropic OAuth 403 "요청이 허용되지 않음" — `open-sse/services/requestRejectedStreak.ts`)에 의해 설정됩니다. 한 번의 거절로 인해 연결이 냉각될 뿐입니다.
-- `expired` (제한된 재시도 후 터미널로 전환 — `EXPIRED_RETRY_MAX = 3` 지수 백오프 — 사용하여 계정이 영구적으로 비활성화되기 전에 일시적인 OAuth 오류가 자가 치유될 수 있음)
+- `banned` — 금지된 키워드 / 계정 차단 감지에 의해 설정됩니다([BAN_DETECTION](../security/BAN_DETECTION.md) 참조). 업스트림의 요청별 거부(`request_rejected`, 예: Anthropic OAuth 403 "Request not allowed")는 이를 설정하지 않습니다. 이러한 거부는 연결 및 모델별로 집계되며, 해당 모델을 점진적으로 증가하는 쿨다운(최대 `REQUEST_REJECTED_MAX_COOLDOWN_MS`(1시간))과 함께 로테이션에서 제외합니다. 모델을 알 수 없는 경우에는 연결을 쿨다운합니다 — `open-sse/services/requestRejectedStreak.ts`
+- `expired` (제한된 재시도 후 최종 상태로 전환 — 지수 백오프를 사용하는 `EXPIRED_RETRY_MAX = 3` — 하므로 일시적인 OAuth 오류가 발생해도 계정이 영구적으로 비활성화되기 전에 자체적으로 복구할 수 있음)
 - `credits_exhausted`
 
-이는 자격 증명이 변경되거나 운영자가 재설정할 때까지 지속됩니다. 일시적인 쿨다운 상태로 터미널 상태를 덮어쓰지 마십시오.
+이 상태는 자격 증명이 변경되거나 운영자가 재설정할 때까지 유지됩니다. 일시적인 쿨다운 상태로 종료 상태를 덮어쓰지 마세요.
 
-**게으른 회복:** `rateLimitedUntil` 지나면 연결이 다시 가능해집니다. 성공적으로 사용되면 `clearAccountError()` 모든 오류 필드를 지웁니다.
+**지연 복구:** `rateLimitedUntil`이 경과하면 연결을 다시 사용할 수 있습니다. 성공적으로 사용되면 `clearAccountError()`가 모든 오류 필드를 지웁니다.
 
-### Claude OAuth 사용 벽: 우선순위가 낮은 레인 + 세션 제한 재설정
+### Claude OAuth 사용량 한도: 낮은 우선순위 레인 + 세션 한도 재설정
 
-**범위:** 하나의 Claude 구독(OAuth) 연결. 두 기능 모두** 연결당 옵트인** ( `providerSpecificData` 에서 연결 → Claude 섹션 → `lowPriorityMode` / `autoLimitReset` 편집, 둘 다 기본값은 꺼져 있음) 및 미러 Claude 코드의 `/low-priority` 및 `/limit-reset` 명령( Claude Code 2.1.263에서 캡처된 와이어 계약).
+**범위:** 하나의 Claude 구독(OAuth) 연결입니다. 두 기능 모두 **연결별 옵트인** 방식입니다
+(연결 편집 → Claude 섹션 → `providerSpecificData`의
+`lowPriorityMode` / `autoLimitReset`, 둘 다 기본적으로 꺼짐). 또한 Claude Code의 `/low-priority` 및 `/limit-reset` 명령을
+그대로 반영합니다(Claude Code 2.1.263에서 캡처한 와이어 계약).
 
 **구현:**
 
 - 상태 머신 + 응답 분류: `open-sse/services/claudeLowPriority.ts`
-- status/claim 클라이언트 재설정: `open-sse/services/claudeLimitReset.ts`
-- 실행자 후크(헤더 주입 + 동일 계정 재시도): `open-sse/executors/base.ts::execute()`
-- 옵트인 지속성: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- 재설정 상태/클레임 클라이언트: `open-sse/services/claudeLimitReset.ts`
+- 실행기 훅(헤더 주입 + 동일 계정 재시도): `open-sse/executors/base.ts::execute()`
+- 옵트인 영속화: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**방아쇠:** 5시간 사용 벽 — a `429` 헤더에 `anthropic-ratelimit-unified-status: rejected` 가 있고 계정이 자격이 있는 경우 `anthropic-ratelimit-unified-slow-offer: treatment` 포함됩니다. 첫 번째 벽(429) 이전에는 아무것도 전송되지 않습니다. 통합 헤더가 없는 버스트 429는 일반 쿨다운 경로를 통과합니다.
+**트리거:** 5시간 사용량 한도 — 헤더에
+`anthropic-ratelimit-unified-status: rejected`가 있고, 계정이 대상인 경우
+`anthropic-ratelimit-unified-slow-offer: treatment`도 포함된 `429`입니다. 첫 번째 한도 초과
+429가 발생하기 전에는 아무것도 전송하지 않습니다. 통합 헤더가 없는 버스트 429는 일반 쿨다운 경로로
+처리됩니다.
 
-**우선순위가 낮은 차선** (`lowPriorityMode`):
+**낮은 우선순위 레인** (`lowPriorityMode`):
 
-- 벽 429에서 집행자는 제안을 수락하고 즉시 재시도합니다.** 같은** `anthropic-usage-limit: slow` 로 계정을 만드세요; 레인은 `anthropic-ratelimit-unified-reset` (+ 60s Grace)가 발표될 때까지 활성 상태로 유지되며 해당 창의 모든 요청에는 헤더가 전달됩니다. 차단된 429는 결코 `handleChatCore` 에 도달하지 않으므로 연결은 다음과 같습니다.** ~ 아니다** 쿨타임이 적용되고 회전되지 않습니다.
-- 이후 응답에 대한 `anthropic-ratelimit-unified-slow-status` : `active` / `not_needed` 차선을 유지합니다. `slot_busy` (429) 또는 `529` 서버의 `anthropic-ratelimit-unified-slow-retry-after` (기본값 20초, 클램프 5~600초, ± 30% 지터)를 기다린 후 레인이 끝나는 지점을 지나 `anthropic-ratelimit-unified-slow-max-wait` (기본값 20분, 클램프 1분~6시간) — 로 제한되어 재시도하고 10분 동안 냉각하면 재수락이 차단됩니다. 대기 시간은 요청 자체의 업스트림 시작 제한 시간(`resolveFetchStartTimeout`, 기본적으로 10분)에서 5초 여유를 뺀 남은 시간으로 추가로 제한됩니다. 해당 제한이 없으면 20분의 기본 max-wait는 요청보다 오래 지속되며 절전 모드는 대기 중에 중단되어 우아한 `max_wait` end + 냉각 대신 `TimeoutError` 나타납니다.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5시간 창 롤오버 또는 `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (지불된 초과분은 이제 벽을 덮기 때문에 모든 상태에서 `extra_usage` 로 끝남) 차선을 종료합니다. 그런 다음 응답은 일반 쿨다운 경로로 흐릅니다. `budget_exhausted` 는 발표된 예산 재설정(≤ 8일)까지 기억됩니다.
-- 벽 검사는 실행기 자체의 400회 구동 내부 시도 재시도(컨텍스트 편집, thinking/effort 클램프, 매개변수 자동 학습) 후에 실행되므로 해당 재시도 중 하나만 표면에 있는 벽 429는 쿨다운 경로에 도달하는 대신 여전히 차단됩니다.
-- 상태는 연결당 메모리 내입니다(다시 시작하려면 다시 승인하는 데 추가 벽 429가 필요합니다).
+- 한도 초과 429가 발생하면 실행기는 제안을 수락하고 동일한 계정에
+  `anthropic-usage-limit: slow`를 사용해 즉시 재시도합니다. 레인은 공지된
+  `anthropic-ratelimit-unified-reset` 시점(+60초의 유예)까지 활성 상태로 유지되며, 해당 기간의 모든 요청에는 이
+  헤더가 포함됩니다. 가로챈 429는 `handleChatCore`에 도달하지 않으므로 연결은
+  쿨다운 상태가 되지 않고 다른 연결로 교체되지도 않습니다.
+- 이후 응답의 `anthropic-ratelimit-unified-slow-status`: `active` / `not_needed`는 레인을
+  유지합니다. `slot_busy`(429) 또는 `529`가 발생하면 서버의
+  `anthropic-ratelimit-unified-slow-retry-after`를 기다린 후(기본 20초, 5–600초로 제한, ±30% 지터)
+  재시도합니다. 대기 시간은 `anthropic-ratelimit-unified-slow-max-wait`(기본 20분, 1분–6시간으로
+  제한)를 초과하지 않으며, 초과하면 레인이 종료되고 10분간의 쿨오프가 재수락을 차단합니다. 이
+  대기 시간은 요청 자체의 업스트림 시작 타임아웃(`resolveFetchStartTimeout`, 기본 10분)에서
+  5초의 여유를 뺀 남은 시간으로도 제한됩니다. 이 제한이 없으면 기본 최대 대기 시간인
+  20분이 요청 시간을 초과하게 되어 대기 중 sleep이 중단되고, 정상적인
+  `max_wait` 종료 + 쿨오프 대신 `TimeoutError`가 표시됩니다.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5시간 창 롤오버 또는
+  `anthropic-ratelimit-unified-overage-in-use: true`가 포함된 `ineligible`(유료 초과 사용이
+  이제 한도 초과를 충당하므로 모든 상태에서 `extra_usage`로 종료)는 레인을 종료합니다. 이후
+  응답은 일반 쿨다운 경로로 전달됩니다. `budget_exhausted`는 공지된 예산 재설정 시점(최대
+  8일)까지 기억됩니다.
+- 한도 초과 확인은 실행기 자체의 400 기반 시도 내 재시도(컨텍스트 편집, 사고/추론 강도 제한,
+  매개변수 자동 학습) 이후에 실행됩니다. 따라서 이러한 재시도 중 하나에서만 한도 초과 429가
+  표면화되더라도 쿨다운 경로에 도달하지 않고 계속 가로채집니다.
+- 상태는 연결별 메모리에 저장됩니다(재시작하면 한도 초과 429가 한 번 더 발생해야 다시 수락됨).
 
-**세션 제한 재설정** (`autoLimitReset`, 둘 다 켜져 있을 때 차선 이전에 시도함):
+**세션 한도 재설정** (`autoLimitReset`, 두 기능이 모두 켜져 있으면 레인보다 먼저 시도):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` 블록; `arm: "reset"` 및 `available: true`, `{ "program": "juniper_tide" }` `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` `providerSpecificData.organizationUUID` 의 조직 UUID, 부트스트랩 폴백).
-- `result: reset|not_limited` → 요청은 최고 속도로 재시도됩니다(느린 헤더 없음). `already_used` / `not_offered` memoise `next_available_at` (기본 1주); 모든 실패는 15분 후에 취소됩니다. 재설정은 일주일에 한 번이며 여전히 주간 한도에 포함됩니다.
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`
+  블록을 확인합니다. `arm: "reset"`이고 `available: true`인 경우,
+  `providerSpecificData.organizationUUID`의 조직 UUID(부트스트랩 폴백)를 사용해
+  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits`를 호출하고
+  `{ "program": "juniper_tide" }`를 전송합니다.
+- `result: reset|not_limited`이면 요청을 최고 속도로 재시도합니다(느린 헤더 없음).
+  `already_used` / `not_offered`는 `next_available_at`(기본 1주)을 메모이즈하며, 실패할 때마다
+  15분 동안 백오프합니다. 재설정은 주 1회 수행되며 주간 한도에도 포함됩니다.
 
-회귀 가드: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+회귀 방지 테스트: `tests/unit/claude-low-priority-mode.test.ts`,
+`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
-### 세션 어피니티(#7274)
+### 세션 고정 (#7274)
 
-**범위:** 하나의 클라이언트 세션(`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` 헤더)이 하나의 연결에 고정되어 있습니다.** 어느** 공급자.
+**범위:** 하나의 클라이언트 세션(`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` 헤더)을
+모든 프로바이더에 대해 하나의 연결에 고정합니다.
 
-**목적:** 요청 전반에 걸쳐 동일한 계정에 다중 턴 에이전트(Claude Code, aider, 사용자 지정 에이전트)를 유지하여 계정별 세션 상태가 있는 공급자에서 계정 간 컨텍스트 손실과 반복적인 콜드 스타트 429를 줄입니다.
+**목적:** 다중 턴 에이전트(Claude Code, aider, 사용자 지정 에이전트)가 요청 간 동일한 계정을
+사용하도록 유지하여, 계정 간 컨텍스트 손실과 계정별 세션 상태가 있는 프로바이더에서 반복적으로
+발생하는 콜드 스타트 429를 줄입니다.
 
 **구현:**
 
-- TTL 해상도: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- 핀 selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- 헤더 추출(일반, 모든 공급자): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- 지속형 핀 테이블: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- 설정: `sessionAffinityTtlMs` (밀리초 단위의 전역 TTL, `0` 비활성화) — `src/lib/db/settings.ts`. 이전에 구성된 Codex TTL 새로운 기본값으로 전달하는 `124_generic_session_affinity_ttl.sql` 마이그레이션을 통해 Codex 전용 `codexSessionAffinityTtlMs` 에서 이름이 변경되었습니다.
+- TTL 확인: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- 고정 연결 선택/생성: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- 헤더 추출(모든 프로바이더에 일반 적용): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- 영속화된 고정 테이블: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- 설정: `sessionAffinityTtlMs`(전역 TTL(ms), `0`이면 비활성화) — `src/lib/db/settings.ts`.
+  Codex 전용 `codexSessionAffinityTtlMs`에서 마이그레이션 `124_generic_session_affinity_ttl.sql`을
+  통해 이름이 변경되었으며, 이전에 구성된 Codex TTL은 새 기본값으로 이어집니다.
 
-#7274 이전에는 `resolveSessionAffinityTtlMs()` `codex` 제외한 모든 제공자에 대해 `0` 에 하드 베일을 걸었으므로 고정 메커니즘과 헤더 추출이 이미 제공자에 구애받지 않았음에도 불구하고 TTL 설정(및 세션 헤더)은 다른 곳에서는 아무런 영향을 미치지 않았습니다. 수정으로 인해 조기 반환이 제거되었습니다. 이제 TTL `0` 보다 전역적으로 설정된 모든 공급자에 균일하게 적용됩니다.
+#7274 이전에는 `resolveSessionAffinityTtlMs()`가 `codex` 이외의 모든 프로바이더에 대해
+무조건 `0`을 반환했으므로, 고정 메커니즘과 헤더 추출은 이미 프로바이더에 구애받지 않는
+방식이었음에도 TTL 설정(및 세션 헤더)이 다른 곳에서는 아무런 효과가 없었습니다. 이 수정으로
+해당 조기 반환이 제거되었으며, 이제 전역에서 TTL을 `0`보다 크게 설정하면 모든 프로바이더에
+동일하게 적용됩니다.
 
-3개의 세션 선호도 헤더는 절대 전달되지 않습니다. 업스트림 — 실행자는 클라이언트 헤더를 전달하는 대신 처음부터 자체 업스트림 헤더를 구축하므로 내부 상관 ID만 유지됩니다.
+세 가지 세션 고정 헤더는 업스트림으로 절대 전달되지 않습니다. 실행기는 클라이언트 헤더를
+그대로 전달하지 않고 자체 업스트림 헤더를 처음부터 구성하므로, 이 값은 내부 상관 관계 ID로만
+사용됩니다.
 
-### 독점 관리 세션 연결 임대
+### 독점 관리 세션 연결 리스租
 
-**범위:** 하나의 활성 관리 HTTP client/session 하나의 적격 OmniRoute 연결을 소유합니다.
+**범위:** 하나의 활성 관리형 HTTP 클라이언트/세션이 하나의 적격 OmniRoute 연결을 소유합니다.
 
-**목적:** 요청 전반에 걸쳐 하드 라우팅 펜스가 필요한 클라이언트에게 지속 가능한 독점 연결 소유권을 제공합니다. 이는 소프트 연속성 기본 설정인 세션 선호도와 다릅니다. 배타적 임대는 SQLite 의 수명 주기 상태를 유지하고 전역 활성 소유자 및 활성 연결 고유성을 적용하며 공급자가 디스패치되기 전에 오래된 생성을 거부합니다.
+**목적:** 요청 전반에 걸쳐 강력한 라우팅 경계를 필요로 하는 클라이언트를 위해 지속 가능한 독점 연결 소유권을 제공합니다. 이는 소프트 연속성 선호 사항인 세션 어피니티와 다릅니다. 독점 리스는 수명 주기 상태를 SQLite에 지속하고, 전역 활성 소유자 및 활성 연결의 고유성을 강제하며, 제공자 디스패치 전에 오래된 세대를 거부합니다.
 
-이 기능은 API 키별로 옵트인됩니다. 관리되는 키에는 `lease:exclusive` 범위와 비어 있지 않은 명시적인 `allowedConnections` 목록이 있어야 합니다. 모든 HTTP 클라이언트는 라이프사이클 엔드포인트를 사용할 수 있습니다. 클라이언트 이름, 사용자 에이전트, 공급자, OAuth 방법 또는 모델이 필요하지 않습니다. 임대는 모델이 아닌 연결을 소유하므로 연결이 일반적으로 자격을 유지하는 동안 모델 변경은 바인딩을 유지합니다. 일반 모델, 할당량, 상태, 쿨다운 및 허용 목록 규칙은 여전히 유효하며 동일한 세대를 다른 무료 적격 연결로 전환할 수 있습니다.
+이 기능은 API 키별로 옵트인됩니다. 관리형 키에는 `lease:exclusive` 스코프와 명시적인 비어 있지 않은 `allowedConnections` 목록이 있어야 합니다. 모든 HTTP 클라이언트가 수명 주기 엔드포인트를 사용할 수 있으며, 클라이언트 이름, 사용자 에이전트, 제공자, OAuth 방식 또는 모델은 필요하지 않습니다. 리스는 모델이 아니라 연결을 소유하므로, 연결이 일반적인 적격 상태를 유지하는 동안 모델을 변경해도 바인딩은 유지됩니다. 일반 모델, 할당량, 상태, 쿨다운 및 허용 목록 규칙은 계속해서 우선 적용되며, 동일한 세대를 다른 사용 가능한 적격 연결로 전환할 수 있습니다.
 
-수명주기는 JSON 작업 `acquire`, `renew` 및 `release` 포함된 `POST /api/v1/session-leases` 입니다. 관리형 추론 요청은 불투명한 `X-OmniRoute-Lease-Owner` 값과 정확한 `X-OmniRoute-Lease-Generation` 제공합니다. 소유자는 `vlo_` 뒤에 43개의 base64url 문자를 사용합니다. 해당 SHA-256 해시만 저장됩니다. 모든 최종 디스패치 펜스는 또한 인증된 API 키 ID 및 활성 연결 ID 바인딩합니다. 임대 제어 헤더는 로그, 보관된 요청 스냅샷 및 업스트림 실행기 헤더에서 제거됩니다.
+수명 주기는 JSON 작업 `acquire`, `renew`, `release`를 사용하는 `POST /api/v1/session-leases`입니다. 관리형 추론 요청에는 불투명한 `X-OmniRoute-Lease-Owner` 값과 정확한 `X-OmniRoute-Lease-Generation`이 포함됩니다. 소유자는 `vlo_` 뒤에 43개의 base64url 문자가 이어지는 형식을 사용하며, 해당 값의 SHA-256 해시만 저장됩니다. 모든 최종 디스패치 경계는 인증된 API 키 ID와 활성 연결 ID도 함께 바인딩합니다. 리스 제어 헤더는 로그, 보존된 요청 스냅샷 및 업스트림 실행기 헤더에서 제거됩니다.
 
-일반 라우팅에 적합한 관리 후보가 있지만 모든 무료 후보가 외부 활성 임대에 의해 점유된 경우 OmniRoute HTTP `429`, 임대 용량 사용 불가능 코드, 용량 대기 상태 및 가장 빠른 관련 만료에서 파생된 제한된 `Retry-After` 반환합니다. 일반 빈 자격은 임대 경합이 아니며 기존 라우팅 오류 의미를 유지합니다.
+일반 라우팅에 적격한 관리형 후보가 있지만 사용 가능한 모든 후보가 다른 활성 리스에 의해 점유된 경우, OmniRoute는 HTTP `429`, lease-capacity-unavailable 코드, waiting-for-capacity 상태 및 가장 이른 관련 만료 시점으로부터 산출된 제한된 `Retry-After`를 반환합니다. 일반적인 적격 후보 없음은 리스 경합이 아니며 기존 라우팅 오류 의미를 유지합니다.
 
-관련 메커니즘은 별도로 유지됩니다.
+관련 메커니즘은 계속 별도로 유지됩니다.
 
-- OAuth 세션 점유는 OAuth 계정에 대한 프로세스-로컬 소프트 배포입니다.
-- 계정 세마포는 요청 동시성 허용을 부여하고 요청이 완료되면 종료됩니다.
-- 독점적인 관리형 세션 임대는 세대 펜스를 사용한 내구성 있는 수명 주기 소유권입니다.
-
----
+- OAuth 세션 점유는 OAuth 계정에 대한 프로세스 로컬 소프트 분배입니다.
+- 계정 세마포어는 요청 동시성 권한을 부여하며 요청이 완료되면 종료됩니다.
+- 독점 관리형 세션 리스는 세대 경계가 적용되는 지속 가능한 수명 주기 소유권입니다.
 
 ## 3. 모델 잠금(Model Lockout)
 
