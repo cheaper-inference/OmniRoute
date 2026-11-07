@@ -1916,6 +1916,10 @@ Used by the auto-key management subsystem to issue and rotate API keys against a
 | GET    | `/api/v1/registered-keys/[id]`        | Retrieve a registered key's metadata (no raw material)                                                                                                                                      |
 | DELETE | `/api/v1/registered-keys/[id]`        | Revoke a registered key                                                                                                                                                                     |
 | POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit revoke endpoint (same effect as DELETE)                                                                                                                                            |
+| GET    | `/api/v1/providers/[provider]/limits` | Read the provider's issuance caps                                                                                                                                                           |
+| PUT    | `/api/v1/providers/[provider]/limits` | Set the provider's issuance caps — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                            |
+| GET    | `/api/v1/accounts/[id]/limits`        | Read the account's issuance caps                                                                                                                                                            |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Set the account's issuance caps — same body as the provider route                                                                                                                           |
 
 **Auth:** management session/API key (`requireManagementAuth`) — the same guard as `/api/keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope; inference-only API keys get `403`. See also `/v1/quotas/check` and `/v1/issues/report`.
 
