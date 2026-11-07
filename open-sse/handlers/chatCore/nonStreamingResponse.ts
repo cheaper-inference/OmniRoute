@@ -700,7 +700,12 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     // translateNonStreamingClientResponse mutated it (applyClientUsageBuffer adds
     // the #8331 client context buffer and can replace usage with an estimate).
     // Re-extracting here would bill the buffer/estimate as real provider usage.
-    const usage = toolLoopUsage ?? okLeg.usage ?? extractUsageFromResponse(responseBody, provider);
+    // `billingUsage` (not the token-only `usage` summary) keeps the provider-reported
+    // cost/credit fields. After a server-owned tool loop the initial leg's value is
+    // stale, so only the loop's cumulative usage or a re-extraction applies there.
+    const legBillingUsage = toolLoopRan ? null : okLeg.billingUsage;
+    const usage =
+      toolLoopUsage ?? legBillingUsage ?? extractUsageFromResponse(responseBody, provider);
     recordFinalInputCalibration(
       body,
       provider,

@@ -25,7 +25,7 @@ test.after(() => {
   fs.rmSync(DIR, { recursive: true, force: true });
 });
 
-function buildDeps(claudeBody, sinks) {
+function buildDeps(claudeBody, sinks, overrides = {}) {
   const noop = () => undefined;
   const wire = { model: "claude-sonnet-4-5", messages: [{ role: "user", content: "hi" }] };
   return {
@@ -132,6 +132,7 @@ function buildDeps(claudeBody, sinks) {
     getModelPreserveOpenAIDeveloperRole: () => false,
     getSkillsModelIdForFormat: () => null,
     log: { debug: noop, info: noop, warn: noop, error: noop },
+    ...overrides,
   };
 }
 
@@ -172,4 +173,57 @@ test("claude->claude CC-compatible: billed usage is the leg usage, not the buffe
   assert.ok(sinks.statsUsage.length > 0, "no api-key usage stats recorded");
   const okAttempt = sinks.attempts.find((a) => a.status === 200);
   assert.equal(okAttempt?.tokens?.prompt_tokens, 100, JSON.stringify(okAttempt));
+});
+
+test("billed usage keeps provider-reported cost and credit fields the leg summary drops", async () => {
+  // The leg's ProviderLegUsage summary only carries token counts. Billing reads the
+  // provider-reported exact cost (xAI cost_in_usd_ticks, OpenRouter usage.cost) and
+  // credit metering from the usage object, so those must survive into the billed usage.
+  const openaiBody = {
+    id: "chatcmpl-1",
+    object: "chat.completion",
+    model: "grok-4",
+    choices: [
+      { index: 0, message: { role: "assistant", content: "hello" }, finish_reason: "stop" },
+    ],
+    usage: {
+      prompt_tokens: 10,
+      completion_tokens: 5,
+      total_tokens: 15,
+      cost_in_usd_ticks: 123456,
+      provider_credits: 3,
+      cost: 0.0042,
+    },
+  };
+  const wire = { model: "grok-4", messages: [{ role: "user", content: "hi" }] };
+  const sinks = { usageRows: [], attempts: [], statsUsage: [], errors: [] };
+  const result = await runNonStreamingResponse(
+    buildDeps(openaiBody, sinks, {
+      provider: "xai",
+      model: "grok-4",
+      effectiveModel: "grok-4",
+      currentModel: "grok-4",
+      body: wire,
+      translatedBody: wire,
+      finalBody: wire,
+      sourceFormat: "openai",
+      targetFormat: "openai",
+      clientResponseFormat: "openai",
+      isClaudeCodeCompatible: false,
+      triedModels: new Set(["grok-4"]),
+    })
+  );
+  assert.deepEqual(sinks.errors.map(String), []);
+  assert.equal(result.response.success, true);
+  assert.ok(sinks.statsUsage.length > 0, "no api-key usage stats recorded");
+  for (const usage of sinks.statsUsage) {
+    assert.equal(usage?.prompt_tokens, 10, `api-key stats: ${JSON.stringify(usage)}`);
+    assert.equal(usage?.cost_in_usd_ticks, 123456, `api-key stats: ${JSON.stringify(usage)}`);
+    assert.equal(usage?.provider_credits, 3, `api-key stats: ${JSON.stringify(usage)}`);
+    assert.equal(usage?.cost_usd, 0.0042, `api-key stats: ${JSON.stringify(usage)}`);
+  }
+  assert.ok(sinks.usageRows.length > 0, "no usage row recorded");
+  for (const row of sinks.usageRows) {
+    assert.equal(row.tokens?.cost_in_usd_ticks, 123456, `usage row: ${JSON.stringify(row)}`);
+  }
 });
