@@ -1,7 +1,12 @@
+import { inheritLocalProcessPressureResponse } from "@omniroute/open-sse/utils/localPressureResponse.ts";
 import { inheritTrustedLocalRateLimitResponse } from "@omniroute/open-sse/services/rateLimitManager/errors.ts";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { inheritResponsePolicies } from "./responsePolicies.ts";
 
+/**
+ * Attach a selected connection ID and bounded routing metrics to the response.
+ * Immutable headers require a wrapper that preserves trusted markers and response policies.
+ */
 export type AccountRoutingTelemetry = {
   accountFallbacks?: number;
   accountFallbackReasons?: readonly string[];
@@ -66,9 +71,12 @@ export function withSelectedConnectionHeader(
       headers: response.headers,
     });
     apply(cloned.headers);
-    // Keep *both* the trusted local rate-limit marker and provider-probe /
-    // empty-turn response policies when response headers are immutable.
-    const trusted = inheritTrustedLocalRateLimitResponse(response, cloned);
+    // Response identity carries local-pressure, trusted rate-limit, provider-probe,
+    // and empty-turn policies. Preserve all of them on the immutable-header wrapper.
+    const trusted = inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
     return inheritResponsePolicies(response, trusted);
   }
 }
