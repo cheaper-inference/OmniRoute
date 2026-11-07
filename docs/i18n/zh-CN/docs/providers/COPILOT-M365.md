@@ -66,35 +66,28 @@ OmniRoute 会扫描 HAR 以查找 Chathub WebSocket URL，提取
 
 ## 令牌有效期和刷新
 
-`access_token` 的有效期较短（通常约为 **~75 分钟**）。过期后，提供者
-会报告连接错误，此时必须重新获取凭据。
+`access_token` 的有效期较短（通常为 **~75 分钟**）。如果没有可用的刷新
+令牌，则必须在令牌过期后重新捕获凭据。
 
 ### 使用 `refreshToken` 自动刷新
 
-为了避免手动重新获取凭据，可以将 Microsoft 刷新令牌存储在连接的
-**Advanced Settings → providerSpecificData** 中：
+在 Microsoft 365 提供者的 **添加连接** 或 **编辑连接** 对话框中，打开
+**高级设置 → 刷新令牌（可选）**。粘贴适用于 `substrate.office.com/sydney` 作用域的 Microsoft OAuth 刷新令牌并保存。输入内容会被遮罩，且不会预填已存储的令牌。编辑时，将其留空可保留现有令牌；粘贴新令牌则会替换现有令牌。
 
-| 字段           | 说明                                                               |
-| -------------- | ------------------------------------------------------------------ |
-| `refreshToken` | 用于 `substrate.office.com/sydney` 范围的 Microsoft OAuth 刷新令牌 |
-| `tier`         | `individual`（默认）、`edu` 或 `enterprise`                        |
+从作用域为 `substrate.office.com/sydney` 的 Microsoft 设备代码流或授权代码流中获取刷新令牌；控制面板不会代你获取。配置刷新令牌后，OmniRoute 会在请求前检查 `access_token`，并仅在需要刷新时刷新它。刷新成功后，还会保存轮换后的刷新令牌，因此只要刷新令牌仍然有效，就无需手动重新捕获凭据。
 
-通过范围限定为 `substrate.office.com/sydney` 的 Microsoft 设备代码流程或授权代码流程
-获取刷新令牌。设置 `refreshToken` 后，OmniRoute 会在每次请求前预先刷新
-`access_token`，因此无需在每次约 75 分钟的有效期结束后重新获取凭据。
-
-如果未设置 `refreshToken`，则必须在每次凭据过期后手动重新获取 WebSocket 凭据。
+如果未设置 `refreshToken`，则必须在每次令牌过期后手动重新捕获 WebSocket 凭据。
 
 ### 层级选择
 
-| 层级         | 别名       | 使用场景                  |
-| ------------ | ---------- | ------------------------- |
-| `individual` | _（默认）_ | 面向消费者的 M365 Copilot |
-| `edu`        | `included` | 教育版 M365 Copilot       |
-| `enterprise` | `work`     | M365 Copilot for Work     |
+| 层级         | 别名       | 服务范围                |
+| ------------ | ---------- | ----------------------- |
+| `individual` | _(默认)_   | 消费者版 M365 Copilot   |
+| `edu`        | `included` | 教育版 M365 Copilot     |
+| `enterprise` | `work`     | 面向工作的 M365 Copilot |
 
-在 **Advanced Settings → providerSpecificData → tier** 中设置层级。该层级会影响
-BizChat 的路由和模型访问权限。
+在 **高级设置 → Copilot 层级** 中设置层级。层级会影响
+BizChat 路由和模型访问权限。
 
 ## 安全模型
 
@@ -111,28 +104,23 @@ BizChat 的路由和模型访问权限。
 
 ### 身份验证立即失败
 
-- 请确认你复制的是 **WebSocket URL**，而不是 XHR/Fetch 请求中的内容。
-  凭据位于 Chathub WebSocket 连接的 `access_token` 查询参数中，
-  而不在 `Authorization: Bearer` 标头中。
-- 请确保 `chathubPath` 包含 URL
-  路径中完整的 `<oid>@<tenant>` 段。
+- 确认你是从 **WebSocket URL** 复制的，而不是从 XHR/Fetch 请求中复制的。凭据位于 Chathub WebSocket 连接的 `access_token` 查询参数中，而不在 `Authorization: Bearer` 标头中。
+- 确保 `chathubPath` 包含 URL 路径中的完整 `<oid>@<tenant>` 段。
 
 ### 令牌在约 75 分钟后过期
 
-这是预期行为。如果没有 `refreshToken`，访问令牌的有效期很短。你可以：
+这是预期行为。如果没有 `refreshToken`，访问令牌的有效期较短。你可以：
 
-- 从 DevTools 中重新获取凭据，或
-- 在高级设置中配置 `refreshToken`，以便自动刷新。
+- 从 DevTools 重新捕获凭据，或
+- 在“添加或编辑连接”对话框中配置 **高级设置 → 刷新令牌（可选）**，以自动刷新。
 
-### 测试连接通过，但聊天返回 401
+### 测试连接成功，但聊天返回 401
 
-令牌可能在验证与首次请求之间已过期。请重新获取一个
-新凭据。
+令牌可能在验证与首次请求之间已过期。请重新捕获最新凭据。
 
-### Copilot 未出现在供应商列表中
+### 提供者列表中未显示 Copilot
 
-请确保已在 **Dashboard → Providers** 中启用 `copilot-m365-web`。在某些层级中，该供应商可能
-默认隐藏。
+确保已在 **仪表板 → 提供者** 中启用 `copilot-m365-web`。在某些套餐中，该提供者默认可能处于隐藏状态。
 
 ## 参考资料
 
