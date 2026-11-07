@@ -379,6 +379,63 @@ test("resolvePreviousResponseState fails closed when the streaming collector tru
   assert.equal(store.resolvePreviousResponseState("resp_gen-collector-truncated", "key-1"), null);
 });
 
+test("resolvePreviousResponseState resolves a completed response whose collector dropped stream events", () => {
+  // A reasoning-heavy reply passes the collector's event cap and sets
+  // `_truncated: true`, yet still reaches `response.completed`: the summary
+  // holds the whole output. Treating it as lost made OmniRoute answer
+  // previous_response_not_found for a response it had just served.
+  insertCallLog({
+    id: "log-dropped-events",
+    responseId: "resp_gen-dropped-events",
+    apiKeyId: "key-1",
+    detailState: "ready",
+    artifactRelPath: "2026-01-01/log-dropped-events.json",
+  });
+  const output = [
+    { type: "reasoning", id: "rs_1", summary: [] },
+    { type: "function_call", call_id: "call_1", name: "read", arguments: "{}" },
+  ];
+  writeArtifact("2026-01-01/log-dropped-events.json", {
+    clientRawRequest: { body: { input: [{ type: "message", role: "user", content: "hi" }] } },
+    clientResponse: {
+      _streamed: true,
+      _eventCount: 961,
+      _droppedEvents: 1,
+      _truncated: true,
+      summary: { id: "resp_gen-dropped-events", status: "completed", output },
+    },
+  });
+
+  assert.deepEqual(store.resolvePreviousResponseState("resp_gen-dropped-events", "key-1"), {
+    input: [{ type: "message", role: "user", content: "hi" }],
+    output,
+  });
+});
+
+test("resolvePreviousResponseState fails closed on a truncated response that never completed", () => {
+  // Partial output from a stream that stopped early must not be replayed as
+  // the turn's whole contribution, even when it is not empty.
+  insertCallLog({
+    id: "log-partial-output",
+    responseId: "resp_gen-partial-output",
+    apiKeyId: "key-1",
+    detailState: "ready",
+    artifactRelPath: "2026-01-01/log-partial-output.json",
+  });
+  writeArtifact("2026-01-01/log-partial-output.json", {
+    clientRawRequest: { body: { input: [{ type: "message", role: "user", content: "hi" }] } },
+    clientResponse: {
+      _truncated: true,
+      summary: {
+        status: "in_progress",
+        output: [{ type: "message", role: "assistant", content: "par" }],
+      },
+    },
+  });
+
+  assert.equal(store.resolvePreviousResponseState("resp_gen-partial-output", "key-1"), null);
+});
+
 test("resolvePreviousResponseState fails closed on an empty output array even without the _truncated flag", () => {
   // Belt-and-suspenders for the same failure class when the collector
   // truncated without ever setting `_truncated` (or for a non-streaming
