@@ -404,38 +404,29 @@ test("Responses -> Chat strips client_metadata (Mistral 422 fix)", () => {
 });
 
 test("Chat -> Responses clamps call_id to 64 chars and keeps the pair matched (port from 9router#396)", () => {
-  // The Responses API rejects call_id values longer than 64 characters. A long
-  // upstream tool-call id must be clamped on BOTH the function_call and its matching
-  // function_call_output, identically, so the orphan filter still pairs them.
-  const longId = "call_" + "a".repeat(80); // 85 chars, > 64
-  const result = openaiToOpenAIResponsesRequest(
-    "gpt-4o",
-    {
-      messages: [
+  // Historical identity retained; clamping can manufacture ownership. Refuse
+  // overlong source IDs rather than rewriting either half of the pair.
+  const longId = "call_" + "a".repeat(80);
+  assert.throws(
+    () =>
+      openaiToOpenAIResponsesRequest(
+        "gpt-4o",
         {
-          role: "assistant",
-          content: null,
-          tool_calls: [
-            { id: longId, type: "function", function: { name: "read_file", arguments: "{}" } },
+          messages: [
+            {
+              role: "assistant",
+              content: null,
+              tool_calls: [
+                { id: longId, type: "function", function: { name: "read_file", arguments: "{}" } },
+              ],
+            },
+            { role: "tool", tool_call_id: longId, content: "ok" },
           ],
         },
-        { role: "tool", tool_call_id: longId, content: "ok" },
-      ],
-    },
-    false,
-    null
-  ) as any;
-
-  const input = result.input as Array<Record<string, any>>;
-  const fnCall = input.find((i) => i.type === "function_call");
-  const fnOut = input.find((i) => i.type === "function_call_output");
-  assert.ok(fnCall, "function_call item must exist");
-  assert.equal(fnCall.call_id.length, 64, "function_call call_id must be clamped to 64 chars");
-  assert.ok(fnOut, "function_call_output must survive the orphan filter after clamping");
-  assert.equal(
-    fnOut.call_id,
-    fnCall.call_id,
-    "output call_id must match the clamped function_call id"
+        false,
+        null
+      ),
+    /valid non-blank call_id/i
   );
 });
 
@@ -909,42 +900,79 @@ test("Chat -> Responses normalizes reasoning_effort max to xhigh", () => {
 });
 
 test("Chat -> Responses filters orphan function_call_output items and leaves empty instructions when absent", () => {
-  const result = openaiToOpenAIResponsesRequest(
-    "gpt-4o",
-    {
-      messages: [
-        { role: "user", content: "Hello" },
-        { role: "tool", tool_call_id: "orphan", content: "skip" },
-        {
-          role: "assistant",
-          tool_calls: [
-            {
-              id: "call_2",
-              type: "function",
-              function: { name: "search", arguments: "{}" },
-            },
-          ],
-        },
-        { role: "tool", tool_call_id: "call_2", content: "found" },
-      ],
-    },
-    false,
-    null
+  // Historical identity retained. Compaction does not authorize silent deletion:
+  // the original mixed orphan + valid pair fixture now has an explicit 400 contract.
+  const body = {
+    messages: [
+      { role: "user", content: "Hello" },
+      { role: "tool", tool_call_id: "orphan", content: "skip" },
+      {
+        role: "assistant",
+        tool_calls: [
+          {
+            id: "call_2",
+            type: "function",
+            function: { name: "search", arguments: "{}" },
+          },
+        ],
+      },
+      { role: "tool", tool_call_id: "call_2", content: "found" },
+    ],
+  };
+  assert.throws(
+    () => openaiToOpenAIResponsesRequest("gpt-4o", body, false, null),
+    (error: unknown) => {
+      const invalid = error as Error & { statusCode?: number };
+      assert.equal(invalid.statusCode, 400);
+      assert.match(invalid.message, /does not match a local tool call/i);
+      return true;
+    }
   );
+});
 
-  assert.equal((result as any).instructions, "");
-  assert.equal(
-    (result as any).input.some((item) => item.call_id === "orphan"),
-    false
+test("Chat -> Responses rejects orphan function_call_output items", () => {
+  assert.throws(
+    () =>
+      openaiToOpenAIResponsesRequest(
+        "gpt-4o",
+        { messages: [{ role: "tool", tool_call_id: "orphan", content: "skip" }] },
+        false,
+        null
+      ),
+    /does not match a local tool call/i
   );
-  assert.equal(
-    (result as any).input.filter((item) => item.type === "function_call_output").length,
-    1
+});
+
+test("Chat -> Responses retains valid pairs and ordinary compacted history with empty instructions", () => {
+  const body = {
+    messages: [
+      { role: "user", content: "Hello" },
+      { role: "tool", tool_call_id: "orphan", content: "skip" },
+      {
+        role: "assistant",
+        tool_calls: [
+          {
+            id: "call_2",
+            type: "function",
+            function: { name: "search", arguments: "{}" },
+          },
+        ],
+      },
+      { role: "tool", tool_call_id: "call_2", content: "found" },
+    ],
+  };
+  // A real caller compaction with no orphan results is still supported.
+  body.messages.splice(1, 1);
+  const result = openaiToOpenAIResponsesRequest("gpt-4o", body, false, null) as {
+    instructions: string;
+    input: Array<Record<string, unknown>>;
+  };
+  assert.equal(result.instructions, "");
+  assert.deepEqual(
+    result.input.filter((item) => item.type === "function_call_output"),
+    [{ type: "function_call_output", call_id: "call_2", output: "found", status: "completed" }]
   );
-  assert.equal(
-    (result as any).input.find((item) => item.type === "function_call_output").call_id,
-    "call_2"
-  );
+  assert.equal(result.input[0].role, "user");
 });
 
 test("Chat -> Responses maps max_completion_tokens to max_output_tokens", () => {

@@ -75,7 +75,6 @@ import {
   applyCodexReasoningSelection,
   normalizeCodexSummaryStreamOptions,
 } from "./codex/reasoningPolicy.ts";
-import { repairMissingCodexToolCallOutputs } from "./codex/toolCallRepair.ts";
 import { recoverCodexReasoningReplayRejection } from "./codex/reasoningReplayRejection.ts";
 import { resolveAppServerConfig } from "./codex/appServerConfig.ts";
 import { getResponsesSubpath } from "./codex/responsesSubpath.ts";
@@ -1433,7 +1432,6 @@ export class CodexExecutor extends BaseExecutor {
 
     sanitizeCodexResponsesInput(body, nativeCodexPassthrough);
     stripOrphanedCodexFunctionCallOutputs(body);
-    repairMissingCodexToolCallOutputs(body);
 
     // ── Cache-aware system prompt handling (both paths) ──
     //

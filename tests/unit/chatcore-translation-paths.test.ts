@@ -660,6 +660,7 @@ test("chatCore drops opaque reasoning for plaintext Responses targets by default
     { type: "reasoning", summary: [{ text: "not self-contained" }] },
     { type: "item_reference", id: "rs_reference" },
     { id: "fc_call", type: "function_call", call_id: "call_1", name: "search", arguments: "{}" },
+    { type: "function_call_output", call_id: "call_1", output: "real search result" },
   ];
 
   const dropped = await invokeChatCore({

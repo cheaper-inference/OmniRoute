@@ -10,10 +10,52 @@ import assert from "node:assert/strict";
 const { ensureToolCallIds } = await import("../../open-sse/translator/helpers/toolCallHelper.ts");
 const { coerceToolCallArguments } =
   await import("../../open-sse/translator/helpers/toolArguments.ts");
+const { coerceHistoricalToolCallArguments } =
+  await import("../../open-sse/translator/helpers/toolArguments.ts");
 const { translateRequest } = await import("../../open-sse/translator/index.ts");
+
+test("historical arguments reject unserializable supplied values without private details", () => {
+  const circular: Record<string, unknown> = {};
+  circular.self = circular;
+  for (const value of [
+    circular,
+    BigInt(1),
+    {
+      /** Simulate a serializer that fails with private details. */
+      toJSON() {
+        throw new Error("private_argument");
+      },
+    },
+    {
+      /** Simulate a value whose serializer produces no JSON. */
+      toJSON() {
+        return undefined;
+      },
+    },
+  ]) {
+    assert.throws(
+      () => coerceHistoricalToolCallArguments(value, "private_call_id"),
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.match(error.message, /malformed arguments/i);
+        assert.doesNotMatch(error.message, /private_argument|private_call_id/);
+        return true;
+      }
+    );
+  }
+});
+
+test("historical zero-argument compatibility and serializable values remain supported", () => {
+  for (const value of [undefined, null, ""])
+    assert.equal(coerceHistoricalToolCallArguments(value, ""), "{}");
+  for (const value of [" 42 ", " null ", " [1,2] ", ' { "x":1 } '])
+    assert.equal(coerceHistoricalToolCallArguments(value, ""), value);
+  assert.equal(coerceHistoricalToolCallArguments({ x: 1 }, ""), '{"x":1}');
+});
 
 type ToolFn = { name: string; arguments?: unknown };
 
+/** Normalize a Chat tool-call fixture and return its argument payload. */
 function normalizeArgs(value: unknown, includeArguments = true): unknown {
   const fn: ToolFn = { name: "probe_tool" };
   if (includeArguments) fn.arguments = value;
@@ -71,6 +113,7 @@ test("ensureToolCallIds: does not fabricate a missing function object", () => {
   assert.equal((body.messages[0].tool_calls[0] as { function?: unknown }).function, undefined);
 });
 
+/** Build a complete Responses function-call history with supplied arguments. */
 function responsesInput(args: unknown) {
   return {
     model: "gpt-4o",
@@ -82,6 +125,7 @@ function responsesInput(args: unknown) {
   };
 }
 
+/** Translate a Responses fixture and extract its Chat tool arguments. */
 function translatedToolArgs(args: unknown): unknown {
   const result = translateRequest(
     "openai-responses",
@@ -107,6 +151,7 @@ test("Responses→Chat: valid JSON preserved, object serialized", () => {
   assert.equal(translatedToolArgs({ city: "SF" }), '{"city":"SF"}');
 });
 
+/** Build a complete Chat tool-call history with optional assistant fields. */
 function chatBody(args: unknown, extra: Record<string, unknown> = {}) {
   return {
     model: "gpt-4o",
@@ -125,6 +170,7 @@ function chatBody(args: unknown, extra: Record<string, unknown> = {}) {
   };
 }
 
+/** Translate Chat history and select its Responses function-call items. */
 function responsesFunctionCalls(body: unknown): Array<{ arguments: unknown }> {
   const result = translateRequest(
     "openai",
@@ -159,9 +205,61 @@ test("Chat→Responses: deprecated function_call with object arguments is serial
         content: null,
         function_call: { name: "get_weather", arguments: { city: "SF" } },
       },
+      { role: "function", name: "get_weather", content: "done" },
     ],
   };
   const calls = responsesFunctionCalls(body);
   assert.equal(calls.length, 1);
   assert.equal(calls[0].arguments, '{"city":"SF"}');
+});
+
+test("Chat→Responses: supplied malformed nonempty arguments fail closed", () => {
+  for (const args of ["   ", '{"city":', "San Francisco"])
+    assert.throws(() => responsesFunctionCalls(chatBody(args)), {
+      message: "Historical tool call has malformed arguments",
+      statusCode: 400,
+      errorType: "invalid_tool_call_arguments",
+    });
+});
+test("Chat→Responses: pending call does not synthesize an empty completed output", () => {
+  const body = chatBody("{}");
+  body.messages.pop();
+  const result = translateRequest(
+    "openai",
+    "openai-responses",
+    "gpt-4o",
+    body,
+    false,
+    {},
+    "openai"
+  ) as { input: Array<Record<string, unknown>> };
+  assert.equal(result.input.filter((item) => item.type === "function_call").length, 1);
+  assert.equal(result.input.filter((item) => item.type === "function_call_output").length, 0);
+});
+test("Chat→Responses: previous_response_id continuation preserves output without a local call", () => {
+  const body = {
+    model: "gpt-4o",
+    previous_response_id: "resp_prev",
+    messages: [{ role: "tool", tool_call_id: "call_remote", content: "done" }],
+  };
+  const result = translateRequest(
+    "openai",
+    "openai-responses",
+    "gpt-4o",
+    body,
+    false,
+    {},
+    "openai"
+  ) as { input: Array<Record<string, unknown>> };
+  assert.equal(result.input[0]?.call_id, "call_remote");
+});
+test("Chat→Responses: orphan output without previous_response_id fails closed", () => {
+  const body = {
+    model: "gpt-4o",
+    messages: [{ role: "tool", tool_call_id: "call_orphan", content: "done" }],
+  };
+  assert.throws(
+    () => translateRequest("openai", "openai-responses", "gpt-4o", body, false, {}, "openai"),
+    /does not match a local tool call/i
+  );
 });

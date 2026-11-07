@@ -9,8 +9,11 @@ import {
   requiresReasoningContentPresence,
 } from "../../../utils/reasoningPlaceholder.ts";
 import { getReadableReasoningValue } from "../../../utils/reasoningFields.ts";
-import { generateToolCallId } from "../../helpers/toolCallHelper.ts";
-import { coerceToolCallArguments } from "../../helpers/toolArguments.ts";
+import {
+  coerceHistoricalToolCallArguments,
+  createToolHistoryError,
+} from "../../helpers/toolArguments.ts";
+import { requireResponsesCallId } from "../../helpers/responsesToolHistory.ts";
 import { chatStrictForResponses } from "../../helpers/toolStrict.ts";
 import {
   JsonRecord,
@@ -19,7 +22,6 @@ import {
   toRecord,
   toArray,
   toString,
-  clampCallId,
   imageUrlToText,
   normalizeVerbosity,
   normalizeResponsesReasoningEffort,
@@ -139,6 +141,7 @@ function buildResponsesTextParts(content: unknown): unknown[] {
   return [{ type: "input_text", text: "" }];
 }
 
+/** Encode Chat history as Responses input without fabricating tool completion or ownership. */
 export function openaiToOpenAIResponsesRequest(
   model: unknown,
   body: unknown,
@@ -159,6 +162,8 @@ export function openaiToOpenAIResponsesRequest(
     result.store = false;
   }
 
+  if (root.previous_response_id !== undefined)
+    result.previous_response_id = root.previous_response_id;
   const input = result.input as JsonRecord[];
 
   // Extract first system message as instructions
@@ -343,9 +348,9 @@ export function openaiToOpenAIResponsesRequest(
           }
           input.push({
             type: "function_call",
-            call_id: clampCallId(toString(toolCall.id).trim() || generateToolCallId()),
+            call_id: requireResponsesCallId(toolCall.id),
             name: fnName,
-            arguments: coerceToolCallArguments(fn.arguments),
+            arguments: coerceHistoricalToolCallArguments(fn.arguments, ""),
             status: "completed",
           });
         }
@@ -358,9 +363,9 @@ export function openaiToOpenAIResponsesRequest(
         if (fnName) {
           input.push({
             type: "function_call",
-            call_id: clampCallId(`call_${fnName}`),
+            call_id: requireResponsesCallId(`call_${fnName}`),
             name: fnName,
-            arguments: coerceToolCallArguments(fc.arguments),
+            arguments: coerceHistoricalToolCallArguments(fc.arguments, ""),
             status: "completed",
           });
         }
@@ -371,7 +376,7 @@ export function openaiToOpenAIResponsesRequest(
     if (role === "tool") {
       input.push({
         type: "function_call_output",
-        call_id: clampCallId(toString(msg.tool_call_id).trim()),
+        call_id: requireResponsesCallId(msg.tool_call_id),
         output:
           typeof msg.content === "string"
             ? msg.content
@@ -391,58 +396,37 @@ export function openaiToOpenAIResponsesRequest(
     if (role === "function") {
       input.push({
         type: "function_call_output",
-        call_id: clampCallId(`call_${toString(msg.name).trim()}`),
+        call_id: requireResponsesCallId(`call_${toString(msg.name).trim()}`),
         output: typeof msg.content === "string" ? msg.content : String(msg.content ?? ""),
         status: "completed",
       });
     }
   }
 
-  // Filter orphaned function_call_output items (no matching function_call)
-  // This happens when Claude Code compaction removes messages but leaves tool results
+  // A compacted orphan is still supplied history. Reject it even alongside a
+  // valid local pair, rather than silently deleting the caller's tool output.
   const knownCallIds = new Set(
     input
-      .filter(
-        (item: { type?: string; call_id?: string }) => item.type === "function_call" && item.call_id
-      )
-      .map((item: { type?: string; call_id?: string }) => item.call_id)
+      .filter((item: JsonRecord) => item.type === "function_call")
+      .map((item: JsonRecord) => item.call_id)
   );
-  const orphanFilteredInput = input.filter((item: { type?: string; call_id?: string }) => {
-    if (item.type === "function_call_output" && item.call_id) {
-      return knownCallIds.has(item.call_id);
-    }
-    return true;
-  });
-  result.input = orphanFilteredInput;
-
-  // Mirror of the filter above: a `function_call` whose output never arrived
-  // (truncated history, client crash mid-tool-loop) makes strict Responses
-  // upstreams reject the whole request with 400 "No tool output found for
-  // function call <id>". Pair every unpaired call with a synthesized empty
-  // output in place rather than dropping the call, so the model still sees
-  // that the call happened and the caller's history stays intact (#15216).
-  const pairedOutputCallIds = new Set(
-    orphanFilteredInput
-      .filter(
-        (item: { type?: string; call_id?: string }) =>
-          item.type === "function_call_output" && item.call_id
-      )
-      .map((item: { type?: string; call_id?: string }) => item.call_id)
-  );
-  const pairedInput: JsonRecord[] = [];
-  for (const item of orphanFilteredInput as Array<{ type?: string; call_id?: string }>) {
-    pairedInput.push(item);
-    if (item.type === "function_call" && item.call_id && !pairedOutputCallIds.has(item.call_id)) {
-      pairedInput.push({
-        type: "function_call_output",
-        call_id: item.call_id,
-        output: "",
-        status: "completed",
-      });
-      pairedOutputCallIds.add(item.call_id);
+  const hasPreviousResponse =
+    typeof root.previous_response_id === "string" && root.previous_response_id.trim() !== "";
+  for (const item of input as JsonRecord[]) {
+    if (
+      item.type === "function_call_output" &&
+      !knownCallIds.has(item.call_id) &&
+      !hasPreviousResponse
+    ) {
+      throw createToolHistoryError(
+        "Tool output does not match a local tool call",
+        "invalid_tool_call_output"
+      );
     }
   }
-  result.input = pairedInput;
+  // Preserve pending calls without inventing completion. The handler validates
+  // complete history after continuation policy has selected the actual wire body.
+  result.input = input;
 
   // If no system message, keep empty instructions
   if (!hasSystemMessage) {

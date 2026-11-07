@@ -3859,7 +3859,7 @@
   },
   "tests/unit/orphaned-tool-filter.test.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 4
+      "count": 3
     }
   },
   "tests/unit/payload-rules-route.test.ts": {
@@ -4704,7 +4704,7 @@
   },
   "tests/unit/translator-openai-responses-req.test.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 76
+      "count": 70
     }
   },
   "tests/unit/translator-openai-to-claude.test.ts": {

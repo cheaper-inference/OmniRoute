@@ -344,7 +344,10 @@ const OPENAI_INCOMPATIBLE_ECHO_FIELDS = [
   "cache_control",
 ];
 
-/** Translate request formats and enforce attachment preservation for CI dispatch. */
+/**
+ * Translate a request between protocols, applying target-specific compatibility rules and
+ * enforcing attachment preservation for CI dispatch.
+ */
 export function translateRequest(
   sourceFormat,
   targetFormat,
@@ -436,17 +439,23 @@ export function translateRequest(
   });
   const preserveResponsesReasoning = sourceFormat === FORMATS.OPENAI_RESPONSES && isReasoner;
 
-  // Ensure tool_calls have id; optionally normalize to 9-char for providers like Mistral
-  ensureToolCallIds(result, { use9CharId });
-
-  // Fix missing tool responses (insert empty tool_result if needed)
-  repairDisplacedToolResults(result);
-  fixMissingToolResponses(result);
+  // Responses history is validated by its translator; do not normalize malformed arguments
+  // or synthesize successful empty outputs before that boundary. Reordering a displaced tool
+  // result next to its call invents nothing, so it still applies there.
+  if (targetFormat !== FORMATS.OPENAI_RESPONSES) {
+    // Ensure tool_calls have id; optionally normalize to 9-char for providers like Mistral
+    ensureToolCallIds(result, { use9CharId });
+    // Fix missing tool responses (insert empty tool_result if needed)
+    repairDisplacedToolResults(result);
+    fixMissingToolResponses(result);
+  } else {
+    repairDisplacedToolResults(result);
+  }
 
   // Claude reconciliation preserves orphaned tool output as labelled user text.
   // Keep the raw result carriers until the target translator can perform that
   // lossless conversion; other target formats retain the strict orphan filter.
-  if (targetFormat !== FORMATS.CLAUDE) {
+  if (targetFormat !== FORMATS.CLAUDE && targetFormat !== FORMATS.OPENAI_RESPONSES) {
     stripOrphanedToolResults(result);
   }
 
