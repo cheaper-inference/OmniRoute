@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Slider } from "@omniroute/ui-kit/slider";
 import Modal from "@/shared/components/Modal";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 interface ProviderWindowCostRow {
   apiKeyKey: string;
@@ -140,8 +141,8 @@ export default function ProviderUsdCostModal({
       </p>
       <div className="min-h-0">
         {loading ? (
-          <div className="flex items-center gap-2 text-sm text-text-muted">
-            <Icon name="progress_activity" size={16} className="animate-spin" />
+          <div role="status" className="flex items-center gap-2 text-sm text-text-muted">
+            <Spinner decorative size="sm" />
             {t("loadingUsdCosts")}
           </div>
         ) : error ? (
