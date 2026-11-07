@@ -214,9 +214,10 @@ export function useLiveDashboard({
         // Subscribe to channels
         ws.send(JSON.stringify({ type: "subscribe", channels: stableChannels }));
 
-        // Heartbeat: send a periodic ping so the server (which only refreshes
-        // liveness from inbound messages) never terminates a healthy, idle
-        // connection for exceeding its inactivity timeout (#10319).
+        // Heartbeat: keep sending an application ping. Older servers refreshed
+        // liveness only from inbound messages and would otherwise terminate a
+        // healthy, idle connection (#10319). The current server counts only the
+        // protocol pong the browser sends on its own, and still answers this ping.
         stopPingHeartbeat();
         pingIntervalRef.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {

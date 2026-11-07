@@ -1359,7 +1359,7 @@ Visą mėnesį neveikianti paslauga naudoja apie 744 egzempliorių valandas, tod
 
 ## Diegimo scenarijai
 
-Norėdami gauti SRE rekomendacijų dėl relay backend (`ts/bifrost/auto` elgsenos, `9router` ir `CLIProxyAPI` išdėstymo bei didelio pralaidumo atsarginės strategijos), žr. [Relay Backend strategija](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Norėdami gauti relay backend SRE rekomendacijų (ts/bifrost/auto veikimo, 9router ir CLIProxyAPI išdėstymo bei didelio pralaidumo atsarginės strategijos), žr. [Relay Backend strategija](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimalus vietinis kūrimas
 
@@ -1390,7 +1390,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Izoliuota nuo tinklo / CI
+### Atskirta nuo tinklo / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1401,7 +1401,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS su atvirkštiniu tarpiniu serveriu („nginx“ + „Cloudflare“)
+### VPS su atvirkštiniu tarpiniu serveriu (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1863,3 +1863,14 @@ Naudoja `open-sse/services/combo.ts` ir `src/lib/quota/quotaScheduler.ts` išank
 | Kintamasis                     | Numatytoji | Šaltinio failas                              | Aprašymas                                                                                                                                                                                                                                                        |
 | ------------------------------ | ---------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`        | `src/lib/providerModels/modelSyncTimings.ts` | Nustatykite `1` kad registruotumėte fazės laiką, sugeneruotą užklausą ID ir fazės success/error rezultatus modelio sinchronizavimo metu. Išjungta visoms kitoms reikšmėms. Žurnaluose nepateikiami užklausų, paskyros, katalogo ir klaidų naudingieji kroviniai. |
+
+## Vietinis „OpenCode“ medijos analizės įrankis
+
+Naudoja `scripts/cli/omniroute-media-mcp.mjs`. Nustatykite šiuos kintamuosius vietinio įrankio proceso aplinkoje.
+
+| Kintamasis                 | Numatytoji reikšmė                                                                  | Aprašas                                                                                                          |
+| -------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (arba `~/.config/opencode/opencode.json`) | „OpenCode“ konfigūracija, kurią skaito medijos įrankis ir diegimo programa.                                      |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                         | Teikėjo įrašas iš „OpenCode“ konfigūracijos, kurį skaito medijos įrankis.                                        |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                              | Medijos įrankio pateikiamas modelis. Jo teikėjas turi palaikyti prašomus medijos tipus.                          |
+| `OMNIROUTE_MEDIA_API_KEY`  | Sukonfigūruotas teikėjo API raktas arba jo aplinkos kintamojo nuoroda               | Pasirenkamas kredencialo perrašymas. Laikykite jį vietinio proceso aplinkoje; niekada neįtraukite jo į saugyklą. |
