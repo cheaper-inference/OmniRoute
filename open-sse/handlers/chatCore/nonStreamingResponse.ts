@@ -696,7 +696,11 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       providerSpecificData: credentials?.providerSpecificData,
       log,
     });
-    const usage = toolLoopUsage ?? extractUsageFromResponse(responseBody, provider);
+    // Bill the provider leg's own usage: it was extracted from the body BEFORE
+    // translateNonStreamingClientResponse mutated it (applyClientUsageBuffer adds
+    // the #8331 client context buffer and can replace usage with an estimate).
+    // Re-extracting here would bill the buffer/estimate as real provider usage.
+    const usage = toolLoopUsage ?? okLeg.usage ?? extractUsageFromResponse(responseBody, provider);
     recordFinalInputCalibration(
       body,
       provider,
