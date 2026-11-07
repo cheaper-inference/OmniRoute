@@ -61,6 +61,24 @@ export const METADATA_KEYS = new Set([
   "request_id",
 ]);
 
+// Anthropic Messages SSE frames. Their text lives at fixed paths (block text, thinking
+// summary, tool-input JSON), so the walker never touches anything else in those frames:
+// usage, signatures, tool ids, server-tool results. The generic walker buffered every
+// unknown string as content and spliced it into the next text delta.
+const CLAUDE_EVENT_TYPES = new Set([
+  "message_start",
+  "content_block_start",
+  "content_block_delta",
+  "content_block_stop",
+  "message_delta",
+  "message_stop",
+  "ping",
+]);
+
+export function isClaudeStreamEvent(json: any): boolean {
+  return !!json && typeof json.type === "string" && CLAUDE_EVENT_TYPES.has(json.type);
+}
+
 // Responses API events whose `delta` carries tool-call arguments (JSON), not answer text.
 export function isResponsesToolArgsDelta(json: any): boolean {
   const t = json?.type;
@@ -160,6 +178,31 @@ export function createSseTextTransform(
   let currentEventLine = "";
   let lastEventLine = "";
   let pendingEventLine = "";
+  let sawEventLine = false;
+
+  // Claude flushes are synthetic content_block_delta frames: clients that dispatch on the
+  // SSE event name (the Anthropic SDKs) must see the matching event line, not the last one.
+  const claudeFlushEventLine = () => (sawEventLine ? "event: content_block_delta" : "");
+
+  // Only Claude flushes return batches (one frame per content block / delta type).
+  // Other formats can return a JSON array as a single payload; preserve that envelope.
+  const emitFlushed = (
+    flushedValue: unknown,
+    controller: TransformStreamDefaultController,
+    eventLine: string,
+    isClaudeFlush: boolean
+  ) => {
+    const values = isClaudeFlush && Array.isArray(flushedValue) ? flushedValue : [flushedValue];
+    for (const value of values) {
+      if (!value) continue;
+      const prefix = lastPrefix || "data: ";
+      const payload = typeof value === "string" ? value : JSON.stringify(value);
+      if (eventLine) {
+        controller.enqueue(encoder.encode(eventLine + "\n"));
+      }
+      controller.enqueue(encoder.encode(prefix + payload + "\n\n"));
+    }
+  };
 
   const handleLine = (line: string, controller: TransformStreamDefaultController) => {
     const trimmed = line.trim();
@@ -182,16 +225,12 @@ export function createSseTextTransform(
       const segment = line.startsWith("data: ") ? line.slice(6) : line.slice(5);
       if (segment === "[DONE]") {
         if (onFlush && !flushed) {
-          const flushedValue = onFlush(lastJson, isJsonStream, lastContentJson);
-          if (flushedValue) {
-            const prefix = lastPrefix || "data: ";
-            const payload =
-              typeof flushedValue === "string" ? flushedValue : JSON.stringify(flushedValue);
-            if (lastEventLine) {
-              controller.enqueue(encoder.encode(lastEventLine + "\n"));
-            }
-            controller.enqueue(encoder.encode(prefix + payload + "\n\n"));
-          }
+          emitFlushed(
+            onFlush(lastJson, isJsonStream, lastContentJson),
+            controller,
+            isClaudeStreamEvent(lastJson) ? claudeFlushEventLine() : lastEventLine,
+            isClaudeStreamEvent(lastJson)
+          );
           flushed = true;
         }
         if (pendingEventLine) {
@@ -272,7 +311,45 @@ export function createSseTextTransform(
             }
           };
 
-          sanitizeObject(json, 0, 0);
+          // Anthropic Messages frames: only the block text, thinking summary and tool-input
+          // JSON are answer text; everything else is protocol data that passes through
+          // byte-for-byte. Each block buffers under its own index, so a thinking block can
+          // never strand the text block that follows it.
+          const sanitizeClaudeEvent = (): boolean => {
+            const index = typeof json.index === "number" ? json.index : 0;
+            const compositeKey = `${index}_0`;
+            let touched = false;
+            const run = (holder: any, field: string, category: FieldCategory) => {
+              if (!holder || typeof holder[field] !== "string") return;
+              touched = true;
+              if (category === "partialJson" && opts?.processToolArgs !== true) return;
+              holder[field] = processor(
+                holder[field],
+                category,
+                isStopSignal,
+                compositeKey,
+                isSnapshot
+              );
+            };
+            if (json.type === "content_block_start") {
+              run(json.content_block, "text", "content");
+              run(json.content_block, "thinking", "reasoning");
+            } else if (json.type === "content_block_delta") {
+              const delta = json.delta;
+              const kind = delta?.type;
+              if (kind === "text_delta") run(delta, "text", "content");
+              else if (kind === "thinking_delta") run(delta, "thinking", "reasoning");
+              else if (kind === "input_json_delta") run(delta, "partial_json", "partialJson");
+            }
+            return touched;
+          };
+
+          const claudeEvent = isClaudeStreamEvent(json);
+          if (claudeEvent) {
+            matched = sanitizeClaudeEvent();
+          } else {
+            sanitizeObject(json, 0, 0);
+          }
 
           if (!matched) {
             // Normal state for control-only chunks (closing frame, usage-only frame): not a
@@ -289,22 +366,20 @@ export function createSseTextTransform(
           }
 
           if (isStopSignal && onFlush && !flushed) {
-            const flushedValue = onFlush(
-              lastJson || json,
-              isJsonStream,
-              lastContentJson || lastJson || json
-            ); // Use json as fallback just in case
-            if (flushedValue) {
-              const prefix = lastPrefix || "data: ";
-              const payload =
-                typeof flushedValue === "string" ? flushedValue : JSON.stringify(flushedValue);
-              // Only enqueue if the flushed value actually has content (onFlush usually returns null if buffer is empty now)
-              if (lastEventLine) {
-                controller.enqueue(encoder.encode(lastEventLine + "\n"));
-              }
-              controller.enqueue(encoder.encode(prefix + payload + "\n\n"));
-            }
-            flushed = true;
+            // A Claude stop signal passes its own frame: the flush helper drains every block
+            // that still holds a tail, and the last frame may be a `ping`, which would send
+            // the flush down the generic path. Other stop signals keep the last frame as the
+            // envelope template, as before.
+            const flushBase = claudeEvent ? json : lastJson || json;
+            emitFlushed(
+              onFlush(flushBase, isJsonStream, lastContentJson || lastJson || json),
+              controller,
+              claudeEvent ? claudeFlushEventLine() : lastEventLine,
+              claudeEvent
+            );
+            // A per-block drain must not latch: a block that never sent its own
+            // content_block_stop still gets drained by message_delta / message_stop.
+            flushed = json.type !== "content_block_stop";
           }
 
           if (!isStopSignal && !isSnapshot) {
@@ -358,6 +433,7 @@ export function createSseTextTransform(
         if (pendingEventLine) {
           controller.enqueue(encoder.encode(pendingEventLine + "\n"));
         }
+        sawEventLine = true;
         currentEventLine = line;
         pendingEventLine = line;
       } else {
@@ -410,16 +486,12 @@ export function createSseTextTransform(
           pendingEventLine = "";
         }
         if (onFlush && !flushed) {
-          const flushedValue = onFlush(lastJson, isJsonStream, lastContentJson);
-          if (flushedValue) {
-            const prefix = lastPrefix || "data: ";
-            const payload =
-              typeof flushedValue === "string" ? flushedValue : JSON.stringify(flushedValue);
-            if (lastEventLine) {
-              controller.enqueue(encoder.encode(lastEventLine + "\n"));
-            }
-            controller.enqueue(encoder.encode(prefix + payload + "\n\n"));
-          }
+          emitFlushed(
+            onFlush(lastJson, isJsonStream, lastContentJson),
+            controller,
+            isClaudeStreamEvent(lastJson) ? claudeFlushEventLine() : lastEventLine,
+            isClaudeStreamEvent(lastJson)
+          );
         }
       } catch (err) {
         console.error("[SSE-TRANSFORM] Error in flush:", err);
