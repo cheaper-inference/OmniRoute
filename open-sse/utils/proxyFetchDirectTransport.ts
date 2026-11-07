@@ -148,18 +148,22 @@ async function sendDirectWithRetry(
         input,
         {
           ...directOptions,
-          dispatcher: connectGuard
-            ? getGuardedDispatcher(connectGuard)
-            : dedicatedCodexImageRequest
-              ? getDedicatedCodexImageDispatcher(imageTimeout)
-              : attempt === 0
-                ? getDefaultDispatcher(hostname)
-                : getRetryDispatcher(hostname),
+          dispatcher: directAttemptDispatcher(
+            connectGuard,
+            dedicatedCodexImageRequest,
+            imageTimeout,
+            hostname,
+            attempt
+          ),
         },
         withPayloadTraffic(raw, null, deps.recordTraffic),
-        dedicatedCodexImageRequest
-          ? imageTimeout
-          : timeoutFor(attempt === 0 && replayTimeout ? 0 : 1)
+        directAttemptTimeout(
+          dedicatedCodexImageRequest,
+          imageTimeout,
+          timeoutFor,
+          attempt,
+          replayTimeout
+        )
       );
     } catch (error) {
       // Validation tags errors, so inspect the original connection code first.
@@ -178,6 +182,29 @@ async function sendDirectWithRetry(
     }
   }
   throw lastError;
+}
+
+function directAttemptTimeout(
+  dedicatedCodexImageRequest: boolean,
+  imageTimeout: number,
+  timeoutFor: (attempt: number) => number,
+  attempt: number,
+  replayTimeout: boolean
+): number {
+  if (dedicatedCodexImageRequest) return imageTimeout;
+  return timeoutFor(attempt === 0 && replayTimeout ? 0 : 1);
+}
+
+function directAttemptDispatcher(
+  connectGuard: ConnectGuardMode | undefined,
+  dedicatedCodexImageRequest: boolean,
+  imageTimeout: number,
+  hostname: string | undefined,
+  attempt: number
+) {
+  if (connectGuard) return getGuardedDispatcher(connectGuard);
+  if (dedicatedCodexImageRequest) return getDedicatedCodexImageDispatcher(imageTimeout);
+  return attempt === 0 ? getDefaultDispatcher(hostname) : getRetryDispatcher(hostname);
 }
 
 async function directRetryBackoff(error: unknown): Promise<void> {

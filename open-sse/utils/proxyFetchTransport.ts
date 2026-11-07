@@ -209,6 +209,34 @@ function finalProxyError(error: unknown, proxyUrl: string, target: string, sourc
   return sanitized;
 }
 
+async function sendProxyAttempt(
+  input: RequestInfo | URL,
+  options: FetchWithDispatcherOptions,
+  deps: ProxyFetchDeps,
+  proxyUrl: string,
+  trafficProxy: unknown,
+  dedicatedCodexImageRequest: boolean,
+  attempt: number
+): Promise<Response> {
+  const meteredFetch = withPayloadTraffic(rawUndici(deps), trafficProxy, deps.recordTraffic);
+  const imageTimeout = dedicatedCodexImageRequest ? codexImageResponseStartTimeoutMs() : 0;
+  return dedicatedCodexImageRequest
+    ? await directFetchWithBoundedResponseStart(
+        input,
+        {
+          ...options,
+          dispatcher: getDedicatedCodexImageProxyDispatcher(proxyUrl, imageTimeout),
+        },
+        meteredFetch,
+        imageTimeout
+      )
+    : await meteredFetch(input, {
+        ...options,
+        dispatcher:
+          attempt === 0 ? createProxyDispatcher(proxyUrl) : getProxyRetryDispatcher(proxyUrl),
+      });
+}
+
 async function sendProxy(
   input: RequestInfo | URL,
   options: FetchWithDispatcherOptions,
@@ -223,23 +251,15 @@ async function sendProxy(
   let lastError: unknown;
   for (let attempt = 0; attempt < max; attempt++) {
     try {
-      const meteredFetch = withPayloadTraffic(rawUndici(deps), trafficProxy, deps.recordTraffic);
-      const imageTimeout = dedicatedCodexImageRequest ? codexImageResponseStartTimeoutMs() : 0;
-      const response = dedicatedCodexImageRequest
-        ? await directFetchWithBoundedResponseStart(
-            input,
-            {
-              ...options,
-              dispatcher: getDedicatedCodexImageProxyDispatcher(proxyUrl, imageTimeout),
-            },
-            meteredFetch,
-            imageTimeout
-          )
-        : await meteredFetch(input, {
-            ...options,
-            dispatcher:
-              attempt === 0 ? createProxyDispatcher(proxyUrl) : getProxyRetryDispatcher(proxyUrl),
-          });
+      const response = await sendProxyAttempt(
+        input,
+        options,
+        deps,
+        proxyUrl,
+        trafficProxy,
+        dedicatedCodexImageRequest,
+        attempt
+      );
       recordProxiedSuccess(proxyUrl, target);
       return response;
     } catch (error) {
