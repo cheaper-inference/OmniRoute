@@ -24,7 +24,10 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { stripGpt5ReasoningWhenTools } from "../../open-sse/services/gpt5SamplingGuard.ts";
+import {
+  foldReasoningForOpenAIChat,
+  stripGpt5ReasoningWhenTools,
+} from "../../open-sse/services/gpt5SamplingGuard.ts";
 
 // Chat Completions models in this suite use gpt-5.4/gpt-5.5 (targetFormat "openai"),
 // which stay on /chat/completions and must keep being stripped. gpt-5.6-sol is reserved
@@ -180,4 +183,23 @@ test("if gpt-5.6 were ever NOT routed to /v1/responses, the strip would still ap
   };
   const result = stripGpt5ReasoningWhenTools(body, "openai", "gpt-5.6-sol", "openai");
   assert.equal(result.reasoning_effort, undefined);
+});
+
+test("foldReasoningForOpenAIChat drops a reasoning object that carries no effort", () => {
+  const body = { model: "gpt-5.4", reasoning: { summary: "auto" }, messages: [] };
+  const result = foldReasoningForOpenAIChat(body, "openai", "openai");
+  assert.equal("reasoning" in result, false);
+  assert.equal("reasoning_effort" in result, false);
+  assert.deepEqual(body.reasoning, { summary: "auto" });
+});
+
+test("foldReasoningForOpenAIChat returns the same body when nothing needs folding", () => {
+  const body = { model: "gpt-5.4", reasoning_effort: "high", messages: [] };
+  assert.equal(foldReasoningForOpenAIChat(body, "openai", "openai"), body);
+});
+
+test("foldReasoningForOpenAIChat leaves other providers and Responses targets alone", () => {
+  const body = { model: "gpt-5.4", reasoning: { effort: "high" } };
+  assert.equal(foldReasoningForOpenAIChat(body, "openrouter", "openai"), body);
+  assert.equal(foldReasoningForOpenAIChat(body, "openai", "openai-responses"), body);
 });
