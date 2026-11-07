@@ -8,7 +8,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import test, { after } from "node:test";
+import test, { after, mock } from "node:test";
 
 import {
   ImportGraph,
@@ -93,6 +93,30 @@ test("each file's imports are read and resolved once per graph", () => {
   fs.writeFileSync(core, 'import { a } from "./a";\n');
   assert.equal(graph.edgesOf(core), first, "a second lookup re-read the file");
   assert.deepEqual(graph.edgesOf(path.join(root, "src/lib/none.ts")), []);
+});
+
+test("building the map reads a source shared by several tests once", () => {
+  const root = graphFixture();
+  execFileSync("git", ["init", "-q"], { cwd: root });
+  execFileSync("git", ["add", "-A"], { cwd: root });
+  const core = path.join(root, "src/lib/core.ts");
+  const readFileSync = fs.readFileSync;
+  let coreReads = 0;
+  const spy = mock.method(fs, "readFileSync", (...args: Parameters<typeof fs.readFileSync>) => {
+    if (path.resolve(String(args[0])) === core) coreReads += 1;
+    return readFileSync(...args);
+  });
+  try {
+    const map = buildTestImpactMap(root);
+    // Both tests reach core.ts; the builder shares one graph, so it is read once.
+    assert.deepEqual(map.sources["src/lib/core.ts"], [
+      "tests/unit/a.test.ts",
+      "tests/unit/x.test.ts",
+    ]);
+    assert.equal(coreReads, 1);
+  } finally {
+    spy.mock.restore();
+  }
 });
 
 test("the map lists each source under every test that reaches it", () => {
