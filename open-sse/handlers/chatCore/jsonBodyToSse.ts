@@ -17,6 +17,7 @@ import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import { withBodyTimeout as defaultWithBodyTimeout } from "../../utils/stream.ts";
 import { synthesizeOpenAiSseFromJson as defaultSynthesize } from "../../utils/jsonToSse.ts";
 import { prependBufferedChunks } from "../../utils/streamReadiness.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 
 type LoggerLike = { debug?: (...args: unknown[]) => void } | null | undefined;
 
@@ -120,7 +121,7 @@ export async function maybeConvertJsonBodyToSse(
   const { sseResponse, jsonBody } = await sniffJsonBodyForSse(providerResponse, ctx, deps);
   if (sseResponse) return inheritEmptyTurnPolicy(providerResponse, sseResponse);
 
-  const jsonText = await deps.withBodyTimeout<string>(jsonBody.text());
+  const jsonText = await deps.withBodyTimeout<string>(readResponseTextWithinCap(jsonBody));
   const synthesizedSse = deps.synthesizeOpenAiSseFromJson(jsonText);
   const rebuiltHeaders = new Headers(providerResponse.headers);
   rebuiltHeaders.delete("content-length");

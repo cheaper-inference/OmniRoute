@@ -1,3 +1,4 @@
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { isNoAuthProviderKey } from "@/shared/utils/noAuthProviders";
 import { isOpencodeFreeTierRefusalForProvider } from "../../executors/opencodeGeoBlock.ts";
 import { isProviderSafetyRefusalBody } from "../../utils/providerSafety.ts";
@@ -20,10 +21,7 @@ export async function shouldSkipCredentialRefresh(
 ): Promise<boolean> {
   if (isNoAuthProviderKey(provider)) return true;
   if (!provider) return false;
-  const bodyText = await response
-    .clone()
-    .text()
-    .catch(() => null); // an unreadable body cannot carry a safety code; keep the refresh
+  const bodyText = await readResponseTextWithinCap(response.clone()).catch(() => null); // an unreadable or over-cap body cannot carry a safety code; keep the refresh
   if (bodyText !== null && isProviderSafetyRefusalBody(response.status, bodyText)) return true;
   if (!provider.toLowerCase().startsWith("opencode")) return false;
   return isOpencodeFreeTierRefusalForProvider(provider, response.status, bodyText);
