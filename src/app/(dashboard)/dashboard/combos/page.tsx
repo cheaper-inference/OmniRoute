@@ -124,6 +124,12 @@ import {
   normalizeIntelligentRoutingConfig,
 } from "@/lib/combos/intelligentRouting";
 import { getComboStepTarget } from "@/lib/combos/steps";
+import {
+  findComboStepConnectionLabel,
+  formatComboStepAccountLabel,
+  resolveComboStepAccountState,
+  resolveLiveConnectionIds,
+} from "@/lib/combos/stepAccountState";
 import { DEAD_COMBO_CONFIG_KEYS } from "@/lib/combos/deadConfigKeys";
 import { modelFamily } from "@/lib/combos/invariants";
 import { resolveProviderAlias } from "@omniroute/open-sse/services/providerAlias.ts";
@@ -766,6 +772,44 @@ function findBuilderProviderByIdentifier(builderProviders, providerIdentifier) {
   );
 }
 
+/**
+ * Connection ids this provider currently has. Unknown until the builder payload
+ * has loaded; after that, an absent provider means it has no connections left.
+ */
+function listProviderConnectionIds(builderProviders, builderProvider) {
+  return resolveLiveConnectionIds({
+    providersLoaded: Array.isArray(builderProviders) && builderProviders.length > 0,
+    providerConnections: builderProvider?.connections,
+  });
+}
+
+/**
+ * `prefix · <account state>` for a step, or null when the step pins nothing and
+ * its scope is not dead (the caller keeps its own "dynamic account" wording).
+ * Shared by the model and provider-wildcard branches so the two never drift.
+ */
+function formatComboStepWithAccount(
+  prefix,
+  step,
+  { builderProviders, builderProvider, showFullEmails }
+) {
+  const connectionId = step.connectionId || null;
+  const liveConnectionIds = listProviderConnectionIds(builderProviders, builderProvider);
+  const rawConnectionLabel =
+    findComboStepConnectionLabel(builderProvider?.connections, connectionId) || step.label || null;
+  const connectionLabel = rawConnectionLabel
+    ? pickDisplayValue([rawConnectionLabel], showFullEmails, rawConnectionLabel)
+    : null;
+
+  const accountState = resolveComboStepAccountState(step, liveConnectionIds);
+  if (!connectionId && accountState !== "unroutable") return null;
+
+  return `${prefix} · ${formatComboStepAccountLabel(accountState, {
+    connectionId,
+    connectionLabel,
+  })}`;
+}
+
 function deriveCandidatePoolFromModels(models) {
   const providerIds = new Set<string>();
 
@@ -816,22 +860,13 @@ function formatComboEntryDisplay(
       return wildcardLabel;
     }
 
-    const connectionId = normalizedEntry.connectionId || null;
-    const rawConnectionLabel =
-      (connectionId &&
-        builderProvider?.connections?.find((connection) => connection.id === connectionId)
-          ?.label) ||
-      normalizedEntry.label ||
-      null;
-    const connectionLabel = rawConnectionLabel
-      ? pickDisplayValue([rawConnectionLabel], showFullEmails, rawConnectionLabel)
-      : null;
+    const withAccount = formatComboStepWithAccount(wildcardLabel, normalizedEntry, {
+      builderProviders,
+      builderProvider,
+      showFullEmails,
+    });
 
-    if (connectionId) {
-      return `${wildcardLabel} · ${connectionLabel || `acct ${connectionId.slice(0, 8)}`}`;
-    }
-
-    return `${wildcardLabel} · dynamic account`;
+    return withAccount ?? `${wildcardLabel} · dynamic account`;
   }
 
   const parsed = parseQualifiedModel(normalizedEntry.model);
@@ -848,19 +883,16 @@ function formatComboEntryDisplay(
     return `${providerLabel}/${modelLabel}`;
   }
 
-  const connectionId = normalizedEntry.connectionId || null;
-  const rawConnectionLabel =
-    (connectionId &&
-      builderProvider?.connections?.find((connection) => connection.id === connectionId)?.label) ||
-    normalizedEntry.label ||
-    null;
-  const connectionLabel = rawConnectionLabel
-    ? pickDisplayValue([rawConnectionLabel], showFullEmails, rawConnectionLabel)
-    : null;
-
-  if (connectionId) {
-    return `${providerLabel}/${modelLabel} · ${connectionLabel || `acct ${connectionId.slice(0, 8)}`}`;
-  }
+  const withAccount = formatComboStepWithAccount(
+    `${providerLabel}/${modelLabel}`,
+    normalizedEntry,
+    {
+      builderProviders,
+      builderProvider,
+      showFullEmails,
+    }
+  );
+  if (withAccount) return withAccount;
 
   if (normalizedEntry.providerId || builderProvider) {
     return `${providerLabel}/${modelLabel} · dynamic account`;
