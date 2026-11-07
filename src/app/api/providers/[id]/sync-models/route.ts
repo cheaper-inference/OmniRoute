@@ -369,16 +369,24 @@ export async function selfFetchWithRetry(
 // fetchProviderModelsForSync — private orchestrator (uses selfFetchWithRetry)
 // ---------------------------------------------------------------------------
 
-async function fetchProviderModelsForSync(request: Request, connectionId: string) {
+async function fetchProviderModelsForSync(
+  request: Request,
+  connectionId: string,
+  mode: ManagedModelImportMode
+) {
   const safeOrigin = getModelSyncInternalBaseUrl();
   const modelsPath =
     `/api/providers/${encodeURIComponent(connectionId)}/models` +
     "?refresh=true&excludeCustom=true";
   const peerLocality = request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) || "remote";
   const denyLocalSpawn = peerLocality !== "loopback" || isModelSyncLocalSpawnDenied(request);
+  // A scheduled sync reads the chat surface only. An explicit import ("merge")
+  // reads every surface: importManagedModels still keeps the synced list to chat
+  // models, and stores the models that serve only non-chat endpoints as imported
+  // rows, which is how a media-only provider's catalog reaches the dashboard.
   const headers = {
     cookie: request.headers.get("cookie") || "",
-    "x-omniroute-model-surface": "chat",
+    ...(mode === "merge" ? {} : { "x-omniroute-model-surface": "chat" }),
     ...buildModelSyncInternalHeaders({ denyLocalSpawn }),
   };
 
@@ -550,7 +558,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
 
     const modelsRes = await timings.measure("discovery", () =>
-      fetchProviderModelsForSync(request, id)
+      fetchProviderModelsForSync(request, id, mode)
     );
 
     const duration = Date.now() - start;
