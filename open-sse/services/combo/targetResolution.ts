@@ -53,6 +53,7 @@ import {
 } from "./comboStructure.ts";
 import { applyContextRequirements } from "./contextRequirements.ts";
 import { recordComboFailure } from "./failureTracker.ts";
+import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
 import {
   buildAllTargetsCoolingDownResponse,
   buildEmptyComboTargetsPayload,
@@ -603,7 +604,7 @@ async function applyContinuityFilters(
     if (exhaustion) {
       // Match handleComboChat: only track failures under context-cache protection pins.
       const effectiveSessionId: string | null = combo.context_cache_protection
-        ? (relayOptions?.sessionId ?? null)
+        ? scopeHandoffSessionId(relayOptions?.sessionId, relayOptions?.apiKeyId)
         : null;
       recordComboFailure(effectiveSessionId, combo.name);
       return {
@@ -629,7 +630,7 @@ async function applyContinuityFilters(
   orderedTargets = applyContextRequirements(orderedTargets, config.contextRequirements, log);
   if (orderedTargets.length === 0 && preContextTargets.length > 0) {
     const effectiveSessionId: string | null = combo.context_cache_protection
-      ? (relayOptions?.sessionId ?? null)
+      ? scopeHandoffSessionId(relayOptions?.sessionId, relayOptions?.apiKeyId)
       : null;
     recordComboFailure(effectiveSessionId, combo.name);
     const { message, diagnostics } = buildEmptyComboTargetsPayload(
@@ -802,7 +803,9 @@ function buildWeightedExhaustionResponse(
     `Weighted selection: every target excluded before dispatch — ${formatPreDispatchExclusions(exclusions)}`
   );
   recordComboFailure(
-    deps.combo.context_cache_protection ? (deps.relayOptions?.sessionId ?? null) : null,
+    deps.combo.context_cache_protection
+      ? scopeHandoffSessionId(deps.relayOptions?.sessionId, deps.relayOptions?.apiKeyId)
+      : null,
     deps.combo.name
   );
   return coolingDown;

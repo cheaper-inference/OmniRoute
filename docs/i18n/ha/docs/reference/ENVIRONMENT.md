@@ -1365,11 +1365,11 @@ Sake jujjuya sabis ɗin gidan yanar gizo kyauta bayan kusan mintuna 15 ba tare d
 
 Sabis ɗin da aka kiyaye tsawon wata ɗaya yana amfani da kusan sa'o'i 744 misali, don haka duba shi akan izni na matakin kyauta na yanzu.
 
-## Yanayin Tura Tsarin
+## Yanayin Aiwatarwa
 
-Don jagorar SRE ta relay backend (halayen ts/bifrost/auto, wurin sanya 9router da CLIProxyAPI, da dabarar madadin mai yawan zirga-zirga), duba [Dabarar Relay Backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Don jagorar SRE na backend na relay (halayen ts/bifrost/auto, sanya 9router da CLIProxyAPI, da dabarar fallback mai yawan zirga-zirga), duba [Dabarun Backend na Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
-### Ƙaramin Ci gaban Gida
+### Ƙaramin Ci gaban A Gida
 
 ```bash
 JWT_SECRET=$(openssl rand -base64 48)
@@ -1379,7 +1379,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Docker na Samarwa
+### Samarwa ta Docker
 
 ```bash
 JWT_SECRET=<generated>
@@ -1398,7 +1398,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Ba tare da Haɗin Cibiyar Sadarwa ba / CI
+### Ba tare da Haɗin Sadarwa / CI ba
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1871,3 +1871,14 @@ Ana amfani da `open-sse/services/combo.ts` da `src/lib/quota/quotaScheduler.ts` 
 | Mai canzawa                    | Tsohuwar | Fayil na asali                               | Bayani                                                                                                                                                                                                                                           |
 | ------------------------------ | -------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`      | `src/lib/providerModels/modelSyncTimings.ts` | Saita zuwa `1` don shiga lokacin lokaci, buƙatun da aka samar da ID da sakamakon success/error na lokaci yayin aiki tare da ƙira. An kashe don duk sauran dabi'u. Logs sun watsar da buƙatun, asusu, katalogi da abubuwan biyan kuɗi na kuskure. |
+
+## Kayan aikin nazarin kafofin watsa labarai na OpenCode na cikin gida
+
+Ana amfani da shi ta `scripts/cli/omniroute-media-mcp.mjs`. Saita waɗannan a cikin yanayin aikin kayan aikin na cikin gida.
+
+| Sauyi                      | Tsoho                                                                             | Bayani                                                                                                                                    |
+| -------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (ko `~/.config/opencode/opencode.json`) | Tsarin OpenCode da kayan aikin kafofin watsa labarai da mai sakawa ke karantawa.                                                          |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                       | Shigar mai samarwa da kayan aikin kafofin watsa labarai ke karantawa daga tsarin OpenCode.                                                |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                            | Samfurin da kayan aikin kafofin watsa labarai ke aika. Dole ne mai samar da shi ya goyi bayan nau’ikan kafofin watsa labarai da aka nema. |
+| `OMNIROUTE_MEDIA_API_KEY`  | Maɓallin API na mai samarwa da aka tsara ko ma’anar yanayinsa                     | Shaidar zaɓi don sauyawa. Ajiye shi a cikin yanayin aikin na cikin gida; kada a taɓa ƙaddamar da shi.                                     |
