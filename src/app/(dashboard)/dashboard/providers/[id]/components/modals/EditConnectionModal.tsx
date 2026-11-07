@@ -19,7 +19,7 @@ import {
   normalizeAntigravityClientProfileSetting,
 } from "@/shared/constants/antigravityClientProfile";
 import { parseExtraApiKeys } from "@/shared/utils/parseApiKeys";
-import { providerHasFreeModels } from "@/shared/utils/freeModels";
+import { freeOnlyImportHintKey, providerSupportsFreeOnlyImport } from "@/shared/utils/freeModels";
 import { useNotificationStore } from "@/store/notificationStore";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
 import type { ConnectionRateLimitOverrides } from "@/lib/db/providers/columns";
@@ -127,7 +127,10 @@ export default function EditConnectionModal({
   const provider = connection?.provider || providerId;
   const connectionAuthType = connection?.authType;
   const connectionProviderSpecificData = connection?.providerSpecificData;
-  const showFreeModelsToggle = providerHasFreeModels(provider);
+  // A retired offer must not trap an existing free-only preference or clear it silently.
+  const showFreeModelsToggle =
+    providerSupportsFreeOnlyImport(provider) ||
+    connectionProviderSpecificData?.importFreeModelsOnly === true;
   const [formData, setFormData] = useState({
     name: "",
     priority: 1,
@@ -897,7 +900,7 @@ export default function EditConnectionModal({
               checked={formData.importFreeModelsOnly}
               onChange={(checked) => setFormData({ ...formData, importFreeModelsOnly: checked })}
               label={t("importFreeModelsOnlyLabel")}
-              description={t("importFreeModelsOnlyHint")}
+              description={t(freeOnlyImportHintKey(provider))}
             />
           )}
           {preserveEncryptedReasoningToggle}

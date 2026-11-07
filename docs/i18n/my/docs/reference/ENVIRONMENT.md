@@ -1359,11 +1359,11 @@ Render spins a free web service down after about 15 minutes without inbound traf
 
 ဝန်ဆောင်မှုတစ်ခုသည် တစ်လလုံးနိုးကြားနေစေရန် 744 သာဓကနာရီများကိုအသုံးပြုသည်၊ ထို့ကြောင့် Render ၏လက်ရှိအခမဲ့အဆင့်ခွင့်ပြုငွေနှင့် ပတ်သက်၍ ၎င်းကိုစစ်ဆေးပါ။
 
-## ဖြန့်ကျက်မှု အခြေအနေများ
+## Deployment Scenarios
 
-relay backend SRE လမ်းညွှန်ချက်များ (ts/bifrost/auto အပြုအမူ၊ 9router နှင့် CLIProxyAPI ထားရှိမှု၊ high-throughput fallback မဟာဗျူဟာ) အတွက် [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md) ကို ကြည့်ပါ။
+Relay backend SRE လမ်းညွှန်ချက်များ (ts/bifrost/auto အပြုအမူ၊ 9router နှင့် CLIProxyAPI နေရာချထားမှု၊ high-throughput fallback မဟာဗျူဟာ) အတွက် [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md) ကိုကြည့်ပါ။
 
-### အနည်းဆုံး Local Development
+### Minimal Local Development
 
 ```bash
 JWT_SECRET=$(openssl rand -base64 48)
@@ -1403,7 +1403,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### Reverse Proxy ပါသော VPS (nginx + Cloudflare)
+### VPS with Reverse Proxy (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1865,3 +1865,14 @@ OmniConductor hub အလုပ်များကို ဒေသခံ A2A TaskM
 | ပြောင်းလဲနိုင်သော              | ပုံသေ | အရင်းအမြစ်ဖိုင်                              | ဖော်ပြချက်                                                                                                                                                                                                                                                              |
 | ------------------------------ | ----- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`   | `src/lib/providerModels/modelSyncTimings.ts` | မော်ဒယ်ထပ်တူပြုခြင်းအတွင်း အဆင့်အချိန်ကိုက်၊ ထုတ်ပေးထားသော တောင်းဆိုချက် ID နှင့် အဆင့် success/error ရလဒ်များကို `1` သို့ သတ်မှတ်ပါ။ အခြားတန်ဖိုးများအားလုံးအတွက် ပိတ်ထားသည်။ မှတ်တမ်းများသည် တောင်းဆိုမှု၊ အကောင့်၊ ကတ်တလောက်နှင့် အမှားအယွင်းများကို ချန်လှပ်ထားသည်။ |
+
+## OpenCode မီဒီယာ-ခွဲခြမ်းစိတ်ဖြာမှု ကိရိယာ
+
+`scripts/cli/omniroute-media-mcp.mjs` က အသုံးပြုသည်။ ၎င်းတို့ကို စက်တွင်းကိရိယာ လုပ်ငန်းစဉ် ပတ်ဝန်းကျင်တွင် သတ်မှတ်ပါ။
+
+| Variable                   | မူလတန်ဖိုး                                                                               | ဖော်ပြချက်                                                                                                       |
+| -------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (သို့မဟုတ် `~/.config/opencode/opencode.json`) | မီဒီယာကိရိယာနှင့် installer က ဖတ်ရှုသည့် OpenCode ဖွဲ့စည်းပုံ။                                                   |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                              | မီဒီယာကိရိယာက OpenCode ဖွဲ့စည်းပုံမှ ဖတ်ရှုသည့် provider entry။                                                  |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                                   | မီဒီယာကိရိယာက တင်သွင်းသည့် model။ ၎င်း၏ provider သည် တောင်းဆိုထားသော မီဒီယာအမျိုးအစားများကို ပံ့ပိုးရမည်။        |
+| `OMNIROUTE_MEDIA_API_KEY`  | Configured provider API key သို့မဟုတ် ၎င်း၏ environment reference                        | ရွေးချယ်နိုင်သော credential override။ ၎င်းကို စက်တွင်းလုပ်ငန်းစဉ် ပတ်ဝန်းကျင်တွင် ထားရှိပါ။ commit မလုပ်ပါနှင့်။ |
