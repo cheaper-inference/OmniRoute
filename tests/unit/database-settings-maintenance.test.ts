@@ -604,7 +604,7 @@ test("cleanupUsageHistory rolls up and deletes old rows using the same day bound
   const remaining = db.prepare("SELECT COUNT(*) AS count FROM usage_history").get() as CountRow;
   assert.equal(remaining.count, 1);
 
-  const daily = db.prepare("SELECT * FROM daily_usage_summary").get() as UsageSummaryRow;
+  const daily = db.prepare("SELECT * FROM usage_daily_summary").get() as UsageSummaryRow;
   assert.equal(daily.total_requests, 1);
   assert.equal(daily.total_input_tokens, 100);
   assert.equal(daily.total_output_tokens, 40);

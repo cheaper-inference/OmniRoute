@@ -1101,6 +1101,7 @@
   "disabled": "Deaktiveret",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Diriger budgetudtømte anmodninger til den gratis nød-fallback-udbyder/-model.",
   "featureFlagArenaEloSyncEnabledDescription": "Aktivér periodisk ELO-synkronisering fra Arena AI-førertavlen til rangering af modelintelligens.",
+  "featureFlagUsageDailyRollupEnabledDescription": "Udgiv lukkede brugsdage i usage_daily_summary forud for opbevaring, så lange analysevinduer læser daglige totaler i stedet for rå rækker. Deaktiveret som standard: offentliggjorte dage mister deres per-forbindelse, per-API-nøgle, succes og latensdetaljer i analyser, og deres omkostninger forbliver som prissat, når de offentliggøres.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Generér og indsæt samtaleresuméer, når combo-routing skifter model. Deaktiver dette for at behandle modelskift uafhængigt og forhindre baggrundsanmodninger om overdragelse for alle eksisterende og fremtidige comboer.",
   "featureFlagReasoningReplayEnabledDescription": "Cache og afspil modellens ræsonnement på tværs af samtaler med flere ture. Deaktiver for at stoppe lagring og genindsættelse af ræsonnement.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Reklamer claude/&lt;provider&gt;/&lt;model&gt; spejl-id'er på /v1/models, så Claude Code gateway modelopdagelse viser ikke-Claude modeller. Advarsel: fordobler katalogposter for alle klienter, når det er aktiveret globalt.",
@@ -3402,12 +3403,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Brug URL, der kan nås fra maskinen, der kører Pi. Det OpenAI-kompatible /v1-slutpunkt tilføjes automatisk.",
     "piManualMergeHint": "Kun forhåndsvisning. Flet denne providers.omniroute-indgang til models.json, så dine andre udbydere og indstillinger forbliver intakte.",
-    "removeMapping": "Fjern tilknytning",
     "customUrl": "Tilpasset URL",
     "customEndpointAria": "Tilpasset slutpunkt",
     "useDefaultKey": "Brug OmniRoute-standnøglen",
     "mainModelAria": "Hovedmodel",
-    "manualConfigTitle": "Grok Build manuel konfiguration"
+    "manualConfigTitle": "Grok Build manuel konfiguration",
+    "removeMapping": "Fjern tilknytning"
   },
   "modelCatalog": {
     "title": "Models & Combos",
@@ -9238,9 +9239,9 @@
         "financial": "Finansiel",
         "brazilian": "Brasiliansk",
         "usa": "USA",
-        "full": "Fuld",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (Sydafrika)"
+        "popia": "POPIA (Sydafrika)",
+        "full": "Fuld"
       },
       "builtinTypes": "Indbyggede typer",
       "types": {
@@ -10176,6 +10177,10 @@
     "healthExtraUsageBypass": "Kvoten er opbrugt; ekstra forbrug er tilladt, så tjenesten fortsætter.",
     "healthPaidCreditsBypass": "Kvoten er opbrugt; tilgængelige betalte kreditter gør det muligt at fortsætte tjenesten.",
     "healthFilteringBypass": "Kvoten er opbrugt; lokal kvotefiltrering er deaktiveret, så tjenesten fortsætter.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Brug",
     "grokExtraUsageCredits": "Ekstra Brugs Kreditter",
     "grokAutoTopUp": "Auto Opladning",
@@ -10633,10 +10638,6 @@
     "confirmRedeemClaudeResetCredit": "Indløsning nulstiller øjeblikkeligt de gældende Claude-brugsgrænser og forbruger denne kredit permanent.",
     "claudeResetCreditsModalTitle": "Claude-nulstillingskreditter",
     "claudeResetCreditsModalExplainer": "Tilgængelige Claude-nulstillingskreditter og ugentlige sessionsnulstillinger for denne konto.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Baseret på de seneste observationer, ikke en direkte kontrol. Vælg en konto for detaljer.",
     "healthRecovery": "Forventet genoprettelse",
     "healthAvailable": "Tilgængelig",

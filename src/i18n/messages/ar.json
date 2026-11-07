@@ -1101,6 +1101,7 @@
   "disabled": "معطل",
   "featureFlagOmnirouteEmergencyFallbackDescription": "توجيه الطلبات التي استنفدت الميزانية إلى موفر/نموذج الاحتياط المجاني للطوارئ.",
   "featureFlagArenaEloSyncEnabledDescription": "تمكين المزامنة الدورية لتصنيف ELO للوحة صدارة Arena AI لتصنيفات ذكاء النماذج.",
+  "featureFlagUsageDailyRollupEnabledDescription": "انشر أيام الاستخدام المغلقة إلى usage_daily_summary قبل سياسة الاحتفاظ، حتى تقرأ نوافذ التحليلات الطويلة الإجماليات اليومية بدلاً من الصفوف الخام. معطل افتراضياً: تفقد الأيام المنشورة تفاصيل الاتصال الفردي، المفتاح الفردي، النجاح، وزمن الاستجابة في التحليلات، ويبقى سعر التكلفة كما هو وقت النشر.",
   "featureFlagUniversalContextHandoffEnabledDescription": "إنشاء ملخصات للمحادثات وإدراجها عند تبديل النماذج بواسطة التوجيه المركّب. عطّل هذا الخيار للتعامل مع عمليات تبديل النماذج بشكل مستقل ومنع طلبات التسليم في الخلفية لجميع التركيبات الحالية والمستقبلية.",
   "featureFlagReasoningReplayEnabledDescription": "تخزين منطق استدلال النموذج وإعادة تشغيله عبر المحادثات متعددة الجولات. عطّل الخيار لإيقاف تخزين الاستدلال وإعادة حقنه.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "اعلن عن معرفات مرآة claude/&lt;provider&gt;/&lt;model&gt; على /v1/models حتى تظهر قائمة اكتشاف نماذج بوابة Claude Code نماذج غير Claude. تحذير: يؤدي إلى تكرار إدخالات الكتالوج لجميع العملاء عند تفعيله عالميًا.",
@@ -3402,12 +3403,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "استخدم URL الذي يمكن الوصول إليه من الجهاز الذي يقوم بتشغيل Pi. تتم إضافة نقطة النهاية /v1 المتوافقة مع OpenAI تلقائيًا.",
     "piManualMergeHint": "معاينة فقط. قم بدمج إدخال providers.omniroute هذا في models.json حتى يظل مقدمو الخدمة والإعدادات الأخرى كما هي.",
-    "removeMapping": "إزالة التعيين",
     "customUrl": "رابط مخصص",
     "customEndpointAria": "نقطة اتصال مخصصة",
     "useDefaultKey": "استخدام مفتاح OmniRoute الافتراضي",
     "mainModelAria": "النموذج الرئيسي",
-    "manualConfigTitle": "إعدادات Grok Build اليدوية"
+    "manualConfigTitle": "إعدادات Grok Build اليدوية",
+    "removeMapping": "إزالة التعيين"
   },
   "modelCatalog": {
     "title": "النماذج والمجموعات",
@@ -9238,9 +9239,9 @@
         "financial": "مالي",
         "brazilian": "برازيلي",
         "usa": "الولايات المتحدة",
-        "full": "كامل",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (جنوب أفريقيا)"
+        "popia": "POPIA (جنوب أفريقيا)",
+        "full": "كامل"
       },
       "builtinTypes": "الأنواع المضمّنة",
       "types": {
@@ -10176,6 +10177,10 @@
     "healthExtraUsageBypass": "نفدت الحصة؛ الاستخدام الإضافي مسموح، لذا تستمر الخدمة.",
     "healthPaidCreditsBypass": "نفدت الحصة؛ تتيح الأرصدة المدفوعة المتاحة استمرار الخدمة.",
     "healthFilteringBypass": "نفدت الحصة؛ تصفية الحصة المحلية معطلة، لذا تستمر الخدمة.",
+    "codexPaidCreditsLabel": "أرصدة Codex المدفوعة",
+    "codexPaidCreditsAvailable": "متاح (الرصيد غير مُبلَّغ عنه)",
+    "codexPaidCreditsUnavailable": "غير متاح أو تم بلوغ حد الإنفاق",
+    "codexPaidCreditsUnlimited": "غير محدود",
     "title": "الاستخدام",
     "grokExtraUsageCredits": "رصيد استخدام إضافي",
     "grokAutoTopUp": "إعادة تعبئة تلقائية",
@@ -10633,10 +10638,6 @@
     "confirmRedeemClaudeResetCredit": "يؤدي الاسترداد إلى إعادة تعيين حدود استخدام Claude المؤهلة فورًا واستهلاك هذا الرصيد بشكل دائم.",
     "claudeResetCreditsModalTitle": "أرصدة إعادة تعيين Claude",
     "claudeResetCreditsModalExplainer": "أرصدة إعادة تعيين Claude المتاحة وعمليات إعادة تعيين الجلسات الأسبوعية لهذا الحساب.",
-    "codexPaidCreditsLabel": "أرصدة Codex المدفوعة",
-    "codexPaidCreditsAvailable": "متاح (الرصيد غير مُبلَّغ عنه)",
-    "codexPaidCreditsUnavailable": "غير متاح أو تم بلوغ حد الإنفاق",
-    "codexPaidCreditsUnlimited": "غير محدود",
     "healthAccountHint": "استنادًا إلى أحدث الملاحظات، وليس فحصًا مباشرًا. حدد حسابًا لعرض التفاصيل.",
     "healthRecovery": "وقت الاستعادة المتوقع",
     "healthAvailable": "متاح",

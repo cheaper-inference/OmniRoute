@@ -1101,6 +1101,7 @@
   "disabled": "নিষ্ক্রিয়",
   "featureFlagOmnirouteEmergencyFallbackDescription": "বাজেট শেষ হয়ে যাওয়া অনুরোধগুলো জরুরি ফ্রি ফলব্যাক প্রোভাইডার/মডেলে রুট করুন।",
   "featureFlagArenaEloSyncEnabledDescription": "মডেল ইন্টেলিজেন্স র‍্যাঙ্কিংয়ের জন্য পর্যায়ক্রমিক Arena AI লিডারবোর্ড ELO সিঙ্ক সক্ষম করুন।",
+  "featureFlagUsageDailyRollupEnabledDescription": "রেটেঞ্চমেন্টের আগে ক্লোজড ইউসেজ ডেয়াকে usage_daily_summary-এ পাব্লিশ করা হয়, যেন দীর্ঘ অ্যানালিটিক্স উইন্ডো প্রতিদিনের মোট পড়ে, কাঁচা রোয়ের বদলে। ডিফল্টে বন্ধ থাকে: পাব্লিশ করা দিনগুলোর অ্যানালিটিক্সে প্রতি-কানেকশন, প্রতি-API-কী, সাফল্য ও ল্যাটেন্সি বিস্তারিত হারিয়ে যায়, এবং তাদের খরচ পাব্লিশ করা অবস্থায় দামের হিসাবে থাকে।",
   "featureFlagUniversalContextHandoffEnabledDescription": "কম্বো রাউটিংয়ে মডেল পরিবর্তন হলে কথোপকথনের সারাংশ তৈরি করে যুক্ত করুন। মডেল পরিবর্তনগুলোকে স্বতন্ত্রভাবে বিবেচনা করতে এবং বিদ্যমান ও ভবিষ্যতের সব কম্বোর জন্য ব্যাকগ্রাউন্ড হ্যান্ডঅফ অনুরোধ প্রতিরোধ করতে এটি নিষ্ক্রিয় করুন।",
   "featureFlagReasoningReplayEnabledDescription": "একাধিক পালাবিশিষ্ট কথোপকথনে মডেলের যুক্তি ক্যাশ করে পুনরায় চালান। যুক্তি সংরক্ষণ ও পুনরায় ঢোকানো বন্ধ করতে নিষ্ক্রিয় করুন।",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models এ claude/&lt;provider&gt;/&lt;model&gt; মিরর আইডি বিজ্ঞাপন দিন যাতে Claude Code গেটওয়ে মডেল আবিষ্কার non-Claude মডেল তালিকাভুক্ত করে। সতর্কতা: এটি গ্লোবালি সক্ষম হলে সমস্ত ক্লায়েন্টের জন্য ক্যাটালগ এন্ট্রি দ্বিগুণ করে।",
@@ -3402,12 +3403,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Pi চালিত মেশিন থেকে URL ব্যবহার করুন। OpenAI- সামঞ্জস্যপূর্ণ /v1 এন্ডপয়েন্ট স্বয়ংক্রিয়ভাবে যোগ করা হয়।",
     "piManualMergeHint": "শুধুমাত্র পূর্বরূপ. এই providers.omniroute এন্ট্রিকে models.json তে মার্জ করুন যাতে আপনার অন্যান্য প্রদানকারী এবং সেটিংস অক্ষত থাকে।",
-    "removeMapping": "ম্যাপিং সরান",
     "customUrl": "কাস্টম URL",
     "customEndpointAria": "কাস্টম এন্ডপয়েন্ট",
     "useDefaultKey": "OmniRoute ডিফল্ট কী ব্যবহার করুন",
     "mainModelAria": "প্রধান মডেল",
-    "manualConfigTitle": "Grok Build ম্যানুয়াল কনফিগ"
+    "manualConfigTitle": "Grok Build ম্যানুয়াল কনফিগ",
+    "removeMapping": "ম্যাপিং সরান"
   },
   "modelCatalog": {
     "title": "মডেল ও কম্বো",
@@ -9238,9 +9239,9 @@
         "financial": "আর্থিক",
         "brazilian": "ব্রাজিলীয়",
         "usa": "যুক্তরাষ্ট্র",
-        "full": "সম্পূর্ণ",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (দক্ষিণ আফ্রিকা)"
+        "popia": "POPIA (দক্ষিণ আফ্রিকা)",
+        "full": "সম্পূর্ণ"
       },
       "builtinTypes": "অন্তর্নির্মিত ধরন",
       "types": {
@@ -10176,6 +10177,10 @@
     "healthExtraUsageBypass": "কোটা শেষ; অতিরিক্ত ব্যবহার অনুমোদিত, তাই পরিষেবা চলতে থাকে।",
     "healthPaidCreditsBypass": "কোটা শেষ; উপলব্ধ প্রদত্ত ক্রেডিট দিয়ে পরিষেবা চালিয়ে যাওয়া যায়।",
     "healthFilteringBypass": "কোটা শেষ; স্থানীয় কোটা ফিল্টার বন্ধ, তাই পরিষেবা চলতে থাকে।",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "ব্যবহার",
     "grokExtraUsageCredits": "অতিরিক্ত ব্যবহার ক্রেডিট",
     "grokAutoTopUp": "অটো টপ-আপ",
@@ -10633,10 +10638,6 @@
     "confirmRedeemClaudeResetCredit": "রিডিম করার সাথে সাথে উপযুক্ত Claude ব্যবহারের সীমা রিসেট হয়ে যায় এবং এই ক্রেডিটটি স্থায়ীভাবে ব্যবহৃত হয়।",
     "claudeResetCreditsModalTitle": "Claude রিসেট ক্রেডিট",
     "claudeResetCreditsModalExplainer": "এই অ্যাকাউন্টের জন্য উপলব্ধ Claude রিসেট ক্রেডিট এবং সাপ্তাহিক সেশন রিসেট।",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "সর্বশেষ পর্যবেক্ষণের ভিত্তিতে, সরাসরি পরীক্ষা নয়। বিস্তারিত দেখতে একটি অ্যাকাউন্ট বেছে নিন।",
     "healthRecovery": "প্রত্যাশিত পুনরুদ্ধারের সময়",
     "healthAvailable": "উপলভ্য",

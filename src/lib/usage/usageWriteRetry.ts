@@ -89,9 +89,10 @@ export function attemptWrite(entry: UsageEntry, options: UsageWriteOptions = {})
     if (!deduplicate) {
       insertEntry(db, prepared);
       inserted = true;
-      return;
+    } else {
+      inserted = insertUnlessDuplicate(db, prepared);
     }
-    inserted = insertUnlessDuplicate(db, prepared);
+    if (inserted) markDayDirty(db, prepared.timestamp);
   })();
 
   // Decoupled via the event bus so usageHistory never imports providerLimits
@@ -155,6 +156,29 @@ function insertUnlessDuplicate(
 
   insertEntry(db, prepared);
   return true;
+}
+
+type UsageDb = ReturnType<typeof getDbInstance>;
+
+/** Next monotonic revision. The caller already holds the write transaction. */
+export function nextRevision(db: UsageDb): number {
+  const current = db
+    .prepare(
+      "UPDATE rollup_revision_counter SET revision = revision + 1 WHERE singleton = 1 RETURNING revision"
+    )
+    .get() as { revision: number };
+  return current.revision;
+}
+
+export function markDayDirty(db: UsageDb, timestamp: string): void {
+  const day = db.prepare("SELECT DATE(?) AS day").get(timestamp) as { day: string };
+  db.prepare(
+    `INSERT INTO rollup_dirty_day (date, revision, marked_at)
+     VALUES (?, ?, ?)
+     ON CONFLICT (date) DO UPDATE SET
+       revision = excluded.revision,
+       marked_at = excluded.marked_at`
+  ).run(day.day, nextRevision(db), new Date().toISOString());
 }
 
 function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEntry): void {

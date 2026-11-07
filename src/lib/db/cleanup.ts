@@ -5,7 +5,9 @@
  */
 
 import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
-import { rollupUsageHistoryBeforeDate } from "@/lib/usage/aggregateHistory";
+import { publishDay, rollupTeamUsageBefore, runDailyRollup } from "@/lib/usage/aggregateHistory";
+import { clearAnalyticsResponseCache } from "@/lib/usage/analyticsResponseCache";
+import { markDayDirty } from "@/lib/usage/usageWriteRetry";
 import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 
 import { getDbInstance } from "./core";
@@ -116,39 +118,74 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
   const cutoffDateStr = cutoffISO.split("T")[0];
 
   const result: CleanupResult = { deleted: 0, errors: 0 };
+  const dates = db
+    .prepare(
+      "SELECT DISTINCT DATE(timestamp) AS day FROM usage_history WHERE timestamp < ? ORDER BY day"
+    )
+    .all(cutoffDateStr) as Array<{ day: string }>;
 
-  // Roll up rows that are about to be deleted into daily_usage_summary so that the
-  // analytics route can still surface historical data via the UNION query. The rollup
-  // uses the exact same day boundary as the DELETE below, so every deleted row
-  // is guaranteed to have been aggregated first.
-  //
-  // rollupUsageHistoryBeforeDate catches its own errors and reports them via the
-  // returned result, so we inspect that rather than relying on a thrown exception.
-  // If the rollup failed, abort the DELETE to avoid permanently losing raw usage data
-  // that was never aggregated.
-  const rollupResult = await rollupUsageHistoryBeforeDate(cutoffDateStr);
-  if (rollupResult.errors > 0) {
-    console.error(
-      "[Cleanup] Aborting usage_history deletion because the pre-delete rollup failed."
-    );
-    result.errors += rollupResult.errors;
-    return result;
+  for (const { day } of dates) {
+    let published;
+    let removed = 0;
+    try {
+      published = await publishDay(day, {
+        onCommit: (tx) => {
+          // Team summaries are built from the raw rows, so fold this day's
+          // unprocessed Team rows in before they are deleted, in the same commit.
+          rollupTeamUsageBefore(tx, nextUtcDay(day));
+          // The fold compares timestamp strings while this DELETE buckets by
+          // DATE(), so a row with a non-UTC offset can miss the fold. Never
+          // delete a Team row that has not been folded.
+          removed = tx
+            .prepare(
+              `DELETE FROM usage_history WHERE DATE(timestamp) = ?
+               AND (billing_team_id IS NULL OR billing_team_id = ''
+                 OR team_rollup_processed_at IS NOT NULL)`
+            )
+            .run(day).changes;
+          if (removed > 0) {
+            tx.prepare("UPDATE usage_daily_summary SET raw_rebuild_safe = 0 WHERE date = ?").run(
+              day
+            );
+          }
+          notePublishedDay(tx, day);
+        },
+      });
+    } catch (error) {
+      console.error("[Cleanup] Error cleaning usage_history:", error);
+      result.errors++;
+      return result;
+    }
+
+    if (!published.published && published.reason === "retired") continue;
+    if (!published.published) {
+      console.error(
+        "[Cleanup] Aborting usage_history deletion because the pre-delete rollup failed."
+      );
+      result.errors++;
+      return result;
+    }
+    result.deleted += removed;
   }
 
-  try {
-    const stmt = db.prepare("DELETE FROM usage_history WHERE timestamp < ?");
-    const runResult = stmt.run(cutoffDateStr);
-    result.deleted = runResult.changes;
-
-    console.log(
-      `[Cleanup] Deleted ${result.deleted} usage_history older than ${retentionDays} days`
-    );
-  } catch (err: unknown) {
-    console.error("[Cleanup] Error cleaning usage_history:", err);
-    result.errors++;
-  }
-
+  console.log(`[Cleanup] Deleted ${result.deleted} usage_history older than ${retentionDays} days`);
   return result;
+}
+
+function nextUtcDay(day: string): string {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, date + 1)).toISOString().slice(0, 10);
+}
+
+function notePublishedDay(db: ReturnType<typeof getDbInstance>, day: string): void {
+  db.prepare(
+    `INSERT INTO rollup_state (tier, last_completed_date)
+     VALUES ('daily', ?)
+     ON CONFLICT (tier) DO UPDATE SET
+       last_completed_date = excluded.last_completed_date
+     WHERE rollup_state.last_completed_date IS NULL
+        OR rollup_state.last_completed_date < excluded.last_completed_date`
+  ).run(day);
 }
 
 /**
@@ -850,10 +887,10 @@ function isResetUsageHistoryPeriod(period: string): period is ResetUsageHistoryP
 
 /**
  * On-demand, period-scoped reset of usage analytics data (`usage_history`,
- * `daily_usage_summary`, `hourly_usage_summary`).
+ * `usage_daily_summary`, `daily_usage_summary`, `hourly_usage_summary`).
  *
  * Unlike {@link cleanupUsageHistory} (retention-based background cleanup,
- * which rolls up rows into `daily_usage_summary` before deleting them), this
+ * which rolls up rows into `usage_daily_summary` before deleting them), this
  * is a destructive user-triggered reset — it intentionally does NOT roll up
  * first, since the whole point is to wipe the data the user selected.
  *
@@ -861,11 +898,22 @@ function isResetUsageHistoryPeriod(period: string): period is ResetUsageHistoryP
  *   every reset target, including conversation identity metadata; any other
  *   value deletes only time-scoped usage/log rows older than `now - period`.
  *   Throws on an invalid period.
+ *
+ * A reset deletes `usage_daily_summary` and increments a persistent generation
+ * in the same transaction. Publishers recheck that fence before writing, so
+ * work priced before even an empty/scoped reset cannot restore deleted data.
+ * The fence itself is never reset, preventing an ABA generation reuse.
  */
 const RESET_TARGETS: Array<
   DeleteByPeriodTarget & { resultKey: keyof ResetUsageHistoryResult; allOnly?: boolean }
 > = [
   { table: "usage_history", column: "timestamp", cutoff: "iso", resultKey: "deletedUsageHistory" },
+  {
+    table: "usage_daily_summary",
+    column: "date",
+    cutoff: "date",
+    resultKey: "deletedDailySummary",
+  },
   {
     table: "daily_usage_summary",
     column: "date",
@@ -944,6 +992,37 @@ const RESET_TARGETS: Array<
   },
 ];
 
+export class UsageResetBoundaryError extends Error {
+  static readonly publicMessage =
+    "This time range splits an archived usage day whose raw history is incomplete. No data was changed. Choose a full reset to remove that archived day.";
+  constructor() {
+    super(UsageResetBoundaryError.publicMessage);
+    this.name = "UsageResetBoundaryError";
+  }
+}
+
+/** Preflight and fence a reset inside its caller's deletion transaction. */
+function prepareUsageResetBoundary(db: ReturnType<typeof getDbInstance>, period: string) {
+  const cutoffIso =
+    period === "all"
+      ? null
+      : new Date(Date.now() - RESET_USAGE_HISTORY_PERIOD_MS[period]).toISOString();
+  const partialDay =
+    cutoffIso && !cutoffIso.endsWith("T00:00:00.000Z") ? cutoffIso.slice(0, 10) : null;
+  if (
+    partialDay &&
+    db
+      .prepare("SELECT 1 FROM usage_daily_summary WHERE date = ? AND raw_rebuild_safe = 0 LIMIT 1")
+      .get(partialDay)
+  ) {
+    throw new UsageResetBoundaryError();
+  }
+  db.prepare(
+    "UPDATE rollup_revision_counter SET reset_generation = reset_generation + 1 WHERE singleton = 1"
+  ).run();
+  return { cutoffIso, partialDay };
+}
+
 export async function resetUsageHistory(period: string): Promise<ResetUsageHistoryResult> {
   if (!isResetUsageHistoryPeriod(period)) {
     throw new Error(`Invalid reset period: ${period}`);
@@ -978,40 +1057,54 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     let artifactsToDelete: string[] = [];
 
     const runReset = db.transaction(() => {
+      const { cutoffIso, partialDay } = prepareUsageResetBoundary(db, period);
       if (period === "all") {
         for (const target of RESET_TARGETS) {
-          (result[target.resultKey] as number) = deleteAllFromTable(target.table);
+          (result[target.resultKey] as number) += deleteAllFromTable(target.table);
         }
         return;
       }
 
-      const cutoffIso = new Date(Date.now() - RESET_USAGE_HISTORY_PERIOD_MS[period]).toISOString();
-      artifactsToDelete = collectCallLogArtifactsBefore(cutoffIso);
+      if (partialDay) {
+        result.deletedDailySummary += db
+          .prepare("DELETE FROM usage_daily_summary WHERE date = ?")
+          .run(partialDay).changes;
+        markDayDirty(db, cutoffIso!);
+      }
+      artifactsToDelete = collectCallLogArtifactsBefore(cutoffIso!);
       for (const target of RESET_TARGETS) {
         if (target.allOnly) continue;
-        (result[target.resultKey] as number) = deleteFromTableBefore(target, cutoffIso);
+        (result[target.resultKey] as number) += deleteFromTableBefore(target, cutoffIso!);
       }
     });
 
     runReset();
+    clearAnalyticsResponseCache();
 
-    let artifactResult: { deletedArtifacts: number; errors: number };
-    if (period === "all") {
-      artifactResult = purgeCallLogArtifactDirectory();
-    } else {
-      artifactResult = deleteCallLogArtifacts(artifactsToDelete);
-    }
+    const artifactResult =
+      period === "all"
+        ? purgeCallLogArtifactDirectory()
+        : deleteCallLogArtifacts(artifactsToDelete);
     result.deletedCallLogArtifacts = artifactResult.deletedArtifacts;
     result.deletedArtifacts = artifactResult.deletedArtifacts;
     result.errors += artifactResult.errors;
 
-    result.deleted = RESET_TARGETS.reduce((sum, t) => sum + (result[t.resultKey] as number), 0);
+    result.deleted = RESET_TARGETS.reduce(
+      (sum, target) => {
+        if (sum.seen.has(target.resultKey)) return sum;
+        sum.seen.add(target.resultKey);
+        sum.deleted += result[target.resultKey] as number;
+        return sum;
+      },
+      { deleted: 0, seen: new Set<keyof ResetUsageHistoryResult>() }
+    ).deleted;
 
     console.log(
       `[Cleanup] Reset usage/log data (period=${period}): ${result.deleted} row(s), ` +
         `${result.deletedCallLogArtifacts} call log artifact(s)`
     );
   } catch (err: unknown) {
+    if (err instanceof UsageResetBoundaryError) throw err;
     console.error("[Cleanup] Error resetting usage history:", err);
     result.errors++;
   }
@@ -1072,6 +1165,21 @@ let _cleanupSchedulerTimer: ReturnType<typeof setInterval> | null = null;
  */
 export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Promise<void> {
   const label = phase === "startup" ? "Startup" : "Periodic";
+  // Publishing a day ahead of retention trades its per-connection, per-API-key, success and
+  // latency detail for daily totals, so it is opt-in (USAGE_DAILY_ROLLUP_ENABLED).
+  if (
+    getUserDatabaseSettings().aggregation.enabled &&
+    isFeatureFlagEnabled("USAGE_DAILY_ROLLUP_ENABLED")
+  ) {
+    try {
+      await runDailyRollup(new Date());
+    } catch (error) {
+      console.error(
+        `[Cleanup] ${label} daily usage publication failed; retention still runs:`,
+        error
+      );
+    }
+  }
   const result = await runAutoCleanup();
   if (result.totalDeleted > 0) {
     console.log(`[Cleanup] ${label} cleanup freed ${result.totalDeleted} rows.`);

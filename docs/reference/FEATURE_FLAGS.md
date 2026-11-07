@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-119 flags across 6 categories. **Default** is the definition default — the value
+120 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (11)
@@ -123,7 +123,7 @@ Invalid enum values and unreadable feature-flag storage fail closed. Neither opt
 priced spend or a failed pricing lookup. Enforcement and the administrator report resolve the
 same effective policy.
 
-### Runtime (56)
+### Runtime (57)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -185,6 +185,7 @@ same effective policy.
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |         | Stop offering and forwarding the `max` reasoning effort for Cursor Grok 4.7 (#17386): Cursor's docs list only low/medium/high/xhigh, so the `grok-4.7-max` fallback alias disappears from the catalog and a `max` effort request is sent without an effort parameter. Off by default: `max` stays offered and forwarded, as a live AgentService/Run probe accepted it.                                                                                                                                                                                                                                                                          |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |         | Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event.                                                                                                                                                                                                                                                                 |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |         | In the compression cache stats, count a compressed request to an automatic-prefix-caching provider (OpenAI, Codex, Azure, or a custom connection that declares prompt caching with marker stripping) as an estimated cache hit even without `cache_control` markers (#17114). The estimate is a cache-eligibility signal, not an observed hit, so the reported hit rate for those providers trends toward 100%. Off by default: only a request carrying `cache_control` markers to a caching provider counts as an estimated hit, so automatic-prefix providers keep reporting 0.                                                               |
+| `USAGE_DAILY_ROLLUP_ENABLED`                   | boolean | `false` |         | Publish closed usage days into `usage_daily_summary` ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.                                                                                                                                                                                                                                                                                                                                        |
 
 ### CLI (5)
 
@@ -282,10 +283,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

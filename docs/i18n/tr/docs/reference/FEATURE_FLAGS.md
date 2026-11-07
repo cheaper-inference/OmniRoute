@@ -44,7 +44,7 @@ Bir boolean bayrağı, etkin değeri `"true"`, `"1"` veya `"yes"` olduğunda
 
 ## Bayrak Kataloğu
 
-6 kategoride 119 bayrak. **Varsayılan**, tanım varsayılanıdır — ne bir DB geçersiz kılması ne de bir ortam değişkeni mevcut olduğunda kullanılan değer.
+6 kategoride 120 bayrak. **Varsayılan**, tanım varsayılanıdır — ne bir DB geçersiz kılması ne de bir ortam değişkeni mevcut olduğunda kullanılan değer.
 
 ### Güvenlik (11)
 
@@ -121,7 +121,7 @@ kapanmaya neden olur. Her iki devre dışı bırakma seçeneği de fiyatlandır�
 başarısız bir fiyatlandırma araması üzerindeki kısıtlamaları gevşetmez. Uygulama ve yönetici raporu
 aynı etkin politikayı belirler.
 
-### Çalışma Zamanı (56)
+### Çalışma Zamanı (57)
 
 | Anahtar                                        | Tür     | Varsayılan | Yeniden Başlatma | Açıklama                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ---------------------------------------------- | ------- | ---------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -183,6 +183,7 @@ aynı etkin politikayı belirler.
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`    |                  | Cursor Grok 4.7 için `max` akıl yürütme düzeyinin sunulmasını ve iletilmesini durdurur (#17386): Cursor belgelerinde yalnızca low/medium/high/xhigh listelendiğinden, `grok-4.7-max` geri dönüş takma adı katalogdan kaldırılır ve `max` düzeyine sahip bir istek, düzey parametresi olmadan gönderilir. Varsayılan olarak kapalıdır: canlı bir AgentService/Run denemesi bunu kabul ettiğinden `max` sunulmaya ve iletilmeye devam eder.                                                                                                                                                                                                                                                                                                                                                  |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false`    |                  | Responses keepalive'larını bir response.in_progress olayı yerine boş satır olarak gönderir; böylece resmi SDK'da sentetik bir anlık görüntü gerçek yanıtın yerini asla alamaz. Boş satır hiçbir SSE olayı göndermez; bu nedenle yalnızca olaylar üzerinde sıfırlanan bir istemci watchdog'u uzun bir sessiz aşama sırasında sıfırlanmaz. Varsayılan olarak kapalıdır: zamanlayıcılar belirtime uygun response.in_progress olayını gönderir.                                                                                                                                                                                                                                                                                                                                                |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`    |                  | Sıkıştırma önbelleği istatistiklerinde, otomatik ön ek önbelleğe almayı kullanan bir sağlayıcıya (OpenAI, Codex, Azure veya işaretçi kaldırma özelliğiyle istem önbelleğe almayı bildiren özel bir bağlantı) gönderilen sıkıştırılmış bir isteği, `cache_control` işaretçileri olmasa bile tahmini bir önbellek isabeti olarak sayar (#17114). Tahmin, gözlemlenen bir isabet değil, önbelleğe uygunluk sinyalidir; bu nedenle söz konusu sağlayıcılar için bildirilen isabet oranı %100'e yaklaşır. Varsayılan olarak kapalıdır: yalnızca önbelleğe alma sağlayıcısına `cache_control` işaretçileri taşıyan bir istek tahmini isabet olarak sayılır; bu nedenle otomatik ön ek sağlayıcıları 0 bildirmeye devam eder.                                                                     |
+| `USAGE_DAILY_ROLLUP_ENABLED`                   | boolean | `false` |         | Kapanan kullanım günlerini saklama süresi dolmadan `usage_daily_summary` içine yayımla, böylece uzun analiz pencereleri ham satırlar yerine günlük toplamları okur. Varsayılan olarak kapalı: yayımlanan günlerde analizlerde bağlantı başına, API anahtarı başına, başarı ve gecikme detayı kaybolur ve maliyetleri yayımlandığı andaki fiyatlandırma olarak kalır.                                                                                                                                                                                                                                                                                                                                        |
 
 ### CLI (5)
 
@@ -268,10 +269,10 @@ Her bayrağı etkin değeri, kaynağı ve bir özetle birlikte döndürür.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... tüm 119 bayrak
+    // ... tüm 120 bayrak
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

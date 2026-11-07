@@ -44,7 +44,7 @@ Bendera boolean dianggap **didayakan** apabila nilai berkuat kuasanya ialah `"tr
 
 ## Katalog Bendera
 
-119 bendera merentasi 6 kategori. **Lalai** ialah lalai definisi — nilai
+120 bendera merentasi 6 kategori. **Lalai** ialah lalai definisi — nilai
 yang digunakan apabila tiada penggantian DB atau pemboleh ubah persekitaran hadir.
 
 ### Keselamatan (11)
@@ -119,7 +119,7 @@ ia mengatasi `USAGE_LIMIT_IGNORE_UNPRICED`. Tanpa nilai enum yang eksplisit, pil
 boolean hulu memilih `count_as_zero`; jika tidak, lalai ialah `fail_closed`.
 Nilai enum yang tidak sah dan storan bendera ciri yang tidak boleh dibaca akan gagal secara tertutup. Tiada satu pun pilihan tidak ikut serta melonggarkan perbelanjaan berharga atau carian harga yang gagal. Penguatkuasaan dan laporan pentadbir menyelesaikan dasar berkesan yang sama.
 
-### Masa jalan (56)
+### Masa jalan (57)
 
 | Key                                            | Jenis   | Lalai   | Mulakan semula | Penerangan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | ------- | ------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -181,6 +181,7 @@ Nilai enum yang tidak sah dan storan bendera ciri yang tidak boleh dibaca akan g
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |                | Hentikan penawaran dan penghantaran usaha penaakulan `max` untuk Cursor Grok 4.7 (#17386): dokumentasi Cursor hanya menyenaraikan low/medium/high/xhigh, jadi alias sandaran `grok-4.7-max` dikeluarkan daripada katalog dan permintaan usaha `max` dihantar tanpa parameter usaha. Dilumpuhkan secara lalai: `max` kekal ditawarkan dan dihantar, kerana siasatan langsung AgentService/Run menerimanya.                                                                                                                                                                                                                                                                                                                                                                                  |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |                | Hantar keepalive Responses sebagai baris kosong dan bukannya peristiwa response.in_progress, supaya syot kilat sintetik tidak boleh menggantikan respons sebenar dalam SDK rasmi. Baris kosong tidak menghantar sebarang peristiwa SSE, jadi watchdog klien yang hanya ditetapkan semula pada peristiwa tidak akan ditetapkan semula semasa fasa senyap yang panjang. Dilumpuhkan secara lalai: pemasa menghantar peristiwa response.in_progress yang sah mengikut spesifikasi.                                                                                                                                                                                                                                                                                                            |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |                | Dalam statistik cache pemampatan, kira permintaan termampat kepada penyedia caching awalan automatik (OpenAI, Codex, Azure, atau sambungan tersuai yang mengisytiharkan caching gesaan dengan penanggalan penanda) sebagai hit cache anggaran walaupun tanpa penanda `cache_control` (#17114). Anggaran tersebut ialah isyarat kelayakan cache, bukan hit yang diperhatikan, maka kadar hit yang dilaporkan untuk penyedia tersebut cenderung kepada 100%. Dilumpuhkan secara lalai: hanya permintaan yang membawa penanda `cache_control` kepada penyedia caching dikira sebagai hit anggaran, jadi penyedia awalan automatik terus melaporkan 0.                                                                                                                                         |
+| `USAGE_DAILY_ROLLUP_ENABLED`                   | boolean | `false` |         | Terbitkan hari penggunaan yang telah ditutup ke `usage_daily_summary` sebelum tempoh simpanan, supaya tetingkat analisis panjang membaca jumlah harian berbanding baris mentah. Dimatikan secara lalai: hari yang diterbitkan kehilangan perincian setiap sambungan, setiap kekunci API, kejayaan dan latensi dalam analisis, dan kosnya kekal seperti harga apabila diterbitkan.                                                                                                                                                                                                                                                                                                                                        |
 
 ### CLI (5)
 
@@ -261,10 +262,10 @@ Mengembalikan setiap bendera bersama nilai berkesan, sumber dan ringkasan.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... kesemua 119 bendera
+    // ... kesemua 120 bendera
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

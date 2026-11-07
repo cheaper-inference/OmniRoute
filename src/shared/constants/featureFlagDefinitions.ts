@@ -1,4 +1,5 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
+import { USAGE_DAILY_ROLLUP_FLAG } from "./usageDailyRollupFlag";
 
 export type { FeatureFlagDefinition };
 
@@ -1382,6 +1383,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "caution",
   },
+  USAGE_DAILY_ROLLUP_FLAG,
   {
     key: "CURSOR_GROK_47_DROP_MAX_EFFORT",
     label: "Cursor Grok 4.7: Drop the max Effort Tier",

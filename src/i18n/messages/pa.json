@@ -1101,6 +1101,7 @@
   "disabled": "ਅਯੋਗ",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ਬਜਟ ਖ਼ਤਮ ਹੋ ਚੁੱਕੀਆਂ ਬੇਨਤੀਆਂ ਨੂੰ ਐਮਰਜੈਂਸੀ ਮੁਫ਼ਤ ਫਾਲਬੈਕ ਪ੍ਰਦਾਤਾ/ਮਾਡਲ ਵੱਲ ਭੇਜੋ।",
   "featureFlagArenaEloSyncEnabledDescription": "ਮਾਡਲ ਇੰਟੈਲੀਜੈਂਸ ਰੈਂਕਿੰਗਾਂ ਲਈ ਸਮੇਂ-ਸਮੇਂ 'ਤੇ Arena AI ਲੀਡਰਬੋਰਡ ELO ਸਿੰਕ ਸਮਰੱਥ ਕਰੋ।",
+  "featureFlagUsageDailyRollupEnabledDescription": "ਬਰਕਰਾਰ ਰੱਖਣ ਤੋਂ ਪਹਿਲਾਂ ਬੰਦ ਵਰਤੋਂ ਦੇ ਦਿਨਾਂ ਨੂੰ usage_daily_summary ਵਿੱਚ ਪ੍ਰਕਾਸ਼ਿਤ ਕਰੋ, ਇਸਲਈ ਲੰਬੀਆਂ ਵਿਸ਼ਲੇਸ਼ਣ ਵਿੰਡੋਜ਼ ਕੱਚੀਆਂ ਕਤਾਰਾਂ ਦੀ ਬਜਾਏ ਰੋਜ਼ਾਨਾ ਕੁੱਲ ਨੂੰ ਪੜ੍ਹਦੀਆਂ ਹਨ। ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ 'ਤੇ ਬੰਦ: ਪ੍ਰਕਾਸ਼ਿਤ ਦਿਨ ਆਪਣਾ ਪ੍ਰਤੀ-ਕੁਨੈਕਸ਼ਨ, ਪ੍ਰਤੀ-API-ਕੁੰਜੀ, ਵਿਸ਼ਲੇਸ਼ਣ ਵਿੱਚ ਸਫਲਤਾ ਅਤੇ ਲੇਟੈਂਸੀ ਵੇਰਵੇ ਗੁਆ ਦਿੰਦੇ ਹਨ, ਅਤੇ ਪ੍ਰਕਾਸ਼ਿਤ ਕੀਤੇ ਜਾਣ 'ਤੇ ਉਹਨਾਂ ਦੀ ਲਾਗਤ ਉਸੇ ਤਰ੍ਹਾਂ ਹੀ ਰਹਿੰਦੀ ਹੈ।",
   "featureFlagUniversalContextHandoffEnabledDescription": "ਜਦੋਂ ਕੰਬੋ ਰਾਊਟਿੰਗ ਮਾਡਲ ਬਦਲਦੀ ਹੈ, ਤਾਂ ਗੱਲਬਾਤ ਦੇ ਸਾਰ ਤਿਆਰ ਕਰਕੇ ਸ਼ਾਮਲ ਕਰੋ। ਮਾਡਲ ਬਦਲਾਵਾਂ ਨੂੰ ਸੁਤੰਤਰ ਤੌਰ 'ਤੇ ਸੰਭਾਲਣ ਅਤੇ ਸਾਰੇ ਮੌਜੂਦਾ ਤੇ ਭਵਿੱਖੀ ਕੰਬੋਜ਼ ਲਈ ਬੈਕਗ੍ਰਾਊਂਡ ਹੈਂਡਆਫ਼ ਬੇਨਤੀਆਂ ਨੂੰ ਰੋਕਣ ਵਾਸਤੇ ਇਸਨੂੰ ਅਯੋਗ ਕਰੋ।",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models ਉੱਤੇ claude/&lt;provider&gt;/&lt;model&gt; ਮਿਰਰ IDs ਦਾ ਪ੍ਰਚਾਰ ਕਰੋ, ਤਾਂ ਜੋ Claude Code ਗੇਟਵੇ ਮਾਡਲ ਖੋਜ ਵਿੱਚ ਗੈਰ-Claude ਮਾਡਲ ਸੂਚੀਬੱਧ ਹੋਣ। ਚੇਤਾਵਨੀ: ਗਲੋਬਲ ਤੌਰ 'ਤੇ ਸਮਰੱਥ ਕਰਨ 'ਤੇ ਇਹ ਸਾਰੇ ਕਲਾਇੰਟਾਂ ਲਈ ਕੈਟਾਲਾਗ ਐਂਟਰੀਆਂ ਨੂੰ ਦੁੱਗਣਾ ਕਰ ਦਿੰਦਾ ਹੈ।",
@@ -3402,12 +3403,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "ਪਾਈ ਚੱਲ ਰਹੀ ਮਸ਼ੀਨ ਤੋਂ ਪਹੁੰਚਯੋਗ URL ਵਰਤੋਂ ਕਰੋ। OpenAI- ਅਨੁਕੂਲ /v1 ਅੰਤਮ ਬਿੰਦੂ ਆਪਣੇ ਆਪ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ।",
     "piManualMergeHint": "ਸਿਰਫ਼ ਝਲਕ। ਇਸ providers.omniroute ਐਂਟਰੀ ਨੂੰ models.json ਵਿੱਚ ਮਿਲਾਓ ਤਾਂ ਜੋ ਤੁਹਾਡੇ ਹੋਰ ਪ੍ਰਦਾਤਾ ਅਤੇ ਸੈਟਿੰਗਾਂ ਬਰਕਰਾਰ ਰਹਿਣ।",
-    "removeMapping": "ਮੈਪਿੰਗ ਹਟਾਓ",
     "customUrl": "ਕਸਟਮ URL",
     "customEndpointAria": "ਕਸਟਮ ਐਂਡਪਆਇੰਟ",
     "useDefaultKey": "OmniRoute ਡਿਫੌਲਟ ਕੀ ਦੀ ਵਰਤੋਂ ਕਰੋ",
     "mainModelAria": "ਮੁੱਖ ਮਾਡਲ",
-    "manualConfigTitle": "Grok Build ਮੈਨੁਅਲ ਕਨਫਿਗ"
+    "manualConfigTitle": "Grok Build ਮੈਨੁਅਲ ਕਨਫਿਗ",
+    "removeMapping": "ਮੈਪਿੰਗ ਹਟਾਓ"
   },
   "modelCatalog": {
     "title": "ਮਾਡਲ ਅਤੇ ਕੰਬੋਜ਼",
@@ -9238,9 +9239,9 @@
         "financial": "ਵਿੱਤੀ",
         "brazilian": "ਬ੍ਰਾਜ਼ੀਲੀ",
         "usa": "ਅਮਰੀਕਾ",
-        "full": "ਪੂਰਾ",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (ਦੱਖਣੀ ਅਫਰੀਕਾ)"
+        "popia": "POPIA (ਦੱਖਣੀ ਅਫਰੀਕਾ)",
+        "full": "ਪੂਰਾ"
       },
       "builtinTypes": "ਬਿਲਟ-ਇਨ ਕਿਸਮਾਂ",
       "types": {

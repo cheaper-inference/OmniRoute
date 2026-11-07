@@ -42,7 +42,7 @@ Boolean zastavica se smatra **omogućenom** kada je njena efektivna vrijednost `
 
 ## Katalog zastavica
 
-119 zastavica u 6 kategorija. **Zadano** je zadana vrijednost definicije — vrijednost
+120 zastavica u 6 kategorija. **Zadano** je zadana vrijednost definicije — vrijednost
 koja se koristi kada nisu prisutni ni DB zamjena ni varijabla okruženja.
 
 ### Sigurnost (11)
@@ -119,7 +119,7 @@ Nevažeće vrijednosti enuma i nedostupna pohrana zastavica funkcionalnosti podr
 Nijedna opcija za odustajanje ne ublažava naplaćenu potrošnju niti neuspješno dohvaćanje cijene.
 Pravila primjene i izvještaj administratora razrješavaju istu efektivnu politiku.
 
-### Izvršno okruženje (56)
+### Izvršno okruženje (57)
 
 | Ključ                                          | Tip     | Zadano  | Ponovno pokretanje | Opis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | ---------------------------------------------- | ------- | ------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -181,6 +181,7 @@ Pravila primjene i izvještaj administratora razrješavaju istu efektivnu politi
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |                    | Prestani nuditi i prosljeđivati maksimalni napor zaključivanja `max` za Cursor Grok 4.7 (#17386): Cursorova dokumentacija navodi samo low/medium/high/xhigh, pa rezervni alias `grok-4.7-max` nestaje iz kataloga, a zahtjev za naporom `max` šalje se bez parametra napora. Podrazumijevano isključeno: `max` ostaje ponuđen i prosljeđuje se, jer ga je aktivna sonda AgentService/Run prihvatila.                                                                                                                                                                                                                                                                                                                                                                                       |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |                    | Šalji Responses keepalive poruke kao prazan red umjesto događaja response.in_progress, tako da sintetički snimak nikada ne može zamijeniti stvarni odgovor u zvaničnom SDK-u. Prazan red ne šalje nijedan SSE događaj, pa se nadzornik klijenta koji se resetuje samo na događaje ne bi resetovao tokom duge tihe faze. Podrazumijevano isključeno: tajmeri šalju događaj response.in_progress koji je validan prema specifikaciji.                                                                                                                                                                                                                                                                                                                                                        |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |                    | U statistici keša kompresije, kompresovani zahtjev pružaocu s automatskim keširanjem prefiksa (OpenAI, Codex, Azure ili prilagođena veza koja navodi keširanje upita uz uklanjanje oznaka) računaj kao procijenjeni pogodak keša čak i bez oznaka `cache_control` (#17114). Procjena je signal podobnosti za keširanje, a ne zabilježeni pogodak, pa prijavljena stopa pogodaka za te pružaoce teži ka 100%. Podrazumijevano isključeno: samo zahtjev koji sadrži oznake `cache_control` upućen pružaocu s keširanjem računa se kao procijenjeni pogodak, pa pružaoci s automatskim prefiksom i dalje prijavljuju 0.                                                                                                                                                                       |
+| `USAGE_DAILY_ROLLUP_ENABLED`                   | boolean | `false` | Objavi zaključene dane korištenja u `usage_daily_summary` prije zadržavanja, tako da se dugi analitički prozori čitaju kao dnevni ukupni umjesto sirovih redova. Isključeno po defaultu: objavljene dane gube detalje po vezi, po API ključu, uspjeha i latencije u analitici, a njihov trošak ostaje kao cijena pri objavljivanju. |
 
 ### CLI (5)
 
@@ -260,10 +261,10 @@ Vraća svaku zastavicu sa efektivnom vrijednošću, izvorom i sažetkom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... svih 119 zastavica
+    // ... svih 120 zastavica
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

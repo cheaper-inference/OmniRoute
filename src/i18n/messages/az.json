@@ -1101,6 +1101,7 @@
   "disabled": "Deaktiv",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Büdcəsi tükənmiş sorğuları təcili pulsuz ehtiyat təminatçıya/modelə yönləndirin.",
   "featureFlagArenaEloSyncEnabledDescription": "Model intellekti reytinqləri üçün dövri Arena AI liderlər cədvəli ELO sinxronizasiyasını aktivləşdirin.",
+  "featureFlagUsageDailyRollupEnabledDescription": "Qorunan qeydlərdən əvvəl istifadə olunmuş günlük məlumatları usage_daily_summary-də açıq şəkildə dərc edin ki, uzun analitik dəstlər gündəlik cəmləri xam sətirlər əvəzinə oxusun. Çöləndə standart olaraq söndürülür: dərc edilən günlərdə analitikdə hər əlaqəyə, hər API açarına, uğur və gecikmə detalları itirilir və xərç dərc edilən qeydlənmiş qiymət ilə saxlanılır.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Kombinə edilmiş marşrutlaşdırma model dəyişdirdikdə söhbət xülasələrini yaradın və əlavə edin. Model dəyişikliklərini müstəqil şəkildə idarə etmək və bütün mövcud və gələcək kombinasiyalar üçün fonda ötürmə sorğularının qarşısını almaq üçün bunu deaktiv edin.",
   "featureFlagReasoningReplayEnabledDescription": "Çoxnövbəli söhbətlərdə model mühakiməsini keşləyin və təkrar oxudun. Saxlamağı və yenidən daxil etməyi dayandırmaq üçün deaktiv edin.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models üzərində claude/&lt;provider&gt;/&lt;model&gt; güzgü id-lərini reklam edin ki, Claude Code keçid modeli kəşfiyyatında qeyri-Claude modelləri siyahıya alsın. Diqqət: qlobal olaraq aktivləşdirildikdə bütün müştərilər üçün kataloq girişlərini ikiqat artırır.",
@@ -3402,12 +3403,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Pi ilə işləyən maşından əldə edilə bilən URL istifadə edin. OpenAI uyğun /v1 son nöqtəsi avtomatik olaraq əlavə edilir.",
     "piManualMergeHint": "Yalnız önizləmə. Bu providers.omniroute girişini models.json -ya birləşdirin ki, digər provayderlər və parametrlər toxunulmaz olsun.",
-    "removeMapping": "Uyğunlaşdırmanı sil",
     "customUrl": "Özəl URL",
     "customEndpointAria": "Özəl nöqtə",
     "useDefaultKey": "OmniRoute standart açarından istifadə edin",
     "mainModelAria": "Əsas model",
-    "manualConfigTitle": "Grok Build əl ilə tənzimləmə konfiqurasiyası"
+    "manualConfigTitle": "Grok Build əl ilə tənzimləmə konfiqurasiyası",
+    "removeMapping": "Uyğunlaşdırmanı sil"
   },
   "modelCatalog": {
     "title": "Modellər və Kombolar",
@@ -9238,9 +9239,9 @@
         "financial": "Maliyyə",
         "brazilian": "Braziliya",
         "usa": "ABŞ",
-        "full": "Tam",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (Cənubi Afrika)"
+        "popia": "POPIA (Cənubi Afrika)",
+        "full": "Tam"
       },
       "builtinTypes": "Daxili növlər",
       "types": {
@@ -10176,6 +10177,10 @@
     "healthExtraUsageBypass": "Kvota tükənib; əlavə istifadəyə icazə verildiyi üçün xidmət davam edir.",
     "healthPaidCreditsBypass": "Kvota tükənib; mövcud ödənişli kreditlər xidmətin davam etməsinə imkan verir.",
     "healthFilteringBypass": "Kvota tükənib; yerli kvota filtrləməsi söndürüldüyü üçün xidmət davam edir.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "İstifadə",
     "grokExtraUsageCredits": "Əlavə İstifadə Krediti",
     "grokAutoTopUp": "Avtomatik Yükləmə",
@@ -10633,10 +10638,6 @@
     "confirmRedeemClaudeResetCredit": "İstifadə edilməsi uyğun Claude istifadə limitlərini dərhal sıfırlayır və bu krediti həmişəlik sərf edir.",
     "claudeResetCreditsModalTitle": "Claude sıfırlama kreditləri",
     "claudeResetCreditsModalExplainer": "Bu hesab üçün mövcud Claude sıfırlama kreditləri və həftəlik sessiya sıfırlamaları.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Son müşahidələrə əsaslanır, canlı yoxlama deyil. Təfərrüatlar üçün hesab seçin.",
     "healthRecovery": "Gözlənilən bərpa vaxtı",
     "healthAvailable": "Əlçatandır",

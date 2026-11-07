@@ -183,6 +183,12 @@ test("resetUsageHistory: 'all' wipes usage_history, daily_usage_summary, and hou
         "gpt-test",
         recentDate
       );
+      db.prepare(
+        "INSERT INTO usage_daily_summary (provider, model, service_tier, date) VALUES (?, ?, 'standard', ?)"
+      ).run("openai", "gpt-test", oldDate);
+      db.prepare(
+        "INSERT INTO usage_daily_summary (provider, model, service_tier, date) VALUES (?, ?, 'standard', ?)"
+      ).run("openai", "gpt-test", recentDate);
 
       db.prepare(
         "INSERT INTO hourly_usage_summary (provider, model, date_hour) VALUES (?, ?, ?)"
@@ -213,6 +219,11 @@ test("resetUsageHistory: 'all' wipes usage_history, daily_usage_summary, and hou
       "sanity: 2 daily_usage_summary rows seeded"
     );
     assert.equal(
+      countRows(db, "usage_daily_summary"),
+      2,
+      "sanity: 2 usage_daily_summary rows seeded"
+    );
+    assert.equal(
       countRows(db, "hourly_usage_summary"),
       2,
       "sanity: 2 hourly_usage_summary rows seeded"
@@ -241,15 +252,15 @@ test("resetUsageHistory: 'all' wipes usage_history, daily_usage_summary, and hou
     );
     assert.equal(
       periodResult.deletedDailySummary,
-      1,
-      "should delete only the old daily_usage_summary row"
+      2,
+      "should delete the old row from both daily summary tables"
     );
     assert.equal(
       periodResult.deletedHourlySummary,
       1,
       "should delete only the old hourly_usage_summary row"
     );
-    assert.equal(periodResult.deleted, 7, "total deleted should sum the reset tables");
+    assert.equal(periodResult.deleted, 8, "total deleted should sum the reset tables");
     assert.equal(
       periodResult.deletedCallLogArtifacts,
       1,
@@ -299,6 +310,11 @@ test("resetUsageHistory: 'all' wipes usage_history, daily_usage_summary, and hou
       "recent daily_usage_summary row should survive"
     );
     assert.equal(
+      countRows(db, "usage_daily_summary"),
+      1,
+      "recent usage_daily_summary row should survive"
+    );
+    assert.equal(
       countRows(db, "hourly_usage_summary"),
       1,
       "recent hourly_usage_summary row should survive"
@@ -336,8 +352,8 @@ test("resetUsageHistory: 'all' wipes usage_history, daily_usage_summary, and hou
     );
     assert.equal(
       allResult.deletedDailySummary,
-      1,
-      "'all' should delete the remaining daily_usage_summary row"
+      2,
+      "'all' should delete the remaining row from both daily summary tables"
     );
     assert.equal(
       allResult.deletedHourlySummary,
@@ -375,6 +391,7 @@ test("resetUsageHistory: 'all' wipes usage_history, daily_usage_summary, and hou
       "'all' should empty compression_analytics"
     );
     assert.equal(countRows(db, "daily_usage_summary"), 0, "'all' should empty daily_usage_summary");
+    assert.equal(countRows(db, "usage_daily_summary"), 0, "'all' should empty usage_daily_summary");
     assert.equal(
       countRows(db, "hourly_usage_summary"),
       0,

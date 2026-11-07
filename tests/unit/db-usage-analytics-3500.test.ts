@@ -1,5 +1,5 @@
 /**
- * #3500 — usage_history / daily_usage_summary aggregation functions extracted
+ * #3500 — usage_history / usage_daily_summary aggregation functions extracted
  * into usageAnalytics.ts (Hard Rule #5, slice 2).
  *
  * Seeds an in-memory temp SQLite DB and asserts each new db function returns the
@@ -66,15 +66,16 @@ function insertDailyUsageSummary(row: Record<string, unknown>) {
     total_output_tokens: 200,
     total_requests: 5,
     total_cost: 0.0,
+    service_tier: "standard",
     ...row,
     date: row.date ?? "2024-01-01",
   };
   // id is AUTOINCREMENT — omit it to let SQLite assign it
   db.prepare(
-    `INSERT INTO daily_usage_summary (
-      date, provider, model, total_input_tokens, total_output_tokens, total_requests, total_cost
+    `INSERT INTO usage_daily_summary (
+      date, provider, model, service_tier, total_input_tokens, total_output_tokens, total_requests, total_cost
     ) VALUES (
-      @date, @provider, @model, @total_input_tokens, @total_output_tokens, @total_requests, @total_cost
+      @date, @provider, @model, @service_tier, @total_input_tokens, @total_output_tokens, @total_requests, @total_cost
     )`
   ).run(full);
 }
@@ -109,12 +110,12 @@ test("#3500 buildUnifiedSource — raw-only branch when sinceIso is recent", () 
 
   assert.equal(typeof result.unifiedSource, "string");
   assert.ok(result.unifiedSource.includes("usage_history"), "source references usage_history");
-  assert.ok(!result.unifiedSource.includes("daily_usage_summary"), "no agg table needed");
+  assert.ok(!result.unifiedSource.includes("usage_daily_summary"), "no agg table needed");
   assert.ok(result.unifiedSource.includes("@since"), "has @since param");
   assert.ok("since" in result.unifiedParams, "unifiedParams has since key");
 });
 
-test("#3500 buildUnifiedSource — raw-only branch for same cutoff date ISO", () => {
+test("#3500 buildUnifiedSource — published cutoff day is read from the summary", () => {
   const rawCutoffDate = "2026-06-21";
   const result = mod.buildUnifiedSource({
     sinceIso: "2026-06-21T01:00:00.000Z",
@@ -124,9 +125,9 @@ test("#3500 buildUnifiedSource — raw-only branch for same cutoff date ISO", ()
     apiKeyParams: {},
   });
 
-  assert.ok(!result.unifiedSource.includes("daily_usage_summary"), "no same-day agg table");
-  assert.equal(result.unifiedParams.since, "2026-06-21T01:00:00.000Z");
-  assert.ok(!("rawCutoffDate" in result.unifiedParams), "rawCutoffDate not needed");
+  assert.ok(result.unifiedSource.includes("usage_daily_summary"), "same-day summary is included");
+  assert.equal(result.unifiedParams.rawCutoffDate, rawCutoffDate);
+  assert.equal(result.unifiedParams.rawCutoff, rawCutoffDate);
 });
 
 // ---------------------------------------------------------------------------
@@ -146,7 +147,7 @@ test("#3500 buildUnifiedSource — UNION branch when sinceIso is old", () => {
   });
 
   assert.ok(result.unifiedSource.includes("usage_history"), "raw leg present");
-  assert.ok(result.unifiedSource.includes("daily_usage_summary"), "agg leg present");
+  assert.ok(result.unifiedSource.includes("usage_daily_summary"), "agg leg present");
   assert.ok(result.unifiedSource.includes("UNION ALL"), "UNION ALL present");
   assert.ok("rawCutoff" in result.unifiedParams, "rawCutoff param present");
   assert.ok("sinceDate" in result.unifiedParams, "sinceDate param present");
@@ -157,7 +158,7 @@ test("#3500 buildUnifiedSource — UNION branch when sinceIso is old", () => {
 // buildUnifiedSource — api_key filter disables agg leg
 // ---------------------------------------------------------------------------
 
-test("#3500 buildUnifiedSource — api_key filter suppresses daily_usage_summary leg", () => {
+test("#3500 buildUnifiedSource — api_key filter suppresses usage_daily_summary leg", () => {
   const oldIso = "2024-01-01T00:00:00.000Z";
   const rawCutoffDate = "2025-01-01"; // after sinceIso, so UNION would fire without the api_key filter
   const result = mod.buildUnifiedSource({
@@ -169,7 +170,7 @@ test("#3500 buildUnifiedSource — api_key filter suppresses daily_usage_summary
   });
 
   assert.ok(
-    !result.unifiedSource.includes("daily_usage_summary"),
+    !result.unifiedSource.includes("usage_daily_summary"),
     "agg leg suppressed with api_key filter"
   );
   assert.ok(result.unifiedSource.includes("usage_history"), "raw leg still present");
@@ -583,7 +584,7 @@ test("#3500 buildPresetUnifiedSource — UNION branch with old sinceIso", () => 
     apiKeyParams: {},
   });
 
-  assert.ok(result.unifiedSource.includes("daily_usage_summary"), "agg leg present");
+  assert.ok(result.unifiedSource.includes("usage_daily_summary"), "agg leg present");
   assert.ok("presetRawCutoff" in result.unifiedParams, "presetRawCutoff param present");
 });
 
@@ -599,7 +600,7 @@ test("#3500 buildPresetUnifiedSource — raw-only with recent sinceIso", () => {
     apiKeyParams: {},
   });
 
-  assert.ok(!result.unifiedSource.includes("daily_usage_summary"), "no agg leg needed");
+  assert.ok(!result.unifiedSource.includes("usage_daily_summary"), "no agg leg needed");
   assert.ok("presetSince" in result.unifiedParams, "presetSince param present");
 });
 
@@ -660,12 +661,12 @@ test("#3500 getAllDomainBudgets — returns array", () => {
 });
 
 // ---------------------------------------------------------------------------
-// UNION source integration — daily_usage_summary rows included in aggregates
+// UNION source integration — usage_daily_summary rows included in aggregates
 // ---------------------------------------------------------------------------
 
 test("#3500 buildUnifiedSource UNION — summary rows merged into getDailyUsage result", () => {
   // Set rawCutoffDate to tomorrow so today's usage_history rows are in the raw leg;
-  // also insert a daily_usage_summary row for a past date that is below rawCutoffDate.
+  // also insert a usage_daily_summary row for a past date that is below rawCutoffDate.
   const tomorrow = new Date(Date.now() + 86_400_000);
   const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
@@ -689,12 +690,12 @@ test("#3500 buildUnifiedSource UNION — summary rows merged into getDailyUsage 
   });
 
   // UNION branch must be used because sinceIso < rawCutoffDate
-  assert.ok(unifiedSource.includes("daily_usage_summary"), "UNION branch active");
+  assert.ok(unifiedSource.includes("usage_daily_summary"), "UNION branch active");
 
   const rows = mod.getDailyUsage(unifiedSource, unifiedParams);
   const june1 = rows.find((r) => r.date === pastDate);
 
   assert.ok(june1, "2023-06-01 summary row is visible through UNION");
-  // daily_usage_summary synthesizes a timestamp at noon; totalTokens = 500+750 = 1250
+  // usage_daily_summary synthesizes a timestamp at noon; totalTokens = 500+750 = 1250
   assert.equal(june1!.totalTokens, 1250, "tokens from summary row: 500+750=1250");
 });

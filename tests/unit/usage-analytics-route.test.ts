@@ -241,10 +241,13 @@ test("GET /api/usage/analytics can include flat-rate provider estimates for the 
 test("GET /api/usage/analytics preserves archived flat-rate estimates without changing billed cost", async () => {
   const db = core.getDbInstance();
   db.prepare(
-    `INSERT INTO daily_usage_summary
-      (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cost)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).run("claude", "claude-opus-5", "2024-01-01", 2, 1_000_000, 1_000_000, 42.5);
+    `INSERT INTO usage_daily_summary
+      (provider, model, service_tier, date, total_requests, total_input_tokens, total_output_tokens, total_cost)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run("claude", "claude-opus-5", "standard", "2024-01-01", 2, 1_000_000, 1_000_000, 42.5);
+  db.prepare(`INSERT INTO rollup_state (tier, last_completed_date) VALUES ('daily', ?)`).run(
+    "2024-01-01"
+  );
 
   const billedResponse = await analyticsRoute.GET(
     makeRequest("http://localhost/api/usage/analytics?range=all")
@@ -294,7 +297,7 @@ test("rollupUsageHistoryBeforeDate stores API-equivalent cost before deleting ra
   const archived = db
     .prepare(
       `SELECT total_requests, total_input_tokens, total_output_tokens, total_cost
-       FROM daily_usage_summary
+       FROM usage_daily_summary
        WHERE provider = ? AND model = ? AND date = ?`
     )
     .get("claude", "claude-opus-5", "2024-01-01") as {
@@ -509,17 +512,8 @@ test("GET /api/usage/analytics does not double-count raw and aggregated rows", a
   const db = core.getDbInstance();
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
-  // The raw/aggregated split boundary is retention.usageHistory (365 days by
-  // default — see cleanupUsageHistory in src/lib/db/cleanup.ts, which rolls up
-  // and deletes usage_history rows using that exact setting). Read it live
-  // instead of hardcoding 30 days so this fixture stays valid regardless of
-  // the configured retention window.
-  const { getUserDatabaseSettings } = await import("../../src/lib/db/databaseSettings.ts");
-  const rawRetentionDays = getUserDatabaseSettings().retention.usageHistory;
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - rawRetentionDays);
-  const olderDate = new Date(cutoffDate);
-  olderDate.setDate(olderDate.getDate() - 1);
+  const olderDate = new Date(today);
+  olderDate.setUTCDate(olderDate.getUTCDate() - 1);
   const olderDateStr = olderDate.toISOString().split("T")[0];
 
   db.prepare(
@@ -528,11 +522,14 @@ test("GET /api/usage/analytics does not double-count raw and aggregated rows", a
   ).run("openai", "gpt-4o", "raw-current", 100, 50, 1, 200, today.toISOString());
 
   const insertSummary = db.prepare(
-    `INSERT INTO daily_usage_summary (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cost)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO usage_daily_summary (provider, model, service_tier, date, total_requests, total_input_tokens, total_output_tokens, total_cost)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   );
-  insertSummary.run("openai", "gpt-4o", todayStr, 99, 9900, 9900, 0);
-  insertSummary.run("openai", "gpt-4o", olderDateStr, 1, 25, 10, 0);
+  insertSummary.run("openai", "gpt-4o", "standard", todayStr, 99, 9900, 9900, 0);
+  insertSummary.run("openai", "gpt-4o", "standard", olderDateStr, 1, 25, 10, 0);
+  db.prepare(`INSERT INTO rollup_state (tier, last_completed_date) VALUES ('daily', ?)`).run(
+    olderDateStr
+  );
 
   const response = await analyticsRoute.GET(
     makeRequest("http://localhost/api/usage/analytics?range=all")
@@ -861,7 +858,7 @@ test("rollupUsageHistoryBeforeDate prices each request, not the day's summed tok
 
   const archived = db
     .prepare(
-      `SELECT total_cost FROM daily_usage_summary
+      `SELECT total_cost FROM usage_daily_summary
        WHERE provider = ? AND model = ? AND date = ?`
     )
     .get("openai", "gpt-4o", "2024-03-01") as { total_cost: number };

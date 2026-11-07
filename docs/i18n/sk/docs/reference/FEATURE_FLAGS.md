@@ -44,7 +44,7 @@ Booleovský príznak sa považuje za **povolený**, keď je jeho efektívna hodn
 
 ## Katalóg príznakov
 
-119 príznakov v 6 kategóriách. **Predvolená hodnota** je predvolená hodnota definície — hodnota
+120 príznakov v 6 kategóriách. **Predvolená hodnota** je predvolená hodnota definície — hodnota
 použitá v prípade, že nie je k dispozícii ani prepísanie v DB, ani premenná prostredia.
 
 ### Bezpečnosť (11)
@@ -122,7 +122,7 @@ funkcií vedú k uzavretiu v prípade zlyhania. Žiadna z volieb opt-out neuvoľ
 ani zlyhanie vyhľadávania cien. Vynucovanie a správa pre administrátora vyhodnocujú rovnakú
 efektívnu politiku.
 
-### Runtime (56)
+### Runtime (57)
 
 | Key                                            | Type    | Default | Reštart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------------------------------------------- | ------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -184,6 +184,7 @@ efektívnu politiku.
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |         | Prestať ponúkať a odovzdávať úroveň odôvodňovania `max` pre Cursor Grok 4.7 (#17386): dokumentácia Cursoru uvádza iba low/medium/high/xhigh, takže alternatívny alias `grok-4.7-max` zmizne z katalógu a požiadavka na úroveň `max` sa odošle bez parametra úrovne odôvodňovania. Predvolene vypnuté: `max` zostáva ponúkané a odovzdávané, keďže živá sonda AgentService/Run ho akceptovala.                                                                                                                                                                                                                                                                                                                                                                                         |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |         | Odosielať keepalive správy Responses ako prázdny riadok namiesto udalosti response.in_progress, aby syntetická snímka nikdy nemohla nahradiť skutočnú odpoveď v oficiálnom SDK. Prázdny riadok nevyšle žiadnu udalosť SSE, takže watchdog klienta, ktorý sa resetuje iba pri udalostiach, sa počas dlhej tichej fázy neresetuje. Predvolene vypnuté: časovače odosielajú udalosť response.in_progress platnú podľa špecifikácie.                                                                                                                                                                                                                                                                                                                                                      |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |         | V štatistikách kompresnej vyrovnávacej pamäte započítať komprimovanú požiadavku poskytovateľovi s automatickým ukladaním prefixov do vyrovnávacej pamäte (OpenAI, Codex, Azure alebo vlastné pripojenie, ktoré deklaruje ukladanie promptov do vyrovnávacej pamäte s odstraňovaním markerov) ako odhadovaný zásah do vyrovnávacej pamäte, a to aj bez markerov `cache_control` (#17114). Odhad je signálom oprávnenosti na uloženie do vyrovnávacej pamäte, nie pozorovaným zásahom, takže hlásená miera zásahov pre týchto poskytovateľov smeruje k 100 %. Predvolene vypnuté: za odhadovaný zásah sa považuje iba požiadavka s markermi `cache_control` odoslaná poskytovateľovi s ukladaním do vyrovnávacej pamäte, takže poskytovatelia s automatickým prefixom naďalej hlásia 0. |
+| `USAGE_DAILY_ROLLUP_ENABLED`                   | boolean | `false` | Prejdenie ukončených dní využívania do `usage_daily_summary` pred expiráciou retencie, aby dlhé analytické okná čítali denné súčty namiesto surových riadkov. Vypnuté predvolene: publikované dni stratia v analýzach detaily podľa pripojenia, kľúča API, úspešnosti a latencie a ich cena zostáva fixná v čase publikácie.
 
 ### CLI (5)
 
@@ -268,10 +269,10 @@ Vráti každý príznak s jeho efektívnou hodnotou, zdrojom a súhrnom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... všetkých 119 príznakov
+    // ... všetkých 120 príznakov
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

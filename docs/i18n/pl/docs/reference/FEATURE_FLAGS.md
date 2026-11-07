@@ -44,7 +44,7 @@ Flaga logiczna jest uznawana za **włączoną**, gdy jej efektywna wartość to 
 
 ## Katalog flag
 
-119 flag w 6 kategoriach. **Domyślna** to domyślna wartość definicji — wartość
+120 flag w 6 kategoriach. **Domyślna** to domyślna wartość definicji — wartość
 używana, gdy nie ma ani nadpisania w bazie danych, ani zmiennej środowiskowej.
 
 ### Bezpieczeństwo (11)
@@ -122,7 +122,7 @@ i nieczytelny magazyn flag funkcji powodują bezpieczne zablokowanie. Żadna z o
 nie łagodzi ograniczeń dotyczących rozliczonych wydatków ani skutków nieudanego wyszukiwania
 cen. Zasady wymuszania i raport administratora rozstrzygają tę samą efektywną politykę.
 
-### Środowisko uruchomieniowe (56)
+### Środowisko uruchomieniowe (57)
 
 | Klucz                                          | Typ     | Wartość domyślna | Ponowne uruchomienie | Opis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------------------------------------------- | ------- | ---------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -184,6 +184,7 @@ cen. Zasady wymuszania i raport administratora rozstrzygają tę samą efektywn�
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`          |                      | Zaprzestań oferowania i przekazywania maksymalnego poziomu wysiłku rozumowania `max` dla Cursor Grok 4.7 (#17386): dokumentacja Cursor wymienia tylko low/medium/high/xhigh, więc alias zastępczy `grok-4.7-max` znika z katalogu, a żądanie poziomu wysiłku `max` jest wysyłane bez parametru poziomu wysiłku. Domyślnie wyłączone: `max` pozostaje oferowane i przekazywane, ponieważ zaakceptowała go aktywna sonda AgentService/Run.                                                                                                                                                                                                                                                                                                                                                                                              |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false`          |                      | Wysyłaj komunikaty podtrzymujące połączenie Responses jako pusty wiersz zamiast zdarzenia response.in_progress, aby syntetyczna migawka nigdy nie mogła zastąpić rzeczywistej odpowiedzi w oficjalnym SDK. Pusty wiersz nie wysyła żadnego zdarzenia SSE, więc mechanizm monitorujący klienta, który resetuje się tylko po zdarzeniach, nie zostanie zresetowany podczas długiej fazy ciszy. Domyślnie wyłączone: liczniki czasu wysyłają zgodne ze specyfikacją zdarzenie response.in_progress.                                                                                                                                                                                                                                                                                                                                      |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`          |                      | W statystykach pamięci podręcznej kompresji traktuj skompresowane żądanie do dostawcy z automatycznym buforowaniem prefiksu (OpenAI, Codex, Azure lub niestandardowe połączenie deklarujące buforowanie promptów z usuwaniem znaczników) jako szacowane trafienie pamięci podręcznej, nawet bez znaczników `cache_control` (#17114). Szacunek jest sygnałem kwalifikującym do użycia pamięci podręcznej, a nie zaobserwowanym trafieniem, dlatego raportowany współczynnik trafień dla tych dostawców zmierza do 100%. Domyślnie wyłączone: tylko żądanie zawierające znaczniki `cache_control` wysłane do dostawcy obsługującego buforowanie jest liczone jako szacowane trafienie, więc dostawcy z automatycznym prefiksem nadal raportują 0.                                                                                       |
+| `USAGE_DAILY_ROLLUP_ENABLED`                   | boolean | `false` |         | Publikuj zamknięte dni użycia do `usage_daily_summary` przed usunięciem danych, aby długie okna analityki odczytywały dzienne sumy zamiast surowych wierszy. Wyłączone domyślnie: opublikowane dni tracą szczegóły per połączenie, per klucz API, pomyślność i opóźnienie w analityce, a ich koszt pozostaje według ceny z momentu publikacji.                                                                                                                                                                                                                                                                                                                                        |
 
 ### CLI (5)
 
@@ -266,10 +267,10 @@ Zwraca każdą flagę wraz z jej efektywną wartością, źródłem i podsumowan
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... wszystkie 119 flag
+    // ... wszystkie 120 flag
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

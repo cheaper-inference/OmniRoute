@@ -1101,6 +1101,7 @@
   "disabled": "ပိတ်ထားသည်",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ဘတ်ဂျက်ကုန်ဆုံးသွားသော တောင်းဆိုမှုများကို အရေးပေါ် အခမဲ့ အရန် provider/model သို့ လမ်းကြောင်းပြောင်းပါ။",
   "featureFlagArenaEloSyncEnabledDescription": "မော်ဒယ်ဉာဏ်ရည်ဆိုင်ရာ အဆင့်သတ်မှတ်ချက်များအတွက် Arena AI leaderboard ELO ကို အခါအားလျော်စွာ ထပ်တူပြုခြင်းအား ဖွင့်ပါ။",
+  "featureFlagUsageDailyRollupEnabledDescription": "ထိန်းသိမ်းထားမှုမတိုင်မီ ပိတ်ထားရသော အသုံးပြုမှုရက်များကို usage_daily_summary သို့ လွှင့်တင်ပါ၊ ထို့ကြောင့် ရှည်လျားသောခွဲခြမ်းစိတ်ဖြာမှု windows များသည် အတန်းကြမ်းများအစား နေ့စဉ်စုစုပေါင်းများကို ဖတ်သည်။ ပုံသေအားဖြင့် ပိတ်သည်- ထုတ်ဝေသည့်ရက်များသည် ၎င်းတို့၏ တစ်ခုချင်းချိတ်ဆက်မှု၊ API-ကီးတစ်ခု၊ အောင်မြင်မှုနှင့် ချိန်ညှိမှုအသေးစိတ်အချက်အလက်များကို ဆုံးရှုံးသွားပြီး ၎င်းတို့၏ကုန်ကျစရိတ်သည် ထုတ်ဝေသည့်အခါတွင် စျေးနှုန်းအတိုင်းရှိနေပါသည်။",
   "featureFlagUniversalContextHandoffEnabledDescription": "combo လမ်းကြောင်းရွေးချယ်မှုက မော်ဒယ်များ ပြောင်းသည့်အခါ စကားဝိုင်းအနှစ်ချုပ်များကို ထုတ်လုပ်၍ ထည့်သွင်းပါ။ မော်ဒယ်ပြောင်းလဲမှုများကို သီးခြားစီ ကိုင်တွယ်ရန်နှင့် လက်ရှိနှင့် အနာဂတ် combo အားလုံးအတွက် နောက်ခံလွှဲပြောင်းတောင်းဆိုမှုများကို တားဆီးရန် ပိတ်ပါ။",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Claude Code gateway ၏ မော်ဒယ်ရှာဖွေမှုစာရင်းတွင် Claude မဟုတ်သော မော်ဒယ်များ ပါဝင်စေရန် /v1/models တွင် claude/&lt;provider&gt;/&lt;model&gt; mirror ids များကို ဖော်ပြပါ။ သတိပေးချက်- အားလုံးအတွက် ဖွင့်ထားပါက client အားလုံးတွင် catalog entry အရေအတွက် နှစ်ဆဖြစ်စေသည်။",
@@ -3402,12 +3403,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Pi လည်ပတ်နေသည့်စက်မှ လက်လှမ်းမီနိုင်သော URL သုံးပါ။ OpenAI-သဟဇာတဖြစ်သော /v1 အဆုံးမှတ်ကို အလိုအလျောက် ထည့်သွင်းထားသည်။",
     "piManualMergeHint": "အစမ်းကြည့်ရန်သာ။ ဤ providers.omniroute ထဲသို့ ဝင်ရောက်မှုကို models.json တွင် ပေါင်းစည်းခြင်းဖြင့် သင်၏ အခြားသော ဝန်ဆောင်မှုပေးသူများနှင့် ဆက်တင်များ မပျက်မစီး ရှိနေစေရန်။",
-    "removeMapping": "ချိတ်ဆက်သတ်မှတ်မှုကို ဖယ်ရှားရန်",
     "customUrl": "စိတ်ကြိုက် URL",
     "customEndpointAria": "ကွဲပြားသော endpoint",
     "useDefaultKey": "OmniRoute ကိုယ်ပိုင် default key ကို အသုံးပြုပါ",
     "mainModelAria": "လက်မောင်းမုခ်ခံစက်",
-    "manualConfigTitle": "Grok Build manual ကွန်ဖစ်ဂျူးရင်"
+    "manualConfigTitle": "Grok Build manual ကွန်ဖစ်ဂျူးရင်",
+    "removeMapping": "ချိတ်ဆက်သတ်မှတ်မှုကို ဖယ်ရှားရန်"
   },
   "modelCatalog": {
     "title": "မော်ဒယ်များနှင့် Combos",
@@ -9238,9 +9239,9 @@
         "financial": "ငွေကြေး",
         "brazilian": "ဘရာဇီး",
         "usa": "အမေရိကန်",
-        "full": "အပြည့်အစုံ",
         "gdpr": "GDPR (ဥရောပသမဂ္ဂ)",
-        "popia": "POPIA (တောင်အာဖရိက)"
+        "popia": "POPIA (တောင်အာဖရိက)",
+        "full": "အပြည့်အစုံ"
       },
       "builtinTypes": "မူလပါဝင်သော အမျိုးအစားများ",
       "types": {

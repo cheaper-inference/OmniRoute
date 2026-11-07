@@ -1101,6 +1101,7 @@
   "disabled": "Onemogućeno",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Usmjeri zahtjeve s iscrpljenim budžetom rute na hitni besplatni fallback provajder/model.",
   "featureFlagArenaEloSyncEnabledDescription": "Omogući periodičnu Arena AI leaderboard ELO sinhronizaciju za rangiranje inteligencije modela.",
+  "featureFlagUsageDailyRollupEnabledDescription": "Objavite zatvorene dane upotrebe u usage_daily_summary prije zadržavanja, tako da dugi prozori za analizu čitaju dnevne ukupne vrijednosti umjesto neobrađenih redova. Isključeno prema zadanim postavkama: objavljeni dani gube svoje po-vezi, po-API-ključu, detalje o uspjehu i kašnjenju u analitici, a njihova cijena ostaje kao cijena kada je objavljena.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Generiši i ubaci sažetke razgovora kada combo rutiranje mijenja modele. Onemogući kako bi se promjene modela tretirale nezavisno i spriječili zahtjevi za predaju u pozadini za sve postojeće i buduće combo konfiguracije.",
   "featureFlagReasoningReplayEnabledDescription": "Keširajte i reproducirajte rezonovanje modela kroz razgovore s više koraka. Onemogućite da biste prestali spremati i ponovo umetati rezonovanje.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Oglašavaj claude/&lt;provider&gt;/&lt;model&gt; mirror ID-ove na /v1/models kako bi Claude Code gateway discovery lista uključivala i ne-Claude modele. Upozorenje: udvostručuje unose u katalogu za sve klijente kada je omogućeno globalno.",
@@ -3402,12 +3403,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Koristite URL dostupnu sa mašine na kojoj radi Pi. OpenAI-kompatibilna /v1 krajnja tačka se dodaje automatski.",
     "piManualMergeHint": "Samo pregled. Spojite ovaj unos providers.omniroute u models.json tako da vaši drugi provajderi i postavke ostanu netaknuti.",
-    "removeMapping": "Ukloni mapiranje",
     "customUrl": "Prilagođena URL",
     "customEndpointAria": "Prilagođena tačka pristupa",
     "useDefaultKey": "Koristite zadanu ključ za OmniRoute",
     "mainModelAria": "Glavni model",
-    "manualConfigTitle": "Ručna konfiguracija Grok Build"
+    "manualConfigTitle": "Ručna konfiguracija Grok Build",
+    "removeMapping": "Ukloni mapiranje"
   },
   "modelCatalog": {
     "title": "Modeli i kombinacije",
@@ -9238,9 +9239,9 @@
         "financial": "Finansijski",
         "brazilian": "Brazilski",
         "usa": "SAD",
-        "full": "Potpuni",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (južna Afrika)"
+        "popia": "POPIA (južna Afrika)",
+        "full": "Potpuni"
       },
       "builtinTypes": "Ugrađeni tipovi",
       "types": {

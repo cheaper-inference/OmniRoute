@@ -1101,6 +1101,7 @@
   "disabled": "Desativado",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Encaminhar pedidos com orçamento esgotado para o fornecedor/modelo de contingência gratuito de emergência.",
   "featureFlagArenaEloSyncEnabledDescription": "Ativar a sincronização periódica do ELO da tabela de classificação da Arena AI para classificações de inteligência do modelo.",
+  "featureFlagUsageDailyRollupEnabledDescription": "Publique os dias de utilização fechados em usage_daily_summary antes da retenção, para que as janelas de análise longas leiam os totais diários em vez das linhas brutas. Desativado por defeito: os dias publicados perdem os detalhes por ligação, por chave API, sucesso e latência nas análises, e o seu custo mantém-se igual ao preço quando publicado.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Gere e injete resumos das conversas quando o encaminhamento de combinações alternar entre modelos. Desative esta opção para tratar as mudanças de modelo de forma independente e impedir pedidos de transferência em segundo plano para todas as combinações existentes e futuras.",
   "featureFlagReasoningReplayEnabledDescription": "Armazena e reproduz o raciocínio do modelo em conversas de vários turnos. Desative para deixar de guardar e reintroduzir o raciocínio.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Anuncie os ids de espelho claude/&lt;provider&gt;/&lt;model&gt; em /v1/models para que a descoberta de modelos do gateway Claude Code liste modelos não Claude. Aviso: duplica entradas de catálogo para todos os clientes quando ativado globalmente.",
@@ -3402,12 +3403,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Utilize o URL acessível na máquina que executa o Pi. O endpoint /v1 compatível com OpenAI é adicionado automaticamente.",
     "piManualMergeHint": "Apenas visualização. Mescle esta entrada providers.omniroute no models.json para que os seus outros providers e definições permaneçam intactos.",
-    "removeMapping": "Remover mapeamento",
     "customUrl": "URL personalizado",
     "customEndpointAria": "Endpoint personalizado",
     "useDefaultKey": "Usar a chave predefinida do OmniRoute",
     "mainModelAria": "Modelo principal",
-    "manualConfigTitle": "Configuração manual do Grok Build"
+    "manualConfigTitle": "Configuração manual do Grok Build",
+    "removeMapping": "Remover mapeamento"
   },
   "modelCatalog": {
     "title": "Modelos e Combos",
@@ -9238,9 +9239,9 @@
         "financial": "Financeiro",
         "brazilian": "Brasileiro",
         "usa": "EUA",
-        "full": "Completo",
         "gdpr": "RGPD (UE)",
-        "popia": "POPIA (África do Sul)"
+        "popia": "POPIA (África do Sul)",
+        "full": "Completo"
       },
       "builtinTypes": "Tipos incorporados",
       "types": {
@@ -10176,6 +10177,10 @@
     "healthExtraUsageBypass": "Quota esgotada; a utilização adicional é permitida, pelo que o serviço continua.",
     "healthPaidCreditsBypass": "Quota esgotada; os créditos pagos disponíveis permitem continuar o serviço.",
     "healthFilteringBypass": "Quota esgotada; a filtragem local de quotas está desativada, pelo que o serviço continua.",
+    "codexPaidCreditsLabel": "Créditos pagos do Codex",
+    "codexPaidCreditsAvailable": "Disponíveis (saldo não indicado)",
+    "codexPaidCreditsUnavailable": "Indisponíveis ou limite de gastos atingido",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Uso",
     "grokExtraUsageCredits": "Créditos de Uso Extra",
     "grokAutoTopUp": "Recarregamento Automático",
@@ -10633,10 +10638,6 @@
     "confirmRedeemClaudeResetCredit": "O resgate repõe imediatamente os limites de utilização elegíveis do Claude e consome permanentemente este crédito.",
     "claudeResetCreditsModalTitle": "Créditos de reposição do Claude",
     "claudeResetCreditsModalExplainer": "Créditos de reposição do Claude disponíveis e reposições semanais de sessão para esta conta.",
-    "codexPaidCreditsLabel": "Créditos pagos do Codex",
-    "codexPaidCreditsAvailable": "Disponíveis (saldo não indicado)",
-    "codexPaidCreditsUnavailable": "Indisponíveis ou limite de gastos atingido",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Com base nas observações recentes, não num teste em direto. Selecione uma conta para ver detalhes.",
     "healthRecovery": "Recuperação prevista",
     "healthAvailable": "Disponível",

@@ -128,7 +128,7 @@ test("quota, stats and rollup read the persisted cost; a later price does not re
     assert.equal((await rollupUsageHistoryBeforeDate("2100-01-01")).errors, 0);
     const summary = core
       .getDbInstance()
-      .prepare("SELECT total_cost FROM daily_usage_summary WHERE provider = 'kiro'")
+      .prepare("SELECT total_cost FROM usage_daily_summary WHERE provider = 'kiro'")
       .get() as { total_cost: number };
     assert.equal(summary.total_cost, 0.01);
   } finally {

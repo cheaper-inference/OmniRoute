@@ -44,7 +44,7 @@ Boolean zastavica smatra se **omogućenom** kada je njezina efektivna vrijednost
 
 ## Katalog zastavica
 
-119 zastavica u 6 kategorija. **Zadano** je zadana vrijednost definicije — vrijednost
+120 zastavica u 6 kategorija. **Zadano** je zadana vrijednost definicije — vrijednost
 koja se upotrebljava kada nisu prisutni ni nadjačavanje u bazi podataka ni varijabla okruženja.
 
 ### Sigurnost (11)
@@ -121,7 +121,7 @@ Nevažeće vrijednosti enumeracije i nečitljiva pohrana oznaka značajki uzroku
 Nijedna opcija za izuzimanje ne ublažava naplaćenu potrošnju ni neuspješno dohvaćanje cijene.
 Provođenje pravila i izvješće administratora razrješavaju istu učinkovitu politiku.
 
-### Izvršno okruženje (56)
+### Izvršno okruženje (57)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ---------------------------------------------- | ------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -183,6 +183,7 @@ Provođenje pravila i izvješće administratora razrješavaju istu učinkovitu p
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |         | Prestani nuditi i prosljeđivati napor zaključivanja `max` za Cursor Grok 4.7 (#17386): Cursorova dokumentacija navodi samo low/medium/high/xhigh, pa zamjenski alias `grok-4.7-max` nestaje iz kataloga, a zahtjev za naporom `max` šalje se bez parametra napora. Isključeno prema zadanim postavkama: `max` se i dalje nudi i prosljeđuje jer ga je aktivna provjera AgentService/Run prihvatila.                                                                                                                                                                                                                                                                                                                                                                                    |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |         | Šalji keepalive poruke za Responses kao prazan redak umjesto događaja response.in_progress, tako da sintetička snimka nikada ne može zamijeniti stvarni odgovor u službenom SDK-u. Prazan redak ne pokreće nijedan SSE događaj, pa se nadzorni mehanizam klijenta koji se ponovno postavlja samo na događaje ne bi ponovno postavio tijekom dugotrajne tihe faze. Isključeno prema zadanim postavkama: mjerači vremena šalju događaj response.in_progress valjan prema specifikaciji.                                                                                                                                                                                                                                                                                                  |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |         | U statistici predmemorije kompresije ubroji komprimirani zahtjev davatelju s automatskim predmemoriranjem prefiksa (OpenAI, Codex, Azure ili prilagođena veza koja deklarira predmemoriranje upita uz uklanjanje oznaka) kao procijenjeni pogodak predmemorije čak i bez oznaka `cache_control` (#17114). Procjena je signal podobnosti za predmemoriju, a ne zabilježeni pogodak, pa prijavljena stopa pogodaka za te davatelje teži prema 100%. Isključeno prema zadanim postavkama: samo zahtjev koji davatelju s predmemoriranjem sadrži oznake `cache_control` računa se kao procijenjeni pogodak, pa davatelji s automatskim prefiksom i dalje prijavljuju 0.                                                                                                                    |
+| `USAGE_DAILY_ROLLUP_ENABLED`                   | boolean | `false` |         | Objavić zatvorene dane korištenja u `usage_daily_summary` prije izbacivanja, tako da dugi analitički prozori čitaju dnevne zbrojeve umjesto sirovih redaka. Isključeno po osnovi: objavljeni dani gube detalje po vezi, po ključu API-ja, uspjeh i latenciju u analitici, a njihova cijena ostaje fiksirana u trenutku objave.                                                                                                                                                                                                                                                                                                                                        |
 
 ### CLI (5)
 
@@ -263,10 +264,10 @@ Vraća svaku zastavicu s učinkovitom vrijednošću, izvorom i sažetkom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... svih 119 zastavica
+    // ... svih 120 zastavica
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

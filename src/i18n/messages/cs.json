@@ -1101,6 +1101,7 @@
   "disabled": "Zakázáno",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Směrovat požadavky s vyčerpaným rozpočtem na nouzového bezplatného záložního poskytovatele/model.",
   "featureFlagArenaEloSyncEnabledDescription": "Povolit periodickou synchronizaci ELO z žebříčku Arena AI pro hodnocení inteligence modelů.",
+  "featureFlagUsageDailyRollupEnabledDescription": "Zveřejněte dny uzavřeného používání do usage_daily_summary před uchováváním, takže dlouhá okna analýzy čtou denní součty namísto nezpracovaných řádků. Ve výchozím nastavení vypnuto: publikované dny přijdou o své připojení, klíč API, podrobnosti o úspěšnosti a latenci v analýze a jejich cena zůstane stejná jako cena při zveřejnění.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Generovat a vkládat souhrny konverzací, když kombinované směrování přepíná mezi modely. Vypnutím budou přepnutí modelu zpracována nezávisle a zabrání se požadavkům na předání na pozadí u všech stávajících i budoucích kombinací.",
   "featureFlagReasoningReplayEnabledDescription": "Ukládejte do mezipaměti a přehrávejte uvažování modelu napříč vícekoloými konverzacemi. Vypnutím zastavíte ukládání a opětovné vkládání uvažování.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Inzerujte claude/&lt;provider&gt;/&lt;model&gt; zrcadlové ID na /v1/models, aby seznam objevování modelů brány Claude Code zahrnoval modely, které nejsou Claude. Upozornění: při globálním povolení zdvojuje katalogové položky pro všechny klienty.",
@@ -3402,12 +3403,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Použijte URL dosažitelné ze stroje, na kterém běží Pi. Koncový bod /v1 kompatibilní s OpenAI se přidá automaticky.",
     "piManualMergeHint": "Pouze náhled. Sloučte tento záznam providers.omniroute do models.json, aby vaši ostatní poskytovatelé a nastavení zůstali nedotčeni.",
-    "removeMapping": "Odebrat mapování",
     "customUrl": "Vlastní adresa URL",
     "customEndpointAria": "Vlastní koncový bod",
     "useDefaultKey": "Použít výchozí klíč OmniRoute",
     "mainModelAria": "Hlavní model",
-    "manualConfigTitle": "Ruční konfigurace buildu pro Grok"
+    "manualConfigTitle": "Ruční konfigurace buildu pro Grok",
+    "removeMapping": "Odebrat mapování"
   },
   "modelCatalog": {
     "title": "Modely a komba",
@@ -9238,9 +9239,9 @@
         "financial": "Finanční",
         "brazilian": "Brazilská",
         "usa": "USA",
-        "full": "Úplná",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (Jihoafrická republika)"
+        "popia": "POPIA (Jihoafrická republika)",
+        "full": "Úplná"
       },
       "builtinTypes": "Vestavěné typy",
       "types": {
@@ -10176,6 +10177,10 @@
     "healthExtraUsageBypass": "Kvóta je vyčerpána; dodatečné využití je povoleno, takže služba pokračuje.",
     "healthPaidCreditsBypass": "Kvóta je vyčerpána; dostupné placené kredity umožňují pokračování služby.",
     "healthFilteringBypass": "Kvóta je vyčerpána; místní filtrování kvót je vypnuto, takže služba pokračuje.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Použití",
     "grokExtraUsageCredits": "Další kredit na použití",
     "grokAutoTopUp": "Automatické dobíjení",
@@ -10633,10 +10638,6 @@
     "confirmRedeemClaudeResetCredit": "Uplatnění okamžitě resetuje příslušné limity využití Claude a trvale spotřebuje tento kredit.",
     "claudeResetCreditsModalTitle": "Kredity na reset Claude",
     "claudeResetCreditsModalExplainer": "Dostupné kredity na reset Claude a týdenní resety relací pro tento účet.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Podle posledních pozorování, nejde o živou kontrolu. Vyberte účet pro podrobnosti.",
     "healthRecovery": "Očekávané obnovení",
     "healthAvailable": "Dostupné",

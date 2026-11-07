@@ -1101,6 +1101,7 @@
   "disabled": "Diżattivat",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Idderieġi t-talbiet li eżawrew il-baġit lejn il-fornitur/mudell ta' riżerva bla ħlas għall-emerġenzi.",
   "featureFlagArenaEloSyncEnabledDescription": "Ippermetti s-sinkronizzazzjoni perjodika tal-ELO mil-leaderboard ta' Arena AI għall-klassifiki tal-intelliġenza tal-mudelli.",
+  "featureFlagUsageDailyRollupEnabledDescription": "Ippubblika ġranet ta' użu magħluqa f'usage_daily_summary qabel iż-żamma, sabiex twieqi analitiċi twal jaqraw it-totali ta' kuljum minflok ringieli mhux maħduma. Mitfi b'mod awtomatiku: il-ġranet ippubblikati jitilfu d-dettall tagħhom għal kull konnessjoni, għal kull API-key, is-suċċess u l-latency fl-analitika, u l-ispiża tagħhom tibqa' kif ipprezzata meta ppubblikata.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Iġġenera u daħħal sommarji tal-konversazzjonijiet meta r-routing tal-kombinazzjonijiet jaqleb bejn il-mudelli. Iddiżattiva din l-għażla biex il-bidliet bejn il-mudelli jiġu ttrattati b'mod indipendenti u biex tipprevjeni talbiet ta' trasferiment fl-isfond għall-kombinazzjonijiet kollha eżistenti u futuri.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Uri l-IDs mera claude/&lt;provider&gt;/&lt;model&gt; fuq /v1/models sabiex l-iskoperta tal-mudelli mill-gateway ta' Claude Code telenka mudelli mhux ta' Claude. Twissija: meta din l-għażla tkun attivata globalment, tirdoppja l-entrati fil-katalgu għall-klijenti kollha.",
@@ -3402,12 +3403,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Uża l- URL li tintlaħaq mill-magna li taħdem Pi. L-endpoint /v1 kompatibbli mal-OpenAI huwa miżjud awtomatikament.",
     "piManualMergeHint": "Preview biss. Għaqqad din id-dħul providers.omniroute models.json sabiex il-fornituri l-oħra tiegħek u s-settings jibqgħu intatti.",
-    "removeMapping": "Neħħi l-immappjar",
     "customUrl": "URL personalizzata",
     "customEndpointAria": "Punt tal-app ta' personalizzazzjoni",
     "useDefaultKey": "Uża l-ħaġa predefinita ta' OmniRoute",
     "mainModelAria": "Il-mudell ewlieni",
-    "manualConfigTitle": "Konfigurazzjoni manwali tal-Grok Build"
+    "manualConfigTitle": "Konfigurazzjoni manwali tal-Grok Build",
+    "removeMapping": "Neħħi l-immappjar"
   },
   "modelCatalog": {
     "title": "Mudelli u Combos",
@@ -9238,9 +9239,9 @@
         "financial": "Finanzjarju",
         "brazilian": "Brażiljan",
         "usa": "Stati Uniti",
-        "full": "Sħiħ",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (Afrika t'Isfel)"
+        "popia": "POPIA (Afrika t'Isfel)",
+        "full": "Sħiħ"
       },
       "builtinTypes": "Tipi integrati",
       "types": {
@@ -10176,6 +10177,10 @@
     "healthExtraUsageBypass": "Il-kwota ntużat kollha; l-użu żejjed huwa permess, għalhekk is-servizz ikompli.",
     "healthPaidCreditsBypass": "Il-kwota ntużat kollha; il-krediti mħallsa disponibbli jippermettu li s-servizz ikompli.",
     "healthFilteringBypass": "Il-kwota ntużat kollha; il-filtrazzjoni lokali tal-kwoti hija diżattivata, għalhekk is-servizz ikompli.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Użu",
     "grokExtraUsageCredits": "Krediti Addizzjonali għall-Użu",
     "grokAutoTopUp": "Rikarga Awtomatika",
@@ -10633,10 +10638,6 @@
     "confirmRedeemClaudeResetCredit": "It-tifdija tirrisettja immedjatament il-limiti eliġibbli tal-użu ta' Claude u tikkonsma dan il-kreditu b'mod permanenti.",
     "claudeResetCreditsModalTitle": "Krediti għall-irrisettjar ta' Claude",
     "claudeResetCreditsModalExplainer": "Krediti disponibbli għall-irrisettjar ta' Claude u rrisettjar ta' sessjonijiet ta' kull ġimgħa għal dan il-kont.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Ibbażat fuq osservazzjonijiet reċenti, mhux test dirett. Agħżel kont għad-dettalji.",
     "healthRecovery": "Irkupru mistenni",
     "healthAvailable": "Disponibbli",

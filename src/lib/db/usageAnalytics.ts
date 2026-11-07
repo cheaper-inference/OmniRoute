@@ -1,6 +1,6 @@
 /**
  * db/usageAnalytics.ts — Read-only aggregation queries over `usage_history`
- * and `daily_usage_summary` extracted from route handlers.
+ * and `usage_daily_summary` extracted from route handlers.
  *
  * Hard Rule #5: routes must not embed raw SQL — these queries live here so the
  * /api/usage/analytics and /api/settings/export-json routes can delegate.
@@ -12,7 +12,11 @@
 import { getDbInstance } from "./core";
 import type { AnalyticsParams } from "./usageAnalytics/sources";
 
-export { buildUnifiedSource, buildPresetUnifiedSource } from "./usageAnalytics/sources";
+export {
+  buildUnifiedSource,
+  buildPresetUnifiedSource,
+  readPublishedCutoffDate,
+} from "./usageAnalytics/sources";
 export type {
   AnalyticsParams,
   BuildUnifiedSourceOptions,
@@ -917,7 +921,7 @@ export function getProviderDailyUsageRows(
       SELECT
         DATE(timestamp) as date,
         LOWER(provider) as provider,
-        COUNT(*) as requests,
+        COALESCE(SUM(requests), 0) as requests,
         COALESCE(SUM(tokens_input), 0) as promptTokens,
         COALESCE(SUM(tokens_output), 0) as completionTokens,
         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens
