@@ -923,6 +923,8 @@
     "batchListTitle": "Lotes",
     "batchListCount": "{count} lotes",
     "batchListRemovingCompleted": "Eliminando…",
+    "batchListRemoveCompletedPartial": "Se ha eliminado una gran cantidad de lotes. Haz clic de nuevo para borrar el resto.",
+    "batchListRemoveCompletedFailed": "Se produjo un error al eliminar los lotes.",
     "batchListRemoveCompleted": "Eliminar completados",
     "batchListTableStatus": "Estado",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Actualizando…",
     "batchListRefresh": "Actualizar",
     "uploadFileModalRemove": "Eliminar",
+    "fileInputChoose": "Elegir archivo",
+    "fileInputChooseMultiple": "Elegir archivos",
+    "fileInputEmpty": "Ningún archivo seleccionado",
+    "fileInputSelectedCount": "{count, plural, one {# archivo seleccionado} other {# archivos seleccionados}}",
+    "fileDropLabel": "Suelta un archivo aquí o elige uno",
+    "fileDropLabelMultiple": "Suelta archivos aquí o elige archivos",
     "uploadFileModalUploading": "Subiendo…",
     "wizardInputReading": "Leyendo archivo…",
     "wizardInputReady": "Listo",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Envía la huella digital del cliente CLI OpenCode v2 en las solicitudes de OpenCode Zen/Go: el User-Agent opencode/latest/<2.x>/cli y x-opencode-client cli y, en las solicitudes del nivel gratuito, los encabezados de sesión v2, los esquemas de las herramientas read/shell de la CLI v2 y ningún tool_choice \"none\". Desactivado de forma predeterminada: cada solicitud de OpenCode conserva sin cambios la identidad, los encabezados y el cuerpo actuales.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Cuando el grupo de candidatos de un combo automático ya está vacío antes de que se ejecute el prefiltro de llamadas a herramientas (todos los destinos se han omitido debido a periodos de espera, bloqueos o agotamiento), se responde con 503 no_eligible_targets en lugar del error 400 heredado \"Ningún destino admite llamadas a herramientas\" capability_mismatch. Desactivado de forma predeterminada: el grupo vacío mantiene el error 400 heredado.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Aplicar etiquetas de endpoints de modelo de confianza (declaradas por el catálogo del proveedor, inferidas a partir del id de un modelo especializado o configuradas por el operador): rechazar con HTTP 400, antes de enviarla, una solicitud dirigida a un endpoint que el modelo no admite en /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations y /v1/audio/*; ocultar de /v1/models los modelos cuyos endpoints etiquetados no tengan un adaptador de OmniRoute; y responder con 422 a la prueba de modelos del panel para dichos modelos. Desactivado de forma predeterminada: las etiquetas de endpoints siguen siendo informativas y las solicitudes se envían exactamente como antes.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "En relés estándar compatibles con Anthropic, mantén los turnos de sistema que aparecen en mitad de la conversación dentro de la lista de mensajes, en lugar de moverlos al mensaje de sistema de nivel superior, para que el prefijo de la solicitud almacenado en caché permanezca estable entre turnos. Solo se aplica cuando el propio cliente ha enviado la beta mid-conversation-system-2026-04-07. Desactivado de forma predeterminada: cada turno de sistema se mueve al mensaje de sistema exactamente como antes, porque los relés que no admiten esa beta rechazan los turnos de sistema incluidos en la lista de mensajes.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Usa los niveles de esfuerzo de razonamiento que publica models.dev cuando ni una anulación del operador ni el registro del proveedor declaren ninguno; conserva únicamente los niveles de esfuerzo conocidos y considera una lista vacía de niveles declarados como «sin niveles». Desactivado de forma predeterminada: el catálogo de modelos y los niveles de esfuerzo resueltos permanecen exactamente como antes.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Permite que las solicitudes auto/* construyan el grupo de candidatos con las capacidades de modelo resueltas (visión, razonamiento, pensamiento) y las puntuaciones de calidad observadas, leídas en una sola lectura masiva. Desactivado por defecto: los pesos de los candidatos en el momento de la solicitud se mantienen exactamente como antes. Activado: esas señales alimentan los pesos de la instantánea, por lo que los pesos de los candidatos y la selección pueden cambiar.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Permite que el análisis de estado de credenciales vuelva a probar las conexiones que la puerta de enlace desactivó automáticamente (como máximo una vez cada 6 horas cada una y 5 por análisis) y reactive una cuando supere la prueba. Desactivado de forma predeterminada: dichas conexiones permanecen desactivadas hasta que intervenga un operador. Las conexiones desactivadas por un operador y las bloqueadas permanentemente nunca vuelven a probarse.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# solicitud} other {# solicitudes}}, {keys, plural, one {# clave limitada} other {# claves limitadas}}",
     "unpricedUsageMore": "…y {count} más",
     "unpricedUsageConfigure": "Configurar precios",
-    "unpricedUsageDismiss": "Descartar"
+    "unpricedUsageDismiss": "Descartar",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analítica",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Permite que esta cuenta use créditos de pago cuando su cuota de suscripción alcance el umbral. Requiere créditos disponibles informados por OpenAI; puede generar cargos. Los límites de Spark y los enfriamientos del proveedor siguen aplicándose. La disponibilidad de créditos se comprueba aunque la verificación previa de cuota esté desactivada, salvo que el filtrado local de cuota esté totalmente desactivado (verificación previa de cuota y política de límites, ambas desactivadas).",
     "disableCoolingDescription": "Omite el tiempo de espera transitorio para que esta conexión siga siendo apta incluso después de errores recuperables (los estados terminales, como bloqueado o caducado, siguen siendo aplicables).",
     "disableCoolingLabel": "Desactivar el tiempo de espera para esta conexión",
+    "keepMidConversationSystemDescription": "Deje los mensajes del sistema enviados a mitad de la conversación dentro de la lista de mensajes en lugar de moverlos al mensaje del sistema de nivel superior, para que el caché de mensajes siga apareciendo en todos los turnos. Habilítelo solo si este upstream acepta el rol \"sistema\" dentro de los mensajes (de lo contrario, responde 400).",
+    "keepMidConversationSystemLabel": "Mantenga los mensajes del sistema a mitad de la conversación en su lugar",
+    "requireUserLastMessageDescription": "Para flujos ascendentes que rechazan el llenado previo del asistente: elimine los giros finales del asistente (sin uso de herramientas) antes de enviar. El modelo puede regenerar su respuesta anterior.",
+    "requireUserLastMessageLabel": "Requerir que la conversación termine con un mensaje de usuario",
     "bulkPasteAdded": "{count, plural, one {1 clave añadida} other {# claves añadidas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicado omitido} other {# duplicados omitidos}}",
     "bulkPasteHint": "Pega una clave de API por línea. Las líneas vacías se ignoran y las claves duplicadas se omiten.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Proveedores locales",
     "maxConcurrentWholeNumberError": "Error: el máximo de solicitudes simultáneas debe ser un número entero",
     "m365TierLabel": "Nivel de Copilot",
+    "m365RefreshTokenLabel": "Actualizar token (opcional)",
+    "m365RefreshTokenHint": "Se utiliza para actualizar automáticamente el token de acceso Microsoft 365.",
+    "m365RefreshTokenEditHint": "Déjelo en blanco para conservar el token existente. Pega un token nuevo para reemplazarlo.",
     "m365TierHint": "Elige qué interfaz de Microsoft 365 Copilot usa esta conexión. Individual es la interfaz BizChat de consumo predeterminada; Educación y Empresa (trabajo) permiten usar las interfaces de sus respectivos inquilinos.",
     "m365TierIndividualOption": "Individual (predeterminado)",
     "m365TierEduOption": "Educación",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Secciones de proxy",
     "requestBodyLimitTitle": "Límite del cuerpo de la solicitud",
     "requestBodyLimitDescription": "Tamaño máximo de la carga útil de la API aceptado antes de analizar el cuerpo de una solicitud. Las rutas específicas para cargas mantienen como mínimo su límite integrado de 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions y Responses aceptan hasta 50 MB hasta que guardes un límite aquí. El límite guardado también se les aplica, tanto si es menor como si es mayor.",
     "requestBodyLimitInputLabel": "Límite del cuerpo de la solicitud en MB",
     "requestBodyLimitEmptyError": "Introduce un límite en MB",
     "requestBodyLimitWholeNumberError": "Usa un número entero",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Todos los {count} intentos fallaron",
       "failed": "fallido",
       "pinnedTitle": "Modelo seleccionado a través de la fijación de sesión del caché de contexto",
-      "pinned": "fijado"
+      "pinned": "fijado",
+      "recoveredAttemptsTitle": "Solicitud recuperada tras {count} intentos",
+      "latestOutcomeFailed": "El último resultado de la solicitud falló"
     },
     "attempts": "intentos",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "continúa desde el elemento principal",
       "continuesFrom": "Continúa desde {id}",
       "viewConversation": "ver conversación",
-      "openConversation": "Abrir conversación {id}"
+      "openConversation": "Abrir conversación {id}",
+      "omittedHttpAttempts": "{count} envíos HTTP no conservados",
+      "noHttpResponse": "No se observó ninguna respuesta HTTP",
+      "transportError": "Error de transporte"
     },
     "tableLabel": "Registros de solicitudes",
     "throughputPostFirstToken": "Después del primer token",
     "throughputEndToEnd": "De extremo a extremo",
     "throughputRate": "{value} tokens/seg",
-    "throughputExplanation": "Ambas tasas usan el mayor de los recuentos de tokens de salida y de razonamiento. La tasa posterior al primer token excluye un TTFT válido; de lo contrario, usa la duración completa. La tasa de extremo a extremo siempre usa la duración completa. Una respuesta almacenada en búfer puede tener una alta tasa de entrega en ráfaga sin una generación del modelo más rápida."
+    "throughputExplanation": "Ambas tasas usan el mayor de los recuentos de tokens de salida y de razonamiento. La tasa posterior al primer token excluye un TTFT válido; de lo contrario, usa la duración completa. La tasa de extremo a extremo siempre usa la duración completa. Una respuesta almacenada en búfer puede tener una alta tasa de entrega en ráfaga sin una generación del modelo más rápida.",
+    "omittedHttpAttempts": "{count} envíos HTTP no conservados",
+    "upstreamStatus": "Servidor de origen {status}",
+    "noHttpResponse": "No se observó ninguna respuesta HTTP",
+    "transportError": "Error de transporte"
   },
   "proxyLogger": {
     "filterAll": "Todos",
@@ -14157,6 +14190,14 @@
         "label": "Orden del pool por salida compartida",
         "description": "Para proveedores cuya cuota se agrupa por dirección de salida, clasifica a un miembro del pool que comparta la dirección de salida observada de un miembro rechazado recientemente justo por debajo de los miembros en buen estado. Solo afecta al orden, nunca se excluye. Requiere PROXY_SKIP_RECENTLY_FAILED, que genera la señal de rechazo que este lee. Desactivado por defecto: el orden de selección es exactamente la rotación simple."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Rechazos de cuotas con alcance modelo",
+        "description": "Aplique una cuota opencode 429 solo al modelo que la alcanzó, de modo que la misma salida siga sirviendo a otros modelos y borrela solo cuando ese modelo tenga éxito. Los consumidores que no tienen ningún modelo (rotación del grupo, estacionamiento y repetición, visibilidad del administrador, activador del selector, barrido de salud) aún lo ven. Necesita PROXY_SKIP_RECENTLY_FAILED, lo que produce el rechazo. Desactivado de forma predeterminada: la cuota 429 de un modelo reserva la salida para cada modelo."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Recuperación de proxy: repetición estricta POST",
+        "description": "Para una solicitud no idempotente (POST, PUT, PATCH, DELETE), reenvíe después de un error de transporte (socket nuevo, respaldo de proxy, respaldo nativo) solo cuando el error demuestre que no se envió nada: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH o un tiempo de espera de conexión. Un error de socket después de la escritura puede significar que el upstream aceptó la solicitud, por lo que un reenvío podría generarla y facturarla dos veces. Desactivado de forma predeterminada: un cuerpo reproducible se reenvía una vez ante cualquier error de transporte, lo que también recupera un socket agrupado obsoleto."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Registro de atribución de rotación",
         "description": "La rotación de opencode registra qué cuenta sirvió o se omitió (solo identificadores enmascarados, nunca identificadores de cuenta completos) y vincula las entradas del registro de proxy con su solicitud, de modo que el operador pueda distinguir las cuentas omitidas de las no utilizadas. Desactivado por defecto: no se escriben líneas de registro ni columnas adicionales."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Reselección de pool ante 429 de OpenCode",
         "description": "Para la rotación multicuenta de OpenCode, tras un 429 de un proveedor agrupado por salida en una cuenta sin proxy bajo un contexto de pool ambiental, solicita al pool de conexiones otro miembro para el siguiente intento en lugar de reintentar con la misma dirección de salida. Ordena, nunca excluye: un pool agotado mantiene el comportamiento actual. Desactivado por defecto: cada 429 rota a la siguiente cuenta exactamente como antes."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "Sonda de salida de nivel libre OpenCode",
+        "description": "Para el ejecutor OpenCode, cuando una solicitud de proxy recibe respuesta 403 o 451 FreeTierError y el reintento de las herramientas observadas falló o no se aplicó, envíe la solicitud una vez a través de un proxy diferente (otro proxy de cuenta u otro miembro del grupo, nunca una conexión directa). Sólo cuando esa sonda responde 200 se reserva la primera salida en la memoria de rechazo de proxy y se sirve la respuesta de la sonda; cuando ambos se niegan, se devuelve la negativa original y no se registra nada. El mismo texto de rechazo cubre una salida marcada IP y una forma de solicitud rechazada, por lo que la sonda los distingue mediante evidencia. Desactivado por defecto: el rechazo se devuelve sin cambios."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Huella digital del cliente OpenCode v2",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Detener ante rechazo por política de contenido",
         "description": "Cuando un destino del combo responda con un rechazo exacto por política de contenido (código o tipo cyber_policy / content_policy_violation), detén el combo y devuelve ese rechazo incluso cuando los destinos restantes sean modelos diferentes, en lugar de avanzar al siguiente destino. Desactivado de forma predeterminada: el rechazo nunca enfría la cuenta ni dispara el disyuntor del proveedor, y el combo avanza a su siguiente destino exactamente como antes."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Respuestas: keepalive solo durante el transporte",
+        "description": "Envíe respuestas keepalive como una línea en blanco en lugar de un evento response.in_progress, por lo que una instantánea sintética nunca podrá reemplazar la respuesta real en el SDK oficial. Una línea en blanco no envía ningún evento SSE, por lo que un perro guardián del cliente que se reinicia solo en eventos no se restablecería durante una fase silenciosa larga. Desactivado de forma predeterminada: los temporizadores envían el evento response.in_progress válido para especificaciones."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Reintento de enfriamiento: omitir rechazos 403/410",
