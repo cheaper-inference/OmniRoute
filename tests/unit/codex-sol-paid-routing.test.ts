@@ -19,7 +19,7 @@ async function resetStorage() {
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
-async function seedCodex(plan: string, priority: number) {
+async function seedCodex(plan: string, priority: number, rateLimitedUntil?: string) {
   return providersDb.createProviderConnection({
     provider: "codex",
     authType: "oauth",
@@ -29,6 +29,7 @@ async function seedCodex(plan: string, priority: number) {
     isActive: true,
     testStatus: "active",
     priority,
+    rateLimitedUntil: rateLimitedUntil ?? null,
     providerSpecificData: { chatgptPlanType: plan },
   });
 }
@@ -48,6 +49,7 @@ test("Sol model detection covers every Codex Sol tier and provider prefix", () =
     "gpt-5.6-sol-ultra",
     "gpt-6-sol",
     "gpt-6-sol-low",
+    "gpt-6-sol-none",
     "gpt-6.1-sol",
     "gpt-6.1-sol-high",
     "codex/gpt-6.1-sol-low",
@@ -71,7 +73,7 @@ test("Sol model detection covers every Codex Sol tier and provider prefix", () =
 test("paid-only model detection covers Astra and Sol across GPT-6 tiers", () => {
   for (const model of [
     "gpt-5.6-sol", "gpt-6-sol", "gpt-6.1-sol",
-    "gpt-6-astra", "gpt-6.1-astra",
+    "gpt-6-astra", "gpt-6.1-astra", "gpt-6-astra-none",
     "codex/gpt-6-astra-low", "cx/gpt-6.1-astra(max)",
     "gpt-6.1-sol(ultra)", "gpt-6-astra-xhigh",
   ]) {
@@ -87,7 +89,7 @@ test("paid-only model detection covers Astra and Sol across GPT-6 tiers", () => 
 
 test("Sol allows paid Codex plans and fails closed for free, go, or unknown", () => {
   for (const model of ["gpt-5.6-sol-high", "gpt-6-sol-low", "codex/gpt-6.1-sol-high", "gpt-6-astra", "cx/gpt-6.1-astra(max)"]) {
-    for (const plan of ["plus", "pro", "team", "business", "enterprise", "edu"]) {
+    for (const plan of ["plus", "pro", "prolite", "promax", "team", "business", "enterprise", "edu"]) {
       assert.equal(eligibility.isCodexPlanEligibleForModel({ chatgptPlanType: plan }, model), true, model + " / " + plan);
     }
     for (const plan of ["free", "go", "unknown", ""]) {
@@ -103,7 +105,7 @@ test("credential routing skips free Codex accounts for Sol", async () => {
   const free = await seedCodex("free", 1);
   const plus = await seedCodex("plus", 2);
 
-  for (const model of ["gpt-5.6-sol-high", "gpt-6-sol-medium", "gpt-6.1-sol-low", "gpt-6-astra-low"]) {
+  for (const model of ["gpt-5.6-sol-high", "gpt-6-sol-medium", "gpt-6-sol-none", "gpt-6.1-sol-low", "gpt-6-astra-low"]) {
     const selected = await auth.getProviderCredentials("codex", null, null, model);
     assert.equal(selected?.connectionId, plus.id, model);
     assert.notEqual(selected?.connectionId, free.id, model);
@@ -129,4 +131,22 @@ test("a Sol request constrained to only free Codex accounts returns no credentia
     const selected = await auth.getProviderCredentials("codex", null, [free.id], model);
     assert.equal(selected, null, model);
   }
+});
+
+test("Codex Pro Lite and Pro Max connections can serve paid-only models", async () => {
+  const proLite = await seedCodex("prolite", 1);
+  const proMax = await seedCodex("promax", 2);
+  for (const [connection, model] of [
+    [proLite, "gpt-6-sol-none"],
+    [proMax, "gpt-6-astra-high"],
+  ] as const) {
+    const selected = await auth.getProviderCredentials("codex", null, [connection.id], model);
+    assert.equal(selected?.connectionId, connection.id, model);
+  }
+});
+
+test("a cooling Free account cannot produce a false Sol retry-after", async () => {
+  const free = await seedCodex("free", 1, new Date(Date.now() + 60_000).toISOString());
+  const selected = await auth.getProviderCredentials("codex", null, [free.id], "gpt-6-sol-none");
+  assert.equal(selected, null);
 });
