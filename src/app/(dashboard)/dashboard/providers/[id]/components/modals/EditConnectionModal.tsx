@@ -19,9 +19,7 @@ import {
   normalizeAntigravityClientProfileSetting,
 } from "@/shared/constants/antigravityClientProfile";
 import { parseExtraApiKeys } from "@/shared/utils/parseApiKeys";
-import { providerHasFreeModels } from "@/shared/utils/freeModels";
-import { maskEmail } from "@/shared/utils/maskEmail";
-import useEmailPrivacyStore from "@/store/emailPrivacyStore";
+import { freeOnlyImportHintKey, providerSupportsFreeOnlyImport } from "@/shared/utils/freeModels";
 import { useNotificationStore } from "@/store/notificationStore";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
 import type { ConnectionRateLimitOverrides } from "@/lib/db/providers/columns";
@@ -75,8 +73,12 @@ import { assignEditApiKeyProviderSpecificData } from "./connectionProviderSpecif
 import { isM365TierCapableProvider, normalizeM365TierValue, type M365TierValue } from "./m365Tier";
 import ProviderTierField from "./ProviderTierField";
 import AgentrouterConsoleFields from "./AgentrouterConsoleFields";
+import CommandCodeZdrToggle from "./CommandCodeZdrToggle";
+import { buildProviderValidateRequestBody } from "./providerValidateRequestBody";
 import { getVertexCredentialCopy } from "./vertexCredentialCopy";
 import QuotaScrapingFields, { EMPTY_QUOTA_SCRAPING_FIELDS } from "./QuotaScrapingFields";
+import { useGitHubCreditLimitDraft } from "./GitHubCreditLimitField";
+import ConnectionEmailCard from "./ConnectionEmailCard";
 import GlmTeamQuotaFields, { EMPTY_GLM_TEAM_QUOTA_FIELDS } from "./GlmTeamQuotaFields";
 import ProviderRegionField, { getProviderRegionConfig } from "./AlibabaProviderRegionField";
 import PeakHourProtectionEditor, {
@@ -125,7 +127,10 @@ export default function EditConnectionModal({
   const provider = connection?.provider || providerId;
   const connectionAuthType = connection?.authType;
   const connectionProviderSpecificData = connection?.providerSpecificData;
-  const showFreeModelsToggle = providerHasFreeModels(provider);
+  // A retired offer must not trap an existing free-only preference or clear it silently.
+  const showFreeModelsToggle =
+    providerSupportsFreeOnlyImport(provider) ||
+    connectionProviderSpecificData?.importFreeModelsOnly === true;
   const [formData, setFormData] = useState({
     name: "",
     priority: 1,
@@ -139,6 +144,7 @@ export default function EditConnectionModal({
     rateLimitMaxConcurrent: "",
     modelConcurrency: "",
     apiKey: "",
+    m365RefreshToken: "",
     healthCheckInterval: "" as number | "",
     baseUrl: "",
     targetFormat: "",
@@ -177,7 +183,10 @@ export default function EditConnectionModal({
     allowPaidCredits: connectionProviderSpecificData?.allowPaidCredits === true,
     passthroughModels: connectionProviderSpecificData?.passthroughModels === true,
     disableCooling: connectionProviderSpecificData?.disableCooling === true,
+    requireUserLastMessage: connectionProviderSpecificData?.requireUserLastMessage === true,
+    keepMidConversationSystem: connectionProviderSpecificData?.keepMidConversationSystem === true,
     importFreeModelsOnly: connectionProviderSpecificData?.importFreeModelsOnly === true,
+    commandCodeZdrEnabled: connectionProviderSpecificData?.zdrEnabled === true,
     tunnelId: stringField(connectionProviderSpecificData?.tunnelId),
     runtimeKey: "",
     connectorName:
@@ -197,12 +206,12 @@ export default function EditConnectionModal({
   const [doctorLoading, setDoctorLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const testModel = useConnectionTestModelDraft(isOpen ? connection : null, saving);
+  const credits = useGitHubCreditLimitDraft(isOpen ? connection : null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [extraApiKeys, setExtraApiKeys] = useState<string[]>([]);
   const [newExtraKey, setNewExtraKey] = useState("");
   const [apiKeyHealth, setApiKeyHealth] = useState<ApiKeyHealthMap>({});
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const showEmail = useEmailPrivacyStore((state) => state.emailsVisible);
   // #6147 — built-in providers can opt in to an advanced base-URL override.
   // OAuth connections are excluded: their save path does not persist
   // providerSpecificData.baseUrl.
@@ -253,6 +262,7 @@ export default function EditConnectionModal({
   const apiKeyOptional =
     providerAllowsOptionalApiKey(provider) || Boolean(isNoAuthWebSessionCredential);
   const isCcCompatible = isClaudeCodeCompatibleProvider(provider);
+  const isPlainAnthropicCompatible = isAnthropicCompatibleProvider(provider) && !isCcCompatible;
   const isCompatible =
     isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider);
   const vertexCopy = isVertex ? getVertexCredentialCopy(t) : null;
@@ -405,13 +415,18 @@ export default function EditConnectionModal({
         allowPaidCredits: connection.providerSpecificData?.allowPaidCredits === true,
         passthroughModels: connection?.providerSpecificData?.passthroughModels === true,
         disableCooling: connection?.providerSpecificData?.disableCooling === true,
+        requireUserLastMessage: connection?.providerSpecificData?.requireUserLastMessage === true,
+        keepMidConversationSystem:
+          connection?.providerSpecificData?.keepMidConversationSystem === true,
         importFreeModelsOnly: connection?.providerSpecificData?.importFreeModelsOnly === true,
+        commandCodeZdrEnabled: connection.providerSpecificData?.zdrEnabled === true,
         tunnelId: stringField(connection.providerSpecificData?.tunnelId),
         runtimeKey: "",
         connectorName:
           stringField(connection.providerSpecificData?.connectorName) ||
           CHATGPT_WEB_CODEX_CONNECTOR_NAME,
         m365Tier: normalizeM365TierValue(connection.providerSpecificData?.tier) as M365TierValue,
+        m365RefreshToken: "",
         peakHourProtection: {
           ...EMPTY_PEAK_HOUR_PROTECTION,
           ...((connection.providerSpecificData?.peakHourProtection as PeakHourProtectionConfig) ||
@@ -476,6 +491,18 @@ export default function EditConnectionModal({
       setTesting(false);
     }
   };
+  const validateRequestBody = (apiKey: string) =>
+    JSON.stringify(
+      buildProviderValidateRequestBody({
+        provider,
+        apiKey,
+        formData,
+        isAwsPolly,
+        showsRegion,
+        defaultRegion,
+        isChatGptWebCodex,
+      })
+    );
   const handleValidate = async () => {
     if (
       !provider ||
@@ -491,24 +518,7 @@ export default function EditConnectionModal({
       const res = await fetch("/api/providers/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider,
-          apiKey: formData.apiKey,
-          validationModelId: formData.validationModelId || undefined,
-          customUserAgent: formData.customUserAgent.trim() || undefined,
-          baseUrl: formData.baseUrl.trim() || undefined,
-          region: isAwsPolly
-            ? formData.region.trim() || "us-east-1"
-            : showsRegion
-              ? formData.region.trim() || defaultRegion
-              : undefined,
-          accessKeyId: isAwsPolly ? formData.awsAccessKeyId.trim() || undefined : undefined,
-          sessionToken: isAwsPolly ? formData.awsSessionToken.trim() || undefined : undefined,
-          cx: formData.cx.trim() || undefined,
-          runtimeKey: isChatGptWebCodex ? formData.runtimeKey.trim() || undefined : undefined,
-          tunnelId: isChatGptWebCodex ? formData.tunnelId.trim() || undefined : undefined,
-          connectorName: isChatGptWebCodex ? formData.connectorName.trim() || undefined : undefined,
-        }),
+        body: validateRequestBody(formData.apiKey),
       });
       const data = await res.json();
       setValidationResult(data.valid ? "success" : "failed");
@@ -595,26 +605,7 @@ export default function EditConnectionModal({
             const res = await fetch("/api/providers/validate", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                provider,
-                apiKey: formData.apiKey,
-                validationModelId: formData.validationModelId || undefined,
-                customUserAgent: formData.customUserAgent.trim() || undefined,
-                baseUrl: formData.baseUrl.trim() || undefined,
-                region: isAwsPolly
-                  ? formData.region.trim() || "us-east-1"
-                  : showsRegion
-                    ? formData.region.trim() || defaultRegion
-                    : undefined,
-                accessKeyId: isAwsPolly ? formData.awsAccessKeyId.trim() || undefined : undefined,
-                sessionToken: isAwsPolly ? formData.awsSessionToken.trim() || undefined : undefined,
-                cx: formData.cx.trim() || undefined,
-                runtimeKey: isChatGptWebCodex ? formData.runtimeKey.trim() || undefined : undefined,
-                tunnelId: isChatGptWebCodex ? formData.tunnelId.trim() || undefined : undefined,
-                connectorName: isChatGptWebCodex
-                  ? formData.connectorName.trim() || undefined
-                  : undefined,
-              }),
+              body: validateRequestBody(formData.apiKey),
             });
             const data = await res.json();
             isValid = !!data.valid;
@@ -726,6 +717,15 @@ export default function EditConnectionModal({
       }
       if (updates.providerSpecificData) {
         updates.providerSpecificData.disableCooling = formData.disableCooling ? true : undefined;
+        if (isPlainAnthropicCompatible) {
+          updates.providerSpecificData.requireUserLastMessage = formData.requireUserLastMessage
+            ? true
+            : undefined;
+        }
+        if (isPlainAnthropicCompatible) {
+          updates.providerSpecificData.keepMidConversationSystem =
+            formData.keepMidConversationSystem ? true : undefined;
+        }
         updates.providerSpecificData.peakHourProtection = normalizePeakHourProtectionForSave(
           formData.peakHourProtection
         );
@@ -757,6 +757,7 @@ export default function EditConnectionModal({
         updates.providerSpecificData.importFreeModelsOnly = formData.importFreeModelsOnly === true;
       }
       testModel.applyTo(updates.providerSpecificData);
+      if (!credits.applyTo(updates.providerSpecificData)) return setSaveError(credits.error);
       const error = (await onSave(updates)) as void | unknown;
       if (error) {
         setSaveError(typeof error === "string" ? error : t("failedSaveConnection"));
@@ -785,6 +786,38 @@ export default function EditConnectionModal({
         t,
         "preserveEncryptedReasoningDescription",
         "Forward encrypted Responses reasoning items supplied by the client."
+      )}
+    />
+  ) : null;
+  const requireUserLastMessageToggle = isPlainAnthropicCompatible ? (
+    <Toggle
+      checked={formData.requireUserLastMessage}
+      onChange={(checked) => setFormData({ ...formData, requireUserLastMessage: checked })}
+      label={providerText(
+        t,
+        "requireUserLastMessageLabel",
+        "Require conversation to end with a user message"
+      )}
+      description={providerText(
+        t,
+        "requireUserLastMessageDescription",
+        "For upstreams that reject assistant prefill: drop trailing assistant turns (no tool_use) before sending. The model may regenerate its previous answer."
+      )}
+    />
+  ) : null;
+  const keepMidConversationSystemToggle = isPlainAnthropicCompatible ? (
+    <Toggle
+      checked={formData.keepMidConversationSystem}
+      onChange={(checked) => setFormData({ ...formData, keepMidConversationSystem: checked })}
+      label={providerText(
+        t,
+        "keepMidConversationSystemLabel",
+        "Keep mid-conversation system messages in place"
+      )}
+      description={providerText(
+        t,
+        "keepMidConversationSystemDescription",
+        'Leave system messages sent mid-conversation inside the message list instead of moving them into the top-level system prompt, so the prompt cache keeps hitting across turns. Enable only if this upstream accepts role "system" inside messages (otherwise it answers 400).'
       )}
     />
   ) : null;
@@ -842,6 +875,7 @@ export default function EditConnectionModal({
             onChange={(patch) => setFormData({ ...formData, ...patch })}
           />
         )}
+        {credits.field}
         {isClaude && (
           <ClaudeConnectionFields
             values={formData}
@@ -866,11 +900,18 @@ export default function EditConnectionModal({
               checked={formData.importFreeModelsOnly}
               onChange={(checked) => setFormData({ ...formData, importFreeModelsOnly: checked })}
               label={t("importFreeModelsOnlyLabel")}
-              description={t("importFreeModelsOnlyHint")}
+              description={t(freeOnlyImportHintKey(provider))}
             />
           )}
           {preserveEncryptedReasoningToggle}
           {openaiResponsesStoreToggle}
+          {requireUserLastMessageToggle}
+          {keepMidConversationSystemToggle}
+          <CommandCodeZdrToggle
+            provider={provider}
+            checked={formData.commandCodeZdrEnabled}
+            onChange={(checked) => setFormData({ ...formData, commandCodeZdrEnabled: checked })}
+          />
           <Toggle
             checked={formData.disableCooling}
             onChange={(checked) => setFormData({ ...formData, disableCooling: checked })}
@@ -919,14 +960,7 @@ export default function EditConnectionModal({
             />
           </div>
         )}
-        {isOAuth && connection.email && (
-          <div className="bg-bg-subtle p-3 rounded-lg">
-            <p className="text-sm text-text-muted mb-1">{t("email")}</p>
-            <p className="font-medium" title={showEmail ? connection.email : undefined}>
-              {showEmail ? connection.email : maskEmail(connection.email)}
-            </p>
-          </div>
-        )}
+        {isOAuth && <ConnectionEmailCard email={connection.email} label={t("email")} />}
         <Input
           label={t("healthCheckMinutes")}
           type="number"
@@ -1210,6 +1244,16 @@ export default function EditConnectionModal({
                   />
                 )}
                 <ProviderTierField provider={provider} />
+                {provider === "copilot-m365-web" && (
+                  <Input
+                    type="password"
+                    autoComplete="new-password"
+                    label={t("m365RefreshTokenLabel")}
+                    value={formData.m365RefreshToken}
+                    onChange={(e) => setFormData({ ...formData, m365RefreshToken: e.target.value })}
+                    hint={t("m365RefreshTokenEditHint")}
+                  />
+                )}
                 {isM365TierCapable && (
                   <Select
                     label={t("m365TierLabel")}

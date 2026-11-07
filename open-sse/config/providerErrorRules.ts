@@ -444,7 +444,7 @@ const EGRESS_BUCKETED_LOCK_PROVIDERS = egressIpLockProvidersFromEnv(
 
 /**
  * Feature-flag reader injected by a module that is allowed to read the flag store
- * (`open-sse/services/accountFallback.ts` registers `isFeatureFlagEnabled`). This file
+ * (`open-sse/services/accountFallback.ts` registers `isRegisteredFeatureFlagEnabled`). This file
  * stays free of `src/` imports: it is reachable from client bundles and the
  * open-sse → src boundary is ratcheted. Unregistered or throwing reader = flag off, so
  * every flag below fails closed to the release default.
