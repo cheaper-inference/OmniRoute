@@ -6,7 +6,11 @@
  */
 
 import type { A2ATask, TaskArtifact } from "../taskManager";
-import { buildSelfLoopHeaders, type A2ACallerContext } from "../selfLoopAuth";
+import {
+  buildSelfLoopHeaders,
+  UnsafeSelfLoopTargetError,
+  type A2ACallerContext,
+} from "../selfLoopAuth";
 import { normalizeQuotaResponse } from "@/shared/contracts/quota";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
 
@@ -40,6 +44,12 @@ export async function executeQuotaManagement(
     quotaFetch("/api/usage/quota", caller),
     quotaFetch("/api/combos", caller),
   ]);
+
+  // Rejected sub-requests degrade to empty data, but a refused base URL means no
+  // call went out at all, and "0 providers" would read as a real answer.
+  if (quotaRaw.status === "rejected" && quotaRaw.reason instanceof UnsafeSelfLoopTargetError) {
+    throw quotaRaw.reason;
+  }
 
   const quota =
     quotaRaw.status === "fulfilled"

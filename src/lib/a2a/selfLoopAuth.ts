@@ -7,18 +7,36 @@
  * when the caller presented no key: a dashboard session, or the keyless
  * posture where OMNIROUTE_API_KEY is unset anyway.
  *
- * Credentials are only attached when the self-loop target is https, or http on
- * a loopback host. A non-loopback http OMNIROUTE_BASE_URL would otherwise send
- * the caller's Bearer token in cleartext to that host.
+ * Credentials are only attached when the self-loop target is https, or http
+ * that stays inside the private network: loopback, a container or service name
+ * (BASE_URL=http://omniroute:20128 is the documented Compose setup), or a private
+ * address. A plain-http URL to anywhere else would send the caller's Bearer token
+ * in cleartext across a network the operator does not control.
  */
 
+import { classifyIpScope } from "@/lib/ipUtils";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
 
-const LOOPBACK_HOST = /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/i;
+const PRIVATE_DNS_SUFFIX = /\.(localhost|local|internal)$/;
+// Link-local is where cloud metadata services listen, never an OmniRoute instance.
+const LINK_LOCAL_IP = /^(169\.254\.|fe[89ab])/;
 
 export interface A2ACallerContext {
   /** The API key the A2A caller authenticated with, if any. */
   apiKey?: string | null;
+}
+
+function isPrivateNetworkHost(hostname: string): boolean {
+  const host = hostname
+    .toLowerCase()
+    .replace(/^\[|\]$/g, "")
+    .replace(/\.$/, "");
+  if (host === "0.0.0.0") return true;
+  const scope = classifyIpScope(host);
+  if (scope === "loopback") return true;
+  if (scope === "private") return !LINK_LOCAL_IP.test(host);
+  if (scope === "public") return false;
+  return !host.includes(".") || PRIVATE_DNS_SUFFIX.test(host);
 }
 
 /** True when a self-loop may carry an API key to `baseUrl`. */
@@ -28,20 +46,22 @@ export function mayForwardSelfLoopCredential(baseUrl: string): boolean {
     if (u.username || u.password) return false;
     if (u.protocol === "https:") return true;
     if (u.protocol !== "http:") return false;
-    return LOOPBACK_HOST.test(u.hostname);
+    return isPrivateNetworkHost(u.hostname);
   } catch {
     return false;
   }
 }
 
+/**
+ * Reaches the A2A caller and the logs, so it never carries the URL: that may hold
+ * proxy credentials or an internal hostname.
+ */
 export class UnsafeSelfLoopTargetError extends Error {
-  readonly baseUrl: string;
-  constructor(baseUrl: string) {
+  constructor() {
     super(
-      `Refusing to send an API key to OMNIROUTE_BASE_URL=${baseUrl}: use https, or http only for localhost / 127.0.0.1 / [::1]`
+      "Refusing to send an API key to the configured OmniRoute base URL: use https, or http to a loopback, container or private-network host, with no credentials in the URL"
     );
     this.name = "UnsafeSelfLoopTargetError";
-    this.baseUrl = baseUrl;
   }
 }
 
@@ -55,7 +75,7 @@ export function buildSelfLoopHeaders(
   };
   if (!key) return headers;
   if (!mayForwardSelfLoopCredential(baseUrl)) {
-    throw new UnsafeSelfLoopTargetError(baseUrl);
+    throw new UnsafeSelfLoopTargetError();
   }
   headers.Authorization = `Bearer ${key}`;
   return headers;

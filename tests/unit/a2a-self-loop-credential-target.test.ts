@@ -1,9 +1,11 @@
 /**
- * buildSelfLoopHeaders must not put a Bearer token on a cleartext non-loopback
- * OMNIROUTE_BASE_URL. https and loopback http stay allowed.
+ * buildSelfLoopHeaders must not put a Bearer token on a plain-http base URL that
+ * leaves the private network. https stays allowed, and so does http to loopback,
+ * a container or service name, or a private address.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { inspect } from "node:util";
 
 const { buildSelfLoopHeaders, mayForwardSelfLoopCredential, UnsafeSelfLoopTargetError } =
   await import("../../src/lib/a2a/selfLoopAuth.ts");
@@ -16,7 +18,7 @@ test.after(() => {
   else process.env.OMNIROUTE_API_KEY = ORIGINAL_KEY;
 });
 
-test("mayForwardSelfLoopCredential: https any host, http only loopback", () => {
+test("mayForwardSelfLoopCredential: https any host, http only inside the private network", () => {
   assert.equal(mayForwardSelfLoopCredential("https://example.com"), true);
   assert.equal(mayForwardSelfLoopCredential("https://10.0.0.5:443/v1"), true);
   assert.equal(mayForwardSelfLoopCredential("http://localhost:20128"), true);
@@ -25,17 +27,35 @@ test("mayForwardSelfLoopCredential: https any host, http only loopback", () => {
   // Unbracketed ::1 is not a valid URL hostname; mayForward must reject it.
   assert.equal(mayForwardSelfLoopCredential("http://::1:20128"), false);
   assert.equal(mayForwardSelfLoopCredential("http://example.com"), false);
-  assert.equal(mayForwardSelfLoopCredential("http://10.0.0.5:20128"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://gw.example.com:20128"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://8.8.8.8:20128"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://172.32.0.1:20128"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://[2001:4860:4860::8888]:20128"), false);
   assert.equal(mayForwardSelfLoopCredential("http://169.254.169.254/"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://[fe80::1]:20128"), false);
   assert.equal(mayForwardSelfLoopCredential("http://user:pass@localhost:20128"), false);
   assert.equal(mayForwardSelfLoopCredential("ftp://localhost"), false);
   assert.equal(mayForwardSelfLoopCredential("not-a-url"), false);
 });
 
-test("buildSelfLoopHeaders attaches Bearer on loopback http and on https", () => {
+test("mayForwardSelfLoopCredential: http to a container or private host stays allowed", () => {
+  // docs/guides/DOCKER_GUIDE.md documents this one as the internal self-fetch URL.
+  assert.equal(mayForwardSelfLoopCredential("http://omniroute:20128"), true);
+  assert.equal(mayForwardSelfLoopCredential("http://omniroute.default.svc.cluster.local"), true);
+  assert.equal(mayForwardSelfLoopCredential("http://omniroute.internal:20128"), true);
+  assert.equal(mayForwardSelfLoopCredential("http://0.0.0.0:20128"), true);
+  assert.equal(mayForwardSelfLoopCredential("http://10.0.0.5:20128"), true);
+  assert.equal(mayForwardSelfLoopCredential("http://172.18.0.2:20128"), true);
+  assert.equal(mayForwardSelfLoopCredential("http://192.168.0.15:20128"), true);
+  assert.equal(mayForwardSelfLoopCredential("http://[fd00::5]:20128"), true);
+  assert.equal(mayForwardSelfLoopCredential("http://user:pass@omniroute:20128"), false);
+});
+
+test("buildSelfLoopHeaders attaches Bearer on a private http target and on https", () => {
   for (const url of [
     "http://localhost:20128",
     "http://127.0.0.1:20128",
+    "http://omniroute:20128",
     "https://gateway.example",
   ]) {
     const headers = buildSelfLoopHeaders({ apiKey: "sk-caller" }, url);
@@ -43,18 +63,27 @@ test("buildSelfLoopHeaders attaches Bearer on loopback http and on https", () =>
   }
 });
 
-test("buildSelfLoopHeaders refuses a cleartext non-loopback target when a key would be sent", () => {
+test("buildSelfLoopHeaders refuses a cleartext public target when a key would be sent", () => {
   assert.throws(
     () => buildSelfLoopHeaders({ apiKey: "sk-caller" }, "http://evil.example:8080"),
-    (err: unknown) => {
-      assert.ok(err instanceof UnsafeSelfLoopTargetError);
-      assert.match((err as Error).message, /http:\/\/evil\.example:8080/);
-      return true;
-    }
+    UnsafeSelfLoopTargetError
   );
   assert.throws(
     () => buildSelfLoopHeaders(undefined, "http://203.0.113.9"),
     UnsafeSelfLoopTargetError
+  );
+});
+
+test("UnsafeSelfLoopTargetError keeps the configured URL out of the error", () => {
+  assert.throws(
+    () => buildSelfLoopHeaders({ apiKey: "sk-caller" }, "https://proxyuser:s3cret@gw.example.com"),
+    (err: unknown) => {
+      assert.ok(err instanceof UnsafeSelfLoopTargetError);
+      const shown = inspect(err, { depth: 6 });
+      assert.ok(!shown.includes("s3cret"), shown);
+      assert.ok(!shown.includes("gw.example.com"), shown);
+      return true;
+    }
   );
 });
 
