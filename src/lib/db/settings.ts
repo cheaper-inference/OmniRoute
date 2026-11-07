@@ -26,11 +26,10 @@ import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
 import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
-import { readSavedCallLogPipelineEnabled } from "./databaseSettings";
 
 /**
  * Settings values stored encrypted at rest (AES-256-GCM via ./encryption).
- * Read and write must stay in sync -- a key that is encrypted on write but not
+ * Read and write must stay in sync — a key that is encrypted on write but not
  * decrypted on read hands ciphertext to the consumer, which fails as a silent
  * auth error rather than a visible one. Both paths derive from this set.
  */

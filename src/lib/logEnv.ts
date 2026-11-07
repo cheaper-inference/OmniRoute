@@ -1,6 +1,6 @@
 import path from "path";
 import { resolveDataDir } from "./dataPaths.ts";
-import { toStrictBooleanSetting } from "@/lib/db/booleanSetting";
+import { toStrictBooleanSetting } from "./db/booleanSetting.ts";
 
 const DEFAULT_APP_LOG_RETENTION_DAYS = 7;
 const DEFAULT_CALL_LOG_RETENTION_DAYS = 7;
