@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                               |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+|                               |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 Провайдеры                 |            352            |   **358**   |          380          |
 | 🧠 Уникальные ID чат-моделей  |           1320            |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar используется по желанию и выполняет тол�
 
 </div>
 
-> Последние обновления с **v3.8.20 → v3.8.53**. Полная история в [`CHANGELOG.md`](CHANGELOG.md).
+> Последние обновления с **v3.8.20 → v3.8.54**. Полная история в [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Маршрутизация `quota-weighted`** — 20-я комбинированная стратегия пропускает исчерпанные аккаунты, затем выбирает среди остальных пропорционально оставшейся квоте ÷ текущей нагрузке, закрепляя существующие диалоги. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Безголовый режим** — `omniroute serve --headless` (или `OMNIROUTE_HEADLESS=1`) запускает только прокси-движок `/v1/*`, отключая дашборд и подсистемы, работающие только с ним. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 Видите `npm warn ERESOLVE` или предупреждения о peer-зависимостях? [Они безвредны](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Используете npm 11 или новее?** npm может блокировать скрипты жизненного цикла пакета, если они не разрешены. `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) необходим для подготовки его нативных файлов среды выполнения. Разрешите пакеты, перечисленные в предупреждении npm, при глобальной установке. Для набора пакетов, указанного в OmniRoute 3.8.53:
+> **Используете npm 11 или новее?** npm может блокировать скрипты жизненного цикла пакета, если они не разрешены. `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) необходим для подготовки его нативных файлов среды выполнения. Разрешите пакеты, перечисленные в предупреждении npm, при глобальной установке. Для набора пакетов, указанного в OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1295,7 +1295,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 также про
   <tr><td nowrap><b>Среда выполнения</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Язык</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> в <code>src/</code> и <code>open-sse/</code> (в ядре отсутствует <code>any</code> начиная с версии 2.0)</td></tr>
   <tr><td nowrap><b>Фреймворк</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База данных</b></td><td>better-sqlite3 (SQLite, журналирование WAL) + LowDB (устаревший JSON) — 147 предметных модулей, 222 миграции</td></tr>
+  <tr><td nowrap><b>База данных</b></td><td>better-sqlite3 (SQLite, журналирование WAL) + LowDB (устаревший JSON) — 147 предметных модулей, 223 миграции</td></tr>
   <tr><td nowrap><b>Память</b></td><td>Полнотекстовый поиск SQLite FTS5 + векторные эмбеддинги с квантованием int8, типизированное затухание</td></tr>
   <tr><td nowrap><b>Схемы</b></td><td>Zod 4 — проверка ввода-вывода инструментов MCP + контракты API</td></tr>
   <tr><td nowrap><b>Протоколы</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1808,7 +1808,7 @@ OmniRoute стоит на плечах гигантов. Он начинался
 
 **[⬆ В начало](#-omniroute)** · Создано ❤️ для сообщества разработчиков ИИ с открытым исходным кодом.
 
-<sub>Создано <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Лицензия MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Создано <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Лицензия MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Обсуждения GitHub включены для вопросов и ответов сообщества -->

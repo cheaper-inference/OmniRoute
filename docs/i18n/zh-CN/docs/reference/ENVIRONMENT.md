@@ -1361,7 +1361,7 @@ Adobe Firefly Web 提供程序（`open-sse/services/adobeFireflyBrowserLogin.ts`
 
 ## 部署场景
 
-有关中继后端 SRE 指南（ts/bifrost/auto 行为、9router 与 CLIProxyAPI 的部署位置，以及高吞吐回退策略），请参阅 [中继后端策略](/docs/reference/RELAY_BACKEND_STRATEGY.md)。
+有关中继后端 SRE 指南（ts/bifrost/auto 行为、9router 与 CLIProxyAPI 的部署位置以及高吞吐回退策略），请参阅[中继后端策略](/docs/reference/RELAY_BACKEND_STRATEGY.md)。
 
 ### 最小本地开发环境
 
@@ -1392,7 +1392,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### 物理隔离环境 / CI
+### 隔离网络 / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1865,3 +1865,14 @@ Redis 会话亲和性回退失效（仅选择启用；SQLite 默认行为不变�
 | 多变的                         | 默认 | 源文件                                       | 描述                                                                                                                               |
 | ------------------------------ | ---- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`  | `src/lib/providerModels/modelSyncTimings.ts` | 设置为`1`以记录模型同步期间的阶段计时、生成的请求ID和阶段success/error结果。对所有其他值禁用。日志省略请求、帐户、目录和错误负载。 |
+
+## 本地 OpenCode 媒体分析工具
+
+由 `scripts/cli/omniroute-media-mcp.mjs` 使用。在本地工具进程环境中设置这些变量。
+
+| 变量                       | 默认值                                                                             | 描述                                                   |
+| -------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json`（或 `~/.config/opencode/opencode.json`） | 媒体工具和安装程序读取的 OpenCode 配置。               |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                        | 媒体工具从 OpenCode 配置中读取的提供者条目。           |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                             | 媒体工具提交的模型。其提供者必须支持所请求的媒体类型。 |
+| `OMNIROUTE_MEDIA_API_KEY`  | 已配置的提供者 API 密钥或其环境变量引用                                            | 可选的凭据覆盖项。将其保留在本地进程环境中；切勿提交。 |

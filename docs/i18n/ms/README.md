@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                 |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+|                                 |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 Penyedia                     |           352           |   **358**   |          380          |
 | 🧠 ID model sembang unik        |          1320           |  **1374**   |         1491          |
@@ -579,7 +579,7 @@ Radar adalah secara ikut serta dan GET sahaja. Klien OmniRoute tidak memuat naik
 
 </div>
 
-> Sorotan terkini dari **v3.8.20 → v3.8.53**. Sejarah penuh di [`CHANGELOG.md`](CHANGELOG.md).
+> Sorotan terkini dari **v3.8.20 → v3.8.54**. Sejarah penuh di [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Penghalaan `quota-weighted`** — strategi kombo ke-20 melangkau akaun yang telah habis kuota, kemudian memilih antara baki akaun mengikut nisbah kuota yang tinggal ÷ beban semasa, sambil mengekalkan perbualan sedia ada. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Mod Headless** — `omniroute serve --headless` (atau `OMNIROUTE_HEADLESS=1`) hanya menjalankan enjin proksi `/v1/*`, dengan papan pemuka dan subsistem khusus papan pemuka dimatikan. → [Mod Headless](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 Nampak `npm warn ERESOLVE` atau amaran peer-dep? [Ia tidak berbahaya](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Guna npm 11 atau lebih baharu?** npm mungkin menyekat skrip kitaran hayat pakej melainkan dibenarkan. `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) diperlukan untuk menyediakan fail masa jalan aslinya. Benarkan pakej yang dinamakan dalam amaran npm semasa memasang secara global. Untuk set pakej yang dilaporkan oleh OmniRoute 3.8.53:
+> **Guna npm 11 atau lebih baharu?** npm mungkin menyekat skrip kitaran hayat pakej melainkan dibenarkan. `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) diperlukan untuk menyediakan fail masa jalan aslinya. Benarkan pakej yang dinamakan dalam amaran npm semasa memasang secara global. Untuk set pakej yang dilaporkan oleh OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1291,7 +1291,7 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
   <tr><td nowrap><b>Masa jalan</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> merentasi <code>src/</code> dan <code>open-sse/</code> (sifar <code>any</code> dalam teras sejak v2.0)</td></tr>
   <tr><td nowrap><b>Rangka kerja</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, pengelogan WAL) + LowDB (JSON legasi) — 147 modul domain, 222 migrasi</td></tr>
+  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, pengelogan WAL) + LowDB (JSON legasi) — 147 modul domain, 223 migrasi</td></tr>
   <tr><td nowrap><b>Memori</b></td><td>SQLite FTS5 teks penuh + pembenaman vektor terkuantum int8, pereputan bertype</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — pengesahan I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1804,7 +1804,7 @@ Lesen MIT - lihat [LICENSE](LICENSE) untuk butiran.
 
 **[⬆ Kembali ke atas](#-omniroute)** · Dibina dengan ❤️ untuk komuniti AI sumber terbuka.
 
-<sub>Dicipta oleh <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Lesen MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Dicipta oleh <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Lesen MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions didayakan untuk Soal Jawab komuniti -->

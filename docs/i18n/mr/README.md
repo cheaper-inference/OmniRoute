@@ -71,7 +71,7 @@ OMNIROUTE ने पैसे वाचवण्यात आणि तुमच
 
 <div align="center">
 
-|                           |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
+|                           |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 प्रदाते                |            352             |   **358**   |          380          |
 | 🧠 अद्वितीय चॅट मॉडेल IDs |            1320            |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar वापरणे ऐच्छिक असून तो केवळ GET
 
 </div>
 
-> **v3.8.20 → v3.8.53** मधील अलीकडील ठळक वैशिष्ट्ये. संपूर्ण इतिहास [`CHANGELOG.md`](CHANGELOG.md) मध्ये.
+> **v3.8.20 → v3.8.54** मधील अलीकडील ठळक वैशिष्ट्ये. संपूर्ण इतिहास [`CHANGELOG.md`](CHANGELOG.md) मध्ये.
 
 - **⚖️ `quota-weighted` रूटिंग** — २०वी कॉम्बो स्ट्रॅटेजी थकलेली खाती वगळते, नंतर उरलेल्या खात्यांमध्ये शिल्लक कोटा ÷ चालू लोडच्या प्रमाणात निवड करते, विद्यमान संभाषणे स्थिर ठेवते. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 हेडलेस मोड** — `omniroute serve --headless` (किंवा `OMNIROUTE_HEADLESS=1`) फक्त `/v1/*` प्रॉक्सी इंजिन चालवते, डॅशबोर्ड आणि डॅशबोर्ड-फक्त सबसिस्टम्स बंद ठेवते. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` किंवा peer-dep वॉर्निंग्ज दिसतायत? [त्या हानिकारक नाहीत](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 किंवा नंतरची आवृत्ती वापरत आहात?** परवानगी न दिल्यास npm पॅकेज लाइफसायकल स्क्रिप्ट्स अवरोधित करू शकते. नेटिव्ह रनटाइम फाइल्स तयार करण्यासाठी OmniRoute ची `postinstall` (`node scripts/build/postinstall.mjs`) आवश्यक आहे. ग्लोबली इंस्टॉल करताना npm च्या वॉर्निंगमध्ये नामांकित पॅकेजेसना परवानगी द्या. OmniRoute 3.8.53 ने नोंदवलेल्या पॅकेज-संचासाठी:
+> **npm 11 किंवा नंतरची आवृत्ती वापरत आहात?** परवानगी न दिल्यास npm पॅकेज लाइफसायकल स्क्रिप्ट्स अवरोधित करू शकते. नेटिव्ह रनटाइम फाइल्स तयार करण्यासाठी OmniRoute ची `postinstall` (`node scripts/build/postinstall.mjs`) आवश्यक आहे. ग्लोबली इंस्टॉल करताना npm च्या वॉर्निंगमध्ये नामांकित पॅकेजेसना परवानगी द्या. OmniRoute 3.8.54 ने नोंदवलेल्या पॅकेज-संचासाठी:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1294,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 देखील �
   <tr><td nowrap><b>रनटाइम</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>भाषा</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> आणि <code>open-sse/</code> मध्ये (v2.0 पासून कोरमध्ये <code>any</code> शून्य)</td></tr>
   <tr><td nowrap><b>फ्रेमवर्क</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगसी) — 147 डोमेन मॉड्यूल्स, 222 मायग्रेशन्स</td></tr>
+  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगसी) — 147 डोमेन मॉड्यूल्स, 223 मायग्रेशन्स</td></tr>
   <tr><td nowrap><b>मेमरी</b></td><td>SQLite FTS5 पूर्ण-पाठ + int8-क्वांटाइझ्ड वेक्टर एम्बेडिंग्ज, टाइप्ड डीके</td></tr>
   <tr><td nowrap><b>स्कीमा</b></td><td>Zod 4 — MCP टूल I/O प्रमाणीकरण + API करार</td></tr>
   <tr><td nowrap><b>प्रोटोकॉल</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1807,7 +1807,7 @@ MIT परवाना - तपशीलांसाठी [LICENSE](LICENSE) �
 
 **[⬆ शीर्षस्थानी परत जा](#-omniroute)** · मुक्त-स्रोत AI समुदायासाठी ❤️ ने तयार केलेले.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> द्वारे निर्मित · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT परवाना · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> द्वारे निर्मित · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT परवाना · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- समुदायासाठी GitHub Discussions सक्षम केले आहे -->

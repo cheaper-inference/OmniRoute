@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                          |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
+|                          |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------ | :------------------------: | :---------: | :-------------------: |
 | 🌐 සපයන්නන්              |            352             |   **358**   |          380          |
 | 🧠 අනන්ය chat model ID   |            1320            |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar භාවිතය තෝරාගත හැකි අතර එය GET �
 
 </div>
 
-> **v3.8.20 → v3.8.53** හි නවතම විශේෂාංග. සම්පූර්ණ ඉතිහාසය [`CHANGELOG.md`](CHANGELOG.md) හි ඇත.
+> **v3.8.20 → v3.8.54** හි නවතම විශේෂාංග. සම්පූර්ණ ඉතිහාසය [`CHANGELOG.md`](CHANGELOG.md) හි ඇත.
 
 - **⚖️ `quota-weighted` මාර්ගගත කිරීම** — 20 වන සංයුක්ත උපාය මඟින් අවසන් වූ ගිණුම් මඟ හැර, ඉතිරි කොටස ÷ ක්රියාත්මක ප්රභාරය අනුව ඉතිරි ගිණුම් අතරින් තේරීම සිදු කරයි, පවතින සංවාද ස්ථිරව තබා ගනී. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless ප්රකාරය** — `omniroute serve --headless` (හෝ `OMNIROUTE_HEADLESS=1`) මඟින් `/v1/*` ප්රොක්සි එන්ජිම පමණක් ක්රියාත්මක වන අතර, ඩෑෂ්බෝඩ් සහ ඩෑෂ්බෝඩ්-පමණක් උපපද්ධති අක්රිය වේ. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` හෝ peer-dep අවවාදයන් දකිනවාද? [ඒවා හානිකර නොවේ](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 හෝ පසුව භාවිත කරනවාද?** npm ඉඩ දෙන තුරු පැකේජ ජීවනචක්ර ස්ක්රිප්ට අවහිර කළ හැක. OmniRoute හි `postinstall` (`node scripts/build/postinstall.mjs`) එහි ස්වදේශීය runtime ගොනු සූදානම් කිරීමට අවශ්ය වේ. ගෝලීයව ස්ථාපනය කිරීමේදී npm අවවාදයේ නම් කළ පැකේජවලට ඉඩ දෙන්න. OmniRoute 3.8.53 මගින් වාර්තා කළ පැකේජ කට්ටලය සඳහා:
+> **npm 11 හෝ පසුව භාවිත කරනවාද?** npm ඉඩ දෙන තුරු පැකේජ ජීවනචක්ර ස්ක්රිප්ට අවහිර කළ හැක. OmniRoute හි `postinstall` (`node scripts/build/postinstall.mjs`) එහි ස්වදේශීය runtime ගොනු සූදානම් කිරීමට අවශ්ය වේ. ගෝලීයව ස්ථාපනය කිරීමේදී npm අවවාදයේ නම් කළ පැකේජවලට ඉඩ දෙන්න. OmniRoute 3.8.54 මගින් වාර්තා කළ පැකේජ කට්ටලය සඳහා:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1294,7 +1294,7 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
   <tr><td nowrap><b>ධාවන පරිසරය</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>භාෂාව</b></td><td>TypeScript 6.0 — <code>src/</code> සහ <code>open-sse/</code> පුරාම <b>100% TypeScript</b> (v2.0 සිට core තුළ <code>any</code> ශුන්යයි)</td></tr>
   <tr><td nowrap><b>රාමුව</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — domain මොඩියුල 147ක්, migrations 222ක්</td></tr>
+  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — domain මොඩියුල 147ක්, migrations 223ක්</td></tr>
   <tr><td nowrap><b>මතකය</b></td><td>SQLite FTS5 පූර්ණ-පාඨ + int8-quantized vector embeddings, typed decay</td></tr>
   <tr><td nowrap><b>ස්කීමා</b></td><td>Zod 4 — MCP tool I/O වලංගුකරණය + API ගිවිසුම්</td></tr>
   <tr><td nowrap><b>ප්රොටෝකෝල</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1807,7 +1807,7 @@ MIT බලපත්රය - විස්තර සඳහා [LICENSE](LICENSE) �
 
 **[⬆ ඉහළට ආපසු](#-omniroute)** · විවෘත මූලාශ්ර AI ප්රජාව වෙනුවෙන් ❤️ සමඟ නිර්මාණය කරන ලදී.
 
-<sub>නිර්මාණය කළේ <a href="https://github.com/diegosouzapw">Diego Souza</a> විසිනි · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT බලපත්රය · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>නිර්මාණය කළේ <a href="https://github.com/diegosouzapw">Diego Souza</a> විසිනි · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT බලපත්රය · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- ප්රජා ප්රශ්න සහ පිළිතුරු සඳහා GitHub Discussions සක්රීය කර ඇත -->

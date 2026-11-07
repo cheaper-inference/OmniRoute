@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                 |               v3.8.50               | **v3.8.51** |      `v3.8.53+`       |
+|                                 |               v3.8.50               | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :---------------------------------: | :---------: | :-------------------: |
 | 🌐 Teikėjai                     |                 352                 |   **358**   |          380          |
 | 🧠 Unikalūs pokalbių modelių ID |                1320                 |  **1374**   |         1491          |
@@ -588,7 +588,7 @@ dabartinį katalogą rasite **[radar.omniroute.online/planos](https://radar.omni
 
 </div>
 
-> Naujausios svarbiausios funkcijos nuo **v3.8.20 → v3.8.53**. Visa istorija [`CHANGELOG.md`](CHANGELOG.md).
+> Naujausios svarbiausios funkcijos nuo **v3.8.20 → v3.8.54**. Visa istorija [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` maršrutizavimas** — 20-oji kombinuota strategija praleidžia išnaudotas paskyras, tada tarp likusių paskirsto apkrovą proporcingai likusiam kvotų kiekiui ÷ esamai apkrovai, išlaikant esamus pokalbius prisegtus. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Veikimas be sąsajos (Headless mode)** — `omniroute serve --headless` (arba `OMNIROUTE_HEADLESS=1`) paleidžia tik `/v1/*` proxy variklį, išjungiant prietaisų skydelį ir tik skydeliui skirtas posistemes. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1023,7 +1023,7 @@ omniroute
 ```
 
 > 💡 Matote `npm warn ERESOLVE` arba „peer-dep" įspėjimus? [Jie nekenksmingi](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Naudojate npm 11 ar naujesnę versiją?** npm gali blokuoti paketų gyvavimo ciklo scenarijus, jei jie neleidžiami. OmniRoute `postinstall` (`node scripts/build/postinstall.mjs`) būtinas norint paruošti vietinius vykdymo failus. Diegdami globaliai leiskite paketus, nurodytus npm įspėjime. Paketų rinkiniui, kurį nurodo OmniRoute 3.8.53:
+> **Naudojate npm 11 ar naujesnę versiją?** npm gali blokuoti paketų gyvavimo ciklo scenarijus, jei jie neleidžiami. OmniRoute `postinstall` (`node scripts/build/postinstall.mjs`) būtinas norint paruošti vietinius vykdymo failus. Diegdami globaliai leiskite paketus, nurodytus npm įspėjime. Paketų rinkiniui, kurį nurodo OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1306,7 +1306,7 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
   <tr><td nowrap><b>Vykdymo aplinka</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Kalba</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kataloguose <code>src/</code> ir <code>open-sse/</code> (branduolyje nėra <code>any</code> nuo v2.0)</td></tr>
   <tr><td nowrap><b>Architektūra</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalų vedimas) + LowDB (JSON palikimas) — 147 domeno modulių, 222 migracijos</td></tr>
+  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalų vedimas) + LowDB (JSON palikimas) — 147 domeno modulių, 223 migracijos</td></tr>
   <tr><td nowrap><b>Atmintis</b></td><td>SQLite FTS5 viso teksto paieška + int8 kvantuoti vektoriniai įterpiniai, tipizuotas nykimas</td></tr>
   <tr><td nowrap><b>Schemos</b></td><td>Zod 4 — MCP įrankių įvesties ir išvesties validavimas + API sutartys</td></tr>
   <tr><td nowrap><b>Protokolai</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1819,7 +1819,7 @@ MIT licencija – daugiau informacijos rasite [LICENSE](LICENSE).
 
 **[⬆ Grįžti į viršų](#-omniroute)** · Sukurta ❤️ atvirojo kodo DI bendruomenei.
 
-<sub>Sukūrė <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licencija · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Sukūrė <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT licencija · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions įjungtos bendruomenės klausimams ir atsakymams -->
