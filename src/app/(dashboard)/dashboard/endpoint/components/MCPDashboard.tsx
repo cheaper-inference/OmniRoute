@@ -14,6 +14,7 @@ import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import { useTranslations } from "next-intl";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 type McpTransport = "stdio" | "sse" | "streamable-http";
 
@@ -192,6 +193,7 @@ function formatPercent(value: number | null | undefined) {
 
 export default function McpDashboardPage() {
   const t = useTranslations("mcpDashboard");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<McpStatusResponse | null>(null);
   const [tools, setTools] = useState<McpTool[]>([]);
@@ -297,9 +299,11 @@ export default function McpDashboardPage() {
     const nextState = selectedCombo.isActive === false;
     const confirmLabel = nextState ? t("activate") : t("deactivate");
     if (
-      !globalThis.confirm(
-        t("confirmSwitchCombo", { action: confirmLabel, combo: selectedCombo.name })
-      )
+      !(await requestConfirm({
+        message: t("confirmSwitchCombo", { action: confirmLabel, combo: selectedCombo.name }),
+        confirmText: confirmLabel,
+        variant: nextState ? "primary" : "danger",
+      }))
     )
       return;
 
@@ -333,7 +337,13 @@ export default function McpDashboardPage() {
       conservative: t("profileConservative"),
     };
     const profileLabel = profileLabelById[selectedProfile];
-    if (!globalThis.confirm(t("confirmApplyProfile", { profile: profileLabel }))) return;
+    if (
+      !(await requestConfirm({
+        message: t("confirmApplyProfile", { profile: profileLabel }),
+        variant: "primary",
+      }))
+    )
+      return;
 
     setActionBusy("resilience");
     setActionMessage("");
@@ -358,7 +368,7 @@ export default function McpDashboardPage() {
   };
 
   const handleResetCircuitBreakers = async () => {
-    if (!globalThis.confirm(t("confirmResetBreakers"))) return;
+    if (!(await requestConfirm(t("confirmResetBreakers")))) return;
 
     setActionBusy("reset");
     setActionMessage("");
@@ -662,6 +672,7 @@ export default function McpDashboardPage() {
           </Button>
         </div>
       </Card>
+      {confirmDialog}
     </div>
   );
 }

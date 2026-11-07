@@ -1,13 +1,27 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { AntigravityExecutor } from "../../open-sse/executors/antigravity.ts";
-import {
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-ag-executor-credits-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+process.env.API_KEY_SECRET = "test-antigravity-executor-credits";
+
+const { AntigravityExecutor } = await import("../../open-sse/executors/antigravity.ts");
+const {
   clearAntigravityVersionCaches,
   seedAntigravityIdeVersionCache,
   seedAntigravityCliVersionCache,
-} from "../../open-sse/services/antigravityVersion.ts";
-import { shouldRetryWithCredits } from "../../open-sse/services/antigravityCredits.ts";
+} = await import("../../open-sse/services/antigravityVersion.ts");
+const { shouldRetryWithCredits } = await import("../../open-sse/services/antigravityCredits.ts");
+const core = await import("../../src/lib/db/core.ts");
+
+test.after(() => {
+  core.resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
 
 async function readRequestBody(body: BodyInit | null | undefined): Promise<string> {
   if (typeof body === "string") return body;
@@ -259,6 +273,14 @@ test("AntigravityExecutor credits modes control envelopes and eligible retry cou
       "retry injects credits at most once when quota exhaustion persists across fallbacks",
       async () => {
         const bodies: Array<Record<string, unknown>> = [];
+        const executor = new AntigravityExecutor();
+        executor.config = {
+          ...executor.config,
+          baseUrls: [
+            "https://daily-cloudcode-pa.googleapis.com",
+            "https://cloudcode-pa.googleapis.com",
+          ],
+        };
         const originalSetTimeout = globalThis.setTimeout;
         globalThis.fetch = async (_url, init) => {
           bodies.push(JSON.parse(await readRequestBody(init?.body)));
@@ -274,7 +296,7 @@ test("AntigravityExecutor credits modes control envelopes and eligible retry cou
           // about credits being injected once across ALL of them, not about the budget itself.
           const result = await withEnv("ANTIGRAVITY_CREDITS", "retry", () =>
             withEnv("ANTIGRAVITY_MAX_429_ATTEMPTS", "12", () =>
-              new AntigravityExecutor().execute({
+              executor.execute({
                 model: "antigravity/gemini-2.5-flash",
                 body: { request: { contents: [{ role: "user", parts: [{ text: "hello" }] }] } },
                 stream: true,
