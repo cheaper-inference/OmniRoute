@@ -125,6 +125,34 @@ async function defaultSelectNextCredentials(
   );
 }
 
+async function executeWithoutImageCredentials(
+  credentials: ImageCredentialRetryOptions["credentials"],
+  execute: ImageCredentialRetryOptions["execute"],
+  allowedConnections: string[] | null
+): Promise<ImageCredentialRetryResult> {
+  // A scoped key cannot dispatch through an implicit credential-less provider.
+  if (Array.isArray(allowedConnections)) {
+    return {
+      credentials,
+      result: {
+        success: false,
+        status: 403,
+        error: "No image-provider connection is allowed for this API key",
+      },
+    };
+  }
+  return { credentials, result: await execute(credentials) };
+}
+
+function outOfScopeImageCredential(
+  credentials: ImageCredentialRetryOptions["credentials"],
+  allowedConnections: string[] | null,
+  error: string
+): ImageCredentialRetryResult | null {
+  if (!isOutsideImageKeyScope(credentials, allowedConnections)) return null;
+  return { credentials, result: { success: false, status: 403, error } };
+}
+
 /**
  * Keep image requests on the same credential lifecycle as chat requests.
  *
@@ -140,24 +168,8 @@ export async function executeImageWithCredentialFallback({
   allowedConnections = null,
   selectNextCredentials = defaultSelectNextCredentials,
 }: ImageCredentialRetryOptions): Promise<ImageCredentialRetryResult> {
-  // Local/no-auth image providers intentionally have no credential row. They
-  // still need one direct attempt, but there is no account identity to refresh
-  // or rotate after a 401.
-  if (!credentials) {
-    // A scoped API key cannot fall through to a credential-less dispatch.
-    // Unscoped local/no-auth image providers retain their existing direct attempt.
-    if (Array.isArray(allowedConnections)) {
-      return {
-        credentials,
-        result: {
-          success: false,
-          status: 403,
-          error: "No image-provider connection is allowed for this API key",
-        },
-      };
-    }
-    return { credentials, result: await execute(credentials) };
-  }
+  // Preserve direct dispatch for local/no-auth providers, but never for a scoped key.
+  if (!credentials) return executeWithoutImageCredentials(credentials, execute, allowedConnections);
 
   const excludedConnectionIds = new Set<string>();
   let currentCredentials = credentials;
@@ -168,16 +180,11 @@ export async function executeImageWithCredentialFallback({
     const connectionId = connectionIdOf(currentCredentials);
     // Defense in depth: selectors and test hooks must never bypass the caller
     // API key's connection allowlist, even during image credential rotation.
-    if (isOutsideImageKeyScope(currentCredentials, allowedConnections)) {
-      return {
-        credentials: currentCredentials,
-        result: {
-          success: false,
-          status: 403,
-          error: "Image credential is outside the API key's allowed connections",
-        },
-      };
-    }
+    const scopedDenial = outOfScopeImageCredential(
+      currentCredentials, allowedConnections,
+      "Image credential is outside the API key's allowed connections"
+    );
+    if (scopedDenial) return scopedDenial;
     if (connectionId && excludedConnectionIds.has(connectionId)) break;
     if (connectionId) excludedConnectionIds.add(connectionId);
 
@@ -200,16 +207,11 @@ export async function executeImageWithCredentialFallback({
     }
 
     // A refresh must not silently substitute a different or unscoped account.
-    if (isOutsideImageKeyScope(currentCredentials, allowedConnections)) {
-      return {
-        credentials: currentCredentials,
-        result: {
-          success: false,
-          status: 403,
-          error: "Refreshed image credential is outside the API key's allowed connections",
-        },
-      };
-    }
+    const refreshedScopeDenial = outOfScopeImageCredential(
+      currentCredentials, allowedConnections,
+      "Refreshed image credential is outside the API key's allowed connections"
+    );
+    if (refreshedScopeDenial) return refreshedScopeDenial;
     lastCredentials = currentCredentials;
     lastResult = await execute(currentCredentials);
     const shouldTryAnotherAccount =
