@@ -208,11 +208,19 @@ async function postHandler(request: any, context: any, preParsedBody: any = null
         thresholdMs: resolveKeepaliveThreshold(body?.model),
         keepaliveFrame: ANTHROPIC_PING_FRAME,
         correlationId,
+        extraHeaders: { "X-Correlation-Id": correlationId },
         deadlineController,
       })
     );
   }
-  return applyHeaders(await handleChat(request, null, body));
+  return applyHeaders(
+    await handleChat(
+      request,
+      null,
+      body,
+      resolveIncomingCorrelationId(request.headers.get("x-correlation-id")) ?? undefined
+    )
+  );
 }
 
 // `logger: null` — the guardrail registry re-evaluates this request inside
