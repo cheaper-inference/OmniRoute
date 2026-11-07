@@ -460,6 +460,22 @@ export const OPTIONAL_BOOT_SUBSYSTEMS: ReadonlyArray<OptionalBootSubsystem> = [
           console.warn("[STARTUP] models.dev sync failed to start (non-fatal):", msg);
         }),
   },
+  // OpenCode free-tier Bun relay: self-gated on OPENCODE_FREE_TIER_RELAY_URL. Non-blocking,
+  // never fatal.
+  {
+    name: "opencode-free-relay",
+    start: () =>
+      import("@/lib/opencodeFreeRelay")
+        .then(async (m) => {
+          const result = await m.startOpencodeFreeRelay();
+          if (result.status !== "disabled")
+            console.log(`[STARTUP] OpenCode free relay: ${result.status} ${result.detail ?? ""}`);
+        })
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.warn("[STARTUP] OpenCode free relay failed to start (non-fatal):", msg);
+        }),
+  },
   // Real-time dashboard WebSocket daemon (port 20132): powers Combo Studio Live,
   // the Home live-pulse, and Live Compression. Side-effect import triggers the
   // flag-gated auto-start (OMNIROUTE_ENABLE_LIVE_WS, default ON).
