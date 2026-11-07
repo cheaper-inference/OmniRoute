@@ -2,6 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { CloudflareAIExecutor } from "../../open-sse/executors/cloudflare-ai.ts";
+import {
+  NonStreamingResponseTooLargeError,
+  readNonStreamingResponseBody,
+} from "../../open-sse/handlers/chatCore/nonStreamingResponseBody.ts";
 
 const MODEL = "@cf/qwen/qwen3-30b-a3b-fp8";
 const CREDENTIALS = { apiKey: "cf-api-token", providerSpecificData: { accountId: "account-123" } };
@@ -114,4 +118,59 @@ test("streaming responses and upstream errors pass through untouched", async () 
   const failed = await run({ reasoning_effort: "none" }, error);
   assert.equal(failed.status, 400);
   assert.equal(await failed.text(), '{"errors":[{"code":8001}]}');
+});
+
+// chatCore runs execute() under the response-start watchdog and reads the body afterwards
+// under its own timeout and size cap, so execute() has to return on headers alone.
+test("thinking off: execute returns on headers and the rewrite happens as the body is read", async () => {
+  const bytes = new TextEncoder().encode(
+    JSON.stringify({ choices: [{ message: { content: null, reasoning_content: "café" } }] })
+  );
+  const split = bytes.indexOf(0xc3) + 1; // Inside the two-byte "é".
+  let finishBody = () => {};
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(bytes.slice(0, split));
+      finishBody = () => {
+        controller.enqueue(bytes.slice(split));
+        controller.close();
+      };
+    },
+  });
+  const pending = run(
+    { reasoning_effort: "none" },
+    () => new Response(body, { status: 200, headers: { "Content-Type": "application/json" } })
+  );
+
+  const beforeBodyEnds = await Promise.race([
+    pending,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 200)),
+  ]);
+  finishBody();
+  const response = await pending;
+
+  assert.ok(beforeBodyEnds, "execute() waited for the whole body");
+  assert.equal((await response.json()).choices[0].message.content, "café");
+});
+
+test("thinking off: an over-cap declared Content-Length still reaches the bounded reader", async () => {
+  const response = await run({ reasoning_effort: "none" }, () =>
+    cloudflareReply(REASONING_ONLY, {
+      headers: { "Content-Type": "application/json", "Content-Length": "2048" },
+    })
+  );
+
+  await assert.rejects(
+    readNonStreamingResponseBody(response, "application/json", false, 1024),
+    NonStreamingResponseTooLargeError
+  );
+});
+
+test("thinking off: a JSON reply that cannot be parsed reaches the client unchanged", async () => {
+  const response = await run(
+    { reasoning_effort: "none" },
+    () => new Response("not json", { status: 200, headers: { "Content-Type": "application/json" } })
+  );
+
+  assert.equal(await response.text(), "not json");
 });

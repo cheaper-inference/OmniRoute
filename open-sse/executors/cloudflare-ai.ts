@@ -83,23 +83,40 @@ export function promoteReasoningOnlyAnswer(payload: unknown): Record<string, unk
   return changed ? { ...record, choices } : null;
 }
 
-async function withPromotedAnswer(response: Response): Promise<Response> {
-  if (!response.ok || !(response.headers.get("content-type") || "").includes("json")) {
-    return response;
-  }
-  const text = await response.text();
-  let promoted: Record<string, unknown> | null = null;
+function promotedBody(text: string): string {
   try {
-    promoted = promoteReasoningOnlyAnswer(JSON.parse(text));
+    const promoted = promoteReasoningOnlyAnswer(JSON.parse(text));
+    return promoted ? JSON.stringify(promoted) : text;
   } catch {
-    promoted = null;
+    return text; // Not JSON after all: the caller's parser reports it, not this rewrite.
   }
-  const headers = new Headers(response.headers);
-  headers.delete("content-length");
-  return new Response(promoted ? JSON.stringify(promoted) : text, {
+}
+
+/**
+ * The rewrite runs as the caller reads the body, not here: execute() is timed as
+ * response-start, and chatCore applies its body timeout and Content-Length cap to the read
+ * that follows. The upstream headers stay, so that cap still sees the declared size.
+ */
+function withPromotedAnswer(response: Response): Response {
+  const isJson = (response.headers.get("content-type") || "").includes("json");
+  if (!response.ok || !response.body || !isJson) return response;
+  const decoder = new TextDecoder();
+  let text = "";
+  const body = response.body.pipeThrough(
+    new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk) {
+        text += decoder.decode(chunk, { stream: true });
+      },
+      flush(controller) {
+        text += decoder.decode();
+        controller.enqueue(new TextEncoder().encode(promotedBody(text)));
+      },
+    })
+  );
+  return new Response(body, {
     status: response.status,
     statusText: response.statusText,
-    headers,
+    headers: response.headers,
   });
 }
 
@@ -153,7 +170,7 @@ export class CloudflareAIExecutor extends BaseExecutor {
     const result = await super.execute(input);
     if (input.stream || result instanceof Response) return result;
     if (!requestsThinkingOff(result.transformedBody ?? input.body)) return result;
-    return { ...result, response: await withPromotedAnswer(result.response) };
+    return { ...result, response: withPromotedAnswer(result.response) };
   }
 
   transformRequest(
