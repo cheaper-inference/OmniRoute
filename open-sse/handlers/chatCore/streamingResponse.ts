@@ -151,6 +151,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     connectionId,
     contextEditingEnabled,
     credentials,
+    forcedConnectionId,
     effectiveModel,
     executeRefreshCredentials,
     executor,
@@ -222,7 +223,11 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       upstreamHttpRejection: rejection,
       getNextFamilyFallback: familyFallback.getNext,
       policy: {
-        allowAccountRotation: !managedLease && comboStrategy !== "context-relay",
+        // The connection pin is strict (API_REFERENCE: "used exclusively", cooldown on
+        // failure, no sibling rotation). The outer retry loop honours it; the in-pipeline
+        // account rotation must too, or a pinned 429 is silently answered by another account.
+        allowAccountRotation:
+          !managedLease && comboStrategy !== "context-relay" && !forcedConnectionId,
         allowModelFallback: true,
         expectedConnectionId: managedLease
           ? String(getCurrentConnectionId() || connectionId || "") || undefined

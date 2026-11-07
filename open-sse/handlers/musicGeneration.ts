@@ -32,6 +32,11 @@ import {
   parseKieResultJson,
 } from "../utils/kieTask.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import {
+  UPSTREAM_MEDIA_LIMITS,
+  downloadUpstreamMedia,
+  upstreamMediaErrorText,
+} from "@/shared/network/remoteImageFetch";
 import { prepareFalCompatibility } from "./fal/compatibility.ts";
 import { handleFalMusicGeneration } from "./mediaGeneration/fal.ts";
 import { handleSyntxMusicGeneration } from "./syntxAudio.ts";
@@ -170,7 +175,15 @@ export async function handleMusicGeneration({
   }
 
   if (providerConfig.format === "udio-music") {
-    return handleUdioMusicGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleUdioMusicGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "minimax-music") {
@@ -465,6 +478,7 @@ async function handleUdioMusicGeneration({
   body,
   credentials,
   log,
+  signal = null,
 }) {
   const startTime = Date.now();
   const cookie = credentials?.apiKey || credentials?.providerSpecificData?.cookie || "";
@@ -518,15 +532,19 @@ async function handleUdioMusicGeneration({
       const songs = await statusRes.json();
       const ready = songs.filter((s) => s.finished && s.song_path);
       if (ready.length > 0) {
-        const audioRes = await fetch(ready[0].song_path);
-        if (!audioRes.ok) {
+        let buf: Buffer;
+        try {
+          ({ buffer: buf } = await downloadUpstreamMedia(ready[0].song_path, {
+            ...UPSTREAM_MEDIA_LIMITS.audio,
+            signal,
+          }));
+        } catch (err) {
           return {
             success: false,
-            status: audioRes.status,
-            error: `Failed to download audio: ${audioRes.status}`,
+            status: 502,
+            error: `Failed to download audio: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
           };
         }
-        const buf = await audioRes.arrayBuffer();
         saveCallLog({
           method: "POST",
           path: "/v1/music/generations",
@@ -539,7 +557,7 @@ async function handleUdioMusicGeneration({
           success: true,
           data: {
             created: Math.floor(Date.now() / 1000),
-            data: [{ b64_json: Buffer.from(buf).toString("base64"), format: "mp3" }],
+            data: [{ b64_json: buf.toString("base64"), format: "mp3" }],
           },
         };
       }

@@ -41,7 +41,7 @@ let nextModelsProbeStatus: number | null = 200;
 // must not replace this stub and send synthetic credentials to a real proxy.
 await import("../../open-sse/utils/proxyFetch.ts");
 const originalFetch = globalThis.fetch;
-globalThis.fetch = (async (input: string | URL | Request) => {
+const probeFetch = (async (input: string | URL | Request) => {
   const url =
     typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
   if (url === `${VALIDATION_BASE_URL}/models`) {
@@ -104,6 +104,10 @@ async function createConnection(
   assert.ok(connection.id, "connection must expose an id");
   return { id: connection.id as string, isActive: connection.isActive };
 }
+
+// Importing the routes installs the patched fetch. Put the probe in its place afterwards, so a
+// test reaches it directly and does not depend on the real lookup of a fake host failing first.
+globalThis.fetch = probeFetch;
 
 test.after(() => {
   globalThis.fetch = originalFetch;

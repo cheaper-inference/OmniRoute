@@ -34,7 +34,7 @@ const originalFetch = globalThis.fetch;
 // When set, every validation probe waits on this promise before answering, so a
 // test can hold a connection test mid-probe while the operator acts.
 let probeGate: Promise<void> | null = null;
-globalThis.fetch = (async (input: string | URL | Request) => {
+const probeFetch = (async (input: string | URL | Request) => {
   const url =
     typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
   if (url === `${VALIDATION_BASE_URL}/models`) {
@@ -113,6 +113,10 @@ function readRow(connectionId: string): { isActive: number; psd: Record<string, 
     psd: row.provider_specific_data ? JSON.parse(row.provider_specific_data) : {},
   };
 }
+
+// Importing the routes installs the patched fetch. Put the probe in its place afterwards, so a
+// test reaches it directly and does not depend on the real lookup of a fake host failing first.
+globalThis.fetch = probeFetch;
 
 test.after(() => {
   globalThis.fetch = originalFetch;

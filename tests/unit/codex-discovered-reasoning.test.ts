@@ -40,7 +40,7 @@ test.after(async () => {
   assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
   await closeCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS);
   resetDbInstance();
-  fs.rmSync(dataDir, { recursive: true, force: true });
+  fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
 });
 
 async function sync() {
