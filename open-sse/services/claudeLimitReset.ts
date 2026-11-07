@@ -392,6 +392,12 @@ export type ClaudeLimitResetPolicyVerdict = {
   allow: boolean;
   /** Receives the outcome of the claim this verdict allowed (only when a claim was made). */
   onSettled?: (attempt: ClaudeLimitResetAttempt) => void;
+  /**
+   * Called once the allowed attempt has resolved, claim or not. Frees whatever the policy
+   * set aside for a claim that was never sent (memo, recent reset, a sibling's in-flight
+   * claim, reset not on offer). Must be idempotent and a no-op after onSettled.
+   */
+  release?: () => void;
 };
 
 /**

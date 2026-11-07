@@ -328,6 +328,80 @@ test("a failed redemption is audited without secrets and backs the account off f
   assert.equal(w.calls.redeem.length, 2);
 });
 
+/**
+ * Redeem once with `error` thrown, then again after the 1 h backoff with the redemption
+ * succeeding. maxPerAccountPerDay = 1, so the second attempt only happens when the first
+ * row does not count toward the caps.
+ */
+async function redeemTwiceAfterError(error: unknown) {
+  const w = createWorld({ feature: { ...EAGER, maxPerAccountPerDay: 1 } });
+  const redeem = w.deps.redeemCredit;
+  w.deps.redeemCredit = async (provider: Provider, id: string, key: string, creditId: string) => {
+    await redeem(provider, id, key, creditId);
+    throw error;
+  };
+  await w.tick();
+  w.deps.redeemCredit = redeem;
+  w.world.windows["conn-a"] = walledSession(NOW + 61 * MINUTE_MS);
+  await w.tick(NOW + 61 * MINUTE_MS);
+  return w;
+}
+
+test("a redemption whose outcome is unknown is recorded as unknown and counts toward the caps", async () => {
+  const unknown = [
+    // Claude: the claim POST timed out, the network failed or the status was unexpected.
+    Object.assign(new Error("Reset credit claim failed: error"), {
+      code: "claim_error",
+      status: 502,
+    }),
+    // Codex: the consume POST threw (timeout / network) and was wrapped.
+    Object.assign(new Error("The operation was aborted due to timeout"), {
+      code: "codex_reset_credit_failed",
+      status: 500,
+    }),
+    // Codex: the consume answered 5xx, or 2xx with a body nobody can read.
+    Object.assign(new Error("Codex reset-credit API returned HTTP 504."), {
+      code: "codex_reset_credit_upstream_error",
+      status: 504,
+    }),
+    Object.assign(new Error("Codex returned an unknown reset-credit response."), {
+      code: "unknown_reset_credit_response",
+      status: 502,
+    }),
+    // Not a typed reset-credit error at all: nothing says the credit was not spent.
+    new DOMException("The operation was aborted due to timeout", "TimeoutError"),
+    new TypeError("fetch failed"),
+  ];
+  for (const error of unknown) {
+    const w = await redeemTwiceAfterError(error);
+    const label = String((error as { code?: unknown }).code ?? (error as Error).name);
+    assert.equal(w.audit.length, 1, label);
+    assert.equal(w.audit[0].status, "unknown", label);
+    assert.equal(w.webhooks.length, 0, `${label}: webhook only on success`);
+    assert.equal(w.calls.redeem.length, 1, `${label}: the unknown outcome holds the daily cap`);
+  }
+});
+
+test("a definite refusal stays failed and does not count toward the caps", async () => {
+  const definite = [
+    Object.assign(new Error("already used"), { code: "already_used", status: 409 }),
+    Object.assign(new Error("no credit"), { code: "no_credit", status: 409 }),
+    Object.assign(new Error("ineligible"), { code: "ineligible", status: 403 }),
+    Object.assign(new Error("HTTP 400"), {
+      code: "codex_reset_credit_upstream_error",
+      status: 400,
+    }),
+    Object.assign(new Error("claim refused"), { code: "claim_unavailable", status: 502 }),
+  ];
+  for (const error of definite) {
+    const w = await redeemTwiceAfterError(error);
+    const label = (error as { code: string }).code;
+    assert.equal(w.audit[0].status, "failed", label);
+    assert.equal(w.calls.redeem.length, 2, `${label}: a refusal does not hold the cap`);
+    assert.equal(w.audit[1].status, "success", label);
+  }
+});
+
 test("single-flight: overlapping ticks never redeem twice", async () => {
   const w = createWorld({ feature: { ...EAGER, maxPerAccountPerDay: 5, maxPerDay: 5 } });
   let release: () => void = () => undefined;

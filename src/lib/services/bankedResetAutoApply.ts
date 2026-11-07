@@ -32,6 +32,7 @@ import { getSettings } from "@/lib/db/settings";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import {
   BANKED_RESET_HISTORY_WINDOW_MS,
+  classifyBankedResetFailure,
   countBankedResetsToday,
   createDefaultBankedResetSinks,
   readBankedResetAuditRows,
@@ -370,7 +371,11 @@ async function applyDecision(
   const day = new Date(nowMs).toISOString().slice(0, 10);
   const n = countBankedResetsToday(rows, connectionId, nowMs) + 1;
   const idempotencyKey = `auto-reset:${connectionId}:${day}:${n}`;
-  const reservation = reserveBankedResetSlot({ connectionId, now: nowMs });
+  const reservation = reserveBankedResetSlot({
+    connectionId,
+    creditType: candidate.creditType,
+    now: nowMs,
+  });
   try {
     try {
       await deps.redeemCredit(
@@ -382,8 +387,14 @@ async function applyDecision(
     } catch (err) {
       state.backoffUntil[key] = nowMs + BANKED_RESET_BACKOFF_MS;
       const reason = toBankedResetReason((err as { code?: unknown } | null)?.code);
-      recordBankedResetOutcome({ ...outcome, status: "failed", reason }, deps.sinks);
-      log.warn(`${key}: banked reset redemption failed; backing off 1 h`, errorFields(err));
+      // A timeout / network failure may still have spent the credit: "unknown" counts
+      // toward the caps; a definite refusal is "failed" and does not.
+      const status = classifyBankedResetFailure(err);
+      recordBankedResetOutcome({ ...outcome, status, reason }, deps.sinks);
+      log.warn(
+        `${key}: banked reset redemption ${status === "unknown" ? "outcome unknown" : "failed"}; backing off 1 h`,
+        errorFields(err)
+      );
       return;
     }
     delete state.listings[key];

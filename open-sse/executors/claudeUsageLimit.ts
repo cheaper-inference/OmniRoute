@@ -18,7 +18,7 @@ import {
   attemptClaudeLimitReset,
   consultClaudeLimitResetPolicy,
   hasClaudeLimitResetPolicy,
-  type ClaudeLimitResetAttempt,
+  type ClaudeLimitResetPolicyVerdict,
 } from "../services/claudeLimitReset.ts";
 import {
   CLAUDE_UNIFIED_HEADERS,
@@ -121,8 +121,9 @@ export class ClaudeUsageLimitGuard {
     if (this.key === null) return false;
     const key = this.key;
     const credentials = input.credentials;
-    // Set by the operator policy when it allows the claim; reports the claim's outcome.
-    let onClaimSettled: ((attempt: ClaudeLimitResetAttempt) => void) | undefined;
+    // The operator policy's verdict: onSettled reports a claim's outcome, release frees a
+    // reservation the attempt never used.
+    let verdict: ClaudeLimitResetPolicyVerdict | null = null;
     const decision = await handleClaudeUsageLimitResponse({
       key,
       config: readClaudeUsageLimitConfig(credentials?.providerSpecificData),
@@ -132,24 +133,32 @@ export class ClaudeUsageLimitGuard {
       waitCeilingMs: this.waitCeilingMs(input.budgetMs),
       limitResetGate: hasClaudeLimitResetPolicy()
         ? async () => {
-            const verdict = await consultClaudeLimitResetPolicy({
+            verdict = await consultClaudeLimitResetPolicy({
               connectionId: credentials?.connectionId ?? null,
               sessionResetAt: readWallSessionResetAt(response.headers),
               now: Date.now(),
             });
-            onClaimSettled = verdict?.onSettled;
             return verdict ? verdict.allow : null;
           }
         : undefined,
-      claimLimitReset: () =>
-        attemptClaudeLimitReset({
+      claimLimitReset: async () => {
+        const attempt = await attemptClaudeLimitReset({
           key,
           connectionId: credentials?.connectionId ?? null,
           accessToken: credentials?.accessToken ?? "",
           providerSpecificData: credentials?.providerSpecificData,
           log: this.log,
-          onSettled: (attempt) => onClaimSettled?.(attempt),
-        }).then((attempt) => attempt.reset),
+          onSettled: (settled) => verdict?.onSettled?.(settled),
+        });
+        // No claim POST (memo, recent reset, a sibling's in-flight claim, not on offer):
+        // onSettled never ran, so free the reservation now instead of holding the caps.
+        try {
+          verdict?.release?.();
+        } catch {
+          // Releasing is best-effort and must never change the attempt's outcome.
+        }
+        return attempt.reset;
+      },
     });
 
     if (decision.kind === "ended") {

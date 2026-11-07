@@ -1,17 +1,17 @@
 /**
  * bankedResetAudit.ts — the audit trail behind "auto-apply banked resets".
  *
- * Every real redemption (success or failure) and every dry-run decision becomes one
- * `bankedReset.redeem` audit row; skip decisions are never written. The rows double as
- * the redemption history: the per-account / per-day caps and the minimum spacing are
- * counted from them, so the limits survive restarts. A successful redemption also fires
- * the `provider.reset_redeemed` webhook.
+ * Every real redemption (success, failure or unknown outcome) and every dry-run decision
+ * becomes one `bankedReset.redeem` audit row; skip decisions are never written. The rows
+ * double as the redemption history: the per-account / per-day caps and the minimum spacing
+ * are counted from them, so the limits survive restarts. A successful redemption also
+ * fires the `provider.reset_redeemed` webhook.
  *
  * Rows carry the connection id, provider, credit type, mode, trigger and reason only —
  * never tokens, emails or upstream credit ids.
  */
 
-import { getAuditLog, logAuditEvent } from "@/lib/compliance/index";
+import { getAuditLog, getAuditLogByActionSince, logAuditEvent } from "@/lib/compliance/index";
 import { notifyWebhookEvent } from "@/lib/webhookDispatcher";
 import type { BankedResetHistory, BankedResetTrigger } from "@/lib/usage/bankedResetPolicy";
 import type {
@@ -24,16 +24,21 @@ export const BANKED_RESET_AUDIT_ACTION = "bankedReset.redeem";
 export const BANKED_RESET_AUDIT_RESOURCE_TYPE = "provider_connection";
 export const BANKED_RESET_WEBHOOK_EVENT: WebhookEvent = "provider.reset_redeemed";
 export const BANKED_RESET_HISTORY_WINDOW_MS = 24 * 60 * 60_000;
-/** Upper bound of rows read to count the caps (getAuditLog caps a page at 500). */
-const BANKED_RESET_HISTORY_READ_LIMIT = 500;
 
-export type BankedResetAuditStatus = "success" | "failed" | "dry-run";
+/**
+ * `unknown`: the redemption request may have been spent upstream without us seeing the
+ * answer (timeout, network failure, 5xx, unreadable success body). It counts toward the
+ * caps like `success`; a definite refusal is `failed` and does not.
+ */
+export type BankedResetAuditStatus = "success" | "failed" | "unknown" | "dry-run";
 
 /** The fields of a `bankedReset.redeem` audit row the caps are counted from. */
 export interface BankedResetAuditRow {
   action?: string | null;
   target?: string | null;
   status?: string | null;
+  /** `details.creditType`; tells the request-path gate's own claims from the job's. */
+  creditType?: string | null;
   timestamp: string;
 }
 
@@ -97,6 +102,33 @@ export function buildBankedResetAuditEntry(outcome: BankedResetOutcome): BankedR
   };
 }
 
+/**
+ * Redemption error codes after which the credit may already be spent upstream. Anything
+ * not listed, and every 4xx, is a definite refusal (already used, no credit, cooldown, a
+ * pre-check) and stays `failed`.
+ */
+const UNKNOWN_OUTCOME_CODES = new Set([
+  // Claude claim POST: timeout, network failure or an unexpected HTTP status.
+  "claim_error",
+  // Thrown, non-HTTP errors wrapped by consume*ResetCredit (timeouts, network failures).
+  "claude_reset_credit_failed",
+  "codex_reset_credit_failed",
+  // Codex consume answered 2xx with a body that names no known outcome.
+  "unknown_reset_credit_response",
+]);
+
+/**
+ * `unknown` when a failed redemption may still have spent the credit, else `failed`. An
+ * error that is not a typed reset-credit error (no string `code`) cannot prove the credit
+ * was not spent, so it is `unknown` too.
+ */
+export function classifyBankedResetFailure(error: unknown): "failed" | "unknown" {
+  const { code, status } = (error ?? {}) as { code?: unknown; status?: unknown };
+  if (typeof code !== "string" || UNKNOWN_OUTCOME_CODES.has(code)) return "unknown";
+  const upstream5xx = code === "codex_reset_credit_upstream_error" && Number(status) >= 500;
+  return upstream5xx ? "unknown" : "failed";
+}
+
 /** Write one audit row; on success also fire the webhook. Never throws. */
 export function recordBankedResetOutcome(outcome: BankedResetOutcome, sinks: BankedResetSinks) {
   try {
@@ -132,7 +164,14 @@ export const BANKED_RESET_RESERVATION_TTL_MS = 10 * 60_000;
 
 export type BankedResetReservationToken = number;
 
-const reservations = new Map<BankedResetReservationToken, { connectionId: string; at: number }>();
+interface BankedResetReservation {
+  connectionId: string;
+  /** Which path holds it: the request-path gate (`claudeSessionReset`) or the job. */
+  creditType: BankedResetCreditType;
+  at: number;
+}
+
+const reservations = new Map<BankedResetReservationToken, BankedResetReservation>();
 let lastReservationToken = 0;
 
 function isReservationLive(at: number, now: number): boolean {
@@ -141,14 +180,33 @@ function isReservationLive(at: number, now: number): boolean {
 
 export function reserveBankedResetSlot(input: {
   connectionId: string;
+  creditType: BankedResetCreditType;
   now: number;
 }): BankedResetReservationToken {
   for (const [token, reservation] of reservations) {
     if (!isReservationLive(reservation.at, input.now)) reservations.delete(token);
   }
   lastReservationToken += 1;
-  reservations.set(lastReservationToken, { connectionId: input.connectionId, at: input.now });
+  reservations.set(lastReservationToken, {
+    connectionId: input.connectionId,
+    creditType: input.creditType,
+    at: input.now,
+  });
   return lastReservationToken;
+}
+
+/** Whether `connectionId` holds a live reservation for `creditType`. */
+export function hasLiveBankedResetSlot(input: {
+  connectionId: string;
+  creditType: BankedResetCreditType;
+  now: number;
+}): boolean {
+  for (const reservation of reservations.values()) {
+    if (reservation.connectionId !== input.connectionId) continue;
+    if (reservation.creditType !== input.creditType) continue;
+    if (isReservationLive(reservation.at, input.now)) return true;
+  }
+  return false;
 }
 
 /** Drop a reservation once its outcome is recorded. Unknown or released tokens are a no-op. */
@@ -168,10 +226,18 @@ function rowMs(row: BankedResetAuditRow): number | null {
   return Number.isFinite(ms) ? ms : null;
 }
 
-/** A row that counts as a redemption: success always, dry-run only while in dry-run mode. */
+/** Statuses whose credit was (or may have been) spent upstream. */
+export function isBankedResetSpentStatus(status: string | null | undefined): boolean {
+  return status === "success" || status === "unknown";
+}
+
+/**
+ * A row that counts as a redemption: success and unknown always (an unknown outcome may
+ * have spent the credit), dry-run only while in dry-run mode.
+ */
 function countsAsRedemption(row: BankedResetAuditRow, mode: BankedResetMode): boolean {
   if (row.action && row.action !== BANKED_RESET_AUDIT_ACTION) return false;
-  return row.status === "success" || (mode === "dry-run" && row.status === "dry-run");
+  return isBankedResetSpentStatus(row.status) || (mode === "dry-run" && row.status === "dry-run");
 }
 
 /**
@@ -226,20 +292,18 @@ export function countBankedResetsToday(
   }).length;
 }
 
-/** `bankedReset.redeem` rows written since `sinceIso`, newest first. */
+/**
+ * Every `bankedReset.redeem` row written since `sinceIso` (an ISO-8601 UTC instant), newest
+ * first. Runs on every Claude wall: an index seek on the exact action, no row cap.
+ */
 export function readBankedResetAuditRows(sinceIso: string): BankedResetAuditRow[] {
-  return getAuditLog({
-    action: BANKED_RESET_AUDIT_ACTION,
-    from: sinceIso,
-    limit: BANKED_RESET_HISTORY_READ_LIMIT,
-  })
-    .filter((entry) => entry.action === BANKED_RESET_AUDIT_ACTION)
-    .map((entry) => ({
-      action: entry.action ?? null,
-      target: entry.target ?? null,
-      status: entry.status,
-      timestamp: entry.timestamp,
-    }));
+  return getAuditLogByActionSince(BANKED_RESET_AUDIT_ACTION, sinceIso).map((entry) => ({
+    action: entry.action ?? null,
+    target: entry.target ?? null,
+    status: entry.status,
+    creditType: detailString(entry.details, "creditType"),
+    timestamp: entry.timestamp,
+  }));
 }
 
 export interface BankedResetHistoryEntry {

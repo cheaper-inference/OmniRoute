@@ -394,7 +394,13 @@ function windowStatus(usedPercentage: number, resetInMs: number | null): WindowS
 function createPolicyHarness(
   feature: Record<string, unknown> | undefined,
   opts: {
-    rows?: { action: string; target: string; status: string; timestamp: string }[];
+    rows?: {
+      action: string;
+      target: string;
+      status: string;
+      timestamp: string;
+      creditType?: string;
+    }[];
     windows?: Record<string, Partial<Record<"session" | "weekly", WindowStatus | null>>>;
     connections?: { id: string; provider: string; authType: string }[];
     failSettings?: boolean;
@@ -518,6 +524,26 @@ test("policy: a failed claim writes a failed row and no webhook", async () => {
   assert.equal(h.webhooks.length, 0);
 });
 
+test("policy: a claim whose outcome is unknown writes an unknown row that counts toward the caps", async () => {
+  // claimClaudeResetCredit answers "error" for a timeout, a network failure or an unexpected
+  // HTTP status: the reset may have been granted without us seeing it.
+  const h = createPolicyHarness(ENABLED);
+  const verdict = await h.policy(WALL);
+  verdict?.onSettled?.({ reset: false, outcome: "error", nextAvailableAt: null });
+  assert.equal(h.audit.length, 1);
+  assert.equal(h.audit[0].status, "unknown");
+  assert.equal((h.audit[0].details as { reason: string }).reason, "error");
+  assert.equal(h.webhooks.length, 0);
+
+  const recent = new Date(NOW - 2 * HOUR_MS).toISOString();
+  const capped = createPolicyHarness(ENABLED, {
+    rows: [
+      { action: "bankedReset.redeem", target: "conn-a", status: "unknown", timestamp: recent },
+    ],
+  });
+  assert.deepEqual(await capped.policy(WALL), { allow: false }, "maxPerAccountPerDay = 1");
+});
+
 test("policy: dry-run never claims but records one dry-run row", async () => {
   const h = createPolicyHarness({ ...ENABLED, mode: "dry-run" });
   const verdict = await h.policy(WALL);
@@ -602,4 +628,227 @@ test("policy: unknown connection or a failing read never claims", async () => {
   assert.deepEqual(await h.policy({ ...WALL, connectionId: null }), { allow: false });
   const failing = createPolicyHarness(ENABLED, { failSettings: true });
   assert.deepEqual(await failing.policy(WALL), { allow: false });
+});
+
+// ── siblings on one account share the claim (no second reservation) ─────────
+
+const SESSION_ROW = {
+  action: "bankedReset.redeem",
+  target: "conn-a",
+  creditType: "claudeSessionReset",
+};
+const liveSlotsAt = (now: number, connectionId = "conn-a") =>
+  bankedResetAudit.summarizeBankedResetHistory([], { connectionId, mode: "eager", now })
+    .accountRedemptions24h;
+
+test("policy: a sibling wall on an account whose claim is in flight shares it — no second slot", async () => {
+  const h = createPolicyHarness(ENABLED);
+  const [first, sibling] = await Promise.all([h.policy(WALL), h.policy(WALL)]);
+  assert.equal(first?.allow, true);
+  assert.equal(typeof first?.onSettled, "function", "the first wall reports the claim");
+  assert.deepEqual(sibling, { allow: true }, "no reservation, no report: it joins the claim");
+  assert.equal(liveSlotsAt(NOW), 1, "exactly one reservation");
+
+  first?.onSettled?.({ reset: true, outcome: "reset", nextAvailableAt: null });
+  assert.equal(h.audit.length, 1);
+  assert.equal(liveSlotsAt(NOW), 0);
+});
+
+test("policy: a success or unknown session-reset row from the last minute lets a sibling ride the memo", async () => {
+  for (const status of ["success", "unknown"]) {
+    const h = createPolicyHarness(ENABLED, {
+      rows: [{ ...SESSION_ROW, status, timestamp: new Date(NOW - 30_000).toISOString() }],
+    });
+    assert.deepEqual(await h.policy(WALL), { allow: true }, status);
+    assert.equal(liveSlotsAt(NOW), 0, `${status}: no new reservation`);
+    assert.equal(h.audit.length, 0);
+  }
+  // Older than the recent-reset window: the caps decide again (maxPerAccountPerDay = 1).
+  const old = createPolicyHarness(ENABLED, {
+    rows: [
+      {
+        ...SESSION_ROW,
+        status: "success",
+        timestamp: new Date(NOW - limitReset.CLAUDE_LIMIT_RESET_RECENT_WINDOW_MS - 1).toISOString(),
+      },
+    ],
+  });
+  assert.deepEqual(await old.policy(WALL), { allow: false });
+});
+
+test("policy: only the gate's own session-reset claims are shared, never in dry-run", async () => {
+  // A banked-grant redemption by the background job sets no request-path memo, so a wall
+  // that rode it would send an unaudited claim.
+  const jobRow = createPolicyHarness(ENABLED, {
+    rows: [
+      {
+        ...SESSION_ROW,
+        creditType: "claudeCredits",
+        status: "success",
+        timestamp: new Date(NOW - 30_000).toISOString(),
+      },
+    ],
+  });
+  assert.deepEqual(await jobRow.policy(WALL), { allow: false });
+
+  const jobSlot = createPolicyHarness(ENABLED);
+  bankedResetAudit.reserveBankedResetSlot({
+    connectionId: "conn-a",
+    creditType: "claudeCredits",
+    now: NOW,
+  });
+  assert.deepEqual(await jobSlot.policy(WALL), { allow: false });
+
+  const dryRun = createPolicyHarness(
+    { ...ENABLED, mode: "dry-run" },
+    {
+      rows: [
+        { ...SESSION_ROW, status: "success", timestamp: new Date(NOW - 30_000).toISOString() },
+      ],
+    }
+  );
+  assert.deepEqual(await dryRun.policy(WALL), { allow: false }, "dry-run never claims");
+});
+
+// ── executor + registered policy: reservations end with the attempt ─────────
+
+/** Register the real src policy, its windows on the real clock (the guard stamps Date.now()). */
+function registerLivePolicy(feature: Record<string, unknown> = ENABLED) {
+  bankedResetAudit._resetBankedResetReservations();
+  const t0 = Date.now();
+  const live = (used: number, resetInMs: number) => ({
+    usedPercentage: used,
+    remainingPercentage: 100 - used,
+    resetAt: new Date(t0 + resetInMs).toISOString(),
+    reachedThreshold: used >= 99,
+  });
+  const windows = { session: live(100, 3 * HOUR_MS), weekly: live(40, 72 * HOUR_MS) };
+  const audit: AuditEntry[] = [];
+  const rows: {
+    action: string;
+    target: string;
+    status: string;
+    creditType: string;
+    timestamp: string;
+  }[] = [];
+  const verdicts: unknown[] = [];
+  const policy = createClaudeSessionResetPolicy({
+    getSettings: async () => ({ bankedResetAutoApply: feature }),
+    getProviderConnections: async () => [],
+    getQuotaWindowStatus: (_id, window) => windows[window],
+    readAuditRows: () => rows,
+    sinks: {
+      logAuditEvent: (entry) => {
+        audit.push(entry);
+        rows.push({
+          action: entry.action,
+          target: entry.target,
+          status: entry.status,
+          creditType: entry.details.creditType,
+          timestamp: new Date().toISOString(),
+        });
+      },
+      notifyWebhookEvent: () => undefined,
+    },
+  });
+  limitReset.setClaudeLimitResetPolicy(async (input) => {
+    const verdict = await policy(input);
+    verdicts.push(verdict);
+    return verdict;
+  });
+  return { audit, verdicts };
+}
+
+async function liveGuardWall(credentials: Record<string, unknown> = CREDENTIALS): Promise<boolean> {
+  const resetSeconds = Math.floor((Date.now() + 3 * HOUR_MS) / 1000);
+  const headers = new Headers(
+    wall429Headers({ "anthropic-ratelimit-unified-reset": String(resetSeconds) })
+  );
+  const guard = new ClaudeUsageLimitGuard("claude", null);
+  guard.applyHeader({}, credentials);
+  return guard.shouldRetry({ status: 429, headers }, "https://api.anthropic.com/v1/messages", {
+    credentials,
+    sentSlow: false,
+  });
+}
+
+function upstreamFetch(opts: { status: number; body?: unknown }) {
+  const calls: { url: string; method: string }[] = [];
+  const fetchImpl = (async (input: unknown, init: RequestInit = {}) => {
+    const url = String(input);
+    calls.push({ url, method: init.method ?? "GET" });
+    if (!url.startsWith(limitReset.CLAUDE_LIMIT_RESET_STATUS_URL)) {
+      throw new Error(`unexpected fetch ${url}`);
+    }
+    return new Response(JSON.stringify(opts.body ?? {}), {
+      status: opts.status,
+      headers: { "Content-Type": "application/json" },
+    });
+  }) as typeof fetch;
+  return { calls, fetchImpl };
+}
+
+test("guard: an allowed wall that sends no claim releases its reservation and writes no row", async () => {
+  const offered = { juniper_tide: { eligible: true, arm: "reset", available: true } };
+  const cases = [
+    { name: "not_offered", fetch: { status: 200, body: { juniper_tide: { eligible: false } } } },
+    { name: "no_status", fetch: { status: 500 } },
+    // Reset on offer, but no organization UUID and the bootstrap lookup fails.
+    { name: "no_organization", fetch: { status: 200, body: offered }, noOrg: true },
+  ];
+  for (const c of cases) {
+    limitReset._resetClaudeLimitResetMemo();
+    const h = registerLivePolicy();
+    const { calls, fetchImpl } = upstreamFetch(c.fetch);
+    const credentials = c.noOrg ? { ...CREDENTIALS, providerSpecificData: {} } : CREDENTIALS;
+    const retry = await withFetch(fetchImpl, () => liveGuardWall(credentials));
+    assert.equal(retry, false, c.name);
+    assert.equal((h.verdicts[0] as { allow?: boolean })?.allow, true, `${c.name}: gate allowed`);
+    assert.equal(calls.filter((call) => call.method === "POST").length, 0, c.name);
+    assert.equal(liveSlotsAt(Date.now()), 0, `${c.name}: reservation released`);
+    assert.equal(h.audit.length, 0, `${c.name}: no row for a claim never sent`);
+
+    // The memo now answers the next wall without any request: still nothing held.
+    const memo = upstreamFetch(c.fetch);
+    assert.equal(await withFetch(memo.fetchImpl, () => liveGuardWall(credentials)), false);
+    assert.equal(memo.calls.length, 0, `${c.name}: memo_skip`);
+    assert.equal(liveSlotsAt(Date.now()), 0, `${c.name}: memo_skip released too`);
+    assert.equal(h.audit.length, 0);
+  }
+});
+
+test("guard: two concurrent walls on one account → both retry, one reservation, one claim", async () => {
+  const h = registerLivePolicy();
+  const calls: { url: string; method: string }[] = [];
+  const slotsDuringClaim: number[] = [];
+  const fetchImpl = (async (input: unknown, init: RequestInit = {}) => {
+    const url = String(input);
+    calls.push({ url, method: init.method ?? "GET" });
+    if (url.startsWith(limitReset.CLAUDE_LIMIT_RESET_STATUS_URL)) {
+      return Response.json({ juniper_tide: { eligible: true, arm: "reset", available: true } });
+    }
+    if (url.startsWith(CLAIM_PREFIX)) {
+      slotsDuringClaim.push(liveSlotsAt(Date.now()));
+      return Response.json({ result: "reset", next_available_at: "2099-01-01T00:00:00Z" });
+    }
+    throw new Error(`unexpected fetch ${url}`);
+  }) as typeof fetch;
+
+  const retries = await withFetch(fetchImpl, () => Promise.all([liveGuardWall(), liveGuardWall()]));
+  assert.deepEqual(retries, [true, true], "both walls are lifted by the one claim");
+  assert.deepEqual(
+    h.verdicts.map((v) => (v as { allow?: boolean })?.allow),
+    [true, true]
+  );
+  assert.equal(calls.filter((call) => call.method === "POST").length, 1, "exactly one claim");
+  assert.deepEqual(slotsDuringClaim, [1], "exactly one reservation while it was in flight");
+  assert.equal(h.audit.length, 1);
+  assert.equal(h.audit[0].status, "success");
+  assert.equal(liveSlotsAt(Date.now()), 0);
+
+  // A third wall right after rides the recent-reset memo: allowed, no new claim.
+  assert.equal(await withFetch(fetchImpl, () => liveGuardWall()), true);
+  assert.equal(calls.filter((call) => call.method === "POST").length, 1);
+  assert.equal(h.audit.length, 1);
+  assert.equal(liveSlotsAt(Date.now()), 0);
 });

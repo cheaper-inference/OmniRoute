@@ -631,6 +631,34 @@ export function getAuditLog(filter: AuditLogFilter = {}): AuditLogEntry[] {
   return rows.map((row) => normalizeAuditLogRow(row));
 }
 
+/**
+ * Every row of one exact `action` written at or after `sinceIso`, newest first — no page
+ * cap. For reads on a hot path (the banked-reset caps run on every Claude usage wall):
+ * the equality seek on idx_audit_action touches only that action's rows, where
+ * getAuditLog's LIKE / datetime() filters scan the table. INDEXED BY pins the index so
+ * ANALYZE statistics cannot switch the plan to a scan of the day's timestamp range.
+ *
+ * `timestamp` is compared as text: logAuditEvent stamps `new Date().toISOString()`
+ * (ISO-8601 UTC, which sorts lexically) unless a caller passes `createdAt`. Pass
+ * `sinceIso` in that same format, and only use this for actions written without
+ * `createdAt`.
+ */
+export function getAuditLogByActionSince(action: string, sinceIso: string): AuditLogEntry[] {
+  const db = getDb();
+  if (!db) return [];
+
+  ensureAuditLogSchema(db);
+  const rows = db
+    .prepare(
+      `SELECT * FROM audit_log INDEXED BY idx_audit_action
+       WHERE action = ? AND timestamp >= ?
+       ORDER BY timestamp DESC, id DESC`
+    )
+    .all(action, sinceIso) as AuditLogRow[];
+
+  return rows.map((row) => normalizeAuditLogRow(row));
+}
+
 export function countAuditLog(filter: AuditLogFilter = {}) {
   const db = getDb();
   if (!db) return 0;
