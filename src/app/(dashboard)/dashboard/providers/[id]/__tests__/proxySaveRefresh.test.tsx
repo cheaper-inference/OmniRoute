@@ -58,7 +58,7 @@ vi.mock("@/shared/components", async () => {
 
 const CONNECTION_ID = "conn-proxy-refresh";
 
-/** What `GET /api/settings/proxy?resolve=<id>` currently reports. */
+/** What `GET /api/settings/proxy?resolveIds=<ids>` currently reports. */
 let resolvedProxy: { name: string; host: string } | null = null;
 
 const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
@@ -71,8 +71,16 @@ const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
     headers: { get: () => "application/json" },
   });
 
-  if (url.startsWith("/api/settings/proxy?resolve=")) {
-    return json(resolvedProxy ? { proxy: resolvedProxy, level: "account" } : { proxy: null });
+  if (url.startsWith("/api/settings/proxy?resolveIds=")) {
+    const ids = new URLSearchParams(url.split("?")[1])
+      .get("resolveIds")!
+      .split(",")
+      .filter(Boolean);
+    return json({
+      results: Object.fromEntries(
+        ids.map((id) => [id, resolvedProxy ? { proxy: resolvedProxy, level: "account" } : null])
+      ),
+    });
   }
   if (url.startsWith("/api/settings/proxy")) {
     return json({ global: null, providers: {} });
@@ -92,7 +100,7 @@ vi.stubGlobal("fetch", fetchMock);
 
 function resolveCallCount() {
   return fetchMock.mock.calls.filter((call) =>
-    String(call[0]).startsWith("/api/settings/proxy?resolve=")
+    String(call[0]).startsWith("/api/settings/proxy?resolveIds=")
   ).length;
 }
 

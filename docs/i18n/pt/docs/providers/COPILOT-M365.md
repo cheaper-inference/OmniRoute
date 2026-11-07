@@ -65,38 +65,37 @@ importação do HAR descodifica a validade do JWT e apresenta o tempo de vida re
 > **Nunca faça commit de uma exportação HAR real, de um token de acesso ou de um token de atualização.** Os valores de teste e
 > de documentação devem ser sempre marcadores de posição.
 
-## Duração e atualização do token
+## Duração do token e atualização
 
-O `access_token` tem uma duração curta (normalmente **~75 minutos**). Após expirar, o fornecedor
-comunica um erro de ligação e terá de obter novamente a credencial.
+O `access_token` tem uma duração curta (normalmente **~75 minutos**). Sem um token
+de atualização utilizável, tem de voltar a capturar a credencial após a expiração.
 
 ### Atualização automática com `refreshToken`
 
-Para evitar ter de obter novamente a credencial de forma manual, pode guardar um token de atualização da Microsoft em
-**Advanced Settings → providerSpecificData** da ligação:
-
-| Campo          | Descrição                                                                           |
-| -------------- | ----------------------------------------------------------------------------------- |
-| `refreshToken` | Token de atualização OAuth da Microsoft para o âmbito `substrate.office.com/sydney` |
-| `tier`         | `individual` (predefinição), `edu` ou `enterprise`                                  |
+Na caixa de diálogo **Adicionar ligação** ou **Editar ligação** do fornecedor Microsoft 365, abra
+**Definições avançadas → Token de atualização (opcional)**. Cole um token de atualização OAuth da Microsoft
+com o âmbito `substrate.office.com/sydney` e guarde. O campo de entrada está mascarado e nunca é
+preenchido previamente com o token armazenado. Ao editar, deixe-o em branco para manter o token existente;
+cole um novo token para o substituir.
 
 Obtenha o token de atualização através de um fluxo de código de dispositivo ou de código de autorização da Microsoft
-com o âmbito `substrate.office.com/sydney`. Com `refreshToken` definido, o OmniRoute
-atualiza preventivamente o `access_token` antes de cada pedido, pelo que não necessita de
-voltar a obter a credencial após cada expiração de ~75 minutos.
+com o âmbito `substrate.office.com/sydney`; o dashboard não o obtém por si. Com um token de atualização configurado,
+o OmniRoute verifica o `access_token` antes dos pedidos e atualiza-o apenas quando é necessário. Uma atualização
+bem-sucedida também guarda o token de atualização rodado, evitando a captura manual enquanto o token de atualização
+continuar válido.
 
-Se `refreshToken` não estiver definido, terá de voltar a obter manualmente a credencial WebSocket
+Se `refreshToken` não estiver definido, tem de voltar a capturar manualmente a credencial WebSocket
 após cada expiração.
 
 ### Seleção do nível
 
-| Nível        | Alias            | Modalidade                     |
-| ------------ | ---------------- | ------------------------------ |
-| `individual` | _(predefinição)_ | M365 Copilot para consumidores |
-| `edu`        | `included`       | M365 Copilot para Educação     |
-| `enterprise` | `work`           | M365 Copilot para Trabalho     |
+| Nível        | Alias           | Superfície                     |
+| ------------ | --------------- | ------------------------------ |
+| `individual` | _(predefinido)_ | Copilot M365 para consumidores |
+| `edu`        | `included`      | Copilot M365 para educação     |
+| `enterprise` | `work`          | Copilot M365 para empresas     |
 
-Defina o nível em **Advanced Settings → providerSpecificData → tier**. O nível afeta
+Defina o nível em **Definições avançadas → Nível do Copilot**. O nível afeta
 o encaminhamento do BizChat e o acesso aos modelos.
 
 ## Modelo de segurança
@@ -114,28 +113,25 @@ o encaminhamento do BizChat e o acesso aos modelos.
 
 ### A autenticação falha imediatamente
 
-- Verifique se copiou a partir do **URL do WebSocket**, e não de um pedido XHR/Fetch. A
-  credencial encontra-se no parâmetro de consulta `access_token` da ligação WebSocket
-  do Chathub — não num cabeçalho `Authorization: Bearer`.
-- Certifique-se de que `chathubPath` inclui o segmento `<oid>@<tenant>` completo do caminho
-  do URL.
+- Verifique se copiou do **URL do WebSocket**, e não de um pedido XHR/Fetch. A
+  credencial está no parâmetro de consulta `access_token` da ligação WebSocket do Chathub
+  — não num cabeçalho `Authorization: Bearer`.
+- Certifique-se de que `chathubPath` inclui o segmento completo `<oid>@<tenant>` do caminho do URL.
 
-### O token expira após ~75 minutos
+### O token expira após cerca de 75 minutos
 
 Isto é esperado. Sem um `refreshToken`, o token de acesso tem uma duração curta. Pode:
 
-- Voltar a obter a credencial a partir das DevTools; ou
-- Configurar um `refreshToken` nas Definições avançadas para a atualização automática.
+- Capturar novamente a credencial nas Ferramentas de Programador, ou
+- Configurar **Definições avançadas → Token de atualização (opcional)** na caixa de diálogo Adicionar ou Editar ligação para uma atualização automática.
 
 ### O teste de ligação é bem-sucedido, mas o chat devolve 401
 
-O token poderá ter expirado entre a validação e o primeiro pedido. Volte a obter uma
-credencial válida.
+O token pode ter expirado entre a validação e o primeiro pedido. Capture novamente uma credencial atualizada.
 
 ### O Copilot não aparece na lista de fornecedores
 
-Certifique-se de que `copilot-m365-web` está ativado em **Painel → Fornecedores**. O fornecedor poderá
-estar oculto por predefinição em alguns níveis.
+Certifique-se de que `copilot-m365-web` está ativado em **Painel → Fornecedores**. O fornecedor pode estar oculto por predefinição em alguns escalões.
 
 ## Referências
 

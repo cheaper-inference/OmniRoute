@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Card from "@/shared/components/Card";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
@@ -55,6 +56,11 @@ function formatAutoRefreshCountdown(ms: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function RefreshGlyph({ refreshing, scheduled }: { refreshing: boolean; scheduled: boolean }) {
+  if (refreshing) return <Spinner decorative size="sm" />;
+  return <Icon name={scheduled ? "schedule" : "refresh"} size={16} />;
 }
 
 function QuotaRow({ quota }: { quota: any }) {
@@ -297,11 +303,7 @@ export default function ProviderQuotaWidget({
           disabled={loading || refreshingAll}
           className="gap-1.5 text-xs"
         >
-          <Icon
-            name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"}
-            size={16}
-            className={refreshingAll ? "animate-spin" : undefined}
-          />
+          <RefreshGlyph refreshing={refreshingAll} scheduled={autoRefreshIntervalMs > 0} />
           {refreshingAll
             ? tr("refreshing", "Refreshing")
             : autoRefreshIntervalMs > 0
@@ -313,8 +315,8 @@ export default function ProviderQuotaWidget({
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 px-4 py-8 text-sm text-text-muted">
-          <Icon name="progress_activity" size={16} className="animate-spin" />
+        <div role="status" className="flex items-center gap-2 px-4 py-8 text-sm text-text-muted">
+          <Spinner decorative size="sm" />
           {tr("loadingQuotas", "Loading...")}
         </div>
       ) : providerGroups.length === 0 ? (
