@@ -100,6 +100,7 @@ export default function ProviderDetailPageClient() {
   const [importCodexModalOpen, setImportCodexModalOpen] = useState(false);
   const [codexCliGuideOpen, setCodexCliGuideOpen] = useState(false);
   const [importClaudeModalOpen, setImportClaudeModalOpen] = useState(false);
+  const [importAgyModalOpen, setImportAgyModalOpen] = useState(false);
   const [importGeminiModalOpen, setImportGeminiModalOpen] = useState(false);
   const [importGrokCliModalOpen, setImportGrokCliModalOpen] = useState(false);
   const [connectingVolcengineAccount, setConnectingVolcengineAccount] = useState(false);
@@ -151,7 +152,7 @@ export default function ProviderDetailPageClient() {
     setBatchDeleteConfirmOpen,
     setBatchTestResults,
     setProviderNode,
-    fetchConnections,
+    fetchConnections: fetchConnectionsWithResult,
     refreshProxyState,
     deleteConfirm,
     handleUpdateConnectionStatus,
@@ -181,6 +182,9 @@ export default function ProviderDetailPageClient() {
     getAttachmentFilename,
     PAGE_SIZE,
   } = useProviderConnections(providerId, isCompatible, isSearchProvider);
+  const fetchConnections = useCallback(async () => {
+    await fetchConnectionsWithResult();
+  }, [fetchConnectionsWithResult]);
 
   const {
     codexGlobalServiceMode,
@@ -220,8 +224,15 @@ export default function ProviderDetailPageClient() {
   const {
     quotaByConnectionId,
     refreshingIds: quotaRefreshingIds,
+    refreshStates: quotaRefreshStates,
     refreshConnection,
-  } = useProviderQuota();
+  } = useProviderQuota({
+    providerId,
+    connectionIds: connections
+      .map((connection) => connection.id)
+      .filter((id): id is string => !!id),
+    refreshConnections: providerId === "codex" ? fetchConnectionsWithResult : undefined,
+  });
   const handleRefreshQuota = useCallback(
     (connectionId: string) => {
       void refreshConnection(connectionId);
@@ -688,6 +699,7 @@ export default function ProviderDetailPageClient() {
             onOpenCodexCliGuide={() => setCodexCliGuideOpen(true)}
             onOpenImportCodex={() => setImportCodexModalOpen(true)}
             onOpenImportClaude={() => setImportClaudeModalOpen(true)}
+            onOpenImportAgy={() => setImportAgyModalOpen(true)}
             onOpenImportGemini={() => setImportGeminiModalOpen(true)}
             onOpenImportGrokCli={() => setImportGrokCliModalOpen(true)}
             t={t}
@@ -709,6 +721,7 @@ export default function ProviderDetailPageClient() {
               onOpenOAuthModal={() => setShowOAuthModal(true)}
               onOpenImportCodex={() => setImportCodexModalOpen(true)}
               onOpenImportClaude={() => setImportClaudeModalOpen(true)}
+              onOpenImportAgy={() => setImportAgyModalOpen(true)}
               onOpenImportGemini={() => setImportGeminiModalOpen(true)}
               onOpenImportGrokCli={() => setImportGrokCliModalOpen(true)}
               t={t}
@@ -777,6 +790,7 @@ export default function ProviderDetailPageClient() {
                 cpaProviderEnabled={cpaProviderEnabled}
                 quotaByConnectionId={quotaByConnectionId}
                 quotaRefreshingIds={quotaRefreshingIds}
+                quotaRefreshStates={quotaRefreshStates}
                 handleRefreshQuota={handleRefreshQuota}
                 onOpenEditModal={(conn) => {
                   setSelectedConnection(conn);
@@ -956,6 +970,8 @@ export default function ProviderDetailPageClient() {
         handleApplyClaudeAuthLocal={handleApplyClaudeAuthLocal}
         importClaudeModalOpen={importClaudeModalOpen}
         setImportClaudeModalOpen={setImportClaudeModalOpen}
+        importAgyModalOpen={importAgyModalOpen}
+        setImportAgyModalOpen={setImportAgyModalOpen}
         importGrokCliModalOpen={importGrokCliModalOpen}
         setImportGrokCliModalOpen={setImportGrokCliModalOpen}
         batchTestResults={batchTestResults}
