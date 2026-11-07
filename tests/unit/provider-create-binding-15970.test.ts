@@ -35,6 +35,25 @@ test.beforeEach(() => {
   fs.mkdirSync(dataDir, { recursive: true });
   fetchCalls.length = 0;
 });
+test.afterEach(async (t) => {
+  const created = await connections.getProviderConnections();
+  for (const connection of created) {
+    // POST starts inactive and validates in the background. Its DNS lookup can
+    // outlive post()'s observation window, so do not reset the next test's fetch
+    // counter or database until this connection's validation has activated it.
+    // Unsupported probes (the Cloudflare fixture) also activate only on completion.
+    await t.waitFor(
+      async () => {
+        const validated = await connections.getProviderConnectionById(String(connection.id));
+        assert.equal(validated?.isActive, true, "background credential validation must finish");
+      },
+      { timeout: 5000, interval: 10 }
+    );
+  }
+  if (created.length > 0) {
+    assert.equal(fetchCalls.length, created.length, "each created connection must be probed once");
+  }
+});
 test.after(async () => {
   await new Promise<void>((resolve) => setTimeout(resolve, 20));
   core.resetDbInstance();
