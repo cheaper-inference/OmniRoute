@@ -82,7 +82,6 @@ function partText(rawPart: unknown, imageRefs: string[]): string {
 function historyPrompt(messages: readonly unknown[]): M365TurnInput {
   const parts: string[] = [];
   const imageRefs: string[] = [];
-  let size = 0;
   for (const raw of messages) {
     const message = record(raw);
     let content = typeof message.content === "string" ? message.content : "";
@@ -95,13 +94,6 @@ function historyPrompt(messages: readonly unknown[]): M365TurnInput {
       (Array.isArray(message.tool_calls)
         ? `\n[assistant tool_calls]\n${JSON.stringify(message.tool_calls)}`
         : "");
-    size += item.length;
-    if (size > M365_MAX_TEXT_LENGTH || parts.length >= 256)
-      throw new M365ExecutorError(
-        400,
-        "m365_input_too_large",
-        "Microsoft 365 Copilot input exceeded the size limit."
-      );
     if (content || Array.isArray(message.tool_calls)) parts.push(item);
   }
   return { text: parts.join("\n\n"), imageRefs };
@@ -250,12 +242,6 @@ export class CopilotM365WebExecutor extends BaseExecutor {
       const toolOptions = { toolChoice, parallelToolCalls: body.parallel_tool_calls !== false };
       const instructions = buildM365ToolInstructions(tools, toolOptions);
       const prompt = [instructions, history.text].filter(Boolean).join("\n\n");
-      if (prompt.length > M365_MAX_TEXT_LENGTH)
-        throw new M365ExecutorError(
-          400,
-          "m365_input_too_large",
-          "Microsoft 365 Copilot input exceeded the size limit."
-        );
       await prepareM365Credentials(input);
       const params = resolveConnectionParams(input.credentials);
       if ("error" in params) throw new M365ExecutorError(400, "invalid_credentials", params.error);
@@ -278,6 +264,14 @@ export class CopilotM365WebExecutor extends BaseExecutor {
       // One upstream turn: continue `resume` with only the new messages, or open a fresh
       // conversation with the whole history.
       const turnFor = (resume: M365ConversationClaim | null) => {
+        // The limit is on what this turn sends: a long conversation continues with its delta.
+        const text = resume ? (delta?.text ?? "") : prompt;
+        if (text.length > M365_MAX_TEXT_LENGTH)
+          throw new M365ExecutorError(
+            400,
+            "m365_input_too_large",
+            "Microsoft 365 Copilot input exceeded the size limit."
+          );
         const url = new URL(
           buildWsUrl(
             {
@@ -297,7 +291,7 @@ export class CopilotM365WebExecutor extends BaseExecutor {
         const invocation = (messageAnnotations: readonly M365ImageAnnotation[]) =>
           buildChatInvocation({
             ...profile,
-            text: resume ? (delta?.text ?? "") : prompt,
+            text,
             traceId: crypto.randomUUID(),
             sessionId: ids.sessionId,
             requestId: url.searchParams.get("chatsessionid")!,
@@ -411,10 +405,12 @@ export class CopilotM365WebExecutor extends BaseExecutor {
           // A content-less InternalError is a turn Copilot dropped, and the conversation it
           // happened in tends to stay broken: re-send the whole request once, in a fresh one.
           // A failed conversation is never committed back, so later requests start fresh too.
+          // A history too long to re-send keeps this failure, not a refusal of the request.
           if (
             !(error instanceof M365TurnError) ||
             error.code !== "M365_INTERNAL_ERROR" ||
-            published
+            published ||
+            prompt.length > M365_MAX_TEXT_LENGTH
           )
             throw error;
           input.log?.info?.(

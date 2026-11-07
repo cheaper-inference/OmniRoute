@@ -158,6 +158,9 @@ standalone proxy's
 Aliases such as `auto`, `quick`, `think-deeper`, and version aliases are also registered.
 The existing `copilot-m365`, `copilot-m365-claude-opus`,
 `copilot-m365-gpt-5-6-reasoning` and `copilot-m365-gpt-5-5-chat` remain valid.
+The documented IDs need the provider prefix (`copilot-m365-web/claude-opus` or
+`m365copilot/claude-opus`): many are generic words or other vendors' model names, so a bare
+`claude-opus` keeps routing as it does without this provider.
 Registration is not a promise that Microsoft serves that model to every account. The
 standalone IDs follow the public [protocol catalog](https://github.com/cramt/m365-copilot-proxy/blob/main/packages/core/src/copilot.ts)
 (the exported model-to-tone map and its model-aware scenario metadata). All native profiles retain

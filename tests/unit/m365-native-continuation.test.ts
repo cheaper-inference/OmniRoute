@@ -290,6 +290,83 @@ async function withUploads(fn: (conversations: string[]) => Promise<void>) {
   }
 }
 
+const errorCode = async (response: Response) =>
+  ((await response.json()) as { error: { code: string } }).error.code;
+
+test("a long history starts fresh: the message count alone is no limit", async () => {
+  await run([ok("done")], async (exec) => {
+    const messages = Array.from({ length: 261 }, (_, index) => user(`message ${index}`));
+    const { response } = await exec.execute(request(messages));
+    assert.equal(response.status, 200);
+    assert.match(sockets[0].args.message.text, /message 0\n[^]*message 260$/);
+  });
+});
+
+test("a conversation past the size limit continues: only its new messages are sent", async () => {
+  await run([ok("first"), ok("second")], async (exec) => {
+    const opening = [user("a".repeat(900_000))];
+    await exec.execute(request(opening));
+    const follow = [...opening, assistant("first"), user("b".repeat(200_000))];
+    const { response } = await exec.execute(request(follow));
+    assert.equal(response.status, 200);
+    assert.equal(sockets[1].args.isStartOfSession, false);
+    assert.equal(sockets[1].query.get("ConversationId"), sockets[0].query.get("ConversationId"));
+    assert.ok(sockets[1].args.message.text.length < 300_000);
+  });
+});
+
+test("a long agent loop keeps continuing past 128 round trips", async () => {
+  const rounds = 140;
+  const script = Array.from({ length: rounds }, (_, index) => ok(`reply ${index}`));
+  await run(script, async (exec) => {
+    const messages: Frame[] = [];
+    for (let index = 0; index < rounds; index++) {
+      messages.push(user(`step ${index}`));
+      const { response } = await exec.execute(request(messages));
+      assert.equal(response.status, 200, `round ${index}`);
+      messages.push(assistant(await text(response)));
+    }
+    assert.equal(sockets.at(-1)?.args.isStartOfSession, false);
+    assert.equal(
+      sockets.at(-1)?.query.get("ConversationId"),
+      sockets[0].query.get("ConversationId")
+    );
+  });
+});
+
+test("a fresh turn over the size limit is refused before any connection", async () => {
+  await run([], async (exec) => {
+    const { response } = await exec.execute(request([user("a".repeat(1_000_001))]));
+    assert.equal(response.status, 400);
+    assert.equal(await errorCode(response), "m365_input_too_large");
+    assert.equal(sockets.length, 0);
+  });
+});
+
+test("new messages over the size limit are refused, even in a continued conversation", async () => {
+  await run([ok("first")], async (exec) => {
+    const opening = [user("open")];
+    await exec.execute(request(opening));
+    const follow = [...opening, assistant("first"), user("b".repeat(1_000_001))];
+    const { response } = await exec.execute(request(follow));
+    assert.equal(response.status, 400);
+    assert.equal(await errorCode(response), "m365_input_too_large");
+    assert.equal(sockets.length, 1);
+  });
+});
+
+test("an InternalError with no room for a fresh retry reports the dropped turn", async () => {
+  await run([ok("first"), internalError], async (exec) => {
+    const opening = [user("a".repeat(900_000))];
+    await exec.execute(request(opening));
+    const follow = [...opening, assistant("first"), user("b".repeat(200_000))];
+    const { response } = await exec.execute(request(follow));
+    assert.equal(response.status, 502);
+    assert.equal(await errorCode(response), "m365_internal_error");
+    assert.equal(sockets.length, 2);
+  });
+});
+
 test("a follow-up uploads only its new image, into the continued conversation", async () => {
   await withUploads(async (uploads) => {
     await run([ok("answer one"), ok("answer two")], async (exec) => {

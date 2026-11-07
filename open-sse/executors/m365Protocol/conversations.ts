@@ -9,7 +9,7 @@
  *
  * A request continues a conversation only when all of these hold:
  * - its messages up to our reply hash to the exact history that conversation was sent
- *   (a sha256 chain over role and content, so any edit breaks it);
+ *   (a sha256 chain over role, content and image references, so any edit breaks it);
  * - the message after that history is our reply: the tool-call ids we issued, or the same
  *   text up to whitespace (so two sessions with the same opener never swap conversations);
  * - something follows our reply, the conversation is not idle-expired and has room left under
@@ -70,6 +70,19 @@ function messageText(content: unknown): string {
     .join("\n");
 }
 
+/** A message's content for the history hash: its text, plus where each image part points. */
+function contentIdentity(content: unknown): string {
+  if (!Array.isArray(content)) return messageText(content);
+  return content
+    .map((part) => {
+      const p = record(part);
+      if (typeof p.text === "string") return p.text;
+      const image = typeof p.image_url === "string" ? p.image_url : record(p.image_url).url;
+      return typeof image === "string" ? `\0image\0${image}` : "";
+    })
+    .join("\n");
+}
+
 function toolCallIds(message: JsonRecord): string[] {
   return Array.isArray(message.tool_calls)
     ? message.tool_calls.map((call) => String(record(call).id ?? ""))
@@ -101,7 +114,7 @@ function echoedFingerprint(message: JsonRecord): string | null {
 function canonical(message: JsonRecord): string {
   return JSON.stringify([
     typeof message.role === "string" ? message.role : "",
-    messageText(message.content),
+    contentIdentity(message.content),
     Array.isArray(message.tool_calls)
       ? message.tool_calls.map((raw) => {
           const call = record(raw);

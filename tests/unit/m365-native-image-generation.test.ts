@@ -230,6 +230,28 @@ test("a used-up image budget is a 429 and no token is minted", async () => {
   );
 });
 
+/** A turn Copilot ended with this result instead of an answer. */
+const ended = (value: string): Frame[] => [
+  { type: 2, item: { result: { value } } },
+  { type: 3, invocationId: "0" },
+];
+
+for (const [value, status] of [
+  ["Throttled", 429],
+  ["OutOfCredits", 429],
+  ["InvalidCopilotLicense", 403],
+  ["Disengaged", 400],
+] as const) {
+  test(`an image turn ending in ${value} keeps its ${status}, as the chat path does`, async () => {
+    await run([ended(value)], async (seen) => {
+      const result = await generate(seen, { prompt: "a fox" });
+      assert.deepEqual([result.success, !result.success && result.status], [false, status]);
+      assert.equal(seen.logs.at(-1)?.status, status);
+      assert.equal(seen.tokenScopes.length, 0);
+    });
+  });
+}
+
 test("an image announced anywhere but the Designer host is not fetched with the token", async () => {
   await run([drawn("https://evil.example/steal")], async (seen) => {
     const result = await generate(seen, { prompt: "a fox" });

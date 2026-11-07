@@ -2675,7 +2675,7 @@ export async function markAccountUnavailable(
       if (fallbackResult.ruleScope === "connection") {
         await updateProviderConnection(connectionId, {
           lastErrorType: fallbackResult.reason,
-          lastError: "M365 account throttled",
+          lastError: status === 403 ? "M365 account not licensed" : "M365 account throttled",
           lastErrorAt: new Date().toISOString(),
           errorCode: status,
           rateLimitedUntil: getUnavailableUntil(cooldownMs),

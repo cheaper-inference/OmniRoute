@@ -68,9 +68,12 @@ export const copilot_m365_webProvider: RegistryEntry = {
       supportsVision: true,
     },
     // Static documented routes, available to list for every account. Microsoft decides entitlement.
+    // Ids like `quick` or `claude-opus` are route labels here, so they must not capture bare
+    // requests meant for other providers.
     ...Object.keys(M365_DOCUMENTED_MODELS).map((id) => ({
       id,
       name: MODEL_DISPLAY_NAMES[id],
+      requiresProviderPrefix: true,
       toolCalling: true,
       supportsVision: true,
     })),

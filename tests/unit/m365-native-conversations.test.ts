@@ -49,6 +49,41 @@ test("a history edited before the reply does not continue", () => {
   assert.equal(s.claim(scope, [user("edited"), assistant("r"), user("x")]), null);
 });
 
+const withImage = (url: string) => ({
+  role: "user",
+  content: [
+    { type: "text", text: "what is this?" },
+    { type: "image_url", image_url: { url } },
+  ],
+});
+
+test("a history whose earlier image changed does not continue, even with the same text", () => {
+  const { s } = store();
+  const sent = withImage("https://example.com/one.png");
+  s.commit(scope, [sent], ids, m365ReplyFingerprint({ text: "r", calls: [] }), 0);
+  const edited = withImage("https://example.com/two.png");
+  assert.equal(s.claim(scope, [edited, assistant("r"), user("x")]), null);
+  assert.ok(s.claim(scope, [sent, assistant("r"), user("x")]));
+});
+
+test("an image in either Responses or Chat shape counts, and so does its removal", () => {
+  const { s } = store();
+  const sent = {
+    role: "user",
+    content: [{ type: "input_image", image_url: "https://example.com/one.png" }],
+  };
+  s.commit(scope, [sent], ids, m365ReplyFingerprint({ text: "r", calls: [] }), 0);
+  assert.equal(s.claim(scope, [{ role: "user", content: [] }, assistant("r"), user("x")]), null);
+  assert.ok(s.claim(scope, [sent, assistant("r"), user("x")]));
+});
+
+test("text sent as a string or as a text part is the same history", () => {
+  const { s } = store();
+  s.commit(scope, [user("open")], ids, m365ReplyFingerprint({ text: "r", calls: [] }), 0);
+  const parts = { role: "user", content: [{ type: "text", text: "open" }] };
+  assert.ok(s.claim(scope, [parts, assistant("r"), user("x")]));
+});
+
 test("a different reply in the client history does not continue (same opener, other session)", () => {
   const { s } = store();
   s.commit(

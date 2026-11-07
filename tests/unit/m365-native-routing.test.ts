@@ -13,6 +13,9 @@ const fallback = await import("../../open-sse/services/accountFallback.ts");
 const semaphore = await import("../../open-sse/services/accountSemaphore.ts");
 const admission = await import("../../open-sse/handlers/chatCore/executorHelpers.ts");
 const { classifyProviderError } = await import("../../open-sse/services/errorClassifier.ts");
+const { getModelInfoCore, isKnownCatalogModelId } =
+  await import("../../open-sse/services/model.ts");
+const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
 const { runProviderExecutionPipeline } =
   await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
 const { shouldSkipCredentialRefresh } =
@@ -45,6 +48,43 @@ test.after(() => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test("the generic documented ids do not claim bare routing for other providers", async () => {
+  // Measured before this guard: `quick` and `claude-sonnet` resolved to copilot-m365-web with no
+  // connection, `claude` turned ambiguous, and `claude-opus` lost the Anthropic fallback.
+  for (const bare of ["quick", "claude-sonnet", "claude-opus-5.5"]) {
+    assert.equal(isKnownCatalogModelId(bare), false, bare);
+    const resolved = await getModelInfoCore(bare, {});
+    assert.equal(resolved.provider, null, bare);
+    assert.equal(resolved.errorType, "model_not_found", bare);
+  }
+  assert.equal((await getModelInfoCore("claude", {})).provider, "pollinations");
+  assert.equal((await getModelInfoCore("gpt-5.3", {})).provider, "openai");
+});
+test("a bare Claude id still reaches an active Anthropic connection", async () => {
+  const anthropic = await db.createProviderConnection({
+    provider: "anthropic",
+    authType: "apikey",
+    apiKey: "synthetic",
+    isActive: true,
+    testStatus: "active",
+  });
+  invalidateDbCache();
+  try {
+    const resolved = await getModelInfoCore("claude-opus", {});
+    assert.deepEqual([resolved.provider, resolved.model], ["anthropic", "claude-opus"]);
+  } finally {
+    await db.deleteProviderConnection(String(anthropic.id));
+    invalidateDbCache();
+  }
+});
+test("an explicit prefix and the legacy ids keep reaching Microsoft 365 Copilot", async () => {
+  for (const prefix of [provider, "m365copilot"]) {
+    const resolved = await getModelInfoCore(`${prefix}/claude-opus`, {});
+    assert.deepEqual([resolved.provider, resolved.model], [provider, "claude-opus"]);
+  }
+  assert.equal((await getModelInfoCore("copilot-m365", {})).provider, provider);
+  assert.equal(isKnownCatalogModelId("copilot-m365-claude-opus"), true);
+});
 test("chatCore does not classify a model licence refusal as an account ban", () => {
   assert.notEqual(
     classifyProviderError(403, body("m365_model_not_licensed"), provider),
@@ -258,6 +298,19 @@ test("native selected credentials serialize an account, permit peers, and abort 
 // A licence denial is recoverable (the model lock or connection cooldown above); it must never
 // classify as FORBIDDEN, which bans the connection permanently. Pinned so a change to this
 // provider's category or the classifier cannot silently start banning licensed accounts.
+test("an account licence denial is recorded as what it is, not as throttling", async () => {
+  const conn = await connection();
+  await auth.markAccountUnavailable(
+    conn.id,
+    403,
+    body("m365_account_not_licensed"),
+    provider,
+    model
+  );
+  const row = await db.getProviderConnectionById(conn.id);
+  assert.equal(row.lastError, "M365 account not licensed");
+  assert.equal(Number(row.errorCode), 403);
+});
 for (const code of ["m365_account_not_licensed", "m365_model_not_licensed"]) {
   test(`${code} never classifies as a permanent FORBIDDEN ban`, () => {
     const denial = body(code);

@@ -2,6 +2,7 @@ import { sanitizeErrorMessage } from "../../../utils/error.ts";
 import type { ProviderCredentials } from "../../../executors/base.ts";
 import { generateM365Images } from "../../../executors/m365ImageGeneration.ts";
 import { M365ExecutorError } from "../../../executors/m365ExecutorOutput.ts";
+import { M365TurnError } from "../../../executors/m365Turn.ts";
 import { m365OrientationForSize } from "../../../executors/m365Protocol/imageGeneration.ts";
 
 /**
@@ -98,7 +99,8 @@ export async function handleM365ImageGeneration({
       }
     }
   } catch (error) {
-    if (error instanceof M365ExecutorError) return fail(error.status, error.message);
+    if (error instanceof M365ExecutorError || error instanceof M365TurnError)
+      return fail(error.status, error.message);
     if (signal?.aborted) return fail(499, "Request cancelled");
     return fail(502, "Microsoft 365 Copilot image generation failed");
   }

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { parseM365PastedCredential } from "@omniroute/open-sse/utils/m365Credentials.ts";
-import { isProviderSpecificSecretKey } from "@/lib/db/providers/providerSpecificDataSecrets";
+import { providerSpecificSecretKeysIn } from "@/lib/db/providers/providerSpecificDataSecrets";
 
 const guid = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
 const claimsSchema = z.object({ tid: guid, oid: guid });
@@ -41,10 +41,10 @@ export function m365MetadataAfterSignIn(
 ): Record<string, unknown> {
   const before = dataSchema.safeParse(existing);
   const after = dataSchema.safeParse(incoming);
-  return Object.fromEntries(
-    Object.entries({
-      ...(before.success ? before.data : {}),
-      ...(after.success ? after.data : {}),
-    }).filter(([key]) => !isProviderSpecificSecretKey(key))
-  );
+  const merged = {
+    ...(before.success ? before.data : {}),
+    ...(after.success ? after.data : {}),
+  };
+  const secrets = new Set(providerSpecificSecretKeysIn(merged));
+  return Object.fromEntries(Object.entries(merged).filter(([key]) => !secrets.has(key)));
 }
