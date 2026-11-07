@@ -11,6 +11,8 @@ import ModelLockoutCard from "./ModelLockoutCard";
 import TokenRefreshBreakerCard, { type TokenRefreshBreakerValue } from "./TokenRefreshBreakerCard";
 import { NumberField, BooleanField } from "./ResilienceFields";
 import { throwIfResilienceSaveFailed } from "./resilienceSaveError";
+import PreferredAccountFailoverCard from "./PreferredAccountFailoverCard";
+import type { PreferredAccountFailoverSettings } from "@/lib/resilience/settings/types";
 
 type RequestQueueSettings = {
   autoEnableApiKeyProviders: boolean;
@@ -65,6 +67,7 @@ export type ProviderCooldownSettings = {
 };
 
 type ResilienceResponse = {
+  preferredAccountFailover?: PreferredAccountFailoverSettings;
   requestQueue: RequestQueueSettings;
   connectionCooldown: {
     oauth: ConnectionCooldownProfileSettings;
@@ -84,6 +87,7 @@ type ResilienceResponse = {
 
 function toResilienceResponse(json: ResilienceResponse): ResilienceResponse {
   return {
+    preferredAccountFailover: json.preferredAccountFailover,
     requestQueue: json.requestQueue,
     connectionCooldown: json.connectionCooldown,
     providerBreaker: json.providerBreaker,
@@ -1214,6 +1218,15 @@ export default function ResilienceTab() {
   return (
     <div className="space-y-6">
       <AutoDisableCard />
+      {data.preferredAccountFailover && (
+        <PreferredAccountFailoverCard
+          value={data.preferredAccountFailover}
+          saving={savingSection === "preferredAccountFailover"}
+          onSave={(preferredAccountFailover) =>
+            savePatch("preferredAccountFailover", { preferredAccountFailover })
+          }
+        />
+      )}
 
       <RequestQueueCard
         value={data.requestQueue}
