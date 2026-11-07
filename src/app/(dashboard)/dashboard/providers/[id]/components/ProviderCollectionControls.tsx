@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Table } from "@omniroute/ui-kit/table";
 import { Button, Select } from "@/shared/components";
@@ -142,20 +142,22 @@ export function CollectionPagination({
   );
 }
 
-export function CollectionLayout({
-  view,
-  columns,
-  headers,
-  children,
-  empty = false,
-}: {
+type CollectionLayoutProps = {
   view: CollectionView;
   columns: number;
   headers: string[];
   children: ReactNode;
   empty?: boolean;
   className?: string;
-}) {
+};
+
+export function CollectionLayout({
+  view,
+  columns,
+  headers,
+  children,
+  empty = false,
+}: CollectionLayoutProps) {
   if (empty) return <div className="rounded-lg border border-border">{children}</div>;
   if (view === "table")
     return (
@@ -185,4 +187,29 @@ export function CollectionLayout({
       {children}
     </div>
   );
+}
+
+/**
+ * Renders the collection layout when `collection` is set (Codex), otherwise the
+ * provider's regular `fallback` container — one typed entry point instead of
+ * spreading a conditional props object onto a component union.
+ */
+export function OptionalCollectionLayout({
+  collection,
+  fallback: Fallback = "div",
+  className,
+  children,
+}: {
+  collection?: Omit<CollectionLayoutProps, "children" | "className">;
+  fallback?: "div" | ComponentType<{ className?: string; children?: ReactNode }>;
+  className?: string;
+  children: ReactNode;
+}) {
+  if (collection)
+    return (
+      <CollectionLayout {...collection} className={className}>
+        {children}
+      </CollectionLayout>
+    );
+  return <Fallback className={className}>{children}</Fallback>;
 }

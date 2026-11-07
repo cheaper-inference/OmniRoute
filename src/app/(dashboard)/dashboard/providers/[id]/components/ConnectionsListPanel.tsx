@@ -3,7 +3,7 @@
 import {
   CollectionViewControls,
   CollectionPagination,
-  CollectionLayout,
+  OptionalCollectionLayout,
   type CollectionView,
   type CollectionPageSize,
 } from "./ProviderCollectionControls";
@@ -210,7 +210,6 @@ export default function ConnectionsListPanel({
         ? Math.max(1, connections.length)
         : pageSize
       : PAGE_SIZE;
-  const RowsLayout = providerId === "codex" ? CollectionLayout : "div";
   const layoutProps = {
     view: viewMode,
     columns,
@@ -503,10 +502,12 @@ export default function ConnectionsListPanel({
           </div>
         </div>
         {paginationBar}
-        <RowsLayout
-          {...(providerId === "codex"
-            ? { ...layoutProps, empty: pageConnections.length === 0 }
-            : {})}
+        <OptionalCollectionLayout
+          collection={
+            providerId === "codex"
+              ? { ...layoutProps, empty: pageConnections.length === 0 }
+              : undefined
+          }
           className="flex flex-col divide-y divide-border border border-t-0 border-border rounded-b-lg overflow-hidden"
         >
           {pageConnections.length === 0 ? (
@@ -615,7 +616,7 @@ export default function ConnectionsListPanel({
               />
             ))
           )}
-        </RowsLayout>
+        </OptionalCollectionLayout>
         {providerId !== "codex" && paginationBar}
       </>
     );
@@ -748,8 +749,8 @@ export default function ConnectionsListPanel({
                   <span className="text-[10px] text-text-muted/40">{groupTotal}</span>
                 </div>
               )}
-              <RowsLayout
-                {...(providerId === "codex" ? layoutProps : {})}
+              <OptionalCollectionLayout
+                collection={providerId === "codex" ? layoutProps : undefined}
                 className="flex flex-col divide-y divide-border"
               >
                 {groupConns.map((conn, index) => (
@@ -857,7 +858,7 @@ export default function ConnectionsListPanel({
                     onRefreshQuota={() => handleRefreshQuota(conn.id)}
                   />
                 ))}
-              </RowsLayout>
+              </OptionalCollectionLayout>
             </div>
           );
         })}

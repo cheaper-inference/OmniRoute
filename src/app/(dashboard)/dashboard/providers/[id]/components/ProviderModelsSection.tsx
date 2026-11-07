@@ -3,7 +3,7 @@
 import {
   CollectionViewControls,
   CollectionPagination,
-  CollectionLayout,
+  OptionalCollectionLayout,
   type CollectionView,
   type CollectionPageSize,
 } from "./ProviderCollectionControls";
@@ -523,7 +523,6 @@ export default function ProviderModelsSection({
         (currentModelPage + 1) * effectivePageSize
       )
     : displayModels;
-  const ModelLayout = operationalList ? CollectionLayout : AutoGrid;
   const activeCount = modelsWithVisibility.filter((m) => !m.isHidden).length;
   const hiddenFilteredCount = filteredModels.filter((m) => m.isHidden).length;
   const visibleFilteredCount = filteredModels.length - hiddenFilteredCount;
@@ -589,19 +588,22 @@ export default function ProviderModelsSection({
           onPageSize={setPageSize}
         />
       )}
-      <ModelLayout
-        {...(operationalList
-          ? {
-              view: collectionView,
-              columns,
-              headers: [
-                providerText(t, "modelColumn", "Model"),
-                providerText(t, "modelDetailsColumn", "Details & actions"),
-                providerText(t, "endpointsColumn", "Endpoints"),
-              ],
-              empty: pagedModels.length === 0,
-            }
-          : {})}
+      <OptionalCollectionLayout
+        fallback={AutoGrid}
+        collection={
+          operationalList
+            ? {
+                view: collectionView,
+                columns,
+                headers: [
+                  providerText(t, "modelColumn", "Model"),
+                  providerText(t, "modelDetailsColumn", "Details & actions"),
+                  providerText(t, "endpointsColumn", "Endpoints"),
+                ],
+                empty: pagedModels.length === 0,
+              }
+            : undefined
+        }
         className={
           operationalList ? "divide-y divide-border rounded-lg border border-border" : undefined
         }
@@ -669,7 +671,7 @@ export default function ProviderModelsSection({
             })}
           </p>
         )}
-      </ModelLayout>
+      </OptionalCollectionLayout>
     </div>
   );
 }
