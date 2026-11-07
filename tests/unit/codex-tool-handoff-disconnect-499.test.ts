@@ -197,8 +197,13 @@ test("Codex tool handoff drains the trailing Responses completion instead of per
 
   t.mock.timers.tick(1);
   await cancelPromise;
-  // Let the stream's promise chain finish before advancing the 50 ms grace deadline.
-  await new Promise<void>((resolve) => setImmediate(resolve));
+  // Let the stream's promise chain finish before advancing the 50 ms grace deadline. With
+  // SSE comments on, completion waits for a pricing lookup, so one event-loop turn is not
+  // enough. This bound runs on real time; the logical grace clock stays frozen meanwhile.
+  const drainDeadline = performance.now() + 5_000;
+  while (!completionRecorded && performance.now() < drainDeadline) {
+    await new Promise<void>((resolve) => setImmediate(resolve));
+  }
   assert.equal(completionRecorded, true, "the trailing completion must drain inside the grace");
   t.mock.timers.tick(70);
   await new Promise<void>((resolve) => setImmediate(resolve));

@@ -19,6 +19,7 @@ process.env.STORAGE_ENCRYPTION_KEY = "synthetic-child-test-key";
 const core = await import("../../src/lib/db/core.ts");
 const dbDest = await import("../../src/lib/db/logExportDestinations.ts");
 const source = await import("../../src/lib/usage/callLogExportSource.ts");
+const { resolveCallLogDetail } = await import("../../src/lib/usage/callLogDetailResolver.ts");
 const runner = await import("../../src/lib/logExport/runner.ts");
 const secrets = await import("../../src/lib/logExport/secrets.ts");
 const fixture = await import("./fixtures/logExportTestDestination.ts");
@@ -176,18 +177,19 @@ test("large artifacts are hydrated in the child while the old control reads them
   const dest = destination("discard", 25);
   const artifactPrefix = path.join(dir, "call_logs") + path.sep;
   let parentArtifactReads = 0;
-  t.mock.method(
-    fs,
-    "readFileSync",
-    new Proxy(fs.readFileSync, {
-      apply(read, receiver, args) {
+  function countArtifactReads<T extends (...args: never[]) => unknown>(read: T) {
+    return new Proxy(read, {
+      apply(target, receiver, args) {
         if (typeof args[0] === "string" && args[0].startsWith(artifactPrefix)) {
           parentArtifactReads++;
         }
-        return Reflect.apply(read, receiver, args);
+        return Reflect.apply(target, receiver, args);
       },
-    })
-  );
+    });
+  }
+  t.mock.method(fs, "readFileSync", countArtifactReads(fs.readFileSync));
+  // The child resolver reads asynchronously: the same call on the parent must count as well.
+  t.mock.method(fs.promises, "readFile", countArtifactReads(fs.promises.readFile));
   async function measure(action: () => Promise<unknown>) {
     const histogram = monitorEventLoopDelay({ resolution: 2 });
     histogram.enable();
@@ -210,6 +212,21 @@ test("large artifacts are hydrated in the child while the old control reads them
   // The positive control proves the probe catches the original synchronous-read regression.
   // Wall time remains diagnostic: another process can deschedule either measurement on CI.
   assert.equal(parentArtifactReads, 500, "the old hydration control must read all 500 artifacts");
+  await resolveCallLogDetail(
+    core.getDbInstance(),
+    {
+      id: "row-0",
+      timestamp: null,
+      model: "fixture-model",
+      status: 200,
+      detailState: "ready",
+      artifactRelPath: "artifact-0.json",
+      error: null,
+      hasPipelineDetails: false,
+    },
+    path.join(dir, "call_logs")
+  );
+  assert.equal(parentArtifactReads, 501, "the probe must also catch the child's async read path");
   assertGone();
 });
 
