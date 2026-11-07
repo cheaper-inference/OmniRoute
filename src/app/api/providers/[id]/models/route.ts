@@ -165,6 +165,7 @@ import { applyConnectionCustomHeaders } from "./discovery/connectionCustomHeader
 import { maybeHandleConolOrSyntxModelDiscovery } from "./webSessionDiscovery";
 import { maybeHandleTwinmindModelDiscovery } from "./twinmindDiscovery";
 import { maybeHandleDevinDesktopModelDiscovery } from "./devinDesktopDiscovery";
+import { maybeHandleMuseCodeModelDiscovery } from "./museCodeDiscovery";
 import { maybeHandleVertexModelDiscovery } from "./vertexDiscovery";
 import { buildNoAuthModelsResponse, filterModelsForRoute } from "./modelRouteProjection";
 
@@ -738,6 +739,9 @@ export async function GET(
 
     const devinDesktopResponse = await maybeHandleDevinDesktopModelDiscovery(webDiscoveryArgs);
     if (devinDesktopResponse) return devinDesktopResponse;
+
+    const museCodeResponse = await maybeHandleMuseCodeModelDiscovery(webDiscoveryArgs);
+    if (museCodeResponse) return museCodeResponse;
 
     if (provider === "bedrock") {
       const cachedResponse = maybeReturnCachedDiscovery();
