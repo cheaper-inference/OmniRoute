@@ -8,6 +8,13 @@ import {
   type ProviderResolve,
 } from "./provider-filter.js";
 import type { LegacyModel } from "./legacy-model.js";
+import {
+  catalogOrderComparator,
+  DEFAULT_CATALOG_ORDER,
+  toOrderEntry,
+  type CatalogOrderEntry,
+  type CatalogOrderSpec,
+} from "./catalog-order.js";
 import { isUserComboRow, usesModelsComboSource, type CombosSource } from "./combos-source.js";
 import {
   comboLookupName,
@@ -126,6 +133,11 @@ export interface ResolvedOptions extends FreeOptions {
   toolsOnly?: boolean;
   visionOnly?: boolean;
   enrichment?: OmniRouteEnrichmentMap | boolean;
+  /**
+   * Ordered catalog sort criteria; each with an optional direction. Absent or
+   * empty applies the default chain `provider → name → recency → id`.
+   */
+  modelOrder?: readonly CatalogOrderSpec[];
   /**
    * Per-provider showcase size. Absent means the catalog default
    * (`SHOWCASE_PER_OWNER`); direct callers keep working without it.
@@ -1122,7 +1134,14 @@ export function buildProviderPayload(
     integrationID: X,
   } as unknown as StableProviderInfo;
   const models: StableModelInfo[] = [];
-  for (const [key, legacy] of collected.entries) {
+  const specs =
+    opts.modelOrder && opts.modelOrder.length > 0 ? opts.modelOrder : DEFAULT_CATALOG_ORDER;
+  const ordered: Array<{ key: string; legacy: LegacyModel; entry: CatalogOrderEntry }> = [
+    ...collected.entries,
+  ].map(([key, legacy]) => ({ key, legacy, entry: toOrderEntry(key, legacy) }));
+  const compare = catalogOrderComparator(specs);
+  ordered.sort((a, b) => compare(a.entry, b.entry));
+  for (const { key, legacy } of ordered) {
     const slash = key.indexOf("/");
     const bareId = slash > 0 ? key.slice(slash + 1) : legacy.id;
     models.push(legacyToStable(X, bareId, legacy, opts.apiKey, opts.baseURL));

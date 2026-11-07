@@ -2,8 +2,28 @@ import { z } from "zod";
 
 import { DEFAULT_MODEL_CACHE_TTL_MS } from "./cache.js";
 import type { ResolvedOptions } from "./catalog.js";
+import {
+  CATALOG_ORDER_DIRECTIONS,
+  CATALOG_ORDER_KEYS,
+  type CatalogOrderSpec,
+} from "./catalog-order.js";
 import { DEFAULT_FREE_SIGNALS, FREE_SIGNALS } from "./shared/free-signals.js";
 import { isHttpUrl } from "./shared/models-map.js";
+
+const catalogOrderSpecSchema = z
+  .object({
+    key: z.enum(CATALOG_ORDER_KEYS, {
+      error: (issue) =>
+        `invalid modelOrder key ${JSON.stringify(issue.input)}: expected one of ${CATALOG_ORDER_KEYS.join(" | ")}`,
+    }),
+    direction: z
+      .enum(CATALOG_ORDER_DIRECTIONS, {
+        error: (issue) =>
+          `invalid modelOrder direction ${JSON.stringify(issue.input)}: expected one of ${CATALOG_ORDER_DIRECTIONS.join(" | ")}`,
+      })
+      .optional(),
+  })
+  .strict();
 
 const apiFormatSchema = z
   .object({
@@ -82,6 +102,11 @@ const pluginOptionsSchema = z
     // declarations bound for a Gemini model. On by default — leaving them in
     // fails the whole request with 400 INVALID_ARGUMENT.
     geminiSanitization: z.boolean().default(true),
+    // Ordered list of catalog sort criteria; each carries an optional
+    // direction. Absent applies the default chain (provider, name, recency);
+    // an empty list means the same. An unknown key or direction is rejected
+    // at load, naming the offending value and the supported set.
+    modelOrder: z.array(catalogOrderSpecSchema).optional(),
     // v1 parity: prefix a model's display name with the upstream provider it
     // routes to, so the same model sold through two connections is
     // distinguishable in the picker.
@@ -190,6 +215,7 @@ export function toResolvedOptions(parsed: PluginOptions): ResolvedOptions {
     freshWindowDays: parsed.freshWindowDays,
     usageMemory: parsed.usageMemory,
     enrichment: parsed.enrichment,
+    modelOrder: parsed.modelOrder,
   };
 }
 
