@@ -1,0 +1,1 @@
+- **fix(codebuddy):** preserve caller-supplied X-Conversation-* ids on CodeBuddy Intl and stop joining unrelated chats that open with the same user message; only explicit client session identity, scoped by connection, links turns ([#18322](https://github.com/cheaper-inference/OmniRoute/pull/18322)) — thanks @z3ncv
