@@ -1,0 +1,1 @@
+- **feat(images):** Antigravity image edits accept multiple reference images (data URL or raw base64; remote URLs stay rejected), each forwarded as its own inline part; invalid references fail fast with a 400 and text-only answers surface as an error ([#16731](https://github.com/diegosouzapw/OmniRoute/pull/16731)) — thanks @yheiakadylan
