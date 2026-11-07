@@ -144,8 +144,12 @@ export class GheCopilotExecutor extends GithubExecutor {
     if ((targetFormat === "claude" || /claude/i.test(bareModel)) && this.config.messagesUrl) {
       return this.getMessagesBase(credentials);
     }
+    const hasExplicitNonResponsesOverride =
+      typeof overrideTargetFormat === "string" && overrideTargetFormat !== "openai-responses";
     if (
-      (targetFormat === "openai-responses" || /codex|^gpt-6/i.test(bareModel)) &&
+      (targetFormat === "openai-responses" ||
+        (!hasExplicitNonResponsesOverride &&
+          (/codex/i.test(bareModel) || /^gpt-(?:[6-9]|5\.[5-9])/i.test(bareModel)))) &&
       this.supportsResponsesEndpoint(bareModel)
     ) {
       return this.getResponsesBase(credentials);

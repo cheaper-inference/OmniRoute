@@ -1,19 +1,19 @@
 // README "the promise" card in the Cheaper Inference UI Kit style (KEA-6307): six pillar tiles
-// in a 3 × 2 grid with a lime highlight sweeping from tile to tile on a 12 s cycle. Output is
+// in a 3 × 2 grid with an accent highlight sweeping from tile to tile on a 12 s cycle. Output is
 // committed as docs/diagrams/promise-pillars.svg; tests/unit/docs/readme-promise-pillars-svg.test.ts
 // fails when the committed file no longer matches this generator, and runs the counts gate's own
 // validators on it (provider total, MCP tool count, free-forever providers).
 //
 //   node scripts/docs/gen-readme-promise-pillars.mjs [--out path.svg]
 //
-// Everything the card draws lives in PROMISE_PILLARS_COPY: it is both the drawn text and the
-// subset input for the embedded fonts, so a glyph can never be drawn without being embedded.
+// Everything the card draws lives in PROMISE_PILLARS_COPY: it is both the drawn text and what the
+// outlining step shapes (scripts/docs/readme-outline.mjs).
 // Numbers stay in <text> nodes because scripts/check/check-docs-counts-sync.mjs reads them from
 // the raw file.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { buildFontFaceCss } from "./readme-fonts.mjs";
-import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
+import { outlineSvg } from "./readme-outline.mjs";
+import { svgOpen, gridDefs, esc, afterKicker } from "./readme-diagram-theme.mjs";
 
 const NB = " ";
 
@@ -36,10 +36,10 @@ export const PROMISE_PILLARS_COPY = {
     "RTK + Caveman stacked compression cuts",
     "15–95% of eligible tokens — ~89% average",
     "on tool-heavy sessions.",
-    "150+ providers with a free tier, 53 free",
+    "150+ providers with a free tier, 52 free",
     "forever — Qoder, Pollinations, Cloudflare,",
     "SiliconFlow… No card needed.",
-    "37 CLI/agent integrations — Claude Code, Codex,",
+    "39 CLI/agent integrations — Claude Code, Codex,",
     "Cursor, Cline, Copilot, Antigravity —",
     "through one config.",
     "OpenAI ↔ Claude ↔ Gemini ↔ Responses API",
@@ -47,7 +47,7 @@ export const PROMISE_PILLARS_COPY = {
     "it just works.",
     "Circuit breakers, TLS stealth, MCP (110",
     "tools), A2A, memory, guardrails, evals —",
-    "39,000+ static test declarations.",
+    "60,000+ static test declarations.",
   ],
   footer: [
     `$ npm i -g omniroute${NB}${NB}·${NB}${NB}point your tool at http://localhost:20128/v1${NB}${NB}·${NB}${NB}$0`,
@@ -126,7 +126,7 @@ function pillar(i, C) {
   return (
     `  <g>\n` +
     `    <rect x="${x}" y="${y}" width="${TILE_W}" height="${TILE_H}" rx="12" class="surface" stroke-width="1"/>\n` +
-    // Sweep highlight: a lime wash + lime border, the one brand emphasis of this card.
+    // Sweep highlight: an accent wash + accent border, the one brand emphasis of this card.
     `    <rect x="${x}" y="${y}" width="${TILE_W}" height="${TILE_H}" rx="12" class="accent-soft stroke-accent" stroke-width="2" opacity="0">` +
     `<animate attributeName="opacity" values="${p.sweep.values}" keyTimes="${p.sweep.keyTimes}" dur="12s" begin="3s" repeatCount="indefinite"/></rect>\n` +
     `    <rect x="${x}" y="${y + 16}" width="4" height="132" rx="2" class="${p.tone}"/>\n` +
@@ -144,35 +144,28 @@ function pillar(i, C) {
 
 export async function renderReadmePromisePillars() {
   const C = PROMISE_PILLARS_COPY;
-  const { css } = await buildFontFaceCss({
-    ui: [...C.headline, ...C.bodies].join(""),
-    uiBold: [...C.headlineMarks, ...C.titles].join(""),
-    mono: [...C.kicker, ...C.footer, ...C.footerRight].join(""),
-  });
-
-  return (
+  return outlineSvg(
     svgOpen({
       viewBox: `0 0 ${W} ${H}`,
       title:
-        "The OmniRoute promise: one endpoint and 380 providers. Six pillars. Resilient fallback: automatic routing continues while another healthy target is available. Save up to 95 percent of eligible tokens: RTK plus Caveman stacked compression averages about 89 percent on tool-heavy sessions. Zero dollars to start: 150+ providers with a free tier and 53 recurring or keyless free-forever providers. Every tool works: 37 CLI and agent integration records, including Claude Code, Codex, Cursor, Cline, Copilot and Antigravity, through one config. One endpoint: OpenAI, Claude, Gemini and Responses API translation at /v1. Production controls: circuit breakers, TLS stealth, MCP with 110 tools, A2A, memory, guardrails, evals, and 39,000+ static test declarations across 5,100+ tracked test files.",
+        "The OmniRoute promise: one endpoint and 380 providers. Six pillars. Resilient fallback: automatic routing continues while another healthy target is available. Save up to 95 percent of eligible tokens: RTK plus Caveman stacked compression averages about 89 percent on tool-heavy sessions. Zero dollars to start: 150+ providers with a free tier and 52 recurring or keyless free-forever providers. Every tool works: 39 CLI and agent integration records, including Claude Code, Codex, Cursor, Cline, Copilot and Antigravity, through one config. One endpoint: OpenAI, Claude, Gemini and Responses API translation at /v1. Production controls: circuit breakers, TLS stealth, MCP with 110 tools, A2A, memory, guardrails, evals, and 60,000+ static test declarations across 8,400+ tracked test files.",
       desc: "Animated promise card: six pillar tiles in reading order, with a soft highlight sweeping from tile to tile in a continuous cycle.",
-      fontFaceCss: css,
     }) +
-    gridDefs("pp-grid") +
-    `  <rect class="bg" x="0" y="0" width="${W}" height="${H}"/>\n` +
-    `  <rect x="0" y="0" width="${W}" height="${H}" fill="url(#pp-grid)"/>\n` +
-    // header
-    `  <text x="40" y="58" class="kicker">${esc(C.kicker[0])}</text>\n` +
-    `  <line x1="180" y1="53" x2="1160" y2="53" class="rule" stroke-width="1"/>\n` +
-    `  <text x="40" y="100" class="sub">${esc(C.headline[0])}` +
-    `<tspan font-weight="600" style="fill:var(--ink)">${esc(C.headlineMarks[0])}</tspan>${esc(C.headline[1])}` +
-    `<tspan font-weight="600" style="fill:var(--ok)">${esc(C.headlineMarks[1])}</tspan>${esc(C.headline[2])}</text>\n` +
-    PILLARS.map((_, i) => pillar(i, C)).join("\n") +
-    "\n" +
-    // footer
-    `  <text x="40" y="516" class="mono-sm" style="fill:var(--muted)">${esc(C.footer[0])}</text>\n` +
-    `  <text x="1160" y="516" text-anchor="end" class="kicker">${esc(C.footerRight[0])}</text>\n` +
-    "</svg>\n"
+      gridDefs("pp-grid") +
+      `  <rect class="bg" x="0" y="0" width="${W}" height="${H}"/>\n` +
+      `  <rect x="0" y="0" width="${W}" height="${H}" fill="url(#pp-grid)"/>\n` +
+      // header
+      `  <text x="40" y="58" class="kicker">${esc(C.kicker[0])}</text>\n` +
+      `  <line x1="${afterKicker(40, C.kicker[0])}" y1="53" x2="1160" y2="53" class="rule" stroke-width="1"/>\n` +
+      `  <text x="40" y="100" class="sub">${esc(C.headline[0])}` +
+      `<tspan font-weight="600" style="fill:var(--ink)">${esc(C.headlineMarks[0])}</tspan>${esc(C.headline[1])}` +
+      `<tspan font-weight="600" style="fill:var(--ok)">${esc(C.headlineMarks[1])}</tspan>${esc(C.headline[2])}</text>\n` +
+      PILLARS.map((_, i) => pillar(i, C)).join("\n") +
+      "\n" +
+      // footer
+      `  <text x="40" y="516" class="mono-sm" style="fill:var(--muted)">${esc(C.footer[0])}</text>\n` +
+      `  <text x="1160" y="516" text-anchor="end" class="kicker">${esc(C.footerRight[0])}</text>\n` +
+      "</svg>\n"
   );
 }
 

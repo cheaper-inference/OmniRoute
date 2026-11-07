@@ -24,6 +24,27 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return sanitizeErrorMessage(error) || fallback;
 }
 
+function buildLegacyRequestQueuePatch(
+  defaults: JsonRecord
+): NonNullable<ResilienceSettingsPatch["requestQueue"]> {
+  return {
+    ...(typeof defaults.requestsPerMinute === "number"
+      ? { requestsPerMinute: defaults.requestsPerMinute }
+      : {}),
+    ...(typeof defaults.minTimeBetweenRequests === "number"
+      ? { minTimeBetweenRequestsMs: defaults.minTimeBetweenRequests }
+      : {}),
+    ...(typeof defaults.concurrentRequests === "number"
+      ? { concurrentRequests: defaults.concurrentRequests }
+      : {}),
+    // #18390: the legacy schema has accepted this key since the global gate landed,
+    // but it was never mapped, so the value was silently dropped.
+    ...(typeof defaults.globalConcurrentRequests === "number"
+      ? { globalConcurrentRequests: defaults.globalConcurrentRequests }
+      : {}),
+  };
+}
+
 function normalizeLegacyPatch(body: JsonRecord): ResilienceSettingsPatch {
   const profiles = asRecord(body.profiles);
   const defaults = asRecord(body.defaults);
@@ -33,17 +54,7 @@ function normalizeLegacyPatch(body: JsonRecord): ResilienceSettingsPatch {
   const patch: ResilienceSettingsPatch = {};
 
   if (Object.keys(defaults).length > 0) {
-    patch.requestQueue = {
-      ...(typeof defaults.requestsPerMinute === "number"
-        ? { requestsPerMinute: defaults.requestsPerMinute }
-        : {}),
-      ...(typeof defaults.minTimeBetweenRequests === "number"
-        ? { minTimeBetweenRequestsMs: defaults.minTimeBetweenRequests }
-        : {}),
-      ...(typeof defaults.concurrentRequests === "number"
-        ? { concurrentRequests: defaults.concurrentRequests }
-        : {}),
-    };
+    patch.requestQueue = buildLegacyRequestQueuePatch(defaults);
   }
 
   if (Object.keys(oauth).length > 0 || Object.keys(apikey).length > 0) {

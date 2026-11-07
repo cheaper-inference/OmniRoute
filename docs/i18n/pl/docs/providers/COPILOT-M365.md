@@ -65,39 +65,39 @@ Podczas importowania pliku HAR dekodowana jest data wygaśnięcia tokenu JWT i w
 > **Nigdy nie zatwierdzaj w repozytorium rzeczywistego eksportu HAR, tokenu dostępu ani tokenu odświeżania.** W testach i
 > dokumentacji należy zawsze używać wartości zastępczych.
 
-## Czas ważności tokenu i odświeżanie
+## Okres ważności tokenu i odświeżanie
 
-Token `access_token` jest krótkotrwały (zwykle **~75 minut**). Po jego wygaśnięciu dostawca
-zgłasza błąd połączenia i konieczne jest ponowne przechwycenie danych uwierzytelniających.
+`access_token` jest krótkotrwały (zwykle **~75 minut**). Bez użytecznego tokenu
+odświeżania po wygaśnięciu należy ponownie przechwycić dane uwierzytelniające.
 
 ### Automatyczne odświeżanie za pomocą `refreshToken`
 
-Aby uniknąć ręcznego ponownego przechwytywania, możesz zapisać token odświeżania Microsoft w sekcji
-**Advanced Settings → providerSpecificData** danego połączenia:
+W oknie dialogowym dostawcy Microsoft 365 **Dodaj połączenie** lub **Edytuj połączenie** otwórz
+**Ustawienia zaawansowane → Token odświeżania (opcjonalnie)**. Wklej token odświeżania Microsoft OAuth
+dla zakresu `substrate.office.com/sydney` i zapisz. Wprowadzone dane są maskowane i nigdy nie są
+wstępnie wypełniane zapisanym tokenem. Podczas edycji pozostaw to pole puste, aby zachować istniejący token;
+wklej nowy token, aby go zastąpić.
 
-| Pole           | Opis                                                                        |
-| -------------- | --------------------------------------------------------------------------- |
-| `refreshToken` | Token odświeżania Microsoft OAuth dla zakresu `substrate.office.com/sydney` |
-| `tier`         | `individual` (domyślnie), `edu` lub `enterprise`                            |
+Uzyskaj token odświeżania za pomocą przepływu kodu urządzenia lub kodu autoryzacji Microsoft
+z zakresem `substrate.office.com/sydney`; pulpit nawigacyjny nie uzyskuje go za Ciebie.
+Po skonfigurowaniu tokenu odświeżania OmniRoute sprawdza `access_token` przed żądaniami
+i odświeża go tylko wtedy, gdy jest to konieczne. Pomyślne odświeżenie zapisuje również
+obrócony token odświeżania, dzięki czemu nie trzeba ponownie ręcznie przechwytywać danych,
+dopóki token odświeżania pozostaje ważny.
 
-Uzyskaj token odświeżania za pomocą przepływu kodu urządzenia lub kodu autoryzacyjnego Microsoft
-z zakresem `substrate.office.com/sydney`. Po ustawieniu `refreshToken` OmniRoute
-zapobiegawczo odświeża `access_token` przed każdym żądaniem, dzięki czemu nie trzeba
-ponownie przechwytywać go po każdym wygaśnięciu po około 75 minutach.
+Jeśli `refreshToken` nie jest ustawiony, po każdym wygaśnięciu należy ręcznie ponownie przechwycić
+dane uwierzytelniające WebSocket.
 
-Jeśli `refreshToken` nie jest ustawiony, po każdym wygaśnięciu należy ręcznie
-ponownie przechwycić dane uwierzytelniające WebSocket.
+### Wybór warstwy
 
-### Wybór poziomu
-
-| Poziom       | Alias        | Wariant                  |
+| Warstwa      | Alias        | Środowisko               |
 | ------------ | ------------ | ------------------------ |
-| `individual` | _(domyślny)_ | Konsumencki M365 Copilot |
+| `individual` | _(domyślna)_ | Konsumencki M365 Copilot |
 | `edu`        | `included`   | Edukacyjny M365 Copilot  |
 | `enterprise` | `work`       | M365 Copilot dla firm    |
 
-Ustaw poziom w sekcji **Advanced Settings → providerSpecificData → tier**. Poziom wpływa
-na trasowanie BizChat i dostęp do modeli.
+Ustaw warstwę w **Ustawienia zaawansowane → Warstwa Copilot**. Warstwa wpływa
+na routing BizChat i dostęp do modeli.
 
 ## Model bezpieczeństwa
 
@@ -108,25 +108,25 @@ na trasowanie BizChat i dostęp do modeli.
 
 ## Rozwiązywanie problemów
 
-### Uwierzytelnianie natychmiast kończy się niepowodzeniem
+### Uwierzytelnianie kończy się niepowodzeniem natychmiast
 
-- Sprawdź, czy dane zostały skopiowane z **adresu URL WebSocket**, a nie z żądania XHR/Fetch. Dane uwierzytelniające znajdują się w parametrze zapytania `access_token` połączenia WebSocket Chathub, a nie w nagłówku `Authorization: Bearer`.
-- Upewnij się, że `chathubPath` zawiera pełny segment `<oid>@<tenant>` ze ścieżki adresu URL.
+- Sprawdź, czy skopiowano dane z **adresu URL WebSocket**, a nie z żądania XHR/Fetch. Dane uwierzytelniające znajdują się w parametrze zapytania `access_token` połączenia WebSocket Chathub — a nie w nagłówku `Authorization: Bearer`.
+- Upewnij się, że `chathubPath` zawiera pełny segment `<oid>@<tenant>` ze ścieżki URL.
 
 ### Token wygasa po około 75 minutach
 
-Jest to oczekiwane zachowanie. Bez `refreshToken` token dostępu jest krótkotrwały. Możesz:
+Jest to oczekiwane zachowanie. Bez `refreshToken` token dostępu ma krótki czas ważności. Wykonaj jedną z następujących czynności:
 
-- Ponownie przechwycić dane uwierzytelniające w DevTools albo
-- Skonfigurować `refreshToken` w ustawieniach zaawansowanych, aby umożliwić automatyczne odświeżanie.
+- Ponownie przechwyć dane uwierzytelniające w DevTools lub
+- Skonfiguruj **Ustawienia zaawansowane → Token odświeżania (opcjonalny)** w oknie dialogowym dodawania lub edytowania połączenia, aby włączyć automatyczne odświeżanie.
 
-### Test połączenia kończy się powodzeniem, ale czat zwraca błąd 401
+### Testowanie połączenia kończy się powodzeniem, ale czat zwraca błąd 401
 
-Token mógł wygasnąć między walidacją a pierwszym żądaniem. Ponownie przechwyć aktualne dane uwierzytelniające.
+Token mógł wygasnąć między jego sprawdzeniem a pierwszym żądaniem. Ponownie przechwyć aktualne dane uwierzytelniające.
 
 ### Copilot nie pojawia się na liście dostawców
 
-Upewnij się, że `copilot-m365-web` jest włączony w sekcji **Panel → Dostawcy**. W niektórych planach dostawca może być domyślnie ukryty.
+Upewnij się, że `copilot-m365-web` jest włączony w sekcji **Pulpit → Dostawcy**. W niektórych planach dostawca może być domyślnie ukryty.
 
 ## Materiały referencyjne
 

@@ -12,11 +12,11 @@
 //   node scripts/docs/gen-readme-compression-pipeline.mjs [--out path.svg]
 //
 // Everything the diagram draws lives in COMPRESSION_PIPELINE_COPY: it is both the drawn text
-// and the subset input for the embedded fonts. The figures are illustrative (not gate-checked)
+// and what the outlining step shapes. The figures are illustrative (not gate-checked)
 // and stay verbatim.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { buildFontFaceCss } from "./readme-fonts.mjs";
+import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
 
 export const COMPRESSION_PIPELINE_COPY = {
@@ -88,19 +88,6 @@ const TOKENS = [
 
 export async function renderCompressionPipeline() {
   const C = COMPRESSION_PIPELINE_COPY;
-  const { css } = await buildFontFaceCss({
-    ui: C.engines.join(""),
-    mono: [
-      ...C.kickers,
-      ...C.figures,
-      ...C.captions,
-      ...C.numbers,
-      ...C.token,
-      ...C.notes,
-      ...C.math,
-    ].join(""),
-  });
-
   const dots = TOKENS.map(
     (t) =>
       `    <circle r="4">\n` +
@@ -128,83 +115,82 @@ export async function renderCompressionPipeline() {
       `      ${flash}\n` +
       `        <animate attributeName="stroke-opacity" values="0;0;${peak};0;0" keyTimes="${FLASH_KEYS[k]}" dur="8s" repeatCount="indefinite"/>\n` +
       `      </rect>\n` +
-      `      <text x="${CELL_W / 2}" y="40" class="mono ${def ? "info" : "muted"}">${esc(n)}</text>\n` +
+      `      <text x="${CELL_W / 2}" y="40" class="label ${def ? "info" : "muted"}">${esc(n)}</text>\n` +
       `    </g>\n` +
       `    <text x="${nameX}" y="${nameY}" class="small${def ? " ink" : ""}">${esc(C.engines[k])}</text>`
     );
   });
 
   const M = C.math;
-  return (
+  return outlineSvg(
     svgOpen({
       viewBox: "0 0 1200 460",
       title: TITLE,
       desc: DESC,
-      fontFaceCss: css,
     }) +
-    gridDefs("cmp-grid") +
-    `  <defs>\n` +
-    `    <linearGradient id="cmp-funnel" x1="0" y1="0" x2="1" y2="0">\n` +
-    `      <stop offset="0" style="stop-color:var(--ink);stop-opacity:0.07"/>\n` +
-    `      <stop offset="1" style="stop-color:var(--ok);stop-opacity:0.18"/>\n` +
-    `    </linearGradient>\n` +
-    `    <path id="cmp-tok" d="M 245,230 L 955,230"/>\n` +
-    `  </defs>\n` +
-    `  <rect class="bg" x="0" y="0" width="1200" height="460"/>\n` +
-    `  <rect x="0" y="0" width="1200" height="460" fill="url(#cmp-grid)"/>\n` +
-    // Client card
-    `  <rect x="70" y="160" width="175" height="130" rx="12" class="surface" stroke-width="1"/>\n` +
-    `  <text x="90" y="190" class="lbl">${esc(C.kickers[0])}</text>\n` +
-    `  <text x="90" y="222" class="num-sm">${esc(C.figures[0])}</text>\n` +
-    `  <text x="90" y="246" class="mono-xs">${esc(C.captions[0])}</text>\n` +
-    `  <circle cx="222" cy="186" r="5" class="accent">` +
-    `<animate attributeName="opacity" values="1;0.4;1" dur="2.2s" repeatCount="indefinite"/></circle>\n` +
-    // Pipeline container
-    // Pipeline container: 12 px wider than the previous file on each side (273–927) so the
-    // 80 px "Session Dedup" name, centred under cell 1, clears the left stroke.
-    `  <rect x="273" y="112" width="654" height="254" rx="12" class="surface" stroke-width="1"/>\n` +
-    `  <text x="600" y="140" text-anchor="middle" class="kicker">${esc(C.kickers[2])}</text>\n` +
-    `  <path d="M 245,208 L 273,210 L 927,226 L 955,227 L 955,233 L 927,234 L 273,250 L 245,252 Z" fill="url(#cmp-funnel)"/>\n` +
-    // 12 engine cells + staggered names
-    `  <g text-anchor="middle">\n` +
-    cells.join("\n") +
-    `\n  </g>\n` +
-    // Token dots (drawn over the cells so they stay visible): four evaporate at engines, the
-    // survivor shrinks and reaches the provider
-    `  <g class="ink">\n` +
-    dots.join("\n") +
-    `\n    <circle r="4">\n` +
-    `      <animateMotion dur="8s" repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes="0;0.10;0.60;1" calcMode="linear"><mpath href="#cmp-tok"/></animateMotion>\n` +
-    `      <animate attributeName="r" values="4;4;2.4;2.4" keyTimes="0;0.10;0.60;1" dur="8s" repeatCount="indefinite"/>\n` +
-    `      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.10;0.11;0.60;0.64;1" dur="8s" repeatCount="indefinite"/>\n` +
-    `    </circle>\n` +
-    `  </g>\n` +
-    // The code token passes through untouched
-    `  <g>\n` +
-    `    <animateMotion dur="8s" repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes="0;0.14;0.64;1" calcMode="linear"><mpath href="#cmp-tok"/></animateMotion>\n` +
-    `    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.14;0.15;0.64;0.68;1" dur="8s" repeatCount="indefinite"/>\n` +
-    `    <rect x="-7" y="-7" width="14" height="14" rx="2" fill="none" class="stroke-ok" stroke-width="1.4"/>\n` +
-    `    <text y="3.5" text-anchor="middle" class="mono-xs ok">${esc(C.token[0])}</text>\n` +
-    `  </g>\n` +
-    // Default-stack bracket under the names
-    `  <path d="M 475,300 L 475,308 L 675,308 L 675,300" fill="none" class="stroke-info" stroke-width="1"/>\n` +
-    `  <text x="575" y="324" text-anchor="middle" class="mono-sm info">${esc(C.notes[0])}</text>\n` +
-    `  <text x="600" y="350" text-anchor="middle" class="mono-sm ok">${esc(C.notes[1])}</text>\n` +
-    // Provider card
-    `  <rect x="955" y="160" width="175" height="130" rx="12" class="surface" stroke-width="1"/>\n` +
-    `  <text x="975" y="190" class="lbl">${esc(C.kickers[1])}</text>\n` +
-    `  <text x="975" y="222" class="num-sm">${esc(C.figures[1])}</text>\n` +
-    `  <g transform="translate(975,236)">\n` +
-    `    <rect width="132" height="22" rx="11" fill="none" class="stroke-ok" stroke-width="1"/>\n` +
-    `    <text x="66" y="15" text-anchor="middle" class="mono-sm ok">` +
-    `<animate attributeName="opacity" values="0.75;0.75;1;1;0.75" keyTimes="0;0.58;0.62;0.78;1" dur="8s" repeatCount="indefinite"/>${esc(C.notes[2])}</text>\n` +
-    `  </g>\n` +
-    // Savings math badge
-    `  <g transform="translate(600,404)">\n` +
-    `    <rect x="-268" y="-16" width="536" height="30" rx="15" class="surface" stroke-width="1"/>\n` +
-    `    <text y="4" text-anchor="middle" class="mono-sm muted">${esc(M[0])}<tspan class="ok">${esc(M[1])}</tspan>${esc(M[2])}<tspan class="ok">${esc(M[3])}</tspan></text>\n` +
-    `  </g>\n` +
-    "</svg>\n"
+      gridDefs("cmp-grid") +
+      `  <defs>\n` +
+      `    <linearGradient id="cmp-funnel" x1="0" y1="0" x2="1" y2="0">\n` +
+      `      <stop offset="0" style="stop-color:var(--ink);stop-opacity:0.07"/>\n` +
+      `      <stop offset="1" style="stop-color:var(--ok);stop-opacity:0.18"/>\n` +
+      `    </linearGradient>\n` +
+      `    <path id="cmp-tok" d="M 245,230 L 955,230"/>\n` +
+      `  </defs>\n` +
+      `  <rect class="bg" x="0" y="0" width="1200" height="460"/>\n` +
+      `  <rect x="0" y="0" width="1200" height="460" fill="url(#cmp-grid)"/>\n` +
+      // Client card
+      `  <rect x="70" y="160" width="175" height="130" rx="12" class="surface" stroke-width="1"/>\n` +
+      `  <text x="90" y="190" class="lbl">${esc(C.kickers[0])}</text>\n` +
+      `  <text x="90" y="222" class="num-sm">${esc(C.figures[0])}</text>\n` +
+      `  <text x="90" y="246" class="label-xs">${esc(C.captions[0])}</text>\n` +
+      `  <circle cx="222" cy="186" r="5" class="accent">` +
+      `<animate attributeName="opacity" values="1;0.4;1" dur="2.2s" repeatCount="indefinite"/></circle>\n` +
+      // Pipeline container
+      // Pipeline container: 12 px wider than the previous file on each side (273–927) so the
+      // 80 px "Session Dedup" name, centred under cell 1, clears the left stroke.
+      `  <rect x="273" y="112" width="654" height="254" rx="12" class="surface" stroke-width="1"/>\n` +
+      `  <text x="600" y="140" text-anchor="middle" class="kicker">${esc(C.kickers[2])}</text>\n` +
+      `  <path d="M 245,208 L 273,210 L 927,226 L 955,227 L 955,233 L 927,234 L 273,250 L 245,252 Z" fill="url(#cmp-funnel)"/>\n` +
+      // 12 engine cells + staggered names
+      `  <g text-anchor="middle">\n` +
+      cells.join("\n") +
+      `\n  </g>\n` +
+      // Token dots (drawn over the cells so they stay visible): four evaporate at engines, the
+      // survivor shrinks and reaches the provider
+      `  <g class="ink">\n` +
+      dots.join("\n") +
+      `\n    <circle r="4">\n` +
+      `      <animateMotion dur="8s" repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes="0;0.10;0.60;1" calcMode="linear"><mpath href="#cmp-tok"/></animateMotion>\n` +
+      `      <animate attributeName="r" values="4;4;2.4;2.4" keyTimes="0;0.10;0.60;1" dur="8s" repeatCount="indefinite"/>\n` +
+      `      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.10;0.11;0.60;0.64;1" dur="8s" repeatCount="indefinite"/>\n` +
+      `    </circle>\n` +
+      `  </g>\n` +
+      // The code token passes through untouched
+      `  <g>\n` +
+      `    <animateMotion dur="8s" repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes="0;0.14;0.64;1" calcMode="linear"><mpath href="#cmp-tok"/></animateMotion>\n` +
+      `    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.14;0.15;0.64;0.68;1" dur="8s" repeatCount="indefinite"/>\n` +
+      `    <rect x="-7" y="-7" width="14" height="14" rx="2" fill="none" class="stroke-ok" stroke-width="1.4"/>\n` +
+      `    <text y="3.5" text-anchor="middle" class="mono-xs ok">${esc(C.token[0])}</text>\n` +
+      `  </g>\n` +
+      // Default-stack bracket under the names
+      `  <path d="M 475,300 L 475,308 L 675,308 L 675,300" fill="none" class="stroke-info" stroke-width="1"/>\n` +
+      `  <text x="575" y="324" text-anchor="middle" class="label-sm info">${esc(C.notes[0])}</text>\n` +
+      `  <text x="600" y="350" text-anchor="middle" class="label-sm ok">${esc(C.notes[1])}</text>\n` +
+      // Provider card
+      `  <rect x="955" y="160" width="175" height="130" rx="12" class="surface" stroke-width="1"/>\n` +
+      `  <text x="975" y="190" class="lbl">${esc(C.kickers[1])}</text>\n` +
+      `  <text x="975" y="222" class="num-sm">${esc(C.figures[1])}</text>\n` +
+      `  <g transform="translate(975,236)">\n` +
+      `    <rect width="132" height="22" rx="11" fill="none" class="stroke-ok" stroke-width="1"/>\n` +
+      `    <text x="66" y="15" text-anchor="middle" class="label-sm ok">` +
+      `<animate attributeName="opacity" values="0.75;0.75;1;1;0.75" keyTimes="0;0.58;0.62;0.78;1" dur="8s" repeatCount="indefinite"/>${esc(C.notes[2])}</text>\n` +
+      `  </g>\n` +
+      // Savings math badge
+      `  <g transform="translate(600,404)">\n` +
+      `    <rect x="-268" y="-16" width="536" height="30" rx="15" class="surface" stroke-width="1"/>\n` +
+      `    <text y="4" text-anchor="middle" class="label-sm muted">${esc(M[0])}<tspan class="ok">${esc(M[1])}</tspan>${esc(M[2])}<tspan class="ok">${esc(M[3])}</tspan></text>\n` +
+      `  </g>\n` +
+      "</svg>\n"
   );
 }
 

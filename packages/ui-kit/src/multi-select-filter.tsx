@@ -3,7 +3,7 @@
 import { ChevronDown, Search, X } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { Button } from "./button";
+import { Button, type ButtonSize } from "./button";
 import { Checkbox } from "./checkbox";
 import { Input } from "./input";
 import { cn } from "./lib/utils";
@@ -22,6 +22,44 @@ export interface MultiSelectFilterOption {
   disabled?: boolean;
 }
 
+/** Interface text derived from the filter `label` or the current selection. */
+export interface MultiSelectFilterLabels {
+  /** Trigger summary when more than one option is selected. */
+  selectedCount: (count: number) => string;
+  /** Trigger accessible name. */
+  trigger: (label: string) => string;
+  /** Popover dialog accessible name. */
+  popover: (label: string) => string;
+  /** Option group accessible name. */
+  optionsGroup: (label: string) => string;
+  /** Clear-search button accessible name. */
+  clearSearch: (label: string) => string;
+  /** Empty search result. */
+  noOptions: string;
+}
+
+export const defaultMultiSelectFilterLabels: MultiSelectFilterLabels = {
+  selectedCount: (count) => `${count} selected`,
+  trigger: (label) => `${label} filter`,
+  popover: (label) => `${label} filter options`,
+  optionsGroup: (label) => `${label} options`,
+  clearSearch: (label) => `Clear ${label.toLowerCase()} search`,
+  noOptions: "No options found.",
+};
+
+/** Copies only the defined overrides, so a missing or `undefined` key keeps the English default. */
+function resolveMultiSelectFilterLabels(
+  overrides: Partial<MultiSelectFilterLabels> | undefined,
+): MultiSelectFilterLabels {
+  const labels: MultiSelectFilterLabels = { ...defaultMultiSelectFilterLabels };
+  if (!overrides) return labels;
+  for (const key of Object.keys(overrides) as (keyof MultiSelectFilterLabels)[]) {
+    const override = overrides[key];
+    if (override !== undefined) Object.assign(labels, { [key]: override });
+  }
+  return labels;
+}
+
 export interface MultiSelectFilterProps {
   label: string;
   allLabel: string;
@@ -34,6 +72,10 @@ export interface MultiSelectFilterProps {
   align?: "start" | "center" | "end";
   className?: string;
   popoverClassName?: string;
+  /** Opt into the host toolbar's control height; compact table filters stay small by default. */
+  triggerSize?: ButtonSize;
+  /** Localized interface text; missing or `undefined` keys fall back to defaultMultiSelectFilterLabels. */
+  labels?: Partial<MultiSelectFilterLabels>;
 }
 
 export function multiSelectFilterValues(
@@ -85,17 +127,19 @@ export function filterMultiSelectFilterOptions(
 export function multiSelectFilterDisplayLabel({
   allLabel,
   noneLabel = "None selected",
+  selectedCountLabel = defaultMultiSelectFilterLabels.selectedCount,
   options,
   value,
 }: {
   allLabel: string;
   noneLabel?: string;
+  selectedCountLabel?: (count: number) => string;
   options: readonly MultiSelectFilterOption[];
   value: MultiSelectFilterValue;
 }): string {
   if (value.mode === "all") return allLabel;
   if (value.mode === "none") return noneLabel;
-  if (value.values.length > 1) return `${value.values.length} selected`;
+  if (value.values.length > 1) return selectedCountLabel(value.values.length);
   const selected = value.values[0];
   return options.find((option) => option.value === selected)?.label ?? selected ?? noneLabel;
 }
@@ -113,7 +157,10 @@ export function MultiSelectFilter({
   align = "start",
   className,
   popoverClassName,
+  triggerSize = "sm",
+  labels: labelOverrides,
 }: MultiSelectFilterProps) {
+  const labels = resolveMultiSelectFilterLabels(labelOverrides);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const menuId = useId();
@@ -126,7 +173,13 @@ export function MultiSelectFilter({
     value.mode === "some" && selectedValues.length === 1
       ? options.find((option) => option.value === selectedValues[0])
       : undefined;
-  const displayLabel = multiSelectFilterDisplayLabel({ allLabel, noneLabel, options, value });
+  const displayLabel = multiSelectFilterDisplayLabel({
+    allLabel,
+    noneLabel,
+    selectedCountLabel: labels.selectedCount,
+    options,
+    value,
+  });
 
   return (
     <Popover
@@ -140,11 +193,11 @@ export function MultiSelectFilter({
         <Button
           type="button"
           variant="outline"
-          size="sm"
+          size={triggerSize}
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-controls={menuId}
-          aria-label={`${label} filter`}
+          aria-label={labels.trigger(label)}
           className={cn("ci-multi-select-filter__trigger", className)}
         >
           <span className="ci-multi-select-filter__value">
@@ -157,7 +210,7 @@ export function MultiSelectFilter({
       <PopoverContent
         id={menuId}
         role="dialog"
-        aria-label={`${label} filter options`}
+        aria-label={labels.popover(label)}
         align={align}
         sideOffset={6}
         className={cn("ci-multi-select-filter__popover", popoverClassName)}
@@ -180,7 +233,7 @@ export function MultiSelectFilter({
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                aria-label={`Clear ${label.toLowerCase()} search`}
+                aria-label={labels.clearSearch(label)}
                 onClick={() => setQuery("")}
                 className="ci-multi-select-filter__clear"
               >
@@ -189,7 +242,7 @@ export function MultiSelectFilter({
             ) : null}
           </div>
         ) : null}
-        <div role="group" aria-label={`${label} options`} className="ci-multi-select-filter__options">
+        <div role="group" aria-label={labels.optionsGroup(label)} className="ci-multi-select-filter__options">
           <div className="ci-multi-select-filter__option" data-selected={value.mode === "all" || undefined}>
             <Checkbox
               checked={value.mode === "all"}
@@ -223,7 +276,7 @@ export function MultiSelectFilter({
             );
           })}
           {visibleOptions.length === 0 ? (
-            <p className="ci-multi-select-filter__empty">No options found.</p>
+            <p className="ci-multi-select-filter__empty">{labels.noOptions}</p>
           ) : null}
         </div>
       </PopoverContent>
