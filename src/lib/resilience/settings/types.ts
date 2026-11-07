@@ -277,7 +277,15 @@ export interface StreamThroughputWatchdogSettings {
   minUsefulBytes: number;
 }
 
+/** Opt-in preferred-account response-start failover, scoped to Antigravity/agy. */
+export interface AntigravityPreferredFailoverSettings {
+  enabled: boolean;
+  preferredTimeoutMs: number;
+  gemini38PreferredTimeoutMs: number;
+}
+
 export interface ResilienceSettings {
+  antigravityPreferredFailover: AntigravityPreferredFailoverSettings;
   requestQueue: RequestQueueSettings;
   connectionCooldown: Record<AuthCategory, ConnectionCooldownProfileSettings>;
   providerBreaker: Record<AuthCategory, ProviderBreakerProfileSettings>;
@@ -295,6 +303,7 @@ export interface ResilienceSettings {
 }
 
 export interface ResilienceSettingsPatch {
+  antigravityPreferredFailover?: Partial<AntigravityPreferredFailoverSettings>;
   requestQueue?: Partial<RequestQueueSettings>;
   connectionCooldown?: Partial<Record<AuthCategory, Partial<ConnectionCooldownProfileSettings>>>;
   providerBreaker?: Partial<Record<AuthCategory, Partial<ProviderBreakerProfileSettings>>>;

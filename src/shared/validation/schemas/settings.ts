@@ -210,8 +210,17 @@ export const tokenRefreshBreakerSettingsSchema = z
   })
   .strict();
 
+export const antigravityPreferredFailoverSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    preferredTimeoutMs: z.number().int().min(500).max(120_000).optional(),
+    gemini38PreferredTimeoutMs: z.number().int().min(500).max(120_000).optional(),
+  })
+  .strict();
+
 export const updateResilienceSchema = z
   .object({
+    antigravityPreferredFailover: antigravityPreferredFailoverSchema.optional(),
     requestQueue: requestQueueSettingsSchema.optional(),
     connectionCooldown: z
       .object({
@@ -270,6 +279,7 @@ export const updateResilienceSchema = z
   .superRefine((value, ctx) => {
     const provided = [
       value.requestQueue,
+      value.antigravityPreferredFailover,
       value.connectionCooldown,
       value.providerBreaker,
       value.tokenRefreshBreaker,

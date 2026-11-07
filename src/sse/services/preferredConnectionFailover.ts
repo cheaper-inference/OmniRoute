@@ -1,14 +1,14 @@
+import type {
+  AntigravityPreferredFailoverSettings,
+} from "@/lib/resilience/settings/types";
+
 /** Response-start cap for an API-key preferred Antigravity connection.
  *
  * Opt-in: a preferred account is only a soft ordering hint. A locally shortened
  * deadline may try ONE eligible sibling, without cooling the first account.
  * A forced pin, managed lease, Muse owner or combo target never uses this policy.
  */
-export type PreferredFailoverSettings = {
-  enabled: boolean;
-  preferredTimeoutMs: number;
-  gemini38PreferredTimeoutMs: number;
-};
+export type PreferredFailoverSettings = AntigravityPreferredFailoverSettings;
 
 export const DEFAULT_PREFERRED_FAILOVER_SETTINGS: PreferredFailoverSettings = {
   enabled: false,

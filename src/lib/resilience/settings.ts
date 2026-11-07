@@ -6,6 +6,10 @@ import {
 
 import type { JsonRecord, ResilienceSettings, ResilienceSettingsPatch } from "./settings/types";
 import {
+  normalizePreferredFailoverSettings,
+  readPreferredFailoverSettings,
+} from "@/sse/services/preferredConnectionFailover";
+import {
   asRecord,
   toInteger,
   resolveStreamRecoveryDefaults,
@@ -83,6 +87,7 @@ export const DEFAULT_REQUEST_QUEUE_MAX_DEPTH = (() => {
 })();
 
 export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
+  antigravityPreferredFailover: readPreferredFailoverSettings(),
   requestQueue: {
     autoEnableApiKeyProviders: true,
     requestsPerMinute: DEFAULT_API_LIMITS.requestsPerMinute,
@@ -329,6 +334,7 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     streamRecovery: streamRecoveryDefaults,
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
     credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
+    antigravityPreferredFailover: DEFAULT_RESILIENCE_SETTINGS.antigravityPreferredFailover,
   };
 }
 
@@ -367,6 +373,9 @@ export function resolveResilienceSettings(
   const fallback = buildLegacyFallback(record);
 
   const resolved: ResilienceSettings = {
+    antigravityPreferredFailover: normalizePreferredFailoverSettings(
+      current.antigravityPreferredFailover, fallback.antigravityPreferredFailover
+    ),
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(
@@ -440,6 +449,9 @@ export function mergeResilienceSettings(
   updates: ResilienceSettingsPatch
 ): ResilienceSettings {
   return {
+    antigravityPreferredFailover: normalizePreferredFailoverSettings(
+      updates.antigravityPreferredFailover, current.antigravityPreferredFailover
+    ),
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(

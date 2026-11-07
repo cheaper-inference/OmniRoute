@@ -96,6 +96,7 @@ import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.
 import { markEmergencyFallback } from "./emergencyFallbackHeader.ts";
 import { resolveEmergencyFallbackDecision } from "./emergencyFallbackHeader.ts";
 import { resolveInternalUpstreamStartTimeoutMs } from "../services/internalUpstreamStartTimeout";
+import { resolveResilienceSettings } from "@/lib/resilience/settings";
 import {
   resolvePreferredConnectionUpstreamStartTimeoutMs,
 } from "../services/preferredConnectionFailover";
@@ -1723,9 +1724,15 @@ async function handleSingleModelChat(
   });
 
   const userAgent = request?.headers?.get("user-agent") || "";
-  const baseRetrySettings = resolveCooldownAwareRetrySettings(
-    runtimeOptions.cachedSettings ?? (await getCachedSettings().catch(() => ({})))
-  );
+  const cachedRuntimeSettings =
+    runtimeOptions.cachedSettings ?? (await getCachedSettings().catch(() => ({})));
+  const baseRetrySettings = resolveCooldownAwareRetrySettings(cachedRuntimeSettings);
+  // The read cache invalidates on settings writes (up to its 5s TTL).
+  // No restart is needed for newly dispatched Antigravity requests.
+  const preferredFailoverSettings =
+    provider === "antigravity" || provider === "agy"
+      ? resolveResilienceSettings(cachedRuntimeSettings).antigravityPreferredFailover
+      : undefined;
   const retrySettings = disableCooldownAwareRetry(
     baseRetrySettings,
     provider === "claude-web" ||
@@ -2162,8 +2169,12 @@ async function handleSingleModelChat(
         effectiveModel,
         preferredFailoverUsed || hasForcedConnection || runtimeOptions.managedLease ||
           museOwner || isCombo
-          ? { enabled: false, preferredTimeoutMs: 5_000, gemini38PreferredTimeoutMs: 12_000 }
-          : undefined
+          ? {
+              enabled: false,
+              preferredTimeoutMs: preferredFailoverSettings?.preferredTimeoutMs ?? 5_000,
+              gemini38PreferredTimeoutMs: preferredFailoverSettings?.gemini38PreferredTimeoutMs ?? 12_000,
+            }
+          : preferredFailoverSettings
       );
       // 4. Execute chat via core after breaker gate checks (with optional TLS tracking)
       if (telemetry) telemetry.startPhase("connect");
