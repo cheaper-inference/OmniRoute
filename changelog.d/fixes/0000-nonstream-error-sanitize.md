@@ -1,1 +1,0 @@
-- **fix(sse):** non-streaming failures no longer relay the raw upstream error response to the client; the sanitized error body is sent and upstream headers like `Set-Cookie` are dropped while the `Retry-After` hint is kept.
