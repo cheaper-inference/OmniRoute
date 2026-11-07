@@ -8,6 +8,33 @@ import { BooleanField, NumberField } from "./ResilienceFields";
 
 type OverrideKind = "provider" | "model";
 
+function canonicalOverrideKey(kind: OverrideKind, key: string): string {
+  const raw = key.trim().toLowerCase();
+  if (kind === "provider" && raw === "agy") return "antigravity";
+  if (kind === "model" && raw.startsWith("agy/")) return "antigravity/" + raw.slice(4);
+  return raw;
+}
+
+function validOverrideKey(kind: OverrideKind, key: string): boolean {
+  if (!/^[a-z0-9][a-z0-9._/@:+-]*\\*?$/i.test(key) || key.length > 180) return false;
+  return kind === "provider" ? !/[/*]/.test(key) : key.includes("/");
+}
+
+function validateOverride(
+  kind: OverrideKind,
+  key: string,
+  ms: number,
+  current: Record<string, number>
+): string | null {
+  if (!validOverrideKey(kind, key)) return "Enter a valid " +
+    (kind === "provider" ? "provider" : "model (provider/model or provider/model*)") + " ID.";
+  if (!(ms === 0 || (ms >= 500 && ms <= 120_000)))
+    return "Timeout must be 0 (disable) or between 500 and 120000 ms.";
+  if (Object.keys(current).length >= 64 && !Object.prototype.hasOwnProperty.call(current, key))
+    return "Maximum 64 overrides per section.";
+  return null;
+}
+
 function OverrideEditor({
   kind,
   value,
@@ -25,23 +52,10 @@ function OverrideEditor({
   const name = kind === "provider" ? "Provider" : "Model (provider/model or provider/model*)";
 
   const add = () => {
-    const raw = key.trim().toLowerCase();
-    const canonical = raw === "agy" && kind === "provider"
-      ? "antigravity" : raw.startsWith("agy/") && kind === "model"
-        ? "antigravity/" + raw.slice(4) : raw;
-    if (!/^[a-z0-9][a-z0-9._/@:+-]*\*?$/i.test(canonical) ||
-        canonical.length > 180 ||
-        (kind === "provider" && /[/*]/.test(canonical)) ||
-        (kind === "model" && !canonical.includes("/"))) {
-      setError("Enter a valid " + name.toLowerCase() + " ID.");
-      return;
-    }
-    if (!(timeoutMs === 0 || (timeoutMs >= 500 && timeoutMs <= 120_000))) {
-      setError("Timeout must be 0 (disable) or between 500 and 120000 ms.");
-      return;
-    }
-    if (Object.keys(value).length >= 64 && !(canonical in value)) {
-      setError("Maximum 64 overrides per section.");
+    const canonical = canonicalOverrideKey(kind, key);
+    const issue = validateOverride(kind, canonical, timeoutMs, value);
+    if (issue) {
+      setError(issue);
       return;
     }
     onChange({ ...value, [canonical]: timeoutMs });
