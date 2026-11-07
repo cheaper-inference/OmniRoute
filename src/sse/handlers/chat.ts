@@ -2309,7 +2309,7 @@ async function handleSingleModelChat(
             result.response, credentials.connectionId
           );
           excludedConnectionIds.add(credentials.connectionId);
-          log.info("AUTH", "Preferred Antigravity account timed out; trying one sibling");
+          log.info("AUTH", "Preferred account response-start timed out; trying one eligible sibling");
           continue;
         }
         return withSelectedConnectionHeader(result.response, credentials.connectionId);
