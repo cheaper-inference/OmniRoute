@@ -69,12 +69,12 @@ test("account rotation is exposed through bounded routing telemetry headers", as
       return new Response(
         JSON.stringify({
           error: {
-            message: "Invalid API key",
-            type: "invalid_request_error",
-            code: "invalid_api_key",
+            message: "Rate limit exceeded",
+            type: "rate_limit_error",
+            code: "rate_limit_exceeded",
           },
         }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
+        { status: 429, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -97,7 +97,7 @@ test("account rotation is exposed through bounded routing telemetry headers", as
   const servingConnection = attempts[1].includes("sk-account-fallback-first") ? first : second;
   assert.equal(response.headers.get("X-OmniRoute-Selected-Connection-Id"), servingConnection.id);
   assert.equal(response.headers.get("X-OmniRoute-Account-Fallbacks"), "1");
-  assert.equal(response.headers.get("X-OmniRoute-Account-Fallback-Reasons"), "http_401");
+  assert.equal(response.headers.get("X-OmniRoute-Account-Fallback-Reasons"), "http_429");
   assert.equal(response.headers.get("X-OmniRoute-Same-Account-Retries"), null);
   assert.equal(response.headers.get("X-OmniRoute-Routing-Wait-Ms"), null);
 
