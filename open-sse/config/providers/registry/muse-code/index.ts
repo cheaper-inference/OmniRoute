@@ -45,11 +45,33 @@ export const muse_codeProvider: RegistryEntry = buildOpenAiCompatibleRegistryEnt
   modelsUrl: `${MUSE_CODE_API_BASE_URL}/models`,
   extraHeaders: { "User-Agent": MUSE_CODE_INFERENCE_USER_AGENT },
   passthroughModels: true,
+  // Meta rejects any declared tool name over 64 chars; ZCode MCP ids exceed it.
+  toolNameMaxLength: 64,
   reasoningTransport: "opaque",
   defaultContextLength: 200000,
   models: [
     museSparkModel("muse-spark-1.3", "Muse Spark 1.3"),
     museSparkModel("muse-spark-1.3-contributor", "Muse Spark 1.3 Contributor"),
+    {
+      id: "muse-wonder-1.0",
+      name: "Muse Wonder 1.0",
+      supportsReasoning: true,
+      toolCalling: true,
+      supportsVision: true,
+      targetFormat: "openai-responses",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "muse-wonder-1.0-contributor",
+      name: "Muse Wonder 1.0 Contributor",
+      supportsReasoning: true,
+      toolCalling: true,
+      supportsVision: true,
+      targetFormat: "openai-responses",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+    },
     museSparkModel("muse-spark-1.2", "Muse Spark 1.2", {
       thinking: ["minimal", "low", "medium", "high", "xhigh"],
     }),

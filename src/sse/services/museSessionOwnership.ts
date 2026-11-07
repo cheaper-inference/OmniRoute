@@ -13,7 +13,13 @@ import {
 import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 
 const digest = (value: string) => opaqueTokenFingerprint(value);
-type Owner = { connectionId: string; generation?: string; account?: string };
+type Owner = {
+  connectionId: string;
+  generation?: string;
+  account?: string;
+  adopted?: boolean;
+  pendingReferences?: string[];
+};
 type Connection = { id: string; unavailable?: boolean };
 
 export function usesMuseOAuthOwnership(
@@ -183,6 +189,19 @@ function continuationIds(value: unknown, ids = new Set<string>()): Set<string> {
   return ids;
 }
 
+function hasUnadoptableItems(value: unknown): boolean {
+  if (Array.isArray(value)) return value.some(hasUnadoptableItems);
+  if (!value || typeof value !== "object") return false;
+  const item = value as Record<string, unknown>;
+  if (item.type === "reasoning" || item.type === "item_reference") return true;
+  if (
+    (item.type === "function_call" || item.type === "function_call_output") &&
+    typeof item.call_id !== "string"
+  )
+    return true;
+  return Object.values(item).some(hasUnadoptableItems);
+}
+
 /** Atomic session assignment; once output was served, pins never expire or move to another account. */
 export function claimMuseSession(
   scope: string,
@@ -198,7 +217,14 @@ export function claimMuseSession(
     const stored = load(`session:${scope}`);
     const prior = stored ? (JSON.parse(stored) as Owner) : null;
     const current = prior && candidates.find((candidate) => candidate.id === prior.connectionId);
-    const pinned = load(`served:${scope}`) === "1";
+    const pinned = load(`served:${scope}`) === "1" || !!prior?.adopted;
+    const references = continuationIds(body);
+    const hasForbiddenHistory =
+      opaqueHashes(body).size > 0 ||
+      [...references].some((id) => id.startsWith("item:")) ||
+      !!body.previous_response_id ||
+      !!body._omniroutePreviousResponseResumed ||
+      hasUnadoptableItems(body);
     if (
       prior &&
       (pinned || (current && !current.unavailable && (!forcedId || forcedId === current.id)))
@@ -214,21 +240,14 @@ export function claimMuseSession(
         throw new MuseOwnershipError("Requested Muse account differs from the session owner.");
       }
     } else {
-      if (
-        opaqueHashes(body).size ||
-        continuationIds(body).size ||
-        body.previous_response_id ||
-        body._omniroutePreviousResponseResumed ||
-        (Array.isArray(body.input) &&
-          body.input.some(
-            (item) =>
-              item &&
-              typeof item === "object" &&
-              ["reasoning", "function_call", "function_call_output", "item_reference"].includes(
-                String(item.type)
-              )
-          ))
-      ) {
+      const adopt =
+        !prior &&
+        references.size > 0 &&
+        !hasForbiddenHistory &&
+        candidates.length === 1 &&
+        !candidates[0].unavailable &&
+        (!forcedId || forcedId === candidates[0].id);
+      if (hasForbiddenHistory || (references.size > 0 && !adopt)) {
         throw new MuseOwnershipError(
           "Muse continuation has no recorded owner; start an independent session without imported opaque history."
         );
@@ -243,7 +262,13 @@ export function claimMuseSession(
         : (rotation.find((candidate) => !candidate.unavailable) ?? rotation[0]);
       if (!connection)
         throw new MuseOwnershipError("Requested Muse OAuth account is unavailable.", 503);
-      owner = { connectionId: connection.id };
+      owner = adopt
+        ? {
+            connectionId: connection.id,
+            adopted: true,
+            pendingReferences: [...references].map(digest),
+          }
+        : { connectionId: connection.id };
       save(`session:${scope}`, JSON.stringify(owner));
       if (!forcedId) save("cursor", String(cursor + 1));
     }
@@ -254,8 +279,19 @@ export function claimMuseSession(
         );
       }
     }
-    for (const id of continuationIds(body)) {
-      if (!owner.generation || load(`reference:${scope}:${digest(id)}`) !== owner.generation) {
+    for (const id of references) {
+      const hash = digest(id);
+      if (
+        !(owner.pendingReferences?.includes(hash) && !owner.generation) &&
+        (!owner.generation || load(`reference:${scope}:${hash}`) !== owner.generation)
+      ) {
+        // Client threads carry tool items issued under other models or restored by
+        // compaction; record them under the scope's bound generation. Opaque and item:
+        // history stays fail-closed.
+        if (owner.generation && id.startsWith("call:")) {
+          save(`reference:${scope}:${hash}`, owner.generation);
+          continue;
+        }
         throw new MuseOwnershipError(
           "Muse tool continuation was not issued to this session and caller generation."
         );
@@ -292,7 +328,13 @@ export function bindMuseGeneration(
         "Muse caller generation changed; existing session reasoning cannot be replayed under the new credential."
       );
     }
-    save(`session:${scope}`, JSON.stringify({ connectionId, generation, account }));
+    for (const hash of owner.pendingReferences || []) {
+      save(`reference:${scope}:${hash}`, generation);
+    }
+    save(
+      `session:${scope}`,
+      JSON.stringify({ connectionId, generation, account, ...(owner.adopted && { adopted: true }) })
+    );
   });
   return generation;
 }
