@@ -16365,6 +16365,7 @@ paths:
 
   /api/v1/fal/models:
     get:
+      x-agent-skill-excluded: true
       tags: [Models]
       summary: Discover Fal endpoints or load one endpoint's validated schema
       security:
@@ -16383,6 +16384,7 @@ paths:
         "502": { description: Upstream discovery unavailable or incomplete }
   /api/v1/fal/run:
     post:
+      x-agent-skill-excluded: true
       tags: [Providers]
       summary: Execute validated native Fal model inputs
       security:
@@ -16432,6 +16434,7 @@ paths:
     parameters:
       - { in: path, name: id, required: true, schema: { type: string } }
     get:
+      x-agent-skill-excluded: true
       tags: [Providers]
       summary: Poll a saved Fal job or retrieve its result without resubmission
       security:
@@ -16456,6 +16459,7 @@ paths:
         "403": { description: Connection is outside the caller's scope }
         "404": { description: Job not found or not owned by caller }
     post:
+      x-agent-skill-excluded: true
       tags: [Providers]
       summary: Send one authorized invocation to an active Fal realtime or HTTP WebSocket
       security:
@@ -16476,6 +16480,7 @@ paths:
         "410": { description: WebSocket session expired or belongs to another worker }
         "429": { description: Rate, quota or budget limit }
     delete:
+      x-agent-skill-excluded: true
       tags: [Providers]
       summary: Cancel a saved Fal job or close its realtime session
       security:
@@ -16488,11 +16493,13 @@ paths:
     parameters:
       - { in: path, name: id, required: true, schema: { type: string } }
     get:
+      x-agent-skill-excluded: true
       tags: [Providers]
       summary: Search Fal models or load a schema for a managed connection
       responses:
         "200": { description: Catalog page or validated endpoint schema }
     put:
+      x-agent-skill-excluded: true
       tags: [Providers]
       summary: Register a validated native Fal endpoint or schema override
       requestBody:
@@ -16511,6 +16518,7 @@ paths:
         "200": { description: Schema validated and saved with native execution path }
         "400": { description: Invalid registration or input schema }
     delete:
+      x-agent-skill-excluded: true
       tags: [Providers]
       summary: Remove a Fal endpoint override and cached schema
       parameters:

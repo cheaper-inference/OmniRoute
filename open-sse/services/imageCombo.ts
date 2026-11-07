@@ -274,7 +274,7 @@ export async function executeImageCombo(
   comboName: string,
   body: Record<string, unknown>,
   auth: {
-    prepareFalInput?: PrepareFalInput;
+    prepareFalInput?: PrepareFalInput | null;
     request: Request;
     policy: { apiKeyInfo?: { id?: string; name?: string } | null };
     /** GHSA-3w2r: the caller key's scope; omitted = unrestricted (unchanged). */

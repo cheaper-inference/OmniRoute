@@ -2,6 +2,7 @@ import { z } from "zod";
 import { FalError } from "@omniroute/open-sse/handlers/fal/client";
 import { errorResponse, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { readRequestBodyWithLimit, getBodySizeLimit } from "@/shared/middleware/bodySizeGuard";
+import { isFalNativeEnabled } from "@/shared/utils/featureFlags";
 
 export const falRunSchema = z
   .object({
@@ -57,6 +58,11 @@ export function falErrorResponse(error: unknown) {
   if (error instanceof FalError && error.retryAfter)
     response.headers.set("Retry-After", error.retryAfter);
   return response;
+}
+
+/** FAL_NATIVE_ENABLED off: the native routes do not exist for callers. */
+export function falNativeDisabled(): Response | null {
+  return isFalNativeEnabled() ? null : errorResponse(404, "Fal native gateway is disabled");
 }
 
 export function falOptions(methods: string) {

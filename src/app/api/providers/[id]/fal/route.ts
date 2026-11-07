@@ -8,7 +8,7 @@ import { canonicalFalEndpoint } from "@omniroute/open-sse/config/falEndpoint";
 import { FalClient, FalError } from "@omniroute/open-sse/handlers/fal/client";
 import { falCapabilities, compileFalInput } from "@omniroute/open-sse/handlers/fal/schema";
 import { resolveFalDefinition } from "@/lib/fal/runtime";
-import { falErrorResponse } from "@/lib/fal/http";
+import { falErrorResponse, falNativeDisabled } from "@/lib/fal/http";
 
 type Context = { params: Promise<{ id: string }> };
 const registration = z
@@ -31,6 +31,8 @@ async function connectionContext(id: string) {
 export async function GET(request: Request, route: Context) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
+  const disabled = falNativeDisabled();
+  if (disabled) return disabled;
   try {
     const { id } = await route.params;
     const client = await connectionContext(id);
@@ -54,6 +56,8 @@ export async function GET(request: Request, route: Context) {
 export async function PUT(request: Request, route: Context) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
+  const disabled = falNativeDisabled();
+  if (disabled) return disabled;
   try {
     const { id } = await route.params;
     await connectionContext(id);
@@ -79,6 +83,8 @@ export async function PUT(request: Request, route: Context) {
 export async function DELETE(request: Request, route: Context) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
+  const disabled = falNativeDisabled();
+  if (disabled) return disabled;
   try {
     const { id } = await route.params;
     await connectionContext(id);

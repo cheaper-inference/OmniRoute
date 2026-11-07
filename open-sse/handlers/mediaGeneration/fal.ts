@@ -1,6 +1,6 @@
-import { canonicalFalEndpoint } from "../../config/falEndpoint.ts";
-import { prepareFalCompatibility, type PrepareFalInput } from "../fal/compatibility.ts";
-import { falTrackingUrl, normalizeFalOutput } from "../fal/client.ts";
+import { falModelPath, falSelectionEndpoint } from "../../config/falEndpoint.ts";
+import type { PrepareFalInput } from "../fal/compatibility.ts";
+import { FalError, falTrackingUrl, normalizeFalOutput } from "../fal/client.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import {
   FetchTimeoutError,
@@ -289,6 +289,20 @@ export function normalizeFalMediaResult(payload: unknown, kind: MediaKind) {
   };
 }
 
+function absoluteFalUrl(value: unknown, baseUrl: string): string | undefined {
+  const url = stringValue(value);
+  if (!url) return undefined;
+  return url.startsWith("http://") || url.startsWith("https://")
+    ? url
+    : `${baseUrl.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
+}
+
+/** The native path pins upstream-supplied URLs to the fal queue before sending the key. */
+function falQueueUrl(value: unknown, requestId: string, baseUrl: string, native: boolean) {
+  if (!native) return absoluteFalUrl(value, baseUrl);
+  return stringValue(value) ? falTrackingUrl(value, requestId) : undefined;
+}
+
 function getToken(credentials: FalCredentials | null | undefined): string {
   return String(credentials?.apiKey || credentials?.accessToken || "");
 }
@@ -306,6 +320,7 @@ async function runFalQueue({
   credentials,
   log,
   signal,
+  native = false,
 }: {
   model: string;
   body: FalBody;
@@ -315,6 +330,7 @@ async function runFalQueue({
   credentials: FalCredentials | null | undefined;
   log?: FalLog | null;
   signal?: AbortSignal | null;
+  native?: boolean;
 }) {
   const startTime = Date.now();
   const baseUrl = providerConfig.baseUrl.replace(/\/$/, "");
@@ -332,7 +348,7 @@ async function runFalQueue({
   const timeoutMs = getConfiguredTimeout();
   const deadline = startTime + timeoutMs;
   const resolvedModel = resolveFalModel(model, body, kind);
-  const falModel = canonicalFalEndpoint(resolvedModel);
+  const falModel = native ? falSelectionEndpoint(resolvedModel) : falModelPath(resolvedModel);
   const queueUrl = `${baseUrl}/${falModel}`;
 
   try {
@@ -370,8 +386,12 @@ async function runFalQueue({
       return normalized;
     }
 
-    const statusUrl = falTrackingUrl(createPayload.status_url, requestId);
-    const responseUrl = falTrackingUrl(createPayload.response_url, requestId);
+    const statusUrl =
+      falQueueUrl(createPayload.status_url, requestId, baseUrl, native) ||
+      `${queueUrl}/requests/${requestId}/status`;
+    const responseUrl =
+      falQueueUrl(createPayload.response_url, requestId, baseUrl, native) ||
+      `${queueUrl}/requests/${requestId}`;
 
     while (Date.now() < deadline) {
       const statusResponse = await fetchWithTimeout(statusUrl, {
@@ -403,7 +423,9 @@ async function runFalQueue({
         }
 
         const normalized = normalizeFalMediaResult(resultPayload, kind);
-        if (normalized.success) Object.assign(normalized.data, normalizeFalOutput(resultPayload));
+        if (native && normalized.success) {
+          Object.assign(normalized.data, normalizeFalOutput(resultPayload));
+        }
         saveCallLog({
           method: "POST",
           path: `/v1/${kind === "video" ? "videos" : "music"}/generations`,
@@ -446,7 +468,7 @@ async function runFalQueue({
   }
 }
 
-export async function handleFalVideoGeneration(args: {
+type FalGenerationArgs = {
   model: string;
   provider: string;
   providerConfig: FalProviderConfig;
@@ -454,56 +476,70 @@ export async function handleFalVideoGeneration(args: {
   credentials: FalCredentials | null | undefined;
   log?: FalLog | null;
   signal?: AbortSignal | null;
-  prepareFalInput?: PrepareFalInput;
-}) {
+  /** FAL_NATIVE_ENABLED, injected by the routes. Null keeps the established request body. */
+  prepareFalInput?: PrepareFalInput | null;
+};
+
+function isBuiltInFalVideoModel(model: string): boolean {
+  return (
+    ["veo3.1/lite", "fal-ai/veo3.1/lite"].includes(model) ||
+    model.startsWith("xai/grok-imagine-video/") ||
+    model.startsWith("google/gemini-omni-flash")
+  );
+}
+
+async function runNativeFalQueue(
+  { prepareFalInput, ...args }: FalGenerationArgs & { prepareFalInput: PrepareFalInput },
+  kind: MediaKind,
+  buildBody: (() => FalBody) | null
+) {
   try {
-    return await runFalQueue({
-      ...args,
-      body:
-        args.body.fal_input !== undefined ||
-        args.model.startsWith("alibaba/") ||
-        (!["veo3.1/lite", "fal-ai/veo3.1/lite"].includes(args.model) &&
-          !args.model.startsWith("xai/grok-imagine-video/") &&
-          !args.model.startsWith("google/gemini-omni-flash"))
-          ? await (args.prepareFalInput ?? prepareFalCompatibility)(
-              canonicalFalEndpoint(args.model),
-              args.body,
-              args.credentials ?? {},
-              args.signal ?? undefined
-            )
-          : buildFalVideoRequestBody(args.body, args.model),
-      kind: "video",
-    });
+    const endpoint = falSelectionEndpoint(resolveFalModel(args.model, args.body, kind));
+    const body = buildBody
+      ? buildBody()
+      : await prepareFalInput(
+          endpoint,
+          args.body,
+          args.credentials ?? {},
+          args.signal ?? undefined
+        );
+    return await runFalQueue({ ...args, body, kind, native: true });
   } catch (error) {
-    return { success: false, status: 400, error: sanitizeErrorMessage(error) };
+    return {
+      success: false,
+      status: error instanceof FalError ? error.status : 400,
+      error: sanitizeErrorMessage(error),
+    };
   }
 }
 
-export async function handleFalMusicGeneration(args: {
-  model: string;
-  provider: string;
-  providerConfig: FalProviderConfig;
-  body: FalBody;
-  credentials: FalCredentials | null | undefined;
-  log?: FalLog | null;
-  signal?: AbortSignal | null;
-  prepareFalInput?: PrepareFalInput;
-}) {
-  try {
-    return await runFalQueue({
-      ...args,
-      body:
-        args.body.fal_input !== undefined || !["ace-step", "fal-ai/ace-step"].includes(args.model)
-          ? await (args.prepareFalInput ?? prepareFalCompatibility)(
-              canonicalFalEndpoint(args.model),
-              args.body,
-              args.credentials ?? {},
-              args.signal ?? undefined
-            )
-          : buildFalMusicRequestBody(args.body),
-      kind: "music",
-    });
-  } catch (error) {
-    return { success: false, status: 400, error: sanitizeErrorMessage(error) };
-  }
+export async function handleFalVideoGeneration({
+  prepareFalInput = null,
+  signal,
+  ...args
+}: FalGenerationArgs) {
+  const buildBody = () => buildFalVideoRequestBody(args.body, args.model);
+  if (!prepareFalInput) return runFalQueue({ ...args, body: buildBody(), kind: "video" });
+  const builtIn = args.body.fal_input === undefined && isBuiltInFalVideoModel(args.model);
+  return runNativeFalQueue(
+    { ...args, signal, prepareFalInput },
+    "video",
+    builtIn ? buildBody : null
+  );
+}
+
+export async function handleFalMusicGeneration({
+  prepareFalInput = null,
+  signal,
+  ...args
+}: FalGenerationArgs) {
+  const buildBody = () => buildFalMusicRequestBody(args.body);
+  if (!prepareFalInput) return runFalQueue({ ...args, body: buildBody(), kind: "music" });
+  const builtIn =
+    args.body.fal_input === undefined && ["ace-step", "fal-ai/ace-step"].includes(args.model);
+  return runNativeFalQueue(
+    { ...args, signal, prepareFalInput },
+    "music",
+    builtIn ? buildBody : null
+  );
 }

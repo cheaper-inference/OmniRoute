@@ -19,6 +19,7 @@ vi.mock("@/shared/components", () => ({
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "fal-ui-routes-"));
 process.env.API_KEY_SECRET = "fal-ui-test-only-secret";
 process.env.INITIAL_PASSWORD = "fal-ui-test-only-password";
+process.env.FAL_NATIVE_ENABLED = "true";
 const run = await import("../../../src/app/api/v1/fal/run/route");
 const jobs = await import("../../../src/app/api/v1/fal/jobs/[id]/route");
 const { saveFalDefinition } = await import("../../../src/lib/db/fal");

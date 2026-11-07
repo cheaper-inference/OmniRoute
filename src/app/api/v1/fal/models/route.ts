@@ -1,13 +1,15 @@
 import { canonicalFalEndpoint } from "@omniroute/open-sse/config/falEndpoint";
 import { falCapabilities } from "@omniroute/open-sse/handlers/fal/schema";
 import { falContext, resolveFalDefinition } from "@/lib/fal/runtime";
-import { falErrorResponse, falOptions } from "@/lib/fal/http";
+import { falErrorResponse, falNativeDisabled, falOptions } from "@/lib/fal/http";
 
 export const dynamic = "force-dynamic";
 export async function OPTIONS() {
   return falOptions("GET, OPTIONS");
 }
 export async function GET(request: Request) {
+  const disabled = falNativeDisabled();
+  if (disabled) return disabled;
   try {
     const query = new URL(request.url).searchParams;
     const endpoint = query.has("endpoint_id")

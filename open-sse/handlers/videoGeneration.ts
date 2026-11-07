@@ -61,7 +61,6 @@ import {
   fetchWithTimeout,
   getConfiguredTimeout,
 } from "@/shared/utils/fetchTimeout";
-import { prepareFalCompatibility } from "./fal/compatibility.ts";
 import { handleFalVideoGeneration } from "./mediaGeneration/fal.ts";
 
 /**
@@ -193,7 +192,7 @@ export async function handleVideoGeneration({
   resolvedProvider = null,
   // #16372 — route-injected media sink (owner + public origin) for auth-gated job results.
   mediaSink = undefined,
-  prepareFalInput = prepareFalCompatibility,
+  prepareFalInput = null,
   signal = null,
 }) {
   if (signal?.aborted) return abortedVideoResult();

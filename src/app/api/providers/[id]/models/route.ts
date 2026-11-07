@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { FalClient } from "@omniroute/open-sse/handlers/fal/client";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch";
+import { isFalNativeEnabled } from "@/shared/utils/featureFlags";
 import {
   getProviderConnectionFamilyIds,
   isClaudeCodeCompatibleProvider,
@@ -300,7 +301,7 @@ export async function GET(
     const connectionId = typeof connection.id === "string" ? connection.id : id;
     const apiKey = typeof connection.apiKey === "string" ? connection.apiKey : "";
     const accessToken = typeof connection.accessToken === "string" ? connection.accessToken : "";
-    if (provider === "fal-ai") {
+    if (provider === "fal-ai" && isFalNativeEnabled()) {
       const falProxy = await resolveProxyForConnection(connectionId, undefined, "fal-ai");
       const client = new FalClient(apiKey || accessToken, (url, init) =>
         runWithProxyContext(falProxy.proxy, () => fetch(url, init))

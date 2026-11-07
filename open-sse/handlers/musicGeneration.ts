@@ -37,7 +37,6 @@ import {
   downloadUpstreamMedia,
   upstreamMediaErrorText,
 } from "@/shared/network/remoteImageFetch";
-import { prepareFalCompatibility } from "./fal/compatibility.ts";
 import { handleFalMusicGeneration } from "./mediaGeneration/fal.ts";
 import { handleSyntxMusicGeneration } from "./syntxAudio.ts";
 import { handleMinimaxMusicGeneration } from "./mediaGeneration/minimaxMusic.ts";
@@ -96,7 +95,7 @@ export async function handleMusicGeneration({
   credentials,
   log,
   signal = null,
-  prepareFalInput = prepareFalCompatibility,
+  prepareFalInput = null,
 }) {
   const { provider, model } = parseMusicModel(body.model);
 

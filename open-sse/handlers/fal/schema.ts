@@ -1,6 +1,7 @@
 import Ajv, { type AnySchema, type ValidateFunction } from "ajv";
 import addFormats from "ajv-formats";
 import { canonicalFalEndpoint, falRealtimePath } from "../../config/falEndpoint.ts";
+import { mapImageSize } from "../../translator/image/sizeMapper.ts";
 import realtimeSchema from "./realtimeSchema.json" with { type: "json" };
 
 export type FalRecord = Record<string, unknown>;
@@ -190,6 +191,10 @@ export function compileFalInput(definition: FalDefinition, transport: FalTranspo
   };
 }
 
+// OpenAI-style controls the compatibility adapter never forwarded to an endpoint that does
+// not document them. Rejecting these would fail requests the routes have always accepted.
+const FAL_OPTIONAL_CONTROLS = new Set(["quality", "style", "user", "stream", "sync_mode"]);
+
 /** Compatibility names are mapped only when the endpoint documents their target. */
 export function falCompatibilityInput(body: FalRecord, definition: FalDefinition): FalRecord {
   const { schema } = falInputSchema(definition);
@@ -206,7 +211,8 @@ export function falCompatibilityInput(body: FalRecord, definition: FalDefinition
     "mask",
   ]);
   for (const [key, value] of Object.entries(body)) {
-    if (!envelope.has(key)) input[key] = value;
+    if (envelope.has(key)) continue;
+    if (Object.hasOwn(properties, key) || !FAL_OPTIONAL_CONTROLS.has(key)) input[key] = value;
   }
   mapMediaReferences(body, properties, input);
   for (const [source, target] of [
@@ -218,13 +224,20 @@ export function falCompatibilityInput(body: FalRecord, definition: FalDefinition
       input[target] = body[source];
     }
   }
-  if (body.size !== undefined) {
-    if (!("image_size" in properties))
-      throw new Error("This fal endpoint does not support size; use fal_input");
+  mapFalSize(body, properties, input);
+  return compileFalInput(definition)({ ...input, ...falRecord(body.fal_input) });
+}
+
+function mapFalSize(body: FalRecord, properties: FalRecord, input: FalRecord) {
+  if (body.size === undefined) return;
+  if ("image_size" in properties) {
     const match = typeof body.size === "string" && body.size.match(/^(\d+)x(\d+)$/);
     input.image_size = match ? { width: Number(match[1]), height: Number(match[2]) } : body.size;
+  } else if ("aspect_ratio" in properties) {
+    input.aspect_ratio ??= mapImageSize(String(body.size));
+  } else {
+    throw new Error("This fal endpoint does not support size; use fal_input");
   }
-  return compileFalInput(definition)({ ...input, ...falRecord(body.fal_input) });
 }
 
 function mapMediaReferences(body: FalRecord, properties: FalRecord, input: FalRecord) {

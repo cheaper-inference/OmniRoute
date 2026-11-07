@@ -44,6 +44,7 @@ vi.mock("@omniroute/open-sse/handlers/fal/realtime", async (original) => ({
 
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "fal-socket-routes-"));
 process.env.API_KEY_SECRET = "fal-socket-test-only-secret";
+process.env.FAL_NATIVE_ENABLED = "true";
 const run = await import("../../../src/app/api/v1/fal/run/route");
 const jobs = await import("../../../src/app/api/v1/fal/jobs/[id]/route");
 const db = await import("../../../src/lib/db/fal");

@@ -7,6 +7,7 @@ import { join } from "node:path";
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "fal-native-routes-"));
 process.env.API_KEY_SECRET = "fal-native-test-secret";
 process.env.INITIAL_PASSWORD = "fal-native-tests-only-password";
+process.env.FAL_NATIVE_ENABLED = "true";
 const run = await import("../../src/app/api/v1/fal/run/route.ts");
 const jobs = await import("../../src/app/api/v1/fal/jobs/[id]/route.ts");
 const models = await import("../../src/app/api/v1/fal/models/route.ts");

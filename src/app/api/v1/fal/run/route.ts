@@ -6,7 +6,7 @@ import {
   falRecord,
 } from "@omniroute/open-sse/handlers/fal/schema";
 import { falContext, resolveFalDefinition, recoverFalReceipt } from "@/lib/fal/runtime";
-import { falErrorResponse, falOptions, readFalRun } from "@/lib/fal/http";
+import { falErrorResponse, falNativeDisabled, falOptions, readFalRun } from "@/lib/fal/http";
 import { dispatchFalJob } from "@/lib/fal/dispatch";
 import { getConfiguredTimeout } from "@/shared/utils/fetchTimeout";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -17,6 +17,8 @@ export async function OPTIONS() {
 }
 
 export async function POST(request: Request) {
+  const disabled = falNativeDisabled();
+  if (disabled) return disabled;
   try {
     const body = await readFalRun(request);
     const endpoint = canonicalFalEndpoint(body.endpoint_id);

@@ -36,7 +36,7 @@ test("compatibility routes inject the connection-scoped Fal preparer", () => {
     for (const call of source.matchAll(
       /handle(?:ImageGeneration|FalAIImageEdit|VideoGeneration|MusicGeneration)\(\{\s*([^,]+),/g
     )) {
-      assert.match(call[1], /prepareFalInput: prepareFalCompatibility/, file);
+      assert.match(call[1], /^prepareFalInput(?:: getFalCompatibilityPreparer\(\))?$/, file);
     }
   }
 });
@@ -48,7 +48,7 @@ test("combo strategies forward the route-injected Fal preparer", () => {
     const route = readFileSync(`src/app/api/v1/${kind}s/generations/route.ts`, "utf8");
     assert.match(
       route,
-      /execute(?:Image|Video)Combo\([\s\S]*?\{\s*prepareFalInput: prepareFalCompatibility/
+      /execute(?:Image|Video)Combo\([\s\S]*?\{\s*prepareFalInput: getFalCompatibilityPreparer\(\)/
     );
   }
 });

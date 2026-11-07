@@ -1,4 +1,4 @@
-import { prepareFalCompatibility } from "@/lib/fal/compatibility";
+import { getFalCompatibilityPreparer } from "@/lib/fal/compatibility";
 import {
   handleAdobeFireflyImageGeneration,
   handleCodexImageEdit,
@@ -8,6 +8,8 @@ import {
   handleSyntxImageGeneration,
 } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import {
+  falImageEditBody,
+  falImageEditMaxReferences,
   handleFalAIImageEdit,
   isFalImageEditModel,
 } from "@omniroute/open-sse/handlers/imageGeneration/providers/fal.ts";
@@ -253,7 +255,8 @@ function classifyImageEditTarget(
       providerConfig.format === "codex-responses" ||
       providerConfig.format === "adobe-firefly-image" ||
       providerConfig.format === "syntx-image" ||
-      (providerConfig.format === "fal-ai" && isFalImageEditModel(parsed.model)) ||
+      (providerConfig.format === "fal-ai" &&
+        isFalImageEditModel(parsed.model, getFalCompatibilityPreparer() !== null)) ||
       providerConfig.id === "openrouter"
     ) {
       return parsed.provider ? { credKey: parsed.provider } : null;
@@ -344,18 +347,19 @@ async function dispatchImageEditTarget(
       : editImage())) as ImageComboDispatchResult;
   }
 
-  if (providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model)) {
+  const prepareFalInput = getFalCompatibilityPreparer();
+  const falNative = prepareFalInput !== null;
+  if (providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model, falNative)) {
     return (await handleFalAIImageEdit({
-      prepareFalInput: prepareFalCompatibility,
+      prepareFalInput,
       provider: parsed.provider,
       model: parsed.model,
       providerConfig,
-      body: {
-        ...ctx.options,
+      body: falImageEditBody(parsed.model, falNative, ctx.options, {
         prompt,
-        size: size ?? undefined,
-        response_format: responseFormat ?? undefined,
-      },
+        size,
+        responseFormat,
+      }),
       images,
       credentials: credentials as never,
       log,
@@ -678,14 +682,16 @@ async function postHandler(request: Request, _context?: unknown) {
 
   const parsed = parseImageModel(resolvedModel);
   const providerConfig = parsed.provider ? getImageProvider(parsed.provider) : null;
+  const prepareFalInput = getFalCompatibilityPreparer();
+  const falNative = prepareFalInput !== null;
   // Firefly nano/gpt-image accept multiple reference blobs; other non-Codex stay at 1.
   const maxRefsForProvider =
     providerConfig?.format === "adobe-firefly-image"
       ? 4
       : providerConfig?.format === "codex-responses"
         ? Number.POSITIVE_INFINITY
-        : providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model)
-          ? Number.POSITIVE_INFINITY
+        : providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model, falNative)
+          ? falImageEditMaxReferences(parsed.model)
           : MAX_NON_CODEX_IMAGE_EDIT_REFERENCES;
   if (providerConfig?.format !== "codex-responses" && imageInputCount > maxRefsForProvider) {
     return errorResponse(
@@ -804,7 +810,7 @@ async function postHandler(request: Request, _context?: unknown) {
     );
   }
 
-  if (providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model)) {
+  if (providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model, falNative)) {
     const credentials = await getProviderCredentialsWithQuotaPreflight(
       parsed.provider,
       null,
@@ -837,16 +843,15 @@ async function postHandler(request: Request, _context?: unknown) {
       editAccounting(accounting, parsed.provider, parsed.model, credentials),
       () =>
         handleFalAIImageEdit({
-          prepareFalInput: prepareFalCompatibility,
+          prepareFalInput,
           provider: parsed.provider,
           model: parsed.model,
           providerConfig,
-          body: {
-            ...input.options,
+          body: falImageEditBody(parsed.model, falNative, input.options, {
             prompt,
-            size: size ?? undefined,
-            response_format: responseFormat ?? undefined,
-          },
+            size,
+            responseFormat,
+          }),
           images,
           credentials: credentials as Record<string, unknown>,
           log,
@@ -1004,7 +1009,7 @@ async function postHandler(request: Request, _context?: unknown) {
       allowedConnections,
       execute: (creds) =>
         handleImageGeneration({
-          prepareFalInput: prepareFalCompatibility,
+          prepareFalInput,
           body: {
             model: resolvedModel,
             prompt,

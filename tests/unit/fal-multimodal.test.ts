@@ -21,6 +21,8 @@ import {
 } from "../../open-sse/handlers/fal/client.ts";
 
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "fal-multimodal-"));
+const { prepareFalCompatibility: prepareFalInput } =
+  await import("../../open-sse/handlers/fal/compatibility.ts");
 const { handleImageGeneration } = await import("../../open-sse/handlers/imageGeneration.ts");
 const { handleFalAIImageEdit } =
   await import("../../open-sse/handlers/imageGeneration/providers/fal.ts");
@@ -128,6 +130,7 @@ test("every retained registry selection resolves, discovers the native schema an
             body,
             credentials: { apiKey: "test-key" },
             log: null,
+            prepareFalInput,
           };
           const result =
             kind === "image"
@@ -135,6 +138,7 @@ test("every retained registry selection resolves, discovers the native schema an
                   body: { ...body, model: selection },
                   credentials: args.credentials,
                   log: null,
+                  prepareFalInput,
                 })
               : kind === "video"
                 ? await handleFalVideoGeneration(args)
@@ -246,11 +250,13 @@ for (const endpoint of imageIds) {
             ],
             credentials: { apiKey: "test-only-key" },
             log: null,
+            prepareFalInput,
           })
         : await handleImageGeneration({
             body: { ...body, model: `fal-ai/${endpoint}` },
             credentials: { apiKey: "test-only-key" },
             log: null,
+            prepareFalInput,
           });
       assert.equal(postedUrl, `https://fal.run/${endpoint}`);
       assert.equal(result.success, true, JSON.stringify(result));

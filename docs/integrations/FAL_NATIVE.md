@@ -4,6 +4,12 @@ title: "Fal native multimodal model APIs"
 
 # Fal native multimodal model APIs
 
+Everything on this page needs the `FAL_NATIVE_ENABLED` feature flag, which is off by default.
+Turn it on under **Dashboard → Settings → Feature Flags** or set `FAL_NATIVE_ENABLED=true`. With
+the flag off, `/v1/fal/*` and `/api/providers/{id}/fal` answer 404, the provider page has no
+native panel, and Fal requests on the image, video and music routes keep their established
+request shape, endpoint mapping and response format.
+
 Add a Fal.ai API-key connection under **Dashboard → Providers → Fal.ai**. The provider
 page contains a native model panel with catalog search, category filtering, pagination,
 schema loading, typed controls, ordered reference uploads, JSON input, job retrieval,
@@ -14,6 +20,10 @@ OmniRoute's provider ID is `fal-ai`. The native `endpoint_id` is a separate valu
 short IDs have explicit mappings in `open-sse/config/falEndpoint.ts`.
 Seedream, Dreamina and Recraft historical selections map explicitly to their `fal-ai/`
 endpoints. Native `google/...`, `xai/...` and `openai/...` publishers remain unchanged.
+On the image, video and music routes, a selection whose first segment is not a known publisher
+is a first-party app and gets the `fal-ai/` owner, so `fal-ai/aura-flow` reaches
+`fal-ai/aura-flow`. Use `POST /v1/fal/run` for a publisher outside that list; it takes the
+`endpoint_id` unchanged.
 The retained Bria 3.2 alias keeps its historical destination; both its old and prefixed
 OpenAPI URLs returned 404 on 2026-11-03. This is upstream availability evidence, not a
 reason to remove the registry entry or route it to a different publisher.

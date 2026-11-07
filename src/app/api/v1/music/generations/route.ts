@@ -1,4 +1,4 @@
-import { prepareFalCompatibility } from "@/lib/fal/compatibility";
+import { getFalCompatibilityPreparer } from "@/lib/fal/compatibility";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { handleMusicGeneration } from "@omniroute/open-sse/handlers/musicGeneration.ts";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -104,7 +104,7 @@ async function postHandler(request, context) {
   }
 
   const result = await handleMusicGeneration({
-    prepareFalInput: prepareFalCompatibility,
+    prepareFalInput: getFalCompatibilityPreparer(),
     body,
     credentials,
     log,

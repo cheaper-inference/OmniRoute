@@ -6,7 +6,7 @@ import {
 import { falRecord } from "@omniroute/open-sse/handlers/fal/schema";
 import { loadFalJob, saveFalJob, type FalJob } from "@/lib/db/fal";
 import { falContext } from "@/lib/fal/runtime";
-import { falErrorResponse, falOptions } from "@/lib/fal/http";
+import { falErrorResponse, falNativeDisabled, falOptions } from "@/lib/fal/http";
 import { getConfiguredTimeout } from "@/shared/utils/fetchTimeout";
 import { closeFalRealtime, sendFalRealtime, loadFalArtifact } from "@/lib/fal/realtime";
 import { recordFalDispatch } from "@/lib/fal/accounting";
@@ -21,6 +21,8 @@ export async function OPTIONS() {
 }
 
 async function track(request: Request, route: Context, cancel: boolean) {
+  const disabled = falNativeDisabled();
+  if (disabled) return disabled;
   try {
     const { id } = await route.params;
     const job = loadFalJob(id);
@@ -129,6 +131,8 @@ export async function DELETE(request: Request, context: Context) {
 
 /** Submit one more validated input on an existing realtime WebSocket. This spends inference. */
 export async function POST(request: Request, route: Context) {
+  const disabled = falNativeDisabled();
+  if (disabled) return disabled;
   try {
     const { id } = await route.params;
     const job = loadFalJob(id);
