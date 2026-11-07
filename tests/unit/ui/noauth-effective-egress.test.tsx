@@ -374,7 +374,11 @@ describe("NoAuthAccountCard effective egress", () => {
     await waitForCondition(
       () => document.body.textContent?.includes("Proxy for Account 1") ?? false
     );
-    const emptyOption = document.body.querySelector("[role=dialog] select option[value='']");
+    const trigger = document.body.querySelector<HTMLButtonElement>(
+      '[role=dialog] button[aria-haspopup="listbox"]'
+    )!;
+    await act(async () => trigger.click());
+    const emptyOption = document.body.querySelector('[role="option"]');
     expect(emptyOption?.textContent).toBe("No own proxy (inherits connection)");
   });
 });

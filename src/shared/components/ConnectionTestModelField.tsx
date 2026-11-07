@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import { useTranslations } from "next-intl";
-import Select from "./Select";
+import SearchableSelectField from "@/shared/components/SearchableSelectField";
 import { DiscoveryDegradedNotice } from "./DiscoveryDegradedNotice";
 import { readDiscoveryDegradation } from "@/shared/discovery/degradedCause";
 
@@ -55,29 +55,26 @@ export default function ConnectionTestModelField({
   const available = models.some((model) => model.id === modelId);
   return (
     <div>
-      <Select
+      <SearchableSelectField
         id={id}
         label={t("defaultModel")}
         hint={t("defaultModelHint")}
         value={modelId}
+        resetKey={connectionId}
         disabled={disabled || loading || failed}
-        onChange={(event) => {
-          setModelId(event.target.value);
-          onChange(event.target.value);
+        loading={loading}
+        onValueChange={(value) => {
+          setModelId(value);
+          onChange(value);
         }}
-      >
-        <option value="">{loading ? t("loading") : t("chooseModel")}</option>
-        {modelId && !available && (
-          <option value={modelId} disabled>
-            {modelId} — {t("unavailable")}
-          </option>
-        )}
-        {models.map((model) => (
-          <option key={model.id} value={model.id}>
-            {model.name || model.id}
-          </option>
-        ))}
-      </Select>
+        options={[
+          { value: "", label: loading ? t("loading") : t("chooseModel"), alwaysVisible: true },
+          ...(modelId && !available
+            ? [{ value: modelId, label: `${modelId} — ${t("unavailable")}`, disabled: true }]
+            : []),
+          ...models.map((model) => ({ value: model.id, label: model.name || model.id })),
+        ]}
+      />
       <DiscoveryDegradedNotice degraded={degradation.degraded} cause={degradation.cause} />
       {failed && (
         <p role="alert" className="mt-1 text-xs text-error">
