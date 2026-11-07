@@ -63,6 +63,22 @@ export const M365_DOCUMENTED_MODELS: Readonly<Record<string, M365ModelProfile>> 
   "gpt-5.2-think-deeper": included("Gpt_5_2_Reasoning"),
 });
 
+/**
+ * The tones whose turns share one per-account cap (`ReasoningTurnExhausted`), reported live on a
+ * work tenant (2026-11-07). A consumer observation, not a protocol guarantee: other reasoning
+ * tones are not known to share it and are deliberately absent.
+ */
+const REASONING_CAP_TONES: ReadonlySet<string> = new Set([
+  "Gpt_5_5_Reasoning",
+  "Gpt_5_6_Reasoning",
+]);
+/** Every documented model id whose turns draw on that shared cap. */
+export function m365ReasoningCapModels(): string[] {
+  return Object.entries(M365_DOCUMENTED_MODELS)
+    .filter(([, profile]) => REASONING_CAP_TONES.has(profile.tone))
+    .map(([id]) => id);
+}
+
 export interface M365ProfileOptions {
   model?: string;
   tier?: string;

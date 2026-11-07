@@ -1,3 +1,5 @@
+import { m365ReasoningCapModels } from "../executors/m365Protocol/profile.ts";
+
 function parsedError(errorText: unknown): Record<string, unknown> {
   try {
     const parsed: unknown = typeof errorText === "string" ? JSON.parse(errorText) : errorText;
@@ -10,6 +12,26 @@ function parsedError(errorText: unknown): Record<string, unknown> {
     // A plain native result code is also accepted; arbitrary prose is not a code.
   }
   return {};
+}
+
+/**
+ * The other models a reasoning-turn cap walls on the same connection: it is a per-account cap on
+ * "Think deeper" turns, so refusing one reasoning model means its siblings would be refused too.
+ * Empty for every other refusal, so a licence or priority-access failure stays on its own model.
+ */
+export function getM365ReasoningCapSiblings(
+  provider: string | null | undefined,
+  status: number,
+  errorText: unknown,
+  structuredError: { code?: unknown } | null | undefined,
+  model: string
+): string[] {
+  if (provider !== "copilot-m365-web" || status !== 429) return [];
+  const error = parsedError(errorText);
+  const codes = [structuredError?.code, error.code, errorText];
+  if (!codes.includes("reasoning_turns_exhausted")) return [];
+  const walled = m365ReasoningCapModels();
+  return walled.includes(model) ? walled.filter((id) => id !== model) : [];
 }
 
 /** Native M365 errors have mixed scope; this is not a passthrough provider. */

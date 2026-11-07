@@ -260,6 +260,68 @@ test("a reasoning-turn cap is model-scoped and keeps Retry-After", () => {
     String(verdict.cooldownMs)
   );
 });
+/** A walled model comes back as a rate-limit verdict instead of a selected credential. */
+async function isWalled(connectionId: string, requestedModel: string) {
+  const result = await selected(connectionId, requestedModel);
+  return !!result && "allRateLimited" in result && result.allRateLimited === true;
+}
+// A reasoning-turn cap is per account across the Think deeper models, so one refusal must take
+// the sibling reasoning models out of rotation, while Quick tones and other failures stay local.
+test("a reasoning-turn cap walls the sibling Think deeper models, not Quick tones", async () => {
+  const conn = await connection();
+  const headers = new Headers({ "Retry-After": "3600" });
+  await auth.markAccountUnavailable(
+    conn.id,
+    429,
+    body("reasoning_turns_exhausted"),
+    provider,
+    "gpt-5.5-think-deeper",
+    null,
+    { headers, isCombo: true, persistUnavailableState: false }
+  );
+  for (const walled of ["gpt-5.5-think-deeper", "gpt-5.6-think-deeper"]) {
+    assert.equal(await isWalled(conn.id, walled), true, walled);
+  }
+  for (const serving of ["gpt-5.5", "gpt-5.6", "gpt-5.6-quick"]) {
+    assert.equal((await selected(conn.id, serving))?.connectionId, conn.id, serving);
+  }
+});
+test("a priority-access refusal on one Think deeper model stays on that model", async () => {
+  const conn = await connection();
+  await auth.markAccountUnavailable(
+    conn.id,
+    429,
+    body("priority_access_exhausted"),
+    provider,
+    "gpt-5.5-think-deeper",
+    null,
+    {
+      headers: new Headers({ "Retry-After": "3600" }),
+      isCombo: true,
+      persistUnavailableState: false,
+    }
+  );
+  assert.equal(await isWalled(conn.id, "gpt-5.5-think-deeper"), true);
+  assert.equal((await selected(conn.id, "gpt-5.6-think-deeper"))?.connectionId, conn.id);
+});
+test("a reasoning-turn cap on a model outside the shared cap locks only that model", async () => {
+  const conn = await connection();
+  await auth.markAccountUnavailable(
+    conn.id,
+    429,
+    body("reasoning_turns_exhausted"),
+    provider,
+    "gpt-5.4-think-deeper",
+    null,
+    {
+      headers: new Headers({ "Retry-After": "3600" }),
+      isCombo: true,
+      persistUnavailableState: false,
+    }
+  );
+  assert.equal(await isWalled(conn.id, "gpt-5.4-think-deeper"), true);
+  assert.equal((await selected(conn.id, "gpt-5.5-think-deeper"))?.connectionId, conn.id);
+});
 test("native selected credentials serialize an account, permit peers, and abort queued admission", async () => {
   const first = await connection();
   await db.updateProviderConnection(first.id, {

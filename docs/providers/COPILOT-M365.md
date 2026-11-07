@@ -176,6 +176,9 @@ standalone IDs follow the public [protocol catalog](https://github.com/cramt/m36
   `reasoning_turns_exhausted` instead, also model-scoped, with no reset time claimed. It was
   reported on one work tenant to cap the "Think deeper" tones while the Quick tones kept
   serving; that scope is a consumer observation, not something this repository has reproduced.
+  Routing therefore also takes the other documented Think deeper models of `gpt-5.5` and
+  `gpt-5.6` out of rotation on that connection for the same cooldown, and leaves the Quick tones
+  and every other failure on its own model.
   Supplied retry hints are preserved; a missing reset is not advertised as a known reset time.
 - A Copilot safety refusal (`Disengaged`) returns **400** `provider_safety_rejection`, the
   shared provider safety-stop label. It never counts against the connection's health, client

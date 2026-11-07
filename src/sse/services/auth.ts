@@ -218,6 +218,7 @@ import {
 } from "./exclusiveConnectionLeasePolicy";
 import { readHeaderValue, type AuthRequestHeaders } from "./headerReader.ts";
 import { isRequestScopedServerFailure } from "./syntheticEmptyStream.ts";
+import { getM365ReasoningCapSiblings } from "@omniroute/open-sse/services/m365ErrorPolicy.ts";
 import {
   getOAuthSessionAvailability,
   reserveOAuthSession,
@@ -2656,13 +2657,23 @@ export async function markAccountUnavailable(
     if (provider === "copilot-m365-web" && fallbackResult.ruleScope) {
       const cooldownMs = fallbackResult.cooldownMs;
       if (fallbackResult.ruleScope === "model" && model) {
-        lockExactModel(
-          provider,
-          connectionId,
+        for (const locked of [
           model,
-          fallbackResult.reason || "forbidden",
-          cooldownMs
-        );
+          ...getM365ReasoningCapSiblings(
+            provider,
+            status,
+            errorText,
+            options.structuredError,
+            model
+          ),
+        ])
+          lockExactModel(
+            provider,
+            connectionId,
+            locked,
+            fallbackResult.reason || "forbidden",
+            cooldownMs
+          );
         await updateProviderConnection(connectionId, {
           lastErrorType: fallbackResult.reason,
           lastError:
