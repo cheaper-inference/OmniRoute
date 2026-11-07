@@ -1361,7 +1361,7 @@ Render විනාඩි 15කට පමණ පසුව එන ගමනාග
 
 ## යෙදවුම් අවස්ථා
 
-Relay backend SRE මාර්ගෝපදේශ සඳහා (ts/bifrost/auto හැසිරීම, 9router සහ CLIProxyAPI ස්ථානගත කිරීම, සහ ඉහළ throughput fallback උපායමාර්ගය), [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md) බලන්න.
+Relay backend SRE මාර්ගෝපදේශ සඳහා (ts/bifrost/auto හැසිරීම, 9router සහ CLIProxyAPI ස්ථානගත කිරීම, සහ ඉහළ-ප්රතිදාන fallback උපායමාර්ගය), [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md) බලන්න.
 
 ### අවම දේශීය සංවර්ධනය
 
@@ -1373,7 +1373,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Docker නිෂ්පාදන පරිසරය
+### Docker නිෂ්පාදනය
 
 ```bash
 JWT_SECRET=<generated>
@@ -1403,7 +1403,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### Reverse Proxy සහිත VPS (nginx + Cloudflare)
+### ප්රතිවර්තන ප්රොක්සියක් සහිත VPS (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1865,3 +1865,14 @@ OmniConductor හබ් කාර්යයන් දේශීය A2A TaskManager
 | විචල්ය                         | පෙරනිමිය | මූලාශ්ර ගොනුව                                | විස්තරය                                                                                                                                                                                                   |
 | ------------------------------ | -------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`      | `src/lib/providerModels/modelSyncTimings.ts` | ආදර්ශ සමමුහුර්ත කිරීමේදී `1` ට ලොග් ෆේස් ටයිමිං, ජනනය කරන ලද ඉල්ලීමක් ID සහ අදියර success/error ප්‍රතිඵල. අනෙකුත් සියලුම අගයන් සඳහා අබල කර ඇත. ලඝු-සටහන් ඉල්ලීම්, ගිණුම, නාමාවලිය සහ දෝෂ ගෙවීම ඉවත් කරයි. |
+
+## දේශීය OpenCode මාධ්ය-විශ්ලේෂණ මෙවලම
+
+`scripts/cli/omniroute-media-mcp.mjs` විසින් භාවිතා කරයි. දේශීය මෙවලම් ක්රියාවලි පරිසරය තුළ මේවා සකසන්න.
+
+| විචල්යය                    | පෙරනිමිය                                                                          | විස්තරය                                                                                              |
+| -------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (හෝ `~/.config/opencode/opencode.json`) | මාධ්ය මෙවලම සහ ස්ථාපකය විසින් කියවනු ලබන OpenCode වින්යාසය.                                          |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                       | මාධ්ය මෙවලම විසින් OpenCode වින්යාසයෙන් කියවනු ලබන සැපයුම්කරු ප්රවේශය.                               |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                            | මාධ්ය මෙවලම විසින් ඉදිරිපත් කරන ආකෘතිය. එහි සැපයුම්කරු ඉල්ලා ඇති මාධ්ය වර්ග සඳහා සහාය දැක්විය යුතුය. |
+| `OMNIROUTE_MEDIA_API_KEY`  | වින්යාස කළ සැපයුම්කරු API යතුර හෝ එහි පරිසර යොමුව                                 | විකල්ප අක්තපත්ර අතික්රමණය. එය දේශීය ක්රියාවලි පරිසරය තුළ තබන්න; කිසිවිටෙක commit නොකරන්න.            |
