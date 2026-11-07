@@ -1,0 +1,1 @@
+- **feat(providers):** GitHub Copilot embeddings (`github/text-embedding-3-small`, `github/text-embedding-ada-002`) through the Copilot API with the exchanged Copilot token, refreshed before dispatch ([#18291](https://github.com/cheaper-inference/OmniRoute/pull/18291)) — thanks @AppleVibe, @tmaarcxs

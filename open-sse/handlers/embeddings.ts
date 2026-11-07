@@ -53,6 +53,7 @@ import {
   type BedrockEmbeddingItem,
 } from "./bedrockEmbeddings.ts";
 import { resolveBedrockRegion } from "../config/bedrock.ts";
+import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
 
 interface ClientRawRequest {
   endpoint: string;
@@ -63,6 +64,7 @@ interface ClientRawRequest {
 interface EmbeddingCredentials {
   apiKey?: string | null;
   accessToken?: string | null;
+  copilotToken?: string | null;
   providerSpecificData?: Record<string, unknown> | null;
 }
 
@@ -310,9 +312,12 @@ export function clampEmbeddingStringInput(input: unknown): unknown {
 }
 
 function buildUpstreamBody(runtime: EmbeddingRuntime): Record<string, unknown> {
+  const input = runtime.body.input;
   const upstreamBody: Record<string, unknown> = {
     model: runtime.model,
-    input: clampEmbeddingStringInput(runtime.body.input),
+    input: clampEmbeddingStringInput(
+      runtime.providerConfig.requiresArrayInput && typeof input === "string" ? [input] : input
+    ),
   };
   if (runtime.body.dimensions !== undefined) upstreamBody.dimensions = runtime.body.dimensions;
   if (runtime.body.encoding_format !== undefined) {
@@ -370,11 +375,26 @@ function resolveUpstreamUrl(runtime: EmbeddingRuntime): string {
     : runtime.providerConfig.baseUrl;
 }
 
+/** Token stored under the provider's `tokenField` (top level first, then providerSpecificData). */
+function providerFieldToken(runtime: EmbeddingRuntime): string | null {
+  const field = runtime.providerConfig.tokenField;
+  if (!field || !runtime.credentials) return null;
+  const value = runtime.credentials[field] || runtime.credentials.providerSpecificData?.[field];
+  return typeof value === "string" && value ? value : null;
+}
+
 function buildAuth(
   runtime: EmbeddingRuntime
 ): { headers: Record<string, string>; token: string | null } | EmbeddingFailure {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = runtime.credentials?.apiKey || runtime.credentials?.accessToken || null;
+  const headers: Record<string, string> =
+    runtime.providerConfig.identityHeaders === "github-copilot"
+      ? getGitHubCopilotChatHeaders("application/json")
+      : { "Content-Type": "application/json" };
+  const token =
+    providerFieldToken(runtime) ||
+    runtime.credentials?.apiKey ||
+    runtime.credentials?.accessToken ||
+    null;
   if (!token && runtime.providerConfig.authType !== "none") {
     return failure(
       401,
