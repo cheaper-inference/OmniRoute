@@ -73,6 +73,7 @@ import type {
   IsModelAvailable,
   HiddenModelsByProvider,
   NestedComboMode,
+  ResolvedComboTarget,
   ResolvedComboUnit,
   SingleModelTarget,
 } from "./types.ts";
@@ -308,6 +309,38 @@ async function evaluatePinnedResponse(args: {
 }
 
 /**
+ * The account binding a context-cache pin must keep. The pin only records the model string, so
+ * without this the pinned dispatch ran with no connection at all and the provider-level selector
+ * (session affinity / LRU) could serve a member bound to account A from account B of the same
+ * provider. Mirrors the main loop: a single matching step keeps its `connectionId`; several steps
+ * sharing the model string are limited to the union of their allowlists; any matching step
+ * without a binding (dynamic account) leaves the whole provider pool open, as before.
+ */
+export function resolvePinnedConnectionBinding(
+  comboTargets: ReadonlyArray<
+    Pick<ResolvedComboTarget, "modelStr" | "connectionId" | "allowedConnectionIds">
+  >,
+  pinnedModel: string
+): { connectionId?: string; allowedConnectionIds?: string[] } {
+  const matches = comboTargets.filter((t) => t.modelStr === pinnedModel);
+  if (matches.length === 0) return {};
+  const allowed = new Set<string>();
+  for (const target of matches) {
+    const ids =
+      Array.isArray(target.allowedConnectionIds) && target.allowedConnectionIds.length > 0
+        ? target.allowedConnectionIds
+        : target.connectionId
+          ? [target.connectionId]
+          : [];
+    if (ids.length === 0) return {};
+    for (const id of ids) allowed.add(id);
+  }
+  const allowedConnectionIds = [...allowed];
+  const single = matches.length === 1 ? matches[0].connectionId : null;
+  return single ? { connectionId: single, allowedConnectionIds } : { allowedConnectionIds };
+}
+
+/**
  * Dispatch to the honored pin and decide whether its response is served. Returns the response to
  * serve (including a 499 when the client went away), or null to fall through to the combo strategy.
  */
@@ -354,6 +387,7 @@ async function dispatchHonoredPin(args: {
     if (recoveryAborted(preContentTransportRecovery, signal))
       return errorResponse(499, "Client disconnected");
     pinnedResult = await handleSingleModelWithTimeout(pinnedBody, pinnedModel, {
+      ...resolvePinnedConnectionBinding(comboTargets, pinnedModel),
       modelPinned: true,
     } as SingleModelTarget);
   } catch (pinErr) {
