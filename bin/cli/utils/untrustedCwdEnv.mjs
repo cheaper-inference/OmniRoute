@@ -1,3 +1,5 @@
+import { isRequireApiKeyValueEnabled } from "../../../src/shared/utils/requireApiKeyValue.mjs";
+
 /**
  * Keys a `.env` in the current working directory may set.
  *
@@ -32,11 +34,6 @@ const LOCALE_LIST_VALUE = /^[A-Za-z0-9_.@:-]{1,64}$/;
 // That also rejects the `:Area/City` form and POSIX rules with `,` or `<>`.
 const TZ_VALUE = /^[A-Za-z0-9_+-][A-Za-z0-9_+/-]{0,63}$/;
 const FLAG_VALUE = /^[A-Za-z0-9]{0,16}$/;
-// The values isFeatureFlagEnabled() in src/shared/utils/featureFlags.ts treats
-// as on, compared the same way (exact, case-sensitive). Every accepted value
-// turns enforcement on, so the file can turn it on but never off.
-const REQUIRE_API_KEY_ON = new Set(["true", "1", "yes"]);
-
 function isPort(value) {
   if (!PORT_VALUE.test(value)) return false;
   const n = Number(value);
@@ -53,7 +50,9 @@ const ALLOWED = new Map([
   ["PORT", PORT_RULE],
   ["API_PORT", PORT_RULE],
   ["DASHBOARD_PORT", PORT_RULE],
-  ["REQUIRE_API_KEY", { check: (v) => REQUIRE_API_KEY_ON.has(v), expected: "true, 1 or yes" }],
+  // The parser the server gate uses, so the file can turn enforcement on but
+  // never off, and a value that already turned it on is not dropped on upgrade.
+  ["REQUIRE_API_KEY", { check: isRequireApiKeyValueEnabled, expected: "true, 1 or yes" }],
   // Display only.
   ["LANG", LOCALE_RULE],
   ["LANGUAGE", { check: (v) => LOCALE_LIST_VALUE.test(v), expected: "a list of locale names" }],

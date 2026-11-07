@@ -82,7 +82,7 @@ keys, listed in `bin/cli/utils/untrustedCwdEnv.mjs`:
 | Key                                  | Accepted values                                                       |
 | ------------------------------------ | --------------------------------------------------------------------- |
 | `PORT`, `API_PORT`, `DASHBOARD_PORT` | a number from 1 to 65535                                              |
-| `REQUIRE_API_KEY`                    | exactly `true`, `1` or `yes`, the values the server treats as on      |
+| `REQUIRE_API_KEY`                    | `true`, `1` or `yes` in any case, the values the server treats as on  |
 | `LANG`, `LC_ALL`, `LC_MESSAGES`      | up to 64 letters, digits, `_`, `.`, `@` or `-`                        |
 | `LANGUAGE`                           | the same, plus `:`                                                    |
 | `TZ`                                 | up to 64 letters, digits, `_`, `+`, `-` or `/`, not starting with `/` |
@@ -130,4 +130,6 @@ set, and no context token. The comparison is exact, so `localhost` and
 `127.0.0.1`, or a host with and without a trailing dot, count as different
 servers and get no context token. A URL with userinfo, a backslash or
 whitespace never matches, because other URL parsers (Python's `urllib` and
-`httpx`, for example) can read a different host from it.
+`httpx`, for example) can read a different host from it. For requests the CLI
+sends itself, that check covers only the scheme and authority, so an id with a
+space in the path or query keeps the token.

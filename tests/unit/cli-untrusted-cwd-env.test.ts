@@ -540,9 +540,6 @@ test("allowlist: values that are not plain ports, locales or flags are skipped",
     ["REQUIRE_API_KEY", "false"],
     ["REQUIRE_API_KEY", "0"],
     ["REQUIRE_API_KEY", ""],
-    ["REQUIRE_API_KEY", "TRUE"],
-    ["REQUIRE_API_KEY", "True"],
-    ["REQUIRE_API_KEY", "YES"],
     ["REQUIRE_API_KEY", "10"],
     ["REQUIRE_API_KEY", "xtrue"],
     ["REQUIRE_API_KEY", "true1"],
@@ -580,6 +577,9 @@ test("allowlist: values that are not plain ports, locales or flags are skipped",
     ["REQUIRE_API_KEY", "true"],
     ["REQUIRE_API_KEY", "1"],
     ["REQUIRE_API_KEY", "yes"],
+    ["REQUIRE_API_KEY", "TRUE"],
+    ["REQUIRE_API_KEY", "True"],
+    ["REQUIRE_API_KEY", "YES"],
     ["LANG", "a".repeat(64)],
     ["LC_MESSAGES", "a".repeat(64)],
     ["LANGUAGE", "en_US:en"],
@@ -596,14 +596,14 @@ test("allowlist: values that are not plain ports, locales or flags are skipped",
 
 test("allowlist: REQUIRE_API_KEY accepts exactly the values the server treats as on", async () => {
   const { isAllowedFromCwdEnv } = await import("../../bin/cli/utils/untrustedCwdEnv.mjs");
-  const { isFeatureFlagEnabled } = await import("../../src/shared/utils/featureFlags.ts");
+  const { isRequireApiKeyEnabled } = await import("../../src/shared/utils/featureFlags.ts");
   const saved = process.env.REQUIRE_API_KEY;
   try {
     const values = ["true", "1", "yes", "TRUE", "True", "YES", "Yes", "on", "false", "0", "no"];
     values.push("", " true", "true ", "10", "01", "xtrue", "true1", "y", "enabled");
     for (const value of values) {
       process.env.REQUIRE_API_KEY = value;
-      const serverOn = isFeatureFlagEnabled("REQUIRE_API_KEY");
+      const serverOn = isRequireApiKeyEnabled();
       // Anything the file may set must turn the check on, and every value
       // that turns it on must be accepted, so an upgrade cannot turn it off.
       assert.equal(isAllowedFromCwdEnv("REQUIRE_API_KEY", value), serverOn, JSON.stringify(value));

@@ -339,6 +339,19 @@ export function contextCredentialFor(ctx, destinationUrl) {
   return ctx.accessToken || ctx.apiKey || undefined;
 }
 
+/**
+ * contextCredentialFor() for a request the CLI sends itself. Only the scheme
+ * and authority are checked: they decide which server gets the request, and
+ * commands put ids in the path and query unencoded, so a space or backslash
+ * there must not cost the token. A URL written into another tool's config goes
+ * through contextCredentialFor() on the whole string, because that tool's URL
+ * parser is not ours.
+ */
+export function contextCredentialForRequest(ctx, requestUrl) {
+  const authority = /^[a-z][a-z0-9+.-]*:\/\/[^/?#]*/i.exec(String(requestUrl ?? ""));
+  return authority ? contextCredentialFor(ctx, authority[0]) : undefined;
+}
+
 /** Async variant for callers that need to observe a just-created keychain entry. */
 export async function resolveActiveContextAsync(overrideName) {
   await hydrateCredentialCache(readConfigFile());
