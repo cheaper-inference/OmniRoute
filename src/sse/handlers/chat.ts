@@ -2162,7 +2162,8 @@ async function handleSingleModelChat(
         effectiveModel,
         preferredFailoverUsed || hasForcedConnection || runtimeOptions.managedLease ||
           museOwner || isCombo
-          ? { enabled: false, preferredTimeoutMs: 5_000, gemini38PreferredTimeoutMs: 12_000 }
+          ? { enabled: false, defaultTimeoutMs: 20_000,
+              providerTimeoutsMs: {}, modelTimeoutsMs: {} }
           : undefined
       );
       // 4. Execute chat via core after breaker gate checks (with optional TLS tracking)
