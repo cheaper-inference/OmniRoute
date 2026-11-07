@@ -4088,7 +4088,7 @@
     }
   },
   "mistral": {
-    "format": "openai-responses",
+    "format": "openai",
     "headers": {
       "apiKey": {
         "Accept": "text/event-stream",
@@ -4106,8 +4106,8 @@
       }
     },
     "url": {
-      "nonStream": "https://api.mistral.ai/v1/responses",
-      "stream": "https://api.mistral.ai/v1/responses"
+      "nonStream": "https://api.mistral.ai/v1/chat/completions",
+      "stream": "https://api.mistral.ai/v1/chat/completions"
     }
   },
   "mixlayer": {

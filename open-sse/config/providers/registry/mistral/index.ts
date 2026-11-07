@@ -3,15 +3,12 @@ import type { RegistryEntry } from "../../shared.ts";
 export const mistralProvider: RegistryEntry = {
   id: "mistral",
   alias: "mistral",
-  // Mistral serves the OpenAI Responses format natively (public preview, stateless:
-  // https://docs.mistral.ai/studio/conversations/responses). Responses clients pass
-  // through; Chat Completions clients are translated by chatCore.
-  format: "openai-responses",
+  // Mistral also serves the OpenAI Responses format natively (public preview, stateless:
+  // https://docs.mistral.ai/studio/conversations/responses). That endpoint is opt-in per
+  // model: `targetFormat` on a row below, or a custom model configured for Responses.
+  format: "openai",
   executor: "default",
-  baseUrl: "https://api.mistral.ai/v1/responses",
-  // Key validation and model discovery cannot be derived from a /responses URL.
-  modelsUrl: "https://api.mistral.ai/v1/models",
-  testKeyModelsUrl: "https://api.mistral.ai/v1/models",
+  baseUrl: "https://api.mistral.ai/v1/chat/completions",
   authType: "apikey",
   authHeader: "bearer",
   defaultContextLength: 262144,
@@ -78,6 +75,15 @@ export const mistralProvider: RegistryEntry = {
       contextLength: 32768,
       toolCalling: true,
       supportsAudio: true,
+    },
+    // Live-tested on /v1/responses: chat and Responses clients, tool calls, replayed history.
+    {
+      id: "labs-leanstral-1-5-1",
+      name: "Leanstral 1.5.1 (Labs)",
+      contextLength: 262144,
+      toolCalling: true,
+      supportsReasoning: true,
+      targetFormat: "openai-responses",
     },
   ],
 };
