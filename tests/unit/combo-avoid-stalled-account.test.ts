@@ -43,7 +43,7 @@ const stalledConnections = await import("../../src/sse/handlers/chat/comboStalle
 const originalFetch = globalThis.fetch;
 const TARGET_TIMEOUT_MS = 1_000;
 
-type Reply = "stall" | "silent-stream" | "ok" | "early-eof";
+type Reply = "stall" | "silent-stream" | "ok" | "early-eof" | "server-error";
 
 const MESSAGE_START = {
   type: "message_start",
@@ -138,6 +138,12 @@ function stubClaude(plan: (token: string, attempt: number) => Reply): string[] {
     if (reply === "stall") return stalledUpstream(init?.signal);
     if (reply === "silent-stream") return silentStream(init?.signal);
     if (reply === "early-eof") return earlyEofStream();
+    if (reply === "server-error") {
+      return new Response(
+        JSON.stringify({ type: "error", error: { type: "api_error", message: "Internal error" } }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
     return claudeStream(`OK-${token}`);
   };
   return dispatches;
@@ -157,7 +163,7 @@ async function seedClaudeAccount(name: string): Promise<{ id: string; token: str
   return { id: String(row.id), token };
 }
 
-async function createOpusCombo(name: string): Promise<string> {
+async function createOpusCombo(name: string, targetTimeoutMs = TARGET_TIMEOUT_MS): Promise<string> {
   await combosDb.createCombo({
     name,
     strategy: "priority",
@@ -166,7 +172,7 @@ async function createOpusCombo(name: string): Promise<string> {
       maxRetries: 0,
       retryDelayMs: 0,
       fallbackDelayMs: 0,
-      targetTimeoutMs: TARGET_TIMEOUT_MS,
+      targetTimeoutMs,
     },
   });
   return name;
@@ -194,7 +200,7 @@ test.beforeEach(async () => {
   await settingsDb.updateSettings({ fallbackStrategy: "fill-first", autoDbBackup: false });
 });
 
-test.afterEach(async () => {
+async function resetTestState(): Promise<void> {
   globalThis.fetch = originalFetch;
   await callLogs.waitForCallLogSaves(2000);
   await new Promise((resolve) => setTimeout(resolve, 50));
@@ -203,7 +209,23 @@ test.afterEach(async () => {
   core.resetDbInstance();
   fs.rmSync(dataDir, { recursive: true, force: true });
   fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// The per-target timer starts before the first request has loaded the cold request path. One
+// warm-up combo request (generous timeout, result ignored) keeps that out of every stall test.
+test.before(async () => {
+  initTranslators();
+  await settingsDb.updateSettings({ fallbackStrategy: "fill-first", autoDbBackup: false });
+  await seedClaudeAccount("warm-up");
+  stubClaude(() => "ok");
+  const warmUp = await handleChat(
+    comboRequest(await createOpusCombo("stall-avoid-warm-up", 30_000))
+  );
+  await warmUp.text();
+  await resetTestState();
 });
+
+test.afterEach(resetTestState);
 
 test.after(() => {
   globalThis.fetch = originalFetch;
@@ -228,6 +250,29 @@ test("after a combo target timeout on account A, the next same-provider target u
   );
   assert.match(body, new RegExp(`OK-${b.token}`));
   assert.equal(response.headers.get("X-OmniRoute-Selected-Connection-Id"), b.id);
+});
+
+test("only the account in flight when the timer fires is avoided, not one that failed earlier in the target", async () => {
+  const a = await seedClaudeAccount("in-flight-a");
+  const b = await seedClaudeAccount("in-flight-b");
+  await seedClaudeAccount("in-flight-c");
+  const combo = await createOpusCombo("stall-avoid-in-flight-only");
+  // Target 1: A fails fast, chat.ts moves on to B inside the same target, and B stalls.
+  const dispatches = stubClaude((token, attempt) => {
+    if (token === b.token) return "stall";
+    return token === a.token && attempt === 1 ? "server-error" : "ok";
+  });
+
+  const response = await handleChat(comboRequest(combo));
+  const body = await response.text();
+
+  assert.equal(response.status, 200, body);
+  assert.deepEqual(
+    dispatches,
+    [a.token, b.token, a.token],
+    "target 2 avoids B (stalled) but may still use A, whose failure was not a timeout"
+  );
+  assert.equal(response.headers.get("X-OmniRoute-Selected-Connection-Id"), a.id);
 });
 
 test("an account that opens the stream but never produces output is also avoided by the next target", async () => {
