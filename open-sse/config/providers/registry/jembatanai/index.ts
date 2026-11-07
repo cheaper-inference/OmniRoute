@@ -22,6 +22,9 @@ export const jembatanaiProvider: RegistryEntry = buildOpenAiCompatibleRegistryEn
     { id: "openai/gpt-6-luna", name: "GPT-6 Luna" },
     { id: "z-ai/glm-5.2", name: "GLM-5.2" },
     { id: "deepseek/deepseek-v4.1-flash", name: "DeepSeek V4.1 Flash" },
+    { id: "deepseek/deepseek-v4-pro-0813", name: "DeepSeek V4 Pro" },
+    { id: "minimax/minimax-m3.1-flash", name: "MiniMax M3.1 Flash" },
+    { id: "z-ai/glm-5.3-flash", name: "GLM-5.3 Flash" },
   ],
   passthroughModels: true,
 });

@@ -47,6 +47,13 @@ test("jembatanai seeds the base catalog and accepts other ids via passthrough", 
   const ids = providerRegistry.jembatanai.models.map((m: { id: string }) => m.id);
   assert.ok(ids.includes("anthropic/claude-sonnet-5"));
   assert.ok(ids.includes("deepseek/deepseek-v4.1-flash"));
+  for (const id of [
+    "deepseek/deepseek-v4-pro-0813",
+    "minimax/minimax-m3.1-flash",
+    "z-ai/glm-5.3-flash",
+  ]) {
+    assert.ok(ids.includes(id), `offline seed must list ${id}`);
+  }
   assert.equal(new Set(ids).size, ids.length, "seed ids must be unique");
   assert.equal(isValidModel("jembatanai", "z-ai/glm-5.2"), true);
   assert.equal(isValidModel("jembatanai", "some-key-scoped-model"), true);
