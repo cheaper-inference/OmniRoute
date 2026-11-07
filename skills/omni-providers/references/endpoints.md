@@ -81,6 +81,9 @@
 - [`POST /api/providers/zed/discover`](#post-apiproviderszeddiscover)
 - [`POST /api/providers/zed/import`](#post-apiproviderszedimport)
 - [`POST /api/providers/zed/manual-import`](#post-apiproviderszedmanual-import)
+- [`GET /api/providers/{id}/fal`](#get-apiprovidersidfal)
+- [`PUT /api/providers/{id}/fal`](#put-apiprovidersidfal)
+- [`DELETE /api/providers/{id}/fal`](#delete-apiprovidersidfal)
 
 ### GET /api/providers
 
@@ -901,4 +904,33 @@ curl -X POST http://localhost:20128/api/providers/zed/manual-import \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
+```
+
+### GET /api/providers/{id}/fal
+
+Search Fal models or load a schema for a managed connection
+
+```bash
+curl http://localhost:20128/api/providers/{id}/fal \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### PUT /api/providers/{id}/fal
+
+Register a validated native Fal endpoint or schema override
+
+```bash
+curl -X PUT http://localhost:20128/api/providers/{id}/fal \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### DELETE /api/providers/{id}/fal
+
+Remove a Fal endpoint override and cached schema
+
+```bash
+curl -X DELETE http://localhost:20128/api/providers/{id}/fal \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```

@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "hapa",
     "errNoReply": "⚠️ Hakuna jibu kutoka kwa lango.",
     "btnSend": "Tuma"
+  },
+  "falNative": {
+    "title": "Modeli asilia za Fal",
+    "description": "Tafuta kituo cha mwisho, pakia skima yake, na ukiendeshe kwa kutumia ingizo lililoelezwa kwenye nyaraka. Hali ya foleni na utiririshaji asilia hubaki tofauti.",
+    "connectionRequired": "Kwanza ongeza muunganisho wenye ufunguo wa API wa Fal.",
+    "category": "Kategoria",
+    "endpoint": "ID ya kituo cha mwisho",
+    "reasoning": "Udhibiti wa kufikiri kimantiki",
+    "input": "Ingizo la JSON katika umbizo asilia (safu huhifadhi mpangilio wake)",
+    "transport": "Njia ya usafirishaji",
+    "run": "Endesha modeli",
+    "job": "ID ya kazi iliyohifadhiwa",
+    "register": "Sajili kituo cha mwisho au skima mbadala",
+    "schema": "Skima ya OpenAPI 3",
+    "download": "Pakua faili la matokeo",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

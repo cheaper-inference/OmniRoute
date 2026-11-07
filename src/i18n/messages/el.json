@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "εκεί",
     "errNoReply": "⚠️ Δεν υπήρξε απάντηση από το gateway.",
     "btnSend": "Αποστολή"
+  },
+  "falNative": {
+    "title": "Εγγενή μοντέλα Fal",
+    "description": "Βρείτε ένα τελικό σημείο, φορτώστε το σχήμα του και εκτελέστε το με τα τεκμηριωμένα δεδομένα εισόδου. Η κατάσταση της ουράς και η εγγενής ροή δεδομένων παραμένουν ξεχωριστές.",
+    "connectionRequired": "Προσθέστε πρώτα μια σύνδεση με κλειδί API του Fal.",
+    "category": "Κατηγορία",
+    "endpoint": "Αναγνωριστικό τελικού σημείου",
+    "reasoning": "Ρύθμιση συλλογισμού",
+    "input": "Είσοδος JSON σε εγγενή μορφή (διατηρείται η σειρά των στοιχείων στους πίνακες)",
+    "transport": "Τρόπος μεταφοράς",
+    "run": "Εκτέλεση μοντέλου",
+    "job": "Αναγνωριστικό αποθηκευμένης εργασίας",
+    "register": "Καταχώριση τελικού σημείου ή παράκαμψης σχήματος",
+    "schema": "Σχήμα OpenAPI 3",
+    "download": "Λήψη αρχείου εξόδου",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "朋友",
     "errNoReply": "⚠️ 閘道沒有回應。",
     "btnSend": "傳送"
+  },
+  "falNative": {
+    "title": "Fal 原生模型",
+    "description": "尋找端點、載入其結構描述，並使用文件中說明的輸入執行。佇列狀態與原生串流保持獨立。",
+    "connectionRequired": "請先新增使用 Fal API 金鑰的連線。",
+    "category": "類別",
+    "endpoint": "端點 ID",
+    "reasoning": "推理控制",
+    "input": "原生 JSON 輸入（陣列保留其順序）",
+    "transport": "傳輸方式",
+    "run": "執行模型",
+    "job": "已儲存的工作 ID",
+    "register": "註冊端點或覆寫結構描述",
+    "schema": "OpenAPI 3 結構描述",
+    "download": "下載輸出檔案",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

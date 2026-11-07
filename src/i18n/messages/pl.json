@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "tam",
     "errNoReply": "⚠️ Brak odpowiedzi z bramki.",
     "btnSend": "Wyślij"
+  },
+  "falNative": {
+    "title": "Natywne modele Fal",
+    "description": "Znajdź punkt końcowy, wczytaj jego schemat i uruchom go z udokumentowanymi danymi wejściowymi. Stan kolejki i natywne przesyłanie strumieniowe pozostają rozdzielone.",
+    "connectionRequired": "Najpierw dodaj połączenie z kluczem API Fal.",
+    "category": "Kategoria",
+    "endpoint": "ID punktu końcowego",
+    "reasoning": "Ustawienie rozumowania",
+    "input": "Natywne dane wejściowe JSON (kolejność elementów tablic zostaje zachowana)",
+    "transport": "Metoda transportu",
+    "run": "Uruchom model",
+    "job": "ID zapisanego zadania",
+    "register": "Zarejestruj punkt końcowy lub zastąp schemat",
+    "schema": "Schemat OpenAPI 3",
+    "download": "Pobierz plik wyjściowy",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

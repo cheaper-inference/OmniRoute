@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "사용자",
     "errNoReply": "⚠️ 게이트웨이에서 응답이 없습니다.",
     "btnSend": "전송"
+  },
+  "falNative": {
+    "title": "Fal 네이티브 모델",
+    "description": "엔드포인트를 찾고 스키마를 불러온 뒤 문서에 명시된 입력으로 실행하세요. 대기열 상태와 네이티브 스트리밍은 별도로 처리됩니다.",
+    "connectionRequired": "먼저 Fal API 키를 사용하는 연결을 추가하세요.",
+    "category": "카테고리",
+    "endpoint": "엔드포인트 ID",
+    "reasoning": "추론 설정",
+    "input": "네이티브 JSON 입력(배열 순서가 유지됩니다)",
+    "transport": "요청 전송 방식",
+    "run": "모델 실행",
+    "job": "저장된 작업 ID",
+    "register": "엔드포인트 또는 덮어쓸 스키마 등록",
+    "schema": "OpenAPI 3 스키마",
+    "download": "아티팩트 다운로드",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

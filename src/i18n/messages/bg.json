@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "тук",
     "errNoReply": "⚠️ Нямаше отговор от гейтвея.",
     "btnSend": "Изпрати"
+  },
+  "falNative": {
+    "title": "Нативни модели на Fal",
+    "description": "Открийте крайна точка, заредете схемата ѝ и я извикайте с документираните входни данни. Състоянието на опашката и нативното поточно предаване остават отделни.",
+    "connectionRequired": "Първо добавете връзка с API ключ за Fal.",
+    "category": "Категория",
+    "endpoint": "ID на крайната точка",
+    "reasoning": "Настройка на разсъждението",
+    "input": "JSON входни данни в нативния формат (редът на елементите в масивите се запазва)",
+    "transport": "Транспорт на заявките",
+    "run": "Стартиране на модела",
+    "job": "ID на запазената задача",
+    "register": "Регистриране на крайна точка или заместваща схема",
+    "schema": "Схема OpenAPI 3",
+    "download": "Изтегляне на изходния файл",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

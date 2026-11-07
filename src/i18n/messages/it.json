@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "lì",
     "errNoReply": "⚠️ Nessuna risposta dal gateway.",
     "btnSend": "Invia"
+  },
+  "falNative": {
+    "title": "Modelli nativi di Fal",
+    "description": "Trova un endpoint, carica il suo schema ed eseguilo con gli input documentati. Lo stato della coda e lo streaming nativo rimangono separati.",
+    "connectionRequired": "Aggiungi prima una connessione con una chiave API Fal.",
+    "category": "Categoria",
+    "endpoint": "ID dell’endpoint",
+    "reasoning": "Impostazione del ragionamento",
+    "input": "Input JSON nativo (l’ordine degli elementi degli array viene mantenuto)",
+    "transport": "Modalità di trasporto",
+    "run": "Esegui modello",
+    "job": "ID del processo salvato",
+    "register": "Registra un endpoint o sostituisci lo schema",
+    "schema": "Schema OpenAPI 3",
+    "download": "Scarica il file di output",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

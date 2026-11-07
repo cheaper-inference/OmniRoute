@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "ସେଠାରେ",
     "errNoReply": "⚠️ ଗେଟ୍‌ୱେ ଦେଖିବାକୁ କୌଣସି ଉତ୍ତର ନାହିଁ।",
     "btnSend": "ପଠାନ୍"
+  },
+  "falNative": {
+    "title": "Falର ନିଜସ୍ୱ ମଡେଲଗୁଡ଼ିକ",
+    "description": "ଏକ ଏଣ୍ଡପଏଣ୍ଟ ଖୋଜନ୍ତୁ, ଏହାର ସ୍କିମା ଲୋଡ୍ କରନ୍ତୁ ଏବଂ ଦଲିଲରେ ବର୍ଣ୍ଣିତ ଇନପୁଟ୍ ସହ ଚଲାନ୍ତୁ। କ୍ୟୁର ସ୍ଥିତି ଓ ମୂଳ ଷ୍ଟ୍ରିମିଂ ଅଲଗା ରହିଥାଏ।",
+    "connectionRequired": "ପ୍ରଥମେ Fal API କୀ ବ୍ୟବହାର କରୁଥିବା ଏକ ସଂଯୋଗ ଯୋଡ଼ନ୍ତୁ।",
+    "category": "ବର୍ଗ",
+    "endpoint": "ଏଣ୍ଡପଏଣ୍ଟ ID",
+    "reasoning": "ତର୍କ ନିୟନ୍ତ୍ରଣ",
+    "input": "ମୂଳ ଫର୍ମାଟରେ JSON ଇନପୁଟ୍ (ଆରେର କ୍ରମ ବଜାୟ ରହେ)",
+    "transport": "ଅନୁରୋଧ ପଠାଇବା ମାଧ୍ୟମ",
+    "run": "ମଡେଲ୍ ଚଲାନ୍ତୁ",
+    "job": "ସଂରକ୍ଷିତ କାର୍ଯ୍ୟର ID",
+    "register": "ଏଣ୍ଡପଏଣ୍ଟ କିମ୍ବା ବଦଳ ସ୍କିମା ପଞ୍ଜୀକରଣ କରନ୍ତୁ",
+    "schema": "OpenAPI 3 ସ୍କିମା",
+    "download": "ଆଉଟପୁଟ୍ ଫାଇଲ୍ ଡାଉନଲୋଡ୍ କରନ୍ତୁ",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

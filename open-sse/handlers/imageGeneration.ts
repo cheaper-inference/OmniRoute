@@ -1,4 +1,6 @@
 import { randomUUID } from "crypto";
+import { canonicalFalEndpoint, isLegacyFalEndpoint } from "../config/falEndpoint.ts";
+import { prepareFalCompatibility } from "./fal/compatibility.ts";
 /** Image generation handler for POST /v1/images/generations (OpenAI-compatible). */
 
 import {
@@ -412,6 +414,7 @@ export async function handleImageGeneration({
   // #16260 — IMAGE_GENERATION_LONG_JOBS, injected by the routes (the flag lives in src/):
   // `{ resolveTimeoutMs }` for the OpenAI-compatible path. Null keeps the default behavior.
   longJobs = null,
+  prepareFalInput = prepareFalCompatibility,
 }) {
   // Retirement guards: the retired-provider sets hold bare provider ids only, so testing
   // the `<provider>/` prefix (or the whole model when it carries no slash) covers both the
@@ -531,6 +534,7 @@ export async function handleImageGeneration({
       signal,
       generateOne: (taskBody) =>
         handleImageGeneration({
+          prepareFalInput,
           body: taskBody,
           credentials,
           log,
@@ -646,12 +650,14 @@ export async function handleImageGeneration({
 
   if (providerConfig.format === "fal-ai") {
     return handleFalAIImageGeneration({
+      prepareFalInput,
       model,
       provider,
       providerConfig,
       body,
       credentials,
       log,
+      signal,
     });
   }
 
@@ -1742,18 +1748,20 @@ export async function handleOpenRouterImageEdit({
 }
 
 async function handleFalAIImageGeneration({
+  prepareFalInput,
   model,
   provider,
   providerConfig,
   body,
   credentials,
   log,
+  signal,
 }) {
   const startTime = Date.now();
   const token = credentials.apiKey || credentials.accessToken;
-  const falModel = model.startsWith("fal-ai/") ? model : `fal-ai/${model}`;
+  const falModel = canonicalFalEndpoint(model);
   const { imageUrl, imageUrls } = extractImageInputs(body);
-  const upstreamBody: Record<string, unknown> = {
+  let upstreamBody: Record<string, unknown> = {
     prompt: body.prompt,
     sync_mode: body.sync_mode ?? true,
   };
@@ -1797,17 +1805,26 @@ async function handleFalAIImageGeneration({
   }
 
   try {
-    const response = await fetch(`${providerConfig.baseUrl.replace(/\/$/, "")}/${falModel}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Key ${token}`,
-      },
-      body: JSON.stringify(upstreamBody),
-    });
+    if (!isLegacyFalEndpoint(model) || body.fal_input !== undefined) {
+      upstreamBody = await prepareFalInput(falModel, body, credentials, signal);
+    }
+    const response = await fetchWithTimeout(
+      `${providerConfig.baseUrl.replace(/\/$/, "")}/${falModel}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Key ${token}`,
+        },
+        body: JSON.stringify(upstreamBody),
+        signal,
+        redirect: "error",
+      }
+    );
 
     if (!response.ok) {
-      const errorText = await response.text();
+      await response.body?.cancel();
+      const errorText = `Fal image request failed (${response.status})`;
       if (log)
         log.error("IMAGE", `${provider} error ${response.status}: ${errorText.slice(0, 200)}`);
       return saveImageErrorResult({
@@ -1836,7 +1853,9 @@ async function handleFalAIImageGeneration({
     return saveImageErrorResult({
       provider,
       model,
-      status: 502,
+      status: /Invalid fal input|Unsupported fal|This fal endpoint/.test(String(err.message))
+        ? 400
+        : 502,
       startTime,
       error: `Image provider error: ${sanitizeErrorMessage((err as Error).message || err)}`,
     });

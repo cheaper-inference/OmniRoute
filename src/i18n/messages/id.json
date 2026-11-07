@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "di sana",
     "errNoReply": "⚠️ Tidak ada respons dari gerbang.",
     "btnSend": "Kirim"
+  },
+  "falNative": {
+    "title": "Model bawaan Fal",
+    "description": "Temukan endpoint, muat skemanya, lalu jalankan dengan input yang didokumentasikan. Status antrean dan streaming bawaan tetap terpisah.",
+    "connectionRequired": "Tambahkan koneksi dengan kunci API Fal terlebih dahulu.",
+    "category": "Kategori",
+    "endpoint": "ID endpoint",
+    "reasoning": "Kontrol penalaran",
+    "input": "Input JSON format asli (urutan elemen array dipertahankan)",
+    "transport": "Metode pengiriman permintaan",
+    "run": "Jalankan model",
+    "job": "ID tugas tersimpan",
+    "register": "Daftarkan endpoint atau skema pengganti",
+    "schema": "Skema OpenAPI 3",
+    "download": "Unduh berkas keluaran",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

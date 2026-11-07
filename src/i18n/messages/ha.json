@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "a nan",
     "errNoReply": "⚠️ Babu amsa daga shafin.",
     "btnSend": "Aika"
+  },
+  "falNative": {
+    "title": "Samfuran Fal na asali",
+    "description": "Nemo wurin ƙarshe, loda tsarin bayanansa, sannan gudanar da shi da abubuwan shigarwa da aka bayyana a takardunsa. Matsayin layin jira da watsa bayanai kai tsaye na Fal suna nan dabam.",
+    "connectionRequired": "Fara da ƙara haɗi mai maɓallin API na Fal.",
+    "category": "Rukuni",
+    "endpoint": "ID na wurin ƙarshe",
+    "reasoning": "Sarrafa tunani",
+    "input": "Abin shigarwa na JSON a tsarin Fal (jerin bayanai suna riƙe da tsarinsu)",
+    "transport": "Hanyar aika buƙata",
+    "run": "Gudanar da samfuri",
+    "job": "ID na aikin da aka adana",
+    "register": "Yi rajistar wurin ƙarshe ko madadin tsarin bayanai",
+    "schema": "Tsarin bayanai na OpenAPI 3",
+    "download": "Sauke fayil ɗin sakamako",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

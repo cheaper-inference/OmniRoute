@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from "../../../utils/fetchTimeout.ts";
 import type { ExecutorLog, ProviderCredentials } from "../../../executors/base.ts";
 import {
   mapFalImageSize,
@@ -7,6 +8,8 @@ import {
   saveImageSuccessResult,
 } from "../../imageGeneration.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
+import { canonicalFalEndpoint, falEditEndpoint } from "../../../config/falEndpoint.ts";
+import { prepareFalCompatibility, type PrepareFalInput } from "../../fal/compatibility.ts";
 
 export const FAL_IMAGE_EDIT_MODELS = new Set([
   "fal-ai/flux-2-flex",
@@ -17,7 +20,13 @@ export const FAL_IMAGE_EDIT_MODELS = new Set([
 export const FAL_IMAGE_EDIT_MAX_REFERENCES = 10;
 
 export function isFalImageEditModel(model: string | null): boolean {
-  return typeof model === "string" && FAL_IMAGE_EDIT_MODELS.has(model);
+  if (typeof model !== "string") return false;
+  try {
+    canonicalFalEndpoint(model);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 type FalAIImageEditOptions = {
@@ -28,6 +37,8 @@ type FalAIImageEditOptions = {
   images: Array<{ bytes: Buffer; mime: string }>;
   credentials: ProviderCredentials;
   log: ExecutorLog | null | undefined;
+  signal?: AbortSignal;
+  prepareFalInput?: PrepareFalInput;
 };
 
 export async function handleFalAIImageEdit({
@@ -38,11 +49,77 @@ export async function handleFalAIImageEdit({
   images,
   credentials,
   log,
+  signal,
+  prepareFalInput = prepareFalCompatibility,
 }: FalAIImageEditOptions) {
   const startTime = Date.now();
-  const editModel = `${model}/edit`;
+  const editModel = falEditEndpoint(model);
+  let upstreamBody: Record<string, unknown> = {};
+
+  if (log) {
+    const promptPreview = String(body.prompt ?? "").slice(0, 60);
+    log.info("IMAGE", `${provider}/${editModel} (fal-ai edit) | prompt: "${promptPreview}..."`);
+  }
+
+  try {
+    upstreamBody = await prepareEditInput(
+      { model, body, images, credentials, signal, prepareFalInput },
+      editModel
+    );
+    const token = credentials.apiKey || credentials.accessToken;
+    const response = await fetchWithTimeout(
+      `${providerConfig.baseUrl.replace(/\/$/, "")}/${editModel}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Key ${token}`,
+        },
+        body: JSON.stringify(upstreamBody),
+        signal,
+        redirect: "error",
+      }
+    );
+
+    return completeEditResponse({
+      response,
+      body,
+      log,
+      provider,
+      editModel,
+      startTime,
+      upstreamBody,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (log) log.error("IMAGE", `${provider} fetch error: ${message}`);
+    return saveImageErrorResult({
+      provider,
+      model: editModel,
+      status: /Invalid fal input|Unsupported fal/.test(message) ? 400 : 502,
+      startTime,
+      error: `Image provider error: ${sanitizeErrorMessage(message || err)}`,
+      path: "/v1/images/edits",
+    });
+  }
+}
+
+async function prepareEditInput(
+  {
+    model,
+    body,
+    images,
+    credentials,
+    signal,
+    prepareFalInput = prepareFalCompatibility,
+  }: Pick<
+    FalAIImageEditOptions,
+    "model" | "body" | "images" | "credentials" | "signal" | "prepareFalInput"
+  >,
+  editModel: string
+) {
   const outputFormat = normalizeRequestedImageFormat(body, "png", ["jpeg", "png"]);
-  const upstreamBody: Record<string, unknown> = {
+  let upstreamBody: Record<string, unknown> = {
     prompt: body.prompt,
     image_urls: images.map(
       ({ bytes, mime }) => `data:${mime || "image/png"};base64,${bytes.toString("base64")}`
@@ -55,61 +132,77 @@ export async function handleFalAIImageEdit({
   if (body.n !== undefined) upstreamBody.num_images = Number(body.n) || 1;
   if (body.seed !== undefined) upstreamBody.seed = body.seed;
 
-  if (log) {
-    const promptPreview = String(body.prompt ?? "").slice(0, 60);
-    log.info("IMAGE", `${provider}/${editModel} (fal-ai edit) | prompt: "${promptPreview}..."`);
-  }
-
-  try {
-    const token = credentials.apiKey || credentials.accessToken;
-    const response = await fetch(`${providerConfig.baseUrl.replace(/\/$/, "")}/${editModel}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Key ${token}`,
+  if (!FAL_IMAGE_EDIT_MODELS.has(canonicalFalEndpoint(model))) {
+    upstreamBody = await prepareFalInput(
+      editModel,
+      {
+        ...body,
+        image_urls: images.map(
+          ({ bytes, mime }) => `data:${mime || "image/png"};base64,${bytes.toString("base64")}`
+        ),
       },
-      body: JSON.stringify(upstreamBody),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      if (log)
-        log.error("IMAGE", `${provider} error ${response.status}: ${errorText.slice(0, 200)}`);
-      return saveImageErrorResult({
-        provider,
-        model: editModel,
-        status: response.status,
-        startTime,
-        error: errorText,
-        requestBody: upstreamBody,
-        path: "/v1/images/edits",
-      });
+      credentials,
+      signal
+    );
+  } else {
+    // Legacy FLUX aliases retain their defaults but no longer discard native options.
+    for (const [key, value] of Object.entries(body)) {
+      if (!["model", "n", "size", "response_format", "fal_input", "mask"].includes(key))
+        upstreamBody[key] = value;
     }
-
-    const payload = await response.json();
-    const normalizedBody =
-      body.response_format === undefined ? { ...body, response_format: "b64_json" } : body;
-    const imagesOut = await normalizeProviderImagePayload(payload, normalizedBody, log, "b64_json");
-    return saveImageSuccessResult({
-      provider,
-      model: editModel,
-      startTime,
-      requestBody: upstreamBody,
-      responseBody: { images_count: imagesOut.length },
-      created: payload.created,
-      images: imagesOut,
-      path: "/v1/images/edits",
-    });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    if (log) log.error("IMAGE", `${provider} fetch error: ${message}`);
+    if (body.mask !== undefined) upstreamBody.mask_url = body.mask;
+    if (body.fal_input && typeof body.fal_input === "object") {
+      upstreamBody = await prepareFalInput(
+        editModel,
+        { fal_input: { ...upstreamBody, ...body.fal_input } },
+        credentials,
+        signal
+      );
+    }
+  }
+  return upstreamBody;
+}
+async function completeEditResponse({
+  response,
+  body,
+  log,
+  provider,
+  editModel,
+  startTime,
+  upstreamBody,
+}: Pick<FalAIImageEditOptions, "body" | "log" | "provider"> & {
+  response: Response;
+  editModel: string;
+  startTime: number;
+  upstreamBody: Record<string, unknown>;
+}) {
+  if (!response.ok) {
+    await response.body?.cancel();
+    const errorText = `Fal image edit request failed (${response.status})`;
+    if (log) log.error("IMAGE", `${provider} error ${response.status}: ${errorText.slice(0, 200)}`);
     return saveImageErrorResult({
       provider,
       model: editModel,
-      status: 502,
+      status: response.status,
       startTime,
-      error: `Image provider error: ${sanitizeErrorMessage(message || err)}`,
+      error: errorText,
+      requestBody: upstreamBody,
       path: "/v1/images/edits",
     });
   }
+
+  const payload = await response.json();
+  const normalizedBody =
+    body.response_format === undefined ? { ...body, response_format: "b64_json" } : body;
+  const imagesOut = await normalizeProviderImagePayload(payload, normalizedBody, log, "b64_json");
+  return saveImageSuccessResult({
+    provider,
+    model: editModel,
+    startTime,
+    requestBody: upstreamBody,
+    responseBody: { images_count: imagesOut.length },
+    created: payload.created,
+    images: imagesOut,
+    path: "/v1/images/edits",
+  });
 }

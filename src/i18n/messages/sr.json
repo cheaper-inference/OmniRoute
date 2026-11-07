@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "тамо",
     "errNoReply": "⚠️ Нема одговора од гатеваја.",
     "btnSend": "Пошаљи"
+  },
+  "falNative": {
+    "title": "Изворни модели Fal",
+    "description": "Пронађите крајњу тачку, учитајте њену шему и покрените је са документованим улазним подацима. Статус реда и изворни стриминг остају одвојени.",
+    "connectionRequired": "Прво додајте везу са API кључем за Fal.",
+    "category": "Категорија",
+    "endpoint": "ID крајње тачке",
+    "reasoning": "Контрола расуђивања",
+    "input": "Улазни JSON у изворном формату (низови задржавају свој редослед)",
+    "transport": "Начин преноса",
+    "run": "Покрени модел",
+    "job": "ID сачуваног задатка",
+    "register": "Региструј крајњу тачку или заменску шему",
+    "schema": "Шема OpenAPI 3",
+    "download": "Преузми излазну датотеку",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

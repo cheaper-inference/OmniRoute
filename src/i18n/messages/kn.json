@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "ಅಲ್ಲಿ",
     "errNoReply": "⚠️ ಗೇಟ್‌ವೇಯಿಂದ ಯಾವುದೇ ಉತ್ತರ ಇಲ್ಲ.",
     "btnSend": "ಕಳುಹಿಸಿ"
+  },
+  "falNative": {
+    "title": "Fal‌ನ ಸ್ವಂತ ಮಾದರಿಗಳು",
+    "description": "ಎಂಡ್ಪಾಯಿಂಟ್ ಹುಡುಕಿ, ಅದರ ಸ್ಕೀಮಾ ಲೋಡ್ ಮಾಡಿ ಮತ್ತು ದಾಖಲಾತಿಯಲ್ಲಿ ವಿವರಿಸಿದ ಇನ್‌ಪುಟ್‌ಗಳೊಂದಿಗೆ ಚಲಾಯಿಸಿ. ಸರದಿಯ ಸ್ಥಿತಿ ಮತ್ತು ಮೂಲ ಸ್ಟ್ರೀಮಿಂಗ್ ಪ್ರತ್ಯೇಕವಾಗಿರುತ್ತವೆ.",
+    "connectionRequired": "ಮೊದಲು Fal API ಕೀ ಬಳಸಿ ಸಂಪರ್ಕವನ್ನು ಸೇರಿಸಿ.",
+    "category": "ವರ್ಗ",
+    "endpoint": "ಎಂಡ್ಪಾಯಿಂಟ್ ID",
+    "reasoning": "ತಾರ್ಕಿಕ ಚಿಂತನೆಯ ನಿಯಂತ್ರಣ",
+    "input": "ಮೂಲ ಸ್ವರೂಪದ JSON ಇನ್‌ಪುಟ್ (ಅರೇಗಳ ಕ್ರಮ ಉಳಿಯುತ್ತದೆ)",
+    "transport": "ವಿನಂತಿ ರವಾನಿಸುವ ವಿಧಾನ",
+    "run": "ಮಾದರಿಯನ್ನು ಚಲಾಯಿಸಿ",
+    "job": "ಉಳಿಸಿದ ಕಾರ್ಯದ ID",
+    "register": "ಎಂಡ್ಪಾಯಿಂಟ್ ಅಥವಾ ಬದಲಿ ಸ್ಕೀಮಾ ನೋಂದಾಯಿಸಿ",
+    "schema": "OpenAPI 3 ಸ್ಕೀಮಾ",
+    "download": "ಔಟ್‌ಪುಟ್ ಫೈಲ್ ಡೌನ್ಲೋಡ್ ಮಾಡಿ",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

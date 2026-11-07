@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "sina",
     "errNoReply": "⚠️ Väravalt ei ole vastust.",
     "btnSend": "Saada"
+  },
+  "falNative": {
+    "title": "Fal natiivmudelid",
+    "description": "Leia otspunkt, laadi selle skeem ja käivita see dokumenteeritud sisenditega. Järjekorra olek ja natiivne voogedastus jäävad eraldi.",
+    "connectionRequired": "Lisa esmalt ühendus Fal API-võtmega.",
+    "category": "Kategooria",
+    "endpoint": "Otspunkti ID",
+    "reasoning": "Arutluse seadistus",
+    "input": "JSON-sisend natiivvormingus (massiivide elementide järjekord säilib)",
+    "transport": "Edastusviis",
+    "run": "Käivita mudel",
+    "job": "Salvestatud töö ID",
+    "register": "Registreeri otspunkt või asenda skeem",
+    "schema": "OpenAPI 3 skeem",
+    "download": "Laadi väljundfail alla",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "ទីនោះ",
     "errNoReply": "⚠️ គ្មានឆ្លើយតបពី gateway ទេ។",
     "btnSend": "ផ្ញើ"
+  },
+  "falNative": {
+    "title": "ម៉ូដែលដើមរបស់ Fal",
+    "description": "ស្វែងរកចំណុចបញ្ចប់ ផ្ទុកស្គីម៉ារបស់វា ហើយដំណើរការដោយប្រើទិន្នន័យបញ្ចូលដែលបានពិពណ៌នាក្នុងឯកសារ។ ស្ថានភាពជួរ និងការបញ្ជូនទិន្នន័យជាបន្តបន្ទាប់តាមទម្រង់ដើមនៅតែដាច់ពីគ្នា។",
+    "connectionRequired": "សូមបន្ថែមការតភ្ជាប់ដោយប្រើសោ API របស់ Fal ជាមុនសិន។",
+    "category": "ប្រភេទ",
+    "endpoint": "ID ចំណុចបញ្ចប់",
+    "reasoning": "ការគ្រប់គ្រងការវែកញែក",
+    "input": "ទិន្នន័យបញ្ចូល JSON តាមទម្រង់ដើម (លំដាប់ធាតុក្នុងអារេត្រូវបានរក្សាទុក)",
+    "transport": "មធ្យោបាយបញ្ជូនសំណើ",
+    "run": "ដំណើរការម៉ូដែល",
+    "job": "ID ការងារដែលបានរក្សាទុក",
+    "register": "ចុះឈ្មោះចំណុចបញ្ចប់ ឬស្គីម៉ាជំនួស",
+    "schema": "ស្គីម៉ា OpenAPI 3",
+    "download": "ទាញយកឯកសារលទ្ធផល",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

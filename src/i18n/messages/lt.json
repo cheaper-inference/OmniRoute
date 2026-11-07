@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "ten",
     "errNoReply": "⚠️ Atsakymo iš įėjimo punkto nėra.",
     "btnSend": "Siųsti"
+  },
+  "falNative": {
+    "title": "Savieji Fal modeliai",
+    "description": "Raskite galinį tašką, įkelkite jo schemą ir paleiskite jį su dokumentuotais įvesties duomenimis. Eilės būsena ir savasis srautinis perdavimas lieka atskirti.",
+    "connectionRequired": "Pirmiausia pridėkite ryšį su Fal API raktu.",
+    "category": "Kategorija",
+    "endpoint": "Galinio taško ID",
+    "reasoning": "Samprotavimo nuostata",
+    "input": "JSON įvestis savuoju formatu (masyvų elementų tvarka išlieka)",
+    "transport": "Perdavimo būdas",
+    "run": "Paleisti modelį",
+    "job": "Išsaugotos užduoties ID",
+    "register": "Registruoti galinį tašką arba pakeisti schemą",
+    "schema": "Schema pagal OpenAPI 3",
+    "download": "Atsisiųsti išvesties failą",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

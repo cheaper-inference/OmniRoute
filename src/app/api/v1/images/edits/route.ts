@@ -1,3 +1,4 @@
+import { prepareFalCompatibility } from "@/lib/fal/compatibility";
 import {
   handleAdobeFireflyImageGeneration,
   handleCodexImageEdit,
@@ -8,7 +9,6 @@ import {
 } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import {
   handleFalAIImageEdit,
-  FAL_IMAGE_EDIT_MAX_REFERENCES,
   isFalImageEditModel,
 } from "@omniroute/open-sse/handlers/imageGeneration/providers/fal.ts";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -213,6 +213,7 @@ async function handleSyntxEditRequest(params: {
 
 /** Reference/prompt payload an edit dispatch needs, shared by single + combo paths. */
 interface ImageEditContext {
+  options?: Record<string, unknown>;
   prompt: string;
   size: string | null;
   responseFormat: string | null;
@@ -345,13 +346,20 @@ async function dispatchImageEditTarget(
 
   if (providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model)) {
     return (await handleFalAIImageEdit({
+      prepareFalInput: prepareFalCompatibility,
       provider: parsed.provider,
       model: parsed.model,
       providerConfig,
-      body: { prompt, size: size ?? undefined, response_format: responseFormat ?? undefined, n: 1 },
+      body: {
+        ...ctx.options,
+        prompt,
+        size: size ?? undefined,
+        response_format: responseFormat ?? undefined,
+      },
       images,
       credentials: credentials as never,
       log,
+      signal: request.signal,
     })) as ImageComboDispatchResult;
   }
 
@@ -624,6 +632,7 @@ async function postHandler(request: Request, _context?: unknown) {
           ? comboPolicy.apiKeyInfo.allowedConnections
           : null;
       return executeImageEditCombo(fullModel, {
+        options: input.options,
         prompt,
         size,
         responseFormat,
@@ -676,7 +685,7 @@ async function postHandler(request: Request, _context?: unknown) {
       : providerConfig?.format === "codex-responses"
         ? Number.POSITIVE_INFINITY
         : providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model)
-          ? FAL_IMAGE_EDIT_MAX_REFERENCES
+          ? Number.POSITIVE_INFINITY
           : MAX_NON_CODEX_IMAGE_EDIT_REFERENCES;
   if (providerConfig?.format !== "codex-responses" && imageInputCount > maxRefsForProvider) {
     return errorResponse(
@@ -828,18 +837,20 @@ async function postHandler(request: Request, _context?: unknown) {
       editAccounting(accounting, parsed.provider, parsed.model, credentials),
       () =>
         handleFalAIImageEdit({
+          prepareFalInput: prepareFalCompatibility,
           provider: parsed.provider,
           model: parsed.model,
           providerConfig,
           body: {
+            ...input.options,
             prompt,
             size: size ?? undefined,
             response_format: responseFormat ?? undefined,
-            n: 1,
           },
           images,
           credentials: credentials as Record<string, unknown>,
           log,
+          signal: request.signal,
         })
     );
 
@@ -993,6 +1004,7 @@ async function postHandler(request: Request, _context?: unknown) {
       allowedConnections,
       execute: (creds) =>
         handleImageGeneration({
+          prepareFalInput: prepareFalCompatibility,
           body: {
             model: resolvedModel,
             prompt,

@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "Ahí",
     "errNoReply": "⚠️ Sin respuesta de la pasarela.",
     "btnSend": "Enviar"
+  },
+  "falNative": {
+    "title": "Modelos nativos de Fal",
+    "description": "Busca un punto de conexión, carga su esquema y ejecútalo con los datos de entrada documentados. El estado de la cola y la transmisión nativa se mantienen separados.",
+    "connectionRequired": "Primero añade una conexión con una clave API de Fal.",
+    "category": "Categoría",
+    "endpoint": "ID del punto de conexión",
+    "reasoning": "Control del razonamiento",
+    "input": "Entrada JSON nativa (se conserva el orden de los elementos de los arrays)",
+    "transport": "Transporte de solicitudes",
+    "run": "Ejecutar modelo",
+    "job": "ID del trabajo guardado",
+    "register": "Registrar un punto de conexión o reemplazar el esquema",
+    "schema": "Esquema OpenAPI 3",
+    "download": "Descargar archivo de salida",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "там",
     "errNoReply": "⚠️ Від шлюза немає відповіді.",
     "btnSend": "Надіслати"
+  },
+  "falNative": {
+    "title": "Нативні моделі Fal",
+    "description": "Знайдіть кінцеву точку, завантажте її схему й запустіть із вхідними даними, описаними в документації. Стан черги та нативне потокове передавання залишаються окремими.",
+    "connectionRequired": "Спочатку додайте підключення з ключем API Fal.",
+    "category": "Категорія",
+    "endpoint": "Ідентифікатор кінцевої точки",
+    "reasoning": "Керування міркуванням",
+    "input": "Вхідні дані JSON у нативному форматі (порядок елементів масивів зберігається)",
+    "transport": "Спосіб передавання",
+    "run": "Запустити модель",
+    "job": "Ідентифікатор збереженого завдання",
+    "register": "Зареєструвати кінцеву точку або перевизначити схему",
+    "schema": "Схема OpenAPI 3",
+    "download": "Завантажити вихідний файл",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

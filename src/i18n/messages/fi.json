@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "siellä",
     "errNoReply": "⚠️ Ei vastausta lähetysverkkoon.",
     "btnSend": "Lähetä"
+  },
+  "falNative": {
+    "title": "Fal-natiivimallit",
+    "description": "Etsi päätepiste, lataa sen skeema ja suorita se dokumentoiduilla syötteillä. Jonon tila ja natiivi suoratoisto pysyvät erillisinä.",
+    "connectionRequired": "Lisää ensin yhteys Fal-API-avaimella.",
+    "category": "Luokka",
+    "endpoint": "Päätepisteen tunniste",
+    "reasoning": "Päättelyn asetus",
+    "input": "Natiivimuotoinen JSON-syöte (taulukoiden alkioiden järjestys säilyy)",
+    "transport": "Siirtotapa",
+    "run": "Suorita malli",
+    "job": "Tallennetun työn tunniste",
+    "register": "Rekisteröi päätepiste tai korvaa skeema",
+    "schema": "OpenAPI 3 -skeema",
+    "download": "Lataa tulostiedosto",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

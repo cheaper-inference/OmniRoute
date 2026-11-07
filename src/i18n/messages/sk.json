@@ -15979,5 +15979,28 @@
     "greetingFallbackName": "tu",
     "errNoReply": "⚠️ Od brány nebol žiaden odozva.",
     "btnSend": "Odoslať"
+  },
+  "falNative": {
+    "title": "Natívne modely Fal",
+    "description": "Vyhľadajte koncový bod, načítajte jeho schému a spustite ho so zdokumentovanými vstupmi. Stav frontu a natívne streamovanie zostávajú oddelené.",
+    "connectionRequired": "Najprv pridajte pripojenie s kľúčom API Fal.",
+    "category": "Kategória",
+    "endpoint": "ID koncového bodu",
+    "reasoning": "Riadenie uvažovania",
+    "input": "Natívny vstup JSON (polia si zachovávajú poradie)",
+    "transport": "Spôsob prenosu",
+    "run": "Spustiť model",
+    "job": "ID uloženej úlohy",
+    "register": "Zaregistrovať koncový bod alebo prepísať schému",
+    "schema": "Schéma OpenAPI 3",
+    "download": "Stiahnuť výstupný súbor",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }
