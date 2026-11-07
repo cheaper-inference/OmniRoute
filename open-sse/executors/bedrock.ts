@@ -18,6 +18,7 @@ import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { normalizeClaudeAdaptiveThinking } from "../services/claudeAdaptiveThinking.ts";
 import { claudeThinkingFromOpenAIRequest } from "../translator/request/openai-to-claude/thinkingConfig.ts";
 import { fitThinkingToMaxTokens } from "../translator/request/openai-to-claude/thinkingBudget.ts";
+import { getModelSpec } from "../../src/shared/constants/modelSpecs.ts";
 
 const encoder = new TextEncoder();
 
@@ -511,31 +512,59 @@ function toolConfigFromOpenAI(tools, toolChoice): ToolConfiguration | undefined 
   return config;
 }
 
+// A Bedrock id wraps the Claude id in a region, a provider and a version
+// (us.anthropic.claude-sonnet-4-5-20250929-v1:0); the model specs know the inner one.
+function claudeSpecId(model) {
+  return String(model)
+    .replace(/^.*anthropic\./i, "")
+    .replace(/-v\d+(?::.*)?$/i, "");
+}
+
+function lastAssistantUsesTool(messages) {
+  const assistant = messages.filter((message) => message.role === "assistant").at(-1);
+  return Boolean(assistant?.content.some(getToolUseIdFromBlock));
+}
+
+// Adaptive thinking omits the thinking text by default, so a client that asked for
+// reasoning would get an empty reasoning_content; ask for the summarized display.
+function withThinkingDisplay(thinking) {
+  return thinking.type === "adaptive" && !thinking.display
+    ? { ...thinking, display: "summarized" }
+    : thinking;
+}
+
 // Claude on Bedrock takes extended thinking in additionalModelRequestFields, in the
 // same shape as the Anthropic Messages API, so reuse the OpenAI to Claude mapping.
-function claudeThinkingFields(model, request, inferenceConfig) {
+// Anything left out here is a request Claude would reject, and it goes out without
+// thinking: a model the specs do not list as thinking-capable (a caller can still set
+// additionalModelRequestFields), and a tool_choice that forces tool use.
+function claudeThinkingFields(model, request, inferenceConfig, payload) {
   if (!BEDROCK_CLAUDE_MODEL.test(String(model))) return null;
-  const mapped = claudeThinkingFromOpenAIRequest(request, model);
+  const specId = claudeSpecId(model);
+  if (!getModelSpec(specId)?.supportsThinking) return null;
+  const toolChoice = payload.toolConfig?.toolChoice;
+  if (toolChoice && !toolChoice.auto) return null;
+
+  const mapped = claudeThinkingFromOpenAIRequest(request, specId);
   if (!mapped.thinking || mapped.thinking.type === "disabled") return null;
-  const { thinking } = normalizeClaudeAdaptiveThinking({ thinking: mapped.thinking }, model);
+  const { thinking } = normalizeClaudeAdaptiveThinking({ thinking: mapped.thinking }, specId);
+  // Manual thinking needs the signed block that preceded the tool_use of the turn in
+  // progress, and a Converse request has none to send back (#5945).
+  if (thinking.type === "enabled" && lastAssistantUsesTool(payload.messages)) return null;
+
   const fitted = fitThinkingToMaxTokens(
-    model,
+    specId,
     Number(inferenceConfig.maxTokens) || 0,
     thinking,
     "bedrock"
   );
   if (!fitted.thinking) return null;
   if (fitted.thinking.budget_tokens) inferenceConfig.maxTokens = fitted.maxTokens;
-  // Claude rejects a non-default temperature while extended thinking is on.
+  // Claude rejects a non-default temperature or a low top_p while thinking is on.
   delete inferenceConfig.temperature;
-  // Adaptive thinking omits the thinking text by default, so a client that asked for
-  // reasoning would get an empty reasoning_content; ask for the summarized display.
-  const shown =
-    fitted.thinking.type === "adaptive" && !fitted.thinking.display
-      ? { ...fitted.thinking, display: "summarized" }
-      : fitted.thinking;
+  delete inferenceConfig.topP;
   return {
-    thinking: shown,
+    thinking: withThinkingDisplay(fitted.thinking),
     ...(mapped.effort ? { output_config: { effort: mapped.effort } } : {}),
   };
 }
@@ -553,11 +582,10 @@ export function openAIToBedrockConverse(model, body) {
   else if (typeof request.stop === "string" && request.stop)
     inferenceConfig.stopSequences = [request.stop];
 
-  // A concrete shape, not a Record: the result is handed to ConverseCommand, whose
-  // input type requires modelId.
-  const thinkingFields = claudeThinkingFields(model, request, inferenceConfig);
   const cachePoints = BEDROCK_CACHE_POINT_MODEL.test(String(model));
 
+  // A concrete shape, not a Record: the result is handed to ConverseCommand, whose
+  // input type requires modelId.
   const payload: {
     modelId: string;
     messages: Message[];
@@ -573,16 +601,21 @@ export function openAIToBedrockConverse(model, body) {
   const system = systemBlocksFromOpenAI(messages, cachePoints);
   if (cachePoints) enforceCachePointLimit(system, payload.messages);
   if (system.length > 0) payload.system = system;
-  if (Object.keys(inferenceConfig).length > 0) payload.inferenceConfig = inferenceConfig;
 
   const toolConfig = toolConfigFromOpenAI(request.tools, request.tool_choice);
   if (toolConfig) payload.toolConfig = toolConfig;
 
   if (request.additionalModelRequestFields !== undefined) {
     payload.additionalModelRequestFields = request.additionalModelRequestFields;
-  } else if (thinkingFields) {
-    payload.additionalModelRequestFields = thinkingFields;
+  } else {
+    const thinkingFields = claudeThinkingFields(model, request, inferenceConfig, payload);
+    if (thinkingFields) {
+      payload.additionalModelRequestFields =
+        thinkingFields as ConverseStreamCommandInput["additionalModelRequestFields"];
+    }
   }
+
+  if (Object.keys(inferenceConfig).length > 0) payload.inferenceConfig = inferenceConfig;
 
   return payload;
 }

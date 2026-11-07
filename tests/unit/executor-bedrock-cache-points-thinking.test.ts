@@ -288,3 +288,129 @@ test("a raw additionalModelRequestFields from the caller still wins", () => {
     thinking: { type: "enabled", budget_tokens: 5000 },
   });
 });
+
+const FORCED_TOOL = {
+  tools: [{ type: "function", function: { name: "lookup", parameters: { type: "object" } } }],
+};
+
+test("a forced tool_choice sends no thinking, as Claude rejects the combination", () => {
+  for (const tool_choice of ["required", { type: "function", function: { name: "lookup" } }]) {
+    const payload = openAIToBedrockConverse(CLAUDE, {
+      ...FORCED_TOOL,
+      messages: [{ role: "user", content: "hi" }],
+      reasoning_effort: "low",
+      max_tokens: 2000,
+      temperature: 0.2,
+      tool_choice,
+    });
+    assert.equal(payload.additionalModelRequestFields, undefined);
+    assert.deepEqual(payload.inferenceConfig, { maxTokens: 2000, temperature: 0.2 });
+  }
+
+  const auto = openAIToBedrockConverse(CLAUDE, {
+    ...FORCED_TOOL,
+    messages: [{ role: "user", content: "hi" }],
+    reasoning_effort: "low",
+    tool_choice: "auto",
+  });
+  assert.equal(auto.additionalModelRequestFields?.thinking?.type, "enabled");
+});
+
+test("thinking drops top_p with temperature, and only thinking does", () => {
+  const body = {
+    messages: [{ role: "user", content: "hi" }],
+    max_tokens: 2000,
+    top_p: 0.9,
+  };
+  const thinking = openAIToBedrockConverse(CLAUDE, { ...body, reasoning_effort: "low" });
+  assert.equal(thinking.inferenceConfig?.topP, undefined);
+
+  const plain = openAIToBedrockConverse(CLAUDE, body);
+  assert.equal(plain.inferenceConfig?.topP, 0.9);
+});
+
+const TOOL_LOOP = [
+  { role: "user", content: "hi" },
+  {
+    role: "assistant",
+    content: "",
+    tool_calls: [{ id: "call_1", type: "function", function: { name: "lookup", arguments: "{}" } }],
+  },
+  { role: "tool", tool_call_id: "call_1", content: "result" },
+];
+
+test("manual thinking is left out while a tool loop is in progress", () => {
+  // Claude wants a signed thinking block before the tool_use of the turn in progress,
+  // and a Converse request has none to send back.
+  const loop = openAIToBedrockConverse(CLAUDE, {
+    messages: TOOL_LOOP,
+    reasoning_effort: "low",
+    max_tokens: 2000,
+    temperature: 0.2,
+  });
+  assert.equal(loop.additionalModelRequestFields, undefined);
+  assert.deepEqual(loop.inferenceConfig, { maxTokens: 2000, temperature: 0.2 });
+
+  const nextTurn = openAIToBedrockConverse(CLAUDE, {
+    messages: [
+      ...TOOL_LOOP,
+      { role: "assistant", content: "done" },
+      { role: "user", content: "and now?" },
+    ],
+    reasoning_effort: "low",
+  });
+  assert.equal(nextTurn.additionalModelRequestFields?.thinking?.type, "enabled");
+});
+
+test("adaptive thinking stays on during a tool loop", () => {
+  const payload = openAIToBedrockConverse(ADAPTIVE_CLAUDE, {
+    messages: TOOL_LOOP,
+    reasoning_effort: "high",
+  });
+  assert.equal(payload.additionalModelRequestFields?.thinking?.type, "adaptive");
+});
+
+test("the thinking budget fits the output cap of a versioned Bedrock id", () => {
+  const payload = openAIToBedrockConverse(CLAUDE, {
+    messages: [{ role: "user", content: "hi" }],
+    reasoning_effort: "high",
+    max_tokens: 1000,
+  });
+  assert.equal(payload.inferenceConfig?.maxTokens, 64000);
+  assert.ok(Number(payload.additionalModelRequestFields?.thinking?.budget_tokens) < 64000);
+});
+
+test("a versioned id of an adaptive-only Claude gets adaptive thinking", () => {
+  const payload = openAIToBedrockConverse("global.anthropic.claude-opus-4-7-v1:0", {
+    messages: [{ role: "user", content: "hi" }],
+    reasoning_effort: "max",
+  });
+  assert.deepEqual(payload.additionalModelRequestFields, {
+    thinking: { type: "adaptive", display: "summarized" },
+    output_config: { effort: "max" },
+  });
+});
+
+test("a Claude without known thinking support keeps the request as it was", () => {
+  const payload = openAIToBedrockConverse("anthropic.claude-3-haiku-20240307-v1:0", {
+    messages: [{ role: "user", content: "hi" }],
+    reasoning_effort: "high",
+    max_tokens: 1000,
+    temperature: 0.2,
+  });
+  assert.equal(payload.additionalModelRequestFields, undefined);
+  assert.deepEqual(payload.inferenceConfig, { maxTokens: 1000, temperature: 0.2 });
+});
+
+test("a raw additionalModelRequestFields leaves the sampling config alone", () => {
+  const payload = openAIToBedrockConverse(CLAUDE, {
+    messages: [{ role: "user", content: "hi" }],
+    reasoning_effort: "high",
+    max_tokens: 1000,
+    temperature: 0.2,
+    top_p: 0.9,
+    additionalModelRequestFields: { top_k: 5 },
+  });
+  assert.deepEqual(payload.additionalModelRequestFields, { top_k: 5 });
+  assert.deepEqual(payload.inferenceConfig, { maxTokens: 1000, temperature: 0.2, topP: 0.9 });
+});
