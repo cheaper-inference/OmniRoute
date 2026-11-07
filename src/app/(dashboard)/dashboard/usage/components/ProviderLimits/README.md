@@ -101,3 +101,13 @@ Successful storage operations persist order; inaccessible storage or failed writ
 retain the shared session order across Full, overview and later mounts. A failed
 write cannot reread old storage over the new order. Storage events synchronize
 cross-tab changes. Reset updates every subscriber even without storage.
+
+The order is also saved server-side as `settings.quotaProviderOrder` so it follows
+the operator across browsers. The first subscriber reads `GET /api/settings` once
+per page load: a non-empty server order replaces the local cache, an empty one
+keeps it, and a drag made before the response arrives wins over the response.
+Every reorder and reset writes through `PATCH /api/settings`; writes are
+serialized and coalesced, and a failed write keeps the order in local storage.
+The Full layout's collapsible sections use `SortableProviderBlock`, whose grip
+sits in the section header and never toggles it; overview rows use
+`SortableProviderRow`. Both share `ProviderSortContext` and this store.

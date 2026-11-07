@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { PROVIDER_ORDER } from "./constants";
 import { useProviderOrder } from "./useProviderOrder";
+import { ProviderSortContext, SortableProviderBlock } from "./ProviderRowSort";
 import QuotaCard from "./QuotaCard";
 import QuotaHealthOverview from "./QuotaHealthOverview";
 import { buildHealthGroups, type HealthAccount } from "./healthOverview";
@@ -16,6 +17,7 @@ import {
   compareProviderGroups,
   type QuotaVisibilityScope,
 } from "./utils";
+import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { compareTr } from "@/shared/utils/turkishText";
 
@@ -153,6 +155,8 @@ interface ProviderQuotaSectionProps extends Omit<Props, "connections"> {
   provider: string;
   connections: any[];
   defaultOpen?: boolean;
+  /** Drag grip from SortableProviderBlock; null when there is nothing to reorder. */
+  dragHandle?: ReactNode;
 }
 
 function ProviderQuotaHeader({
@@ -161,7 +165,9 @@ function ProviderQuotaHeader({
   activeCount,
   count,
   open,
+  dragHandle,
 }: {
+  dragHandle: ReactNode;
   group: ReturnType<typeof buildHealthGroups>[number] | undefined;
   providerLabel: string;
   activeCount: number;
@@ -180,6 +186,7 @@ function ProviderQuotaHeader({
     : undefined;
   return (
     <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
+      {dragHandle}
       <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
       <div className="min-w-0 flex-1">
         <h3 className="text-sm font-semibold text-text-main leading-5 truncate">
@@ -222,6 +229,7 @@ function ProviderQuotaSection({
   onHideQuota,
   onShowQuota,
   accounts,
+  dragHandle = null,
 }: ProviderQuotaSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
   const group =
@@ -236,6 +244,7 @@ function ProviderQuotaSection({
       className="rounded-lg border border-border bg-surface overflow-hidden"
     >
       <ProviderQuotaHeader
+        dragHandle={dragHandle}
         group={group}
         providerLabel={providerLabel}
         activeCount={activeCount}
@@ -304,7 +313,8 @@ export default function QuotaCardGrid({
   accounts,
   summaryFailed,
 }: Props) {
-  const { order } = useProviderOrder(connections.map((c) => c.provider));
+  const t = useTranslations("usage");
+  const { order, custom, reset, reorder } = useProviderOrder(connections.map((c) => c.provider));
   const orderedConnections = [...connections].sort(
     (a, b) => order.indexOf(a.provider) - order.indexOf(b.provider)
   );
@@ -373,33 +383,55 @@ export default function QuotaCardGrid({
     (a, b) => order.indexOf(a.provider) - order.indexOf(b.provider)
   );
 
+  // Drag grips reuse the overview's sortable store (useProviderOrder), so the
+  // order is shared by every layout and saved to settings.quotaProviderOrder.
+  const groupIds = groups.map((group) => group.provider);
+  const canReorder = groupIds.length > 1;
+
   return (
     <div className="space-y-4">
-      {groups.map(({ provider, connections: conns }) => (
-        <ProviderQuotaSection
-          key={provider}
-          provider={provider}
-          connections={conns}
-          accounts={accounts}
-          quotaData={quotaData}
-          loading={loading}
-          errors={errors}
-          lastRefreshedAt={lastRefreshedAt}
-          emailsVisible={emailsVisible}
-          providerLabels={providerLabels}
-          onRefresh={onRefresh}
-          onOpenCutoff={onOpenCutoff}
-          onOpenResetCredits={onOpenResetCredits}
-          onToggleActive={onToggleActive}
-          togglingActiveId={togglingActiveId}
-          quotaVisibility={quotaVisibility}
-          onHideQuota={onHideQuota}
-          onShowQuota={onShowQuota}
-          redeemingResetCreditId={redeemingResetCreditId}
-          loadingResetCreditsId={loadingResetCreditsId}
-          defaultOpen
-        />
-      ))}
+      {custom && (
+        <div className="flex justify-end">
+          <Button variant="ghost" size="sm" data-reset-order className="text-xs" onClick={reset}>
+            <Icon name="restart_alt" size={14} /> {t("healthResetOrder")}
+          </Button>
+        </div>
+      )}
+      <ProviderSortContext ids={groupIds} labels={providerLabels} onReorder={reorder}>
+        {groups.map(({ provider, connections: conns }) => (
+          <SortableProviderBlock
+            key={provider}
+            id={provider}
+            label={providerLabels[provider] || provider}
+          >
+            {(handle) => (
+              <ProviderQuotaSection
+                provider={provider}
+                connections={conns}
+                accounts={accounts}
+                quotaData={quotaData}
+                loading={loading}
+                errors={errors}
+                lastRefreshedAt={lastRefreshedAt}
+                emailsVisible={emailsVisible}
+                providerLabels={providerLabels}
+                onRefresh={onRefresh}
+                onOpenCutoff={onOpenCutoff}
+                onOpenResetCredits={onOpenResetCredits}
+                onToggleActive={onToggleActive}
+                togglingActiveId={togglingActiveId}
+                quotaVisibility={quotaVisibility}
+                onHideQuota={onHideQuota}
+                onShowQuota={onShowQuota}
+                redeemingResetCreditId={redeemingResetCreditId}
+                loadingResetCreditsId={loadingResetCreditsId}
+                dragHandle={canReorder ? handle : null}
+                defaultOpen
+              />
+            )}
+          </SortableProviderBlock>
+        ))}
+      </ProviderSortContext>
     </div>
   );
 }

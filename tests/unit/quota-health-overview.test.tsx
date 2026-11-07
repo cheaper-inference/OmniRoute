@@ -331,7 +331,7 @@ it.each([
   { compact: false, locale: "zh-CN" },
   { compact: true, locale: "zh-CN" },
 ])(
-  "full/compact follows saved provider order without handles ($locale, compact=$compact)",
+  "full/compact follows saved provider order; only Full sections get handles ($locale, compact=$compact)",
   ({ compact, locale }) => {
     localStorage.setItem(
       "omniroute:limits:providerOrder",
@@ -362,6 +362,11 @@ it.each([
     expect(
       screen.getAllByTestId("detail-card").map((e) => e.getAttribute("data-provider-card"))
     ).toEqual(["minimax", "claude", "codex"]);
-    expect(document.querySelector("[data-drag-handle]")).toBeNull();
+    // #18344: Full provider sections share the overview's sortable order store and
+    // carry one grip each, in the saved order; compact cards stay without handles.
+    const handles = [...document.querySelectorAll("[data-drag-handle]")];
+    expect(handles.map((h) => h.closest("[data-provider]")?.getAttribute("data-provider"))).toEqual(
+      compact ? [] : ["minimax", "claude", "codex"]
+    );
   }
 );
