@@ -23,6 +23,7 @@ import {
   type ErrorRuleScope,
   type ErrorRulesDraft,
   type ErrorRulesIssue,
+  type ErrorRulesPayload,
 } from "./providerErrorRulesModel";
 
 type Translate = ReturnType<typeof useTranslations>;
@@ -234,6 +235,101 @@ const newDefault = (): DraftDefault => ({
   cooldown: { choice: "1h", customMinutes: "" },
 });
 
+function RulesSection({
+  rules,
+  errorsFor,
+  onChange,
+}: {
+  rules: DraftRule[];
+  errorsFor: (index: number) => string[];
+  onChange: (next: DraftRule[]) => void;
+}) {
+  const t = useTranslations("resilienceCooldowns");
+  return (
+    <section className="flex flex-col gap-3">
+      <h4 className="text-sm font-semibold text-text-main">{t("errorRules.rulesHeading")}</h4>
+      <p className="text-xs text-text-muted">{t("errorRules.matchHint")}</p>
+      {rules.length === 0 && (
+        <p className="text-sm text-text-muted">{t("errorRules.rulesEmpty")}</p>
+      )}
+      {rules.map((rule, index) => (
+        <RuleRow
+          key={rule.key}
+          rule={rule}
+          errors={errorsFor(index)}
+          onChange={(next) => onChange(rules.map((r, i) => (i === index ? next : r)))}
+          onRemove={() => onChange(rules.filter((_, i) => i !== index))}
+        />
+      ))}
+      <div>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon="add"
+          onClick={() => onChange([...rules, newRule()])}
+        >
+          {t("errorRules.addRule")}
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+function DefaultsSection({
+  defaults,
+  errorsFor,
+  onChange,
+}: {
+  defaults: DraftDefault[];
+  errorsFor: (index: number) => string[];
+  onChange: (next: DraftDefault[]) => void;
+}) {
+  const t = useTranslations("resilienceCooldowns");
+  return (
+    <section className="flex flex-col gap-3">
+      <h4 className="text-sm font-semibold text-text-main">{t("errorRules.defaultsHeading")}</h4>
+      <p className="text-xs text-text-muted">{t("errorRules.defaultsHint")}</p>
+      {defaults.length === 0 && (
+        <p className="text-sm text-text-muted">{t("errorRules.defaultsEmpty")}</p>
+      )}
+      {defaults.map((entry, index) => (
+        <DefaultRow
+          key={entry.key}
+          entry={entry}
+          errors={errorsFor(index)}
+          onChange={(next) => onChange(defaults.map((d, i) => (i === index ? next : d)))}
+          onRemove={() => onChange(defaults.filter((_, i) => i !== index))}
+        />
+      ))}
+      <div>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon="add"
+          onClick={() => onChange([...defaults, newDefault()])}
+        >
+          {t("errorRules.addDefault")}
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+async function fetchErrorRulesDraft(): Promise<ErrorRulesDraft> {
+  const res = await fetch("/api/settings", { cache: "no-store" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return toErrorRulesDraft((await res.json()) as Record<string, unknown>);
+}
+
+async function patchErrorRules(payload: ErrorRulesPayload): Promise<void> {
+  const res = await fetch("/api/settings", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+}
+
 /** Editor for the operator error rules (`providerErrorRules`) and catch-all defaults. */
 export default function ProviderErrorRulesCard() {
   const t = useTranslations("resilienceCooldowns");
@@ -245,9 +341,7 @@ export default function ProviderErrorRulesCard() {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/settings", { cache: "no-store" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setDraft(toErrorRulesDraft((await res.json()) as Record<string, unknown>));
+      setDraft(await fetchErrorRulesDraft());
       setLoadError(false);
     } catch {
       setLoadError(true);
@@ -273,12 +367,7 @@ export default function ProviderErrorRulesCard() {
     }
     setSaving(true);
     try {
-      const res = await fetch("/api/settings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(result.payload),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await patchErrorRules(result.payload);
       notify.success(t("errorRules.saved"));
     } catch {
       notify.error(t("errorRules.saveFailed"));
@@ -298,71 +387,16 @@ export default function ProviderErrorRulesCard() {
         </p>
       ) : (
         <div className="flex flex-col gap-6">
-          <section className="flex flex-col gap-3">
-            <h4 className="text-sm font-semibold text-text-main">{t("errorRules.rulesHeading")}</h4>
-            <p className="text-xs text-text-muted">{t("errorRules.matchHint")}</p>
-            {draft.rules.length === 0 && (
-              <p className="text-sm text-text-muted">{t("errorRules.rulesEmpty")}</p>
-            )}
-            {draft.rules.map((rule, index) => (
-              <RuleRow
-                key={rule.key}
-                rule={rule}
-                errors={errorsFor("rule", index)}
-                onChange={(next) =>
-                  update({ ...draft, rules: draft.rules.map((r, i) => (i === index ? next : r)) })
-                }
-                onRemove={() =>
-                  update({ ...draft, rules: draft.rules.filter((_, i) => i !== index) })
-                }
-              />
-            ))}
-            <div>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon="add"
-                onClick={() => update({ ...draft, rules: [...draft.rules, newRule()] })}
-              >
-                {t("errorRules.addRule")}
-              </Button>
-            </div>
-          </section>
-          <section className="flex flex-col gap-3">
-            <h4 className="text-sm font-semibold text-text-main">
-              {t("errorRules.defaultsHeading")}
-            </h4>
-            <p className="text-xs text-text-muted">{t("errorRules.defaultsHint")}</p>
-            {draft.defaults.length === 0 && (
-              <p className="text-sm text-text-muted">{t("errorRules.defaultsEmpty")}</p>
-            )}
-            {draft.defaults.map((entry, index) => (
-              <DefaultRow
-                key={entry.key}
-                entry={entry}
-                errors={errorsFor("default", index)}
-                onChange={(next) =>
-                  update({
-                    ...draft,
-                    defaults: draft.defaults.map((d, i) => (i === index ? next : d)),
-                  })
-                }
-                onRemove={() =>
-                  update({ ...draft, defaults: draft.defaults.filter((_, i) => i !== index) })
-                }
-              />
-            ))}
-            <div>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon="add"
-                onClick={() => update({ ...draft, defaults: [...draft.defaults, newDefault()] })}
-              >
-                {t("errorRules.addDefault")}
-              </Button>
-            </div>
-          </section>
+          <RulesSection
+            rules={draft.rules}
+            errorsFor={(index) => errorsFor("rule", index)}
+            onChange={(rules) => update({ ...draft, rules })}
+          />
+          <DefaultsSection
+            defaults={draft.defaults}
+            errorsFor={(index) => errorsFor("default", index)}
+            onChange={(defaults) => update({ ...draft, defaults })}
+          />
           <div className="flex items-center justify-end gap-3">
             {issues.some((issue) => issue.kind === "tooMany") && (
               <p role="alert" className="text-xs text-error">

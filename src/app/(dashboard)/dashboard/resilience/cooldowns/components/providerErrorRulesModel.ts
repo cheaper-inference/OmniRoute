@@ -110,43 +110,75 @@ function asReason(value: unknown): ErrorRuleReason | "" {
   return ERROR_RULE_REASONS.includes(value as ErrorRuleReason) ? (value as ErrorRuleReason) : "";
 }
 
-/** Settings JSON (GET /api/settings) → editable draft. Tolerates missing/malformed values. */
-export function toErrorRulesDraft(settings: Record<string, unknown>): ErrorRulesDraft {
-  const rules: DraftRule[] = [];
-  const defaults: DraftDefault[] = [];
-  const storedRules = settings.providerErrorRules;
-  if (storedRules && typeof storedRules === "object") {
-    for (const [provider, list] of Object.entries(storedRules as Record<string, unknown>)) {
-      if (!Array.isArray(list)) continue;
-      for (const entry of list) {
-        if (!entry || typeof entry !== "object") continue;
-        const rule = entry as Partial<StoredRule>;
-        rules.push({
-          key: nextDraftKey(),
-          provider,
-          status: typeof rule.status === "number" ? String(rule.status) : "",
-          match: typeof rule.match === "string" ? rule.match : "",
-          scope: asScope(rule.scope),
-          reason: asReason(rule.reason),
-          cooldown: cooldownFromMs(rule.cooldownMs),
-        });
-      }
-    }
-  }
-  const storedDefaults = settings.providerErrorDefaults;
-  if (storedDefaults && typeof storedDefaults === "object") {
-    for (const [provider, entry] of Object.entries(storedDefaults as Record<string, unknown>)) {
-      const value = (entry ?? {}) as Partial<StoredDefault>;
-      if (typeof value.cooldownMs !== "number") continue;
-      defaults.push({
+function draftRuleFrom(provider: string, rule: Partial<StoredRule>): DraftRule {
+  return {
+    key: nextDraftKey(),
+    provider,
+    status: typeof rule.status === "number" ? String(rule.status) : "",
+    match: typeof rule.match === "string" ? rule.match : "",
+    scope: asScope(rule.scope),
+    reason: asReason(rule.reason),
+    cooldown: cooldownFromMs(rule.cooldownMs),
+  };
+}
+
+function draftRulesFrom(stored: unknown): DraftRule[] {
+  if (!stored || typeof stored !== "object") return [];
+  return Object.entries(stored as Record<string, unknown>).flatMap(([provider, list]) =>
+    Array.isArray(list)
+      ? list
+          .filter((entry) => entry && typeof entry === "object")
+          .map((entry) => draftRuleFrom(provider, entry as Partial<StoredRule>))
+      : []
+  );
+}
+
+function draftDefaultsFrom(stored: unknown): DraftDefault[] {
+  if (!stored || typeof stored !== "object") return [];
+  return Object.entries(stored as Record<string, unknown>).flatMap(([provider, entry]) => {
+    const value = (entry ?? {}) as Partial<StoredDefault>;
+    if (typeof value.cooldownMs !== "number") return [];
+    return [
+      {
         key: nextDraftKey(),
         provider,
         scope: asScope(value.scope),
         cooldown: cooldownFromMs(value.cooldownMs),
-      });
-    }
-  }
-  return { rules, defaults };
+      },
+    ];
+  });
+}
+
+/** Settings JSON (GET /api/settings) → editable draft. Tolerates missing/malformed values. */
+export function toErrorRulesDraft(settings: Record<string, unknown>): ErrorRulesDraft {
+  return {
+    rules: draftRulesFrom(settings.providerErrorRules),
+    defaults: draftDefaultsFrom(settings.providerErrorDefaults),
+  };
+}
+
+type FlagIssue = (kind: ErrorRowIssueKind) => void;
+
+function parseDraftStatus(text: string, flag: FlagIssue): number | undefined {
+  const trimmed = text.trim();
+  if (!trimmed) return undefined;
+  const status = Number(trimmed);
+  if (!Number.isInteger(status) || status < 100 || status > 599) flag("status");
+  return status;
+}
+
+function storedRuleFrom(rule: DraftRule, flag: FlagIssue): StoredRule {
+  const status = parseDraftStatus(rule.status, flag);
+  const match = rule.match.length > 0 ? rule.match : undefined;
+  if (status === undefined && match === undefined) flag("condition");
+  const cooldownMs = cooldownToMs(rule.cooldown);
+  if (cooldownMs === null) flag("duration");
+  const stored: StoredRule = { scope: rule.scope };
+  if (status !== undefined) stored.status = status;
+  if (match !== undefined) stored.match = match;
+  if (rule.reason) stored.reason = rule.reason;
+  if (typeof cooldownMs === "number") stored.cooldownMs = cooldownMs;
+  return stored;
 }
 
 /** Draft → PATCH /api/settings payload, or the list of problems blocking the save. */
@@ -163,21 +195,8 @@ export function serializeErrorRulesDraft(
     const provider = rule.provider.trim().toLowerCase();
     const flag = (kind: ErrorRowIssueKind) => issues.push({ kind, target: "rule", index });
     if (!provider) flag("provider");
-    const statusText = rule.status.trim();
-    const status = statusText ? Number(statusText) : undefined;
-    if (status !== undefined && (!Number.isInteger(status) || status < 100 || status > 599)) {
-      flag("status");
-    }
-    const match = rule.match.length > 0 ? rule.match : undefined;
-    if (status === undefined && match === undefined) flag("condition");
-    const cooldownMs = cooldownToMs(rule.cooldown);
-    if (cooldownMs === null) flag("duration");
+    const stored = storedRuleFrom(rule, flag);
     if (!provider) return;
-    const stored: StoredRule = { scope: rule.scope };
-    if (status !== undefined) stored.status = status;
-    if (match !== undefined) stored.match = match;
-    if (rule.reason) stored.reason = rule.reason;
-    if (typeof cooldownMs === "number") stored.cooldownMs = cooldownMs;
     (providerErrorRules[provider] ??= []).push(stored);
   });
 
