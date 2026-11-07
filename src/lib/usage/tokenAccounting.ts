@@ -130,17 +130,28 @@ export function getReasoningTokens(tokens: unknown): number {
   );
 }
 
-// Non-greedy, single-capture, no nested variable-length quantifiers → ReDoS-safe.
-const THINK_BLOCK_RE = /<think>([\s\S]*?)<\/think>/gi;
+const THINK_OPEN_RE = /<think>/gi;
+const THINK_CLOSE_RE = /<\/think>/gi;
 
 type ObservedReasoning = { source: "content" | "think" | null; chars: number };
 
+// Two literal searches that only move forward, stopping at the first unclosed tag.
+// One lazy `<think>([\s\S]*?)</think>` retries from every unclosed `<think>`, which
+// is quadratic, and no-log attempts scan the untruncated response on the request path.
 function countThinkTagChars(text: string): number {
   let chars = 0;
-  for (const match of text.matchAll(THINK_BLOCK_RE)) {
-    chars += (match[1] ?? "").length;
+  let cursor = 0;
+  while (true) {
+    THINK_OPEN_RE.lastIndex = cursor;
+    const open = THINK_OPEN_RE.exec(text);
+    if (!open) return chars;
+    const contentStart = open.index + open[0].length;
+    THINK_CLOSE_RE.lastIndex = contentStart;
+    const close = THINK_CLOSE_RE.exec(text);
+    if (!close) return chars;
+    chars += close.index - contentStart;
+    cursor = close.index + close[0].length;
   }
-  return chars;
 }
 
 // #13965: Claude-format content arrays — native Claude bodies, or the same blocks

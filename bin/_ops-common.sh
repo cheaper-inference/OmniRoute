@@ -24,6 +24,23 @@ ops_die() {
   exit 1
 }
 
+# ops_sql_str <value> — print <value> as an SQL string literal: wrapped in
+# single quotes, with embedded single quotes doubled. Use it for every path
+# spliced into SQL handed to the sqlite3 CLI, so a quote in a directory name
+# cannot end the literal.
+ops_sql_str() {
+  local q="'"
+  printf "'%s'" "${1//$q/$q$q}"
+}
+
+# ops_sqlite [sqlite3 args...] — the sqlite3 CLI without the operator's
+# ~/.sqliterc (or $XDG_CONFIG_HOME/sqlite3/sqliterc) and with a fixed output
+# format, so a personal `.headers on`, `.mode box` or `.echo on` cannot change
+# what the scripts read back.
+ops_sqlite() {
+  sqlite3 -init /dev/null -batch -noheader -list "$@"
+}
+
 ops_require_cmd() {
   command -v "$1" >/dev/null 2>&1 || ops_die "required command not found: $1"
 }
