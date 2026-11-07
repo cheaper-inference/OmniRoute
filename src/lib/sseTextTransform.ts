@@ -108,7 +108,9 @@ function claudeStreamedPaths(json: any): ClaudeStreamedPath[] {
 const CLAUDE_OPAQUE_KEYS = new Set(["tool_use_id", "encrypted_index"]);
 
 // Redact every other string of a Claude frame in place (search results, citations, tool
-// input): the same coverage as the non-streaming masker, without touching the buffers.
+// input), without touching the buffers. The coverage matches the generic walker: a metadata
+// key skips a string value only, and any object or array under it is still walked, because
+// tool input can use those names for its own data.
 function redactClaudeFrameStrings(
   obj: any,
   streamed: ClaudeStreamedPath[],
@@ -116,10 +118,10 @@ function redactClaudeFrameStrings(
 ): void {
   if (!obj || typeof obj !== "object" || obj.type === "redacted_thinking") return;
   for (const key of Object.keys(obj)) {
-    if (classifyField(key) === null || CLAUDE_OPAQUE_KEYS.has(key)) continue;
+    if (CLAUDE_OPAQUE_KEYS.has(key)) continue;
     if (streamed.some((path) => path.holder === obj && path.field === key)) continue;
-    if (typeof obj[key] === "string") obj[key] = redact(obj[key]);
-    else redactClaudeFrameStrings(obj[key], streamed, redact);
+    if (typeof obj[key] !== "string") redactClaudeFrameStrings(obj[key], streamed, redact);
+    else if (classifyField(key) !== null) obj[key] = redact(obj[key]);
   }
 }
 

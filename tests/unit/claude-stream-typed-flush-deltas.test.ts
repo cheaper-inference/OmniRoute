@@ -470,4 +470,68 @@ for (const [name, make, needle, kept] of [
     const { citation } = citationFrame.delta as unknown as { citation: Record<string, string> };
     assert.equal(citation.encrypted_index, OPAQUE);
   });
+
+  // A metadata key name marks a string as protocol data, not the object under it: tool input
+  // can carry any key, so values nested below `event` or `name` are still user data.
+  for (const key of ["event", "name", "status", "format", "provider", "model", "object", "usage"]) {
+    for (const [shape, nest] of [
+      ["object", (value: string) => ({ value })],
+      ["array", (value: string) => [{ value }, value]],
+    ] as const) {
+      test(`${name} transform: a sensitive value in an ${shape} under tool input ${key} is redacted`, async () => {
+        const leaky = `call ${SECRET} ${EMAIL}`;
+        const output = await runTransform(make(), [
+          messageStart,
+          ev("content_block_start", {
+            index: 0,
+            content_block: {
+              type: "tool_use",
+              id: "toolu_1",
+              name: "lookup",
+              input: { [key]: nest(leaky) },
+            },
+          }),
+          ev("content_block_stop", { index: 0 }),
+          messageEnd,
+        ]);
+        assert.ok(!output.includes(needle), "the sensitive value must not reach the client");
+        const frames = parseFrames(output);
+        const block = frames.find((f) => f.data.type === "content_block_start")!.data
+          .content_block as unknown as { name: string; input: Record<string, unknown> };
+        assert.equal(block.name, "lookup", "the tool name is protocol data");
+        assert.ok(JSON.stringify(block.input[key]).includes("call "), "the value stays in place");
+        assert.ok(JSON.stringify(block.input[key]).includes(kept), "only the match is replaced");
+      });
+    }
+  }
+
+  test(`${name} transform: a metadata string is still skipped next to a redacted object`, async () => {
+    const frames = parseFrames(
+      await runTransform(make(), [
+        messageStart,
+        ev("content_block_start", {
+          index: 0,
+          content_block: {
+            type: "web_search_tool_result",
+            tool_use_id: OPAQUE,
+            content: [
+              {
+                type: "web_search_result",
+                title: `Result for ${SECRET} ${EMAIL}`,
+                encrypted_content: OPAQUE,
+                signature: OPAQUE,
+              },
+            ],
+          },
+        }),
+        ev("content_block_stop", { index: 0 }),
+        messageEnd,
+      ])
+    );
+    const block = contentBlock(frames, 0);
+    assert.equal(block.tool_use_id, OPAQUE);
+    assert.equal(block.content[0].encrypted_content, OPAQUE);
+    assert.equal((block.content[0] as unknown as { signature: string }).signature, OPAQUE);
+    assert.ok(!block.content[0].title.includes(needle));
+  });
 }
