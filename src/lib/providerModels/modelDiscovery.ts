@@ -10,6 +10,7 @@ import { CANONICAL_EFFORT_VALUES } from "@/shared/reasoning/effortStandardizatio
 import { isObsoleteKiroModelAlias } from "@omniroute/open-sse/services/kiroModels.ts";
 import { filterSelectableModels } from "@omniroute/open-sse/services/modelLifecycle.ts";
 import { getEmbeddingProvider } from "@omniroute/open-sse/config/embeddingRegistry.ts";
+import { isCompatibleFreeImportProvider } from "@/shared/utils/freeModels";
 import { hasPayloadFreeEvidence, hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
 
 type JsonRecord = Record<string, unknown>;
@@ -716,7 +717,11 @@ export function normalizeDiscoveredModels(
     const supportsVision = detectVisionInput(record);
     // Persist only evidence present in this discovery payload. Static catalog
     // membership is intentionally not evidence about this connection's economics.
-    const explicitlyPaid = providerId === "siliconflow" && hasPayloadPaidEvidence(record);
+    const explicitlyPaid =
+      hasPayloadPaidEvidence(record) ||
+      (isCompatibleFreeImportProvider(providerId) &&
+        typeof record.tier === "string" &&
+        record.tier.trim().toLowerCase() === "paid");
     const isFree = !explicitlyPaid && hasPayloadFreeEvidence({ ...record, id });
 
     deduped.set(id, {
@@ -792,19 +797,36 @@ export async function getCachedDiscoveredModels(
     : models;
 }
 
+function prepareDiscoveredModels(providerId: string, models: unknown) {
+  // #11088 (option 1): the synced store is endpoint-agnostic. Images/embeddings
+  // models must persist so per-connection endpoint routing (#11088) and the
+  // /v1/models catalog can see them. Chat selectability is applied at read time
+  // (auto-pool expansion, chat projections), not at write time.
+  return filterSelectableModels(providerId, normalizeDiscoveredModels(models, providerId));
+}
+
 export async function persistDiscoveredModels(
   providerId: string,
   connectionId: string,
   models: unknown
 ): Promise<SyncedAvailableModel[]> {
-  // #11088 (option 1): the synced store is endpoint-agnostic — images/embeddings
-  // models must persist so per-connection endpoint routing (#11088) and the
-  // /v1/models catalog can see them. Chat selectability is applied at read time
-  // (auto-pool expansion, chat projections), not at write time.
-  const normalized = filterSelectableModels(
-    providerId,
-    normalizeDiscoveredModels(models, providerId)
-  );
+  const normalized = prepareDiscoveredModels(providerId, models);
+  await replaceSyncedAvailableModelsForConnection(providerId, connectionId, normalized);
+  return normalized;
+}
+
+/**
+ * #19143: an empty discovery says nothing about the catalog, so it must not write.
+ * The replacement writer deletes the stored row and stamps syncedModelsAt, and that
+ * stamp can make a stale sibling catalog authoritative again.
+ */
+export async function persistNonEmptyDiscoveredModels(
+  providerId: string,
+  connectionId: string,
+  models: unknown
+): Promise<SyncedAvailableModel[]> {
+  const normalized = prepareDiscoveredModels(providerId, models);
+  if (normalized.length === 0) return normalized;
   await replaceSyncedAvailableModelsForConnection(providerId, connectionId, normalized);
   return normalized;
 }
