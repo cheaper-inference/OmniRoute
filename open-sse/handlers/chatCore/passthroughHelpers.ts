@@ -544,7 +544,7 @@ export function isClaudeCodeSemanticPassthroughRequest({
   userAgent?: string | null;
 }): boolean {
   const isDirectClaudeCodeProvider =
-    provider === "claude" || isClaudeCodeCompatibleProvider(provider);
+    provider === "claude" || provider === "anthropic" || isClaudeCodeCompatibleProvider(provider);
   if (!isDirectClaudeCodeProvider) return false;
   if (sourceFormat !== FORMATS.CLAUDE) return false;
   if (targetFormat !== FORMATS.CLAUDE) return false;
