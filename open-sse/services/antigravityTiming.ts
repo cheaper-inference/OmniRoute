@@ -174,6 +174,50 @@ function classifyTimingAbort(signal: AbortSignal | null | undefined): string {
   return "caller_abort";
 }
 
+function measureIdleDuration(account: AccountTiming, started: number): number | null {
+  if (account.inflight > 0) return 0;
+  return account.lastFinishedAt === null ? null : Math.max(0, started - account.lastFinishedAt);
+}
+
+type PhysicalSendState = {
+  scope: TimingContext;
+  started: number;
+  idleDurationMs: number | null;
+  concurrentInflight: number;
+  physicalSend: number;
+  headersAt: number | null;
+  firstDeltaAt: number | null;
+};
+
+function buildTimingEvent(
+  phase: string,
+  send: PhysicalSendState,
+  now: number,
+  extra: Record<string, unknown>
+): Record<string, unknown> {
+  const { scope, started, headersAt, firstDeltaAt } = send;
+  // Correlation ids stay log fields, never metric labels. No URLs or payloads.
+  return {
+    event: "antigravity_timing",
+    phase,
+    requestId: scope.requestId,
+    account: createHash("sha256").update(scope.connectionId).digest("hex").slice(0, 16),
+    model: normalizeAntigravityTimingModel(scope.model),
+    physicalSend: send.physicalSend,
+    idleDurationMs: send.idleDurationMs,
+    concurrentInflight: send.concurrentInflight,
+    dnsMs: null,
+    connectMs: null,
+    tlsMs: null,
+    headerLatencyMs: headersAt === null ? null : headersAt - started,
+    firstMeaningfulDeltaFromHeadersMs:
+      firstDeltaAt === null || headersAt === null ? null : firstDeltaAt - headersAt,
+    firstMeaningfulDeltaFromSendMs: firstDeltaAt === null ? null : firstDeltaAt - started,
+    elapsedMs: Math.max(0, now - started),
+    ...extra,
+  };
+}
+
 export class AntigravityTimingTracker {
   private accounts = new Map<string, AccountTiming>();
   constructor(
@@ -187,42 +231,21 @@ export class AntigravityTimingTracker {
     const account = claimTimingAccount(this.accounts, scope.connectionId);
     if (!account) return send();
     const started = this.now();
-    const idleDurationMs =
-      account.inflight > 0
-        ? 0
-        : account.lastFinishedAt === null
-          ? null
-          : Math.max(0, started - account.lastFinishedAt);
-    const concurrentInflight = ++account.inflight;
-    const physicalSend = ++scope.sends;
-    let headersAt: number | null = null;
-    let firstDeltaAt: number | null = null;
+    const attempt: PhysicalSendState = {
+      scope,
+      started,
+      idleDurationMs: measureIdleDuration(account, started),
+      concurrentInflight: ++account.inflight,
+      physicalSend: ++scope.sends,
+      headersAt: null,
+      firstDeltaAt: null,
+    };
     let finished = false;
     let observationTimer: ReturnType<typeof setTimeout> | null = null;
     const event = (phase: string, extra: Record<string, unknown> = {}) => {
-      if (physicalSend > MAX_EVENTS_PER_ATTEMPT / 3) return;
-      // Correlation ids stay log fields, never metric labels. No URLs or payloads.
-      const fields = {
-        event: "antigravity_timing",
-        phase,
-        requestId: scope.requestId,
-        account: createHash("sha256").update(scope.connectionId).digest("hex").slice(0, 16),
-        model: normalizeAntigravityTimingModel(scope.model),
-        physicalSend,
-        idleDurationMs,
-        concurrentInflight,
-        dnsMs: null,
-        connectMs: null,
-        tlsMs: null,
-        headerLatencyMs: headersAt === null ? null : headersAt - started,
-        firstMeaningfulDeltaFromHeadersMs:
-          firstDeltaAt === null || headersAt === null ? null : firstDeltaAt - headersAt,
-        firstMeaningfulDeltaFromSendMs: firstDeltaAt === null ? null : firstDeltaAt - started,
-        elapsedMs: Math.max(0, this.now() - started),
-        ...extra,
-      };
+      if (attempt.physicalSend > MAX_EVENTS_PER_ATTEMPT / 3) return;
       try {
-        scope.emit(fields);
+        scope.emit(buildTimingEvent(phase, attempt, this.now(), extra));
       } catch {
         /* Diagnostics cannot change request behavior. */
       }
@@ -250,7 +273,7 @@ export class AntigravityTimingTracker {
     armObservationTimer();
     try {
       const response = await send();
-      headersAt = this.now();
+      attempt.headersAt = this.now();
       event("headers", { status: response.status });
       if (signal?.aborted) finish(abortPhase());
       // Antigravity can return an intermediate 403/429 that the executor retries
@@ -272,7 +295,7 @@ export class AntigravityTimingTracker {
         onChunk: armObservationTimer,
         isFinished: () => finished,
         onFirstDelta: () => {
-          firstDeltaAt = this.now();
+          attempt.firstDeltaAt = this.now();
           event("first_meaningful_delta");
         },
       });
