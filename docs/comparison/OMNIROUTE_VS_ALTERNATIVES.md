@@ -17,7 +17,7 @@ Objective feature comparison vs popular open-source AI routers.
 | **Free/no-auth catalog entries**                   |                   **155**                   |      n/a       |    passthrough    |     n/a     |
 | **Self-hostable**                                  |                     ✅                      |       ✅       |        ❌         |   ⚠ paid    |
 | **OAuth catalog entries**                          |                   **23**                    |    partial     |        ❌         |     ❌      |
-| **Auto-fallback combos**                           |              **20 strategies**              | priority-based |    tier-based     |  weighted   |
+| **Auto-fallback combos**                           |              **21 strategies**              | priority-based |    tier-based     |  weighted   |
 | **Fusion (parallel panel + judge synthesis)**      |                     ✅                      |       ❌       |        ❌         |     ❌      |
 | **Tier 1/2/3 fallback (subscription→cheap→free)**  |                   ✅ + UI                   |     manual     |        n/a        |   manual    |
 | **Token compression**                              | 12-engine stack (RTK + Caveman + LLMLingua) |      none      |       none        |    none     |

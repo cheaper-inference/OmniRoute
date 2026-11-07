@@ -149,10 +149,14 @@ test("DOC-01: the bs i18n fork agrees with the code too", () => {
   // docs/i18n/bs/AGENTS.md is a hand-maintained translation fork (DOC-03), so it
   // drifts silently. It is the only AGENTS.md mirror tracked in the repo.
   const text = doc("docs/i18n/bs/AGENTS.md");
-  const line = text.split("\n").find((l) => /javnih strategija/.test(l));
+  // Bosnian numerals govern the case of the noun phrase: 21 javna strategija,
+  // 22 javne strategije, 20 javnih strategija. Accept the three forms so a correct
+  // count is never forced into the wrong grammatical number.
+  const BS_COUNT = /(\d+)\s+javn(?:a|e|ih)\s+strategij[ae]\b/;
+  const line = text.split("\n").find((l) => BS_COUNT.test(l));
 
   assert.ok(line, "the bs mirror must carry the strategy sentence");
-  const count = line.match(/(\d+)\s+javnih strategija/);
+  const count = line.match(BS_COUNT);
   assert.ok(count, "the bs mirror must state a strategy count");
   assert.equal(
     Number(count[1]),
