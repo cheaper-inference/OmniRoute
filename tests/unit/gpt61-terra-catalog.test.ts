@@ -9,6 +9,7 @@ import { splitCodexReasoningSuffix } from "../../open-sse/executors/codex/reason
 import { CODEX_NATIVE_UNPREFIXED_MODELS } from "../../open-sse/services/model.ts";
 import { resolveChatCoreTargetFormat } from "../../open-sse/handlers/chatCore/targetFormat.ts";
 import { openaiToOpenAIResponsesRequest } from "../../open-sse/translator/request/openai-responses/toResponses.ts";
+import { stripGpt5SamplingWhenReasoning } from "../../open-sse/services/gpt5SamplingGuard.ts";
 
 const MODEL = "gpt-6.1-terra";
 const EFFORTS = ["ultra", "max", "xhigh", "high", "medium", "low"];
@@ -127,4 +128,36 @@ test("Terra Codex registry keeps Responses, bounded OAuth context and reasoning"
     assert.equal(entry.maxOutputTokens, 128000, id);
     assert.equal(entry.supportsVision, true, id);
   }
+});
+
+test("Terra sampling is preserved without reasoning and filtered with active reasoning", () => {
+  const fields = { temperature: 0.7, top_p: 0.9, top_logprobs: 2, logprobs: true };
+
+  // Native Responses input already carries reasoning.effort.
+  const noneNative = stripGpt5SamplingWhenReasoning(
+    { model: MODEL, reasoning: { effort: "none" }, ...fields }, "openai", MODEL
+  );
+  for (const [key, value] of Object.entries(fields)) assert.equal(noneNative[key as keyof typeof fields], value);
+
+  const activeNative = stripGpt5SamplingWhenReasoning(
+    { model: MODEL, reasoning: { effort: "high" }, ...fields }, "openai", MODEL
+  );
+  for (const key of Object.keys(fields)) assert.equal((activeNative as Record<string, unknown>)[key], undefined);
+
+  // Chat Completions translation to Responses must obey the same policy.
+  const chatWithNone = openaiToOpenAIResponsesRequest(MODEL, {
+    model: MODEL, messages: [{ role: "user", content: "hello" }], reasoning_effort: "none",
+    temperature: fields.temperature, top_p: fields.top_p,
+  }, false, {}) as Record<string, unknown>;
+  const forwardedNone = stripGpt5SamplingWhenReasoning(chatWithNone, "openai", MODEL);
+  assert.equal(forwardedNone.temperature, fields.temperature);
+  assert.equal(forwardedNone.top_p, fields.top_p);
+
+  const chatWithActive = openaiToOpenAIResponsesRequest(MODEL, {
+    model: MODEL, messages: [{ role: "user", content: "hello" }], reasoning_effort: "high",
+    temperature: fields.temperature, top_p: fields.top_p,
+  }, false, {}) as Record<string, unknown>;
+  const forwardedActive = stripGpt5SamplingWhenReasoning(chatWithActive, "openai", MODEL);
+  assert.equal(forwardedActive.temperature, undefined);
+  assert.equal(forwardedActive.top_p, undefined);
 });
