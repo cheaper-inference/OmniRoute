@@ -49,22 +49,22 @@ test("the real runners are still detected", () => {
     "node --test"
   );
   assert.equal(
-    isAutomatedTestProcess(["node", "/repo/tests/unit/foo.test.ts"], NO_ENV),
+    isAutomatedTestProcess(["node", "/repo/tests/unit/foo.test.ts"], NO_ENV, []),
     true,
     "a tests/ path"
   );
   assert.equal(
-    isAutomatedTestProcess(["node", "/repo/src/foo.test.ts"], NO_ENV),
+    isAutomatedTestProcess(["node", "/repo/src/foo.test.ts"], NO_ENV, []),
     true,
     "a *.test.ts file"
   );
   assert.equal(
-    isAutomatedTestProcess(["node", "/repo/node_modules/.bin/vitest", "run"], NO_ENV),
+    isAutomatedTestProcess(["node", "/repo/node_modules/.bin/vitest", "run"], NO_ENV, []),
     true,
     "vitest binary"
   );
   assert.equal(
-    isAutomatedTestProcess(["node", "/repo/node_modules/.bin/jest"], NO_ENV),
+    isAutomatedTestProcess(["node", "/repo/node_modules/.bin/jest"], NO_ENV, []),
     true,
     "jest binary"
   );
