@@ -1,0 +1,1 @@
+- **feat(observability):** opt-in V8 heap pressure log: with `OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED=1` the event-loop stall recorder logs heap, RSS and inflight numbers at most once a minute when `heapUsed` passes `OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB` (default 900) ([#19054](https://github.com/cheaper-inference/OmniRoute/pull/19054)) — thanks @Bl0ck154

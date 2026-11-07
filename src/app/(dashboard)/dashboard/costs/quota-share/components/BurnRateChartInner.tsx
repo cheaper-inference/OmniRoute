@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { chartTheme } from "@omniroute/ui-kit/chart-theme";
 import type { PoolUsageSnapshot } from "@/lib/quota/types";
 
 export interface BurnRateChartInnerProps {
@@ -61,21 +62,17 @@ export default function BurnRateChartInner({ usage }: BurnRateChartInnerProps) {
       <div className="h-24">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <XAxis dataKey="time" tick={{ fontSize: 9 }} tickLine={false} axisLine={false} />
-            <YAxis hide />
-            <Tooltip
-              contentStyle={{
-                background: "var(--color-surface)",
-                border: "1px solid var(--color-border)",
-                fontSize: 10,
-              }}
+            <XAxis
+              {...chartTheme.xAxis}
+              dataKey="time"
+              tick={{ ...chartTheme.xAxis.tick, fontSize: 9 }}
             />
+            <YAxis hide />
+            <Tooltip {...chartTheme.tooltip} />
             <Line
-              type="monotone"
+              {...chartTheme.line}
               dataKey="consumed"
               stroke="var(--color-chart-3)"
-              strokeWidth={2}
-              dot={false}
               strokeDasharray="4 2"
             />
           </LineChart>

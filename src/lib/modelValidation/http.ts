@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { buildErrorBody } from "../../../open-sse/utils/error.ts";
+import { normalizeNodeModelId } from "@/lib/providerModels/modelIdNormalization";
 import { abortable, deadline } from "./limits";
 
 const identifier = (limit: number) =>
@@ -98,7 +99,15 @@ export function createValidateAndAddHandler(dependencies: {
           "Invalid validation request; explicit inference consent is required"
         );
       }
-      const result = await dependencies.validateAndAdd(parsed.data, request.signal);
+      // Same write-path contract as POST /api/provider-models: validate and
+      // store the bare upstream id so a prefixed paste cannot register a
+      // stacked custom row on a compatible node. Canonical providers' ids
+      // pass through untouched.
+      const input = {
+        ...parsed.data,
+        modelId: await normalizeNodeModelId(parsed.data.provider, parsed.data.modelId),
+      };
+      const result = await dependencies.validateAndAdd(input, request.signal);
       return Response.json(result, { status: 201, headers });
     } catch (error) {
       const known = error instanceof ModelValidationError;
