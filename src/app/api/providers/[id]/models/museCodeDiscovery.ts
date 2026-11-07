@@ -3,12 +3,13 @@ import { SAFE_OUTBOUND_FETCH_PRESETS, safeOutboundFetch } from "@/shared/network
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import {
   MUSE_CODE_CATALOG_URL,
-  MUSE_CODE_INFERENCE_USER_AGENT,
   MUSE_CODE_MODELS_URL,
 } from "@omniroute/open-sse/config/museCode.ts";
+import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { mergeMuseCodeModelListings } from "@omniroute/open-sse/services/museCodeModels.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { toDiscoveryFailure, type DiscoveryFailure } from "@/shared/discovery/degradedCause";
+import { applyConnectionCustomHeaders } from "./discovery/connectionCustomHeaders";
 
 interface DiscoveryWarnings {
   cacheWarning?: string;
@@ -21,6 +22,7 @@ interface MuseCodeDiscoveryRouteOptions {
   provider: string;
   apiKey: unknown;
   accessToken: unknown;
+  providerSpecificData?: unknown;
   proxy: unknown;
   maybeReturnCachedDiscovery: () => Response | null;
   maybeReturnAutoFetchDisabled: () => Response | null;
@@ -38,24 +40,56 @@ class MuseCodeListingError extends Error {
   }
 }
 
+/** A `/v1/models` answer without a `data` array is a failed discovery, not an empty one. */
+class MuseCodeListingShapeError extends Error {
+  readonly code = "INVALID_RESPONSE";
+
+  constructor(readonly url: string) {
+    super(`Muse Code listing ${url} answered without a data array`);
+  }
+}
+
 function stringOf(value: unknown): string {
   return typeof value === "string" ? value.replace(/^Bearer\s+/i, "").trim() : "";
 }
 
-async function readListing(url: string, token: string, proxy: unknown): Promise<unknown> {
+/**
+ * The listing requests carry the identity inference sends (the registry entry's
+ * headers) and the connection's own custom headers, like every other discovery.
+ */
+function listingHeaders(token: string, providerSpecificData: unknown): Record<string, string> {
+  const headers: Record<string, string> = {
+    ...(getRegistryEntry("muse-code")?.extraHeaders ?? {}),
+    Accept: "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+  return applyConnectionCustomHeaders(headers, providerSpecificData);
+}
+
+async function readListing(
+  url: string,
+  headers: Record<string, string>,
+  proxy: unknown
+): Promise<unknown> {
   const response = await safeOutboundFetch(url, {
     ...SAFE_OUTBOUND_FETCH_PRESETS.modelsDiscovery,
     guard: getProviderOutboundGuard(),
     proxyConfig: proxy,
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-      "User-Agent": MUSE_CODE_INFERENCE_USER_AGENT,
-    },
+    headers,
   });
   if (!response.ok) throw new MuseCodeListingError(url, response.status);
   return response.json();
+}
+
+async function readUsableListing(
+  headers: Record<string, string>,
+  proxy: unknown
+): Promise<unknown> {
+  const body = await readListing(MUSE_CODE_MODELS_URL, headers, proxy);
+  const data = body && typeof body === "object" ? (body as { data?: unknown }).data : undefined;
+  if (!Array.isArray(data)) throw new MuseCodeListingShapeError(MUSE_CODE_MODELS_URL);
+  return body;
 }
 
 /**
@@ -86,9 +120,10 @@ export async function maybeHandleMuseCodeModelDiscovery(
     );
   }
 
+  const headers = listingHeaders(token, options.providerSpecificData);
   const [usable, catalog] = await Promise.allSettled([
-    readListing(MUSE_CODE_MODELS_URL, token, options.proxy),
-    readListing(MUSE_CODE_CATALOG_URL, token, options.proxy),
+    readUsableListing(headers, options.proxy),
+    readListing(MUSE_CODE_CATALOG_URL, headers, options.proxy),
   ]);
 
   if (usable.status === "rejected") {

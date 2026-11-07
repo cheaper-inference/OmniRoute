@@ -13,8 +13,12 @@ const modelsDb = await import("../../src/lib/db/models.ts");
 const providerModelsRoute = await import("../../src/app/api/providers/[id]/models/route.ts");
 const { muse_codeProvider } =
   await import("../../open-sse/config/providers/registry/muse-code/index.ts");
-const { MUSE_CODE_CATALOG_URL, MUSE_CODE_MODELS_URL } =
-  await import("../../open-sse/config/museCode.ts");
+const {
+  MUSE_CODE_CATALOG_URL,
+  MUSE_CODE_CLIENT_SURFACE,
+  MUSE_CODE_MODELS_URL,
+  museCodeClientUserAgent,
+} = await import("../../open-sse/config/museCode.ts");
 
 const originalFetch = globalThis.fetch;
 const KEY = "muse-fixture-key";
@@ -69,7 +73,9 @@ async function resetStorage() {
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
-async function seedMuseConnection(): Promise<{ id: string }> {
+async function seedMuseConnection(
+  providerSpecificData: Record<string, unknown> = {}
+): Promise<{ id: string }> {
   return (await providersDb.createProviderConnection({
     provider: "muse-code",
     authType: "apikey",
@@ -77,16 +83,17 @@ async function seedMuseConnection(): Promise<{ id: string }> {
     apiKey: KEY,
     isActive: true,
     testStatus: "active",
-    providerSpecificData: { autoFetchModels: true },
+    providerSpecificData: { autoFetchModels: true, ...providerSpecificData },
   })) as { id: string };
 }
 
-function stubListings(responses: Record<string, () => Response>) {
+function stubListings(responses: Record<string, () => Response>, sentHeaders?: Headers[]) {
   const requested: string[] = [];
   globalThis.fetch = async (url, init: RequestInit = {}) => {
     const target = String(url);
     requested.push(target);
     const headers = new Headers(init.headers);
+    sentHeaders?.push(headers);
     assert.equal(headers.get("authorization"), `Bearer ${KEY}`, `${target} must carry the key`);
     const respond = responses[target];
     assert.ok(respond, `unexpected discovery request to ${target}`);
@@ -191,6 +198,59 @@ test("Muse Code discovery reports a failed /v1/models instead of trusting the ca
   assert.equal(body.error, "HTTP 401", "the fallback names why discovery failed");
   const synced = await modelsDb.getSyncedAvailableModelsForConnection("muse-code", connection.id);
   assert.equal(synced.length, 0, "a failed discovery never writes the catalog");
+});
+
+for (const [label, payload] of [
+  ["no body fields", {}],
+  ["a null data field", { data: null }],
+] as const) {
+  test(`Muse Code discovery treats a /v1/models answer with ${label} as a failure`, async () => {
+    const connection = await seedMuseConnection();
+    await modelsDb.replaceSyncedAvailableModelsForConnection("muse-code", connection.id, [
+      { id: "muse-spark-1.3", name: "muse-spark-1.3", source: "imported" },
+    ]);
+    stubListings({
+      [MUSE_CODE_MODELS_URL]: () => Response.json(payload),
+      [MUSE_CODE_CATALOG_URL]: () => Response.json(CATALOG),
+    });
+
+    const { body } = await discover(connection.id);
+
+    assert.notEqual(body.source, "api");
+    assert.equal(body.degraded, true);
+    assert.equal(body.error, "INVALID_RESPONSE");
+    const synced = await modelsDb.getSyncedAvailableModelsForConnection("muse-code", connection.id);
+    assert.deepEqual(
+      synced.map((model) => model.id),
+      ["muse-spark-1.3"],
+      "a malformed listing never overwrites the stored catalog"
+    );
+  });
+}
+
+test("Muse Code discovery sends the client identity and the connection's custom headers", async () => {
+  const connection = await seedMuseConnection({
+    customHeaders: { "X-Routing-Hint": "west", "User-Agent": "operator-agent/2" },
+  });
+  const sent: Headers[] = [];
+  stubListings(
+    {
+      [MUSE_CODE_MODELS_URL]: () => Response.json(USABLE),
+      [MUSE_CODE_CATALOG_URL]: () => Response.json(CATALOG),
+    },
+    sent
+  );
+
+  await discover(connection.id);
+
+  assert.equal(sent.length, 2);
+  for (const headers of sent) {
+    assert.equal(headers.get("x-client-id"), MUSE_CODE_CLIENT_SURFACE);
+    assert.equal(headers.get("x-routing-hint"), "west");
+    // An operator's User-Agent replaces the default client identity, as on inference.
+    assert.equal(headers.get("user-agent"), "operator-agent/2");
+    assert.notEqual(headers.get("user-agent"), museCodeClientUserAgent());
+  }
 });
 
 test("Muse Code seed catalog lists only models Meta serves on the Muse Code API", () => {
