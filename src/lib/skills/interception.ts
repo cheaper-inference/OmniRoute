@@ -375,6 +375,30 @@ function buildAnthropicWebSearchBlocks(
   ];
 }
 
+/**
+ * Render handled tool results as assistant content blocks. Claude Code's WebSearch
+ * only reads server_tool_use + web_search_tool_result blocks, so handled
+ * omniroute_web_search results get that structured pair; every other result, and
+ * a failed search, keeps the text shape (#2815 rationale).
+ */
+function buildAnthropicResultBlocks(
+  toolCalls: ToolCall[],
+  results: { id: string; result: unknown }[]
+): Record<string, unknown>[] {
+  const callById = new Map(toolCalls.map((call) => [call.id, call]));
+  return results.flatMap((r) => {
+    const call = callById.get(r.id);
+    const searchBlocks = call ? buildAnthropicWebSearchBlocks(call, r.result) : null;
+    if (searchBlocks) return searchBlocks;
+    return [
+      {
+        type: "text",
+        text: `[Skill result: ${call?.name || r.id}]\n${JSON.stringify(r.result)}`,
+      },
+    ];
+  });
+}
+
 export async function handleToolCallExecution(
   response: any,
   modelId: string,
@@ -468,27 +492,10 @@ export async function handleToolCallExecution(
       // (with stop_sequence cleared). The mixed-tool branch keeps the original
       // stop_reason because real native tool_use blocks still need the client.
       const handledToolCallIds = new Set(results.map((r) => r.id));
-      const toolNamesById = new Map(toolCalls.map((call) => [call.id, call.name]));
-      const callById = new Map(toolCalls.map((call) => [call.id, call]));
       const remainingContent = (Array.isArray(response.content) ? response.content : []).filter(
         (block: any) => !(block?.type === "tool_use" && handledToolCallIds.has(block.id))
       );
-      // Claude Code's WebSearch only reads server_tool_use + web_search_tool_result
-      // blocks, so handled omniroute_web_search results get that structured pair.
-      // Every other handled result keeps the text shape below (#2815 rationale).
-      const resultBlocks: Array<Record<string, unknown>> = [];
-      for (const r of results) {
-        const call = callById.get(r.id);
-        const searchBlocks = call ? buildAnthropicWebSearchBlocks(call, r.result) : null;
-        if (searchBlocks) {
-          resultBlocks.push(...searchBlocks);
-        } else {
-          resultBlocks.push({
-            type: "text",
-            text: `[Skill result: ${toolNamesById.get(r.id) || r.id}]\n${JSON.stringify(r.result)}`,
-          });
-        }
-      }
+      const resultBlocks = buildAnthropicResultBlocks(toolCalls, results);
       const firstRemainingToolUseIndex = remainingContent.findIndex(
         (block: any) => block?.type === "tool_use"
       );
