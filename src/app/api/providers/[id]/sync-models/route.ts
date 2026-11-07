@@ -663,6 +663,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       })
     );
 
+    if (freeFilterEmpty) {
+      // A free-only connection whose listing holds no free model has nothing
+      // callable. The report already cuts the stale snapshot
+      // (resolveEffectiveAvailableModels); the stored catalog must say the same,
+      // or routing and auto-combo pools keep serving the paid rows the
+      // discovery refresh stored as cached, non-free entries.
+      await timings.measure("free-filter-cut", () =>
+        replaceSyncedAvailableModelsForConnection(logProvider, id, [])
+      );
+    }
     const effectiveAvailableModels = resolveEffectiveAvailableModels(
       freeFilterEmpty,
       discoveredModels,
