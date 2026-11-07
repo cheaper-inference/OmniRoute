@@ -5744,6 +5744,8 @@
     "importFromModels": "Ներմուծել /models-ից",
     "modelsImported": "Ներմուծվել է {count} մոդել",
     "allModelsAlreadyImported": "Բոլոր մոդելներն արդեն ներմուծված են",
+    "providerPublishesNoModelList": "Այս մատակարարը մոդելների ցանկ չի հրապարակում — դրա ներկառուցված կատալոգը արդիական է",
+    "modelsNoLongerListed": "{count, plural, one {# մոդելն} other {# մոդելները}} այլևս նշված չեն մատակարարի կողմից",
     "noNewModelsToImport": "Ներմուծման համար նոր մոդելներ չկան. բոլոր մոդելներն արդեն գրանցամատյանում կամ հատուկ մոդելների ցանկում են",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Մոդելի հայտնաբերումը ձախողվեց {time}",

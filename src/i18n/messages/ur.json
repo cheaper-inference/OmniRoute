@@ -5744,6 +5744,8 @@
     "importFromModels": "/models سے درآمد کریں",
     "modelsImported": "{count} ماڈلز درآمد کر لیے گئے",
     "allModelsAlreadyImported": "تمام ماڈلز پہلے ہی درآمد کیے جا چکے ہیں",
+    "providerPublishesNoModelList": "یہ فراہم کنندہ ماڈلز کی کوئی فہرست شائع نہیں کرتا — اس کا بلٹ اِن کیٹلاگ تازہ ترین ہے",
+    "modelsNoLongerListed": "{count, plural, one {# ماڈل اب فراہم کنندہ کی فہرست میں شامل نہیں ہے} other {# ماڈلز اب فراہم کنندہ کی فہرست میں شامل نہیں ہیں}}",
     "noNewModelsToImport": "درآمد کرنے کے لیے کوئی نیا ماڈل نہیں — تمام ماڈلز پہلے ہی رجسٹری یا حسبِ ضرورت ماڈلز کی فہرست میں موجود ہیں",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "ماڈل دریافت ناکام {time}",

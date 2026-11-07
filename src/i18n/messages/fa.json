@@ -5744,6 +5744,8 @@
     "importFromModels": "وارد کردن از /models",
     "modelsImported": "{count} مدل وارد شد",
     "allModelsAlreadyImported": "همه مدلها قبلاً وارد شدهاند",
+    "providerPublishesNoModelList": "این ارائه‌دهنده هیچ فهرستی از مدل‌ها منتشر نمی‌کند — فهرست داخلی آن به‌روز است",
+    "modelsNoLongerListed": "{count, plural, one {# مدل دیگر توسط ارائه‌دهنده فهرست نشده است} other {# مدل دیگر توسط ارائه‌دهنده فهرست نشده‌اند}}",
     "noNewModelsToImport": "مدل جدیدی برای وارد کردن وجود ندارد — همه مدلها از قبل در رجیستری یا فهرست مدلهای سفارشی هستند",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "شکست در کشف مدل {time}",

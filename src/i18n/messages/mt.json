@@ -5821,6 +5821,8 @@
     "importFromModels": "Importa minn /models",
     "modelsImported": "Ġew importati {count} mudelli",
     "allModelsAlreadyImported": "Il-mudelli kollha diġà ġew importati",
+    "providerPublishesNoModelList": "Dan il-fornitur ma jippubblikax lista ta’ mudelli — il-katalgu integrat tiegħu huwa aġġornat",
+    "modelsNoLongerListed": "{count, plural, one {# mudell m’għadux elenkat} other {# mudelli m’għadhomx elenkati}} mill-fornitur",
     "noNewModelsToImport": "M’hemmx mudelli ġodda x’timporta — il-mudelli kollha diġà jinsabu fir-reġistru jew fil-lista tal-mudelli personalizzati",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Skoperta tal-mudell falliet {time}",

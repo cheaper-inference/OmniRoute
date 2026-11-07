@@ -5821,6 +5821,8 @@
     "importFromModels": "ከ /models አስመጣ",
     "modelsImported": "{count} ሞዴሎች ገብተዋል",
     "allModelsAlreadyImported": "ሁሉም ሞዴሎች አስቀድመው ገብተዋል",
+    "providerPublishesNoModelList": "ይህ አቅራቢ የሞዴሎች ዝርዝር አያትምም — አብሮ የተሰራው ካታሎግ ወቅታዊ ነው",
+    "modelsNoLongerListed": "{count, plural, one {# ሞዴል ከእንግዲህ በአቅራቢው ዝርዝር ውስጥ የለም} other {# ሞዴሎች ከእንግዲህ በአቅራቢው ዝርዝር ውስጥ የሉም}}",
     "noNewModelsToImport": "የሚገቡ አዲስ ሞዴሎች የሉም — ሁሉም ሞዴሎች አስቀድመው በመዝገቡ ወይም በብጁ ሞዴሎች ዝርዝር ውስጥ ይገኛሉ",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "የሞዴል ግኝት አልተሳካም {time}",

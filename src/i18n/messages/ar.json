@@ -5821,6 +5821,8 @@
     "importFromModels": "استيراد من /models",
     "modelsImported": "تم استيراد {count} نموذج",
     "allModelsAlreadyImported": "جميع النماذج مستوردة بالفعل",
+    "providerPublishesNoModelList": "لا يَنشر هذا الموفر قائمة بالنماذج — الكتالوج المدمج لديه مُحدَّث",
+    "modelsNoLongerListed": "{count, plural, zero {لم تعد أي نماذج مُدرجة لدى الموفر} one {لم يعد نموذج واحد مُدرجًا لدى الموفر} two {لم يعد نموذجان مُدرجين لدى الموفر} few {لم تعد # نماذج مُدرجة لدى الموفر} many {لم يعد # نموذجًا مُدرجًا لدى الموفر} other {لم تعد # من النماذج مُدرجة لدى الموفر}}",
     "noNewModelsToImport": "لا توجد نماذج جديدة لاستيرادها — جميعها موجودة في السجل أو قائمة النماذج المخصصة",
     "localCatalogFallbackStatus": "تعذّر الوصول إلى قائمة نماذج المزود — يتم عرض الكتالوج المضمّن",
     "discoveryDegradedStatus": "فشل اكتشاف النموذج {time}",

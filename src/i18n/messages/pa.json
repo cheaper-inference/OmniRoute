@@ -5821,6 +5821,8 @@
     "importFromModels": "/models ਤੋਂ ਆਯਾਤ ਕਰੋ",
     "modelsImported": "{count} ਮਾਡਲ ਆਯਾਤ ਕੀਤੇ ਗਏ",
     "allModelsAlreadyImported": "ਸਾਰੇ ਮਾਡਲ ਪਹਿਲਾਂ ਹੀ ਆਯਾਤ ਕੀਤੇ ਹੋਏ ਹਨ",
+    "providerPublishesNoModelList": "ਇਹ ਪ੍ਰਦਾਤਾ ਕੋਈ ਮਾਡਲ ਸੂਚੀ ਪ੍ਰਕਾਸ਼ਿਤ ਨਹੀਂ ਕਰਦਾ — ਇਸਦਾ ਬਿਲਟ-ਇਨ ਕੈਟਾਲੌਗ ਅੱਪਡੇਟ ਹੈ",
+    "modelsNoLongerListed": "{count, plural, one {# ਮਾਡਲ} other {# ਮਾਡਲ}} ਹੁਣ ਪ੍ਰਦਾਤਾ ਵੱਲੋਂ ਸੂਚੀਬੱਧ ਨਹੀਂ",
     "noNewModelsToImport": "ਆਯਾਤ ਕਰਨ ਲਈ ਕੋਈ ਨਵਾਂ ਮਾਡਲ ਨਹੀਂ — ਸਾਰੇ ਮਾਡਲ ਪਹਿਲਾਂ ਹੀ ਰਜਿਸਟਰੀ ਜਾਂ ਕਸਟਮ ਮਾਡਲਾਂ ਦੀ ਸੂਚੀ ਵਿੱਚ ਹਨ",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "ਮਾਡਲ ਖੋਜ ਅਸਫਲ {time}",

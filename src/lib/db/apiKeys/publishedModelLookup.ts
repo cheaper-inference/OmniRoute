@@ -4,7 +4,14 @@ import { isSkippedEffortProvider } from "@omniroute/open-sse/utils/syncedEffortV
 import { resolveProviderId } from "@/shared/constants/providers";
 import { isReservedProviderPrefix } from "@/shared/constants/reservedProviderPrefixes";
 import { checkKeyModelAccess } from "../apiKeyGroups";
-import { getCustomModels, getModelIsHidden, getSyncedAvailableModelsByConnection } from "../models";
+import {
+  admitSyncedModelsByConnection,
+  getActiveConnectionAdmissionRefs,
+  getCustomModels,
+  getModelIsHidden,
+  getSyncedAvailableModelsByConnection,
+  unionAdmittedModels,
+} from "../models";
 import { getCachedProviderNodes } from "../readCache";
 
 /**
@@ -69,11 +76,15 @@ export async function findPublishedModel(
   if (canonicalId) providerIds.push(canonicalId);
 
   for (const providerId of providerIds) {
-    const [syncedModelsByConnection, customModels] = await Promise.all([
+    const [syncedModelsByConnection, admissionRefs, customModels] = await Promise.all([
       getSyncedAvailableModelsByConnection(providerId),
+      getActiveConnectionAdmissionRefs(providerId),
       getCustomModels(providerId),
     ]);
-    const syncedModels = Object.values(syncedModelsByConnection).flat();
+    // A free-only connection publishes only its free rows.
+    const syncedModels = unionAdmittedModels(
+      admitSyncedModelsByConnection(providerId, syncedModelsByConnection, admissionRefs)
+    );
     const publishedModelId = syncedModels.concat(customModels).some((m) => m.id === shortModelId)
       ? shortModelId
       : resolveSyncedEffortVariantBase(providerId, shortModelId, syncedModels);

@@ -5744,6 +5744,8 @@
     "importFromModels": "Impordi asukohast /models",
     "modelsImported": "Imporditud {count} mudelit",
     "allModelsAlreadyImported": "Kõik mudelid on juba imporditud",
+    "providerPublishesNoModelList": "See teenusepakkuja ei avalda mudelite loendit — selle sisseehitatud kataloog on ajakohane",
+    "modelsNoLongerListed": "{count, plural, one {# mudel ei ole} other {# mudelit ei ole}} teenusepakkuja loendis enam",
     "noNewModelsToImport": "Uusi imporditavaid mudeleid pole — kõik mudelid on juba registris või kohandatud mudelite loendis",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Mudeli avastamine ebaõnnestus {time}",

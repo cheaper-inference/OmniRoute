@@ -5744,6 +5744,8 @@
     "importFromModels": "Importera från /models",
     "modelsImported": "{count} modeller importerade",
     "allModelsAlreadyImported": "Alla modeller är redan importerade",
+    "providerPublishesNoModelList": "Den här leverantören publicerar ingen modellista — den inbyggda katalogen är aktuell",
+    "modelsNoLongerListed": "{count, plural, one {# modell listas inte längre} other {# modeller listas inte längre}} av leverantören",
     "noNewModelsToImport": "Inga nya modeller att importera — alla modeller finns redan i registret eller listan över anpassade modeller",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Modellupptäckt misslyckades {time}",
