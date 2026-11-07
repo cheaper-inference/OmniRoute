@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { cacheCreationFields, readCacheWriteUsage } from "../../open-sse/utils/cacheWriteUsage.ts";
+import {
+  cacheCreationFields,
+  mergeCacheCreationFields,
+  readCacheWriteUsage,
+} from "../../open-sse/utils/cacheWriteUsage.ts";
 import { estimateApiEquivalentCacheWrite } from "../../src/lib/usage/cacheWriteEstimate.ts";
 import { computeCostFromPricing } from "../../src/lib/usage/costCalculator.ts";
 import { normalizeUsage } from "../../open-sse/utils/usageTracking.ts";
@@ -78,6 +82,28 @@ for (const row of cases) {
     }
   });
 }
+
+test("a numeric-string total keeps its value; only tier buckets are strict numbers", () => {
+  const raw = { prompt_tokens: 110, completion_tokens: 2, cache_creation_input_tokens: "100" };
+  const usage = readCacheWriteUsage(raw);
+  assert.equal(usage.total, 100);
+  assert.equal(usage.status, "unknown");
+  assert.equal(normalizeUsage(raw)?.cache_creation_input_tokens, 100);
+  assert.equal(
+    extractUsageFromResponse({ usage: raw }, "compatible").cache_creation_input_tokens,
+    100
+  );
+  assert.equal(readCacheWriteUsage({ cache_creation_input_tokens: "abc" }).status, "invalid");
+  assert.equal(readCacheWriteUsage({ cache_creation_input_tokens: "-5" }).status, "invalid");
+  assert.equal(readCacheWriteUsage({ cache_creation_input_tokens: "" }).status, "invalid");
+  assert.equal(
+    mergeCacheCreationFields(
+      { cache_creation_input_tokens: "100" },
+      { cache_creation: { ephemeral_5m_input_tokens: 30 } }
+    ).cache_creation_input_tokens,
+    100
+  );
+});
 
 test("unknown provider fields survive rebuilding without double counting aliases", () => {
   const raw = {

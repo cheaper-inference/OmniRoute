@@ -37,7 +37,6 @@ import {
   getLoggedInputTokens,
   getLoggedOutputTokens,
   getPromptCacheReadTokensOrNull,
-  getPromptCacheCreationTokensOrNull,
   getReasoningTokensOrNull,
   getObservedReasoning,
 } from "./tokenAccounting";
@@ -938,7 +937,7 @@ export function saveCallLog(entry: any, metadataOnly = false): Promise<void> {
       in: getLoggedInputTokens(entry.tokens),
       out: getLoggedOutputTokens(entry.tokens),
       cacheRead: getPromptCacheReadTokensOrNull(entry.tokens),
-      cacheCreation: getPromptCacheCreationTokensOrNull(entry.tokens),
+      cacheCreation: readCacheWriteUsage(entry.tokens).total,
       reasoning: getReasoningTokensOrNull(entry.tokens),
       compressed: typeof entry.tokensCompressed === "number" ? entry.tokensCompressed : null,
     });

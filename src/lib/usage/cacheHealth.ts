@@ -280,7 +280,9 @@ export function buildCacheHealthResponse(opts: {
          FROM call_logs
         WHERE timestamp >= ?
           AND status = 200
-          AND (tokens_cache_read IS NOT NULL OR tokens_cache_creation IS NOT NULL)
+          AND (tokens_cache_read IS NOT NULL OR tokens_cache_creation IS NOT NULL
+               OR tokens_cache_creation_5m IS NOT NULL OR tokens_cache_creation_1h IS NOT NULL
+               OR cache_creation_tier_status IN ('invalid', 'inconsistent'))
           ${modelFilter}
         ORDER BY timestamp DESC
         LIMIT ?`

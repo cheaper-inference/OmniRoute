@@ -13,7 +13,10 @@ const { updatePricing } = await import("../../src/lib/db/settings/pricing.ts");
 const { createPreMigrationBackup } =
   await import("../../src/lib/db/migrationRunner/preMigrationBackup.ts");
 const { restoreDbBackup } = await import("../../src/lib/db/backup.ts");
+const { trackPendingRequest, getPendingById, clearPendingRequests } =
+  await import("../../src/lib/usage/usageHistory.ts");
 after(() => {
+  clearPendingRequests();
   resetDbInstance();
   fs.rmSync(dir, { recursive: true, force: true });
 });
@@ -50,6 +53,59 @@ test("tier usage survives the real log sink and management/cache-health projecti
   const legacy = (await getCallLogs({ limit: 10 })).find((r) => r.id === "synthetic-legacy");
   assert.equal(legacy?.cacheWriteUsage.status, "unknown");
   assert.equal(buildCacheHealthResponse({ range: "1h" }).cacheWriteUnknownTotal, 50);
+});
+
+test("Cache Health counts tier-only and rejected receipts that have no aggregate counter", async () => {
+  getDbInstance().prepare("DELETE FROM call_logs").run();
+  await saveCallLog({
+    id: "synthetic-tier-only",
+    status: 200,
+    provider: "anthropic",
+    model: "synthetic-model",
+    tokens: {
+      prompt_tokens: 40,
+      completion_tokens: 2,
+      cache_creation: { ephemeral_5m_input_tokens: 30 },
+    },
+  });
+  await saveCallLog({
+    id: "synthetic-rejected",
+    status: 200,
+    provider: "anthropic",
+    model: "synthetic-model",
+    tokens: { prompt_tokens: 40, completion_tokens: 2, cache_creation_input_tokens: -5 },
+  });
+  // A receipt with no cache evidence at all stores the "unknown" status and stays out.
+  await saveCallLog({
+    id: "synthetic-no-cache",
+    status: 200,
+    provider: "anthropic",
+    model: "synthetic-model",
+    tokens: { prompt_tokens: 40, completion_tokens: 2 },
+  });
+  const summary = buildCacheHealthResponse({ range: "1h" });
+  assert.equal(summary.totalCalls, 2);
+  assert.equal(summary.cacheWrite5mTotal, 30);
+  assert.equal(summary.cacheWriteInvalidCalls, 1);
+});
+
+test("the live request detail reports the same cache-write total as the stored row", async () => {
+  const pendingRequestId = trackPendingRequest("synthetic-model", "anthropic", "conn", true);
+  await saveCallLog({
+    id: "synthetic-live-tiers",
+    pendingRequestId,
+    status: 200,
+    provider: "anthropic",
+    model: "synthetic-model",
+    tokens: {
+      prompt_tokens: 110,
+      completion_tokens: 2,
+      cache_creation: { ephemeral_5m_input_tokens: 30, ephemeral_1h_input_tokens: 70 },
+    },
+  });
+  const stored = (await getCallLogs({ limit: 10 })).find((r) => r.id === "synthetic-live-tiers");
+  assert.equal(stored?.cacheWriteUsage.total, 100);
+  assert.equal(getPendingById().get(pendingRequestId)?.tokens?.cacheCreation, 100);
 });
 
 test("diagnostic price snapshot and tier metadata survive the existing backup/restore path", async () => {

@@ -634,10 +634,11 @@ function isSchemaAlreadyApplied(
         hasColumn(db, "usage_history", "provider_credits") &&
         hasColumn(db, "usage_history", "provider_cost_usd")
       );
-    case "226":
-      // Cache-write tier columns (#17307, renumbered 213 -> 217 -> 226: the 213 slot went to
-      // 213_api_key_preferred_connections first and the 217 slot to
-      // 217_quota_recovery_tickets, neither of which has a guard here).
+    case "227":
+      // Cache-write tier columns (#17307, renumbered 213 -> 217 -> 226 -> 227: the 213 slot went
+      // to 213_api_key_preferred_connections first, the 217 slot to 217_quota_recovery_tickets
+      // and the 226 slot to 226_request_cost_ledger_read_indexes, none of which has a guard
+      // here). Keyed by version only: a stale number would skip those migrations.
       return [
         "tokens_cache_creation_5m",
         "tokens_cache_creation_1h",

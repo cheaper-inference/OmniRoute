@@ -13,6 +13,10 @@ const record = (value: unknown): JsonRecord =>
   value !== null && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 const counter = (value: unknown): number | null =>
   typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+// The aggregate keeps the numeric-string tolerance normalizeUsage() always had for non-standard
+// upstreams. Tier buckets are new to this feature and stay strict numbers.
+const totalCounter = (value: unknown): number | null =>
+  counter(typeof value === "string" && value.trim() !== "" ? Number(value) : value);
 
 function sources(value: unknown) {
   const usage = record(value);
@@ -39,7 +43,7 @@ function cacheWriteTotal(
   sum: number
 ): number | null {
   return (
-    counter(rawTotal) ??
+    totalCounter(rawTotal) ??
     (rawTotal == null && fiveMinute !== null && oneHour !== null && Number.isFinite(sum)
       ? sum
       : null)
@@ -54,7 +58,7 @@ function invalidCacheWriteCounters(
   sum: number
 ): boolean {
   return (
-    (rawTotal != null && counter(rawTotal) === null) ||
+    (rawTotal != null && totalCounter(rawTotal) === null) ||
     (rawTiers != null && (typeof rawTiers !== "object" || Array.isArray(rawTiers))) ||
     ["ephemeral_5m_input_tokens", "ephemeral_1h_input_tokens"].some(
       (key) => tiers[key] != null && counter(tiers[key]) === null
@@ -138,7 +142,8 @@ export function mergeCacheCreationFields(previous: unknown, incoming: unknown): 
     merged.cache_creation = { ...record(before.cache_creation), ...record(next.cache_creation) };
     // A partial snapshot's omitted total is not zero, nor a delta to add. Read
     // explicit totals before deriving a sum from the merged pair of buckets.
-    const total = counter(sources(incoming).rawTotal) ?? counter(sources(previous).rawTotal);
+    const total =
+      totalCounter(sources(incoming).rawTotal) ?? totalCounter(sources(previous).rawTotal);
     if (total !== null) merged.cache_creation_input_tokens = total;
   }
   const statuses = [readCacheWriteUsage(previous).status, readCacheWriteUsage(incoming).status];
