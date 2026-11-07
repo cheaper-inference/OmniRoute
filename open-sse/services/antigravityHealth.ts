@@ -83,12 +83,19 @@ export class AntigravityHealthTracker {
   }
 
   /** Apply only to a pool that already passed quota, terminal, model and pin rules. */
-  candidates<T extends { id: string }>(connections: T[], model: string, forced = false): T[] {
+  candidates<T extends { id: string }>(
+    connections: T[],
+    model: string | ((connection: T) => string),
+    forced = false
+  ): T[] {
+    // A bare model can be replaced by each connection's own defaultModel.
+    // Evaluate health against the model this connection will actually dispatch.
+    const modelFor = (connection: T) => typeof model === "string" ? model : model(connection);
     const healthy: T[] = [];
     const due: T[] = [];
     const open: T[] = [];
     for (const connection of connections) {
-      const entry = this.entries.get(this.key(connection.id, model));
+      const entry = this.entries.get(this.key(connection.id, modelFor(connection)));
       if (!entry || entry.backoff === 0) healthy.push(connection);
       else if (!entry.probe) (entry.until <= this.now() ? due : open).push(connection);
     }
@@ -97,8 +104,10 @@ export class AntigravityHealthTracker {
     if (healthy.length || due.length) return [...healthy, ...due];
     // Availability escape hatch: one real request to the earliest quarantined pair.
     // begin() enforces a single probe even when selectors race.
-    return open.sort((a, b) => this.entries.get(this.key(a.id, model))!.until -
-      this.entries.get(this.key(b.id, model))!.until).slice(0, 1);
+    return open.sort((a, b) =>
+      this.entries.get(this.key(a.id, modelFor(a)))!.until -
+      this.entries.get(this.key(b.id, modelFor(b)))!.until
+    ).slice(0, 1);
   }
 
   remainingCooldownMs(connectionId: string, model: string): number {
