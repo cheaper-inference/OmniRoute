@@ -923,6 +923,8 @@
     "batchListTitle": "Partijas",
     "batchListCount": "{count} partijas",
     "batchListRemovingCompleted": "Noņem…",
+    "batchListRemoveCompletedPartial": "Noņemts liels skaits pakešu. Noklikšķiniet vēlreiz, lai notīrītu atlikušās.",
+    "batchListRemoveCompletedFailed": "Noņemot paketes, radās kļūda.",
     "batchListRemoveCompleted": "Noņemt pabeigtos",
     "batchListTableStatus": "Statuss",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Atsvaidzina…",
     "batchListRefresh": "Atsvaidzināt",
     "uploadFileModalRemove": "Noņemt",
+    "fileInputChoose": "Izvēlēties failu",
+    "fileInputChooseMultiple": "Izvēlēties failus",
+    "fileInputEmpty": "Fails nav izvēlēts",
+    "fileInputSelectedCount": "{count, plural, one {Atlasīts # fails} other {Atlasīti # faili}}",
+    "fileDropLabel": "Nometiet failu šeit vai izvēlieties to",
+    "fileDropLabelMultiple": "Nometiet failus šeit vai izvēlieties tos",
     "uploadFileModalUploading": "Augšupielādē…",
     "wizardInputReading": "Nolasa failu…",
     "wizardInputReady": "Gatavs",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go pieprasījumos sūtīt OpenCode v2 CLI klienta identifikācijas nospiedumu: opencode/latest/<2.x>/cli User-Agent un x-opencode-client cli, bet bezmaksas līmeņa pieprasījumos — v2 sesijas galvenes, v2 CLI read/shell rīku shēmas un bez tool_choice \"none\". Pēc noklusējuma izslēgts: katrs OpenCode pieprasījums saglabā pašreizējo identitāti, galvenes un pamattekstu nemainītu.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Ja automātiskās kombinācijas kandidātu kopa ir tukša jau pirms rīku izsaukšanas priekšfiltra izpildes (visi mērķi izlaisti gaidīšanas periodu, bloķējumu vai izsmelšanas dēļ), atgriezt 503 no_eligible_targets, nevis mantoto 400 \"Neviens mērķis neatbalsta rīku izsaukšanu\" capability_mismatch. Pēc noklusējuma izslēgts: tukšai kopai joprojām tiek atgriezts mantotais 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Ieviest uzticamo modeļu galapunktu tagu (kurus deklarējis pakalpojumu sniedzēja katalogs, kuri secināti no specializēta modeļa ID vai kurus iestatījis operators) obligātu pārbaudi: pirms nosūtīšanas noraidīt ar HTTP 400 pieprasījumu, kas nosūtīts uz galapunktu, kuru modelis neapkalpo, ceļos /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations un /v1/audio/*; paslēpt no /v1/models modeļus, kuru atzīmētajiem galapunktiem nav OmniRoute adaptera; un informācijas paneļa modeļa testā šādiem modeļiem atbildēt ar 422. Pēc noklusējuma izslēgts: galapunktu tagi paliek informatīvi, un pieprasījumi tiek nosūtīti tieši tāpat kā iepriekš.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Vienkāršos ar anthropic saderīgos starpniekserveros sarunas vidū ievietotos sistēmas ziņojumus paturiet ziņojumu sarakstā, nevis pārvietojiet tos uz augstākā līmeņa sistēmas uzvedni, lai kešatmiņā saglabātais uzvednes prefikss starp sarunas posmiem paliktu nemainīgs. Attiecas tikai tad, ja klients pats ir nosūtījis mid-conversation-system-2026-04-07 beta. Pēc noklusējuma izslēgts: katrs sistēmas ziņojums tiek pārvietots uz sistēmas uzvedni tieši tāpat kā iepriekš, jo starpniekserveri bez šīs beta versijas noraida sistēmas ziņojumus ziņojumu sarakstā.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Izmantojiet models.dev publicētos spriešanas piepūles līmeņus, ja ne operatora pārrakstījums, ne pakalpojumu sniedzēju reģistrs tādus nedeklarē, saglabājot tikai zināmos piepūles līmeņus, un uzskatiet tukšu deklarēto līmeņu sarakstu par \"nav līmeņu\". Pēc noklusējuma izslēgts: modeļu katalogs un noteiktie piepūles līmeņi paliek tieši tādi paši kā iepriekš.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Ļauj auto/* pieprasījumiem veidot kandidātu kopu ar atrisinātām modeļu iespējām (redze, spriešana, domāšana) un novērotiem kvalitātes rādītājiem, kas nolasīti vienā lielapjoma nolasījumā. Pēc noklusējuma izslēgts: kandidātu svari pieprasījuma laikā paliek tieši tādi paši kā iepriekš. Ieslēgts: šie signāli tiek iekļauti momentuzņēmuma svaros, tāpēc kandidātu svari un izvēle var mainīties.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Ļaut akreditācijas datu stāvokļa pārbaudei atkārtoti testēt savienojumus, kurus vārteja pati izslēdza (katru ne biežāk kā reizi 6 stundās, 5 vienā pārbaudes reizē), un atkal ieslēgt savienojumu, ja atkārtotais tests ir sekmīgs. Pēc noklusējuma izslēgts: šādi savienojumi paliek izslēgti, līdz operators veic darbību. Operatora izslēgti un pastāvīgi bloķēti savienojumi nekad netiek atkārtoti testēti.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# pieprasījums} other {# pieprasījumi}}, {keys, plural, one {# ierobežota atslēga} other {# ierobežotas atslēgas}}",
     "unpricedUsageMore": "…un vēl {count}",
     "unpricedUsageConfigure": "Konfigurēt cenas",
-    "unpricedUsageDismiss": "Aizvērt"
+    "unpricedUsageDismiss": "Aizvērt",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analītika",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Izlaist pārejošo nogaidīšanas periodu, lai šo savienojumu varētu izmantot arī pēc novēršamām kļūdām (galīgie stāvokļi, piemēram, bloķēts savienojums vai beidzies derīguma termiņš, joprojām ir spēkā).",
     "disableCoolingLabel": "Atspējot nogaidīšanas periodu šim savienojumam",
+    "keepMidConversationSystemDescription": "Sarunas vidū nosūtītos sistēmas ziņojumus atstājiet ziņojumu sarakstā, nevis pārvietojiet tos uz augstākā līmeņa sistēmas uzvedni, lai uzvednes kešatmiņa tiktu rādīta vairākos pagriezienos. Iespējot tikai tad, ja šī augšpuse pieņem lomu \"sistēma\" ziņojumos (pretējā gadījumā tā atbild uz 400).",
+    "keepMidConversationSystemLabel": "Sarunas vidū saglabājiet sistēmas ziņojumus vietā",
+    "requireUserLastMessageDescription": "Augštecēm, kas noraida Asistenta priekšaizpildīšanu: pirms nosūtīšanas nolaidiet palīga pagriezienus (bez tool_use). Modelis var atjaunot savu iepriekšējo atbildi.",
+    "requireUserLastMessageLabel": "Pieprasīt, lai saruna beigtos ar lietotāja ziņojumu",
     "bulkPasteAdded": "{count, plural, one {Pievienota 1 atslēga} other {Pievienotas # atslēgas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Izlaists 1 dublikāts} other {Izlaisti # dublikāti}}",
     "bulkPasteHint": "Ielīmējiet vienu API atslēgu katrā rindā. Tukšās rindas tiek ignorētas, un dublētās atslēgas tiek izlaistas.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Vietējie nodrošinātāji",
     "maxConcurrentWholeNumberError": "Maksimālajam vienlaicīgo pieprasījumu skaitam jābūt veselam skaitlim",
     "m365TierLabel": "Copilot līmenis",
+    "m365RefreshTokenLabel": "Atsvaidzināt marķieri (neobligāti)",
+    "m365RefreshTokenHint": "Izmanto, lai automātiski atsvaidzinātu Microsoft 365 piekļuves pilnvaru.",
+    "m365RefreshTokenEditHint": "Atstājiet tukšu, lai saglabātu esošo pilnvaru. Ielīmējiet jaunu marķieri, lai to aizstātu.",
     "m365TierHint": "Izvēlieties, kuru Microsoft 365 Copilot saskarni izmanto šis savienojums. Individuālā saskarne ir noklusējuma BizChat patērētājiem; izglītības un uzņēmuma (darba) opcijas izmanto attiecīgā nomnieka saskarnes.",
     "m365TierIndividualOption": "Individuālais (noklusējums)",
     "m365TierEduOption": "Izglītība",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Starpniekservera sadaļas",
     "requestBodyLimitTitle": "Pieprasījuma pamatteksta ierobežojums",
     "requestBodyLimitDescription": "Maksimālais API datu apjoms, kas tiek pieņemts pirms pieprasījuma pamatteksta parsēšanas. Atsevišķajiem augšupielādes maršrutiem joprojām ir vismaz tajos iebūvētais 100 MB ierobežojums.",
+    "requestBodyLimitChatHint": "Chat Completions un Responses pieņem līdz 50 MB, līdz šeit saglabājat ierobežojumu. Saglabātais ierobežojums attiecas arī uz tām neatkarīgi no tā, vai tas ir mazāks vai lielāks.",
     "requestBodyLimitInputLabel": "Pieprasījuma pamatteksta ierobežojums (MB)",
     "requestBodyLimitEmptyError": "Ievadiet ierobežojumu MB",
     "requestBodyLimitWholeNumberError": "Izmantojiet veselu skaitli",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Neizdevās neviens no {count} mēģinājumiem",
       "failed": "neizdevās",
       "pinnedTitle": "Modelis izvēlēts, izmantojot konteksta kešatmiņas sesijas piesaisti",
-      "pinned": "piesaistīts"
+      "pinned": "piesaistīts",
+      "recoveredAttemptsTitle": "Pieprasījums atjaunots pēc {count} mēģinājumiem",
+      "latestOutcomeFailed": "Pēdējā pieprasījuma rezultāts bija neveiksmīgs"
     },
     "attempts": "mēģinājumi",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "turpinās no vecākelementa",
       "continuesFrom": "Turpinās no {id}",
       "viewConversation": "skatīt sarunu",
-      "openConversation": "Atvērt sarunu {id}"
+      "openConversation": "Atvērt sarunu {id}",
+      "omittedHttpAttempts": "{count} HTTP sūtījumi nav saglabāti",
+      "noHttpResponse": "HTTP atbilde nav novērota",
+      "transportError": "Pārsūtīšanas kļūda"
     },
     "tableLabel": "Pieprasījumu žurnāli",
     "throughputPostFirstToken": "Pēc pirmā marķiera",
     "throughputEndToEnd": "No sākuma līdz beigām",
     "throughputRate": "{value} marķieri/s",
-    "throughputExplanation": "Abas likmes izmanto lielāko no izvades un spriešanas marķieru skaita. Rādītājs “Pēc pirmā marķiera” neietver derīgu TTFT; pretējā gadījumā tiek izmantots pilns ilgums. Rādītājs “No sākuma līdz beigām” vienmēr izmanto pilnu ilgumu. Buferētai atbildei var būt augsta brāzmaina piegādes likme bez ātrākas modeļa ģenerēšanas."
+    "throughputExplanation": "Abas likmes izmanto lielāko no izvades un spriešanas marķieru skaita. Rādītājs “Pēc pirmā marķiera” neietver derīgu TTFT; pretējā gadījumā tiek izmantots pilns ilgums. Rādītājs “No sākuma līdz beigām” vienmēr izmanto pilnu ilgumu. Buferētai atbildei var būt augsta brāzmaina piegādes likme bez ātrākas modeļa ģenerēšanas.",
+    "omittedHttpAttempts": "{count} HTTP sūtījumi nav saglabāti",
+    "upstreamStatus": "Augšupējais serveris {status}",
+    "noHttpResponse": "HTTP atbilde nav novērota",
+    "transportError": "Pārsūtīšanas kļūda"
   },
   "proxyLogger": {
     "filterAll": "Visi",
@@ -14157,6 +14190,14 @@
         "label": "Koplietotās izejošās plūsmas pūla secība",
         "description": "Pakalpojumu sniedzējiem, kuru kvota tiek grupēta pēc izejošās adreses, ierindot pūla dalībnieku, kuram ir kopīga novērotā izejošā adrese ar nesen noraidītu dalībnieku, tieši aiz veselajiem dalībniekiem. Tikai secība, nekad netiek izslēgts. Nepieciešams PROXY_SKIP_RECENTLY_FAILED, kas nodrošina noraidījuma signālu tā nolasīšanai. Pēc noklusējuma izslēgts: atlases secība precīzi atbilst parastajai rotācijai."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Kvotu atteikumi uz modeli",
+        "description": "Lietojiet opencode kvotu 429 tikai tam modelim, kas to trāpījis, lai tā pati izeja turpinātu apkalpot citus modeļus, un notīriet to tikai tad, kad šim modelim ir izdevies. Patērētāji, kuriem nav modeļa (baseina rotācija, stāvēšana un atkārtošana, administratora redzamība, selektora aktivizētājs, veselības pārbaude), joprojām to redz. Nepieciešams PROXY_SKIP_RECENTLY_FAILED, kas rada atteikumu. Izslēgts pēc noklusējuma: viena modeļa kvota 429 katram modelim nosaka izeju."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Starpniekservera ielāde: stingra POST atkārtošana",
+        "description": "Ja pieprasījums nav idempotens (POST, PUT, PATCH, DELETE), atkārtoti sūtiet pēc transportēšanas kļūdas (svaiga ligzda, starpniekservera atkāpšanās, vietējā atkāpšanās) tikai tad, ja kļūda pierāda, ka nekas nav nosūtīts: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH vai savienojuma taimauts. Kontaktligzdas kļūda pēc rakstīšanas var nozīmēt, ka augšējais pieprasījums ir pieņēmis pieprasījumu, tāpēc atkārtota sūtīšana var ģenerēt un iekasēt to divreiz. Pēc noklusējuma izslēgts: atkārtoti atskaņojams pamatteksts tiek nosūtīts atkārtoti jebkuras transportēšanas kļūdas gadījumā, kas arī atkopj novecojušu apvienoto ligzdu."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotācijas atribūcijas reģistrēšana",
         "description": "Opencode rotācija reģistrē, kurš konts apkalpoja pieprasījumu vai tika izlaists (tikai maskēti ID, nekad pilni kontu ID), un sasaista starpniekservera žurnāla ierakstus ar to pieprasījumu, lai operators varētu atšķirt izlaistos kontus no neizmantotajiem. Pēc noklusējuma izslēgts: netiek rakstītas papildu žurnāla rindas vai kolonnas."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 pūla atkārtota atlase",
         "description": "OpenCode vairāku kontu rotācijā pēc 429 kļūdas saņemšanas no pakalpojumu sniedzēja ar izejošās plūsmas sadalījumu grozos kontā bez starpniekservera apkārtējā pūla kontekstā, nākamajam mēģinājumam pieprasīt savienojumu pūlam citu dalībnieku, nevis atkārtot to pašu izejošo adresi. Sakārto, nekad neizslēdz: izsmelts pūls saglabā pašreizējo darbību. Pēc noklusējuma izslēgts: katra 429 kļūda rotē uz nākamo kontu tieši tāpat kā iepriekš."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "OpenCode izpildītājam, ja uz starpniekservera pieprasījumu tiek atbildēts 403 vai 451 FreeTierError un novēroto rīku atkārtots mēģinājums neizdevās vai netika lietots, nosūtiet pieprasījumu vienreiz, izmantojot citu starpniekserveri (citu konta starpniekserveri vai citu kopas dalībnieku, nekad nav tieša savienojuma). Tikai tad, kad šī zonde atbild uz 200, starpniekservera atteikuma atmiņā tiek atstāta pirmā izeja un tiek apkalpota zondes atbilde; kad abi atsakās, tiek atgriezts sākotnējais atteikums un nekas netiek ierakstīts. Tas pats atteikuma teksts aptver atzīmētu izejas IP un atteikta pieprasījuma formu, tāpēc zonde tos atšķir ar pierādījumiem. Pēc noklusējuma izslēgts: atteikums tiek atgriezts nemainīts."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 klienta ciparospiedums",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: apstāties satura politikas atteikuma gadījumā",
         "description": "Kad combo mērķis atbild ar precīzu satura politikas atteikumu (kods vai tips cyber_policy / content_policy_violation), apturēt combo un atgriezt šo atteikumu pat tad, ja atlikušie mērķi ir citi modeļi, nevis pāriet pie nākamā mērķa. Pēc noklusējuma izslēgts: atteikums nekad neatvēsina kontu un neiedarbina pakalpojumu sniedzēja slēdzi, un combo pāriet pie nākamā mērķa tieši tāpat kā iepriekš."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Atbildes: saglabāt dzīvību tikai transporta laikā",
+        "description": "Nosūtiet atbildes kā tukšu rindiņu, nevis response.in_progress notikumu, tāpēc sintētisks momentuzņēmums nekad nevar aizstāt reālo atbildi oficiālajā SDK. Tukša rinda nenosūta SSE notikumu, tāpēc klienta sargsuns, kas atiestata tikai notikumus, netiktu atiestatīts ilgstošas klusuma fāzes laikā. Pēc noklusējuma izslēgts: taimeri nosūta specifikācijas derīgu response.in_progress notikumu."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atdzišanas atkārtošana: izlaist 403/410 atteikumus",

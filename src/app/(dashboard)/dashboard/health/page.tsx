@@ -13,6 +13,7 @@ import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { compareTr } from "@/shared/utils/turkishText";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useLocale, useTranslations } from "next-intl";
 import TelemetryCard from "./TelemetryCard";
 import ProviderHealthAutopilotCard from "./ProviderHealthAutopilotCard";
@@ -83,6 +84,7 @@ function HealthSnapshot() {
   const tc = useTranslations("common");
   const tp = useTranslations("providers");
   const nodeMap = useProviderNodeMap();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [data, setData] = useState(null);
   const [dbHealth, setDbHealth] = useState(null);
   const [dbHealthError, setDbHealthError] = useState(null);
@@ -154,7 +156,7 @@ function HealthSnapshot() {
   }, [fetchHealth, fetchExtras, fetchDbHealth]);
 
   const handleResetHealth = async () => {
-    if (!confirm(t("resetConfirm"))) return;
+    if (!(await requestConfirm(t("resetConfirm")))) return;
     setResetting(true);
     try {
       const res = await fetch("/api/monitoring/health", { method: "DELETE" });
@@ -1183,6 +1185,7 @@ function HealthSnapshot() {
           </div>
         </Card>
       )}
+      {confirmDialog}
     </HealthLayout>
   );
 }
