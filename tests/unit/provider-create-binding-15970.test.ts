@@ -23,9 +23,17 @@ const nodes = await import("../../src/lib/db/providers/nodes.ts");
 const connections = await import("../../src/lib/db/providers.ts");
 const { POST } = await import("../../src/app/api/providers/route.ts");
 const { makeManagementSessionRequest } = await import("../helpers/managementSession.ts");
+// Every connection the route creates is auto-tested in the background (fire-and-forget), so
+// that probe can call fetch after its own test has ended. Each test therefore gets its own
+// fixture key, and a recorded call that carries an earlier test's key is told apart from
+// the current test's calls instead of being blamed on it.
+const FIXTURE_KEY_PREFIX = "sk-fixture-only-15970";
+let fixtureKey = "";
+const earlierKeys: string[] = [];
 const fetchCalls: string[] = [];
-globalThis.fetch = async (input) => {
-  fetchCalls.push(String(input instanceof Request ? input.url : input));
+globalThis.fetch = async (input, init) => {
+  const request = new Request(input, init);
+  fetchCalls.push([request.url, ...request.headers.entries()].join(" "));
   return Response.json({ data: [], models: [] });
 };
 
@@ -34,6 +42,8 @@ test.beforeEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(dataDir, { recursive: true });
   fetchCalls.length = 0;
+  if (fixtureKey) earlierKeys.push(fixtureKey);
+  fixtureKey = `${FIXTURE_KEY_PREFIX}-${randomUUID()}`;
 });
 test.after(async () => {
   await new Promise<void>((resolve) => setTimeout(resolve, 20));
@@ -64,13 +74,12 @@ async function post(provider: string, providerSpecificData?: Record<string, unkn
       body: {
         provider,
         name: "Binding fixture",
-        apiKey: "sk-fixture-only-15970",
+        apiKey: fixtureKey,
         ...(providerSpecificData ? { providerSpecificData } : {}),
         ...extra,
       },
     })
   );
-  await new Promise<void>((resolve) => setTimeout(resolve, 20));
   return result;
 }
 
@@ -79,7 +88,8 @@ async function assertRejected(result: Response, reason = /conflict/i) {
   assert.equal(result.status, 400, body);
   assert.match(body, reason);
   assert.equal((await connections.getProviderConnections()).length, 0);
-  assert.equal(fetchCalls.length, 0, "conflict must not start credential validation upstream");
+  const ownCalls = fetchCalls.filter((call) => !earlierKeys.some((key) => call.includes(key)));
+  assert.equal(ownCalls.length, 0, "conflict must not start credential validation upstream");
   assert.doesNotMatch(body, /sk-fixture|first\.invalid|second\.invalid|at \//);
 }
 
