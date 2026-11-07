@@ -1366,7 +1366,7 @@ Huduma inayowekwa macho kwa mwezi mzima hutumia takriban saa 744, kwa hivyo iang
 
 ## Matukio ya Usambazaji
 
-Kwa mwongozo wa SRE wa backend ya relay (tabia ya ts/bifrost/auto, uwekaji wa 9router dhidi ya CLIProxyAPI, na mkakati wa fallback wa upitishaji wa juu), angalia [Mkakati wa Backend ya Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Kwa mwongozo wa SRE wa backend ya relay (tabia ya ts/bifrost/auto, uwekaji wa 9router dhidi ya CLIProxyAPI, na mkakati wa fallback wa throughput ya juu), tazama [Mkakati wa Backend ya Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Maendeleo ya Ndani ya Kimsingi
 
@@ -1397,7 +1397,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Mazingira Yaliyotengwa na Mtandao / CI
+### Bila Mtandao wa Nje / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1408,7 +1408,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS yenye Proksi ya Kinyume (nginx + Cloudflare)
+### VPS yenye Reverse Proxy (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1870,3 +1870,14 @@ Inatumiwa na `open-sse/services/combo.ts` na `src/lib/quota/quotaScheduler.ts` k
 | Inaweza kubadilika             | Chaguomsingi | Faili Chanzo                                 | Maelezo                                                                                                                                                                                                                             |
 | ------------------------------ | ------------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`          | `src/lib/providerModels/modelSyncTimings.ts` | Weka `1` ili kuweka muda wa awamu, ombi lililozalishwa ID na matokeo ya awamu ya success/error wakati wa ulandanishi wa muundo. Imezimwa kwa thamani zingine zote. Kumbukumbu huacha ombi, akaunti, katalogi na upakiaji wa makosa. |
+
+## Zana la uchanganuzi wa media la OpenCode la ndani
+
+Linatumika na `scripts/cli/omniroute-media-mcp.mjs`. Weka hizi katika mazingira ya mchakato wa zana ya ndani.
+
+| Kigezo                     | Chaguo-msingi                                                                     | Maelezo                                                                                                               |
+| -------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (au `~/.config/opencode/opencode.json`) | Usanidi wa OpenCode unaosomwa na zana ya media na kisakinishi.                                                        |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                       | Ingizo la mtoa huduma linalosomwa kutoka kwa usanidi wa OpenCode na zana ya media.                                    |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                            | Muundo unaotumwa na zana ya media. Mtoa huduma wake lazima atumie aina za media zilizoombwa.                          |
+| `OMNIROUTE_MEDIA_API_KEY`  | Ufunguo wa API wa mtoa huduma uliosanidiwa au marejeleo yake ya mazingira         | Kitambulisho cha hiari cha kubatilisha. Kiweke katika mazingira ya mchakato wa ndani; usiwahi kukiweka kwenye hazina. |

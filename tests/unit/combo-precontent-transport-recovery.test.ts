@@ -20,6 +20,8 @@ const { classifyPreContentReadFailure } =
   await import("../../open-sse/services/combo/preContentTransportFailure.ts");
 const { SseOutputScanner } = await import("../../open-sse/services/combo/firstOutputStream.ts");
 const { createRecoverableStream } = await import("../../open-sse/services/streamRecovery.ts");
+const { scopeHandoffSessionId } =
+  await import("../../open-sse/services/combo/handoffSessionScope.ts");
 const { recordSessionModelUsage, getLastSessionModel } =
   await import("../../src/lib/db/contextHandoffs.ts");
 const { createProviderConnection } = await import("../../src/lib/db/providers.ts");
@@ -139,8 +141,11 @@ function setup(
   };
   const relayOptions = route === "pin" ? { sessionId: `${name}-session` } : undefined;
   if (relayOptions) {
-    recordSessionModelUsage(relayOptions.sessionId, name, first, "transport-a");
-    assert.equal(getLastSessionModel(relayOptions.sessionId, name), first);
+    // Production keys handoff and model-history rows per caller, so a seeded
+    // row needs the same scope the running code will look it up with.
+    const scoped = scopeHandoffSessionId(relayOptions.sessionId, undefined)!;
+    recordSessionModelUsage(scoped, name, first, "transport-a");
+    assert.equal(getLastSessionModel(scoped, name), first);
   }
   return { combo, allCombos: [combo, child], relayOptions };
 }

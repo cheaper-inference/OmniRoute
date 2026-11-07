@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                 |               v3.8.50               | **v3.8.51** |      `v3.8.53+`       |
+|                                 |               v3.8.50               | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :---------------------------------: | :---------: | :-------------------: |
 | 🌐 Teikėjai                     |                 352                 |   **358**   |          380          |
 | 🧠 Unikalūs pokalbių modelių ID |                1320                 |  **1374**   |         1491          |
@@ -588,7 +588,7 @@ dabartinį katalogą rasite **[radar.omniroute.online/planos](https://radar.omni
 
 </div>
 
-> Naujausios svarbiausios funkcijos nuo **v3.8.20 → v3.8.53**. Visa istorija [`CHANGELOG.md`](CHANGELOG.md).
+> Naujausios svarbiausios funkcijos nuo **v3.8.20 → v3.8.54**. Visa istorija [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` maršrutizavimas** — 20-oji kombinuota strategija praleidžia išnaudotas paskyras, tada tarp likusių paskirsto apkrovą proporcingai likusiam kvotų kiekiui ÷ esamai apkrovai, išlaikant esamus pokalbius prisegtus. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Veikimas be sąsajos (Headless mode)** — `omniroute serve --headless` (arba `OMNIROUTE_HEADLESS=1`) paleidžia tik `/v1/*` proxy variklį, išjungiant prietaisų skydelį ir tik skydeliui skirtas posistemes. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1023,7 +1023,7 @@ omniroute
 ```
 
 > 💡 Matote `npm warn ERESOLVE` arba „peer-dep" įspėjimus? [Jie nekenksmingi](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Naudojate npm 11 ar naujesnę versiją?** npm gali blokuoti paketų gyvavimo ciklo scenarijus, jei jie neleidžiami. OmniRoute `postinstall` (`node scripts/build/postinstall.mjs`) būtinas norint paruošti vietinius vykdymo failus. Diegdami globaliai leiskite paketus, nurodytus npm įspėjime. Paketų rinkiniui, kurį nurodo OmniRoute 3.8.53:
+> **Naudojate npm 11 ar naujesnę versiją?** npm gali blokuoti paketų gyvavimo ciklo scenarijus, jei jie neleidžiami. OmniRoute `postinstall` (`node scripts/build/postinstall.mjs`) būtinas norint paruošti vietinius vykdymo failus. Diegdami globaliai leiskite paketus, nurodytus npm įspėjime. Paketų rinkiniui, kurį nurodo OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1819,7 +1819,7 @@ MIT licencija – daugiau informacijos rasite [LICENSE](LICENSE).
 
 **[⬆ Grįžti į viršų](#-omniroute)** · Sukurta ❤️ atvirojo kodo DI bendruomenei.
 
-<sub>Sukūrė <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licencija · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Sukūrė <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT licencija · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions įjungtos bendruomenės klausimams ir atsakymams -->

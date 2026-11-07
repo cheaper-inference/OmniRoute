@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                          |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+|                                          |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 Soláthraithe                          |           352           |   **358**   |          380          |
 | 🧠 Aitheantóirí uathúla samhlacha comhrá |          1320           |  **1374**   |         1491          |
@@ -589,7 +589,7 @@ faoin gcatalóg reatha ag **[radar.omniroute.online/planos](https://radar.omniro
 
 </div>
 
-> Buaicphointí le déanaí ó **v3.8.20 → v3.8.53**. Stair iomlán i [`CHANGELOG.md`](CHANGELOG.md).
+> Buaicphointí le déanaí ó **v3.8.20 → v3.8.54**. Stair iomlán i [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Ródú `quota-weighted`** — seachnaíonn an 20ú straitéis combo cuntais atá ídithe, ansin tarraingíonn sí i measc na gcuntas eile i gcomhréir leis an gcuóta atá fágtha ÷ an t-ualach atá ar siúl, ag coinneáil comhráite atá ann cheana greamaithe. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Mód gan cheann** — ritheann `omniroute serve --headless` (nó `OMNIROUTE_HEADLESS=1`) inneall seachfhreastalaí `/v1/*` amháin, leis an deais agus fo-chórais deais amháin múchta. → [Mód Gan Cheann](docs/guides/HEADLESS.md)
@@ -1023,7 +1023,7 @@ omniroute
 ```
 
 > 💡 An bhfaca tú `npm warn ERESOLVE` nó rabhaidh peer-dep? [Tá siad neamhdhíobhálach](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **An bhfuil npm 11 nó níos déanaí á úsáid agat?** D'fhéadfadh npm scrioptanna saolré pacáiste a bhlocáil mura gceadaítear iad. Tá `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) riachtanach chun a chomhaid dúchasacha am rith a ullmhú. Ceadaigh na pacáistí a ainmnítear i rabhadh npm agus iad á suiteáil go domhanda. Maidir leis an tacar pacáistí a thuairiscigh OmniRoute 3.8.53:
+> **An bhfuil npm 11 nó níos déanaí á úsáid agat?** D'fhéadfadh npm scrioptanna saolré pacáiste a bhlocáil mura gceadaítear iad. Tá `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) riachtanach chun a chomhaid dúchasacha am rith a ullmhú. Ceadaigh na pacáistí a ainmnítear i rabhadh npm agus iad á suiteáil go domhanda. Maidir leis an tacar pacáistí a thuairiscigh OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1816,7 +1816,7 @@ Ceadúnas MIT - féach [LICENSE](LICENSE) le haghaidh sonraí.
 
 **[⬆ Ar ais go barr](#-omniroute)** · Tógtha le ❤️ do phobal AI na foinse oscailte.
 
-<sub>Cruthaithe ag <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Cruthaithe ag <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Cumasaíodh Plé GitHub le haghaidh Ceisteanna agus Freagraí an phobail -->
