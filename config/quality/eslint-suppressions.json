@@ -1448,11 +1448,6 @@
       "count": 1
     }
   },
-  "src/lib/usage/callLogs.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/lib/usage/fetcher.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 7

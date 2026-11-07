@@ -9,6 +9,8 @@ import {
   matchesDisplayFilter,
   displayStatus,
   reportedPercent,
+  isCooldownKind,
+  DISPLAY_KINDS,
 } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/availabilityDisplay.ts";
 const now = Date.parse("2099-01-01T00:00:00Z");
 const H = 3_600_000;
@@ -167,4 +169,10 @@ test("reportedPercent keeps the lowest finite cell percentage and ignores the re
   assert.equal(reportedPercent([cell(30), cell(10), cell(20)]), 10);
   assert.equal(reportedPercent([cell(Number.NaN), cell(Number.POSITIVE_INFINITY)]), null);
   assert.equal(reportedPercent([cell(Number.NaN), cell(45)]), 45);
+});
+
+test("isCooldownKind covers exactly the cooldown kinds", () => {
+  const cooling = new Set<string>(["cd5", "cdw"]);
+  for (const kind of DISPLAY_KINDS)
+    assert.equal(isCooldownKind(kind), cooling.has(kind), `unexpected verdict for ${kind}`);
 });

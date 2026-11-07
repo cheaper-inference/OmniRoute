@@ -340,7 +340,18 @@ it.each(["en", "zh-CN"])(
     const partial = document.querySelector('[data-account="partial"]')!;
     expect(partial.querySelector("[data-partial]")).toHaveClass("h-[6px]");
     const cooling = document.querySelector('[data-account="session"]')!;
-    expect(cooling.querySelector("[data-fill]")).toHaveStyle({ height: "80%" });
+    expect(cooling).toHaveAttribute("data-kind", "cd5");
+    const coolingFill = cooling.querySelector("[data-fill]")!;
+    expect(coolingFill).toHaveStyle({ height: "80%", top: "0px" });
+    expect(coolingFill.style.bottom).toBe("");
+    // A cooldown capsule fills from the top so it cannot be read as remaining quota.
+    expect(coolingFill).toHaveAttribute("data-fill-direction", "down");
+    const healthy = document.querySelector('[data-account="high"]')!;
+    expect(healthy).toHaveAttribute("data-kind", "ok");
+    const healthyFill = healthy.querySelector("[data-fill]")!;
+    expect(healthyFill).toHaveAttribute("data-fill-direction", "up");
+    expect(healthyFill).toHaveStyle({ bottom: "0px" });
+    expect(healthyFill.style.top).toBe("");
     expect(document.querySelector("[data-banner]")).toHaveTextContent(
       locale === "en" ? "2 accounts temporarily unavailable" : "2 个号暂时不能用"
     );

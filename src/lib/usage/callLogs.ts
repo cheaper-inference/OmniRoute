@@ -142,11 +142,6 @@ type CallLogSummaryRow = {
 export const RESOLVED_ACCOUNT_SQL =
   "COALESCE(NULLIF(pc.name, ''), NULLIF(pc.email, ''), cl.account)";
 
-type DeleteResult = {
-  deletedRows: number;
-  deletedArtifacts: number;
-};
-
 const CALL_LOG_ID_RETRY_LIMIT = 3;
 
 function generateLogId() {
@@ -314,15 +309,18 @@ function snapshotHasOpaqueReasoningItem(body: unknown): boolean {
   const record =
     body !== null && typeof body === "object" && !Array.isArray(body) ? (body as JsonRecord) : null;
   if (!record) return false;
-  const outputs: unknown[] = [];
-  if (Array.isArray(record.output)) outputs.push(...record.output);
   const nested =
     record.response !== null &&
     typeof record.response === "object" &&
     !Array.isArray(record.response)
       ? (record.response as JsonRecord)
       : null;
-  if (nested && Array.isArray(nested.output)) outputs.push(...nested.output);
+  // Array literals, not push(...): no-log attempts pass the live body, and a spread
+  // into call arguments overflows the stack past roughly 125k items.
+  const outputs: unknown[] = [
+    ...(Array.isArray(record.output) ? record.output : []),
+    ...(nested && Array.isArray(nested.output) ? nested.output : []),
+  ];
   return outputs.some((item) => {
     const itemRecord =
       item !== null && typeof item === "object" && !Array.isArray(item)
@@ -341,19 +339,47 @@ function snapshotHasOpaqueReasoningItem(body: unknown): boolean {
 function resolveReasoningObservation(
   usageReasoning: number | null,
   responseBody: unknown,
-  streamMeta?: { encryptedSeen?: boolean } | null
+  streamMeta?: {
+    encryptedSeen?: boolean;
+    snapshotSource?: string | null;
+    snapshotChars?: number | null;
+  } | null
 ): { source: string | null; chars: number | null } {
-  if (streamMeta?.encryptedSeen === true || snapshotHasOpaqueReasoningItem(responseBody)) {
+  if (
+    streamMeta?.encryptedSeen === true ||
+    streamMeta?.snapshotSource === "encrypted" ||
+    snapshotHasOpaqueReasoningItem(responseBody)
+  ) {
     return { source: "encrypted", chars: null };
   }
   if (usageReasoning != null && usageReasoning > 0) {
     return { source: "usage", chars: null };
+  }
+  // A no-log request keeps only scalars from its live response, not a cloned body.
+  if (
+    (streamMeta?.snapshotSource === "content" || streamMeta?.snapshotSource === "think") &&
+    typeof streamMeta.snapshotChars === "number" &&
+    streamMeta.snapshotChars > 0
+  ) {
+    return { source: streamMeta.snapshotSource, chars: streamMeta.snapshotChars };
   }
   const observed = getObservedReasoning(extractAssistantMessage(responseBody));
   if (observed.chars > 0) {
     return { source: observed.source, chars: observed.chars };
   }
   return { source: null, chars: null };
+}
+
+/**
+ * Read numerical reasoning observations from the live response before a no-log
+ * attempt drops its payload. Never retain content or encrypted reasoning blobs.
+ */
+export function captureReasoningSnapshotMeta(responseBody: unknown): {
+  snapshotSource: string | null;
+  snapshotChars: number | null;
+} {
+  const { source, chars } = resolveReasoningObservation(null, responseBody);
+  return { snapshotSource: source, snapshotChars: chars };
 }
 
 function hasCallLogsColumn(columnName: string): boolean {
@@ -447,43 +473,51 @@ function mapSummaryRow(row: CallLogSummaryRow) {
 }
 
 async function saveCallLogOperation(entry: any, metadataOnly = false): Promise<void> {
-  let prepared: PreparedCallLogRow;
   try {
-    prepared = await buildCallLogRow(entry, metadataOnly);
-  } catch (error) {
-    logCallLogSaveFailure(error);
-    return;
-  }
-  let inserted = false;
-  try {
-    insertCallLogRow(prepared);
-    inserted = true;
-  } catch (error) {
-    if (!isWriteLockError(error)) {
+    let prepared: PreparedCallLogRow;
+    try {
+      prepared = await buildCallLogRow(entry, metadataOnly);
+    } catch (error) {
       logCallLogSaveFailure(error);
       return;
     }
-    const retry = scheduleWriteRetry(() => {
+    let inserted = false;
+    try {
       insertCallLogRow(prepared);
       inserted = true;
-    }, logCallLogSaveFailure);
-    pendingCallLogSaves.add(retry);
-    try {
-      await retry;
-    } finally {
-      pendingCallLogSaves.delete(retry);
+    } catch (error) {
+      if (!isWriteLockError(error)) {
+        logCallLogSaveFailure(error);
+        return;
+      }
+      const retry = scheduleWriteRetry(() => {
+        insertCallLogRow(prepared);
+        inserted = true;
+      }, logCallLogSaveFailure);
+      pendingCallLogSaves.add(retry);
+      try {
+        await retry;
+      } finally {
+        pendingCallLogSaves.delete(retry);
+      }
     }
-  }
-  if (!inserted) return;
-  markRequestPersistedById(
-    entry.pendingRequestId,
-    entry.pendingRequestGeneration,
-    String(prepared.logEntry.id)
-  );
-  try {
-    await publishCallLogDetail(prepared);
-  } catch (error) {
-    logCallLogSaveFailure(error);
+    if (!inserted) return;
+    markRequestPersistedById(
+      entry.pendingRequestId,
+      entry.pendingRequestGeneration,
+      String(prepared.logEntry.id)
+    );
+    try {
+      await publishCallLogDetail(prepared);
+    } catch (error) {
+      logCallLogSaveFailure(error);
+    }
+  } finally {
+    // Clear a temporary continuation even if the row or artifact cannot be written.
+    // Metadata-only summaries must not invalidate a full response's bridge.
+    if (!metadataOnly && typeof entry?.responseId === "string" && entry.responseId.length > 0) {
+      clearPendingContinuationState(entry.responseId);
+    }
   }
 }
 
@@ -493,8 +527,6 @@ type PreparedCallLogRow = {
   logEntry: Record<string, unknown>;
   insertParams: Record<string, unknown>;
   hasResilienceColumn: boolean;
-  detailState: CallLogDetailState;
-  responseId: string | null;
   /** Builds the artifact from the row's FINAL id; null when no detail is expected. */
   buildDetailArtifact: (() => ReturnType<typeof buildArtifact>) | null;
 };
@@ -760,8 +792,6 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
     logEntry,
     insertParams,
     hasResilienceColumn,
-    detailState,
-    responseId: typeof logEntry.responseId === "string" ? logEntry.responseId : null,
     buildDetailArtifact: detailExpected
       ? () =>
           buildArtifact(
@@ -834,25 +864,16 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
 
 /** Write the inserted row's artifact and publish it, or make the row terminal missing. */
 async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void> {
-  const { db, logEntry, buildDetailArtifact, responseId } = prepared;
-  let detailState = prepared.detailState;
+  const { db, logEntry, buildDetailArtifact } = prepared;
   if (buildDetailArtifact) {
     const id = String(logEntry.id);
     try {
       const artifactResult = await writeCallArtifactAsync(buildDetailArtifact());
-      if (artifactResult && publishPendingCallLogDetail(db, id, artifactResult)) {
-        detailState = "ready";
-      }
+      if (artifactResult) publishPendingCallLogDetail(db, id, artifactResult);
     } finally {
       // A null result or a thrown write must not strand the export cursor.
       failPendingCallLogDetail(db, id);
     }
-  }
-
-  if (detailState === "ready" && typeof responseId === "string") {
-    // The durable row is now authoritative; drop the bridge entry instead
-    // of letting it idle until its TTL.
-    clearPendingContinuationState(responseId);
   }
 
   scheduleCallLogRotation();
