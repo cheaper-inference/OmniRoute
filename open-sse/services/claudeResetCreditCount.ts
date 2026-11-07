@@ -17,6 +17,11 @@
 
 import { getClaudeCodeVersion } from "../executors/claudeIdentity.ts";
 import { setBoundedEntry } from "./claudeLowPriority.ts";
+import {
+  computeClaudeUsageRetryMs,
+  isClaudeOauthUsageCoolingDown,
+  markClaudeOauthUsage429,
+} from "./claudeUsageCooldown.ts";
 
 type JsonRecord = Record<string, unknown>;
 type FetchLike = typeof fetch;
@@ -46,7 +51,7 @@ export function claudeResetCreditHeaders(accessToken: string): Record<string, st
   };
 }
 
-export type JsonResponse = { ok: boolean; status: number; body: unknown };
+export type JsonResponse = { ok: boolean; status: number; body: unknown; headers?: Headers | null };
 
 /**
  * Fetch and read a JSON body under one deadline: the timer covers the body read too, so a
@@ -71,7 +76,8 @@ export async function fetchJsonWithTimeout(
   try {
     const res = await Promise.race([fetchImpl(url, { ...init, signal: ctrl.signal }), deadline]);
     const body: unknown = await Promise.race([res.json().catch(() => null), deadline]);
-    return { ok: res.ok, status: res.status, body };
+    const headers = typeof res.headers?.get === "function" ? res.headers : null;
+    return { ok: res.ok, status: res.status, body, headers };
   } finally {
     clearTimeout(timer);
   }
@@ -80,11 +86,25 @@ export async function fetchJsonWithTimeout(
 export type ClaudeResetCreditUsageResult =
   { ok: true; body: unknown } | { ok: false; status: number; body: unknown };
 
-/** GET the reset-credit usage snapshot. Never throws — a timeout or transport failure is status 0. */
+/**
+ * Same endpoint as the quota poll, so it shares that poll's per-credential 429 cooldown:
+ * a call made during the window would be refused and restart it.
+ */
+export function respectClaudeUsageCooldown(accessToken: string, res: JsonResponse): void {
+  if (res.status !== 429) return;
+  const now = Date.now();
+  markClaudeOauthUsage429(accessToken, now, computeClaudeUsageRetryMs(res.headers ?? null, now));
+}
+
+/**
+ * GET the reset-credit usage snapshot. Never throws — a timeout or transport failure is
+ * status 0; while the credential is in its OAuth-usage 429 cooldown it answers 429 locally.
+ */
 export async function fetchClaudeResetCreditUsage(
   accessToken: string,
   options: { fetchImpl?: FetchLike; timeoutMs?: number } = {}
 ): Promise<ClaudeResetCreditUsageResult> {
+  if (isClaudeOauthUsageCoolingDown(accessToken)) return { ok: false, status: 429, body: null };
   try {
     const res = await fetchJsonWithTimeout(
       options.fetchImpl ?? fetch,
@@ -92,6 +112,7 @@ export async function fetchClaudeResetCreditUsage(
       { method: "GET", headers: claudeResetCreditHeaders(accessToken) },
       options.timeoutMs ?? CLAUDE_RESET_CREDIT_USAGE_TIMEOUT_MS
     );
+    respectClaudeUsageCooldown(accessToken, res);
     return res.ok
       ? { ok: true, body: res.body ?? {} }
       : { ok: false, status: res.status, body: res.body };

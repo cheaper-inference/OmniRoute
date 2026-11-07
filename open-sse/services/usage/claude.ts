@@ -48,8 +48,20 @@ const CLAUDE_CONFIG = {
   apiVersion: "2023-06-01",
 };
 
-/** A successful OAuth usage read is reused for this long before polling again. */
-export const CLAUDE_USAGE_SUCCESS_TTL_MS = 65_000;
+/**
+ * A successful OAuth usage read is reused for this long before polling again.
+ * Background pollers (quota cache, provider-limits sync, saturation signals) all
+ * go through here, so this is the effective polling interval per credential;
+ * a manual refresh (`forceRefresh`) skips it. Anthropic rate-limits this
+ * endpoint to a few calls per credential per hour.
+ */
+export const CLAUDE_USAGE_SUCCESS_TTL_MS = 15 * 60_000;
+/**
+ * Floor for a manual refresh: the dashboard sends one per open limits card (at most
+ * every 30 s, plus optional auto-refresh), so `forceRefresh` reuses a success younger
+ * than this instead of polling Anthropic again.
+ */
+export const CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS = 5 * 60_000;
 /** Cap on remembered credentials and on concurrent distinct polls. */
 const CLAUDE_USAGE_CACHE_MAX = 128;
 
@@ -76,6 +88,8 @@ export interface ClaudeUsageResult {
 interface CachedClaudeUsage {
   value: ClaudeUsageResult;
   fetchedAt: number;
+  /** Set when the quota changed upstream (a reset claim): never reused, still the stale fallback. */
+  expired?: boolean;
 }
 
 // Keyed by sha256(accessToken) — raw tokens never sit as map keys.
@@ -122,7 +136,8 @@ function staleFromCache(cached: CachedClaudeUsage): ClaudeUsageResult {
  *
  * Polling policy per credential:
  *  - concurrent callers share one in-flight request;
- *  - a success is reused for CLAUDE_USAGE_SUCCESS_TTL_MS (`forceRefresh` skips this);
+ *  - a success is reused for CLAUDE_USAGE_SUCCESS_TTL_MS; `forceRefresh` shortens that
+ *    to CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS;
  *  - a 429 starts a Retry-After-aware cooldown during which the last known quota is
  *    served flagged `_stale` (or a rate-limit message when nothing is cached yet);
  *  - 401 reports expired authentication; only 404/405 fall back to the legacy
@@ -146,11 +161,10 @@ export function getClaudeUsage(
 
   const key = hashClaudeCredential(accessToken);
   const cached = lastSuccessfulUsage.get(key);
-  if (
-    cached &&
-    !options.forceRefresh &&
-    Date.now() - cached.fetchedAt < CLAUDE_USAGE_SUCCESS_TTL_MS
-  ) {
+  const reuseForMs = options.forceRefresh
+    ? CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS
+    : CLAUDE_USAGE_SUCCESS_TTL_MS;
+  if (cached && !cached.expired && Date.now() - cached.fetchedAt < reuseForMs) {
     return Promise.resolve(cached.value);
   }
 
@@ -306,6 +320,16 @@ async function fetchClaudeUsage(
 }
 
 /** Test-only: clear the success cache and in-flight polls. */
+/**
+ * Mark the last successful read as outdated, e.g. after a reset claim changed the quota, so
+ * the next read polls Anthropic instead of reusing it. It still backs a stale answer on 429.
+ */
+export function expireClaudeUsageCache(accessToken?: string): void {
+  if (!accessToken) return;
+  const cached = lastSuccessfulUsage.get(hashClaudeCredential(accessToken));
+  if (cached) cached.expired = true;
+}
+
 export function _resetClaudeUsagePollingState(): void {
   lastSuccessfulUsage.clear();
   inFlightUsage.clear();
