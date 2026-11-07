@@ -39,11 +39,10 @@ const MIN_USABLE_ACCESS_TOKEN_LIFETIME_SECONDS = 60;
  * runtime token-refresh path) instead of re-implementing the POST — the
  * exchange call itself is free (no model/quota usage).
  *
- * Returns `null` when the token is valid (or the check was inconclusive, e.g.
- * a transient network error) — the import proceeds normally in that case,
- * optionally with rotated tokens already applied to `payload`. Returns an
- * error string when the refresh_token is confirmed dead and the import
- * should be rejected.
+ * Returns `"valid"` when the exchange succeeded (rotated tokens are already
+ * applied to `payload`), `"invalid"` when the refresh_token is confirmed dead,
+ * and `"inconclusive"` when the check could not decide, e.g. a transient
+ * network error. The caller decides what each outcome means for the record.
  */
 async function validateCodexRefreshToken(payload: {
   accessToken: string;
@@ -134,18 +133,14 @@ function preserveStoredCodexCredentials(
   return !hasNewerCredentialsForExpiredConnection(existing, payload);
 }
 
-async function findExistingCodexConnection(
-  payload: CodexImportPayload
-): Promise<ExistingCodexConnection | null> {
+function findExistingCodexConnection(
+  payload: CodexImportPayload,
+  connections: ExistingCodexConnection[]
+): ExistingCodexConnection | null {
   const accountId = codexAccountId(payload.providerSpecificData);
   if (!accountId) return null;
-  const connections = (await getProviderConnections({
-    provider: "codex",
-    authType: "oauth",
-  })) as ExistingCodexConnection[];
   const incomingUserId =
-    payload.providerSpecificData &&
-    typeof payload.providerSpecificData.chatgptUserId === "string"
+    payload.providerSpecificData && typeof payload.providerSpecificData.chatgptUserId === "string"
       ? payload.providerSpecificData.chatgptUserId.trim()
       : "";
   return (
@@ -221,12 +216,21 @@ type CodexImportRecordResult =
   | { index: number; ok: true; connectionId: string; email: string; unchanged?: true }
   | { index: number; ok: false; error: string };
 
-async function importOneCodexRecord(record: unknown, index: number): Promise<CodexImportRecordResult> {
+async function importOneCodexRecord(
+  record: unknown,
+  index: number
+): Promise<CodexImportRecordResult> {
   const norm = normalizeCodexImportRecord(record);
   if (!norm.ok) return { index, ok: false, error: norm.error };
 
   try {
-    const existing = await findExistingCodexConnection(norm.payload);
+    // Fetched per record: an earlier record in this batch may have just created
+    // the row a later duplicate must match.
+    const connections = (await getProviderConnections({
+      provider: "codex",
+      authType: "oauth",
+    })) as Array<ExistingCodexConnection & Record<string, unknown>>;
+    const existing = findExistingCodexConnection(norm.payload, connections);
     const sameRefreshToken =
       existing !== null &&
       typeof existing.refreshToken === "string" &&
@@ -239,16 +243,18 @@ async function importOneCodexRecord(record: unknown, index: number): Promise<Cod
 
     // A rotated server token must not be overwritten by a stale exported token.
     const preserveExistingCredentials = preserveStoredCodexCredentials(
-      existing, norm.payload, sameRefreshToken, validation
+      existing,
+      norm.payload,
+      sameRefreshToken,
+      validation
     );
     let conn;
     if (preserveExistingCredentials) {
       conn = await updateExistingCodexImportMetadata(existing, norm.payload);
     } else {
-      const allExisting = await getProviderConnections({ provider: "codex", authType: "oauth" });
-      const payload = preserveExistingCodexConnectionState(
-        norm.payload, allExisting as Array<Record<string, unknown>>
-      );
+      // Keep operator-managed state (priority and providerSpecificData) when
+      // the upsert matches an existing connection.
+      const payload = preserveExistingCodexConnectionState(norm.payload, connections);
       conn = await createProviderConnection(payload as Record<string, unknown>);
     }
     return {
@@ -260,7 +266,8 @@ async function importOneCodexRecord(record: unknown, index: number): Promise<Cod
     };
   } catch (error) {
     return {
-      index, ok: false,
+      index,
+      ok: false,
       error: sanitizeErrorMessage(error instanceof Error ? error.message : String(error)),
     };
   }
