@@ -10,6 +10,11 @@
 import { saveCallLog } from "../../imageResult.ts";
 import { sleep } from "../../../utils/sleep.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
+import {
+  UPSTREAM_MEDIA_LIMITS,
+  downloadUpstreamMedia,
+  upstreamMediaErrorText,
+} from "@/shared/network/remoteImageFetch";
 
 const DEFAULT_POLL_INTERVAL_MS = 4000;
 const DEFAULT_POLL_TIMEOUT_MS = 180000;
@@ -112,19 +117,20 @@ async function pollMysticTask(params: {
   return { status, imageUrl: typeof generated[0] === "string" ? generated[0] : undefined };
 }
 
+// The image URL comes from Magnific's task result; download it with the upstream-media policy.
 async function downloadGeneratedImage(
   imageUrl: string
 ): Promise<{ state: "ok"; b64: string } | { state: "failed"; status: number; error: string }> {
-  const imgRes = await fetch(imageUrl);
-  if (!imgRes.ok) {
+  try {
+    const { buffer } = await downloadUpstreamMedia(imageUrl, UPSTREAM_MEDIA_LIMITS.image);
+    return { state: "ok", b64: buffer.toString("base64") };
+  } catch (err) {
     return {
       state: "failed",
-      status: imgRes.status,
-      error: `Failed to download image: ${imgRes.status}`,
+      status: 502,
+      error: `Failed to download image: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
     };
   }
-  const buf = await imgRes.arrayBuffer();
-  return { state: "ok", b64: Buffer.from(buf).toString("base64") };
 }
 
 async function resolveCompletedResult(params: {
