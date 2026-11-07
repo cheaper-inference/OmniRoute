@@ -130,8 +130,9 @@ async function executeWithoutImageCredentials(
   execute: ImageCredentialRetryOptions["execute"],
   allowedConnections: string[] | null
 ): Promise<ImageCredentialRetryResult> {
-  // A scoped key cannot dispatch through an implicit credential-less provider.
-  if (Array.isArray(allowedConnections)) {
+  // A scoped key may use a keyless provider only when it admits the
+  // synthetic noauth connection explicitly.
+  if (Array.isArray(allowedConnections) && !allowedConnections.includes("noauth")) {
     return {
       credentials,
       result: {

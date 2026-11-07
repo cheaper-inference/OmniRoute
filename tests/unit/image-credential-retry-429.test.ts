@@ -368,3 +368,30 @@ test("an unscoped local image provider may still dispatch without credentials", 
   assert.equal(result.status, 200);
   assert.equal(executed, true);
 });
+
+test("keyless image execution honors an explicit noauth connection scope", async () => {
+  let dispatched = 0;
+  const execute = async () => {
+    dispatched++;
+    return { success: true, status: 200 };
+  };
+  const allowed = await executeImageWithCredentialFallback({
+    provider: "sdwebui",
+    requestedModel: "sdwebui",
+    credentials: null,
+    allowedConnections: ["noauth"],
+    execute,
+  });
+  assert.equal(allowed.result.status, 200);
+  assert.equal(dispatched, 1);
+
+  const denied = await executeImageWithCredentialFallback({
+    provider: "sdwebui",
+    requestedModel: "sdwebui",
+    credentials: null,
+    allowedConnections: ["unrelated-connection"],
+    execute,
+  });
+  assert.equal(denied.result.status, 403);
+  assert.equal(dispatched, 1);
+});
