@@ -336,7 +336,7 @@ The MCP server that exposes the CCR tools can be reached three ways. The default
 CCR is a **two-tier** store, not in-memory-only:
 
 - **Hot in-memory tier** — per-block cap 2 MiB, per-principal 16 MiB, global 64 MiB. Entries default to a 24 h TTL (maximum 7 days). Full MCP retrieval from memory is capped at 256 KiB; anything larger is still reachable through the ranged / grep modes.
-- **Durable SQLite tier** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, on by default) — backs the in-memory tier so a block survives LRU eviction, the TTL, a restart, or a retrieve landing on another instance.
+- **Durable SQLite tier** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, on by default) — backs the in-memory tier so a block survives LRU eviction, a restart, or a retrieve landing on another instance. The row keeps the block's TTL, so a block past its TTL is gone from both tiers.
 
 Three guards keep the durable tier bounded — a block stays memory-only when:
 
@@ -344,14 +344,14 @@ Three guards keep the durable tier bounded — a block stays memory-only when:
 2. the runtime is a cloud runtime (no local disk);
 3. `COMPRESSION_CCR_DURABLE_STORE=false`.
 
-So "the block disappeared" is not a blanket restart story: a sub-512 KB block on a local, non-cloud runtime survives a restart via the durable tier. See [Environment reference](../reference/ENVIRONMENT.md) for the variable.
+So "the block disappeared" is not a blanket restart story: a sub-512 KB block on a local, non-cloud runtime survives a restart via the durable tier until its TTL runs out. See [Environment reference](../reference/ENVIRONMENT.md) for the variable.
 
 ### The two markers
 
-| Marker                                | Meaning                                                                                                                                        | What the model should do                                                                                                                                    |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `[CCR retrieve hash=<24hex> chars=N]` | A large block was stored content-addressed.                                                                                                    | Call `omniroute_ccr_retrieve` with the **24-hex hash copied verbatim** to get the original text back.                                                       |
-| `[dedup:ref sha=…]`                   | `session-dedup` elided text already sent in an earlier turn of the same session. This is an **intentional look-back**, not a loss or an error. | Do **not** call any tool and do **not** try to "reconstruct" it. The first occurrence of the text is the canonical copy; the current turn is never re-sent. |
+| Marker                                | Meaning                                                                                                                                        | What the model should do                                                                                                                                                                     |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | A large block was stored content-addressed.                                                                                                    | Call `omniroute_ccr_retrieve` with the **24-hex hash copied verbatim** to get the original text back.                                                                                        |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided text already sent in an earlier turn of the same session. This is an **intentional look-back**, not a loss or an error. | Do **not** call any tool and do **not** try to "reconstruct" it. The first occurrence of the text is the canonical copy; the current turn is never rewritten, it is deduped on a later turn. |
 
 The `[dedup:ref]` look-back is a deliberate protocol decision — there is no pre-send reconstruction. Treat it as "this exact text was already on the wire earlier in this session."
 
@@ -359,7 +359,7 @@ The `[dedup:ref]` look-back is a deliberate protocol decision — there is no pr
 
 - **Key (stdio):** a stdio caller carries no per-request identity, so it authenticates with `OMNIROUTE_API_KEY` (set in the MCP server's `env`). Without it the caller is anonymous and tools that require a principal may degrade.
 - **`tools[]` is the injection precondition.** The CCR retrieve-protocol instruction (#8033) is injected **only** when the request's advertised `tools[]` proves the client can actually reach `omniroute_ccr_retrieve`. The match is a trailing-segment match bounded by a separator (`__`, `.`, `/`, `:`) — never a bare substring — so a namespaced name such as `mcp__gateway__omniroute_ccr_retrieve` still counts. An absent or non-matching `tools[]` means the instruction is _not_ injected, by design.
-- **`codemode:false` (OpenCode clients).** OpenCode defaults to Code Mode, which advertises only its native tools to the model and **does not** put MCP tools on the native `tools[]` list. Set `codemode: false` on the MCP server entry so the `omniroute_ccr_*` tools are advertised and the CCR instruction gets injected. This is a **client** setting, not an OmniRoute one.
+- **`codemode:false` (OpenCode clients).** OpenCode defaults to Code Mode, which advertises only its native tools to the model and **does not** put MCP tools on the native `tools[]` list. Set `codemode: false` on the MCP server entry so the `omniroute_ccr_*` tools are advertised. This is a **client** setting, not an OmniRoute one. It does not get the CCR instruction injected yet: OpenCode names a tool `<server>_<tool>`, so a server called `omniroute` exposes `omniroute_omniroute_ccr_retrieve`, and `_` is not one of the matched separators.
 - **Principals.** Storage and retrieval are isolated per authenticated principal (per API key). A key sees its own blocks only.
 
 ### Scopes per tool
@@ -375,28 +375,28 @@ Scope enforcement is always on for narrow-scoped HTTP/SSE callers. The `omnirout
 | `omniroute_ccr_list`     | `read:compression`  |
 | `omniroute_ccr_stats`    | `read:compression`  |
 
-A missing scope returns a **JSON-RPC error** (not an HTTP 403 — the `403 LOCAL_ONLY` is the separate loopback route-guard auth): `Insufficient MCP scopes for <tool>. Missing: <scope>.` A minimal remote key can hold `mcp:connect` (authorizes the `/api/mcp/` local-only carve-out) plus the specific read/write scope it needs.
+A missing scope returns an **MCP tool error result** (`isError: true`, not an HTTP 403 — the `403 LOCAL_ONLY` is the separate loopback route-guard auth): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` A minimal remote key can hold `mcp:connect` (authorizes the `/api/mcp/` local-only carve-out) plus the specific read/write scope it needs.
 
 ### Client matrix
 
-| Client            | Transport                                 | Config to use                                                                                                                                                                                                | `tools[]` advertised? (→ CCR instruction injected)                                                                |
-| ----------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| Claude Code       | streamable-http                           | `claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream`                                                                                                                    | Yes — MCP-capable; injected.                                                                                      |
-| Cursor / Cline    | `stdio` **or** `streamable-http`          | stdio: `omniroute --mcp` with `OMNIROUTE_API_KEY` in `env`; or the `claude mcp add-server … --type http` line in [Setup Guide → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) | Yes — advertise the `omniroute_ccr_*` tools.                                                                      |
-| OpenCode          | streamable-http                           | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                             | Only with `codemode: false`; default Code Mode hides them.                                                        |
-| OpenAI-compatible | OpenAI-compatible HTTP (chat completions) | standard chat-completions client against the OpenAI-compatible endpoint                                                                                                                                      | **Never** — a plain OpenAI-compatible caller is never told to call the tool, and the instruction is not injected. |
+| Client            | Transport                                 | Config to use                                                                                                                                                                                                                           | `tools[]` advertised? (→ CCR instruction injected)                                                                                                                                                  |
+| ----------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code       | streamable-http                           | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                       | Yes — MCP-capable; injected.                                                                                                                                                                        |
+| Cursor / Cline    | `stdio` **or** `streamable-http`          | stdio: `omniroute --mcp` with `OMNIROUTE_API_KEY` in `env`; or a remote MCP entry pointing at `http://localhost:20128/api/mcp/stream` (see [Setup Guide → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration)) | Yes — advertise the `omniroute_ccr_*` tools.                                                                                                                                                        |
+| OpenCode          | streamable-http                           | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                                                        | Tools advertised only with `codemode: false`; the instruction is still not injected, because `omniroute_omniroute_ccr_retrieve` does not match (see [Client prerequisites](#client-prerequisites)). |
+| OpenAI-compatible | OpenAI-compatible HTTP (chat completions) | standard chat-completions client against the OpenAI-compatible endpoint                                                                                                                                                                 | **Never** — a plain OpenAI-compatible caller is never told to call the tool, and the instruction is not injected.                                                                                   |
 
 ### Retrieval limits & pagination
 
 MCP tool text results are clipped around `mcpAccessibility.maxTextChars` (default `50000`). A `full` retrieve of a block is capped at 256 KiB — **there is no unbounded full retrieve**. When a block's `chars=N` is large, page it instead of pulling the whole thing:
 
 - Rule of thumb: **`chars > 40000` → use a `mode`**, never a bare full.
-- `mode:"grep"` — `pattern` match only (with `start`/`end` bounds and paging), cheapest for "find the one line I need."
-- `mode:"lines"` — a bounded line range.
-- `mode:"head"` / `mode:"tail"` — first/last slice.
-- `mode:"stats"` — summary without the body.
+- `mode:"grep"` — regex `pattern` matched line by line, up to 1,000 matching lines (`unique: true` drops repeats), cheapest for "find the one line I need."
+- `mode:"lines"` — a 1-indexed line range; needs both `start` and `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` lines.
+- `mode:"stats"` — line, character, and byte counts without the body.
 
-Use `start`/`end` to walk a long block in pages rather than requesting the whole thing at once.
+Use `mode:"lines"` with `start`/`end` to walk a long block in pages rather than requesting the whole thing at once.
 
 ### Tool naming
 
@@ -404,7 +404,7 @@ The retrieve tool is currently named `omniroute_ccr_retrieve` (the `omniroute_` 
 
 ### Session lifecycle
 
-Streamable-HTTP sessions idle out and the server reaps them; the idle window is the `MCP_SESSION_IDLE_MS` constant (referenced by name, not a hardcoded value, so this page does not drift when it changes). Symptoms of an idle-reaped session are `Unknown Mcp-Session-Id` / `mcp session expired` — the remedy is to reconnect or restart the session, **not** to rotate a key, change a scope, or rename a tool. A stateless-transport direction is in flight upstream and will remove session handling altogether.
+Streamable-HTTP sessions idle out and the server reaps them; the idle window is the `MCP_SESSION_IDLE_MS` constant (referenced by name, not a hardcoded value, so this page does not drift when it changes). The symptom of an idle-reaped session is an HTTP 404 with `Unknown Mcp-Session-Id` — the remedy is to reconnect or restart the session, **not** to rotate a key, change a scope, or rename a tool.
 
 ## API Surface
 

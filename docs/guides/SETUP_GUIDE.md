@@ -231,7 +231,7 @@ npm run test:protocols:e2e
 **Claude Code:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
@@ -253,11 +253,7 @@ Add to your MCP settings (stdio, with the key so the caller has a principal):
 }
 ```
 
-Or, when `mcpTransport` is `streamable-http` (Settings → Endpoints), connect over HTTP streamable — same command as Claude Code:
-
-```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
-```
+Or, when `mcpTransport` is `streamable-http` (set it on `/dashboard/mcp` or with `omniroute mcp enable --transport streamable-http`), point the client's remote MCP server entry at `http://localhost:20128/api/mcp/stream`.
 
 The key travels as `Authorization: Bearer <api-key>` (see [MCP Server → Remote access](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) for remote hosts; a remote key needs `mcp:connect` plus its read/write scopes).
 

@@ -152,7 +152,7 @@ Cursor, Cline, and compatible MCP client setup.
 | `omniroute_rtk_discover`            | `read:compression`  | Discover recurring noise in opt-in RTK output samples                                                                    |
 | `omniroute_rtk_learn`               | `read:compression`  | Generate a reviewable RTK filter draft from opt-in samples                                                               |
 
-CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction, the TTL, or a restart — except blocks over 512 KB and cloud runtimes, which stay memory-only. Each block is limited to 2 MiB, each
+CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB and cloud runtimes, which stay memory-only. Each block is limited to 2 MiB, each
 principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum
 seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the
 ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by
