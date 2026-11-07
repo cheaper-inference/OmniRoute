@@ -77,9 +77,11 @@ export class MinIntervalThrottle {
           : Math.max(now, this.lastStart + this.minIntervalMs + this.nextJitter());
       const wait = startAt - now;
       if (wait > 0) await this.clock.sleep(wait);
-      // Timers can resume late under load. Space the next acquisition from
-      // this actual wakeup, rather than allowing a catch-up burst.
-      this.lastStart = this.clock.now();
+      // Spacing is measured between real starts. A timer that wakes late (a
+      // loaded CI box, a paused process) would otherwise shorten the next gap,
+      // because the next caller computes its wait from the scheduled instant
+      // rather than from when this fetch actually began.
+      this.lastStart = Math.max(startAt, this.clock.now());
     } finally {
       release();
     }

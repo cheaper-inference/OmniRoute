@@ -50,6 +50,19 @@ test("a late timer still leaves a full interval before the next queued fetch", a
   assert.equal(clock.now(), 2000);
 });
 
+test("a backward clock correction cannot move the scheduled spacing window back", async () => {
+  const clock = new FakeClock();
+  clock.sleep = async (ms) => {
+    clock.slept.push(ms);
+    // The wall clock moves back 100ms while the first timer is pending.
+    clock.t += ms - (clock.slept.length === 1 ? 100 : 0);
+  };
+  const throttle = new MinIntervalThrottle({ minIntervalMs: 250, jitterMs: 0, clock });
+  await Promise.all([throttle.acquire(), throttle.acquire(), throttle.acquire()]);
+  assert.deepEqual(clock.slept, [250, 350]);
+  assert.equal(clock.now(), 1500);
+});
+
 test("#16948 zero-valued clocks still enforce spacing on the second acquisition", async () => {
   const clock = new FakeClock();
   clock.t = 0;
