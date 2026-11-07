@@ -13,6 +13,11 @@ import {
   isSpawnCapableBypassPrefix,
   SPAWN_CAPABLE_PATTERNS,
 } from "../../src/shared/constants/spawnCapablePrefixes.ts";
+import {
+  buildImportGraph,
+  isSpawnCapableSource,
+  reachesSpawnCapableModule,
+} from "../../scripts/check/lib/spawnImportGraph.ts";
 
 const ROUTE = "/api/providers/agy-auth/apply-local";
 
@@ -35,6 +40,26 @@ test("the non-spawning agy-auth siblings stay reachable through a tunnel", () =>
     assert.equal(isLocalOnlyPath(`/api/providers/agy-auth/${sibling}`), false, sibling);
   }
   assert.equal(isLocalOnlyPath("/api/providers/agy-auth"), false);
+});
+
+test("the spawn stays out of the code the tunnel-reachable import routes load", () => {
+  const shared = "src/lib/oauth/utils/agyAuthImport.ts";
+  const detect = "src/lib/oauth/utils/agyLocalDetect.ts";
+  assert.equal(isSpawnCapableSource(fs.readFileSync(shared, "utf8")), false);
+  assert.equal(isSpawnCapableSource(fs.readFileSync(detect, "utf8")), true);
+
+  const applyLocal = "src/app/api/providers/agy-auth/apply-local/route.ts";
+  const importRoutes = ["import", "import-bulk"].map(
+    (name) => `src/app/api/providers/agy-auth/${name}/route.ts`
+  );
+  const repoRoot = process.cwd();
+  const graph = buildImportGraph({ repoRoot, entryFiles: [applyLocal, ...importRoutes] });
+  const reachesDetect = (route: string) =>
+    reachesSpawnCapableModule(graph, repoRoot, route, { isSpawnModule: (rel) => rel === detect })
+      .reachable;
+
+  assert.equal(reachesDetect(applyLocal), true);
+  for (const route of importRoutes) assert.equal(reachesDetect(route), false, route);
 });
 
 test("the OpenAPI spec marks apply-local as loopback-only", () => {

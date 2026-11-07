@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 
 import {
   parseAndValidateAgyToken,
-  detectLocalAgyTokenRaw,
   AgyAuthFileError,
 } from "../../src/lib/oauth/utils/agyAuthImport.ts";
+import { detectLocalAgyTokenRaw } from "../../src/lib/oauth/utils/agyLocalDetect.ts";
 
 // Fixture token values are deliberately generic (not `ya29.`/`1//` shaped) so secret
 // scanners don't flag them — the parser only cares that they are non-empty strings.

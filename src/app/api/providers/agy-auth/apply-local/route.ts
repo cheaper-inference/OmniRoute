@@ -5,8 +5,8 @@ import {
   parseAndValidateAgyToken,
   enrichWithAntigravityBackend,
   createConnectionFromAgyToken,
-  detectLocalAgyTokenRaw,
 } from "@/lib/oauth/utils/agyAuthImport";
+import { detectLocalAgyTokenRaw } from "@/lib/oauth/utils/agyLocalDetect";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
 import { getProviderAuditTarget } from "@/lib/compliance/providerAudit";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";

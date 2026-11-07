@@ -544,6 +544,7 @@
       "tests/unit/rotation-config-provider-cooldown.test.ts",
       "tests/unit/route-explainability.test.ts",
       "tests/unit/route-guard-acp-agents-local-only.test.ts",
+      "tests/unit/route-guard-agy-auth-apply-local.test.ts",
       "tests/unit/route-guard-cli-tools-settings-local-only.test.ts",
       "tests/unit/route-guard-cursor-agent-availability.test.ts",
       "tests/unit/route-guard-devin-agentic-auth-status.test.ts",
