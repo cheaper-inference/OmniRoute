@@ -61,6 +61,7 @@ async function resolveProviderSpecificData(
       nodeName: node.name,
       ...(node.chatPath ? { chatPath: node.chatPath } : {}),
       ...(node.modelsPath ? { modelsPath: node.modelsPath } : {}),
+      ...(node.customJsonConfig ? { customJson: node.customJsonConfig } : {}),
     };
   } else if (entry.baseUrl) {
     base = { baseUrl: entry.baseUrl };

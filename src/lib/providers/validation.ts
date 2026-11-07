@@ -27,6 +27,7 @@ import {
   resolveBaseUrl,
 } from "./validation/urlHelpers";
 import { toValidationErrorResult } from "./validation/transport";
+import { isCustomJsonProviderData, validateCustomJsonConnection } from "./validation/customJson";
 import { validateCloudflareAiProvider } from "./validation/cloudflareAi";
 import {
   validateDeepSeekWebProvider,
@@ -198,6 +199,10 @@ export async function validateProviderApiKey({
 
   if (!provider || (requiresApiKey && !apiKey)) {
     return { valid: false, error: "Provider and API key required", unsupported: false };
+  }
+
+  if (isOpenAICompatibleProvider(provider) && isCustomJsonProviderData(providerSpecificData)) {
+    return validateCustomJsonConnection(providerSpecificData);
   }
 
   if (isOpenAICompatibleProvider(provider)) {
