@@ -446,104 +446,148 @@ server/
 
 ---
 
-## 4. `open-sse/` - فضای کار موتور جریان
+## 4. `open-sse/` — فضای کاری موتور استریم
 
-فضای کاری npm جداگانه منتشر شده به عنوان `@omniroute/open-sse`. دارای پردازش درخواست، مجریان، مترجمان، خدمات، ترانسفورماتور و سرور MCP است.
+فضای کاری جداگانهای از npm که با نام `@omniroute/open-sse` منتشر میشود. مسئول پردازش
+درخواستها، اجراکنندهها، مترجمها، سرویسها، ترنسفورمر و سرور MCP است.
 
 ```
 open-sse/
-├── index.ts                Public exports
-├── package.json            Workspace manifest
+├── index.ts                خروجیهای عمومی
+├── package.json            مانیفست فضای کاری
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Provider registries, header profiles, identity, …
-├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
-├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Responses API ↔ Chat Completions stream transformer
-├── services/               80+ service modules (combos, fallback, quotas, identity, …)
-├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
-└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
+├── config/                 رجیستریهای ارائهدهندگان، پروفایلهای header، هویت، …
+├── handlers/               مدیریتکنندههای درخواست (گفتوگو، embedding، صوت، تصویر، …)
+├── executors/              159 ماژول اجراکنندهٔ ارائهدهندگان (کلاسهای اجراکننده + ابزارهای کمکی هر ارائهدهنده)
+├── translator/             تبدیل قالب (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            ترنسفورمر جریان Responses API ↔ Chat Completions
+├── services/               بیش از 80 ماژول سرویس (ترکیبی، fallback، سهمیهها، هویت، …)
+├── utils/                  ابزارهای کمکی استریم، کلاینت TLS، AWS SigV4، واکشی از طریق proxy، …
+└── mcp-server/             سرور MCP (3 انتقال، 33 scope، 110 ابزار)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| گرداننده                | هدف                                                            |
-| ----------------------- | -------------------------------------------------------------- |
-| `chatCore.ts`           | خط لوله چت اصلی (کش، محدودیت نرخ، مسیریابی ترکیبی، ارسال مجری) |
-| `responsesHandler.ts`   | پاسخ OpenAI نقطه ورود API                                      |
-| `embeddings.ts`         | جاسازی ها                                                      |
-| `imageGeneration.ts`    | تولید تصویر                                                    |
-| `audioSpeech.ts`        | تبدیل متن به گفتار                                             |
-| `audioTranscription.ts` | گفتار به متن                                                   |
-| `videoGeneration.ts`    | تولید ویدئو                                                    |
-| `musicGeneration.ts`    | نسل موسیقی                                                     |
-| `rerank.ts`             | رتبه بندی مجدد                                                 |
-| `moderations.ts`        | اعتدال                                                         |
-| `search.ts`             | جستجوی وب                                                      |
-| `sseParser.ts`          | تجزیه کننده رویداد SSE                                         |
-| `usageExtractor.ts`     | تعداد توکنها را از جریانهای بالادست خارج کنید                  |
-| `responseSanitizer.ts`  | نوار نویز خاص ارائه دهنده                                      |
-| `responseTranslator.ts` | بین پاسخ ارائه دهنده و لایه مترجم چسب بزنید                    |
+| Handler                 | Purpose                                                                     |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `chatCore.ts`           | خط لولهٔ اصلی گفتوگو (کش، محدودیت نرخ، مسیریابی ترکیبی، ارسال به اجراکننده) |
+| `responsesHandler.ts`   | نقطهٔ ورود OpenAI Responses API                                             |
+| `embeddings.ts`         | Embeddingها                                                                 |
+| `imageGeneration.ts`    | تولید تصویر                                                                 |
+| `audioSpeech.ts`        | تبدیل متن به گفتار                                                          |
+| `audioTranscription.ts` | تبدیل گفتار به متن                                                          |
+| `videoGeneration.ts`    | تولید ویدئو                                                                 |
+| `musicGeneration.ts`    | تولید موسیقی                                                                |
+| `rerank.ts`             | بازرتبهبندی                                                                 |
+| `moderations.ts`        | تعدیل                                                                       |
+| `search.ts`             | جستوجوی وب                                                                  |
+| `sseParser.ts`          | تجزیهکنندهٔ رویدادهای SSE                                                   |
+| `usageExtractor.ts`     | استخراج تعداد توکنها از جریانهای بالادستی                                   |
+| `responseSanitizer.ts`  | حذف نویزهای اختصاصی ارائهدهندگان                                            |
+| `responseTranslator.ts` | رابط بین پاسخ ارائهدهنده و لایهٔ مترجم                                      |
 
 ### 4.2 `open-sse/executors/`
 
-156 ماژول اجرایی سطح بالا (`*.ts` منهای `base.ts`، `index.ts` و تست - تعداد `npm run check:docs-counts` اندازه گیری می شود). هر کلاس اجرا کننده `BaseExecutor` (`base.ts`)، مستقیماً یا از طریق `DefaultExecutor` یا مجری دیگری گسترش می یابد. ماژولهای باقیمانده کمککنندههای هر ارائهدهنده هستند (طرحوارههای ابزار، آداپتورهای fetch/TTS ، کنترلکنندههای عجیب و غریب). مجریان عبارتند از:
+159 ماژول اجراکنندهٔ سطح بالا (`*.ts` بهجز `base.ts`، `index.ts` و تستها — تعداد آن را
+`npm run check:docs-counts` اندازهگیری میکند). هر کلاس اجراکننده بهصورت مستقیم یا از طریق
+`DefaultExecutor` یا اجراکنندهای دیگر، `BaseExecutor` (`base.ts`) را گسترش میدهد؛ ماژولهای
+باقیمانده ابزارهای کمکی هر ارائهدهنده هستند (schemaهای ابزار، adapterهای fetch/TTS و مدیریت
+رفتارهای خاص). اجراکنندهها شامل موارد زیر هستند:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, `index.ts`, `claudeIdentity.ts`.
+`antigravity`، `azure-openai`، `blackbox-web`، `cliproxyapi`،
+`chatgpt-web-codex`، `cloudflare-ai`، `codex`، `commandCode`، `cursor`، `default`، `devin-cli`،
+`muse-spark-web`، `nlpcloud`، `opencode`، `perplexity-web`، `petals`،
+`pollinations`، `qoder`، `vertex`، `devin-desktop`، بهعلاوهٔ `claudeIdentity.ts`
+(ابزار کمکی هویت مشترک) و `index.ts` (رجیستری).
 
-> توجه: ارائه دهندگانی که در اینجا فهرست نشده اند توسط `default.ts` با استفاده از مجری عمومی سازگار با OpenAI ارائه می شوند. کاتالوگ کامل ارائه دهنده (377 ارائه دهنده) در `src/shared/constants/providers.ts` زندگی می کند.
+> توجه: ارائهدهندگانی که در اینجا فهرست نشدهاند، توسط `default.ts` و با استفاده از اجراکنندهٔ
+> عمومی سازگار با OpenAI ارائه میشوند. فهرست کامل ارائهدهندگان (380 ارائهدهنده) در
+> `src/shared/constants/providers.ts` قرار دارد.
 
 ### 4.3 `open-sse/translator/`
 
-ترجمه هاب و گفتار (OpenAI مرکز است).
+ترجمهٔ hub-and-spoke (OpenAI هاب است).
 
-- **9 درخواست مترجم** (`translator/request/`): `antigravity-to-openai`، `claude-to-gemini`، `claude-to-openai`، `gemini-to-openai`، `openai-responses`، `openai-to-claude`، `openai-to-cursor`، `openai-to-gemini`، `openai-to-kiro`.
-- **9 مترجم پاسخ** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
-- **9 کمک کننده** (`translator/helpers/`): `claudeHelper`، `geminiHelper`، `geminiToolsSanitizer`، `maxTokensHelper`، `openaiHelper`، `responsesApiHelper`، `schemaCoercion`، `toolCallHelper`، بعلاوه آزمایشات کمکی.
-- **کمک کننده های تصویر** (`translator/image/sizeMapper.ts`).
+- **9 مترجم درخواست** (`translator/request/`):
+  `antigravity-to-openai`، `claude-to-gemini`، `claude-to-openai`،
+  `gemini-to-openai`، `openai-responses`، `openai-to-claude`،
+  `openai-to-cursor`، `openai-to-gemini`، `openai-to-kiro`.
+- **9 مترجم پاسخ** (`translator/response/`):
+  `claude-to-openai`، `cursor-to-openai`، `gemini-to-claude`، `gemini-to-openai`،
+  `kiro-to-openai`، `openai-responses`، `openai-to-antigravity`،
+  `openai-to-claude`.
+- **9 ابزار کمکی** (`translator/helpers/`):
+  `claudeHelper`، `geminiHelper`، `geminiToolsSanitizer`، `maxTokensHelper`،
+  `openaiHelper`، `responsesApiHelper`، `schemaCoercion`، `toolCallHelper`، بهعلاوهٔ
+  تستهای ابزارهای کمکی.
+- **ابزارهای کمکی تصویر** (`translator/image/sizeMapper.ts`).
 - سطح بالا: `bootstrap.ts`، `formats.ts`، `registry.ts`، `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based پاسخها مبدل تکمیلهای چت API ↔ (استفاده شده توسط مسیر `responses/` catch-all).
+- `responsesTransformer.ts` — مبدل مبتنی بر `TransformStream` برای Responses API ↔ Chat
+  Completions (که توسط catch-all مسیر `responses/` استفاده میشود).
 
 ### 4.5 `open-sse/services/`
 
-نکات برجسته (لیست کامل زیر `open-sse/services/`):
+موارد برجسته (فهرست کامل در `open-sse/services/`):
 
-| نگرانی            | فایل ها                                                                                                                                                                                                                                                  |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| مسیریابی ترکیبی   | `combo.ts` (20 استراتژی)، `comboConfig.ts`، `comboMetrics.ts`، `comboManifestMetrics.ts`، `comboAgentMiddleware.ts`                                                                                                                                      |
-| موتور کمبو خودکار | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| تاب آوری          | `accountFallback.ts` (قفل خنک کننده + ), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                           |
-| سهمیه ها          | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| ذخیره سازی        | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| هوش مسیریابی      | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| جابجایی مدل       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| فشرده سازی        | `compression/` - سیم کشی موتور فشرده سازی کامل                                                                                                                                                                                                           |
-| جلسه توکن +       | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| ردیف / آشکار      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / شبکه         | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| دسته ها           | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| استفاده           | `usage.ts`                                                                                                                                                                                                                                               |
+| دغدغه              | فایلها                                                                                                                                                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| مسیریابی ترکیبی    | `combo.ts` (20 راهبرد)، `comboConfig.ts`، `comboMetrics.ts`، `comboManifestMetrics.ts`، `comboAgentMiddleware.ts`                                                                                                                                        |
+| موتور ترکیب خودکار | `autoCombo/` — `engine.ts`، `scoring.ts`، `taskFitness.ts`، `virtualFactory.ts`، `modePacks.ts`، `autoPrefix.ts`، `persistence.ts`، `providerDiversity.ts`، `providerRegistryAccessor.ts`، `routerStrategy.ts`، `selfHealing.ts`، `index.ts`             |
+| تابآوری            | `accountFallback.ts` (خنکسازی + قفل)، `errorClassifier.ts`، `requestRejectedStreak.ts`، `emergencyFallback.ts`، `rateLimitManager.ts`، `rateLimitSemaphore.ts`، `accountSemaphore.ts`، `accountSelector.ts`                                              |
+| سهمیهها            | `quotaMonitor.ts`، `quotaPreflight.ts`، `bailianQuotaFetcher.ts`، `codexQuotaFetcher.ts`، `deepseekQuotaFetcher.ts`، `openrouterQuotaFetcher.ts`، `openrouterFreeWindow.ts`، `llmgatewayQuotaFetcher.ts`، `crofUsageFetcher.ts`، `antigravityCredits.ts` |
+| کشکردن             | `reasoningCache.ts`، `searchCache.ts`، `signatureCache.ts`، `requestDedup.ts`                                                                                                                                                                            |
+| هوشمندی مسیریابی   | `intentClassifier.ts`، `taskAwareRouter.ts`، `backgroundTaskDetector.ts`، `volumeDetector.ts`، `wildcardRouter.ts`، `workflowFSM.ts`، `specificityDetector.ts`، `specificityRules.ts`، `specificityTypes.ts`                                             |
+| مدیریت مدل         | `modelCapabilities.ts`، `modelDeprecation.ts`، `modelFamilyFallback.ts`، `modelStrip.ts`، `model.ts`، `provider.ts`، `providerRequestDefaults.ts`، `providerCostData.ts`، `payloadRules.ts`                                                              |
+| فشردهسازی          | `compression/` — اتصال کامل موتور فشردهسازی                                                                                                                                                                                                              |
+| توکن + نشست        | `tokenRefresh.ts`، `sessionManager.ts`، `apiKeyRotator.ts`، `contextManager.ts`، `contextHandoff.ts`، `systemPrompt.ts`، `roleNormalizer.ts`، `responsesInputSanitizer.ts`، `toolSchemaSanitizer.ts`، `toolLimitDetector.ts`، `thinkingBudget.ts`        |
+| رده / مانیفست      | `tierResolver.ts`، `tierConfig.ts`، `tierDefaults.json`، `tierTypes.ts`، `manifestAdapter.ts`                                                                                                                                                            |
+| IP / شبکه          | `ipFilter.ts`، `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| دستهها             | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| استفاده            | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 ابزار منحصر به فرد** سیمی در `server.ts` (45 متعارف در حافظه `schemas/tools.ts` + ، مهارتها، مهارتهای GitHub، استخر، گیمیفیکیشن، پلاگین، Notion، Obsidian، پیکره محلی و ماژولهای فشردهسازی - اتحاد شمارش شده توسط `countUniqueMcpTools`).
-- **3 حمل و نقل** : stdio, HTTP Streamable, SSE.
-- **33 دامنه** در زمان اجرا اجرا می شود - لیست پایه در `src/shared/constants/mcpScopes.ts`، مجموعه کامل ترکیبی از دامنه های اعلام شده توسط هر ماژول ابزار است.
-- جدول حسابرسی: `mcp_tool_audit` (جمعیت `audit.ts`).
-- فایل ها: `server.ts`، `index.ts`، `httpTransport.ts`، `audit.ts`، `scopeEnforcement.ts`، `runtimeHeartbeat.ts`، `descriptionCompressor.ts`، `schemas/{tools, a2a, audit, index}.ts`، `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`، به علاوه تست های زیر `__tests__/`.
-- برای کاتالوگ کامل ابزار به [MCP-SERVER.md](../frameworks/MCP-SERVER.md) مراجعه کنید.
+- **110 ابزار منحصربهفرد** که در `server.ts` متصل شدهاند (45 ابزار متعارف در `schemas/tools.ts` +
+  ماژولهای حافظه، مهارتها، مهارتهای GitHub، pool، بازیوارسازی، افزونه، Notion، Obsidian،
+  پیکره محلی و فشردهسازی — اجتماع آنها با `countUniqueMcpTools` شمارش میشود).
+- **3 انتقال**: stdio، HTTP Streamable، SSE.
+- **33 دامنه** که در زمان اجرا اعمال میشوند — فهرست پایه در `src/shared/constants/mcpScopes.ts` قرار دارد و مجموعه کامل، اجتماع دامنههای اعلامشده توسط هر ماژول ابزار است.
+- جدول ممیزی: `mcp_tool_audit` (توسط `audit.ts` پر میشود).
+- فایلها: `server.ts`، `index.ts`، `httpTransport.ts`، `audit.ts`، `scopeEnforcement.ts`،
+  `runtimeHeartbeat.ts`، `descriptionCompressor.ts`، `schemas/{tools, a2a, audit, index}.ts`،
+  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`،
+  بههمراه آزمونهای موجود در `__tests__/`.
+- برای فهرست کامل ابزارها، به [MCP-SERVER.md](../frameworks/MCP-SERVER.md) مراجعه کنید.
 
 ### 4.7 `open-sse/config/`
 
-ثبتهای ارائهدهنده (`providerRegistry.ts`، `providerModels.ts`، `providerHeaderProfiles.ts`)، رجیستریهای مدل با فرمت (`audioRegistry.ts`، `embeddingRegistry.ts`، `imageRegistry.ts`، `moderationRegistry.ts`، `musicRegistry.ts`، `rerankRegistry.ts`، `searchRegistry.ts`، `videoRegistry.ts`)، کمککنندگان هویت (`codexIdentity.ts`، `codexInstructions.ts`، `anthropicHeaders.ts`، `antigravityUpstream.ts`، `antigravityModelAliases.ts`، zq، `cliFingerprints.ts`، `toolCloaking.ts` `defaultThinkingSignature.ts` zq کمک کنندگان (`credentialLoader.ts`، `codexClient.ts`)، و آداپتورهای ابری (`azureAi.ts`، `bedrock.ts`، `datarobot.ts`، `glmProvider.ts`، `maritalk.ts`، `oci.ts`، `petals.ts`، `runway.ts`، `sap.ts`، `watsonx.ts`، `ollamaModels.ts`، `errorConfig.ts`، `constants.ts`، `registryUtils.ts`).
+رجیستریهای ارائهدهندگان (`providerRegistry.ts`، `providerModels.ts`،
+`providerHeaderProfiles.ts`)، رجیستریهای مدل بر اساس قالب (`audioRegistry.ts`،
+`embeddingRegistry.ts`، `imageRegistry.ts`، `moderationRegistry.ts`،
+`musicRegistry.ts`، `rerankRegistry.ts`، `searchRegistry.ts`، `videoRegistry.ts`)،
+دستیارهای هویت (`codexIdentity.ts`، `codexInstructions.ts`،
+`anthropicHeaders.ts`، `antigravityUpstream.ts`، `antigravityModelAliases.ts`،
+`cliFingerprints.ts`، `toolCloaking.ts`، `defaultThinkingSignature.ts`)،
+دستیارهای اعتبارنامه (`credentialLoader.ts`، `codexClient.ts`) و آداپتورهای
+ابری (`azureAi.ts`، `bedrock.ts`، `datarobot.ts`، `glmProvider.ts`،
+`maritalk.ts`، `oci.ts`، `petals.ts`، `runway.ts`، `sap.ts`، `watsonx.ts`،
+`ollamaModels.ts`، `errorConfig.ts`، `constants.ts`، `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-جریان های ابتدایی و کمک های ارائه دهنده: `stream.ts`، `streamHandler.ts`، `streamHelpers.ts`، `streamPayloadCollector.ts` `streamReadiness.ts` `sseHeartbeat.ts`، `proxyFetch.ts`، `proxyDispatcher.ts`، `tlsClient.ts`، `networkProxy.ts`، `awsSigV4.ts`، `cacheControlPolicy.ts`، `cursorChecksum.ts` `comfyuiClient.ts` `cursorAgentProtobuf.ts`، `cursorVersionDetector.ts`، `kieTask.ts`، `bypassHandler.ts`، `aiSdkCompat.ts`، `thinkTagParser.ts` `requestLogger.ts` `urlSanitize.ts` `usageTracking.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
+مبانی استریم و ابزارهای کمکی ارائهدهنده: `stream.ts`، `streamHandler.ts`،
+`streamHelpers.ts`، `streamPayloadCollector.ts`، `streamReadiness.ts`،
+`sseHeartbeat.ts`، `proxyFetch.ts`، `proxyDispatcher.ts`، `tlsClient.ts`،
+`networkProxy.ts`، `awsSigV4.ts`، `cacheControlPolicy.ts`،
+`cursorChecksum.ts`، `cursorAgentProtobuf.ts`، `cursorVersionDetector.ts`،
+`comfyuiClient.ts`، `kieTask.ts`، `bypassHandler.ts`، `aiSdkCompat.ts`،
+`thinkTagParser.ts`، `urlSanitize.ts`، `usageTracking.ts`، `requestLogger.ts`،
+`progressTracker.ts`، `cors.ts`، `error.ts`، `logger.ts`، `sleep.ts`،
+`ollamaTransform.ts`.
 
 ---
 

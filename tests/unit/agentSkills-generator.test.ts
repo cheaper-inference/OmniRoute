@@ -736,3 +736,21 @@ test("serializeFrontmatter escapes backslashes before quotes → valid round-tri
     "description with backslashes + quotes + newline must round-trip exactly"
   );
 });
+
+test("generated skills keep a formatter-stable blank line after frontmatter", async () => {
+  const directory = mkTmpDir();
+  try {
+    await generateAgentSkills({
+      dryRun: false,
+      prune: false,
+      outputDir: directory,
+      onlyIds: ["cli-health"],
+    });
+    assert.match(
+      fs.readFileSync(path.join(directory, "cli-health", "SKILL.md"), "utf8"),
+      /\n---\n\n<!-- generated/
+    );
+  } finally {
+    rmTmpDir(directory);
+  }
+});

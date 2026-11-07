@@ -217,19 +217,29 @@ test("crash after two acknowledged batches retains cursor and records failure wi
 
 test("hung destination is terminated at timeout, escalating past ignored SIGTERM", async () => {
   rows(2);
-  // 6 s leaves a loaded runner time to boot the child and reach the hang fixture before
-  // the run timeout fires; the bound below still proves the 500 ms SIGKILL escalation.
-  process.env.OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS = "6000";
   const dest = destination("hang");
-  const start = Date.now();
-  const result = await runner.runDestinationExport(dest);
-  assert.equal(result.success, false);
-  assert.match(result.error ?? "", /timed out/);
-  assert.ok(Date.now() - start < 10000);
-  assert.equal(dbDest.getLogExportDestination(dest.id)?.lastStatus, "failure");
-  assert.equal(result.cursorRowId, 0);
-  assertGone();
-  assert.equal(child?.signalCode, "SIGKILL");
+  const ready = `${output}.hang-ready`;
+  // The escalation is only observable once the child has booted far enough to ignore
+  // SIGTERM. On a heavily loaded runner, booting tsx can take longer than the run timeout;
+  // then the default handler ends the child on SIGTERM and the run proves nothing about
+  // escalation. The fixture writes `ready` right after installing its handler, so retry
+  // with a longer timeout only while that never happened.
+  for (const timeoutMs of [6000, 12000, 24000]) {
+    fs.rmSync(ready, { force: true });
+    process.env.OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS = String(timeoutMs);
+    const start = Date.now();
+    const result = await runner.runDestinationExport(dest);
+    assert.equal(result.success, false);
+    assert.match(result.error ?? "", /timed out/);
+    assert.ok(Date.now() - start < timeoutMs + 4000);
+    assert.equal(dbDest.getLogExportDestination(dest.id)?.lastStatus, "failure");
+    assert.equal(result.cursorRowId, 0);
+    assertGone();
+    if (!fs.existsSync(ready)) continue;
+    assert.equal(child?.signalCode, "SIGKILL");
+    return;
+  }
+  assert.fail("hang fixture never installed its SIGTERM handler before the run timeout");
 });
 
 test("secret travels over IPC only, not argv/env, and child gets explicit heap limit", async () => {
