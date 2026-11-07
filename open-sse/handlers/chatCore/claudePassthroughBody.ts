@@ -36,6 +36,23 @@ import { stripClaudeRejectedTopLevelFields } from "./passthroughHelpers.ts";
 
 type LoggerLike = { debug?: (...args: unknown[]) => void } | null | undefined;
 
+type ClaudePassthroughBodyInput = {
+  body: Record<string, unknown>;
+  provider: string;
+  clientHeaders: Headers | Record<string, unknown> | null | undefined;
+  isClaudeCodeSemanticPassthrough: boolean;
+  effectiveModel: string;
+  targetFormat: string;
+  preserveCacheControl: boolean;
+  connectionCacheOverride?: ConnectionCacheOverride | null;
+  normalizeClaudeUpstreamMessages: (
+    payload: Record<string, unknown>,
+    options?: { preserveToolResultBlocks?: boolean }
+  ) => void;
+  applyReasoningRuleDirective: (bodyInput: unknown, targetFormat?: "claude") => unknown;
+  log?: LoggerLike;
+};
+
 /**
  * Anthropic-native upstreams only: third-party Claude-shape providers have their own (or no)
  * caching semantics. A connection's cache override is the operator's opt-out.
@@ -63,22 +80,7 @@ export function buildClaudePassthroughBody({
   normalizeClaudeUpstreamMessages,
   applyReasoningRuleDirective,
   log,
-}: {
-  body: Record<string, unknown>;
-  provider: string;
-  clientHeaders: Headers | Record<string, unknown> | null | undefined;
-  isClaudeCodeSemanticPassthrough: boolean;
-  effectiveModel: string;
-  targetFormat: string;
-  preserveCacheControl: boolean;
-  connectionCacheOverride?: ConnectionCacheOverride | null;
-  normalizeClaudeUpstreamMessages: (
-    payload: Record<string, unknown>,
-    options?: { preserveToolResultBlocks?: boolean }
-  ) => void;
-  applyReasoningRuleDirective: (bodyInput: unknown, targetFormat?: "claude") => unknown;
-  log?: LoggerLike;
-}): Record<string, unknown> {
+}: ClaudePassthroughBodyInput): Record<string, unknown> {
   // applyReasoningRuleDirective returns unknown; the hoist helper requires a record.
   const claudePassthroughBody = applyReasoningRuleDirective({ ...body }, "claude");
   const translatedBody = hoistDeferredToolsForTarget(
