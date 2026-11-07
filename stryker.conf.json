@@ -42,7 +42,7 @@
       "tests/unit/claude-model-scoped-429-headroom-18296.test.ts",
       "tests/unit/qoder-model-scoped-throttle-real-path.test.ts",
       "tests/unit/qoder-model-scoped-throttle.test.ts",
-    "tests/unit/upstream-response-decoded-byte-cap.test.ts",
+      "tests/unit/upstream-response-decoded-byte-cap.test.ts",
       "tests/unit/vision-bridge-model-lockout-18268.test.ts",
       "tests/unit/antigravity-headers-budget.test.ts",
       "tests/unit/log-truncation-image-ref.test.ts",

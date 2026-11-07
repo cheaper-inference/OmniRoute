@@ -18,8 +18,11 @@ const {
   readResponseTextWithinCap,
   NonStreamingResponseTooLargeError,
 } = await import("../../open-sse/handlers/chatCore/nonStreamingResponseBody.ts");
-const { maybeConvertJsonBodyToSse } =
+const { convertJsonBodyWithinCap, maybeConvertJsonBodyToSse } =
   await import("../../open-sse/handlers/chatCore/jsonBodyToSse.ts");
+const { runReadinessFallback } =
+  await import("../../open-sse/handlers/chatCore/streamReadinessFallback.ts");
+const { normalizeProviderResponse } = await import("../../open-sse/services/selfHostedEntry.ts");
 const { runProviderExecutionPipeline } =
   await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
 const { parseUpstreamError } = await import("../../open-sse/utils/error.ts");
@@ -34,9 +37,9 @@ function setCapEnv(value: string | undefined) {
 // Most direct reads pass CAP. Callers that take no cap argument (JSON→SSE, the pipeline) read
 // the env var, so set it only while such a test runs. Other test files sharing this process
 // (--test-isolation=none) never see it; the "withCapEnv restores" test below checks that.
-async function withCapEnv<T>(fn: () => Promise<T>): Promise<T> {
+async function withCapEnv<T>(fn: () => Promise<T>, cap: number = CAP): Promise<T> {
   const previous = process.env[CAP_ENV];
-  process.env[CAP_ENV] = String(CAP);
+  process.env[CAP_ENV] = String(cap);
   try {
     return await fn();
   } finally {
@@ -547,13 +550,112 @@ test("withCapEnv restores the env var, also after a throw", async () => {
   }
 });
 
-test("parseUpstreamError rejects an over-cap gzip error body", async () => {
+test("parseUpstreamError stops at the cap and keeps the upstream status", async () => {
   const res = await fetch(`${base}/err-gzip-bomb`);
-  await assert.rejects(
-    withCapEnv(() => parseUpstreamError(res, "mock")),
-    isCapError
-  );
+  const parsed = await withCapEnv(() => parseUpstreamError(res, "mock"));
+  assert.equal(parsed.statusCode, 500);
+  assert.equal(parsed.message, "Provider error body exceeded response size limit");
+  assert.deepEqual(parsed.responseBody, { _rawText: parsed.message });
   await assertClosedEarly();
+});
+
+test("a self-hosted candidate with an over-cap error body stays a normalized error", async () => {
+  const res = await fetch(`${base}/err-gzip-bomb`);
+  const normalized = await withCapEnv(() => normalizeProviderResponse(res));
+  assert.equal(normalized.status, 500);
+  const body = (await normalized.json()) as { error: { message: string } };
+  assert.equal(body.error.message, "Provider error body exceeded response size limit");
+  await assertClosedEarly();
+});
+
+test("a consumed body rejects like Response.text() instead of reading as empty", async () => {
+  const used = new Response("already read");
+  await used.text();
+  await assert.rejects(readResponseTextWithinCap(used), TypeError);
+
+  const cancelled = new Response("cancelled");
+  await cancelled.body?.cancel();
+  await assert.rejects(readResponseTextWithinCap(cancelled), TypeError);
+});
+
+function jsonResponse(text: string) {
+  return new Response(text, { headers: { "content-type": "application/json" } });
+}
+
+test("an over-cap JSON body on a streaming request becomes a terminal 502 readiness failure", async () => {
+  const converted = await withCapEnv(
+    () =>
+      convertJsonBodyWithinCap(jsonResponse(JSON.stringify({ text: "x".repeat(64) })), {
+        provider: "mock",
+        model: "m",
+      }),
+    16
+  );
+  assert.equal(converted.response.status, 502);
+  assert.equal(converted.overCap?.ok, false);
+  assert.equal(converted.overCap?.response, converted.response);
+  assert.equal(converted.overCap?.code, "upstream_response_too_large");
+  assert.equal(converted.overCap?.upstreamFailure, true);
+  const body = (await converted.response.json()) as { error: { code: string; message: string } };
+  assert.equal(body.error.code, "upstream_response_too_large");
+  assert.match(body.error.message, /exceeded the 16-byte cap/);
+});
+
+test("convertJsonBodyWithinCap leaves a body under the cap and other read failures alone", async () => {
+  const text = JSON.stringify({ text: "under the cap" });
+  const converted = await convertJsonBodyWithinCap(jsonResponse(text), {
+    provider: "mock",
+    model: "m",
+  });
+  assert.equal(converted.overCap, null);
+  assert.equal(converted.response.ok, true);
+  assert.equal(await converted.response.text(), text);
+
+  const failure = new Error("read failed");
+  const failing = new ReadableStream<Uint8Array>({ pull: (c) => c.error(failure) });
+  await assert.rejects(
+    convertJsonBodyWithinCap(
+      new Response(failing, { headers: { "content-type": "application/json" } }),
+      { provider: "mock", model: "m" }
+    ),
+    (err) => err === failure
+  );
+});
+
+test("an over-cap JSON body on the readiness retry keeps the original failure", async () => {
+  const failedReadiness = {
+    ok: false as const,
+    reason: "stalled",
+    classificationReason: "stalled",
+    code: "STREAM_READINESS_TIMEOUT",
+    type: "stream_timeout",
+    response: new Response("stalled", { status: 504 }),
+  };
+  const outcome = await withCapEnv(
+    () =>
+      runReadinessFallback({
+        failedReadiness,
+        failedConnectionId: "connection",
+        failedBody: new Response("stalled body"),
+        currentModel: "m",
+        streamReadinessPolicy: { timeoutMs: 50, maxTimeoutMs: 50 },
+        provider: "mock",
+        model: "m",
+        reqLogger: { logTargetRequest() {} },
+        providerUrl: "u",
+        providerHeaders: {},
+        finalBody: { original: true },
+        translatedBody: {},
+        executeProviderRequest: async () => ({
+          response: jsonResponse(JSON.stringify({ text: "x".repeat(64) })),
+        }),
+        providerRequestCapture: { body: (body) => body },
+      }),
+    16
+  );
+  assert.equal(outcome.ok, false);
+  assert.equal(outcome.ok === false && outcome.code, "STREAM_READINESS_TIMEOUT");
+  assert.deepEqual(outcome.finalBody, { original: true });
 });
 
 test("parseUpstreamError still returns a normal-size gzip error body", async () => {

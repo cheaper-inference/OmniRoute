@@ -68,7 +68,8 @@ export async function readResponseTextWithinCap(
     void response.body?.cancel().catch(() => {});
     throw new NonStreamingResponseTooLargeError(declared, maxBytes);
   }
-  if (!response.body) return response.text();
+  // A consumed body has a closed stream that would read as empty; text() rejects it instead.
+  if (!response.body || response.bodyUsed) return response.text();
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder();

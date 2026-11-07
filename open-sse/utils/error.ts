@@ -515,10 +515,12 @@ export async function parseUpstreamError(response: Response, provider: string | 
       message = text;
     }
   } catch (err) {
-    // Cap rejections must surface: swallowing them would hide a cut-short body
-    // and let callers keep treating the truncated JSON as a normal upstream error.
-    if (err instanceof NonStreamingResponseTooLargeError) throw err;
-    message = `Upstream error: ${response.status}`;
+    // Every caller relies on this returning the upstream status, so an over-cap body
+    // is reported in the message: nothing of it is parsed, and the read closed the body.
+    message =
+      err instanceof NonStreamingResponseTooLargeError
+        ? "Provider error body exceeded response size limit"
+        : `Upstream error: ${response.status}`;
     responseBody = { _rawText: message };
   }
 
