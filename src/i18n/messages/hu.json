@@ -784,6 +784,13 @@
     "batchDetailWindow": "Ablak",
     "batchDetailCreated": "Létrehozva",
     "providerTopologyEmpty": "Még nem csatlakozott szolgáltató",
+    "topologyModels": "Modellek",
+    "topologyModelsOn": "Be",
+    "topologyModelsOnHint": "Élő vagy friss kérésekkel rendelkező modellek megjelenítése",
+    "topologyModelsAuto": "Automatikus",
+    "topologyModelsAutoHint": "Csak a folyamatban lévő kéréssel rendelkező modellek megjelenítése",
+    "topologyModelsOff": "Ki",
+    "topologyModelsOffHint": "Modellcsomópontok elrejtése",
     "badgeToastUnlocked": "Jelvény feloldva!",
     "batchListSearchPlaceholder": "Keresés azonosító, végpont, modell szerint…",
     "batchListDeleteAllCompletedTitle": "Törölje az összes befejezett köteget",
@@ -916,6 +923,8 @@
     "batchListTitle": "Kötegek",
     "batchListCount": "{count} köteg",
     "batchListRemovingCompleted": "Eltávolítás…",
+    "batchListRemoveCompletedPartial": "Nagyszámú köteg eltávolítva. Kattintson ismét a többi törléséhez.",
+    "batchListRemoveCompletedFailed": "Hiba történt a kötegek eltávolítása közben.",
     "batchListRemoveCompleted": "Befejezettek eltávolítása",
     "batchListTableStatus": "Állapot",
     "batchListTableId": "ID",
@@ -954,6 +963,12 @@
     "batchListRefreshing": "Frissítés…",
     "batchListRefresh": "Frissítés",
     "uploadFileModalRemove": "Eltávolítás",
+    "fileInputChoose": "Fájl kiválasztása",
+    "fileInputChooseMultiple": "Fájlok kiválasztása",
+    "fileInputEmpty": "Nincs kiválasztva fájl",
+    "fileInputSelectedCount": "{count, plural, one {# fájl kiválasztva} other {# fájl kiválasztva}}",
+    "fileDropLabel": "Húzzon ide egy fájlt, vagy válasszon ki egyet",
+    "fileDropLabelMultiple": "Húzzon ide fájlokat, vagy válasszon ki fájlokat",
     "uploadFileModalUploading": "Feltöltés…",
     "wizardInputReading": "Fájl beolvasása…",
     "wizardInputReady": "Kész",
@@ -1028,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Az OpenCode v2 CLI-kliens ujjlenyomatának küldése az OpenCode Zen/Go kéréseknél: az opencode/latest/<2.x>/cli User-Agent és az x-opencode-client cli, az ingyenes csomag kéréseinél pedig a v2 munkamenet-fejlécek, a v2 CLI read/shell eszközsémák, tool_choice \"none\" nélkül. Alapértelmezés szerint kikapcsolva: minden OpenCode-kérés változatlanul megtartja a jelenlegi identitást, fejléceket és törzset.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Ha egy automatikus kombináció jelöltkészlete már az eszközhívási előszűrő futtatása előtt üres (minden célpont kimarad a várakozási idők, zárolások vagy kimerülés miatt), a korábbi 400-as „No target supports tool calling” capability_mismatch helyett 503-as no_eligible_targets választ adjon. Alapértelmezés szerint ki van kapcsolva: üres jelöltkészlet esetén megmarad a korábbi 400-as válasz.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "A megbízható modellvégpont-címkék (amelyeket a szolgáltatói katalógus deklarál, egy speciális modellazonosítóból következtetünk ki, vagy az üzemeltető állít be) kikényszerítése: a /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations és /v1/audio/* útvonalakon még a továbbítás előtt HTTP 400 válasszal elutasítja az olyan végpontra küldött kéréseket, amelyet a modell nem szolgál ki; elrejti a /v1/models listából azokat a modelleket, amelyek címkézett végpontjaihoz nincs OmniRoute-adapter; és az ilyen modellek irányítópulti tesztjére 422-es választ ad. Alapértelmezés szerint ki van kapcsolva: a végpontcímkék tájékoztató jellegűek maradnak, és a kérések továbbítása pontosan úgy történik, mint korábban.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Egyszerű, Anthropic-kompatibilis átjátszók esetén a beszélgetés közbeni rendszerszerepű üzenetek maradjanak az üzenetlistában ahelyett, hogy a legfelső szintű rendszerpromptba kerülnének, így a gyorsítótárazott promptelőtag stabil marad a beszélgetési fordulók között. Ez csak akkor érvényes, ha maga a kliens küldte el a mid-conversation-system-2026-04-07 bétát. Alapértelmezés szerint ki van kapcsolva: minden rendszerszerepű üzenet pontosan úgy kerül át a rendszerpromptba, mint korábban, mert az ezt a bétát nem támogató átjátszók elutasítják az üzenetlistában szereplő rendszerszerepű üzeneteket.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Használja a models.dev által közzétett következtetési ráfordítási szinteket, ha sem operátori felülbírálás, sem a szolgáltatói nyilvántartás nem határoz meg ilyeneket; csak az ismert ráfordítási szinteket tartsa meg, az üresen deklarált szintlistát pedig kezelje úgy, mintha „nem lennének szintek”. Alapértelmezés szerint kikapcsolva: a modellkatalógus és a feloldott ráfordítási szintek pontosan a korábbiak maradnak.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Lehetővé teszi, hogy az auto/* kérések a jelöltkészletet feloldott modellképességekkel (látás, következtetés, gondolkodás) és megfigyelt minőségi pontszámokkal állítsák össze, egyetlen tömeges olvasással betöltve. Alapértelmezés szerint ki: a jelöltek súlyai a kérés idején pontosan a korábbiak maradnak. Be: ezek a jelek bekerülnek a pillanatkép súlyaiba, így a jelöltek súlyai és a kiválasztás változhat.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Engedélyezze, hogy a hitelesítő adatok állapotának ellenőrzése újratesztelje az átjáró által automatikusan kikapcsolt kapcsolatokat (kapcsolatonként legfeljebb 6 óránként egyszer, ellenőrzésenként 5-öt), és újra bekapcsolja őket, ha sikeresen teljesítik az újratesztelést. Alapértelmezés szerint ki van kapcsolva: az ilyen kapcsolatok mindaddig kikapcsolva maradnak, amíg egy operátor nem intézkedik. Az operátor által letiltott és a véglegesen kitiltott kapcsolatokat a rendszer soha nem teszteli újra.",
@@ -1932,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# kérés} other {# kérések}}, {keys, plural, one {# korlátozott kulcs} other {# korlátozott kulcsok}}",
     "unpricedUsageMore": "…és még {count} további",
     "unpricedUsageConfigure": "Árazás beállítása",
-    "unpricedUsageDismiss": "Bezárás"
+    "unpricedUsageDismiss": "Bezárás",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analitika",
@@ -3499,6 +3522,19 @@
     "autoComboTestTruncated": "Tesztelt {tested} a {total} élő jelöltből (legmagasabb súlyok először).",
     "controlCenter": "Irányítóközpont",
     "createCombo": "Combo létrehozása",
+    "exportCombos": "Exportálás",
+    "exportCombosFailed": "A combók exportálása sikertelen",
+    "importCombos": "Importálás",
+    "importCombosTitle": "Combók importálása",
+    "importCombosInvalidFile": "Ez a fájl nem érvényes combo-export.",
+    "importCombosSummary": "Combók a fájlban: {total} ({fresh} új, {conflicting} már létező névvel).",
+    "importCombosMergeHint": "Az egyesítés megtartja az összes meglévő combót, és kihagyja azokat, amelyek neve már létezik. A kapcsolatok és a hitelesítő adatok soha nem kerülnek importálásra.",
+    "importCombosReplaceHint": "Az Összes cseréje törli a meglévő combókat ({current}), és helyettük a fájlt importálja. Ez nem vonható vissza.",
+    "importCombosMerge": "Egyesítés",
+    "importCombosReplace": "Összes cseréje",
+    "importCombosDone": "Importált combók: {created}. Kihagyva: {skipped}.",
+    "importCombosFailed": "A combók importálása sikertelen",
+    "importCombosWarnings": "Importálva figyelmeztetésekkel",
     "editCombo": "Combo szerkesztése",
     "deleteCombo": "Combo törlése",
     "noModels": "Nincsenek modellek",
@@ -3606,6 +3642,8 @@
     "testStepRunning": "Tesztelés…",
     "testStepNotTestable": "Csak egyetlen modellt tartalmazó lépések tesztelhetők",
     "saving": "Mentés...",
+    "liveAccountLabel": "törvény: {id}",
+    "liveAccountTooltip": "Számla: {id}",
     "liveNoProviders": "Még nem észlelhető szolgáltató.",
     "liveFleetDataHint": "A flottaadatok élő kombó eseményeken keresztül érkeznek.",
     "liveActiveCount": "Aktív ({count})",
@@ -4108,7 +4146,8 @@
     "duplicateAutoComboSnapshotMsg": "Ez rögzíti az éppen csatlakoztatott szolgáltatókat/modelleket, amelyek megfelelnek ennek a sablonnak, egy szerkeszthető kombinációba.",
     "duplicateAutoComboFailedPrefix": "Az automatikus kombináció duplikálása sikertelen:",
     "duplicateAutoComboUnknownError": "Ismeretlen hiba",
-    "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból"
+    "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból",
+    "fallbackSummary": "{rate}% kérés vésztárhelyre váltott, átlagosan ~{skips} célpontot ugrottunk feje kérésenként"
   },
   "costs": {
     "title": "Költségek",
@@ -5293,6 +5332,10 @@
       "disableAutoScroll": "Automatikus görgetés kikapcsolása",
       "enableAutoScroll": "Automatikus görgetés bekapcsolása",
       "autoScroll": "Automatikus görgetés",
+      "pauseLogs": "A frissítések szüneteltetése",
+      "resumeLogs": "Folytassa a frissítéseket",
+      "paused": "Szüneteltetve",
+      "scanLimited": "Elérte a szkennelési korlátot",
       "entryCount": "{count, plural, one {# bejegyzés} other {# bejegyzés}}",
       "lastHour": "Elmúlt 1 óra",
       "updatedAt": "Frissítve: {time}",
@@ -5994,6 +6037,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "Csak ingyenes modellek importálása",
     "importFreeModelsOnlyHint": "Ha engedélyezve van, csak a szolgáltató ingyenes modelljei kerülnek importálásra. A fizetős modellek kihagyásra kerülnek.",
+    "importFreeModelsOnlyCompatibleHint": "Ha be van kapcsolva, csak azok a modellek kerülnek importálásra, amelyeket ennek a végpontnak a /models listája ingyenesként jelöl (:free azonosító, ingyenes jelző vagy nulla ár). A fizetős modellek és az árazási adatok nélküli modellek kimaradnak.",
     "perModelQuotaToggle": "Modellenkénti kvóta kapcsoló",
     "modelId": "Modellazonosító",
     "customModelPlaceholder": "pl. gpt-4.5-turbo",
@@ -6052,6 +6096,53 @@
     "applyClaudeAuthLocal": "Hitelesítés alkalmazása",
     "exportClaudeAuthFile": "Hitelesítés exportálása",
     "importClaudeAuth": "Hitelesítés importálása",
+    "importAgyAuth": "Hitelesítés importálása",
+    "agyImportTitle": "Csatlakoztassa Antigravity (Google Cloud Code)",
+    "agyImportTabLocal": "1-Kattintson a Helyi CLI",
+    "agyImportTabSingle": "Fájl / Paste Token",
+    "agyImportTabBulk": "Tömeges importálás",
+    "agyImportLocalHeading": "Az aktív munkamenet automatikus felismerése",
+    "agyImportLocalIntro": "Aktív Google Cloud Code / Antigravity CLI bejelentkezést észlel innen:",
+    "agyImportLocalSourceEnv": "A AGY_TOKEN_FILE környezeti változó által elnevezett tokenfájl",
+    "agyImportLocalSourceKeyring": "Linux Secret Service / kulcstartó (service=gemini, user=antigravity)",
+    "agyImportLocalSourceCli": "Helyi CLI token profilok (~/.gemini/antigravity-cli/)",
+    "agyImportLocalNote": "Nincs szükség böngészőbe való bejelentkezésre, felugró ablakra vagy kézi OAuth kódmásolásra. A token akkor is OmniRoute ben marad, ha kijelentkezik a CLI ből.",
+    "agyImportLocalOverwrite": "Cserélje / frissítse a meglévő kapcsolatot, ha már importálva van",
+    "agyImportLocalSubmit": "Import a helyi Antigravity",
+    "agyImportLocalNotFound": "Nem észlelhető helyi Antigravity CLI bejelentkezés.",
+    "agyImportLocalCreated": "Antigravity fiók csatlakoztatva a helyi munkamenetből.",
+    "agyImportLocalRefreshed": "Helyi Antigravity kapcsolat frissítve.",
+    "agyImportLocalFailed": "Nem sikerült csatlakozni a helyi Antigravity munkamenethez",
+    "agyImportInvalidToken": "Érvénytelen token formátum (hiányzik access_token vagy refresh_token)",
+    "agyImportParseFileFailed": "A fájl nem elemezhető JSON ként",
+    "agyImportParsePasteFailed": "A beillesztett tartalmat nem sikerült JSON ként értelmezni",
+    "agyImportDuplicate": "A fiók már létezik. Jelölje be a \"Létező cseréje\" lehetőséget a felülíráshoz.",
+    "agyImportFailed": "Nem sikerült importálni Antigravity hitelesítő adatokat",
+    "agyImportSuccess": "Antigravity fiók importálva.",
+    "agyImportInvalidJson": "Érvénytelen JSON",
+    "agyImportAccountN": "Számlaszám:{index}",
+    "agyImportNoValidEntries": "Nincsenek érvényes importálandó bejegyzések",
+    "agyImportBulkFailed": "A tömeges importálás nem sikerült",
+    "agyImportBulkSuccess": "Importált Antigravity fiókok: {count}",
+    "agyImportBulkRunFailed": "Nem sikerült futtatni a tömeges importálást",
+    "agyImportUploadFile": "Fájl feltöltése",
+    "agyImportPasteJson": "JSON beillesztése",
+    "agyImportFileHint": "Válassza ki a antigravity-oauth-token fájlt vagy egy exportált token JSON fájlt",
+    "agyImportValidToken": "Érvényes token észlelve:",
+    "agyImportConnectionName": "Kapcsolat neve (nem kötelező)",
+    "agyImportConnectionNamePlaceholder": "pl. munkahelyi fiók",
+    "agyImportEmailLabel": "E-mail (opcionális felülírás)",
+    "agyImportReplaceSingle": "Cserélje ki a meglévő kapcsolatot, ha az e-mail már létezik",
+    "agyImportSubmitSingle": "Fiók importálása",
+    "agyImportUploadFiles": "Fájlok feltöltése",
+    "agyImportPasteJsonArray": "JSON tömb beillesztése",
+    "agyImportBulkFileHint": "Válasszon ki egy vagy több JSON token fájlt",
+    "agyImportStaged": "Fájlok színpadra: {count}",
+    "agyImportValid": "Érvényes",
+    "agyImportResults": "Eredmények importálása:",
+    "agyImportResultsSummary": "Sikerült: {success} · Sikertelen: {failed} · Összesen: {total}",
+    "agyImportReplaceBulk": "Cserélje le a meglévő kapcsolatokat az e-mail egyezésnél",
+    "agyImportSubmitBulk": "Az összes importálása",
     "claudeApplyModalTitle": "Jelentkezzen a Local Claude Code-ra",
     "claudeApplyTargetLabel": "Cél útvonal",
     "claudeApplyBackupLabel": "Biztonsági mentések",
@@ -6189,6 +6280,10 @@
     "hideEmails": "Összes e-mail-cím elrejtése",
     "a": "A",
     "accountConcurrencyCapHint": "Account Concurrency Cap Hint",
+    "aiCreditsLimit": "AI Credits-korlát számlázási időszakonként",
+    "aiCreditsLimitPlaceholder": "Nincs helyi korlát",
+    "aiCreditsLimitHint": "Kihagyja ezt a kapcsolatot, amikor a GitHub által jelentett AI Credits eléri ezt az értéket, így az útválasztás a többi kapcsolatára vált. Üresen kikapcsolja; a 0 mindig kihagyja. A hiányzó vagy elavult használati adat soha nem blokkol — ez nem garantált költési plafon.",
+    "aiCreditsLimitInvalid": "Az AI Credits-korlát nem negatív szám legyen, vagy üres a kikapcsoláshoz.",
     "accountConcurrencyCapLabel": "Account Concurrency Cap Label",
     "accountIdHint": "Account Id Hint",
     "accountIdLabel": "Account Id Label",
@@ -6231,8 +6326,21 @@
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "quotaRefreshCurrent": "Aktuális kvóta frissítése",
+    "quotaRefreshCurrentHint": "Lekéri a fiók aktuális kvótáját a visszaállítási kreditek felhasználása nélkül.",
+    "quotaRefreshing": "Kvóta ellenőrzése…",
+    "quotaRefreshFresh": "A kvóta ellenőrizve. A fiók elérhetőségét a szerver határozza meg.",
+    "quotaRefreshFailed": "A kvóta ellenőrzése sikertelen. A korábbi adatok nem változtak.",
+    "quotaRefreshStale": "A szerver régi kvótaadatokat adott vissza. Ez nem új megfigyelés.",
+    "quotaRefreshPartial": "A kvótaadatoknak csak egy része érhető el.",
+    "quotaWindowUnavailable": "A(z) {window} kvótája nem érhető el",
+    "quotaConnectionRefreshFailed": "A kvóta ellenőrzése befejeződött, de a fióklistát nem sikerült frissíteni.",
     "disableCoolingDescription": "Az átmeneti várakozási idő kihagyása, hogy ez a kapcsolat helyreállítható hibák után is használható maradjon (a végleges állapotok, például a letiltás vagy lejárat továbbra is érvényesek).",
     "disableCoolingLabel": "Lehűlési idő (cooldown) letiltása ehhez a kapcsolathoz",
+    "keepMidConversationSystemDescription": "A beszélgetés közben elküldött rendszerüzeneteket hagyja az üzenetlistán belül ahelyett, hogy a legfelső szintű rendszerpromptba helyezné át őket, így a gyorsítótár folyamatosan üti egymást. Csak akkor engedélyezze, ha ez az upstream elfogadja a \"rendszer\" szerepkört az üzenetekben (egyébként 400-at válaszol).",
+    "keepMidConversationSystemLabel": "Tartsa a helyén a beszélgetés közbeni rendszerüzeneteket",
+    "requireUserLastMessageDescription": "Az asszisztens-előtöltést elutasító upstreameknél: küldés előtt engedje el az asszisztens-fordulatokat (no tool_use). A modell visszaállíthatja korábbi válaszát.",
+    "requireUserLastMessageLabel": "A beszélgetés felhasználói üzenettel történő befejezéséhez szükséges",
     "bulkPasteAdded": "{count, plural, one {1 kulcs hozzáadva} other {# kulcs hozzáadva}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ismétlődő kulcs kihagyva} other {# ismétlődő kulcs kihagyva}}",
     "bulkPasteHint": "Illessz be soronként egy API-kulcsot. Az üres sorokat figyelmen kívül hagyjuk, az ismétlődő kulcsokat pedig kihagyjuk.",
@@ -6269,6 +6377,8 @@
     "newApiUserIdLabel": "New-API felhasználói azonosító",
     "newApiUserIdPlaceholder": "pl. 12345",
     "newApiUserIdHint": "Az AgentRouter New-Api-User fejlécértéke, amelyet a konzol API-kulcsával együtt használunk a kvótaegyenleg lekéréséhez.",
+    "tokenrouterManagementKeyLabel": "Kezelési kulcs (opcionális)",
+    "tokenrouterManagementKeyHint": "Fiókkulcs a TokenRouter irányítópultjáról (Settings → Management Key). Csak a kvóta és az egyenleg lekérdezésére szolgál, kérésekhez soha. A mentett kulcs nem jelenik meg; hagyja üresen a megtartásához.",
     "newApiAggregatorToggleLabel": "Aggregátor Kapu",
     "newApiAggregatorToggleHint": "Engedélyezze a egyenleg-érzékelést az Új-API / Egy-API / Sub2API aggregátor csomópontokhoz. A műszerfal megjeleníti az egyenleg jelvényt, és a kvóta-előzetes irányítás kihagyja a kimerült fiókokat.",
     "newApiAggregatorConsoleApiKeyHint": "Rendszerhozzáférési Token az aggregátor /api/user/self végpontjához. Nem a routing API kulcs.",
@@ -6282,6 +6392,8 @@
     "customUserAgentLabel": "Egyéni User-Agent címkéje",
     "huggingfaceBillToHint": "Nem kötelező. A Hugging Face számlázási fiók azonosítója, amelyet a költségek hozzárendeléséhez X-HF-Bill-To fejlécként küldünk el.",
     "huggingfaceBillToLabel": "Hugging Face Bill-To-fiók",
+    "commandCodeZdrLabel": "Nulla adatmegőrzés (ZDR) megkövetelése",
+    "commandCodeZdrHint": "Minden, ezzel az API-kulccsal küldött kéréssel x-cmd-zdr: 1 fejlécet küld. A ZDR-képes upstream nélküli modellek elérhetetlenek lehetnek.",
     "databricksBaseUrlHint": "Databricks alap-URL súgója",
     "defaultThinkingStrengthHint": "Akkor használatos, ha a kérelem nem határozza meg az érvelés intenzitását.",
     "defaultThinkingStrengthLabel": "Alapértelmezett gondolkodási intenzitás",
@@ -6328,6 +6440,9 @@
     "localProviders": "Helyi szolgáltatók",
     "maxConcurrentWholeNumberError": "Az egyidejű műveletek maximális számának egész számnak kell lennie",
     "m365TierLabel": "Copilot szint",
+    "m365RefreshTokenLabel": "Token frissítése (opcionális)",
+    "m365RefreshTokenHint": "A Microsoft 365 hozzáférési token automatikus frissítésére szolgál.",
+    "m365RefreshTokenEditHint": "Hagyja üresen a meglévő token megtartásához. Illesszen be egy új tokent a helyére.",
     "m365TierHint": "Válassza ki, melyik Microsoft 365 Copilot felületet használja ez a kapcsolat. Az Individual az alapértelmezett fogyasztói BizChat; az Education és az Enterprise (munkahelyi) a saját bérlői (tenant) felületeiket választják.",
     "m365TierIndividualOption": "Individual (alapértelmezett)",
     "m365TierEduOption": "Oktatás",
@@ -6874,6 +6989,11 @@
     "anonymousFallbackEnabled": "Névtelen visszaesés engedélyezve a(z) {provider} számára",
     "anonymousFallbackDisabled": "Névtelen visszaesés letiltva a(z) {provider} esetében — a kimerült kapcsolatok átugorják ezt a szolgáltatót",
     "anonymousFallbackUpdateFailed": "Nem sikerült frissíteni az anonim visszaállítási beállítást",
+    "retryDelayTitle": "Újrapróbálkozási késleltetés",
+    "retryDelayDesc": "Mennyi ideig pihen egy kapcsolat sebességkorlát-hiba után, ha a szolgáltató nem adja meg, mikor lehet újra próbálkozni. Az automatikus mód a beépített visszalépést használja; a szolgáltató által küldött visszaállítási idő mindig elsőbbséget élvez.",
+    "retryDelayAuto": "Automatikus",
+    "retryDelaySaved": "Újrapróbálkozási késleltetés mentve",
+    "retryDelayUpdateFailed": "Nem sikerült frissíteni az újrapróbálkozási késleltetést",
     "batchDeleteFailed": "Tömeges törlés sikertelen",
     "batchDeleteNetworkError": "Hálózati hiba a tömeges törlés során",
     "batchUpdateFailed": "A kötegelt frissítés sikertelen",
@@ -7057,6 +7177,7 @@
     "proxySubTabsAria": "Proxyszakaszok",
     "requestBodyLimitTitle": "Kéréstörzs méretkorlátja",
     "requestBodyLimitDescription": "Az API-kérések kéréstörzsének a feldolgozás előtt elfogadott maximális mérete. A dedikált feltöltési útvonalak megtartják legalább a beépített 100 MB-os korlátjukat.",
+    "requestBodyLimitChatHint": "A Chat Completions és a Responses legfeljebb 50 MB-ot fogad el, amíg itt nem mentesz egy korlátot. A mentett korlát rájuk is érvényes, akár alacsonyabb, akár magasabb.",
     "requestBodyLimitInputLabel": "Kéréstörzs méretkorlátja MB-ban",
     "requestBodyLimitEmptyError": "Adjon meg egy korlátot MB-ban",
     "requestBodyLimitWholeNumberError": "Használjon egész számot",
@@ -7207,6 +7328,8 @@
     "enableThinking": "Gondolkodás engedélyezése",
     "maxThinkingTokens": "Max gondolkodási jelzők",
     "enableProxy": "Proxy engedélyezése",
+    "defaultNewConnectionProxyEnabled": "Proxy alapértelmezett engedélyezése az új kapcsolatokhoz",
+    "defaultNewConnectionProxyEnabledDesc": "Beállítja az új szolgáltatói fiókok kezdeti proxyállapotát, ha nincs kifejezetten más választás. A meglévő kapcsolatok nem változnak. Az útválasztás továbbra is a globális beállításoktól és a proxy konfigurációjától függ. Minden fiók később módosítható.",
     "perKeyProxyEnabled": "Kulcsonkénti proxy-hozzárendelés engedélyezése",
     "perKeyProxyEnabledDesc": "Ha engedélyezve van, minden szolgáltatói kapcsolat saját proxy-hozzárendelést használhat",
     "proxyUrl": "Proxy URL-címe",
@@ -7242,6 +7365,13 @@
     "themeLight": "Fény",
     "themeDark": "Sötét",
     "themeSystem": "Rendszer",
+    "paletteTitle": "Színpaletta",
+    "paletteDesc": "Az Editions az alapértelmezett megjelenés. A Classic visszahozza a korábbi limezöld kiemelőszínt.",
+    "paletteSelectionAria": "Színpaletta kiválasztása",
+    "paletteEditions": "Editions",
+    "paletteEditionsDesc": "Meleg, semleges színek rézszínű kiemeléssel",
+    "paletteClassic": "Classic",
+    "paletteClassicDesc": "Hűvös, semleges színek limezöld kiemeléssel",
     "endpointTunnelVisibility": "Végpont alagút láthatósága",
     "endpointTunnelVisibilityDesc": "Az alagútvezérlők elrejtése a Végpont oldalon az alagút állapotának megváltoztatása nélkül.",
     "showCloudflareTunnel": "Cloudflare gyorsalagút",
@@ -9067,6 +9197,17 @@
     "resilienceTokenRefreshScopeConnection": "Kapcsolat (minden fióknak saját megszakítója van)",
     "resilienceTokenRefreshThreshold": "Sikertelen próbálkozások a szüneteltetés előtt",
     "resilienceTokenRefreshCooldown": "Szünet a kioldás után",
+    "mfaTitle": "Kétlépcsős azonosítás",
+    "mfaDesc": "A jelszó mellett egy hitelesítő alkalmazás kódjának megkövetelése az irányítópultra való bejelentkezéshez vagy a CLI csatlakoztatásához.",
+    "mfaScanQr": "Olvassa be ezt a QR-kódot a hitelesítő alkalmazással (vagy adja meg kézzel a beállítási kulcsot), majd írja be a megjelenő 6 jegyű kódot.",
+    "mfaManualKey": "Beállítási kulcs",
+    "mfaCodeLabel": "Ellenőrző kód",
+    "mfaBackupCodesTitle": "Mentse el a helyreállító kódjait",
+    "mfaBackupCodesDesc": "Mindegyik kód egyszer jelentkezteti be, ha elveszíti a hozzáférést a hitelesítőhöz. Többé nem jelennek meg.",
+    "mfaBackupCodesRemaining": "Hátralévő helyreállító kódok: {count}",
+    "mfaDisableDesc": "A kétlépcsős azonosítás kikapcsolásához adja meg a jelszavát és egy aktuális kódot (vagy egy helyreállító kódot).",
+    "mfaRecoveryHint": "Elveszett eszköz helyreállítása: indítsa a szervert OMNIROUTE_DISABLE_MFA=true beállítással, és jelentkezzen be magáról a gazdagépről.",
+    "mfaRecoverySwitchActive": "Az OMNIROUTE_DISABLE_MFA be van állítva: az erről a gazdagépről történő bejelentkezések kihagyják a második lépést. Törölje, miután újra hozzáfér.",
     "piiMasking": {
       "title": "Személyes adatok maszkolása",
       "description": "Válassza ki, mely személyesadat-típusokat maszkolja a rendszer, és adjon hozzá saját mintákat. A maszkolás kikapcsolva marad, amíg be nem kapcsolja az alább látható funkciójelzőket.",
@@ -9125,7 +9266,12 @@
       "statsTitle": "Észlelések az újraindítás óta",
       "statsEmpty": "Még nincs észlelés.",
       "statsRequest": "Kérések"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "Származtatott videóképkockák megőrzése",
+    "modalityBridgeVideoDrilldownEnabledDesc": "Az ideiglenes JPEG-megőrzés csak akkor engedélyezett, ha a hitelesített kérés a drilldown: true értéket is beállítja. A nyers videókat soha nem őrizzük meg.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "Hitelesített képkocka-részletezés engedélyezése",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Az API-kulcsok csak a saját átlátszatlan azonosítóikat olvashatják és törölhetik. Névtelen vagy kulcsok közötti hozzáférés nem engedélyezett.",
+    "modalityBridgeVideoDrilldownUsage": "Megőrzött JPEG-ek / bájtok"
   },
   "contextRtk": {
     "title": "RTK-motor",
@@ -10238,6 +10384,7 @@
     "purchaseOauthFree": "Ingyenes OAuth",
     "purchaseApiKey": "API-kulcs",
     "creditsLabel": "Kreditek",
+    "aiCreditsUsed": "{count} AI Credits felhasználva",
     "creditBalanceHint": "Fennmaradó egyenleg",
     "unlimitedLabel": "Korlátlan",
     "refreshing": "Frissítés folyamatban",
@@ -10751,7 +10898,11 @@
     "deleteAndRelaunch": "Törlés",
     "settingsJson": "settings.json",
     "fromDataDir": "az adatkönyvtárból",
-    "relaunchApp": "Indítsa újra az OmniRoute asztali alkalmazást"
+    "relaunchApp": "Indítsa újra az OmniRoute asztali alkalmazást",
+    "mfaPrompt": "Adja meg a hitelesítő alkalmazásban látható kódot",
+    "mfaCodeLabel": "Ellenőrző kód",
+    "mfaCodePlaceholder": "6 jegyű kód vagy helyreállító kód",
+    "mfaBackupCodeHint": "Elvesztette az eszközét? Adja meg inkább az egyik helyreállító kódját."
   },
   "landing": {
     "brandName": "OmniRoute",
@@ -12219,7 +12370,9 @@
       "failedTitle": "Az összes {count} kísérlet meghiúsult",
       "failed": "sikertelen",
       "pinnedTitle": "Modell kiválasztva a kontextus-cache munkamenet rögzítésével",
-      "pinned": "rögzített"
+      "pinned": "rögzített",
+      "recoveredAttemptsTitle": "A kérés {count} próbálkozás után helyreállt",
+      "latestOutcomeFailed": "A legutóbbi kérés eredménye sikertelen"
     },
     "attempts": "kísérletek",
     "detail": {
@@ -12321,13 +12474,20 @@
       "continuesFromParent": "a szülő folytatása",
       "continuesFrom": "{id} folytatása",
       "viewConversation": "beszélgetés megtekintése",
-      "openConversation": "A(z) {id} beszélgetés megnyitása"
+      "openConversation": "A(z) {id} beszélgetés megnyitása",
+      "omittedHttpAttempts": "{count} HTTP-küldés nincs megőrizve",
+      "noHttpResponse": "Nem észlelt HTTP-választ",
+      "transportError": "Átviteli hiba"
     },
     "tableLabel": "Kérésnaplók",
     "throughputPostFirstToken": "Első token utáni",
     "throughputEndToEnd": "Végponttól végpontig",
     "throughputRate": "{value} token/mp",
-    "throughputExplanation": "Mindkét arány a kimeneti és a reasoning tokenszám közül a nagyobbat használja. Az első token utáni érték kizárja az érvényes TTFT-t; egyébként a teljes időtartamot használja. A végponttól végpontig érték mindig a teljes időtartamot használja. Egy puffereit válasz nagy burst átviteli sebességgel is rendelkezhet anélkül, hogy a modell gyorsabban generálna."
+    "throughputExplanation": "Mindkét arány a kimeneti és a reasoning tokenszám közül a nagyobbat használja. Az első token utáni érték kizárja az érvényes TTFT-t; egyébként a teljes időtartamot használja. A végponttól végpontig érték mindig a teljes időtartamot használja. Egy puffereit válasz nagy burst átviteli sebességgel is rendelkezhet anélkül, hogy a modell gyorsabban generálna.",
+    "omittedHttpAttempts": "{count} HTTP-küldés nincs megőrizve",
+    "upstreamStatus": "Felsőbb kiszolgáló {status}",
+    "noHttpResponse": "Nem észlelt HTTP-választ",
+    "transportError": "Átviteli hiba"
   },
   "proxyLogger": {
     "filterAll": "Összes",
@@ -14094,6 +14254,14 @@
         "label": "Megosztott egress pool-sorrend",
         "description": "Azon szolgáltatók esetén, amelyeknél a kvóta egress-címek szerint van csoportosítva, a nemrég elutasított tag megfigyelt egress-címén osztozó pool-tagot közvetlenül az egészséges tagok mögé rangsorolja. Csak sorrendezés, soha nem kizárás. A PROXY_SKIP_RECENTLY_FAILED beállítást igényli, amely létrehozza az általa beolvasott elutasítási jelet. Alapértelmezés szerint kikapcsolva: a kiválasztási sorrend pontosan megegyezik a sima rotációval."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Modell-hatókörű kvóta-elutasítások",
+        "description": "A opencode 429-es kvótáját csak arra a modellre alkalmazza, amelyik eltalálta, hogy ugyanaz a kimenet továbbra is kiszolgáljon más modelleket, és csak akkor törölje, ha az adott modell sikeres lesz. Azok a fogyasztók, akiknek nincs modellje (medence forgatás, parkolás és visszajátszás, adminisztrátori láthatóság, választó trigger, állapotsöprés), továbbra is látják. Szüksége van PROXY_SKIP_RECENTLY_FAILED, amely az elutasítást eredményezi. Alapértelmezés szerint ki: egy modell 429-es kvótája minden modellnél félreteszi a kilépést."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy lekérés: szigorú POST visszajátszás",
+        "description": "Nem idempotens kérés esetén (POST, PUT, PATCH, DELETE) csak akkor küldjön újra egy szállítási hiba (friss socket, proxy backback, native backback) után, ha a hiba azt bizonyítja, hogy semmit sem küldtek: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH vagy csatlakozási időtúllépés. Az írás utáni socket hiba azt jelentheti, hogy az upstream elfogadta a kérést, így az újraküldés kétszer generálhat és számlázhat. Alapértelmezés szerint kikapcsolva: egy újrajátszható törzset a rendszer egyszer újraküld minden szállítási hiba esetén, ami az elavult poolsocketet is helyreállítja."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotációs hozzárendelés naplózása",
         "description": "Az opencode rotáció rögzíti, hogy melyik fiók szolgált ki kérést vagy lett kihagyva (csak maszkolt azonosítók, soha nem teljes fiókazonosítók), és összekapcsolja a proxynapló-bejegyzéseket a kérésükkel, így az üzemeltető meg tudja különböztetni a kihagyott fiókokat a nem használtaktól. Alapértelmezés szerint kikapcsolva: nem íródnak extra naplósorok és extra oszlopok."
@@ -14145,6 +14313,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 pool újraválasztás",
         "description": "Az OpenCode többfiókos rotációjánál, ha egy ambient pool kontextusban futó, proxy nélküli fiókon egy egress-bucketed szolgáltatótól 429-es hiba érkezik, kérjen egy másik tagot a kapcsolatkészletből (connection pool) a következő kísérlethez ahelyett, hogy ugyanazzal az egress címmel próbálkozna újra. Sorrendbe állít, sosem zár ki: a kimerült pool megőrzi a jelenlegi viselkedést. Alapértelmezés szerint kikapcsolva: minden 429 a következő fiókra rotál, pontosan úgy, mint korábban."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "A OpenCode végrehajtó esetében, ha a proxy kérésére 403 vagy 451 FreeTierError válaszol, és a megfigyelt eszközök újrapróbálkozása sikertelen vagy nem érvényesült, küldje el a kérést egyszer egy másik proxyn keresztül (egy másik fiókproxy vagy egy másik készlettag, soha nem közvetlen kapcsolat). Csak akkor, ha a szonda 200-at válaszol, akkor az első kilépést félretesszük a proxy elutasítási memóriájában, és a szonda válaszát kiszolgáljuk; amikor mindketten megtagadják, az eredeti elutasítást visszaküldik, és semmit nem rögzítenek. Ugyanaz az elutasító szöveg egy megjelölt kilépési IP és egy elutasított kérés alakzatot takar, így a szonda bizonyítékokkal különbözteti meg őket. Alapértelmezés szerint kikapcsolva: az elutasítás változatlan formában kerül visszaküldésre."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 kliens-ujjlenyomat",
@@ -14325,6 +14497,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Leállítás tartalom-irányelvi elutasításkor",
         "description": "Ha egy combo-célpont pontos tartalom-irányelvi elutasítással válaszol (cyber_policy / content_policy_violation kód vagy típus), állítsa le a combót, és küldje vissza ezt az elutasítást még akkor is, ha a fennmaradó célpontok más modellek, ahelyett, hogy továbblépne a következő célpontra. Alapértelmezés szerint kikapcsolva: az elutasítás soha nem helyezi nyugalmi állapotba a fiókot, nem oldja ki a provider breakert, és a combo pontosan úgy halad tovább a következő célpontra, mint korábban."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Válaszok: csak a szállítás során maradjon életben",
+        "description": "A válaszok elküldése üres sorként a response.in_progress esemény helyett, így a szintetikus pillanatkép soha nem helyettesítheti a valódi választ a hivatalos SDK ben. Az üres sor nem küld SSE eseményt, így a csak eseményekre visszaállító kliensfigyelő nem indul vissza egy hosszú néma fázis alatt. Alapértelmezés szerint kikapcsolva: az időzítők elküldik a spec-valid response.in_progress eseményt."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown újrapróbálkozás: 403/410 elutasítások kihagyása",
@@ -14333,270 +14509,6 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Árazatlan használati költségpolitika",
         "description": "Hogyan kezelik a kulcsonkénti napi/hetentei USD-korlátok a sikeres használatot, amelynél a szolgáltatónál vagy a modellnél nincs árazási bejegyzés. fail_closed (alapértelmezett) a periódust túllépettnek jelöli, így egy ismeretlen költség soha nem kerülhet át a kemény plafonon. count_as_zero ezt a használatot $0-ként számolja, és továbbra is érvényesíti a beárazott költést. Az árazatlan modelleket mindenesetre listázza a műszerfal kezdőlapja."
-      },
-      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
-        "label": "Fiókonkódok naplózása",
-        "description": "Az AUTH-naplósorokba kerüljön be az előtagú fiókonkód (pl. \"'<provider>' fiók használata: abc12345...'). Alaphelyzetben kikapcsolva van, így a megosztott/több bérlős folyamatnaplóból a fiókonkódok elrejtett maradnak. Független a Hibakeresési módtól; a Hibakeresési mód bekapcsolása nem jeleníti meg ezt az opciót."
-      },
-      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
-        "label": "Jelszavas bejelentkezés letiltása OIDC esetén",
-        "description": "Ha az OIDC engedélyezve van, letiltja a jelszavas bejelentkezést, így a felhasználók csak OIDC Single Sign-On használatával azonosíthatják magukat. Ha le van tiltva (alapértelmezett), a jelszavas bejelentkezés és az OIDC egyaránt elérhető."
-      },
-      "AUDIO_REMOTE_PROVIDER_NODES": {
-        "label": "Távoli audio szolgáltatói csomópontok",
-        "description": "Engedélyezi a /v1/audio/* útvonalak számára a localhoston kívül üzemeltetett, OpenAI-kompatibilis szolgáltatói csomópontok használatát. Alapértelmezés szerint ki van kapcsolva — az audió távoli gazdagépre irányítása megváltoztatja a kimenő identitást (egress identity), és kifejezett operátori döntést igényel. A loopback csomópontok mindig engedélyezettek, és ezeket nem érinti."
-      },
-      "RERANK_REMOTE_PROVIDER_NODES": {
-        "label": "Távoli Rerank szolgáltatói csomópontok",
-        "description": "Engedélyezi a POST /v1/rerank kérés (valamint a memóriamotor rerank lépése, amely ezt loopbacken keresztül hívja meg) számára a localhoston kívül üzemeltetett, OpenAI-kompatibilis szolgáltatói csomópontok használatát — például egy TEI-t, Infinityt, vLLM-et stb. futtató helyi hálózati gépet vagy Tailscale peert. Alapértelmezés szerint ki van kapcsolva — a távoli gazdagépre irányítás megváltoztatja a kimenő identitást (egress identity), és kifejezett operátori döntést igényel. A loopback csomópontok mindig engedélyezettek, és ezeket nem érinti. A távoli csomópontoknak a szolgáltató kimenő URL-irányelvének (provider outbound URL policy) is meg kell felelniük."
-      },
-      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
-        "label": "Hálózati rotáció megosztott egress védelme",
-        "description": "Hálózati kivétel (időtúllépés, kapcsolat elutasítva/bontva) esetén több fiókos rotáció-végrehajtónál, ha a hibázó fiókhoz nem tartozik dedikált proxy, egy rövid türelmi időt (cooldown) alkalmaz, és kihagyja a többi proxy nélküli fiókot a kérés hátralévő részében ahelyett, hogy mindegyikkel újrapróbálkozna. Alapértelmezés szerint be van kapcsolva (biztonságos: nincs egress IP változás, kizárólag a késleltetés/cooldown kockázatát csökkenti a megosztott egress fiókoknál). Kapcsolja ki, ha vissza szeretné állítani az azonnali továbbadást az első proxy nélküli hibánál."
-      },
-      "PROXY_SKIP_RECENTLY_FAILED": {
-        "label": "Nemrég meghiúsult proxyk kihagyása",
-        "description": "A proxypoolok és az opencode fiókonkénti rotációja leállítja az éppen meghiúsult proxyk újbóli kiszolgálását (elutasított TCP-próba vagy rajta keresztül kapott 429-es hiba) egy folyamatonkénti időtartamra, amely minden ismétléskor megduplázódik egy felső korlátig. Proxyállapot nem kerül mentésre; minden jelölt félretételével a választás változatlan marad. Alapértelmezés szerint bekapcsolva: a kiválasztási sorrend csak a PROXY_SKIP_RECENTLY_FAILED=false beállítással egyezik meg pontosan a sima rotációval."
-      },
-      "PROXY_POOL_SHARED_EGRESS_ORDER": {
-        "label": "Megosztott egress pool-sorrend",
-        "description": "Azon szolgáltatók esetén, amelyeknél a kvóta egress-címek szerint van csoportosítva, a nemrég elutasított tag megfigyelt egress-címén osztozó pool-tagot közvetlenül az egészséges tagok mögé rangsorolja. Csak sorrendezés, soha nem kizárás. A PROXY_SKIP_RECENTLY_FAILED beállítást igényli, amely létrehozza az általa beolvasott elutasítási jelet. Alapértelmezés szerint kikapcsolva: a kiválasztási sorrend pontosan megegyezik a sima rotációval."
-      },
-      "ROTATION_ATTRIBUTION": {
-        "label": "Rotációs hozzárendelés naplózása",
-        "description": "Az opencode rotáció rögzíti, hogy melyik fiók szolgált ki kérést vagy lett kihagyva (csak maszkolt azonosítók, soha nem teljes fiókazonosítók), és összekapcsolja a proxynapló-bejegyzéseket a kérésükkel, így az üzemeltető meg tudja különböztetni a kihagyott fiókokat a nem használtaktól. Alapértelmezés szerint kikapcsolva: nem íródnak extra naplósorok és extra oszlopok."
-      },
-      "PROXY_POOL_EGRESS_OBSERVATION": {
-        "label": "Proxy pool egress-megfigyelés",
-        "description": "Megjeleníti az irányítópulton a proxypool alatt, hogy hány megfigyelt egress IP szolgálta ki a tagjait az elmúlt 24 órában, hány kapcsolat használta őket, és mennyi volt a legtöbb egyetlen IP mögött. Csak olvasható, a proxynaplóból számított adat, útválasztásra soha nem használt. Alapértelmezés szerint kikapcsolva: a poolszerkesztő változatlan marad, és a megfigyelési route null értékkel válaszol."
-      },
-      "PROXY_OPERATOR_EGRESS_ENABLED": {
-        "label": "Proxyüzemeltetői egress",
-        "description": "Fogadja az üzemeltető által beküldött, dátumozott megfigyelt címeket pool-tagonként, és egyesíti őket a naplóbeolvasással a megjelenítéshez és a pool-sorrendhez. Alapértelmezés szerint kikapcsolva: a push route 404-es választ ad, a pool-olvasások pedig pontosan úgy működnek, mint korábban."
-      },
-      "OPENCODE_RESPONSES_STALL_ROTATION": {
-        "label": "OpenCode Responses elakadási rotáció",
-        "description": "Az OpenCode végrehajtó esetében figyeli a streamelt Responses válasz törzsének első bájtját (időablak: RESPONSES_FIRST_BYTE_TIMEOUT_MS, alapértelmezett: 15000). A 2xx Responses stream, amely az időablakon túl is néma marad, elakadtként lesz kezelve: a fiók pihentetési (cooldown) állapotba kerül, a kérés pedig egyszer átvált a következő fiókra; a második elakadás azonnal hibát jelez (fail fast). Alapértelmezés szerint kikapcsolva: az elakadt streamek a stream készenléti időkorlátjáig fenntartják a jelenlegi várakozást."
-      },
-      "OPENCODE_USER_BLOCKED_ROTATION": {
-        "label": "OpenCode user_blocked rotáció",
-        "description": "Az OpenCode végrehajtó esetében, ha egy upstream user_blocked elutasítást tartalmazó 403-as vagy 451-es választ ad (nem földrajzi tiltás, nem Cloudflare ujjlenyomat-elutasítás), helyezze az elutasított fiókot pihentetésre (cooldown), és kérésenként legfeljebb egyszer váltson át a következő fiókra; a második elutasítás változatlanul, sikeres jelölés nélkül kerül visszaadásra. Alapértelmezés szerint kikapcsolva: az upstream felhasználói tiltásának megkerülése kijátszásnak tűnhet, és elterjesztheti a jelölést a fiókflottán, így az elutasítás változatlanul kerül visszaadásra, hacsak az operátor kifejezetten nem engedélyezi."
-      },
-      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
-        "label": "OpenCode átmeneti failover-visszatartás",
-        "description": "Az OpenCode több fiókos rotációjánál tartson szünetet a következő fiókhoz való továbbítás előtt, ha két egymást követő kísérlet átmeneti upstream hibával (5xx vagy üres 400-as elutasítás) hiúsult meg. A szünet 1,5 mp-ről indul, minden további egymást követő hiba esetén megduplázódik, szünetenként legfeljebb 6 mp-ben, kérésenként pedig 10 mp-ben korlátozva; a kliens lekapcsolódásakor kimarad, a sikertelen választörzs pedig a várakozás előtt felszabadul. Alapértelmezés szerint kikapcsolva: a failover azonnali marad."
-      },
-      "FLUSH_EMPTY_RETRY_ENABLED": {
-        "label": "Üres kör újrapróbálása (Flush)",
-        "description": "A lefordított streamelt körökben, ha az upstream kör nem tartalmaz használható tartalmat (csak következtetést tartalmazó [reasoning-only] befejezés vagy nulla érdemi adatcsomag), indítson korlátos újrapróbálkozásokat a normál hitelesítési útvonalon keresztül (legfeljebb `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` alkalommal), még mielőtt bármi eljutna a klienshez. Alapértelmezés szerint kikapcsolva: az üres körök megtartják az eddigi viselkedést (üres 200 vagy üres tartalmú 502)."
-      },
-      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
-        "label": "Üres stream testvérkapcsolati helyreállítása",
-        "description": "Claude/Codex streaming: az első életciklus-esemény után végezzen egy rövid ellenőrzést (legfeljebb 1s / 64 KiB) a használható kimenetért; a tartalom nélkül véget érő stream egy empty_content hibává válik, amely a meglévő korlátos újrapróbálkozási keretet egy másik alkalmas kapcsolatra fordítja (nincs cooldown, nincs modellkizárás), a round-robin kombinációk pedig leállítják az újrapróbálkozást a kliens lekapcsolódásakor. Emellett a vizsgálat során a refusal, a pause_turn és a model_context_window_exceeded állapotokat is érvényes üres végállapotként kezeli. Alapértelmezés szerint kikapcsolva: a készenlét, az üres tartalom kezelése és a kombinált újrapróbálkozások pontosan úgy működnek, mint eddig."
-      },
-      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
-        "label": "Stream késői kimeneti szonda",
-        "description": "Streaming kimeneti szonda: az első 64 továbbított chunk után folytassa minden 16. chunk mintavételezését az első látható kimenetig, így a későn induló kimenet esetén is megjelölésre kerül, hogy a stream kimenetet állított elő. Egy ezt követő elszigetelt 5xx hiba kérésszintű marad ahelyett, hogy csak a modellre érvényes kizárást rögzítene, és a firstOutputMs visszamenőleg kitöltésre kerül az aktuális mintavételezési rés első kimeneti chunkjával. Alapértelmezés szerint kikapcsolva: csak az első 64 továbbított chunk kerül ellenőrzésre, pontosan úgy, mint korábban."
-      },
-      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
-        "label": "OpenCode sebességkorlátos 429 korai leállítás",
-        "description": "Az OpenCode többfiókos rotációjánál állítsa le a fiókhullámot az első olyan 429-es hibánál, amely valódi sebességkorlátként van besorolva (egy értelmezhető Retry-After fejléc vagy egy sebesség-/használati korlátot megnevező választörzs), és adja vissza azt az upstream 429-es választ változatlanul (állapotkód, törzs, Retry-After és kvóta fejlécek), ahelyett, hogy az összes többi fiókkal próbálkozna. A be nem sorolt 429-es hibák tovább rotálnak. Alapértelmezés szerint kikapcsolva: az ingyenes szint kimenő IP-címenként korlátozott (#9611), így minden 429 a következő fiókra rotál, a kimerült hullám pedig az utolsó upstream 429-et adja vissza."
-      },
-      "OPENCODE_PARK_AND_RESUME": {
-        "label": "OpenCode 429 parkolás és folytatás",
-        "description": "Az OpenCode többfiókos rotációjánál parkoltassa a kérést ismétlődő átmeneti 429-es hibák (vagy egy friss pool-terhelési jelzés) után egy heartbeat segítségével, majd próbáljon újra egy legfeljebb 3 egymást követő fiókból álló korlátozott szakaszt a teljes flotta lekérdezése helyett. Alapértelmezés szerint kikapcsolva: minden 429 a következő fiókra rotál, pontosan úgy, mint korábban."
-      },
-      "STREAM_READINESS_STALL_RETRY": {
-        "label": "Stream készenléti elakadás újrapróbálása",
-        "description": "Streaming chat kéréseknél, ha az első upstream törzs elakad, mielőtt használható eseményt hozna létre, indítson egyetlen korlátozott második kísérletet ugyanazon az útvonalon, változatlan készenléti kerettel és fiókbüntetés nélkül. Alapértelmezés szerint kikapcsolva: az elakadt első törzs újrapróbálkozás nélkül meghiúsítja a kérést."
-      },
-      "OPENCODE_POOL_RESELECT": {
-        "label": "OpenCode 429 pool újraválasztás",
-        "description": "Az OpenCode többfiókos rotációjánál, ha egy ambient pool kontextusban futó, proxy nélküli fiókon egy egress-bucketed szolgáltatótól 429-es hiba érkezik, kérjen egy másik tagot a kapcsolatkészletből (connection pool) a következő kísérlethez ahelyett, hogy ugyanazzal az egress címmel próbálkozna újra. Sorrendbe állít, sosem zár ki: a kimerült pool megőrzi a jelenlegi viselkedést. Alapértelmezés szerint kikapcsolva: minden 429 a következő fiókra rotál, pontosan úgy, mint korábban."
-      },
-      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
-        "label": "OpenCode v2 kliens-ujjlenyomat",
-        "description": "OpenCode v2 CLI kliens-ujjlenyomat küldése az OpenCode Zen/Go kéréseken (#16571): opencode/latest/<2.x>/cli User-Agent és x-opencode-client cli, a kliens User-Agent csak akkor marad meg, ha az egy 2.x OpenCode kliens, a korlátozott ingyenes szintű kéréseknél nincs x-opencode-request, a munkamenet tükrözve az x-opencode-session-id/x-session-affinity/x-session-id fejlécekre, a v2 CLI read/shell sémák a beillesztett helyőrző eszközökön és a \"none\" tool_choice eldobva. Alapértelmezés szerint kikapcsolva: minden OpenCode kérés bájtról bájtra megőrzi az aktuális identitást, fejléceket és törzset."
-      },
-      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
-        "label": "OpenCode Zen Egress-IP-zárolás",
-        "description": "Az OpenCode Zen (opencode-zen) hozzáadása az alapértelmezett egress-IP-zárolási családhoz, így az egyik Zen kapcsolaton érkező 429-es hiba minden olyan testvér Zen kapcsolatot is várakoztat, amely osztozik annak egress IP-címén. Alapértelmezés szerint kikapcsolva: a Zen kulcsalapú, és minden kapcsolat külön hűl le, pontosan úgy, mint korábban. A kifejezetten megadott OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS érték mindig felülbírálja ezt a jelzőt."
-      },
-      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
-        "label": "OpenCode teljes szöveges hibaszabályok",
-        "description": "Engedélyezi a beépített OpenCode hibaszabályoknak (opencode-zen, opencode-go, opencode-cli), hogy a teljes upstream hibaüzenetre illeszkedjenek, így a törzsben lévő jelölők, mint például az organization_quota_exceeded vagy a \"monthly usage limit reached\", a 429-es hibát kvótakimerülésként sorolják be kapcsolatszintű zárolással. Alapértelmezés szerint kikapcsolva: ezek a szabályok csak a strukturált hibakódot látják, és a 429 rövid sebességkorlát-túllépésként marad meg, pontosan úgy, mint korábban."
-      },
-      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
-        "label": "Cloudflare Workers AI teljes szöveges hibaszabályok",
-        "description": "Engedélyezi a beépített Cloudflare Workers AI hibaszabálynak, hogy a teljes upstream hibaüzenetre illeszkedjen, így a 429-es \"daily free allocation\" törzs kvótakimerülésként lesz besorolva a rövid sebességkorlát-túllépés helyett. Alapértelmezés szerint kikapcsolva: a szabály csak a strukturált hibakódot látja, pontosan úgy, mint korábban."
-      },
-      "CAPABILITY_FILTER_ENABLED": {
-        "label": "Képességszűrő",
-        "description": "A kérések elutasítása még a kiküldés előtt, ha a célmodell nem rendelkezik a szükséges képességekkel (vision, tools, structured output, context window). Megvédi a közvetlen, egyetlen szolgáltatóhoz intézett kéréseket, amelyek megkerülik a combo-layer kompatibilitási szűrőjét."
-      },
-      "USAGE_LIMIT_IGNORE_UNPRICED": {
-        "label": "Árazatlan használat figyelmen kívül hagyása az USD-kvótákban",
-        "description": "Az árral nem rendelkező modellek használatát számolja $0-ként a kulcsonkénti USD használati kvótákban ahelyett, hogy a kvótát túllépettnek tekintené. Alapértelmezés szerint kikapcsolva: az árazatlan modellek vagy útválasztási álnevek (routing alias) elfedhetik a valós költést, így a kvóta zártan hibázik (fails closed)."
-      },
-      "RADAR_ENABLED": {
-        "label": "Radar",
-        "description": "Engedélyezi az OmniRoute Radar modult (katalóguscsatorna-képernyők és szinkronizálás). Alapértelmezés szerint kikapcsolva; az engedélyezés csak a kezelőfelületet oldja fel — az adatszinkronizálás továbbra is külön bekapcsolást (opt-in) igényel."
-      },
-      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
-        "label": "Modellvégpont-képességkapu",
-        "description": "Megbízható modellvégpont-címkék kikényszerítése (amelyeket a szolgáltatói katalógus deklarált, egy speciális modellazonosítóból lett kikövetkeztetve, vagy az operátor állított be): elutasítja a kérést HTTP 400 hibakóddal a kérés továbbítása (dispatch) előtt a /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations és /v1/audio/* útvonalakon, ha a modell nem szolgálja ki az adott végpontot; elrejti a /v1/models listából azokat a modelleket, amelyek felcímkézett végpontjaihoz nem tartozik OmniRoute adapter; valamint 422-es kóddal válaszol az irányítópult modelltesztjére az ilyen modellek esetén. Alapértelmezés szerint kikapcsolva: a végpontcímkék tájékoztató jellegűek maradnak, és a kérések továbbítása pontosan ugyanúgy történik, mint korábban."
-      },
-      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
-        "label": "Univerzális kontextusátadás",
-        "description": "Beszélgetés-összefoglalók generálása és beillesztése, amikor a kombó útválasztás (combo routing) modellt vált. Kapcsolja ki, ha a modellváltásokat függetlenül kívánja kezelni, és meg szeretné akadályozni a háttérben futó átadási kéréseket az összes létező és jövőbeli kombó esetében."
-      },
-      "REASONING_REPLAY_ENABLED": {
-        "label": "Gondolatmenet újrajátszása",
-        "description": "A modell gondolatmenetének gyorsítótárazása és újrajátszása többfordulós beszélgetések során. Kapcsolja ki a gondolatmenetek tárolásának és újbóli beillesztésének leállításához."
-      },
-      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
-        "label": "Codex App-Server transzport",
-        "description": "Engedélyezi a Codex számára a helyi app-szerver WebSocket JSON-RPC transzport használatát (codexTransport=app-server). Kikapcsolt állapotban az app-szervert választó kapcsolatok visszaváltanak a Codex egyéb transzportjaira."
-      },
-      "EXPOSE_CC_DISCOVERY_ALIASES": {
-        "label": "Claude Code felfedezési álnevek",
-        "description": "A claude/'<provider>'/'<model>' tükör azonosítókat hirdeti meg a /v1/models végponton, hogy a Claude Code kapukapui modell-felfedező felsorolja a nem-Claude modelljeit is. Figyelem: a globálisan engedélyezve megduplázza a katalógus-bejegyzéseket minden ügyfél számára."
-      },
-      "NO_THINKING_ALIAS_ENABLED": {
-        "label": "Gondolkodás-mentes modell álnevek",
-        "description": "A no-think/'<provider>'/'<model>' kapukapui álnevek fő kapcsolója. Be (alapértelmezett): a /v1/models minden alkalmas, gondolkodásra képes Claude-modellhez gondolkodás-mentes variánst is hirdeti, és egy no-think/ azonosítóval beküldött kérés a valódi modellhez kerül át, a gondolkodás elnyomva. Ki: a variánsokat nem hirdetik meg, és egy no-think/ azonosító úgy lesz kezelve, mint bármely más ismeretlen modell azonosító. Amikor be van kapcsolva, a modellenkénti ModelSpec.noThinkingAlias bekapcsolás/kikapcsolás továbbra is érvényben marad."
-      },
-      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
-        "label": "Gondolkodási szintváltozatok letiltása",
-        "description": "A gondolkodási szintváltozatok (pl. -low, -medium, -high) generálásának letiltása a /v1/models katalógusban."
-      },
-      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
-        "label": "Adaptív virtuális beléptetési sávok",
-        "description": "Bérlőnkénti adaptív virtuális beléptetési sávok engedélyezése a szolgáltatói továbbításhoz (#9654): az egyik bérlő forgalmi csúcsa többé nem okoz 503-as hibát egy másiknál. Az OMNIROUTE_CHAT_VIRTUAL_LANES környezeti változó felülírja ezt az irányítópultos beállítást; a módosítások a szerver újraindításakor lépnek érvénybe."
-      },
-      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
-        "label": "Működési kapukapui tükrök",
-        "description": "A '<gateway-alias>'/'<model>' tükör azonosítókat hirdeti meg a /v1/models végponton azokban a modellekben, amelyek kanonikus tulajdonosának nincs aktív hitelesítő adata, de egy átmeneti kapukapu aktív hitelesítő adatokkal útküli át őket. Figyelem: a globálisan engedélyezve katalógus-bejegyzéseket ad hozzá minden ügyfél számára."
-      },
-      "NEWAPI_AGGREGATOR_BALANCE": {
-        "label": "New-API aggregátoregyenleg",
-        "description": "Egyenlegészlelés engedélyezése a New-API / One-API / Sub2API aggregátorral kompatibilis csomópontokhoz. Ha engedélyezve van, az aggregátor jelölővel rendelkező kompatibilis csomópontok jelentik az egyenlegüket az irányítópulton és a kvóta-előellenőrzési útválasztás során."
-      },
-      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
-        "label": "Törölt keresési kapcsolatok elrejtése",
-        "description": "A keresési statisztikák és a legutóbbi keresések csak azokat a szolgáltatókat veszik számításba, amelyek még élő kapcsolattal rendelkeznek (a kulcs nélküli szolgáltatók, mint például a duckduckgo-free, mindig beleszámítanak). Kikapcsolva minden megőrzött keresési sort megtart szolgáltató-azonosítóval."
-      },
-      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
-        "label": "Szigorú Free jelvény",
-        "description": "Irányítópult szolgáltatói oldalai: a Free jelvény megjelenítése csak a szolgáltató által ténylegesen figyelembe vett jelzések alapján — figyelmen kívül hagyja a megjelenített név heurisztikáját, a nem logikai free mezőket és a dokumentált ingyenes szinttel nem rendelkező, regisztrált szolgáltatók :free utótagjait. Kikapcsolt állapotban a korábbi jelvényszabály marad érvényben."
-      },
-      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
-        "label": "Auto Combo: az üres készlet 503-as választ ad",
-        "description": "Ha egy auto combo jelöltállománya már a tool-calling előszűrő futtatása előtt üres (minden célpont kihagyva cooldownok, kizárások vagy kimerülés miatt), a korábbi 400 \"No target supports tool calling\" capability_mismatch helyett 503 no_eligible_targets választ ad. Alapértelmezés szerint kikapcsolva: az üres készlet a korábbi 400-as választ tartja meg."
-      },
-      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
-        "label": "Mistral egyértelmű 401 lágy zárolás",
-        "description": "Egy csupasz Mistral 401 ('{\"detail\":\"Unauthorized\"}', explicit hitelesítési jelzés nélkül) bájtra azonos visszavont kulcs és kimerült kvóta esetén. Bekapcsolva egy ilyen 401 lehűti a kapcsolatot ahelyett, hogy lejártként félreállítaná, egy órán belül legfeljebb 3 alkalommal; a következő már lejártként állítja félre, így a visszavont kulcs végül oda kerül. Alapértelmezés szerint kikapcsolva: minden csupasz Mistral 401 lejártként állítja félre a kapcsolatot, mint eddig."
-      },
-      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
-        "label": "Batch és fájl automatikus tisztítás",
-        "description": "Engedélyezi az automatikus karbantartási folyamatnak, hogy törölje az OMNIROUTE_BATCH_RETENTION_DAYS értéknél régebbi végállapotú (completed/failed/cancelled/expired) Batch API feladatokat a soronkénti ellenőrzőpontjaikkal együtt, valamint kiürítse a feltöltött fájlok BLOB tartalmát a saját expires_at idejük lejárta után. Alapértelmezés szerint ki van kapcsolva: minden meglévő telepítés a korábbiaknak megfelelően megőrzi ezeket az adatokat, amíg egy operátor be nem kapcsolja ezt a funkciót. Az operátor által indított DELETE /api/v1/batches/delete-completed útvonalat ez sehogy sem érinti – az egy különálló, feltétel nélküli nyilvános API-szerződés."
-      },
-      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
-        "label": "Antigravity fiókbérlet",
-        "description": "Lefoglalja a kiválasztott Antigravity fiókot az azt kiválasztó kérés streaming életciklusának idejére, így egy egyidejű újrapróbálkozás vagy a hitelesítési adatok átadása nem választhat ki újra egy olyan fiókot, amely már egy folyamatban lévő streamhez van rendelve. A foglalás hatóköre a (connection, callable upstream model) párra korlátozódik, így egy fiók továbira is kiszolgálhat egyszerre két különböző modellt. Ha az adott modellhez már minden alkalmas fiók bérlés alatt áll, a kérés egy strukturált 503 POOL_BUSY választ ad vissza korlátos Retry-After értékkel ahelyett, hogy tovább terhelné a foglalt fiókot. Alapértelmezés szerint ki van kapcsolva: a fiókválasztás pontosan a korábbiak szerint működik, és nem történik foglalás."
-      },
-      "COMBO_AUTO_PRUNE_STALE_STEPS": {
-        "label": "Elavult combo-lépések automatikus eltávolítása",
-        "description": "Egy hiteles élő katalógussal végzett sikeres modellszinkronizálás után eltávolítja azokat a combo-lépéseket, amelyek olyan modellekhez vannak rögzítve, amelyeket a katalógus már nem tartalmaz, eltávolított lépésenként egy auditbejegyzést készítve. Sikertelen, degradált vagy csak ingyenes szinkronizálás esetén soha nem távolít el lépéseket, és soha nem ürít ki teljesen egy combót. Alapértelmezés szerint ki van kapcsolva: az elavult lépések csak megjelölésre kerülnek."
-      },
-      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
-        "label": "Claude OAuth összegzett gondolkodás",
-        "description": "Engedélyezi, hogy az olvasható gondolkodást (thinking.display \"summarized\") kérő Claude OAuth kérések elhagyják a redact-thinking-2026-02-12 Anthropic bétát, ami egyébként arra késztetné az Anthropicot, hogy üres, csak aláírást tartalmazó gondolkodási blokkokat adjon vissza. Alapértelmezés szerint ki van kapcsolva: ez a béta része a Claude Code OAuth hálózati ujjlenyomatának, így az OAuth kérések változatlanul hagyják. Az API-kulcsos Claude kérések már ezen kapcsoló nélkül is támogatják az összegzett gondolkodást; az OMNIROUTE_REDACT_THINKING=false beállítás is csak akkor jut el az OAuth-hoz, ha ez a kapcsoló be van kapcsolva."
-      },
-      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
-        "label": "Kiro eszközhívás-javítás",
-        "description": "Ha egy streamelt Kiro-válasz hibás formátumú tool_call burkolót ad ki (hiányzó input.name vagy input.arguments) bármilyen látható kimenet előtt, nyomja el azt, és küldje el újra a kérést egyszer egy javító utasítással ahelyett, hogy a kört az invalid_kiro_tool_call hibával fejezné be. Az újrapróbálkozás egy extra Kiro-kérésbe kerül; a második sikertelen próbálkozás a kört a kiro_tool_call_repair_retry_failed hibával fejezi be. Alapértelmezés szerint be van kapcsolva. Állítsa false értékre, ha azt szeretné, hogy a kör már az első hibás formátumú burkolónál meghiúsuljon."
-      },
-      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
-        "label": "models.dev erőfeszítési szintek",
-        "description": "Használja a models.dev által közzétett következtetési erőfeszítési szinteket (az ismert erőfeszítési szókészletre szűkítve), ha sem az operátori felülbírálás, sem a szolgáltatói regiszter nem határoz meg egyet sem, és a deklarált üres szintlistát kezelje „nincsenek szintek”-ként a /v1/models effort_tiers és a kombinált szintek metszeteiben. Alapértelmezés szerint kikapcsolva: az effort_tiers és a feloldott supportedThinkingEfforts pontosan úgy marad, mint korábban."
-      },
-      "LMARENA_SYNTHESIZED_CX_ENABLED": {
-        "label": "Arena szintetizált cx telemetria",
-        "description": "Csatoljon egy szintetizált, programozott cx kliensinterakciós blobot (azt az értéket, amelyet maga az arena.ai küld egy rögzített interakció nélküli oldalhoz) minden olyan Arena (lmarena) create-evaluation kéréshez, amely nem rendelkezik operátor által megadott providerSpecificData.cx értékkel. Alapértelmezés szerint kikapcsolva: a cx mező egy Arena automatizáció elleni jelzés, így az OmniRoute csak azt az értéket továbbítja, amelyet az operátor egy valódi böngésző-munkamenetből rögzített (providerSpecificData.cx), egyébként pedig egyáltalán nem küld cx-et. Nem bizonyított upstream előny; csak akkor engedélyezze, ha az Arena elkezdi elutasítani a cx nélküli kéréseket."
-      },
-      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
-        "label": "Natív Codex reaktív tömörítés",
-        "description": "Engedélyezze, hogy a reaktív (küszöbérték alapú) és a végső menedékként szolgáló kontextustömörítési menetek a natív Codex passthrough-előzményeit (POST /v1/responses a codex szolgáltatóhoz) is átírják a Responses input[] adapter használatával, ha túllépik a kontextuskeretet. Alapértelmezés szerint kikapcsolva: a natív Codex előzmények a Codex kliens tulajdonában vannak, és a tömörítés soha nem írja át őket; a túlméretezett kérések továbbra is meghiúsulnak a kontextuskeret ellenőrzésén, pontosan úgy, mint korábban. Megköveteli a globális tömörítés bekapcsolását és azt, hogy a modell ne legyen kizárva."
-      },
-      "QUOTA_WINDOW_BOUNDED_PARK": {
-        "label": "Kvótaablak: korlátos parkolás figyelembevétele",
-        "description": "Engedélyezze, hogy az ablakonkénti kvótaszabályzat (a fiókkiválasztás által használt munkamenet-/heti küszöbértékek) figyelembe vegye a korlátos kimerülési parkolást: amint a korlátozott parkolási határidő lejárt, vagy a gyorsítótárazott kvótamegfigyelés régebbi, mint a parkolási korlát, az ablak nem zárja ki tovább a fiókot egy friss kvótalekérésig. Alapértelmezés szerint kikapcsolva: a gyorsítótárazott ablak továbbra is blokkol a legutóbb jelentett százaléka alapján a saját visszaállítási idejéig."
-      },
-      "IMAGE_GENERATION_LONG_JOBS": {
-        "label": "Képgenerálás: Hosszú feladatok",
-        "description": "OpenAI-kompatibilis képgeneráláshoz: használja a kapcsolat időtúllépését (providerSpecificData.timeoutMs), egyébként a központi upstream lekérési időkorlátot (FETCH_TIMEOUT_MS, majd REQUEST_TIMEOUT_MS, alapértelmezett 600 s) a rögzített 120 s-os képkeret helyett; a hívó által megszakított kéréseket zárja le 499-cel; és tegye lehetővé a Playground számára, hogy a hosszú képgenerálási feladatokat SSE-streamként fogadja keepalive heartbeatekkel. Alapértelmezés szerint kikapcsolva: a rögzített keret érvényesül, és a hívó általi megszakítás nem továbbítódik. A választörzs beolvasására vonatkozó határidő mindig be van kapcsolva."
-      },
-      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
-        "label": "Katalógustükrözési finomítások",
-        "description": "Finomítja a claude/ felderítési és funkcionális gateway tükrözéseket a /v1/models végponton. Alapértelmezés szerint kikapcsolva: mindkét tükrözési fázis pontosan úgy működik, mint korábban. Bekapcsolva: a claude/ felderítési tükrök lefedik a listázott reasoning-effort változatokat is (-low/-medium/-high/-xhigh), kihagyják a beépített auto/* azonosítókat, amelyeket a kérés útvonala nem tud feloldani, és kihagyják a már listázott aliast; a funkcionális gateway tükrök kihagyják a kombinációkat és az OmniRoute által szintetizált azonosítókat (claude/, no-think/), a tulajdonost az owned_by mezőből veszik, soha nem használják a tulajdonost a saját gatewayeként, valamint kihagyják a blockedProviders listában letiltott gatewayeket és a gateway hiteles élő katalógusán kívüli modelleket."
-      },
-      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
-        "label": "Proxy állapota: Az elutasítás nullázza a hibasorozatot",
-        "description": "A proxy állapotfelmérése (health sweep) során a célpont által elutasított próbák (401/403/429: a proxy továbbította, a célállomás elutasította ezt az egress IP-t) állítsák vissza a proxy egymást követő hibáinak sorozatát, hasonlóan egy kiszolgált próbához. Alapértelmezés szerint kikapcsolva: az elutasítás semleges marad, és megőrzi a sorozatot (#10654). Az 5xx-as kódok mindkét esetben nem tekinthetők döntőnek, és az elutasítás soha nem távolít el, nem tilt le és nem aktivál újra proxyt."
-      },
-      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
-        "label": "Grok előfizetéses képek",
-        "description": "Regisztrálja az xai-oauth (xao) és grok-cli képútvonalakat, valamint leképezi az OpenAI high/hd minőséget az xAI medium értékére. Alapértelmezés szerint kikapcsolva: az API-kulcsos xAI képútvonal a meglévő OpenAI-kompatibilis kérésen marad, és az előfizetéses útvonalak nincsenek regisztrálva."
-      },
-      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
-        "label": "xAI OAuth élő modellfelderítés",
-        "description": "Lekéri az élő xAI modellkatalógust az xai-oauth kapcsolatokhoz a https://api.x.ai/v1/models címről az OAuth bearer token használatával a rögzített statikus seed helyett. Alapértelmezés szerint bekapcsolva. Állítsa a jelzőt false értékre a statikus seed további kiszolgálásához. HTTP-hibák esetén a felderítési útvonal visszavált a seedre; maga a flag getter nem kezdeményez HTTP-kérést."
-      },
-      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
-        "label": "Anthropic-kompatibilis beszélgetés közbeni system körök",
-        "description": "A sima anthropic-compatible-* relayeken (claude → claude passthrough) a beszélgetés közbeni role:system köröket tartsa meg a messages[] tömbön belül ahelyett, hogy kiemelné őket a legfelső szintű system paraméterbe, így a gyorsítótárazott promptprefix stabil marad a körök között. Csak akkor érvényes, ha maga a kliens küldte a mid-conversation-system-2026-04-07 anthropic-beta értéket (változatlanul továbbítva upstream irányba). Alapértelmezés szerint kikapcsolva: minden system kör pontosan úgy kerül kiemelésre, mint korábban, mivel a bétát nem támogató relayek 400-as hibával elutasítják a role:system üzeneteket."
-      },
-      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
-        "label": "DB-állapotellenőrzés: Indítási vizsgálat elhalasztása",
-        "description": "Futtassa az indításkori DB integritás-/állapotellenőrzést azután, hogy a szerver megkezdte a kérések fogadását (a setImmediate használatával), ahelyett, hogy blokkolná az indítást annak befejezéséig. Alapértelmezés szerint kikapcsolva: az indítás blokkolódik az ellenőrzés alatt, pontosan úgy, mint a #13717 előtt, így a sérült adatbázist a rendszer még az első kérés kiszolgálása előtt észleli. Bekapcsolva: az indítás azonnal visszatér, és az ellenőrzés (amely most korlátozott/lapozott, valamint valós fájlalapú DB esetén egy megszakítható gyermekfolyamatba van izolálva) közvetlenül utána fut le."
-      },
-      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
-        "label": "OpenCode közzétett katalógus szerinti útválasztás",
-        "description": "Engedélyezi, hogy a kifejezett registry-végpont nélküli OpenCode Zen és OpenCode Go modellek a kérésfelületüket (Responses a(z) @ai-sdk/openai, Messages a(z) @ai-sdk/anthropic esetén) a közzétett models.opencode.ai katalógusból vegyék, amely a háttérben 6 óránként kerül beolvasásra. Alapértelmezés szerint kikapcsolva: a végpont pontosan úgy a registry heurisztikáiból származik, mint korábban, és a katalógus soha nem kerül lekérésre."
-      },
-      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
-        "label": "Auto-kérések: Feloldott képességsúlyok",
-        "description": "Engedélyezi, hogy az auto/* kérések (a resolveModelOrError és az automatikus útválasztó wrapper) a feloldott modellképességekkel (vision, reasoning, thinking) és a megfigyelt minőségi pontszámokkal építsék fel a jelöltpoolt, egyetlen menetben beolvasva, mint a /v1/models katalógus esetében. Alapértelmezés szerint kikapcsolva: a kéréskori pillanatkép-súlyok pontosan olyanok maradnak, mint korábban (a képességek igény szerint oldódnak fel, és nem táplálják a súlyokat). Bekapcsolva: ezek a jelek beépülnek a pillanatkép-súlyokba, így a jelöltek súlyai – és ezáltal a kiválasztás – módosulhatnak."
-      },
-      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
-        "label": "Automatikus kombináció: kulcstalan transportszabályozás",
-        "description": "Kizárja az auto/* jelöltkészletből azokat a kulcs nélküli (hitelesítés nélküli) szolgáltatókat, amelyek átvitele helyi böngészőt (browserBacked) vagy helyileg telepített CLI-t (isLocalCli) igényel, hogy egy lefagyott tag ne akaszthasson meg egy auto kérést a célonkénti időtúllépésig (#17036). Alapértelmezés szerint kikapcsolva: minden emulált eszközhívást használó, hitelesítés nélküli szolgáltató pontosan úgy marad a készletben, mint eddig. A közvetlen '<alias>'/'<model>' hívások mindkét esetben működnek."
-      },
-      "CODEBUDDY_CN_INLINE_REASONING": {
-        "label": "CodeBuddy CN: belső következtetési újrafuttatás",
-        "description": "A codebuddy-cn gondolkodási modelljeinek (DeepSeek-V4 / Kimi-K2 család, amelyeknek szüksége van következtetési újrafuttatásra) esetén minden újrafuttatott asszisztensi reasoning_content-ot belső '<thought>' blokkként jelenít meg a üzenet tartalmának elején, így megőrződik akkor is, ha a kapuzás kicsempészi a reasoning_content mezőt (#13632). Alapértelmezetten kikapcsolva: a codebuddy-cn kérések változatlanul kerülnek továbbításra; a reasoning_content mező önmagában mindig megmarad."
-      },
-      "PROVIDER_SAFETY_STOPS_TERMINAL": {
-        "label": "Szolgáltatói biztonsági leállások: Terminális",
-        "description": "Kezelje a kifejezett szolgáltatói biztonsági leállást (misalignment_policy_violation, content_policy_violation vagy a pontos, régebbi 'blocked by our safety systems' elutasítás provider_safety_rejection címkével) terminális, kérésszintű elutasításként: a kódja megmarad a HTTP-, Responses-, WebSocket- és completed-stream hibákon keresztül, a combo pedig leáll ennél ahelyett, hogy megpróbálkozna más célpontokkal, megszakítva az engedélyezett testvérkéréseket (#17049). Alapértelmezés szerint kikapcsolva: ezek a hibák megtartják a meglévő kezelésüket, és a combo útválasztása változatlan marad."
-      },
-      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
-        "label": "Hitelesítő adatok állapota: Automatikusan letiltott kapcsolatok újratesztelése",
-        "description": "Engedélyezi, hogy a hitelesítő adatok állapotellenőrzése újratesztelje az átjáró által magától kikapcsolt kapcsolatokat (autoDisabledAt jelöléssel; kapcsolatonként legfeljebb 6 óránként egyszer, és ellenőrzésenként legfeljebb 5 kapcsolatot), és visszakapcsolja a kapcsolatot, ha az újratesztelés sikeres (#16190). Alapértelmezés szerint kikapcsolva: a kikapcsolt kapcsolatok kikapcsolva maradnak, amíg egy operátor újra nem engedélyezi vagy nem teszteli őket, pontosan úgy, mint korábban. Az operátor által letiltott kapcsolatok és a végleges kitiltás miatt lekapcsolt kapcsolatok soha nem kerülnek újratesztelésre."
-      },
-      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
-        "label": "Hitelesítőadat-kapu: Csak hitelesítési diagnózisok",
-        "description": "Szűkítse le a combo hitelesítőadat-kapuját, hogy a gyorsítótárazott sikertelen hitelesítési próba csak akkor blokkolja a kapcsolatot, ha a diagnózis hibás hitelesítő adatokat igazol (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). A nem egyértelmű hibák (időtúllépések, sebességkorlátozások, kimaradások, nem támogatott próbák és típus nélküli ütemezési hibák) ekkor ismeretlenként lesznek kezelve, és a kapcsolat továbbra is fogad forgalmat. Alapértelmezés szerint kikapcsolva: bármilyen gyorsítótárazott próbahiba blokkolja a kapcsolatot a gyorsítótár érvényességi idejére (TTL: 5 perc)."
-      },
-      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
-        "label": "Combo: Leállítás tartalom-irányelvi elutasításkor",
-        "description": "Ha egy combo-célpont pontos tartalom-irányelvi elutasítással válaszol (cyber_policy / content_policy_violation kód vagy típus), állítsa le a combót, és küldje vissza ezt az elutasítást még akkor is, ha a fennmaradó célpontok más modellek, ahelyett, hogy továbblépne a következő célpontra. Alapértelmezés szerint kikapcsolva: az elutasítás soha nem helyezi nyugalmi állapotba a fiókot, nem oldja ki a provider breakert, és a combo pontosan úgy halad tovább a következő célpontra, mint korábban."
-      },
-      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
-        "label": "Cooldown újrapróbálkozás: 403/410 elutasítások kihagyása",
-        "description": "Amikor minden fiók cooldown alatt van, és a legkorábban lejáró cooldownt egy 403 (hozzáférés megtagadva) vagy egy 410 (megszűnt) okozta, azonnal adja vissza ezt az elutasítást ahelyett, hogy megvárná a cooldown lejárását és újraküldené a kérést; egy megújuló agentrouter kapcsolati hatókörű kvóta 403 ekkor 429-es errorCode-dal kerül mentésre, így újrapróbálható marad. Alapértelmezés szerint kikapcsolva: csak a 401 hagyja ki a várakozást, és minden elutasítás azzal a státusszal kerül mentésre, amellyel érkezett."
       }
     }
   },
@@ -15298,6 +15210,63 @@
       "saved": "Cooldown-szabályok mentve",
       "saveFailed": "Nem sikerült menteni a cooldown-szabályokat"
     },
+    "errorRules": {
+      "title": "Hibákra vonatkozó cooldown-szabályok",
+      "subtitle": "Ismerje fel a szolgáltatói hibákat HTTP-állapot, hibaszöveg vagy mindkettő alapján, és válassza ki, mit és mennyi ideig szüneteltessen. Ezek a szabályok a beépítettek előtt futnak.",
+      "rulesHeading": "Szabályok",
+      "rulesEmpty": "Még nincsenek szabályok.",
+      "addRule": "Szabály hozzáadása",
+      "provider": "Szolgáltató",
+      "providerPlaceholder": "pl. openai",
+      "status": "HTTP-állapot",
+      "statusPlaceholder": "Bármely",
+      "match": "A hibaszöveg tartalmazza",
+      "matchPlaceholder": "Bármilyen szöveg",
+      "matchHint": "Az első egyező szabály érvényes. A hibaszöveg egyszerű, kis- és nagybetűt nem megkülönböztető szöveg, nem reguláris kifejezés. Az üres mező bármire illeszkedik.",
+      "scope": "Szüneteltetés",
+      "scopes": {
+        "connection": "Ez a kapcsolat",
+        "model": "Csak ez a modell",
+        "provider": "A teljes szolgáltató"
+      },
+      "reason": "Ok",
+      "reasonAuto": "Automatikus",
+      "reasons": {
+        "quota_exhausted": "Kvóta kimerült",
+        "rate_limit_exceeded": "Sebességkorlát túllépve",
+        "auth_error": "Hitelesítési hiba",
+        "model_capacity": "A modell túlterhelt",
+        "server_error": "Szerverhiba",
+        "unknown": "Egyéb"
+      },
+      "duration": "Időtartam",
+      "durations": {
+        "auto": "Alapértelmezett",
+        "30m": "30 perc",
+        "1h": "1 óra",
+        "5h": "5 óra",
+        "24h": "24 óra",
+        "custom": "Egyéni"
+      },
+      "customMinutes": "Perc (1–43200)",
+      "remove": "Eltávolítás",
+      "defaultsHeading": "Alapértelmezés a szabály nélküli hibákhoz",
+      "defaultsHint": "Opcionális, szolgáltatónként. Csak akkor érvényes, ha egyetlen szabály sem illeszkedik egy 402-es, 403-as, 408-as, 429-es vagy 5xx-es hibára. A kéréshibákat, például a 400-at, sosem érinti.",
+      "defaultsEmpty": "Nincs alapértelmezés. A szabály nélküli hibák a beépített viselkedést követik.",
+      "addDefault": "Alapértelmezés hozzáadása",
+      "errors": {
+        "provider": "Adjon meg egy szolgáltatót.",
+        "condition": "Adjon meg HTTP-állapotot, hibaszöveget vagy mindkettőt.",
+        "status": "100 és 599 közötti állapotot használjon.",
+        "duration": "Adjon meg 1 és 43200 közötti percet.",
+        "duplicateDefault": "Ennek a szolgáltatónak már van alapértelmezése.",
+        "tooMany": "Legfeljebb 50 szabály."
+      },
+      "save": "Hibaszabályok mentése",
+      "saved": "Hibaszabályok mentve",
+      "saveFailed": "Nem sikerült menteni a hibaszabályokat",
+      "loadFailed": "Nem sikerült betölteni a hibaszabályokat"
+    },
     "list": {
       "title": "Útválasztásból kiesett kapcsolatok",
       "subtitle": "A cooldownok és modellzárolások maguktól lejárnak. Törölje őket, ha azonnal vissza szeretné állítani a kapcsolatot az útválasztásba.",
@@ -15631,6 +15600,7 @@
     "upstreamStatus": "Felfelé állapot",
     "noResponse": "Nincs válasz",
     "egressIp": "Kimeneti IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Fejlécek után",
     "firstChunkAfter": "Első darab után",
     "servedBy": "Szolgáltatva általa",

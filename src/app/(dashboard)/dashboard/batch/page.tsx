@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Button from "@/shared/components/Button";
 import BatchListTab from "./BatchListTab";
 import type { FileRecord } from "@/lib/db/files";
@@ -299,7 +300,11 @@ export default function BatchPage() {
       {/* Toolbar: auto-refresh indicator + Refresh + New batch */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <span className="text-xs text-text-muted flex items-center gap-1">
-          <Icon name="sync" size={14} className={loading ? "animate-spin" : "animate-pulse"} />
+          {loading ? (
+            <Spinner decorative size="xs" />
+          ) : (
+            <Icon name="sync" size={14} className="animate-pulse" />
+          )}
           {t("batchListAutoRefresh")}
         </span>
         <div className="flex gap-2">
