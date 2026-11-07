@@ -41,61 +41,57 @@ Keďže toto číslo je odhad:
 
 ### Zdroj cien
 
-Náklady pochádzajú z cenovej tabuľky určenej podľa nasledujúceho poradia priorít
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Náklady pochádzajú zo zlúčenej cenovej tabuľky v [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) v tomto poradí priority (** najskôr najvyššie** ):
 
-1. **Používateľské prepísania** — ceny, ktoré nastavíte na ovládacom paneli alebo prostredníctvom `PATCH /api/pricing`.
-2. **Synchronizované externé ceny** — načítané z verejného súboru
-   `model_prices_and_context_window.json` služby LiteLLM, keď je synchronizácia povolená (ukladajú sa v samostatnom
-   mennom priestore `pricing_synced`, takže nikdy neprepíšu vaše vlastné nastavenia).
-3. **Predvolené hodnoty zapísané v kóde** — dodávané s OmniRoute.
+1. **Používateľ prepíše** — ceny nastavené na dashboarde alebo cez `PATCH /api/pricing` (menný priestor `pricing` ).
+2. **synchronizácia modelov.dev** ceny — získané zo `https://models.dev/api.json` (priestor názvov `models_dev_pricing` ).
+3. **synchronizácia LiteLLM** ceny — získané z verejného `model_prices_and_context_window.json` spoločnosti LiteLLM(priestor názvov `pricing_synced` ).
+4. **Pevne zakódované predvolené hodnoty** sadzby — odoslané v [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Synchronizácia externých cien je **voliteľná** a predvolene vypnutá. Súvisiace premenné prostredia
-(pozri [`.env.example`](../../.env.example)):
+Pre rovnaké provider/model hodnoty z vrstiev s vyššou prioritou prepíšu zodpovedajúce polia v nižších vrstvách; polia chýbajúce v hornej vrstve môžu stále pochádzať z nižšej vrstvy. Poradie je pevné, aj keď sú obe nezávislé synchronizačné úlohy spustené súčasne. `GET /api/pricing?includeSources=1` vráti `pricing` a `sourceMap`, ktorých označenia pre jednotlivé modely (`user`, `modelsDev`, `litellm`, `default`) identifikujú vrstvu s najvyššou prioritou obsahujúcu daný model.
 
-| Premenná prostredia     | Predvolené | Účel                                                                    |
-| ----------------------- | ---------- | ----------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`    | Povolenie synchronizácie cien LiteLLM na pozadí pri spustení.           |
-| `PRICING_SYNC_INTERVAL` | `86400`    | Interval synchronizácie v **sekundách** (predvolene raz denne).         |
-| `PRICING_SYNC_SOURCES`  | `litellm`  | Zoznam zdrojov oddelených čiarkami (dnes je podporovaný iba `litellm`). |
+**LiteLLM synchronizácia** je voliteľné, predvolene zakázané. Jeho premenné prostredia (pozri [`.env.example`](../../.env.example) ) sú:
 
-### Vzorec na výpočet nákladov
+| Env var                 | Predvolené | Účel                                                                               |
+| ----------------------- | ---------- | ---------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`    | Povoliť synchronizáciu cien LiteLLM na pozadí.                                     |
+| `PRICING_SYNC_INTERVAL` | `86400`    | Interval synchronizácie v sekundách (denne).                                       |
+| `PRICING_SYNC_SOURCES`  | `litellm`  | Výber zdroja len pre túto synchronizáciu; momentálne je podporovaná iba `litellm`. |
 
-Náklady sa počítajú pre každú požiadavku z počtu tokenov a sadzieb za milión tokenov v
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+**synchronizácia modelov.dev** je oddelená od synchronizácie LiteLLM a je tiež predvolene vypnutá. Povoľte ho v Nastaveniach (synchronizácia modelov.dev) alebo použite tieto premenné:
 
-- **Vstupné tokeny** (bez tokenov načítaných z vyrovnávacej pamäte a tokenov na jej vytvorenie) × sadzba `input`.
-- **Tokeny načítané z vyrovnávacej pamäte** × sadzba `cached` (ak chýba, použije sa vstupná sadzba).
-- **Tokeny na vytvorenie vyrovnávacej pamäte** × sadzba `cache_creation` (ak chýba, použije sa vstupná sadzba).
-- **Výstupné tokeny** × sadzba `output`.
-- **Tokeny uvažovania** × sadzba `reasoning` (ak chýba, použije sa výstupná sadzba).
+| Env var                    | Predvolené      | Účel                                                                                                                                   |
+| -------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nenastavené)_ | Zrušiť nastavenie nasleduje po prepínači Nastavenia; `1/true/on/yes` zapína a `0/false/off/no` vypína (aj keď to nastavenia povoľujú). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Predvolený interval synchronizácie models.dev v sekundách (denne).                                                                     |
 
-Všetky sadzby sa interpretujú ako USD za 1 000 000 tokenov. Úroveň služby Codex „fast“/„priority“
-alebo „flex“ uplatňuje násobiteľ nákladov (`getCodexFastCostMultiplier`) — napr. pri úrovni flex
-sa účtuje 50 % zľava na tokeny, ktorá sa na ovládacom paneli zobrazuje ako **úspory flex**.
+`PRICING_SYNC_SOURCES` robí** nie** povoliť modely.dev; ovláda iba synchronizáciu LiteLLM. Odstránením prepísania používateľa sa nevymaže ani synchronizovaný priestor názvov; začne platiť ďalšia dostupná cenová vrstva. Pri cenovo dostupnom modeli pred pridaním manuálneho prepísania skontrolujte nastavenia synchronizácie aj `sourceMap`.
 
-Názvy modelov sa najprv normalizujú (odstránia sa predpony ciest poskytovateľov, ako napríklad `openai/`
-alebo `accounts/fireworks/models/`), aby sa aj historické riadky naďalej zhodovali s cenou.
+### Vzorec nákladov
+
+Cena sa počíta na žiadosť z počtu tokenov a sadzieb za milión tokenov v [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
+
+- **Vstupné tokeny** (mínus čítania z vyrovnávacej pamäte a tokeny na vytvorenie vyrovnávacej pamäte) rýchlosť × `input`.
+- **Tokeny na čítanie z vyrovnávacej pamäte** × `cached` sadzba (spadne späť na vstupnú rýchlosť).
+- **Tokeny na vytváranie vyrovnávacej pamäte** × `cache_creation` sadzba (spadne späť na vstupnú rýchlosť).
+- **Výstupné tokeny** sadzba × `output`.
+- **Tokeny zdôvodnenia** × `reasoning` rýchlosť (spadne späť na výstupnú rýchlosť).
+
+Všetky sadzby sú interpretované ako USD na 1 000 000 tokenov. Úroveň služieb „rýchla“/„priorita“ alebo „flex“ Codex uplatňuje násobiteľ nákladov (`getCodexFastCostMultiplier`) — napr. flex sa účtuje s 50 % zľavou na token, ktorá sa zobrazí ako** flexibilné úspory** v prístrojovej doske.
+
+Názvy modelov sa najskôr normalizujú (predpony cesty poskytovateľa ako `openai/` alebo `accounts/fireworks/models/` sú odstránené), takže historické riadky stále zodpovedajú cene.
 
 ### Ako sa zaznamenávajú výdavky
 
-- Náklady na jednu požiadavku sa vypočítajú po odpovedi a zaznamenajú sa asynchrónne bez čakania,
-  takže klientovi nikdy nepridávajú latenciu. Spotreba zdieľanej kvóty sa naplánuje na nasledujúci
-  cyklus udalostí prostredníctvom [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Výdavky API kľúčov sa ukladajú do vyrovnávacej pamäte a zapisujú v dávkach pomocou
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (predvolený interval zápisu 60 s,
-  vyrovnávacia pamäť s kapacitou 1 000 záznamov). Možno ich upraviť pomocou:
+- Náklady na žiadosť sa vypočítajú po odozve a zaznamenajú sa, aby sa klientovi nikdy nezvýšila latencia. Spotreba zdieľanej kvóty je naplánovaná pri ďalšom zaškrtnutí slučky udalostí cez [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Výdavky na kľúč API sa ukladajú do vyrovnávacej pamäte a vyprázdnia v dávkach pomocou [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (predvolený interval vyprázdnenia 60 s, vyrovnávacia pamäť 1 000 záznamov). Laditeľné cez:
 
-  | Premenná prostredia                 | Predvolené | Účel                                            |
-  | ----------------------------------- | ---------- | ----------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Interval zápisu v milisekundách.                |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Maximálny počet záznamov pred vykonaním zápisu. |
+  | Env var                             | Predvolené | Účel                                                               |
+  | ----------------------------------- | ---------- | ------------------------------------------------------------------ |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Interval splachovania v milisekundách.                             |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Maximálny počet záznamov vo vyrovnávacej pamäti pred vyprázdnením. |
 
-Údaje o nákladoch na ovládacom paneli sa **nenačítavajú** z dolárovej sumy uloženej v jednotlivých
-riadkoch — pri každom spustení analytického koncového bodu sa nanovo vypočítajú z počtu tokenov
-a aktuálnej cenovej tabuľky. To znamená, že oprava nesprávnej ceny (a opätovná synchronizácia)
-spätne aktualizuje historické odhady nákladov.
+Údaje o nákladoch na prístrojovej doske sú** nie** čítať z uloženej sumy v dolároch za riadok — sa prepočítavajú za chodu z počtu tokenov a aktuálnej cenovej tabuľky pri každom spustení analytického koncového bodu. To znamená, že oprava nesprávnej ceny (a opätovná synchronizácia) spätne aktualizuje historické odhady nákladov.
 
 ---
 
@@ -141,53 +137,50 @@ Oblasť Náklady obsahuje aj nasledujúce stránky (všetky pod `/dashboard/cost
 
 ---
 
-## Koncové body API
+## API koncové body
 
-Všetky tieto koncové body vyžadujú overenie správy (loopback/JWT, prostredníctvom `requireManagementAuth`), pokiaľ
-nie je uvedené inak.
+Všetky tieto vyžadujú autorizáciu správy (loopback/JWT, via `requireManagementAuth`), pokiaľ nie je uvedené inak.
 
-### Analytika využitia a nákladov
+### Analýza používania a nákladov
 
-| Metóda | Koncový bod              | Účel                                                                                                                                                                             |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Kompletná analytika nákladov/využitia: súhrn, denný trend, podľa poskytovateľa/modelu/kľúča API/účtu/úrovne. Parametre: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Využitie kvóty jednotlivých poskytovateľov v čase. Parametre: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                       |
-| `GET`  | `/api/usage/history`     | Riadky nespracovanej histórie využitia.                                                                                                                                          |
-| `GET`  | `/api/usage/call-logs`   | Denníky jednotlivých požiadaviek (model, tokeny, náklady, latencia, stav).                                                                                                       |
-| `GET`  | `/api/usage/quota`       | Stav kvóty poskytovateľa.                                                                                                                                                        |
-| `GET`  | `/api/usage/proxy-logs`  | Denníky požiadaviek proxy.                                                                                                                                                       |
+| Metóda | Koncový bod              | Účel                                                                                                                                                      |
+| ------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Úplná analýza cost/usage : súhrn, denný trend, podľa provider/model/API key/account/tier. Dopyt: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | Využitie kvót na poskytovateľa v priebehu času. Dopyt: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                       |
+| `GET`  | `/api/usage/history`     | Nespracované riadky histórie používania.                                                                                                                  |
+| `GET`  | `/api/usage/call-logs`   | Protokoly hovorov podľa požiadaviek (model, tokeny, cena, latencia, stav).                                                                                |
+| `GET`  | `/api/usage/quota`       | Stav kvóty poskytovateľa.                                                                                                                                 |
+| `GET`  | `/api/usage/proxy-logs`  | Protokoly žiadostí proxy.                                                                                                                                 |
 
-### Rozpočty
+### rozpočty
 
-| Metóda | Koncový bod              | Účel                                                                                         |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Súhrn nákladov + kontrola rozpočtu pre jeden kľúč API (povinný parameter dopytu `apiKeyId`). |
-| `POST` | `/api/usage/budget`      | Nastavenie denných/týždenných/mesačných limitov v USD + prahu upozornenia pre kľúč API.      |
-| `GET`  | `/api/usage/budget/bulk` | Hromadné súhrny rozpočtov naprieč kľúčmi API.                                                |
+| Metóda | Koncový bod              | Účel                                                                                              |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Súhrn nákladov + kontrola rozpočtu pre jeden kľúč API (vyžaduje sa parameter dotazu `apiKeyId` ). |
+| `POST` | `/api/usage/budget`      | Nastavte limity daily/weekly/monthly USD + varovný prah pre kľúč API.                             |
+| `GET`  | `/api/usage/budget/bulk` | Hromadné súhrny rozpočtu cez kľúče API.                                                           |
 
-> Rozpočtové API je obmedzené na jednotlivé **kľúče API** (`apiKeyId`). Limity vrátené volaním
-> `GET /api/usage/budget` zahŕňajú `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> `warningThreshold` a priebežné súčty (`totalCostToday`, `totalCostMonth`, …).
+> Rozpočet API je vymedzený na** kľúč API** (`apiKeyId`). Limity vrátené `GET /api/usage/budget` zahŕňajú `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` a priebežné súčty (`totalCostToday`, `totalCostMonth`, ...).
 
-### Ceny
+### Stanovenie cien
 
-| Metóda   | Koncový bod             | Účel                                                                                                                              |
-| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Aktuálne zlúčené ceny (používateľské + synchronizované + predvolené). Pomocou `?includeSources=1` zobrazíte zdroj každej položky. |
-| `PATCH`  | `/api/pricing`          | Prepísanie cien pre `{ provider: { model: { input, output, cached, … } } }`.                                                      |
-| `DELETE` | `/api/pricing`          | Obnovenie predvolených cien (voliteľne obmedzené pomocou `?provider=&model=`).                                                    |
-| `GET`    | `/api/pricing/defaults` | Zobrazenie predvolených záložných sadzieb za 1 milión.                                                                            |
-| `GET`    | `/api/pricing/models`   | Ceny podľa modelu.                                                                                                                |
-| `POST`   | `/api/pricing/sync`     | Spustenie manuálnej synchronizácie z externých zdrojov (LiteLLM).                                                                 |
-| `GET`    | `/api/pricing/sync`     | Aktuálny stav synchronizácie.                                                                                                     |
-| `DELETE` | `/api/pricing/sync`     | Vymazanie všetkých synchronizovaných cenových údajov.                                                                             |
+| Metóda   | Koncový bod             | Účel                                                                                                                                                                           |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Zlúčené štvorvrstvové oceňovanie (používateľ, models.dev, LiteLLM, predvolené hodnoty). `?includeSources=1` vráti `pricing` + `sourceMap`.                                     |
+| `PATCH`  | `/api/pricing`          | Prepísať ceny pre `{ provider: { model: { input, output, cached, … } } }`.                                                                                                     |
+| `DELETE` | `/api/pricing`          | Odstráňte prepísania používateľských cien (voliteľne s rozsahom podľa `?provider=&model=`); synchronizované rýchlosti alebo vstavané predvolené hodnoty zostávajú ako záložné. |
+| `GET`    | `/api/pricing/defaults` | Zobraziť predvolené miery záložných hodnôt per-1M.                                                                                                                             |
+| `GET`    | `/api/pricing/models`   | Cena určená podľa modelu.                                                                                                                                                      |
+| `POST`   | `/api/pricing/sync`     | Spustite manuálnu synchronizáciu z externých zdrojov (LiteLLM).                                                                                                                |
+| `GET`    | `/api/pricing/sync`     | Aktuálny stav synchronizácie.                                                                                                                                                  |
+| `DELETE` | `/api/pricing/sync`     | Jasné len ceny synchronizované LiteLLM (`pricing_synced`); Údaje models.dev sú oddelené.                                                                                       |
 
-### Ďalšie koncové body súvisiace s nákladmi
+### Iné nákladovo relevantné koncové body
 
-| Metóda | Koncový bod                   | Účel                                                                                           |
-| ------ | ----------------------------- | ---------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | Celkový počet tokenov bezplatného modelu, využitie tento mesiac a zostávajúci bezplatný limit. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Využitie fondu zdieľanej kvóty.                                                                |
+| Metóda | Koncový bod                   | Účel                                                                                          |
+| ------ | ----------------------------- | --------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/free-tier/summary`      | Celkové súčty tokenov bezplatného modelu, použité tento mesiac a zostávajúce bezplatné kvóty. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Využitie pre spoločný fond kvót.                                                              |
 
 ---
 

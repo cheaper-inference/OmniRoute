@@ -19,6 +19,7 @@ import { compareTr } from "@/shared/utils/turkishText";
 import type { CodexGlobalServiceMode } from "@/lib/providers/codexFastTier";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
 import type { ConnectionDeleteConfirmState } from "../hooks/useConnectionDeleteConfirm";
+import type { QuotaRefreshState } from "../hooks/providerQuotaRefresh";
 import type { ProviderQuotaCacheEntry } from "../hooks/useProviderQuota";
 import { filterConnectionsByQuery } from "../connectionsSearchFilter";
 import {
@@ -26,6 +27,9 @@ import {
   matchesHealthFilter,
   VERIFICATION_REQUIRED_FILTER,
 } from "../connectionHealthFilter";
+
+/** Rows with no explicit Codex refresh outcome yet (stable reference across renders). */
+const NO_QUOTA_REFRESH_STATES: Readonly<Record<string, QuotaRefreshState>> = {};
 
 type ConnectionsListPanelProps = {
   connections: ConnectionRowConnection[];
@@ -92,6 +96,7 @@ type ConnectionsListPanelProps = {
   // Per-account quota strip (useProviderQuota) — threaded to every row.
   quotaByConnectionId: Record<string, ProviderQuotaCacheEntry>;
   quotaRefreshingIds: ReadonlySet<string>;
+  quotaRefreshStates?: Record<string, QuotaRefreshState>;
   handleRefreshQuota: (id: string) => void;
   // Modal triggers (all pass through from client, no closing over client internals)
   onOpenEditModal: (conn: ConnectionRowConnection) => void;
@@ -178,6 +183,7 @@ export default function ConnectionsListPanel({
   cpaProviderEnabled,
   quotaByConnectionId,
   quotaRefreshingIds,
+  quotaRefreshStates = NO_QUOTA_REFRESH_STATES,
   handleRefreshQuota,
   canAutoSync,
   onOpenEditModal,
@@ -484,6 +490,7 @@ export default function ConnectionsListPanel({
                 }
                 quotaCache={quotaByConnectionId[conn.id]}
                 quotaRefreshing={quotaRefreshingIds.has(conn.id)}
+                quotaRefreshState={quotaRefreshStates[conn.id]}
                 onRefreshQuota={() => handleRefreshQuota(conn.id)}
               />
             ))
@@ -685,6 +692,7 @@ export default function ConnectionsListPanel({
                     }
                     quotaCache={quotaByConnectionId[conn.id]}
                     quotaRefreshing={quotaRefreshingIds.has(conn.id)}
+                    quotaRefreshState={quotaRefreshStates[conn.id]}
                     onRefreshQuota={() => handleRefreshQuota(conn.id)}
                   />
                 ))}

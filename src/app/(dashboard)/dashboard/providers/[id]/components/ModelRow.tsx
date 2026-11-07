@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 /**
  * ModelRow — Issue #3501 Phase 1e
  *
@@ -22,6 +23,11 @@ import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Button, Checkbox, FilterPills } from "@/shared/components";
 import ModelComboBadge from "./ModelComboBadge";
 import ModelCompatPopover from "./ModelCompatPopover";
+import {
+  ContextWindowOverrideEditButton,
+  ContextWindowOverrideField,
+  useContextWindowOverrideEditor,
+} from "./ContextWindowOverrideEditor";
 import ModelEndpointTagsEditor, { type ModelEndpointEditorInfo } from "./ModelEndpointTagsEditor";
 
 // ---------------------------------------------------------------------------
@@ -269,6 +275,11 @@ export interface ModelRowProps {
   onTestModel?: (modelId: string, fullModel: string) => Promise<void>;
   testStatus?: "ok" | "error" | "quota" | null;
   testingModel?: boolean;
+  // Manual context-window override for catalog models. Opt-in: without the
+  // callback the row renders exactly as before (no badge, no editor).
+  contextWindowOverride?: number | null;
+  onSaveContextWindowOverride?: (modelId: string, value: number | null) => Promise<void>;
+  savingContextOverride?: boolean;
   endpointInfo?: ModelEndpointEditorInfo;
 }
 
@@ -294,9 +305,17 @@ export default function ModelRow({
   onTestModel,
   testStatus,
   testingModel,
+  contextWindowOverride,
+  onSaveContextWindowOverride,
+  savingContextOverride,
   endpointInfo,
 }: ModelRowProps) {
   const isHidden = Boolean(model.isHidden);
+  const contextEditor = useContextWindowOverrideEditor({
+    modelId: model.id,
+    override: contextWindowOverride,
+    onSave: onSaveContextWindowOverride,
+  });
   const [editing, setEditing] = useState(false);
   const [aliasValue, setAliasValue] = useState(alias || "");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -364,6 +383,14 @@ export default function ModelRow({
       <div className="flex min-w-0 items-center gap-2 pl-6">
         <ModelSourceBadge source={model.source} />
         {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
+        {onSaveContextWindowOverride && (
+          <ContextWindowOverrideField
+            editor={contextEditor}
+            override={contextWindowOverride}
+            saving={savingContextOverride}
+            t={t}
+          />
+        )}
         {onSetAlias && (
           <span className="flex min-w-0 flex-1 items-center text-[10px] gap-1">
             {editing ? (
@@ -415,6 +442,9 @@ export default function ModelRow({
               <span>{providerText(t, "blacklistModel", "Blacklist")}</span>
             </Button>
           )}
+          {onSaveContextWindowOverride && (
+            <ContextWindowOverrideEditButton editor={contextEditor} t={t} />
+          )}
           {onTestModel && (
             <Button
               variant="ghost"
@@ -446,7 +476,7 @@ export default function ModelRow({
               }
             >
               {testingModel ? (
-                <Icon name="progress_activity" size={14} className="animate-spin" />
+                <Spinner decorative size="xs" />
               ) : testStatus === "ok" ? (
                 <Icon name="check_circle" size={14} />
               ) : testStatus === "quota" ? (

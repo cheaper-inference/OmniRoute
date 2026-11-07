@@ -48,6 +48,15 @@ describe("matchesHealthFilter", () => {
     expect(pick(VERIFICATION_REQUIRED_FILTER)).toEqual(["pending"]);
   });
 
+  it("treats a prefix-shadowed connection as an error, not active (#17339)", () => {
+    const shadowed = conn({
+      id: "shadowed",
+      prefixShadowed: { code: "prefix_shadowed", message: "Prefix routes to the builtin" },
+    });
+    expect(matchesHealthFilter(shadowed, "active")).toBe(false);
+    expect(matchesHealthFilter(shadowed, "error")).toBe(true);
+  });
+
   it("counts the connections that still need verification", () => {
     expect(countVerificationRequired(all)).toBe(1);
     expect(countVerificationRequired([healthy, failing])).toBe(0);

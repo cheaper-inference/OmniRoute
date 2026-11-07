@@ -12,7 +12,10 @@ providers:
         messages:
           - role: user
             content: "{{prompt}}"
-      transformResponse: "json"
+      # HTTP 400 is the expected guard outcome. Preserve the complete body as
+      # output text; a top-level object.error is interpreted as a provider failure.
+      validateStatus: "status === 400"
+      transformResponse: "JSON.stringify(json)"
 defaultTest:
   options:
     provider: https

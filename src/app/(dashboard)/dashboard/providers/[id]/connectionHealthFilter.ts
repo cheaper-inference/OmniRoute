@@ -12,7 +12,7 @@ export const VERIFICATION_REQUIRED_FILTER = "verification_required";
 
 export function isHealthyConnection(c: ConnectionRowConnection): boolean {
   const s = c.testStatus;
-  return c.isActive !== false && (!s || s === "active" || s === "success");
+  return c.isActive !== false && !c.prefixShadowed && (!s || s === "active" || s === "success");
 }
 
 export function needsVerification(c: ConnectionRowConnection): boolean {
