@@ -1,1 +1,0 @@
-- **fix(dashboard):** Show the Kimi provider name in quota cards, overview groups and the provider filter instead of its internal moonshot identifier.
