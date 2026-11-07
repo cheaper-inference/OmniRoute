@@ -3,6 +3,7 @@ import {
   getRegistryEntry,
 } from "@omniroute/open-sse/config/providerRegistry";
 import { getSearchProvider } from "@omniroute/open-sse/config/searchRegistry.ts";
+import { resolveAntigravityModelId } from "@omniroute/open-sse/config/antigravityModelAliases.ts";
 import {
   getProviderModels,
   PROVIDER_ID_TO_ALIAS,
@@ -574,14 +575,20 @@ export async function reconcileProvidersWithActiveSyncedCatalog(
     const isMatchingProviderPrefix =
       slash > 0 && catalogLookupIds(canonicalProvider).includes(qualifiedProvider);
     const candidateIds = isMatchingProviderPrefix ? [modelId.slice(slash + 1), modelId] : [modelId];
+    // Legacy Antigravity tier ids route through a declared shared wire id.
+    // Unknown suffixes and unrelated providers stay governed by the live roster.
+    const liveModelIds =
+      canonicalProvider === "antigravity" || canonicalProvider === "agy"
+        ? Array.from(new Set([...candidateIds, ...candidateIds.map(resolveAntigravityModelId)]))
+        : candidateIds;
     const registryModel = getProviderModels(provider).find((model) =>
-      candidateIds.includes(model.id)
+      liveModelIds.includes(model.id)
     );
     const declaredLiveIds = Array.isArray(registryModel?.liveCatalogIds)
       ? registryModel.liveCatalogIds
       : [];
     const modelIsLive = catalog.models.some(
-      (model) => candidateIds.includes(model.id) || declaredLiveIds.includes(model.id)
+      (model) => liveModelIds.includes(model.id) || declaredLiveIds.includes(model.id)
     );
     // Cursor auto-router: always allow `auto` / router variants even if a stale live
     // catalog omitted them (AvailableModels / agent list often returns wire id
