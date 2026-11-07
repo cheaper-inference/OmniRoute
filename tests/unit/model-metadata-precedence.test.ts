@@ -86,6 +86,70 @@ test("operator-set endpoints DO override discovered endpoints", () => {
   assert.equal(merged.endpointCapabilitySource, "operator");
 });
 
+test("defaulted custom endpoints do not mask unmarked non-chat discovered endpoints", () => {
+  const base = { id: "text-embedding-3-small", supportedEndpoints: ["embeddings"] };
+  const custom = {
+    id: "text-embedding-3-small",
+    supportedEndpoints: ["chat"],
+    endpointCapabilitySource: "defaulted",
+  };
+  const merged = mergeCustomModelMetadata(base, custom);
+  assert.deepEqual(merged.supportedEndpoints, ["embeddings"]);
+  assert.equal(merged.endpointCapabilitySource, undefined);
+});
+
+test("defaulted custom endpoints still fill a discovered chat-only row", () => {
+  const base = { id: "m", supportedEndpoints: ["chat"] };
+  const custom = {
+    id: "m",
+    supportedEndpoints: ["chat", "responses"],
+    endpointCapabilitySource: "defaulted",
+  };
+  const merged = mergeCustomModelMetadata(base, custom);
+  assert.deepEqual(merged.supportedEndpoints, ["chat", "responses"]);
+  assert.equal(merged.endpointCapabilitySource, "defaulted");
+});
+
+test("the default apiFormat of a defaulted custom row does not mask the discovered one", () => {
+  const base = {
+    id: "mistral-embed",
+    supportedEndpoints: ["embeddings"],
+    endpointCapabilitySource: "inferred",
+    apiFormat: "embeddings",
+  };
+  const custom = {
+    id: "mistral-embed",
+    apiFormat: "chat-completions",
+    supportedEndpoints: ["chat"],
+    endpointCapabilitySource: "defaulted",
+  };
+  assert.equal(mergeCustomModelMetadata(base, custom).apiFormat, "embeddings");
+  assert.equal(
+    mergeCustomModelMetadata(base, { ...custom, apiFormat: "responses" }).apiFormat,
+    "responses"
+  );
+});
+
+test("an unmarked legacy custom row yields only its bare chat placeholder", () => {
+  const base = {
+    id: "mistral-embed",
+    supportedEndpoints: ["embeddings"],
+    endpointCapabilitySource: "inferred",
+  };
+  assert.deepEqual(
+    mergeCustomModelMetadata(base, { id: "mistral-embed", supportedEndpoints: ["chat"] })
+      .supportedEndpoints,
+    ["embeddings"]
+  );
+  assert.deepEqual(
+    mergeCustomModelMetadata(base, {
+      id: "mistral-embed",
+      supportedEndpoints: ["embeddings", "chat"],
+    }).supportedEndpoints,
+    ["embeddings", "chat"]
+  );
+});
+
 test("with no custom models the base list is returned as a copy", () => {
   const base = [{ id: "a" }, { id: "b" }];
   const merged = mergeModelsWithCustomPrecedence(base, []);
