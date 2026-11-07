@@ -231,6 +231,15 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
   },
 };
 
+// Normalize legacy and modern opt-in flags without inflating the large resolvers.
+function normalizeAntigravityToggle(
+  section: unknown,
+  legacyEnabled: unknown,
+  fallback: boolean
+): { enabled: boolean } {
+  return { enabled: toBoolean(asRecord(section).enabled, toBoolean(legacyEnabled, fallback)) };
+}
+
 function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
   const profiles = asRecord(settings.providerProfiles);
   const defaults = asRecord(settings.rateLimitDefaults);
@@ -373,15 +382,11 @@ export function resolveResilienceSettings(
   const fallback = buildLegacyFallback(record);
 
   const resolved: ResilienceSettings = {
-    antigravityTimingTelemetry: {
-      enabled: toBoolean(
-        asRecord(current.antigravityTimingTelemetry).enabled,
-        toBoolean(
-          legacyAntigravitySettings.timingTelemetryEnabled,
-          fallback.antigravityTimingTelemetry.enabled
-        )
-      ),
-    },
+    antigravityTimingTelemetry: normalizeAntigravityToggle(
+      current.antigravityTimingTelemetry,
+      legacyAntigravitySettings.timingTelemetryEnabled,
+      fallback.antigravityTimingTelemetry.enabled
+    ),
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(
@@ -455,12 +460,9 @@ export function mergeResilienceSettings(
   updates: ResilienceSettingsPatch
 ): ResilienceSettings {
   return {
-    antigravityTimingTelemetry: {
-      enabled: toBoolean(
-        updates.antigravityTimingTelemetry?.enabled,
-        current.antigravityTimingTelemetry.enabled
-      ),
-    },
+    antigravityTimingTelemetry: normalizeAntigravityToggle(
+      updates.antigravityTimingTelemetry, undefined, current.antigravityTimingTelemetry.enabled
+    ),
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(
