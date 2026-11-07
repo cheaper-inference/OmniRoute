@@ -1,0 +1,1 @@
+- **feat(contrib):** OmniRoute Tray for Linux (KDE Plasma 6 plasmoid + PySide6 tray) under `contrib/omniroute-tray-linux`, installed from the local checkout only (no remote clone or self-update) ([#14196](https://github.com/diegosouzapw/OmniRoute/pull/14196)) — thanks @Susanthakuri92
