@@ -22,6 +22,7 @@ import {
 import {
   applyServerOwnedToolLoopIfNeeded,
   derivePostInjectionRequestIdentity,
+  finalizeServerOwnedFollowUpRequest,
   followUpLegInput,
 } from "../chatCore/serverOwnedToolLoopWire.ts";
 
@@ -115,6 +116,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     finalBody: _finalBody,
     geminiPromptCacheMode,
     finalizePendingScope,
+    forcedConnectionId,
     getCurrentConnectionId,
     getManagedLeaseFenceErrorCode,
     getModelNormalizeToolCallId,
@@ -345,7 +347,11 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       expectedConnectionId: managedLease
         ? String(getCurrentConnectionId() || connectionId || "") || undefined
         : undefined,
-      allowAccountRotation: !managedLease && comboStrategy !== "context-relay",
+      // The connection pin is strict (API_REFERENCE: "used exclusively", cooldown on
+      // failure, no sibling rotation). The outer retry loop honours it; the in-pipeline
+      // account rotation must too, or a pinned 429 is silently answered by another account.
+      allowAccountRotation:
+        !managedLease && comboStrategy !== "context-relay" && !forcedConnectionId,
       allowModelFallback: true,
       hasApiKeyMetadata: Boolean(apiKeyInfo),
       executeProviderRequest: (modelToCall, allowDedup, policy, rejection) =>
@@ -553,6 +559,12 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
             },
           }
         );
+        const followUpFinalized = finalizeServerOwnedFollowUpRequest({
+          translatedBody: translatedBody as Record<string, unknown>,
+          provider,
+          targetFormat,
+        });
+        translatedBody = followUpFinalized.translatedBody;
         syncExecuteTranslatedBody(translatedBody);
         return runNonStreamingProviderLeg(
           followUpLegInput(
@@ -575,9 +587,9 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
               getCurrentConnectionId: () => getCurrentConnectionId() || undefined,
               effectiveModel: currentModel,
               translatedBody: translatedBody as Record<string, unknown>,
-              toolNameMap,
+              toolNameMap: followUpFinalized.toolNameMap,
               customToolNames,
-              requestToolIdentityMap,
+              requestToolIdentityMap: followUpFinalized.requestToolIdentityMap,
               reasoningCacheScope,
               reasoningReplayHistory,
               videoTranscriptSensitive: videoBridgeObserved,

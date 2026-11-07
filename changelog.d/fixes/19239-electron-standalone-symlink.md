@@ -1,0 +1,1 @@
+- **fix(electron):** The shared web build packs and restores again: colocated packages keep their relative `.bin` links, restored links verify on Windows, and restoring a 123k-entry bundle no longer takes hours ([#19239](https://github.com/cheaper-inference/OmniRoute/pull/19239))

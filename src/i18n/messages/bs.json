@@ -1000,6 +1000,8 @@
     "batchListTitle": "Serije",
     "batchListCount": "{count} serija",
     "batchListRemovingCompleted": "Uklanjanje…",
+    "batchListRemoveCompletedPartial": "Uklonjen je veliki broj paketa. Kliknite ponovo da biste uklonili preostale.",
+    "batchListRemoveCompletedFailed": "Došlo je do greške prilikom uklanjanja paketa.",
     "batchListRemoveCompleted": "Ukloni završene",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",
@@ -1038,6 +1040,12 @@
     "batchListRefreshing": "Osvježavanje…",
     "batchListRefresh": "Osvježi",
     "uploadFileModalRemove": "Ukloni",
+    "fileInputChoose": "Odaberi datoteku",
+    "fileInputChooseMultiple": "Odaberi datoteke",
+    "fileInputEmpty": "Nije odabrana nijedna datoteka",
+    "fileInputSelectedCount": "{count, plural, one {Odabrana je # datoteka} other {Odabrano je # datoteka}}",
+    "fileDropLabel": "Ispusti datoteku ovdje ili je odaberi",
+    "fileDropLabelMultiple": "Ispusti datoteke ovdje ili ih odaberi",
     "uploadFileModalUploading": "Otpremanje…",
     "wizardInputReading": "Čitanje datoteke…",
     "wizardInputReady": "Spreman",
@@ -6106,6 +6114,7 @@
     "perModelQuotaDescription": "Kada je omogućeno, 429/404 greške zaključavaju samo specifični model, a ne cijelu vezu. Koristite za provajdere sa limitima brzine po modelu (npr. ModelScope).",
     "importFreeModelsOnlyLabel": "Uvezi samo besplatne modele",
     "importFreeModelsOnlyHint": "Kada je omogućeno, uvoze se samo besplatni modeli ovog provajdera. Plaćeni modeli se preskaču.",
+    "importFreeModelsOnlyCompatibleHint": "Kada je uključeno, uvoze se samo modeli koje lista /models ove krajnje tačke označava kao besplatne (:free id, oznaka besplatno ili nulte cijene). Plaćeni modeli i modeli bez podataka o cijenama se preskaču.",
     "perModelQuotaToggle": "Prekidač za kvote po modelu",
     "modelId": "ID modela",
     "customModelPlaceholder": "npr. Gpt-4.5-turbo",
@@ -6164,6 +6173,53 @@
     "applyClaudeAuthLocal": "Primijeni autentifikaciju",
     "exportClaudeAuthFile": "Izvezi autentifikaciju",
     "importClaudeAuth": "Uvezi autentifikaciju",
+    "importAgyAuth": "Uvezi autentifikaciju",
+    "agyImportTitle": "Poveži Antigravity (Google Cloud Code)",
+    "agyImportTabLocal": "1-Kliknite na Local CLI",
+    "agyImportTabSingle": "File / Paste Token",
+    "agyImportTabBulk": "Bulk Import",
+    "agyImportLocalHeading": "Automatsko otkrivanje aktivne sesije",
+    "agyImportLocalIntro": "Otkriva aktivnu Google Cloud Code / Antigravity CLI prijavu iz:",
+    "agyImportLocalSourceEnv": "Datoteka tokena nazvana varijablom okruženja AGY_TOKEN_FILE",
+    "agyImportLocalSourceKeyring": "Linux Secret Service / privjesak za ključeve (service=gemini, user=antigravity)",
+    "agyImportLocalSourceCli": "Lokalni profili CLI tokena (~/.gemini/antigravity-cli/)",
+    "agyImportLocalNote": "Nije potrebna prijava na pretraživač, iskačući prozor ili ručna kopija OAuth koda. Token ostaje u OmniRoute čak i ako se odjavite iz CLI.",
+    "agyImportLocalOverwrite": "Zamijenite / osvježite postojeću vezu ako je već uvezena",
+    "agyImportLocalSubmit": "Uvoz iz lokalne Antigravity",
+    "agyImportLocalNotFound": "Nije otkrivena lokalna prijava Antigravity CLI.",
+    "agyImportLocalCreated": "Antigravity nalog povezan sa lokalne sesije.",
+    "agyImportLocalRefreshed": "Lokalna Antigravity veza je osvježena.",
+    "agyImportLocalFailed": "Povezivanje lokalne Antigravity sesije nije uspjelo",
+    "agyImportInvalidToken": "Nevažeći format tokena (nedostaje access_token ili refresh_token)",
+    "agyImportParseFileFailed": "Nije moguće raščlaniti datoteku kao JSON",
+    "agyImportParsePasteFailed": "Nije moguće raščlaniti zalijepljeni sadržaj kao JSON",
+    "agyImportDuplicate": "Račun već postoji. Označite \"Zamijeni postojeće\" da ga prepišete.",
+    "agyImportFailed": "Uvoz Antigravity akreditiva nije uspio",
+    "agyImportSuccess": "Antigravity račun uvezen.",
+    "agyImportInvalidJson": "Nevažeći JSON",
+    "agyImportAccountN": "Račun #{index}",
+    "agyImportNoValidEntries": "Nema važećih unosa za uvoz",
+    "agyImportBulkFailed": "Grupni uvoz nije uspio",
+    "agyImportBulkSuccess": "Antigravity nalozi uvezeni: {count}",
+    "agyImportBulkRunFailed": "Pokretanje masovnog uvoza nije uspjelo",
+    "agyImportUploadFile": "Upload file",
+    "agyImportPasteJson": "Paste JSON",
+    "agyImportFileHint": "Odaberite antigravity-oauth-token datoteku ili izvezenu JSON datoteku tokena",
+    "agyImportValidToken": "Otkriven je važeći token:",
+    "agyImportConnectionName": "Naziv veze (opcionalno)",
+    "agyImportConnectionNamePlaceholder": "npr. radni račun",
+    "agyImportEmailLabel": "E-pošta (opcija zamjena)",
+    "agyImportReplaceSingle": "Zamijenite postojeću vezu ako e-pošta već postoji",
+    "agyImportSubmitSingle": "Uvezi račun",
+    "agyImportUploadFiles": "Upload files",
+    "agyImportPasteJsonArray": "Zalijepi JSON niz",
+    "agyImportBulkFileHint": "Odaberite jednu ili više datoteka JSON tokena",
+    "agyImportStaged": "Fajlovi postavljeni: {count}",
+    "agyImportValid": "Valid",
+    "agyImportResults": "Rezultati uvoza:",
+    "agyImportResultsSummary": "Uspjelo: {success} · Nije uspjelo: {failed} · Ukupno: {total}",
+    "agyImportReplaceBulk": "Zamijenite postojeće veze na email matchu",
+    "agyImportSubmitBulk": "Uvezi sve",
     "claudeApplyModalTitle": "Primijeni na Local Claude Code",
     "claudeApplyTargetLabel": "Ciljna putanja",
     "claudeApplyBackupLabel": "Rezervne kopije",
@@ -7105,7 +7161,16 @@
     "chatgptConnectorLabel": "ChatGPT prilagođeni konektor",
     "doctorChecking": "Provjeravanje statusa…",
     "doctorCheck": "Provjeri status liječnika",
-    "fallbackRetryBackendTitle": "Pozadišni servis za ponavljanje u slučaju pada"
+    "fallbackRetryBackendTitle": "Pozadišni servis za ponavljanje u slučaju pada",
+    "quotaRefreshCurrent": "Osvježi trenutnu kvotu",
+    "quotaRefreshCurrentHint": "Provjerava trenutnu kvotu ovog računa bez trošenja kredita za resetovanje.",
+    "quotaRefreshing": "Provjera kvote…",
+    "quotaRefreshFresh": "Kvota je provjerena. Server određuje dostupnost računa.",
+    "quotaRefreshFailed": "Provjera kvote nije uspjela. Prethodni podaci nisu promijenjeni.",
+    "quotaRefreshStale": "Server je vratio stare podatke o kvoti. Ovo nije novo očitanje.",
+    "quotaRefreshPartial": "Dostupan je samo dio podataka o kvoti.",
+    "quotaWindowUnavailable": "Kvota za {window} nije dostupna",
+    "quotaConnectionRefreshFailed": "Provjera kvote je završena, ali lista računa nije mogla biti osvježena."
   },
   "settings": {
     "title": "Postavke",
@@ -7340,6 +7405,8 @@
     "enableThinking": "Omogući razmišljanje (Thinking)",
     "maxThinkingTokens": "Maksimalno tokena za razmišljanje",
     "enableProxy": "Omogući proxy",
+    "defaultNewConnectionProxyEnabled": "Podrazumijevano uključi proxy za nove veze",
+    "defaultNewConnectionProxyEnabledDesc": "Postavlja početno stanje proxyja za nove račune pružalaca, osim ako je izričito odabrano drugačije. Postojeće veze se ne mijenjaju. Usmjeravanje zavisi od globalnih postavki i konfiguracije proxyja. Svaki račun možete kasnije promijeniti.",
     "perKeyProxyEnabled": "Omogući dodjelu proxy-ja po ključu",
     "perKeyProxyEnabledDesc": "Kada je omogućeno, svaka konekcija provajdera može koristiti vlastitu dodjelu proxy-ja",
     "proxyUrl": "URL proxyja",
@@ -9276,7 +9343,12 @@
       "statsTitle": "Otkrivanja od ponovnog pokretanja",
       "statsEmpty": "Još nema otkrivanja.",
       "statsRequest": "Zahtjevi"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "Zadrži izvedene kadrove videozapisa",
+    "modalityBridgeVideoDrilldownEnabledDesc": "Dozvoli privremeno zadržavanje JPEG datoteka samo kada autentificirani zahtjev također postavlja drilldown: true. Izvorni videozapisi se nikada ne zadržavaju.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "Dozvoli autentificiranu detaljnu analizu kadrova",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Dozvoli API ključevima da čitaju i brišu samo vlastite neprozirne identifikatore. Anonimni pristup ili pristup između različitih ključeva nije dozvoljen.",
+    "modalityBridgeVideoDrilldownUsage": "Zadržane JPEG datoteke / bajtovi"
   },
   "contextRtk": {
     "title": "RTK pogon",
@@ -14259,9 +14331,13 @@
         "label": "Redoslijed poola sa zajedničkim izlazom",
         "description": "Za pružaoce usluga čija se kvota raspoređuje prema izlaznoj adresi, rangira člana poola koji dijeli uočenu izlaznu adresu nedavno odbijenog člana neposredno ispod ispravnih članova. Mijenja se samo redoslijed, nikada se ne isključuje. Zahtijeva PROXY_SKIP_RECENTLY_FAILED, koji generiše signal odbijanja koji se očitava. Isključeno po zadanim postavkama: redoslijed odabira je identičan običnoj rotaciji."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Odbijanja kvota u okviru modela",
+        "description": "Primijenite opencode kvotu 429 samo na model koji ju je pogodio, tako da isti izlaz nastavlja služiti drugim modelima, i obrišite ga samo kada taj model uspije. Potrošači koji nemaju model (rotacija bazena, parkiranje i ponovno igranje, vidljivost administratora, okidač birača, pregled zdravlja) i dalje ga vide. Potreban je PROXY_SKIP_RECENTLY_FAILED, koji proizvodi odbijanje. Isključeno prema zadanim postavkama: kvota jednog modela 429 stavlja izlaz na stranu za svaki model."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Proxy preuzimanje: stroga POST repriza",
+        "description": "Za zahtjev koji nije idempotentan (POST, PUT, PATCH, DELETE), ponovo pošaljite nakon transportne greške (svježa utičnica, proxy rezervni, izvorni rezervni) samo kada greška dokaže da ništa nije poslano: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ili vremensko ograničenje povezivanja. Greška utičnice nakon pisanja može značiti da je upstream prihvatio zahtjev, tako da bi ponovno slanje moglo generirati i naplatiti ga dva puta. Isključeno prema zadanim postavkama: tijelo koje se može reproducirati se ponovo šalje jednom prilikom svake greške u transportu, što također oporavlja zastarjeli skupni soket."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Evidentiranje atribucije rotacije",
@@ -14314,6 +14390,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 ponovni odabir bazena",
         "description": "Za OpenCode rotaciju s više računa, nakon 429 odgovora od egress-bucketed provajdera na računu bez proxyja pod kontekstom ambijentalnog bazena, zatraži od bazena konekcija drugog člana za sljedeći pokušaj umjesto ponovnog pokušaja na istoj egress adresi. Raspoređuje, nikada ne isključuje: iscrpljeni bazen zadržava trenutno ponašanje. Podrazumijevano isključeno: svaki 429 rotira na sljedeći račun tačno kao i ranije."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode izlazna sonda slobodnog nivoa",
+        "description": "Za OpenCode executor, kada se na proxy zahtjev odgovori 403 ili 451 FreeTierError i pokušaj ponovnog pokušaja promatranih alata nije uspio ili se ne primjenjuje, pošaljite zahtjev jednom preko drugog proxy servera (drugi proxy naloga ili drugi član skupa, nikad direktna veza). Tek kada ta sonda odgovori na 200, prvi izlaz se ostavlja po strani u memoriji odbijanja proxy servera i služi odgovor sonde; kada oboje odbiju, originalno odbijanje se vraća i ništa se ne evidentira. Isti tekst odbijanja pokriva označeni izlazni IP i odbijeni oblik zahtjeva, tako da ih sonda razlikuje dokazima. Podrazumevano isključeno: odbijanje se vraća nepromenjeno."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Otisak OpenCode v2 klijenta",
@@ -14496,8 +14576,8 @@
         "description": "Kada cilj komboa odgovori tačnim odbijanjem zbog politike sadržaja (kod ili tip cyber_policy / content_policy_violation), zaustavite combo i vratite to odbijanje čak i kada su preostali ciljevi različiti modeli, umjesto prelaska na sljedeći cilj. Podrazumijevano isključeno: odbijanje nikada ne hladi nalog niti aktivira prekidač pružaoca usluge, a combo prelazi na svoj sljedeći cilj tačno kao i ranije."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Odgovori: samo preko transporta",
+        "description": "Pošaljite odgovore kao praznu liniju umjesto response.in_progress događaja, tako da sintetički snimak nikada ne može zamijeniti pravi odgovor u službenom SDK. Prazan red ne šalje SSE događaj, tako da se klijent čuvar koji se resetuje samo na događaje ne bi resetovao tokom duge tihe faze. Isključeno prema zadanim postavkama: tajmeri šalju response.in_progress događaj koji vrijedi za specifikaciju."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovni pokušaj tokom hlađenja: Preskoči odbijanja 403/410",
@@ -15206,6 +15286,63 @@
       "save": "Sačuvaj pravila",
       "saved": "Pravila perioda hlađenja su sačuvana",
       "saveFailed": "Čuvanje pravila perioda hlađenja nije uspjelo"
+    },
+    "errorRules": {
+      "title": "Pravila perioda hlađenja za greške",
+      "subtitle": "Prepoznajte greške provajdera po HTTP statusu, tekstu greške ili oboje i odaberite šta i koliko dugo pauzirati. Ova pravila se primjenjuju prije ugrađenih.",
+      "rulesHeading": "Pravila",
+      "rulesEmpty": "Još nema pravila.",
+      "addRule": "Dodaj pravilo",
+      "provider": "Provajder",
+      "providerPlaceholder": "npr. openai",
+      "status": "HTTP status",
+      "statusPlaceholder": "Bilo koji",
+      "match": "Tekst greške sadrži",
+      "matchPlaceholder": "Bilo koji tekst",
+      "matchHint": "Važi prvo pravilo koje se podudara. Tekst greške je običan tekst bez razlikovanja velikih i malih slova, a ne regularni izraz. Prazno polje odgovara svemu.",
+      "scope": "Pauziraj",
+      "scopes": {
+        "connection": "Ovu vezu",
+        "model": "Samo ovaj model",
+        "provider": "Cijelog provajdera"
+      },
+      "reason": "Razlog",
+      "reasonAuto": "Automatski",
+      "reasons": {
+        "quota_exhausted": "Kvota potrošena",
+        "rate_limit_exceeded": "Prekoračeno ograničenje zahtjeva",
+        "auth_error": "Greška autentifikacije",
+        "model_capacity": "Model je preopterećen",
+        "server_error": "Greška servera",
+        "unknown": "Ostalo"
+      },
+      "duration": "Trajanje",
+      "durations": {
+        "auto": "Zadano",
+        "30m": "30 minuta",
+        "1h": "1 sat",
+        "5h": "5 sati",
+        "24h": "24 sata",
+        "custom": "Prilagođeno"
+      },
+      "customMinutes": "Minute (od 1 do 43200)",
+      "remove": "Ukloni",
+      "defaultsHeading": "Zadano za greške bez pravila",
+      "defaultsHint": "Neobavezno, po provajderu. Primjenjuje se samo kad nijedno pravilo ne odgovara grešci 402, 403, 408, 429 ili 5xx. Greške zahtjeva, poput 400, nikad nisu obuhvaćene.",
+      "defaultsEmpty": "Zadana vrijednost nije postavljena. Greške bez pravila zadržavaju ugrađeno ponašanje.",
+      "addDefault": "Dodaj zadanu vrijednost",
+      "errors": {
+        "provider": "Unesite provajdera.",
+        "condition": "Postavite HTTP status, tekst greške ili oboje.",
+        "status": "Koristite status između 100 i 599.",
+        "duration": "Unesite od 1 do 43200 minuta.",
+        "duplicateDefault": "Ovaj provajder već ima zadanu vrijednost.",
+        "tooMany": "Najviše 50 pravila."
+      },
+      "save": "Sačuvaj pravila grešaka",
+      "saved": "Pravila grešaka sačuvana",
+      "saveFailed": "Pravila grešaka nije moguće sačuvati",
+      "loadFailed": "Pravila grešaka nije moguće učitati"
     },
     "list": {
       "title": "Konekcije van usmjeravanja",

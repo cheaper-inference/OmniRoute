@@ -90,11 +90,9 @@ function KeyAccessRow({
         aria-busy={pending || undefined}
         title={hint ?? undefined}
         disabled={disabled || lastItem}
-        className={cn(
-          "ci-switch--compact",
-          (disabled || lastItem) && "opacity-50",
-          pending && "opacity-60"
-        )}
+        size="sm"
+        // The kit dims a disabled bare switch itself (opacity .48).
+        className={cn(pending && "opacity-60")}
         onCheckedChange={() => void toggle()}
       />
     </div>

@@ -330,6 +330,23 @@ export function isProxyPoolSharedEgressOrderEnabled(): boolean {
 }
 
 /**
+ * Model-scoped quota refusals on opencode (opt-in, default off): a quota 429 sets the egress aside
+ * only for the model that hit it. Fail-closed: an unreadable flag store keeps the whole-egress
+ * set-aside.
+ */
+export function isProxyRefusalModelScopeEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("PROXY_REFUSAL_MODEL_SCOPE");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve PROXY_REFUSAL_MODEL_SCOPE, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/**
  * Rotation attribution (skipped-account log lines, per-account rotation state,
  * masked serving-account id and request correlation on proxy log entries).
  * Opt-in; an unreadable flag store keeps it hidden (fail-safe off).
@@ -497,6 +514,19 @@ export function isOpencodePoolReselectEnabled(): boolean {
   } catch (error) {
     console.error(
       "[featureFlags] Failed to resolve OPENCODE_POOL_RESELECT, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/** OPENCODE_FREE_TIER_EGRESS_PROBE (default off): probe one other proxy after a FreeTierError. */
+export function isOpencodeFreeTierEgressProbeEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("OPENCODE_FREE_TIER_EGRESS_PROBE");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve OPENCODE_FREE_TIER_EGRESS_PROBE, defaulting to disabled:",
       error instanceof Error ? error.message : error
     );
     return false;
