@@ -57,6 +57,7 @@ import type { CompressionExclusions } from "@omniroute/open-sse/services/compres
 import { resolveComboConfig } from "@omniroute/open-sse/services/comboConfig.ts";
 import { injectHandoffIntoBody } from "@omniroute/open-sse/services/contextHandoff.ts";
 import { runWithTransientBackendRetry } from "@omniroute/open-sse/services/transientBackendRetry.ts";
+import { isMarkedLocalProcessPressureResponse } from "@omniroute/open-sse/utils/localPressureResponse.ts";
 import {
   HTTP_STATUS,
   ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
@@ -1308,10 +1309,12 @@ async function handleChatImplementation(
     comboPreselectedCredentials.clear();
 
     // ── Global Fallback Provider (#689) ────────────────────────────────────
-    // If combo exhausted all models, try the global fallback before giving up.
+    // If combo exhausted all models, try the global fallback before giving up. A local pressure
+    // shed did not exhaust anything: the fallback would only be shed again, with retries.
     if (
       !response.ok &&
       [502, 503].includes(response.status) &&
+      !isMarkedLocalProcessPressureResponse(response) &&
       typeof (settings as any)?.globalFallbackModel === "string" &&
       (settings as any).globalFallbackModel.trim()
     ) {
