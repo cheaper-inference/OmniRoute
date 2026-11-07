@@ -7,6 +7,12 @@
  */
 
 import { saveCallLog } from "@/lib/usageDb";
+import {
+  downloadUpstreamMedia,
+  UPSTREAM_MEDIA_LIMITS,
+  upstreamMediaErrorText,
+} from "@/shared/network/remoteImageFetch";
+import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { abortedVideoResult, POLL_ABORTED, pollJsonAfter } from "./abort.ts";
 
 // Catalog id -> Leonardo `model` enum for POST /generations-text-to-video. `phoenix` was the
@@ -65,18 +71,22 @@ async function downloadLeonardoVideo(
   signal: AbortSignal | null,
   timeoutMs = LEONARDO_VIDEO_DOWNLOAD_TIMEOUT_MS
 ): Promise<ArrayBuffer | typeof POLL_ABORTED | { status: number; error: string }> {
-  const timeout = AbortSignal.timeout(timeoutMs);
   try {
-    const res = await fetch(videoUrl, {
-      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+    const { buffer } = await downloadUpstreamMedia(videoUrl, {
+      maxBytes: UPSTREAM_MEDIA_LIMITS.video.maxBytes,
+      timeoutMs,
+      signal,
     });
-    if (!res.ok)
-      return { status: 502, error: `Leonardo video download failed (HTTP ${res.status})` };
-    return await res.arrayBuffer();
+    return new Uint8Array(buffer).buffer;
   } catch (err) {
     if (signal?.aborted) return POLL_ABORTED;
-    if (timeout.aborted) return { status: 504, error: "Leonardo video download timed out" };
-    throw err;
+    if (err instanceof Error && err.name === "TimeoutError") {
+      return { status: 504, error: "Leonardo video download timed out" };
+    }
+    return {
+      status: 502,
+      error: `Leonardo video download failed: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
+    };
   }
 }
 
