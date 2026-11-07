@@ -1,1 +1,0 @@
-- **fix(codex):** cached quota exhaustion no longer rejects accounts with positive remaining quota at the shared 99% safety threshold; configurable early cutoffs and genuine exhaustion remain enforced ([#18735](https://github.com/cheaper-inference/OmniRoute/pull/18735) — thanks @insoln).
