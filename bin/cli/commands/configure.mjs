@@ -2,7 +2,7 @@ import os from "node:os";
 import path from "node:path";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { apiFetch } from "../api.mjs";
-import { loadContexts, resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, loadContexts, resolveActiveContext } from "../contexts.mjs";
 import { createPrompt, printSuccess, printError, printInfo, printHeading } from "../io.mjs";
 import { t } from "../i18n.mjs";
 import { guardHostConfigTarget } from "../utils/config-home-guard.mjs";
@@ -85,7 +85,13 @@ export function resolveConfigureTargetOptions(opts = {}) {
     resolved.remote = resolved.baseUrl;
   }
 
-  const contextKey = context?.accessToken || context?.apiKey;
+  // The context token goes only with the context's own server; another
+  // --remote/--base-url keeps the explicit or ambient key.
+  const destination =
+    resolved.remote ||
+    resolved.baseUrl ||
+    `http://localhost:${opts.port || process.env.PORT || "20128"}`;
+  const contextKey = contextCredentialFor(context, destination);
   if (contextKey && (!opts.apiKey || opts.apiKey === ambientKey)) {
     resolved.apiKey = contextKey;
   }

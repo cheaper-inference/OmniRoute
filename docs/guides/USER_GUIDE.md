@@ -374,7 +374,10 @@ omniroute
 omniroute --port 3000
 ```
 
-The CLI automatically loads `.env` from `~/.omniroute/.env` or `./.env`.
+The CLI automatically loads `.env` from `~/.omniroute/.env` or `./.env`. A `./.env` in the
+working directory may set only a short allowlist of keys (ports, `REQUIRE_API_KEY`, locale and
+color settings); put everything else in `~/.omniroute/.env`. See
+[CLI launch contracts](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tray mode
 

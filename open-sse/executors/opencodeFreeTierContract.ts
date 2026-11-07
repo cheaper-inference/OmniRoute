@@ -248,6 +248,46 @@ const GO_SURFACE_BASE_URL = "https://opencode.ai/zen/go/v1";
 export const FREE_TIER_INFERENCE_BASE_URL = "https://opencode.ai/inference/v1";
 
 /**
+ * Where OpenCode Go serves its Gemini-wire models (e.g. `gemini-4-argon`):
+ * `<base>/models/<model>:streamGenerateContent?alt=sse` keyed by `x-goog-api-key`. The
+ * `/zen/go/v1` chat host does not serve those models.
+ */
+const GO_GEMINI_INFERENCE_BASE_URL = "https://opencode.ai/inference/go/v1";
+
+/**
+ * OpenCode Go's Gemini wire: its own inference host, keyed by `x-goog-api-key`. Never gated:
+ * the free tier exists only on the Zen surface (`isGatedFreeTierRequest`).
+ */
+export function isGoGeminiWire(requestFormat: string | null, surface: OpencodeSurface): boolean {
+  return requestFormat === "gemini" && surface === "go";
+}
+
+/**
+ * The upstream URL of one request, by wire format, under the `base` the caller resolved. The
+ * Go Gemini wire has a fixed host, so that lane ignores `base`, published catalog included.
+ */
+export function opencodeEndpointUrl(
+  requestFormat: string | null,
+  surface: OpencodeSurface,
+  base: string,
+  model: string,
+  stream: boolean
+): string {
+  switch (requestFormat) {
+    case "claude":
+      return `${base}/messages`;
+    case "openai-responses":
+      return `${base}/responses`;
+    case "gemini": {
+      const root = isGoGeminiWire(requestFormat, surface) ? GO_GEMINI_INFERENCE_BASE_URL : base;
+      return `${root}/models/${model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`;
+    }
+    default:
+      return `${base}/chat/completions`;
+  }
+}
+
+/**
  * The credential the gated free-tier lane serves.
  *
  * Measured live on 2026-10-21 against `https://opencode.ai/inference/v1` (Chat

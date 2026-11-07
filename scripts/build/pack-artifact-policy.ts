@@ -279,6 +279,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "bin/cli/utils/ensureAndroidCacheDir.mjs",
   "bin/cli/utils/parseEnvValue.mjs",
   "bin/cli/utils/storageKeyProvision.mjs",
+  // The allowlist of keys a working-directory .env may set; read on every CLI boot.
+  "bin/cli/utils/untrustedCwdEnv.mjs",
   "bin/cli/utils/versionFastPath.mjs",
   // #11437 import — `describeVolatileEnvWarning`, called on every CLI boot.
   "bin/cli/utils/volatileEnvPath.mjs",

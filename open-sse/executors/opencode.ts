@@ -64,8 +64,10 @@ import {
 import {
   attemptFor,
   isGatedFreeTierRequest,
+  isGoGeminiWire,
   isPremiumOpencodeModel,
   noteFreeTierOutcome,
+  opencodeEndpointUrl,
   prepareFreeTierRequest,
   rebuildJsonFromForcedStream,
   resolveFreeTierCredential,
@@ -1561,16 +1563,7 @@ export class OpencodeExecutor extends BaseExecutor {
       Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
         ? freeTierDispatchBase()
         : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
-    switch (this._requestFormat) {
-      case "claude":
-        return `${base}/messages`;
-      case "openai-responses":
-        return `${base}/responses`;
-      case "gemini":
-        return `${base}/models/${model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`;
-      default:
-        return `${base}/chat/completions`;
-    }
+    return opencodeEndpointUrl(this._requestFormat, this._surface(), base, model, stream);
   }
 
   /**
@@ -1612,6 +1605,8 @@ export class OpencodeExecutor extends BaseExecutor {
     if (key) {
       if (this._requestFormat === "claude" || this.usesZenApiKeyAuth()) {
         headers["x-api-key"] = key;
+      } else if (isGoGeminiWire(this._requestFormat, this._surface())) {
+        headers["x-goog-api-key"] = key;
       } else {
         headers["Authorization"] = `Bearer ${key}`;
       }
