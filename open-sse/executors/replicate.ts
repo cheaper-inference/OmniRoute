@@ -18,6 +18,18 @@ type OpenAIMessage = {
 
 type Usage = { prompt_tokens: number; completion_tokens: number; total_tokens: number };
 type ParsedModel = { path: string; version: string | null };
+type PushFrame = (frame: string) => void;
+type PredictionRequest = {
+  url: string;
+  headers: Record<string, string>;
+  credentials: ProviderCredentials;
+  model: string;
+  stream: boolean;
+  payload: JsonRecord;
+  promptText: string;
+  maxTokens: number | null;
+  signal?: AbortSignal | null;
+};
 
 const DEFAULT_BASE_URL = "https://api.replicate.com/v1";
 // Replicate holds the connection for up to 60s when asked with `Prefer: wait`.
@@ -56,15 +68,20 @@ function extractText(content: unknown): string {
 }
 
 // Vision-capable Replicate models take a single `image` input (URL or data URI).
+function imagePartUrl(part: unknown): string | null {
+  const item = asRecord(part);
+  if (item.type !== "image_url" && item.type !== "input_image") return null;
+  const ref = item.image_url;
+  const url = typeof ref === "string" ? ref : asRecord(ref).url;
+  return typeof url === "string" && url ? url : null;
+}
+
 function extractFirstImage(messages: OpenAIMessage[]): string | null {
   for (const message of messages) {
     if (!Array.isArray(message?.content)) continue;
     for (const part of message.content) {
-      const item = asRecord(part);
-      if (item.type !== "image_url" && item.type !== "input_image") continue;
-      const ref = item.image_url;
-      const url = typeof ref === "string" ? ref : asRecord(ref).url;
-      if (typeof url === "string" && url) return url;
+      const url = imagePartUrl(part);
+      if (url) return url;
     }
   }
   return null;
@@ -83,9 +100,28 @@ function describeToolCalls(toolCalls: unknown): string {
     .join("\n");
 }
 
+type Turn = { label: string; text: string; user: boolean };
+
+function toTurn(role: string, text: string): Turn {
+  if (role === "assistant") return { label: "Assistant", text, user: false };
+  // Keep tool results in the transcript so the model still sees them.
+  if (role === "tool" || role === "function") return { label: "Tool result", text, user: true };
+  return { label: "User", text, user: true };
+}
+
+// Replicate language models take a single `prompt` string. A lone user turn is
+// sent verbatim; multi-turn history is flattened into a labelled transcript.
+function flattenTurns(turns: Turn[]): string {
+  if (turns.length === 1 && turns[0].label === "User") return turns[0].text;
+  return turns
+    .map((turn) => `${turn.label}: ${turn.text}`)
+    .concat(turns.length > 0 && turns[turns.length - 1].user ? ["Assistant:"] : [])
+    .join("\n");
+}
+
 function resolvePrompt(messages: OpenAIMessage[]): { prompt: string; systemPrompt: string | null } {
   const systemParts: string[] = [];
-  const turns: Array<{ label: string; text: string; user: boolean }> = [];
+  const turns: Turn[] = [];
 
   for (const message of messages) {
     const role = String(message?.role || "user").toLowerCase();
@@ -94,24 +130,13 @@ function resolvePrompt(messages: OpenAIMessage[]): { prompt: string; systemPromp
       .join("\n");
     if (!text) continue;
     if (role === "system" || role === "developer") systemParts.push(text);
-    else if (role === "assistant") turns.push({ label: "Assistant", text, user: false });
-    else if (role === "tool" || role === "function") {
-      // Keep tool results in the transcript so the model still sees them.
-      turns.push({ label: "Tool result", text, user: true });
-    } else turns.push({ label: "User", text, user: true });
+    else turns.push(toTurn(role, text));
   }
 
-  // Replicate language models take a single `prompt` string. A lone user turn is
-  // sent verbatim; multi-turn history is flattened into a labelled transcript.
-  const prompt =
-    turns.length === 1 && turns[0].label === "User"
-      ? turns[0].text
-      : turns
-          .map((turn) => `${turn.label}: ${turn.text}`)
-          .concat(turns.length > 0 && turns[turns.length - 1].user ? ["Assistant:"] : [])
-          .join("\n");
-
-  return { prompt, systemPrompt: systemParts.length > 0 ? systemParts.join("\n\n") : null };
+  return {
+    prompt: flattenTurns(turns),
+    systemPrompt: systemParts.length > 0 ? systemParts.join("\n\n") : null,
+  };
 }
 
 function estimateTokens(text: string): number {
@@ -208,6 +233,27 @@ function errorResponse(status: number, message: string, retryAfter?: string | nu
       ...(retryAfter ? { "Retry-After": retryAfter } : {}),
     },
   });
+}
+
+// Turns a prediction that reached a final state (or ran out of time) into the client response.
+function finishedResponse(prediction: JsonRecord, request: PredictionRequest): Response {
+  if (prediction.status !== "succeeded") {
+    const failed = prediction.status === "failed" || prediction.status === "canceled";
+    const reason = typeof prediction.error === "string" ? `: ${prediction.error}` : "";
+    return errorResponse(
+      failed ? 502 : 504,
+      failed
+        ? `Replicate prediction ${String(prediction.status)}${reason}`
+        : "Replicate prediction did not finish in time"
+    );
+  }
+
+  const content = outputToText(prediction.output);
+  const usage = resolveUsage(prediction, request.promptText, content);
+  const finishReason = resolveFinishReason(usage, request.maxTokens);
+  return request.stream
+    ? synthesizedStream(content, request.model, usage, finishReason)
+    : jsonCompletion(content, request.model, usage, finishReason);
 }
 
 // Upstream HTTP failure that keeps its status (and Retry-After) so rate-limit and
@@ -494,19 +540,84 @@ export class ReplicateExecutor extends BaseExecutor {
     }
   }
 
+  // Reads the upstream SSE events into `push`; returns what arrived and any stream error.
+  private async pumpOutput(
+    body: ReadableStream<Uint8Array>,
+    write: ReturnType<typeof chunkWriter>,
+    push: PushFrame
+  ): Promise<{ content: string; streamError: string | null }> {
+    let content = "";
+    for await (const event of readSseEvents(body)) {
+      if (event.event === "output") {
+        content += event.data;
+        if (event.data) {
+          push(write([{ index: 0, delta: { content: event.data }, finish_reason: null }]));
+        }
+      } else if (event.event === "error") {
+        const streamError = sanitizeErrorMessage(asRecord(safeJson(event.data)).detail ?? "");
+        return { content, streamError };
+      } else if (event.event === "done") {
+        break;
+      }
+    }
+    return { content, streamError: null };
+  }
+
+  private async relayUpstream(
+    streamUrl: string,
+    prediction: JsonRecord,
+    request: PredictionRequest,
+    write: ReturnType<typeof chunkWriter>,
+    push: PushFrame,
+    signal: AbortSignal
+  ): Promise<void> {
+    const res = await this.send(
+      streamUrl,
+      {
+        method: "GET",
+        headers: { Accept: "text/event-stream", "Cache-Control": "no-store" },
+        signal,
+      },
+      request.credentials
+    );
+    if (!res.ok || !res.body) {
+      throw new ReplicateHttpError(
+        res.ok ? 502 : res.status,
+        res.headers.get("Retry-After"),
+        describeUpstreamFailure(res.status, null)
+      );
+    }
+
+    push(write([{ index: 0, delta: { role: "assistant" }, finish_reason: null }]));
+    const { content, streamError } = await this.pumpOutput(res.body, write, push);
+
+    if (streamError !== null) {
+      push(sseChunk(buildErrorBody(502, `Replicate prediction failed: ${streamError}`)));
+      push("data: [DONE]\n\n");
+      return;
+    }
+
+    const final = await this.fetchFinalPrediction(
+      prediction,
+      request.url,
+      request.headers,
+      request.credentials
+    );
+    const usage = resolveUsage(final, request.promptText, content);
+    const finishReason = resolveFinishReason(usage, request.maxTokens);
+    push(write([{ index: 0, delta: {}, finish_reason: finishReason }]));
+    push(write([], usage));
+    push("data: [DONE]\n\n");
+  }
+
   // Relays Replicate's native SSE stream (`output` events carry raw text tokens).
   private relayStream(
     streamUrl: string,
     prediction: JsonRecord,
-    requestUrl: string,
-    headers: Record<string, string>,
-    model: string,
-    promptText: string,
-    maxTokens: number | null,
-    credentials: ProviderCredentials,
-    signal?: AbortSignal | null
+    request: PredictionRequest
   ): Response {
-    const write = chunkWriter(model);
+    const { signal } = request;
+    const write = chunkWriter(request.model);
     const encoder = new TextEncoder();
     const upstreamAbort = new AbortController();
     const onAbort = () => upstreamAbort.abort();
@@ -516,62 +627,15 @@ export class ReplicateExecutor extends BaseExecutor {
     const body = new ReadableStream<Uint8Array>({
       start: async (controller) => {
         const push = (frame: string) => controller.enqueue(encoder.encode(frame));
-        let content = "";
         try {
-          const res = await this.send(
+          await this.relayUpstream(
             streamUrl,
-            {
-              method: "GET",
-              headers: { Accept: "text/event-stream", "Cache-Control": "no-store" },
-              signal: upstreamAbort.signal,
-            },
-            credentials
-          );
-          if (!res.ok || !res.body) {
-            throw new ReplicateHttpError(
-              res.ok ? 502 : res.status,
-              res.headers.get("Retry-After"),
-              describeUpstreamFailure(res.status, null)
-            );
-          }
-
-          push(write([{ index: 0, delta: { role: "assistant" }, finish_reason: null }]));
-          let streamError: string | null = null;
-
-          for await (const event of readSseEvents(res.body)) {
-            if (event.event === "output") {
-              content += event.data;
-              if (event.data) {
-                push(write([{ index: 0, delta: { content: event.data }, finish_reason: null }]));
-              }
-            } else if (event.event === "error") {
-              streamError = sanitizeErrorMessage(asRecord(safeJson(event.data)).detail ?? "");
-              break;
-            } else if (event.event === "done") {
-              break;
-            }
-          }
-
-          if (streamError !== null) {
-            push(sseChunk(buildErrorBody(502, `Replicate prediction failed: ${streamError}`)));
-            push("data: [DONE]\n\n");
-            finished = true;
-            controller.close();
-            return;
-          }
-
-          const final = await this.fetchFinalPrediction(
             prediction,
-            requestUrl,
-            headers,
-            credentials
+            request,
+            write,
+            push,
+            upstreamAbort.signal
           );
-          const usage = resolveUsage(final, promptText, content);
-          push(
-            write([{ index: 0, delta: {}, finish_reason: resolveFinishReason(usage, maxTokens) }])
-          );
-          push(write([], usage));
-          push("data: [DONE]\n\n");
           finished = true;
           controller.close();
         } catch (error) {
@@ -594,128 +658,94 @@ export class ReplicateExecutor extends BaseExecutor {
       cancel: async () => {
         upstreamAbort.abort();
         signal?.removeEventListener("abort", onAbort);
-        if (!finished) await this.cancelPrediction(prediction, requestUrl, headers, credentials);
+        if (!finished) {
+          await this.cancelPrediction(
+            prediction,
+            request.url,
+            request.headers,
+            request.credentials
+          );
+        }
       },
     });
 
     return new Response(body, { status: 200, headers: { "Content-Type": "text/event-stream" } });
   }
 
+  private async runPrediction(request: PredictionRequest): Promise<Response> {
+    const { url, headers, credentials, signal } = request;
+    const res = await this.send(
+      url,
+      { method: "POST", headers, body: JSON.stringify(request.payload), signal },
+      credentials
+    );
+
+    if (!res.ok) {
+      const detail = asRecord(await res.json().catch(() => ({}))).detail;
+      return errorResponse(
+        res.status,
+        describeUpstreamFailure(res.status, detail),
+        res.headers.get("Retry-After")
+      );
+    }
+
+    const created = asRecord(await res.json());
+    const streamUrl = asRecord(created.urls).stream;
+    const running = !TERMINAL_STATUSES.has(String(created.status));
+    if (request.stream && running && isTrustedStreamUrl(streamUrl, url)) {
+      return this.relayStream(streamUrl, created, request);
+    }
+
+    const prediction = await this.pollUntilDone(created, url, headers, credentials, signal);
+    return finishedResponse(prediction, request);
+  }
+
   async execute({ model, body, stream, credentials, signal, upstreamExtraHeaders }: ExecuteInput) {
     const url = this.buildUrl(model, stream, 0, credentials);
     const headers = this.buildHeaders(credentials, stream);
     mergeUpstreamExtraHeaders(headers, upstreamExtraHeaders);
+    const result = (response: Response, transformedBody: unknown) => ({
+      response,
+      url,
+      headers,
+      transformedBody,
+    });
 
     const parsed = parseModel(model);
     if (!parsed) {
-      return {
-        response: errorResponse(
-          400,
-          "Replicate model IDs must look like owner/name or owner/name:version."
-        ),
-        url,
-        headers,
-        transformedBody: body,
-      };
+      return result(
+        errorResponse(400, "Replicate model IDs must look like owner/name or owner/name:version."),
+        body
+      );
     }
 
     const built = this.buildPayload(body, parsed, stream);
     if (!built) {
-      return {
-        response: errorResponse(400, "Replicate requests require at least one user message."),
-        url,
-        headers,
-        transformedBody: body,
-      };
+      return result(
+        errorResponse(400, "Replicate requests require at least one user message."),
+        body
+      );
     }
-    const { payload, promptText, maxTokens } = built;
+    const { payload } = built;
 
     try {
-      const res = await this.send(
-        url,
-        { method: "POST", headers, body: JSON.stringify(payload), signal },
-        credentials
-      );
-
-      if (!res.ok) {
-        const detail = asRecord(await res.json().catch(() => ({}))).detail;
-        return {
-          response: errorResponse(
-            res.status,
-            describeUpstreamFailure(res.status, detail),
-            res.headers.get("Retry-After")
-          ),
-          url,
-          headers,
-          transformedBody: payload,
-        };
-      }
-
-      const created = asRecord(await res.json());
-      const streamUrl = asRecord(created.urls).stream;
-
-      if (stream && !TERMINAL_STATUSES.has(String(created.status))) {
-        if (isTrustedStreamUrl(streamUrl, url)) {
-          return {
-            response: this.relayStream(
-              streamUrl,
-              created,
-              url,
-              headers,
-              model,
-              promptText,
-              maxTokens,
-              credentials,
-              signal
-            ),
-            url,
-            headers,
-            transformedBody: payload,
-          };
-        }
-      }
-
-      const prediction = await this.pollUntilDone(created, url, headers, credentials, signal);
-
-      if (prediction.status !== "succeeded") {
-        const failed = prediction.status === "failed" || prediction.status === "canceled";
-        const reason = typeof prediction.error === "string" ? `: ${prediction.error}` : "";
-        return {
-          response: errorResponse(
-            failed ? 502 : 504,
-            failed
-              ? `Replicate prediction ${String(prediction.status)}${reason}`
-              : "Replicate prediction did not finish in time"
-          ),
-          url,
-          headers,
-          transformedBody: payload,
-        };
-      }
-
-      const content = outputToText(prediction.output);
-      const usage = resolveUsage(prediction, promptText, content);
-      const finishReason = resolveFinishReason(usage, maxTokens);
-      return {
-        response: stream
-          ? synthesizedStream(content, model, usage, finishReason)
-          : jsonCompletion(content, model, usage, finishReason),
+      const response = await this.runPrediction({
+        ...built,
         url,
         headers,
-        transformedBody: payload,
-      };
+        credentials,
+        model,
+        stream,
+        signal,
+      });
+      return result(response, payload);
     } catch (error) {
       if (signal?.aborted) throw error;
       const response =
         error instanceof ReplicateHttpError
           ? errorResponse(error.status, error.message, error.retryAfter)
           : errorResponse(502, "Replicate request failed");
-      return {
-        response,
-        url,
-        headers,
-        transformedBody: payload,
-      };
+      return result(response, payload);
     }
   }
 }
