@@ -13,53 +13,73 @@ OmniRoute प्रशासनिक कार्रवाइयों, प्�
 
 ## क्या लॉग किया जाता है
 
-### प्रशासनिक ऑडिट घटनाएँ (`audit_log`)
+### प्रशासनिक ऑडिट इवेंट (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })` की प्रत्येक कॉल एक पंक्ति बनाती है। कार्रवाई स्ट्रिंग `domain.verb` (या `domain.verb.outcome`) पैटर्न का पालन करती हैं। स्रोत-वृक्ष में पुष्टि किए गए कार्रवाई प्रकारों में ये शामिल हैं:
+`logAuditEvent({ action, actor, target, details, ... })` का प्रत्येक कॉल
+एक पंक्ति उत्पन्न करता है। एक्शन स्ट्रिंग `domain.verb` (या
+`domain.verb.outcome`) पैटर्न का पालन करती हैं। ट्री में पुष्ट एक्शन प्रकारों
+में शामिल हैं:
 
-| कार्रवाई                             | स्रोत                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| एक्शन                                | स्रोत                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-प्रत्येक प्रविष्टि `action`, `actor` (डिफ़ॉल्ट रूप से `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` और `timestamp` को दर्ज करती है। संवेदनशील कुंजियों (`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey` से मेल खाने वाली कोई भी कुंजी आदि) को पंक्ति लिखे जाने से पहले पुनरावर्ती रूप से संशोधित करके `"[redacted]"` कर दिया जाता है।
+प्रत्येक प्रविष्टि में `action`, `actor` (डिफ़ॉल्ट रूप से `"system"`),
+`target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` और `timestamp` शामिल होते हैं। संवेदनशील कुंजियों
+(`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey`
+से मेल खाने वाली कोई भी कुंजी आदि) को पंक्ति लिखे जाने से पहले पुनरावर्ती रूप
+से `"[redacted]"` में बदल दिया जाता है।
+
+`api_key.auth.touch` पंक्तियाँ सफल API-कुंजी मेटाडेटा और डिस्कवरी रीड
+(GET/HEAD) को रिकॉर्ड करती हैं, जो कभी अनुरोध लॉग तक नहीं पहुँचते: कौन-सी कुंजी,
+कब, और सामान्यीकृत पथ। इन्हें एकत्रित किया जाता है और अधिकतम 1,000 पंक्तियों तक
+सीमित रखा जाता है। `noLog` वाली कुंजियों और पर्यावरण कुंजी को छोड़ दिया जाता है।
+कॉलर का IP पता और यूज़र-एजेंट तभी जोड़े जाते हैं जब
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` फीचर फ़्लैग चालू हो (डिफ़ॉल्ट रूप से
+बंद)।
 
 ### MCP टूल कॉल (`mcp_tool_audit`)
 
-प्रत्येक MCP टूल आह्वान `open-sse/mcp-server/audit.ts` के माध्यम से एक पंक्ति लिखता है। स्कीमा (`src/lib/db/migrations/002_mcp_a2a_tables.sql` से):
+प्रत्येक MCP टूल इनवोकेशन
+`open-sse/mcp-server/audit.ts` के माध्यम से एक पंक्ति लिखता है। स्कीमा
+`src/lib/db/migrations/002_mcp_a2a_tables.sql` से है:
 
-| स्तंभ            | टिप्पणियाँ                                |
-| ---------------- | ----------------------------------------- |
-| `id`             | स्वतः-वृद्धि                              |
-| `tool_name`      | MCP टूल पहचानकर्ता                        |
-| `input_hash`     | इनपुट का sha256 (कोई पेलोड संग्रहीत नहीं) |
-| `output_summary` | संक्षिप्त, काटा गया सारांश                |
-| `duration_ms`    | बीता हुआ वास्तविक समय                     |
-| `api_key_id`     | कॉलकर्ता (नल हो सकता है)                  |
-| `success`        | `1` / `0`                                 |
-| `error_code`     | विफलता पर अंतिम त्रुटि कोड                |
-| `created_at`     | ISO टाइमस्टैम्प                           |
+| कॉलम             | विवरण                                 |
+| ---------------- | ------------------------------------- |
+| `id`             | ऑटोइन्क्रीमेंट                        |
+| `tool_name`      | MCP टूल आइडेंटिफ़ायर                  |
+| `input_hash`     | इनपुट का sha256 (पेलोड संग्रहीत नहीं) |
+| `output_summary` | संक्षिप्त, छोटा किया गया सारांश       |
+| `duration_ms`    | वॉल समय                               |
+| `api_key_id`     | कॉलर (नल योग्य)                       |
+| `success`        | `1` / `0`                             |
+| `error_code`     | विफलता पर टर्मिनल एरर कोड             |
+| `created_at`     | ISO टाइमस्टैम्प                       |
 
 ### अनुरोध / उपयोग लॉग
 
-ये परिचालन टेलीमेट्री हैं (कड़ाई से प्रशासनिक ऑडिट नहीं), लेकिन समान अवधारण पाइपलाइन साझा करते हैं:
+ये ऑपरेशनल टेलीमेट्री हैं (सख्ती से प्रशासनिक ऑडिट नहीं), लेकिन समान
+रिटेंशन पाइपलाइन साझा करते हैं:
 
-- `usage_history` — प्रति-अनुरोध उपयोग समेकन
-- `call_logs` — पूर्ण प्रति-अनुरोध लॉग (पंक्ति-सीमा के अधीन, नीचे देखें)
+- `usage_history` — प्रति-अनुरोध उपयोग का रोल-अप
+- `call_logs` — प्रत्येक अनुरोध का पूर्ण लॉग (नीचे दिए गए पंक्ति-सीमा के अधीन)
 - `proxy_logs` — प्रॉक्सी ट्रैफ़िक लॉग (पंक्ति-सीमा के अधीन)
-- `request_detail_logs` — पुराना विस्तृत अनुरोध लॉग (मौजूद होने पर अभी भी हटाया जाता है)
+- `request_detail_logs` — पुराना विस्तृत अनुरोध लॉग (मौजूद होने पर अभी भी प्रून किया जाता है)
 
 ## स्टोरेज स्कीमा
 
