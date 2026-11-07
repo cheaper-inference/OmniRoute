@@ -61,10 +61,10 @@ export const METADATA_KEYS = new Set([
   "request_id",
 ]);
 
-// Anthropic Messages SSE frames. Their text lives at fixed paths (block text, thinking
-// summary, tool-input JSON), so the walker never touches anything else in those frames:
-// usage, signatures, tool ids, server-tool results. The generic walker buffered every
-// unknown string as content and spliced it into the next text delta.
+// Anthropic Messages SSE frames. Their streamed text lives at fixed paths (block text,
+// thinking summary, tool-input JSON) and only those paths enter the rolling buffers. The
+// generic walker buffered every unknown string as content and spliced it into the next
+// text delta; the other strings of these frames are redacted where they sit instead.
 const CLAUDE_EVENT_TYPES = new Set([
   "message_start",
   "content_block_start",
@@ -77,6 +77,50 @@ const CLAUDE_EVENT_TYPES = new Set([
 
 export function isClaudeStreamEvent(json: any): boolean {
   return !!json && typeof json.type === "string" && CLAUDE_EVENT_TYPES.has(json.type);
+}
+
+type ClaudeStreamedPath = { holder: any; field: string; category: FieldCategory };
+
+// The fields of a Claude frame that stream through the rolling buffers.
+function claudeStreamedPaths(json: any): ClaudeStreamedPath[] {
+  if (json.type === "content_block_start") {
+    const holder = json.content_block;
+    return [
+      { holder, field: "text", category: "content" },
+      { holder, field: "thinking", category: "reasoning" },
+    ];
+  }
+  if (json.type !== "content_block_delta") return [];
+  const holder = json.delta;
+  if (holder?.type === "text_delta") return [{ holder, field: "text", category: "content" }];
+  if (holder?.type === "thinking_delta") {
+    return [{ holder, field: "thinking", category: "reasoning" }];
+  }
+  if (holder?.type === "input_json_delta") {
+    return [{ holder, field: "partial_json", category: "partialJson" }];
+  }
+  return [];
+}
+
+// Protocol tokens of Claude frames that METADATA_KEYS does not cover: a redaction hit on
+// one would corrupt it (`tool_use_id` links a result to its call, `encrypted_index` and a
+// `redacted_thinking` block are opaque blobs the client sends back verbatim).
+const CLAUDE_OPAQUE_KEYS = new Set(["tool_use_id", "encrypted_index"]);
+
+// Redact every other string of a Claude frame in place (search results, citations, tool
+// input): the same coverage as the non-streaming masker, without touching the buffers.
+function redactClaudeFrameStrings(
+  obj: any,
+  streamed: ClaudeStreamedPath[],
+  redact: (text: string) => string
+): void {
+  if (!obj || typeof obj !== "object" || obj.type === "redacted_thinking") return;
+  for (const key of Object.keys(obj)) {
+    if (classifyField(key) === null || CLAUDE_OPAQUE_KEYS.has(key)) continue;
+    if (streamed.some((path) => path.holder === obj && path.field === key)) continue;
+    if (typeof obj[key] === "string") obj[key] = redact(obj[key]);
+    else redactClaudeFrameStrings(obj[key], streamed, redact);
+  }
 }
 
 // Responses API events whose `delta` carries tool-call arguments (JSON), not answer text.
@@ -312,17 +356,19 @@ export function createSseTextTransform(
           };
 
           // Anthropic Messages frames: only the block text, thinking summary and tool-input
-          // JSON are answer text; everything else is protocol data that passes through
-          // byte-for-byte. Each block buffers under its own index, so a thinking block can
-          // never strand the text block that follows it.
+          // JSON stream through the buffers. Each block buffers under its own index, so a
+          // thinking block can never strand the text block that follows it. Every other
+          // string is redacted in place as a standalone value (the snapshot path), which
+          // emits no tail and so does not count as content for the flush below.
           const sanitizeClaudeEvent = (): boolean => {
             const index = typeof json.index === "number" ? json.index : 0;
             const compositeKey = `${index}_0`;
+            const streamed = claudeStreamedPaths(json);
             let touched = false;
-            const run = (holder: any, field: string, category: FieldCategory) => {
-              if (!holder || typeof holder[field] !== "string") return;
+            for (const { holder, field, category } of streamed) {
+              if (!holder || typeof holder[field] !== "string") continue;
               touched = true;
-              if (category === "partialJson" && opts?.processToolArgs !== true) return;
+              if (category === "partialJson" && opts?.processToolArgs !== true) continue;
               holder[field] = processor(
                 holder[field],
                 category,
@@ -330,17 +376,10 @@ export function createSseTextTransform(
                 compositeKey,
                 isSnapshot
               );
-            };
-            if (json.type === "content_block_start") {
-              run(json.content_block, "text", "content");
-              run(json.content_block, "thinking", "reasoning");
-            } else if (json.type === "content_block_delta") {
-              const delta = json.delta;
-              const kind = delta?.type;
-              if (kind === "text_delta") run(delta, "text", "content");
-              else if (kind === "thinking_delta") run(delta, "thinking", "reasoning");
-              else if (kind === "input_json_delta") run(delta, "partial_json", "partialJson");
             }
+            redactClaudeFrameStrings(json, streamed, (text) =>
+              processor(text, "content", false, compositeKey, true)
+            );
             return touched;
           };
 

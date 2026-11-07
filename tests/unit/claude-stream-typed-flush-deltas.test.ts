@@ -345,3 +345,129 @@ for (const [name, make] of [
     );
   });
 }
+
+// Strings outside the three streamed paths never enter the rolling window, but they are not
+// exempt from redaction: they are cleaned where they sit, so a search result, a citation or
+// a pre-filled tool input cannot carry a credential or PII past the transform, and none of
+// them is spliced into the text of the block. Opaque protocol tokens stay byte-identical.
+const SECRET = "sk-proj-" + "A1b2C3d4".repeat(6);
+const EMAIL = "jane.doe@example.com";
+// Opaque values that look like a credential on purpose: a redaction pass must skip them.
+const OPAQUE = "sk-proj-" + "Z9y8X7w6".repeat(6);
+
+type ServerBlock = {
+  input: Record<string, string>;
+  content: Array<{ title: string; url: string; encrypted_content: string }>;
+  tool_use_id: string;
+  data: string;
+};
+const contentBlock = (frames: Frame[], index: number) =>
+  frames.find((f) => f.data.type === "content_block_start" && f.data.index === index)!.data
+    .content_block as unknown as ServerBlock;
+
+function serverToolFrames(): string[] {
+  const leaky = `${SECRET} ${EMAIL}`;
+  return [
+    messageStart,
+    ev("content_block_start", {
+      index: 0,
+      content_block: {
+        type: "server_tool_use",
+        id: "srvtoolu_1",
+        name: "web_search",
+        input: { query: `find ${leaky}` },
+      },
+    }),
+    ev("content_block_stop", { index: 0 }),
+    ev("content_block_start", {
+      index: 1,
+      content_block: {
+        type: "web_search_tool_result",
+        tool_use_id: OPAQUE,
+        content: [
+          {
+            type: "web_search_result",
+            url: `https://example.org/${SECRET}/${EMAIL}`,
+            title: `Result for ${leaky}`,
+            encrypted_content: OPAQUE,
+            page_age: null,
+          },
+        ],
+      },
+    }),
+    ev("content_block_stop", { index: 1 }),
+    ev("content_block_start", { index: 2, content_block: { type: "text", text: "" } }),
+    ev("content_block_delta", {
+      index: 2,
+      delta: {
+        type: "citations_delta",
+        citation: {
+          type: "web_search_result_location",
+          cited_text: `Quoted ${leaky}`,
+          url: "https://example.org/page",
+          title: `Cited ${leaky}`,
+          encrypted_index: OPAQUE,
+        },
+      },
+    }),
+    ev("content_block_delta", { index: 2, delta: { type: "text_delta", text: "Answer." } }),
+    ev("content_block_stop", { index: 2 }),
+    ev("content_block_start", {
+      index: 3,
+      content_block: { type: "redacted_thinking", data: OPAQUE },
+    }),
+    ev("content_block_stop", { index: 3 }),
+    ev("content_block_start", {
+      index: 4,
+      content_block: {
+        type: "tool_use",
+        id: "toolu_1",
+        name: "lookup",
+        input: { note: `call ${leaky}` },
+      },
+    }),
+    ev("content_block_stop", { index: 4 }),
+    messageEnd,
+  ];
+}
+
+for (const [name, make, needle, kept] of [
+  ["credential", () => createCredentialSseTransform(), SECRET, EMAIL],
+  ["PII", () => createPiiSseTransform({ windowSize: 8 }), EMAIL, SECRET],
+] as const) {
+  test(`${name} transform: non-streamed strings of Claude frames are redacted in place`, async () => {
+    const output = await runTransform(make(), serverToolFrames());
+    const frames = parseFrames(output);
+    assert.ok(!output.includes(needle), "the sensitive value must not reach the client");
+
+    const block = (index: number) => contentBlock(frames, index);
+    assert.ok(block(0).input.query.startsWith("find "), "server tool input keeps its own text");
+    assert.ok(block(0).input.query.includes(kept), "only the sensitive value is replaced");
+    const result = block(1).content[0];
+    assert.ok(result.title.startsWith("Result for "), "result title stays in its frame");
+    assert.ok(result.url.startsWith("https://example.org/"), "result url stays in its frame");
+    assert.ok(block(4).input.note.startsWith("call "), "tool input stays in its frame");
+
+    const citationFrame = frames.find((f) => f.data.delta?.type === "citations_delta")!.data;
+    const { citation } = citationFrame.delta as unknown as { citation: Record<string, string> };
+    assert.ok(citation.cited_text.startsWith("Quoted "), "cited text stays in its frame");
+    assert.ok(citation.title.startsWith("Cited "), "citation title stays in its frame");
+
+    const acc = accumulate(frames);
+    assert.deepEqual([...acc.text.keys()], [2], "nothing is spliced into another block");
+    assert.equal(acc.text.get(2), "Answer.", "no frame string leaks into the answer text");
+    assert.deepEqual(acc.wrongType, []);
+    assert.deepEqual(acc.lateDeltas, []);
+  });
+
+  test(`${name} transform: opaque Claude protocol tokens are never redacted`, async () => {
+    const frames = parseFrames(await runTransform(make(), serverToolFrames()));
+    const block = (index: number) => contentBlock(frames, index);
+    assert.equal(block(1).tool_use_id, OPAQUE);
+    assert.equal(block(1).content[0].encrypted_content, OPAQUE);
+    assert.equal(block(3).data, OPAQUE);
+    const citationFrame = frames.find((f) => f.data.delta?.type === "citations_delta")!.data;
+    const { citation } = citationFrame.delta as unknown as { citation: Record<string, string> };
+    assert.equal(citation.encrypted_index, OPAQUE);
+  });
+}
