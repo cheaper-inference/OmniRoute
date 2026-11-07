@@ -232,6 +232,15 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
   },
 };
 
+// Normalize legacy and modern opt-in flags without inflating the large resolvers.
+function normalizeAntigravityToggle(
+  section: unknown,
+  legacyEnabled: unknown,
+  fallback: boolean
+): { enabled: boolean } {
+  return { enabled: toBoolean(asRecord(section).enabled, toBoolean(legacyEnabled, fallback)) };
+}
+
 function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
   const profiles = asRecord(settings.providerProfiles);
   const defaults = asRecord(settings.rateLimitDefaults);
@@ -374,15 +383,11 @@ export function resolveResilienceSettings(
   const fallback = buildLegacyFallback(record);
 
   const resolved: ResilienceSettings = {
-    antigravityAdaptiveHealth: {
-      enabled: toBoolean(
-        asRecord(current.antigravityAdaptiveHealth).enabled,
-        toBoolean(
-          legacyAntigravitySettings.adaptiveHealthEnabled,
-          fallback.antigravityAdaptiveHealth.enabled
-        )
-      ),
-    },
+    antigravityAdaptiveHealth: normalizeAntigravityToggle(
+      current.antigravityAdaptiveHealth,
+      legacyAntigravitySettings.adaptiveHealthEnabled,
+      fallback.antigravityAdaptiveHealth.enabled
+    ),
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(
@@ -456,12 +461,9 @@ export function mergeResilienceSettings(
   updates: ResilienceSettingsPatch
 ): ResilienceSettings {
   return {
-    antigravityAdaptiveHealth: {
-      enabled: toBoolean(
-        updates.antigravityAdaptiveHealth?.enabled,
-        current.antigravityAdaptiveHealth.enabled
-      ),
-    },
+    antigravityAdaptiveHealth: normalizeAntigravityToggle(
+      updates.antigravityAdaptiveHealth, undefined, current.antigravityAdaptiveHealth.enabled
+    ),
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(
