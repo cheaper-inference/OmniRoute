@@ -142,11 +142,6 @@ type CallLogSummaryRow = {
 export const RESOLVED_ACCOUNT_SQL =
   "COALESCE(NULLIF(pc.name, ''), NULLIF(pc.email, ''), cl.account)";
 
-type DeleteResult = {
-  deletedRows: number;
-  deletedArtifacts: number;
-};
-
 const CALL_LOG_ID_RETRY_LIMIT = 3;
 
 function generateLogId() {
@@ -478,43 +473,51 @@ function mapSummaryRow(row: CallLogSummaryRow) {
 }
 
 async function saveCallLogOperation(entry: any, metadataOnly = false): Promise<void> {
-  let prepared: PreparedCallLogRow;
   try {
-    prepared = await buildCallLogRow(entry, metadataOnly);
-  } catch (error) {
-    logCallLogSaveFailure(error);
-    return;
-  }
-  let inserted = false;
-  try {
-    insertCallLogRow(prepared);
-    inserted = true;
-  } catch (error) {
-    if (!isWriteLockError(error)) {
+    let prepared: PreparedCallLogRow;
+    try {
+      prepared = await buildCallLogRow(entry, metadataOnly);
+    } catch (error) {
       logCallLogSaveFailure(error);
       return;
     }
-    const retry = scheduleWriteRetry(() => {
+    let inserted = false;
+    try {
       insertCallLogRow(prepared);
       inserted = true;
-    }, logCallLogSaveFailure);
-    pendingCallLogSaves.add(retry);
-    try {
-      await retry;
-    } finally {
-      pendingCallLogSaves.delete(retry);
+    } catch (error) {
+      if (!isWriteLockError(error)) {
+        logCallLogSaveFailure(error);
+        return;
+      }
+      const retry = scheduleWriteRetry(() => {
+        insertCallLogRow(prepared);
+        inserted = true;
+      }, logCallLogSaveFailure);
+      pendingCallLogSaves.add(retry);
+      try {
+        await retry;
+      } finally {
+        pendingCallLogSaves.delete(retry);
+      }
     }
-  }
-  if (!inserted) return;
-  markRequestPersistedById(
-    entry.pendingRequestId,
-    entry.pendingRequestGeneration,
-    String(prepared.logEntry.id)
-  );
-  try {
-    await publishCallLogDetail(prepared);
-  } catch (error) {
-    logCallLogSaveFailure(error);
+    if (!inserted) return;
+    markRequestPersistedById(
+      entry.pendingRequestId,
+      entry.pendingRequestGeneration,
+      String(prepared.logEntry.id)
+    );
+    try {
+      await publishCallLogDetail(prepared);
+    } catch (error) {
+      logCallLogSaveFailure(error);
+    }
+  } finally {
+    // Clear a temporary continuation even if the row or artifact cannot be written.
+    // Metadata-only summaries must not invalidate a full response's bridge.
+    if (!metadataOnly && typeof entry?.responseId === "string" && entry.responseId.length > 0) {
+      clearPendingContinuationState(entry.responseId);
+    }
   }
 }
 
@@ -524,8 +527,6 @@ type PreparedCallLogRow = {
   logEntry: Record<string, unknown>;
   insertParams: Record<string, unknown>;
   hasResilienceColumn: boolean;
-  detailState: CallLogDetailState;
-  responseId: string | null;
   /** Builds the artifact from the row's FINAL id; null when no detail is expected. */
   buildDetailArtifact: (() => ReturnType<typeof buildArtifact>) | null;
 };
@@ -791,8 +792,6 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
     logEntry,
     insertParams,
     hasResilienceColumn,
-    detailState,
-    responseId: typeof logEntry.responseId === "string" ? logEntry.responseId : null,
     buildDetailArtifact: detailExpected
       ? () =>
           buildArtifact(
@@ -865,25 +864,16 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
 
 /** Write the inserted row's artifact and publish it, or make the row terminal missing. */
 async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void> {
-  const { db, logEntry, buildDetailArtifact, responseId } = prepared;
-  let detailState = prepared.detailState;
+  const { db, logEntry, buildDetailArtifact } = prepared;
   if (buildDetailArtifact) {
     const id = String(logEntry.id);
     try {
       const artifactResult = await writeCallArtifactAsync(buildDetailArtifact());
-      if (artifactResult && publishPendingCallLogDetail(db, id, artifactResult)) {
-        detailState = "ready";
-      }
+      if (artifactResult) publishPendingCallLogDetail(db, id, artifactResult);
     } finally {
       // A null result or a thrown write must not strand the export cursor.
       failPendingCallLogDetail(db, id);
     }
-  }
-
-  if (detailState === "ready" && typeof responseId === "string") {
-    // The durable row is now authoritative; drop the bridge entry instead
-    // of letting it idle until its TTL.
-    clearPendingContinuationState(responseId);
   }
 
   scheduleCallLogRotation();
