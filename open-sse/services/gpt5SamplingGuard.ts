@@ -26,6 +26,11 @@ import { FORMATS } from "../translator/formats.ts";
 type JsonRecord = Record<string, unknown>;
 
 const SAMPLING_PARAMS = ["temperature", "top_p"] as const;
+// Terra additionally rejects log-probability controls when reasoning is active.
+// With effort "none" all four fields remain eligible for passthrough.
+const TERRA_REASONING_SAMPLING_PARAMS = [
+  ...SAMPLING_PARAMS, "top_logprobs", "logprobs",
+] as const;
 // Suffix that encodes an active (non-none) reasoning effort, e.g. `gpt-5.4-high`.
 const ACTIVE_EFFORT_SUFFIX = /-(low|medium|high|xhigh|minimal)$/i;
 // Suffix that encodes the explicit non-reasoning mode, e.g. `gpt-5.4-none`.
@@ -68,7 +73,9 @@ export function stripGpt5SamplingWhenReasoning<T extends Record<string, unknown>
   if (!hasActiveReasoning(record, model)) return body;
 
   const stripped: string[] = [];
-  for (const param of SAMPLING_PARAMS) {
+  const params = model.toLowerCase() === "gpt-6.1-terra"
+    ? TERRA_REASONING_SAMPLING_PARAMS : SAMPLING_PARAMS;
+  for (const param of params) {
     if (Object.hasOwn(record, param)) stripped.push(param);
   }
   if (stripped.length === 0) return body;
