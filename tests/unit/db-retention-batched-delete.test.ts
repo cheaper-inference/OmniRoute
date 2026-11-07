@@ -72,7 +72,7 @@ function seedUsageHistory(count: number, timestamp: string, model = "m") {
 
 function summarizedRequests() {
   return (
-    db().prepare("SELECT COALESCE(SUM(total_requests), 0) AS n FROM daily_usage_summary").get() as {
+    db().prepare("SELECT COALESCE(SUM(total_requests), 0) AS n FROM usage_daily_summary").get() as {
       n: number;
     }
   ).n;
@@ -250,7 +250,7 @@ test("an empty backlog runs one DELETE and deletes nothing", async () => {
 });
 
 test("a usage_history cleanup that fails part way leaves no half-deleted day", async () => {
-  db().exec("DELETE FROM usage_history; DELETE FROM daily_usage_summary");
+  db().exec("DELETE FROM usage_history; DELETE FROM daily_usage_summary; DELETE FROM usage_daily_summary;");
   const days = getUserDatabaseSettings().retention.usageHistory;
   seedUsageHistory(8_000, daysAgo(days + 5));
   seedUsageHistory(7_999, daysAgo(days + 4));
@@ -292,11 +292,11 @@ test("a call_logs cleanup that fails part way reports the rows it already delete
 });
 
 test("a failed usage_history rollup aborts the delete", async () => {
-  db().exec("DELETE FROM usage_history; DELETE FROM daily_usage_summary");
+  db().exec("DELETE FROM usage_history; DELETE FROM daily_usage_summary; DELETE FROM usage_daily_summary;");
   const days = getUserDatabaseSettings().retention.usageHistory;
   seedUsageHistory(500, daysAgo(days + 5));
   db().exec(
-    `CREATE TEMP TRIGGER fail_rollup BEFORE INSERT ON daily_usage_summary
+    `CREATE TEMP TRIGGER fail_rollup BEFORE INSERT ON usage_daily_summary
      BEGIN SELECT RAISE(ABORT, 'injected rollup failure'); END`
   );
   let result;
@@ -341,7 +341,7 @@ test("the batched delete rejects a batch size that would never finish", async ()
 });
 
 test("a usage_history row whose date part is not a real calendar day never moves the delete past the cutoff", async () => {
-  db().exec("DELETE FROM usage_history");
+  db().exec("DELETE FROM usage_history; DELETE FROM usage_daily_summary");
   // '2025-09-31' sorts before the cutoff '2025-10-01', but Date.parse rolls it
   // forward to 10-01, so the next day would be 10-02, past the cutoff.
   seedUsageHistory(1, "2025-09-31T12:00:00.000Z");
@@ -356,7 +356,7 @@ test("a usage_history row whose date part is not a real calendar day never moves
 });
 
 test("usage_history retention deletes the whole day before the cutoff day", async () => {
-  db().exec("DELETE FROM usage_history; DELETE FROM daily_usage_summary");
+  db().exec("DELETE FROM usage_history; DELETE FROM daily_usage_summary; DELETE FROM usage_daily_summary;");
   const cutoffDay = usageCutoffDay(getUserDatabaseSettings().retention.usageHistory);
   const dayBefore = new Date(Date.parse(`${cutoffDay}T00:00:00.000Z`) - DAY_MS)
     .toISOString()
@@ -372,7 +372,7 @@ test("usage_history retention deletes the whole day before the cutoff day", asyn
 });
 
 test("usage_history days are split at UTC midnight in a timezone east of UTC", async () => {
-  db().exec("DELETE FROM usage_history");
+  db().exec("DELETE FROM usage_history; DELETE FROM usage_daily_summary");
   seedUsageHistory(4, "2025-09-29T20:00:00.000Z");
   seedUsageHistory(3, "2025-09-30T01:00:00.000Z");
   seedUsageHistory(1, "2025-10-01T00:00:00.000Z");
@@ -396,7 +396,7 @@ test("usage_history days are split at UTC midnight in a timezone east of UTC", a
 });
 
 test("usage_history days are split at UTC midnight across a local DST change", async () => {
-  db().exec("DELETE FROM usage_history");
+  db().exec("DELETE FROM usage_history; DELETE FROM usage_daily_summary");
   // 2025-03-09 is the spring-forward day in America/New_York. A next day
   // computed with local-time setDate lands on 2025-03-09T23:00Z, the same UTC
   // day, and the delete never moves past it.
@@ -423,7 +423,7 @@ test("usage_history days are split at UTC midnight across a local DST change", a
 });
 
 test("an empty usage_history timestamp does not stop the delete", async () => {
-  db().exec("DELETE FROM usage_history");
+  db().exec("DELETE FROM usage_history; DELETE FROM usage_daily_summary");
   // MIN(timestamp) is '' here; that is a value, not the end of the backlog.
   seedUsageHistory(1, "");
   seedUsageHistory(3, "2025-09-29T12:00:00.000Z");
@@ -438,7 +438,7 @@ test("an empty usage_history timestamp does not stop the delete", async () => {
 });
 
 test("a usage_history timestamp with an extended year does not stall the delete", async () => {
-  db().exec("DELETE FROM usage_history");
+  db().exec("DELETE FROM usage_history; DELETE FROM usage_daily_summary");
   // '+010000-…' and '-000001-…' sort before '2025-…' but their first 10
   // characters are not YYYY-MM-DD. Date.parse still accepts
   // '+010000-01T00:00:00Z', and the "next day" it gives, '+010000-01', sorts
@@ -459,7 +459,7 @@ test("a usage_history timestamp with an extended year does not stall the delete"
 });
 
 test("a bare YYYY-MM-DD usage_history timestamp is deleted with its own day and kept on the cutoff day", async () => {
-  db().exec("DELETE FROM usage_history");
+  db().exec("DELETE FROM usage_history; DELETE FROM usage_daily_summary");
   // DATE() in the rollup puts a bare '2025-09-30' on 09-30 and a bare
   // '2025-10-01' on the cutoff day, which the rollup has not summarized.
   seedUsageHistory(1, "2025-09-29T12:00:00.000Z");
@@ -477,7 +477,7 @@ test("a bare YYYY-MM-DD usage_history timestamp is deleted with its own day and 
 });
 
 test("usage_history rows with an empty timestamp go even when no dated row is before the cutoff", async () => {
-  db().exec("DELETE FROM usage_history");
+  db().exec("DELETE FROM usage_history; DELETE FROM usage_daily_summary");
   // The rollup has nothing to sum for these, and the old single DELETE removed
   // them. A MIN() that skipped '' would end the loop with them still there.
   seedUsageHistory(2, "");
@@ -494,7 +494,7 @@ test("usage_history rows with an empty timestamp go even when no dated row is be
 });
 
 test("an empty usage_history timestamp sends the rest of the backlog in one statement", async () => {
-  db().exec("DELETE FROM usage_history");
+  db().exec("DELETE FROM usage_history; DELETE FROM usage_daily_summary");
   seedUsageHistory(1, "");
   seedUsageHistory(2, "2025-09-28T12:00:00.000Z");
   seedUsageHistory(3, "2025-09-29T12:00:00.000Z");
@@ -511,7 +511,7 @@ test("an empty usage_history timestamp sends the rest of the backlog in one stat
 });
 
 test("a usage_history timestamp that only starts like a date does not stall the delete", async () => {
-  db().exec("DELETE FROM usage_history");
+  db().exec("DELETE FROM usage_history; DELETE FROM usage_daily_summary");
   // '2025-1(old)' sorts after the 09-29 rows and before the cutoff. Date.parse
   // accepts '2025-1(old' (it skips the '(' as a comment) and reads it as local
   // time, so the "next day" it gives is 2025-01-02 (or 2025-01-01 east of UTC).
@@ -532,7 +532,7 @@ test("a usage_history timestamp that only starts like a date does not stall the 
 });
 
 test("a usage_history backlog of more than three days is deleted in one run", async () => {
-  db().exec("DELETE FROM usage_history");
+  db().exec("DELETE FROM usage_history; DELETE FROM usage_daily_summary");
   const days = getUserDatabaseSettings().retention.usageHistory;
   for (let d = 2; d <= 7; d++) seedUsageHistory(1, daysAgo(days + d));
   const { result, perStatement, ticks } = await observeDeletes(
@@ -553,7 +553,7 @@ test("another connection can take the write lock between usage_history days", as
   // connection stay invisible here -- the rows would read as missing even though
   // the cleanup never touched them.
   core.resetDbInstance();
-  db().exec("DELETE FROM usage_history");
+  db().exec("DELETE FROM usage_history; DELETE FROM usage_daily_summary");
   const days = getUserDatabaseSettings().retention.usageHistory;
   for (let d = 2; d <= 4; d++) seedUsageHistory(5, daysAgo(days + d));
   const other = new DatabaseSync(dbFile());

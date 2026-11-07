@@ -26,6 +26,7 @@ import {
   deleteCallLogArtifacts,
   deleteFromTableBefore,
   deleteFromTableBeforeInBatches,
+  yieldToEventLoop,
   tableExists,
   type DeleteByPeriodTarget,
 } from "./cleanup/usagePurge";
@@ -171,6 +172,9 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
       return result;
     }
     result.deleted += removed;
+    // One statement per day, and the loop yields between them so a writer on
+    // another connection can take the lock instead of waiting for the whole run.
+    await yieldToEventLoop();
   }
 
   console.log(`[Cleanup] Deleted ${result.deleted} usage_history older than ${retentionDays} days`);

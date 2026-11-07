@@ -61,7 +61,7 @@ export function deleteFromTableBefore(target: DeleteByPeriodTarget, cutoffIso: s
  */
 export type DeleteProgress = { deleted: number };
 
-function yieldToEventLoop(): Promise<void> {
+export function yieldToEventLoop(): Promise<void> {
   return new Promise<void>((resolve) => setImmediate(resolve));
 }
 
