@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Button } from "@/shared/components";
 
 /**
@@ -189,7 +190,7 @@ export default function ConnectionQuotaPanel({
       title={t("quotaRefresh")}
       aria-label={t("quotaRefresh")}
     >
-      <Icon name="refresh" size={13} className={refreshing ? "animate-spin" : undefined} />
+      {refreshing ? <Spinner decorative size="xs" /> : <Icon name="refresh" size={13} />}
     </Button>
   ) : null;
 
