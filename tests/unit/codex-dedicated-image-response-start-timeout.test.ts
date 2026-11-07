@@ -9,6 +9,7 @@ import {
   getDefaultDispatcher,
   getDedicatedCodexImageDispatcher,
 } from "../../open-sse/utils/proxyDispatcher.ts";
+import { getGuardedDispatcher } from "../../open-sse/utils/connectGuardDispatcher.ts";
 
 const CODEX_GENERATION = "https://chatgpt.com/backend-api/codex/images/generations";
 const CODEX_EDITS = "https://chatgpt.com/backend-api/codex/images/edits";
@@ -251,6 +252,35 @@ test("Codex paid image POST is submitted once through an edge relay", async () =
       2,
       "other relay POSTs keep the fresh-socket retry"
     );
+  });
+});
+
+test("a guarded Codex paid image POST keeps its connect guard and is submitted once", async () => {
+  await withTimeoutOverrides(async () => {
+    const dispatchers: unknown[] = [];
+    let nativeAttempts = 0;
+    await assert.rejects(
+      proxyFetch(
+        CODEX_GENERATION,
+        {
+          method: "POST",
+          body: JSON.stringify({ prompt: "test" }),
+          connectGuard: "block-metadata",
+        },
+        {
+          undiciFetch: async (_input: RequestInfo | URL, options: RequestInit = {}) => {
+            dispatchers.push((options as RequestInit & { dispatcher?: unknown }).dispatcher);
+            throw connectionReset();
+          },
+          nativeFetch: async () => {
+            nativeAttempts++;
+            return new Response("unexpected");
+          },
+        }
+      )
+    );
+    assert.deepEqual(dispatchers, [getGuardedDispatcher("block-metadata")]);
+    assert.equal(nativeAttempts, 0, "native fallback must not resubmit image work");
   });
 });
 
