@@ -1,5 +1,7 @@
 import type { AntigravityHealthAttempt } from "@omniroute/open-sse/services/antigravityHealth";
 import { createStreamContentWatcher } from "@omniroute/open-sse/utils/streamReadiness";
+import { inheritTrustedLocalRateLimitResponse } from "@omniroute/open-sse/services/rateLimitManager/errors";
+import { inheritResponsePolicies } from "../handlers/chat/responsePolicies";
 
 export function bindAntigravityHealthAttempt(
   attempt: AntigravityHealthAttempt,
@@ -52,7 +54,15 @@ export function holdAntigravityHealthThroughResponse(
       try { await reader.cancel(reason); } finally { reader.releaseLock(); }
     },
   });
-  return new Response(body, {
-    status: response.status, statusText: response.statusText, headers: response.headers,
+  const wrapped = new Response(body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
   });
+  // Routing and local-limit provenance is attached to Response identity, not headers.
+  // A stream wrapper must not erase provider-probe or empty-turn policy decisions.
+  return inheritResponsePolicies(
+    response,
+    inheritTrustedLocalRateLimitResponse(response, wrapped)
+  );
 }
