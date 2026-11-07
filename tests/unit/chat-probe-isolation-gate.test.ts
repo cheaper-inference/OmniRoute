@@ -11,6 +11,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
 const chatRoute = await import("../../src/app/api/v1/chat/completions/route.ts");
 const { CHAT_PROBE_NOT_ISOLATED_CODE, chatProbeLeavesNoConversation, isChatProbeRefusal } =
   await import("../../src/lib/providers/chatProbePolicy.ts");
@@ -89,11 +90,21 @@ for (const mark of ["combo-health-check", "assessment"]) {
 }
 
 test("an ordinary request to the same model is not a probe and is not refused by the gate", async () => {
-  countUpstreamCalls();
+  // A usable web-session connection, so the request can reach the provider.
+  await providersDb.createProviderConnection({
+    provider: "deepseek-web",
+    authType: "apikey",
+    name: "deepseek-web-fixture",
+    apiKey: "deepseek-web-fixture-token",
+    isActive: true,
+    testStatus: "active",
+  });
+  const upstream = countUpstreamCalls();
   const response = await chatRoute.POST(chatRequest(WEB_SESSION_MODEL));
   const body = await response.json().catch(() => null);
 
   assert.equal(isChatProbeRefusal(body), false);
+  assert.ok(upstream.calls > 0, "the ordinary request must be dispatched to the provider");
 });
 
 test("a probe reaching a web-session target inside a combo is refused for that target", async () => {
@@ -138,4 +149,34 @@ test("an assessment the pipeline refuses (e.g. through a combo) is not assessed,
 
   const result = await new Assessor("key", "http://localhost/v1").probeModel("auto", "best-free");
   assert.equal(result.status, "unknown");
+});
+
+test("a model every assessment probe was refused for is neither tested nor failed", async () => {
+  const sent: string[] = [];
+  globalThis.fetch = (async (url: string | URL) => {
+    sent.push(String(url));
+    return Response.json({ choices: [{ message: { role: "assistant", content: "OK" } }] });
+  }) as typeof fetch;
+  const assessor = new Assessor("key", "http://localhost/v1");
+
+  const run = await assessor.runAssessment([
+    { providerId: "deepseek-web", modelId: "deepseek-v4-pro-think" },
+    { providerId: "openai", modelId: "gpt-4.1" },
+  ]);
+  const refused = assessor.getAssessment("deepseek-web", "deepseek-v4-pro-think");
+
+  assert.equal(sent.length, 2, "only the API-key model was probed (quick + standard)");
+  assert.equal(refused?.status, "unknown");
+  assert.equal(refused?.consecutiveFails, 0);
+  assert.equal(refused?.probeCount, 0);
+  assert.equal(run.modelsTested, 1);
+  assert.equal(run.modelsPassed, 1);
+  assert.equal(run.modelsFailed, 0);
+
+  // Assessing again keeps the refused model out of the failure streak.
+  await assessor.assessModel("deepseek-web", "deepseek-v4-pro-think");
+  assert.equal(
+    assessor.getAssessment("deepseek-web", "deepseek-v4-pro-think")?.consecutiveFails,
+    0
+  );
 });

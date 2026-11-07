@@ -155,6 +155,9 @@ export class Assessor {
       if (result.status === "auth_error" || result.status === "broken") break;
     }
 
+    // Every probe refused by the isolation gate: the model was not tested, so its
+    // failure streak and probe count stay as they were.
+    const notAssessed = probeResults.every((r) => r === NOT_ASSESSED);
     const bestResult = probeResults.find((r) => r.status === "working") ?? probeResults[0];
     const latencies = probeResults.filter((r) => r.status === "working").map((r) => r.latencyMs);
 
@@ -177,8 +180,11 @@ export class Assessor {
       tier: "balanced",
       lastTested: now,
       lastError: bestResult.error ?? null,
-      consecutiveFails: bestResult.status === "working" ? 0 : (existing?.consecutiveFails ?? 0) + 1,
-      probeCount: (existing?.probeCount ?? 0) + probeResults.length,
+      consecutiveFails:
+        bestResult.status === "working"
+          ? 0
+          : (existing?.consecutiveFails ?? 0) + (notAssessed ? 0 : 1),
+      probeCount: (existing?.probeCount ?? 0) + (notAssessed ? 0 : probeResults.length),
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
     };
@@ -208,6 +214,8 @@ export class Assessor {
 
     for (const { providerId, modelId } of models) {
       const assessment = await this.assessModel(providerId, modelId);
+      // A model the isolation gate kept from every probe was not tested.
+      if (assessment.status === NOT_ASSESSED.status) continue;
       run.modelsTested++;
       if (assessment.status === "working") run.modelsPassed++;
       else if (assessment.status === "rate_limited") run.modelsRateLimited++;
