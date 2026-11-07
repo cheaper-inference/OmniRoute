@@ -1,8 +1,14 @@
 import { fetch as undiciFetch } from "undici";
+import {
+  getGuardedDispatcher,
+  isConnectGuardRefusal,
+  type ConnectGuardMode,
+} from "./connectGuardDispatcher.ts";
 import { withPayloadTraffic } from "./proxyTrafficTransport.ts";
 import {
   createProxyDispatcher,
   getDefaultDispatcher,
+  getDedicatedCodexImageDispatcher,
   getRetryDispatcher,
   isLocalEgressHostname,
 } from "./proxyDispatcher.ts";
@@ -16,6 +22,8 @@ import {
 } from "./directResponseStartTimeout.ts";
 import {
   getEffectiveSignal,
+  isDedicatedCodexImageRequest,
+  codexImageResponseStartTimeoutMs,
   canResendAfterTransportError,
   isAmbiguousFailureReplaySafe,
   requestHasNonReplayableBody,
@@ -62,7 +70,8 @@ export async function dispatchDirectFetch(
   deps: ProxyFetchDeps,
   runtime: ProxyTransportRuntime,
   target: string,
-  source: string
+  source: string,
+  connectGuard?: ConnectGuardMode
 ): Promise<Response> {
   const store = runtime.tlsFingerprintContext.getStore();
   let tlsFallback = false;
@@ -76,11 +85,20 @@ export async function dispatchDirectFetch(
   if (process.versions.bun || isLoopbackHost(targetPart(target, "hostname"))) {
     return withPayloadTraffic(native, null, deps.recordTraffic)(input, options);
   }
-  return sendDirectWithRetry(input, options, deps, native, target, source, tlsFallback);
+  return sendDirectWithRetry(
+    input,
+    options,
+    deps,
+    native,
+    target,
+    source,
+    tlsFallback,
+    connectGuard
+  );
 }
 
 function validateDirectFailure(error: unknown, signal: AbortSignal | null | undefined): void {
-  if (signal?.aborted) throw error;
+  if (signal?.aborted || isConnectGuardRefusal(error)) throw error;
   if (isDirectResponseStartTimeout(error)) return;
   const message = error instanceof Error ? error.message : String(error);
   if (message.includes("onRequestStart")) {
@@ -111,12 +129,15 @@ async function sendDirectWithRetry(
   native: FetchWithDispatcher,
   target: string,
   source: string,
-  tlsFallback: boolean
+  tlsFallback: boolean,
+  connectGuard?: ConnectGuardMode
 ): Promise<Response> {
   const directOptions = { ...options, signal: getEffectiveSignal(input, options) };
   const nonReplayable = requestHasNonReplayableBody(input, options);
   const replayTimeout = isAmbiguousFailureReplaySafe(input, options);
-  const max = nonReplayable ? 1 : 2;
+  const dedicatedCodexImageRequest = isDedicatedCodexImageRequest(input, target, options);
+  const imageTimeout = dedicatedCodexImageRequest ? codexImageResponseStartTimeoutMs() : 0;
+  const max = nonReplayable || dedicatedCodexImageRequest ? 1 : 2;
   const raw = deps.undiciFetch ?? (undiciFetch as unknown as FetchWithDispatcher);
   const timeoutFor = directHeadersTimeoutResolver(directOptions, target);
   const hostname = targetPart(target, "hostname") || undefined;
@@ -127,14 +148,23 @@ async function sendDirectWithRetry(
         input,
         {
           ...directOptions,
-          dispatcher: attempt === 0 ? getDefaultDispatcher(hostname) : getRetryDispatcher(hostname),
+          dispatcher: connectGuard
+            ? getGuardedDispatcher(connectGuard)
+            : dedicatedCodexImageRequest
+              ? getDedicatedCodexImageDispatcher(imageTimeout)
+              : attempt === 0
+                ? getDefaultDispatcher(hostname)
+                : getRetryDispatcher(hostname),
         },
         withPayloadTraffic(raw, null, deps.recordTraffic),
-        timeoutFor(attempt === 0 && replayTimeout ? 0 : 1)
+        dedicatedCodexImageRequest
+          ? imageTimeout
+          : timeoutFor(attempt === 0 && replayTimeout ? 0 : 1)
       );
     } catch (error) {
       // Validation tags errors, so inspect the original connection code first.
-      const canResend = canResendAfterTransportError(input, options, error);
+      const canResend =
+        !dedicatedCodexImageRequest && canResendAfterTransportError(input, options, error);
       validateDirectFailure(error, directOptions.signal);
       if (retryDirectFailure(error, attempt, max, replayTimeout, timeoutFor, target, canResend)) {
         await directRetryBackoff(error);
@@ -142,6 +172,8 @@ async function sendDirectWithRetry(
         continue;
       }
       if (!canResend) refuseResend(error, nonReplayable);
+      // Guarded requests must never fall back to an unguarded proxy or native lookup.
+      if (connectGuard) throw error;
       return exhaustedDirect(input, options, deps, native, raw, target, source, tlsFallback, error);
     }
   }

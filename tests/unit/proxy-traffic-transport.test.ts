@@ -334,3 +334,58 @@ for (const route of ["direct", "relay", "proxy"] as const) {
     });
   }
 }
+
+for (const route of ["direct", "proxy", "relay"] as const) {
+  for (const fails of [false, true]) {
+    test(`dedicated paid image ${route} ${fails ? "failure" : "success"} is metered once`, async () => {
+      const context = new AsyncLocalStorage<unknown>();
+      const proxy =
+        route === "relay"
+          ? { type: "vercel", host: "fixture.invalid", relayAuth: "synthetic-test-only" }
+          : { type: "http", host: "fixture.invalid", port: 8080 };
+      const records: Array<{ route: unknown; delta: Record<string, number> }> = [];
+      let sends = 0;
+      const native = async (): Promise<Response> => assert.fail("paid images must not fall back");
+      const runtime = {
+        originalFetch: native as typeof fetch,
+        originalFetchWithDispatcher: native,
+        proxyContext: context,
+        tlsFingerprintContext: new AsyncLocalStorage<{ used: boolean }>(),
+        resolveProxyForRequest: () => ({
+          source: route === "direct" ? "direct" : "context",
+          proxyUrl: route === "direct" ? null : "http://fixture.invalid:8080",
+        }),
+      };
+      const request = context.run(route === "direct" ? null : proxy, () =>
+        dispatchProxyFetch(
+          "https://chatgpt.com/backend-api/codex/images/generations",
+          { method: "POST", body: "é" },
+          {
+            undiciFetch: async () => {
+              sends++;
+              if (fails) throw Object.assign(new TypeError("fetch failed"), { code: "ECONNRESET" });
+              return new Response("ok");
+            },
+            nativeFetch: native,
+            recordTraffic: (recordedRoute, delta) => records.push({ route: recordedRoute, delta }),
+          },
+          runtime
+        )
+      );
+      if (fails) await assert.rejects(request);
+      else assert.equal(await (await request).text(), "ok");
+      assert.equal(sends, 1);
+      assert.ok(records.every((record) => record.route === (route === "direct" ? null : proxy)));
+      assert.deepEqual(
+        records.map(({ delta }) => delta),
+        fails
+          ? [{ attempts: 1, uploadBytes: 2, knownUploadAttempts: 1 }, { failedAttempts: 1 }]
+          : [
+              { attempts: 1, uploadBytes: 2, knownUploadAttempts: 1 },
+              { downloadBytes: 2 },
+              { completedDownloads: 1 },
+            ]
+      );
+    });
+  }
+}

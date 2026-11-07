@@ -1,8 +1,12 @@
 import { Agent } from "undici";
+import type { ConnectGuardMode } from "./connectGuardDispatcher.ts";
 import tlsClient, { type TlsFetchOptions } from "./tlsClient.ts";
 import { isUpstreamHttp2Enabled } from "./proxyDispatcher.ts";
 import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
-export type FetchWithDispatcherOptions = RequestInit & { dispatcher?: unknown };
+export type FetchWithDispatcherOptions = RequestInit & {
+  dispatcher?: unknown;
+  connectGuard?: ConnectGuardMode;
+};
 export type FetchWithDispatcher = (
   input: RequestInfo | URL,
   init?: FetchWithDispatcherOptions
@@ -292,4 +296,31 @@ export function isWreqProxySupported(proxyUrl: string): boolean {
   } catch {
     return false;
   }
+}
+
+/** Dedicated Codex Images calls are slow, chargeable, and must never be replayed. */
+export function isDedicatedCodexImageRequest(
+  input: RequestInfo | URL,
+  targetUrl: string,
+  options: FetchWithDispatcherOptions
+): boolean {
+  const method =
+    options.method ??
+    (typeof Request !== "undefined" && input instanceof Request ? input.method : "GET");
+  if (method.toUpperCase() !== "POST") return false;
+  try {
+    const url = new URL(targetUrl);
+    return (
+      url.protocol === "https:" &&
+      url.hostname === "chatgpt.com" &&
+      /^\/backend-api\/codex\/images\/(?:generations|edits)\/?$/.test(url.pathname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function codexImageResponseStartTimeoutMs(): number {
+  const configured = Number(process.env.OMNIROUTE_CODEX_IMAGE_RESPONSE_START_TIMEOUT_MS);
+  return Number.isFinite(configured) && configured > 0 ? Math.floor(configured) : 600_000;
 }

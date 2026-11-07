@@ -3,11 +3,13 @@ import type { AsyncLocalStorage } from "node:async_hooks";
 import { withPayloadTraffic, type TrafficRecorderOverride } from "./proxyTrafficTransport.ts";
 import {
   createProxyDispatcher,
+  getDedicatedCodexImageProxyDispatcher,
   getProxyRetryDispatcher,
   buildVercelRelayHeaders,
   isRelayType,
   proxyUrlForLogs,
 } from "./proxyDispatcher.ts";
+import { directFetchWithBoundedResponseStart } from "./directResponseStartTimeout.ts";
 import { stampOwnListenerSelfHop } from "./selfHop.ts";
 import { recordFinalTransportOutcome, recordProxiedSuccess } from "./proxyTransportOutcome.ts";
 import { sanitizeTransportError } from "./proxyTransportError.ts";
@@ -16,6 +18,8 @@ import { dispatchDirectFetch } from "./proxyFetchDirectTransport.ts";
 import { tryTlsSend, isTlsSendEligible } from "./proxyFetchTlsTransport.ts";
 import {
   getEffectiveSignal,
+  isDedicatedCodexImageRequest,
+  codexImageResponseStartTimeoutMs,
   canResendAfterTransportError,
   requestHasNonReplayableBody,
   tagProxyUnreachable,
@@ -77,6 +81,11 @@ export async function dispatchProxyFetch(
   deps: ProxyFetchDeps,
   runtime: ProxyTransportRuntime
 ): Promise<Response> {
+  const connectGuard = options?.connectGuard;
+  if (connectGuard) {
+    options = { ...options };
+    delete options.connectGuard;
+  }
   stampOwnListenerSelfHop(input, options);
   const context = runtime.proxyContext.getStore();
   if (context === DIRECT_PROXY_CONTEXT)
@@ -86,7 +95,8 @@ export async function dispatchProxyFetch(
     return withPayloadTraffic(rawUndici(deps), undefined, deps.recordTraffic)(input, options);
   const target = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
   const { source, proxyUrl } = resolveRoute(runtime, target);
-  if (!proxyUrl) return dispatchDirectFetch(input, options, deps, runtime, target, source);
+  if (!proxyUrl)
+    return dispatchDirectFetch(input, options, deps, runtime, target, source, connectGuard);
   const trafficProxy = source === "context" ? context : proxyUrl;
   if (context && typeof context === "object" && isRelayType((context as { type?: string }).type)) {
     return sendRelay(input, options, deps, context as RelayConfig, trafficProxy, target);
@@ -135,7 +145,8 @@ async function sendRelay(
   target: string
 ): Promise<Response> {
   const request = relayRequest(config, target, options);
-  const max = requestHasNonReplayableBody(input, options) ? 1 : 2;
+  const dedicatedCodexImageRequest = isDedicatedCodexImageRequest(input, target, options);
+  const max = requestHasNonReplayableBody(input, options) || dedicatedCodexImageRequest ? 1 : 2;
   let lastError: unknown;
   for (let attempt = 0; attempt < max; attempt++) {
     const controller = new AbortController();
@@ -207,19 +218,28 @@ async function sendProxy(
   target: string,
   source: string
 ): Promise<Response> {
-  const max = requestHasNonReplayableBody(input, options) ? 1 : 2;
+  const dedicatedCodexImageRequest = isDedicatedCodexImageRequest(input, target, options);
+  const max = requestHasNonReplayableBody(input, options) || dedicatedCodexImageRequest ? 1 : 2;
   let lastError: unknown;
   for (let attempt = 0; attempt < max; attempt++) {
     try {
-      const response = await withPayloadTraffic(
-        rawUndici(deps),
-        trafficProxy,
-        deps.recordTraffic
-      )(input, {
-        ...options,
-        dispatcher:
-          attempt === 0 ? createProxyDispatcher(proxyUrl) : getProxyRetryDispatcher(proxyUrl),
-      });
+      const meteredFetch = withPayloadTraffic(rawUndici(deps), trafficProxy, deps.recordTraffic);
+      const imageTimeout = dedicatedCodexImageRequest ? codexImageResponseStartTimeoutMs() : 0;
+      const response = dedicatedCodexImageRequest
+        ? await directFetchWithBoundedResponseStart(
+            input,
+            {
+              ...options,
+              dispatcher: getDedicatedCodexImageProxyDispatcher(proxyUrl, imageTimeout),
+            },
+            meteredFetch,
+            imageTimeout
+          )
+        : await meteredFetch(input, {
+            ...options,
+            dispatcher:
+              attempt === 0 ? createProxyDispatcher(proxyUrl) : getProxyRetryDispatcher(proxyUrl),
+          });
       recordProxiedSuccess(proxyUrl, target);
       return response;
     } catch (error) {

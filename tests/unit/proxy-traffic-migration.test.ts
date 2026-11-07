@@ -25,10 +25,10 @@ process.env.OMNIROUTE_PLUGINS_DIR = path.join(fixtureDir, "plugins");
 process.env.OMNIROUTE_MIGRATIONS_DIR = fixtureDir;
 
 const sql = fs.readFileSync(
-  new URL("../../src/lib/db/migrations/226_proxy_payload_traffic.sql", import.meta.url),
+  new URL("../../src/lib/db/migrations/228_proxy_payload_traffic.sql", import.meta.url),
   "utf8"
 );
-fs.writeFileSync(path.join(fixtureDir, "226_proxy_payload_traffic.sql"), sql, "utf8");
+fs.writeFileSync(path.join(fixtureDir, "228_proxy_payload_traffic.sql"), sql, "utf8");
 fs.writeFileSync(
   path.join(fixtureDir, "206_codex_wakeup_tasks.sql"),
   "CREATE TABLE incoming_206 (id INTEGER PRIMARY KEY);",
@@ -91,6 +91,77 @@ fs.writeFileSync(
   "utf8"
 );
 
+for (const file of [
+  "226_request_cost_ledger_read_indexes.sql",
+  "227_quota_recovery_due_cover.sql",
+]) {
+  fs.writeFileSync(
+    path.join(fixtureDir, file),
+    fs.readFileSync(new URL(`../../src/lib/db/migrations/${file}`, import.meta.url), "utf8"),
+    "utf8"
+  );
+}
+
+function createCanonicalLedgerTables(
+  db: ReturnType<typeof createNodeSqliteAdapterFromDatabase>
+): void {
+  db.exec(`CREATE TABLE request_cost_ledger (
+    api_key_id TEXT, timestamp TEXT, success INTEGER, service_tier TEXT, amount_usd REAL, request_id TEXT
+  );
+  INSERT INTO request_cost_ledger VALUES ('retained-key', 'fixture-created', 1, 'default', 0.25, 'retained-request');
+  CREATE INDEX idx_rcl_api_key_timestamp ON request_cost_ledger(api_key_id, timestamp);
+  CREATE TABLE quota_recovery_tickets (state TEXT, next_attempt_at TEXT, expires_at TEXT, api_key_id TEXT);
+  INSERT INTO quota_recovery_tickets VALUES ('pending', 'next-attempt', 'expires', 'retained-key');
+  CREATE INDEX idx_quota_recovery_due ON quota_recovery_tickets(state, next_attempt_at);`);
+}
+
+function assertCanonicalLedgerIndexes(
+  db: ReturnType<typeof createNodeSqliteAdapterFromDatabase>
+): void {
+  assert.deepEqual(db.prepare("SELECT * FROM request_cost_ledger").all(), [
+    {
+      api_key_id: "retained-key",
+      timestamp: "fixture-created",
+      success: 1,
+      service_tier: "default",
+      amount_usd: 0.25,
+      request_id: "retained-request",
+    },
+  ]);
+  const indexes = db.prepare("PRAGMA index_list(request_cost_ledger)").all() as Array<{
+    name: string;
+  }>;
+  assert.ok(indexes.some(({ name }) => name === "idx_rcl_api_key_ts_cover"));
+  assert.ok(indexes.some(({ name }) => name === "idx_rcl_request_id"));
+  assert.ok(!indexes.some(({ name }) => name === "idx_rcl_api_key_timestamp"));
+  assert.deepEqual(
+    (
+      db.prepare("PRAGMA index_info(idx_rcl_api_key_ts_cover)").all() as Array<{ name: string }>
+    ).map(({ name }) => name),
+    ["api_key_id", "timestamp", "success", "service_tier", "amount_usd"]
+  );
+  assert.deepEqual(
+    (db.prepare("PRAGMA index_info(idx_rcl_request_id)").all() as Array<{ name: string }>).map(
+      ({ name }) => name
+    ),
+    ["request_id"]
+  );
+  assert.deepEqual(db.prepare("SELECT * FROM quota_recovery_tickets").all(), [
+    {
+      state: "pending",
+      next_attempt_at: "next-attempt",
+      expires_at: "expires",
+      api_key_id: "retained-key",
+    },
+  ]);
+  assert.deepEqual(
+    (db.prepare("PRAGMA index_info(idx_quota_recovery_due)").all() as Array<{ name: string }>).map(
+      ({ name }) => name
+    ),
+    ["state", "next_attempt_at", "expires_at", "api_key_id"]
+  );
+}
+
 function createTokenLedger(db: ReturnType<typeof createNodeSqliteAdapterFromDatabase>): void {
   db.exec(`CREATE TABLE token_ledger (
     id TEXT PRIMARY KEY, to_api_key_id TEXT, from_api_key_id TEXT, created_at TEXT
@@ -130,7 +201,7 @@ test(
         { version: "213", name: "proxy_payload_traffic", path: "unused.sql" },
         { version: "207", name: "remove_opencode_free_provider", path: "unused.sql" },
         { version: "225", name: "token_ledger_balance_indexes", path: "unused.sql" },
-        { version: "226", name: "proxy_payload_traffic", path: "unused.sql" },
+        { version: "228", name: "proxy_payload_traffic", path: "unused.sql" },
       ];
       const before = db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all();
       assert.equal(hasLedgerRepairCandidates(db, files), false);
@@ -153,9 +224,21 @@ test.after(() => {
 
 test(
   "traffic migration upgrades fresh and published ledgers without losing counters",
-  { timeout: 3000 },
+  { timeout: 10000 },
   () => {
-    const publishedSlots = ["206", "207", "213", "214", "215", "217", "218", "223", "224", "225"];
+    const publishedSlots = [
+      "206",
+      "207",
+      "213",
+      "214",
+      "215",
+      "217",
+      "218",
+      "223",
+      "224",
+      "225",
+      "226",
+    ];
     for (let mask = 0; mask < 1 << publishedSlots.length; mask++) {
       const versions = publishedSlots.filter((_, index) => mask & (1 << index));
       const db = createNodeSqliteAdapterFromDatabase(new DatabaseSync(":memory:"), ":memory:");
@@ -179,8 +262,10 @@ test(
           "CREATE TABLE proxy_logs (id TEXT PRIMARY KEY); INSERT INTO proxy_logs VALUES ('retained');"
         );
         createTokenLedger(db);
-        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 11 : 12);
+        createCanonicalLedgerTables(db);
+        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 13 : 14);
         assertCanonicalTokenIndexes(db);
+        assertCanonicalLedgerIndexes(db);
         assert.deepEqual(db.prepare("SELECT * FROM proxy_logs").all(), [
           { id: "retained", egress_ip_v4: null, egress_ip_v6: null },
         ]);
@@ -198,7 +283,9 @@ test(
             { version: "223", name: "call_logs_queue_wait_ms" },
             { version: "224", name: "proxy_logs_egress_ip_families" },
             { version: "225", name: "token_ledger_balance_indexes" },
-            { version: "226", name: "proxy_payload_traffic" },
+            { version: "226", name: "request_cost_ledger_read_indexes" },
+            { version: "227", name: "quota_recovery_due_cover" },
+            { version: "228", name: "proxy_payload_traffic" },
           ],
           `canonical ledger after ${versions.join(",") || "fresh"} startup`
         );
@@ -223,7 +310,7 @@ test(
           assert.equal(
             (
               db
-                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version = '226'")
+                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version = '228'")
                 .get() as {
                 applied_at: string;
               }
@@ -262,8 +349,10 @@ test("traffic migration preserves the previously published higher slot", { timeo
       "CREATE TABLE proxy_logs (id TEXT PRIMARY KEY); INSERT INTO proxy_logs VALUES ('retained');"
     );
     createTokenLedger(db);
+    createCanonicalLedgerTables(db);
     runMigrations(db, { isNewDb: true });
     assertCanonicalTokenIndexes(db);
+    assertCanonicalLedgerIndexes(db);
     assert.deepEqual(db.prepare("SELECT * FROM proxy_logs").all(), [
       { id: "retained", egress_ip_v4: null, egress_ip_v6: null },
     ]);
@@ -274,7 +363,7 @@ test("traffic migration preserves the previously published higher slot", { timeo
     );
     assert.equal(
       (
-        db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='226'").get() as {
+        db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='228'").get() as {
           applied_at: string;
         }
       ).applied_at,
@@ -294,18 +383,25 @@ test("traffic migration preserves the previously published higher slot", { timeo
   }
 });
 
-test("traffic migration preserves canonical 225 and existing 226 ledger timestamps", () => {
+test("traffic migration preserves canonical 225/226/227 and existing 228 ledger timestamps", () => {
   const db = createNodeSqliteAdapterFromDatabase(new DatabaseSync(":memory:"), ":memory:");
   try {
     db.exec(sql);
     createTokenLedger(db);
+    createCanonicalLedgerTables(db);
     db.exec(fs.readFileSync(path.join(fixtureDir, "225_token_ledger_balance_indexes.sql"), "utf8"));
+    db.exec(
+      fs.readFileSync(path.join(fixtureDir, "226_request_cost_ledger_read_indexes.sql"), "utf8")
+    );
+    db.exec(fs.readFileSync(path.join(fixtureDir, "227_quota_recovery_due_cover.sql"), "utf8"));
     db.exec(`CREATE TABLE _omniroute_migrations (
       version TEXT PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     INSERT INTO _omniroute_migrations VALUES
       ('225', 'token_ledger_balance_indexes', 'canonical-applied'),
-      ('226', 'proxy_payload_traffic', 'traffic-applied');
+      ('226', 'request_cost_ledger_read_indexes', 'canonical-226-applied'),
+      ('227', 'quota_recovery_due_cover', 'canonical-227-applied'),
+      ('228', 'proxy_payload_traffic', 'traffic-applied');
     INSERT INTO proxy_payload_traffic (route_key, route_kind, attempts, started_at, updated_at)
       VALUES ('direct', 'direct', 9, 'start', 'update');
     CREATE TABLE proxy_logs (id TEXT PRIMARY KEY);`);
@@ -318,7 +414,13 @@ test("traffic migration preserves canonical 225 and existing 226 ledger timestam
         .all(),
       [
         { version: "225", name: "token_ledger_balance_indexes", applied_at: "canonical-applied" },
-        { version: "226", name: "proxy_payload_traffic", applied_at: "traffic-applied" },
+        {
+          version: "226",
+          name: "request_cost_ledger_read_indexes",
+          applied_at: "canonical-226-applied",
+        },
+        { version: "227", name: "quota_recovery_due_cover", applied_at: "canonical-227-applied" },
+        { version: "228", name: "proxy_payload_traffic", applied_at: "traffic-applied" },
       ]
     );
     assert.deepEqual(
@@ -326,6 +428,7 @@ test("traffic migration preserves canonical 225 and existing 226 ledger timestam
       { attempts: 9, started_at: "start", updated_at: "update" }
     );
     assertCanonicalTokenIndexes(db);
+    assertCanonicalLedgerIndexes(db);
     assert.equal(runMigrations(db, { isNewDb: true }), 0);
   } finally {
     db.close();
@@ -343,11 +446,11 @@ test(
       version TEXT PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     INSERT INTO _omniroute_migrations (version, name) VALUES
-      ('226', 'unrelated_migration'), ('207', 'proxy_payload_traffic');
+      ('228', 'unrelated_migration'), ('207', 'proxy_payload_traffic');
     INSERT INTO proxy_payload_traffic (route_key, route_kind, attempts, started_at, updated_at)
       VALUES ('direct', 'direct', 9, 'start', 'update');`);
       const before = db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all();
-      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 226 is occupied/);
+      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 228 is occupied/);
       assert.deepEqual(
         db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all(),
         before
@@ -362,3 +465,53 @@ test(
     }
   }
 );
+
+test("old 226 and duplicate 228 traffic history retain the destination timestamp", () => {
+  const db = createNodeSqliteAdapterFromDatabase(new DatabaseSync(":memory:"), ":memory:");
+  try {
+    db.exec(sql);
+    createTokenLedger(db);
+    createCanonicalLedgerTables(db);
+    db.exec(`CREATE TABLE _omniroute_migrations (
+      version TEXT PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    INSERT INTO _omniroute_migrations VALUES
+      ('226', 'proxy_payload_traffic', 'old-traffic-applied'),
+      ('228', 'proxy_payload_traffic', 'destination-applied');
+    CREATE TABLE proxy_logs (id TEXT PRIMARY KEY);
+    INSERT INTO proxy_payload_traffic (route_key, route_kind, attempts, started_at, updated_at)
+      VALUES ('direct', 'direct', 9, 'start', 'update');`);
+    assert.equal(runMigrations(db, { isNewDb: true }), 13);
+    assert.deepEqual(
+      db.prepare("SELECT name, applied_at FROM _omniroute_migrations WHERE version='228'").get(),
+      {
+        name: "proxy_payload_traffic",
+        applied_at: "destination-applied",
+      }
+    );
+    assert.deepEqual(
+      db.prepare("SELECT name FROM _omniroute_migrations WHERE version='226'").get(),
+      {
+        name: "request_cost_ledger_read_indexes",
+      }
+    );
+    assert.deepEqual(
+      db.prepare("SELECT attempts, started_at, updated_at FROM proxy_payload_traffic").get(),
+      {
+        attempts: 9,
+        started_at: "start",
+        updated_at: "update",
+      }
+    );
+    assertCanonicalTokenIndexes(db);
+    assertCanonicalLedgerIndexes(db);
+    const before = db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all();
+    assert.equal(runMigrations(db, { isNewDb: true }), 0);
+    assert.deepEqual(
+      db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all(),
+      before
+    );
+  } finally {
+    db.close();
+  }
+});
