@@ -2,9 +2,14 @@
 // Family: leonardo | Module: leonardo | Lines: 3427-3558 (132 LOC)
 // Ref: see open-sse/handlers/imageGeneration.ts top-of-file comment for split rationale
 
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { sleep } from "../../../utils/sleep.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
+import {
+  UPSTREAM_MEDIA_LIMITS,
+  downloadUpstreamMedia,
+  upstreamMediaErrorText,
+} from "@/shared/network/remoteImageFetch";
 
 // Leonardo's v1 API takes a platform-model UUID as `modelId` and answers a catalog id such
 // as "phoenix" with HTTP 500 "internal error". UUIDs from GET /api/rest/v1/platformModels.
@@ -17,6 +22,22 @@ const LEONARDO_MODEL_IDS: Record<string, string> = {
 export function resolveLeonardoModelId(model: string | undefined): string {
   const id = model || "phoenix";
   return LEONARDO_MODEL_IDS[id] ?? id;
+}
+
+/**
+ * Output size: explicit `width`/`height` win, then an OpenAI-style `size` ("576x1024"),
+ * then 1024 for whatever is still missing.
+ */
+export function resolveLeonardoImageSize(body: {
+  size?: unknown;
+  width?: number;
+  height?: number;
+}): { width: number; height: number } {
+  const match = typeof body.size === "string" ? body.size.trim().match(/^(\d+)x(\d+)$/i) : null;
+  return {
+    width: body.width || (match ? Number(match[1]) : 1024),
+    height: body.height || (match ? Number(match[2]) : 1024),
+  };
 }
 
 // init_strength (0.1-0.9) is how closely the output follows the edit reference. In a live
@@ -95,8 +116,7 @@ export async function handleLeonardoImageGeneration({
       body: JSON.stringify({
         modelId: resolveLeonardoModelId(model),
         prompt,
-        width: body.width || 1024,
-        height: body.height || 1024,
+        ...resolveLeonardoImageSize(body),
         num_images: 1,
         ...initFields,
       }),
@@ -139,15 +159,16 @@ export async function handleLeonardoImageGeneration({
       if (gen.status === "COMPLETE") {
         const imgUrl = gen.generated_images?.[0]?.url;
         if (imgUrl) {
-          const imgRes = await fetch(imgUrl);
-          if (!imgRes.ok) {
+          let buf: Buffer;
+          try {
+            ({ buffer: buf } = await downloadUpstreamMedia(imgUrl, UPSTREAM_MEDIA_LIMITS.image));
+          } catch (err) {
             return {
               success: false,
-              status: imgRes.status,
-              error: `Failed to download image: ${imgRes.status}`,
+              status: 502,
+              error: `Failed to download image: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
             };
           }
-          const buf = await imgRes.arrayBuffer();
           saveCallLog({
             method: "POST",
             path: logPath,
@@ -160,7 +181,7 @@ export async function handleLeonardoImageGeneration({
             success: true,
             data: {
               created: Math.floor(Date.now() / 1000),
-              data: [{ b64_json: Buffer.from(buf).toString("base64") }],
+              data: [{ b64_json: buf.toString("base64") }],
             },
           };
         }
