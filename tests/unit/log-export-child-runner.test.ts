@@ -228,7 +228,8 @@ test("crash after two acknowledged batches retains cursor and records failure wi
 
 test(
   "hung destination is terminated at timeout, escalating past ignored SIGTERM",
-  { timeout: 30_000 },
+  // Only bounds a child that never boots: a loaded runner has needed tens of seconds for tsx.
+  { timeout: 60_000 },
   async (t) => {
     rows(2);
     process.env.OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS = "1500";
@@ -253,7 +254,8 @@ test(
       if (child && child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
     });
     const pending = runner.runDestinationExport(dest);
-    // The old 1.5 s wall-clock deadline could kill a slow-starting child before it ignored TERM.
+    // The deadline runs on the mocked clock, so a slow-starting child can no longer be killed
+    // before it ignored TERM: nothing advances until the fixture reports the hang.
     await ready;
     t.mock.timers.tick(1499);
     assert.equal(child?.killed, false, "the configured deadline must not fire early");
