@@ -75,6 +75,7 @@ import SearchProviderCard from "./components/SearchProviderCard";
 import NoAuthProviderControls from "./components/NoAuthProviderControls";
 import AnonymousFallbackToggle from "./components/AnonymousFallbackToggle";
 import ProviderRetryDelaySelect from "./components/ProviderRetryDelaySelect";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 // providerText used by UpstreamProxyCard (Phase 1t.7)
 
 export default function ProviderDetailPageClient() {
@@ -98,6 +99,7 @@ export default function ProviderDetailPageClient() {
   const [importCodexModalOpen, setImportCodexModalOpen] = useState(false);
   const [codexCliGuideOpen, setCodexCliGuideOpen] = useState(false);
   const [importClaudeModalOpen, setImportClaudeModalOpen] = useState(false);
+  const [importAgyModalOpen, setImportAgyModalOpen] = useState(false);
   const [importGeminiModalOpen, setImportGeminiModalOpen] = useState(false);
   const [importGrokCliModalOpen, setImportGrokCliModalOpen] = useState(false);
   const [connectingVolcengineAccount, setConnectingVolcengineAccount] = useState(false);
@@ -149,7 +151,7 @@ export default function ProviderDetailPageClient() {
     setBatchDeleteConfirmOpen,
     setBatchTestResults,
     setProviderNode,
-    fetchConnections,
+    fetchConnections: fetchConnectionsWithResult,
     refreshProxyState,
     deleteConfirm,
     handleUpdateConnectionStatus,
@@ -179,6 +181,9 @@ export default function ProviderDetailPageClient() {
     getAttachmentFilename,
     PAGE_SIZE,
   } = useProviderConnections(providerId, isCompatible, isSearchProvider);
+  const fetchConnections = useCallback(async () => {
+    await fetchConnectionsWithResult();
+  }, [fetchConnectionsWithResult]);
 
   const {
     codexGlobalServiceMode,
@@ -212,13 +217,21 @@ export default function ProviderDetailPageClient() {
   const t = useTranslations("providers");
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const notify = useNotificationStore();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   // Per-account usage/limits strip — cached snapshot from the server's
   // providerLimitsCache, with per-connection on-demand live refresh.
   const {
     quotaByConnectionId,
     refreshingIds: quotaRefreshingIds,
+    refreshStates: quotaRefreshStates,
     refreshConnection,
-  } = useProviderQuota();
+  } = useProviderQuota({
+    providerId,
+    connectionIds: connections
+      .map((connection) => connection.id)
+      .filter((id): id is string => !!id),
+    refreshConnections: providerId === "codex" ? fetchConnectionsWithResult : undefined,
+  });
   const handleRefreshQuota = useCallback(
     (connectionId: string) => {
       void refreshConnection(connectionId);
@@ -552,6 +565,7 @@ export default function ProviderDetailPageClient() {
     fetchProviderModelMeta,
     fetchAliases,
     notify,
+    requestConfirm,
     t,
     selectedConnection,
     providerNode,
@@ -684,6 +698,7 @@ export default function ProviderDetailPageClient() {
             onOpenCodexCliGuide={() => setCodexCliGuideOpen(true)}
             onOpenImportCodex={() => setImportCodexModalOpen(true)}
             onOpenImportClaude={() => setImportClaudeModalOpen(true)}
+            onOpenImportAgy={() => setImportAgyModalOpen(true)}
             onOpenImportGemini={() => setImportGeminiModalOpen(true)}
             onOpenImportGrokCli={() => setImportGrokCliModalOpen(true)}
             t={t}
@@ -705,6 +720,7 @@ export default function ProviderDetailPageClient() {
               onOpenOAuthModal={() => setShowOAuthModal(true)}
               onOpenImportCodex={() => setImportCodexModalOpen(true)}
               onOpenImportClaude={() => setImportClaudeModalOpen(true)}
+              onOpenImportAgy={() => setImportAgyModalOpen(true)}
               onOpenImportGemini={() => setImportGeminiModalOpen(true)}
               onOpenImportGrokCli={() => setImportGrokCliModalOpen(true)}
               t={t}
@@ -773,6 +789,7 @@ export default function ProviderDetailPageClient() {
                 cpaProviderEnabled={cpaProviderEnabled}
                 quotaByConnectionId={quotaByConnectionId}
                 quotaRefreshingIds={quotaRefreshingIds}
+                quotaRefreshStates={quotaRefreshStates}
                 handleRefreshQuota={handleRefreshQuota}
                 onOpenEditModal={(conn) => {
                   setSelectedConnection(conn);
@@ -946,6 +963,8 @@ export default function ProviderDetailPageClient() {
         handleApplyClaudeAuthLocal={handleApplyClaudeAuthLocal}
         importClaudeModalOpen={importClaudeModalOpen}
         setImportClaudeModalOpen={setImportClaudeModalOpen}
+        importAgyModalOpen={importAgyModalOpen}
+        setImportAgyModalOpen={setImportAgyModalOpen}
         importGrokCliModalOpen={importGrokCliModalOpen}
         setImportGrokCliModalOpen={setImportGrokCliModalOpen}
         batchTestResults={batchTestResults}
@@ -971,6 +990,7 @@ export default function ProviderDetailPageClient() {
         notify={notify}
         t={t}
       />
+      {confirmDialog}
     </div>
   );
 }
