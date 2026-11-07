@@ -1,0 +1,1 @@
+- **feat(providers):** Added EVREN (SSYZ) as an OpenAI-compatible API-key provider (`https://evren-llmapi.ssyz.org.tr/v1`), with live model discovery via `passthroughModels` ([#18365](https://github.com/diegosouzapw/OmniRoute/pull/18365)) — thanks @4ni1ak
