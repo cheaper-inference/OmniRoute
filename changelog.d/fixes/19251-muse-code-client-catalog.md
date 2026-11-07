@@ -1,0 +1,1 @@
+- **fix(providers):** Muse Code model discovery now reads the Muse Code client catalog for each model's limits, efforts, modalities and visibility, and the seed catalog no longer lists Llama models a Muse Code key cannot call (#19251) — thanks @aldoeliacim

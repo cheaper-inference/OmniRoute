@@ -1,0 +1,1 @@
+- **tests:** The Kimi logomark icon fixture unmounts its React roots inside `act()` before the jsdom environment goes away, so the theme reset no longer schedules work that runs after teardown and fails the UI shard with `ReferenceError: window is not defined`

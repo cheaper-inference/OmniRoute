@@ -426,6 +426,13 @@ function ensureColumn(db: SqliteAdapter, tableName: string, columnName: string, 
   }
 }
 
+function triggerHasWhenClause(db: SqliteAdapter, triggerName: string): boolean {
+  const trigger = db
+    .prepare("SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?")
+    .get(triggerName) as { sql: string } | undefined;
+  return trigger !== undefined && /\bWHEN\b/i.test(trigger.sql);
+}
+
 function isSchemaAlreadyApplied(
   db: SqliteAdapter,
   migration: { version: string; name: string }
@@ -593,6 +600,11 @@ function isSchemaAlreadyApplied(
         hasColumn(db, "provider_nodes", "daily_quota_reset_timezone") &&
         hasColumn(db, "provider_nodes", "daily_quota_reset_hour")
       );
+    case "178":
+      // 178 only exists to give memory_fts_au a WHEN clause. A released ledger slot
+      // (#18952) can replay it long after 203 rewrote that trigger, and the replay would
+      // drop 203's memory_id condition, which is what indexes new memories (#15707).
+      return triggerHasWhenClause(db, "memory_fts_au");
     case "179":
       // proxy_logs.upstream_status may already exist if ensureProxyLogsColumns ran first;
       // a bare ADD COLUMN would then throw. Renumbering the migration means renaming this case
