@@ -1,0 +1,1 @@
+- **fix(usage):** `request_cost_ledger` now records `tokens_cache_read` and `tokens_cache_creation` from the request usage (OpenAI and Claude shapes), matching `usage_history` for the same request; both columns were always 0 before ([#18865](https://github.com/cheaper-inference/OmniRoute/issues/18865)) — thanks @PawelKinczyk

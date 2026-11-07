@@ -6,7 +6,8 @@
  * Model/custom overrides win first. A declared connection-level alternate protocol wins next. A
  * Responses-shaped inbound request otherwise keeps the Responses wire format, except for custom
  * OpenAI-compatible connections explicitly configured for Chat.
- * AgentRouter may inherit the inbound protocol when no explicit connection override exists.
+ * AgentRouter defaults Responses-only models to Responses, otherwise inheriting the inbound
+ * protocol when no explicit connection override exists.
  * Returns both `alias` (reused by the handler when stripping the `alias/` prefix off the upstream
  * model id) and `targetFormat`.
  */
@@ -16,6 +17,8 @@ import { getRegistryEntry } from "../../config/providerRegistry.ts";
 import { resolveAlternateFormat } from "../../config/providers/alternateFormats.ts";
 import { getTargetFormat } from "../../services/provider.ts";
 import { FORMATS } from "../../translator/formats.ts";
+
+const AGENTROUTER_RESPONSES_MODELS = new Set(["gpt-6-astra", "gpt-6.1-sol", "gpt-5.6-sol"]);
 
 export function resolveChatCoreTargetFormat(opts: {
   provider: string;
@@ -44,11 +47,14 @@ export function resolveChatCoreTargetFormat(opts: {
   )?.targetFormat;
   const inferredAgentRouterTargetFormat =
     provider === "agentrouter" &&
-    !(typeof explicitConnectionTargetFormat === "string" && explicitConnectionTargetFormat) &&
-    (sourceFormat === FORMATS.OPENAI_RESPONSES ||
-      sourceFormat === FORMATS.OPENAI ||
-      sourceFormat === FORMATS.CLAUDE)
-      ? sourceFormat
+    !(typeof explicitConnectionTargetFormat === "string" && explicitConnectionTargetFormat)
+      ? AGENTROUTER_RESPONSES_MODELS.has(resolvedModel)
+        ? FORMATS.OPENAI_RESPONSES
+        : sourceFormat === FORMATS.OPENAI_RESPONSES ||
+            sourceFormat === FORMATS.OPENAI ||
+            sourceFormat === FORMATS.CLAUDE
+          ? sourceFormat
+          : undefined
       : undefined;
   const providerTargetFormat = getTargetFormat(provider, providerSpecificData);
   const declaredConnectionAlternate = resolveAlternateFormat(

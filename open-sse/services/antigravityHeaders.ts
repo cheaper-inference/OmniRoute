@@ -52,12 +52,65 @@ function resolveAntigravityPlatformEnum(): number {
 export const ANTIGRAVITY_IDE_NODE_API_CLIENT = "google-api-nodejs-client/10.3.0";
 export const ANTIGRAVITY_IDE_NODE_X_GOOG_API_CLIENT = "gl-node/22.21.1";
 
-// Antigravity presents the native macOS desktop client fingerprint: the upstream
-// backend expects the Mac build, so the OS/arch token is pinned to darwin/arm64
-// regardless of the host OmniRoute happens to run on (#8098). The IDE / CLI /
-// IDE-Node User-Agent split (#8013) is preserved — only the platform token is fixed.
+// Antigravity presents the native macOS desktop client fingerprint on the IDE path:
+// the upstream backend expects the Mac build, so the OS/arch token is pinned to
+// darwin/arm64 regardless of the host OmniRoute happens to run on (#8098). The IDE /
+// CLI / IDE-Node User-Agent split (#8013) is preserved — only the platform token is fixed.
+//
+// The CLI path (agy, a Go binary) has no such constraint: it reports the real host in
+// Go's runtime.GOOS/GOARCH dialect, captured live from `agy 1.4.4` on Windows x64 as
+// `os_type=windows; arch=amd64`. Node's own names ("win32"/"x64") are a giveaway.
 const ANTIGRAVITY_OS_TYPE = "darwin";
 const ANTIGRAVITY_ARCH = "arm64";
+
+const ANTIGRAVITY_GO_OS: Record<string, string> = {
+  win32: "windows",
+  darwin: "darwin",
+  linux: "linux",
+  freebsd: "freebsd",
+  openbsd: "openbsd",
+  sunos: "solaris",
+  aix: "aix",
+};
+
+const ANTIGRAVITY_GO_ARCH: Record<string, string> = {
+  x64: "amd64",
+  ia32: "386",
+  arm64: "arm64",
+  arm: "arm",
+  ppc64: "ppc64",
+  s390x: "s390x",
+};
+
+/** Map a Node `process.platform`/`process.arch` pair onto Go's GOOS/GOARCH tokens. */
+export function resolveAntigravityGoPlatform(
+  platform: string = process.platform,
+  arch: string = process.arch
+): { osType: string; arch: string } {
+  return {
+    osType: ANTIGRAVITY_GO_OS[platform] ?? platform,
+    arch: ANTIGRAVITY_GO_ARCH[arch] ?? arch,
+  };
+}
+
+// `cl` is Google's internal Piper changelist for the build that shipped a given CLI
+// version — not derivable from the version, and not exposed by the public manifests
+// (only version/url/sha512 are). Seeded from the native capture; refresh when bumping.
+const ANTIGRAVITY_KNOWN_CHANGELISTS: Record<string, string> = {
+  "1.4.4": "1003595037",
+};
+
+/**
+ * Resolve the CLI build changelist: explicit override, then the known-version table.
+ * Returns `null` when the version has no recorded changelist, so the caller omits `cl=`
+ * entirely — a stale changelist paired with a newer version is a worse fingerprint than
+ * no changelist at all.
+ */
+export function resolveAntigravityCliChangelist(version: string): string | null {
+  const override = process.env.ANTIGRAVITY_CLI_CL?.trim();
+  if (override) return override;
+  return ANTIGRAVITY_KNOWN_CHANGELISTS[version] ?? null;
+}
 
 function withOptionalBearerAuth(
   headers: Record<string, string>,
@@ -75,9 +128,12 @@ export function antigravityIdeUserAgent(version = getCachedAntigravityIdeVersion
 
 export function antigravityCliUserAgent(
   version = getCachedAntigravityCliVersion(),
-  authMethod = "consumer"
+  authMethod = "consumer",
+  changelist = resolveAntigravityCliChangelist(version),
+  platform = resolveAntigravityGoPlatform()
 ): string {
-  return `antigravity/cli/${version} (aidev_client; os_type=${ANTIGRAVITY_OS_TYPE}; arch=${ANTIGRAVITY_ARCH}; auth_method=${authMethod})`;
+  const clToken = changelist ? `cl=${changelist}; ` : "";
+  return `antigravity/cli/${version} (aidev_client; os_type=${platform.osType}; arch=${platform.arch}; ${clToken}auth_method=${authMethod})`;
 }
 
 export function antigravityIdeNodeUserAgent(version = getCachedAntigravityIdeVersion()): string {
@@ -112,8 +168,16 @@ export function getAntigravityIdeNodeHeaders(accessToken?: string | null): Recor
   );
 }
 
-/** Native loadCodeAssist body metadata captured from both official clients. */
-export function getAntigravityLoadCodeAssistMetadata(): Record<string, number> {
+/** Native loadCodeAssist body metadata, per client profile. */
+export function getAntigravityLoadCodeAssistMetadata(
+  profile: AntigravityClientProfile = "ide"
+): Record<string, number> | { ideType: string } {
+  // The Go CLI sends the bare string form — 38 bytes, 200 OK, captured live. The numeric
+  // enum shape below is what the IDE build needs; sending it from the CLI path would be
+  // an identity mismatch.
+  if (profile === "cli") {
+    return { ideType: "ANTIGRAVITY" };
+  }
   return {
     ideType: ANTIGRAVITY_IDE_TYPE_ENUM,
     platform: resolveAntigravityPlatformEnum(),

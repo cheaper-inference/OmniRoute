@@ -17,6 +17,7 @@ import ProviderIcon from "@/shared/components/ProviderIcon";
 import InfoTooltip from "@/shared/components/InfoTooltip";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { FilterSelect, HeroStat, SyncMini } from "./PricingTabHelpers";
 
 type CoverageFilter = "all" | "lt50" | "gte50lt100" | "full";
@@ -133,6 +134,7 @@ export default function PricingTab() {
     message: string;
   } | null>(null);
   const t = useTranslations("settings");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   const showStatus = useCallback((tone: "success" | "error" | "info", message: string) => {
     setStatusMessage({ tone, message });
@@ -403,7 +405,10 @@ export default function PricingTab() {
 
   const resetProvider = useCallback(
     async (providerAlias: string, pricingKey?: string) => {
-      if (!confirm(t("resetPricingConfirm", { provider: providerAlias.toUpperCase() }))) return;
+      const confirmed = await requestConfirm(
+        t("resetPricingConfirm", { provider: providerAlias.toUpperCase() })
+      );
+      if (!confirmed) return;
 
       try {
         const writeKey = pricingKey || providerAlias;
@@ -433,7 +438,7 @@ export default function PricingTab() {
         );
       }
     },
-    [loadData, showStatus, t]
+    [loadData, showStatus, t, requestConfirm]
   );
 
   const triggerSync = useCallback(async () => {
@@ -469,7 +474,7 @@ export default function PricingTab() {
   }, [loadData, showStatus, t]);
 
   const clearSyncedPricing = useCallback(async () => {
-    if (!confirm(t("clearSyncedPricingConfirm"))) return;
+    if (!(await requestConfirm(t("clearSyncedPricingConfirm")))) return;
 
     setSyncing(true);
     try {
@@ -491,7 +496,7 @@ export default function PricingTab() {
     } finally {
       setSyncing(false);
     }
-  }, [loadData, showStatus, t]);
+  }, [loadData, showStatus, t, requestConfirm]);
 
   if (loading) {
     return (
@@ -764,6 +769,7 @@ export default function PricingTab() {
           </Button>
         )}
       </div>
+      {confirmDialog}
     </div>
   );
 }

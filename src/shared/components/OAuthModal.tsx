@@ -25,6 +25,7 @@ import GheConfigStep from "@/shared/components/oauthModal/GheConfigStep";
 import GitlabDuoSetupStep from "@/shared/components/oauthModal/GitlabDuoSetupStep";
 import OAuthErrorStep from "@/shared/components/oauthModal/OAuthErrorStep";
 import OAuthWaitingStep from "@/shared/components/oauthModal/OAuthWaitingStep";
+import CopilotPolicyStep from "@/shared/components/oauthModal/CopilotPolicyStep";
 import { getPasteTokenCopyKeys } from "@/shared/components/oauthModal/pasteTokenCopy";
 import { parseGrokCliPasteToken } from "@/lib/oauth/utils/grokCliAuthJson";
 import { buildGoogleLoopbackHint } from "@/lib/oauth/utils/googleLoopbackHint";
@@ -39,7 +40,7 @@ export { formatDeviceCodeRemaining } from "./OAuthModalPanels";
 const GOOGLE_OAUTH_PROVIDERS = new Set(["antigravity", "agy"]);
 
 /** Providers that use a local callback server on a random port (PKCE browser flow). */
-const PKCE_CALLBACK_SERVER_PROVIDERS = new Set(["codex", "xai-oauth", "grok-cli"]);
+const PKCE_CALLBACK_SERVER_PROVIDERS = new Set(["codex", "xai-oauth", "grok-cli", "devin-desktop"]);
 
 // grok-cli is wired into BOTH the device-code panel (its default, #7358) and
 // the browser PKCE + import-token paths above/below (#7013) — the user picks
@@ -53,6 +54,7 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "kimi-coding",
   "kilocode",
   "codebuddy-cn",
+  "freebuff",
   "codebuddy-intl",
   "ghe-copilot",
   "grok-cli",
@@ -61,8 +63,9 @@ const DEVICE_CODE_PROVIDERS = new Set([
 ]);
 
 const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
-const IMPORT_TOKEN_ONLY_PROVIDERS = new Set(["devin-desktop", "devin-cli"]);
-const PASTE_FIRST_PROVIDERS = new Set([...IMPORT_TOKEN_ONLY_PROVIDERS, "claude"]);
+const IMPORT_TOKEN_ONLY_PROVIDERS = new Set(["devin-cli"]);
+// Devin Desktop opens on the key import (its long-standing default); browser sign-in is a tab.
+const PASTE_FIRST_PROVIDERS = new Set([...IMPORT_TOKEN_ONLY_PROVIDERS, "devin-desktop", "claude"]);
 
 // POST a bare Codex access token to the access-token-only import endpoint
 // (#1290); shared by the bare-JWT and session-JSON paste branches (#6636).
@@ -168,6 +171,9 @@ export default function OAuthModal({
   // DEVICE_CODE_PROVIDERS); flipping this to true routes startOAuthFlow through
   // the browser PKCE / PKCE_CALLBACK_SERVER_PROVIDERS branch instead.
   const [grokBrowserMode, setGrokBrowserMode] = useState(false);
+  // github only: gate the device-code flow behind the policy-ambiguous disclosure.
+  // Flipped to true when the user clicks "I understand — Connect" in CopilotPolicyStep.
+  const [copilotPolicyAcknowledged, setCopilotPolicyAcknowledged] = useState(false);
   // #8046 follow-up: structured diagnosis for the LAN-IP loopback mismatch, rendered
   // by its own step instead of as prose inside the generic red error step.
   const [loopbackHint, setLoopbackHint] = useState<PkceLoopbackMismatchHint | null>(null);
@@ -265,7 +271,7 @@ export default function OAuthModal({
                 .filter(Boolean)
                 .join("; ")
             : "";
-          throw new Error(details ? `${errMsg} (${details})` : errMsg);
+          throw new Error(details ? `${errMsg} (${details})` : String(errMsg));
         }
 
         setStep("success");
@@ -405,6 +411,12 @@ export default function OAuthModal({
           setDeviceData(null);
           setStep("waiting");
 
+          // GitHub Copilot: show policy-ambiguous disclosure before requesting credentials.
+          if (provider === "github" && !copilotPolicyAcknowledged) {
+            setStep("copilot-policy");
+            return;
+          }
+
           // GHE Copilot needs the enterprise URL collected first (see ghe-config step)
           if (provider === "ghe-copilot" && !gheUrl.trim()) {
             setStep("ghe-config");
@@ -503,6 +515,9 @@ export default function OAuthModal({
                   getErrorMessage(serverData, serverRes.status, t("errorCallbackServerFailed"))
                 );
 
+              if (typeof serverData.authUrl !== "string" || !serverData.authUrl) {
+                throw new Error(errorMessageFromBody(serverData, t("errorBrowserUnavailable")));
+              }
               setAuthData({ ...serverData, redirectUri: serverData.redirectUri });
               setStep("waiting");
               popupRef.current = window.open(serverData.authUrl, "oauth_auth");
@@ -533,8 +548,10 @@ export default function OAuthModal({
 
                 if (pollData.error && !pollData.pending) {
                   throw new Error(
-                    pollData.errorDescription ||
-                      errorMessageFromBody(pollData, t("errorAuthorizationFailed"))
+                    String(
+                      pollData.errorDescription ||
+                        errorMessageFromBody(pollData, t("errorAuthorizationFailed"))
+                    )
                   );
                 }
               }
@@ -576,7 +593,10 @@ export default function OAuthModal({
           // Fixed native-app loopback callback, distinct ports so both can run concurrently (#7013).
           const grokBuildPort = provider === "xai-oauth" ? 56121 : 56122;
           redirectUri = `http://127.0.0.1:${grokBuildPort}/callback`;
-        } else if (provider === "devin-desktop" || provider === "devin-cli") {
+        } else if (provider === "devin-desktop") {
+          // Fixed loopback registered by the Devin CLI login (paste-URL fallback off-host).
+          redirectUri = "http://127.0.0.1:59653/callback";
+        } else if (provider === "devin-cli") {
           // Retained callback-path fallback for the retired browser flow.
           const port = window.location.port || "20128";
           redirectUri = `http://localhost:${port}/auth/callback`;
@@ -609,7 +629,7 @@ export default function OAuthModal({
           throw new Error(errMsg);
         }
 
-        if (!data.authUrl) {
+        if (typeof data.authUrl !== "string" || !data.authUrl) {
           throw new Error(errorMessageFromBody(data, t("errorBrowserUnavailable")));
         }
 
@@ -646,6 +666,7 @@ export default function OAuthModal({
       gheUrl,
       invalidateDeviceFlow,
       grokBrowserMode,
+      copilotPolicyAcknowledged,
       t,
     ]
   );
@@ -1095,6 +1116,17 @@ export default function OAuthModal({
         {/* OAuth flow steps — hidden when paste-token mode is active */}
         {(!supportsTokenPaste || !showPasteToken) && (
           <>
+            {/* GitHub Copilot: policy-ambiguous disclosure before device-code flow */}
+            {provider === "github" && step === "copilot-policy" && (
+              <CopilotPolicyStep
+                startOAuthFlow={() => {
+                  setCopilotPolicyAcknowledged(true);
+                  void startOAuthFlow();
+                }}
+                onClose={handleClose}
+              />
+            )}
+
             {/* GHE Copilot: collect the GitHub Enterprise base URL before starting */}
             {provider === "ghe-copilot" && step === "ghe-config" && (
               <GheConfigStep
