@@ -64,7 +64,7 @@ function baseAlias(name: string, namespace = ""): string {
     .update(JSON.stringify([namespace, name]))
     .digest("hex")
     .slice(0, 16);
-  return `muse_${name}_${hash}`;
+  return `${`muse_${name}`.replace(/[^A-Za-z0-9_-]/g, "_")}_${hash}`;
 }
 
 function metadata(body: JsonRecord, key: string, map: Map<string, unknown>): void {
@@ -91,7 +91,7 @@ for (const name of COLLISIONS) {
   });
 }
 
-test("collision matching is case-sensitive and never parses flat dots or mcp prefixes", () => {
+test("every function name is aliased: case variants, flat dots and mcp prefixes are names too", () => {
   const names = [
     "Read_file",
     "Bash",
@@ -100,14 +100,58 @@ test("collision matching is case-sensitive and never parses flat dots or mcp pre
     "files.read_file",
     "mcp__files__read_file",
   ];
-  const body = { tools: names.map((name) => fn(name)) };
-  const out = rewrite(body);
+  const out = rewrite({ tools: names.map((name) => fn(name)) });
+  const wires = records(out.tools).map((tool) => tool.name as string);
   assert.deepEqual(
-    records(out.tools).map((tool) => tool.name),
-    names
+    wires,
+    names.map((name) => baseAlias(name))
   );
-  assert.equal(out._toolNameMap, undefined);
+  for (const [index, name] of names.entries()) {
+    assert.match(wires[index], /^[A-Za-z0-9_-]{1,64}$/);
+    assert.equal(aliases(out).get(wires[index]), name);
+  }
   assert.equal(out._namespaceToolIdentityMap, undefined);
+});
+
+// Names Muse refuses ("Muse Code subscriptions cover requests from the Muse Code client
+// only") when a request declares them as functions, measured against the live API: the Muse
+// Code client's own tool names and others. A hard-coded list missed shell, OpenCode's tool.
+for (const name of ["shell", "apply_patch", "update_plan", "workflow", "monitor", "web_fetch"]) {
+  test(`aliases ${name}, a name Muse keeps for its own client`, () => {
+    const out = rewrite({ tools: [fn(name)] });
+    assert.equal(wire(out), baseAlias(name));
+    assert.equal(aliases(out).get(wire(out)), name);
+  });
+}
+
+test("an OpenCode tool fleet reaches Muse under no client name, and every alias maps back", () => {
+  const names = [
+    "edit",
+    "glob",
+    "grep",
+    "read",
+    "shell",
+    "skill",
+    "webfetch",
+    "websearch",
+    "write",
+  ];
+  const body: JsonRecord = {
+    tools: names.map((name) => fn(name)),
+    input: [
+      { type: "message", role: "user", content: "run it" },
+      { type: "function_call", call_id: "c1", name: "shell", arguments: "{}" },
+      { type: "function_call_output", call_id: "c1", output: "ok" },
+    ],
+  };
+  const out = rewrite(body);
+  const wires = records(out.tools).map((tool) => tool.name as string);
+  for (const [index, name] of names.entries()) {
+    assert.notEqual(wires[index], name);
+    assert.equal(aliases(out).get(wires[index]), name);
+  }
+  assert.equal(records(out.input)[1].name, wires[names.indexOf("shell")]);
+  assert.equal(records(body.input as unknown[])[1].name, "shell");
 });
 
 test("mixed function, custom, native server, and builtin fleets only alias functions", () => {
@@ -480,15 +524,18 @@ test("intermediate alias references resolve the declared composed client identit
         const choice = allowed
           ? records(record(out.tool_choice).tools)[0]
           : record(out.tool_choice);
-        assert.equal(childWire(out), "safe_wire");
-        assert.equal(records(out.input)[0].name, "safe_wire");
-        assert.equal(choice.name, "safe_wire");
+        // safe_wire is another layer's alias: the composed client identity gets this helper's.
+        const aliased = baseAlias("OriginalClientBash", "files");
+        assert.equal(childWire(out), aliased);
+        assert.equal(records(out.input)[0].name, aliased);
+        assert.equal(choice.name, aliased);
         assert.equal(records(out.input)[0].namespace, namespace);
         assert.equal(choice.namespace, namespace);
         assert.equal(records(out.tools)[0].name, "files");
-        assert.deepEqual(identities(out).get("safe_wire"), identity);
-        assert.notEqual(identities(out).get("safe_wire"), identity);
-        assert.equal(aliases(out).get("safe_wire"), "OriginalClientBash");
+        assert.deepEqual(identities(out).get(aliased), identity);
+        assert.notEqual(identities(out).get(aliased), identity);
+        assert.equal(identities(out).has("safe_wire"), false);
+        assert.equal(aliases(out).get(aliased), "OriginalClientBash");
         assert.notEqual(aliases(out), original);
         assert.equal(call.name, "bash");
         assert.equal(reference.name, "bash");
@@ -522,11 +569,13 @@ test("composed alias leaves preserve ambiguous bare references across namespace 
     deepFreeze(body);
     const out = rewrite(body);
     const choice = allowed ? records(record(out.tool_choice).tools)[0] : record(out.tool_choice);
-    assert.equal(childWire(out), "a_wire");
-    assert.equal(childWire(out, 1), "b_wire");
+    // Each declaration gets this helper's alias for its own namespace identity...
+    assert.equal(childWire(out), baseAlias("OriginalClientBash", "a"));
+    assert.equal(childWire(out, 1), baseAlias("OriginalClientBash", "b"));
+    // ...while the ambiguous bare reference still names no namespace.
     assert.equal(records(out.input)[0].name, "bash");
     assert.equal(choice.name, "bash");
-    assert.equal(aliases(out).size, original.size);
+    assert.equal(aliases(out).size, original.size + 2);
     assert.notEqual(aliases(out), original);
     assert.deepEqual(
       [...original],
@@ -539,16 +588,17 @@ test("composed alias leaves preserve ambiguous bare references across namespace 
   }
 });
 
-test("explicit flat identity guards survive alongside unrelated colliding tools", () => {
+test("an explicit flat identity guard moves to its tool's alias, next to another flat tool", () => {
   const guard = { namespace: "", name: "mcp__files__read" };
   const body: JsonRecord = { tools: [fn("bash"), fn(guard.name)] };
   const original = new Map<string, unknown>([[guard.name, guard]]);
   metadata(body, "_namespaceToolIdentityMap", original);
   const out = rewrite(body);
   assert.equal(wire(out), baseAlias("bash"));
-  assert.equal(wire(out, 1), guard.name);
-  assert.deepEqual(identities(out).get(guard.name), guard);
-  assert.notEqual(identities(out).get(guard.name), guard);
+  assert.equal(wire(out, 1), baseAlias(guard.name));
+  assert.deepEqual(identities(out).get(wire(out, 1)), guard);
+  assert.notEqual(identities(out).get(wire(out, 1)), guard);
+  assert.equal(identities(out).has(guard.name), false);
   assert.equal(identities(out).has(wire(out)), false);
   assert.deepEqual([...original], [[guard.name, guard]]);
 });
@@ -619,7 +669,9 @@ test("an occupied prior alias for a different identity is never reused as this d
   metadata(body, "_toolNameMap", new Map([[candidate, "AnotherClientTool"]]));
   const out = rewrite(body);
   assert.equal(wire(out), `${candidate}_1`);
-  assert.equal(wire(out, 1), candidate);
+  // The occupied wire is another layer's alias, not this helper's for its tool: realiased.
+  assert.equal(wire(out, 1), baseAlias("AnotherClientTool"));
+  assert.equal(aliases(out).get(wire(out, 1)), "AnotherClientTool");
   assert.equal(records(out.input)[0].name, `${candidate}_1`);
   assert.equal(aliases(out).get(candidate), "AnotherClientTool");
 });
@@ -774,7 +826,7 @@ test("both copied metadata channels remain nonenumerable and do not serialize", 
 });
 
 test("existing ledgers are detached and nonenumerable even when no function needs rewriting", () => {
-  const body: JsonRecord = { tools: [fn("safe")] };
+  const body: JsonRecord = { tools: [{ type: "custom", name: "safe" }] };
   const oldAliases = new Map<string, unknown>([["safe", "Safe"]]);
   const oldIdentities = new Map<string, unknown>([["safe", { namespace: "files", name: "Safe" }]]);
   metadata(body, "_toolNameMap", oldAliases);
