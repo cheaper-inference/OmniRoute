@@ -18,6 +18,21 @@ function findBareStreamError(events: Array<Record<string, unknown>>): unknown {
   return null;
 }
 
+/**
+ * #17049: a stream can carry a specific rejection (e.g. a provider safety stop) as a bare
+ * `error` frame and then close with a generic `response.failed`. The earlier root error is
+ * the cause; reporting the generic one turns a request-scoped refusal into a retryable
+ * server error. Completed and non-failed terminal snapshots are returned unchanged.
+ */
+function preserveEarlierRejection(
+  terminalResponse: Record<string, unknown>,
+  events: Array<Record<string, unknown>>
+): ResponseSnapshot {
+  if (terminalResponse.status !== "failed") return terminalResponse;
+  const rootError = findBareStreamError(events.filter((event) => event.type === "error"));
+  return rootError ? { ...terminalResponse, error: rootError } : terminalResponse;
+}
+
 /** Preserve settled snapshots; only identified Responses streams may synthesize a failure. */
 export function pickResponsesSnapshot(
   terminalResponse: ResponseSnapshot,
@@ -32,7 +47,8 @@ export function pickResponsesSnapshot(
         event.type === "error" ||
         (typeof event.type === "string" && event.type.startsWith("response."))
     );
-  const streamError = terminalResponse || !isResponsesStream ? null : findBareStreamError(events);
-  if (!streamError || terminalResponse || latestResponse?.status === "completed") return snapshot;
+  if (terminalResponse) return preserveEarlierRejection(terminalResponse, events);
+  const streamError = isResponsesStream ? findBareStreamError(events) : null;
+  if (!streamError || latestResponse?.status === "completed") return snapshot;
   return { ...(snapshot || {}), status: "failed", error: streamError };
 }

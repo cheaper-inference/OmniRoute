@@ -62,6 +62,7 @@ export const LOCAL_ONLY_API_PREFIXES: ReadonlyArray<string> = [
   "/api/cli-tools/pi-settings", // spawns via getCliRuntimeStatus() to detect the `pi` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
   "/api/cli-tools/smelt-settings", // spawns via getCliRuntimeStatus() to detect the `smelt` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
   "/api/cli-tools/status", // GET calls getCliRuntimeStatus() per CLI_TOOL_IDS entry (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/whycodes-settings", // spawns via getCliRuntimeStatus() to detect the `whycodes` CLI install (Hard Rules #15 + #17, #14107)
   "/api/services/", // T-10: embedded service lifecycle (spawn child processes)
   "/api/version-manager/", // downloads, unpacks and runs the CLIProxyAPI binary, the same work as /api/services/cliproxy/ (Hard Rules #15 + #17); read-only GETs exempted below
   "/api/tunnels/cloudflared", // POST installs/starts/stops cloudflared; safe methods are exempted below
@@ -99,6 +100,7 @@ export const LOCAL_ONLY_API_PREFIXES: ReadonlyArray<string> = [
   "/api/resilience/connections", // Per-account resilience state. NOTE: prefix matching also gates future /api/resilience/connections-* paths.
   // Dashboard HTML stays out of this list: a reverse proxy is not loopback, so
   // gating the page logged the session out. The JSON API above stays local-only.
+  "/api/providers/agy-auth/apply-local", // spawns `secret-tool` through detectLocalAgyTokenRaw() and reads host-local token files (Hard Rules #15 + #17). Exact entry on purpose: the sibling import, import-bulk and zip-extract routes only parse what the request carries, and tunnel-served dashboards use them.
   "/api/providers/cursor/agent-availability", // credential-free dashboard-nudge check: spawns `cursor-agent status --format json` via checkCursorAgentAvailability()/getCachedCursorAgentAvailability() (src/lib/cursor/renewal.ts) — RCE-via-tunnel surface (Hard Rules #15 + #17). Narrow-scoped like /login and /refresh-cursor, not the whole /api/providers/ tree. Placed under /api/providers/ rather than /api/oauth/ because /api/oauth/ is PUBLIC-classified and never reaches this LOCAL_ONLY gate.
   "/api/modality-bridge/video/", // Video Bridge status + extraction broker; fixed ffmpeg/ffprobe subprocesses, strict loopback only (Hard Rules #15 + #17)
 ];
@@ -201,9 +203,11 @@ export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
   // which defaults to true), so a POST+PUT pair repoints the CLI at attacker
   // credentials or an attacker base URL. Found sweeping the same class.
   "/api/cli-tools/codex-profiles",
-  // Writes into ~/.gemini/antigravity-cli/antigravity-oauth-token. Same family
-  // as the {claude,codex}-auth/apply-local pattern below; a plain path because
-  // it carries no dynamic segment.
+  // Imports the host's local Antigravity login (token files, Linux keyring through
+  // `secret-tool`). Same family as the {claude,codex}-auth/apply-local pattern below;
+  // a plain path because it carries no dynamic segment. Also LOCAL_ONLY above, for
+  // the spawn; this entry keeps auth mandatory for loopback callers under
+  // requireLogin=false.
   "/api/providers/agy-auth/apply-local",
   // Obsidian integration. POST /webdav points the WebDAV file service — served by
   // the custom Node layer BEFORE Next.js, outside this pipeline — at a
@@ -256,6 +260,13 @@ export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
   "/api/log-export",
   // SIGTERMs the process, like its twin /api/shutdown above.
   "/api/restart",
+  // CLIProxyAPI management compatibility (also reached as /v0/management/* via the
+  // next.config.mjs rewrite and the classify.ts alias). api-call sends upstream requests
+  // with a connection's stored OAuth token, auth-files lists the OAuth accounts, and
+  // reset-quota lifts routing cooldowns: none of that is for an anonymous caller, so it
+  // stays authenticated under requireLogin=false. ALWAYS_PROTECTED rather than LOCAL_ONLY
+  // so a remote client holding a manage-scope key (the use case) keeps working.
+  "/api/v0/management",
 ];
 
 /**

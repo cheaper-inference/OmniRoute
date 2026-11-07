@@ -55,11 +55,11 @@ test("empty data payload carries no stream liveness", () => {
   assert.equal(hasUsefulStreamContent("data: [DONE]\n\n"), false);
 });
 
-test("non-json payload stays live through the pre-existing fallback", () => {
-  // Pre-existing catch branch (streamReadiness.ts: hasUsefulStreamContent):
-  // a non-empty payload that is not JSON counts as content. Out of scope,
-  // documented here so no future change silently flips it.
-  assert.equal(hasUsefulStreamContent("data: {truncated-json-GkD\n\n"), true);
+test("non-json data line is refused instead of counting as content", () => {
+  // Declared behavior change: a non-empty payload that is not JSON no longer
+  // counts as content. The former fallback accepted any non-empty `data:` text,
+  // which let proxy error pages and other garbage pass the content check.
+  assert.equal(hasUsefulStreamContent("data: {truncated-json-GkD\n\n"), false);
 });
 
 test("content watcher observes thinking-phase deltas as liveness", () => {
