@@ -6250,7 +6250,7 @@
     "apiRegionChina": "中國大陸",
     "apiRegionHint": "選取用於 API 存取與配額追蹤的端點區域。",
     "apiRegionInternational": "國際",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionLabel": "API 區域",
     "apikey": "API key",
     "audio": "音訊",
     "audioProvidersHeading": "音訊 Provider",

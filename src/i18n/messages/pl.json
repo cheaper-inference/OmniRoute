@@ -6250,7 +6250,7 @@
     "apiRegionChina": "Chiny kontynentalne",
     "apiRegionHint": "Wybierz region punktu końcowego używany do dostępu do API i śledzenia limitów.",
     "apiRegionInternational": "Międzynarodowy",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionLabel": "Region API",
     "apikey": "Klucz API",
     "audio": "Dźwięk",
     "audioProvidersHeading": "Nagłówek Audio Providers",
