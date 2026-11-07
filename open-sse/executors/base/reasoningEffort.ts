@@ -14,6 +14,7 @@ import {
   REASONING_EFFORT_ORDER,
 } from "../../services/learnedReasoningEffortCaps.ts";
 import { isBasetenReasoningModel, mapBasetenReasoningParams } from "./basetenReasoning.ts";
+import { isK31MappableEffort, isKimiK31Model } from "../../utils/kimiK31.ts";
 
 /**
  * Sanitize reasoning_effort for providers that don't accept all values.
@@ -205,7 +206,7 @@ export function supportsMaxEffortForProvider(provider: string, model: string): b
     supportsClaudeMaxEffort(resolvedModelId);
   const isOpencodeGo = isOpencodeGoProvider(provider);
   const isOllamaCloud = isOllamaCloudProvider(provider);
-  const isMoonshotK3 = /^kimi-k3(?:$|-)/i.test(resolvedModelId);
+  const isMoonshotK3 = /^kimi-k3(?:$|[.-])/i.test(resolvedModelId);
   const isCommandCode = isCommandCodeProvider(provider);
   const isMaxTierModel =
     MAX_TIER_REASONING_MODEL_PATTERN.test(resolvedModelId) ||
@@ -268,6 +269,18 @@ function readEffortCarriers(b: Record<string, unknown>): EffortCarriers {
     hasOutputConfigEffort,
     effort,
   };
+}
+
+const K31_NATIVE_PROVIDERS = new Set(["moonshot", "kimi", "kimi-coding", "kimi-coding-apikey"]);
+
+/**
+ * K3.1 rejects off-thinking and unknown effort values, so preserve them for
+ * the upstream 400 instead of silently clamping to an accepted tier. Only the
+ * mappable tiers fall through to the regular clamp.
+ */
+function shouldPreserveK31Effort(provider: string, model: string, effort: string): boolean {
+  if (!K31_NATIVE_PROVIDERS.has(provider) || !isKimiK31Model(model)) return false;
+  return !isK31MappableEffort(effort);
 }
 
 /** Write a normalized effort value back to every carrier that was present.
@@ -336,6 +349,40 @@ function stripEffortValue(b: Record<string, unknown>, c: EffortCarriers): Record
   return next;
 }
 
+/** Providers/models that reject `reasoning_effort` outright, so it is stripped rather than clamped. */
+function rejectsReasoningEffort(provider: string, modelStr: string): boolean {
+  if (provider === "mistral") return MISTRAL_NO_REASONING_EFFORT_PATTERN.test(modelStr);
+  return (
+    provider === "github" &&
+    !GITHUB_REASONING_EFFORT_OPT_IN_PATTERN.test(modelStr) &&
+    GITHUB_NO_REASONING_EFFORT_PATTERN.test(modelStr)
+  );
+}
+
+/**
+ * Cloudflare Workers AI models that reject the `none` carrier a `force` + `none`
+ * rule emits (#18994), verified live 2026-11-05: gpt-oss-20b, nemotron-3-120b and
+ * glm-4.7-flash answer `400 AiError: Invalid input (code 8001)`, and qwen3.8-27b
+ * answers "Supported types are xhigh (default), medium, and low". gpt-oss-120b
+ * publishes the same low|medium|high menu as gpt-oss-20b. All of them accept `low`.
+ * The field cannot be dropped instead: an absent effort runs the model's default
+ * tier (medium/xhigh), which reasons more than `low` on every one of them.
+ * Other Workers AI models keep `none`: qwen3-30b-a3b accepts it and stops thinking
+ * (Cloudflare then returns the answer in `reasoning_content` with `content: null`),
+ * and glm-5.2, kimi-k2.6 and the deepseek-v4 family list it as supported.
+ * glm-5.3 is handled by the GLM-5.3 family branch.
+ */
+export const CLOUDFLARE_NONE_REJECTING_MODEL_PATTERN =
+  /(?:^|\/)(?:gpt-oss-|qwen3\.8-|nemotron-3-|glm-4\.7-flash)/i;
+
+function rejectsCloudflareNoneEffort(provider: string, modelStr: string, effortStr: string) {
+  return (
+    provider === "cloudflare-ai" &&
+    effortStr === "none" &&
+    CLOUDFLARE_NONE_REJECTING_MODEL_PATTERN.test(modelStr)
+  );
+}
+
 export function sanitizeReasoningEffortForProvider(
   body: unknown,
   provider: string,
@@ -375,6 +422,8 @@ export function sanitizeReasoningEffortForProvider(
   const effortStr = typeof c.effort === "string" ? c.effort.toLowerCase() : "";
   const modelStr = model || "";
 
+  if (shouldPreserveK31Effort(provider, modelStr, effortStr)) return working;
+
   // ── o1-preview: does not accept reasoning_effort parameter at all ─────────
   if (O1_PREVIEW_PATTERN.test(modelStr)) {
     log?.info?.(
@@ -384,15 +433,10 @@ export function sanitizeReasoningEffortForProvider(
     return stripEffortValue(working, c);
   }
 
-  const githubOptIn =
-    provider === "github" && GITHUB_REASONING_EFFORT_OPT_IN_PATTERN.test(modelStr);
-  const rejecting =
-    (provider === "mistral" && MISTRAL_NO_REASONING_EFFORT_PATTERN.test(modelStr)) ||
-    (provider === "github" && !githubOptIn && GITHUB_NO_REASONING_EFFORT_PATTERN.test(modelStr));
-  if (rejecting) {
+  if (rejectsReasoningEffort(provider, modelStr)) {
     log?.info?.(
       "REASONING_SANITIZE",
-      `${provider}/${modelStr}: removed unsupported reasoning_effort`
+      `${provider}/${modelStr}: removed unsupported reasoning_effort ${effortStr}`
     );
     return stripEffortValue(working, c);
   }
@@ -635,6 +679,14 @@ export function sanitizeReasoningEffortForProvider(
     log?.info?.(
       "REASONING_SANITIZE",
       `${provider}/${modelStr}: mapped reasoning_effort ${effortStr} → low`
+    );
+    return writeEffortValue(working, "low", c);
+  }
+
+  if (rejectsCloudflareNoneEffort(provider, modelStr, effortStr)) {
+    log?.info?.(
+      "REASONING_SANITIZE",
+      `${provider}/${modelStr}: clamped reasoning_effort none → low (rejected by this Workers AI model)`
     );
     return writeEffortValue(working, "low", c);
   }

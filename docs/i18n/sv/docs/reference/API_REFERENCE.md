@@ -4,49 +4,52 @@
 
 ---
 
-🌐 **Språk:** 🇺🇸 [Engelska](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **Språk:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-Grundläggande referens för OmniRoute-API:et. Den omfattar den publika `/v1`-ytan och de mest använda hanteringsändpunkterna. Den maskinläsbara filen [`docs/openapi.yaml`](../openapi.yaml) och routeträdet under `src/app/api/` är de uttömmande källorna.
+Kärnreferens för OmniRoute API. Den täcker det publika `/v1`-gränssnittet och de mest använda administrationsendpoints; den maskinläsbara [`docs/openapi.yaml`](../openapi.yaml) och trädstrukturen för routes under `src/app/api/` är de uttömmande källorna.
 
-För det specifika OpenAI-kompatibla protokollet och matrisen över leverantörsfunktioner, se
+För det fokuserade OpenAI-kompatibla protokollet och matrisen över leverantörsfunktioner, se
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+Varje distribution tillhandahåller sin egen kopia av specifikationen på `/openapi.yaml`, genererad från `docs/openapi.yaml` under bygget. Den innehåller byggets version och en relativ server-URL (`./`), så att begäranden förblir på den värd som tillhandahöll dokumentet. Ett verktyg som importerar den nedladdade filen har ingen sådan värd och behöver bas-URL:en anges manuellt.
 
 ---
 
 ## Innehållsförteckning
 
-- [Chattkompletteringar](#chat-completions)
+- [Chat Completion-anrop](#chat-completions)
 - [Exklusiva hanterade sessionslån](#exclusive-managed-session-leases)
 - [Inbäddningar](#embeddings)
 - [Bildgenerering](#image-generation)
-- [OCR för dokument](#document-ocr)
+- [Dokument-OCR](#document-ocr)
 - [Lista modeller](#list-models)
-- [Manifest för leverantörsinsticksprogram](#provider-plugin-manifest)
-- [Kompatibilitetsslutpunkter](#compatibility-endpoints)
-- [Fil-API](#files-api)
-- [Batch-API](#batches-api)
-- [Sök-API](#search-api)
+- [Manifest för leverantörsplugin](#provider-plugin-manifest)
+- [Kompatibilitetsendpoints](#compatibility-endpoints)
+- [Files API](#files-api)
+- [Batches API](#batches-api)
+- [Search API](#search-api)
 - [WebSocket-strömning](#websocket-streaming)
-- [Kvoter och problemrapportering](#quotas--issues-reporting)
+- [Rapportering av kvoter och problem](#quotas--issues-reporting)
 - [Semantisk cache](#semantic-cache)
-- [Kontrollpanel och hantering](#dashboard--management)
-- [Kombinationshantering](#combo-management)
+- [CLIProxyAPI-kompatibilitet för hantering](#cliproxyapi-management-compatibility)
+- [Instrumentpanel och hantering](#dashboard--management)
+- [Combo-hantering](#combo-management)
 - [Webhooks](#webhooks)
 - [Registrerade nycklar (automatisk hantering)](#registered-keys-auto-management)
-- [Agentprotokoll](#agents-protocol)
+- [Agents-protokoll](#agents-protocol)
 - [Hanteringsproxyservrar](#management-proxies)
-- [Feltålighet (utökad)](#resilience-extended)
+- [Robusthet (utökad)](#resilience-extended)
 - [Färdigheter](#skills)
 - [Minne](#memory)
 - [MCP-server](#mcp-server)
 - [A2A-server](#a2a-server)
-- [Moln, utvärderingar och bedömning](#cloud-evals--assess)
+- [Cloud, Evals och Assess](#cloud-evals--assess)
 - [Bearbetning av förfrågningar](#request-processing)
 - [Autentisering](#authentication)
 
 ---
 
-## Chattkompletteringar
+## Chat Completion-anrop
 
 ```bash
 POST /v1/chat/completions
@@ -62,34 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### Anpassade rubriker
+### Anpassade headers
 
-| Rubrik                   | Riktning  | Beskrivning                                                                                                                                                                                                                       |
-| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Förfrågan | Ange `true` för att kringgå cachen                                                                                                                                                                                                |
-| `x-omniroute-no-memory`  | Förfrågan | Ange `true` för att hoppa över injicering av minne och färdigheter för denna förfrågan (motsvarar no-cache och undviker extra token-/kostnadsbelastning per anrop)                                                                |
-| `X-OmniRoute-Progress`   | Förfrågan | Ange `true` för förloppshändelser                                                                                                                                                                                                 |
-| `X-Session-Id`           | Förfrågan | Beständig sessionsnyckel för extern sessionsaffinitet                                                                                                                                                                             |
-| `x_session_id`           | Förfrågan | Varianten med understreck godtas också (direkt HTTP)                                                                                                                                                                              |
-| `X-OmniRoute-Session-Id` | Förfrågan | Sessions-/konversationstagg som anges av anroparen (används även av minnet). När den finns sparas den ordagrant i `call_logs.session_tag` för kostnadsattribuering per session (#8249) – skapas aldrig automatiskt när den saknas |
-| `Idempotency-Key`        | Förfrågan | Dedupliceringsnyckel (5 sekunders fönster)                                                                                                                                                                                        |
-| `X-Request-Id`           | Förfrågan | Alternativ dedupliceringsnyckel                                                                                                                                                                                                   |
-| `x-omniroute-connection` | Förfrågan | Fäst en förfrågan för en enskild modell till en leverantörsanslutning (ett konto) via dess ID – se [Kontofästning per förfrågan](#account-pinning-per-request)                                                                    |
-| `X-OmniRoute-Cache`      | Svar      | `HIT` eller `MISS` (utan strömning)                                                                                                                                                                                               |
-| `X-OmniRoute-Idempotent` | Svar      | `true` om deduplicerad                                                                                                                                                                                                            |
-| `X-OmniRoute-Progress`   | Svar      | `enabled` om förloppsspårning är aktiverad                                                                                                                                                                                        |
-| `X-OmniRoute-Session-Id` | Svar      | Effektivt sessions-ID som används av OmniRoute                                                                                                                                                                                    |
-| `X-OmniRoute-Request-Id` | Svar      | Korrelations-ID för förfrågan (när det är känt)                                                                                                                                                                                   |
-| `X-OmniRoute-Version`    | Svar      | OmniRoutes byggversion (alltid tillgänglig)                                                                                                                                                                                       |
-| `X-OmniRoute-Cost-Saved` | Svar      | Belopp i USD som cachen sparade vid en HIT (endast cacheträffar)                                                                                                                                                                  |
-| `X-OmniRoute-Decision`   | Svar      | Routningsspårning: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` är kombinationsstrategin, eller `single` för en förfrågan utan kombination) – finns alltid i slutförda svar                                      |
+| Header                   | Riktning  | Beskrivning                                                                                                                                                                                                          |
+| ------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Förfrågan | Ange `true` för att kringgå cache                                                                                                                                                                                    |
+| `x-omniroute-no-memory`  | Förfrågan | Ange `true` för att hoppa över injicering av minne + färdigheter för denna förfrågan (speglar no-cache; undviker token-/kostnadsomkostnaden per anrop)                                                               |
+| `X-OmniRoute-Progress`   | Förfrågan | Ange `true` för förloppshändelser                                                                                                                                                                                    |
+| `X-Session-Id`           | Förfrågan | Klistrad sessionsnyckel för extern sessionsaffinitet                                                                                                                                                                 |
+| `x_session_id`           | Förfrågan | Understrecksvariant accepteras också (direkt HTTP)                                                                                                                                                                   |
+| `X-OmniRoute-Session-Id` | Förfrågan | Sessions-/konversationstagg som anges av anroparen (matas även till minnet). När den finns sparas den ordagrant i `call_logs.session_tag` för kostnadsattribuering per session (#8249) — skapas aldrig om den saknas |
+| `Idempotency-Key`        | Förfrågan | Deduplikationsnyckel (5 sekunders fönster)                                                                                                                                                                           |
+| `X-Request-Id`           | Förfrågan | Alternativ dedupliceringsnyckel                                                                                                                                                                                      |
+| `x-omniroute-connection` | Förfrågan | Fäst en förfrågan med en enda modell till en leverantörsanslutning (ett konto) med dess id — se [Kontofästning per förfrågan](#account-pinning-per-request)                                                          |
+| `X-OmniRoute-Cache`      | Svar      | `HIT` eller `MISS` (ej strömmande)                                                                                                                                                                                   |
+| `X-OmniRoute-Idempotent` | Svar      | `true` om deduplicerad                                                                                                                                                                                               |
+| `X-OmniRoute-Progress`   | Svar      | `enabled` om förloppsspårning är aktiverad                                                                                                                                                                           |
+| `X-OmniRoute-Session-Id` | Svar      | Effektivt sessions-ID som används av OmniRoute                                                                                                                                                                       |
+| `X-OmniRoute-Request-Id` | Svar      | Korrelations-ID för förfrågan (när det är känt)                                                                                                                                                                      |
+| `X-OmniRoute-Version`    | Svar      | OmniRoutes byggversion (alltid närvarande)                                                                                                                                                                           |
+| `X-OmniRoute-Cost-Saved` | Svar      | USD som cachen sparade in vid en HIT (endast cacheträffar)                                                                                                                                                           |
+| `X-OmniRoute-Decision`   | Svar      | Routningsspårning: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` är den kombinerade strategin, eller `single` för en förfrågan som inte är kombinerad) — alltid närvarande i slutförandesvar         |
 
-> Nginx-anmärkning: om du använder headers med understreck (till exempel `x_session_id`) aktiverar du `underscores_in_headers on;`.
+> Nginx-anteckning: om du förlitar dig på headers med understreck (till exempel `x_session_id`), aktivera `underscores_in_headers on;`.
 
-#### Kontofixering per begäran
+#### Kontofästning per förfrågan
 
 När en leverantör har flera anslutningar (konton eller nycklar) väljer OmniRoute normalt en
-via sin strategi för kontoval. En begäran kan i stället fixeras till en specifik anslutning
+genom sin strategi för kontoval. En förfrågan kan i stället fästa en specifik anslutning
 med headern `x-omniroute-connection`:
 
 ```bash
@@ -100,25 +103,25 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Var du hittar id:t.** Öppna leverantörssidan i kontrollpanelen
-  (**Kontrollpanel → Leverantörer → <provider>**) och klicka på id-brickan `xxxxxxxx…` på en
-  anslutningsrad — då kopieras det fullständiga anslutnings-id:t.
-- **Vilka begäranden som respekterar det.** Begäranden med en enda modell (`provider/model`) på
-  `/v1/chat/completions`, `/v1/messages` och `/v1/responses`. Kombinationer ignorerar headern:
-  fixera i stället ett konto per kombinationssteg via stegets egen anslutning.
-- **Fixeringen är strikt, inte en preferens.** Den fixerade anslutningen används exklusivt. Ett
-  fel i begäran registrerar kontots nedkylningsperiod men växlar **inte** till ett annat konto
-  hos samma leverantör.
-- **Nedkylning och kvot frigör fixeringen.** Medan den fixerade anslutningen är under nedkylning,
-  har förbrukat sin kvot eller blockeras av en kvotpolicy, faller efterföljande begäranden tillbaka
-  på leverantörens övriga anslutningar, precis som ofixerad trafik.
-- **Okända eller inaktiverade id:n leder till fel.** Ett id som inte finns i leverantörens aktiva
-  pool (raderat, inaktiverat eller tillhörande en annan leverantör) innebär att inget konto är
-  tillgängligt, så begäran misslyckas i stället för att tyst dirigeras någon annanstans.
+- **Var du hittar id:t.** Öppna leverantörssidan i instrumentpanelen
+  (**Dashboard → Providers → <provider>**) och klicka på id-chipet `xxxxxxxx…` på en anslutningsrad —
+  då kopieras hela anslutnings-id:t.
+- **Vilka begäranden som använder det.** Begäranden för en enskild modell (`provider/model`) på
+  `/v1/chat/completions`, `/v1/messages` och `/v1/responses`. Kombinationer ignorerar huvudet: fäst
+  ett konto per steg i kombinationen genom stegets egen anslutning i stället.
+- **Fästningen är strikt, inte en preferens.** Den fästa anslutningen används uteslutande. Ett
+  fel under begäran registrerar kontots nedkylningsperiod men växlar **inte** till ett
+  syskonkonto hos samma leverantör.
+- **Nedkylning och kvot frigör fästningen.** Medan den fästa anslutningen är under nedkylning,
+  kvoten är förbrukad eller anslutningen blockeras av en kvotpolicy, faller senare begäranden
+  tillbaka på leverantörens övriga anslutningar, precis som ej fästad trafik.
+- **Okända eller inaktiverade id:n misslyckas.** Ett id som inte finns i leverantörens aktiva pool
+  (borttaget, inaktiverat eller tillhörande en annan leverantör) lämnar inget behörigt konto, så
+  begäran misslyckas i stället för att tyst dirigeras någon annanstans.
 
-Claude Code skickar anpassade headers via `ANTHROPIC_CUSTOM_HEADERS`. Lägg till det i `env`-blocket
-i `~/.claude/settings.json`, eller i en `.claude/settings.json` på projektnivå för att fixera ett
-annat konto per projekt:
+Claude Code skickar anpassade huvuden via `ANTHROPIC_CUSTOM_HEADERS`. Lägg det i blocket `env`
+i `~/.claude/settings.json`, eller i ett projektnivåspecifikt `.claude/settings.json` för att
+fästa ett annat konto per projekt:
 
 ```jsonc
 {
@@ -130,22 +133,22 @@ annat konto per projekt:
 }
 ```
 
-Källa: `src/sse/handlers/chat.ts` (läsning av header), `src/sse/services/auth.ts` och
-`src/sse/services/sessionAffinityPin.ts` (frigöring av fixeringen och kontroll av om anslutningen saknas i poolen).
+Källa: `src/sse/handlers/chat.ts` (läsning av huvud), `src/sse/services/auth.ts` och
+`src/sse/services/sessionAffinityPin.ts` (frigörande av fästning och kontrollen av om anslutningen saknas i poolen).
 
-> **Headers för kostnadstelemetri:** lyckade svar utan strömning innehåller även uppsättningen `X-OmniRoute-*` för kostnadstelemetri — `X-OmniRoute-Response-Cost` (USD, exakt 10 decimaler; `0.0000000000` för kostnadsfria eller oprissatta anrop), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` och `X-OmniRoute-Fallback-Attempts` (endast när > 0), samt `X-OmniRoute-Request-Id` och `X-OmniRoute-Version`. Dessa skickas av chattkompletteringar, `/v1/responses`, `/v1/messages` **och medieslutpunkterna** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` och `/v1/moderations` (alltid kostnaden `0`). Mediekostnaden beräknas per modalitet (per bild, per sekund, per tecken eller per sökenhet) när prisuppgifter finns tillgängliga, annars `0` (öppet vid fel).
+> **Kostnadstelemetrihuvuden:** lyckade svar som inte strömmas innehåller också uppsättningen `X-OmniRoute-*` för kostnadstelemetri — `X-OmniRoute-Response-Cost` (USD, exakt 10 decimaler; `0.0000000000` för kostnadsfria/prislösa), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` och `X-OmniRoute-Fallback-Attempts` (endast när > 0), samt `X-OmniRoute-Request-Id` och `X-OmniRoute-Version`. Dessa skickas av chat completions, `/v1/responses`, `/v1/messages` **och medieendpoints** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` och `/v1/moderations` (alltid med kostnaden `0`). Mediekostnaden beräknas per modalitet (per bild, per sekund, per tecken, per sökenhet) när prissättning är tillgänglig, annars `0` (fail-open).
 
-> **Kostnadssemantik vid cacheträff:** vid en träff i den semantiska cachen (`X-OmniRoute-Cache-Hit: true`) görs inget externt anrop, så `X-OmniRoute-Response-Cost` är `0.0000000000` (den **inkrementella** kostnaden för att leverera träffen). Den ursprungliga kostnaden eller kostnaden som annars skulle ha uppstått rapporteras separat i `X-OmniRoute-Cost-Saved`. Faktureringskonsumenter bör summera `X-OmniRoute-Response-Cost` (träffar kostar ingenting); cacheanalys kan aggregera `X-OmniRoute-Cost-Saved`.
+> **Semantiken för kostnad vid cacheträff:** vid en HIT i den semantiska cachen (`X-OmniRoute-Cache-Hit: true`) görs inget anrop uppströms, så `X-OmniRoute-Response-Cost` är `0.0000000000` (den **inkrementella** kostnaden för att leverera träffen). Den ursprungliga kostnaden/kostnaden som skulle ha uppstått rapporteras separat i `X-OmniRoute-Cost-Saved`. Faktureringskonsumenter bör summera `X-OmniRoute-Response-Cost` (träffar kostar inget); cacheanalyser kan aggregera `X-OmniRoute-Cost-Saved`.
 
-## Exklusiv leasing av hanterade sessioner
+## Exklusiva hanterade sessionslån
 
-Exklusiv leasing av hanterade sessioner är ett valfritt, klientneutralt routningskontrakt: en aktiv ägare
-innehar en kvalificerad OmniRoute-anslutning. Det innebär inte leasing av en modell, kräver inte OAuth, identifierar inte en
-specifik klient och kräver inte en specifik leverantör.
+Exklusiv hantering av sessionslån är ett opt-in, klientneutralt routningskontrakt: en aktiv ägare
+innehar en berättigad OmniRoute-anslutning. Det lånar inte ut en modell, kräver inte OAuth, identifierar
+inte en viss klient och kräver inte en viss provider.
 
-Den autentiserande API-nyckeln måste ha omfånget `lease:exclusive` och en explicit icke-tom
-`allowedConnections`-lista. Databasens mutationsgräns framtvingar båda fälten tillsammans när nycklar
-skapas och uppdateras delvis.
+Den autentiserande API-nyckeln måste ha scopet `lease:exclusive` och en explicit lista med
+`allowedConnections` som inte är tom. Databasmutationens gräns verkställer båda fälten tillsammans
+när nycklar skapas och partiella uppdateringar görs.
 
 ```http
 POST /api/v1/session-leases
@@ -156,9 +159,9 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-Lyckade svar för erhållande, förnyelse och frigöring exponerar tidsstämplar, `state` och den exakta positiva
-`generation`, men aldrig den valda anslutningen eller autentiseringsuppgifterna. Vid förnyelse och frigöring anges
-generationen i JSON-innehållet:
+Lyckade svar på acquire, renew och release visar tidsstämplar, `state` och det exakta positiva
+`generation`, men aldrig den valda anslutningen eller autentiseringsuppgifter. Renew och release
+anger generationen i JSON-brödtexten:
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -168,7 +171,7 @@ generationen i JSON-innehållet:
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-En aktiv leaseägare kan uttryckligen begära integritetssäkra visningsmetadata för sin aktuella bindning:
+En aktiv låneägare kan uttryckligen begära integritetssäkra visningsmetadata för sin aktuella bindning:
 
 ```json
 { "action": "status", "generation": 1 }
@@ -188,37 +191,39 @@ En aktiv leaseägare kan uttryckligen begära integritetssäkra visningsmetadata
 }
 ```
 
-Den här valfria statusåtgärden skyddas av den opaka ägaren, den autentiserade hanterade API-nyckeln och den exakta
-aktiva generationen i en enda databastransaktion. `displayName` är endast det beskurna konfigurerade
-anslutningsnamnet; det är `null` när det inte finns något säkert konfigurerat namn. OmniRoute ersätter aldrig detta med en
-e-postadress eller genererad kontoidentitet. Leverantörsvärdet är en icke-känslig visningsetikett och aldrig
-en genererad identifierare för en kompatibel leverantör. Autentiseringsuppgifter, tokens, cookies, råa anslutnings- eller API-
-nyckel-id:n, ägarhashar, avgränsningshemligheter och interna routningsdata utelämnas.
+Denna opt-in-åtgärd för status avgränsas av den ogenomskinliga ägaren, den autentiserade hanterade
+API-nyckeln och den exakta aktiva generationen i en och samma databastransaktion. `displayName` är
+endast det trimmade konfigurerade anslutningsnamnet; det är `null` när inget säkert konfigurerat
+namn finns. OmniRoute ersätter aldrig detta med en e-postadress eller en genererad kontoidentitet.
+Provider-värdet är en icke-känslig visningsetikett och aldrig en genererad identifierare för en
+kompatibel provider. Autentiseringsuppgifter, token, cookies, råa anslutnings- eller API-nyckel-ID:n,
+ägarhashar, stängselhemligheter och interna routningsdata exkluderas.
 
-Uppslagningar med fel nyckel, fel ägare, inaktuell generation, saknad, utgången, frigjord eller ogiltigförklarad lease
-returnerar alla samma `409 LEASE_FENCE_STALE`-fel utan anslutningsmetadata. En klient som tog emot svaret om väntan på kapacitet har ingen aktiv bindning att inspektera. När routningen flyttar en aktiv lease
-förblir samma generation giltig och statusen returnerar atomärt den nya bindningen, aldrig den gamla.
-Befintliga klienter förblir oförändrade eftersom svar för erhållande, förnyelse, frigöring och väntan behåller
-sina tidigare format.
+Uppslag med fel nyckel, fel ägare, inaktuell generation, saknad, utgången, frisläppt eller
+ogiltigförklarad bindning returnerar alla samma `409 LEASE_FENCE_STALE`-fel utan anslutningsmetadata.
+En klient som tog emot svaret om kapacitetsväntan har ingen aktiv bindning att inspektera. När
+routningen övergår från en aktiv lånebindning förblir samma generation giltig och status returnerar
+atomiskt den nya bindningen, aldrig den gamla. Befintliga klienter förblir oförändrade eftersom
+svaren för acquire, renew, release och väntan behåller sina tidigare strukturer.
 
-Det här serverkontraktet ändrar inte standardversionen av OpenAI Codex `/status`. Standardversionen av Codex rapporterar för närvarande sin
-modellleverantör och sitt inbyggda autentiserings-/kontotillstånd, men renderar inte godtyckliga anpassade
-leverantörskontometadata; en senare klientintegration måste anropa den här åtgärden och avgöra hur
-`connection.displayName` ska visas.
+Detta serverkontrakt ändrar inte vanliga OpenAI Codex `/status`. Vanliga Codex rapporterar för
+närvarande sin modellprovider och sitt inbyggda autentiserings-/kontotillstånd, men renderar inte
+godtyckliga metadata om anpassade providerkonton; en senare klientintegration måste anropa denna
+åtgärd och avgöra hur `connection.displayName` ska visas.
 
-Varje hanterad inferensbegäran anger därefter båda kontrollhuvudena:
+Varje hanterad inferensbegäran skickar sedan båda styrningsheaders:
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-Den exakta ägaren, generationen, aktiva anslutningen och autentiserade API-nyckeln avgränsas omedelbart
-före varje uppströmsförsök som stöds. Återanvändning av ägare och generation med en annan nyckel misslyckas även
-när den nyckeln tillåter samma anslutning. Råa ägarvärden sparas inte, loggas inte, behålls inte i
-ögonblicksbilden av begäran och vidarebefordras inte uppströms.
+Den exakta ägaren, generationen, aktiva anslutningen och den autentiserade API-nyckeln avgränsas
+omedelbart före varje stödd upstream-begäran. Om ägare och generation återanvänds med en annan nyckel
+misslyckas begäran även när den nyckeln tillåter samma anslutning. Råa ägare sparas inte, loggas inte,
+behålls inte i begärans snapshot och vidarebefordras inte uppströms.
 
-Tillfällig konkurrens om resurser returnerar HTTP `429` med `Retry-After` och:
+Tillfällig konkurrens returnerar HTTP `429` med `Retry-After` och:
 
 ```json
 {
@@ -229,38 +234,39 @@ Tillfällig konkurrens om resurser returnerar HTTP `429` med `Retry-After` och:
 }
 ```
 
-Det här svaret innebär endast att den ordinarie uppsättningen kvalificerade anslutningar inte var tom och att varje ledig kandidat
-innehades av en annan aktiv lease. Modeller/leverantörer som inte stöds, regelavvikelser, väntetid, kvot,
-hälsa och andra vanliga kvalificeringsfel behåller sina befintliga OmniRoute-svar.
+Detta svar betyder endast att den vanliga berättigade mängden inte var tom och att varje ledig
+kandidat hölls av en aktiv lånebindning som tillhörde någon annan. Modeller/providers som inte stöds,
+policyavvikelse, cooldown, kvot, hälsa och andra vanliga berättigandefel behåller sina befintliga
+OmniRoute-svar.
 
 ### `x-omniroute-compression`
 
-Åsidosättning av komprimeringsplanen per begäran. Högsta prioritet – har företräde framför åsidosättningen för routningskombinationen,
-den aktiva profilen, den automatiska utlösaren och panelens standardinställning. Värden:
+Åsidosättning av komprimeringsplanen per begäran. Högsta prioritet — överträffar åsidosättningen för
+routingkombinationen, den aktiva profilen, automatisk utlösare och panelens Default. Värden:
 
-| Värde         | Effekt                                                                                                                       |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Ingen komprimering för den här begäran.                                                                                      |
-| `default`     | Standardprofilen som härleds från panelen (ignorerar den aktiva profilen). Informationsförlorande motorer förblir avstängda. |
-| `safe`        | Endast deduplicering och komprimering av blanksteg.                                                                          |
-| `allow-lossy` | Behåll operatörsplanen för den här begäran, inklusive sammanfattningar och stilomskrivningar.                                |
-| `engine:<id>` | En enskild motor när den är aktiverad, t.ex. `engine:rtk`. Aktivering per begäran för den motorn.                            |
-| `<combo>`     | En namngiven kombination, matchad först efter namn (skiftlägesokänsligt) och därefter efter id.                              |
+| Value         | Effect                                                                                                         |
+| ------------- | -------------------------------------------------------------------------------------------------------------- |
+| `off`         | Ingen komprimering för denna begäran.                                                                          |
+| `default`     | Den panelhärledda Default-profilen (ignorerar den aktiva profilen). Förlustbehäftade motorer lämnas avstängda. |
+| `safe`        | Endast deduplicering och vikning av blanksteg.                                                                 |
+| `allow-lossy` | Behåll operatörens plan för denna begäran, inklusive sammanfattningar och stilomskrivningar.                   |
+| `engine:<id>` | En enda motor när den är aktiverad, t.ex. `engine:rtk`. Opt-in för den motorn per begäran.                     |
+| `<combo>`     | En namngiven kombination, matchad först mot namn (skiftlägesokänsligt), sedan mot ID.                          |
 
-Anmärkningar:
+Anteckningar:
 
-- Okända värden ignoreras (begäran avvisas aldrig); lösningen går vidare till den normala operatörsprioriteten.
-- Om flera kombinationer har samma namn ska kombinationens **id** anges för en deterministisk matchning.
-- En kombination vars namn är `off` eller `default` kan inte väljas efter namn (dessa nyckelord tolkas först); referera till en sådan kombination med dess id.
-- Huvudreglaget för komprimering är en absolut spärr: när komprimering är globalt inaktiverad kan det här huvudet inte aktivera den.
+- Okända värden ignoreras (begäran avvisas aldrig); upplösningen faller tillbaka till den normala prioriteten för operatören.
+- Om flera kombinationer delar namn, skicka kombinationens **id** för en deterministisk matchning.
+- En kombination vars namn är `off` eller `default` kan inte väljas med namn (dessa nyckelord tolkas först); referera till en sådan kombination med dess ID.
+- Huvudreglaget för komprimering är en hård spärr: när komprimering är globalt inaktiverad kan denna header inte aktivera den.
 
-Den tillämpade planen återges i svarshuvudet:
+Den tillämpade planen återges i svarsheadern:
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
 ```
 
-där `<source>` är något av `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` eller `off`.
+där `<source>` är ett av `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` eller `off`.
 
 ---
 
@@ -279,16 +285,16 @@ Content-Type: application/json
 
 Tillgängliga leverantörer: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
 
-Katalog-ID:n är `provider/model` (exempel: `jina-ai/jina-embeddings-v5-omni-small`). Enkla Jina-modell-ID:n som finns i registret (till exempel `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) kan också matchas. Jinas funktioner för inbäddning, omrankning, klassificering och segmentering använder autentiseringsuppgifterna för `jina-ai` från kontrollpanelen i första hand; `JINA_AI_API_KEY` används endast som reserv när det inte finns någon nyckel i kontrollpanelen. Kortet `jina-reader` är endast avsett för Reader / `r.jina.ai` (`POST /v1/web/fetch`) och tillhandahåller aldrig inbäddningar eller omrankning.
+Katalog-ID:n är `provider/model` (exempel: `jina-ai/jina-embeddings-v5-omni-small`). Nakna Jina-modell-ID:n som finns i registret (till exempel `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) löses också. Jina embed/rerank/classify/segment använder först autentiseringsuppgifter för `jina-ai` från dashboarden; `JINA_AI_API_KEY` används endast som reserv när ingen dashboard-nyckel finns. Kortet `jina-reader` är endast Reader / `r.jina.ai` (`POST /v1/web/fetch`) och tillhandahåller aldrig embeddings eller rerank.
 
-Registermodeller som uppger att de har multimodalt stöd accepterar även upp till 32 leverantörsneutrala strukturerade
-objekt. Medieobjektens typer är `text`, `image`, `audio`, `video` och `document`. Deras `source`
+Registermodeller som anger stöd för multimodalitet accepterar också upp till 32 leverantörsneutrala strukturerade
+objekt. Medieobjektstyperna är `text`, `image`, `audio`, `video` och `document`. Deras medie-`source`
 är antingen `{"type":"url","url":"https://..."}` eller
 `{"type":"base64","data":"...","media_type":"..."}`.
 
 Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`
-och familjealiaset `jina-ai/jina-embeddings-v5-omni` → omni-small) accepterar även Jinas inbyggda
-EmbeddingsV5Request-dokument och **vidarebefordrar dem oförändrade** till `https://api.jina.ai/v1/embeddings`:
+och familjealiaset `jina-ai/jina-embeddings-v5-omni` → omni-small) accepterar också Jinas inbyggda
+EmbeddingsV5Request-dokumentation och **vidarebefordrar dem oförändrade** till `https://api.jina.ai/v1/embeddings`:
 
 ```json
 {
@@ -303,33 +309,32 @@ EmbeddingsV5Request-dokument och **vidarebefordrar dem oförändrade** till `htt
 }
 ```
 
-Inbyggda värden för `{ image | audio | video | pdf }` kan vara en offentlig HTTPS-URL, en `data:`-URI eller rå
-base64. OmniRoute konverterar inte dessa objekt till strängar och hämtar inte inbyggda bild-URL:er – Jina hämtar
-själv offentliga medier. Extra Jina-fält (`task`, `normalized`, `truncate`, `embedding_type`)
-vidarebefordras. Jina-SKU:er som endast stöder text avvisar fortfarande dokument som inte är text.
+Inbyggda `{ image | audio | video | pdf }`-värden kan vara en offentlig HTTPS-URL, en `data:`-URI eller rå
+base64. OmniRoute konverterar inte dessa objekt till strängar och hämtar inte inbyggda bild-URL:er — Jina hämtar
+det offentliga mediet själv. Extra Jina-fält (`task`, `normalized`, `truncate`, `embedding_type`) vidarebefordras. Jina-SKU:er som endast stöder text avvisar fortfarande dokument som inte är text.
 
 Säkerhets- och transportgränser:
 
-- URL:er till fjärrmedier måste använda offentlig HTTPS. Kanoniska `{type,source:url}`-objekt hämtas
-  på serversidan (förnyad validering av omdirigeringar, tidsgränser, storleksgränser, offentlig DNS och
-  anslutningslåsning) och bäddas in före leverantörsanropet. Jinas inbyggda `{image:"https://..."}`-objekt vidarebefordras i befintligt skick
+- Fjärrmedie-URL:er måste vara offentliga HTTPS-URL:er. Kanoniska `{type,source:url}`-objekt hämtas
+  på serversidan (omvalidering av omdirigeringar, timeout, storleksgränser, offentlig DNS, anslutningslåsning) och bäddas
+  in innan leverantörsanropet. Jina-inbyggda `{image:"https://..."}`-objekt vidarebefordras som de är
   efter samma kontroll av offentlig HTTPS; Jina hämtar URL:en.
-- Infogade base64-medier är begränsade till 8 MiB avkodad data per objekt och 16 MiB avkodad data för hela begäran.
+- Inline-base64-media är begränsade till 8 MiB avkodad data per objekt och 16 MiB avkodad data för hela begäran.
 
-Leverantörsöversättning (kanoniska objekt vidarebefordras aldrig oförändrade):
+Översättning per leverantör (kanoniska objekt vidarebefordras aldrig oförändrade):
 
-- Jinas multimodala modeller: varje objekt på toppnivå blir ett modalitetsnycklat objekt
-  (`text` / `image` / `audio` / `video` / `pdf`) som använder data-URI:er för infogade medier; en vektor per
+- Jinas multimodala modeller: varje objekt på toppnivå blir ett objekt med en modalitetsnyckel
+  (`text` / `image` / `audio` / `video` / `pdf`) som använder data-URI:er för inline-media; en vektor per
   objekt på toppnivå.
-- Gemini Embedding 2-familjen: en matris på toppnivå blir en enda inbyggd
+- Gemini Embedding 2-familjen: en array på toppnivå blir en enda inbyggd
   `models/{model}:embedContent`-begäran med `content.parts` (`text` eller `inline_data`).
-- llama.cpp (`llama-cpp/<model>`, valfri modell som den lokala servern har läst in): kanoniska `text`-objekt
-  blir vanliga strängar, och `image` / `audio` / `video` blir varsitt
-  `{"content": [part]}`-objekt som använder llama-servers innehållsdelar för chatt (`image_url`,
-  `input_audio` med formatet `wav` / `mp3` / `flac`, `input_video`) med infogade data; en vektor
-  per objekt på toppnivå. Servern måste köras med `--embedding --mmproj …`; utan en projektor
-  avvisar den själv medier. `document` stöds inte.
-- Okända/dynamiska modeller utan explicita modalitetsmetadata avvisar strukturerade indata med HTTP 400.
+- llama.cpp (`llama-cpp/<model>`, alla modeller som den lokala servern har laddat): kanoniska `text`-objekt
+  blir enkla strängar, och `image` / `audio` / `video` blir vardera ett `{"content": [part]}`-objekt,
+  med hjälp av llama-servers chattinnehållsdelar (`image_url`,
+  `input_audio` med formatet `wav` / `mp3` / `flac`, `input_video`) med inline-data; en vektor per
+  objekt på toppnivå. Servern måste köras med `--embedding --mmproj …`; utan en projektor
+  avvisar den själv media. `document` stöds inte.
+- Okända/dynamiska modeller utan uttryckliga modalitetsmetadata avvisar strukturerad indata med HTTP 400.
 
 ```json
 {
@@ -346,11 +351,10 @@ Leverantörsöversättning (kanoniska objekt vidarebefordras aldrig oförändrad
 }
 ```
 
-Modell-/modalitetskombinationer som inte stöds returnerar HTTP 400 i stället för att konvertera objektet. Utökningsfält
-utanför indata i äldre sträng-/tokenbegäranden fortsätter att skickas vidare oförändrade.
+Kombinationer av modeller och modaliteter som inte stöds returnerar HTTP 400 i stället för att tvinga fram en konvertering av objektet. Tilläggsfält som inte hör till indata i äldre sträng-/token-begäranden fortsätter att vidarebefordras oförändrade.
 
 ```bash
-# Lista alla inbäddningsmodeller
+# Lista alla embeddingmodeller
 GET /v1/embeddings
 ```
 
@@ -370,33 +374,35 @@ Content-Type: application/json
 }
 ```
 
-Tillgängliga leverantörer omfattar OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokalt), ComfyUI (lokalt).
+Tillgängliga leverantörer inkluderar OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokalt), ComfyUI (lokalt).
 
-`n` returnerar `n` bilder i `data[]`. För leverantörer vars bakomliggande API returnerar en bild per anrop
+`n` returnerar `n` bilder i `data[]`. Leverantörer vars uppströms-API returnerar en bild per anrop
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) görs `n` separata anrop till det bakomliggande API:t, med högst 4 samtidiga anrop. Ett
-fast `seed` förskjuts med anropets index (`seed`, `seed + 1`, …), så att bilderna skiljer sig åt men förblir
-reproducerbara. `n` är begränsat till 10. Begäran misslyckas i sin helhet om något anrop misslyckas. Listan
-över format som använder parallella anrop finns i `SINGLE_IMAGE_FANOUT_FORMATS` i
+NVIDIA NIM, Cloudflare Workers AI) får `n` separata uppströmsanrop, med högst 4 samtidiga. Ett
+fast `seed` förskjuts med anropsindex (`seed`, `seed + 1`, …), så bilderna skiljer sig åt men förblir
+reproducerbara. `n` begränsas till 10. Hela begäran misslyckas om något anrop misslyckas. Listan över
+format för fan-out är `SINGLE_IMAGE_FANOUT_FORMATS` i
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux återanvänder den befintliga anslutningen med API-nyckel och accepterar prefixen `zenmux/` eller `zm/`:
+ZenMux återanvänder den befintliga API-nyckelanslutningen och accepterar prefixen
+`zenmux/` eller `zm/`:
 
-- `zenmux/openai/gpt-image-2` använder ZenMux OpenAI Images API. Alternativen omfattar `size`,
+- `zenmux/openai/gpt-image-2` använder ZenMuxs OpenAI Images API. Alternativen inkluderar `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background` och `response_format`.
-- Andra utgivare, exempelvis `zm/meta/muse-image-1.0`, använder ZenMux Vertex AI-slutpunkt `:predict`.
-  `n` mappas till `sampleCount`, `aspect_ratio` till `aspectRatio` och `image_size`
-  (`1K`, `2K`, `4K`) till `sampleImageSize`. Ett pixelvärde för `size` anger endast ett bildförhållande,
-  inte garanterade pixeldimensioner. Vilka bildförhållanden, upplösningar och antal som stöds varierar beroende på modell.
+- Andra utgivare, till exempel `zm/meta/muse-image-1.0`, använder ZenMuxs Vertex AI-` :predict`
+  -slutpunkt. `n` mappas till `sampleCount`, `aspect_ratio` till `aspectRatio` och `image_size`
+  (`1K`, `2K`, `4K`) till `sampleImageSize`. En pixelbaserad `size` anger endast ett bildförhållande,
+  inte garanterade pixeldimensioner. Vilka bildförhållanden, upplösningar och antal som stöds varierar
+  mellan modeller.
 - `zm/inclusionai/ming-image-0.1-design` väljer sina egna dimensioner. Utelämna `size`,
   `aspect_ratio` och `image_size`; explicita värden returnerar HTTP 400. PNG, JPEG och WebP
   kan begäras med `output_format`.
 
-Den här integrationen stöder generering av bilder från text, inte redigering baserad på referensbilder. Utdata från Vertex
-normaliseras till `data[].b64_json`; `response_format: "url"` returnerar en bakomliggande
-HTTPS-URL eller en base64-data-URL när endast bilddata är tillgängliga. Tomma/filtrerade utdata
-returnerar ett fel i stället för ett tomt lyckat svar. Modellåtkomsten beror på ZenMux-kontot.
-Se [ZenMux Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) och
+Denna integration stöder text-till-bild-generering, inte redigering av referensbilder. Vertex-utdata
+normaliseras till `data[].b64_json`; `response_format: "url"` returnerar en uppströms-HTTPS-URL
+eller en base64-data-URL när endast bildbyte är tillgängliga. Tomma eller filtrerade utdata
+returnerar ett fel i stället för ett tomt lyckat svar. Modellåtkomst beror på ZenMux-kontot.
+Se [ZenMuxs Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) och
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
 ```bash
@@ -422,17 +428,17 @@ Content-Type: application/json
 }
 ```
 
-`model` väljer OCR-leverantör via prefixet `provider/model`; ett modell-id utan prefix (t.ex.
+`model` väljer OCR-leverantören via ett `provider/model`-prefix; ett fristående modell-ID (t.ex.
 `mistral-ocr-latest`) matchas mot sin registrerade leverantör, och om `model` utelämnas används
-Mistral (`mistral-ocr-latest`) som standard. Registrerade leverantörer (`open-sse/config/ocrRegistry.ts`):
+Mistral som standard (`mistral-ocr-latest`). Registrerade leverantörer (`open-sse/config/ocrRegistry.ts`):
 
-| Leverantörs-id                | Modell-id            | Värde för `model`                                                | Anmärkningar                                                                                            |
-| ----------------------------- | -------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (eller enbart `mistral-ocr-latest`) | Synkront – svaret returneras direkt från det enda anropet till det bakomliggande API:t.                 |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                      | Asynkront bakomliggande API (`analyze` + pollning) – se nedan.                                          |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                          | Synkront, via Vertex AI:s partnerslutpunkt `openapi/chat/completions` – se nedan för autentisering/URL. |
+| Leverantörs-ID                | Modell-ID            | Värdet för `model`                                                   | Anmärkningar                                                                                           |
+| ----------------------------- | -------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (eller fristående `mistral-ocr-latest`) | Synkront — svaret returneras direkt från det enda uppströmsanropet.                                    |
+| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                          | Asynkront uppströms (`analyze` + polling) — se nedan.                                                  |
+| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                              | Synkront via Vertex AIs partner-slutpunkt `openapi/chat/completions` — se nedan för autentisering/URL. |
 
-Alla tre leverantörerna svarar med samma Mistral-formaterade svarsobjekt:
+Alla tre leverantörer svarar med samma Mistral-formade svar:
 
 ```json
 {
@@ -444,26 +450,27 @@ Alla tre leverantörerna svarar med samma Mistral-formaterade svarsobjekt:
 
 ### Pollningsflöde för Azure Document Intelligence
 
-Azure Document Intelligence-API:t `analyze` är asynkront: den inledande begäran returnerar ett
-`Operation-Location`-huvud i stället för ett svarsobjekt, och resultatet måste pollas. Hanteraren
-(`open-sse/handlers/ocr.ts`) pollar denna URL varje sekund i upp till 30 försök, avbryter omedelbart (fortsätter
-inte att polla) vid ett pollsvar som inte är `ok` eller statusen `"failed"`, och returnerar `504` om
-åtgärden fortfarande körs när antalet tillåtna försök har förbrukats. Det slutliga Azure-svaret
-normaliseras till samma `pages`-/`markdown`-format som används av Mistral innan det returneras till
-anroparen, så klientkoden behöver inte specialhantera leverantören.
+Azure Document Intelligences `analyze`-API är asynkront: den första begäran returnerar ett
+`Operation-Location`-huvud i stället för en svarstext, och resultatet måste hämtas genom polling.
+Hanteraren (`open-sse/handlers/ocr.ts`) pollar den URL:en varje sekund i upp till 30 försök,
+avslutar direkt (fortsätter inte att polla) vid ett pollningssvar som inte är `ok` eller vid statusen
+`"failed"`, och returnerar `504` om åtgärden fortfarande körs efter att försöksbudgeten har
+förbrukats. Det slutliga Azure-svaret normaliseras till samma `pages`/`markdown`-form som används
+av Mistral innan det returneras till anroparen, så klientkod behöver inte hantera leverantören
+särskilt.
 
-### Autentisering och slutpunktsmatchning för Vertex AI DeepSeek OCR
+### Autentisering och slutpunktsupplösning för Vertex AI DeepSeek OCR
 
 `vertex-deepseek-ocr` återanvänder samma Vertex AI-autentisering som OmniRoute redan stöder för
 chatt-/bildtrafik (`open-sse/executors/vertex.ts`): anslutningens API-nyckel är antingen en
-Service Account-autentiseringsuppgift i JSON-format (som byts mot en kortlivad OAuth-åtkomsttoken via JWT-bearerflödet)
-eller en redan utfärdad OAuth-åtkomsttoken som används i befintligt skick. URL:en till den bakomliggande slutpunkten är Vertex
-generiska partnerslutpunkt `openapi/chat/completions`, som skapas utifrån anslutningens projekt och
-region – ett explicit `providerSpecificData.project`/`providerSpecificData.region` har alltid företräde;
-annars härleds projektet från Service Account-JSON-objektets `project_id` och regionen
-är som standard `us-central1`. Båda matchningarna sker i `open-sse/handlers/ocr.ts`
+Service Account JSON-uppgift (som byts mot en kortlivad OAuth-åtkomsttoken via JWT-bearer-flödet)
+eller en redan utfärdad OAuth-åtkomsttoken som används som den är. URL:en till uppströms-slutpunkten
+är Vertex generiska partner-slutpunkt `openapi/chat/completions`, konstruerad från anslutningens
+projekt och region — en explicit `providerSpecificData.project`/`providerSpecificData.region` gäller
+alltid; annars härleds projektet från Service Account JSON-fältet `project_id` och regionen
+förinställs till `us-central1`. Båda upplösningarna sker i `open-sse/handlers/ocr.ts`
 (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) och används av
-`src/app/api/v1/ocr/route.ts` innan begäran skickas vidare till `handleOcr`.
+`src/app/api/v1/ocr/route.ts` innan vidarebefordran till `handleOcr`.
 
 ---
 
@@ -473,15 +480,15 @@ annars härleds projektet från Service Account-JSON-objektets `project_id` och 
 GET /v1/models
 Authorization: Bearer your-api-key
 
-→ Returnerar alla chatt-, inbäddnings- och bildmodeller samt kombinationer i OpenAI-format
+→ Returnerar alla chatt-, embedding- och bildmodeller + kombinationer i OpenAI-format
 ```
 
 ### Modellpriser (`pricing`)
 
 En post innehåller ett `pricing`-objekt när OmniRoute känner till modellens pris. Priset kommer
-från pristabellen som används för kostnadsredovisning: inbyggda standardvärden, synkroniserade priser och
-åsidosättningar som angetts via `/api/pricing`. Dessa är listpriser, så även prenumerationsleverantörer
-visar ett pris per token.
+från pristabellen som kostnadsberäkningen använder: inbyggda standardvärden, synkroniserade priser och
+åsidosättningar som anges via `/api/pricing`. Detta är listpriser, så prenumerationsleverantörer visar
+också ett pris per token.
 
 ```json
 "pricing": {
@@ -496,64 +503,64 @@ visar ett pris per token.
 }
 ```
 
-| Fält                                                            | Enhet                        | Anmärkningar                                                                                                                                    |
+| Fält                                                            | Enhet                        | Anteckningar                                                                                                                                    |
 | --------------------------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `prompt`, `completion`, `input_cache_read`, `input_cache_write` | USD per token, decimalsträng | OpenRouter-kompatibelt, aldrig i exponentnotation. De två cachefälten visas endast när det finns ett cachepris.                                 |
 | `input`, `output`, `cached`, `cache_creation`                   | USD per 1M tokens, tal       | Fält från tidigare katalogversioner, behållna för befintliga klienter. `reasoning` och `long_context` visas också när prisraden innehåller dem. |
 
-- **Kombinationer** använder priset för sitt första synliga mål. Inbyggda `auto/*`-kombinationer väljer ett
-  mål vid tidpunkten för begäran och har därför inget `pricing`.
-- **Kostnadsfria modeller** visar `"0"` (och `0`) när priset är noll. En modell utan prisrad
-  visar också `"0"` när katalogen markerar den som kostnadsfri (`free: true`) eller när den finns med i den inbyggda
-  katalogen över kostnadsfria modeller.
-- **Okänt pris:** posten har ingen `pricing`-nyckel.
-- **Kreditdebiterade leverantörer** (som Kiro) debiterar per begäran i stället för per token. Deras
-  poster behåller de numeriska fälten per 1M som de hade tidigare och innehåller inga strängfält per token.
-- **Varianter** (id:n för resonemangsansträngning, alias utan tänkande samt speglingar för identifiering och gateway)
-  kopierar priset från modellen som de dirigerar till.
-- Fälten innehåller endast baspriser. Nivåer för lång kontext (det numeriska fältet `long_context`) och
-  multiplikatorer för tjänstenivåer (exempelvis Codex fast eller flex) ändrar inte `prompt` eller
+- **Kombinationer** har priset för sitt första synliga mål. Inbyggda `auto/*`-kombinationer väljer ett
+  mål vid begäran, så de har inget `pricing`.
+- **Gratis modeller** visar `"0"` (och `0`) när priset är noll. En modell utan prisrad
+  visar också `"0"` när katalogen markerar den som gratis (`free: true`) eller den finns med i den inbyggda
+  katalogen över gratis modeller.
+- **Okänt pris:** posten saknar nyckeln `pricing`.
+- **Leverantörer med kreditbaserad debitering** (till exempel Kiro) debiterar per begäran i stället för per token. Deras
+  poster behåller de numeriska fälten per 1M som de hade tidigare och saknar strängfält per token.
+- **Varianter** (id:n för resonemangsansträngning, alias utan tänkande, speglingar för upptäckt och gateway)
+  kopierar priset från modellen de dirigerar till.
+- Fälten innehåller endast grundpriser. Nivåer för lång kontext (det numeriska fältet `long_context`) och
+  multiplikatorer för tjänstenivåer (till exempel Codex fast eller flex) ändrar inte `prompt` eller
   `completion`.
-- Objektet är detsamma för alla autentiseringsmetoder, inklusive en begäran i Anthropic-stil
-  med `x-api-key` och `anthropic-version` (svaret förblir `{ "object": "list",
+- Objektet är detsamma för alla autentiseringsstilar, inklusive en Anthropic-liknande
+  begäran med `x-api-key` och `anthropic-version` (svaret förblir `{ "object": "list",
 "data": [...] }`). Implementering: `src/app/api/v1/models/catalogPricing.ts`.
 
 ### Prefix för modell-id:n (`?prefix=`)
 
-De flesta modeller annonseras under ett **leverantörsprefix**. Vilket prefix du får styrs av
+De flesta modeller annonseras med ett **leverantörsprefix**. Vilket prefix du får styrs av
 funktionsflaggan `MODELS_CATALOG_PREFIX_MODE` och kan åsidosättas **per begäran** med en
-frågeparameter – praktiskt för en klient som vill ha en ren lista utan att ändra den serveromfattande
+frågeparameter — användbart för en klient som vill ha en ren lista utan att ändra den serveromfattande
 inställningen för alla andra:
 
 ```bash
-GET /v1/models?prefix=alias        # ett id per modell – det korta aliasprefixet
-GET /v1/models?prefix=dual         # båda formerna (serverns standardvärde)
+GET /v1/models?prefix=alias        # ett id per modell — prefixet med det korta aliaset
+GET /v1/models?prefix=dual         # båda formerna (serverstandard)
 GET /v1/models?prefix=canonical    # endast det fullständiga leverantörs-id-prefixet
 ```
 
-| Läge        | Genererar                                                 | Anmärkningar                                                                                                                                                                                        |
-| ----------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dual`      | `cc/claude-sonnet-4-6` **och** `claude/claude-sonnet-4-6` | **Standard.** Båda id:n dirigeras till samma modell; behålls så att klientkonfigurationer som hårdkodat någon av formerna fortsätter att fungera. Fördubblar katalogen ungefär.                     |
-| `alias`     | `cc/claude-sonnet-4-6`                                    | En post per modell. Leverantörer utan ett separat alias genererar fortfarande sin post, så ingenting går förlorat.                                                                                  |
-| `canonical` | `claude/claude-sonnet-4-6`                                | En post per modell under det fullständiga leverantörs-id-prefixet. Leverantörer utan ett separat alias (t.ex. `antigravity/…`, `agy/…`) genererar även här sitt enda id, så ingenting går förlorat. |
+| Läge        | Genererar                                                 | Anteckningar                                                                                                                                                                                     |
+| ----------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `dual`      | `cc/claude-sonnet-4-6` **och** `claude/claude-sonnet-4-6` | **Standard.** Båda id:na dirigeras till samma modell; behålls så att klientkonfigurationer som hårdkodat någon av formerna fortsätter att fungera. Katalogen blir ungefär dubbelt så stor.       |
+| `alias`     | `cc/claude-sonnet-4-6`                                    | En post per modell. Leverantörer utan ett särskilt alias genererar fortfarande sin post, så inget går förlorat.                                                                                  |
+| `canonical` | `claude/claude-sonnet-4-6`                                | En post per modell under det fullständiga leverantörs-id-prefixet. Leverantörer utan ett särskilt alias (t.ex. `antigravity/…`, `agy/…`) genererar även här sitt enda id, så inget går förlorat. |
 
-En spegling i `dual`-läge kan också identifieras utan frågeparametern: den innehåller ett `parent`-fält
-som pekar på det primära id:t.
+En spegling i läget `dual` kan också identifieras utan frågeparametern: den innehåller ett `parent`-
+fält som pekar på det primära id:t.
 
-Klienter som visar en modellväljare bör begära `?prefix=alias` – det är vad
-[OmniCopilot-tillägget för VS Code](../guides/VSCODE-COPILOT.md) gör.
+Klienter som återger en modellväljare bör begära `?prefix=alias` — det är detta som
+[OmniCopilot VS Code-tillägget](../guides/VSCODE-COPILOT.md) gör.
 
-### Identifieringsfilter (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
+### Upptäcktsfilter (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
 
-`GET /v1/models` accepterar valfria identifieringsfilter. Utan något av dem är svaret
-oförändrat. De begränsar katalogen som anroparen redan kan se (API-nyckelbehörigheter tillämpas först),
-och de körs före pagineringen i OpenAI-stil med `limit` / `after`:
+`GET /v1/models` accepterar valfria upptäcktsfilter. Utan något av dem är svaret
+oförändrat. De begränsar katalogen som anroparen redan ser (API-nyckelbehörigheter tillämpas först),
+och körs före sidindelningen med `limit` / `after` i OpenAI-stil:
 
 ```bash
-GET /v1/models?capability=vision&capability=tool_calling   # varje angiven funktion måste vara sann
+GET /v1/models?capability=vision&capability=tool_calling   # alla angivna funktioner måste vara true
 GET /v1/models?capability=vision,reasoning&min_context=200000
-GET /v1/models?kind=embedding                              # katalogens `type`; rader utan en sådan är `chat`
-GET /v1/models?q=sonnet&limit=10                           # skiftlägesokänslig matchning mot id eller namn
+GET /v1/models?kind=embedding                              # katalogens `type`; rader utan ett sådant är `chat`
+GET /v1/models?q=sonnet&limit=10                           # skiftlägesokänslig matchning på id eller namn
 ```
 
 | Parameter     | Värden                                                                                              |
@@ -563,11 +570,11 @@ GET /v1/models?q=sonnet&limit=10                           # skiftlägesokänsli
 | `kind`        | `chat`, `audio`, `embedding`, `image`, `moderation`, `music`, `rerank`, `video`                     |
 | `q`           | 1–200 tecken                                                                                        |
 
-Ett okänt värde eller ett `min_context` som inte är ett icke-negativt heltal (exempelvis `1.5`)
-returnerar HTTP `400`, och meddelandet visar de giltiga värdena. Implementering:
+Ett okänt värde, eller ett `min_context` som inte är ett icke-negativt heltal (till exempel `1.5`),
+returnerar HTTP `400` och meddelandet listar de giltiga värdena. Implementering:
 `src/app/api/v1/models/catalogFilters.ts`.
 
-### Kortlista över modeller (`POST /v1/models/query`)
+### Modellurval (`POST /v1/models/query`)
 
 `POST /v1/models/query` returnerar en kort, deterministisk lista från samma katalog, med samma
 autentisering och synlighet per nyckel som `GET /v1/models`:
@@ -583,75 +590,83 @@ Content-Type: application/json
 → { "object": "list", "data": [ ...models ] }
 ```
 
-Alla fält är valfria. `capabilities` och `exclude` accepterar en array eller en kommaseparerad sträng;
+Alla fält är valfria. `capabilities` och `exclude` kan anges som en array eller en kommaseparerad sträng;
 `max_output` jämförs med `max_output_tokens`. Resultaten sorteras efter `owned_by` och därefter `id`.
-`limit` har standardvärdet `20`, och värden över `100` begränsas till `100`. Ogiltig JSON, ett okänt
+`limit` har standardvärdet `20` och värden över `100` begränsas till `100`. Ogiltig JSON, ett okänt
 fält eller ett ogiltigt värde returnerar HTTP `400`.
 
 ### Individuellt dolda chattmodeller
 
-En modell som är markerad som **Dold** på sin leverantörssida utesluts från katalogen och avvisas
-med HTTP `404` / `model_not_found` när den begärs uttryckligen. Kontrollen använder den matchade
-leverantören och modellen, inklusive leverantörsalias, nodprefix för kompatibla leverantörer och
-standardvärden för anslutningar. En kombination hoppar över dolda mål och kan använda ett synligt syskon; när inget
-körbart mål återstår returneras samma felkod. När en modell görs synlig börjar detta gälla vid nästa
-begäran. Synlighetsåsidosättningar som endast gäller bilder döljer inte chattmodellen med samma ID.
+En modell som markerats som **Dold** på sin providersida exkluderas från katalogen och avvisas
+med HTTP `404` / `model_not_found` när den begärs explicit. Kontrollen använder den upplösta providern
+och modellen, inklusive provideralias, kompatibla provider-nodprefix och anslutningsstandardvärden.
+En kombination hoppar över dolda mål och kan använda ett synligt syskon; när inget körbart mål
+återstår returneras samma felkod. När modellen görs synlig igen börjar detta gälla vid nästa begäran.
+Synlighetsöverskrivningar som endast gäller bilder döljer inte chattmodellen med samma ID.
 
-Den här individuella modellinställningen är separat från
-[tillåtelse-/nekandelistorna för modellexponering](../routing/MODEL_EXPOSURE_LIST.md), som filtrerar
-katalogannonsering och kandidater för automatisk dirigering, samtidigt som explicit dirigering behålls. Modellbehörigheter
-för API-nycklar fortsätter att gälla oberoende av detta. Katalogens standardläge för prefix förblir `dual`.
+Denna individuella modellinställning är separat från
+[allow/deny-listorna för modellexponering](../routing/MODEL_EXPOSURE_LIST.md), som filtrerar
+katalogannonsering och kandidater för automatisk routning, samtidigt som explicit dirigering behålls.
+API-nyckelns modellbehörigheter fortsätter att tillämpas oberoende. Standardläget för katalogprefix
+förblir `dual`.
 
-### Modellvarianter utan tänkande
+### Modellvarianter utan thinking
 
-För Claude-modeller med stöd för tänkande annonserar `/v1/models` även en variant **utan tänkande** vars ID har prefixet `claude-3-omniroute-no-thinking/`:
+För Claude-modeller som stöder thinking annonserar `/v1/models` även en variant **utan thinking**, vars id
+har prefixet `claude-3-omniroute-no-thinking/`:
 
 ```
 claude-3-omniroute-no-thinking/<provider>/<model>
 ```
 
-När detta ID väljs (t.ex. i en Claude Code-konfiguration som alltid bifogar ett `thinking`-block) matchas det tillbaka till den verkliga `<provider>/<model>` med resonemang inaktiverat — `thinking:{type:"disabled"}` på sökvägen `/v1/messages`, eller med fälten `reasoning`/`reasoning_effort` borttagna på sökvägen `/v1/chat/completions`. Varianten listas endast för modeller i Claude-familjen som stöder tänkande **och** respekterar `disabled` (så exempelvis modeller som endast stöder adaptivt läge och avvisar `disabled` utesluts). Operatörer kan tvinga varianten att vara aktiverad eller inaktiverad per modell via `ModelSpec.noThinkingAlias`.
+När detta id väljs (till exempel i en Claude Code-konfiguration som alltid bifogar ett `thinking`-block)
+översätts det tillbaka till den riktiga `<provider>/<model>`-modellen med reasoning inaktiverat —
+`thinking:{type:"disabled"}` på sökvägen `/v1/messages`, eller så tas fälten `reasoning`/`reasoning_effort`
+bort på sökvägen `/v1/chat/completions`. Varianten listas endast för Claude-familjens modeller som stöder
+thinking **och** respekterar `disabled` (så adaptiva modeller som endast stöder adaptive och avvisar
+`disabled` exkluderas). Operatörer kan tvinga varianten att vara aktiverad eller inaktiverad per modell
+via `ModelSpec.noThinkingAlias`.
 
 ---
 
-## Manifest för leverantörsinsticksprogram
+## Manifest för provider-plugin
 
 ```bash
 GET /api/v1/provider-plugin-manifest
 ```
 
-Returnerar det JSON-säkra manifestet för leverantörsinsticksprogram som används av Bifrost, CLIProxyAPI och
-framtida sidoprocessroutrar. Svaret genereras från TypeScript-registret över leverantörer
-och utesluter avsiktligt OAuth-klienthemligheter, matchning mot körningsmiljön,
-exekveringsfunktioner, begärandehuvuden och kontodata.
+Returnerar det JSON-säkra manifestet för provider-plugin som används av Bifrost, CLIProxyAPI och
+framtida sidecar-routrar. Svaret genereras från TypeScript-registret för providers och
+utesluter avsiktligt OAuth-klienthemligheter, upplösning av runtime-miljö, executor-funktioner,
+request-headers och kontodata.
 
-Använd den här ändpunkten när en sidoprocess körs utanför processen och inte kan importera
+Använd denna endpoint när en sidecar körs out-of-process och inte kan importera
 `open-sse/config/providerPluginManifestRegistry.ts` direkt.
 
 ---
 
-## ElevenLabs-ljudgenerering
+## Ljudgenerering med ElevenLabs
 
-Konfigurera en `elevenlabs`-leverantörsanslutning i OmniRoute med din ElevenLabs API-nyckel.
-Klienter autentiserar sig med sin **OmniRoute**-nyckel (`Authorization: Bearer $OMNIROUTE_API_KEY`);
-gatewayen tillhandahåller den lagrade leverantörsnyckeln som `xi-api-key`. Skicka aldrig en ElevenLabs-nyckel
-som bearer-token till gatewayen.
+Konfigurera en `elevenlabs`-provideranslutning i OmniRoute med din ElevenLabs API-nyckel.
+Klienter autentiserar med sin **OmniRoute**-nyckel (`Authorization: Bearer $OMNIROUTE_API_KEY`);
+gatewayen tillhandahåller den lagrade provider-nyckeln som `xi-api-key`. Skicka aldrig en ElevenLabs-nyckel
+som gatewayens bearer-token.
 
-| Metod | Sökväg                      | Svar                                                     | Ändpunktskategori för API-nyckel |
-| ----- | --------------------------- | -------------------------------------------------------- | -------------------------------- |
-| POST  | `/v1/sound-generation`      | Leverantörsspecifika ljudbyte                            | `elevenlabs`                     |
-| POST  | `/v1/music`                 | Leverantörsspecifika ljudbyte                            | `music`                          |
-| POST  | `/v1/music/stream`          | Strömmande ljudbyte                                      | `music`                          |
-| POST  | `/v1/music/detailed`        | Leverantörsspecifikt multipart-ljud och kompositionsplan | `music`                          |
-| POST  | `/v1/music/detailed/stream` | Leverantörsspecifika SSE-metadata och ljudsegment        | `music`                          |
-| POST  | `/v1/music/plan`            | JSON-kompositionsplan                                    | `music`                          |
+| Metod | Sökväg                      | Svar                                             | Kategori för API-nyckelendpoint |
+| ----- | --------------------------- | ------------------------------------------------ | ------------------------------- |
+| POST  | `/v1/sound-generation`      | Ursprungliga ljudbytes                           | `elevenlabs`                    |
+| POST  | `/v1/music`                 | Ursprungliga ljudbytes                           | `music`                         |
+| POST  | `/v1/music/stream`          | Strömmande ljudbytes                             | `music`                         |
+| POST  | `/v1/music/detailed`        | Ursprungligt multipart-ljud och kompositionsplan | `music`                         |
+| POST  | `/v1/music/detailed/stream` | Ursprungliga SSE-metadata och ljudfragment       | `music`                         |
+| POST  | `/v1/music/plan`            | JSON-kompositionsplan                            | `music`                         |
 
-Dessa ändpunkter kompletterar de befintliga rutterna `/v1/audio/speech`, `/v1/audio/transcriptions`,
-`/v1/voices`, `/v1/text-to-speech/{voiceId}` och `/v1/speech-to-text`. Leverantörsspecifika JSON-fält
+Dessa endpoints kompletterar de befintliga `/v1/audio/speech`, `/v1/audio/transcriptions`,
+`/v1/voices`, `/v1/text-to-speech/{voiceId}` och `/v1/speech-to-text`-rutterna. Ursprungliga JSON-fält
 och frågeparametrar som `output_format` och `enable_logging` bevaras.
-Svar från `/v1/music/detailed` behåller sina multipart-gränser; tolka dem som multipart.
+Svar från `/v1/music/detailed` behåller sina multipart-avgränsare; tolka dem som multipart.
 `/v1/music/detailed/stream` returnerar `text/event-stream` med kompositionsmetadata och
-base64-kodade ljudsegment i SSE-händelser. Alla sex rutter stöder CORS-förhandsanrop.
+base64-kodade ljudfragment i SSE-händelser. Alla sex rutter stöder CORS-preflight.
 
 ```bash
 export OMNIROUTE_BASE_URL="http://localhost:20128"
@@ -672,18 +687,18 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music?output_format=mp3_44100_128"
   --output music.mp3
 ```
 
-Använd `/v1/music/stream` med samma JSON-innehåll för stegvis ljudleverans. Komposition
+Använd `/v1/music/stream` med samma JSON-body för inkrementell ljudleverans. Composition
 accepterar exakt ett av `prompt` eller `composition_plan`; `/v1/music/plan` kräver `prompt`
-och accepterar valfritt `source_composition_plan`. De leverantörsspecifika schemana bevarar ytterligare
-leverantörsfält så att versioner av kompositionsplaner och finjusteringsalternativ når ElevenLabs.
+och accepterar valfritt `source_composition_plan`. De ursprungliga schemana bevarar ytterligare
+provider-fält så att versioner av kompositionsplaner och finjusteringsalternativ når ElevenLabs.
 
-Den enhetliga ändpunkten `/v1/music/generations` accepterar även `elevenlabs/music_v1`,
-`elevenlabs/music_v2` och `elevenlabs/music_v2_5`. Med en aktiv ElevenLabs-anslutning
-visas dessa modeller i musikkatalogen. Den här ändpunkten returnerar
-`{"created":...,"data":[{"b64_json":"...","format":"mp3"}]}`. Dess `duration`-fält anges i
+Den enhetliga endpointen `/v1/music/generations` accepterar också
+`elevenlabs/music_v1`, `elevenlabs/music_v2` och `elevenlabs/music_v2_5`. Med en aktiv ElevenLabs-anslutning
+exponeras dessa modeller i musikkatalogen. Denna endpoint returnerar
+`{"created":...,"data":[{"b64_json":"...","format":"mp3"}]}`. Fältet `duration` anges i
 sekunder och mappas till `music_length_ms`; ett explicit `music_length_ms` har företräde.
-`instrumental` mappas till `force_instrumental`, där det leverantörsspecifika fältet har företräde.
-Använd de leverantörsspecifika strömningsändpunkterna för strömning och den leverantörsspecifika kompositionsändpunkten
+`instrumental` mappas till `force_instrumental`, där det ursprungliga fältet har företräde.
+Använd de ursprungliga streaming-endpointarna för streaming och den ursprungliga kompositionsendpointen
 för begäranden som enbart styrs av en kompositionsplan.
 
 ```bash
@@ -693,56 +708,56 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
   -d '{"model":"elevenlabs/music_v1","prompt":"Gentle instrumental piano","duration":10,"instrumental":true}'
 ```
 
-Begränsningar för ändpunkt, modell, budget och anslutning tillämpas före ett uppströmsanrop. Leverantörsspecifika
-rutter returnerar uppströmsstatuskoder och felinnehåll oförändrade, inklusive `402` för en
-abonnemangsbegränsning och `429` för en kvotgräns. Huvudena `character-cost`, `song-id`, `request-id` och `retry-after`
+Begränsningar för endpoint, modell, budget och anslutning tillämpas innan ett upstream-anrop görs. Ursprungliga
+rutter returnerar upstream-statuskoder och felkroppar oförändrade, inklusive `402` för en planbegränsning
+och `429` för en kvotbegränsning. Headerarna `character-cost`, `song-id`, `request-id` och `retry-after`
 bevaras när de finns. Ett kostnadsfritt kreditsaldo garanterar inte åtkomst till alla
 musikmodeller, utdataformat eller API-funktioner: ElevenLabs avgör behörigheten för varje begäran.
-Den enhetliga ändpunkten bevarar felstatuskoder i OmniRoutes normaliserade felstruktur.
+Den enhetliga endpointen bevarar felstatuskoder i OmniRoutes normaliserade felsvar.
 
-Uppströmskontrakt: [ljudeffekter](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
+Upstream-kontrakt: [ljudeffekter](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
 [musikkomposition](https://elevenlabs.io/docs/api-reference/music/compose) och
-[detaljer för strömmande musik](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
+[detaljerad musikstreaming](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
 
 ---
 
-## Kompatibilitetsslutpunkter
+## Kompatibilitetsendpoints
 
-| Metod | Sökväg                                    | Format                                 |
-| ----- | ----------------------------------------- | -------------------------------------- |
-| POST  | `/v1/chat/completions`                    | OpenAI                                 |
-| POST  | `/v1/messages`                            | Anthropic                              |
-| POST  | `/v1/responses`                           | OpenAI Responses                       |
-| POST  | `/v1/embeddings`                          | OpenAI                                 |
-| POST  | `/v1/images/generations`                  | OpenAI Images                          |
-| POST  | `/v1/images/edits`                        | OpenAI Images (redigering/inpainting)  |
-| POST  | `/v1/videos/generations`                  | Videogenerering i OpenAI-stil          |
-| POST  | `/v1/music/generations`                   | Musikgenerering i OpenAI-stil          |
-| POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                     |
-| POST  | `/v1/audio/speech`                        | OpenAI TTS (returnerar ljudinnehåll)   |
-| POST  | `/v1/rerank`                              | Omrankning i Cohere-/Voyage-stil       |
-| POST  | `/v1/classify`                            | Jina-klassificering (`api.jina.ai`)    |
-| POST  | `/v1/segment`                             | Jina-segmenterare (`segment.jina.ai`)  |
-| POST  | `/v1/moderations`                         | OpenAI Moderations                     |
-| GET   | `/v1/models`                              | OpenAI                                 |
-| POST  | `/v1/models/query`                        | Filtrerad lista över lämpliga modeller |
-| POST  | `/v1/messages/count_tokens`               | Anthropic                              |
-| GET   | `/v1beta/models`                          | Gemini                                 |
-| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                 |
-| POST  | `/v1/api/chat`                            | Ollama                                 |
-| GET   | `/api/v1/vscode/{token}/`                 | Alias för OpenAI-katalogen             |
-| GET   | `/api/v1/vscode/{token}/models`           | Alias för OpenAI-modeller              |
-| POST  | `/api/v1/vscode/{token}/chat/completions` | Tokeniserat OpenAI-alias               |
-| POST  | `/api/v1/vscode/{token}/responses`        | Tokeniserat alias för OpenAI Responses |
-| POST  | `/api/v1/vscode/{token}/api/chat`         | Tokeniserat Ollama-alias               |
-| GET   | `/api/v1/vscode/{token}/api/tags`         | Tokeniserat alias för Ollama-taggar    |
+| Metod | Sökväg                                    | Format                                |
+| ----- | ----------------------------------------- | ------------------------------------- |
+| POST  | `/v1/chat/completions`                    | OpenAI                                |
+| POST  | `/v1/messages`                            | Anthropic                             |
+| POST  | `/v1/responses`                           | OpenAI Responses                      |
+| POST  | `/v1/embeddings`                          | OpenAI                                |
+| POST  | `/v1/images/generations`                  | OpenAI Images                         |
+| POST  | `/v1/images/edits`                        | OpenAI Images (redigering/inpainting) |
+| POST  | `/v1/videos/generations`                  | Videogenerering i OpenAI-stil         |
+| POST  | `/v1/music/generations`                   | Musikgenerering i OpenAI-stil         |
+| POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
+| POST  | `/v1/audio/speech`                        | OpenAI TTS (returnerar ljudinnehåll)  |
+| POST  | `/v1/rerank`                              | Omrankning i Cohere/Voyage-stil       |
+| POST  | `/v1/classify`                            | Jina-klassificering (`api.jina.ai`)   |
+| POST  | `/v1/segment`                             | Jina-segmenterare (`segment.jina.ai`) |
+| POST  | `/v1/moderations`                         | OpenAI Moderations                    |
+| GET   | `/v1/models`                              | OpenAI                                |
+| POST  | `/v1/models/query`                        | Filtrerad modellista                  |
+| POST  | `/v1/messages/count_tokens`               | Anthropic                             |
+| GET   | `/v1beta/models`                          | Gemini                                |
+| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                |
+| POST  | `/v1/api/chat`                            | Ollama                                |
+| GET   | `/api/v1/vscode/{token}/`                 | OpenAI-katalogalias                   |
+| GET   | `/api/v1/vscode/{token}/models`           | OpenAI-modellalias                    |
+| POST  | `/api/v1/vscode/{token}/chat/completions` | OpenAI-tokeniserat alias              |
+| POST  | `/api/v1/vscode/{token}/responses`        | OpenAI Responses-tokeniserat alias    |
+| POST  | `/api/v1/vscode/{token}/api/chat`         | Ollama-tokeniserat alias              |
+| GET   | `/api/v1/vscode/{token}/api/tags`         | Ollama-taggar, tokeniserat alias      |
 
-Alla POST-rutter följer samma struktur: `Bearer your-api-key` + Zod-validerad JSON-brödtext (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` osv., se `src/shared/validation/schemas.ts`). 4xx returneras om schemavalideringen misslyckas.
+Alla POST-rutter följer samma struktur: `Bearer your-api-key` + Zod-validerad JSON-body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` osv.; se `src/shared/validation/schemas.ts`). 4xx returneras vid schemavalideringsfel.
 
-För klienter som inte kan bifoga `Authorization: Bearer ...` accepterar OmniRoute även API-nycklar i URL:en, antingen via kompatibla frågesträngar (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) eller via de särskilda `/api/v1/vscode/{token}/...`-slutpunkterna som dokumenteras nedan.
+För klienter som inte kan bifoga `Authorization: Bearer ...` accepterar OmniRoute även API-nycklar i URL:en via antingen kompatibilitet med frågesträngar (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) eller de dedikerade `/api/v1/vscode/{token}/...`-endpoints som dokumenteras nedan.
 
 ```bash
-# Omrankning (leverantör i molnregistret eller en OpenAI-kompatibel leverantörsnod som "<prefix>/<model>")
+# Omrankning (molnregisterleverantör eller en OpenAI-kompatibel leverantörsnod som "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
 # Jina-klassificering (autentiseringsuppgifter för Foundation API)
@@ -754,50 +769,50 @@ POST /v1/segment     { "content": "...", "return_chunks": true }
 # Jina-sökning (s.jina.ai; leverantörsalias: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Modereringar
+# Moderering
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — returnerar innehåll av typen audio/mpeg (eller i begärt format)
+# TTS — returnerar en body med audio/mpeg (eller det begärda formatet)
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS kräver ett språk och en röst: `language` har standardvärdet "en"; en saknad
-# röst eller namnet på en standardröst från OpenAI (alloy, nova, …) blir "Adrian"
+# Soniox TTS kräver ett språk och en röst: `language` har som standard värdet "en"; om
+# en röst saknas eller om ett OpenAI-standardröstnamn (alloy, nova, …) anges blir värdet "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
 # Bildredigering (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Video-/musikgenerering (modell-id med leverantörsprefix)
+# Video-/musikgenerering (leverantörsprefixerat modell-ID)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Leverantörsnoder för omrankning:** `POST /v1/rerank` dirigeras även till OpenAI-kompatibla leverantörsnoder
+> **Noder för omrankningsleverantörer:** `POST /v1/rerank` dirigeras också till OpenAI-kompatibla leverantörsnoder
 > (oMLX, vLLM, Infinity, TEI bakom en gateway, …) som adresseras som `<node-prefix>/<model>`. Loopback-
-> noder (`localhost`, `127.0.0.1`, `172.16.0.0/12`) är alltid behöriga, liksom värdnamn som
-> operatören anger i `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (t.ex. ett Docker/Compose-tjänstenamn som
+> noder (`localhost`, `127.0.0.1`, `172.16.0.0/12`) är alltid tillåtna, liksom värdnamn som operatören
+> anger i `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (t.ex. ett Docker-/Compose-tjänstenamn som
 > `http://reranker:8080/v1`; dessa anropas direkt, aldrig via `HTTP(S)_PROXY` eller en
-> anslutnings låsta proxy). Noder på andra
-> värdar — en dator i det lokala nätverket eller en Tailscale-peer — är endast behöriga när operatören aktiverar
-> funktionsflaggan `RERANK_REMOTE_PROVIDER_NODES` **och** nodens bas-URL godkänns av leverantörens
-> policy för utgående URL:er (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Minnesmotorns omrankningssteg anropar denna rutt via
+> anslutnings låsta proxy). Noder på alla andra
+> värdar — en dator i det lokala nätverket eller en Tailscale-peer — är endast tillåtna när operatören aktiverar
+> funktionsflaggan `RERANK_REMOTE_PROVIDER_NODES` **och** nodens bas-URL godkänns av leverantörens policy för utgående URL:er
+> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
+> Minnesmotorns omrankningssteg anropar denna route via
 > loopback, så samma regel styr `rerankProviderModel` i minnesinställningarna.
 >
-> **Lokala serverformat:** noden anropas på `<base>/v1/rerank` och, vid 404, på `<base>/rerank`
-> (Infinity, TEI). Brödtexten som skickas uppströms innehåller både Cohere/OpenAI-stavningen (`documents`,
-> `return_documents`) och TEI-stavningen (`texts`, `return_text`), och svaret uppströms
-> normaliseras till Cohere-formatet: TEI:s nakna `[{index, score, text}]`, `{results: [{index, score}]}`
-> från tunna gateway-servrar och Voyage-formatet `{data: [...]}` returneras alla till klienten som
+> **Former för lokala servrar:** noden anropas på `<base>/v1/rerank` och, vid 404, på `<base>/rerank`
+> (Infinity, TEI). Uppströmsbegärans body innehåller både Cohere-/OpenAI-notationen (`documents`,
+> `return_documents`) och TEI-notationen (`texts`, `return_text`), och uppströmssvaret
+> normaliseras till Cohere-kuvertet: TEI:s nakna `[{index, score, text}]`, `{results: [{index, score}]}`
+> från tunna gateways och Voyage-liknande `{data: [...]}` returneras alla till klienten som
 > `{results: [{index, relevance_score, document?}]}`, sorterade efter poäng och begränsade till `top_n`.
 
-> **Identifiering av leverantörsnoder:** modeller på en OpenAI-kompatibel leverantörsnod visas i `GET /v1/models`
-> under nodprefixet. Rader som saknar slutpunktsmetadata (vilket är vanligt för lokala `/v1/models`-listningar)
-> ärver nodens `apiType`, så en `embeddings`-nods modeller får `type: "embedding"` och en
-> `rerank`-nods modeller får `type: "rerank"` i stället för att som standard använda chatt; ett explicit
-> `supportedEndpoints` på en synkroniserad eller manuellt tillagd rad har fortfarande företräde.
+> **Upptäckt av leverantörsnoder:** modeller på en OpenAI-kompatibel leverantörsnod visas i `GET /v1/models`
+> under nodprefixet. Rader som saknar endpointmetadata (vilket är typiskt för lokala `/v1/models`-listningar)
+> ärver nodens `apiType`, så modellerna för en `embeddings`-nod får `type: "embedding"` och
+> modellerna för en `rerank`-nod får `type: "rerank"` i stället för att standardmässigt klassificeras som chat;
+> ett explicit `supportedEndpoints` på en synkroniserad eller manuellt tillagd rad har fortfarande företräde.
 
-### Dedikerade leverantörsrutter
+### Dedikerade leverantörsroutes
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -809,112 +824,132 @@ Leverantörsprefixet läggs till automatiskt om det saknas. Modeller som inte ma
 
 ---
 
-## API för filer
+## Files API
 
-OpenAI-kompatibel filslutpunkt för batchindata/-utdata och uppladdningar med filändamål.
+OpenAI-kompatibelt Files-endpoint för batchindata/-utdata och uppladdningar med filändamål.
 
-| Metod  | Sökväg                   | Beskrivning                                                                                                        |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| POST   | `/v1/files`              | Ladda upp en fil (multipart: `file`, `purpose`, `expires_after[anchor]`, `expires_after[seconds]`) — högst 512 MiB |
-| GET    | `/v1/files`              | Lista filer för den autentiserade API-nyckeln                                                                      |
-| GET    | `/v1/files/[id]`         | Hämta en fils metadata                                                                                             |
-| DELETE | `/v1/files/[id]`         | Ta bort en fil                                                                                                     |
-| GET    | `/v1/files/[id]/content` | Strömma tillbaka filens rådata                                                                                     |
+| Method | Path                     | Description                                                                                                      |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| POST   | `/v1/files`              | Ladda upp en fil (multipart: `file`, `purpose`, `expires_after[anchor]`, `expires_after[seconds]`) — max 512 MiB |
+| GET    | `/v1/files`              | Lista filer för den autentiserade API-nyckeln                                                                    |
+| GET    | `/v1/files/[id]`         | Hämta en fils metadata                                                                                           |
+| DELETE | `/v1/files/[id]`         | Ta bort en fil                                                                                                   |
+| GET    | `/v1/files/[id]/content` | Strömma tillbaka den råa filkroppen                                                                              |
 
-**Autentisering:** Bearer-API-nyckel — filer avgränsas per API-nyckel via `getApiKeyRequestScope`. En nyckel
-kan endast se, ladda ned och ta bort sina egna filer; en instrumentpanelssession utan nyckel kan läsa hela
-instansen; åtkomst till en fil utan ägare (anonym uppladdning eller uppladdning via instrumentpanelssession) nekas för alla
-anropare utan session. `GET /v1/files` avvisar en anonym anropare — och en angiven nyckel som inte
-kan matchas — med `401` även när `REQUIRE_API_KEY=false`, i stället för att lista alla klienters
-filer (GHSA-m3hp-hq9g-fpmv, GHSA-2jm2-mpx8-6523).
+**Autentisering:** Bearer API-nyckel — filer är begränsade per API-nyckel via `getApiKeyRequestScope`. En nyckel kan endast se, ladda ned och ta bort sina egna filer; en dashboard-session utan nyckel läser hela instansen; en fil utan ägare (uppladdad anonymt eller via en dashboard-session) nekas alla anropare som inte är sessioner. `GET /v1/files` avvisar en anonym anropare — och en angiven nyckel som inte kan lösas — med `401` även när `REQUIRE_API_KEY=false`, i stället för att lista alla klienters filer (GHSA-m3hp-hq9g-fpmv, GHSA-2jm2-mpx8-6523).
 
 ---
 
-## API för batchar
+## Batches API
 
 OpenAI-kompatibel batchbearbetning.
 
-| Metod  | Sökväg                    | Beskrivning                                                                                                    |
+| Method | Path                      | Description                                                                                                    |
 | ------ | ------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| POST   | `/v1/batches`             | Skapa batch — innehållet valideras av `v1BatchCreateSchema` (`input_file_id`, `endpoint`, `completion_window`) |
+| POST   | `/v1/batches`             | Skapa batch — brödtexten valideras av `v1BatchCreateSchema` (`input_file_id`, `endpoint`, `completion_window`) |
 | GET    | `/v1/batches`             | Lista batchar                                                                                                  |
 | GET    | `/v1/batches/[id]`        | Hämta batchstatus + `request_counts`                                                                           |
 | DELETE | `/v1/batches/[id]`        | Ta bort en slutförd/misslyckad batch                                                                           |
 | POST   | `/v1/batches/[id]/cancel` | Avbryt en pågående batch                                                                                       |
 
-**Autentisering:** Bearer-API-nyckel. Batchar avgränsas per API-nyckel enligt samma tredelade regel som
-filer: endast den egna nyckeln, instrumentpanelssessionen för hela instansen, poster utan ägare nekas för alla
-anropare utan session (hämtning, borttagning, avbrytning och kontrollen av `input_file_id` vid skapande).
-`GET /v1/batches` avvisar en anonym anropare med `401` även när `REQUIRE_API_KEY=false`.
+**Autentisering:** Bearer API-nyckel. Batchar är begränsade per API-nyckel enligt samma trevägsregel som filer: endast den egna nyckeln, dashboard-sessionen gäller för hela instansen och poster utan ägare nekas alla anropare som inte är sessioner (hämtning, borttagning, avbrytning och kontrollen av `input_file_id` vid skapande). `GET /v1/batches` avvisar en anonym anropare med `401` även när `REQUIRE_API_KEY=false`.
 
 ---
 
-## Sök API
+## Söknings-API
 
-Web/search -leverantörsabstraktion (Tavily, Brave, Exa, Serper, etc.).
+Abstraktion för webbsökning/leverantörer (Tavily, Brave, Exa, Serper osv.).
 
-| Metod | Väg                    | Beskrivning                                                                     |
-| ----- | ---------------------- | ------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Lista konfigurerade sökleverantörers + funktioner                               |
-| POST  | `/v1/search`           | Kör en sökfråga — body validerad av `v1SearchSchema`, stöder caching/coalescing |
-| GET   | `/v1/search/analytics` | hit/latency/cache -statistik per leverantör                                     |
+| Metod | Sökväg                 | Beskrivning                                                                               |
+| ----- | ---------------------- | ----------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Lista konfigurerade sökleverantörer + funktioner                                          |
+| POST  | `/v1/search`           | Kör en sökfråga — begäran valideras av `v1SearchSchema`, stöd för cachning/sammanslagning |
+| GET   | `/v1/search/analytics` | Statistik över träffar/svarstid/cache per leverantör                                      |
 
-**Auth:** Bärare API nyckel (`extractApiKey` + `isValidApiKey`). Sökpolicy tillämpas via `enforceApiKeyPolicy`.
+**Autentisering:** Bearer-API-nyckel (`extractApiKey` + `isValidApiKey`). Sökningspolicy
+verkställs via `enforceApiKeyPolicy`.
 
-### Exa och Tavily `provider_options`
+### `provider_options` för Exa och Tavily
 
-Exa och Tavily läser leverantörsspecifika fält från en namnavståndspåse: `provider_options.exa` (eller `provider_options["exa-search"]`) och `provider_options.tavily` (eller `provider_options["tavily-search"]`). Endast nycklarna nedan vidarebefordras. Var och en kontrolleras mot sitt eget Zod schema i `open-sse/handlers/search/providerOptionsPassthrough.ts`, och en nyckel med fel typ släpps. Alla andra nyckelr ignoreras, inklusive auth, base URL, `stream` och `outputSchema`. De platta nycklarna som används av andra leverantörer (`cx`, `depth`, ...) fungerar som tidigare.
+Exa och Tavily läser leverantörsspecifika fält från en namngiven behållare:
+`provider_options.exa` (eller `provider_options["exa-search"]`) och `provider_options.tavily`
+(eller `provider_options["tavily-search"]`). Endast nycklarna nedan vidarebefordras. Var och en
+kontrolleras mot sitt eget Zod-schema i
+`open-sse/handlers/search/providerOptionsPassthrough.ts`, och en nyckel med fel typ tas bort. Alla
+andra nycklar ignoreras, inklusive autentisering, bas-URL, `stream` och `outputSchema`. De platta
+nycklar som används av andra leverantörer (`cx`, `depth`, ...) fungerar som tidigare.
 
-| Leverantör | Fält på högsta nivå                                                                                                                                                                                                                                                                                                                                                       | Kapslad                                                                                                                                     |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (platta primitiver), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` slogs samman över standard `{ text: true, highlights: true }` |
-| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                           |
+| Leverantör | Fält på toppnivå                                                                                                                                                                                                                                                                                                                                                          | Kapslade                                                                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (platta primitiva värden), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` sammanfogade med standardvärdet `{ text: true, highlights: true }` |
+| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                |
 
-De generiska fälten vinner alltid: `query`, `max_results`, `filters` (domäner), `country` och ämnet som härrör från `search_type`. På Exa behåller `search_type: "news"` `category: "news"`. Tavily accepterar också `search_type: "finance"` (`topic: "finance"`).
+De generiska fälten vinner alltid: `query`, `max_results`, `filters` (domäner), `country` och
+ämnet som härleds från `search_type`. För Exa behåller `search_type: "news"` `category: "news"`.
+Tavily accepterar även `search_type: "finance"` (`topic: "finance"`).
 
-Firecrawl-sökningskostnaden registreras per startat block av 10 returnerade resultat, 0,002 USD (2 poäng) per block och minst ett block per samtal ( [Firecrawl-fakturering](https://docs.firecrawl.dev/billing) ): 11 resultat kostar 0,004 USD.
+Kostnaden för Firecrawl-sökning registreras per påbörjat block om 10 returnerade resultat, till
+$0.002 (2 krediter) per block och minst ett block per anrop
+([Firecrawl-fakturering](https://docs.firecrawl.dev/billing)): 11 resultat kostar $0.004.
 
-Den generiska `time_range` når nu båda leverantörerna: Exa får `startPublishedDate` (ISO timestamp) och Tavily får `start_date` (`YYYY-MM-DD`). Ett explicit datum i `provider_options` åsidosätter det mappade.
+Det generiska `time_range` når nu båda leverantörerna: Exa får `startPublishedDate` (ISO-tidsstämpel)
+och Tavily får `start_date` (`YYYY-MM-DD`). Ett uttryckligt datum i `provider_options` åsidosätter
+det mappade datumet.
 
-Exa-resultat håller `id`, `highlight_scores`, `summary`, `subpages`, `entities` och `extras` i `provider_raw`. Tavily resultat behåller `images` och `favicon`.
+Exa-resultat behåller `id`, `highlights` (varje highlight, inte bara det första som används som
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` och `extras` i `provider_raw`.
+Tavily-resultat behåller `images` och `favicon`.
 
-Kostnaden för länksökning registreras till $0,005 för `depth` `fast` och `standard` och $0,05 för `deep` ( [Linkup-prissättning](https://docs.linkup.so/pages/documentation/development/pricing) ), oavsett om `depth` kommer från `provider_options` eller anslutningens inställningar.
+Kostnaden för Linkup-sökning registreras till $0.005 för `depth` `fast` och `standard` samt $0.05
+för `deep` ([Linkup-priser](https://docs.linkup.so/pages/documentation/development/pricing)),
+oavsett om `depth` kommer från `provider_options` eller anslutningens inställningar.
 
-Exa `type: "lite"` (Exa 3.0) accepterar en mindre uppsättning fält och avvisar hela begäran när något annat fält är inställt. För lite släpps `additionalQueries`, `systemPrompt` och varje `contents` knapp utom `text` och `highlights` före samtalet. De föråldrade `subpages`, `subpageTarget`, `highlights.numSentences` och `highlights.highlightsPerUrl` vidarebefordras inte längre.
+Exa `type: "lite"` (Exa 3.0) accepterar en mindre uppsättning fält och avvisar hela begäran när
+något annat fält har angetts. För lite tas `additionalQueries`, `systemPrompt` och alla
+`contents`-nycklar utom `text` och `highlights` bort före anropet. De föråldrade
+`subpages`, `subpageTarget`, `highlights.numSentences` och `highlights.highlightsPerUrl` skickas
+inte längre vidare.
 
-Kostnadsredovisning är det platta registret `costPerQuery`, förutom Exa, som följer Exas egen prissättning: 0,007 $ per samtal för `auto` (och den äldre `fast`) eller 0,004 $ för `lite` (och den äldre `instant`), som täcker 10 resultat; $0,001 för varje ytterligare resultat; och $0,001 per returnerat resultat när `contents.summary` är inställt. Tavily registreras till 1 poäng ($0,008) för `search_depth` `basic`, `fast` och `ultra-fast`, och 2 poäng ($0,016) för `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Ett samtal med `auto_parameters: true` som Tavily uppgraderar till avancerad spelas fortfarande in med 1 poäng.
+Kostnadsredovisningen använder det platta registret `costPerQuery`, förutom för Exa, som följer
+Exas egna priser: $0.007 per anrop för `auto` (och det äldre `fast`) eller $0.004 för `lite` (och
+det äldre `instant`), vilket täcker 10 resultat; $0.001 för varje ytterligare resultat; samt
+$0.001 per returnerat resultat när `contents.summary` är inställt. Tavily registreras till 1 kredit
+($0.008) för `search_depth` `basic`, `fast` och `ultra-fast`, samt 2 krediter ($0.016) för
+`advanced` ([Tavily API-krediter](https://docs.tavily.com/documentation/api-credits)). Ett anrop
+med `auto_parameters: true` som Tavily uppgraderar till advanced registreras fortfarande till
+1 kredit.
 
 ---
 
-## API för webbhämtning
+## Web Fetch API
 
-Extrahera innehåll från en URL via en konfigurerad leverantör för webbhämtning (Firecrawl, Jina
+Extrahera innehåll från en URL via en konfigurerad webbhämtningsleverantör (Firecrawl, Jina
 Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
 
-Parallel Extract (`parallel-search`, samma API-nyckel som Parallel Search) returnerar endast Markdown
-— alla andra `format` ger ett `400` — och begränsar innehållet till 100 000 tecken. När
-målsidan i sig inte kan extraheras rapporterar uppströmstjänsten detta i ett HTTP 200-svar;
+Parallel Extract (`parallel-search`, samma API-nyckel som Parallel Search) returnerar endast Markdown — alla andra
+`format`-värden ger ett `400` — och begränsar innehållet till 100 000 tecken. När målsidan
+själv inte kan extraheras rapporterar upstream detta i ett HTTP 200;
 OmniRoute exponerar det som ett `422` med ett fast meddelande.
 
-| Metod | Sökväg          | Beskrivning                                                |
-| ----- | --------------- | ---------------------------------------------------------- |
-| POST  | `/v1/web/fetch` | Hämta/skrapa en URL — body valideras av `v1WebFetchSchema` |
+| Method | Path            | Description                                                |
+| ------ | --------------- | ---------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Hämta/skrapa en URL — body valideras av `v1WebFetchSchema` |
 
-**Autentisering:** Bearer-API-nyckel (`extractApiKey` + `isValidApiKey`). Policyn tillämpas via `enforceApiKeyPolicy`.
+**Autentisering:** Bearer API-nyckel (`extractApiKey` + `isValidApiKey`). Policyn tillämpas via
+`enforceApiKeyPolicy`.
 
-**Kvotmedveten reservhantering (#8297):** när ingen uttrycklig `provider` anges gås poolen
+**Kvotmedveten fallback (#8297):** när ingen explicit `provider` anges gås poolen
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
 `parallel-search`) igenom i fast
-prioritetsordning (fyll först) — en hastighetsbegränsad men konfigurerad leverantör hoppas över
-i stället för att avbryta begäran, och ett återförsöksbart kvotrelaterat fel från uppströmstjänsten
-(HTTP 429 alltid; 402/403 för kvotbaserade kostnadsfria nivåer hos Firecrawl/Tavily/TinyFish —
-inte för Jina Reader, och aldrig för en vanlig felaktig 400-begäran) går vidare till nästa
-ännu oprövade leverantör med autentiseringsuppgifter vid tidpunkten för begäran. När alla leverantörer i
-poolen är uttömda returnerar slutpunkten ett enda `429` (med en `Retry-After`-
-header) i stället för det tidigare generiska `400`. När en uttrycklig `provider`
-begärs sker **ingen** tyst reservhantering — en hastighetsbegränsad eller felande uttrycklig
-leverantör exponerar sitt eget fel (`429` om den är hastighetsbegränsad, annars statusen från
-uppströmstjänsten).
+prioritetsordning (fill-first) — en hastighetsbegränsad men konfigurerad leverantör hoppas över
+i stället för att avbryta begäran, och ett återförsökningsbart upstream-fel/kvotfel
+(HTTP 429 alltid; 402/403 för Firecrawl/Tavily/TinyFish-kvoter i kostnadsfria nivåer —
+inte för Jina Reader och aldrig för en vanlig felaktig 400-begäran) går vidare till
+nästa oprövade leverantör med autentiserade uppgifter vid tiden för begäran. När alla leverantörer i
+poolen är uttömda returnerar slutpunkten ett enda `429` (med en `Retry-After`-header)
+i stället för det tidigare generiska `400`. När en explicit `provider` begärs finns
+ingen tyst fallback — en hastighetsbegränsad eller felande explicit leverantör visar sitt eget fel (`429`
+vid hastighetsbegränsning, annars upstream-statusen).
 
 ---
 
@@ -924,63 +959,63 @@ uppströmstjänsten).
 GET /v1/ws?handshake=1
 ```
 
-Validerar en WebSocket-uppgraderingshandskakning och returnerar exempelmeddelandena för protokollet på trådnivå (`request`, `cancel`). Faktiska WS-ramar hanteras av den medföljande WS-servern utanför Next.js-routningstabellen.
+Validerar ett WebSocket-uppgraderingshandslag och returnerar exempelmeddelanden för trådprotokollet (`request`, `cancel`). Faktiska WS-ramar hanteras av den medföljande WS-servern utanför Next.js-routetabellen.
 
-**Autentisering:** Bearer-API-nyckel under handskakningen.
+**Autentisering:** Bearer API-nyckel under handskakningen.
 
-### Responses API över WebSocket (endast codex)
+### Responses API via WebSocket (endast codex)
 
 ```bash
-# Samma värd:port som HTTP-API:t (standard 20128); uppgradera anslutningen:
+# Samma host:port som HTTP-API:t (standard 20128); uppgradera anslutningen:
 wscat -c "ws://localhost:20128/v1/responses?api_key=<OMNIROUTE_API_KEY>"
 # (eller: -H "Authorization: Bearer <OMNIROUTE_API_KEY>")
 
-# Den första ramen MÅSTE vara response.create:
+# Första ramen MÅSTE vara response.create:
 { "type": "response.create", "model": "gpt-5.5", "input": [ { "role": "user", "content": "hi" } ] }
 ```
 
-En proxy för Responses API över WebSocket är kopplad **uteslutande till `codex`** (ChatGPT-
-backend). Den lyssnar på samma port som API:t/instrumentpanelen på sökvägarna `/v1/responses`,
-`/responses` och `/api/v1/responses`. Vid den första `response.create`-ramen
-autentiserar och förbereder den via den interna bryggan `codex-responses-ws`, väljer en
+En proxy för Responses-API via WebSocket är kopplad **uteslutande till `codex`** (ChatGPT
+backend). Den lyssnar på samma port som API:t/dashboarden på sökvägarna `/v1/responses`,
+`/responses` och `/api/v1/responses`. På den första `response.create`-ramen autentiserar
+och förbereder den via den interna `codex-responses-ws`-bryggan, väljer en
 codex OAuth-anslutning och tunnlar till `wss://chatgpt.com/backend-api/codex/responses`
-via transporten `wreq-js`. **Modeller som inte är codex avvisas** (`codex_ws_provider_required`).
-För kvotdelningsroutning använder du `model: "qtSd/<group>/codex/<model>"`. Implementerat i
+via transporten `wreq-js`. **Andra codex-modeller än `codex` avvisas** (`codex_ws_provider_required`).
+För kvotdelningsroutning använder du `model: "qtSd/<group>/codex/<model>"`. Implementerad i
 `app/server-ws.mjs` + `scripts/dev/responses-ws-proxy.mjs` + `src/app/api/internal/codex-responses-ws/route.ts`.
 
-**Autentisering:** Bearer-API-nyckel under handskakningen. Den medföljande HTTP-servern (`server-ws.mjs`)
+**Autentisering:** Bearer API-nyckel under handskakningen. Den medföljande HTTP-servern (`server-ws.mjs`)
 måste vara den aktiva startpunkten (vilket den är som standard när `app/server-ws.mjs` finns).
 
-#### Modell-id: använd det rena ChatGPT-id:t (utan prefixet `codex/`)
+#### Modell-id: använd det nakna ChatGPT-id:t (utan prefixet `codex/`)
 
-OpenAI:s **Codex CLI** validerar modellnamnet på klientsidan när
+OpenAI **Codex CLI** validerar modellnamnet på klientsidan när
 `supports_websockets = true` och **avvisar leverantörsprefixade id:n** som
 `codex/gpt-5.5` (`The 'codex/gpt-5.5' model is not supported when using Codex with
-a ChatGPT account`). Skicka det **rena** id:t (t.ex. `gpt-5.5`). OmniRoutes brygga är
-endast avsedd för codex, så den slår upp ett rent id på nytt som en codex-modell
-(`resolveCodexWsModelInfo`) innan den tunnlar vidare uppströms — även om ett rent
-`gpt-5.5` annars skulle routas till en annan leverantör över HTTP.
+a ChatGPT account`). Skicka det **nakna** id:t (t.ex. `gpt-5.5`). OmniRoutes brygga är
+endast för codex, så den löser om ett naket id som en codex-modell
+(`resolveCodexWsModelInfo`) innan den tunnlar upstream — även om ett naket
+`gpt-5.5` annars skulle routas till en annan leverantör via HTTP.
 
 #### Konfigurera OpenAI Codex CLI
 
-Rikta Codex CLI mot OmniRoute genom att lägga till en anpassad leverantör med WebSocket-
-stöd i `~/.codex/config.toml` (använd en separat `CODEX_HOME` för att undvika att ändra
-en befintlig konfiguration):
+Peka Codex CLI mot OmniRoute genom att lägga till en anpassad leverantör med WebSocket
+-stöd i `~/.codex/config.toml` (använd en separat `CODEX_HOME` för att undvika att påverka en
+befintlig konfiguration):
 
 ```toml
-model = "gpt-5.5"                 # rent id — INTE "codex/gpt-5.5"
+model = "gpt-5.5"                 # naket id — INTE "codex/gpt-5.5"
 model_provider = "omniroute"
 
 [model_providers.omniroute]
 name = "OmniRoute (WS)"
 base_url = "http://localhost:20128/v1"   # inget avslutande snedstreck; WS-URL:en härleds (använd https/wss i produktion)
-wire_api = "responses"                    # det enda värdet som stöds sedan februari 2026
-supports_websockets = true                # aktiverar transporten för Responses över WS
-env_key = "OMNIROUTE_API_KEY"             # innehåller OmniRoute-API-nyckeln (Bearer)
+wire_api = "responses"                    # enda värdet som stöds sedan februari 2026
+supports_websockets = true                # aktiverar transporten Responses via WS
+env_key = "OMNIROUTE_API_KEY"             # innehåller OmniRoute API-nyckeln (Bearer)
 ```
 
 ```bash
-export OMNIROUTE_API_KEY=sk-...           # en OmniRoute-API-nyckel (valfri nyckel om REQUIRE_API_KEY=false)
+export OMNIROUTE_API_KEY=sk-...           # en OmniRoute API-nyckel (valfri nyckel om REQUIRE_API_KEY=false)
 codex exec "Responda apenas: PONG"
 ```
 
@@ -991,34 +1026,55 @@ slutförandet.
 
 ---
 
-## Kvoter och problemrapportering
+## Rapportering av kvoter och problem
 
-| Metod | Sökväg              | Beskrivning                                                                                     |
-| ----- | ------------------- | ----------------------------------------------------------------------------------------------- |
-| GET   | `/v1/quotas/check`  | Förhandsvalidera kvoten för en `provider` + `accountId` innan en registrerad nyckel utfärdas    |
-| POST  | `/v1/issues/report` | Rapportera ett fel vid kvot-/nyckelutfärdande till GitHub (kräver `GITHUB_ISSUES_REPO` + token) |
+| Metod | Sökväg              | Beskrivning                                                                                              |
+| ----- | ------------------- | -------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/quotas/check`  | Förvalidera kvoten för en `provider` + `accountId` innan en registrerad nyckel utfärdas                  |
+| POST  | `/v1/issues/report` | Rapportera ett misslyckande vid kvot-/nyckelutfärdande till GitHub (kräver `GITHUB_ISSUES_REPO` + token) |
 
-**Autentisering:** Bearer-API-nyckel (`isAuthenticated`).
+**Autentisering:** Bearer API-nyckel (`isAuthenticated`).
+
+### Återställning av kvotsession (valfritt)
+
+En icke-strömmande `POST /v1/chat/completions` eller `POST /v1/responses` som misslyckas med
+ett terminalt kvotfel (`402`/`429`/`503` vars body anger att kvoten eller krediterna är slut)
+kan parkeras och spelas upp senare i stället för att returnera felet. Anroparen väljer detta per
+begäran med tre headers:
+
+| Header                       | Värde                                            |
+| ---------------------------- | ------------------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                                           |
+| `x-omniroute-session`        | sessions-ID, `[A-Za-z0-9._:-]{1,128}`            |
+| `x-omniroute-recovery-turn`  | tur-ID som är unikt inom sessionen (samma regel) |
+
+Endast turer med `stream: false` utan verktyg, verktygshistorik eller `previous_response_id`, och utan
+`x-omniroute-connection`-bindning, är berättigade, och `STORAGE_ENCRYPTION_KEY` måste vara angiven
+(begäran lagras krypterad i upp till 24 timmar). Svaret blir då `202` med
+`recovery.poll`; polla `GET /v1/quota-recoveries/{id}` (`202` medan den väntar, `200` med den
+återställda bodyn när den är klar) eller avbryt med `DELETE`. Ärenden är endast synliga för den API-
+nyckel som skapade dem. En uppspelning vars resultat är osäkert avslutas i `needs_confirmation`
+i stället för att skickas två gånger. Källa: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
 ## Självbetjäningsanvändning (`/api/usage/om-usage`)
 
-Alla API-nycklar kan läsa **sin egen** användning och sina kvoter — ingen administrationsautentisering krävs. Det här är ändpunkten som en
-klient (CLI, OmniCopilot-panelen) använder för att visa en nyckelinnehavare dennes kostnader.
+Alla API-nycklar kan läsa **sin egen** användning och sina kvoter — ingen administrativ autentisering krävs. Detta är slutpunkten som en
+klient (CLI, OmniCopilot-panelen) använder för att visa en nyckelinnehavare dennes förbrukning.
 
 ```bash
 # Textformat (det historiska kontraktet — oformaterad text för en terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturerat format — det som ett användargränssnitt använder
+# Strukturerat format — det som ett gränssnitt använder
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Nyckeln måste ha **`allowUsageCommand`** aktiverat (inaktiverat som standard — instrumentpanelens API-nyckelhanterare
-växlar detta per nyckel). Utan det svarar ändpunkten med `403`.
+Nyckeln måste ha **`allowUsageCommand`** aktiverat (inaktiverat som standard — instrumentpanelen för API-nycklar
+växlar detta per nyckel). Utan detta svarar slutpunkten med `403`.
 
 `?format=json` returnerar en diskriminerad struktur så att en anropare aldrig läser ett datafält från ett
 avslag. Vid lyckat resultat:
@@ -1026,7 +1082,7 @@ avslag. Vid lyckat resultat:
 ```jsonc
 {
   "allowed": true,
-  // finns endast när nyckeln har valt användningsgränser per nyckel (dagligen/veckovis i USD):
+  // finns endast när nyckeln har valt gränser för användning per nyckel (daglig/veckovis USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1035,9 +1091,9 @@ avslag. Vid lyckat resultat:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // ögonblicksbilden av den valda leverantörskvoten, eller null när inget ännu har cachelagrats:
+  // ögonblicksbild av den valda leverantörens kvot, eller null när inget ännu har cachelagrats:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // ögonblicksbilder för alla anslutningar, så att ett användargränssnitt kan återge flera leverantörer sida vid sida:
+  // ögonblicksbild för varje anslutning, så att ett gränssnitt kan återge flera leverantörer sida vid sida:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1045,64 +1101,64 @@ avslag. Vid lyckat resultat:
 }
 ```
 
-Vid avslag (`401` felaktig nyckel / `403` inte tillåtet) returnerar samma rutt
-`{ "allowed": false, "error": { "message": "…" } }` — ett befintligt men tomt `personal`/`provider`
-(nyckeln är tillåten, men inget har ännu hämtats) är ett annat tillstånd än ett avslag, och endast JSON-formatet
+Vid avslag (`401` ogiltig nyckel / `403` inte tillåten) returnerar samma route
+`{ "allowed": false, "error": { "message": "…" } }` — ett närvarande men tomt `personal`/`provider`
+(nyckel tillåten, inget ännu känt) är ett annat tillstånd än ett avslag, och endast JSON-formatet
 skiljer dem åt.
 
-**Autentisering:** anroparens egen Bearer-API-nyckel, validerad med `isValidApiKey` — detta är _inte_
-administrationsgränssnittet (`/api/keys/…`), som förblir skyddat av `requireManagementAuth`.
+**Autentisering:** anroparens egen Bearer API-nyckel, validerad med `isValidApiKey` — detta är _inte_
+den administrativa ytan (`/api/keys/…`), som fortfarande skyddas av `requireManagementAuth`.
 
 ### Råa kontra cutoff-justerade kvotprocenttal
 
-När `/api/usage/om-usage` används bör anropare observera skillnaden mellan de
-procenttal som visas i **oformaterad text** och den strukturerade **JSON-utdata**:
+När `/api/usage/om-usage` används bör anropare notera skillnaden mellan
+procenttalen som presenteras av **ofärgade textutdata** och strukturerade **JSON-utdata**:
 
-| Aspekt               | Oformaterat textformat (`/api/usage/om-usage` / `@@om-usage`)                             | JSON-format (`?format=json`)                                               |
-| :------------------- | :---------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- |
-| **Utdatafält**       | `NN% left` (t.ex. `20% left`)                                                             | `provider.quotas` / `providers[].quotas`                                   |
-| **Mätning**          | **Cutoff-justerat användbart utrymme**: återstående kapacitet över cutoff-tröskeln        | **Rå uppströmskvot**: ojusterad mätning från leverantören                  |
-| **Cutoff-skalning**  | Skalas via `effectiveRemainingPercent()` så att den skyddade reserven visas som `0% left` | Ingen (råa ögonblicksbildsvärden enligt leverantörens rapportering)        |
-| **Tröskeldata**      | Inkluderas i det visade procenttalet                                                      | Lagras i `quotaWindowThresholds` per anslutning (eller serverstandarder)   |
-| **Primär användare** | Interaktiva CLI:er, terminalpromptar, mänskliga operatörer                                | Programmatiska integrationer, instrumentpaneler, analyser, kostnadsspårare |
+| Aspekt               | Textformat (`/api/usage/om-usage` / `@@om-usage`)                                         | JSON-format (`?format=json`)                                                  |
+| :------------------- | :---------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
+| **Utdatafält**       | `NN% left` (t.ex. `20% left`)                                                             | `provider.quotas` / `providers[].quotas`                                      |
+| **Mätning**          | **Cutoff-justerad användbar tilldelning**: återstående kapacitet över cutoff-tröskeln     | **Rå uppströmskvot**: ojusterat leverantörsmått                               |
+| **Cutoff-skalning**  | Skalad via `effectiveRemainingPercent()` så att den skyddade reserven visas som `0% left` | Ingen (råa ögonblicksbildsvärden som rapporterats av leverantören)            |
+| **Tröskeldata**      | Inkluderas i det visade procenttalet                                                      | Lagrade i `quotaWindowThresholds` per anslutning (eller serverstandarder)     |
+| **Primär användare** | Interaktiva CLI:er, terminalfrågor, mänskliga operatörer                                  | Programmässiga integrationer, instrumentpaneler, analys, faktureringsspårning |
 
 #### Formeln för cutoff-justering
 
-OmniRoute stöder proaktiva kvotgränser för att förhindra att uppströmsresurserna tar slut (konfigureras via anslutningens
-`quotaWindowThresholds`, leverantörsstandarder eller globala inställningar för motståndskraft). När en cutoff-tröskel
-(t.ex. `cutoff = 25%`) är aktiv för ett kvotfönster beräknar textrenderaren det återstående utrymmet så här:
+OmniRoute stöder proaktiva quota-cutoffs för att förhindra att uppströmskvoten tar slut (konfigureras via anslutningens
+`quotaWindowThresholds`, leverantörsstandarder eller globala resiliensinställningar). När en cutoff-tröskel
+(t.ex. `cutoff = 25%`) är aktiv i ett kvotfönster beräknar textrenderaren återstående tilldelning enligt följande:
 
-- Om `remaining <= cutoff`: returneras `0%`.
-- Om `remaining > cutoff`: returneras `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Om `remaining <= cutoff`: returnerar `0%`.
+- Om `remaining > cutoff`: returnerar `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Den formaterade textutdatan avrundar detta till närmaste heltal (`Math.round(...)`).
+Det formaterade textresultatet avrundas till närmaste heltal (`Math.round(...)`).
 
 #### Illustrativt exempel
 
-Anta ett leverantörsfönster med **60 % rå användning** (och därmed **40 % rå återstående kvot**) och en konfigurerad
-**cutoff-tröskel på 25 % återstående kvot**:
+Betrakta ett leverantörsfönster med **60 % rå användning** (och därmed **40 % rå återstående kvot**) samt ett konfigurerat tröskelvärde på **25 % för återstående kvot**:
 
-| Representation               | Beräkning                                          | Återstående |         Underförstådd användning         |
+| Representation               | Beräkning                                          | Återstående |            Härledd användning            |
 | :--------------------------- | :------------------------------------------------- | :---------: | :--------------------------------------: |
 | **Rå JSON (`?format=json`)** | Uppströmsögonblicksbild (`quotas[window]`)         |  **40 %**   |                 **60 %**                 |
 | **Textformat (`NN% left`)**  | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20 %**   | **80 %** (om `100 - remaining` beräknas) |
 
-- **Varför texten visar 20 % kvar:** Av de 40 % av den fysiska kvoten som finns kvar på kontot reserveras 25 % av
-  cutoff-policyn. Anroparen har endast 15 % av 75 % användbart utrymme kvar innan routern slutar
-  dirigera till den här anslutningen. Skalningen säkerställer att anslutningen signalerar uttömning (`0% left`) exakt när
-  dirigeringen upphör.
-- **Varför JSON bevarar råa värden:** JSON-nyttolasten returnerar leverantörens exakta ögonblicksbild (`UsageSnapshot`)
-  så att externa verktyg får åtkomst till faktisk uppströmsanvändning och anslutningsspecifika
-  `quotaWindowThresholds` utan informationsförlorande skalning på serversidan.
+- **Varför text visar 20 % återstående:** Av de 40 % fysisk kvot som återstår på kontot är 25 % reserverat av
+  avkortningspolicyn. Anroparen har endast 15 % av 75 % användbart utrymme kvar innan routern slutar
+  dirigera trafik till denna anslutning. Skalningen säkerställer att anslutningen signalerar att kvoten är slut
+  (`0% left`) exakt när dirigeringen upphör.
+- **Varför JSON bevarar råvärden:** JSON-nyttolasten returnerar den exakta leverantörsögonblicksbilden (`UsageSnapshot`)
+  så att externa verktyg får tillgång till faktisk användning uppströms och anslutningsnivåns
+  `quotaWindowThresholds` utan förlustbringande skalning på serversidan.
 
 #### Vägledning för migrering av konsumenter
 
-Om en extern integration (till exempel ett redigeringsplugin eller agenttillägg) tidigare skrapade text-
-slutpunkten (`NN% left`) och beräknade använd procentandel som `100 - NN`, innebär en migrering till `?format=json` följande:
+Om en extern integration (till exempel ett redigerartillägg eller en agentutökning) tidigare läste textslutpunkten
+(`NN% left`) och beräknade använd procentandel som `100 - NN`, innebär migrering till `?format=json` att:
 
-- Avläsning av råa JSON-värden återspeglar **faktisk förbrukning uppströms** (60 % använt i exemplet ovan).
-- Om integrationen vill bevara textslutpunktens semantik för användbar kvot kan den utvärdera
-  den effektiva formeln för återstående kvot på klientsidan med hjälp av `quotaWindowThresholds` för åsidosättningar på anslutningsnivå.
+- Läsning av råa JSON-värden återspeglar **faktisk användning uppströms** (60 % användning i exemplet ovan).
+- Om integrationen vill bevara textslutpunktens semantik för användbart utrymme kan den beräkna
+  formeln för effektivt återstående utrymme på klientsidan med hjälp av `quotaWindowThresholds` för
+  åsidosättningar på anslutningsnivå.
 
 ---
 
@@ -1112,7 +1168,7 @@ slutpunkten (`NN% left`) och beräknade använd procentandel som `100 - NN`, inn
 # Hämta cachestatistik
 GET /api/cache/stats
 
-# Rensa alla cachar
+# Rensa alla cacheminnen
 DELETE /api/cache/stats
 ```
 
@@ -1135,35 +1191,35 @@ Exempel på svar:
 
 ### Påverkan på latens
 
-En TRÄFF i den semantiska cachen levererar svaret från cachen **utan ett
-anrop till uppströmsleverantören**, så den rapporterade `X-OmniRoute-Response-Latency` är nära noll
-(oavsett den ursprungliga uppströmslatensen). Latenskänsliga klienter
-(prestandamätning, övervakning av p50/p99) bör kontrollera svarshuvudet
-`X-OmniRoute-Cache-Latency`:
+En träff i den semantiska cachen serverar svaret från cachen **utan ett
+anrop uppströms**, så den rapporterade `X-OmniRoute-Response-Latency` är nära noll
+(oavsett den ursprungliga latensen uppströms). Latenskänsliga klienter
+(benchmarking, p50/p99-övervakning) bör kontrollera
+svarshuvudet `X-OmniRoute-Cache-Latency`:
 
-| Värde       | Betydelse                                                             |
-| ----------- | --------------------------------------------------------------------- |
-| `synthetic` | Svaret levererades från cachen; latensen är inte verklig uppströmstid |
-| _(saknas)_  | Svar från ett verkligt uppströmsanrop                                 |
+| Värde       | Betydelse                                                           |
+| ----------- | ------------------------------------------------------------------- |
+| `synthetic` | Svaret serveras från cachen; latensen är inte verklig tid uppströms |
+| _(absent)_  | Svar från ett verkligt anrop uppströms                              |
 
-### Cacheförbigång per nyckel
+### Cacheförbikoppling per nyckel
 
 API-nycklar kan välja bort läsningar från den semantiska cachen via `cacheDefaultMode`:
 
-| Värde    | Beteende                                                  |
-| -------- | --------------------------------------------------------- |
-| `legacy` | Normalt cachebeteende (standard)                          |
-| `bypass` | Hoppa över cacheuppslagning helt; anropa alltid uppströms |
+| Värde    | Beteende                                                |
+| -------- | ------------------------------------------------------- |
+| `legacy` | Normalt cachebeteende (standard)                        |
+| `bypass` | Hoppa över cachesökningen helt; träffa alltid uppströms |
 
-Ange vid skapande av nyckeln (`POST /api/keys`) eller vid uppdatering (`PATCH /api/keys/[id]`):
+Ange detta när nyckeln skapas (`POST /api/keys`) eller uppdateras (`PATCH /api/keys/[id]`):
 
 ```json
 { "cacheDefaultMode": "bypass" }
 ```
 
-### Förbigång per begäran
+### Förbikoppling per begäran
 
-Alla begäranden kan förbigå cachen oavsett nyckelinställningarna:
+Alla begäranden kan kringgå cachen oavsett nyckelinställningar:
 
 ```
 X-OmniRoute-No-Cache: true
@@ -1171,52 +1227,93 @@ X-OmniRoute-No-Cache: true
 
 ---
 
-## Kontrollpanel och hantering
+## Kompatibilitet med CLIProxyAPI-hantering
 
-Hanteringsvägar (`/api/*` förutom offentlig autentisering/inloggning) auktoriseras **inte** av
-vanliga API-nycklar för inferens. Autentiseringsfamiljer, behörighetsomfång och curl-exempel:
-[Hanteringsautentisering](../guides/MANAGEMENT-AUTH.md).
+OmniRoute besvarar de tre hanteringsendpoints för [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
+som användningspaneler anropar för att läsa Claude- och Codex-prenumerationernas gränser
+(till exempel T3 Codes användningsgränskälla `cliproxy`). Ange klientens bas-URL till
+OmniRoute och använd en API-nyckel med omfånget `manage` som hanteringsnyckel. Rutterna
+serveras på `/v0/management/*` och `/api/v0/management/*`.
+
+| Metod | Sökväg                       | Beskrivning                                                                                                                              |
+| ----- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/v0/management/auth-files`  | Claude- och Codex OAuth-anslutningar som `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Inga token              |
+| POST  | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Skickar en tillåten begäran med kontots token och returnerar `{ status_code, body }` |
+| POST  | `/v0/management/reset-quota` | Body `{ auth_index }`. Rensar anslutningens cooldown, modellblockeringar och Codex-cooldowns per omfång för ett konto                    |
+
+- `auth_index` är OmniRoutes anslutnings-ID. `provider` är `claude` eller `codex` (endast OAuth-
+  anslutningar; API-nyckelleverantören `anthropic` listas inte). För Codex är
+  `id_token.chatgpt_account_id` det lagrade arbetsområdes-ID:t och `plan_type` den lagrade planen.
+- `api-call` är inte en generell proxy. Den accepterar endast Claude `GET
+https://api.anthropic.com/api/oauth/usage` och Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` samt
+  `POST .../wham/rate-limit-reset-credits/consume`, och då endast för ett konto från motsvarande
+  leverantör. Allt annat returnerar `403` utan att kontakta upstream. Anroparens
+  `Authorization`-header (inklusive platshållaren `$TOKEN$`) ignoreras: OmniRoute injicerar
+  anslutningens åtkomsttoken, uppdaterar den först när den snart löper ut och vidarebefordrar endast
+  tillåtna headers (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
+  `Accept`, `Content-Type`). Om `Chatgpt-Account-Id` saknas används det lagrade arbetsområdes-ID:t
+  som standard. Begäranden löper ut efter 15 sekunder och använder anslutningens proxy.
+- `reset-quota` lämnar slutgiltiga tillstånd (`banned`, `expired`, `credits_exhausted`) orörda. Ett okänt
+  `auth_index` returnerar `404`.
+
+**Autentisering:** panelsession eller en API-nyckel med omfånget `manage`, krävs även när inloggning är inaktiverad
+(sökvägarna finns i `ALWAYS_PROTECTED_API_PATHS`). Nycklar som endast används för inferens får `403`. Källa:
+`src/lib/cliproxyCompat/managementApi.ts`.
+
+---
+
+## Instrumentpanel och administration
+
+Administrationsrutter (`/api/*` förutom offentlig autentisering/inloggning) auktoriseras **inte** av vanliga API-nycklar för inferens. Autentiseringsuppgifter, omfattningar och curl-exempel:
+[Autentisering för administration](../guides/MANAGEMENT-AUTH.md).
 
 ### Autentisering
 
-| Slutpunkt                     | Metod    | Beskrivning                                                                                                                                                                                                                                                                                                     |
-| ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | Inloggning                                                                                                                                                                                                                                                                                                      |
-| `/api/auth/logout`            | POST     | Utloggning                                                                                                                                                                                                                                                                                                      |
-| `/api/settings/require-login` | GET/POST | Inloggningsstatus (GET, offentlig). POST anger lösenordet/växlar inloggning: endast för operatörer när ett lösenord finns (kontrollpanelsession, lokal CLI eller inloggning inaktiverad – API-nycklar och `oma_`-token får `403`); en kontrollpanelsession skickar `currentPassword` för att ersätta lösenordet |
+| Endpoint                      | Method   | Description                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | Logga in                                                                                                                                                                                                                                                                                                                                |
+| `/api/auth/logout`            | POST     | Logga ut                                                                                                                                                                                                                                                                                                                                |
+| `/api/settings/require-login` | GET/POST | Inloggningsstatus (GET, offentlig). POST anger lösenordet / aktiverar eller inaktiverar inloggning: endast operatör när ett lösenord finns (instrumentpanelssession, lokal CLI eller inloggning inaktiverad — API-nycklar och `oma_`-tokens får `403`); en instrumentpanelssession skickar `currentPassword` för att ersätta lösenordet |
 
-### Leverantörshantering
+### Providerhantering
 
-| Slutpunkt                               | Metod                     | Beskrivning                                                                                                                                                     |
-| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Lista/skapa leverantörer                                                                                                                                        |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Hantera en leverantör                                                                                                                                           |
-| `/api/providers/[id]/test`              | POST                      | Testa leverantörsanslutningen                                                                                                                                   |
-| `/api/providers/[id]/models`            | GET                       | Lista leverantörens modeller                                                                                                                                    |
-| `/api/providers/validate`               | POST                      | Validera leverantörskonfiguration                                                                                                                               |
-| `/api/providers/bulk`                   | POST                      | Masslägg till API-nycklar för EN leverantör                                                                                                                     |
-| `/api/providers/import`                 | POST                      | Importera en heterogen LISTA över leverantörer från en tolkad CSV-/JSON-fil (#6836); resultat med partiella fel per rad                                         |
-| `/api/provider-nodes*`                  | Diverse                   | Hantering av leverantörsnoder                                                                                                                                   |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Anpassade modeller och åsidosättningar per modell (lägg till, uppdatera, dölj/visa, ta bort)                                                                    |
-| `/api/provider-models/validate-and-add` | POST                      | Hanteringsautentiserad, valfri strikt anslutningsvalidering och atomär registrering av anpassade modeller; se [Modellvalidering](../guides/MODEL-VALIDATION.md) |
+| Endpoint                                | Method                    | Description                                                                                                                                                                                   |
+| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | Lista / skapa providers                                                                                                                                                                       |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Hantera en provider                                                                                                                                                                           |
+| `/api/providers/[id]/test`              | POST                      | Testa provideranslutning                                                                                                                                                                      |
+| `/api/providers/[id]/models`            | GET                       | Lista providermodeller                                                                                                                                                                        |
+| `/api/providers/validate`               | POST                      | Validera providerkonfiguration                                                                                                                                                                |
+| `/api/providers/bulk`                   | POST                      | Lägg till API-nycklar i bulk för EN provider                                                                                                                                                  |
+| `/api/providers/import`                 | POST                      | Importera en heterogen providerLISTA från en tolkad CSV/JSON-fil (#6836); resultat med partiella fel per rad                                                                                  |
+| `/api/provider-nodes*`                  | Various                   | Hantera providernoder                                                                                                                                                                         |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Anpassade modeller och åsidosättningar per modell (lägga till, uppdatera, dölja/visa, ta bort)                                                                                                |
+| `/api/provider-models/validate-and-add` | POST                      | Strikt anslutningsvalidering och atomär registrering av anpassade modeller, autentiserad för administration och med explicit aktivering; se [Modellvalidering](../guides/MODEL-VALIDATION.md) |
 
 För synkroniserade/importerade modeller accepterar `PUT /api/provider-models` `provider`, `modelId` och
-`maxOutputTokenOverride`: ett positivt heltal anger den manuella gränsen för utdatatoken, medan `null`
-rensar den för att återställa standardvärdet. `GET /api/provider-models?provider=<provider>` returnerar dessa
-värden i `modelOutputOverrides`, inklusive modeller utan en rad för en anpassad modell. Åsidosättningen
-använder körningskapaciteten `max_output_tokens` och kvarstår efter en omsynkronisering av modellen. Sidan för den OpenAI-kompatibla
-leverantören erbjuder samma kontroller för redigering/rensning och markerar modeller med uttryckligt stöd för bildbehandling.
+`maxOutputTokenOverride`: ett positivt heltal anger den manuella gränsen för output-token, och `null`
+raderar den för att återställa standardvärdet. `GET /api/provider-models?provider=<provider>` returnerar dessa
+värden i `modelOutputOverrides`, inklusive modeller utan en rad för anpassad modell. Åsidosättningen använder runtime-funktionen
+`max_output_tokens` och överlever en omsynkronisering av modellen. OpenAI-kompatibla
+providersidan erbjuder samma kontroller för att redigera/rensa och markerar modeller med explicit stöd för vision.
 
-Anpassade Chat Completions-noder anpassar uttryckliga bortval av resonemang till uppströmsservern. Ett
-lyckat anslutningstest väljer automatiskt chattmallskontroller för varje exakt modell-ID
-vars `/models`-post styrker ett identifierat `owned_by`-värde: `vllm`, `sglang` eller `llamacpp`.
-Transparenta OpenAI-kompatibla omslag kan bevara den ursprungliga modellposten i ett kapslat
-`openai`-objekt; identifieringen följer upp till tre sådana omslag. Modeller med saknat, okänt eller
-motstridigt ägarskap behåller vanligt OpenAI-beteende. Identifieringen återanvänder den befintliga katalogbegäran,
-genererar inga slutförandetoken och ogiltigförklaras när anslutningens slutpunkt ändras.
+På en kompatibel providernod lagrar skrivvägarna (`POST`, `PUT`, `PATCH`, `DELETE` och
+`/api/provider-models/validate-and-add`) modell-ID:t som det nakna upstream-ID:t: ett ID
+som klistrats in från en prefixförsedd lista får varje inledande kedja av nodens eget prefix hopslagen, och
+svaren återger det lagrade ID:t. Kanoniska providers snedstrecksseparerade ID:n (t.ex. `nvidia/nemotron-…`) lagras
+oförändrade. `/v1/models` skickar aldrig ut ett staplat `<prefix>/<prefix>/<model>`-ID.
 
-Använd det befintliga API:et för partiell
-uppdatering av leverantörer för att låsa beteendet för en uppströmsserver som inte exponerar dessa metadata:
+Anpassade Chat Completions-noder anpassar explicita avböjanden av resonemang till backend-systemet uppströms. Ett
+lyckat anslutningstest väljer automatiskt kontroller för chattmallar för varje exakt modell-ID
+vars `/models`-post visar ett identifierat `owned_by`-värde: `vllm`, `sglang` eller `llamacpp`.
+Transparenta OpenAI-kompatibla wrappers kan bevara den ursprungliga modellposten i ett nästlat
+`openai`-objekt; detekteringen följer upp till tre sådana omslag. Modeller med saknat, okänt eller
+motstridigt ägarskap behåller vanligt OpenAI-beteende. Detekteringen återanvänder den befintliga
+katalogbegäran, genererar inga completion-token och ogiltigförklaras när anslutningens endpoint
+ändras.
+
+Om du vill låsa beteendet för en backend som inte exponerar dessa metadata använder du det befintliga API:et för partiell leverantörsuppdatering:
 
 ```json
 {
@@ -1226,83 +1323,99 @@ uppdatering av leverantörer för att låsa beteendet för en uppströmsserver s
 }
 ```
 
-Skicka denna kropp med `PUT /api/providers/<connection-id>`. För den anslutningen skickas en uttrycklig
-resonemangsnivå på `none` som `chat_template_kwargs.thinking=false` och
-`chat_template_kwargs.enable_thinking=false`. Uttryckliga inbyggda mallvärden har fortsatt företräde,
-såvida inte en resonemangsregel på serversidan framtvingar en nivå. Inställningen gäller endast när en anpassad
-OpenAI-kompatibel anslutning skickar en Chat Completions-kropp; Responses-begäranden och vanliga
-leverantörer behåller sin inbyggda begärandestruktur. Ställ in `reasoningControl` på `openai` för att framtvinga vanlig OpenAI-
-vidarebefordran av `reasoning_effort`, eller utelämna den/ställ in den på `null` för att använda automatisk identifiering.
+Skicka den body:n med `PUT /api/providers/<connection-id>`. På den anslutningen skickas en explicit
+resonemangsinsats på `none` som `chat_template_kwargs.thinking=false` och
+`chat_template_kwargs.enable_thinking=false`. Explicita inbyggda mallvärden förblir styrande
+såvida inte en resonemangsregel på serversidan tvingar fram en insats. Inställningen gäller endast när en anpassad OpenAI-kompatibel anslutning skickar en Chat Completions-body; Responses-begäranden och vanliga leverantörer behåller sin ursprungliga request-struktur. Ange `reasoningControl` till `openai` för att tvinga fram vanlig OpenAI-vidarebefordran av `reasoning_effort`, eller utelämna det/ange det till `null` för att använda automatisk detektering.
 
-Klassificeringsbegäranden i Claude Codes autoläge inaktiverar som standard inbyggt tänkande när de
-inte innehåller några uttryckliga resonemangskontroller. Identifieringen använder klassificerarens systemmarkör i begäranden
-i Claude-format, inte modellnamn eller slutförandegränser. Uttryckliga kontroller i kroppen, stödda nivå-/tänkande-
-headers, routningsregler och den fastställda modellnivån behåller sin befintliga prioritet. Båda klassificerings-
-stegen behåller sina prompter, slutförandegränser, stoppsekvenser och verkliga behörighets-
-beslut från uppströmsservern; det andra steget kan fortfarande generera sitt begärda synliga resonemang som vanlig text.
+Claude Code-begäranden från klassificeraren i automatiskt läge inaktiverar som standard inbyggt tänkande när de inte innehåller några explicita resonemangskontroller. Detekteringen använder klassificerarens systemmarkör i Claude-formaterade begäranden, inte modellnamn eller completion-begränsningar. Explicita body-kontroller, headers för stödda insatser/tänkande, routningsregler och fastställd modellinsats behåller sin befintliga prioritet. Båda klassificeringsstegen behåller sina prompts, completion-begränsningar, stoppsekvenser och verkliga behörighetsbeslut från uppströms; det andra steget kan fortfarande producera sitt begärda synliga resonemang som vanlig text.
 
 ### OAuth-flöden
 
-| Slutpunkt                        | Metod   | Beskrivning               |
+| Endpoint                         | Metod   | Beskrivning               |
 | -------------------------------- | ------- | ------------------------- |
-| `/api/oauth/[provider]/[action]` | Diverse | Leverantörsspecifik OAuth |
+| `/api/oauth/[provider]/[action]` | Various | Leverantörsspecifik OAuth |
 
 ### Routning och konfiguration
 
-| Slutpunkt             | Metod    | Beskrivning                          |
-| --------------------- | -------- | ------------------------------------ |
-| `/api/models/alias`   | GET/POST | Modellalias                          |
-| `/api/models/catalog` | GET      | Alla modeller efter leverantör + typ |
-| `/api/combos*`        | Diverse  | Hantering av kombinationer           |
-| `/api/keys*`          | Diverse  | Hantering av API-nycklar             |
-| `/api/pricing`        | GET      | Modellprissättning                   |
+| Endpoint              | Metod    | Beskrivning                        |
+| --------------------- | -------- | ---------------------------------- |
+| `/api/models`         | GET/PUT  | Modellista/aliasuppdatering        |
+| `/api/models/alias`   | GET/POST | Modellalias                        |
+| `/api/models/catalog` | GET      | Alla modeller per leverantör + typ |
+| `/api/combos*`        | Various  | Hantering av kombinationer         |
+| `/api/keys*`          | Various  | Hantering av API-nycklar           |
+| `/api/pricing`        | GET      | Modellprissättning                 |
+
+#### Modellgränsernas ursprung
+
+`GET /api/models?withLimits=1` (även `true`; `0`/`false` eller om parametern utelämnas behåller den
+oförändrade standardpayloaden) lägger till `contextWindow`, `maxInputTokens`, `maxOutputTokens` och ett
+`capsSource`-objekt i varje modellrad. `capsSource` anger regeln som levererade varje gräns, så att
+en oväntad gräns (till exempel 128k på en 1M-modell) kan spåras till sitt ursprung. De fastställda
+värdena är samma som routningen använder; flaggan lägger endast till fält och ändrar aldrig något värde.
+Alla andra `withLimits`-värden avvisas med `400`.
+
+| `capsSource`-värde                           | Ursprung                                                                      |
+| -------------------------------------------- | ----------------------------------------------------------------------------- |
+| `override:context`                           | Bestående åsidosättning av kontextfönstret (`model_context_overrides`)        |
+| `override:max_input` / `override:max_output` | Bestående åsidosättning av `max_input_tokens` / `max_output_tokens`-kapacitet |
+| `static-authoritative:<provider>/<model>`    | Statisk auktoritativ tabell över kontextfönster                               |
+| `synced:<provider>/<model>`                  | Synkroniserad kapacitetsrad från models.dev                                   |
+| `registry:<provider>/<model>`                | Post i leverantörsregistret                                                   |
+| `spec:<model>`                               | Statisk modellspecifikation                                                   |
+| `effort-base:` prefix                        | Rad hämtad från basmodellen för en variant med insatssuffix                   |
+| `none`                                       | Ingen källa anger gränsen (värdet är `null`)                                  |
+
+Implementering: `getResolvedModelCapabilitiesWithLimitSources()` i `src/lib/modelCapabilities.ts`
+och prioritetskedjorna i `src/lib/modelCapabilityLimits.ts`.
 
 ### Användning och analys
 
-| Slutpunkt                        | Metod           | Beskrivning                                                                                                                                                                                                                                                                                                                                       |
-| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Användningshistorik                                                                                                                                                                                                                                                                                                                               |
-| `/api/usage/logs`                | GET             | Användningsloggar                                                                                                                                                                                                                                                                                                                                 |
-| `/api/usage/request-logs`        | GET             | Loggar på begärandenivå                                                                                                                                                                                                                                                                                                                           |
-| `/api/usage/[connectionId]`      | GET             | Användning per anslutning                                                                                                                                                                                                                                                                                                                         |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Budgetar för tokengränser per API-nyckel                                                                                                                                                                                                                                                                                                          |
-| `/api/usage/model-latency-stats` | GET             | Löpande aggregerad latens per leverantör/modell (genomsnitt/p50/p95/p99, lyckandefrekvens); filter: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                               |
-| `/api/usage/cache-health`        | GET             | Sammanfattning av promptcachehälsa för `call_logs` — skriv-/läsförhållande, p50/p90/p99-fördelning av skrivstorlek, koncentration av omfattande skrivningar, uppdelning per modell samt ett omdöme på `healthy`/`degraded`/`thrash`/`no-data`; frågeparametrar `range` (`1h`\|`24h`\|`7d`\|`30d`, standardvärde `24h`) och valfri `model` (#8827) |
+| Endpoint                         | Method          | Beskrivning                                                                                                                                                                                                                                                                                                                                          |
+| -------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Användningshistorik                                                                                                                                                                                                                                                                                                                                  |
+| `/api/usage/logs`                | GET             | Användningsloggar                                                                                                                                                                                                                                                                                                                                    |
+| `/api/usage/request-logs`        | GET             | Loggar på begärandenivå                                                                                                                                                                                                                                                                                                                              |
+| `/api/usage/[connectionId]`      | GET             | Användning per anslutning                                                                                                                                                                                                                                                                                                                            |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Tokenbegränsningsbudgetar per API-nyckel                                                                                                                                                                                                                                                                                                             |
+| `/api/usage/model-latency-stats` | GET             | Rullande aggregerad fördröjning per leverantör/modell (avg/p50/p95/p99, lyckandefrekvens); filter: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                   |
+| `/api/usage/cache-health`        | GET             | Sammanfattning av promptcache-status över `call_logs` — skriv-/läsförhållande, p50/p90/p99-fördelning av skrivstorlek, koncentration av omfattande skrivningar, uppdelning per modell samt bedömningen `healthy`/`degraded`/`thrash`/`no-data`; frågeparametrarna `range` (`1h`\|`24h`\|`7d`\|`30d`, standardvärde `24h`) och valfri `model` (#8827) |
 
-### Behörigheter för API-nycklar
+### API-nyckelbehörigheter
 
-`PATCH /api/keys/{id}` uppdaterar behörigheterna för en befintlig nyckel. Liksom alla `/api/keys*`-rutter kräver den hanteringsauktorisering (se [Hanteringsautentisering](../guides/MANAGEMENT-AUTH.md)), inte en inferensnyckel. Skicka endast de fält som du vill ändra; en begäran utan något av dem avvisas med `No valid fields to update`. De godkända fälten definieras av `updateKeyPermissionsSchema` i `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` uppdaterar behörigheterna för en befintlig nyckel. Precis som alla `/api/keys*`-rutter kräver den hanteringsauktorisering (se [Autentisering för hantering](../guides/MANAGEMENT-AUTH.md)), inte en inferensnyckel. Skicka endast de fält du vill ändra. En begäran utan något av dessa fält avvisas med `No valid fields to update`. De godkända fälten definieras av `updateKeyPermissionsSchema` i `src/shared/validation/schemas/keys.ts`.
 
-| Fält                                        | Typ                                                                        | Anmärkningar                                                                                                                                                        |
-| ------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | sträng, 1–200 tecken                                                       |                                                                                                                                                                     |
-| `isActive`                                  | boolesk                                                                    |                                                                                                                                                                     |
-| `isBanned`                                  | boolesk                                                                    |                                                                                                                                                                     |
-| `expiresAt`                                 | ISO 8601-datum och -tid eller `null`                                       | `null` tar bort utgångstiden                                                                                                                                        |
-| `modelAccessMode`                           | `all` \| `restricted`                                                      | `allowedModels` måste vara tom när läget är `all`                                                                                                                   |
-| `allowedModels`, `blockedModels`            | matris med strängar, upp till 1 000                                        |                                                                                                                                                                     |
-| `allowedCombos`                             | matris med strängar, upp till 500                                          | Styr vilka kombinationer nyckeln får anropa; direkta modeller styrs av `modelAccessMode` / `allowedModels`                                                          |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `allowedConnections` får inte vara tom när läget är `restricted` och måste vara tom när läget är `all`                                                              |
-| `allowedConnections`                        | matris med UUID:er, upp till 100                                           |                                                                                                                                                                     |
-| `allowAutoCombos`                           | boolesk                                                                    | `false` avvisar begäranden för `auto/*`-modeller med den här nyckeln; nycklar där detta aldrig har angetts tillåts                                                  |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                              | Vad `GET /v1/models` listar för den här nyckeln (endast kombinationer, endast modeller eller båda); det ändrar inte vad nyckeln får anropa                          |
-| `forcedModel`                               | sträng med upp till 300 tecken eller `null`                                | Dirigerar chattbegäranden till den här modellen/kombinationen och har företräde framför `X-Route-Model` och `body.model`; nyckelns begränsningar gäller fortfarande |
-| `noLog`, `autoResolve`                      | boolesk                                                                    |                                                                                                                                                                     |
-| `throttleDelayMs`                           | heltal, 0–300000                                                           |                                                                                                                                                                     |
-| `maxSessions`                               | heltal, 0–10000                                                            |                                                                                                                                                                     |
-| `rateLimits`                                | matris med `{ limit, window }` (positiva heltal, upp till 50) eller `null` | `null` tar bort gränserna                                                                                                                                           |
-| `accessSchedule`                            | schemaobjekt eller `null`                                                  | `null` tar bort schemat                                                                                                                                             |
-| `scopes`                                    | matris med strängar, upp till 32                                           |                                                                                                                                                                     |
-| `allowedEndpoints`                          | matris med strängar, upp till 20                                           |                                                                                                                                                                     |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                     |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | Se [Cacheförbikoppling per nyckel](#per-key-cache-bypass)                                                                                                           |
-| `compressionEnabled`                        | boolesk                                                                    |                                                                                                                                                                     |
-| `codexServiceMode`                          | ett av Codex-tjänstelägena                                                 |                                                                                                                                                                     |
-| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                     |
-| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                     |
-| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                     |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 eller `null`                                                   |                                                                                                                                                                     |
-| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                     |
+| Fält                                        | Typ                                                                      | Anteckningar                                                                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | sträng, 1–200 tecken                                                     |                                                                                                                                           |
+| `isActive`                                  | booleskt värde                                                           |                                                                                                                                           |
+| `isBanned`                                  | booleskt värde                                                           |                                                                                                                                           |
+| `expiresAt`                                 | ISO 8601-datum och tid eller `null`                                      | `null` rensar utgångstiden                                                                                                                |
+| `modelAccessMode`                           | `all` \| `restricted`                                                    | `allowedModels` måste vara tom när läget är `all`                                                                                         |
+| `allowedModels`, `blockedModels`            | array av strängar, upp till 1000                                         |                                                                                                                                           |
+| `allowedCombos`                             | array av strängar, upp till 500                                          | Styr vilka kombinationer nyckeln får anropa; direkta modeller styrs av `modelAccessMode` / `allowedModels`                                |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                    | `allowedConnections` måste vara icke-tom när läget är `restricted` och tom när läget är `all`                                             |
+| `allowedConnections`                        | array av UUID:er, upp till 100                                           |                                                                                                                                           |
+| `allowAutoCombos`                           | booleskt värde                                                           | `false` avvisar begäranden för `auto/*`-modeller med denna nyckel; nycklar som aldrig har angett detta tillåts                            |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                            | Vad `GET /v1/models` listar för denna nyckel (endast kombinationer, endast modeller eller båda); det ändrar inte vad nyckeln får anropa   |
+| `forcedModel`                               | sträng med upp till 300 tecken eller `null`                              | Dirigerar chattbegäranden till denna modell/kombination, före `X-Route-Model` och `body.model`; nyckelns begränsningar gäller fortfarande |
+| `noLog`, `autoResolve`                      | booleskt värde                                                           |                                                                                                                                           |
+| `throttleDelayMs`                           | heltal, 0–300000                                                         |                                                                                                                                           |
+| `maxSessions`                               | heltal, 0–10000                                                          |                                                                                                                                           |
+| `rateLimits`                                | array av `{ limit, window }` (positiva heltal, upp till 50) eller `null` | `null` rensar begränsningarna                                                                                                             |
+| `accessSchedule`                            | schemaobjekt eller `null`                                                | `null` rensar schemat                                                                                                                     |
+| `scopes`                                    | array av strängar, upp till 32                                           |                                                                                                                                           |
+| `allowedEndpoints`                          | array av strängar, upp till 20                                           |                                                                                                                                           |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                       |                                                                                                                                           |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                     | Se [cacheförbigång per nyckel](#per-key-cache-bypass)                                                                                     |
+| `compressionEnabled`                        | booleskt värde                                                           |                                                                                                                                           |
+| `codexServiceMode`                          | ett av Codex-tjänstelägena                                               |                                                                                                                                           |
+| `disableNonPublicModels`                    | boolean                                                                  |                                                                                                                                           |
+| `allowUsageCommand`                         | boolean                                                                  |                                                                                                                                           |
+| `usageLimitEnabled`                         | boolean                                                                  |                                                                                                                                           |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                    |                                                                                                                                           |
+| `chaosModeEnabled`                          | boolean                                                                  |                                                                                                                                           |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1313,159 +1426,153 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Inställningar
 
-| Slutpunkt                             | Metod         | Beskrivning                                                                                                                                                                                                                                                                            |
-| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Allmänna inställningar. Säkerhetspolicynycklar (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) kräver `currentPassword` och en operatörsautentiseringsuppgift – API-nycklar och `oma_`-token får `403`; varje ändring kräver åtkomsttokenscope `admin` |
-| `/api/settings/proxy`                 | GET/PUT       | Konfiguration av nätverksproxy                                                                                                                                                                                                                                                         |
-| `/api/settings/proxy/test`            | POST          | Testa proxyanslutningen                                                                                                                                                                                                                                                                |
-| `/api/settings/ip-filter`             | GET/PUT       | Lista över tillåtna/blockerade IP-adresser                                                                                                                                                                                                                                             |
-| `/api/settings/thinking-budget`       | GET/PUT       | Omskrivningsläge för **begäranden** avseende tänkande/resonemang (vidarebefordring / automatisk borttagning / anpassat / adaptivt). Oberoende av komprimering. Se [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                  |
-| `/api/settings/system-prompt`         | GET/PUT       | Global systemprompt                                                                                                                                                                                                                                                                    |
-| `/api/settings/compression`           | GET/PUT       | Global komprimeringskonfiguration                                                                                                                                                                                                                                                      |
-| `/api/settings/purge-request-history` | POST          | Rensa rader i begärandeloggen och lokala anropsloggartefakter                                                                                                                                                                                                                          |
+| Endpoint                              | Method        | Beskrivning                                                                                                                                                                                                                                                                              |
+| ------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Allmänna inställningar. Säkerhetspolicy-nycklar (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) kräver `currentPassword` och en operatörsautentiseringsuppgift — API-nycklar och `oma_`-token får `403`; varje ändring kräver åtkomsttokenscopet `admin` |
+| `/api/settings/proxy`                 | GET/PUT       | Konfiguration av nätverksproxy                                                                                                                                                                                                                                                           |
+| `/api/settings/proxy/test`            | POST          | Testa proxyanslutning                                                                                                                                                                                                                                                                    |
+| `/api/settings/ip-filter`             | GET/PUT       | IP-tillåtelselista/blocklista                                                                                                                                                                                                                                                            |
+| `/api/settings/thinking-budget`       | GET/PUT       | Läge för omskrivning av **request** för tänkande/resonemang (passthrough / auto-strip / custom / adaptive). Oberoende av komprimering. Se [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                            |
+| `/api/settings/system-prompt`         | GET/PUT       | Global systemprompt                                                                                                                                                                                                                                                                      |
+| `/api/settings/compression`           | GET/PUT       | Global komprimeringskonfiguration                                                                                                                                                                                                                                                        |
+| `/api/settings/purge-request-history` | POST          | Rensa rader i request-loggen och lokala anropsloggsartefakter                                                                                                                                                                                                                            |
 
 ### Kontext och komprimering
 
-| Ändpunkt                               | Metod          | Beskrivning                                                                     |
-| -------------------------------------- | -------------- | ------------------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | Förhandsgranska komprimering med off/lite/standard/aggressive/ultra/RTK/stacked |
-| `/api/compression/language-packs`      | GET            | Lista tillgängliga Caveman-språkpaket                                           |
-| `/api/compression/rules`               | GET            | Lista metadata för Caveman-regler                                               |
-| `/api/context/caveman/config`          | GET/PUT        | Alias för Caveman-specifika inställningar                                       |
-| `/api/context/rtk/config`              | GET/PUT        | RTK-specifika inställningar, inklusive anpassade filter och lagring av råutdata |
-| `/api/context/rtk/filters`             | GET            | RTK-filterkatalog och diagnostik för anpassade filter                           |
-| `/api/context/rtk/test`                | POST           | Kör RTK-förhandsgranskning/test mot en textnyttolast                            |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Läs lagrade maskerade råutdata efter pekar-id                                   |
-| `/api/context/combos`                  | GET/POST       | Lista/skapa komprimeringskombinationer                                          |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Visa/uppdatera/ta bort komprimeringskombination                                 |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Tilldela komprimeringskombinationer till routningskombinationer                 |
-| `/api/context/analytics`               | GET            | Alias för komprimeringsanalys                                                   |
+| Endpoint                               | Method         | Description                                                                          |
+| -------------------------------------- | -------------- | ------------------------------------------------------------------------------------ |
+| `/api/compression/preview`             | POST           | Förhandsgranska komprimering med off/lite/standard/aggressive/ultra/RTK/stacked      |
+| `/api/compression/language-packs`      | GET            | Lista tillgängliga Caveman-språkpaket                                                |
+| `/api/compression/rules`               | GET            | Lista metadata för Caveman-regler                                                    |
+| `/api/context/caveman/config`          | GET/PUT        | Alias för Caveman-specifika inställningar                                            |
+| `/api/context/rtk/config`              | GET/PUT        | RTK-specifika inställningar, inklusive anpassade filter och bibehållande av råutdata |
+| `/api/context/rtk/filters`             | GET            | RTK-filterkatalog och diagnostik för anpassade filter                                |
+| `/api/context/rtk/test`                | POST           | Kör RTK-förhandsgranskning/test mot en textnyttolast                                 |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Läs bibehållen redigerad råutdata via pekar-id                                       |
+| `/api/context/combos`                  | GET/POST       | Lista/skapa komprimeringskombinationer                                               |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Visa/uppdatera/ta bort komprimeringskombination                                      |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Tilldela komprimeringskombinationer till routningskombinationer                      |
+| `/api/context/analytics`               | GET            | Alias för komprimeringsanalys                                                        |
 
 ### Övervakning
 
-| Ändpunkt                             | Metod      | Beskrivning                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/sessions`                      | GET        | Spårning av aktiva sessioner                                                                                                                                                                                                                                                                                                                                                                                       |
-| `/api/rate-limits`                   | GET        | Hastighetsgränser per konto                                                                                                                                                                                                                                                                                                                                                                                        |
-| `/api/monitoring/health`             | GET        | Hälsokontroll + leverantörssammanfattning (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Hanteringsvyn inkluderar `credentialHealth`: skalärvärden från probcachen, `failedConnections` när `failed>0` samt `staleDbNonOkCount` (beständigt SQLite-`test_status`, inte mätvärdet). Se [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Cachestatistik/rensning                                                                                                                                                                                                                                                                                                                                                                                            |
-| `/api/modality-bridge/stats`         | GET        | Minnesbaserade `attempts`, lyckade/`bridged`, misslyckanden, cacheträffar, `totalLatencyMs`, `latencySamples`, stickprovsbaserade `averageLatencyMs` och tidpunkt för senaste användning (återställs vid omstart; hanteringsautentisering)                                                                                                                                                                         |
-| `/api/modality-bridge/video/runtime` | GET        | Strikt kontroll av betrodd loopback före hanteringsautentisering/prob; sanerad tillgänglighets- och versionsinformation för FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                              |
-| `/api/modality-bridge/video/extract` | POST       | Intern autentiserad byteförmedlare via betrodd loopback; 50 MiB indata, begränsad kö/32 MiB utdata, `503` vid kapacitetsbrist, `499` vid frånkoppling, `504` vid överskriden tidsgräns; inte ett offentligt API för uppladdning                                                                                                                                                                                    |
+| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Spårning av aktiva sessioner                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/api/rate-limits`                   | GET        | Hastighetsbegränsningar per konto                                                                                                                                                                                                                                                                                                                                                                                       |
+| `/api/monitoring/health`             | GET        | Hälsokontroll + leverantörssammanfattning (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Administrationsvyn inkluderar `credentialHealth`: skalärer från probe-cachen, `failedConnections` när `failed>0` samt `staleDbNonOkCount` (SQLite:s beständiga `test_status`, inte mätvärdet). Se [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Cache-statistik / rensa                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `/api/modality-bridge/stats`         | GET        | In-memory `attempts`, lyckade anrop/`bridged`, misslyckade anrop, cacheträffar, `totalLatencyMs`, `latencySamples`, provbaserade `averageLatencyMs` samt tidpunkt för senaste användning (återställs vid omstart; administrationsautentisering)                                                                                                                                                                         |
+| `/api/modality-bridge/video/runtime` | GET        | Strikt kontroll av betrodd loopback innan administrationsautentisering/probning; sanerad tillgänglighet och versionsinformation för FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                           |
+| `/api/modality-bridge/video/extract` | POST       | Intern autentiserad byteförmedlare för betrodd loopback; indata på 50 MiB, begränsad kö/32 MiB utdata, `503` vid kapacitetsbrist, `499` vid frånkoppling, `504` vid deadline; inte ett offentligt API för uppladdning                                                                                                                                                                                                   |
 
 ### Säkerhetskopiering och export/import
 
-| Endpoint                    | Metod  | Beskrivning                                                                               |
-| --------------------------- | ------ | ----------------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | Lista tillgängliga säkerhetskopior                                                        |
-| `/api/db-backups`           | PUT    | Skapa en manuell säkerhetskopia                                                           |
-| `/api/db-backups`           | POST   | Återställ från en specifik säkerhetskopia                                                 |
-| `/api/db-backups`           | PATCH  | Spara inställningar för kvarhållning av säkerhetskopior (endast operatörer)               |
-| `/api/db-backups`           | DELETE | Rensa lagrade säkerhetskopior enligt inställningarna för kvarhållning (endast operatörer) |
-| `/api/db-backups/export`    | GET    | Ladda ned databasen som en .sqlite-fil                                                    |
-| `/api/db-backups/import`    | POST   | Ladda upp en .sqlite-fil för att ersätta databasen (`?dryRun=true` validerar endast)      |
-| `/api/db-backups/exportAll` | GET    | Ladda ned en fullständig säkerhetskopia som ett .tar.gz-arkiv                             |
+| Endpoint                    | Method | Description                                                                       |
+| --------------------------- | ------ | --------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | Lista tillgängliga säkerhetskopior                                                |
+| `/api/db-backups`           | PUT    | Skapa en manuell säkerhetskopia                                                   |
+| `/api/db-backups`           | POST   | Återställ från en specifik säkerhetskopia                                         |
+| `/api/db-backups`           | PATCH  | Spara inställningar för bevarande av säkerhetskopior (endast operatör)            |
+| `/api/db-backups`           | DELETE | Rensa lagrade säkerhetskopior enligt inställningarna för bevarande                |
+| `/api/db-backups/export`    | GET    | Ladda ned databasen som en .sqlite-fil                                            |
+| `/api/db-backups/import`    | POST   | Ladda upp .sqlite-fil för att ersätta databasen (`?dryRun=true` validerar endast) |
+| `/api/db-backups/exportAll` | GET    | Ladda ned en fullständig säkerhetskopia som ett .tar.gz-arkiv                     |
 
 `/api/db-backups/export`, `/api/db-backups/exportAll` och `/api/settings/export-json` lämnar ut
-alla lagrade autentiseringsuppgifter, så de kräver instrumentpanelens session eller det lokala CLI-verktyget (eller att
-inloggning är inaktiverad). API-nycklar oavsett omfattning och `oma_`-åtkomsttoken får `403`. Återställningarna har samma
-begränsning: `POST /api/db-backups/import` (inklusive `dryRun=true`), `POST /api/db-backups` (återställning
-via id) och `POST /api/settings/import-json` ersätter den aktiva databasen eller inställningarna, så en maskins
-autentiseringsuppgifter får också `403` där; `omniroute sync import` skickar det lokala CLI-verktygets autentiseringsuppgifter. Detsamma gäller
-`DELETE /api/db-backups` (rensa lagrade säkerhetskopior) och `PATCH /api/db-backups` (inställningar för kvarhållning:
-de sparade värdena styr den automatiska rensningen efter varje säkerhetskopiering). Listning (`GET`) och skapande
-av en manuell säkerhetskopia (`PUT`) använder fortsatt vanlig autentisering för hantering.
+alla lagrade autentiseringsuppgifter och kräver därför dashboardsessionen eller det lokala CLI:t (eller
+att inloggning är inaktiverad). API-nycklar med valfri behörighetsomfattning och åtkomsttoken för `oma_` får `403`. Återställningarna har samma gräns: `POST /api/db-backups/import` (`dryRun=true` inkluderat), `POST /api/db-backups` (återställning efter id) och `POST /api/settings/import-json` ersätter den aktiva databasen eller inställningarna, så maskinautentiseringsuppgifter får också `403` där; `omniroute sync import` skickar autentiseringsuppgiften för det lokala CLI:t. Detsamma gäller `DELETE /api/db-backups` (rensa lagrade säkerhetskopior) och `PATCH /api/db-backups` (inställningar för bevarande: de sparade värdena styr den automatiska rensningen efter varje säkerhetskopia). Listning (`GET`) och skapande av en manuell säkerhetskopia (`PUT`) använder fortsatt vanlig hanteringsautentisering.
 
 ### Molnsynkronisering
 
-| Endpoint               | Metod | Beskrivning                     |
-| ---------------------- | ----- | ------------------------------- |
-| `/api/sync/cloud`      | Flera | Åtgärder för molnsynkronisering |
-| `/api/sync/initialize` | POST  | Initiera synkronisering         |
-| `/api/cloud/*`         | Flera | Molnhantering                   |
+| Endpoint               | Method  | Description                 |
+| ---------------------- | ------- | --------------------------- |
+| `/api/sync/cloud`      | Various | Molnsynkroniseringsåtgärder |
+| `/api/sync/initialize` | POST    | Initiera synkronisering     |
+| `/api/cloud/*`         | Various | Molnhantering               |
 
 ### Tunnlar
 
-| Endpoint                   | Metod | Beskrivning                                                                       |
-| -------------------------- | ----- | --------------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET   | Läs installations-/körningsstatus för Cloudflare Quick Tunnel i instrumentpanelen |
-| `/api/tunnels/cloudflared` | POST  | Aktivera eller inaktivera Cloudflare Quick Tunnel (`action=enable/disable`)       |
-| `/api/tunnels/ngrok`       | GET   | Läs körningsstatus för ngrok Tunnel i instrumentpanelen                           |
-| `/api/tunnels/ngrok`       | POST  | Aktivera eller inaktivera ngrok Tunnel (`action=enable/disable`)                  |
+| Endpoint                   | Method | Description                                                                     |
+| -------------------------- | ------ | ------------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET    | Läs installations- och körningsstatus för Cloudflare Quick Tunnel i dashboarden |
+| `/api/tunnels/cloudflared` | POST   | Aktivera eller inaktivera Cloudflare Quick Tunnel (`action=enable/disable`)     |
+| `/api/tunnels/ngrok`       | GET    | Läs körningsstatus för ngrok Tunnel i dashboarden                               |
+| `/api/tunnels/ngrok`       | POST   | Aktivera eller inaktivera ngrok Tunnel (`action=enable/disable`)                |
 
 ### CLI-verktyg
 
-| Endpoint                           | Metod | Beskrivning                |
-| ---------------------------------- | ----- | -------------------------- |
-| `/api/cli-tools/claude-settings`   | GET   | Status för Claude CLI      |
-| `/api/cli-tools/codex-settings`    | GET   | Status för Codex CLI       |
-| `/api/cli-tools/droid-settings`    | GET   | Status för Droid CLI       |
-| `/api/cli-tools/openclaw-settings` | GET   | Status för OpenClaw CLI    |
-| `/api/cli-tools/runtime/[toolId]`  | GET   | Generisk CLI-körningsmiljö |
+| Endpoint                           | Method | Description          |
+| ---------------------------------- | ------ | -------------------- |
+| `/api/cli-tools/claude-settings`   | GET    | Claude CLI-status    |
+| `/api/cli-tools/codex-settings`    | GET    | Codex CLI-status     |
+| `/api/cli-tools/droid-settings`    | GET    | Droid CLI-status     |
+| `/api/cli-tools/openclaw-settings` | GET    | OpenClaw CLI-status  |
+| `/api/cli-tools/runtime/[toolId]`  | GET    | Generisk CLI-körning |
 
-CLI-svar inkluderar: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+CLI-svar innehåller: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
 ### ACP-agenter
 
-| Endpoint          | Metod  | Beskrivning                                                        |
+| Endpoint          | Method | Description                                                        |
 | ----------------- | ------ | ------------------------------------------------------------------ |
 | `/api/acp/agents` | GET    | Lista alla identifierade agenter (inbyggda + anpassade) med status |
 | `/api/acp/agents` | POST   | Lägg till en anpassad agent eller uppdatera identifieringscachen   |
 | `/api/acp/agents` | DELETE | Ta bort en anpassad agent via frågeparametern `id`                 |
 
-GET-svaret inkluderar `agents[]` (id, name, binary, version, installed, protocol, isCustom) och `summary` (total, installed, notFound, builtIn, custom).
+GET-svaret innehåller `agents[]` (id, name, binary, version, installed, protocol, isCustom) och `summary` (total, installed, notFound, builtIn, custom).
 
 ### Motståndskraft och hastighetsbegränsningar
 
-| Slutpunkt                         | Metod     | Beskrivning                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| --------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | Hämta/uppdatera inställningar för begärandekö, anslutningars nedkylningsperiod, leverantörers kretsbrytare och väntetider                                                                                                                                                                                                                                                                                                                |
-| `/api/resilience/reset`           | POST      | Återställ kretsbrytare för leverantörer                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `/api/resilience/model-cooldowns` | GET       | Lista aktiva spärrar per (leverantör, anslutning, modell), sorterade efter återstående tid                                                                                                                                                                                                                                                                                                                                               |
-| `/api/resilience/model-cooldowns` | DELETE    | Rensa en modellspärr — brödtext `{provider, model}` eller `{all: true}` för att rensa allt                                                                                                                                                                                                                                                                                                                                               |
-| `/api/rate-limits`                | GET/POST  | Status för hastighetsbegränsning per konto (GET) eller aktivera/inaktivera skydd mot hastighetsbegränsning för en anslutning (POST `{connectionId, enabled}`). Skrivvägen som stöds för `rateLimitProtection` (ändras aldrig via `PUT /api/providers/[id]`). Obs! `enabled: false` inaktiverar uttryckligt skydd men undantar inte en aktiv API-nyckelanslutning från det globala automatiska skyddsnätet (`autoEnableApiKeyProviders`). |
-| `/api/rate-limit`                 | GET       | Global konfiguration för hastighetsbegränsning (utfasad; alias för `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                   |
+| Endpoint                          | Method    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/resilience`                 | GET/PATCH | Hämta/uppdatera inställningar för begärandekö, anslutningsnedkylning, leverantörsbrytare och väntetider                                                                                                                                                                                                                                                                                                                                                |
+| `/api/resilience/reset`           | POST      | Återställ kretsbrytare för leverantörer                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `/api/resilience/model-cooldowns` | GET       | Lista aktiva låsningar per (leverantör, anslutning, modell), sorterade efter återstående tid                                                                                                                                                                                                                                                                                                                                                           |
+| `/api/resilience/model-cooldowns` | DELETE    | Rensa en modellåsning — body `{provider, model}` eller `{all: true}` för att rensa allt                                                                                                                                                                                                                                                                                                                                                                |
+| `/api/rate-limits`                | GET/POST  | Status för hastighetsbegränsning per konto (GET) eller aktivera/inaktivera skydd mot hastighetsbegränsning för en anslutning (POST `{connectionId, enabled}`). Stödd skrivväg för `rateLimitProtection` (ändras aldrig via `PUT /api/providers/[id]`). Obs! `enabled: false` inaktiverar explicit skydd men undantar inte en aktiv anslutning med API-nyckel från det globala automatiska säkerhetsnätet för aktivering (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Global konfiguration för hastighetsbegränsning (föråldrad; alias för `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                               |
 
-> Alla fyra `/api/resilience/*`-vägar kräver **hanteringsautentisering** (`requireManagementAuth`). Se [Resiliens (utökad)](#resilience-extended) för en fullständig genomgång av leverantörers kretsbrytare, anslutningars nedkylningsperioder och modellspärrar.
+> Alla fyra `/api/resilience/*`-rutter kräver **hanteringsautentisering** (`requireManagementAuth`). Se [Resiliens (utökad)](#resilience-extended) för en fullständig genomgång av leverantörsbrytare kontra anslutningsnedkylning kontra modellåsning.
 
 ### Utvärderingar
 
-| Slutpunkt    | Metod    | Beskrivning                              |
-| ------------ | -------- | ---------------------------------------- |
-| `/api/evals` | GET/POST | Lista utvärderingssviter/kör utvärdering |
+| Endpoint     | Method   | Description                                |
+| ------------ | -------- | ------------------------------------------ |
+| `/api/evals` | GET/POST | Lista utvärderingssviter / kör utvärdering |
 
-### Policyer
+### Principer
 
-| Slutpunkt       | Metod           | Beskrivning               |
-| --------------- | --------------- | ------------------------- |
-| `/api/policies` | GET/POST/DELETE | Hantera routningspolicyer |
+| Endpoint        | Method          | Description                |
+| --------------- | --------------- | -------------------------- |
+| `/api/policies` | GET/POST/DELETE | Hantera routningsprinciper |
 
 ### Efterlevnad
 
-| Slutpunkt                   | Metod | Beskrivning                                 |
-| --------------------------- | ----- | ------------------------------------------- |
-| `/api/compliance/audit-log` | GET   | Granskningslogg för efterlevnad (senaste N) |
+| Endpoint                    | Method | Description                                 |
+| --------------------------- | ------ | ------------------------------------------- |
+| `/api/compliance/audit-log` | GET    | Granskningslogg för efterlevnad (senaste N) |
 
-### v1beta (Gemini-kompatibel)
+### v1beta (Gemini-kompatibelt)
 
-| Slutpunkt                  | Metod | Beskrivning                            |
-| -------------------------- | ----- | -------------------------------------- |
-| `/v1beta/models`           | GET   | Lista modeller i Gemini-format         |
-| `/v1beta/models/{...path}` | POST  | Gemini-slutpunkt för `generateContent` |
+| Endpoint                   | Method | Description                            |
+| -------------------------- | ------ | -------------------------------------- |
+| `/v1beta/models`           | GET    | Lista modeller i Gemini-format         |
+| `/v1beta/models/{...path}` | POST   | Gemini-slutpunkt för `generateContent` |
 
-Dessa slutpunkter speglar Geminis API-format för klienter som förväntar sig kompatibilitet med Geminis inbyggda SDK.
+Dessa slutpunkter speglar Geminis API-format för klienter som förväntar sig inbyggd Gemini SDK-kompatibilitet.
 
-### Interna API:er/system-API:er
+### Interna system-API:er
 
-| Slutpunkt                | Metod | Beskrivning                                                            |
-| ------------------------ | ----- | ---------------------------------------------------------------------- |
-| `/api/init`              | GET   | Kontroll av programinitiering (används vid första körningen)           |
-| `/api/tags`              | GET   | Ollama-kompatibla modelltaggar (för Ollama-klienter)                   |
-| `/api/restart`           | POST  | Utlös en kontrollerad omstart av servern                               |
-| `/api/shutdown`          | POST  | Utlös en kontrollerad avstängning av servern                           |
-| `/api/system/env/repair` | POST  | Reparera miljövariabler för OAuth-leverantörer                         |
-| `/api/system/version`    | GET   | Aktuell/senaste version, uppdateringsstatus och lanseringskanal        |
-| `/api/system/version`    | POST  | Starta en distributionsmedveten uppdatering till den senaste versionen |
+| Endpoint                 | Method | Description                                                            |
+| ------------------------ | ------ | ---------------------------------------------------------------------- |
+| `/api/init`              | GET    | Kontroll av programinitiering (används vid första körningen)           |
+| `/api/tags`              | GET    | Ollama-kompatibla modelletiketter (för Ollama-klienter)                |
+| `/api/restart`           | POST   | Utlös en ordnad omstart av servern                                     |
+| `/api/shutdown`          | POST   | Utlös en ordnad avstängning av servern                                 |
+| `/api/system/env/repair` | POST   | Reparera miljövariabler för OAuth-leverantörer                         |
+| `/api/system/version`    | GET    | Aktuell/senaste version, uppdateringsstatus, versionskanal             |
+| `/api/system/version`    | POST   | Starta en distributionsmedveten uppdatering till den senaste versionen |
 
 > **Obs!** Dessa slutpunkter används internt av systemet eller för kompatibilitet med Ollama-klienter. De anropas vanligtvis inte av slutanvändare.
 
@@ -1490,16 +1597,16 @@ Reparerar saknade eller skadade OAuth-miljövariabler för en specifik leverant�
 }
 ```
 
-### Version och lanseringskanal
+### Version och releasekanal
 
 ```bash
 GET /api/system/version
 ```
 
-Hanteringsroute som endast är tillgänglig via loopback (administratörsautentisering). Returnerar den version som körs, den senast
-publicerade versionen och statusen för automatisk uppdatering. `releaseChannel` och `channels` är nya
-fält (spår 3.8.54); `channel` behåller sin betydelse – distributionsläget som instrumentpanelens uppdateringsfunktion
-använder (`npm`, `source` eller `docker-compose`).
+Loopback-begränsad hanteringsrutt (administratörsautentisering). Returnerar den körande versionen, den senaste
+publicerade versionen och statusen för automatisk uppdatering. `releaseChannel` och `channels` är tillagda
+fält (rail 3.8.54); `channel` behåller sin betydelse — distributionsläget som instrumentpanelen använder för uppdatering
+(`npm`, `source` eller `docker-compose`).
 
 ```json
 {
@@ -1515,17 +1622,17 @@ använder (`npm`, `source` eller `docker-compose`).
 }
 ```
 
-- `releaseChannel` – npm-kanalen för det bygge som körs: `nightly` för versioner av typen `-nightly.*`,
-  `next` för andra förhandsversioner (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` för en stabil version med ett
-  äldre huvudversionsnummer än `channels.latest`, annars `latest`. Samma regler som i
+- `releaseChannel` — npm-kanalen för den körande builden: `nightly` för versioner med `-nightly.*`,
+  `next` för andra förhandsversioner (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` för en stabil version av en
+  äldre huvudversion än `channels.latest`, annars `latest`. Samma regler som i
   `scripts/release/dist-tag.mjs`, som väljer npm-distributionstaggen vid publicering.
-- `channels` – den senast publicerade versionen för varje distributionstagg, från `npm view omniroute dist-tags` (med HTTP-reservlösning för registret),
-  cachelagrad med samma TTL på 10 minuter som `latest`. `latest` finns alltid
-  (faller tillbaka på fältet `latest`, därefter `"unavailable"`); `next`, `nightly` och `lts` visas
-  endast när respektive distributionstagg finns. En begäran med `Cache-Control: no-cache` uppdaterar båda uppslagningarna.
+- `channels` — den publicerade senaste versionen för varje distributionstagg, från `npm view omniroute dist-tags` (med HTTP-reservlösning
+  via registret), cachad med samma TTL på 10 minuter som `latest`. `latest` finns alltid
+  (faller tillbaka på fältet `latest`, sedan `"unavailable"`); `next`, `nightly` och `lts` visas
+  endast när den distributionstaggen finns. En begäran med `Cache-Control: no-cache` uppdaterar båda uppslagen.
 
-Kanalmodellen (`latest` = v3 fram till den allmänna lanseringen av 4.0, `next` = rc, `nightly` = byggen från `develop`,
-`lts` = korrigeringar för v3 efter den allmänna lanseringen av 4.0) beskrivs i `docs/ops/RELEASE_STRATEGY.md`.
+Kanalmodellen (`latest` = v3 fram till GA-versionen 4.0, `next` = rc, `nightly` = `develop`-byggen,
+`lts` = v3-patchar efter GA-versionen 4.0) beskrivs i `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 
@@ -1537,9 +1644,12 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkribera ljudfiler med valfri konfigurerad STT-leverantör. Det första sökvägssegmentet väljer den ursprungliga leverantören (`openai/…`, `deepgram/…`). Gatewayer som återexporterar en annan leverantörs modell använder ett kvalificerat id (`openrouter/deepgram/nova-3`).
+Transkribera ljudfiler med valfri konfigurerad STT-leverantör. Det första segmentsökvägen
+väljer den inbyggda leverantören (`openai/…`, `deepgram/…`). Gateways som
+exporterar en annan leverantörs modell använder ett kvalificerat id
+(`openrouter/deepgram/nova-3`).
 
-**Begäran:**
+**Förfrågan:**
 
 ```bash
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
@@ -1559,9 +1669,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Exempel på modell-id:n:** `openai/whisper-1` (kräver en OpenAI-nyckel), `openrouter/deepgram/nova-3` (kräver en OpenRouter-nyckel), `deepgram/nova-3` (kräver en ursprunglig Deepgram-nyckel). En begäran med enbart `deepgram/nova-3` använder **inte** OpenRouter.
+**Exempel på modell-id:n:** `openai/whisper-1` (kräver en OpenAI-nyckel),
+`openrouter/deepgram/nova-3` (kräver en OpenRouter-nyckel),
+`deepgram/nova-3` (kräver en inbyggd Deepgram-nyckel). En begäran med endast
+`deepgram/nova-3` använder **inte** OpenRouter.
 
 **Format som stöds:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** filbaserad transkribering över Gemini Live
+WebSocket (kräver en Gemini API-nyckel). Uppladdningen konverteras till 16 kHz mono-PCM med `ffmpeg`
+(måste finnas i `PATH`, såvida filen inte redan är en 16 kHz mono-PCM WAV), strömmas till sessionen och
+den slutgiltiga texten returneras som `{ "text": "..." }`. Valfria formulärfält för `language` och `prompt`
+vidarebefordras. Begränsningar: uppladdningar över 25 MiB eller avkodat ljud som är längre än 10 minuter
+besvaras med `413`; en konvertering som körs längre än 60 s avslutas och besvaras med `504`. API-nyckeln
+skickas endast i huvudet `x-goog-api-key`, aldrig i WebSocket-URL:en.
 
 ---
 
@@ -1570,29 +1691,29 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 För klienter som använder Ollamas API-format:
 
 ```bash
-# Chattändpunkt (Ollama-format)
+# Chat-endpoint (Ollama-format)
 POST /v1/api/chat
 
-# Modellista (Ollama-format)
+# Modellförteckning (Ollama-format)
 GET /api/tags
 ```
 
-Begäranden översätts automatiskt mellan Ollama-formatet och interna format.
+Begäranden översätts automatiskt mellan Ollama-format och interna format.
 
-## Tokeniserade VS Code-alias utan sidhuvud
+## Tokeniserade VS Code-/headerlösa alias
 
-Använd dessa alias när en integration inte kan lägga till ett `Authorization`-sidhuvud och API-nyckeln måste bäddas in i bas-URL:en.
+Använd dessa alias när en integration inte kan lägga till en `Authorization`-header och behöver API-nyckeln inbäddad i bas-URL:en.
 
 ```bash
-# Katalogalias i OpenAI-stil
+# OpenAI-stilens katalogalias
 GET /api/v1/vscode/{token}/
 GET /api/v1/vscode/{token}/models
 
-# Chattalias i OpenAI-stil
+# OpenAI-stilens chattalias
 POST /api/v1/vscode/{token}/chat/completions
 POST /api/v1/vscode/{token}/responses
 
-# Alias i Ollama-stil
+# Ollama-stilens alias
 POST /api/v1/vscode/{token}/api/chat
 GET /api/v1/vscode/{token}/api/tags
 ```
@@ -1606,18 +1727,18 @@ curl -X POST https://your-host.example/api/v1/vscode/YOUR_API_KEY/chat/completio
   -d '{"model":"auto","messages":[{"role":"user","content":"hello"}]}'
 ```
 
-Anmärkningar:
+Anteckningar:
 
-- De tokeniserade aliasen återanvänder samma hanterare som `/v1/*` och `/api/tags`; svarsstrukturerna förblir identiska.
-- Föredra `Authorization: Bearer ...` när klienten stöder anpassade sidhuvuden.
-- URL-baserade token kan förekomma i loggar från omvända proxyservrar, webbläsarhistorik och telemetri utanför OmniRoute. Betrakta dem som ett kompatibilitetsalternativ, inte som standardmetod för autentisering.
+- De tokeniserade aliasen återanvänder samma hanterare som `/v1/*` och `/api/tags`; svarsformaten förblir identiska.
+- Föredra `Authorization: Bearer ...` när klienten stöder anpassade headers.
+- URL-baserade tokens kan förekomma i reverse proxy-loggar, webbläsarhistorik och telemetri utanför OmniRoute. Behandla dem som ett kompatibilitetsalternativ, inte som standardautentiseringsmetod.
 
 ---
 
 ## Telemetri
 
 ```bash
-# Hämta en sammanfattning av latenstelemetri (p50/p95/p99 per leverantör)
+# Hämta en sammanfattning av latensens telemetri (p50/p95/p99 per leverantör)
 GET /api/telemetry/summary
 ```
 
@@ -1654,17 +1775,17 @@ Content-Type: application/json
 }
 ```
 
-> **Schemaanmärkningar** (`setBudgetSchema`): `apiKeyId` är obligatoriskt; minst ett av `dailyLimitUsd`, `weeklyLimitUsd` eller `monthlyLimitUsd` måste vara större än noll. Valfria fält: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Det äldre formatet `{keyId, limit, period}` returnerar `400 Bad Request`.
+> **Schemaanteckningar** (`setBudgetSchema`): `apiKeyId` krävs; minst ett av `dailyLimitUsd`, `weeklyLimitUsd` eller `monthlyLimitUsd` måste vara större än noll. Valfria fält: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Det äldre formatet `{keyId, limit, period}` returnerar `400 Bad Request`.
 
-## Tokengränser
+## Tokenbegränsningar
 
-**Tokenbudgetar** per API-nyckel (separata från den USD-baserade budgeten ovan). De tillämpas direkt i sökvägen för begäran: när en nyckels användning i det aktuella fönstret når gränsen avvisas begäranden med `429 Too Many Requests`. Gränser kan begränsas till en specifik `model`, en `provider` eller tillämpas `global`t för hela nyckeln. När flera gränser matchar en begäran gäller den mest restriktiva.
+**token**-budgetar per API-nyckel (separata från den USD-baserade budgeten ovan). Verkställs direkt i begäransflödet: när en nyckels användning under det aktuella fönstret når dess gräns avvisas begäranden med `429 Too Many Requests`. Begränsningar kan avgränsas till en specifik `model`, en `provider` eller tillämpas `global`t för hela nyckeln; när flera begränsningar matchar en begäran gäller den mest restriktiva.
 
 ```bash
-# Lista en nyckels tokengränser (inklusive aktuell användning i fönstret)
+# Lista en nyckels tokenbegränsningar (inkluderar aktuell användning i fönstret)
 GET /api/usage/token-limits?apiKeyId=key-123
 
-# Skapa eller uppdatera en tokengräns
+# Skapa eller uppdatera en tokenbegränsning
 POST /api/usage/token-limits
 Content-Type: application/json
 
@@ -1677,24 +1798,24 @@ Content-Type: application/json
   "enabled": true
 }
 
-# Ta bort en tokengräns efter id
+# Ta bort en tokenbegränsning efter id
 DELETE /api/usage/token-limits?id=tl-abc
 ```
 
-> **Schemaanteckningar** (`setTokenLimitSchema`): `apiKeyId` och `scopeType` (`model` | `provider` | `global`) är obligatoriska. `scopeValue` är obligatoriskt såvida inte `scopeType` är `global` (t.ex. ett modell-id för omfånget `model` eller ett leverantörs-id för omfånget `provider`). `tokenLimit` måste vara ett positivt heltal (konverteras från en sträng). Valfritt: `id` (utelämna för att skapa, ange för att uppdatera), `resetInterval` (`daily` | `weekly` | `monthly`, standardvärde `monthly`), `resetTime` (`HH:MM`), `enabled` (standardvärde `true`). Svar från `GET` kompletterar varje gräns med `tokensUsed`, `remaining`, `windowStart`, `periodStartAt` och `nextResetAt`. Detta är en hanteringsslutpunkt (autentisering tillämpas centralt av authz-pipelinen).
+> **Schemaanteckningar** (`setTokenLimitSchema`): `apiKeyId` och `scopeType` (`model` | `provider` | `global`) krävs. `scopeValue` krävs såvida inte `scopeType` är `global` (t.ex. ett modell-id för `model`-omfattning, ett provider-id för `provider`-omfattning). `tokenLimit` måste vara ett positivt heltal (konverteras från sträng). Valfritt: `id` (utelämna för att skapa, ange för att uppdatera), `resetInterval` (`daily` | `weekly` | `monthly`, standard är `monthly`), `resetTime` (`HH:MM`), `enabled` (standard är `true`). `GET`-svar utökar varje begränsning med `tokensUsed`, `remaining`, `windowStart`, `periodStartAt` och `nextResetAt`. Detta är en endpoint i management-klassen (autentisering verkställs centralt av authz-pipelinen).
 
 ## Bearbetning av begäranden
 
 1. Klienten skickar en begäran till `/v1/*`
-2. Routens hanterare anropar `handleChat`, `handleEmbedding`, `handleAudioTranscription` eller `handleImageGeneration`
-3. Modellen matchas (direkt leverantör/modell eller alias/kombination)
+2. Routehanteraren anropar `handleChat`, `handleEmbedding`, `handleAudioTranscription` eller `handleImageGeneration`
+3. Modellen löses (direkt provider/modell eller alias/kombination)
 4. Autentiseringsuppgifter väljs från den lokala databasen med filtrering efter kontotillgänglighet
-5. För chatt: `handleChatCore` kontrollerar semantisk cache/signaturcache och matchar kombinationens komprimeringsinställningar
-6. Proaktiv komprimering körs före översättning till leverantörens format när den är aktiverad (`lite`, Caveman, RTK eller staplad)
-7. Leverantörsexekveraren skickar begäran uppströms
-8. Svaret översätts tillbaka till klientformatet (chatt) eller returneras i befintligt skick (inbäddningar/bilder/ljud)
+5. För chatt kontrollerar `handleChatCore` semantisk/signaturbaserad cache och löser komprimeringsinställningar för kombinationen
+6. Proaktiv komprimering körs före provideröversättningen när den är aktiverad (`lite`, Caveman, RTK eller staplad)
+7. Provider-exekveraren skickar begäran uppströms
+8. Svaret översätts tillbaka till klientformatet (chatt) eller returneras som det är (embeddings/bilder/ljud)
 9. Användning, komprimeringsanalys och begärandeloggar registreras
-10. Reservlösning tillämpas vid fel enligt kombinationsreglerna
+10. Fallback tillämpas vid fel enligt reglerna för kombinationen
 
 Fullständig arkitekturreferens: [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 
@@ -1702,32 +1823,32 @@ Fullständig arkitekturreferens: [`ARCHITECTURE.md`](../architecture/ARCHITECTUR
 
 ## Hantering av kombinationer
 
-Kombinationer för routing på högre nivå (som redan sammanfattats under `/api/combos*`) kan också mappas 1:1 från ett mönster för modell-id, vilket möjliggör transparent omdirigering av ett modell-id i OpenAI-stil till en kombination.
+Routingkombinationer på högre nivå (som redan sammanfattats under `/api/combos*`) kan också mappas 1:1 från ett modell-id-mönster, vilket möjliggör transparent omdirigering av ett OpenAI-liknande modell-id till en kombination.
 
 | Metod  | Sökväg                           | Beskrivning                                                                    |
 | ------ | -------------------------------- | ------------------------------------------------------------------------------ |
-| GET    | `/api/model-combo-mappings`      | Lista alla mappningar från modell till kombination                             |
+| GET    | `/api/model-combo-mappings`      | Lista alla modell→kombination-mappningar                                       |
 | POST   | `/api/model-combo-mappings`      | Skapa mappning — body: `{pattern, comboId, priority?, enabled?, description?}` |
 | GET    | `/api/model-combo-mappings/[id]` | Hämta en enskild mappning                                                      |
 | PUT    | `/api/model-combo-mappings/[id]` | Uppdatera fält i en befintlig mappning                                         |
 | DELETE | `/api/model-combo-mappings/[id]` | Ta bort en mappning                                                            |
 
-**Autentisering:** hanteringssession/API-nyckel (`requireManagementAuth`).
+**Autentisering:** management-session/API-nyckel (`requireManagementAuth`).
 
 ---
 
-## Webhookar
+## Webhooks
 
-Utgående webhook-prenumerationer för OmniRoute-händelser (slutförda begäranden, förbrukad kvot, nyckelrotation osv.).
+Utgående webhookprenumerationer för OmniRoute-händelser (slutförda begäranden, kvotförbrukning, nyckelrotation med mera).
 
 | Metod  | Sökväg                    | Beskrivning                                                              |
 | ------ | ------------------------- | ------------------------------------------------------------------------ |
-| GET    | `/api/webhooks`           | Lista webhookar (hemligheter maskeras som `<prefix>...`)                 |
-| POST   | `/api/webhooks`           | Skapa webhook — brödtext: `{url, events?: ["*"], secret?, description?}` |
+| GET    | `/api/webhooks`           | Lista webhooks (hemligheter maskeras till `<prefix>...`)                 |
+| POST   | `/api/webhooks`           | Skapa en webhook — body: `{url, events?: ["*"], secret?, description?}`  |
 | GET    | `/api/webhooks/[id]`      | Hämta en webhook                                                         |
 | PUT    | `/api/webhooks/[id]`      | Uppdatera url/events/secret/description                                  |
 | DELETE | `/api/webhooks/[id]`      | Ta bort en webhook                                                       |
-| POST   | `/api/webhooks/[id]/test` | Skicka en testnyttolast till webhook-URL:en och returnera leveransstatus |
+| POST   | `/api/webhooks/[id]/test` | Skicka en testnyttolast till webhookens URL och returnera leveransstatus |
 
 **Autentisering:** hanteringssession/API-nyckel (`requireManagementAuth`).
 
@@ -1735,34 +1856,34 @@ Utgående webhook-prenumerationer för OmniRoute-händelser (slutförda begäran
 
 ## Registrerade nycklar (automatisk hantering)
 
-Används av undersystemet för automatisk nyckelhantering för att utfärda och rotera API-nycklar mot en bakomliggande leverantör/ett bakomliggande konto, med dagliga/timvisa kvoter.
+Används av undersystemet för automatisk nyckelhantering för att utfärda och rotera API-nycklar mot en underliggande leverantör/ett konto, med dagliga/timvisa kvoter.
 
-| Metod  | Sökväg                                | Beskrivning                                                                                                                                                                                                                     |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Lista registrerade nycklar (endast maskerat prefix)                                                                                                                                                                             |
-| POST   | `/api/v1/registered-keys`             | Utfärda en ny registrerad nyckel — brödtext: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerar den råa nyckeln **en gång**. Returnerar `429` om kvoten inte medger begäran. |
-| GET    | `/api/v1/registered-keys/[id]`        | Hämta metadata för en registrerad nyckel (inget råmaterial)                                                                                                                                                                     |
-| DELETE | `/api/v1/registered-keys/[id]`        | Återkalla en registrerad nyckel                                                                                                                                                                                                 |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit slutpunkt för återkallning (samma effekt som DELETE)                                                                                                                                                                   |
+| Metod  | Sökväg                                | Beskrivning                                                                                                                                                                                                  |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/v1/registered-keys`             | Lista registrerade nycklar (endast maskerat prefix)                                                                                                                                                          |
+| POST   | `/api/v1/registered-keys`             | Utfärda en ny registrerad nyckel — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerar den råa nyckeln **en gång**. Returnerar `429` vid nekad kvot. |
+| GET    | `/api/v1/registered-keys/[id]`        | Hämta metadata för en registrerad nyckel (inget råvärde)                                                                                                                                                     |
+| DELETE | `/api/v1/registered-keys/[id]`        | Återkalla en registrerad nyckel                                                                                                                                                                              |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit endpoint för återkallande (samma effekt som DELETE)                                                                                                                                                 |
 
-**Autentisering:** hanteringssession/API-nyckel (`requireManagementAuth`) — samma kontroll som för `/api/keys`: en kontrollpanelssession, den lokala CLI-token eller en API-nyckel med omfånget `manage`/`admin`; API-nycklar som endast är avsedda för inferens får `403`. Se även `/v1/quotas/check` och `/v1/issues/report`.
+**Autentisering:** hanteringssession/API-nyckel (`requireManagementAuth`) — samma skydd som `/api/keys`: en dashboardsession, den lokala CLI-token eller en API-nyckel med scopet `manage`/`admin`; API-nycklar som endast har behörighet för inferens får `403`. Se även `/v1/quotas/check` och `/v1/issues/report`.
 
 ---
 
 ## Agentprotokoll
 
-Molnagentuppgifter (Claude Code, Codex Cloud, OpenHands osv.) som körs på distans åt OmniRoute-användare.
+Molnagentuppgifter (Claude Code, Codex Cloud, OpenHands osv.) som körs på distans på uppdrag av OmniRoute-användare.
 
-| Metod  | Sökväg                        | Beskrivning                                                                                                                                                  |
-| ------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/agents/tasks`        | Lista uppgifter — valfria `?provider=`, `?status=`, `?limit=` (1–500, standardvärde 50)                                                                      |
-| POST   | `/api/v1/agents/tasks`        | Skapa uppgift — innehållet valideras av `CreateCloudAgentTaskSchema` (`providerId`, `prompt`, `source`, `options?`). Returnerar `201` med ett uppgiftsomslag |
-| DELETE | `/api/v1/agents/tasks?id=...` | Ta bort en uppgift                                                                                                                                           |
-| GET    | `/api/v1/agents/tasks/[id]`   | Läs uppgift — uppdaterar synkront statusen från den överordnade molnagenten när ett `external_id` har angetts                                                |
-| POST   | `/api/v1/agents/tasks/[id]`   | Diskriminerad åtgärd: `{action: "approve"}`, `{action: "message", message}` eller `{action: "cancel"}`                                                       |
-| DELETE | `/api/v1/agents/tasks/[id]`   | Ta bort en specifik uppgift efter ID                                                                                                                         |
+| Metod  | Sökväg                        | Beskrivning                                                                                                                                              |
+| ------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/agents/tasks`        | Lista uppgifter — valfria `?provider=`, `?status=`, `?limit=` (1–500, standardvärde 50)                                                                  |
+| POST   | `/api/v1/agents/tasks`        | Skapa uppgift — brödtexten valideras av `CreateCloudAgentTaskSchema` (`providerId`, `prompt`, `source`, `options?`). Returnerar `201` med uppgiftsomslag |
+| DELETE | `/api/v1/agents/tasks?id=...` | Ta bort en uppgift                                                                                                                                       |
+| GET    | `/api/v1/agents/tasks/[id]`   | Läs uppgift — uppdaterar synkront status från den uppströms molnagenter när `external_id` har angetts                                                    |
+| POST   | `/api/v1/agents/tasks/[id]`   | Diskriminerad åtgärd: `{action: "approve"}`, `{action: "message", message}` eller `{action: "cancel"}`                                                   |
+| DELETE | `/api/v1/agents/tasks/[id]`   | Ta bort en specifik uppgift efter id                                                                                                                     |
 
-> **Autentisering:** hanteringsautentisering krävs för varje metod (`requireCloudAgentManagementAuth`). Före v3.8.0 var dessa oautentiserade — se incheckning `588a0333` för den bakåtinkompatibla ändringen.
+> **Autentisering:** administrationsautentisering krävs för varje metod (`requireCloudAgentManagementAuth`). Före v3.8.0 var dessa oautentiserade — se commiten `588a0333` för den brytande ändringen.
 
 ```bash
 # Skapa en Claude Code-molnuppgift
@@ -1774,78 +1895,78 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks \
 
 ---
 
-## Hanteringsproxyservrar
+## Administrationsproxyer
 
-Utgående HTTP(S)-/SOCKS-proxyservrar som kan tilldelas leverantörer, konton eller globalt.
+Utgående HTTP(S)/SOCKS-proxyer som kan tilldelas leverantörer, konton eller globalt.
 
-| Metod  | Sökväg                                       | Beskrivning                                                                                                                                                          |
-| ------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/management/proxies`                 | Lista proxyservrar (med `?id=` returneras en; med `?id=&where_used=1` returneras tilldelningsgrafen)                                                                 |
-| POST   | `/api/v1/management/proxies`                 | Skapa proxyserver — innehållet valideras av `createProxyRegistrySchema`                                                                                              |
-| PATCH  | `/api/v1/management/proxies`                 | Uppdatera proxyserver — innehållet valideras av `updateProxyRegistrySchema` (kräver `id`)                                                                            |
-| DELETE | `/api/v1/management/proxies?id=...&force=1`  | Ta bort proxyserver (använd `force=1` för att koppla bort tilldelningar)                                                                                             |
-| GET    | `/api/v1/management/proxies/assignments`     | Lista tilldelningar — kan filtreras efter `proxy_id`, `scope`, `scope_id`; ange `resolve_connection_id=<id>` för att hitta den aktiva proxyservern för en anslutning |
-| PUT    | `/api/v1/management/proxies/assignments`     | Tilldela — innehållet valideras av `proxyAssignmentSchema` (`{scope, scopeId?, proxyId?}`). Rensar dispatcher-cachen                                                 |
-| PUT    | `/api/v1/management/proxies/bulk-assign`     | Masstilldela — innehållet valideras av `bulkProxyAssignmentSchema` (`{scope, scopeIds[], proxyId?}`)                                                                 |
-| GET    | `/api/v1/management/proxies/health?hours=24` | Aggregerad proxyhälsa (antal lyckade/misslyckade anrop samt latens) under ett tidsfönster                                                                            |
+| Metod  | Sökväg                                       | Beskrivning                                                                                                                                                     |
+| ------ | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/management/proxies`                 | Lista proxyer (med `?id=` returneras en; med `?id=&where_used=1` returneras tilldelningsgrafen)                                                                 |
+| POST   | `/api/v1/management/proxies`                 | Skapa proxy — brödtexten valideras av `createProxyRegistrySchema`                                                                                               |
+| PATCH  | `/api/v1/management/proxies`                 | Uppdatera proxy — brödtexten valideras av `updateProxyRegistrySchema` (kräver `id`)                                                                             |
+| DELETE | `/api/v1/management/proxies?id=...&force=1`  | Ta bort proxy (använd `force=1` för att koppla från tilldelningar)                                                                                              |
+| GET    | `/api/v1/management/proxies/assignments`     | Lista tilldelningar — kan filtreras efter `proxy_id`, `scope`, `scope_id`; skicka `resolve_connection_id=<id>` för att lösa den aktiva proxyn för en anslutning |
+| PUT    | `/api/v1/management/proxies/assignments`     | Tilldela — brödtexten valideras av `proxyAssignmentSchema` (`{scope, scopeId?, proxyId?}`). Rensar dispatchercachen                                             |
+| PUT    | `/api/v1/management/proxies/bulk-assign`     | Mass­tilldela — brödtexten valideras av `bulkProxyAssignmentSchema` (`{scope, scopeIds[], proxyId?}`)                                                           |
+| GET    | `/api/v1/management/proxies/health?hours=24` | Samlad proxyhälsa (antal lyckade/misslyckade anrop, svarstid) under ett tidsintervall                                                                           |
 
-**Autentisering:** hanteringssession/API-nyckel krävs för varje rutt (`requireManagementAuth`).
+**Autentisering:** administrationssession/API-nyckel krävs för varje route (`requireManagementAuth`).
 
-> Uppgiftsbeskrivningens `POST /api/v1/management/proxies/[id]/assignments` och `POST /api/v1/management/proxies/[id]/health` hanteras av de platta rutterna `/assignments` och `/health` som visas ovan — det finns inga underordnade rutter per ID i kodbasen.
+> Uppgiftsbeskrivningens `POST /api/v1/management/proxies/[id]/assignments` och `POST /api/v1/management/proxies/[id]/health` hanteras av de platta routarna `/assignments` och `/health` som visas ovan — det finns inga underroutrar per id i kodbasen.
 
 ---
 
-## Motståndskraft (utökad)
+## Resiliens (utökad)
 
-OmniRoute tillhandahåller tre oberoende mekanismer för tillfälliga fel. Hanteringsendpoints nedan låter operatörer läsa och åsidosätta dem:
+OmniRoute tillhandahåller tre oberoende mekanismer för tillfälliga fel; hanteringsendpoints nedan gör det möjligt för operatörer att läsa av och åsidosätta dem:
 
-| Omfattning             | Lagring av tillstånd                           | Läs                                       | Återställ / rensa                                      |
-| ---------------------- | ---------------------------------------------- | ----------------------------------------- | ------------------------------------------------------ |
-| Leverantörsbrytare     | `domain_circuit_breakers` + i minnet           | `/api/monitoring/health`                  | `POST /api/resilience/reset`                           |
-| Anslutningens väntetid | `rateLimitedUntil` för leverantörsanslutningar | `/api/rate-limits`, `/api/providers/[id]` | (återaktiveras vid behov; rensa via leverantörens PUT) |
-| Modellspärr            | Register över modelltillgänglighet i minnet    | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`               |
+| Omfattning                       | Lagring av tillstånd                        | Läs                                       | Återställ / rensa                                |
+| -------------------------------- | ------------------------------------------- | ----------------------------------------- | ------------------------------------------------ |
+| Provider-brytare                 | `domain_circuit_breakers` + minne           | `/api/monitoring/health`                  | `POST /api/resilience/reset`                     |
+| Nedkylningsperiod för anslutning | `rateLimitedUntil` på provideranslutningar  | `/api/rate-limits`, `/api/providers/[id]` | (återaktiveras fördröjt; rensa via provider PUT) |
+| Modellblockering                 | Register över modelltillgänglighet i minnet | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`         |
 
-`PATCH /api/resilience` accepterar åsidosättningar för leverantörsbrytare under `providerBreaker.oauth` och `providerBreaker.apikey`. Varje profil stöder `degradationThreshold`, `failureThreshold` och `resetTimeoutMs`. Samma fält finns i Kontrollpanel → Inställningar → Motståndskraft.
+`PATCH /api/resilience` accepterar åsidosättningar av provider-brytare under `providerBreaker.oauth` och `providerBreaker.apikey`. Varje profil stöder `degradationThreshold`, `failureThreshold` och `resetTimeoutMs`; samma fält exponeras i Dashboard → Settings → Resilience.
 
 ```bash
-# Rensa en enskild modellspärr
+# Rensa en blockering för en enskild modell
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"provider":"openai","model":"gpt-4o-mini"}'
 
-# Rensa alla spärrar
+# Rensa alla blockeringar
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -d '{"all":true}'
 ```
 
-Fullständig konceptuell referens och standardvärden för brytare: se [`CLAUDE.md`](../../CLAUDE.md) → "Körtidstillstånd för motståndskraft" och [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md).
+Fullständig konceptuell referens och standardvärden för brytare: se [`CLAUDE.md`](../../CLAUDE.md) → "Resiliensens körtidstillstånd" och [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md).
 
-### Kö för hastighetsbegränsning och skyddsnät för automatisk aktivering
+### Kö för hastighetsbegränsningar och säkerhetsnät för automatisk aktivering
 
-- **Skrivväg som stöds**: `POST /api/rate-limits` med innehållet `{"connectionId": "<id>", "enabled": true|false}` är den hanteringsendpoint som stöds för att slå på eller av skydd mot hastighetsbegränsning för en anslutning. `PUT /api/providers/[id]` ändrar eller växlar avsiktligt inte `rateLimitProtection` (#11278).
-- **Semantik för `enabled: false`**: Om `enabled: false` anges tas det uttryckliga skyddet bort för anslutningen, men en aktiv API-nyckelanslutning undantas **inte** från det globala skyddsnätet för automatisk aktivering (`autoEnableApiKeyProviders = true`). I `reconcileEnabledConnections` (`open-sse/services/rateLimitManager.ts`) är `false` och `undefined` likvärdiga. Aktiva API-nyckelanslutningar utan uttryckligt skydd förblir skyddade av skyddsnätet för automatisk aktivering.
-- **Global inaktivering**: Om API-nyckelanslutningar ska köras utan köer för hastighetsbegränsning inaktiverar du skyddsnätet globalt via `RATE_LIMIT_AUTO_ENABLE=false` (miljövariabel) eller `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false` (Inställningar → Motståndskraft / `PATCH /api/resilience`).
+- **Sökväg för skrivning som stöds**: `POST /api/rate-limits` med brödtexten `{"connectionId": "<id>", "enabled": true|false}` är den hanteringsendpoint som stöds för att aktivera eller inaktivera skydd mot hastighetsbegränsningar för en anslutning. `PUT /api/providers/[id]` ändrar eller växlar avsiktligt inte `rateLimitProtection` (#11278).
+- **Semantik för `enabled: false`**: Att ange `enabled: false` tar bort explicit skydd för anslutningen, men **innebär inte** att en aktiv API-nyckelanslutning avstår från det globala säkerhetsnätet för automatisk aktivering (`autoEnableApiKeyProviders = true`). I `reconcileEnabledConnections` (`open-sse/services/rateLimitManager.ts`) är `false` och `undefined` likvärdiga; aktiva API-nyckelanslutningar utan explicit skydd förblir skyddade av säkerhetsnätet för automatisk aktivering.
+- **Global inaktivering**: Om du vill köra API-nyckelanslutningar utan köer för hastighetsbegränsningar inaktiverar du säkerhetsnätet globalt via `RATE_LIMIT_AUTO_ENABLE=false` (env) eller `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false` (Settings → Resilience / `PATCH /api/resilience`).
 
 ---
 
 ## Färdigheter
 
-Ramverk för att utöka OmniRoute med anpassade körbara hanterare samt integrationer med marknadsplatser.
+Färdighetsramverk för att utöka OmniRoute med anpassade körbara hanterare samt integrationer med marknadsplatser.
 
 | Metod  | Sökväg                            | Beskrivning                                                                                                                            |
 | ------ | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/skills`                     | Lista installerade färdigheter — kan filtreras med `?q=`, `?mode=on\|off\|auto`, `?source=skillsmp\|skillssh\|local`, sidindelad       |
+| GET    | `/api/skills`                     | Lista installerade färdigheter — kan filtreras med `?q=`, `?mode=on\|off\|auto`, `?source=skillsmp\|skillssh\|local`, paginerad        |
 | GET    | `/api/skills/[id]`                | Hämta en färdighet                                                                                                                     |
-| PUT    | `/api/skills/[id]`                | Uppdatera en färdighet (namn, beskrivning, läge, schema, hanterare, taggar)                                                            |
+| PUT    | `/api/skills/[id]`                | Uppdatera färdighet (namn, beskrivning, läge, schema, hanterare, taggar)                                                               |
 | DELETE | `/api/skills/[id]`                | Avinstallera en färdighet                                                                                                              |
-| POST   | `/api/skills/install`             | Installera en färdighet från ett råmanifest — innehåll: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}` |
-| GET    | `/api/skills/executions`          | Lista senaste körningarna av färdigheter (granskningslogg med indata/utdata/varaktighet)                                               |
-| GET    | `/api/skills/marketplace?q=...`   | Sökning/populär lista från marknadsplatsen SkillsMP (kräver inställningen `skillsmpApiKey`)                                            |
-| POST   | `/api/skills/marketplace/install` | Installera en färdighet efter id från SkillsMP                                                                                         |
+| POST   | `/api/skills/install`             | Installera en färdighet från ett råmanifest — brödtext: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}` |
+| GET    | `/api/skills/executions`          | Lista de senaste körningarna av färdigheter (revisionsspår med indata/utdata/körtid)                                                   |
+| GET    | `/api/skills/marketplace?q=...`   | Sök- och popularitetslista från SkillsMP-marknadsplatsen (kräver inställningen `skillsmpApiKey`)                                       |
+| POST   | `/api/skills/marketplace/install` | Installera en färdighet efter ID från SkillsMP                                                                                         |
 | GET    | `/api/skills/skillssh?q=&limit=`  | Sök i registret skills.sh                                                                                                              |
-| POST   | `/api/skills/skillssh/install`    | Installera en färdighet efter id från skills.sh                                                                                        |
+| POST   | `/api/skills/skillssh/install`    | Installera en färdighet efter ID från skills.sh                                                                                        |
 
 **Autentisering:** hanteringssession/API-nyckel. Sökvägar för marknadsplatssökning accepterar antingen hanteringsautentisering eller en Bearer-API-nyckel (`isAuthenticated`).
 
@@ -1853,45 +1974,45 @@ Ramverk för att utöka OmniRoute med anpassade körbara hanterare samt integrat
 
 ## Minne
 
-Beständigt minne för konversationer/fakta, avgränsat per API-nyckel/session.
+Beständigt konversations-/faktaminne, begränsat till API-nyckel/session.
 
-| Metod  | Sökväg               | Beskrivning                                                                                                         |
-| ------ | -------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/memory`        | Lista minnen — `?apiKeyId=`, `?type=`, `?sessionId=`, `?q=`, med sidnumrering via `offset/limit` eller `page/limit` |
-| POST   | `/api/memory`        | Skapa minne — brödtext validerad av Zod: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}`      |
-| GET    | `/api/memory/[id]`   | Hämta ett minne                                                                                                     |
-| DELETE | `/api/memory/[id]`   | Ta bort ett minne                                                                                                   |
-| GET    | `/api/memory/health` | Minnesundersystemets hälsa (databasanslutning, backend för inbäddningar, status för vektorindex)                    |
+| Metod  | Sökväg               | Beskrivning                                                                                                      |
+| ------ | -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/memory`        | Lista minnen — `?apiKeyId=`, `?type=`, `?sessionId=`, `?q=`, med `offset/limit` eller `page/limit`-paginering    |
+| POST   | `/api/memory`        | Skapa minne — begärandet valideras av Zod: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}` |
+| GET    | `/api/memory/[id]`   | Hämta ett minne                                                                                                  |
+| DELETE | `/api/memory/[id]`   | Ta bort ett minne                                                                                                |
+| GET    | `/api/memory/health` | Hälsostatus för minnessubsystemet (DB-anslutning, backend för embeddingar, status för vektorindex)               |
 
-**Autentisering:** hanteringssession/API-nyckel (`requireManagementAuth`). `type`-uppräkning: `FACTUAL`, `EPISODIC`, `SEMANTIC`, `PROCEDURAL` (se `MemoryType` i `src/lib/memory/types.ts`).
+**Autentisering:** hanteringssession/API-nyckel (`requireManagementAuth`). `type`-enum: `FACTUAL`, `EPISODIC`, `SEMANTIC`, `PROCEDURAL` (se `MemoryType` i `src/lib/memory/types.ts`).
 
 ---
 
 ## MCP-server
 
-OmniRoute levereras med en inbäddad Model Context Protocol-server med 3 transporter (stdio, SSE, streamable-http) och omfångsbegränsade verktyg. Dashboard-slutpunkterna nedan läser status-/granskningsdata och vidarebefordrar HTTP-transporterna.
+OmniRoute levereras med en inbäddad Model Context Protocol-server med 3 transportalternativ (stdio, SSE, streamable-http) och begränsade verktyg. Slutpunkterna i kontrollpanelen läser status-/granskningsdata och proxar HTTP-transportalternativen.
 
 | Metod | Sökväg | Beskrivning |
 | ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Hjärtslag, transport, onlinestatus, senaste anrop, vanligaste verktyg, lyckandefrekvens under 24 timmar |
+| GET | `/api/mcp/status` | Hjärtstatus, transport, onlinestatus, senaste anrop, främsta verktyg, lyckandefrekvens under 24 timmar |
 | GET | `/api/mcp/tools` | Lista över MCP-verktyg med `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Öppna SSE-ström för SSE-transporten (returnerar `503` om MCP är inaktiverat eller transporten inte matchar) |
-| POST | `/api/mcp/sse` | Skicka JSON-RPC-ram via SSE-transporten |
+| GET | `/api/mcp/sse` | Öppna en SSE-ström för SSE-transporten (returnerar `503` om MCP är inaktiverat eller om transporten inte matchar) |
+| POST | `/api/mcp/sse` | Skicka en JSON-RPC-ram på SSE-transporten |
 | GET | `/api/mcp/stream` | Öppna SSE-sidan av Streamable HTTP-transporten (serverinitierade meddelanden) |
-| POST | `/api/mcp/stream` | Skicka JSON-RPC-ram via Streamable HTTP-transporten |
+| POST | `/api/mcp/stream` | Skicka en JSON-RPC-ram på Streamable HTTP-transporten |
 | DELETE | `/api/mcp/stream` | Avsluta en Streamable HTTP-session |
-| GET | `/api/mcp/audit` | Sök i granskningsloggen — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Sammanställd granskningsstatistik (totaler, lyckandefrekvens, genomsnittlig varaktighet, vanligaste verktyg) |
+| GET | `/api/mcp/audit` | Fråga granskningsloggen — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
+| GET | `/api/mcp/audit/stats` | Sammanställd granskningsstatistik (totaler, lyckandefrekvens, genomsnittlig varaktighet, främsta verktyg) |
 
-**Autentisering:** transporterna `sse`/`stream` använder den MCP-specifika autentiseringsytan (Bearer-API-nyckel med omfånget `mcp`); rutterna `status`/`tools`/`audit*` kan läsas från dashboarden (ingen ytterligare autentisering krävs utöver åtkomst till dashboard-värden).
+**Autentisering:** transportalternativen `sse`/`stream` använder den MCP-specifika autentiseringsytan (Bearer API-nyckel med `mcp`-omfattning); rutterna `status`/`tools`/`audit*` kan läsas från kontrollpanelen (ingen ytterligare autentisering krävs utöver åtkomst till kontrollpanelens värd).
 
-> Båda HTTP-transporterna styrs av `settings.mcpEnabled` och `settings.mcpTransport` — en transport som inte matchar returnerar `400`, ett inaktiverat MCP-tillstånd returnerar `503`.
+> Båda HTTP-transportalternativen styrs av `settings.mcpEnabled` och `settings.mcpTransport` — en transport som inte matchar returnerar `400`, och ett inaktiverat MCP-läge returnerar `503`.
 
 ---
 
 ## A2A-server
 
-OmniRoute tillhandahåller en A2A-slutpunkt (Agent-to-Agent) för JSON-RPC 2.0 samt ett REST-omslag för inspektion och användning i kontrollpaneler.
+OmniRoute exponerar en A2A-endpoint (Agent-to-Agent) för JSON-RPC 2.0 samt ett REST-omslag för inspektion och användning i dashboards.
 
 ### JSON-RPC
 
@@ -1911,14 +2032,14 @@ Content-Type: application/json
 }
 ```
 
-Metoder som stöds (samtliga styrs av `settings.a2aEnabled`):
+Metoder som stöds (alla kräver att `settings.a2aEnabled` är aktiverat):
 
-| Metod            | Beskrivning                                                            |
-| ---------------- | ---------------------------------------------------------------------- |
-| `message/send`   | Synkron körning av färdighet; returnerar `{task, artifacts, metadata}` |
-| `message/stream` | Strömmande SSE-körning av samma uppsättning färdigheter                |
-| `tasks/get`      | Hämtar en uppgift via `taskId`                                         |
-| `tasks/cancel`   | Avbryter en uppgift via `taskId`                                       |
+| Method           | Description                                                               |
+| ---------------- | ------------------------------------------------------------------------- |
+| `message/send`   | Synkron körning av en färdighet; returnerar `{task, artifacts, metadata}` |
+| `message/stream` | Strömmad SSE-körning av samma uppsättning färdigheter                     |
+| `tasks/get`      | Hämtar en uppgift efter `taskId`                                          |
+| `tasks/cancel`   | Avbryter en uppgift efter `taskId`                                        |
 
 Inbyggda färdigheter: `smart-routing`, `quota-management`, `provider-discovery`, `cost-analysis`, `health-report`.
 
@@ -1928,50 +2049,48 @@ Inbyggda färdigheter: `smart-routing`, `quota-management`, `provider-discovery`
 GET /.well-known/agent.json
 ```
 
-Returnerar det offentliga A2A-agentkortet (namn, beskrivning, funktioner, färdighetskatalog och autentiseringsschema) — cachelagrat offentligt i 1 timme. Ingen autentisering krävs.
+Returnerar det offentliga A2A-agentkortet (namn, beskrivning, funktioner, färdighetskatalog, autentiseringsschema) — cachas offentligt i 1 timme. Ingen autentisering krävs.
 
 ### REST-hjälpfunktioner
 
-| Metod | Sökväg                       | Beskrivning                                                                                                           |
-| ----- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/a2a/status`            | A2A-status + uppgiftsstatistik + sammanfattning av cachelagrat agentkort                                              |
-| GET   | `/api/a2a/tasks`             | Listar uppgifter — `?state=submitted\|working\|completed\|failed\|cancelled`, `?skill=`, `?limit=` (≤200), `?offset=` |
-| POST  | `/api/a2a/tasks`             | (Inte implementerad som REST-hjälpfunktion — skapa via JSON-RPC `message/send`)                                       |
-| GET   | `/api/a2a/tasks/[id]`        | Hämtar en uppgift                                                                                                     |
-| POST  | `/api/a2a/tasks/[id]/cancel` | Avbryter en uppgift                                                                                                   |
+| Method | Path                         | Description                                                                                                           |
+| ------ | ---------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/a2a/status`            | A2A-status + uppgiftsstatistik + sammanfattning av cachat agentkort                                                   |
+| GET    | `/api/a2a/tasks`             | Listar uppgifter — `?state=submitted\|working\|completed\|failed\|cancelled`, `?skill=`, `?limit=` (≤200), `?offset=` |
+| POST   | `/api/a2a/tasks`             | (Inte implementerad som REST-hjälpfunktion — skapa via JSON-RPC `message/send`)                                       |
+| GET    | `/api/a2a/tasks/[id]`        | Hämtar en uppgift                                                                                                     |
+| POST   | `/api/a2a/tasks/[id]/cancel` | Avbryter en uppgift                                                                                                   |
 
-**Autentisering:** REST-hjälpfunktionerna körs utan hanteringsautentisering (läsbara från kontrollpanelen); JSON-RPC-rutten `/a2a` använder Bearer-värdet `OMNIROUTE_API_KEY` om det har konfigurerats.
+**Autentisering:** REST-hjälpfunktionerna körs utan hanteringsautentisering (läsbara från dashboarden); JSON-RPC-routen `/a2a` använder Bearer `OMNIROUTE_API_KEY` om den har konfigurerats.
 
 ---
 
 ## Moln, utvärderingar och bedömningar
 
-| Metod | Sökväg | Beskrivning |
+| Method | Path | Description |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
-| POST | `/api/cloud/auth` | Verifierar en Bearer-nyckel och returnerar maskerade leverantörsanslutningar + modellalias för klienter som använder molnsynkronisering |
+| POST | `/api/cloud/auth` | Verifierar en Bearer-nyckel och returnerar maskerade leverantörsanslutningar samt modellalias för klienter som synkroniserar med molnet |
 | POST | `/api/cloud/credentials/update` | Uppdaterar krypterade autentiseringsuppgifter för en molnsynkroniserad leverantör |
-| POST | `/api/cloud/model/resolve` | Matchar ett logiskt modell-ID mot en konkret leverantör/modell med hjälp av den lokala routningstabellen |
-| GET | `/api/cloud/models/alias` | Listar modellalias så som de exponeras för molnsynkronisering |
+| POST | `/api/cloud/model/resolve` | Matchar ett logiskt modell-ID mot en konkret leverantör/modell med hjälp av den lokala routingtabellen |
+| GET | `/api/cloud/models/alias` | Listar modellalias som exponeras för molnsynkronisering |
 | GET | `/api/assess` | Läser de senaste bedömningskategoriseringarna (per leverantör/modell) |
-| POST | `/api/assess` | Kör en bedömning — brödtext: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
+| POST | `/api/assess` | Kör en bedömning — body: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
 | GET | `/api/evals` | Listar inbyggda utvärderingssviter + de senaste körningarna |
 | POST | `/api/evals` | Startar en utvärderingskörning |
-| POST | `/api/evals/suites` | Skapar en anpassad utvärderingssvit — brödtexten valideras av `evalSuiteSaveSchema` |
+| POST | `/api/evals/suites` | Skapar en anpassad utvärderingssvit — body valideras av `evalSuiteSaveSchema` |
 | GET | `/api/evals/suites/[id]` | Hämtar en anpassad utvärderingssvit |
 
-**Autentisering:** `/api/cloud/auth` validerar en Bearer-nyckel direkt och returnerar den maskerade nyckeln och `projectId` för varje anslutning endast för en nyckel med omfånget `manage` / `admin`; de övriga rutterna `/api/cloud/*`, `/api/evals/*` och `/api/assess` kräver en hanteringssession/API-nyckel. POST för `/api/assess` använder `validateBody` med ett diskriminerat unionsschema för omfång.
-
----
+**Autentisering:** `/api/cloud/auth` validerar en Bearer-nyckel direkt och returnerar den maskerade nyckeln och `projectId` för varje anslutning endast för en nyckel med scopet `manage` / `admin`; de övriga `/api/cloud/*`, `/api/evals/*`- och `/api/assess`-rutterna kräver hanteringssession/API-nyckel. POST-anrop till `/api/assess` använder `validateBody` med ett schema för diskriminerad union av scope.
 
 ## Hantering av ACP (Agent Client Protocol)
 
 som underordnade processer. Dessa slutpunkter hanterar identifiering av ACP-agenter och registrering av anpassade agenter.
 
-| Metod  | Sökväg            | Beskrivning                                                                                                                                                           |
-| ------ | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/acp/agents` | Lista alla kända CLI-agenter (inbyggda + anpassade) med installationsstatus, version och binärfil                                                                     |
-| POST   | `/api/acp/agents` | Registrera en anpassad ACP-agent eller uppdatera cachen — kropp: `{id, name, binary, versionCommand, providerAlias, spawnArgs, protocol}` eller `{action: "refresh"}` |
-| DELETE | `/api/acp/agents` | Ta bort en anpassad ACP-agent — frågeparameter: `?id=<agentId>`                                                                                                       |
+| Metod  | Sökväg            | Beskrivning                                                                                                                                                          |
+| ------ | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/acp/agents` | Lista alla kända CLI-agenter (inbyggda + anpassade) med installationsstatus, version och binärfil                                                                    |
+| POST   | `/api/acp/agents` | Registrera en anpassad ACP-agent eller uppdatera cachen — body: `{id, name, binary, versionCommand, providerAlias, spawnArgs, protocol}` eller `{action: "refresh"}` |
+| DELETE | `/api/acp/agents` | Ta bort en anpassad ACP-agent — frågeparameter: `?id=<agentId>`                                                                                                      |
 
 **Exempel på svar** (`GET /api/acp/agents`):
 
@@ -2002,7 +2121,7 @@ som underordnade processer. Dessa slutpunkter hanterar identifiering av ACP-agen
 }
 ```
 
-**Autentisering:** Kräver en hanteringssession (`auth_token`-cookie för instrumentpanelen) eller en API-nyckel med hanteringsbehörighet.
+**Autentisering:** Kräver en hanteringssession (instrumentpanelens `auth_token`-cookie) eller en API-nyckel med hanteringsomfattning.
 
 Se [ACP-ramverket](../frameworks/ACP.md) för fullständig information.
 
@@ -2010,14 +2129,14 @@ Se [ACP-ramverket](../frameworks/ACP.md) för fullständig information.
 
 ## Analys och observerbarhet
 
-Slutpunkter för realtidsanalys för övervakning av dirigering, komprimering och leverantörsmångfald. Dessa används av sidorna under `/dashboard/analytics/*`.
+Analysändpunkter i realtid för övervakning av routning, komprimering och leverantörsmångfald. Dessa används av sidorna `/dashboard/analytics/*`.
 
-### Analys av automatisk dirigering
+### Analys av automatisk routning
 
 | Metod | Sökväg                               | Beskrivning                                                                                                                     |
 | ----- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/analytics/auto-routing`        | Aggregerad statistik för automatisk dirigering: totalt antal anrop, strategifördelning, nivåfördelning och främsta leverantörer |
-| GET   | `/api/analytics/auto-routing?days=7` | Statistik för ett tidsfönster (standardvärde 24 timmar)                                                                         |
+| GET   | `/api/analytics/auto-routing`        | Sammanställd statistik för automatisk routning: totalt antal anrop, strategifördelning, nivåfördelning och främsta leverantörer |
+| GET   | `/api/analytics/auto-routing?days=7` | Statistik för ett tidsintervall (standard är 24 timmar)                                                                         |
 
 **Exempel på svar**:
 
@@ -2047,9 +2166,9 @@ Slutpunkter för realtidsanalys för övervakning av dirigering, komprimering oc
 
 ### Komprimeringsanalys
 
-| Metod | Sökväg                       | Beskrivning                                                                                          |
-| ----- | ---------------------------- | ---------------------------------------------------------------------------------------------------- |
-| GET   | `/api/analytics/compression` | Aggregerad komprimeringsstatistik: sparade token, besparing i %, lägesfördelning och motoranvändning |
+| Metod | Sökväg                       | Beskrivning                                                                                                |
+| ----- | ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| GET   | `/api/analytics/compression` | Sammanställd komprimeringsstatistik: sparade token, besparingsprocent, lägesfördelning och motoranvändning |
 
 **Exempel på svar**:
 
@@ -2076,9 +2195,9 @@ Slutpunkter för realtidsanalys för övervakning av dirigering, komprimering oc
 
 ### Spårning av leverantörsmångfald
 
-| Metod | Sökväg                     | Beskrivning                                                                                                                 |
-| ----- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/analytics/diversity` | Mångfaldsspårning baserad på Shannon-entropi: förhindrar enskilda felpunkter genom att mäta spridningen mellan leverantörer |
+| Metod | Sökväg                     | Beskrivning                                                                                                     |
+| ----- | -------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| GET   | `/api/analytics/diversity` | Shannon-entropibaserad spårning av mångfald: förhindrar enskilda felpunkter genom att mäta leverantörsspridning |
 
 **Exempel på svar**:
 
@@ -2098,18 +2217,18 @@ Slutpunkter för realtidsanalys för övervakning av dirigering, komprimering oc
 }
 ```
 
-**Autentisering:** Kräver en hanteringssession eller en API-nyckel med hanteringsbehörighet.
+**Autentisering:** Kräver en hanteringssession eller en API-nyckel med hanteringsomfattning.
 
 ---
 
 ## Administratörsåtgärder
 
-Endpoints endast för administratörer för operativ hantering.
+Administratörsen­dpunkter för operativ hantering.
 
-| Metod | Sökväg                   | Beskrivning                                                                                     |
-| ----- | ------------------------ | ----------------------------------------------------------------------------------------------- |
-| GET   | `/api/admin/concurrency` | Läs aktuella samtidighetsgränser (globala + per leverantör)                                     |
-| POST  | `/api/admin/concurrency` | Uppdatera samtidighetsgränser — body: `{global?: number, perProvider?: Record<string, number>}` |
+| Method | Path                     | Description                                                                                     |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------- |
+| GET    | `/api/admin/concurrency` | Läs aktuella samtidighetsgränser (globala + per leverantör)                                     |
+| POST   | `/api/admin/concurrency` | Uppdatera samtidighetsgränser — body: `{global?: number, perProvider?: Record<string, number>}` |
 
 **Autentisering:** Kräver en hanteringssession med administratörsbehörighet.
 
@@ -2118,18 +2237,18 @@ Endpoints endast för administratörer för operativ hantering.
 ## Hantering av CLI-verktyg
 
 Hantera CLI-verktyg som integreras med OmniRoute (antigravity, commandCode,
-devin-cli osv.). Se [Leverantörsreferens](./PROVIDER_REFERENCE.md) för den fullständiga listan.
+devin-cli med flera). Se [Leverantörsreferens](./PROVIDER_REFERENCE.md) för hela listan.
 
-| Metod | Sökväg                                  | Beskrivning                                                                                                                                                          |
-| ----- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/cli-tools/all-statuses`           | Status för alla CLI-verktyg (installerat, version, senast observerat)                                                                                                |
-| GET   | `/api/cli-tools/status`                 | Detaljerad status för ett CLI-verktyg (`?tool=`-fråga)                                                                                                               |
-| POST  | `/api/cli-tools/apply`                  | Skriv ett verktygs genererade konfiguration (`dryRun` förhandsgranskar; `422` + `containerEphemeralTarget` vid containerkörning; `migration` anger äldre Codex YAML) |
-| GET   | `/api/cli-tools/backups`                | Lista säkerhetskopior av CLI-verktygens konfigurationer                                                                                                              |
-| POST  | `/api/cli-tools/backups`                | Skapa en säkerhetskopia av alla CLI-verktygskonfigurationer                                                                                                          |
-| POST  | `/api/cli-tools/backups`                | Återställ: samma endpoint med `{tool, backupId}` i body återställer den säkerhetskopian                                                                              |
-| GET   | `/api/cli-tools/antigravity-mitm`       | Status för Antigravity MITM-proxyn (CLI-verktyget "antigravity-mitm")                                                                                                |
-| POST  | `/api/cli-tools/antigravity-mitm/alias` | Konfigurera alias för antigravity-mitm                                                                                                                               |
+| Method | Path                                    | Description                                                                                                                                                         |
+| ------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/cli-tools/all-statuses`           | Status för alla CLI-verktyg (installerat, version, senast sedd)                                                                                                     |
+| GET    | `/api/cli-tools/status`                 | Statusinformation för ett CLI-verktyg (`?tool=` query)                                                                                                              |
+| POST   | `/api/cli-tools/apply`                  | Skriv ett verktygs genererade konfiguration (`dryRun` förhandsvisar; `422` + `containerEphemeralTarget` när containeriserat; `migration` anger en äldre Codex YAML) |
+| GET    | `/api/cli-tools/backups`                | Lista säkerhetskopior av CLI-verktygskonfigurationer                                                                                                                |
+| POST   | `/api/cli-tools/backups`                | Skapa en säkerhetskopia av alla CLI-verktygskonfigurationer                                                                                                         |
+| POST   | `/api/cli-tools/backups`                | Återställning: samma slutpunkt med `{tool, backupId}` i brödtexten återställer den säkerhetskopian                                                                  |
+| GET    | `/api/cli-tools/antigravity-mitm`       | Status för Antigravity MITM-proxy (`antigravity-mitm` CLI-verktyget)                                                                                                |
+| POST   | `/api/cli-tools/antigravity-mitm/alias` | Konfigurera alias för antigravity-mitm                                                                                                                              |
 
 **Autentisering:** Kräver en hanteringssession.
 
@@ -2137,36 +2256,36 @@ devin-cli osv.). Se [Leverantörsreferens](./PROVIDER_REFERENCE.md) för den ful
 
 ## Agentfärdigheter
 
-Hantera färdigheter för AI-agenter (liknande OpenAI:s anpassade GPT:er, men för agenter).
+Hantera AI-agentfärdigheter (liknande OpenAI:s anpassade GPT:er, men för agenter).
 
-| Metod  | Sökväg                       | Beskrivning                                                                                  |
+| Method | Path                         | Description                                                                                  |
 | ------ | ---------------------------- | -------------------------------------------------------------------------------------------- |
 | GET    | `/api/agent-skills`          | Lista alla agentfärdigheter (inbyggda + anpassade)                                           |
 | GET    | `/api/agent-skills/[id]`     | Hämta en specifik agentfärdighet                                                             |
 | POST   | `/api/agent-skills`          | Skapa en anpassad agentfärdighet — body: `{name, description, prompt, model?, temperature?}` |
 | PUT    | `/api/agent-skills/[id]`     | Uppdatera en anpassad agentfärdighet                                                         |
 | DELETE | `/api/agent-skills/[id]`     | Ta bort en anpassad agentfärdighet                                                           |
-| GET    | `/api/agent-skills/[id]/raw` | Hämta rå prompt + metadata (ingen exekvering)                                                |
+| GET    | `/api/agent-skills/[id]/raw` | Hämta råprompt + metadata (ingen körning)                                                    |
 | POST   | `/api/agent-skills/generate` | AI-generera en ny färdighet från en beskrivning på naturligt språk                           |
 
-**Autentisering:** Kräver en hanteringssession eller en API-nyckel med hanteringsbehörighet.
+**Autentisering:** Kräver en hanteringssession eller en API-nyckel med hanteringsomfattning.
 
 ---
 
 ## Cachehantering
 
-Hantera den semantiska cachen och resonemangscachen.
+Hantera den semantiska cachen och cachen för resonemang.
 
-| Metod  | Sökväg                 | Beskrivning                                                                                                           |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/cache`           | Cacheöversikt: totalt antal poster, träfffrekvens, storlek på disk                                                    |
-| GET    | `/api/cache/entries`   | Lista cachade poster (med paginering)                                                                                 |
-| DELETE | `/api/cache/entries`   | Ta bort cacheposter (filtrera efter frågeparametrar)                                                                  |
-| GET    | `/api/cache/stats`     | Detaljerad cachestatistik (per leverantör, per modell)                                                                |
-| GET    | `/api/cache/reasoning` | Status för resonemangscachen (för återuppspelning av resonemang)                                                      |
-| DELETE | `/api/cache/reasoning` | Rensa resonemangscachen — frågeparametrar: `?toolCallId=<id>` (enskild), `?provider=<p>` eller inga parametrar (alla) |
+| Metod  | Sökväg                 | Beskrivning                                                                                                               |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/cache`           | Cacheöversikt: totalt antal poster, träffrekvens, storlek på disk                                                         |
+| GET    | `/api/cache/entries`   | Lista cachelagrade poster (med sidnumrering)                                                                              |
+| DELETE | `/api/cache/entries`   | Ta bort cacheposter (filtrera med frågeparametrar)                                                                        |
+| GET    | `/api/cache/stats`     | Detaljerad cachestatistik (per leverantör, per modell)                                                                    |
+| GET    | `/api/cache/reasoning` | Status för cachen för resonemang (för uppspelning av resonemang)                                                          |
+| DELETE | `/api/cache/reasoning` | Rensa cachen för resonemang — frågeparametrar: `?toolCallId=<id>` (enstaka), `?provider=<p>` eller inga parametrar (alla) |
 
-**Autentisering:** Kräver hanteringssession.
+**Autentisering:** Kräver en administrationssession.
 
 ---
 
@@ -2176,40 +2295,40 @@ Hantera beständigt minne (FTS5 + vektorinbäddningar).
 
 | Metod  | Sökväg             | Beskrivning                                                            |
 | ------ | ------------------ | ---------------------------------------------------------------------- |
-| GET    | `/api/memory`      | Lista minnesposter (filtrera efter omfång, typ och sökfråga)           |
+| GET    | `/api/memory`      | Lista minnesposter (filtrera efter omfång, typ, sökfråga)              |
 | POST   | `/api/memory`      | Skapa en ny minnespost — brödtext: `{scope, type, content, metadata?}` |
 | GET    | `/api/memory/[id]` | Hämta en specifik minnespost                                           |
 | PUT    | `/api/memory/[id]` | Uppdatera en minnespost                                                |
 | DELETE | `/api/memory/[id]` | Ta bort en minnespost                                                  |
-| GET    | `/api/memory?q=`   | Sök i minnet (FTS5 + vektor) — statistik ingår i samma svar            |
+| GET    | `/api/memory?q=`   | Sök i minnet (FTS5 + vektor) — statistik inkluderas i samma svar       |
 
-**Autentisering:** Kräver hanteringssession eller API-nyckel med hanteringsomfång.
+**Autentisering:** Kräver en administrationssession eller en API-nyckel med administrationsomfång.
 
 ---
 
 ## Webhooks
 
-Hantera webhook-prenumerationer för händelser.
+Hantera webhookprenumerationer för händelser.
 
 | Metod  | Sökväg                          | Beskrivning                                                                      |
 | ------ | ------------------------------- | -------------------------------------------------------------------------------- |
-| GET    | `/api/webhooks`                 | Lista alla webhook-prenumerationer                                               |
-| POST   | `/api/webhooks`                 | Skapa en webhook-prenumeration — brödtext: `{url, events[], secret?, active?}`   |
-| GET    | `/api/webhooks/[id]`            | Hämta en specifik webhook-prenumeration                                          |
-| PUT    | `/api/webhooks/[id]`            | Uppdatera en webhook-prenumeration                                               |
-| DELETE | `/api/webhooks/[id]`            | Ta bort en webhook-prenumeration                                                 |
+| GET    | `/api/webhooks`                 | Lista alla webhookprenumerationer                                                |
+| POST   | `/api/webhooks`                 | Skapa en webhookprenumeration — brödtext: `{url, events[], secret?, active?}`    |
+| GET    | `/api/webhooks/[id]`            | Hämta en specifik webhookprenumeration                                           |
+| PUT    | `/api/webhooks/[id]`            | Uppdatera en webhookprenumeration                                                |
+| DELETE | `/api/webhooks/[id]`            | Ta bort en webhookprenumeration                                                  |
 | GET    | `/api/webhooks/[id]/deliveries` | Lista leveranshistorik för en webhook (logg över lyckade/misslyckade leveranser) |
 | POST   | `/api/webhooks/[id]/test`       | Skicka en testhändelse till en webhook                                           |
 
-**Autentisering:** Kräver hanteringssession.
+**Autentisering:** Kräver en administrationssession.
 
-Se [Webhooks-ramverket](../frameworks/WEBHOOKS.md) för en fullständig lista över händelsetyper.
+Se [Webhooks-ramverk](../frameworks/WEBHOOKS.md) för fullständiga händelsetyper.
 
 ---
 
 ## Färdighetsramverk
 
-Hantera färdigheter (ramverket för agentbaserade tillägg).
+Hantera färdigheter (ramverket för agenttillägg).
 
 | Metod  | Sökväg                   | Beskrivning                                                                                          |
 | ------ | ------------------------ | ---------------------------------------------------------------------------------------------------- |
@@ -2218,48 +2337,48 @@ Hantera färdigheter (ramverket för agentbaserade tillägg).
 | DELETE | `/api/skills/[id]`       | Avinstallera en färdighet                                                                            |
 | PUT    | `/api/skills/[id]`       | Aktivera eller inaktivera en färdighet — body: `{enabled?: boolean, mode?: "on" \| "off" \| "auto"}` |
 | POST   | `/api/skills/executions` | Kör en färdighet — body: `{skillName, apiKeyId, input?, sessionId?}`                                 |
-| GET    | `/api/skills/executions` | Lista körningshistorik för alla färdigheter (filtrera efter `?apiKeyId=`)                            |
+| GET    | `/api/skills/executions` | Lista körningshistorik för alla färdigheter (filtrera med `?apiKeyId=`)                              |
 
-**Autentisering:** Kräver en hanteringssession eller en API-nyckel med hanteringsbehörighet.
+**Autentisering:** Kräver en hanteringssession eller en API-nyckel med hanteringsomfattning.
 
 Se [Färdighetsramverk](../frameworks/SKILLS.md) för fullständig information.
 
 ---
 
-## Insticksprogram
+## Tillägg
 
-Hantera OmniRoute-insticksprogram (tillägg från tredje part).
+Hantera OmniRoute-tillägg (tillägg från tredje part).
 
-| Metod  | Sökväg                             | Beskrivning                                         |
-| ------ | ---------------------------------- | --------------------------------------------------- |
-| GET    | `/api/plugins`                     | Lista installerade insticksprogram                  |
-| POST   | `/api/plugins/marketplace/install` | Installera ett insticksprogram från marknadsplatsen |
-| DELETE | `/api/plugins/[name]`              | Avinstallera ett insticksprogram                    |
-| POST   | `/api/plugins/[name]/activate`     | Aktivera ett insticksprogram                        |
-| POST   | `/api/plugins/[name]/deactivate`   | Inaktivera ett insticksprogram                      |
-| GET    | `/api/plugins/[name]/config`       | Hämta insticksprogrammets konfiguration             |
-| PUT    | `/api/plugins/[name]/config`       | Uppdatera insticksprogrammets konfiguration         |
+| Metod  | Sökväg                             | Beskrivning                                 |
+| ------ | ---------------------------------- | ------------------------------------------- |
+| GET    | `/api/plugins`                     | Lista installerade tillägg                  |
+| POST   | `/api/plugins/marketplace/install` | Installera ett tillägg från marknadsplatsen |
+| DELETE | `/api/plugins/[name]`              | Avinstallera ett tillägg                    |
+| POST   | `/api/plugins/[name]/activate`     | Aktivera ett tillägg                        |
+| POST   | `/api/plugins/[name]/deactivate`   | Inaktivera ett tillägg                      |
+| GET    | `/api/plugins/[name]/config`       | Hämta tilläggskonfiguration                 |
+| PUT    | `/api/plugins/[name]/config`       | Uppdatera tilläggskonfiguration             |
 
 **Autentisering:** Kräver en hanteringssession.
 
-Se [Ramverk för insticksprogram](../frameworks/PLUGIN_SDK.md) för fullständig information.
+Se [Tilläggsramverk](../frameworks/PLUGIN_SDK.md) för fullständig information.
 
 ---
 
-## Skuggroutning
+## Skuggrouting
 
-Skugg-/A-B-jämförelse av leverantörer är **inte en fristående REST-yta** — den konfigureras via kombinationsroutning (se [Automatisk kombination](../routing/AUTO-COMBO.md)). Jämförelsemått per kombination tillhandahålls av `GET /api/combos/metrics`.
+Skuggning / A/B-jämförelse av leverantörer är **inte ett fristående REST-gränssnitt** — det konfigureras via komborouting (se [Auto-Combo](../routing/AUTO-COMBO.md)). Jämförelsemått per kombination tillhandahålls av `GET /api/combos/metrics`.
 
 ---
 
 ## Skyddsräcken
 
-Inspektera skyddsräckena vid körning (identifiering av personligt identifierbar information, identifiering av promptinjektioner och bildbryggning). Skyddsräckena körs för varje begäran; undantag per anrop anges via begärandehuvudet `x-omniroute-disabled-guardrails` — det finns ingen beständig yta för aktivering/inaktivering.
+Inspektera körningens skyddsräcken (PII-detektering, detektering av promptinjektion och bildförmedling). Skyddsräcken körs vid varje begäran; opt-out per anrop görs via request-headern `x-omniroute-disabled-guardrails` — det finns inget beständigt gränssnitt för aktivering/inaktivering.
 
-| Metod | Sökväg                 | Beskrivning                                                                           |
-| ----- | ---------------------- | ------------------------------------------------------------------------------------- |
-| GET   | `/api/guardrails`      | Lista registrerade skyddsräcken och deras status (namn/aktiverad/prioritet)           |
-| POST  | `/api/guardrails/test` | Testkör pipelinen före anrop mot exempelindata — body: `{input, disabledGuardrails?}` |
+| Metod | Sökväg                 | Beskrivning                                                                             |
+| ----- | ---------------------- | --------------------------------------------------------------------------------------- |
+| GET   | `/api/guardrails`      | Lista registrerade skyddsräcken och deras status (namn / aktiverat / prioritet)         |
+| POST  | `/api/guardrails/test` | Testkör föranropspipeline över ett exempelindata — body: `{input, disabledGuardrails?}` |
 
 **Autentisering:** Kräver en hanteringssession.
 
@@ -2271,12 +2390,20 @@ Se [Säkerhet > Skyddsräcken](../security/GUARDRAILS.md) för fullständig info
 
 ## Autentisering
 
-Se [Autentisering för hantering](../guides/MANAGEMENT-AUTH.md) för de fyra typerna av autentiseringsuppgifter (dashboard-session, lokal CLI-token, `oma_live_…`-åtkomsttoken, API-nyckel med hanteringsbehörighet) och hur de skiljer sig från inferensnycklar.
+Se [Autentisering för hantering](../guides/MANAGEMENT-AUTH.md) för de fyra
+uppgiftsfamiljerna (dashboard-session, lokal CLI-token, `oma_live_…`-åtkomsttoken,
+API-nyckel med manage-scope) och hur de skiljer sig från inferensnycklar.
 
 - Dashboard-rutter (`/dashboard/*`) använder cookien `auth_token`
-- Inloggning använder den sparade lösenordshashen, med `INITIAL_PASSWORD` som reserv
-- `requireLogin` kan aktiveras eller inaktiveras via `/api/settings/require-login`
-- `/v1/*`-rutter kan valfritt kräva en Bearer API-nyckel när `REQUIRE_API_KEY=true`
-- ”hanteringstoken”/”API-nyckel med hanteringsbehörighet” i denna referens avser någon av typerna i den guiden – inte en odefinierad extra typ av hemlighet
+- Inloggning använder sparad lösenordshash; reservvärde är `INITIAL_PASSWORD`
+- Växeln `requireLogin` kan ändras via `/api/settings/require-login`
+- `/v1/*`-rutter kräver valfritt en Bearer-API-nyckel när `REQUIRE_API_KEY=true`
+- ”management-token” / ”API-nyckel med management-scope” i den här referensen
+  betyder en av familjerna i den guiden — inte en odefinierad extra hemlighetstyp
 
-> **Bakåtinkompatibel ändring (v3.8.0)** – `/api/v1/agents/tasks/*` och hanteringsändpunkterna för cooldown kräver nu **hanteringsautentisering** (dashboard-cookien `auth_token` eller en API-nyckel med hanteringsbehörighet). Klienter som tidigare anropade dessa rutter utan autentisering får nu `401 Unauthorized`. Se commit `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`).
+> **Bakåtinkompatibel ändring (v3.8.0)** — `/api/v1/agents/tasks/*` och
+> cooldown-hanteringsslutpunkterna kräver nu **autentisering för hantering**
+> (dashboard-cookien `auth_token` eller en API-nyckel med management-scope).
+> Klienter som tidigare anropade dessa rutter utan autentisering får
+> `401 Unauthorized`. Se commiten `588a0333`
+> (`fix(auth): require management auth for agent and cooldown APIs`).

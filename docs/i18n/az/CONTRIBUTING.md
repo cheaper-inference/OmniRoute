@@ -8,14 +8,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## İnkişaf mühitinin qurulması
+## İnkişaf Mühiti
 
 ### İlkin tələblər
 
-- **Node.js** `>=22.22.2 <23` və ya `>=24.0.0 <27` (tövsiyə olunur: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, və ya `>=24.0.0 <27` (tövsiyə olunur: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ istifadəçiləri (Node 24+):** `npm install` əmrindən sonra yerli modulların quraşdırıldığını yoxlayın:
+> **Node 24 ilə Windows:** cari 24 LTS düzəliş buraxılışından istifadə edin (ən azı 24.20.0).
+> Daha əvvəlki buraxılışlar `--test-force-exit` prosesi bağladıqda uğurlu testlərdən sonra
+> prosesi dayandıra bilər. Node-un [Windows libuv düzəlişi](https://github.com/nodejs/node/pull/61999) bu
+> icra mühiti qəzasını aradan qaldırır; test təsdiqləmələrini və runner-in çıxış yoxlamalarını aktiv saxlayın.
+
+> **npm v11+ istifadəçiləri (Node 24+):** `npm install` əmrindən sonra native modulların quraşdırıldığını yoxlayın:
 > `node -e "require('better-sqlite3')"`. Əgər `MODULE_NOT_FOUND` xətası ilə uğursuz olarsa,
 > `npm approve-scripts better-sqlite3 && npm install` əmrini icra edin. Baxın:
 > [Problemlərin aradan qaldırılması](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -36,88 +41,89 @@ npm install
 # Şablondan .env faylınızı yaradın
 cp .env.example .env
 
-# Tələb olunan məxfi dəyərləri yaradın
+# Tələb olunan məxfi açarları yaradın
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 İnkişaf üçün əsas dəyişənlər:
 
-| Dəyişən                | İnkişaf üçün standart    | Təsvir                      |
-| ---------------------- | ------------------------ | --------------------------- |
-| `PORT`                 | `20128`                  | Server portu                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Ön tərəf üçün əsas URL      |
-| `JWT_SECRET`           | (yuxarıda yaradın)       | JWT imzalama məxfi dəyəri   |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | İlk giriş parolu            |
-| `APP_LOG_LEVEL`        | `info`                   | Jurnal təfərrüatı səviyyəsi |
+| Dəyişən                | İnkişaf üçün standart dəyər | Təsvir                          |
+| ---------------------- | --------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                     | Server portu                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Frontend üçün baza URL-i        |
+| `JWT_SECRET`           | (yuxarıda yaradılır)        | JWT imzalama məxfi açarı        |
+| `INITIAL_PASSWORD`     | `CHANGEME`                  | İlk giriş parolu                |
+| `APP_LOG_LEVEL`        | `info`                      | Jurnal təfərrüatlılıq səviyyəsi |
 
-### İdarəetmə paneli parametrləri
+### İdarə panelinin tənzimləmələri
 
-İdarəetmə paneli, həmçinin mühit dəyişənləri vasitəsilə konfiqurasiya edilə bilən funksiyalar üçün interfeys keçidləri təqdim edir:
+İdarə paneli mühit dəyişənləri vasitəsilə də konfiqurasiya oluna bilən funksiyalar üçün UI keçidləri təqdim edir:
 
-| Parametrin yeri        | Keçid paneli          | Təsvir                                          |
-| ---------------------- | --------------------- | ----------------------------------------------- |
-| Parametrlər → Qabaqcıl | Sazlama rejimi        | Sazlama sorğusu jurnallarını aktivləşdirir (UI) |
-| Parametrlər → Ümumi    | Yan panelin görünməsi | Yan panel bölmələrini göstərir/gizlədir         |
+| Tənzimləmənin yeri       | Keçid                 | Təsvir                                        |
+| ------------------------ | --------------------- | --------------------------------------------- |
+| Tənzimləmələr → Qabaqcıl | Sazlama rejimi        | Sazlama sorğusu jurnallarını aktivləşdir (UI) |
+| Tənzimləmələr → Ümumi    | Yan panelin görünməsi | Yan panel bölmələrini göstər/gizlət           |
 
-Bu parametrlər verilənlər bazasında saxlanılır və yenidən başladılmalar arasında qorunur; təyin edildikdə mühit dəyişənlərinin standart dəyərlərini üstələyir.
+Bu tənzimləmələr verilənlər bazasında saxlanılır və yenidən başladılmadan sonra qorunur; təyin edildikdə mühit dəyişəni standartlarını üstələyir.
 
 ### Lokal olaraq işə salma
 
 ```bash
-# İnkişaf rejimi (avtomatik yenidən yükləmə)
+# İnkişaf rejimi (hot reload)
 npm run dev
 
-# İstehsal yığımı
-npm run build    # next build → .build/next/, sonra assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ sonra assembleStandalone → dist/
 npm run start
 
-# Töhfə verənlərin dəyişiklikləri üçün yalnız arxa tərəf/API üzrə sürətli kompilyasiya
+# Contributor dəyişiklikləri üçün sürətli yalnız backend/API kompilyasiyası
 npm run build:contributor
 
-# Buraxılış yığımı (təmiz yenidən yığım + HEAD nəzarət göstəricisi — yerləşdirmə üçün tələb olunur)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA faylını yazır
+# Release build (təmiz yenidənqurma + HEAD sentinel — deploy üçün tələb olunur)
+npm run build:release   # rm -rf .build dist və build + dist/BUILD_SHA yazır
 
 # Ümumi port konfiqurasiyası
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Töhfə verənlər üçün yığım yalnız kompilyasiya yoxlamasını həyata keçirir: o, müstəqil
-paylanmanı yığmır və ya istəyə bağlı yerli paketləmə resurslarını yaratmır. Paylana bilən paketi
-yoxlamaq lazım olduqda adi istehsal yığımından istifadə edin.
+Contributor build yalnız kompilyasiya yoxlaması həyata keçirir: standalone
+distribusiyasını yığmır və optional native paketləmə aktivlərini build etmir. Göndərilə bilən paketi
+yoxlamaq lazım olduqda adi production build-dən istifadə edin.
 
-### Yığım çıxışının strukturu
+### Build çıxışının quruluşu
 
-| Kataloq   | Məzmun                                                                     | İzlənilir |
-| --------- | -------------------------------------------------------------------------- | --------- |
-| `src/`    | Tətbiqin mənbə kodu (TypeScript / TSX)                                     | Bəli      |
-| `.build/` | Aralıq fayllar — `next build` çıxışı (gitignored, `distDir = .build/next`) | Xeyr      |
-| `dist/`   | Paylana bilən paket — `assembleStandalone` tərəfindən yığılır (gitignored) | Xeyr      |
+| Qovluq    | Məzmun                                                                       | İzlənilir |
+| --------- | ---------------------------------------------------------------------------- | --------- |
+| `src/`    | Tətbiq mənbə kodu (TypeScript / TSX)                                         | Bəli      |
+| `.build/` | Aralıq fayllar — `next build` çıxışı (gitignored, `distDir = .build/next`)   | Xeyr      |
+| `dist/`   | Göndərilə bilən paket — `assembleStandalone` tərəfindən yığılır (gitignored) | Xeyr      |
 
-Yığım konveyeri bir keçiddən ibarətdir:
+Build pipeline tək keçiddən ibarətdir:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js çıxışı)
-  └─ assembleStandalone()                 (standalone + static + public + yerli resursları kopyalayır)
-       └─ çıxış: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (standalone + static + public + native aktivlərini köçürür)
+       └─ çıxış: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` əlavə olaraq əvvəlcə hər iki kataloqu təmizləyir və yerləşdirmə bütövlüyünün
-nəzarət göstəricisi kimi `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) faylını yazır.
+`npm run build:release` əlavə olaraq əvvəlcə hər iki qovluğu təmizləyir və
+deploy bütövlüyü göstəricisi kimi `dist/BUILD_SHA` faylına
+`git rev-parse --short HEAD` dəyərini yazır.
 
-`npm run build:contributor` yalnız arxa tərəf üçün yığım profilindən istifadə edir. O, yığım zamanı
-idarəetmə panelinin UI fayllarını müvəqqəti əvəz edir, API marşrut emalçılarını saxlayır və yığımdan
-sonra orijinal faylları bərpa edir. İdarəetmə panelinin UI hissəsinə təsir edən dəyişikliklər və ya tam
-buraxılış yoxlaması üçün `npm run build` istifadə edin; töhfə verənlər profili buraxılış yığımını əvəz etmir.
+`npm run build:contributor` yalnız backend üçün build profilindən istifadə edir. Build zamanı
+idarə panelinin UI fayllarını müvəqqəti olaraq stub-larla əvəz edir, API route handler-lərini saxlayır
+və build-dən sonra orijinal faylları bərpa edir. İdarə panelinin UI-sına təsir edən dəyişikliklər və ya
+tam release yoxlaması üçün `npm run build` əmrindən istifadə edin; contributor profili release build-i əvəz etmir.
 
-> **VPS-də yerləşdirmə qeydi:** uzaq təsvir kataloqu `/usr/lib/node_modules/omniroute/app/`
-> dəyişməyib. Yerləşdirmə vasitələri `dist/` məzmununu rsync vasitəsilə ora köçürür.
-> Yalnız repozitoriya daxilindəki yığım çıxışının yolu dəyişib (`app/` → `dist/`).
+> **VPS deploy qeydi:** uzaq image qovluğu `/usr/lib/node_modules/omniroute/app/`
+> dəyişməz qalır. Deploy bacarıqları `dist/` məzmununu həmin qovluğa rsync edir.
+> Yalnız repodaxili build çıxış yolu dəyişib (`app/` → `dist/`).
 
 Standart URL-lər:
 
-- **İdarəetmə paneli**: `http://localhost:20128/dashboard`
+- **İdarə paneli**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
