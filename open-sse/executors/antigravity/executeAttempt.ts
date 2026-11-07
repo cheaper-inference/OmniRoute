@@ -33,6 +33,8 @@ import {
 import * as prl from "../../utils/providerRequestLogging.ts";
 import { withAntigravityTiming, timeAntigravityFetch } from "../../services/antigravityTiming.ts";
 import * as timingLog from "@/sse/utils/logger";
+import { getCachedSettings } from "@/lib/db/readCache";
+import { resolveAntigravityTimingTelemetryEnabled } from "../../services/antigravityTimingConfig.ts";
 import { generateAntigravityRequestId } from "../../services/antigravityIdentity.ts";
 import {
   createCreditsExtractionTransform as createCreditsExtractionTransformImpl,
@@ -161,9 +163,15 @@ function observeTimedAntigravitySend(
 ): Promise<Response> {
   // The feature is off by default. The outer HTTP-attempt collector must see
   // the final response wrapper so response-to-attempt correlation still works.
-  return prl.observeProviderHttpSend(metadata, () => {
-    if (process.env.OMNIROUTE_ANTIGRAVITY_TIMING_TELEMETRY !== "true" || !metadata.connectionId)
-      return send();
+  return prl.observeProviderHttpSend(metadata, async () => {
+    if (!metadata.connectionId) return send();
+    // The settings read uses the existing 5s TTL cache. If unavailable, keep
+    // the original env switch behavior rather than breaking real provider IO.
+    const envEnabled = process.env.OMNIROUTE_ANTIGRAVITY_TIMING_TELEMETRY === "true";
+    const enabled = await getCachedSettings()
+      .then((saved) => resolveAntigravityTimingTelemetryEnabled(saved, envEnabled))
+      .catch(() => envEnabled);
+    if (!enabled) return send();
     return withAntigravityTiming(
       {
         enabled: true,

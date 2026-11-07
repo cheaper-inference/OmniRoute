@@ -83,6 +83,9 @@ export const DEFAULT_REQUEST_QUEUE_MAX_DEPTH = (() => {
 })();
 
 export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
+  antigravityTimingTelemetry: {
+    enabled: process.env.OMNIROUTE_ANTIGRAVITY_TIMING_TELEMETRY === "true",
+  },
   requestQueue: {
     autoEnableApiKeyProviders: true,
     requestsPerMinute: DEFAULT_API_LIMITS.requestsPerMinute,
@@ -329,6 +332,7 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     streamRecovery: streamRecoveryDefaults,
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
     credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
+    antigravityTimingTelemetry: DEFAULT_RESILIENCE_SETTINGS.antigravityTimingTelemetry,
   };
 }
 
@@ -364,9 +368,17 @@ export function resolveResilienceSettings(
   if (cached) return cached;
 
   const current = asRecord(record.resilienceSettings);
+  const legacyAntigravitySettings = asRecord(current.antigravity);
   const fallback = buildLegacyFallback(record);
 
   const resolved: ResilienceSettings = {
+    antigravityTimingTelemetry: {
+      enabled: typeof asRecord(current.antigravityTimingTelemetry).enabled === "boolean"
+        ? asRecord(current.antigravityTimingTelemetry).enabled as boolean
+        : typeof legacyAntigravitySettings.timingTelemetryEnabled === "boolean"
+          ? legacyAntigravitySettings.timingTelemetryEnabled as boolean
+          : fallback.antigravityTimingTelemetry.enabled,
+    },
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(
@@ -440,6 +452,11 @@ export function mergeResilienceSettings(
   updates: ResilienceSettingsPatch
 ): ResilienceSettings {
   return {
+    antigravityTimingTelemetry: {
+      enabled: typeof updates.antigravityTimingTelemetry?.enabled === "boolean"
+        ? updates.antigravityTimingTelemetry.enabled
+        : current.antigravityTimingTelemetry.enabled,
+    },
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(
