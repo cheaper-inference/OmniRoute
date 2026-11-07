@@ -4,11 +4,13 @@
 
 ---
 
-OmniRoute ní àwọn ètò ìfaradà mẹ́ta tí ó yàtọ̀ sí ara wọn ṣùgbọ́n tí wọ́n ní í ṣe pẹ̀lú ara wọn. Ọ̀kọ̀ọ̀kan wọn ní àyíká àti ète rẹ̀ pàtò. Máa ya wọn sọ́tọ̀ nígbà tí o bá ń ṣe ìtúpalẹ̀ àṣìṣe lórí ìwà routing.
+OmniRoute ni awọn ọna isọdọtun mẹta pato ṣugbọn ti o ni ibatan. Ọkọọkan ni aaye ati idi ti o yatọ. Jeki wọn lọtọ nigbati o n ṣatunṣe ihuwasi afisona.
 
-![àpẹẹrẹ ìfaradà ipele mẹ́ta](../diagrams/exported/resilience-3layers.svg)
+![3-layer resilience model](../diagrams/exported/resilience-3layers.svg)
 
-> Orísun: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+> Orisun: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+
+> **Precedence Env-vs-dasibodu fun resilience toggles.** Ijade-in resilience yipada awọn irugbin lati agbegbe — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — nikan pese _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean kan duro ni `resilienceSettings` (Dashboard →** Eto → Resilience** / `PATCH /api/resilience`, ti a fipamọ sinu `key_value`) bori lori iye env: deede (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) ntọju boolean ti o fipamọ nigbakugba ti ọkan wa. Ṣiṣeto iru env var si `true` lori imuṣiṣẹ nibiti dasibodu ti fipamọ tẹlẹ `false` nitorinaa ko yipada ohunkohun — yi iyipada sinu** Eto → Resilience** (tabi ko awọn ti o ti fipamọ aaye) dipo.
 
 ## 1. Circuit Breaker Olùpèsè
 
@@ -59,169 +61,191 @@ Ipele kẹrin kan, tí ó jẹ́ **ìyàn** (`PROVIDER_COOLDOWN_ENABLED`, àtòl
 
 Lábẹ́ ààlà náà, a **kò** ka olùpèsè náà sí ẹni tó ń tutù; àṣeyọrí kan máa ń pa window náà rẹ́. Àwọn ẹ̀yọ ipele-ìsopọ̀ (`provider:connectionId`) máa ń lo backoff exponential ti `minRetryCooldownMs → maxRetryCooldownMs` dípò èyí. Àwọn ìbófinró (overrides): `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Àbò àtúnbòwò (regression guard): `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Ìgbà Ìsinmi Ìsopọ̀
+## 2. Ìgbà Ìdákẹ́jẹ̀ Àsopọ̀
 
-**Ìbítàn:** ìsopọ̀/àkántì/kókórò olùpèsè kan ṣoṣo.
+**Ààlà:** àsopọ̀/àkáǹtì/kókó olupèsè kan.
 
-**Ète:** fò kókórò burúkú kan nígbà tí àwọn ìsopọ̀ mìíràn fún olùpèsè kannáà ń tẹ̀síwájú ní fífi iṣẹ́ ṣe.
+**Ète:** fo kọ́kọ́rọ̀ kan tí kò dára kọjá nígbà tí àwọn àsopọ̀ mìíràn fún olupèsè kan náà bá ń ṣiṣẹ́.
 
-**Ìmúṣe:**
+**Ìmúlò:**
 
-- Sí àmì ò-ṣeé-ḍè: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Ìyànyàn: `getProviderCredentials*` nínú fáìlì kannáà
-- Ìṣirò ìsinmi: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- Àwọn ìtòláyàn: `src/lib/resilience/settings.ts`
+- Sàmì sí aláìsí: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Yíyan: `getProviderCredentials*` nínú fáìlì kan náà
+- Ìṣírò ìgbà ìdákẹ́jẹ̀: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Àwọn ìṣètò: `src/lib/resilience/settings.ts`
 
-**Àwọn aaye fún ìsopọ̀ kọ̀ọ̀kan:**
+**Àwọn pápá fún àsopọ̀ kọ̀ọ̀kan:**
 
-- `rateLimitedUntil` — àmì-àkókò títí ìsinmi yóò fi parí
+- `rateLimitedUntil` — àkókò tí ìgbà ìdákẹ́jẹ̀ yóò fi parí
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — olùka ìdàfẹ́yìn ìlòpọ̀-jíjáde
+- `backoffLevel` — àkáǹtò ìpadà-sẹ́yìn tí ń pọ̀ sí i lọ́nà ìtẹ̀síwájú
 
-**Àwọn ìsinmi àtòwájáde:**
+**Àwọn ìgbà ìdákẹ́jẹ̀ àìyípadà:**
 
-- OAuth ìpìlẹ̀: 5s
-- API-key ìpìlẹ̀: 3s
-- API-key 429: ń fẹ́ àkòrí `Retry-After`/ìtún-ìṣètò/Ọ̀rọ̀ ìtún-ìṣètò tí a lè ṣàlàyè láti ìsàtẹ̀yìn
-- Ìdàfẹ́yìn: `baseCooldownMs * 2 ** failureIndex`
+- Ìpìlẹ̀ OAuth: 5s
+- Ìpìlẹ̀ kọ́kọ́rọ̀ API: 3s
+- API-key 429: ó fẹ́ràn àwọn àkọsílẹ̀ `Retry-After`/àwọn àkọsílẹ̀ reset láti ọdọ̀ upstream/àti ọ̀rọ̀ reset tí a lè túmọ̀
+- Ìpadà-sẹ́yìn: `baseCooldownMs * 2 ** failureIndex`
 
-**Ààbò ìkọlu àpapọ̀ (anti-thundering-herd):** ń dín àwọn ìkùnà tí ń ṣẹlẹ̀ lásìkò kannáà lọ́wọ́ lílò ìsinmi gùn ju bó yẹ lọ tàbí ṣíṣe ìfikún-meji lórí `backoffLevel`.
+**Ìdádúró ìgbìyànjú fún olupèsè kọ̀ọ̀kan.** Ojú-ìwé àlàyé olupèsè ní yíyan **Ìdádúró ìgbìyànjú** (Auto,
+15s títí dé 1h). Ó ń tọ́jú `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`
+(1–21600, nípasẹ̀ `PATCH /api/resilience`). Nígbà tí àṣìṣe ìdiwọ̀n-oṣuwọn kò bá ní
+àmi ìgbìyànjú upstream, iye yẹn máa rọ́pò ìpadà-sẹ́yìn tí a ṣe àfikún fún olupèsè náà, ó sì tún
+`backoffLevel` ṣe sí 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Àṣẹ àkọ́kọ́ fún àṣìṣe
+ìdiwọ̀n-oṣuwọn, láti èyí tó ga jù lọ sí èyí tó kéré jù lọ: àmi ìgbìyànjú upstream, lẹ́yìn náà
+`providerSpecificData.rotationOverrides.rateLimitResetSeconds` fún àsopọ̀ náà, lẹ́yìn náà ìdádúró ìgbìyànjú
+fún olupèsè náà, lẹ́yìn náà `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` láyé àyíká, àti lẹ́yìn náà
+ìpadà-sẹ́yìn tí a ṣe àfikún. Auto máa ń yọ pápá náà kúrò. Ó kan ìdí ìdiwọ̀n-oṣuwọn nìkan, kò kan àwọn
+ipò ìkẹyìn.
 
-**Àwọn 429 ààlà ìfarabalẹ̀ kò gòke àtẹ̀gùn ìdàfẹ́yìn.** `429` tí ara (body) rẹ̀ bá ṣàlàyè ààlà ìfarabalẹ̀ ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`) túmọ̀ sí pé àkántì náà wà lára ayé ṣùgbọ́n ó bùsì. `checkFallbackError()` ń dá ìdí `concurrency_limited` padà: yí padà sí ìsopọ̀ tókàn báyìí, sinmi ẹni yìí fún `CONCURRENCY_LIMIT_COOLDOWN_MS` tí a dì mọ́lẹ̀ (1s) tàbí àfihàn àtúngbìyànjú ti ìsàtẹ̀yìn, fi `backoffLevel` sílẹ̀ láìyípadà, kí o sì ṣètò `skipProviderBreaker`. Ara quota kedere ṣì ni bó ti yẹ lọ, nítorí náà ara tí ó tún bá àpẹẹrẹ quota mu ṣì dúró gẹ́gẹ́ bí ìdájọ́ quota. Ìwárí: `looksLikeConcurrencyLimit()` nínú `src/shared/utils/classify429.ts`; ìdájọ́: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (`FailureKind` ti breaker) kò yí padà àti ó ṣì ń ka `rate_limit` fún àwọn ara wọ̀nyí.
+**Ààbò lòdì sí agbo àwọn ìbéèrè:** ó máa ń dí àwọn àṣìṣe tó ń ṣẹlẹ̀ pọ̀ ní àkókò kan dúró kí wọ́n má bàa
+gùn ìgbà ìdákẹ́jẹ̀ ju bó ṣe yẹ lọ tàbí kí wọ́n pọ̀ sí `backoffLevel` lẹ́ẹ̀mejì.
 
-**Ìdíwọ́ àkóónú ṣánkoòrò kò mú kí àkántì sinmi.** Nígbà tí olùṣọ́ ìdíwọ́ àkóónú (`open-sse/utils/streamHandler.ts`) bá fọwọ́ sí ṣánkoòrò tí kò rán èsì awoṣe kankan ní àkókò tó yẹ, `markAccountUnavailable()` ń gba àṣìṣe náà pamọ́ lórí ìsopọ̀ ṣùgbọ́n kò ṣètò ìsinmi kankan: ìdíwọ́ náà ti ìbéèrè yẹn ni, ó sì jẹ́ máa ń jẹ́ yíyí ìrònúwò gígùn tí èsì kò tíì jáde. Àwọn olùṣàkóso lè padà wọlé pẹ̀lú `resilienceSettings.streamStallCooldown.enabled` (àtòwájáde `false`).
+**429 ààlà ìkápá kò máa ń gòkè àtẹ̀gùn ìpadà-sẹ́yìn.** `429` tí ara rẹ̀ bá ròyìn ààlà ìkápá
+("ọ̀pọ̀ ìbéèrè tó ń ṣẹlẹ̀ ní àkókò kan", "ààlà ìkápá", "ààlà ìbéèrè àfijù", GLM `并发数过高`) túmọ̀ sí pé
+àkáǹtì náà wà ní ìlera ṣùgbọ́n ó dí. `checkFallbackError()` máa ń da ìdí `concurrency_limited` padà:
+ó máa ń yí sí àsopọ̀ tó kàn lẹ́sẹ̀kẹsẹ̀, ó máa ń fi àsopọ̀ yìí sínú ìdákẹ́jẹ̀ fún
+`CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) tàbí àmi ìgbìyànjú upstream, ó máa ń jẹ́ kí `backoffLevel` wà bí ó ṣe wà,
+ó sì máa ń ṣètò `skipProviderBreaker`.
+Ara quota tó hàn gbangba ṣì máa ń borí, nítorí náà ara tó bá tún bá àpẹẹrẹ quota mu ṣì máa ń jẹ́ ìdájọ́ quota.
+Ìṣàwárí: `looksLikeConcurrencyLimit()` nínú `src/shared/utils/classify429.ts`;
+ìdájọ́: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (`FailureKind` ti
+breaker) kò yí padà, ó sì ṣì ń ka `rate_limit` fún àwọn ara wọ̀nyí.
 
-**Àmì ìdádúró ìfẹ́-ara-ẹni fún ìyànyàn àkántì `p2c`.** Gbìyànjú kọ̀ọ̀kan tí a ránṣẹ́ ń gba àkókò-títí-ó-fi-gba-byte-àkọ́kọ́ àti èsì rẹ̀ pamọ́ fún ìsopọ̀ kọ̀ọ̀kan (àti fún ìsopọ̀ + awoṣe) nínú fèrèsé yíyí inú ìrántí: àwọn àpẹẹrẹ 20 tó gbẹ̀yìn nínú ìṣẹ́jú 15 (`open-sse/services/connectionLatencyTracker.ts`, tí a gba pamọ́ láti `safeLogEvents()` nínú `src/sse/handlers/chatHelpers.ts`). Nígbà tí `resilienceSettings.p2cLatency.weight` bá ga ju `0` lọ (ààyè 0-20, àtòwájáde `0` = ó pa), `compareP2CConnections()` nínú `src/sse/services/auth.ts` ń fi títí dé `weight` oòrùn kún olùdíje kọ̀ọ̀kan nínú ìyà náà. Ìdá kan nínú rẹ̀ ń wá láti ìdádúró gẹ́gẹ́ bí ìwọ̀n sí olùdíje tó yára jù lọ (tó bá lọ́lọ́ lé-meji yóò gbé ìdá náà kíkún) àti ìdá kejì láti ọ̀pọ̀ àṣìṣe yíyí. Gbólóhùn náà ń ṣiṣẹ́ nígbà tí àwọn olùdíje méjèèjì bá ní o kéré jù àpẹẹrẹ 3, nítorí náà a kò jẹ́ àwọn àkántì tuntun ní ìjàyà, òkè rẹ̀ sì ń dúró lábẹ́ àwọn ìjàyà quota-dílọ́wọ́ àti quota-tán. Kò fi ẹ̀rọ ìyípadà (circuit) tirẹ̀ kankan: àwọn àkántì tí ń kùnà ni àwọn ìpele ìsinmi, ìtìjà àti breaker ṣì ń ṣàkóso. Ṣètò rẹ̀ pẹ̀lú `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
+**Àkókò dídúró nínú àkóónú ṣiṣan kò máa ń fi àkáǹtì sínú ìdákẹ́jẹ̀.** Nígbà tí olùṣọ́ àkóónú-dídúró
+(`open-sse/utils/streamHandler.ts`) bá juwọ́ sílẹ̀ lórí ṣiṣan kan tí kò fi àbájáde model ránṣẹ́ ní àkókò,
+`markAccountUnavailable()` máa ń gba àṣìṣe náà sílẹ̀ lórí àsopọ̀ náà, ṣùgbọ́n kò ṣètò ìdákẹ́jẹ̀ kankan:
+dídúró náà jẹ́ ti ìbéèrè yẹn, ó sì sábà máa ń jẹ́ ìrònú gígùn tí kò tíì ní àbájáde. Àwọn oníṣẹ́ lè yàn
+láti tún un ṣiṣẹ́ pẹ̀lú `resilienceSettings.streamStallCooldown.enabled`
+(default `false`).
 
-**Àwọn firemu ìrònúwò ń bẹ̀rẹ̀ ìṣòwò ìdíwọ́ àkóónú lẹ́ẹ̀kansi.** Awoṣe ìrònúwò lè ronú fún ìṣẹ́jú kí ó tó fi àmì (token) àkọ́kọ́ rẹ̀ tó fi ara han: Claude ń ṣán àwọn firemu `thinking_delta` tí ọ̀rọ̀ ìrònúwò wọn lè jẹ́ òfo, Responses API sì ń ṣán nǹkan ìrònúwò ọ̀kan lẹ́yìn òmíràn. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) ń mọ̀ àwọn firemu wọ̀nyí, olùṣọ́ sì ń bẹ̀rẹ̀ ìṣòwò rẹ̀ lórí ọ̀kọ̀ọ̀kan dípò kí ó fagi lé yíyí náà. Wọn kò ṣì jẹ́ èsì awoṣe, nítorí náà yíyí tí ó parí pẹ̀lú ìrònúwò nìkan ni wọ́n ṣì ń ké sí òfo, yíyí tí ó dáwọ́ ìrònúwò dúró tí ó ń fi àwọn heartbeat nìkan ránṣẹ́ sì ṣì ń mú kí olùṣọ́ kìlò.
+**Àmì ìfaramọ́ àkókò tí a lè yàn fún yíyan àkáǹtì `p2c`.** Ìgbìyànjú kọ̀ọ̀kan tí a bá pín máa ń gba
+àkókò títí-dé-byte-akọ́kọ́ àti àbájáde rẹ̀ sílẹ̀ fún àsopọ̀ kọ̀ọ̀kan (àti fún àsopọ̀ kọ̀ọ̀kan + model) nínú
+fèrèsé yíyípadà inú-ìrántí: àwọn àpẹẹrẹ 20 tó kẹ́yìn láàárín ìṣẹ́jú 15
+(`open-sse/services/connectionLatencyTracker.ts`, tí a gbà sílẹ̀ láti `safeLogEvents()` nínú
+`src/sse/handlers/chatHelpers.ts`). Nígbà tí `resilienceSettings.p2cLatency.weight` bá ga ju
+`0` lọ (ààlà 0-20, default `0` = ti pa), `compareP2CConnections()` nínú `src/sse/services/auth.ts` máa ń fi
+àwọn kókó tó tó `weight` kún olùdíje kọ̀ọ̀kan nínú méjì náà. Ìdajì rẹ̀ máa ń wá láti ìdádúró gẹ́gẹ́ bí
+ìpín sí olùdíje tó yára jù lọ (ẹni tó lọ́ra ní ìlọ́po méjì máa ń gba ìdajì náà ní kíkún), ìdajì kejì sì máa ń wá
+láti oṣuwọn àṣìṣe yíyípadà. Ọ̀rọ̀ yìí máa ń ṣiṣẹ́ nígbà tí àwọn olùdíje méjèèjì bá ní ó kéré tán àpẹẹrẹ 3,
+nítorí náà a kò máa ń jẹ àwọn àkáǹtì tuntun níyà, àjà títẹ̀síwájú rẹ̀ sì máa ń wà ní ìsàlẹ̀ àwọn ìjìyà
+quota-blocked àti quota-exhausted. Kò ṣẹ̀dá circuit tirẹ̀: àwọn àkáǹtì tí ń ṣàṣìṣe ṣì máa ń jẹ́ iṣẹ́ àwọn
+ìpele ìdákẹ́jẹ̀, lockout àti breaker. Ṣètò rẹ̀ pẹ̀lú `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-Àwọn firemu `reasoningContentEvent` binary ti Kiro pẹ̀lú ìforúkọsílẹ̀ (signature) tí kò ṣófo ń pa ìṣẹ́ ìrònúwò yìí mọ́ láàyè olùmúṣe gẹ́gẹ́ bí delta `reasoning_content` òfo. A kò rán ìforúkọsílẹ̀ náà síwájú. Metadata, àwọn firemu àìpé àti àwọn ìforúkọsílẹ̀ òfo kò bẹ̀rẹ̀ ìṣòwò àkóónú lẹ́ẹ̀kansi; àkókò ìparí ṣánkoòrò-aláṣiṣẹ́ tìdájọ́ àti ìfagilé olùlò ṣì ń ṣiṣẹ́ (`open-sse/executors/kiro/reasoning.ts`).
+**Àwọn fireemu ìrònú máa ń tún isuna dídúró àkóónú bẹ̀rẹ̀.** Model ìrònú lè ronú fún
+ìṣẹ́jú mélòó kan kí token tí a lè rí kọ́kọ́ tó jáde: Claude máa ń ṣiṣan àwọn fireemu `thinking_delta` tí
+ọ̀rọ̀ ìrònú wọn lè ṣófo, API Responses sì máa ń ṣiṣan ohun ìrònú kan lẹ́yìn èkejì. `isReasoningProgressFrame()`
+(`open-sse/utils/streamReadiness.ts`) máa ń dá àwọn fireemu wọ̀nyí mọ̀, olùṣọ́ sì máa ń tún isuna rẹ̀ bẹ̀rẹ̀
+lórí ọkọ̀ọ̀kan dípò fífagilé ìyípadà náà. Wọ́n ṣì kì í ṣe àbájáde model, nítorí náà ìyípadà tí ó parí pẹ̀lú
+ìrònú nìkan ṣì máa ń jẹ́ ròyìn gẹ́gẹ́ bí òfo, àti ìyípadà tí ó dá ìrònú dúró tí ó sì ń rán heartbeat nìkan
+ṣì máa ń mú olùṣọ́ ṣiṣẹ́.
 
-**Àwọn ipò ìparí (KÒ ṢE ìsinmi):**
+Àwọn fireemu `reasoningContentEvent` alakomeji Kiro tí wọ́n ní ìbuwọlu tí kò ṣófo máa ń pa ìṣe ìrònú yìí mọ́
+nípasẹ̀ executor gẹ́gẹ́ bí delta `reasoning_content` òfo. A kò máa ń firánṣẹ́ ìbuwọlu náà síwájú. Metadata,
+àwọn fireemu tí kò pé àti àwọn ìbuwọlu tó ṣófo kò máa ń tún isuna àkóónú bẹ̀rẹ̀; àkókò ìdúró ṣiṣan tí kò
+yẹ̀ àti fagilé oníbàárà ṣì máa ń ṣiṣẹ́ lọ́tọ̀ (`open-sse/executors/kiro/reasoning.ts`).
 
-- `banned` — tí ìwárí ọ̀rọ̀-àyípadà tí a dínwọ́ / ìdínwọ́ àkántì ṣètò (wò [BAN_DETECTION](../security/BAN_DETECTION.md)), àti lọ́wọ́ àwọn ìkọ̀sílẹ̀ ìbéèrè-lẹ́yìn-ìbéèrè mẹ́ta láti ìsàtẹ̀yìn (`request_rejected`, b.i. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ìkọ̀sílẹ̀ ẹyọ kan ṣoṣo ó kan ń mú kí ìsopọ̀ sinmi
-- `expired` (ó ń yí padà sí ìparí lẹ́yìn àwọn àtúngbìyànjú tí a dè — `EXPIRED_RETRY_MAX = 3` pẹ̀lú ìdàfẹ́yìn ìlòpọ̀-jíjáde — kí àwọn àṣìṣe OAuth kúkúrú lè wọ́lẹ̀ fúnra wọn ṣáájú kí àkántì jẹ́ dídẹ́kúnlẹ́yìn láérayé)
+**Àwọn ipò ìkẹyìn (KÌ Í ṣe ìgbà ìdákẹ́jẹ̀):**
+
+- `banned` — a máa ń ṣètò rẹ̀ nípasẹ̀ ìṣàwárí ọ̀rọ̀ tí a fòfin dè / ìdènà àkáǹtì (wo [BAN_DETECTION](../security/BAN_DETECTION.md)). Àwọn ìkọ̀sílẹ̀ upstream fún ìbéèrè kọ̀ọ̀kan (`request_rejected`, fún àpẹẹrẹ Anthropic OAuth 403 "Request not allowed") kò máa ń ṣètò rẹ̀: a máa ń kà wọ́n fún àsopọ̀ àti model kọ̀ọ̀kan, wọ́n sì máa ń mú model yẹn kúrò nínú yíyí pẹ̀lú ìgbà ìdákẹ́jẹ̀ tó ń pọ̀ sí i tí a fi mọ́ `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), tàbí wọ́n máa ń fi àsopọ̀ náà sínú ìdákẹ́jẹ̀ nígbà tí a kò bá mọ model — `open-sse/services/requestRejectedStreak.ts`
+- `expired` (ó máa ń yí padà sí ipò ìkẹyìn lẹ́yìn àwọn ìgbìyànjú tí a bá ààlà sí — `EXPIRED_RETRY_MAX = 3` pẹ̀lú ìpadà-sẹ́yìn tí ń pọ̀ sí i — kí àwọn àṣìṣe OAuth tó máa ń ṣẹlẹ̀ lẹ́ẹ̀kọ̀ọ̀kan lè tún ara wọn ṣe kí a tó mú àkáǹtì náà ṣiṣẹ́ títí láé)
 - `credits_exhausted`
 
-Àwọn wọ̀nyí ń pẹ́ títí àwọn ẹ̀rí-ìmọ̀ yóò fi yí padà tàbí olùṣàkóso yóò tún wọ́n ṣe. Má ṣe kọ àwọn ipò ìparí lé lórí pẹ̀lú ipò ìsinmi kúkúrú.
+Àwọn wọ̀nyí máa ń dúró títí àwọn ẹ̀rí ìwọlé yóò fi yí padà tàbí tí oníṣẹ́ kan bá tún wọn ṣe. Má ṣe kọ àwọn ipò ìparí sórí ipò ìdákẹ́jẹ̀ẹ́ ìgbà díẹ̀.
 
-**Ìmúpadàsílẹ̀ lẹ́ẹsẹ̀sẹ̀:** nígbà tí `rateLimitedUntil` bá ti kọjá, ìsopọ̀ di ẹni tó yẹ lẹ́ẹ̀kansi. Ní lílò àṣeyọrí, `clearAccountError()` ń pa gbogbo àwọn aaye àṣìṣe rẹ́.
+**Ìmúpadàbọ̀sípò aláìṣẹ̀dá:** nígbà tí `rateLimitedUntil` bá ti kọjá, ìsopọ̀ náà tún di yíyẹ lẹ́ẹ̀kansi. Nígbà lílo tó ṣàṣeyọrí, `clearAccountError()` máa ń pa gbogbo àwọn pápá aṣìṣe rẹ́ rẹ́.
 
-### Òdì lílò Claude OAuth: ọ̀nà àyíkáàmọ́rìn kékeré + ìtún-ìṣètò ààlà ìpàdé
+### Odi lílo Claude OAuth: ọ̀nà àkọ́kọ́-kéré + àtúnṣe ààlà ìgbà ìpàdé
 
-**Ìbítàn:** ìsopọ̀ ìforúkọsílẹ̀ Claude (OAuth) kan. Àwọn ẹ̀yà méjèèjì jẹ́ **ìfẹ́-ara-ẹni fún ìsopọ̀ kọ̀ọ̀kan** (Ṣàtúnṣe ìsopọ̀ → abala Claude → `lowPriorityMode` / `autoLimitReset` nínú `providerSpecificData`, àtòwájáde méjèèjì pa) àti wọ́n ń dá àwọn àṣẹ `/low-priority` àti `/limit-reset` ti Claude Code lẹ́yìn (àdéhùn okun tí a mú jáde lọ́wọ́ Claude Code 2.1.263).
+**Ààlà:** ìsopọ̀ Claude kan ṣoṣo (OAuth). Àwọn ẹ̀yà méjèèjì jẹ́ **àṣàyàn fún ìsopọ̀ kọ̀ọ̀kan** (Ṣàtúnṣe ìsopọ̀ → apá Claude → `lowPriorityMode` / `autoLimitReset` nínú `providerSpecificData`, méjèèjì sì máa ń wa ni pipa ní àkọ́kọ́) wọ́n sì ń fara wé àwọn àṣẹ Claude Code `/low-priority` àti `/limit-reset` (àdéhùn waya tí a gbà silẹ̀ láti Claude Code 2.1.263).
 
-**Ìmúṣe:**
+**Ìmúlò:**
 
-- Ẹ̀rọ alákóso ipò + ìṣètò ìdáhùn sí ẹ̀ka: `open-sse/services/claudeLowPriority.ts`
-- Kíláyẹ́ǹtì ipò àtúntò/ìbéèrè: `open-sse/services/claudeLimitReset.ts`
-- Hook olùṣiṣẹ́ (fífi àkọlé kún un + àtúndánwò àkọọ́lẹ̀ kan náà): `open-sse/executors/base.ts::execute()`
-- Ìtọ́jú tí a yàn láti mú ṣiṣẹ́: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Ẹ̀rọ ipò + ìpínlẹ̀ èsì: `open-sse/services/claudeLowPriority.ts`
+- Oníbàárà ipò/ìbéèrè àtúnṣe: `open-sse/services/claudeLimitReset.ts`
+- Kókó executor (fífún akọsori + ìgbìyànjú lẹ́ẹ̀kan síi fún àkọọ́lẹ̀ kan náà): `open-sse/executors/base.ts::execute()`
+- Ìpamọ́ àṣàyàn: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Ohun tó ń mú un ṣiṣẹ́:** ògiri lílo wákàtí 5 — `429` kan tí àwọn àkọlé rẹ̀ ní
-`anthropic-ratelimit-unified-status: rejected` àti, nígbà tí àkọọ́lẹ̀ náà bá yẹ,
-`anthropic-ratelimit-unified-slow-offer: treatment`. Kò sí ohun tí a fi ránṣẹ́ ṣáájú 429
-ògiri àkọ́kọ́ yẹn; 429 ọ̀pọ̀lọpọ̀ lójijì tí kò ní àwọn àkọlé ìṣọ̀kan máa ń gba ọ̀nà
-àsìkò ìtutù déédéé.
+**Ìmú ṣiṣẹ́:** odi lílo wákàtí 5 — `429` kan tí àwọn akọsori rẹ̀ bá ní
+`anthropic-ratelimit-unified-status: rejected` àti, nígbà tí àkọọ́lẹ̀ bá yẹ,
+`anthropic-ratelimit-unified-slow-offer: treatment`. A kò rán ohunkóhun kí `429` odi àkọ́kọ́ yẹn tó ṣẹlẹ̀; `429` ìbúgbàù kan tí kò ní àwọn akọsori ìṣọ̀kan máa ń gba ọ̀nà ìdákẹ́jẹ̀ẹ́ déédéé.
 
-**Ọ̀nà aláìní-ààyò púpọ̀** (`lowPriorityMode`):
+**Ọ̀nà àkọ́kọ́-kéré** (`lowPriorityMode`):
 
-- Ní 429 ògiri, olùṣiṣẹ́ náà gba ìfilọ́lẹ̀ náà, ó sì tún àkọọ́lẹ̀ **kan náà** gbìyànjú
-  lẹ́sẹ̀kẹsẹ̀ pẹ̀lú `anthropic-usage-limit: slow`; ọ̀nà náà máa ń ṣiṣẹ́ títí di
-  `anthropic-ratelimit-unified-reset` tí a kéde (+60s àkókò àfikún), gbogbo ìbéèrè
-  nínú àkókò yẹn sì máa ń ní àkọlé náà. 429 tí a dá dúró yẹn kò dé ọ̀dọ̀
-  `handleChatCore` rárá, nítorí náà a **kò** fi ìsopọ̀ náà sínú àsìkò ìtutù, bẹ́ẹ̀ ni
-  a kò yí i kúrò.
-- `anthropic-ratelimit-unified-slow-status` lórí àwọn ìdáhùn tó tẹ̀ lé: `active` / `not_needed`
-  ń jẹ́ kí ọ̀nà náà wà; `slot_busy` (429) tàbí `529` máa ń dúró fún
-  `anthropic-ratelimit-unified-slow-retry-after` ti olupin (àìyípadà 20s, ààlà 5–600s,
-  ìyípadà aláìdúró ±30%) kí wọ́n sì tún gbìyànjú, pẹ̀lú ààlà
-  `anthropic-ratelimit-unified-slow-max-wait` (àìyípadà 20 ìṣẹ́jú, ààlà
-  1 ìṣẹ́jú–6 wákàtí) — lẹ́yìn ìyẹn, ọ̀nà náà máa dópin, àsìkò ìtutù ìṣẹ́jú 10 sì máa
-  dí gbígbà á padà. Àkókò ìdúró náà tún ní ààlà ohun tó kù nínú àkókò ìparí-dídúró
-  fún ìbẹ̀rẹ̀ ìhà òkè ti ìbéèrè náà fúnra rẹ̀ (`resolveFetchStartTimeout`, ìṣẹ́jú 10
-  ní àìyípadà), tí a yọ àlàfo 5 s kúrò: láìsí ààlà yẹn, àkókò ìdúró-gíga ìṣẹ́jú 20
-  ti àìyípadà yóò kọjá ọjọ́ ìbéèrè náà, a ó sì fòpin sí oorun náà ní àárín ìdúró,
-  tí yóò mú `TimeoutError` jáde dípò òpin `max_wait` ọlọ́rẹ̀ẹ́lẹ́ + àsìkò ìtutù.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, yíyí ferese wákàtí 5, tàbí
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (èyí tó máa ń parí rẹ̀
-  gẹ́gẹ́ bí `extra_usage` lórí ipò èyíkéyìí, nítorí lílo àfikún tí a sanwó fún ti ń bo
-  ògiri náà báyìí) máa ń parí ọ̀nà náà; ìdáhùn náà yóò wá gba ọ̀nà àsìkò ìtutù déédéé.
-  A máa rántí `budget_exhausted` títí di àtúntò ìnáwó tí a kéde (≤ ọjọ́ 8).
-- Àyẹ̀wò ògiri máa ń ṣiṣẹ́ lẹ́yìn àwọn àtúndánwò inú-ìgbìyànjú tí 400 ń mú ṣiṣẹ́ fún
-  olùṣiṣẹ́ náà (àtúnṣe àyíká, fífi ààlà sí ìrònú/ìsapá, kíkọ́ pàràmítà fúnra rẹ̀), nítorí
-  náà 429 ògiri kan tó ṣẹ̀ṣẹ̀ fara hàn lórí ọ̀kan lára àwọn àtúndánwò wọ̀nyẹn ṣì máa
-  jẹ́ dídá dúró dípò kó dé ọ̀nà àsìkò ìtutù.
-- Ipò wà nínú ìrántí fún ìsopọ̀ kọ̀ọ̀kan (àtúnrẹ̀ bẹ̀rẹ̀ máa ń ná 429 ògiri àfikún kan
-  láti gbà á padà).
+- Ní `429` odi náà, executor gba àǹfààní náà, ó sì tún gbìyànjú **àkọọ́lẹ̀ kan náà** lẹ́sẹ̀kẹsẹ̀ pẹ̀lú `anthropic-usage-limit: slow`; ọ̀nà náà máa ń ṣiṣẹ́ títí di `anthropic-ratelimit-unified-reset` tí a kéde (+ àkókò àfikún 60s), gbogbo ìbéèrè tó wà nínú àkókò yẹn sì máa ń gbé akọsori náà. `429` tí a dá dúró kò dé `handleChatCore`, nítorí náà a **kò** fi ìsopọ̀ náà sínú ìdákẹ́jẹ̀ẹ́, a kò sì yí i padà kúrò níbẹ̀.
+- `anthropic-ratelimit-unified-slow-status` nínú àwọn èsì tó tẹ̀lé: `active` / `not_needed` máa ń pa ọ̀nà náà mọ́; `slot_busy` (429) tàbí `529` máa ń dúró de `anthropic-ratelimit-unified-slow-retry-after` ti server (àìpẹ̀ 20s, ààlà 5–600s, ìyípadà ±30%) kí wọ́n sì tún gbìyànjú, pẹ̀lú ààlà láti `anthropic-ratelimit-unified-slow-max-wait` (àìpẹ̀ ìṣẹ́jú 20, ààlà ìṣẹ́jú 1–wákàtí 6) — lẹ́yìn náà ọ̀nà náà parí, ìgbà ìtùnú ìṣẹ́jú 10 sì máa ń dí ìgbà míràn láti gba a. A tún máa ń dín ìdúró náà kù sí ohun tí ó kù nínú àkókò ìbẹ̀rẹ̀ upstream ti ìbéèrè fúnra rẹ̀ (`resolveFetchStartTimeout`, ìṣẹ́jú 10 ní àìpẹ̀) kúrò ní ààlà ìṣẹ́jú 5: láìsí ààlà yìí, ààlà ìdúró ìṣẹ́jú 20 tí ó jẹ́ àìpẹ̀ yóò ju àkókò ìbéèrè lọ, oorun ìdúró náà á sì dáwọ́ dúró ní àárín, tí ó máa ń fi `TimeoutError` hàn dípò ìparí `max_wait` pẹ̀lú ìgbà ìtùnú.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, yíyípadà fèrèsé wákàtí 5, tàbí
+  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (èyí tó parí rẹ̀ sí `extra_usage` lórí ipò èyíkéyìí, nítorí pé àfikún ìsanwó ti bo odi náà báyìí) máa ń parí ọ̀nà náà; lẹ́yìn náà èsì náà máa ń gba ọ̀nà ìdákẹ́jẹ̀ẹ́ déédéé. A máa ń rántí `budget_exhausted` títí di àtúnṣe isuna tí a kéde (≤ ọjọ́ 8).
+- Àyẹ̀wò odi náà máa ń ṣiṣẹ́ lẹ́yìn àwọn ìgbìyànjú àtúnṣe inú ìgbìyànjú ti executor fúnra rẹ̀ tí `400` ń fa (àtúnṣe àyíká, àwọn ààlà ìrònú/ìsapá, ẹ̀kọ́ param aládàáṣiṣẹ́), nítorí náà `429` odi kan tí ó hàn nìkan lórí ọ̀kan lára àwọn ìgbìyànjú wọ̀nyí tún máa ń dá dúró dípò kí ó dé ọ̀nà ìdákẹ́jẹ̀ẹ́.
+- Ipò wà nínú ìrántí fún ìsopọ̀ kọ̀ọ̀kan (ìtúnbẹ̀rẹ̀ máa ń ná `429` odi àfikún kan kí a tó tún gba a).
 
-**Àtúntò ààlà sáà** (`autoLimitReset`, a máa kọ́kọ́ dán an wò ṣáájú ọ̀nà náà nígbà tí àwọn méjèèjì bá ṣiṣẹ́):
+**Àtúnṣe ààlà ìgbà ìpàdé** (`autoLimitReset`, tí a bá tan méjèèjì, a máa ń gbìyànjú rẹ̀ ṣáájú ọ̀nà náà):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → ìdènà `juniper_tide`;
-  nígbà tí `arm: "reset"` àti `available: true`,
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → ìdènà
+  `juniper_tide`; nígbà tí `arm: "reset"` àti `available: true` bá wà,
   `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` pẹ̀lú
-  `{ "program": "juniper_tide" }` (UUID àjọ láti
-  `providerSpecificData.organizationUUID`, àṣàyàn ìpadàsẹ́yìn bootstrap).
-- `result: reset|not_limited` → a tún ìbéèrè náà gbìyànjú ní ẹ̀kúnrẹ́rẹ́ iyára (kò sí
-  àkọlé lọ́ra). `already_used` / `not_offered` ń fi `next_available_at` pamọ́ sínú ìrántí
-  (ọ̀sẹ̀ kan ní àìyípadà); ìkùnà èyíkéyìí máa ń fà sẹ́yìn fún ìṣẹ́jú 15. Àtúntò náà
-  jẹ́ ẹ̀ẹ̀kan lọ́sẹ̀, ó sì ṣì kà sí ààlà ọ̀sẹ̀.
+  `{ "program": "juniper_tide" }` (UUID àjọ láti `providerSpecificData.organizationUUID`, pẹ̀lú ìpadà sí bootstrap).
+- `result: reset|not_limited` → a tún máa ń gbìyànjú ìbéèrè náà pẹ̀lú ìyára kíkún (láìsí akọsori slow).
+  `already_used` / `not_offered` máa ń fi `next_available_at` pamọ́ (ọ̀sẹ̀ kan ní àìpẹ̀); ìkùnà èyíkéyìí máa ń fa ìdúró ìṣẹ́jú 15. Àtúnṣe náà jẹ́ ẹ̀ẹ̀kan lọ́sẹ̀, ó sì tún ka sí ààlà ọ̀sẹ̀.
 
-Àwọn ààbò lòdì sí ìpadà-sẹ́yìn: `tests/unit/claude-low-priority-mode.test.ts`,
+Àwọn olùṣọ́ ìpadàbọ̀sípò: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
-### Ìbámu sáà (#7274)
+### Ìfaramọ́ ìpàdé (#7274)
 
-**Ìwọ̀n:** sáà kíláyẹ́ǹtì kan (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` àkọlé) tí a so mọ́ ìsopọ̀ kan, fún olùpèsè **èyíkéyìí**.
+**Ààlà:** ìpàdé oníbàárà kan (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) tí a so mọ́ ìsopọ̀ kan ṣoṣo, fún **olùpèsè èyíkéyìí**.
 
-**Ète:** jẹ́ kí aṣojú oníyípo-púpọ̀ (Claude Code, aider, àwọn aṣojú àkànṣe) wà lórí
-àkọọ́lẹ̀ kan náà láàárín àwọn ìbéèrè, kí ó dín ìpàdánù àyíká láàárín àwọn àkọọ́lẹ̀ àti
-àwọn 429 ìbẹ̀rẹ̀-tútù àsọtúnsọ kù lórí àwọn olùpèsè tó ní ipò sáà fún àkọọ́lẹ̀ kọ̀ọ̀kan.
+**Ète:** láti jẹ́ kí aṣojú ìyípadà-ọ̀pọ̀ (Claude Code, aider, àwọn aṣojú àṣà) wà lórí àkọọ́lẹ̀ kan náà kọjá àwọn ìbéèrè, kí ìpadánù àyíká láàárín àkọọ́lẹ̀ àti àwọn `429` ìbẹ̀rẹ̀ tútù tó tún ń ṣẹlẹ̀ lórí àwọn olùpèsè tí wọ́n ní ipò ìpàdé fún àkọọ́lẹ̀ kọ̀ọ̀kan dín kù.
 
-**Ìmúṣẹ:**
+**Ìmúlò:**
 
 - Ìpinnu TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Yíyan/ṣiṣẹ̀dá ìsopọ̀ tí a so mọ́: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Yíyọ àkọlé jáde (gbogbogbò, fún olùpèsè èyíkéyìí): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Tábìlì ìsopọ̀ tí a tọ́jú: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Ètò: `sessionAffinityTtlMs` (TTL àgbáyé ní ms, `0` ń pa á) — `src/lib/db/settings.ts`.
-  A tún orúkọ rẹ̀ ṣe láti `codexSessionAffinityTtlMs` tí ó jẹ́ ti Codex nìkan nípasẹ̀
-  ìṣíkiri `124_generic_session_affinity_ttl.sql`, èyí tó gbé Codex TTL èyíkéyìí tí a ti
-  ṣètò tẹ́lẹ̀ lọ gẹ́gẹ́ bí àìyípadà tuntun.
+- Yíyan/ṣẹ̀dá pin: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Yíya akọsori jáde (gbogbogbò, olùpèsè èyíkéyìí): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Tábìlì pin tí a pamọ́: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Ètò: `sessionAffinityTtlMs` (TTL àgbáyé ní ms, `0` máa ń pa á) — `src/lib/db/settings.ts`. A tún sọ ọ́ di orúkọ láti `codexSessionAffinityTtlMs` tí Codex nìkan máa ń lò, nípasẹ̀ migration `124_generic_session_affinity_ttl.sql`, èyí tó ń gbé TTL Codex tó ti wà tẹ́lẹ̀ lọ sí àìpẹ̀ tuntun.
 
-Ṣáájú #7274, `resolveSessionAffinityTtlMs()` máa ń dá dúró pátápátá sí `0` fún gbogbo
-olùpèsè àyàfi `codex`, nítorí náà ètò TTL (àti àwọn àkọlé sáà) kò ní ipa níbòmíràn bí ó
-tilẹ̀ jẹ́ pé ìlànà sísopọ̀ àti yíyọ àkọlé jáde ti jẹ́ èyí tí kò dá lórí olùpèsè kan pàtó.
-Àtúnṣe náà yọ ìpadà-kúrò kutukutu yẹn; TTL ń kan gbogbo olùpèsè bákan náà báyìí ní kété
-tí a bá ṣètò rẹ̀ ní àgbáyé sí ju `0` lọ.
+Ṣáájú #7274, `resolveSessionAffinityTtlMs()` máa ń dáwọ́ dúró sí `0` fún gbogbo olùpèsè tí kì í ṣe `codex`, nítorí náà ètò TTL (àti àwọn akọsori ìpàdé) kò ní ipa kankan níbikíbi mìíràn, bí ó tilẹ̀ jẹ́ pé ẹ̀rọ pin àti yíya akọsori jáde ti jẹ́ aláìbá olùpèsè kan. Àtúnṣe náà yọ ìpadà ìbẹ̀rẹ̀ yẹn kúrò; TTL náà báyìí máa ń kan gbogbo olùpèsè déédéé nígbà tí a bá ṣètò rẹ̀ jáde lórí `0`.
 
-A kì í fi àwọn àkọlé ìbámu sáà mẹ́tẹ̀ẹ̀ta náà ránṣẹ́ sí ìhà òkè láé — àwọn olùṣiṣẹ́
-ń kọ àwọn àkọlé ìhà òkè tiwọn láti ìbẹ̀rẹ̀ dípò fífi àwọn àkọlé kíláyẹ́ǹtì ránṣẹ́ kọjá,
-nítorí náà èyí jẹ́ ID ìbáṣepọ̀ inú ẹ̀rọ nìkan.
+A kì í rán àwọn akọsori ìfaramọ́ ìpàdé mẹ́ta náà sí upstream láé — àwọn executor máa ń kọ́ àwọn akọsori upstream tiwọn láti ìbẹ̀rẹ̀ dípò kí wọ́n kọjá àwọn akọsori oníbàárà, nítorí náà èyí máa ń dúró gẹ́gẹ́ bí ID ìbáṣepọ̀ inú ètò nìkan.
 
-### Àwọn àṣẹ yíyá ìsopọ̀ sáà tí a ṣàkóso fún ẹnìkan ṣoṣo
+### Àwọn yáyà ìsopọ̀ ìpàdé alákóso tí kò ní pínpín
 
-**Ìwọ̀n:** kíláyẹ́ǹtì/sáà HTTP tí a ń ṣàkóso, tó ń ṣiṣẹ́, kan ló ní ìsopọ̀ OmniRoute kan tó yẹ.
+**Ìwọ̀n:** oníbàárà HTTP/session alákóso kan tí ń ṣiṣẹ́ ló ní ìsopọ̀ OmniRoute kan ṣoṣo tí ó yẹ.
 
-**Ète:** pèsè ìní ìsopọ̀ àdáni tó dúróṣinṣin fún àwọn kíláyẹ́ǹtì tó nílò ààlà ìdarí
-líle láàárín àwọn ìbéèrè. Èyí yàtọ̀ sí ìbámu sáà, èyí tí ó jẹ́ ààyò ìtẹ̀síwájú rírọ̀:
-àṣẹ yíyá àdáni ń tọ́jú ipò ìgbésí-ayé sínú SQLite, ń mú kí ẹni-tó-ní-lọ́wọ́ àti
-ìsopọ̀-tó-ń-ṣiṣẹ́ jẹ́ ọ̀tọ̀ ní àgbáyé, ó sì kọ ìran tí ó ti pẹ́ kí a tó darí rẹ̀ sí olùpèsè.
+**Ète:** pèsè ìní ìsopọ̀ aláìsọ̀tọ̀ tó lè wà pẹ́ fún àwọn oníbàárà tí ó nílò
+ààlà routing tó muna káàkiri àwọn ìbéèrè. Èyí yàtọ̀ sí ìfarakanra session, èyí tí í ṣe ìfẹ́
+ìtẹ̀síwájú rírọ̀: lease aláìsọ̀tọ̀ máa ń pa ipò lifecycle mọ́ nínú SQLite, ó ń fìdí ìyàtọ̀
+ọ̀tọ̀ fún olówó tó ń ṣiṣẹ́ àti ìsopọ̀ tó ń ṣiṣẹ́ múlẹ̀ káàkiri ètò, ó sì kọ́ generation tó ti di
+àtijọ́ kí provider dispatch tó wáyé.
 
-Ẹya náà jẹ́ opt-in fún kòkòrò API kọ̀ọ̀kan. Kòkòrò tó ń ṣàkóso rẹ̀ gbọdọ̀ ní àyè `lease:exclusive` àti àtòjọ `allowedConnections` kedere tí kò ṣófo. Èyíkéyìí oníbàárà HTTP lè lò úpáñlá ìyípadà ẹ̀mí; kò sí orúkọ oníbàárà, user-agent, olùpèsè, ọ̀nà OAuth, tàbí àwoṣe tí a nílò. Ìyáàjá náà ní asopọ̀ lọ́wọ́, kì í ṣe àwoṣe, nítorí náà àyípadà àwoṣe ń pa asopọ̀bọ̀ mọ́ níwọ̀n ìgbà tí asopọ̀ náà bá ń tẹ̀síwájú láti wọ́pọ̀ dáradára. Àwọn òfin àwoṣe deede, àwọn òfin ojú-ìwòye, ìlera, ìdáàrò àti àtòjọ àwọn tí a fàyè gba ṣì jẹ́ aláṣẹ, wọ́n sì lè gbe iran kannáà rà sí asopọ̀ mìíràn tí ó ṣofò tí ó sì wọ́pọ̀.
+Ẹ̀ya yìí jẹ́ àṣàyàn fún API key kọ̀ọ̀kan. Key tí a ń ṣàkóso gbọ́dọ̀ ní scope `lease:exclusive` àti
+àtòjọ `allowedConnections` tó ṣe kedere tí kò sì ṣófo. Oníbàárà HTTP kankan lè lo lifecycle endpoint; kò sí
+orúkọ oníbàárà, user-agent, provider, OAuth method, tàbí model tí a nílò. Lease náà ní ìsopọ̀ kan,
+kì í ṣe model kan, nítorí náà ìyípadà model máa ń pa binding mọ́ nígbà tí ìsopọ̀ náà bá ṣì jẹ́
+èyí tí ó yẹ ní àṣà. Àwọn òfin model, quota, health, cooldown, àti allowlist deede ṣì jẹ́ aláṣẹ, wọ́n sì lè
+yí generation kan náà padà sí ìsopọ̀ mìíràn tí ó wà lómìnira tí ó sì yẹ.
 
-Ìyípadà ẹ̀mí náà ni `POST /api/v1/session-leases` pẹ̀lú àwọn ìṣe JSON `acquire`, `renew`, àti `release`. Àwọn ìbéèrè ìtumọ̀ tó ń ṣàkóso wọn ń fi iye `X-OmniRoute-Lease-Owner` tó pamọ́ àti `X-OmniRoute-Lease-Generation` gangan hàn. Olùní lo `vlo_` tí àwọn lẹ́tà base64url mẹ́rìnlélógójì tẹ̀ lé e; SHA-256 hash rẹ̀ nìkan ni a fipamọ́. Gbogbo ìdíwọ́ ìranšẹ̀ ìkẹ́yìn tún so ID kòkòrò API tí a fìdí rẹ̀ múlẹ̀ àti ID asopọ̀ tó ń ṣiṣẹ́ lọ́wọ́ papọ̀. A yọ àwọn àkọlé ìṣàkóso ìyáàjá kúrò nínú àkọsílẹ̀, àwọn àwòrán ìbéèrè tí a pamọ́, àti àwọn àkọlé olùṣe ìtànìjáde.
+Lifecycle náà ni `POST /api/v1/session-leases` pẹ̀lú àwọn ìṣe JSON `acquire`, `renew`, àti `release`.
+Àwọn ìbéèrè inference tí a ń ṣàkóso máa ń fi iye `X-OmniRoute-Lease-Owner` tí kò ní ìtumọ̀ sílẹ̀ àti
+`X-OmniRoute-Lease-Generation` gangan hàn. Owner náà máa ń bẹ̀rẹ̀ pẹ̀lú `vlo_` lẹ́yìn náà àwọn
+àfọwọ́kọ base64url 43; SHA-256 hash rẹ̀ nìkan ni a máa ń tọ́jú. Gbogbo fence dispatch ìkẹyìn tún máa ń so
+ID API key tí a fìdí rẹ̀ múlẹ̀ àti ID ìsopọ̀ tó ń ṣiṣẹ́ pọ̀. A máa ń yọ àwọn header ìṣàkóso lease kúrò
+nínú logs, àwọn àwòrán request tí a tọ́jú, àti àwọn header executor tó wà lókè.
 
-Bí ìtọ́sọ́nà deede bá ní àwọn olùdíje tó ń ṣàkóso tí wọ́n wọ́pọ̀ ṣùgbọ́n gbogbo olùdíje tó ṣofò ti ní ìyáàjá àjèjì tó ń ṣiṣẹ́ lọ́wọ́, OmniRoute ń dá HTTP `429` padà, kóòdù lease-capacity-unavailable, ìpò tí ó ń dúró de àyè, àti `Retry-After` tí ó ní ààlà tí wọ́n gba láti inú ìparí pípẹ́ ṣẹ́ṣẹ́ jùlọ tó bá a mu.
+Tí routing deede bá ní àwọn candidate managed tó yẹ, ṣùgbọ́n tí gbogbo candidate tó wà lómìnira bá jẹ́ ti
+lease àjèjì tó ń ṣiṣẹ́, OmniRoute máa dá HTTP `429` padà, pẹ̀lú code lease-capacity-unavailable, ipò
+waiting-for-capacity, àti `Retry-After` tí a ní ààlà tí a yọ láti expiry tó kù sílẹ̀ jù lọ.
+Àìsí eligibility deede kì í ṣe ìjàkadì lease, ó sì ń pa ìtumọ̀ aṣiṣe routing tó wà tẹ́lẹ̀ mọ́.
 
-Ìṣófo àwọn tí wọ́n wọ́pọ̀ deede kì í ṣe ìfààwọ̀ ìyáàjá, ó sì ń pa àwọn ìtumọ̀ aṣìṣe ìtọ́sọ́nà rẹ̀ mọ́ bó ti ṣe ń lọ.
+Àwọn ọ̀nà tó jọmọ̀ ṣì yàtọ̀:
 
-Àwọn ètò tó jọ mọ́ ẹ̀yí ṣì dúró lọ́tọ̀:
+- Ààyè OAuth session jẹ́ ìpínpin rírọ̀ tó wà nínú process fún àwọn account OAuth.
+- Account semaphores máa ń fúnni ní àwọn àṣẹ concurrency fún request, wọ́n sì máa ń parí nígbà tí request bá pé.
+- Exclusive managed session leases jẹ́ ìní lifecycle tó lè wà pẹ́ pẹ̀lú generation fence.
 
-- Ìdókòwò àkókò OAuth jẹ́ pínpín rọ̀rọ̀ tó dúró nínú ìlànà fún àwọn àkáǹtì OAuth.
-- Àwọn semafóò àkáǹtì ń fún àwọn ìfàyèlà ìṣiṣẹ́ àpapọ̀ àwọn ìbéèrè lẹ́yìn, wọ́n sì ń parí nígbà tí ìbéèrè kan bá parí.
-- Àwọn ìyáàjá àkókò tó ń ṣàkóso ẹni-kọ̀ọ̀kan jẹ́ ìní ẹ̀mí ìyípadà tó pẹ́ pẹ̀lú ìdíwọ́ iran.
+---
 
 ## 3. Ìdènà Àwòṣe
 
@@ -326,26 +350,26 @@ tó ń ṣiṣẹ́ jẹ́ ti ìgbà díẹ̀.
 
 ---
 
-## 4. Ìṣàkóso Ìṣiṣẹ́pọ̀ Quota-Share (v3.8.36)
+## 4. Ìṣàkóso Ìbáṣepọ̀ Quota-Share (v3.8.36)
 
-Àwọn àkọọ́lẹ̀ ìforúkọsílẹ̀ (GLM, MiniMax, abbl.) sábà máa ń gba nǹkan bí ìbéèrè
-~1–3 péré ní àkókò kan náà; fífi ju bẹ́ẹ̀ lọ ń fa 429 àti àwọn àkókò ìdádúró.
-Èyí le gan-an lábẹ́ àwọn àkójọpọ̀ **quota-share** (`qtSd/…`), níbi tí ọ̀pọ̀
-kọ́kọ́rọ́ API ti ń pín àkọọ́lẹ̀ iṣẹ́ òkè kan náà. Ìpele mẹ́ta ló ń dáàbò bo
-àkọọ́lẹ̀ tí a jọ ń lò kí ìbéèrè má bàa kún inú rẹ̀ kọjá ààlà.
+Àwọn àkáǹtì ìforúkọsílẹ̀ (GLM, MiniMax, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) sábà máa ń gba àwọn
+ìbéèrè tó ń lọ pọ̀ ní àkókò kan 1–3 péré; bí a bá kọjá iye yìí, ó máa ń fa 429 àti
+àwọn àkókò ìdádúró. Èyí burú jù lọ lábẹ́ àwọn combo
+**quota-share** (`qtSd/…`), níbi tí àwọn kọ́kọ́rọ́ API púpọ̀ ti ń pín àkáǹtì upstream kan.
+Àwọn ipele mẹ́ta ń jẹ́ kí àkáǹtì tí a pín má bà a kún fún ìbéèrè ju.
 
-### Ààlà ìṣiṣẹ́pọ̀ fún asopọ̀ kọ̀ọ̀kan (`max_concurrent`)
+### Ààlà ìbáṣepọ̀ fún connection kọ̀ọ̀kan (`max_concurrent`)
 
-Asopọ̀ olùpèsè kọ̀ọ̀kan lè sọ ààlà `max_concurrent` kan
-(`provider_connections.max_concurrent`, tí a ṣètò nínú fèrèsé asopọ̀ / API / DB).
-Fi í sílẹ̀ ní òfo tí o kò bá fẹ́ ààlà. Èyí ni ìṣàkóso kan ṣoṣo tó ń darí ìpele
-títẹ̀lé-lẹ́sẹẹsẹ ní ìsàlẹ̀ — ṣètò rẹ̀ sí iye ìṣiṣẹ́pọ̀ gidi ti àkọọ́lẹ̀ náà
-(fún àpẹẹrẹ, GLM ~1, MiniMax ~2).
+Connection provider kọ̀ọ̀kan lè kéde àjà ààlà `max_concurrent`
+(`provider_connections.max_concurrent`, tí a ṣètò nínú connection modal / API / DB).
+Fi sílẹ̀ ní òfo bí o kò bá fẹ́ ààlà kankan. Èyí ni knob kan ṣoṣo tó ń darí ipele
+serialization tó wà nísàlẹ̀ — ṣètò ó sí ìbáṣepọ̀ gidi àkáǹtì náà (fún àpẹẹrẹ, GLM ~1,
+MiniMax ~2).
 
-### Àwọn ààlà ìṣiṣẹ́pọ̀ fún awoṣe kọ̀ọ̀kan (`modelConcurrency`)
+### Àwọn ààlà ìbáṣepọ̀ fún model (`modelConcurrency`)
 
-Asopọ̀ kan tún lè sọ àwọn ààlà ìṣiṣẹ́pọ̀ pàtó fún awoṣe kọ̀ọ̀kan
-nínú máàpù `rateLimitOverrides` rẹ̀:
+Connection kan tún lè kéde àwọn àjà ààlà ìbáṣepọ̀ pàtó fún model kọ̀ọ̀kan
+nínú map `rateLimitOverrides`:
 
 ```json
 {
@@ -356,80 +380,80 @@ nínú máàpù `rateLimitOverrides` rẹ̀:
 }
 ```
 
-Ṣètò rẹ̀ nínú fèrèsé asopọ̀ (**Àwọn àtúnṣe ààlà oṣùwọ̀n → Àwọn ààlà
-ìṣiṣẹ́pọ̀ fún awoṣe kọ̀ọ̀kan**, `model=cap` kan lórí ìlà kọ̀ọ̀kan) tàbí nípasẹ̀
+Ṣètò ó nínú connection modal (**Rate limit overrides → Per-model
+concurrency caps**, `model=cap` kan fún laini kọ̀ọ̀kan) tàbí nípasẹ̀
 `PATCH /api/providers/[id]` pẹ̀lú ìrísí JSON kan náà. Ìtumọ̀ àwọn kọ́kọ́rọ́:
 
-- **Gbogbo asopọ̀ ní ìfiwéra pẹ̀lú awoṣe pàtó:** `maxConcurrent` ṣì jẹ́ ààlà
-  tí gbogbo asopọ̀ ń pín. Nígbà tí àwọn méjèèjì bá wúlò, a máa gba àwọn ẹnu-ọ̀nà
-  méjèèjì lẹ́ẹ̀kan náà nínú ẹnu-ọ̀nà àpapọ̀ kan
-  (`global → provider → account → model`); ààlà tó le jù lára àwọn tó wúlò
-  ni yóò ní ipa.
-- **Ìbámu pípé ti kọ́kọ́rọ́ awoṣe:** kọ́kọ́rọ́ náà ni ọ̀rọ̀ awoṣe tí a fi ránṣẹ́
-  sí olùṣiṣẹ́ lẹ́yìn tí a bá ti pinnu ipa-ọ̀nà — nígbà gbogbo, ó jẹ́ id awoṣe
-  òkè lásán (`glm-5`), kì í ṣe orúkọ àpèjúwe `provider/model` láti ọ̀dọ̀
-  oníbàárà (`zai/glm-5` kò bá `glm-5` mu). Àwọn iye gbọdọ̀ jẹ́ odidi rere
-  tó ń ṣàlàyé ààlà iye ìbéèrè tó lè ṣiṣẹ́ ní àkókò kan náà.
-- **Ìtòlẹ́sẹẹsẹ agbègbè, kò sí ìṣàwárí:** àwọn ìbéèrè tó kọjá ààlà máa dúró
-  nínú ìtòlẹ́sẹẹsẹ agbègbè pẹ̀lú ìlànà ìtòlẹ́sẹẹsẹ/àkókò-ìparí tó ti wà
-  (àwọn àṣìṣe ìgbàwọlé onírúurú `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL`). OmniRoute kì í ṣàwárí tàbí fojú díwọ̀n ìlànà
-  iṣẹ́ òkè — ó ń fi àwọn ààlà pàtó tí olùdarí ṣètò múlẹ̀. Ẹnu-ọ̀nà awoṣe
-  tó ti kún kì í pa olùpèsè, bẹ́ẹ̀ ni kì í dá ìdènà awoṣe títí láé sílẹ̀;
-  ìhùwàsí 429/àkókò ìdádúró/ìyípadà sí omiì ti iṣẹ́ òkè ṣì jẹ́ ààbò ìkẹyìn
-  fún àṣìṣe.
-- **Ìpín fún asopọ̀ kọ̀ọ̀kan, fún ìlànà-iṣẹ́ kọ̀ọ̀kan:** àwọn ààlà jẹ́ ti
-  asopọ̀ ibi ìpamọ́ dátà kọ̀ọ̀kan, a sì ń pa wọ́n mọ́ sínú ìrántí; nítorí náà,
-  asopọ̀ méjì tó tún ń lo kọ́kọ́rọ́ API iṣẹ́ òkè kan náà kì í ṣọ̀kan pẹ̀lú
-  ara wọn.
-- **Àìṣètò túmọ̀ sí pé kò sí ìyípadà:** fífi máàpù náà sílẹ̀ (tàbí fífi
-  ààyè inú pánẹ́ẹ̀lì sílẹ̀ ní òfo) kò fi ẹnu-ọ̀nà awoṣe kankan kún un.
-  Àpẹẹrẹ ìṣètò láì sọ pé ààlà olùpèsè àgbáyé kankan wà:
+- **Ààlà gbogbo connection sí ààlà pàtó fún model:** `maxConcurrent` ṣì jẹ́ ààlà
+  gbogbo connection tí a pín. Nígbà tí àwọn méjèèjì bá wúlò, a gba àwọn gate méjèèjì
+  ní atomikì nínú composite gate kan náà
+  (`global → provider → account → model`); ìwà tó máa ṣẹlẹ̀ ni ààlà tó le jù lọ nínú
+  àwọn ààlà tó kan.
+- **Ìbámu kọ́kọ́rọ́ model gan-an:** kọ́kọ́rọ́ náà ni string model tí a fi ránṣẹ́ sí
+  executor lẹ́yìn ìpinnu routing — lọ́pọ̀ ìgbà ni model id upstream tí kò ní àfikún
+  (`glm-5`), kì í ṣe alias `provider/model` ti client (`zai/glm-5` kò bá
+  `glm-5` mu). Àwọn iye jẹ́ ààlà àwọn ìbéèrè tó ń lọ pọ̀ ní àkókò kan, tí ó jẹ́ odidi
+  rere.
+- **Queueing ní agbègbè, kò sí ìwádìí:** àwọn ìbéèrè tó pọ̀ ju iye lọ máa ń dúró ní
+  queue ní agbègbè pẹ̀lú semantics queue/timeout tó wà tẹ́lẹ̀ (àwọn aṣiṣe gbigba wọlé
+  tí a tẹ̀ jáde ni `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute kò ṣe
+  ìwádìí tàbí àfọ̀mọ̀ policy upstream — ó ń fi agbára mú àwọn ààlà pàtó tí operator
+  ṣètò. Gate model tí ó kún kò ní pa provider rẹ̀, kò sì ní dá ìdènà model títí láé;
+  ìhùwàsí upstream 429/cooldown/fallback ṣì jẹ́ àtìlẹ́yìn aṣiṣe.
+- **Àyè connection kọ̀ọ̀kan, process kọ̀ọ̀kan:** àwọn ààlà jẹ́ ti connection database
+  kọ̀ọ̀kan, a sì ń di wọ́n sínú iranti, nítorí náà àwọn connection méjì tí ń tún lo
+  API key upstream kan kò bá ara wọn ṣọ̀kan.
+- **Àìṣètò túmọ̀ sí pé kò sí ìyípadà:** fífi map náà sílẹ̀ (tàbí fífi pápá dashboard
+  sílẹ̀ ní òfo) kò fi gate model kankan kún un. Àpẹẹrẹ ìṣètò láì sọ ààlà provider
+  gbogbo ayé di dandan:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Títẹ̀lé-lẹ́sẹẹsẹ àwọn ìbéèrè quota-share
+### Ṣísọ́pọ̀ àwọn ìbéèrè quota-share
 
-Nígbà tí ìfiranṣẹ́ quota-share bá dojú kọ asopọ̀ kan tó sọ `max_concurrent`
-rere, a máa tẹ àwọn ìbéèrè tó ń lọ sí **àkọọ́lẹ̀** náà ní àkókò kan náà
-lẹ́sẹẹsẹ nípasẹ̀ semaphore fún asopọ̀ kọ̀ọ̀kan (kọ́kọ́rọ́
-`qsconn:<connectionId>`): àwọn ìbéèrè tó kọjá ààlà **máa dúró nínú
-ìtòlẹ́sẹẹsẹ** dípò kí wọ́n kún inú àkọọ́lẹ̀ náà. Ó jẹ́ **ṣí-sílẹ̀ nígbà
-ìkùnà** — ìtòlẹ́sẹẹsẹ tó ti kún tàbí àkókò tó parí máa tẹ̀síwájú láì gba
-àyè kan dípò kí ó kọ ìbéèrè tó ṣeé firánṣẹ́ sílẹ̀ láéláé. Tan-an tàbí pa á
-nínú **Àwọn ìṣètò → Ìfaradà → Ìṣiṣẹ́pọ̀ fún asopọ̀ quota-share kọ̀ọ̀kan**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, ó máa ń wà ní títàn
-ní ìbẹ̀rẹ̀). Láìsí ààlà `max_concurrent`, ìhùwàsí náà kò ní yí padà.
+Nígbà tí dispatch quota-share bá dojú kọ́ connection kan tó kéde
+`max_concurrent` rere, àwọn ìbéèrè tó ń lọ pọ̀ sí **account** náà ni a máa ń sọ́pọ̀
+nípasẹ̀ semaphore fún connection náà (key `qsconn:<connectionId>`): àwọn ìbéèrè tó
+pọ̀ ju iye lọ **máa dúró nínú queue** dípò kí wọ́n kún account náà. Ó jẹ́
+**fail-open** — queue tó kún tàbí timeout máa ń tẹ̀síwájú láìsí slot dípò kí ó
+kọ̀ ìbéèrè tí a lè dispatch ṣe. Yí i sílẹ̀ tàbí pa á nínú **Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, aiyipada
+on). Láìsí ààlà `max_concurrent`, ìwà náà kò yí padà.
 
-> Ẹnu-ọ̀nà ìdarí ipa-ọ̀nà quota-share (`selectQuotaShareTarget`, DRR + P2C)
-> fúnra rẹ̀ jẹ́ èyí tó ṣí-sílẹ̀ nígbà ìkùnà, ó sì kàn ń _dín ààyè àṣàyàn_
-> asopọ̀ tó ti dé ààlà kù — pẹ̀lú àkójọpọ̀ asopọ̀ kan ṣoṣo, kò lè fi ààlà
-> líle múlẹ̀, nítorí náà semaphore yìí gan-an ló ń ṣàkóso ìṣàn ìbéèrè tó pọ̀.
+> Gate routing quota-share (`selectQuotaShareTarget`, DRR + P2C) fúnra rẹ̀
+> jẹ́ fail-open, ó sì kan _dín ààyò_ connection tó ti dé ààlà kù — pẹ̀lú pool
+> connection kan kò lè fi ààlà líle sí i, nítorí náà semaphore yìí ni ohun tó ń
+> dá ìkún omi náà dúró gan-an.
 
-### Àtúngbìyànjú tó mọ àkókò ìdádúró àkójọpọ̀
+### Retry combo tó mọ̀ nípa cooldown
 
-Fún gbogbo ọgbọ́n àkójọpọ̀ (nígbà tí ó bá ṣiṣẹ́), ìbéèrè kan tó máa mú 429
-kẹyìn wá nítorí àkókò ìdádúró alágbàákò KÚKÚRÚ máa dúró de òpin rẹ̀, yóò sì
-tún fi ìbéèrè náà ránṣẹ́ dípò pípadà 429 — èyí bo àwọn àkókò TPM/RPM irú ti
-Gemini (~60s retry-after) lórí àwọn àkójọpọ̀ awoṣe-púpọ̀, fún àpẹẹrẹ, nígbà
-tí àwọn ibi-afẹ́ méjèèjì nínú àkójọpọ̀ awoṣe méjì bá dé ààlà oṣùwọ̀n fún
-awoṣe kọ̀ọ̀kan. `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) nínú **Àwọn ìṣètò → Ìfaradà** ló fi ààlà sí i. Kò dúró láéláé
-lórí `quota_exhausted` (tí a ti tì pa títí di ọ̀gànjọ́ òru) tàbí àwọn ìdí
-ìfàṣẹsí/àìrí.
+Fún gbogbo ọgbọ́n combo (nígbà tí ó bá ṣiṣẹ́), ìbéèrè tí yóò mú 429 kan dá sílẹ̀
+fún cooldown transient KURU máa ń dúró de rẹ̀, ó sì tún máa ń dispatch dípò kí ó
+dá 429 náà padà — èyí bo àwọn window TPM/RPM irú Gemini (~60s retry-after)
+lórí combo model púpọ̀, fún àpẹẹrẹ nígbà tí àwọn target méjèèjì nínú combo model
+méjì bá dé ààlà rate fún model kan. `comboCooldownWait` ló ń fi ààlà sí i
+(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) nínú **Settings → Resilience**.
+Kò dúró de `quota_exhausted` (tí a ti tì títí di ọ̀gànjọ́), tàbí àwọn ìdí auth/not-found.
 
-Ẹnu-ọ̀nà kan náà tún bo ipò ṣáájú ìfiranṣẹ́ (#16319): nígbà tí a bá foju kọ
-gbogbo ibi-afẹ́ àkójọpọ̀ kan kí ìgbìyànjú kankan tó bẹ̀rẹ̀ nítorí pé awoṣe
-wọn wà lábẹ́ ìdènà alágbàákò kúkúrú, ipa-ọ̀nà aláìní-ìgbìyànjú náà máa dúró
-de òpin ìdènà lábẹ́ àwọn ààlà kan náà, yóò sì tún fi ìbéèrè náà ránṣẹ́, dípò
-dídi èsì `503 ALL_TARGETS_SKIPPED` tí kò ní ìtọ́kasí. Nígbà tí a kò bá gba
-ìdúró láàyè (ààlà ti dé, iye ìgbìyànjú tàbí ìnáwó ti parí, tàbí àǹfààní náà
-wà ní pípà), èsì ìkẹyìn máa yí sí `429 rate_limit_error` tó ní `retry_after` /
-`reset_at` láti àkókò ìparí ìdènà alágbàákò tó kọ́kọ́ dé; àwọn ìdènà kótà,
-ìfàṣẹsí àti àìrí máa pa 503 tí kò ní ìtọ́kasí mọ́.
+Combo lè yọ ara rẹ̀ kúrò pẹ̀lú `config.comboCooldownWaitEnabled: false`. `false`
+gidi nìkan ni ó máa ń pa àwọn ìdúró combo pínpín wọ̀nyí (cooldown lẹ́yìn dispatch
+àti circuit-open/model-lock lẹ́yìn dispatch) àti àfikún wait-budget timeout-floor
+wọn. Àìsí iye tàbí `true` máa ń pa policy gbogbo ayé mọ́; `true` kò lè mú ìdúró ṣiṣẹ́
+ní gbogbo ayé tí a bá ti pa á. `targetTimeoutMs` tó ṣàlàyé ní pàtó ṣì ni ó máa ń borí.
+Yíyọ ara kúrò yìí kò yí ìdúró native-Codex turn-pin lọ́tọ̀ tó wá ṣáájú dispatch padà.
+
+Gate kan náà bo ọ̀ràn ṣáájú dispatch (#16319): nígbà tí a bá foju gbogbo target
+combo kọjá ṣáájú kí ìgbìyànjú kankan tó bẹ̀rẹ̀ nítorí pé model rẹ̀ wà nínú ìdènà
+transient kúkúrú, ọ̀nà zero-attempt máa ń dúró de ìdènà náà lábẹ́ àwọn àjà kan náà,
+ó sì tún máa ń dispatch, dípò kí ó dá
+`503 ALL_TARGETS_SKIPPED` aláìní hint padà. Nígbà tí a kò bá gba ìdúró laaye
+(àjà, ìgbìyànjú tàbí budget ti tán, tàbí feature náà ti wa ni pipa), response
+ìkẹyìn máa ń yí padà sí `429 rate_limit_error`, ó sì máa ń gbe
+`retry_after` / `reset_at` láti inú ìparí ìdènà transient tó tètè dé; quota, auth àti
+àwọn ìdènà not-found ṣì máa ń pa 503 aláìní hint mọ́.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
@@ -552,30 +576,13 @@ Ní àtọ́kànwá, OmniRoute máa ń ṣí ààbò ìlànilẹnu rate-limit f�
 
 ---
 
-## 6. Olùsọ́ ààyò sisan-aláìyára (#9709)
+## 6. Abojuto ohun elo ti o lọra-san (#9709)
 
-Ààbò aṣayan `resilienceSettings.streamRecovery.throughputWatchdog` ń ṣàwárí
-orísun-òkè kan tí ó ṣì ń fi àwọn àkọ́sọ́láàrẹ ránṣẹ́ ṣùgbọ́n tí ó ń ṣẹ̀dá àbájáde
-olùrànlọ́wọ́ ní ìsàlẹ̀ oṣùwọn àbájáde-tó-wúlò tí a ṣètò. Ó yàtọ̀ lọ́nà pàtápàtá sí
-àkókò parí aìṣiṣẹ́: àwọn ìlù-ọkàn àti metadata kò tún àago méjèèjì kankan ṣe àtòpò,
-wọn kò sì ka sí ìlọsíwájú. Ó tún yàtọ̀ sí òpin ìgbìyànjú líle (#9153), èyí tó ṣì
-jẹ́ àjàlá ààbò pátápátá láìka sí didára àbájáde.
+Ẹṣọ `resilienceSettings.streamRecovery.throughputWatchdog` iyan ṣe awari ṣiṣan ti o wa ni oke ti o tun nfi awọn ṣoki ranṣẹ ṣugbọn ti n ṣe iṣelọpọ oluranlọwọ ni isalẹ oṣuwọn igbejade iwulo tunto. O ti mọọmọ yato si akoko isinsinyi: awọn lu ọkan ati metadata tunto bẹni aago ati maṣe ka bi ilọsiwaju. O tun jẹ iyatọ si akoko ipari igbiyanju lile (#9153), eyiti o jẹ aja aabo pipe laibikita didara iṣelọpọ.
 
-Olùsọ́ náà nílò àsìkò ìgbọ́násí tí ìtẹ̀le yóò sì jẹ́ fèrèsé yíyí tó pé kí ó tó lè
-dáwọ́ dúró. Ó ń ka àwọn ìyípadà ọ̀rọ̀ láti àwọn ìṣẹ̀lẹ̀ àbájáde Chat Completions àti
-Responses API (àṣojú báìtì UTF-8 tó ṣọ́ra), ó ń fọ́wọ́ rí àwọn ìṣẹ̀lẹ̀ lílò-nìkan àti
-àwọn ẹ̀yí òfo, ó sì ń dáwọ́ ìdájọ́ rẹ̀ dúró nígbà tí àwọn ìṣẹ̀lẹ̀ ìpè-irinṣẹ́ tàbí
-ìròyìn bá ń lọ lọ́wọ́. A ti pa á rẹ́rẹ́ láti ìbẹ̀rẹ̀, a sì lè mú ú ṣiṣẹ́ pẹ̀lú
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; fèrèsé náà, ìgbọ́násí, oṣùwọn kéréjù,
-àti àbájáde kéréjù tí a lè wọn, gbogbo wọn ni ìlà ìwọ̀ntúnwọ̀nsì àwọn àtòpò
-ààbò-ìfaradà deéde ń ṣàkóso wọn.
+Abojuto nilo akoko gbigbona ti o tẹle pẹlu ferese yiyi ni pipe ṣaaju ki o to le waye. O ka awọn delta ọrọ lati Awọn ipari Wiregbe ati Awọn idahun awọn iṣẹlẹ igbejade API (aṣoju UTF-8 byte Konsafetifu), kọju lilo-nikan ati awọn iṣẹlẹ ofo, o si da idajọ duro lakoko ipe-irinṣẹ tabi awọn iṣẹlẹ ero wa ni ọkọ ofurufu. O jẹ alaabo nipasẹ aiyipada ati pe o le mu ṣiṣẹ pẹlu `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (iye iye env nikan awọn irugbin aiyipada — ti o fipamọ `resilienceSettings.streamRecovery.throughputWatchdog.enabled` boolean bori; wo akọsilẹ iṣaaju env-vs-dashboard ni oke itọsọna yii); ferese, igbona, oṣuwọn ti o kere ju, ati iṣẹjade wiwọn ti o kere ju ti wa ni opin nipasẹ awọn ipele isọdọtun awọn eto deede.
 
-Nígbà tí a bá mú ú ṣiṣẹ́, ìdáwọ́dúró olùsọ́ náà máa ń kan ìgbìyànjú orísun-òkè tó
-ń ṣiṣẹ́ lọ́wọ́lọ́wọ́ nìkan. Ṣáájú àwọn báìtì kankan tí oníbàárà lè rí, ọ̀nà
-ìmúpadàbọ̀sípọ̀ tẹ́lẹ̀ lórí àkáǹtì kannáà tó wà tẹ́lẹ̀ lè tún ìgbìyànjú náà ṣí.
-Lẹ́yìn ìfipamọ́, a kò tún sisan náà ṣe láìsí ìṣọ́ra rárá; àdéhùn ìtẹ̀síwájú ààbò
-láàrin sisan tó wà tẹ́lẹ̀ nìkan ló lè so ìfikún-ìparí pọ̀. Ìparí ṣì jẹ́
-ìṣe-lẹ́ẹ̀kan-ṣoṣo, nítorí náà a kò ṣe ìṣirò lílò àti ìtúpalẹ̀ semaphore lẹ́mejì.
+Nigbati o ba mu ṣiṣẹ, iṣẹyun oluṣọ ni a lo nikan si igbiyanju oke ti nṣiṣe lọwọ. Ṣaaju eyikeyi awọn baiti ti o han alabara, akọọlẹ kanna ti o wa ni ọna imularada ni kutukutu le tun igbiyanju naa ṣii. Lẹhin ti o ti ṣe, ṣiṣan naa ko tun ṣe atunṣe ni afọju; nikan ni ailewu aarin-san itesiwaju guide le aranpo a suffix. Ipari si wa ni shot ẹyọkan, nitorinaa ṣiṣe iṣiro lilo ati itusilẹ semaphore ko ni ẹda.
 
 ---
 

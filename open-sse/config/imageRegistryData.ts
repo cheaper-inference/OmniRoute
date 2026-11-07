@@ -19,6 +19,7 @@ import { AI_HORDE_IMAGE_PROVIDER } from "./providers/registry/aihorde/imageModel
 import { toRegistryImageModels as toSyntxImageModels } from "../services/syntxMediaCatalog.ts";
 import { ZENMUX_IMAGE_PROVIDER } from "./providers/registry/zenmux/imageModels.ts";
 import { MUSE_CODE_IMAGE_PROVIDER } from "./providers/registry/muse-code/imageModels.ts";
+import { CODEX_IMAGE_PROVIDER } from "./providers/registry/codex/imageModels.ts";
 import { GROK_BUILD_PROXY_BASE_URL } from "./grokBuildEndpoints.ts";
 
 export interface ImageModelEntry {
@@ -253,40 +254,7 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     supportedSizes: ["1024x1024", "1024x1792", "1792x1024"],
   },
 
-  // Codex serves images under ChatGPT OAuth two ways (handleCodexImageGeneration):
-  //  - `gpt-image-*` ids use the dedicated `/backend-api/codex/images/{generations,edits}`
-  //    routes, which take the image model as a request field (codexImages.ts);
-  //  - the GPT-5.6 ids call `/responses` with the hosted `image_generation` tool, whose
-  //    image model the backend pins to `gpt-image-2-codex`.
-  codex: {
-    id: "codex",
-    alias: "cx",
-    baseUrl: "https://chatgpt.com/backend-api/codex/responses",
-    authType: "oauth",
-    authHeader: "bearer",
-    format: "codex-responses",
-    models: [
-      {
-        id: "gpt-5.6-sol",
-        catalogId: "gpt-5.6-sol-image",
-        name: "GPT 5.6 Sol (Codex Image)",
-      },
-      {
-        id: "gpt-5.6-terra",
-        catalogId: "gpt-5.6-terra-image",
-        name: "GPT 5.6 Terra (Codex Image)",
-      },
-      {
-        id: "gpt-5.6-luna",
-        catalogId: "gpt-5.6-luna-image",
-        name: "GPT 5.6 Luna (Codex Image)",
-      },
-      { id: "gpt-image-2.5-flare", name: "GPT Image 2.5 Flare (Codex)" },
-      { id: "gpt-image-2.5-sunburst", name: "GPT Image 2.5 Sunburst (Codex)" },
-      { id: "gpt-image-2", name: "GPT Image 2 (Codex)" },
-    ],
-    supportedSizes: ["1024x1024", "1024x1536", "1536x1024"],
-  },
+  codex: CODEX_IMAGE_PROVIDER,
 
   // Cursor plan image generation via the Agent CLI native `generateImage` tool.
   // Reuses the same OAuth/API-key connection as chat (`provider: "cursor"`).
