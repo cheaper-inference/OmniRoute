@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { PageHeader, SectionHeader as KitSectionHeader } from "@omniroute/ui-kit/page-header";
+import { Tile } from "@omniroute/ui-kit/tile";
 import {
   Table,
   TableBody,
@@ -15,6 +16,7 @@ import {
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Select from "@/shared/components/Select";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import ModelCooldownsCard from "./components/ModelCooldownsCard";
@@ -568,7 +570,7 @@ export default function RuntimePageClient() {
               title={t("refreshNow")}
               aria-label={t("refreshNow")}
             >
-              <Icon name="refresh" size={16} className={loading ? "animate-spin" : undefined} />
+              {loading ? <Spinner decorative size="sm" /> : <Icon name="refresh" size={16} />}
             </Button>
           </>
         }
@@ -1043,32 +1045,30 @@ function KpiCard({
   onClick: () => void;
   active: boolean;
 }) {
-  // kit-exception: Multi-line KPI tile that also filters the feed: the kit Button is a single-line pill, so
-  // this stays a native <button> on kit tokens (state exposed through aria-pressed).
+  // Kit Tile as a feed-filter toggle (aria-pressed). The title — the accessible name — keeps the
+  // label and the value; the hint is the description. The tone only colours the glyph and value.
   return (
-    <button
-      type="button"
+    <Tile
+      pressed={active}
       onClick={onClick}
-      aria-pressed={active}
-      className="text-left rounded-xl border px-4 py-3 transition-colors cursor-pointer bg-surface"
-      style={{
-        borderColor: active ? tone : "var(--color-border)",
-        boxShadow: active ? `0 0 0 2px color-mix(in srgb, ${tone} 14%, transparent)` : undefined,
-      }}
-    >
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
-          {label}
-        </span>
+      className="px-4 py-3"
+      meta={
         <span style={{ color: tone }}>
           <Icon name={icon} size={16} />
         </span>
-      </div>
-      <div className="mt-1 text-2xl font-bold tabular-nums" style={{ color: tone }}>
-        {value}
-      </div>
-      <div className="text-[10px] text-text-muted truncate">{hint}</div>
-    </button>
+      }
+      title={
+        <>
+          <span className="block text-[11px] uppercase tracking-wider font-semibold text-text-muted">
+            {label}
+          </span>{" "}
+          <span className="mt-1 block text-2xl font-bold tabular-nums" style={{ color: tone }}>
+            {value}
+          </span>
+        </>
+      }
+      description={<span className="block truncate">{hint}</span>}
+    />
   );
 }
 

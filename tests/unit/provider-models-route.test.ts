@@ -841,13 +841,17 @@ test("provider models route falls back to cached models when a refresh fails", a
   assert.equal(fetchCalls, 2);
 });
 
-test("provider models route clears cached discovery when a refresh returns no remote models", async () => {
+// #19143: an empty answer may be transient, so it never clears a catalog or refreshes its
+// timestamp. A provider that really lost its models reports a degraded discovery until the
+// operator uses Clear All; a smaller non-empty list still replaces the catalog.
+test("provider models route keeps cached discovery when a refresh returns no remote models", async () => {
   const connection = await seedConnection("opencode-go", {
     apiKey: "opencode-go-key",
   });
   await modelsDb.replaceSyncedAvailableModelsForConnection("opencode-go", connection.id, [
     { id: "cached-go", name: "Cached Go", source: "imported" },
   ]);
+  const before = await providersDb.getProviderConnectionById(connection.id);
 
   globalThis.fetch = async () => {
     return Response.json({ data: [] });
@@ -859,12 +863,46 @@ test("provider models route clears cached discovery when a refresh returns no re
     "opencode-go",
     connection.id
   );
+  const after = await providersDb.getProviderConnectionById(connection.id);
 
   assert.equal(response.status, 200);
-  assert.equal(body.source, "local_catalog");
+  assert.equal(body.source, "cache");
   assert.match(body.warning, /no remote models discovered/i);
-  assert.ok(body.models.every((model) => model.id !== "cached-go"));
-  assert.deepEqual(cachedModels, []);
+  assert.equal(body.degraded, true);
+  assert.equal(body.error, "EMPTY_CATALOG");
+  assert.ok(body.models.some((model) => model.id === "cached-go"));
+  assert.deepEqual(
+    cachedModels.map((model) => model.id),
+    ["cached-go"]
+  );
+  assert.equal(after?.syncedModelsAt, before?.syncedModelsAt);
+});
+
+test("provider models route answers a degraded empty list when no fallback exists", async () => {
+  const connection = await seedConnection("openai-compatible-no-fallback", {
+    apiKey: "sk-openai-compatible",
+    providerSpecificData: { autoFetchModels: true, baseUrl: "https://proxy.example.com/v1" },
+  });
+
+  globalThis.fetch = async () => {
+    return Response.json({ data: [] });
+  };
+
+  const response = await callRoute(connection.id);
+  const body = (await response.json()) as {
+    source: string;
+    degraded: boolean;
+    error: string;
+    models: unknown[];
+  };
+  const stored = await providersDb.getProviderConnectionById(connection.id);
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(body.models, []);
+  assert.equal(body.source, "local_catalog");
+  assert.equal(body.degraded, true);
+  assert.equal(body.error, "EMPTY_CATALOG");
+  assert.ok(!stored?.syncedModelsAt);
 });
 
 test("provider models route keeps upstream discovery off until autoFetchModels is explicitly enabled", async () => {
