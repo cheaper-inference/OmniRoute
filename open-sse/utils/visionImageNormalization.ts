@@ -53,62 +53,88 @@ export interface VisionImageNormalizationResult {
   changed: boolean;
 }
 
+type SharpInstance = ReturnType<SharpModule>;
+type SharpMetadata = Awaited<ReturnType<SharpInstance["metadata"]>>;
+
+function passthrough(input: Buffer): VisionImageNormalizationResult {
+  return { buffer: input, mime: null, changed: false };
+}
+
+/** Budgets apply to the image as displayed: use the EXIF-oriented size. */
+function orientedSize(meta: SharpMetadata): { width: number; height: number } {
+  return {
+    width: meta.autoOrient?.width ?? meta.width ?? 0,
+    height: meta.autoOrient?.height ?? meta.height ?? 0,
+  };
+}
+
+/** Combined scale for both constraints (aspect preserved). */
+function fitWithinBudget(width: number, height: number): { width: number; height: number } {
+  const scale = Math.min(
+    MAX_LONG_EDGE / Math.max(width, height),
+    Math.sqrt(MAX_TOTAL_PIXELS / (width * height)),
+    1
+  );
+  return {
+    width: Math.max(1, Math.round(width * scale)),
+    height: Math.max(1, Math.round(height * scale)),
+  };
+}
+
+/**
+ * Re-encode: keep alpha-free PNGs lossless; everything else (incl. alpha
+ * flattened onto white and exotic formats) becomes a baseline JPEG.
+ */
+async function encodeForVision(
+  pipeline: SharpInstance,
+  hasAlpha: boolean,
+  format: string
+): Promise<{ buffer: Buffer; mime: string }> {
+  if (hasAlpha) {
+    const buffer = await pipeline
+      .flatten({ background: "#ffffff" })
+      .jpeg({ quality: JPEG_QUALITY, progressive: false })
+      .toBuffer();
+    return { buffer, mime: "image/jpeg" };
+  }
+  if (format === "png") {
+    return { buffer: await pipeline.png().toBuffer(), mime: "image/png" };
+  }
+  const buffer = await pipeline.jpeg({ quality: JPEG_QUALITY, progressive: false }).toBuffer();
+  return { buffer, mime: "image/jpeg" };
+}
+
 /** Normalize one decoded image into the vision-pipeline comfort zone. Never throws. */
 export async function normalizeVisionImageBuffer(
   input: Buffer
 ): Promise<VisionImageNormalizationResult> {
   const sharp = await loadSharp();
-  if (!sharp) return { buffer: input, mime: null, changed: false };
+  if (!sharp) return passthrough(input);
   try {
     const img = sharp(input, { failOn: "error" });
     const meta = await img.metadata();
-    // Budgets apply to the image as displayed: use the EXIF-oriented size.
-    const width = meta.autoOrient?.width ?? meta.width ?? 0;
-    const height = meta.autoOrient?.height ?? meta.height ?? 0;
-    if (!width || !height) return { buffer: input, mime: null, changed: false };
+    const { width, height } = orientedSize(meta);
+    if (!width || !height) return passthrough(input);
 
     const format = meta.format ?? "";
     const hasAlpha = meta.hasAlpha === true;
-    const long = Math.max(width, height);
-    const pixels = width * height;
+    const needsResize =
+      Math.max(width, height) > MAX_LONG_EDGE || width * height > MAX_TOTAL_PIXELS;
     const compliantFormat = !hasAlpha && (format === "png" || format === "jpeg");
-    const needsResize = long > MAX_LONG_EDGE || pixels > MAX_TOTAL_PIXELS;
     if (compliantFormat && !needsResize) {
       return { buffer: input, mime: `image/${format}`, changed: false };
     }
 
-    // Combined scale for both constraints (aspect preserved).
-    const scale = Math.min(MAX_LONG_EDGE / long, Math.sqrt(MAX_TOTAL_PIXELS / pixels), 1);
-    const targetWidth = Math.max(1, Math.round(width * scale));
-    const targetHeight = Math.max(1, Math.round(height * scale));
-
+    const target = needsResize ? fitWithinBudget(width, height) : { width, height };
     // Re-encoding drops EXIF, so bake the orientation into the pixels first;
     // otherwise a rotated phone photo reaches the model sideways.
-    let pipeline = img.autoOrient().resize({
-      width: needsResize ? targetWidth : width,
-      height: needsResize ? targetHeight : height,
-      fit: "inside",
-      withoutEnlargement: true,
-    });
-
-    // Re-encode: keep alpha-free PNGs lossless; everything else (incl. alpha
-    // flattened onto white and exotic formats) becomes a baseline JPEG.
-    if (hasAlpha) {
-      pipeline = pipeline.flatten({ background: "#ffffff" }).jpeg({
-        quality: JPEG_QUALITY,
-        progressive: false,
-      });
-      const buffer = await pipeline.toBuffer();
-      return { buffer, mime: "image/jpeg", changed: true };
-    }
-    if (format === "png") {
-      const buffer = await pipeline.png().toBuffer();
-      return { buffer, mime: "image/png", changed: true };
-    }
-    const buffer = await pipeline.jpeg({ quality: JPEG_QUALITY, progressive: false }).toBuffer();
-    return { buffer, mime: "image/jpeg", changed: true };
+    const pipeline = img
+      .autoOrient()
+      .resize({ ...target, fit: "inside", withoutEnlargement: true });
+    const { buffer, mime } = await encodeForVision(pipeline, hasAlpha, format);
+    return { buffer, mime, changed: true };
   } catch {
-    return { buffer: input, mime: null, changed: false };
+    return passthrough(input);
   }
 }
 
@@ -119,24 +145,66 @@ interface BodyWalkStats {
   skipped: number;
 }
 
-async function normalizeDataUriInPlace(
-  holder: Record<string, unknown>,
-  key: string
-): Promise<boolean> {
-  const value = holder[key];
-  if (typeof value !== "string" || !value.startsWith("data:")) return false;
-  const match = DATA_URI_RE.exec(value);
-  if (!match) return false;
+/** Decode one base64 payload and normalize it; null when nothing changed or it failed. */
+async function normalizeBase64Payload(
+  base64: string
+): Promise<{ buffer: Buffer; mime: string } | null> {
   try {
-    const input = Buffer.from(match[2], "base64");
-    if (!input.length) return false;
+    const input = Buffer.from(base64, "base64");
+    if (!input.length) return null;
     const out = await normalizeVisionImageBuffer(input);
-    if (!out.changed || !out.mime) return false;
-    holder[key] = `data:${out.mime};base64,${out.buffer.toString("base64")}`;
-    return true;
+    return out.changed && out.mime ? { buffer: out.buffer, mime: out.mime } : null;
   } catch {
-    return false;
+    return null;
   }
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+/** OpenAI form: { type: "image_url", image_url: { url: "data:..." } } */
+async function normalizeOpenAiImagePart(
+  record: Record<string, unknown>,
+  stats: BodyWalkStats
+): Promise<void> {
+  const urlHolder = asRecord(record.image_url);
+  // Remote http(s) URLs are intentionally left alone — the gateway does not
+  // download them during normalization.
+  if (!urlHolder || typeof urlHolder.url !== "string" || !urlHolder.url.startsWith("data:")) {
+    return;
+  }
+  const match = DATA_URI_RE.exec(urlHolder.url);
+  const out = match ? await normalizeBase64Payload(match[2]) : null;
+  if (!out) {
+    stats.skipped++;
+    return;
+  }
+  urlHolder.url = `data:${out.mime};base64,${out.buffer.toString("base64")}`;
+  stats.normalized++;
+}
+
+/** Claude form: { type: "image", source: { type: "base64", media_type, data } } */
+async function normalizeClaudeImageBlock(
+  record: Record<string, unknown>,
+  stats: BodyWalkStats
+): Promise<void> {
+  if (record.type !== "image") return;
+  const source = asRecord(record.source);
+  if (!source || source.type !== "base64" || typeof source.data !== "string") return;
+  // Same validation as the OpenAI form: the media type must be an image/* type.
+  const composed = `data:${String(source.media_type ?? "image/png")};base64,${source.data}`;
+  const match = DATA_URI_RE.exec(composed);
+  const out = match ? await normalizeBase64Payload(match[2]) : null;
+  if (!out) {
+    stats.skipped++;
+    return;
+  }
+  source.data = out.buffer.toString("base64");
+  source.media_type = out.mime;
+  stats.normalized++;
 }
 
 /** Recursively walk a request body and normalize every inline (base64) image. */
@@ -147,58 +215,8 @@ async function walk(node: unknown, stats: BodyWalkStats): Promise<void> {
     return;
   }
   const record = node as Record<string, unknown>;
-
-  // OpenAI form: { type: "image_url", image_url: { url: "data:..." } }
-  const imageUrl = record.image_url;
-  if (imageUrl && typeof imageUrl === "object" && !Array.isArray(imageUrl)) {
-    const urlHolder = imageUrl as Record<string, unknown>;
-    if (typeof urlHolder.url === "string") {
-      if (urlHolder.url.startsWith("data:")) {
-        (await normalizeDataUriInPlace(urlHolder, "url")) ? stats.normalized++ : stats.skipped++;
-      }
-      // Remote http(s) URLs are intentionally left alone — the gateway does
-      // not download them during normalization.
-    }
-  }
-
-  // Claude form: { type: "image", source: { type: "base64", media_type, data } }
-  const source = record.source;
-  if (
-    record.type === "image" &&
-    source &&
-    typeof source === "object" &&
-    !Array.isArray(source) &&
-    (source as Record<string, unknown>).type === "base64"
-  ) {
-    const sourceHolder = source as Record<string, unknown>;
-    if (typeof sourceHolder.data === "string") {
-      // Reuse the data-URI machinery by composing and re-splitting.
-      const composed = `data:${String(sourceHolder.media_type ?? "image/png")};base64,${sourceHolder.data}`;
-      const match = DATA_URI_RE.exec(composed);
-      if (match) {
-        try {
-          const input = Buffer.from(match[2], "base64");
-          if (!input.length) {
-            stats.skipped++;
-          } else {
-            const out = await normalizeVisionImageBuffer(input);
-            if (out.changed && out.mime) {
-              sourceHolder.data = out.buffer.toString("base64");
-              sourceHolder.media_type = out.mime;
-              stats.normalized++;
-            } else {
-              stats.skipped++;
-            }
-          }
-        } catch {
-          stats.skipped++;
-        }
-      } else {
-        stats.skipped++;
-      }
-    }
-  }
-
+  await normalizeOpenAiImagePart(record, stats);
+  await normalizeClaudeImageBlock(record, stats);
   for (const value of Object.values(record)) {
     if (value && typeof value === "object") await walk(value, stats);
   }
