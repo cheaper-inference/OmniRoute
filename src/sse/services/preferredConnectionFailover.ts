@@ -43,8 +43,8 @@ export function normalizePreferredFailoverSettings(
 }
 
 export function readPreferredFailoverSettings(): PreferredFailoverSettings {
-  // Until the separate runtime-settings UI is available, keep the feature
-  // disabled on existing installations. The environment flag is a kill switch.
+  // The environment flag is an opt-in fallback for installations without a
+  // persisted Resilience override. Saved dashboard values take precedence.
   return {
     ...DEFAULT_PREFERRED_FAILOVER_SETTINGS,
     enabled: /^(?:1|true)$/i.test(
