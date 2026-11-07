@@ -1,6 +1,11 @@
+import { inheritLocalProcessPressureResponse } from "@omniroute/open-sse/utils/localPressureResponse.ts";
 import { inheritTrustedLocalRateLimitResponse } from "@omniroute/open-sse/services/rateLimitManager/errors.ts";
 import { inheritResponsePolicies } from "./responsePolicies.ts";
 
+/**
+ * Returns the response with its selected connection ID, or unchanged when no ID is given.
+ * Immutable headers require a wrapper that preserves trusted markers and response policies.
+ */
 export function withSelectedConnectionHeader(
   response: Response,
   connectionId: string | null | undefined
@@ -20,7 +25,10 @@ export function withSelectedConnectionHeader(
     // A cloned response must keep the trusted local rate-limit marker plus the per-Response
     // routing policies of the original (#15594 provider-probe marker, #16072 empty-turn
     // execution record), or the probe fence / empty-turn guard loses track of it.
-    const trusted = inheritTrustedLocalRateLimitResponse(response, cloned);
+    const trusted = inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
     return inheritResponsePolicies(response, trusted);
   }
 }
