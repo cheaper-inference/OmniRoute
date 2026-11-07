@@ -727,15 +727,21 @@ export function getHiddenQuotaRows(
 
 /**
  * Returns true when `connection` should be visible under the selected
- * `providerFilter`. The sentinel `"all"` matches every connection; any other
- * value must equal the connection's `provider` key exactly. Connections with a
+ * `providerFilter`. Empty selections and the legacy sentinel `"all"` match every
+ * connection; otherwise one selected key must match exactly. Connections with a
  * missing/non-string provider are filtered out when a specific provider is
  * selected (defensive — the live route only emits string provider keys).
  */
 export function matchesProviderFilter(
   connection: { provider?: unknown } | null | undefined,
-  providerFilter: string
+  providerFilter: string | readonly string[]
 ): boolean {
+  if (Array.isArray(providerFilter)) {
+    return (
+      providerFilter.length === 0 ||
+      (typeof connection?.provider === "string" && providerFilter.includes(connection.provider))
+    );
+  }
   if (!providerFilter || providerFilter === "all") return true;
   if (!connection || typeof connection.provider !== "string") return false;
   return connection.provider === providerFilter;
