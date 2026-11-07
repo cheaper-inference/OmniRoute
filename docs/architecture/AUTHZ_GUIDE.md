@@ -151,7 +151,7 @@ Enrolled from Settings → Security; off until the operator turns it on
 
 | Class        | Description                                                                                                                                          | Auth required                                                           |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `PUBLIC`     | Explicitly safe routes — login, logout, status, init, health, onboarding bootstrap.                                                                  | None                                                                    |
+| `PUBLIC`     | Explicitly safe routes — login, logout, status, health, onboarding bootstrap.                                                                        | None                                                                    |
 | `CLIENT_API` | Model-serving endpoints — `/api/v1/*`, `/api/v1beta/*`, plus aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer key when the effective `REQUIRE_API_KEY` feature flag is enabled |
 | `MANAGEMENT` | Dashboard pages, settings, providers, keys, admin and diagnostics endpoints.                                                                         | Dashboard session OR Bearer with `manage` scope                         |
 
@@ -231,7 +231,6 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/logout",
   "/api/auth/status",
   "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
-  "/api/init",
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",

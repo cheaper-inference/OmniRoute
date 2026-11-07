@@ -74,6 +74,43 @@ class RecordingThrottle extends MinIntervalThrottle {
   }
 }
 
+/** A clock whose sleeps can wake late, the way a busy runner's timers do. */
+class WakingLateClock implements ThrottleClock {
+  t = 1_000;
+  private index = 0;
+
+  constructor(private readonly overshootsMs: number[]) {}
+
+  now = () => this.t;
+  sleep = async (ms: number) => {
+    const overshoot = this.overshootsMs[this.index] ?? 0;
+    this.index += 1;
+    this.t += ms + overshoot;
+  };
+}
+
+test("#15172 a late timer does not shorten the next gap", async () => {
+  // The first sleep wakes 40ms late, the next one on time. Measuring the next
+  // wait from the scheduled instant instead of the real one turns that into a
+  // 210ms gap even though the interval is 250ms.
+  const clock = new WakingLateClock([40, 0]);
+  const throttle = new MinIntervalThrottle({ minIntervalMs: INTERVAL_MS, jitterMs: 0, clock });
+
+  const grantedAt: number[] = [];
+  const acquire = async () => {
+    await throttle.acquire();
+    grantedAt.push(clock.now());
+  };
+  await acquire();
+  await acquire();
+  await acquire();
+
+  for (let i = 1; i < grantedAt.length; i++) {
+    const gap = grantedAt[i] - grantedAt[i - 1];
+    assert.ok(gap >= INTERVAL_MS, `gap ${gap}ms between grant ${i - 1} and ${i}`);
+  }
+});
+
 test("#15172 concurrent Codex usage fetches start at least one interval apart", async () => {
   const throttle = new RecordingThrottle({ minIntervalMs: INTERVAL_MS, jitterMs: 0 });
   setQuotaFetchThrottleForTests(throttle);
