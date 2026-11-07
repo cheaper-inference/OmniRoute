@@ -1000,6 +1000,8 @@
     "batchListTitle": "Batchkørsler",
     "batchListCount": "{count} batchkørsler",
     "batchListRemovingCompleted": "Fjerner…",
+    "batchListRemoveCompletedPartial": "Et stort antal batches blev fjernet. Klik igen for at rydde resten.",
+    "batchListRemoveCompletedFailed": "Der opstod en fejl under fjernelse af batches.",
     "batchListRemoveCompleted": "Fjern fuldførte",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",
@@ -1038,6 +1040,12 @@
     "batchListRefreshing": "Opdaterer…",
     "batchListRefresh": "Opdater",
     "uploadFileModalRemove": "Fjern",
+    "fileInputChoose": "Vælg fil",
+    "fileInputChooseMultiple": "Vælg filer",
+    "fileInputEmpty": "Ingen fil valgt",
+    "fileInputSelectedCount": "{count, plural, one {# fil valgt} other {# filer valgt}}",
+    "fileDropLabel": "Slip en fil her, eller vælg en",
+    "fileDropLabelMultiple": "Slip filer her, eller vælg filer",
     "uploadFileModalUploading": "Uploader…",
     "wizardInputReading": "Læser fil…",
     "wizardInputReady": "Klar",
@@ -6452,6 +6460,9 @@
     "localProviders": "Lokale udbydere",
     "maxConcurrentWholeNumberError": "Maks. antal samtidige skal være et heltal",
     "m365TierLabel": "Copilot-niveau",
+    "m365RefreshTokenLabel": "Opdater token (valgfrit)",
+    "m365RefreshTokenHint": "Bruges til automatisk at opdatere Microsoft 365-adgangstokenet.",
+    "m365RefreshTokenEditHint": "Lad stå tomt for at beholde det eksisterende token. Indsæt et nyt token for at erstatte det.",
     "m365TierHint": "Vælg, hvilken Microsoft 365 Copilot-flade denne forbindelse bruger. Individuel er standardforbruger-BizChat; Uddannelse og Enterprise (arbejde) tilmelder sig deres tenant-flader.",
     "m365TierIndividualOption": "Individuel (standard)",
     "m365TierEduOption": "Uddannelse",
@@ -12372,7 +12383,9 @@
       "failedTitle": "Alle {count} forsøg mislykkedes",
       "failed": "mislykkedes",
       "pinnedTitle": "Model valgt via kontekst-cache session fastgørelse",
-      "pinned": "fastgjort"
+      "pinned": "fastgjort",
+      "recoveredAttemptsTitle": "Anmodningen blev genoprettet efter {count} forsøg",
+      "latestOutcomeFailed": "Det seneste anmodningsresultat mislykkedes"
     },
     "attempts": "forsøg",
     "detail": {
@@ -12474,13 +12487,20 @@
       "continuesFromParent": "fortsætter fra overordnet",
       "continuesFrom": "Fortsætter fra {id}",
       "viewConversation": "vis samtale",
-      "openConversation": "Åbn samtale {id}"
+      "openConversation": "Åbn samtale {id}",
+      "omittedHttpAttempts": "{count} HTTP-afsendelser blev ikke gemt",
+      "noHttpResponse": "Intet HTTP-svar blev observeret",
+      "transportError": "Transportfejl"
     },
     "tableLabel": "Anmodningslogfiler",
     "throughputPostFirstToken": "Efter første token",
     "throughputEndToEnd": "Ende-til-ende",
     "throughputRate": "{value} tokens/sek.",
-    "throughputExplanation": "Begge hastigheder bruger det højeste af antallet af output- og reasoning-tokens. Efter første token udelader en gyldig TTFT; ellers bruges hele varigheden. Ende-til-ende bruger altid hele varigheden. Et bufret svar kan have en høj burst-leveringshastighed uden hurtigere modelgenerering."
+    "throughputExplanation": "Begge hastigheder bruger det højeste af antallet af output- og reasoning-tokens. Efter første token udelader en gyldig TTFT; ellers bruges hele varigheden. Ende-til-ende bruger altid hele varigheden. Et bufret svar kan have en høj burst-leveringshastighed uden hurtigere modelgenerering.",
+    "omittedHttpAttempts": "{count} HTTP-afsendelser blev ikke gemt",
+    "upstreamStatus": "Opstrømsserver {status}",
+    "noHttpResponse": "Intet HTTP-svar blev observeret",
+    "transportError": "Transportfejl"
   },
   "proxyLogger": {
     "filterAll": "Alle",
@@ -14247,6 +14267,14 @@
         "label": "Puljerækkefølge for delt egress",
         "description": "For udbydere, hvis kvote er opdelt efter egress-adresse, rangeres et puljemedlem, der deler et nyligt afvist medlems observerede egress-adresse, lige under sunde medlemmer. Kun rækkefølge, ekskluderes aldrig. Kræver PROXY_SKIP_RECENTLY_FAILED, som genererer det afvisningssignal, den aflæser. Deaktiveret som standard: udvælgelsesrækkefølgen er nøjagtig den almindelige rotation."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Modelbestemte kvoteafslag",
+        "description": "Anvend kun en opencode kvote 429 på den model, der ramte den, så den samme udgang bliver ved med at tjene andre modeller, og ryd den først, når den model lykkes. Forbrugere, der ikke har nogen model (pool-rotation, park og genafspilning, admin-synlighed, vælgertrigger, sundheds-sweep) ser det stadig. Behøver PROXY_SKIP_RECENTLY_FAILED, som producerer afslaget. Fra som standard: én models kvote 429 sætter udgangen til side for hver model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy-hentning: streng POST -gentagelse",
+        "description": "For en ikke-idempotent anmodning (POST, PUT, PATCH, DELETE), skal du kun sende igen efter en transportfejl (fresh socket, proxy fallback, native fallback), når fejlen beviser, at der ikke er blevet sendt: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH eller en forbindelsestimeout. En socket-fejl efter skrivningen kan betyde, at upstream accepterede anmodningen, så en genafsendelse kunne generere og fakturere den to gange. Deaktiveret som standard: en genafspilbar krop sendes igen én gang ved enhver transportfejl, som også genopretter en forældet poolet socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logning af rotationsattribuering",
         "description": "Opencode-rotation registrerer, hvilken konto der betjente eller blev sprunget over (kun maskerede id'er, aldrig fulde konto-id'er), og forbinder proxylogposter med deres anmodning, så operatøren kan skelne mellem overspringede konti og ubrugte. Deaktiveret som standard: ingen ekstra loglinjer, ingen ekstra kolonner skrives."
@@ -14298,6 +14326,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Genvalg af pool ved OpenCode 429",
         "description": "For OpenCode-multikonto-rotationen: efter en 429 fra en egress-bucketed udbyder på en proxyfri konto under en omgivende pool-kontekst, anmodes forbindelsespoolen om et andet medlem til det næste forsøg i stedet for at prøve den samme egress-adresse igen. Sorterer, udelukker aldrig: en udtømt pool bevarer den nuværende adfærd. Deaktiveret som standard: enhver 429 roterer til den næste konto, præcis som før."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "For OpenCode eksekutoren, når en fuldmagtsanmodning besvares 403 eller 451 FreeTierError og de observerede værktøjer igen mislykkedes eller ikke fandt anvendelse, skal du sende anmodningen én gang via en anden proxy (en anden kontoproxy eller et andet puljemedlem, aldrig en direkte forbindelse). Først når denne sonde svarer 200, bliver den første udgang sat til side i proxy-afvisningshukommelsen, og sondesvaret serveret; når begge nægter, returneres det oprindelige afslag, og intet registreres. Den samme afvisningstekst dækker en markeret egress IP og en form for afvist anmodning, så sonden adskiller dem ved bevis. Fra som standard: afslaget returneres uændret."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2-klientfingeraftryk",
@@ -14478,6 +14510,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Stop ved afvisning på grund af indholdspolitik",
         "description": "Når et combo-mål svarer med en præcis afvisning på grund af indholdspolitik (kode eller type cyber_policy / content_policy_violation), skal comboen stoppe og returnere denne afvisning, selv når de resterende mål er andre modeller, i stedet for at gå videre til næste mål. Deaktiveret som standard: afvisningen afkøler aldrig kontoen eller udløser udbyderafbryderen, og comboen går videre til sit næste mål præcis som før."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Svar: Hold kun i live over transporten",
+        "description": "Send svar keepalives som en tom linje i stedet for en response.in_progress -begivenhed, så et syntetisk snapshot kan aldrig erstatte det rigtige svar i den officielle SDK. En tom linje sender ingen SSE begivenhed, så en klientovervågning, der kun nulstiller på hændelser, vil ikke blive nulstillet under en lang stille fase. Fra som standard: timere sender den spec-gyldige response.in_progress hændelse."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Genforsøg ved nedkøling: Spring 403/410-afvisninger over",

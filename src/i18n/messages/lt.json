@@ -923,6 +923,8 @@
     "batchListTitle": "Paketai",
     "batchListCount": "Paketų skaičius: {count}",
     "batchListRemovingCompleted": "Šalinama…",
+    "batchListRemoveCompletedPartial": "Pašalinta daug paketų. Spustelėkite dar kartą, kad išvalytumėte likusius.",
+    "batchListRemoveCompletedFailed": "Šalinant paketus įvyko klaida.",
     "batchListRemoveCompleted": "Pašalinti užbaigtus",
     "batchListTableStatus": "Būsena",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Atnaujinama…",
     "batchListRefresh": "Atnaujinti",
     "uploadFileModalRemove": "Pašalinti",
+    "fileInputChoose": "Pasirinkti failą",
+    "fileInputChooseMultiple": "Pasirinkti failus",
+    "fileInputEmpty": "Nepasirinktas joks failas",
+    "fileInputSelectedCount": "{count, plural, one {Pasirinktas # failas} other {Pasirinkta failų: #}}",
+    "fileDropLabel": "Nuvilkite failą čia arba pasirinkite jį",
+    "fileDropLabelMultiple": "Nuvilkite failus čia arba pasirinkite juos",
     "uploadFileModalUploading": "Įkeliama…",
     "wizardInputReading": "Skaitomas failas…",
     "wizardInputReady": "Paruošta",
@@ -6375,6 +6383,9 @@
     "localProviders": "Vietiniai teikėjai",
     "maxConcurrentWholeNumberError": "Didžiausias lygiagrečių užklausų skaičius turi būti sveikasis skaičius",
     "m365TierLabel": "Copilot lygis",
+    "m365RefreshTokenLabel": "Atnaujinti prieigos raktą (neprivaloma)",
+    "m365RefreshTokenHint": "Naudojamas automatiškai atnaujinti Microsoft 365 prieigos raktą.",
+    "m365RefreshTokenEditHint": "Palikite tuščią, kad liktų esamas prieigos raktas. Įklijuokite naują prieigos raktą, kad jį pakeistumėte.",
     "m365TierHint": "Pasirinkite, kurią Microsoft 365 Copilot sąsają naudoja šis ryšys. Asmeninė yra numatytoji vartotojams skirta BizChat sąsaja; švietimo ir įmonės (darbo) parinktys naudoja jų nuomotojo sąsajas.",
     "m365TierIndividualOption": "Asmeninė (numatytoji)",
     "m365TierEduOption": "Švietimo",
@@ -12295,7 +12306,9 @@
       "failedTitle": "Nepavyko nė vienas iš {count} bandymų",
       "failed": "nepavyko",
       "pinnedTitle": "Modelis pasirinktas naudojant konteksto podėlio seanso prisegimą",
-      "pinned": "prisegtas"
+      "pinned": "prisegtas",
+      "recoveredAttemptsTitle": "Užklausa atkurta po {count} bandymų",
+      "latestOutcomeFailed": "Paskutinės užklausos rezultatas nesėkmingas"
     },
     "attempts": "bandymai",
     "detail": {
@@ -12397,13 +12410,20 @@
       "continuesFromParent": "tęsiama nuo pirminio elemento",
       "continuesFrom": "Tęsiama nuo {id}",
       "viewConversation": "Peržiūrėti pokalbį",
-      "openConversation": "Atidaryti pokalbį {id}"
+      "openConversation": "Atidaryti pokalbį {id}",
+      "omittedHttpAttempts": "{count} HTTP siuntimų neišsaugota",
+      "noHttpResponse": "HTTP atsakymas nepastebėtas",
+      "transportError": "Perdavimo klaida"
     },
     "tableLabel": "Užklausų žurnalai",
     "throughputPostFirstToken": "Po pirmojo tokeno",
     "throughputEndToEnd": "Nuo pradžios iki pabaigos",
     "throughputRate": "{value} tokenų/s",
-    "throughputExplanation": "Abi spartos apskaičiuojamos pagal didesnį iš išvesties ir samprotavimo tokenų skaičių. Skaičiuojant spartą po pirmojo tokeno, galiojanti TTFT neįtraukiama; kitu atveju naudojama visa trukmė. Skaičiuojant spartą nuo pradžios iki pabaigos, visada naudojama visa trukmė. Buferinis atsakas gali būti pateikiamas dideliu momentiniu greičiu, nors modelis nėra generuojamas greičiau."
+    "throughputExplanation": "Abi spartos apskaičiuojamos pagal didesnį iš išvesties ir samprotavimo tokenų skaičių. Skaičiuojant spartą po pirmojo tokeno, galiojanti TTFT neįtraukiama; kitu atveju naudojama visa trukmė. Skaičiuojant spartą nuo pradžios iki pabaigos, visada naudojama visa trukmė. Buferinis atsakas gali būti pateikiamas dideliu momentiniu greičiu, nors modelis nėra generuojamas greičiau.",
+    "omittedHttpAttempts": "{count} HTTP siuntimų neišsaugota",
+    "upstreamStatus": "Aukštesnysis serveris {status}",
+    "noHttpResponse": "HTTP atsakymas nepastebėtas",
+    "transportError": "Perdavimo klaida"
   },
   "proxyLogger": {
     "filterAll": "Visi",
@@ -14170,6 +14190,14 @@
         "label": "Bendro išvesties telkinio tvarka",
         "description": "Teikėjams, kurių kvota skirstoma pagal išvesties adresą, telkinio narį, turintį tą patį stebėtą išvesties adresą kaip ir neseniai atmestas narys, rikiuoti iškart po veikiančių narių. Tik rikiavimas, niekada neatmetama. Reikalingas PROXY_SKIP_RECENTLY_FAILED, kuris pateikia nuskaitomą atmetimo signalą. Pagal numatytuosius nustatymus išjungta: pasirinkimo tvarka yra visiškai tokia pati, kaip įprastos rotacijos."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Kvotos atsisakymas taikyti pagal modelį",
+        "description": "Taikykite opencode kvotą 429 tik jį patyrusiam modeliui, kad ta pati išeitis ir toliau aptarnautų kitus modelius ir išvalykite tik tada, kai tam modeliui pavyksta. Vartotojai, kurie neturi modelio (baseinas sukimasis, parkavimas ir pakartojimas, administratoriaus matomumas, selektoriaus paleidiklis, sveikatos patikrinimas), vis tiek jį mato. Reikia PROXY_SKIP_RECENTLY_FAILED, kuris sukuria atsisakymą. Išjungta pagal numatytuosius nustatymus: vieno modelio kvota 429 atideda kiekvieno modelio išėjimą."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Įgaliotasis serveris: griežtas POST pakartojimas",
+        "description": "Neidempotentišką užklausą (POST, PUT, PATCH, DELETE) iš naujo siųskite po perdavimo klaidos (naujas lizdas, tarpinio serverio atsarginė dalis, vietinė atsarginė dalis) tik tada, kai klaida įrodo, kad nieko nebuvo išsiųsta: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH arba prisijungimo laikas. Lizdo klaida po įrašymo gali reikšti, kad prieš srovę buvo priimta užklausa, todėl pakartotinis siuntimas gali sugeneruoti ir sumokėti du kartus. Išjungta pagal numatytuosius nustatymus: pakartojamas tekstas iš naujo siunčiamas vieną kartą, kai įvyko bet kokia transportavimo klaida, taip pat atkuriama pasenusi sukaupta jungtis."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotacijos priskyrimo žurnalizavimas",
         "description": "„opencode“ rotacija fiksuoja, kuri paskyra aptarnavo užklausą arba buvo praleista (tik užmaskuoti ID, niekada ne pilni paskyrų ID), ir susieja proxy žurnalo įrašus su jų užklausa, kad operatorius galėtų atskirti praleistas paskyras nuo nenaudotų. Pagal numatytuosius nustatymus išjungta: papildomų žurnalo eilučių ar stulpelių nerašoma."
@@ -14221,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 telkinio pakartotinis pasirinkimas",
         "description": "„OpenCode“ kelių paskyrų rotacijai: gavus 429 iš tiekėjo, ribojančio pagal egress srautą, paskyroje be tarpinio serverio (proxy-less) bendro telkinio kontekste, kitam bandymui paprašyti ryšių telkinio kito nario, užuot bandžius vėl su tuo pačiu egress adresu. Rūšiuoja, bet niekada neatmeta: išsekus telkiniui, išlaikomas dabartinis elgesys. Pagal numatytuosius nustatymus išjungta: kiekvienas 429 perjungia į kitą paskyrą lygiai taip pat, kaip ir anksčiau."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "OpenCode vykdytojui, kai į įgaliotąjį užklausą atsakoma 403 arba 451 FreeTierError, o stebimų įrankių pakartotinis bandymas nepavyko arba nepritaikytas, vieną kartą išsiųskite užklausą per kitą tarpinį serverį (kitą paskyros tarpinį serverį arba kitą telkinio narį, niekada tiesioginio ryšio). Tik tada, kai šis zondas atsako 200, tarpinio serverio atsisakymo atmintyje atidedamas pirmasis išėjimas ir pateikiamas zondo atsakymas; abiem atsisakius, grąžinamas pirminis atsisakymas ir nieko neužfiksuojama. Tas pats atsisakymo tekstas apima pažymėtą išėjimo IP ir atmesto prašymo formą, todėl zondas juos atskiria įrodymais. Išjungta pagal numatytuosius nustatymus: atsisakymas grąžinamas nepakeistas."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 kliento pirštų atspaudas",
@@ -14401,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: sustabdyti gavus turinio politikos atmetimą",
         "description": "Kai „combo“ taikinys atsako tiksliu turinio politikos atmetimu (kodas arba tipas cyber_policy / content_policy_violation), sustabdyti „combo“ ir grąžinti tą atmetimą net tada, kai likę taikiniai yra kitokie modeliai, užuot pereinant prie kito taikinio. Pagal numatytuosius nustatymus išjungta: atmetimas niekada neatvėsina paskyros ir nesuaktyvina teikėjo grandinės pertraukiklio, o „combo“ pereina prie kito taikinio lygiai taip pat, kaip anksčiau."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Atsakymai: išlikti gyvam tik transportuojant",
+        "description": "Siųskite atsakymus kaip tuščią eilutę, o ne response.in_progress įvykį, todėl sintetinė momentinė nuotrauka niekada negali pakeisti tikrojo atsakymo oficialiame SDK. Tuščia eilutė nesiunčia jokio SSE įvykio, todėl kliento sargybinis, kuris iš naujo nustato tik įvykius, nebūtų iš naujo nustatytas per ilgą tyliąją fazę. Išjungta pagal numatytuosius nustatymus: laikmačiai siunčia galiojantį response.in_progress įvykį."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atvėsimo pakartotinis bandymas: praleisti 403/410 atmetimus",

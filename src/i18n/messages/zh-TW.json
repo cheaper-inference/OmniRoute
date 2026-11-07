@@ -923,6 +923,8 @@
     "batchListTitle": "批處理",
     "batchListCount": "{count} 個批處理",
     "batchListRemovingCompleted": "移除中…",
+    "batchListRemoveCompletedPartial": "已移除大量批次。請再次點擊以清除其餘批次。",
+    "batchListRemoveCompletedFailed": "移除批次時發生錯誤。",
     "batchListRemoveCompleted": "移除已完成",
     "batchListTableStatus": "狀態",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "重新整理中…",
     "batchListRefresh": "重新整理",
     "uploadFileModalRemove": "移除",
+    "fileInputChoose": "選擇檔案",
+    "fileInputChooseMultiple": "選擇檔案",
+    "fileInputEmpty": "未選擇任何檔案",
+    "fileInputSelectedCount": "{count, plural, one {已選擇 # 個檔案} other {已選擇 # 個檔案}}",
+    "fileDropLabel": "將檔案拖放至此處或選擇一個檔案",
+    "fileDropLabelMultiple": "將檔案拖放至此處或選擇檔案",
     "uploadFileModalUploading": "上傳中…",
     "wizardInputReading": "讀取檔案…",
     "wizardInputReady": "就緒",
@@ -6375,6 +6383,9 @@
     "localProviders": "本地 Provider",
     "maxConcurrentWholeNumberError": "最大併發必須是整數",
     "m365TierLabel": "Copilot 層級",
+    "m365RefreshTokenLabel": "刷新令牌（可選）",
+    "m365RefreshTokenHint": "用於自動刷新Microsoft 365 存取令牌。",
+    "m365RefreshTokenEditHint": "留空以保留現有令牌。貼上新令牌來替換它。",
     "m365TierHint": "選擇此連線使用哪個 Microsoft 365 Copilot 介面。Individual 是預設的消費者 BizChat；教育版和企業（工作）版則使用各自的租戶介面。",
     "m365TierIndividualOption": "個人版（預設）",
     "m365TierEduOption": "教育版",
@@ -12295,7 +12306,9 @@
       "failedTitle": "所有 {count} 次嘗試均失敗",
       "failed": "失敗",
       "pinnedTitle": "透過上下文快取會話固定選擇的模型",
-      "pinned": "固定"
+      "pinned": "固定",
+      "recoveredAttemptsTitle": "請求經過 {count} 次嘗試後恢復",
+      "latestOutcomeFailed": "最近一次請求結果失敗"
     },
     "attempts": "嘗試次數",
     "detail": {
@@ -12397,13 +12410,20 @@
       "continuesFromParent": "接續自父項目",
       "continuesFrom": "接續自 {id}",
       "viewConversation": "檢視對話",
-      "openConversation": "開啟對話 {id}"
+      "openConversation": "開啟對話 {id}",
+      "omittedHttpAttempts": "未保留 {count} 次 HTTP 傳送",
+      "noHttpResponse": "未觀察到 HTTP 回應",
+      "transportError": "傳輸錯誤"
     },
     "tableLabel": "請求日誌",
     "throughputPostFirstToken": "首個權杖後",
     "throughputEndToEnd": "端對端",
     "throughputRate": "{value} 個權杖/秒",
-    "throughputExplanation": "兩種速率皆採用輸出與推理權杖數量中的較大值。首個權杖後速率會排除有效的 TTFT；否則會使用完整持續時間。端對端速率一律使用完整持續時間。緩衝回應可能具有較高的突發傳送速率，但不代表模型生成速度更快。"
+    "throughputExplanation": "兩種速率皆採用輸出與推理權杖數量中的較大值。首個權杖後速率會排除有效的 TTFT；否則會使用完整持續時間。端對端速率一律使用完整持續時間。緩衝回應可能具有較高的突發傳送速率，但不代表模型生成速度更快。",
+    "omittedHttpAttempts": "未保留 {count} 次 HTTP 傳送",
+    "upstreamStatus": "上游伺服器 {status}",
+    "noHttpResponse": "未觀察到 HTTP 回應",
+    "transportError": "傳輸錯誤"
   },
   "proxyLogger": {
     "filterAll": "全部",
@@ -14170,6 +14190,14 @@
         "label": "共享出口池排序",
         "description": "對按出口地址配額的提供者，把與近期被拒成員觀測到相同出口地址的池成員排在健康成員之後。只調順序，絕不排除。依賴 PROXY_SKIP_RECENTLY_FAILED 提供它讀取的拒絕訊號。預設關閉：選擇順序與純輪換完全一致。"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "模型範圍的配額拒絕",
+        "description": "僅將opencode配額 429 應用於命中它的模型，因此同一出口繼續為其他模型提供服務，並且僅在該模型成功時才清除它。沒有模型（池輪換、停放和重播、管理員可見性、選擇器觸發器、健康掃描）的消費者仍然可以看到它。需要PROXY_SKIP_RECENTLY_FAILED，這會產生拒絕。預設為關閉：一個型號的配額 429 為每個型號預留出口。"
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "代理獲取：嚴格的POST重播",
+        "description": "對於非冪等請求（POST、 PUT、 PATCH、 DELETE），僅當錯誤證明未發送任何內容時，才會在傳輸錯誤（新鮮套接字、代理回退、本機回退）後重新發送： ECONNREFUSED、 ENOTFOUND、 EAI_AGAIN、 ENETUNREACH或連接逾時。寫入後的套接字錯誤可能意味著上游接受了請求，因此重新發送可能會產生兩次併計費。預設為關閉：在任何傳輸錯誤時都會重新發送一次可重播主體，這也會恢復陳舊的池化套接字。"
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "輪換歸因日誌",
         "description": "opencode 輪換記錄由哪個帳戶服務或被跳過（僅脫敏 id，絕不記錄完整帳戶 id），並把代理日誌條目關聯到其請求，便於運維區分被跳過的帳戶和未使用的帳戶。預設關閉：不寫額外日誌行，不寫額外列。"
@@ -14221,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 池重選",
         "description": "對 OpenCode 多帳戶輪換，在環境池上下文下，無代理帳戶從按出口配額的提供者收到 429 後，向連線池請求另一個成員做下次嘗試，而不是重試同一出口地址。只排序，不排除：池耗盡時保持現狀。預設關閉：每個 429 都輪換到下一帳戶，與之前一致。"
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode免費層出口探測器",
+        "description": "對於OpenCode執行器，當代理請求被回應 403 或 451 FreeTierError並且觀察到的工具重試失敗或不適用時，透過不同的代理（另一個帳戶代理或另一個池成員，從不直接連接）發送一次請求。只有當該探測回答 200 時，才是在代理拒絕記憶體中預留的第一個出口，並提供探測回應；當雙方都拒絕時，則返回最初的拒絕並且不記錄任何內容。相同的拒絕文字涵蓋了標記的出口IP和拒絕的請求形狀，因此探測器通過證據將它們區分開。預設為關閉：拒絕原樣返回。"
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 客戶端指紋",
@@ -14401,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "組合：遇內容策略拒絕即停",
         "description": "當組合目標返回精確的內容策略拒絕（code 或 type 為 cyber_policy / content_policy_violation）時，停止組合並返回該拒絕，即使剩餘目標是不同模型，不再前進到下一目標。預設關閉：該拒絕不冷卻帳戶也不觸發提供者斷路器，組合與之前一樣前進到下一目標。"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "回應：僅透過傳輸保持活動狀態",
+        "description": "將回應 keepalives 作為空行而不是response.in_progress事件發送，因此合成快照永遠無法取代官方SDK中的真實回應。空白行不會調度SSE事件，因此僅在事件發生時重置的客戶端看門狗在長時間靜默階段不會重置。預設為關閉：計時器發送規範有效的response.in_progress事件。"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "冷卻重試：跳過 403/410 拒絕",

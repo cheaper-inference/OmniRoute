@@ -1,3 +1,7 @@
+import type {
+  HttpAttemptSelection,
+  HttpAttemptRejectionSlot,
+} from "../utils/providerHttpAttempts.ts";
 import { finalizeTranslatedRequest } from "./chatCore/translatedRequestFinalize.ts";
 import { isPassiveCodex } from "../services/tokenRefresh/passiveCodex.ts";
 import {
@@ -180,6 +184,7 @@ import { resolveChatExecutor } from "./chatCore/searchProviderRejection.ts";
 import { normalizeClaudeUpstreamMessages as normalizeClaudeUpstreamMessagesFor } from "./chatCore/claudeUpstreamMessages.ts";
 import {
   persistAttemptLogs as persistAttemptLogsFor,
+  drainUpstreamHttpAttempts,
   type PersistAttemptLogsArgs,
 } from "./chatCore/attemptLogging.ts";
 import { stageTrace } from "./chatCore/stageTrace.ts";
@@ -518,6 +523,7 @@ async function handleChatCoreInner({
     payload?: unknown,
     maxDepth = 3
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
+  let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
   // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps
   // the fire-and-forget save + computes latencyMs, so the call sites stay byte-identical.
@@ -601,6 +607,7 @@ async function handleChatCoreInner({
   }
   const releaseTurnExecution = turnExecution.release;
   let turnExecutionHandedOffToStream = false;
+  let drainUnpersistedHttpAttempts = () => {};
 
   // Preserve chatCore's canonical formatting while the guarded body remains byte-stable.
   // prettier-ignore
@@ -936,6 +943,7 @@ async function handleChatCoreInner({
     }
     return persistAttemptLogsFor(args, {
       traceId,
+      httpAttempts: providerRequestCapture.httpAttempts,
       provider,
       connectionId,
       model,
@@ -1091,6 +1099,14 @@ async function handleChatCoreInner({
     videoTranscriptSensitive: videoBridgeObserved,
   };
   const providerRequestCapture = createPreparedRequestLogger(reqLogger, pendingScope);
+  drainUnpersistedHttpAttempts = drainUpstreamHttpAttempts.bind(null, {
+    httpAttempts: providerRequestCapture.httpAttempts,
+    correlationId,
+    traceId,
+    noLogEnabled: Boolean(noLogEnabled),
+    apiKeyInfo: apiKeyInfo ? { id: apiKeyInfo.id, name: apiKeyInfo.name } : null,
+    comboName: typeof comboName === "string" ? comboName : null,
+  });
   // 0. Log client raw request (before format conversion) — redacts video transcript
   // cues in the logged copy only; see videoBridgeSnapshotRedaction.ts.
   logClientRawRequestRedacted(reqLogger, clientRawRequest, videoBridgeObserved);
@@ -2524,11 +2540,21 @@ async function handleChatCoreInner({
 
   const dedupRequestBody = { ...translatedBody, model: `${provider}/${model}`, stream };
   const dedupEnabled = shouldDeduplicate(dedupRequestBody);
-  // Namespaced by the calling API key: dedup hands the SAME response object to
-  // every joiner, so a shared hash across keys is a cross-principal response
-  // leak (GHSA-6c7w-56xp-wpc6).
+  // Namespaced by the calling API key AND the selected provider connection: dedup
+  // hands the SAME response object to every joiner, so a shared hash across keys
+  // is a cross-principal response leak (GHSA-6c7w-56xp-wpc6), and a shared hash
+  // across connections serves the request from an account the caller did not
+  // select — a pin on another account would silently be ignored while its
+  // response header still named the pinned one. Keyless installs keep dedup
+  // within a connection: identical requests that select the same connection
+  // still join. The hash is computed once, before dispatch; rotation inside the
+  // pipeline is handled by `allowDedup` (first attempt only), not here.
   const dedupHash = dedupEnabled
-    ? computeRequestHash(dedupRequestBody, apiKeyInfo?.id, trustedEffortContext)
+    ? computeRequestHash(
+        dedupRequestBody,
+        `${apiKeyInfo?.id ?? ""}:${getCurrentConnectionId() ?? ""}`,
+        trustedEffortContext
+      )
     : null;
 
   const toolDisclosure = resolveToolDisclosureConfig(settings);
@@ -2588,8 +2614,10 @@ async function handleChatCoreInner({
   };
   const executeProviderRequest = (
     modelToCall: string = effectiveModel,
-    allowDedup: boolean = false
-  ) => executeProviderRequestLeaf(executeProviderRequestDeps, modelToCall, allowDedup);
+    allowDedup: boolean = false,
+    _policy?: { allowAccountRotation?: boolean },
+    rejection?: HttpAttemptRejectionSlot
+  ) => executeProviderRequestLeaf(executeProviderRequestDeps, modelToCall, allowDedup, rejection);
 
   // Snapshot + message count helpers extracted to chatCore/providerRequestRegistration.ts
   // (chatCore slice 2).
@@ -3176,6 +3204,7 @@ async function handleChatCoreInner({
       credentials,
       effectiveModel,
       executeRefreshCredentials,
+      forcedConnectionId,
       executor,
       getCurrentConnectionId,
       getExecutionCredentials,
@@ -3227,6 +3256,7 @@ async function handleChatCoreInner({
       pipelineRecovered = streamingOutcome.carry.pipelineRecovered;
       providerHeaders = streamingOutcome.carry.providerHeaders;
       providerResponse = streamingOutcome.carry.providerResponse;
+      upstreamHttpSelection = streamingOutcome.carry.upstreamHttpSelection;
       providerUrl = streamingOutcome.carry.providerUrl;
     }
     if (streamingOutcome && streamingOutcome.response) return streamingOutcome.response;
@@ -3242,6 +3272,7 @@ async function handleChatCoreInner({
       apiKeyInfo,
       allowedConnections,
       appendRequestLog,
+      forcedConnectionId,
       applyProviderFailureClassification,
       assertManagedLeaseFence,
       attachCompressionUsageReceiptAfterAnalytics,
@@ -3377,6 +3408,7 @@ async function handleChatCoreInner({
   }
 
   const streamingTailOutcome = await runStreamingTail({
+    upstreamHttpSelection,
     geminiPromptCacheMode,
     isScopedGeminiCacheTarget,
     tokensCompressed,
@@ -3463,6 +3495,9 @@ async function handleChatCoreInner({
   return streamingTailOutcome.result;
   } finally {
     if (!turnExecutionHandedOffToStream) {
+      try {
+        drainUnpersistedHttpAttempts();
+      } catch {}
       releaseTurnExecution();
     }
   }

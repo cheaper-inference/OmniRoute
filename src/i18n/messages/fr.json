@@ -923,6 +923,8 @@
     "batchListTitle": "Lots",
     "batchListCount": "{count} lots",
     "batchListRemovingCompleted": "Suppression…",
+    "batchListRemoveCompletedPartial": "Un grand nombre de lots ont été supprimés. Cliquez à nouveau pour supprimer les autres.",
+    "batchListRemoveCompletedFailed": "Une erreur s’est produite lors de la suppression des lots.",
     "batchListRemoveCompleted": "Supprimer les lots terminés",
     "batchListTableStatus": "Statut",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Actualisation…",
     "batchListRefresh": "Actualiser",
     "uploadFileModalRemove": "Supprimer",
+    "fileInputChoose": "Choisir un fichier",
+    "fileInputChooseMultiple": "Choisir des fichiers",
+    "fileInputEmpty": "Aucun fichier choisi",
+    "fileInputSelectedCount": "{count, plural, one {# fichier sélectionné} other {# fichiers sélectionnés}}",
+    "fileDropLabel": "Déposez un fichier ici ou choisissez-en un",
+    "fileDropLabelMultiple": "Déposez des fichiers ici ou choisissez-en",
     "uploadFileModalUploading": "Téléversement…",
     "wizardInputReading": "Lecture du fichier…",
     "wizardInputReady": "Prêt",
@@ -6375,6 +6383,9 @@
     "localProviders": "Fournisseurs locaux",
     "maxConcurrentWholeNumberError": "Le nombre maximal d’accès simultanés doit être un nombre entier",
     "m365TierLabel": "Niveau Copilot",
+    "m365RefreshTokenLabel": "Jeton d'actualisation (facultatif)",
+    "m365RefreshTokenHint": "Utilisé pour actualiser automatiquement le jeton d'accès Microsoft 365.",
+    "m365RefreshTokenEditHint": "Laissez vide pour conserver le jeton existant. Collez un nouveau jeton pour le remplacer.",
     "m365TierHint": "Choisissez la surface Microsoft 365 Copilot que cette connexion utilise. Individuel est le BizChat grand public par défaut ; Éducation et Entreprise (travail) optent pour les surfaces de leur tenant.",
     "m365TierIndividualOption": "Individuel (par défaut)",
     "m365TierEduOption": "Éducation",
@@ -12295,7 +12306,9 @@
       "failedTitle": "Les {count} tentatives ont échoué",
       "failed": "échec",
       "pinnedTitle": "Modèle sélectionné via l’épinglage de session du cache de contexte",
-      "pinned": "épinglé"
+      "pinned": "épinglé",
+      "recoveredAttemptsTitle": "Requête rétablie après {count} tentatives",
+      "latestOutcomeFailed": "Le dernier résultat de la requête est un échec"
     },
     "attempts": "tentatives",
     "detail": {
@@ -12397,13 +12410,20 @@
       "continuesFromParent": "fait suite au parent",
       "continuesFrom": "Fait suite à {id}",
       "viewConversation": "afficher la conversation",
-      "openConversation": "Ouvrir la conversation {id}"
+      "openConversation": "Ouvrir la conversation {id}",
+      "omittedHttpAttempts": "{count} envois HTTP non conservés",
+      "noHttpResponse": "Aucune réponse HTTP observée",
+      "transportError": "Erreur de transport"
     },
     "tableLabel": "Journaux des requêtes",
     "throughputPostFirstToken": "Après le premier token",
     "throughputEndToEnd": "Bout en bout",
     "throughputRate": "{value} tokens/sec",
-    "throughputExplanation": "Les deux débits utilisent le plus grand des nombres de tokens de sortie et de raisonnement. Le débit après le premier token exclut un TTFT valide ; sinon, il utilise la durée totale. Le débit bout en bout utilise toujours la durée totale. Une réponse mise en mémoire tampon peut présenter un débit de livraison en rafale élevé sans génération de modèle plus rapide."
+    "throughputExplanation": "Les deux débits utilisent le plus grand des nombres de tokens de sortie et de raisonnement. Le débit après le premier token exclut un TTFT valide ; sinon, il utilise la durée totale. Le débit bout en bout utilise toujours la durée totale. Une réponse mise en mémoire tampon peut présenter un débit de livraison en rafale élevé sans génération de modèle plus rapide.",
+    "omittedHttpAttempts": "{count} envois HTTP non conservés",
+    "upstreamStatus": "Serveur amont {status}",
+    "noHttpResponse": "Aucune réponse HTTP observée",
+    "transportError": "Erreur de transport"
   },
   "proxyLogger": {
     "filterAll": "Tous",
@@ -14170,6 +14190,14 @@
         "label": "Ordre du pool par adresse d'egress partagée",
         "description": "Pour les fournisseurs dont le quota est compartimenté par adresse d'egress, classe un membre du pool partageant l'adresse d'egress observée d'un membre récemment refusé juste en dessous des membres sains. Ordre uniquement, jamais exclu. Nécessite PROXY_SKIP_RECENTLY_FAILED, qui produit le signal de refus qu'il lit. Désactivé par défaut : l'ordre de sélection correspond exactement à la rotation standard."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Refus de quotas limités à un modèle",
+        "description": "Appliquez un quota opencode 429 uniquement au modèle qui l'a atteint, afin que la même sortie continue de servir d'autres modèles et ne l'effacez que lorsque ce modèle réussit. Les consommateurs qui n'ont pas de modèle (rotation du pool, parcage et relecture, visibilité de l'administrateur, déclencheur de sélecteur, balayage de santé) le voient toujours. Il faut PROXY_SKIP_RECENTLY_FAILED, ce qui produit le refus. Désactivé par défaut : le quota 429 d'un modèle réserve la sortie pour chaque modèle."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Récupération du proxy : relecture stricte POST",
+        "description": "Pour une requête non idempotente (POST, PUT, PATCH, DELETE), renvoyer après une erreur de transport (nouvelle socket, proxy fallback, native fallback) uniquement lorsque l'erreur prouve que rien n'a été envoyé : ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ou un délai d'attente de connexion. Une erreur de socket après l'écriture peut signifier que l'amont a accepté la demande, donc un renvoi pourrait la générer et la facturer deux fois. Désactivé par défaut : un corps rejouable est renvoyé une fois en cas d'erreur de transport, ce qui récupère également un socket poolé obsolète."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Journalisation de l'attribution de rotation",
         "description": "La rotation d'opencode enregistre quel compte a été utilisé ou ignoré (identifiants masqués uniquement, jamais d'identifiants de compte complets) et associe les entrées du journal de proxy à leur requête, afin que l'opérateur puisse distinguer les comptes ignorés de ceux non utilisés. Désactivé par défaut : aucune ligne de journal supplémentaire, aucune colonne supplémentaire écrite."
@@ -14221,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Resélection de pool 429 OpenCode",
         "description": "Pour la rotation multi-comptes OpenCode, après une 429 provenant d'un fournisseur compartimenté par IP de sortie sur un compte sans proxy dans un contexte de pool ambiant, demande au pool de connexions un autre membre pour la tentative suivante au lieu de réessayer la même adresse de sortie. Ordonne, n'exclut jamais : un pool épuisé conserve le comportement actuel. Désactivé par défaut : chaque 429 effectue une rotation vers le compte suivant, exactement comme auparavant."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "Sonde de sortie de niveau gratuit OpenCode",
+        "description": "Pour l'exécuteur OpenCode, lorsqu'une requête proxy reçoit une réponse 403 ou 451 FreeTierError et que la nouvelle tentative des outils observés a échoué ou ne s'est pas appliquée, envoyez la requête une fois via un proxy différent (un autre proxy de compte ou un autre membre du pool, jamais une connexion directe). Ce n'est que lorsque cette sonde répond à 200 que la première sortie est mise de côté dans la mémoire de refus du proxy et que la réponse de la sonde est servie ; lorsque les deux refusent, le refus initial est renvoyé et rien n'est enregistré. Le même texte de refus couvre une sortie signalée IP et une forme de demande refusée, de sorte que la sonde les distingue par des preuves. Désactivé par défaut : le refus est renvoyé inchangé."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Empreinte client OpenCode v2",
@@ -14401,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo : arrêt sur refus de politique de contenu",
         "description": "Lorsqu'une cible de combo répond par un refus exact lié à la politique de contenu (code ou type cyber_policy / content_policy_violation), arrêter le combo et renvoyer ce refus même lorsque les cibles restantes sont des modèles différents, au lieu de passer à la cible suivante. Désactivé par défaut : le refus ne met jamais le compte en période de refroidissement et ne déclenche pas le disjoncteur du fournisseur, et le combo passe à sa cible suivante exactement comme avant."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Réponses : rester en vie pendant le transport uniquement",
+        "description": "Envoyez les réponses keepalives sous la forme d'une ligne vierge au lieu d'un événement response.in_progress, de sorte qu'un instantané synthétique ne pourra jamais remplacer la vraie réponse dans le SDK officiel. Une ligne vide ne distribue aucun événement SSE, donc un chien de garde client qui se réinitialise uniquement sur les événements ne sera pas réinitialisé pendant une longue phase silencieuse. Désactivé par défaut : les minuteries envoient l'événement response.in_progress conforme aux spécifications."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Réessai lors du cooldown : ignorer les refus 403/410",

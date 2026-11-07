@@ -923,6 +923,8 @@
     "batchListTitle": "Kötegek",
     "batchListCount": "{count} köteg",
     "batchListRemovingCompleted": "Eltávolítás…",
+    "batchListRemoveCompletedPartial": "Nagyszámú köteg eltávolítva. Kattintson ismét a többi törléséhez.",
+    "batchListRemoveCompletedFailed": "Hiba történt a kötegek eltávolítása közben.",
     "batchListRemoveCompleted": "Befejezettek eltávolítása",
     "batchListTableStatus": "Állapot",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Frissítés…",
     "batchListRefresh": "Frissítés",
     "uploadFileModalRemove": "Eltávolítás",
+    "fileInputChoose": "Fájl kiválasztása",
+    "fileInputChooseMultiple": "Fájlok kiválasztása",
+    "fileInputEmpty": "Nincs kiválasztva fájl",
+    "fileInputSelectedCount": "{count, plural, one {# fájl kiválasztva} other {# fájl kiválasztva}}",
+    "fileDropLabel": "Húzzon ide egy fájlt, vagy válasszon ki egyet",
+    "fileDropLabelMultiple": "Húzzon ide fájlokat, vagy válasszon ki fájlokat",
     "uploadFileModalUploading": "Feltöltés…",
     "wizardInputReading": "Fájl beolvasása…",
     "wizardInputReady": "Kész",
@@ -6375,6 +6383,9 @@
     "localProviders": "Helyi szolgáltatók",
     "maxConcurrentWholeNumberError": "Az egyidejű műveletek maximális számának egész számnak kell lennie",
     "m365TierLabel": "Copilot szint",
+    "m365RefreshTokenLabel": "Token frissítése (opcionális)",
+    "m365RefreshTokenHint": "A Microsoft 365 hozzáférési token automatikus frissítésére szolgál.",
+    "m365RefreshTokenEditHint": "Hagyja üresen a meglévő token megtartásához. Illesszen be egy új tokent a helyére.",
     "m365TierHint": "Válassza ki, melyik Microsoft 365 Copilot felületet használja ez a kapcsolat. Az Individual az alapértelmezett fogyasztói BizChat; az Education és az Enterprise (munkahelyi) a saját bérlői (tenant) felületeiket választják.",
     "m365TierIndividualOption": "Individual (alapértelmezett)",
     "m365TierEduOption": "Oktatás",
@@ -12295,7 +12306,9 @@
       "failedTitle": "Az összes {count} kísérlet meghiúsult",
       "failed": "sikertelen",
       "pinnedTitle": "Modell kiválasztva a kontextus-cache munkamenet rögzítésével",
-      "pinned": "rögzített"
+      "pinned": "rögzített",
+      "recoveredAttemptsTitle": "A kérés {count} próbálkozás után helyreállt",
+      "latestOutcomeFailed": "A legutóbbi kérés eredménye sikertelen"
     },
     "attempts": "kísérletek",
     "detail": {
@@ -12397,13 +12410,20 @@
       "continuesFromParent": "a szülő folytatása",
       "continuesFrom": "{id} folytatása",
       "viewConversation": "beszélgetés megtekintése",
-      "openConversation": "A(z) {id} beszélgetés megnyitása"
+      "openConversation": "A(z) {id} beszélgetés megnyitása",
+      "omittedHttpAttempts": "{count} HTTP-küldés nincs megőrizve",
+      "noHttpResponse": "Nem észlelt HTTP-választ",
+      "transportError": "Átviteli hiba"
     },
     "tableLabel": "Kérésnaplók",
     "throughputPostFirstToken": "Első token utáni",
     "throughputEndToEnd": "Végponttól végpontig",
     "throughputRate": "{value} token/mp",
-    "throughputExplanation": "Mindkét arány a kimeneti és a reasoning tokenszám közül a nagyobbat használja. Az első token utáni érték kizárja az érvényes TTFT-t; egyébként a teljes időtartamot használja. A végponttól végpontig érték mindig a teljes időtartamot használja. Egy puffereit válasz nagy burst átviteli sebességgel is rendelkezhet anélkül, hogy a modell gyorsabban generálna."
+    "throughputExplanation": "Mindkét arány a kimeneti és a reasoning tokenszám közül a nagyobbat használja. Az első token utáni érték kizárja az érvényes TTFT-t; egyébként a teljes időtartamot használja. A végponttól végpontig érték mindig a teljes időtartamot használja. Egy puffereit válasz nagy burst átviteli sebességgel is rendelkezhet anélkül, hogy a modell gyorsabban generálna.",
+    "omittedHttpAttempts": "{count} HTTP-küldés nincs megőrizve",
+    "upstreamStatus": "Felsőbb kiszolgáló {status}",
+    "noHttpResponse": "Nem észlelt HTTP-választ",
+    "transportError": "Átviteli hiba"
   },
   "proxyLogger": {
     "filterAll": "Összes",
@@ -14170,6 +14190,14 @@
         "label": "Megosztott egress pool-sorrend",
         "description": "Azon szolgáltatók esetén, amelyeknél a kvóta egress-címek szerint van csoportosítva, a nemrég elutasított tag megfigyelt egress-címén osztozó pool-tagot közvetlenül az egészséges tagok mögé rangsorolja. Csak sorrendezés, soha nem kizárás. A PROXY_SKIP_RECENTLY_FAILED beállítást igényli, amely létrehozza az általa beolvasott elutasítási jelet. Alapértelmezés szerint kikapcsolva: a kiválasztási sorrend pontosan megegyezik a sima rotációval."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Modell-hatókörű kvóta-elutasítások",
+        "description": "A opencode 429-es kvótáját csak arra a modellre alkalmazza, amelyik eltalálta, hogy ugyanaz a kimenet továbbra is kiszolgáljon más modelleket, és csak akkor törölje, ha az adott modell sikeres lesz. Azok a fogyasztók, akiknek nincs modellje (medence forgatás, parkolás és visszajátszás, adminisztrátori láthatóság, választó trigger, állapotsöprés), továbbra is látják. Szüksége van PROXY_SKIP_RECENTLY_FAILED, amely az elutasítást eredményezi. Alapértelmezés szerint ki: egy modell 429-es kvótája minden modellnél félreteszi a kilépést."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy lekérés: szigorú POST visszajátszás",
+        "description": "Nem idempotens kérés esetén (POST, PUT, PATCH, DELETE) csak akkor küldjön újra egy szállítási hiba (friss socket, proxy backback, native backback) után, ha a hiba azt bizonyítja, hogy semmit sem küldtek: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH vagy csatlakozási időtúllépés. Az írás utáni socket hiba azt jelentheti, hogy az upstream elfogadta a kérést, így az újraküldés kétszer generálhat és számlázhat. Alapértelmezés szerint kikapcsolva: egy újrajátszható törzset a rendszer egyszer újraküld minden szállítási hiba esetén, ami az elavult poolsocketet is helyreállítja."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotációs hozzárendelés naplózása",
         "description": "Az opencode rotáció rögzíti, hogy melyik fiók szolgált ki kérést vagy lett kihagyva (csak maszkolt azonosítók, soha nem teljes fiókazonosítók), és összekapcsolja a proxynapló-bejegyzéseket a kérésükkel, így az üzemeltető meg tudja különböztetni a kihagyott fiókokat a nem használtaktól. Alapértelmezés szerint kikapcsolva: nem íródnak extra naplósorok és extra oszlopok."
@@ -14221,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 pool újraválasztás",
         "description": "Az OpenCode többfiókos rotációjánál, ha egy ambient pool kontextusban futó, proxy nélküli fiókon egy egress-bucketed szolgáltatótól 429-es hiba érkezik, kérjen egy másik tagot a kapcsolatkészletből (connection pool) a következő kísérlethez ahelyett, hogy ugyanazzal az egress címmel próbálkozna újra. Sorrendbe állít, sosem zár ki: a kimerült pool megőrzi a jelenlegi viselkedést. Alapértelmezés szerint kikapcsolva: minden 429 a következő fiókra rotál, pontosan úgy, mint korábban."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "A OpenCode végrehajtó esetében, ha a proxy kérésére 403 vagy 451 FreeTierError válaszol, és a megfigyelt eszközök újrapróbálkozása sikertelen vagy nem érvényesült, küldje el a kérést egyszer egy másik proxyn keresztül (egy másik fiókproxy vagy egy másik készlettag, soha nem közvetlen kapcsolat). Csak akkor, ha a szonda 200-at válaszol, akkor az első kilépést félretesszük a proxy elutasítási memóriájában, és a szonda válaszát kiszolgáljuk; amikor mindketten megtagadják, az eredeti elutasítást visszaküldik, és semmit nem rögzítenek. Ugyanaz az elutasító szöveg egy megjelölt kilépési IP és egy elutasított kérés alakzatot takar, így a szonda bizonyítékokkal különbözteti meg őket. Alapértelmezés szerint kikapcsolva: az elutasítás változatlan formában kerül visszaküldésre."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 kliens-ujjlenyomat",
@@ -14401,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Leállítás tartalom-irányelvi elutasításkor",
         "description": "Ha egy combo-célpont pontos tartalom-irányelvi elutasítással válaszol (cyber_policy / content_policy_violation kód vagy típus), állítsa le a combót, és küldje vissza ezt az elutasítást még akkor is, ha a fennmaradó célpontok más modellek, ahelyett, hogy továbblépne a következő célpontra. Alapértelmezés szerint kikapcsolva: az elutasítás soha nem helyezi nyugalmi állapotba a fiókot, nem oldja ki a provider breakert, és a combo pontosan úgy halad tovább a következő célpontra, mint korábban."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Válaszok: csak a szállítás során maradjon életben",
+        "description": "A válaszok elküldése üres sorként a response.in_progress esemény helyett, így a szintetikus pillanatkép soha nem helyettesítheti a valódi választ a hivatalos SDK ben. Az üres sor nem küld SSE eseményt, így a csak eseményekre visszaállító kliensfigyelő nem indul vissza egy hosszú néma fázis alatt. Alapértelmezés szerint kikapcsolva: az időzítők elküldik a spec-valid response.in_progress eseményt."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown újrapróbálkozás: 403/410 elutasítások kihagyása",

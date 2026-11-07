@@ -1000,6 +1000,8 @@
     "batchListTitle": "ባችዎች",
     "batchListCount": "{count} ባችዎች",
     "batchListRemovingCompleted": "በማስወገድ ላይ…",
+    "batchListRemoveCompletedPartial": "ብዙ ባችዎች ተወግደዋል። የቀሩትን ለማጽዳት እንደገና ጠቅ ያድርጉ።",
+    "batchListRemoveCompletedFailed": "ባችዎችን በማስወገድ ላይ ሳለ ስህተት ተከስቷል።",
     "batchListRemoveCompleted": "የተጠናቀቁትን አስወግድ",
     "batchListTableStatus": "ሁኔታ",
     "batchListTableId": "ID",
@@ -1038,6 +1040,12 @@
     "batchListRefreshing": "በማደስ ላይ…",
     "batchListRefresh": "አድስ",
     "uploadFileModalRemove": "አስወግድ",
+    "fileInputChoose": "ፋይል ይምረጡ",
+    "fileInputChooseMultiple": "ፋይሎችን ይምረጡ",
+    "fileInputEmpty": "ምንም ፋይል አልተመረጠም",
+    "fileInputSelectedCount": "{count, plural, one {# ፋይል ተመርጧል} other {# ፋይሎች ተመርጠዋል}}",
+    "fileDropLabel": "ፋይል እዚህ ይጣሉ ወይም አንድ ይምረጡ",
+    "fileDropLabelMultiple": "ፋይሎችን እዚህ ይጣሉ ወይም ፋይሎችን ይምረጡ",
     "uploadFileModalUploading": "በመስቀል ላይ…",
     "wizardInputReading": "ፋይሉን በማንበብ ላይ…",
     "wizardInputReady": "ዝግጁ",
@@ -6452,6 +6460,9 @@
     "localProviders": "አካባቢያዊ አቅራቢዎች",
     "maxConcurrentWholeNumberError": "ከፍተኛው በአንድ ጊዜ የሚከናወን ብዛት ሙሉ ቁጥር መሆን አለበት",
     "m365TierLabel": "የCopilot ደረጃ",
+    "m365RefreshTokenLabel": "አድስ ማስመሰያ (አማራጭ)",
+    "m365RefreshTokenHint": "የ Microsoft 365 መዳረሻ ማስመሰያ በራስ ሰር ለማደስ ስራ ላይ ይውላል።",
+    "m365RefreshTokenEditHint": "ያለውን ማስመሰያ ለማቆየት ባዶ ይተውት። እሱን ለመተካት አዲስ ማስመሰያ ይለጥፉ።",
     "m365TierHint": "ይህ ግንኙነት የትኛውን Microsoft 365 Copilot በይነገጽ እንደሚጠቀም ይምረጡ። ግለሰብ ነባሪው የተጠቃሚ BizChat ነው፤ ትምህርት እና ድርጅት (ሥራ) የየተከራያቸውን በይነገጾች ያነቃሉ።",
     "m365TierIndividualOption": "ግለሰብ (ነባሪ)",
     "m365TierEduOption": "ትምህርት",
@@ -12372,7 +12383,9 @@
       "failedTitle": "ሁሉም {count} ሙከራዎች አልተሳኩም",
       "failed": "አልተሳካም",
       "pinnedTitle": "ሞዴሉ በcontext-cache ክፍለ ጊዜ ማጣበቅ ተመርጧል",
-      "pinned": "ተያይዟል"
+      "pinned": "ተያይዟል",
+      "recoveredAttemptsTitle": "ጥያቄው በ{count} ሙከራዎች ተሳክቷል",
+      "latestOutcomeFailed": "የመጨረሻው ጥያቄ ውጤት አልተሳካም"
     },
     "attempts": "ሙከራዎች",
     "detail": {
@@ -12474,13 +12487,20 @@
       "continuesFromParent": "ከወላጅ ይቀጥላል",
       "continuesFrom": "ከ{id} ይቀጥላል",
       "viewConversation": "ውይይቱን ይመልከቱ",
-      "openConversation": "ውይይት {id}ን ይክፈቱ"
+      "openConversation": "ውይይት {id}ን ይክፈቱ",
+      "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+      "noHttpResponse": "የHTTP ምላሽ አልታየም",
+      "transportError": "የማጓጓዣ ስህተት"
     },
     "tableLabel": "የጥያቄ ምዝግብ ማስታወሻዎች",
     "throughputPostFirstToken": "ከመጀመሪያው ቶከን በኋላ",
     "throughputEndToEnd": "ከጫፍ እስከ ጫፍ",
     "throughputRate": "በሰከንድ {value} ቶከኖች",
-    "throughputExplanation": "ሁለቱም ፍጥነቶች ከውጤት እና ከምክንያታዊ ትንተና ቶከኖች ብዛት የሚበልጠውን ይጠቀማሉ። ከመጀመሪያው ቶከን በኋላ ያለው ፍጥነት ትክክለኛ TTFTን አያካትትም፤ ካልሆነ ግን ሙሉውን ቆይታ ይጠቀማል። ከጫፍ እስከ ጫፍ ሁልጊዜ ሙሉውን ቆይታ ይጠቀማል። በቋት የተያዘ ምላሽ የሞዴሉ ማመንጨት ሳይፈጥን ከፍተኛ የፈጣን ማድረስ ፍጥነት ሊኖረው ይችላል።"
+    "throughputExplanation": "ሁለቱም ፍጥነቶች ከውጤት እና ከምክንያታዊ ትንተና ቶከኖች ብዛት የሚበልጠውን ይጠቀማሉ። ከመጀመሪያው ቶከን በኋላ ያለው ፍጥነት ትክክለኛ TTFTን አያካትትም፤ ካልሆነ ግን ሙሉውን ቆይታ ይጠቀማል። ከጫፍ እስከ ጫፍ ሁልጊዜ ሙሉውን ቆይታ ይጠቀማል። በቋት የተያዘ ምላሽ የሞዴሉ ማመንጨት ሳይፈጥን ከፍተኛ የፈጣን ማድረስ ፍጥነት ሊኖረው ይችላል።",
+    "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+    "upstreamStatus": "የላይኛው አገልጋይ {status}",
+    "noHttpResponse": "የHTTP ምላሽ አልታየም",
+    "transportError": "የማጓጓዣ ስህተት"
   },
   "proxyLogger": {
     "filterAll": "ሁሉም",
@@ -14247,6 +14267,14 @@
         "label": "የጋራ መውጫ ስብስብ ቅደም ተከተል",
         "description": "ኮታቸው በመውጫ አድራሻ ለተከፋፈለ አቅራቢዎች፣ በቅርቡ ውድቅ የተደረገውን አባል የታየበትን የመውጫ አድራሻ የሚጋራ የስብስብ አባልን ከጤናማ አባላት በታች ደረጃ ይስጡ። ቅደም ተከተል ብቻ ነው፣ በጭራሽ አይገለልም። የሚያነበውን የውድቅ ማድረጊያ ምልክት የሚያመነጨውን PROXY_SKIP_RECENTLY_FAILED ይፈልጋል። በነባሪነት ጠፍቷል፦ የመምረጫ ቅደም ተከተል ልክ እንደ መደበኛው ዝውውር ነው።"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "በሞዴል የተቀመጡ የኮታ ውድቀቶች",
+        "description": "opencode ኮታ 429ን ለተመታው ሞዴል ብቻ ይተግብሩ፣ ስለዚህ ያው ኢግሬስ ሌሎች ሞዴሎችን ማገልገሉን ይቀጥላል እና ያ ሞዴል ሲሳካ ብቻ ያፅዱት። ምንም ሞዴል የሌላቸው ሸማቾች (የገንዳ ማሽከርከር፣ ፓርክ እና መልሶ ማጫወት፣ የአስተዳዳሪ ታይነት፣ የመራጭ ቀስቃሽ፣ የጤና ጠረግ) አሁንም ያዩታል። እምቢታውን የሚያመጣው PROXY_SKIP_RECENTLY_FAILED ያስፈልገዋል. በነባሪ ጠፍቷል፡ የአንድ ሞዴል ኮታ 429 ለእያንዳንዱ ሞዴል መውጣቱን ያስቀምጣል።"
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "ተኪ ማምጣት፡ ጥብቅ POST እንደገና መጫወት",
+        "description": "ጥንካሬ ላልሆነ ጥያቄ (POST, PUT, PATCH, DELETE) ከትራንስፖርት ስህተት በኋላ እንደገና ላክ (ትኩስ ሶኬት፣ ተኪ ውድቀት፣ ቤተኛ መውደቅ) ስህተቱ ምንም እንዳልተላከ ሲያረጋግጥ ብቻ ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ወይም የግንኙነት ጊዜ ማብቂያ። ከጽሁፉ በኋላ የተፈጠረ የሶኬት ስህተት ወደላይ ያለው ሰው ጥያቄውን ተቀብሏል፣ ስለዚህ እንደገና መላክ ሁለት ጊዜ ማመንጨት እና ማስከፈል ይችላል። በነባሪነት ጠፍቷል፡ በማንኛውም የትራንስፖርት ስህተት ዳግም ሊጫወት የሚችል አካል አንድ ጊዜ ይናደዳል፣ ይህ ደግሞ የቆየ የተጠቀለለ ሶኬት ይመልሳል።"
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "የዝውውር አበርክቶ ምዝገባ",
         "description": "የOpencode ዝውውር የትኛው መለያ እንዳገለገለ ወይም እንደተዘለለ ይመዘግባል (የተሸፈኑ መታወቂያዎች ብቻ፣ በጭራሽ ሙሉ የመለያ መታወቂያዎች አይደሉም) እና ኦፕሬተሩ የተዘለሉ መለያዎችን ካልተጠቀሙባቸው ለይቶ ማወቅ እንዲችል የፕሮክሲ ምዝግብ ግቤቶችን ከጥያቄያቸው ጋር ያገናኛል። በነባሪነት ጠፍቷል፦ ምንም ተጨማሪ የምዝግብ መስመሮች፣ ምንም ተጨማሪ አምዶች አይጻፉም።"
@@ -14298,6 +14326,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 የፑል ድጋሚ ምርጫ",
         "description": "ለOpenCode ባለብዙ መለያ ቅብብሎሽ፣ በአካባቢ ፑል (ambient pool) አውድ ስር ፕሮክሲ በሌለው መለያ ላይ ከ egress-bucketed አቅራቢ 429 ከተቀበለ በኋላ፣ ተመሳሳዩን የ egress አድራሻ እንደገና ከመሞከር ይልቅ ለቀጣዩ ሙከራ የግንኙነት ፑሉን ሌላ አባል ይጠይቁ። ቅደም ተከተል ያስይዛል እንጂ በጭራሽ አያገልልም፦ የተሟጠጠ ፑል አሁን ያለውን ባህሪ ጠብቆ ያቆያል። በነባሪ ጠፍቷል፡ እያንዳንዱ 429 ልክ እንደበፊቱ ወደ ቀጣዩ መለያ ይሽከረከራል።"
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode ነፃ-ደረጃ ኢግረስ ምርመራ",
+        "description": "ለ OpenCode ፈጻሚ፣ የተኪ ጥያቄ 403 ወይም 451 FreeTierError ሲመለስ እና የተስተዋሉ መሳሪያዎች ድጋሚ ሲሞክሩ ወይም ሳይተገበሩ ሲቀሩ፣ ጥያቄውን አንድ ጊዜ በተለያየ ፕሮክሲ በኩል ይላኩ (ሌላ የመለያ ፕሮክሲ ወይም ሌላ ገንዳ አባል፣ በጭራሽ ቀጥተኛ ግንኙነት)። ያ ፍተሻ 200 ሲመልስ ብቻ በፕሮክሲ እምቢታ ማህደረ ትውስታ ውስጥ የተቀመጠው የመጀመሪያው መውጣት እና የፍተሻ ምላሹ አገልግሎት ይሰጣል። ሁለቱም እምቢ ሲሉ, ዋናው እምቢታ ይመለሳል እና ምንም ነገር አይመዘገብም. ተመሳሳዩ የእምቢታ ጽሑፍ ባንዲራ የተደረገ egress IP እና ውድቅ የተደረገ የጥያቄ ቅርፅን ይሸፍናል፣ ስለዚህ መርማሪው በማስረጃ ይለያቸዋል። በነባሪ ጠፍቷል፡ እምቢታው ሳይለወጥ ይመለሳል።"
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "የOpenCode v2 ደንበኛ የጣት አሻራ",
@@ -14478,6 +14510,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo፦ የይዘት ፖሊሲ እምቢታ ሲያጋጥም አቁም",
         "description": "አንድ የ Combo ዒላማ በትክክለኛ የይዘት ፖሊሲ እምቢታ (ኮድ ወይም ዓይነት cyber_policy / content_policy_violation) ምላሽ ሲሰጥ፣ ወደ ቀጣዩ ዒላማ ከማለፍ ይልቅ የቀሩት ዒላማዎች የተለያዩ ሞዴሎች ቢሆኑም እንኳ Comboውን ያቁሙ እና ያንን እምቢታ ይመልሱ። በነባሪነት ጠፍቷል፦ እምቢታው መለያውን በፍጹም cooldown ውስጥ አያስገባም ወይም provider breakerን አያስነሳም፣ እንዲሁም Comboው ልክ እንደቀድሞው ወደ ቀጣዩ ዒላማው ያልፋል።"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "ምላሾች፡- በትራንስፖርት ላይ ብቻ ይኑር",
+        "description": "ምላሾችን ጠባቂዎችን ከ response.in_progress ክስተት ይልቅ እንደ ባዶ መስመር ይላኩ፣ ስለዚህ ሰው ሰራሽ የሆነ ቅጽበተ-ፎቶ በይፋዊው SDK ውስጥ ትክክለኛውን ምላሽ በጭራሽ ሊተካ አይችልም። ባዶ መስመር ምንም SSE ክስተት አይልክም፣ ስለዚህ በክስተቶች ላይ ብቻ ዳግም የሚያስጀምር የደንበኛ ጠባቂ በፀጥታ ረጅም ጊዜ ውስጥ ዳግም አይጀምርም። በነባሪ ጠፍቷል፡ የሰዓት ቆጣሪዎች ልዩ የሆነውን response.in_progress ክስተት ይልካሉ።"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "የ Cooldown ዳግም ሙከራ፦ የ 403/410 እምቢታዎችን ዝለል",

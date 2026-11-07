@@ -923,6 +923,8 @@
     "batchListTitle": "Makundi",
     "batchListCount": "Makundi {count}",
     "batchListRemovingCompleted": "Inaondoa…",
+    "batchListRemoveCompletedPartial": "Idadi kubwa ya makundi imeondolewa. Bofya tena ili kufuta yaliyosalia.",
+    "batchListRemoveCompletedFailed": "Hitilafu imetokea wakati wa kuondoa makundi.",
     "batchListRemoveCompleted": "Ondoa zilizokamilika",
     "batchListTableStatus": "Hali",
     "batchListTableId": "Kitambulisho",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Inaonyesha upya…",
     "batchListRefresh": "Onyesha upya",
     "uploadFileModalRemove": "Ondoa",
+    "fileInputChoose": "Chagua faili",
+    "fileInputChooseMultiple": "Chagua faili",
+    "fileInputEmpty": "Hakuna faili lililochaguliwa",
+    "fileInputSelectedCount": "{count, plural, one {Faili # limechaguliwa} other {Faili # zimechaguliwa}}",
+    "fileDropLabel": "Dondosha faili hapa au uchague moja",
+    "fileDropLabelMultiple": "Dondosha faili hapa au uchague faili",
     "uploadFileModalUploading": "Inapakia…",
     "wizardInputReading": "Inasoma faili…",
     "wizardInputReady": "Tayari",
@@ -6375,6 +6383,9 @@
     "localProviders": "Watoa Huduma wa Ndani",
     "maxConcurrentWholeNumberError": "Hitilafu ya nambari nzima ya kiwango cha juu cha miunganisho sambamba",
     "m365TierLabel": "Kiwango cha Copilot",
+    "m365RefreshTokenLabel": "Onyesha upya tokeni (si lazima)",
+    "m365RefreshTokenHint": "Inatumika kuonyesha upya tokeni ya ufikiaji Microsoft 365 kiotomatiki.",
+    "m365RefreshTokenEditHint": "Acha wazi ili kuweka tokeni iliyopo. Bandika tokeni mpya ili kuibadilisha.",
     "m365TierHint": "Chagua ni kiolesura gani cha Microsoft 365 Copilot ambacho muunganisho huu unatumia. Binafsi ndiyo BizChat ya kawaida ya mtumiaji; Elimu na Biashara (kazi) huchagua violesura vya wapangaji wao.",
     "m365TierIndividualOption": "Binafsi (chaguo-msingi)",
     "m365TierEduOption": "Elimu",
@@ -12295,7 +12306,9 @@
       "failedTitle": "Jaribio zote {count} zimefeli",
       "failed": "imeshindwa",
       "pinnedTitle": "Mfano umechaguliwa kupitia upanuzi wa muktadha wa kikao",
-      "pinned": "imefungwa"
+      "pinned": "imefungwa",
+      "recoveredAttemptsTitle": "Ombi limerejeshwa baada ya majaribio {count}",
+      "latestOutcomeFailed": "Matokeo ya ombi la mwisho yameshindwa"
     },
     "attempts": "jaribio",
     "detail": {
@@ -12397,13 +12410,20 @@
       "continuesFromParent": "inaendelea kutoka kwa mzazi",
       "continuesFrom": "Inaendelea kutoka {id}",
       "viewConversation": "tazama mazungumzo",
-      "openConversation": "Fungua mazungumzo {id}"
+      "openConversation": "Fungua mazungumzo {id}",
+      "omittedHttpAttempts": "Matumaji {count} ya HTTP hayakuhifadhiwa",
+      "noHttpResponse": "Hakuna jibu la HTTP lililoonekana",
+      "transportError": "Hitilafu ya usafirishaji"
     },
     "tableLabel": "Kumbukumbu za maombi",
     "throughputPostFirstToken": "Baada ya tokeni ya kwanza",
     "throughputEndToEnd": "Mwanzo hadi mwisho",
     "throughputRate": "{value} tokeni/sek",
-    "throughputExplanation": "Viwango vyote viwili hutumia idadi kubwa zaidi kati ya tokeni za matokeo na tokeni za ufikiri. Baada-ya-tokeni-ya-kwanza haijumuishi TTFT halali; vinginevyo hutumia muda kamili. Mwanzo-hadi-mwisho hutumia muda kamili kila wakati. Jibu lililohifadhiwa linaweza kuwa na kiwango cha juu cha uwasilishaji wa mlipuko bila uzalishaji wa modeli wa haraka zaidi."
+    "throughputExplanation": "Viwango vyote viwili hutumia idadi kubwa zaidi kati ya tokeni za matokeo na tokeni za ufikiri. Baada-ya-tokeni-ya-kwanza haijumuishi TTFT halali; vinginevyo hutumia muda kamili. Mwanzo-hadi-mwisho hutumia muda kamili kila wakati. Jibu lililohifadhiwa linaweza kuwa na kiwango cha juu cha uwasilishaji wa mlipuko bila uzalishaji wa modeli wa haraka zaidi.",
+    "omittedHttpAttempts": "Matumaji {count} ya HTTP hayakuhifadhiwa",
+    "upstreamStatus": "Seva ya juu {status}",
+    "noHttpResponse": "Hakuna jibu la HTTP lililoonekana",
+    "transportError": "Hitilafu ya usafirishaji"
   },
   "proxyLogger": {
     "filterAll": "Zote",
@@ -14170,6 +14190,14 @@
         "label": "Mpangilio wa Kitanda cha Sogoro Shirikishi",
         "description": "Kwa waangalizi ambao kiwango chao kinapatikana kwa maelezo ya anwani ya sogoro, weka alama kwa mtu anayeshiriki alama ya anwani ya sogoro aliyotajwa mara ndogo zilizokataliwa tu ndani ya mwanasayansi. Mpangilio tu, usikutolii. Inahitaji PROXY_SKIP_RECENTLY_FAILED, ambayo hutoa ishara ya ukatili wanayoelekeza kuisoma. Imezimwa kwa chaguo-msingi: mpangilio wa uteuzo ni sawaswa na mzunguko safi."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Kukataliwa kwa mgao wa modeli",
+        "description": "Tumia mgawo wa opencode 429 pekee kwa mfano ulioipiga, kwa hivyo njia hiyo hiyo inaendelea kutumikia mifano mingine, na kuifuta tu wakati mtindo huo unafaulu. Wateja ambao hawana muundo (mzunguko wa bwawa, bustani na kucheza tena, mwonekano wa msimamizi, kichochezi cha kuchagua, kufagia afya) bado wanaiona. Inahitaji PROXY_SKIP_RECENTLY_FAILED, ambayo hutoa kukataa. Imezimwa kwa chaguo-msingi: mgawo wa modeli 429 huweka kando kwa kila modeli."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Uletaji wa wakala: kucheza tena kwa POST",
+        "description": "Kwa ombi lisilo la msingi (POST, PUT, PATCH, DELETE), tuma tena baada ya hitilafu ya usafiri (soketi safi, mbadala mbadala, urejeshaji asilia) pale tu hitilafu inapothibitisha kuwa hakuna kitu kilitumwa: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH au muda wa kuunganisha. Hitilafu ya soketi baada ya kuandika inaweza kumaanisha mkondo wa juu ulikubali ombi, kwa hivyo kutuma tena kunaweza kutoa na kulitoza mara mbili. Imezimwa kwa chaguo-msingi: mwili unaoweza kucheza tena hutupwa tena mara moja kwenye hitilafu yoyote ya usafiri, ambayo pia hurejesha soketi iliyochakaa iliyounganishwa."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Kurekodi ya Marefu ya Mzunguko",
         "description": "Mzunguko wa opencode unrekodi akaunti ambayo ilitumwa au ilirukaa (alama za masiki tu, kamwe alama kamili za akaunti) na linakiangusisha rekodi za proxy na ombi la ombi, ili msimamizi anaweze kutofautisha akaunti zilizorukaa na zile zisizotumwa. Imezimwa kwa chaguo-msingi: hakuna mistari ya ziada ya ukandisi, hakuna mizunguko ya ziada ya mwandiko."
@@ -14221,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Ombi la OpenCode la 429 la Kuchagua Upya Mzigo",
         "description": "Kwa mzunguko wa multi-account wa OpenCode, baada ya 429 kutoka kwa muuguzi wa egress-bucketed kwenye akaunti isiyo na proxy chini ya mazingira ya mzigo, ombi mzigo wa mahusiano mwanahati naye kwa jaribio likifanya kile badala ya kurudia anwango la egress zilele. Utaratibu, haihitimu kabisa: mzigo umechoka huondoa mtazamo wa sasa. Imezimwa kwa chaguo-msingi: 429 yoyote huzunguka kwenda akaunti ifuatayo haswa kama awali."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Uchunguzi wa Egress wa Kiwango Huria",
+        "description": "Kwa mtekelezaji wa OpenCode, wakati ombi la wakala linapojibiwa 403 au 451 FreeTierError na zana zinazozingatiwa hazijafaulu au hazikutumika, tuma ombi hilo mara moja kupitia seva mbadala tofauti (wakala mwingine wa akaunti au mwanachama mwingine wa kikundi, kamwe muunganisho wa moja kwa moja). Wakati uchunguzi huo unajibu 200 tu ndipo njia ya kwanza iliyowekwa kando katika kumbukumbu ya kukataa wakala na majibu ya uchunguzi yanatolewa; wakati wote wanakataa, kukataa asili kunarejeshwa na hakuna kitu kinachorekodiwa. Maandishi yale yale ya kukataa yanafunika IP iliyotiwa alama na umbo la ombi lililokataliwa, kwa hivyo uchunguzi unawatofautisha kwa ushahidi. Imezimwa kwa chaguo-msingi: kukataa kunarudishwa bila kubadilika."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Joho la Client ya OpenCode v2",
@@ -14401,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Mzingamano: Kumuisha kwa Kukataa kwa Sera ya Mwenendo",
         "description": "Tangu mzingamano wa awali wa kutoka amwajibu kukataa kwa sera ya mwenendo tu (mabao au aina cyber_policy / content_policy_violation), mzingamano anamwisha na kurejea kukataa kwa hata tangu awali wa mzingamano ni michoro tofauti, badala ya kwenda kwa mzingamano unaofuata. Imezimwa kwa chaguo-msingi: kukataa haina kufuruputa akaunti au kutosha mwingiliano, na mzingamano anakwenda kwa mzingamano unaofuata kama ya awali."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Majibu: weka hai kwenye usafiri pekee",
+        "description": "Tuma kumbukumbu za Majibu kama mstari tupu badala ya tukio response.in_progress, ili picha ya muhtasari ya syntetisk haiwezi kamwe kuchukua nafasi ya jibu halisi katika SDK rasmi. Laini tupu haitumi tukio la SSE, kwa hivyo shirika la ulinzi la mteja ambalo linaweka upya matukio pekee halitawekwa upya wakati wa awamu ya kimya ya muda mrefu. Imezimwa kwa chaguo-msingi: vipima muda hutuma tukio sahihi response.in_progress."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jaribio Tena la Kupumzika: Kuzima Ukwilizaji wa 403/410",
