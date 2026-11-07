@@ -1,1 +1,0 @@
-- **fix(sse):** Local and self-hosted providers can no longer dispatch to cloud-metadata addresses; loopback and LAN base URLs still work.

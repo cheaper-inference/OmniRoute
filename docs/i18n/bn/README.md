@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                  |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+|                                  |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------------- | :--------------------: | :---------: | :-------------------: |
 | 🌐 প্রদানকারী                    |          352           |   **358**   |          380          |
 | 🧠 অনন্য চ্যাট মডেল ID           |          1320          |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar ব্যবহার ঐচ্ছিক এবং এটি কেবল 
 
 </div>
 
-> **v3.8.20 → v3.8.53** থেকে সাম্প্রতিক হাইলাইট। সম্পূর্ণ ইতিহাস [`CHANGELOG.md`](CHANGELOG.md)-এ।
+> **v3.8.20 → v3.8.54** থেকে সাম্প্রতিক হাইলাইট। সম্পূর্ণ ইতিহাস [`CHANGELOG.md`](CHANGELOG.md)-এ।
 
 - **⚖️ `quota-weighted` রাউটিং** — ২০তম কম্বো স্ট্র্যাটেজি ক্লান্ত অ্যাকাউন্টগুলো এড়িয়ে যায়, তারপর বাকি অ্যাকাউন্টগুলোর মধ্যে অবশিষ্ট কোটার অনুপাতে (বিভাজিত ইন-ফ্লাইট লোড দিয়ে) নির্বাচন করে, বিদ্যমান কথোপকথনগুলো পিন করে রাখে। → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 হেডলেস মোড** — `omniroute serve --headless` (অথবা `OMNIROUTE_HEADLESS=1`) কেবল `/v1/*` প্রক্সি ইঞ্জিন চালায়, ড্যাশবোর্ড ও ড্যাশবোর্ড-শুধু সাবসিস্টেমগুলো বন্ধ থাকে। → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` বা peer-dep warning দেখছেন? [এগুলো নিরীহ](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)।
-> **npm 11 বা পরবর্তী ব্যবহার করছেন?** অনুমতি না দিলে npm প্যাকেজ lifecycle scripts ব্লক করতে পারে। OmniRoute-এর native runtime ফাইল প্রস্তুত করতে এর `postinstall` (`node scripts/build/postinstall.mjs`) আবশ্যক। গ্লোবালি ইনস্টল করার সময় npm-এর warning-এ যে প্যাকেজগুলোর নাম আছে সেগুলোর অনুমতি দিন। OmniRoute 3.8.53 যে প্যাকেজ সেট রিপোর্ট করে:
+> **npm 11 বা পরবর্তী ব্যবহার করছেন?** অনুমতি না দিলে npm প্যাকেজ lifecycle scripts ব্লক করতে পারে। OmniRoute-এর native runtime ফাইল প্রস্তুত করতে এর `postinstall` (`node scripts/build/postinstall.mjs`) আবশ্যক। গ্লোবালি ইনস্টল করার সময় npm-এর warning-এ যে প্যাকেজগুলোর নাম আছে সেগুলোর অনুমতি দিন। OmniRoute 3.8.54 যে প্যাকেজ সেট রিপোর্ট করে:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1291,7 +1291,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
   <tr><td nowrap><b>রানটাইম</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ভাষা</b></td><td>TypeScript 6.0 — <code>src/</code> এবং <code>open-sse/</code> জুড়ে <b>100% TypeScript</b> (v2.0 থেকে কোরে শূন্য <code>any</code>)</td></tr>
   <tr><td nowrap><b>ফ্রেমওয়ার্ক</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ডেটাবেস</b></td><td>better-sqlite3 (SQLite, WAL জার্নালিং) + LowDB (JSON লিগ্যাসি) — 147টি ডোমেইন মডিউল, 222টি মাইগ্রেশন</td></tr>
+  <tr><td nowrap><b>ডেটাবেস</b></td><td>better-sqlite3 (SQLite, WAL জার্নালিং) + LowDB (JSON লিগ্যাসি) — 147টি ডোমেইন মডিউল, 223টি মাইগ্রেশন</td></tr>
   <tr><td nowrap><b>মেমরি</b></td><td>SQLite FTS5 পূর্ণ-পাঠ্য + int8-কোয়ান্টাইজড ভেক্টর এম্বেডিং, টাইপড ডিকে</td></tr>
   <tr><td nowrap><b>স্কিমা</b></td><td>Zod 4 — MCP টুল I/O যাচাইকরণ + API চুক্তি</td></tr>
   <tr><td nowrap><b>প্রোটোকল</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1804,7 +1804,7 @@ MIT লাইসেন্স - বিস্তারিত জানতে [LICE
 
 **[⬆ শীর্ষে ফিরে যান](#-omniroute)** · ওপেন-সোর্স AI কমিউনিটির জন্য ❤️ দিয়ে তৈরি।
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> কর্তৃক তৈরি · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT লাইসেন্স · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> কর্তৃক তৈরি · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT লাইসেন্স · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- কমিউনিটির প্রশ্নোত্তরের জন্য GitHub Discussions সক্রিয় করা হয়েছে -->

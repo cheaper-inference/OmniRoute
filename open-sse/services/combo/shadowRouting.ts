@@ -130,11 +130,9 @@ export function scheduleShadowRouting(
       targets.map(async (target) => {
         const startedAt = Date.now();
         try {
-          const shadowBody = {
-            ...cloneRequestBodyForShadowRouting(shadowBaseBody),
-            model: target.modelStr,
-            stream: false,
-          };
+          // Check availability before allocating another full history copy.
+          // The synchronous snapshot above already isolates the incoming
+          // request from mutations while this background task is deferred.
           if (isModelAvailable) {
             const available = await isModelAvailable(target.modelStr, target);
             if (available !== true) {
@@ -148,6 +146,16 @@ export function scheduleShadowRouting(
             }
           }
 
+          // A single shadow target owns the snapshot exclusively: avoid the
+          // second deep clone. With multiple targets, retain an independent
+          // copy for each so an executor cannot mutate another target's body.
+          const shadowBody = {
+            ...(targets.length === 1
+              ? shadowBaseBody
+              : cloneRequestBodyForShadowRouting(shadowBaseBody)),
+            model: target.modelStr,
+            stream: false,
+          };
           const response = await withTimeout(
             handleSingleModel(shadowBody, target.modelStr, {
               ...target,

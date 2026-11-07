@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                  |           v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
+|                                  |           v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------------- | :-------------------------: | :---------: | :-------------------: |
 | 🌐 المزوّدون                     |             352             |   **358**   |          380          |
 | 🧠 معرّفات نماذج الدردشة الفريدة |            1320             |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar اختياري ويستخدم طلبات GET فقط. لا يرفع عمي�
 
 </div>
 
-> أبرز التحديثات الأخيرة من **v3.8.20 → v3.8.53**. السجل الكامل في [`CHANGELOG.md`](CHANGELOG.md).
+> أبرز التحديثات الأخيرة من **v3.8.20 → v3.8.54**. السجل الكامل في [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ التوجيه بناءً على الحصة النسبية (`quota-weighted`)** — استراتيجية الدمج رقم 20 تتجاوز الحسابات المستنفدة، ثم تختار من الباقي بنسبة الحصة المتبقية ÷ الحمل الجاري، مع إبقاء المحادثات الحالية مثبتة. → [الدمج التلقائي](docs/routing/AUTO-COMBO.md)
 - **🧰 وضع بدون واجهة (`Headless mode`)** — تشغيل `omniroute serve --headless` (أو `OMNIROUTE_HEADLESS=1`) يقوم بتشغيل محرك البروكسي `/v1/*` فقط، مع إيقاف لوحة التحكم والأنظمة الفرعية الخاصة بها. → [وضع بدون واجهة](docs/guides/HEADLESS.md)
@@ -1019,7 +1019,7 @@ omniroute
 ```
 
 > 💡 هل ترى `npm warn ERESOLVE` أو تحذيرات peer-dep؟ [إنها غير ضارّة](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **هل تستخدم npm 11 أو أحدث؟** قد تمنع npm سكربتات دورة حياة الحزم ما لم يُسمح بها. إن `postinstall` الخاص بـ OmniRoute (`node scripts/build/postinstall.mjs`) مطلوب لتحضير ملفات بيئة التشغيل الأصلية. اسمح بالحزم المذكورة في تحذير npm عند التثبيت العام. بالنسبة لمجموعة الحزم التي أبلغ عنها OmniRoute 3.8.53:
+> **هل تستخدم npm 11 أو أحدث؟** قد تمنع npm سكربتات دورة حياة الحزم ما لم يُسمح بها. إن `postinstall` الخاص بـ OmniRoute (`node scripts/build/postinstall.mjs`) مطلوب لتحضير ملفات بيئة التشغيل الأصلية. اسمح بالحزم المذكورة في تحذير npm عند التثبيت العام. بالنسبة لمجموعة الحزم التي أبلغ عنها OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1296,7 +1296,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
   <tr><td nowrap><b>بيئة التشغيل</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>اللغة</b></td><td>TypeScript 6.0 — <b>TypeScript بنسبة 100%</b> عبر <code>src/</code> و<code>open-sse/</code> (لا توجد <code>any</code> في النواة منذ v2.0)</td></tr>
   <tr><td nowrap><b>إطار العمل</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، تسجيل WAL) + LowDB (JSON قديم) — 147 وحدة نطاق، و222 عملية ترحيل</td></tr>
+  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، تسجيل WAL) + LowDB (JSON قديم) — 147 وحدة نطاق، و223 عملية ترحيل</td></tr>
   <tr><td nowrap><b>الذاكرة</b></td><td>بحث SQLite FTS5 في النصوص الكاملة + تضمينات متجهية بكمّية int8، وتلاشي مُنظَّم حسب النوع</td></tr>
   <tr><td nowrap><b>المخططات</b></td><td>Zod 4 — التحقق من إدخال/إخراج أدوات MCP + عقود API</td></tr>
   <tr><td nowrap><b>البروتوكولات</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1809,7 +1809,7 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 **[⬆ العودة إلى الأعلى](#-omniroute)** · صُنع بـ ❤️ لمجتمع الذكاء الاصطناعي مفتوح المصدر.
 
-<sub>أنشأه <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · ترخيص MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>أنشأه <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · ترخيص MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- تم تفعيل مناقشات GitHub للأسئلة والأجوبة المجتمعية -->
