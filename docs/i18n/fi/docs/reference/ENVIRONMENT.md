@@ -1359,7 +1359,7 @@ Koko kuukauden valveilla pidetty palvelu käyttää noin 744 instanssituntia, jo
 
 ## Käyttöönoton skenaariot
 
-Releen taustajärjestelmän SRE-ohjeet (ts/bifrost/auto-toiminta, 9routerin ja CLIProxyAPIn sijoittelu sekä suuren läpimenon varastrategia) löytyvät kohdasta [Releen taustajärjestelmän strategia](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Relay-taustapalvelun SRE-ohjeet (ts/bifrost/auto-toiminta, 9routerin ja CLIProxyAPIn sijoittelu sekä suuren läpimenon varastrategia) ovat kohdassa [Relay-taustapalvelun strategia](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimaalinen paikallinen kehitys
 
@@ -1390,7 +1390,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Verkkoympäristöstä eristetty / CI
+### Eristetty verkko / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1863,3 +1863,14 @@ Pitkäikäinen SSE kuluttaja, joka heijastaa OmniConductor keskittimen tehtävä
 | Muuttuva                       | Oletus | Lähdetiedosto                                | Kuvaus                                                                                                                                                                                                                                   |
 | ------------------------------ | ------ | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`    | `src/lib/providerModels/modelSyncTimings.ts` | Aseta `1` kirjataksesi vaiheen ajoituksen, luodun pyynnön ID ja vaiheen success/error tulokset mallin synkronoinnin aikana. Ei käytössä kaikille muille arvoille. Lokeista jätetään pois pyyntö-, tili-, luettelo- ja virhehyötykuormat. |
+
+## Paikallinen OpenCode-mediat analysointityökalu
+
+Käytetään tiedostossa `scripts/cli/omniroute-media-mcp.mjs`. Aseta nämä paikallisen työkaluprosessin ympäristöön.
+
+| Muuttuja                   | Oletusarvo                                                                         | Kuvaus                                                                                                                      |
+| -------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (tai `~/.config/opencode/opencode.json`) | OpenCode-määritystiedosto, jonka mediatyökalu ja asennusohjelma lukevat.                                                    |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                        | Mediatyökalun OpenCode-määrityksestä lukema palveluntarjoajan nimi.                                                         |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                             | Mediatyökalun lähettämä malli. Sen palveluntarjoajan on tuettava pyydettyjä mediatyyppejä.                                  |
+| `OMNIROUTE_MEDIA_API_KEY`  | Määritetty palveluntarjoajan API-avain tai sen ympäristöviite                      | Valinnainen tunnistetietojen ohitus. Säilytä se paikallisen prosessin ympäristössä; älä koskaan vie sitä versionhallintaan. |

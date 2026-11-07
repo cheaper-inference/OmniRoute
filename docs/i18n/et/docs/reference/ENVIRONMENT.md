@@ -1368,7 +1368,7 @@ Terve kuu ärkvel hoitud teenus kasutab umbes 744 eksemplari tundi, seega kontro
 
 ## Juurutamise stsenaariumid
 
-Relay tagasüsteemi SRE-juhiste kohta (ts/bifrosti/auto käitumine, 9routeri ja CLIProxyAPI paigutus ning suure läbilaskevõimega varustrateegia) vaadake jaotist [Relay tagasüsteemi strateegia](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Relay tagasüsteemi SRE-juhiste (ts/bifrosti/auto käitumise, 9routeri ja CLIProxyAPI paigutuse ning suure läbilaskevõimega varustrateegia) kohta vaadake jaotist [Relay tagasüsteemi strateegia](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimaalne kohalik arendus
 
@@ -1380,7 +1380,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Dockeri tootmiskeskkond
+### Docker tootmiskeskkonnas
 
 ```bash
 JWT_SECRET=<generated>
@@ -1872,3 +1872,14 @@ Kasutavad `open-sse/services/combo.ts` ja `src/lib/quota/quotaScheduler.ts` eelt
 | Muutuv                         | Vaikimisi | Lähtefail                                    | Kirjeldus                                                                                                                                                                                                            |
 | ------------------------------ | --------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`       | `src/lib/providerModels/modelSyncTimings.ts` | Määrake `1`, et logida mudeli sünkroonimise ajal faasiajastus, genereeritud päring ID ja faas success/error. Kõigi muude väärtuste jaoks keelatud. Logid jätavad välja päringu-, konto-, kataloogi- ja veakoormused. |
+
+## Kohalik OpenCode'i meediaanalüüsi tööriist
+
+Kasutab `scripts/cli/omniroute-media-mcp.mjs`. Määrake need kohaliku tööriistaprotsessi keskkonnas.
+
+| Muutuja                    | Vaikeväärtus                                                                       | Kirjeldus                                                                                                             |
+| -------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (või `~/.config/opencode/opencode.json`) | OpenCode'i konfiguratsioon, mida meediatööriist ja paigaldaja loevad.                                                 |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                        | OpenCode'i konfiguratsioonist meediatööriista loetav pakkuja kirje.                                                   |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                             | Meediatööriista edastatav mudel. Selle pakkuja peab toetama taotletud meediatüüpe.                                    |
+| `OMNIROUTE_MEDIA_API_KEY`  | Konfigureeritud pakkuja API-võti või selle keskkonnaviide                          | Valikuline mandaadi alistamine. Hoidke seda kohaliku protsessi keskkonnas; ärge lisage seda kunagi versioonihaldusse. |

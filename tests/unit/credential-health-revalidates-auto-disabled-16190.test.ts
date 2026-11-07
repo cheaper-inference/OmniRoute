@@ -44,7 +44,7 @@ const HOUR_MS = 60 * 60 * 1000;
 const probeCalls = new Map<string, number>();
 const failingNodes = new Set<string>();
 const originalFetch = globalThis.fetch;
-globalThis.fetch = (async (input: string | URL | Request) => {
+const probeFetch = (async (input: string | URL | Request) => {
   const url =
     typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
   const match = VALIDATION_PATH.exec(url);
@@ -240,6 +240,10 @@ async function sweepAt(offsetMs: number): Promise<void> {
     mock.timers.reset();
   }
 }
+
+// Importing the routes installs the patched fetch. Put the probe in its place afterwards, so a
+// test reaches it directly and does not depend on the real lookup of a fake host failing first.
+globalThis.fetch = probeFetch;
 
 test.after(() => {
   scheduler.stopCredentialHealthCheck();

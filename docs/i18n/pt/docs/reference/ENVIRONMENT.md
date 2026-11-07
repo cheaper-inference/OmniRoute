@@ -1366,11 +1366,11 @@ O Render desativa um serviço Web gratuito após cerca de 15 minutos sem tráfeg
 
 Um serviço mantido ativo durante um mês inteiro utiliza cerca de 744 horas de instância, por isso compare-o com o limite atual de nível gratuito do Render.
 
-## Cenários de Implementação
+## Cenários de implementação
 
-Para obter orientações de SRE sobre o backend de relay (comportamento de ts/bifrost/auto, posicionamento de 9router vs CLIProxyAPI e estratégia de fallback de alto débito), consulte [Estratégia do Backend de Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Para obter orientações de SRE sobre o backend de relay (comportamento de ts/bifrost/auto, colocação do 9router face ao CLIProxyAPI e estratégia de fallback de elevado débito), consulte [Estratégia do backend de relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
-### Desenvolvimento Local Mínimo
+### Desenvolvimento local mínimo
 
 ```bash
 JWT_SECRET=$(openssl rand -base64 48)
@@ -1380,7 +1380,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Docker em Produção
+### Docker em produção
 
 ```bash
 JWT_SECRET=<generated>
@@ -1399,7 +1399,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Ambiente Isolado da Rede / CI
+### Isolado da rede / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1410,7 +1410,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS com Proxy Inverso (nginx + Cloudflare)
+### VPS com proxy inverso (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1872,3 +1872,14 @@ Utilizado por `open-sse/services/combo.ts` e `src/lib/quota/quotaScheduler.ts` p
 | Variável                       | Predefinição | Arquivo de origem                            | Descrição                                                                                                                                                                                                                                                  |
 | ------------------------------ | ------------ | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`          | `src/lib/providerModels/modelSyncTimings.ts` | Defina como `1` para registar o tempo de fase, um pedido ID gerado e os resultados de fase success/error durante a sincronização do modelo. Desativado para todos os outros valores. Os registos omitem as cargas úteis de pedido, conta, catálogo e erro. |
+
+## Ferramenta local de análise de multimédia do OpenCode
+
+Utilizada por `scripts/cli/omniroute-media-mcp.mjs`. Defina estas variáveis no ambiente do processo da ferramenta local.
+
+| Variável                   | Predefinição                                                                      | Descrição                                                                                                                  |
+| -------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (ou `~/.config/opencode/opencode.json`) | Configuração do OpenCode lida pela ferramenta de multimédia e pelo instalador.                                             |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                       | Entrada do fornecedor lida pela ferramenta de multimédia a partir da configuração do OpenCode.                             |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                            | Modelo submetido pela ferramenta de multimédia. O respetivo fornecedor tem de suportar os tipos de multimédia solicitados. |
+| `OMNIROUTE_MEDIA_API_KEY`  | Chave de API do fornecedor configurado ou a respetiva referência de ambiente      | Substituição opcional da credencial. Mantenha-a no ambiente do processo local; nunca a submeta para o repositório.         |

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "./Icon";
+import { Spinner } from "./Loading";
 import Modal from "./Modal";
 import Button from "./Button";
 import Checkbox from "./Checkbox";
@@ -927,11 +928,11 @@ export default function ModelSelectModal({
                   title={labelOrFallback("testSelectedProviders", "Test providers")}
                   className="gap-1 text-xs"
                 >
-                  <Icon
-                    name={testingProviders ? "progress_activity" : "science"}
-                    size={14}
-                    className={testingProviders ? "animate-spin" : undefined}
-                  />
+                  {testingProviders ? (
+                    <Spinner decorative size="xs" />
+                  ) : (
+                    <Icon name="science" size={14} />
+                  )}
                   <span>
                     {testingProviders && testProgress
                       ? labelOrFallback(

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
-import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Input from "@/shared/components/Input";
 import { useScrapeFetch } from "../../hooks/useScrapeFetch";
 import ScrapeResult from "../ScrapeResult";
@@ -125,7 +125,7 @@ export default function ScrapeTab({ configState, onMetrics }: ScrapeTabProps) {
       {/* Loading spinner */}
       {loading && (
         <div className="flex items-center justify-center py-12" data-testid="scrape-loading">
-          <Icon name="progress_activity" size={32} className="text-primary animate-spin" />
+          <Spinner size="lg" />
         </div>
       )}
 

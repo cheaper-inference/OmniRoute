@@ -15,7 +15,8 @@ const tokensCss = read("packages/ui-kit/src/ci-tokens.css");
 const editionsCss = read("packages/ui-kit/src/ci-editions.css");
 
 const colors = await import("../../src/shared/constants/colors.ts");
-const { BRAND_TINT_PERCENT } = await import("../../src/shared/utils/brandTint.ts");
+const { BRAND_TINT_PERCENT, brandTintVars } =
+  await import("../../packages/ui-kit/src/brand-tint.ts");
 const { AI_PROVIDERS } = await import("../../src/shared/constants/providers.ts");
 const { CLI_TOOLS } = await import("../../src/shared/constants/cliTools.ts");
 
@@ -178,6 +179,81 @@ test("body ink on a brand tint stays AA for every provider and CLI tool brand co
   assert.deepEqual(failures, [], failures.join("\n"));
 });
 
+test("the kit's ink and border hold on the tint for every provider and CLI tool brand", () => {
+  const brands = new Set<string>();
+  for (const p of Object.values(AI_PROVIDERS as Record<string, { color?: string }>)) {
+    if (p.color) brands.add(p.color);
+  }
+  for (const tool of Object.values(CLI_TOOLS as Record<string, { color?: string }>)) {
+    if (tool.color) brands.add(tool.color);
+  }
+  assert.ok(brands.size > 100, "the catalog brands were loaded");
+  const failures: string[] = [];
+  for (const brand of brands) {
+    const vars = brandTintVars(brand);
+    assert.ok(vars, `${brand} is a hex the kit accepts`);
+    for (const theme of Object.keys(THEMES)) {
+      const scheme = theme.endsWith("dark") ? "dark" : "light";
+      const surface = resolve(theme, "var(--ci-color-surface)");
+      const tinted = tint(vars["--ci-brand"], surface, BRAND_TINT_PERCENT);
+      const ink = contrast(vars[`--ci-brand-ink-${scheme}`], tinted);
+      const border = contrast(vars[`--ci-brand-border-${scheme}`], tinted);
+      if (ink < 4.5) failures.push(`${theme} ${brand} ink: ${ink.toFixed(2)}`);
+      if (border < 3) failures.push(`${theme} ${brand} border: ${border.toFixed(2)}`);
+    }
+  }
+  assert.deepEqual(failures, [], failures.join("\n"));
+});
+
+test("brand chips use the kit tint, and the app's own tint helper is gone", () => {
+  assert.equal(fs.existsSync(path.join(root, "src/shared/utils/brandTint.ts")), false);
+  const chips: Array<[string, number]> = [
+    ["src/app/(dashboard)/dashboard/free-provider-rankings/page.tsx", 2],
+    ["src/app/(dashboard)/dashboard/cli-code/components/CopilotToolCard.tsx", 3],
+    ["src/app/(dashboard)/dashboard/cli-code/components/DefaultToolCard.tsx", 1],
+  ];
+  for (const [file, count] of chips) {
+    const source = read(file);
+    assert.doesNotMatch(source, /brandTintStyle/, `${file}: no app tint helper`);
+    assert.equal(source.match(/style=\{brandTintVars\(/g)?.length, count, `${file}: kit tint vars`);
+    assert.equal(
+      source.match(/"ci-brand-tint bg-\[var\(--ci-brand-subtle\)\] /g)?.length,
+      count,
+      `${file}: the tint class paints the kit's subtle background`
+    );
+  }
+});
+
+test("secondary text inside a brand tint follows the kit's ink, not the root alias", () => {
+  assert.match(
+    read("src/app/globals.css"),
+    /\.ci-brand-tint \{\s*--color-text-muted: var\(--ci-color-text-muted\);\s*\}/
+  );
+  assert.match(
+    read("packages/ui-kit/src/ci-ui.css"),
+    /\.ci-brand-tint \{[^}]*--ci-color-text-muted: var\(--ci-brand-ink\);/
+  );
+});
+
+test("token text stays AA on every step of the saliency ramp, in all four looks", () => {
+  const source = read("src/app/(dashboard)/dashboard/compression/studio/SaliencyHeatmap.tsx");
+  const percent = Number(/var\(--ci-scale-div-\$\{step\}\) (\d+)%, transparent/.exec(source)?.[1]);
+  assert.ok(percent > 0, "the heatmap mixes the ramp into the surface");
+  const failures: string[] = [];
+  for (const theme of Object.keys(THEMES)) {
+    const ink = resolve(theme, "var(--ci-color-foreground)");
+    for (const step of [1, 2, 3, 5, 6, 7]) {
+      for (const surface of ["ci-color-surface", "ci-color-surface-subtle"]) {
+        const ramp = resolve(theme, `var(--ci-scale-div-${step})`);
+        const below = resolve(theme, `var(--${surface})`);
+        const ratio = contrast(ink, tint(ramp, below, percent));
+        if (ratio < 4.5) failures.push(`${theme} div-${step} on ${surface}: ${ratio.toFixed(2)}`);
+      }
+    }
+  }
+  assert.deepEqual(failures, [], failures.join("\n"));
+});
+
 test("white text on a brand fill and brand-coloured text are gone from the audited screens", () => {
   const files = [
     "src/app/(dashboard)/dashboard/free-provider-rankings/page.tsx",
@@ -194,7 +270,7 @@ test("white text on a brand fill and brand-coloured text are gone from the audit
     assert.doesNotMatch(
       source,
       /backgroundColor:\s*(provider|tool|providerInfo)\.color\b/,
-      `${file}: no solid brand fill (use brandTintStyle)`
+      `${file}: no solid brand fill (use brandTintVars)`
     );
     assert.doesNotMatch(
       source,
