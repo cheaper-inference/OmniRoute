@@ -87,6 +87,71 @@ function logGeminiMusicCall(params: {
   }).catch(() => {});
 }
 
+type GeminiMusicCall = { modelLabel: string; provider: string; startTime: number };
+
+/** Logs a failed call and returns the failure result the music route expects. */
+function failGeminiMusicCall(
+  call: GeminiMusicCall,
+  status: number,
+  error: string,
+  logError: string = error
+) {
+  logGeminiMusicCall({
+    status,
+    model: call.modelLabel,
+    provider: call.provider,
+    duration: Date.now() - call.startTime,
+    error: logError,
+  });
+  return { success: false as const, status, error };
+}
+
+/** `x-goog-api-key` for an API key, a bearer header for an access token. */
+function buildGeminiMusicHeaders(apiKey?: string, accessToken?: string): Record<string, string> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (apiKey) headers["x-goog-api-key"] = apiKey;
+  else headers.Authorization = `Bearer ${accessToken}`;
+  return headers;
+}
+
+async function readGeminiMusicResponse(
+  response: Response,
+  call: GeminiMusicCall,
+  log?: GeminiMusicLog | null
+) {
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    log?.error?.("MUSIC", `${call.modelLabel} gemini-lyria error (${response.status})`);
+    return failGeminiMusicCall(
+      call,
+      response.status,
+      sanitizeErrorMessage(detail) || `Gemini music upstream error (${response.status})`,
+      detail.slice(0, 500)
+    );
+  }
+
+  const inline = extractInlineAudio(await response.json());
+  if (!inline) {
+    return failGeminiMusicCall(call, 502, "Gemini Lyria returned no audio content");
+  }
+
+  logGeminiMusicCall({
+    status: 200,
+    model: call.modelLabel,
+    provider: call.provider,
+    duration: Date.now() - call.startTime,
+    responseBody: { audio_count: 1 },
+  });
+
+  return {
+    success: true as const,
+    data: {
+      created: Math.floor(Date.now() / 1000),
+      data: [{ b64_json: inline.base64, format: resolveFormat(inline.mimeType) }],
+    },
+  };
+}
+
 export async function handleGeminiMusicGeneration({
   model,
   provider,
@@ -96,7 +161,6 @@ export async function handleGeminiMusicGeneration({
   log,
   signal = null,
 }: GeminiMusicArgs) {
-  const startTime = Date.now();
   const apiKey = stringValue(credentials?.apiKey);
   const accessToken = stringValue(credentials?.accessToken);
   if (!apiKey && !accessToken) {
@@ -104,92 +168,29 @@ export async function handleGeminiMusicGeneration({
   }
 
   const prompt = stringValue(body.prompt) ?? String(body.prompt ?? "");
-  const modelLabel = `${provider}/${model}`;
+  const call: GeminiMusicCall = {
+    modelLabel: `${provider}/${model}`,
+    provider,
+    startTime: Date.now(),
+  };
   const url = `${providerConfig.baseUrl.replace(/\/$/, "")}/${encodeURIComponent(
     model
   )}:generateContent`;
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (apiKey) headers["x-goog-api-key"] = apiKey;
-  else headers.Authorization = `Bearer ${accessToken}`;
 
-  log?.info?.("MUSIC", `${modelLabel} (gemini-lyria) | prompt: "${prompt.slice(0, 60)}..."`);
+  log?.info?.("MUSIC", `${call.modelLabel} (gemini-lyria) | prompt: "${prompt.slice(0, 60)}..."`);
 
   try {
     const response = await fetch(url, {
       method: "POST",
-      headers,
+      headers: buildGeminiMusicHeaders(apiKey, accessToken),
       body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] }),
       ...(signal ? { signal } : {}),
     });
-
-    if (!response.ok) {
-      const detail = await response.text().catch(() => "");
-      log?.error?.("MUSIC", `${modelLabel} gemini-lyria error (${response.status})`);
-      logGeminiMusicCall({
-        status: response.status,
-        model: modelLabel,
-        provider,
-        duration: Date.now() - startTime,
-        error: detail.slice(0, 500),
-      });
-      return {
-        success: false as const,
-        status: response.status,
-        error: sanitizeErrorMessage(detail) || `Gemini music upstream error (${response.status})`,
-      };
-    }
-
-    const inline = extractInlineAudio(await response.json());
-    if (!inline) {
-      logGeminiMusicCall({
-        status: 502,
-        model: modelLabel,
-        provider,
-        duration: Date.now() - startTime,
-        error: "Gemini Lyria returned no audio content",
-      });
-      return {
-        success: false as const,
-        status: 502,
-        error: "Gemini Lyria returned no audio content",
-      };
-    }
-
-    logGeminiMusicCall({
-      status: 200,
-      model: modelLabel,
-      provider,
-      duration: Date.now() - startTime,
-      responseBody: { audio_count: 1 },
-    });
-
-    return {
-      success: true as const,
-      data: {
-        created: Math.floor(Date.now() / 1000),
-        data: [{ b64_json: inline.base64, format: resolveFormat(inline.mimeType) }],
-      },
-    };
+    return await readGeminiMusicResponse(response, call, log);
   } catch (err) {
-    if (signal?.aborted) {
-      logGeminiMusicCall({
-        status: 499,
-        model: modelLabel,
-        provider,
-        duration: Date.now() - startTime,
-        error: "Request aborted",
-      });
-      return { success: false as const, status: 499, error: "Request aborted" };
-    }
+    if (signal?.aborted) return failGeminiMusicCall(call, 499, "Request aborted");
     const message = sanitizeErrorMessage(err) || "Gemini music generation failed";
-    log?.error?.("MUSIC", `${modelLabel} gemini-lyria failed: ${message}`);
-    logGeminiMusicCall({
-      status: 502,
-      model: modelLabel,
-      provider,
-      duration: Date.now() - startTime,
-      error: message,
-    });
-    return { success: false as const, status: 502, error: message };
+    log?.error?.("MUSIC", `${call.modelLabel} gemini-lyria failed: ${message}`);
+    return failGeminiMusicCall(call, 502, message);
   }
 }
