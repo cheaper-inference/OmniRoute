@@ -67,3 +67,69 @@ With an explicit `DATA_DIR`, setting
 `OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV=1` prevents startup from falling through
 to the default user data directory's credential environment. This is useful for
 isolated tests. It does not disable other explicitly selected environment files.
+
+## Working-directory `.env`
+
+The CLI reads `.env` files in this order, and the first file to set a key wins:
+the explicit `DATA_DIR`, the default data directory, the current working
+directory, then the package directory. Shell variables always win.
+
+The working directory may belong to someone else (a cloned repository, an
+unpacked archive), and `omniroute serve` passes the CLI environment on to the
+server and to every tool the server runs. So a `.env` there may set only these
+keys, listed in `bin/cli/utils/untrustedCwdEnv.mjs`:
+
+| Key                                  | Accepted values                                                       |
+| ------------------------------------ | --------------------------------------------------------------------- |
+| `PORT`, `API_PORT`, `DASHBOARD_PORT` | a number from 1 to 65535                                              |
+| `REQUIRE_API_KEY`                    | `true`, `1` or `yes` in any case, the values the server treats as on  |
+| `LANG`, `LC_ALL`, `LC_MESSAGES`      | up to 64 letters, digits, `_`, `.`, `@` or `-`                        |
+| `LANGUAGE`                           | the same, plus `:`                                                    |
+| `TZ`                                 | up to 64 letters, digits, `_`, `+`, `-` or `/`, not starting with `/` |
+| `NO_COLOR`, `FORCE_COLOR`            | up to 16 letters and digits                                           |
+
+Every value `REQUIRE_API_KEY` accepts turns the check on, so the file cannot
+turn the check off itself. It does not decide the result, though: the server
+reads a `REQUIRE_API_KEY` override stored in the database before the
+environment, while the startup warning about listening on all interfaces
+without an API key reads only the environment. With a stored override of
+`false`, a working-directory `REQUIRE_API_KEY=true` leaves the API open and
+hides that warning. The `TZ` rule is narrower than POSIX: it rejects `.`, `:`,
+`,` and `<>`, so the `:Area/City` form and rules such as
+`EST5EDT,M3.2.0,M11.1.0` have to be set in the shell or in `<DATA_DIR>/.env`.
+
+Names must match exactly, in upper case. Any other line, a value that fails its
+check, and a name that is not plain ASCII letters, digits and `_` (for example
+one with a NUL byte or a look-alike letter) are skipped. The CLI prints one
+warning that names the keys it cannot set and one that names allowed keys it
+ignored, each with what to change (`PORT (expected a port number from 1 to
+65535)`, `port (write the name as PORT)`). Neither prints the values. File
+paths in these messages, and the `.env` path `omniroute doctor` reports, are
+escaped when they contain control or bidi characters. The restriction does not apply when the working directory is the
+data directory or the package directory.
+
+A port from that file still decides which local port the CLI talks to. A
+process that listens on that port receives the CLI's API key, the context
+token, and the CLI machine token (`x-omniroute-cli-token`, see
+[CLI_TOKEN.md](../security/CLI_TOKEN.md)), which the local server accepts for
+management calls from loopback. On a machine shared with other users, do not
+run `omniroute` in a directory whose `.env` sets a port you did not choose.
+
+The parser has no `export` syntax. A line such as `export LD_PRELOAD=...` names
+a variable `export LD_PRELOAD`; from the working directory it is skipped, and
+in other `.env` files it sets that literal name, which nothing reads.
+
+The CLI pairs a context's stored token (access token or legacy API key) only
+with that context's own origin: scheme, host and port, compared as
+`URL.origin`. This applies to requests made through the CLI's HTTP client
+(`--base-url`, `OMNIROUTE_BASE_URL`, `omniroute connect <new-url>`) and to the
+`launch`, `launch codex`, `configure` and `setup-*` commands that write a base
+URL and key into another tool's config. Pointed at another server with
+`--remote`, they use an explicit `--api-key` or `OMNIROUTE_API_KEY` if one is
+set, and no context token. The comparison is exact, so `localhost` and
+`127.0.0.1`, or a host with and without a trailing dot, count as different
+servers and get no context token. A URL with userinfo, a backslash or
+whitespace never matches, because other URL parsers (Python's `urllib` and
+`httpx`, for example) can read a different host from it. For requests the CLI
+sends itself, that check covers only the scheme and authority, so an id with a
+space in the path or query keeps the token.
