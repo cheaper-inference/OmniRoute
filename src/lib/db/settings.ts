@@ -26,6 +26,7 @@ import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
 import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
+import { createBankedResetAutoApplyDefaults } from "@/shared/constants/bankedResetAutoApply";
 
 /**
  * Settings values stored encrypted at rest (AES-256-GCM via ./encryption).
@@ -318,6 +319,11 @@ export async function getSettings() {
     // connection on, since pinging burns a small amount of real quota (Hard Rule #20
     // spirit: never mutate/consume on the operator's behalf by default).
     codexAutoPing: { connections: {} },
+    // Opt-in auto-apply of banked resets (Codex credits, Claude grants, Claude weekly
+    // session reset). OFF and dry-run by default — never redeems on the operator's behalf
+    // until enabled. Stored values are merged with these defaults by
+    // mergeBankedResetAutoApplySettings (src/lib/usage/bankedResetPolicy.ts).
+    bankedResetAutoApply: createBankedResetAutoApplyDefaults(),
     // #8848: opt-in per-connection Claude proactive warmup (empty = off for everyone).
     claudeWarmup: { connections: {} },
     // Operator-set CLI client-version overrides for the Claude Code / Codex

@@ -9,16 +9,25 @@
  *
  * Both behaviors are opt-in per connection (`providerSpecificData.lowPriorityMode` /
  * `autoLimitReset`) and only ever act on a real 5-hour usage wall — see the module header of
- * claudeLowPriority.ts for the wire contract and the lifecycle.
+ * claudeLowPriority.ts for the wire contract and the lifecycle. When an operator policy is
+ * registered (`setClaudeLimitResetPolicy`, "auto-apply banked resets"), it may take over the
+ * reset decision; with the feature off it answers `null` and the toggle decides as before.
  */
 
-import { attemptClaudeLimitReset } from "../services/claudeLimitReset.ts";
 import {
+  attemptClaudeLimitReset,
+  consultClaudeLimitResetPolicy,
+  hasClaudeLimitResetPolicy,
+  type ClaudeLimitResetAttempt,
+} from "../services/claudeLimitReset.ts";
+import {
+  CLAUDE_UNIFIED_HEADERS,
   CLAUDE_USAGE_LIMIT_HEADER,
   CLAUDE_USAGE_LIMIT_SLOW,
   createClaudeLowPriorityWait,
   handleClaudeUsageLimitResponse,
   isClaudeLowPriorityActive,
+  parseClaudeHeaderNumber,
   readClaudeUsageLimitConfig,
   resolveClaudeUsageLimitKey,
   type ClaudeLowPriorityWait,
@@ -47,6 +56,16 @@ function isClaudeOAuth(provider: string, credentials?: ProviderCredentials | nul
     credentials.accessToken.startsWith("sk-ant-oat") &&
     !credentials?.apiKey
   );
+}
+
+/** The wall's announced session-window reset (unix seconds in the headers) as ISO, if any. */
+function readWallSessionResetAt(headers: Headers): string | null {
+  const seconds =
+    parseClaudeHeaderNumber(headers, CLAUDE_UNIFIED_HEADERS.reset5h) ??
+    parseClaudeHeaderNumber(headers, CLAUDE_UNIFIED_HEADERS.reset);
+  if (seconds === undefined || seconds <= 0) return null;
+  const date = new Date(seconds * 1000);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : null;
 }
 
 /** Sleep that rejects as soon as the request is aborted, so a lane wait never outlives it. */
@@ -102,6 +121,8 @@ export class ClaudeUsageLimitGuard {
     if (this.key === null) return false;
     const key = this.key;
     const credentials = input.credentials;
+    // Set by the operator policy when it allows the claim; reports the claim's outcome.
+    let onClaimSettled: ((attempt: ClaudeLimitResetAttempt) => void) | undefined;
     const decision = await handleClaudeUsageLimitResponse({
       key,
       config: readClaudeUsageLimitConfig(credentials?.providerSpecificData),
@@ -109,6 +130,17 @@ export class ClaudeUsageLimitGuard {
       wait: this.wait,
       sentSlow: input.sentSlow,
       waitCeilingMs: this.waitCeilingMs(input.budgetMs),
+      limitResetGate: hasClaudeLimitResetPolicy()
+        ? async () => {
+            const verdict = await consultClaudeLimitResetPolicy({
+              connectionId: credentials?.connectionId ?? null,
+              sessionResetAt: readWallSessionResetAt(response.headers),
+              now: Date.now(),
+            });
+            onClaimSettled = verdict?.onSettled;
+            return verdict ? verdict.allow : null;
+          }
+        : undefined,
       claimLimitReset: () =>
         attemptClaudeLimitReset({
           key,
@@ -116,6 +148,7 @@ export class ClaudeUsageLimitGuard {
           accessToken: credentials?.accessToken ?? "",
           providerSpecificData: credentials?.providerSpecificData,
           log: this.log,
+          onSettled: (attempt) => onClaimSettled?.(attempt),
         }).then((attempt) => attempt.reset),
     });
 
