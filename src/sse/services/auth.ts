@@ -166,6 +166,7 @@ import {
   WEB_COOKIE_PROVIDERS,
 } from "@/shared/constants/providers";
 import { isModelExcludedByConnection } from "@/domain/connectionModelRules";
+import { isCodexPlanEligibleForModel } from "@omniroute/open-sse/services/codexPlanEligibility.ts";
 import {
   isRequestedModelAdvertised,
   loadAdvertisedModelsForConnections,
@@ -1163,6 +1164,12 @@ export async function getProviderCredentials(
       if (resolvedId === "qoder" && options.requireToolCalling) {
         allConnections = allConnections.filter(qoderSupportsCallerTools);
       }
+      // An ineligible Codex plan cannot make a paid-only model appear rate-limited.
+      if (provider === "codex" && requestedModel) {
+        allConnections = allConnections.filter((connection) =>
+          isCodexPlanEligibleForModel(connection.providerSpecificData, requestedModel)
+        );
+      }
       log.debug("AUTH", `${provider} | all connections (incl inactive): ${allConnections.length}`);
       if (allConnections.length > 0) {
         const earliest = getEarliestRateLimitedUntil(allConnections);
@@ -1293,6 +1300,13 @@ export async function getProviderCredentials(
         connectionFilterStatus.set(c.id, "modelExcluded");
         return false;
       }
+      // Paid-only Codex models must never be sent to Free/Go/unknown accounts.
+      // Filter before routing modes so even an explicit probe cannot select one.
+      if (provider === "codex" && requestedModel &&
+          !isCodexPlanEligibleForModel(c.providerSpecificData, requestedModel)) {
+        connectionFilterStatus.set(c.id, "codexPlanIneligible");
+        return false;
+      }
       if (
         requestedModel &&
         ((c.provider === "codex" && advertisedModelsByConnection.get(c.id)?.size === 0) ||
@@ -1413,7 +1427,14 @@ export async function getProviderCredentials(
     });
 
     if (availableConnections.length === 0) {
-      const cooldownStates: CooldownInspectionState[] = connections.map((connection) => {
+      // Only model-eligible accounts may contribute to this model's retry/cooldown hint.
+      const cooldownEligibleConnections =
+        provider === "codex" && requestedModel
+          ? connections.filter((connection) =>
+              isCodexPlanEligibleForModel(connection.providerSpecificData, requestedModel)
+            )
+          : connections;
+      const cooldownStates: CooldownInspectionState[] = cooldownEligibleConnections.map((connection) => {
         const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
         const codexScopeCooldownMs =
           provider === "codex"
