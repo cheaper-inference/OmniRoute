@@ -1,4 +1,5 @@
 import { resolveStreamIndices } from "./streamIndices";
+import { createResponsesSseText } from "./responsesSseText";
 export type FieldCategory = "content" | "reasoning" | "toolArgs" | "partialJson";
 
 // Keys that always map to a fixed category, regardless of where they appear in the chunk.
@@ -146,7 +147,7 @@ export function createSseTextTransform(
   ) => string,
   onFlush?: (lastJson: any, isJsonStream?: boolean, lastContentJson?: any) => any,
   onCancel?: () => void,
-  opts?: { processToolArgs?: boolean }
+  opts?: { processToolArgs?: boolean; releaseResponsesLane?: (index: string) => void }
 ): TransformStream {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder("utf-8");
@@ -160,6 +161,22 @@ export function createSseTextTransform(
   let currentEventLine = "";
   let lastEventLine = "";
   let pendingEventLine = "";
+  const responses = createResponsesSseText(
+    processor,
+    opts?.processToolArgs,
+    opts?.releaseResponsesLane
+  );
+  let responsesStream = false;
+  const emitResponses = (
+    events: Record<string, unknown>[],
+    controller: TransformStreamDefaultController
+  ) => {
+    for (const event of events) {
+      controller.enqueue(
+        encoder.encode(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`)
+      );
+    }
+  };
 
   const handleLine = (line: string, controller: TransformStreamDefaultController) => {
     const trimmed = line.trim();
@@ -181,7 +198,8 @@ export function createSseTextTransform(
       lastPrefix = prefix;
       const segment = line.startsWith("data: ") ? line.slice(6) : line.slice(5);
       if (segment === "[DONE]") {
-        if (onFlush && !flushed) {
+        if (responsesStream) emitResponses(responses.drain(), controller);
+        if (!responsesStream && onFlush && !flushed) {
           const flushedValue = onFlush(lastJson, isJsonStream, lastContentJson);
           if (flushedValue) {
             const prefix = lastPrefix || "data: ";
@@ -272,7 +290,14 @@ export function createSseTextTransform(
             }
           };
 
-          sanitizeObject(json, 0, 0);
+          const isResponses = typeof json.type === "string" && json.type.startsWith("response.");
+          if (isResponses) {
+            responsesStream = true;
+            emitResponses(responses.transform(json), controller);
+            matched = true;
+          } else {
+            sanitizeObject(json, 0, 0);
+          }
 
           if (!matched) {
             // Normal state for control-only chunks (closing frame, usage-only frame): not a
@@ -288,7 +313,7 @@ export function createSseTextTransform(
             flushed = false;
           }
 
-          if (isStopSignal && onFlush && !flushed) {
+          if (!isResponses && isStopSignal && onFlush && !flushed) {
             const flushedValue = onFlush(
               lastJson || json,
               isJsonStream,
@@ -409,7 +434,8 @@ export function createSseTextTransform(
           controller.enqueue(encoder.encode(pendingEventLine + "\n"));
           pendingEventLine = "";
         }
-        if (onFlush && !flushed) {
+        if (responsesStream) emitResponses(responses.drain(), controller);
+        if (!responsesStream && onFlush && !flushed) {
           const flushedValue = onFlush(lastJson, isJsonStream, lastContentJson);
           if (flushedValue) {
             const prefix = lastPrefix || "data: ";
