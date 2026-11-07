@@ -923,6 +923,8 @@
     "batchListTitle": "Rukunoni",
     "batchListCount": "{count} rukunoni",
     "batchListRemovingCompleted": "Ana cirewa…",
+    "batchListRemoveCompletedPartial": "An cire rukuni masu yawa. Danna sake don share sauran.",
+    "batchListRemoveCompletedFailed": "An sami kuskure yayin cire rukunan.",
     "batchListRemoveCompleted": "Cire waɗanda aka kammala",
     "batchListTableStatus": "Matsayi",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Ana sabuntawa…",
     "batchListRefresh": "Sabunta",
     "uploadFileModalRemove": "Cire",
+    "fileInputChoose": "Zaɓi fayil",
+    "fileInputChooseMultiple": "Zaɓi fayiloli",
+    "fileInputEmpty": "Ba a zaɓi fayil ba",
+    "fileInputSelectedCount": "{count, plural, one {An zaɓi fayil #} other {An zaɓi fayiloli #}}",
+    "fileDropLabel": "Ajiye fayil a nan ko zaɓi ɗaya",
+    "fileDropLabelMultiple": "Ajiye fayiloli a nan ko zaɓi fayiloli",
     "uploadFileModalUploading": "Ana lodawa…",
     "wizardInputReading": "Ana karanta fayil…",
     "wizardInputReady": "A shirye",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Aika sawun yatsan abokin cinikin OpenCode v2 CLI a kan buƙatun OpenCode Zen/Go: wato opencode/latest/<2.x>/cli User-Agent da x-opencode-client cli, sannan a kan buƙatun matakin kyauta a aika taken zaman v2, tsarin kayan aikin karantawa/shell na v2 CLI, ba tare da tool_choice \"none\" ba. A kashe yake ta tsohuwa: kowace buƙatar OpenCode tana riƙe asali, take da jiki na yanzu ba tare da canji ba.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Idan tarin ’yan takarar combo na atomatik ya riga ya zama fanko kafin matatar farko ta kiran kayan aiki ta fara aiki (an tsallake kowace manufa saboda lokutan jira, kullewa ko ƙarewa), a mayar da 503 no_eligible_targets maimakon tsohon 400 \"Babu manufa da ke goyon bayan kiran kayan aiki\" capability_mismatch. A kashe yake ta tsohuwa: tarin da yake fanko zai ci gaba da mayar da tsohon 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Tilasta amintattun alamun wuraren ƙarshen samfurin (waɗanda kundin mai samarwa ya ayyana, aka gano daga id na samfurin ƙwarewa, ko mai gudanarwa ya saita): ƙi buƙatar da aka aika zuwa wurin ƙarshe da samfurin ba ya tallafawa da HTTP 400 kafin aikawa a /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations da /v1/audio/*; ɓoye samfuran da wuraren ƙarshensu masu alama ba su da adaftan OmniRoute daga /v1/models; sannan a amsa gwajin samfurin dashboard da 422 ga irin waɗannan samfuran. A kashe yake ta tsohuwa: alamun wuraren ƙarshen za su ci gaba da zama na bayani kawai, kuma za a aika buƙatu daidai kamar yadda ake yi a baya.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "A kan relay masu dacewa da anthropic na yau da kullum, a bar saƙonnin system da ke tsakiyar tattaunawa a cikin jerin saƙonni maimakon matsar da su zuwa system prompt na babban mataki, domin prefix ɗin prompt da aka adana a cache ya ci gaba da kasancewa daidai a duk juyin tattaunawa. Wannan yana aiki ne kawai idan client ɗin da kansa ya aika beta na mid-conversation-system-2026-04-07. A kashe yake ta tsohuwa: ana matsar da kowane saƙon system zuwa system prompt kamar yadda ake yi a baya, saboda relay waɗanda ba su da wannan beta suna ƙin karɓar saƙonnin system a cikin jerin saƙonni.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Yi amfani da matakan ƙoƙarin tunani da models.dev ke wallafawa idan babu saitin maye gurbi na mai gudanarwa ko na rajistar mai bayarwa da ya ayyana wasu, tare da riƙe sanannun matakan ƙoƙari kawai, sannan a ɗauki jerin matakan da aka ayyana amma babu komai a ciki a matsayin \"babu matakai\". A kashe yake ta tsohuwa: kundin samfura da matakan ƙoƙarin da aka tantance za su kasance daidai yadda suke a baya.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Yana bari buƙatun auto/* su gina rukunin ’yan takara da ƙwarewar samfurin da aka warware (gani, tunani mai zurfi, tunani) da makin inganci da aka lura, waɗanda aka karanta a karatu ɗaya na gaba ɗaya. A kashe ta tsohuwa: nauyin ’yan takara a lokacin buƙata yana nan daidai kamar da. A kunne: waɗannan alamomi suna shiga nauyin hoton lokaci, don haka nauyin ’yan takara da zaɓi na iya canzawa.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Bari binciken lafiyar bayanan shaidarka ya sake gwada haɗin da gateway ya kashe da kansa (aƙalla sau ɗaya kawai a cikin kowane awa 6 ga kowane haɗi, haɗi 5 a kowane bincike), sannan ya sake kunna ɗaya idan ya ci gwajin. Wannan a kashe yake ta tsohuwa: irin waɗannan haɗin za su ci gaba da kasancewa a kashe har sai ma'aikaci ya ɗauki mataki. Ba a taɓa sake gwada haɗin da ma'aikaci ya kashe ko aka haramta na dindindin ba.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# buƙata} other {# buƙatu}}, {keys, plural, one {# maɓalli mai iyaka} other {# maɓallan masu iyaka}}",
     "unpricedUsageMore": "…da {count} ƙari",
     "unpricedUsageConfigure": "Saita farashi",
-    "unpricedUsageDismiss": "Rufe"
+    "unpricedUsageDismiss": "Rufe",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Nazari",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Tsallake lokacin dakatawa na wucin gadi domin wannan haɗin ya ci gaba da cancanta ko bayan kurakuran da za a iya gyarawa (har yanzu yanayin ƙarshe kamar an hana/an ƙare suna aiki).",
     "disableCoolingLabel": "Kashe lokacin dakatawa na wannan haɗin",
+    "keepMidConversationSystemDescription": "A bar saƙon tsarin da aka aika tsakiyar tattaunawa a cikin jerin saƙon maimakon matsar da su zuwa babban matakin tsarin faɗakarwa, don haka cache ɗin gaggawa ta ci gaba da bugawa a cikin juyi. Kunna kawai idan wannan na sama ya karɓi rawar \"tsarin\" a cikin saƙonni (in ba haka ba yana amsa 400).",
+    "keepMidConversationSystemLabel": "Ajiye saƙonnin tsarin tattaunawa a tsakiyar wuri",
+    "requireUserLastMessageDescription": "Don abubuwan da ke sama waɗanda suka ƙi yarda da prefill na mataimaka: sauke mataimaki na baya (babu kayan aiki_use) kafin aikawa. Samfurin na iya sabunta amsar sa ta baya.",
+    "requireUserLastMessageLabel": "Bukatar tattaunawa don ƙare tare da saƙon mai amfani",
     "bulkPasteAdded": "{count, plural, one {An ƙara maɓalli 1} other {An ƙara maɓallai #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {An tsallake kwafi 1} other {An tsallake kwafi #}}",
     "bulkPasteHint": "Liƙa maɓallin API ɗaya a kowane layi. Ana watsi da layukan da babu komai kuma ana tsallake maɓallan da aka maimaita.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Masu Samarwa na Gida",
     "maxConcurrentWholeNumberError": "Kuskure: Matsakaicin Ayyuka Masu Gudana Lokaci Guda Dole Ya Zama Cikakkiyar Lamba",
     "m365TierLabel": "Matakin Copilot",
+    "m365RefreshTokenLabel": "Alamar wartsakewa (na zaɓi)",
+    "m365RefreshTokenHint": "Ana amfani da shi don sabunta alamar samun damar Microsoft 365 ta atomatik.",
+    "m365RefreshTokenEditHint": "Bar komai don kiyaye alamar da ke akwai. Manna sabon alama don maye gurbinsa.",
     "m365TierHint": "Zaɓi ɓangaren Microsoft 365 Copilot da wannan haɗin zai yi amfani da shi. Individual shi ne tsohon BizChat na masu amfani; Education da Enterprise (work) suna ba da damar amfani da ɓangarorin tenant ɗinsu.",
     "m365TierIndividualOption": "Na Mutum Ɗaya (tsoho)",
     "m365TierEduOption": "Ilimi",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Sassan Proxy",
     "requestBodyLimitTitle": "Iyakar Jikin Buƙata",
     "requestBodyLimitDescription": "Matsakaicin girman bayanan API da ake karɓa kafin a tantance jikin buƙata. Hanyoyin lodawa na musamman suna riƙe aƙalla iyakarsu ta asali ta 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions da Responses suna karɓar har zuwa 50 MB kafin ka adana iyaka a nan. Iyakarka da aka adana tana shafarsu ma, ko ta yi ƙasa ko ta fi haka.",
     "requestBodyLimitInputLabel": "Iyakar jikin buƙata a MB",
     "requestBodyLimitEmptyError": "Shigar da iyaka a MB",
     "requestBodyLimitWholeNumberError": "Yi amfani da cikakkiyar lamba",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Dukkan yunƙuran guda {count} sun gaza",
       "failed": "ya gaza",
       "pinnedTitle": "An zaɓi samfurin ta hanyar kafe shi ga zaman context-cache",
-      "pinned": "an kafe"
+      "pinned": "an kafe",
+      "recoveredAttemptsTitle": "An dawo da buƙatar bayan ƙoƙari {count}",
+      "latestOutcomeFailed": "Sakamakon buƙata ta ƙarshe ya gaza"
     },
     "attempts": "yunƙurai",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "ya ci gaba daga na sama",
       "continuesFrom": "Ya ci gaba daga {id}",
       "viewConversation": "duba tattaunawa",
-      "openConversation": "Buɗe tattaunawa {id}"
+      "openConversation": "Buɗe tattaunawa {id}",
+      "omittedHttpAttempts": "Ba a adana aikawar HTTP guda {count} ba",
+      "noHttpResponse": "Ba a lura da martanin HTTP ba",
+      "transportError": "Kuskuren jigila"
     },
     "tableLabel": "Rajistocin buƙatu",
     "throughputPostFirstToken": "Bayan farkon token",
     "throughputEndToEnd": "Daga farko zuwa ƙarshe",
     "throughputRate": "{value} token/daƙiƙa",
-    "throughputExplanation": "Duk ƙididdigar biyu suna amfani da mafi girman adadin token na fitarwa da na tunani. Bayan farkon token ba ya haɗa da TTFT mai inganci; in ba haka ba yana amfani da cikakken lokaci. Daga farko zuwa ƙarshe koyaushe yana amfani da cikakken lokaci. Amsa da aka tanada (buffered) na iya samun ƙimar isar da sauri mai yawa ba tare da saurin samar da samfurin ba."
+    "throughputExplanation": "Duk ƙididdigar biyu suna amfani da mafi girman adadin token na fitarwa da na tunani. Bayan farkon token ba ya haɗa da TTFT mai inganci; in ba haka ba yana amfani da cikakken lokaci. Daga farko zuwa ƙarshe koyaushe yana amfani da cikakken lokaci. Amsa da aka tanada (buffered) na iya samun ƙimar isar da sauri mai yawa ba tare da saurin samar da samfurin ba.",
+    "omittedHttpAttempts": "Ba a adana aikawar HTTP guda {count} ba",
+    "upstreamStatus": "Sabar da ke sama {status}",
+    "noHttpResponse": "Ba a lura da martanin HTTP ba",
+    "transportError": "Kuskuren jigila"
   },
   "proxyLogger": {
     "filterAll": "Duka",
@@ -14157,6 +14190,14 @@
         "label": "Tsarin Rukunin Egress da Aka Raba",
         "description": "Ga masu ba da sabis waɗanda aka raba ƙuotarsu bisa adireshin egress, sanya memba na rukuni da ke raba adireshin egress da aka lura na wani memba da aka ƙi kwanan nan a ƙasan membobi masu lafiya. Tsari kawai, ba a taɓa cirewa ba. Yana buƙatar PROXY_SKIP_RECENTLY_FAILED, wanda ke samar da siginar ƙin karɓa da yake karantawa. A kashe ta tsohuwa: tsarin zaɓi yana zama ainihin juyawa na yau da kullun."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Ƙin ƙaƙƙarfan ƙaƙƙarfan ƙira",
+        "description": "Aiwatar da ƙididdiga na opencode 429 kawai ga samfurin da ya buge shi, don haka wannan egress ɗin yana ci gaba da yin hidima ga wasu samfuran, kuma a share shi kawai lokacin da wannan ƙirar ta yi nasara. Masu cin kasuwa waɗanda ba su da abin ƙira (juyawa ta tafkin, wurin shakatawa da sake kunnawa, hangen nesa na gudanarwa, mai zaɓin faɗa, sharewar lafiya) har yanzu suna ganinsa. Yana buƙatar PROXY_SKIP_RECENTLY_FAILED, wanda ke haifar da ƙi. Kashe ta tsohuwa: kewayon samfurin 429 ɗaya yana keɓance ɓarna ga kowane ƙira."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Daukewar wakili: tsananin sake kunnawa POST",
+        "description": "Don buƙatun mara ƙarfi (POST, PUT, PATCH, DELETE), sake aikawa bayan kuskuren sufuri (sabon soket, faɗuwar wakili, faɗuwar ƙasa) kawai lokacin da kuskuren ya tabbatar da cewa ba a aika komai ba: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ko lokacin gama haɗi. Kuskuren soket bayan rubutawa na iya nufin mai sama ya karɓi buƙatun, don haka sake aikawa zai iya haifar da lissafin shi sau biyu. Kashe ta tsohuwa: jiki mai sake kunnawa yana jin haushi sau ɗaya akan kowane kuskuren jigilar kaya, wanda kuma ya dawo da tukwici mai dunƙulewa."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Yin Rijistar Danganta Juyawa",
         "description": "Juyawar opencode tana yin rikodin asusun da ya yi aiki ko aka tsallake (masked ids kawai, ba cikakkun id na asusu ba) kuma tana haɗa bayanan rajistar proxy zuwa buƙatarsu, domin mai gudanarwa ya iya bambanta asusun da aka tsallake da waɗanda ba a yi amfani da su ba. A kashe ta tsohuwa: babu ƙarin layukan rajista, babu ƙarin ginshiƙan da aka rubuta."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Sake Zaɓar Pool na 429 a OpenCode",
         "description": "Domin jujjuyawar asusu da yawa ta OpenCode, bayan samun 429 daga mai ba da sabis na egress-bucketed a kan asusun da ba shi da proxy a ƙarƙashin mahallin ambient pool, nemi wani memba daga connection pool domin ƙoƙari na gaba maimakon sake gwada adireshin egress iri ɗaya. Yana tsara jeri ne, ba ya cirewa: pool ɗin da ya ƙare yana ci gaba da aiki kamar yadda yake a yanzu. A kashe yake bisa asali: kowane 429 yana jujjuyawa zuwa asusu na gaba daidai kamar yadda yake a baya."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "Ga mai zartar da OpenCode, lokacin da aka amsa buƙatun wakili 403 ko 451 FreeTierError kuma kayan aikin da aka lura sun yi nasara ko ba a yi amfani da su ba, aika buƙatar sau ɗaya ta hanyar wakili na daban (wani wakili na asusu ko wani memba na tafkin, ba za a taɓa haɗa kai tsaye ba). Sai kawai lokacin da wannan binciken ya amsa 200 shine farkon fitowar da aka keɓe a cikin ƙwaƙwalwar ƙin wakili da amsawar binciken; idan duka biyun sun ƙi, a mayar da ainihin ƙi kuma ba a rubuta kome ba. Rubutun ƙin yarda iri ɗaya ya ƙunshi tutocin egress IP da sifar buƙatun da aka ƙi, don haka binciken ya raba su da shaida. Kashe ta tsohuwa: an dawo da ƙi ba canzawa."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Fingerprint na Abokin Ciniki na OpenCode v2",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Tsaya Kan Ƙin Yarda na Manufar Abun Ciki",
         "description": "Lokacin da manufar combo ta ba da amsa tare da ainihin ƙin yarda na manufar abun ciki (lamba ko nau'in cyber_policy / content_policy_violation), tsayar da combo ɗin kuma mayar da wannan ƙin yardar ko da kuwa sauran manufofin samfura ne daban-daban, maimakon ci gaba zuwa manufa ta gaba. A kashe yake bisa asali: ƙin yardar ba ta taɓa kwantar da asusun ko kunna provider breaker ba, kuma combo yana ci gaba zuwa manufarsa ta gaba daidai kamar da."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Martani: kiyaye rayuwa akan jigilar kaya kawai",
+        "description": "Aika Amsoshi masu kiyaye rai azaman layin mara komai maimakon taron response.in_progress, don haka hoton roba ba zai taɓa maye gurbin ainihin martani a cikin SDK na hukuma ba. Layin da ba komai a ciki ba ya aika da taron SSE, don haka mai sa ido na abokin ciniki wanda ke sake saiti akan abubuwan da suka faru kawai ba za a sake saita shi ba yayin dogon shuru. Kashe ta tsohuwa: masu ƙidayar lokaci suna aika takamammen tabbataccen taron response.in_progress."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Sake Gwajin Cooldown: Tsallake Ƙin Karɓa na 403/410",
