@@ -18,14 +18,17 @@ keep failing.
 
 ## Supported Events
 
-The `WebhookEvent` type (`src/lib/webhooks/eventDescriptions.ts`, consumed by `src/lib/webhookDispatcher.ts`) currently models exactly four events:
+The `WebhookEvent` type (`src/lib/webhooks/eventDescriptions.ts`, consumed by `src/lib/webhookDispatcher.ts`) currently models seven events:
 
-| Event               | Fires when                                         |
-| ------------------- | -------------------------------------------------- |
-| `request.completed` | A proxied request completes successfully           |
-| `request.failed`    | A proxied request fails after all retries/fallback |
-| `quota.exceeded`    | An API key crosses a budget/quota threshold        |
-| `test.ping`         | Synthetic event used by the test endpoint          |
+| Event                     | Fires when                                                                          |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| `request.completed`       | A proxied request completes successfully                                            |
+| `request.failed`          | A proxied request fails after all retries/fallback                                  |
+| `quota.exceeded`          | An API key crosses a budget/quota threshold                                         |
+| `proxy.set_aside`         | A proxy pool member is set aside after repeated refusals (transition only)          |
+| `proxy.pool.exhausted`    | Every member of a proxy pool scope is set aside                                     |
+| `provider.reset_redeemed` | Auto-apply banked resets redeemed a reset credit or the Claude weekly session reset |
+| `test.ping`               | Synthetic event used by the test endpoint                                           |
 
 Subscriptions accept the literal `"*"` to receive every event. Unknown event
 names in `events` are ignored at dispatch time.
