@@ -23,6 +23,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { z } from "zod";
 import { useNotificationStore } from "@/store/notificationStore";
 import { isClaudeCodeCompatibleProvider } from "@/shared/constants/providers";
 import type { ConnectionRowConnection } from "../components/ConnectionRow";
@@ -112,28 +113,59 @@ async function loadProxyConfigData(): Promise<{ config: any } | null> {
   }
 }
 
-async function resolveConnectionProxies(
-  conns: { id?: string }[]
-): Promise<Record<string, { proxy: any; level: string } | null> | null> {
+/** Cap matching the API's `?resolveIds=` limit; larger lists are batched. */
+const MAX_RESOLVE_IDS = 200;
+
+/**
+ * `?resolveIds=` response shape: one entry per requested connection, `null`
+ * when that connection resolves to no proxy.
+ */
+const resolvedProxiesSchema = z.object({
+  results: z.record(z.string(), z.object({ proxy: z.unknown(), level: z.string() }).nullable()),
+});
+type ResolvedConnectionProxy = { proxy: unknown; level: string } | null;
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let index = 0; index < items.length; index += size)
+    out.push(items.slice(index, index + size));
+  return out;
+}
+
+async function resolveProxyChunk(
+  ids: string[]
+): Promise<Record<string, ResolvedConnectionProxy> | null> {
   try {
-    const results = await Promise.all(
-      conns
-        .filter((c) => c.id)
-        .map((c) =>
-          fetch(`/api/settings/proxy?resolve=${encodeURIComponent(c.id!)}`, { cache: "no-store" })
-            .then((r) => (r.ok ? r.json() : null))
-            .then((data) => [c.id!, data] as [string, any])
-            .catch(() => [c.id!, null] as [string, any])
-        )
-    );
-    const map: Record<string, { proxy: any; level: string } | null> = {};
-    for (const [id, data] of results) {
-      map[id] = data?.proxy ? data : null;
+    const res = await fetch(`/api/settings/proxy?resolveIds=${encodeURIComponent(ids.join(","))}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const parsed = resolvedProxiesSchema.safeParse(await res.json());
+    if (!parsed.success) return null;
+
+    const map: Record<string, ResolvedConnectionProxy> = {};
+    for (const id of ids) {
+      const entry = parsed.data.results[id];
+      map[id] = entry && entry.proxy ? entry : null;
     }
     return map;
   } catch {
     return null;
   }
+}
+
+async function resolveConnectionProxies(
+  conns: { id?: string }[]
+): Promise<Record<string, ResolvedConnectionProxy> | null> {
+  const ids = [...new Set(conns.map((c) => c.id).filter((id): id is string => Boolean(id)))];
+  if (ids.length === 0) return {};
+
+  // One request per 200 connections: a request per connection was an O(n)
+  // burst against the same process that serves the LLM proxy. Batching keeps
+  // every connection covered, so no row is left without its proxy badge.
+  const chunks = await Promise.all(chunk(ids, MAX_RESOLVE_IDS).map(resolveProxyChunk));
+  if (chunks.some((result) => result === null)) return null;
+  return Object.assign({}, ...chunks);
 }
 
 // ──── types ─────────────────────────────────────────────────────────────────
