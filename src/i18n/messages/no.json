@@ -923,6 +923,8 @@
     "batchListTitle": "Batcher",
     "batchListCount": "{count} batcher",
     "batchListRemovingCompleted": "Fjerner…",
+    "batchListRemoveCompletedPartial": "Fjernet et stort antall partier. Klikk igjen for å fjerne resten.",
+    "batchListRemoveCompletedFailed": "Det oppstod en feil under fjerning av partier.",
     "batchListRemoveCompleted": "Fjern fullførte",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Oppdaterer…",
     "batchListRefresh": "Oppdater",
     "uploadFileModalRemove": "Fjern",
+    "fileInputChoose": "Velg fil",
+    "fileInputChooseMultiple": "Velg filer",
+    "fileInputEmpty": "Ingen fil valgt",
+    "fileInputSelectedCount": "{count, plural, one {# fil valgt} other {# filer valgt}}",
+    "fileDropLabel": "Slipp en fil her eller velg en",
+    "fileDropLabelMultiple": "Slipp filer her eller velg filer",
     "uploadFileModalUploading": "Laster opp…",
     "wizardInputReading": "Leser fil…",
     "wizardInputReady": "Klar",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Send fingeravtrykket til OpenCode v2 CLI-klienten i OpenCode Zen/Go-forespørsler: opencode/latest/<2.x>/cli som User-Agent og x-opencode-client cli, og i forespørsler på gratisnivå v2-øktshodene, v2 CLI-verktøyskjemaene for read/shell og ingen tool_choice \"none\". Deaktivert som standard: Alle OpenCode-forespørsler beholder gjeldende identitet, hoder og brødtekst uendret.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Når kandidatpoolen til en automatisk kombinasjon allerede er tom før forhåndsfilteret for verktøykall kjøres (alle mål er hoppet over på grunn av nedkjølingsperioder, sperrer eller oppbrukte kvoter), returneres 503 no_eligible_targets i stedet for den eldre 400-feilen «No target supports tool calling» capability_mismatch. Deaktivert som standard: En tom pool beholder den eldre 400-feilen.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Håndhev klarerte tagger for modellendepunkter (deklarert av leverandørkatalogen, utledet fra en spesialisert modell-ID eller angitt av operatøren): Avvis en forespørsel sendt til et endepunkt som modellen ikke støtter, med HTTP 400 før videresending på /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations og /v1/audio/*; skjul modeller med taggede endepunkter som ikke har noen OmniRoute-adapter, fra /v1/models; og svar med 422 på modelltesten i kontrollpanelet for slike modeller. Av som standard: Endepunkttagger forblir kun informative, og forespørsler videresendes nøyaktig som før.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "På vanlige anthropic-kompatible reléer beholdes systemmeldinger midt i samtalen i meldingslisten i stedet for å flyttes til systeminstruksen på toppnivå, slik at det bufrede instruksjonsprefikset forblir stabilt på tvers av meldingene. Gjelder bare når klienten selv har sendt betaen mid-conversation-system-2026-04-07. Deaktivert som standard: Hver systemmelding flyttes til systeminstruksen akkurat som før, fordi reléer uten denne betaen avviser systemmeldinger i meldingslisten.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Bruk nivåene for resonneringsinnsats som models.dev publiserer når verken en operatøroverstyring eller leverandørregisteret angir noen, behold bare kjente innsatsnivåer, og behandle en tom liste over angitte nivåer som «ingen nivåer». Deaktivert som standard: Modellkatalogen og de fastsatte innsatsnivåene forblir nøyaktig som før.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Lar auto/*-forespørsler bygge kandidatpoolen med avklarte modellegenskaper (syn, resonnering, tenkning) og observerte kvalitetspoeng, lest i én samlet lesing. Av som standard: kandidatvektene ved forespørselstidspunktet forblir nøyaktig som før. På: disse signalene inngår i øyeblikksbildevektene, så kandidatvekter og valg kan endres.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "La helsekontrollen for legitimasjon teste på nytt tilkoblinger som gatewayen har slått av automatisk (maksimalt én gang hver 6. time per tilkobling, 5 per kontroll), og slå dem på igjen når den nye testen er vellykket. Av som standard: Slike tilkoblinger forblir av til en operatør griper inn. Tilkoblinger som er deaktivert av en operatør eller permanent utestengt, testes aldri på nytt.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# forespørsel} other {# forespørsler}}, {keys, plural, one {# begrenset nøkkel} other {# begrensede nøkler}}",
     "unpricedUsageMore": "…og {count} til",
     "unpricedUsageConfigure": "Konfigurer priser",
-    "unpricedUsageDismiss": "Lukk"
+    "unpricedUsageDismiss": "Lukk",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analyse",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Hopp over den forbigående nedkjølingen slik at denne tilkoblingen forblir kvalifisert selv etter gjenopprettelige feil (sluttilstander som utestengt/utløpt gjelder fortsatt).",
     "disableCoolingLabel": "Deaktiver nedkjøling for denne tilkoblingen",
+    "keepMidConversationSystemDescription": "La systemmeldinger som er sendt midt i samtalen inne i meldingslisten i stedet for å flytte dem inn i systemmeldingen på øverste nivå, slik at hurtigbufferen fortsetter å trykke på tvers av svinger. Aktiver bare hvis denne oppstrøms aksepterer rollen \"system\" i meldinger (ellers svarer den 400).",
+    "keepMidConversationSystemLabel": "Hold systemmeldinger midt i samtalen på plass",
+    "requireUserLastMessageDescription": "For oppstrøms som avviser assistent-prefill: slipp etterfølgende assistentsvinger (ingen tool_use) før sending. Modellen kan gjenskape sitt tidligere svar.",
+    "requireUserLastMessageLabel": "Krev at samtalen avsluttes med en brukermelding",
     "bulkPasteAdded": "{count, plural, one {1 nøkkel lagt til} other {# nøkler lagt til}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplikat hoppet over} other {# duplikater hoppet over}}",
     "bulkPasteHint": "Lim inn én API-nøkkel per linje. Tomme linjer ignoreres, og duplikatnøkler hoppes over.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Lokale leverandører",
     "maxConcurrentWholeNumberError": "Maksimal samtidighet må være et heltall",
     "m365TierLabel": "Copilot-nivå",
+    "m365RefreshTokenLabel": "Oppdater token (valgfritt)",
+    "m365RefreshTokenHint": "Brukes til å oppdatere Microsoft 365-tilgangstoken automatisk.",
+    "m365RefreshTokenEditHint": "La stå tomt for å beholde det eksisterende tokenet. Lim inn et nytt token for å erstatte det.",
     "m365TierHint": "Velg hvilken Microsoft 365 Copilot-flate denne tilkoblingen bruker. Individuell er standard forbruker-BizChat; Utdanning og Enterprise (arbeid) velger sine leietakerflater.",
     "m365TierIndividualOption": "Individuell (standard)",
     "m365TierEduOption": "Utdanning",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Proxyseksjoner",
     "requestBodyLimitTitle": "Grense for forespørselskropp",
     "requestBodyLimitDescription": "Maksimal størrelse på API-nyttelasten som godtas før forespørselskroppen analyseres. Dedikerte opplastingsruter beholder minst den innebygde grensen på 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions og Responses godtar opptil 50 MB til du lagrer en grense her. Den lagrede grensen gjelder også for dem, enten den er lavere eller høyere.",
     "requestBodyLimitInputLabel": "Grense for forespørselskropp i MB",
     "requestBodyLimitEmptyError": "Angi en grense i MB",
     "requestBodyLimitWholeNumberError": "Bruk et heltall",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Alle {count} forsøk mislyktes",
       "failed": "feilet",
       "pinnedTitle": "Modell valgt via kontekst-cache økt festing",
-      "pinned": "festet"
+      "pinned": "festet",
+      "recoveredAttemptsTitle": "Forespørselen ble gjenopprettet etter {count} forsøk",
+      "latestOutcomeFailed": "Det siste forespørselsresultatet mislyktes"
     },
     "attempts": "forsøk",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "fortsetter fra overordnet",
       "continuesFrom": "Fortsetter fra {id}",
       "viewConversation": "vis samtale",
-      "openConversation": "Åpne samtale {id}"
+      "openConversation": "Åpne samtale {id}",
+      "omittedHttpAttempts": "{count} HTTP-sendinger ble ikke lagret",
+      "noHttpResponse": "Ingen HTTP-respons ble observert",
+      "transportError": "Transportfeil"
     },
     "tableLabel": "Forespørselslogger",
     "throughputPostFirstToken": "Etter første token",
     "throughputEndToEnd": "Ende-til-ende",
     "throughputRate": "{value} tokens/sek",
-    "throughputExplanation": "Begge ratene bruker det største av antall output- og resonneringstokens. Etter første token ekskluderer en gyldig TTFT; ellers brukes hele varigheten. Ende-til-ende bruker alltid hele varigheten. Et bufret svar kan ha høy burst-leveringsrate uten raskere modellgenerering."
+    "throughputExplanation": "Begge ratene bruker det største av antall output- og resonneringstokens. Etter første token ekskluderer en gyldig TTFT; ellers brukes hele varigheten. Ende-til-ende bruker alltid hele varigheten. Et bufret svar kan ha høy burst-leveringsrate uten raskere modellgenerering.",
+    "omittedHttpAttempts": "{count} HTTP-sendinger ble ikke lagret",
+    "upstreamStatus": "Oppstrømsserver {status}",
+    "noHttpResponse": "Ingen HTTP-respons ble observert",
+    "transportError": "Transportfeil"
   },
   "proxyLogger": {
     "filterAll": "Alle",
@@ -14157,6 +14190,14 @@
         "label": "Rekkefølge for delt egress-pulje",
         "description": "For leverandører der kvoten er inndelt etter egress-adresse, ranger et puljemedlem som deler et nylig avvist medlems observerte egress-adresse like under friske medlemmer. Kun rekkefølge, aldri ekskludert. Krever PROXY_SKIP_RECENTLY_FAILED, som produserer avvisningssignalet den leser. Av som standard: utvalgsrekkefølgen er nøyaktig den vanlige rotasjonen."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Modellbestemt kvoteavslag",
+        "description": "Bruk en opencode kvote 429 bare på modellen som treffer den, slik at den samme utgangen fortsetter å betjene andre modeller, og fjern den bare når den modellen lykkes. Forbrukere som ikke har noen modell (bassengrotasjon, park og replay, adminsynlighet, velgerutløser, helsesveip) ser det fortsatt. Trenger PROXY_SKIP_RECENTLY_FAILED, som produserer avslaget. Av som standard: én modells kvote 429 setter utgangen til side for hver modell."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy-henting: streng POST replay",
+        "description": "For en ikke-idempotent forespørsel (POST, PUT, PATCH, DELETE), send på nytt etter en transportfeil (fresh socket, proxy-fallback, native fallback) bare når feilen beviser at ingenting ble sendt: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH eller en tilkoblingstidsavbrudd. En socket-feil etter skrivingen kan bety at oppstrømmen godtok forespørselen, slik at en ny sending kan generere og fakturere den to ganger. Av som standard: en gjenspillbar kropp sendes på nytt én gang ved enhver transportfeil, som også gjenoppretter en gammel samlekontakt."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logging av rotasjonsattribusjon",
         "description": "Opencode-rotasjon registrerer hvilken konto som betjente eller ble hoppet over (kun maskerte ID-er, aldri fullstendige konto-ID-er) og kobler proxyloggoppføringer til forespørselen deres, slik at operatøren kan skille overhoppede kontoer fra ubrukte. Av som standard: ingen ekstra logglinjer, ingen ekstra kolonner skrives."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429: gjenvalg av pool",
         "description": "For OpenCode-rotasjon over flere kontoer: etter en 429 fra en leverandør med kvoter per utgående IP på en proxy-løs konto i en omgivende pool-kontekst, be tilkoblingspoolen om et annet medlem for neste forsøk i stedet for å prøve den samme utgående adressen på nytt. Sorterer, ekskluderer aldri: en uttømt pool beholder gjeldende oppførsel. Deaktivert som standard: hver 429 roterer til neste konto nøyaktig som før."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "For OpenCode utføreren, når en proxy-forespørsel er besvart 403 eller 451 FreeTierError og de observerte verktøyene mislyktes eller ikke gjaldt, send forespørselen én gang via en annen proxy (en annen kontoproxy eller et annet gruppemedlem, aldri en direkte tilkobling). Først når den sonden svarer 200 blir den første utgangen satt til side i proxy-avslagsminnet og sondesvaret servert; når begge nekter, returneres det opprinnelige avslaget og ingenting registreres. Den samme avvisningsteksten dekker en flagget utgående IP og en form for avvist forespørsel, så sonden skiller dem fra hverandre ved hjelp av bevis. Av som standard: avslaget returneres uendret."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2-klientfingeravtrykk",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Kombo: Stopp ved innholdspolicyavvisning",
         "description": "Når et kombomål svarer med en eksakt innholdspolicyavvisning (kode eller type cyber_policy / content_policy_violation), stopp komboen og returner denne avvisningen selv om de gjenværende målene er andre modeller, i stedet for å gå videre til neste mål. Deaktivert som standard: avvisningen kjøler aldri ned kontoen eller utløser leverandørens kretsbryter, og komboen går videre til sitt neste mål akkurat som før."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Svar: hold liv kun over transporten",
+        "description": "Send svar keepalives som en tom linje i stedet for en response.in_progress -hendelse, så et syntetisk øyeblikksbilde kan aldri erstatte det virkelige svaret i den offisielle SDK. En tom linje sender ingen SSE -hendelser, så en klientvakthund som tilbakestiller kun på hendelser, vil ikke bli tilbakestilt under en lang stille fase. Av som standard: tidtakere sender den spesifikasjonsgyldige response.in_progress hendelsen."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Gjenforsøk ved nedkjøling: Hopp over 403/410-avvisninger",

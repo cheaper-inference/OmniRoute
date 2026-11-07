@@ -1,4 +1,12 @@
 /**
+ * How long a sync getter waits before re-trying a background version lookup that failed
+ * (network error, non-2xx, unparseable payload). A failure caches nothing, and the getters
+ * run per upstream request, so without a wait a down or rate-limited registry is asked on
+ * every request. A lookup that answered (newer or not) waits the module's own cache TTL.
+ */
+export const BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS = 15 * 60 * 1000;
+
+/**
  * Whether this runtime may start a background network refresh (a client-version lookup
  * against GitHub or the npm registry).
  *

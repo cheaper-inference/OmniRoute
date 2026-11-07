@@ -1,4 +1,5 @@
 import { register } from "../registry.ts";
+import { geminiMediaToOpenAI } from "../helpers/mediaContentParts.ts";
 import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
 import { createGeminiToolCallIdPairing } from "../helpers/geminiToolCallIds.ts";
@@ -114,6 +115,7 @@ function splitCoLocatedFunctionResponses(contents) {
   return out;
 }
 
+/** Convert Gemini history to OpenAI messages with its tool calls and media intact. */
 function convertGeminiContent(content, toolCallIds) {
   const role = content.role === "user" ? "user" : "assistant";
 
@@ -129,16 +131,8 @@ function convertGeminiContent(content, toolCallIds) {
       parts.push({ type: "text", text: part.text });
     }
 
-    if (part.inlineData || part.inline_data) {
-      const data = part.inlineData || part.inline_data;
-      const mimeType = data.mimeType || data.mime_type || "image/png";
-      parts.push({
-        type: "image_url",
-        image_url: {
-          url: `data:${mimeType};base64,${data.data}`,
-        },
-      });
-    }
+    const media = geminiMediaToOpenAI(part);
+    if (media) parts.push(media);
 
     if (part.functionCall) {
       toolCalls.push({
