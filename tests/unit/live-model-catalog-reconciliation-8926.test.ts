@@ -118,10 +118,7 @@ test("Antigravity Gemini 3.7 display tiers match the shared live -tiered wire id
   ]);
   for (const tier of ["low", "medium", "high"]) {
     const requested = `gemini-3.7-flash-${tier}`;
-    const result = await reconcileProvidersWithActiveSyncedCatalog(
-      ["antigravity"],
-      requested
-    );
+    const result = await reconcileProvidersWithActiveSyncedCatalog(["antigravity"], requested);
     assert.deepEqual(result.providers, ["antigravity"], requested);
     assert.deepEqual(result.excludedProviders, [], requested);
   }

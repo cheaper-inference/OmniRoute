@@ -575,7 +575,9 @@ export async function reconcileProvidersWithActiveSyncedCatalog(
     const isMatchingProviderPrefix =
       slash > 0 && catalogLookupIds(canonicalProvider).includes(qualifiedProvider);
     const candidateIds = isMatchingProviderPrefix ? [modelId.slice(slash + 1), modelId] : [modelId];
-    // Legacy Antigravity tier ids route through a declared shared wire id.
+    // Antigravity ids route through a declared wire alias in both shapes: legacy 3.7
+    // tiers onto the shared `-tiered` id, and the `-tiered` id that getModelInfo folds
+    // a 3.8 tier into back onto a tier id the roster may list instead.
     // Unknown suffixes and unrelated providers stay governed by the live roster.
     const liveModelIds =
       canonicalProvider === "antigravity" || canonicalProvider === "agy"

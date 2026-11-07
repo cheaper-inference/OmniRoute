@@ -1,1 +1,0 @@
-- **fix(models):** Reconcile legacy Antigravity Gemini 3.7 tier aliases against their shared live `-tiered` wire model while preserving existing provider-prefix and slash-ID checks.
