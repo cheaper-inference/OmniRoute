@@ -44,28 +44,24 @@ export {
 // Codex usage endpoint (same as usage.ts CODEX_CONFIG)
 const CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
 
-// Cache TTL -- short enough to be reactive, long enough to avoid rate limits
+// Cache TTL — short enough to be reactive, long enough to avoid rate limits
 const CACHE_TTL_MS = 60_000; // 60 seconds
 
-// Max age for reusing a stale cached quota snapshot when fresh fetch fails or times out
+// Max age for reusing a cached snapshot when a refresh fails or times out
 const MAX_STALE_CACHE_MS = 15 * 60_000; // 15 minutes
 
-const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
+// The preflight awaits this fetch on the request path, so the default stays short.
+const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
+
+// Largest delay a Node timer honors; AbortSignal.timeout also rejects fractions.
+const MAX_REQUEST_TIMEOUT_MS = 2_147_483_647;
 
 export function getCodexQuotaFetchTimeoutMs(): number {
-  const raw = process.env.CODEX_QUOTA_FETCH_TIMEOUT_MS;
-  if (raw !== undefined && raw !== null && raw.trim() !== "") {
-    const parsed = Number(raw.trim());
-    if (Number.isFinite(parsed) && parsed > 0) return parsed;
-  }
-  return DEFAULT_REQUEST_TIMEOUT_MS;
-}
-
-function getUsableCachedQuota(cached: CacheEntry | undefined): CodexDualWindowQuota | null {
-  if (cached?.quota && Date.now() - cached.fetchedAt < MAX_STALE_CACHE_MS) {
-    return cached.quota;
-  }
-  return null;
+  const raw = process.env.CODEX_QUOTA_FETCH_TIMEOUT_MS?.trim();
+  const parsed = raw ? Number(raw) : NaN;
+  return Number.isInteger(parsed) && parsed > 0 && parsed <= MAX_REQUEST_TIMEOUT_MS
+    ? parsed
+    : DEFAULT_REQUEST_TIMEOUT_MS;
 }
 
 // Per-account quota window info; structural slots exist only for known durations.
@@ -92,15 +88,17 @@ interface CacheEntry {
 // In-memory cache: connectionId → { quota, fetchedAt }
 const quotaCache = new Map<string, CacheEntry>();
 
-// Auto-cleanup stale entries every 5 minutes
-const _cacheCleanup = setInterval(() => {
+function sweepQuotaCache(): void {
   const now = Date.now();
   for (const [key, entry] of quotaCache) {
-    if (now - entry.fetchedAt > CACHE_TTL_MS * 5) {
+    if (now - entry.fetchedAt > MAX_STALE_CACHE_MS) {
       quotaCache.delete(key);
     }
   }
-}, 5 * 60_000);
+}
+
+// Auto-cleanup stale entries every 5 minutes
+const _cacheCleanup = setInterval(sweepQuotaCache, 5 * 60_000);
 
 if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
   (_cacheCleanup as { unref?: () => void }).unref?.();
@@ -203,11 +201,30 @@ function getCodexConnectionMeta(
 // ─── Core Fetcher ────────────────────────────────────────────────────────────
 
 /**
+ * The snapshot a failed refresh may fall back to. A spent window can have been
+ * reset upstream and a window past its resetAt no longer says anything, so
+ * either one leaves the account unknown (null), as if nothing had been cached.
+ * The `stale` mark lets the cutoff apply the connection's own thresholds.
+ */
+function getUsableCachedQuota(cached: CacheEntry | undefined): CodexDualWindowQuota | null {
+  if (!cached || Date.now() - cached.fetchedAt >= MAX_STALE_CACHE_MS) return null;
+  const { quota } = cached;
+  if (quota.limitReached) return null;
+  const now = Date.now();
+  const outdated = Object.values(quota.windows ?? {}).some(
+    ({ percentUsed, resetAt }) =>
+      percentUsed >= 1 || (resetAt ? new Date(resetAt).getTime() <= now : false)
+  );
+  return outdated ? null : { ...quota, stale: true };
+}
+
+/**
  * Fetch current quota for a Codex connection.
  * Returns percentUsed = max(5h%, 7d%) — worst-case across both windows.
  *
  * @param connectionId - Connection ID from the DB (used to look up credentials)
- * @returns QuotaInfo or null if fetch fails / no credentials
+ * @returns QuotaInfo, a usable stale snapshot if the refresh fails, or null when
+ *   the quota is unknown (no credentials, or a failed fetch with no usable snapshot)
  */
 export async function fetchCodexQuota(
   connectionId: string,
@@ -259,7 +276,7 @@ export async function fetchCodexQuota(
 
     if (!response.ok) {
       // Non-2xx: could be token expired or quota API down.
-      // Return null to proceed (fail-open — don't block on API errors).
+      // Keep a usable snapshot, otherwise null: an API error is not exhaustion.
       if (response.status === 401 || response.status === 403) {
         // Token expired — remove from cache so next call re-fetches
         deleteQuotaCacheForConnection(connectionId);
@@ -282,7 +299,7 @@ export async function fetchCodexQuota(
     quotaCache.set(cacheKey, { quota, fetchedAt: Date.now() });
     return quota;
   } catch {
-    // Network error, timeout, etc. -- prefer stale cache if available, else fail open
+    // Network error, timeout, etc. — same fallback as a non-2xx response
     return getUsableCachedQuota(cached);
   }
 }
@@ -348,6 +365,7 @@ export function registerCodexQuotaFetcher(): void {
 }
 
 export const __testing = {
+  sweepQuotaCache,
   ageCacheEntry(connectionIdOrKey: string, ageMs: number): void {
     for (const [key, entry] of quotaCache) {
       if (key === connectionIdOrKey || key.startsWith(`${connectionIdOrKey}:`)) {

@@ -23,8 +23,8 @@ export async function markQuotaPreflightAccountUnavailable(
   requestedModel: string | null
 ): Promise<string | null> {
   if (preflight.reason === "quota_unavailable") {
-    // Quota telemetry was unavailable or timed out -- do not manufacture a 5-minute
-    // rate-limit cooldown for unverified exhaustion.
+    // Unknown is not exhausted: the request skips this account, but nothing is
+    // persisted, so a timed-out quota read cannot lock a healthy account for 5 minutes.
     return null;
   }
 

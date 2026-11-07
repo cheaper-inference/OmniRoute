@@ -85,17 +85,15 @@ test("the full Codex quota-filtering opt-out takes precedence over the paid-cred
     true
   );
 
-  // When quota telemetry is unavailable (null), the paid-credit gate fails open
-  // rather than falsely assuming credit exhaustion and persisting a 5-minute cooldown.
+  // Disabling only the preflight keeps the mandatory credit check (documented toggle behavior).
   const preflightOnlyOff = { allowPaidCredits: true, quotaPreflightEnabled: false };
   assert.equal(
     hasCodexCreditOptIn("codex", { providerSpecificData: preflightOnlyOff }, "codex/gpt-5.5"),
     true
   );
-  assert.equal(
-    evaluateQuotaCutoff(null, undefined, { ...scope, providerSpecificData: preflightOnlyOff })
-      .proceed,
-    true
+  assert.deepEqual(
+    evaluateQuotaCutoff(null, undefined, { ...scope, providerSpecificData: preflightOnlyOff }),
+    { proceed: false, reason: "quota_unavailable" }
   );
   // When quota telemetry IS available and paid credits are exhausted, cutoff blocks.
   assert.equal(
