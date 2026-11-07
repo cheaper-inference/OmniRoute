@@ -46,6 +46,7 @@ export interface TargetNodeModel {
   latencyMs?: number;
   error?: string;
   failKind?: FailKind;
+  connectionId?: string | null;
   /** Real circuit-breaker state for this target's provider (U1b enrichment).
    * Only set when the breaker is non-healthy (OPEN/HALF_OPEN/DEGRADED). */
   cbState?: CbState;
@@ -85,6 +86,7 @@ export interface ComboEventInput {
   latencyMs?: number;
   error?: string;
   timestamp: number;
+  connectionId?: string | null;
 }
 
 // ── classifyFailKind ──────────────────────────────────────────────────────
@@ -133,11 +135,13 @@ export function reduceComboEvent(run: ComboRunModel | null, ev: ComboEventInput)
         ? new Map(run.targets.map((t) => [t.targetIndex, t]))
         : new Map<number, TargetNodeModel>();
 
+      const existingTarget = existingTargets.get(ev.targetIndex);
       const updatedTarget: TargetNodeModel = {
         targetIndex: ev.targetIndex,
         provider: ev.provider,
         model: ev.model,
         state: "attempting",
+        connectionId: ev.connectionId ?? existingTarget?.connectionId ?? null,
       };
 
       existingTargets.set(ev.targetIndex, updatedTarget);
@@ -167,6 +171,7 @@ export function reduceComboEvent(run: ComboRunModel | null, ev: ComboEventInput)
           latencyMs: ev.latencyMs,
           error: ev.error,
           failKind: classifyFailKind(ev.error),
+          connectionId: ev.connectionId ?? null,
         };
         return {
           comboName: ev.comboName,
@@ -185,6 +190,7 @@ export function reduceComboEvent(run: ComboRunModel | null, ev: ComboEventInput)
               latencyMs: ev.latencyMs,
               error: ev.error,
               failKind: classifyFailKind(ev.error),
+              connectionId: ev.connectionId ?? t.connectionId,
             }
           : t
       );
@@ -203,6 +209,7 @@ export function reduceComboEvent(run: ComboRunModel | null, ev: ComboEventInput)
           model: ev.model,
           state: "succeeded",
           latencyMs: ev.latencyMs,
+          connectionId: ev.connectionId ?? null,
         };
         return {
           comboName: ev.comboName,
@@ -220,6 +227,7 @@ export function reduceComboEvent(run: ComboRunModel | null, ev: ComboEventInput)
               ...t,
               state: "succeeded" as TargetState,
               latencyMs: ev.latencyMs,
+              connectionId: ev.connectionId ?? t.connectionId,
             }
           : t
       );
@@ -318,6 +326,7 @@ export function comboRunToFlow(run: ComboRunModel): { nodes: Node[]; edges: Edge
         cooldownCount: t.cooldownCount,
         cooldownTotal: t.cooldownTotal,
         cooldownRetryAfterMs: t.cooldownRetryAfterMs,
+        connectionId: t.connectionId,
       },
     });
 

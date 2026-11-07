@@ -120,9 +120,9 @@ Truy cập qua: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Thiết lập nhà cung cấp
 
-Để thêm hàng loạt kết nối khóa API từ tệp CSV hoặc JSON, hãy sử dụng **Bảng điều khiển → Nhà cung cấp → Nhập từ tệp**. Các cột được xác định theo vị trí (`provider,name,apiKey,baseUrl,priority`); `provider` phải tồn tại sẵn dưới dạng nhà cung cấp được quản lý hoặc một nút tương thích. Xem [Nhập nhà cung cấp từ tệp CSV hoặc JSON](../providers/CSV-IMPORT.md).
+Để thêm hàng loạt kết nối khóa API từ tệp CSV hoặc JSON, hãy sử dụng **Bảng điều khiển → Nhà cung cấp → Nhập từ tệp**. Các cột được xác định theo vị trí (`provider,name,apiKey,baseUrl,priority`); `provider` phải tồn tại dưới dạng nhà cung cấp được quản lý hoặc một node tương thích. Xem [Nhập nhà cung cấp từ tệp CSV hoặc JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Nhà cung cấp theo gói đăng ký
+### 🔐 Nhà cung cấp gói đăng ký
 
 #### Claude Code (Pro/Max)
 
@@ -137,11 +137,13 @@ Mô hình:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Mẹo chuyên nghiệp:** Dùng Opus cho các tác vụ phức tạp, Sonnet khi cần tốc độ. OmniRoute theo dõi hạn mức theo từng mô hình!
+**Mẹo chuyên nghiệp:** Sử dụng Opus cho các tác vụ phức tạp, Sonnet để có tốc độ. OmniRoute theo dõi hạn mức theo từng mô hình!
 
-Không có trình duyệt trên máy chủ OmniRoute? Chạy `claude setup-token` ở bất kỳ đâu đã đăng nhập Claude Code và dán token có thời hạn một năm vào tab **Setup Token**. Xem [Claude Code với setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Không có trình duyệt trên máy chủ OmniRoute? Hãy chạy `claude setup-token` ở bất kỳ đâu Claude Code đã đăng nhập và dán token một năm vào tab **Mã thiết lập**. Xem [Claude Code với setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Các tuyến Claude và tương thích với Claude Code duy trì mức nỗ lực suy luận `max` cho các mô hình Opus và Sonnet. Các mô hình Haiku không chấp nhận mức nỗ lực `max`, vì vậy OmniRoute sẽ hạ yêu cầu đó xuống ngân sách suy luận cao trước khi gửi đến dịch vụ thượng nguồn.
+Các route tương thích với Claude và Claude Code bảo toàn mức độ suy nghĩ `max` cho
+các mô hình Opus và Sonnet. Các mô hình Haiku không chấp nhận bậc hiệu suất `max`, nên OmniRoute sẽ hạ cấp
+yêu cầu đó xuống ngân sách suy nghĩ cao trước khi gửi lên dịch vụ nguồn.
 
 #### OpenAI Codex (Plus/Pro)
 
@@ -162,7 +164,7 @@ Mô hình:
 ```bash
 Bảng điều khiển → Nhà cung cấp → Kết nối GitHub
 → OAuth qua GitHub
-→ Đặt lại hàng tháng (ngày 1 mỗi tháng)
+→ Đặt lại hàng tháng (ngày 1 hàng tháng)
 
 Mô hình:
   gh/gpt-5.5
@@ -172,9 +174,25 @@ Mô hình:
   gh/gemini-3.1-pro-preview
 ```
 
+**Tín dụng AI (tính phí theo token).** Khi GitHub báo cáo `credits_used` cho
+tài khoản, thẻ Giới hạn nhà cung cấp sẽ hiển thị một dòng **Tín dụng AI** với số tín dụng
+đã sử dụng trong kỳ thanh toán hiện tại, kể cả đối với các gói tổ chức không giới hạn.
+
+**Giới hạn Tín dụng AI cục bộ.** Chỉnh sửa một kết nối GitHub và đặt **Giới hạn Tín dụng AI mỗi
+kỳ thanh toán** (`providerSpecificData.githubCreditLimit`). Để trống sẽ tắt giới hạn này; `0`
+luôn bỏ qua kết nối. Khi số liệu sử dụng gần nhất lớn hơn hoặc bằng giới hạn,
+việc chọn tài khoản sẽ bỏ qua kết nối đó và định tuyến sẽ chuyển sang các kết nối khác,
+tương tự như khi đạt ngưỡng của chính sách hạn mức. Việc kiểm tra sử dụng số liệu mà quá trình
+làm mới hạn mức định kỳ đã thu thập — không bao giờ gọi GitHub trên đường xử lý yêu cầu —
+và có cơ chế mở khi lỗi: số liệu bị thiếu hoặc đã cũ (cũ hơn 15 phút hoặc thuộc kỳ thanh toán
+đã được đặt lại) sẽ không chặn kết nối. Đây là một biện pháp bảo vệ cục bộ, **không phải
+mức trần chi tiêu được đảm bảo**: độ trễ báo cáo của GitHub, khoảng thời gian làm mới,
+các yêu cầu đang xử lý và mức sử dụng bên ngoài OmniRoute có thể khiến giới hạn này bị vượt qua.
+Hãy sử dụng các cơ chế kiểm soát chi tiêu riêng của GitHub để đặt giới hạn cứng.
+
 ### 💰 Nhà cung cấp giá rẻ
 
-#### GLM-4.7 (Đặt lại hàng ngày, $0.6/1M)
+#### GLM-4.7 (đặt lại hàng ngày, $0.6/1M)
 
 1. Đăng ký: [Zhipu AI](https://open.bigmodel.cn)
 2. Lấy khóa API từ Coding Plan
@@ -182,37 +200,37 @@ Mô hình:
 
 **Sử dụng:** `glm/glm-4.7` — **Mẹo chuyên nghiệp:** Coding Plan cung cấp hạn mức gấp 3 lần với chi phí bằng 1/7! Đặt lại hàng ngày lúc 10:00 sáng.
 
-#### MiniMax M2.1 (Đặt lại sau 5 giờ, $0.20/1M)
+#### MiniMax M2.1 (đặt lại sau 5 giờ, $0.20/1M)
 
 1. Đăng ký: [MiniMax](https://www.minimax.io)
 2. Lấy khóa API → Bảng điều khiển → Thêm khóa API
 
 **Sử dụng:** `minimax/MiniMax-M2.1` — **Mẹo chuyên nghiệp:** Lựa chọn rẻ nhất cho ngữ cảnh dài (1M token)!
 
-#### Kimi K2 (Cố định $9/tháng)
+#### Kimi K2 ($9/tháng cố định)
 
-1. Đăng ký gói: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+1. Đăng ký: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Lấy khóa API → Bảng điều khiển → Thêm khóa API
 
-**Sử dụng:** `kimi/kimi-k2.5` — **Mẹo chuyên nghiệp:** Mức cố định $9/tháng cho 10M token = chi phí thực tế $0.90/1M!
+**Sử dụng:** `kimi/kimi-k2.5` — **Mẹo chuyên nghiệp:** $9/tháng cố định cho 10M token = chi phí hiệu dụng $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Đăng ký: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Tạo khóa API Qianfan → Bảng điều khiển → Thêm khóa API: Nhà cung cấp: `qianfan`
 
-**Sử dụng:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` hoặc một ID mô hình Qianfan tương thích với OpenAI khác.
+**Sử dụng:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` hoặc một ID mô hình tương thích với Qianfan OpenAI khác.
 
 ### 🆓 Nhà cung cấp MIỄN PHÍ
 
-Các nhà cung cấp miễn phí không yêu cầu xác thực có một công tắc bên cạnh **Không yêu cầu xác thực** trên trang nhà cung cấp của họ.
-Việc tắt công tắc sẽ vô hiệu hóa nhà cung cấp đó, xóa nhà cung cấp khỏi các chế độ xem nhà cung cấp đã cấu hình/thu gọn và
-xóa các mô hình của nhà cung cấp khỏi `/v1/models`.
+Các nhà cung cấp miễn phí không yêu cầu xác thực có một công tắc bên cạnh **Không yêu cầu xác thực** trên trang nhà cung cấp.
+Tắt công tắc này sẽ vô hiệu hóa nhà cung cấp đó, xóa nhà cung cấp khỏi các chế độ xem Nhà cung cấp đã cấu hình/rút gọn,
+và xóa các mô hình của nhà cung cấp khỏi `/v1/models`.
 
 #### Qoder (9 mô hình MIỄN PHÍ)
 
 ```bash
-Bảng điều khiển → Kết nối Qoder → Đăng nhập OAuth → Quyền truy cập phụ thuộc vào các giới hạn hiện tại của nhà cung cấp
+Bảng điều khiển → Kết nối Qoder → Đăng nhập OAuth → Quyền truy cập tùy thuộc vào các giới hạn hiện tại của nhà cung cấp
 
 Mô hình: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -220,7 +238,7 @@ Mô hình: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, 
 #### Kiro (Claude MIỄN PHÍ)
 
 ```bash
-Bảng điều khiển → Kết nối Kiro → AWS Builder ID hoặc Google/GitHub → ~50 tín dụng/tháng
+Bảng điều khiển → Kết nối Kiro → AWS Builder ID hoặc Google/GitHub → khoảng 50 tín dụng/tháng
 
 Mô hình: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -612,17 +630,17 @@ post_install() {
 <details>
 <summary><b>Xem tất cả các mô hình khả dụng</b></summary>
 
-> Danh sách dưới đây được tuyển chọn từ `open-sse/config/providerRegistry.ts` cho v3.8.0. Các danh mục đám mây (Gemini, OpenRouter, v.v.) được đồng bộ động — để xem toàn bộ danh mục trực tiếp, hãy mở **Bảng điều khiển → Nhà cung cấp → [provider] → Mô hình khả dụng** hoặc gọi `GET /api/models/catalog`.
+> Danh sách dưới đây được tuyển chọn từ `open-sse/config/providerRegistry.ts` cho v3.8.0. Danh mục đám mây (Gemini, OpenRouter, v.v.) được đồng bộ động — để xem toàn bộ danh mục trực tiếp, hãy mở **Bảng điều khiển → Nhà cung cấp → [nhà cung cấp] → Mô hình khả dụng** hoặc gọi `GET /api/models/catalog`.
 >
-> Nếu danh sách tích hợp sẵn của một nhà cung cấp bị lệch, hãy dùng **Nhập từ /models** trên trang đó (hoặc bật **Tự động đồng bộ**) để kéo danh mục trực tiếp từ upstream. Điều này đã được xác minh ở v3.8.50 cho LLM7.io (`gemini-3.1-flash-lite`) và UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); quyền truy cập ẩn danh của Pollinations vẫn bị giới hạn bởi upstream trong cùng đợt kiểm thử đó.
+> Nếu danh sách tích hợp sẵn của một nhà cung cấp không còn đồng bộ, hãy sử dụng **Nhập từ /models** trên trang đó (hoặc bật **Tự động đồng bộ**) để tải danh mục trực tiếp từ nguồn thượng nguồn. Điều này đã được xác minh trong v3.8.50 đối với LLM7.io (`gemini-3.1-flash-lite`) và UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); quyền truy cập ẩn danh Pollinations vẫn bị giới hạn bởi nguồn thượng nguồn trong cùng đợt kiểm thử.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ các mức effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ các cấp độ effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth MIỄN PHÍ: sử dụng danh mục trực tiếp hiển thị tại **Bảng điều khiển → Nhà cung cấp → Kiro → Mô hình khả dụng**. Tính khả dụng phụ thuộc vào tài khoản và gói dịch vụ.
+**Kiro (`kr/`)** — OAuth MIỄN PHÍ: sử dụng danh mục trực tiếp được hiển thị trong **Bảng điều khiển → Nhà cung cấp → Kiro → Mô hình khả dụng**. Tính khả dụng phụ thuộc vào tài khoản và gói dịch vụ.
 
 **Qoder (`if/`)** — OAuth MIỄN PHÍ: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -636,11 +654,11 @@ post_install() {
 
 **Groq (`groq/`)** — Tốc độ cực nhanh: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok chính chủ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok gốc: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Lưu trữ tại EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Được lưu trữ tại EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Tăng cường tìm kiếm: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Tăng cường bằng tìm kiếm: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Mã nguồn mở: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (miễn phí), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -650,17 +668,17 @@ post_install() {
 
 **Cohere (`cohere/`)** — Tập trung vào RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Doanh nghiệp: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Doanh nghiệp: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Được đồng bộ trực tiếp theo từng khóa API từ Google — không có danh sách tĩnh. Kết nối một khóa trong **Bảng điều khiển → Nhà cung cấp** rồi dùng **Mô hình khả dụng** để nhập danh mục hiện tại (ví dụ: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Được đồng bộ trực tiếp theo khóa API từ Google — không có danh sách tĩnh. Kết nối khóa trong **Bảng điều khiển → Nhà cung cấp**, sau đó sử dụng **Mô hình khả dụng** để nhập danh mục hiện tại (ví dụ: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Các nhà cung cấp tương thích khác** (tuyển chọn): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (qua `aws-bedrock`), `azure-ai`, `openrouter` (danh mục chuyển tiếp), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Mỗi nhà cung cấp duy trì danh sách mô hình riêng trong `providerRegistry.ts` và có thể được tự động đồng bộ khi nhà cung cấp đó cung cấp endpoint `/models`.
+**Các nhà cung cấp tương thích khác** (được chọn): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (thông qua `aws-bedrock`), `azure-ai`, `openrouter` (danh mục chuyển tiếp), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Mỗi nhà cung cấp duy trì danh sách mô hình riêng trong `providerRegistry.ts` và có thể được tự động đồng bộ khi nhà cung cấp cung cấp điểm cuối `/models`.
 
-**Lưu ý về ID mô hình:** OmniRoute sử dụng các ID nguyên bản của nhà cung cấp (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Một số ID chứa phiên bản có dấu chấm vì đó là định dạng mà API upstream mong đợi. Nếu một mô hình không có trong danh sách trên, hãy chạy `omniroute models --search <term>` hoặc gọi `GET /api/models/catalog` để xác nhận tính khả dụng.
+**Lưu ý về ID mô hình:** OmniRoute sử dụng ID gốc của nhà cung cấp (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Một số ID có phiên bản dạng dấu chấm vì đó là định dạng mà API thượng nguồn yêu cầu. Nếu một mô hình không được liệt kê ở trên, hãy chạy `omniroute models --search <term>` hoặc gọi `GET /api/models/catalog` để xác nhận tính khả dụng.
 
 </details>
 

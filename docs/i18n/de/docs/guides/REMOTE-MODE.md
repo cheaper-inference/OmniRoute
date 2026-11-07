@@ -44,31 +44,35 @@ dein Laptop                               entfernter OmniRoute-Server (VPS)
 
 ---
 
-## Verbindung herstellen
+## Verbinden
 
-### Mit dem Verwaltungspasswort (Bootstrap)
+### Mit dem Management-Passwort (Bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
-# Verwaltungspasswort für http://192.168.0.15:20128: ********
-# ✔ Verbunden mit http://192.168.0.15:20128 — Kontext '192.168.0.15' (Berechtigungsbereich: admin)
+# Management-Passwort für http://192.168.0.15:20128: ********
+# ✔ Verbunden mit http://192.168.0.15:20128 — Kontext „192.168.0.15“ (Bereich: admin)
 ```
 
-Der Passwortablauf stellt standardmäßig ein **admin**-Token aus (da du das Passwort
-besitzt, hast du bereits vollständige Kontrolle). Schränke den Berechtigungsbereich mit `--scope` ein:
+Der Passwortablauf stellt standardmäßig ein **Admin-Token** aus (da Sie das Passwort besitzen, haben Sie bereits die vollständige Kontrolle). Mit `--scope` können Sie den Berechtigungsbereich einschränken:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Optionen: `--port <p>` (wenn der Host keinen Port enthält), `--name <ctx>` (Kontextname),
+Optionen: `--port <p>` (wenn für den Host kein Port angegeben ist), `--name <ctx>` (Kontextname),
 `--scope read|write|admin`. Eine vollständige URL wird unverändert übernommen:
 `omniroute connect https://omni.example.com`.
 
-### Mit einem zuvor generierten Token
+Wenn für das Dashboard eine Zwei-Faktor-Authentifizierung aktiviert ist (Einstellungen →
+Sicherheit), wird das Passwort allein abgelehnt: Die CLI fordert dann den Code aus der
+Authenticator-App (oder einen Wiederherstellungscode) an. Für die nicht interaktive Verwendung
+können Sie ihn mit `--totp <code>` vorab übergeben.
 
-Generiere im Dashboard (oder mit `omniroute tokens create`) ein bereichsbeschränktes Token und
-füge es ein — kein Passwort erforderlich:
+### Mit einem vorab generierten Token
+
+Generieren Sie im Dashboard (oder mit `omniroute tokens create`) ein Token mit eingeschränktem
+Berechtigungsbereich und fügen Sie es ein — kein Passwort erforderlich:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
@@ -451,12 +455,12 @@ omniroute contexts remove 192-168-0-15 --yes   # lokalen Kontext löschen (selbs
 
 ## API-Endpunkte (Referenz)
 
-| Methode | Route                 | Authentifizierung   | Berechtigungsumfang               |
-| ------- | --------------------- | ------------------- | --------------------------------- |
-| POST    | `/api/cli/connect`    | Verwaltungspasswort | — (öffentlich, passwortgeschützt) |
-| GET     | `/api/cli/whoami`     | Zugriffstoken       | Lesen                             |
-| GET     | `/api/cli/tokens`     | Zugriffstoken       | Administration                    |
-| POST    | `/api/cli/tokens`     | Zugriffstoken       | Administration                    |
-| DELETE  | `/api/cli/tokens/:id` | Zugriffstoken       | Administration                    |
+| Methode | Route                 | Authentifizierung              | Berechtigungsumfang               |
+| ------- | --------------------- | ------------------------------ | --------------------------------- |
+| POST    | `/api/cli/connect`    | Passwort; 2FA, falls aktiviert | — (öffentlich, passwortgeschützt) |
+| GET     | `/api/cli/whoami`     | Zugriffstoken                  | Lesen                             |
+| GET     | `/api/cli/tokens`     | Zugriffstoken                  | Administration                    |
+| POST    | `/api/cli/tokens`     | Zugriffstoken                  | Administration                    |
+| DELETE  | `/api/cli/tokens/:id` | Zugriffstoken                  | Administration                    |
 
-Die vollständigen Schemas finden Sie in [openapi.yaml](../openapi.yaml).
+Vollständige Schemas finden Sie unter [openapi.yaml](../openapi.yaml).
