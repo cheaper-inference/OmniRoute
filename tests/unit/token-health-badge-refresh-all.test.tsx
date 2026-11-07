@@ -9,7 +9,7 @@
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import TokenHealthBadge from "./TokenHealthBadge";
+import TokenHealthBadge from "@/shared/components/TokenHealthBadge";
 import { useNotificationStore } from "@/store/notificationStore";
 
 vi.mock("next-intl", () => ({
