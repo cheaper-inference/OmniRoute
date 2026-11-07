@@ -17,6 +17,11 @@
  */
 
 import { logToolCall } from "../audit.ts";
+import {
+  omniJevConfigSchema,
+  isOmniJevStrategy,
+  type OmniJevConfig,
+} from "../../../src/shared/validation/omniJev.ts";
 import { readAnalyticsTotals, readProviderMetrics } from "../analyticsShape.ts";
 import { toSafeMcpErrorMessage } from "../errorMessage.ts";
 // #15159 M-06: the hop lives in one place now. The private copy this replaced read
@@ -35,6 +40,7 @@ import type {
   RoutingStrategyValue,
 } from "../../../src/shared/constants/routingStrategies.ts";
 import { normalizeRoutingStrategy } from "../../../src/shared/constants/routingStrategies.ts";
+import { toNumber } from "../../../src/shared/utils/numeric.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -58,16 +64,6 @@ function toArrayOfRecords(value: unknown): JsonRecord[] {
 
 function toString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;
-}
-
-function toNumber(value: unknown, fallback = 0): number {
-  const parsed =
-    typeof value === "number"
-      ? value
-      : typeof value === "string" && value.trim().length > 0
-        ? Number(value)
-        : Number.NaN;
-  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function toBoolean(value: unknown, fallback = false): boolean {
@@ -361,10 +357,37 @@ export async function handleSetBudgetGuard(args: {
   }
 }
 
+/**
+ * The auto-strategy config to persist, or undefined when the call changes neither the auto
+ * sub-strategy nor the OmniJev settings (the combo's stored config is then left alone).
+ */
+function buildAutoRoutingConfig(
+  currentConfig: JsonRecord,
+  args: { autoRoutingStrategy?: AutoRoutingStrategyValue; omniJev?: OmniJevConfig }
+): JsonRecord | undefined {
+  if (!args.autoRoutingStrategy && !args.omniJev) return undefined;
+  const currentAutoConfig = toRecord(currentConfig.auto);
+  return {
+    ...currentConfig,
+    auto: {
+      ...Object.fromEntries(Object.entries(currentConfig).filter(([key]) => key !== "auto")),
+      ...currentAutoConfig,
+      routerStrategy: isOmniJevStrategy(args.autoRoutingStrategy)
+        ? "omni-jev"
+        : (args.autoRoutingStrategy ??
+          currentAutoConfig.routerStrategy ??
+          currentConfig.routerStrategy ??
+          "rules"),
+      ...(args.omniJev ? { omniJev: omniJevConfigSchema.parse(args.omniJev) } : {}),
+    },
+  };
+}
+
 export async function handleSetRoutingStrategy(args: {
   comboId: string;
   strategy: RoutingStrategyValue;
   autoRoutingStrategy?: AutoRoutingStrategyValue;
+  omniJev?: OmniJevConfig;
 }) {
   const start = Date.now();
   try {
@@ -407,17 +430,8 @@ export async function handleSetRoutingStrategy(args: {
     );
 
     const normalizedStrategy = normalizeRoutingStrategy(args.strategy);
-    let nextConfig: JsonRecord | undefined = undefined;
-    if (normalizedStrategy === "auto" && args.autoRoutingStrategy) {
-      const currentAutoConfig = toRecord(currentConfig.auto);
-      nextConfig = {
-        ...currentConfig,
-        auto: {
-          ...currentAutoConfig,
-          routerStrategy: args.autoRoutingStrategy,
-        },
-      };
-    }
+    const nextConfig =
+      normalizedStrategy === "auto" ? buildAutoRoutingConfig(currentConfig, args) : undefined;
 
     const payload: JsonRecord = { strategy: normalizedStrategy };
     if (nextConfig && Object.keys(nextConfig).length > 0) {

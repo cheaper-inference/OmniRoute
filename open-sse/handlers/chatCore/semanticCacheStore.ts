@@ -16,6 +16,7 @@ import {
   isTruncatedCompletion as defaultIsTruncatedCompletion,
 } from "@/lib/semanticCache";
 import { isSmallEnoughForSemanticCache as defaultIsSmallEnough } from "../../utils/estimateSize.ts";
+import { semanticCacheConversation } from "./semanticCacheConversation.ts";
 import { getSemanticCacheManager } from "../../services/cache/semanticCacheManager.ts";
 
 type LoggerLike = { debug?: (...args: unknown[]) => void } | null | undefined;
@@ -73,7 +74,7 @@ export function storeSemanticCacheResponse(
   }
   const signature = deps.generateSignature(
     args.model,
-    args.body.messages ?? args.body.input,
+    semanticCacheConversation(args.body),
     args.body.temperature,
     args.body.top_p,
     args.apiKeyId ?? undefined,

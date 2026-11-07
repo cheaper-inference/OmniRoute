@@ -12,6 +12,7 @@ import { synthesizeOpenAiSseFromJson } from "../../utils/jsonToSse.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
+import { semanticCacheConversation } from "./semanticCacheConversation.ts";
 import { getSemanticCacheManager } from "../../services/cache/semanticCacheManager.ts";
 
 export function isSemanticCacheEnabled(
@@ -92,7 +93,7 @@ export async function checkSemanticCache({
       // with a signature computed without them.
       const signature = generateSignature(
         model,
-        body.messages ?? body.input,
+        semanticCacheConversation(body),
         body.temperature,
         body.top_p,
         apiKeyId ?? undefined,
