@@ -1578,7 +1578,7 @@ These endpoints mirror Gemini's API format for clients that expect native Gemini
 
 | Endpoint                 | Method | Description                                            |
 | ------------------------ | ------ | ------------------------------------------------------ |
-| `/api/init`              | GET    | Application initialization check (used on first run)   |
+| `/api/init`              | GET    | Start background sync services (management auth)       |
 | `/api/tags`              | GET    | Ollama-compatible model tags (for Ollama clients)      |
 | `/api/restart`           | POST   | Trigger graceful server restart                        |
 | `/api/shutdown`          | POST   | Trigger graceful server shutdown                       |
