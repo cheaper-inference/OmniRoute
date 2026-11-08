@@ -46,6 +46,7 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { GITLAB_DUO_OAUTH_SETUP_MESSAGE } from "@/shared/constants/gitlabDuoSetupMessage";
 import { keychainImportOnlyGuard } from "./keychainImportOnly";
 import { buildRemoteOAuthHint } from "./remoteOAuthHint";
+import { authorizeM365, exchangeM365 } from "./m365Auth";
 
 // Persist one callback server per provider across Next.js HMR reloads.
 if (!globalThis.__pkceCallbackStates) {
@@ -190,6 +191,7 @@ export async function GET(
     const { searchParams } = new URL(request.url);
 
     if (action === "authorize") {
+      if (provider === "copilot-m365-web") return authorizeM365(searchParams);
       const requestedRedirectUri =
         searchParams.get("redirect_uri") || "http://localhost:8080/callback";
       const redirectUri = resolveBrowserOAuthRedirectUri(provider, requestedRedirectUri);
@@ -481,6 +483,9 @@ export async function POST(
     }
 
     let body: any = rawBody;
+    // This provider requires the exact full redirect URL and its server-issued
+    // transaction. Do not normalize it through the generic raw-code exchange.
+    if (provider === "copilot-m365-web" && action === "exchange") return exchangeM365(rawBody);
     if (action === "exchange") {
       const validation = validateBody(oauthExchangeSchema, rawBody);
       if (isValidationFailure(validation)) {
