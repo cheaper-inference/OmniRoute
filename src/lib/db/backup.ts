@@ -522,24 +522,24 @@ export async function restoreDbBackup(backupId: string) {
     throw new Error(`Backup file is corrupt: ${message}`);
   }
 
-  // Force pre-restore backup (bypass throttle) and await so the DB is not closed while backup runs
-  if (!isSqliteAutoBackupDisabled()) {
-    _lastBackupAt = 0;
-    const backupDirForPre = getBackupDir();
-    if (SQLITE_FILE && fs.existsSync(SQLITE_FILE)) {
-      const stat = fs.statSync(SQLITE_FILE);
-      if (stat.size >= 4096) {
-        if (!fs.existsSync(backupDirForPre))
-          fs.mkdirSync(backupDirForPre, { recursive: true, mode: DB_SECRET_DIR_MODE });
-        const preBackupPath = path.join(
-          backupDirForPre,
-          `db_${new Date().toISOString().replace(/[:.]/g, "-")}_pre-restore.sqlite`
-        );
-        const dbForBackup = getDbInstance();
-        await dbForBackup.backup(preBackupPath);
-        chmodQuiet(preBackupPath, DB_SECRET_FILE_MODE);
-        _lastBackupAt = Date.now();
-      }
+  // Force pre-restore backup (bypass throttle) and await so the DB is not closed while backup runs.
+  // This copy is mandatory, not routine: DISABLE_SQLITE_AUTO_BACKUP and the dashboard toggle
+  // switch off routine backups only, and must not remove the restore safety net.
+  _lastBackupAt = 0;
+  const backupDirForPre = getBackupDir();
+  if (SQLITE_FILE && fs.existsSync(SQLITE_FILE)) {
+    const stat = fs.statSync(SQLITE_FILE);
+    if (stat.size >= 4096) {
+      if (!fs.existsSync(backupDirForPre))
+        fs.mkdirSync(backupDirForPre, { recursive: true, mode: DB_SECRET_DIR_MODE });
+      const preBackupPath = path.join(
+        backupDirForPre,
+        `db_${new Date().toISOString().replace(/[:.]/g, "-")}_pre-restore.sqlite`
+      );
+      const dbForBackup = getDbInstance();
+      await dbForBackup.backup(preBackupPath);
+      chmodQuiet(preBackupPath, DB_SECRET_FILE_MODE);
+      _lastBackupAt = Date.now();
     }
   }
 
