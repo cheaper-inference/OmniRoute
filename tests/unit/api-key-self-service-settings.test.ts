@@ -261,9 +261,10 @@ test("historical self-service migration 218 preserves settings and installs upst
   assert.ok(columns.some((column) => column.name === "mirror_urls"));
 });
 
-test("historical self-service migration 229 moves down to 228 without re-running the table", async () => {
+test("historical self-service migration 229 frees its slot for the next upstream 229 migration", async () => {
   // Builds of #14771/#14862 pushed before the release filled 223–227 shipped the settings
-  // table as 229. Those databases must keep their settings and record a single row at 228.
+  // table as 229. On those databases 228 re-runs idempotently and the stale 229 ledger row
+  // must not shadow whatever migration the release lands at 229 next.
   const db = core.getDbInstance();
   const saved = settingsDb.updateApiKeySelfServiceSettings("historical-229-key", {
     sharedQuotaProviders: ["codex"],
@@ -277,11 +278,19 @@ test("historical self-service migration 229 moves down to 228 without re-running
   runMigrations(db);
   settingsDb.clearApiKeySelfServiceSettingsCache();
   assert.deepEqual(settingsDb.getApiKeySelfServiceSettings("historical-229-key"), saved);
+
+  const { reconcileRenumberedMigrations } =
+    await import("../../src/lib/db/migrationRunner/schemaState.ts");
+  const repaired = reconcileRenumberedMigrations(db, [
+    { version: "228", name: "api_key_self_service_settings", path: "228.sql" },
+    { version: "229", name: "future_upstream_migration", path: "229.sql" },
+  ]);
+  assert.equal(repaired, true);
   assert.deepEqual(
     db
-      .prepare("SELECT version FROM _omniroute_migrations WHERE name = ? ORDER BY version")
-      .all("api_key_self_service_settings"),
-    [{ version: "228" }]
+      .prepare("SELECT version, name FROM _omniroute_migrations WHERE version IN ('228', '229')")
+      .all(),
+    [{ version: "228", name: "api_key_self_service_settings" }]
   );
 });
 
