@@ -30,11 +30,8 @@ function recordBill(input: Identity, costUsd: number | null, tokens?: unknown): 
   }
 }
 
-/** One successful physical embedding batch, not one row per vector or combo wrapper. */
-export async function recordEmbeddingRequest(
-  input: Identity & { usage: Record<string, unknown> | null }
-): Promise<number | null> {
-  const usage = input.usage ? { ...input.usage } : {};
+function normalizeEmbeddingUsage(raw: Record<string, unknown> | null): Record<string, unknown> {
+  const usage = raw ? { ...raw } : {};
   // OpenRouter's raw embeddings usage reports dollars as `cost`; the shared
   // calculator/persistence consume its normalized `cost_usd` spelling.
   if (typeof usage.cost === "number" && Number.isFinite(usage.cost) && usage.cost >= 0) {
@@ -43,11 +40,21 @@ export async function recordEmbeddingRequest(
   if (usage.prompt_tokens === undefined && typeof usage.total_tokens === "number") {
     usage.prompt_tokens = usage.total_tokens;
   }
-  const reportedCost = readReportedCost(input.provider, usage).providerCostUsd;
+  return usage;
+}
+
+function hasMeasuredTokenCount(usage: Record<string, unknown>): boolean {
   const count = usage.prompt_tokens ?? usage.input_tokens;
-  const hasMeasuredUsage =
-    reportedCost !== null ||
-    (typeof count === "number" && Number.isSafeInteger(count) && count >= 0);
+  return typeof count === "number" && Number.isSafeInteger(count) && count >= 0;
+}
+
+/** One successful physical embedding batch, not one row per vector or combo wrapper. */
+export async function recordEmbeddingRequest(
+  input: Identity & { usage: Record<string, unknown> | null }
+): Promise<number | null> {
+  const usage = normalizeEmbeddingUsage(input.usage);
+  const reportedCost = readReportedCost(input.provider, usage).providerCostUsd;
+  const hasMeasuredUsage = reportedCost !== null || hasMeasuredTokenCount(usage);
   const pricing = hasMeasuredUsage
     ? await calculateCostDetailed(input.provider, input.model, usage)
     : { costUsd: 0, priced: false };
