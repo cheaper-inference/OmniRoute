@@ -153,32 +153,24 @@ function opaqueHashes(value: unknown, hashes = new Set<string>()): Set<string> {
   return hashes;
 }
 
-/** Continuation ids a single object node carries directly (not those of its nested values). */
-function ownContinuationIds(item: Record<string, unknown>): string[] {
-  const ids: string[] = [];
-  if (
-    ["function_call", "function_call_output"].includes(String(item.type)) &&
-    typeof item.call_id === "string"
-  )
-    ids.push(`call:${item.call_id}`);
-  if (item.role === "tool" && typeof item.tool_call_id === "string")
-    ids.push(`call:${item.tool_call_id}`);
-  if (Array.isArray(item.tool_calls)) {
-    for (const call of item.tool_calls)
-      if (call && typeof call.id === "string") ids.push(`call:${call.id}`);
-  }
-  if (item.type === "item_reference" && typeof item.id === "string") ids.push(`item:${item.id}`);
-  return ids;
+/**
+ * Server-side item references a node carries directly (not those of its nested values). Tool
+ * call ids and plain item ids are not among them: whoever produced a turn chooses them, they
+ * carry no account state, and Muse accepts a tool history whose ids it never issued. Fencing
+ * them made any thread that ran tools on another model impossible to continue on Muse.
+ */
+function ownItemReferences(item: Record<string, unknown>): string[] {
+  return item.type === "item_reference" && typeof item.id === "string" ? [`item:${item.id}`] : [];
 }
 
-function continuationIds(value: unknown, ids = new Set<string>()): Set<string> {
+function itemReferences(value: unknown, ids = new Set<string>()): Set<string> {
   if (Array.isArray(value)) {
-    for (const item of value) continuationIds(item, ids);
+    for (const item of value) itemReferences(item, ids);
   } else if (value && typeof value === "object") {
     const item = value as Record<string, unknown>;
-    for (const id of ownContinuationIds(item)) ids.add(id);
+    for (const id of ownItemReferences(item)) ids.add(id);
     for (const nested of Object.values(item))
-      if (nested && typeof nested === "object") continuationIds(nested, ids);
+      if (nested && typeof nested === "object") itemReferences(nested, ids);
   }
   return ids;
 }
@@ -216,7 +208,7 @@ export function claimMuseSession(
     } else {
       if (
         opaqueHashes(body).size ||
-        continuationIds(body).size ||
+        itemReferences(body).size ||
         body.previous_response_id ||
         body._omniroutePreviousResponseResumed ||
         (Array.isArray(body.input) &&
@@ -224,9 +216,7 @@ export function claimMuseSession(
             (item) =>
               item &&
               typeof item === "object" &&
-              ["reasoning", "function_call", "function_call_output", "item_reference"].includes(
-                String(item.type)
-              )
+              ["reasoning", "item_reference"].includes(String(item.type))
           ))
       ) {
         throw new MuseOwnershipError(
@@ -254,10 +244,10 @@ export function claimMuseSession(
         );
       }
     }
-    for (const id of continuationIds(body)) {
+    for (const id of itemReferences(body)) {
       if (!owner.generation || load(`reference:${scope}:${digest(id)}`) !== owner.generation) {
         throw new MuseOwnershipError(
-          "Muse tool continuation was not issued to this session and caller generation."
+          "Muse item reference was not issued to this session and caller generation."
         );
       }
     }
@@ -304,7 +294,6 @@ export function recordMuseOutput(response: Response, scope: string, generation: 
   touchMuseOwnershipScope(scope);
   const record = (value: unknown) => {
     for (const hash of opaqueHashes(value)) save(`opaque:${scope}:${hash}`, generation);
-    for (const id of continuationIds(value)) save(`reference:${scope}:${digest(id)}`, generation);
     const output = value as {
       item?: { id?: unknown };
       output?: unknown[];
