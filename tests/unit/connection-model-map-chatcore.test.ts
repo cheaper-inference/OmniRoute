@@ -17,6 +17,7 @@ const { clearPendingRequests } = await import("../../src/lib/usage/usageHistory.
 const { waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const { calculateCostDetailed } = await import("../../src/lib/usage/costCalculator.ts");
 const { getCostSummary } = await import("../../src/domain/costRules.ts");
+const { updatePricing } = await import("../../src/lib/db/settings/pricing.ts");
 const originalFetch = globalThis.fetch;
 
 const USAGE = { prompt_tokens: 1000, completion_tokens: 500, total_tokens: 1500 };
@@ -256,6 +257,9 @@ for (const stream of [false, true]) {
   // Effort variants are the common case of a served id that differs from the routed `model`. How
   // they are priced is a separate billing policy: this feature must not move it for unmapped traffic.
   test(`without a map an effort variant keeps its routed billing, stream=${stream}`, async () => {
+    // #18754 prices an effort variant like its base model, so a user override on the routed id is
+    // what tells the two prices apart here.
+    await updatePricing({ anthropic: { "claude-opus-5-5-high": { input: 40, output: 200 } } });
     const usage = { prompt_tokens: 1000, completion_tokens: 500 };
     const routed = await calculateCostDetailed("anthropic", "claude-opus-5-5-high", usage);
     const served = await calculateCostDetailed("anthropic", "claude-opus-5-5", usage);
