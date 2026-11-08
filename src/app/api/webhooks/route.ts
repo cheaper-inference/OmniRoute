@@ -27,7 +27,7 @@ const createWebhookSchema = z
     secret: z.string().max(500).optional(),
     description: z.string().max(1000).optional().default(""),
     kind: z.enum(WEBHOOK_KINDS).optional().default("custom"),
-    metadata: z.record(z.string()).optional(),
+    metadata: z.record(z.string(), z.string()).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.kind === "telegram") return;

@@ -56,11 +56,11 @@ en raison d’un fait concret lié à l’implémentation :
 
 Voici ce que cela signifie pour chaque surface, même avec `CORS_ALLOW_ALL=true` :
 
-| Surface                                        | Mécanisme d’authentification | Effet du CORS avec caractère générique                                                                                                                                                                                                                                                  |
-| ---------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tableau de bord / MANAGEMENT `/api/*`          | Session par cookie           | L’origine est renvoyée, mais **sans `Allow-Credentials`**, le navigateur **bloque** la lecture avec informations d’identification. Un site interorigine malveillant **ne peut pas lire** les réponses authentifiées de votre tableau de bord, et le cookie de session n’est pas exposé. |
-| API cliente `/v1/*`, `/v1beta/*`               | En-tête Bearer / `x-api-key` | Déjà permissive **par conception** (`relaxForTokenAuth`) : les navigateurs ne joignent jamais automatiquement `Authorization`/`x-api-key`, si bien que la page d’un attaquant ne peut pas fournir votre clé. `CORS_ALLOW_ALL` n’élargit pas cette exposition.                           |
-| Lecture publique uniquement (`/api/health`, …) | Aucun                        | Non sensible ; le caractère générique est sans danger.                                                                                                                                                                                                                                  |
+| Surface                                        | Mécanisme d’authentification | Effet du CORS avec caractère générique                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tableau de bord / MANAGEMENT `/api/*`          | Session par cookie           | L’origine est renvoyée, mais **sans `Allow-Credentials`**, le navigateur **bloque** la lecture avec informations d’identification. Un site interorigine malveillant **ne peut pas lire** les réponses authentifiées de votre tableau de bord, et le cookie de session n’est pas exposé.                                                                                                                                             |
+| API cliente `/v1/*`, `/v1beta/*`               | En-tête Bearer / `x-api-key` | Déjà permissive **par conception** (`relaxForTokenAuth`) : les navigateurs ne joignent jamais automatiquement `Authorization`/`x-api-key`, si bien que la page d’un attaquant ne peut pas fournir votre clé. Le renvoi de l’origine ne s’applique que lorsque la clé présentée a été validée ; les réponses anonymes (`REQUIRE_API_KEY=false`) conservent la liste d’autorisation. `CORS_ALLOW_ALL` n’élargit pas cette exposition. |
+| Lecture publique uniquement (`/api/health`, …) | Aucun                        | Non sensible ; le caractère générique est sans danger.                                                                                                                                                                                                                                                                                                                                                                              |
 
 L’exposition **résiduelle** de `CORS_ALLOW_ALL=true` se limite donc à : (a)
 des **lectures** interorigines sans informations d’identification de données déjà accessibles sans authentification, et (b)
@@ -125,10 +125,52 @@ Origines CORS autorisées**, sans redémarrage.
   la clé d’API est la barrière. C’est pourquoi cette surface est volontairement
   permissive, afin que les clients de navigateur et Electron puissent lire les réponses
   auxquelles ils ont déjà droit.
+  Le renvoi assoupli de l’origine suit la clé validée, et non la simple présence de
+  l’en-tête : lorsque `REQUIRE_API_KEY=false` sert une requête de manière anonyme, sa
+  réponse réussie conserve la liste d’autorisation fermée par défaut. Les refus
+  d’authentification (401) restent lisibles afin que les clients puissent signaler une clé
+  révoquée ou mal saisie (#5242) : le 401 émis par le pipeline lui-même conserve le renvoi
+  de l’origine, et une route qui refuse elle-même la clé après que le pipeline l’a servie
+  comme anonyme (`/v1/models` et `/v1beta/models` lorsque l’authentification de gestion est
+  configurée, les routes limitées au propriétaire `/v1/files`, `/v1/batches`, `/v1/media`,
+  `/v1/session-leases` et les routes de candidats de l’auto-combo) ajoute le renvoi de
+  l’origine à ce 401 via `credentialRejectionHeaders()`. Le renvoi dépend de la présence
+  dans la requête d’un en-tête d’identifiants (`Authorization`, `x-api-key`,
+  `x-goog-api-key` ou le cookie `auth_token`), et non de celui que la route a vérifié ; il
+  n’est jamais associé à `Access-Control-Allow-Credentials`, et le corps est une enveloppe
+  d’erreur fixe. Les routes de gestion sous `/api/v1/` protégées par `requireManagementAuth()`
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) n’ajoutent pas ce renvoi : avec `REQUIRE_API_KEY=false`, leurs réponses 401/403 ne sont
+  pas lisibles depuis une autre origine.
 - **Session par cookie (le tableau de bord) :** elle est protégée par le comportement
   fermé par défaut **et** par l’absence de `Access-Control-Allow-Credentials` sur le
   chemin partagé. N’incluez pas les origines de gestion ou du tableau de bord dans une
   configuration permissive ; elles doivent rester strictement fermées par défaut.
+
+## Handshakes WebSocket (`/v1/responses`, `/v1/ws`)
+
+Les navigateurs n’appliquent pas CORS aux WebSocket ; les transports WebSocket qui
+renvoient une sortie d’inférence vérifient donc eux-mêmes l’en-tête `Origin` du handshake
+(`src/server/origin/wsOrigin.ts`) : le WebSocket de Responses (`/v1/responses`) et,
+lorsque OmniRoute s’exécute via `npm start` / `npm run dev`, la passerelle `/v1/ws` et
+`/api/v1/ws`, qui diffuse `/v1/chat/completions`, `/v1/messages` et
+`/v1/responses` sous forme de trames. La passerelle demande le verdict à
+`/api/v1/ws?handshake=1` et refuse l’upgrade si cette route n’a pas effectué la
+vérification. Un handshake est accepté lorsque :
+
+- il ne comporte pas d’en-tête `Origin` (Codex CLI, SDK et autres clients hors navigateur) ;
+- l’en-tête `Origin` est admis par la liste d’autorisation ci-dessus
+  (`CORS_ALLOWED_ORIGINS`, le paramètre `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`) ;
+- l’en-tête `Origin` correspond à l’une des origines publiques d’OmniRoute lui-même (l’URL
+  de base publique configurée, l’origine transmise par un proxy de confiance, ou un hôte
+  loopback/LAN direct indiqué sous forme d’adresse IP littérale ou de `localhost` — les
+  mêmes candidats que ceux utilisés par la vérification des mutations du tableau de
+  bord) ; ou
+- il comporte une clé d’API valide, comme sur la surface HTTP `/v1/*`.
+
+Tout autre cas reçoit `403 ws_origin_forbidden`. Un cookie de session du tableau de bord
+n’exempte pas un en-tête `Origin` étranger, car le navigateur le joint au socket de
+n’importe quelle page. `localhost` sur un autre port n’est pas considéré comme la même
+origine ; ajoutez ces origines de développement à `CORS_ALLOWED_ORIGINS`.
 
 ## Exemple : proxy inverse devant OmniRoute
 
@@ -155,15 +197,16 @@ l’onglet Sécurité), et non dans le proxy.
 
 ## Fichiers sources
 
-| Élément concerné                                          | Fichier                                                              |
-| --------------------------------------------------------- | -------------------------------------------------------------------- |
-| Résolution de la liste d’autorisation + `getCorsStatus()` | `src/server/cors/origins.ts`                                         |
-| Application du middleware (source unique de vérité)       | `src/server/authz/pipeline.ts`                                       |
-| Paramètres → injection des origines à l’exécution         | `src/lib/config/runtimeSettings.ts`                                  |
-| État d’exécution pour le tableau de bord                  | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Bannière d’avertissement du tableau de bord               | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| Champ Origines CORS autorisées                            | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| CORS par route de Cloud-Agent (l’exception)               | `src/lib/cloudAgent/api.ts`                                          |
+| Élément concerné                                               | Fichier                                                              |
+| -------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Résolution de la liste d’autorisation + `getCorsStatus()`      | `src/server/cors/origins.ts`                                         |
+| Application du middleware (source unique de vérité)            | `src/server/authz/pipeline.ts`                                       |
+| Paramètres → injection des origines à l’exécution              | `src/lib/config/runtimeSettings.ts`                                  |
+| État d’exécution pour le tableau de bord                       | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Bannière d’avertissement du tableau de bord                    | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| Champ Origines CORS autorisées                                 | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| CORS par route de Cloud-Agent (l’exception)                    | `src/lib/cloudAgent/api.ts`                                          |
+| Vérification de l’en-tête `Origin` lors du handshake WebSocket | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Voir aussi
 

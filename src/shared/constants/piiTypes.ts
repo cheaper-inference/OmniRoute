@@ -22,6 +22,20 @@ export const PII_BUILTIN_TYPES = [
   "ipv6_address",
   "aws_key",
   "api_key_generic",
+  // GDPR (EU) — validators in src/shared/utils/piiPatterns.ts
+  "iban",
+  "eu_vat",
+  "es_dni_nie",
+  "it_codice_fiscale",
+  "pl_pesel",
+  "nl_bsn",
+  "de_steuer_id",
+  "se_personnummer",
+  // POPIA (South Africa)
+  "za_id",
+  "za_phone",
+  "za_vat",
+  "za_tax_ref",
 ] as const;
 
 export type PiiBuiltinType = (typeof PII_BUILTIN_TYPES)[number];
@@ -51,6 +65,21 @@ export const PII_TEMPLATES: ReadonlyArray<{ id: string; types: readonly PiiBuilt
   { id: "financial", types: ["credit_card", "cpf", "cnpj", "aws_key", "api_key_generic"] },
   { id: "brazilian", types: ["cpf", "cnpj", "phone_br", "email"] },
   { id: "usa", types: ["ssn", "phone_us", "email"] },
+  {
+    id: "gdpr",
+    types: [
+      "email",
+      "iban",
+      "eu_vat",
+      "es_dni_nie",
+      "it_codice_fiscale",
+      "pl_pesel",
+      "nl_bsn",
+      "de_steuer_id",
+      "se_personnummer",
+    ],
+  },
+  { id: "popia", types: ["email", "za_id", "za_phone", "za_vat", "za_tax_ref"] },
   { id: "full", types: [...PII_BUILTIN_TYPES] },
 ];
 

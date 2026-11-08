@@ -9,6 +9,7 @@ import {
   extendDeepSeekEffortValues,
 } from "@/shared/reasoning/effortStandardization";
 import { knownReasoningEffortTiers } from "@/lib/modelsDevSync/transform";
+import { resolveModelDisplayName } from "@/shared/utils/modelDisplayName";
 
 export interface CustomModelEntry {
   id?: string;
@@ -108,6 +109,39 @@ export function maybeOmitCatalogModelName<T extends Record<string, unknown>>(
   const { name: omittedName, ...nextModel } = model;
   void omittedName;
   return nextModel;
+}
+
+/**
+ * Give a catalog row a human-readable `name` when it has none, or when the only
+ * name it got is its own id (`enrichCatalogModelEntry` falls back to the raw model
+ * id when the registry has no name). A real name is returned untouched, and no
+ * field other than `name` is ever written.
+ */
+export function withCatalogDisplayName<T extends Record<string, unknown>>(model: T): T {
+  const id = typeof model.id === "string" ? model.id : "";
+  const root = typeof model.root === "string" && model.root ? model.root : id;
+  const name = typeof model.name === "string" ? model.name.trim() : "";
+  const leaf = root.slice(root.lastIndexOf("/") + 1);
+  if (name && name !== id && name !== root && name !== leaf) return model;
+  const derived = resolveModelDisplayName(root);
+  return derived && derived !== name ? { ...model, name: derived } : model;
+}
+
+/**
+ * The name a synced row should carry: its own published name, unless the static
+ * registry already names the model (the registry name keeps winning, as before).
+ */
+export function pickSyncedCatalogName(
+  syncedModel: { id?: unknown; name?: unknown },
+  registryModelLists: Array<Array<{ id?: unknown; name?: unknown }> | undefined>
+): string | undefined {
+  const id = typeof syncedModel.id === "string" ? syncedModel.id : "";
+  const name = typeof syncedModel.name === "string" ? syncedModel.name.trim() : "";
+  if (!id || !name || name === id) return undefined;
+  const registryNamed = registryModelLists.some((list) =>
+    (list || []).some((entry) => entry?.id === id && typeof entry.name === "string" && entry.name)
+  );
+  return registryNamed ? undefined : name;
 }
 
 export function intersectStringArrays(arrays: string[][]): string[] {

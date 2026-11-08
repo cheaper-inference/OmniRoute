@@ -144,8 +144,8 @@ function getBufferTokens(): number {
 
 async function _loadBufferFromDb(): Promise<void> {
   try {
-    const { getSettings } = await import("@/lib/db/settings");
-    const settings = await getSettings();
+    const { getCachedSettings } = await import("@/lib/db/readCache");
+    const settings = await getCachedSettings();
     const val = settings.usageTokenBuffer;
     if (typeof val === "number" && val >= 0) {
       _cachedBuffer = val;
@@ -968,13 +968,16 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
 
   // Ollama NDJSON format (raw from provider, before translation)
   // Ollama sends: { "model": "...", "done": true, "prompt_eval_count": N, "eval_count": M }
+  // and, on newer servers, "prompt_eval_cached_count": C (cache reads, a subset of N).
   if (chunk.done === true && typeof chunk.prompt_eval_count === "number") {
     const promptEvalCount = chunk.prompt_eval_count || 0;
     const evalCount = chunk.eval_count || 0;
+    const cachedCount = chunk.prompt_eval_cached_count;
     return normalizeUsage({
       prompt_tokens: promptEvalCount,
       completion_tokens: evalCount,
       total_tokens: promptEvalCount + evalCount,
+      ...(typeof cachedCount === "number" ? { cached_tokens: cachedCount } : {}),
     });
   }
 
