@@ -111,6 +111,19 @@ export function ensureUsageHistoryColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE usage_history ADD COLUMN success INTEGER DEFAULT 1");
       console.log("[DB] Added usage_history.success column");
     }
+    // Cloud initialization uses the inline schema without versioned migrations.
+    // Reconcile stored-cost columns here as well as in the disk migration path.
+    for (const [column, type] of [
+      ["provider_cost_usd", "REAL CHECK(provider_cost_usd >= 0)"],
+      ["calculated_cost_usd", "REAL CHECK(calculated_cost_usd >= 0)"],
+      ["billing_unit", "TEXT"],
+      ["billing_quantity", "REAL CHECK(billing_quantity >= 0)"],
+      ["billing_unit_price_usd", "REAL CHECK(billing_unit_price_usd >= 0)"],
+    ]) {
+      if (!columnNames.has(column)) {
+        db.exec(`ALTER TABLE usage_history ADD COLUMN ${column} ${type}`);
+      }
+    }
     if (!columnNames.has("latency_ms")) {
       db.exec("ALTER TABLE usage_history ADD COLUMN latency_ms INTEGER DEFAULT 0");
       console.log("[DB] Added usage_history.latency_ms column");

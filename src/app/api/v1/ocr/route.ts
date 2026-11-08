@@ -135,7 +135,10 @@ async function postHandler(request, _context) {
         ...result,
         apiKeyId: policy.apiKeyInfo?.id,
         apiKeyName: policy.apiKeyInfo?.name,
-        connectionId: credentials.connectionId,
+        connectionId:
+          "connectionId" in credentials && typeof credentials.connectionId === "string"
+            ? credentials.connectionId
+            : null,
         startTime,
         annotated: Boolean(body.bbox_annotation_format || body.document_annotation_format),
       }),
