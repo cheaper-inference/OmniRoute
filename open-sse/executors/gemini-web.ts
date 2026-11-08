@@ -89,6 +89,20 @@ function formatStreamChunk(content: string, model: string, finishReason: string 
   };
 }
 
+function flattenGeminiTextContent(content: unknown): string | null {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return null;
+
+  const text: string[] = [];
+  for (const part of content) {
+    if (!part || typeof part !== "object" || Array.isArray(part)) return null;
+    const record = part as Record<string, unknown>;
+    if (record.type !== "text" || typeof record.text !== "string") return null;
+    text.push(record.text);
+  }
+  return text.join("");
+}
+
 /**
  * Flatten the OpenAI-style multi-turn `messages[]` into the single plain-text
  * prompt typed into the Gemini web UI (#8371).
@@ -122,9 +136,11 @@ function formatStreamChunk(content: string, model: string, finishReason: string 
  *   <last user message>
  */
 export function buildGeminiPrompt(messages: Array<{ role: string; content: unknown }>): string {
-  const textMessages = messages.filter(
-    (m) => typeof m.content === "string" && (m.content as string).trim().length > 0
-  ) as Array<{ role: string; content: string }>;
+  const textMessages: Array<{ role: string; content: string }> = [];
+  for (const message of messages) {
+    const content = flattenGeminiTextContent(message.content);
+    if (content?.trim()) textMessages.push({ role: message.role, content });
+  }
 
   const userMessages = textMessages.filter((m) => m.role === "user");
   const lastUser = userMessages[userMessages.length - 1];
@@ -185,12 +201,13 @@ export function buildGeminiToolPrompt(
   }>
 ): string {
   const toolPrompt = effectiveMessages
-    .filter((m) => m.role === "system" && typeof m.content === "string")
-    .map((m) => m.content as string)
+    .filter((m) => m.role === "system")
+    .map((m) => flattenGeminiTextContent(m.content))
+    .filter((content): content is string => content !== null)
     .join("\n\n");
   const lastUserIdx = effectiveMessages.map((m) => m.role).lastIndexOf("user");
   const lastUserMsg = lastUserIdx >= 0 ? effectiveMessages[lastUserIdx] : undefined;
-  const userText = typeof lastUserMsg?.content === "string" ? lastUserMsg.content : "";
+  const userText = flattenGeminiTextContent(lastUserMsg?.content) ?? "";
 
   // Everything except the current ask has to be rendered: an assistant turn that
   // called a tool and the `role: "tool"` result for it are the only evidence
@@ -205,12 +222,13 @@ export function buildGeminiToolPrompt(
   const prior: string[] = [];
   for (const [index, m] of effectiveMessages.entries()) {
     if (index === lastUserIdx) continue; // rendered below as the current ask
-    if (typeof m.content === "string" && m.content.trim()) {
-      if (m.role === "user") prior.push(`User: ${m.content}`);
-      else if (m.role === "assistant") prior.push(`Assistant: ${m.content}`);
+    const content = flattenGeminiTextContent(m.content);
+    if (content?.trim()) {
+      if (m.role === "user") prior.push(`User: ${content}`);
+      else if (m.role === "assistant") prior.push(`Assistant: ${content}`);
       else if (m.role === "tool") {
         const id = typeof m.tool_call_id === "string" ? m.tool_call_id : "";
-        prior.push(id ? `Tool result [${id}]: ${m.content}` : `Tool result: ${m.content}`);
+        prior.push(id ? `Tool result [${id}]: ${content}` : `Tool result: ${content}`);
       }
     }
     const calls = Array.isArray(m.tool_calls) ? m.tool_calls : [];
@@ -541,16 +559,14 @@ export class GeminiWebExecutor extends BaseExecutor {
       ? buildGeminiToolPrompt(effectiveMessages)
       : buildGeminiPrompt(messages);
 
-    // A system-only request (no user message at all) must still 400 — since
-    // #13380 prepends the system text, `prompt` alone is no longer a
-    // reliable "no user message" signal for the no-tools path (it used to be
-    // empty for a system-only request; now it carries the system text).
+    // A system-only or unreadable user request must still 400. A system or tool
+    // contract makes `prompt` alone an unreliable "no user message" signal.
     const hasUserMessage = messages.some(
       (m: { role: string; content: unknown }) =>
-        m.role === "user" && typeof m.content === "string" && m.content.trim().length > 0
+        m.role === "user" && Boolean(flattenGeminiTextContent(m.content)?.trim())
     );
 
-    if (!prompt || (!hasTools && !hasUserMessage)) {
+    if (!prompt || !hasUserMessage) {
       return {
         response: new Response(JSON.stringify({ error: "No user message found" }), {
           status: 400,

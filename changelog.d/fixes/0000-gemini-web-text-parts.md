@@ -1,0 +1,1 @@
+- **fix(gemini-web):** Flatten OpenAI text-part arrays in normal and tool prompts, while rejecting unreadable content parts.
