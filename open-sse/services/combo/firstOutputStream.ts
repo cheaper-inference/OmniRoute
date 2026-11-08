@@ -19,7 +19,6 @@
  */
 import { COMBO_PER_MODEL_TIMEOUT_REASON } from "./comboAbortReasons.ts";
 import { sseChunkCarriesOutput } from "../../utils/sseOutputSignal.ts";
-import { isReasoningProgressFrame } from "../../utils/streamReadiness.ts";
 import { createSSEDataLineNormalizer } from "../../utils/streamHelpers.ts";
 import {
   createTransportReplayObserver,
@@ -68,47 +67,40 @@ function carriesOutput(payload: string): boolean {
   return sseChunkCarriesOutput(`data: ${payload.replace(/\n/g, " ")}\n\n`);
 }
 
-/** Return a safe protocol label for logs after the shared predicate recognizes reasoning. */
-function reasoningFrameKind(payload: string, eventType: string): string | null {
-  const frame = `${eventType ? `event: ${eventType}\n` : ""}data: ${payload.replace(/\n/g, " ")}\n\n`;
-  if (!isReasoningProgressFrame(frame)) return null;
-
+/**
+ * Claude-only upstream thinking activity. Structural block starts count even when empty;
+ * deltas count only when they carry a non-empty thinking/signature string. Injected thinking
+ * signatures add only `signature: ""` to an upstream start, which does not match a delta.
+ */
+function claudeThinkingFrameKind(payload: string): string | null {
   try {
     const parsed: unknown = JSON.parse(payload.replace(/\n/g, " "));
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return "reasoning";
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
     const event = parsed as Record<string, unknown>;
-    const type = typeof event.type === "string" ? event.type : eventType;
     if (
-      type === "content_block_start" &&
+      event.type === "content_block_start" &&
       event.content_block &&
       typeof event.content_block === "object"
     ) {
       const blockType = (event.content_block as Record<string, unknown>).type;
-      if (blockType === "thinking" || blockType === "redacted_thinking") return blockType;
+      return blockType === "thinking" || blockType === "redacted_thinking" ? blockType : null;
     }
-    if (type === "content_block_delta" && event.delta && typeof event.delta === "object") {
-      const delta = event.delta as Record<string, unknown>;
-      const deltaType = delta.type;
-      if (deltaType === "signature_delta") {
-        return typeof delta.signature === "string" && delta.signature.length > 0
-          ? "signature_delta"
-          : null;
-      }
-      if (deltaType === "thinking_delta") return "thinking_delta";
+    if (event.type !== "content_block_delta" || !event.delta || typeof event.delta !== "object")
+      return null;
+    const delta = event.delta as Record<string, unknown>;
+    if (delta.type === "thinking_delta") {
+      return typeof delta.thinking === "string" && delta.thinking.length > 0
+        ? "thinking_delta"
+        : null;
     }
-    if (type.startsWith("response.reasoning")) return "response.reasoning";
-    if (
-      (type === "response.output_item.added" || type === "response.output_item.done") &&
-      event.item &&
-      typeof event.item === "object" &&
-      (event.item as Record<string, unknown>).type === "reasoning"
-    ) {
-      return "reasoning";
+    if (delta.type === "signature_delta") {
+      return typeof delta.signature === "string" && delta.signature.length > 0
+        ? "signature_delta"
+        : null;
     }
-    if (Array.isArray(event.candidates)) return "thoughtSignature";
-    return "reasoning";
+    return null;
   } catch {
-    return "reasoning";
+    return null;
   }
 }
 
@@ -125,7 +117,6 @@ export class SseOutputScanner {
   private dataLines: string[] = [];
   private bufferedChars = 0;
   private previousChunkEndedWithCr = false;
-  private eventType = "";
   private reasoningKind: string | null = null;
   private replayNormalizer = createSSEDataLineNormalizer();
   private replayBufferedChars = 0;
@@ -197,11 +188,10 @@ export class SseOutputScanner {
     if (this.dataLines.length === 0) return false;
     const payload = this.dataLines.join("\n");
     this.dataLines = [];
-    const kind = payload.length > 0 ? reasoningFrameKind(payload, this.eventType) : null;
     const ready = payload.length > 0 && carriesOutput(payload);
+    const kind = ready || payload.length === 0 ? null : claudeThinkingFrameKind(payload);
     if (ready) this.observeReplay?.();
     else if (kind) this.reasoningKind = kind;
-    this.eventType = "";
     return ready;
   }
 
@@ -218,16 +208,11 @@ export class SseOutputScanner {
     if (line === "") {
       const payload = this.dataLines.join("\n");
       this.dataLines = [];
-      const kind = payload.length > 0 ? reasoningFrameKind(payload, this.eventType) : null;
       const ready = payload.length > 0 && carriesOutput(payload);
+      const kind = ready || payload.length === 0 ? null : claudeThinkingFrameKind(payload);
       if (ready) this.observeReplay?.();
       else if (kind) this.reasoningKind = kind;
-      this.eventType = "";
       return ready;
-    }
-    if (line.startsWith("event:")) {
-      this.eventType = line.slice(6).trim();
-      return false;
     }
     if (!line.startsWith("data:")) return false;
     const value = line.slice(5);
@@ -314,7 +299,7 @@ export async function awaitFirstOutput(
   const scanner = new SseOutputScanner(createTransportReplayObserver(response));
   let timer: ReturnType<typeof setTimeout> | undefined;
 
-  let reasoningFrameKind: string | null = null;
+  let thinkingFrameKind: string | null = null;
   const outcome = await new Promise<"output" | "reasoning" | FirstOutputStallReason>((resolve) => {
     let settled = false;
     const finish = (value: "output" | "reasoning" | FirstOutputStallReason) => {
@@ -345,8 +330,8 @@ export async function awaitFirstOutput(
             finish("output");
             return;
           }
-          reasoningFrameKind = scanner.reasoningActivity();
-          if (reasoningFrameKind) {
+          thinkingFrameKind = scanner.reasoningActivity();
+          if (thinkingFrameKind) {
             finish("reasoning");
             return;
           }
@@ -369,7 +354,7 @@ export async function awaitFirstOutput(
   void reader.cancel(COMBO_PER_MODEL_TIMEOUT_REASON).catch(() => undefined);
   if (outcome === "output") return { kind: "output", response };
   if (outcome === "reasoning") {
-    return { kind: "reasoning", response, frameKind: reasoningFrameKind ?? "reasoning" };
+    return { kind: "reasoning", response, frameKind: thinkingFrameKind ?? "thinking" };
   }
 
   if (outcome === "budget") {

@@ -410,7 +410,15 @@ export async function executeTargetAttempt(
         deps.clientRequestedStream,
         deps.log,
         deps.config.responseValidation as ResponseValidationConfig | null | undefined,
-        preContentTransportRecovery ? deps.signal : null,
+        targetSignal
+          ? preContentTransportRecovery
+            ? AbortSignal.any(
+                [deps.signal, targetSignal].filter((signal): signal is AbortSignal => !!signal)
+              )
+            : targetSignal
+          : preContentTransportRecovery
+            ? deps.signal
+            : null,
         await isTrustedEmptyTurn(provider, result, target.connectionId),
         preContentTransportRecovery
       );

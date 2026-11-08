@@ -65,6 +65,22 @@ function sseResponse(body: ReadableStream<Uint8Array>, status = 200) {
   });
 }
 
+function delayedSseBody(first: string, later: string, delayMs = 30) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(enc.encode(first));
+      timer = setTimeout(() => {
+        controller.enqueue(enc.encode(later));
+        controller.close();
+      }, delayMs);
+    },
+    cancel() {
+      if (timer) clearTimeout(timer);
+    },
+  });
+}
+
 test("a streaming target that never produces output is abandoned within the per-target budget", async () => {
   let cancelled = false;
   const runner = buildTargetTimeoutRunner({
@@ -201,6 +217,106 @@ test("a Messages-protocol content block delta counts as output", async () => {
   assert.equal(res.status, 200);
 });
 
+test("a Claude redacted thinking block start passes through byte-for-byte", async () => {
+  const redactedStart =
+    'event: content_block_start\ndata: {"type":"content_block_start","index":0,"content_block":{"type":"redacted_thinking","data":"opaque"}}\n\n';
+  const later = 'event: content_block_stop\ndata: {"type":"content_block_stop","index":0}\n\n';
+  const expected = redactedStart + later;
+  const response = sseResponse(delayedSseBody(redactedStart, later));
+  const started = Date.now();
+  const result = await awaitFirstOutput(response, 900);
+
+  assert.equal(result.kind, "reasoning");
+  assert.ok(Date.now() - started < 500, "the upstream Claude thinking frame must end the wait");
+  assert.equal(
+    await result.response.text(),
+    expected,
+    "the original stream remains byte-identical"
+  );
+});
+
+test("an empty Claude thinking_delta alone waits for the first-output budget", async () => {
+  const emptyThinking =
+    'event: content_block_delta\ndata: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":""}}\n\n';
+  const runner = buildTargetTimeoutRunner({
+    handleSingleModel: async () => sseResponse(sseBody([emptyThinking], { stall: true })),
+    comboTargetTimeoutMs: 280,
+    log: noopLog,
+  });
+
+  const started = Date.now();
+  const result = await runner({}, "claude-empty-thinking-delta");
+  assert.equal(result.status, 504);
+  assert.ok(Date.now() - started >= 220, "an empty thinking delta is not upstream progress");
+});
+
+test("a non-empty Claude thinking_delta passes through with later bytes intact", async () => {
+  const thinkingDelta =
+    'event: content_block_delta\ndata: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"Let me reason"}}\n\n';
+  const later = 'event: content_block_stop\ndata: {"type":"content_block_stop","index":0}\n\n';
+  const expected = thinkingDelta + later;
+  const response = sseResponse(delayedSseBody(thinkingDelta, later));
+  const started = Date.now();
+  const result = await awaitFirstOutput(response, 900);
+
+  assert.equal(
+    result.kind,
+    "output",
+    "the shared output predicate treats visible thinking text as output"
+  );
+  assert.ok(Date.now() - started < 500, "non-empty Claude thinking ends the wait");
+  assert.equal(
+    await result.response.text(),
+    expected,
+    "the original stream remains byte-identical"
+  );
+});
+
+test("an OpenAI role chunk with empty reasoning waits for the first-output budget", async () => {
+  const roleOnly =
+    'data: {"choices":[{"delta":{"role":"assistant","content":null,"reasoning_content":""}}]}\n\n';
+  const runner = buildTargetTimeoutRunner({
+    handleSingleModel: async () => sseResponse(sseBody([roleOnly], { stall: true })),
+    comboTargetTimeoutMs: 280,
+    log: noopLog,
+  });
+
+  const started = Date.now();
+  const result = await runner({}, "openai-empty-reasoning-role");
+  assert.equal(result.status, 504);
+  assert.ok(Date.now() - started >= 220, "an empty reasoning field is not progress");
+});
+
+test("a Responses reasoning item after response.created waits for the first-output budget", async () => {
+  const created =
+    'event: response.created\ndata: {"type":"response.created","response":{"id":"r","status":"in_progress","output":[]}}\n\n';
+  const reasoningItem =
+    'event: response.output_item.added\ndata: {"type":"response.output_item.added","item":{"id":"reasoning_1","type":"reasoning","summary":[]}}\n\n';
+  const runner = buildTargetTimeoutRunner({
+    handleSingleModel: async () => sseResponse(sseBody([created, reasoningItem], { stall: true })),
+    comboTargetTimeoutMs: 280,
+    log: noopLog,
+  });
+
+  const started = Date.now();
+  const result = await runner({}, "responses-reasoning-item");
+  assert.equal(result.status, 504);
+  assert.ok(Date.now() - started >= 220, "Responses reasoning items are outside the Claude rule");
+});
+
+test("thinking start followed by text in one chunk is classified as output", async () => {
+  const thinkingStart =
+    'event: content_block_start\ndata: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":""}}\n\n';
+  const textDelta =
+    'event: content_block_delta\ndata: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"answer"}}\n\n';
+  const expected = thinkingStart + textDelta;
+  const response = sseResponse(sseBody([expected]));
+  const result = await awaitFirstOutput(response, 900);
+
+  assert.equal(result.kind, "output");
+  assert.equal(await result.response.text(), expected, "output bytes are passed through unchanged");
+});
+
 test("an upstream empty thinking block start passes before the first-output budget", async () => {
   const thinkingStart =
     'event: content_block_start\ndata: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":""}}\n\n';
@@ -218,7 +334,7 @@ test("an upstream empty thinking block start passes before the first-output budg
   assert.equal(result, response, "reasoning activity hands the original response through");
   assert.ok(Date.now() - started < 500, "reasoning must pass before the 900ms budget");
   assert.deepEqual(logs, [
-    "first-output gate: reasoning activity from claude-opus-thinking (thinking), handing stream through",
+    "first-output gate: upstream thinking from claude-opus-thinking (thinking), ending the first-output wait",
   ]);
   await result.body?.cancel();
 });

@@ -109,6 +109,77 @@ test("streaming leg: a bare AbortError (real client disconnect) still persists a
   assert.equal((persisted[0] as { status: number }).status, 499);
 });
 
+test("combo: a hedge winner aborts and cancels a losing Claude thinking stream", async () => {
+  const enc = new TextEncoder();
+  let upstreamAborted = false;
+  let responseBodyCancelled = false;
+
+  const result = await handleComboChat({
+    body: { messages: [{ role: "user", content: "think" }], stream: true },
+    combo: {
+      name: "hedge-cancels-thinking-stream",
+      strategy: "priority",
+      models: ["openai/slow-model", "claude/fast-model"],
+      config: {
+        maxRetries: 0,
+        retryDelayMs: 0,
+        fallbackDelayMs: 0,
+        zeroLatencyOptimizationsEnabled: true,
+        hedging: true,
+        hedgeDelayMs: 20,
+      },
+    },
+    handleSingleModel: async (_b, modelStr, target) => {
+      if (modelStr === "openai/slow-model") {
+        const body = new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(
+              enc.encode(
+                'event: content_block_start\ndata: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":""}}\n\n'
+              )
+            );
+          },
+          pull() {
+            return new Promise<void>(() => {});
+          },
+          cancel() {
+            responseBodyCancelled = true;
+          },
+        });
+        target?.modelAbortSignal?.addEventListener(
+          "abort",
+          () => {
+            upstreamAborted = true;
+          },
+          { once: true }
+        );
+        return new Response(body, {
+          status: 200,
+          headers: { "content-type": "text/event-stream" },
+        });
+      }
+      return new Response(
+        JSON.stringify({ choices: [{ message: { role: "assistant", content: "winner" } }] }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      );
+    },
+    isModelAvailable: async () => true,
+    log: { info: noop, warn: noop, debug: noop, error: noop },
+    settings: null,
+    allCombos: null,
+  });
+
+  assert.equal(result.status, 200);
+  assert.equal(
+    ((await result.json()) as { choices: { message: { content: string } }[] }).choices[0].message
+      .content,
+    "winner"
+  );
+  await new Promise((resolve) => setTimeout(resolve, 80));
+  assert.equal(upstreamAborted, true, "the losing target's upstream fetch must receive abort");
+  assert.equal(responseBodyCancelled, true, "the losing response body must be cancelled");
+});
+
 test("combo: a hedge loser returning the 599 sentinel adds no failure bookkeeping", async () => {
   clearCooldownState();
   const logs: string[] = [];
