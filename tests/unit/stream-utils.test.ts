@@ -1058,11 +1058,10 @@ Arguments: {"command":"systemctl status omniroute"}`;
   assert.doesNotMatch(text, /Arguments:/);
   assert.match(text, /response.output_item.added/);
   assert.match(text, /response.function_call_arguments.done/);
-  // 5 synthesized function-call events (from the textual tool-call conversion)
-  // + 1 for the terminal response.completed itself, now also pushed so
-  // previous_response_id continuation can recover a real id/output for a
-  // passthrough Responses-API reply (see responsesContinuationStore.ts).
-  assert.equal(onCompletePayload.clientPayload._eventCount, 6);
+  // 3 synthesized function-call lifecycle events plus the terminal snapshot's
+  // existing collector entries. The raw textual delta is no longer collected/
+  // forwarded a second time after successful conversion.
+  assert.equal(onCompletePayload.clientPayload._eventCount, 5);
   assert.equal(onCompletePayload.responseBody.choices[0].finish_reason, "tool_calls");
   assert.equal(onCompletePayload.responseBody.choices[0].message.content, null);
   assert.equal(

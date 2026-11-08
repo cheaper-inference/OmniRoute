@@ -104,7 +104,7 @@ function splitKimiEffortSuffix(model: string): { model: string; effort: Reasonin
   const provider = KIMI_CODING_PREFIX_PROVIDER[model.slice(0, slash).toLowerCase()];
   if (!provider) return null;
   const split = splitKimiCodingEffortVariant(provider, model.slice(slash + 1));
-  if (!split) return null;
+  if (!split?.effort) return null;
   const baseModel = model.slice(0, -(split.effort.length + 1));
   return { model: baseModel, effort: split.effort };
 }

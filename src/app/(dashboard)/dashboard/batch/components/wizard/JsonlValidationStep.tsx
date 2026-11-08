@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { validateJsonl } from "@/lib/batches/validateJsonl";
 import type { ValidationResult } from "@/lib/batches/types";
 import type { SupportedBatchEndpoint } from "@/lib/batches/types";
@@ -57,8 +58,8 @@ export default function JsonlValidationStep({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 gap-3">
-        <Icon name="progress_activity" size={30} className="text-accent animate-spin" />
+      <div role="status" className="flex flex-col items-center justify-center py-12 gap-3">
+        <Spinner decorative size="lg" className="text-accent" />
         <span className="text-sm text-text-muted">{t("wizardValidating")}</span>
       </div>
     );

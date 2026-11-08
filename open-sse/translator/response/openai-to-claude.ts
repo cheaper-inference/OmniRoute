@@ -879,8 +879,17 @@ export function openaiToClaudeResponse(chunk, state) {
       });
     }
 
-    // Override finish_reason to tool_use if XML tool calls were found
-    const overrideFinishReason = xmlToolCalls.length > 0 ? "tool_calls" : choice.finish_reason;
+    // Override finish_reason to tool_calls when tool calls were emitted but the
+    // upstream reported a clean stop (#18270): some OpenAI-compatible upstreams
+    // send finish_reason "stop" together with tool_calls, and the Claude client
+    // stops its agent loop unless stop_reason is "tool_use".
+    const hasEmittedToolCalls =
+      xmlToolCalls.length > 0 || (state.toolCalls instanceof Map && state.toolCalls.size > 0);
+    const overrideFinishReason =
+      hasEmittedToolCalls &&
+      openAIFinishReasonToClaudeStopReason(choice.finish_reason) === "end_turn"
+        ? "tool_calls"
+        : choice.finish_reason;
 
     // Mark finish for later usage injection in stream.js
     state.finishReason = overrideFinishReason;

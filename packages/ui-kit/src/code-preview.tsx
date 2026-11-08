@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, CSSProperties, ReactNode } from "react";
 import { Check, Copy } from "lucide-react";
 import { cn } from "./lib/utils";
 
@@ -10,6 +10,9 @@ export type CodePreviewTokenTone = "keyword" | "string" | "number" | "function" 
 export interface CodePreviewToken {
   text: string;
   tone?: CodePreviewTokenTone;
+  /** Optional grammar colors, separate from semantic fallback tones. */
+  color?: string;
+  darkColor?: string;
 }
 
 export interface CodePreviewProps extends Omit<ComponentProps<"section">, "onCopy"> {
@@ -24,6 +27,14 @@ export interface CodePreviewProps extends Omit<ComponentProps<"section">, "onCop
   lines?: CodePreviewToken[][];
   copyLabel?: string;
   copiedLabel?: string;
+  /** Button text while a getCopyValue copy is pending. Defaults to "Copying…". */
+  copyingLabel?: string;
+  /** Screen-reader announcement after a successful copy. Defaults to "Code copied to clipboard". */
+  copiedAnnouncement?: string;
+  /** Visible error after a failed copy. Defaults depend on whether getCopyValue is set. */
+  copyErrorLabel?: string;
+  /** Accessible name of the code region. Defaults to "<language> code". */
+  codeLabel?: string;
   /** Resolve clipboard text only after a click; displayed source stays unchanged. */
   getCopyValue?: () => Promise<string>;
   /** Receives displayed code, never the private value returned by getCopyValue. */
@@ -42,6 +53,10 @@ export function CodePreview({
   lines,
   copyLabel = "Copy",
   copiedLabel = "Copied",
+  copyingLabel = "Copying…",
+  copiedAnnouncement = "Code copied to clipboard",
+  copyErrorLabel,
+  codeLabel,
   getCopyValue,
   onCopy,
   onCopyError,
@@ -126,25 +141,25 @@ export function CodePreview({
         </span>
         <button type="button" className="ci-code-preview__copy" onClick={copy} disabled={!rawCode || copying} aria-busy={copying || undefined} data-copied={copied || undefined}>
           {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-          {copying ? "Copying…" : copied ? copiedLabel : copyLabel}
+          {copying ? copyingLabel : copied ? copiedLabel : copyLabel}
         </button>
       </header>
-      <pre className="ci-code-preview__pre" tabIndex={0} aria-label={`${String(language || filename || "Code")} code`}>
+      <pre className="ci-code-preview__pre" tabIndex={0} aria-label={codeLabel ?? `${String(language || filename || "Code")} code`}>
         <code>
           {sourceLines.map((line, lineIndex) => (
             <span className="ci-code-preview__line" key={lineIndex}>
               {showLineNumbers && <span className="ci-code-preview__number" aria-hidden="true">{lineIndex + 1}</span>}
               <span className="ci-code-preview__source">
                 {line.map((token, tokenIndex) => (
-                  <span key={tokenIndex} data-tone={token.tone}>{token.text}</span>
+                  <span key={tokenIndex} data-tone={token.tone} data-syntax-color={token.color ? "" : undefined} style={token.color ? { "--ci-code-token-light": variant === "terminal" ? token.darkColor ?? token.color : token.color, "--ci-code-token-dark": token.darkColor ?? token.color } as CSSProperties : undefined}>{token.text}</span>
                 ))}
               </span>
             </span>
           ))}
         </code>
       </pre>
-      {copyFailed && <p className="ci-code-preview__error" role="alert">{getCopyValue ? "Could not copy code. Please try again." : "Could not copy code. Select it and try again."}</p>}
-      <span className="ci-sr-only" aria-live="polite">{copied ? "Code copied to clipboard" : ""}</span>
+      {copyFailed && <p className="ci-code-preview__error" role="alert">{copyErrorLabel ?? (getCopyValue ? "Could not copy code. Please try again." : "Could not copy code. Select it and try again.")}</p>}
+      <span className="ci-sr-only" aria-live="polite">{copied ? copiedAnnouncement : ""}</span>
     </section>
   );
 }

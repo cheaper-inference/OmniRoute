@@ -163,7 +163,7 @@ OmniRoute expone 6 habilidades A2A conectadas en `src/lib/a2a/taskExecution.ts::
 | Informe de salud              | `health-report`      | Agrega disyuntor, enfriamiento y estado de bloqueo por proveedor                                                                                                                        | salud, resiliencia                    | "Mostrar estado de salud de todos los proveedores" |
 | Capacidades de lista          | `list-capabilities`  | Devuelve el catálogo completo de habilidades del agente de 45 entradas (23 API + 21 CLI + 1 config) como una tabla de rebajas con SKILL.md URLs sin formato para inyección de contexto. | catálogo, descubrimiento, habilidades | "Enumere todas las capacidades OmniRoute "         |
 
-> La Tarjeta de Agente debe mantenerse alineada con el catálogo de proveedores 377 en vivo; Los recuentos de proveedores y los metadatos free/no-auth se obtienen del registro de tiempo de ejecución.
+> La Tarjeta de Agente debe mantenerse alineada con el catálogo de proveedores 380 en vivo; Los recuentos de proveedores y los metadatos free/no-auth se obtienen del registro de tiempo de ejecución.
 
 ### Detalle de habilidad `list-capabilities`
 
@@ -197,17 +197,17 @@ El endpoint JSON-RPC `/a2a` es el punto de entrada canónico de A2A. Los siguien
 
 ---
 
-## Añadir una nueva habilidad
+## Agregar una nueva habilidad
 
-1. **Cree el archivo de la habilidad:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Crear archivo de habilidad:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exporte una función asíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga la estructura de habilidades existentes como `smartRouting.ts`.
+   Exportar una función asíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga la forma de habilidades existentes como `smartRouting.ts`.
 
-2. **Registre el controlador:** en `src/lib/a2a/taskExecution.ts`, añada una entrada a `A2A_SKILL_HANDLERS`:
+2. **Controlador de registro:** en `src/lib/a2a/taskExecution.ts`, agregue una entrada a `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...habilidades existentes
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ El endpoint JSON-RPC `/a2a` es el punto de entrada canónico de A2A. Los siguien
    };
    ```
 
-3. **Expóngala en la tarjeta del agente:** en `src/app/.well-known/agent.json/route.ts`, añádala al array `skills`:
+3. **Exponer en Tarjeta de Agente:** en `src/lib/a2a/agentCardMetadata.ts` (compartido por `/.well-known/agent.json` y `/.well-known/agent-card.json`), agregue a la matriz `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ El endpoint JSON-RPC `/a2a` es el punto de entrada canónico de A2A. Los siguien
    }
    ```
 
-4. **Escriba pruebas:** `tests/unit/a2a-<your-skill>.test.ts`. Cubra el caso exitoso y el caso de error.
+4. **Escribir pruebas:** `tests/unit/a2a-<your-skill>.test.ts`. Cubra la ruta de error + del camino feliz.
 
-5. **Documente** la nueva habilidad en la tabla `Available Skills` de este archivo.
+5. **Documento** la nueva habilidad en la tabla `Available Skills` de este archivo.
 
 ---
 
