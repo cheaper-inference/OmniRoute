@@ -117,6 +117,16 @@ const GPT_6_1_SOL_CODEX_PRICING = {
   ...GPT_6_SOL_CODEX_PRICING,
   cached: 0.1,
 };
+// GPT-6.1 Terra Standard: 25 / 1.25 / 125 credits per MTok (input / cached / output), the same
+// 25 credits/USD convention. Matches the API pricing table row $1.00 / $0.05 / $5.00, cache write $1.25.
+// https://learn.chatgpt.com/docs/pricing#token-rates (checked 2026-11-09)
+const GPT_6_1_TERRA_CODEX_PRICING = {
+  input: 1.0,
+  output: 5.0,
+  cached: 0.05,
+  reasoning: 5.0,
+  cache_creation: 1.25,
+};
 const GPT_6_LUNA_CODEX_PRICING = {
   input: 0.1,
   output: 0.5,
@@ -218,6 +228,13 @@ export const DEFAULT_PRICING_OAUTH = {
     "gpt-6.1-sol-high": GPT_6_1_SOL_CODEX_PRICING,
     "gpt-6.1-sol-medium": GPT_6_1_SOL_CODEX_PRICING,
     "gpt-6.1-sol-low": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.1-terra": GPT_6_1_TERRA_CODEX_PRICING,
+    "gpt-6.1-terra-ultra": GPT_6_1_TERRA_CODEX_PRICING,
+    "gpt-6.1-terra-max": GPT_6_1_TERRA_CODEX_PRICING,
+    "gpt-6.1-terra-xhigh": GPT_6_1_TERRA_CODEX_PRICING,
+    "gpt-6.1-terra-high": GPT_6_1_TERRA_CODEX_PRICING,
+    "gpt-6.1-terra-medium": GPT_6_1_TERRA_CODEX_PRICING,
+    "gpt-6.1-terra-low": GPT_6_1_TERRA_CODEX_PRICING,
     "gpt-6-luna": GPT_6_LUNA_CODEX_PRICING,
     "gpt-6-luna-max": GPT_6_LUNA_CODEX_PRICING,
     "gpt-6-luna-xhigh": GPT_6_LUNA_CODEX_PRICING,
