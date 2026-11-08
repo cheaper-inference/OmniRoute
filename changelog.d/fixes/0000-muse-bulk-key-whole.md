@@ -1,0 +1,1 @@
+- **fix(providers):** bulk-adding a Muse key (`LLM|...`) stores the whole line as the key and names it `Key N`, instead of saving the name `LLM` with a key that has lost its prefix.

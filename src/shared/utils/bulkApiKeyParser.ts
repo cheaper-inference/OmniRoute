@@ -8,6 +8,7 @@
  *   - blank lines (skipped)
  *
  * `apiKey` may contain `|` — only the first `|` is treated as the separator.
+ * Exception: a line that starts with `LLM|` is a Muse key. It is kept whole as the key and auto-named.
  *
  * When `withAccountId` is enabled (Cloudflare Workers AI), each line carries a
  * per-key account id in a 3-field shape:
@@ -55,7 +56,14 @@ function parseAccountKeyLine(raw: string, nextName: () => string): ParsedKeyLine
   return { name, accountId, apiKey };
 }
 
+// A Muse key starts with `LLM|`. Splitting it at the first pipe stores the name "LLM" and a key
+// without its prefix, which upstream rejects.
+// shortcut: the parser does not know the provider, so a key a user names exactly "LLM" is read as a
+// Muse key too; scope this to the muse-code provider when the modal passes the provider id.
+const MUSE_KEY_LINE = /^LLM\|/i;
+
 function parseKeyLine(raw: string, nextName: () => string): ParsedKeyLine {
+  if (MUSE_KEY_LINE.test(raw)) return { name: nextName(), apiKey: raw };
   const pipeIdx = raw.indexOf("|");
   const namePart = pipeIdx === -1 ? "" : raw.slice(0, pipeIdx).trim();
   const apiKey = pipeIdx === -1 ? raw : raw.slice(pipeIdx + 1).trim();
