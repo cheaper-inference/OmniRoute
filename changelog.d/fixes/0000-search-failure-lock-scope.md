@@ -1,0 +1,1 @@
+- **fix(search):** a rate-limited or failing search call that borrows a chat key (Ollama Cloud, Z.AI, Jina, Perplexity, xAI) no longer puts that chat connection on cooldown, so chat keeps using it.

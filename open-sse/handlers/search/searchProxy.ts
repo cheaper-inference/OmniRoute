@@ -203,6 +203,12 @@ export interface ExecuteProviderFetchParams {
   ) => { results: SearchResult[]; totalResults: number | null };
 }
 
+/** The one connection-row read in this file (post-dispatch state, never credential selection). */
+async function readConnection(connectionId: string) {
+  const { getProviderConnectionById } = await import("@/lib/db/providers");
+  return getProviderConnectionById(connectionId);
+}
+
 /**
  * Perform the upstream search HTTP call (through the resolved proxy, if any),
  * then handle the success/error/exception branches: call-log persistence,
@@ -260,8 +266,14 @@ export async function executeProviderFetch(
       }
       if (connectionId && shouldCoolDownSearchConnection(response.status, errorText)) {
         try {
-          const { markAccountUnavailable } = await import("@/sse/services/auth.ts");
-          await markAccountUnavailable(connectionId, response.status, errorText, config.id, null);
+          // A search provider can borrow a chat key (SEARCH_CREDENTIAL_FALLBACKS). A search
+          // failure says nothing about that key's chat health, so only the provider's own
+          // connections get the connection-wide cooldown.
+          const owner = await readConnection(connectionId);
+          if (owner?.provider === config.id) {
+            const { markAccountUnavailable } = await import("@/sse/services/auth.ts");
+            await markAccountUnavailable(connectionId, response.status, errorText, config.id, null);
+          }
         } catch {
           /* non-critical - background cooldown mark must not break search response */
         }
@@ -301,8 +313,7 @@ export async function executeProviderFetch(
     // when the row is already clean.
     if (connectionId) {
       try {
-        const { getProviderConnectionById } = await import("@/lib/db/providers");
-        const current = await getProviderConnectionById(connectionId);
+        const current = await readConnection(connectionId);
         if (current) {
           const { clearAccountError } = await import("@/sse/services/auth.ts");
           await clearAccountError(connectionId, current as never);
