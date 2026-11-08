@@ -164,6 +164,13 @@ async function gateFirstOutput(params: FirstOutputGateParams): Promise<Response>
     timeoutController.signal
   );
   if (gate.kind === "output") return gate.response;
+  if (gate.kind === "reasoning") {
+    log.info(
+      "COMBO",
+      `first-output gate: reasoning activity from ${modelStr} (${gate.frameKind}), handing stream through`
+    );
+    return gate.response;
+  }
 
   if (gate.reason !== "budget") {
     // Cancelled from outside (hedge winner, client disconnect) or the body closed empty.

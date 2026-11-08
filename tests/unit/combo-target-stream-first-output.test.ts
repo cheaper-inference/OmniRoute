@@ -201,6 +201,60 @@ test("a Messages-protocol content block delta counts as output", async () => {
   assert.equal(res.status, 200);
 });
 
+test("an upstream empty thinking block start passes before the first-output budget", async () => {
+  const thinkingStart =
+    'event: content_block_start\ndata: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":""}}\n\n';
+  const response = sseResponse(sseBody([thinkingStart], { stall: true }));
+  const logs: string[] = [];
+  const runner = buildTargetTimeoutRunner({
+    handleSingleModel: async () => response,
+    comboTargetTimeoutMs: 900,
+    log: { ...noopLog, info: (_tag, message) => logs.push(message) },
+  });
+
+  const started = Date.now();
+  const result = await runner({}, "claude-opus-thinking");
+
+  assert.equal(result, response, "reasoning activity hands the original response through");
+  assert.ok(Date.now() - started < 500, "reasoning must pass before the 900ms budget");
+  assert.deepEqual(logs, [
+    "first-output gate: reasoning activity from claude-opus-thinking (thinking), handing stream through",
+  ]);
+  await result.body?.cancel();
+});
+
+test("a non-empty signature_delta alone proves upstream reasoning activity", async () => {
+  const signature =
+    'event: content_block_delta\ndata: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"opaque-signature"}}\n\n';
+  const response = sseResponse(sseBody([signature], { stall: true }));
+  const runner = buildTargetTimeoutRunner({
+    handleSingleModel: async () => response,
+    comboTargetTimeoutMs: 900,
+    log: noopLog,
+  });
+
+  const started = Date.now();
+  const result = await runner({}, "claude-signature-only");
+
+  assert.equal(result, response);
+  assert.ok(Date.now() - started < 500, "signature activity must pass before the budget");
+  await result.body?.cancel();
+});
+
+test("an empty signature bootstrap does not pass the first-output gate", async () => {
+  const emptySignature =
+    'event: content_block_delta\ndata: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":""}}\n\n';
+  const runner = buildTargetTimeoutRunner({
+    handleSingleModel: async () => sseResponse(sseBody([emptySignature], { stall: true })),
+    comboTargetTimeoutMs: 120,
+    log: noopLog,
+  });
+
+  const result = await runner({}, "claude-empty-signature-bootstrap");
+  assert.equal(result.status, 504);
+  assert.equal((await result.json())?.error?.code, "combo_target_timeout");
+});
+
 test("heartbeat-only frames do not end the guard", async () => {
   const frames = ['data: {"type":"ping"}\n\n', 'data: {"choices":[{"index":0,"delta":{}}]}\n\n'];
   const runner = buildTargetTimeoutRunner({
