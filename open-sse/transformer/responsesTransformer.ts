@@ -207,6 +207,9 @@ export function createResponsesLogger(model, logsDir = null) {
   };
 }
 
+// How long a finish_reason waits for a trailing usage chunk before completing anyway.
+const DEFERRED_COMPLETION_GRACE_MS = 3000;
+
 /**
  * Create TransformStream that converts Chat Completions SSE to Responses API SSE
  * @param {Object} logger - Optional logger instance
@@ -266,6 +269,7 @@ export function createResponsesApiTransformStream(
     // response.completed — a trailing usage-only chunk (choices: [], usage: {...}) may
     // still arrive for stream_options.include_usage=true upstreams.
     awaitingTrailingUsage: false,
+    completionTimer: null as ReturnType<typeof setTimeout> | null,
   };
 
   const encoder = new TextEncoder();
@@ -600,7 +604,15 @@ export function createResponsesApiTransformStream(
     }
   };
 
+  const clearCompletionTimer = () => {
+    if (state.completionTimer) {
+      clearTimeout(state.completionTimer);
+      state.completionTimer = null;
+    }
+  };
+
   const sendCompleted = (controller) => {
+    clearCompletionTimer();
     if (!state.completedSent) {
       state.completedSent = true;
 
@@ -977,8 +989,19 @@ export function createResponsesApiTransformStream(
               // #6906: defer response.completed — a trailing usage-only chunk may
               // still arrive (stream_options.include_usage=true). The empty-choices
               // branch above (or flush() at stream end, as a fallback) actually
-              // calls sendCompleted().
+              // calls sendCompleted(). An upstream that sends neither usage nor
+              // [DONE] and keeps the connection open must not hold the client until
+              // the stall watchdog fires, so a short timer completes the response.
               state.awaitingTrailingUsage = true;
+              state.completionTimer = setTimeout(() => {
+                state.completionTimer = null;
+                try {
+                  sendCompleted(controller);
+                } catch {
+                  // Stream already torn down; nothing left to complete.
+                }
+              }, DEFERRED_COMPLETION_GRACE_MS);
+              (state.completionTimer as { unref?: () => void })?.unref?.();
             }
           }
         }
@@ -1002,6 +1025,7 @@ export function createResponsesApiTransformStream(
           clearInterval(state.keepaliveTimer);
           state.keepaliveTimer = null;
         }
+        clearCompletionTimer();
         for (const i in state.msgItemAdded) closeMessage(controller, i);
         closeReasoning(controller);
         for (const i in state.funcCallIds) closeToolCall(controller, i);
@@ -1020,6 +1044,7 @@ export function createResponsesApiTransformStream(
           clearInterval(state.keepaliveTimer);
           state.keepaliveTimer = null;
         }
+        clearCompletionTimer();
       },
     },
     { highWaterMark: 16384 },
