@@ -39,16 +39,6 @@ export async function grokBotAgentAccess(
   }
 }
 
-export async function grokBotOptionalAgentAccess(
-  connection: Connection,
-  agentId: string,
-  deps: AccessDeps = {}
-): Promise<GrokBotAgentAccess> {
-  if (agentId !== "") return grokBotAgentAccess(connection, agentId, deps);
-  const token = await (deps.token ?? grokBotToken)(connection);
-  return "error" in token ? token : { accessToken: token.accessToken };
-}
-
 export function grokBotAccessError(access: GrokBotAgentAccess): NextResponse | null {
   if ("accessToken" in access) return null;
   const status =

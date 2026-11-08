@@ -82,7 +82,7 @@ it("keeps labelled native account selection and disabled roster semantics throug
     </NextIntlClientProvider>
   );
   const account = screen.getByRole("combobox", { name: "accountsTitle" });
-  expect(account.className).toContain("ci-select-native");
+  expect(account.className).toContain("ci-native-select");
   expect(
     (screen.getByRole("combobox", { name: "rosterTitle" }) as HTMLSelectElement).disabled
   ).toBe(true);

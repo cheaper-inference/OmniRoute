@@ -6,7 +6,6 @@ const { permissionAnswer, permissionFailure, permissionSummary } = await import(
   `${D}/permission.ts`
 );
 const { watchRefusal, watchCounter, watchSlot } = await import(`${D}/overlap.ts`);
-const { transcriptErrorFrame } = await import(`${D}/transcript.ts`);
 const { nextExpiry } = await import(`${D}/token.ts`);
 
 // These four decisions used to live inside route handlers, where nothing could
@@ -32,14 +31,6 @@ test("the third watch on one connection is refused with 429", () => {
     code: "too_many_watches",
   });
 });
-
-test("the failure frame is a named event, not a data frame", () => {
-  const frame = transcriptErrorFrame();
-  assert.ok(frame.startsWith("event: error"), "the page throws on this line");
-  assert.ok(frame.endsWith("\n\n"), "SSE needs the blank line to dispatch");
-  assert.ok(!frame.startsWith("data: "), "a data frame would be parsed as content");
-});
-
 test("a refresh answer without an expiry gets a short assumed lifetime", () => {
   const now = Date.parse("2026-10-23T00:00:00Z");
   const written = nextExpiry("", now, 30 * 60 * 1000);

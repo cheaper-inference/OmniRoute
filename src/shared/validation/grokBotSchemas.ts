@@ -23,6 +23,11 @@ export const grokBotPermissionSchema = z.object({
 export const grokBotDraftSchema = z.object(entry);
 export const grokBotSecretSchema = z.object({ ...entry, value: text });
 export const grokBotSendSchema = z.object({ agentId: id, messageId: id, text });
+export const grokBotComputerFileSchema = z.object({
+  agentId: id,
+  machineId: id,
+  path: z.string().min(1),
+});
 export const grokBotWidgetSchema = z.union([
   z.object({ ...entry, dismiss: z.literal(true), value: z.string().optional() }),
   z.object({ ...entry, dismiss: z.literal(false).optional(), value: text }),

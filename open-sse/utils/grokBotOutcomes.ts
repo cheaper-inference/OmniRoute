@@ -40,6 +40,15 @@ export function grokBotSendOutcome(answer: unknown): GrokBotActionOutcome {
   return body.dispatched === true ? "accepted" : "unknown";
 }
 
+/** The keys a service uses to explain that it did not do what was asked. */
+const REFUSAL_KEYS = ["error", "code", "status", "message"] as const;
+
+function saysRefused(body: Record<string, unknown>): boolean {
+  if (body.accepted === false || body.dispatched === false) return true;
+  if (hasRefusal(body)) return true;
+  return REFUSAL_KEYS.some((key) => key in body);
+}
+
 export function grokBotCardOutcome(
   answer: unknown,
   options: { allowEmpty?: boolean } = {}
@@ -48,17 +57,7 @@ export function grokBotCardOutcome(
   if (answer === null) return allowEmpty ? "accepted" : "unknown";
   const body = record(answer);
   if (!body) return "unknown";
-  if (
-    body.accepted === false ||
-    body.dispatched === false ||
-    hasRefusal(body) ||
-    "error" in body ||
-    "code" in body ||
-    "status" in body ||
-    "message" in body
-  ) {
-    return "refused";
-  }
+  if (saysRefused(body)) return "refused";
   if (Object.keys(body).length === 0) return allowEmpty ? "accepted" : "unknown";
   if (body.accepted === true || body.dispatched === true) return "accepted";
   return "unknown";

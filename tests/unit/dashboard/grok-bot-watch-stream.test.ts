@@ -5,8 +5,6 @@ const { watchStream, pumpWatch, safeBlobUrl } =
   await import("../../../src/app/(dashboard)/dashboard/grok-bot/watchStream.ts");
 const { watchCounter, watchSlot } =
   await import("../../../src/app/(dashboard)/dashboard/grok-bot/overlap.ts");
-const { fillOmittedBodies, RECOVERY_CONCURRENCY } =
-  await import("../../../src/app/(dashboard)/dashboard/grok-bot/recover.ts");
 
 function readerFrames(frames: unknown[], failAt?: number) {
   let index = 0;

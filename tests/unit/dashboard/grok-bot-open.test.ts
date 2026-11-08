@@ -404,7 +404,7 @@ test("an unusable reset ends the stream instead of reconnecting", async (t) => {
   let reads = 0;
   const opened = openTranscript({
     request: { phase: "live", after: "0" },
-    read: async function* (request, signal) {
+    read: async function* (_request, signal) {
       reads += 1;
       yield { cursorTooOld: { agentId: "agent" } };
       await new Promise<void>((resolve) =>

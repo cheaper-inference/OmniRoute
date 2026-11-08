@@ -710,9 +710,6 @@ export function applyTranscriptFrame(state: TranscriptState, frame: unknown): Tr
  * event, not a data frame: parsed as a frame an empty object would reset the
  * failure counters and the retry loop would never end.
  */
-export function transcriptErrorFrame(): string {
-  return "event: error\ndata: {}\n\n";
-}
 export type TranscriptTerminalCode =
   "auth" | "permission" | "quota" | "protocol" | "unknown" | "timeout" | "unavailable";
 

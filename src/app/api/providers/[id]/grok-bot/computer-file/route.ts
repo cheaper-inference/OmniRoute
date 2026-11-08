@@ -6,6 +6,7 @@ import { getProviderConnectionById } from "@/lib/db/providers";
 import { grokBotAgentAccess, grokBotAccessError } from "../access";
 import { grokBotComputerFile } from "../../../../../(dashboard)/dashboard/grok-bot/computerFile";
 import { grokBotComputers } from "../../../../../(dashboard)/dashboard/grok-bot/computers";
+import { grokBotComputerFileSchema } from "@/shared/validation/grokBotSchemas";
 import { grokBotRead } from "../../../../../(dashboard)/dashboard/grok-bot/read";
 
 export function computerFilePathAllowed(path: string, roots: string[]): boolean {
@@ -44,18 +45,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!connection || connection.provider !== "grok-bot") {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
-  let body: { agentId?: unknown; machineId?: unknown; path?: unknown } = {};
-  try {
-    body = (await request.json()) as typeof body;
-  } catch {
-    return NextResponse.json({ error: "invalid" }, { status: 400 });
-  }
-  const agentId = typeof body.agentId === "string" ? body.agentId : "";
-  const machineId = typeof body.machineId === "string" ? body.machineId : "";
-  const path = typeof body.path === "string" ? body.path : "";
-  if (agentId === "" || machineId === "" || path === "") {
-    return NextResponse.json({ error: "invalid" }, { status: 400 });
-  }
+  const parsed = grokBotComputerFileSchema.safeParse(await request.json().catch(() => undefined));
+  if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
+  const { agentId, machineId, path } = parsed.data;
   // Every sibling route refuses to spend the connection's token while an exclusive
   // lease holds it; reading a file from the computer is the same kind of spend.
   if (await isConnectionUnavailableToAuxiliaryActivity(id)) {

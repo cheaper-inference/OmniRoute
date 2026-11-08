@@ -16,6 +16,30 @@ const END_STREAM_FLAG = 0x02;
  */
 export const MAX_CONNECT_FRAME_BYTES = 16 * 1024 * 1024;
 
+/**
+ * Splits whatever complete frames `pending` holds, leaving the partial tail for the next
+ * read. A trailer frame ends the stream rather than producing a value.
+ */
+function drainFrames(pending: Uint8Array, decoder: TextDecoder) {
+  const frames: unknown[] = [];
+  let rest = pending;
+  let ended = false;
+  for (;;) {
+    const complete = takeCompleteFrame(rest);
+    if (!complete) break;
+    const { flag, frame, remaining } = complete;
+    rest = remaining;
+    if (flag & END_STREAM_FLAG) {
+      throwTrailerError(decoder.decode(frame));
+      ended = true;
+      break;
+    }
+    if (flag !== 0) continue;
+    frames.push(JSON.parse(decoder.decode(frame)));
+  }
+  return { frames, remaining: rest, ended };
+}
+
 export async function* readConnectFrames(
   stream: ReadableStream<Uint8Array>,
   maxFrameBytes = MAX_CONNECT_FRAME_BYTES
@@ -34,18 +58,10 @@ export async function* readConnectFrames(
       chunk.set(pending);
       chunk.set(value, pending.length);
       pending = chunk;
-      for (;;) {
-        const complete = takeCompleteFrame(pending);
-        if (!complete) break;
-        const { flag, frame, remaining } = complete;
-        pending = remaining;
-        if (flag & END_STREAM_FLAG) {
-          throwTrailerError(decoder.decode(frame));
-          return;
-        }
-        if (flag !== 0) continue;
-        yield JSON.parse(decoder.decode(frame));
-      }
+      const drained = drainFrames(pending, decoder);
+      pending = drained.remaining;
+      for (const frame of drained.frames) yield frame;
+      if (drained.ended) return;
     }
   } finally {
     reader.cancel().catch(() => {});
