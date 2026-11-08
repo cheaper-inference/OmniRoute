@@ -1859,9 +1859,15 @@ export async function getProviderCredentials(
       if (options.lease) commitSelectionSideEffects = affinityPlan?.commit;
       else syncSessionAffinityRuntimeFields(connectionsRaw, connection);
     } else if (options.sessionKey) {
-      log.info(
+      // Selection falls back to LRU, so a miss means affinity is off or no candidate is left.
+      log.debug(
         "AUTH",
-        `session_key=${formatSessionKeyForLog(options.sessionKey)} has no available affinity target`
+        `session_key=${formatSessionKeyForLog(options.sessionKey)} has no available affinity target`,
+        {
+          reason: sessionAffinityTtlMs <= 0 ? "affinity_disabled" : "no_connection",
+          provider,
+          candidates: orderedConnections.length,
+        }
       );
     }
 

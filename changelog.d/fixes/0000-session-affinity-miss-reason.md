@@ -1,0 +1,1 @@
+- **fix(logging):** a request whose session key gets no affinity account now logs a reason code at debug level instead of an info line without a reason.
