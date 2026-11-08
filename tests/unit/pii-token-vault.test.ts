@@ -7,7 +7,8 @@ import os from "node:os";
 import path from "node:path";
 import { inspect } from "node:util";
 
-process.env.DATA_DIR ??= fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-pii-vault-"));
+// A private DB per file: a shared DATA_DIR makes two test processes race the migrations.
+process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-pii-vault-"));
 
 const {
   RequestTokenVault,
@@ -20,6 +21,9 @@ const {
 } = await import("../../src/lib/pii/tokenVault.ts");
 const { processPII, sanitizeRequest } = await import("../../src/shared/utils/inputSanitizer.ts");
 const { PIIMaskerGuardrail } = await import("../../src/lib/guardrails/piiMasker.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+
+test.after(() => resetDbInstance());
 
 const TOKEN_SHAPE = /^<<PII_[A-Z0-9_]+_[A-Z]{8}_\d+>>$/;
 
@@ -233,8 +237,11 @@ test("pii-masker mints only with context.tokenVault and falls back to placeholde
       ],
     };
     const vault = new RequestTokenVault({ nonce: "ZXCVBNMA" });
-    const minted = await masker.preCall(body, { tokenVault: vault });
+    const warnings: unknown[] = [];
+    const log = { warn: (...args: unknown[]) => warnings.push(args) };
+    const minted = await masker.preCall(body, { tokenVault: vault, log });
     const mintedText = JSON.stringify(minted.modifiedPayload);
+    assert.deepEqual(warnings, [], "the vault path must not fall back");
     assert.match(mintedText, /<<PII_SSN_US_ZXCVBNMA_\d>>/);
     assert.match(mintedText, /<<PII_EMAIL_ZXCVBNMA_\d>>/);
     assert.doesNotMatch(mintedText, /jane@example\.com|123-45-6789/);
