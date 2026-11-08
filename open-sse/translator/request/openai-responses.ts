@@ -1045,7 +1045,11 @@ export function openaiResponsesToOpenAIRequest(
   // prompt caching (#517). But #517's fix never added a provider gate, so it leaked to
   // every destination, OpenAI or not — a strict non-OpenAI upstream (NVIDIA) 400s on the
   // unrecognized field (#7533). Strip it for any non-OpenAI destination.
-  if (!isOpenAIDestination) delete result.prompt_cache_key;
+  // `conversation_id` is the same kind of session field (Codex reads it), so it follows the same gate.
+  if (!isOpenAIDestination) {
+    delete result.prompt_cache_key;
+    delete result.conversation_id;
+  }
   delete result.input;
   delete result.instructions;
   delete result.include;
