@@ -12,7 +12,7 @@ import {
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
 import { AUTO_DISABLE_BANNED_SCOPES } from "@/shared/utils/autoDisableBanned";
-import { CLI_VERSION_KEYS, CLI_VERSION_PATTERN } from "@/shared/constants/cliVersions";
+import { CLI_VERSION_KEYS, CLI_VERSION_PATTERN } from "@omniroute/open-sse/config/cliVersions.ts";
 
 // Single source of truth: ../settingsSchemas (the schema the runtime settings route validates
 // against). Re-exported here so this modular barrel stays in exact lockstep — a divergent local
@@ -43,6 +43,9 @@ export const requestQueueSettingsSchema = z
     requestsPerMinute: z.number().int().min(1).optional(),
     minTimeBetweenRequestsMs: z.number().int().min(0).optional(),
     concurrentRequests: z.number().int().min(1).optional(),
+    // #18390: the Request Queue card always posts this field. Bounds mirror
+    // normalizeRequestQueueSettings; 0 disables the global gate.
+    globalConcurrentRequests: z.number().int().min(0).max(100_000).optional(),
     // 0 is an explicit "disable the queue-wait budget" sentinel (see
     // src/lib/resilience/settings/normalize.ts maxWaitMs) — do not clamp it up to 1.
     maxWaitMs: z.number().int().min(0).optional(),
@@ -91,6 +94,9 @@ export const waitForCooldownSettingsSchema = z
     enabled: z.boolean().optional(),
     maxRetries: z.number().int().min(0).max(10).optional(),
     maxRetryWaitSec: z.number().int().min(0).max(300).optional(),
+    // #18390: read by normalizeWaitForCooldownSettings, which also floors it at
+    // maxRetryWaitSec * 1000. The ceiling matches its 5 minute cap.
+    budgetMs: z.number().int().min(0).max(300_000).optional(),
   })
   .strict();
 
@@ -252,6 +258,7 @@ export const updateResilienceSchema = z
             rpm: z.number().int().min(1).optional(),
             concurrency: z.number().int().min(1).optional(),
             providerConcurrency: z.number().int().min(0).max(100_000).optional(),
+            rateLimitCooldownSeconds: z.number().int().min(1).max(21_600).optional(),
           })
           .strict()
       )

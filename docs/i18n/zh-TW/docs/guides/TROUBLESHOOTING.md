@@ -39,31 +39,37 @@ OmniRoute 的常見問題與解決方案。
 
 ### 免費提供者的速率限制（429 / 400 / 401）
 
-**症狀**：使用免費／無需驗證的提供者（auggie 等）搭配 `model: "auto"` 時，您會間歇性地收到 `HTTP 429`、`400` 或 `401`，而非正常回覆。稍後使用相同提示重試時，請求會成功，但自動化作業（cron 工作、代理程式、指令碼）會在第一次失敗時中斷。
+**症狀**：使用 `model: "auto"` 搭配免費／無驗證提供者（auggie 等）時，偶爾會收到 `HTTP 429`、`400` 或 `401`，而不是答案。稍後片刻重試相同提示時請求會成功，但自動化工作流程（cron 工作、代理程式、指令碼）會在第一次失敗時中斷。
 
-**根本原因**：三種彼此獨立的失敗模式會疊加：
+**根本原因**：三種獨立的失敗模式疊加在一起：
 
-1. **提供者速率限制（`429`）**：免費方案可能會強制執行每個時間視窗的配額。突發的大量平行呼叫會耗盡配額，因此在時間視窗重設之前，後續請求都會遭到拒絕。
-2. **直通模式中的故障模型（`400`/`401`）**：`auto/*` 集區可能包含已在目錄中註冊、但沒有有效憑證的直通模型（→ `401`）。自動路由器嘗試其中一個模型後失敗，而錯誤會在備援機制啟動前向外傳播。
-3. **並行放大效應（負載下出現 `429`）**：當多個代理程式／cron 工作階段同時存取 `auto` 時，彙總請求速率會超出免費提供者可承受的範圍，導致合法呼叫被標記為濫用。
+1. **提供者速率限制（`429`）**：免費方案可能會執行每個時間視窗的配額限制。大量平行呼叫會耗盡配額，因此下一個請求會遭拒，直到時間視窗重設。
+2. **直通模式中的損壞模型（`400`/`401`）**：`auto/*` 集合可能包含已在目錄中註冊、但沒有有效認證資訊的直通模型（→ `401`）。自動路由器嘗試使用其中一個模型並失敗，錯誤會在啟動回退機制前向外傳播。
+3. **並行放大效應（負載下的 `429`）**：當多個代理程式／cron 工作階段同時呼叫 `auto` 時，累積請求速率會超過免費提供者可承受的程度，因此正常請求也會被標記為濫用。
 
-**經驗證的修正方式（社群回報，2026-08-10）**：調整三個環境變數，讓輪替、並行控制與備援機制能夠吸收免費方案的不穩定狀況，而不是直接因其失敗：
+**已驗證的修正方式（社群回報，2026-08-10）**：調整三個環境變數，讓輪替、並行處理與回退機制吸收免費方案的波動，而不是因此失敗：
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 遇到 400/401 時切換至其他模型／提供者（略過故障的直通模型）
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # 明確設定重量級請求的准入上限（預設未設定：沒有請求數量上限，請參閱下方說明）
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # 對於緩慢的上游，將有限等待時間提高至超過 RATE_LIMIT_MAX_WAIT_MS 的預設值
+export OMNIROUTE_ROTATE_ON_400=true           # 在 400/401 時切換至其他模型／提供者（略過損壞的直通模型）
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # 明確的高負載請求上限（預設未設定：不限制請求數量，請參閱下方注意事項）
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # 將有限等待時間提高到高於慢速上游的 RATE_LIMIT_MAX_WAIT_MS 預設值
 ```
 
-請在 OmniRoute 程序環境中設定這些變數（即常駐程式，例如透過 LaunchAgent plist 或 `systemctl edit`），然後重新啟動 OmniRoute。輪替旗標是效果最顯著的單一調整項目：它會將硬性失敗轉換為對集區中健康提供者的透明重試。
+請在 OmniRoute 程序環境中設定這些變數（守護程式，例如透過 LaunchAgent plist 或 `systemctl edit`），然後重新啟動 OmniRoute。輪替旗標是影響力最高的單一設定：它會將硬性失敗轉換為針對集合中健康提供者的透明重試。
 
-**注意**：`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 會限制可同時執行的重量級（長上下文）請求數量；此限制是准入閘門，而非提供者速率限制器。**#503-fanout 更新：**此變數預設不再設定（現在只有在明確設定時才會生效，如上所示）——重量級請求的准入改由自動推導的位元組預算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`）控管，該預算會根據主機的實際記憶體上限自行調整，因此全新部署即使完全不設定此變數，也應該會遇到少得多的 `503 chat_admission_busy` 拒絕；在此明確設定它仍會完全依照文件所述運作。明確指定的位元組預算覆寫值會限制在 8 MiB–2 GiB 之間。`413 body_exceeds_budget` 並非暫時性錯誤：請提高該位元組預算、降低 `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`，或提高程序記憶體上限。`inflight_bytes_budget` 卸載表示暫時性的資源爭用，仍可重試。各提供者的速率限制（`open-sse/services/rateLimitManager.ts`）由 `RATE_LIMIT_MAX_WAIT_MS`、`RATE_LIMIT_MAX_QUEUE_DEPTH` 與 `RATE_LIMIT_AUTO_ENABLE` 分別控管——請參閱 `.env.example`。
+**注意**：`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 限制同時執行的高負載（長內容）請求數量；此限制是請求准入閘門，而不是提供者速率限制。**#503-fanout 更新：** 此變數現在預設不再設定（只有在明確設定時才會生效，如上所示）——高負載請求准入現在改由自動衍生的位元組預算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`）控制，該預算會根據主機的實際記憶體上限自行調整。因此，新的部署即使完全不設定此變數，也應該會大幅減少 `503 chat_admission_busy` 拒絕；在此處明確設定仍完全按照文件說明運作。明確的位元組預算覆寫值會限制在 8 MiB–2 GiB。`413 body_exceeds_budget` 並非暫時性錯誤：請提高該位元組預算、降低 `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` 或已儲存的請求本文限制，或提高程序的記憶體上限。`inflight_bytes_budget` 造成的卸載是暫時性競爭，仍可重試。每個提供者的速率限制（`open-sse/services/rateLimitManager.ts`）則由 `RATE_LIMIT_MAX_WAIT_MS`、`RATE_LIMIT_MAX_QUEUE_DEPTH` 和 `RATE_LIMIT_AUTO_ENABLE` 分別管理——請參閱 `.env.example`。
 
-**如何驗證修正是否生效**：快速連續執行代理程式／cron 兩次，並確認兩次皆成功。修正前，第二次執行通常會拋出 `429`/`401`。修正後，失敗（如果有）會被透明地重試，且呼叫會完成。您也可以執行 `curl /monitoring/health`，並觀察提供者連線上的 `rateLimitedUntil` 欄位，以及受影響提供者的 `circuitBreakers.providerBreakers[].state`——其狀態會是 `CLOSED`、`DEGRADED`、`OPEN` 或 `HALF_OPEN` 其中之一（請參閱 `src/shared/utils/circuitBreaker.ts`）；持續失敗的提供者會依序從 `CLOSED → DEGRADED → OPEN` 切換，直到重設時間視窗允許探測請求通過（`HALF_OPEN`）。
+**升級注意事項：已儲存的請求本文限制現在也會套用至聊天功能。** 先前在 Settings > Advanced > Request Body Limit 下儲存的限制（`maxBodySizeMb`），現在也會套用至 `/v1/chat/completions` 和 `/v1/responses`。在此變更之前，無論儲存了什麼設定，這兩個路由最多都接受 50 MB，因此儲存較低限制的安裝現在會開始拒絕超過該限制的聊天本文。從未儲存限制的安裝則會維持 50 MB 預設值。
 
-**如果仍看到 429**：該提供者目前使用中的帳戶確實已耗盡其_配額_（不只是速率限制）。請在 OmniRoute 儀表板 → Providers → Accounts 中，為同一提供者新增第二個帳戶，或混用另一個免費提供者（例如 `routeway`、`auggie`）。輪替只能處理暫時性的速率限制／400／401；硬性配額耗盡需要第二組憑證或不同的提供者。
+拒絕回應的 HTTP 狀態碼為 `413`，其中 `error.code` 設為 `PAYLOAD_TOO_LARGE`，`error.type` 設為 `payload_too_large`。訊息會指出目前生效的限制：當宣告的 `Content-Length` 超過限制時，訊息為 `Request body too large. Maximum allowed: 10 MB`；當實際讀取的位元組超過限制時，訊息為 `Request body too large for chat completions (max 10 MB).`。這與上方的 `413 body_exceeds_budget` 不同；後者來自記憶體預算，不會受到此設定變更影響。
 
-**如果在視覺模型（`auto/vision`、`bazaarlink/*`）上看到 403**：已連線的帳戶沒有包含視覺功能的付費方案，或 API 金鑰權限不足。請在提供者儀表板中確認金鑰範圍包含視覺／多模態功能，或連線付費方案帳戶並將其保留為視覺功能的目標提供者。
+若要提高限制，請在 `/dashboard/settings/advanced` 儲存較高的值，或傳送 `PATCH /api/settings` 並附上 `{"maxBodySizeMb": 50}`。接受的值為 1 至 500 MB，套用時不需要重新啟動，而設定為 50 可還原先前的聊天限制。另外仍有兩個限制可能會阻止較大的本文：設定後的限制還會受到 `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`（若已設定）的上限限制；此外，Kubernetes ingress 註解 `proxy-body-size`（隨附資訊清單中為 `50m`）也必須另外提高，才能允許超過 50 MB 的內容。
+
+**如何驗證是否生效**：快速連續執行代理程式／cron 工作兩次，確認兩次都成功。在修正前，第二次執行通常會擲出 `429`／`401`。修正後，即使發生失敗，也會透明地進行重試並完成呼叫。你也可以執行 `curl /monitoring/health`，並查看提供者連線上的 `rateLimitedUntil` 欄位，以及受影響提供者的 `circuitBreakers.providerBreakers[].state`——狀態值為 `CLOSED`、`DEGRADED`、`OPEN` 或 `HALF_OPEN` 之一（請參閱 `src/shared/utils/circuitBreaker.ts`）；持續失敗的提供者會在重設視窗允許探測請求通過（`HALF_OPEN`）之前，依序從 `CLOSED → DEGRADED → OPEN` 轉換。
+
+**如果仍然看到 429**：該提供者的作用中帳戶確實已耗盡其 _配額_（不只是速率限制）。請在 OmniRoute 儀表板 → Providers → Accounts 中，為相同提供者新增第二個帳戶，或混用其他免費提供者（例如 `routeway`、`auggie`）。輪替只能協助處理暫時性的速率／400／401 問題；硬性配額耗盡則需要第二組認證資訊或改用其他提供者。
+
+**如果在視覺模型（`auto/vision`、`bazaarlink/*`）上看到 403**：已連線的帳戶缺少包含視覺功能的付費方案，或 API 金鑰的權限不足。請在提供者儀表板中確認金鑰範圍包含視覺／多模態功能，或連線至付費方案帳戶，並將其保留為視覺目標。
 
 ---
 

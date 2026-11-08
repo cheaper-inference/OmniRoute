@@ -240,19 +240,18 @@ Poleg tega `updateNssDatabases()` namesti potrdilo v uporabniške zbirke podatko
 
 Vse končne točke MITM zahtevajo preverjanje pristnosti za upravljanje (`requireCliToolsAuth`). Geslo sudo je predpomnjeno v obsegu modula (nikoli v `globalThis`) in se izbriše ob `stopMitm()`.
 
-## Preglasitve User-Agent — spremenljivke okolja (12. razdelek datoteke `.env.example`)
+## User-Agent preglasi — env vars (`.env.example` razdelek 12)
 
-| Spremenljivka            | Privzeta vrednost                                               |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| Spremenljivka       | Privzeto                                      |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Uporablja jih `open-sse/executors/base.ts::buildHeaders()` prek dinamičnega iskanja. **Posodobite jih, ko ponudniki izdajo nove različice CLI-ja** — zastareli nizi UA so zavrnjeni, ker predstavljajo zastarele odjemalce.
+Porabi `open-sse/executors/base.ts::buildHeaders()` prek dinamičnega iskanja.** Obrnite se na te, ko ponudniki izdajo nove različice CLI** — stale UA nizi se začnejo zavračati kot zastareli odjemalci.
 
 ## Preklopniki načina združljivosti CLI-ja (`.env.example`, razdelek 13)
 

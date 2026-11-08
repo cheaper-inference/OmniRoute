@@ -3,6 +3,17 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  type AlertDialogTone,
+} from "@omniroute/ui-kit/alert-dialog";
+import {
   Dialog,
   DialogClose,
   DialogContent,
@@ -192,7 +203,14 @@ export default function Modal({
   );
 }
 
-// Confirm Modal helper
+// The legacy variant vocabulary, read as the kit's confirmation tones.
+const CONFIRM_TONES: Partial<Record<ButtonVariant, AlertDialogTone>> = {
+  danger: "destructive",
+  warning: "warning",
+};
+
+// The kit AlertDialog: role="alertdialog", focus starts on Cancel, an outside click does nothing
+// and there is no close button. Focus goes back to the opener through the kit, not `Modal`.
 export function ConfirmModal({
   isOpen,
   onClose,
@@ -205,25 +223,39 @@ export function ConfirmModal({
   loading = false,
 }: ConfirmModalProps) {
   const t = useTranslations("common");
+  const [confirming, setConfirming] = useState(false);
+  const busy = loading || confirming;
+
+  const handleConfirm = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // The kit action closes after onClick. Callers close through `isOpen`, and some keep the
+    // dialog open on purpose when the work fails.
+    event.preventDefault();
+    const result = onConfirm();
+    if (!(result instanceof Promise)) return;
+    setConfirming(true);
+    void result.finally(() => setConfirming(false));
+  };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={title ?? t("confirmTitle")}
-      size="sm"
-      footer={
-        <>
-          <Button variant="ghost" onClick={onClose} disabled={loading}>
-            {cancelText ?? t("cancel")}
-          </Button>
-          <Button variant={variant} onClick={() => void onConfirm()} loading={loading}>
-            {confirmText ?? t("confirmAction")}
-          </Button>
-        </>
-      }
+    <AlertDialog
+      tone={CONFIRM_TONES[variant] ?? "default"}
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <p className="text-text-muted">{message}</p>
-    </Modal>
+      <AlertDialogContent className="max-w-sm">
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title ?? t("confirmTitle")}</AlertDialogTitle>
+          <AlertDialogDescription>{message}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={busy}>{cancelText ?? t("cancel")}</AlertDialogCancel>
+          <AlertDialogAction loading={busy} onClick={handleConfirm}>
+            {confirmText ?? t("confirmAction")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
