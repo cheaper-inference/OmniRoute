@@ -24,6 +24,10 @@ import type {
 import { bufferedResponsesFailure } from "./bufferedResponsesFailure.ts";
 import { translateNonStreamingClientResponse } from "./nonStreamingClientTranslate.ts";
 import { parseNonStreamingResponseBody, isJsonRecord } from "./nonStreamingResponseParse.ts";
+import {
+  NonStreamingResponseTooLargeError,
+  readResponseTextWithinCap,
+} from "./nonStreamingResponseBody.ts";
 import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
@@ -621,7 +625,7 @@ export async function runNonStreamingProviderLeg(
     let parsedErrorBody: Record<string, unknown> = {};
 
     try {
-      const errorBodyText = await providerResponse.text();
+      const errorBodyText = await readResponseTextWithinCap(providerResponse);
       try {
         parsedErrorBody = JSON.parse(errorBodyText) as Record<string, unknown>;
       } catch {
@@ -635,8 +639,11 @@ export async function runNonStreamingProviderLeg(
         "Provider request failed";
       upstreamErrorCode = typeof errObj?.code === "string" ? errObj.code : undefined;
       upstreamErrorType = typeof errObj?.type === "string" ? errObj.type : undefined;
-    } catch {
-      message = "Provider request failed";
+    } catch (readErr) {
+      message =
+        readErr instanceof NonStreamingResponseTooLargeError
+          ? "Provider error body exceeded response size limit"
+          : "Provider request failed";
     }
 
     // Parse Retry-After from upstream response headers
