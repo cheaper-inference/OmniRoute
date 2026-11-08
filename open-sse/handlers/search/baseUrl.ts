@@ -64,3 +64,12 @@ export function resolveSearchBaseUrl(config: SearchProviderConfig, params: BaseU
 
   return config.baseUrl.replace(/\/+$/, "");
 }
+
+/**
+ * The same name check as the base URL, for each redirect Location
+ * (./redirectGuard.ts). Defined here so this directory keeps a single import
+ * of the shared URL guard.
+ */
+export function validateSearchRedirectUrl(url: URL): URL {
+  return parseAndValidateNonMetadataUrl(url);
+}

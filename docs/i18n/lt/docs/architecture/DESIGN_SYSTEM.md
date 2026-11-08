@@ -4,165 +4,95 @@
 
 ---
 
-> **Būsena:** valdymo skydelis sukurtas naudojant **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), kuris įtrauktas
-> kaip darbo sritis `packages/ui-kit` (`@omniroute/ui-kit`; pradinio projekto momentinė kopija užfiksuota faile
-> `packages/ui-kit/UPSTREAM.md` ir tikrinama naudojant `npm run check:ui-kit-snapshot`). Šviesi tema yra pagrindinė;
-> numatytoji nuostata yra `system`. Akcento spalva – Keak žalsva (`--ci-color-accent`). Inter
-> (tarpai tarp raidžių 0, `--ci-letter-spacing-ui`) yra naudotojo sąsajos šriftų šeima, Instrument Serif naudojamas tik dideliam, negausiam
-> antraštiniam tekstui (`.ci-dashboard-display`), o IBM Plex Mono – kodui; visi šriftai pateikiami vietoje per
-> `@fontsource/*` importus failo `src/app/globals.css` pradžioje. Visos piktogramos yra Lucide simboliai.
+> **Būsena:** prietaisų skydelis pastatytas ant** Keak CI UI rinkinys** (`@keak/cheaper-inference-ui-kit`), tiekiama kaip darbo sritis `packages/ui-kit` (`@omniroute/ui-kit`; momentinė nuotrauka prieš srovę yra prisegta `packages/ui-kit/UPSTREAM.md` ir saugoma `npm run check:ui-kit-snapshot`). Šviesa yra kanoninė tema; numatytoji nuostata yra `system`. Numatytoji paletė yra rinkinio** leidimai** išvaizda (šilto popieriaus neutralumas ir vario akcentas `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Nustatymai → Išvaizda → Spalvų paletės pasiūlymai** Klasika** , rinkinio baziniai žetonai su laimo akcentu. „Switzer“ yra viena šeima, skirta UI, ekranui ir kodo tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Scenarijai Šveicarijoje trūksta kritimo po glifo (`src/app/globals.css`): „Inter“ – kirilica, graikų ir vietnamiečių kalba ir, tik pagal `html[dir="rtl"]`, „Vazirmatn“ – arabų rašmenims. Kiekviena piktograma yra Lucide glifas.
 
-## 1. Kur kas yra
+## 1. Kur gyvena daiktai
 
-- **Rinkinys.** `packages/ui-kit/src` yra baitas į baitą sutampanti pirminio `src/` kopija iš
-  `packages/ui-kit/UPSTREAM.md` nurodyto commit (ten taip pat užfiksuotas licencijos leidimas); `PATCHES.md`
-  išvardytos vietinės pataisos (jų nėra). Jis naudojamas kaip pirminis kodas, be komponavimo: `next.config.mjs`
-  jį transkompiliuoja, o `tsconfig.json` susieja `@omniroute/ui-kit` → `packages/ui-kit/src` ir
-  `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` ir `vitest.mcp.config.ts` turi tą patį
-  pseudonimą). Rinkinio komponentą importuokite per jo antrinį kelią (`@omniroute/ui-kit/table`,
-  `@omniroute/ui-kit/page-header`…), niekada per bendrą `@omniroute/ui-kit` eksportavimo modulį: šis modulis
-  į kiekvieną importuotoją įtraukia visus komponentus (įskaitant datos parinkiklį). Rinkinio stilių lentelė
-  įtraukiama per `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Žetonai.** `packages/ui-kit/src/ci-tokens.css` apibrėžia `--ci-*` žetonus; `src/app/globals.css`
-  susieja juos su senaisiais OmniRoute pavadinimais (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), todėl esami `var(--color-*)` naudojimo atvejai ir Tailwind
-  pagalbinės klasės veikia toliau. Naujame kode naudojamos Tailwind pagalbinės klasės (`bg-surface`,
-  `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) arba rinkinio klasės —
-  niekada šešioliktainė spalvos reikšmė (`tests/unit/design-kit-bridge.test.ts` užtikrina šios sąsajos
-  laikymąsi). `text-primary` per `--text-color-primary` nurodo į `--color-primary-ink` (lime-800 šviesioje
-  temoje, žaliosios citrinos spalvos akcentas tamsioje), todėl pirminis tekstas išlieka įskaitomas, o
-  `bg-primary`/`border-primary` išlaiko žaliosios citrinos spalvos paviršių. Diagramų serijose naudojami
-  `--color-chart-1` … `--color-chart-5`.
-- **Temos.** `<html className="ci-theme">` (`src/app/layout.tsx`) dokumentui įjungia rinkinio temą.
-  Pasirinkimas gali būti `light`, `dark` arba `system` (`THEME_CONFIG.defaultTheme = "system"` faile
-  `src/shared/constants/appConfig.ts`; `system` atsižvelgia į `prefers-color-scheme`). `applyTheme()` faile
-  `src/store/themeStore.ts` (jo veikimą atkartoja įterptinis pradinis scenarijus faile `src/app/layout.tsx`,
-  vykdomas prieš hidrataciją) nustato `data-theme="dark"|"light"` ir kartu perjungia `.dark` klasę elemente
-  `<html>`. Rinkinio tamsiosios temos žetonų rinkinys parenkamas pagal `data-theme="dark"`
-  (`packages/ui-kit/src/ci-tokens.css`); pačios OmniRoute tamsiosios temos perrašos (`.dark` blokas faile
-  `globals.css`) ir senosios Tailwind `dark:` pagalbinės klasės parenkamos pagal `.dark` klasę. Akcento
-  spalvų išankstinių nuostatų nėra: akcentas visada gaunamas iš rinkinio, o iš senesnės versijos išlikusi
-  nuostata pašalinama įkeliant saugyklą.
-- **Komponentai (adapteriai).** `src/shared/components/index.tsx` išlaiko OmniRoute komponentų API (tuos
-  pačius pavadinimus, numatytuosius eksportus ir parametrus), o jo baziniai komponentai yra rinkinio
-  adapteriai: formos (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),
-  perdangos ir grįžtamasis ryšys (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`,
-  `EmptyState`, `Loading`), struktūra (`Collapsible`, `CollapsibleSection`, `SegmentedControl`,
-  `Breadcrumbs`, `Avatar`) ir lentelės (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`,
-  `PresetSlider`). Adapteris importuoja rinkinio komponentą per antrinį kelią ir susieja senuosius
-  parametrus su juo — pavyzdžiui, `Button variant="primary"` atitinka rinkinio `default` mygtuką
-  (`--ci-button-primary-*`: priešingas paviršius šviesioje temoje, akcentas su jo
-  `--ci-color-accent-foreground` teksto spalva tamsioje), `danger` atitinka `destructive`, o `warning` —
-  `outline` su `.ci-button--warning` plėtiniu. `.ci-button--warning` ir `.ci-badge[data-tone]` taisyklės
-  failo `globals.css` pabaigoje (`@layer components`) yra OmniRoute plėtiniai, taikomi ant rinkinio klasių.
-  `tests/unit/ui/adapters/*.test.tsx` užfiksuoja kiekvieno adapterio veikimą.
-- **Apvalkalas.** `src/app/(dashboard)/layout.tsx` atvaizduoja `DashboardLayout`, kuris atvaizduoja
-  `src/shared/components/layouts/DashboardShell.tsx`: rinkinio `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) su OmniRoute navigacijos logika faile
-  `src/shared/components/Sidebar.tsx`. Nuoroda „pereiti prie turinio“, vedanti į `#main-content`, yra
-  pirmasis fokusuojamas elementas. `src/shared/components/Header.tsx` turi rinkinio `SidebarTrigger`
-  (vienintelį apvalkalo šoninės juostos perjungiklį), Keak `ProductSwitcher` ir komandų paletės atidarymo
-  elementą; maršruto pavadinimas rodomas tik tol, kol `#main-content` viduje nėra prijungto rinkinio
-  `PageHeader` (`.ci-page-header`), todėl puslapyje, turinčiame savo `PageHeader`, yra vienintelis `h1`.
-  `src/shared/components/CommandPalette.tsx` yra rinkinio `Dialog`.
-- **Piktogramos.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) per `ICON_MAP`
-  (`src/shared/constants/iconMap.ts`) susieja pavadinimą (ekranuose naudojamą Material Symbols žodyną) su
-  Lucide simboliu. Material Symbols šrifto ir paketo nebėra: jei žemėlapyje pavadinimo nėra, atvaizduojamas
-  neutralus pakaitinis simbolis (`data-icon-missing="true"`), o ne produkcinėje aplinkoje konsolėje
-  pateikiamas įspėjimas. `npm run gen:icon-map` išveda naudojamus pavadinimus, kurių nėra žemėlapyje
-  (`tests/unit/icon-map-coverage.test.ts` nepavyksta aptikus bet kurį pavadinimą be Lucide piktogramos;
-  `tests/unit/icon-map-object-values.test.ts` tikrina paieškos objektuose saugomus pavadinimus);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` perrašo pažodinius
-  `<span className="material-symbols-outlined">` elementus į `<Icon>`.
-- **Prekės ženklas.** `src/shared/components/OmniRouteLogo.tsx` apgaubia rinkinį: numatytasis eksportas
-  `OmniRouteLogo` atvaizduoja `ProductIcon product="omniroute" variant="glyph"` (įterptinį SVG, saugų
-  naudoti su `basePath`), o `OmniRouteLockup` atvaizduoja `ProductLockup product="omniroute"` (prieinamas
-  pavadinimas „Keak OmniRoute“) arba, baltojo ženklinimo operatoriams, jų pačių `name`/`logoSrc`.
-  Produktų perjungiklio paskirties vietos saugomos faile `src/shared/constants/keakProducts.ts`
-  (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Atskirieji ekranai — `src/app/login/page.tsx`,
-  `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`,
-  `src/app/not-found.tsx` ir `src/shared/components/ErrorPageScaffold.tsx` — rodo bendrąjį logotipą;
-  `tests/unit/brand-pages-static.test.ts` tai užtikrina.
+- **rinkinys.** `packages/ui-kit/src` yra baitas už baitą `src/` kopija prieš srovę `packages/ui-kit/UPSTREAM.md` prisegimo metu (kuris taip pat įrašo licencijos įgaliojimą); `PATCHES.md` pateikia vietinių pataisų sąrašą (nėra). Jis naudojamas kaip šaltinis, nekuriant: `next.config.mjs` jį perkelia, o `tsconfig.json` atvaizduoja `@omniroute/ui-kit` → `packages/ui-kit/src` ir `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` ir `vitest.mcp.config.ts` turi tą patį slapyvardį). Importuokite rinkinio komponentą pagal jo papildomą kelią (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), niekada ne per `@omniroute/ui-kit` cilindrą: statinė įtraukia kiekvieną komponentą (įskaitant datos rinkiklį) į kiekvieną importuotoją. Rinkinio stiliaus lapas įvedamas per `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, visas lapas: pagrindinis `ci-ui.css` ir kiekviena modelių šeima).
+- **Žetonai.** `packages/ui-kit/src/ci-tokens.css` deklaruoja `--ci-*` žetonus; `src/app/globals.css` sujungia juos su senais OmniRoute pavadinimais (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), todėl esami `var(--color-*)` skaito ir Tailwind paslaugos veikia toliau. Naujas kodas naudoja Tailwind paslaugų programas (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`...) arba rinkinių klases — niekada nenaudoja šešioliktainės reikšmės (`tests/unit/design-kit-bridge.test.ts` užtikrina tiltą). `text-primary` yra `--color-primary-ink` per `--text-color-primary`, todėl pirminis tekstas lieka skaitomas, o `bg-primary`/`border-primary` išlaiko akcento paviršių: leidimuose tai yra rinkinio `--ci-color-accent-active` (gilaus vario `#99562f` šviesoje, vario akcentas tamsoje); pagal Classic, lime-800 šviesoje ir laimo akcentas tamsoje. Diagramų serijos naudoja `--color-chart-1` … `--color-chart-8`, kiekviena su tekstu saugančiu `--color-chart-N-ink` ir nepermatomu `--color-chart-N-subtle` lusto atspalviu, priskirtu rinkinio serijos tvarka (`ciChartSeriesOrder`).
+- **Temos.** `<html className="ci-theme">` (`src/app/layout.tsx`) pasirenka dokumentą į rinkinio temą. Pirmenybė teikiama `light`, `dark` arba `system` (`THEME_CONFIG.defaultTheme = "system"` `src/shared/constants/appConfig.ts`; `system` seka `prefers-color-scheme`). `applyTheme()` į `src/store/themeStore.ts` (atspindi `THEME_BOOT_SCRIPT`, įdėta į `src/app/layout.tsx`, kuri veikia prieš hidrataciją) nustato `data-theme="dark"|"light"` ir kartu perjungia `.dark` klasę `<html>`. Rinkinio tamsių žetonų rinkinys yra pažymėtas `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute tamsieji nepaisymai ( `.dark` blokas `globals.css`) ir senasis Tailwind `dark:` paslaugų raktas `.dark` klasėje. Išankstinių akcentų spalvų nustatymų nėra: akcentas visada gaunamas iš rinkinio, o išlikęs senesnės versijos išankstinis nustatymas atmetamas, kai parduotuvė įkeliama.
+- **Paletės.** Du, abu iš rinkinio (`src/shared/constants/appearancePalette.ts`): `editions`, numatytasis ir `classic`. Editions yra rinkinio `data-ci-appearance="editions"` atributas `<html>`, kurį `ci-editions.css` (importavo `ci-ui.css`) derina su `data-theme`; Klasika yra atributo nebuvimas. Šakninio išdėstymo serveris pateikia atributą, todėl lankytojas, neturintis nieko saugomo (arba neturintis JS), gauna leidimus ant kiekvieno paviršiaus — prietaisų skydelio, prisijungimo, `/status`, klaidų puslapių, `/docs` ir PWA. Pasirinkimas išlieka šalia temos toje pačioje `theme` parduotuvėje (`palette`, `setPalette()`, `applyPalette()` in `src/store/themeStore.ts`) ir taikomas prieš dažą `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, įtrauktas į maketo `<head>`), kuris pašalina atributą tik tada, kai saugoma paletė yra `"classic"`; `src/app/global-error.tsx`, už šaknies išdėstymo ribų, taiko iš tos pačios parduotuvės. Nedėkite `data-ci-appearance` ant jokio kito elemento: rinkinys suderina jį su `html:root:has([data-ci-appearance="editions"])`, todėl vienas palikuonis pakeis visą dokumentą. Editions `data-ci-editions-variant="landing"` variantas skirtas rinkodaros puslapiams, o ne prietaisų skydeliui. Naršyklės chromas: serveris pateikia numatytuosius leidimus `viewport.themeColor` (viena žyma kiekvienam `prefers-color-scheme`) ir žiniatinklio manifestą — `PWA_THEME_COLORS` in `src/shared/constants/pwaThemeColors.ts`, vienas leidimų `--ci-color-background` veidrodis (`#f3f1e9` / `#11120f`), kurį `tests/unit/pwa-theme-colors.test.ts` `ci-editions.css` Tada tiesioginis `<meta name="theme-color">` seka saugomą paletę ir režimą: `THEME_BOOT_SCRIPT` perrašo žymes prieš dažymą, o temų parduotuvės veiksmai tai atlieka kiekvieną kartą pakeitus (`resolveThemeColor()` / `applyThemeColor()` in `src/shared/utils/themeColorMeta.ts`, `CLASSIC_PAGE_BACKGROUND` nuskaitant iš rinkinio `ciTokens`). Aiški light/dark tema nustato kiekvieną žymą į tą režimą; `system` išlaiko vieną spalvą vienoje schemoje. Aprašas lieka leidimais: jis paimamas vieną kartą įdiegus, be pirmenybės. Monakas nuskaito jo spalvas iš zondo (`monacoKitTheme.ts`); Pagal leidimus zondo skaitymas apverčia šakninį `data-theme` vienam sinchroniniam praėjimui, nes rinkinys išsprendžia Editions light/dark iš šakninės dalies.
+- **Komponentai (adapteriai).** `src/shared/components/index.tsx` išlaiko OmniRoute komponentą API (tie patys pavadinimai, numatytieji eksportai ir rekvizitai), o už jo esantys primityvai yra komplekto adapteriai: formos (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),`ConfirmModal` `Modal`, `Tooltip`, `NotificationToast`, `EmptyState`), struktūrą (`Collapsible`, `CollapsibleSection`, `SegmentedControl` `Avatar` `Loading` ir lenteles ( `Breadcrumbs`,`DataTable`, `FilterBar` `FilterPills` `ColumnToggle` `InfoTooltip` `PresetSlider`. Adapteris importuoja rinkinio komponentą antriniu keliu ir susieja su juo senus rekvizitus, — pavyzdžiui, `Button variant="primary"` yra rinkinio `default` mygtukas (`--ci-button-primary-*`: atvirkštinis paviršius šviesoje, akcentas su `--ci-color-accent-foreground` rašalu tamsoje), `danger` yra `destructive`, o `warning` yra rinkinys `warning`. `Badge` būsenos variantai yra rinkinio tonai, o `Select` su `<option>` vaikais pateikia rinkinį `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` kaiščiu kiekvieną adapterį.
+- **Lukštas.** `src/app/(dashboard)/layout.tsx` pateikia `DashboardLayout`, kuris atvaizduoja `src/shared/components/layouts/DashboardShell.tsx`: rinkinį `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), su OmniRoute naršymo logika `src/shared/components/Sidebar.tsx`. „Pereiti prie turinio“ nuoroda į `#main-content` yra pirmasis fokusuojamas elementas. `src/shared/components/Header.tsx` turi rinkinį `SidebarTrigger` (vienintelis apvalkalo šoninės juostos perjungiklis), Keak `ProductSwitcher` ir komandų paletės atidarytuvą; jis rodo tik maršruto pavadinimą, kol `#main-content` viduje nėra įmontuotas joks rinkinys `PageHeader` (`.ci-page-header`), todėl puslapis su savo `PageHeader` turi vieną `h1`. `src/shared/components/CommandPalette.tsx` yra `Dialog` rinkinys.
+- **Piktogramos.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) paverčia pavadinimą (ekranų vartojamas medžiagos simbolių žodynas) per `ICON_MAP` (`src/shared/constants/iconMap.ts`) į Lucide glifą. Material Symbols šrifto ir paketo nebėra: žemėlapyje trūkstamas pavadinimas atvaizduoja neutralų rezervuotos vietos glyfą (`data-icon-missing="true"`) ir užregistruoja konsolės įspėjimą už gamybos ribų. `npm run gen:icon-map` spausdina naudojamus pavadinimus, kurių trūksta žemėlapyje (`tests/unit/icon-map-coverage.test.ts` nepavyksta bet kuriame pavadinime be Lucide piktogramos; `tests/unit/icon-map-object-values.test.ts` apima pavadinimus, saugomus paieškos objektuose); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` perrašo pažodinį `<span className="material-symbols-outlined">` apima į `<Icon>`.
+- **Prekės ženklas.** `src/shared/components/OmniRouteLogo.tsx` apvynioja rinkinį: numatytasis eksportavimas `OmniRouteLogo` pateikia `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe), o `OmniRouteLockup` pateikia `ProductLockup product="omniroute"` (prieinamas pavadinimas „Keak OmniRoute“) arba, baltos etiketės operatoriams, savo `name`/`logoSrc`. Produktų perjungimo paskirties vietos yra `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Atskiruose ekranuose — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` ir `src/shared/components/ErrorPageScaffold.tsx` — rodomas užrakinimas; `tests/unit/brand-pages-static.test.ts` tai saugo.
 
 ## 2. Taisyklės
 
-1. Tokenai, niekada literalai. Sąmoningai paliktos išimtys: visada tamsus konsolės terminalas ir
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) – rinkinio būsenų paletės išspręstų hex
-   reikšmių atspindys iškvietėjams, kuriems reikia tiesioginės hex reikšmės. Kategorinės paletės
-   nebėra išimtis: jos remiasi penkiais rinkinio diagramų tokenais (`--color-chart-1..5`) per
-   `src/shared/utils/categoricalPalette.ts`, o maršrutizavimo strategijoms – per
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow briaunos ir orkestravimo
-   drobė skaito temai jautrius `--orch-status-*` kintamuosius (`src/shared/components/flow/edgeStyles.ts`).
-2. Niekada ranka netaisykite `packages/ui-kit/src`: sinchronizuokite su `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit patikra `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) nepavyksta, jei bent
-   vienas baitas skiriasi nuo užfiksuoto (pinned) upstream commit (ji praleidžiama su įspėjimu,
-   kai upstream klono – `UI_KIT_CLONE` arba `_references/cheaper-inference-ui-kit` – nėra). Kai
-   rinkinyje ko nors trūksta, apeikite tai adapteryje arba ekrane ir paprašykite to upstream.
-3. Rinkinio teksto numatytosios reikšmės yra anglų kalba (`label = "Loading"`, `loadingLabel = "Loading table"`…) –
-   perduokite išverstas eilutes iš `useTranslations(...)` kaskart, kai rinkinio komponentas atvaizduoja tekstą.
-4. Tailwind utilities turi pirmenybę prieš rinkinio komponentų klases (rinkinys deklaruoja
-   `@layer theme, base, components, utilities`, o jo taisyklės gyvena `components` sluoksnyje) –
-   naudokite utilities tarpams ir išdėstymui, o ne rinkinio komponentų perdažymui.
-5. Antraštės: `.ci-heading` (Inter, be tarpženklio atstumo) puslapių ir skyrių pavadinimams;
-   `.ci-dashboard-display` (Instrument Serif) tik dideliam, retam display tekstui, pvz., klaidos
-   puslapio būsenos kodui.
-6. `tests/unit/dashboard-kit-sweep.test.ts` prižiūri rinkinio diegimą: jokio Material ligatūros span
-   po `src/app` ar `src/shared/components`; dashboard medyje (`src/app/(dashboard)` ir
-   `src/shared/components`) jokių grynų `<select>`, `<textarea>` ar `<table>` ir jokių rankiškai
-   kurtų `role="dialog"` už išvardytų išimčių ribų (`Select` adapterio natiivioji šaka,
-   `RequestLoggerDetail`); kiekvienas grynas `<button>` ar `<input>` ten turi turėti komentarą su
-   `kit-exception:` (su priežastimi), kuris baigiasi ne daugiau kaip 3 eilutėmis aukščiau jo;
-   paletės atspalviai ir `dark:` variantai – tik failuose, kuriuos išvardija testas.
-7. Prieš PR patikrinkite abi temas ir 390 px peržiūros sritį (ekrano kopijos);
-   `tests/e2e/a11y.spec.ts` paleidžia axe.
+1. Žetonai, niekada pažodiniai. Išimtys laikomos specialiai: visada tamsus pulto terminalas ir `STATUS_HEX` (`src/shared/constants/statusColors.ts`), išspręstas šešioliktainis rinkinio būsenos paletės veidrodis skambinantiems, kuriems reikia pažodinės šešioliktainės. Kategorinės paletės nebėra išimtis: jos važiuoja ant rinkinio aštuonių diagramų žetonų (`--color-chart-1..8`, plius `-ink`/`-subtle`), rinkinio serijos tvarka, per `src/shared/utils/categoricalPalette.ts` ir, maršruto parinkimo strategijoms, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow briaunos ir orkestravimo drobė nuskaito temą atitinkančius `--orch-status-*` kintamuosius (`src/shared/components/flow/edgeStyles.ts`).
+2. Niekada netaisykite `packages/ui-kit/src` ranka: sinchronizuokite su `scripts/dev/sync-ui-kit.sh <commit>`; išankstinio patvirtinimo vartai `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) sugenda bet kuriame baite, kuris skiriasi nuo prisegto išankstinio patvirtinimo (jis praleidžiamas su įspėjimu, kai nėra klono prieš srovę, `UI_KIT_CLONE` arba `_references/cheaper-inference-ui-kit`). Kai rinkinyje kažko trūksta, aplenkite jį adapteryje arba ekrane ir paprašykite prieš srovę.
+3. Numatytieji rinkinio teksto nustatymai yra anglų kalba (`label = "Loading"`, `loadingLabel = "Loading table"`…). — perduoda išverstas eilutes iš `useTranslations(...)` kai rinkinio komponentas pateikia tekstą.
+4. Tailwind komunalinės paslaugos laimi rinkinio komponentų klases (rinkinys deklaruoja `@layer theme, base, components, utilities`, o jo taisyklės galioja `components`) — naudoja komunalines paslaugas tarpams ir išdėstymui, o ne rinkinio komponentų perspalvinimui.
+5. Antraštės: `.ci-heading` puslapių ir skyrių pavadinimams; `.ci-dashboard-display` tik dideliam, retai rodomam tekstui, pvz., klaidos puslapio būsenos kodui. Abu naudoja Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` apsaugo rinkinio priėmimą: nėra medžiagos ligatūros tarpo pagal `src/app` arba `src/shared/components`; prietaisų skydelio medyje (`src/app/(dashboard)` ir `src/shared/components`) nėra neapdorotų `<select>`, `<textarea>` arba `<table>` ir rankiniu būdu susuktų `role="dialog"` išskyrus išvardytas išimtis (gimtoji `Select` adapterio šaka, `RequestLoggerDetail`); kiekviename neapdorotame `<button>` arba `<input>` reikia komentaro su `kit-exception:` (su priežastimi), kuris baigiasi daugiausia 3 eilutėmis virš jo; paletės atspalviai ir `dark:` variantai tik testavimo sąrašuose.
+7. Prieš PR patikrinkite abi temas ir 390 px peržiūros sritį (ekrano kopijas); `tests/e2e/a11y.spec.ts` paleidžia kirvį.
 
 ## 3. Ekrano pridėjimas
 
-1. Puslapį pradėkite rinkinio `PageHeader` (`@omniroute/ui-kit/page-header`, informacijos suvestinėje naudokite `compact`) — nurodykite pavadinimą, aprašą ir `actions`. Tada apvalkalo antraštė neberodo savo pavadinimo.
-2. Valdiklius kurkite iš `@/shared/components` (adapterių), o kai adapterio nėra, naudokite rinkinio komponentus, importuojamus pagal antrinį kelią (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
-   `Slider`…).
-3. Piktogramos: `<Icon name="…" />`. Naują pavadinimą įtraukite į `ICON_MAP` su semantiškai atitinkančiu Lucide
-   komponentu; `npm run gen:icon-map` pateikia vis dar trūkstamų pavadinimų sąrašą.
-4. Spalvos: naudokite semantines pagalbines klases (`text-success`, `bg-warning-bg`, `border-border`…) ir
-   `var(--color-chart-N)` diagramų duomenų sekoms; nenaudokite šešioliktainių reikšmių ir `dark:` variantų, kurie tik pakartoja spalvą.
-5. Tekstas: kiekviena eilutė, įskaitant rinkinio komponentams perduodamas etiketes, turi būti gaunama iš `useTranslations`. Naujus
-   raktus įtraukite į `src/i18n/messages/en.json`, `pt-BR.json` ir `vi.json` (vietnamiečių kalbos atitikties testas reikalauja
-   kiekvieno angliško rakto); kitos lokalės užpildomos vykdant i18n sinchronizavimą.
+1. Puslapį pradėkite rinkinio `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` prietaisų skydelio
+   viduje) — pavadinimas, aprašymas ir `actions`. Tada apvalkalo antraštė nerodo savo pavadinimo.
+2. Valdiklius kurkite iš `@/shared/components` (adapterių), o kur adapterio nėra, importuokite rinkinio
+   komponentus per subkelius (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`,
+   `RadioGroup`, `Slider`…).
+3. Piktogramos: `<Icon name="…" />`. Naujas pavadinimas įtraukiamas į `ICON_MAP` kartu su semantiškai
+   atitinkančiu Lucide komponentu; `npm run gen:icon-map` išvardija dar trūkstamus pavadinimus.
+4. Spalvos: semantinės pagalbinės klasės (`text-success`, `bg-warning-bg`, `border-border`…) ir
+   `var(--color-chart-N)` diagramų serijoms; jokių hex reikšmių ir jokių `dark:` variantų, kurie tik
+   kartoja spalvą.
+5. Tekstas: kiekviena eilutė, įskaitant rinkinio komponentams perduodamas etiketes, gaunama iš
+   `useTranslations`. Nauji raktai įtraukiami į `src/i18n/messages/en.json`, `pt-BR.json` ir `vi.json`
+   (vietnamiečių kalbos atitikties testas fiksuoja kiekvieną anglišką raktą); kitas lokalės užpildo i18n
+   sinchronizavimas.
 6. Prieš PR paleiskite patikras: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (tai vienintelė patikra, aptinkanti pasikartojantį importą faile `iconMap.ts`),
-   `npm run check:ui-icu` ir paties ekrano testus.
+   `npm run check:dashboard-typecheck` (vienintelė patikra, aptinkanti pasikartojantį importą faile
+   `iconMap.ts`), `npm run check:ui-icu` ir paties ekrano testus.
 
 ## 4. Adapterio pridėjimas arba keitimas
 
-1. Išlaikykite viešąją `src/shared/components/index.tsx` API: tuos pačius eksportuojamus pavadinimus, numatytuosius eksportus ir
-   priimamas savybes. Adapterio viduje susiekite senąsias savybes su rinkinio savybėmis (žr. `Button.tsx`: `VARIANT_TO_KIT`,
-   `SIZE_TO_KIT`).
-2. Importuokite rinkinį pagal dalinį kelią (`@omniroute/ui-kit/<component>`).
-3. Rinkinio trūkumų apėjimai turi būti adapteryje (arba `globals.css` sluoksnyje `@layer components`, kai taisomas
+1. Išlaikykite viešąją `src/shared/components/index.tsx` API: tuos pačius eksportų pavadinimus, numatytuosius
+   eksportus ir priimtinus props. Senovinius props susiekite su rinkiniu adapterio viduje (žr. `Button.tsx`:
+   `VARIANT_TO_KIT`, `SIZE_TO_KIT`).
+2. Rinkinį importuokite per subpath (`@omniroute/ui-kit/<component>`).
+3. Rinkinio spragų apejimai turi būti adapteryje (arba `globals.css` `@layer components`, jei pataisa yra
    stilius), bet niekada ne `packages/ui-kit/src`.
-4. Pridėkite arba atnaujinkite `tests/unit/ui/adapters/<name>.test.tsx`. Jei adapteris turi daug naudotojų, palyginkite
-   sugeneruotą žymėjimą prieš pakeitimą ir po jo — užpildų ar apgaubiančių elementų pakeitimai paveikia kiekvieną ekraną.
+4. Pridėkite arba atnaujinkite `tests/unit/ui/adapters/<name>.test.tsx`. Jei adapterį naudoja daug kvietėjų,
+   palyginkite atvaizduotą žymėjimą prieš ir po pakeitimo — padding arba wrapper pakeitimai išsilieja į
+   kiekvieną ekraną.
 
-## 5. Rinkinio atnaujinimas
+## 5. Komplekto atnaujinimas
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` nukopijuoja pirminio šaltinio `src/` iš nurodyto pakeitimo į
-`packages/ui-kit/src` ir pritaiko vienintelę leidžiamą transformaciją (pašalina `.js` plėtinį iš
-santykinių importų). Tada: peržiūrėkite `git diff packages/ui-kit`, vizualiai patikrinkite teikėjų, nustatymų, derinių,
-naudojimo ir galinio taško ekranus abiejose temose, paleiskite `npm run check:ui-kit-snapshot` ir `npm run test:vitest:ui` bei
-atidarykite PR, pridėdami pirminio šaltinio pakeitimų žurnalą.
+`npm run check:ui-kit-upstream` lygina `packages/ui-kit/UPSTREAM.md` prisegtą versiją su naujausia `v*` žyma prieš srovę ir išspausdina sinchronizavimo komandą, kai išleidžiamas leidimas.
 
-## 6. Nuorodų rodyklė
+Kasdieninė `UI Kit upstream watch` darbo eiga (`.github/workflows/ui-kit-upstream-watch.yml`) atlieka tą patį patikrinimą. Kol kaištis yra už nugaros, `scripts/ci/ui-kit-sync-pr.sh` išlaiko vieną sinchronizavimo PR atvirktį prieš aukščiausią `release/vX.Y.Z` šaką, slenkančią atšaką `chore/ui-kit-sync-latest`. Jis niekada nesusilieja: kiekvieną rinkinio leidimą vis tiek reikia vizualiai patikrinti vietinį VPS. Filialas atkuriamas, kai išleidžiamas naujesnis leidimas, o kitu atveju paliekama ramybėje. Atviras PR su įpareigojimais, stumiamais ranka, neperrašomas, o PR versijai, kurią prižiūrėtojas uždarė nesujungęs, lieka uždarytas iki naujesnės leidimo.
 
-- `src/app/globals.css` — tokenų tiltas, `.dark` perrašymai, OmniRoute `@layer components` plėtiniai
-- `packages/ui-kit/UPSTREAM.md` — užfiksuotas pirminio šaltinio pakeitimas ir licencijos leidimas; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` ir šalia jo esantys adapteriai; `src/shared/components/layouts/DashboardShell.tsx`,
-  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
-  `scripts/dev/codemod-material-icons.mjs`
+Kai negalima atidaryti jokio PR (tikslinis leidimas užšaldytas, PR įvykdymai nustumiami ranka, PR buvo uždarytas arba nenustatytas PR prieigos raktas), darbo eiga lieka atvira viena sekimo problema, kurioje nurodoma, kodėl.
+
+Darbo eiga naudoja dvi paslaptis:
+
+- `secrets.UI_KIT_READ_TOKEN`: tik skaitomas prieigos raktas, skirtas privačiam atpirkimui prieš srautą. Kai darbo eigos nepavyksta nuskaityti prieš srovę (nėra prieigos rakto, nustojo veikti arba GitHub nepasiekiamas), vykdymas lieka žalias, bet įrašomas įspėjimas ir lieka atvira viena atskira problema, kuri užsidaro, kai vėlesnis paleidimas gali vėl nuskaityti prieš srovę.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: smulkus tokenas šioje saugykloje su turinio ir ištraukimo užklausomis rašyti. Numatytasis `GITHUB_TOKEN` negali sukurti PRs čia, o atidarytas PR nesuaktyvins CI. Be šio prieigos rakto darbo eiga tik stumia šaką.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` nukopijuoja prieš srovę esantį `src/` to įpareigojimo metu (`latest` = naujausia `v*` žyma) į `packages/ui-kit/src`, taiko vieną leistiną transformaciją (atmeta `.js` priesagą iš santykinių importų) ir nustato darbo srities versiją `packages/ui-kit/package.json` ir `package-lock.json` į ankstesnę. Tada: peržiūrėkite `git diff packages/ui-kit`, atlikite abiejų temų teikėjų, nustatymų, kombinacijų, naudojimo ir galutinio taško vaizdinį perdavimą, paleiskite `npm run check:ui-kit-snapshot` ir `npm run test:vitest:ui` ir atidarykite PR naudodami išankstinį pakeitimų žurnalą.
+
+## 6. README diagramos
+
+Dvylika pagrindinių `README.md` įterptų diagramų (`docs/diagrams/*.svg`) yra rinkinys, pritaikytas statiniam vaizdui, ir jos generuojamos, o ne braižomos ranka: 13 generatoriaus failų `scripts/docs/gen-readme-*.mjs` (dvylika diagramų plius `gen-readme-diagrams.mjs` tvarkyklė) ir 12 pasenimo testų `tests/unit/docs/readme-*-svg.test.ts`, po vieną diagramoje, kiekvienas baitass failas su savo išvesties qzpar generatoriumi ( `test-unit`).
+
+- **Žetonai.** `scripts/docs/readme-diagram-theme.mjs` nukopijuoja leidimų paletę (numatytąją išvaizdą) iš `packages/ui-kit/src/ci-editions.css` (prisegta prie to failo `tests/unit/docs/readme-diagram-theme.test.ts`, kuri taip pat tikrina WCAG AA kiekvienai teksto spalvai kiekviename paviršiuje abiejose schemose; vienintelė išimtis, šviesi `warn`, yra rinkinio įspėjimas patamsintas 10 %, nes rinkinio reikšmė yra 4,46:1 ant drobės teksto.`ci-tokens.css`): Switzer pagal rinkinio svorius (400/500/600, ekranas 500) ir visko sekimas, išskyrus kodo vaidmenis (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), kurie yra IBM Plex Mono ir yra skirti tik komandoms, terminalams ir URLs. Šviesos reikšmės yra ant `:root`, tamsios reikšmės už `prefers-color-scheme: dark`, failo viduje, todėl kiekvienas vaizdas atitinka žiūrinčiojo schemą GitHub.
+- **Šriftai.** GitHub Markdown neturi CSS, o camo tarpinis serveris blokuoja kiekvieną išorinį gavimą, todėl rinkinio tipas turi patekti į failą. `scripts/docs/readme-outline.mjs`, paskutinis kiekvieno generatoriaus veiksmas, formuoja Šveicarijos vaidmenis su HarfBuzz ir nubrėžia juos kaip vektorinius kontūrus (`<defs>` paths ir `<use>`), o rodyklėmis ir geometriniais simboliais, kurių Šveicarui trūksta pagal savo metriką. Kontūrai, niekada nenaudojamas įterptasis šriftas: Šveicarijos licencija (`packages/ui-kit/src/fonts/FFL.txt`) draudžia keisti poaibį ir formatą be raštiško sutikimo ir leidžia naudoti vektorinius brėžinius, todėl iš naujo neįveskite Šveicarijos `@font-face` arba `data:` URI. Vienas faile paliktas šriftas yra OFL IBM Plex Mono poaibis, skirtas tikrajam kodo tekstui (`scripts/docs/readme-fonts.mjs`), sudarytas iš tų simbolių; bet koks glifas negali įterpti metimų.
+- **Regeneruoti.** `npm run docs:readme-diagrams` perrašo visus dvylika README tvarka ir atspausdina vieną eilutę kiekviename faile su jo dydžiu. Vienas generatorius taip pat veikia savarankiškai (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` reikia `node --import tsx/esm` nes jo skaičiai gaunami iš tiesioginio katalogo įkėlimo programos `open-sse/config/freeModelCatalog.ts`; katalogo pakeitimo CI pasekmė yra `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Sujunkite generatorių ir SVG kartu.
+- **Įrodymas.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` pateikia failą taip, kaip GitHub jį aptarnauja ( `<img>` žyma, camo's `Content-Security-Policy`, `image/svg+xml`), užfiksuoja šviesų ir tamsų rėmelį ir praneša apie išorinio šrifto užklausas, kad būtų sukurtas puslapis (turi būti 0).
+- **Biudžetas.** Mažiau nei 200 KB už failą (tai patvirtina kiekvienas pasenimo testas); 500 KB yra bet kurio README vaizdo kietoji riba ( SVG studio patvirtinimo taisyklė).
+- **Kopijuoti nepakeista, skaičiuojama nuo vartų.** Keičiamas prekės ženklo tipas ir paletė, o ne žodžiai: kiekvienas generatorius neša savo diagramos kopiją `*_COPY` konstantoje (arba sukuria ją iš tiesioginio katalogo), kuri yra ir nupieštas tekstas, ir kontūro žingsnio įvestis. Kanoninės figūros lieka `<text>` mazguose (nematomos, kai nubrėžiamos, `fill-opacity:0`), skaitomos `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); Diagramų, kurias nuskaito vartai, pasenimo testai taip pat paleidžia patvirtinimo priemones sugeneruotame faile, todėl nuo kodo nutolusi figūra nepavyksta. — pataisykite šaltinį, kurį skaito vartai, o ne skaičių generatoriuje.
+
+## 7. Atskaitos indeksas
+
+- `src/app/globals.css` — prieigos raktų tiltas, `.dark` nepaisymas, OmniRoute `@layer components` plėtiniai
+- `packages/ui-kit/UPSTREAM.md` — prisegtas įsipareigojimo ir licencijos įgaliojimas; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` ir šalia jo esantys adapteriai; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
-  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

@@ -1,1 +1,0 @@
-- **fix(pool):** Serve a fresh session instead of null when the pool holds only dead sessions ([#18115](https://github.com/cheaper-inference/OmniRoute/pull/18115)) — thanks @maxmad64bis

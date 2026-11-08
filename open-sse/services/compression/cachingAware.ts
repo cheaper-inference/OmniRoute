@@ -7,7 +7,9 @@
  */
 
 import {
+  isOpenCodeLane,
   providerSupportsCaching,
+  providerUsesAutomaticPrefixCaching,
   type ConnectionCacheOverride,
 } from "../../utils/cacheControlPolicy.ts";
 
@@ -17,6 +19,7 @@ export interface CachingDetectionContext {
   provider?: string | null;
   targetFormat?: string | null;
   model?: string | null;
+  geminiPromptCacheMode?: "off" | "implicit" | null;
   connectionCacheOverride?: ConnectionCacheOverride | null;
 }
 
@@ -25,6 +28,9 @@ export interface CachingContext {
   provider: string | null;
   targetFormat: string | null;
   isCachingProvider: boolean;
+  /** True when the provider caches a prefix without cache_control markers (OpenAI, Codex, Azure).
+   * It describes cache ELIGIBILITY only; it says nothing about an observed cache hit. */
+  usesAutomaticPrefixCaching: boolean;
 }
 
 export interface CacheAwareStrategy {
@@ -93,13 +99,45 @@ export function detectCachingContext(
     inferProviderFromModel(context.model) ??
     inferProviderFromModel(bodyRecord.model);
   const targetFormat = normalizeString(context.targetFormat)?.toLowerCase() ?? null;
+  const resolvedModel = context.model ?? normalizeString(bodyRecord.model);
+  const isAntigravityTarget = provider === "antigravity" || provider === "agy";
+  const geminiPromptCacheMode = context.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
 
   return {
     hasCacheControl: hasCacheControl(body),
     provider,
     targetFormat,
-    isCachingProvider: providerSupportsCaching(provider, targetFormat, context.connectionCacheOverride),
+    isCachingProvider:
+      isAntigravityTarget && geminiPromptCacheMode === "off"
+        ? false
+        : providerSupportsCaching(
+            provider,
+            targetFormat,
+            context.connectionCacheOverride,
+            resolvedModel
+          ),
+    usesAutomaticPrefixCaching: providerUsesAutomaticPrefixCaching(
+      provider,
+      context.connectionCacheOverride,
+      resolvedModel
+    ),
   };
+}
+
+/**
+ * OpenCode's upstream automatic-prefix cache and retroactive history compression
+ * cannot safely run together: stacked lite/session-dedup steps may rewrite
+ * previously sent tool results, invalidating the prefix on the next turn.
+ * The chatCore live-zone path uses this signal to preserve cold prefixes verbatim
+ * and reuse them on subsequent turns while still processing new tool outputs.
+ * Explicit per-connection cache overrides remain authoritative.
+ */
+export function mustKeepOpenCodeHistoryVerbatim(
+  body: unknown,
+  context: CachingDetectionContext = {}
+): boolean {
+  const caching = detectCachingContext(body, context);
+  return caching.usesAutomaticPrefixCaching && isOpenCodeLane(caching.provider);
 }
 
 /**
