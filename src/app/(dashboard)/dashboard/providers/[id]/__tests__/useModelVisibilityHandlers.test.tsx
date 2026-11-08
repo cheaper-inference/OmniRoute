@@ -37,6 +37,7 @@ const baseProps = {
   fetchProviderModelMeta: vi.fn().mockResolvedValue(undefined),
   fetchAliases: vi.fn().mockResolvedValue(undefined),
   notify,
+  requestConfirm: vi.fn().mockResolvedValue(true),
   t,
   selectedConnection: { id: "conn-1", provider: "anthropic-compatible-cc-test" },
   providerNode: { id: "anthropic-compatible-cc-test" },
@@ -151,10 +152,6 @@ describe("useModelVisibilityHandlers", () => {
   });
 
   it("clears models for both storage alias and canonical providerId when they differ", async () => {
-    vi.stubGlobal(
-      "confirm",
-      vi.fn(() => true)
-    );
     const fetchMock = vi.mocked(fetch);
     fetchMock.mockResolvedValue({
       ok: true,

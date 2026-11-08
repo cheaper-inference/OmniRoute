@@ -144,11 +144,6 @@
       "count": 2
     }
   },
-  "open-sse/executors/opencode.ts": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 2
-    }
-  },
   "open-sse/executors/perplexity-web/protocol.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -608,11 +603,6 @@
       "count": 5
     }
   },
-  "open-sse/utils/stream.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "open-sse/utils/streamHelpers.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -764,11 +754,6 @@
     }
   },
   "src/app/(dashboard)/dashboard/resilience/connections/components/ConnectionsTable.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/app/(dashboard)/dashboard/search-tools/components/SearchHistory.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
@@ -1044,11 +1029,6 @@
     }
   },
   "src/app/api/v1/music/generations/route.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/app/api/v1/ocr/route.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
@@ -1460,11 +1440,6 @@
   },
   "src/lib/usage/apiKeyUsageLimits.ts": {
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/usage/callLogs.ts": {
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },

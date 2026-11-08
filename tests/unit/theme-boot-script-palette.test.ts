@@ -52,14 +52,41 @@ function boot(
     theme: root.dataset.theme,
     darkClass: root.classList.contains("dark"),
     colorScheme: root.style.colorScheme,
-    /** content of every theme-color meta, keyed by its media ("" when it has none). */
-    themeColors: Object.fromEntries(
-      [...win.document.querySelectorAll('meta[name="theme-color"]')].map((m) => [
-        m.getAttribute("media") ?? "",
-        m.getAttribute("content"),
-      ])
+    /**
+     * The colour the browser uses per media ("" when a tag has none): the first tag in tree order
+     * that is not parked (`media="not all"`), as hex. A server tag whose colour changes is parked
+     * behind an `rgb()` copy rather than rewritten (#19066), so React can still adopt it.
+     */
+    themeColors: effectiveThemeColors(win.document),
+    /** content of the server-rendered tags (parked ones included), keyed by original media. */
+    serverContents: Object.fromEntries(
+      [...win.document.querySelectorAll('meta[name="theme-color"]')]
+        .filter((m) => !m.hasAttribute("data-theme-color-boot"))
+        .map((m) => [
+          m.getAttribute("data-theme-color-media") ?? m.getAttribute("media") ?? "",
+          m.getAttribute("content"),
+        ])
     ) as Record<string, string | null>,
   };
+}
+
+function toHex(content: string | null): string | null {
+  const rgb = /^rgb\((\d+) (\d+) (\d+)\)$/.exec(content ?? "");
+  if (!rgb) return content;
+  return `#${rgb
+    .slice(1)
+    .map((c) => Number(c).toString(16).padStart(2, "0"))
+    .join("")}`;
+}
+
+function effectiveThemeColors(doc: Document): Record<string, string | null> {
+  const out: Record<string, string | null> = {};
+  for (const m of doc.querySelectorAll('meta[name="theme-color"]')) {
+    const media = m.getAttribute("media") ?? "";
+    if (media === "not all" || media in out) continue;
+    out[media] = toHex(m.getAttribute("content"));
+  }
+  return out;
 }
 
 const persisted = (state: Record<string, unknown>) => JSON.stringify({ state, version: 0 });
@@ -111,6 +138,21 @@ test("a corrupted store never throws and leaves the server default (Editions) in
 
 const LIGHT_MEDIA = "(prefers-color-scheme: light)";
 const DARK_MEDIA = "(prefers-color-scheme: dark)";
+
+test("theme-color before paint: the server tags keep their content (React adopts them by it)", () => {
+  for (const state of [
+    { theme: "dark", palette: "classic" },
+    { theme: "system", palette: "classic" },
+    { theme: "light", palette: "editions" },
+  ]) {
+    for (const prefersDark of [false, true]) {
+      assert.deepEqual(boot(persisted(state), { prefersDark }).serverContents, {
+        [LIGHT_MEDIA]: EDITIONS_PAGE_BACKGROUND.light,
+        [DARK_MEDIA]: EDITIONS_PAGE_BACKGROUND.dark,
+      });
+    }
+  }
+});
 
 test("theme-color before paint: palette × explicit light/dark sets every variant to that mode", () => {
   for (const [palette, bg] of [

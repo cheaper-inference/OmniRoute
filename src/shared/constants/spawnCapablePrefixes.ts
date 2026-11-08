@@ -105,6 +105,7 @@ export const SPAWN_CAPABLE_PATTERNS: ReadonlyArray<RegExp> = [
   /^\/api\/providers\/volcengine-plan\/connect(\/.*)?$/, // launches Playwright to bind a Volcano Engine console session — covers the manual headful flow AND the session-based phone/SMS auto-login sub-routes (/code, /status, /cancel, /resend)
   /^\/api\/providers\/[^/]+\/refresh-cursor\/?$/, // spawns cursor-agent via renewal.ts (Hard Rules #15 + #17)
   /^\/api\/providers\/cursor\/agent-availability\/?$/, // static path (no dynamic segment), but kept in this array alongside its /api/providers/ siblings rather than the flat SPAWN_CAPABLE_PREFIXES array — spawns cursor-agent status via checkCursorAgentAvailability()/getCachedCursorAgentAvailability() (Hard Rules #15 + #17)
+  /^\/api\/providers\/agy-auth\/apply-local\/?$/, // static path kept with its /api/providers/ siblings, like cursor/agent-availability above — spawns `secret-tool` via detectLocalAgyTokenRaw() (Hard Rules #15 + #17)
   /^\/api\/providers\/[^/]+\/chatgpt-web-codex-doctor\/?$/, // spawns via getTunnelRuntimeStatus() → spawnSync("...","runtimes status") (open-sse/executors/chatgpt-web-codex/tunnelClient.ts). Mirrors LOCAL_ONLY_API_PATTERNS in routeGuard.ts; keep the two in sync (GHSA-9q3h-mjm5-f4gj).
   // S-01 (#15159): web-provider validation spawns `<bin> acp --agent-type summarizer`.
   // Mirrors LOCAL_ONLY_API_PATTERNS (every LOCAL_ONLY pattern must have a twin here).

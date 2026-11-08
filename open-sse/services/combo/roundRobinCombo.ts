@@ -111,6 +111,7 @@ import {
   isLocalKeyPolicyBreachErrorBody,
   isAccountSemaphoreCapacityFailure,
   isLocalQueueCapacityErrorBody,
+  isLocalProcessPressureResponse,
   isProviderCircuitOpenResult,
   toRecordedTarget,
   getExhaustedTargetSkipReason,
@@ -156,7 +157,6 @@ import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import { resolveTargetTokenLimit } from "./targetTokenLimit.ts";
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
-import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 
 /**
  * Handle round-robin combo: each request goes to the next model in circular order.
@@ -1113,6 +1113,16 @@ export async function handleRoundRobinCombo({
           } catch {
             logRetryHintUnreadable(log, "COMBO-RR", modelStr, result.status, "clone failed");
           }
+          // Process-wide shedding is terminal, not a target failure. Preserve the
+          // original body/headers and leave health, semaphore cooldown and pins alone.
+          if (isLocalProcessPressureResponse(result, errorBody)) {
+            rrEvents.failed(
+              errorText || `HTTP ${result.status}`,
+              Date.now() - startTime,
+              selectedConnectionIdOf(result)
+            );
+            return result;
+          }
           retryAfter ||= readProseRetryAfter(bodyText); // #13672 opt-in prose hints
 
           if (result.status === 499) {
@@ -1454,6 +1464,7 @@ export async function handleRoundRobinCombo({
       strategy: "round-robin",
     });
     if (compatFallbackResult) {
+      if (!compatFallbackResult.ok) return compatFallbackResult;
       recordComboRequest(combo.name, null, {
         success: true,
         latencyMs: Date.now() - startTime,

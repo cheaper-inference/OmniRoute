@@ -6,6 +6,7 @@
  * predicates are re-exported from combo.ts for backward compatibility.
  */
 
+import { isMarkedLocalProcessPressureResponse } from "../../utils/localPressureResponse.ts";
 import {
   EXECUTOR_CONTRACT_VIOLATION_CODE,
   LOCAL_CONFIGURATION_ERROR_CODES,
@@ -31,6 +32,7 @@ import {
 } from "../accountFallback.ts";
 import { isModelNotFound404 } from "../accountFallback/perModelFailureScope.ts";
 import { isRequestScoped400 } from "../accountFallback/requestScoped400.ts";
+import { isAssistantPrefillUnsupported400 } from "../assistantPrefillError.ts";
 import { isResourceNotFoundResponse } from "../errorClassifier.ts";
 import { isOpencodeFreeTierRefusal } from "../../executors/opencodeGeoBlock.ts";
 import { isChatGptWebBridgeFailure } from "../../utils/chatgptWebBridgeFailure.ts";
@@ -284,6 +286,15 @@ export function shouldRecordProviderBreakerFailure(args: {
   );
 }
 
+const CREDENTIAL_AUTH_ERROR_CODES = new Set([
+  "token_expired",
+  "expired_token",
+  "invalid_token",
+  "invalid_api_key",
+  "authentication_error",
+  "unauthorized",
+]);
+
 const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   context_length_exceeded: true,
   context_window_exceeded: true,
@@ -350,6 +361,14 @@ export function isRequestScopedUpstreamFailure(error?: {
 }): boolean {
   const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
   const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
+
+  // OpenAI/Codex wraps some credential failures in the generic
+  // `invalid_request_error` type (notably `code=token_expired`). Those are
+  // connection-scoped auth failures: the current account must be excluded so
+  // sibling-account fallback can continue. Letting the generic type win here
+  // stops rotation after the first such account and leaks its 401 to the client.
+  if (CREDENTIAL_AUTH_ERROR_CODES.has(code)) return false;
+
   return (
     REQUEST_SCOPED_UPSTREAM_ERROR_CODES[code] === true ||
     isContentPolicyRefusal(error) ||
@@ -399,6 +418,17 @@ export function isAccountSemaphoreCapacityFailure(error?: {
   );
 }
 
+/** Process-wide shedding cannot recover by retrying another combo target. Only a shed this
+ * process created is terminal: an upstream can return the same 503 body and keeps fallback. */
+export function isLocalProcessPressureResponse(response: Response, body: unknown): boolean {
+  if (response.status !== 503 || !isMarkedLocalProcessPressureResponse(response)) return false;
+  if (!body || typeof body !== "object") return false;
+  const error = (body as Record<string, unknown>).error;
+  if (!error || typeof error !== "object") return false;
+  const code = (error as Record<string, unknown>).code;
+  return code === "resource_pressure" || code === "heap_pressure";
+}
+
 export function isComboTargetTimeoutFailure(error?: {
   code?: string | null;
   type?: string | null;
@@ -441,7 +471,9 @@ export function isComboRequestScopedFailure(
     isRequestScopedUpstreamFailure(error) ||
     (response.status === 404 && isResourceNotFoundResponse(errorText)) ||
     // #14313: body-only free-tier refusals (relayed sentence, no error.type kept).
-    isOpencodeFreeTierRefusal(response.status, errorText)
+    isOpencodeFreeTierRefusal(response.status, errorText) ||
+    // Prefill ban: the body's shape, not the model/connection — even without error.type.
+    isAssistantPrefillUnsupported400(response.status, errorText)
   );
 }
 
