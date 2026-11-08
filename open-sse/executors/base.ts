@@ -122,6 +122,7 @@ import { applyPeerTraceHeader } from "@/shared/resilience/peerRouting";
 import { applyClineProtocolHeaders } from "@/shared/utils/clineAuth";
 import { isProbeContext } from "@/shared/utils/probeOrigin";
 import { assertDispatchUrlAllowed, dispatchGuarded } from "./dispatchPin.ts";
+import { dispatchWithGzipBody } from "./base/gzipRequestBody.ts";
 // Header helpers extracted to a pure leaf; re-exported for external importers
 // (executors + tests) that import them from "./base.ts".
 export {
@@ -1037,17 +1038,20 @@ export class BaseExecutor {
               model,
               requestCredentials,
               (url, init) =>
-                observeProviderHttpSend(
-                  {
-                    provider: this.provider,
-                    model:
-                      typeof (serializedBody as Record<string, unknown> | null)?.model === "string"
-                        ? String((serializedBody as Record<string, unknown>).model)
-                        : model,
-                    connectionId: requestCredentials?.connectionId ?? null,
-                    endpoint: "unknown",
-                  },
-                  () => this.dispatchRequest(url, init, requestCredentials)
+                dispatchWithGzipBody(this.provider, url, init, (gzipUrl, gzipInit) =>
+                  observeProviderHttpSend(
+                    {
+                      provider: this.provider,
+                      model:
+                        typeof (serializedBody as Record<string, unknown> | null)?.model ===
+                        "string"
+                          ? String((serializedBody as Record<string, unknown>).model)
+                          : model,
+                      connectionId: requestCredentials?.connectionId ?? null,
+                      endpoint: "unknown",
+                    },
+                    () => this.dispatchRequest(gzipUrl, gzipInit, requestCredentials)
+                  )
                 )
             )(requestUrl, optionsWithSignal);
           } finally {
