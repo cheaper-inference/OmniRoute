@@ -54,6 +54,9 @@ function getPercentConfig(value: unknown, fallback: number): number {
 }
 
 function getUnitConfig(value: unknown, fallback: number): number {
+  // null means "unset" here, matching resolveComboConfig(), which strips null
+  // before the cascade merge — Number(null) would otherwise turn it into 0.
+  if (value === null || value === undefined) return fallback;
   const numericValue = finiteNumberOrNull(value);
   if (numericValue === null) return fallback;
   return Math.max(0, Math.min(1, numericValue));

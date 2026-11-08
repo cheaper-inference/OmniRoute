@@ -10,9 +10,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { resolveResetAwareConfig, scoreResetAwareQuota } = await import(
-  "../../../open-sse/services/combo/quotaScoring.ts"
-);
+const { resolveResetAwareConfig, scoreResetAwareQuota } =
+  await import("../../../open-sse/services/combo/quotaScoring.ts");
+const { resolveComboConfig, getDefaultComboConfig } =
+  await import("../../../open-sse/services/comboConfig.ts");
+const { comboRuntimeConfigSchema } =
+  await import("../../../src/shared/validation/schemas/combo.ts");
 
 test("1. default floor stays the historical 0.5", () => {
   const config = resolveResetAwareConfig({});
@@ -54,7 +57,9 @@ test("3. floor is clamped to [0,1]; invalid values fall back to the default", ()
   assert.equal(resolveResetAwareConfig({ resetAwareNoQuotaFloor: 7 }).noQuotaFloor, 1);
   assert.equal(resolveResetAwareConfig({ resetAwareNoQuotaFloor: -2 }).noQuotaFloor, 0);
   assert.equal(resolveResetAwareConfig({ resetAwareNoQuotaFloor: "banana" }).noQuotaFloor, 0.5);
-  assert.equal(resolveResetAwareConfig({ resetAwareNoQuotaFloor: null }).noQuotaFloor, 0); // family semantics: Number(null)=0, same as every resetAware* weight
+  // null means "unset" (resolveComboConfig strips it before merging), so it
+  // falls back to the default instead of Number(null) = 0.
+  assert.equal(resolveResetAwareConfig({ resetAwareNoQuotaFloor: null }).noQuotaFloor, 0.5);
 });
 
 test("4. floor of 0 lets a no-telemetry member act as last-resort only against exhaustion", () => {
@@ -63,5 +68,36 @@ test("4. floor of 0 lets a no-telemetry member act as last-resort only against e
   // left, but still above limitReached (-Infinity), so it stays reachable as a
   // final fallback.
   assert.equal(scoreResetAwareQuota(null, config).score, 0);
-  assert.ok(scoreResetAwareQuota(null, config).score > scoreResetAwareQuota({ limitReached: true }, config).score);
+  assert.ok(
+    scoreResetAwareQuota(null, config).score >
+      scoreResetAwareQuota({ limitReached: true }, config).score
+  );
+});
+
+test("5. the cascade default and a combo override reach the scorer", () => {
+  assert.equal(getDefaultComboConfig().resetAwareNoQuotaFloor, 0.5);
+  const unset = resolveComboConfig({ config: {} }, {});
+  assert.equal(resolveResetAwareConfig(unset).noQuotaFloor, 0.5);
+  const nulled = resolveComboConfig({ config: { resetAwareNoQuotaFloor: null } }, {});
+  assert.equal(resolveResetAwareConfig(nulled).noQuotaFloor, 0.5);
+  const overridden = resolveComboConfig(
+    { config: { resetAwareNoQuotaFloor: 0.1 } },
+    { comboDefaults: { resetAwareNoQuotaFloor: 0.9 } }
+  );
+  assert.equal(resolveResetAwareConfig(overridden).noQuotaFloor, 0.1);
+});
+
+test("6. the combo config schema validates resetAwareNoQuotaFloor", () => {
+  assert.equal(
+    comboRuntimeConfigSchema.parse({ resetAwareNoQuotaFloor: "0.2" }).resetAwareNoQuotaFloor,
+    0.2
+  );
+  assert.equal(comboRuntimeConfigSchema.safeParse({ resetAwareNoQuotaFloor: 0 }).success, true);
+  assert.equal(comboRuntimeConfigSchema.safeParse({ resetAwareNoQuotaFloor: 1 }).success, true);
+  assert.equal(comboRuntimeConfigSchema.safeParse({ resetAwareNoQuotaFloor: 1.5 }).success, false);
+  assert.equal(comboRuntimeConfigSchema.safeParse({ resetAwareNoQuotaFloor: -0.1 }).success, false);
+  assert.equal(
+    comboRuntimeConfigSchema.safeParse({ resetAwareNoQuotaFloor: "banana" }).success,
+    false
+  );
 });
