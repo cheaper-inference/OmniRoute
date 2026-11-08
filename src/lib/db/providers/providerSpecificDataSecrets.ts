@@ -133,19 +133,6 @@ export const PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS = [
 
 export type ProviderSpecificSecretField = (typeof PROVIDER_SPECIFIC_SECRET_FIELDS)[number];
 
-/**
- * True for a key that holds a credential even though it is not a fixed name in
- * PROVIDER_SPECIFIC_SECRET_FIELDS: WordPress names its session cookie
- * `wordpress_logged_in_<siteHash>`, so veoaifree-web rows may store any suffixed variant
- * (open-sse/utils/wordpressSessionKey.ts, #17041).
- */
-export function isProviderSpecificSecretKey(key: string): boolean {
-  return (
-    (PROVIDER_SPECIFIC_SECRET_FIELDS as readonly string[]).includes(key) ||
-    isWordPressLoggedInKey(key)
-  );
-}
-
 /** Declared secret fields plus any dynamically-named secret key present in `data`. */
 export function providerSpecificSecretKeysIn(data: Record<string, unknown>): string[] {
   const keys: string[] = [...PROVIDER_SPECIFIC_SECRET_FIELDS];

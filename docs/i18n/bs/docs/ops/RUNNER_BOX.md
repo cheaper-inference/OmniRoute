@@ -27,13 +27,12 @@ Izmjereno 2026-10-18:
 | swap      | 16 GB                                   | `omniroute-113-5` radi s isključenim swapom (`MemorySwapMax=0`), tako da se nekontrolisani build prekida kada dostigne svoje ograničenje umjesto da prebaci server na swap                                                                                                                                                                                                                    |
 | `/tmp`    | **12 GB tmpfs = RAM**                   | sve što se tamo smjesti zauzima memoriju; preostale datoteke uklanjaju se nakon 3 h                                                                                                                                                                                                                                                                                                           |
 | CPU       | zabilježeno opterećenje 60 na 32 jezgre | prije uvođenja kvota, jedan Turbopack build (~1166 % CPU) zajedno s paketom testova pokrivenosti na istom serveru blokirao je heartbeat signale ostalih listenera (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                       |
-| runneri   | **6 listenera**                         | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` su onemogućeni (`systemctl enable --now` ponovo aktivira jedan)                                                                                                                                                                                                                                                               |
+| runneri   | **7 listenera** (2026-10-28)            | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` nosi i `omni-build`; `omniroute-113-3/-4/-8` su obrisani iz repozitorija (2026-10-28)                                                                                                                                                                                                                                                  |
 
 Ograničenja se nalaze u `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` svake jedinice
 (prethodne vrijednosti sačuvane su kao `override.conf.bak-20261018`) i primijenjena su uživo pomoću
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — bez ponovnog pokretanja, tako da nijedan
-aktivni zadatak nije bio pogođen. Oznake se mijenjaju putem runners API-ja
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+aktivni zadatak nije bio pogođen. Oznake se mijenjaju putem runners API-ja (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), također uživo.
 
 ## Instalirajte janitor (jednokratno, na serveru)
@@ -42,7 +41,7 @@ aktivni zadatak nije bio pogođen. Oznake se mijenjaju putem runners API-ja
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): svakih 30 min, zapis u /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` je obavezan: janitor pomoću jednog snimka otvorenih datoteka potvrđuje da
@@ -117,8 +116,16 @@ odjednom, samo kada nije aktivan**, pri čemu provjera neaktivnosti i ponovno po
   je imao `MemoryHigh=4G` do 2026-10-18 — promptfoo build se tamo 54 minute probijao kroz povrat memorije;
   8 GB uklanja ograničavanje.
 - **Namjerno manje listenera.** Četiri OmniRoute jedinice onemogućene su 2026-08-29 — svaki dodatni
-  listener još je jedan korisnik prethodno navedenog memorijskog budžeta. Gornja granica janitora je 6 (`MAX_ACTIVE_RUNNERS=6` u cronu): on broji
-  svaki `Runner.Listener` na sistemu, a OmniHeuris + OmniMind dodaju dva na naša četiri.
+  listener još je jedan korisnik prethodno navedenog memorijskog budžeta. Gornja granica janitora je 8 (`MAX_ACTIVE_RUNNERS=8` u cronu): on broji
+  svaki `Runner.Listener` na sistemu, a OmniHeuris + OmniMind dodaju dva na naših pet.
+- **Unit i Vitest poslovi ostaju hostovani.** `ci.yml` šalje svoje unit shardove i Vitest posao na
+  `[self-hosted, omni-ci]` samo kada je varijabla repozitorija `vars.USE_VPS_TEST_RUNNER`
+  `true`, i tada samo za `pull_request` izvršavanja iz istog repozitorija; forkovi, `merge_group` i slanja izmjena
+  ostaju na `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Varijabla je
+  `false`. Dana 2026-10-28 tri `omni-ci` listenera sa 4 jezgre trebala su 250–270 s za `npm ci`, a svaki
+  unit shard dostigao je ograničenje posla od 30 minuta, naspram ~634 s za hostovani shard, uz opterećenje sistema
+  17–24. Listeneri su obrisani. Ne uključujte ponovo varijablu bez listenera dimenzioniranih za
+  unit shard.
 - **Nikada nemojte ručno čistiti `/tmp` ili `_work` dok je bilo koji runner zauzet.**
   Provjera pa brisanje s razmakom između ta dva koraka razlog je zbog kojeg je aktivni Build posao izgubio svoj
   `_work` 2026-08-27. Janitor obavlja provjeru i uklanjanje u jednom koraku;
@@ -132,8 +139,10 @@ odjednom, samo kada nije aktivan**, pri čemu provjera neaktivnosti i ponovno po
 
 ## Hostovana traka (izvršioci koje hostuje GitHub)
 
-Račun je na **Pro** planu: **40 istovremenih hostovanih poslova**, koje dijele sve PR provjere,
-svi radni tokovi pokrenuti slanjem izmjena i zadana postavka za CodeQL. Izmjereno 2026-10-18 tokom
+Repozitorij pripada organizaciji `cheaper-inference`, na **Team** planu: **60
+istovremenih hostovanih poslova**, koje dijele svi repozitoriji u organizaciji, sve PR provjere,
+svi radni tokovi pokrenuti slanjem izmjena i zadana postavka za CodeQL. Brojke u nastavku izmjerene su na
+**Pro** planu (40 istovremenih hostovanih poslova). Izmjereno 2026-10-18 tokom
 kampanje spajanja (~10 spajanja/sat na `release/v3.8.52`): **2.500 izvršavanja radnih tokova kreirano je
 za 24 h**, 44 slanja izmjena na granu za 6 h, **106 hostovanih poslova na čekanju**, dok su PR provjere čekale
 satima, a PR-ovi su spajani bez njih. Devet radnih tokova pokretalo se pri svakom slanju izmjena na granu:

@@ -15,7 +15,7 @@ const modelSchema = z
       .trim()
       .min(1)
       .max(256)
-      .regex(/^[a-zA-Z0-9][a-zA-Z0-9._:/@+-]*$/),
+      .regex(/^[a-zA-Z0-9@][a-zA-Z0-9._:/@+-]*$/),
   })
   .strict();
 const sending = new Set<string>();
