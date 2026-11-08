@@ -60,8 +60,13 @@ async function seed() {
 function usage(used = 10) {
   return Response.json({
     rate_limit: {
-      primary_window: { used_percent: used, reset_after_seconds: 300 },
-      secondary_window: { used_percent: used, reset_after_seconds: 600 },
+      // Upstream names each window by its duration; an unlabelled window is not a session/weekly fact.
+      primary_window: { used_percent: used, limit_window_seconds: 18000, reset_after_seconds: 300 },
+      secondary_window: {
+        used_percent: used,
+        limit_window_seconds: 604800,
+        reset_after_seconds: 600,
+      },
     },
   });
 }
