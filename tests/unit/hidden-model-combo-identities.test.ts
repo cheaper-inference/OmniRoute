@@ -143,3 +143,43 @@ test("opencode-zen hidden state is keyed by its own provider id", async () => {
   assert.equal(hidden.response.status, 404);
   assert.deepEqual(hidden.calls, []);
 });
+
+test("agy and antigravity retain independent hidden-model visibility in combos", async () => {
+  models.mergeModelCompatOverride("antigravity", "claude-opus-5-5-high", { isHidden: true });
+  const agyVisible = await dispatch(["agy/claude-opus-5-5-high"]);
+  assert.equal(agyVisible.response.status, 200);
+  assert.deepEqual(agyVisible.calls, ["agy/claude-opus-5-5-high"]);
+
+  const agHidden = await dispatch(["antigravity/claude-opus-5-5-high"]);
+  assert.equal(agHidden.response.status, 404);
+  assert.deepEqual(agHidden.calls, []);
+
+  models.mergeModelCompatOverride("antigravity", "claude-opus-5-5-high", { isHidden: false });
+  models.mergeModelCompatOverride("agy", "claude-opus-5-5-high", { isHidden: true });
+
+  const agyHidden = await dispatch(["agy/claude-opus-5-5-high"]);
+  assert.equal(agyHidden.response.status, 404);
+  assert.deepEqual(agyHidden.calls, []);
+
+  const agVisible = await dispatch(["antigravity/claude-opus-5-5-high"]);
+  assert.equal(agVisible.response.status, 200);
+  assert.deepEqual(agVisible.calls, ["antigravity/claude-opus-5-5-high"]);
+});
+
+test("isComboModelVisible resolves an agy/ model without providerId against the agy hidden set", async () => {
+  const { isComboModelVisible } = await import("../../open-sse/services/combo/comboVisibility.ts");
+  const hiddenAntigravity = new Map([["antigravity", new Set(["claude-opus-5-5-high"])]]);
+  const hiddenAgy = new Map([["agy", new Set(["claude-opus-5-5-high"])]]);
+
+  // Hiding on antigravity must not hide an explicit agy/ model when no providerId is known
+  // (e.g. the dispatchPrelude judge check passes providerId = null).
+  assert.equal(isComboModelVisible("agy/claude-opus-5-5-high", null, hiddenAntigravity), true);
+  assert.equal(
+    isComboModelVisible("antigravity/claude-opus-5-5-high", null, hiddenAntigravity),
+    false
+  );
+
+  // And the reverse: hiding on agy hides agy/ but not antigravity/.
+  assert.equal(isComboModelVisible("agy/claude-opus-5-5-high", null, hiddenAgy), false);
+  assert.equal(isComboModelVisible("antigravity/claude-opus-5-5-high", null, hiddenAgy), true);
+});

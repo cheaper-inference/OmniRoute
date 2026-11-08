@@ -30,7 +30,11 @@ for (const flagName of ["limit_reached", "limitReached"]) {
   for (const reached of [true, false]) {
     test(`Spark ${flagName}=${reached} survives extraction, both cache writes and JSON reads`, async () => {
       const now = Date.now();
-      const window = { used_percent: 20, reset_at: (now + 3600000) / 1000 };
+      const window = {
+        used_percent: 20,
+        limit_window_seconds: 18000,
+        reset_at: (now + 3600000) / 1000,
+      };
       const wire = {
         rate_limit: { limit_reached: false, primary_window: window },
         additional_rate_limits: [
@@ -44,6 +48,8 @@ for (const flagName of ["limit_reached", "limitReached"]) {
       setCodexUsageFetchForTests(async () => Response.json(wire));
       try {
         const usage = await getCodexUsage("synthetic-token");
+        assert.ok("quotas" in usage);
+        assert.equal(usage.quotas.gpt_5_3_codex_spark_session?.windowSeconds, 18000);
         const entry = toProviderLimitsCacheEntry(usage, "manual", new Date(now).toISOString());
         const verdict = buildConnectionQuotaAvailability(connection, entry, policy);
         const routing = evaluateQuotaCutoff(

@@ -704,6 +704,25 @@ External Postgres / multi-writer HA is **not** a documented stock path. If you n
 
 ## Scale-out: N independent processes
 
+### Codex token rotation ownership
+
+Copies of one Codex account must not independently consume its single-use refresh
+token. On instances that only consume synchronized credentials, set
+`OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` (alias `cx`). Leave it unset on the
+single rotation owner. Each process still needs its own `DATA_DIR`; this option
+neither shares SQLite nor supplies token synchronization or a distributed lock.
+
+The passive instance rereads the connection when a refresh is needed and adopts
+only a different, unexpired access token. Otherwise refresh is disabled without
+expiring or deactivating the connection or counting a refresh-breaker failure.
+Real upstream authentication failures still use normal failure accounting,
+exponential cooldown and the normal client error; account deactivation remains
+permanent. Synchronize the owner's rotated tokens before access tokens expire
+(the default proactive refresh lead is five minutes), or re-import the Codex auth
+file. Passive imports store the supplied tokens without validating them at the
+token endpoint. Manual dashboard/API refresh returns `409 refresh_disabled`;
+new OAuth logins are unchanged. See [environment reference](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
+
 One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). That measurement is a **memory-budget** warning, not a product hard-max of two concurrent long `/v1/responses`. Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling — overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
 
 ### One-process: more than two long `/v1/responses`

@@ -19,6 +19,10 @@ import { LRUCache } from "./cacheLayer";
 import { getDbInstance } from "./db/core";
 import { toNumber } from "@/shared/utils/numeric";
 import { conversationSignatureFields } from "../../open-sse/utils/conversationSignatureFields";
+import { startSemanticCachePruneJob } from "./jobs/semanticCachePruneJob";
+
+// Like reasoning-cache cleanup, start from the consumer module, independent of boot path.
+startSemanticCachePruneJob();
 
 type JsonRecord = Record<string, unknown>;
 

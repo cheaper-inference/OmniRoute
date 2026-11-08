@@ -12,8 +12,61 @@ import {
 } from "@omniroute/ui-kit/table";
 import { Badge, Card, Button, Input, Spinner, Toggle, ProxyConfigModal } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import { DEFAULT_NEW_CONNECTION_PROXY_ENABLED } from "@/shared/constants/newConnectionProxy.mjs";
 
 type GlobalProxyConfig = { type: string; host: string; port: number } | null;
+
+type ProxyPreferences = {
+  perKeyProxyEnabled: boolean;
+  defaultNewConnectionProxyEnabled: boolean;
+  settingsRevision: number;
+};
+
+function ProxyPreferenceAction({
+  preferences,
+  setting,
+  label,
+  loading,
+  saving,
+  onChange,
+}: {
+  preferences: ProxyPreferences | null;
+  setting: "perKeyProxyEnabled" | "defaultNewConnectionProxyEnabled";
+  label: string;
+  loading: boolean;
+  saving: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  if (!preferences) return loading ? <Spinner size="sm" /> : null;
+  return (
+    <Toggle
+      ariaLabel={label}
+      checked={preferences[setting]}
+      disabled={loading || saving}
+      onChange={onChange}
+    />
+  );
+}
+
+function parsePreferences(data: Record<string, unknown>): ProxyPreferences {
+  const creationDefault =
+    data.defaultNewConnectionProxyEnabled === undefined
+      ? DEFAULT_NEW_CONNECTION_PROXY_ENABLED
+      : data.defaultNewConnectionProxyEnabled;
+  if (
+    typeof creationDefault !== "boolean" ||
+    typeof data.perKeyProxyEnabled !== "boolean" ||
+    !Number.isSafeInteger(data.settingsRevision) ||
+    Number(data.settingsRevision) < 0
+  ) {
+    throw new Error("Invalid settings response");
+  }
+  return {
+    perKeyProxyEnabled: data.perKeyProxyEnabled,
+    defaultNewConnectionProxyEnabled: creationDefault,
+    settingsRevision: Number(data.settingsRevision),
+  };
+}
 
 type HealthcheckResult = {
   proxyUrl: string;
@@ -41,8 +94,12 @@ async function fetchGlobalProxyConfig(): Promise<GlobalProxyConfig | undefined> 
 export default function GlobalConfigTab() {
   const [proxyModalOpen, setProxyModalOpen] = useState(false);
   const [globalProxy, setGlobalProxy] = useState<GlobalProxyConfig>(null);
-  const [perKeyProxyEnabled, setPerKeyProxyEnabled] = useState(false);
-  const [perKeyLoading, setPerKeyLoading] = useState(true);
+  const [preferences, setPreferences] = useState<ProxyPreferences | null>(null);
+  const [preferencesLoading, setPreferencesLoading] = useState(true);
+  const [preferencesSaving, setPreferencesSaving] = useState(false);
+  const [preferencesError, setPreferencesError] = useState<string | null>(null);
+  const preferencesRequest = useRef(0);
+  const savePending = useRef(false);
   const [targetUrl, setTargetUrl] = useState("https://api.openai.com/v1/models");
   const [testing, setTesting] = useState(false);
   const [results, setResults] = useState<HealthcheckResult[] | null>(null);
@@ -57,43 +114,68 @@ export default function GlobalConfigTab() {
     if (proxy !== undefined) setGlobalProxy(proxy);
   }, []);
 
+  const loadPreferences = useCallback(async (signal?: AbortSignal) => {
+    const sequence = ++preferencesRequest.current;
+    try {
+      const res = await fetch("/api/settings", { cache: "no-store", signal });
+      if (!res.ok) throw new Error("Settings read failed");
+      const next = parsePreferences(await res.json());
+      if (mountedRef.current && sequence === preferencesRequest.current) setPreferences(next);
+    } catch {
+      if (mountedRef.current && sequence === preferencesRequest.current && !signal?.aborted) {
+        setPreferencesError("errorPage.description");
+      }
+    } finally {
+      if (mountedRef.current && sequence === preferencesRequest.current)
+        setPreferencesLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     mountedRef.current = true;
+    const controller = new AbortController();
     void (async () => {
       const proxy = await fetchGlobalProxyConfig();
       if (mountedRef.current && proxy !== undefined) setGlobalProxy(proxy);
     })();
-    void (async () => {
-      try {
-        const res = await fetch("/api/settings", { cache: "no-store" });
-        if (res.ok) {
-          const data = await res.json();
-          if (mountedRef.current) setPerKeyProxyEnabled(data.perKeyProxyEnabled === true);
-        }
-      } catch {
-        /* leave default */
-      } finally {
-        if (mountedRef.current) setPerKeyLoading(false);
-      }
-    })();
+    void Promise.resolve().then(() => {
+      if (!controller.signal.aborted) return loadPreferences(controller.signal);
+    });
     return () => {
       mountedRef.current = false;
+      controller.abort();
     };
-  }, []);
+  }, [loadPreferences]);
 
-  const handleTogglePerKeyProxyEnabled = async () => {
-    const newValue = !perKeyProxyEnabled;
+  const savePreference = async (
+    key: "perKeyProxyEnabled" | "defaultNewConnectionProxyEnabled",
+    newValue: boolean
+  ) => {
+    if (!preferences || preferencesLoading || savePending.current) return;
+    savePending.current = true;
+    setPreferencesSaving(true);
+    setPreferencesError(null);
+    const sequence = ++preferencesRequest.current;
     try {
       const res = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ perKeyProxyEnabled: newValue }),
+        body: JSON.stringify({ [key]: newValue, expectedRevision: preferences.settingsRevision }),
       });
-      if (res.ok) {
-        setPerKeyProxyEnabled(newValue);
+      if (!res.ok) throw new Error("Settings save failed");
+      const next = parsePreferences(await res.json());
+      if (next[key] !== newValue || next.settingsRevision <= preferences.settingsRevision) {
+        throw new Error("Unconfirmed settings save");
       }
-    } catch (err) {
-      console.error("Failed to update per-key proxy setting:", err);
+      if (mountedRef.current && sequence === preferencesRequest.current) setPreferences(next);
+    } catch {
+      if (mountedRef.current && sequence === preferencesRequest.current) {
+        setPreferencesError("settingSaveFailed");
+      }
+    } finally {
+      savePending.current = false;
+      if (mountedRef.current && sequence === preferencesRequest.current)
+        setPreferencesSaving(false);
     }
   };
 
@@ -152,16 +234,52 @@ export default function GlobalConfigTab() {
       </Card>
 
       <Card
+        icon="vpn_lock"
+        title={t("defaultNewConnectionProxyEnabled")}
+        subtitle={t("defaultNewConnectionProxyEnabledDesc")}
+        action={
+          <ProxyPreferenceAction
+            preferences={preferences}
+            setting="defaultNewConnectionProxyEnabled"
+            label={t("defaultNewConnectionProxyEnabled")}
+            loading={preferencesLoading}
+            saving={preferencesSaving}
+            onChange={(next) => void savePreference("defaultNewConnectionProxyEnabled", next)}
+          />
+        }
+      >
+        {preferencesError && (
+          <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-error">
+            <span>{t(preferencesError)}</span>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={preferencesLoading || preferencesSaving}
+              onClick={() => {
+                setPreferencesLoading(true);
+                setPreferencesError(null);
+                void loadPreferences();
+              }}
+            >
+              {tc("retry")}
+            </Button>
+          </div>
+        )}
+      </Card>
+
+      <Card
         icon="key"
         title={t("perKeyProxyEnabled")}
         subtitle={t("perKeyProxyEnabledDesc")}
         className="[&>[data-slot=card-header]]:mb-0"
         action={
-          <Toggle
-            ariaLabel={t("perKeyProxyEnabled")}
-            checked={perKeyProxyEnabled}
-            disabled={perKeyLoading}
-            onChange={handleTogglePerKeyProxyEnabled}
+          <ProxyPreferenceAction
+            preferences={preferences}
+            setting="perKeyProxyEnabled"
+            label={t("perKeyProxyEnabled")}
+            loading={preferencesLoading}
+            saving={preferencesSaving}
+            onChange={(next) => void savePreference("perKeyProxyEnabled", next)}
           />
         }
       />

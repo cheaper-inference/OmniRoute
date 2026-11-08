@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  selectCompressionPlan,
   selectCompressionStrategy,
   getEffectiveMode,
   applyCompression,
@@ -34,12 +35,18 @@ describe("Full Compression Pipeline", () => {
       ],
     };
 
-    // Step 1: Select strategy
-    const mode = selectCompressionStrategy(baseConfig, null, 100);
-    assert.equal(mode, "lite");
+    // Step 1: Select strategy. Since #18818 a configured lite runs as a scoped one-step stacked
+    // pipeline, and the plan still names lite as the mode analytics reports.
+    const plan = selectCompressionPlan(baseConfig, null, 100);
+    assert.equal(plan.mode, "stacked");
+    assert.equal(plan.reportedMode, "lite");
+    assert.deepEqual(
+      plan.stackedPipeline.map((step) => step.engine),
+      ["lite"]
+    );
 
     // Step 2: Apply compression
-    const result = applyCompression(body, mode);
+    const result = applyCompression(body, "lite");
     assert.equal(result.compressed, true);
     assert.ok(result.stats);
 
@@ -70,10 +77,11 @@ describe("Full Compression Pipeline", () => {
     };
     const body = { messages: [{ role: "user", content: "test\n\n\n\nmessage" }] };
 
-    const mode = selectCompressionStrategy(config, "my-combo", 100);
-    assert.equal(mode, "lite");
+    const plan = selectCompressionPlan(config, "my-combo", 100);
+    assert.equal(plan.mode, "stacked");
+    assert.equal(plan.reportedMode, "lite");
 
-    const result = applyCompression(body, mode);
+    const result = applyCompression(body, "lite");
     assert.equal(result.compressed, true);
   });
 
@@ -89,9 +97,10 @@ describe("Full Compression Pipeline", () => {
     const mode1 = getEffectiveMode(config, null, 10);
     assert.equal(mode1, "off");
 
-    // Above threshold → lite
+    // Above threshold → lite, dispatched as a scoped stacked step (#18818)
     const mode2 = getEffectiveMode(config, null, 100);
-    assert.equal(mode2, "lite");
+    assert.equal(mode2, "stacked");
+    assert.equal(selectCompressionPlan(config, null, 100).reportedMode, "lite");
   });
 
   it("lite compression + stats pipeline works together", () => {
