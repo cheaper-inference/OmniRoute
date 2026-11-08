@@ -102,6 +102,13 @@ export function buildPythonSearchPath(
     // Windows branch stays testable from a POSIX host.
     return [...windowsPythonDirs(env), env.PATH || ""].filter(Boolean).join(path.win32.delimiter);
   }
+  return [...posixManagerDirs(env), ...EXTRA_BINS, env.PATH || ""]
+    .filter(Boolean)
+    .join(path.posix.delimiter);
+}
+
+/** Version-manager shim/bin dirs probed on POSIX hosts (mise, pyenv, asdf, conda, pipx/uv). */
+function posixManagerDirs(env: EnvLike): string[] {
   const home = env.HOME || "";
   const managerDirs: string[] = [];
   if (home || env.MISE_DATA_DIR) {
@@ -119,7 +126,7 @@ export function buildPythonSearchPath(
   if (home) {
     managerDirs.push(`${home}/.local/bin`); // pipx / uv installs
   }
-  return [...managerDirs, ...EXTRA_BINS, env.PATH || ""].filter(Boolean).join(path.posix.delimiter);
+  return managerDirs;
 }
 
 /**
