@@ -1,0 +1,1 @@
+- **fix(translator):** Preserve Gemini `parametersJsonSchema` tool arguments and xAI Gemini `responseJsonSchema` structured output ([#19048](https://github.com/cheaper-inference/OmniRoute/pull/19048)) — thanks @xiaoyaner0201

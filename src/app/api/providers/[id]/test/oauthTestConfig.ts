@@ -309,12 +309,29 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     // connectivity is proven by every chat/completions request.
     checkExpiry: true,
   },
+  freebuff: {
+    // Freebuff login yields a long-lived Codebuff session token with no refresh
+    // grant or advertised expiry. Validate presence only — the upstream session
+    // probe (/api/v1/freebuff/session) allocates a session, so it is not a
+    // side-effect-free test; real connectivity is proven by chat requests.
+    checkExpiry: true,
+    refreshable: false,
+  },
   "devin-desktop": {
     // Devin Desktop authentication is import-only: the copied API key has no
     // refresh token or known expiry. Validate token presence here; real
     // connectivity is exercised by chat requests.
     checkExpiry: true,
     refreshable: false,
+  },
+  "copilot-m365-web": {
+    // "Sign in with Microsoft" stores this provider as an OAuth connection.
+    // Copilot answers over a SignalR WebSocket and has no side-effect-free HTTP
+    // probe, so validate the access token's expiry and renew an expired one
+    // through the tenant's token endpoint: a successful renewal proves the
+    // refresh token is still good. Every chat request proves connectivity.
+    checkExpiry: true,
+    refreshable: true,
   },
   "grok-cli": {
     // #7610: was entirely absent from OAUTH_TEST_CONFIG, so "Test Connection"

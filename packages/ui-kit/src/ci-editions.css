@@ -45,6 +45,9 @@
   --ci-color-accent-surface-subtle: rgb(229 172 130 / .12);
   --ci-color-accent-surface-strong: rgb(229 172 130 / .22);
   --ci-color-accent-surface-range: rgb(229 172 130 / .18);
+  --ci-color-accent-ink: #8f4d26;
+  /* Same hue, darker: 4.5:1 on the accent tint over every content surface, muted included. */
+  --ci-badge-accent-ink: #894a24;
   --ci-color-control-active-bg: #e5ac82;
   --ci-color-control-active-fg: #241b15;
   --ci-color-control-thumb: #626459;
@@ -64,7 +67,8 @@
   --ci-color-live: #477665;
   --ci-color-success: #3c735b;
   --ci-color-success-bg: #e4ece3;
-  --ci-color-warning: #99631f;
+  /* Warning is also small text (badges, alerts): 4.5:1 on warning-bg and every content surface. */
+  --ci-color-warning: #8a591c;
   --ci-color-warning-bg: #f3e6cf;
   --ci-color-danger: #ae4340;
   --ci-color-danger-bg: #f5e2dc;
@@ -73,9 +77,42 @@
   --ci-color-info-bg: #e4e9ed;
   --ci-chart-1: #99562f;
   --ci-chart-2: #477665;
-  --ci-chart-3: #8a8068;
+  --ci-chart-3: #887e66;
   --ci-chart-4: #526b80;
   --ci-chart-5: #96727a;
+  --ci-chart-6: #773e6a;
+  --ci-chart-7: #5f560a;
+  --ci-chart-8: #697dbc;
+  --ci-chart-1-ink: #8f4d26;
+  --ci-chart-2-ink: #3a6958;
+  --ci-chart-3-ink: #6a6049;
+  --ci-chart-4-ink: #4a6277;
+  --ci-chart-5-ink: #79575f;
+  --ci-chart-6-ink: #773e6a;
+  --ci-chart-7-ink: #5f560a;
+  --ci-chart-8-ink: #4c5e9a;
+  --ci-chart-1-subtle: #ece2d8;
+  --ci-chart-2-subtle: #e1e7e0;
+  --ci-chart-3-subtle: #eae8e0;
+  --ci-chart-4-subtle: #e2e5e4;
+  --ci-chart-5-subtle: #ece6e3;
+  --ci-chart-6-subtle: #e8dfe1;
+  --ci-chart-7-subtle: #e4e2d3;
+  --ci-chart-8-subtle: #e6e8ed;
+  --ci-scale-seq-1: #5384a6;
+  --ci-scale-seq-2: #457290;
+  --ci-scale-seq-3: #38607b;
+  --ci-scale-seq-4: #2c4f67;
+  --ci-scale-seq-5: #1f3e53;
+  --ci-scale-seq-6: #142e40;
+  --ci-scale-seq-7: #091f2e;
+  --ci-scale-div-1: #4a2003;
+  --ci-scale-div-2: #6f350e;
+  --ci-scale-div-3: #8f5029;
+  --ci-scale-div-4: #817f7a;
+  --ci-scale-div-5: #376889;
+  --ci-scale-div-6: #1a4c6c;
+  --ci-scale-div-7: #0a3149;
   --ci-color-announcement-accent: #e5ac82;
   --ci-font-display: var(--ci-font-ui);
   --ci-type-display-family: var(--ci-font-ui);
@@ -124,6 +161,8 @@
 :is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"]), html:root[data-theme="dark"][data-ci-appearance="editions"]),
 :is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"]), html:root[data-theme="dark"][data-ci-appearance="editions"]) :is(.ci-theme, [data-ci-appearance="editions"]),
 [data-ci-appearance="editions"][data-theme="dark"] {
+  --ci-scheme-light: initial;
+  --ci-scheme-dark: ;
   --ci-color-background: #11120f;
   --ci-color-canvas: #11120f;
   --ci-color-surface: #191a16;
@@ -136,6 +175,8 @@
   --ci-color-text-muted: #a5a69b;
   --ci-color-text-subtle: #93958a;
   --ci-color-accent-active: #e5ac82;
+  --ci-color-accent-ink: #e5ac82;
+  --ci-badge-accent-ink: var(--ci-color-accent-ink);
   --ci-color-control-thumb: #a5a69b;
   --ci-color-border-subtle: rgb(242 240 232 / .13);
   --ci-color-border: rgb(242 240 232 / .22);
@@ -162,6 +203,39 @@
   --ci-chart-3: #c0b79b;
   --ci-chart-4: #a6bfd0;
   --ci-chart-5: #c99ca5;
+  --ci-chart-6: #dd9ccc;
+  --ci-chart-7: #bfb772;
+  --ci-chart-8: #9bb1f4;
+  --ci-chart-1-ink: var(--ci-chart-1);
+  --ci-chart-2-ink: var(--ci-chart-2);
+  --ci-chart-3-ink: var(--ci-chart-3);
+  --ci-chart-4-ink: var(--ci-chart-4);
+  --ci-chart-5-ink: var(--ci-chart-5);
+  --ci-chart-6-ink: var(--ci-chart-6);
+  --ci-chart-7-ink: var(--ci-chart-7);
+  --ci-chart-8-ink: var(--ci-chart-8);
+  --ci-chart-1-subtle: #42372c;
+  --ci-chart-2-subtle: #343d37;
+  --ci-chart-3-subtle: #3a3931;
+  --ci-chart-4-subtle: #353b3b;
+  --ci-chart-5-subtle: #3c3433;
+  --ci-chart-6-subtle: #40343a;
+  --ci-chart-7-subtle: #3a3928;
+  --ci-chart-8-subtle: #333842;
+  --ci-scale-seq-1: #4e7890;
+  --ci-scale-seq-2: #668ca3;
+  --ci-scale-seq-3: #7ea1b7;
+  --ci-scale-seq-4: #96b7ca;
+  --ci-scale-seq-5: #afccde;
+  --ci-scale-seq-6: #c9e2f2;
+  --ci-scale-seq-7: #ebf7ff;
+  --ci-scale-div-1: #fed4b9;
+  --ci-scale-div-2: #e4ab84;
+  --ci-scale-div-3: #c0865e;
+  --ci-scale-div-4: #74736d;
+  --ci-scale-div-5: #6d9bbc;
+  --ci-scale-div-6: #90c0e2;
+  --ci-scale-div-7: #c1e3fc;
   --ci-sidebar-active-bg: rgb(229 172 130 / .14);
   --ci-sidebar-active-fg: #e5ac82;
 }
@@ -171,6 +245,8 @@
 @media (prefers-color-scheme: dark) {
   :is(html:root:not([data-theme]):has([data-ci-appearance="editions"]), html:root:not([data-theme])[data-ci-appearance="editions"]),
   :is(html:root:not([data-theme]):has([data-ci-appearance="editions"]), html:root:not([data-theme])[data-ci-appearance="editions"]) :is(.ci-theme, [data-ci-appearance="editions"]) {
+    --ci-scheme-light: initial;
+    --ci-scheme-dark: ;
     --ci-color-background: #11120f;
     --ci-color-canvas: #11120f;
     --ci-color-surface: #191a16;
@@ -183,6 +259,8 @@
     --ci-color-text-muted: #a5a69b;
     --ci-color-text-subtle: #93958a;
     --ci-color-accent-active: #e5ac82;
+    --ci-color-accent-ink: #e5ac82;
+    --ci-badge-accent-ink: var(--ci-color-accent-ink);
     --ci-color-control-thumb: #a5a69b;
     --ci-color-border-subtle: rgb(242 240 232 / .13);
     --ci-color-border: rgb(242 240 232 / .22);
@@ -209,6 +287,46 @@
     --ci-chart-3: #c0b79b;
     --ci-chart-4: #a6bfd0;
     --ci-chart-5: #c99ca5;
+    --ci-chart-6: #dd9ccc;
+    --ci-chart-7: #bfb772;
+    --ci-chart-8: #9bb1f4;
+    /* data-theme="dark" gets these aliases from ci-tokens.css; the fallback does not. */
+    --ci-code-keyword: var(--ci-code-inverse-keyword);
+    --ci-code-string: var(--ci-code-inverse-string);
+    --ci-code-number: var(--ci-code-inverse-number);
+    --ci-code-function: var(--ci-code-inverse-function);
+    --ci-code-property: var(--ci-code-inverse-property);
+    --ci-code-comment: var(--ci-code-inverse-comment);
+    --ci-chart-1-ink: var(--ci-chart-1);
+    --ci-chart-2-ink: var(--ci-chart-2);
+    --ci-chart-3-ink: var(--ci-chart-3);
+    --ci-chart-4-ink: var(--ci-chart-4);
+    --ci-chart-5-ink: var(--ci-chart-5);
+    --ci-chart-6-ink: var(--ci-chart-6);
+    --ci-chart-7-ink: var(--ci-chart-7);
+    --ci-chart-8-ink: var(--ci-chart-8);
+    --ci-chart-1-subtle: #42372c;
+    --ci-chart-2-subtle: #343d37;
+    --ci-chart-3-subtle: #3a3931;
+    --ci-chart-4-subtle: #353b3b;
+    --ci-chart-5-subtle: #3c3433;
+    --ci-chart-6-subtle: #40343a;
+    --ci-chart-7-subtle: #3a3928;
+    --ci-chart-8-subtle: #333842;
+    --ci-scale-seq-1: #4e7890;
+    --ci-scale-seq-2: #668ca3;
+    --ci-scale-seq-3: #7ea1b7;
+    --ci-scale-seq-4: #96b7ca;
+    --ci-scale-seq-5: #afccde;
+    --ci-scale-seq-6: #c9e2f2;
+    --ci-scale-seq-7: #ebf7ff;
+    --ci-scale-div-1: #fed4b9;
+    --ci-scale-div-2: #e4ab84;
+    --ci-scale-div-3: #c0865e;
+    --ci-scale-div-4: #74736d;
+    --ci-scale-div-5: #6d9bbc;
+    --ci-scale-div-6: #90c0e2;
+    --ci-scale-div-7: #c1e3fc;
     --ci-sidebar-active-bg: rgb(229 172 130 / .14);
     --ci-sidebar-active-fg: #e5ac82;
   }
@@ -221,4 +339,88 @@
     color: var(--ci-sidebar-active-fg);
     background: var(--ci-sidebar-active-bg);
   }
+}
+
+/* Landing continuity is an explicit document variant. Tokens alone reach
+ * existing controls and body portals; removing the modifier restores Editions.
+ * Hosts supply Inter through --font-inter or a loaded Inter font family. */
+:is(html:root:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-ci-appearance="editions"][data-ci-editions-variant="landing"], [data-ci-appearance="editions"][data-ci-editions-variant="landing"]),
+:is(html:root:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-ci-appearance="editions"][data-ci-editions-variant="landing"]) :is(.ci-theme, [data-ci-appearance="editions"]) {
+  --ci-font-ui: var(--font-inter, "Inter"), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ci-font-display: var(--ci-font-ui);
+  --ci-font-mono: var(--font-ibm-plex-mono, "IBM Plex Mono"), ui-monospace, monospace;
+  --ci-color-background: #f3f0e7;
+  --ci-color-canvas: #f3f0e7;
+  --ci-color-surface: #f8f5ed;
+  --ci-color-surface-subtle: #ece8de;
+  --ci-color-surface-muted: #e5e0d5;
+  --ci-color-surface-inverse: #191a15;
+  --ci-color-foreground: #24251f;
+  --ci-color-text: #24251f;
+  --ci-color-heading: #24251f;
+  --ci-color-brand-mark: #24251f;
+  --ci-color-text-muted: #606156;
+  --ci-color-text-subtle: #606156;
+  --ci-color-text-inverse: #f4f1e8;
+  --ci-color-accent-hover: #edba94;
+  --ci-color-accent-foreground: #221b14;
+  --ci-color-border: #24251f33;
+  --ci-color-border-subtle: #24251f24;
+  --ci-color-border-strong: #24251f66;
+  --ci-color-focus: #a15e38;
+  --ci-color-focus-ring: #a15e38;
+  --ci-color-selection: #e5ac8259;
+  --ci-radius-sm: 2px;
+  --ci-radius-md: 4px;
+  --ci-radius-lg: 4px;
+  --ci-radius-xl: 6px;
+  --ci-radius-2xl: 8px;
+  --ci-radius-control: 2px;
+  --ci-radius-surface: 2px;
+  --ci-radius-pill: 2px;
+  --ci-button-primary-fg: #221b14;
+  --ci-button-primary-hover: #edba94;
+  --ci-button-accent-fg: #221b14;
+  --ci-card-border: var(--ci-color-border);
+}
+:is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-theme="dark"][data-ci-appearance="editions"][data-ci-editions-variant="landing"]),
+:is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-theme="dark"][data-ci-appearance="editions"][data-ci-editions-variant="landing"]) :is(.ci-theme, [data-ci-appearance="editions"]),
+[data-ci-appearance="editions"][data-ci-editions-variant="landing"][data-theme="dark"] {
+  --ci-color-background: #11120f;
+  --ci-color-canvas: #11120f;
+  --ci-color-surface: #191a16;
+  --ci-color-surface-subtle: #20211b;
+  --ci-color-surface-muted: #292a23;
+  --ci-color-foreground: #f4f1e8;
+  --ci-color-text: #f4f1e8;
+  --ci-color-heading: #f4f1e8;
+  --ci-color-brand-mark: #f4f1e8;
+  --ci-color-text-muted: #b0b0a3;
+  --ci-color-text-subtle: #a4a597;
+  --ci-color-border: #f4f1e833;
+  --ci-color-border-subtle: #f4f1e824;
+  --ci-color-border-strong: #f4f1e866;
+  --ci-color-focus: #e5ac82;
+  --ci-color-focus-ring: #e5ac82;
+}
+@media (prefers-color-scheme: dark) {
+:is(html:root:not([data-theme]):has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root:not([data-theme])[data-ci-appearance="editions"][data-ci-editions-variant="landing"]),
+:is(html:root:not([data-theme]):has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root:not([data-theme])[data-ci-appearance="editions"][data-ci-editions-variant="landing"]) :is(.ci-theme, [data-ci-appearance="editions"]) {
+  --ci-color-background: #11120f;
+  --ci-color-canvas: #11120f;
+  --ci-color-surface: #191a16;
+  --ci-color-surface-subtle: #20211b;
+  --ci-color-surface-muted: #292a23;
+  --ci-color-foreground: #f4f1e8;
+  --ci-color-text: #f4f1e8;
+  --ci-color-heading: #f4f1e8;
+  --ci-color-brand-mark: #f4f1e8;
+  --ci-color-text-muted: #b0b0a3;
+  --ci-color-text-subtle: #a4a597;
+  --ci-color-border: #f4f1e833;
+  --ci-color-border-subtle: #f4f1e824;
+  --ci-color-border-strong: #f4f1e866;
+  --ci-color-focus: #e5ac82;
+  --ci-color-focus-ring: #e5ac82;
+}
 }

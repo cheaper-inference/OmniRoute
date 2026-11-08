@@ -25,26 +25,27 @@ omniroute launch --profile glm52  # Claude Code juża glm/glm-5.2 permezz ta’ 
 
 ---
 
-## Kif Claude Code jikkonnettja ma’ gateway
+## Kif Claude Code jgħaqqad ma' gateway
 
-Claude Code jikkomunika mal-**Anthropic Messages API** u jiġi dirett lejn endpoint
-personalizzat permezz ta’ varjabbli tal-ambjent (m’għandux flag `--base-url`):
+Claude Code titkellem il**Anthropic Messaġġi API** u huwa indikat lejn endpoint personalizzat b'varjabbli ambjentali (m'għandu l-ebda bandiera `--base-url` ):
 
-| Varjabbli                                    | Għan                                                                                                    |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | URL ewlieni tal-gateway (Claude Code jżid `/v1/messages`). **Mingħajr is-suffiss `/v1`.**               |
-| `ANTHROPIC_AUTH_TOKEN`                       | Jintbagħat bħala `Authorization: Bearer …` — uża t-token ta’ aċċess / API key ta’ OmniRoute             |
-| `ANTHROPIC_API_KEY`                          | Alternattiva: jintbagħat bħala `x-api-key`. Jekk it-tnejn huma ssettjati, jirbaħ `ANTHROPIC_AUTH_TOKEN` |
-| `ANTHROPIC_MODEL`                            | Jimponi mudell speċifiku (jieħu preċedenza fuq il-valur predefinit tas-selettur `/model`)               |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → is-selettur nattiv `/model` jelenka mudelli `claude*`/`anthropic*` minn `/v1/models`              |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Jillimita t-tokens tal-output għal kull tweġiba (eż. `65536`)                                           |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Limitu ta’ tokens għall-kompattazzjoni awtomatika                                                       |
+| Varjabbli                                    | Għan                                                                                                |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Gateway root URL ( Kodiċi Claude jehmeż `/v1/messages`).** L-ebda suffiss `/v1`.**                  |
+| `ANTHROPIC_AUTH_TOKEN`                       | Mibgħut bħala `Authorization: Bearer …` — uża t-token tal-aċċess OmniRoute tiegħek / iċ-ċavetta API |
+| `ANTHROPIC_API_KEY`                          | Alternattiva: mibgħuta bħala `x-api-key`. Jekk it-tnejn sett, `ANTHROPIC_AUTH_TOKEN` jirba[         |
+| `ANTHROPIC_MODEL`                            | Forza mudell speċifiku (jgħelbu l-default tal-picker `/model` )                                     |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → il-picker nattiv `/model` jelenka mudelli `claude*`/`anthropic*` minn `/v1/models`            |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Limitu tokens tal-output għal kull rispons (eż. `65536`)                                            |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Limitu ta' token għall-kompattazzjoni awtomatika                                                    |
 
-> Il-varjabbli tal-ambjent jinqraw **darba biss waqt l-istartjar** — erġa’ ibda Claude Code wara li tibdilhom.
+> Env vars jinqraw** darba fl-istartjar** — restart Claude Code wara li tbiddelhom.
 
-`omniroute launch` jissettjahom kollha għalik: isolvi l-URL ewlieni + it-token
-mill-kuntest attiv (għalhekk `omniroute connect <vps>` u mbagħad `omniroute launch`
-jaħdmu direttament), jiċċekkja s-saħħa tas-server, u jeżegwixxi `claude`.
+Għal kredenzjali li ddur minflok string fissa, issettja `apiKeyHelper` `~/.claude/settings.json` għal kmand li jistampa l-kredenzjali attwali għal stdout. Claude Code jdaħħal fil-caches l-output tiegħu għal ħames minuti awtomatikament (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` jegħleb dak) u jibgħat il-valur kemm `Authorization: Bearer` kif ukoll `x-api-key`. L-iskript irid jistampa l-kredenzjali u xejn aktar — banner maġenbu jfalli l-helper fuq v2.1.227 +.
+
+Hekk jaħdem Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` jistampa token ta' aċċess Entra ta' ħajja qasira li OmniRoute jivverifika minflok ċavetta API. Ara [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` jistabbilixxi dawn kollha għalik: issolvi t-token bażi URL + mill-kuntest attiv (hekk `omniroute connect <vps>` allura `omniroute launch` jaħdem biss), jiċċekkja s-saħħa tas-server, u execs `claude`.
 
 ---
 

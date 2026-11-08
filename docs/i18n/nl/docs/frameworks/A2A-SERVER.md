@@ -163,7 +163,7 @@ OmniRoute onthult 6 A2A vaardigheden die zijn vastgelegd in `src/lib/a2a/taskExe
 | Gezondheidsrapport               | `health-report`      | Verzamelt de stroomonderbreker, cooldown en lock-outstatus per provider                                                                                                 | gezondheid, veerkracht              | "Toon gezondheidsstatus van alle zorgverleners" |
 | Maak een lijst van mogelijkheden | `list-capabilities`  | Retourneert de volledige Agent Skills-catalogus met 45 vermeldingen (23 API + 21 CLI + 1 config) als een afprijstabel met onbewerkte SKILL.md URLs voor contextinjectie | catalogus, ontdekking, vaardigheden | "Laat alle OmniRoute mogelijkheden zien"        |
 
-> De Agent Card moet in lijn blijven met de live 377-providercatalogus; providertellingen en free/no-auth metagegevens zijn afkomstig uit het runtime-register.
+> De Agent Card moet in lijn blijven met de live 380-providercatalogus; providertellingen en free/no-auth metagegevens zijn afkomstig uit het runtime-register.
 
 ### `list-capabilities` -vaardigheidsdetail
 
@@ -197,17 +197,17 @@ Het JSON-RPC-eindpunt `/a2a` is het canonieke A2A-toegangspunt. De onderstaande 
 
 ---
 
-## Een nieuwe skill toevoegen
+## Een nieuwe vaardigheid toevoegen
 
-1. **Maak een skillbestand:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Vaardigheidsbestand maken:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exporteer een asynchrone functie `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Volg de structuur van bestaande skills, zoals `smartRouting.ts`.
+   Exporteer een asynchrone functie `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Volg de vorm van bestaande vaardigheden zoals `smartRouting.ts`.
 
-2. **Registreer de handler:** voeg in `src/lib/a2a/taskExecution.ts` een item toe aan `A2A_SKILL_HANDLERS`:
+2. **Registerbehandelaar:** Voeg in `src/lib/a2a/taskExecution.ts` een vermelding toe aan `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...bestaande skills
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ Het JSON-RPC-eindpunt `/a2a` is het canonieke A2A-toegangspunt. De onderstaande 
    };
    ```
 
-3. **Maak de skill beschikbaar in de Agent Card:** voeg in `src/app/.well-known/agent.json/route.ts` het volgende toe aan de `skills`-array:
+3. **Blootstellen op agentkaart:** in `src/lib/a2a/agentCardMetadata.ts` (gedeeld door `/.well-known/agent.json` en `/.well-known/agent-card.json`), voeg toe aan de `skills` array:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Uw skill",
-     "description": "Korte, intentiegerichte beschrijving",
-     "tags": ["routering", "quotum"],
-     "examples": ["Voorbeeld van een aanroep in natuurlijke taal"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Schrijf tests:** `tests/unit/a2a-<your-skill>.test.ts`. Test zowel het succesvolle pad als het foutpad.
+4. **Schrijf testen:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + foutpad.
 
-5. **Documenteer** de nieuwe skill in de tabel `Beschikbare skills` van dit bestand.
+5. **Document** de nieuwe vaardigheid in de `Available Skills` tabel van dit bestand.
 
 ---
 
