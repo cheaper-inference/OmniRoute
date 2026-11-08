@@ -1,1 +1,0 @@
-- **fix(autopilot):** Improve provider and combo health autopilot accuracy for disabled inventory, informational diagnostics, connection eligibility, and account-scoped quota coverage ([#17974](https://github.com/diegosouzapw/OmniRoute/pull/17974)) — thanks @seanford

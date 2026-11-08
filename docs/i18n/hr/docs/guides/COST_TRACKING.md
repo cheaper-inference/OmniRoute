@@ -37,69 +37,61 @@ Budući da je broj procjena:
 
 ---
 
-## Kako se troškovi procjenjuju
+## Kako se procjenjuju troškovi
 
 ### Izvor cijena
 
-Troškovi dolaze iz tablice cijena koja se određuje prema sljedećem redoslijedu prvenstva
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Troškovi dolaze iz spojene tablice cijena u [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), ovim redoslijedom prednosti (** prvi najviši** ):
 
-1. **Korisničke izmjene** — cijene koje postavite na nadzornoj ploči / putem `PATCH /api/pricing`.
-2. **Sinkronizirane vanjske cijene** — dohvaćaju se iz javne LiteLLM-ove datoteke
-   `model_prices_and_context_window.json` kada je sinkronizacija omogućena (pohranjuju se
-   u zasebnom prostoru naziva `pricing_synced` kako nikada ne bi prebrisale vaše izmjene).
-3. **Zadane vrijednosti ugrađene u kod** — isporučuju se s OmniRouteom.
+1. **Korisnička nadjačavanja** — cijene postavljene na nadzornoj ploči ili putem `PATCH /api/pricing` ( `pricing` imenski prostor).
+2. **modeli.dev sink** — cijene dohvaćene iz `https://models.dev/api.json` ( `models_dev_pricing` imenski prostor).
+3. **LiteLLM sinkronizacija** — cijene dohvaćene iz LiteLLM-ovog javnog `model_prices_and_context_window.json` ( `pricing_synced` imenskog prostora).
+4. **Tvrdo kodirane zadane postavke** — cijene isporučene u [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Sinkronizacija vanjskih cijena zahtijeva **izričito uključivanje** i prema zadanim je
-postavkama onemogućena. Relevantne varijable okruženja
-(pogledajte [`.env.example`](../../.env.example)):
+Za isti provider/model, vrijednosti iz slojeva višeg prioriteta prepisuju odgovarajuća polja u nižim slojevima; polja koja su odsutna u gornjem sloju ipak mogu dolaziti iz nižeg sloja. Redoslijed je fiksan čak i kada se oba nezavisna zadatka sinkronizacije izvode u isto vrijeme. `GET /api/pricing?includeSources=1` vraća `pricing` i `sourceMap`, čije oznake po modelu (`user`, `modelsDev`, `litellm`, `default`) identificiraju sloj najvišeg prioriteta koji sadrži taj model.
 
-| Varijabla okruženja     | Zadana vrijednost | Svrha                                                                   |
-| ----------------------- | ----------------- | ----------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`           | Omogućuje pozadinsku sinkronizaciju cijena iz LiteLLM-a pri pokretanju. |
-| `PRICING_SYNC_INTERVAL` | `86400`           | Interval sinkronizacije u **sekundama** (zadano jednom dnevno).         |
-| `PRICING_SYNC_SOURCES`  | `litellm`         | Popis izvora odvojenih zarezima (trenutačno je podržan samo `litellm`). |
+**LiteLLM sinkronizacija** je opt-in, onemogućen prema zadanim postavkama. Njegove varijable okruženja (vidi [`.env.example`](../../.env.example) ) su:
+
+| Env var                 | Zadano    | Svrha                                                                         |
+| ----------------------- | --------- | ----------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Omogući pozadinsku LiteLLM sinkronizaciju cijena.                             |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Interval sinkronizacije u sekundama (dnevno).                                 |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Odabir izvora samo za ovu sinkronizaciju; trenutno je podržan samo `litellm`. |
+
+**modeli.dev sink** odvojen je od LiteLLM sinkronizacije i također je onemogućen prema zadanim postavkama. Omogućite ga u postavkama (models.dev sync) ili upotrijebite ove varijable:
+
+| Env var                    | Zadano               | Svrha                                                                                                                                                          |
+| -------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nije postavljeno)_ | Poništenje slijedi nakon prekidača postavki; `1/true/on/yes` se prisilno uključuje, a `0/false/off/no` se prisilno isključuje (čak i ako Postavke to omoguće). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`              | Zadani interval sinkronizacije models.dev u sekundama (dnevno).                                                                                                |
+
+`PRICING_SYNC_SOURCES` radi** ne** omogućiti models.dev; kontrolira samo LiteLLM sinkronizaciju. Brisanje nadjačavanja korisnika ne briše niti sinkronizirani prostor imena; sljedeći dostupni sloj cijena postaje učinkovit. Za model bez cijene, provjerite postavke sinkronizacije i `sourceMap` prije dodavanja ručnog nadjačavanja.
 
 ### Formula troška
 
-Trošak se izračunava za svaki zahtjev iz broja tokena i cijena po milijun tokena u
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Trošak se izračunava po zahtjevu iz broja tokena i stope po milijun tokena u [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Ulazni tokeni** (umanjeni za čitanja iz predmemorije i tokene stvaranja predmemorije) × cijena `input`.
-- **Tokeni pročitani iz predmemorije** × cijena `cached` (ako nije dostupna, koristi se cijena ulaznih tokena).
-- **Tokeni stvaranja predmemorije** × cijena `cache_creation` (ako nije dostupna, koristi se cijena ulaznih tokena).
-- **Izlazni tokeni** × cijena `output`.
-- **Tokeni zaključivanja** × cijena `reasoning` (ako nije dostupna, koristi se cijena izlaznih tokena).
+- **Ulazni tokeni** (minus čitanja predmemorije i tokeni za stvaranje predmemorije) × `input` stopa.
+- **Tokeni za čitanje predmemorije** × `cached` brzina (vraća se na ulaznu brzinu).
+- **Tokeni za stvaranje predmemorije** × `cache_creation` brzina (vraća se na ulaznu brzinu).
+- **Izlazni žetoni** × `output` stopa.
+- **Tokeni obrazloženja** × `reasoning` stopa (vraća se na izlaznu brzinu).
 
-Sve cijene tumače se kao USD za 1.000.000 tokena. Razina usluge Codex „fast”/„priority”
-ili „flex” primjenjuje množitelj troška (`getCodexFastCostMultiplier`) — primjerice, flex
-se obračunava uz 50-postotni popust na tokene, što se na nadzornoj ploči prikazuje kao
-**flex ušteda**.
+Sve se stope tumače kao USD za 1.000.000 tokena. Codex "brza"/"prioritetna" ili "fleksibilna" razina usluge primjenjuje multiplikator troškova (`getCodexFastCostMultiplier`) — npr. flex se naplaćuje s popustom od 50% simbola, pojavljuje se kao** fleksibilna štednja** u nadzornoj ploči.
 
-Nazivi modela najprije se normaliziraju (uklanjaju se prefiksi putanja pružatelja kao što
-su `openai/` ili `accounts/fireworks/models/`) kako bi povijesni retci i dalje odgovarali
-cijeni.
+Nazivi modela prvo se normaliziraju (prefiksi staza pružatelja usluga kao što su `openai/` ili `accounts/fireworks/models/` se uklanjaju) tako da povijesni redovi i dalje odgovaraju cijeni.
 
-### Kako se potrošnja bilježi
+### Kako se bilježi potrošnja
 
-- Trošak po zahtjevu izračunava se nakon odgovora i bilježi bez čekanja na dovršetak kako
-  klijentu nikada ne bi povećao latenciju. Potrošnja zajedničke kvote raspoređuje se u
-  sljedećem ciklusu petlje događaja putem datoteke
-  [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Potrošnja API ključa privremeno se sprema i skupno zapisuje putem komponente
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (zadani interval zapisivanja
-  od 60 s, međuspremnik od 1.000 zapisa). Može se prilagoditi putem:
+- Trošak po zahtjevu izračunava se nakon odgovora i bilježi paljenje i zaboravljanje tako da nikada ne dodaje kašnjenje klijentu. Potrošnja dijeljene kvote zakazana je na sljedećem otkucaju petlje događaja putem [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Potrošnja API ključa sprema se u međuspremnik i ispire u serijama od strane [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (zadani interval ispiranja od 60 s, međuspremnik od 1000 unosa). Podesivo putem:
 
-  | Varijabla okruženja                 | Zadana vrijednost | Svrha                                                 |
-  | ----------------------------------- | ----------------- | ----------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`           | Interval pražnjenja međuspremnika u milisekundama.    |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`            | Najveći broj zapisa u međuspremniku prije pražnjenja. |
+  | Env var                             | Zadano  | Svrha                                     |
+  | ----------------------------------- | ------- | ----------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Interval ispiranja u milisekundama.       |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Maks. međuspremnik unosa prije ispiranja. |
 
-Podaci o troškovima na nadzornoj ploči **ne** čitaju se iz pohranjenog dolarskog iznosa
-za svaki redak — iznova se izračunavaju iz broja tokena i trenutačne tablice cijena svaki
-put kada se pokrene krajnja točka za analitiku. To znači da ispravljanje pogrešne cijene
-(i ponovna sinkronizacija) retroaktivno ažurira povijesne procjene troškova.
+Cifre troškova nadzorne ploče su** ne** čitaju iz pohranjenog iznosa u dolarima po retku — ponovno se izračunavaju u hodu iz broja tokena i trenutne tablice cijena svaki put kada se pokrene krajnja točka analitike. To znači da ispravljanje pogrešne cijene (i ponovna sinkronizacija) retroaktivno ažurira povijesne procjene troškova.
 
 ---
 
@@ -147,51 +139,48 @@ Područje Troškovi također sadržava sljedeće stranice (sve pod `/dashboard/c
 
 ## API krajnje točke
 
-Sve zahtijevaju autentifikaciju za upravljanje (povratna petlja/JWT, putem `requireManagementAuth`), osim ako
-nije drukčije navedeno.
+Sve to zahtijeva autorizaciju upravljanja (loopback/JWT, putem `requireManagementAuth`), osim ako nije navedeno.
 
-### Analitika upotrebe i troškova
+### Analitika korištenja i troškova
 
-| Metoda | Krajnja točka            | Svrha                                                                                                                                                                        |
-| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Potpuna analitika troškova/upotrebe: sažetak, dnevni trend, prema pružatelju/modelu/API ključu/računu/razini. Upit: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Iskorištenost kvote po pružatelju tijekom vremena. Upit: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                        |
-| `GET`  | `/api/usage/history`     | Neobrađeni retci povijesti upotrebe.                                                                                                                                         |
-| `GET`  | `/api/usage/call-logs`   | Zapisi poziva po zahtjevu (model, tokeni, trošak, latencija, status).                                                                                                        |
-| `GET`  | `/api/usage/quota`       | Status kvote pružatelja.                                                                                                                                                     |
-| `GET`  | `/api/usage/proxy-logs`  | Zapisi proxy zahtjeva.                                                                                                                                                       |
+| metoda | Krajnja točka            | Svrha                                                                                                                                                       |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Potpuna cost/usage analitika: sažetak, dnevni trend, po provider/model/API key/account/tier. upit: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | Iskorištenost kvote po pružatelju tijekom vremena. Upit: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                       |
+| `GET`  | `/api/usage/history`     | Neobrađeni retci povijesti korištenja.                                                                                                                      |
+| `GET`  | `/api/usage/call-logs`   | Zapisi poziva po zahtjevu (model, tokeni, cijena, latencija, status).                                                                                       |
+| `GET`  | `/api/usage/quota`       | Status kvote pružatelja usluga.                                                                                                                             |
+| `GET`  | `/api/usage/proxy-logs`  | Dnevnici zahtjeva za proxy.                                                                                                                                 |
 
 ### Proračuni
 
-| Metoda | Krajnja točka            | Svrha                                                                                           |
-| ------ | ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Sažetak troškova + provjera proračuna za jedan API ključ (parametar upita `apiKeyId` obavezan). |
-| `POST` | `/api/usage/budget`      | Postavljanje dnevnih/tjednih/mjesečnih ograničenja u USD-u + praga upozorenja za API ključ.     |
-| `GET`  | `/api/usage/budget/bulk` | Skupni sažeci proračuna za više API ključeva.                                                   |
+| metoda | Krajnja točka            | Svrha                                                                                              |
+| ------ | ------------------------ | -------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Sažetak troškova + provjera proračuna za jedan API ključ (potreban je `apiKeyId` parametar upita). |
+| `POST` | `/api/usage/budget`      | Postavi daily/weekly/monthly USD ograničava + prag upozorenja za API ključ.                        |
+| `GET`  | `/api/usage/budget/bulk` | Skupni proračunski sažeci po API ključevima.                                                       |
 
-> API za proračun ograničen je na pojedinačni **API ključ** (`apiKeyId`). Ograničenja koja vraća
-> `GET /api/usage/budget` uključuju `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> `warningThreshold` i tekuće ukupne iznose (`totalCostToday`, `totalCostMonth`, …).
+> Proračun API je obuhvaćen prema** ključ API** (`apiKeyId`). Ograničenja koja vraća `GET /api/usage/budget` uključuju `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` i tekuće ukupne iznose (`totalCostToday`, `totalCostMonth`, …).
 
 ### Cijene
 
-| Metoda   | Krajnja točka           | Svrha                                                                                                                    |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `GET`    | `/api/pricing`          | Trenutačne objedinjene cijene (korisničke + sinkronizirane + zadane). `?includeSources=1` prikazuje izvor za svaki unos. |
-| `PATCH`  | `/api/pricing`          | Nadjačavanje cijena za `{ provider: { model: { input, output, cached, … } } }`.                                          |
-| `DELETE` | `/api/pricing`          | Vraćanje cijena na zadane vrijednosti (opcionalno ograničeno putem `?provider=&model=`).                                 |
-| `GET`    | `/api/pricing/defaults` | Prikaz zadanih rezervnih cijena po 1M.                                                                                   |
-| `GET`    | `/api/pricing/models`   | Cijene indeksirane prema modelu.                                                                                         |
-| `POST`   | `/api/pricing/sync`     | Pokretanje ručne sinkronizacije iz vanjskih izvora (LiteLLM).                                                            |
-| `GET`    | `/api/pricing/sync`     | Trenutačni status sinkronizacije.                                                                                        |
-| `DELETE` | `/api/pricing/sync`     | Brisanje svih sinkroniziranih podataka o cijenama.                                                                       |
+| metoda   | Krajnja točka           | Svrha                                                                                                                                                      |
+| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Spojene cijene na četiri razine (korisnik, models.dev, LiteLLM, zadane postavke). `?includeSources=1` vraća `pricing` + `sourceMap`.                       |
+| `PATCH`  | `/api/pricing`          | Nadjačaj cijene za `{ provider: { model: { input, output, cached, … } } }`.                                                                                |
+| `DELETE` | `/api/pricing`          | Ukloni nadjačavanje korisničkih cijena (opcionalno obuhvaćeno `?provider=&model=`); sinkronizirane stope ili ugrađene zadane postavke ostaju kao rezervne. |
+| `GET`    | `/api/pricing/defaults` | Prikaži zadane rezervne stope per-1M.                                                                                                                      |
+| `GET`    | `/api/pricing/models`   | Cijena određena prema modelu.                                                                                                                              |
+| `POST`   | `/api/pricing/sync`     | Pokreni ručnu sinkronizaciju iz vanjskih izvora (LiteLLM).                                                                                                 |
+| `GET`    | `/api/pricing/sync`     | Trenutačni status sinkronizacije.                                                                                                                          |
+| `DELETE` | `/api/pricing/sync`     | Obriši samo cijene sinkronizirane s LiteLLM-om (`pricing_synced`); modeli.dev podaci su odvojeni.                                                          |
 
-### Ostale krajnje točke povezane s troškovima
+### Ostale krajnje točke relevantne za troškove
 
-| Metoda | Krajnja točka                 | Svrha                                                                           |
-| ------ | ----------------------------- | ------------------------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | Ukupan broj tokena besplatnog modela, potrošnja ovog mjeseca i preostala kvota. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Potrošnja za skup dijeljene kvote.                                              |
+| metoda | Krajnja točka                 | Svrha                                                                                 |
+| ------ | ----------------------------- | ------------------------------------------------------------------------------------- |
+| `GET`  | `/api/free-tier/summary`      | Ukupni tokeni slobodnog modela, korišteni u ovom mjesecu i preostali besplatni iznos. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Upotreba za zajednički skup kvota.                                                    |
 
 ---
 

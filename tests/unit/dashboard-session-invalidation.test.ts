@@ -201,3 +201,97 @@ test("the revoked-session list drops expired entries, deduplicates and stays bou
   assert.equal((big as unknown[]).length, 500);
   assert.equal((big as Array<{ jti: string }>).at(-1)?.jti, "s599");
 });
+
+type LogoutInternals = typeof logoutRoute.logoutRouteInternals;
+
+/** Runs `fn` with the logout route's seams overridden, restoring them afterwards. */
+async function withLogoutInternals<T>(
+  overrides: Partial<LogoutInternals>,
+  fn: () => Promise<T>
+): Promise<T> {
+  const internals = logoutRoute.logoutRouteInternals as Record<string, unknown>;
+  const saved = new Map(Object.keys(overrides).map((key) => [key, internals[key]]));
+  Object.assign(internals, overrides);
+  try {
+    return await fn();
+  } finally {
+    for (const [key, value] of saved) internals[key] = value;
+  }
+}
+
+/** A cookie store holding `token`, recording every cookie the route deletes into `deleted`. */
+function cookieStoreFor(token: string, deleted: string[]) {
+  return {
+    get: (name: string) => (name === DASHBOARD_SESSION_COOKIE ? { value: token } : undefined),
+    delete: (name: string) => {
+      deleted.push(name);
+    },
+  };
+}
+
+test("a sign-out whose revocation cannot be saved fails closed with a retryable 503", async () => {
+  const session = await mintDashboardSessionToken(secret);
+  const deleted: string[] = [];
+  const internalDetail = "SQLITE_FULL: database or disk is full at /secret/path/storage.sqlite";
+
+  const response = await withLogoutInternals(
+    {
+      getCookieStore: (async () =>
+        cookieStoreFor(session, deleted)) as LogoutInternals["getCookieStore"],
+      updateSettings: (async () => {
+        throw new Error(internalDetail);
+      }) as LogoutInternals["updateSettings"],
+    },
+    () => logoutRoute.POST(new Request("http://localhost/api/auth/logout", { method: "POST" }))
+  );
+
+  assert.equal(response.status, 503);
+  assert.ok(Number(response.headers.get("retry-after")) > 0, "the client is told to retry");
+  assert.match(response.headers.get("cache-control") || "", /no-store/);
+  assert.deepEqual(deleted, [], "the cookie stays so the user can retry the sign-out");
+  assert.ok(await verifyDashboardSessionToken(session), "the session was not revoked");
+
+  const raw = await response.text();
+  assert.equal(raw.includes("SQLITE_FULL"), false, "the storage error is not sent to the client");
+  assert.equal(raw.includes("/secret/path"), false);
+  const body = JSON.parse(raw) as { success?: unknown; error?: { message?: unknown } };
+  assert.notEqual(body.success, true);
+  assert.equal(typeof body.error?.message, "string");
+});
+
+test("concurrent sign-outs keep both revocations when the settings change mid-write", async () => {
+  const first = await mintDashboardSessionToken(secret);
+  const second = await mintDashboardSessionToken(secret);
+  const deleted: string[] = [];
+  const stores = [cookieStoreFor(first, deleted), cookieStoreFor(second, deleted)];
+  let reads = 0;
+  let raced = false;
+
+  const responses = await withLogoutInternals(
+    {
+      getCookieStore: (async () => stores.shift()) as LogoutInternals["getCookieStore"],
+      // The first sign-out reads the list, then the second one commits before the first writes.
+      getSettings: (async () => {
+        const snapshot = await settingsDb.getSettings();
+        reads += 1;
+        if (reads === 1) {
+          raced = true;
+          const other = await logoutRoute.POST(
+            new Request("http://localhost/api/auth/logout", { method: "POST" })
+          );
+          assert.equal(other.status, 200);
+        }
+        return snapshot;
+      }) as LogoutInternals["getSettings"],
+    },
+    async () => [
+      await logoutRoute.POST(new Request("http://localhost/api/auth/logout", { method: "POST" })),
+    ]
+  );
+
+  assert.ok(raced, "the second sign-out committed inside the first one's read-write window");
+  assert.equal(responses[0].status, 200);
+  assert.deepEqual(deleted, [DASHBOARD_SESSION_COOKIE, DASHBOARD_SESSION_COOKIE]);
+  assert.equal(await verifyDashboardSessionToken(first), null, "the first sign-out is kept");
+  assert.equal(await verifyDashboardSessionToken(second), null, "the second sign-out is kept");
+});

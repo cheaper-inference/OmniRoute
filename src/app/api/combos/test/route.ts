@@ -16,14 +16,14 @@ import { testComboSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { ownListenerSelfHopToken, SELF_HOP_HEADER } from "@omniroute/open-sse/utils/selfHop";
 import { isAutoComboId, materializeAutoCombo } from "@/lib/combos/autoVirtual";
 import type { ComboRecord } from "@/domain/persistence/comboRepositories";
 
 export const COMBO_TEST_TIMEOUT_MS = 60_000;
-export const COMBO_TEST_TOTAL_TIMEOUT_MS = 180_000;
 /**
  * Virtual auto combos can hold every connected model in the pool — probing all
- * of them would run far past the total budget. Cap the smoke test at the
+ * of them would create excessive upstream health probes. Cap the smoke test at the
  * highest-weighted candidates; `totalCandidates` in the response reports the
  * unbounded pool size so the UI can explain the truncation.
  */
@@ -165,6 +165,9 @@ async function testComboTarget(
         "Content-Type": "application/json",
         ...(internalApiKey ? { Authorization: `Bearer ${internalApiKey}` } : {}),
         "X-Internal-Test": "combo-health-check",
+        // Sent here, not left to the fetch stamp: that only fires for listenPort(), and this
+        // targets apiPort, which differs when the API has its own port.
+        [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
         // Force a fresh execution path so combo tests cannot be satisfied by
         // OmniRoute's semantic cache or other request reuse layers.
         "X-OmniRoute-No-Cache": "true",
@@ -315,22 +318,11 @@ async function probeComboTargets(
   signal: AbortSignal | null
 ): Promise<ComboTestResult[]> {
   const results: ComboTestResult[] = [];
-  const loopStarted = Date.now();
   for (const target of targets) {
     // Client disconnects surface through signal (from request.signal at the
     // call site). Stop instead of starting another doomed probe.
     if (signal?.aborted) {
       break;
-    }
-    if (Date.now() - loopStarted >= COMBO_TEST_TOTAL_TIMEOUT_MS) {
-      results.push(
-        buildComboTestResult(target, {
-          status: "error",
-          error: `Timeout (${COMBO_TEST_TOTAL_TIMEOUT_MS / 1000}s total)`,
-          latencyMs: 0,
-        })
-      );
-      continue;
     }
     results.push(await testComboTarget(target, baseInternalUrl, internalApiKey, signal));
   }
