@@ -490,7 +490,7 @@ function ConnectionRowContent({
                 onToggle={onToggleQuotaVisibility}
               />
             )}
-            {connection.provider === "codex" && onRefreshQuota && (
+            {!detailsOnly && connection.provider === "codex" && onRefreshQuota && (
               <ConnectionQuotaRefreshButton
                 refreshing={quotaRefreshing}
                 state={quotaRefreshState}

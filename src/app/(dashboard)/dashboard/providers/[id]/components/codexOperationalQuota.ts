@@ -20,6 +20,39 @@ export function codexOperationalWindows(
   return windows.length ? windows : ["5h", "7d"];
 }
 
+type CodexPoolWindow = NonNullable<
+  ConnectionRowConnection["codexAccountPool"]
+>["children"][number]["quota"]["windows"]["5h"];
+
+function cachedUsedPercent(cached: Record<string, unknown>): number | null {
+  if (finite(cached.used) && finite(cached.total) && cached.total > 0) {
+    return (cached.used / cached.total) * 100;
+  }
+  return finite(cached.remainingPercentage) ? 100 - cached.remainingPercentage : null;
+}
+
+function poolUsedPercent(pool: CodexPoolWindow | null | undefined): number | null {
+  if (!pool) return null;
+  if (finite(pool.usedPercentage)) return pool.usedPercentage;
+  return finite(pool.usage) && finite(pool.limit) && pool.limit > 0
+    ? (pool.usage / pool.limit) * 100
+    : null;
+}
+
+function windowMatches(cached: Record<string, unknown>, minDays: number, label: RegExp): boolean {
+  return (
+    (finite(cached.windowSeconds) && cached.windowSeconds >= minDays * 86400) ||
+    (typeof cached.displayName === "string" && label.test(cached.displayName))
+  );
+}
+
+function cachedPeriod(cached: Record<string, unknown> | null): Pick<OperationalQuota, "period"> {
+  if (!cached) return {};
+  if (windowMatches(cached, 27, /month|mensal/i)) return { period: "monthly" };
+  if (windowMatches(cached, 6, /weekly|semanal/i)) return { period: "weekly" };
+  return {};
+}
+
 /** Only observed numeric values count as usage. Missing usage must never become zero. */
 export function codexOperationalQuota(
   connection: ConnectionRowConnection,
@@ -32,31 +65,11 @@ export function codexOperationalQuota(
     ?.quota.windows[window];
   // The cache updates after the row's refresh action; it takes precedence over the pool snapshot.
   const source = cached ?? pool;
-  let percent: number | null = null;
-  if (cached) {
-    if (finite(cached.used) && finite(cached.total) && cached.total > 0) {
-      percent = (cached.used / cached.total) * 100;
-    } else if (finite(cached.remainingPercentage)) {
-      percent = 100 - cached.remainingPercentage;
-    }
-  } else if (pool) {
-    if (finite(pool.usedPercentage)) percent = pool.usedPercentage;
-    else if (finite(pool.usage) && finite(pool.limit) && pool.limit > 0) {
-      percent = (pool.usage / pool.limit) * 100;
-    }
-  }
+  const percent = cached ? cachedUsedPercent(cached) : poolUsedPercent(pool);
   const reset = source?.resetAt;
   return {
     usedPercent: percent === null ? null : Math.min(100, Math.max(0, Math.round(percent))),
     resetAt: typeof reset === "string" && Number.isFinite(Date.parse(reset)) ? reset : null,
-    ...(cached &&
-    ((finite(cached.windowSeconds) && cached.windowSeconds >= 27 * 86400) ||
-      (typeof cached.displayName === "string" && /month|mensal/i.test(cached.displayName)))
-      ? { period: "monthly" as const }
-      : cached &&
-          ((finite(cached.windowSeconds) && cached.windowSeconds >= 6 * 86400) ||
-            (typeof cached.displayName === "string" && /weekly|semanal/i.test(cached.displayName)))
-        ? { period: "weekly" as const }
-        : {}),
+    ...cachedPeriod(cached),
   };
 }

@@ -7,13 +7,15 @@ import ProviderActionsMenu from "./ProviderActionsMenu";
 import CodexResetCreditsAction from "./CodexResetCreditsAction";
 import CodexPingNowButton from "./CodexPingNowButton";
 
-export default function CodexAccountActions(props: ConnectionRowProps) {
-  const t = useTranslations("providers");
+type Translate = ReturnType<typeof useTranslations>;
+type SectionProps = { props: ConnectionRowProps; t: Translate; disabled: boolean };
+
+function QuotaActions({ props, t }: SectionProps) {
   const { connection } = props;
-  const disabled = connection.isActive === false;
+  if (connection.quotaVisible === false) return null;
   return (
-    <ProviderActionsMenu>
-      {connection.quotaVisible !== false && props.onRefreshQuota && (
+    <>
+      {props.onRefreshQuota && (
         <Button
           size="sm"
           variant="ghost"
@@ -25,14 +27,19 @@ export default function CodexAccountActions(props: ConnectionRowProps) {
           {t("quotaRefresh")}
         </Button>
       )}
-      {connection.quotaVisible !== false && (
-        <CodexResetCreditsAction
-          connectionId={connection.id}
-          count={props.quotaCache?.bankedResetCredits}
-          onRefresh={props.onRefreshQuota}
-        />
-      )}
-      <div className="my-1 border-t border-border" />
+      <CodexResetCreditsAction
+        connectionId={connection.id}
+        count={props.quotaCache?.bankedResetCredits}
+        onRefresh={props.onRefreshQuota}
+      />
+    </>
+  );
+}
+
+function CredentialActions({ props, t, disabled }: SectionProps) {
+  const { connection } = props;
+  return (
+    <>
       <ConnectionTestButton connectionId={connection.id} disabled={disabled} />
       <Button
         variant="ghost"
@@ -59,6 +66,19 @@ export default function CodexAccountActions(props: ConnectionRowProps) {
       {props.isOAuth && connection.provider === "codex" && (
         <CodexPingNowButton connectionId={connection.id} disabled={disabled} />
       )}
+      <CodexAuthFileActions props={props} t={t} disabled={disabled} />
+      {props.onReauth && (
+        <Button variant="ghost" size="sm" icon="passkey" onClick={props.onReauth}>
+          {t("reauthenticateConnection")}
+        </Button>
+      )}
+    </>
+  );
+}
+
+function CodexAuthFileActions({ props, t }: SectionProps) {
+  return (
+    <>
       {props.onApplyCodexAuthLocal && (
         <Button
           variant="ghost"
@@ -83,12 +103,13 @@ export default function CodexAccountActions(props: ConnectionRowProps) {
           {t("exportCodexAuthFile")}
         </Button>
       )}
-      {props.onReauth && (
-        <Button variant="ghost" size="sm" icon="passkey" onClick={props.onReauth}>
-          {t("reauthenticateConnection")}
-        </Button>
-      )}
-      <div className="my-1 border-t border-border" />
+    </>
+  );
+}
+
+function ManageActions({ props, t, disabled }: SectionProps) {
+  return (
+    <>
       <Button
         variant="ghost"
         size="sm"
@@ -112,6 +133,20 @@ export default function CodexAccountActions(props: ConnectionRowProps) {
           {t("proxyConfig")}
         </Button>
       )}
+    </>
+  );
+}
+
+export default function CodexAccountActions(props: ConnectionRowProps) {
+  const t = useTranslations("providers");
+  const section = { props, t, disabled: props.connection.isActive === false };
+  return (
+    <ProviderActionsMenu>
+      <QuotaActions {...section} />
+      <div className="my-1 border-t border-border" />
+      <CredentialActions {...section} />
+      <div className="my-1 border-t border-border" />
+      <ManageActions {...section} />
       <div className="my-1 border-t border-border" />
       <Button
         variant="ghost"

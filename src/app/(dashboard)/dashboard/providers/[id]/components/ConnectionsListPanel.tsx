@@ -131,6 +131,22 @@ function resolveConnProxyField(
   return connProxyMap[connId]?.proxy?.[field] || null;
 }
 
+/**
+ * First/last flags drive the priority move buttons; any other sort order has no
+ * neighbour to swap with inside the visible order, so every row is both ends.
+ */
+function groupedRowEdges(
+  sortOrder: string,
+  group: { index: number; count: number },
+  row: { index: number; count: number }
+): { isFirst: boolean; isLast: boolean } {
+  if (sortOrder !== "priority") return { isFirst: true, isLast: true };
+  return {
+    isFirst: group.index === 0 && row.index === 0,
+    isLast: group.index === group.count - 1 && row.index === row.count - 1,
+  };
+}
+
 export default function ConnectionsListPanel({
   connections,
   providerId,
@@ -761,11 +777,11 @@ export default function ConnectionsListPanel({
                     isOAuth={conn.authType === "oauth"}
                     isClaude={providerId === "claude"}
                     codexGlobalServiceMode={codexGlobalServiceMode}
-                    isFirst={sortOrder !== "priority" || (gi === 0 && index === 0)}
-                    isLast={
-                      sortOrder !== "priority" ||
-                      (gi === visibleGroupKeys.length - 1 && index === groupConns.length - 1)
-                    }
+                    {...groupedRowEdges(
+                      sortOrder,
+                      { index: gi, count: visibleGroupKeys.length },
+                      { index, count: groupConns.length }
+                    )}
                     isSelected={selectedIds.has(conn.id)}
                     onToggleSelect={() => handleToggleSelectOne(conn.id)}
                     onMoveUp={() => handleSwapPriority(conn, sorted[sorted.indexOf(conn) - 1])}
