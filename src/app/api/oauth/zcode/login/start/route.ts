@@ -26,12 +26,17 @@ export async function POST(request: Request) {
   try {
     if (parsed.data.connectionId) {
       const connection = await getProviderConnectionById(parsed.data.connectionId);
+      const data = connection?.providerSpecificData;
+      const account =
+        data && typeof data === "object" && !Array.isArray(data)
+          ? (data as Record<string, unknown>)
+          : null;
       if (
         !connection ||
         connection.provider !== "zcode" ||
         connection.authType !== "oauth" ||
-        connection.providerSpecificData?.family !== parsed.data.family ||
-        typeof connection.providerSpecificData?.userId !== "string"
+        account?.family !== parsed.data.family ||
+        typeof account?.userId !== "string"
       ) {
         return NextResponse.json(
           { error: "Invalid Z-code account for reauthorization" },

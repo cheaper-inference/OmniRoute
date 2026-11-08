@@ -846,7 +846,9 @@ test("an unpinned Z-code request selects an added OAuth account", async () => {
     idToken: "zcode-start-token",
     providerSpecificData: { family: "zai", userId: "user-1" },
   });
-  const selected = await auth.getProviderCredentials("zcode");
+  const legacy = await auth.getProviderCredentials("zcode");
+  assert.equal(legacy?.connectionId, "noauth");
+  const selected = await auth.getProviderCredentials("zcode-start");
   assert.equal(selected?.connectionId, connection.id);
   assert.equal(selected?.idToken, "zcode-start-token");
 });

@@ -1225,6 +1225,7 @@ function LegacyOAuthModal({
                     { value: "bigmodel", label: "BigModel (China)" },
                   ].map((option) => (
                     <label key={option.value} className="flex items-center gap-2">
+                      {/* kit-exception: the UI kit has no radio-group control for region selection */}
                       <input
                         type="radio"
                         name="zcode-region"

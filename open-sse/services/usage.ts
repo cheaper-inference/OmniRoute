@@ -157,6 +157,8 @@ export async function getUsageForProvider(
 
   switch (provider) {
     case "zcode":
+    case "zcode-cn-start":
+    case "zcode-cn-individual":
     case "zcode-individual":
       return await getManagedZcodeUsage(connection);
     case "zcode-start":

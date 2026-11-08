@@ -137,49 +137,56 @@ export class NativeZcodeHostClient {
       const type = this.buffer[offset];
       const body = this.buffer.subarray(offset + HEADER_BYTES, offset + HEADER_BYTES + length);
       offset += HEADER_BYTES + length;
-      if (type !== 1) continue;
-      const header = decodeZcodeValue(body);
-      const payload = decodeZcodeValue(body, header.offset);
-      if (payload.offset !== body.length || !Array.isArray(header.value))
-        throw new Error("bad frame");
-      const [kind, id] = header.value;
-      if (kind === 200) {
-        this.readyResolve?.();
-        continue;
-      }
-      if (![201, 202, 203].includes(kind) || typeof id !== "number") continue;
-      const pending = this.pending.get(id);
-      if (!pending) continue;
-      this.pending.delete(id);
-      clearTimeout(pending.timer);
-      if (kind === 201) pending.resolve(payload.value);
-      else {
-        const error = new Error(
-          kind === 203 ? "ZCode host request canceled" : "ZCode host request failed"
-        );
-        const value =
-          payload.value && typeof payload.value === "object"
-            ? (payload.value as Record<string, unknown>)
-            : {};
-        const data =
-          value.data && typeof value.data === "object"
-            ? (value.data as Record<string, unknown>)
-            : {};
-        const sanitizeCode = (candidate: unknown) => {
-          const code = safeCode(candidate);
-          return typeof code === "string" &&
-            this.secretValues.some((secret) => secret && code.includes(secret))
-            ? undefined
-            : code;
-        };
-        const code = sanitizeCode(value.code),
-          providerCode = sanitizeCode(data.code);
-        if (code !== undefined) Object.assign(error, { code });
-        if (providerCode !== undefined) Object.assign(error, { providerCode });
-        pending.reject(error);
-      }
+      this.consumeFrame(type, body);
     }
     if (offset) this.buffer = this.buffer.subarray(offset);
+  }
+
+  private consumeFrame(type: number, body: Buffer): void {
+    if (type !== 1) return;
+    const header = decodeZcodeValue(body);
+    const payload = decodeZcodeValue(body, header.offset);
+    if (payload.offset !== body.length || !Array.isArray(header.value))
+      throw new Error("bad frame");
+    const [kind, id] = header.value;
+    if (kind === 200) {
+      this.readyResolve?.();
+      return;
+    }
+    if (![201, 202, 203].includes(kind) || typeof id !== "number") return;
+    const pending = this.pending.get(id);
+    if (!pending) return;
+    this.pending.delete(id);
+    clearTimeout(pending.timer);
+    if (kind === 201) pending.resolve(payload.value);
+    else {
+      const error = this.hostError(kind, payload.value);
+      pending.reject(error);
+    }
+  }
+
+  private hostError(kind: number, payloadValue: unknown): Error {
+    const error = new Error(
+      kind === 203 ? "ZCode host request canceled" : "ZCode host request failed"
+    );
+    const value =
+      payloadValue && typeof payloadValue === "object"
+        ? (payloadValue as Record<string, unknown>)
+        : {};
+    const data =
+      value.data && typeof value.data === "object" ? (value.data as Record<string, unknown>) : {};
+    const sanitizeCode = (candidate: unknown) => {
+      const code = safeCode(candidate);
+      return typeof code === "string" &&
+        this.secretValues.some((secret) => secret && code.includes(secret))
+        ? undefined
+        : code;
+    };
+    const code = sanitizeCode(value.code),
+      providerCode = sanitizeCode(data.code);
+    if (code !== undefined) Object.assign(error, { code });
+    if (providerCode !== undefined) Object.assign(error, { providerCode });
+    return error;
   }
 
   async call(channel: string, method: string, args: unknown[]): Promise<unknown> {

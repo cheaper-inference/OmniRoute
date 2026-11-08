@@ -443,18 +443,19 @@ const chatPathOwnsBreakerAccounting = () => "ignore" as const;
  * Do not apply OmniRoute's ambient proxy (or its reachability fast-fail) to that
  * transport. The explicit HTTP gateway still follows the configured proxy route.
  */
-export function runWithProviderProxyContext<T>(
+export async function runWithProviderProxyContext<T>(
   provider: string,
   proxy: unknown,
-  fn: () => T,
+  fn: () => T | Promise<T>,
   zcodeTransport = process.env.ZCODE_TRANSPORT
-): T {
+): Promise<T> {
   const providerId = provider.trim().toLowerCase();
   const transport = zcodeTransport?.trim().toLowerCase();
   const nativeZcodeHost =
     /^zcode(?:-|$)/.test(providerId) &&
     (!transport || transport === "app-server" || transport === "native-host");
-  return nativeZcodeHost ? runWithDirectFetchContext(fn) : runWithProxyContext(proxy || null, fn);
+  if (nativeZcodeHost) return await runWithDirectFetchContext(fn);
+  return await runWithProxyContext(proxy || null, fn);
 }
 
 export async function executeChatWithBreaker({

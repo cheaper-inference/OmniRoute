@@ -1,3 +1,4 @@
+import { ZCODE_PROVIDERS } from "@/shared/constants/zcodeProviders";
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
 import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import {
@@ -224,8 +225,7 @@ function shouldRefreshProviderLimitsCache(
 
 export function isSupportedUsageConnection(connection: ProviderConnectionLike | null): boolean {
   if (!connection?.provider) return false;
-  if (["zcode", "zcode-start", "zcode-individual"].includes(connection.provider))
-    return connection.authType === "oauth";
+  if (ZCODE_PROVIDERS.has(connection.provider)) return connection.authType === "oauth";
 
   if (connection.authType === "oauth") {
     return supportsProviderQuota(connection.provider, connection);
@@ -242,7 +242,7 @@ function mergeZcodeUsageCache(
 ): ProviderLimitsCacheEntry {
   // Never retain stale account/plan results after an unavailable readback.
   if (
-    ["zcode", "zcode-start", "zcode-individual"].includes(provider) &&
+    ZCODE_PROVIDERS.has(provider) &&
     (Array.isArray(next.quotaGroups) || (next.message && !next.quotas))
   )
     return next;

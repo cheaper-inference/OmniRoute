@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ZCODE_PROVIDERS } from "@/shared/constants/zcodeProviders";
 import { useLocale, useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
@@ -365,8 +366,12 @@ export default function QuotaCardExpanded({
   );
   const zcodeGroups = useMemo(
     () =>
-      ["zcode", "zcode-start", "zcode-individual"].includes(providerId || "")
-        ? quotaGroups.filter((group) => group.plan === "start" || group.plan === "individual")
+      ZCODE_PROVIDERS.has(providerId || "")
+        ? quotaGroups.filter(
+            (group, index, groups) =>
+              (group.plan === "start" || group.plan === "individual") &&
+              groups.findIndex((candidate) => candidate.plan === group.plan) === index
+          )
         : [],
     [providerId, quotaGroups]
   );

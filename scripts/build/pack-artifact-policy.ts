@@ -181,6 +181,8 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "package.json",
   // OpenCode free-tier Bun relay, spawned by src/lib/opencodeFreeRelay.ts; shipped via package.json "files".
   "scripts/ops/opencode-free-relay.ts",
+  // Operator installer for the packaged native ZCode runtime.
+  "scripts/ops/install-zcode-native-runtime.mjs",
   "scripts/build/assembleStandalone.mjs",
   "scripts/build/publicOpenApi.mjs",
   "scripts/build/backendOnlyPages.mjs",

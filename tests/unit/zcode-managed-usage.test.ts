@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import { getManagedZcodeUsage } from "../../open-sse/services/usage/zcode.ts";
 import { toProviderLimitsCacheEntry } from "../../src/lib/usage/providerLimitsCache.ts";
 import { isSupportedUsageConnection } from "../../src/lib/usage/providerLimits.ts";
+import { resetDbInstance } from "../../src/lib/db/core.ts";
+
+test.after(() => resetDbInstance());
 
 const makeAccount = (id: string, family: "zai" | "bigmodel") => ({
   id,

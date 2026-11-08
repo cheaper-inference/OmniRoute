@@ -7,10 +7,14 @@ vi.mock("next-intl", () => ({
 }));
 import QuotaCardExpanded from "../../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded";
 
-function render(quotaGroups: Array<Record<string, unknown>>, loading = false) {
+function render(
+  quotaGroups: Array<Record<string, unknown>>,
+  loading = false,
+  providerId = "zcode"
+) {
   return renderToStaticMarkup(
     <QuotaCardExpanded
-      providerId="zcode"
+      providerId={providerId}
       quotas={[]}
       quotaGroups={quotaGroups}
       loading={loading}
@@ -60,6 +64,11 @@ describe("ZCode account quota groups", () => {
     expect(html).toContain("50%");
     expect(html).toContain("80%");
     expect(html).toContain("2026-11-07T17:59:10.000Z");
+  });
+  it("deduplicates plan groups and supports Chinese tariff namespaces", () => {
+    const group = { plan: "start", status: "unknown", observedAt: null, quotas: {} };
+    const html = render([group, { ...group }], false, "zcode-cn-start");
+    expect(html.match(/aria-label="Start"/g)).toHaveLength(1);
   });
   it("renders unknown separately and never claims zero quota", () => {
     const html = render([

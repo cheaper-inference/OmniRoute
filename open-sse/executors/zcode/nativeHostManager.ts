@@ -156,6 +156,40 @@ export async function resolveNativeRuntime(dataDirectory = resolveDataDir()): Pr
   throw new NativeSessionError("A compatible ZCode native server runtime is not installed", 503);
 }
 
+function nativeHostEnvironment(
+  runtime: string,
+  state: Awaited<ReturnType<typeof prepareNativeAccountState>>
+): NodeJS.ProcessEnv {
+  // Native hosts own their account, endpoint and engine configuration. Legacy
+  // gateway/debug overrides must not leak into the unmodified native runtime.
+  const inheritedEnv = Object.fromEntries(
+    Object.entries(process.env).filter(([key]) => !key.startsWith("ZCODE_"))
+  );
+  const env: NodeJS.ProcessEnv = {
+    ...inheritedEnv,
+    NODE_ENV: process.env.NODE_ENV || "production",
+    // Native MCP discovery also reads the OS home, outside ZCODE_* paths.
+    // Keep the operator's global MCP servers out of caller-owned sessions.
+    HOME: state.directory,
+    USERPROFILE: state.directory,
+    XDG_CONFIG_HOME: join(state.directory, ".config"),
+    ZCODE_DATA_BASE_DIR: state.directory,
+    ZCODE_DESKTOP_HOME_DIR: state.directory,
+    ZCODE_STORAGE_DIR: join(state.directory, ".zcode"),
+    ZCODE_HOME: join(state.directory, ".zcode"),
+    ZCODE_CREDENTIAL_SECRET: state.secret,
+    ZCODE_AGENT_SERVER_COMMAND: join(runtime, "node"),
+    ZCODE_AGENT_SERVER_ARGS_JSON: JSON.stringify([
+      join(runtime, "zcode.cjs"),
+      "app-server",
+      "--stdio",
+    ]),
+  };
+  delete env.ZCODE_SERVER_ROOT;
+  delete env.NODE_OPTIONS;
+  return env;
+}
+
 type Host = { child: ChildProcess; fingerprint: string; serverRoot: string };
 export class NativeZcodeHostManager {
   private hosts = new Map<string, Host>();
@@ -230,32 +264,7 @@ export class NativeZcodeHostManager {
       this.options.stateRoot || join(resolveDataDir(), "zcode-native"),
       account
     );
-    // Native hosts own their account, endpoint and engine configuration. Legacy
-    // gateway/debug overrides must not leak into the unmodified native runtime.
-    const inheritedEnv = Object.fromEntries(
-      Object.entries(process.env).filter(([key]) => !key.startsWith("ZCODE_"))
-    );
-    const env: NodeJS.ProcessEnv = {
-      ...inheritedEnv,
-      // Native MCP discovery also reads the OS home, outside ZCODE_* paths.
-      // Keep the operator's global MCP servers out of caller-owned sessions.
-      HOME: state.directory,
-      USERPROFILE: state.directory,
-      XDG_CONFIG_HOME: join(state.directory, ".config"),
-      ZCODE_DATA_BASE_DIR: state.directory,
-      ZCODE_DESKTOP_HOME_DIR: state.directory,
-      ZCODE_STORAGE_DIR: join(state.directory, ".zcode"),
-      ZCODE_HOME: join(state.directory, ".zcode"),
-      ZCODE_CREDENTIAL_SECRET: state.secret,
-      ZCODE_AGENT_SERVER_COMMAND: join(runtime, "node"),
-      ZCODE_AGENT_SERVER_ARGS_JSON: JSON.stringify([
-        join(runtime, "zcode.cjs"),
-        "app-server",
-        "--stdio",
-      ]),
-    };
-    delete env.ZCODE_SERVER_ROOT;
-    delete env.NODE_OPTIONS;
+    const env = nativeHostEnvironment(runtime, state);
     const child = fork(join(runtime, "server-core.js"), ["1"], {
       execPath: join(runtime, "node"),
       execArgv: [],

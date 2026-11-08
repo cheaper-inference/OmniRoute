@@ -108,6 +108,8 @@ test("managed child excludes caller exec arguments, reuses identity, and closes 
     join(runtime, "server-core.js"),
     `
     if (process.execArgv.length) process.exit(2);
+    if (JSON.stringify(process.argv.slice(2)) !== '["1"]') process.exit(8);
+    if (process.env.NODE_OPTIONS) process.exit(9);
     if (process.env.ZCODE_DATA_BASE_DIR !== process.env.ZCODE_DESKTOP_HOME_DIR) process.exit(3);
     if (!process.env.ZCODE_CREDENTIAL_SECRET) process.exit(4);
     if (process.env.ZCODE_SERVICE_AUTHORITY_MODE || process.env.ZCODE_EGRESS_PROXY) process.exit(5);
@@ -128,6 +130,9 @@ test("managed child excludes caller exec arguments, reuses identity, and closes 
     idToken: "test-jwt",
     authType: "oauth",
     providerSpecificData: { family: "zai", userId: "user" },
+    // Caller metadata must never become executable/argv or launch environment.
+    command: "/untrusted/caller-command",
+    args: ["--eval", "process.exit(10)"],
   };
   let pid: number | undefined;
   const oldAuthority = process.env.ZCODE_SERVICE_AUTHORITY_MODE;

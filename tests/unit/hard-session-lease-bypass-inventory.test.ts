@@ -191,6 +191,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
     // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
     "src/app/api/oauth/[provider]/[action]/m365Auth.ts": 1,
+    // Management-authenticated reauthorization validates the named account; no model dispatch.
+    "src/app/api/oauth/zcode/login/start/route.ts": 1,
     "src/app/api/oauth/codex/import/route.ts": 1,
     "src/app/api/oauth/kiro/api-key/route.ts": 1,
     "src/app/api/oauth/kiro/auto-import/route.ts": 2,
@@ -278,6 +280,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/monitoring/providerHealthMatrix.ts": 1,
     "src/lib/oauth/connectionPersistence.ts": 1,
     "src/lib/oauth/services/persistCursorConnection.ts": 1,
+    // Login persistence finds an existing account to update; no inference dispatch.
+    "src/lib/oauth/services/zcodePersistence.ts": 1,
     "src/lib/oauth/utils/agyAuthImport.ts": 1,
     "src/lib/oauth/utils/claudeAuthImport.ts": 1,
     "src/lib/oauth/utils/codexAuthImport.ts": 1,
@@ -341,7 +345,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // owner's connection id — so this is a state read (class C).
     "src/sse/handlers/chat/museOwnership.ts": 1,
     "src/sse/handlers/chatHelpers.ts": 1,
-    "src/sse/services/auth.ts": 4,
+    // Reads the selected row after a 429 for tariff-aware cooldown, without dispatch.
+    "src/sse/services/chatQuotaExhaustion.ts": 1,
+    // Includes the selected tariff account read for cooldown state.
+    "src/sse/services/auth.ts": 5,
   },
 };
 

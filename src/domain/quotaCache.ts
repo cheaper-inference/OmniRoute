@@ -42,6 +42,8 @@ import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
 import { filterCodexQuotaWindows } from "@omniroute/open-sse/services/codexQuotaWindowPolicy.ts";
 import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
 import { resolveProviderId } from "@/shared/constants/providers";
+import { ZCODE_PROVIDERS } from "@/shared/constants/zcodeProviders";
+import { isZcodeQuotaScopeApplicable, resolveSnapshotQuotaProvider } from "./zcodeQuotaScope";
 import {
   claudeQuotaMatchesModel,
   isExplicitClaudeQuota429Text,
@@ -747,24 +749,17 @@ export function isQuotaScopeApplicable(
   provider: string,
   authType?: string | null
 ): boolean {
-  if (authType !== "oauth") return true;
-  const target = resolveProviderId(provider);
-  const targetPlan = ["zcode", "zcode-start", "zcode-cn-start"].includes(target)
-    ? "start"
-    : ["zcode-individual", "zcode-cn-individual"].includes(target)
-      ? "individual"
-      : null;
-  if (!targetPlan) return true;
+  if (authType !== "oauth" || !ZCODE_PROVIDERS.has(resolveProviderId(provider))) return true;
   const entry = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
-  if (!entry) return true;
-  // The bare connection provider `zcode` does not identify the plan observed.
-  const source = resolveProviderId(entry.provider);
-  const sourcePlan = ["zcode-start", "zcode-cn-start"].includes(source)
-    ? "start"
-    : ["zcode-individual", "zcode-cn-individual"].includes(source)
-      ? "individual"
-      : null;
-  return sourcePlan === targetPlan;
+  return isZcodeQuotaScopeApplicable(provider, authType, entry?.provider);
+}
+
+function canApplyRequestQuota(
+  connectionId: string,
+  provider: string,
+  authType?: string | null
+): boolean {
+  return isQuotaScopeApplicable(connectionId, provider, authType) && !isQuotaHealthy(connectionId);
 }
 
 export function isQuotaExhaustedForRequest(
@@ -774,8 +769,7 @@ export function isQuotaExhaustedForRequest(
   providerSpecificData?: unknown,
   authType?: string | null
 ): boolean {
-  if (!isQuotaScopeApplicable(connectionId, provider, authType)) return false;
-  if (isQuotaHealthy(connectionId)) return false;
+  if (!canApplyRequestQuota(connectionId, provider, authType)) return false;
   if (isCodexQuotaFilteringDisabled(provider, providerSpecificData)) return false;
   if (isClaudeExtraUsageAllowed(provider, providerSpecificData)) return false;
   // Subscription snapshots cannot decide paid-credit eligibility. The mandatory
@@ -1034,20 +1028,7 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
   if (Object.keys(quotas).length === 0) return null;
   const exhausted = isExhausted(quotas);
 
-  // Mixed persisted tariff windows cannot be attributed to either plan.
-  if (
-    snapshotScopes.size > 1 &&
-    [...snapshotScopes].some((scope) =>
-      [
-        "zcode",
-        "zcode-start",
-        "zcode-individual",
-        "zcode-cn-start",
-        "zcode-cn-individual",
-      ].includes(scope)
-    )
-  )
-    provider = "zcode";
+  provider = resolveSnapshotQuotaProvider(provider, snapshotScopes);
   const entry: QuotaCacheEntry = {
     connectionId,
     provider,
