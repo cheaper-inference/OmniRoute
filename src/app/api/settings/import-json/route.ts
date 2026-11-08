@@ -12,6 +12,9 @@ import { getSettings } from "@/lib/db/settings";
 import { setSystemPromptConfig } from "@omniroute/open-sse/services/systemPrompt.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { IMPORT_STRIPPED_SETTINGS_KEYS } from "@/shared/constants/securityImpactingSettings";
+import { updateSettingsSchema } from "@/shared/validation/settingsSchemas";
+
+const settingsKeySchema = updateSettingsSchema.partial();
 
 /**
  * Drops the password (and any `currentPassword`), every key PATCH only accepts after password
@@ -23,6 +26,21 @@ function stripSecurityImpactingSettings(settings: object): Record<string, unknow
     delete safeSettings[key];
   }
   return safeSettings;
+}
+
+/**
+ * Validates each key on its own with the PATCH /api/settings schema. A key that fails is dropped
+ * and named, so one bad value cannot poison the stored settings. Keys the schema does not know
+ * (written by other routes, such as `tailscaleUrl`) are kept, as before.
+ */
+function dropInvalidSettings(settings: Record<string, unknown>) {
+  const valid: Record<string, unknown> = {};
+  const ignoredKeys: string[] = [];
+  for (const [key, value] of Object.entries(settings)) {
+    if (settingsKeySchema.safeParse({ [key]: value }).success) valid[key] = value;
+    else ignoredKeys.push(key);
+  }
+  return { valid, ignoredKeys };
 }
 
 /**
@@ -79,8 +97,11 @@ export async function POST(request: Request) {
     }
 
     // 🔒 Zero-Trust: strip authentication + security-impacting config before migration
+    let ignoredKeys: string[] = [];
     if (data.settings && typeof data.settings === "object") {
-      data = { ...data, settings: stripSecurityImpactingSettings(data.settings) };
+      const checked = dropInvalidSettings(stripSecurityImpactingSettings(data.settings));
+      ignoredKeys = checked.ignoredKeys;
+      data = { ...data, settings: checked.valid };
     }
 
     const db = getDbInstance();
@@ -111,6 +132,7 @@ export async function POST(request: Request) {
       success: true,
       message: "Legacy JSON database imported successfully",
       ...counts,
+      ...(ignoredKeys.length > 0 ? { ignoredKeys } : {}),
     });
   } catch (err) {
     console.error("[API] Error importing JSON backup:", err);
