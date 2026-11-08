@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import Icon from "@/shared/components/Icon";
 import { UsageAnalytics, CardSkeleton } from "@/shared/components";
+import OpenAIBillingPanel from "@/shared/components/OpenAIBillingPanel";
 import EvalsTab from "../usage/components/EvalsTab";
 import CacheHealthTab from "./CacheHealthTab";
 import ComboHealthTab from "./ComboHealthTab";
@@ -107,6 +108,7 @@ function AnalyticsPageContent() {
           {activeTab === "overview" ? (
             <>
               <UsageAnalytics />
+              <OpenAIBillingPanel />
               <DiversityScoreCard />
             </>
           ) : null}
