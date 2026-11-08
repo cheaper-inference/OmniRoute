@@ -27,6 +27,14 @@
  *                                  source_hash — mechanical mirror rewrites stop
  *                                  showing up as `target changed` while genuine
  *                                  source drift is still reported)
+ *   npm run i18n:run -- --failures-json=<path>
+ *                                 (also write the run summary and the failed
+ *                                  (source, locale) units as JSON)
+ *
+ * Exit codes of a translation run: 0 every work unit translated; 3 (EXIT_PARTIAL) at
+ * least one unit translated and at least one failed: the successful mirrors and their
+ * state records are written, a failed unit keeps its mirror and its state record exactly
+ * as they were; 1 nothing could be translated, or any other error.
  *
  * Backend (configured via env, never committed):
  *   OMNIROUTE_TRANSLATION_API_URL     e.g. https://cloud.omniroute.dev/v1
@@ -37,6 +45,17 @@
  *                                     cmd/deepseek/deepseek-v4.1-flash
  *   OMNIROUTE_TRANSLATION_TIMEOUT_MS  optional, default 60000
  *   OMNIROUTE_TRANSLATION_CONCURRENCY optional, default 4
+ *
+ * Google engine (scripts/i18n/lib/google-translate.mjs — structure-safe: only text is sent,
+ * fences / table rows / code spans are rebuilt from the source):
+ *   OMNIROUTE_TRANSLATION_ENGINE      llm (default) | google — `google` needs no LLM env at all
+ *   OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK  default on; `0` disables. With the llm engine, a
+ *                                     chunk no model could produce (every model and the
+ *                                     re-split rejected, or a model error) is translated by
+ *                                     Google instead of failing the locale.
+ *   OMNIROUTE_TRANSLATION_GOOGLE_API_KEY   optional; official Cloud Translation v2 instead of
+ *                                     the keyless web endpoint
+ *   OMNIROUTE_TRANSLATION_GOOGLE_CONCURRENCY  parallel Google requests (default 6)
  */
 
 import { promises as fs, existsSync, readFileSync } from "node:fs";
@@ -47,7 +66,16 @@ import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
-import { isFallbackWorthy, resolveModelChain } from "./lib/translate-backend.mjs";
+import {
+  isFallbackWorthy,
+  llmCircuit,
+  noteLlmFailure,
+  noteLlmSuccess,
+  resolveModelChain,
+  translationEngine as sharedTranslationEngine,
+  googleFallbackEnabled as sharedGoogleFallbackEnabled,
+} from "./lib/translate-backend.mjs";
+import { translateMarkdownWithGoogle } from "./lib/google-translate.mjs";
 import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/translation-state.mjs";
 
 // ----- .env loader --------------------------------------------------------
@@ -176,6 +204,7 @@ function parseArgs(argv) {
     adopt: false,
     targetsOnly: false,
     concurrency: null,
+    failuresJson: null,
   };
   for (const arg of argv.slice(2)) {
     if (arg === "--force") opts.force = true;
@@ -201,6 +230,7 @@ function parseArgs(argv) {
         .map((s) => s.trim())
         .filter(Boolean);
     else if (arg.startsWith("--concurrency=")) opts.concurrency = Number(arg.slice(14));
+    else if (arg.startsWith("--failures-json=")) opts.failuresJson = arg.slice(16);
     else if (arg === "--help" || arg === "-h") {
       console.log(
         [
@@ -213,6 +243,9 @@ function parseArgs(argv) {
           "  --adopt              Rebuild .i18n-state.json from the files on disk (no API calls)",
           "  --targets-only       With --adopt: re-hash only the mirrors, keeping every source_hash",
           "  --concurrency=<n>    Parallel API requests (default: env CONCURRENCY or 4)",
+          "  --failures-json=<p>  Write the run summary and the failed units to <p> as JSON",
+          "",
+          "Exit: 0 all translated, 3 partial (failed units left untouched), 1 none translated or error",
         ].join("\n")
       );
       process.exit(0);
@@ -534,6 +567,9 @@ export function validateTranslatedChunk(source, output) {
   if (fences[0] !== fences[1]) problems.push(`code fences ${fences[1]}/${fences[0]}`);
   const rows = [countLines(/^\s*\|/, source), countLines(/^\s*\|/, text)];
   if (rows[0] !== rows[1]) problems.push(`table rows ${rows[1]}/${rows[0]}`);
+  else problems.push(...tableCellProblems(source, text));
+  const refs = issueRefProblem(source, text);
+  if (refs) problems.push(refs);
   const meta = META_PROSE.filter((re) => countMatches(re, text) > countMatches(re, source));
   if (meta.length) problems.push(`meta-prose ${meta.map((re) => re.source).join(", ")}`);
   const lost = lostInlineCode(source, text);
@@ -543,12 +579,142 @@ export function validateTranslatedChunk(source, output) {
       `inline code changed: ${shown.join(", ")}${lost.length > 3 ? ` (+${lost.length - 3})` : ""}`
     );
   }
+  problems.push(...htmlStructureProblems(source, text));
+  const leaked = countMatches(LEAKED_PLACEHOLDER, text) - countMatches(LEAKED_PLACEHOLDER, source);
+  if (leaked > 0) problems.push(`leaked translator placeholder x${leaked}`);
   return { text, problems };
+}
+
+// GitHub issue / PR references are literals a mirror test may pin (`#15281` in QUALITY_GATES.md's
+// check:cycles row): the Google engine wrote `# 15281` in six locales on #18795. The output must
+// carry the same multiset as the source; order may change with the sentence.
+const ISSUE_REF = /(?<![\w&])#\d+(?!\d)/g;
+
+function issueRefProblem(source, translated) {
+  const tally = (text) => {
+    const counts = new Map();
+    for (const [ref] of text.matchAll(ISSUE_REF)) counts.set(ref, (counts.get(ref) ?? 0) + 1);
+    return counts;
+  };
+  const before = tally(source);
+  const after = tally(translated);
+  const changed = [...new Set([...before.keys(), ...after.keys()])]
+    .filter((ref) => (before.get(ref) ?? 0) !== (after.get(ref) ?? 0))
+    .map((ref) => `${ref} ${after.get(ref) ?? 0}/${before.get(ref) ?? 0}`);
+  if (!changed.length) return null;
+  return `issue refs ${changed.slice(0, 4).join(", ")}${changed.length > 4 ? ` (+${changed.length - 4})` : ""}`;
+}
+
+// Cell separators of one table row: unescaped pipes outside code spans, and escaped pipes apart.
+// The row-count check alone let a row through that gained a cell, and the Google engine escapes
+// a pipe the translator writes (`or` answered the danda as `|`, shipped as `\|` on #18795), so
+// the cell count holds there and only the escaped count moves.
+function tableRowShape(row) {
+  let cells = 0;
+  let escaped = 0;
+  let tick = false;
+  for (let i = 0; i < row.length; i++) {
+    if (row[i] === "\\" && row[i + 1] === "|") {
+      escaped++;
+      i++;
+    } else if (row[i] === "`") tick = !tick;
+    else if (row[i] === "|" && !tick) cells++;
+  }
+  return { cells, escaped };
+}
+
+function tableCellProblems(source, translated) {
+  const rowsOf = (text) => text.split("\n").filter((l) => /^\s*\|/.test(l));
+  const src = rowsOf(source);
+  const out = rowsOf(translated);
+  const bad = [];
+  for (let i = 0; i < src.length; i++) {
+    const a = tableRowShape(src[i]);
+    const b = tableRowShape(out[i] ?? "");
+    if (a.cells !== b.cells || a.escaped !== b.escaped) bad.push(i + 1);
+  }
+  if (!bad.length) return [];
+  const shown = bad.slice(0, 4).join(", ");
+  return [`table cells changed in row ${shown}${bad.length > 4 ? ` (+${bad.length - 4})` : ""}`];
+}
+
+// The Google engine's masking tokens (`<span translate="no">zqa</span>`, bare `zqi`, private-use
+// placeholders): none may survive into a mirror (ja, 2026-10-28, shipped `zqi` / `zqo`).
+const LEAKED_PLACEHOLDER = /<span translate=|(?<!\p{L})zq[a-z]+(?!\p{L})|[\ue000-\uf8ff]/gu;
+const HTML_TAG = /<(\/?)([A-Za-z][\w-]*)(?=[\s/>])[^>]*?(\/?)>/g;
+const HTML_CODE = /<(code|kbd|samp)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi;
+const VOID_TAGS = new Set(["br", "hr", "img", "input", "meta", "link", "wbr", "source", "col"]);
+
+// Prose an HTML tag can live in: outside fences and outside backtick code spans (a tag inside
+// backticks is a literal, compared by lostInlineCode). <think> is checked on its own above.
+function htmlProse(markdown) {
+  return proseOutsideFences(markdown).replace(/(`+)[^\n]*?\1/g, "");
+}
+
+function htmlTags(prose) {
+  const tags = [];
+  for (const m of prose.matchAll(HTML_TAG)) {
+    const name = m[2].toLowerCase();
+    if (name === "think") continue;
+    tags.push({ name, close: m[1] === "/", single: m[3] === "/" || VOID_TAGS.has(name) });
+  }
+  return tags;
+}
+
+function nestsWell(tags) {
+  const stack = [];
+  for (const t of tags) {
+    if (t.single) continue;
+    if (!t.close) stack.push(t.name);
+    else if (stack.pop() !== t.name) return false;
+  }
+  return stack.length === 0;
+}
+
+// README's tech-stack table is HTML inside markdown: a translated `<tr>` row must keep every tag
+// (by name, opening and closing counted apart), the source's nesting, and the exact text of its
+// `<code>` / `<kbd>` / `<samp>` spans, the same contract lostInlineCode applies to backticks.
+export function htmlStructureProblems(source, translated) {
+  const problems = [];
+  const src = htmlProse(source);
+  const out = htmlProse(translated);
+  const srcTags = htmlTags(src);
+  const outTags = htmlTags(out);
+  const tally = (tags) => {
+    const counts = new Map();
+    for (const t of tags) {
+      const key = `<${t.close ? "/" : ""}${t.name}>`;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return counts;
+  };
+  const before = tally(srcTags);
+  const after = tally(outTags);
+  const changed = [...new Set([...before.keys(), ...after.keys()])]
+    .filter((key) => (before.get(key) ?? 0) !== (after.get(key) ?? 0))
+    .map((key) => `${key} ${after.get(key) ?? 0}/${before.get(key) ?? 0}`);
+  if (changed.length) problems.push(`html tags ${changed.slice(0, 4).join(", ")}`);
+  if (nestsWell(srcTags) && !nestsWell(outTags)) problems.push("html nesting broken");
+  const codes = (prose) => {
+    const spans = new Map();
+    for (const m of prose.matchAll(HTML_CODE)) spans.set(m[2], (spans.get(m[2]) ?? 0) + 1);
+    return spans;
+  };
+  const srcCode = codes(src);
+  const outCode = codes(out);
+  const lost = [...srcCode].filter(([span, n]) => (outCode.get(span) ?? 0) < n).map(([s]) => s);
+  if (lost.length) {
+    const shown = lost.slice(0, 3).map((span) => `<code>${span}</code>`);
+    problems.push(
+      `html code changed: ${shown.join(", ")}${lost.length > 3 ? ` (+${lost.length - 3})` : ""}`
+    );
+  }
+  return problems;
 }
 
 // Inline code spans outside fenced blocks, counted by content. Soft-wrapped lines of a paragraph
 // are joined first, because a CommonMark code span may cross a line break.
-function inlineCodeSpans(markdown) {
+function proseOutsideFences(markdown) {
   const prose = [];
   let inFence = false;
   for (const line of markdown.split("\n")) {
@@ -557,7 +723,11 @@ function inlineCodeSpans(markdown) {
       prose.push("");
     } else prose.push(inFence ? "" : line);
   }
-  const joined = prose.join("\n").replace(/([^\n])\n(?=[^\n])/g, "$1 ");
+  return prose.join("\n").replace(/([^\n])\n(?=[^\n])/g, "$1 ");
+}
+
+function inlineCodeSpans(markdown) {
+  const joined = proseOutsideFences(markdown);
   const spans = new Map();
   for (const match of joined.matchAll(/(?<!`)`([^`\n]+)`(?!`)/g)) {
     const span = match[1].replace(/\s+/g, " ").trim();
@@ -726,9 +896,10 @@ export function joinTranslatedChunks(parts) {
 // A mirror is retranslated section by section: the state remembers a short
 // hash of every `## ` section of the source at the time of translation, and a
 // later run only sends the sections whose hash changed, splicing the untouched
-// translated sections of the mirror back in. Sections are matched by index
-// only — an inserted or removed section shifts everything after it and costs
-// a retranslation of the tail, which is acceptable.
+// translated sections of the mirror back in. While the source keeps its section
+// count, sections are matched by index (a rewritten section keeps its slot).
+// When a section is inserted or removed the two lists are lined up by hash, so
+// only the sections that are really new go to the model.
 
 // Section 0 is the preamble (text before the first `## `); every other section
 // starts with its `## ` heading line. Joining with "\n\n" reproduces the body
@@ -755,22 +926,60 @@ export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
   if (!Array.isArray(previousHashes) || previousHashes.length !== mirrorSections.length) {
     return null;
   }
-  if (previousHashes.length !== sections.length) return null;
   const now = sectionHashes(sections);
+  // `match[i]` is the recorded section (and so the mirror section) that source section `i`
+  // lines up with, or -1 when it has no counterpart.
+  const match =
+    previousHashes.length === now.length
+      ? now.map((_, i) => i)
+      : alignSectionHashes(previousHashes, now);
   const reuse = new Map();
   const translate = [];
   now.forEach((h, i) => {
+    const j = match[i];
+    if (j < 0) {
+      translate.push(i);
+      return;
+    }
     // A mirror section byte-equal to its source section is an untranslated copy (322 mirrors
     // of the 36 pre-expansion locales were adopted as English, 2026-09-16 audit) — never reuse it.
     // Section 0 of a mirror that starts with a YAML block is the old extractor's leaked
     // frontmatter (24 newer locales, 2026-09-16) — always rebuild it.
-    const leakedFrontmatter = i === 0 && /^---\s*\n/.test(mirrorSections[i]);
-    const untranslated = looksUntranslated(mirrorSections[i], sections[i]);
-    if (h === previousHashes[i] && !untranslated && !leakedFrontmatter)
-      reuse.set(i, mirrorSections[i]);
+    const leakedFrontmatter = j === 0 && /^---\s*\n/.test(mirrorSections[j]);
+    const untranslated = looksUntranslated(mirrorSections[j], sections[i]);
+    if (h === previousHashes[j] && !untranslated && !leakedFrontmatter)
+      reuse.set(i, mirrorSections[j]);
     else translate.push(i);
   });
   return { reuse, translate };
+}
+
+// Longest common subsequence of the recorded hashes and the current ones: for every current
+// section, the index of the recorded section it lines up with, or -1. Used only when the section
+// count changed. Order is preserved, so a section that merely moved is translated again; equal
+// hashes (two identical sections) pair up left to right.
+function alignSectionHashes(previous, now) {
+  const rows = previous.length + 1;
+  const cols = now.length + 1;
+  const lcs = Array.from({ length: rows }, () => new Uint32Array(cols));
+  for (let i = previous.length - 1; i >= 0; i--) {
+    for (let j = now.length - 1; j >= 0; j--) {
+      lcs[i][j] =
+        previous[i] === now[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+    }
+  }
+  const match = new Array(now.length).fill(-1);
+  let i = 0;
+  let j = 0;
+  while (i < previous.length && j < now.length) {
+    if (previous[i] === now[j]) {
+      match[j] = i;
+      i++;
+      j++;
+    } else if (lcs[i + 1][j] >= lcs[i][j + 1]) i++;
+    else j++;
+  }
+  return match;
 }
 
 // The mirror without the prefix this script writes in front of the translated
@@ -808,6 +1017,18 @@ export function mirrorNeedsRebuild(mirrorText, sourceText) {
   if (/^---\s*\n[\s\S]{0,600}?\n---\s*\n/.test(body)) return true; // leaked frontmatter
   const sourceBody = stripTopHeading(sourceText.replace(/^---\n[\s\S]*?\n---\n+/, ""));
   return looksUntranslated(body, sourceBody); // still English
+}
+
+/**
+ * True when the mirror on disk no longer matches the target_hash its record holds (a hand
+ * edit such as #18659, or a scripted rewrite of the mirrors). `i18n:check` reports it as a
+ * drifted target, so the refresh has to queue it: with the source unchanged every section is
+ * reused from the mirror itself (no translation call, the edit survives) and the new hash is
+ * recorded. Skipping it left the drift in place and failed every scheduled refresh
+ * (runs 41748740681, 41786406551).
+ */
+export function mirrorEdited(record, mirrorBuf) {
+  return !!record?.target_hash && sha256(mirrorBuf) !== record.target_hash;
 }
 
 export function extractMirrorBody(mirrorText) {
@@ -913,34 +1134,140 @@ async function resolveSectionPlan({ task, state, opts, sections }) {
   return planSectionReuse({ previousHashes, sections, mirrorSections });
 }
 
-async function translateBody(body, localeEntry, backend) {
+// A chunk the validator keeps rejecting used to be retried CHUNK_ATTEMPTS times on the same
+// model and then fail the whole doc: the model chain only engaged on HTTP errors. On
+// 2026-10-27 the fallback model cut large tables right after the header row under load
+// ("table rows 1/9") and one USER_GUIDE run spent 6.6 h on retries. A rejected chunk now
+// falls through the chain (each level keeps the rest of the chain for HTTP fallback), and
+// when every model rejects a large chunk it is re-split on the same safe seams as
+// chunkMarkdown (headings, paragraphs, table rows) and translated piece by piece.
+const SPLIT_DEPTH = 2;
+const SPLIT_MIN_CHARS = 1500;
+
+export async function translateChunk(
+  chunk,
+  system,
+  backend,
+  { call = callChat, label = "chunk", depth = 0 } = {}
+) {
+  const messages = [
+    { role: "system", content: system },
+    { role: "user", content: chunk },
+  ];
+  const chain = [backend.model, ...(backend.fallbackModels ?? [])].filter(Boolean);
+  let checked;
+  for (let level = 0; level < chain.length; level++) {
+    const levelBackend = {
+      ...backend,
+      model: chain[level],
+      fallbackModels: chain.slice(level + 1),
+    };
+    for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
+      checked = validateTranslatedChunk(chunk, await call(messages, levelBackend));
+      if (checked.problems.length === 0) return checked.text;
+      logWarn(
+        `  ${label} rejected (${chain[level]}, attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
+      );
+    }
+  }
+  if (depth < SPLIT_DEPTH && chunk.length > SPLIT_MIN_CHARS) {
+    const pieces = chunkMarkdown(chunk, Math.ceil(chunk.length / 2));
+    if (pieces.length > 1) {
+      logWarn(
+        `  ${label} split into ${pieces.length} smaller pieces after every model rejected it`
+      );
+      const parts = [];
+      for (let p = 0; p < pieces.length; p++) {
+        parts.push(
+          await translateChunk(pieces[p], system, backend, {
+            call,
+            label: `${label}.${p + 1}`,
+            depth: depth + 1,
+          })
+        );
+      }
+      return joinTranslatedChunks(parts);
+    }
+  }
+  throw new Error(`${label} failed validation: ${checked.problems.join("; ")}`);
+}
+
+export const translationEngine = sharedTranslationEngine;
+export const googleFallbackEnabled = sharedGoogleFallbackEnabled;
+
+let protectedTermsCache = null;
+function protectedTerms() {
+  if (protectedTermsCache) return protectedTermsCache;
+  try {
+    const file = path.join(SCRIPT_DIR, "glossary", "protected-terms.json");
+    protectedTermsCache = JSON.parse(readFileSync(file, "utf8")).terms ?? [];
+  } catch {
+    protectedTermsCache = [];
+  }
+  return protectedTermsCache;
+}
+
+// One chunk through Google, checked by the same output guard as a model answer. The web
+// endpoint's answers vary between calls (2026-10-28: hy failed once, passed on rerun), so a
+// rejected answer is retried like a model answer.
+async function translateChunkWithGoogle(chunk, localeEntry, backend, label) {
+  let problems = [];
+  for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
+    const text = await (backend.googleTranslate ?? translateMarkdownWithGoogle)(
+      chunk,
+      localeEntry.code,
+      { protectedTerms: protectedTerms() }
+    );
+    const checked = validateTranslatedChunk(chunk, text);
+    if (checked.problems.length === 0) return checked.text;
+    problems = checked.problems;
+    logWarn(
+      `  ${label} rejected (google, attempt ${attempt}/${CHUNK_ATTEMPTS}): ${problems.join("; ")}`
+    );
+  }
+  throw new Error(`${label} failed validation (google): ${problems.join("; ")}`);
+}
+
+export async function translateBody(body, localeEntry, backend) {
   const englishName = localeEntry.english ?? localeEntry.name;
   const native = localeEntry.native ?? localeEntry.name;
   const system = SYSTEM_PROMPT(englishName, native);
   const chunks = chunkMarkdown(body);
   const translated = [];
+  const engine = backend.engine ?? "llm";
+  const fallback = backend.googleFallback ?? googleFallbackEnabled();
   for (let i = 0; i < chunks.length; i++) {
-    const messages = [
-      { role: "system", content: system },
-      { role: "user", content: chunks[i] },
-    ];
-    let checked;
-    for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
-      checked = validateTranslatedChunk(chunks[i], await callChat(messages, backend));
-      if (checked.problems.length === 0) break;
-      logWarn(
-        `  chunk ${i + 1}/${chunks.length} rejected (attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
-      );
+    const label = `chunk ${i + 1}/${chunks.length}`;
+    let text;
+    if (engine === "google" || (fallback && llmCircuit.open)) {
+      text = await translateChunkWithGoogle(chunks[i], localeEntry, backend, label);
+    } else {
+      try {
+        text = await translateChunk(chunks[i], system, backend, {
+          call: backend.callChat ?? callChat,
+          label,
+        });
+        noteLlmSuccess();
+      } catch (err) {
+        if (!fallback) throw err;
+        // quota / credits / auth, or LLM_FAILURE_LIMIT failures in a row: stop asking the LLM
+        if (noteLlmFailure(err)) {
+          logWarn(
+            `  LLM backend unavailable (${llmCircuit.reason}) — the rest of this run uses Google`
+          );
+        }
+        // Every model and the re-split rejected the chunk (or the chain errored out): Google
+        // rebuilds the structure from the source, so a truncated table cannot come back.
+        logWarn(
+          `  [i18n-google] ${label} via Google (${String(err?.message ?? err).slice(0, 160)})`
+        );
+        text = await translateChunkWithGoogle(chunks[i], localeEntry, backend, label);
+      }
     }
-    if (checked.problems.length > 0) {
-      throw new Error(
-        `chunk ${i + 1}/${chunks.length} failed validation: ${checked.problems.join("; ")}`
-      );
-    }
-    translated.push(checked.text);
+    translated.push(text);
     if (chunks.length > 1) {
       logInfo(
-        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${checked.text.length} chars)`
+        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${text.length} chars)`
       );
     }
   }
@@ -981,6 +1308,41 @@ function createLimiter(max) {
 
 // ----- Main ----------------------------------------------------------------
 
+// A run where some units translated and some failed. The workflow commits the good mirrors
+// and lists the failed units; a failed unit is never written and never gets a state record.
+export const EXIT_PARTIAL = 3;
+
+export function translationExitCode({ translated, failed }) {
+  if (!failed) return 0;
+  return translated > 0 ? EXIT_PARTIAL : 1;
+}
+
+/**
+ * The drift a partial run is allowed to leave behind: a source none of whose locales
+ * translated keeps its recorded `source_hash`, and a failed (source, locale) keeps its
+ * mirror (missing or hand-edited). Everything else in the drift report still blocks.
+ */
+export function blockingDrift(report, failures, translated = []) {
+  // A report without the drift lists (e.g. `missing-state`) can never be excused.
+  const lists = ["driftedSources", "missingTargets", "driftedTargets"];
+  if (!lists.every((k) => Array.isArray(report?.[k]))) {
+    return [{ kind: "report", rel: String(report?.reason ?? "unreadable drift report") }];
+  }
+  const translatedRels = new Set(translated.map((t) => t.rel));
+  const failedRels = new Set(failures.map((f) => f.rel).filter((rel) => !translatedRels.has(rel)));
+  const failedUnits = new Set(failures.map((f) => `${f.rel}\u0000${f.locale}`));
+  const blocking = [];
+  for (const x of report.driftedSources) {
+    if (!failedRels.has(x.rel)) blocking.push({ kind: "driftedSources", ...x });
+  }
+  for (const kind of ["missingTargets", "driftedTargets"]) {
+    for (const x of report[kind]) {
+      if (!failedUnits.has(`${x.rel}\u0000${x.locale}`)) blocking.push({ kind, ...x });
+    }
+  }
+  return blocking;
+}
+
 /**
  * Merge one run's (source, locale) records into a freshly re-read state. Source-level
  * `source_hash` follows the record; untouched entries stay as the other runners left them.
@@ -995,6 +1357,30 @@ export function mergeStateUpdates(fresh, touched, fallback) {
     entry.locales[locale] = record;
   }
   return base;
+}
+
+/**
+ * Move a source-level `source_hash` to the current source hash when EVERY docs locale already
+ * records that hash — the mirrors were brought up to date outside this runner (a hand re-sync
+ * that updated only the locale records, #18824). With no unit left to translate, nothing else
+ * would ever move the source-level hash and the drift check would report `source-changed`
+ * forever (refresh run 41636350056). A locale that lags, failed or has no record blocks the
+ * heal, so a source whose locales did not all translate is never marked as done.
+ * `currentHashes` maps rel → sha256 of the source; `locales` is the full docs locale list.
+ * Mutates `state`; returns the healed rels.
+ */
+export function healSourceHashes(state, currentHashes, locales) {
+  const healed = [];
+  if (!locales.length) return healed;
+  for (const [rel, hash] of currentHashes) {
+    const entry = state?.sources?.[rel];
+    if (!entry || entry.source_hash === hash) continue;
+    if (locales.every((locale) => entry.locales?.[locale]?.source_hash === hash)) {
+      entry.source_hash = hash;
+      healed.push(rel);
+    }
+  }
+  return healed;
 }
 
 async function main() {
@@ -1012,7 +1398,8 @@ async function main() {
   }
 
   const docsExcluded = new Set(config.docsExcluded ?? ["en"]);
-  let targetLocales = config.locales.map((l) => l.code).filter((code) => !docsExcluded.has(code));
+  const docsLocales = config.locales.map((l) => l.code).filter((code) => !docsExcluded.has(code));
+  let targetLocales = docsLocales;
   if (opts.locales) {
     targetLocales = targetLocales.filter((code) => opts.locales.includes(code));
     const missing = opts.locales.filter((c) => !config.locales.some((l) => l.code === c));
@@ -1091,7 +1478,13 @@ async function main() {
 
   // Read backend env up front so dry-run can still print masked summary.
   let backend = null;
-  if (!opts.dryRun) {
+  if (!opts.dryRun && translationEngine() === "google") {
+    backend = {
+      engine: "google",
+      concurrency: opts.concurrency || Number(process.env.OMNIROUTE_TRANSLATION_CONCURRENCY || 8),
+    };
+    logInfo(`backend: Google Translate (concurrency=${backend.concurrency})`);
+  } else if (!opts.dryRun) {
     backend = backendConfig();
     if (opts.concurrency) backend.concurrency = opts.concurrency;
     else backend.concurrency = Number(process.env.OMNIROUTE_TRANSLATION_CONCURRENCY || 4);
@@ -1121,9 +1514,10 @@ async function main() {
   const touched = [];
   for (const rel of sources) {
     const { hash: sourceHash } = sourceHashes.get(rel);
-    const entry =
-      state.sources[rel] || (state.sources[rel] = { source_hash: sourceHash, locales: {} });
-    entry.source_hash = sourceHash;
+    // The source-level hash moves only with a translated unit (mergeStateUpdates); setting it
+    // here would also reach the save-time fallback below and mark a source whose every locale
+    // failed as translated.
+    const entry = state.sources[rel] || (state.sources[rel] = { source_hash: null, locales: {} });
 
     for (const locale of targetLocales) {
       stats.considered++;
@@ -1131,17 +1525,19 @@ async function main() {
       const previous = entry.locales[locale];
       const sourceChanged = previous?.source_hash !== sourceHash;
       const missingTarget = !existsSync(targetAbs);
+      const mirrorBuf =
+        !opts.force && !sourceChanged && !missingTarget ? await fs.readFile(targetAbs) : null;
       const needsRebuild =
-        !opts.force &&
-        !sourceChanged &&
-        !missingTarget &&
-        mirrorNeedsRebuild(await fs.readFile(targetAbs, "utf8"), sourceHashes.get(rel).text);
-      if (!opts.force && !sourceChanged && !missingTarget && !needsRebuild) {
+        !!mirrorBuf && mirrorNeedsRebuild(mirrorBuf.toString("utf8"), sourceHashes.get(rel).text);
+      const edited = !!mirrorBuf && !needsRebuild && mirrorEdited(previous, mirrorBuf);
+      if (!opts.force && !sourceChanged && !missingTarget && !needsRebuild && !edited) {
         stats.skipped++;
         continue;
       }
       if (needsRebuild)
         logInfo(`${rel} → ${locale}: mirror needs a rebuild (English copy or leaked frontmatter)`);
+      if (edited)
+        logInfo(`${rel} → ${locale}: mirror edited since its last record — re-recording it`);
       tasks.push({ rel, locale, targetAbs, sourceChanged, missingTarget });
     }
   }
@@ -1235,21 +1631,43 @@ async function main() {
   } catch (err) {
     logWarn(`${err.message} at save time — merging into this run's snapshot instead`);
   }
-  await saveState(mergeStateUpdates(fresh, touched, state));
+  const merged = mergeStateUpdates(fresh, touched, state);
+  const currentHashes = new Map([...sourceHashes].map(([rel, { hash }]) => [rel, hash]));
+  for (const rel of healSourceHashes(merged, currentHashes, docsLocales)) {
+    logInfo(`${rel}: every locale already records the current source — source hash updated`);
+  }
+  await saveState(merged);
 
   const elapsedSec = ((Date.now() - startMs) / 1000).toFixed(1);
   logInfo(
     `summary: translated=${stats.translated}, skipped=${stats.skipped}, failed=${stats.failed}, total considered=${stats.considered}, elapsed=${elapsedSec}s`
   );
 
+  if (opts.failuresJson) {
+    const translatedUnits = touched.map(({ rel, locale }) => ({ rel, locale }));
+    const summary = { ...stats, failures, translatedUnits };
+    await fs.writeFile(
+      path.resolve(opts.failuresJson),
+      `${JSON.stringify(summary, null, 2)}\n`,
+      "utf8"
+    );
+  }
+
   if (failures.length) {
     logWarn(`${failures.length} failures:`);
     for (const f of failures) console.warn(`  - ${f.rel} [${f.locale}]: ${f.error}`);
-    process.exit(1);
+    const code = translationExitCode(stats);
+    if (code === EXIT_PARTIAL) {
+      logWarn(
+        `partial run: ${stats.translated} translated and recorded, ${failures.length} left as they were`
+      );
+    }
+    process.exit(code);
   }
 }
 
-const isDirectRun = import.meta.url === pathToFileURL(process.argv[1]).href;
+// argv[1] is unset under `node -e` (the refresh workflow imports blockingDrift that way).
+const isDirectRun = !!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isDirectRun) {
   main().catch((err) => {
     logError(err?.stack || err?.message || String(err));

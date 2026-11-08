@@ -3,6 +3,11 @@
 // state, following the handlers submodule pattern (chatCore/, responseSanitizer/).
 import { normalizeOpenAICompatibleFinishReasonString } from "../../utils/finishReason.ts";
 import { stripObfuscationZeroWidth } from "../../utils/zeroWidth.ts";
+import {
+  TRUNCATED_STREAM_FINISH_REASON,
+  hasSseDoneMarker,
+  markTruncatedStreamBody,
+} from "./truncation.ts";
 
 type AccumulatedToolCall = {
   id: string;
@@ -15,6 +20,7 @@ type AccumulatedToolCall = {
 type GeminiSSEAccumulator = {
   textContent: string;
   finishReason: string;
+  sawFinishReason: boolean;
   usage: Record<string, unknown> | null;
   sawContent: boolean;
   toolCalls: AccumulatedToolCall[];
@@ -120,6 +126,7 @@ function applyFinishReason(
   acc: GeminiSSEAccumulator
 ): void {
   if (!candidate?.finishReason) return;
+  acc.sawFinishReason = true;
   acc.finishReason = normalizeOpenAICompatibleFinishReasonString(
     String(candidate.finishReason).toLowerCase()
   );
@@ -167,32 +174,93 @@ function applyCacheEvidence(
   }
 }
 
+/**
+ * The event's usageMetadata. Cloud Code nests it under `response`; native Gemini can send it at
+ * the top level, also next to a `response` that carries only candidates.
+ */
+function readUsageMetadata(parsed: Record<string, unknown>): Record<string, unknown> | undefined {
+  const response = parsed.response as Record<string, unknown> | undefined;
+  const um = response?.usageMetadata ?? parsed.usageMetadata;
+  return um && typeof um === "object" && !Array.isArray(um)
+    ? (um as Record<string, unknown>)
+    : undefined;
+}
+
+/**
+ * Resolve the cumulative completion count and its reasoning part. Gemini reports thoughts apart
+ * from candidates; OpenAI's completion_tokens includes them (same rule as the streaming and
+ * non-stream translators). A snapshot without candidatesTokenCount keeps the last completion.
+ */
+function resolveCompletionTokens(
+  um: Record<string, unknown>,
+  previousUsage: Record<string, unknown>
+): { completionTokens: number | undefined; reasoningTokens: number | undefined } {
+  const previousReasoningTokens = (
+    previousUsage.completion_tokens_details as { reasoning_tokens?: number } | undefined
+  )?.reasoning_tokens;
+  const reasoningTokens = nonNegativeOr(um.thoughtsTokenCount, previousReasoningTokens);
+  const candidateTokens = nonNegativeOr(um.candidatesTokenCount, undefined);
+  const completionTokens =
+    candidateTokens === undefined
+      ? nonNegativeOr(previousUsage.completion_tokens, undefined)
+      : candidateTokens + (reasoningTokens ?? 0);
+  return { completionTokens, reasoningTokens };
+}
+
+/** Resolve total tokens while preserving Gemini's first-zero and later-zero semantics. */
+function resolveTotalTokens(
+  reportedTotalTokens: number | undefined,
+  previousUsage: Record<string, unknown>,
+  previousTotalTokens: number | undefined,
+  promptTokens: number | undefined,
+  completionTokens: number | undefined
+): number | undefined {
+  const derivedTotal =
+    typeof promptTokens === "number" && typeof completionTokens === "number"
+      ? promptTokens + completionTokens
+      : undefined;
+  return reportedTotalTokens === 0 &&
+    !Object.prototype.hasOwnProperty.call(previousUsage, "total_tokens")
+    ? derivedTotal
+    : (reportedTotalTokens ?? previousTotalTokens ?? derivedTotal);
+}
+
 /** Extract usageMetadata into the OpenAI-shaped usage object, if present. */
 function applyUsageMetadata(parsed: Record<string, unknown>, acc: GeminiSSEAccumulator): void {
-  const response = (parsed.response ?? parsed) as Record<string, unknown>;
-  const um = response?.usageMetadata as Record<string, unknown> | undefined;
+  const um = readUsageMetadata(parsed);
   if (!um) return;
 
   const previousUsage = acc.usage ?? {};
-  const promptTokens = nonNegativeOr(um.promptTokenCount, previousUsage.prompt_tokens);
-  const completionTokens = nonNegativeOr(um.candidatesTokenCount, previousUsage.completion_tokens);
-  // Gemini may omit totalTokenCount (or report 0); keep the last total, else derive it.
-  const totalTokens =
-    nonNegativeOr(um.totalTokenCount, 0) ||
-    previousUsage.total_tokens ||
-    (typeof promptTokens === "number" && typeof completionTokens === "number"
-      ? promptTokens + completionTokens
-      : undefined);
+  const previousPromptTokens = nonNegativeOr(previousUsage.prompt_tokens, undefined);
+  const previousTotalTokens = nonNegativeOr(previousUsage.total_tokens, undefined);
+  const promptTokens = nonNegativeOr(um.promptTokenCount, previousPromptTokens);
+  const { completionTokens, reasoningTokens } = resolveCompletionTokens(um, previousUsage);
+  // Preserve the upstream total-zero semantics and the PR reasoning-inclusive counts.
+  const totalTokens = resolveTotalTokens(
+    nonNegativeOr(um.totalTokenCount, undefined),
+    previousUsage,
+    previousTotalTokens,
+    promptTokens,
+    completionTokens
+  );
+
   const previousCachedTokens = (
     previousUsage.prompt_tokens_details as { cached_tokens?: number } | undefined
   )?.cached_tokens;
-  const cachedTokens = resolveCachedTokens(um, promptTokens, previousCachedTokens);
+  const cachedTokens = resolveCachedTokens(
+    um,
+    typeof promptTokens === "number" ? promptTokens : undefined,
+    previousCachedTokens
+  );
 
   const nextUsage = {
     ...previousUsage,
     ...(typeof promptTokens === "number" ? { prompt_tokens: promptTokens } : {}),
     ...(typeof completionTokens === "number" ? { completion_tokens: completionTokens } : {}),
     ...(typeof totalTokens === "number" ? { total_tokens: totalTokens } : {}),
+    ...(typeof reasoningTokens === "number" && reasoningTokens > 0
+      ? { completion_tokens_details: { reasoning_tokens: reasoningTokens } }
+      : {}),
   } as Record<string, unknown>;
   applyCacheEvidence(nextUsage, um, cachedTokens);
   acc.usage = nextUsage;
@@ -284,6 +352,7 @@ export function parseSSEToGeminiResponse(
   const acc: GeminiSSEAccumulator = {
     textContent: "",
     finishReason: "stop",
+    sawFinishReason: false,
     usage: null,
     sawContent: false,
     toolCalls: [],
@@ -300,5 +369,11 @@ export function parseSSEToGeminiResponse(
 
   if (!acc.sawContent && acc.toolCalls.length === 0) return null;
 
-  return buildChatCompletionFromAccumulator(acc, fallbackModel);
+  // #18432 — content but no candidate finishReason (nor [DONE]): the stream was cut.
+  const streamCut = !acc.sawFinishReason && acc.sawContent && !hasSseDoneMarker(rawSSE);
+  if (streamCut) {
+    acc.finishReason = TRUNCATED_STREAM_FINISH_REASON;
+  }
+
+  return markTruncatedStreamBody(buildChatCompletionFromAccumulator(acc, fallbackModel), streamCut);
 }
