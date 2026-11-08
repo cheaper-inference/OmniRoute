@@ -749,7 +749,7 @@ async function applyPromptCacheStage(
   );
   const promptCacheAffinityTargets =
     promptCacheAffinityEnabled && resolvePromptCacheAffinityKey(body)
-      ? await expandPromptCacheAffinityTargets(orderedTargets)
+      ? await expandPromptCacheAffinityTargets(orderedTargets, deps.apiKeyAllowedConnections)
       : orderedTargets;
 
   // Determine affinity scope: restrict to model-level for deterministic strategies
