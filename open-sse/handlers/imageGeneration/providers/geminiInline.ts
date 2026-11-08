@@ -136,8 +136,7 @@ export function resolveGeminiReferenceParts(
 ): { parts: GeminiInlineDataPart[] } | { error: string } {
   if (!body || typeof body !== "object") return { parts: [] };
   const record = body as Record<string, unknown>;
-  const fallbackMime =
-    typeof record.imageMime === "string" && record.imageMime ? record.imageMime : "image/png";
+  const fallbackMime = fallbackImageMime(record);
   const binaryRefs = Array.isArray(record.referenceImages) ? record.referenceImages : [];
   if (binaryRefs.length === 0 && record.imageBytes) {
     const part = geminiInlineImagePart({ imageBytes: record.imageBytes, imageMime: fallbackMime });
@@ -151,25 +150,52 @@ export function resolveGeminiReferenceParts(
   }
 
   const parts: GeminiInlineDataPart[] = [];
-  for (const ref of binaryRefs) {
-    const entry = ref as { bytes?: unknown; mime?: unknown } | null;
-    if (!entry || !Buffer.isBuffer(entry.bytes) || entry.bytes.length === 0) {
-      return { error: `Invalid reference image ${parts.length + 1}` };
-    }
-    const mimeType = typeof entry.mime === "string" && entry.mime ? entry.mime : fallbackMime;
-    parts.push({ inlineData: { mimeType, data: entry.bytes.toString("base64") } });
-  }
-  if (stringRefs.some((ref) => typeof ref === "string" && REMOTE_URL_RE.test(ref.trim()))) {
-    return { error: REMOTE_REFERENCE_URL_ERROR };
-  }
-  for (const ref of stringRefs) {
-    const part = resolveStringReference(ref, fallbackMime);
-    if (!part) {
-      return { error: `Invalid reference image ${parts.length + 1}. ${INLINE_REFERENCE_HINT}` };
-    }
+  const error =
+    appendBinaryReferences(binaryRefs, fallbackMime, parts) ??
+    appendStringReferences(stringRefs, fallbackMime, parts);
+  return error ? { error } : { parts };
+}
+
+function fallbackImageMime(record: Record<string, unknown>): string {
+  return typeof record.imageMime === "string" && record.imageMime ? record.imageMime : "image/png";
+}
+
+function binaryReferencePart(ref: unknown, fallbackMime: string): GeminiInlineDataPart | null {
+  const entry = ref as { bytes?: unknown; mime?: unknown } | null;
+  if (!entry || !Buffer.isBuffer(entry.bytes) || entry.bytes.length === 0) return null;
+  const mimeType = typeof entry.mime === "string" && entry.mime ? entry.mime : fallbackMime;
+  return { inlineData: { mimeType, data: entry.bytes.toString("base64") } };
+}
+
+/** Append `{bytes,mime}` references to `parts`; returns an error message on the first bad one. */
+function appendBinaryReferences(
+  refs: unknown[],
+  fallbackMime: string,
+  parts: GeminiInlineDataPart[]
+): string | null {
+  for (const ref of refs) {
+    const part = binaryReferencePart(ref, fallbackMime);
+    if (!part) return `Invalid reference image ${parts.length + 1}`;
     parts.push(part);
   }
-  return { parts };
+  return null;
+}
+
+/** Append string references to `parts`; remote URLs and unreadable values return an error. */
+function appendStringReferences(
+  refs: unknown[],
+  fallbackMime: string,
+  parts: GeminiInlineDataPart[]
+): string | null {
+  if (refs.some((ref) => typeof ref === "string" && REMOTE_URL_RE.test(ref.trim()))) {
+    return REMOTE_REFERENCE_URL_ERROR;
+  }
+  for (const ref of refs) {
+    const part = resolveStringReference(ref, fallbackMime);
+    if (!part) return `Invalid reference image ${parts.length + 1}. ${INLINE_REFERENCE_HINT}`;
+    parts.push(part);
+  }
+  return null;
 }
 
 /** Prompt with an explicit "use every reference" instruction when references are attached. */
@@ -204,23 +230,14 @@ export function buildGeminiImageUserParts(
 export function extractGeminiImageResults(
   responseBody: unknown,
   promptText: string
-): { images: Array<{ b64_json: string; revised_prompt: string }>; error: string | null } {
+): { images: GeminiImageResult[]; error: string | null } {
   const record = (responseBody && typeof responseBody === "object" ? responseBody : {}) as {
-    candidates?: Array<{ content?: { parts?: Array<Record<string, unknown>> } }>;
+    candidates?: Array<{ content?: { parts?: GeminiResponsePart[] } }>;
   };
-  const images: Array<{ b64_json: string; revised_prompt: string }> = [];
+  const images: GeminiImageResult[] = [];
   const texts: string[] = [];
   for (const candidate of record.candidates || []) {
-    const parts = candidate?.content?.parts || [];
-    const revised = parts.find((p) => typeof p.text === "string" && p.text)?.text;
-    for (const part of parts) {
-      const inline = (part.inlineData || part.inline_data) as { data?: unknown } | undefined;
-      if (inline && typeof inline.data === "string" && inline.data) {
-        images.push({ b64_json: inline.data, revised_prompt: (revised as string) || promptText });
-      } else if (typeof part.text === "string" && part.text.trim()) {
-        texts.push(part.text.trim());
-      }
-    }
+    collectCandidateParts(candidate?.content?.parts || [], promptText, images, texts);
   }
   if (images.length > 0) return { images, error: null };
   const text = texts.join(" ").slice(0, 300);
@@ -230,4 +247,35 @@ export function extractGeminiImageResults(
       ? `Antigravity returned text instead of an image: ${text}`
       : "Antigravity did not return an image",
   };
+}
+
+type GeminiImageResult = { b64_json: string; revised_prompt: string };
+type GeminiResponsePart = Record<string, unknown>;
+
+function inlineImageData(part: GeminiResponsePart): string | null {
+  const inline = (part.inlineData || part.inline_data) as { data?: unknown } | undefined;
+  return inline && typeof inline.data === "string" && inline.data ? inline.data : null;
+}
+
+function nonEmptyText(part: GeminiResponsePart): string | null {
+  return typeof part.text === "string" && part.text.trim() ? part.text.trim() : null;
+}
+
+/** Split one candidate's parts into image results and plain text answers. */
+function collectCandidateParts(
+  parts: GeminiResponsePart[],
+  promptText: string,
+  images: GeminiImageResult[],
+  texts: string[]
+): void {
+  const revised = parts.find((p) => typeof p.text === "string" && p.text)?.text;
+  for (const part of parts) {
+    const data = inlineImageData(part);
+    if (data) {
+      images.push({ b64_json: data, revised_prompt: (revised as string) || promptText });
+      continue;
+    }
+    const text = nonEmptyText(part);
+    if (text) texts.push(text);
+  }
 }
