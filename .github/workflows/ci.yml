@@ -18,8 +18,12 @@ on:
     types: [checks_requested]
   workflow_dispatch:
 
+  # A description edit on a Mergify queue draft (Mergify writes its queue summary there, and
+  # the Blacksmith app appends its footer, ~4 edits in the first 30 s) gets its own group and
+  # skips the matrix: in the shared group it cancelled the candidate's real run, and Mergify
+  # dequeued the PR on the cancelled checks ("checks interrupted", #18853/#18858 on 2026-11-03).
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && format('-queue-edit-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -37,6 +41,7 @@ env:
 jobs:
   changes:
     name: Change Classification
+    if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     runs-on: ubuntu-latest
     outputs:
       # Match the official Mergify App and both repository IDs from GitHub's
@@ -1222,6 +1227,14 @@ jobs:
       JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-test-api-key-secret-long
     steps:
+      # Same disk exhaustion as the unit shards: merging the 8 raw shard JSONs filled the
+      # hosted runner disk on 2026-11-03 (job 125909618697, "No space left on device").
+      - name: Free hosted runner disk
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
@@ -1313,6 +1326,11 @@ jobs:
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           files: coverage/lcov.info
+          # `files` does not stop the uploader from also searching the workspace: on the
+          # v3.8.53 release push (run 42180292091) it found the 22207 per-shard JSON files
+          # under coverage-shards/, hit the 5-minute ceiling and never uploaded anything,
+          # while continue-on-error kept the step green. lcov.info is the only report.
+          disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
       - name: Upload coverage artifacts
@@ -1679,8 +1697,13 @@ jobs:
       - run: npm run test:protocols:e2e
 
   admission-verdict:
-    name: Gate / CI
-    if: ${{ always() }}
+    # A queue-draft edit run must not leave a check named "Gate / CI" on the draft: Mergify
+    # read that skipped check as a finished non-success and dequeued the PR (#18961 on
+    # 2026-11-04) before the real run reported. Every other run keeps the exact name.
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / CI (queue-draft edit)' || 'Gate / CI' }}
+    # Runs on every candidate; only a Mergify queue-draft description edit skips it (see the
+    # workflow concurrency note): that draft is never what branch protection merges.
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:
@@ -1733,7 +1756,7 @@ jobs:
   ci-summary:
     name: CI Dashboard
     runs-on: ubuntu-latest
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     needs:
       - changes
       - lint

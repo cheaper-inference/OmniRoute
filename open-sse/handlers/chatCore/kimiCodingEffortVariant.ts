@@ -12,11 +12,13 @@
  *   - the requested id is not itself a registry id of the provider, and
  *   - it ends in a known effort token, and
  *   - the remaining base is a registry id, or a spec alias of one (`kimi-k3` → wire `k3`).
+ * Bare spec aliases may also normalize to a wire id without synthesizing an effort.
  * The body is mutated in place (model + reasoning_effort); an explicit client effort or an
  * explicitly disabled `thinking` always wins over the suffix.
  */
 
 import { splitKimiCodingEffortVariant } from "../../utils/kimiCodingEffortVariant.ts";
+import { isKimiK31Model } from "../../utils/kimiK31.ts";
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -24,31 +26,45 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
-function hasExplicitEffort(body: Record<string, unknown>): boolean {
+function hasExplicitEffortValue(body: Record<string, unknown>, modelId: string): boolean {
   const thinking = asRecord(body.thinking);
-  const explicit =
-    body.reasoning_effort ??
-    asRecord(body.reasoning)?.effort ??
-    asRecord(body.output_config)?.effort ??
-    thinking?.effort;
-  if (!(explicit === undefined || explicit === null || explicit === "")) return true;
-  return thinking?.type === "disabled";
+  const efforts = [
+    body.reasoning_effort,
+    asRecord(body.reasoning)?.effort,
+    asRecord(body.output_config)?.effort,
+    thinking?.effort,
+  ];
+  if (efforts.some((value) => value !== undefined && value !== null && value !== "")) return true;
+  return isKimiK31Model(modelId) && efforts.some((value) => value !== undefined);
+}
+
+function hasExplicitEffort(body: Record<string, unknown>, modelId: string): boolean {
+  return hasExplicitEffortValue(body, modelId) || asRecord(body.thinking)?.type === "disabled";
 }
 
 export function applyKimiCodingEffortVariant(opts: {
   provider: string | null | undefined;
   effectiveModel: string;
-  /** Mutated in place (model + reasoning_effort) when an effort suffix is stripped. */
+  /** Mutated in place when a wire alias or effort suffix is normalized. */
   body: unknown;
 }): { effectiveModel: string; log: string | null } {
+  const body = asRecord(opts.body);
+  if (body && isKimiK31Model(opts.effectiveModel)) {
+    if (body.enable_thinking === false && !hasExplicitEffortValue(body, opts.effectiveModel)) {
+      body.thinking = { ...(asRecord(body.thinking) || {}), type: "disabled" };
+    }
+    delete body.enable_thinking;
+  }
+
   const split = splitKimiCodingEffortVariant(opts.provider, opts.effectiveModel);
   if (!split) return { effectiveModel: opts.effectiveModel, log: null };
 
-  const body = asRecord(opts.body);
-  let effortNote = "explicit effort kept";
+  let effortNote = "policy default";
   if (body) {
     body.model = split.wireModel;
-    if (!hasExplicitEffort(body)) {
+    if (hasExplicitEffort(body, opts.effectiveModel)) {
+      effortNote = "explicit effort kept";
+    } else if (split.effort) {
       body.reasoning_effort = split.effort;
       effortNote = `reasoning_effort=${split.effort}`;
     }
