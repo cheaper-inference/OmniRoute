@@ -29,6 +29,7 @@ import {
   type DeleteByPeriodTarget,
 } from "./cleanup/usagePurge";
 import { ensureCompressionRunTelemetryTable } from "./compressionRunTelemetry";
+import { WINDOW_MS } from "@/lib/quota/dimensions";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import {
   pruneDbBackupsOutsideMigrationWindow,
@@ -496,6 +497,32 @@ export async function cleanupCcrBlocks(): Promise<CleanupResult> {
   return result;
 }
 
+/**
+ * Delete closed quota-share buckets. The sliding window reads only the current and the
+ * previous bucket, so a row not updated for two of the longest windows (monthly) is dead
+ * for every window. No retention setting: the cutoff follows the window table.
+ */
+export async function cleanupQuotaConsumption(): Promise<CleanupResult> {
+  const result: CleanupResult = { deleted: 0, errors: 0 };
+
+  try {
+    await deleteFromTableBeforeInBatches(
+      { table: "quota_consumption", column: "updated_at", cutoff: "epochMs" },
+      new Date(Date.now() - 2 * WINDOW_MS.monthly).toISOString(),
+      { progress: result }
+    );
+    console.log(`[Cleanup] Deleted ${result.deleted} closed quota_consumption buckets`);
+  } catch (err: unknown) {
+    console.error(
+      `[Cleanup] Error cleaning quota_consumption (${result.deleted} rows deleted):`,
+      err
+    );
+    result.errors++;
+  }
+
+  return result;
+}
+
 const BATCH_RETENTION_DAYS_DEFAULT = 30; // matches OpenAI's own Batch API output retention window
 
 function getBatchRetentionDays(): number {
@@ -710,6 +737,7 @@ export async function runAutoCleanup(): Promise<{
     compressionRunTelemetry: await cleanupCompressionRunTelemetry(),
     proxyLogs: await cleanupProxyLogs(),
     ccrBlocks: await cleanupCcrBlocks(),
+    quotaConsumption: await cleanupQuotaConsumption(),
     conversationTurnNodes: await cleanupConversationTurnNodes(),
     agenticConversations: await cleanupAgenticConversations(),
     oldBatches: await cleanupOldBatches(),
