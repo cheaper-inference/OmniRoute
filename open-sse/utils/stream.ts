@@ -185,6 +185,19 @@ type StreamCompletePayload = {
 /** Queue budget every provider used before `streamBufferBytes` existed. */
 const DEFAULT_STREAM_BUFFER_BYTES = 16384;
 
+/**
+ * Longest upstream SSE line (no newline yet) the stream keeps in memory. A line past it ends
+ * the stream with one error frame. Generous on purpose (same size as the non-streaming
+ * response cap): one inline base64 image frame can reach tens of MiB.
+ */
+const MAX_PENDING_SSE_LINE_CHARS = 64 * 1024 * 1024;
+
+/**
+ * Same window as `appendBoundedText` in streamHelpers.ts. Streamed answer text at or past it
+ * has lost its head, so the summary is only a log tail and must not be cached as the answer.
+ */
+const SUMMARY_TEXT_WINDOW_CHARS = 64 * 1024;
+
 type StreamOptions = {
   mode?: string;
   targetFormat?: string;
@@ -282,6 +295,53 @@ type UsageTokenRecord = Record<string, number>;
 
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
+/** `{ _summary_text_tail: true }` when streamed text reached the window, else `{}`. */
+function summaryTextTailMarker(...texts: Array<string | undefined>): { _summary_text_tail?: true } {
+  return texts.some((text) => (text?.length ?? 0) >= SUMMARY_TEXT_WINDOW_CHARS)
+    ? { _summary_text_tail: true }
+    : {};
+}
+
+/**
+ * Chat-shaped tool calls for the completion summary: the Chat/textual calls, then native Claude
+ * `tool_use` blocks and Responses `function_call` items (each once, by call id). The result is
+ * a fresh list; the wire events are not touched.
+ */
+function mergeNativeToolCalls(
+  chatCalls: ToolCall[],
+  claudeCalls: ToolCall[],
+  responsesItems: Iterable<unknown>,
+  responsesPending: Iterable<unknown>
+): ToolCall[] {
+  const calls = [...chatCalls].sort((a, b) => a.index - b.index);
+  const seen = new Set(calls.map((call) => call.id).filter(Boolean));
+  const add = (call: ToolCall) => {
+    if (call.id && seen.has(call.id)) return;
+    if (call.id) seen.add(call.id);
+    calls.push({ ...call, index: calls.length });
+  };
+  for (const call of claudeCalls) add(call);
+  for (const raw of [...responsesItems, ...responsesPending]) {
+    const item = asRecord(raw);
+    if (item.type !== "function_call" || typeof item.name !== "string") continue;
+    add({
+      id:
+        typeof item.call_id === "string"
+          ? item.call_id
+          : typeof item.id === "string"
+            ? item.id
+            : null,
+      index: 0,
+      type: "function",
+      function: {
+        name: item.name,
+        arguments: typeof item.arguments === "string" ? item.arguments : "",
+      },
+    });
+  }
+  return calls;
 }
 
 function addRestoredResponsesToolSchemas(
@@ -922,6 +982,8 @@ export function createSSEStream(options: StreamOptions = {}) {
   /** Passthrough: accumulate tool_calls deltas for call log responseBody */
   const passthroughToolCalls = new Map<string, ToolCall>();
   let passthroughToolCallSeq = 0;
+  /** Passthrough: native Claude tool_use blocks, kept apart so the wire never sees them as textual calls */
+  const passthroughNativeToolCalls = new Map<string, ToolCall>();
   const allowedToolNames = extractAllowedToolNames(body);
   let skipPassthroughEvent = false;
   const thinkState = initThinkState(mode === STREAM_MODE.PASSTHROUGH, provider, model);
@@ -1493,6 +1555,29 @@ export function createSSEStream(options: StreamOptions = {}) {
     return { preserveQueuedChunks, terminate: preserveQueuedChunks && !flushing };
   };
 
+  const abortOversizePendingLine = (controller: TransformStreamDefaultController<Uint8Array>) => {
+    buffer = "";
+    const failure: StreamFailurePayload = {
+      status: 502,
+      message: "Upstream SSE line exceeded the size limit",
+      code: "invalid_sse_payload",
+      type: "server_error",
+      streamSnapshot: buildStreamFailureSnapshot(providerPayloadCollector),
+    };
+    const output = formatTranslatedStreamError(
+      failure,
+      (mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat : sourceFormat) ?? undefined
+    );
+    reqLogger?.appendConvertedChunk?.(output);
+    forward(controller, encoder.encode(output));
+    upstreamErrorForwarded = true;
+    doneSent = true;
+    abortStreamFailure(controller, failure, failure.message, {
+      notifyComplete: true,
+      ...failureBoundaryOptions(),
+    });
+  };
+
   const emitTranslatedFailureAndAbort = (
     controller: TransformStreamDefaultController<Uint8Array>,
     payload: unknown
@@ -1565,7 +1650,9 @@ export function createSSEStream(options: StreamOptions = {}) {
         const text = decoder.decode(chunk, { stream: true });
         buffer += text;
         reqLogger?.appendProviderChunk?.(text);
-        const nlIdx = buffer.lastIndexOf("\n");
+        // Scan only the new text: a line without a newline must not be re-walked per chunk.
+        const textNlIdx = text.lastIndexOf("\n");
+        const nlIdx = textNlIdx >= 0 ? buffer.length - text.length + textNlIdx : -1;
         const lines = nlIdx >= 0 ? buffer.slice(0, nlIdx).split("\n") : [];
         if (nlIdx >= 0) buffer = buffer.slice(nlIdx + 1);
 
@@ -2135,6 +2222,35 @@ export function createSSEStream(options: StreamOptions = {}) {
                     toolNameMap,
                     clientTools ?? (body as JsonRecord | null)?.tools
                   );
+                  // Native tool_use blocks only feed the completion summary; the wire is unchanged.
+                  if (
+                    parsed.type === "content_block_start" &&
+                    parsed.content_block?.type === "tool_use"
+                  ) {
+                    const input = parsed.content_block.input;
+                    passthroughNativeToolCalls.set(`claude:${parsed.index}`, {
+                      id:
+                        typeof parsed.content_block.id === "string"
+                          ? parsed.content_block.id
+                          : null,
+                      index: passthroughNativeToolCalls.size,
+                      type: "function",
+                      function: {
+                        name: String(parsed.content_block.name ?? ""),
+                        arguments:
+                          input && typeof input === "object" && Object.keys(input).length > 0
+                            ? JSON.stringify(input)
+                            : "",
+                      },
+                    });
+                  } else if (
+                    parsed.type === "content_block_delta" &&
+                    parsed.delta?.type === "input_json_delta" &&
+                    typeof parsed.delta.partial_json === "string"
+                  ) {
+                    const nativeCall = passthroughNativeToolCalls.get(`claude:${parsed.index}`);
+                    if (nativeCall) nativeCall.function.arguments += parsed.delta.partial_json;
+                  }
                   // Track content length and accumulate from Claude format
                   if (parsed.delta?.text) {
                     totalContentLength += parsed.delta.text.length;
@@ -2782,6 +2898,8 @@ export function createSSEStream(options: StreamOptions = {}) {
             }
           }
         }
+        // Complete lines above are already handled; what is left is one unfinished line.
+        if (buffer.length > MAX_PENDING_SSE_LINE_CHARS) abortOversizePendingLine(controller);
       },
 
       async flush(controller) {
@@ -3160,18 +3278,25 @@ export function createSSEStream(options: StreamOptions = {}) {
                 if (reasoning) {
                   message.reasoning_content = reasoning;
                 }
-                if (passthroughToolCalls.size > 0) {
-                  message.tool_calls = [...passthroughToolCalls.values()].sort(
-                    (a, b) => a.index - b.index
-                  );
+                // Native Claude / Responses calls already went to the client as wire events;
+                // list them here too so logs and the cache keep them (the wire is unchanged).
+                const summaryToolCalls = mergeNativeToolCalls(
+                  [...passthroughToolCalls.values()],
+                  [...passthroughNativeToolCalls.values()],
+                  passthroughResponsesOutputItems,
+                  passthroughResponsesPendingFunctionCalls.values()
+                );
+                const summaryHasToolCalls = passthroughHasToolCalls || summaryToolCalls.length > 0;
+                if (summaryToolCalls.length > 0) {
+                  message.tool_calls = summaryToolCalls;
                 }
                 // Hardening: log empty assistant response after tool completion
                 // for observability — helps diagnose Copilot "Sorry, no response was returned"
-                if (passthroughHasToolCalls && !content.trim() && !reasoning.trim()) {
+                if (summaryHasToolCalls && !content.trim() && !reasoning.trim()) {
                   console.warn(
                     `[STREAM] Empty assistant response after tool_calls completion (${provider || "provider"}:${model || "unknown"}) — sessionId=${sessionId}`
                   );
-                } else if (passthroughHasToolCalls && !content.trim() && reasoning.trim()) {
+                } else if (summaryHasToolCalls && !content.trim() && reasoning.trim()) {
                   message.content = "";
                 }
 
@@ -3179,7 +3304,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   choices: [
                     {
                       message,
-                      finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
+                      finish_reason: summaryHasToolCalls ? "tool_calls" : "stop",
                     },
                   ],
                   usage: {
@@ -3188,6 +3313,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                     total_tokens: prompt + completion,
                   },
                   _streamed: true,
+                  ...summaryTextTailMarker(
+                    passthroughAccumulatedContent,
+                    passthroughAccumulatedReasoning
+                  ),
                 };
                 onComplete({
                   status: 200,
@@ -3597,6 +3726,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   total_tokens: prompt + completion,
                 },
                 _streamed: true,
+                ...summaryTextTailMarker(state?.accumulatedContent, state?.accumulatedReasoning),
               };
               onComplete({
                 status: 200,
