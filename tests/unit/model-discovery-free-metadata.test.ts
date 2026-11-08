@@ -21,7 +21,7 @@ test("normalizeDiscoveredModels records only free evidence present in discovery 
   assert.equal(byId.get("zero-priced")?.isFree, true);
   assert.equal(byId.get("rotating-model:free")?.isFree, true);
   assert.equal(byId.get("blank-price")?.isFree, undefined);
-  assert.equal(byId.get("paid")?.isFree, undefined);
+  assert.equal(byId.get("paid")?.isFree, false);
 });
 
 test("normalizeDiscoveredModels reads Vercel AI Gateway input/output pricing and free tags", () => {
@@ -44,9 +44,9 @@ test("normalizeDiscoveredModels reads Vercel AI Gateway input/output pricing and
   assert.equal(byId.get("poolside/laguna-s-2.1-free")?.isFree, true);
   assert.equal(byId.get("vendor/tagged-no-price")?.isFree, true);
   // A published non-zero price outranks a tag: never badge a model that bills.
-  assert.equal(byId.get("vendor/tagged-but-priced")?.isFree, undefined);
-  assert.equal(byId.get("vendor/half-free")?.isFree, undefined);
-  assert.equal(byId.get("vendor/paid")?.isFree, undefined);
+  assert.equal(byId.get("vendor/tagged-but-priced")?.isFree, false);
+  assert.equal(byId.get("vendor/half-free")?.isFree, false);
+  assert.equal(byId.get("vendor/paid")?.isFree, false);
 });
 
 test("normalizeDiscoveredModels honors provider free:false vetoes and non-token billing", () => {
@@ -67,9 +67,9 @@ test("normalizeDiscoveredModels honors provider free:false vetoes and non-token 
   );
   const byId = new Map(models.map((model) => [model.id, model]));
 
-  assert.equal(byId.get("google/lyria-3-pro-preview")?.isFree, undefined);
-  assert.equal(byId.get("auto")?.isFree, undefined);
-  assert.equal(byId.get("deepseek-ocr-2")?.isFree, undefined);
+  assert.equal(byId.get("google/lyria-3-pro-preview")?.isFree, false);
+  assert.equal(byId.get("auto")?.isFree, false);
+  assert.equal(byId.get("deepseek-ocr-2")?.isFree, false);
   assert.equal(byId.get("agnes-3-0-flash")?.isFree, true);
 });
 
