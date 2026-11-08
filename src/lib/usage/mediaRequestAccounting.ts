@@ -148,28 +148,39 @@ export async function priceMediaRequest(input: {
   return bill;
 }
 
+/** Bookkeeping must never turn already-paid media into a client error/retry. */
+export async function safelyRecordMedia(work: () => Promise<unknown>): Promise<void> {
+  try {
+    await work();
+  } catch {
+    console.error("[Media accounting] Billing persistence failed");
+  }
+}
+
 /** One physical successful attempt, including combos. No wrapper-level second debit. */
 export async function recordMediaRequest(
   input: MediaRequestIdentity,
   bill: MediaBill
 ): Promise<void> {
-  await saveRequestUsage(
-    {
-      ...input,
-      tokens: bill.usage,
-      calculatedCostUsd: bill.reportedCostUsd === null ? bill.costUsd : null,
-      billingUnit: bill.unit,
-      billingQuantity: bill.quantity,
-      billingUnitPriceUsd: bill.unitPriceUsd,
-      status: "200",
-      success: true,
-      latencyMs: Date.now() - input.startTime,
-    },
-    { deduplicate: false }
-  );
-  if (!input.apiKeyId || isFlatRateProvider(input.provider)) return;
-  if (bill.costUsd === null) recordUnpricedBudgetUsage(input.apiKeyId, input);
-  else recordCost(input.apiKeyId, bill.costUsd, { ...input, tokens: bill.usage, success: true });
+  return safelyRecordMedia(async () => {
+    await saveRequestUsage(
+      {
+        ...input,
+        tokens: bill.usage,
+        calculatedCostUsd: bill.reportedCostUsd === null ? bill.costUsd : null,
+        billingUnit: bill.unit,
+        billingQuantity: bill.quantity,
+        billingUnitPriceUsd: bill.unitPriceUsd,
+        status: "200",
+        success: true,
+        latencyMs: Date.now() - input.startTime,
+      },
+      { deduplicate: false }
+    );
+    if (!input.apiKeyId || isFlatRateProvider(input.provider)) return;
+    if (bill.costUsd === null) recordUnpricedBudgetUsage(input.apiKeyId, input);
+    else recordCost(input.apiKeyId, bill.costUsd, { ...input, tokens: bill.usage, success: true });
+  });
 }
 
 /** Unknown is not free. The final asynchronous TTS charge is visible in usage/ledger, not headers. */
@@ -179,6 +190,6 @@ export function attachMediaResponseMeta(
 ): Response {
   const result = attachOmniRouteMetaToResponse(response, metadata);
   if (metadata.costUsd === null) result.headers.delete("X-OmniRoute-Response-Cost");
-  result.headers.set("X-OmniRoute-Cost-Status", metadata.costUsd === null ? "unknown" : "recorded");
+  result.headers.set("X-OmniRoute-Cost-Status", metadata.costUsd === null ? "unknown" : "known");
   return result;
 }

@@ -22,7 +22,7 @@ const costRules = await import("../../src/domain/costRules.ts");
 const stt = await import("../../src/app/api/v1/audio/transcriptions/route.ts");
 const tts = await import("../../src/app/api/v1/audio/speech/route.ts");
 const images = await import("../../src/app/api/v1/images/generations/route.ts");
-const { priceMediaRequest, normalizeMediaUsage } =
+const { priceMediaRequest, normalizeMediaUsage, safelyRecordMedia } =
   await import("../../src/lib/usage/mediaRequestAccounting.ts");
 const originalFetch = globalThis.fetch;
 
@@ -461,4 +461,21 @@ test("token-priced images retain nested cache discounts without retaining arbitr
     }),
     { input_tokens_details: { cached_tokens: 50 } }
   );
+});
+
+test("accounting persistence failures never replace paid media responses or log sensitive diagnostics", async () => {
+  const messages: unknown[] = [];
+  const original = console.error;
+  console.error = (...args: unknown[]) => {
+    messages.push(args);
+  };
+  try {
+    await safelyRecordMedia(async () => {
+      throw new Error("private-synthetic-diagnostic");
+    });
+  } finally {
+    console.error = original;
+  }
+  assert.equal(messages.length, 1);
+  assert.equal(JSON.stringify(messages).includes("private-synthetic-diagnostic"), false);
 });

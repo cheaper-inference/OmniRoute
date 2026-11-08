@@ -350,7 +350,7 @@ export async function executeImageCombo(
       fallbackAttempts: run.fallbackCount,
     });
     if (costUsd === null) headers.delete("X-OmniRoute-Response-Cost");
-    headers.set("X-OmniRoute-Cost-Status", costUsd === null ? "unknown" : "recorded");
+    headers.set("X-OmniRoute-Cost-Status", costUsd === null ? "unknown" : "known");
 
     // Return the handler payload unchanged so the combo path matches the
     // direct-model path byte-for-byte; re-wrap only if a handler ever yields

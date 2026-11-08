@@ -459,7 +459,7 @@ async function postHandler(request, context) {
       requestId: bill?.requestId || generateRequestId(),
     });
     if (costUsd === null) headers.delete("X-OmniRoute-Response-Cost");
-    headers.set("X-OmniRoute-Cost-Status", costUsd === null ? "unknown" : "recorded");
+    headers.set("X-OmniRoute-Cost-Status", costUsd === null ? "unknown" : "known");
     return new Response(JSON.stringify((result as { data: unknown }).data), {
       status: 200,
       headers,

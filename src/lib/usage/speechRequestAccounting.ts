@@ -5,6 +5,7 @@ import {
   attachMediaResponseMeta,
   priceMediaRequest,
   recordMediaRequest,
+  safelyRecordMedia,
   type MediaRequestIdentity,
 } from "./mediaRequestAccounting";
 
@@ -16,19 +17,20 @@ export async function accountSpeechResponse(
   const billInput = { ...input, unit: "character" as const, quantity: input.characters };
   const estimate = await priceMediaRequest(billInput);
   const reported = speechUsage(response);
-  const persist = async (usage?: Record<string, number> | null) => {
-    const bill = usage ? await priceMediaRequest({ ...billInput, usage }) : estimate;
-    await recordMediaRequest(input, bill);
-    await saveCallLog({
-      ...input,
-      id: input.requestId,
-      method: "POST",
-      path: input.endpoint,
-      status: 200,
-      duration: Date.now() - input.startTime,
-      tokens: bill.usage,
+  const persist = (usage?: Record<string, number> | null) =>
+    safelyRecordMedia(async () => {
+      const bill = usage ? await priceMediaRequest({ ...billInput, usage }) : estimate;
+      await recordMediaRequest(input, bill);
+      await saveCallLog({
+        ...input,
+        id: input.requestId,
+        method: "POST",
+        path: input.endpoint,
+        status: 200,
+        duration: Date.now() - input.startTime,
+        tokens: bill.usage,
+      });
     });
-  };
   if (reported) {
     const task = reported.then(persist).catch(() => {
       console.error("[Speech accounting] Billing persistence failed");
