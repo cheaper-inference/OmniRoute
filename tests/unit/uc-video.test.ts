@@ -319,23 +319,39 @@ test("handleUcVideoGeneration (persona) 401s (retryable) when credential missing
   assert.equal(result.retryable, true);
 });
 
-test("handleUcVideoGeneration (persona) times out with 504 when never ready", async () => {
+test("handleUcVideoGeneration (persona) times out with 504 when never ready", async (t) => {
+  // Advance the deadline with the injected sleep instead of racing a no-op sleep
+  // against wall time. The result must stay pending, even on a fast runner.
+  let now = Date.now();
+  t.mock.method(Date, "now", () => now);
   const resultUrl = "https://videogen.moveinwater.com/never";
-  const fetchImpl = personaFetch({
-    pendingPolls: 1000,
-    resultUrl,
-    jwt: fakeJwt("uid", FUTURE_EXP),
-  });
+  const fetchImpl = t.mock.fn(
+    personaFetch({
+      pendingPolls: Infinity,
+      resultUrl,
+      jwt: fakeJwt("uid", FUTURE_EXP),
+    })
+  );
+  const sleeps: number[] = [];
   const result = (await handleUcVideoGeneration({
     model: "uc/wan-2.2-spicy",
     provider: "uc",
     body: { prompt: "x", timeout_ms: 5, poll_interval_ms: 1 },
     credentials: PERSONA_CRED,
     fetchImpl,
-    sleepImpl: noSleep,
+    sleepImpl: async (ms) => {
+      sleeps.push(ms);
+      // Fail promptly if the deadline stops being enforced, rather than spin forever.
+      assert.ok(sleeps.length <= 4, "must not sleep at or beyond the polling deadline");
+      now += ms;
+    },
   })) as { success: boolean; status?: number };
   assert.equal(result.success, false);
   assert.equal(result.status, 504);
+  assert.deepEqual(sleeps, [1, 1, 1, 1]);
+  const polls = fetchImpl.mock.calls.filter(({ arguments: [url] }) => url === resultUrl);
+  assert.equal(polls.length, 5);
+  assert.ok(polls.every(({ arguments: [, init] }) => init?.method === "HEAD"));
 });
 
 test("handleUcVideoGeneration (persona) surfaces a Clerk mint failure", async () => {
