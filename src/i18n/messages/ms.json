@@ -5722,6 +5722,7 @@
     "filterError": "Ralat",
     "filterBanned": "Disekat",
     "filterCreditsExhausted": "Kredit habis",
+    "filterVerificationRequired": "Perlu pengesahan",
     "accountSearchPlaceholder": "Cari akaun…",
     "noFilteredConnections": "Tiada sambungan yang sepadan dengan penapis semasa.",
     "failedSetAlias": "Gagal menetapkan alias",
