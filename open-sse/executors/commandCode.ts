@@ -970,6 +970,29 @@ async function createJsonResponse(
 
 // ── CommandCodeExecutor ──────────────────────────────────────────────────────
 
+/**
+ * Wraps a non-OK upstream reply as the executor result, keeping its status, status
+ * text and headers; an unreadable body falls back to a generic message.
+ */
+async function upstreamErrorResult<T>(
+  upstream: Response,
+  label: string,
+  request: { url: string; headers: Record<string, string>; transformedBody: T }
+) {
+  const errorText = await upstream.text().catch(() => {
+    console.warn(`[commandCode] ${label} text failed`);
+    return "";
+  });
+  return {
+    response: new Response(errorText || `Command Code API error ${upstream.status}`, {
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headers: upstream.headers,
+    }),
+    ...request,
+  };
+}
+
 export class CommandCodeExecutor extends BaseExecutor {
   constructor(provider = "command-code") {
     super(provider, REGISTRY["command-code"]);
@@ -1071,20 +1094,11 @@ export class CommandCodeExecutor extends BaseExecutor {
     cliTransformedBody = { ...cliTransformedBody, params: cliRecovery.body };
 
     if (!cliUpstream.ok) {
-      const errorText = await cliUpstream.text().catch(() => {
-        console.warn("[commandCode] cli upstream text failed");
-        return "";
-      });
-      return {
-        response: new Response(errorText || `Command Code API error ${cliUpstream.status}`, {
-          status: cliUpstream.status,
-          statusText: cliUpstream.statusText,
-          headers: cliUpstream.headers,
-        }),
+      return upstreamErrorResult(cliUpstream, "cli upstream", {
         url: cliUrl,
         headers: cliHeaders,
         transformedBody: cliTransformedBody,
-      };
+      });
     }
 
     // An embedded `error` frame before any content fails the request with its own status.
@@ -1213,19 +1227,6 @@ export class CommandCodeExecutor extends BaseExecutor {
       }
     }
 
-    const errorText = await upstream.text().catch(() => {
-      console.warn("[commandCode] upstream text failed");
-      return "";
-    });
-    return {
-      response: new Response(errorText || `Command Code API error ${upstream.status}`, {
-        status: upstream.status,
-        statusText: upstream.statusText,
-        headers: upstream.headers,
-      }),
-      url,
-      headers,
-      transformedBody,
-    };
+    return upstreamErrorResult(upstream, "upstream", { url, headers, transformedBody });
   }
 }
