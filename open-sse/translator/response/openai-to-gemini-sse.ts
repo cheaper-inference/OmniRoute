@@ -122,7 +122,14 @@ export function openAIChunkToGeminiChunk(
   state?: GeminiToolCallState
 ): GeminiStreamChunk | null {
   const choice = parsed.choices?.[0];
-  if (!choice) return null;
+  if (!choice) {
+    // Transport heartbeat (`choices: []`, no usage): forward an empty Gemini chunk so a client
+    // idle-read timer resets. It must be a `data:` frame: @google/genai only drains those, and a
+    // colon comment or lone newline breaks some versions. No candidates keeps it out of chat history.
+    return Array.isArray(parsed.choices) && parsed.choices.length === 0 && !parsed.usage
+      ? { candidates: [] }
+      : null;
+  }
 
   const delta: OpenAIChoiceDelta = choice.delta || {};
 
