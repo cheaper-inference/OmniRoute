@@ -38,6 +38,7 @@ import { getCombo, getComboForModel, getModelInfo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
 import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import { trustedInternalTestMark } from "@omniroute/open-sse/utils/selfHop.ts";
 import { ASSESSMENT_PROBE_MARK, refuseUnisolatedChatProbe } from "@/lib/providers/chatProbePolicy";
 import { getImageModelEntry, isImageOnlyModel } from "@omniroute/open-sse/config/imageRegistry.ts";
 import { acceptHeaderForcesStream } from "@omniroute/open-sse/utils/aiSdkCompat.ts";
@@ -127,7 +128,7 @@ import {
   withModalityBridgeHeader,
   withConversationId,
 } from "./chatHelpers";
-import { buildModalityBridgeHeader } from "@/lib/guardrails/modalityBridge/bridgeStats";
+import { buildModalityBridgeResponseHeaders } from "@/lib/guardrails/modalityBridge/bridgeResponseHeaders";
 import { type VideoBridgeLog, deriveVideoBridgeLog } from "./chat/videoBridgeLog.ts";
 import {
   resolveClientSessionId,
@@ -658,11 +659,13 @@ async function handleChatImplementation(
     return internalUsageCommandResponse;
   }
 
-  const internalTestMark = request.headers?.get?.("x-internal-test");
-  const isComboLiveTest = internalTestMark === "combo-health-check";
+  const isComboLiveTest = trustedInternalTestMark(request.headers) === "combo-health-check";
   // Every automated probe, a live test or an assessment, is gated against leaving a conversation
   // on a signed-in account; only the live test also bypasses breakers, cooldowns and quota policy.
-  const isAutomatedProbe = isComboLiveTest || internalTestMark === ASSESSMENT_PROBE_MARK;
+  // That bypass needs this process's token; the assessment mark only makes its own request
+  // stricter, so it is read as sent (assessment probes do not always reach the stamped listener).
+  const isAutomatedProbe =
+    isComboLiveTest || request.headers?.get?.("x-internal-test") === ASSESSMENT_PROBE_MARK;
 
   if (!modelStr) {
     log.warn("CHAT", "Missing model");
@@ -902,7 +905,7 @@ async function handleChatImplementation(
   // Modality Bridge transparency (Task 9): non-null only when a pre-call bridge
   // guardrail transformed the payload (describe path) — stamped on the main
   // success exits below via withModalityBridgeHeader().
-  const modalityBridgeHeader = buildModalityBridgeHeader(preCallGuardrails.results);
+  const modalityBridgeHeader = buildModalityBridgeResponseHeaders(preCallGuardrails.results);
   // #12150 P1b: video-bridge log/Memory shadow — undefined on every
   // non-video request. Threaded through handleSingleModelChat's
   // runtimeOptions -> executeChatWithBreaker -> handleChatCore.
