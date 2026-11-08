@@ -26,6 +26,7 @@ import { applyAutomaticDisableMarker } from "@/lib/providers/operatorDisable";
 import { isRetestAutoDisabledEnabled } from "@/lib/credentialHealth/retestAutoDisabledFlag";
 import { ensureProviderSpecificDataSecretsEncrypted } from "./providers/migrations";
 import { bumpProxyConfigGeneration, getSettings } from "./settings";
+import { readNewConnectionProxyDefault } from "./newConnectionProxy.mjs";
 import {
   getStoredManagementPassword,
   isBcryptHash,
@@ -43,6 +44,7 @@ import { isMicrosoftDesignerWebRetiredProviderId } from "@/shared/constants/desi
 import { reconcileCodexUsageHistory } from "./providers/usageIdentityReconciliation";
 import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
 import { applyCodexChildCooldownClearOnUpdate } from "./providers/codexAccountState";
+import { sameM365Account } from "@/lib/providers/m365Identity";
 
 import {
   withNullableMaxConcurrent,
@@ -476,6 +478,14 @@ function findExistingCookieConnection(
 }
 
 export async function createProviderConnection(data: JsonRecord) {
+  // Omission must remain omission through the existing-row merge (including
+  // internal callers that supply an optional property with value undefined).
+  if (data.proxyEnabled === undefined) {
+    data = { ...data };
+    delete data.proxyEnabled;
+  } else if (typeof data.proxyEnabled !== "boolean") {
+    throw new Error("proxyEnabled must be a boolean");
+  }
   await assertApiKeyIsNotManagementPassword(data.apiKey);
   const db = getDbInstance() as unknown as DbLike;
   const now = new Date().toISOString();
@@ -492,7 +502,20 @@ export async function createProviderConnection(data: JsonRecord) {
   const workspaceId = toStringOrNull(providerSpecificData.workspaceId);
   const chatgptUserId = toStringOrNull(providerSpecificData.chatgptUserId);
 
-  if (data.authType === "oauth" && data.provider === "codex" && chatgptUserId) {
+  if (data.authType === "oauth" && data.provider === "copilot-m365-web") {
+    const candidates = db
+      .prepare("SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth'")
+      .all(data.provider) as JsonRecord[];
+    existing =
+      candidates.find((row) =>
+        sameM365Account(
+          {
+            providerSpecificData: parseProviderSpecificData(row.provider_specific_data),
+          },
+          data
+        )
+      ) || null;
+  } else if (data.authType === "oauth" && data.provider === "codex" && chatgptUserId) {
     const strongSql = workspaceId
       ? "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth' AND json_extract(provider_specific_data, '$.workspaceId') = ? AND json_extract(provider_specific_data, '$.chatgptUserId') = ?"
       : "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth' AND (json_extract(provider_specific_data, '$.workspaceId') IS NULL OR json_extract(provider_specific_data, '$.workspaceId') = '') AND json_extract(provider_specific_data, '$.chatgptUserId') = ?";
@@ -699,7 +722,7 @@ export async function createProviderConnection(data: JsonRecord) {
     isActive: data.isActive !== undefined ? data.isActive : true,
     createdAt: now,
     updatedAt: now,
-    proxyEnabled: normalizeBooleanColumn(data.proxyEnabled, true),
+    proxyEnabled: data.proxyEnabled ?? readNewConnectionProxyDefault(db),
     perKeyProxyEnabled: normalizeBooleanColumn(data.perKeyProxyEnabled, false),
     quotaVisible: normalizeBooleanColumn(data.quotaVisible, true),
   };
@@ -735,7 +758,6 @@ export async function createProviderConnection(data: JsonRecord) {
     "rateLimitProtection",
     "group",
     "maxConcurrent",
-    "proxyEnabled",
     "perKeyProxyEnabled",
     "quotaVisible",
     "quotaWindowThresholds",

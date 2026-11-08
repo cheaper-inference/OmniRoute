@@ -1,3 +1,7 @@
+import type {
+  HttpAttemptSelection,
+  HttpAttemptRejectionSlot,
+} from "../../utils/providerHttpAttempts.ts";
 import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 import type { ChatCoreErrorResult, ProviderLegUsage } from "@/lib/skills/toolLoopTypes.ts";
 import type { getProviderCredentials } from "@/sse/services/auth.ts";
@@ -30,9 +34,11 @@ import {
   isCodexResponseCurrent,
 } from "../../services/codexAccount/fences.ts";
 import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 
 export interface ChatCoreExecutorResult {
   response: Response;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   url: string;
   headers: Record<string, string>;
   transformedBody: unknown;
@@ -51,6 +57,7 @@ export interface ProviderExecutionPolicy {
 export type ProviderExecutionOutcome =
   | {
       kind: "response";
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       response: Response;
       url: string;
       headers: Record<string, string>;
@@ -61,6 +68,7 @@ export type ProviderExecutionOutcome =
     }
   | {
       kind: "error";
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       result: ChatCoreErrorResult;
       providerUsage: ProviderLegUsage | null;
       upstreamDiagnostic?: Record<string, unknown>;
@@ -138,7 +146,12 @@ export interface ProviderExecutionPipelineInput {
   connection: PipelineConnectionContext;
   wire: PipelineWireState;
   state: PipelineStateHooks;
-  sendProviderAttempt: (model: string, allowDedup: boolean) => Promise<ChatCoreExecutorResult>;
+  upstreamHttpRejection?: HttpAttemptRejectionSlot;
+  sendProviderAttempt: (
+    model: string,
+    allowDedup: boolean,
+    rejection?: HttpAttemptRejectionSlot
+  ) => Promise<ChatCoreExecutorResult>;
   getLastOutboundBody?: (attempt: ChatCoreExecutorResult) => unknown;
   onSignatureFailure?: (failure: {
     status: number;
@@ -205,7 +218,7 @@ async function recordUpstreamRateLimit(
   }
   let capacity429 = false;
   try {
-    const text = await attempt.response.clone().text();
+    const text = await readResponseTextWithinCap(attempt.response.clone());
     capacity429 =
       provider === "codex" && isTransientCodexCapacity429(status, text, attempt.response.headers);
     // parseRetryAfterFromBody JSON.parses a string and falls back to "unknown"
@@ -271,6 +284,7 @@ async function toOutcome(
       headers: attempt.headers,
       transformedBody: attempt.transformedBody,
       upstreamDiagnostic: attempt.upstreamDiagnostic,
+      upstreamHttpSelection: attempt.upstreamHttpSelection ?? null,
       model,
       connectionId,
     };
@@ -281,7 +295,7 @@ async function toOutcome(
   try {
     // clone() is the drain. sendProviderAttempt must not cancel() a streaming
     // non-2xx body before we get here (BYOP 422 / Codex 429 Retry-After).
-    const text = await attempt.response.clone().text();
+    const text = await readResponseTextWithinCap(attempt.response.clone());
     try {
       body = JSON.parse(text);
       fields = readUpstreamErrorFields(body);
@@ -326,6 +340,7 @@ async function toOutcome(
     },
     providerUsage: null,
     upstreamDiagnostic: attempt.upstreamDiagnostic,
+    upstreamHttpSelection: attempt.upstreamHttpSelection ?? null,
     model,
     connectionId,
   };
@@ -356,7 +371,17 @@ function maxAttemptsFor(provider: string): number {
 export async function runProviderExecutionPipeline(
   input: ProviderExecutionPipelineInput
 ): Promise<ProviderExecutionOutcome> {
-  const { policy, target, connection, wire, state: baseState, sendProviderAttempt } = input;
+  const { policy, target, connection, wire, state: baseState } = input;
+  const sendProviderAttempt = async (model: string, allowDedup: boolean) => {
+    const rejection: HttpAttemptRejectionSlot = { selection: null };
+    if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = null;
+    try {
+      return await input.sendProviderAttempt(model, allowDedup, rejection);
+    } catch (error) {
+      if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = rejection.selection;
+      throw error;
+    }
+  };
   const maxAttempts = maxAttemptsFor(target.provider);
   const allowedConnections = connection.allowedConnections ?? null;
   const excludedIds: string[] = [];
@@ -511,10 +536,7 @@ export async function runProviderExecutionPipeline(
     if (canRotateAccount && target.provider === "antigravity" && status === 422) {
       // Same drain as toOutcome: clone the Response. A prior body.cancel()
       // makes this throw "Body has already been consumed" and skips rotate.
-      const byopBody = await attempt.response
-        .clone()
-        .text()
-        .catch(() => "");
+      const byopBody = await readResponseTextWithinCap(attempt.response.clone()).catch(() => "");
       if (byopBody.includes("gcp_project_required")) {
         const failedId = currentConnectionId(connection);
         if (failedId && !excludedIds.includes(failedId)) excludedIds.push(failedId);
@@ -542,7 +564,7 @@ export async function runProviderExecutionPipeline(
     {
       let signatureMessage = attempt.response.statusText || "upstream error";
       try {
-        const parsed = JSON.parse(await attempt.response.clone().text()) as {
+        const parsed = JSON.parse(await readResponseTextWithinCap(attempt.response.clone())) as {
           error?: { message?: unknown };
         };
         if (typeof parsed?.error?.message === "string" && parsed.error.message) {
@@ -593,7 +615,7 @@ export async function runProviderExecutionPipeline(
             let message = response.statusText || "upstream error";
             let responseBody: unknown = null;
             try {
-              responseBody = JSON.parse(await response.clone().text());
+              responseBody = JSON.parse(await readResponseTextWithinCap(response.clone()));
               const err = (responseBody as { error?: { message?: unknown } } | null)?.error;
               if (typeof err?.message === "string" && err.message) message = err.message;
             } catch {
@@ -608,6 +630,8 @@ export async function runProviderExecutionPipeline(
           },
         });
       } catch (error) {
+        const rejectedSelection = input.upstreamHttpRejection?.selection ?? null;
+        if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = null;
         if (signatureFailure) {
           input.onSignatureFailure?.({
             status,
@@ -619,8 +643,10 @@ export async function runProviderExecutionPipeline(
             recoverySucceeded: false,
           });
         }
+        if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = rejectedSelection;
         throw error;
       }
+      if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = null;
       if (signatureFailure) {
         input.onSignatureFailure?.({
           status,
@@ -644,6 +670,7 @@ export async function runProviderExecutionPipeline(
             (signatureRecovery.execution.headers as Record<string, string>) ?? attempt.headers,
           transformedBody: signatureRecovery.execution.transformedBody ?? attempt.transformedBody,
           upstreamDiagnostic: signatureRecovery.execution.upstreamDiagnostic,
+          upstreamHttpSelection: signatureRecovery.execution.upstreamHttpSelection ?? null,
         };
         return toOutcome(
           lastAttempt,
@@ -657,7 +684,7 @@ export async function runProviderExecutionPipeline(
     if (policy.allowModelFallback) {
       let fallbackMessage = attempt.response.statusText || "upstream error";
       try {
-        const parsed = JSON.parse(await attempt.response.clone().text()) as {
+        const parsed = JSON.parse(await readResponseTextWithinCap(attempt.response.clone())) as {
           error?: { message?: unknown };
         };
         if (typeof parsed?.error?.message === "string" && parsed.error.message) {

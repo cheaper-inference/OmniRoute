@@ -3,6 +3,7 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 
 export const SELF_HOP_HEADER = "x-omniroute-self-hop";
+export const INTERNAL_TEST_HEADER = "x-internal-test";
 
 // One token per process, never persisted or logged. It lives on globalThis, not in a
 // module-level variable: Next bundles open-sse, so the instrumentation bundle (whose
@@ -41,6 +42,19 @@ export function isOwnListenerSelfHop(value: string | null | undefined): boolean 
   const expected = Buffer.from(ownListenerSelfHopToken().toLowerCase());
   if (got.length !== expected.length) return false;
   return timingSafeEqual(got, expected);
+}
+
+/**
+ * The internal live-test mark, or null unless this process sent the request. The mark skips
+ * cooldowns, breakers and quota policy, so only the process-local token can vouch for it: a
+ * client can set any header, and an API key (the deployment env key included) is something
+ * clients hold.
+ */
+export function trustedInternalTestMark(
+  headers: Pick<Headers, "get"> | null | undefined
+): string | null {
+  if (!isOwnListenerSelfHop(headers?.get?.(SELF_HOP_HEADER))) return null;
+  return headers?.get?.(INTERNAL_TEST_HEADER) ?? null;
 }
 
 export function stampOwnListenerSelfHop(

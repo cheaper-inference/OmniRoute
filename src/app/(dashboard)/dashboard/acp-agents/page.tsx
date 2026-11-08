@@ -5,6 +5,7 @@ import Link from "next/link";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, Input } from "@/shared/components";
 import Badge from "@/shared/components/Badge";
 import ProviderIcon from "@/shared/components/ProviderIcon";
@@ -151,7 +152,7 @@ export default function AgentsPage() {
   if (loading) {
     return (
       <div role="status" className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-        <Icon name="progress_activity" size={32} className="animate-spin text-primary" />
+        <Spinner decorative size="lg" className="text-primary" />
         <p className="text-sm text-text-muted">{t("scanning")}</p>
       </div>
     );

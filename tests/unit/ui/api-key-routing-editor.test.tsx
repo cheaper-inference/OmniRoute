@@ -163,8 +163,8 @@ describe("isolated routing editor", () => {
       target: { value: "Changed draft" },
     });
     chooseKitSelectValue(screen.getByRole("combobox", { name: "API key" }), "second");
-    expect(screen.getByRole("dialog")).not.toBeNull();
-    fireEvent.click(screen.getByRole("dialog").querySelector("button")!);
+    expect(screen.getByRole("alertdialog")).not.toBeNull();
+    fireEvent.click(screen.getByRole("alertdialog").querySelector("button")!);
     expect(kitSelectValue(screen.getByRole("combobox", { name: "API key" }))).toBe("key");
   });
 

@@ -166,24 +166,37 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "081",
     toName: "inspector_custom_hosts",
   },
-  // Earlier PR heads used 215, 217 and 218 before Teams, quota recovery and proxy mirrors landed.
+  // Earlier PR heads used 215, 217, 218, 224 and 226 before Teams, quota recovery, proxy mirrors,
+  // proxy egress families and request-cost indexes landed.
   // Rehome only exact Codex ledger rows; the canonical release features keep their slots.
   {
     fromVersion: "215",
     fromName: "codex_connection_fences",
-    toVersion: "226",
+    toVersion: "228",
     toName: "codex_connection_fences",
   },
   {
     fromVersion: "217",
     fromName: "codex_connection_fences",
-    toVersion: "226",
+    toVersion: "228",
     toName: "codex_connection_fences",
   },
   {
     fromVersion: "218",
     fromName: "codex_connection_fences",
-    toVersion: "226",
+    toVersion: "228",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "224",
+    fromName: "codex_connection_fences",
+    toVersion: "228",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "226",
+    fromName: "codex_connection_fences",
+    toVersion: "228",
     toName: "codex_connection_fences",
   },
   // PR #10409 circulated through these draft slots before the current release
@@ -294,6 +307,23 @@ export const LEGACY_VERSION_SLOT_MIGRATIONS = [
   { version: "033", name: "add_batch_id_to_call_logs" },
   { version: "046", name: "remove_status_from_files" },
   { version: "051", name: "remove_status_from_files" },
+  // A renumbering shifted 140-143 in pairs, leaving the ledger holding the old
+  // arrangement: ccr_blocks at 139 and 140, api_key_cache_default_mode at 141
+  // and 143. In each pair exactly one row still matches a file (ccr_blocks at
+  // 139, api_key_cache_default_mode at 143), so only the other row is listed
+  // here. Its occupancy is what stopped the file now belonging at that version
+  // from being back-filled; radar_referrals_cache and the two
+  // proxy_subscriptions columns were the visible casualties. Releasing a slot
+  // replays that version's file after everything newer has run, so an entry here
+  // needs a file that is safe out of order, or a guard in isSchemaAlreadyApplied
+  // (178 has one: its file would otherwise overwrite the trigger 203 installed).
+  { version: "140", name: "ccr_blocks" },
+  { version: "141", name: "api_key_cache_default_mode" },
+  { version: "142", name: "connection_runtime_state" },
+  { version: "176", name: "provider_connection_synced_models_at" },
+  { version: "177", name: "xp_action_counts" },
+  { version: "178", name: "memory_fts_skip_access_updates" },
+  { version: "197", name: "model_capabilities_reasoning_efforts" },
 ] as const;
 
 export const SUPERSEDED_DUPLICATE_MIGRATIONS = [
