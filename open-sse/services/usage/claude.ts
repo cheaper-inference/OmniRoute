@@ -147,11 +147,6 @@ export function observeClaudeUsageHeaders(
   observedUsage.set(hashClaudeCredential(accessToken), { body, observedAt: now });
 }
 
-/**
- * Serve the plan windows from the latest response headers when they are newer than what
- * the usage endpoint gave (a cached read, a stale read during a 429 cooldown, or only the
- * rate-limit message). Other failures (expired auth, transport) stay visible.
- */
 /** When the endpoint read behind `usage` was taken (NaN when unknown, 0 when there is none). */
 function endpointReadAt(usage: ClaudeUsageResult, cached: CachedClaudeUsage | undefined): number {
   if (usage._stale) return Date.parse(String(usage._staleSince));
@@ -167,6 +162,11 @@ function recentEndpointRead(
   return observedAt - cached.fetchedAt < CLAUDE_USAGE_SUCCESS_TTL_MS ? cached.value : null;
 }
 
+/**
+ * Serve the plan windows from the latest response headers when they are newer than what
+ * the usage endpoint gave (a cached read, a stale read during a 429 cooldown, or only the
+ * rate-limit message). Other failures (expired auth, transport) stay visible.
+ */
 function preferNewerObservedUsage(key: string, usage: ClaudeUsageResult): ClaudeUsageResult {
   const observed = observedUsage.get(key);
   if (!observed) return usage;
