@@ -1,0 +1,1 @@
+- **fix(cache):** the semantic cache now ignores a request threshold header that is below the configured similarity threshold, and it no longer stores responses that contain tool calls, so a cache hit cannot replay stale tool-call arguments.
