@@ -1,0 +1,1 @@
+- **fix(cache):** the exact-match response cache no longer stores a response that carries tool calls, so a cache hit cannot replay a stale tool-call argument list.

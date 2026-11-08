@@ -610,6 +610,32 @@ export function isTruncatedCompletion(response: unknown): boolean {
 }
 
 /**
+ * True when a response carries client-visible tool calls: OpenAI `tool_calls` / `function_call`,
+ * Claude `tool_use`, Responses `function_call` / `custom_tool_call` items, Gemini `functionCall`.
+ * Replaying one from the exact-match cache hands back a stale argument list and skips the tool
+ * round trip, so such a response is never stored.
+ */
+export function responseCarriesToolCalls(response: unknown): boolean {
+  const r = asRecord(response);
+  const list = (value: unknown): JsonRecord[] => (Array.isArray(value) ? value.map(asRecord) : []);
+  const fromChoices = list(r.choices).some((choice) => {
+    const message = asRecord(choice.message ?? choice.delta);
+    return (
+      (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) ||
+      !!message.function_call
+    );
+  });
+  const fromBlocks = list(r.content).some((block) => block.type === "tool_use");
+  const fromOutput = list(r.output).some(
+    (item) => item.type === "function_call" || item.type === "custom_tool_call"
+  );
+  const fromCandidates = list(r.candidates).some((candidate) =>
+    list(asRecord(candidate.content).parts).some((part) => !!part.functionCall)
+  );
+  return fromChoices || fromBlocks || fromOutput || fromCandidates;
+}
+
+/**
  * Streaming variant: the assembled SSE body is scanned for a truncating
  * finish_reason. Parsing is intentionally tolerant — an unparseable chunk is
  * treated as "not known to be truncated" so a malformed frame never silently
