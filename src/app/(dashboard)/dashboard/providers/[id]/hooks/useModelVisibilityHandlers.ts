@@ -24,16 +24,18 @@ import { useState, useMemo } from "react";
 import {
   formatProviderModelsErrorResponse,
   providerText,
-  testAllResultsText,
+  recordTestAllOutcome,
+  type TestAllTally,
+  testAllSummaryMessages,
   evaluateTestAllEntry,
   shouldSwitchToVisibleFilter,
   type ProviderMessageTranslator,
   type CompatByProtocolMap,
 } from "../providerPageHelpers";
-import { useNotificationStore } from "@/store/notificationStore";
+import type { NotificationStore } from "@/store/notificationStore";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 
-type NotifyStore = ReturnType<typeof useNotificationStore>;
+type NotifyStore = NotificationStore;
 
 // ──── types ──────────────────────────────────────────────────────────────────
 
@@ -55,6 +57,8 @@ export interface UseModelVisibilityHandlersParams {
   fetchProviderModelMeta: () => Promise<void>;
   fetchAliases: () => Promise<void>;
   notify: NotifyStore;
+  /** Kit confirmation dialog (`useConfirmDialog().requestConfirm`); resolves true on confirm. */
+  requestConfirm: (message: string) => Promise<boolean>;
   t: ProviderMessageTranslator;
   formatProviderModelsErrorResponse?: typeof formatProviderModelsErrorResponse;
   /** The current selected connection (may be null). */
@@ -104,6 +108,7 @@ export function useModelVisibilityHandlers({
   fetchProviderModelMeta,
   fetchAliases,
   notify,
+  requestConfirm,
   t,
   selectedConnection,
   providerNode,
@@ -116,7 +121,9 @@ export function useModelVisibilityHandlers({
   const [clearingModels, setClearingModels] = useState(false);
   const [modelFilter, setModelFilter] = useState("");
   const [testingModelId, setTestingModelId] = useState<string | null>(null);
-  const [modelTestStatus, setModelTestStatus] = useState<Record<string, "ok" | "error" | "quota">>({});
+  const [modelTestStatus, setModelTestStatus] = useState<Record<string, "ok" | "error" | "quota">>(
+    {}
+  );
   const [testingAll, setTestingAll] = useState(false);
   const [testProgress, setTestProgress] = useState<{ done: number; total: number } | null>(null);
   const [autoHideFailed, setAutoHideFailed] = useState(false);
@@ -260,14 +267,20 @@ export function useModelVisibilityHandlers({
 
   const handleClearAllModels = async () => {
     if (clearingModels) return;
-    if (!confirm(t("clearAllModelsConfirm"))) return;
+    if (!(await requestConfirm(t("clearAllModelsConfirm")))) return;
     setClearingModels(true);
     try {
-      const res = await fetch(
-        `/api/provider-models?provider=${encodeURIComponent(providerStorageAlias)}&all=true`,
-        { method: "DELETE" }
+      const targetProviders = Array.from(
+        new Set([providerStorageAlias, providerId].filter(Boolean))
       );
-      if (res.ok) {
+      const responses = await Promise.all(
+        targetProviders.map((targetProvider) =>
+          fetch(`/api/provider-models?provider=${encodeURIComponent(targetProvider)}&all=true`, {
+            method: "DELETE",
+          })
+        )
+      );
+      if (responses.every((res) => res.ok)) {
         // Also delete all aliases that belong to this provider
         await Promise.all(
           providerAliasEntries.map(([alias]) =>
@@ -316,6 +329,11 @@ export function useModelVisibilityHandlers({
           )
         );
         setModelTestStatus((prev) => ({ ...prev, [modelId]: "ok" }));
+      } else if (data.skipped) {
+        // A skipped probe never ran — neither healthy nor broken, so no status icon.
+        notify.info(
+          extractApiErrorMessage(data, providerText(t, "modelTestFailed", "Model test failed"))
+        );
       } else {
         // extractApiErrorMessage coerces any object-shaped `error` (e.g. a Zod
         // format object) to a string so notify.error never hands the toast a
@@ -344,8 +362,7 @@ export function useModelVisibilityHandlers({
     setTestingAll(true);
     setTestProgress({ done: 0, total: targets.length });
 
-    let ok = 0;
-    let error = 0;
+    const tally: TestAllTally = { ok: 0, error: 0, skipped: 0 };
     let hiddenCount = 0;
 
     const CHUNK_SIZE = 3;
@@ -361,6 +378,7 @@ export function useModelVisibilityHandlers({
                   status?: "ok" | "error" | "slow";
                   rateLimited?: boolean;
                   isTimeout?: boolean;
+                  skipped?: boolean;
                   error?: string;
                 }
               >;
@@ -376,26 +394,25 @@ export function useModelVisibilityHandlers({
 
             const entry = result.results?.[fullModel];
             const outcome = evaluateTestAllEntry(entry, autoHideFailed);
-            // #9511: paint "quota" status for quota-exhausted models (amber badge),
-            // "ok" for healthy, "error" for genuine failures.
-            setModelTestStatus((prev) => ({
-              ...prev,
-              [modelId]: outcome.isQuota ? "quota" : outcome.status,
-            }));
-            if (outcome.status === "ok") {
-              ok++;
-            } else {
-              error++;
-              if (outcome.shouldHide) {
-                // Hidden flag keyed by providerId — same as the manual eye toggle and the read
-                // (fetchProviderModelMeta). providerStorageAlias wrote it under the alias while the
-                // read looked under the canonical id, so auto-hide never reflected.
-                await handleToggleModelHidden(providerId, modelId, true);
-                hiddenCount++;
-              }
+            recordTestAllOutcome(tally, outcome, entry?.error);
+            // A skipped probe never ran — neither healthy nor broken, so no status icon.
+            if (!outcome.skipped) {
+              // #9511: paint "quota" status for quota-exhausted models (amber badge),
+              // "ok" for healthy, "error" for genuine failures.
+              setModelTestStatus((prev) => ({
+                ...prev,
+                [modelId]: outcome.isQuota ? "quota" : outcome.status,
+              }));
+            }
+            if (outcome.shouldHide) {
+              // Hidden flag keyed by providerId — same as the manual eye toggle and the read
+              // (fetchProviderModelMeta). providerStorageAlias wrote it under the alias while the
+              // read looked under the canonical id, so auto-hide never reflected.
+              await handleToggleModelHidden(providerId, modelId, true);
+              hiddenCount++;
             }
           } catch (e) {
-            error++;
+            tally.error++;
             setModelTestStatus((prev) => ({ ...prev, [modelId]: "error" }));
           }
           setTestProgress((prev) => (prev ? { done: prev.done + 1, total: prev.total } : null));
@@ -403,7 +420,9 @@ export function useModelVisibilityHandlers({
       );
     }
 
-    notify.info(testAllResultsText(t, ok, ok + error));
+    for (const message of testAllSummaryMessages(t, tally)) {
+      notify.info(message);
+    }
     if (hiddenCount > 0) {
       notify.info(providerText(t, "testAllFailedHidden", "{count} hidden", { count: hiddenCount }));
       // Bug #4887: switch to "visible" so the models we just auto-hid disappear

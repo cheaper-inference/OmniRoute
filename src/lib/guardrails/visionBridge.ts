@@ -307,6 +307,8 @@ export interface VisionBridgeDependencies {
   ) => Promise<string>;
   /** Override combo-target vision check — return true to force processing, false to skip. */
   checkModelHasComboMapping?: (model: string) => Promise<boolean>;
+  /** Test/embedder seam: preserve the full combo verdict, including non-combo. */
+  resolveComboVisionDecision?: (model: string) => Promise<ComboVisionBridgeDecision>;
   /**
    * Whether a model string has a usable active credential (true/false).
    * Return `null` when indeterminate (no DB / error) so callers can fail-open.
@@ -325,6 +327,7 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
     this.deps = options?.deps ?? {};
   }
 
+  /** Apply the configured vision bridge while preserving ordinary non-image content. */
   async preCall(payload: unknown, context: GuardrailContext): Promise<GuardrailResult<unknown>> {
     // 1. Check if disabled at guardrail level
     if (!this.enabled) {
@@ -367,13 +370,22 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
       requestedModelVision = capabilities?.supportsVision ?? null;
       comboVisionBridgeDecision = forceVisionBridge
         ? "process"
-        : this.deps.checkModelHasComboMapping
-          ? (await this.deps.checkModelHasComboMapping(model))
-            ? "process"
-            : "skip"
-          : await getComboVisionBridgeDecision(model);
+        : this.deps.resolveComboVisionDecision
+          ? await this.deps.resolveComboVisionDecision(model)
+          : this.deps.checkModelHasComboMapping
+            ? (await this.deps.checkModelHasComboMapping(model))
+              ? "process"
+              : "skip"
+            : await getComboVisionBridgeDecision(model);
 
-      if (comboVisionBridgeDecision === "skip") {
+      // #18008: "skip" = every step proven vision-capable. "process" (mixed, no forced
+      // bridge) also keeps raw images — combo dispatch filters text-only targets.
+      const usesRealComboResolver =
+        !this.deps.resolveComboVisionDecision && !this.deps.checkModelHasComboMapping;
+      if (
+        comboVisionBridgeDecision === "skip" ||
+        (comboVisionBridgeDecision === "process" && !forceVisionBridge && usesRealComboResolver)
+      ) {
         return { block: false };
       }
 
@@ -406,6 +418,13 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
       return { block: false };
     }
 
+    // The image-only router cannot qualify a destination for other attachments.
+    // Auto's compatibility pass checks every required modality (including after
+    // catalog expansion); let it keep the complete mixed request intact.
+    if (isAuto && detectMediaParts(messages).some((part) => part.kind !== "image")) {
+      return { block: false };
+    }
+
     // 6. Get settings (injectable for testing)
     const getSettings = this.deps.getSettings ?? defaultGetSettings;
     let settings: Record<string, unknown> = {};
@@ -424,9 +443,9 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
       return { block: false };
     }
 
-    // 8. Check for images. Description mode can only replace top-level parts,
-    // while reroute mode preserves the entire body and therefore also supports
-    // images nested inside Responses function_call_output items.
+    // 8. Detect replaceable images in both top-level content and nested Claude
+    // tool_result parts. Responses function_call_output needs its separate
+    // detector for reroute mode (the output array is not message.content).
     const imageParts = extractImageParts(messages as Parameters<typeof extractImageParts>[0]);
     const nestedToolImageCount = countNestedToolOutputImages(messages as unknown[]);
     const detectedImageCount = imageParts.length + nestedToolImageCount;
@@ -642,6 +661,17 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
         { hasUsableCredentials: scopedCheckCreds }
       );
       if (!scopedModel) {
+        // A known text-only model must not receive the original image when the
+        // API-key scope forbids all available captioning routes. An explicit
+        // local rejection is safer than a guaranteed opaque upstream 400 and
+        // does not spend a provider's credit outside the caller's key policy.
+        if (!isAuto && (requestedModelVision === false || forceVisionBridge)) {
+          return {
+            block: true,
+            message: "No permitted vision model can describe images for this text-only target",
+            meta: { reason: "no_permitted_vision_model", requestedModel: model },
+          };
+        }
         context.log?.warn?.(
           "VISION_BRIDGE",
           `No vision model is permitted for this API key; passing ${detectedImageCount} image(s) through unchanged`
@@ -742,12 +772,27 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
     // outright (capability_mismatch), so stub text is strictly better than
     // preserving bytes no combo target can consume.
     const allNull = descriptions.every((d) => d === null);
+    // #17069: a confirmed text-only direct target cannot accept raw images even
+    // when only ONE description fails, or the history contains more images than
+    // maxImages. Keep the original fail-open rule for UNKNOWN/vision-capable
+    // targets: they may still be able to consume the unmodified image bytes.
+    const confirmedTextOnlyDirectTarget =
+      !isAuto &&
+      (requestedModelVision === false || forceVisionBridge) &&
+      comboVisionBridgeDecision !== "skip";
+    const noVisionCombo = comboVisionBridgeDecision === "no-vision";
     if (
-      allNull &&
-      (comboVisionBridgeDecision === "process" || comboVisionBridgeDecision === "no-vision")
+      confirmedTextOnlyDirectTarget ||
+      noVisionCombo ||
+      (allNull && comboVisionBridgeDecision === "process")
     ) {
-      for (let i = 0; i < descriptions.length; i++) {
-        descriptions[i] = `[Image ${i + 1}]: (unavailable — no vision-capable provider connected)`;
+      const totalImagesToReplace =
+        confirmedTextOnlyDirectTarget || noVisionCombo ? imageParts.length : descriptions.length;
+      for (let i = 0; i < totalImagesToReplace; i++) {
+        if (descriptions[i] == null) {
+          descriptions[i] =
+            `[Image ${i + 1}]: (unavailable — no vision-capable provider connected)`;
+        }
       }
     }
 

@@ -62,6 +62,9 @@ export type { SyncedAvailableModel } from "./models/synced";
 export {
   getCustomModelVisionOverride,
   listCustomModelVisionOverrides,
+  buildCustomModelVisionOverrides,
+  readCustomModelsByProvider,
+  type CustomModelsByProvider,
   type CustomModelVisionOverrideMap,
   type CustomModelVisionDatabase,
   type CustomModelVisionOverrideReadOptions,

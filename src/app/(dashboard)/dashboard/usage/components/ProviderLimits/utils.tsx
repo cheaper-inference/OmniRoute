@@ -171,8 +171,9 @@ export function resolvePlanValue(plan, providerSpecificData, providerId) {
     psd.tier,
     psd.accountTier,
     // Claude OAuth bootstrap: rate_limit_tier has the Max 5x/20x multiplier.
-    psd.organizationRateLimitTier,
+    // The account's own (seat) tier first: a Team org's base tier is not the seat's.
     psd.rateLimitTier,
+    psd.organizationRateLimitTier,
     psd.organizationType,
     // Codex OAuth bootstrap: chatgpt_plan_type is captured at import time
     // (src/lib/oauth/services/codexImport.ts) and is the only source of the
@@ -340,6 +341,7 @@ export const RESET_CREDIT_PROVIDERS = [
   // grok-cli redeems through the same codex-reset-credit endpoint (tip of
   // release/v3.8.51); kept here so the generalized gate below covers it.
   "grok-cli",
+  "claude",
   "glm",
   "glm-cn",
   "glmt",
@@ -348,7 +350,9 @@ export const RESET_CREDIT_PROVIDERS = [
 
 /** The redemption API backing a provider's reset credits, if supported. */
 export function getResetCreditEndpoint(provider: string): string | null {
-  if (provider === "codex" || provider === "grok-cli") return "/api/usage/codex-reset-credit";
+  if (provider === "codex" || provider === "grok-cli" || provider === "claude") {
+    return "/api/usage/codex-reset-credit";
+  }
   if (["glm", "glm-cn", "glmt", "zai"].includes(provider)) {
     return "/api/usage/glm-reset-card";
   }
@@ -359,11 +363,39 @@ export function canProviderRedeemResetCredit(provider: string): boolean {
   return (RESET_CREDIT_PROVIDERS as readonly string[]).includes(provider);
 }
 
-export function computeCanRedeemResetCredit(provider: string, quotas: any[]): boolean {
-  return (
-    canProviderRedeemResetCredit(provider) &&
-    quotas.some((q: any) => q?.isResetCredits && Number(q.creditCount ?? q.remaining ?? 0) > 0)
-  );
+export interface ResetCreditGateContext {
+  /** The raw usage payload behind the card (carries `bankedResetCredits` when known). */
+  raw?: unknown;
+  authType?: string;
+}
+
+/**
+ * The regular Claude usage poll cannot see banked reset credits; only the reset-credit list
+ * (opened by the user) or the opt-in auto-reset learns the count. Until then the count is
+ * unknown and a Claude OAuth card keeps its entry point — only an authoritative 0 hides it.
+ */
+function isClaudeResetCreditCountUnknown(
+  provider: string,
+  context?: ResetCreditGateContext
+): boolean {
+  if (provider !== "claude" || context?.authType !== "oauth") return false;
+  const raw =
+    context.raw && typeof context.raw === "object"
+      ? (context.raw as Record<string, unknown>)
+      : null;
+  return typeof raw?.bankedResetCredits !== "number";
+}
+
+export function computeCanRedeemResetCredit(
+  provider: string,
+  quotas: any[],
+  context?: ResetCreditGateContext
+): boolean {
+  if (!canProviderRedeemResetCredit(provider)) return false;
+  if (quotas.some((q: any) => q?.isResetCredits && Number(q.creditCount ?? q.remaining ?? 0) > 0)) {
+    return true;
+  }
+  return isClaudeResetCreditCountUnknown(provider, context);
 }
 
 export function hasQuotaCutoffOverrides(connection: any): boolean {
@@ -474,12 +506,24 @@ export function getBarColor(remainingPercentage: number): {
     ? "critical"
     : quotaStatusLevel(remainingPercentage);
   if (level === "ok") {
-    return { bar: "#22c55e", text: "#22c55e", bg: "rgba(34,197,94,0.12)" };
+    return {
+      bar: "var(--color-success)",
+      text: "var(--color-success)",
+      bg: "color-mix(in srgb, var(--color-success) 12%, transparent)",
+    };
   }
   if (level === "alert") {
-    return { bar: "#eab308", text: "#eab308", bg: "rgba(234,179,8,0.12)" };
+    return {
+      bar: "var(--color-warning)",
+      text: "var(--color-warning)",
+      bg: "color-mix(in srgb, var(--color-warning) 12%, transparent)",
+    };
   }
-  return { bar: "#ef4444", text: "#ef4444", bg: "rgba(239,68,68,0.12)" };
+  return {
+    bar: "var(--color-error)",
+    text: "var(--color-error)",
+    bg: "color-mix(in srgb, var(--color-error) 12%, transparent)",
+  };
 }
 
 export function formatCountdown(resetAt: string | null | undefined): string | null {

@@ -72,31 +72,32 @@ dengan menyatakan titik akhir dan perkara yang hilang — supaya sebab pemilih b
 
 ## Pilihan
 
-| Kunci                            | Lalai                                                     | Nota                                                                                                                           |
+| Kunci                            | Lalai                                                     | Catatan                                                                                                                        |
 | -------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `providerId`                     | `"omniroute"`                                             | ID penyedia, ID integrasi dan awalan tempat model dipaparkan                                                                   |
+| `providerId`                     | `"omniroute"`                                             | ID penyedia, ID integrasi dan awalan yang digunakan untuk memaparkan model                                                     |
 | `baseURL`                        | diperlukan                                                | Akar get laluan, `http(s)` sahaja; akhiran `/v1` ditambahkan apabila diperlukan                                                |
 | `apiKey`                         | kelayakan yang disambungkan, kemudian `OMNIROUTE_API_KEY` | Kunci sembang untuk `/v1/*`                                                                                                    |
 | `managementReadToken`            | kembali menggunakan `apiKey`                              | Kunci untuk `/api/*` — biasanya **bukan** kunci yang sama                                                                      |
 | `displayName`                    | `"OmniRoute"`                                             | Nama penyedia dalam pemilih                                                                                                    |
-| `timeoutMs`                      | `10000`                                                   | Tamat masa pengambilan bagi setiap titik akhir (kombo automatik menggunakan 5s)                                                |
-| `modelCacheTtlMs`                | `300000`                                                  | TTL cache katalog; syot kilat cakera mempercepat permulaan sejuk                                                               |
-| `timeouts`                       | kembali menggunakan `timeoutMs`                           | Had masa bagi setiap titik akhir dalam ms: `models`, `combos`, `autoCombos`, `enrichment`                                      |
-| `enrichment`                     | `true`                                                    | Ambil nama, harga dan had peringkat percuma                                                                                    |
-| `providerTag`                    | `true`                                                    | Awalkan nama paparan dengan penyedia huluan yang menjadi destinasi penghalaannya                                               |
+| `timeoutMs`                      | `10000`                                                   | Had masa pengambilan bagi setiap titik akhir (gabungan automatik menggunakan 5 saat)                                           |
+| `modelCacheTtlMs`                | `300000`                                                  | TTL cache katalog; petikan cakera mempercepatkan permulaan sejuk                                                               |
+| `timeouts`                       | kembali menggunakan `timeoutMs`                           | Peruntukan masa bagi setiap titik akhir dalam ms: `models`, `combos`, `autoCombos`, `enrichment`                               |
+| `enrichment`                     | `true`                                                    | Dapatkan nama, harga dan peruntukan peringkat percuma                                                                          |
+| `providerTag`                    | `true`                                                    | Awalkan nama paparan dengan penyedia huluan yang menjadi destinasi halaannya                                                   |
 | `usableOnly`                     | `false`                                                   | Kekalkan hanya penyedia yang dilaporkan oleh get laluan sebagai telah diperuntukkan                                            |
+| `combosSource`                   | `"api"`                                                   | `"models"` melangkau `/api/combos` dan menerbitkan baris gabungan `/v1/models`; penapis peringkat ahli mengekalkan `"api"`     |
 | `showcasePerOwner`               | `10`                                                      | Entri paparan lalai yang dikekalkan bagi setiap penyedia                                                                       |
-| `freshPerOwner`                  | `10`                                                      | Entri baharu paparan lalai yang dikekalkan bagi setiap penyedia                                                                |
-| `freshWindowDays`                | `90`                                                      | Tetingkap kebaharuan dalam hari untuk cabang baharu                                                                            |
-| `usageMemory`                    | `true`                                                    | Pulihkan entri yang digugurkan secara statik tetapi dinamakan oleh analitik penggunaan 30 hari (memerlukan token pengurusan)   |
+| `freshPerOwner`                  | `10`                                                      | Entri terkini paparan lalai yang dikekalkan bagi setiap penyedia                                                               |
+| `freshWindowDays`                | `90`                                                      | Tempoh kesegaran dalam hari untuk cabang terkini                                                                               |
+| `usageMemory`                    | `true`                                                    | Pulihkan entri yang digugurkan secara statik dan dinamakan oleh analitis penggunaan 30 hari (memerlukan token pengurusan)      |
 | `visibleModels` / `hiddenModels` | `[]`                                                      | Senarai benarkan padanan tepat atau akhiran; penafian diutamakan; `*` menerbitkan katalog penuh (penapis lain masih digunakan) |
-| `geminiSanitization`             | `true`                                                    | Buang kata kunci JSON-Schema yang ditolak oleh Gemini daripada skema alat (alat `$ref` dimajukan tanpa perubahan)              |
+| `geminiSanitization`             | `true`                                                    | Buang kata kunci Skema JSON yang ditolak oleh Gemini daripada skema alat (alat `$ref` dimajukan tanpa perubahan)               |
 | `apiFormat.allowAnthropic`       | `false`                                                   | Halakan ID dalam senarai benarkan melalui blok API Anthropic                                                                   |
-| `apiFormat.anthropicModels`      | `[]`                                                      | ID model penuh yang dihalakan kepada Anthropic                                                                                 |
+| `apiFormat.anthropicModels`      | `[]`                                                      | ID model penuh yang dihalakan ke Anthropic                                                                                     |
 | `logLevel` / `startupDebug`      | `warn` / `false`                                          | Tahap keterperincian pengelog                                                                                                  |
 
-Memori penggunaan diaktifkan secara lalai. Tanpa token pengurusan, ciri ini kekal tidak aktif
-(notis permulaan direkodkan) dan tiada apa-apa dipulihkan.
+Memori penggunaan diaktifkan secara lalai. Tanpa token pengurusan, ia kekal tidak aktif
+(notis permulaan dilogkan) dan tiada apa-apa dipulihkan.
 
 ## Cara katalog kekal terkini
 

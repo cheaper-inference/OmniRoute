@@ -1,8 +1,18 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { DiscoveryPageClient } from "../DiscoveryPageClient";
+
+// The results now render in the kit Table (KEA-7886), whose persistent scrollbar measures the
+// table with ResizeObserver — jsdom does not implement it.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 // Stable `t` reference: useTranslations must return the SAME function across
 // renders, otherwise the `load` useCallback (dep [t]) changes every render and

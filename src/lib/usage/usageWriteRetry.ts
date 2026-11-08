@@ -15,12 +15,14 @@
  */
 
 import { getDbInstance } from "../db/core";
+import { resolveBillingTeamIdForApiKeyAt } from "../db/teams";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
   resolveOrphanedUsageAccountIdentity,
   resolveUsageAccountIdentity,
 } from "./accountIdentity";
 import { normalizeServiceTier } from "./usageHistory/helpers";
+import { readReportedCost } from "./creditMeteredProviders";
 import { emitUsageRecorded } from "./usageEvents";
 import {
   getLoggedInputTokens,
@@ -104,6 +106,7 @@ type PreparedEntry = {
   entry: UsageEntry;
   timestamp: string;
   serviceTier: string;
+  billingTeamId: string | null;
   tokensInput: number;
   tokensOutput: number;
   accountIdentity: {
@@ -123,6 +126,9 @@ function prepareEntry(db: ReturnType<typeof getDbInstance>, entry: UsageEntry): 
     entry,
     timestamp,
     serviceTier: normalizeServiceTier(entry.serviceTier ?? entry.service_tier),
+    // Ordinary terminal writes always resolve ownership from effective history.
+    // Historical snapshot restoration belongs to the authenticated JSON importer.
+    billingTeamId: resolveBillingTeamIdForApiKeyAt(entry.apiKeyId, timestamp),
     tokensInput: getLoggedInputTokens(entry.tokens),
     tokensOutput: getLoggedOutputTokens(entry.tokens),
     accountIdentity: connection
@@ -152,14 +158,24 @@ function insertUnlessDuplicate(
 }
 
 function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEntry): void {
-  const { entry, timestamp, serviceTier, tokensInput, tokensOutput, accountIdentity } = prepared;
+  const {
+    entry,
+    timestamp,
+    serviceTier,
+    billingTeamId,
+    tokensInput,
+    tokensOutput,
+    accountIdentity,
+  } = prepared;
+  const { providerCredits, providerCostUsd } = readReportedCost(entry.provider, entry.tokens);
   db.prepare(
     `
     INSERT INTO usage_history (provider, model, connection_id, account_key, account_label,
-      account_label_priority, api_key_id, api_key_name, tokens_input, tokens_output,
-      tokens_cache_read, tokens_cache_creation, tokens_reasoning, service_tier, status, success,
-      latency_ms, ttft_ms, error_code, combo_strategy, endpoint, cpa_auth_index, timestamp)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      account_label_priority, api_key_id, api_key_name, billing_team_id,
+      tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
+      service_tier, status, success, latency_ms, ttft_ms, error_code, combo_strategy, endpoint,
+      cpa_auth_index, timestamp, provider_credits, provider_cost_usd)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
   ).run(
     entry.provider ? resolveProviderId(entry.provider) : null,
@@ -170,6 +186,7 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     accountIdentity.accountLabelPriority,
     entry.apiKeyId || null,
     entry.apiKeyName || null,
+    billingTeamId,
     tokensInput,
     tokensOutput,
     getPromptCacheReadTokens(entry.tokens),
@@ -184,7 +201,9 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     entry.comboStrategy || entry.combo_strategy || null,
     entry.endpoint || null,
     entry.cpaAuthIndex || null,
-    timestamp
+    timestamp,
+    providerCredits,
+    providerCostUsd
   );
 }
 

@@ -35,3 +35,44 @@ export function isComboPerModelTimeoutAbort(signal: AbortSignal | null | undefin
   if (!signal?.aborted) return false;
   return abortReasonMessage(signal) === COMBO_PER_MODEL_TIMEOUT_REASON;
 }
+
+/**
+ * True only when `signal` was aborted by the combo-level sibling supersession
+ * (a hedge race loser, or a sibling landing a terminal response). A client
+ * disconnect or a per-model timeout both return false.
+ */
+export function isHedgeCancelledSignal(signal: AbortSignal | null | undefined): boolean {
+  if (!signal?.aborted) return false;
+  return abortReasonMessage(signal) === COMBO_HEDGE_CANCELLED_REASON;
+}
+
+/**
+ * True when `error` carries the hedge-cancel reason: directly as the abort
+ * reason error (native `fetch` rejects with `signal.reason`), as a raw string
+ * (`abort(reason)` with a string), or nested in a wrapper's `.cause` chain
+ * (executors/proxy layers re-wrap rejections). Bare DOMException aborts and
+ * every other failure shape return false.
+ */
+export function isHedgeCancelledReasonError(error: unknown): boolean {
+  const seen = new Set<unknown>();
+  let current: unknown = error;
+  for (let depth = 0; depth < 4 && current && !seen.has(current); depth++) {
+    seen.add(current);
+    if (typeof current === "string") return current === COMBO_HEDGE_CANCELLED_REASON;
+    if (typeof current !== "object") return false;
+    let message: string;
+    try {
+      const value = (current as { message?: unknown }).message;
+      message = typeof value === "string" ? value : "";
+    } catch {
+      return false;
+    }
+    if (message === COMBO_HEDGE_CANCELLED_REASON) return true;
+    try {
+      current = (current as { cause?: unknown }).cause;
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}

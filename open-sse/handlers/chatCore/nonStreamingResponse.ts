@@ -1,10 +1,11 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * Non-streaming response path, lifted out of handleChatCore.
  * The body matches the barrel. Closed-over request state arrives through
  * deps, and the values the barrel reads afterwards leave through carry.
  */
 
-import { meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
+import { isUnpricedMeteredCost, meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
 import { readCpaAuthIndex } from "../chatCore/failureUsage.ts";
 
 import { createRoutingEvent, emitRoutingEvent } from "../../services/routing/index.ts";
@@ -21,6 +22,7 @@ import {
 import {
   applyServerOwnedToolLoopIfNeeded,
   derivePostInjectionRequestIdentity,
+  finalizeServerOwnedFollowUpRequest,
   followUpLegInput,
 } from "../chatCore/serverOwnedToolLoopWire.ts";
 
@@ -58,7 +60,7 @@ import { runNonStreamingProviderLeg } from "../chatCore/nonStreamingProviderLeg.
 import type { NonStreamingProviderLegResult } from "@/lib/skills/toolLoopTypes.ts";
 import { finalizeToolLoopError } from "../chatCore/nonStreamingFinalization.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
-import { deleteSessionAccountAffinity } from "@/lib/db/sessionAccountAffinity";
+import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
 import { MEMORY_BUILTIN_TOOL_NAMES } from "@/lib/skills/memoryBuiltins";
 
@@ -89,7 +91,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     buildCacheUsageLogMeta,
     buildCostCtx,
     buildErrorBody,
-    calculateCost,
+    calculateCostDetailed,
     calibrationEstimatedInputTokens,
     claudePromptCacheLogMeta: _claudePromptCacheLogMeta,
     clientRawRequest,
@@ -112,7 +114,9 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     extractSessionAffinityKey,
     extractUsageFromResponse,
     finalBody: _finalBody,
+    geminiPromptCacheMode,
     finalizePendingScope,
+    forcedConnectionId,
     getCurrentConnectionId,
     getManagedLeaseFenceErrorCode,
     getModelNormalizeToolCallId,
@@ -127,6 +131,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     injectionResult,
     isCombo,
     isJsonRecord,
+    isScopedGeminiCacheTarget,
     isLocalStreamLifecycleError,
     isSemaphoreCapacityError,
     isServerOwnedToolLoopEnabled,
@@ -198,9 +203,11 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     requestToolIdentityMap,
     stream,
     toolNameMap,
+    tokensCompressed,
     traceEnabled,
     videoBridgeObserved,
   } = deps;
+  let upstreamHttpSelection: HttpAttemptSelection | null = null;
   const familyFallback = createRequestFamilyFallback(provider, {
     headers: clientRawRequest?.headers,
     hasApiKeyMetadata: Boolean(apiKeyInfo),
@@ -231,12 +238,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       policy,
       model: pipelineModel,
       translatedBody: wireBody,
+      upstreamHttpRejection,
     }) => {
       translatedBody = wireBody as typeof translatedBody;
       syncExecuteTranslatedBody(translatedBody);
       currentModel = pipelineModel;
       triedModels.add(pipelineModel);
       return runProviderExecutionPipeline({
+        upstreamHttpRejection,
         getNextFamilyFallback: familyFallback.getNext,
         policy,
         target: {
@@ -307,11 +316,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
               extractSessionAffinityKey(body, clientRawRequest?.headers) ||
               null;
             if (!key) return;
-            try {
-              deleteSessionAccountAffinity(key, "codex");
-            } catch {
-              // best-effort
-            }
+            deleteSessionAccountAffinityBestEffort(key, "codex");
           },
           onAuditAccountRotation: (params) => {
             logAuditEvent({
@@ -327,8 +332,8 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
             });
           },
         },
-        sendProviderAttempt: (modelToCall, allowDedup) =>
-          executeProviderRequest(modelToCall, allowDedup),
+        sendProviderAttempt: (modelToCall, allowDedup, rejection) =>
+          executeProviderRequest(modelToCall, allowDedup, undefined, rejection),
         getLastOutboundBody: () => providerRequestCapture.latest()?.body,
         onSignatureFailure: reportSignatureFailure,
       });
@@ -342,11 +347,15 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       expectedConnectionId: managedLease
         ? String(getCurrentConnectionId() || connectionId || "") || undefined
         : undefined,
-      allowAccountRotation: !managedLease && comboStrategy !== "context-relay",
+      // The connection pin is strict (API_REFERENCE: "used exclusively", cooldown on
+      // failure, no sibling rotation). The outer retry loop honours it; the in-pipeline
+      // account rotation must too, or a pinned 429 is silently answered by another account.
+      allowAccountRotation:
+        !managedLease && comboStrategy !== "context-relay" && !forcedConnectionId,
       allowModelFallback: true,
       hasApiKeyMetadata: Boolean(apiKeyInfo),
-      executeProviderRequest: (modelToCall, allowDedup) =>
-        executeProviderRequest(modelToCall, allowDedup),
+      executeProviderRequest: (modelToCall, allowDedup, policy, rejection) =>
+        executeProviderRequest(modelToCall, allowDedup, policy, rejection),
       runProviderExecution: runNonStreamingPipeline,
       setRequestWireState: ({ translatedBody: nextBody, effectiveModel: nextModel }) => {
         translatedBody = nextBody as typeof translatedBody;
@@ -374,6 +383,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       log,
     });
 
+    upstreamHttpSelection = legResult.upstreamHttpSelection ?? null;
     if (legResult.kind === "error") {
       const err = legResult.result;
       const errMessage =
@@ -426,6 +436,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         status: `FAILED ${err.status}`,
       }).catch(() => {});
       persistAttemptLogs({
+        upstreamHttpSelection,
         status: err.status,
         error: err.error || "Provider request failed",
         providerRequest: finalBody || translatedBody,
@@ -441,7 +452,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         cacheSource: "upstream",
       });
       persistFailureUsage(err.status, err.errorCode || `upstream_${err.status}`);
-      trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+      trackPendingRequest(
+        model,
+        provider,
+        pendingConnId,
+        false,
+        undefined,
+        pendingScope.owner ?? pendingRequestId
+      );
       return {
         response: err,
         carry: {
@@ -541,12 +559,18 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
             },
           }
         );
+        const followUpFinalized = finalizeServerOwnedFollowUpRequest({
+          translatedBody: translatedBody as Record<string, unknown>,
+          provider,
+          targetFormat,
+        });
+        translatedBody = followUpFinalized.translatedBody;
         syncExecuteTranslatedBody(translatedBody);
         return runNonStreamingProviderLeg(
           followUpLegInput(
             {
-              executeProviderRequest: (modelToCall, allowDedup) =>
-                executeProviderRequest(modelToCall, allowDedup),
+              executeProviderRequest: (modelToCall, allowDedup, policy, rejection) =>
+                executeProviderRequest(modelToCall, allowDedup, policy, rejection),
               runProviderExecution: runNonStreamingPipeline,
               setRequestWireState: ({ translatedBody: nextBody, effectiveModel: nextModel }) => {
                 translatedBody = nextBody as typeof translatedBody;
@@ -563,9 +587,9 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
               getCurrentConnectionId: () => getCurrentConnectionId() || undefined,
               effectiveModel: currentModel,
               translatedBody: translatedBody as Record<string, unknown>,
-              toolNameMap,
+              toolNameMap: followUpFinalized.toolNameMap,
               customToolNames,
-              requestToolIdentityMap,
+              requestToolIdentityMap: followUpFinalized.requestToolIdentityMap,
               reasoningCacheScope,
               reasoningReplayHistory,
               videoTranscriptSensitive: videoBridgeObserved,
@@ -584,6 +608,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       return {
         response: await finalizeToolLoopError({
           loop: loopApply.loop,
+          upstreamHttpSelection: loopApply.loop.upstreamHttpSelection ?? null,
           model,
           provider,
           connectionId: pendingConnId,
@@ -591,7 +616,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           persistFailureUsage,
           persistAttemptLogs,
           trackPendingRequest,
-          pendingRequestId,
+          pendingRequestId: pendingScope.owner ?? pendingRequestId,
         }),
         carry: {
           translatedBody,
@@ -621,6 +646,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       okLeg = loopApply.leg;
     }
 
+    upstreamHttpSelection = okLeg.upstreamHttpSelection ?? null;
     if (okLeg.upstreamResponse) {
       providerResponse = okLeg.upstreamResponse;
       providerHeaders = normalizeHeaders(okLeg.upstreamResponse.headers);
@@ -679,7 +705,15 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       usage,
       toolLoopUsage != null
     );
-    const cacheUsageLogMeta = buildCacheUsageLogMeta(usage);
+    const cacheUsageLogMeta = buildCacheUsageLogMeta(
+      usage,
+      isScopedGeminiCacheTarget
+        ? {
+            mode: geminiPromptCacheMode,
+            compressionTokens: tokensCompressed || undefined,
+          }
+        : undefined
+    );
     if (usage && typeof usage === "object") {
       attachCompressionUsageReceiptAfterAnalytics(usage as Record<string, unknown>, "provider");
       if (provider === "gemini") {
@@ -782,14 +816,20 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         ? translatedResponse.usage
         : null;
     const costUsage = normalizeUsage(responseUsage);
-    const estimatedCost = costUsage
-      ? await calculateCost(provider, model, costUsage, { serviceTier: effectiveServiceTier })
-      : 0;
+    const costResult = costUsage
+      ? await calculateCostDetailed(provider, model, costUsage, {
+          serviceTier: effectiveServiceTier,
+        })
+      : null;
+    const estimatedCost = costResult?.costUsd ?? 0;
+    // A metered model with no price must not pass the dollar budget as $0.
+    const unpricedBudgetCost = isUnpricedMeteredCost(provider, costResult);
     const chatCostCtx = buildCostCtx(provider, model, usage, effectiveServiceTier, traceId);
 
     if (postCallGuardrails.blocked) {
       const guardrailMessage = postCallGuardrails.message || "Response blocked by guardrail";
       persistAttemptLogs({
+        upstreamHttpSelection,
         status: HTTP_STATUS.BAD_REQUEST,
         tokens: usage,
         responseBody,
@@ -804,13 +844,15 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         clientResponse: buildErrorBody(HTTP_STATUS.BAD_REQUEST, guardrailMessage),
         claudeCacheMeta: claudePromptCacheLogMeta,
         claudeCacheUsageMeta: cacheUsageLogMeta,
+        geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
         cacheSource: "upstream",
       });
       recordChatCallCost(
         apiKeyInfo,
         meteredBudgetCost(provider, estimatedCost),
         chatCostCtx,
-        false
+        false,
+        unpricedBudgetCost
       );
       log?.warn?.(
         "GUARDRAIL",
@@ -894,6 +936,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       persistAttemptLogs({
         status: HTTP_STATUS.BAD_GATEWAY,
         error: malformedDiagnostic,
+        upstreamHttpSelection,
         tokens: usage,
         responseBody: sanitizedMalformedResponse,
         providerRequest: finalBody || translatedBody,
@@ -901,10 +944,18 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         clientResponse: malformedClientBody,
         claudeCacheMeta: claudePromptCacheLogMeta,
         claudeCacheUsageMeta: cacheUsageLogMeta,
+        geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
         cacheSource: "upstream",
       });
       persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "malformed_translated_response");
-      trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+      trackPendingRequest(
+        model,
+        provider,
+        pendingConnId,
+        false,
+        undefined,
+        pendingScope.owner ?? pendingRequestId
+      );
       // Routing event (feedback foundation) — record the malformed outcome so
       // the quality tracker de-prioritizes this model over time.
       void emitRoutingEvent(
@@ -924,6 +975,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           status: HTTP_STATUS.BAD_GATEWAY,
           finishReason: routingFinishReason(translatedResponse),
           connectionId: credentials?.connectionId ?? null,
+          apiKeyId: apiKeyInfo?.id ?? null,
         })
       );
       return {
@@ -970,6 +1022,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     await saveIdempotency(idempotencyKey, translatedResponse, 200);
     reqLogger.logConvertedResponse(translatedResponse);
     persistAttemptLogs({
+      upstreamHttpSelection,
       status: 200,
       tokens: usage,
       responseBody,
@@ -984,9 +1037,16 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       clientResponse: translatedResponse,
       claudeCacheMeta: claudePromptCacheLogMeta,
       claudeCacheUsageMeta: cacheUsageLogMeta,
+      geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
       cacheSource: "upstream",
     });
-    recordChatCallCost(apiKeyInfo, meteredBudgetCost(provider, estimatedCost), chatCostCtx, true);
+    recordChatCallCost(
+      apiKeyInfo,
+      meteredBudgetCost(provider, estimatedCost),
+      chatCostCtx,
+      true,
+      unpricedBudgetCost
+    );
 
     // === Quota Share POST-hook (B/F7) — fire-and-forget, fail-open ===
     await scheduleQuotaShareConsumption({
@@ -1077,6 +1137,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         status: 200,
         finishReason: routingFinishReason(translatedResponse),
         connectionId: credentials?.connectionId ?? null,
+        apiKeyId: apiKeyInfo?.id ?? null,
       })
     );
 
@@ -1105,7 +1166,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       },
     };
   } catch (error) {
-    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    trackPendingRequest(
+      model,
+      provider,
+      pendingConnId,
+      false,
+      undefined,
+      pendingScope.owner ?? pendingRequestId
+    );
     const errorMetadata = getSafeErrorMetadata(error);
     const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
     if (managedLeaseFenceCode)
@@ -1135,6 +1203,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       }).catch(() => {});
       const failureMessage = sanitizeErrorMessage(errorMetadata.message) || "Semaphore timeout";
       persistAttemptLogs({
+        upstreamHttpSelection: null,
         status: HTTP_STATUS.RATE_LIMITED,
         error: failureMessage,
         providerRequest: finalBody || translatedBody,

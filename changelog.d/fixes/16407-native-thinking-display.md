@@ -1,1 +1,0 @@
-- Honor the configured thinking-summary display for native Claude OAuth requests while preserving explicit display settings and disabled thinking modes. (#16407)

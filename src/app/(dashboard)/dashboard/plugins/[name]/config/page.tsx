@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, use } from "react";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Card, Button } from "@/shared/components";
+import Checkbox from "@/shared/components/Checkbox";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
 
@@ -81,60 +85,63 @@ export default function PluginConfigPage({ params }: { params: Promise<{ name: s
 
   return (
     <div className="space-y-6 p-6">
-      <h1 className="text-2xl font-bold">{t("configure", { name })}</h1>
+      <PageHeader compact title={t("configure", { name })} />
 
       {schemaKeys.length === 0 ? (
-        <Card className="p-4">
-          <p className="text-gray-500">{t("noConfigSettings")}</p>
+        <Card padding="sm">
+          <p className="text-text-muted">{t("noConfigSettings")}</p>
         </Card>
       ) : (
-        <Card className="space-y-4 p-4">
+        <Card padding="sm" className="space-y-4">
           {schemaKeys.map((key) => {
             const field = plugin.configSchema[key];
             const value = config[key] ?? field.default ?? "";
 
             return (
-              <div key={key} className="space-y-1">
-                <label className="text-sm font-medium">
-                  {key}
-                  {field.description && (
-                    <span className="ml-2 text-xs text-gray-500">{field.description}</span>
-                  )}
-                </label>
+              <div key={key}>
                 {field.type === "boolean" ? (
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={!!value}
                     onChange={(e) => handleChange(key, e.target.checked)}
-                    className="ml-2"
+                    label={
+                      <>
+                        {key}
+                        {field.description && (
+                          <span className="ml-2 text-xs text-text-muted">{field.description}</span>
+                        )}
+                      </>
+                    }
                   />
                 ) : field.enum ? (
-                  <select
+                  <Select
+                    label={key}
+                    hint={field.description || undefined}
                     value={String(value)}
                     onChange={(e) => handleChange(key, e.target.value)}
-                    className="w-full rounded border p-2"
                   >
                     {field.enum.map((opt) => (
                       <option key={opt} value={opt}>
                         {opt}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 ) : field.type === "number" ? (
-                  <input
+                  <Input
+                    label={key}
+                    hint={field.description || undefined}
                     type="number"
                     value={Number(value)}
                     min={field.min}
                     max={field.max}
                     onChange={(e) => handleChange(key, Number(e.target.value))}
-                    className="w-full rounded border p-2"
                   />
                 ) : (
-                  <input
+                  <Input
+                    label={key}
+                    hint={field.description || undefined}
                     type="text"
                     value={String(value)}
                     onChange={(e) => handleChange(key, e.target.value)}
-                    className="w-full rounded border p-2"
                   />
                 )}
               </div>

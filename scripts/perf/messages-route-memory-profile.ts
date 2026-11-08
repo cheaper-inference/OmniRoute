@@ -1023,7 +1023,7 @@ async function runDriver(): Promise<void> {
     provenance,
     harnessSha256: harnessHash(),
     baseBranch: "release/v3.8.51",
-    inheritedBaseRed: "diegosouzapw/OmniRoute#12732",
+    inheritedBaseRed: "cheaper-inference/OmniRoute#12732",
     variedFactor: "serialized context bytes only",
     fixedConditions: {
       concurrency: 1,

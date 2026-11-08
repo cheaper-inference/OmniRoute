@@ -16,6 +16,7 @@ import { getCustomModels } from "@/lib/db/models";
 import { getProviderNodeById } from "@/lib/db/providers";
 import { requiresWebSessionCredential } from "@/shared/providers/webSessionCredentials";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { isImageOnlyModel } from "@omniroute/open-sse/config/imageRegistry";
 import { withRateLimit } from "@omniroute/open-sse/services/rateLimitManager";
 import {
   isCreditsExhausted,
@@ -26,6 +27,7 @@ import { getTrustedLocalRateLimitError } from "@omniroute/open-sse/services/rate
 import { runAsProbe } from "@/shared/utils/probeOrigin";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
+import { ownListenerSelfHopToken, SELF_HOP_HEADER } from "@omniroute/open-sse/utils/selfHop";
 
 const INTERNAL_ORIGIN = "http://omniroute.internal";
 export const DEFAULT_MODEL_TEST_TIMEOUT_MS = 30_000;
@@ -34,6 +36,8 @@ const DOLA_PRO_TEST_TIMEOUT_MS = 90_000;
 const DOUBAO_WEB_PROVIDER_ID = "doubao-web";
 const ZAI_WEB_PROVIDER_ID = "zai-web";
 const ZAI_WEB_TEST_TIMEOUT_MS = 60_000;
+const CHATGPT_WEB_PROVIDER_ID = "chatgpt-web";
+const CHATGPT_WEB_TEST_TIMEOUT_MS = 90_000;
 const XIAOMI_MIMO_TOKEN_PLAN_PROVIDER_ID = "xiaomi-mimo-token-plan";
 const XIAOMI_MIMO_TOKEN_PLAN_TEST_TIMEOUT_MS = 60_000;
 const SLOW_WEB_TEST_MODELS = new Set(["dola-pro"]);
@@ -138,6 +142,10 @@ export function resolveModelTestTimeoutMs(
     return Math.max(requestedTimeoutMs, ZAI_WEB_TEST_TIMEOUT_MS);
   }
 
+  if (normalizedProviderId === CHATGPT_WEB_PROVIDER_ID) {
+    return Math.max(requestedTimeoutMs, CHATGPT_WEB_TEST_TIMEOUT_MS);
+  }
+
   if (normalizedProviderId === XIAOMI_MIMO_TOKEN_PLAN_PROVIDER_ID) {
     return Math.max(requestedTimeoutMs, XIAOMI_MIMO_TOKEN_PLAN_TEST_TIMEOUT_MS);
   }
@@ -193,8 +201,10 @@ export function buildInternalChatRequest(
       // The bearer gives the request a memory owner; a connection test must not receive
       // injected memory/skills or feed memory extraction (same opt-out as #13139).
       "x-omniroute-no-memory": "true",
-      // Reuse the existing strict-mode internal bypass for live health checks.
+      // Reuse the existing strict-mode internal bypass for live health checks. The mark only
+      // counts next to the process token: this call never crosses fetch, so nothing stamps it.
       "X-Internal-Test": "combo-health-check",
+      [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
       "X-OmniRoute-No-Cache": "true",
       // #6240: a connection test must be clean — never let the operator's globally-enabled
       // Output Styles (e.g. "Ultra terse") leak a system prompt into a test-model call.
@@ -220,6 +230,7 @@ export function buildInternalResponsesRequest(
       Authorization: `Bearer ${resolveSelfLoopBearer()}`,
       "x-omniroute-no-memory": "true",
       "X-Internal-Test": "combo-health-check",
+      [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
       "X-OmniRoute-No-Cache": "true",
       "X-OmniRoute-Compression": "off",
       "X-Request-Id": `model-test-${randomUUID()}`,
@@ -375,17 +386,21 @@ export function detectTestKind(modelStr: string, customModel: any, nodeApiType?:
       nodeType === "responses" ||
       supportedEndpoints.includes("responses"));
   // Non-chat generation endpoints (image, music, video) should NOT be dispatched
-  // as chat completions — they incur billable generation costs (#13376).
+  // as chat completions — they incur billable generation costs (#13376). An explicit
+  // generation apiFormat, or an image-only registry model that chat.ts rejects
+  // (#6457), wins over the add-model form's default "chat" tick (#17071).
+  const isGenerationFormat = apiFormat === "images-generations" || apiFormat === "video";
+  const isGenerationOnlyTag =
+    !supportedEndpoints.includes("chat") &&
+    ["images", "images-generations", "music", "videos"].some((endpoint) =>
+      supportedEndpoints.includes(endpoint)
+    );
   const isNonChatGeneration =
     !isAudioTranscription &&
     !isRerank &&
     !isEmbedding &&
     !isResponses &&
-    supportedEndpoints.length > 0 &&
-    !supportedEndpoints.includes("chat") &&
-    (supportedEndpoints.includes("images") ||
-      supportedEndpoints.includes("music") ||
-      supportedEndpoints.includes("videos"));
+    (isGenerationFormat || isGenerationOnlyTag || isImageOnlyModel(modelStr));
 
   return {
     isRerank,
@@ -608,6 +623,7 @@ export async function runSingleModelTest(
       // model's modality cannot be exercised by a chat test. The route passes httpStatus
       // straight to NextResponse — omitting it made Next answer 200 for a skipped test.
       httpStatus: 422,
+      skipped: true,
       error:
         "Skipped: non-chat generation model (images/music/video) — use the corresponding generation endpoint instead",
     };

@@ -169,6 +169,7 @@ test("sync keeps a same-id manual model as the user-configurable metadata overri
       id: "shared-model",
       name: "Operator configuration",
       source: "manual",
+      endpointCapabilitySource: "operator",
       apiFormat: "responses",
       supportedEndpoints: ["responses"],
       targetFormat: "claude",

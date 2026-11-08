@@ -4,7 +4,6 @@
  */
 import { CORS_HEADERS } from "../utils/cors.ts";
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
-import { audioStreamResponse } from "../utils/audioResponse.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import {
   SyntxMediaError,
@@ -17,6 +16,7 @@ import {
   transcribeSyntxAudio,
 } from "../services/syntxMedia.ts";
 import { looksLikeJwt } from "../services/syntxAuth.ts";
+import { upstreamAudioContentType } from "@/shared/network/remoteImageFetch";
 
 type Creds = {
   apiKey?: string;
@@ -66,8 +66,11 @@ export async function handleSyntxSpeech({
     });
     const url = firstMediaUrl(result, "audio") || result.media[0]?.url;
     if (!url) return errorResponse(502, "SYNTX speech completed without an audio URL");
-    const audioRes = await fetchImpl(url);
-    return audioStreamResponse(audioRes);
+    const { bytes, contentType } = await fetchSyntxMediaBytes(url);
+    return new Response(new Uint8Array(bytes), {
+      status: 200,
+      headers: { ...CORS_HEADERS, "Content-Type": upstreamAudioContentType(contentType) },
+    });
   } catch (error) {
     const status = error instanceof SyntxMediaError ? error.status : 502;
     return errorResponse(
@@ -127,6 +130,7 @@ async function runSyntxMusicJob(options: {
   startTime: number;
   log?: { info?: (...args: unknown[]) => void; error?: (...args: unknown[]) => void };
   fetchImpl: typeof fetch;
+  signal?: AbortSignal | null;
 }) {
   const { aiName, modelType } = resolveSyntxMediaTarget(options.model, "music");
   const settings = mapSyntxAudioRequestSettings(aiName, modelType, options.body);
@@ -150,7 +154,7 @@ async function runSyntxMusicJob(options: {
   const item = await musicItemFromUrl(
     url,
     String(options.body.response_format || "").toLowerCase() === "b64_json",
-    options.fetchImpl
+    options.signal ?? null
   );
   saveCallLog({
     method: "POST",
@@ -167,11 +171,11 @@ async function runSyntxMusicJob(options: {
 async function musicItemFromUrl(
   url: string,
   wantsBase64: boolean,
-  fetchImpl: typeof fetch
+  signal: AbortSignal | null
 ): Promise<{ url?: string; b64_json?: string; format: string }> {
   if (!wantsBase64) return { url, format: "mp3" };
   return {
-    b64_json: (await fetchSyntxMediaBytes(url, fetchImpl)).bytes.toString("base64"),
+    b64_json: (await fetchSyntxMediaBytes(url, { signal })).bytes.toString("base64"),
     format: "mp3",
   };
 }
@@ -183,6 +187,7 @@ export async function handleSyntxMusicGeneration({
   credentials,
   log,
   fetchImpl = fetch,
+  signal = null,
 }: {
   model: string;
   provider: string;
@@ -190,6 +195,7 @@ export async function handleSyntxMusicGeneration({
   credentials: Creds | null | undefined;
   log?: { info?: (...args: unknown[]) => void; error?: (...args: unknown[]) => void };
   fetchImpl?: typeof fetch;
+  signal?: AbortSignal | null;
 }) {
   const startTime = Date.now();
   const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
@@ -215,6 +221,7 @@ export async function handleSyntxMusicGeneration({
       startTime,
       log,
       fetchImpl,
+      signal,
     });
   } catch (error) {
     const status = error instanceof SyntxMediaError ? error.status : 502;

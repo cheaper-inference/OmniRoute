@@ -120,6 +120,51 @@ export function normalizeComplianceEventTypes(
   };
 }
 
+/**
+ * Webpack builds load each locale catalog as its raw JSON text (`asset/source`
+ * rule in next.config.mjs) so the compiler does not hold every catalog as an
+ * object tree; Turbopack, tsx and Node still hand back the parsed object.
+ * Accept both.
+ */
+export function parseLocaleMessages(source: unknown): Record<string, unknown> {
+  return (typeof source === "string" ? JSON.parse(source) : source) as Record<string, unknown>;
+}
+
+type CatalogImporter = (locale: string) => Promise<unknown>;
+
+/**
+ * Parses each locale's catalog once and then returns the same object for the
+ * life of the process, the lifetime the module cache gave the parsed JSON
+ * before. In `next dev` an edited catalog still shows up: the rebuild
+ * re-evaluates this module, and with it the cache.
+ */
+export function createLocaleMessagesLoader(importCatalog: CatalogImporter) {
+  const parsed = new Map<string, Record<string, unknown>>();
+  return async function loadLocaleMessages(locale: string): Promise<Record<string, unknown>> {
+    const cached = parsed.get(locale);
+    if (cached) return cached;
+    const messages = parseLocaleMessages(await importCatalog(locale));
+    parsed.set(locale, messages);
+    return messages;
+  };
+}
+
+const loadLocaleMessages = createLocaleMessagesLoader(
+  async (locale) => (await import(`./messages/${locale}.json`)).default
+);
+
+const normalizedCache = new WeakMap<Record<string, unknown>, Record<string, unknown>>();
+
+export function getNormalizedLocaleMessages(
+  messages: Record<string, unknown>
+): Record<string, unknown> {
+  const cached = normalizedCache.get(messages);
+  if (cached) return cached;
+  const normalized = normalizeComplianceEventTypes(messages);
+  normalizedCache.set(messages, normalized);
+  return normalized;
+}
+
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
   let locale: string = cookieStore.get(LOCALE_COOKIE)?.value || "";
@@ -131,19 +176,22 @@ export default getRequestConfig(async () => {
 
   locale = resolveRequestedLocale(locale, LOCALES, LOCALE_ALIASES, DEFAULT_LOCALE);
 
-  const localeMessages = normalizeComplianceEventTypes(
-    (await import(`./messages/${locale}.json`)).default as Record<string, unknown>
-  );
+  const rawLocaleMessages = await loadLocaleMessages(locale);
+  const localeMessages = getNormalizedLocaleMessages(rawLocaleMessages);
+
+  // When the active locale is the fallback (EN), return immediately without cloning or merging
+  if (locale === FALLBACK_LOCALE) {
+    return {
+      locale,
+      messages: localeMessages,
+    };
+  }
 
   // G1: fall back to EN for any missing key. EN is loaded only once per request
   // and only when the active locale is not EN itself (no-op).
-  let messages = localeMessages as Record<string, unknown>;
-  if (locale !== FALLBACK_LOCALE) {
-    const fallbackMessages = normalizeComplianceEventTypes(
-      (await import(`./messages/${FALLBACK_LOCALE}.json`)).default as Record<string, unknown>
-    );
-    messages = deepMergeFallback({ ...localeMessages }, fallbackMessages);
-  }
+  const rawFallbackMessages = await loadLocaleMessages(FALLBACK_LOCALE);
+  const fallbackMessages = getNormalizedLocaleMessages(rawFallbackMessages);
+  let messages = deepMergeFallback({ ...localeMessages }, fallbackMessages);
 
   // 4. Merge EN as namespace-level fallback for locales that are missing new namespaces.
   //    Only applied when the active locale is not EN (avoids a redundant import).
@@ -152,16 +200,14 @@ export default getRequestConfig(async () => {
   //    This ensures new namespaces (e.g. cliCode, cliAgents, acpAgents, cliCommon added
   //    in plan 14 F9) are displayed in English for the 39 non-EN/non-pt-BR locales until
   //    translations are shipped.
-  let mergedMessages: Record<string, unknown> = messages as Record<string, unknown>;
-  if (locale !== DEFAULT_LOCALE) {
-    const enMessages = normalizeComplianceEventTypes(
-      (await import(`./messages/${DEFAULT_LOCALE}.json`)).default as Record<string, unknown>
-    );
-    mergedMessages = { ...enMessages, ...mergedMessages };
+  if (locale !== DEFAULT_LOCALE && DEFAULT_LOCALE !== FALLBACK_LOCALE) {
+    const rawEnMessages = await loadLocaleMessages(DEFAULT_LOCALE);
+    const enMessages = getNormalizedLocaleMessages(rawEnMessages);
+    messages = { ...enMessages, ...messages };
   }
 
   return {
     locale,
-    messages: mergedMessages,
+    messages,
   };
 });

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Modal, Button, Input, Select } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import Textarea from "@/shared/components/Textarea";
 
 interface Memory {
   id: string;
@@ -23,6 +25,8 @@ export default function EditMemoryModal({ memory, isOpen, onClose, onSaved }: Pr
   const t = useTranslations("memory");
   const [type, setType] = useState<"factual" | "episodic" | "procedural" | "semantic">("factual");
   const [key, setKey] = useState("");
+  const contentId = useId();
+  const metadataId = useId();
   const [content, setContent] = useState("");
   const [metadataStr, setMetadataStr] = useState("{}");
   const [metadataError, setMetadataError] = useState("");
@@ -111,55 +115,53 @@ export default function EditMemoryModal({ memory, isOpen, onClose, onSaved }: Pr
     >
       <div className="space-y-4">
         {error && (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-400">
+          <div className="p-3 rounded-lg bg-error/10 border border-error/20 text-xs text-error">
             {error}
           </div>
         )}
-        <div>
-          <label className="block text-sm font-medium mb-1">{t("type")}</label>
-          <Select
-            value={type}
-            onChange={(e) => setType(e.target.value as typeof type)}
-            className="w-full"
-          >
-            <option value="factual">{t("factual")}</option>
-            <option value="episodic">{t("episodic")}</option>
-            <option value="procedural">{t("procedural")}</option>
-            <option value="semantic">{t("semantic")}</option>
-          </Select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">{t("key")}</label>
-          <Input
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            placeholder={t("keyPlaceholder")}
-            className="w-full"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">{t("content")}</label>
-          <textarea
+        <Select
+          label={t("type")}
+          value={type}
+          onChange={(e) => setType(e.target.value as typeof type)}
+          className="w-full"
+        >
+          <option value="factual">{t("factual")}</option>
+          <option value="episodic">{t("episodic")}</option>
+          <option value="procedural">{t("procedural")}</option>
+          <option value="semantic">{t("semantic")}</option>
+        </Select>
+        <Input
+          label={t("key")}
+          value={key}
+          onChange={(e) => setKey(e.target.value)}
+          placeholder={t("keyPlaceholder")}
+          className="w-full"
+        />
+        <Field label={t("content")} htmlFor={contentId}>
+          <Textarea
+            id={contentId}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t("contentPlaceholder")}
             rows={4}
-            className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 resize-y"
+            className="resize-y text-sm"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">{t("editModal.metadataLabel")}</label>
-          <textarea
+        </Field>
+        <Field
+          label={t("editModal.metadataLabel")}
+          htmlFor={metadataId}
+          error={metadataError || undefined}
+        >
+          <Textarea
+            id={metadataId}
             value={metadataStr}
             onChange={(e) => handleMetadataChange(e.target.value)}
             rows={4}
             spellCheck={false}
-            className={`w-full px-3 py-2 rounded-lg bg-background border text-xs font-mono focus:outline-none focus:ring-1 focus:ring-violet-500 resize-y ${
-              metadataError ? "border-red-500" : "border-border"
-            }`}
+            error={Boolean(metadataError)}
+            className="resize-y font-mono text-xs"
           />
-          {metadataError && <p className="text-xs text-red-400 mt-1">{metadataError}</p>}
-        </div>
+        </Field>
       </div>
     </Modal>
   );

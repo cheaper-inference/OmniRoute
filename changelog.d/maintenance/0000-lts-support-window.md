@@ -1,1 +1,0 @@
-- **docs:** SECURITY.md now states the v3.9 LTS support window: `stable/v3` receives security fixes and critical regressions for 12 months after the 3.9.0 cut, or until 90 days after v4.0.0 becomes `latest`, whichever is later (T-GAP-3).

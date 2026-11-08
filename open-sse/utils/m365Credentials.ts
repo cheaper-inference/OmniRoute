@@ -7,7 +7,7 @@ export interface M365CredentialParts {
 
 const CHATHUB_PATH = "/m365Copilot/Chathub/";
 const TRUSTED_HOST =
-  /^(?:[a-z0-9-]+\.)*(?:m365\.cloud\.microsoft|copilot\.microsoft\.com|substrate\.office\.com)$/i;
+  /^(?:(?:[a-z0-9-]+\.)*(?:m365\.cloud\.microsoft|copilot\.microsoft\.com|substrate\.office\.com)|substrate\.svc\.cloud\.microsoft)$/i;
 
 export type M365ChatHubUrlResult =
   | { credential: Required<M365CredentialParts> }

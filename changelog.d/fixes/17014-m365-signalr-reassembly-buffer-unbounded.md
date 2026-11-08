@@ -1,1 +1,0 @@
-- **fix(sse):** a Microsoft 365 Copilot turn whose WebSocket frames never terminate now aborts at the same 1 MiB pending-buffer cap as the Claude Web reader instead of growing memory without bound ([#17014](https://github.com/diegosouzapw/OmniRoute/pull/17014)) — thanks @maxmad64bis

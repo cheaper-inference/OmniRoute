@@ -38,34 +38,34 @@ Studio nwere taabụ atọ nke jikọtara ọchụchọ webụ, ịwepụta ọd
 
 ### Taabụ Ọchụchọ
 
-Na-akwalite `SearchForm` + `ResultsPanel` + `RerankPanel` ndị dị ugbu a ka ha bụrụ taabụ:
+Na-agbanwe `SearchForm` + `ResultsPanel` + `RerankPanel` ndị dị ugbu a ka ha bụrụ taabụ:
 
-- Ajụjụ → nsonaazụ (aha, URL, mpempe ederede, akara mkpa).
-- Metadata onye na-eweta ọrụ na pane Nhazi (ọnụahịa, oke ojiji, ọnọdụ).
-- Ngalaba nhazigharị: họrọ model nhazigharị, hazigharịa nsonaazụ, gosipụta `positionDelta`.
-- Ọnọdụ efu nwere CTA mgbe ahazighị onye na-eweta ọchụchọ ọ bụla.
+- Ajụjụ → nsonaazụ (aha, URL, iberibe ọdịnaya, akara mkpa).
+- Metadata nke onye na-eweta ọrụ na paanụ Config (ọnụahịa, oke ojiji, ọnọdụ).
+- Ngalaba nhazigharị: họrọ ụdị nhazigharị, hazigharịa nsonaazụ, gosipụta `positionDelta`.
+- Ọnọdụ efu nwere oku ime ihe (CTA) mgbe ahazighị onye na-eweta ọrụ ọchụchọ ọ bụla.
 - Akụkọ ọchụchọ site na `SearchHistory.tsx`.
 - Na-akpọ `POST /v1/search` (endpoint dị ugbu a, enweghị mgbanwe).
 
-### Taabụ Nwepụta
+### Taabụ Scrape
 
 Taabụ ọhụrụ maka iwepụta ọdịnaya site na URL site na `POST /v1/web/fetch` (emepụtara na atụmatụ 05):
 
-- Ntinye: URL + toggle peeji zuru ezu + nhọrọ usoro (markdown / ederede / HTML).
-- Nyefee → nweta → gosipụta `ScrapeResult.tsx`.
-- `ScrapeResult` na-egosipụta nhụchalụ markdown + toggle nke ọdịnaya raw.
-- Oke: ọ bụrụ na body nzaghachi > **256 KB**, UI na-egosi `(ebipụrụ, lee raw)` ma mepee raw n'ime modal Monaco (D21).
-- Pane metadata: onye na-eweta (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), oge ode, ọnụahịa, nha nzaghachi, ọnụ ọgụgụ njikọ.
+- Ntinye: URL + mgba ọkụ ibe zuru ezu + ihe nhọpụta usoro (markdown / ederede / HTML).
+- Nyefee → weta → gosipụta `ScrapeResult.tsx`.
+- `ScrapeResult` na-egosipụta nlele markdown + mgba ọkụ maka ọdịnaya raw.
+- Oke: ọ bụrụ na ahụ nzaghachi > **256 KB**, UI na-egosi `(ebelatara, lee raw)` ma mepee ọdịnaya raw na modal Monaco (D21).
+- Paanụ metadata: onye na-eweta ọrụ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latency, ọnụahịa, nha nzaghachi, ọnụọgụ njikọ.
 - Na-eji hook `useScrapeFetch.ts`.
 
 ### Taabụ Ntụnyere
 
-Na-eme otu ajụjụ/URL ahụ n'ofe ihe ruru **ndị na-eweta ọrụ 4 n'otu oge** (D22):
+Na-eme otu ajụjụ/URL ahụ n’ofe ndị na-eweta ọrụ ruru **4 n’otu oge** (D22):
 
-- Kọlụm dị n'akụkụ ibe ha maka onye na-eweta ọrụ ọ bụla.
-- Ọ̀tụ̀tụ̀: oge ode, ọnụahịa, ọnụ ọgụgụ nsonaazụ, nha nzaghachi.
-- Ngụkọta njikọ URL maka ọchụchọ (ọnụ ọgụgụ URL ndị ha nwekọrọ ma e jiri ya tụnyere nsonaazụ mbụ).
-- Na-akpọ `POST /v1/search` (ọchụchọ) ma ọ bụ `POST /v1/web/fetch` (nwepụta) maka onye na-eweta ọrụ ọ bụla.
+- Kọlụm ndị dị n’akụkụ ibe ha maka onye na-eweta ọrụ ọ bụla.
+- Metrik: latency, ọnụahịa, ọnụọgụ nsonaazụ, nha nzaghachi.
+- Mgbakọ ndakọrịta URL maka ọchụchọ (ọnụọgụ URL ndị jikọrọ ọnụ ma e jiri ya tụnyere nsonaazụ mbụ).
+- Na-akpọ `POST /v1/search` (ọchụchọ) ma ọ bụ `POST /v1/web/fetch` (scrape) maka onye na-eweta ọrụ ọ bụla.
 
 ---
 
@@ -98,15 +98,15 @@ Na-eme otu ajụjụ/URL ahụ n'ofe ihe ruru **ndị na-eweta ọrụ 4 n'otu o
 
 ---
 
-## Katalọgụ Provider
+## Katalọgụ Ndị Na-enye Ọrụ
 
-`ProviderCatalog.tsx` na-egosi ndepụta provider zuru ezu sitere na `GET /api/search/providers`
-(a gbasapụrụ na F4 iji tinye fetch providers):
+`ProviderCatalog.tsx` na-egosi ndepụta zuru ezu nke ndị na-enye ọrụ sitere na `GET /api/search/providers`
+(nke a gbasapụrụ na F4 iji tinye ndị na-enye ọrụ fetch):
 
-| `kind` | `"search"` (providers 20) ma ọ bụ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (ndị na-enye ọrụ 20) ma ọ bụ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-A na-**ewepụta status n’oge request** site n’ịchọpụta ma credentials dị nakwa ma
-keys niile nọ ugbu a na cooldown.
+A na-**ewepụta ọkwa ahụ n'oge arịrịọ** site n’ịchọpụta ma ozi nzere dị nakwa ma
+igodo niile hà nọ ugbu a n’oge nchere cooldown.
 
 ---
 
@@ -120,16 +120,16 @@ Ebe ndochi API key na-abụkarị `$OMNIROUTE_API_KEY` (D11, nke ya na Playgroun
 
 ## Mgbanwe Backend
 
-Naanị otu mgbanwe backend ka atụmatụ a chọrọ:
+Naanị otu mgbanwe backend ka achọrọ maka atụmatụ a:
 
-### `GET /api/search/providers` Agbasapụrụ
+### `GET /api/search/providers` Agbasawanyere
 
-A gbasapụrụ `src/app/api/search/providers/route.ts` iji:
+Agbasawanyere `src/app/api/search/providers/route.ts` ka ọ:
 
-- Tinye fetch providers 6 niile (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) na array ahụ.
-- Tinye `kind: "search" | "fetch"` n’ihe ọ bụla.
-- Tinye `status: "configured" | "missing" | "rate_limited"` nke sitere na ọnọdụ credentials dị ugbu a.
-- Debe ndakọrịta na nsụgharị gara aga — fields ndị dịbu (`id`, `name`, wdg.) agbanweghị.
+- Tinye fetch provider niile (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) n'ime array ahụ.
+- Tinye `kind: "search" | "fetch"` n'ihe ọ bụla.
+- Tinye `status: "configured" | "missing" | "rate_limited"` nke ewepụtara site na ọnọdụ credential dị ugbu a.
+- Debe ndakọrịta na ụdị ochie — field ndị dị adị (`id`, `name`, wdg.) agbanweghị.
 
 ---
 

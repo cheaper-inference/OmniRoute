@@ -113,21 +113,21 @@ E2E ਮੈਟ੍ਰਿਕਸ ਨੂੰ ਆਪਣੇ-ਆਪ ਛੱਡ ਦਿੰ�
 
 ### ਰਿਲੀਜ਼ ਤੋਂ ਪਹਿਲਾਂ
 
-- [ ] ਇਸ ਰਿਲੀਜ਼ ਲਈ ਨਿਸ਼ਾਨਾ ਬਣਾਏ ਸਾਰੇ PRs `release/vX.Y.0` ਵਿੱਚ merge ਹੋ ਚੁੱਕੇ ਹਨ
-- [ ] ਇਸ ਵਰਜਨ ਲਈ ਸਾਰੀਆਂ ਖੁੱਲ੍ਹੀਆਂ Linear/issue ਆਈਟਮਾਂ ਬੰਦ ਹਨ ਜਾਂ ਅਗਲੇ milestone ਵਿੱਚ ਭੇਜੀਆਂ ਗਈਆਂ ਹਨ
-- [ ] `release/vX.Y.0` branch ਉੱਤੇ CI ਹਰਾ ਹੈ
-- [ ] ਕੋਡ ਵਿੱਚ ਕੋਈ `TODO(release)` ਮਾਰਕਰ ਨਹੀਂ: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker base image ਅੱਪ-ਟੂ-ਡੇਟ ਹੈ (ਇਸ ਵੇਲੇ `node:24.15.0-trixie-slim`)
+- [ ] ਇਸ ਰਿਲੀਜ਼ ਲਈ ਨਿਸ਼ਾਨਾ ਬਣਾਏ ਸਾਰੇ PRs ਨੂੰ `release/vX.Y.0` ਵਿੱਚ ਮਰਜ ਕੀਤਾ ਗਿਆ ਹੈ
+- [ ] ਇਸ ਵਰਜਨ ਲਈ ਸਾਰੇ ਖੁੱਲ੍ਹੇ Linear/issue ਆਈਟਮ ਬੰਦ ਕਰ ਦਿੱਤੇ ਗਏ ਹਨ ਜਾਂ ਅਗਲੇ ਮਾਈਲਸਟੋਨ ਵੱਲ ਭੇਜ ਦਿੱਤੇ ਗਏ ਹਨ
+- [ ] `release/vX.Y.0` ਬ੍ਰਾਂਚ ਉੱਤੇ CI ਹਰਾ ਹੈ
+- [ ] ਕੋਡ ਵਿੱਚ ਕੋਈ `TODO(release)` ਮਾਰਕਰ ਨਹੀਂ ਹੈ: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker ਬੇਸ ਇਮੇਜ ਅੱਪ ਟੂ ਡੇਟ ਹੈ (ਇਸ ਵੇਲੇ `node:24.15.0-trixie-slim`)
 
-### ਵਰਜਨ ਅਤੇ ਤਬਦੀਲੀ-ਲਾਗ
+### ਵਰਜਨ ਅਤੇ ਚੇਂਜਲੌਗ
 
-- [ ] `/version-bump-cc <patch|minor|major>` ਚਲਾਓ (Claude Code skill)
-  - `package.json`, `electron/package.json` ਨੂੰ bump ਕਰਦਾ ਹੈ
-  - ਪਿਛਲੇ tag ਤੋਂ ਬਾਅਦ ਦੇ git commits ਤੋਂ `CHANGELOG.md` ਮੁੜ ਤਿਆਰ ਕਰਦਾ ਹੈ
-  - README.md badges ਅੱਪਡੇਟ ਕਰਦਾ ਹੈ
-- [ ] CHANGELOG.md ਦੀ ਹੱਥੀਂ ਸਮੀਖਿਆ ਕਰੋ ਅਤੇ ਲੋੜ ਪੈਣ 'ਤੇ commit messages ਸਾਫ਼ ਕਰੋ
-- [ ] ਯਕੀਨੀ ਬਣਾਓ ਕਿ `CHANGELOG.md` ਵਿੱਚ ਸਭ ਤੋਂ ਨਵਾਂ semver ਸੈਕਸ਼ਨ `package.json` ਦੇ ਵਰਜਨ ਦੇ ਬਰਾਬਰ ਹੈ
-- [ ] ਆਉਣ ਵਾਲੇ ਕੰਮ ਲਈ `## [Unreleased]` ਨੂੰ changelog ਦਾ ਪਹਿਲਾ ਸੈਕਸ਼ਨ ਰੱਖੋ
+- [ ] `/version-bump-cc <patch|minor|major>` ਚਲਾਓ (Claude Code ਸਕਿਲ)
+  - `package.json`, `electron/package.json` ਦੇ ਵਰਜਨ ਵਧਾਉਂਦਾ ਹੈ
+  - ਪਿਛਲੇ ਟੈਗ ਤੋਂ ਬਾਅਦ ਵਾਲੀਆਂ git ਕਮਿਟਾਂ ਤੋਂ `CHANGELOG.md` ਮੁੜ ਤਿਆਰ ਕਰਦਾ ਹੈ
+  - README.md ਬੈਜ ਅੱਪਡੇਟ ਕਰਦਾ ਹੈ
+- [ ] CHANGELOG.md ਦੀ ਹੱਥੀਂ ਸਮੀਖਿਆ ਕਰੋ ਅਤੇ ਲੋੜ ਪੈਣ 'ਤੇ ਕਮਿਟ ਸੁਨੇਹੇ ਸਾਫ਼ ਕਰੋ
+- [ ] ਯਕੀਨੀ ਬਣਾਓ ਕਿ `CHANGELOG.md` ਵਿੱਚ ਨਵੀਨਤਮ semver ਸੈਕਸ਼ਨ `package.json` ਦੇ ਵਰਜਨ ਦੇ ਬਰਾਬਰ ਹੈ
+- [ ] ਆਉਣ ਵਾਲੇ ਕੰਮ ਲਈ `## [Unreleased]` ਨੂੰ ਪਹਿਲੇ ਚੇਂਜਲੌਗ ਸੈਕਸ਼ਨ ਵਜੋਂ ਰੱਖੋ
 - [ ] `docs/openapi.yaml` ਅੱਪਡੇਟ ਕਰੋ → `info.version` ਦਾ `package.json` ਦੇ ਵਰਜਨ ਦੇ ਬਰਾਬਰ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ
 
 ### ਕੋਡ ਗੁਣਵੱਤਾ
@@ -135,138 +135,138 @@ E2E ਮੈਟ੍ਰਿਕਸ ਨੂੰ ਆਪਣੇ-ਆਪ ਛੱਡ ਦਿੰ�
 - [ ] `npm run lint` — 0 ਗਲਤੀਆਂ (ਚੇਤਾਵਨੀਆਂ ਪਹਿਲਾਂ ਤੋਂ ਮੌਜੂਦ ਹਨ)
 - [ ] `npm run typecheck:core` — ਸਾਫ਼
 - [ ] `npm run typecheck:noimplicit:core` — ਸਾਫ਼ (ਸਖ਼ਤ)
-- [ ] `npm run check:cycles:ratchet` — `cycles ≤ metrics.cycles.value` (`quality-baseline.json`; `check:cycles`: `cycles > 0 → exit 1`, #15281)
+- [ ] `npm run check:cycles:ratchet` — ਸਥਿਰ ਕੀਤੀ `metrics.cycles` ਸੀਮਾ ਦੇ ਅੰਦਰ (ਸਧਾਰਨ `check:cycles` ਕਿਸੇ ਵੀ ਚੱਕਰ 'ਤੇ 1 ਨਾਲ ਬੰਦ ਹੁੰਦਾ ਹੈ, #15281)
 - [ ] `npm run check:any-budget:t11` — ਬਜਟ ਦੇ ਅੰਦਰ
 - [ ] `npm run check:route-validation:t06` — ਸਾਫ਼
-- [ ] `npm run check:node-runtime` — ਸਮਰਥਿਤ runtime ਦੀ ਘੱਟੋ-ਘੱਟ ਸੀਮਾ ਪੂਰੀ ਹੁੰਦੀ ਹੈ (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` ਵਿੱਚ `SUPPORTED_NODE_RANGE` ਅਨੁਸਾਰ; `package.json` ਦੇ `engines` ਨਾਲ ਇਕਸਾਰ)
+- [ ] `npm run check:node-runtime` — ਸਮਰਥਿਤ ਰਨਟਾਈਮ ਦੀ ਘੱਟੋ-ਘੱਟ ਸੀਮਾ ਪੂਰੀ ਹੁੰਦੀ ਹੈ (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` ਵਿੱਚ `SUPPORTED_NODE_RANGE` ਅਨੁਸਾਰ; `package.json` ਦੇ `engines` ਨਾਲ ਇਕਸਾਰ)
 
 ### ਟੈਸਟਿੰਗ
 
-- [ ] `npm run test:unit` — ਸਫਲ
-- [ ] `npm run test:vitest` — ਸਫਲ (MCP server, autoCombo, cache)
-- [ ] `npm run test:coverage` — 60/60/60/60 ਗੇਟ ਸੰਤੁਸ਼ਟ (statements/lines/functions/branches)
-- [ ] `npm run test:integration` — ਸਫਲ (ਜੇ ਤਬਦੀਲੀਆਂ DB / handlers ਨੂੰ ਛੂਹਦੀਆਂ ਹਨ)
-- [ ] `npm run test:combo:matrix` — ਸਫਲ (combo strategy ਮੈਟ੍ਰਿਕਸ: ਸਾਰੀਆਂ 19 ਜਨਤਕ routing strategies ਦੇ ਚੋਣ ਫ਼ੈਸਲਿਆਂ ਨੂੰ ਨਿਰਧਾਰਿਤ ਢੰਗ ਨਾਲ ਸਾਬਤ ਕਰਦਾ ਹੈ; combo routing, strategy resolution, ਜਾਂ fallback logic ਨੂੰ ਛੂਹਣ ਵੇਲੇ ਚਲਾਓ)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ਵਿਕਲਪਿਕ/ਹੱਥੀਂ** (ਗੇਟ ਕੀਤਾ ਹੋਇਆ ਅਸਲ-upstream smoke; VPS `root@192.168.0.15` ਤੋਂ read-only DB snapshot ਲੈਂਦਾ ਹੈ; ਅਸਲ providers ਨੂੰ ਵਰਤਦਾ ਹੈ, credits ਖਰਚ ਹੁੰਦੇ ਹਨ; CI ਵਿੱਚ ਕਦੇ ਨਹੀਂ ਚੱਲਦਾ; ਗੇਟ ਤੋਂ ਬਿਨਾਂ ਸਾਫ਼ ਢੰਗ ਨਾਲ ਛੱਡ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ)
-- [ ] `npm run test:combo:live:vps` — **ਵਿਕਲਪਿਕ/ਹੱਥੀਂ** (Phase-3 VPS live smoke: ਸਧਾਰਨ Node ESM ਰਾਹੀਂ live `.15` server ਦੇ ਵਿਰੁੱਧ 7 HTTP scenarios; `ssh root@192.168.0.15` ਦੀ ਲੋੜ ਹੈ; ਕੇਵਲ `__live_test__*` combos ਬਣਾਉਂਦਾ/ਮਿਟਾਉਂਦਾ ਹੈ; ਅਸਲ providers ਨੂੰ ਵਰਤਦਾ ਹੈ; CI ਵਿੱਚ ਕਦੇ ਨਹੀਂ ਚੱਲਦਾ)
-- [ ] `npm run test:e2e` — ਸਫਲ (UI ਤਬਦੀਲੀਆਂ)
-- [ ] `npm run test:protocols:e2e` — ਸਫਲ (MCP/A2A ਤਬਦੀਲੀਆਂ)
-- [ ] `npm run test:ecosystem` — ਸਫਲ
+- [ ] `npm run test:unit` — ਪਾਸ
+- [ ] `npm run test:vitest` — ਪਾਸ (MCP ਸਰਵਰ, autoCombo, ਕੈਸ਼)
+- [ ] `npm run test:coverage` — 60/60/60/60 ਦੀ ਸ਼ਰਤ ਪੂਰੀ (ਸਟੇਟਮੈਂਟ/ਲਾਈਨਾਂ/ਫੰਕਸ਼ਨ/ਬ੍ਰਾਂਚਾਂ)
+- [ ] `npm run test:integration` — ਪਾਸ (ਜੇ ਤਬਦੀਲੀਆਂ DB / ਹੈਂਡਲਰਾਂ ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਕਰਦੀਆਂ ਹਨ)
+- [ ] `npm run test:combo:matrix` — ਪਾਸ (ਕਾਂਬੋ ਰਣਨੀਤੀ ਮੈਟ੍ਰਿਕਸ: ਸਾਰੀਆਂ 19 ਜਨਤਕ ਰਾਊਟਿੰਗ ਰਣਨੀਤੀਆਂ ਦੇ ਚੋਣ ਫ਼ੈਸਲਿਆਂ ਨੂੰ ਨਿਰਧਾਰਤ ਢੰਗ ਨਾਲ ਸਾਬਤ ਕਰਦਾ ਹੈ; ਕਾਂਬੋ ਰਾਊਟਿੰਗ, ਰਣਨੀਤੀ ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਜਾਂ ਫਾਲਬੈਕ ਲਾਜਿਕ ਵਿੱਚ ਤਬਦੀਲੀ ਕਰਨ ਵੇਲੇ ਚਲਾਓ)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ਵਿਕਲਪਿਕ/ਹੱਥੀਂ** (ਗੇਟ ਕੀਤਾ ਅਸਲ-ਅੱਪਸਟ੍ਰੀਮ ਸਮੋਕ ਟੈਸਟ; VPS `root@192.168.0.15` ਤੋਂ ਕੇਵਲ-ਪੜ੍ਹਨਯੋਗ DB ਸਨੈਪਸ਼ਾਟ ਲੈਂਦਾ ਹੈ; ਅਸਲ ਪ੍ਰਦਾਤਿਆਂ ਨੂੰ ਹਿੱਟ ਕਰਦਾ ਹੈ ਅਤੇ ਕ੍ਰੈਡਿਟ ਖਰਚਦਾ ਹੈ; CI ਵਿੱਚ ਕਦੇ ਨਹੀਂ ਚੱਲਦਾ; ਗੇਟ ਤੋਂ ਬਿਨਾਂ ਸਾਫ਼-ਸੁਥਰੇ ਢੰਗ ਨਾਲ ਛੱਡ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ)
+- [ ] `npm run test:combo:live:vps` — **ਵਿਕਲਪਿਕ/ਹੱਥੀਂ** (Phase-3 VPS ਲਾਈਵ ਸਮੋਕ ਟੈਸਟ: ਸਧਾਰਨ Node ESM ਰਾਹੀਂ ਲਾਈਵ `.15` ਸਰਵਰ ਵਿਰੁੱਧ 7 HTTP ਦ੍ਰਿਸ਼; `ssh root@192.168.0.15` ਦੀ ਲੋੜ ਹੈ; ਕੇਵਲ `__live_test__*` ਕਾਂਬੋ ਬਣਾਉਂਦਾ/ਮਿਟਾਉਂਦਾ ਹੈ; ਅਸਲ ਪ੍ਰਦਾਤਿਆਂ ਨੂੰ ਹਿੱਟ ਕਰਦਾ ਹੈ; CI ਵਿੱਚ ਕਦੇ ਨਹੀਂ ਚੱਲਦਾ)
+- [ ] `npm run test:e2e` — ਪਾਸ (UI ਤਬਦੀਲੀਆਂ)
+- [ ] `npm run test:protocols:e2e` — ਪਾਸ (MCP/A2A ਤਬਦੀਲੀਆਂ)
+- [ ] `npm run test:ecosystem` — ਪਾਸ
 
-### Hooks (Husky ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ)
+### ਹੁੱਕ (Husky ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ)
 
-Husky hooks `.husky/` ਵਿੱਚ ਮੌਜੂਦ ਹਨ ਅਤੇ git ਕਾਰਵਾਈਆਂ ਉੱਤੇ ਆਪਣੇ-ਆਪ ਚੱਲਦੇ ਹਨ।
+Husky ਹੁੱਕ `.husky/` ਵਿੱਚ ਮੌਜੂਦ ਹਨ ਅਤੇ git ਕਾਰਵਾਈਆਂ ਦੌਰਾਨ ਆਪਣੇ-ਆਪ ਚੱਲਦੇ ਹਨ।
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** ਤੇਜ਼ ਨਿਰਧਾਰਿਤ ਗੇਟ — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 ਨੂੰ ਸਰਗਰਮ ਕੀਤਾ ਗਿਆ)। ਜਾਣਬੁੱਝ ਕੇ `test:unit` ਨੂੰ ਸ਼ਾਮਲ ਨਹੀਂ ਕਰਦਾ (ਹੌਲਾ; CI ਦੀ `test-unit` job ਦੁਆਰਾ ਕਵਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ)।
-  - release branches ਨੂੰ push ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ `npm run test:unit` ਹੱਥੀਂ ਚਲਾਓ।
+- **pre-push:** ਤੇਜ਼ ਅਤੇ ਨਿਰਧਾਰਤ ਗੇਟ — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 ਨੂੰ ਸਰਗਰਮ ਕੀਤਾ ਗਿਆ)। ਜਾਣ-ਬੁੱਝ ਕੇ `test:unit` ਨੂੰ ਸ਼ਾਮਲ ਨਹੀਂ ਕਰਦਾ (ਹੌਲਾ ਹੈ; CI ਦੇ `test-unit` ਜੌਬ ਦੁਆਰਾ ਕਵਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ)।
+  - ਰਿਲੀਜ਼ ਬ੍ਰਾਂਚਾਂ ਨੂੰ ਪੁਸ਼ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ `npm run test:unit` ਹੱਥੀਂ ਚਲਾਓ।
 
-ਜੇ ਕੋਈ hook ਅਸਫਲ ਹੁੰਦਾ ਹੈ: ਮੂਲ ਸਮੱਸਿਆ ਠੀਕ ਕਰੋ, `--no-verify` ਨਾਲ ਇਸਨੂੰ bypass ਨਾ ਕਰੋ।
+ਜੇ ਕੋਈ ਹੁੱਕ ਫੇਲ੍ਹ ਹੁੰਦਾ ਹੈ: ਮੂਲ ਸਮੱਸਿਆ ਠੀਕ ਕਰੋ, `--no-verify` ਨਾਲ ਇਸਨੂੰ ਬਾਈਪਾਸ ਨਾ ਕਰੋ।
 
-### Conventional Commits
+### ਰਵਾਇਤੀ ਕਮਿਟਾਂ
 
-ਰਿਲੀਜ਼ ਵਿੱਚ ਜਾਣ ਵਾਲੇ ਸਾਰੇ commits ਲਈ `type(scope): subject` ਫਾਰਮੈਟ ਦੀ ਪਾਲਣਾ ਲਾਜ਼ਮੀ ਹੈ।
+ਰਿਲੀਜ਼ ਵਿੱਚ ਜਾਣ ਵਾਲੀਆਂ ਸਾਰੀਆਂ ਕਮਿਟਾਂ ਲਈ `type(scope): subject` ਫਾਰਮੈਟ ਦੀ ਪਾਲਣਾ ਲਾਜ਼ਮੀ ਹੈ।
 
-**ਵੈਧ types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**ਵੈਧ ਕਿਸਮਾਂ:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**ਵੈਧ scopes:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**ਵੈਧ ਸਕੋਪ:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-Breaking changes: `BREAKING CHANGE:` footer ਜਾਂ scope ਤੋਂ ਬਾਅਦ `!` ਜੋੜੋ (ਜਿਵੇਂ `feat(api)!: drop /v0`)।
+ਬ੍ਰੇਕਿੰਗ ਤਬਦੀਲੀਆਂ: `BREAKING CHANGE:` ਫੁੱਟਰ ਜਾਂ ਸਕੋਪ ਤੋਂ ਬਾਅਦ `!` ਜੋੜੋ (ਉਦਾਹਰਨ ਵਜੋਂ `feat(api)!: drop /v0`)।
 
 ### ਦਸਤਾਵੇਜ਼ੀਕਰਨ
 
 - [ ] `npm run check:docs-sync` ਪਾਸ ਹੁੰਦਾ ਹੈ (pre-commit ਦੁਆਰਾ ਆਪਣੇ-ਆਪ ਚਲਾਇਆ ਜਾਂਦਾ ਹੈ)
 - [ ] `npm run check:docs-all` ਪਾਸ ਹੁੰਦਾ ਹੈ (ਸੰਯੁਕਤ ਜਾਂਚ: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` 0 ਨਾਲ ਬੰਦ ਹੁੰਦਾ ਹੈ — ਕੋਡ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ਇਕਰਾਰਨਾਮਾ ਬਰਕਰਾਰ ਹੈ
+- [ ] `npm run check:env-doc-sync` 0 ਨਾਲ ਬੰਦ ਹੁੰਦਾ ਹੈ — ਕੋਡ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ਕਾਂਟ੍ਰੈਕਟ ਸਹੀ-ਸਲਾਮਤ ਹੈ
 - [ ] `npm run check:doc-links` 0 ਨਾਲ ਬੰਦ ਹੁੰਦਾ ਹੈ — ਪੁਨਰਗਠਨ ਤੋਂ ਬਾਅਦ ਕੋਈ ਅੰਦਰੂਨੀ markdown ਹਵਾਲਾ ਟੁੱਟਿਆ ਨਹੀਂ ਹੈ
-- [ ] ਸਟੋਰੇਜ/ਰਨਟਾਈਮ ਅੰਤਰ ਲਈ `docs/architecture/ARCHITECTURE.md` ਦੀ ਸਮੀਖਿਆ ਕੀਤੀ ਗਈ
-- [ ] env var ਅਤੇ ਸੰਚਾਲਨ ਸੰਬੰਧੀ ਅੰਤਰ ਲਈ `docs/guides/TROUBLESHOOTING.md` ਦੀ ਸਮੀਖਿਆ ਕੀਤੀ ਗਈ
-- [ ] ਜੇ `.env.example` ਬਦਲਿਆ ਹੈ: `docs/reference/ENVIRONMENT.md` ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ
+- [ ] ਸਟੋਰੇਜ/ਰਨਟਾਈਮ ਡ੍ਰਿਫਟ ਲਈ `docs/architecture/ARCHITECTURE.md` ਦੀ ਸਮੀਖਿਆ ਕੀਤੀ ਗਈ ਹੈ
+- [ ] env var ਅਤੇ ਓਪਰੇਸ਼ਨਲ ਡ੍ਰਿਫਟ ਲਈ `docs/guides/TROUBLESHOOTING.md` ਦੀ ਸਮੀਖਿਆ ਕੀਤੀ ਗਈ ਹੈ
+- [ ] ਜੇ `.env.example` ਬਦਲਿਆ ਹੈ: `docs/reference/ENVIRONMENT.md` ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ ਹੈ
 - [ ] ਜੇ ਨਵੀਂ ਵਿਸ਼ੇਸ਼ਤਾ ਦਾ UI ਹੈ: `docs/guides/USER_GUIDE.md` ਵਿੱਚ ਇਸਦਾ ਜ਼ਿਕਰ ਹੈ
-- [ ] ਜੇ ਨਵੀਂ ਵਿਸ਼ੇਸ਼ਤਾ ਦੀ API ਹੈ: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` ਅੱਪਡੇਟ ਕੀਤੇ ਗਏ
+- [ ] ਜੇ ਨਵੀਂ ਵਿਸ਼ੇਸ਼ਤਾ ਦਾ API ਹੈ: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` ਅੱਪਡੇਟ ਕੀਤੇ ਗਏ ਹਨ
 - [ ] ਜੇ ਨਵੀਂ ਵਿਸ਼ੇਸ਼ਤਾ ਇੱਕ ਮੋਡੀਊਲ ਹੈ: ਸਮਰਪਿਤ `docs/<MODULE>.md` ਮੌਜੂਦ ਹੈ
-- [ ] ਜੇ ਇਹ ਬ੍ਰੇਕਿੰਗ ਬਦਲਾਅ ਹੈ: `docs/guides/TROUBLESHOOTING.md` ਵਿੱਚ ਮਾਈਗ੍ਰੇਸ਼ਨ ਨੋਟ ਹੈ
+- [ ] ਜੇ ਇਹ ਬ੍ਰੇਕਿੰਗ ਤਬਦੀਲੀ ਹੈ: `docs/guides/TROUBLESHOOTING.md` ਵਿੱਚ ਮਾਈਗ੍ਰੇਸ਼ਨ ਨੋਟ ਮੌਜੂਦ ਹੈ
 
 ### i18n
 
-- [ ] `npm run i18n:check` 0 ਨਾਲ ਬੰਦ ਹੁੰਦਾ ਹੈ — ਅਨੁਵਾਦ ਸਥਿਤੀ (`.i18n-state.json`) ਸਰੋਤ ਦਸਤਾਵੇਜ਼ਾਂ ਨਾਲ ਸਿੰਕ ਵਿੱਚ ਹੈ (ਸਖ਼ਤ ਮੋਡ ਵਿੱਚ ਕੋਈ ਸਰੋਤ ਅੰਤਰ ਨਹੀਂ; ਆਖ਼ਰੀ ਪਲ ਦੇ ਦਸਤਾਵੇਜ਼ੀ ਸੁਧਾਰਾਂ ਲਈ ਚੇਤਾਵਨੀ-ਮੋਡ ਸਲਾਹ ਸਵੀਕਾਰਯੋਗ ਹੈ, ਪਰ ਟੈਗ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਇਹ 0 ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ)
-- [ ] `npm run i18n:check-ui-coverage` 0 ਨਾਲ ਬੰਦ ਹੁੰਦਾ ਹੈ — ਹਰ UI ਲੋਕੇਲ 80% ਕਵਰੇਜ ਦੀ ਘੱਟੋ-ਘੱਟ ਹੱਦ 'ਤੇ ਜਾਂ ਉਸ ਤੋਂ ਉੱਪਰ ਹੈ
-- [ ] `npm run i18n:sync-ui:dry` ਸਾਰੇ 42 ਲੋਕੇਲਾਂ ਵਿੱਚ 0 ਗੁੰਮ ਕੁੰਜੀਆਂ ਦੀ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ
+- [ ] `npm run i18n:check` 0 ਨਾਲ ਬੰਦ ਹੁੰਦਾ ਹੈ — ਅਨੁਵਾਦ ਸਥਿਤੀ (`.i18n-state.json`) ਸਰੋਤ ਦਸਤਾਵੇਜ਼ਾਂ ਨਾਲ ਸਿੰਕ ਹੈ (ਸਖ਼ਤ ਮੋਡ ਵਿੱਚ ਕੋਈ ਡ੍ਰਿਫਟ ਕੀਤਾ ਸਰੋਤ ਨਹੀਂ; ਆਖ਼ਰੀ ਵੇਲੇ ਦੇ ਛੋਟੇ ਦਸਤਾਵੇਜ਼ੀ ਸੁਧਾਰਾਂ ਲਈ ਚੇਤਾਵਨੀ-ਮੋਡ ਦੀ ਸਲਾਹ ਮਨਜ਼ੂਰਯੋਗ ਹੈ, ਪਰ ਟੈਗ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਇਹ 0 ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ)
+- [ ] `npm run i18n:check-ui-coverage` 0 ਨਾਲ ਬੰਦ ਹੁੰਦਾ ਹੈ — ਹਰੇਕ UI ਲੋਕੇਲ 80% ਕਵਰੇਜ ਦੀ ਘੱਟੋ-ਘੱਟ ਸੀਮਾ 'ਤੇ ਜਾਂ ਇਸ ਤੋਂ ਉੱਪਰ ਹੈ
+- [ ] `npm run i18n:sync-ui:dry` ਸਾਰੇ 66 ਨਿਸ਼ਾਨਾ ਲੋਕੇਲਾਂ ਵਿੱਚ 0 ਗੁੰਮ ਕੁੰਜੀਆਂ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ (`en` ਸਰੋਤ ਤੋਂ ਇਲਾਵਾ ਹਰੇਕ ਲੋਕੇਲ)
 - [ ] ਜੇ ਸਰੋਤ ਅੰਗਰੇਜ਼ੀ ਦਸਤਾਵੇਜ਼ ਬਦਲੇ ਹਨ, ਤਾਂ ਟੈਗ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ `npm run i18n:run` ਚਲਾਓ (`.env` ਵਿੱਚ `OMNIROUTE_TRANSLATION_API_KEY` ਦੀ ਲੋੜ ਹੈ)
-- [ ] ਜੇ ਅਨੁਵਾਦ ਯੋਗਦਾਨ ਮਾਮੂਲੀ ਹਨ, ਤਾਂ ਉਨ੍ਹਾਂ ਨੂੰ ਅਗਲੀ ਰਿਲੀਜ਼ ਤੱਕ ਮੁਲਤਵੀ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ (CHANGELOG ਵਿੱਚ ਟਰੈਕ ਕਰੋ)
+- [ ] ਜੇ ਅਨੁਵਾਦ ਯੋਗਦਾਨ ਛੋਟੇ ਹਨ ਤਾਂ ਉਨ੍ਹਾਂ ਨੂੰ ਅਗਲੀ ਰਿਲੀਜ਼ ਤੱਕ ਮੁਲਤਵੀ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ (CHANGELOG ਵਿੱਚ ਟਰੈਕ ਕਰੋ)
 
-### ਡਾਟਾਬੇਸ ਮਾਈਗ੍ਰੇਸ਼ਨਾਂ
+### ਡਾਟਾਬੇਸ ਮਾਈਗ੍ਰੇਸ਼ਨ
 
-- [ ] ਜੇ `src/lib/db/migrations/` ਵਿੱਚ ਨਵੀਆਂ ਫ਼ਾਈਲਾਂ ਹਨ:
-  - [ ] ਹਰ ਮਾਈਗ੍ਰੇਸ਼ਨ idempotent ਹੈ (`CREATE TABLE IF NOT EXISTS`, ਆਦਿ)
+- [ ] ਜੇ `src/lib/db/migrations/` ਵਿੱਚ ਨਵੀਆਂ ਫਾਈਲਾਂ ਹਨ:
+  - [ ] ਹਰੇਕ ਮਾਈਗ੍ਰੇਸ਼ਨ idempotent ਹੈ (`CREATE TABLE IF NOT EXISTS`, ਆਦਿ)
   - [ ] ਮਾਈਗ੍ਰੇਸ਼ਨਾਂ ਨੂੰ ਟ੍ਰਾਂਜ਼ੈਕਸ਼ਨਾਂ ਵਿੱਚ ਲਪੇਟਿਆ ਗਿਆ ਹੈ
   - [ ] ਸਹੀ ਢੰਗ ਨਾਲ ਨੰਬਰ ਦਿੱਤੇ ਗਏ ਹਨ (ਕ੍ਰਮ ਵਿੱਚ ਕੋਈ ਖਾਲੀ ਥਾਂ ਨਹੀਂ)
 - [ ] ਨਵੀਂ ਇੰਸਟਾਲੇਸ਼ਨ 'ਤੇ ਟੈਸਟ ਕਰੋ: `~/.omniroute/omniroute.db` ਮਿਟਾਓ ਅਤੇ `npm run dev` ਚਲਾਓ
-- [ ] ਮੌਜੂਦਾ ਇੰਸਟਾਲੇਸ਼ਨ 'ਤੇ ਟੈਸਟ ਕਰੋ: DB ਦਾ ਬੈਕਅੱਪ ਲਓ, ਮਾਈਗ੍ਰੇਸ਼ਨ ਚਲਾਓ, ਸਕੀਮਾ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ
-- [ ] ਜੇ ਮਾਈਗ੍ਰੇਸ਼ਨ ਟੇਬਲਾਂ ਨੂੰ ਮੁੜ ਲਿਖਦੀ ਹੈ, ਤਾਂ WAL ਫ਼ਾਈਲਾਂ (`-wal`, `-shm`) ਨੂੰ ਸਹੀ ਢੰਗ ਨਾਲ ਸੰਭਾਲਿਆ ਗਿਆ ਹੈ
+- [ ] ਮੌਜੂਦਾ ਇੰਸਟਾਲੇਸ਼ਨ 'ਤੇ ਟੈਸਟ ਕਰੋ: DB ਦਾ ਬੈਕਅੱਪ ਲਓ, ਮਾਈਗ੍ਰੇਸ਼ਨ ਚਲਾਓ ਅਤੇ ਸਕੀਮਾ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ
+- [ ] ਜੇ ਮਾਈਗ੍ਰੇਸ਼ਨ ਟੇਬਲਾਂ ਨੂੰ ਮੁੜ ਲਿਖਦੀ ਹੈ ਤਾਂ WAL ਫਾਈਲਾਂ (`-wal`, `-shm`) ਨੂੰ ਸਹੀ ਢੰਗ ਨਾਲ ਸੰਭਾਲਿਆ ਗਿਆ ਹੈ
 
-### ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ (Zod-ਪ੍ਰਮਾਣਿਤ)
+### ਪ੍ਰੋਵਾਈਡਰ ਕੈਟਾਲਾਗ (Zod-ਪ੍ਰਮਾਣਿਤ)
 
-- [ ] `src/shared/constants/providers.ts` Zod ਸਕੀਮਾ ਲੋਡ ਸਮੇਂ ਵੈਧ ਹੈ
-  - [ ] ਸਾਰੇ ਪ੍ਰਦਾਤਾਵਾਂ ਕੋਲ ਲੋੜੀਂਦੇ ਖੇਤਰ ਹਨ (`id`, `label`, `kind`, ਆਦਿ)
-  - [ ] ਨਵੇਂ ਮੁਫ਼ਤ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ `freeNote` ਦਿੱਤਾ ਗਿਆ ਹੈ
-  - [ ] OAuth ਪ੍ਰਦਾਤਾਵਾਂ ਕੋਲ `src/lib/oauth/constants/oauth.ts` ਵਿੱਚ ਰਜਿਸਟਰ ਕੀਤਾ `oauthConfig` ਹੈ
-- [ ] ਜੇ ਨਵਾਂ ਪ੍ਰਦਾਤਾ ਜੋੜਿਆ ਗਿਆ ਹੈ: `open-sse/executors/` ਵਿੱਚ ਸੰਬੰਧਿਤ executor ਮੌਜੂਦ ਹੈ
-- [ ] ਜੇ ਫਾਰਮੈਟ non-OpenAI ਹੈ: `open-sse/translator/` ਵਿੱਚ translator ਮੌਜੂਦ ਹੈ
-- [ ] ਮਾਡਲ `open-sse/config/providerRegistry.ts` ਵਿੱਚ ਰਜਿਸਟਰ ਕੀਤੇ ਗਏ ਹਨ
-- [ ] `tests/unit/` ਵਿੱਚ ਯੂਨਿਟ ਟੈਸਟ ਪ੍ਰਦਾਤਾ ਵਰਗੀਕਰਨ ਅਤੇ ਰੂਟਿੰਗ ਨੂੰ ਕਵਰ ਕਰਦੇ ਹਨ
+- [ ] `src/shared/constants/providers.ts` ਦੀ Zod ਸਕੀਮਾ ਲੋਡ ਸਮੇਂ ਵੈਧ ਹੈ
+  - [ ] ਸਾਰੇ ਪ੍ਰੋਵਾਈਡਰਾਂ ਕੋਲ ਲੋੜੀਂਦੇ ਫ਼ੀਲਡ ਹਨ (`id`, `label`, `kind`, ਆਦਿ)
+  - [ ] ਨਵੇਂ ਮੁਫ਼ਤ ਪ੍ਰੋਵਾਈਡਰਾਂ ਲਈ `freeNote` ਦਿੱਤਾ ਗਿਆ ਹੈ
+  - [ ] OAuth ਪ੍ਰੋਵਾਈਡਰਾਂ ਦਾ `oauthConfig`, `src/lib/oauth/constants/oauth.ts` ਵਿੱਚ ਰਜਿਸਟਰ ਹੈ
+- [ ] ਜੇ ਨਵਾਂ ਪ੍ਰੋਵਾਈਡਰ ਜੋੜਿਆ ਗਿਆ ਹੈ: `open-sse/executors/` ਵਿੱਚ ਉਸ ਨਾਲ ਸੰਬੰਧਿਤ ਐਗਜ਼ੀਕਿਊਟਰ
+- [ ] ਜੇ ਫਾਰਮੈਟ OpenAI ਵਾਲਾ ਨਹੀਂ ਹੈ: `open-sse/translator/` ਵਿੱਚ ਅਨੁਵਾਦਕ
+- [ ] ਮਾਡਲ `open-sse/config/providerRegistry.ts` ਵਿੱਚ ਰਜਿਸਟਰ ਹਨ
+- [ ] `tests/unit/` ਵਿੱਚ ਯੂਨਿਟ ਟੈਸਟ ਪ੍ਰੋਵਾਈਡਰ ਵਰਗੀਕਰਨ ਅਤੇ ਰੂਟਿੰਗ ਨੂੰ ਕਵਰ ਕਰਦੇ ਹਨ
 
 ### ਡੈਸਕਟਾਪ (Electron)
 
 ਜੇ `electron/` ਬਦਲਿਆ ਹੈ:
 
-- [ ] `npm run electron:smoke:packaged` ਪਾਸ ਹੁੰਦਾ ਹੈ
+- [ ] `npm run electron:smoke:packaged` ਸਫਲ ਹੁੰਦਾ ਹੈ
 - [ ] `:win`, `:mac`, `:linux` ਵਿੱਚੋਂ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਲਈ ਬਿਲਡਾਂ ਦੀ ਜਾਂਚ ਕੀਤੀ ਗਈ ਹੈ
-- [ ] ਕੋਡ ਸਾਈਨਿੰਗ ਸਰਟੀਫਿਕੇਟਾਂ ਦੀ ਮਿਆਦ ਖ਼ਤਮ ਨਹੀਂ ਹੋਈ (ਜੇ ਸਾਈਨਿੰਗ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ)
+- [ ] ਕੋਡ ਸਾਈਨਿੰਗ ਸਰਟੀਫਿਕੇਟ ਦੀ ਮਿਆਦ ਖ਼ਤਮ ਨਹੀਂ ਹੋਈ (ਜੇ ਸਾਈਨਿੰਗ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ)
 - [ ] `electron/package.json` ਦਾ ਵਰਜਨ ਰੂਟ `package.json` ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ
-- [ ] ਜੇ `stable` 'ਤੇ ਰਿਲੀਜ਼ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ, ਤਾਂ ਆਟੋ-ਅੱਪਡੇਟ ਚੈਨਲ ਪੁਆਇੰਟਰ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ ਹੈ
+- [ ] ਜੇ `stable` ਲਈ ਰਿਲੀਜ਼ ਕਰ ਰਹੇ ਹੋ ਤਾਂ ਆਟੋ-ਅੱਪਡੇਟ ਚੈਨਲ ਪੁਆਇੰਟਰ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ ਹੈ
 
 ### ਬਿਲਡ ਲੇਆਉਟ
 
-ਰਿਪੋਜ਼ਟਰੀ ਤਿੰਨ ਵੱਖਰੀਆਂ ਆਉਟਪੁੱਟ ਡਾਇਰੈਕਟਰੀਆਂ ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ — ਇਨ੍ਹਾਂ ਨੂੰ ਕਦੇ ਵੀ ਆਪਸ ਵਿੱਚ ਨਾ ਮਿਲਾਓ:
+ਰਿਪੋਜ਼ਟਰੀ ਤਿੰਨ ਵੱਖ-ਵੱਖ ਆਉਟਪੁੱਟ ਡਾਇਰੈਕਟਰੀਆਂ ਵਰਤਦੀ ਹੈ — ਇਨ੍ਹਾਂ ਨੂੰ ਕਦੇ ਵੀ ਆਪਸ ਵਿੱਚ ਨਾ ਮਿਲਾਓ:
 
-| ਡਾਇਰੈਕਟਰੀ | ਉਦੇਸ਼                                                     | ਟਰੈਕ ਕੀਤੀ ਜਾਂਦੀ ਹੈ? |
-| --------- | --------------------------------------------------------- | ------------------- |
-| `src/`    | ਐਪਲੀਕੇਸ਼ਨ ਸਰੋਤ (TypeScript / TSX)                         | ਹਾਂ                 |
-| `.build/` | ਬਿਲਡ ਦੇ ਵਿਚਕਾਰਲੇ ਨਤੀਜੇ — `next build` ਆਉਟਪੁੱਟ (`distDir`) | ਨਹੀਂ (gitignored)   |
-| `dist/`   | ਵੰਡਣਯੋਗ npm ਬੰਡਲ — `assembleStandalone` ਦੁਆਰਾ ਤਿਆਰ ਕੀਤਾ   | ਨਹੀਂ (gitignored)   |
+| ਡਾਇਰੈਕਟਰੀ | ਉਦੇਸ਼                                                   | ਟ੍ਰੈਕ ਕੀਤੀ ਜਾਂਦੀ ਹੈ? |
+| --------- | ------------------------------------------------------- | -------------------- |
+| `src/`    | ਐਪਲੀਕੇਸ਼ਨ ਸਰੋਤ (TypeScript / TSX)                       | ਹਾਂ                  |
+| `.build/` | ਬਿਲਡ ਇੰਟਰਮੀਡੀਏਟ — `next build` ਆਉਟਪੁੱਟ (`distDir`)      | ਨਹੀਂ (gitignored)    |
+| `dist/`   | ਵੰਡਣਯੋਗ npm ਬੰਡਲ — `assembleStandalone` ਦੁਆਰਾ ਤਿਆਰ ਕੀਤਾ | ਨਹੀਂ (gitignored)    |
 
 > **ਓਪਰੇਟਰ ਨੋਟ:** ਰਿਮੋਟ VPS ਇਮੇਜ ਡਾਇਰੈਕਟਰੀ `/usr/lib/node_modules/omniroute/app/` ਹੀ ਰਹਿੰਦੀ ਹੈ।
-> ਸਿਰਫ਼ **ਰਿਪੋਜ਼ਟਰੀ ਦੇ ਅੰਦਰਲਾ** ਬਿਲਡ ਆਉਟਪੁੱਟ ਬਦਲਿਆ ਹੈ (`app/` → `dist/`)। ਡਿਪਲੌਇ ਕੌਸ਼ਲ
-> `dist/` ਦੀ ਸਮੱਗਰੀ ਨੂੰ ਰਿਮੋਟ `app/` ਡਾਇਰੈਕਟਰੀ ਵਿੱਚ rsync ਕਰਦੇ ਹਨ — VPS ਪਾਥ ਵਿੱਚ ਕਿਸੇ ਬਦਲਾਅ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ।
+> ਸਿਰਫ਼ **ਰਿਪੋਜ਼ਟਰੀ ਦੇ ਅੰਦਰਲਾ** ਬਿਲਡ ਆਉਟਪੁੱਟ ਬਦਲਿਆ ਹੈ (`app/` → `dist/`)। ਡਿਪਲੌਇ ਸਕਿੱਲਾਂ
+> `dist/` ਦੀ ਸਮੱਗਰੀ ਨੂੰ ਰਿਮੋਟ `app/` ਡਾਇਰੈਕਟਰੀ ਵਿੱਚ rsync ਕਰਦੀਆਂ ਹਨ — VPS ਪਾਥ ਵਿੱਚ ਕਿਸੇ ਬਦਲਾਅ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ।
 
-**ਇੱਕ-ਬਿਲਡ ਪ੍ਰਵਾਹ:**
+**ਇੱਕੋ-ਬਿਲਡ ਪ੍ਰਵਾਹ:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (ਸਾਫ਼-ਸਫ਼ਾਈ)
-  └─ next build → .build/next/   (ਵਿਚਕਾਰਲੇ ਨਤੀਜੇ)
+  └─ rm -rf .build dist          (ਸਾਫ਼ ਕਰਨਾ)
+  └─ next build → .build/next/   (ਇੰਟਰਮੀਡੀਏਟ)
   └─ assembleStandalone          (standalone + static + public + natives ਨੂੰ dist/ ਵਿੱਚ ਕਾਪੀ ਕਰਦਾ ਹੈ)
-  └─ writes dist/BUILD_SHA       (HEAD ਸੰਕੇਤਕ)
+  └─ writes dist/BUILD_SHA       (HEAD ਸੈਂਟੀਨਲ)
 ```
 
-ਡਿਪਲੌਇ ਲਈ `npm run build` ਤੋਂ ਬਾਅਦ ਵੱਖਰੇ ਤੌਰ 'ਤੇ `npm run build:cli` ਨਾ ਚਲਾਓ — ਇਸਦੀ ਬਜਾਏ
-`npm run build:release` ਵਰਤੋ, ਜੋ ਇੱਕੋ ਕਮਾਂਡ ਵਿੱਚ ਸਾਫ਼ ਮੁੜ-ਬਿਲਡ + ਸੰਕੇਤਕ ਬਣਾਉਂਦਾ ਹੈ।
+ਡਿਪਲੌਇ ਲਈ `npm run build` ਚਲਾਉਣ ਤੋਂ ਬਾਅਦ ਵੱਖਰੇ ਤੌਰ 'ਤੇ `npm run build:cli` ਨਾ ਚਲਾਓ — ਇਸਦੀ ਥਾਂ
+`npm run build:release` ਵਰਤੋ, ਜੋ ਇੱਕੋ ਕਮਾਂਡ ਵਿੱਚ ਸਾਫ਼ ਰੀਬਿਲਡ + ਸੈਂਟੀਨਲ ਕਰਦਾ ਹੈ।
 
-### ਆਰਟੀਫੈਕਟ ਪ੍ਰਮਾਣਿਕਤਾ
+### ਆਰਟੀਫੈਕਟ ਪ੍ਰਮਾਣੀਕਰਨ
 
 - [ ] `npm run build:release` ਸਫਲ ਹੁੰਦਾ ਹੈ ਅਤੇ `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` ਸਾਫ਼ ਹੈ — ਕੋਈ `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, ਜਾਂ ਹੋਰ ਸਥਾਨਕ ਬਚੀ ਸਮੱਗਰੀ ਨਹੀਂ
+- [ ] `npm run check:pack-artifact` ਸਾਫ਼ ਹੈ — ਕੋਈ `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, ਜਾਂ ਹੋਰ ਸਥਾਨਕ ਬਚੀ ਹੋਈ ਸਮੱਗਰੀ ਨਹੀਂ
 - [ ] ਬਿਲਡ ਤੋਂ ਬਾਅਦ `dist/server.js` ਮੌਜੂਦ ਹੈ
-- [ ] ਵਿਕਲਪਿਕ ਸਥਾਨਕ ਪੈਕੇਜਡ-ਰਨਟਾਈਮ ਸਮੋਕ ਟੈਸਟ: `npm run dev:candidate -- build` ਤੋਂ ਬਾਅਦ `npm run dev:candidate -- validate` ਇੱਕ ਅਲੱਗ `DATA_DIR` 'ਤੇ ਪੈਕ ਕੀਤੀ tarball ਨੂੰ ਬੂਟ ਕਰਦਾ ਹੈ ਅਤੇ `/api/health` + `/v1/models` ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ ([ਯੋਗਦਾਨ ਗੋਲਡਨ ਪਾਥ](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ਵੇਖੋ)
+- [ ] ਵਿਕਲਪਿਕ ਸਥਾਨਕ ਪੈਕ ਕੀਤੇ ਰਨਟਾਈਮ ਦਾ ਸਮੋਕ ਟੈਸਟ: `npm run dev:candidate -- build` ਤੋਂ ਬਾਅਦ `npm run dev:candidate -- validate`, ਇੱਕ ਅਲੱਗ `DATA_DIR` ਉੱਤੇ ਪੈਕ ਕੀਤੀ tarball ਨੂੰ ਬੂਟ ਕਰਦਾ ਹੈ ਅਤੇ `/api/health` + `/v1/models` ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ ([ਯੋਗਦਾਨ ਗੋਲਡਨ ਪਾਥ](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ਵੇਖੋ)
 
 ### ਟੈਗਿੰਗ ਅਤੇ ਰਿਲੀਜ਼
 
-- [ ] `/generate-release-cc` (Claude Code ਕੌਸ਼ਲ) ਚਲਾਓ:
+- [ ] `/generate-release-cc` (Claude Code ਸਕਿੱਲ) ਚਲਾਓ:
   - `vX.Y.Z` ਟੈਗ ਬਣਾਉਂਦਾ ਹੈ
-  - ਟੈਗ ਅਤੇ ਬ੍ਰਾਂਚ ਪੁਸ਼ ਕਰਦਾ ਹੈ
-  - changelog ਸਮੱਗਰੀ ਨਾਲ GitHub Release ਖੋਲ੍ਹਦਾ ਹੈ
-  - Electron ਇੰਸਟਾਲਰ ਜੋੜਦਾ ਹੈ (ਜੇ ਬਣਾਏ ਗਏ ਹੋਣ)
+  - ਟੈਗ ਅਤੇ ਬ੍ਰਾਂਚ ਨੂੰ ਪੁਸ਼ ਕਰਦਾ ਹੈ
+  - ਚੇਂਜਲੌਗ ਸਮੱਗਰੀ ਨਾਲ GitHub Release ਖੋਲ੍ਹਦਾ ਹੈ
+  - Electron ਇੰਸਟਾਲਰਾਂ ਨੂੰ ਅਟੈਚ ਕਰਦਾ ਹੈ (ਜੇ ਬਣਾਏ ਗਏ ਹਨ)
 - [ ] ਜਾਂ ਹੱਥੀਂ:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -276,44 +276,44 @@ npm run build:release
 
 ### ਡਿਪਲੌਇ
 
-ਡਿਪਲੌਇ ਕੌਸ਼ਲ ਹਲਕੇ rsync ਪ੍ਰਵਾਹ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ — ਨਾ `npm pack`, ਨਾ `npm i -g`:
+ਡਿਪਲੌਇ ਸਕਿੱਲਾਂ ਹਲਕਾ rsync ਪ੍ਰਵਾਹ ਵਰਤਦੀਆਂ ਹਨ — ਕੋਈ `npm pack` ਨਹੀਂ, ਕੋਈ `npm i -g` ਨਹੀਂ:
 
-- [ ] ਟਾਰਗੇਟ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਡਿਪਲੌਇ ਸਕਿਲ ਵਰਤੋ:
-  - `/deploy-vps-local-cc` — ਲੋਕਲ VPS (192.168.0.15)
+- [ ] ਟਾਰਗੇਟ ਨਾਲ ਮੇਲ ਖਾਂਦੀ ਡਿਪਲੌਇ ਸਕਿੱਲ ਵਰਤੋ:
+  - `/deploy-vps-local-cc` — ਸਥਾਨਕ VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — ਦੋਵੇਂ
 - [ ] ਡਿਪਲੌਇ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] ਬਿਲਡ ਉੱਥੇ ਚੱਲਣਾ ਲਾਜ਼ਮੀ ਹੈ ਜਿੱਥੇ `node_modules` ਅਸਲੀ ਹੋਵੇ (ਮੁੱਖ ਚੈੱਕਆਉਟ ਜਾਂ `npm ci` ਚਲਾਈ ਹੋਈ ਵਰਕਟ੍ਰੀ — ਸਿੰਬੋਲਿਕ ਲਿੰਕ ਵਾਲੀ ਵਰਕਟ੍ਰੀ ਨਹੀਂ)
+- [ ] ਬਿਲਡ ਉੱਥੇ ਚੱਲਣਾ ਲਾਜ਼ਮੀ ਹੈ ਜਿੱਥੇ `node_modules` ਅਸਲੀ ਹੋਵੇ (ਮੁੱਖ checkout ਜਾਂ `npm ci` ਕੀਤਾ worktree — symlink ਕੀਤਾ worktree ਨਹੀਂ)
 - [ ] ਡਿਪਲੌਇ ਕੀਤੀ ਇੰਸਟੈਂਸ ਦਾ ਸਮੋਕ ਟੈਸਟ ਕਰੋ:
   - `/dashboard/health` ਖੋਲ੍ਹੋ → ਜਾਂਚੋ ਕਿ ਵਰਜਨ ਸਟ੍ਰਿੰਗ ਰਿਲੀਜ਼ ਨਾਲ ਮੇਲ ਖਾਂਦੀ ਹੈ
   - ਕਿਸੇ ਜਾਣੇ-ਪਛਾਣੇ ਪ੍ਰੋਵਾਈਡਰ ਵਿਰੁੱਧ `/v1/chat/completions` ਬੇਨਤੀ ਚਲਾਓ
-  - ਤਸਦੀਕ ਕਰੋ ਕਿ `/api/monitoring/health` `CLOSED` ਸਰਕਿਟ ਬ੍ਰੇਕਰ ਵਾਪਸ ਕਰਦਾ ਹੈ
+  - ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ `/api/monitoring/health`, `CLOSED` ਸਰਕਿਟ ਬ੍ਰੇਕਰ ਵਾਪਸ ਕਰਦਾ ਹੈ
   - ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ MCP ਟ੍ਰਾਂਸਪੋਰਟ ਜਵਾਬ ਦਿੰਦੇ ਹਨ (`/mcp` HTTP, `/mcp-sse` SSE)
 
 ### ਰਿਲੀਜ਼ ਤੋਂ ਬਾਅਦ
 
-- [ ] `/capture-release-evidences-cc` ਚਲਾਓ (Claude Code ਸਕਿਲ)
-  - ਨਵੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦੇ WebP ਸਕ੍ਰੀਨਸ਼ਾਟ/ਰਿਕਾਰਡਿੰਗਾਂ ਕੈਪਚਰ ਕਰਦਾ ਹੈ
-  - ਰਿਲੀਜ਼ ਨੋਟਸ / ਬਲੌਗ ਪੋਸਟ ਨਾਲ ਨੱਥੀ ਕਰਦਾ ਹੈ
-- [ ] ਰਿਲੀਜ਼ ਘੋਸ਼ਣਾ ਨਾਲ GitHub Discussions / Discord ਅੱਪਡੇਟ ਕਰੋ
+- [ ] `/capture-release-evidences-cc` (Claude Code ਸਕਿੱਲ) ਚਲਾਓ
+  - ਨਵੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦੇ WebP ਸਕ੍ਰੀਨਸ਼ਾਟ/ਰਿਕਾਰਡਿੰਗ ਕੈਪਚਰ ਕਰਦਾ ਹੈ
+  - ਉਨ੍ਹਾਂ ਨੂੰ ਰਿਲੀਜ਼ ਨੋਟਸ / ਬਲੌਗ ਪੋਸਟ ਨਾਲ ਅਟੈਚ ਕਰਦਾ ਹੈ
+- [ ] GitHub Discussions / Discord ਨੂੰ ਰਿਲੀਜ਼ ਘੋਸ਼ਣਾ ਨਾਲ ਅੱਪਡੇਟ ਕਰੋ
 - [ ] ਅਗਲੇ ਵਰਜਨ ਲਈ ਮਾਈਲਸਟੋਨ ਖੋਲ੍ਹੋ
-- [ ] ਜੇ ਗੰਭੀਰ ਹੋਵੇ: ਇਨ-ਐਪ ਬੈਨਰ ਲਈ ਚਰਚਾ ਨੂੰ ਪਿਨ ਕਰੋ ਜਾਂ `news.json` ਵਿੱਚ ਪੋਸਟ ਕਰੋ
+- [ ] ਜੇ ਗੰਭੀਰ ਹੋਵੇ: ਚਰਚਾ ਨੂੰ ਪਿੰਨ ਕਰੋ ਜਾਂ ਇਨ-ਐਪ ਬੈਨਰ ਲਈ `news.json` ਵਿੱਚ ਪੋਸਟ ਕਰੋ
 
 ### Radar ਜਨਤਕ-ਲਾਂਚ ਗੇਟ
 
-Radar ਘੋਸ਼ਣਾ ਨੂੰ ਜਾਣ-ਬੁੱਝ ਕੇ `active: false` ਨਾਲ ਕਮਿਟ ਕੀਤਾ ਗਿਆ ਹੈ। ਹੇਠਾਂ ਦਿੱਤੀ ਹਰ ਆਈਟਮ ਲਈ ਸਬੂਤ ਮਿਲਣ ਤੋਂ ਬਾਅਦ ਐਕਟੀਵੇਸ਼ਨ ਇੱਕ ਵੱਖਰੀ
-ਤਬਦੀਲੀ ਹੈ:
+Radar ਘੋਸ਼ਣਾ ਨੂੰ ਜਾਣਬੁੱਝ ਕੇ `active: false` ਨਾਲ ਕਮਿਟ ਕੀਤਾ ਗਿਆ ਹੈ। ਹੇਠਾਂ ਦਿੱਤੀ ਹਰ ਆਈਟਮ ਦਾ ਸਬੂਤ ਮਿਲਣ ਤੋਂ ਬਾਅਦ ਐਕਟੀਵੇਸ਼ਨ ਇੱਕ ਵੱਖਰਾ
+ਬਦਲਾਅ ਹੈ:
 
-- [ ] ਸਾਰੇ ਸਟੈਕ ਕੀਤੇ Radar PR ਮਰਜ ਹੋ ਚੁੱਕੇ ਹਨ ਅਤੇ ਰਿਲੀਜ਼-ਟਿਪ CI ਹਰਾ ਹੈ
-- [ ] `RADAR_ENABLED` ਨੂੰ ਹਾਲੇ ਵੀ ਡਿਫੌਲਟ ਤੌਰ 'ਤੇ ਬੰਦ ਰੱਖਦਿਆਂ OSS Radar ਰੂਟਾਂ ਨੂੰ ਡਿਪਲੌਇ ਅਤੇ ਸਮੋਕ ਟੈਸਟ ਕਰੋ
-- [ ] ਨਿਰਧਾਰਤ Radar ਹੋਸਟ 'ਤੇ `GET /planos`, `/termos`, `/privacidade`, ਅਤੇ `/reembolso` ਦਾ ਸਮੋਕ ਟੈਸਟ ਕਰੋ
-- [ ] ਨਿੱਜੀ ਸੇਵਾ ਵਿੱਚ ਓਪਰੇਟਰ ਦੀ ਪਛਾਣ/ਸੰਪਰਕ/ਪਤਾ ਅਤੇ ਮਾਲਕ ਦੁਆਰਾ ਮਨਜ਼ੂਰਸ਼ੁਦਾ ਕਾਨੂੰਨੀ ਸਮੀਖਿਆ ਦਰਜ ਕਰੋ
-- [ ] ਸਿਰਫ਼ ਟੈਸਟ ਮੋਡ ਵਿੱਚ Stripe Checkout ਅਤੇ ਦਸਤਖ਼ਤ ਕੀਤੇ ਵੈੱਬਹੁੱਕ ਦੀ ਜਾਂਚ ਕਰੋ
-- [ ] ਮਨਜ਼ੂਰਸ਼ੁਦਾ ਭੇਜਣ ਵਾਲੇ/ਡੋਮੇਨ ਨਾਲ ਇੱਕ ਇਨਕ੍ਰਿਪਟ ਕੀਤੀ ਟ੍ਰਾਂਜ਼ੈਕਸ਼ਨਲ-ਈਮੇਲ ਡਿਲਿਵਰੀ ਦੀ ਜਾਂਚ ਕਰੋ
-- [ ] ਬੈਕਅੱਪ ਰੀਸਟੋਰ ਅਤੇ ਨਿਗਰਾਨੀ ਹੇਠ, ਬਜਟ-ਸੀਮਿਤ ਇੱਕ ਰਿਸਰਚ ਰਨ ਨੂੰ ਸਾਬਤ ਕਰੋ
-- [ ] ਦਾਨ ਦਾ ਸਬੂਤ ਸਵੀਕਾਰ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ BRL/PIX ਸਮੀਖਿਆ ਨੀਤੀ ਨੂੰ ਮਨਜ਼ੂਰੀ ਦਿਓ
-- [ ] ਉਪਰੋਕਤ ਗੇਟ ਪੂਰੇ ਹੋਣ ਤੋਂ ਬਾਅਦ ਹੀ ਜਨਤਕ Checkout ਸਮਰੱਥ ਕਰੋ, ਫਿਰ ਨਵੀਂ `news.json` ID ਨੂੰ ਐਕਟੀਵੇਟ ਕਰੋ
-- [ ] ਤਸਦੀਕ ਕਰੋ ਕਿ Home ਬੈਨਰ ਸਥਾਨਕਕ੍ਰਿਤ ਕਾਪੀ ਵਰਤਦਾ ਹੈ ਅਤੇ ਪੁਰਾਣੀ ID ਨੂੰ ਖਾਰਜ ਕਰਨ ਤੋਂ ਬਾਅਦ ਨਵੀਂ ID ਮੁੜ ਦਿਖਾਈ ਦਿੰਦੀ ਹੈ
+- [ ] ਸਾਰੇ ਸਟੈਕ ਕੀਤੇ Radar PR ਮਰਜ ਹੋ ਗਏ ਹਨ ਅਤੇ ਰਿਲੀਜ਼-ਟਿਪ CI ਹਰਾ ਹੈ
+- [ ] `RADAR_ENABLED` ਨੂੰ ਡਿਫਾਲਟ ਤੌਰ 'ਤੇ ਬੰਦ ਰੱਖਦੇ ਹੋਏ OSS Radar ਰੂਟਾਂ ਨੂੰ ਡਿਪਲੌਇ ਕਰੋ ਅਤੇ ਸਮੋਕ ਟੈਸਟ ਕਰੋ
+- [ ] ਨਾਮਿਤ Radar ਹੋਸਟ ਉੱਤੇ `GET /planos`, `/termos`, `/privacidade`, ਅਤੇ `/reembolso` ਦਾ ਸਮੋਕ ਟੈਸਟ ਕਰੋ
+- [ ] ਨਿੱਜੀ ਸੇਵਾ ਵਿੱਚ ਓਪਰੇਟਰ ਦੀ ਪਛਾਣ/ਸੰਪਰਕ/ਪਤਾ ਅਤੇ ਮਾਲਕ ਦੁਆਰਾ ਮਨਜ਼ੂਰ ਕੀਤੀ ਕਾਨੂੰਨੀ ਸਮੀਖਿਆ ਦਰਜ ਕਰੋ
+- [ ] ਸਿਰਫ਼ ਟੈਸਟ ਮੋਡ ਵਿੱਚ Stripe Checkout ਅਤੇ ਸਾਈਨ ਕੀਤੇ webhook ਦੀ ਜਾਂਚ ਕਰੋ
+- [ ] ਮਨਜ਼ੂਰਸ਼ੁਦਾ ਭੇਜਣ ਵਾਲੇ/ਡੋਮੇਨ ਨਾਲ ਇੱਕ ਇਨਕ੍ਰਿਪਟ ਕੀਤੀ ਲੈਣ-ਦੇਣ ਸੰਬੰਧੀ ਈਮੇਲ ਡਿਲੀਵਰੀ ਦੀ ਜਾਂਚ ਕਰੋ
+- [ ] ਬੈਕਅੱਪ ਰੀਸਟੋਰ ਅਤੇ ਇੱਕ ਨਿਗਰਾਨੀ ਹੇਠ, ਬਜਟ-ਸੀਮਿਤ ਖੋਜ ਰਨ ਨੂੰ ਸਾਬਤ ਕਰੋ
+- [ ] ਦਾਨ ਦਾ ਸਬੂਤ ਸਵੀਕਾਰ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ BRL/PIX ਸਮੀਖਿਆ ਨੀਤੀ ਨੂੰ ਮਨਜ਼ੂਰ ਕਰੋ
+- [ ] ਸਿਰਫ਼ ਪਿਛਲੇ ਗੇਟ ਪੂਰੇ ਹੋਣ ਤੋਂ ਬਾਅਦ ਜਨਤਕ Checkout ਨੂੰ ਸਮਰੱਥ ਕਰੋ, ਫਿਰ ਨਵੀਂ `news.json` ID ਨੂੰ ਐਕਟੀਵੇਟ ਕਰੋ
+- [ ] ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ Home ਬੈਨਰ ਸਥਾਨਕ ਬਣਾਈ ਕਾਪੀ ਵਰਤਦਾ ਹੈ ਅਤੇ ਪੁਰਾਣੀ ID ਨੂੰ ਖਾਰਜ ਕਰਨ ਤੋਂ ਬਾਅਦ ਨਵੀਂ ID ਮੁੜ ਦਿਖਾਈ ਦਿੰਦੀ ਹੈ
 
 ## Embedded Services ਸਮੋਕ ਜਾਂਚ (v3.8.4+)
 

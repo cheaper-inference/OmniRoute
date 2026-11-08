@@ -11,17 +11,12 @@ AI (ailtireacht, coinbhinsiúin, tástáil, geataí cáilíochta, sreabhadh oibr
 foghlaimí PII). Léigh ina iomláine é; ná cuir rialacha an tionscadail leis arís anseo. Baineann gach rud thíos le
 Claude Code AMHÁIN — mionchoigeartuithe oibríochtúla ar rialacha atá sainithe cheana féin in `AGENTS.md`.
 
-## Leithlisiú worktree — sonraí sonracha do Claude Code
+## Leithlisiú worktree — sonraí a bhaineann le Claude Code
 
-Tá an prótacal iomlán éigeantach worktree (deimhniú an bhunbhrainse, conair chanónach
-`.claude/worktrees/`, `cp -al` node_modules, rialacha díchoimisiúnaithe) in `AGENTS.md` → Git Workflow → "Worktree
-isolation". Pointí sonracha do Claude Code:
+Tá an prótacal iomlán éigeantach um leithlisiú worktree (dearbhú an bhunbhrainse, an cosán canónta `.claude/worktrees/`, `cp -al` node_modules, rialacha scortha) le fáil i [`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (achoimrithe in `AGENTS.md` → Sreabhadh Oibre Git → "Leithlisiú worktree"). Pointí a bhaineann go sonrach le Claude Code:
 
-- Deimhnigh an bunbhrainse leis an oibreoir trí `AskUserQuestion` (Riail Dhian #19) mura bhfuil sé
-  ráite acu leat cheana féin.
-- Tabhair tús áite don uirlis dhúchasach `EnterWorktree` — cruthaíonn sí worktrees faoi
-  `.claude/worktrees/` (an chonair chanónach) cheana féin. Cruthaigh an worktree leis an ordú doiciméadaithe `git
-worktree add`, ansin glaoigh ar `EnterWorktree` lena `path`.
+- Deimhnigh an bunbhrainse leis an oibreoir trí `AskUserQuestion` (Cruaríail #19) mura ndúirt siad leat cheana é.
+- Tabhair tosaíocht don uirlis dhúchais `EnterWorktree` — cruthaíonn sí worktrees faoi `.claude/worktrees/` (an cosán canónta) cheana féin. Cruthaigh an worktree leis an ordú doiciméadaithe `git worktree add`, ansin glaoigh `EnterWorktree` lena `path`.
 
 ## Sábháilteacht trastseisiúin — sonraí sonracha do Claude Code
 

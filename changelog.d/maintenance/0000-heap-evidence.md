@@ -1,1 +1,0 @@
-- **ci:** the two hosted webpack heap budgets are now recorded with their evidence — build.yml 10240 MB (validated 2026-10-18) and docker-publish 12288 MB (three green publishes) — and a test keeps every Docker heap override at or above the native floor.

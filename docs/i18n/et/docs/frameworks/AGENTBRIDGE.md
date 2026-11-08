@@ -16,34 +16,34 @@ AgentBridge on OmniRoute'i MITM-puhverserver (vahendusrünne ehk Man-in-the-Midd
 
 ### Mis on AgentBridge?
 
-Kui IDE agent (nt GitHub Copilot, Cursor, Claude Code) teeb API-kutse, loob see ühenduse otse ülesvoolu AI-teenusepakkujaga (OpenAI, Anthropic jne). AgentBridge püüab selle ühenduse läbipaistvalt TLS-i tasandil kinni — ilma et agendi konfiguratsiooni oleks vaja muuta — ja suunab päringu OmniRoute'i kaudu ümber.
+Kui IDE agent (nt GitHub Copilot, Cursor, Claude kood) teeb API -kõne, ühendub see otse ülesvoolu AI pakkujaga (OpenAI, Anthropic jne). AgentBridge katkestab selle ühenduse läbipaistvalt TLS tasemel — ilma et oleks vaja agendi konfiguratsiooni — muuta, ja kirjutab päringu ümber OmniRoute kaudu.
 
 See tähendab, et saate:
 
-- **Suunata mis tahes agendi ümber mis tahes teenusepakkujale**: Copilot suhtleb OpenAI-ga? Suunake see ümber Anthropic Claude'i, Gemini või ükskõik millise OmniRoute'i 372 teenusepakkuja juurde.
-- **Rakendada mudelite vastendusi**: `gemini-3-flash` → `claude-sonnet-4.7` läbipaistvalt töötleja tasandil.
-- **Jälgida kogu agentide liiklust**: iga kinnipüütud päring avaldatakse [liikluse inspektoris](./TRAFFIC_INSPECTOR.md).
-- **Rakendada OmniRoute'i tõrkekindlust**: kombineeritud marsruutimine, kaitselülitid, varuvariandid ja kulude jälgimine toimivad ka IDE-agentide liikluse puhul.
+- **Suunake mis tahes agent mis tahes teenusepakkuja juurde** : Copilot räägid OpenAI-ga? Suunake see ümber Anthropic Claude, Gemini või mõnele OmniRoute 380 pakkujale.
+- **Rakendage mudeli vastendusi** : `gemini-3-flash` → `claude-sonnet-4.7` läbipaistvalt käitleja tasemel.
+- **Jälgige kogu agendiliiklust** : iga pealtkuulatud päring avaldatakse [liiklusinspektorile](./TRAFFIC_INSPECTOR.md).
+- **Rakendage OmniRoute vastupidavust** : kombineeritud marsruutimine, kaitselülitid, varud ja kulude jälgimine ka IDE agendi liikluse jaoks.
 
-### Positsioon turul
+### Positsioneerimine vs turg
 
-| Funktsioon                           | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------------------------ | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                          |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                       |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                           |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                         |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                           |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                       |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                          |    —    |    —     |        ✓        |             ✓             |
-| Open Code                            |    —    |    —     |        ✓        |             ✓             |
-| Trae                                 |    —    |    —     |        —        |       🔍 Uurimisel        |
-| Juhtpaneeli kasutajaliides           |    ✓    |    ✗     |        ✗        |             ✓             |
-| Liikluse inspektor                   |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute'i marsruutimine            |    ✗    |    ✗     |        ✗        |             ✓             |
-| Mudelite vastendamise kasutajaliides |    ✗    |    ✗     |        ✗        |             ✓             |
-| Möödumisloend                        |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ülesvoolu CA-sertifikaat             |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funktsioon              | 9 ruuter | anti-api | llm-pealtkuulaja | **OmniRoute AgentBridge** |
+| ----------------------- | :------: | :------: | :--------------: | :-----------------------: |
+| Antigravity             |    ✓     |    ✓     |        —         |             ✓             |
+| GitHub Copilot          |    ✓     |    ✓     |        —         |             ✓             |
+| Kiro (AWS)              |    ✓     |    ✓     |        —         |             ✓             |
+| OpenAI Codex            |    —     |    ✓     |        —         |             ✓             |
+| Cursor IDE              |    ✓     |    ✓     |        —         |             ✓             |
+| Zed Industries          |    —     |    ✓     |        —         |             ✓             |
+| Claude kood             |    —     |    —     |        ✓         |             ✓             |
+| Ava kood                |    —     |    —     |        ✓         |             ✓             |
+| Trae                    |    —     |    —     |        —         |         🔍 Uurib          |
+| Armatuurlaud UI         |    ✓     |    ✗     |        ✗         |             ✓             |
+| Liiklusinspektor        |    ✗     |    ✗     |        ✓         |             ✓             |
+| OmniRoute marsruutimine |    ✗     |    ✗     |        ✗         |             ✓             |
+| Mudeli kaardistamine UI |    ✗     |    ✗     |        ✗         |             ✓             |
+| Möödasõiduloend         |    ✗     |    ✗     |        ✓         |             ✓             |
+| Ülesvoolu CA sert       |    ✗     |    ✗     |        ✓         |             ✓             |
 
 ---
 

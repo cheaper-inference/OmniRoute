@@ -4,77 +4,82 @@
 
 ---
 
-`devin-cli-agentic` huruhusu mazingira halisi ya utekelezaji ya Claude Code kutumia endpoint ya
-ndani ya Anthropic Messages ya OmniRoute huku Devin CLI rasmi ikitoa majibu ya modeli kupitia
-ACP stdio. Haibadilishi watoa huduma waliopo wa Anthropic, Claude OAuth, Claude Web, au
-`devin-cli`.
+`devin-cli-agentic` huruhusu mazingira halisi ya utekelezaji ya Claude Code kutumia endpoint ya ndani ya
+Anthropic Messages ya OmniRoute huku Devin CLI rasmi ikitoa majibu ya modeli kupitia ACP stdio. Haiwabadilishi
+watoa huduma waliopo wa Anthropic, Claude OAuth, Claude Web, au `devin-cli`.
 
-> **Hali ya sasa: Claude Code imefungwa kwenye toleo `2.1.258`; uthibitishaji wa nje ya mtandao
-> na wa moja kwa moja ulirekodiwa mara ya mwisho kwenye `2.1.220`.** Toleo lililofungwa la
-> `2.1.220` lilikamilisha hali tatu zilizotengwa kupitia Devin CLI `3000.2.17` na modeli
-> `swe-1-7-lightning`; utekelezaji huo wa mwisho wa moja kwa moja ulithibitisha zamu za `Read`,
-> `Edit`, na `Bash` zinazomilikiwa na mteja, matokeo yaliyofaulu ya `npm test`, ugunduzi wa
-> amri na ujuzi wa mradi, uelekezaji wa Devin pekee, na kutokuwepo kabisa kwa trafiki ya Claude
-> inayotoka nje. Kisha toleo lililofungwa lilipandishwa hadi `2.1.258` (kizazi cha CLI ambacho
-> utambulisho wa Claude wa OmniRoute huiga, na mstari wa kwanza unaotoa kiwango cha Fable 5.1
-> moja kwa moja). Kwenye toleo jipya lililofungwa, safu ya usakinishaji na `claude --version`
-> zilithibitishwa kwenye taswira msingi iliyofungwa, na mkusanyiko wa majaribio ya kitengo wa
-> daraja, `compose config`, pamoja na uthibitisho tuli wa utengaji hufaulu — lakini hali ya
-> majaribio bandia ya nje ya mtandao na mkusanyiko wa hali tatu wa moja kwa moja bado
-> haujaendeshwa tena. Ziendeshe tena (angalia "Kusasisha zana zilizofungwa") kabla ya
-> kutegemea daraja ukiwa na toleo hili lililofungwa.
+Kwa miito ya zana inayomilikiwa na mteja, pitisha kupitia `devin-cli-agentic` (jina mbadala `dva`), yaani
+mtoa huduma mwenye uwezo wa kutumia zana katika muundo wa Claude. Kitekelezaji cha zamani cha ACP cha `devin-cli` (`dv`)
+ni cha maandishi pekee: huendesha kifupishaji cha Devin kisicho na zana na hakiwezi kurudisha miito ya zana. Metadata ya
+modeli yake imetiwa alama ipasavyo ili uelekezaji wa mseto unaohitaji zana uiepuke.
+
+> **Hali ya sasa: Claude Code iliyofungwa kwenye toleo `2.1.258`; uthibitishaji wa nje ya mtandao na wa moja kwa moja ulirekodiwa mara ya mwisho
+> kwenye `2.1.220`.** Toleo lililofungwa la `2.1.220` lilikamilisha hali tatu zilizotengwa kupitia Devin CLI
+> `3000.2.17` na modeli `swe-1-7-lightning`; utekelezaji huo wa mwisho wa moja kwa moja ulithibitisha zamu za `Read`,
+> `Edit`, na `Bash` zinazomilikiwa na mteja, matokeo yaliyofaulu ya `npm test`, ugunduzi wa amri na ujuzi wa
+> mradi, uelekezaji kupitia Devin pekee, na trafiki sifuri inayotoka kwenda Claude. Kisha toleo lililofungwa lilipandishwa hadi `2.1.258`
+> (kizazi cha CLI ambacho utambulisho wa Claude wa OmniRoute huiga, na laini ya kwanza inayojumuisha
+> daraja la Fable 5.1 moja kwa moja). Kwenye toleo jipya lililofungwa, safu ya usakinishaji na `claude --version`
+> zilithibitishwa kwenye image ya msingi iliyofungwa, na mkusanyiko wa majaribio ya kitengo wa daraja, `compose config` pamoja na
+> uthibitisho tuli wa utengaji hufaulu — lakini hali ya mock ya nje ya mtandao na mkusanyiko wa moja kwa moja wa hali tatu
+> bado hazijatekelezwa tena. Zitekeleze tena (angalia "Kusasisha zana zilizofungwa") kabla ya kutegemea
+> daraja likiwa na toleo hili lililofungwa.
 
 ## Usanifu
 
 ```text
-Claude Code 2.1.258 (kontena la Linux lililotengwa lisilotumia root)
+Claude Code 2.1.258 (kontena la Linux lililotengwa lisilo la root)
   -> http://omniroute:20128/v1/messages
-  -> devin-cli-agentic (mtoa huduma wa umbizo la Claude, asiyehitaji uthibitishaji)
+  -> devin-cli-agentic (muundo wa Claude, mtoa huduma asiye na uthibitishaji)
   -> devin acp --agent-type summarizer (ACP stdio rasmi, bila zana za Devin)
-  -> Akaunti ya Devin katika ujazo maalumu wa devin-auth
+  -> Akaunti ya Devin katika volume maalumu ya devin-auth
 ```
 
-Ajenti chaguo-msingi wa ACP wa CLI rasmi anaweza kutekeleza zana zake mwenyewe, kwa hiyo
-daraja hili halitumii. Huanzisha ajenti mahususi wa ACP wa `summarizer`, ambaye modi yake
-rasmi ya CLI haina zana, na hupanga ombi la Anthropic lililoserialishwa kama mfuatano wa
-utekelezaji. Wakati kitendo kingine kinachomilikiwa na Claude kinahitajika, jibu lazima liwe
-na kifuniko kimoja tu cha zana ya mteja. `tool_call` au `tool_call_update` yoyote ya ACP
-hukataliwa kabla ya jibu kuripotiwa kuwa limefaulu.
+Ajenti chaguo-msingi wa ACP wa CLI rasmi anaweza kutekeleza zana zake mwenyewe, kwa hivyo daraja hili halitumii
+ajenti huyo. Huanzisha ajenti maalumu wa ACP wa `summarizer`, ambaye hali yake rasmi ya CLI haina zana, na
+hufungasha ombi la Anthropic lililoserialishwa kama ufuatiliaji wa utekelezaji. Wakati kitendo kingine kinachomilikiwa na Claude
+kinahitajika, jibu lazima liwe na bahasha moja tu ya zana ya mteja. `tool_call` au
+`tool_call_update` yoyote ya ACP hukataliwa kabla ya jibu kuripotiwa kuwa
+limefaulu.
 
-Kiserialisha kilicho katika `open-sse/executors/devin-agentic/serializer.ts` huhifadhi
-`system`, `text`, `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `tool_choice`,
-na zana zinazotolewa na Claude Code. Picha na vizuizi visivyojulikana husababisha hitilafu
-wazi. Matokeo makubwa ya zana hutumia alama inayoonekana ya kukatwa.
+Kisarialishaji katika `open-sse/executors/devin-agentic/serializer.ts` huhifadhi `system`,
+`text`, `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `tool_choice`, na
+zana zinazotolewa na Claude Code. Picha na vizuizi visivyojulikana hushindwa kwa uwazi. Matokeo makubwa ya zana
+hutumia alama inayoonekana ya ufupishaji.
 
-Kichanganuzi hukubali kifuniko kimoja huru cha `<tool>{...}</tool>` kwa kila zamu ya modeli.
-Hukagua jina dhidi ya orodha ya zana ya ombi, huthibitisha hoja dhidi ya JSON Schema ya zana
-hiyo, hukataa mchanganyiko wa simulizi na vitendo, na huruhusu jaribio moja la urekebishaji
-lenye ukomo. Kisha Claude Code hutekeleza `tool_use` ya Anthropic inayotokana na hilo ndani
-ya mazingira ya ndani na kutuma `tool_result` kupitia OmniRoute.
+Kichanganuzi hukubali bahasha moja huru ya `<tool>{...}</tool>` kwa kila zamu ya modeli. Hukagua
+jina dhidi ya orodha ya zana ya ombi, huthibitisha hoja dhidi ya JSON Schema ya zana hiyo,
+hukataa mchanganyiko wa maelezo na vitendo, na kuruhusu jaribio moja la urekebishaji lenye kikomo. Kisha Claude Code
+hutekeleza `tool_use` ya Anthropic inayotokana na hilo ndani ya mazingira ya ndani na kutuma `tool_result` kupitia
+OmniRoute.
+
+## Uelekezaji otomatiki
+
+Mtoa huduma anastahiki kujumuishwa katika makundi ya wagombea ya `auto/*` ya OmniRoute wakati hajazuiwa.
+Ustahiki wa kuwa mgombea hauhakikishi kuchaguliwa: mkakati wa uelekezaji wa mseto (kwa mfano,
+last-known-good) unaweza kumpendelea mtoa huduma mwingine. Tumia `dva/<model>` au mseto unaotanguliza Devin wakati
+unahitaji kila ombi lipitie Devin.
 
 ## Utengaji na modeli ya vitisho
 
-Usakinishaji, akaunti, na usanidi wa Claude kwenye seva mwenyeji viko nje ya mawanda na
-vinachukuliwa kuwa haviruhusiwi. Huduma za Compose:
+Usakinishaji, akaunti na usanidi wa Claude kwenye seva mwenyeji havihusiki na huchukuliwa kuwa
+vimekatazwa. Huduma za Compose:
 
-- huendeshwa kama UID/GID `10001:10001`, zikiwa na mfumo wa faili wa msingi wa kusoma pekee,
-  uwezo ulioondolewa, na `no-new-privileges`;
-- hutumia `/home/bridge` ya faragha, ujazo maalumu wa usanidi wa Claude, data ya OmniRoute
-  iliyotengwa, na ujazo tofauti wa `devin-auth`;
-- huambatisha tu maeneo ya kazi/ushahidi ya `.sandbox` yanayoweza kutupwa;
-- haziambatishi saraka ya nyumbani ya seva mwenyeji, Keychain, SSH, vitambulisho vya wingu,
-  au soketi ya Docker;
-- huunda mazingira yaliyobainishwa wazi na kuondoa vigezo vya API/OAuth/uelekezaji vya
-  Anthropic;
-- huelekeza uchakataji wa Claude Code kwenye `http://omniroute:20128` pekee kwa kutumia
-  ufunguo wa ndani pekee.
+- huendeshwa kama UID/GID `10001:10001`, zikiwa na mfumo wa faili wa mizizi wa kusoma pekee, uwezo ulioondolewa, na
+  `no-new-privileges`;
+- hutumia `/home/bridge` ya faragha, ujazo mahususi wa usanidi wa Claude, data ya OmniRoute iliyotengwa,
+  na ujazo tofauti wa `devin-auth`;
+- hupachika tu maeneo ya kazi/ushahidi ya `.sandbox` yanayoweza kutupwa;
+- hazipachiki saraka ya nyumbani ya seva mwenyeji, Keychain, vitambulisho vya SSH, vitambulisho vya wingu, au soketi ya Docker;
+- huunda mazingira yaliyobainishwa wazi na kuondoa vigezo vya API/OAuth/uelekezaji vya Anthropic;
+- huelekeza uchakataji wa Claude Code kwa `http://omniroute:20128` pekee kwa kutumia ufunguo wa ndani pekee.
 
-Wasifu wa nje ya mtandao hutumia mtandao wa ndani. Katika wasifu wa moja kwa moja, OmniRoute
-hufikia endpoint rasmi za Devin kupitia `network-guard` pekee; maeneo mengine yasiyohusiana
-hukataliwa. Claude Code ina kinga tofauti inayozuia trafiki yote inayotoka nje na inaweza
-kufikia huduma ya ndani ya OmniRoute pekee kupitia `NO_PROXY`. Faili za ukaguzi za kinga
-huambatishwa tu na mchakato wao wa kinga. Hati hukagua umiliki wa faili, modi, idadi ya
-viungo, na kila uamuzi kabla ya kuhamisha ushahidi usio na tokeni.
+Wasifu wa nje ya mtandao hutumia mtandao wa ndani. Katika wasifu wa moja kwa moja, OmniRoute hufikia
+vituo rasmi vya Devin kupitia `network-guard` pekee; maeneo mengine yasiyohusiana yanakataliwa.
+Claude Code ina ulinzi tofauti wa kutoka unaokataa kila kitu na inaweza kufikia huduma ya ndani ya OmniRoute
+pekee kupitia `NO_PROXY`. Faili za ukaguzi za ulinzi hupachikwa tu na mchakato husika wa ulinzi. Skripti
+huthibitisha umiliki wa faili, modi, idadi ya viungo na kila uamuzi kabla ya kuhamisha
+ushahidi usio na tokeni.
 
 Endesha uthibitisho wa utengaji kwa kujitegemea:
 
@@ -82,39 +87,43 @@ Endesha uthibitisho wa utengaji kwa kujitegemea:
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Huthibitisha topolojia, viambatisho vilivyopewa majina, mipangilio ya kutotumia root/kusoma
-pekee, uelekezaji wa ndani uliobainishwa wazi, kutokuwepo kwa vigezo nyeti vya mazingira,
-kutokuwepo kwa soketi ya Docker, ufikiaji uliozuiwa wa `api.anthropic.com` na `claude.ai`,
-uteuzi wa mtoa huduma wa Devin pekee, na kushindwa kwa wazi wakati mfumo wa nyuma wa ACP
-haupatikani.
+Huthibitisha topolojia, vipachiko vyenye majina, mipangilio ya kutotumia root/kusoma pekee, uelekezaji wa ndani uliobainishwa wazi,
+kutokuwepo kwa vigezo nyeti vya mazingira, kutokuwepo kwa soketi ya Docker, ufikiaji uliozuiwa kwa
+`api.anthropic.com` na `claude.ai`, uteuzi wa mtoa huduma wa Devin pekee, na kushindwa kwa wazi wakati
+sehemu ya nyuma ya ACP haipatikani.
 
 ## Usanidi wa mara ya kwanza na matumizi ya kawaida
 
-Jenga image iliyobainishwa:
+Jenga taswira yenye matoleo yaliyofungwa:
 
 ```bash
 ./scripts/devin-bridge/build
 ```
 
-Thibitisha utambulisho wa volume iliyotengwa ya Devin pekee:
+Thibitisha utambulisho wa ujazo wa Devin uliotengwa pekee:
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/login-devin
 ```
 
-Amri ya kuingia hutumia mtiririko rasmi wa tokeni unaofanywa kwa mikono uliokusudiwa kwa mazingira ya mbali/kontena. Thamani huingizwa moja kwa moja kwenye kidokezo cha CLI; haipitishwi kama hoja ya mchakato, haiandikwi kwenye Git, wala hainakiliwi kutoka kwa host.
+Amri ya kuingia hutumia mtiririko rasmi wa tokeni unaoingizwa mwenyewe uliokusudiwa kwa mazingira ya
+mbali/kontena. Thamani huingizwa moja kwa moja katika kidokezo cha CLI; haipitishwi kama hoja ya
+mchakato, haiandikwi kwenye Git, wala hainakiliwi kutoka kwenye seva mwenyeji.
 
-Anzisha mazingira ya utekelezaji yaliyotengwa ya Claude Code:
+Anzisha mazingira ya utekelezaji ya Claude Code yaliyotengwa:
 
 ```bash
 ./scripts/devin-bridge/launch
 ```
 
-`launch` hukagua upya utengaji, uthibitishaji wa Devin, na ugunduzi wa modeli kabla ya kuanzisha Claude Code iliyo ndani ya kontena. Kamwe haiendeshi executable ya Claude ya host. Lakabu za modeli zinaweza kuwekwa katika `.env.devin-bridge`; kila thamani iliyosanidiwa lazima ihifadhi kiambishi awali cha `devin-cli-agentic/`.
+`launch` hukagua upya utengaji, uthibitishaji wa utambulisho wa Devin na ugunduzi wa modeli kabla ya kuanzisha
+Claude Code iliyo ndani ya kontena. Kamwe haiendeshi faili tekelezi ya Claude ya seva mwenyeji. Majina mbadala ya modeli yanaweza
+kuwekwa katika `.env.devin-bridge`; kila thamani iliyosanidiwa lazima idumishe kiambishi awali cha
+`devin-cli-agentic/`.
 
 ## Amri za uthibitishaji
 
-Njia ya nje ya mtandao inayoweza kuzalishwa upya haihitaji akaunti ya Devin na haina Intaneti wakati wa utekelezaji:
+Njia inayoweza kurudiwa ya nje ya mtandao haihitaji akaunti ya Devin na haina Intaneti wakati wa utekelezaji:
 
 ```bash
 ./scripts/devin-bridge/test-unit
@@ -123,48 +132,56 @@ Njia ya nje ya mtandao inayoweza kuzalishwa upya haihitaji akaunti ya Devin na h
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Njia ya moja kwa moja inayohitaji uthibitishaji na kuwezeshwa kwa hiari ni:
+Njia ya moja kwa moja iliyothibitishwa inayohitaji kuwezeshwa kwa hiari ni:
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/test-live-devin
 ```
 
-Kiendeshaji cha moja kwa moja husubiri kati ya matukio ili kuepuka kufungua vipindi vya ACP kwa mfululizo wa ghafla, na huthibitisha matukio yenye muundo ya mtiririko wa Claude badala ya kuamini madai ya maandishi. Matukio yake matatu yanathibitisha:
+Kiendeshaji cha moja kwa moja husubiri kati ya hali za majaribio ili kuepuka kufungua vipindi vya ACP kwa mfululizo wa haraka na
+huthibitisha matukio yaliyoundwa ya mtiririko wa Claude badala ya kuamini madai ya maandishi. Hali zake tatu
+huthibitisha:
 
 1. usomaji wa moja kwa moja wa mradi na uchanganuzi wa hitilafu;
-2. `Edit` halisi, `Bash` `npm test` inayomilikiwa na mteja, na matokeo ya mwisho;
-3. `/bridge-check` pamoja na ugunduzi wa `bridge-proof`, usomaji wa mradi, `npm test` nyingine iliyofanikiwa inayomilikiwa na mteja, na ukamilishaji bila kazi inayosubiri.
+2. `Edit` halisi, `Bash` `npm test` inayomilikiwa na kiteja, na matokeo ya mwisho;
+3. `/bridge-check` pamoja na ugunduzi wa `bridge-proof`, usomaji wa mradi, `npm test` nyingine iliyofaulu
+   inayomilikiwa na kiteja, na ukamilishaji bila kazi inayosubiri.
 
-Kizuizi cha mwisho pia hukagua ukaguzi wa mtandao wa Devin na huhitaji ukaguzi wa trafiki inayotoka wa Claude ubaki tupu.
+Kizuizi cha mwisho pia hukagua ukaguzi wa mtandao wa Devin na huhitaji ukaguzi wa kutoka wa Claude
+uendelee kuwa tupu.
 
-## Kusasisha zana zilizobainishwa
+## Kusasisha zana zilizofungiwa kwenye matoleo mahususi
 
-Image hubainisha matoleo ya Node, Claude Code, na Devin CLI katika `docker/devin-bridge/Dockerfile`. Ili kusasisha:
+Taswira hufungia Node, Claude Code na Devin CLI kwenye matoleo mahususi katika
+`docker/devin-bridge/Dockerfile`. Ili kusasisha:
 
-1. badilisha matoleo yaliyotajwa waziwazi;
-2. badilisha checksums zote mbili za kumbukumbu za Devin zinazotegemea usanifu kwa thamani za artifact rasmi;
-3. jenga upya na uendeshe kila amri ya uthibitishaji wa nje ya mtandao;
-4. thibitisha matoleo ndani ya image;
-5. endesha upya seti ya majaribio ya moja kwa moja ya matukio matatu yenye uthibitishaji.
+1. badilisha matoleo yaliyobainishwa waziwazi;
+2. badilisha jumla-hakiki zote mbili za kumbukumbu ya Devin zinazohusiana na usanifu mahususi kwa thamani za
+   artefakti rasmi;
+3. jenga upya na utekeleze kila amri ya uthibitishaji wa nje ya mtandao;
+4. thibitisha matoleo yaliyo ndani ya taswira;
+5. tekeleza tena kifurushi cha moja kwa moja chenye uthibitishaji wa utambulisho na hali tatu.
 
-Usisakinishe CLI yoyote kati ya hizo mbili kote kwenye host wala kubadilisha uthibitishaji wa checksum kwa upakuaji ambao haujathibitishwa.
+Usisakinishe CLI yoyote kati ya hizo mbili kimataifa kwenye mashine mwenyeji wala kubadilisha uthibitishaji wa jumla-hakiki na
+upakuaji ambao haujathibitishwa.
 
 ## Uchunguzi na usafishaji
 
 - `docker compose -f docker/devin-bridge/compose.yml --profile offline logs omniroute`
-  huonyesha urutishaji wa ndani na hitilafu za kitekelezaji zilizosafishwa.
-- `.sandbox/evidence/mock-acp.jsonl` hurekodi vitendo vya ACP bandia vinavyotoa matokeo yanayojirudia.
-- `.sandbox/evidence/claude-stream.jsonl` hurekodi utekelezaji halisi wa Claude Code wa nje ya mtandao.
+  huonyesha uelekezaji wa ndani na hitilafu za kitekelezaji zilizosafishwa.
+- `.sandbox/evidence/mock-acp.jsonl` hurekodi vitendo vya ACP bandia vinavyotoa matokeo thabiti.
+- `.sandbox/evidence/claude-stream.jsonl` hurekodi utekelezaji halisi wa Claude Code nje ya mtandao.
 - `.sandbox/evidence/live-*.jsonl` hurekodi mitiririko mitatu ya moja kwa moja iliyothibitishwa.
-- `.sandbox/evidence/egress.jsonl` na `.sandbox/evidence/claude-egress.jsonl` ni nakala zilizothibitishwa, zisizo na tokeni, za ukaguzi wa ulinzi.
+- `.sandbox/evidence/egress.jsonl` na `.sandbox/evidence/claude-egress.jsonl` ni nakala zilizothibitishwa,
+  zisizo na tokeni za ukaguzi wa njia za kutoka.
 
-Simamisha kontena na mitandao inayomilikiwa huku ukihifadhi volume za kuingia/usanidi:
+Simamisha kontena na mitandao inayomilikiwa huku ukihifadhi ujazo wa kuingia/usanidi:
 
 ```bash
 ./scripts/devin-bridge/clean
 ```
 
-Ondoa mazingira yote yanayomilikiwa na bridge, ikijumuisha volume zilizopewa majina:
+Ondoa mazingira yote yanayomilikiwa na daraja, ikijumuisha ujazo wenye majina:
 
 ```bash
 ./scripts/devin-bridge/clean --all
@@ -172,15 +189,14 @@ Ondoa mazingira yote yanayomilikiwa na bridge, ikijumuisha volume zilizopewa maj
 
 ## Vikomo
 
-- Daraja hili linategemea jukumu lisilobadilika la `summarizer` lisilotumia zana kwa sababu Devin CLI `3000.2.17`
-  haitoi wakala wa ACP usioegemea upande wowote na usiotumia zana. Adapta hurekebisha majibu ya kati
-  yenye muundo wa muhtasari, lakini jaribio moja la urekebishaji lenye kikomo bado linaweza kushindwa waziwazi.
-- Miito hai ya ACP inaweza kurudisha majibu ya muda mfupi ya `502`/`504`. Mfumo wa majaribio hutenganisha matukio kwa vipindi;
-  hitilafu inayoendelea husalia katika hali ya kufungwa inaposhindwa na haichagui kamwe mtoa huduma mwingine.
-- Muktadha wa ACP huundwa upya kutoka kwa kila ombi la Anthropic; hakuna uhusiano
-  na mchakato/kikao.
+- Daraja hutegemea jukumu lisilobadilika la `summarizer` lisilo na zana kwa sababu Devin CLI `3000.2.17`
+  haitoi wakala wa ACP usioegemea upande wowote na usio na zana. Adapta hufidia majibu ya kati
+  yenye muundo wa muhtasari, lakini jaribio moja la kurekebisha lenye kikomo bado linaweza kushindwa waziwazi.
+- Miito ya moja kwa moja ya ACP inaweza kurudisha majibu ya muda ya `502`/`504`. Kiendeshaji cha majaribio hutenganisha hali kwa muda;
+  kushindwa kunakoendelea hubaki katika hali ya kufungwa inaposhindwa na kamwe hakichagui mtoa huduma mwingine.
+- Muktadha wa ACP huundwa upya kutoka kwa kila ombi la Anthropic; hakuna uhusiano wa kudumu na mchakato/kikao.
 - Mwito mmoja wa zana unatumika kwa kila jibu la modeli; miito sambamba hukataliwa.
-- Picha hazitumiki kabisa. Uoni, matokeo ya kufikiri, vidhibiti vya juhudi, na dirisha la muktadha la 1M
+- Taswira hazitumiki kabisa. Uwezo wa kuona, matokeo ya kufikiri, vidhibiti vya kiwango cha juhudi na dirisha la muktadha la 1M
   havitangazwi.
 - SSE hutumia matukio halali ya mzunguko wa maisha wa Anthropic lakini hutolewa baada ya zamu ya ACP yenye kikomo
-  kukusanywa; vipande vya ACP havipitishwi hatua kwa hatua.
+  kukusanywa; vipande vya ACP havitumwi hatua kwa hatua.

@@ -186,9 +186,10 @@
       "_rebaseline_2026_08_28_npm_publish_hosted_stage_job": "192 -> 194 (+2). Job novo `stage-npm` em .github/workflows/npm-publish.yml: o npm RECUSA `--provenance` vindo de runner self-hosted (422 \"Unsupported GitHub Actions runner environment\"), e o job `publish` nao pode migrar para runner hospedado porque 16 GB nao bastam para o fallback next-build do build:cli (documentado no proprio runs-on). A separacao foi a unica saida que preserva a atestacao SLSA que a 3.8.49 ja tem. Os +2 sao da MESMA convencao deliberada de todos os workflows (ver _scanner_harden_workflows_2026_06_16): unpinned-uses @vN em actions/download-artifact@v8 + actions/setup-node@v7, mais o cache-poisoning que o proprio setup-node@v7 ja gera nos outros 2 jobs deste MESMO arquivo (linhas 85 e 463) e que ja esta na baseline. Fixar por SHA so este job violaria a convencao. Nenhuma classe nova: zero template-injection / artipacked / dangerous-triggers / excessive-permissions — o job declara apenas contents:read + id-token:write, que e o minimo para a proveniencia. Medido pelo job Quality Gates (Extended) no run 33162... da PR #11877 = 194."
     },
     "vulnCount": {
-      "value": 27,
+      "value": 7,
       "direction": "down",
-      "dedicatedGate": true
+      "dedicatedGate": true,
+      "_tighten_2026_11_06_pr18174": "27 -> 7. Measured vulnCount=7 by scripts/check/check-vuln-ratchet.mjs on the root lockfile after the promptfoo 0.125.1, MSAL and basic-ftp repair merged with release/v3.8.54. The 7 are dev-only and were disclosed on 2026-10-30, after the repair was first measured: glob 10.5.0, 11.1.0, 13.0.6 (GHSA-3g3m-2fjr-6pw4), minimatch 9.0.9, 10.2.5, 10.2.6 (GHSA-g3hv-75wg-m249), joi 18.2.9 (GHSA-4528-x5fx-h6hg)."
     },
     "cycles": {
       "value": 14,
@@ -379,10 +380,11 @@
       "dedicatedGate": true
     },
     "rtlPhysicalClasses": {
-      "value": 1214,
+      "value": 843,
       "direction": "down",
       "eps": 0,
-      "_seeded_2026_07_28": "Measured by scripts/check/check-rtl-ratchet.mjs. tests/unit/ui/rtl-logical-classes.test.tsx pins four components and states it is partial (#3541); this bounds the remainder."
+      "_seeded_2026_07_28": "Measured by scripts/check/check-rtl-ratchet.mjs. tests/unit/ui/rtl-logical-classes.test.tsx pins four components and states it is partial (#3541); this bounds the remainder.",
+      "_tighten_2026_10_22_kea7886": "1214 -> 843. Measured rtlPhysicalClasses=702 by scripts/check/check-rtl-ratchet.mjs on feat/new-uikit-task42 (feat/new-uikit af385849 + docs): the UI kit migration (KEA-7886) replaced physical left/right utilities across the dashboard. 843 = ceil(702 * 1.2), keeping the velocity-phase 20% headroom (_policy) instead of freezing at the live count."
     }
   },
   "_coverage_note": "Pisos anti-flake ~2pt abaixo do real do CI mergeado MEDIDO COM os 135 testes religados (run 27247237268: statements 78.4 / lines 78.4 / functions 83.84 / branches 75.73). O religamento da 6A.1 HONESTIFICOU a regua: os ~82.5 anteriores eram inflados porque modulos nunca importados ficavam fora do denominador do c8. Apertar via --require-tighten na Fase 6A (2026-06-16).",

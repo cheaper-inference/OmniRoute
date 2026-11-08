@@ -12,7 +12,8 @@ import { registerDynamicImageModelSource } from "../config/dynamicImageModelSour
 
 export const AI_HORDE_API_BASE = "https://aihorde.net/api";
 export const AI_HORDE_ANONYMOUS_KEY = "0000000000";
-export const AI_HORDE_CLIENT_AGENT = "OmniRoute:3.8.49:https://github.com/diegosouzapw/OmniRoute";
+export const AI_HORDE_CLIENT_AGENT =
+  "OmniRoute:3.8.49:https://github.com/cheaper-inference/OmniRoute";
 export const AI_HORDE_CATALOG_POLL_MS = 30_000;
 // The catalog endpoint is a fixed, trusted OmniRoute-controlled URL (not
 // user-supplied), so it does not need SSRF host validation — but it still

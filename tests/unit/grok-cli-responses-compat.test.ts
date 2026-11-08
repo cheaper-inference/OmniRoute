@@ -39,17 +39,10 @@ test("grok-cli exposes the authenticated grok-build model catalog", () => {
         contextLength: 500000,
         targetFormat: "openai-responses",
       },
-      {
-        id: "grok-composer-2.5-fast",
-        name: "Composer 2.5",
-        contextLength: 200000,
-        targetFormat: "openai-responses",
-      },
     ]
   );
   assert.equal(getModelTargetFormat("gc", "grok-4.6"), "openai-responses");
   assert.equal(getModelTargetFormat("gc", "grok-4.5"), "openai-responses");
-  assert.equal(getModelTargetFormat("gc", "grok-composer-2.5-fast"), "openai-responses");
   assert.equal(grok_cliProvider.modelsUrl, GROK_BUILD_MODELS_URL);
 });
 

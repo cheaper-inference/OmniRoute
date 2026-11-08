@@ -284,13 +284,11 @@ OmniRoute 的組合引擎支援 **20 種路由策略**（宣告於 `src/shared/c
 
 若需嚴格輪替，請使用 `round-robin`；在 `weighted` 中設定相同權重只能達到統計上的平衡，而非嚴格平衡。
 
-### 代理管線模式 (Agentic pipeline mode)
+### 代理式管線模式
 
-具有至少兩個模型的 `pipeline` 組合可以透過 `config.agenticOrchestration.enabled` 選擇加入規劃者/執行者路由。第一個目標負責規劃和最終答案；第二個目標發出客戶端原生工具呼叫。OmniRoute 會從請求協定中偵測工具結果的延續，詢問規劃者是否需要另一個工具回合，並動態地將執行者或規劃者設為面向客戶端的最終步驟。
+至少包含兩個模型的 `pipeline` 組合，可透過 `config.agenticOrchestration.enabled` 選擇啟用規劃器／執行器路由。第一個目標負責規劃與最終回答；第二個目標則發出用戶端原生工具呼叫。OmniRoute 會從請求協定中偵測工具結果的接續內容，詢問規劃器是否需要進行另一輪工具呼叫，並動態選擇執行器或規劃器作為面向用戶端的最終步驟。
 
-在工具結果延續時，若兩個連續完成的回合重複相同的工具呼叫且結果未變，或者兩個連續回合中每個明確標記的結果都失敗，OmniRoute 也會停止執行。結果變更則允許重複呼叫（例如輪詢）。此防護機制會在新的使用者請求時重置，將平行呼叫分組為一個回合，並支援 Anthropic、Chat Completions、Responses 和 Gemini 歷史記錄。即使規劃者要求另一個工具回合，它也會收到原因並負責最終答案。
-
-第二個目標之後的其他模型為排序的執行者備份。失敗的 HTTP 回應或傳輸異常會推進到下一個執行者，攜帶相同的規劃者決策和原生工具，但使用該執行者自己的步驟提示和已解析的連線。第一個成功的回應會原樣返回，包括 SSE 串流；成功開始串流後的失敗無法在此處重試。如果所有執行者都失敗，則返回最後一個失敗。客戶端中止會停止分發。
+第二個目標之後的其他模型會依序作為執行器備援。若 HTTP 回應失敗或發生傳輸例外，系統會繼續嘗試下一個執行器，同時沿用相同的規劃器決策與原生工具，但使用該執行器自己的步驟提示詞和解析後的連線。第一個成功的回應會原封不動地傳回，包括 SSE 串流；成功的串流開始後若發生失敗，便無法在此重試。若所有執行器皆失敗，則傳回最後一次失敗。用戶端中止操作會停止分派。
 
 ```json
 {
@@ -302,7 +300,7 @@ OmniRoute 的組合引擎支援 **20 種路由策略**（宣告於 `src/shared/c
 }
 ```
 
-執行者可能會在一個回應中發出多個獨立呼叫。相依呼叫會在後續的客戶端工具結果回合中處理，並由規劃者審查每個結果。`maxToolRounds` 預設為 `8`，接受 `1`–`32`；一旦達到此限制，規劃者必須產生最佳的可用最終答案。內部規劃者決策會被緩衝，而選定的面向客戶端回應則保留原始的串流偏好。
+執行器可在單一回應中發出多個彼此獨立的呼叫。相依呼叫會在後續用戶端工具結果輪次中處理，且規劃器會審查每個結果。`maxToolRounds` 預設為 `8`，接受 `1`–`32`；達到上限後，規劃器必須產生當下可得的最佳最終回答。內部規劃器決策會先經過緩衝，而選定的用戶端回應則會保留原始的串流偏好設定。
 
 ### `round-robin` 黏著批次與帳戶展開
 
@@ -412,22 +410,22 @@ Auto Combo 引擎不需要預先定義的組合。相反地，`open-sse/services
 
 ## API
 
-**沒有專用的 `POST /api/combos/auto` 端點** — Auto-Combo 可透過兩種方式使用：
+**沒有專用的 `POST /api/combos/auto` 端點**——Auto-Combo 可透過兩種方式使用：
 
-1. **零設定（建議）：** 傳送任何聊天補全請求，並使用 `model: "auto"` 或 `model: "auto/<variant>"`。虛擬工廠會針對每個請求建構 combo — 不需持久化，也不需呼叫 API。
+1. **零設定（建議）：** 傳送任何聊天補全請求，並使用 `model: "auto"` 或 `model: "auto/<variant>"`。虛擬工廠會為每個請求建構組合——無須持久化，也無須進行 API 呼叫。
 
-2. **使用 `strategy: "auto"` 的持久化 combo：** 透過 `POST /api/combos` 建立一般 combo，並設定 `strategy: "auto"`，以及 `config.auto.weights` / `config.auto.candidatePool`。這會使用相同的評分引擎；combo 會儲存在 `combos` 中，並可透過 ID 重複使用。
+2. **使用 `strategy: "auto"` 的持久化組合：** 透過 `POST /api/combos` 建立一般組合，並設定 `strategy: "auto"`，以及 `config.auto.weights` / `config.auto.candidatePool`。系統會使用相同的評分引擎；該組合會儲存在 `combos` 中，並可透過 ID 重複使用。
 
-若要進行探索，`GET /api/combos/auto` 會列出每個變體及其解析後的候選池，以及 `context_length` / `max_output_tokens` — 即候選池各視窗中的最大值。用戶端（例如 opencode 外掛程式）必須公布這些值，而非 `0`：內容長度為零會完全停用 opencode 的自動壓縮，導致工作階段持續增長，直到閘道的歷史記錄清除機制破壞上下文為止。公布最大值是安全的，因為 Auto-Combo 的上下文預先篩選器會將過大的請求路由至具備大型視窗的候選項目。
+若要探索可用項目，`GET /api/combos/auto` 會列出每個變體及其解析後的候選集，另包含 `context_length` / `max_output_tokens`——即候選集中各個視窗的最大值。用戶端（例如 opencode 外掛程式）必須宣告這些值，而非 `0`：內容長度為零會完全停用 opencode 的自動壓縮，導致工作階段持續增長，直到閘道的歷史記錄清除機制破壞上下文。宣告最大值是安全的，因為 Auto-Combo 的上下文預先篩選器會將超大請求路由至具有大型視窗的候選項目。
 
 ```bash
-# 零設定用法（無需建立 combo）
+# 零設定用法（不建立組合）
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# 透過一般 combos 端點建立持久化 auto combo
+# 透過一般 combos 端點建立持久化的自動組合
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
@@ -435,33 +433,32 @@ curl -X POST http://localhost:20128/api/combos \
 
 ### 自動路由器策略
 
-持久化的 `strategy: "auto"` combo 可將 `config.routerStrategy`（或舊版的
-`config.auto.routerStrategy`）設定為以下其中一種：
+持久化的 `strategy: "auto"` 組合可將 `config.routerStrategy`（或舊版
+`config.auto.routerStrategy`）設定為下列其中一項：
 
-- `rules` — 預設的加權評分
-- `score` — 選擇已設定加權分數最高的項目。分數完全相同時，會保留已設定的
-  候選項目順序；現有的 `explorationRate` 會從完整的已排序候選池中進行取樣。
-- `cost` / `eco` — 最便宜的健康提供者
-- `latency` / `fast` — 具有可靠性懲罰的最低 p95 延遲
-- `sla-aware` / `sla` — 優先選擇符合 p95 延遲、錯誤率及選用
+- `rules`——預設的加權評分
+- `score`——選取已設定加權分數最高的項目。分數完全相同時，會保留設定的
+  候選項目順序；現有的 `explorationRate` 會從完整的已排序候選集中取樣。
+- `cost` / `eco`——最便宜的健康提供者
+- `latency` / `fast`——具有可靠性懲罰的最低 p95 延遲
+- `sla-aware` / `sla`——優先選取符合 p95 延遲、錯誤率及選用
   成本 SLO 的候選項目
-- `lkgp` — 優先使用上次已知的良好提供者
-- `nadir` — 詢問 [Nadir](https://getnadir.com) 的決策 API，判斷提示需要候選池中的哪個
-  模型；需選擇加入，失敗時開放回退至 `rules`
+- `lkgp`——優先使用最後一個已知良好的提供者
+- `nadir`——詢問 [Nadir](https://getnadir.com) 的決策 API，判斷提示需要候選集中的哪個模型；需主動啟用，失敗時開放回退至 `rules`
 
 ### 路由器策略詳解
 
-Auto-Combo 引擎公開了 7 種可插拔的 **RouterStrategy** 實作，
-您可以透過 `config.routerStrategy`（或舊版的 `config.auto.routerStrategy`）進行切換。
-每種策略都會根據 `RoutingContext`
-（任務類型、工具／視覺提示、token 估算、選用的 SLA 政策、選用的
-上次已知良好提供者），從候選池中挑選一個提供者。
+Auto-Combo 引擎提供 7 種可插拔的 **RouterStrategy** 實作，
+您可透過 `config.routerStrategy`（或舊版 `config.auto.routerStrategy`）進行切換。
+每個策略會根據 `RoutingContext`
+（任務類型、工具／視覺提示、Token 估算值、選用的 SLA 政策、選用的
+最後已知良好提供者），從候選集中挑選一個提供者。
 
-#### 1. `rules`（預設）— 16 因子加權評分
+#### 1. `rules`（預設）——16 項因素加權評分
 
 封裝現有的評分引擎。先篩除斷路器狀態為 `OPEN` 的
-候選項目，再以目前任務類型及 `getTaskFitness()` 執行 `scorePool()`，
-並選擇分數最高的提供者。
+候選項目，接著使用目前的任務類型及 `getTaskFitness()` 執行 `scorePool()`，
+並選取分數最高的提供者。
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -481,15 +478,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**使用時機**：預設選項。當您希望在所有訊號之間取得平衡的權衡時使用。
+**適用情境**：預設選項。適合希望在所有訊號之間取得均衡取捨時使用。
 
-**別名**：`rules`（無其他別名）
+**別名**：`rules`（無別名）
 
 ---
 
-#### 2. `cost` / `eco` — 最便宜的健康提供者
+#### 2. `cost` / `eco`——最便宜的健康提供者
 
-依 `costPer1MTokens`（升冪）排序候選池，並選擇最便宜的項目。
+依 `costPer1MTokens`（遞增）排序候選集，並選取最便宜的提供者。
 會先篩除狀態為 `OPEN` 的候選項目。
 
 ```ts
@@ -505,13 +502,13 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**使用時機**：成本敏感型工作負載、批次處理或背景工作。
+**適用情境**：成本敏感型工作負載、批次處理或背景作業。
 
 **別名**：`cost`、`eco`
 
 ---
 
-#### 3. `latency` / `fast` — 具有可靠性懲罰的最低 p95 延遲
+#### 3. `latency` / `fast`——具有可靠性懲罰的最低 p95 延遲
 
 依 `p95LatencyMs + (errorRate * 1000)` 排序。錯誤率懲罰可確保
 不可靠的提供者即使名義延遲較低，排名仍會較後。
@@ -531,16 +528,16 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**使用時機**：延遲敏感型工作負載，例如即時聊天、自動完成或
+**適用情境**：對延遲敏感的工作負載，例如即時聊天、自動完成或
 互動式程式設計助理。
 
 **別名**：`latency`、`fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — 延遲／錯誤／成本 SLO 合規性
+#### 4. `sla-aware` / `sla`——延遲／錯誤／成本 SLO 合規性
 
-根據每個候選項目符合已設定 SLO 政策的程度進行評分：
+根據每個候選項目符合所設定 SLO 政策的程度進行評分：
 
 | 因素         | 權重 | 公式                                              |
 | ------------ | ---- | ------------------------------------------------- |
@@ -550,8 +547,8 @@ class LatencyStrategyImpl implements RouterStrategy {
 | 成本分數     | 10%  | `threshold / max(value, ε)` 或反向正規化          |
 | 穩定性分數   | 5%   | 反向正規化的延遲標準差                            |
 
-當 `hardConstraints: true` 時，候選項主要依照**違規分數**
-（超出任何 SLO 的程度）排序，其次再依綜合分數排序。否則只會依照
+當 `hardConstraints: true` 時，候選項目會先依照**違規分數**
+（超出任何 SLO 的程度）排序，再依綜合分數排序。否則只會依照
 綜合分數排序。
 
 ```ts
@@ -561,12 +558,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... 依據政策為每個候選項評分：{ targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... 根據原則對每個候選項目評分：{ targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA 欄位**（在組合設定中指定）：
+**SLA 欄位**（在組合設定中設定）：
 
 ```json
 {
@@ -590,7 +587,7 @@ class SLAStrategyImpl implements RouterStrategy {
 #### 5. `lkgp` — 優先使用最後一個已知良好的提供者
 
 會先嘗試**最後一個已知良好的提供者**（若已設定），接著退回使用
-`rules` 策略。這適合用於工作階段黏著性——由相同的提供者處理
+`rules` 策略。這適合用於工作階段黏著性——由同一個提供者處理
 對話中的後續請求。
 
 ```ts
@@ -618,21 +615,21 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-**適用時機**：當您希望由相同提供者處理後續請求的多輪對話
-（例如，為了快取、上下文連續性或定價一致性）。
+**適用時機**：當您希望由同一個提供者處理多輪對話中的
+後續請求時（例如為了快取、上下文連貫性或定價一致性）。
 
 **別名**：`lkgp`（無其他別名）
 
 ---
 
-#### 6. `nadir` — 透過 Nadir 根據提示詞選擇模型
+#### 6. `nadir` — 透過 Nadir 依提示選擇模型
 
-上述每種策略都會依據自身的遙測資料對候選項進行排名；它們都不會讀取
+上述每種策略都會依據各自的遙測資料對候選項目進行排名；它們都不會讀取
 請求。`nadir` 會將最後一輪使用者訊息以及集區中的模型 ID 傳送至
 [Nadir](https://getnadir.com) 的決策 API（`POST /v1/bucket`），並路由至 Nadir
-從該選單中選出的模型（`simple` → 最便宜且能力足夠的模型，`complex` →
-前沿模型）。提供該模型的連線仍由 `rules` 選取，因此配額、
-健康狀態與成本會繼續決定使用哪個帳戶。
+從該選單中選出的模型（`simple` → 能勝任的最便宜模型，`complex` →
+前沿模型）。提供該模型的連線仍由 `rules` 選擇，因此配額、
+健康狀態與成本仍會決定使用哪個帳號。
 
 ```json
 {
@@ -648,23 +645,25 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` 和 `OMNIROUTE_NADIR_BASE_URL` 是這兩個
-字串的環境變數備用值。只有自行託管的 Nadir 才需要 `baseUrl`（結尾的 `/v1` 可被接受）。
-無金鑰的呼叫會使用 Nadir 的匿名層級，此層級會依 IP 限制速率。
+`OMNIROUTE_NADIR_API_KEY` 與 `OMNIROUTE_NADIR_BASE_URL` 是這兩個
+字串的備用環境變數。只有自行託管 Nadir 時才需要 `baseUrl`（可接受尾端帶有 `/v1`）。
+無金鑰的呼叫會使用 Nadir 的匿名方案，該方案會依每個 IP 限制速率。使用金鑰時
+（[建立一個](https://app.getnadir.com/dashboard/api-keys)），每次決策都會
+記錄到您的 Nadir 儀表板。完整的設定與驗證說明：
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/)。
 
-會傳送到外部的內容：最後一則使用者訊息的文字（前 16k 個字元）、候選
-模型 ID，以及 `source: "omniroute"` 頻道標籤。不會傳送系統提示詞、歷史記錄、工具或
+傳送至外部的內容包括：最後一則使用者訊息的文字（前 16k 個字元）、候選
+模型 ID，以及 `source: "omniroute"` 通道標籤。不會傳送系統提示、歷史記錄、工具或
 標頭。
 
-失敗行為採取失效開放：逾時（預設 2000 ms）、非 2xx 回應、無法連線的
-主機、格式錯誤的回應，或選取集區外的項目，都會改用 `rules`
-的決策，且原因會加上前綴 `NadirStrategy: fallback (…)`。呼叫失敗後，
-策略會略過網路請求 30 秒，因此服務中斷時每 30 秒只會產生一次逾時，而不是
-每個請求都產生一次。只有當 Nadir 實際做出
-選擇時，路由事件才會回報 `strategy: "nadir"`。
+失敗行為採用開放式失效：逾時（預設為 2000 ms）、非 2xx 回應、主機無法連線、
+格式錯誤的回應，或選取結果不在集區內時，都會採用 `rules`
+決策，且原因前面會加上 `NadirStrategy: fallback (…)`。呼叫失敗後，
+該策略會略過網路請求 30 秒，因此服務中斷時每 30 秒只會產生一次逾時，而非
+每個請求都發生一次。只有當 Nadir 確實做出選擇時，路由事件才會回報 `strategy: "nadir"`。
 
-**適用時機**：模型集區橫跨多個模型層級（小型、中型
-及前沿模型）的混合難度流量，且您希望降低一律使用前沿模型所造成的成本。
+**適用時機**：流量中的任務難度不一，且集區橫跨多個模型層級（小型、中型
+與前沿模型），而您希望降低一律使用前沿模型所產生的成本。
 
 **別名**：`nadir`（無其他別名）
 
@@ -715,14 +714,14 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ### 路由器策略選擇指南
 
-| 使用案例       | 策略        | 原因                       |
-| -------------- | ----------- | -------------------------- |
-| 平衡型工作負載 | `rules`     | 預設——考量所有因素         |
-| 最小化成本     | `cost`      | 一律選擇最便宜的項目       |
-| 最小化延遲     | `latency`   | 選擇速度最快且可靠的提供者 |
-| 嚴格的 SLO     | `sla-aware` | 依 p95／錯誤／成本門檻篩選 |
-| 多輪對話       | `lkgp`      | 工作階段黏著性             |
-| 混合難度       | `nadir`     | 根據每個提示詞選擇模型層級 |
+| 使用情境     | 策略        | 原因                             |
+| ------------ | ----------- | -------------------------------- |
+| 均衡工作負載 | `rules`     | 預設值 — 會考量所有因素          |
+| 最小化成本   | `cost`      | 一律選擇最便宜的提供者           |
+| 最小化延遲   | `latency`   | 選擇速度最快且可靠的提供者       |
+| 嚴格的 SLO   | `sla-aware` | 依 p95／錯誤率／成本閾值進行篩選 |
+| 多輪對話     | `lkgp`      | 工作階段黏著性                   |
+| 混合難度     | `nadir`     | 依每個提示選擇模型層級           |
 
 SLA 感知欄位：
 

@@ -2,22 +2,35 @@
 
 import type { HTMLAttributes } from "react";
 import { useTranslations } from "next-intl";
+import { Card, CardContent } from "@omniroute/ui-kit/card";
+import { LoadingState } from "@omniroute/ui-kit/loading-state";
+import { Skeleton as KitSkeleton } from "@omniroute/ui-kit/skeleton";
+import {
+  Spinner as KitSpinner,
+  type SpinnerProps as KitSpinnerProps,
+} from "@omniroute/ui-kit/spinner";
 import { cn } from "@/shared/utils/cn";
 
-type SpinnerSize = "sm" | "md" | "lg" | "xl";
+type SpinnerSize = "xs" | "sm" | "md" | "lg" | "xl";
 type LoadingType = "spinner" | "page" | "skeleton" | "card";
 
-const spinnerSizes: Record<SpinnerSize, string> = {
-  sm: "size-4",
+// 12/16/24/32/48px. The kit box stops at 20px and calls that `md`, so the steps above `sm` keep
+// this scale with a utility, which beats the kit rule (`@layer components`).
+const SPINNER_BOX: Partial<Record<SpinnerSize, string>> = {
   md: "size-6",
   lg: "size-8",
   xl: "size-12",
 };
 
-interface SpinnerProps {
+interface SpinnerProps extends HTMLAttributes<HTMLSpanElement> {
   size?: SpinnerSize;
   className?: string;
   label?: string;
+  /**
+   * Hidden from assistive technology and drawn in the surrounding text colour, for a spinner in a
+   * named button or next to text that already says what is loading. Ignores `label`.
+   */
+  decorative?: boolean;
 }
 
 interface PageLoadingProps {
@@ -37,32 +50,40 @@ interface LoadingProps extends HTMLAttributes<HTMLDivElement> {
   label?: string;
 }
 
-// Spinner loading
-export function Spinner({ size = "md", className, label }: SpinnerProps) {
+// A separate component so a decorative spinner needs no translations.
+function StatusSpinner({
+  label,
+  className,
+  ...props
+}: Omit<KitSpinnerProps, "label"> & { label?: string }) {
   const t = useTranslations("common");
   const ariaLabel = label ?? t("loading");
   return (
-    <span
-      role="status"
+    <KitSpinner
       aria-live="polite"
       aria-label={ariaLabel}
-      className={cn("inline-flex", className)}
-    >
-      <span className="sr-only">{ariaLabel}</span>
-      <span
-        aria-hidden="true"
-        className={cn(
-          "material-symbols-outlined text-primary animate-spin motion-reduce:animate-none",
-          spinnerSizes[size]
-        )}
-      >
-        progress_activity
-      </span>
-    </span>
+      label={ariaLabel}
+      className={cn("text-primary", className)}
+      {...props}
+    />
   );
 }
 
-// Full page loading
+// Spinner loading — the kit spinner, a labelled status unless `decorative`.
+export function Spinner({
+  size = "md",
+  className,
+  label,
+  decorative = false,
+  ...props
+}: SpinnerProps) {
+  const kitSize = size === "xs" ? "xs" : "sm";
+  const box = cn(SPINNER_BOX[size], className);
+  if (decorative) return <KitSpinner size={kitSize} className={box} {...props} />;
+  return <StatusSpinner size={kitSize} className={box} label={label} {...props} />;
+}
+
+// Full page loading — the kit panel loader, centred over the viewport (route-level fallback).
 export function PageLoading({ message, className }: PageLoadingProps) {
   const t = useTranslations("common");
   return (
@@ -71,38 +92,30 @@ export function PageLoading({ message, className }: PageLoadingProps) {
         "fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg px-6",
         className
       )}
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
     >
-      <Spinner size="xl" />
-      <p className="mt-4 text-text-muted text-center">{message ?? t("loading")}</p>
+      <LoadingState variant="panel" label={message ?? t("loading")} aria-busy="true" />
     </div>
   );
 }
 
-// Skeleton loading
+// Skeleton loading — the kit skeleton is aria-hidden and carries `ci-skeleton`.
 export function Skeleton({ className, ...props }: SkeletonProps) {
-  return (
-    <div
-      aria-hidden="true"
-      className={cn("animate-pulse motion-reduce:animate-none rounded-lg bg-border", className)}
-      {...props}
-    />
-  );
+  return <KitSkeleton aria-hidden="true" className={className} {...props} />;
 }
 
 // Card skeleton
 export function CardSkeleton() {
   return (
-    <div className="p-6 rounded-xl border border-border bg-surface" aria-hidden="true">
-      <div className="flex items-center justify-between mb-4 gap-4">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="size-10 rounded-lg" />
-      </div>
-      <Skeleton className="h-8 w-16 mb-2" />
-      <Skeleton className="h-3 w-20" />
-    </div>
+    <Card aria-hidden="true">
+      <CardContent className="space-y-3">
+        <div className="flex items-center justify-between gap-4">
+          <KitSkeleton variant="text" width="40%" />
+          <KitSkeleton width={40} height={40} />
+        </div>
+        <KitSkeleton variant="text" width="30%" />
+        <KitSkeleton variant="text" width="50%" />
+      </CardContent>
+    </Card>
   );
 }
 

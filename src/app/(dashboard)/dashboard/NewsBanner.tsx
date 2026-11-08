@@ -11,6 +11,9 @@ import {
   selectActiveNews,
   serializeDismissedNewsIds,
 } from "@/shared/utils/releaseNotes";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 
 function subscribeToDismissals(callback: () => void) {
   window.addEventListener("storage", callback);
@@ -79,9 +82,7 @@ export default function NewsBanner() {
     >
       <div className="flex min-w-0 items-start gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-          <span className="material-symbols-outlined text-[22px] text-primary" aria-hidden="true">
-            {announcement.icon}
-          </span>
+          <Icon name={announcement.icon} size={22} className="text-primary" />
         </div>
         <div className="min-w-0">
           <p className="text-sm font-semibold text-text-main">{announcement.title}</p>
@@ -95,24 +96,20 @@ export default function NewsBanner() {
             href={announcement.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:brightness-110"
+            className={buttonVariants({ size: "sm", className: "gap-1.5 whitespace-nowrap" })}
           >
             {announcement.linkLabel ?? announcement.title}
-            <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-              open_in_new
-            </span>
+            <Icon name="open_in_new" size={14} />
           </a>
         )}
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          icon="close"
           onClick={dismiss}
           aria-label={t("dismissNotification")}
-          className="text-text-muted transition-colors hover:text-text-main"
-        >
-          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-            close
-          </span>
-        </button>
+          className="text-text-muted hover:text-text-main"
+        />
       </div>
     </div>
   );

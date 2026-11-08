@@ -114,91 +114,91 @@ Oʻtkazib yuborilgan qamrov/ratchet yuzasi release branchdagi keyingi toʻliq is
 Faqat testlarga oid difflar (barcha fayllar `tests/` ichida, hech biri `tests/e2e/` ichida emas) E2E
 matritsasini hech qanday yorliqsiz avtomatik ravishda oʻtkazib yuboradi.
 
-## Batafsil nazorat roʻyxati
+## Batafsil tekshiruv roʻyxati
 
 ### Relizdan oldin
 
 - [ ] Ushbu relizga moʻljallangan barcha PRlar `release/vX.Y.0` ga birlashtirilgan
-- [ ] Ushbu versiya uchun barcha ochiq Linear/issue elementlari yopilgan yoki keyingi bosqichga oʻtkazilgan
-- [ ] `release/vX.Y.0` branchida CI yashil holatda
-- [ ] Kodda `TODO(release)` markerlari yoʻq: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker asosiy tasviri yangilangan (hozirda `node:24.15.0-trixie-slim`)
+- [ ] Ushbu versiya uchun barcha ochiq Linear/muammo bandlari yopilgan yoki keyingi bosqichga oʻtkazilgan
+- [ ] `release/vX.Y.0` tarmogʻida CI muvaffaqiyatli
+- [ ] Kodda `TODO(release)` belgilari yoʻq: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker bazaviy tasviri yangilangan (hozirda `node:24.15.0-trixie-slim`)
 
 ### Versiya va oʻzgarishlar jurnali
 
 - [ ] `/version-bump-cc <patch|minor|major>` ni ishga tushiring (Claude Code koʻnikmasi)
   - `package.json`, `electron/package.json` versiyalarini oshiradi
   - Oxirgi tegdan keyingi git commitlari asosida `CHANGELOG.md` ni qayta yaratadi
-  - README.md belgilarini yangilaydi
-- [ ] CHANGELOG.md ni qoʻlda koʻrib chiqing va zarur boʻlsa commit xabarlarini tozalang
-- [ ] `CHANGELOG.md` dagi eng soʻnggi semver boʻlimi `package.json` versiyasiga tengligini tekshiring
+  - README.md nishonlarini yangilaydi
+- [ ] CHANGELOG.md ni qoʻlda koʻrib chiqing va kerak boʻlsa commit xabarlarini tartibga keltiring
+- [ ] `CHANGELOG.md` dagi eng soʻnggi semver boʻlimi `package.json` versiyasiga teng ekanini tekshiring
 - [ ] Kelgusi ishlar uchun `## [Unreleased]` ni oʻzgarishlar jurnalining birinchi boʻlimi sifatida saqlang
 - [ ] `docs/openapi.yaml` ni yangilang → `info.version` `package.json` versiyasiga teng boʻlishi kerak
 
 ### Kod sifati
 
 - [ ] `npm run lint` — 0 ta xato (ogohlantirishlar avvaldan mavjud)
-- [ ] `npm run typecheck:core` — toza
-- [ ] `npm run typecheck:noimplicit:core` — toza (qatʼiy)
-- [ ] `npm run check:cycles:ratchet` — `cycles ≤ metrics.cycles.value` (`quality-baseline.json`; `check:cycles`: `cycles > 0 → exit 1`, #15281)
+- [ ] `npm run typecheck:core` — xatosiz
+- [ ] `npm run typecheck:noimplicit:core` — xatosiz (qatʼiy)
+- [ ] `npm run check:cycles:ratchet` — muzlatilgan `metrics.cycles` chegarasi doirasida (oddiy `check:cycles` har qanday sikl mavjud boʻlsa 1 bilan yakunlanadi, #15281)
 - [ ] `npm run check:any-budget:t11` — budjet doirasida
-- [ ] `npm run check:route-validation:t06` — toza
-- [ ] `npm run check:node-runtime` — qoʻllab-quvvatlanadigan minimal runtime talabi bajarilgan (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` dagi `SUPPORTED_NODE_RANGE` boʻyicha; `package.json` dagi `engines` bilan moslashtirilgan)
+- [ ] `npm run check:route-validation:t06` — xatosiz
+- [ ] `npm run check:node-runtime` — qoʻllab-quvvatlanadigan minimal bajarish muhiti talabi bajarilgan (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` dagi `SUPPORTED_NODE_RANGE` ga muvofiq; `package.json` dagi `engines` bilan moslashtirilgan)
 
-### Testlash
+### Sinov
 
 - [ ] `npm run test:unit` — muvaffaqiyatli
-- [ ] `npm run test:vitest` — muvaffaqiyatli (MCP server, autoCombo, cache)
-- [ ] `npm run test:coverage` — 60/60/60/60 chegarasi bajarilgan (statementlar/qatorlar/funksiyalar/branchlar)
-- [ ] `npm run test:integration` — muvaffaqiyatli (agar oʻzgarishlar DB / handlerlarga tegishli boʻlsa)
-- [ ] `npm run test:combo:matrix` — muvaffaqiyatli (combo strategiyasi matritsasi: barcha 19 ta ommaviy routing strategiyasining tanlov qarorlarini deterministik tarzda isbotlaydi; combo routing, strategiyani aniqlash yoki fallback mantigʻiga tegilganda ishga tushiring)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ixtiyoriy/qoʻlda** (gate bilan himoyalangan haqiqiy upstream smoke-testi; VPS `root@192.168.0.15` dan faqat oʻqishga moʻljallangan DB snapshotini oladi; haqiqiy providerlarga murojaat qiladi, kredit sarflaydi; CIʼda hech qachon ishga tushmaydi; gatesiz holatda toza tarzda oʻtkazib yuboriladi)
-- [ ] `npm run test:combo:live:vps` — **ixtiyoriy/qoʻlda** (Phase-3 VPS jonli smoke-testi: oddiy Node ESM orqali jonli `.15` serveriga qarshi 7 ta HTTP ssenariy; `ssh root@192.168.0.15` talab qiladi; faqat `__live_test__*` combolarini yaratadi/oʻchiradi; haqiqiy providerlarga murojaat qiladi; CIʼda hech qachon ishga tushmaydi)
+- [ ] `npm run test:vitest` — muvaffaqiyatli (MCP serveri, autoCombo, kesh)
+- [ ] `npm run test:coverage` — 60/60/60/60 chegarasi bajarilgan (ifodalar/satrlar/funksiyalar/tarmoqlar)
+- [ ] `npm run test:integration` — muvaffaqiyatli (agar oʻzgarishlar DB / ishlov beruvchilarga taalluqli boʻlsa)
+- [ ] `npm run test:combo:matrix` — muvaffaqiyatli (combo strategiyalari matritsasi: barcha 19 ta ommaviy marshrutlash strategiyasining tanlov qarorlarini deterministik tarzda tasdiqlaydi; combo marshrutlash, strategiyani aniqlash yoki zaxira mantiqiga oʻzgartirish kiritilganda ishga tushiring)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ixtiyoriy/qoʻlda** (shart bilan yoqiladigan haqiqiy yuqori oqim smoke-sinovi; VPS `root@192.168.0.15` dan faqat oʻqish uchun moʻljallangan DB snapshotini oladi; haqiqiy provayderlarga murojaat qiladi, kredit sarflaydi; CI da hech qachon ishga tushmaydi; shart yoʻq boʻlsa muammosiz oʻtkazib yuboriladi)
+- [ ] `npm run test:combo:live:vps` — **ixtiyoriy/qoʻlda** (3-bosqich VPS jonli smoke-sinovi: oddiy Node ESM orqali jonli `.15` serveriga qarshi 7 ta HTTP ssenariysi; `ssh root@192.168.0.15` talab qilinadi; faqat `__live_test__*` combolarini yaratadi/oʻchiradi; haqiqiy provayderlarga murojaat qiladi; CI da hech qachon ishga tushmaydi)
 - [ ] `npm run test:e2e` — muvaffaqiyatli (UI oʻzgarishlari)
 - [ ] `npm run test:protocols:e2e` — muvaffaqiyatli (MCP/A2A oʻzgarishlari)
 - [ ] `npm run test:ecosystem` — muvaffaqiyatli
 
-### Hooklar (Husky orqali tekshirilgan)
+### Hooklar (Husky tomonidan tekshirilgan)
 
-Husky hooklari `.husky/` ichida joylashgan va git operatsiyalarida avtomatik ishga tushadi.
+Husky hooklari `.husky/` ichida joylashgan va git amallari vaqtida avtomatik ravishda ishga tushadi.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** tezkor deterministik tekshiruvlar — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 da faollashtirilgan). `test:unit` ataylab kiritilmagan (sekin; CIʼdagi `test-unit` jobi bilan qamrab olinadi).
-  - Release branchlarni push qilishdan oldin `npm run test:unit` ni qoʻlda ishga tushiring.
+- **pre-push:** tezkor deterministik tekshiruvlar — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 kuni faollashtirilgan). `test:unit` ataylab kiritilmagan (sekin; CI dagi `test-unit` vazifasi bilan qamrab olingan).
+  - Reliz tarmoqlarini push qilishdan oldin `npm run test:unit` ni qoʻlda ishga tushiring.
 
 Agar hook muvaffaqiyatsiz tugasa: asosiy muammoni tuzating, `--no-verify` bilan chetlab oʻtmang.
 
-### Conventional Commits
+### Anʼanaviy commitlar
 
-Relizga kiradigan barcha commitlar `type(scope): subject` formatiga rioya qilishi shart.
+Relizga kiritiladigan barcha commitlar `type(scope): subject` formatiga rioya qilishi kerak.
 
 **Yaroqli turlar:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Yaroqli scopelar:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Yaroqli qamrovlar:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-Buzuvchi oʻzgarishlar: `BREAKING CHANGE:` footerini yoki scopedan keyin `!` qoʻshing (masalan, `feat(api)!: drop /v0`).
+Moslikni buzuvchi oʻzgarishlar: `BREAKING CHANGE:` yakuniy qaydini yoki qamrovdan keyin `!` belgisini qoʻshing (masalan, `feat(api)!: drop /v0`).
 
 ### Hujjatlar
 
 - [ ] `npm run check:docs-sync` muvaffaqiyatli yakunlanadi (pre-commit tomonidan avtomatik ishga tushiriladi)
 - [ ] `npm run check:docs-all` muvaffaqiyatli yakunlanadi (umumiy tekshiruv: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` 0 kodi bilan yakunlanadi — kod ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` muhit shartnomasi buzilmagan
-- [ ] `npm run check:doc-links` 0 kodi bilan yakunlanadi — qayta tuzilmalashdan keyin buzilgan ichki markdown havolalari yoʻq
-- [ ] `docs/architecture/ARCHITECTURE.md` saqlash muhiti/ishlash muhiti tafovutlari uchun tekshirildi
-- [ ] `docs/guides/TROUBLESHOOTING.md` muhit oʻzgaruvchilari va operatsion tafovutlar uchun tekshirildi
-- [ ] Agar `.env.example` oʻzgargan boʻlsa: `docs/reference/ENVIRONMENT.md` yangilandi
-- [ ] Agar yangi funksiya UI interfeysiga ega boʻlsa: u `docs/guides/USER_GUIDE.md` faylida tilga olingan
-- [ ] Agar yangi funksiya API interfeysiga ega boʻlsa: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` yangilandi
-- [ ] Agar yangi funksiya modul boʻlsa: unga bagʻishlangan `docs/<MODULE>.md` mavjud
-- [ ] Agar moslikni buzuvchi oʻzgarish boʻlsa: `docs/guides/TROUBLESHOOTING.md` migratsiya qaydiga ega
+- [ ] `npm run check:env-doc-sync` 0 bilan yakunlanadi — kod ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` muhit shartnomasi yaxlit saqlangan
+- [ ] `npm run check:doc-links` 0 bilan yakunlanadi — qayta tuzishdan keyin buzilgan ichki markdown havolalari yoʻq
+- [ ] `docs/architecture/ARCHITECTURE.md` saqlash/bajarish muhiti tafovutlari boʻyicha koʻrib chiqilgan
+- [ ] `docs/guides/TROUBLESHOOTING.md` muhit oʻzgaruvchilari va operatsion tafovutlar boʻyicha koʻrib chiqilgan
+- [ ] Agar `.env.example` oʻzgargan boʻlsa: `docs/reference/ENVIRONMENT.md` yangilangan
+- [ ] Agar yangi funksiyada UI boʻlsa: u `docs/guides/USER_GUIDE.md` da tilga olingan
+- [ ] Agar yangi funksiyada API boʻlsa: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` yangilangan
+- [ ] Agar yangi funksiya modul boʻlsa: maxsus `docs/<MODULE>.md` mavjud
+- [ ] Agar moslikni buzuvchi oʻzgarish boʻlsa: `docs/guides/TROUBLESHOOTING.md` da migratsiya qaydi mavjud
 
 ### i18n
 
-- [ ] `npm run i18n:check` 0 kodi bilan yakunlanadi — tarjima holati (`.i18n-state.json`) manba hujjatlari bilan sinxronlangan (qatʼiy rejimda tafovutli manbalar yoʻq; soʻnggi daqiqadagi hujjat tuzatishlari uchun ogohlantirish rejimi tavsiyasi maqbul, ammo teg qoʻyishdan oldin natija 0 boʻlishi kerak)
-- [ ] `npm run i18n:check-ui-coverage` 0 kodi bilan yakunlanadi — har bir UI lokali kamida 80% qamrov chegarasiga yetgan
-- [ ] `npm run i18n:sync-ui:dry` barcha 42 ta lokal boʻyicha 0 ta yetishmayotgan kalit haqida xabar beradi
-- [ ] Agar ingliz tilidagi manba hujjatlari oʻzgargan boʻlsa, teg qoʻyishdan oldin `npm run i18n:run` buyrugʻini ishga tushiring (`.env` ichida `OMNIROUTE_TRANSLATION_API_KEY` talab qilinadi)
-- [ ] Kichik tarjima hissalarini keyingi relizgacha kechiktirish mumkin (CHANGELOG ichida kuzatib boring)
+- [ ] `npm run i18n:check` 0 bilan yakunlanadi — tarjima holati (`.i18n-state.json`) manba hujjatlari bilan sinxronlangan (qatʼiy rejimda tafovutli manbalar yoʻq; soʻnggi daqiqadagi hujjat tuzatishlari uchun ogohlantirish rejimidagi tavsiya qabul qilinadi, ammo teg qoʻyishdan oldin natija 0 boʻlishi kerak)
+- [ ] `npm run i18n:check-ui-coverage` 0 bilan yakunlanadi — har bir UI lokali kamida 80% qamrov chegarasiga yetgan
+- [ ] `npm run i18n:sync-ui:dry` barcha 66 ta maqsadli lokal boʻyicha 0 ta yetishmayotgan kalit haqida xabar beradi (`en` manbasidan tashqari har bir lokal)
+- [ ] Agar ingliz tilidagi manba hujjatlari oʻzgargan boʻlsa, teg qoʻyishdan oldin `npm run i18n:run` ni ishga tushiring (`.env` ichida `OMNIROUTE_TRANSLATION_API_KEY` talab qilinadi)
+- [ ] Kichik boʻlsa, tarjima hissalarini keyingi relizga qoldirish mumkin (CHANGELOG da kuzatib boring)
 
 ### Maʼlumotlar bazasi migratsiyalari
 
@@ -206,72 +206,72 @@ Buzuvchi oʻzgarishlar: `BREAKING CHANGE:` footerini yoki scopedan keyin `!` qo�
   - [ ] Har bir migratsiya idempotent (`CREATE TABLE IF NOT EXISTS` va hokazo)
   - [ ] Migratsiyalar tranzaksiyalarga oʻralgan
   - [ ] Toʻgʻri raqamlangan (ketma-ketlikda boʻshliqlar yoʻq)
-- [ ] Yangi oʻrnatishda sinovdan oʻtkazing: `~/.omniroute/omniroute.db` faylini oʻchirib, `npm run dev` buyrugʻini ishga tushiring
-- [ ] Mavjud oʻrnatishda sinovdan oʻtkazing: maʼlumotlar bazasining zaxira nusxasini oling, migratsiyani ishga tushiring va sxemani tekshiring
-- [ ] Agar migratsiya jadvallarni qayta yozsa, WAL fayllari (`-wal`, `-shm`) toʻgʻri boshqariladi
+- [ ] Yangi oʻrnatishda sinang: `~/.omniroute/omniroute.db` ni oʻchiring va `npm run dev` ni ishga tushiring
+- [ ] Mavjud oʻrnatishda sinang: DB zaxira nusxasini yarating, migratsiyani ishga tushiring, sxemani tekshiring
+- [ ] Agar migratsiya jadvallarni qayta yozsa, WAL fayllari (`-wal`, `-shm`) toʻgʻri boshqarilgan
 
-### Provayderlar katalogi (Zod orqali tekshiriladi)
+### Provayderlar katalogi (Zod orqali tekshirilgan)
 
 - [ ] `src/shared/constants/providers.ts` Zod sxemasi yuklanish vaqtida yaroqli
-  - [ ] Barcha provayderlarda talab qilinadigan maydonlar (`id`, `label`, `kind` va hokazo) mavjud
-  - [ ] Yangi bepul provayderlar uchun `freeNote` berilgan
-  - [ ] OAuth provayderlari `src/lib/oauth/constants/oauth.ts` ichida roʻyxatdan oʻtkazilgan `oauthConfig` ga ega
-- [ ] Agar yangi provayder qoʻshilgan boʻlsa: `open-sse/executors/` ichida unga mos ijrochi mavjud
+  - [ ] Barcha provayderlarda majburiy maydonlar (`id`, `label`, `kind` va boshqalar) mavjud
+  - [ ] Yangi bepul provayderlar uchun `freeNote` taqdim etilgan
+  - [ ] OAuth provayderlarining `oauthConfig` konfiguratsiyasi `src/lib/oauth/constants/oauth.ts` faylida roʻyxatdan oʻtkazilgan
+- [ ] Agar yangi provayder qoʻshilgan boʻlsa: `open-sse/executors/` ichida tegishli ijrochi mavjud
 - [ ] Agar format OpenAI formatida boʻlmasa: `open-sse/translator/` ichida tarjimon mavjud
-- [ ] Modellar `open-sse/config/providerRegistry.ts` ichida roʻyxatdan oʻtkazilgan
+- [ ] Modellar `open-sse/config/providerRegistry.ts` faylida roʻyxatdan oʻtkazilgan
 - [ ] `tests/unit/` ichidagi modul testlari provayderlarni tasniflash va yoʻnaltirishni qamrab oladi
 
 ### Ish stoli ilovasi (Electron)
 
 Agar `electron/` oʻzgargan boʻlsa:
 
-- [ ] `npm run electron:smoke:packaged` muvaffaqiyatli yakunlanadi
+- [ ] `npm run electron:smoke:packaged` muvaffaqiyatli oʻtadi
 - [ ] Yigʻilmalar `:win`, `:mac`, `:linux` variantlaridan kamida bittasi uchun sinovdan oʻtkazilgan
-- [ ] Kodni imzolash sertifikatlarining muddati tugamagan (agar imzolash ishlatilsa)
-- [ ] `electron/package.json` versiyasi asosiy `package.json` versiyasiga mos
-- [ ] Agar `stable` kanaliga reliz qilinayotgan boʻlsa, avtomatik yangilash kanali koʻrsatkichi yangilangan
+- [ ] Kodni imzolash sertifikatlarining amal qilish muddati tugamagan (agar imzolash ishlatilsa)
+- [ ] `electron/package.json` versiyasi ildizdagi `package.json` versiyasiga mos
+- [ ] Agar `stable` kanaliga reliz chiqarilsa, avtomatik yangilash kanali koʻrsatkichi yangilangan
 
 ### Yigʻilma tuzilmasi
 
 Repozitoriy uchta alohida chiqish katalogidan foydalanadi — ularni hech qachon aralashtirmang:
 
-| Katalog   | Maqsad                                                                 | Kuzatiladimi?             |
-| --------- | ---------------------------------------------------------------------- | ------------------------- |
-| `src/`    | Ilovaning manba kodi (TypeScript / TSX)                                | Ha                        |
-| `.build/` | Yigʻish oraliq fayllari — `next build` chiqishi (`distDir`)            | Yoʻq (gitignore qilingan) |
-| `dist/`   | Tarqatiladigan npm toʻplami — `assembleStandalone` tomonidan yigʻiladi | Yoʻq (gitignore qilingan) |
+| Katalog   | Maqsad                                                                     | Kuzatiladimi?                   |
+| --------- | -------------------------------------------------------------------------- | ------------------------------- |
+| `src/`    | Ilova manba kodi (TypeScript / TSX)                                        | Ha                              |
+| `.build/` | Oraliq yigʻilma fayllari — `next build` chiqishi (`distDir`)               | Yoʻq (git eʼtiborsiz qoldiradi) |
+| `dist/`   | Tarqatishga tayyor npm toʻplami — `assembleStandalone` tomonidan yigʻiladi | Yoʻq (git eʼtiborsiz qoldiradi) |
 
-> **Operator qaydi:** masofaviy VPS tasvir katalogi `/usr/lib/node_modules/omniroute/app/` boʻlib qoladi.
-> Faqat **repozitoriy ichidagi** yigʻilma chiqishi koʻchirildi (`app/` → `dist/`). Joylashtirish koʻnikmalari
-> `dist/` tarkibini masofaviy `app/` katalogiga rsync orqali nusxalaydi — VPS yoʻllarini oʻzgartirish talab qilinmaydi.
+> **Operator eslatmasi:** masofaviy VPS tasviri katalogi hali ham `/usr/lib/node_modules/omniroute/app/` boʻlib qoladi.
+> Faqat **repozitoriy ichidagi** yigʻilma chiqishi koʻchirildi (`app/` → `dist/`). Joylashtirish vositalari
+> `dist/` tarkibini masofaviy `app/` katalogiga rsync orqali uzatadi — VPS yoʻllarini oʻzgartirish talab etilmaydi.
 
-**Bir martalik yigʻish jarayoni:**
+**Yagona yigʻilma jarayoni:**
 
 ```
 npm run build:release
   └─ rm -rf .build dist          (tozalash)
   └─ next build → .build/next/   (oraliq fayllar)
-  └─ assembleStandalone          (mustaqil yigʻilma + statik fayllar + ommaviy fayllar + mahalliy modullarni → dist/ ga nusxalaydi)
-  └─ dist/BUILD_SHA ni yozadi    (HEAD nazorat belgisi)
+  └─ assembleStandalone          (standalone + static + public + natives fayllarini dist/ ichiga nusxalaydi)
+  └─ writes dist/BUILD_SHA       (HEAD nazorat belgisi)
 ```
 
-Joylashtirish uchun `npm run build` buyrugʻidan soʻng alohida `npm run build:cli` buyrugʻini ishga tushirmang — bitta buyruqda toza qayta yigʻish va nazorat belgisini yaratadigan
+Joylashtirish uchun `npm run build` buyrugʻidan keyin alohida `npm run build:cli` buyrugʻini ISHGA TUSHIRMANG — bitta buyruqda toza qayta yigʻish va nazorat belgisini yaratadigan
 `npm run build:release` buyrugʻidan foydalaning.
 
 ### Artefaktni tekshirish
 
-- [ ] `npm run build:release` muvaffaqiyatli yakunlanadi va `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` tekshiruvi toza — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` yoki boshqa mahalliy qoldiqlar yoʻq
+- [ ] `npm run build:release` muvaffaqiyatli bajariladi va `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` toza yakunlanadi — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` yoki boshqa mahalliy qoldiqlar yoʻq
 - [ ] Yigʻishdan keyin `dist/server.js` mavjud
-- [ ] Ixtiyoriy mahalliy paketlangan ishlash muhiti tezkor sinovi: `npm run dev:candidate -- build` buyrugʻidan soʻng `npm run dev:candidate -- validate` paketlangan tarball faylini ajratilgan `DATA_DIR` ichida ishga tushiradi va `/api/health` + `/v1/models` ni tekshiradi ([Hissa qoʻshishning tavsiya etilgan jarayoni](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ga qarang)
+- [ ] Ixtiyoriy mahalliy paketlangan bajarilish muhiti smoke testi: `npm run dev:candidate -- build` buyrugʻidan keyin `npm run dev:candidate -- validate` izolyatsiyalangan `DATA_DIR` muhitida paketlangan tarball faylini ishga tushiradi va `/api/health` + `/v1/models` manzillarini tekshiradi ([Hissa qoʻshishning asosiy yoʻli](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) boʻlimiga qarang)
 
-### Teg qoʻyish va reliz
+### Teglash va reliz
 
-- [ ] `/generate-release-cc` buyrugʻini ishga tushiring (Claude Code koʻnikmasi):
+- [ ] `/generate-release-cc` buyrugʻini ishga tushiring (Claude Code vositasi):
   - `vX.Y.Z` tegini yaratadi
-  - Teg va branchni yuboradi
+  - Teg va tarmoqni yuboradi
   - Oʻzgarishlar jurnali matni bilan GitHub Release ochadi
-  - Electron oʻrnatuvchilarini biriktiradi (agar yigʻilgan boʻlsa)
+  - Electron oʻrnatuvchilarini biriktiradi (agar ular yigʻilgan boʻlsa)
 - [ ] Yoki qoʻlda:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -281,43 +281,44 @@ Joylashtirish uchun `npm run build` buyrugʻidan soʻng alohida `npm run build:c
 
 ### Joylashtirish
 
-Joylashtirish koʻnikmalari yengil rsync jarayonidan foydalanadi — `npm pack` ham, `npm i -g` ham ishlatilmaydi:
+Joylashtirish vositalari yengil rsync jarayonidan foydalanadi — `npm pack` ham, `npm i -g` ham ishlatilmaydi:
 
-- [ ] Maqsadga mos deploy ko‘nikmasidan foydalaning:
-  - `/deploy-vps-local-cc` — lokal VPS (192.168.0.15)
+- [ ] Nishonga mos joylashtirish vositasidan foydalaning:
+  - `/deploy-vps-local-cc` — mahalliy VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
-  - `/deploy-vps-both-cc` — har ikkisi
-- [ ] Deploy qilishdan oldin `dist/BUILD_SHA` == `git rev-parse --short HEAD` ekanini tasdiqlang
-- [ ] Build `node_modules` haqiqiy bo‘lgan joyda bajarilishi kerak (asosiy checkout yoki `npm ci` bajarilgan worktree — symlink qilingan worktree EMAS)
-- [ ] Deploy qilingan instansiyada smoke-test o‘tkazing:
+  - `/deploy-vps-both-cc` — ikkalasi
+- [ ] Joylashtirishdan oldin `dist/BUILD_SHA` == `git rev-parse --short HEAD` ekanini tasdiqlang
+- [ ] Yigʻish `node_modules` haqiqiy boʻlgan joyda bajarilishi kerak (asosiy ishchi nusxa yoki `npm ci` bajarilgan worktree — ramziy havola qilingan worktree EMAS)
+- [ ] Joylashtirilgan nusxada smoke testini bajaring:
   - `/dashboard/health` sahifasini oching → versiya satri relizga mosligini tekshiring
-  - Ma’lum provayderga `/v1/chat/completions` so‘rovini yuboring
-  - `/api/monitoring/health` `CLOSED` holatidagi circuit breaker’larni qaytarishini tekshiring
+  - Maʼlum provayderga `/v1/chat/completions` soʻrovini yuboring
+  - `/api/monitoring/health` `CLOSED` holatidagi avtomatik uzgichlarni qaytarishini tekshiring
   - MCP transportlari javob berishini tasdiqlang (`/mcp` HTTP, `/mcp-sse` SSE)
 
 ### Relizdan keyin
 
-- [ ] `/capture-release-evidences-cc` buyrug‘ini ishga tushiring (Claude Code ko‘nikmasi)
+- [ ] `/capture-release-evidences-cc` buyrugʻini ishga tushiring (Claude Code vositasi)
   - Yangi funksiyalarning WebP skrinshotlari/yozuvlarini oladi
-  - Ularni reliz qaydlari / blog postiga biriktiradi
-- [ ] GitHub Discussions / Discord’ni reliz e’loni bilan yangilang
-- [ ] Keyingi versiya uchun milestone oching
-- [ ] Agar muhim bo‘lsa: muhokamani qadab qo‘ying yoki ilova ichidagi banner uchun `news.json` fayliga joylang
+  - Ularni reliz qaydlari/blog postiga biriktiradi
+- [ ] GitHub Discussions / Discord sahifalarini reliz eʼloni bilan yangilang
+- [ ] Keyingi versiya uchun bosqich yarating
+- [ ] Agar muhim boʻlsa: muhokamani mahkamlang yoki ilova ichidagi banner uchun `news.json` fayliga joylang
 
-### Radar’ni ommaviy ishga tushirish shartlari
+### Radar ommaviy ishga tushirish nazorat nuqtasi
 
-Radar e’loni ataylab `active: false` holatida commit qilingan. Uni faollashtirish quyidagi har bir band bo‘yicha dalil taqdim etilgandan keyin alohida o‘zgartirish sifatida amalga oshiriladi:
+Radar eʼloni ataylab `active: false` holatida commit qilingan. Faollashtirish quyidagi har bir band dalillar bilan tasdiqlanganidan keyin alohida
+oʻzgartirish sifatida amalga oshiriladi:
 
-- [ ] Barcha ketma-ket Radar PR’lari birlashtirilgan va reliz uchidagi CI muvaffaqiyatli o‘tgan
-- [ ] `RADAR_ENABLED` standart holatda o‘chiq qolgan holda OSS Radar marshrutlarini deploy qiling va smoke-testdan o‘tkazing
-- [ ] Belgilangan Radar hostida `GET /planos`, `/termos`, `/privacidade` va `/reembolso` marshrutlarini smoke-testdan o‘tkazing
-- [ ] Operatorning shaxsi/aloqa ma’lumotlari/manzilini hamda egasi tasdiqlagan huquqiy tekshiruvni xususiy servisda qayd eting
-- [ ] Stripe Checkout va imzolangan webhook’ni faqat test rejimida sinab ko‘ring
-- [ ] Tasdiqlangan jo‘natuvchi/domen orqali bitta shifrlangan tranzaksion e-pochta yetkazib berilishini sinab ko‘ring
-- [ ] Zaxira nusxasidan tiklashni va nazorat ostida, byudjeti cheklangan bitta tadqiqot ishga tushirilishini isbotlang
-- [ ] Xayriya dalillarini qabul qilishdan oldin BRL/PIX tekshiruv siyosatini tasdiqlang
-- [ ] Ommaviy Checkout’ni faqat oldingi shartlar bajarilgandan keyin yoqing, so‘ng yangi `news.json` ID’sini faollashtiring
-- [ ] Home banneri mahalliylashtirilgan matndan foydalanishini va eski ID yopib qo‘yilgandan keyin yangi ID qayta paydo bo‘lishini tekshiring
+- [ ] Barcha ketma-ket Radar PRlari birlashtirilgan va reliz uchidagi CI muvaffaqiyatli oʻtgan
+- [ ] `RADAR_ENABLED` hali ham standart holatda oʻchiq boʻlgan holda OSS Radar marshrutlarini joylashtiring va smoke testidan oʻtkazing
+- [ ] Belgilangan Radar hostida `GET /planos`, `/termos`, `/privacidade` va `/reembolso` manzillarini smoke testidan oʻtkazing
+- [ ] Operatorning shaxsi/aloqa maʼlumotlari/manzilini va egasi tasdiqlagan huquqiy koʻrib chiqishni xususiy xizmatda qayd eting
+- [ ] Stripe Checkout va imzolangan webhook’ni faqat test rejimida sinab koʻring
+- [ ] Tasdiqlangan joʻnatuvchi/domen orqali bitta shifrlangan tranzaksion e-pochta yetkazilishini sinab koʻring
+- [ ] Zaxira nusxadan tiklashni va nazorat ostidagi, budjeti cheklangan bitta tadqiqot ishga tushirilishini isbotlang
+- [ ] Xayriya dalillarini qabul qilishdan oldin BRL/PIX koʻrib chiqish siyosatini tasdiqlang
+- [ ] Ommaviy Checkout’ni faqat yuqoridagi nazorat nuqtalaridan oʻtilgach yoqing, soʻng yangi `news.json` ID qiymatini faollashtiring
+- [ ] Bosh sahifa banneri mahalliylashtirilgan matndan foydalanishini va eski ID yopilgandan keyin yangi ID qayta koʻrinishini tekshiring
 
 ## Ichki xizmatlar smoke sinovlari (v3.8.4+)
 

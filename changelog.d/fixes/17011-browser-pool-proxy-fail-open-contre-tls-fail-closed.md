@@ -1,1 +1,0 @@
-- **fix(sse):** a browser context is no longer served without its assigned proxy when the proxy lookup fails — the request fails visibly instead of egressing from the real IP ([#17011](https://github.com/diegosouzapw/OmniRoute/pull/17011)) — thanks @maxmad64bis

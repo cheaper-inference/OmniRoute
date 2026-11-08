@@ -1,3 +1,4 @@
+import { readResponseTextWithinCap } from "../utils/responseBodyCap.ts";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,
@@ -31,11 +32,13 @@ import {
   appendBufferedKiroToolInput,
   encodeSse,
   getBufferedKiroToolInput,
+  kiroRequestDeclaresToolCallWrapperName,
   validateKiroToolCallWrapperInput,
   validateKiroToolName,
   validateKiroToolUse,
   type PendingKiroWrapperToolCall,
 } from "./kiroToolCallValidation.ts";
+import { addKiroCredits } from "./kiroCredits.ts";
 import {
   createKiroToolCallRepairStream,
   isKiroToolCallRepairEnabled,
@@ -46,6 +49,8 @@ export { validateKiroToolUse } from "./kiroToolCallValidation.ts";
 type JsonRecord = Record<string, unknown>;
 
 type UsageSummary = {
+  provider_credits?: number;
+  cost_in_usd_ticks?: number;
   prompt_tokens: number;
   completion_tokens: number;
   total_tokens: number;
@@ -127,6 +132,48 @@ export function flushBufferedToolArgs(
   state.toolArgsBuffered.clear();
 }
 
+/**
+ * Give argument-less tool calls a parseable `"{}"` before the stream finishes.
+ *
+ * A tool call starts with `arguments: ""`. When Kiro sends no input for it (a
+ * tool with no parameters, or one whose parameters are all optional and the
+ * model passed none), nothing replaces that empty string, so the client
+ * reassembles `""` — which strict OpenAI clients reject as a malformed call.
+ * OpenAI itself sends `"{}"` for these, so match that.
+ *
+ * Only call this at the terminal flush: injecting `"{}"` earlier could be
+ * followed by a late argument fragment for the same call.
+ */
+export function flushEmptyToolCallArgs(
+  state: Pick<KiroStreamState, "seenToolIds" | "toolArgsEmitted">,
+  controller: { enqueue: (chunk: Uint8Array) => void },
+  ctx: { responseId: string; created: number; model: string }
+): void {
+  if (!state.seenToolIds || state.seenToolIds.size === 0) return;
+  const { responseId, created, model } = ctx;
+  for (const [toolCallId, toolIndex] of state.seenToolIds) {
+    const emitted = state.toolArgsEmitted.get(toolCallId) || "";
+    if (emitted.trim() !== "") continue;
+    const argsChunk: JsonRecord = {
+      id: responseId,
+      object: "chat.completion.chunk",
+      created,
+      model,
+      choices: [
+        {
+          index: 0,
+          delta: {
+            tool_calls: [{ index: toolIndex, function: { arguments: "{}" } }],
+          },
+          finish_reason: null,
+        },
+      ],
+    };
+    controller.enqueue(TEXT_ENCODER.encode(`data: ${JSON.stringify(argsChunk)}\n\n`));
+    state.toolArgsEmitted.set(toolCallId, emitted + "{}");
+  }
+}
+
 function buildKiroFinishChunk(
   state: KiroStreamState,
   responseId: string,
@@ -206,7 +253,14 @@ function ensureKiroUsage(state: KiroStreamState, model: string) {
       ? Math.floor((state.contextUsagePercentage * resolveKiroMaxInputTokens(model)) / 100)
       : 0;
 
-  if (estimatedTotalTokens <= 0 && estimatedOutputTokens <= 0) return;
+  if (estimatedTotalTokens <= 0 && estimatedOutputTokens <= 0) {
+    // A credit-only response still needs explicit zero token counts so the
+    // usage block is well-formed and its credits reach billing.
+    if (state.usage?.provider_credits !== undefined) {
+      state.usage = { ...state.usage, prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+    }
+    return;
+  }
   // Without a percentage there is no total to split, so the output estimate is
   // all that is known and stands on its own.
   if (estimatedTotalTokens <= 0) {
@@ -299,7 +353,7 @@ const KIRO_IMPROPERLY_FORMED_MESSAGE = "Improperly formed request";
 async function isBrandedGatewayProfileArnRejection(response: Response): Promise<boolean> {
   if (response.status !== 400) return false;
   try {
-    const text = await response.clone().text();
+    const text = await readResponseTextWithinCap(response.clone());
     return (
       text.includes(KIRO_PROFILE_ARN_REQUIRED_MESSAGE) ||
       text.includes(KIRO_IMPROPERLY_FORMED_MESSAGE)
@@ -477,18 +531,24 @@ export class KiroExecutor extends BaseExecutor {
         )?.userInputMessage as Record<string, unknown>
       )?.content as string) || "";
     const thinkingExpected = userContent.includes("<thinking_mode>enabled</thinking_mode>");
+    // A client tool named `tool_call` is not the Kiro MCP wrapper (#18675). Read the
+    // pre-allowlist body: it carries the names openai-to-kiro synthesized from history.
+    const sseOpts = {
+      thinkingExpected,
+      clientDeclaresWrapperName: kiroRequestDeclaresToolCallWrapperName(body),
+    };
     const transformedResponse =
       stream && isKiroToolCallRepairEnabled()
         ? createKiroToolCallRepairStream({
             upstream: response,
             transform: (raw, opts) =>
-              this.transformEventStreamToSSE(raw, model, { thinkingExpected, ...opts }),
+              this.transformEventStreamToSSE(raw, model, { ...sseOpts, ...opts }),
             retry: async (payload, retrySignal) => (await send(payload, retrySignal)).res,
             transformedBody,
             signal,
             log,
           })
-        : this.transformEventStreamToSSE(response, model, { thinkingExpected });
+        : this.transformEventStreamToSSE(response, model, sseOpts);
 
     return { response: transformedResponse, url, headers, transformedBody };
   }
@@ -512,6 +572,11 @@ export class KiroExecutor extends BaseExecutor {
     model: string,
     opts: {
       thinkingExpected?: boolean;
+      /**
+       * The request declared its own tool named `tool_call`: treat those events as
+       * ordinary client tool calls instead of the Kiro MCP wrapper (#18675).
+       */
+      clientDeclaresWrapperName?: boolean;
       /** Return true to suppress the error frame (the one-shot repair will retry). */
       onInvalidToolCall?: (message: string) => boolean;
       responseId?: string;
@@ -638,7 +703,10 @@ export class KiroExecutor extends BaseExecutor {
         emitToolCallStart(controller, toolCall.toolCallId, toolCall.toolName, toolIndex);
         const argumentsStr =
           typeof toolInput === "string" ? toolInput : JSON.stringify(toolInput ?? {});
-        if (argumentsStr) emitToolCallArguments(controller, toolIndex, argumentsStr);
+        if (argumentsStr) {
+          emitToolCallArguments(controller, toolIndex, argumentsStr);
+          state.toolArgsEmitted.set(toolCall.toolCallId, argumentsStr);
+        }
       }
       state.pendingWrapperToolCalls.clear();
       return true;
@@ -864,7 +932,7 @@ export class KiroExecutor extends BaseExecutor {
                 const toolCallId = getToolCallId(singleToolUse);
                 const toolInput = singleToolUse.input;
 
-                if (toolName === KIRO_TOOL_CALL_WRAPPER) {
+                if (toolName === KIRO_TOOL_CALL_WRAPPER && !opts.clientDeclaresWrapperName) {
                   let pending = state.pendingWrapperToolCalls.get(toolCallId);
                   if (!pending) {
                     if (state.seenToolIds.has(toolCallId)) {
@@ -980,6 +1048,16 @@ export class KiroExecutor extends BaseExecutor {
             // Handle meteringEvent - mark that we received it
             if (eventType === "meteringEvent") {
               state.hasMeteringEvent = true;
+              // A metering frame without a `usage` figure has nothing to add and is
+              // skipped. With KIRO_REQUIRE_CREDITS every frame is validated, so a
+              // malformed one fails the stream; a stream with no credits at all is
+              // rejected in flush().
+              if (
+                event.payload?.usage !== undefined ||
+                process.env.KIRO_REQUIRE_CREDITS === "true"
+              ) {
+                state.usage = addKiroCredits(state.usage, event.payload);
+              }
             }
 
             // Handle token usage. Kiro reports it under more than one frame: the
@@ -1029,6 +1107,7 @@ export class KiroExecutor extends BaseExecutor {
 
                 if (inputTokens > 0 || outputTokens > 0) {
                   state.usage = {
+                    ...state.usage,
                     prompt_tokens: inputTokens,
                     completion_tokens: outputTokens,
                     total_tokens: inputTokens + outputTokens,
@@ -1069,6 +1148,8 @@ export class KiroExecutor extends BaseExecutor {
           // Flush any buffered tool arguments (partial-object payloads) before finishing —
           // idempotent against toolArgsEmitted if messageStopEvent already flushed them.
           flushBufferedToolArgs(state, controller, { responseId, created, model });
+          // A tool call that never received input still has `arguments: ""`; send "{}".
+          flushEmptyToolCallArgs(state, controller, { responseId, created, model });
 
           // Drain any pending inline-thinking tag fragment so we don't drop
           // trailing characters when the stream ends mid-tag (e.g. `<thi`).
@@ -1103,6 +1184,13 @@ export class KiroExecutor extends BaseExecutor {
                 controller.enqueue(TEXT_ENCODER.encode(`data: ${JSON.stringify(chunk)}\n\n`));
               }
             );
+          }
+
+          if (
+            process.env.KIRO_REQUIRE_CREDITS === "true" &&
+            state.usage?.provider_credits === undefined
+          ) {
+            throw new Error("Kiro response ended without credit metering");
           }
 
           // Emit finish chunk if not already sent

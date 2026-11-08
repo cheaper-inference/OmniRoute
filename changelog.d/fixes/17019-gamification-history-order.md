@@ -1,1 +1,0 @@
-- **fix(gamification):** the transfer history is ordered by `created_at DESC`, which has a one-second resolution, so transfers recorded in the same second had no defined order; ties are now broken by `id DESC`, newest first ([#17019](https://github.com/diegosouzapw/OmniRoute/pull/17019)) — thanks @pacocartones

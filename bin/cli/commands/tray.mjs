@@ -18,9 +18,7 @@ export function registerTray(program) {
     .command("hide")
     .description(t("tray.hide") || "Hide the tray icon")
     .action(() => {
-      process.stderr.write(
-        "Send SIGUSR1 to the serve process to toggle the tray, or restart without --tray.\n"
-      );
+      process.stderr.write("Restart with `omniroute serve --no-tray` to hide the tray icon.\n");
     });
 
   cmd

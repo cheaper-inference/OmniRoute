@@ -1,1 +1,0 @@
-- **fix(providers):** Stop billing-risk misclassification of ten paid SiliconFlow flagship models as unlimited free. Only trust live free evidence; explicit paid flags and positive pricing veto free-only imports and badges (#17028).

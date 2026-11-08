@@ -44,6 +44,7 @@ export const GLM_SHARED_MODELS = Object.freeze([
     toolCalling: true,
     supportsReasoning: true,
     supportedThinkingEfforts: ["low", "high", "max"],
+    supportsVision: false,
   },
   {
     id: "glm-5.3-high",
@@ -53,6 +54,7 @@ export const GLM_SHARED_MODELS = Object.freeze([
     toolCalling: true,
     supportsReasoning: true,
     supportedThinkingEfforts: ["high"],
+    supportsVision: false,
   },
   {
     id: "glm-5.3-low",
@@ -62,6 +64,7 @@ export const GLM_SHARED_MODELS = Object.freeze([
     toolCalling: true,
     supportsReasoning: true,
     supportedThinkingEfforts: ["low"],
+    supportsVision: false,
   },
   {
     // Explicit alias for the upstream default (max) — pins reasoning_effort so
@@ -73,6 +76,7 @@ export const GLM_SHARED_MODELS = Object.freeze([
     toolCalling: true,
     supportsReasoning: true,
     supportedThinkingEfforts: ["max"],
+    supportsVision: false,
   },
   {
     id: "glm-5.3-flash-high",

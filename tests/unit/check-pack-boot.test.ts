@@ -8,11 +8,13 @@ import { fileURLToPath } from "node:url";
 import {
   REQUIRED_SQLJS_RUNTIME_FILES,
   REQUIRED_MACHINE_TOKEN_RUNTIME_FILES,
+  REQUIRED_DOCS_I18N_RUNTIME_FILES,
   pickTarball,
   evaluateBoot,
   pickPort,
   findMissingSqlJsRuntimeFiles,
   findMissingMachineTokenRuntimeFiles,
+  findMissingDocsI18nRuntimeFiles,
   evaluateMachineTokenAuth,
   evaluateSqlJsRoundTrip,
   evaluateRestartPersistence,
@@ -80,6 +82,22 @@ test("installed package contract requires sql.js metadata, entrypoint, and WASM"
   assert.deepEqual(
     findMissingSqlJsRuntimeFiles("/pkg", (file) => present.has(file)),
     ["node_modules/sql.js/dist/sql-wasm.wasm"]
+  );
+});
+
+test("installed package contract requires the translated docs mirrors and jsdom", () => {
+  const present = new Set(REQUIRED_DOCS_I18N_RUNTIME_FILES.map((file) => path.join("/pkg", file)));
+  assert.deepEqual(
+    findMissingDocsI18nRuntimeFiles("/pkg", (file) => present.has(file)),
+    []
+  );
+
+  // jsdom is a declared dependency, so npm places it at <packageRoot>/node_modules.
+  present.delete(path.join("/pkg", "node_modules/jsdom/package.json"));
+  present.delete(path.join("/pkg", "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md"));
+  assert.deepEqual(
+    findMissingDocsI18nRuntimeFiles("/pkg", (file) => present.has(file)),
+    ["dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md", "node_modules/jsdom/package.json"]
   );
 });
 

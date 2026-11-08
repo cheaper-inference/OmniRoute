@@ -15,10 +15,7 @@ test.describe("Group B — /logs/activity redirect", () => {
     request,
   }) => {
     // Follow redirects and verify the final URL is /dashboard/activity
-    const response = await page.goto(
-      "http://localhost:20128/dashboard/logs/activity",
-      { waitUntil: "domcontentloaded" }
-    );
+    const response = await page.goto("/dashboard/logs/activity", { waitUntil: "domcontentloaded" });
 
     const finalUrl = page.url();
     // After following redirects, should end up at /dashboard/activity
@@ -31,12 +28,9 @@ test.describe("Group B — /logs/activity redirect", () => {
     request,
   }) => {
     // Make a non-follow-redirect request to verify the redirect status code.
-    const response = await request.get(
-      "http://localhost:20128/dashboard/logs/activity",
-      {
-        maxRedirects: 0,
-      }
-    );
+    const response = await request.get("/dashboard/logs/activity", {
+      maxRedirects: 0,
+    });
 
     // Next.js permanentRedirect() returns 308 (or 307 in development mode).
     // When auth is required the server may respond with a 302/307 to /login

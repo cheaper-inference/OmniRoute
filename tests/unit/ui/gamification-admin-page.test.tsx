@@ -1,7 +1,23 @@
 // @vitest-environment jsdom
 import React from "react";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
+
+// Warm the page module once, outside the 5 s per-test budget: the first cold transform of the
+// kit (PageHeader, Table…) can take several seconds on a loaded runner. Assertions are unchanged.
+beforeAll(async () => {
+  await import("../../../src/app/(dashboard)/dashboard/gamification/admin/page");
+}, 60_000);
 
 // Namespace-prefixed keys instead of the global en.json-backed mock: any English
 // string still hard-coded in the page would surface verbatim in the rendered text.

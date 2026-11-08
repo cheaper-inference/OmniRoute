@@ -3,11 +3,14 @@ import {
   finalizePendingRequestById,
   updatePendingRequest,
   updatePendingRequestById,
+  type PendingRequestIdentity,
   type PendingRequestMetadata,
+  type PendingRequestOwner,
 } from "./usageHistory";
 
 export type PendingRequestScope = {
   id: string | null | undefined;
+  owner?: PendingRequestOwner;
   model: string;
   provider: string;
   connectionId: string | null;
@@ -64,16 +67,31 @@ function protectPendingMetadata(
   return protectedMetadata;
 }
 
+/**
+ * The exact attempt this scope owns: the captured owner first, then its ID. A scope with an
+ * identity never falls back to the most-recent lookup, so a late completion cannot finalize
+ * another request (#17891).
+ */
+function pendingScopeIdentity(scope: PendingRequestScope): PendingRequestIdentity | null {
+  return scope.owner ?? (scope.id || null);
+}
+
 export function updatePendingScope(scope: PendingRequestScope, metadata: PendingRequestMetadata) {
   const retainedMetadata = protectPendingMetadata(scope, metadata);
-  if (!updatePendingRequestById(scope.id || null, retainedMetadata)) {
+  const identity = pendingScopeIdentity(scope);
+  if (identity) {
+    updatePendingRequestById(identity, retainedMetadata);
+  } else {
     updatePendingRequest(scope.model, scope.provider, scope.connectionId, retainedMetadata);
   }
 }
 
 export function finalizePendingScope(scope: PendingRequestScope, metadata: PendingRequestMetadata) {
   const retainedMetadata = protectPendingMetadata(scope, metadata);
-  if (!finalizePendingRequestById(scope.id, retainedMetadata)) {
+  const identity = pendingScopeIdentity(scope);
+  if (identity) {
+    finalizePendingRequestById(identity, retainedMetadata);
+  } else {
     finalizePendingRequest(scope.model, scope.provider, scope.connectionId, retainedMetadata);
   }
 }

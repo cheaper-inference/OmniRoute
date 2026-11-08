@@ -18,7 +18,7 @@ type GlmTeamQuotaFieldsProps = {
 
 export default function GlmTeamQuotaFields({ values, onChange, t }: GlmTeamQuotaFieldsProps) {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border/50 bg-surface/20 p-4">
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
       <Input
         label={providerText(t, "glmOrganizationIdLabel", "GLM team organization ID")}
         name="glmOrganizationId"

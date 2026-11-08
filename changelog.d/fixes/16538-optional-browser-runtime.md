@@ -1,1 +1,0 @@
-- Load ChatGPT Web browser dependencies only when a browser operation starts, and resolve installed browser-runtime packs explicitly so absent optional packs do not break metadata and storage helpers.
