@@ -603,15 +603,11 @@ function ConversationActions({ t, state, handlers }: ConversationProps) {
   );
 }
 
-export function ConversationPanel({
-  t,
-  state,
-  handlers,
-}: {
-  t: Translate;
-  state: ConversationState;
-  handlers: ConversationHandlers;
-}) {
+/**
+ * Keeps a transcript pinned to its newest row unless the reader scrolled away. Rows grow
+ * after they render, so the height is watched rather than assumed.
+ */
+function usePinnedScroll(rowCount: number) {
   const scroller = useRef<HTMLDivElement>(null);
   const [grown, setGrown] = useState(0);
   useLayoutEffect(() => {
@@ -628,16 +624,35 @@ export function ConversationPanel({
     const nearBottom = node.scrollHeight - node.scrollTop - node.clientHeight < 8;
     if (unread || nearBottom) node.scrollTo(0, node.scrollHeight);
     node.dataset.opened = "1";
-  }, [state.messages.length, grown]);
+  }, [rowCount, grown]);
+  return scroller;
+}
+
+function StatusHeader({ t, label, runState }: { t: Translate; label: string; runState: string }) {
+  return (
+    <div className="flex items-center gap-2 border-b border-border px-4 py-2 text-xs text-text-muted">
+      <span className="inline-block size-2 rounded-full bg-success" />
+      <span>
+        {label}
+        {runState === "" ? null : ` ${t("stateBox", { state: runState })}`}
+      </span>
+    </div>
+  );
+}
+
+export function ConversationPanel({
+  t,
+  state,
+  handlers,
+}: {
+  t: Translate;
+  state: ConversationState;
+  handlers: ConversationHandlers;
+}) {
+  const scroller = usePinnedScroll(state.messages.length);
   return (
     <div className="flex h-full min-h-[28rem] flex-col">
-      <div className="flex items-center gap-2 border-b border-border px-4 py-2 text-xs text-text-muted">
-        <span className="inline-block size-2 rounded-full bg-success" />
-        <span>
-          {state.stateLabel}
-          {state.runState === "" ? null : ` ${t("stateBox", { state: state.runState })}`}
-        </span>
-      </div>
+      <StatusHeader t={t} label={state.stateLabel} runState={state.runState} />
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto py-3" ref={scroller}>
         <MessageList
           hidden={Math.max(0, state.messages.length - state.window)}

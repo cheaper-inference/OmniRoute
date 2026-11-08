@@ -60,22 +60,49 @@ type Outcome =
  * silent past the deadline, or fails. Whatever happened, it reports back what the
  * retry loop should do next and never decides that itself.
  */
-async function attempt(ctx: Context, request: TranscriptCursor, fails: number): Promise<Outcome> {
-  const controller = new AbortController();
-  const openedAt = Date.now();
-  ctx.active = controller;
+/** Restarts the silence deadline on every frame; a half-open socket never rejects. */
+function silenceWatchdog(ctx: Context, controller: AbortController) {
+  let timer = setTimeout(() => controller.abort(), ctx.silenceMs);
+  return {
+    touch() {
+      clearTimeout(timer);
+      timer = setTimeout(() => controller.abort(), ctx.silenceMs);
+    },
+    clear() {
+      clearTimeout(timer);
+    },
+  };
+}
+
+function classifyFailure(error: unknown): RetryKind {
+  if ((error as { admission?: unknown })?.admission === true) return "admission";
+  if ((error as { fatal?: unknown })?.fatal === true) return "fatal";
+  return "drop";
+}
+
+type FrameLoop =
+  | { kind: "stopped" }
+  | { kind: "ended"; cursor: TranscriptCursor; cutover: boolean; sawFrame: boolean }
+  | { kind: "threw"; cursor: TranscriptCursor; error: unknown; sawFrame: boolean };
+
+/**
+ * Reads one upstream watch to its end, its stop, or a failure. It reports what happened
+ * and leaves the retry decision to the caller.
+ */
+async function pumpFrames(
+  ctx: Context,
+  request: TranscriptCursor,
+  controller: AbortController,
+  watchdog: { touch: () => void }
+): Promise<FrameLoop> {
   let cursor = request;
   let cutover = false;
+  let sawFrame = false;
   let handlerFault = false;
-  let kind: RetryKind = "drop";
-  // A half-open socket delivers nothing and never rejects, so the attempt needs
-  // its own deadline or the reader waits for a close that never comes.
-  let silence = setTimeout(() => controller.abort(), ctx.silenceMs);
   try {
     for await (const frame of ctx.input.read(request, controller.signal)) {
       if (ctx.stopped) return { kind: "stopped" };
-      clearTimeout(silence);
-      silence = setTimeout(() => controller.abort(), ctx.silenceMs);
+      watchdog.touch();
       handlerFault = true;
       const next = ctx.input.onFrame(frame, cursor);
       handlerFault = false;
@@ -84,7 +111,7 @@ async function attempt(ctx: Context, request: TranscriptCursor, fails: number): 
         after: next.after,
         ...(next.generation === undefined ? {} : { generation: next.generation }),
       };
-      fails = 0;
+      sawFrame = true;
       if (next.halt) {
         ctx.stop();
         return { kind: "stopped" };
@@ -96,36 +123,43 @@ async function attempt(ctx: Context, request: TranscriptCursor, fails: number): 
     }
   } catch (error) {
     if (handlerFault) {
-      // The frame handler threw, not the transport: retrying would repeat the
-      // same fault forever, so the session ends here.
-      if (ctx.input.onFault) {
-        ctx.input.onFault(error);
-        ctx.stop();
-        return { kind: "stopped" };
-      }
-      throw error;
+      // The frame handler threw, not the transport: retrying would repeat the same
+      // fault forever, so the session ends here.
+      if (!ctx.input.onFault) throw error;
+      ctx.input.onFault(error);
+      ctx.stop();
+      return { kind: "stopped" };
     }
-    kind =
-      (error as { admission?: unknown })?.admission === true
-        ? "admission"
-        : (error as { fatal?: unknown })?.fatal === true
-          ? "fatal"
-          : "drop";
-    if (kind === "fatal") ctx.input.onFault?.(error);
-    // A read that rejects, a read that ends early and a read that goes silent are
-    // the same event here: the stream stopped before we asked it to.
+    // A read that rejects, one that ends early and one that goes silent are the same
+    // event here: the stream stopped before we asked it to.
+    return { kind: "threw", cursor, error, sawFrame };
+  }
+  return { kind: "ended", cursor, cutover, sawFrame };
+}
+
+async function attempt(ctx: Context, request: TranscriptCursor, fails: number): Promise<Outcome> {
+  const controller = new AbortController();
+  const openedAt = Date.now();
+  ctx.active = controller;
+  const watchdog = silenceWatchdog(ctx, controller);
+  let loop: FrameLoop;
+  try {
+    loop = await pumpFrames(ctx, request, controller, watchdog);
   } finally {
-    clearTimeout(silence);
+    watchdog.clear();
     controller.abort();
     ctx.active = undefined;
   }
-  if (ctx.stopped) return { kind: "stopped" };
-  if (cutover) return { kind: "cutover", cursor };
-  const nextFails = fails + 1;
-  const requestedWait = ctx.input.retryWait(nextFails, Date.now() - openedAt, kind);
-  const wait = kind === "fatal" ? -1 : requestedWait;
+  if (loop.kind === "stopped" || ctx.stopped) return { kind: "stopped" };
+  if (loop.kind === "ended" && loop.cutover) return { kind: "cutover", cursor: loop.cursor };
+  const kind: RetryKind = loop.kind === "threw" ? classifyFailure(loop.error) : "drop";
+  if (loop.kind === "threw" && kind === "fatal") ctx.input.onFault?.(loop.error);
+  // A turn that produced frames is a fresh start, so its first failure counts as one.
+  const nextFails = loop.sawFrame ? 1 : fails + 1;
+  if (kind === "fatal") return { kind: "stopped" };
+  const wait = ctx.input.retryWait(nextFails, Date.now() - openedAt, kind);
   if (wait < 0) return { kind: "stopped" };
-  return { kind: "retry", cursor, fails: nextFails, wait };
+  return { kind: "retry", cursor: loop.cursor, fails: nextFails, wait };
 }
 
 async function run(ctx: Context, request: TranscriptCursor, fails: number): Promise<void> {

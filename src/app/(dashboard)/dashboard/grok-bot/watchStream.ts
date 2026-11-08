@@ -228,6 +228,78 @@ export async function pumpWatch(input: {
   return pump(input);
 }
 
+/** True when the stream cannot proceed and has already been settled. */
+function refuse(
+  input: { signal: AbortSignal; generation?: number },
+  upstream: AbortController,
+  release: () => void,
+  controller: ReadableStreamDefaultController<Uint8Array>
+): boolean {
+  // The caller may have gone away before the stream was pulled. Opening the upstream
+  // watch anyway spends one of the connection's two slots and holds it until it ends.
+  if (input.signal.aborted) {
+    release();
+    controller.close();
+    return true;
+  }
+  if (input.generation === undefined) {
+    upstream.abort();
+    release();
+    controller.error(Object.assign(new Error("generation required"), { fatal: true }));
+    return true;
+  }
+  return false;
+}
+
+function frameSource(
+  input: {
+    accessToken: string;
+    agentId: string;
+    after: string;
+    frames?: FramesReader;
+  },
+  generation: number,
+  upstream: AbortController
+) {
+  const readFrames = input.frames ?? grokBotReadStream;
+  return readFrames({
+    accessToken: input.accessToken,
+    method: "WatchGrokBotTranscripts",
+    payload: {
+      cursors: [
+        {
+          agentId: input.agentId,
+          sessionId: "",
+          generation,
+          afterUpdatedSeq: input.after,
+        },
+      ],
+      inlineBodyMaxBytes: 65_536,
+    },
+    signal: upstream.signal,
+  });
+}
+
+function recoverFor(
+  input: {
+    accessToken: string;
+    agentId: string;
+    recover?: typeof grokBotRead;
+    fetchBlob?: (url: string, init?: RequestInit) => Promise<Response>;
+  },
+  upstream: AbortController
+) {
+  return async (frame: unknown) =>
+    recoverOmitted(
+      frame,
+      input.accessToken,
+      input.agentId,
+      input.recover,
+      input.fetchBlob,
+      upstream.signal
+    );
+}
+
 export function watchStream(input: {
   accessToken: string;
   agentId: string;
@@ -241,7 +313,6 @@ export function watchStream(input: {
   fetchBlob?: (url: string, init?: RequestInit) => Promise<Response>;
   pressure?: () => Backpressure;
 }): ReadableStream<Uint8Array> {
-  const readFrames = input.frames ?? grokBotReadStream;
   const upstream = new AbortController();
   let released = false;
   const release = () => {
@@ -254,42 +325,13 @@ export function watchStream(input: {
   return new ReadableStream<Uint8Array>(
     {
       async start(controller) {
-        // The caller may have gone away before the stream was pulled. Opening the
-        // upstream watch anyway spends one of the connection's two slots and leaves
-        // it held until the read finishes.
-        if (input.signal.aborted) {
-          release();
-          controller.close();
-          return;
-        }
+        if (refuse(input, upstream, release, controller)) return;
         const streamId = input.streamId ?? crypto.randomUUID();
-        const encoder = new TextEncoder();
-        controller.enqueue(encoder.encode(transcriptConnectedFrame(streamId)));
-        if (input.generation === undefined) {
-          upstream.abort();
-          release();
-          controller.error(Object.assign(new Error("generation required"), { fatal: true }));
-          return;
-        }
+        controller.enqueue(new TextEncoder().encode(transcriptConnectedFrame(streamId)));
         const gate = queueGate(controller);
         let frames: AsyncIterable<unknown>;
         try {
-          frames = readFrames({
-            accessToken: input.accessToken,
-            method: "WatchGrokBotTranscripts",
-            payload: {
-              cursors: [
-                {
-                  agentId: input.agentId,
-                  sessionId: "",
-                  generation: input.generation,
-                  afterUpdatedSeq: input.after,
-                },
-              ],
-              inlineBodyMaxBytes: 65_536,
-            },
-            signal: upstream.signal,
-          });
+          frames = frameSource(input, input.generation as number, upstream);
         } catch (error) {
           upstream.abort();
           release();
@@ -303,15 +345,7 @@ export function watchStream(input: {
             upstream,
             pressure: input.pressure ?? gate,
             streamId,
-            recover: async (frame) =>
-              recoverOmitted(
-                frame,
-                input.accessToken,
-                input.agentId,
-                input.recover,
-                input.fetchBlob,
-                upstream.signal
-              ),
+            recover: recoverFor(input, upstream),
           });
         } finally {
           input.signal.removeEventListener("abort", onAbort);

@@ -9,13 +9,10 @@ import { idle, isTerminal } from "./session";
 
 import * as actions from "./page-actions";
 import type { PageState } from "./page-state";
-export function DetailsPanel({ state }: { state: PageState }) {
+/** The bot's machines, and reading a file from one of them. */
+function ComputerCard({ state }: { state: PageState }) {
   const {
-    t,
-    accountRegion,
-    skillRegion,
     computerRegion,
-    accounts,
     computers,
     computerPath,
     setComputerPath,
@@ -23,6 +20,117 @@ export function DetailsPanel({ state }: { state: PageState }) {
     setComputerFileState,
     selectedAccount,
     selectedBot,
+  } = state;
+  return (
+    <Card icon="computer" padding="sm" title={computerRegion.title}>
+      {computers.length > 0 ? (
+        <ComputersPanel
+          computers={computers}
+          onPath={setComputerPath}
+          onRead={(computer) => {
+            void fetch(
+              `/api/providers/${encodeURIComponent(selectedAccount)}/grok-bot/computer-file`,
+              {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({
+                  agentId: selectedBot,
+                  machineId: computer.machineId,
+                  path: computerPath,
+                }),
+              }
+            )
+              .then(async (response) => {
+                if (!response.ok) throw new Error(String(response.status));
+                const bytes = new Uint8Array(await response.arrayBuffer());
+                setComputerFileState(`${bytes.byteLength} bytes`);
+              })
+              .catch((error: unknown) => {
+                setComputerFileState(error instanceof Error ? error.message : "unavailable");
+              });
+          }}
+          path={computerPath}
+          result={computerFileState}
+        />
+      ) : (
+        <p className="text-sm text-text-muted">{computerRegion.empty}</p>
+      )}
+        </Card>
+  );
+}
+
+/** What the selected bot can be asked to do. */
+function SkillsCard({
+  empty,
+  routines,
+  skills,
+  title,
+}: {
+  empty: string;
+  routines: PageState["routines"];
+  skills: PageState["skills"];
+  title: string;
+}) {
+  return (
+    <Card icon="extension" padding="sm" title={title}>
+      {skills.length > 0 || routines.length > 0 ? (
+        <SkillsPanel routines={routines} skills={skills} />
+      ) : (
+        <p className="text-sm text-text-muted">{empty}</p>
+      )}
+    </Card>
+  );
+}
+
+/** Who a message goes to when it is sent, beyond the account it was written for. */
+function FanoutCard({
+  accounts,
+  fanout,
+  empty,
+  onToggle,
+  title,
+}: {
+  accounts: PageState["accounts"];
+  fanout: PageState["fanout"];
+  empty: string;
+  onToggle: PageState["setFanout"];
+  title: string;
+}) {
+  if (accounts.length === 0) {
+    return (
+      <Card icon="badge" padding="sm" title={title}>
+        <p className="text-sm text-text-muted">{empty}</p>
+      </Card>
+    );
+  }
+  return (
+    <Card icon="badge" padding="sm" title={title}>
+      <ul className="space-y-1">
+        {accounts.map((account) => (
+          <li className="flex items-center gap-2 text-sm" key={account.id}>
+            <Checkbox
+              aria-label={account.name}
+              checked={fanout.includes(account.id)}
+              onChange={(event) =>
+                onToggle((current) =>
+                  toggleFanout(current, account.id, event.target.checked, account.email ?? "")
+                )
+              }
+            />
+            <span className="truncate">{account.name}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
+export function DetailsPanel({ state }: { state: PageState }) {
+  const {
+    t,
+    accountRegion,
+    skillRegion,
+    accounts,
     skills,
     routines,
     fanout,
@@ -30,69 +138,21 @@ export function DetailsPanel({ state }: { state: PageState }) {
   } = state;
   return (
     <aside className="grid gap-3 border-b border-border p-3 md:grid-cols-2">
-      <Card icon="badge" padding="sm" title={t("fanoutTitle")}>
-        {accounts.length > 0 ? (
-          <ul className="space-y-1">
-            {accounts.map((account) => (
-              <li className="flex items-center gap-2 text-sm" key={account.id}>
-                <Checkbox
-                  aria-label={account.name}
-                  checked={fanout.includes(account.id)}
-                  onChange={(event) =>
-                    setFanout((current) =>
-                      toggleFanout(current, account.id, event.target.checked, account.email ?? "")
-                    )
-                  }
-                />
-                <span className="truncate">{account.name}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-text-muted">{accountRegion.empty}</p>
-        )}
-      </Card>
-      <Card icon="extension" padding="sm" title={skillRegion.title}>
-        {skills.length > 0 || routines.length > 0 ? (
-          <SkillsPanel routines={routines} skills={skills} />
-        ) : (
-          <p className="text-sm text-text-muted">{skillRegion.empty}</p>
-        )}
-      </Card>
-      <Card icon="computer" padding="sm" title={computerRegion.title}>
-        {computers.length > 0 ? (
-          <ComputersPanel
-            computers={computers}
-            onPath={setComputerPath}
-            onRead={(computer) => {
-              void fetch(
-                `/api/providers/${encodeURIComponent(selectedAccount)}/grok-bot/computer-file`,
-                {
-                  method: "POST",
-                  headers: { "content-type": "application/json" },
-                  body: JSON.stringify({
-                    agentId: selectedBot,
-                    machineId: computer.machineId,
-                    path: computerPath,
-                  }),
-                }
-              )
-                .then(async (response) => {
-                  if (!response.ok) throw new Error(String(response.status));
-                  const bytes = new Uint8Array(await response.arrayBuffer());
-                  setComputerFileState(`${bytes.byteLength} bytes`);
-                })
-                .catch((error: unknown) => {
-                  setComputerFileState(error instanceof Error ? error.message : "unavailable");
-                });
-            }}
-            path={computerPath}
-            result={computerFileState}
-          />
-        ) : (
-          <p className="text-sm text-text-muted">{computerRegion.empty}</p>
-        )}
-      </Card>
+      <FanoutCard
+        accounts={accounts}
+        fanout={fanout}
+        empty={accountRegion.empty}
+        onToggle={setFanout}
+        title={t("fanoutTitle")}
+      />
+      <SkillsCard
+        empty={skillRegion.empty}
+        routines={routines}
+        skills={skills}
+        title={skillRegion.title}
+      />
+      <ComputerCard state={state} />
+
       <Card icon="storefront" padding="sm" title="Marketplace">
         <a
           className="text-sm text-primary underline"

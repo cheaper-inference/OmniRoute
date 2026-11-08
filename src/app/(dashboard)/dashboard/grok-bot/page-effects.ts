@@ -17,6 +17,7 @@ import {
   recordedSend,
   resumeTranscript,
   transcriptDeletionMatches,
+  type TranscriptCard,
   type TranscriptItem,
 } from "./transcript";
 
@@ -122,130 +123,141 @@ type FrameState = Pick<
   | "shownByBotRef"
   | "nextStableRef"
 >;
+type DeletedRow = { entryId: string; seq: string };
+
+const botKey = (state: { selectedAccount: string; selectedBot: string }) =>
+  `${state.selectedAccount}:${state.selectedBot}`;
+
+/** A replaced session leaves nothing from before it on screen, notices included. */
+function applyClearedFrame(state: FrameState, stream: StreamView, next: { cleared?: boolean }) {
+  if (!next.cleared) return;
+  stream.shown = [];
+  state.shownByBotRef.current[botKey(state)] = [];
+  state.setMessages([]);
+  state.setCards([]);
+  state.setPermissions([]);
+  state.setHistoryUnavailable(false);
+  state.setTurnFailure("");
+  state.closedNowRef.current = [];
+}
+
+/** A row the service deleted has to leave every collection it could appear in. */
+function applyDeletedRows(state: FrameState, stream: StreamView, next: { deleted: DeletedRow[] }) {
+  if (next.deleted.length === 0) return;
+  const removed = (item: DeletedRow) => transcriptDeletionMatches(next.deleted, item);
+  stream.shown = stream.shown.filter((item) => !removed(item));
+  state.shownByBotRef.current[botKey(state)] = stream.shown;
+  state.setMessages(stream.shown);
+  state.setCards((held) => held.filter((item) => !removed(item)));
+  state.setPermissions((held) => held.filter((item) => !removed(item)));
+}
+
+/** A reason describes one turn: another turn, or another bot, must not inherit it. */
+function applyTurnFailure(state: FrameState, next: { turnFailure?: string }) {
+  const key = botKey(state);
+  if (next.turnFailure !== undefined) {
+    state.turnFailureKeyRef.current = key;
+    state.setTurnFailure(next.turnFailure);
+    return;
+  }
+  if (state.turnFailureKeyRef.current === "" || state.turnFailureKeyRef.current === key) return;
+  state.turnFailureKeyRef.current = "";
+  state.setTurnFailure("");
+}
+
+function mergeCards(state: FrameState, next: { cards: TranscriptCard[] }) {
+  if (next.cards.length === 0) return;
+  state.setCards((held) => {
+    const merged = [...held];
+    for (const card of next.cards) {
+      const identity = card.entryId !== "" ? card.entryId : card.seq;
+      if (state.closedNowRef.current.includes(identity)) continue;
+      const index = merged.findIndex(
+        (current) => (current.entryId !== "" ? current.entryId : current.seq) === identity
+      );
+      if (index >= 0) merged[index] = card;
+      else merged.push(card);
+    }
+    return merged;
+  });
+}
+
+/** Gives every arriving row its local id, then folds it into what is on screen. */
+function applyVisibleRows(
+  state: FrameState,
+  stream: StreamView,
+  next: { visible: TranscriptItem[] }
+) {
+  if (next.visible.length === 0) return;
+  const scoped: TranscriptItem[] = [];
+  for (const [index] of next.visible.entries()) {
+    const named = localRowId(
+      stream.shown,
+      next.visible,
+      index,
+      state.nextStableRef.current,
+      botKey(state)
+    );
+    state.nextStableRef.current = named.next;
+    scoped.push(named.item);
+  }
+  stream.shown = mergeTranscriptRows(stream.shown, scoped);
+  state.shownByBotRef.current[botKey(state)] = stream.shown;
+  state.setMessages(stream.shown);
+  if (next.visible.some((item) => recordedSend(state.pendingSendRef.current, item))) {
+    state.setSendState("recorded");
+  }
+}
+
+function rememberCursor(
+  state: FrameState,
+  stream: StreamView,
+  next: { phase: "snapshot" | "live"; after: string; generation?: number }
+) {
+  stream.request = { phase: next.phase, after: next.after, generation: next.generation };
+  state.rememberedRef.current[botKey(state)] = {
+    after: stream.request.after,
+    generation: next.generation,
+    // The connection's timestamp is what decides whether a resumed cursor still belongs
+    // to this connection; without it every resume fell back to a snapshot.
+    seenAt: state.connectionUpdatedAt,
+    messages: stream.shown,
+  };
+}
+
 function handleFrame(
   state: FrameState,
   stream: StreamView,
   frame: unknown,
   cursor: TranscriptCursor
 ) {
-  const {
-    selectedAccount,
-    selectedBot,
-    setMessages,
-    setPermissions,
-    setCards,
-    closedNowRef,
-    setHistoryUnavailable,
-    presenceRef,
-    setStatus,
-    setRunState,
-    setSendState,
-    setTurnFailure,
-    connectionUpdatedAt,
-    apply,
-    pendingSendRef,
-    rememberedRef,
-    shownByBotRef,
-    nextStableRef,
-    turnFailureKeyRef,
-  } = state;
-
-  if (selectedBot) apply({ type: "frame" });
+  if (state.selectedBot) state.apply({ type: "frame" });
   const seen = readPresence(frame, Date.now());
-  presenceRef.current = { ...presenceRef.current, ...seen };
-  setStatus(statusOf(presenceRef.current, Date.now(), selectedBot));
-  if (seen.runState !== undefined) setRunState(seen.runState);
+  state.presenceRef.current = { ...state.presenceRef.current, ...seen };
+  state.setStatus(statusOf(state.presenceRef.current, Date.now(), state.selectedBot));
+  if (seen.runState !== undefined) state.setRunState(seen.runState);
   const next = nextTranscriptRequest(cursor, frame);
-  if (next.cleared) {
-    // The session was replaced, so nothing from before the reset belongs on screen —
-    // including the notices and dismissed cards that described the old one.
-    stream.shown = [];
-    shownByBotRef.current[`${selectedAccount}:${selectedBot}`] = [];
-    setMessages([]);
-    setCards([]);
-    setPermissions([]);
-    setHistoryUnavailable(false);
-    setTurnFailure("");
-    closedNowRef.current = [];
-  }
-  if (next.deleted.length > 0) {
-    // A row the service deleted has to leave every collection it could appear in.
-    const removed = (item: { entryId: string; seq: string }) =>
-      transcriptDeletionMatches(next.deleted, item);
-    stream.shown = stream.shown.filter((item) => !removed(item));
-    shownByBotRef.current[`${selectedAccount}:${selectedBot}`] = stream.shown;
-    setMessages(stream.shown);
-    setCards((held) => held.filter((item) => !removed(item)));
-    setPermissions((held) => held.filter((item) => !removed(item)));
-  }
-  // A reason describes one turn: starting another turn, or watching a different bot,
-  // must not leave the previous one's text on screen.
-  const turnFailureKey = `${selectedAccount}:${selectedBot}`;
-  if (next.turnFailure !== undefined) {
-    turnFailureKeyRef.current = turnFailureKey;
-    setTurnFailure(next.turnFailure);
-  } else if (turnFailureKeyRef.current !== "" && turnFailureKeyRef.current !== turnFailureKey) {
-    turnFailureKeyRef.current = "";
-    setTurnFailure("");
-  }
-  if (next.permissions.length > 0) setPermissions(next.permissions);
-  if (next.cards.length > 0) {
-    setCards((held) => {
-      const merged = [...held];
-      for (const card of next.cards) {
-        const identity = card.entryId !== "" ? card.entryId : card.seq;
-        if (closedNowRef.current.includes(identity)) continue;
-        const index = merged.findIndex(
-          (current) => (current.entryId !== "" ? current.entryId : current.seq) === identity
-        );
-        if (index >= 0) merged[index] = card;
-        else merged.push(card);
-      }
-      return merged;
-    });
-  }
-  if (next.historyUnavailable) setHistoryUnavailable(true);
-  if (next.visible.length > 0) {
-    const scoped: TranscriptItem[] = [];
-    for (const [index] of next.visible.entries()) {
-      const named = localRowId(
-        stream.shown,
-        next.visible,
-        index,
-        nextStableRef.current,
-        `${selectedAccount}:${selectedBot}`
-      );
-      nextStableRef.current = named.next;
-      scoped.push(named.item);
-    }
-    stream.shown = mergeTranscriptRows(stream.shown, scoped);
-    shownByBotRef.current[`${selectedAccount}:${selectedBot}`] = stream.shown;
-    setMessages(stream.shown);
-    if (next.visible.some((item) => recordedSend(pendingSendRef.current, item))) {
-      setSendState("recorded");
-    }
-  }
-  stream.request = { phase: next.phase, after: next.after, generation: next.generation };
-  rememberedRef.current[`${selectedAccount}:${selectedBot}`] = {
-    after: stream.request.after,
-    generation: next.generation,
-    // The connection's timestamp is what decides whether a resumed cursor still
-    // belongs to this connection; without it every resume fell back to a snapshot.
-    seenAt: connectionUpdatedAt,
-    messages: stream.shown,
-  };
+  applyClearedFrame(state, stream, next);
+  applyDeletedRows(state, stream, next);
+  applyTurnFailure(state, next);
+  if (next.permissions.length > 0) state.setPermissions(next.permissions);
+  mergeCards(state, next);
+  if (next.historyUnavailable) state.setHistoryUnavailable(true);
+  applyVisibleRows(state, stream, next);
+  rememberCursor(state, stream, next);
   if (next.halt) {
     // The service replaced the session in a way this reader cannot continue from.
     // Reporting a cutover would leave the console looking like a live stream that
     // simply went quiet, so the page moves to its lost state and offers a retry.
-    apply({ type: "fault" });
+    state.apply({ type: "fault" });
   } else if (next.stop) {
-    apply({ type: "cutover" });
+    state.apply({ type: "cutover" });
   }
-  // open.ts builds the next cursor from this step, so the generation has to travel
-  // with it; dropping it here is what made every request after the handover fail.
+  // open.ts builds the next cursor from this step, so the generation has to travel with
+  // it; dropping it here is what made every request after the handover fail.
   return transcriptStep(next);
 }
+
 function startTranscript(state: PageState) {
   const {
     selectedAccount,
