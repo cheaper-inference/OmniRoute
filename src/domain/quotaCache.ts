@@ -455,8 +455,7 @@ export function hydrateCodexQuotaCacheForRequest(
   entry.nextResetAt = entry.exhausted
     ? capParkWindow(earliestResetAt(entry.quotas), observedAt)
     : null;
-  const owner = readCodexQuotaOwner(connection.id);
-  if (owner) entry.codexOwnerEpoch = owner.epoch;
+  tagCodexOwnerEpoch(entry);
   cache.set(connection.id, entry);
 }
 
@@ -750,19 +749,30 @@ export function getClaudeQuotaPreflightResetAt(
   return decisionForLatestClaudeReset(windows, "connection", now)?.resetAt ?? null;
 }
 
+/** Request-time overrides that make cached quota windows irrelevant for this request. */
+function isQuotaFilterBypassed(
+  connectionId: string,
+  provider: string,
+  requestedModel: string | null,
+  providerSpecificData: unknown
+): boolean {
+  if (provider === "codex") getQuotaCache(connectionId); // expire a replaced owner's override
+  if (isQuotaHealthy(connectionId)) return true;
+  if (isCodexQuotaFilteringDisabled(provider, providerSpecificData)) return true;
+  if (isClaudeExtraUsageAllowed(provider, providerSpecificData)) return true;
+  // Subscription snapshots cannot decide paid-credit eligibility. The mandatory
+  // Codex preflight checks the credit balance before dispatch; cooldowns remain separate.
+  return isCodexPaidCreditsEnabled(provider, providerSpecificData, requestedModel);
+}
+
 export function isQuotaExhaustedForRequest(
   connectionId: string,
   provider: string,
   requestedModel: string | null = null,
   providerSpecificData?: unknown
 ): boolean {
-  if (provider === "codex") getQuotaCache(connectionId);
-  if (isQuotaHealthy(connectionId)) return false;
-  if (isCodexQuotaFilteringDisabled(provider, providerSpecificData)) return false;
-  if (isClaudeExtraUsageAllowed(provider, providerSpecificData)) return false;
-  // Subscription snapshots cannot decide paid-credit eligibility. The mandatory
-  // Codex preflight checks the credit balance before dispatch; cooldowns remain separate.
-  if (isCodexPaidCreditsEnabled(provider, providerSpecificData, requestedModel)) return false;
+  if (isQuotaFilterBypassed(connectionId, provider, requestedModel, providerSpecificData))
+    return false;
   const entry = getQuotaCache(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
   if (!entry) return false;
 
@@ -878,6 +888,21 @@ export function setQuotaCache(
   }
   setQuotaCacheInner(connectionId, provider, reportedQuotas, rawModelQuotas, options);
 }
+/** Prior entry for snapshot dedupe; Codex also rehydrates owner-matching snapshots. */
+function priorQuotaEntry(connectionId: string, provider: string): QuotaCacheEntry | null {
+  return (
+    getQuotaCache(connectionId) ||
+    (provider === "codex" ? hydrateQuotaCacheFromSnapshots(connectionId) : null)
+  );
+}
+
+/** Tag a Codex entry with its opaque durable owner epoch; returns the epoch, if any. */
+function tagCodexOwnerEpoch(entry: QuotaCacheEntry): string | null {
+  const owner = entry.provider === "codex" ? readCodexQuotaOwner(entry.connectionId) : null;
+  if (owner) entry.codexOwnerEpoch = owner.epoch;
+  return owner?.epoch ?? null;
+}
+
 function setQuotaCacheInner(
   connectionId: string,
   provider: string,
@@ -892,9 +917,7 @@ function setQuotaCacheInner(
   const modelQuotas = normalizeQuotas(rawModelQuotas);
   // #4438 — capture the prior entry BEFORE overwriting the cache so we can skip
   // redundant snapshot writes for idle connections whose quota didn't change.
-  const prior =
-    getQuotaCache(connectionId) ||
-    (provider === "codex" ? hydrateQuotaCacheFromSnapshots(connectionId) : null);
+  const prior = priorQuotaEntry(connectionId, provider);
   const retainedCodexWindows =
     provider === "codex"
       ? retainFreshCodexObservations(connectionId, quotas, prior)
@@ -918,8 +941,7 @@ function setQuotaCacheInner(
       Date.now()
     ),
   };
-  const codexOwner = provider === "codex" ? readCodexQuotaOwner(connectionId) : null;
-  if (codexOwner) entry.codexOwnerEpoch = codexOwner.epoch;
+  const codexOwnerEpoch = tagCodexOwnerEpoch(entry);
   getState().cache.set(connectionId, entry);
 
   if (entry && rawQuotas) {
@@ -931,7 +953,7 @@ function setQuotaCacheInner(
       quotas,
       prior,
       retainedCodexWindows,
-      codexOwner?.epoch ?? null
+      codexOwnerEpoch
     );
   }
   recordCompleteReading(entry, prior, options.complete === true);
