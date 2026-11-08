@@ -28,11 +28,35 @@ export const opencode_serverProvider: RegistryEntry = {
     // (GET /config/providers), not through this list; these entries declare the
     // window/capability contract for the ids that are stable enough to pin.
     // Cost is 0 upstream (cost.input/cost.output), so they route as free tier.
-    { id: "big-pickle", name: "Big Pickle", supportsReasoning: true, interleavedField: "reasoning_content" },
-    { id: "space-bunny-free", name: "Space Bunny Free", supportsReasoning: true, contextLength: 1048576 },
-    { id: "muse-spark-1.3-contributor-free", name: "Muse Spark 1.3 Contributor Free", supportsReasoning: true },
-    { id: "nemotron-3-ultra-free", name: "Nemotron 3 Ultra Free", supportsReasoning: true, contextLength: 1000000 },
-    { id: "mimo-v2.6-flash-free", name: "MiMo V2.6 Flash Free", supportsReasoning: true, contextLength: 1048576 },
+    {
+      id: "big-pickle",
+      name: "Big Pickle",
+      supportsReasoning: true,
+      interleavedField: "reasoning_content",
+    },
+    {
+      id: "space-bunny-free",
+      name: "Space Bunny Free",
+      supportsReasoning: true,
+      contextLength: 1048576,
+    },
+    {
+      id: "muse-spark-1.3-contributor-free",
+      name: "Muse Spark 1.3 Contributor Free",
+      supportsReasoning: true,
+    },
+    {
+      id: "nemotron-3-ultra-free",
+      name: "Nemotron 3 Ultra Free",
+      supportsReasoning: true,
+      contextLength: 1000000,
+    },
+    {
+      id: "mimo-v2.6-flash-free",
+      name: "MiMo V2.6 Flash Free",
+      supportsReasoning: true,
+      contextLength: 1048576,
+    },
     { id: "deepseek-v4.1-flash-free", name: "DeepSeek V4.1 Flash Free", supportsReasoning: true },
   ],
 };
