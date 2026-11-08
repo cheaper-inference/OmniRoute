@@ -44,31 +44,35 @@ je laptop                                externe OmniRoute (VPS)
 
 ---
 
-## Verbinding maken
+## Verbinden
 
-### Met het beheerwachtwoord (bootstrap)
+### Met het beheerderswachtwoord (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
-# Beheerwachtwoord voor http://192.168.0.15:20128: ********
+# Beheerderswachtwoord voor http://192.168.0.15:20128: ********
 # ✔ Verbonden met http://192.168.0.15:20128 — context '192.168.0.15' (bereik: admin)
 ```
 
-De wachtwoordprocedure maakt standaard een **admin**-token aan (je beschikt over het
-wachtwoord en hebt dus al volledige controle). Beperk het bereik met `--scope`:
+De wachtwoordstroom maakt standaard een **admin**-token aan (je hebt het wachtwoord, dus je hebt al volledige controle). Beperk het bereik met `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Opties: `--port <p>` (wanneer de host geen poort bevat), `--name <ctx>` (contextnaam),
+Opties: `--port <p>` (wanneer de host geen poort heeft), `--name <ctx>` (contextnaam),
 `--scope read|write|admin`. Een volledige URL wordt ongewijzigd gebruikt:
 `omniroute connect https://omni.example.com`.
 
+Wanneer op de server tweefactorauthenticatie voor het dashboard is ingeschakeld (Instellingen →
+Beveiliging), wordt alleen het wachtwoord geweigerd: de CLI vraagt vervolgens om de code uit de
+authenticator-app (of een herstelcode). Geef deze vooraf door met `--totp <code>` voor
+niet-interactief gebruik.
+
 ### Met een vooraf gegenereerd token
 
-Genereer een token met een bepaald bereik in het dashboard (of met
-`omniroute tokens create`) en plak het — er is geen wachtwoord nodig:
+Genereer een token met een bepaald bereik in het dashboard (of met `omniroute tokens create`) en
+plak het — er is geen wachtwoord nodig:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
@@ -441,12 +445,12 @@ omniroute contexts remove 192-168-0-15 --yes   # verwijder de lokale context (ze
 
 ## API-eindpunten (referentie)
 
-| Methode | Route                 | Authenticatie    | Bereik                                  |
-| ------- | --------------------- | ---------------- | --------------------------------------- |
-| POST    | `/api/cli/connect`    | beheerwachtwoord | — (openbaar, met wachtwoordbeveiliging) |
-| GET     | `/api/cli/whoami`     | toegangstoken    | lezen                                   |
-| GET     | `/api/cli/tokens`     | toegangstoken    | beheer                                  |
-| POST    | `/api/cli/tokens`     | toegangstoken    | beheer                                  |
-| DELETE  | `/api/cli/tokens/:id` | toegangstoken    | beheer                                  |
+| Methode | Route                 | Authenticatie                       | Bereik                                 |
+| ------- | --------------------- | ----------------------------------- | -------------------------------------- |
+| POST    | `/api/cli/connect`    | wachtwoord; 2FA indien ingeschakeld | — (openbaar, met wachtwoord beveiligd) |
+| GET     | `/api/cli/whoami`     | toegangstoken                       | read                                   |
+| GET     | `/api/cli/tokens`     | toegangstoken                       | admin                                  |
+| POST    | `/api/cli/tokens`     | toegangstoken                       | admin                                  |
+| DELETE  | `/api/cli/tokens/:id` | toegangstoken                       | admin                                  |
 
 Zie [openapi.yaml](../openapi.yaml) voor de volledige schema's.

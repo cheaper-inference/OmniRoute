@@ -1,4 +1,4 @@
-import { getAllSyncedAvailableModels } from "./db/models";
+import { getAllSyncedAvailableModels, getSyncedAvailableModels } from "./db/models";
 import { getResolvedModelCapabilities } from "./modelCapabilities";
 import {
   getModelContextOverrideRecord,
@@ -114,6 +114,33 @@ export function reconcileContextWindows(
   return result;
 }
 
+/** Max synchronous work per slice before the cooperative pass yields to the event loop (#18048). */
+const RECONCILE_SLICE_MS = 15;
+
+const yieldToEventLoop = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
+
+/**
+ * Cooperative twin of `reconcileContextWindows`: identical decisions, but it hands the
+ * event loop back every ~15 ms so a large catalog (100+ connections) cannot starve
+ * loopback requests and client traffic (#18048).
+ */
+export async function reconcileContextWindowsCooperative(
+  discovered: DiscoveredWindow[],
+  deps: ReconcileDeps
+): Promise<ReconcileResult> {
+  const result: ReconcileResult = { scanned: 0, written: 0, removed: 0, skippedManual: 0 };
+  let sliceStart = performance.now();
+  for (const entry of discovered) {
+    result.scanned++;
+    reconcileOne(entry, deps, result);
+    if (performance.now() - sliceStart >= RECONCILE_SLICE_MS) {
+      await yieldToEventLoop();
+      sliceStart = performance.now();
+    }
+  }
+  return result;
+}
+
 /** Flatten the per-provider discovery map into the reconcile input. */
 function toDiscoveredWindows(
   byProvider: Record<
@@ -134,9 +161,28 @@ function toDiscoveredWindows(
   return out;
 }
 
+export interface RunReconcileOptions {
+  /** Restrict the pass to these providers (post-sync path); omit for the full pass. */
+  providers?: string[];
+}
+
+async function loadDiscoveryByProvider(
+  providers?: string[]
+): Promise<Awaited<ReturnType<typeof getAllSyncedAvailableModels>>> {
+  if (!providers) return getAllSyncedAvailableModels();
+  const byProvider: Awaited<ReturnType<typeof getAllSyncedAvailableModels>> = {};
+  for (const provider of new Set(providers)) {
+    byProvider[provider] = await getSyncedAvailableModels(provider);
+    await yieldToEventLoop();
+  }
+  return byProvider;
+}
+
 /** Run the reconcile against the live DB (discovery → overrides). */
-export async function runContextWindowReconcile(): Promise<ReconcileResult> {
-  const byProvider = await getAllSyncedAvailableModels();
+export async function runContextWindowReconcile(
+  options: RunReconcileOptions = {}
+): Promise<ReconcileResult> {
+  const byProvider = await loadDiscoveryByProvider(options.providers);
   const discovered = toDiscoveredWindows(byProvider);
   // Each catalog-version bump drops catalog-version memos (the synced vision
   // verdict map, which `getCatalogWindow` reads), so writes inside the pass do
@@ -144,7 +190,7 @@ export async function runContextWindowReconcile(): Promise<ReconcileResult> {
   // override-free catalog and the override table directly, so they stay exact.
   let changed = false;
   try {
-    return reconcileContextWindows(discovered, {
+    return await reconcileContextWindowsCooperative(discovered, {
       // Compare against the override-free catalog view. A persisted override must
       // never feed back into the comparison that (re)writes it, or the reconciler
       // oscillates (write → equal → remove → differ → write ...).

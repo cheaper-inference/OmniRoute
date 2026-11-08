@@ -15,51 +15,69 @@ Implementarea se află în `src/lib/compliance/index.ts` (T-43 — „Controale 
 
 ### Evenimente de audit administrativ (`audit_log`)
 
-Fiecare apel către `logAuditEvent({ action, actor, target, details, ... })` produce un rând. Șirurile de acțiuni urmează un model `domain.verb` (sau `domain.verb.outcome`). Tipurile de acțiuni confirmate în arborele sursă includ:
+Fiecare apel al `logAuditEvent({ action, actor, target, details, ... })` produce
+un rând. Șirurile de acțiuni urmează un tipar
+`domain.verb` (sau `domain.verb.outcome`). Tipurile de acțiuni confirmate în arbore includ:
 
-| Acțiune                              | Sursă                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Acțiune                              | Sursă                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Fiecare intrare înregistrează `action`, `actor` (valoarea implicită este `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` și `timestamp`. Cheile sensibile (`apiKey`, `accessToken`, `refreshToken`, `password`, orice corespunde modelelor `*token`/`*secret`/`*apikey` etc.) sunt redactate recursiv ca `"[redacted]"` înainte ca rândul să fie scris.
+Fiecare intrare înregistrează `action`, `actor` (implicit `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` și `timestamp`. Cheile sensibile (`apiKey`, `accessToken`,
+`refreshToken`, `password`, orice corespunde tiparului `*token`/`*secret`/`*apikey`,
+etc.) sunt redactate recursiv la `"[redacted]"` înainte ca rândul să fie scris.
+
+Rândurile `api_key.auth.touch` înregistrează metadatele și citirile de descoperire
+(GET/HEAD) reușite ale cheilor API, care nu ajung niciodată în jurnalul de
+cereri: care cheie, când și calea normalizată, agregate și limitate la 1.000 de
+rânduri. Cheile cu `noLog` și cheia de mediu sunt omise. Adresa IP și agentul
+utilizatorului apelantului sunt adăugate numai când indicatorul de funcționalitate
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` este activat (dezactivat în mod
+implicit).
 
 ### Apeluri ale instrumentelor MCP (`mcp_tool_audit`)
 
-Fiecare invocare a unui instrument MCP scrie un rând prin `open-sse/mcp-server/audit.ts`. Schema (din `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Fiecare invocare a unui instrument MCP scrie un rând prin
+`open-sse/mcp-server/audit.ts`. Schema (din
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Coloană          | Note                                                         |
-| ---------------- | ------------------------------------------------------------ |
-| `id`             | incrementare automată                                        |
-| `tool_name`      | identificatorul instrumentului MCP                           |
-| `input_hash`     | sha256 al datelor de intrare (sarcina utilă nu este stocată) |
-| `output_summary` | rezumat scurt, trunchiat                                     |
-| `duration_ms`    | timp scurs                                                   |
-| `api_key_id`     | apelantul (poate fi nul)                                     |
-| `success`        | `1` / `0`                                                    |
-| `error_code`     | codul erorii terminale în caz de eșec                        |
-| `created_at`     | marcaj temporal ISO                                          |
+| Coloană          | Note                                           |
+| ---------------- | ---------------------------------------------- |
+| `id`             | autoincrementare                               |
+| `tool_name`      | identificatorul instrumentului MCP             |
+| `input_hash`     | sha256 al intrării (nu se stochează payloadul) |
+| `output_summary` | rezumat scurt, trunchiat                       |
+| `duration_ms`    | timp de execuție                               |
+| `api_key_id`     | apelantul (poate fi nul)                       |
+| `success`        | `1` / `0`                                      |
+| `error_code`     | codul de eroare terminal la eșec               |
+| `created_at`     | marcaj temporal ISO                            |
 
-### Jurnale de cereri/utilizare
+### Jurnale de cereri / utilizare
 
-Acestea reprezintă telemetrie operațională (nu strict audit administrativ), dar folosesc același mecanism de retenție:
+Acestea sunt date de telemetrie operațională (nu sunt strict audit administrativ),
+dar folosesc aceeași conductă de păstrare:
 
-- `usage_history` — agregarea utilizării pentru fiecare cerere
-- `call_logs` — jurnal complet pentru fiecare cerere (supus unei limite de rânduri; consultați mai jos)
-- `proxy_logs` — jurnalul traficului proxy (supus unei limite de rânduri)
-- `request_detail_logs` — jurnal detaliat moștenit al cererilor (este în continuare curățat dacă există)
+- `usage_history` — centralizare a utilizării pentru fiecare cerere
+- `call_logs` — jurnal complet pentru fiecare cerere (supus limitei de rânduri, vezi mai jos)
+- `proxy_logs` — jurnal al traficului proxy (supus limitei de rânduri)
+- `request_detail_logs` — jurnal detaliat legacy al cererilor (este eliminat în continuare dacă există)
 
 ## Schema de stocare
 

@@ -29,6 +29,7 @@ import {
   Textarea,
 } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useProxyBatchOperations } from "./useProxyBatchOperations";
 import { ProxyStatusBadge } from "./ProxyStatusBadge";
 import { ProxyHealthCell } from "./ProxyHealthCell";
@@ -57,6 +58,7 @@ import {
   loadProxyHealth,
   loadProxyUsage,
   repairRelayResponseSchema,
+  useProxyBulkImportLimit,
 } from "./proxyRegistryData";
 
 export default function ProxyRegistryManager({
@@ -69,6 +71,7 @@ export default function ProxyRegistryManager({
   onOpenCloudflareRelay,
 }: ProxyRegistryManagerProps = {}) {
   const t = useTranslations("proxyRegistry");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const settingsT = useTranslations("settings");
   const [items, setItems] = useState<ProxyItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -111,6 +114,7 @@ export default function ProxyRegistryManager({
   const [bulkImportSkipped, setBulkImportSkipped] = useState(0);
   const [bulkImportParsedOnce, setBulkImportParsedOnce] = useState(false);
   const [bulkImporting, setBulkImporting] = useState(false);
+  const bulkImportLimit = useProxyBulkImportLimit(); // #13917
   const [bulkImportResult, setBulkImportResult] = useState<{
     created: number;
     updated: number;
@@ -352,7 +356,7 @@ export default function ProxyRegistryManager({
       const payload = await res.json().catch(() => ({}));
       const inUse = res.status === 409;
       if (inUse) {
-        const ok = window.confirm(t("errorForceDeleteConfirm"));
+        const ok = await requestConfirm(t("errorForceDeleteConfirm"));
         if (!ok) return;
 
         const forceRes = await fetch(`/api/settings/proxies?id=${encodeURIComponent(id)}&force=1`, {
@@ -568,8 +572,8 @@ export default function ProxyRegistryManager({
 
   const handleBulkImportExecute = async () => {
     if (bulkImportParsed.length === 0) return;
-    if (bulkImportParsed.length > 100) {
-      setError(t("bulkImportMaxExceeded"));
+    if (bulkImportParsed.length > bulkImportLimit) {
+      setError(t("bulkImportMaxExceeded", { max: bulkImportLimit }));
       return;
     }
 
@@ -1373,6 +1377,7 @@ export default function ProxyRegistryManager({
           </div>
         </div>
       </Modal>
+      {confirmDialog}
     </>
   );
 }

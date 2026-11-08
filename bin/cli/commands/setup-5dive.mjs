@@ -38,7 +38,7 @@
 
 import { spawn } from "node:child_process";
 import { printHeading, printInfo, printSuccess, printError, createPrompt } from "../io.mjs";
-import { resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 
 const DEFAULT_PROFILE = "omniroute";
 
@@ -67,7 +67,7 @@ export function resolveFivediveTarget(opts = {}) {
   if (!apiKey) {
     try {
       const c = resolveActiveContext(opts.context ?? process.env.OMNIROUTE_CONTEXT);
-      apiKey = c?.accessToken || c?.apiKey;
+      apiKey = contextCredentialFor(c, baseUrl);
     } catch {
       /* no context configured */
     }

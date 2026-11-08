@@ -29,6 +29,7 @@ import {
   resolveAdobeAccessToken,
   exchangeAdobeCookieForAccessToken,
 } from "./adobeFireflyClient.ts";
+import { matchAdobeForterTimestamp } from "./adobeFireflySecurity.ts";
 
 export interface AdobeFireflySession {
   accessToken: string;
@@ -202,8 +203,7 @@ export function extractAdobeForterTimestampMs(cookieOrBlob: string): number {
     normalizeAdobeForterToken(getAdobeCookieValue(cookieOrBlob, "forterToken")) ||
     normalizeAdobeForterToken(getAdobeCookieValue(cookieOrBlob, "forter")) ||
     "";
-  const m = ftr.match(/_(\d{13})__/);
-  return m ? Number(m[1]) : 0;
+  return matchAdobeForterTimestamp(ftr);
 }
 
 export function getAdobeForterAgeMs(cookieOrBlob: string): number {
@@ -367,10 +367,7 @@ export function resolveAdobeArpSessionIdSmart(
       }
     })();
     // Prefer the ARP whose forter timestamp is newer (…_ms__UDF43…).
-    const ts = (ftr: string) => {
-      const m = ftr.match(/_(\d{13})__/);
-      return m ? Number(m[1]) : 0;
-    };
+    const ts = (ftr: string) => matchAdobeForterTimestamp(ftr);
     if (ts(rebuiltFtr) >= ts(extractedFtr)) return rebuilt;
     return extracted;
   }

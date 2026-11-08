@@ -16,14 +16,14 @@
  *
  * @internal — not part of the public combo.ts barrel.
  */
-import { isFeatureFlagEnabled } from "../../../src/shared/utils/featureFlags.ts";
+import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
 
 export type ProtectedPriorityStopCause = "circuit_open" | "predictive_ttft";
 
 export function protectedPriorityStopStatus(cause?: ProtectedPriorityStopCause): 502 | 503 {
   if (cause !== "circuit_open" && cause !== "predictive_ttft") return 503;
   try {
-    return isFeatureFlagEnabled("PROTECTED_PRIORITY_INFRA_502_ENABLED") ? 502 : 503;
+    return isRegisteredFeatureFlagEnabled("PROTECTED_PRIORITY_INFRA_502_ENABLED") ? 502 : 503;
   } catch {
     // no-effect: an unreadable flag store keeps the legacy 503
     return 503;
@@ -40,7 +40,7 @@ export function protectedPriorityStopStatus(cause?: ProtectedPriorityStopCause):
  */
 export function isComboEmptyPoolNoEligibleTargetsEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled("COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED");
+    return isRegisteredFeatureFlagEnabled("COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED");
   } catch {
     // no-effect: an unreadable flag store keeps the legacy 400 capability_mismatch
     return false;

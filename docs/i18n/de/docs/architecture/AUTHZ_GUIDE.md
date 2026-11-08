@@ -13,88 +13,158 @@ OmniRoute verfügt über eine routenabhängige Autorisierungspipeline, die jede 
 
 > Quelle: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## Zwei Auth-Modi
+## Zwei Authentifizierungsmodi
 
 ### 1. API-Schlüssel (Bearer)
 
-Wird für die OpenAI-, Anthropic- und Gemini-kompatiblen Client-APIs sowie einige Management-Routen verwendet, wenn der Schlüssel den Scope `manage` hat.
+Wird für die mit OpenAI/Anthropic/Gemini kompatiblen Client-APIs und einige Verwaltungsrouten verwendet, wenn der Schlüssel den `manage`-Scope besitzt.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Validiert durch `isValidApiKey()` / `extractApiKey()` in `src/sse/services/auth.ts` und über `src/shared/utils/apiAuth.ts` erneut exportiert. Der Validator akzeptiert außerdem die Umgebungsvariablen `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` als dauerhafte Passthrough-Schlüssel (Issue #1350).
+Wird durch `isValidApiKey()` / `extractApiKey()` in `src/sse/services/auth.ts` validiert und über `src/shared/utils/apiAuth.ts` erneut exportiert. Der Validator akzeptiert außerdem die Umgebungsvariablen `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` als dauerhafte Passthrough-Schlüssel (Issue #1350).
 
 ### 2. Dashboard-Sitzung (auth_token-Cookie)
 
-Für Dashboard-Seiten und Administrationsvorgänge.
+Für Dashboard-Seiten und Admin-Operationen.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Ein Cookie gilt nur dann als Sitzung, wenn das JWT verifiziert werden kann **und** `authenticated: true` enthält (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Jeder Verwender des Cookies (Route-Guard des Dashboards (`isDashboardSessionAuthenticated()`), Auffrischung in der Authz-Pipeline, WebSocket-Handshake, Live-Server, `/api/settings/require-login`, `/api/auth/status`) läuft über diesen Helper. Andere mit `JWT_SECRET` signierte JWTs existieren — das Cursor-CLI-Passthrough stellt für Schlüsselinhaber Tokens mit `iss "omniroute" / aud "cursor-cli"` aus — und gelten niemals als Sitzungen (#13298).
+Ein Cookie ist nur dann eine Sitzung, wenn das JWT erfolgreich verifiziert wird **und** `authenticated: true` enthält
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Jeder
+Consumer des Cookies (Dashboard-Route-Guard (`isDashboardSessionAuthenticated()`), Aktualisierung
+der Authz-Pipeline, WebSocket-Handshake, Live-Server,
+`/api/settings/require-login`, `/api/auth/status`) verwendet diesen Helper.
+Es gibt weitere mit `JWT_SECRET` signierte JWTs — der Cursor-CLI-Passthrough erstellt
+für Schlüsselinhaber Tokens mit `iss "omniroute" / aud "cursor-cli"` — und diese sind niemals Sitzungen
+(#13298).
 
-Verifiziert durch `isDashboardSessionAuthenticated()` in `src/shared/utils/apiAuth.ts`. Die Pipeline erneuert das JWT automatisch, wenn weniger als 7 Tage seiner 30-tägigen Laufzeit übrig sind.
+Wird durch `isDashboardSessionAuthenticated()` in `src/shared/utils/apiAuth.ts` verifiziert. Die Pipeline aktualisiert das JWT automatisch, wenn es in seiner 30-tägigen Gültigkeitsdauer noch weniger als 7 Tage gültig ist.
 
-Eine Sitzung kann auch vor Ablauf der 30 Tage enden. Jeder Aussteller läuft über `mintDashboardSessionToken` (mit Ausstellungszeitpunkt `iat` und ID `jti`), und der Verifier prüft zwei Einstellungen: `sessionsValidAfter`, das eine Passwortänderung setzt, sodass jede zuvor ausgestellte Sitzung ungültig wird (der Browser, der das Passwort geändert hat, erhält ein neues Cookie), und `revokedDashboardSessions`, dem `POST /api/auth/logout` die `jti` der abgemeldeten Sitzung hinzufügt. Sitzungen, die von einer älteren Version ausgestellt wurden, tragen keinen dieser beiden Claims und bleiben bis zur ersten Passwortänderung gültig. Können die Einstellungen nicht gelesen werden, wird die Sitzung nicht vertraut.
+Eine Sitzung kann auch vor Ablauf der 30 Tage enden, da jeder Aussteller `mintDashboardSessionToken` verwendet (mit einem Ausstellungszeitpunkt `iat` und einer ID `jti`) und der Verifier zwei Einstellungen prüft: `sessionsValidAfter`, die bei einer Passwortänderung gesetzt wird, sodass jede zuvor ausgestellte Sitzung nicht mehr verifiziert wird (der Browser, in dem das Passwort geändert wurde, erhält ein neues Cookie), sowie `revokedDashboardSessions`, zu der `POST /api/auth/logout` die `jti` der abgemeldeten Sitzung hinzufügt. Sitzungen, die von einer älteren Version ausgestellt wurden, enthalten keinen dieser beiden Claims und bleiben bis zur ersten Passwortänderung gültig. Wenn die Einstellungen nicht gelesen werden können, wird der Sitzung nicht vertraut.
 
-Einige Management-Routen akzeptieren **entweder** Modus: Cookie ODER `Bearer <key>`, wenn der API-Schlüssel den Scope `manage` (oder `admin`) hat. Dadurch wird der in v3.8 ergänzte Ablauf „konfigurierbar über API-Aufrufe“ ermöglicht.
+Einige Verwaltungsrouten akzeptieren **beide** Modi: Cookie ODER `Bearer <key>`, wenn der API-Schlüssel den `manage`- (oder `admin`-)Scope besitzt. Dies ermöglicht den in v3.8 eingeführten Workflow „über API-Aufrufe konfigurierbar“.
 
-#### Optionaler OIDC-Login-Schutz (#6973)
+#### Optionales OIDC-Login-Gate (#6973)
 
-Die Administrator-Anmeldung im Dashboard unterstützt zusätzlich einen **optionalen** OIDC-Ablauf (OpenID Connect) neben der standardmäßigen Passwortanmeldung. Die Passwortanmeldung wird nie entfernt, sondern nur ergänzt:
+Die Dashboard-Admin-Anmeldung unterstützt neben der standardmäßigen Passwortanmeldung auch einen **opt-in**-OIDC-(OpenID-Connect-)Flow
+— die Passwortanmeldung wird niemals entfernt, sondern nur
+ergänzt:
 
-- Deaktiviert, sofern nicht `settings.oidcEnabled === true` **und** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` alle konfiguriert sind (Einstellungen → Auth).
+- Deaktiviert, sofern `settings.oidcEnabled === true` **und** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` nicht alle konfiguriert sind (Einstellungen → Auth).
   `GET /api/auth/oidc/login` gibt andernfalls `400` zurück.
-- `GET /api/auth/oidc/login` ermittelt den `authorization_endpoint` aus
-  `/.well-known/openid-configuration` des Issuers (Fallback: `<issuer>/authorize`),
-  erstellt die Redirect-URI aus der eingehenden Anfrage (berücksichtigt `x-forwarded-proto`)
-  und leitet zum IdP weiter, mit einem zufälligen `state`, der in einem `httpOnly`-Cookie
-  `oidc_state` gespeichert wird.
-- `GET /api/auth/oidc/callback` prüft `state`, tauscht den Authorization Code aus und
-  verifiziert die Signatur des ID-Tokens über das JWKS des Issuers (`createRemoteJWKSet`
-  aus `jose`, pro JWKS-URI zwischengespeichert) mit Prüfungen von `issuer`/`audience`.
-  Die Allowlist `oidcAllowedSubjects` ist erforderlich: Sie gleicht den `sub`-Claim des
-  Tokens oder dessen `email`-Claim ab. Der E-Mail-Claim wird nur berücksichtigt, wenn
-  `email_verified === true` ist, sodass eine nicht verifizierte E-Mail beim IdP die
-  Sperre nie passieren kann. Ohne Einträge lehnt der Callback jede Anmeldung ab
-  (`not_configured`).
-- Bei Erfolg prägt er **genau dasselbe** 30-tägige `auth_token`-JWT, das die Passwortanmeldung
-  ausstellt (`src/app/api/auth/login/route.ts`). Der Rest der Dashboard-Sitzungspipeline
-  (automatische Erneuerung, Cookie-Flags) bleibt daher unverändert. OIDC ersetzt nur, wie das
-  Cookie erzeugt wird, nicht, was es gewährt.
-- Jede `oidc*`-Einstellung (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`,
-  `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`)
-  steht in `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`):
-  `PATCH /api/settings` antwortet mit `400 PASSWORD_REQUIRED`, sofern der Body das
-  Management-Passwort nicht als `currentPassword` enthält (`401 PASSWORD_MISMATCH`, wenn es
-  falsch ist). `oidcDisablePasswordLogin` verweigert die Passwort-_Anmeldung_
-  (`POST /api/auth/login`), behält aber den gespeicherten Passwort-Hash bei. Die erneute
-  Authentifizierung prüft weiterhin `currentPassword` dagegen.
-- `corsOrigins` und `bruteForceProtection` stehen ebenfalls in `SECURITY_IMPACTING_SETTINGS_KEYS`.
-  Eine Lockerung einer der beiden schwächt die Anmeldeschutzmechanismen, daher verlangen sie
-  dieselbe erneute Authentifizierung mit `currentPassword` (der Tab Sicherheit fragt danach),
-  und der JSON-Import verwirft sie.
-- Jeder Sicherheitsrichtlinien-Schlüssel (die Einträge in `SECURITY_IMPACTING_SETTINGS_KEYS`,
-  jeder `oidc*`-Schlüssel und der Zustand der Dashboard-Sitzung) ist bei `PATCH /api/settings`
-  **nur für Operatoren** zugänglich. Ein API-Schlüssel mit Scope `manage` oder ein
-  `oma_`-Access-Token wird mit `403` abgelehnt, selbst wenn er das richtige `currentPassword`
-  sendet. Die Ablehnung wird als `settings.update_failed` mit `reason: OPERATOR_REQUIRED`
-  protokolliert (`requireOperatorCredential()` in `src/lib/api/operatorCredential.ts`).
-  Gewöhnliche Einstellungen (Theme, Darstellungsoptionen) bleiben für einen `manage`-Schlüssel
-  oder ein `admin`-Access-Token beschreibbar. Jede Änderung von `/api/settings` selbst (und von
-  `/api/settings/require-login`) erfordert außerdem den Access-Token-Scope `admin`
-  (`ADMIN_MUTATION_EXACT_PATHS` in `src/server/authz/accessScopes.ts`, exakter Pfadabgleich).
-  `GET` bleibt `read`. Die übrigen Unterrouten `/api/settings/*` (Proxys, Combo-Standards,
-  Modell-Aliase, Kompression, Bereinigungen …) behalten den aus der Methode abgeleiteten Scope `write`.
-- `POST /api/settings/import-json` überspringt diese erneute Authentifizierung. Daher entfernt
-  es vor dem Schreiben jeden Schlüssel aus `IMPORT_STRIPPED_SETTINGS_KEYS` (in derselben Datei):
-  das Passwort und `currentPassword`, jeden Eintrag aus `SECURITY_IMPACTING_SETTINGS_KEYS` sowie
-  den Zustand der Dashboard-Sitzung (`sessionsValidAfter`, `revokedDashboardSessions`).
-  Der Import eines älteren Backups kann daher keine Sitzung wiederbeleben, die durch eine
-  Passwortänderung oder eine Abmeldung beendet wurde.
+- `GET /api/auth/oidc/login` ermittelt den `authorization_endpoint` aus der
+  `/.well-known/openid-configuration` des Issuers (fällt auf
+  `<issuer>/authorize` zurück), erstellt die Redirect-URI aus der eingehenden
+  Anfrage (`x-forwarded-proto`-aware) und leitet mit einem zufälligen `state`,
+  der in einem `httpOnly`-Cookie namens `oidc_state` gespeichert wird, zum IdP
+  weiter.
+- `GET /api/auth/oidc/callback` validiert `state`, tauscht den
+  Autorisierungscode aus und verifiziert die Signatur des ID-Tokens über die
+  JWKS des Issuers (`createRemoteJWKSet` von `jose`, pro JWKS-URI
+  zwischengespeichert) mit Prüfungen von `issuer` und `audience`. Für die
+  Dashboard-Zulassung ist eine nichtleere Liste `oidcAllowedSubjects`, eine
+  Richtlinie `oidcAdmissionClaim` oder beides erforderlich. Die Subjektliste
+  gleicht `sub` oder `email` nur ab, wenn `email_verified === true` ist. Die
+  optionale Claim-Richtlinie verwendet einen durch Punkte getrennten Pfad zu
+  einem ID-Token-Claim (zum Beispiel `realm_access.roles`) sowie ein Array
+  akzeptierter Werte; der aufgelöste Claim muss ein Array aus Zeichenfolgen
+  sein, das mindestens einen akzeptierten Wert enthält. Wenn beide Richtlinien
+  konfiguriert sind, müssen beide erfüllt sein. Fehlende oder fehlerhaft
+  formatierte Claims führen zu einer Ablehnung, und ohne eine der beiden
+  Richtlinien verweigert der Callback die Anmeldung (`not_configured`).
+  Bestehende Konfigurationen, die ausschließlich auf Subjekten basieren,
+  bleiben unverändert.
+- Keycloak ordnet Realm-Rollen normalerweise Zugriffstoken zu, nicht
+  unbedingt ID-Tokens. Um die Realm-Rolle `admin` zu verlangen, konfigurieren
+  Sie für diesen Client einen Protocol Mapper, der `realm_access.roles` in
+  **dessen ID-Token** aufnimmt, und setzen Sie anschließend
+  `oidcAdmissionClaim` auf `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Überprüfen Sie den tatsächlichen ID-Token-Claim für diesen Client, bevor Sie
+  eine ausschließlich rollenbasierte Zulassung aktivieren; die Anwendung liest
+  keine Rollen aus Zugriffstoken. Eine tokenbezogene Ablehnung auf IdP-Seite
+  kann diese anwendungsseitige Prüfung ergänzen, aber nicht ersetzen.
+- Bei Erfolg wird dasselbe **exakte** 30-Tage-`auth_token`-JWT ausgestellt, das
+  auch die kennwortbasierte Anmeldung ausstellt
+  (`src/app/api/auth/login/route.ts`). Dadurch bleibt der übrige
+  Dashboard-Sitzungspfad (automatische Erneuerung, Cookie-Flags) unverändert —
+  OIDC ersetzt nur die Art, wie das Cookie ausgestellt wird, nicht die damit
+  gewährten Berechtigungen. Änderungen an IdP-Rollen oder -Gruppen machen
+  bestehende OmniRoute-Sitzungen nicht ungültig; Abmeldung,
+  Kennwortänderung oder Sitzungsablauf bestimmen weiterhin deren Lebensdauer.
+- Jede `oidc*`-Einstellung (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) ist in
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`) enthalten:
+  `PATCH /api/settings` antwortet mit `400 PASSWORD_REQUIRED`, sofern der Body
+  nicht das Verwaltungspasswort als `currentPassword` enthält
+  (`401 PASSWORD_MISMATCH`, wenn es falsch ist).
+  `oidcDisablePasswordLogin` verweigert die Kennwortanmeldung
+  (`POST /api/auth/login`), behält aber den gespeicherten Kennwort-Hash bei;
+  auch die erneute Authentifizierung prüft `currentPassword` dagegen.
+- `corsOrigins` und `bruteForceProtection` befinden sich ebenfalls in
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: Eine Lockerung schwächt die
+  Anmeldeschutzmaßnahmen, daher erfordern sie dieselbe erneute
+  Authentifizierung mit `currentPassword` (die Registerkarte „Sicherheit“
+  fragt danach), und der JSON-Import lässt sie weg.
+- Jeder Sicherheitsschlüssel — die Einträge in
+  `SECURITY_IMPACTING_SETTINGS_KEYS`, jeder `oidc*`-Schlüssel und der Zustand
+  der Dashboard-Sitzung — ist bei `PATCH /api/settings` **ausschließlich für
+  Betreiber** bestimmt: Ein API-Schlüssel mit Manage-Bereich oder ein
+  `oma_`-Zugriffstoken wird mit `403` abgelehnt, selbst wenn das korrekte
+  `currentPassword` übermittelt wird. Die Ablehnung wird als
+  `settings.update_failed` mit `reason: OPERATOR_REQUIRED` protokolliert
+  (`requireOperatorCredential()` in `src/lib/api/operatorCredential.ts`).
+  Gewöhnliche Einstellungen (Design, Anzeigeeinstellungen) bleiben für einen
+  `manage`-Schlüssel oder ein `admin`-Zugriffstoken schreibbar. Jede Änderung an
+  `/api/settings` selbst (sowie an `/api/settings/require-login`) erfordert
+  außerdem den `admin`-Bereich des Zugriffstokens
+  (`ADMIN_MUTATION_EXACT_PATHS` in `src/server/authz/accessScopes.ts`,
+  Abgleich mit dem exakten Pfad); `GET` bleibt bei `read`, und die übrigen
+  `/api/settings/*`-Unterrouten (Proxies, Combo-Standardeinstellungen,
+  Modell-Aliase, Komprimierung, Bereinigungen …) behalten den aus der Methode
+  abgeleiteten `write`-Bereich.
+- `POST /api/settings/import-json` überspringt diese erneute Authentifizierung
+  und entfernt daher vor dem Schreiben jeden Schlüssel aus
+  `IMPORT_STRIPPED_SETTINGS_KEYS` (dieselbe Datei): das Kennwort und
+  `currentPassword`, jeden Eintrag aus `SECURITY_IMPACTING_SETTINGS_KEYS`
+  sowie den Zustand der Dashboard-Sitzung
+  (`sessionsValidAfter`, `revokedDashboardSessions`). Der Import einer älteren
+  Sicherung kann daher keine Sitzung wiederbeleben, die durch eine
+  Kennwortänderung oder eine Abmeldung bereits beendet wurde.
+
+#### Optionale TOTP-Zwei-Faktor-Anmeldung (#16619)
+
+Wird unter Einstellungen → Sicherheit eingerichtet und bleibt deaktiviert, bis
+der Betreiber sie aktiviert
+(`src/server/auth/dashboardMfa.ts`).
+
+- **Was abgedeckt ist:** Passwortanmeldung (`POST /api/auth/login`, die anschließend
+  `POST /api/auth/mfa/verify` benötigt) und `omniroute connect` (`POST /api/cli/connect`,
+  das einen reinen Passwortaustausch ablehnt und den Code als `totp` entgegennimmt).
+- **Was nicht abgedeckt ist:** OIDC-/SSO-Anmeldung (`/api/auth/oidc/callback`) fragt
+  nicht nach dem OmniRoute-TOTP. Sie verwendet den eigenen zweiten Faktor des
+  Identitätsanbieters. Wenn OIDC aktiviert ist, muss MFA daher beim IdP erzwungen werden.
+- **Wiederherstellung** (verlorenes Gerät, keine Wiederherstellungscodes mehr oder ein
+  Faktor, der nicht mehr verifiziert werden kann, beispielsweise nachdem sich
+  `STORAGE_ENCRYPTION_KEY` geändert hat):
+  1. Starten Sie den Server mit `OMNIROUTE_DISABLE_MFA=true` neu.
+  2. Melden Sie sich direkt auf dem Host (Loopback-Peer und Loopback-`Host`, z. B.
+     `http://localhost:20128`) mit dem Passwort an. Der zweite Faktor wird nur für diesen
+     Ursprung übersprungen; für jeden anderen Ursprung ist der Code weiterhin erforderlich.
+  3. Geben Sie unter Einstellungen → Sicherheit → Deaktivieren das Passwort ein und
+     lassen Sie den Code leer. `POST /api/auth/mfa/disable` akzeptiert einen Body ohne
+     `code` nur, solange die Variable gesetzt ist und die Anfrage vom Host stammt. Die
+     Dashboard-Sitzung und das aktuelle Passwort sind weiterhin erforderlich. Außerdem
+     wird der Vorgang als `auth.mfa.disabled` mit `secondFactor: "recovery_switch"`
+     protokolliert.
+  4. Heben Sie die Setzung von `OMNIROUTE_DISABLE_MFA` auf, starten Sie den Server neu
+     und führen Sie die Registrierung bei Bedarf erneut durch.
 
 ## Routenklassen
 
@@ -111,44 +181,46 @@ Einige Aktionen der Klasse `MANAGEMENT` sind **nur für Operatoren** zugänglich
 ## Pipeline
 
 ```
-Eingehende Anfrage → src/proxy.ts
+Incoming request → src/proxy.ts
   → runAuthzPipeline() in src/server/authz/pipeline.ts
-    1. Vertrauenswürdige interne Header entfernen (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Anfrage-ID generieren, Route über classifyRoute() klassifizieren
-    3. Wenn pathname == "/" → Weiterleitung zu /dashboard
-    4. Wenn im Entleerungsmodus (kontrolliertes Herunterfahren) und /api/* → 503
-    5. Wenn nicht-GET /api/* → checkBodySize()-Schutz prüfen
-    6. Wenn OPTIONS → CORS-Preflight 204
-    7. Wenn options.enforce == false → unverändert mit Routenklassen-Headern weiterleiten
-    8. Andernfalls: POLICIES[routeClass].evaluate(ctx)
-       - zulassen   → x-omniroute-auth-{kind,id,label,scopes} setzen → NextResponse.next()
-       - ablehnen   → JSON-Fehler mit correlation_id (Dashboard-Seiten → 302 /login)
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Vertrauenswürdige interne Header (definiert in `src/server/authz/headers.ts`) werden **vor der Klassifizierung aus eingehenden Anfragen entfernt** — Clients können `x-omniroute-auth-*` nicht vorab setzen, um sich als ein Subjekt auszugeben.
+Vertrauenswürdige interne Header (definiert in `src/server/authz/headers.ts`) sind** von eingehenden Anfragen ausgeschlossen** Vor der Klassifizierung können — Clients `x-omniroute-auth-*` nicht vorab ausfüllen, um sich als Subjekt auszugeben.
 
-### Policy-Verträge
+### Policenverträge
 
-Jede Routenklasse besitzt eine Policy in `src/server/authz/policies/`:
+Jede Routenklasse hat eine Richtlinie in `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — gibt immer `allow({ kind: "anonymous", id: "anonymous" })` zurück.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — extrahiert Bearer und validiert ihn über `validateApiKey()`. Fällt nur dann auf anonymen Zugriff zurück, wenn das effektive Feature-Flag `REQUIRE_API_KEY` deaktiviert ist. Das effektive Flag wird über `isRequireApiKeyEnabled()` ermittelt (`DB-Feature-Flag-Überschreibung > process.env.REQUIRE_API_KEY > Standardwert`), sodass Dashboard-Feature-Flags und Umgebungsvariablen `/api/v1/*`, `/api/v1beta/*` und Aliase konsistent steuern; Fehler bei der Ermittlung führen zur Ablehnung. Erlaubt Anfragen mit Dashboard-Sitzung auf Client-API-Routen (einschließlich `/api/v1/models`, das vom Dashboard-Modellkatalog verwendet wird).
-- **`managementPolicy`** (`policies/management.ts`) — akzeptiert Dashboard-Sitzungen und interne Modell-Synchronisierungsanfragen (abgeglichen mit `/api/providers/[name]/(sync-models|models)`) oder überspringt die Prüfung vollständig, wenn `isAuthRequired()` false zurückgibt. Gibt 403 (`AUTH_001`) zurück, wenn ein Bearer-Token vorhanden, aber ungültig ist, andernfalls 401. Erzwingt außerdem vor jedem Authentifizierungszweig die Routenwächter-Stufen (LOCAL_ONLY / ALWAYS_PROTECTED) — siehe [Routenwächter-Stufen](../security/ROUTE_GUARD_TIERS.md). Auf LOCAL_ONLY-Pfade in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (derzeit: `/api/mcp/`) kann von Nicht-Loopback-Adressen aus zugegriffen werden, wenn der Bearer-Key den `manage`-Scope besitzt; alle anderen LOCAL_ONLY-Pfade bleiben unabhängig vom Scope strikt auf Loopback beschränkt.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — extrahiert Bearer und validiert über `validateApiKey()`. Fällt nur dann auf „Anonym“ durch, wenn das effektive `REQUIRE_API_KEY` Feature-Flag deaktiviert ist. Das effektive Flag wird durch `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) aufgelöst, sodass Dashboard-Feature-Flags und Umgebungsvariablen `/api/v1/*`, `/api/v1beta/*` und Aliase konsistent steuern. Resolver-Ausfälle schlagen fehl. Ermöglicht Dashboard-Sitzungsanfragen auf Client- API Routen (einschließlich `/api/v1/models`, das vom Dashboard-Modellkatalog verwendet wird). Wenn Entra ID SSO aktiviert ist, wird ein Bearer, der strukturell ein Entra-Token ist (drei base64url-Segmente, `RS*` alg, `kid`), vom SSO Zweig verarbeitet** vor** `validateApiKey()` und sein Urteil ist endgültig — es fällt niemals auf den API-Schlüsselpfad oder den Degrade-to-anonymous-Zweig durch, sodass ein Ausfall des Identitätsanbieters nicht zu offenem Zugriff werden kann. Statische API Schlüssel sind davon nicht betroffen. Siehe [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — akzeptiert Dashboard-Sitzungen, interne Modellsynchronisierungsanforderungen (abgeglichen mit `/api/providers/[name]/(sync-models|models)`) oder überspringt vollständig, wenn `isAuthRequired()` „false“ zurückgibt. Gibt 403 (`AUTH_001`) zurück, wenn ein Bearer-Token vorhanden, aber ungültig ist, andernfalls 401. Erzwingt außerdem die Route-Guard-Stufen (LOCAL_ONLY / ALWAYS_PROTECTED) vor jedem Authentifizierungszweig — siehe [Route Guard-Stufen](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY Pfade in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (heute: `/api/mcp/`) kann von Nicht-Loopback aus zugegriffen werden, wenn der Bearer-Schlüssel den `manage` Bereich trägt; Alle anderen LOCAL_ONLY -Pfade bleiben unabhängig vom Bereich strikt-Loopback.
 
-Eine erfolgreiche Policy gibt ein `AuthSubject` mit `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` zurück. Nachgelagerte Handler können es über `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` auslesen, anstatt die Authentifizierungslogik erneut auszuführen.
+Eine erfolgreiche Richtlinie gibt `AuthSubject` mit `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` zurück. Downstream-Handler können es über `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` lesen, anstatt die Authentifizierungslogik erneut ausführen zu müssen.
 
-## Liste öffentlicher Routen
+## Liste der öffentlichen Routen
 
-`src/shared/constants/publicApiRoutes.ts` ist die explizite Positivliste:
+`src/shared/constants/publicApiRoutes.ts` ist die explizite Allowlist:
 
-Die Liste ist nach **Form** aufgeteilt, und diese Aufteilung ist sicherheitskritisch (GHSA-74g9-q8f6-793h): Ein Präfix wird mit `startsWith()` abgeglichen und stimmt daher auch mit jedem benachbarten Pfad überein, der dieselben führenden Zeichen aufweist.
-`/api/usage/om-usage` als Präfix machte `/api/usage/om-usage<anything>` ÖFFENTLICH, und Next löst dies zu `/api/usage/[connectionId]` auf — einem Handler ohne eigene Authentifizierung.
+Die Liste ist nach **Form** aufgeteilt, und diese Aufteilung ist sicherheitsrelevant (GHSA-74g9-q8f6-793h): Ein Präfix
+wird mit `startsWith()` abgeglichen und stimmt daher auch mit jedem benachbarten Pfad überein, der dieselben
+führenden Zeichen enthält. Das Präfix `/api/usage/om-usage` markierte `/api/usage/om-usage<anything>` als PUBLIC, und Next löst
+dies zu `/api/usage/[connectionId]` auf — einem Handler ohne eigene Authentifizierung.
 
 ```ts
-// Echte Unterbäume. Jeder Eintrag MUSS mit "/" enden (durch einen Unit-Test sichergestellt).
+// Echte Teilbäume. Jeder Eintrag MUSS mit "/" enden (wird durch einen Unit-Test überprüft).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // wird in classify als CLIENT_API behandelt, nicht als „öffentlich ohne Authentifizierung“
+  "/api/v1/", // in classify als CLIENT_API behandelt, nicht als "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
@@ -160,6 +232,7 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
+  "/api/auth/mfa/verify", // Login-Schritt 2 für optional aktiviertes TOTP; benötigt das MFA-pending-Cookie
   "/api/init",
   "/api/sync/bundle",
   "/api/cli/connect",
@@ -167,20 +240,20 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/skills/collect/chaos",
 ]);
 
-// Schreibgeschützte Einzelrouten, für die auch die CORS-Origin-Beschränkung gelockert wird.
+// Schreibgeschützte Einzelrouten, die ebenfalls die CORS-Ursprungslockerung erhalten.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Schreibgeschützte Einzelroute OHNE Lockerung der CORS-Beschränkung.
+// Schreibgeschützte Einzelroute OHNE CORS-Ursprungslockerung.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Schreibgeschützte Routen sind **nur** für sichere Methoden öffentlich. Hinweis: `classifyRoute()` schließt `/api/v1/*` und `/api/v1beta/*` vom PUBLIC-Fallback aus — diese werden immer als `CLIENT_API` klassifiziert, sodass die Richtlinie für Bearer-Schlüssel weiterhin gilt.
+Schreibgeschützte Routen sind **nur** für sichere Methoden öffentlich. Hinweis: `classifyRoute()` schließt `/api/v1/*` und `/api/v1beta/*` vom PUBLIC-Fallback aus — diese sind immer `CLIENT_API`, sodass die Bearer-Key-Richtlinie weiterhin gilt.
 
 ## Hinzufügen einer neuen Route
 
@@ -282,25 +355,25 @@ Die Endpunkte `/api/v1/agents/tasks/*` und `/api/resilience/model-cooldowns` **e
 - Öffentliche Positivliste: `tests/unit/public-api-routes.test.ts`.
 - Gezielt ausführen: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## Debugging
+## Debuggen
 
-Die Pipeline versieht Antworten immer mit:
+Die Pipeline stempelt Antworten immer mit:
 
 ```
-x-request-id:               <Korrelations-ID, wird in Fehlerantworten wiedergegeben>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Bei authentifizierten Anfragen enthalten die Upstream-Anfrage-Header (auf Handler-Seite) außerdem:
+Für authentifizierte Anfragen enthalten die Upstream-Anfrage-Header (Handlerseite) außerdem Folgendes:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<letzte 4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
-x-omniroute-auth-scopes:    kommagetrennte Liste
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Verwenden Sie `assertAuth(req, expectedClass)` innerhalb von Handlern — die Funktion löst einen `AuthzAssertionError` mit dem Code `AUTHZ_NOT_INITIALIZED` aus, wenn die Middleware umgangen wurde (hilfreich, um Konfigurationsregressionen in Tests zu erkennen).
+Verwenden Sie `assertAuth(req, expectedClass)` innerhalb der Handler — Es löst `AuthzAssertionError` mit dem Code `AUTHZ_NOT_INITIALIZED` aus, wenn die Middleware umgangen wurde (hilfreich zum Erkennen von Konfigurationsregressionen in Tests).
 
 ## Siehe auch
 

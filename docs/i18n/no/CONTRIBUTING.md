@@ -15,8 +15,13 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`, eller `>=24.0.0 <27` (anbefalt: 24 LTS)
 - **npm** 10+
 
-> **Brukere av npm v11+ (Node 24+):** Etter `npm install` må du kontrollere at integrerte moduler ble installert:
-> `node -e "require('better-sqlite3')"`. Hvis kommandoen mislykkes med `MODULE_NOT_FOUND`,
+> **Windows med Node 24:** bruk den gjeldende 24 LTS-oppdateringen (minst 24.20.0).
+> Tidligere versjoner kan avslutte etter vellykkede tester når `--test-force-exit` lukker
+> prosessen. Node sin [Windows libuv-fiks](https://github.com/nodejs/node/pull/61999) løser
+> dette kjøretidskrasjet; behold testpåstandene og kontrollene av avslutning av testkjøreren aktivert.
+
+> **Brukere av npm v11+ (Node 24+):** Etter `npm install` må du kontrollere at native moduler ble installert:
+> `node -e "require('better-sqlite3')"`. Hvis dette mislykkes med `MODULE_NOT_FOUND`,
 > kjør `npm approve-scripts better-sqlite3 && npm install`. Se
 > [Feilsøking](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -43,77 +48,79 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Viktige variabler for utvikling:
 
-| Variabel               | Standardverdi for utvikling | Beskrivelse                   |
-| ---------------------- | --------------------------- | ----------------------------- |
-| `PORT`                 | `20128`                     | Serverport                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Basis-URL for grensesnittet   |
-| `JWT_SECRET`           | (generer ovenfor)           | Hemmelighet for JWT-signering |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | Passord ved første innlogging |
-| `APP_LOG_LEVEL`        | `info`                      | Detaljnivå for logging        |
+| Variabel               | Standard for utvikling   | Beskrivelse                   |
+| ---------------------- | ------------------------ | ----------------------------- |
+| `PORT`                 | `20128`                  | Serverport                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis-URL for frontend        |
+| `JWT_SECRET`           | (generer ovenfor)        | Hemmelighet for JWT-signering |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Passord ved første pålogging  |
+| `APP_LOG_LEVEL`        | `info`                   | Detaljnivå for logger         |
 
 ### Innstillinger for kontrollpanelet
 
-Kontrollpanelet har brytere for funksjoner som også kan konfigureres via miljøvariabler:
+Kontrollpanelet tilbyr UI-brytere for funksjoner som også kan konfigureres via miljøvariabler:
 
-| Plassering av innstilling | Bryter                    | Beskrivelse                                     |
-| ------------------------- | ------------------------- | ----------------------------------------------- |
-| Innstillinger → Avansert  | Feilsøkingsmodus          | Aktiver feilsøkingslogger for forespørsler (UI) |
-| Innstillinger → Generelt  | Synlighet for sidepanelet | Vis/skjul deler av sidepanelet                  |
+| Plassering i innstillinger | Bryter                   | Beskrivelse                                     |
+| -------------------------- | ------------------------ | ----------------------------------------------- |
+| Innstillinger → Avansert   | Feilsøkingsmodus         | Aktiver feilsøkingslogger for forespørsler (UI) |
+| Innstillinger → Generelt   | Synlighet for sidestolpe | Vis/skjul deler av sidestolpen                  |
 
-Disse innstillingene lagres i databasen og beholdes på tvers av omstarter. Når de er angitt, overstyrer de standardverdiene fra miljøvariablene.
+Disse innstillingene lagres i databasen og beholdes på tvers av omstarter. Når de er angitt,
+overstyrer de standardverdiene for miljøvariablene.
 
-### Lokal kjøring
+### Kjøre lokalt
 
 ```bash
-# Utviklingsmodus (automatisk innlasting)
+# Utviklingsmodus (automatisk omlasting)
 npm run dev
 
 # Produksjonsbygg
 npm run build    # next build → .build/next/ og deretter assembleStandalone → dist/
 npm run start
 
-# Rask kompilering kun for backend/API ved bidragsyterendringer
+# Rask backend-/API-kompilering for bidragsyterendringer
 npm run build:contributor
 
-# Utgivelsesbygg (ren ombygging + HEAD-kontrollmarkør — påkrevd for distribusjon)
-npm run build:release   # rm -rf .build dist && build + skriver dist/BUILD_SHA
+# Bygg for utgivelse (ren ombygging + HEAD-markør — nødvendig for utrulling)
+npm run build:release   # rm -rf .build dist og bygg + skriver dist/BUILD_SHA
 
 # Vanlig portkonfigurasjon
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bidragsyterbygget utfører kun validering ved kompilering: det setter ikke sammen den frittstående
-distribusjonen og bygger heller ikke valgfrie integrerte pakkeressurser. Bruk det vanlige produksjonsbygget når
-du må validere pakken som skal distribueres.
+Bidragsyterbygget utfører validering som bare omfatter kompilering: Det setter ikke sammen
+den frittstående distribusjonen og bygger ikke valgfrie native pakkeressurser. Bruk det
+vanlige produksjonsbygget når du må validere pakken som skal distribueres.
 
-### Oppsett for byggutdata
+### Struktur for byggeutdata
 
-| Katalog   | Innhold                                                                         | Versjonsstyrt |
-| --------- | ------------------------------------------------------------------------------- | ------------- |
-| `src/`    | Kildekode for applikasjonen (TypeScript / TSX)                                  | Ja            |
-| `.build/` | Mellomprodukter — utdata fra `next build` (gitignored, `distDir = .build/next`) | Nei           |
-| `dist/`   | Distribuerbar pakke — satt sammen av `assembleStandalone` (gitignored)          | Nei           |
+| Katalog   | Innhold                                                                              | Sporingsstatus |
+| --------- | ------------------------------------------------------------------------------------ | -------------- |
+| `src/`    | Kildekode for applikasjonen (TypeScript / TSX)                                       | Ja             |
+| `.build/` | Mellomliggende filer — utdata fra `next build` (gitignored, `distDir = .build/next`) | Nei            |
+| `dist/`   | Pakke klar for distribusjon — satt sammen av `assembleStandalone` (gitignored)       | Nei            |
 
-Byggeprosessen består av én gjennomkjøring:
+Byggeprosessen består av én gjennomgang:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (utdata fra Next.js)
-  └─ assembleStandalone()                 (kopierer frittstående + statiske + offentlige + integrerte ressurser)
-       └─ utdata: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js-utdata)
+  └─ assembleStandalone()                 (kopierer standalone + static + public + native assets)
+       └─ utdata: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` tømmer i tillegg begge katalogene først og skriver
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en kontrollmarkør for distribusjonsintegritet.
+`npm run build:release` rydder i tillegg begge katalogene først og skriver
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en integritetsmarkør for utrulling.
 
-`npm run build:contributor` bruker byggeprofilen som kun omfatter backend. Den erstatter midlertidig
-UI-filene for kontrollpanelet med plassholdere under byggingen, beholder API-rutebehandlerne og gjenoppretter originalfilene
-etter byggingen. Bruk `npm run build` for endringer som påvirker brukergrensesnittet i kontrollpanelet eller for fullstendig
-validering av utgivelsen. Bidragsyterprofilen er ikke en erstatning for utgivelsesbygget.
+`npm run build:contributor` bruker byggeprofilen som bare omfatter backend. Den erstatter
+midlertidig UI-filer for kontrollpanelet med stubber under byggingen, beholder
+API-rutebehandlerne og gjenoppretter originalfilene etter bygget. Bruk `npm run build`
+for endringer som påvirker UI-et i kontrollpanelet, eller for full validering av utgivelsen;
+bidragsyterprofilen er ikke en erstatning for bygget for utgivelse.
 
-> **Merknad om VPS-distribusjon:** Den eksterne bildekatalogen `/usr/lib/node_modules/omniroute/app/`
-> er uendret. Distribusjonsfunksjonene bruker rsync til å overføre innholdet i `dist/` til den.
-> Bare banen til byggutdataene i repositoriet er endret (`app/` → `dist/`).
+> **Merknad om VPS-utrulling:** den eksterne bildeklatalogen `/usr/lib/node_modules/omniroute/app/`
+> er uendret. Utrullingsferdighetene rsync-er innholdet i `dist/` til den.
+> Bare utdatastien for bygging i repositoriet er flyttet (`app/` → `dist/`).
 
 Standard-URL-er:
 
@@ -173,15 +180,15 @@ Omfang (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 # Alle tester (enhet + vitest + økosystem + e2e)
 npm run test:all
 
-# Én enkelt testfil (Node.js' innebygde testkjører – de fleste testene bruker denne)
+# Én enkelt testfil (Node.js sin innebygde testkjører — de fleste tester bruker denne)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Bare enhetstestene som påvirkes av endringen din (samme TIA-velger som CI-porten, #8084)
+# Bare enhetstestene som påvirkes av endringen din (samme TIA-velger som CI-kontrollen, #8084)
 npm run test:scoped            # endringer i siste commit (eller arbeidstreet)
-npm run test:scoped:staged     # bare staged-endringer – passer godt med en pre-commit-kjøring
-npm run test:scoped:full       # bygg kartet over importgrafen på nytt først (etter at filer er lagt til/flyttet)
-# Exit 1 + «run the full suite» betyr at en sentral fil (tsconfig, package.json, …) eller en
-# ikke-kartlagt kilde ble endret – velgeren feiler på en sikker måte og hopper aldri over noe i stillhet.
+npm run test:scoped:staged     # bare klargjorte endringer — passer godt med en pre-commit-kjøring
+npm run test:scoped:full       # bygg kartet over importgrafen på nytt først (etter å ha lagt til/flyttet filer)
+# Exit 1 + «kjør hele testpakken» betyr at en sentral fil (tsconfig, package.json, …) eller en
+# ikke-kartlagt kilde ble endret — velgeren feiler sikkert og hopper aldri over noe uten varsel.
 
 # Vitest (MCP-server, autoCombo, hurtigbuffer)
 npm run test:vitest
@@ -195,49 +202,50 @@ npm run test:protocols:e2e
 # Kompatibilitetstester for økosystemet
 npm run test:ecosystem
 
-# Dekningsport: 60 % setninger/linjer/funksjoner/grener
+# Dekningskrav: 60 % setninger/linjer/funksjoner/grener
 npm run test:coverage
 npm run coverage:report
 
-# Linting + formateringskontroll
+# Kontroll av linting + formatering
 npm run lint
 npm run check
 
-# Begrenset smoke-test med reelle oppstrømstjenester i kombinasjon (krever VPS-tilgang + kreditter hos reelle leverandører)
-# Treffer REELLE leverandører – koster litt. Kjøres ALDRI i CI. Hoppes over uten feil når porten mangler.
+# Kontrollert smoke-test av kombinasjoner mot reelle oppstrømstjenester (krever VPS-tilgang + kreditter hos reelle leverandører)
+# Kaller REELLE leverandører — koster litt. Kjører ALDRI i CI. Hoppes problemfritt over uten kontrollvariabelen.
 # Krever: tilgang med ssh root@192.168.0.15 (henter et skrivebeskyttet DB-øyeblikksbilde fra VPS-en).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Fase 3-smoke-test mot aktiv VPS – vanlige Node ESM-skript som treffer den aktive .15-serveren direkte.
+# Fase 3-smoke-test direkte mot VPS — vanlige Node ESM-skript som kaller den aktive .15-serveren direkte.
 # Krever: tilgang med ssh root@192.168.0.15 (kombinasjoner opprettes/fjernes via SSH sqlite).
-# Treffer REELLE leverandører (liten kostnad). Oppretter/sletter bare __live_test__*-kombinasjoner. Kjøres ALDRI i CI.
+# Kaller REELLE leverandører (liten kostnad). Oppretter/sletter bare __live_test__*-kombinasjoner. Kjører ALDRI i CI.
 # REQUIRE_API_KEY=false på .15, så ingen API-nøkkel er nødvendig, men COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY respekteres hvis de er angitt.
-npm run test:combo:live:vps              # 7 HTTP-scenarioer (prioritet/round-robin/vektet/kostnad/fusion/auto + tilstand)
+npm run test:combo:live:vps              # 7 HTTP-scenarioer (priority/round-robin/weighted/cost/fusion/auto + helsesjekk)
 npm run test:combo:live:vps:failover     # legger til et reelt failover-scenario på tvers av leverandører (totalt 8)
 ```
 
 Merknader om dekning:
 
-- `npm run test:coverage` måler kildedekning for hovedpakken med enhetstester, ekskluderer `tests/**` og inkluderer `open-sse/**`
-- Pull requests må holde dekningsporten på **60 %+** for setninger/linjer/funksjoner/grener
+- `npm run test:coverage` måler kodedekningen for hovedpakken med enhetstester, utelater `tests/**` og inkluderer `open-sse/**`
+- Pull requests må holde dekningskravet på **60 %+** for setninger/linjer/funksjoner/grener
 - Hvis en PR endrer produksjonskode i `src/`, `open-sse/`, `electron/` eller `bin/`, må den legge til eller oppdatere automatiserte tester i samme PR
 - `npm run coverage:report` skriver ut den detaljerte rapporten fil for fil fra den siste dekningskjøringen
-- `npm run test:coverage:legacy` bevarer den eldre måleverdien for historisk sammenligning
-- Se `docs/ops/COVERAGE_PLAN.md` for den faseinndelte planen for forbedring av dekningen
+- `npm run test:coverage:legacy` bevarer den eldre målemetoden for historisk sammenligning
+- Se `docs/ops/COVERAGE_PLAN.md` for den trinnvise planen for forbedring av kodedekningen
 
 ### Krav til pull requests
 
-Før du åpner en PR, bruker du
-[anbefalt bidragsprosess](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) for å kjøre den fokuserte løkken for
-det du har endret. Hele enhetstestpakken (4 CI-sharder), Vitest, dekningsporten på **60 %+** og
-produksjonsbygget er CIs ansvar – å kjøre dem lokalt gir ingen informasjon som PR-kontrollene
-ikke allerede gir deg, og på mindre maskiner kan det overbelaste verten (#8084):
+Før du åpner en PR, bruk
+[den anbefalte bidragsflyten](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) til å kjøre den fokuserte løkken for
+det du har endret. Hele enhetstestpakken (4 CI-deler), Vitest, dekningskravet på **60 %+** og
+produksjonsbygget er CI-systemets ansvar — lokal kjøring av disse gir ingen informasjon som PR-
+kontrollene ikke allerede vil gi deg, og på mindre maskiner kan det overbelaste verten (#8084):
 
 - Kjør testfilene som dekker endringen din: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Kjør `npm run lint`
 - Inkluder eller oppdater automatiserte tester i samme PR hver gang produksjonskoden endres
-- Oppgi de endrede eller tillagte testfilene i PR-beskrivelsen når produksjonskoden er endret
-- Kontroller SonarQube-resultatet i PR-en når prosjektets hemmeligheter er konfigurert i CI
+- I `node:test`-filer må alle `await` på toppnivå (som `await import(...)`) plasseres før den første `test()` / `describe()`: med `--test-force-exit` kan tester som registreres etter dette, i stillhet aldri bli kjørt (#18045; håndheves av `npm run check:test-tla-order`)
+- Inkluder de endrede eller nye testfilene i PR-beskrivelsen når produksjonskoden er endret
+- Kontroller SonarQube-resultatet for PR-en når prosjektets hemmeligheter er konfigurert i CI
 
 Gjeldende teststatus: **122 enhetstestfiler** som dekker:
 
@@ -247,8 +255,8 @@ Gjeldende teststatus: **122 enhetstestfiler** som dekker:
 - Databaseoperasjoner og skjema (21 DB-moduler)
 - OAuth-flyter og autentisering
 - Validering av API-endepunkter (Zod v4)
-- MCP-serververktøy og håndheving av tilgangsomfang
-- Memory- og Skills-systemene
+- Verktøy for MCP-serveren og håndheving av scopes
+- Minne- og ferdighetssystemer
 
 ---
 

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { isTextOnlyChatTransport } from "@/shared/constants/visionModels";
 import { parseModel } from "@omniroute/open-sse/services/model.ts";
 import { getModelInfo } from "@/sse/services/model";
 import { getModelAliases } from "@/lib/db/models";
@@ -375,6 +376,39 @@ function resolveCatalogPricing(
   return user ? { ...(base || {}), ...user } : base;
 }
 
+function lookupCatalogPricing(
+  source: Record<string, Record<string, Record<string, number>>>,
+  provider: string,
+  model: string
+): Record<string, number> | null {
+  const providerPricing =
+    findInsensitive(source, provider) || findInsensitive(source, provider.replace(/-cn$/, ""));
+  if (providerPricing) {
+    const modelPricing =
+      findInsensitive(providerPricing, model) ||
+      findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
+      findInsensitive(
+        providerPricing,
+        model.includes("/") ? model.split("/").pop() || model : model
+      );
+    if (modelPricing && typeof modelPricing === "object") {
+      const input = modelPricing.input;
+      const output = modelPricing.output;
+      if (typeof input === "number" || typeof output === "number") {
+        const pricing: Record<string, number> = {};
+        if (typeof input === "number") pricing.input = input;
+        if (typeof output === "number") pricing.output = output;
+        if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
+        if (typeof modelPricing.cache_creation === "number") {
+          pricing.cache_creation = modelPricing.cache_creation;
+        }
+        return pricing;
+      }
+    }
+  }
+  return null;
+}
+
 function resolveBaseCatalogPricing(
   provider: string,
   model: string,
@@ -385,32 +419,8 @@ function resolveBaseCatalogPricing(
     const modelsDev = (
       snapshot ? snapshot.modelsDevPricing || {} : getModelsDevPricing()
     ) as Record<string, Record<string, Record<string, number>>>;
-    const providerPricing =
-      findInsensitive(modelsDev, provider) ||
-      findInsensitive(modelsDev, provider.replace(/-cn$/, ""));
-    if (providerPricing) {
-      const modelPricing =
-        findInsensitive(providerPricing, model) ||
-        findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
-        findInsensitive(
-          providerPricing,
-          model.includes("/") ? model.split("/").pop() || model : model
-        );
-      if (modelPricing && typeof modelPricing === "object") {
-        const input = modelPricing.input;
-        const output = modelPricing.output;
-        if (typeof input === "number" || typeof output === "number") {
-          const pricing: Record<string, number> = {};
-          if (typeof input === "number") pricing.input = input;
-          if (typeof output === "number") pricing.output = output;
-          if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
-          if (typeof modelPricing.cache_creation === "number") {
-            pricing.cache_creation = modelPricing.cache_creation;
-          }
-          return pricing;
-        }
-      }
-    }
+    const pricing = lookupCatalogPricing(modelsDev, provider, model);
+    if (pricing) return pricing;
   } catch {
     // pricing lookup must never break catalog assembly
   }
@@ -424,31 +434,8 @@ function resolveBaseCatalogPricing(
       string,
       Record<string, Record<string, number>>
     >;
-    const providerPricing =
-      findInsensitive(litellm, provider) || findInsensitive(litellm, provider.replace(/-cn$/, ""));
-    if (providerPricing) {
-      const modelPricing =
-        findInsensitive(providerPricing, model) ||
-        findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
-        findInsensitive(
-          providerPricing,
-          model.includes("/") ? model.split("/").pop() || model : model
-        );
-      if (modelPricing && typeof modelPricing === "object") {
-        const input = modelPricing.input;
-        const output = modelPricing.output;
-        if (typeof input === "number" || typeof output === "number") {
-          const pricing: Record<string, number> = {};
-          if (typeof input === "number") pricing.input = input;
-          if (typeof output === "number") pricing.output = output;
-          if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
-          if (typeof modelPricing.cache_creation === "number") {
-            pricing.cache_creation = modelPricing.cache_creation;
-          }
-          return pricing;
-        }
-      }
-    }
+    const pricing = lookupCatalogPricing(litellm, provider, model);
+    if (pricing) return pricing;
   } catch {
     // pricing lookup must never break catalog assembly
   }
@@ -464,6 +451,7 @@ function resolveBaseCatalogPricing(
   return null;
 }
 
+/** Expose normalized capability and input-modality metadata to model-list clients. */
 export function enrichCatalogModelEntry<T extends JsonRecord>(
   entry: T,
   input?: { provider?: string | null; model?: string | null },
@@ -581,9 +569,26 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
   nextEntry.capabilities = {
     ...existingCapabilities,
     ...capabilityFields,
+    ...(metadata.modalities.input.length > 0
+      ? {
+          audio_input: metadata.modalities.input.includes("audio"),
+          video_input: metadata.modalities.input.includes("video"),
+          file_input:
+            metadata.modalities.input.includes("pdf") || metadata.modalities.input.includes("file"),
+        }
+      : {}),
   };
 
-  if (!Array.isArray(entry.input_modalities) && metadata.modalities.input.length > 0) {
+  if (isTextOnlyChatTransport(metadata.provider)) {
+    // Correct stale/synced image declarations as well as the capability flag.
+    nextEntry.input_modalities = ["text"];
+    nextEntry.output_modalities = ["text"];
+  } else if (
+    (!Array.isArray(entry.input_modalities) ||
+      metadata.provider === "cheaperinference" ||
+      metadata.provider === "cinf") &&
+    metadata.modalities.input.length > 0
+  ) {
     nextEntry.input_modalities = metadata.modalities.input;
   }
 
@@ -660,7 +665,9 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
 
   if (
     typeof metadata.limits.maxInputTokens === "number" &&
-    (typeof nextEntry.max_input_tokens !== "number" || authoritativeContextWindow !== null)
+    (typeof nextEntry.max_input_tokens !== "number" ||
+      authoritativeContextWindow !== null ||
+      persistedContextWindow !== null)
   ) {
     nextEntry.max_input_tokens = metadata.limits.maxInputTokens;
   }

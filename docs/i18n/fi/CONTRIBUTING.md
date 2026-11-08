@@ -10,12 +10,17 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ## Kehitysympäristön määritys
 
-### Esivaatimukset
+### Edellytykset
 
 - **Node.js** `>=22.22.2 <23` tai `>=24.0.0 <27` (suositus: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ -käyttäjät (Node 24+):** Varmista `npm install` -komennon jälkeen, että natiivimoduulit asennettiin:
+> **Windows ja Node 24:** käytä nykyistä 24 LTS -korjausjulkaisua (vähintään 24.20.0).
+> Aiemmat julkaisut voivat keskeyttää prosessin onnistuneiden testien jälkeen, kun `--test-force-exit` sulkee
+> prosessin. Noden [Windows libuv -korjaus](https://github.com/nodejs/node/pull/61999) korjaa
+> tämän ajonaikaisen kaatumisen; pidä testiväitteet ja suorittimen poistumistarkistukset käytössä.
+
+> **npm v11+ -käyttäjät (Node 24+):** tarkista `npm install` -komennon jälkeen, että natiivimoduulit asennettiin:
 > `node -e "require('better-sqlite3')"`. Jos komento epäonnistuu virheellä `MODULE_NOT_FOUND`,
 > suorita `npm approve-scripts better-sqlite3 && npm install`. Katso
 > [Vianmääritys](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -33,7 +38,7 @@ npm install
 ### Ympäristömuuttujat
 
 ```bash
-# Luo .env-tiedosto mallista
+# Luo .env-muuttuja mallista
 cp .env.example .env
 
 # Luo vaaditut salaisuudet
@@ -41,79 +46,80 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Kehityksen keskeiset muuttujat:
+Kehityksen kannalta tärkeät muuttujat:
 
-| Muuttuja               | Kehityksen oletusarvo    | Kuvaus                             |
-| ---------------------- | ------------------------ | ---------------------------------- |
-| `PORT`                 | `20128`                  | Palvelimen portti                  |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Käyttöliittymän perus-URL          |
-| `JWT_SECRET`           | (luo yllä)               | JWT-allekirjoituksen salaisuus     |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Ensimmäisen kirjautumisen salasana |
-| `APP_LOG_LEVEL`        | `info`                   | Lokituksen yksityiskohtaisuustaso  |
+| Muuttuja               | Kehityksen oletusarvo       | Kuvaus                             |
+| ---------------------- | --------------------------- | ---------------------------------- |
+| `PORT`                 | `20128`                     | Palvelimen portti                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Käyttöliittymän perus-URL          |
+| `JWT_SECRET`           | (luo yllä olevalla tavalla) | JWT-allekirjoituksen salaisuus     |
+| `INITIAL_PASSWORD`     | `CHANGEME`                  | Ensimmäisen kirjautumisen salasana |
+| `APP_LOG_LEVEL`        | `info`                      | Lokien yksityiskohtaisuustaso      |
 
 ### Hallintapaneelin asetukset
 
-Hallintapaneeli sisältää käyttöliittymän valitsimet ominaisuuksille, jotka voidaan määrittää myös ympäristömuuttujilla:
+Hallintapaneelissa on käyttöliittymän vaihtopainikkeita ominaisuuksille, jotka voidaan määrittää myös ympäristömuuttujilla:
 
-| Asetuksen sijainti        | Valitsin            | Kuvaus                                                      |
-| ------------------------- | ------------------- | ----------------------------------------------------------- |
-| Asetukset → Lisäasetukset | Virheenkorjaustila  | Ota käyttöön pyyntöjen virheenkorjauslokit (käyttöliittymä) |
-| Asetukset → Yleiset       | Sivupalkin näkyvyys | Näytä tai piilota sivupalkin osiot                          |
+| Asetuksen sijainti  | Vaihtopainike      | Kuvaus                                                      |
+| ------------------- | ------------------ | ----------------------------------------------------------- |
+| Settings → Advanced | Debug Mode         | Ota virheenkorjauksen pyyntölokit käyttöön (käyttöliittymä) |
+| Settings → General  | Sidebar Visibility | Näytä/piilota sivupalkin osiot                              |
 
-Nämä asetukset tallennetaan tietokantaan ja säilyvät uudelleenkäynnistysten välillä. Kun ne on määritetty, ne ohittavat ympäristömuuttujien oletusarvot.
+Nämä asetukset tallennetaan tietokantaan, ja ne säilyvät uudelleenkäynnistysten yli. Kun ne on määritetty, ne ohittavat ympäristömuuttujien oletusarvot.
 
-### Paikallinen suorittaminen
+### Suorittaminen paikallisesti
 
 ```bash
-# Kehitystila (automaattinen uudelleenlataus)
+# Kehitystila (kuuma uudelleenlataus)
 npm run dev
 
 # Tuotantokoontiversio
-npm run build    # next build → .build/next/, sitten assembleStandalone → dist/
+npm run build    # next build → .build/next/ ja sen jälkeen assembleStandalone → dist/
 npm run start
 
-# Nopea, vain taustajärjestelmän/API:n käännös kontribuoijien muutoksia varten
+# Nopea vain taustajärjestelmän ja API:n käännös avustajien muutoksia varten
 npm run build:contributor
 
-# Julkaisukoontiversio (puhdas uudelleenkoonti + HEAD-tarkiste — vaaditaan käyttöönottoa varten)
-npm run build:release   # rm -rf .build dist && koonti + kirjoittaa tiedoston dist/BUILD_SHA
+# Julkaisukoontiversio (puhdas uudelleenkoonti + HEAD-paikkamerkki — käyttöönottoa varten pakollinen)
+npm run build:release   # rm -rf .build dist ja build + kirjoittaa dist/BUILD_SHA
 
-# Yleinen porttimääritys
+# Yleinen portin määritys
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Kontribuoijien koontiversio suorittaa vain käännösaikaisen validoinnin: se ei kokoa itsenäistä
-jakelua eikä valinnaisia natiivin paketoinnin resursseja. Käytä tavallista tuotantokoontiversiota,
-kun toimitettavissa oleva paketti on validoitava.
+Avustajakoontiversio suorittaa vain käännöksen validoinnin: se ei kokoa itsenäistä
+jakelua eikä rakenna valinnaisia natiivipaketoinnin resursseja. Käytä tavallista tuotantokoontiversiota,
+kun haluat validoida toimitettavan paketin.
 
-### Koontitulosteen rakenne
+### Koontituloksen hakemistorakenne
 
-| Hakemisto | Sisältö                                                                    | Seurataan |
-| --------- | -------------------------------------------------------------------------- | --------- |
-| `src/`    | Sovelluksen lähdekoodi (TypeScript / TSX)                                  | Kyllä     |
-| `.build/` | Välitulokset — `next build` -tuloste (gitignored, `distDir = .build/next`) | Ei        |
-| `dist/`   | Toimitettava paketti — toiminnon `assembleStandalone` kokoama (gitignored) | Ei        |
+| Hakemisto | Sisältö                                                                           | Seurattu |
+| --------- | --------------------------------------------------------------------------------- | -------- |
+| `src/`    | Sovelluksen lähdekoodi (TypeScript / TSX)                                         | Kyllä    |
+| `.build/` | Väliaikaistiedostot — `next build` -tulos (gitignorettu, `distDir = .build/next`) | Ei       |
+| `dist/`   | Toimitettava paketti — `assembleStandalone` kokoaa sen (gitignorettu)             | Ei       |
 
-Koontiputki suoritetaan yhdellä läpikäynnillä:
+Koontiputki on yksivaiheinen:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js-tuloste)
-  └─ assembleStandalone()                 (kopioi itsenäisen version + staattiset tiedostot + julkiset tiedostot + natiiviresurssit)
-       └─ tuloste: dist/                  (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js-tulos)
+  └─ assembleStandalone()                 (kopioi standalone + static + public + native assets)
+       └─ tulos: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` puhdistaa lisäksi ensin molemmat hakemistot ja kirjoittaa
-tiedoston `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) käyttöönoton eheystarkisteeksi.
+`npm run build:release` tyhjentää lisäksi ensin molemmat hakemistot ja kirjoittaa
+`dist/BUILD_SHA`-tiedoston (= `git rev-parse --short HEAD`) käyttöönoton eheyden paikkamerkiksi.
 
-`npm run build:contributor` käyttää vain taustajärjestelmän koontiprofiilia. Se korvaa
-hallintapaneelin käyttöliittymätiedostot väliaikaisesti tynkäversioilla koonnin ajaksi, säilyttää API-reittien käsittelijät ja palauttaa alkuperäiset tiedostot
-koonnin jälkeen. Käytä komentoa `npm run build` muutoksiin, jotka vaikuttavat hallintapaneelin käyttöliittymään, tai täydelliseen
-julkaisun validointiin. Kontribuoijaprofiili ei korvaa julkaisukoontiversiota.
+`npm run build:contributor` käyttää vain taustajärjestelmälle tarkoitettua koontiprofiilia. Se korvaa
+hallintapaneelin käyttöliittymän tiedostot tilapäisesti koonnin ajaksi, säilyttää API-reittien käsittelijät
+ja palauttaa alkuperäiset tiedostot koonnin jälkeen. Käytä `npm run build` -komentoa muutoksille, jotka
+vaikuttavat hallintapaneelin käyttöliittymään, tai täydelliseen julkaisun validointiin; avustajaprofiili
+ei korvaa julkaisukoontiversiota.
 
-> **Huomautus VPS-käyttöönotosta:** etäpalvelimen näköistiedostohakemisto `/usr/lib/node_modules/omniroute/app/`
-> ei ole muuttunut. Käyttöönoton työkalut synkronoivat `dist/`-hakemiston sisällön siihen rsyncillä.
-> Vain repositorion sisäinen koontitulosteen polku muuttui (`app/` → `dist/`).
+> **VPS-käyttöönottoa koskeva huomautus:** etäpalvelimen kuvatiedostoja sisältävä hakemisto `/usr/lib/node_modules/omniroute/app/`
+> säilyy muuttumattomana. Käyttöönoton työkalut synkronoivat `dist/`-hakemiston sisällön sinne rsyncillä.
+> Vain repositorion sisäinen koontituloksen polku siirrettiin (`app/` → `dist/`).
 
 Oletus-URL-osoitteet:
 
@@ -173,15 +179,15 @@ Kohdealueet (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `
 # Kaikki testit (yksikkötestit + vitest + ekosysteemi + e2e)
 npm run test:all
 
-# Yksittäinen testitiedosto (Node.js:n oma testiajuri — useimmat testit käyttävät tätä)
+# Yksittäinen testitiedosto (Node.js:n oma testien suoritusohjelma — useimmat testit käyttävät tätä)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Vain muutoksesi vaikutuspiirissä olevat yksikkötestit (sama TIA-valitsin kuin CI-portissa, #8084)
-npm run test:scoped            # viimeisimmän commitin muutokset (tai työhakemiston muutokset)
-npm run test:scoped:staged     # vain indeksiin lisätyt muutokset — sopii hyvin pre-commit-ajoon
+npm run test:scoped            # viimeisimmän committauksen (tai työhakemiston) muutokset
+npm run test:scoped:staged     # vain valmistellut muutokset — sopii hyvin ennen committausta suoritettavaksi
 npm run test:scoped:full       # muodosta tuontigraafikartta ensin uudelleen (tiedostojen lisäämisen/siirtämisen jälkeen)
-# Exit 1 + "run the full suite" tarkoittaa, että keskeinen tiedosto (tsconfig, package.json, …) tai
-# kartoittamaton lähdetiedosto muuttui — valitsin toimii turvallisesti eikä koskaan ohita testejä huomaamatta.
+# Poistumiskoodi 1 + "suorita koko testikokonaisuus" tarkoittaa, että keskitetty tiedosto (tsconfig, package.json, …) tai
+# kartoittamaton lähdetiedosto muuttui — valitsin toimii vikatilanteessa turvallisesti eikä koskaan ohita testejä huomaamatta.
 
 # Vitest (MCP-palvelin, autoCombo, välimuisti)
 npm run test:vitest
@@ -203,52 +209,53 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Portilla suojattu oikeiden ylävirtojen yhdistelmäsavutesti (edellyttää VPS-yhteyttä + oikeiden palveluntarjoajien saldoa)
-# Käyttää OIKEITA palveluntarjoajia — maksaa hieman. EI KOSKAAN suoriteta CI:ssä. Ohitetaan siististi ilman porttia.
-# Edellyttää: ssh root@192.168.0.15 -yhteys (lataa VPS:ltä vain luku -tilassa olevan tietokantavedoksen).
+# Portilla suojattu, todellisia upstream-palveluita käyttävä combo-savutesti (edellyttää VPS-käyttöoikeutta + todellisten palveluntarjoajien krediittejä)
+# Käyttää TODELLISIA palveluntarjoajia — aiheuttaa hieman kustannuksia. EI KOSKAAN suoriteta CI:ssä. Ohitetaan siististi ilman porttia.
+# Edellyttää: ssh root@192.168.0.15 -käyttöoikeus (lataa VPS:ltä vain luku -tilassa olevan tietokantavedoksen).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Vaiheen 3 VPS-livesavutesti — tavallisia Node ESM -skriptejä, jotka käyttävät suoraan .15-livepalvelinta.
-# Edellyttää: ssh root@192.168.0.15 -yhteys (yhdistelmät luodaan/poistetaan SSH:n kautta sqlite-tietokannassa).
-# Käyttää OIKEITA palveluntarjoajia (pieni kustannus). Luo/poistaa vain __live_test__*-yhdistelmiä. EI KOSKAAN suoriteta CI:ssä.
-# REQUIRE_API_KEY=false .15-palvelimella, joten API-avainta ei tarvita, mutta COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY huomioidaan, jos ne on asetettu.
-npm run test:combo:live:vps              # 7 HTTP-skenaariota (prioriteetti/vuorottelu/painotettu/kustannus/fuusio/automaattinen + kunto)
+# Vaiheen 3 VPS-savutesti tuotantoympäristössä — tavalliset Node ESM -skriptit, jotka käyttävät suoraan käytössä olevaa .15-palvelinta.
+# Edellyttää: ssh root@192.168.0.15 -käyttöoikeus (combot luodaan/puretaan SSH:n kautta sqlite-tietokannassa).
+# Käyttää TODELLISIA palveluntarjoajia (pieni kustannus). Luo/poistaa vain __live_test__*-comboja. EI KOSKAAN suoriteta CI:ssä.
+# REQUIRE_API_KEY=false palvelimella .15, joten API-avainta ei tarvita, mutta COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY huomioidaan, jos ne on asetettu.
+npm run test:combo:live:vps              # 7 HTTP-skenaariota (prioriteetti/kiertovuorottelu/painotettu/kustannus/fuusio/automaattinen + kunto)
 npm run test:combo:live:vps:failover     # lisää todellisen palveluntarjoajien välisen vikasietoskenaarion (yhteensä 8)
 ```
 
-Kattavuushuomautukset:
+Kattavuutta koskevat huomautukset:
 
-- `npm run test:coverage` mittaa päälähdekoodin kattavuuden pääasialliselle yksikkötestikokonaisuudelle, jättää `tests/**` pois ja sisältää `open-sse/**`
-- Vetopyyntöjen on pidettävä kattavuusportti vähintään **60 %:ssa** lauseista/riveistä/funktioista/haaroista
-- Jos PR muuttaa tuotantokoodia hakemistossa `src/`, `open-sse/`, `electron/` tai `bin/`, samassa PR:ssä on lisättävä tai päivitettävä automaattisia testejä
+- `npm run test:coverage` mittaa lähdekoodin kattavuuden pääasialliselle yksikkötestikokonaisuudelle, jättää pois `tests/**`-hakemiston ja sisältää `open-sse/**`-hakemiston
+- Pull requestien on pidettävä kattavuusportin arvo vähintään **60 %:ssa** lauseiden/rivien/funktioiden/haarojen osalta
+- Jos PR muuttaa tuotantokoodia hakemistossa `src/`, `open-sse/`, `electron/` tai `bin/`, sen on lisättävä tai päivitettävä automaattisia testejä samassa PR:ssä
 - `npm run coverage:report` tulostaa viimeisimmän kattavuusajon yksityiskohtaisen tiedostokohtaisen raportin
 - `npm run test:coverage:legacy` säilyttää vanhemman mittarin historiallista vertailua varten
-- Vaiheittainen kattavuuden parannussuunnitelma on tiedostossa `docs/ops/COVERAGE_PLAN.md`
+- Katso vaiheittainen kattavuuden parannussuunnitelma tiedostosta `docs/ops/COVERAGE_PLAN.md`
 
-### Vetopyyntöjen vaatimukset
+### Pull requestin vaatimukset
 
 Ennen PR:n avaamista käytä
-[osallistumisen suositeltua etenemistapaa](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) suorittaaksesi kohdennetun kierroksen
-tekemillesi muutoksille. Täysi yksikkötestikokonaisuus (4 CI-osiota), Vitest, **60 %+:n** kattavuusportti ja
-tuotantokoonti ovat CI:n vastuulla — niiden suorittaminen paikallisesti ei tuota mitään sellaista lisätietoa, jota PR:n
-tarkistukset eivät jo tarjoaisi, ja pienemmillä koneilla se voi kuormittaa järjestelmän äärimmilleen (#8084):
+[osallistumisen suositeltua polkua](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) suorittaaksesi kohdennetun tarkistuskierroksen
+tekemillesi muutoksille. Koko yksikkötestikokonaisuus (4 CI-osiota), Vitest, **60 %+**:n kattavuusportti ja
+tuotantokoonti ovat CI:n vastuulla — niiden suorittaminen paikallisesti ei anna tietoa, jota PR:n
+tarkistukset eivät jo tarjoaisi, ja pienemmissä koneissa se voi kuormittaa järjestelmän äärimmilleen (#8084):
 
 - Suorita muutoksesi kattavat testitiedostot: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Suorita `npm run lint`
 - Lisää tai päivitä automaattisia testejä samassa PR:ssä aina, kun tuotantokoodi muuttuu
-- Mainitse muutetut tai lisätyt testitiedostot PR:n kuvauksessa, kun tuotantokoodi muuttui
+- Sijoita `node:test`-tiedostoissa jokainen ylätason `await` (kuten `await import(...)`) ennen ensimmäistä `test()`- / `describe()`-kutsua: `--test-force-exit`-asetusta käytettäessä sen jälkeen rekisteröidyt testit voivat jäädä huomaamatta kokonaan suorittamatta (#18045; tämän valvoo `npm run check:test-tla-order`)
+- Sisällytä muuttuneet tai lisätyt testitiedostot PR:n kuvaukseen, kun tuotantokoodi muuttui
 - Tarkista PR:n SonarQube-tulos, kun projektin salaisuudet on määritetty CI:ssä
 
-Testien nykytila: **122 yksikkötestitiedostoa**, jotka kattavat seuraavat:
+Testien nykyinen tila: **122 yksikkötestitiedostoa**, jotka kattavat:
 
-- Palveluntarjoajien kääntäjät ja muotomuunnokset
-- Nopeusrajoitus, circuit breaker ja häiriönsietokyky
-- Semanttinen välimuisti, idempotenssi ja edistymisen seuranta
-- Tietokantatoiminnot ja skeema (21 tietokantamoduulia)
-- OAuth-työnkulut ja todennus
-- API-päätepisteiden validointi (Zod v4)
-- MCP-palvelimen työkalut ja käyttöalueiden valvonta
-- Memory- ja Skills-järjestelmät
+- Palveluntarjoajien muuntimet ja muotomuunnokset
+- Nopeusrajoituksen, katkaisijan ja häiriönsietokyvyn
+- Semanttisen välimuistin, idempotenssin ja edistymisen seurannan
+- Tietokantatoiminnot ja skeeman (21 tietokantamoduulia)
+- OAuth-prosessit ja todennuksen
+- API-päätepisteiden validoinnin (Zod v4)
+- MCP-palvelimen työkalut ja käyttöalueiden valvonnan
+- Muisti- ja Skills-järjestelmät
 
 ---
 

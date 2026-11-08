@@ -2,9 +2,11 @@
  * Registry of local-core config renderers, one entry per core.
  *
  * A second core only adds one file plus one table entry; callers resolve the
- * renderer through `RENDERERS[DEFAULT_CORE]` at runtime.
+ * renderer through the renderer table at runtime (`rendererFor` by target
+ * suffix, `DEFAULT_CORE` as the fallback).
  */
 import type { CoreModel } from "./model";
+import { renderMihomo, resolveMihomoTag } from "./mihomo";
 import { renderSingBox, resolveOffendingTag } from "./singbox";
 
 export type RenderOk = {
@@ -49,11 +51,24 @@ export type OffendingResolver = (
 /** One offending-output resolver per core, looked up at runtime. */
 export const OFFENDING_RESOLVERS: Record<string, OffendingResolver> = {
   "sing-box": resolveOffendingTag,
+  mihomo: resolveMihomoTag,
 };
 
 export const RENDERERS: Record<string, CoreRenderer> = {
   "sing-box": Object.assign(renderSingBox, { apiReload: false as const }),
+  mihomo: Object.assign(renderMihomo, { apiReload: false as const }),
 };
 
-/** Core rendered when a subscription doesn't name one (only entry so far). */
+/** Core rendered when a subscription doesn't name one (only default so far). */
 export const DEFAULT_CORE = "sing-box";
+
+/**
+ * Resolve the core for an adopted config path by its suffix: `.yaml`/`.yml`
+ * render through Mihomo, anything else through the default core. The guard
+ * is case-sensitive, so the selection is too (an uppercase suffix resolves
+ * to the default). Never throws.
+ */
+export function rendererFor(target: string): { core: string; renderer: CoreRenderer } {
+  const core = target.endsWith(".yaml") || target.endsWith(".yml") ? "mihomo" : DEFAULT_CORE;
+  return { core, renderer: RENDERERS[core] ?? RENDERERS[DEFAULT_CORE] };
+}
