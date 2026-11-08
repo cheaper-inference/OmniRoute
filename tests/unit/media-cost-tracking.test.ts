@@ -430,3 +430,35 @@ test("unavailable speech metadata uses an explicit tariff without inventing a pr
   near(costRules.checkBudget(key.id).periodUsed, 0.0001144);
   assert.equal((await ledger(key.id)).length, 1);
 });
+
+test("token-priced images retain nested cache discounts without retaining arbitrary usage payloads", async () => {
+  const { key } = await seed("openai", "gpt-image-2", { input: 2, output: 0, cached: 0.2 });
+  globalThis.fetch = async () =>
+    Response.json({
+      data: [{ b64_json: "c3ludGhldGlj" }],
+      usage: {
+        input_tokens: 100,
+        output_tokens: 0,
+        input_tokens_details: { cached_tokens: 50, private_text: "must-not-persist" },
+      },
+    });
+  const response = await images.POST(
+    jsonRequest("images/generations", key.key, {
+      model: "openai/gpt-image-2",
+      prompt: "synthetic",
+    }),
+    {}
+  );
+  assert.equal(response.status, 200);
+  near(response.headers.get("x-omniroute-response-cost"), 0.00011);
+  const rows = await getUsageHistory();
+  assert.equal(rows[0].tokens.cacheRead, 50);
+  near(rows[0].calculatedCostUsd, 0.00011);
+  near(costRules.checkBudget(key.id).periodUsed, 0.00011);
+  assert.deepEqual(
+    normalizeMediaUsage({
+      input_tokens_details: { cached_tokens: 50, private_text: "must-not-persist" },
+    }),
+    { input_tokens_details: { cached_tokens: 50 } }
+  );
+});

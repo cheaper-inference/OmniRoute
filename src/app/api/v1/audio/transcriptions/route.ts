@@ -72,7 +72,7 @@ export async function peekDurationUsage(
   return undefined;
 }
 
-async function peekBillingUsage(response: Response): Promise<Record<string, number>> {
+async function peekBillingUsage(response: Response): Promise<Record<string, unknown>> {
   try {
     if (!response.headers.get("content-type")?.includes("application/json")) return {};
     const parsed = await response.clone().json();
@@ -240,7 +240,7 @@ async function transcribeWithModel(
       provider,
       model: resolvedModel,
       unit: "second",
-      quantity: usage.seconds,
+      quantity: typeof usage.seconds === "number" ? usage.seconds : null,
       usage,
     });
     await recordMediaRequest(
