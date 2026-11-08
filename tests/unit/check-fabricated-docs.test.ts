@@ -224,6 +224,25 @@ test("env-var: a var present only in .env.example is NOT flagged", () => {
   );
 });
 
+test("env-var: a feature flag defined in a split catalog module is NOT flagged", () => {
+  // FEATURE_FLAG_DEFINITIONS spreads per-area modules such as
+  // searchFeatureFlagDefinitions.ts (#17933); their keys are env-overridable too.
+  const found = findingsFor({
+    files: {
+      "src/shared/constants/featureFlagDefinitions.ts":
+        'export const FEATURE_FLAG_DEFINITIONS = [\n  {\n    key: "MAIN_CATALOG_FLAG",\n  },\n];\n',
+      "src/shared/constants/searchFeatureFlagDefinitions.ts":
+        'export const SEARCH_FEATURE_FLAG_DEFINITIONS = [\n  {\n    key: "SPLIT_CATALOG_FLAG",\n  },\n];\n',
+    },
+    docs: { "flags.md": "Toggle `MAIN_CATALOG_FLAG` or `SPLIT_CATALOG_FLAG`.\n" },
+  });
+  assert.ok(!found.has("env-var::MAIN_CATALOG_FLAG"), "main catalog keys are indexed");
+  assert.ok(
+    !found.has("env-var::SPLIT_CATALOG_FLAG"),
+    "keys from a spread *FeatureFlagDefinitions.ts module must be indexed, not flagged"
+  );
+});
+
 test("api-path: a documented prefix with sub-routes (/api/cloud/) is NOT flagged", () => {
   const found = findingsFor({
     files: {
