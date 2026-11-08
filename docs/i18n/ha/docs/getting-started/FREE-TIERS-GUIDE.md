@@ -19,43 +19,42 @@ OmniRoute yana **tattara** haɗin da aka saita zuwa endpoint guda ɗaya. Har yan
 
 ---
 
-## Masu Bayar da Sabis na Samun Dama Kyauta da Aka Zaɓa
+## Wakilan Masu Bayar da Samun Dama Kyauta
 
-### Samun Dama Mai Maimaituwa, Mara Maɓalli, ko Mara Iyakar Amfani
+### Samun Dama Mai Maimaituwa, Mara Buƙatar Maɓalli, ko Mara Iyaka
 
-Waɗannan masu bayar da sabis suna da hanyar samun dama kyauta mai maimaituwa, mara maɓalli, ko mara iyakar amfani a cikin kundin da aka tantance. “Mara iyakar amfani” na nufin babu iyakar token da aka wallafa; har yanzu ana iya amfani da iyakokin saurin buƙata, yawan ayyukan lokaci guda, asusu, yanki, da manufofi:
+Waɗannan masu bayarwa suna da hanyar samun dama kyauta mai maimaituwa, mara buƙatar maɓalli, ko mara iyaka a cikin kundin da aka tantance. “Mara iyaka” na nufin babu iyakar token da aka wallafa; har yanzu ana iya sanya iyakokin saurin buƙata, yawan ayyukan lokaci guda, asusu, yanki, da manufofi:
 
-| Mai Bayar da Sabis | Samfura                                                                                                  | Ƙayyadadden Amfani                                                                                                                                       | Yadda Ake Haɗawa                                                                             |
-| ------------------ | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **Kiro AI**        | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, da sauransu                                                 | Kundin da aka tantance ya kiyasta tarin token 25K na bai ɗaya kowane wata                                                                                | Tsarin OAuth/asusu; an yi wa ToS alamar `avoid` a cikin kundin                               |
-| **OpenCode Free**  | Jerin samfuran `*-free` na yanzu a cikin rajistar mai bayar da sabis                                     | Mara maɓalli; babu iyakar token da aka wallafa                                                                                                           | Ba a buƙatar bayanan shaidar mai bayar da sabis; an yi wa ToS alamar `avoid`                 |
-| **Pollinations**   | Jerin samfura marasa maɓalli na yanzu; an dakatar da wasu tsofaffin samfura ko kuma suna buƙatar maɓalli | Mara maɓalli; babu iyakar token da aka wallafa                                                                                                           | Ba a buƙatar bayanan shaidar mai bayar da sabis don samfuran marasa maɓalli                  |
-| **Logfare**        | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, da ƙari                                     | Maɓallin API kyauta (babu iyakar saurin buƙata, babu buƙatar kati); **ana adana bayanan kowace buƙata** don bincike (a daina shiga a logfare.ai/consent) | Maɓalli nan take a logfare.ai/register; ToS/keɓantawa a logfare.ai/tos da logfare.ai/privacy |
-| **Cloudflare AI**  | Kundin Workers AI                                                                                        | Tarin da aka tantance ya kiyasta token kusan 30M/wata daga raka’o’in amfani da aka wallafa                                                               | Asusun Cloudflare da bayanan shaidar API                                                     |
-| **Gemini**         | Iyalan Gemini Flash                                                                                      | Iyakokin saurin buƙata suna bambanta bisa aiki/samfuri; ba a haɗa wani tabbataccen adadin token na wata-wata a cikin babban bayani ba                    | Maɓallin API na Google AI Studio; duba iyakokin da ke aiki na aikin                          |
-| **Groq**           | Samfuran Llama, GPT-OSS, da Qwen                                                                         | Tarin da aka tantance ya kiyasta token kusan 15M/wata                                                                                                    | Maɓallin API na Groq; iyakokin saurin buƙata suna aiki                                       |
+| Mai Bayarwa       | Samfura                                                                                      | Ƙayyadadden Adadi                                                                                                                                    | Yadda Ake Haɗawa                                                                         |
+| ----------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, da sauransu                                     | Kundin da aka tantance ya kiyasta tarin token 25K na bai ɗaya a kowane wata                                                                          | Tsarin OAuth/asusu; an yi wa ToS alamar `avoid` a cikin kundin                           |
+| **Pollinations**  | Jerin samfura marasa maɓalli na yanzu; an daina wasu tsoffin samfura ko suna buƙatar maɓalli | Mara buƙatar maɓalli; babu iyakar token da aka wallafa                                                                                               | Ba a buƙatar bayanan shaidar mai bayarwa don samfuran marasa maɓalli                     |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, da ƙari                         | Maɓallin API kyauta (babu iyakar saurin buƙata, babu kati); **ana yin rajistar kowace buƙata** don bincike (a fice daga wannan a logfare.ai/consent) | Maɓalli nan take a logfare.ai/register; ToS/sirri a logfare.ai/tos da logfare.ai/privacy |
+| **Cloudflare AI** | Kundin Workers AI                                                                            | Tarin da aka tantance ya kiyasta token ~30M/wata daga raka'o'in amfani da aka wallafa                                                                | Asusun Cloudflare da bayanan shaidar API                                                 |
+| **Gemini**        | Iyalan Gemini Flash                                                                          | Iyakokin saurin buƙata masu canzawa bisa aikin/samfuri; ba a haɗa wani tsayayyen tallafin token na wata-wata a cikin babban bayanin ba               | Maɓallin API na Google AI Studio; duba iyakokin aikin da ke aiki                         |
+| **Groq**          | Samfuran Llama, GPT-OSS, da Qwen                                                             | Tarin da aka tantance ya kiyasta token ~15M/wata                                                                                                     | Maɓallin API na Groq; ana amfani da iyakokin saurin buƙata                               |
 
-### Tallafin Rijista da Kuɗaɗen Amfani na Musamman ga Mai Bayar da Sabis
+### Tallafin Rajista da Kuɗaɗen Amfani na Musamman ga Mai Bayarwa
 
-Waɗannan masu bayar da sabis suna bayar da tallafin rijista ko kuɗaɗen amfani na talla, bisa ƙa’idojin cancantarsu. Kamar yadda aka tabbatar a 2026-10-08, [farashin Cerebras](https://www.cerebras.ai/pricing) yana buƙatar hanyar biyan kuɗi domin samun kuɗin amfani na $5 sau ɗaya wanda zai ƙare bayan kwanaki 30; ba ƙayyadadden adadin token mai maimaituwa ba ne. [Iyakokin saurin buƙata na Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) suna bambanta bisa aiki, samfur, da mataki, don haka ba a mayar da su zuwa tabbataccen tallafin token na wata-wata ba.
+Waɗannan masu bayarwa suna bayar da tallafin rajista ko kuɗaɗen amfani na talla, bisa ƙa'idodin cancantarsu. Kamar yadda aka tabbatar a 2026-10-08, [farashin Cerebras](https://www.cerebras.ai/pricing) yana buƙatar hanyar biyan kuɗi domin samun kuɗin amfani na $5 sau ɗaya wanda zai ƙare bayan kwanaki 30; ba ƙayyadadden adadin token mai maimaituwa ba ne. [Iyakokin saurin buƙata na Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) suna bambanta bisa aiki, samfuri, da mataki, don haka ba a mayar da su zuwa tabbataccen tallafin token na wata-wata ba.
 
-| Mai Bayar da Sabis | Kuɗaɗen Amfani Kyauta                                                                            | Samfura                         | Yadda Ake Samu                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------- | ---------------------------------------------------------- |
-| **Cerebras**       | Kuɗin amfani na talla na $5 sau ɗaya; zai ƙare bayan kwanaki 30                                  | Kundin inferens na yanzu        | Asusu da ingantacciyar hanyar biyan kuɗi                   |
-| **DeepSeek**       | Token 5M kyauta                                                                                  | DeepSeek V4                     | Yi rijista a platform.deepseek.com                         |
-| **LongCat**        | Tallafin token 10M na sau ɗaya                                                                   | LongCat 2.0                     | Maɓallin API + KYC; biyan gwargwadon amfani bayan tallafin |
-| **Vertex AI**      | Kuɗin amfani na rijista na $300 da aka wakilta a matsayin token kusan 300M a tsarin kasafin kuɗi | Gemini da samfuran abokan hulɗa | Asusun Google Cloud; ƙa’idojin caji da cancanta suna aiki  |
+| Mai Bayarwa   | Kuɗaɗen Amfani Kyauta                                                             | Samfura                         | Yadda Ake Samu                                                         |
+| ------------- | --------------------------------------------------------------------------------- | ------------------------------- | ---------------------------------------------------------------------- |
+| **Cerebras**  | Kuɗin amfani na talla na $5 sau ɗaya; zai ƙare bayan kwanaki 30                   | Kundin inference na yanzu       | Asusu da ingantacciyar hanyar biyan kuɗi                               |
+| **DeepSeek**  | Token 5M kyauta                                                                   | DeepSeek V4                     | Yi rajista a platform.deepseek.com                                     |
+| **LongCat**   | Tallafin token 10M sau ɗaya                                                       | LongCat 2.0                     | Maɓallin API + KYC; biyan gwargwadon amfani bayan tallafin             |
+| **Vertex AI** | Kuɗin rajista na $300 da aka wakilta a matsayin token ~300M a tsarin kasafin kuɗi | Gemini da samfuran abokan hulɗa | Asusun Google Cloud; ana amfani da ƙa'idodin lissafin kuɗi da cancanta |
 
 ### Sauran Iyakantattun Hanyoyin Samun Dama
 
-Waɗannan masu bayar da sabis suna da **matakan kyauta** masu takamaiman iyakoki:
+Waɗannan masu bayarwa suna da **matakan kyauta** masu takamaiman iyakoki:
 
-| Mai Bayar da Sabis         | Iyakar Kyauta                                                                                               | Samfura                                 | Ya Fi Dacewa Don |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------- | ---------------- |
-| **GitHub Models**          | An kiyasta tarin bai ɗaya da aka tantance a token kusan 18M/wata                                            | Tantance samfura iri-iri                |
-| **Hugging Face**           | Ƙaramin tarin wata-wata mai maimaituwa                                                                      | Gwaje-gwaje da nau’o’in samfura         |
-| **OpenRouter free models** | Tarin bai ɗaya mai iyakar buƙatu; ƙarin kuɗi na zaɓi sau ɗaya yana ƙara adadin izinin amfani mai maimaituwa | Faɗaɗɗen kundin madadin                 |
-| **AI Horde**               | Ƙarfin al’umma mara maɓalli; samuwarsa tana bambanta                                                        | Inferens mai amfani da damar da ta samu |
+| Mai Bayarwa                | Iyakar Kyauta                                                                                        | Samfura                                    | Mafi Dacewa Don |
+| -------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------ | --------------- |
+| **GitHub Models**          | Tarin bai ɗaya da aka tantance ya kiyasta token ~18M/wata                                            | Tantance samfura iri-iri                   |
+| **Hugging Face**           | Ƙaramin tari mai maimaituwa a kowane wata                                                            | Gwaje-gwaje da bambancin samfura           |
+| **OpenRouter free models** | Tarin bai ɗaya mai iyakar buƙatu; ƙarin kuɗi na zaɓi sau ɗaya yana ƙara adadin da ake samu akai-akai | Faɗaɗɗen kundin madadin                    |
+| **AI Horde**               | Ƙarfin al'umma mara buƙatar maɓalli; samuwa tana bambanta                                            | Inference da aka rarraba idan dama ta samu |
 
 ---
 

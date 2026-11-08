@@ -1,3 +1,6 @@
+import { realpathSync } from "node:fs";
+import { resolve as resolvePath } from "node:path";
+import { fileURLToPath } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { APP_CONFIG } from "@/shared/constants/appConfig";
@@ -45,6 +48,7 @@ import {
   shouldForceScopeEnforcement,
   type McpToolExtraLike,
 } from "./scopeEnforcement.ts";
+import { resolveMcpToolOwnerId } from "./mcpCallerIdentity.ts";
 import {
   handleSimulateRoute,
   handleSetBudgetGuard,
@@ -64,6 +68,7 @@ import {
   handleOneproxyStats,
 } from "./tools/advancedTools.ts";
 import { handlePickFastestModel } from "./tools/pickFastestModel.ts";
+import { registerPerplexityResearchTool } from "./tools/perplexityResearch.ts";
 // #15159 M-01 — "file = register + wrap. handle* -> tools/canonical/*.ts".
 // These twelve handlers used to be defined inline below `withScopeEnforcement`,
 // which made this file a 784-line registration-and-implementation mix. They are
@@ -577,6 +582,8 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
     )
   );
 
+  registerPerplexityResearchTool(server, withScopeEnforcement);
+
   server.registerTool(
     "omniroute_x_search",
     {
@@ -986,8 +993,7 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
         withScopeEnforcement(
           toolName,
           async (args, extra) => {
-            const scopeContext = resolveCallerScopeContext(extra, Array.from(MCP_ALLOWED_SCOPES));
-            const apiKeyId = scopeContext.callerId || "mcp";
+            const apiKeyId = (await resolveMcpToolOwnerId(extra)) ?? "mcp";
             try {
               const execution = await skillExecutor.execute(
                 skill.name,
@@ -1060,8 +1066,22 @@ export async function startMcpStdio(): Promise<void> {
   }
 }
 
-// If this file is run directly, start stdio server
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, "/"))) {
+// If this file is run directly, start stdio server. Compare real filesystem
+// paths — a raw `import.meta.url.endsWith(argv[1])` never matches once the path
+// needs percent-encoding in the file: URL (any space, e.g. macOS "Application
+// Support"), and symlinked installs resolve elsewhere (#18556).
+function isMcpStdioEntryRunDirectly(): boolean {
+  if (!process.argv[1]) return false;
+  try {
+    return (
+      realpathSync(fileURLToPath(import.meta.url)) === realpathSync(resolvePath(process.argv[1]))
+    );
+  } catch {
+    return false;
+  }
+}
+
+if (isMcpStdioEntryRunDirectly()) {
   startMcpStdio().catch((err) => {
     console.error("[MCP] Fatal error:", err);
     process.exit(1);

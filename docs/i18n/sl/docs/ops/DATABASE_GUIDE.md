@@ -511,7 +511,7 @@ sqlite3 ~/.omniroute/storage.sqlite "PRAGMA integrity_check;"
 
 ## Obnovitev po katastrofi
 
-### Scenarij 1: Izgubljena datoteka WAL
+### Scenarij 1: Datoteka WAL je izgubljena
 
 Datoteka `-wal` manjka, vendar sta `-shm` in glavna podatkovna zbirka nepoškodovani:
 
@@ -528,21 +528,24 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Scenarij 2: Poškodovana datoteka glavne podatkovne zbirke
+### Scenarij 2: Glavna datoteka podatkovne zbirke je poškodovana
 
-Obnovite iz varnostne kopije:
+Obnovite jo iz varnostne kopije:
 
 ```bash
-omniroute sync pull --merge   # ali: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Scenarij 3: Izgubljen šifrirni ključ
+`omniroute sync pull [outPath]` zgolj prenese celoten arhiv `.tar.gz` iz delujočega strežnika
+(`GET /api/db-backups/exportAll`, zahtevane so poverilnice upravljavca); ničesar ne obnovi.
 
-Brez ključa **obnovitev ni mogoča**. Šifriranih polj ni mogoče prebrati. Vse ponudnike znova ročno dodajte z novimi poverilnicami.
+### Scenarij 3: Šifrirni ključ je izgubljen
 
-> **Omilitev tveganja**: Šifrirni ključ vedno varnostno kopirajte ločeno, po možnosti v upravitelju gesel ali sistemu KMS.
+Brez ključa **obnovitev ni mogoča**. Šifriranih polj ni mogoče prebrati. Ročno znova dodajte vse ponudnike z novimi poverilnicami.
 
-### Scenarij 4: Poln disk
+> **Omilitev tveganja**: Šifrirni ključ vedno varnostno kopirajte ločeno, najbolje v upravitelju gesel ali sistemu KMS.
+
+### Scenarij 4: Disk je poln
 
 SQLite bo vrnil napake `SQLITE_FULL`. Sprostite prostor na disku in nato izvedite:
 

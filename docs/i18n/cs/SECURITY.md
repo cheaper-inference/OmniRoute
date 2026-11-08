@@ -29,22 +29,23 @@ Pokud objevíte bezpečnostní zranitelnost v OmniRoute, nahlaste ji prosím odp
 | 3.7.x   | ✅ Bezpečnostní                                  |
 | < 3.7.0 | ❌ Nepodporováno                                 |
 
-## Období podpory LTS (v3.9.x)
+## Doba podpory LTS (v3.9.x)
 
-Po verzi 3.8.59 bude následovat verze **3.9.0**, která na větvi
-`stable/v3` otevírá větev dlouhodobé podpory (viz [`ROADMAP.md`](ROADMAP.md) → „Fáze 3 — v3.9.0 LTS“).
+Po verzi 3.8.59 následuje **3.9.0**, která na větvi
+`stable/v3` zahajuje řadu s dlouhodobou podporou (viz [`ROADMAP.md`](ROADMAP.md) → „Fáze 3 — v3.9.0 LTS“).
 
-- **Co větev `stable/v3` dostává:** opravy chyb, bezpečnostní záplaty a aktualizace poskytovatelů. Nové
-  funkce směřují do kanálu v4; u větve LTS má stabilita přednost. `npm install omniroute`
-  (distribuční značka `latest`) zůstává na v3 během celého cyklu v4.
-- **Délka období:** `<T-GAP-3: čeká se na rozhodnutí vlastníka — viz ROADMAP.md>`. Délka
-  období po všeobecné dostupnosti v4.0 (kdy se `latest` přepne na v4) **zatím nebyla stanovena**; tato
-  část bude aktualizována, až ji správce oznámí. Do té doby nepředpokládejte žádné datum ukončení.
-- **Hlášení zranitelnosti ve větvi LTS:** stejným kanálem jako u kterékoli jiné verze —
-  prostřednictvím soukromého [Bezpečnostního upozornění GitHubu](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  nikdy jako veřejný problém. Uveďte, kterou verzi jste testovali (například `3.9.2`); opravy se začleňují do
-  `stable/v3` a následně se přenášejí do v4.
-- **Bezpečnostní základna při zahájení LTS:** naměřený stav skeneru, kontroly zabezpečení tras a
+- **Co větev `stable/v3` dostává:** opravy chyb, bezpečnostní záplaty a aktualizace providerů. Nové
+  funkce přecházejí do kanálu v4; řada LTS upřednostňuje stabilitu. `npm install omniroute`
+  (dist-tag `latest`) zůstává na v3 po celý cyklus v4.
+- **Doba trvání:** větev `stable/v3` dostává **bezpečnostní opravy a opravy kritických regresí po dobu
+  12 měsíců od vydání 3.9.0 nebo do uplynutí 90 dnů od zveřejnění v4.0.0 jako `latest` —
+  podle toho, co nastane později**. Výsledné datum ukončení je při vydání zaznamenáno v poznámkách k verzi 3.9.0 a v
+  [`ROADMAP.md`](ROADMAP.md).
+- **Nahlášení zranitelnosti v řadě LTS:** použijte stejný kanál jako u jakékoli jiné verze —
+  soukromé [bezpečnostní hlášení GitHubu](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  nikdy veřejný issue. Uveďte, kterou verzi jste testovali (například `3.9.2`); opravy se nejprve začlení do
+  `stable/v3` a následně se přenesou do v4.
+- **Výchozí stav zabezpečení při vydání LTS:** naměřený stav skeneru, ochrana tras a
   důkazy týkající se veřejných přihlašovacích údajů jsou zaznamenány v
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 

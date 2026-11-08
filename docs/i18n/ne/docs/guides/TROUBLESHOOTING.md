@@ -33,37 +33,43 @@ OmniRoute का सामान्य समस्या र समाधान
 
 ---
 
-## विस्तृत समस्या निवारण
+## विस्तृत समस्या समाधान
 
 ---
 
-### निःशुल्क प्रदायकहरूमा दर सीमितता (429 / 400 / 401)
+### निःशुल्क प्रदायकहरूमा दर सीमितीकरण (429 / 400 / 401)
 
-**लक्षण**: निःशुल्क/प्रमाणीकरण नचाहिने प्रदायकहरू (opencode, auggie, आदि) सँग `model: "auto"` प्रयोग गर्दा, कहिलेकाहीँ उत्तरको सट्टा `HTTP 429`, `400`, वा `401` प्राप्त हुन्छ। केही क्षणपछि उही प्रम्प्ट पुनः प्रयास गर्दा अनुरोधहरू सफल हुन्छन्, तर स्वचालन (cron jobs, agents, scripts) पहिलो असफलतामै रोकिन्छ।
+**लक्षण**: निःशुल्क/प्रमाणीकरण-विहीन प्रदायकहरू (auggie आदि) सँग `model: "auto"` प्रयोग गर्दा, कहिलेकाहीँ उत्तरको सट्टा `HTTP 429`, `400`, वा `401` प्राप्त हुन्छ। केही क्षणपछि उही प्रम्प्ट पुनः प्रयास गर्दा अनुरोध सफल हुन्छ, तर स्वचालन (cron jobs, agents, scripts) पहिलो असफलतामै अवरुद्ध हुन्छ।
 
-**मूल कारण**: तीनवटा स्वतन्त्र असफलता अवस्थाहरू एकसाथ थपिन्छन्:
+**मूल कारण**: तीनवटा स्वतन्त्र असफलता अवस्थाहरू एकैसाथ देखा पर्छन्:
 
-1. **प्रदायकको दर सीमा (`429`)**: निःशुल्क तहहरूले प्रत्येक समयावधिका लागि कोटा लागू गर्न सक्छन्। समानान्तर कलहरूको अचानक वृद्धिले यसलाई समाप्त गर्छ, त्यसैले समयावधि रिसेट नभएसम्म अर्को अनुरोध अस्वीकार गरिन्छ।
-2. **passthrough मा बिग्रिएको मोडेल (`400`/`401`)**: `auto/*` पूलहरूमा `opencode` का त्यस्ता passthrough मोडेलहरू समावेश हुन सक्छन्, जुन क्याटलगमा दर्ता भएका छन् तर सक्रिय प्रमाणहरू छैनन् (जस्तै `oc/north-mini-code-free` → `401`)। auto-router ले एउटा प्रयास गर्छ, असफल हुन्छ, र फलब्याक सुरु हुनुअघि नै त्रुटि प्रसारित हुन्छ।
-3. **समवर्तीता प्रवर्धन (लोडमा `429`)**: धेरै agent/cron सत्रहरूले एकैपटक `auto` प्रयोग गर्दा, समग्र अनुरोध दर निःशुल्क प्रदायकहरूले सहन सक्ने सीमाभन्दा बढी हुन्छ, जसका कारण वैध कलहरूलाई पनि दुरुपयोगका रूपमा चिन्ह लगाइन्छ।
+1. **प्रदायकको दर-सीमा (`429`)**: निःशुल्क तहहरूले प्रत्येक अवधिका लागि कोटा लागू गर्न सक्छन्। समानान्तर कलहरूको अचानक बढेको सङ्ख्याले कोटा समाप्त गर्छ, त्यसैले अवधि पुनः सुरु नभएसम्म अर्को अनुरोध अस्वीकार हुन्छ।
+2. **पासथ्रुमा बिग्रिएको मोडेल (`400`/`401`)**: `auto/*` पूलमा क्याटलगमा दर्ता भएका तर सक्रिय प्रमाण-पत्र नभएका पासथ्रु मोडेलहरू समावेश हुन सक्छन् (→ `401`)। अटो-राउटरले एउटा मोडेल प्रयास गर्छ, असफल हुन्छ, र फलब्याक सुरु हुनुअघि नै त्रुटि अगाडि पठाइन्छ।
+3. **समवर्ती अनुरोधको बढ्दो प्रभाव (`429` under load)**: धेरै agent/cron सत्रहरूले एकैपटक `auto` प्रयोग गर्दा, कुल अनुरोध दर निःशुल्क प्रदायकहरूले सहन सक्ने सीमाभन्दा बढी हुन्छ, त्यसैले वैध कलहरूलाई दुरुपयोगी भनेर चिनो लगाइन्छ।
 
-**प्रमाणित समाधान (समुदायद्वारा रिपोर्ट गरिएको, 2026-08-10)**: rotation, concurrency, र fallback ले निःशुल्क तहको अस्थिरतालाई विफल हुनुको सट्टा सम्हाल्न सकून् भनेर तीनवटा environment variables मिलाउनुहोस्:
+**प्रमाणित समाधान (समुदायद्वारा रिपोर्ट गरिएको, 2026-08-10)**: तीनवटा वातावरण चरहरू समायोजन गर्नुहोस्, ताकि रोटेसन, समवर्तिता र फलब्याकले निःशुल्क तहको उतारचढाव सम्हालून् र त्यसका कारण प्रक्रिया बन्द नहोस्:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 मा अर्को मोडेल/प्रदायकमा जानुहोस् (बिग्रिएका passthrough मोडेलहरू छोड्छ)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # heavyweight प्रवेशको स्पष्ट अधिकतम सीमा (पूर्वनिर्धारित रूपमा सेट हुँदैन: अनुरोध-सङ्ख्यामा सीमा छैन, तलको टिप्पणी हेर्नुहोस्)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ढिला upstream हरूका लागि सीमित प्रतीक्षालाई RATE_LIMIT_MAX_WAIT_MS को पूर्वनिर्धारित मानभन्दा माथि बढाउनुहोस्
+export OMNIROUTE_ROTATE_ON_400=true           # 400/401 मा अर्को मोडेल/प्रदायकमा जानुहोस् (बिग्रिएका पासथ्रु मोडेलहरूलाई छोड्छ)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # स्पष्ट heavyweight admission सीमा (पूर्वनिर्धारित रूपमा unset: अनुरोध-सङ्ख्यामा सीमा छैन, तलको टिप्पणी हेर्नुहोस्)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # सुस्त अपस्ट्रीमका लागि RATE_LIMIT_MAX_WAIT_MS को पूर्वनिर्धारित मानभन्दा बढी bounded wait बढाउनुहोस्
 ```
 
-यी मानहरू OmniRoute process environment मा सेट गर्नुहोस् (daemon मा, जस्तै LaunchAgent plist वा `systemctl edit` मार्फत), त्यसपछि OmniRoute पुनः सुरु गर्नुहोस्। rotation flag सबैभन्दा बढी प्रभाव पार्ने एकल उपाय हो: यसले पूर्ण असफलतालाई पूलको स्वस्थ प्रदायकमा गरिने पारदर्शी पुनः प्रयासमा रूपान्तरण गर्छ।
+यी मानहरू OmniRoute प्रक्रियाको वातावरणमा सेट गर्नुहोस् (daemon, जस्तै LaunchAgent plist वा `systemctl edit` मार्फत), त्यसपछि OmniRoute पुनः सुरु गर्नुहोस्। रोटेसन फ्ल्याग सबैभन्दा प्रभावकारी उपाय हो: यसले कडा असफलतालाई पूलमा रहेको स्वस्थ प्रदायकविरुद्ध पारदर्शी पुनः प्रयासमा रूपान्तरण गर्छ।
 
-**टिप्पणी**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ले एकैपटक चल्ने heavyweight — long-context — अनुरोधहरूको सङ्ख्या सीमित गर्छ; यो सीमा प्रवेश-द्वार हो, प्रदायकको दर सीमक होइन। **#503-fanout अद्यावधिक:** यो var अब पूर्वनिर्धारित रूपमा सेट हुँदैन (माथि देखाइएझैँ स्पष्ट रूपमा कन्फिगर गर्दा मात्र अब लागू हुन्छ) — यसको सट्टा heavyweight प्रवेशलाई स्वचालित रूपमा निर्धारण गरिएको byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) द्वारा नियन्त्रण गरिन्छ, जसले host को वास्तविक memory ceiling अनुसार आफूलाई मापन गर्छ। त्यसैले नयाँ deployment मा यो var बिल्कुलै सेट नगर्दा पनि निकै कम `503 chat_admission_busy` अस्वीकारहरू देखिनुपर्छ; यसलाई यहाँ स्पष्ट रूपमा सेट गर्दा अझै पनि दस्तावेजमा वर्णन गरिएअनुसार नै काम गर्छ। स्पष्ट byte-budget overrides लाई 8 MiB–2 GiB मा सीमित गरिन्छ। `413 body_exceeds_budget` अस्थायी होइन: त्यो byte budget बढाउनुहोस्, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` घटाउनुहोस्, वा process memory ceiling बढाउनुहोस्। `inflight_bytes_budget` shed अस्थायी स्रोत प्रतिस्पर्धा हो र पुनः प्रयास गर्न मिल्छ। प्रत्येक प्रदायकको दर सीमितता (`open-sse/services/rateLimitManager.ts`) लाई `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, र `RATE_LIMIT_AUTO_ENABLE` द्वारा छुट्टै नियन्त्रण गरिन्छ — `.env.example` हेर्नुहोस्।
+**टिप्पणी**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ले एकैपटक चल्न सक्ने heavyweight — लामो-सन्दर्भ भएका — अनुरोधहरूको सङ्ख्या सीमित गर्छ; यो सीमा प्रदायकको दर-सीमितीकरण होइन, admission gate हो। **#503-fanout update:** यो चर अब पूर्वनिर्धारित रूपमा सेट हुँदैन (अब माथि देखाइएझैँ स्पष्ट रूपमा कन्फिगर गर्दा मात्र लागू हुन्छ) — यसको सट्टा heavyweight admission स्वचालित रूपमा निकालिएको byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) द्वारा नियन्त्रित हुन्छ, जुन होस्टको वास्तविक मेमोरी सीमाबाट आफैँ मापन हुन्छ। त्यसैले नयाँ deployment ले यो चर नै सेट नगरी धेरै कम `503 chat_admission_busy` अस्वीकारहरू देख्नुपर्छ; यहाँ यसलाई स्पष्ट रूपमा सेट गर्दा पनि दस्तावेजमा वर्णन गरिएअनुसार नै काम गर्छ। स्पष्ट byte-budget override हरू 8 MiB–2 GiB बीच सीमित हुन्छन्। `413 body_exceeds_budget` अस्थायी होइन: उक्त byte budget बढाउनुहोस्, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` वा सुरक्षित गरिएको request body limit घटाउनुहोस्, वा प्रक्रियाको मेमोरी सीमा बढाउनुहोस्। `inflight_bytes_budget` का कारण अनुरोध हटाइनु अस्थायी contention हो र पुनः प्रयास गर्न सकिन्छ। प्रत्येक प्रदायकको दर सीमितीकरण (`open-sse/services/rateLimitManager.ts`) अलग रूपमा `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, र `RATE_LIMIT_AUTO_ENABLE` द्वारा नियन्त्रित हुन्छ — `.env.example` हेर्नुहोस्।
 
-**यसले काम गरेको छ कि छैन भनेर कसरी प्रमाणित गर्ने**: आफ्नो agent/cron लाई छोटो अन्तरालमा दुई पटक चलाउनुहोस् र दुवै पटक सफल भएको पुष्टि गर्नुहोस्। समाधान लागू गर्नुअघि, दोस्रो पटक चलाउँदा सामान्यतया `429`/`401` त्रुटि आउँछ। समाधान लागू गरेपछि, असफलताहरू (यदि कुनै भएमा) पारदर्शी रूपमा पुनः प्रयास गरिन्छन् र कल पूरा हुन्छ। तपाईं `curl /monitoring/health` पनि चलाउन सक्नुहुन्छ र provider connections मा रहेको `rateLimitedUntil` फिल्ड तथा प्रभावित providers का लागि `circuitBreakers.providerBreakers[].state` हेर्न सक्नुहुन्छ — state `CLOSED`, `DEGRADED`, `OPEN`, वा `HALF_OPEN` मध्ये एउटा हुन्छ (`src/shared/utils/circuitBreaker.ts` हेर्नुहोस्), र निरन्तर असफल भइरहने provider, reset window ले probe लाई पास हुन दिनुअघि, `CLOSED → DEGRADED → OPEN` मा परिवर्तन हुनेछ (`HALF_OPEN`)।
+**अपग्रेड टिप्पणी: अब सुरक्षित गरिएको request body limit chat मा पनि लागू हुन्छ।** Settings > Advanced > Request Body Limit (`maxBodySizeMb`) अन्तर्गत पहिले सुरक्षित गरिएको सीमा अब `/v1/chat/completions` र `/v1/responses` मा पनि लागू हुन्छ। यो परिवर्तनअघि सुरक्षित गरिएको मान जे भए पनि ती दुई route ले 50 MB सम्म स्वीकार गर्थे, त्यसैले कम सीमा सुरक्षित गरिएको install ले अब उक्त सीमाभन्दा ठूला chat body अस्वीकार गर्न थाल्छ। कुनै सीमा कहिल्यै सुरक्षित नगरिएको install ले 50 MB को पूर्वनिर्धारित सीमा कायम राख्छ।
 
-**यदि तपाईंले अझै पनि 429 देख्नुभयो भने**: उक्त provider को सक्रिय account ले वास्तवमै आफ्नो _quota_ समाप्त गरिसकेको छ (केवल rate मात्र होइन)। OmniRoute dashboard → Providers → Accounts मा सोही provider का लागि दोस्रो account थप्नुहोस्, वा अर्को निःशुल्क provider (जस्तै `routeway`, `auggie`) समावेश गर्नुहोस्। Rotation ले अस्थायी rate/400/401 समस्यामा मात्र मद्दत गर्छ; quota पूर्ण रूपमा समाप्त भएको अवस्थामा दोस्रो credential वा फरक provider आवश्यक पर्छ।
+अस्वीकार HTTP `413` का रूपमा आउँछ, जसमा `error.code` लाई `PAYLOAD_TOO_LARGE` र `error.type` लाई `payload_too_large` मा सेट गरिएको हुन्छ। सन्देशले लागू सीमाको नाम बताउँछ: घोषित `Content-Length` त्यो सीमाभन्दा बढी हुँदा `Request body too large. Maximum allowed: 10 MB`, वा वास्तवमा पढिएका byte हरू बढी हुँदा `Request body too large for chat completions (max 10 MB).`। यो माथिको `413 body_exceeds_budget` जस्तै होइन, जुन मेमोरी budget बाट आउँछ र यो सेटिङले परिवर्तन हुँदैन।
 
-**यदि vision models (`auto/vision`, `bazaarlink/*`) मा 403 देख्नुभयो भने**: जडान गरिएको account सँग vision समावेश भएको paid plan छैन, वा API key का permissions अपर्याप्त छन्। provider dashboard मा key scope ले vision/multimodal समावेश गरेको पुष्टि गर्नुहोस्, वा paid tier account जडान गरेर त्यसलाई vision target का रूपमा राख्नुहोस्।
+सीमा बढाउन, `/dashboard/settings/advanced` मा ठूलो मान सुरक्षित गर्नुहोस्, वा `PATCH /api/settings` सँग `{"maxBodySizeMb": 50}` पठाउनुहोस्। 1 देखि 500 MB सम्मका मान स्वीकार गरिन्छ, यो restart नगरी लागू हुन्छ, र 50 ले अघिल्लो chat सीमा पुनर्स्थापित गर्छ। ठूला body लाई अझै दुई अन्य सीमाले रोक्न सक्छन्: सेट गरिएको अवस्थामा `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ले सुरक्षित गरिएको सीमालाई पनि अधिकतम बनाउँछ, र Kubernetes ingress annotation `proxy-body-size` (shipped manifests मा `50m`) लाई 50 MB भन्दा माथिका अनुरोधका लागि छुट्टै बढाउनुपर्छ।
+
+**यसले काम गरेको पुष्टि गर्ने तरिका**: आफ्नो agent/cron लाई छोटो अन्तरालमा दुईपटक चलाउनुहोस् र दुवै सफल भएको पुष्टि गर्नुहोस्। समाधानअघि दोस्रो run ले सामान्यतः `429`/`401` फ्याँक्थ्यो। समाधानपछि, भए पनि असफलताहरू पारदर्शी रूपमा पुनः प्रयास गरिन्छ र कल पूरा हुन्छ। तपाईं `curl /monitoring/health` पनि चलाउन सक्नुहुन्छ र प्रदायक connection हरूमा रहेको `rateLimitedUntil` field तथा प्रभावित प्रदायकहरूको `circuitBreakers.providerBreakers[].state` हेर्न सक्नुहुन्छ — state मध्ये एउटा `CLOSED`, `DEGRADED`, `OPEN`, वा `HALF_OPEN` हुन्छ (`src/shared/utils/circuitBreaker.ts` हेर्नुहोस्)। लगातार असफल हुने प्रदायक reset window ले probe पार गर्न दिनुअघि (`HALF_OPEN`) `CLOSED → DEGRADED → OPEN` मा जानेछ।
+
+**यदि अझै 429 देखिन्छ भने**: उक्त प्रदायकका लागि सक्रिय account ले साँच्चिकै आफ्नो _quota_ समाप्त गरेको छ (केवल rate मात्र होइन)। OmniRoute dashboard → Providers → Accounts मा उही प्रदायकका लागि दोस्रो account थप्नुहोस्, वा अर्को निःशुल्क प्रदायक (जस्तै `routeway`, `auggie`) पनि प्रयोग गर्नुहोस्। रोटेसनले अस्थायी rate/400/401 समस्यामा मात्र सहायता गर्छ; कडा quota समाप्तिका लागि दोस्रो credential वा फरक प्रदायक आवश्यक हुन्छ।
+
+**यदि vision मोडेलहरू (`auto/vision`, `bazaarlink/*`) मा 403 देखिन्छ भने**: जडित account मा vision समावेश भएको सशुल्क योजना छैन, वा API key सँग पर्याप्त अनुमति छैन। प्रदायकको dashboard मा key scope मा vision/multimodal समावेश भएको पुष्टि गर्नुहोस्, वा सशुल्क तहको account जडान गरेर त्यसलाई vision target का रूपमा राख्नुहोस्।
 
 ---
 
@@ -90,11 +96,11 @@ npm install -g omniroute --legacy-peer-deps
 
 ---
 
-## npm install-scripts अवरुद्ध भएको चेतावनी (विश्वव्यापी स्थापना)
+## npm install-scripts अवरुद्ध चेतावनी (विश्वव्यापी स्थापना)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` चलाउँदा npm का नयाँ संस्करणहरू (v11+ र v12+) ले पूर्वनिर्धारित रूपमा प्याकेज lifecycle scripts अवरुद्ध गर्छन् र install-scripts चेतावनी देखाउँछन्:
+`npm install -g omniroute` चलाउँदा, npm का नयाँ संस्करणहरू (v11+ र v12+) ले पूर्वनिर्धारित रूपमा प्याकेज जीवनचक्र स्क्रिप्टहरू अवरुद्ध गर्छन् र install-scripts चेतावनी देखाउँछन्:
 
 ```
 npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
@@ -104,25 +110,25 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### के यो चेतावनी बेवास्ता गर्न सकिन्छ?
 
-**आंशिक रूपमा, तर scripts बिना चलाउन सिफारिस गरिँदैन।** OmniRoute मा सहज fallback हरू समावेश छन्: यदि standalone bundle बाट native `better-sqlite3` bindings लोड गर्न सकिएन भने, अनुप्रयोगले `node:sqlite` वा `sql.js` जस्ता वैकल्पिक drivers प्रयोग गर्छ ([SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md) हेर्नुहोस्)। server अझै सुरु हुनेछ, तर `sql.js` जस्ता WASM fallback मा चलाउँदा SQLite WAL (Write-Ahead Logging) mode निष्क्रिय हुन्छ र memory तथा disk-sync overhead बढ्छ।
+**आंशिक रूपमा, तर स्क्रिप्टहरू बिना चलाउन सिफारिस गरिँदैन।** OmniRoute मा सहज वैकल्पिक व्यवस्थाहरू समावेश छन्: यदि स्ट्यान्डअलोन बन्डलबाट नेटिभ `better-sqlite3` बाइन्डिङहरू लोड गर्न सकिएन भने, अनुप्रयोगले `node:sqlite` वा `sql.js` जस्ता वैकल्पिक ड्राइभरहरू प्रयोग गर्छ ([SQLite रनटाइम रिजोल्युसन](../ops/SQLITE_RUNTIME.md) हेर्नुहोस्)। सर्भर अझै पनि सुरु हुनेछ, तर `sql.js` जस्ता WASM विकल्पहरूमा चलाउँदा SQLite WAL (Write-Ahead Logging) मोड निष्क्रिय हुन्छ र मेमोरी तथा डिस्क-सिङ्कको अतिरिक्त भार बढ्छ।
 
-### वास्तवमा कुन scripts आवश्यक छन्?
+### वास्तवमा कुन स्क्रिप्टहरू आवश्यक छन्?
 
-अवरुद्ध गरिएका सबै scripts OmniRoute चलाउन अनिवार्य हुँदैनन्:
+सबै अवरुद्ध स्क्रिप्टहरू OmniRoute चलाउन अत्यावश्यक हुँदैनन्:
 
-- **अनिवार्य (`omniroute`, `better-sqlite3`):** OmniRoute एउटा Next.js standalone application bundle (`dist/`) बाट चल्छ। स्थापनाका क्रममा npm ले शीर्ष-स्तरको `node_modules/better-sqlite3/` मा host-specific native SQLite driver डाउनलोड वा compile गर्छ। त्यसपछि OmniRoute को `postinstall` script (`scripts/build/postinstall.mjs`) ले यी host-specific binaries लाई प्रमाणित गरेर `dist/node_modules/` मा प्रतिलिपि गर्छ, ताकि standalone server ले तिनमा पहुँच गर्न सकोस्। यदि `omniroute` को postinstall script अवरुद्ध भयो भने, यो प्रतिलिपि गर्ने चरण छोडिन्छ।
-- **वैकल्पिक/अप्रत्यक्ष (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** यी build helpers, watcher tools वा system keychain utilities हुन्। तिनलाई अनुमति दिँदा build चेतावनीहरू रोकिन्छन्, तर मूल routing कार्यक्षमताका लागि ती आवश्यक छैनन्।
-- **बहिष्कृत (`onnxruntime-node`):** स्थानीय AI embeddings का लागि एउटा वैकल्पिक dependency हो र OmniRoute चलाउन **आवश्यक छैन**। यसको postinstall script ले NuGet बाट लगभग 300MB का CUDA assets डाउनलोड गर्छ; समर्थित hardware मा स्थानीय ONNX acceleration प्रयोग गर्ने स्पष्ट उद्देश्य नभएसम्म यसलाई allow-list मा समावेश नगर्नुहोस्।
+- **अत्यावश्यक (`omniroute`, `better-sqlite3`):** OmniRoute एउटा Next.js स्ट्यान्डअलोन अनुप्रयोग बन्डल (`dist/`) बाट चल्छ। स्थापनाका क्रममा, npm ले शीर्ष-स्तरको `node_modules/better-sqlite3/` मा होस्ट-विशिष्ट नेटिभ SQLite ड्राइभर डाउनलोड वा कम्पाइल गर्छ। त्यसपछि OmniRoute को `postinstall` स्क्रिप्ट (`scripts/build/postinstall.mjs`) ले यी होस्ट-विशिष्ट बाइनरीहरू प्रमाणित गरी `dist/node_modules/` मा प्रतिलिपि गर्छ, ताकि स्ट्यान्डअलोन सर्भरले तिनलाई पहुँच गर्न सकोस्। यदि `omniroute` को postinstall स्क्रिप्ट अवरुद्ध भयो भने, यो प्रतिलिपि गर्ने चरण छुट्छ।
+- **वैकल्पिक/ट्रान्जिटिभ (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** यी बिल्ड सहायक, वाचर उपकरण वा प्रणाली कीचेन उपयोगिताहरू हुन्। तिनलाई अनुमति दिँदा बिल्ड चेतावनीहरू रोक्न सकिन्छ, तर मूल राउटिङ कार्यक्षमताका लागि ती आवश्यक छैनन्।
+- **बहिष्कृत (`onnxruntime-node`):** स्थानीय AI एम्बेडिङहरूका लागि वैकल्पिक डिपेन्डेन्सी हो र OmniRoute चलाउन **आवश्यक छैन**। यसको postinstall स्क्रिप्टले NuGet बाट करिब 300MB का CUDA एसेटहरू डाउनलोड गर्छ; समर्थित हार्डवेयरमा स्थानीय ONNX एक्सेलेरेसन प्रयोग गर्ने स्पष्ट उद्देश्य नभएसम्म यसलाई अनुमति-सूचीमा समावेश नगर्नुहोस्।
 
 ### सिफारिस गरिएको समाधान
 
-विश्वव्यापी स्थापनाका क्रममा आवश्यक install scripts लाई अनुमति दिन र चेतावनीहरू दबाउन OmniRoute र यसका native dependencies का लागि `--allow-scripts` प्रयोग गर्नुहोस्:
+विश्वव्यापी स्थापनाका क्रममा आवश्यक install स्क्रिप्टहरूलाई अनुमति दिन र चेतावनीहरू हटाउन, OmniRoute र यसका नेटिभ डिपेन्डेन्सीहरूका लागि `--allow-scripts` प्रयोग गर्नुहोस्:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-वैकल्पिक रूपमा, तपाईंको user account का सबै विश्वव्यापी स्थापनाहरूका लागि यसलाई स्थायी रूपमा configure गर्न:
+वैकल्पिक रूपमा, आफ्नो प्रयोगकर्ता खाताका सबै विश्वव्यापी स्थापनाहरूका लागि यसलाई स्थायी रूपमा कन्फिगर गर्न:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### आफ्नो स्थापना प्रमाणित गर्नुहोस्
 
-स्थापनापछि native bindings र runtime environment स्वस्थ छन् भनी सुनिश्चित गर्न built-in diagnostic tool चलाउनुहोस्:
+स्थापनापछि, नेटिभ बाइन्डिङहरू र रनटाइम वातावरण ठीक अवस्थामा छन् भनी सुनिश्चित गर्न अन्तर्निर्मित निदान उपकरण चलाउनुहोस्:
 
 ```bash
 omniroute doctor

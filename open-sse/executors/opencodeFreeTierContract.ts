@@ -7,8 +7,10 @@
  *
  *   1. `stream: true` in the body,
  *   2. a non-empty `tools` array (the content is not inspected),
- *   3. a session header shaped `ses_` + 12 hex + 14 base62 (the shape is checked, the
- *      value is not — 12 arbitrary hex digits pass),
+ *   3. a session header shaped `ses_` + 12 hex + 14 base62 whose 12-hex time part decodes
+ *      to the client's `Identifier.descending()` counter window (`0xFC0–0xFFF`). The shape
+ *      alone is not enough — the value is validated too, since 2026-10-13 — so a session
+ *      is minted by `opencodeHeaders.ts` (`canonicalId`) rather than copied arbitrarily,
  *   4. a `User-Agent` carrying `opencode/<version>` with version >= 1.17 (an older
  *      version answers 426 UpgradeRequired rather than 403).
  *
@@ -16,20 +18,34 @@
  * host are not gated (a paid model without tools answers 401 CreditsError), which is why
  * `requiresFreeTierRequestContract` narrows the contract to free-tier models.
  *
+ * Measured again on 2026-10-14: the free tier moved. The client now takes its base URL
+ * from the models.dev catalog (`https://opencode.ai/inference/v1`), and the very same
+ * request is refused on `/zen/v1`; on the new base a declared `read` or `bash` whose
+ * parameters carry no properties is refused, while an empty schema on a name outside the
+ * quartet still passes. `FREE_TIER_INFERENCE_BASE_URL` and `placeholderToolParameters`
+ * carry those two facts.
+ *
  * The module also owns the free-model catalog — the catalog is what decides whether the
  * contract applies, so the two belong together and the executor imports them from here —
  * and the way back: the forced stream is rebuilt into a JSON body for a caller that asked
  * for JSON, reusing the shared event-stream parsers.
  */
+import { isLoopbackHostname } from "../utils/urlHost.ts";
 import { parseSSEToOpenAIResponse, parseSSEToResponsesOutput } from "../handlers/sseParser.ts";
+import { readSyncedOpencodeFamilyModelIds } from "@/lib/db/models";
+import { getModelCatalogCacheVersion } from "@/lib/db/readCache";
+import { getModelsDevPricing, getSyncedCapability } from "@/lib/modelsDevSync";
 import {
   confirmBorrowedToolNames,
   getObservedToolNames,
   noteRefusedBorrowedToolNames,
   recordAcceptedToolNames,
+  recordedToolParameters,
   resolvePlaceholderNames,
 } from "./opencodeToolObservation.ts";
 import { isOpencodeFreeTierRefusal } from "./opencodeGeoBlock.ts";
+import { sanitizeToolChoice, v2PlaceholderTool } from "../utils/opencodeFingerprintSchemas.ts";
+import { OPENCODE_CLI_PROMPT_TEMPLATE, OPENCODE_CLI_TOOLS } from "./opencodeCliPrompt.ts";
 import {
   forgetAttempt,
   planShape,
@@ -38,6 +54,13 @@ import {
   rememberAttempt,
   shapeKeyOf,
 } from "./opencodeRequestShape.ts";
+
+/** Which conversation a placeholder's recorded schema belongs to. */
+export interface ToolSchemaScope {
+  readonly provider: string;
+  readonly model: string;
+  readonly session?: string;
+}
 
 /**
  * What one gated request declared, kept until its outcome is known.
@@ -52,6 +75,12 @@ export interface FreeTierContractAttempt {
   readonly session: string | undefined;
   readonly borrowed: boolean;
   readonly clientToolNames: readonly string[];
+  /**
+   * The parameter object each client tool declared, parsed once from the request body. Kept
+   * as references for the lifetime of the request only, so an accepted attempt can hand the
+   * observation store the shape the upstream just took.
+   */
+  readonly clientParameters?: ReadonlyMap<string, Record<string, unknown>>;
   /** A refusal may still be replayed in the other shape: its outcome is noted afterwards. */
   readonly probe?: boolean;
   /**
@@ -60,50 +89,139 @@ export interface FreeTierContractAttempt {
    * `borrowed` means it came from the observation store.
    */
   readonly injectedPlaceholders?: boolean;
+  /**
+   * Names of OpenCode CLI tools this layer declared that the caller had not: a model call to
+   * one of them is dropped from the response (see `opencodeInjectedToolFilter.ts`).
+   */
+  readonly injectedToolNames?: readonly string[];
 }
 
 /**
- * Models that work WITHOUT any API key on the free/noauth opencode tier.
+ * Free-vs-premium is derived from the synced catalog when one exists, not a static list.
  *
- * The upstream free tier rotates frequently — when a `-free` suffix model is
- * delisted upstream, the upstream returns "Model X is not supported" (a separate
- * issue from this gate). The set is defined by two data sources:
+ * The upstream free tier rotates constantly — models.dev lists dozens of `-free` ids and
+ * adds/retires them without notice — so a hard-coded set goes stale overnight (measured
+ * 2026-10-14: 5 of the 6 ids the old `OPENCODE_FREE_MODELS` held were already absent from
+ * the live `/zen/v1/models` list, 4 of them `deprecated`). When the catalog is synced, a
+ * model is free-tier iff:
  *
- *   1. **Known free models** — models explicitly listed in the noauth
- *      `opencode` provider registry (`open-sse/config/providers/registry/opencode/index.ts`).
- *      These are the canonical free models. `deepseek-v4-flash-free` appears in both
- *      the noauth AND the zen registry (it is free on both tiers).
- *   2. **`-free` suffix** — any model whose id ends in `-free`. This automatically
- *      covers upstream free-tier additions without a code deploy.
+ *   1. **available** — its id is in the synced live catalog for the `opencode` family
+ *      (what `GET https://opencode.ai/zen/v1/models` reported at discovery time), which
+ *      catches ids the upstream has since delisted; and
+ *   2. **free** — models.dev reports `cost.input === 0 && cost.output === 0` for it, which
+ *      catches free models that carry no `-free` suffix (`big-pickle`) and drops the ones
+ *      that gained a price; and
+ *   3. **not deprecated** — `status !== "deprecated"` as a secondary guard.
+ *
+ * Signals are read synchronously from data OmniRoute already syncs — the live catalog via
+ * the discovery writer (`syncedAvailableModels`) and cost/status via `models.dev`
+ * (`modelsDevSync.ts`) — memoized on `getModelCatalogCacheVersion()`, which every catalog
+ * write bumps. No per-request fetch, and no table to rot.
+ *
+ * When the catalog has never been synced (a fresh install, or a unit test with no DB), the
+ * check **falls back to the legacy heuristic** — the `-free` suffix plus the registry's
+ * known free ids — rather than treating every model as premium. Failing closed there would
+ * 402 every free model on an unsynced deployment and regress the pre-change behavior; the
+ * fallback keeps the status quo until discovery runs, and the synced catalog then takes
+ * over. `OPENCODE_LEGACY_FREE_MODELS` is therefore retained only as that fallback.
  *
  * For `opencode-go`, there is no free tier — ALL models require an API key.
  */
-const OPENCODE_FREE_MODELS = new Set([
+interface OpencodeFreeCatalog {
+  /** Catalog version this snapshot was built from; a bump invalidates it. */
+  readonly version: number;
+  /** Free ids from the synced catalog, or `null` when no catalog has been synced. */
+  readonly free: ReadonlySet<string> | null;
+}
+
+/**
+ * Legacy free ids kept only as the unsynced-catalog fallback (see the block above).
+ *
+ * `deepseek-v4.1-flash-free` replaced the delisted `deepseek-v4-flash-free` in the zen
+ * registry and `mimo-v2.6-flash-free` replaced the deprecated `mimo-v2.5-free`; the
+ * rotating `-free` ids are covered by the suffix rule alongside this set.
+ */
+const OPENCODE_LEGACY_FREE_MODELS = new Set([
   "big-pickle",
-  "deepseek-v4-flash-free",
-  "mimo-v2.5-free",
+  "deepseek-v4.1-flash-free",
+  "mimo-v2.6-flash-free",
   "hy3-free",
   "nemotron-3-ultra-free",
   "north-mini-code-free",
 ]);
 
+/** Provider ids whose live catalog feeds the `opencode` family (canonical + aliases). */
+const OPENCODE_CATALOG_PROVIDER_IDS = ["opencode-zen", "opencode"] as const;
+
+let freeCatalogCache: OpencodeFreeCatalog | null = null;
+
+/**
+ * Test seam: pin the free-model set without a synced catalog, so unit tests can exercise
+ * `isPremiumOpencodeModel` (and the request contract it gates) deterministically. Pass
+ * `null` to restore the catalog-driven lookup.
+ */
+let testFreeModelsOverride: ReadonlySet<string> | null = null;
+
+export function _setOpencodeFreeModelsForTests(ids: readonly string[] | null): void {
+  testFreeModelsOverride = ids === null ? null : new Set(ids);
+  freeCatalogCache = null;
+}
+
+/** The free ids the synced catalog implies, or `null` when nothing has been synced. */
+function deriveFreeIdsFromCatalog(): Set<string> | null {
+  try {
+    const available = readSyncedOpencodeFamilyModelIds();
+    if (available.size === 0) return null;
+    const free = new Set<string>();
+    const pricing = getModelsDevPricing();
+    const byProvider =
+      pricing[OPENCODE_CATALOG_PROVIDER_IDS[0]] ?? pricing[OPENCODE_CATALOG_PROVIDER_IDS[1]];
+    for (const id of available) {
+      const cost = byProvider?.[id];
+      if (!cost || cost.input !== 0 || cost.output !== 0) continue;
+      const status = getSyncedCapability(OPENCODE_CATALOG_PROVIDER_IDS[0], id)?.status;
+      if (status === "deprecated") continue;
+      free.add(id);
+    }
+    return free;
+  } catch {
+    // No DB / no synced pricing yet: no catalog, fall back to the legacy heuristic.
+    return null;
+  }
+}
+
+/** Build (or reuse) the free-model snapshot for the current catalog version. */
+function opencodeFreeModelCatalog(): ReadonlySet<string> | null {
+  if (testFreeModelsOverride) return testFreeModelsOverride;
+
+  const version = getModelCatalogCacheVersion();
+  if (freeCatalogCache && freeCatalogCache.version === version) return freeCatalogCache.free;
+
+  const free = deriveFreeIdsFromCatalog();
+  freeCatalogCache = { version, free };
+  return free;
+}
+
 /**
  * Determine whether a model requires an API key on the given opencode provider.
  *
  * - `opencode-go`: ALL models require a key (no free tier).
- * - `opencode` / `opencode-zen`: premium = any model NOT in the free set (known
- *   free models OR ending in `-free`).
+ * - `opencode` / `opencode-zen`: premium = any model NOT in the synced free catalog
+ *   (available ∩ free ∧ not deprecated). With no synced catalog, the legacy heuristic
+ *   (`-free` suffix or the registry's known free ids) is used instead.
  * - Unknown models are assumed premium (fail-safe).
  */
 export function isPremiumOpencodeModel(model: string, provider: string): boolean {
   // opencode-go has no free tier — every model requires a key.
   if (provider === "opencode-go") return true;
 
-  // Models ending in `-free` are always free on the noauth/zen tier.
-  if (model.endsWith("-free")) return false;
+  const id = model.trim();
+  const catalog = opencodeFreeModelCatalog();
+  if (catalog) return !catalog.has(id);
 
-  // Check the known free model catalog.
-  return !OPENCODE_FREE_MODELS.has(model);
+  // Unsynced catalog: the legacy rule, so an unsynced deployment keeps its behavior.
+  if (id.endsWith("-free")) return false;
+  return !OPENCODE_LEGACY_FREE_MODELS.has(id);
 }
 
 /**
@@ -120,6 +238,137 @@ export type OpencodeSurface = "zen" | "go" | "other";
 
 const ZEN_SURFACE_BASE_URL = "https://opencode.ai/zen/v1";
 const GO_SURFACE_BASE_URL = "https://opencode.ai/zen/go/v1";
+
+/**
+ * Where a gated free-tier request is sent. Since 2026-10-14 the OpenCode client takes its
+ * base URL from the models.dev catalog (`https://opencode.ai/inference/v1`), and the free
+ * tier refuses the very same request on `/zen/v1` with 403 FreeTierError. Paid models keep
+ * the registry base URL, which still serves them.
+ */
+export const FREE_TIER_INFERENCE_BASE_URL = "https://opencode.ai/inference/v1";
+
+/**
+ * Where OpenCode Go serves its Gemini-wire models (e.g. `gemini-4-argon`):
+ * `<base>/models/<model>:streamGenerateContent?alt=sse` keyed by `x-goog-api-key`. The
+ * `/zen/go/v1` chat host does not serve those models.
+ */
+const GO_GEMINI_INFERENCE_BASE_URL = "https://opencode.ai/inference/go/v1";
+
+/**
+ * OpenCode Go's Gemini wire: its own inference host, keyed by `x-goog-api-key`. Never gated:
+ * the free tier exists only on the Zen surface (`isGatedFreeTierRequest`).
+ */
+export function isGoGeminiWire(requestFormat: string | null, surface: OpencodeSurface): boolean {
+  return requestFormat === "gemini" && surface === "go";
+}
+
+/**
+ * The upstream URL of one request, by wire format, under the `base` the caller resolved. The
+ * Go Gemini wire has a fixed host, so that lane ignores `base`, published catalog included.
+ */
+export function opencodeEndpointUrl(
+  requestFormat: string | null,
+  surface: OpencodeSurface,
+  base: string,
+  model: string,
+  stream: boolean
+): string {
+  switch (requestFormat) {
+    case "claude":
+      return `${base}/messages`;
+    case "openai-responses":
+      return `${base}/responses`;
+    case "gemini": {
+      const root = isGoGeminiWire(requestFormat, surface) ? GO_GEMINI_INFERENCE_BASE_URL : base;
+      return `${root}/models/${model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`;
+    }
+    default:
+      return `${base}/chat/completions`;
+  }
+}
+
+/**
+ * The credential the gated free-tier lane serves.
+ *
+ * Measured live on 2026-10-21 against `https://opencode.ai/inference/v1` (Chat
+ * Completions and Responses, three header styles, both the v1 and v2 identity
+ * shapes): the lane answers 200 to the literal `Bearer public` and to no
+ * `Authorization` at all, but 403 `Model access is disabled` to a real API key
+ * on every endpoint — so the operator's key, which the keyed `/zen/v1` lane
+ * needs, is exactly what must NOT travel on the anonymous lane the gated
+ * request is routed to. `opencode2api`'s anonymous lane pins the same literal
+ * (`Authorization: Bearer public`), which is the credential the official
+ * client's keyless free tier presents.
+ *
+ * `OPENCODE_FREE_TIER_CREDENTIAL` overrides it per install:
+ *
+ *   - unset / empty → `public` (the anonymous lane credential);
+ *   - `key` → keep the operator's API key (for an upstream that re-opens
+ *     free-tier access to keyed accounts);
+ *   - `none` / `off` → send no credential header at all;
+ *   - anything else → sent verbatim as the bearer token.
+ *
+ * Read per call, so a change takes effect immediately (same motif as
+ * `OPENCODE_FREE_TIER_REQUEST_CONTRACT`).
+ */
+export const FREE_TIER_PUBLIC_CREDENTIAL = "public";
+
+/** How the gated free-tier lane authenticates one request. */
+export type FreeTierCredential =
+  | { readonly mode: "key" }
+  | { readonly mode: "none" }
+  | { readonly mode: "literal"; readonly value: string };
+
+/** Resolve the free-tier credential for this request (env read per call). */
+export function resolveFreeTierCredential(): FreeTierCredential {
+  const raw = (process.env.OPENCODE_FREE_TIER_CREDENTIAL || "").trim();
+  if (raw === "") return { mode: "literal", value: FREE_TIER_PUBLIC_CREDENTIAL };
+  if (/^key$/i.test(raw)) return { mode: "key" };
+  if (/^(none|off)$/i.test(raw)) return { mode: "none" };
+  return { mode: "literal", value: raw };
+}
+
+/**
+ * Pick the bearer key for a request. Outside the gated lane (`freeTier` null) or in `key`
+ * mode the operator's key wins; `literal` sends the configured token and `none` sends nothing.
+ * `operatorKey` is lazy so Extra API Keys rotation only advances when that key is used.
+ */
+export function resolveGatedCredential(
+  freeTier: FreeTierCredential | null,
+  operatorKey: () => string | undefined
+): string | undefined {
+  if (!freeTier || freeTier.mode === "key") return operatorKey();
+  return freeTier.mode === "literal" ? freeTier.value : undefined;
+}
+
+/**
+ * Base URL of the Bun relay (`scripts/ops/opencode-free-relay.ts`), from
+ * `OPENCODE_FREE_TIER_RELAY_URL`; `null` when unset or not an http(s) URL. Throws when the
+ * URL is plaintext `http://` on a non-loopback host. Read per call.
+ *
+ * Measured 2026-11-05: the free models answer 429 FreeUsageLimitError to any request not sent
+ * by Bun's native fetch, so gated requests are sent through a Bun process when one is set up.
+ */
+export function freeTierRelayUrl(): string | null {
+  const raw = (process.env.OPENCODE_FREE_TIER_RELAY_URL || "").trim().replace(/\/+$/, "");
+  if (!raw) return null;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+  // The relay request carries the upstream authorization header and the egress proxy
+  // credentials, so plaintext HTTP is only acceptable on a loopback host.
+  if (url.protocol === "http:" && !isLoopbackHostname(url.hostname)) {
+    throw new Error(
+      "OPENCODE_FREE_TIER_RELAY_URL must use https:// unless the relay host is loopback " +
+        "(localhost, 127.0.0.0/8 or ::1)"
+    );
+  }
+  return raw;
+}
 
 /** Tell the surfaces apart by registry `baseUrl`, so provider ids and aliases stay out. */
 export function surfaceFromBaseUrl(baseUrl: string | null | undefined): OpencodeSurface {
@@ -166,7 +415,7 @@ export function requiresFreeTierRequestContract(
 }
 
 /** The placeholder tool name the official client uses for the same purpose. */
-const PLACEHOLDER_TOOL_NAME = "_noop";
+const PLACEHOLDER_TOOL_NAME = "read";
 export const DEFAULT_PLACEHOLDER_TOOL_NAME = PLACEHOLDER_TOOL_NAME;
 
 /**
@@ -197,6 +446,64 @@ const PLACEHOLDER_TOOL_DESCRIPTION =
 const PLACEHOLDER_TOOL_PARAMETERS = { type: "object", properties: {} } as const;
 
 /**
+ * Minimal parameter schemas for injected placeholder tools, mirroring the OpenCode client's
+ * argument names. Since 2026-10-14 the free tier refuses a declared `read` or `bash` whose
+ * parameter object has no properties (measured on /inference/v1: `read` + `bash` with
+ * `properties: {}` is 403, the same pair with `{command}` on `bash` is 200, and a request
+ * with no property-bearing `read` is 403), while an empty schema on a name outside the
+ * quartet (`webfetch`, `_noop`) still passes.
+ */
+const PLACEHOLDER_TOOL_PARAMETER_SCHEMAS: Readonly<Record<string, Record<string, unknown>>> = {
+  bash: { type: "object", properties: { command: { type: "string" } }, required: ["command"] },
+  glob: { type: "object", properties: { pattern: { type: "string" } }, required: ["pattern"] },
+  grep: { type: "object", properties: { pattern: { type: "string" } }, required: ["pattern"] },
+  read: { type: "object", properties: { filePath: { type: "string" } }, required: ["filePath"] },
+};
+
+/**
+ * Parameter schema for an injected placeholder tool named `name`. Precedence: the opt-in v2
+ * CLI schema (`isOpencodeV2ClientFingerprintEnabled()`, #16571, which pins the quartet
+ * verbatim), then the schema the client already sent and the upstream accepted (recorded by
+ * the caller through `scope`), then the pinned quartet schema, then the empty object. A
+ * name with no recorded schema and outside the quartet keeps the empty object exactly as
+ * before.
+ */
+export function placeholderToolParameters(
+  name: string,
+  v2Fingerprint = false,
+  recorded?: Record<string, unknown>
+): Record<string, unknown> {
+  const v2 = v2Fingerprint ? v2PlaceholderTool(name) : undefined;
+  return (
+    v2?.parameters ??
+    recorded ??
+    PLACEHOLDER_TOOL_PARAMETER_SCHEMAS[name] ??
+    PLACEHOLDER_TOOL_PARAMETERS
+  );
+}
+
+/**
+ * The parameters an injected entry carries, reading the recorded schema for this scope when
+ * one is known. Both construction sites (first dispatch and retry) go through this, so a
+ * borrowed name never falls back to the empty object while a recorded schema exists.
+ */
+function injectedToolParameters(
+  name: string,
+  v2Fingerprint: boolean,
+  scope: ToolSchemaScope | undefined
+): Record<string, unknown> {
+  const recorded =
+    scope && recordedToolParameters(scope.provider, scope.model, scope.session, name);
+  return placeholderToolParameters(name, v2Fingerprint, recorded);
+}
+
+/** Description for an injected placeholder tool; the v2 CLI's own text under the v2 flag. */
+export function placeholderToolDescription(name: string, v2Fingerprint = false): string {
+  const v2 = v2Fingerprint ? v2PlaceholderTool(name) : undefined;
+  return v2?.description ?? PLACEHOLDER_TOOL_DESCRIPTION;
+}
+
+/**
  * Bring a free-tier request up to the upstream contract, without overriding anything the
  * caller already decided: client tools are kept as they are, and the placeholder tool is
  * only added when the caller sent none or when client-supplied tools do not yet carry the
@@ -206,8 +513,9 @@ const PLACEHOLDER_TOOL_PARAMETERS = { type: "object", properties: {} } as const;
  * the Responses surface takes the flat one. Neither carries a `tool_choice` — the upstream
  * rejects any value but "auto" (measured 2026-09-18: 400 invalid_request_error, `only
  * "auto" is supported for tool_choice`), so a `tool_choice` the caller did not send is
- * never added, and one the caller did send travels unchanged. Any other body format only
- * gets the streaming flag: injecting a tool shape blind would be a guess.
+ * never added, and one the caller did send travels unchanged (except, under the opt-in v2
+ * fingerprint, a "none" the upstream would refuse: see `sanitizeToolChoice`). Any other body
+ * format only gets the streaming flag: injecting a tool shape blind would be a guess.
  *
  * Which names go in is resolved by `resolvePlaceholderNames`, because the upstream does
  * inspect them.
@@ -215,13 +523,16 @@ const PLACEHOLDER_TOOL_PARAMETERS = { type: "object", properties: {} } as const;
 export function applyFreeTierRequestContract<T>(
   body: T,
   requestFormat: string | null,
-  placeholderNames: readonly string[] = [PLACEHOLDER_TOOL_NAME]
+  placeholderNames: readonly string[] = [PLACEHOLDER_TOOL_NAME],
+  v2Fingerprint = false,
+  scope?: ToolSchemaScope
 ): T {
   if (!body || typeof body !== "object" || Array.isArray(body)) return body;
   const record = body as Record<string, unknown>;
   const next: Record<string, unknown> = { ...record, stream: true };
+  if (v2Fingerprint) sanitizeToolChoice(next);
 
-  const existingNames = new Set(clientToolNamesOf(next));
+  const existingNames = new Set(clientToolsOf(next).names);
   const baseNames = placeholderNames.length > 0 ? placeholderNames : [PLACEHOLDER_TOOL_NAME];
   const namesToAdd = baseNames.filter((name) => !existingNames.has(name));
 
@@ -235,8 +546,8 @@ export function applyFreeTierRequestContract<T>(
       ...namesToAdd.map((name) => ({
         type: "function",
         name,
-        description: PLACEHOLDER_TOOL_DESCRIPTION,
-        parameters: PLACEHOLDER_TOOL_PARAMETERS,
+        description: placeholderToolDescription(name, v2Fingerprint),
+        parameters: injectedToolParameters(name, v2Fingerprint, scope),
       })),
     ];
     return next as T;
@@ -249,8 +560,8 @@ export function applyFreeTierRequestContract<T>(
         type: "function",
         function: {
           name,
-          description: PLACEHOLDER_TOOL_DESCRIPTION,
-          parameters: PLACEHOLDER_TOOL_PARAMETERS,
+          description: placeholderToolDescription(name, v2Fingerprint),
+          parameters: injectedToolParameters(name, v2Fingerprint, scope),
         },
       })),
     ];
@@ -270,8 +581,9 @@ export function applyFreeTierRequestContract<T>(
  * FreeTierError. When such a refusal comes back, this rebuilds the same body with the
  * observed names appended after the client's own entries: the client tools keep their
  * full shape (description, parameters) so the model can still call them, while the
- * appended names are list entries with an empty parameter object — the same shape the
- * placeholder path uses, never a callable tool.
+ * appended names are list entries carrying the minimal parameter schema
+ * `placeholderToolParameters` gives them — the same shape the placeholder path uses,
+ * never a callable tool.
  *
  * Pure: returns the input body unchanged when no observed names are missing, so the
  * caller can skip the retry on identity alone. Resolution order is the store's own:
@@ -284,16 +596,18 @@ export function mergeClientToolsWithObserved<T>(
   provider: string,
   model: string,
   session: string | undefined,
-  configured: readonly string[]
+  configured: readonly string[],
+  v2Fingerprint = false
 ): T {
   if (!body || typeof body !== "object" || Array.isArray(body)) return body;
   const record = body as Record<string, unknown>;
   if (!Array.isArray(record.tools) || record.tools.length === 0) return body;
   const own = session ? getObservedToolNames(provider, model, session) : null;
   const observed = own ?? getObservedToolNames(provider, model) ?? configured;
-  const have = new Set(clientToolNamesOf(body));
+  const have = new Set(clientToolsOf(body).names);
   const missing = observed.filter((name) => !have.has(name));
   if (missing.length === 0) return body;
+  const scope: ToolSchemaScope = { provider, model, session };
   const next: Record<string, unknown> = { ...(record as Record<string, unknown>) };
   if (requestFormat === "openai-responses") {
     next.tools = [
@@ -301,8 +615,8 @@ export function mergeClientToolsWithObserved<T>(
       ...missing.map((name) => ({
         type: "function",
         name,
-        description: PLACEHOLDER_TOOL_DESCRIPTION,
-        parameters: PLACEHOLDER_TOOL_PARAMETERS,
+        description: placeholderToolDescription(name, v2Fingerprint),
+        parameters: injectedToolParameters(name, v2Fingerprint, scope),
       })),
     ];
     return next as T;
@@ -314,8 +628,8 @@ export function mergeClientToolsWithObserved<T>(
         type: "function",
         function: {
           name,
-          description: PLACEHOLDER_TOOL_DESCRIPTION,
-          parameters: PLACEHOLDER_TOOL_PARAMETERS,
+          description: placeholderToolDescription(name, v2Fingerprint),
+          parameters: injectedToolParameters(name, v2Fingerprint, scope),
         },
       })),
     ];
@@ -324,18 +638,47 @@ export function mergeClientToolsWithObserved<T>(
   return body;
 }
 
-function clientToolNamesOf(body: unknown): string[] {
-  if (!body || typeof body !== "object" || Array.isArray(body)) return [];
-  const tools = (body as Record<string, unknown>).tools;
-  if (!Array.isArray(tools)) return [];
+/**
+ * The tools a request declares, in one pass: their names (for the observation store and the
+ * existing-name check) and the parameter object each one carried, by name. Chat Completions
+ * nests the fields under `function`; the Responses surface keeps them flat.
+ */
+function clientToolsOf(body: unknown): {
+  names: string[];
+  parameters: Map<string, Record<string, unknown>>;
+} {
   const names: string[] = [];
+  const parameters = new Map<string, Record<string, unknown>>();
+  if (!body || typeof body !== "object" || Array.isArray(body)) return { names, parameters };
+  const tools = (body as Record<string, unknown>).tools;
+  if (!Array.isArray(tools)) return { names, parameters };
   for (const tool of tools) {
-    if (!tool || typeof tool !== "object") continue;
-    const entry = tool as { name?: unknown; function?: { name?: unknown } };
-    const name = typeof entry.name === "string" ? entry.name : entry.function?.name;
-    if (typeof name === "string") names.push(name);
+    const declared = clientToolOf(tool);
+    if (!declared) continue;
+    names.push(declared.name);
+    if (declared.parameters) parameters.set(declared.name, declared.parameters);
   }
-  return names;
+  return { names, parameters };
+}
+
+/** One tool entry's name, and the parameter object it carries when it is a plain object. */
+function clientToolOf(tool: unknown): {
+  name: string;
+  parameters?: Record<string, unknown>;
+} | null {
+  if (!tool || typeof tool !== "object") return null;
+  const entry = tool as {
+    name?: unknown;
+    parameters?: unknown;
+    function?: { name?: unknown; parameters?: unknown };
+  };
+  const name = typeof entry.name === "string" ? entry.name : entry.function?.name;
+  if (typeof name !== "string") return null;
+  const schema = entry.function?.parameters ?? entry.parameters;
+  if (schema && typeof schema === "object" && !Array.isArray(schema)) {
+    return { name, parameters: schema as Record<string, unknown> };
+  }
+  return { name };
 }
 
 /**
@@ -358,6 +701,67 @@ function isTrackable(value: unknown): value is object {
   return typeof value === "object" && value !== null;
 }
 
+/** The OpenCode CLI build-agent prompt for `model`, with a neutral environment block. */
+export function canonicalOpencodeSystemPrompt(model: string, now: Date = new Date()): string {
+  return OPENCODE_CLI_PROMPT_TEMPLATE.split("{{MODEL}}")
+    .join(model.replace(/^opencode[^/]*\//, ""))
+    .split("{{DATE}}")
+    .join(now.toDateString());
+}
+
+/**
+ * Relay mode body: the upstream answers a free model only when messages[0] is the genuine
+ * OpenCode system prompt and the CLI's full tool set is declared (anything shorter is 429).
+ * The caller's own system messages follow the canonical one and its tools keep their shape;
+ * only CLI tools it did not declare are added, and those are recorded as injected.
+ */
+function applyCanonicalRelayContract(
+  body: unknown,
+  model: string
+): { body: unknown; injected: string[] } | null {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+  const record = body as Record<string, unknown>;
+  if (!Array.isArray(record.messages)) return null;
+  const canonical = canonicalOpencodeSystemPrompt(model);
+  const first = record.messages[0] as { role?: unknown; content?: unknown } | undefined;
+  const already = first?.role === "system" && first.content === canonical;
+  const messages = already
+    ? record.messages
+    : [{ role: "system", content: canonical }, ...record.messages];
+  const have = new Set(clientToolsOf(record).names);
+  const missing = OPENCODE_CLI_TOOLS.filter((tool) => !have.has(tool.function.name));
+  const tools = [...(Array.isArray(record.tools) ? record.tools : []), ...missing];
+  return {
+    body: { ...record, stream: true, messages, tools },
+    injected: missing.map((tool) => tool.function.name),
+  };
+}
+
+function prepareRelayRequest<T>(
+  body: T,
+  requestFormat: string | null,
+  provider: string,
+  model: string,
+  session: string | undefined,
+  origin: object | undefined
+): { body: T; attempt: FreeTierContractAttempt } | null {
+  if (!freeTierRelayUrl() || (requestFormat !== "openai" && requestFormat !== null)) return null;
+  const canonical = applyCanonicalRelayContract(body, model);
+  if (!canonical) return null;
+  const clientTools = clientToolsOf(body);
+  const attempt: FreeTierContractAttempt = {
+    provider,
+    model,
+    session,
+    borrowed: false,
+    clientToolNames: clientTools.names,
+    clientParameters: clientTools.parameters,
+    injectedToolNames: canonical.injected,
+  };
+  if (isTrackable(origin)) rememberAttempt(origin, attempt);
+  return { body: canonical.body as T, attempt };
+}
+
 export function prepareFreeTierRequest<T>(
   body: T,
   requestFormat: string | null,
@@ -365,13 +769,17 @@ export function prepareFreeTierRequest<T>(
   provider: string,
   model: string,
   session?: string,
-  origin?: object
+  origin?: object,
+  v2Fingerprint = false
 ): { body: T; attempt: FreeTierContractAttempt | null } {
-  const clientToolNames = clientToolNamesOf(body);
+  const clientTools = clientToolsOf(body);
+  const clientToolNames = clientTools.names;
   if (!requiresFreeTierRequestContract(surface, provider, model)) {
     if (isTrackable(origin)) forgetAttempt(origin);
     return { body, attempt: null };
   }
+  const relayed = prepareRelayRequest(body, requestFormat, provider, model, session, origin);
+  if (relayed) return relayed;
   const eligible = isTrackable(origin) && clientToolNames.length === 0;
   const key = eligible ? shapeKeyOf(provider, model, body) : "";
   const plan =
@@ -381,12 +789,14 @@ export function prepareFreeTierRequest<T>(
   const chosen = plan.shape;
   const names = resolvePlaceholderNames(provider, model, session, configuredPlaceholderToolNames());
   const borrowed = clientToolNames.length === 0 && names.length > 0 && chosen === "tools";
+  const scope: ToolSchemaScope = { provider, model, session };
   const attempt: FreeTierContractAttempt = {
     provider,
     model,
     session,
     borrowed,
     clientToolNames,
+    clientParameters: clientTools.parameters,
     probe: plan.probe,
   };
   if (isTrackable(origin)) rememberAttempt(origin, attempt);
@@ -401,15 +811,17 @@ export function prepareFreeTierRequest<T>(
   return {
     body:
       chosen === "bare"
-        ? withStreaming(body)
-        : applyFreeTierRequestContract(body, requestFormat, names),
+        ? withStreaming(body, v2Fingerprint)
+        : applyFreeTierRequestContract(body, requestFormat, names, v2Fingerprint, scope),
     attempt,
   };
 }
 
-function withStreaming<T>(body: T): T {
+function withStreaming<T>(body: T, v2Fingerprint = false): T {
   if (!body || typeof body !== "object" || Array.isArray(body)) return body;
-  return { ...(body as Record<string, unknown>), stream: true } as T;
+  const next: Record<string, unknown> = { ...(body as Record<string, unknown>), stream: true };
+  if (v2Fingerprint) sanitizeToolChoice(next);
+  return next as T;
 }
 
 /**
@@ -445,7 +857,8 @@ export function noteFreeTierOutcome(
         attempt.provider,
         attempt.model,
         attempt.session,
-        attempt.clientToolNames
+        attempt.clientToolNames,
+        attempt.clientParameters
       );
     } else if (attempt.borrowed && !attempt.probe) {
       confirmBorrowedToolNames(attempt.provider, attempt.model, attempt.session);

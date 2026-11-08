@@ -11,6 +11,7 @@ const core = await import("../../src/lib/db/core.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const callLogs = await import("../../src/lib/usage/callLogs.ts");
+const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const routeExplain = await import("../../src/lib/usage/routeExplain.ts");
 const route = await import("../../src/app/api/usage/route-explain/[id]/route.ts");
 const { normalizeComboStep } = await import("../../src/lib/combos/steps.ts");
@@ -211,38 +212,59 @@ test("route explainability replays why a combo target was selected", async () =>
     index: 1,
   });
 
-  await callLogs.saveCallLog({
-    id: "route-replay-selected",
-    timestamp: new Date().toISOString(),
-    method: "POST",
-    path: "/v1/chat/completions",
-    status: 200,
-    model: "openai/gpt-4o-mini",
-    requestedModel: comboInput.name,
-    provider: "openai",
-    connectionId: "route-replay-fast",
-    duration: 120,
-    tokens: { prompt_tokens: 100, completion_tokens: 50 },
-    comboName: comboInput.name,
-    comboStepId: fastStep.id,
-    comboExecutionKey: fastStep.id,
-  });
-  await callLogs.saveCallLog({
-    id: "route-replay-related",
-    timestamp: new Date().toISOString(),
-    method: "POST",
-    path: "/v1/chat/completions",
-    status: 503,
-    model: "anthropic/claude-3-haiku",
-    requestedModel: comboInput.name,
-    provider: "anthropic",
-    connectionId: "route-replay-slow",
-    duration: 2_000,
-    tokens: { prompt_tokens: 100, completion_tokens: 0 },
-    comboName: comboInput.name,
-    comboStepId: slowStep.id,
-    comboExecutionKey: slowStep.id,
-  });
+  // Ten observations establish the live candidate latency signal used by replay.
+  for (let index = 0; index < 10; index++) {
+    await callLogs.saveCallLog({
+      id: index === 0 ? "route-replay-selected" : `route-replay-fast-${index}`,
+      timestamp: new Date(Date.now() - index * 60_000).toISOString(),
+      method: "POST",
+      path: "/v1/chat/completions",
+      status: 200,
+      model: "openai/gpt-4o-mini",
+      requestedModel: comboInput.name,
+      provider: "openai",
+      connectionId: "route-replay-fast",
+      duration: 120,
+      tokens: { prompt_tokens: 100, completion_tokens: 50 },
+      comboName: comboInput.name,
+      comboStepId: fastStep.id,
+      comboExecutionKey: fastStep.id,
+    });
+    await usageHistory.saveRequestUsage({
+      provider: "openai",
+      model: "gpt-4o-mini",
+      connectionId: "route-replay-fast",
+      timestamp: new Date(Date.now() - index * 60_000).toISOString(),
+      success: true,
+      latencyMs: 120,
+      tokens: { input: 100, output: 50 },
+    });
+    await callLogs.saveCallLog({
+      id: index === 0 ? "route-replay-related" : `route-replay-slow-${index}`,
+      timestamp: new Date(Date.now() - index * 60_000).toISOString(),
+      method: "POST",
+      path: "/v1/chat/completions",
+      status: 503,
+      model: "anthropic/claude-3-haiku",
+      requestedModel: comboInput.name,
+      provider: "anthropic",
+      connectionId: "route-replay-slow",
+      duration: 2_000,
+      tokens: { prompt_tokens: 100, completion_tokens: 0 },
+      comboName: comboInput.name,
+      comboStepId: slowStep.id,
+      comboExecutionKey: slowStep.id,
+    });
+    await usageHistory.saveRequestUsage({
+      provider: "anthropic",
+      model: "claude-3-haiku",
+      connectionId: "route-replay-slow",
+      timestamp: new Date(Date.now() - index * 60_000).toISOString(),
+      success: false,
+      latencyMs: 2_000,
+      tokens: { input: 100, output: 0 },
+    });
+  }
 
   const explanation = await routeExplain.explainRouteByRequestId("route-replay-selected");
 

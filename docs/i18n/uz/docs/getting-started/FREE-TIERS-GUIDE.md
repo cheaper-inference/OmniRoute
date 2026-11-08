@@ -16,43 +16,42 @@ OmniRoute sozlangan ulanishlarni bitta endpointda **birlashtiradi**. Hisob talab
 
 ---
 
-## Bepul kirish imkonini beruvchi namunaviy provayderlar
+## Bepul kirish imkonini beruvchi asosiy provayderlar
 
-### Takroriy, kalitsiz yoki cheklanmagan kirish
+### Takrorlanuvchi, kalitsiz yoki cheklanmagan kirish
 
-Ushbu provayderlar tekshirilgan katalogda takroriy, kalitsiz yoki cheklanmagan bepul kirish usuliga ega. “Cheklanmagan” eʼlon qilingan token chegarasi yoʻqligini anglatadi; tezlik, parallellik, hisob, hududiy va siyosat cheklovlari baribir qoʻllanishi mumkin:
+Ushbu provayderlar tekshirilgan katalogda takrorlanuvchi, kalitsiz yoki cheklanmagan bepul kirish imkoniyatiga ega. “Cheklanmagan” eʼlon qilingan token chegarasi yoʻqligini anglatadi; tezlik, parallel soʻrovlar, hisob, hududiy va siyosat cheklovlari baribir qoʻllanishi mumkin:
 
-| Provayder         | Modellar                                                                                      | Kvota                                                                                                                                                         | Ulanish usuli                                                                                                        |
-| ----------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 va boshqalar                                      | Tekshirilgan katalog hisobiga koʻra, oyiga 25K tokenlik umumiy pul                                                                                            | OAuth/hisob jarayoni; katalogda ToS `avoid` deb belgilangan                                                          |
-| **OpenCode Free** | Provayder reyestridagi joriy `*-free` modellar toʻplami                                       | Kalitsiz; eʼlon qilingan token chegarasi yoʻq                                                                                                                 | Provayder hisob maʼlumotlari talab qilinmaydi; ToS `avoid` deb belgilangan                                           |
-| **Pollinations**  | Joriy kalitsiz modellar toʻplami; ayrim avvalgi modellar toʻxtatilgan yoki kalit talab qiladi | Kalitsiz; eʼlon qilingan token chegarasi yoʻq                                                                                                                 | Kalitsiz modellar uchun provayder hisob maʼlumotlari talab qilinmaydi                                                |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 va boshqalar                      | Bepul API kaliti (tezlik cheklovlarisiz, karta talab qilinmaydi); tadqiqot uchun **har bir soʻrov qayd etiladi** (logfare.ai/consent orqali rad etish mumkin) | Kalitni logfare.ai/register orqali darhol olish mumkin; ToS/maxfiylik siyosati: logfare.ai/tos va logfare.ai/privacy |
-| **Cloudflare AI** | Workers AI katalogi                                                                           | Eʼlon qilingan foydalanish birliklari asosida tekshirilgan pul hisobi oyiga ~30M tokenni tashkil etadi                                                        | Cloudflare hisobi va API hisob maʼlumotlari                                                                          |
-| **Gemini**        | Gemini Flash oilasi                                                                           | Loyiha/model boʻyicha oʻzgaruvchan tezlik cheklovlari; asosiy taklifga belgilangan oylik token granti kiritilmagan                                            | Google AI Studio API kaliti; loyihaning faol cheklovlarini tekshiring                                                |
-| **Groq**          | Llama, GPT-OSS va Qwen modellari                                                              | Tekshirilgan pul hisobi oyiga ~15M tokenni tashkil etadi                                                                                                      | Groq API kaliti; tezlik cheklovlari qoʻllanadi                                                                       |
+| Provayder         | Modellar                                                                                      | Kvota                                                                                                                                                | Qanday ulanish mumkin                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 va boshqalar                                      | Tekshirilgan katalog hisobiga koʻra, oyiga 25K tokenli umumiy pul                                                                                    | OAuth/hisob jarayoni; katalogda ToS `avoid` deb belgilangan                                                 |
+| **Pollinations**  | Joriy kalitsiz modellar toʻplami; ayrim avvalgi modellar toʻxtatilgan yoki kalit talab qiladi | Kalitsiz; eʼlon qilingan token chegarasi yoʻq                                                                                                        | Kalitsiz modellar uchun provayder hisob maʼlumotlari talab qilinmaydi                                       |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 va boshqalar                      | Bepul API kaliti (tezlik cheklovi va karta talabi yoʻq); tadqiqot uchun **har bir soʻrov qayd etiladi** (logfare.ai/consent orqali rad etish mumkin) | Kalitni logfare.ai/register orqali darhol olish mumkin; ToS/maxfiylik: logfare.ai/tos va logfare.ai/privacy |
+| **Cloudflare AI** | Workers AI katalogi                                                                           | Tekshirilgan pul eʼlon qilingan foydalanish birliklari asosida oyiga ~30M token deb baholanadi                                                       | Cloudflare hisobi va API hisob maʼlumotlari                                                                 |
+| **Gemini**        | Gemini Flash oilasi                                                                           | Loyiha/modelga qarab oʻzgaruvchan tezlik cheklovlari; asosiy taklifga qatʼiy oylik token granti kiritilmagan                                         | Google AI Studio API kaliti; loyihaning faol cheklovlarini tekshiring                                       |
+| **Groq**          | Llama, GPT-OSS va Qwen modellari                                                              | Tekshirilgan pul oyiga ~15M token deb baholanadi                                                                                                     | Groq API kaliti; tezlik cheklovlari qoʻllaniladi                                                            |
 
 ### Roʻyxatdan oʻtish grantlari va provayderga xos kreditlar
 
-Ushbu provayderlar muvofiqlik qoidalariga rioya qilingan holda roʻyxatdan oʻtish grantlari yoki reklama kreditlarini taklif qiladi. 2026-10-08 sanasida tekshirilganidek, [Cerebras narxlari](https://www.cerebras.ai/pricing) 30 kundan keyin muddati tugaydigan bir martalik $5 kredit uchun toʻlov usulini talab qiladi; bu takroriy token kvotasi emas. [Gemini tezlik cheklovlari](https://ai.google.dev/gemini-api/docs/rate-limits) loyiha, model va darajaga qarab oʻzgaradi, shu sababli ular kafolatlangan oylik token grantiga aylantirilmagan.
+Ushbu provayderlar muvofiqlik qoidalariga rioya qilingan holda roʻyxatdan oʻtish grantlari yoki reklama kreditlarini taklif qiladi. 2026-10-08 holatiga koʻra tasdiqlangan [Cerebras narxlari](https://www.cerebras.ai/pricing) 30 kundan keyin muddati tugaydigan bir martalik $5 kredit uchun toʻlov usulini talab qiladi; bu takrorlanuvchi token kvotasi emas. [Gemini tezlik cheklovlari](https://ai.google.dev/gemini-api/docs/rate-limits) loyiha, model va tarif darajasiga qarab farq qiladi, shu sababli ular kafolatlangan oylik token grantiga aylantirilmagan.
 
-| Provayder     | Bepul kreditlar                                                                  | Modellar                   | Olish usuli                                                         |
-| ------------- | -------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------- |
-| **Cerebras**  | Bir martalik $5 reklama krediti; muddati 30 kundan keyin tugaydi                 | Joriy inferensiya katalogi | Hisob va amaldagi toʻlov usuli                                      |
-| **DeepSeek**  | 5M bepul token                                                                   | DeepSeek V4                | platform.deepseek.com saytida roʻyxatdan oʻting                     |
-| **LongCat**   | Bir martalik 10M tokenlik grant                                                  | LongCat 2.0                | API kaliti + KYC; grantdan keyin foydalanishga qarab toʻlov         |
-| **Vertex AI** | Byudjet modelida ~300M token sifatida ifodalangan $300 roʻyxatdan oʻtish krediti | Gemini va hamkor modellar  | Google Cloud hisobi; hisob-kitob va muvofiqlik qoidalari qoʻllanadi |
+| Provayder     | Bepul kreditlar                                                                  | Modellar                  | Qanday olish mumkin                                                   |
+| ------------- | -------------------------------------------------------------------------------- | ------------------------- | --------------------------------------------------------------------- |
+| **Cerebras**  | Bir martalik $5 reklama krediti; muddati 30 kundan keyin tugaydi                 | Joriy inferens katalogi   | Hisob va yaroqli toʻlov usuli                                         |
+| **DeepSeek**  | 5M bepul token                                                                   | DeepSeek V4               | platform.deepseek.com saytida roʻyxatdan oʻting                       |
+| **LongCat**   | Bir martalik 10M tokenli grant                                                   | LongCat 2.0               | API kaliti + KYC; grantdan keyin foydalanish hajmiga qarab toʻlov     |
+| **Vertex AI** | Byudjet modelida ~300M token sifatida ifodalangan $300 roʻyxatdan oʻtish krediti | Gemini va hamkor modellar | Google Cloud hisobi; hisob-kitob va muvofiqlik qoidalari qoʻllaniladi |
 
 ### Boshqa cheklangan kirish imkoniyatlari
 
-Ushbu provayderlar muayyan cheklovlarga ega **bepul darajalarni** taklif qiladi:
+Ushbu provayderlarda muayyan cheklovlarga ega **bepul tariflar** mavjud:
 
-| Provayder                  | Bepul chegara                                                                                     | Modellar                                   | Eng mos foydalanish holati |
-| -------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------- |
-| **GitHub Models**          | Tekshirilgan umumiy pul hisobi oyiga ~18M tokenni tashkil etadi                                   | Modellarni keng qamrovda baholash          |
-| **Hugging Face**           | Kichik, takroriy oylik pul                                                                        | Tajribalar va model xilma-xilligi          |
-| **OpenRouter free models** | Soʻrovlar soni cheklangan umumiy pul; ixtiyoriy bir martalik toʻldirish takroriy limitni oshiradi | Keng qamrovli zaxira katalogi              |
-| **AI Horde**               | Kalitsiz hamjamiyat quvvati; mavjudlik oʻzgarib turadi                                            | Imkoniyatga qarab taqsimlangan inferensiya |
+| Provayder                      | Bepul limit                                                                                             | Modellar                                | Eng mos foydalanish sohasi |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- | --------------------------------------- | -------------------------- |
+| **GitHub Models**              | Tekshirilgan umumiy pul oyiga ~18M token deb baholanadi                                                 | Modellarni keng qamrovda baholash       |
+| **Hugging Face**               | Har oy yangilanadigan kichik pul                                                                        | Tajribalar va model xilma-xilligi       |
+| **OpenRouter bepul modellari** | Soʻrovlar soni cheklangan umumiy pul; ixtiyoriy bir martalik toʻldirish takrorlanuvchi limitni oshiradi | Keng qamrovli zaxira katalogi           |
+| **AI Horde**                   | Kalitsiz hamjamiyat quvvati; mavjudlik oʻzgarib turadi                                                  | Imkoniyatga qarab taqsimlangan inferens |
 
 ---
 

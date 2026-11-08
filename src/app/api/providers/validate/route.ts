@@ -9,6 +9,7 @@ import {
   isAnthropicCompatibleProvider,
 } from "@/shared/constants/providers";
 import { validateProviderApiKey } from "@/lib/providers/validation";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { projectProviderValidationResultForPublicResponse } from "@/lib/providers/validation/transport";
 import { getProxyForLevel } from "@/lib/db/settings";
 import { resolveProxyForProvider } from "@/lib/db/proxies";
@@ -66,6 +67,7 @@ export async function POST(request) {
       runtimeKey,
       tunnelId,
       connectorName,
+      zdrEnabled,
     } = validation.data;
 
     const retirementResponse = rejectRetiredCommonChatGptWebProvider(provider);
@@ -93,6 +95,7 @@ export async function POST(request) {
     if (runtimeKey) providerSpecificData.runtimeKey = runtimeKey;
     if (tunnelId) providerSpecificData.tunnelId = tunnelId;
     if (connectorName) providerSpecificData.connectorName = connectorName;
+    if (zdrEnabled === true) providerSpecificData.zdrEnabled = true;
 
     if (isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider)) {
       const node: any = await getProviderNodeById(provider);
@@ -131,6 +134,10 @@ export async function POST(request) {
           provider,
           apiKey,
           providerSpecificData,
+          // S-01 (#15159, #15766 shape): the devin CLI-spawn fallback inside the
+          // dispatch may only run for loopback/LAN peers — the trusted
+          // peer-locality header, never a client-supplied value.
+          allowLocalSpawn: getRequestPeerLocality(request) !== "remote",
         })
       )
     );

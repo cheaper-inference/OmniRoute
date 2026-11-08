@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { parseIntegerQueryParam } from "@/lib/api/queryIntegerParam";
 import { listFiles } from "@/lib/db/files";
 import { getApiKeyRequestScope, resolveListScope } from "@/app/api/v1/_helpers/apiKeyScope";
 
@@ -15,7 +16,9 @@ export async function GET(request: Request) {
 
   try {
     const url = new URL(request.url);
-    const limit = Number.parseInt(url.searchParams.get("limit") || "100", 10);
+    const parsedLimit = parseIntegerQueryParam(url.searchParams, "limit", 100);
+    if (parsedLimit.ok === false) return parsedLimit.response;
+    const limit = parsedLimit.value;
     const files =
       listScope.mode === "api_key"
         ? listFiles({ limit, apiKeyId: listScope.apiKeyId })

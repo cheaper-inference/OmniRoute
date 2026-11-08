@@ -1,1 +1,0 @@
-- **fix(models):** /v1beta/models names custom-provider models under the operator-configured provider-node prefix instead of the raw node UUID, matching the public identity /v1/models has published since #8327.

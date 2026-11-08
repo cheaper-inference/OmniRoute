@@ -1,1 +1,0 @@
-- fix(build): repair partially traced external package dirs missing package.json (e.g. zod) in the standalone bundle so Windows portable MCP endpoints stop returning 500 (#15493)

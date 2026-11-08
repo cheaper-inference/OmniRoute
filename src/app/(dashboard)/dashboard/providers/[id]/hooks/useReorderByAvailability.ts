@@ -16,7 +16,11 @@
  */
 
 import { useState } from "react";
-import { sortConnectionsByAvailability } from "../components/connectionRowHelpers";
+import {
+  buildPriorityUpdates,
+  persistPriorityUpdates,
+  sortConnectionsByAvailability,
+} from "../components/connectionRowHelpers";
 import type { ConnectionRowConnection } from "../components/ConnectionRow";
 
 /** Minimal surface of the notification store this hook needs. */
@@ -28,8 +32,7 @@ export interface UseReorderByAvailabilityParams {
   connections: ConnectionRowConnection[];
   setConnections: (
     updater:
-      | ConnectionRowConnection[]
-      | ((prev: ConnectionRowConnection[]) => ConnectionRowConnection[])
+      ConnectionRowConnection[] | ((prev: ConnectionRowConnection[]) => ConnectionRowConnection[])
   ) => void;
   fetchConnections: () => Promise<void>;
   notify: ReorderNotifier;
@@ -65,15 +68,8 @@ export function useReorderByAvailability({
     const sorted = sortConnectionsByAvailability(connections as any[]);
     setConnections(sorted as ConnectionRowConnection[]);
     try {
-      await Promise.all(
-        sorted.map((conn: any, idx: number) =>
-          fetch(`/api/providers/${conn.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ priority: idx }),
-          })
-        )
-      );
+      // 1-based: a 0-based `priority: 0` on the first row was rejected (400).
+      await persistPriorityUpdates(buildPriorityUpdates(sorted));
       await fetchConnections();
     } catch (error) {
       console.log("Error reordering connections by availability:", error);

@@ -118,31 +118,40 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ## Ìṣàn Ìgbéwọlé API-Key
 
-Ìfàṣẹsí API-key jẹ́ fún àwọn ẹ̀rí bearer Kiro / AWS CodeWhisperer tó wà fún ìgbà pípẹ́. Kò
-lo ìmúdójúìwọ̀n OAuth, nítorí náà ó yẹra fún fífi ìjókòó OIDC tí a pín lò di asán.
+Ìfàṣẹsí API-key jẹ́ fún àwọn ìwé-ẹ̀rí bearer Kiro / AWS CodeWhisperer tí a pinnu fún lílò ìgbà pípẹ́. Kì í
+lo ìmúdójúìwọ̀n OAuth, nítorí náà ó yẹra fún fífi ìjókòó OIDC tí a pín pa run.
 
 ### Dashboard
 
 1. Ṣí **Dashboard -> Providers -> Kiro**.
 2. Yan **API Key**.
-3. Lẹ API key náà àti ẹkùn AWS àṣàyàn (`us-east-1` gẹ́gẹ́ bí àkọ́kọ́).
-4. OmniRoute yóò fìdí key náà múlẹ̀, yóò sì fi àsopọ̀ náà pamọ́.
+3. Lẹ API key náà, kí o sì yan ẹkùn AWS: **Auto-detect** (àìyípadà), **US East
+   (N. Virginia)** tàbí **Europe (Frankfurt)**.
+4. OmniRoute fìdí key náà múlẹ̀, ó sì fi àsopọ̀ náà pamọ́ ní dídè mọ́ ẹkùn tí
+   key náà ti ṣiṣẹ́.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
 
-### Àdéhùn Inú Ètò
+`region` gba `auto` (àìyípadà), `us-east-1` tàbí `eu-central-1`; gbogbo iye míì ni a
+kọ̀ pẹ̀lú HTTP 400.
 
-Ọ̀nà API náà ń fìdí key náà múlẹ̀ nípa pípè `KiroService.validateApiKey()`, èyí tí
-ń lo `ListAvailableProfiles` lòdì sí endpoint CodeWhisperer/Amazon Q tó bá ẹkùn náà mu,
-tó sì ń pinnu `profileArn` kan.
+### Àdéhùn Inú
 
-Àsopọ̀ tí a fipamọ́ náà ń lo:
+Ojú-ọ̀nà API náà fìdí key náà múlẹ̀ nípa pípè `KiroService.validateApiKey()`, èyí tí
+ó ń pe `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(API inference key ti Amazon Q ń lò) pẹ̀lú àkókò ìdádúró 10 s fún ẹkùn kọ̀ọ̀kan. Ní
+ipò `auto`, ó kọ́kọ́ gbìyànjú `us-east-1`, lẹ́yìn náà `eu-central-1`, ó sì ń tọ́jú ẹkùn àkọ́kọ́
+tí ó gba key náà. Bí gbogbo ẹkùn olùdíje bá kọ key kan, ìgbéwọlé náà yóò kùnà pẹ̀lú
+HTTP 400. Lẹ́yìn náà, a ń pe `ListAvailableProfiles` bí ó bá ṣeé ṣe láti ṣàwárí
+`profileArn` àṣàyàn kan (AWS máa ń kọ̀ ọ́ fún ọ̀pọ̀ jù lọ àwọn API key).
+
+Àsopọ̀ tí a fipamọ́ ń lo:
 
 ```json
 {
@@ -155,10 +164,13 @@ tó sì ń pinnu `profileArn` kan.
 }
 ```
 
-Ní àsìkò ìṣiṣẹ́, `KiroExecutor.buildHeaders()` ń fi key náà ránṣẹ́ gẹ́gẹ́ bí
+Ní àkókò ìṣiṣẹ́, `KiroExecutor.buildHeaders()` ń fi key náà ránṣẹ́ gẹ́gẹ́ bí
 `Authorization: Bearer <key>`, ó sì ń ṣàfikún `tokentype: API_KEY`. Àwọn ìpè quota/profile
-ń lo àmì kan náà kí AWS lè ka bearer náà sí API key tó wà fún ìgbà pípẹ́ dípò
-token ìráàyèsí OIDC tàbí ti àwùjọ.
+ń lo àmì kan náà, kí AWS lè ka bearer náà sí API key ìgbà pípẹ́ dípò
+OIDC tàbí token ìráyè social. `KiroExecutor.execute()` ń fi inference API-key ránṣẹ́ nìkan
+sí `https://q.<region>.amazonaws.com/generateAssistantResponse` — pẹ̀lú `us-east-1`
+— nítorí gateway Kiro IDE kọ `TokenType=API_KEY`, àti pé
+`codewhisperer.us-east-1` kọ àwọn payload API-key gẹ́gẹ́ bí body ìbéèrè tí kò tọ́ (HTTP 400).
 
 ---
 

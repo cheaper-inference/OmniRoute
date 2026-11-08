@@ -96,28 +96,40 @@ Le champ `region` utilise par défaut `us-east-1` lorsqu’il est omis.
 
 ---
 
-## Flux d’importation par clé API
+## Flux d’importation d’une clé API
 
-L’authentification par clé API est destinée aux identifiants bearer Kiro / AWS CodeWhisperer à longue durée de vie. Elle n’utilise pas l’actualisation OAuth et évite donc l’invalidation des sessions OIDC partagées.
+L’authentification par clé API est destinée aux identifiants bearer Kiro / AWS CodeWhisperer de longue durée. Elle
+n’utilise pas l’actualisation OAuth, ce qui évite l’invalidation des sessions OIDC partagées.
 
 ### Tableau de bord
 
 1. Ouvrez **Tableau de bord -> Fournisseurs -> Kiro**.
-2. Sélectionnez **Clé API**.
-3. Collez la clé API et, éventuellement, la région AWS (`us-east-1` par défaut).
-4. OmniRoute valide la clé et enregistre la connexion.
+2. Choisissez **Clé API**.
+3. Collez la clé API et sélectionnez la région AWS : **Détection automatique** (par défaut), **USA Est
+   (Virginie du Nord)** ou **Europe (Francfort)**.
+4. OmniRoute valide la clé et enregistre la connexion en l’associant à la région dans laquelle la
+   clé fonctionne.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` accepte `auto` (par défaut), `us-east-1` ou `eu-central-1` ; toute autre valeur est
+rejetée avec le code HTTP 400.
 
 ### Contrat interne
 
-La route API valide la clé en appelant `KiroService.validateApiKey()`, qui utilise `ListAvailableProfiles` avec le point de terminaison CodeWhisperer/Amazon Q correspondant à la région et détermine un `profileArn`.
+La route API valide la clé en appelant `KiroService.validateApiKey()`, qui
+appelle `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(l’API de surface utilisée par Amazon Q pour l’inférence par clé API) avec un délai d’expiration de 10 s par région. En
+mode `auto`, elle essaie `us-east-1`, puis `eu-central-1`, et enregistre la première région
+qui accepte la clé. Une clé rejetée dans toutes les régions candidates entraîne l’échec de l’importation avec le code
+HTTP 400. `ListAvailableProfiles` est ensuite appelé sans garantie de succès afin de découvrir un éventuel
+`profileArn` (AWS refuse cet appel pour la plupart des clés API).
 
 La connexion enregistrée utilise :
 
@@ -132,7 +144,13 @@ La connexion enregistrée utilise :
 }
 ```
 
-Lors de l’exécution, `KiroExecutor.buildHeaders()` envoie la clé sous la forme `Authorization: Bearer <key>` et ajoute `tokentype: API_KEY`. Les appels relatifs aux quotas et aux profils utilisent le même marqueur afin qu’AWS traite le bearer comme une clé API à longue durée de vie plutôt que comme un jeton d’accès OIDC ou de réseau social.
+Lors de l’exécution, `KiroExecutor.buildHeaders()` envoie la clé sous la forme
+`Authorization: Bearer <key>` et ajoute `tokentype: API_KEY`. Les appels de quota/profil
+utilisent le même marqueur afin qu’AWS traite le jeton bearer comme une clé API de longue durée plutôt que
+comme un jeton d’accès OIDC ou social. `KiroExecutor.execute()` envoie les requêtes d’inférence par clé API uniquement
+à `https://q.<region>.amazonaws.com/generateAssistantResponse` — y compris pour `us-east-1`
+— car la passerelle de l’IDE Kiro rejette `TokenType=API_KEY` et
+`codewhisperer.us-east-1` rejette les charges utiles de clé API comme un corps de requête non valide (HTTP 400).
 
 ---
 

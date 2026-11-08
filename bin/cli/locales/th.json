@@ -123,7 +123,9 @@
       "maxCostOpt": "ค่าใช้จ่ายสูงสุดต่อวัน (USD)",
       "allowedModelsOpt": "รายการโมเดลที่อนุญาตโดยคั่นด้วยจุลภาค",
       "nothingToSet": "ไม่ได้ระบุฟิลด์นโยบาย โปรดใช้ --rate-limit, --max-cost หรือ --allowed-models",
-      "updated": "อัปเดตนโยบายแล้ว"
+      "updated": "อัปเดตนโยบายแล้ว",
+      "modelAccessModeOpt": "โหมดการเข้าถึงโมเดล (all | restricted)",
+      "unrestrictedOpt": "อนุญาตทุกโมเดล (--model-access-mode all)"
     },
     "expiration": {
       "title": "การหมดอายุของคีย์",
@@ -1169,32 +1171,18 @@
   "sync": {
     "description": "ซิงค์การกำหนดค่าระหว่างอินสแตนซ์ OmniRoute",
     "push": {
-      "description": "พุชการกำหนดค่าไปยังระบบคลาวด์หรืออินสแตนซ์ระยะไกล",
-      "target": "เป้าหมาย (cloud หรือ context:name)",
-      "bundle": "ส่วนของบันเดิลที่จะซิงค์",
-      "dryRun": "แสดงตัวอย่างโดยไม่ใช้การเปลี่ยนแปลง"
+      "description": "พุชการกำหนดค่าไปยังระบบคลาวด์หรืออินสแตนซ์ระยะไกล"
     },
     "pull": {
-      "description": "ดึงการกำหนดค่าจากระบบคลาวด์หรืออินสแตนซ์ระยะไกล",
-      "source": "แหล่งที่มา (cloud หรือ context:name)",
-      "merge": "ผสานกับการกำหนดค่าที่มีอยู่",
-      "replace": "แทนที่การกำหนดค่าที่มีอยู่",
-      "dryRun": "แสดงตัวอย่างโดยไม่ใช้การเปลี่ยนแปลง"
-    },
-    "diff": {
-      "source": "คอนเท็กซ์ต้นทาง",
-      "target": "คอนเท็กซ์ปลายทาง"
+      "description": "ดึงการกำหนดค่าจากระบบคลาวด์หรืออินสแตนซ์ระยะไกล"
     },
     "bundle": {
       "description": "ส่งออกการกำหนดค่าเป็นไฟล์บันเดิล",
-      "include": "ส่วนที่จะรวม (คั่นด้วยจุลภาค)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "นำเข้าไฟล์บันเดิล",
       "dryRun": "ตรวจสอบความถูกต้องโดยไม่ใช้การเปลี่ยนแปลง"
-    },
-    "initialize": {
-      "fromCloud": "เริ่มต้นจากข้อมูลสำรองบนคลาวด์"
     },
     "tokens": {
       "description": "จัดการโทเค็นการซิงค์",
@@ -1206,9 +1194,6 @@
       "revoke": {
         "yes": "ข้ามการยืนยัน"
       }
-    },
-    "resolve": {
-      "description": "แก้ไขข้อขัดแย้งในการซิงค์แบบโต้ตอบ"
     }
   },
   "config": {

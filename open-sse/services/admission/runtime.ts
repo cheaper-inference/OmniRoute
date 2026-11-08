@@ -20,6 +20,7 @@ import {
   type ShadowDecision,
 } from "./types.ts";
 import { buildErrorBody } from "../../utils/error.ts";
+import { getProcessStore } from "@/shared/utils/processSingleton";
 import { CORS_HEADERS } from "../../utils/cors.ts";
 import {
   checkResourcePressureGuard,
@@ -43,24 +44,14 @@ export const DEFAULT_ADAPTIVE_ADMISSION_CONFIG: Readonly<AdaptiveAdmissionConfig
   virtualLanes: false,
 });
 
-const RUNTIME_STORE_KEY = Symbol.for("omniroute.adaptiveAdmission.runtime");
-
 type RuntimeStore = {
   runtime: AdaptiveAdmissionRuntime | null;
 };
 
-type GlobalWithRuntimeStore = typeof globalThis & {
-  [RUNTIME_STORE_KEY]?: RuntimeStore;
-};
-
 function getRuntimeStore(): RuntimeStore {
-  const globalWithStore = globalThis as GlobalWithRuntimeStore;
-  let store = globalWithStore[RUNTIME_STORE_KEY];
-  if (!store) {
-    store = { runtime: null };
-    globalWithStore[RUNTIME_STORE_KEY] = store;
-  }
-  return store;
+  return getProcessStore("adaptiveAdmission.runtime", () => ({
+    runtime: null,
+  }));
 }
 
 const ENV_KEYS = {

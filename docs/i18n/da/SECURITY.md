@@ -32,20 +32,21 @@ Hvis du opdager en sikkerhedssårbarhed i OmniRoute, bedes du rapportere den ans
 ## LTS-supportperiode (v3.9.x)
 
 Efter 3.8.59 er den næste version **3.9.0**, som åbner linjen for langsigtet support på
-`stable/v3`-branchen (se [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
+`stable/v3`-grenen (se [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
 
 - **Hvad `stable/v3` modtager:** fejlrettelser, sikkerhedsrettelser og udbyderopdateringer. Nye
-  funktioner føjes til v4-kanalen; LTS-linjen prioriterer stabilitet. `npm install omniroute`
+  funktioner kommer i v4-kanalen; LTS-linjen prioriterer stabilitet. `npm install omniroute`
   (`latest`-dist-tagget) forbliver på v3 under hele v4-cyklussen.
-- **Periodens varighed:** `<T-GAP-3: ejerens beslutning afventes — se ROADMAP.md>`. Periodens
-  længde efter v4.0 GA (når `latest` skifter til v4) er **endnu ikke besluttet**; dette
-  afsnit opdateres, når vedligeholderen offentliggør den. Indtil da må du ikke antage en slutdato.
-- **Rapportering af en sårbarhed i LTS-linjen:** samme kanal som for enhver anden version —
-  en privat [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  aldrig en offentlig issue. Angiv, hvilken version du testede (f.eks. `3.9.2`); rettelser tilføjes på
-  `stable/v3` og overføres efterfølgende til v4.
-- **Sikkerhedsbaseline ved etableringen af LTS-linjen:** målt scannertilstand, route-guard- og
-  public-credential-beviser registreres i
+- **Periodens varighed:** `stable/v3` modtager **sikkerhedsrettelser og rettelser til kritiske regressioner i
+  12 måneder efter udgivelsen af 3.9.0 eller indtil 90 dage efter, at v4.0.0 udgives som `latest` —
+  alt efter hvilken dato der ligger senest**. Den resulterende slutdato registreres i udgivelsesnoterne til 3.9.0 og i
+  [`ROADMAP.md`](ROADMAP.md), når udgivelsen finder sted.
+- **Rapportering af en sårbarhed i LTS-linjen:** Brug samme kanal som for enhver anden version —
+  en privat [GitHub-sikkerhedsmeddelelse](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  aldrig en offentlig issue. Angiv, hvilken version du testede (f.eks. `3.9.2`); rettelser implementeres på
+  `stable/v3` og porteres fremad til v4.
+- **Sikkerhedsbaseline ved LTS-udgivelsen:** Den målte scannertilstand samt dokumentation for route guards og
+  offentlige legitimationsoplysninger registreres i
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

@@ -31,21 +31,22 @@ Jika anda menemui kerentanan keselamatan dalam OmniRoute, sila laporkannya secar
 
 ## Tempoh sokongan LTS (v3.9.x)
 
-Selepas 3.8.59, versi seterusnya ialah **3.9.0**, yang membuka barisan sokongan jangka panjang pada cabang
+Selepas 3.8.59, versi seterusnya ialah **3.9.0**, yang memulakan siri sokongan jangka panjang pada cabang
 `stable/v3` (lihat [`ROADMAP.md`](ROADMAP.md) → "Fasa 3 — v3.9.0 LTS").
 
-- **Perkara yang diterima oleh `stable/v3`:** pembetulan pepijat, tampalan keselamatan dan kemas kini penyedia. Ciri
-  baharu disalurkan ke saluran v4; barisan LTS mengutamakan kestabilan. `npm install omniroute`
+- **Apa yang diterima oleh `stable/v3`:** pembetulan pepijat, tampalan keselamatan dan kemas kini penyedia. Ciri
+  baharu disalurkan ke saluran v4; siri LTS mengutamakan kestabilan. `npm install omniroute`
   (`latest` dist-tag) kekal pada v3 sepanjang keseluruhan kitaran v4.
-- **Tempoh tetingkap:** `<T-GAP-3: keputusan pemilik belum dibuat — lihat ROADMAP.md>`. Tempoh
-  tetingkap selepas v4.0 GA (apabila `latest` bertukar kepada v4) **masih belum diputuskan**; bahagian ini
-  dikemas kini apabila penyelenggara mengumumkannya. Sehingga itu, jangan andaikan tarikh tamat.
-- **Melaporkan kerentanan dalam barisan LTS:** saluran yang sama seperti mana-mana versi lain —
+- **Tempoh sokongan:** `stable/v3` menerima **pembetulan keselamatan dan pembetulan regresi kritikal selama
+  12 bulan selepas keluaran 3.9.0, atau sehingga 90 hari selepas v4.0.0 diterbitkan sebagai `latest` —
+  yang mana lebih lewat**. Tarikh tamat yang terhasil direkodkan dalam nota keluaran 3.9.0 dan dalam
+  [`ROADMAP.md`](ROADMAP.md) apabila keluaran tersebut dibuat.
+- **Melaporkan kerentanan dalam siri LTS:** gunakan saluran yang sama seperti mana-mana versi lain —
   [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) peribadi,
-  bukan isu awam. Nyatakan versi yang anda uji (contohnya `3.9.2`); pembetulan dimasukkan ke
-  `stable/v3` dan dibawa ke hadapan ke v4.
-- **Garis dasar keselamatan pada permulaan LTS:** keadaan pengimbas yang diukur, pengawal laluan dan
-  bukti kelayakan awam direkodkan dalam
+  bukan isu awam. Nyatakan versi yang anda uji (contohnya `3.9.2`); pembetulan dimasukkan ke dalam
+  `stable/v3` dan dipindahkan ke hadapan ke v4.
+- **Garis dasar keselamatan semasa keluaran LTS:** keadaan pengimbas yang diukur, bukti pengadang laluan dan
+  kelayakan awam direkodkan dalam
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

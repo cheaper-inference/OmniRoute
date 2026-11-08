@@ -6,6 +6,7 @@
  */
 
 import { parseModelFromRegistry } from "./registryUtils.ts";
+import { GROK_BUILD_PROXY_BASE_URL } from "./grokBuild.ts";
 import { RUNWAYML_SUPPORTED_VIDEO_MODELS } from "./runway.ts";
 import { SEGMIND_VIDEO_MODELS } from "./providers/registry/segmind/videoModels.ts";
 import { toRegistryVideoModels } from "../services/adobeFireflyModels.ts";
@@ -102,7 +103,11 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
     authType: "apikey",
     authHeader: "bearer",
     format: "vertex-veo",
+    // Vertex uses the GA `-001` ids; the Gemini-API `*-generate-preview` names 404 here.
+    // Veo 3.1 is GA in us-central1 (the default region).
     models: [
+      { id: "veo-3.1-generate-001", name: "Veo 3.1 (Vertex)" },
+      { id: "veo-3.1-fast-generate-001", name: "Veo 3.1 Fast (Vertex)" },
       { id: "veo-3.0-generate-001", name: "Veo 3.0 (Vertex)" },
       { id: "veo-3.0-fast-generate-001", name: "Veo 3.0 Fast (Vertex)" },
       { id: "veo-2.0-generate-001", name: "Veo 2.0 (Vertex)" },
@@ -192,12 +197,15 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
   },
   leonardo: {
     id: "leonardo",
-    baseUrl: "https://cloud.leonardo.ai/api/rest/v1/generations",
+    baseUrl: "https://cloud.leonardo.ai/api/rest/v1/generations-text-to-video",
     statusUrl: "https://cloud.leonardo.ai/api/rest/v1/generations",
     authType: "apikey",
     authHeader: "bearer",
     format: "leonardo-video",
-    models: [{ id: "phoenix", name: "Phoenix Video" }],
+    models: [
+      { id: "motion-2.0", name: "Motion 2.0" },
+      { id: "motion-2.0-fast", name: "Motion 2.0 Fast" },
+    ],
   },
   pollinations: {
     id: "pollinations",
@@ -414,6 +422,17 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
     models: [{ id: "grok-imagine-video", name: "Grok Imagine Video" }],
   },
 
+  "grok-cli": {
+    id: "grok-cli",
+    alias: "gc",
+    baseUrl: `${GROK_BUILD_PROXY_BASE_URL}/videos`,
+    statusUrl: `${GROK_BUILD_PROXY_BASE_URL}/videos`,
+    authType: "oauth",
+    authHeader: "bearer",
+    format: "xai-video",
+    models: [{ id: "grok-imagine-video", name: "Grok Imagine Video (OAuth)" }],
+  },
+
   // UC (uncensored.com) video generation. One handler (handleUcVideoGeneration)
   // serves BOTH surfaces, picking by credential: PERSONA web (un-metered, Clerk
   // JWT -> internal.chatuncensored.ai/{text,image}_to_video + moveinwater result
@@ -489,6 +508,35 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
     authHeader: "bearer",
     format: "syntx-video",
     models: toSyntxVideoModels(),
+  },
+
+  // Added locally. OpenRouter publishes video on POST /api/v1/videos (the
+  // /videos/generations path is a 404). That endpoint is asynchronous: it
+  // answers 202 with a job id, so `format` selects the submit→poll preset
+  // rather than the synchronous openai-video handler, which returned 200
+  // with no video. Model ids are OpenRouter's own slugs, passed through.
+  openrouter: {
+    id: "openrouter",
+    baseUrl: "https://openrouter.ai/api/v1",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openrouter-video-job",
+    models: [
+      { id: "google/veo-3.1", name: "Veo 3.1" },
+      { id: "google/veo-3.1-fast", name: "Veo 3.1 Fast" },
+      { id: "google/veo-3.1-lite", name: "Veo 3.1 Lite" },
+      { id: "openai/sora-2-pro", name: "Sora 2 Pro" },
+      { id: "kwaivgi/kling-v3.0-pro", name: "Kling 3.0 Pro" },
+      { id: "kwaivgi/kling-v3.0-std", name: "Kling 3.0 Standard" },
+      { id: "bytedance/seedance-2.5", name: "Seedance 2.5" },
+      { id: "bytedance/seedance-2.0", name: "Seedance 2.0" },
+      { id: "minimax/hailuo-3-max", name: "Hailuo 3 Max" },
+      { id: "minimax/hailuo-3", name: "Hailuo 3" },
+      { id: "alibaba/wan-3.0", name: "Wan 3.0" },
+      { id: "alibaba/wan-3.0-prime", name: "Wan 3.0 Prime" },
+      { id: "x-ai/grok-imagine-video-1.5", name: "Grok Imagine Video 1.5" },
+      { id: "runway/gen-4.5", name: "Runway Gen-4.5" },
+    ],
   },
 };
 

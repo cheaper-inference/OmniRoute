@@ -23,39 +23,38 @@ OmniRoute **samler** konfigurerede forbindelser i ét slutpunkt. Du skal stadig 
 
 ### Tilbagevendende, nøglefri eller ubegrænset adgang
 
-Disse udbydere har en tilbagevendende, nøglefri eller ubegrænset adgangsmulighed i det reviderede katalog. “Ubegrænset” betyder, at der ikke er offentliggjort nogen token-grænse; begrænsninger for hastighed, samtidighed, konto, region og politik kan stadig gælde:
+Disse udbydere har en tilbagevendende, nøglefri eller ubegrænset vej til gratis adgang i det reviderede katalog. “Ubegrænset” betyder, at der ikke er offentliggjort noget tokenloft; begrænsninger for hastighed, samtidighed, konto, region og politik kan stadig være gældende:
 
-| Udbyder           | Modeller                                                                                 | Kvote                                                                                                                                 | Sådan opretter du forbindelse                                                                                     |
-| ----------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 og andre                                     | Det reviderede katalog anslår en delt månedlig pulje på 25K tokens                                                                    | OAuth-/kontoflow; brugsvilkår markeret som `avoid` i kataloget                                                    |
-| **OpenCode Free** | Det aktuelle sæt af `*-free`-modeller i udbyderregistret                                 | Nøglefri; ingen offentliggjort token-grænse                                                                                           | Ingen udbyderlegitimationsoplysninger; brugsvilkår markeret som `avoid`                                           |
-| **Pollinations**  | Det aktuelle nøglefri modelsæt; nogle tidligere modeller er udgået eller kræver en nøgle | Nøglefri; ingen offentliggjort token-grænse                                                                                           | Ingen udbyderlegitimationsoplysninger til de nøglefri modeller                                                    |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 og flere                     | Gratis API-nøgle (ingen hastighedsbegrænsninger, intet kort); **hver anmodning logges** til forskning (fravælg på logfare.ai/consent) | Få en nøgle med det samme på logfare.ai/register; brugsvilkår/datapolitik på logfare.ai/tos og logfare.ai/privacy |
-| **Cloudflare AI** | Workers AI-kataloget                                                                     | Den reviderede pulje anslås til ~30M tokens/måned baseret på offentliggjorte forbrugsenheder                                          | Cloudflare-konto og API-legitimationsoplysninger                                                                  |
-| **Gemini**        | Gemini Flash-familien                                                                    | Varierende hastighedsgrænser for projekter/modeller; ingen fast månedlig token-tildeling er inkluderet i oversigten                   | Google AI Studio API-nøgle; kontrollér projektets aktive grænser                                                  |
-| **Groq**          | Llama-, GPT-OSS- og Qwen-modeller                                                        | Den reviderede pulje anslås til ~15M tokens/måned                                                                                     | Groq API-nøgle; hastighedsgrænser gælder                                                                          |
+| Udbyder           | Modeller                                                                          | Kvote                                                                                                                                   | Sådan opretter du forbindelse                                                                                              |
+| ----------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 og andre                              | Det reviderede katalog anslår en delt månedlig pulje på 25K tokens                                                                      | OAuth-/kontoflow; brugsvilkårene er markeret som `avoid` i kataloget                                                       |
+| **Pollinations**  | Aktuelt nøglefrit modelsæt; nogle tidligere modeller er udgået eller kræver nøgle | Nøglefri; intet offentliggjort tokenloft                                                                                                | Ingen udbyderlegitimationsoplysninger til de nøglefri modeller                                                             |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 og flere              | Gratis API-nøgle (ingen hastighedsbegrænsninger, intet kort); **alle anmodninger logges** til forskning (fravælg på logfare.ai/consent) | Få en nøgle med det samme på logfare.ai/register; brugsvilkår og privatlivspolitik på logfare.ai/tos og logfare.ai/privacy |
+| **Cloudflare AI** | Workers AI-katalog                                                                | Den reviderede pulje anslår ~30M tokens/måned ud fra offentliggjorte forbrugsenheder                                                    | Cloudflare-konto og API-legitimationsoplysninger                                                                           |
+| **Gemini**        | Gemini Flash-familien                                                             | Variable hastighedsgrænser pr. projekt/model; ingen fast månedlig tokentildeling er inkluderet i oversigten                             | Google AI Studio-API-nøgle; kontrollér projektets aktive grænser                                                           |
+| **Groq**          | Llama-, GPT-OSS- og Qwen-modeller                                                 | Den reviderede pulje anslår ~15M tokens/måned                                                                                           | Groq-API-nøgle; hastighedsgrænser er gældende                                                                              |
 
-### Oprettelsestilskud og udbyderspecifikke kreditter
+### Oprettelsestildelinger og udbyderspecifikke kreditter
 
-Disse udbydere tilbyder oprettelsestilskud eller kampagnekreditter i henhold til deres kvalifikationsregler. Som verificeret den 2026-10-08 kræver [Cerebras' priser](https://www.cerebras.ai/pricing) en betalingsmetode for en engangskredit på $5, der udløber efter 30 dage; det er ikke en tilbagevendende token-kvote. [Gemini-hastighedsgrænser](https://ai.google.dev/gemini-api/docs/rate-limits) varierer efter projekt, model og niveau, så de konverteres ikke til en garanteret månedlig token-tildeling.
+Disse udbydere tilbyder oprettelsestildelinger eller kampagnekreditter i henhold til deres kvalifikationsregler. Som bekræftet den 2026-10-08 kræver [Cerebras' priser](https://www.cerebras.ai/pricing) en betalingsmetode for en engangskredit på $5, der udløber efter 30 dage; det er ikke en tilbagevendende tokenkvote. [Geminis hastighedsgrænser](https://ai.google.dev/gemini-api/docs/rate-limits) varierer efter projekt, model og niveau, så de omregnes ikke til en garanteret månedlig tokentildeling.
 
-| Udbyder       | Gratis kreditter                                                           | Modeller                     | Sådan får du adgang                                              |
-| ------------- | -------------------------------------------------------------------------- | ---------------------------- | ---------------------------------------------------------------- |
-| **Cerebras**  | Engangskampagnekredit på $5; udløber efter 30 dage                         | Det aktuelle inferenskatalog | Konto og gyldig betalingsmetode                                  |
-| **DeepSeek**  | 5M gratis tokens                                                           | DeepSeek V4                  | Tilmeld dig på platform.deepseek.com                             |
-| **LongCat**   | Engangstildeling på 10M tokens                                             | LongCat 2.0                  | API-nøgle + KYC; løbende betaling efter tildelingen              |
-| **Vertex AI** | Oprettelseskredit på $300, repræsenteret som ~300M tokens i budgetmodellen | Gemini- og partnermodeller   | Google Cloud-konto; fakturerings- og kvalifikationsregler gælder |
+| Udbyder       | Gratis kreditter                                                           | Modeller                   | Sådan får du adgang                                                     |
+| ------------- | -------------------------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------------- |
+| **Cerebras**  | Engangskampagnekredit på $5; udløber efter 30 dage                         | Aktuelt inferenskatalog    | Konto og gyldig betalingsmetode                                         |
+| **DeepSeek**  | 5M gratis tokens                                                           | DeepSeek V4                | Tilmeld dig på platform.deepseek.com                                    |
+| **LongCat**   | Engangstildeling på 10M tokens                                             | LongCat 2.0                | API-nøgle + KYC; løbende betaling efter tildelingen                     |
+| **Vertex AI** | Oprettelseskredit på $300, repræsenteret som ~300M tokens i budgetmodellen | Gemini- og partnermodeller | Google Cloud-konto; regler for fakturering og kvalifikation er gældende |
 
 ### Anden begrænset adgang
 
-Disse udbydere har **gratis niveauer** med specifikke grænser:
+Disse udbydere har **gratis niveauer** med specifikke begrænsninger:
 
-| Udbyder                    | Gratis grænse                                                                            | Modeller                             | Bedst til |
-| -------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------ | --------- |
-| **GitHub Models**          | Den reviderede delte pulje anslås til ~18M tokens/måned                                  | Bred modelevaluering                 |
-| **Hugging Face**           | Lille tilbagevendende månedlig pulje                                                     | Eksperimenter og modelvariation      |
-| **OpenRouter free models** | Delt anmodningsbegrænset pulje; valgfri engangsoptankning øger den tilbagevendende kvote | Bredt reservekatalog                 |
-| **AI Horde**               | Nøglefri fællesskabskapacitet; tilgængeligheden varierer                                 | Opportunistisk distribueret inferens |
+| Udbyder                    | Gratis grænse                                                                                        | Modeller                             | Bedst til |
+| -------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------ | --------- |
+| **GitHub Models**          | Den reviderede delte pulje anslår ~18M tokens/måned                                                  | Bred modelevaluering                 |
+| **Hugging Face**           | Lille tilbagevendende månedlig pulje                                                                 | Eksperimenter og modelvariation      |
+| **OpenRouter free models** | Delt pulje med begrænset antal anmodninger; valgfri engangsoptankning øger den tilbagevendende kvote | Bredt reservekatalog                 |
+| **AI Horde**               | Nøglefri fællesskabskapacitet; tilgængeligheden varierer                                             | Opportunistisk distribueret inferens |
 
 ---
 

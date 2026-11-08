@@ -29,22 +29,21 @@
 | 3.7.x   | ✅ 安全支持                                 |
 | < 3.7.0 | ❌ 不受支持                                 |
 
-## LTS 支持窗口（v3.9.x）
+## LTS 支持期限（v3.9.x）
 
-在 3.8.59 之后，下一个版本是 **3.9.0**，它将在
+3.8.59 之后的下一个版本是 **3.9.0**，该版本将在
 `stable/v3` 分支上开启长期支持线（参见 [`ROADMAP.md`](ROADMAP.md) → “阶段 3 — v3.9.0 LTS”）。
 
-- **`stable/v3` 接收的内容：**错误修复、安全补丁和提供者更新。新
-  功能将进入 v4 渠道；LTS 线优先保证稳定性。在整个 v4 周期中，`npm install omniroute`
-  （`latest` dist-tag）都会保持在 v3。
-- **窗口持续时间：**`<T-GAP-3: 所有者的决定待定 — 请参阅 ROADMAP.md>`。v4.0 正式发布之后
-  （即 `latest` 切换至 v4 时）的窗口长度**尚未确定**；维护者公布决定后，
-  本节将进行更新。在此之前，请勿假定结束日期。
-- **报告 LTS 线中的漏洞：**使用与其他版本相同的渠道 —
-  私密的 [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)，
-  切勿创建公开 issue。请说明您测试的版本（例如 `3.9.2`）；修复将合入
-  `stable/v3`，并向前移植至 v4。
-- **LTS 切分时的安全基线：**测得的扫描器状态、路由防护和
+- **`stable/v3` 接收的更新：**错误修复、安全补丁和提供者更新。新功能将进入 v4 渠道；LTS 支持线以稳定性为首要目标。在整个 v4 周期内，`npm install omniroute`
+  （`latest` dist-tag）将保持在 v3。
+- **支持期限：**`stable/v3` 将在 **3.9.0 发布后的 12 个月内，或在 v4.0.0 以 `latest` 发布后的 90 天内接收安全修复和关键回归修复——
+  以两者中较晚的日期为准**。确定的结束日期将在 3.9.0 发布时记录于其发行说明和
+  [`ROADMAP.md`](ROADMAP.md) 中。
+- **报告 LTS 支持线中的漏洞：**使用与任何其他版本相同的渠道——
+  私密的 [GitHub 安全公告](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)，
+  切勿提交公开议题。请说明测试的版本（例如 `3.9.2`）；修复将合入
+  `stable/v3`，并向前移植到 v4。
+- **LTS 发布时的安全基线：**扫描器的实测状态、路由防护及
   公共凭据证明记录在
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) 中。
 

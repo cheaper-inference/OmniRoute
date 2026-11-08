@@ -4,7 +4,7 @@
 
 ---
 
-> **簡而言之**：安裝 → 連接免費提供者 → 將 IDE 指向 OmniRoute。完成。
+> **重點摘要**：安裝 → 連接符合資格的提供者 → 將您的 IDE 指向 OmniRoute。完成。
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute 會在 `http://localhost:20128` 啟動。儀表板將自動開啟。
 
 ---
 
-## 步驟 3：連接免費提供者
+## 步驟 3：連線至符合資格的提供者
 
-您可以連接免費提供者，**無須支付任何費用**即可使用 OmniRoute。
+選擇其條款與配額符合您需求的提供者。在 **Dashboard → Providers** 中，連結您自己的帳戶或 API 金鑰，然後測試連線。不保證能免費存取或無須金鑰即可使用。
 
-### 選項 A：Kiro（免費 Claude — 無須信用卡）
-
-1. 在 `http://localhost:20128` 開啟儀表板
-2. 前往 **提供者** → **新增提供者**
-3. 選取 **Kiro AI**
-4. 按一下 **連接**（無須 API 金鑰！）
-5. 完成！您現在可以免費使用 Claude 模型。
-
-### 選項 B：OpenCode Free（無須驗證）
-
-1. 在 `http://localhost:20128` 開啟儀表板
-2. 前往 **提供者** → **新增提供者**
-3. 選取 **OpenCode Free**
-4. 按一下 **連接**（無須 API 金鑰！）
-5. 完成！您現在可以免費使用多種模型。
-
-### 選項 C：Pollinations（無須金鑰）
-
-1. 在 `http://localhost:20128` 開啟儀表板
-2. 前往 **提供者** → **新增提供者**
-3. 選取 **Pollinations**
-4. 按一下 **連接**（無須 API 金鑰！）
-5. 完成！您現在可以免費使用 GPT-5、Claude、Gemini 等模型。
+`auto` 預設會排除標記為 `tos: avoid` 的提供者，包括 Kiro。連結帳戶不會變更此政策。**Dashboard → Combos** 中的選擇加入設定適用於所有自動組合。選擇提供者前，請先閱讀[免費方案指南](./FREE-TIERS-GUIDE.md)。
 
 ---
 
@@ -152,9 +130,9 @@ omniroute launch-codex --model auto
 
 ## 接下來呢？
 
-- **[Auto-Combo 指南](./AUTO-COMBO-GUIDE.md)** — 讓 OmniRoute 為您選擇最佳 AI
-- **[提供者指南](./PROVIDERS-GUIDE.md)** — 連接更多提供者（免費及付費）
-- **[免費方案指南](./FREE-TIERS-GUIDE.md)** — 無須信用卡即可免費使用 AI
+- **[自動組合指南](./AUTO-COMBO-GUIDE.md)** — 讓 OmniRoute 為您挑選最佳的 AI
+- **[提供者指南](./PROVIDERS-GUIDE.md)** — 連接更多提供者（免費與付費）
+- **[免費方案指南](./FREE-TIERS-GUIDE.md)** — 查看提供者條款與免費方案限制
 - **[疑難排解](../guides/TROUBLESHOOTING.md)** — 修正常見問題
 
 ---
@@ -163,23 +141,23 @@ omniroute launch-codex --model auto
 
 ### 「我需要 API 金鑰嗎？」
 
-**不需要！** 您可以使用免費提供者（Kiro、OpenCode Free、Pollinations），無須任何 API 金鑰。只需在儀表板中連接它們即可。
+OmniRoute API 金鑰用於驗證您的工具。上游憑證則取決於提供者：有些需要 API 金鑰或登入帳戶。不保證可免費存取。
 
 ### 「`auto` 是什麼？」
 
-`auto` 會指示 OmniRoute 為每個請求自動選擇最佳提供者。它會考量速度、成本、品質及可用性。詳細資訊請參閱 [Auto-Combo 指南](./AUTO-COMBO-GUIDE.md)。
+`auto` 會讓 OmniRoute 自動為每個請求選擇最佳提供者。它會考量速度、成本、品質和可用性。詳情請參閱[自動組合指南](./AUTO-COMBO-GUIDE.md)。
 
 ### 「費用是多少？」
 
-OmniRoute 本身是**免費且開放原始碼**的。您只需為所使用的提供者付費。許多提供者都提供免費方案——請參閱[免費方案指南](./FREE-TIERS-GUIDE.md)。
+OmniRoute 本身是**免費且開放原始碼的**。您只需為所使用的提供者付費。許多提供者提供免費方案——請參閱[免費方案指南](./FREE-TIERS-GUIDE.md)。
 
-### 「我可以搭配 Claude Code／Cursor／Copilot 使用嗎？」
+### 「我可以將它與 Claude Code / Cursor / Copilot 搭配使用嗎？」
 
-**可以！** OmniRoute 可搭配任何支援 OpenAI 格式的工具使用。只需將基礎 URL 設定為 `http://localhost:20128/v1`。如需特定設定說明，請參閱 [CLI 工具指南](../reference/CLI-TOOLS.md)。
+**可以！** OmniRoute 可與任何支援 OpenAI 格式的工具搭配使用。只需將基礎 URL 設為 `http://localhost:20128/v1`。具體設定說明請參閱 [CLI 工具指南](../reference/CLI-TOOLS.md)。
 
-### 「如果提供者中斷服務怎麼辦？」
+### 「如果提供者停止服務，該怎麼辦？」
 
-OmniRoute 會自動略過失敗的提供者，並嘗試下一個。您無須進行任何操作。詳細資訊請參閱 [Auto-Combo 指南](./AUTO-COMBO-GUIDE.md)。
+OmniRoute 會自動略過失敗的提供者，並嘗試下一個。您不需要進行任何操作。詳情請參閱[自動組合指南](./AUTO-COMBO-GUIDE.md)。
 
 ---
 

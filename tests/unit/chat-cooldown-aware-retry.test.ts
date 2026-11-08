@@ -1,4 +1,19 @@
+import { registerHooks } from "node:module";
+const cooldownWaitHook = registerHooks({
+  resolve(specifier, context, next) {
+    if (
+      context.parentURL?.endsWith("/src/sse/handlers/chat.ts") &&
+      specifier === "../services/cooldownAwareRetry"
+    )
+      return {
+        url: new URL("../fixtures/cooldown-wait-observer.mjs", import.meta.url).href,
+        shortCircuit: true,
+      };
+    return next(specifier, context);
+  },
+});
 import test from "node:test";
+import { setTimeout as realSetTimeout, clearTimeout as realClearTimeout } from "node:timers";
 import assert from "node:assert/strict";
 import pino from "pino";
 
@@ -8,8 +23,12 @@ process.env.STREAM_IDLE_TIMEOUT_MS = "50";
 process.env.STREAM_READINESS_TIMEOUT_MS = "50";
 
 const harness = await createChatPipelineHarness("chat-cooldown-aware-retry");
+const { setCooldownWaitObserver } = await import("../fixtures/cooldown-wait-observer.mjs");
 const auth = await import("../../src/sse/services/auth.ts");
-const { getProviderConnectionById } = await import("../../src/lib/db/providers.ts");
+const { getProviderConnectionById, updateProviderConnection } =
+  await import("../../src/lib/db/providers.ts");
+const { getCooldownAwareRetryDecision } =
+  await import("../../src/sse/services/cooldownAwareRetry.ts");
 const { logger: rootLogger } = await import("../../src/shared/utils/logger.ts");
 const { __setTlsFetchOverrideForTesting } =
   await import("../../open-sse/services/claudeTlsClient.ts");
@@ -68,6 +87,7 @@ test.afterEach(async () => {
 });
 
 test.after(async () => {
+  cooldownWaitHook.deregister();
   await harness.cleanup();
 });
 
@@ -114,42 +134,123 @@ test("handleChat does not probe Claude Web repeatedly after an upstream 429", as
   assert.equal(completionCalls, 1);
 });
 
-test("handleChat waits for a short cooldown and retries once within the configured budget", async () => {
-  await seedConnection("openai", {
-    apiKey: "sk-openai-cooldown-short",
-    rateLimitedUntil: new Date(Date.now() + 950).toISOString(),
-    lastError: "short cooldown window",
-    errorCode: 429,
-  });
-  await settingsDb.updateSettings({
-    requestRetry: 1,
-    maxRetryIntervalSec: 1,
-  });
-
-  let fetchCalls = 0;
-  globalThis.fetch = async () => {
-    fetchCalls += 1;
-    return buildOpenAIResponse("recovered after cooldown");
-  };
-
-  const startedAt = Date.now();
-  const response = await handleChat(
-    buildRequest({
-      body: {
-        model: "openai/gpt-4.1",
-        stream: false,
-        messages: [{ role: "user", content: "retry after short cooldown" }],
+test(
+  "handleChat waits for a short cooldown and retries once within the configured budget",
+  { timeout: 30_000 },
+  async (t) => {
+    let clock = Date.now();
+    let resumedAt: number | null = null;
+    t.mock.method(
+      Date,
+      "now",
+      () => clock + (resumedAt === null ? 0 : Math.floor(performance.now() - resumedAt))
+    );
+    let readyResolve;
+    const ready = new Promise((resolve) => {
+      readyResolve = resolve;
+    });
+    const observation = {
+      calls: 0,
+      waitMs: 0,
+      done: false,
+      start: () => {
+        t.mock.timers.enable({ apis: ["setTimeout"] });
+        readyResolve();
       },
-    })
-  );
-  const elapsedMs = Date.now() - startedAt;
-  const body = (await response.json()) as any;
+      complete: (ms) => {
+        clock += ms;
+        resumedAt = performance.now();
+        t.mock.timers.reset();
+      },
+    };
+    const controller = new AbortController();
+    let pending: Promise<Response> | undefined;
+    // Use real timers for test deadlines even while the production wait is under test.
+    async function bounded<T>(promise: Promise<T>, label: string): Promise<T> {
+      let timer;
+      try {
+        return await Promise.race([
+          promise,
+          new Promise<never>((_, reject) => {
+            timer = realSetTimeout(() => reject(new Error(label)), 5_000);
+          }),
+        ]);
+      } finally {
+        realClearTimeout(timer);
+      }
+    }
+    setCooldownWaitObserver(observation);
+    t.after(async () => {
+      controller.abort();
+      t.mock.timers.reset();
+      setCooldownWaitObserver(null);
+      if (pending) {
+        await bounded(
+          pending.then(
+            () => undefined,
+            () => undefined
+          ),
+          "aborted request did not settle"
+        );
+      }
+    });
+    await seedConnection("openai", {
+      apiKey: "sk-openai-cooldown-short",
+      rateLimitedUntil: new Date(Date.now() + 950).toISOString(),
+      lastError: "short cooldown window",
+      errorCode: 429,
+    });
+    await settingsDb.updateSettings({
+      requestRetry: 1,
+      maxRetryIntervalSec: 1,
+    });
 
-  assert.equal(response.status, 200);
-  assert.equal(fetchCalls, 1);
-  assert.ok(elapsedMs >= 250, `expected cooldown-aware retry wait, got ${elapsedMs}ms`);
-  assert.equal(body.choices[0].message.content, "recovered after cooldown");
-});
+    let fetchCalls = 0;
+    globalThis.fetch = async () => {
+      fetchCalls += 1;
+      return buildOpenAIResponse("recovered after cooldown");
+    };
+
+    pending = handleChat(
+      buildRequestWithSignal(
+        {
+          model: "openai/gpt-4.1",
+          stream: false,
+          messages: [{ role: "user", content: "retry after short cooldown" }],
+        },
+        controller.signal
+      )
+    );
+    await bounded(
+      Promise.race([
+        ready,
+        pending.then(() => {
+          throw new Error("request completed without entering the cooldown wait");
+        }),
+      ]),
+      "request did not enter the cooldown wait"
+    );
+    assert.equal(observation.calls, 1);
+    assert.ok(observation.waitMs > 0 && observation.waitMs <= 1000);
+    assert.equal(fetchCalls, 0, "upstream must not be called before the cooldown wait");
+    assert.equal(observation.done, false);
+    t.mock.timers.tick(observation.waitMs - 1);
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(observation.done, false, "the actual wait must not finish before its deadline");
+    t.mock.timers.tick(1);
+    const response = await pending;
+    const body = (await response.json()) as unknown as {
+      choices: Array<{ message: { content: string } }>;
+      error: { message: string };
+    };
+
+    assert.equal(response.status, 200);
+    assert.equal(fetchCalls, 1);
+    assert.equal(observation.waitMs, 950);
+    assert.equal(observation.done, true);
+    assert.equal(body.choices[0].message.content, "recovered after cooldown");
+  }
+);
 
 test("handleChat recovers from a real 429 once the connection cooldown expires", async () => {
   await seedConnection("openai", {
@@ -194,7 +295,10 @@ test("handleChat recovers from a real 429 once the connection cooldown expires",
     })
   );
   const elapsedMs = Date.now() - startedAt;
-  const body = (await response.json()) as any;
+  const body = (await response.json()) as unknown as {
+    choices: Array<{ message: { content: string } }>;
+    error: { message: string };
+  };
 
   assert.equal(response.status, 200);
   assert.equal(fetchCalls, 4);
@@ -229,7 +333,10 @@ test("handleChat does not wait when the cooldown exceeds maxRetryIntervalSec", a
       },
     })
   );
-  const body = (await response.json()) as any;
+  const body = (await response.json()) as unknown as {
+    choices: Array<{ message: { content: string } }>;
+    error: { message: string };
+  };
 
   assert.equal(fetchCalls, 0);
   assert.equal(response.status, 503);
@@ -250,14 +357,14 @@ test("handleChat returns model_cooldown when every credential for the requested 
   });
 
   await auth.markAccountUnavailable(
-    (first as any).id,
+    (first as unknown as { id: string }).id,
     429,
     "too many requests",
     "gemini",
     "gemini-2.5-pro"
   );
   await auth.markAccountUnavailable(
-    (second as any).id,
+    (second as unknown as { id: string }).id,
     429,
     "too many requests",
     "gemini",
@@ -279,7 +386,10 @@ test("handleChat returns model_cooldown when every credential for the requested 
       },
     })
   );
-  const body = (await response.json()) as any;
+  const body = (await response.json()) as unknown as {
+    choices: Array<{ message: { content: string } }>;
+    error: { message: string };
+  };
 
   assert.equal(fetchCalls, 0);
   assert.equal(response.status, 429);
@@ -314,7 +424,10 @@ test("handleChat retries a direct stream readiness timeout once, without cooldow
       },
     })
   );
-  const body = (await response.json()) as any;
+  const body = (await response.json()) as unknown as {
+    choices: Array<{ message: { content: string } }>;
+    error: { message: string };
+  };
 
   assert.equal(response.status, 504);
   // #14209 (issue #14025): a direct (non-combo, non-forced, still-connected) request gets ONE
@@ -323,7 +436,9 @@ test("handleChat retries a direct stream readiness timeout once, without cooldow
   assert.equal(fetchCalls, 2);
   assert.equal(body.error.code, "STREAM_READINESS_TIMEOUT");
 
-  const refreshedConnection = (await getProviderConnectionById((connection as any).id)) as any;
+  const refreshedConnection = (await getProviderConnectionById(
+    (connection as unknown as { id: string }).id
+  )) as unknown as Record<string, unknown>;
   assert.equal(refreshedConnection.testStatus, "active");
   assert.ok(refreshedConnection.rateLimitedUntil == null);
   assert.ok(refreshedConnection.errorCode == null);
@@ -363,7 +478,10 @@ test("handleChat aborts the pending cooldown wait when the client disconnects", 
     )
   );
   const elapsedMs = Date.now() - startedAt;
-  const body = (await response.json()) as any;
+  const body = (await response.json()) as unknown as {
+    choices: Array<{ message: { content: string } }>;
+    error: { message: string };
+  };
 
   assert.equal(fetchCalls, 0);
   assert.ok(elapsedMs < 1_000, `should abort cooldown wait promptly, got ${elapsedMs}ms`);
@@ -425,4 +543,243 @@ test("#15789: requestRetry=3 dispatches upstream exactly 4 times and never logs 
     assert.equal(max, 3);
     assert.ok(n >= 1 && n <= max, `logged ${n}/${max} is out of bounds`);
   }
+});
+
+// #16305 — COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED (default off) lets a 403/410 cooldown skip the
+// cooldown-aware wait like a 401, and persists a renewing agentrouter quota 403 as 429.
+const SKIP_REFUSALS_FLAG = "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED";
+function setSkipRefusals(enabled: boolean | null) {
+  if (enabled === null) delete process.env[SKIP_REFUSALS_FLAG];
+  else process.env[SKIP_REFUSALS_FLAG] = enabled ? "true" : "false";
+}
+test.afterEach(() => setSkipRefusals(null));
+
+const decisionSettings = {
+  enabled: true,
+  maxRetries: 3,
+  maxRetryWaitSec: 10,
+  maxRetryWaitMs: 10_000,
+  budgetMs: 300_000,
+};
+function shouldRetryAfterCooldown(lastErrorCode: unknown): boolean {
+  const retryAfter = new Date(Date.now() + 1_500).toISOString();
+  return getCooldownAwareRetryDecision({
+    retryAfter,
+    settings: decisionSettings,
+    attempt: 0,
+    lastErrorCode,
+  }).shouldRetry;
+}
+
+async function seedCooledConnection(
+  provider: string,
+  name: string,
+  errorCode: number,
+  lastError: string
+) {
+  const connection = await seedConnection(provider, { name, apiKey: `sk-${name}` });
+  await updateProviderConnection((connection as unknown as { id: string }).id, {
+    rateLimitedUntil: new Date(Date.now() + 1_500).toISOString(),
+    lastError,
+    errorCode,
+    testStatus: "unavailable",
+  });
+  await settingsDb.updateSettings({ requestRetry: 3, maxRetryIntervalSec: 3 });
+  return connection;
+}
+
+async function runCooledRequest(model: string, content: string) {
+  let fetchCalls = 0;
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    return buildOpenAIResponse("served after the cooldown");
+  };
+  const startedAt = Date.now();
+  const response = await handleChat(
+    buildRequest({
+      body: { model, stream: false, messages: [{ role: "user", content }] },
+    })
+  );
+  const elapsedMs = Date.now() - startedAt;
+  return { response, fetchCalls, elapsedMs };
+}
+
+test("[flag off] a short 403 cooldown is still waited out and the request re-sent (default)", async () => {
+  await seedCooledConnection("glm", "glm-refused-off", 403, "forbidden");
+  const { response, fetchCalls, elapsedMs } = await runCooledRequest(
+    "glm/glm-5.1",
+    "refused on every account"
+  );
+  await response.body?.cancel();
+  assert.equal(response.status, 200);
+  assert.equal(fetchCalls, 1);
+  assert.ok(elapsedMs >= 1_000, `default policy waits out the cooldown, got ${elapsedMs}ms`);
+});
+
+test("[flag on] handleChat returns a persistent 403 without waiting or retrying once every account cools down", async () => {
+  setSkipRefusals(true);
+  await seedCooledConnection("glm", "glm-refused", 403, "forbidden");
+  const { response, fetchCalls, elapsedMs } = await runCooledRequest(
+    "glm/glm-5.1",
+    "refused on every account"
+  );
+  await response.body?.cancel();
+  assert.equal(fetchCalls, 0);
+  assert.equal(response.status, 403);
+  assert.ok(
+    elapsedMs < 1_000,
+    `persistent refusal must not wait out the cooldown, got ${elapsedMs}ms`
+  );
+});
+
+test("[flag on] handleChat returns a persistent 410 without waiting or retrying once every account cools down", async () => {
+  setSkipRefusals(true);
+  await seedCooledConnection(
+    "openai",
+    "openai-retired",
+    410,
+    "model has reached its end of life and is no longer available"
+  );
+  const { response, fetchCalls, elapsedMs } = await runCooledRequest(
+    "openai/gpt-4.1",
+    "retired model on every account"
+  );
+  await response.body?.cancel();
+  assert.equal(fetchCalls, 0);
+  assert.equal(response.status, 410);
+  assert.ok(elapsedMs < 1_000, `retired model must not wait out the cooldown, got ${elapsedMs}ms`);
+});
+
+test("cooldown-aware retry decision: 403/410 retry by default, skip only with the flag on", () => {
+  // Flag off (default): only 401 skips the wait.
+  assert.equal(shouldRetryAfterCooldown(401), false);
+  assert.equal(shouldRetryAfterCooldown(403), true);
+  assert.equal(shouldRetryAfterCooldown(410), true);
+  assert.equal(shouldRetryAfterCooldown(429), true);
+
+  setSkipRefusals(true);
+  assert.equal(shouldRetryAfterCooldown(401), false);
+  assert.equal(shouldRetryAfterCooldown(403), false);
+  assert.equal(shouldRetryAfterCooldown("403"), false);
+  assert.equal(shouldRetryAfterCooldown(410), false);
+  assert.equal(shouldRetryAfterCooldown(429), true);
+  assert.equal(shouldRetryAfterCooldown(null), true);
+});
+
+async function markAgentrouterQuota403() {
+  const connection = await seedConnection("agentrouter", { apiKey: "sk-agentrouter-quota" });
+  const id = (connection as unknown as { id: string }).id;
+  const result = await auth.markAccountUnavailable(
+    id,
+    403,
+    '{"error":{"message":"账户额度不足，请充值后重试"}}',
+    "agentrouter",
+    "claude-opus-5"
+  );
+  const updated = (await getProviderConnectionById(id)) as unknown as Record<string, unknown>;
+  return { result, updated };
+}
+
+test("[flag off] a connection-scoped agentrouter quota 403 keeps its persisted 403 (default)", async () => {
+  const { result, updated } = await markAgentrouterQuota403();
+  assert.equal(result.shouldFallback, true);
+  assert.ok(result.cooldownMs > 0);
+  assert.equal(Number(updated.errorCode), 403);
+  // Default policy: the 403 cooldown is still waited out.
+  assert.equal(shouldRetryAfterCooldown(updated.errorCode), true);
+});
+
+test("[flag on] a connection-scoped agentrouter quota 403 persists as 429 and stays retryable", async () => {
+  setSkipRefusals(true);
+  const { result, updated } = await markAgentrouterQuota403();
+  assert.equal(result.shouldFallback, true);
+  assert.ok(result.cooldownMs > 0);
+  assert.equal(Number(updated.errorCode), 429);
+  assert.equal(shouldRetryAfterCooldown(updated.errorCode), true);
+});
+
+test("[flag on] a generic apikey 403 keeps its 403 error code and skips the cooldown wait", async () => {
+  setSkipRefusals(true);
+  const connection = await seedConnection("glm", { apiKey: "sk-glm-generic-403" });
+  const id = (connection as unknown as { id: string }).id;
+
+  const result = await auth.markAccountUnavailable(id, 403, "forbidden", "glm", "glm-5.1");
+  assert.equal(result.shouldFallback, true);
+
+  const updated = (await getProviderConnectionById(id)) as unknown as Record<string, unknown>;
+  assert.equal(Number(updated.errorCode), 403);
+  assert.equal(shouldRetryAfterCooldown(updated.errorCode), false);
+});
+
+test("[flag on] handleChat still retries after a short cooldown when the earliest cooldown is a 429", async () => {
+  setSkipRefusals(true);
+  const first = await seedConnection("openai", {
+    name: "openai-mixed-first",
+    apiKey: "sk-openai-mixed-first",
+  });
+  const second = await seedConnection("openai", {
+    name: "openai-mixed-second",
+    apiKey: "sk-openai-mixed-second",
+  });
+  await updateProviderConnection((first as unknown as { id: string }).id, {
+    rateLimitedUntil: new Date(Date.now() + 900).toISOString(),
+    lastError: "short quota window",
+    errorCode: 429,
+    testStatus: "unavailable",
+  });
+  await updateProviderConnection((second as unknown as { id: string }).id, {
+    rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
+    lastError: "forbidden",
+    errorCode: 403,
+    testStatus: "unavailable",
+  });
+  await settingsDb.updateSettings({ requestRetry: 1, maxRetryIntervalSec: 3 });
+
+  let fetchCalls = 0;
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    return buildOpenAIResponse("recovered after mixed cooldown");
+  };
+
+  const response = await handleChat(
+    buildRequest({
+      body: {
+        model: "openai/gpt-4.1",
+        stream: false,
+        messages: [{ role: "user", content: "mixed cooldown, earliest is retryable" }],
+      },
+    })
+  );
+  const body = (await response.json()) as unknown as {
+    choices: Array<{ message: { content: string } }>;
+    error: { message: string };
+  };
+
+  assert.equal(response.status, 200);
+  assert.equal(fetchCalls, 1);
+  assert.equal(body.choices[0].message.content, "recovered after mixed cooldown");
+});
+
+test("a 403 model-scoped refusal keeps the connection usable for other models", async () => {
+  const { isModelLocked } = await import("../../open-sse/services/accountFallback.ts");
+  const connection = await seedConnection("agentrouter", { apiKey: "sk-agentrouter-model" });
+
+  const result = await auth.markAccountUnavailable(
+    (connection as unknown as { id: string }).id,
+    403,
+    '{"error":{"message":"无权访问模型 claude-opus-5"}}',
+    "agentrouter",
+    "claude-opus-5"
+  );
+
+  assert.equal(result.shouldFallback, true);
+
+  const updated = (await getProviderConnectionById(
+    (connection as unknown as { id: string }).id
+  )) as unknown as Record<string, unknown>;
+  assert.ok(!updated.rateLimitedUntil, "a model-scoped refusal must not cool the connection");
+  assert.equal(
+    isModelLocked("agentrouter", (connection as unknown as { id: string }).id, "claude-opus-5"),
+    true
+  );
 });

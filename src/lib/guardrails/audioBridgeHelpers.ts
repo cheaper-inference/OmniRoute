@@ -8,6 +8,8 @@ import { fetchRemoteImage } from "@/shared/network/remoteImageFetch";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatBodyAdmission";
 
 import { hasUsableCredentialsForModel } from "./visionBridgeCredentials";
+import { SELF_LOOP_KEY_ID_HEADER } from "./visionBridgeHelpers";
+import type { VisionBridgeKeyScope } from "./visionBridgeKeyScope";
 
 export type AudioCredentialCheck = (model: string) => Promise<boolean | null>;
 
@@ -23,6 +25,11 @@ export interface AudioTranscriptionConfig {
   model: string;
   signal?: AbortSignal;
   timeoutMs: number;
+  /**
+   * Caller API-key scope. The transcription self-loop carries the key id so the
+   * receiving route applies that key's connection/model policy (GHSA-3w2r).
+   */
+  keyScope?: Pick<VisionBridgeKeyScope, "apiKeyId">;
 }
 
 export interface AudioTranscriptionSegment {
@@ -287,18 +294,17 @@ async function sendAudioTranscriptionRequest(
 
     const port = (deps.getPort ?? (() => getRuntimePorts().port))();
     const bearer = (deps.getBearer ?? resolveSelfLoopBearer)();
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+      Authorization: `Bearer ${bearer}`,
+      "Content-Type": `multipart/form-data; boundary=${boundary}`,
+    };
+    // Scope the sub-request to the caller's key: honored only alongside the
+    // self-loop bearer, so it can only narrow access (see enforceApiKeyPolicy).
+    if (config.keyScope) headers[SELF_LOOP_KEY_ID_HEADER] = config.keyScope.apiKeyId;
     const response = await (deps.fetchImpl ?? fetch)(
       `http://localhost:${port}/v1/audio/transcriptions`,
-      {
-        method: "POST",
-        signal,
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${bearer}`,
-          "Content-Type": `multipart/form-data; boundary=${boundary}`,
-        },
-        body: multipartBody,
-      }
+      { method: "POST", signal, headers, body: multipartBody }
     );
     if (!response.ok) {
       throw new Error(`Audio transcription failed (${response.status})`);

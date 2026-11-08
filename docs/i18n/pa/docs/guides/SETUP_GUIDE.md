@@ -147,15 +147,15 @@ omniroute providers validate
 ### 2) ਆਪਣੇ ਕੋਡਿੰਗ ਟੂਲ ਨੂੰ ਨਿਰਧਾਰਤ ਕਰੋ
 
 ```txt
-ਬੇਸ URL: http://localhost:20128/v1
+ਮੂਲ URL: http://localhost:20128/v1
 API ਕੁੰਜੀ:  [Endpoint ਪੰਨੇ ਤੋਂ ਕਾਪੀ ਕਰੋ]
 ਮਾਡਲ:    if/qwen3.8-max-preview (ਜਾਂ ਕੋਈ ਵੀ ਪ੍ਰਦਾਤਾ/ਮਾਡਲ ਪ੍ਰੀਫਿਕਸ)
 ```
 
-ਜੇ ਤੁਹਾਡਾ ਐਡੀਟਰ `Authorization: Bearer ...` ਨਹੀਂ ਭੇਜ ਸਕਦਾ, ਤਾਂ ਇਸਦੀ ਬਜਾਏ ਟੋਕਨ-ਯੁਕਤ ਅਨੁਕੂਲਤਾ ਬੇਸ ਦੀ ਵਰਤੋਂ ਕਰੋ:
+ਜੇ ਤੁਹਾਡਾ ਐਡੀਟਰ `Authorization: Bearer ...` ਨਹੀਂ ਭੇਜ ਸਕਦਾ, ਤਾਂ ਇਸ ਦੀ ਬਜਾਏ ਟੋਕਨ-ਯੁਕਤ ਅਨੁਕੂਲਤਾ ਮੂਲ ਵਰਤੋ:
 
 ```txt
-ਬੇਸ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+ਮੂਲ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
 ਮਾਡਲ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
 ਚੈਟ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
 Ollama ਟੈਗ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
@@ -163,36 +163,37 @@ Ollama ਟੈਗ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 
 Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode ਅਤੇ OpenAI-ਅਨੁਕੂਲ SDKs ਨਾਲ ਕੰਮ ਕਰਦਾ ਹੈ।
 
-#### `setup-*` ਨਾਲ ਸਵੈਚਾਲਿਤ ਸੰਰਚਨਾ
+#### `setup-*` ਨਾਲ ਸਵੈਚਾਲਿਤ ਸੰਰਚਨਾ ਕਰੋ
 
-ਬੇਸ URL ਅਤੇ ਕੁੰਜੀ ਨੂੰ ਹੱਥੀਂ ਪੇਸਟ ਕਰਨ ਦੀ ਬਜਾਏ, OmniRoute ਨੂੰ ਲਾਈਵ ਮਾਡਲ ਕੈਟਾਲਾਗ ਤੋਂ ਹਰ ਟੂਲ ਦੀ
-ਆਪਣੀ ਸੰਰਚਨਾ ਲਿਖਣ ਦਿਓ। ਪ੍ਰਤੀ ਟੂਲ ਇੱਕ ਕਮਾਂਡ:
+ਮੂਲ URL ਅਤੇ ਕੁੰਜੀ ਨੂੰ ਹੱਥੀਂ ਪੇਸਟ ਕਰਨ ਦੀ ਬਜਾਏ, OmniRoute ਨੂੰ ਲਾਈਵ ਮਾਡਲ ਕੈਟਾਲਾਗ ਤੋਂ ਹਰੇਕ ਟੂਲ ਦੀ
+ਆਪਣੀ ਸੰਰਚਨਾ ਲਿਖਣ ਦਿਓ। ਹਰੇਕ ਟੂਲ ਲਈ ਇੱਕ ਕਮਾਂਡ:
 
 ```bash
-omniroute setup-codex        # ~/.codex/<name>.config.toml ਪ੍ਰੋਫਾਈਲਾਂ
+omniroute setup-codex        # ~/.codex/<name>.config.toml ਪ੍ਰੋਫ਼ਾਈਲਾਂ
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-ਅਨੁਕੂਲ)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI-ਅਨੁਕੂਲ)
 omniroute setup-cline        # Cline CLI + VS Code ਐਕਸਟੈਂਸ਼ਨ ਸੈਟਿੰਗਾਂ
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor ਦੇ ਇਨ-ਐਪ ਕਦਮ ਪ੍ਰਿੰਟ ਕਰਦਾ ਹੈ
+omniroute setup-cursor       # Cursor ਦੇ ਇਨ-ਐਪ ਪੜਾਅ ਪ੍ਰਿੰਟ ਕਰਦਾ ਹੈ
 omniroute setup-roo          # Roo Code ਇੰਪੋਰਟ + autoImport ਪੁਆਇੰਟਰ
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-ਹਰੇਕ ਇੱਕ ਸਥਾਨਕ ਟੂਲ ਨੂੰ ਇੱਕ **ਰਿਮੋਟ** OmniRoute ਦੇ ਵਿਰੁੱਧ ਸੰਰਚਿਤ ਕਰਨ ਲਈ `--remote <url> --api-key <key>` ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ,
-ਅਤੇ ਨਾਲ ਹੀ ਝਲਕ ਦੇਖਣ ਲਈ `--dry-run` ਵੀ। ਸਹੀ env ਇੰਜੈਕਟ ਕਰਕੇ ਅਤੇ ਕੋਈ ਵੀ ਸੰਰਚਨਾ ਲਿਖੇ ਬਿਨਾਂ CLI ਲਾਂਚ ਕਰਨ ਲਈ,
-ਆਮ ਲਾਂਚਰ `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) ਦੀ ਵਰਤੋਂ ਕਰੋ;
-ਪੁਰਾਣੇ ਪ੍ਰਤੀ-ਟੂਲ ਲਾਂਚਰ `omniroute launch` (Claude Code) ਅਤੇ
-`omniroute launch-codex` (Codex) ਉਪਲਬਧ ਰਹਿੰਦੇ ਹਨ।
+ਹਰੇਕ ਕਮਾਂਡ ਇੱਕ ਸਥਾਨਕ ਟੂਲ ਨੂੰ ਇੱਕ **ਰਿਮੋਟ** OmniRoute ਲਈ ਸੰਰਚਿਤ ਕਰਨ ਵਾਸਤੇ `--remote <url> --api-key <key>`
+ਸਵੀਕਾਰ ਕਰਦੀ ਹੈ, ਅਤੇ ਪੂਰਵ-ਝਲਕ ਲਈ `--dry-run` ਵੀ ਸਵੀਕਾਰ ਕਰਦੀ ਹੈ। ਸਹੀ env ਇੰਜੈਕਟ ਕਰਕੇ ਅਤੇ ਬਿਲਕੁਲ ਵੀ
+ਸੰਰਚਨਾ ਲਿਖੇ ਬਿਨਾਂ CLI ਚਲਾਉਣ ਲਈ, ਆਮ ਲਾਂਚਰ `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini)
+ਵਰਤੋ; ਪੁਰਾਣੇ ਪ੍ਰਤੀ-ਟੂਲ ਲਾਂਚਰ `omniroute launch` (Claude Code) ਅਤੇ
+`omniroute launch-codex` (Codex) ਅਜੇ ਵੀ ਉਪਲਬਧ ਹਨ।
 
-ਪੂਰੀ ਸਾਰਣੀ (ਹਰ ਕਮਾਂਡ ਕੀ ਲਿਖਦੀ ਹੈ, ਹਰ ਫਲੈਗ, ਸਥਾਨਕ ਬਨਾਮ ਰਿਮੋਟ, ਬੇਸ-URL
-`/v1` ਰਵਾਇਤਾਂ) ਲਈ, **[CLI ਇੰਟੀਗ੍ਰੇਸ਼ਨ](./CLI-INTEGRATIONS.md)** ਵੇਖੋ।
+ਪੂਰੀ ਸਾਰਣੀ ਲਈ (ਹਰੇਕ ਕਮਾਂਡ ਕੀ ਲਿਖਦੀ ਹੈ, ਹਰ ਫਲੈਗ, ਸਥਾਨਕ ਬਨਾਮ ਰਿਮੋਟ, ਮੂਲ-URL
+`/v1` ਰਵਾਇਤਾਂ), **[CLI ਇੰਟੀਗ੍ਰੇਸ਼ਨਾਂ](./CLI-INTEGRATIONS.md)** ਵੇਖੋ।
 
-ਵਿਸਤ੍ਰਿਤ ਪ੍ਰਤੀ-ਟੂਲ ਸੰਰਚਨਾ (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ਅਤੇ ਹੋਰ) ਲਈ, ਸਮਰਪਿਤ **[CLI ਟੂਲ ਗਾਈਡ](../reference/CLI-TOOLS.md)** ਵੇਖੋ।
+ਹਰੇਕ ਟੂਲ ਦੀ ਵਿਸਤ੍ਰਿਤ ਸੰਰਚਨਾ ਲਈ (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ਅਤੇ ਹੋਰ), ਸਮਰਪਿਤ **[CLI ਟੂਲ ਗਾਈਡ](../reference/CLI-TOOLS.md)** ਵੇਖੋ।
 
 ---
 
@@ -321,7 +322,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) ਟੈਂਪਲੇਟ
+## Void Linux (xbps-src) ਟੈਂਪਲੇਟ
 
 Void Linux ਵਰਤੋਂਕਾਰਾਂ ਲਈ, ਤੁਸੀਂ `xbps-src` ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਇੱਕ ਮੂਲ ਪੈਕੇਜ ਬਣਾ ਸਕਦੇ ਹੋ। ਇਸ ਬਲਾਕ ਨੂੰ `srcpkgs/omniroute/template` ਵਜੋਂ ਸੰਭਾਲੋ:
 

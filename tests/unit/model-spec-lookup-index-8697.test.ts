@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { getCanonicalModelSpecId, getModelSpec } from "../../src/shared/constants/modelSpecs.ts";
+import {
+  findModelSpecIdByExactOrAlias,
+  getCanonicalModelSpecId,
+  getModelSpec,
+} from "../../src/shared/constants/modelSpecs.ts";
 
 describe("model spec lookup index (#8697-adjacent — getCanonicalModelSpecId)", () => {
   it("still resolves case-insensitive exact matches", () => {
@@ -16,6 +20,19 @@ describe("model spec lookup index (#8697-adjacent — getCanonicalModelSpecId)",
 
   it("returns null for a genuinely unknown model id", () => {
     assert.equal(getCanonicalModelSpecId("definitely-not-a-real-model-xyz-123"), null);
+  });
+
+  it("keeps namespace stripping available for provider-qualified public lookups", () => {
+    assert.ok(getModelSpec("deepseek-v4-flash"));
+    assert.equal(getModelSpec("deepseek/deepseek-v4-flash"), getModelSpec("deepseek-v4-flash"));
+  });
+
+  it("preserves upstream namespaces when resolving already-scoped capabilities", () => {
+    const options = { stripNamespace: false };
+    assert.equal(getModelSpec("deepseek/deepseek-v4-flash", options), undefined);
+    assert.equal(getCanonicalModelSpecId("deepseek/deepseek-v4-flash", options), null);
+    assert.equal(findModelSpecIdByExactOrAlias("deepseek/deepseek-v4-flash", options), null);
+    assert.equal(getModelSpec("DEEPSEEK-V4-FLASH", options), getModelSpec("deepseek-v4-flash"));
   });
 
   it("does not rescan MODEL_SPECS per lookup (regression guard for O(n) scans)", () => {

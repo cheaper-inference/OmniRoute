@@ -1,12 +1,19 @@
 import type { CredentialLeaseSelectionContext } from "./exclusiveConnectionLeasePolicy";
+import type { ConnectionRestrictionSource } from "./credentialSelectionDiagnostics.ts";
 
 export interface CredentialSelectionOptions {
+  /** Provenance of the effective allowlist; does not alter authorization. */
+  connectionRestrictionSources?: readonly ConnectionRestrictionSource[];
   /** Exclude credential-specific transports that cannot serve caller tools. */
   requireToolCalling?: boolean;
   allowSuppressedConnections?: boolean;
   allowRateLimitedConnections?: boolean;
   bypassQuotaPolicy?: boolean;
   forcedConnectionId?: string | null;
+  /** API-key-scoped ordered preference. Only ranks connections that survived eligibility gates. */
+  preferredConnectionIds?: string[] | null;
+  /** The pin was chosen by the operator for this request (x-omniroute-connection), not derived by a combo. */
+  explicitConnectionPin?: boolean;
   excludeConnectionIds?: string[] | null;
   sessionKey?: string | null;
   sessionAffinityTtlMs?: number | null;

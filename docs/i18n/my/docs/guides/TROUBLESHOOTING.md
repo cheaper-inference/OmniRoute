@@ -33,37 +33,43 @@ OmniRoute အတွက် အဖြစ်များသော ပြဿနာ�
 
 ---
 
-## အသေးစိတ်ပြဿနာဖြေရှင်းခြင်း
+## အသေးစိတ် ပြဿနာဖြေရှင်းခြင်း
 
 ---
 
-### အခမဲ့ Provider များတွင် Rate Limit သတ်မှတ်ခံရခြင်း (429 / 400 / 401)
+### အခမဲ့ Provider များတွင် Rate Limiting ဖြစ်ခြင်း (429 / 400 / 401)
 
-**လက္ခဏာ**: အခမဲ့/အထောက်အထားမလိုသော provider များ (opencode, auggie စသည်) နှင့် `model: "auto"` ကို အသုံးပြုသောအခါ အဖြေများအစား `HTTP 429`, `400` သို့မဟုတ် `401` ကို ရံဖန်ရံခါ ရရှိသည်။ ခဏအကြာတွင် တူညီသော prompt ကို ပြန်လည်ကြိုးစားသည့်အခါ request များ အောင်မြင်သော်လည်း automation (cron jobs, agents, scripts) သည် ပထမဆုံး ကျရှုံးမှုတွင် ရပ်တန့်သွားသည်။
+**လက္ခဏာ**: အခမဲ့/အထောက်အထားမလိုသော provider များ (auggie စသည်) နှင့် `model: "auto"` ကို အသုံးပြုသောအခါ အဖြေများအစား `HTTP 429`၊ `400` သို့မဟုတ် `401` ကို တစ်ခါတစ်ရံ ရရှိနိုင်သည်။ တူညီသော prompt ကို ခဏအကြာတွင် ပြန်လည်ကြိုးစားပါက request များ အောင်မြင်သော်လည်း automation (cron jobs၊ agents၊ scripts) များသည် ပထမဆုံးအကြိမ် မအောင်မြင်သောအခါ ပျက်စီးနိုင်သည်။
 
-**အရင်းခံအကြောင်းရင်း**: သီးခြား failure mode သုံးမျိုး တစ်ပြိုင်နက် ဖြစ်ပေါ်နေခြင်းဖြစ်သည်။
+**အရင်းခံအကြောင်းရင်း**: သီးခြားဖြစ်သော failure mode သုံးမျိုးသည် တစ်ပြိုင်နက် ဖြစ်ပေါ်နေခြင်းဖြစ်သည်-
 
-1. **Provider rate-limit (`429`)**: အခမဲ့ tier များတွင် အချိန်ကာလအလိုက် quota ကို သတ်မှတ်ထားနိုင်သည်။ Parallel call များ အများအပြား တစ်ပြိုင်နက်ဝင်လာခြင်းက quota ကို ကုန်ဆုံးစေသောကြောင့် အချိန်ကာလ ပြန်လည်စတင်သည်အထိ နောက် request ကို ငြင်းပယ်ပါလိမ့်မည်။
-2. **Passthrough ထဲရှိ ပျက်နေသော model (`400`/`401`)**: `auto/*` pool များတွင် catalog ၌ register လုပ်ထားသော်လည်း လက်ရှိအသုံးပြုနိုင်သော credentials မရှိသည့် `opencode` မှ passthrough model များ ပါဝင်နိုင်သည် (ဥပမာ `oc/north-mini-code-free` → `401`)။ Auto-router က တစ်ခုကို စမ်းကြည့်ပြီး ကျရှုံးသွားသောအခါ fallback မစတင်မီ error က ဆက်လက်ပျံ့နှံ့သွားသည်။
-3. **Concurrency ကြောင့် ပြဿနာပိုမိုပြင်းထန်ခြင်း (load များချိန်တွင် `429`)**: agent/cron session များစွာက `auto` ကို တစ်ပြိုင်နက် အသုံးပြုသောအခါ စုစုပေါင်း request rate သည် အခမဲ့ provider များ လက်ခံနိုင်သည့် ပမာဏထက် ကျော်လွန်သွားသောကြောင့် တရားဝင် call များကိုပင် အလွဲသုံးစားပြုမှုအဖြစ် သတ်မှတ်ခံရသည်။
+1. **Provider rate-limit (`429`)**: အခမဲ့အဆင့်များတွင် သတ်မှတ်ထားသော အချိန်ဝင်းဒိုးအလိုက် quota ရှိနိုင်သည်။ Parallel call များ အလွန်များပြားပါက ၎င်းကို ကုန်ဆုံးစေပြီး ဝင်းဒိုး ပြန်လည်သတ်မှတ်သည်အထိ နောက်ထပ် request ကို ငြင်းပယ်နိုင်သည်။
+2. **Passthrough တွင် ပျက်နေသော model (`400`/`401`)**: `auto/*` pool များတွင် catalog ထဲ၌ မှတ်ပုံတင်ထားသော်လည်း အသက်ဝင်သော credential မရှိသည့် passthrough model များ ပါဝင်နိုင်သည် (→ `401`)။ Auto-router သည် ထို model ကို စမ်းသုံးပြီး မအောင်မြင်ပါက fallback မစတင်မီ error ကို ဆက်လက်ပို့ပေးနိုင်သည်။
+3. **Concurrency amplification (`429` under load)**: Agent/cron session များစွာက `auto` ကို တစ်ချိန်တည်း ဝင်ရောက်သောအခါ စုစုပေါင်း request rate သည် အခမဲ့ provider များ ခံနိုင်ရည်ထက် ကျော်လွန်သွားပြီး မှန်ကန်သော call များကိုပင် အလွဲသုံးစားလုပ်နေသည်ဟု သတ်မှတ်ခံရနိုင်သည်။
 
-**အတည်ပြုပြီး ဖြေရှင်းနည်း (community မှ တင်ပြထားသည်၊ 2026-08-10)**: အခမဲ့ tier ၏ မတည်ငြိမ်မှုကြောင့် ရပ်တန့်မသွားဘဲ rotation, concurrency နှင့် fallback တို့က ကိုင်တွယ်ဖြေရှင်းနိုင်စေရန် environment variable သုံးခုကို ချိန်ညှိပါ။
+**အတည်ပြုထားသော ဖြေရှင်းချက် (community-reported, 2026-08-10)**: အခမဲ့အဆင့်၏ မတည်ငြိမ်မှုကို မအောင်မြင်ဘဲ ဖြတ်သန်းနိုင်ရန် rotation၊ concurrency နှင့် fallback တို့က စုပ်ယူပေးစေရန် environment variable သုံးခုကို ချိန်ညှိပါ-
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 ဖြစ်လျှင် အခြား model/provider သို့ ပြောင်းပါ (ပျက်နေသော passthrough model များကို ကျော်သွားသည်)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # heavyweight admission ၏ အမြင့်ဆုံးအကန့်အသတ်ကို အတိအလင်း သတ်မှတ်ပါ (ပုံမှန်အားဖြင့် မသတ်မှတ်ထားပါ: request အရေအတွက် အကန့်အသတ်မရှိပါ၊ အောက်ပါမှတ်ချက်ကို ကြည့်ပါ)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # နှေးသော upstream များအတွက် ကန့်သတ်ထားသည့် စောင့်ဆိုင်းချိန်ကို RATE_LIMIT_MAX_WAIT_MS ၏ ပုံသေတန်ဖိုးထက် မြှင့်ပါ
+export OMNIROUTE_ROTATE_ON_400=true           # 400/401 ဖြစ်ပါက အခြား model/provider သို့ ပြောင်းပါ (ပျက်နေသော passthrough model များကို ကျော်ပါ)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # heavyweight request များအတွက် ဝင်ခွင့်အများဆုံး သတ်မှတ်ချက် (ပုံမှန်အားဖြင့် မသတ်မှတ်ထားပါ: request အရေအတွက် ကန့်သတ်ချက်မရှိ၊ အောက်ပါမှတ်ချက်ကို ကြည့်ပါ)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # နှေးကွေးသော upstream များအတွက် RATE_LIMIT_MAX_WAIT_MS ၏ ပုံမှန်တန်ဖိုးထက် bounded wait ကို မြှင့်ပါ
 ```
 
-ဤ variable များကို OmniRoute process environment (daemon၊ ဥပမာ LaunchAgent plist သို့မဟုတ် `systemctl edit` မှတစ်ဆင့်) တွင် သတ်မှတ်ပြီးနောက် OmniRoute ကို restart လုပ်ပါ။ Rotation flag သည် အကျိုးသက်ရောက်မှုအရှိဆုံး ချိန်ညှိချက်ဖြစ်သည်။ ၎င်းက အပြီးတိုင်ကျရှုံးမှုကို pool ထဲရှိ ကောင်းမွန်စွာအလုပ်လုပ်နေသော provider တစ်ခုနှင့် အလိုအလျောက် ပြန်လည်ကြိုးစားမှုအဖြစ် ပြောင်းလဲပေးသည်။
+၎င်းတို့ကို OmniRoute process environment (daemon၊ ဥပမာ LaunchAgent plist သို့မဟုတ် `systemctl edit` မှတစ်ဆင့်) တွင် သတ်မှတ်ပြီးနောက် OmniRoute ကို ပြန်လည်စတင်ပါ။ Rotation flag သည် အကျိုးသက်ရောက်မှုအကြီးဆုံး တစ်ခုတည်းသော ချိန်ညှိချက်ဖြစ်သည်- ၎င်းသည် အပြီးသတ် failure ကို pool ထဲရှိ ကျန်းမာသော provider ထံ ပွင့်လင်းမြင်သာစွာ ပြန်လည်ကြိုးစားခြင်းအဖြစ် ပြောင်းလဲပေးသည်။
 
-**မှတ်ချက်**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` သည် heavyweight — long-context — request မည်မျှကို တစ်ပြိုင်နက် run နိုင်သည်ကို ကန့်သတ်သည်။ ဤအကန့်အသတ်သည် admission gate ဖြစ်ပြီး provider rate limiter မဟုတ်ပါ။ **#503-fanout အပ်ဒိတ်:** ဤ variable ကို ပုံမှန်အားဖြင့် သတ်မှတ်မထားတော့ပါ (ယခုအခါ အထက်ပါအတိုင်း အတိအလင်း configure လုပ်ထားမှသာ အကျိုးသက်ရောက်သည်) — ထိုအစား heavyweight admission ကို host ၏ အမှန်တကယ် memory အမြင့်ဆုံးအကန့်အသတ်မှ အလိုအလျောက် တွက်ချက်ထားသော byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ဖြင့် ထိန်းချုပ်ပြီး၊ ၎င်းသည် ကိုယ်တိုင် ချိန်ညှိသတ်မှတ်သောကြောင့် အသစ် deploy လုပ်ထားသောစနစ်သည် ဤ variable ကို လုံးဝမသတ်မှတ်ဘဲ `503 chat_admission_busy` ငြင်းပယ်မှုများကို သိသိသာသာ နည်းပါးစွာ ကြုံတွေ့သင့်သည်။ သို့သော် ဤနေရာတွင် ၎င်းကို အတိအလင်းသတ်မှတ်ခြင်းသည် ဖော်ပြထားသည့်အတိုင်း အတိအကျ ဆက်လက်အလုပ်လုပ်ပါသည်။ အတိအလင်း override လုပ်ထားသော byte-budget များကို 8 MiB–2 GiB အတွင်း ကန့်သတ်ထားသည်။ `413 body_exceeds_budget` သည် ယာယီအခြေအနေမဟုတ်ပါ။ ထို byte budget ကို မြှင့်ပါ၊ `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ကို လျှော့ပါ၊ သို့မဟုတ် process memory အမြင့်ဆုံးအကန့်အသတ်ကို မြှင့်ပါ။ `inflight_bytes_budget` shed သည် ယာယီ resource contention ဖြစ်ပြီး ပြန်လည်ကြိုးစားနိုင်ဆဲဖြစ်သည်။ Provider တစ်ခုချင်းစီအလိုက် rate limit သတ်မှတ်ခြင်း (`open-sse/services/rateLimitManager.ts`) ကို `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` နှင့် `RATE_LIMIT_AUTO_ENABLE` တို့ဖြင့် သီးခြားထိန်းချုပ်သည် — `.env.example` ကို ကြည့်ပါ။
+**မှတ်ချက်**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` သည် heavyweight — long-context — request မည်မျှ တစ်ချိန်တည်း လုပ်ဆောင်နိုင်သည်ကို ကန့်သတ်သည်။ ဤကန့်သတ်ချက်သည် admission gate ဖြစ်ပြီး provider rate limiter မဟုတ်ပါ။ **#503-fanout update:** ဤ var ကို ယခုအခါ ပုံမှန်အားဖြင့် မသတ်မှတ်တော့ပါ (အထက်တွင် ဖော်ပြထားသည့်အတိုင်း အတိအကျ သတ်မှတ်သည့်အခါမှသာ အကျိုးသက်ရောက်သည်)—ထိုအစား heavyweight admission ကို host ၏ အမှန်တကယ် memory ceiling မှ အလိုအလျောက်တွက်ချက်ပြီး ကိုယ်တိုင်ချိန်ညှိသော byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ဖြင့် ထိန်းချုပ်သည်။ ထို့ကြောင့် deployment အသစ်တွင် ဤ var ကို လုံးဝမသတ်မှတ်ဘဲ `503 chat_admission_busy` ငြင်းပယ်မှုများ အလွန်လျော့နည်းလာမည်ဖြစ်သည်။ ဤနေရာတွင် အတိအကျ သတ်မှတ်ခြင်းသည်လည်း မှတ်တမ်းတင်ထားသည့်အတိုင်း အတိအကျ အလုပ်လုပ်ဆဲဖြစ်သည်။ Explicit byte-budget override များကို 8 MiB–2 GiB အတွင်း ကန့်သတ်သည်။ `413 body_exceeds_budget` သည် ယာယီမဟုတ်ပါ- ထို byte budget ကို မြှင့်ပါ၊ `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` သို့မဟုတ် သိမ်းဆည်းထားသော request body limit ကို လျှော့ပါ၊ သို့မဟုတ် process memory ceiling ကို မြှင့်ပါ။ `inflight_bytes_budget` shed သည် ယာယီပြိုင်ဆိုင်မှုဖြစ်ပြီး ပြန်လည်ကြိုးစားနိုင်ဆဲ ဖြစ်သည်။ Provider တစ်ခုချင်းစီအလိုက် rate limiting ကို `open-sse/services/rateLimitManager.ts` က သီးခြားစီ ထိန်းချုပ်ပြီး `RATE_LIMIT_MAX_WAIT_MS`၊ `RATE_LIMIT_MAX_QUEUE_DEPTH` နှင့် `RATE_LIMIT_AUTO_ENABLE` တို့က သတ်မှတ်သည်—`.env.example` ကို ကြည့်ပါ။
 
-**အလုပ်လုပ်ကြောင်း အတည်ပြုနည်း**: သင့် agent/cron ကို အချိန်တိုအတွင်း နှစ်ကြိမ်ဆက်တိုက် run ပြီး နှစ်ကြိမ်လုံး အောင်မြင်ကြောင်း အတည်ပြုပါ။ ပြင်ဆင်မှုမတိုင်မီ ဒုတိယအကြိမ် run သည် ပုံမှန်အားဖြင့် `429`/`401` ကို ထုတ်ပေးတတ်သည်။ ပြင်ဆင်ပြီးနောက် ပျက်ကွက်မှုများ (ရှိပါက) ကို နောက်ကွယ်တွင် အလိုအလျောက် ပြန်လည်ကြိုးစားပေးပြီး call ပြီးမြောက်သွားပါမည်။ `curl /monitoring/health` ကိုလည်း အသုံးပြုနိုင်ပြီး provider ချိတ်ဆက်မှုများရှိ `rateLimitedUntil` field နှင့် သက်ရောက်မှုရှိသော provider များအတွက် `circuitBreakers.providerBreakers[].state` ကို စောင့်ကြည့်နိုင်သည် — state သည် `CLOSED`, `DEGRADED`, `OPEN` သို့မဟုတ် `HALF_OPEN` တစ်ခုခု ဖြစ်သည် (`src/shared/utils/circuitBreaker.ts` ကိုကြည့်ပါ)။ ဆက်တိုက်ပျက်ကွက်နေသော provider သည် reset window က probe တစ်ခုကို ဖြတ်သန်းခွင့်မပေးမီ `CLOSED → DEGRADED → OPEN` သို့ ပြောင်းသွားမည် (`HALF_OPEN`)။
+**Upgrade note: a saved request body limit now also applies to chat.** Settings > Advanced > Request Body Limit (`maxBodySizeMb`) အောက်တွင် ယခင်က သိမ်းဆည်းထားသော limit သည် ယခုအခါ `/v1/chat/completions` နှင့် `/v1/responses` တို့တွင်လည်း အကျုံးဝင်သည်။ ဤပြောင်းလဲမှုမတိုင်မီ ထို route နှစ်ခုသည် သိမ်းဆည်းထားသည့် တန်ဖိုးမည်မျှဖြစ်စေ 50 MB အထိ လက်ခံခဲ့သောကြောင့် limit နိမ့်နိမ့်ဖြင့် သိမ်းဆည်းထားသော install တစ်ခုသည် ယခုအခါ ထိုတန်ဖိုးထက် ကျော်လွန်သော chat body များကို စတင်ငြင်းပယ်မည်ဖြစ်သည်။ Limit တစ်ခုကို တစ်ခါမျှ မသိမ်းဆည်းခဲ့သော install သည် 50 MB ပုံမှန်တန်ဖိုးကို ဆက်လက်အသုံးပြုမည်။
 
-**429 ကို မြင်နေရဆဲဖြစ်ပါက**: ထို provider အတွက် လက်ရှိအသုံးပြုနေသော account သည် ၎င်း၏ _quota_ ကို အမှန်တကယ် အပြည့်အဝ သုံးစွဲပြီးဖြစ်သည် (rate သက်သက်မဟုတ်ပါ)။ OmniRoute dashboard → Providers → Accounts တွင် provider တူညီသော ဒုတိယ account တစ်ခု ထည့်ပါ၊ သို့မဟုတ် အခြားအခမဲ့ provider တစ်ခု (ဥပမာ `routeway`, `auggie`) ကို ရောနှောအသုံးပြုပါ။ Rotation သည် ယာယီဖြစ်သော rate/400/401 များအတွက်သာ အထောက်အကူဖြစ်သည်။ quota လုံးဝကုန်ဆုံးမှုအတွက် ဒုတိယ credential တစ်ခု သို့မဟုတ် မတူညီသော provider တစ်ခု လိုအပ်သည်။
+ငြင်းပယ်မှုသည် HTTP `413` ဖြစ်ပြီး `error.code` ကို `PAYLOAD_TOO_LARGE` နှင့် `error.type` ကို `payload_too_large` ဟု သတ်မှတ်ထားသည်။ Message တွင် အကျုံးဝင်သော limit ကို ဖော်ပြသည်- ကြေညာထားသော `Content-Length` သည် ထို limit ထက် ကျော်လွန်ပါက `Request body too large. Maximum allowed: 10 MB` ဖြစ်ပြီး၊ အမှန်တကယ် ဖတ်ယူထားသော bytes များက ကျော်လွန်ပါက `Request body too large for chat completions (max 10 MB).` ဖြစ်သည်။ ၎င်းသည် အထက်တွင် ဖော်ပြထားသော `413 body_exceeds_budget` နှင့် မတူပါ။ ထို error သည် memory budget မှ ဖြစ်ပေါ်ပြီး ဤ setting ဖြင့် ပြောင်းလဲမည်မဟုတ်ပါ။
 
-**vision model များ (`auto/vision`, `bazaarlink/*`) တွင် 403 ကို မြင်ရပါက**: ချိတ်ဆက်ထားသော account တွင် vision ပါဝင်သည့် အခပေး plan မရှိခြင်း သို့မဟုတ် API key တွင် လုံလောက်သော permission မရှိခြင်း ဖြစ်သည်။ key scope တွင် vision/multimodal ပါဝင်ကြောင်း provider dashboard တွင် အတည်ပြုပါ၊ သို့မဟုတ် အခပေးအဆင့် account တစ်ခုကို ချိတ်ဆက်ပြီး ၎င်းကို vision target အဖြစ် ဆက်လက်ထားရှိပါ။
+Limit ကို မြှင့်ရန် `/dashboard/settings/advanced` တွင် ပိုမြင့်သောတန်ဖိုးကို သိမ်းဆည်းပါ၊ သို့မဟုတ် `PATCH /api/settings` ကို `{"maxBodySizeMb": 50}` ဖြင့် ပေးပို့ပါ။ 1 မှ 500 MB အတွင်း တန်ဖိုးများကို လက်ခံသည်၊ restart မလုပ်ဘဲ အကျုံးဝင်ပြီး 50 သည် ယခင် chat limit ကို ပြန်လည်ရရှိစေသည်။ အခြား limit နှစ်ခုက ပိုကြီးသော body ကို ရပ်တန့်စေနိုင်သေးသည်- သတ်မှတ်ထားပါက `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` သည် သိမ်းဆည်းထားသော limit ကိုလည်း ကန့်သတ်ပြီး Kubernetes ingress annotation `proxy-body-size` (ပေးပို့ထားသော manifests များတွင် `50m`) ကို 50 MB ထက်ကျော်သော အရာများအတွက် သီးခြားမြှင့်ရမည်။
+
+**အလုပ်လုပ်ကြောင်း စစ်ဆေးနည်း**: သင်၏ agent/cron ကို အချိန်တိုအတွင်း နှစ်ကြိမ် run လုပ်ပြီး နှစ်ကြိမ်စလုံး အောင်မြင်ကြောင်း အတည်ပြုပါ။ ဖြေရှင်းချက်မပြုလုပ်မီ ဒုတိယ run သည် ပုံမှန်အားဖြင့် `429`/`401` ဖြစ်လေ့ရှိသည်။ ဖြေရှင်းချက်ပြုလုပ်ပြီးနောက် failure ဖြစ်ပါကပင် ပွင့်လင်းမြင်သာစွာ ပြန်လည်ကြိုးစားပြီး call ကို ပြီးမြောက်စေမည်။ ထို့အပြင် `curl /monitoring/health` ကို အသုံးပြု၍ provider connection များရှိ `rateLimitedUntil` field နှင့် သက်ရောက်မှုရှိသော provider များအတွက် `circuitBreakers.providerBreakers[].state` ကို စောင့်ကြည့်နိုင်သည်—state သည် `CLOSED`၊ `DEGRADED`၊ `OPEN` သို့မဟုတ် `HALF_OPEN` တစ်ခုဖြစ်သည် (`src/shared/utils/circuitBreaker.ts` ကို ကြည့်ပါ)။ အဆက်မပြတ် မအောင်မြင်သော provider သည် reset window က probe တစ်ခု ဖြတ်သန်းခွင့်မပေးမီ (`HALF_OPEN`) `CLOSED → DEGRADED → OPEN` အဖြစ် ပြောင်းလဲမည်။
+
+**429 ကို ဆက်လက်တွေ့နေရပါက**: ထို provider အတွက် အသုံးပြုနေသော account သည် rate သာမက ၎င်း၏ _quota_ ကို အမှန်တကယ် ကုန်ဆုံးထားခြင်းဖြစ်သည်။ OmniRoute dashboard → Providers → Accounts တွင် ထို provider အတွက် ဒုတိယ account တစ်ခု ထည့်ပါ၊ သို့မဟုတ် အခြားအခမဲ့ provider တစ်ခု (ဥပမာ `routeway`၊ `auggie`) ကို ရောနှောအသုံးပြုပါ။ Rotation သည် ယာယီ rate/400/401 ပြဿနာများကိုသာ ကူညီနိုင်သည်။ quota လုံးဝကုန်ဆုံးခြင်းအတွက် ဒုတိယ credential သို့မဟုတ် အခြား provider တစ်ခု လိုအပ်သည်။
+
+**Vision model များ (`auto/vision`၊ `bazaarlink/*`) တွင် 403 တွေ့ပါက**: ချိတ်ဆက်ထားသော account တွင် vision ပါဝင်သည့် paid plan မရှိခြင်း သို့မဟုတ် API key တွင် လုံလောက်သော permission မရှိခြင်း ဖြစ်နိုင်သည်။ Provider dashboard တွင် key scope ၌ vision/multimodal ပါဝင်ကြောင်း အတည်ပြုပါ၊ သို့မဟုတ် paid tier account တစ်ခုကို ချိတ်ဆက်ပြီး ၎င်းကို vision target အဖြစ် ဆက်လက်ထားရှိပါ။
 
 ---
 
@@ -94,44 +100,44 @@ OmniRoute က ထိန်းချုပ်ထားခြင်းမရှိ
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` ကို လုပ်ဆောင်သည့်အခါ npm version အသစ်များ (v11+ နှင့် v12+) သည် package lifecycle script များကို မူလသတ်မှတ်ချက်အရ ပိတ်ဆို့ထားပြီး install-scripts သတိပေးချက်တစ်ခုကို ပြသပါသည်။
+`npm install -g omniroute` ကို လုပ်ဆောင်သည့်အခါ npm ဗားရှင်းအသစ်များ (v11+ နှင့် v12+) သည် package lifecycle script များကို မူလအတိုင်း ပိတ်ဆို့ပြီး install-scripts သတိပေးချက်ကို ပြသသည်-
 
 ```
-npm warn install-scripts allowScripts တွင် ခွင့်ပြုမထားသောကြောင့် package 7 ခု၏ install script များကို ပိတ်ဆို့ထားသည်-
+npm warn install-scripts allowScripts တွင် ခွင့်ပြုထားခြင်းမရှိသောကြောင့် package 7 ခု၏ install script များကို ပိတ်ဆို့ထားသည်-
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### ဤသတိပေးချက်ကို လျစ်လျူရှုနိုင်ပါသလား။
 
-**တစ်စိတ်တစ်ပိုင်း လျစ်လျူရှုနိုင်သော်လည်း script များမပါဘဲ လုပ်ဆောင်ခြင်းကို အကြံမပြုပါ။** OmniRoute တွင် ပြဿနာဖြစ်လျှင် အလိုအလျောက်အစားထိုးအသုံးပြုနိုင်သည့် fallback များ ပါဝင်သည်။ Native `better-sqlite3` binding များကို standalone bundle မှ load မလုပ်နိုင်ပါက application သည် `node:sqlite` သို့မဟုတ် `sql.js` ကဲ့သို့သော အခြား driver များကို အဆင့်ဆင့် fallback လုပ်အသုံးပြုပါမည် ([SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md) ကို ကြည့်ပါ)။ Server သည် ဆက်လက်စတင်နိုင်သော်လည်း `sql.js` ကဲ့သို့သော WASM fallback များဖြင့် လုပ်ဆောင်ခြင်းသည် SQLite WAL (Write-Ahead Logging) mode ကို ပိတ်ထားစေပြီး memory အသုံးပြုမှုနှင့် disk sync overhead ကို တိုးမြင့်စေပါသည်။
+**တစ်စိတ်တစ်ပိုင်းအားဖြင့် လျစ်လျူရှုနိုင်သော်လည်း script များမပါဘဲ လုပ်ဆောင်ရန် မအကြံပြုပါ။** OmniRoute တွင် ပြဿနာဖြစ်လျှင် အစားထိုးအသုံးပြုနိုင်သော နည်းလမ်းများ ပါဝင်သည်။ standalone bundle မှ native `better-sqlite3` binding များကို load မလုပ်နိုင်ပါက application သည် `node:sqlite` သို့မဟုတ် `sql.js` ကဲ့သို့သော အခြား driver များကို အဆင့်ဆင့် အစားထိုးအသုံးပြုသည် ([SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md) ကို ကြည့်ပါ)။ Server သည် စတင်နိုင်ဆဲဖြစ်သော်လည်း `sql.js` ကဲ့သို့သော WASM fallback များပေါ်တွင် လုပ်ဆောင်ခြင်းသည် SQLite WAL (Write-Ahead Logging) mode ကို ပိတ်စေပြီး memory နှင့် disk-sync အပိုဝန်ကို မြင့်တက်စေသည်။
 
-### အမှန်တကယ်လိုအပ်သည့် script များမှာ မည်သည့်အရာများဖြစ်သနည်း။
+### မည်သည့် script များ အမှန်တကယ် လိုအပ်သနည်း။
 
-ပိတ်ဆို့ခံထားရသည့် script အားလုံးသည် OmniRoute ကို လုပ်ဆောင်ရန် မရှိမဖြစ်လိုအပ်သည် မဟုတ်ပါ။
+ပိတ်ဆို့ခံထားရသော script အားလုံးသည် OmniRoute ကို လုပ်ဆောင်ရန် မရှိမဖြစ်လိုအပ်သည် မဟုတ်ပါ-
 
-- **မရှိမဖြစ်လိုအပ်သောအရာများ (`omniroute`, `better-sqlite3`):** OmniRoute သည် Next.js standalone application bundle (`dist/`) မှ လုပ်ဆောင်ပါသည်။ Installation ပြုလုပ်နေစဉ် npm သည် host နှင့် သီးခြားကိုက်ညီသော native SQLite driver ကို ထိပ်ဆုံးအဆင့်ရှိ `node_modules/better-sqlite3/` ထဲသို့ download လုပ်ခြင်း သို့မဟုတ် compile လုပ်ခြင်း ပြုလုပ်ပါသည်။ ထို့နောက် OmniRoute ၏ `postinstall` script (`scripts/build/postinstall.mjs`) သည် အဆိုပါ host နှင့် သီးခြားကိုက်ညီသော binary များကို စစ်ဆေးပြီး standalone server က အသုံးပြုနိုင်ရန် `dist/node_modules/` ထဲသို့ copy လုပ်ပါသည်။ `omniroute` ၏ postinstall script ကို ပိတ်ဆို့ထားပါက ဤ copy အဆင့်ကို ကျော်သွားမည်ဖြစ်သည်။
-- **ရွေးချယ်နိုင်သော/transitive အရာများ (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** ၎င်းတို့သည် build helper များ၊ watcher tool များ သို့မဟုတ် system keychain utility များဖြစ်သည်။ ၎င်းတို့ကို ခွင့်ပြုခြင်းဖြင့် build သတိပေးချက်များကို ကာကွယ်နိုင်သော်လည်း core routing လုပ်ဆောင်ချက်အတွက် မလိုအပ်ပါ။
-- **ဖယ်ထုတ်ထားသောအရာ (`onnxruntime-node`):** Local AI embedding များအတွက် ရွေးချယ်နိုင်သော dependency တစ်ခုဖြစ်ပြီး OmniRoute လုပ်ဆောင်ရန် **မလိုအပ်ပါ**။ ၎င်း၏ postinstall script သည် NuGet မှ CUDA asset ~300MB ကို download လုပ်ပါသည်။ ပံ့ပိုးထားသော hardware တွင် local ONNX acceleration ကို အသုံးပြုရန် တိတိကျကျ ရည်ရွယ်ထားခြင်းမရှိပါက ၎င်းကို allow-list ထဲသို့ မထည့်ပါနှင့်။
+- **မရှိမဖြစ်လိုအပ်သော (`omniroute`, `better-sqlite3`):** OmniRoute သည် Next.js standalone application bundle (`dist/`) မှ လုပ်ဆောင်သည်။ ထည့်သွင်းစဉ်အတွင်း npm သည် လက်ရှိ host အတွက် သီးသန့် native SQLite driver ကို အပေါ်ဆုံးအဆင့်ရှိ `node_modules/better-sqlite3/` ထဲသို့ download လုပ်ခြင်း သို့မဟုတ် compile လုပ်ခြင်း ပြုလုပ်သည်။ ထို့နောက် OmniRoute ၏ `postinstall` script (`scripts/build/postinstall.mjs`) သည် အဆိုပါ host-specific binary များကို စစ်ဆေးပြီး standalone server က အသုံးပြုနိုင်စေရန် `dist/node_modules/` ထဲသို့ ကူးယူသည်။ `omniroute` ၏ postinstall script ကို ပိတ်ဆို့ထားပါက ဤကူးယူမှုအဆင့်ကို ကျော်သွားမည်ဖြစ်သည်။
+- **ရွေးချယ်နိုင်သော/ဆင့်ပွားမှီခိုမှု (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** ၎င်းတို့သည် build အထောက်အကူပြုကိရိယာများ၊ watcher tool များ သို့မဟုတ် system keychain utility များဖြစ်သည်။ ၎င်းတို့ကို ခွင့်ပြုခြင်းဖြင့် build သတိပေးချက်များကို တားဆီးနိုင်သော်လည်း အဓိက routing လုပ်ဆောင်ချက်အတွက် မလိုအပ်ပါ။
+- **ချန်လှပ်ထားသော (`onnxruntime-node`):** Local AI embedding များအတွက် ရွေးချယ်နိုင်သော dependency ဖြစ်ပြီး OmniRoute လုပ်ဆောင်ရန် **မလိုအပ်ပါ**။ ၎င်း၏ postinstall script သည် NuGet မှ ~300MB ရှိသော CUDA asset များကို download လုပ်သည်။ ပံ့ပိုးထားသော hardware တွင် local ONNX acceleration ကို အသုံးပြုရန် ရည်ရွယ်ထားကြောင်း သေချာမှသာ ၎င်းကို allow-list ထဲသို့ ထည့်ပါ။
 
 ### အကြံပြုထားသော ဖြေရှင်းနည်း
 
-Global install ပြုလုပ်နေစဉ် လိုအပ်သော install script များကို ခွင့်ပြုပြီး သတိပေးချက်များကို ဖျောက်ထားရန် OmniRoute နှင့် ၎င်း၏ native dependency များအတွက် `--allow-scripts` ကို ထည့်သွင်းအသုံးပြုပါ။
+Global install ပြုလုပ်စဉ် လိုအပ်သော install script များကို ခွင့်ပြုပြီး သတိပေးချက်များကို ဖယ်ရှားရန် OmniRoute နှင့် ၎င်း၏ native dependency များအတွက် `--allow-scripts` ကို ထည့်သွင်းအသုံးပြုပါ-
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-တစ်နည်းအားဖြင့် သင့် user account ရှိ global installation အားလုံးအတွက် ၎င်းကို အမြဲတမ်းအသုံးပြုရန် အောက်ပါအတိုင်း configure လုပ်နိုင်ပါသည်။
+တစ်နည်းအားဖြင့် သင့် user account ရှိ global installation အားလုံးအတွက် အမြဲတမ်း configure လုပ်ထားရန်-
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 npm install -g omniroute
 ```
 
-### သင်၏ installation ကို စစ်ဆေးခြင်း
+### သင်၏ installation ကို စစ်ဆေးပါ
 
-Installation ပြီးသွားပါက native binding များနှင့် runtime environment ကောင်းမွန်စွာ အလုပ်လုပ်နေကြောင်း သေချာစေရန် ပါဝင်ပြီးသား diagnostic tool ကို လုပ်ဆောင်ပါ။
+ထည့်သွင်းပြီးနောက် native binding များနှင့် runtime environment ကောင်းမွန်စွာ အလုပ်လုပ်ကြောင်း သေချာစေရန် built-in diagnostic tool ကို လုပ်ဆောင်ပါ-
 
 ```bash
 omniroute doctor

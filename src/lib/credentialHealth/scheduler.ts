@@ -23,6 +23,7 @@ import { testSingleConnection } from "@/app/api/providers/[id]/test/route";
 import { getProviderConnections } from "@/lib/db/providers";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { setCredentialHealth, initCredentialCache } from "@/lib/credentialHealth/cache";
+import { runAutoDisabledRevalidation } from "@/lib/credentialHealth/autoDisabledRevalidation";
 import {
   DEFAULT_SWEEP_INTERVAL_MS,
   isCredentialProbeInconclusive,
@@ -30,6 +31,7 @@ import {
 } from "@/lib/credentialHealth/probePolicy";
 import { isInRefreshBackoff } from "@/lib/tokenRefreshCircuit";
 import { emit } from "@/lib/events/eventBus";
+import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import { SEARCH_VALIDATOR_CONFIGS } from "@/lib/providers/validation/searchProviders";
 
@@ -82,6 +84,7 @@ function isBuildProcess(): boolean {
 
 function isCredentialHealthCheckDisabled(): boolean {
   if (isBuildProcess() || isAutomatedTestProcess()) return true;
+  if (isBackgroundServicesDisabled()) return true;
   const val = process.env.OMNIROUTE_DISABLE_CREDENTIAL_HEALTH_CHECK;
   return val ? TRUE_ENV_VALUES.has(val.trim().toLowerCase()) : false;
 }
@@ -325,9 +328,25 @@ export async function sweep(): Promise<void> {
       globalIntervalMs = resolveCredentialHealthSweepInterval(null);
     }
 
+    // #16190: connections the gateway switched off by itself get a slow, capped
+    // retest (operator-disabled ones never do); a passing one is back on, its
+    // pacing is seeded so the active pass below does not probe it twice, and the
+    // health cache shows it active right away.
+    const revalidation = await runAutoDisabledRevalidation({ sweepIntervalMs: globalIntervalMs });
+    for (const conn of revalidation.reactivated) {
+      const testedAt = Date.now();
+      const intervalMs = getConnIntervalMs(conn, globalIntervalMs) ?? globalIntervalMs;
+      state.perConnTiming.set(conn.id, {
+        lastAttemptAt: testedAt,
+        nextAttemptAt: testedAt + intervalMs,
+      });
+      setCredentialHealth(conn.id, String(conn.provider ?? ""), "active");
+    }
+
     // Get active provider connections only (API-key + OAuth). Disabled
     // connections are excluded from routing and must not consume health-check
-    // concurrency or delay the scheduler with avoidable upstream timeouts.
+    // concurrency or delay the scheduler with avoidable upstream timeouts; the
+    // retest above is the only exception, capped per sweep.
     let connections: Array<{
       id: string;
       provider: string;

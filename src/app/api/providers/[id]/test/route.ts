@@ -11,7 +11,12 @@ import { projectProviderValidationResultForPublicResponse } from "@/lib/provider
 import { getCliRuntimeStatus } from "@/shared/services/cliRuntime";
 import { buildQoderCliNotFoundHint } from "@omniroute/open-sse/services/qoderCliResolve.ts";
 // Use the shared open-sse token refresh with built-in dedup/race-condition cache
-import { getAccessToken } from "@omniroute/open-sse/services/tokenRefresh.ts";
+import { getAccessToken, isPassiveCodex } from "@omniroute/open-sse/services/tokenRefresh.ts";
+import { redactVerificationUrls } from "@omniroute/open-sse/services/antigravityVerification.ts";
+import {
+  clearAntigravityVerificationUrl,
+  recordAntigravityVerificationUrl,
+} from "@omniroute/open-sse/handlers/chatCore/antigravityVerificationState.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import { shouldHideLogs } from "@/lib/tokenHealthCheck";
@@ -27,8 +32,9 @@ import {
 import { providerAllowsOptionalApiKey } from "@/shared/constants/providers";
 import { shouldUseApiKeyConnectionTest } from "./webSessionTestDispatch";
 import { testCodexAppServerConnection, makeDiagnosis } from "./codexAppServerHealth";
-import { recoverKeyHealth } from "@omniroute/open-sse/services/apiKeyRotator.ts";
+import { persistConnectionTestHealth } from "./connectionTestHealth";
 import { lockModelIfPerModelQuota } from "@omniroute/open-sse/services/accountFallback.ts";
+import { clearTestedBreakers } from "@/lib/resilience/clearTestedBreakers";
 import { shouldClearErrorStateOnValidProbe } from "@/lib/usage/providerLimits";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import * as apiKeyTestResult from "./apiKeyTestResult";
@@ -82,6 +88,8 @@ export type ConnectionTestOptions = {
    * allowLocalRuntimeProbe above. Defaults to permissive for the internal scheduler.
    */
   allowLocalSpawn?: boolean;
+  /** #16190: false keeps an unverifiable (skipped) test from switching a connection on. */
+  activateUnverified?: boolean;
 };
 
 export async function getProviderRuntimeStatus(
@@ -227,7 +235,7 @@ async function refreshOAuthToken(connection: any) {
       }
       await updateProviderConnection(connection.id, update);
     });
-    return result; // { accessToken, expiresIn, refreshToken } or null
+    return isPassiveCodex(provider) && !result?.accessToken ? null : result; // { accessToken, expiresIn, refreshToken } or null
   } catch (err) {
     console.error(
       `Error refreshing ${provider} token:`,
@@ -841,8 +849,20 @@ export async function testOAuthConnection(
     if (connection.provider === "antigravity" || connection.provider === "agy") {
       console.log(
         `[OAuthTest] ${connection.provider} probe returned HTTP ${res.status}:`,
-        bodyText.slice(0, 500)
+        redactVerificationUrls(bodyText).slice(0, 500)
       );
+      // The probe is the only place the dashboard Test and the hourly credential-health run
+      // see Google's raw 403, so keep its "verify your account" link for the Verify button.
+      if (res.status === 403) {
+        await recordAntigravityVerificationUrl({
+          provider: connection.provider,
+          connectionId: connection.id,
+          upstreamErrorBody: bodyText,
+          message: "",
+        }).catch(() => {
+          console.warn("[OAuthTest] Could not store the antigravity verification link");
+        });
+      }
     }
 
     // #13010: a Cloud Code envelope failure answers with its own JSON `error.message`.
@@ -921,6 +941,11 @@ async function testApiKeyConnection(connection: any, allowLocalSpawn = true) {
       apiKey: connection.apiKey,
       providerSpecificData: connection.providerSpecificData,
       allowLocalSpawn,
+      credentials: {
+        accessToken: connection.accessToken,
+        refreshToken: connection.refreshToken,
+        expiresAt: connection.expiresAt,
+      },
     })
   );
 
@@ -1062,13 +1087,11 @@ export async function testSingleConnection(
     connection) as typeof connection;
   const operatorDisabled = isOperatorDisabled(latest);
 
-  // Unsupported validation capability is neutral: the provider cannot be verified through the
-  // generic test surface, which says nothing about its credential. Do not mutate persisted
-  // credential health (testStatus/lastError/etc.) — but DO activate it if it isn't already: under
-  // the "only advertise tested connections" default (connections start isActive:false, see
-  // POST /api/providers) it would stay hidden from /v1/models forever. Operator-disabled stays off.
+  // An unsupported validation says nothing about the credential: keep its health as is, but switch
+  // it on (new connections start isActive:false and would stay off /v1/models forever), unless an
+  // operator switched it off or the caller passed activateUnverified:false (#16190).
   if (result.skipped === true) {
-    if (latest.isActive !== true && !operatorDisabled) {
+    if (latest.isActive !== true && !operatorDisabled && options.activateUnverified !== false) {
       try {
         await updateProviderConnection(connectionId, { isActive: true });
       } catch (activateError) {
@@ -1093,18 +1116,6 @@ export async function testSingleConnection(
       ? makeDiagnosis("ok", "local", null, null)
       : classifyFailure({ error: result.error, statusCode: result.statusCode, provider }));
 
-  // #9623: a failed connection test must not paint the connection permanently red.
-  // Previously a non-terminal failure wrote `testStatus: "error"` with
-  // `rateLimitedUntil: null` — since the cooldown filter only ever skips entries
-  // whose rateLimitedUntil is in the future, a null cooldown left the connection
-  // permanently unavailable after a transient outage. Give non-terminal test
-  // failures a short cooldown so the lazy-recovery path retries them.
-  const terminalTestStatuses = new Set(["banned", "expired", "credits_exhausted"]);
-  const isTerminalFailure =
-    !result.valid &&
-    terminalTestStatuses.has(String(diagnosis.code ?? diagnosis.type ?? "").toLowerCase());
-  const testFailureCooldownMs = result.valid ? 0 : 30_000; // 30s retry window
-
   // A successful credential probe proves the KEY is valid. It does NOT prove the
   // quota window reopened: the probe is a cheap auth/models call that never touches
   // the chat quota a weekly cap applies to. Clearing an ACTIVE cooldown here — which
@@ -1118,60 +1129,32 @@ export async function testSingleConnection(
     connection as { rateLimitedUntil?: string | null },
     result.valid
   );
-  const lastErrorType = result.valid ? connection.lastErrorType : diagnosis.type;
-
-  const updateData: Record<string, any> = {
-    testStatus: clearErrorState ? "active" : result.valid ? connection.testStatus : "error",
-    // A passing test is the sole activation signal under the "only advertise tested-working
-    // connections" default (POST /api/providers creates connections isActive:false). Only ever
-    // flips ON: a failing test leaves isActive untouched (a transient failure must not take a
-    // working connection out of rotation — the cooldown/rateLimitedUntil below handles that), so
-    // this never deactivates anything, nor re-enables an operator-disabled one.
-    ...(result.valid && !operatorDisabled ? { isActive: true } : {}),
-    lastError: clearErrorState ? null : result.valid ? connection.lastError : result.error,
-    lastErrorAt: clearErrorState ? null : result.valid ? connection.lastErrorAt : now,
-    lastTested: now,
-    lastErrorType: clearErrorState ? null : lastErrorType,
-    lastErrorSource: clearErrorState
-      ? null
-      : result.valid
-        ? connection.lastErrorSource
-        : diagnosis.source,
-    errorCode: clearErrorState
-      ? null
-      : result.valid
-        ? connection.errorCode
-        : diagnosis.code || result.statusCode || null,
-    rateLimitedUntil: clearErrorState
-      ? null
-      : isTerminalFailure
-        ? connection.rateLimitedUntil || null
-        : result.valid
-          ? connection.rateLimitedUntil || null
-          : new Date(Date.now() + testFailureCooldownMs).toISOString(),
-  };
-
-  if (clearErrorState) {
-    updateData.backoffLevel = 0;
+  await persistConnectionTestHealth({
+    connectionId,
+    provider,
+    connection,
+    latest,
+    result,
+    diagnosis,
+    operatorDisabled,
+    clearErrorState,
+    now,
+    persist: updateProviderConnection,
+  });
+  // Once persisted, same gate as the error state: a valid probe also closes a DEGRADED breaker.
+  if (clearErrorState) clearTestedBreakers(provider, connectionId);
+  // A passing probe means Google lifted the "verify your account" challenge: drop the stored
+  // link so the Verify button and the pending-verification filter clear without waiting for
+  // the next successful chat request.
+  if (result.valid) {
+    await clearAntigravityVerificationUrl(
+      provider,
+      connectionId,
+      latest.providerSpecificData
+    ).catch(() => {
+      console.warn("[ConnectionTest] Could not clear the antigravity verification link");
+    });
   }
-
-  if (result.valid && (connection.apiKey || connection.accessToken)) {
-    const recovered = recoverKeyHealth(connectionId, "primary", latest.providerSpecificData);
-    if (recovered) updateData.providerSpecificData = recovered;
-  }
-  apiKeyTestResult.applyDetectedControlUpdate(updateData, latest.providerSpecificData, result);
-  if (result.refreshed && result.newTokens) {
-    updateData.accessToken = result.newTokens.accessToken;
-    if (result.newTokens.refreshToken) {
-      updateData.refreshToken = result.newTokens.refreshToken;
-    }
-    if (result.newTokens.expiresIn) {
-      updateData.expiresAt = new Date(Date.now() + result.newTokens.expiresIn * 1000).toISOString();
-    }
-  }
-
-  // Update status in db
-  await updateProviderConnection(connectionId, updateData);
 
   // Sync to cloud if token was refreshed
   if (result.refreshed) {

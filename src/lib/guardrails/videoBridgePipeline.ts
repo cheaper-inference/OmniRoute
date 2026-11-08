@@ -17,13 +17,11 @@
 //    `audioTranscript` with the sampled visual frame captions
 //    (videoBridgeHelpers.ts::describeVideoPart already does the fusion
 //    internally; this port names that boundary explicitly and is where a
-//    real audio-transcription backend would be substituted).
+//    server STT is composed here by `createVideoSttAdapter`).
 //  - `VideoDrilldownPort` — the frame-zoom persistence boundary
-//    (videoBridgeDrilldown.ts::VideoDrilldownCache.put). NOT wired into
-//    `processVideoPart` yet: today only the separate
-//    `/api/modality-bridge/video/drilldown` route writes drill-down entries.
-//    The type lives here so a future extraction step can seed drill-down
-//    candidates from a processed part without re-deriving the port shape.
+//    (videoBridgeDrilldown.ts::VideoDrilldownCache.put). The production adapter
+//    is composed around the describing port by `createVideoDrilldownAdapter`;
+//    it publishes already-derived frames via the shared tenant-bound lifecycle.
 import { createHash } from "node:crypto";
 
 import { fetch as undiciFetch } from "undici";
@@ -66,7 +64,10 @@ import {
   safeSetCacheEntry,
   videoBridgeAbortError,
 } from "./videoBridgeResultCache";
-import { callVisionModel as defaultCallVisionModel, type VisionModelConfig } from "./visionBridgeHelpers";
+import {
+  callVisionModel as defaultCallVisionModel,
+  type VisionModelConfig,
+} from "./visionBridgeHelpers";
 
 export interface VideoAnalysisContext {
   /** Effective prompt behavior after the no-text fallback. */
@@ -94,8 +95,8 @@ export interface VideoAudioTranscriptionPort {
   describePart: typeof defaultDescribeVideoPart;
 }
 
-/** Frame drill-down persistence boundary (videoBridgeDrilldown.ts). Not yet
- * wired into `processVideoPart` — see the module header note above. */
+/** Legacy raw-store port; the production describing adapter uses the shared
+ * opaque-handle lifecycle rather than exposing raw session/ref keys. */
 export interface VideoDrilldownPort {
   put: VideoDrilldownCache["put"];
 }
@@ -145,7 +146,7 @@ function waitForVideoBridgePromise<T>(promise: Promise<T>, signal: AbortSignal):
 // silently undefined, which would read as "no transcript" / mark
 // `videoBridgeObserved: false` for a video that does carry one.
 const VIDEO_BRIDGE_RESULT_CACHE_VERSION = "v6";
-const VIDEO_BRIDGE_RESULT_CACHE_POLICY = "sampling-then-dedup-v2";
+const VIDEO_BRIDGE_RESULT_CACHE_POLICY = "sampling-then-dedup-v3-client-transcript";
 const VIDEO_BRIDGE_RESULT_CACHE_KEY_KIND = "video-result-v4";
 const VIDEO_BRIDGE_DOWNLOAD_FLIGHT_VERSION = "v1";
 
@@ -256,7 +257,10 @@ function createVideoResultCacheIdentity(
   return {
     analysisMode: analysis.analysisMode,
     cacheVersion: VIDEO_BRIDGE_RESULT_CACHE_VERSION,
-    dedupCandidateFrameCount: resolveVideoDedupCandidateFrameCount(runtime.frameCount),
+    dedupCandidateFrameCount: resolveVideoDedupCandidateFrameCount(
+      runtime.frameCount,
+      runtime.samplingPolicy
+    ),
     dedupPolicyVersion: VIDEO_DEDUP_POLICY_VERSION,
     dedupThreshold: VIDEO_DEDUP_THRESHOLD,
     extractorVersion: VIDEO_BRIDGE_RESULT_CACHE_VERSION,
@@ -425,6 +429,8 @@ interface DescribeWithVisionModelDeps {
     config: VisionModelConfig,
     apiKey?: string
   ) => Promise<string>;
+  /** GHSA-3w2r: the caller API key's scope, applied to every frame describe. */
+  visionKeyScope?: VisionModelConfig["keyScope"];
 }
 
 async function describeWithVisionModel(
@@ -455,7 +461,11 @@ async function describeWithVisionModel(
       timeoutMs: runtime.timeoutMs,
     },
     async (frameDataUri, timestampSeconds, signal) => {
-      const prompt = composeVideoFramePrompt(visionRuntime.prompt, timestampSeconds, analysis.focusHint);
+      const prompt = composeVideoFramePrompt(
+        visionRuntime.prompt,
+        timestampSeconds,
+        analysis.focusHint
+      );
       const key = cache
         ? bridgeCacheKey(frameDataUri, `${prompt}@${timestampSeconds.toFixed(3)}`, selectedModel)
         : null;
@@ -477,6 +487,7 @@ async function describeWithVisionModel(
         signal,
         timeoutMs: runtime.timeoutMs,
         fetchImpl: undiciFetch as unknown as typeof fetch,
+        ...(deps.visionKeyScope ? { keyScope: deps.visionKeyScope } : {}),
       });
       successfulModels.add(producerModel);
       if (key && cache) cache.setEntry(key, { value: caption, producerModel });
@@ -502,12 +513,17 @@ export interface ProcessVideoPartDeps {
   selectVideoModel: () => Promise<string | null>;
   /** Mirrors `VideoBridgeDependencies.describePart` — bypasses the internal
    * vision-model path entirely when supplied (test/override seam). */
-  overrideDescribePart?: (part: VideoPart, analysis: VideoAnalysisContext) => Promise<DescribedVideo>;
+  overrideDescribePart?: (
+    part: VideoPart,
+    analysis: VideoAnalysisContext
+  ) => Promise<DescribedVideo>;
   callVisionModel?: (
     imageDataUri: string,
     config: VisionModelConfig,
     apiKey?: string
   ) => Promise<string>;
+  /** GHSA-3w2r: the caller API key's scope, applied to every frame describe. */
+  visionKeyScope?: VisionModelConfig["keyScope"];
 }
 
 export interface ProcessVideoPartParams {
@@ -530,6 +546,7 @@ export type ProcessVideoPartResult =
       description: string;
       /** Log-safe redacted shadow (see `DescribedVideo.descriptionRedacted`); undefined when no transcript cue was rendered. */
       descriptionRedacted?: string;
+      drilldown?: DescribedVideo["drilldown"];
       durationSeconds: number;
       framesExtracted: number;
       framesRequested: number;
@@ -575,13 +592,25 @@ export async function processVideoPart(
             buildVideoDownloadFlightKey(part, context, VIDEO_BRIDGE_MAX_BYTES, runtime.timeoutMs),
             attemptSignal,
             (downloadSignal) =>
-              deps.broker.loadVideoPartBytes(part, VIDEO_BRIDGE_MAX_BYTES, runtime.timeoutMs, downloadSignal, {
-                fetchRemote: deps.broker.fetchRemote,
-              })
+              deps.broker.loadVideoPartBytes(
+                part,
+                VIDEO_BRIDGE_MAX_BYTES,
+                runtime.timeoutMs,
+                downloadSignal,
+                {
+                  fetchRemote: deps.broker.fetchRemote,
+                }
+              )
           )
-        : await deps.broker.loadVideoPartBytes(part, VIDEO_BRIDGE_MAX_BYTES, runtime.timeoutMs, attemptSignal, {
-            fetchRemote: deps.broker.fetchRemote,
-          })
+        : await deps.broker.loadVideoPartBytes(
+            part,
+            VIDEO_BRIDGE_MAX_BYTES,
+            runtime.timeoutMs,
+            attemptSignal,
+            {
+              fetchRemote: deps.broker.fetchRemote,
+            }
+          )
       : null;
     const contentFingerprint =
       deps.cache && videoBytes
@@ -650,7 +679,12 @@ export async function processVideoPart(
             analysis,
             processingSignal,
             videoBytes ?? undefined,
-            { broker: deps.broker, transcription: deps.transcription, callVisionModel: deps.callVisionModel }
+            {
+              broker: deps.broker,
+              transcription: deps.transcription,
+              callVisionModel: deps.callVisionModel,
+              visionKeyScope: deps.visionKeyScope,
+            }
           );
       if (processingSignal.aborted) throw videoBridgeAbortError();
       const resultCacheBytes = Buffer.byteLength(described.description, "utf8");
@@ -674,7 +708,8 @@ export async function processVideoPart(
               modelUsed: described.modelUsed ?? resultCacheIdentity.model,
               samplingCandidateCount: described.sampling?.candidateCount ?? 0,
               samplingPolicyEffective: described.sampling?.policyEffective ?? "uniform",
-              samplingPolicyRequested: described.sampling?.policyRequested ?? runtime.samplingPolicy,
+              samplingPolicyRequested:
+                described.sampling?.policyRequested ?? runtime.samplingPolicy,
               transcriptCuesApplied: described.transcriptCues?.length ?? 0,
               contactSheetUsed: described.contactSheetUsed ?? false,
               ...(described.fusion ? { fusion: described.fusion } : {}),
@@ -719,6 +754,7 @@ export async function processVideoPart(
       dedupDropped: described.dedupDropped ?? 0,
       description: described.description,
       descriptionRedacted: described.descriptionRedacted,
+      drilldown: described.drilldown,
       durationSeconds: described.durationSeconds,
       framesExtracted: described.framesExtracted ?? described.framesUsed,
       framesRequested: described.framesRequested,

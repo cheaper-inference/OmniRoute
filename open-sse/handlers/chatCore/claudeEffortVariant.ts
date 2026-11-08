@@ -33,6 +33,52 @@ function hasExplicitClaudeEffort(claudeBody: Record<string, unknown>): boolean {
   return !(explicitEffort === undefined || explicitEffort === null || explicitEffort === "");
 }
 
+function isCursorProvider(provider: string | null | undefined): boolean {
+  return (
+    provider === "cursor" || provider === "cu" || provider === "cursor-api" || provider === "cua"
+  );
+}
+
+/**
+ * The base model id that {@link applyClaudeEffortVariant} dispatches for a Claude
+ * effort-variant id (`claude-opus-5-5-high` → `claude-opus-5-5`), or `null` when the
+ * id is sent upstream as-is (no effort suffix, not a Claude effort base, or a lane
+ * that keeps tier ids literal: Cursor, Devin CLI, Antigravity Claude 5.x tiers).
+ * Cost accounting uses it to price a variant like the model that actually served it.
+ */
+export function resolveClaudeEffortVariantBase(
+  provider: string | null | undefined,
+  model: string
+): { baseModel: string; effort: string } | null {
+  // Cursor advertises native effort-suffixed ids. Its executor resolves exact
+  // live-catalog ids before applying its own suffix fallback; stripping here
+  // destroys that information before the executor can see it.
+  if (isCursorProvider(provider)) return null;
+  // Devin CLI catalogs embed the effort tier in the model id itself
+  // (`claude-opus-5-low` is a distinct upstream model). Stripping the suffix
+  // would dispatch a base id that does not exist upstream, so keep the id
+  // literal for these providers regardless of the Claude-family name.
+  if (isDevinLiteralModelIdProvider(provider)) return null;
+  // Antigravity Claude 5.x tiers are distinct upstream ids (`claude-opus-5-5-high`);
+  // the bare base id does not exist on the Cloud Code backend.
+  if (isAntigravityLiteralTierModelId(provider, model)) return null;
+  if (typeof model !== "string") return null;
+
+  const { baseModel, effort } = splitClaudeEffortSuffix(model);
+  if (!effort) return null;
+  const isDirectClaudeLane = provider === "claude" || isClaudeCodeCompatibleProvider(provider);
+  // Anthropic's dotted catalog aliases must resolve before checking the known base.
+  const knownBase =
+    provider === "anthropic"
+      ? (resolveProviderModelAlias(provider, baseModel) ?? baseModel)
+      : baseModel;
+  if (!isDirectClaudeLane && !isKnownClaudeEffortBaseModel(knownBase)) return null;
+  // The suffixed id was resolved before it was split, so the provider alias (for example the
+  // dotted `claude-haiku-4.5` that Anthropic only accepts as `claude-haiku-4-5`) has to be
+  // applied to the base id here too.
+  return { baseModel: resolveProviderModelAlias(provider, baseModel) ?? baseModel, effort };
+}
+
 export function applyClaudeEffortVariant(opts: {
   provider: string | null | undefined;
   effectiveModel: string;
@@ -41,53 +87,19 @@ export function applyClaudeEffortVariant(opts: {
   sourceFormat: string;
 }): { effectiveModel: string; log: string | null } {
   const { provider, body, sourceFormat } = opts;
-  // Cursor advertises native effort-suffixed ids. Its executor resolves exact
-  // live-catalog ids before applying its own suffix fallback; stripping here
-  // destroys that information before the executor can see it.
-  if (
-    provider === "cursor" ||
-    provider === "cu" ||
-    provider === "cursor-api" ||
-    provider === "cua"
-  ) {
-    return { effectiveModel: opts.effectiveModel, log: null };
-  }
-  let effectiveModel = opts.effectiveModel;
-  let log: string | null = null;
+  const variant = resolveClaudeEffortVariantBase(provider, opts.effectiveModel);
+  if (!variant) return { effectiveModel: opts.effectiveModel, log: null };
 
-  // Devin CLI catalogs embed the effort tier in the model id itself
-  // (`claude-opus-5-low` is a distinct upstream model). Stripping the suffix
-  // would dispatch a base id that does not exist upstream, so keep the id
-  // literal for these providers regardless of the Claude-family name.
-  if (isDevinLiteralModelIdProvider(provider)) {
-    return { effectiveModel, log: null };
-  }
-
-  // Antigravity Claude 5.x tiers are distinct upstream ids (`claude-opus-5-5-high`);
-  // the bare base id does not exist on the Cloud Code backend.
-  if (isAntigravityLiteralTierModelId(provider, effectiveModel)) {
-    return { effectiveModel, log: null };
-  }
-
-  if (typeof effectiveModel === "string") {
-    const { baseModel, effort } = splitClaudeEffortSuffix(effectiveModel);
-    const isDirectClaudeLane = provider === "claude" || isClaudeCodeCompatibleProvider(provider);
-    if (effort && (isDirectClaudeLane || isKnownClaudeEffortBaseModel(baseModel))) {
-      // The suffixed id was resolved before it was split, so the provider alias (for example the
-      // dotted `claude-haiku-4.5` that Anthropic only accepts as `claude-haiku-4-5`) has to be
-      // applied to the base id here too.
-      const resolvedBase = resolveProviderModelAlias(provider, baseModel);
-      effectiveModel = resolvedBase;
-      if (body && typeof body === "object" && !Array.isArray(body)) {
-        const claudeBody = body as Record<string, unknown>;
-        claudeBody.model = resolvedBase;
-        if (sourceFormat !== FORMATS.CLAUDE && !hasExplicitClaudeEffort(claudeBody)) {
-          claudeBody.reasoning_effort = effort;
-        }
-      }
-      log = `Claude effort variant: stripped "-${effort}" → ${resolvedBase} (reasoning_effort=${effort})`;
+  const { baseModel: resolvedBase, effort } = variant;
+  if (body && typeof body === "object" && !Array.isArray(body)) {
+    const claudeBody = body as Record<string, unknown>;
+    claudeBody.model = resolvedBase;
+    if (sourceFormat !== FORMATS.CLAUDE && !hasExplicitClaudeEffort(claudeBody)) {
+      claudeBody.reasoning_effort = effort;
     }
   }
-
-  return { effectiveModel, log };
+  return {
+    effectiveModel: resolvedBase,
+    log: `Claude effort variant: stripped "-${effort}" → ${resolvedBase} (reasoning_effort=${effort})`,
+  };
 }

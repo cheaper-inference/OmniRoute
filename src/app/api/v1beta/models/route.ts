@@ -11,6 +11,7 @@ import { getSettings } from "@/lib/db/settings";
 import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
 import { getSyncedCapabilities } from "@/lib/modelsDevSync";
 import { mergeCustomModelMetadata } from "@/lib/providers/modelMetadataPrecedence";
+import { getProviderPrefixIndex } from "@/lib/providerNodePrefixes";
 import { getModelCatalogAuthRejection } from "../../v1/models/catalogRequest";
 
 /**
@@ -112,6 +113,11 @@ export async function GET(request: Request) {
     // #16207: public naming resolver — compatible-provider node UUIDs become the
     // operator-configured prefix, exactly what /v1/models publishes as owned_by.
     const resolvePublicProviderId = await getPublicProviderIdResolver();
+    // Compatible nodes that do not uniquely own a non-reserved prefix are not
+    // runtime-routable under any public name, so they are not advertised at all.
+    const { compatibleNodeIds, eligibleNodeIds } = await getProviderPrefixIndex();
+    const isUnadvertisedNode = (providerId: string) =>
+      compatibleNodeIds.has(providerId) && !eligibleNodeIds.has(providerId);
 
     // Built-in models (hardcoded defaults)
     for (const [provider, providerModels] of Object.entries(PROVIDER_MODELS)) {
@@ -173,6 +179,7 @@ export async function GET(request: Request) {
       for (const [providerId, syncedModels] of Object.entries(syncedModelsMap)) {
         if (providerId === "gemini") continue;
         if (!activeKeys.has(providerId)) continue;
+        if (isUnadvertisedNode(providerId)) continue;
         if (!Array.isArray(syncedModels)) continue;
         for (const m of syncedModels) {
           if (!m || typeof m.id !== "string") continue;
@@ -216,6 +223,7 @@ export async function GET(request: Request) {
         // Skip Gemini — handled by syncedAvailableModels above
         if (providerId === "gemini") continue;
         if (!activeKeys.has(providerId)) continue;
+        if (isUnadvertisedNode(providerId)) continue;
         for (const model of rawModels) {
           if (!model || typeof model !== "object" || typeof (model as any).id !== "string")
             continue;

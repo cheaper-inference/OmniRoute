@@ -77,6 +77,29 @@ function readVisionOverrideFromModels(value: string | null, modelId: string): bo
   }
 }
 
+/**
+ * Read only this provider's exact custom-model id, without the broader
+ * path-shaped fallback that can match an identically named model in another
+ * node. Vision Bridge uses this when a slash-bearing id may be either a
+ * foreign routing prefix or an upstream vendor namespace (#16801).
+ *
+ * null means no owned explicit evidence, not a non-vision verdict.
+ */
+export function getExactCustomModelVisionOverride(
+  providerId: string,
+  modelId: string
+): boolean | null {
+  if (!providerId || !modelId) return null;
+  try {
+    const row = getDbInstance()
+      .prepare("SELECT value FROM key_value WHERE namespace = 'customModels' AND key = ?")
+      .get(providerId);
+    return readVisionOverrideFromModels(getKeyValue(row).value, modelId);
+  } catch {
+    return null;
+  }
+}
+
 function collectOverrideHits(map: CustomModelVisionOverrideMap): OverrideHit[] {
   const hits: OverrideHit[] = [];
   for (const [providerId, byModel] of map) {
@@ -152,40 +175,67 @@ export function getCustomModelVisionOverride(
   }
 }
 
-/** Bulk-load explicit custom-model vision overrides with one SQLite query. */
-export function listCustomModelVisionOverrides(
+/** Provider → parsed `customModels` rows, the shape `getCustomModels()` returns without a provider. */
+export type CustomModelsByProvider = Readonly<Record<string, unknown>>;
+
+/**
+ * Bulk-load every provider's `customModels` row with one SQLite query.
+ *
+ * One request-level snapshot shares this single read between the vision
+ * overrides and the #16929 operator endpoint overlay of the live listing, so
+ * `/api/models` never re-reads the namespace per consumer. Malformed rows are
+ * skipped individually; a failing read yields an empty map (fail open).
+ */
+export function readCustomModelsByProvider(
   options: CustomModelVisionOverrideReadOptions = {}
-): CustomModelVisionOverrideMap {
+): CustomModelsByProvider {
   try {
     const db = options.getDatabase?.() ?? getDbInstance();
     const rows = db
       .prepare("SELECT key, value FROM key_value WHERE namespace = 'customModels'")
       .all();
-    const result = new Map<string, Map<string, boolean>>();
+    const result: Record<string, unknown> = {};
     for (const row of rows) {
       const { key, value } = getKeyValue(row);
       if (!key || !value) continue;
       try {
-        const models = JSON.parse(value) as unknown;
-        if (!Array.isArray(models)) continue;
-        const byModel = new Map<string, boolean>();
-        for (const candidate of models) {
-          if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) continue;
-          const { id, supportsVision } = candidate as {
-            id?: unknown;
-            supportsVision?: unknown;
-          };
-          if (typeof id === "string" && typeof supportsVision === "boolean") {
-            byModel.set(id, supportsVision);
-          }
-        }
-        if (byModel.size > 0) result.set(key, byModel);
+        result[key] = JSON.parse(value) as unknown;
       } catch {
         // Malformed custom-model rows do not participate in capability resolution.
       }
     }
     return result;
   } catch {
-    return new Map<string, Map<string, boolean>>();
+    return {};
   }
+}
+
+/** Derive the explicit custom-model vision overrides from already-read `customModels` rows. */
+export function buildCustomModelVisionOverrides(
+  customModelsByProvider: CustomModelsByProvider
+): CustomModelVisionOverrideMap {
+  const result = new Map<string, Map<string, boolean>>();
+  for (const [key, models] of Object.entries(customModelsByProvider)) {
+    if (!Array.isArray(models)) continue;
+    const byModel = new Map<string, boolean>();
+    for (const candidate of models) {
+      if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) continue;
+      const { id, supportsVision } = candidate as {
+        id?: unknown;
+        supportsVision?: unknown;
+      };
+      if (typeof id === "string" && typeof supportsVision === "boolean") {
+        byModel.set(id, supportsVision);
+      }
+    }
+    if (byModel.size > 0) result.set(key, byModel);
+  }
+  return result;
+}
+
+/** Bulk-load explicit custom-model vision overrides with one SQLite query. */
+export function listCustomModelVisionOverrides(
+  options: CustomModelVisionOverrideReadOptions = {}
+): CustomModelVisionOverrideMap {
+  return buildCustomModelVisionOverrides(readCustomModelsByProvider(options));
 }

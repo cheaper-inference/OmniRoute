@@ -33,9 +33,6 @@ test("anthropic dotted catalog ids resolve to the dashed ids the Messages API ac
 
 test("a request for anthropic/<dotted id> is routed with the dashed model", async () => {
   for (const [dotted, dashed] of Object.entries(DOTTED_TO_DASHED)) {
-    // `claude-opus-4.5` is caught earlier by a legacy alias that routes it to the `claude`
-    // provider as `claude-opus-4-5-20251101`, so it never reaches this table.
-    if (dotted === "claude-opus-4.5") continue;
     const info = await getModelInfoCore(`anthropic/${dotted}`, null);
     assert.equal(info.provider, "anthropic", dotted);
     assert.equal(info.model, dashed, dotted);

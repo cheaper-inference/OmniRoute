@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 
 /**
  * MITM Proxy page — moved to AgentBridge (plan 11 §12).
@@ -11,6 +14,7 @@ import { useTranslations } from "next-intl";
 export default function MitmProxyMovedPage() {
   const router = useRouter();
   const t = useTranslations("agentBridge.pageMoved");
+  const tc = useTranslations("common");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -20,21 +24,20 @@ export default function MitmProxyMovedPage() {
   }, [router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-8">
-      <div className="rounded-xl border border-amber-500/40 bg-amber-900/20 p-8 text-center max-w-md w-full space-y-4">
-        <div className="flex items-center justify-center gap-2">
-          <span className="material-symbols-outlined text-amber-400 text-[28px]">info</span>
-          <h1 className="text-lg font-semibold text-amber-200">{t("title")}</h1>
-        </div>
-        <p className="text-sm text-amber-300/80">{t("message")}</p>
-        <button
-          type="button"
-          onClick={() => router.replace("/dashboard/tools/agent-bridge")}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/20 text-amber-200 px-4 py-2 text-sm font-medium hover:bg-amber-500/30 transition-colors"
-        >
-          {t("goNow")}
-        </button>
-      </div>
+    <div className="flex min-h-[60vh] items-center justify-center p-8">
+      <Alert
+        variant="warning"
+        className="w-full max-w-md"
+        icon={<Icon name="info" size={20} />}
+        title={<h1 className="text-lg font-semibold">{t("title")}</h1>}
+        description={t("message")}
+        dismissLabel={tc("close")}
+        actions={
+          <Button variant="outline" onClick={() => router.replace("/dashboard/tools/agent-bridge")}>
+            {t("goNow")}
+          </Button>
+        }
+      />
     </div>
   );
 }

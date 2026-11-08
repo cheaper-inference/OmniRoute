@@ -1,4 +1,10 @@
+import { projectProviderPrefixCollisions } from "@/lib/providers/providerPrefixCollision";
 import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
+import {
+  getDiscoveryStatesForConnections,
+  type DiscoveryStateEntry,
+  type DiscoveryStateRecord,
+} from "@/lib/db/discoveryState";
 import { NextResponse } from "next/server";
 import { getSettings } from "@/lib/db/settings";
 import { resolveResilienceSettings } from "@/lib/resilience/settings";
@@ -24,6 +30,7 @@ import {
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
   providerAllowsOptionalApiKey,
+  NOAUTH_PROVIDERS,
   resolveProviderId,
 } from "@/shared/constants/providers";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
@@ -73,6 +80,7 @@ import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { hydrateCompatibleNodeCreation } from "@/lib/providers/compatibleNodeCreation";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import { parseM365RefreshToken } from "@/lib/providers/m365RefreshToken";
 
 function projectCodexAccountPoolWithRoutingQuota(
   connection: Parameters<typeof projectCodexAccountPool>[0],
@@ -145,9 +153,22 @@ export async function GET(request: Request) {
 
     // Hide or mask sensitive fields
     const requestQueueSettings = resolveResilienceSettings(await getSettings()).requestQueue;
-    const safeConnections = connections.map((c) => {
+    // The outcome of the last model discovery of each connection. A read
+    // failure must not break the connection list: an unknown outcome simply
+    // reads as "unknown".
+    let discoveryStates = new Map<string, DiscoveryStateRecord>();
+    try {
+      const discoveryEntries: DiscoveryStateEntry[] = connections.map((c) => ({
+        provider: String(c.provider ?? ""),
+        id: String(c.id ?? ""),
+      }));
+      discoveryStates = getDiscoveryStatesForConnections(discoveryEntries);
+    } catch (error) {
+      console.error("Failed to read the stored discovery outcomes:", error);
+    }
+    const safeConnections = (await projectProviderPrefixCollisions(connections)).map((c) => {
       const providerSpecificData = c.providerSpecificData
-        ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData)
+        ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData, { revealKeys })
         : undefined;
       return {
         ...c,
@@ -156,6 +177,13 @@ export async function GET(request: Request) {
         refreshToken: undefined,
         idToken: undefined,
         providerSpecificData,
+        // #16940: the row mapper drops null columns; keep "never synced" an
+        // explicit null so the dashboard contract does not depend on absence.
+        syncedModelsAt: typeof c.syncedModelsAt === "string" ? c.syncedModelsAt : null,
+        // Same contract for the discovery outcome: absent means "unknown",
+        // never "healthy".
+        discoveryState:
+          discoveryStates.get(`${String(c.provider ?? "")}:${String(c.id ?? "")}`) ?? null,
         rateLimitAutoProtected: isConnectionAutoProtected(
           {
             provider: String(c.provider),
@@ -215,6 +243,7 @@ export async function POST(request: Request) {
       testStatus,
       providerSpecificData: incomingPsd,
       allowNoCredential,
+      proxyEnabled,
     } = validation.data;
     const provider = resolveProviderId(requestedProvider);
     if (provider === "cloudflare-ai" && Object.hasOwn(body, "accountId")) {
@@ -238,11 +267,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Business validation
+    // Business validation. Own-property only: `in` is also true for Object.prototype
+    // keys ("toString", "constructor"), which are not catalogued providers.
+    const isNoAuthProvider =
+      typeof provider === "string" && Object.hasOwn(NOAUTH_PROVIDERS, provider);
     const isValidProvider =
       isManagedProviderConnectionId(provider) ||
       isOpenAICompatibleProvider(provider) ||
-      isAnthropicCompatibleProvider(provider);
+      isAnthropicCompatibleProvider(provider) ||
+      isNoAuthProvider;
 
     if (!isValidProvider) {
       return NextResponse.json({ error: "Invalid provider" }, { status: 400 });
@@ -250,6 +283,28 @@ export async function POST(request: Request) {
 
     let providerSpecificData = incomingPsd || null;
     let persistedApiKey = apiKey;
+
+    const m365Token = parseM365RefreshToken(provider, incomingPsd);
+    if (!m365Token.success) {
+      return NextResponse.json(
+        {
+          error: {
+            message: sanitizeErrorMessage("Invalid request"),
+            details: [
+              {
+                field: "providerSpecificData.refreshToken",
+                message: sanitizeErrorMessage("Refresh token must be a bounded plaintext string"),
+              },
+            ],
+          },
+        },
+        { status: 400 }
+      );
+    }
+    if (provider === "copilot-m365-web" && providerSpecificData) {
+      providerSpecificData = { ...providerSpecificData };
+      delete providerSpecificData.refreshToken;
+    }
 
     if (provider === "qoder") {
       providerSpecificData = normalizeQoderPatProviderData(providerSpecificData || {});
@@ -340,9 +395,11 @@ export async function POST(request: Request) {
 
     const newConnection = await createProviderConnection({
       provider,
+      ...(proxyEnabled !== undefined ? { proxyEnabled } : {}),
       authType: "apikey",
       name,
       apiKey: persistedApiKey,
+      ...(m365Token.data.refreshToken ? { refreshToken: m365Token.data.refreshToken } : {}),
       priority: priority || 1,
       globalPriority: globalPriority || null,
       defaultModel: defaultModel || null,
@@ -441,6 +498,9 @@ export async function POST(request: Request) {
     // Hide sensitive fields
     const result: Record<string, any> = { ...newConnection };
     delete result.apiKey;
+    delete result.accessToken;
+    delete result.refreshToken;
+    delete result.idToken;
     if (result.providerSpecificData) {
       result.providerSpecificData = sanitizeProviderSpecificDataForResponse(
         result.providerSpecificData
@@ -579,7 +639,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (!Array.isArray(body.ids) || body.ids.length === 0) {
+  if (!body || typeof body !== "object" || !Array.isArray(body.ids) || body.ids.length === 0) {
     return NextResponse.json(
       { error: "ids must be a non-empty array of connection IDs" },
       { status: 400 }

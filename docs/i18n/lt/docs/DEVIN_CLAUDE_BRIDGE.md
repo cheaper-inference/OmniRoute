@@ -4,91 +4,97 @@
 
 ---
 
-`devin-cli-agentic` leidžia tikrajai Claude Code vykdymo aplinkai naudoti vietinį OmniRoute Anthropic
-Messages galinį tašką, o oficiali Devin CLI teikia modelio atsakymus per ACP stdio. Ji
+`devin-cli-agentic` leidžia tikrajai Claude Code vykdymo aplinkai naudoti OmniRoute vietinį Anthropic
+Messages galinį tašką, o oficiali Devin CLI per ACP stdio pateikia modelio atsakymus. Jis
 nekeičia esamų Anthropic, Claude OAuth, Claude Web ar `devin-cli` teikėjų.
 
-> **Dabartinė būsena: užfiksuota Claude Code versija `2.1.258`; paskutinį kartą patikra
-> neprisijungus ir tiesioginė patikra užregistruotos naudojant `2.1.220`.** Su užfiksuota `2.1.220`
-> versija buvo įvykdyti trys izoliuoti scenarijai naudojant Devin CLI `3000.2.17` ir modelį
-> `swe-1-7-lightning`; tas galutinis tiesioginis vykdymas patvirtino kliento valdomus `Read`,
-> `Edit` ir `Bash` veiksmus, sėkmingus `npm test` rezultatus, projekto komandų bei įgūdžių
-> aptikimą, maršruto parinkimą tik per Devin ir tai, kad į Claude neišsiųsta jokių duomenų.
-> Tada užfiksuota versija buvo pakelta iki `2.1.258` (CLI kartos, kuria apsimeta OmniRoute
-> Claude tapatybė, ir pirmosios versijų linijos, kurioje savaime pateikiama Fable 5.1 pakopa).
-> Su naująja užfiksuota versija diegimo sluoksnis ir `claude --version` buvo patikrinti
-> užfiksuotame baziniame atvaizde, o tilto vienetų testų rinkinys, `compose config` ir statinis
-> izoliacijos įrodymas sėkmingai įvykdomi, tačiau imitacinis scenarijus neprisijungus ir
-> tiesioginis trijų scenarijų rinkinys dar nebuvo paleisti iš naujo. Paleiskite juos iš naujo
-> (žr. „Užfiksuotų įrankių atnaujinimas“) prieš pasikliaudami tiltu su šia užfiksuota versija.
+Kliento valdomus įrankių iškvietimus nukreipkite per `devin-cli-agentic` (alternatyvusis vardas `dva`) –
+Claude formato teikėją, palaikantį įrankius. Senasis `devin-cli` (`dv`) ACP vykdytojas
+palaiko tik tekstą: jis paleidžia Devin santraukų kūrimo priemonę be įrankių ir negali grąžinti įrankių iškvietimų. Jo modelio
+metaduomenys atitinkamai pažymėti, todėl derinių maršruto parinkimas, kuriam būtini įrankiai, jo vengs.
+
+> **Dabartinė būsena: fiksuota Claude Code versija `2.1.258`; paskutinis autonominis ir tiesioginis patvirtinimas
+> užregistruotas naudojant `2.1.220`.** Naudojant fiksuotą `2.1.220` versiją buvo įvykdyti trys izoliuoti scenarijai per Devin CLI
+> `3000.2.17` ir modelį `swe-1-7-lightning`; šis galutinis tiesioginis vykdymas patvirtino kliento valdomus `Read`,
+> `Edit` ir `Bash` veiksmus, sėkmingus `npm test` rezultatus, projekto komandų ir gebėjimų
+> aptikimą, maršruto parinkimą tik per Devin ir tai, kad nebuvo jokio išeinančio Claude srauto. Tada fiksuota versija buvo pakelta iki `2.1.258`
+> (CLI kartos, kuria apsimeta OmniRoute Claude tapatybė, ir pirmosios versijos, kurioje
+> Fable 5.1 lygis pateikiamas savaime). Naudojant naują fiksuotą versiją, fiksuotame baziniame atvaizde buvo
+> patikrintas diegimo sluoksnis ir `claude --version`, o tilto vienetinių testų rinkinys, `compose config` ir
+> statinis izoliacijos įrodymas yra sėkmingi, tačiau autonominis maketinis scenarijus ir tiesioginis trijų scenarijų
+> rinkinys dar nebuvo paleisti iš naujo. Prieš pasikliaudami tiltu su šia fiksuota versija, paleiskite juos iš naujo
+> (žr. „Fiksuotų įrankių naujinimas“).
 
 ## Architektūra
 
 ```text
-Claude Code 2.1.258 (izoliuotas ne root „Linux“ konteineris)
+Claude Code 2.1.258 (izoliuotas ne root Linux konteineris)
   -> http://omniroute:20128/v1/messages
-  -> devin-cli-agentic („Claude“ formatas, autentifikavimo nereikalaujantis teikėjas)
-  -> devin acp --agent-type summarizer (oficialus ACP stdio, be „Devin“ įrankių)
-  -> „Devin“ paskyra specialiame devin-auth tome
+  -> devin-cli-agentic (Claude formato teikėjas be autentifikavimo)
+  -> devin acp --agent-type summarizer (oficialus ACP stdio, be Devin įrankių)
+  -> Devin paskyra specialiai jai skirtame devin-auth tome
 ```
 
 Oficialios CLI numatytasis ACP agentas gali vykdyti savo įrankius, todėl šis tiltas jo
-nenaudoja. Jis paleidžia fiksuotą `summarizer` ACP agentą, kurio oficialus CLI režimas neturi
-įrankių, ir suformuoja serializuotą Anthropic užklausą kaip vykdymo seką. Kai reikia kito
-Claude valdomo veiksmo, atsakyme turi būti tiksliai vienas kliento įrankio apvalkalas. Bet
-koks ACP `tool_call` arba `tool_call_update` atmetamas prieš pranešant, kad atsakymas buvo
+nenaudoja. Jis paleidžia fiksuotą `summarizer` ACP agentą, kurio oficialus CLI režimas neturi įrankių, ir
+suformuoja serializuotą Anthropic užklausą kaip vykdymo trasą. Kai reikia atlikti kitą Claude valdomą
+veiksmą, atsakyme turi būti lygiai vienas kliento įrankio apvalkalas. Bet koks ACP
+`tool_call` ar `tool_call_update` atmetamas prieš pranešant, kad atsakymas
 sėkmingas.
 
 Serializatorius faile `open-sse/executors/devin-agentic/serializer.ts` išsaugo `system`,
-`text`, `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `tool_choice` ir Claude
-Code pateiktus įrankius. Aptikus vaizdus ar nežinomus blokus, vykdymas aiškiai nutraukiamas
-su klaida. Dideliuose įrankių rezultatuose naudojama matoma sutrumpinimo žyma.
+`text`, `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `tool_choice` ir
+Claude Code pateiktus įrankius. Vaizdai ir nežinomi blokai aiškiai atmetami. Dideliuose įrankių rezultatuose
+naudojamas matomas sutrumpinimo žymeklis.
 
-Analizatorius priima vieną atskirą `<tool>{...}</tool>` apvalkalą kiekvienam modelio
-atsakymui. Jis patikrina pavadinimą pagal užklausos įrankių sąrašą, patikrina argumentus pagal
-to įrankio JSON Schema, atmeta sumaišytą pasakojimą ir veiksmus bei leidžia vieną ribotą
-taisymo bandymą. Tada Claude Code vietoje įvykdo gautą Anthropic `tool_use` ir per OmniRoute
-grąžina `tool_result`.
+Analizatorius priima vieną atskirą `<tool>{...}</tool>` apvalkalą per kiekvieną modelio atsakymą. Jis patikrina
+pavadinimą pagal užklausos įrankių sąrašą, patvirtina argumentus pagal to įrankio JSON
+Schema, atmeta pasakojimo ir veiksmų mišinį bei leidžia vieną ribotą taisymo bandymą. Tada Claude Code
+vietoje įvykdo gautą Anthropic `tool_use` ir per OmniRoute išsiunčia
+`tool_result`.
 
-## Izoliacija ir grėsmių modelis
+## Automatinis maršruto parinkimas
 
-Pagrindinio kompiuterio Claude diegimas, paskyra ir konfigūracija nepatenka į taikymo sritį
-ir laikomi draudžiamais. Compose paslaugos:
+Kai teikėjas neužblokuotas, jį galima įtraukti į OmniRoute `auto/*` kandidatų telkinius.
+Tinkamumas būti kandidatu negarantuoja pasirinkimo: derinio maršruto parinkimo strategija (pavyzdžiui,
+paskutinis sėkmingas variantas) gali teikti pirmenybę kitam teikėjui. Kai reikalaujate, kad kiekviena užklausa
+būtų nukreipta per Devin, naudokite `dva/<model>` arba derinį, kuriame pirmenybė teikiama Devin.
 
-- vykdomos naudojant UID/GID `10001:10001`, su tik skaitoma šaknine failų sistema,
-  panaikintomis galimybėmis ir `no-new-privileges`;
-- naudoja privatų `/home/bridge`, specialų Claude konfigūracijos tomą, izoliuotus OmniRoute
-  duomenis ir atskirą `devin-auth` tomą;
+## Izoliavimas ir grėsmių modelis
+
+Pagrindinio kompiuterio Claude diegimas, paskyra ir konfigūracija nepatenka į taikymo sritį ir yra
+laikomi draudžiamais. Compose paslaugos:
+
+- veikia su UID/GID `10001:10001`, turi tik skaitomą šakninę failų sistemą, pašalintas galimybes ir
+  `no-new-privileges`;
+- naudoja privatų `/home/bridge`, atskirą Claude konfigūracijos tomą, izoliuotus OmniRoute duomenis
+  ir atskirą `devin-auth` tomą;
 - prijungia tik vienkartines `.sandbox` darbo sritis ir įrodymus;
-- neprijungia pagrindinio kompiuterio namų katalogo, Keychain, SSH, debesijos kredencialų ar
-  Docker lizdo;
-- sukuria aiškiai apibrėžtas aplinkas ir pašalina Anthropic API/OAuth/maršruto parinkimo
-  kintamuosius;
-- nukreipia Claude Code išvadų generavimą tik į `http://omniroute:20128`, naudojant tik
-  vietinį raktą.
+- neprijungia pagrindinio kompiuterio namų katalogo, Keychain, SSH, debesijos prisijungimo duomenų ar Docker lizdo;
+- sukuria aiškiai apibrėžtas aplinkas ir pašalina Anthropic API/OAuth/maršruto parinkimo kintamuosius;
+- nukreipia Claude Code išvadų generavimą tik į `http://omniroute:20128`, naudojant tik vietinį raktą.
 
-Neprisijungus naudojamas profilis naudoja vidinį tinklą. Tiesioginiame profilyje OmniRoute
-oficialius Devin galinius taškus pasiekia tik per `network-guard`; nesusijusios paskirties
-vietos yra draudžiamos. Claude Code turi atskirą visą išeinantį srautą blokuojančią apsaugą
-ir per `NO_PROXY` gali pasiekti tik vietinę OmniRoute paslaugą. Apsaugos audito failai
-prijungiami tik prie atitinkamo apsaugos proceso. Prieš eksportuodami prieigos raktų
-neturinčius įrodymus, scenarijai patikrina failų nuosavybę, režimą, nuorodų skaičių ir
-kiekvieną sprendimą.
+Neprisijungęs profilis naudoja vidinį tinklą. Aktyviajame profilyje OmniRoute oficialius
+Devin galinius taškus pasiekia tik per `network-guard`; nesusijusios paskirties vietos yra blokuojamos.
+Claude Code turi atskirą visą išeinantį srautą blokuojančią apsaugą ir per `NO_PROXY` gali pasiekti tik vietinę OmniRoute
+paslaugą. Apsaugos audito failus prijungia tik atitinkamas apsaugos procesas.
+Prieš eksportuodami įrodymus be prieigos raktų, scenarijai patikrina failų savininkus, režimą, nuorodų skaičių
+ir kiekvieną sprendimą.
 
-Paleiskite izoliacijos įrodymą atskirai:
+Paleiskite izoliavimo įrodymo patikrą atskirai:
 
 ```bash
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Jis patikrina topologiją, vardinius prijungimus, ne root / tik skaitomus nustatymus, aiškiai
-apibrėžtą vietinį maršruto parinkimą, jautrių aplinkos kintamųjų nebuvimą, Docker lizdo
-nebuvimą, užblokuotą prieigą prie `api.anthropic.com` ir `claude.ai`, tik Devin teikėjo
-pasirinkimą ir aiškų sutrikimą, kai ACP vidinė sistema nepasiekiama.
+Ji patikrina topologiją, vardinius prijungimus, ne root naudotojo ir tik skaitymo nuostatas, aiškiai apibrėžtą vietinį maršruto parinkimą,
+jautrių aplinkos kintamųjų nebuvimą, Docker lizdo nebuvimą, užblokuotą prieigą prie
+`api.anthropic.com` ir `claude.ai`, tik Devin teikėjo pasirinkimą ir aiškiai užfiksuotą nesėkmę,
+kai ACP posistemė nepasiekiama.
 
 ## Pradinė sąranka ir įprastas naudojimas
 
-Sukurkite prisegtą atvaizdą:
+Sukurkite prie konkrečios versijos prisegtą atvaizdą:
 
 ```bash
 ./scripts/devin-bridge/build
@@ -100,7 +106,9 @@ Autentifikuokite tik izoliuotą Devin tomą:
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/login-devin
 ```
 
-Prisijungimo komanda naudoja oficialų rankinio prieigos rakto procesą, skirtą nuotolinėms / konteinerizuotoms aplinkoms. Reikšmė įvedama tiesiai į CLI užklausą; ji neperduodama kaip proceso argumentas, neįrašoma į Git ir nenukopijuojama iš pagrindinio kompiuterio.
+Prisijungimo komanda naudoja oficialų rankinio prieigos rakto procesą, skirtą nuotolinėms ir konteinerių
+aplinkoms. Reikšmė įvedama tiesiai į CLI užklausą; ji neperduodama kaip
+proceso argumentas, neįrašoma į Git ir nekopijuojama iš pagrindinio kompiuterio.
 
 Paleiskite izoliuotą Claude Code vykdymo aplinką:
 
@@ -108,11 +116,14 @@ Paleiskite izoliuotą Claude Code vykdymo aplinką:
 ./scripts/devin-bridge/launch
 ```
 
-`launch` prieš paleisdama konteinerizuotą Claude Code iš naujo patikrina izoliaciją, Devin autentifikavimą ir modelių aptikimą. Ji niekada nepaleidžia pagrindinio kompiuterio Claude vykdomojo failo. Modelių alternatyviuosius pavadinimus galima nustatyti faile `.env.devin-bridge`; kiekviena sukonfigūruota reikšmė privalo išlaikyti prefiksą `devin-cli-agentic/`.
+`launch` prieš paleisdama konteineryje veikiantį Claude Code iš naujo patikrina izoliavimą, Devin autentifikavimą
+ir modelių aptikimą. Ji niekada nepaleidžia pagrindinio kompiuterio Claude vykdomojo failo. Modelių alternatyvius vardus galima
+nustatyti faile `.env.devin-bridge`; kiekviena sukonfigūruota reikšmė privalo išlaikyti
+`devin-cli-agentic/` prefiksą.
 
 ## Tikrinimo komandos
 
-Atkuriamam autonominiam procesui nereikia Devin paskyros ir vykdymo metu nereikia interneto:
+Atkuriamam veikimo neprisijungus procesui nereikia Devin paskyros ir vykdymo metu nereikia interneto:
 
 ```bash
 ./scripts/devin-bridge/test-unit
@@ -121,48 +132,56 @@ Atkuriamam autonominiam procesui nereikia Devin paskyros ir vykdymo metu nereiki
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Pasirenkamas autentifikuotas tiesioginio testavimo procesas:
+Pasirinktinis autentifikuotas aktyvusis procesas:
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/test-live-devin
 ```
 
-Tiesioginio testavimo vykdyklė daro pauzes tarp scenarijų, kad ACP seansai nebūtų atidaromi vienu pliūpsniu, ir tikrina struktūrizuotus Claude srauto įvykius, užuot pasikliovusi tekstiniais teiginiais. Trys jos scenarijai patvirtina:
+Aktyvusis vykdiklis tarp scenarijų palaukia, kad ACP sesijos nebūtų atidaromos pliūpsniu, ir
+tikrina struktūrinius Claude srauto įvykius, užuot pasitikėjęs tekstiniais teiginiais. Trys jo
+scenarijai įrodo:
 
-1. tiesioginį projekto nuskaitymą ir defektų analizę;
-2. tikrą `Edit`, kliento valdomą `Bash` `npm test` ir galutinį rezultatą;
-3. `/bridge-check` kartu su `bridge-proof` aptikimu, projekto nuskaitymą, dar vieną sėkmingą kliento valdomą `npm test` ir užbaigimą be laukiančių darbų.
+1. tiesioginį projekto failų skaitymą ir defektų analizę;
+2. tikrą `Edit`, klientui priklausantį `Bash` `npm test` ir galutinį rezultatą;
+3. `/bridge-check` bei `bridge-proof` aptikimą, projekto failų skaitymą, dar vieną sėkmingą
+   klientui priklausantį `npm test` ir užbaigimą be laukiančių darbų.
 
-Galutinis kontrolinis etapas taip pat patikrina Devin tinklo auditą ir reikalauja, kad Claude išeinančiojo srauto auditas liktų tuščias.
+Galutinė patikra taip pat patikrina Devin tinklo auditą ir reikalauja, kad Claude išeinančio srauto auditas
+liktų tuščias.
 
 ## Prisegtų įrankių atnaujinimas
 
-Atvaizde prisegtos Node, Claude Code ir Devin CLI versijos faile `docker/devin-bridge/Dockerfile`. Norėdami atnaujinti:
+Atvaizde naudojamos konkrečios Node, Claude Code ir Devin CLI versijos, nurodytos
+`docker/devin-bridge/Dockerfile`. Norėdami atnaujinti:
 
 1. pakeiskite aiškiai nurodytas versijas;
-2. pakeiskite abiejų architektūrų Devin archyvų kontrolines sumas oficialaus artefakto reikšmėmis;
-3. iš naujo sukurkite atvaizdą ir paleiskite visas autonominio tikrinimo komandas;
-4. patvirtinkite versijas atvaizdo viduje;
+2. pakeiskite abiem architektūroms skirtų Devin archyvų kontrolines sumas oficialaus
+   artefakto reikšmėmis;
+3. iš naujo sukurkite atvaizdą ir paleiskite kiekvieną autonominio tikrinimo komandą;
+4. patvirtinkite atvaizde esančias versijas;
 5. iš naujo paleiskite autentifikuotą trijų scenarijų tiesioginių testų rinkinį.
 
-Nediekite nė vienos CLI visuotinai pagrindiniame kompiuteryje ir nepakeiskite kontrolinių sumų tikrinimo nepatikrintu atsisiuntimu.
+Neįdiekite nė vienos CLI globaliai pagrindinėje sistemoje ir nepakeiskite kontrolinių sumų tikrinimo
+nepatikrintu atsisiuntimu.
 
 ## Diagnostika ir išvalymas
 
 - `docker compose -f docker/devin-bridge/compose.yml --profile offline logs omniroute`
-  rodo vietinį maršruto parinkimą ir išvalytas vykdyklės klaidas.
-- `.sandbox/evidence/mock-acp.jsonl` registruoja deterministinius imituojamus ACP veiksmus.
-- `.sandbox/evidence/claude-stream.jsonl` registruoja tikrą autonominį Claude Code vykdymą.
+  rodo vietinį maršruto parinkimą ir nuasmenintas vykdyklės klaidas.
+- `.sandbox/evidence/mock-acp.jsonl` registruoja deterministinius imitacinio ACP veiksmus.
+- `.sandbox/evidence/claude-stream.jsonl` registruoja tikrą autonominį Claude Code paleidimą.
 - `.sandbox/evidence/live-*.jsonl` registruoja tris patikrintus tiesioginius srautus.
-- `.sandbox/evidence/egress.jsonl` ir `.sandbox/evidence/claude-egress.jsonl` yra patikrintos, prieigos raktų neturinčios apsaugos auditų kopijos.
+- `.sandbox/evidence/egress.jsonl` ir `.sandbox/evidence/claude-egress.jsonl` yra patikrintos,
+  prieigos raktų neturinčios apsaugos auditų kopijos.
 
-Sustabdykite valdomus konteinerius ir tinklus, išsaugodami prisijungimo / konfigūracijos tomus:
+Sustabdykite šiam sprendimui priklausančius konteinerius ir tinklus, išsaugodami prisijungimo / konfigūracijos tomus:
 
 ```bash
 ./scripts/devin-bridge/clean
 ```
 
-Pašalinkite visą tiltui priklausančią aplinką, įskaitant vardinius tomus:
+Pašalinkite visą šiam sprendimui priklausančią tilto aplinką, įskaitant vardinius tomus:
 
 ```bash
 ./scripts/devin-bridge/clean --all
@@ -170,14 +189,14 @@ Pašalinkite visą tiltui priklausančią aplinką, įskaitant vardinius tomus:
 
 ## Apribojimai
 
-- Tiltas remiasi fiksuotu, įrankių nenaudojančiu `summarizer` vaidmeniu, nes Devin CLI `3000.2.17`
-  nepateikia neutralaus, įrankių nenaudojančio ACP agento. Adapteris kompensuoja į santrauką panašius
-  tarpinius atsakymus, tačiau vienas ribotas taisymo bandymas vis tiek gali aiškiai nepavykti.
-- Tiesioginiai ACP kvietimai gali grąžinti laikinus `502`/`504` atsakymus. Testavimo sistema daro tarpus tarp scenarijų;
-  nuolatinės trikties atveju taikomas saugusis užvėrimas ir kitas teikėjas niekada nepasirenkamas.
-- ACP kontekstas atkuriamas iš kiekvienos Anthropic užklausos; nėra sąsajos su procesu ar sesija.
-- Viename modelio atsakyme palaikomas vienas įrankio iškvietimas; lygiagretūs iškvietimai atmetami.
-- Vaizdai aiškiai nepalaikomi. Vaizdinė analizė, samprotavimo išvestis, pastangų valdikliai ir 1M
-  konteksto langas nėra nurodomi kaip palaikomi.
-- SSE naudoja galiojančius Anthropic gyvavimo ciklo įvykius, tačiau jie išsiunčiami surinkus ribotos trukmės ACP etapą;
-  ACP fragmentai laipsniškai nepersiunčiami.
+- Tiltas remiasi fiksuotu, įrankių neturinčiu `summarizer` vaidmeniu, nes Devin CLI `3000.2.17`
+  nepateikia neutralaus, įrankių neturinčio ACP agento. Adapteris kompensuoja į santrauką panašius
+  tarpinius atsakymus, tačiau vienas apribotas taisymo bandymas vis tiek gali aiškiai nepavykti.
+- Tiesioginiai ACP iškvietimai gali grąžinti laikinuosius `502`/`504` atsakymus. Testavimo sistema daro tarpus tarp scenarijų;
+  nuolatinio gedimo atveju prieiga lieka užblokuota ir niekada nepasirenkamas kitas teikėjas.
+- ACP kontekstas atkuriamas iš kiekvienos Anthropic užklausos; nėra susiejimo su procesu / seansu.
+- Vienam modelio atsakymui palaikomas vienas įrankio iškvietimas; lygiagretūs iškvietimai atmetami.
+- Vaizdai aiškiai nepalaikomi. Vaizdų atpažinimas, mąstymo išvestis, pastangų valdikliai ir 1M
+  konteksto langas nėra deklaruojami.
+- SSE naudoja galiojančius Anthropic gyvavimo ciklo įvykius, tačiau jie siunčiami surinkus apribotą ACP iteraciją;
+  ACP fragmentai nėra persiunčiami palaipsniui.

@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   heap:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: Heap-growth gate
     runs-on: ubuntu-latest
     steps:
@@ -21,10 +21,12 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
       - run: npm run test:heap
 
   chaos:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: Resilience chaos (fault injection)
     runs-on: ubuntu-latest
     steps:
@@ -36,12 +38,19 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
       - run: npm run test:chaos
 
   k6-soak:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: k6 load/soak
-    runs-on: ubuntu-latest
+    # #11965: this job runs a backend-only `next build`; the hosted 7 GB runner cannot build
+    # release/v3.8.51 (VM shutdown ~7 min in), so it targets the box's light pool (`omni-light`:
+    # two listeners, jobs ≤ ~6 GB). Falls back to hosted when USE_VPS_RUNNER is off.
+    # #16853: on hosted it died in `npm run build:cli` 8 nights out of 8 ("The runner has
+    # received a shutdown signal").
+    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -50,51 +59,131 @@ jobs:
         with:
           node-version: "24"
           cache: npm
+      # Fresh runtime state per run (same contract as nightly-llm-security.yml). The
+      # omni-light runner keeps a persistent $HOME, so a server booted without DATA_DIR
+      # lands on $HOME/.omniroute, where a database left by older runs can sit far behind
+      # the tip's migrations: the mass-migration guard (#3416) refuses to migrate it and
+      # the server never becomes healthy. A DATA_DIR under $RUNNER_TEMP is a new database
+      # every run, so every migration applies and nothing on the box is touched.
+      - name: Prepare isolated runtime state
+        id: runtime
+        run: |
+          data_dir=$(mktemp -d "$RUNNER_TEMP/omniroute-k6-soak.XXXXXX")
+          mkdir "$data_dir/plugins"
+          {
+            echo "DATA_DIR=$data_dir"
+            echo "OMNIROUTE_PLUGINS_DIR=$data_dir/plugins"
+          } >> "$GITHUB_ENV"
       - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
       - name: Build CLI bundle
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
           OMNIROUTE_BUILD_BACKEND_ONLY: "1"
+          OMNIROUTE_USE_TURBOPACK: "0"
         run: npm run build:cli
+      # Own port: this box also hosts the deployed server on 20128. A test server that
+      # dies on EADDRINUSE must NOT let the soak fall through to whatever else answers
+      # there, and a soak against nothing must not go green — the health wait fails the
+      # job (same contract as nightly-llm-security.yml). Auto-backups stay off: one
+      # pre-migration backup per boot piles up under the runner's home.
       - name: Start OmniRoute (background)
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
-          PORT: "20128"
+          PORT: "21776"
+          DISABLE_SQLITE_AUTO_BACKUP: "true"
         run: |
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:20128/api/monitoring/health >/dev/null; then echo "server up"; break; fi
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:21776/api/monitoring/health >/dev/null; then echo "server up"; exit 0; fi
             sleep 2
           done
+          echo "::error::Test server did not come up on 21776 in 120s — see server.log. Refusing to run the soak against an unknown target."
+          tail -40 server.log || true
+          exit 1
       - name: Install k6
         uses: grafana/setup-k6-action@v1
       - name: Run k6 soak
         run: k6 run tests/load/k6-soak.js
         env:
-          BASE_URL: http://localhost:20128
+          BASE_URL: http://localhost:21776
           SOAK_DURATION: "3m"
           SOAK_VUS: "10"
       - name: Stop server
         if: always()
         run: kill "$(cat server.pid)" || true
 
+  a11y-build:
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
+    name: A11y build (production artefact, omni-build)
+    # #16853: the a11y suite needs a production build of the FULL dashboard, and that build
+    # does not fit the light pool the a11y job runs on (Turbopack reaches ~40 GB RSS on the
+    # `.113`, #16169; webpack needs a >= 10 GB V8 heap for this tree). Build it once on the
+    # build pool — same runner class and Turbopack policy as ci.yml's `build` job — and hand
+    # the artefact to the a11y job, which only boots it. Falls back to hosted (webpack) when
+    # the VPS build runner is off, like ci.yml.
+    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true') && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-latest' }}
+    timeout-minutes: 60
+    env:
+      JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      # Page-data collection imports server modules that open the database: keep it in a
+      # fresh DATA_DIR, never the self-hosted runner's persistent $HOME (same contract as
+      # the k6 job above and nightly-llm-security.yml).
+      - name: Prepare isolated runtime state
+        run: |
+          data_dir=$(mktemp -d "$RUNNER_TEMP/omniroute-a11y-build.XXXXXX")
+          mkdir "$data_dir/plugins"
+          {
+            echo "DATA_DIR=$data_dir"
+            echo "OMNIROUTE_PLUGINS_DIR=$data_dir/plugins"
+          } >> "$GITHUB_ENV"
+      - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
+      - name: Build Next.js (production)
+        run: npm run build
+        env:
+          OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true') && '1' || '0' }}
+      # Same archive contract as ci.yml's build -> test-e2e hand-off: tar keeps the paths
+      # relative to the checkout (.build/next/...), the build cache stays out.
+      - name: Archive the build for the a11y job
+        run: |
+          tar -czf "$RUNNER_TEMP/a11y-build.tar.gz" \
+            --exclude='.build/next/cache' \
+            .build/next
+      - name: Upload the build for the a11y job
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: a11y-next-build
+          path: ${{ runner.temp }}/a11y-build.tar.gz
+          retention-days: 1
+
   a11y:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: A11y axe (nightly, freeze-and-alert)
-    # #11965: this job runs a backend-only `next build`; the hosted 7 GB runner cannot build
-    # release/v3.8.51 (VM shutdown ~7 min in), so it targets the box's light pool (`omni-light`:
-    # two listeners, jobs ≤ ~6 GB). Falls back to hosted when USE_VPS_RUNNER is off.
-    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
-    # The Playwright webServer (`start` mode) builds Next via build-next-isolated.mjs and
-    # boots the standalone server itself (waits on /api/monitoring/health, 15min webServer
-    # timeout). Unlike the per-PR test-e2e job, this nightly job has no pre-built artifact,
-    # so it self-builds — hence the generous job timeout. REQUIRE_AXE=1 makes the suite run
-    # the real axe analysis (the 4 page tests are gated to nightly so per-PR e2e stays fast)
-    # and makes the meta-test fail loudly if @axe-core/playwright ever goes missing.
-    # webServer timeout raised to 30 min (env below) to survive contention on the
-    # shared omni-light listeners; job budget must cover build + 30 min boot + suite.
-    timeout-minutes: 50
+    needs: a11y-build
+    # Boots the production build made by `a11y-build` (no self-build here: #16853) and runs
+    # the axe suite against it. Hosted, always: on the light pool the 1.2 GB artefact took
+    # 1,416 s to download and the 30-minute timeout cancelled the job before axe ran (run
+    # 39156364797, 2026-10-18), after it had already queued 80 min behind lint-guard jobs.
+    # Hosted runners pull the same class of artefact in seconds (the per-PR E2E shards), a
+    # standalone server fits them, and a fresh VM has no port or $HOME left by other jobs.
+    # REQUIRE_AXE=1 makes the suite run the real axe analysis (the 4 page tests are gated to
+    # nightly so per-PR e2e stays fast) and makes the meta-test fail loudly if
+    # @axe-core/playwright ever goes missing.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-test-api-key-secret-long
@@ -109,9 +198,13 @@ jobs:
       # PORT drives the server the webServer script boots — both set, same value.
       DASHBOARD_PORT: "21777"
       PORT: "21777"
-      # Boot window: 15 min is not enough when both omni-light listeners are
-      # already building concurrent jobs; 30 min covers the observed worst case.
-      OMNIROUTE_PLAYWRIGHT_WEB_SERVER_TIMEOUT: "1800000"
+      # The webServer only boots the downloaded standalone build (same switch the per-PR
+      # test-e2e shards use), so its window covers a boot, not a build.
+      OMNIROUTE_PLAYWRIGHT_SKIP_BUILD: "1"
+      OMNIROUTE_PLAYWRIGHT_WEB_SERVER_TIMEOUT: "600000"
+      # Send the server's stdout to the job log: the 2026-10-18 failure was a 30-minute
+      # silent wait because Playwright discards webServer stdout by default.
+      OMNIROUTE_PLAYWRIGHT_WEB_SERVER_STDOUT: "pipe"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -120,7 +213,20 @@ jobs:
         with:
           node-version: "24"
           cache: npm
+      # The server this job boots must not open the runner's persistent $HOME/.omniroute:
+      # a database left there by older runs sits behind the tip's migrations and the
+      # mass-migration guard (#3416) keeps the server from ever becoming healthy.
+      - name: Prepare isolated runtime state
+        run: |
+          data_dir=$(mktemp -d "$RUNNER_TEMP/omniroute-a11y.XXXXXX")
+          mkdir "$data_dir/plugins"
+          {
+            echo "DATA_DIR=$data_dir"
+            echo "OMNIROUTE_PLUGINS_DIR=$data_dir/plugins"
+          } >> "$GITHUB_ENV"
       - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
       - name: Cache Playwright browsers
         uses: actions/cache@v6.1.0
         with:
@@ -128,5 +234,12 @@ jobs:
           key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: playwright-chromium-${{ runner.os }}-
       - run: npx playwright install --with-deps chromium
-      - name: Run axe a11y suite (self-building webServer)
+      - name: Download the production build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: a11y-next-build
+          path: next-build-artifact
+      - name: Extract the production build
+        run: tar -xzf next-build-artifact/a11y-build.tar.gz
+      - name: Run axe a11y suite (prebuilt standalone server)
         run: npx playwright test tests/e2e/a11y.spec.ts

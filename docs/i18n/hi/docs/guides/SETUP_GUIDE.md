@@ -147,9 +147,9 @@ omniroute providers validate
 ### 2) अपने कोडिंग टूल को कॉन्फ़िगर करें
 
 ```txt
-बेस URL: http://localhost:20128/v1
-API कुंजी:  [Endpoint पेज से कॉपी करें]
-मॉडल:    if/qwen3.8-max-preview (या कोई भी प्रोवाइडर/मॉडल प्रीफ़िक्स)
+बेस URL:  http://localhost:20128/v1
+API कुंजी: [Endpoint पेज से कॉपी करें]
+मॉडल:     if/qwen3.8-max-preview (या कोई भी प्रोवाइडर/मॉडल प्रीफ़िक्स)
 ```
 
 यदि आपका एडिटर `Authorization: Bearer ...` नहीं भेज सकता, तो इसके बजाय टोकनयुक्त संगतता बेस का उपयोग करें:
@@ -165,34 +165,35 @@ Ollama टैग URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 
 #### `setup-*` से स्वचालित रूप से कॉन्फ़िगर करें
 
-बेस URL और कुंजी को मैन्युअल रूप से पेस्ट करने के बजाय, OmniRoute को लाइव मॉडल कैटलॉग से प्रत्येक टूल की
-अपनी कॉन्फ़िगरेशन लिखने दें। प्रत्येक टूल के लिए एक कमांड:
+बेस URL और कुंजी को मैन्युअल रूप से पेस्ट करने के बजाय, OmniRoute को लाइव मॉडल कैटलॉग से प्रत्येक टूल का
+अपना कॉन्फ़िगरेशन लिखने दें। प्रत्येक टूल के लिए एक कमांड:
 
 ```bash
-omniroute setup-codex        # ~/.codex/<name>.config.toml प्रोफ़ाइल
+omniroute setup-codex        # ~/.codex/<name>.config.toml प्रोफ़ाइलें
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-संगत)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI-संगत)
 omniroute setup-cline        # Cline CLI + VS Code एक्सटेंशन सेटिंग्स
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor के इन-ऐप चरण प्रिंट करता है
+omniroute setup-cursor       # Cursor में किए जाने वाले चरण प्रिंट करता है
 omniroute setup-roo          # Roo Code इम्पोर्ट + autoImport पॉइंटर
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (OpenAI-संगत)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-स्थानीय टूल को किसी **रिमोट** OmniRoute के लिए कॉन्फ़िगर करने हेतु प्रत्येक कमांड `--remote <url> --api-key <key>` स्वीकार करता है, और पूर्वावलोकन के लिए `--dry-run` भी स्वीकार करता है। सही
-env इंजेक्ट करके और बिना कोई कॉन्फ़िगरेशन लिखे CLI लॉन्च करने के लिए सामान्य लॉन्चर
+स्थानीय टूल को किसी **रिमोट** OmniRoute के लिए कॉन्फ़िगर करने हेतु प्रत्येक कमांड `--remote <url> --api-key <key>` स्वीकार करता है, साथ ही पूर्वावलोकन के लिए `--dry-run` भी स्वीकार करता है। सही
+env को इंजेक्ट करके और कोई भी कॉन्फ़िगरेशन लिखे बिना CLI लॉन्च करने के लिए सामान्य लॉन्चर
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) का उपयोग करें;
 पुराने प्रति-टूल लॉन्चर `omniroute launch` (Claude Code) और
 `omniroute launch-codex` (Codex) अभी भी उपलब्ध हैं।
 
-पूरी तालिका (प्रत्येक कमांड क्या लिखता है, हर फ़्लैग, स्थानीय बनाम रिमोट, बेस-URL
+पूरी तालिका (प्रत्येक कमांड क्या लिखता है, सभी फ़्लैग, स्थानीय बनाम रिमोट, बेस-URL
 `/v1` परंपराएँ) के लिए, **[CLI इंटीग्रेशन](./CLI-INTEGRATIONS.md)** देखें।
 
-प्रत्येक टूल की विस्तृत कॉन्फ़िगरेशन (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot और अन्य) के लिए, समर्पित **[CLI टूल्स गाइड](../reference/CLI-TOOLS.md)** देखें।
+प्रत्येक टूल के विस्तृत कॉन्फ़िगरेशन (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot और अन्य) के लिए, समर्पित **[CLI टूल्स गाइड](../reference/CLI-TOOLS.md)** देखें।
 
 ---
 
@@ -337,7 +338,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# प्रत्येक रिलीज़ के लिए चेकसम को इसके साथ पुनः जनरेट करें:
+# प्रत्येक रिलीज़ के लिए चेकसम को इस कमांड से पुनः जनरेट करें:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

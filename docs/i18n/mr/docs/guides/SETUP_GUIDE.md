@@ -140,7 +140,7 @@ omniroute providers validate
 
 ### 1) प्रदाते कनेक्ट करा आणि API की तयार करा
 
-1. Dashboard → `Providers` उघडा आणि किमान एक प्रदाता (OAuth किंवा API की) कनेक्ट करा.
+1. Dashboard → `Providers` उघडा आणि किमान एक प्रदाता कनेक्ट करा (OAuth किंवा API की).
 2. Dashboard → `Endpoints` उघडा आणि API की तयार करा.
 3. (पर्यायी) Dashboard → `Combos` उघडा आणि तुमची फॉलबॅक साखळी सेट करा.
 
@@ -149,7 +149,7 @@ omniroute providers validate
 ```txt
 Base URL: http://localhost:20128/v1
 API Key:  [Endpoint पृष्ठावरून कॉपी करा]
-Model:    if/qwen3.8-max-preview (किंवा कोणताही provider/model प्रीफिक्स)
+Model:    if/qwen3.8-max-preview (किंवा कोणताही provider/model उपसर्ग)
 ```
 
 तुमचा एडिटर `Authorization: Bearer ...` पाठवू शकत नसल्यास, त्याऐवजी टोकनयुक्त सुसंगतता बेस वापरा:
@@ -161,12 +161,12 @@ Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
 Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode आणि OpenAI-सुसंगत SDKs सोबत कार्य करते.
+Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode आणि OpenAI-सुसंगत SDK सह कार्य करते.
 
 #### `setup-*` वापरून स्वयंचलितपणे कॉन्फिगर करा
 
-बेस URL आणि की हाताने पेस्ट करण्याऐवजी, OmniRoute ला लाइव्ह मॉडेल कॅटलॉगमधून प्रत्येक साधनाचे
-स्वतःचे कॉन्फिगरेशन लिहू द्या. प्रत्येक साधनासाठी एक कमांड:
+बेस URL आणि की हाताने पेस्ट करण्याऐवजी, थेट मॉडेल कॅटलॉगवरून प्रत्येक साधनाचे
+स्वतःचे कॉन्फिग OmniRoute ला लिहू द्या. प्रत्येक साधनासाठी एक कमांड:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml प्रोफाइल्स
@@ -178,21 +178,22 @@ omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # Cursor मधील अॅप-अंतर्गत पायऱ्या प्रिंट करते
 omniroute setup-roo          # Roo Code इम्पोर्ट + autoImport पॉइंटर
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-स्थानिक साधन **रिमोट** OmniRoute विरुद्ध कॉन्फिगर करण्यासाठी प्रत्येक कमांड `--remote <url> --api-key <key>` स्वीकारते, तसेच पूर्वावलोकनासाठी `--dry-run` स्वीकारते. योग्य
-env अंतर्भूत करून आणि कोणतेही कॉन्फिगरेशन अजिबात न लिहिता CLI सुरू करण्यासाठी, सामान्य लाँचर
+स्थानिक साधन **दूरस्थ** OmniRoute विरुद्ध कॉन्फिगर करण्यासाठी प्रत्येक कमांड `--remote <url> --api-key <key>` स्वीकारते, तसेच पूर्वावलोकनासाठी `--dry-run` स्वीकारते. योग्य
+env अंतर्भूत करून आणि कोणतेही कॉन्फिग न लिहिता CLI सुरू करण्यासाठी सर्वसाधारण लाँचर
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) वापरा;
-प्रति-साधन जुने लाँचर `omniroute launch` (Claude Code) आणि
+पूर्वीचे प्रत्येक-साधनासाठीचे लाँचर `omniroute launch` (Claude Code) आणि
 `omniroute launch-codex` (Codex) अजूनही उपलब्ध आहेत.
 
-संपूर्ण तक्त्यासाठी (प्रत्येक कमांड काय लिहिते, प्रत्येक फ्लॅग, स्थानिक विरुद्ध रिमोट, बेस-URL
+संपूर्ण तक्त्यासाठी (प्रत्येक कमांड काय लिहिते, प्रत्येक फ्लॅग, स्थानिक विरुद्ध दूरस्थ, बेस-URL
 `/v1` पद्धती), **[CLI एकत्रीकरणे](./CLI-INTEGRATIONS.md)** पहा.
 
-प्रत्येक साधनाच्या तपशीलवार कॉन्फिगरेशनसाठी (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot आणि इतर), समर्पित **[CLI साधने मार्गदर्शक](../reference/CLI-TOOLS.md)** पहा.
+प्रत्येक साधनाच्या तपशीलवार कॉन्फिगरेशनसाठी (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot आणि इतर), समर्पित **[CLI साधने मार्गदर्शिका](../reference/CLI-TOOLS.md)** पहा.
 
 ---
 
@@ -321,9 +322,9 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) टेम्पलेट
+## Void Linux (xbps-src) टेम्पलेट
 
-Void Linux वापरकर्ते `xbps-src` वापरून नेटिव्ह पॅकेज बिल्ड करू शकतात. हा ब्लॉक `srcpkgs/omniroute/template` म्हणून जतन करा:
+Void Linux वापरकर्त्यांसाठी, तुम्ही `xbps-src` वापरून नेटिव्ह पॅकेज बिल्ड करू शकता. हा ब्लॉक `srcpkgs/omniroute/template` म्हणून जतन करा:
 
 ```bash
 # 'omniroute' साठी टेम्पलेट फाइल
@@ -337,7 +338,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# प्रत्येक रिलीझसाठी चेकसम पुन्हा तयार करण्यासाठी:
+# प्रत्येक रिलीझसाठी चेकसम पुन्हा तयार करा:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

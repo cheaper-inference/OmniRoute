@@ -85,3 +85,75 @@ test("deprecated queue keys are not used", () => {
     assert.equal(key in (release ?? {}), false, `${key} is deprecated/removed in Mergify`);
   }
 });
+
+const integration = config.queue_rules?.find((rule) => rule.name === "relay-integration");
+
+test("the opt-in Relay integration queue preserves original commits without paid batching", () => {
+  assert.ok(integration, "queue_rules must define the opt-in integration queue");
+  assert.equal(integration.merge_method, "merge");
+  assert.equal(integration.update_method, "merge", "rebasing would rewrite contributor heads");
+  assert.equal(integration.checks_timeout, release?.checks_timeout);
+  for (const rule of config.queue_rules ?? []) {
+    for (const key of [
+      "batch_size",
+      "batch_max_wait_time",
+      "batch_max_failure_resolution_attempts",
+      "allow_inplace_checks",
+      "allow_queue_branch_edit",
+      "autoqueue",
+      "speculative_checks",
+      "queue_branch_merge_method",
+      "merge_bot_account",
+      "update_bot_account",
+    ]) {
+      assert.equal(
+        key in rule,
+        false,
+        `${rule.name}: unexpected paid, bypass or rewrite option ${key}`
+      );
+    }
+  }
+});
+
+test("integration routing is owner-only, exact-target and separately reviewed", () => {
+  assert.deepEqual(integration?.queue_conditions, [
+    "base=release/v3.8.52",
+    "head=fix/relay-integration-candidate-20261015",
+    "author=diegosouzapw",
+    "label=queue",
+    "label=integration-reviewed",
+    "-draft",
+    "-conflict",
+  ]);
+  const conditions = release?.queue_conditions as string[];
+  assert.ok(conditions.includes("-label=integration-reviewed"));
+  assert.ok(
+    conditions.includes("-head~=^fix/relay-integration-candidate-"),
+    "a missing review label must not route the candidate to squash"
+  );
+});
+
+test("integration admission retains every ordinary gate and requires both aggregate verdicts", () => {
+  assert.deepEqual(integration?.merge_conditions, release?.merge_conditions);
+  for (const rule of config.queue_rules ?? []) {
+    const conditions = rule.merge_conditions as unknown[];
+    assert.ok(conditions.includes("check-success=Gate / CI"), `${rule.name}: missing CI verdict`);
+    assert.ok(
+      conditions.includes("check-success=Gate / Quality"),
+      `${rule.name}: missing Quality verdict`
+    );
+  }
+});
+
+test("ordinary admission keeps its exact failure allowance instead of broadening it", () => {
+  assert.deepEqual(release?.merge_conditions, [
+    {
+      or: ["#check-failure=0", { and: ["#check-failure=1", "check-failure=Build (advisory)"] }],
+    },
+    "#check-pending=0",
+    "#check-success>=1",
+    "check-success=Merge integrity (changelog + generated skills)",
+    "check-success=Gate / CI",
+    "check-success=Gate / Quality",
+  ]);
+});

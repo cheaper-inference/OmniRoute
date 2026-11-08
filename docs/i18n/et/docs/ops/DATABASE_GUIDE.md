@@ -509,18 +509,18 @@ Kui see tagastab midagi muud kui `ok`, **lõpetage kohe andmebaasi kasutamine** 
 
 ---
 
-## Katastroofijärgne taaste
+## Taaste pärast avariid
 
 ### Stsenaarium 1: WAL-fail on kadunud
 
-Fail `-wal` puudub, kuid `-shm` ja põhiandmebaas on terved:
+Fail `-wal` puudub, kuid `-shm` ja põhiandmebaas on alles:
 
 ```bash
 # Taastub järgmisel avamisel automaatselt
 omniroute
 ```
 
-Kui SQLite ei suuda automaatselt taastada:
+Kui SQLite ei suuda automaatselt taastuda:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite ".recover" > recovered.sql
@@ -528,26 +528,29 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Stsenaarium 2: põhiandmebaasi fail on rikutud
+### Stsenaarium 2: Põhiandmebaasi fail on rikutud
 
 Taastage varukoopiast:
 
 ```bash
-omniroute sync pull --merge   # või: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Stsenaarium 3: krüpteerimisvõti on kadunud
+`omniroute sync pull [outPath]` laadib töötavast serverist alla ainult täieliku `.tar.gz`-arhiivi
+(`GET /api/db-backups/exportAll`, nõutav on operaatori autentimisteave); see ei taasta midagi.
 
-Ilma võtmeta **pole taastamine võimalik**. Krüpteeritud välju ei saa lugeda. Lisage kõik teenusepakkujad uute mandaatidega käsitsi uuesti.
+### Stsenaarium 3: Krüpteerimisvõti on kadunud
 
-> **Leevendusmeede**: varundage krüpteerimisvõti alati eraldi, eelistatult paroolihalduris või KMS-is.
+Ilma võtmeta **pole taastamine võimalik**. Krüpteeritud väljad on loetamatud. Lisage kõik teenusepakkujad uute autentimisandmetega käsitsi uuesti.
 
-### Stsenaarium 4: ketas on täis
+> **Leevendus**: Varundage krüpteerimisvõti alati eraldi, eelistatavalt paroolihalduris või KMS-is.
+
+### Stsenaarium 4: Ketas on täis
 
 SQLite tagastab vead `SQLITE_FULL`. Vabastage kettaruumi ja seejärel käivitage:
 
 ```bash
-# Tehke WAL-i kontrollpunkt ruumi vabastamiseks
+# Tehke WAL-i kontrollpunkt, et ruumi vabastada
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

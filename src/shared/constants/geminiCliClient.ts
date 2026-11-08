@@ -8,6 +8,11 @@
  * version when it is a dotted triple newer than the pin. The lookup is
  * fire-and-forget; a cold or failed fetch stays on the pin.
  */
+import {
+  BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS,
+  canStartBackgroundRefresh,
+} from "../utils/backgroundRefresh";
+
 export const GEMINI_CLI_CLIENT_VERSION = "0.1.0";
 export const GEMINI_CLI_USER_AGENT_SUFFIX = "(linux; x64)";
 
@@ -22,6 +27,9 @@ type FetchLike = typeof fetch;
 let cachedVersion: string | null = null;
 let cachedAt = 0;
 let inFlight: Promise<string> | null = null;
+// Earliest time the getter may start another background lookup: one TTL after any answer
+// (the cache below only keeps versions newer than the pin), the retry window after a failure.
+let nextBackgroundRefreshAt = 0;
 
 function parseDottedTriple(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -52,7 +60,7 @@ function readFreshCache(): string | null {
 }
 
 function shouldAutoRefreshGeminiCliVersion(): boolean {
-  if (typeof process === "undefined") return false;
+  if (!canStartBackgroundRefresh()) return false;
   return !process.env.NODE_TEST_CONTEXT;
 }
 
@@ -62,7 +70,12 @@ function shouldAutoRefreshGeminiCliVersion(): boolean {
  * itself never waits on the network.
  */
 export function getGeminiCliClientVersion(): string {
-  if (shouldAutoRefreshGeminiCliVersion() && !readFreshCache() && !inFlight) {
+  if (
+    shouldAutoRefreshGeminiCliVersion() &&
+    !readFreshCache() &&
+    !inFlight &&
+    Date.now() >= nextBackgroundRefreshAt
+  ) {
     void refreshGeminiCliClientVersion();
   }
   return pickAtLeastPin(readFreshCache());
@@ -112,6 +125,9 @@ export function refreshGeminiCliClientVersion(fetchImpl: FetchLike = fetch): Pro
       cachedVersion = resolved;
       cachedAt = Date.now();
     }
+    nextBackgroundRefreshAt =
+      Date.now() +
+      (resolved ? GEMINI_CLI_VERSION_CACHE_TTL_MS : BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS);
     return pickAtLeastPin(resolved ?? readFreshCache());
   })();
 
@@ -124,6 +140,7 @@ export function refreshGeminiCliClientVersion(fetchImpl: FetchLike = fetch): Pro
 
 /** Test seam: drop the registry cache so the next refresh hits the network. */
 export function resetGeminiCliClientVersionCache(): void {
+  nextBackgroundRefreshAt = 0;
   cachedVersion = null;
   cachedAt = 0;
   inFlight = null;

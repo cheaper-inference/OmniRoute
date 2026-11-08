@@ -298,13 +298,13 @@ Belangrijkste gedragingen:
 
 ## 🔑 Synchronisatietokens en configuratiebundel _(v3.6.6+)_
 
-Toegang vanaf meerdere apparaten en toegang voor externe operators is nu mogelijk via **afgebakende synchronisatietokens**:
+Toegang vanaf meerdere apparaten en toegang voor externe operators is nu mogelijk via **synchronisatietokens met een beperkt bereik**:
 
-- **`POST /api/sync/tokens`** — Geef een nieuw synchronisatietoken uit (afgebakend, met optionele vervaldatum)
+- **`POST /api/sync/tokens`** — Geef een nieuw synchronisatietoken uit (met een beperkt bereik en optionele vervaldatum)
 - **`DELETE /api/sync/tokens/:id`** — Trek een token in
-- **`GET /api/sync/bundle`** — Download een geversioneerde, met ETag geïndexeerde JSON-snapshot van alle niet-gevoelige instellingen (wachtwoorden gemaskeerd)
+- **`GET /api/sync/bundle`** — Download een geversioneerde, door een ETag geïdentificeerde JSON-snapshot van de configuratie (uitsluitend geverifieerd met een synchronisatietoken). Authenticatie-instellingen, zoals het dashboardwachtwoord, worden verwijderd, maar providerreferenties en API-sleutels worden wel opgenomen. Behandel het bestand daarom als een geheim
 
-De configuratiebundel wordt opgebouwd door `src/lib/sync/bundle.ts`. Clients vergelijken de `ETag`-responsheader om wijzigingen te detecteren zonder de volledige payload opnieuw te downloaden.
+De configuratiebundel wordt opgebouwd door `src/lib/sync/bundle.ts`. Clients vergelijken de `ETag`-responseheader om wijzigingen te detecteren zonder de volledige inhoud opnieuw te downloaden. Via de CLI slaat `omniroute sync bundle <outPath> --token <syncToken>` (of `OMNIROUTE_SYNC_TOKEN`) de bundel op in een bestand dat alleen toegankelijk is voor de eigenaar.
 
 ---
 

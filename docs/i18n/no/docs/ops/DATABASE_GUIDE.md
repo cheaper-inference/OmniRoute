@@ -533,12 +533,15 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Gjenopprett fra sikkerhetskopi:
 
 ```bash
-omniroute sync pull --merge   # eller: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` laster bare ned et fullstendig `.tar.gz`-arkiv fra en kjørende server
+(`GET /api/db-backups/exportAll`, operatørlegitimasjon kreves); den gjenoppretter ikke noe.
 
 ### Scenario 3: Krypteringsnøkkelen er tapt
 
-**Ingen gjenoppretting er mulig** uten nøkkelen. De krypterte feltene er uleselige. Legg til alle leverandørene manuelt på nytt med ny påloggingsinformasjon.
+**Ingen gjenoppretting er mulig** uten nøkkelen. De krypterte feltene er uleselige. Legg til alle leverandører på nytt manuelt med ny legitimasjon.
 
 > **Risikoreduserende tiltak**: Sikkerhetskopier alltid krypteringsnøkkelen separat, helst i en passordbehandler eller KMS.
 

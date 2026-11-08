@@ -1,4 +1,5 @@
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { fetchOllamaCloudBalance } from "./ollamaCloudBalance.ts";
 
 type JsonRecord = Record<string, unknown>;
 type UsageQuota = {
@@ -183,8 +184,26 @@ async function fetchOllamaCloudUsageFromSettings(
   };
 }
 
-export async function getOllamaCloudUsage(providerSpecificData?: JsonRecord) {
+/** API-key path (`GET /api/balance`); returns quotas, or the reason it could not. */
+async function getOllamaCloudBalanceUsage(apiKey: string) {
+  try {
+    const balance = await fetchOllamaCloudBalance(apiKey);
+    if (balance.quotas) return { usage: { plan: "Ollama Cloud", quotas: balance.quotas } };
+    return { message: balance.message };
+  } catch (error) {
+    return { message: `Ollama Cloud quota error: ${sanitizeErrorMessage(error)}` };
+  }
+}
+
+export async function getOllamaCloudUsage(providerSpecificData?: JsonRecord, apiKey?: string) {
   const config = resolveOllamaCloudConfig(providerSpecificData);
+  const key = typeof apiKey === "string" ? apiKey.trim() : "";
+  if (key) {
+    // The documented API-key balance endpoint comes first; the cookie scraper stays as fallback.
+    const balance = await getOllamaCloudBalanceUsage(key);
+    if (balance.usage) return balance.usage;
+    if (config.state !== "configured") return { message: balance.message };
+  }
   if (config.state === "none") {
     return {
       message:

@@ -1,7 +1,9 @@
+import { ainetcafeGateway } from "./ainetcafe";
 import { onomeoGateway } from "./onomeo";
 import { unificallyGateway } from "./unifically";
 /** APIKEY provider catalog — gateways family. Pure data; merged by apikey/index.ts via spread. */
 export const APIKEY_PROVIDERS_GATEWAYS = {
+  ...ainetcafeGateway,
   ...onomeoGateway,
   ...unificallyGateway,
   // 1min.ai (https://docs.1min.ai) — multi-model chat aggregator with its own
@@ -37,22 +39,6 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://cheaperinference.com/?utm_source=omniroute",
     apiHint:
       "Create an API key at https://cheaperinference.com/?utm_source=omniroute (needs the `inference` scope), then paste the ir_live_… token here.",
-    passthroughModels: true,
-  },
-  freebuff: {
-    id: "freebuff",
-    alias: "freebuff",
-    name: "Freebuff",
-    icon: "terminal",
-    color: "#10B981",
-    textIcon: "FB",
-    website: "https://freebuff.com",
-    hasFree: true,
-    serviceKinds: ["llm"],
-    subscriptionRisk: true,
-    riskNoticeVariant: "official-client-only",
-    authHint: "Enter your Freebuff / Codebuff auth token from the CLI login.",
-    freeNote: "Free Freebuff models (official client only); paid API: freebuff.com/account/api.",
     passthroughModels: true,
   },
   "charm-hyper": {
@@ -766,7 +752,6 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     icon: "opencode",
     color: "#6366f1",
     website: "https://opencode.ai/zen",
-    anonymousFallback: true,
     // One credential fronts many upstream models (deepseek, glm, qwen, grok,
     // minimax, ...). A 402 means "this MODEL is not in the plan", not "the
     // account is out of credit", so it must reach the per-model lockout branch
@@ -781,7 +766,6 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     icon: "opencode",
     color: "#6366f1",
     website: "https://opencode.ai/go",
-    anonymousFallback: true,
     // One credential fronts many upstream models (deepseek, glm, qwen, grok,
     // minimax, ...). A 402 means "this MODEL is not in the plan", not "the
     // account is out of credit", so it must reach the per-model lockout branch
@@ -999,6 +983,20 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     color: "#4F46E5",
     textIcon: "NG",
     website: "https://nano-gpt.com",
+  },
+  // NaN.Builders (https://nan.builders) — OpenAI-compatible /v1 covering chat, vision,
+  // embeddings, STT, TTS, images and rerank; per-model token quotas feed the limits panel.
+  nan: {
+    id: "nan",
+    serviceKinds: ["llm", "imageToText", "embedding", "stt", "tts", "image"],
+    alias: "nan",
+    name: "NaN.Builders",
+    icon: "hub",
+    color: "#6D5EF3",
+    textIcon: "NaN",
+    website: "https://nan.builders",
+    apiHint:
+      "Create an API key at https://cloud.nan.builders, then paste it here as a Bearer token. OpenAI-compatible base URL: https://api.nan.builders/v1.",
   },
   aimlapi: {
     id: "aimlapi",
@@ -1357,6 +1355,24 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     apiHint:
       "Token Market provides an OpenAI-compatible API at https://api.tokensmarket.ai/v1 and discovers its current model catalog from /v1/models.",
   },
+  tokenharbor: {
+    id: "tokenharbor",
+    serviceKinds: ["llm"],
+    alias: "tokenharbor",
+    name: "Token Harbor",
+    icon: "anchor",
+    color: "#0EA5E9",
+    textIcon: "TH",
+    passthroughModels: true,
+    website: "https://tokenharbor.ai",
+    hasFree: true,
+    authHint:
+      "Create a Token Harbor account and copy your Universal Key from https://tokenharbor.ai/dashboard.",
+    apiHint:
+      "Token Harbor is OpenAI-compatible. Use the tokenharbor provider prefix with the exact model ID from its live /v1/models catalog; API base URL: https://tokenharbor.ai/v1.",
+    freeNote:
+      "Selected :free model IDs listed at https://tokenharbor.ai/models?category=free use a personal rolling 7-day list-price allowance and never charge the wallet; free routes have 60 RPM and 1,800 requests/hour per account. Enable free routes first; prompts and responses may be retained after opting in. Model availability can change.",
+  },
   navy: {
     id: "navy",
     serviceKinds: ["llm"],
@@ -1585,5 +1601,49 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     authHint: "Create an API key at https://seekai.cc, then paste it here as a Bearer token.",
     apiHint:
       "Create an API key at https://seekai.cc, then paste it here as a Bearer token. OpenAI-compatible base URL: https://seekai.cc/v1.",
+  },
+  // Demon Route: OpenAI-compatible, key-gated account model discovery.
+  demonroute: {
+    id: "demonroute",
+    serviceKinds: ["llm"],
+    alias: "demonroute",
+    name: "Demon Route",
+    icon: "hub",
+    color: "#6D28D9",
+    textIcon: "DR",
+    passthroughModels: true,
+    website: "https://demonroute.com",
+    apiHint:
+      "Create an API key at https://demonroute.com, then paste it here as a Bearer token. OpenAI-compatible base URL: https://api.demonroute.com/v1.",
+  },
+  // DaoXE (https://daoxe.com) — QuantumNous New-API gateway. OpenAI-compatible /v1;
+  // /v1/models is key-gated and account-scoped, so models are discovered live.
+  daoxe: {
+    id: "daoxe",
+    serviceKinds: ["llm"],
+    alias: "daoxe",
+    name: "DaoXE",
+    icon: "hub",
+    color: "#0F766E",
+    textIcon: "DX",
+    passthroughModels: true,
+    website: "https://daoxe.com",
+    apiHint:
+      "Create an API token at https://daoxe.com/token, then paste it here as a Bearer token. OpenAI-compatible base URL: https://api.daoxe.com/v1.",
+  },
+  // Gisoo (https://gisoo.pro) — prepaid multi-model relay. OpenAI-compatible /api/v1;
+  // /api/v1/models is public, so models are discovered live. No free tier.
+  gisoo: {
+    id: "gisoo",
+    serviceKinds: ["llm"],
+    alias: "gisoo",
+    name: "Gisoo",
+    icon: "hub",
+    color: "#FFC700",
+    textIcon: "GS",
+    passthroughModels: true,
+    website: "https://gisoo.pro",
+    apiHint:
+      "Create an API key in your Gisoo account, then paste it here as a Bearer token. OpenAI-compatible base URL: https://gisoo.pro/api/v1. Prepaid credit; no free tier.",
   },
 };

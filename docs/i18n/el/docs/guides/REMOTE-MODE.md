@@ -46,35 +46,38 @@ omniroute configure codex                # ← γράφει ένα τοπικό 
 
 ## Σύνδεση
 
-### Με τον κωδικό πρόσβασης διαχείρισης (αρχική ρύθμιση)
+### Με τον κωδικό πρόσβασης διαχείρισης (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
-# Κωδικός πρόσβασης διαχείρισης για το http://192.168.0.15:20128: ********
-# ✔ Συνδέθηκε στο http://192.168.0.15:20128 — περιβάλλον '192.168.0.15' (εύρος: admin)
+# Κωδικός πρόσβασης διαχείρισης για http://192.168.0.15:20128: ********
+# ✔ Συνδέθηκε στο http://192.168.0.15:20128 — περιβάλλον '192.168.0.15' (εμβέλεια: admin)
 ```
 
-Η ροή με κωδικό πρόσβασης εκδίδει από προεπιλογή ένα διακριτικό **admin** (εφόσον έχετε τον κωδικό πρόσβασης,
-διαθέτετε ήδη πλήρη έλεγχο). Περιορίστε το εύρος με `--scope`:
+Η ροή κωδικού πρόσβασης εκδίδει από προεπιλογή ένα διακριτικό **admin** (έχετε τον κωδικό πρόσβασης, επομένως έχετε ήδη πλήρη έλεγχο). Περιορίστε την εμβέλεια με `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Επιλογές: `--port <p>` (όταν ο κεντρικός υπολογιστής δεν περιλαμβάνει θύρα), `--name <ctx>` (όνομα περιβάλλοντος),
-`--scope read|write|admin`. Μια πλήρης διεύθυνση URL χρησιμοποιείται αυτούσια:
+Επιλογές: `--port <p>` (όταν ο κεντρικός υπολογιστής δεν έχει θύρα), `--name <ctx>` (όνομα περιβάλλοντος),
+`--scope read|write|admin`. Ένα πλήρες URL χρησιμοποιείται ως έχει:
 `omniroute connect https://omni.example.com`.
 
-### Με ένα προδημιουργημένο διακριτικό
+Όταν στον διακομιστή είναι ενεργοποιημένος ο έλεγχος ταυτότητας δύο παραγόντων του πίνακα εργαλείων (Ρυθμίσεις →
+Ασφάλεια), ο κωδικός πρόσβασης μόνος του απορρίπτεται: το CLI ζητά στη συνέχεια τον κωδικό από την
+εφαρμογή ελέγχου ταυτότητας (ή έναν κωδικό ανάκτησης). Για μη διαδραστική χρήση, περάστε τον εκ των προτέρων με `--totp <code>`.
 
-Δημιουργήστε ένα διακριτικό περιορισμένου εύρους στον πίνακα ελέγχου (ή με `omniroute tokens create`) και
+### Με ένα προεκδοθέν διακριτικό
+
+Δημιουργήστε ένα διακριτικό περιορισμένης εμβέλειας στον πίνακα εργαλείων (ή με `omniroute tokens create`) και
 επικολλήστε το — δεν απαιτείται κωδικός πρόσβασης:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-Το CLI το επικυρώνει μέσω του `GET /api/cli/whoami` και το αποθηκεύει ως ενεργό περιβάλλον.
+Το CLI το επικυρώνει μέσω `GET /api/cli/whoami` και το αποθηκεύει ως το ενεργό περιβάλλον.
 
 ---
 
@@ -242,113 +245,97 @@ tunnel ανοιχτό μέχρι η σύνδεση να εμφανιστεί ω�
 
 ---
 
-## Διαχείριση token
+## Διαχείριση tokens
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ εμφανίζει το μυστικό ΜΙΑ ΦΟΡΑ — αντιγράψτε το τώρα
-omniroute tokens list                 # με απόκρυψη: id, όνομα, scope, πρόθεμα, κατάσταση, λήξη
-omniroute tokens revoke <id|prefix>   # άμεση ανάκληση
-omniroute tokens scopes               # επεξήγηση των τριών scope
+#   ↳ εμφανίζει το μυστικό ΜΙΑ φορά — αντιγράψτε το τώρα
+omniroute tokens list                 # με μάσκα: id, name, scope, prefix, κατάσταση, λήξη
+omniroute tokens revoke <id|prefix>   # ανάκληση άμεσα
+omniroute tokens scopes               # εξήγηση των τριών scopes
 ```
 
-Οι εντολές `tokens` απαιτούν διαπιστευτήριο **admin**. Μπορείτε επίσης να
-διαχειρίζεστε τα token στον πίνακα ελέγχου, στην ενότητα **Settings → Access
-Tokens** (δημιουργία, ανάκληση, αντιγραφή μία φορά).
+Οι εντολές `tokens` απαιτούν διαπιστευτήριο **admin**. Μπορείτε επίσης να διαχειρίζεστε τα tokens στον πίνακα ελέγχου, στο **Settings → Access Tokens** (δημιουργία, ανάκληση, αντιγραφή μία φορά).
+
+Ένα token δεν μπορεί ποτέ να εκδοθεί με περισσότερα δικαιώματα από όσα έχει ο δημιουργός του. Ένα token `admin` μπορεί να δημιουργηθεί μόνο από τον διαχειριστή — τη συνεδρία του πίνακα ελέγχου, το τοπικό CLI στον ίδιο τον server ή το `omniroute connect` με τον κωδικό. Τα μηχανικά διαπιστευτήρια (ένα token πρόσβασης `admin`, ή κλειδί API με scope `manage`/`admin`) μπορούν να εκδώσουν μόνο tokens `write` και `read` — αν ζητήσουν `--scope admin`, επιστρέφεται `403`. Η απενεργοποίηση της σύνδεσης δεν ανοίγει την έκδοση tokens: ένα token πρόσβασης οποιουδήποτε scope είναι διαπιστευτήριο που αποδέχονται οι διαδρομές που απαιτούν πάντα αυθεντικοποίηση, οπότε μια ανώνυμη κλήση λαμβάνει `401` σε κάθε scope.
 
 ---
 
-## Ρύθμιση ενός CLI προγραμματισμού από τον απομακρυσμένο κατάλογο
+## Ρύθμιση CLI προγραμματισμού από τον απομακρυσμένο κατάλογο
 
-Η εντολή `omniroute configure` διαβάζει τον ζωντανό κατάλογο μοντέλων του
-**ενεργού διακομιστή** και γράφει μια ρύθμιση παραμέτρων στο **δικό σας** μηχάνημα.
+Το `omniroute configure` διαβάζει τον ζωντανό κατάλογο μοντέλων του **ενεργού server** και γράφει μια ρύθμιση στον **δικό σας** υπολογιστή.
 
 ```bash
 omniroute configure codex
-#   Πάροχοι: glm, kmc, ollamacloud, opencode-go, …
-#   Πάροχος: glm
-#   ID μοντέλου: glm/glm-5.2
-#   ✔ Εγγράφηκε το ~/.codex/glm52.config.toml
-#   Χρήση:  codex --profile glm52
+#   Providers: glm, kmc, ollamacloud, opencode-go, …
+#   Provider: glm
+#   Model id: glm/glm-5.2
+#   ✔ Wrote ~/.codex/glm52.config.toml
+#   Use it:  codex --profile glm52
 
 # μη διαδραστικά
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# διατηρήστε ένα συχνά χρησιμοποιούμενο μοντέλο στην κορυφή του διαδραστικού επιλογέα
+# κράτα ένα συχνά χρησιμοποιούμενο μοντέλο στην κορυφή του διαδραστικού επιλογέα
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Ο επιλογέας διατηρεί μόνο ID μοντέλων (ποτέ URL ή διαπιστευτήρια) στο τοπικό
-αρχείο `model-preferences.json`, οριοθετημένα ανά context και στόχο CLI. Τα
-αγαπημένα εμφανίζονται πριν από τις πρόσφατες επιλογές· χρησιμοποιήστε το
-`--unfavorite` για να αφαιρέσετε ένα επιλεγμένο μοντέλο από τη λίστα αυτού του
-context/στόχου.
+Ο επιλογέας κρατά μόνο αναγνωριστικά μοντέλων (ποτέ URLs ή διαπιστευτήρια) στο τοπικό αρχείο `model-preferences.json`, με εύρος ανά context και στόχο CLI. Τα αγαπημένα εμφανίζονται πριν από τις πρόσφατες επιλογές· χρησιμοποιήστε το `--unfavorite` για να αφαιρέσετε ένα επιλεγμένο μοντέλο από τη λίστα του συγκεκριμένου context/στόχου.
 
-Το προφίλ που εγγράφεται αναφέρεται στο κλειδί inference μέσω μεταβλητής
-περιβάλλοντος (`OMNIROUTE_API_KEY`) — το μυστικό δεν εγγράφεται ποτέ στον δίσκο.
-Για την εφάπαξ βασική ρύθμιση του Codex (το block
-`[model_providers.omniroute]`), ανατρέξτε στο
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Το γραμμένο προφίλ αναφέρεται στο κλειδί inference μέσω μεταβλητής περιβάλλοντος (`OMNIROUTE_API_KEY`), επομένως το μυστικό δεν γράφεται ποτέ στον δίσκο. Για την εφάπαξ βασική ρύθμιση του Codex (το μπλοκ `[model_providers.omniroute]`), δείτε το [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Εκκίνηση ενός CLI προς το απομακρυσμένο σύστημα (χωρίς εγγραφή ρυθμίσεων)
+### Εκκίνηση CLI έναντι του απομακρυσμένου (χωρίς εγγραφή ρύθμισης)
 
-Η εντολή `omniroute run <target>` λαμβάνει επίσης υπόψη το ενεργό context: το
-απομακρυσμένο βασικό URL και το διαπιστευτήριο του context εισάγονται μόνο στη
-διεργασία που εκκινείται.
+Το `omniroute run <target>` σέβεται επίσης το ενεργό context: η απομακρυσμένη βασική διεύθυνση URL και το διαπιστευτήριο του context εισάγονται μόνο στη διεργασία που εκκινείται.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → απομακρυσμένο σύστημα
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → απομακρυσμένο
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Προεπισκόπηση όσων ακριβώς θα εκκινούνταν (μόνο ΟΝΟΜΑΤΑ ΚΛΕΙΔΙΩΝ env, ποτέ τιμές):
+# Προεπισκόπηση του ακριβούς τι θα εκκινηθεί (μόνο ΟΝΟΜΑΤΑ μεταβλητών env, ποτέ τιμές):
 omniroute run codex --dry-run --json
 ```
 
-Στόχοι: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(μοναδική πηγή: `bin/cli/cli-manifest.mjs`). Τα Qwen και Gemini εκτελούνται με
-έναν προσωρινό, απομονωμένο αρχικό κατάλογο, ο οποίος αφαιρείται κατά την έξοδο,
-ώστε η εκκίνηση να μην αγγίζει — ούτε να διαρρέει σε — την προσωπική ρύθμιση των
-εργαλείων σας.
+Στόχοι: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (μία πηγή: `bin/cli/cli-manifest.mjs`). Τα Qwen και Gemini εκτελούνται με προσωρινό, απομονωμένο home που αφαιρείται κατά την έξοδο, ώστε η εκκίνηση να μην αγγίζει — ούτε να διαρρέει μέσα σε — την προσωπική σας ρύθμιση των εργαλείων.
 
 ### Εντολές ρύθμισης ανά CLI
 
-Κάθε υποστηριζόμενο CLI διαθέτει μια εντολή ρύθμισης που γνωρίζει το
-απομακρυσμένο σύστημα (όλες λαμβάνουν υπόψη το ενεργό context ή τις επιλογές
-`--remote <url> --api-key <key>`):
+Κάθε υποστηριζόμενο CLI έχει εντολή ρύθμισης με επίγνωση του remote (όλες σέβονται το ενεργό context, ή `--remote <url> --api-key <key>`):
 
-| CLI         | Εντολή                     | Τι εγγράφει                                                                                                                                                                                             |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | προφίλ `~/.codex/<name>.config.toml` (ανά μοντέλο)                                                                                                                                                      |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (ανά μοντέλο)                                                                                                                                                 |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — ο συμβατός με OpenAI πάροχος `omniroute` με κάθε μοντέλο του καταλόγου (εκτελέστε `opencode -m omniroute/<model>`)                                                 |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (λειτουργία CLI) + εμφανίζει τις ρυθμίσεις της επέκτασης VS Code προς επικόλληση (συμβατό με OpenAI, βασικό URL **χωρίς** `/v1`)                             |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + ρυθμίσεις `kilocode.*` του VS Code — συμβατό με OpenAI, βασικό URL **με** `/v1`                                                                                 |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + CLI `cn`) — `provider: openai`, `apiBase` **με** `/v1`, κλειδί μέσω `${{ secrets.OMNIROUTE_API_KEY }}`                                                   |
-| Cursor      | `omniroute setup-cursor`   | εμφανίζει τα βήματα εντός της εφαρμογής (Ρυθμίσεις → Μοντέλα → Παράκαμψη βασικού URL του OpenAI **με** `/v1` + κλειδί + μοντέλο). Η ρύθμιση του Cursor είναι αδιαφανής SQLite — μόνο πίνακας συνομιλίας |
-| Roo Code    | `omniroute setup-roo`      | εγγράφει ένα JSON εισαγωγής του Roo (`~/.omniroute/roo-settings.json`) + ορίζει το `roo-cline.autoImportSettingsPath` + εμφανίζει βήματα για το UI (συμβατό με OpenAI, βασικό URL **με** `/v1`)         |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — πάροχος `openai-compat`, `base_url` **με** `/v1`, κλειδί μέσω `$OMNIROUTE_API_KEY`                                                                                       |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **χωρίς** `/v1` + `GOOSE_MODEL`) + οδηγίες περιβάλλοντος                                                                         |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **χωρίς** `/v1` + `model: openai/<id>`) + οδηγίες περιβάλλοντος (`aider --message --yes`)                                                                        |
-| Qwen Code   | `omniroute setup-qwen`     | καταχώριση V4 `modelProviders.openai` στο `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` στο `~/.qwen/.env`                                                                                              |
+| CLI         | Εντολή                     | Τι γράφει                                                                                                                                                                                         |
+| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | προφίλ `~/.codex/<name>.config.toml` (ανά μοντέλο)                                                                                                                                                |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (ανά μοντέλο)                                                                                                                                           |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — ο πάροχος `omniroute` συμβατός με openai, με κάθε μοντέλο του καταλόγου (εκτελέστε `opencode -m omniroute/<model>`)                                          |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (λειτουργία CLI) + εκτυπώνει τις ρυθμίσεις της επέκτασης VS Code για επικόλληση (OpenAI-compatible, Base URL **χωρίς** `/v1`)                          |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + ρυθμίσεις VS Code `kilocode.*` — OpenAI-compatible, Base URL **με** `/v1`                                                                                 |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + CLI `cn`) — `provider: openai`, `apiBase` **με** `/v1`, κλειδί μέσω `${{ secrets.OMNIROUTE_API_KEY }}`                                             |
+| Cursor      | `omniroute setup-cursor`   | εκτυπώνει τα βήματα μέσα στην εφαρμογή (Settings → Models → Override OpenAI Base URL **με** `/v1` + κλειδί + μοντέλο). Η ρύθμιση του Cursor είναι αδιαφανής SQLite — μόνο για το πάνελ συνομιλίας |
+| Roo Code    | `omniroute setup-roo`      | γράφει ένα JSON εισαγωγής Roo (`~/.omniroute/roo-settings.json`) + ορίζει το `roo-cline.autoImportSettingsPath` + εκτυπώνει τα βήματα του UI (OpenAI-compatible, Base URL **με** `/v1`)           |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — πάροχος `openai-compat`, `base_url` **με** `/v1`, κλειδί μέσω `$OMNIROUTE_API_KEY`                                                                                 |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **με** `/v1`, το κλειδί το διαβάζει το Zed από το `$OMNIROUTE_API_KEY` (ποτέ δεν γράφεται)               |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **χωρίς** `/v1` + `GOOSE_MODEL`) + συνταγή env                                                                             |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **χωρίς** `/v1` + `model: openai/<id>`) + συνταγή env (`aider --message --yes`)                                                                            |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` καταχώριση V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` στο `~/.qwen/.env`                                                                                            |
 
 ```bash
-# OpenCode (πάροχος συμβατός με OpenAI, όλα τα μοντέλα του καταλόγου, απομακρυσμένο VPS)
+# OpenCode (πάροχος συμβατός με openai, όλα τα μοντέλα του καταλόγου, απομακρυσμένο VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # διατήρηση μόνο των μοντέλων που αντιστοιχούν
-opencode -m omniroute/glm/glm-5.2 "..."          # εξαγάγετε πρώτα το OMNIROUTE_API_KEY
+omniroute setup-opencode --only glm,kimi        # κράτα μόνο τα αντίστοιχα μοντέλα
+opencode -m omniroute/glm/glm-5.2 "..."          # εξαγωγή του OMNIROUTE_API_KEY πρώτα
 ```
 
-> Το OpenCode διαθέτει επίσης μια πιο πλούσια ενσωμάτωση μέσω **plugin**: `omniroute setup opencode`
-> (πλέον με υποστήριξη απομακρυσμένης σύνδεσης μέσω `--remote`) εγκαθιστά το `@omniroute/opencode-plugin`.
-> Το `setup-opencode` είναι η ελαφριά, συμβατή με OpenAI εναλλακτική. Το κλειδί API
-> αναφέρεται μέσω `{env:OMNIROUTE_API_KEY}` — δεν εγγράφεται ποτέ στον δίσκο.
+> Το OpenCode διαθέτει επίσης πιο πλούσια ενσωμάτωση **plugin**: το `omniroute setup opencode`
+> (πλέον με υποστήριξη remote μέσω `--remote`) εγκαθιστά το `@omniroute/opencode-plugin`.
+> Το `setup-opencode` είναι η ελαφριά εναλλακτική συμβατή με openai. Το κλειδί API
+> αναφέρεται μέσω του `{env:OMNIROUTE_API_KEY}` — ποτέ δεν γράφεται στον δίσκο.
 >
-> Στο OpenCode v2, χρησιμοποιήστε αντ’ αυτού το `@omniroute/opencode-plugin-v2`: ίδιος κατάλογος,
-> διαφορετική σύμβαση φόρτωσης. Διαβάζει το κλειδί από τον χώρο αποθήκευσης διαπιστευτηρίων
-> του ίδιου του OpenCode όταν η ενσωμάτωση είναι συνδεδεμένη, επομένως μια απομακρυσμένη πύλη δεν χρειάζεται κανένα κλειδί
-> στο `opencode.json`.
+> Στο OpenCode v2, χρησιμοποιήστε αντί αυτού το `@omniroute/opencode-plugin-v2`: ίδιος
+> κατάλογος, διαφορετικό συμβόλαιο loader. Διαβάζει το κλειδί από το δικό του κατάστημα
+> διαπιστευτηρίων του OpenCode όταν η ενσωμάτωση είναι συνδεδεμένη, οπότε ένα απομακρυσμένο
+> gateway δεν χρειάζεται κλειδί καθόλου στο `opencode.json`.
 
 ---
 
@@ -459,10 +446,10 @@ omniroute contexts remove 192-168-0-15 --yes   # καταργεί το τοπι�
 
 | Μέθοδος | Διαδρομή              | Έλεγχος ταυτότητας            | Εμβέλεια                                       |
 | ------- | --------------------- | ----------------------------- | ---------------------------------------------- |
-| POST    | `/api/cli/connect`    | κωδικός πρόσβασης διαχείρισης | — (δημόσιο, προστατευμένο με κωδικό πρόσβασης) |
-| GET     | `/api/cli/whoami`     | token πρόσβασης               | ανάγνωση                                       |
-| GET     | `/api/cli/tokens`     | token πρόσβασης               | διαχειριστής                                   |
-| POST    | `/api/cli/tokens`     | token πρόσβασης               | διαχειριστής                                   |
-| DELETE  | `/api/cli/tokens/:id` | token πρόσβασης               | διαχειριστής                                   |
+| POST    | `/api/cli/connect`    | password; 2FA αν είναι ενεργό | — (δημόσιο, προστατευμένο με κωδικό πρόσβασης) |
+| GET     | `/api/cli/whoami`     | access token                  | read                                           |
+| GET     | `/api/cli/tokens`     | access token                  | admin                                          |
+| POST    | `/api/cli/tokens`     | access token                  | admin                                          |
+| DELETE  | `/api/cli/tokens/:id` | access token                  | admin                                          |
 
 Δείτε το [openapi.yaml](../openapi.yaml) για τα πλήρη σχήματα.

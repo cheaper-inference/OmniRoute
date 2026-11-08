@@ -37,33 +37,39 @@ OmniRoute සඳහා පොදු ගැටලු සහ විසඳුම්
 
 ---
 
-### නොමිලේ සැපයුම්කරුවන්ගේ වේග සීමා කිරීම (429 / 400 / 401)
+### නොමිලේ සපයන්නන් මත අනුපාත සීමා කිරීම (429 / 400 / 401)
 
-**ලක්ෂණය**: නොමිලේ/සත්යාපනය අවශ්ය නොවන සැපයුම්කරුවන් (opencode, auggie, ආදිය) සමඟ `model: "auto"` භාවිත කරන විට, පිළිතුරු වෙනුවට කඩින් කඩ `HTTP 429`, `400`, හෝ `401` ලැබේ. මොහොතකට පසුව එම prompt එකම නැවත උත්සාහ කළ විට ඉල්ලීම් සාර්ථක වන නමුත්, පළමු අසාර්ථක වීමේදීම ස්වයංක්රීයකරණය (cron jobs, agents, scripts) බිඳ වැටේ.
+**ලක්ෂණය**: නොමිලේ/සත්යාපනයකින් තොර සපයන්නන් (auggie ආදිය) සමඟ `model: "auto"` භාවිත කරන විට, පිළිතුරු වෙනුවට අතරින් පතර `HTTP 429`, `400`, හෝ `401` ලැබේ. මොහොතකට පසුව එම prompt එකම නැවත උත්සාහ කළ විට ඉල්ලීම් සාර්ථක වේ, නමුත් ස්වයංක්රීයකරණය (cron jobs, agents, scripts) පළමු අසාර්ථකත්වයේදී බිඳ වැටේ.
 
-**මූලික හේතුව**: ස්වාධීන අසාර්ථකත්ව ආකාර තුනක් එකට එකතු වේ:
+**මූලික හේතුව**: ස්වාධීන අසාර්ථකතා ආකාර තුනක් එකට එකතු වේ:
 
-1. **සැපයුම්කරුගේ වේග සීමාව (`429`)**: නොමිලේ මට්ටම්වලට එක් කාල කවුළුවකට කෝටාවක් බලාත්මක කළ හැක. සමාන්තර ඇමතුම් සමූහයක් එය අවසන් කරන බැවින්, කවුළුව නැවත සැකසෙන තෙක් ඊළඟ ඉල්ලීම ප්රතික්ෂේප වේ.
-2. **Passthrough තුළ බිඳුණු model එකක් (`400`/`401`)**: `auto/*` pools තුළ catalog එකේ ලියාපදිංචි වී ඇති නමුත් සජීවී අක්තපත්ර නොමැති `opencode` වෙතින් passthrough models ඇතුළත් විය හැක (උදා. `oc/north-mini-code-free` → `401`). auto-router එකක් උත්සාහ කර අසාර්ථක වන අතර, fallback ක්රියාත්මක වීමට පෙර දෝෂය ඉදිරියට පැතිරේ.
-3. **සමකාලීනත්ව වර්ධනය (බර යටතේ `429`)**: agent/cron sessions කිහිපයක් එකවර `auto` වෙත පිවිසෙන විට, සමස්ත ඉල්ලීම් වේගය නොමිලේ සැපයුම්කරුවන්ට දරාගත හැකි සීමාව ඉක්මවන බැවින්, වලංගු ඇමතුම්ද අනිසි භාවිත ලෙස සලකුණු වේ.
+1. **සපයන්නාගේ අනුපාත සීමාව (`429`)**: නොමිලේ මට්ටම් මඟින් එක් කාල කවුළුවකට quota එකක් පැනවිය හැක. සමාන්තර ඇමතුම් රාශියක් එය අවසන් කළ විට, කවුළුව යළි සකසන තෙක් ඊළඟ ඉල්ලීම ප්රතික්ෂේප වේ.
+2. **passthrough හි බිඳුණු model එක (`400`/`401`)**: `auto/*` pools තුළ catalog එකේ ලියාපදිංචි කර ඇති නමුත් සජීවී credentials නොමැති passthrough models ඇතුළත් විය හැක (→ `401`). auto-router එකක් උත්සාහ කර අසාර්ථක වන අතර, fallback ක්රියාත්මක වීමට පෙර දෝෂය ඉහළට පැතිරේ.
+3. **සමගාමීත්වය වැඩිවීම (`429` under load)**: agent/cron sessions කිහිපයක් එකවර `auto` වෙත පැමිණෙන විට, සමස්ත ඉල්ලීම් අනුපාතය නොමිලේ සපයන්නන්ට දරාගත හැකි මට්ටම ඉක්මවා යන අතර, නීත්යානුකූල ඇමතුම් අපයෝජන ලෙස සලකුණු වේ.
 
-**තහවුරු කළ විසඳුම (ප්රජාව විසින් වාර්තා කරන ලදී, 2026-08-10)**: නොමිලේ මට්ටමේ අස්ථාවරත්වය හේතුවෙන් අසාර්ථක වීම වෙනුවට rotation, concurrency, සහ fallback මඟින් එය අවශෝෂණය කරගැනීමට පරිසර විචල්ය තුනක් සකසන්න:
+**සත්යාපිත විසඳුම (ප්රජාව විසින් වාර්තා කරන ලද, 2026-08-10)**: rotation, concurrency සහ fallback මඟින් නොමිලේ මට්ටමේ වෙනස්වන තත්ත්වයන් දරාගන්නා ලෙසත් ඒවා මත නතර නොවන ලෙසත් environment variables තුනක් සකසන්න:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 ලැබුණු විට වෙනත් model/provider එකකට මාරු වන්න (බිඳුණු passthrough models මඟහරී)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # heavyweight admission සඳහා පැහැදිලි උපරිම සීමාව (පෙරනිමියෙන් සකසා නැත: ඉල්ලීම්-ගණන සීමාවක් නැත, පහත සටහන බලන්න)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # මන්දගාමී upstreams සඳහා සීමිත රැඳී සිටීම RATE_LIMIT_MAX_WAIT_MS පෙරනිමියට වඩා ඉහළ නංවන්න
+export OMNIROUTE_ROTATE_ON_400=true           # 400/401 මත වෙනත් model/provider එකකට මාරු වන්න (බිඳුණු passthrough models මඟ හරියි)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # පැහැදිලි heavyweight ඇතුළත් කිරීමේ උපරිම සීමාව (පෙරනිමියෙන් unset: ඉල්ලීම්-ගණන් සීමාවක් නැත, පහත සටහන බලන්න)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # මන්දගාමී upstreams සඳහා RATE_LIMIT_MAX_WAIT_MS පෙරනිමිය ඉක්මවා bounded wait එක වැඩි කරන්න
 ```
 
-මේවා OmniRoute process environment එකේ (daemon එකේ, උදා. LaunchAgent plist හෝ `systemctl edit` හරහා) සකසා, පසුව OmniRoute නැවත ආරම්භ කරන්න. rotation flag එක තනිවම වැඩිම බලපෑමක් ඇති විකල්පයයි: එය දැඩි අසාර්ථකත්වයක් pool එකේ ඇති සෞඛ්ය සම්පන්න සැපයුම්කරුවෙකු වෙත විනිවිද පෙනෙන නැවත උත්සාහයක් බවට පරිවර්තනය කරයි.
+මේවා OmniRoute process environment එක තුළ (daemon එකේ, උදාහරණයක් ලෙස LaunchAgent plist හෝ `systemctl edit` හරහා) සකසා, පසුව OmniRoute නැවත ආරම්භ කරන්න. Rotation flag එකෙන් වැඩිම බලපෑමක් ඇති කරන්නේ එයයි: එය දැඩි අසාර්ථකත්වයක් pool එකේ සෞඛ්ය සම්පන්න provider එකකට පාරදෘශ්ය ලෙස නැවත උත්සාහ කිරීමක් බවට පත් කරයි.
 
-**සටහන**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` මඟින් එකවර ධාවනය වන heavyweight — දිගු-context — ඉල්ලීම් ගණන සීමා කරයි; එම සීමාව admission gate එකක් මිස සැපයුම්කරුගේ වේග සීමාකාරකයක් නොවේ. **#503-fanout යාවත්කාලීනය:** මෙම var එක දැන් පෙරනිමියෙන් සකසා නැත (දැන් එය ඉහත පරිදි පැහැදිලිව වින්යාස කළ විට පමණක් බැඳේ) — ඒ වෙනුවට heavyweight admission, host එකේ සැබෑ memory ceiling එක අනුව ස්වයංක්රීයව පරිමාණය වන auto-derived byte budget එකක් (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) මඟින් පාලනය වේ. එබැවින් අලුත් deployment එකකදී මෙම var එක කිසිසේත් සකස් නොකරම `503 chat_admission_busy` ප්රතික්ෂේප කිරීම් බෙහෙවින් අඩුවෙන් දැකිය යුතුය; මෙහි එය පැහැදිලිව සැකසීම තවමත් ලේඛනගත කර ඇති ආකාරයටම ක්රියා කරයි. පැහැදිලි byte-budget overrides 8 MiB–2 GiB අතරට සීමා වේ. `413 body_exceeds_budget` තාවකාලික නොවේ: එම byte budget එක වැඩි කරන්න, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` අඩු කරන්න, හෝ process memory ceiling එක වැඩි කරන්න. `inflight_bytes_budget` shed එකක් තාවකාලික තරගකාරී තත්ත්වයක් වන අතර නැවත උත්සාහ කළ හැක. එක් එක් සැපයුම්කරු සඳහා වන වේග සීමා කිරීම (`open-sse/services/rateLimitManager.ts`) `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, සහ `RATE_LIMIT_AUTO_ENABLE` මඟින් වෙනම පාලනය වේ — `.env.example` බලන්න.
+**සටහන**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` එකවර ක්රියාත්මක වන heavyweight — දිගු-context — ඉල්ලීම් ගණන සීමා කරයි; මෙම සීමාව admission gate එකක් මිස provider rate limiter එකක් නොවේ. **#503-fanout update:** මෙම var එක දැන් පෙරනිමියෙන් සකසා නොමැත (ඉහත පරිදි පැහැදිලිව වින්යාස කළ විට පමණක් දැන් සීමා කරයි) — ඒ වෙනුවට heavyweight admission එක host හි සැබෑ memory ceiling එකෙන් ස්වයංක්රීයව ගණනය වන byte budget එකකින් (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) පාලනය වේ. එබැවින් මෙම var එක කිසිසේත් සකස් නොකරන නව deployment එකක `503 chat_admission_busy` ප්රතික්ෂේප කිරීම් සැලකිය යුතු ලෙස අඩු විය යුතුය; මෙහි එය පැහැදිලිව සකස් කිරීම තවමත් ලේඛනගත ආකාරයටම ක්රියා කරයි. පැහැදිලි byte-budget overrides 8 MiB–2 GiB අතරට සීමා වේ. `413 body_exceeds_budget` තාවකාලික නොවේ: එම byte budget එක වැඩි කරන්න, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` හෝ සුරැකි request body limit එක අඩු කරන්න, නැතහොත් process memory ceiling එක වැඩි කරන්න. `inflight_bytes_budget` shed එක තාවකාලික තරඟකාරීත්වයක් වන අතර නැවත උත්සාහ කළ හැක. එක් එක් provider සඳහා වන rate limiting (`open-sse/services/rateLimitManager.ts`) වෙන වෙනම `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, සහ `RATE_LIMIT_AUTO_ENABLE` මඟින් පාලනය වේ — `.env.example` බලන්න.
 
-**එය ක්රියා කළ බව තහවුරු කරන්නේ කෙසේද**: ඔබගේ agent/cron එක ඉක්මන් අනුක්රමයකින් දෙවරක් ධාවනය කර, අවස්ථා දෙකම සාර්ථක වන බව තහවුරු කරන්න. නිවැරදි කිරීමට පෙර, දෙවන ධාවනය සාමාන්යයෙන් `429`/`401` දෝෂයක් නිකුත් කරයි. නිවැරදි කිරීමෙන් පසු, අසාර්ථක වීම් (තිබේ නම්) විනිවිද පෙනෙන ලෙස නැවත උත්සාහ කෙරෙන අතර ඇමතුම සම්පූර්ණ වේ. ඔබට `curl /monitoring/health` ද ධාවනය කර provider සම්බන්ධතා මත ඇති `rateLimitedUntil` ක්ෂේත්රය සහ බලපෑමට ලක් වූ providers සඳහා `circuitBreakers.providerBreakers[].state` නිරීක්ෂණය කළ හැක — state එක `CLOSED`, `DEGRADED`, `OPEN`, හෝ `HALF_OPEN` යන ඒවායින් එකකි (`src/shared/utils/circuitBreaker.ts` බලන්න), තවද අඛණ්ඩව අසාර්ථක වන provider එකක් reset window එක මඟින් probe එකකට ඉඩ ලැබීමට පෙර `CLOSED → DEGRADED → OPEN` ලෙස මාරු වේ (`HALF_OPEN`).
+**යාවත්කාලීන සටහන: සුරැකි request body limit එකක් දැන් chat සඳහාද අදාළ වේ.** Settings > Advanced > Request Body Limit (`maxBodySizeMb`) යටතේ කලින් සුරැකි limit එකක් දැන් `/v1/chat/completions` සහ `/v1/responses` වෙතද අදාළ වේ. මෙම වෙනසට පෙර, සුරැකී තිබූ අගය කුමක් වුවත් එම routes දෙක 50 MB දක්වා පිළිගත් බැවින්, අඩු සුරැකි limit එකක් සහිත install එකක් එම සීමාවට වඩා වැඩි chat bodies ප්රතික්ෂේප කිරීමට පටන් ගනී. කිසිවිටෙක limit එකක් සුරැකී නොමැති install එකක් 50 MB පෙරනිමිය තබා ගනී.
 
-**ඔබට තවමත් 429 පෙනේ නම්**: එම provider සඳහා සක්රිය account එකේ _quota_ සත්ය වශයෙන්ම අවසන් වී ඇත (rate එක පමණක් නොවේ). OmniRoute dashboard → Providers → Accounts තුළ එම provider සඳහා දෙවන account එකක් එක් කරන්න, නැතහොත් වෙනත් නොමිලේ provider එකක් (උදා. `routeway`, `auggie`) මිශ්ර කර භාවිත කරන්න. Rotation උපකාරී වන්නේ තාවකාලික rate/400/401 තත්ත්ව සඳහා පමණි; quota එක සම්පූර්ණයෙන් අවසන් වීමකදී දෙවන credential එකක් හෝ වෙනත් provider එකක් අවශ්ය වේ.
+ප්රතික්ෂේප කිරීම HTTP `413` එකක් වන අතර `error.code` `PAYLOAD_TOO_LARGE` ලෙසත් `error.type` `payload_too_large` ලෙසත් සකසා ඇත. බලපැවැත්වෙන සීමාව message එකේ සඳහන් වේ: ප්රකාශිත `Content-Length` එය ඉක්මවා ගිය විට `Request body too large. Maximum allowed: 10 MB`, හෝ ඇත්ත වශයෙන් කියවන ලද bytes ප්රමාණය එය ඉක්මවා ගිය විට `Request body too large for chat completions (max 10 MB).` මෙය ඉහත සඳහන් `413 body_exceeds_budget` සමඟ එකම දෙයක් නොවේ; එය memory budget එකෙන් පැමිණෙන අතර මෙම setting එකෙන් වෙනස් නොවේ.
 
-**vision models (`auto/vision`, `bazaarlink/*`) මත 403 පෙනේ නම්**: සම්බන්ධිත account එකට vision ඇතුළත් ගෙවීම් සහිත plan එකක් නොමැත, නැතහොත් API key එකට ප්රමාණවත් permissions නොමැත. key scope එකට vision/multimodal ඇතුළත් බව provider dashboard එක තුළ තහවුරු කරන්න, නැතහොත් ගෙවීම් සහිත tier account එකක් සම්බන්ධ කර එය vision target එක ලෙස තබා ගන්න.
+සීමාව වැඩි කිරීමට, `/dashboard/settings/advanced` හි වැඩි අගයක් සුරකින්න, නැතහොත් `PATCH /api/settings` සමඟ `{"maxBodySizeMb": 50}` යවන්න. 1 සිට 500 MB දක්වා අගයන් පිළිගනු ලැබේ, එය restart එකකින් තොරව ක්රියාත්මක වන අතර, 50 මඟින් පෙර chat limit එක ප්රතිස්ථාපනය කරයි. වෙනත් සීමා දෙකක් තවමත් විශාල body එකක් නවතා දැමිය හැක: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` සකසා තිබේ නම් එයද සුරැකි limit එක සීමා කරයි, සහ Kubernetes ingress annotation `proxy-body-size` (ship කරන ලද manifests තුළ `50m`) 50 MB ඉක්මවන ඕනෑම දෙයක් සඳහා වෙනම වැඩි කළ යුතුය.
+
+**එය ක්රියා කළ බව සත්යාපනය කරන ආකාරය**: ඔබේ agent/cron එක ඉක්මනින් අනුක්රමයෙන් දෙවරක් ධාවනය කර දෙකම සාර්ථක වන බව තහවුරු කරන්න. විසඳුමට පෙර, දෙවන ධාවනය සාමාන්යයෙන් `429`/`401` විසි කරයි. විසඳුමෙන් පසු, තිබේ නම් අසාර්ථකතා පාරදෘශ්ය ලෙස නැවත උත්සාහ කර ඇමතුම සම්පූර්ණ වේ. ඔබට `curl /monitoring/health` ද ධාවනය කර, provider connections හි `rateLimitedUntil` field එක සහ බලපෑමට ලක් වූ providers සඳහා `circuitBreakers.providerBreakers[].state` නිරීක්ෂණය කළ හැක — state එක `CLOSED`, `DEGRADED`, `OPEN`, හෝ `HALF_OPEN` වලින් එකකි (`src/shared/utils/circuitBreaker.ts` බලන්න). අඛණ්ඩව අසාර්ථක වන provider එකක්, reset window එකක් probe එකක් හරහා යාමට ඉඩ දීමට පෙර (`HALF_OPEN`), `CLOSED → DEGRADED → OPEN` ලෙස මාරු වේ.
+
+**තවමත් 429 පෙනේ නම්**: එම provider සඳහා සක්රීය account එක සැබෑවටම එහි _quota_ අවසන් කර ඇත (හුදෙක් rate එක නොවේ). OmniRoute dashboard → Providers → Accounts තුළ එම provider සඳහා දෙවන account එකක් එක් කරන්න, නැතහොත් වෙනත් නොමිලේ provider එකක් (උදා. `routeway`, `auggie`) එක් කරන්න. Rotation උපකාරී වන්නේ තාවකාලික rate/400/401 තත්ත්වයන් සඳහා පමණි; දැඩි quota අවසන් වීමකට දෙවන credential එකක් හෝ වෙනත් provider එකක් අවශ්ය වේ.
+
+**Vision models (`auto/vision`, `bazaarlink/*`) මත 403 පෙනේ නම්**: සම්බන්ධ කර ඇති account එකට vision ඇතුළත් paid plan එකක් නොමැති විය හැක, නැතහොත් API key එකට ප්රමාණවත් permissions නොමැති විය හැක. provider dashboard තුළ key scope එකට vision/multimodal ඇතුළත් දැයි සත්යාපනය කරන්න, නැතහොත් paid tier account එකක් සම්බන්ධ කර එය vision target එක ලෙස තබා ගන්න.
 
 ---
 
@@ -90,48 +96,48 @@ npm install -g omniroute --legacy-peer-deps
 
 ---
 
-## npm install-scripts අවහිර කළ බවට අනතුරු ඇඟවීම (ගෝලීය ස්ථාපනය)
+## npm install-scripts අවහිර කිරීමේ අනතුරු ඇඟවීම (ගෝලීය ස්ථාපනය)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` ධාවනය කරන විට, නව npm අනුවාද (v11+ සහ v12+) පෙරනිමියෙන් පැකේජ ජීවන චක්ර script අවහිර කර install-scripts අනතුරු ඇඟවීමක් පෙන්වයි:
+`npm install -g omniroute` ධාවනය කරන විට, නව npm අනුවාද (v11+ සහ v12+) පෙරනිමියෙන් පැකේජ ජීවන චක්ර ස්ක්රිප්ට් අවහිර කර install-scripts අනතුරු ඇඟවීමක් පෙන්වයි:
 
 ```
-npm warn install-scripts allowScripts මඟින් ආවරණය නොවන බැවින් පැකේජ 7ක install script අවහිර කර ඇත:
+npm warn install-scripts allowScripts මඟින් ආවරණය නොවන නිසා පැකේජ 7ක ස්ථාපන ස්ක්රිප්ට් අවහිර කර ඇත:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### මෙම අනතුරු ඇඟවීම නොසලකා හැරිය හැකිද?
 
-**අර්ධ වශයෙන් හැකි නමුත් script නොමැතිව ධාවනය කිරීම නිර්දේශ නොකෙරේ.** OmniRoute සතුව සුමට fallback ඇත: standalone bundle එකෙන් native `better-sqlite3` binding පූරණය කළ නොහැකි නම්, යෙදුම `node:sqlite` හෝ `sql.js` වැනි විකල්ප driver වෙත fallback වේ ([SQLite ධාවන කාල නිරාකරණය](../ops/SQLITE_RUNTIME.md) බලන්න). සේවාදායකය තවමත් ආරම්භ වනු ඇත, නමුත් `sql.js` වැනි WASM fallback මත ධාවනය කිරීමෙන් SQLite WAL (Write-Ahead Logging) මාදිලිය අක්රිය වන අතර මතක සහ තැටි සමමුහුර්තකරණ අතිරික්තය වැඩි වේ.
+**අර්ධ වශයෙන් හැකි නමුත්, ස්ක්රිප්ට් නොමැතිව ධාවනය කිරීම නිර්දේශ නොකෙරේ.** OmniRoute සතුව දෝෂයකදී විකල්පයකට සුමටව මාරු වීමේ හැකියාව ඇත: ස්වාධීන බණ්ඩලයෙන් ස්වදේශීය `better-sqlite3` බැඳීම් පූරණය කළ නොහැකි නම්, යෙදුම `node:sqlite` හෝ `sql.js` වැනි විකල්ප ධාවක වෙත මාරු වේ ([SQLite ධාවනකාල විසඳුම](../ops/SQLITE_RUNTIME.md) බලන්න). සේවාදායකය එසේ වුවද ආරම්භ වන නමුත්, `sql.js` වැනි WASM විකල්ප මත ධාවනය කිරීමෙන් SQLite WAL (Write-Ahead Logging) ප්රකාරය අක්රිය වන අතර මතක සහ තැටි සමමුහුර්ත කිරීමේ අතිරේක වියදම වැඩි වේ.
 
-### සැබවින්ම අවශ්ය script මොනවාද?
+### සැබවින්ම අවශ්ය වන්නේ කුමන ස්ක්රිප්ට්ද?
 
-අවහිර කළ සියලුම script OmniRoute ධාවනය කිරීමට අත්යවශ්ය නොවේ:
+අවහිර කරන ලද සියලුම ස්ක්රිප්ට් OmniRoute ධාවනය කිරීමට අත්යවශ්ය නොවේ:
 
-- **අත්යවශ්ය (`omniroute`, `better-sqlite3`):** OmniRoute ධාවනය වන්නේ Next.js standalone යෙදුම් bundle එකකිනි (`dist/`). ස්ථාපනය අතරතුර, npm විසින් ඉහළම මට්ටමේ `node_modules/better-sqlite3/` තුළ ධාරකයට විශේෂිත native SQLite driver එක බාගැනීම හෝ සම්පාදනය කිරීම සිදු කරයි. ඉන්පසු OmniRoute හි `postinstall` script එක (`scripts/build/postinstall.mjs`) මෙම ධාරකයට විශේෂිත binary සත්යාපනය කර standalone සේවාදායකයට ඒවාට ප්රවේශ විය හැකි වන පරිදි `dist/node_modules/` වෙත පිටපත් කරයි. `omniroute` හි postinstall script එක අවහිර කර ඇත්නම්, මෙම පිටපත් කිරීමේ පියවර මඟ හැරේ.
-- **විකල්ප/අනුක්රමික (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** මේවා build උපකාරක, watcher මෙවලම් හෝ පද්ධති keychain උපයෝගිතා වේ. ඒවාට ඉඩ දීමෙන් build අනතුරු ඇඟවීම් වළක්වන නමුත්, මූලික routing ක්රියාකාරීත්වය සඳහා ඒවා අවශ්ය නොවේ.
-- **බැහැර කළ (`onnxruntime-node`):** දේශීය AI embedding සඳහා වන විකල්ප dependency එකක් වන අතර OmniRoute ධාවනය කිරීමට එය **අවශ්ය නොවේ**. එහි postinstall script එක NuGet වෙතින් ~300MB ප්රමාණයක CUDA සම්පත් බාගනී; සහාය දක්වන දෘඪාංග මත දේශීය ONNX ත්වරණය භාවිත කිරීමට ඔබ පැහැදිලිවම අදහස් කරන්නේ නම් හැර, එය allow-list එකට ඇතුළත් නොකරන්න.
+- **අත්යවශ්ය (`omniroute`, `better-sqlite3`):** OmniRoute ධාවනය වන්නේ Next.js ස්වාධීන යෙදුම් බණ්ඩලයකින් (`dist/`) ය. ස්ථාපනය අතරතුර, npm ඉහළ මට්ටමේ `node_modules/better-sqlite3/` තුළ සත්කාරක පද්ධතියට විශේෂිත ස්වදේශීය SQLite ධාවකය බාගත කිරීම හෝ සම්පාදනය කිරීම සිදු කරයි. අනතුරුව OmniRoute හි `postinstall` ස්ක්රිප්ට් එක (`scripts/build/postinstall.mjs`) මෙම සත්කාරක පද්ධතියට විශේෂිත ද්විමය ගොනු සත්යාපනය කර, ස්වාධීන සේවාදායකයට ඒවා වෙත ප්රවේශ විය හැකි වන පරිදි `dist/node_modules/` වෙත පිටපත් කරයි. `omniroute` හි postinstall ස්ක්රිප්ට් එක අවහිර කර ඇත්නම්, මෙම පිටපත් කිරීමේ පියවර මඟ හැරේ.
+- **විකල්ප/පරායත්ත (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** මේවා ගොඩනැගීමේ සහායක, නිරීක්ෂණ මෙවලම් හෝ පද්ධති යතුරු දාම උපයෝගිතා වේ. ඒවාට ඉඩ දීමෙන් ගොඩනැගීමේ අනතුරු ඇඟවීම් වළක්වන නමුත්, මූලික මාර්ගගත කිරීමේ ක්රියාකාරීත්වය සඳහා ඒවා අවශ්ය නොවේ.
+- **බැහැර කළ (`onnxruntime-node`):** දේශීය AI embeddings සඳහා වන විකල්ප පරායත්තතාවක් වන අතර OmniRoute ධාවනය කිරීමට එය **අවශ්ය නොවේ**. එහි postinstall ස්ක්රිප්ට් එක NuGet වෙතින් ~300MBක CUDA සම්පත් බාගත කරයි; සහාය දක්වන දෘඩාංග මත දේශීය ONNX ත්වරණය භාවිත කිරීමට ඔබ පැහැදිලිවම අදහස් කරන්නේ නම් මිස එය අවසර ලැයිස්තුවට ඇතුළත් නොකරන්න.
 
 ### නිර්දේශිත විසඳුම
 
-ගෝලීය ස්ථාපනයක් අතරතුර අවශ්ය install script සඳහා අවසර දී අනතුරු ඇඟවීම් නිහඬ කිරීමට, OmniRoute සහ එහි native dependency සඳහා `--allow-scripts` යොදන්න:
+ගෝලීය ස්ථාපනයකදී අවශ්ය ස්ථාපන ස්ක්රිප්ට්වලට ඉඩ දී අනතුරු ඇඟවීම් නිහඬ කිරීමට, OmniRoute සහ එහි ස්වදේශීය පරායත්තතා සඳහා `--allow-scripts` යොදන්න:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-විකල්පයක් ලෙස, ඔබේ පරිශීලක ගිණුමේ සියලුම ගෝලීය ස්ථාපන සඳහා මෙය ස්ථිරව වින්යාස කිරීමට:
+විකල්පයක් ලෙස, ඔබගේ පරිශීලක ගිණුමේ සියලුම ගෝලීය ස්ථාපන සඳහා මෙය ස්ථිරව වින්යාස කිරීමට:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 npm install -g omniroute
 ```
 
-### ඔබේ ස්ථාපනය සත්යාපනය කරන්න
+### ඔබගේ ස්ථාපනය සත්යාපනය කරන්න
 
-ස්ථාපනයෙන් පසු, native binding සහ ධාවන කාල පරිසරය නිසි තත්ත්වයේ පවතින බව තහවුරු කරගැනීමට ඇතුළත් කළ රෝගනිශ්චය මෙවලම ධාවනය කරන්න:
+ස්ථාපනයෙන් පසුව, ස්වදේශීය බැඳීම් සහ ධාවනකාල පරිසරය නිසි තත්ත්වයේ පවතින බව සහතික කිරීමට අන්තර්ගත රෝග විනිශ්චය මෙවලම ධාවනය කරන්න:
 
 ```bash
 omniroute doctor

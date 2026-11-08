@@ -22,6 +22,11 @@ export const KNOWN_OFFENDING_FIELDS: readonly string[] = [
   // Codex → GLM or Ollama Cloud), whose strict endpoint rejects it as an extra
   // field. Retrying without it is safe because it only changes output style.
   "verbosity",
+  // Claude Code's top-level telemetry object. paramSupport.ts drops it up front
+  // for claude-* model ids; this catches Claude-shaped gateways whose model id
+  // does not contain "claude" and 400 with "diagnostics: Extra inputs are not
+  // permitted".
+  "diagnostics",
 ];
 
 /** Return the first known-offending field literally named in a 400 body, or null. */

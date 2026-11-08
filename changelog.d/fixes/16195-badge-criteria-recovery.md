@@ -1,1 +1,0 @@
-- fix(gamification): Ignore malformed badge criteria consistently during evaluation and hidden-badge prerequisite checks, preserving valid awards, owner isolation, and the earned snapshot (#16195).

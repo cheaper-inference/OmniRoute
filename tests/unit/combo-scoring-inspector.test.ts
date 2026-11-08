@@ -19,6 +19,7 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const quotaSnapshotsDb = await import("../../src/lib/db/quotaSnapshots.ts");
 const callLogs = await import("../../src/lib/usage/callLogs.ts");
+const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const comboMetrics = await import("../../open-sse/services/comboMetrics.ts");
 const inspector = await import("../../src/lib/usage/comboScoringInspector.ts");
 const comboHealthDashboard = await import("../../src/lib/usage/comboHealthDashboard.ts");
@@ -82,7 +83,8 @@ async function seedAutoCombo(comboOverrides: Record<string, unknown> = {}) {
     index: 1,
   });
 
-  for (let index = 0; index < 4; index += 1) {
+  // Live candidate latency requires ten observations before using history.
+  for (let index = 0; index < 10; index += 1) {
     await callLogs.saveCallLog({
       id: `scoring-fast-${index}`,
       timestamp: new Date(Date.now() - index * 60_000).toISOString(),
@@ -99,9 +101,18 @@ async function seedAutoCombo(comboOverrides: Record<string, unknown> = {}) {
       comboStepId: firstStep.id,
       comboExecutionKey: firstStep.id,
     });
+    await usageHistory.saveRequestUsage({
+      provider: "openai",
+      model: "gpt-4o-mini",
+      connectionId: "scoring-conn-fast",
+      timestamp: new Date(Date.now() - index * 60_000).toISOString(),
+      success: true,
+      latencyMs: 100,
+      tokens: { input: 100, output: 100 },
+    });
   }
 
-  for (let index = 0; index < 4; index += 1) {
+  for (let index = 0; index < 10; index += 1) {
     await callLogs.saveCallLog({
       id: `scoring-slow-${index}`,
       timestamp: new Date(Date.now() - index * 60_000).toISOString(),
@@ -117,6 +128,15 @@ async function seedAutoCombo(comboOverrides: Record<string, unknown> = {}) {
       comboName: comboInput.name,
       comboStepId: secondStep.id,
       comboExecutionKey: secondStep.id,
+    });
+    await usageHistory.saveRequestUsage({
+      provider: "anthropic",
+      model: "claude-3-5-haiku",
+      connectionId: "scoring-conn-slow",
+      timestamp: new Date(Date.now() - index * 60_000).toISOString(),
+      success: index !== 0,
+      latencyMs: 1_000,
+      tokens: { input: 100, output: 100 },
     });
   }
 
@@ -297,10 +317,9 @@ test("configured auto preview uses live evaluation scores and zero quota contrib
     assert.equal(quota?.source, "runtime");
     assert.equal(quota?.weight, 0);
     assert.equal(quota?.contribution, 0);
-    assert.equal(
-      target.score,
-      Number(target.factors.reduce((sum, factor) => sum + factor.contribution, 0).toFixed(4))
-    );
+    // Displayed contributions are independently rounded to four decimals.
+    const displayedSum = target.factors.reduce((sum, factor) => sum + factor.contribution, 0);
+    assert.ok(Math.abs(target.score - displayedSum) <= (target.factors.length + 1) * 0.00005);
   }
 });
 

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
+import Button from "@/shared/components/Button";
 
 /**
  * ClaudeCcDiscoveryInfoButton — informational entry point for the Claude Code
@@ -19,16 +21,17 @@ export default function ClaudeCcDiscoveryInfoButton() {
 
   return (
     <div className="relative inline-block">
-      <button
-        type="button"
+      <Button
+        variant="outline"
+        size="sm"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         title={t("ccDiscoveryInfoTooltip")}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-transparent px-2.5 py-1 text-[12px] text-text-main hover:border-primary/40 transition-colors"
+        className="gap-1.5 text-[12px]"
       >
-        <span className="material-symbols-outlined text-[16px]">help</span>
+        <Icon name="help" size={16} />
         {t("ccDiscoveryInfoButton")}
-      </button>
+      </Button>
 
       {open && (
         <div className="absolute z-10 mt-2 w-80 rounded-lg border border-border bg-surface p-3 text-xs shadow-lg">

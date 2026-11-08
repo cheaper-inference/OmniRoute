@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
 
 interface UpstreamCaFieldProps {
   value: string;
@@ -42,43 +45,31 @@ export function UpstreamCaField({ value, onChange, onSave }: UpstreamCaFieldProp
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-xs font-medium text-text-muted">
-        {t("upstreamCaLabel") || "Upstream CA Certificate (corporate)"}
-      </label>
-      <div className="flex gap-2">
-        <input
+      <div className="flex flex-wrap items-end gap-2">
+        <Input
           type="text"
-          className="flex-1 rounded-lg border border-border/50 bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+          label={t("upstreamCaLabel") || "Upstream CA Certificate (corporate)"}
+          className="min-w-[14rem] flex-1"
           placeholder={t("upstreamCaPlaceholder") || "/etc/ssl/certs/corp-ca.pem"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
-        <button
-          type="button"
-          onClick={handleTest}
-          disabled={testing || !value.trim()}
-          className="shrink-0 rounded-lg border border-border/50 bg-card px-3 py-2 text-xs font-medium hover:bg-surface transition-colors disabled:opacity-50"
-        >
-          {testing ? "Testing…" : t("upstreamCaTest") || "Test TLS"}
-        </button>
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!value.trim()}
-          className="shrink-0 rounded-lg bg-primary/10 text-primary px-3 py-2 text-xs font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
-        >
+        <Button variant="outline" onClick={handleTest} disabled={!value.trim()} loading={testing}>
+          {testing ? t("upstreamCaTesting") : t("upstreamCaTest") || "Test TLS"}
+        </Button>
+        <Button variant="secondary" onClick={handleSave} disabled={!value.trim()}>
           {t("save") || "Save"}
-        </button>
+        </Button>
       </div>
       {testResult === "ok" && (
-        <p className="text-xs text-emerald-500">
-          <span className="material-symbols-outlined text-[12px] mr-1">check_circle</span>
+        <p role="status" className="flex items-center gap-1 text-xs text-success">
+          <Icon name="check_circle" size={12} />
           {t("upstreamCaTestOk") || "TLS test passed"}
         </p>
       )}
       {testResult === "error" && (
-        <p className="text-xs text-red-500">
-          <span className="material-symbols-outlined text-[12px] mr-1">error</span>
+        <p role="alert" className="flex items-center gap-1 text-xs text-error">
+          <Icon name="error" size={12} />
           {t("upstreamCaTestError") || "TLS test failed — check the path and CA file"}
         </p>
       )}

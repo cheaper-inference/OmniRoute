@@ -298,13 +298,13 @@ Viktiga beteenden:
 
 ## 🔑 Synkroniseringstoken och konfigurationspaket _(v3.6.6+)_
 
-Åtkomst från flera enheter och för externa operatörer är nu möjlig via **avgränsade synkroniseringstoken**:
+Åtkomst från flera enheter och för externa operatörer är nu möjlig via **omfångsbegränsade synkroniseringstoken**:
 
-- **`POST /api/sync/tokens`** — Utfärda ett nytt synkroniseringstoken (avgränsat, med valfri giltighetstid)
+- **`POST /api/sync/tokens`** — Utfärda ett nytt synkroniseringstoken (omfångsbegränsat, med valfri giltighetstid)
 - **`DELETE /api/sync/tokens/:id`** — Återkalla ett token
-- **`GET /api/sync/bundle`** — Hämta en versionshanterad JSON-ögonblicksbild, identifierad med ETag, av alla icke-känsliga inställningar (lösenord är maskerade)
+- **`GET /api/sync/bundle`** — Hämta en versionshanterad JSON-ögonblicksbild av konfigurationen, identifierad med ETag (autentiseras endast med ett synkroniseringstoken). Autentiseringsinställningar, såsom lösenordet till kontrollpanelen, tas bort, men leverantörsautentiseringsuppgifter och API-nycklar inkluderas, så behandla filen som en hemlighet
 
-Konfigurationspaketet skapas av `src/lib/sync/bundle.ts`. Konsumenter jämför svarshuvudet `ETag` för att upptäcka ändringar utan att hämta hela datamängden igen.
+Konfigurationspaketet skapas av `src/lib/sync/bundle.ts`. Klienter jämför svarshuvudet `ETag` för att identifiera ändringar utan att hämta hela nyttolasten igen. Från kommandoraden sparar `omniroute sync bundle <outPath> --token <syncToken>` (eller `OMNIROUTE_SYNC_TOKEN`) det i en fil som endast ägaren har åtkomst till.
 
 ---
 

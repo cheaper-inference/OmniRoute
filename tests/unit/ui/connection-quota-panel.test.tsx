@@ -126,6 +126,34 @@ describe("ConnectionQuotaPanel", () => {
     expect(el.textContent).toContain("7d 20%");
   });
 
+  it("shows only reported Claude windows and preserves an observed zero", () => {
+    const el = mount(
+      <ConnectionQuotaPanel
+        {...panelProps({
+          providerId: "claude",
+          connection: { id: "claude-weekly", provider: "claude" } as ConnectionRowConnection,
+          cache: {
+            quotas: {
+              "session (5h)": null,
+              "weekly (7d)": {
+                used: 0,
+                total: 100,
+                remainingPercentage: 100,
+                resetAt: futureReset(120),
+              },
+            },
+            modelQuotas: { "weekly sonnet (7d)": null },
+          },
+        })}
+      />
+    );
+    expect(el.textContent).toContain("7d 0%");
+    expect(el.textContent).not.toContain("5h");
+    expect(el.textContent).not.toContain("sonnet");
+    act(() => el.querySelector<HTMLButtonElement>("button[title='Usage details']")!.click());
+    expect(el.textContent).not.toContain("session (5h)");
+  });
+
   it("surfaces worst per-model windows as chips when no rolling windows exist (antigravity)", () => {
     const modelQuota = (used: number, remaining: number) => ({
       used,
@@ -229,6 +257,37 @@ describe("ConnectionQuotaPanel", () => {
       />
     );
     expect(el.textContent).toContain("usage endpoint rate limited");
+  });
+
+  it("surfaces a top-level message alongside parsed quota rows (xiaomi-mimo fallback)", () => {
+    const el = mount(
+      <ConnectionQuotaPanel
+        {...panelProps({
+          providerId: "xiaomi-mimo",
+          connection: {
+            id: "c5",
+            provider: "xiaomi-mimo",
+            name: "MiMo account",
+          } as ConnectionRowConnection,
+          cache: {
+            quotas: {
+              monthly: {
+                used: 14_954_038_035,
+                total: 38_000_000_000,
+                remainingPercentage: 60.6,
+                resetAt: futureReset(72),
+              },
+            },
+            plan: "Xiaomi MiMo Token Plan (OmniRoute-tracked)",
+            message: "MiMo console cookie missing or expired — set the cookie to read live quota.",
+            fetchedAt: new Date().toISOString(),
+          },
+        })}
+      />
+    );
+    // the row count must not gate the hint: without this the fallback counters
+    // render as if they were live console numbers.
+    expect(el.textContent).toContain("MiMo console cookie missing or expired");
   });
 
   it("offers a first fetch when no cache exists yet and fires onRefresh", () => {

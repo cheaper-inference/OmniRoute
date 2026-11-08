@@ -1,5 +1,6 @@
 import dns from "node:dns";
 import { Agent, type Dispatcher } from "undici";
+import * as undici from "undici";
 import {
   isCloudMetadataHost,
   isPrivateHost,
@@ -19,6 +20,15 @@ import { getDispatcherOptions } from "./proxyDispatcher.ts";
 export type ConnectGuardMode = Exclude<OutboundUrlGuardMode, "none">;
 
 export const CONNECT_GUARD_BLOCKED_CODE = "ERR_OUTBOUND_HOST_BLOCKED";
+
+/** True when a failed fetch was refused by the guarded lookup, not by the network. */
+export function isConnectGuardRefusal(error: unknown): boolean {
+  const failure = error as { code?: unknown; cause?: { code?: unknown } } | null;
+  return (
+    failure?.code === CONNECT_GUARD_BLOCKED_CODE ||
+    failure?.cause?.code === CONNECT_GUARD_BLOCKED_CODE
+  );
+}
 
 type LookupAddress = { address: string; family: number };
 type LookupCallback = (
@@ -66,6 +76,21 @@ export function createGuardedLookup(
   };
 }
 
+function compatibleGuardedDispatcher(agent: Dispatcher): Dispatcher {
+  if (typeof agent.dispatch !== "function") {
+    throw new Error("This runtime does not support guarded outbound dispatchers");
+  }
+  const Bridge = undici.Dispatcher1Wrapper;
+  if (typeof Bridge !== "function") return agent;
+  return new (class extends Bridge {
+    dispatch(options: Dispatcher.DispatchOptions, handler: Dispatcher.DispatchHandler): boolean {
+      return typeof handler?.onRequestStart === "function"
+        ? agent.dispatch(options, handler)
+        : super.dispatch(options, handler);
+    }
+  })(agent);
+}
+
 const guardedDispatchers = new Map<ConnectGuardMode, Dispatcher>();
 
 /**
@@ -88,6 +113,7 @@ export function getGuardedDispatcher(guard: ConnectGuardMode): Dispatcher {
         lookup: createGuardedLookup(guard),
       } as never,
     });
+    dispatcher = compatibleGuardedDispatcher(dispatcher);
     guardedDispatchers.set(guard, dispatcher);
   }
   return dispatcher;

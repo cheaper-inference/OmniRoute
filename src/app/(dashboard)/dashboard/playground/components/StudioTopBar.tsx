@@ -1,5 +1,9 @@
 "use client";
 
+import Button from "@/shared/components/Button";
+import Modal from "@/shared/components/Modal";
+import SegmentedControl from "@/shared/components/SegmentedControl";
+
 // src/app/(dashboard)/dashboard/playground/components/StudioTopBar.tsx
 
 import { useState } from "react";
@@ -36,32 +40,26 @@ const TABS: TabConfig[] = [
  * Top bar with tab switcher, token/cost counter, and export code button.
  * Export code modal uses ExportCodeModal (F7) when exportState is provided.
  */
-export default function StudioTopBar({ activeTab, onTabChange, metrics, exportState }: StudioTopBarProps) {
+export default function StudioTopBar({
+  activeTab,
+  onTabChange,
+  metrics,
+  exportState,
+}: StudioTopBarProps) {
   const t = useTranslations("playground");
   const [exportOpen, setExportOpen] = useState(false);
 
   return (
     <>
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-bg-alt shrink-0">
-        {/* Tabs */}
-        <div className="flex items-center gap-1" role="tablist">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                activeTab === tab.id
-                  ? "bg-primary/10 text-primary"
-                  : "text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
-              <span>{t(tab.labelKey)}</span>
-            </button>
-          ))}
-        </div>
+      <div className="flex items-center justify-between gap-3 px-4 py-2 border-b border-border bg-bg-alt shrink-0">
+        {/* Tabs (kit capsule tabs via the SegmentedControl adapter) */}
+        <SegmentedControl
+          options={TABS.map((tab) => ({ value: tab.id, label: t(tab.labelKey), icon: tab.icon }))}
+          value={activeTab}
+          onChange={(value) => onTabChange(value as StudioTab)}
+          aria-label={t("playgroundTabs")}
+          size="sm"
+        />
 
         {/* Right side: token counter + export button */}
         <div className="flex items-center gap-3">
@@ -71,15 +69,19 @@ export default function StudioTopBar({ activeTab, onTabChange, metrics, exportSt
             costUsd={metrics.costUsd}
           />
 
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setExportOpen(true)}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded border border-border hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-text-main transition-colors"
+            className="gap-1 text-xs text-text-muted"
             title={t("exportCode")}
             aria-label={t("exportCode")}
           >
-            <span className="font-mono text-[11px]">&lt;/&gt;</span>
+            <span className="font-mono text-[11px]" aria-hidden="true">
+              &lt;/&gt;
+            </span>
             <span>{t("exportShort")}</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -87,31 +89,13 @@ export default function StudioTopBar({ activeTab, onTabChange, metrics, exportSt
       {exportOpen && exportState != null && (
         <ExportCodeModal state={exportState} onClose={() => setExportOpen(false)} />
       )}
-      {exportOpen && exportState == null && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          onClick={() => setExportOpen(false)}
-        >
-          <div
-            className="bg-surface border border-border rounded-xl p-6 w-[480px] max-w-full shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-text-main">{t("exportCodeTitle")}</h2>
-              <button
-                onClick={() => setExportOpen(false)}
-                className="text-text-muted hover:text-text-main"
-                aria-label={t("closeExportModal")}
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
-            </div>
-            <p className="text-sm text-text-muted">
-              {t("noStateToExport")}
-            </p>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={exportOpen && exportState == null}
+        onClose={() => setExportOpen(false)}
+        title={t("exportCodeTitle")}
+      >
+        <p className="text-sm text-text-muted">{t("noStateToExport")}</p>
+      </Modal>
     </>
   );
 }

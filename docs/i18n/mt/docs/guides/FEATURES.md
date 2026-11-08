@@ -282,15 +282,15 @@ Imġiba ewlenija:
 
 ---
 
-## 🔑 Sincronizzazzjoni Tokken u Pakkett tal-Konfigurazzjoni _(v3.6.6+)_
+## 🔑 Tokens tas-Sinkronizzazzjoni u Pakkett tal-Konfigurazzjoni _(v3.6.6+)_
 
-L-aċċess għal diversi tagħmir u operaturi estern huwa issa possibbli permezz ta' **tokken ta' sincronizzazzjoni skopjati**:
+L-aċċess minn diversi apparati u minn operaturi esterni issa huwa possibbli permezz ta’ **tokens tas-sinkronizzazzjoni b’ambitu definit**:
 
-- **`POST /api/sync/tokens`** — Ħarreġ tokken ta' sincronizzazzjoni ġdid (skopjat, b'iskadenza fakultattiva)
-- **`DELETE /api/sync/tokens/:id`** — Revoka tokken
-- **`GET /api/sync/bundle``** — niżżel snapshot JSON b'verżjoni, iċċavjat b'ETag, tal-konfigurazzjoni kollha mhux sensittiva (kliem infurżati msir redacted)
+- **`POST /api/sync/tokens`** — Oħroġ token tas-sinkronizzazzjoni ġdid (b’ambitu definit u bi skadenza fakultattiva)
+- **`DELETE /api/sync/tokens/:id`** — Irrevoka token
+- **`GET /api/sync/bundle`** — Niżżel snapshot JSON tal-konfigurazzjoni b’verżjoni u b’ċavetta `ETag` (awtentikat biss permezz ta’ token tas-sinkronizzazzjoni). Is-settings tal-awtentikazzjoni, bħall-password tad-dashboard, jitneħħew, iżda l-kredenzjali tal-fornituri u ċ-ċwievet tal-API jiġu inklużi, għalhekk ittratta l-fajl bħala sigriet
 
-Il-pakkett tal-konfigurazzjoni huwa mibni minn `src/lib/sync/bundle.ts`. Il-konsumaturi jikkomparaw l-intestatura ta' rispons `ETag` biex jiskopru t-tibdil mingħajr ma jniżżlu mill-ġdid il-pakkett kollu.
+Il-pakkett tal-konfigurazzjoni jinbena minn `src/lib/sync/bundle.ts`. Il-konsumaturi jqabblu l-header tar-rispons `ETag` biex jidentifikaw bidliet mingħajr ma jerġgħu jniżżlu l-payload kollu. Mill-CLI, `omniroute sync bundle <outPath> --token <syncToken>` (jew `OMNIROUTE_SYNC_TOKEN`) jissejvjah f’fajl aċċessibbli mis-sid biss.
 
 ---
 

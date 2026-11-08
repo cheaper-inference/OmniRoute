@@ -513,7 +513,7 @@ Tí ó bá dá ohunkóhun mìíràn padà yàtọ̀ sí `ok`, **dá lílo databa
 
 ### Ìṣẹ̀lẹ̀ 1: Fáìlì WAL Sọnù
 
-Fáìlì `-wal` kò sí, ṣùgbọ́n `-shm` àti DB àkọ́kọ́ ṣì wà ní pípé:
+Fáìlì `-wal` kò sí, ṣùgbọ́n `-shm` àti DB àkọ́kọ́ ṣì pé:
 
 ```bash
 # Yóò mú ara rẹ̀ padà bọ̀ sípò nígbà tí a bá tún ṣí i
@@ -530,24 +530,27 @@ mv recovered.db ~/.omniroute/storage.sqlite
 
 ### Ìṣẹ̀lẹ̀ 2: Fáìlì DB Àkọ́kọ́ Bàjẹ́
 
-Mú un padà láti inú àfẹ́yìntì:
+Mú un padà láti inú afẹ́yìntì:
 
 ```bash
-omniroute sync pull --merge   # tàbí: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Ìṣẹ̀lẹ̀ 3: Kọ́kọ́rọ́ Ìfipamọ́ Sọnù
+`omniroute sync pull [outPath]` ń ṣe ìgbàsílẹ̀ péré fún àkójọpọ̀ `.tar.gz` kíkún láti inú olupin tí ń ṣiṣẹ́
+(`GET /api/db-backups/exportAll`, a nílò ẹ̀rí ìdánimọ̀ olùdarí); kò mú ohunkóhun padà bọ̀ sípò.
 
-**Kò sí ọ̀nà láti mú un padà bọ̀ sípò** láìsí kọ́kọ́rọ́ náà. A kò lè ka àwọn ààyè tí a ti fi ìfipamọ́ bo. Fi gbogbo àwọn olùpèsè kún un pẹ̀lú ọwọ́ nípa lílo àwọn ẹ̀rí ìwọlé tuntun.
+### Ìṣẹ̀lẹ̀ 3: Kọ́kọ́rọ́ Ìfipamọ́ Aṣírí Sọnù
 
-> **Ìdínkù Ewu**: Máa ṣe àfẹ́yìntì kọ́kọ́rọ́ ìfipamọ́ lọ́tọ̀ ní gbogbo ìgbà, ó dára jù lọ láti fi pamọ́ sínú olùṣàkóso ọ̀rọ̀ aṣínà tàbí KMS.
+**Kò sí ọ̀nà láti mú un padà bọ̀ sípò** láìsí kọ́kọ́rọ́ náà. A kò lè ka àwọn ààyè tí a fi pamọ́ ní aṣírí. Fi gbogbo àwọn olùpèsè kún un lẹ́ẹ̀kan sí i pẹ̀lú ẹ̀rí ìdánimọ̀ tuntun.
+
+> **Ìdínkù ewu**: Máa ṣe afẹ́yìntì kọ́kọ́rọ́ ìfipamọ́ aṣírí lọ́tọ̀ nígbà gbogbo, ó dára jù lọ nínú olùṣàkóso ọ̀rọ̀ aṣínà tàbí KMS.
 
 ### Ìṣẹ̀lẹ̀ 4: Dísíkì Kún
 
-SQLite yóò dá àwọn àṣìṣe `SQLITE_FULL` padà. Tú ààyè sílẹ̀ lórí dísíkì, lẹ́yìn náà:
+SQLite yóò dá àwọn àṣìṣe `SQLITE_FULL` padà. Ṣe ààyè sílẹ̀ lórí dísíkì, lẹ́yìn náà:
 
 ```bash
-# Ṣe àyè ìdádúró WAL láti tú ààyè sílẹ̀
+# Ṣe checkpoint WAL láti dá ààyè sílẹ̀
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

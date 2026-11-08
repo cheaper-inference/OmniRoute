@@ -1,10 +1,12 @@
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import { getCodexClientSessionId } from "../../config/codexIdentity.ts";
+import { modelAfterFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
 import {
   noteCodexTurnStateProvenance,
   readCodexTurnStateHeader,
 } from "../../config/codexTurnState.ts";
 import {
+  STREAM_ACTIVE_TIMEOUT_OVERRIDE_MS,
   STREAM_DISCONNECT_GRACE_PERIOD_MS,
   STREAM_READINESS_MAX_TIMEOUT_MS,
   STREAM_READINESS_TIMEOUT_MS,
@@ -13,12 +15,8 @@ import {
 import { incrementTokenUsage } from "../../services/geminiRateLimitTracker.ts";
 import { forgetClaudeThinkingForClientResponse } from "../../services/claudeThinkingStore.ts";
 import { requestTtftMs, streamEmittedOutput } from "../../utils/streamTiming.ts";
+import { readStreamPartialUsage } from "../../utils/streamPartialUsage.ts";
 import { clearPostOutputFailureStreak } from "../../services/accountFallback/postOutputFailureStreak.ts";
-import {
-  createRoutingEvent,
-  emitRoutingEvent,
-  outcomeFromStatus,
-} from "../../services/routing/index.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { needsTranslation } from "../../translator/index.ts";
 import { runEmptyTurnRetryLoop } from "./emptyTurnRetryLoop.ts";
@@ -32,39 +30,59 @@ import { ensureStreamReadiness } from "../../utils/streamReadiness.ts";
 import { resolveStreamReadinessTimeout } from "../../utils/streamReadinessPolicy.ts";
 import { maybeFallbackAfterReadiness } from "./streamReadinessFallback.ts";
 import { captureStreamReasoningForReplay } from "./streamReasoningCapture.ts";
-import { meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
+import { resolveStreamStateBody } from "./streamStateBody.ts";
+import { isUnpricedMeteredCost, meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
 import { resolveSuppressThinkClose } from "../../utils/thinkCloseMarker.ts";
 import { hasActiveClaudeThinking } from "../../utils/thinkingBudget.ts";
 import { buildCacheUsageLogMeta } from "./cacheUsageMeta.ts";
 import { recordContextEditingTelemetryHook } from "./contextEditingTelemetry.ts";
 import { readCpaAuthIndex } from "./failureUsage.ts";
 import { emitRequestGamificationEvent } from "./gamificationEvent.ts";
-import { maybeConvertJsonBodyToSse } from "./jsonBodyToSse.ts";
+import { convertJsonBodyWithinCap } from "./jsonBodyToSse.ts";
 import { runMemoryExtractionGate } from "./memoryExtraction.ts";
 import { mergeResponseToolNameMap } from "./passthroughToolNames.ts";
 import { runPluginOnResponseHook, runPluginOnStreamCompleteHook } from "./pluginOnResponse.ts";
-import { routingFinishReason } from "./routingFinishReason.ts";
 import { wrapReadableStreamWithFinalize } from "./streamFinalize.ts";
 import { buildStreamLedgerDetails, recordStreamingCost } from "./streamingCost.ts";
-import { assembleStreamingPipeline } from "./streamingPipeline.ts";
+import { assembleStreamingPipeline, resolvePiiGate } from "./streamingPipeline.ts";
 import { scheduleStreamingQuotaShareConsumption } from "./streamingQuotaShare.ts";
 import { assembleStreamingResponseHeaders } from "./streamingResponseHeaders.ts";
 import { storeStreamingSemanticCacheResponse } from "./streamingSemanticCacheStore.ts";
 import { recordFinalInputCalibration } from "./contextEstimation.ts";
+import { emitStreamingRoutingEvent } from "./streamingRoutingEvent.ts";
 import { recordStreamingUsageStats } from "./streamingUsageStats.ts";
 import { maybeSyncClaudeExtraUsageState } from "./telemetryHelpers.ts";
-import { getExecutorTimeoutMs, resolveConnectionTimeoutMs } from "./upstreamTimeouts.ts";
-import { recordCost } from "@/domain/costRules";
+import {
+  getExecutorTimeoutMs,
+  resolveConnectionTimeoutMs,
+  resolveTargetStreamActiveTimeoutMs,
+} from "./upstreamTimeouts.ts";
+import { recordCost, recordUnpricedBudgetUsage } from "@/domain/costRules";
 import { extractFacts } from "@/lib/memory/extraction";
-import { calculateCost } from "@/lib/usage/costCalculator";
+import { calculateCost, calculateCostDetailed } from "@/lib/usage/costCalculator";
 import { appendRequestLog, trackPendingRequest } from "@/lib/usageDb";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags.ts";
+import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
+import { isEmptyStreamSiblingRecoveryEnabled } from "../../services/streamRecovery.ts";
 import { getProviderCredentials } from "@/sse/services/auth";
+import { resolveCredentialGate } from "@/lib/streamingCredentialTransform";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- deps bag mirrors the barrel closure
 type Loose = any;
 
 export type StreamingTailDeps = Record<string, Loose>;
+
+/**
+ * The request logger syncs captured stream chunks onto the pending entry only past a
+ * byte threshold or on flush (#17282). Flush before the entry moves to completed
+ * details, otherwise a short stream's capture never reaches them.
+ */
+function flushPendingStreamCapture(reqLogger: unknown): void {
+  try {
+    (reqLogger as { getPipelinePayloads?: () => unknown } | null)?.getPipelinePayloads?.();
+  } catch {
+    // Capture is best-effort; finalization must still release the pending attempt.
+  }
+}
 
 export async function runStreamingTail(deps: StreamingTailDeps) {
   const {
@@ -93,10 +111,12 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     executeProviderRequest,
     executor,
     fallbackAttempts,
+    geminiPromptCacheMode,
     getCurrentConnectionId,
     forcedConnectionId,
     isCombo,
     isDroidCLI,
+    isScopedGeminiCacheTarget,
     isResponsesEndpoint,
     log,
     managedLease,
@@ -108,6 +128,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     onStreamFailure,
     pendingConnId,
     pendingRequestId,
+    pendingRequestOwner,
     persistAttemptLogs,
     persistFailureUsage,
     pipelineSessionId,
@@ -129,6 +150,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     streamUserAgent,
     targetFormat,
     thinkingMarkerHeader,
+    tokensCompressed,
     toolNameMap,
     traceId,
     translatedBody,
@@ -150,7 +172,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // though it carried valid content/reasoning_content. Detect a JSON (non-SSE)
   // upstream body and synthesize an equivalent OpenAI SSE stream so the
   // streaming pipeline (and the client) get a valid stream.
-  providerResponse = await maybeConvertJsonBodyToSse(providerResponse, { log, provider, model });
+  const jsonConversion = await convertJsonBodyWithinCap(providerResponse, { log, provider, model });
+  providerResponse = jsonConversion.response;
   const streamReadinessPolicy = resolveStreamReadinessTimeout({
     baseTimeoutMs: STREAM_READINESS_TIMEOUT_MS,
     provider,
@@ -174,16 +197,26 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     );
   }
 
-  let streamReadiness = await ensureStreamReadiness(providerResponse, {
-    timeoutMs: streamReadinessPolicy.timeoutMs,
-    maxTimeoutMs: streamReadinessPolicy.maxTimeoutMs,
-    provider,
-    model,
-    log,
-  });
+  let upstreamHttpSelection = deps.upstreamHttpSelection ?? null;
+  let streamReadiness =
+    jsonConversion.overCap ??
+    (await ensureStreamReadiness(providerResponse, {
+      timeoutMs: streamReadinessPolicy.timeoutMs,
+      maxTimeoutMs: streamReadinessPolicy.maxTimeoutMs,
+      provider,
+      model,
+      log,
+      // #16438 opt-in: briefly probe Claude/Codex streams for usable output after the first
+      // lifecycle event so an empty turn can be retried on a sibling connection.
+      contentProbeMs:
+        (provider === "claude" || provider === "codex") && isEmptyStreamSiblingRecoveryEnabled()
+          ? 1000
+          : undefined,
+    }));
   // A stall is an upstream issue, not an account fault — the executor loop
   // already ended at headers, so this bounded retry is the only recovery left.
   const fallback = await maybeFallbackAfterReadiness({
+    upstreamHttpSelection,
     streamReadiness,
     clientAborted: streamController.signal.aborted,
     failedConnectionId: getCurrentConnectionId(),
@@ -204,10 +237,22 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   streamReadiness = fallback.readiness;
   providerResponse = fallback.providerResponse;
   finalBody = fallback.finalBody;
+  upstreamHttpSelection = fallback.upstreamHttpSelection ?? null;
   if (streamReadiness.ok === false) {
     const { response: failureResponse, reason } = streamReadiness;
     const { classificationReason, upstreamDiagnostic } = streamReadiness;
-    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    if (pendingConnId) {
+      trackPendingRequest(
+        model,
+        provider,
+        pendingConnId,
+        false,
+        undefined,
+        pendingRequestOwner ?? pendingRequestId
+      );
+    } else {
+      streamController.clearPendingRequest();
+    }
     appendRequestLog({
       model,
       provider,
@@ -215,6 +260,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       status: `FAILED ${failureResponse.status}`,
     }).catch(() => {});
     persistAttemptLogs({
+      upstreamHttpSelection,
       status: failureResponse.status,
       error: reason,
       providerRequest: finalBody || translatedBody,
@@ -254,25 +300,28 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // cooldown and no forced exclusion: the round-robin picker may rotate
   // fingerprint slots opportunistically, a single slot simply replays the same
   // account. Budget: `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` retries, then fall
-  // back to the current behavior. Translate-path streams only (mirror of the
-  // empty-stream guard); flag off = byte-for-byte unchanged. Bounded reader
-  // (abandon past the cap, never a full `text()` read); the original
+  // back to the current behavior. Flag off = byte-for-byte unchanged. Bounded
+  // reader (abandon past the cap, never a full `text()` read); the original
   // reconstructed response is piped, only the bounded copy is classified.
+  // #17461: armed for EVERY path, not only translated ones. The condition this
+  // loop recovers from is detected by the empty-stream guard on every path
+  // (`rejectEmptyChoicesStream` lives in the shared SSE transform), so a direct
+  // openai→openai turn — the shape most degenerate turns arrive in — was
+  // exactly the case the loop never saw. The judge stays conservative: a turn
+  // it cannot summarize passes through unchanged.
   // Known TTFT cost when armed: a small valid turn under the cap is fully
   // buffered before the first client byte (flag off by default, so the
   // streaming path is untouched unless opted in).
   if (stream && providerResponse.ok && providerResponse.body) {
     let flushEmptyRetryArmed = false;
     try {
-      flushEmptyRetryArmed = isFeatureFlagEnabled("FLUSH_EMPTY_RETRY_ENABLED");
+      flushEmptyRetryArmed = isRegisteredFeatureFlagEnabled("FLUSH_EMPTY_RETRY_ENABLED");
     } catch {
       flushEmptyRetryArmed = false;
     }
-    const isTranslatePath =
-      targetFormat === FORMATS.OPENAI_RESPONSES ||
-      needsTranslation(targetFormat, clientResponseFormat);
-    if (flushEmptyRetryArmed && isTranslatePath) {
+    if (flushEmptyRetryArmed) {
       const retried = await runEmptyTurnRetryLoop({
+        upstreamHttpSelection,
         providerResponse,
         credentials,
         provider,
@@ -298,7 +347,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
         captureBody: (body) => providerRequestCapture.body(body),
       });
       providerResponse = retried.providerResponse;
-      if (retried.adopted) finalBody = retried.finalBody;
+      if (retried.adopted) {
+        finalBody = retried.finalBody;
+        upstreamHttpSelection = retried.upstreamHttpSelection ?? null;
+      }
     }
   }
 
@@ -307,10 +359,11 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     await onRequestSuccess();
   }
 
+  const responseModel = modelAfterFamilyFallback(model, currentModel, effectiveModel, finalBody);
   const responseHeaders = assembleStreamingResponseHeaders({
     providerHeaders: providerResponse.headers,
     provider,
-    model,
+    model: responseModel,
     pendingRequestId,
     compressionResponseMeta,
     comboStrategy,
@@ -355,6 +408,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     firstOutputMs,
     itlMs: streamItlMs,
     interrupted: _streamInterrupted,
+    cacheEvidence: streamCacheEvidence,
+    partialUsage: streamPartialUsage,
   }) => {
     const ttft = requestTtftMs(streamTimingOriginOffsetMs, firstOutputMs);
     const normalizedStreamStatus = streamStatus || 200;
@@ -364,66 +419,85 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       if (streamFailureCompletionRecorded) return;
       streamFailureCompletionRecorded = true;
     }
-    const cacheUsageLogMeta = buildCacheUsageLogMeta(streamUsage);
-    const streamConnectionId = getCurrentConnectionId();
+    let cacheUsageLogMeta: ReturnType<typeof buildCacheUsageLogMeta>;
+    let streamConnectionId = pendingConnId ?? connectionId;
+    try {
+      cacheUsageLogMeta = buildCacheUsageLogMeta(
+        streamUsage,
+        isScopedGeminiCacheTarget
+          ? {
+              mode: geminiPromptCacheMode,
+              evidence: streamCacheEvidence,
+              compressionTokens: tokensCompressed || undefined,
+              timing: { ttftMs: ttft, itlMs: streamItlMs },
+            }
+          : undefined
+      );
+      streamConnectionId = getCurrentConnectionId();
 
-    if (normalizedStreamStatus === 200) {
-      clearPostOutputFailureStreak(provider, streamConnectionId, modelInfo.model);
-      void maybeSyncClaudeExtraUsageState({
+      if (normalizedStreamStatus === 200) {
+        clearPostOutputFailureStreak(provider, streamConnectionId, modelInfo.model);
+        void maybeSyncClaudeExtraUsageState({
+          provider,
+          connectionId: streamConnectionId,
+          providerSpecificData: credentials?.providerSpecificData,
+          log,
+        });
+      }
+
+      // The stream translator stores Claude signed thinking per tool call as it goes;
+      // a turn that may echo video transcript cues must not be retained at all.
+      if (videoBridgeObserved && streamResponseBody) {
+        forgetClaudeThinkingForClientResponse(streamResponseBody);
+      }
+
+      if (normalizedStreamStatus === 200 && streamResponseBody) {
+        captureStreamReasoningForReplay({
+          streamResponseBody,
+          clientResponseFormat,
+          responseToolNameMap,
+          providerRequestBody: finalBody || translatedBody || body,
+          translatedBody,
+          reasoningReplayHistory,
+          provider,
+          model,
+          reasoningCacheScope,
+          videoTranscriptSensitive: videoBridgeObserved,
+        });
+      }
+      effectiveServiceTier = resolveReportedServiceTier(streamResponseBody) ?? effectiveServiceTier;
+
+      // Context Editing telemetry (streaming): the reconstructed stream body now carries
+      // context_management.applied_edits from the final message_delta snapshot. Mirror the
+      // non-streaming hook so streaming context-clear savings also surface under engine
+      // "context-editing" in compression analytics. Best-effort, Claude-only.
+      if (normalizedStreamStatus === 200) {
+        recordContextEditingTelemetryHook({
+          contextEditingEnabled,
+          provider,
+          responseBody: streamResponseBody,
+          skillRequestId,
+          log,
+        });
+      }
+    } finally {
+      // Keep the completion guard when bookkeeping fails, but release this exact
+      // pending attempt before the stream's callback boundary catches the error.
+      // Model-only admissions share the controller's disconnect/error cleanup guard.
+      if (!pendingConnId) streamController.clearPendingRequest();
+      flushPendingStreamCapture(reqLogger);
+      streamFailure.finalizeStreamRequestLog({
+        pendingRequestId: pendingRequestOwner ?? pendingRequestId,
+        model,
         provider,
         connectionId: streamConnectionId,
-        providerSpecificData: credentials?.providerSpecificData,
-        log,
+        providerResponse: providerPayload ?? streamResponseBody ?? undefined,
+        clientResponse: clientPayload ?? streamResponseBody ?? undefined,
+        status: normalizedStreamStatus,
+        error: streamError,
+        errorCode: streamErrorCode,
       });
     }
-
-    // The stream translator stores Claude signed thinking per tool call as it goes;
-    // a turn that may echo video transcript cues must not be retained at all.
-    if (videoBridgeObserved && streamResponseBody) {
-      forgetClaudeThinkingForClientResponse(streamResponseBody);
-    }
-
-    if (normalizedStreamStatus === 200 && streamResponseBody) {
-      captureStreamReasoningForReplay({
-        streamResponseBody,
-        clientResponseFormat,
-        responseToolNameMap,
-        providerRequestBody: finalBody || translatedBody || body,
-        translatedBody,
-        reasoningReplayHistory,
-        provider,
-        model,
-        reasoningCacheScope,
-        videoTranscriptSensitive: videoBridgeObserved,
-      });
-    }
-    effectiveServiceTier = resolveReportedServiceTier(streamResponseBody) ?? effectiveServiceTier;
-
-    // Context Editing telemetry (streaming): the reconstructed stream body now carries
-    // context_management.applied_edits from the final message_delta snapshot. Mirror the
-    // non-streaming hook so streaming context-clear savings also surface under engine
-    // "context-editing" in compression analytics. Best-effort, Claude-only.
-    if (normalizedStreamStatus === 200) {
-      recordContextEditingTelemetryHook({
-        contextEditingEnabled,
-        provider,
-        responseBody: streamResponseBody,
-        skillRequestId,
-        log,
-      });
-    }
-
-    streamFailure.finalizeStreamRequestLog({
-      pendingRequestId,
-      model,
-      provider,
-      connectionId: streamConnectionId,
-      providerResponse: providerPayload ?? streamResponseBody ?? undefined,
-      clientResponse: clientPayload ?? streamResponseBody ?? undefined,
-      status: normalizedStreamStatus,
-      error: streamError,
-      errorCode: streamErrorCode,
-    });
 
     // Track cache token metrics for streaming responses
     if (streamUsage && typeof streamUsage === "object") {
@@ -458,65 +532,47 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       comboStrategy,
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
+      partialUsage: streamPartialUsage,
+      emittedOutput: streamEmittedOutput(transformStream),
     });
 
     // Routing event (feedback foundation) — fire-and-forget, cheap, never blocks
     // the stream. Feeds the quality tracker + optional OTel exporter.
-    void emitRoutingEvent(
-      createRoutingEvent({
-        requestId: traceId || pendingRequestId || "unknown",
-        provider: provider || "unknown",
-        model: model || "unknown",
-        strategy: isCombo ? (comboStrategy ?? "combo") : "direct",
-        latencyMs: Date.now() - startTime,
-        ttftMs: typeof ttft === "number" && Number.isFinite(ttft) && ttft >= 0 ? ttft : null,
-        itlMs:
-          typeof streamItlMs === "number" && Number.isFinite(streamItlMs) && streamItlMs >= 0
-            ? streamItlMs
-            : null,
-        inputTokens:
-          streamUsage && typeof streamUsage === "object"
-            ? (() => {
-                const promptTokens = (streamUsage as Record<string, unknown>).prompt_tokens;
-                return typeof promptTokens === "number" && Number.isFinite(promptTokens)
-                  ? promptTokens
-                  : null;
-              })()
-            : null,
-        outputTokens:
-          streamUsage && typeof streamUsage === "object"
-            ? (() => {
-                const completionTokens = (streamUsage as Record<string, unknown>).completion_tokens;
-                return typeof completionTokens === "number" && Number.isFinite(completionTokens)
-                  ? completionTokens
-                  : null;
-              })()
-            : null,
-        cost: null,
-        retries: 0,
-        fallbackUsed: false, // combo-level fallback tracked by decisionTrace
-        outcome:
-          normalizedStreamStatus === 200
-            ? "success"
-            : streamErrorCode === "stream_interrupted" || streamErrorCode === "aborted"
-              ? "stream_interrupted"
-              : outcomeFromStatus(normalizedStreamStatus),
-        status: normalizedStreamStatus,
-        finishReason: routingFinishReason(streamResponseBody),
-        connectionId: streamConnectionId ?? credentials?.connectionId ?? null,
-      })
-    );
+    // Cost is resolved asynchronously (pricing DB lookup) and the event is emitted only
+    // after it lands, so OTel spans carry gen_ai.usage.cost.
+    emitStreamingRoutingEvent({
+      requestId: traceId || pendingRequestId || "unknown",
+      provider,
+      model,
+      isCombo,
+      comboStrategy,
+      startTime,
+      ttft,
+      streamItlMs,
+      streamUsage,
+      normalizedStreamStatus,
+      streamErrorCode,
+      streamResponseBody,
+      connectionId: streamConnectionId ?? credentials?.connectionId ?? null,
+      apiKeyId: apiKeyInfo?.id ?? null,
+      serviceTier: effectiveServiceTier,
+      calculateCost,
+    });
 
     persistAttemptLogs({
+      upstreamHttpSelection,
       status: normalizedStreamStatus,
       error: streamError || undefined,
-      tokens: streamUsage || {},
+      // A stream that ended early (499 / mid-stream failure) has no `usage`, but its call log
+      // still shows the tokens already generated (estimates are flagged via `estimated`).
+      tokens: streamUsage || streamPartialUsage || {},
       responseBody: streamResponseBody ?? undefined,
       providerRequest: finalBody || translatedBody,
       providerResponse: providerPayload,
       clientResponse: clientPayload ?? streamResponseBody ?? undefined,
       claudeCacheMeta: claudePromptCacheLogMeta,
       claudeCacheUsageMeta: cacheUsageLogMeta,
+      geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
       cacheSource: "upstream",
       // #13130: persist TTFT so call_logs.ttft_ms lets the dashboard compute
       // generation-time TPS instead of wall-clock TPS.
@@ -530,11 +586,17 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       model,
       streamUsage,
       serviceTier: effectiveServiceTier,
-      calculateCost,
+      calculateCost: calculateCostDetailed,
       // Only the budget-consumable share may draw down the allowance.
       recordCost: (apiKeyId, cost, details) => {
         const budgetCost = meteredBudgetCost(provider, cost);
         if (budgetCost > 0) recordCost(apiKeyId, budgetCost, details);
+      },
+      // A metered model with no price must not pass the dollar budget as $0.
+      recordUnpricedCost: (apiKeyId, cost) => {
+        if (isUnpricedMeteredCost(provider, cost)) {
+          recordUnpricedBudgetUsage(apiKeyId, { provider, model });
+        }
       },
       ledger: buildStreamLedgerDetails(effectiveServiceTier, normalizedStreamStatus < 400, traceId),
     });
@@ -609,6 +671,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     persistFailureUsage,
     onStreamFailure,
     hasEmittedOutput: () => streamEmittedOutput(transformStream),
+    readPartialUsage: () => readStreamPartialUsage(transformStream),
   });
   const handleStreamFailure = streamFailureFinalizers.handleStreamFailure;
   onPipelineStreamError = streamFailureFinalizers.onPipelineStreamError;
@@ -627,6 +690,9 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       }),
   });
 
+  // The pipeline can fail before the awaited response hooks return to chatCore.
+  deps.registerStreamFinalizers?.(onPipelineStreamError, onClientDisconnectFinalize);
+
   // For providers using Responses API format, translate stream back to openai (Chat Completions) format
   // UNLESS client is Droid CLI which expects openai-responses format back
   const needsResponsesTranslation =
@@ -634,7 +700,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     clientResponseFormat === FORMATS.OPENAI &&
     !isResponsesEndpoint &&
     !isDroidCLI;
-  const streamStateBody = finalBody || body;
+  // Response arguments belong to the client's schema, before provider cloaking.
+  const streamStateBody = resolveStreamStateBody(clientResponseFormat, body, finalBody);
 
   // Client's explicit thinking intent (Anthropic Messages shape). Claude Code
   // sends `{type:"enabled"}` or `{type:"adaptive"}` to opt into relaying
@@ -672,7 +739,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       // openai-responses → openai translation still wants the namespace identity
       // map for #7936-style round-trip closure when the client also speaks
       // Responses (Codex CLI).
-      requestToolIdentityMap
+      requestToolIdentityMap,
+      null,
+      undefined,
+      pendingRequestOwner ?? pendingRequestId
     );
   } else if (needsTranslation(targetFormat, clientResponseFormat)) {
     // Standard translation for other providers
@@ -703,7 +773,12 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       }),
       requestedThinking,
       customToolNames,
-      requestToolIdentityMap
+      requestToolIdentityMap,
+      // The CLIENT's declared tools[]: an Anthropic-format client gets its own
+      // tool-name casing back from any provider (OpenCode `read`, Claude Code `Read`).
+      (body as Record<string, unknown> | null | undefined)?.tools ?? null,
+      undefined,
+      pendingRequestOwner ?? pendingRequestId
     );
   } else {
     log?.debug?.("STREAM", `Standard passthrough mode`);
@@ -718,10 +793,32 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       apiKeyInfo,
       handleStreamFailure,
       clientResponseFormat,
-      requestToolIdentityMap
+      requestToolIdentityMap,
+      (body as Record<string, unknown> | null | undefined)?.tools ?? null,
+      pendingRequestOwner ?? pendingRequestId
     );
   }
 
+  // Per-request credential gate: same flag and opt-out name as the
+  // non-streaming post-call guardrail. Only data keys chatCore.ts already
+  // passes (apiKeyInfo, body, clientRawRequest) are read here; the readers
+  // default to the production modules inside resolveCredentialGate, and unit
+  // tests inject fakes by calling that helper directly.
+  const credentialGate = await resolveCredentialGate({
+    apiKeyInfo: deps.apiKeyInfo,
+    body: deps.body,
+    headers: deps.clientRawRequest?.headers,
+  });
+  // Per-request PII opt-out: same names as the non-streaming guardrail.
+  // Only data keys chatCore.ts already passes (apiKeyInfo, body,
+  // clientRawRequest) are read here; the reader defaults to the production
+  // module inside resolvePiiGate, and unit tests inject fakes by calling
+  // that helper directly.
+  const piiGate = await resolvePiiGate({
+    apiKeyInfo: deps.apiKeyInfo,
+    body: deps.body,
+    headers: deps.clientRawRequest?.headers,
+  });
   const finalStream = assembleStreamingPipeline({
     providerResponse,
     transformStream,
@@ -729,13 +826,25 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     createPiiTransform,
     clientRawRequestHeaders: clientRawRequest?.headers,
     clientResponseFormat,
-    echoModel,
+    echoModel: echoModel || (currentModel !== effectiveModel ? responseModel : null),
     responseHeaders,
+    credentialRedactionEnabled: credentialGate.credentialRedactionEnabled,
+    credentialDisabledGuardrails: credentialGate.credentialDisabledGuardrails,
+    piiDisabledGuardrails: piiGate.piiDisabledGuardrails,
     // Same adaptive budget the pre-handoff readiness gate above just used —
     // reasoning models that legitimately take a while to say anything keep
     // that same patience for their first REAL content, not just their first
     // lifecycle frame. See pipeWithDisconnect's own doc comment.
     contentStallTimeoutMs: streamReadinessPolicy.timeoutMs,
+    // The same target the readiness gate priced above. With STREAM_ACTIVE_TIMEOUT_MS
+    // unset, a budget it declared (connection, then model, then provider) can raise
+    // the default cap; an operator's positive value is a hard cap; 0 disables it.
+    activeTimeoutMs: resolveTargetStreamActiveTimeoutMs(
+      STREAM_ACTIVE_TIMEOUT_OVERRIDE_MS,
+      provider,
+      model,
+      credentials
+    ),
   });
   const clientFacingStream = wrapReadableStreamWithFinalize(finalStream, releaseTurnExecution);
 

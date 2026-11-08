@@ -3,7 +3,10 @@ import {
   getRegistryEntry,
 } from "@omniroute/open-sse/config/providerRegistry";
 import { getSearchProvider } from "@omniroute/open-sse/config/searchRegistry.ts";
-import { PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels.ts";
+import {
+  getProviderModels,
+  PROVIDER_ID_TO_ALIAS,
+} from "@omniroute/open-sse/config/providerModels.ts";
 import {
   ensureCursorAutoCatalogEntry,
   ensureCursorGrokEffortAliases,
@@ -160,8 +163,15 @@ async function unionCustomModels(
   models: SyncedAvailableModel[]
 ): Promise<SyncedAvailableModel[]> {
   let customRows: SyncedAvailableModel[] = [];
+  const endpointOnlyIds = new Set<string>();
   try {
-    customRows = normalizeSyncedAvailableModels(await getCustomModels(providerId), providerId);
+    const rawCustom = await getCustomModels(providerId);
+    for (const row of Array.isArray(rawCustom) ? rawCustom : []) {
+      if (row?.source === "endpoint-override" && typeof row.id === "string") {
+        endpointOnlyIds.add(row.id);
+      }
+    }
+    customRows = normalizeSyncedAvailableModels(rawCustom, providerId);
   } catch {
     // Fail open: a customModels read/parse miss must not empty the synced catalog.
     return models;
@@ -175,6 +185,18 @@ async function unionCustomModels(
   for (const model of customRows) {
     if (!model?.id) continue;
     const existing = merged.get(model.id);
+    if (endpointOnlyIds.has(model.id)) {
+      // A custom row created only to edit endpoint tags must never replace a
+      // discovered name, protocol or token limit with synthesized defaults.
+      if (existing && Array.isArray(model.supportedEndpoints)) {
+        merged.set(model.id, {
+          ...existing,
+          supportedEndpoints: model.supportedEndpoints,
+          endpointCapabilitySource: "operator",
+        });
+      }
+      continue;
+    }
     if (!existing) {
       merged.set(model.id, model);
       continue;
@@ -403,7 +425,18 @@ export async function getActiveSyncedCatalog(
  * Return non-empty synced catalogs grouped by provider, restricted to active
  * connections. This is the authoritative live source for /v1/models.
  */
-export async function getAllActiveSyncedModels(): Promise<Record<string, SyncedAvailableModel[]>> {
+export interface GetAllActiveSyncedModelsOptions {
+  /**
+   * `customModels` rows already read by the caller's request-level capability
+   * snapshot. When present the listing reuses them instead of reading the
+   * namespace a second time (#16929 operator endpoint overlay).
+   */
+  customModelsByProvider?: Readonly<Record<string, unknown>>;
+}
+
+export async function getAllActiveSyncedModels(
+  options: GetAllActiveSyncedModelsOptions = {}
+): Promise<Record<string, SyncedAvailableModel[]>> {
   try {
     const connections = await getRawProviderConnections({ isActive: true }, undefined, undefined, [
       "id",
@@ -430,6 +463,22 @@ export async function getAllActiveSyncedModels(): Promise<Record<string, SyncedA
 
     const result: Record<string, SyncedAvailableModel[]> = {};
 
+    // #16929: one customModels read for the whole listing (not one per provider),
+    // and none at all when the caller's capability snapshot already holds the rows.
+    let customModelsByProvider: Readonly<Record<string, unknown>> =
+      options.customModelsByProvider ?? {};
+    if (!options.customModelsByProvider) {
+      try {
+        const all = await getCustomModels();
+        if (all && typeof all === "object" && !Array.isArray(all)) {
+          customModelsByProvider = all as Record<string, unknown>;
+        }
+      } catch {
+        // An unavailable custom overlay must not empty the entire live model
+        // catalog: keep the raw synced entries just as dispatch does.
+      }
+    }
+
     await Promise.all(
       Array.from(connectionIdsByProvider.entries()).map(async ([providerId, connectionIds]) => {
         const modelsByConnection = await getSyncedAvailableModelsByConnection(providerId);
@@ -437,11 +486,42 @@ export async function getAllActiveSyncedModels(): Promise<Record<string, SyncedA
         // Dispatch (getActiveSyncedCatalog) unions registry dispatch-tagged
         // rows into discovery; listing must agree, or model pickers fed by
         // enumeration surfaces cannot see a model dispatch will accept.
+        const syncedRows = unionRegistryDispatchModels(
+          providerId,
+          collectModelsForConnections(modelsByConnection, connectionIds)
+        );
+        // The batched /v1/models listing must read the same operator endpoint
+        // overrides as getActiveSyncedCatalog() (dispatch). Otherwise a model
+        // edited from chat to embeddings disappears from dispatch but keeps
+        // advertising chat in the public catalog. Overlay ONLY same-id rows:
+        // entirely new operator models are still handled by the custom loop.
+        const candidates = customModelsByProvider[providerId];
+        const overrides: Array<{
+          id?: string;
+          supportedEndpoints?: string[];
+          endpointCapabilitySource?: string;
+        }> = Array.isArray(candidates) ? candidates : [];
+        const endpointsById = new Map(
+          overrides
+            .filter(
+              (row) =>
+                row?.endpointCapabilitySource === "operator" &&
+                typeof row.id === "string" &&
+                Array.isArray(row.supportedEndpoints) &&
+                row.supportedEndpoints.length > 0
+            )
+            .map((row) => [row.id!, row.supportedEndpoints!])
+        );
         const models = enrichCursorCatalog(
           providerId,
-          unionRegistryDispatchModels(
-            providerId,
-            collectModelsForConnections(modelsByConnection, connectionIds)
+          syncedRows.map((row) =>
+            endpointsById.has(row.id)
+              ? {
+                  ...row,
+                  supportedEndpoints: endpointsById.get(row.id)!,
+                  endpointCapabilitySource: "operator" as const,
+                }
+              : row
           )
         );
 
@@ -485,17 +565,32 @@ export async function reconcileProvidersWithActiveSyncedCatalog(
   const excludedProviders: string[] = [];
 
   for (const { provider, catalog } of states) {
-    const modelIsLive = catalog.models.some((model) => model.id === modelId);
+    // A slash may be part of a literal model ID (e.g. a custom marketplace
+    // route), not a provider qualifier. Strip it only when its first segment
+    // actually names this provider or a compatible catalog sibling.
+    const slash = modelId.indexOf("/");
+    const canonicalProvider = resolveStoredProviderId(provider);
+    const qualifiedProvider = slash > 0 ? resolveStoredProviderId(modelId.slice(0, slash)) : "";
+    const isMatchingProviderPrefix =
+      slash > 0 && catalogLookupIds(canonicalProvider).includes(qualifiedProvider);
+    const candidateIds = isMatchingProviderPrefix ? [modelId.slice(slash + 1), modelId] : [modelId];
+    const registryModel = getProviderModels(provider).find((model) =>
+      candidateIds.includes(model.id)
+    );
+    const declaredLiveIds = Array.isArray(registryModel?.liveCatalogIds)
+      ? registryModel.liveCatalogIds
+      : [];
+    const modelIsLive = catalog.models.some(
+      (model) => candidateIds.includes(model.id) || declaredLiveIds.includes(model.id)
+    );
     // Cursor auto-router: always allow `auto` / router variants even if a stale live
     // catalog omitted them (AvailableModels / agent list often returns wire id
     // `default` only; listing injects `auto` + cost/balance/intelligence).
     const cursorAutoAllow =
-      provider === "cursor" &&
-      (modelId === "auto" ||
-        modelId === "default" ||
-        modelId === "auto-cost" ||
-        modelId === "auto-balance" ||
-        modelId === "auto-intelligence");
+      canonicalProvider === "cursor" &&
+      ["auto", "default", "auto-cost", "auto-balance", "auto-intelligence"].some((id) =>
+        candidateIds.includes(id)
+      );
 
     if (!catalog.authoritative || modelIsLive || cursorAutoAllow) {
       providers.push(provider);

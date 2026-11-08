@@ -1,4 +1,6 @@
+import { selectHttpResponse } from "../utils/providerHttpAttempts.ts";
 import crypto, { randomUUID } from "crypto";
+import { isAntigravityPreResponseTimeout } from "../services/antigravityTimeout.ts";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,
@@ -13,6 +15,13 @@ import {
   getAntigravityOAuthUserAgent,
 } from "../services/antigravityHeaders.ts";
 import { classify429, decide429, type Decision } from "../services/antigravity429Engine.ts";
+import {
+  buildAntigravityRefusalReplayResponse,
+  fingerprintAntigravityRequest,
+  getActiveAntigravityRefusal,
+  getAntigravity429AttemptBudget,
+  rememberAntigravity429Refusal,
+} from "../services/antigravity429Guard.ts";
 import { parseRetryFromErrorText, type RetryHintProvenance } from "../services/accountFallback.ts";
 import { parseDetailedRetryHintFromJsonBody } from "../services/retryAfterJson.ts";
 import {
@@ -40,6 +49,8 @@ import {
   stripCloudCodeThinkingConfig,
 } from "../services/cloudCodeThinking.ts";
 import { buildGeminiTools } from "../translator/helpers/geminiToolsSanitizer.ts";
+import { sanitizeGeminiPartFunctionResponse } from "../translator/request/openai-to-gemini/helpers.ts";
+import { logger } from "../utils/logger.ts";
 import {
   type AntigravityCollectedStream,
   processAntigravitySSEText,
@@ -58,6 +69,8 @@ import {
   tryCreditsRetry,
   tryEmbedLongRetryAfter,
   buildFinalAntigravityResult,
+  peekFirstAntigravitySseEvent,
+  isAntigravityHeaderDeadlineTimeout,
   buildAntigravity429ErrorMessage,
   markCreditsExhausted,
   isAbortError,
@@ -72,9 +85,8 @@ import {
   resolveAntigravityClientVersion,
 } from "../services/antigravityClientProfile.ts";
 import {
-  generateAntigravityRequestId,
+  buildAntigravityEnvelopeIdentity,
   getAntigravityEnvelopeUserAgent,
-  getAntigravitySessionId,
 } from "../services/antigravityIdentity.ts";
 import {
   isGeminiTrailingModelTurnRejectingModel,
@@ -327,10 +339,34 @@ const COMPETITIVE_AGENT_PROMPT_PATTERNS: RegExp[] = [
 ];
 
 /**
- * Strip competing-agent identity sentences from systemInstruction.parts.
+ * Oh My Pi (OMP) coding-harness markers reported to draw a false 429
+ * RESOURCE_EXHAUSTED from Antigravity on large agent prompts even with quota
+ * left. These are compatibility rewrites, not proof of intentional upstream
+ * blocking: they only neutralize known harness tags/branding, and only inside
+ * systemInstruction text. Order matters ("Oh My Pi coding harness" before
+ * "Oh My Pi").
+ */
+const HARNESS_MARKER_REWRITES: Array<{ from: RegExp; to: string }> = [
+  { from: /<(\/?)system[-_]conventions>/gi, to: "<$1conventions>" },
+  { from: /<(\/?)system[-_]directive>/gi, to: "<$1instructions>" },
+  { from: /<(\/?)critical>/gi, to: "<$1important>" },
+  { from: /Oh My Pi coding harness/gi, to: "AI coding assistant" },
+  { from: /Oh My Pi/gi, to: "coding assistant" },
+  { from: /omp Live/gi, to: "coding assistant live" },
+];
+
+/** Harness telemetry keys stripped from the envelope and from `labels`. */
+const ANTIGRAVITY_HARNESS_TELEMETRY_KEYS = ["used_claude", "used_claude_conservative"] as const;
+
+const promptNormalizeLog = logger("AG_PROMPT_NORMALIZE");
+
+/**
+ * Normalize systemInstruction.parts text before Antigravity dispatch: strip
+ * competing-agent identity sentences (#10420) and rewrite OMP harness markers.
+ * Only string `text` parts are touched; every other part and field is kept.
  * Returns the original reference when nothing matched (no allocation).
  */
-export function stripCompetitiveAgentPrompts(systemInstruction: unknown): unknown {
+export function normalizeAntigravitySystemInstruction(systemInstruction: unknown): unknown {
   const record = asRecord(systemInstruction);
   const parts = Array.isArray(record?.parts)
     ? (record.parts as Array<Record<string, unknown>>)
@@ -351,10 +387,62 @@ export function stripCompetitiveAgentPrompts(systemInstruction: unknown): unknow
         text = stripped;
       }
     }
+    let rewrites = 0;
+    for (const { from, to } of HARNESS_MARKER_REWRITES) {
+      const rewritten = text.replace(from, to);
+      if (rewritten !== text) {
+        rewrites++;
+        text = rewritten;
+      }
+    }
+    if (rewrites > 0) {
+      changed = true;
+      promptNormalizeLog.debug("Rewrote harness markers in systemInstruction", { rewrites });
+    }
     return text === part.text ? part : { ...part, text };
   });
 
   return changed ? { ...record, parts: newParts } : systemInstruction;
+}
+
+/** Legacy name (#10420) kept for existing importers. */
+export const stripCompetitiveAgentPrompts = normalizeAntigravitySystemInstruction;
+
+/**
+ * Drop OMP harness telemetry keys (`used_claude`, `used_claude_conservative`)
+ * from a record and from its `labels` map. Every other key and label is kept.
+ * Returns the original reference when nothing was removed.
+ */
+function stripAntigravityHarnessTelemetry<T>(value: T): T {
+  const record = asRecord(value);
+  if (!record) return value;
+
+  let changed = false;
+  const cleaned: Record<string, unknown> = { ...record };
+  for (const key of ANTIGRAVITY_HARNESS_TELEMETRY_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(cleaned, key)) {
+      delete cleaned[key];
+      changed = true;
+    }
+  }
+
+  const labels = asRecord(cleaned.labels);
+  if (labels) {
+    const cleanedLabels: Record<string, unknown> = { ...labels };
+    let labelsChanged = false;
+    for (const key of ANTIGRAVITY_HARNESS_TELEMETRY_KEYS) {
+      if (Object.prototype.hasOwnProperty.call(cleanedLabels, key)) {
+        delete cleanedLabels[key];
+        labelsChanged = true;
+      }
+    }
+    if (labelsChanged) {
+      cleaned.labels = cleanedLabels;
+      changed = true;
+    }
+  }
+
+  return changed ? (cleaned as T) : value;
 }
 
 function getAntigravitySafetySettings(safetySettings: unknown): unknown[] | undefined {
@@ -364,6 +452,20 @@ function getAntigravitySafetySettings(safetySettings: unknown): unknown[] | unde
     const category = asRecord(setting)?.category;
     return typeof category !== "string" || !ANTIGRAVITY_UNSUPPORTED_SAFETY_CATEGORIES.has(category);
   });
+}
+
+/**
+ * Gemini branch (no field whitelist): apply the same systemInstruction
+ * normalization the Claude branch gets, leaving every other field untouched.
+ */
+function normalizeAntigravityGeminiSystemInstruction<T extends Record<string, unknown>>(
+  request: T
+): T {
+  if (!asRecord(request.systemInstruction)) return request;
+  const systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+  return systemInstruction === request.systemInstruction
+    ? request
+    : { ...request, systemInstruction };
 }
 
 function sanitizeAntigravityGeminiRequest(
@@ -379,7 +481,7 @@ function sanitizeAntigravityGeminiRequest(
     // #10420: strip competing-agent identity sentences (e.g. "You are a
     // Claude agent, built on Anthropic's Claude Agent SDK.") that Antigravity
     // flags and answers with 429 RESOURCE_EXHAUSTED.
-    clean.systemInstruction = stripCompetitiveAgentPrompts(request.systemInstruction);
+    clean.systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
   }
 
   clean.generationConfig = asRecord(request.generationConfig)
@@ -476,12 +578,27 @@ type AntigravityAttemptContext = {
   fallbackCount: number;
   physicalSendCounter: AntigravityPhysicalSendCounter;
   correlationId: string | null;
+  /** Per-request upstream-429 budget across ALL hosts (antigravity429Guard.ts). */
+  rateLimitBudget: AntigravityRateLimitBudget;
+};
+
+/**
+ * Upstream 429s seen for this request across every host. Once `count` reaches `max`
+ * the 429 goes back to the caller instead of being retried, and the request body
+ * (`fingerprint`) is remembered so an identical re-send is answered locally.
+ */
+type AntigravityRateLimitBudget = {
+  max: number;
+  count: number;
+  fingerprint: string | null;
 };
 
 /** Context threaded through the 429/503 handling helpers — adds the sent response. */
 type AntigravityRateLimitContext = AntigravityAttemptContext & {
   response: Response;
   finalHeaders: Record<string, string>;
+  /** This response spent the request's 429 budget: no more retries on any host. */
+  budget429Spent: boolean;
 };
 
 /**
@@ -502,17 +619,26 @@ type AntigravityAttemptOutcome =
   | { action: "retry"; sameUrl: boolean; lastStatus?: number };
 
 export class AntigravityExecutor extends BaseExecutor {
-  constructor() {
+  streamReadinessTimeoutMs?: number;
+
+  constructor(options?: { streamReadinessTimeoutMs?: number }) {
     super("antigravity", PROVIDERS.antigravity);
+    this.streamReadinessTimeoutMs = options?.streamReadinessTimeoutMs;
   }
 
-  override shouldRetry(status: number, urlIndex: number): boolean {
+  override shouldRetry(status: number, urlIndex: number, model?: string): boolean {
+    if (
+      status === HTTP_STATUS.NOT_FOUND &&
+      typeof model === "string" &&
+      /argon|gemini-4/i.test(model)
+    ) {
+      return false;
+    }
     return (
       (status === HTTP_STATUS.RATE_LIMITED ||
         status === HTTP_STATUS.NOT_FOUND ||
         status === HTTP_STATUS.BAD_GATEWAY ||
-        status === HTTP_STATUS.SERVICE_UNAVAILABLE ||
-        status === HTTP_STATUS.GATEWAY_TIMEOUT) &&
+        status === HTTP_STATUS.SERVICE_UNAVAILABLE) &&
       urlIndex + 1 < this.getFallbackCount()
     );
   }
@@ -531,10 +657,14 @@ export class AntigravityExecutor extends BaseExecutor {
 
   buildHeaders(credentials: AntigravityCredentials, _stream = true): Record<string, string> {
     const clientProfile = getAntigravityClientProfile(credentials);
-    const raw = {
+    const raw: Record<string, string> = {
       ...getAntigravityContentHeaders(clientProfile, credentials.accessToken),
-      Accept: "text/event-stream",
     };
+    // The native Go CLI requests SSE through `?alt=sse` alone and sends no Accept header;
+    // only the IDE/Electron profile advertises `text/event-stream`.
+    if (clientProfile !== "cli") {
+      raw.Accept = "text/event-stream";
+    }
     // Scrub proxy/fingerprint headers that reveal non-native traffic
     return scrubProxyAndFingerprintHeaders(raw);
   }
@@ -708,19 +838,21 @@ export class AntigravityExecutor extends BaseExecutor {
         const hasFunctionCall = c.parts?.some((p) => p.functionCall) || false;
 
         const parts =
-          c.parts?.filter((p) => {
-            if (typeof p.text === "string" && p.text === "") return false;
-            if (p.functionCall && !p.functionCall.name) return false;
+          c.parts
+            ?.filter((p) => {
+              if (typeof p.text === "string" && p.text === "") return false;
+              if (p.functionCall && !p.functionCall.name) return false;
 
-            // Only strip if it's NOT our bypass sentinel.
-            // Antigravity models (like Gemini) need this sentinel to bypass 400 errors.
-            return (
-              !p.thought &&
-              (hasFunctionCall ||
-                !p.thoughtSignature ||
-                p.thoughtSignature === "skip_thought_signature_validator")
-            );
-          }) || [];
+              // Only strip if it's NOT our bypass sentinel.
+              // Antigravity models (like Gemini) need this sentinel to bypass 400 errors.
+              return (
+                !p.thought &&
+                (hasFunctionCall ||
+                  !p.thoughtSignature ||
+                  p.thoughtSignature === "skip_thought_signature_validator")
+              );
+            })
+            .map(sanitizeGeminiPartFunctionResponse) || [];
         return { ...c, role, parts };
       }) || [];
 
@@ -734,14 +866,18 @@ export class AntigravityExecutor extends BaseExecutor {
       }
     }
 
+    const identity = buildAntigravityEnvelopeIdentity({
+      isClaude,
+      credentials,
+      sessionIdFallback:
+        typeof normalizedRequest?.sessionId === "string" ? normalizedRequest.sessionId : undefined,
+    });
+
     const safetySettings = getAntigravitySafetySettings(normalizedRequest?.safetySettings);
     const rawTransformedRequest = {
       ...normalizedRequest,
       ...(contents.length > 0 && { contents }),
-      sessionId: getAntigravitySessionId(
-        credentials,
-        typeof normalizedRequest?.sessionId === "string" ? normalizedRequest.sessionId : undefined
-      ),
+      sessionId: identity.sessionId,
       ...(safetySettings !== undefined && { safetySettings }),
       toolConfig:
         Array.isArray(normalizedRequest?.tools) && normalizedRequest.tools.length > 0
@@ -757,11 +893,18 @@ export class AntigravityExecutor extends BaseExecutor {
           sanitizeAntigravityGeminiRequest(rawTransformedRequest)
         )
       : isGemini
-        ? stripTrailingAntigravityAssistantTurn(rawTransformedRequest)
+        ? stripTrailingAntigravityAssistantTurn(
+            normalizeAntigravityGeminiSystemInstruction(rawTransformedRequest)
+          )
         : rawTransformedRequest;
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
-
+    // Identity labels join (never replace) the caller's own labels (#16618).
+    const callerLabels = asRecord((transformedRequest as Record<string, unknown>).labels);
+    (transformedRequest as Record<string, unknown>).labels = {
+      ...callerLabels,
+      ...identity.labels,
+    };
     const {
       project: _project,
       model: _model,
@@ -792,13 +935,16 @@ export class AntigravityExecutor extends BaseExecutor {
     const requestType = _requestType === "image_gen" ? "image_gen" : "agent";
     const envelope: AntigravityRequestEnvelope = {
       project: projectId,
-      requestId: generateAntigravityRequestId(),
+      requestId: identity.requestId,
       request: transformedRequest,
       model: upstreamModel,
       userAgent: getAntigravityEnvelopeUserAgent(credentials),
       requestType,
-      ...passthroughFields,
+      ...stripAntigravityHarnessTelemetry(passthroughFields),
     };
+    // Harness telemetry is dropped from the inner request too (the Claude branch's
+    // whitelist already omits it; the Gemini/other branches pass the request through).
+    envelope.request = stripAntigravityHarnessTelemetry(envelope.request);
 
     return envelope;
   }
@@ -1110,7 +1256,13 @@ export class AntigravityExecutor extends BaseExecutor {
         headers: [["Content-Type", "application/json"]],
       });
 
-      return { response: syntheticResponse, url, headers, transformedBody };
+      return {
+        response: syntheticResponse,
+        upstreamHttpSelection: selectHttpResponse(response),
+        url,
+        headers,
+        transformedBody,
+      };
     };
 
     return collect();
@@ -1154,6 +1306,7 @@ export class AntigravityExecutor extends BaseExecutor {
       try {
         result = await this.executeOnce(input, candidate, physicalSendCounter);
       } catch (error) {
+        if (isAntigravityPreResponseTimeout(error)) throw error;
         const outcome = handleAntigravityFallbackChainError(
           input,
           error,
@@ -1242,6 +1395,13 @@ export class AntigravityExecutor extends BaseExecutor {
     const creditsMode = getCreditsMode();
     const useCreditsFirst = shouldUseCreditsFirst(credentials?.accessToken || "", creditsMode);
     const creditsRetryState: AntigravityCreditsRetryState = { attempted: false };
+    // Upstream 429s for this request across ALL hosts; once the budget is spent the 429
+    // goes back to the caller instead of being retried (antigravity429Guard.ts).
+    const rateLimitBudget: AntigravityRateLimitBudget = {
+      max: getAntigravity429AttemptBudget(),
+      count: 0,
+      fingerprint: null,
+    };
 
     for (let urlIndex = 0; urlIndex < fallbackCount; urlIndex++) {
       const url = this.buildUrl(model, upstreamStream, urlIndex);
@@ -1261,6 +1421,25 @@ export class AntigravityExecutor extends BaseExecutor {
       }
 
       const transformedBody = finalizeAntigravityRequestBody(transformed, useCreditsFirst, l);
+
+      // A body that already spent its 429 budget is answered locally until the block
+      // expires — the client re-sending it must not reach Google again.
+      if (rateLimitBudget.fingerprint === null) {
+        rateLimitBudget.fingerprint = fingerprintAntigravityRequest(accountId, transformedBody);
+        const activeRefusal = getActiveAntigravityRefusal(rateLimitBudget.fingerprint);
+        if (activeRefusal) {
+          l.warn(
+            "AG_429_BUDGET",
+            `Not resending a request Antigravity refused with 429 (repeat ${activeRefusal.strikes}, ${Math.ceil(activeRefusal.remainingMs / 1000)}s left) — answered locally`
+          );
+          return {
+            response: buildAntigravityRefusalReplayResponse(activeRefusal),
+            url,
+            headers,
+            transformedBody,
+          };
+        }
+      }
 
       // Initialize retry counter for this URL
       if (!retryAttemptsByUrl[urlIndex]) {
@@ -1285,6 +1464,7 @@ export class AntigravityExecutor extends BaseExecutor {
           fallbackCount,
           physicalSendCounter,
           correlationId,
+          rateLimitBudget,
         });
 
         if (outcome.action === "return") return outcome.result;
@@ -1295,6 +1475,11 @@ export class AntigravityExecutor extends BaseExecutor {
         if (signal?.aborted || isAbortError(error)) {
           throw signal?.reason ?? error;
         }
+        // This deadline has already consumed its full header budget. Never
+        // spend it again on another host within the SAME provider account.
+        // A silent body (headers but no first SSE event) is per-host and
+        // still fails over to the next base URL (#13125).
+        if (isAntigravityHeaderDeadlineTimeout(error)) throw error;
         lastError = error;
         // A fetch failure on a URL that still has a fallback is a retry, not a
         // failed request: the loop continues and the client gets the next
@@ -1348,6 +1533,7 @@ export class AntigravityExecutor extends BaseExecutor {
       retryAttemptsByUrl,
       physicalSendCounter,
       correlationId,
+      rateLimitBudget,
     } = ctx;
 
     const { response, finalHeaders } = await sendAntigravityRequest(
@@ -1366,15 +1552,21 @@ export class AntigravityExecutor extends BaseExecutor {
     );
 
     let retryMs: number | null = null;
+    let budget429Spent = false;
 
     if (
       response.status === HTTP_STATUS.RATE_LIMITED ||
       response.status === HTTP_STATUS.SERVICE_UNAVAILABLE
     ) {
+      if (response.status === HTTP_STATUS.RATE_LIMITED) {
+        rateLimitBudget.count += 1;
+        budget429Spent = rateLimitBudget.count >= rateLimitBudget.max;
+      }
       const rateLimitOutcome = await this.handleAntigravityRateLimit({
         ...ctx,
         response,
         finalHeaders,
+        budget429Spent,
       });
 
       if (rateLimitOutcome.action === "return") {
@@ -1389,7 +1581,7 @@ export class AntigravityExecutor extends BaseExecutor {
       retryMs = rateLimitOutcome.retryMs;
     }
 
-    if (this.shouldRetry(response.status, urlIndex)) {
+    if (!budget429Spent && this.shouldRetry(response.status, urlIndex, model)) {
       log.debug("RETRY", `${response.status} on ${url}, trying fallback ${urlIndex + 1}`);
       return { action: "retry", sameUrl: false, lastStatus: response.status };
     }
@@ -1441,9 +1633,16 @@ export class AntigravityExecutor extends BaseExecutor {
     signal: AbortSignal | null | undefined,
     log: SafeAntigravityLog
   ): Promise<SsePassthroughResult> {
-    if (!stream && response.ok && response.body) {
+    const peekedResponse = await peekFirstAntigravitySseEvent(
+      response,
+      url,
+      this.streamReadinessTimeoutMs,
+      signal
+    );
+
+    if (!stream && peekedResponse.ok && peekedResponse.body) {
       return this.collectStreamToResponse(
-        response,
+        peekedResponse,
         model,
         url,
         finalHeaders,
@@ -1455,7 +1654,7 @@ export class AntigravityExecutor extends BaseExecutor {
 
     return buildFinalAntigravityResult(
       stream,
-      response,
+      peekedResponse,
       url,
       finalHeaders,
       transformedBody,
@@ -1475,10 +1674,13 @@ export class AntigravityExecutor extends BaseExecutor {
   async handleAntigravityRateLimit(
     ctx: AntigravityRateLimitContext
   ): Promise<AntigravityRateLimitOutcome> {
-    const { response, log, urlIndex, retryAttemptsByUrl, fallbackCount } = ctx;
+    const { response, log, urlIndex, retryAttemptsByUrl, fallbackCount, budget429Spent } = ctx;
+    const { rateLimitBudget } = ctx;
 
     // Try to get retry time from headers first
     let retryMs: number | null = this.parseRetryHeaders(response.headers);
+    // What Google itself stated, before decide429 fills in its defaults.
+    let upstreamRetryHintMs: number | null = retryMs;
 
     // If no retry time in headers, try to parse from error message body
     let switchAuth = false;
@@ -1487,6 +1689,22 @@ export class AntigravityExecutor extends BaseExecutor {
       if (resolved.kind === "return") return { action: "return", result: resolved.result };
       retryMs = resolved.retryMs;
       switchAuth = resolved.switchAuth;
+      upstreamRetryHintMs = resolved.upstreamRetryHintMs;
+    }
+
+    if (budget429Spent) {
+      if (rateLimitBudget.fingerprint) {
+        const refusal = rememberAntigravity429Refusal(
+          rateLimitBudget.fingerprint,
+          upstreamRetryHintMs
+        );
+        log.warn(
+          "AG_429_BUDGET",
+          `${rateLimitBudget.count} upstream 429s for this request (budget ${rateLimitBudget.max}) — returning it; identical re-sends are answered locally for ${Math.ceil(refusal.blockMs / 1000)}s`
+        );
+      }
+      // No same-host retry, no next host: the 429 goes back to the caller.
+      return { action: "fallthrough", retryMs, lastStatus: response.status };
     }
 
     // Bounded short-retry: a non-null retryAfterMs ≤ 60s covers nearly every
@@ -1550,11 +1768,15 @@ export class AntigravityExecutor extends BaseExecutor {
    * credits retry. Returns the resolved retryMs, or an early "return" result
    * when the credits retry itself produced a response to hand back to the client.
    */
-  private async tryResolveRetryFromErrorBody(
-    ctx: AntigravityRateLimitContext
-  ): Promise<
+  private async tryResolveRetryFromErrorBody(ctx: AntigravityRateLimitContext): Promise<
     | { kind: "return"; result: SsePassthroughResult }
-    | { kind: "resolved"; retryMs: number | null; switchAuth: boolean }
+    | {
+        kind: "resolved";
+        retryMs: number | null;
+        switchAuth: boolean;
+        /** Retry hint parsed from the body, before decide429 applied its defaults. */
+        upstreamRetryHintMs: number | null;
+      }
   > {
     const {
       response,
@@ -1625,13 +1847,14 @@ export class AntigravityExecutor extends BaseExecutor {
         kind: "resolved",
         retryMs,
         switchAuth: decision.kind === "short_cooldown_switch_auth",
+        upstreamRetryHintMs: parsedRetryMs,
       };
     } catch (error) {
       if (signal?.aborted || isAbortError(error)) {
         throw signal?.reason ?? error;
       }
       // Ignore parse errors, will fall back to exponential backoff
-      return { kind: "resolved", retryMs: null, switchAuth: false };
+      return { kind: "resolved", retryMs: null, switchAuth: false, upstreamRetryHintMs: null };
     }
   }
 

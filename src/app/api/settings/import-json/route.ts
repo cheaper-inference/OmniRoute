@@ -3,17 +3,23 @@ import { getDbInstance } from "@/lib/db/core";
 import { backupDbFile } from "@/lib/db/backup";
 import { clearApiKeyCaches } from "@/lib/db/apiKeys";
 import { invalidateDbCache } from "@/lib/db/readCache";
-import { isAuthRequired, isAuthenticated } from "@/shared/utils/apiAuth";
+import {
+  CREDENTIAL_IMPORT_FORBIDDEN_MESSAGE,
+  requireOperatorCredential,
+} from "@/lib/api/operatorCredential";
 import { runJsonMigration, type LegacyJsonData } from "@/lib/db/jsonMigration";
 import { getSettings } from "@/lib/db/settings";
 import { setSystemPromptConfig } from "@omniroute/open-sse/services/systemPrompt.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
-import { SECURITY_IMPACTING_SETTINGS_KEYS } from "@/shared/constants/securityImpactingSettings";
+import { IMPORT_STRIPPED_SETTINGS_KEYS } from "@/shared/constants/securityImpactingSettings";
 
-/** Drops the password and every key PATCH only accepts after password re-auth. */
+/**
+ * Drops the password (and any `currentPassword`), every key PATCH only accepts after password
+ * re-auth, and the dashboard session state (`sessionsValidAfter`, `revokedDashboardSessions`).
+ */
 function stripSecurityImpactingSettings(settings: object): Record<string, unknown> {
   const safeSettings: Record<string, unknown> = { ...settings };
-  for (const key of ["password", ...SECURITY_IMPACTING_SETTINGS_KEYS]) {
+  for (const key of IMPORT_STRIPPED_SETTINGS_KEYS) {
     delete safeSettings[key];
   }
   return safeSettings;
@@ -25,19 +31,22 @@ function stripSecurityImpactingSettings(settings: object): Record<string, unknow
  * Imports a legacy OmniRoute JSON backup into the current SQLite
  * database.  Accepts either multipart/form-data (file field) or a raw JSON body.
  *
- * 🔒 Auth-guarded.
- * 🔒 Zero-Trust: password plus every key `PATCH /api/settings` only accepts after
- *    password re-auth (SECURITY_IMPACTING_SETTINGS_KEYS: requireLogin, the LOCAL_ONLY
- *    manage-scope bypass list/kill-switch, OIDC login keys) are stripped before insertion —
- *    an import must not be a way around that re-auth.
+ * 🔒 Operator-only: dashboard session, local CLI, or login disabled. The import replaces
+ *    settings, connections and API keys, so API keys of any scope and `oma_` access tokens
+ *    get 403 (same boundary as `GET /api/settings/export-json`).
+ * 🔒 Zero-Trust: IMPORT_STRIPPED_SETTINGS_KEYS are stripped before insertion — the password
+ *    and `currentPassword`, every key `PATCH /api/settings` only accepts after password
+ *    re-auth (SECURITY_IMPACTING_SETTINGS_KEYS: requireLogin, the LOCAL_ONLY manage-scope
+ *    bypass list/kill-switch, every OIDC key) and the dashboard session state — an import
+ *    must not be a way around that re-auth, nor revive sessions a password change or a
+ *    sign-out ended.
  * 🔒 A pre-import backup is created automatically before any data is written.
  */
 export async function POST(request: Request) {
-  if (await isAuthRequired(request)) {
-    if (!(await isAuthenticated(request))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const operatorVerdict = await requireOperatorCredential(request, {
+    forbiddenMessage: CREDENTIAL_IMPORT_FORBIDDEN_MESSAGE,
+  });
+  if (operatorVerdict.ok === false) return operatorVerdict.response;
 
   try {
     let rawText: string | null = null;

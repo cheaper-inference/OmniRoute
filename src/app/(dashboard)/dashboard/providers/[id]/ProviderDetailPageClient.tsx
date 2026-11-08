@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Card, Button, CardSkeleton } from "@/shared/components";
+import ProviderTosNotice from "@/shared/components/ProviderTosNotice";
 import {
   NOAUTH_PROVIDERS,
   getProviderAlias,
@@ -39,6 +40,7 @@ import {
 import { findDefaultReferral } from "@/lib/radar/referrals";
 import { type ConnectionRowConnection } from "./components/ConnectionRow";
 import { useProviderConnections } from "./hooks/useProviderConnections";
+import { useDevinAgenticAuthStatus } from "../hooks/useDevinAgenticAuthStatus";
 import { useProviderQuota } from "./hooks/useProviderQuota";
 import { useProviderSettings } from "./hooks/useProviderSettings";
 import { useProviderModels } from "./hooks/useProviderModels";
@@ -50,6 +52,7 @@ import { useModelImportHandlers } from "./hooks/useModelImportHandlers";
 import { useApiKeySave } from "./hooks/useApiKeySave";
 import { useModelVisibilityHandlers } from "./hooks/useModelVisibilityHandlers";
 import { useModelCompatState } from "./hooks/useModelCompatState";
+import { useModelComboUsage } from "./hooks/useModelComboUsage";
 import { useConnectionGate } from "./hooks/useConnectionGate";
 import { useProviderNodeActions } from "./hooks/useProviderNodeActions";
 import ProviderExtraPanels from "./components/ProviderExtraPanels";
@@ -58,6 +61,7 @@ import CustomModelsSection from "./components/CustomModelsSection";
 import ConnectionsListPanel from "./components/ConnectionsListPanel";
 import CoolingConnectionsPanel from "./components/CoolingConnectionsPanel";
 import ConnectionsHeaderToolbar from "./components/ConnectionsHeaderToolbar";
+import { ConnectionPinTip } from "./components/ConnectionIdChip";
 import VolcengineConnectModal from "./components/VolcengineConnectModal";
 import ProviderAccountRoutingCard from "../../settings/components/ProviderAccountRoutingCard";
 import ZedImportCard from "./components/ZedImportCard";
@@ -70,6 +74,8 @@ import UpstreamProxyCard from "./components/UpstreamProxyCard";
 import SearchProviderCard from "./components/SearchProviderCard";
 import NoAuthProviderControls from "./components/NoAuthProviderControls";
 import AnonymousFallbackToggle from "./components/AnonymousFallbackToggle";
+import ProviderRetryDelaySelect from "./components/ProviderRetryDelaySelect";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 // providerText used by UpstreamProxyCard (Phase 1t.7)
 
 export default function ProviderDetailPageClient() {
@@ -93,6 +99,7 @@ export default function ProviderDetailPageClient() {
   const [importCodexModalOpen, setImportCodexModalOpen] = useState(false);
   const [codexCliGuideOpen, setCodexCliGuideOpen] = useState(false);
   const [importClaudeModalOpen, setImportClaudeModalOpen] = useState(false);
+  const [importAgyModalOpen, setImportAgyModalOpen] = useState(false);
   const [importGeminiModalOpen, setImportGeminiModalOpen] = useState(false);
   const [importGrokCliModalOpen, setImportGrokCliModalOpen] = useState(false);
   const [connectingVolcengineAccount, setConnectingVolcengineAccount] = useState(false);
@@ -144,7 +151,7 @@ export default function ProviderDetailPageClient() {
     setBatchDeleteConfirmOpen,
     setBatchTestResults,
     setProviderNode,
-    fetchConnections,
+    fetchConnections: fetchConnectionsWithResult,
     refreshProxyState,
     deleteConfirm,
     handleUpdateConnectionStatus,
@@ -174,6 +181,9 @@ export default function ProviderDetailPageClient() {
     getAttachmentFilename,
     PAGE_SIZE,
   } = useProviderConnections(providerId, isCompatible, isSearchProvider);
+  const fetchConnections = useCallback(async () => {
+    await fetchConnectionsWithResult();
+  }, [fetchConnectionsWithResult]);
 
   const {
     codexGlobalServiceMode,
@@ -207,13 +217,21 @@ export default function ProviderDetailPageClient() {
   const t = useTranslations("providers");
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const notify = useNotificationStore();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   // Per-account usage/limits strip — cached snapshot from the server's
   // providerLimitsCache, with per-connection on-demand live refresh.
   const {
     quotaByConnectionId,
     refreshingIds: quotaRefreshingIds,
+    refreshStates: quotaRefreshStates,
     refreshConnection,
-  } = useProviderQuota();
+  } = useProviderQuota({
+    providerId,
+    connectionIds: connections
+      .map((connection) => connection.id)
+      .filter((id): id is string => !!id),
+    refreshConnections: providerId === "codex" ? fetchConnectionsWithResult : undefined,
+  });
   const handleRefreshQuota = useCallback(
     (connectionId: string) => {
       void refreshConnection(connectionId);
@@ -281,6 +299,7 @@ export default function ProviderDetailPageClient() {
   );
   const oauthProviderId = resolveProviderOAuthBackendId(providerId, providerInfo);
   const providerSupportsOAuth =
+    providerId === "copilot-m365-web" ||
     providerInfo?.toggleAuthType === "oauth" ||
     providerInfo?.toggleAuthType === "free" ||
     oauthProviderId !== providerId;
@@ -298,6 +317,9 @@ export default function ProviderDetailPageClient() {
   const supportsDualAuth = supportsDualAuthProvider(providerId);
   const isOAuth = providerSupportsOAuth && !providerSupportsPat;
   const providerAlias = getProviderAlias(providerId);
+  const devinAgenticAuthenticated = useDevinAgenticAuthStatus(providerId === "devin-cli-agentic");
+  const displayConnectionCount =
+    connections.length + (devinAgenticAuthenticated && connections.length === 0 ? 1 : 0);
   const isFreeNoAuth =
     NOAUTH_PROVIDERS[providerId]?.noAuth === true ||
     getProviderById(providerId)?.managedAccount === true;
@@ -367,7 +389,10 @@ export default function ProviderDetailPageClient() {
     connections,
     setConnections,
     notify,
-    t
+    t,
+    async () => {
+      await Promise.all([fetchConnections(), fetchProviderModelMeta()]);
+    }
   );
 
   // ── model-related effects (loading gate) ────────────────────────────────
@@ -495,6 +520,9 @@ export default function ProviderDetailPageClient() {
 
   // Phase 1e: compat-state derivations
   const compat = useModelCompatState(modelMeta.customModels, modelMeta.modelCompatOverrides);
+  // Combo membership for every model on this provider — drives the small
+  // "used in combo X" badge behind each model row (#16216).
+  const comboUsage = useModelComboUsage(providerId);
   const { customMap } = compat;
   const effectiveModelNormalize = compat.effectiveModelNormalize;
   const effectiveModelPreserveDeveloper = compat.effectiveModelPreserveDeveloper;
@@ -538,6 +566,7 @@ export default function ProviderDetailPageClient() {
     fetchProviderModelMeta,
     fetchAliases,
     notify,
+    requestConfirm,
     t,
     selectedConnection,
     providerNode,
@@ -568,13 +597,15 @@ export default function ProviderDetailPageClient() {
       <ProviderPageHeader
         providerId={providerId}
         providerInfo={{ ...providerInfo, website: providerHeaderWebsite }}
-        connectionsCount={connections.length}
+        connectionsCount={displayConnectionCount}
         isOpenAICompatible={isOpenAICompatible}
         isAnthropicProtocolCompatible={isAnthropicProtocolCompatible}
         onOpenTutorial={() => setShowTutorialModal(true)}
         t={t}
         isReferralLink={isReferralLink}
       />
+
+      <ProviderTosNotice providerId={providerId} />
 
       {providerId === "zed" && (
         <ZedImportCard fetchConnections={fetchConnections} notify={notify} />
@@ -613,6 +644,7 @@ export default function ProviderDetailPageClient() {
           providerName={providerInfo?.name || providerId}
         />
       )}
+      {!isUpstreamProxyProvider && <ProviderRetryDelaySelect providerId={providerId} />}
       {!isUpstreamProxyProvider && (!isFreeNoAuth || providerSupportsPat) && (
         <Card>
           <ProviderAccountRoutingCard
@@ -650,6 +682,10 @@ export default function ProviderDetailPageClient() {
             loadCodexSettings={loadCodexSettings}
             onSetProxyTarget={setProxyTarget}
             handleDistributeProxies={handleDistributeProxies}
+            onAccountProxiesReset={async () => {
+              await fetchConnections();
+              await refreshProxyState();
+            }}
             handleBatchTestAll={handleBatchTestAll}
             gateConnectionFlow={gateConnectionFlow}
             openApiKeyAddFlow={openApiKeyAddFlow}
@@ -663,6 +699,7 @@ export default function ProviderDetailPageClient() {
             onOpenCodexCliGuide={() => setCodexCliGuideOpen(true)}
             onOpenImportCodex={() => setImportCodexModalOpen(true)}
             onOpenImportClaude={() => setImportClaudeModalOpen(true)}
+            onOpenImportAgy={() => setImportAgyModalOpen(true)}
             onOpenImportGemini={() => setImportGeminiModalOpen(true)}
             onOpenImportGrokCli={() => setImportGrokCliModalOpen(true)}
             t={t}
@@ -684,12 +721,14 @@ export default function ProviderDetailPageClient() {
               onOpenOAuthModal={() => setShowOAuthModal(true)}
               onOpenImportCodex={() => setImportCodexModalOpen(true)}
               onOpenImportClaude={() => setImportClaudeModalOpen(true)}
+              onOpenImportAgy={() => setImportAgyModalOpen(true)}
               onOpenImportGemini={() => setImportGeminiModalOpen(true)}
               onOpenImportGrokCli={() => setImportGrokCliModalOpen(true)}
               t={t}
             />
           ) : (
             <>
+              <ConnectionPinTip />
               <CoolingConnectionsPanel
                 connections={connections}
                 onClearCooldown={handleClearCooldown}
@@ -751,6 +790,7 @@ export default function ProviderDetailPageClient() {
                 cpaProviderEnabled={cpaProviderEnabled}
                 quotaByConnectionId={quotaByConnectionId}
                 quotaRefreshingIds={quotaRefreshingIds}
+                quotaRefreshStates={quotaRefreshStates}
                 handleRefreshQuota={handleRefreshQuota}
                 onOpenEditModal={(conn) => {
                   setSelectedConnection(conn);
@@ -790,6 +830,7 @@ export default function ProviderDetailPageClient() {
             models={models}
             modelMeta={modelMeta}
             modelAliases={modelAliases}
+            comboUsage={comboUsage}
             syncedAvailableModels={syncedAvailableModels}
             syncedCatalogAuthoritative={syncedCatalogAuthoritative}
             compatibleFallbackModels={compatibleFallbackModels}
@@ -923,6 +964,8 @@ export default function ProviderDetailPageClient() {
         handleApplyClaudeAuthLocal={handleApplyClaudeAuthLocal}
         importClaudeModalOpen={importClaudeModalOpen}
         setImportClaudeModalOpen={setImportClaudeModalOpen}
+        importAgyModalOpen={importAgyModalOpen}
+        setImportAgyModalOpen={setImportAgyModalOpen}
         importGrokCliModalOpen={importGrokCliModalOpen}
         setImportGrokCliModalOpen={setImportGrokCliModalOpen}
         batchTestResults={batchTestResults}
@@ -948,6 +991,7 @@ export default function ProviderDetailPageClient() {
         notify={notify}
         t={t}
       />
+      {confirmDialog}
     </div>
   );
 }

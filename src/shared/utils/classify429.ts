@@ -133,6 +133,11 @@ const QUOTA_PATTERNS: ReadonlyArray<RegExp> = [
   /使用上限/,
   /限额将在/,
   /已达?到.*上限/,
+  // GLM/z.ai out of credit (code 1113): "余额不足或无可用资源包,请充值。" — a
+  // long-period signal, so apikey-category 429s keep their credits classification.
+  /\[1113\]/,
+  /余额不足/,
+  /无可用资源包/,
 
   // Kimi/Moonshot: "您的账户额度已用尽，请充值后重试。"
   /额度已用尽/,
@@ -194,6 +199,42 @@ export function looksLikeQuotaExhausted(body: unknown): boolean {
   const text = bodyToText(body);
   if (!text) return false;
   return QUOTA_PATTERNS.some((pat) => pat.test(text));
+}
+
+/**
+ * Concurrency-limit wording in 429 bodies ("too many concurrent requests").
+ * The account is healthy — it is just busy with other in-flight requests —
+ * so the right reaction is to fail over to a sibling connection, not to climb
+ * the exponential backoff ladder. Every pattern is a fixed phrase with bounded
+ * alternations only (no `.*`), per the ReDoS rule.
+ */
+const CONCURRENCY_PATTERNS: ReadonlyArray<RegExp> = [
+  /too many (?:concurrent|simultaneous|parallel) (?:requests?|connections?|sessions?|calls?)/i,
+  /concurrent (?:requests?|connections?|sessions?) limit/i,
+  /concurrency limit/i,
+  /max(?:imum)? concurrency/i,
+  /parallel requests? limit/i,
+  /simultaneous requests? limit/i,
+  /high concurrency usage/i,
+  // GLM/z.ai code 1302: "您当前使用该API的并发数过高，请降低并发…"
+  /并发数?过高/,
+];
+
+/**
+ * Returns true if a 429 body reports a CONCURRENCY limit (contention on a
+ * healthy account). An explicit quota body always wins: a body that matches
+ * any quota pattern is never treated as concurrency.
+ *
+ * Deliberately NOT a `FailureKind`: the circuit breaker's per-kind cooldowns
+ * key on `classify429`, and that contract stays unchanged (a concurrency 429
+ * still reads `rate_limit` there). Only the connection-cooldown path consumes
+ * this signal (open-sse/services/accountFallback.ts).
+ */
+export function looksLikeConcurrencyLimit(body: unknown): boolean {
+  const text = bodyToText(body);
+  if (!text) return false;
+  if (!CONCURRENCY_PATTERNS.some((pat) => pat.test(text))) return false;
+  return !looksLikeQuotaExhausted(text);
 }
 
 /**

@@ -29,23 +29,24 @@ Nếu phát hiện lỗ hổng bảo mật trong OmniRoute, vui lòng báo cáo 
 | 3.7.x     | ✅ Bảo mật                                                 |
 | < 3.7.0   | ❌ Không được hỗ trợ                                       |
 
-## Khoảng thời gian hỗ trợ LTS (v3.9.x)
+## Thời hạn hỗ trợ LTS (v3.9.x)
 
-Sau 3.8.59, phiên bản tiếp theo là **3.9.0**, mở nhánh hỗ trợ dài hạn trên
+Sau 3.8.59, phiên bản tiếp theo là **3.9.0**, mở đầu nhánh hỗ trợ dài hạn trên
 nhánh `stable/v3` (xem [`ROADMAP.md`](ROADMAP.md) → "Giai đoạn 3 — v3.9.0 LTS").
 
 - **Những gì `stable/v3` nhận được:** các bản sửa lỗi, bản vá bảo mật và bản cập nhật nhà cung cấp. Các
-  tính năng mới được đưa vào kênh v4; nhánh LTS ưu tiên tính ổn định. `npm install omniroute`
-  (`latest` dist-tag) vẫn ở v3 trong toàn bộ chu kỳ v4.
-- **Thời lượng hỗ trợ:** `<T-GAP-3: đang chờ quyết định của chủ sở hữu — xem ROADMAP.md>`. Thời lượng
-  hỗ trợ sau khi v4.0 GA (khi `latest` chuyển sang v4) **vẫn chưa được quyết định**; phần này
-  sẽ được cập nhật khi người bảo trì công bố. Cho đến lúc đó, không nên giả định ngày kết thúc.
-- **Báo cáo lỗ hổng trong nhánh LTS:** sử dụng cùng kênh như mọi phiên bản khác —
+  tính năng mới được đưa vào kênh v4; dòng LTS ưu tiên tính ổn định. `npm install omniroute`
+  (dist-tag `latest`) vẫn ở v3 trong toàn bộ chu kỳ v4.
+- **Thời hạn:** `stable/v3` nhận được **các bản sửa lỗi bảo mật và lỗi hồi quy nghiêm trọng trong
+  12 tháng sau khi phát hành 3.9.0 hoặc cho đến 90 ngày sau khi v4.0.0 được phát hành dưới dạng `latest` —
+  tùy thời điểm nào muộn hơn**. Ngày kết thúc tương ứng được ghi lại trong ghi chú phát hành 3.9.0 và trong
+  [`ROADMAP.md`](ROADMAP.md) khi bản phát hành được tạo.
+- **Báo cáo lỗ hổng trong dòng LTS:** sử dụng cùng kênh như mọi phiên bản khác —
   một [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) riêng tư,
-  tuyệt đối không phải issue công khai. Hãy nêu rõ phiên bản bạn đã kiểm thử (ví dụ `3.9.2`); các bản sửa lỗi được đưa vào
-  `stable/v3` và chuyển tiếp sang v4.
-- **Đường cơ sở bảo mật tại thời điểm tách nhánh LTS:** trạng thái được đo lường của trình quét, cơ chế bảo vệ tuyến và
-  bằng chứng về thông tin xác thực công khai được ghi lại trong
+  tuyệt đối không sử dụng issue công khai. Hãy nêu rõ phiên bản bạn đã kiểm thử (ví dụ `3.9.2`); các bản sửa lỗi được đưa vào
+  `stable/v3` và được chuyển tiếp sang v4.
+- **Đường cơ sở bảo mật tại thời điểm phát hành LTS:** trạng thái trình quét đã đo lường, các bằng chứng về bộ bảo vệ tuyến và
+  thông tin xác thực công khai được ghi lại trong
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

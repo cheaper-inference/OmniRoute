@@ -182,6 +182,7 @@ omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # prints Cursor's in-app steps
 omniroute setup-roo          # Roo Code import + autoImport pointer
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
@@ -230,12 +231,12 @@ npm run test:protocols:e2e
 **Claude Code:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Add to your MCP settings:
+Add to your MCP settings (stdio, with the key so the caller has a principal):
 
 ```json
 {
@@ -243,13 +244,20 @@ Add to your MCP settings:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Full MCP documentation:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 tools, IDE configs, Python/TS/Go clients.
+Or, when `mcpTransport` is `streamable-http` (set it on `/dashboard/mcp` or with `omniroute mcp enable --transport streamable-http`), point the client's remote MCP server entry at `http://localhost:20128/api/mcp/stream`.
+
+The key travels as `Authorization: Bearer <api-key>` (see [MCP Server → Remote access](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) for remote hosts; a remote key needs `mcp:connect` plus its read/write scopes).
+
+**Full MCP documentation:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 tools, IDE configs, Python/TS/Go clients. Operator reference for the compression CCR/dedup tools (markers, prerequisites, per-tool scopes, retrieval pagination, diagnostics): [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 ### A2A Setup (Agent-to-Agent Protocol)
 

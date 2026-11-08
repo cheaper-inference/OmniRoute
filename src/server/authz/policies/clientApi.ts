@@ -1,9 +1,13 @@
 import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth.ts";
-import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
-import { extractApiKey } from "@/sse/services/auth.ts";
-import { extractGoogApiKeyHeader } from "@/sse/services/googApiKeyAuth.ts";
+import { recordApiKeyAuthTouch } from "@/lib/compliance/index";
+import { classifyIpScope, getClientIpFromRequest } from "@/lib/ipUtils";
+import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
+import { extractApiKeyCandidates } from "@/sse/services/clientApiKeyResolver.ts";
+import { isEntraSsoEnabled } from "../entra/config";
+import { evaluateSsoAuth, looksLikeEntraJwt } from "../entra/evaluate";
 import type { AuthOutcome, PolicyContext, RoutePolicy } from "../context";
 import { allow, reject } from "../context";
+import { isViaProxyRequest, requestPeerAddress } from "../peerContext";
 
 const HANDSHAKE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
@@ -18,47 +22,96 @@ function isWsHandshake(ctx: PolicyContext): boolean {
   }
 }
 
-function extractBearer(request: Request): string | null {
-  const raw = request.headers.get("authorization") ?? request.headers.get("Authorization");
-  const xApiKey = request.headers.get("x-api-key") ?? request.headers.get("X-Api-Key");
-  const xGoogApiKey = extractGoogApiKeyHeader(request.headers);
-  if (raw) {
-    const trimmed = raw.trim();
-    if (trimmed.toLowerCase().startsWith("bearer ")) {
-      const token = trimmed.slice(7).trim();
-      if (token) return token;
-    }
-    // A non-"Bearer <token>" Authorization header (an empty "Bearer ", or a
-    // client's own non-OmniRoute token — VS Code Copilot sends one even when the
-    // OmniRoute key lives in the URL path of a /vscode tokenized endpoint) must
-    // NOT short-circuit auth. Fall through to x-api-key and the path-scoped URL
-    // token below instead of rejecting the request with "Authentication required".
-  }
-
-  if (xApiKey) {
-    return xApiKey.trim() || null;
-  }
-
-  // Issue #7034: gemini-cli (and any @google/genai-based client) sends its
-  // key via x-goog-api-key exclusively — accept it unconditionally, same
-  // shape as the x-api-key fallback above.
-  if (xGoogApiKey) {
-    return xGoogApiKey;
-  }
-
-  return extractApiKey(request);
-}
-
 function maskKeyId(apiKey: string): string {
   const tail = apiKey.slice(-4);
   return `key_${tail}`;
 }
 
+function redactCredentials(
+  value: string | null,
+  credentials: Array<string | null | undefined>
+): string | null {
+  if (!value) return null;
+  let sanitized = value;
+  for (const credential of credentials) {
+    if (credential) sanitized = sanitized.split(credential).join("[redacted]");
+  }
+  return sanitized;
+}
+
+function getAuthTouchClientIp(ctx: PolicyContext): string {
+  const peerAddress = requestPeerAddress(ctx);
+  const peerScope = classifyIpScope(peerAddress);
+  const trustedProxyHop =
+    isViaProxyRequest(ctx) && (peerScope === "loopback" || peerScope === "private");
+
+  return getClientIpFromRequest({
+    headers: ctx.request.headers,
+    // A token-validated proxy stamp plus a local/private socket peer is the
+    // app's trusted-proxy boundary. Withhold that hop so ipUtils resolves the
+    // forwarded client. Public/direct peers remain authoritative even if they
+    // spoof forwarding headers.
+    ip: trustedProxyHop ? undefined : (peerAddress ?? undefined),
+  });
+}
+
+/**
+ * Opt-in (default off): record the caller's IP and user-agent on auth-touch rows.
+ * Off, the row still records which key was used, when, and on which path.
+ */
+export const API_KEY_AUDIT_CLIENT_DETAILS_FLAG = "API_KEY_AUDIT_CLIENT_DETAILS_ENABLED";
+
+/**
+ * Best-effort audit of a successful GET/HEAD API-key authentication (metadata and
+ * discovery reads that never reach the inference call log). Honours noLog keys and
+ * the env key, and redacts every presented credential from the recorded path/UA.
+ * Client IP and user-agent are recorded only with API_KEY_AUDIT_CLIENT_DETAILS_FLAG on.
+ */
+async function recordClientApiAuthTouch(
+  ctx: PolicyContext,
+  credential: string,
+  credentials: string[]
+): Promise<void> {
+  const method = ctx.request.method.toUpperCase();
+  if (method !== "GET" && method !== "HEAD") return;
+  // Best effort end to end: the key already validated, so a failure in the metadata
+  // lookup, IP resolution or redaction must never change the auth outcome.
+  try {
+    const { getApiKeyMetadata } = await import("../../../lib/db/apiKeys");
+    const metadata = await getApiKeyMetadata(credential);
+    if (!metadata || metadata.id === "env-key" || metadata.noLog === true) return;
+    const withClientDetails = isFeatureFlagEnabled(API_KEY_AUDIT_CLIENT_DETAILS_FLAG);
+    recordApiKeyAuthTouch({
+      apiKeyId: metadata.id,
+      method,
+      normalizedPath: redactCredentials(ctx.classification.normalizedPath, credentials) || "/",
+      ipAddress: withClientDetails ? getAuthTouchClientIp(ctx) : null,
+      userAgent: withClientDetails
+        ? redactCredentials(ctx.request.headers.get("user-agent"), [
+            ...credentials,
+            metadata.keyHash,
+          ])
+        : null,
+      requestId: ctx.requestId,
+    });
+  } catch {
+    // Observability only; never block or reject an authenticated request.
+  }
+}
+
 export const clientApiPolicy: RoutePolicy = {
   routeClass: "CLIENT_API",
   async evaluate(ctx: PolicyContext): Promise<AuthOutcome> {
-    const bearer = extractBearer(ctx.request as Request);
-    if (!bearer) {
+    // Every credential the client presented, in precedence order (Bearer,
+    // x-api-key, x-goog-api-key #7034, path-scoped `/vscode/<key>/…` token).
+    // A non-"Bearer <token>" Authorization header (an empty "Bearer ", or a
+    // client's own non-OmniRoute token — VS Code Copilot sends one even when the
+    // OmniRoute key lives in the URL path of a /vscode tokenized endpoint) must
+    // NOT short-circuit auth, and neither may an unrelated Bearer sent ALONGSIDE
+    // a valid x-api-key (Claude Code with a claude.ai session or
+    // ANTHROPIC_AUTH_TOKEN): the request is accepted when ANY credential validates.
+    const credentials = extractApiKeyCandidates(ctx.request as Request);
+    if (credentials.length === 0) {
       // The WS descriptor handshake is a metadata read; the route handler
       // performs the actual wsAuth/dashboard/API-key decision and returns the
       // protocol details the browser needs before opening the socket.
@@ -77,25 +130,50 @@ export const clientApiPolicy: RoutePolicy = {
       return reject(401, "AUTH_002", "Authentication required");
     }
 
-    const { validateApiKey } = await import("../../../lib/db/apiKeys");
-    const ok = await validateApiKey(bearer);
-    if (!ok) {
-      // Issue #2257: when REQUIRE_API_KEY is off, a stale CLI config (Codex
-      // Desktop auto-config, Hermes, etc.) carrying an invalid Bearer
-      // shouldn't 401 the whole request — REQUIRE_API_KEY=false means
-      // "anonymous traffic is allowed", so an invalid key should degrade to
-      // anonymous instead of rejecting. We log a warning so the bad key is
-      // still observable in the request log.
-      if (!isRequireApiKeyEnabled()) {
-        console.warn(
-          `[clientApiPolicy] invalid bearer presented to ${ctx.classification.normalizedPath} ` +
-            `but REQUIRE_API_KEY=false — falling through to anonymous (key_id=${maskKeyId(bearer)})`
-        );
-        return allow({ kind: "anonymous", id: "local" });
+    // Runs before validateApiKey, but only while SSO is actually configured —
+    // otherwise a client's own unrelated JWT would stop degrading to anonymous
+    // under REQUIRE_API_KEY=false. Once SSO does claim a bearer, its outcome is
+    // FINAL: falling through would let that same branch turn an Entra outage
+    // into open access. The highest-precedence credential is the one SSO
+    // inspects (Claude Code's apiKeyHelper sends the JWT as both Bearer and
+    // x-api-key, so it is always first).
+    const primary = credentials[0];
+    if (looksLikeEntraJwt(primary) && (await isEntraSsoEnabled())) {
+      const verdict = await evaluateSsoAuth(primary);
+      if (!verdict.ok) {
+        const failure = verdict as { status: number; code: string; message: string };
+        return reject(failure.status, failure.code, failure.message);
       }
-      return reject(401, "AUTH_002", "Invalid API key");
+      return allow({
+        kind: "sso_user",
+        id: verdict.oid,
+        label: verdict.upn || undefined,
+      });
     }
 
-    return allow({ kind: "client_api_key", id: maskKeyId(bearer) });
+    const { validateApiKey } = await import("../../../lib/db/apiKeys");
+    for (const credential of credentials) {
+      // The subject is the credential that actually validated, so identity and
+      // usage never bind to a stale Bearer sent next to a valid x-api-key.
+      if (await validateApiKey(credential)) {
+        await recordClientApiAuthTouch(ctx, credential, credentials);
+        return allow({ kind: "client_api_key", id: maskKeyId(credential) });
+      }
+    }
+
+    // Issue #2257: when REQUIRE_API_KEY is off, a stale CLI config (Codex
+    // Desktop auto-config, Hermes, etc.) carrying an invalid Bearer
+    // shouldn't 401 the whole request — REQUIRE_API_KEY=false means
+    // "anonymous traffic is allowed", so an invalid key should degrade to
+    // anonymous instead of rejecting. We log a warning so the bad key is
+    // still observable in the request log.
+    if (!isRequireApiKeyEnabled()) {
+      console.warn(
+        `[clientApiPolicy] invalid bearer presented to ${ctx.classification.normalizedPath} ` +
+          `but REQUIRE_API_KEY=false — falling through to anonymous (key_id=${maskKeyId(credentials[0])})`
+      );
+      return allow({ kind: "anonymous", id: "local" });
+    }
+    return reject(401, "AUTH_002", "Invalid API key");
   },
 };

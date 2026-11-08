@@ -13,12 +13,19 @@ import {
   isUnconfiguredLoopbackSearchProvider,
   SEARCH_PROVIDERS,
   getSearchCredentialFallbacks,
+  autoSearchCandidates,
+  admitsAutoCandidate,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { buildErrorBody, errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  keyAdmitsKeylessProviders,
+  resolveKeyConnectionScope,
+  withoutKeyScopeBlocked,
+} from "@/sse/services/keyConnectionScope";
 import { v1SearchSchema } from "@/shared/validation/schemas";
 import {
   formatValidationMessage,
@@ -78,13 +85,28 @@ export async function GET() {
 type SearchCredentials = Record<string, any>;
 type SearchCredentialLookup = SearchCredentials | RateLimitedCredentials | null;
 
-async function resolveSearchCredentials(providerId: string): Promise<SearchCredentialLookup> {
-  const credentials = await getProviderCredentialsWithQuotaPreflight(providerId).catch(() => null);
+/**
+ * GHSA-3w2r: every lookup is bounded by the caller key's connection scope
+ * (`allowedConnections`, null = unscoped). A provider whose connections are all
+ * outside that scope counts as unconfigured, so selection moves on to the next
+ * provider instead of dispatching the secret-less key-scope sentinel.
+ */
+async function resolveSearchCredentials(
+  providerId: string,
+  allowedConnections: string[] | null
+): Promise<SearchCredentialLookup> {
+  const credentials = withoutKeyScopeBlocked(
+    await getProviderCredentialsWithQuotaPreflight(providerId, null, allowedConnections).catch(
+      () => null
+    )
+  );
   if (credentials && !isAllRateLimitedCredentials(credentials)) return credentials;
 
   for (const fallbackId of getSearchCredentialFallbacks(providerId)) {
-    const fallbackCredentials = await getProviderCredentialsWithQuotaPreflight(fallbackId).catch(
-      () => null
+    const fallbackCredentials = withoutKeyScopeBlocked(
+      await getProviderCredentialsWithQuotaPreflight(fallbackId, null, allowedConnections).catch(
+        () => null
+      )
     );
     if (fallbackCredentials && !isAllRateLimitedCredentials(fallbackCredentials)) {
       return fallbackCredentials;
@@ -95,13 +117,22 @@ async function resolveSearchCredentials(providerId: string): Promise<SearchCrede
   return credentials;
 }
 
-async function resolveSearchExecutionCredentials(providerConfig: {
-  id: string;
-  authType: string;
-}): Promise<SearchCredentialLookup> {
-  const credentials = await resolveSearchCredentials(providerConfig.id);
+async function resolveSearchExecutionCredentials(
+  providerConfig: {
+    id: string;
+    authType: string;
+  },
+  allowedConnections: string[] | null
+): Promise<SearchCredentialLookup> {
+  const credentials = await resolveSearchCredentials(providerConfig.id, allowedConnections);
   if (credentials) return credentials;
-  return providerConfig.authType === "none" ? {} : null;
+  // GHSA-3w2r: a keyless provider (DuckDuckGo free, a local SearXNG default, …)
+  // sends the query to a party the key's connection allowlist did not approve,
+  // so a connection-scoped key reaches it only when the allowlist names
+  // `noauth` (chat's #9057 rule).
+  return providerConfig.authType === "none" && keyAdmitsKeylessProviders(allowedConnections)
+    ? {}
+    : null;
 }
 
 // Helper: build domain filter array from filters object
@@ -140,6 +171,10 @@ async function postHandler(request: Request, context: unknown) {
   // Enforce API key policies — use "search" as model identifier for consistent policy config
   const policy = await enforceApiKeyPolicy(request, "search");
   if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: provider credentials stay inside the key's connection scope.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+  const { allowedConnections } = scope;
 
   const settings = await getSettings().catch(() => ({}) as any);
   const blockedProviders = settings?.blockedProviders || [];
@@ -197,7 +232,10 @@ async function postHandler(request: Request, context: unknown) {
 
   if (body.provider) {
     // Explicit provider — single credential lookup (with fallback)
-    const explicitCredentials = await resolveSearchExecutionCredentials(providerConfig);
+    const explicitCredentials = await resolveSearchExecutionCredentials(
+      providerConfig,
+      allowedConnections
+    );
     if (isAllRateLimitedCredentials(explicitCredentials)) {
       return rateLimitedProviderResponse(providerConfig.id, explicitCredentials);
     }
@@ -209,43 +247,26 @@ async function postHandler(request: Request, context: unknown) {
       );
     }
   } else {
-    // Auto-select — try the resolved provider first, then iterate others by cost
-    const selectedCredentials = await resolveSearchExecutionCredentials(providerConfig);
-    if (isAllRateLimitedCredentials(selectedCredentials)) {
-      firstRateLimitedCredentials = {
-        providerId: providerConfig.id,
-        credentials: selectedCredentials,
-      };
-    } else {
-      credentials = selectedCredentials;
-    }
+    // Auto-select: walk the same admitted, cost-ranked candidates executeWebSearch uses
+    // (a configured SearXNG included), so /v1/search and the web_search tool agree even
+    // when two providers tie on cost. selectProvider's pick is only a seed for errors.
+    const sortedIds = autoSearchCandidates(body.search_type)
+      .filter((provider) => !isProviderBlockedByIdOrAlias(provider.id, blockedProviders))
+      .map((p) => p.id);
 
-    if (!credentials) {
-      // Sort by cost to find cheapest with credentials (fallback-only providers
-      // are reached via the last-resort step below, never the primary pick).
-      const sortedIds = Object.values(SEARCH_PROVIDERS)
-        .filter(
-          (provider) =>
-            !provider.fallbackOnly &&
-            supportsSearchType(provider, body.search_type) &&
-            !isProviderBlockedByIdOrAlias(provider.id, blockedProviders)
-        )
-        .sort((a, b) => a.costPerQuery - b.costPerQuery)
-        .map((p) => p.id);
-
-      for (const pid of sortedIds) {
-        if (pid === providerConfig.id) continue;
-        const altConfig = getSearchProvider(pid);
-        const altCreds = altConfig ? await resolveSearchExecutionCredentials(altConfig) : null;
-        if (isAllRateLimitedCredentials(altCreds)) {
-          firstRateLimitedCredentials ??= { providerId: pid, credentials: altCreds };
-          continue;
-        }
-        if (altConfig && altCreds) {
-          providerConfig = altConfig;
-          credentials = altCreds;
-          break;
-        }
+    for (const pid of sortedIds) {
+      const altConfig = getSearchProvider(pid);
+      const altCreds = altConfig
+        ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
+        : null;
+      if (isAllRateLimitedCredentials(altCreds)) {
+        firstRateLimitedCredentials ??= { providerId: pid, credentials: altCreds };
+        continue;
+      }
+      if (altConfig && admitsAutoCandidate(altConfig, altCreds)) {
+        providerConfig = altConfig;
+        credentials = altCreds;
+        break;
       }
     }
 
@@ -265,10 +286,15 @@ async function postHandler(request: Request, context: unknown) {
       for (const fallbackProvider of fallbackProviders) {
         providerConfig = fallbackProvider;
         if (fallbackProvider.id === "duckduckgo-free") {
+          // GHSA-3w2r: the keyless last resort follows the same rule as above.
+          if (!keyAdmitsKeylessProviders(allowedConnections)) continue;
           credentials = {};
           break;
         }
-        const fallbackCreds = await resolveSearchCredentials(fallbackProvider.id);
+        const fallbackCreds = await resolveSearchCredentials(
+          fallbackProvider.id,
+          allowedConnections
+        );
         if (isAllRateLimitedCredentials(fallbackCreds)) continue;
         if (fallbackCreds) {
           credentials = fallbackCreds;
@@ -290,21 +316,17 @@ async function postHandler(request: Request, context: unknown) {
       );
     }
 
-    // Find alternate for failover — must bind credentials to the matched provider.
-    // Exclude fallback-only providers; they are only used by the last-resort step.
-    const otherIds = Object.values(SEARCH_PROVIDERS)
-      .filter(
-        (provider) => !provider.fallbackOnly && supportsSearchType(provider, body.search_type)
-      )
-      .sort((a, b) => a.costPerQuery - b.costPerQuery)
-      .map((p) => p.id)
-      .filter((id) => id !== providerConfig.id);
+    // Find alternate for failover — must bind credentials to the matched provider. It comes
+    // from the same unblocked candidates; the other fallback-only providers stay last-resort.
+    const otherIds = sortedIds.filter((id) => id !== providerConfig.id);
 
     for (const pid of otherIds) {
       const altConfig = getSearchProvider(pid);
-      const creds = altConfig ? await resolveSearchExecutionCredentials(altConfig) : null;
+      const creds = altConfig
+        ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
+        : null;
       if (isAllRateLimitedCredentials(creds)) continue;
-      if (creds) {
+      if (altConfig && admitsAutoCandidate(altConfig, creds)) {
         alternateProviderId = pid;
         alternateCredentials = creds;
         break;
@@ -319,7 +341,7 @@ async function postHandler(request: Request, context: unknown) {
         if (!provider.fallbackOnly || provider.id === providerConfig.id) continue;
         if (isUnconfiguredLoopbackSearchProvider(provider)) continue;
         if (!supportsSearchType(provider, body.search_type)) continue;
-        const fallbackCreds = await resolveSearchExecutionCredentials(provider);
+        const fallbackCreds = await resolveSearchExecutionCredentials(provider, allowedConnections);
         if (fallbackCreds && !isAllRateLimitedCredentials(fallbackCreds)) {
           alternateProviderId = provider.id;
           alternateCredentials = fallbackCreds;
@@ -346,6 +368,10 @@ async function postHandler(request: Request, context: unknown) {
       time_range: body.time_range,
       content: body.content,
       provider_options: body.provider_options,
+      // GHSA-3w2r: a connection-scoped key gets its own cache partition, so it
+      // is never served a result fetched through a connection outside its
+      // scope. Unscoped callers keep sharing today's entries (key omitted).
+      connection_scope: allowedConnections ? [...allowedConnections].sort() : undefined,
     }
   );
 

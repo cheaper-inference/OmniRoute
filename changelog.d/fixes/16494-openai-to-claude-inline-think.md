@@ -1,1 +1,0 @@
-- **fix(translator):** split inline `<think>` reasoning into Claude thinking blocks on OpenAI→Claude streams for textual-reasoning routes (DeepSeek-R1 mirrors, QwQ, K3, MiniMax-M3), instead of leaking the raw markup into the text block ([#16494](https://github.com/diegosouzapw/OmniRoute/pull/16494)) — thanks @sirwhy

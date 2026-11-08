@@ -37,34 +37,34 @@ Search Tools Studio는 `/dashboard/search-tools`를 기본 검색 플레이그�
 
 ### 검색 탭
 
-기존 `SearchForm` + `ResultsPanel` + `RerankPanel`을 하나의 탭으로 발전시킵니다.
+기존 `SearchForm` + `ResultsPanel` + `RerankPanel`을 하나의 탭으로 발전시킵니다:
 
 - 쿼리 → 결과(제목, URL, 스니펫, 관련성 점수).
-- 구성 창에 공급자 메타데이터(비용, 할당량, 상태) 표시.
-- 재순위 섹션: 재순위 모델을 선택하고 결과 순서를 재정렬하며 `positionDelta` 표시.
-- 검색 공급자가 구성되지 않은 경우 CTA가 포함된 빈 상태 표시.
+- Config 창의 제공자 메타데이터(비용, 할당량, 상태).
+- 재순위 지정 섹션: 재순위 지정 모델을 선택하고 결과 순서를 재정렬하며 `positionDelta`를 표시합니다.
+- 검색 제공자가 구성되지 않은 경우 CTA가 포함된 빈 상태를 표시합니다.
 - `SearchHistory.tsx`를 통한 검색 기록.
-- `POST /v1/search` 호출(기존 엔드포인트, 변경 없음).
+- `POST /v1/search`를 호출합니다(기존 엔드포인트, 변경 없음).
 
-### 스크랩 탭
+### 스크레이프 탭
 
-`POST /v1/web/fetch`(계획 05에서 생성됨)를 통해 URL에서 콘텐츠를 추출하는 새로운 탭입니다.
+`POST /v1/web/fetch`(계획 05에서 생성됨)를 통해 URL에서 콘텐츠를 추출하는 새로운 탭입니다:
 
 - 입력: URL + 전체 페이지 토글 + 형식 선택기(markdown / text / HTML).
 - 제출 → 가져오기 → `ScrapeResult.tsx` 렌더링.
-- `ScrapeResult`는 markdown 미리보기 + 원본 토글을 렌더링.
-- 제한: 응답 본문이 **256 KB**를 초과하면 UI에 `(잘림, 원본 보기)`를 표시하고 Monaco 모달에서 원본을 엽니다(D21).
-- 메타데이터 패널: 공급자(firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), 지연 시간, 비용, 응답 크기, 링크 수.
-- `useScrapeFetch.ts` 훅 사용.
+- `ScrapeResult`는 마크다운 미리보기 + 원본 토글을 렌더링합니다.
+- 제한: 응답 본문이 **256 KB**를 초과하면 UI에 `(잘림, 원본 보기)`가 표시되고 Monaco 모달에서 원본이 열립니다(D21).
+- 메타데이터 패널: 제공자(firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), 지연 시간, 비용, 응답 크기, 링크 수.
+- `useScrapeFetch.ts` 훅을 사용합니다.
 
 ### 비교 탭
 
-최대 **4개의 공급자에서 동일한 쿼리/URL을 병렬로** 실행합니다(D22).
+최대 **4개의 제공자에서 동일한 쿼리/URL을 병렬로** 실행합니다(D22):
 
-- 공급자별로 나란히 열 표시.
+- 제공자별 나란히 배치된 열.
 - 지표: 지연 시간, 비용, 결과 수, 응답 크기.
-- 검색 시 URL 중복 계산(초기 결과 대비 공유 URL 수).
-- 공급자별로 `POST /v1/search`(검색) 또는 `POST /v1/web/fetch`(스크랩) 호출.
+- 검색에 대한 URL 중복 계산(초기 결과 대비 공유된 URL 수).
+- 제공자별로 `POST /v1/search`(검색) 또는 `POST /v1/web/fetch`(스크레이프)를 호출합니다.
 
 ---
 
@@ -97,15 +97,14 @@ Search Tools Studio는 `/dashboard/search-tools`를 기본 검색 플레이그�
 
 ---
 
-## 프로바이더 카탈로그
+## 제공자 카탈로그
 
-`ProviderCatalog.tsx`는 `GET /api/search/providers`에서 전체 프로바이더 목록을 제공합니다
-(F4에서 가져오기 프로바이더를 포함하도록 확장됨):
+`ProviderCatalog.tsx`는 `GET /api/search/providers`에서 전체 제공자 목록을 노출합니다
+(F4에서 fetch 제공자를 포함하도록 확장됨):
 
-| `kind` | `"search"`(20개 프로바이더) 또는 `"fetch"`(firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"`(20개 제공자) 또는 `"fetch"`(firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-상태는 요청 시점에 자격 증명의 존재 여부와 모든 키가 현재 쿨다운 상태인지 확인하여
-**동적으로 결정됩니다**.
+상태는 자격 증명의 존재 여부와 모든 키가 현재 쿨다운 상태인지 확인하여 **요청 시점에 파생**됩니다.
 
 ---
 
@@ -119,16 +118,16 @@ API 키 플레이스홀더는 항상 `$OMNIROUTE_API_KEY`입니다(D11, Playgrou
 
 ## 백엔드 변경 사항
 
-이 기능에 필요한 백엔드 변경 사항은 하나뿐이었습니다:
+이 기능을 위해 필요한 백엔드 변경 사항은 하나뿐이었습니다.
 
 ### 확장된 `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts`는 다음과 같이 확장되었습니다:
+`src/app/api/search/providers/route.ts`는 다음과 같이 확장되었습니다.
 
-- 6개의 가져오기 프로바이더(`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`)를 모두 배열에 포함합니다.
+- 모든 가져오기 제공자(`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`)를 배열에 포함합니다.
 - 모든 항목에 `kind: "search" | "fetch"`를 추가합니다.
 - 실시간 자격 증명 상태에서 파생된 `status: "configured" | "missing" | "rate_limited"`를 추가합니다.
-- 이전 버전과의 호환성을 유지합니다. 기존 필드(`id`, `name` 등)는 변경되지 않습니다.
+- 하위 호환성을 유지합니다. 기존 필드(`id`, `name` 등)는 변경되지 않습니다.
 
 ---
 

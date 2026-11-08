@@ -200,7 +200,7 @@ test("claude passthrough never forwards a foreign server_tool_use id to api.anth
 test("non-Anthropic Claude-format target (zai) receives the history unchanged", async () => {
   const { captured, result } = await runPassthrough("zai", "glm-5.1");
   assert.ok(captured, "fetch was not called");
-  assert.ok(!captured.url.includes("api.anthropic.com"));
+  assert.notEqual(new URL(captured.url).hostname, "api.anthropic.com");
   assert.equal(result.success, true);
 
   const blocks = captured.body.messages.flatMap((m) => (Array.isArray(m.content) ? m.content : []));

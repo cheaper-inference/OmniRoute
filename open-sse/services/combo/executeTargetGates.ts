@@ -27,14 +27,13 @@ import { evaluateCliproxyPreflightGate } from "../../../src/lib/services/cliprox
 import { lookupPositiveCap } from "./concurrencyCaps.ts";
 import { recordComboDecision } from "./decisionTrace.ts";
 import { recordPersistedSkipBypass } from "../comboMetrics.ts";
-import {
-  getExhaustedTargetSkipReason,
-  resolvePersistedConnectionCooldownSkipReason,
-} from "./comboPredicates.ts";
+import { getExhaustedTargetSkipReason } from "./comboPredicates.ts";
+import { resolveAndRecordPersistedCooldown } from "./persistedConnectionCooldown.ts";
 import { resolveQuotaExhaustionCutoffForTarget } from "./quotaExhaustionCutoff.ts";
 import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.ts";
 import type { AttemptLoopDeps, AttemptLoopState, GateDecision } from "./attemptLoopTypes.ts";
 import { modelAvailabilitySkipReason, type ResolvedComboTarget } from "./types.ts";
+import { recordSkippedConnectionCooldown } from "./skippedConnectionCooldown.ts";
 import type { PreDispatchExclusion } from "./pinRecovery.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
 
@@ -124,10 +123,12 @@ export async function evaluateExecuteTargetGates(opts: {
       cause,
     });
 
-  // Lift-as-is from combo.ts executeTarget: only count a fallback when
-  // this is not the first ordered target. Do not change the condition.
+  // Every skipped ordered target is a fallback, the first one included: the
+  // counter has to match the index of the target that ends up serving the
+  // request — the same value stamped on the target as `fallbackAttempts` and
+  // exposed as `X-OmniRoute-Fallback-Attempts`.
   const bumpFallback = () => {
-    if (i > 0) state.fallbackCount++;
+    state.fallbackCount++;
   };
 
   const openBreaker = findOpenCircuitBreaker(provider, target.connectionId);
@@ -202,7 +203,8 @@ export async function evaluateExecuteTargetGates(opts: {
     : { ...target, modelAbortSignal: abortSignal, fallbackAttempts: i };
 
   if (target.connectionId) {
-    const persistedSkip = await resolvePersistedConnectionCooldownSkipReason(
+    const persistedSkip = await resolveAndRecordPersistedCooldown(
+      state,
       target,
       (id) => readConnectionForCooldownGate(id, false),
       allowRateLimitedConnection
@@ -350,6 +352,7 @@ export async function evaluateExecuteTargetGates(opts: {
     const available = await deps.isModelAvailable(modelStr, targetForAttempt);
     const skipReason = modelAvailabilitySkipReason(available);
     if (skipReason) {
+      recordSkippedConnectionCooldown(state, available);
       deps.log.debug?.(
         "COMBO",
         skipReason === "model_not_in_catalog"

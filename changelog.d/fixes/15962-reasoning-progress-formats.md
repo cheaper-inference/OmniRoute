@@ -1,1 +1,0 @@
-- Recognize Gemini thought signatures and OpenAI-compatible reasoning deltas as stream progress, preserving content-stall timeouts for lifecycle-only streams and the separate empty-output guard.

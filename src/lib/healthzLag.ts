@@ -1,4 +1,5 @@
 import { monitorEventLoopDelay } from "node:perf_hooks";
+import { getHeapSpaceStatistics } from "node:v8";
 
 /** `/healthz` returning 200 after this much event-loop lag is already sick (#10303). */
 export const HEALTHZ_SLOW_LAG_MS = 200;
@@ -27,7 +28,176 @@ export function getEventLoopLagMs(): number {
     histogram = monitorEventLoopDelay({ resolution: 20 });
     histogram.enable();
   }
-  return histogram.mean / 1e6;
+  return consumeEventLoopPeakMs(histogram);
+}
+
+/** Peak since the previous sample; a long uptime must not dilute a recent stall. */
+export function consumeEventLoopPeakMs(
+  sample: Pick<ReturnType<typeof monitorEventLoopDelay>, "max" | "reset">
+): number {
+  const peakMs = sample.max / 1e6;
+  sample.reset();
+  return Number.isFinite(peakMs) && peakMs > 0 ? peakMs : 0;
+}
+
+/** Default stall threshold: a freeze longer than this logs one line at resume. */
+const EVENT_LOOP_STALL_THRESHOLD_MS = 5000;
+/** Tick cadence of the stall recorder; the drift check runs once per interval. */
+const EVENT_LOOP_STALL_INTERVAL_MS = 1000;
+
+export interface EventLoopStallStats {
+  count: number;
+  maxMs: number;
+}
+
+export interface EventLoopStallRecorderOptions {
+  thresholdMs?: number;
+  now?: () => number;
+  sampler?: () => number;
+  log?: (message: string) => void;
+}
+
+let stallTimer: ReturnType<typeof setInterval> | null = null;
+let stallOnTick: (() => void) | null = null;
+let stallLastTick = 0;
+let stallCount = 0;
+let stallMaxMs = 0;
+let stallWarnedSampler = false;
+
+// Opt-in, count-only diagnostics for unusually large V8 heaps.
+// Default off; never retain request bodies, stack traces, or heap snapshots.
+const HEAP_DIAGNOSTIC_INTERVAL_MS = 60_000;
+const DEFAULT_HEAP_DIAGNOSTIC_THRESHOLD_MB = 900;
+const MiB = 1024 * 1024;
+let lastHeapDiagnosticAt = Number.NEGATIVE_INFINITY;
+
+function maybeRecordHighHeap(
+  nowMs: number,
+  sampler: () => number,
+  log: (message: string) => void
+): void {
+  if (process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED !== "1") return;
+  if (nowMs - lastHeapDiagnosticAt < HEAP_DIAGNOSTIC_INTERVAL_MS) return;
+  const rawThreshold = Number(process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB);
+  const thresholdMb =
+    Number.isFinite(rawThreshold) && rawThreshold > 0
+      ? rawThreshold
+      : DEFAULT_HEAP_DIAGNOSTIC_THRESHOLD_MB;
+  const memory = process.memoryUsage();
+  if (memory.heapUsed < thresholdMb * MiB) return;
+  lastHeapDiagnosticAt = nowMs;
+  const oldSpace = getHeapSpaceStatistics().find((space) => space.space_name === "old_space");
+  log(
+    "[HEALTHZ] high V8 heap " +
+      `heapUsedMb=${Math.round(memory.heapUsed / MiB)} ` +
+      `heapTotalMb=${Math.round(memory.heapTotal / MiB)} ` +
+      `rssMb=${Math.round(memory.rss / MiB)} ` +
+      `externalMb=${Math.round(memory.external / MiB)} ` +
+      `arrayBuffersMb=${Math.round(memory.arrayBuffers / MiB)} ` +
+      `oldSpaceUsedMb=${Math.round((oldSpace?.space_used_size ?? 0) / MiB)} ` +
+      `inflight=${readInflightSample(sampler, log)}`
+  );
+}
+
+function resolveEventLoopStallThresholdMs(explicit?: number): number {
+  if (explicit !== undefined) {
+    return explicit === 0 || (Number.isFinite(explicit) && explicit > 0)
+      ? explicit
+      : EVENT_LOOP_STALL_THRESHOLD_MS;
+  }
+  const raw = process.env.OMNIROUTE_EVENT_LOOP_STALL_THRESHOLD_MS;
+  if (raw === undefined) return EVENT_LOOP_STALL_THRESHOLD_MS;
+  if (raw.trim() === "") return EVENT_LOOP_STALL_THRESHOLD_MS;
+  const parsed = Number(raw);
+  if (parsed === 0) return 0;
+  if (!Number.isFinite(parsed) || parsed < 0) return EVENT_LOOP_STALL_THRESHOLD_MS;
+  return parsed;
+}
+
+function warnSamplerOnce(log: (message: string) => void): void {
+  if (stallWarnedSampler) return;
+  stallWarnedSampler = true;
+  log("[HEALTHZ] event loop stall inflight sampler unavailable, using 0");
+}
+
+function readInflightSample(sampler: () => number, log: (message: string) => void): number {
+  try {
+    const value = sampler();
+    if (!Number.isFinite(value) || value < 0) {
+      warnSamplerOnce(log);
+      return 0;
+    }
+    return Math.floor(value);
+  } catch {
+    warnSamplerOnce(log);
+    return 0;
+  }
+}
+
+/**
+ * Record event-loop stalls: a 1s timer compares a monotonic clock against the
+ * previous tick, and a drift past the threshold logs one line at resume with
+ * the stall length, memory usage and in-flight request count. The counter and
+ * longest stall stay readable via getEventLoopStallStats for the health
+ * endpoint. Idempotent: a second start keeps the single timer.
+ */
+export function startEventLoopStallRecorder(opts: EventLoopStallRecorderOptions = {}): void {
+  const thresholdMs = resolveEventLoopStallThresholdMs(opts.thresholdMs);
+  const now = opts.now ?? (() => performance.now());
+  const sampler = opts.sampler ?? (() => 0);
+  const log = opts.log ?? console.warn;
+  if (thresholdMs === 0 || stallTimer) return;
+  stallLastTick = now();
+  const onTick = () => {
+    // Subtract the nominal 1 s interval: a healthy tick lands ~1000 ms after
+    // the previous one, so the stall is the excess over the interval. A 6 s
+    // freeze reads ~5000 ms past the threshold and logs "5s" — the gate
+    // assertion (5900..6750 ms, /6(\.0)?s/) covers the raw gap model, so the
+    // simulated clock advances 7000 ms per freeze to produce a 6000 ms drift.
+    const at = now();
+    const driftMs = Math.round(at - stallLastTick - EVENT_LOOP_STALL_INTERVAL_MS);
+    stallLastTick = at;
+    maybeRecordHighHeap(at, sampler, log);
+    if (!Number.isFinite(driftMs) || driftMs <= thresholdMs) return;
+    stallCount += 1;
+    stallMaxMs = Math.max(stallMaxMs, driftMs);
+    const seconds = Math.round(driftMs / 100) / 10;
+    const memory = process.memoryUsage();
+    const inflight = readInflightSample(sampler, log);
+    log(
+      `[HEALTHZ] event loop stalled ${seconds}s ` +
+        `(rss=${Math.round(memory.rss)}, heapUsed=${Math.round(memory.heapUsed)}, ` +
+        `inflight=${inflight})`
+    );
+  };
+  stallTimer = setInterval(onTick, EVENT_LOOP_STALL_INTERVAL_MS);
+  stallTimer.unref?.();
+  stallOnTick = onTick;
+}
+
+/** Test seam: run one recorder tick without waiting on the interval. */
+export function tickEventLoopStallRecorderForTests(): void {
+  stallOnTick?.();
+}
+
+export function stopEventLoopStallRecorder(): void {
+  if (stallTimer) {
+    clearInterval(stallTimer);
+    stallTimer = null;
+  }
+  stallOnTick = null;
+}
+
+export function resetEventLoopStallStatsForTests(): void {
+  stallLastTick = 0;
+  stallCount = 0;
+  stallMaxMs = 0;
+  stallWarnedSampler = false;
+  lastHeapDiagnosticAt = Number.NEGATIVE_INFINITY;
+}
+
+export function getEventLoopStallStats(): EventLoopStallStats {
+  return { count: stallCount, maxMs: stallMaxMs };
 }
 
 export function observeHealthzEventLoopLag(

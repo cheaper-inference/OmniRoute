@@ -1,6 +1,12 @@
 import { setTimeout as sleep } from "node:timers/promises";
 import { getCliToken, CLI_TOKEN_HEADER } from "./utils/cliToken.mjs";
-import { resolveActiveContext, resolveActiveContextAsync } from "./contexts.mjs";
+import {
+  contextCredentialForRequest,
+  resolveActiveContext,
+  resolveActiveContextAsync,
+} from "./contexts.mjs";
+
+export { isContextOrigin } from "./contexts.mjs";
 
 export const RETRY_DEFAULTS = Object.freeze({
   maxAttempts: 3,
@@ -85,13 +91,19 @@ export async function buildHeaders(opts) {
   // key — a real `--api-key <x>` flag or a command-supplied token like
   // `connect --key` — counts as explicit and wins. Within a context the scoped
   // accessToken wins over the legacy apiKey.
+  //
+  // A context credential belongs to the server it was issued by, so it is only
+  // attached when the request goes to that context's own origin. A --base-url,
+  // OMNIROUTE_BASE_URL or absolute URL that points somewhere else (including
+  // `connect` probing a new server) falls through to the explicit/ambient key.
+  const destinationUrl = opts.destinationUrl ?? getBaseUrl(opts);
   const ambientKey = process.env.OMNIROUTE_API_KEY || null;
   const explicitKey = opts.apiKey && opts.apiKey !== ambientKey ? opts.apiKey : null;
   let auth = explicitKey;
   if (!auth) {
     try {
       const ctx = await resolveActiveContextAsync(opts.context ?? process.env.OMNIROUTE_CONTEXT);
-      auth = ctx?.accessToken || ctx?.apiKey || null;
+      auth = contextCredentialForRequest(ctx, destinationUrl) || null;
     } catch {
       // No context credential available — fall through to the ambient fallback.
     }
@@ -103,7 +115,6 @@ export async function buildHeaders(opts) {
   // Inject the machine-derived credential only for an explicit local loopback
   // destination. Remote contexts and absolute remote URLs use scoped access
   // tokens and must never receive this machine-bound local credential.
-  const destinationUrl = opts.destinationUrl ?? getBaseUrl(opts);
   if (!isLoopbackUrl(destinationUrl)) {
     headers.delete(CLI_TOKEN_HEADER);
   } else {
@@ -204,11 +215,13 @@ async function readResponseBody(res) {
   }
 }
 
-function fetchOnce(url, init, timeoutMs) {
-  if (!timeoutMs) return fetch(url, init);
+// `signal` (opts.signal) lets a caller cancel the request; it combines with the
+// per-attempt timeout when both are set.
+function fetchOnce(url, init, timeoutMs, signal) {
+  if (!timeoutMs) return fetch(url, signal ? { ...init, signal } : init);
   const ac = new AbortController();
   const t = setTimeout(() => ac.abort(), timeoutMs);
-  const merged = { ...init, signal: ac.signal };
+  const merged = { ...init, signal: signal ? AbortSignal.any([signal, ac.signal]) : ac.signal };
   return fetch(url, merged).finally(() => clearTimeout(t));
 }
 
@@ -229,7 +242,7 @@ export async function apiFetch(path, opts = {}) {
   let lastErr;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const res = await fetchOnce(url, { method, headers, body, redirect }, timeout);
+      const res = await fetchOnce(url, { method, headers, body, redirect }, timeout, opts.signal);
       if (res.ok) return enrichResponse(res, opts);
       if (attempt < maxAttempts && shouldRetryStatus(res.status, method, opts)) {
         const delay = computeBackoff(attempt, res.headers.get("retry-after"));
@@ -244,7 +257,8 @@ export async function apiFetch(path, opts = {}) {
       return enrichResponse(res, opts);
     } catch (err) {
       lastErr = err;
-      if (attempt < maxAttempts && shouldRetryError(err, opts)) {
+      // A caller that aborted its own signal wants the request stopped, not retried.
+      if (attempt < maxAttempts && !opts.signal?.aborted && shouldRetryError(err, opts)) {
         const delay = computeBackoff(attempt, null);
         if (verbose) {
           process.stderr.write(

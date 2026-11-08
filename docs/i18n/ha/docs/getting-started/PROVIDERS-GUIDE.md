@@ -8,88 +8,81 @@
 
 ---
 
-## Mene Ne Mai Samarwa?
+## Mene Ne Mai Bayar da Sabis?
 
-Ka ɗauki mai samarwa kamar **kamfanin sadarwar waya**. Kamar yadda kake buƙatar kamfanin sadarwar waya don yin kira, haka kuma kake buƙatar mai samar da AI don amfani da samfurorin AI. OmniRoute kamar waya ce da ke aiki da **dukkan kamfanonin sadarwa** — za ka iya sauyawa tsakaninsu ta atomatik.
+Ka ɗauki mai bayar da sabis kamar **kamfanin sadarwar waya**. Kamar yadda kake buƙatar kamfanin sadarwar waya don yin kira, kana buƙatar mai bayar da sabis na AI don amfani da samfuran AI. OmniRoute kamar waya ce da ke aiki da **dukkan kamfanonin sadarwa** — za ka iya sauyawa tsakaninsu ta atomatik.
 
-### Nau'ikan Masu Samarwa
+### Nau'ikan Masu Bayar da Sabis
 
-| Nau'i                | Mene Ne                         | Misalai                           | Farashi                      |
-| -------------------- | ------------------------------- | --------------------------------- | ---------------------------- |
-| **Kyauta**           | Ba a buƙatar biyan kuɗi         | Kiro, OpenCode Free, Pollinations | $0                           |
-| **Maɓallin API**     | Kana buƙatar maɓallin API       | OpenAI, Anthropic, Google         | Biya gwargwadon amfani       |
-| **OAuth**            | Shiga da asusunka               | Claude Code, GitHub Copilot       | Kuɗin rajista                |
-| **Kukin Yanar Gizo** | Yana amfani da zaman burauzarka | ChatGPT Web (Codex), Gemini Web   | $0 (yana amfani da asusunka) |
+| Nau'i          | Mene Ne                         | Misalai                         | Kuɗi                         |
+| -------------- | ------------------------------- | ------------------------------- | ---------------------------- |
+| **Kyauta**     | Ba a buƙatar biyan kuɗi         | Kiro, Pollinations              | $0                           |
+| **API Key**    | Kana buƙatar API key            | OpenAI, Anthropic, Google       | Biya gwargwadon amfani       |
+| **OAuth**      | Shiga da asusunka               | Claude Code, GitHub Copilot     | Biyan kuɗin rajista          |
+| **Web Cookie** | Yana amfani da zaman burauzarka | ChatGPT Web (Codex), Gemini Web | $0 (yana amfani da asusunka) |
 
-### Masu Samarwa Ta Kukin Yanar Gizo
+### Masu Bayar da Sabis ta Web Cookie
 
-Duba **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** don umarnin saiti na gama-gari, iyakoki, magance matsaloli, da jagororin tabbatar da sahihanci na kowane mai samarwa.
+Duba **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** don umarnin saitawa na gaba ɗaya, iyakoki, warware matsaloli, da jagororin tabbatar da asali na musamman ga kowane mai bayar da sabis.
 ---
 
-## Fara Cikin Sauri: Haɗa Mai Samarwarka Na Farko
+## Farawa Cikin Sauri: Haɗa Mai Ba da Sabis Na Farko
 
-### Saitin masu samarwa na kyauta na farkon gudanarwa wanda ba dole ba ne
+### Saitin mai ba da sabis kyauta na farkon amfani, idan ana so
 
-Mayen farkon gudanarwa yana bayar da bayyanannen katin **Saita masu samarwa na kyauta**. Yana samo jerin waɗanda suka cancanta a halin yanzu
-daga rajistar masu samarwa da ba sa buƙatar tabbatar da sahihanci ta OmniRoute, sannan ya ba ka damar dubawa da cire zaɓin kowane
-mai samarwa kafin tabbatarwa. OmniRoute yana nuna sanarwar taka-tsantsan ta mai samarwar da kuma hanyar haɗi zuwa shafinsa
-domin ka fara duba sharuɗɗan ɓangare na uku, keɓantawa, samuwa, da iyakokin adadin amfani.
+Jagoran farkon amfani yana bayar da katin **Saita masu ba da sabis kyauta** a sarari. Yana samo jerin waɗanda suka cancanta a halin yanzu daga rajistar masu ba da sabis marasa buƙatar tantancewa ta OmniRoute, sannan ya ba ka damar dubawa da cire zaɓin kowane mai ba da sabis kafin tabbatarwa. OmniRoute yana nuna sanarwar taka-tsantsan ta mai ba da sabis da kuma mahaɗi zuwa shafinsa domin ka fara duba sharuɗɗan ɓangare na uku, keɓantawa, samuwa, da iyakokin yawan buƙatu.
 
-Wannan matakin ba dole ba ne: kammala mayen ba ya taɓa ƙirƙirar haɗin masu samarwa na kyauta a ɓoye.
-Yana ƙirƙirar masu samarwa waɗanda har yanzu babu su ne kawai, yana barin haɗunan da aka riga aka keɓance
-ba tare da taɓa su ba, kuma yana bayar da rahoton waɗanda aka ƙirƙira, waɗanda aka riga aka saita, da waɗanda suka gaza ɗaya bayan ɗaya. Za ka iya
-sake gwada waɗanda suka gaza kawai cikin aminci bayan sakamako na wani ɓangare.
+Wannan matakin na zaɓi ne: kammala jagoran ba ya taɓa ƙirƙirar haɗin masu ba da sabis kyauta a ɓoye. Yana ƙirƙirar masu ba da sabis waɗanda har yanzu babu su kawai, yana barin haɗin da aka riga aka keɓance ba tare da taɓa su ba, kuma yana bayar da rahoton waɗanda aka ƙirƙira, waɗanda aka riga aka saita, da waɗanda suka gaza ɗaya bayan ɗaya. Bayan samun sakamako na wani ɓangare, za ka iya sake gwada waɗanda suka gaza kawai cikin aminci.
 
-### Zaɓi A: Mai Samarwa Na Kyauta (Ba A Buƙatar Katin Kuɗi)
+### Zaɓi A: Mai Ba da Sabis Kyauta (Ba a Buƙatar Katin Kuɗi)
 
 1. Buɗe allon sarrafawa a `http://localhost:20128`
-2. Je zuwa **Masu Samarwa** → **Ƙara Mai Samarwa**
-3. Zaɓi ɗaya daga cikin waɗannan masu samarwa na kyauta:
-   - **Kiro AI** — Samfurorin Claude na kyauta (ba a buƙatar tabbatar da sahihanci)
-   - **OpenCode Free** — Samfurorin GPT na kyauta (ba a buƙatar tabbatar da sahihanci)
-   - **Pollinations** — GPT-5, Claude, Gemini na kyauta (ba a buƙatar maɓalli)
-   - **LongCat** — Token miliyan 10 kyauta (kyauta sau ɗaya, yana buƙatar asusu + KYC)
-   - **Cloudflare AI** — Samfura sama da 50, neuron 10K/rana
+2. Je zuwa **Masu Ba da Sabis** → **Ƙara Mai Ba da Sabis**
+3. Zaɓi ɗaya daga cikin waɗannan masu ba da sabis kyauta:
+   - **Kiro AI** — Samfuran Claude kyauta (ba a buƙatar tantancewa)
+   - **Pollinations** — GPT-5, Claude, Gemini kyauta (ba a buƙatar maɓalli)
+   - **LongCat** — Token miliyan 10 kyauta (tallafi na sau ɗaya, yana buƙatar asusu + KYC)
+   - **Cloudflare AI** — Samfura fiye da 50, neuron 10K/rana
    - **MLX Gemma 26B** — Samfurin Apple Silicon na cikin gida (~38.5 tok/s, ~15.9GB RAM)
    - **MLX Qwen 3.8 27B** — Samfurin Apple Silicon na cikin gida (~9.1 tok/s, ~13.1GB RAM)
 4. Danna **Haɗa**
 5. An gama! Yanzu kana da damar amfani da AI kyauta.
 
-### Zaɓi B: Mai Samarwa Ta Maɓallin API (Na Biya)
+### Zaɓi B: Mai Ba da Sabis ta Maɓallin API (Na Biya)
 
-1. Samu maɓallin API daga shafin yanar gizon mai samarwar:
+1. Samu maɓallin API daga shafin yanar gizon mai ba da sabis:
    - **OpenAI**: https://platform.openai.com/api-keys
    - **Anthropic**: https://console.anthropic.com/
    - **Google**: https://aistudio.google.com/apikey
    - **DeepSeek**: https://platform.deepseek.com/
    - **Groq**: https://console.groq.com/
 2. Buɗe allon sarrafawa a `http://localhost:20128`
-3. Je zuwa **Masu Samarwa** → **Ƙara Mai Samarwa**
-4. Zaɓi mai samarwarka
+3. Je zuwa **Masu Ba da Sabis** → **Ƙara Mai Ba da Sabis**
+4. Zaɓi mai ba da sabis naka
 5. Liƙa maɓallin API naka
 6. Danna **Haɗa**
-7. An gama! Yanzu kana da damar amfani da samfurorin wannan mai samarwa.
+7. An gama! Yanzu kana da damar amfani da samfuran wannan mai ba da sabis.
 
-### Zaɓi C: Mai Samarwa Ta OAuth (Rajista)
+### Zaɓi C: Mai Ba da Sabis ta OAuth (Biyan Kuɗin Rajista)
 
 1. Buɗe allon sarrafawa a `http://localhost:20128`
-2. Je zuwa **Masu Samarwa** → **Ƙara Mai Samarwa**
-3. Zaɓi mai samarwarka (misali, Claude Code, GitHub Copilot)
-4. Danna **Haɗa da OAuth**
+2. Je zuwa **Masu Ba da Sabis** → **Ƙara Mai Ba da Sabis**
+3. Zaɓi mai ba da sabis naka (misali, Claude Code, GitHub Copilot)
+4. Danna **Haɗa ta OAuth**
 5. Shiga da asusunka
-6. An gama! Yanzu kana da damar amfani da samfurorin rajistarka.
+6. An gama! Yanzu kana da damar amfani da samfuran rajistarka.
 
-### Zaɓi D: Samfurorin MLX Na Cikin Gida (Apple Silicon)
+### Zaɓi D: Samfuran MLX na Cikin Gida (Apple Silicon)
 
-Ga kwamfutocin Mac na Apple Silicon masu haɗaɗɗiyar ma'adanar ƙwaƙwalwa, OmniRoute yana goyon bayan haɗawa da samfurorin MLX na cikin gida da ke gudana ta `mlx-lm.server` a matsayin masu samarwa na cikin gida masu dacewa da OpenAI.
+Ga kwamfutocin Mac masu Apple Silicon da ƙwaƙwalwar haɗaka, OmniRoute yana goyon bayan haɗawa da samfuran MLX na cikin gida da ke gudana ta `mlx-lm.server` a matsayin masu ba da sabis na cikin gida masu dacewa da OpenAI.
 
-#### Abubuwan Da Ake Buƙata Tun Farko
+#### Abubuwan da Ake Buƙata Tun Farko
 
-- **Apple Silicon Mac** (M1/M2/M3/M4) mai haɗaɗɗiyar ma'adanar ƙwaƙwalwa ta 24GB+ da aka ba da shawara
-- Mai sarrafa fakiti na **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **Apple Silicon Mac** (M1/M2/M3/M4) mai ƙwaƙwalwar haɗaka ta 24GB ko fiye; ana ba da shawarar hakan
+- Manajan fakitin **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
-#### Fara Cikin Sauri
+#### Farawa Cikin Sauri
 
 1. **Shigar da abubuwan dogaro**:
 
@@ -104,15 +97,15 @@ Ga kwamfutocin Mac na Apple Silicon masu haɗaɗɗiyar ma'adanar ƙwaƙwalwa, Om
 2. **Kaddamar da sabobin MLX da hannu** (a tashoshi daban-daban):
 
    ```bash
-   # Tasha ta 1: Gemma 4 26B A4B IT-QAT (port 11435)
+   # Tasha 1: Gemma 4 26B A4B IT-QAT (tashar 11435)
    uv run mlx_lm.server --model mlx-community/gemma-4-26B-A4B-it-qat-q4_0-mlx-aligned --port 11435 --host 127.0.0.1
 
-   # Tasha ta 2: Qwen 3.8 27B MLX Mixed (port 11436)
+   # Tasha 2: Qwen 3.8 27B MLX Mixed (tashar 11436)
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
-3. **Haɗa a Allon Sarrafawar OmniRoute**:
-   - Je zuwa **Masu Samarwa** → **Ƙara Mai Samarwa**
+3. **Haɗa a Allon Sarrafawa na OmniRoute**:
+   - Je zuwa **Masu Ba da Sabis** → **Ƙara Mai Ba da Sabis**
    - Zaɓi **MLX Gemma 26B** ko **MLX Qwen 3.8 27B**
    - Danna **Haɗa** (ba a buƙatar maɓallin API)
 
@@ -122,29 +115,29 @@ Ga kwamfutocin Mac na Apple Silicon masu haɗaɗɗiyar ma'adanar ƙwaƙwalwa, Om
    opencode config set api.base_url http://localhost:20128/v1
    opencode config set api.key <your-omniroute-api-key>
 
-   # Yi amfani da samfurorin MLX
+   # Yi amfani da samfuran MLX
    opencode run --model mlx-gemma/gemma-4-26b
    opencode run --model mlx-qwen/qwen3.8-27b
    ```
 
-#### Sarrafa Ma'adanar Ƙwaƙwalwa
+#### Gudanar da Ƙwaƙwalwa
 
-**Muhimmi**: Da haɗaɗɗiyar ma'adanar ƙwaƙwalwa ta 24GB, **babban samfurin MLX guda ɗaya ne kawai zai iya gudana a lokaci guda**.
+**Muhimmi**: Tare da ƙwaƙwalwar haɗaka ta 24GB, **babban samfurin MLX guda ɗaya kawai zai iya gudana a lokaci guda**.
 
-- Gemma 26B: ~15.9GB iyakar ma'adanar ƙwaƙwalwa
-- Qwen 3.8 27B: ~13.1GB iyakar ma'adanar ƙwaƙwalwa
+- Gemma 26B: kololuwar amfani da ƙwaƙwalwa ~15.9GB
+- Qwen 3.8 27B: kololuwar amfani da ƙwaƙwalwa ~13.1GB
 
 Dole ne ka sarrafa wannan da hannu:
 
 - Gudanar da sabar MLX guda ɗaya kawai a lokaci guda, ko
-- Gudanar da dukansu a kan na'urori daban-daban, ko
-- Tsayar da ɗaya kafin kaddamar da ɗayan
+- Gudanar da su biyun a na'urori daban-daban, ko
+- Dakatar da ɗaya kafin kaddamar da ɗayan
 
-OmniRoute ba ya sarrafa ayyukan sabar MLX ta atomatik — yana tura buƙatu ne kawai zuwa wuraren ƙarshe masu dacewa da OpenAI waɗanda ka saita.
+OmniRoute ba ya sarrafa hanyoyin aikin sabar MLX ta atomatik — yana tura buƙatu ne kawai zuwa maƙuraran da suka dace da OpenAI waɗanda ka saita.
 
 #### Goyon Bayan Kiran Kayan Aiki
 
-Dukkan samfurorin biyu suna goyon bayan kiran kayan aiki mai dacewa da OpenAI. Gwada da:
+Duk samfuran biyu suna goyon bayan kiran kayan aiki mai dacewa da OpenAI. Gwada da:
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -152,8 +145,8 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "Mene ne 2+2? Yi amfani da kayan aikin kalkuleta."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Yi lissafi", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
@@ -161,29 +154,28 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 | Matsala                  | Mafita                                                                                                |
 | ------------------------ | ----------------------------------------------------------------------------------------------------- |
-| Sabar ba ta farawa       | Duba `uv run mlx_lm.server --help` kuma tabbatar da ID na samfurin                                    |
-| Ƙwaƙwalwa ta ƙare        | Tabbatar samfurin guda ɗaya ne kawai ke gudana; rufe sauran manhajoji; duba Activity Monitor          |
-| An ƙi haɗi               | Tabbatar sabar tana gudana a kan tashar da ta dace (11435/11436)                                      |
+| Sabar ba ta kaddamar ba  | Duba `uv run mlx_lm.server --help` kuma tabbatar da ID na samfuran                                    |
+| Ƙwaƙwalwa ta ƙare        | Tabbatar samfur guda ɗaya ne kawai ke gudana; rufe sauran manhajoji; duba Activity Monitor            |
+| An ƙi haɗi               | Tabbatar sabar tana gudana a tashar da ta dace (11435/11436)                                          |
 | Amsoshi suna jinkiri     | Buƙata ta farko tana loda samfurin cikin ƙwaƙwalwa (~30-60s); buƙatun da suka biyo baya suna da sauri |
-| Kiran kayan aiki ya gaza | Tabbatar samfurin yana goyon bayan kayan aiki; duba rajistan OmniRoute don kurakuran fassara          |
+| Kiran kayan aiki ya gaza | Tabbatar samfurin yana goyon bayan kayan aiki; duba log na OmniRoute don kurakuran fassara            |
 
 ---
 
 ## Mafi Kyawun Masu Bayar da Sabis Kyauta
 
-Waɗannan masu bayar da sabis suna ba da **damar amfani kyauta** ba tare da katin kiredit ba:
+Waɗannan masu bayar da sabis suna ba da **damar amfani kyauta** ba tare da katin kuɗi ba:
 
-| Mai Bayar da Sabis | Ƙayyadadden Amfani Kyauta | Samfura                                  | Yadda Ake Haɗawa         |
-| ------------------ | ------------------------- | ---------------------------------------- | ------------------------ |
-| **Kiro AI**        | kiredit 50/wata           | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Ba a buƙatar tantancewa  |
-| **OpenCode Free**  | Mara iyaka                | GPT-4o, Claude, Gemini                   | Ba a buƙatar tantancewa  |
-| **Pollinations**   | Ba a buƙatar maɓalli      | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Ba a buƙatar tantancewa  |
-| **LongCat**        | 10M sau ɗaya              | LongCat-2.0                              | Maɓallin API + KYC       |
-| **Cloudflare AI**  | neuron 10K/rana           | samfura 50+                              | Ba a buƙatar tantancewa  |
-| **NVIDIA NIM**     | ~40 RPM                   | samfura 129                              | Ana buƙatar maɓallin API |
-| **Cerebras**       | kiredit na rajista na $5  | GLM 4.7, GPT-OSS 120B                    | Maɓallin API + kati      |
+| Mai Bayar da Sabis | Adadin Amfani Kyauta     | Samfura                                  | Yadda Ake Haɗawa         |
+| ------------------ | ------------------------ | ---------------------------------------- | ------------------------ |
+| **Kiro AI**        | kiredit 50/wata          | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Ba a buƙatar tantancewa  |
+| **Pollinations**   | Ba a buƙatar maɓalli     | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Ba a buƙatar tantancewa  |
+| **LongCat**        | 10M sau ɗaya             | LongCat-2.0                              | Maɓallin API + KYC       |
+| **Cloudflare AI**  | neuron 10K/rana          | samfura 50+                              | Ba a buƙatar tantancewa  |
+| **NVIDIA NIM**     | ~40 RPM                  | samfura 129                              | Ana buƙatar maɓallin API |
+| **Cerebras**       | kiredit na rajista na $5 | GLM 4.7, GPT-OSS 120B                    | Maɓallin API + kati      |
 
-**Shawara**: Haɗa masu bayar da sabis kyauta da yawa don samun **AI kyauta mara iyaka** tare da sauyawa ta atomatik idan ɗaya ya gaza!
+**Shawara**: Haɗa masu bayar da sabis kyauta da yawa don samun **AI kyauta mara iyaka** tare da komawa wani sabis ta atomatik idan an samu matsala!
 
 ---
 
@@ -236,22 +228,22 @@ Yanzu an haɗa mai bayar da sabis ɗinka. Za ka iya amfani da shi tare da `model
 
 ---
 
-## Amfani da Masu Bayar da Sabis da Yawa
+## Amfani da Masu Bayarwa da Yawa
 
-OmniRoute yana aiki mafi kyau tare da **masu bayar da sabis da yawa**. Wannan yana ba ka:
+OmniRoute yana aiki mafi kyau tare da **masu bayarwa da yawa**. Wannan yana ba ka:
 
-- **Komawa ga wani ta atomatik** — Idan mai bayar da sabis ɗaya ya gaza, OmniRoute zai gwada na gaba
-- **Inganta farashi** — OmniRoute yana zaɓar mai bayar da sabis mafi arha ga kowace buƙata
-- **Inganta sauri** — OmniRoute yana zaɓar mai bayar da sabis mafi sauri ga kowace buƙata
-- **Inganta inganci** — OmniRoute yana zaɓar mafi kyawun mai bayar da sabis ga kowane aiki
+- **Sauyawa ta atomatik** — Idan mai bayarwa ɗaya ya gaza, OmniRoute zai gwada na gaba
+- **Inganta farashi** — OmniRoute yana zaɓar mai bayarwa mafi arha ga kowace buƙata
+- **Inganta sauri** — OmniRoute yana zaɓar mai bayarwa mafi sauri ga kowace buƙata
+- **Inganta inganci** — OmniRoute yana zaɓar mai bayarwa mafi kyau ga kowane aiki
 
-### Tsarin da Aka Ba da Shawara
+### Saitin da Aka Ba da Shawara
 
-Haɗa aƙalla **masu bayar da sabis 3** domin samun ƙwarewa mafi kyau:
+Haɗa aƙalla **masu bayarwa 3** don samun ƙwarewa mafi kyau:
 
-1. **Mai bayar da sabis kyauta ɗaya** (Kiro, OpenCode Free, ko Pollinations) — Kullum yana samuwa
-2. **Mai bayar da sabis mai sauri ɗaya** (Groq, Cerebras) — Domin samun amsoshi cikin sauri
-3. **Mai bayar da sabis mai inganci ɗaya** (OpenAI, Anthropic, Google) — Domin ayyuka masu sarƙaƙiya
+1. **Mai bayarwa kyauta guda ɗaya** (Kiro ko Pollinations) — Yana samuwa koyaushe
+2. **Mai bayarwa mai sauri guda ɗaya** (Groq, Cerebras) — Don amsoshi cikin sauri
+3. **Mai bayarwa mai inganci guda ɗaya** (OpenAI, Anthropic, Google) — Don ayyuka masu sarƙaƙiya
 
 Sannan yi amfani da `model: "auto"` kuma OmniRoute zai zaɓi mafi dacewa ta atomatik ga kowace buƙata.
 
@@ -335,27 +327,27 @@ da iyakar lokaci mai daidaituwa ƙarin ingantawa ne daban; wannan halayyar ba ta
 
 ### "Shin sai na biya kafin in yi amfani da OmniRoute?"
 
-**A'a!** OmniRoute kyauta ne kuma buɗaɗɗen tushe ne. Za ka iya amfani da masu bayarwa na kyauta (Kiro, OpenCode Free, Pollinations) ba tare da biyan komai ba. Za ka biya ne kawai idan ka zaɓi amfani da masu bayarwa na biyan kuɗi.
+**A'a!** OmniRoute kyauta ne kuma tushen sa a buɗe yake. Za ka iya amfani da masu samar da sabis na kyauta (Kiro, Pollinations) ba tare da biyan komai ba. Za ka biya ne kawai idan ka zaɓi yin amfani da masu samar da sabis na biya.
 
-### "Wane mai bayarwa ya kamata in fara da shi?"
+### "Wane mai samar da sabis ya kamata in fara da shi?"
 
-Fara da **Kiro AI** — kyauta ne, ba ya buƙatar maɓallin API, kuma yana ba ka damar amfani da samfuran Claude. Sannan ka ƙara wasu masu bayarwa gwargwadon buƙata.
+Fara da **Kiro AI** — kyauta ne, ba ya buƙatar API key, kuma yana ba ka damar amfani da nau'ikan Claude. Sannan ka ƙara wasu masu samar da sabis gwargwadon buƙata.
 
-### "Zan iya amfani da masu bayarwa da yawa a lokaci guda?"
+### "Zan iya amfani da masu samar da sabis da yawa a lokaci guda?"
 
-**I!** Wannan shi ne ainihin manufar OmniRoute. Haɗa masu bayarwa da yawa sannan ka yi amfani da `model: "auto"` domin barin OmniRoute ya zaɓi mafi dacewa ga kowace buƙata.
+**Eh!** Wannan shi ne ainihin manufar OmniRoute. Haɗa masu samar da sabis da yawa sannan ka yi amfani da `model: "auto"` domin OmniRoute ya zaɓi mafi dacewa ga kowace buƙata.
 
-### "Me zai faru idan wani mai bayarwa ya daina aiki?"
+### "Me zai faru idan wani mai samar da sabis ya daina aiki?"
 
-OmniRoute yana tsallake masu bayarwa da suka gaza kai tsaye sannan ya gwada na gaba. Ba ka buƙatar yin komai.
+OmniRoute yana tsallake masu samar da sabis da suka gaza ta atomatik, sannan ya gwada na gaba. Ba ka buƙatar yin komai.
 
-### "Ta yaya zan cire haɗin mai bayarwa?"
+### "Ta yaya zan cire haɗin mai samar da sabis?"
 
-Je zuwa Masu Bayarwa → danna kan mai bayarwar → danna **Cire Haɗi**.
+Je zuwa Providers → danna mai samar da sabis ɗin → danna **Disconnect**.
 
-### "Zan iya amfani da maɓallan API da nake da su?"
+### "Zan iya amfani da API keys da nake da su?"
 
-**I!** Idan kana da maɓallan API na OpenAI, Anthropic, Google, da sauransu, za ka iya amfani da su a cikin OmniRoute. Kawai ka liƙa su lokacin haɗa mai bayarwar.
+**Eh!** Idan kana da API keys na OpenAI, Anthropic, Google, da sauransu, za ka iya amfani da su a cikin OmniRoute. Kawai liƙa su yayin haɗa mai samar da sabis.
 
 ---
 

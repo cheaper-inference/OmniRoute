@@ -42,35 +42,35 @@ A `TrafficBuffer` (`src/mitm/inspector/buffer.ts`) egy megosztott, memóriában 
 
 A Traffic Inspector **5 egyidejű rögzítési forrást** támogat. Mindegyik egymástól függetlenül kapcsolható be és ki. Minden `InterceptedRequest` (`src/mitm/inspector/types.ts`) `source` mezője az `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` vagy `"tproxy"` értékek egyikét tartalmazza.
 
-### 1. mód — AgentBridge (alapértelmezett, mindig aktív)
+### 1. mód — AgentBridge (alapértelmezett, mindig bekapcsolva)
 
 **Forrás:** AgentBridge-kezelők (`src/mitm/handlers/base.ts`)
 **Működés:** A `MitmHandlerBase` minden `intercept()` hívása meghívja a `hookBufferStart()` függvényt a továbbítás előtt, majd a `hookBufferUpdate()` függvényt a befejezéskor. Nem igényel további konfigurációt — az AgentBridge elindulásakor azonnal működik.
 **Hatókör:** Az AgentBridge-ben konfigurált 9 IDE-ügynök
 **Megjegyzés:** Az `InterceptedRequest` `source` mezője = `"agent-bridge"`
 
-### 2. mód — Egyéni hosztok (DNS-átirányítás)
+### 2. mód — Egyéni gazdagépek (DNS-átirányítás)
 
-**Forrás:** Felhasználó által meghatározott hosztlista (`inspector_custom_hosts` tábla)
-**Működés:** Egy hoszt felhasználói felületen történő hozzáadása beírja a `127.0.0.1 <host>` sort az `/etc/hosts` fájlba (sudo szükséges). A meglévő AgentBridge MITM-kiszolgáló (443-as port) dinamikusan létrehoz egy SNI-tanúsítványt az új hoszthoz.
-**Hatókör:** Bármely alkalmazás, amely a hozzáadott hosztot használja — nincs szükség az alkalmazás konfigurációjának módosítására
+**Forrás:** Felhasználó által meghatározott gazdagéplista (`inspector_custom_hosts` tábla)
+**Működés:** Egy gazdagép felhasználói felületen keresztüli hozzáadásakor a rendszer beírja a `127.0.0.1 <host>` sort az `/etc/hosts` fájlba (sudo szükséges). A meglévő AgentBridge MITM-kiszolgáló (443-as port) dinamikusan létrehoz egy SNI-tanúsítványt az új gazdagéphez.
+**Hatókör:** Bármely, a hozzáadott gazdagépet használó alkalmazás — nincs szükség az alkalmazás konfigurációjának módosítására
 **Megjegyzés:** `source` = `"custom-host"`
 
 Példák felhasználási esetekre:
 
-- A Python-szkriptekből az `api.openai.com` felé irányuló forgalom figyelése
+- Az `api.openai.com` figyelése Python-szkriptekből
 - A `my-internal-llm.company.com` hibakeresése
-- Az azonos hálózaton lévő mobileszközök forgalmának rögzítése (ARP-hamisítással — haladó)
+- Az ugyanazon a hálózaton lévő mobileszközök forgalmának rögzítése (ARP-hamisítással — haladó)
 
 ### 3. mód — HTTP_PROXY-figyelő (8080-as port)
 
 **Forrás:** A `HTTP_PROXY`/`HTTPS_PROXY` környezeti változókat használó alkalmazások
-**Működés:** Egy másodlagos, a 8080-as porton figyelő szolgáltatás (`src/mitm/inspector/httpProxyServer.ts`), amely szabványos explicit HTTP/HTTPS-proxyként működik. Fogadja a `CONNECT` alagutakat (HTTPS) és a közvetlen HTTP-kéréseket.
-**Hatókör:** Bármely alkalmazás, amely figyelembe veszi a `HTTP_PROXY` környezeti változót — nincs szükség DNS-módosításra vagy sudo jogosultságra
+**Működés:** Egy másodlagos, a 8080-as porton figyelő szolgáltatás (`src/mitm/inspector/httpProxyServer.ts`), amely szabványos explicit HTTP/HTTPS-proxyként működik. Fogad `CONNECT` alagutakat (HTTPS) és közvetlen HTTP-kéréseket.
+**Hatókör:** Bármely alkalmazás, amely figyelembe veszi a `HTTP_PROXY` környezeti változót — nincs szükség DNS-módosításra vagy sudo használatára
 **Megjegyzés:** `source` = `"http-proxy"`
 
 ```bash
-# Gyors rögzítés egyetlen parancshoz:
+# Egyetlen parancs gyors rögzítése:
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
 # Folyamatos rögzítés egy parancsértelmező-munkamenetben:
@@ -78,48 +78,48 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS-korlátozás:** A HTTPS `CONNECT` alagutak esetében alapértelmezés szerint csak a metaadatokat (hoszt, port, időzítés) rögzíti — a TLS-törzs nincs visszafejtve. A teljes törzs vizsgálatához engedélyezze a „HTTPS visszafejtése proxy módban” kapcsolót (külön bekapcsolandó, és megköveteli, hogy az AgentBridge tanúsítványa megbízható legyen).
+**TLS-korlátozás:** A HTTPS egy egyszerű `CONNECT` alagúton halad keresztül: a figyelő változtatás nélkül továbbítja a titkosított bájtokat, és csak metaadatokat rögzít (gazdagép, port, időzítés). Soha nem fejti vissza a HTTPS-t, és ehhez a módhoz nincs olyan beállítás, amely bekapcsolná a visszafejtést. A HTTPS-törzsek rögzítéséhez irányítsa a gazdagépet az 1. módon (AgentBridge), a 2. módon (Egyéni gazdagépek) vagy az 5. módon (TPROXY-visszafejtés) keresztül.
 
-**Portütközés:** Ha a 8080-as port használatban van, az AgentBridge strukturált hibával ellátott 409-es választ ad vissza. A port az `INSPECTOR_HTTP_PROXY_PORT` környezeti változóval módosítható.
+**Portütközés:** Ha a 8080-as port használatban van, az AgentBridge strukturált hibával kísért 409-es választ ad vissza. A port az `INSPECTOR_HTTP_PROXY_PORT` környezeti változóval módosítható.
 
-### 4. mód — Rendszerszintű proxy (haladó, külön bekapcsolandó)
+### 4. mód — Rendszerszintű proxy (haladó, külön bekapcsolható)
 
-**Forrás:** Operációs rendszer szintű proxybeállítások (a gépen lévő összes alkalmazásra érvényes)
-**Működés:** Az operációs rendszer API-jait használja az összes HTTP/HTTPS-forgalom HTTP_PROXY-figyelőn keresztüli átirányításához:
+**Forrás:** Operációsrendszer-szintű proxybeállítások (a gép összes alkalmazására érvényes)
+**Működés:** Operációsrendszer-API-k segítségével az összes HTTP/HTTPS-forgalmat a HTTP_PROXY-figyelőn keresztül irányítja át:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Hatókör:** A gépen lévő minden olyan alkalmazás, amely figyelembe veszi a rendszer proxybeállításait
+  **Hatókör:** A gép minden olyan alkalmazása, amely figyelembe veszi a rendszer proxybeállításait
   **Megjegyzés:** `source` = `"system-proxy"`
 
 **Biztonsági mechanizmusok:**
 
-- Automatikus kikapcsolási időzítő (alapértelmezés szerint 30 perc, az `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` segítségével konfigurálható)
-- A rendszer korábbi proxyállapota mentésre kerül az adatbázisban, és visszaállításkor helyreáll
-- Az irányítópult „Rendszerproxy visszaállítása” üzenetet jelenít meg, ha a felhasználó aktív állapotban másik oldalra navigál
-- A felhasználói felület `⚠ Haladó` jelvényt és külön megerősítő jelölőnégyzetet jelenít meg
+- Automatikus kikapcsolási időzítő (alapértelmezés szerint 30 perc, az `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` változóval konfigurálható)
+- A rendszer korábbi proxyállapota az adatbázisba kerül, és visszaállításkor helyreáll
+- Ha a felhasználó aktív állapotban elnavigál, az irányítópulton megjelenik a „Rendszerproxy visszaállítása” üzenet
+- A felhasználói felületen megjelenik a `⚠ Haladó` jelvény és egy kifejezett megerősítő jelölőnégyzet
 
-### 5. mód — TPROXY transzparens visszafejtés (Linux, root, külön bekapcsolandó)
+### 5. mód — TPROXY transzparens visszafejtés (Linux, root, külön bekapcsolható)
 
 **Forrás:** Kernel TPROXY + házirend-alapú útválasztás (`src/mitm/tproxy/`)
-**Működés:** Megjelöli a célportra (alapértelmezés szerint `443`) irányuló új helyi kimenő TCP-kapcsolatokat a `mangle OUTPUT` láncban, egy `ip rule` átirányítja a megjelölt csomagokat helyi kézbesítésre, majd a `mangle PREROUTING` lánc `TPROXY` célja átadja azokat egy transzparens (**IP_TRANSPARENT**) figyelőnek (alapértelmezett portja `8443`). A figyelő egy dinamikus hitelesítésszolgáltató által **igény szerint, SNI-hosztnevenként kiállított** végponti tanúsítvánnyal lezárja a TLS-kapcsolatot, rögzíti a visszafejtett adatcserét, majd újratitkosítva továbbítja a kérést az eredeti célhelyre.
-**Hatókör:** **Tetszőleges** célhosztok a célporton — nincs szükség `/etc/hosts`-hamisításra, `HTTP_PROXY` környezeti változóra vagy a rendszerszintű proxy módosítására. Az elfogott folyamat konfigurációját nem kell módosítani, de meg kell bíznia a dinamikus hitelesítésszolgáltatóban.
+**Működés:** A célportra (alapértelmezés szerint `443`) irányuló új helyi kimenő TCP-kapcsolatokat megjelöli a `mangle OUTPUT` láncban, egy `ip rule` átirányítja a megjelölt csomagokat helyi kézbesítésre, majd a `mangle PREROUTING` `TPROXY` célja átadja őket egy transzparens (**IP_TRANSPARENT**) figyelőnek (alapértelmezett portja `8443`). A figyelő a TLS-kapcsolatot egy dinamikus hitelesítésszolgáltató által **igény szerint, SNI-gazdagépnevenként** kiadott végtanúsítvánnyal végződteti, rögzíti a visszafejtett adatcserét, majd újratitkosítva továbbítja a kérést az eredeti célhoz.
+**Hatókör:** **Tetszőleges** célgazdagépek a célporton — nincs `/etc/hosts`-hamisítás, nincs `HTTP_PROXY` környezeti változó, és nem módosítja a rendszerszintű proxyt. Az elfogott folyamat nem igényel konfigurációmódosítást, de meg kell bíznia a dinamikus hitelesítésszolgáltatóban.
 **Megjegyzés:** `source` = `"tproxy"`
 
-**Követelmények:** Kizárólag Linux (**IP_TRANSPARENT** csak Linuxon érhető el), **CAP_NET_ADMIN** képesség (root), valamint egy natív N-API-bővítmény, amelyet C-eszközlánccal kell lefordítani (`npm run build:native:tproxy`). Ha ezek nem érhetők el, az irányítópult kapcsolója le van tiltva, és a „A TPROXY-visszafejtéshez Linux + root + a natív bővítmény szükséges” elemleírás jelenik meg. A tűzfalszabályok alkalmazása és visszaállítása tranzakciósan történik (egy összeomlás soha nem hagy hátra `mangle` szabályt), újraindításkor pedig törlődnek. Egy SO_MARK-alapú hurok elleni védelem megakadályozza, hogy a proxy saját, újratitkosított továbbított forgalma ismét elfogásra kerüljön.
+**Követelmények:** Kizárólag Linux (**IP_TRANSPARENT** csak Linuxon érhető el), **CAP_NET_ADMIN** képesség (root), valamint egy natív N-API-kiegészítő, amelyet C-eszközlánccal kell lefordítani (`npm run build:native:tproxy`). Ha ezek nem érhetők el, az irányítópult kapcsolója le van tiltva, és a következő elemleírás jelenik meg: „A TPROXY-visszafejtéshez Linux + root + a natív kiegészítő szükséges”. A tűzfalszabályok alkalmazása és visszaállítása tranzakciós módon történik (egy összeomlás soha nem hagy hátra `mangle` szabályt), újraindításkor pedig törlődnek. Egy SO_MARK-alapú hurokellenes mechanizmus megakadályozza, hogy a proxy saját, újratitkosított továbbított forgalmát ismét elfogja a rendszer.
 
-Ez egy jelentős alrendszer, saját, külön üzemeltetői útmutatóval — a teljes tűzfalkonfigurációért, az SNI-nkénti dinamikus hitelesítésszolgáltatóért és a megbízhatóságitár-telepítőért, a csak helyi útvonalért, a hurok elleni védelem részleteiért és a konfigurációs sémáért tekintse meg a `docs/security/MITM-TPROXY-DECRYPT.md` fájlt (git; nincs beépítve a `/docs` dokumentációba). A kapcsolót a `GET / POST / DELETE /api/tools/agent-bridge/tproxy` vezérli (megjegyzés: az útvonal az AgentBridge előtag alatt található, nem a Traffic Inspector előtagja alatt).
+Ez egy jelentős alrendszer, amely saját, külön üzemeltetői útmutatóval rendelkezik — a teljes tűzfalreceptet, az SNI-nként dinamikus hitelesítésszolgáltatót és megbízhatóságitár-telepítőt, a csak helyi útvonalat, a hurokellenes megoldás részleteit és a konfigurációs sémát lásd a `docs/security/MITM-TPROXY-DECRYPT.md` fájlban (git; nincs beépítve a `/docs` könyvtárba). A kapcsolót a `GET / POST / DELETE /api/tools/agent-bridge/tproxy` vezérli (megjegyzés: az útvonal az AgentBridge előtag alatt található, nem a Traffic Inspector előtagja alatt).
 
 ### A rögzítési módok összehasonlítása
 
-| Mód                    | Beállítás                          |            Sudo?            | Hatókör                                              | Megjegyzések                                                                                                                                                  |
-| ---------------------- | ---------------------------------- | :-------------------------: | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge         | Automatikus                        | Egyszer (tanúsítvány+hosts) | 9 IDE-ügynök                                         | Alapértelmezetten bekapcsolva                                                                                                                                 |
-| 2. Egyéni hostok       | Hostonkénti bevitel                |      Igen (hosts fájl)      | Az adott hostot használó bármely alkalmazás          | Adatbázisban megőrizve                                                                                                                                        |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`           |             Nem             | A környezeti változókat figyelembe vevő alkalmazások | 8080-as port, alapértelmezetten nincs TLS-visszafejtés                                                                                                        |
-| 4. Rendszerszintű      | Kapcsoló + megerősítés             |            Igen             | A gép összes alkalmazása                             | Automatikus kikapcsolás 30 perc után                                                                                                                          |
-| 5. TPROXY-visszafejtés | Kapcsoló (Linux + natív bővítmény) | Igen (root + CA-telepítés)  | Bármely host a célporton                             | Tetszőleges hostokat fejt vissza; alapértelmezetten kikapcsolva — lásd: `docs/security/MITM-TPROXY-DECRYPT.md` (git; nincs belefordítva a `/docs` könyvtárba) |
+| Mód                    | Beállítás                           |            Sudo?            | Hatókör                                              | Megjegyzések                                                                                                                                                   |
+| ---------------------- | ----------------------------------- | :-------------------------: | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge         | Automatikus                         | Egyszer (tanúsítvány+hosts) | 9 IDE-ügynök                                         | Alapértelmezés szerint bekapcsolva                                                                                                                             |
+| 2. Egyéni hostok       | Hostonkénti bevitel                 |      Igen (hosts fájl)      | Az adott hostot használó bármely alkalmazás          | Adatbázisban megőrizve                                                                                                                                         |
+| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`            |             Nem             | A környezeti változókat figyelembe vevő alkalmazások | 8080-as port; a HTTPS CONNECT-alagúton halad (csak metaadatok, visszafejtés soha)                                                                              |
+| 4. Rendszerszintű      | Kapcsoló + megerősítés              |            Igen             | A gép összes alkalmazása                             | 30 perc elteltével automatikusan kikapcsol                                                                                                                     |
+| 5. TPROXY-visszafejtés | Kapcsoló (Linux + natív kiegészítő) | Igen (root + CA telepítése) | Bármely host a célporton                             | Tetszőleges hostokat fejt vissza; alapértelmezés szerint kikapcsolva — lásd: `docs/security/MITM-TPROXY-DECRYPT.md` (git; nincs beépítve a `/docs` könyvtárba) |
 
 ---
 
@@ -340,29 +340,29 @@ Az exportálás a `GET /api/tools/traffic-inspector/sessions/{id}/export.har` v�
 
 ## §6 Biztonság
 
-A Traffic Inspector **minden elfogott HTTPS-forgalmat** megjelenít, beleértve az engedélyezési fejléceket és a kéréstörzseket is. A következő védelmi intézkedések vannak érvényben:
+A Traffic Inspector megjeleníti az **összes elfogott HTTPS-forgalmat**, beleértve az engedélyezési fejléceket és a kérés törzsét is. A következő védelmi mechanizmusok vannak érvényben:
 
-| Védelmi intézkedés                              | Részletek                                                                                                                                                                                                   |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                                  | Minden útvonal és a WebSocket-végpont kizárólag a visszacsatolási felületről érhető el (ezt a `routeGuard.ts` még a hitelesítés előtt kikényszeríti)                                                        |
-| **Titkok maszkolása**                           | A lineáris `maskSecret()` kereső kitakarja az RFC 6750 Bearer hitelesítő adatokat, a szolgáltatói előtaggal ellátott kulcsokat és a hosszú, átlátszatlan tokeneket a `TrafficBuffer.push()` meghívása előtt |
-| **Törzsméret korlátozása**                      | Az `INSPECTOR_MAX_BODY_KB` értéknél (alapértelmezés szerint 1024 KB) nagyobb törzsek csonkolva jelennek meg a `„(a teljesítmény érdekében csonkolva)”` értesítéssel                                         |
-| **Fejlécek megtisztítása**                      | A neveket kisbetűssé alakítja; a keretezési, ugrásonkénti és proxyhitelesítési fejléceket eldobja; a sütiket teljesen kitakarja; a hitelesítő adatok értékeinek kezelését a `maskSecret()` függvényre bízza |
-| **CSP**                                         | A Traffic Inspector oldalain szigorú Content Security Policy akadályozza meg a beszúrt választörzseken keresztüli XSS-támadásokat                                                                           |
-| **Alapértelmezés szerint nincs tartós tárolás** | A `TrafficBuffer` a memóriában található, és a kiszolgáló újraindításakor elvész. A munkamenetek csak kifejezett rögzítés esetén kerülnek tartós tárolásra                                                  |
+| Védelmi mechanizmus                             | Részletek                                                                                                                                                                                                              |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                                  | Minden útvonal és a WebSocket-végpont kizárólag loopback kapcsolaton érhető el (ezt a `routeGuard.ts` még a hitelesítés előtt kikényszeríti)                                                                           |
+| **Titkok maszkolása**                           | A lineáris `maskSecret()` vizsgáló kitakarja az RFC 6750 szerinti Bearer hitelesítő adatokat, a szolgáltatói előtaggal ellátott kulcsokat és a hosszú, átlátszatlan tokeneket a `TrafficBuffer.push()` meghívása előtt |
+| **Törzsméret korlátozása**                      | Az `INSPECTOR_MAX_BODY_KB` értéknél (alapértelmezés szerint 1024 KB) nagyobb törzsek csonkolva lesznek, és megjelenik a `"(teljesítménybeli okokból csonkolva)"` értesítés                                             |
+| **Fejlécek tisztítása**                         | A nevek kisbetűssé alakulnak; a keretezési, ugrásonkénti és proxyhitelesítési fejlécek el lesznek távolítva; a sütik teljesen ki lesznek takarva; a hitelesítőadat-értékek kezelését a `maskSecret()` végzi            |
+| **CSP**                                         | A Traffic Inspector oldalain szigorú Content Security Policy akadályozza meg a befecskendezett választörzseken keresztüli XSS-támadásokat                                                                              |
+| **Alapértelmezés szerint nincs tartós tárolás** | A `TrafficBuffer` memóriában tárolódik, és a kiszolgáló újraindításakor elveszik. A munkamenetek csak kifejezett rögzítés esetén lesznek tartósan tárolva                                                              |
 
-### Alkalmazott szigorú szabályok
+### Alkalmazott kötelező szabályok
 
-| Szabály                           | Alkalmazás                                                                             |
-| --------------------------------- | -------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | A Traffic Inspector útvonalainak minden HTTP-hibaválasza megtisztításra kerül          |
-| **#15 + #17** `isLocalOnlyPath()` | A `/api/tools/traffic-inspector/` LOCAL_ONLY + SPAWN_CAPABLE (rendszerproxy-parancsok) |
+| Szabály                           | Alkalmazás                                                                              |
+| --------------------------------- | --------------------------------------------------------------------------------------- |
+| **#12** `sanitizeErrorMessage`    | A Traffic Inspector útvonalairól érkező összes HTTP-hibaválasz megtisztításra kerül     |
+| **#15 + #17** `isLocalOnlyPath()` | Az `/api/tools/traffic-inspector/` LOCAL_ONLY + SPAWN_CAPABLE (rendszerproxy-parancsok) |
 
 ### Ismert korlátozások
 
-- **A rendszerszintű proxymód** a gépen futó összes alkalmazást érinti, beleértve a VPN-klienseket és az SSO-t is. Mindig az automatikus kikapcsolási időzítővel együtt használja. Megosztott gépeken ne használja.
-- **CONNECT-alagutas HTTPS**: A 3. mód (HTTP_PROXY) HTTPS-célhelyek esetén csak az alagút metaadatait rögzíti, kivéve, ha engedélyezve van a TLS-elfogás. Ez szándékos — ha az adott alkalmazások nem tekintenék megbízhatónak az AgentBridge tanúsítványát, az átlátszó rögzítés megszakítaná a TLS-ellenőrzést.
-- **Egyes komponensekbe beégetett karakterláncok**: Néhány felhasználóifelület-komponensben (F7/F8) található néhány olyan beégetett karakterlánc, amelyet az i18n-kulcsok még nem fednek le. Ezek az i18n-hiányosságokról szóló jelentés Ismert korlátozás szakaszában vannak dokumentálva; egy későbbi frissítés során kerülnek áttelepítésre. Az érintett karakterláncok a felhasználói felület olyan dekoratív címkéi, amelyek funkcionális használatához nincs szükség fordításra.
+- A **rendszerszintű proxymód** a gépen futó összes alkalmazásra hatással van, beleértve a VPN-klienseket és az SSO-t is. Mindig automatikus kikapcsolási időzítővel használja. Megosztott gépeken ne használja.
+- **CONNECT-alagutas HTTPS**: A 3. mód (HTTP_PROXY) HTTPS-célok esetén csak az alagút metaadatait rögzíti, és soha nem fejti vissza a titkosításukat. Ez szándékos működés — a visszafejtéshez minden kliensnek megbízhatónak kellene tekintenie egy MITM-tanúsítványt, ezért a figyelő végpontok között titkosítva tartja a HTTPS-forgalmat. Ha szüksége van a HTTPS-törzsekre, használja az AgentBridge, a Custom Hosts vagy a TPROXY decrypt megoldást.
+- **Egyes komponensekbe beégetett karakterláncok**: Néhány felhasználói felületi komponens (F7/F8) kis számú, beégetett karakterláncot tartalmaz, amelyeket még nem fednek le i18n-kulcsok. Ezek ismert korlátozásként szerepelnek az i18n-hiányossági jelentésben; áttelepítésük egy későbbi körben történik meg. Az érintett karakterláncok a felhasználói felület olyan dekoratív címkéi, amelyek funkcionális használatához nincs szükség fordításra.
 
 ---
 
@@ -427,7 +427,7 @@ Amikor a puffer eléri az `INSPECTOR_BUFFER_SIZE` értékét (alapértelmezés s
 
 ## §8 API-referencia
 
-Minden útvonal `LOCAL_ONLY` (csak loopbacken érhető el) és `SPAWN_CAPABLE` (rendszerproxy-parancsok). Lásd: `src/server/authz/routeGuard.ts`.
+Minden útvonal `LOCAL_ONLY` (csak loopbackon érhető el) és `SPAWN_CAPABLE` (rendszerproxy-parancsok). Lásd: `src/server/authz/routeGuard.ts`.
 
 Alapútvonal: `/api/tools/traffic-inspector/`
 
@@ -438,7 +438,7 @@ Alapútvonal: `/api/tools/traffic-inspector/`
 | GET     | `/requests`                 | Kérések listázása (szűrhető: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
 | GET     | `/requests/{id}`            | Egyetlen kérés részletei                                                             |
 | DELETE  | `/requests`                 | A memóriában tárolt puffer törlése                                                   |
-| POST    | `/requests/{id}/replay`     | Ugyanazon kérés újbóli végrehajtása az OmniRoute útválasztóján keresztül             |
+| POST    | `/requests/{id}/replay`     | Ugyanazon kérés újbóli végrehajtása az OmniRoute útválasztón keresztül               |
 | PUT     | `/requests/{id}/annotation` | Kéréshez tartozó megjegyzés mentése vagy frissítése                                  |
 
 ### WebSocket
@@ -449,32 +449,31 @@ Alapútvonal: `/api/tools/traffic-inspector/`
 
 ### Exportálás
 
-| Metódus | Útvonal       | Leírás                                                  |
-| ------- | ------------- | ------------------------------------------------------- |
-| GET     | `/export.har` | Az aktuális szűrt lista exportálása HAR 1.2 formátumban |
+| Metódus | Útvonal       | Leírás                                           |
+| ------- | ------------- | ------------------------------------------------ |
+| GET     | `/export.har` | Az aktuális szűrt lista exportálása HAR 1.2-ként |
 
-### Egyéni gazdagépek
+### Egyéni hosztok
 
-| Metódus | Útvonal         | Leírás                                                               |
-| ------- | --------------- | -------------------------------------------------------------------- |
-| GET     | `/hosts`        | Egyéni gazdagépek listázása                                          |
-| POST    | `/hosts`        | Gazdagép hozzáadása (automatikusan szerkeszti az `/etc/hosts` fájlt) |
-| DELETE  | `/hosts/{host}` | Gazdagép eltávolítása                                                |
-| PATCH   | `/hosts/{host}` | Az `enabled` állapot átváltása                                       |
+| Metódus | Útvonal         | Leírás                                                            |
+| ------- | --------------- | ----------------------------------------------------------------- |
+| GET     | `/hosts`        | Egyéni hosztok listázása                                          |
+| POST    | `/hosts`        | Hoszt hozzáadása (automatikusan szerkeszti az `/etc/hosts` fájlt) |
+| DELETE  | `/hosts/{host}` | Hoszt eltávolítása                                                |
+| PATCH   | `/hosts/{host}` | Az `enabled` állapot átváltása                                    |
 
 ### Rögzítési módok
 
-| Metódus | Útvonal                        | Leírás                                                                                                       |
-| ------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| GET     | `/capture-modes`               | Az AgentBridge / egyéni gazdagépek / HTTP_PROXY / rendszerproxy módok állapota és a `tls-intercept` kapcsoló |
-| POST    | `/capture-modes/http-proxy`    | A HTTP_PROXY-figyelő indítása/leállítása (`{action: "start"\|"stop"}`)                                       |
-| POST    | `/capture-modes/system-proxy`  | A rendszerszintű proxy alkalmazása/visszaállítása (`{action: "apply"\|"revert"}`)                            |
-| POST    | `/capture-modes/tls-intercept` | A HTTPS-törzs visszafejtésének átváltása proxy módban (`{enabled: boolean}`)                                 |
+| Metódus | Útvonal                       | Leírás                                                                            |
+| ------- | ----------------------------- | --------------------------------------------------------------------------------- |
+| GET     | `/capture-modes`              | Az AgentBridge / egyéni hosztok / HTTP_PROXY / rendszerproxy módok állapota       |
+| POST    | `/capture-modes/http-proxy`   | A HTTP_PROXY-figyelő indítása/leállítása (`{action: "start"\|"stop"}`)            |
+| POST    | `/capture-modes/system-proxy` | A rendszerszintű proxy alkalmazása/visszaállítása (`{action: "apply"\|"revert"}`) |
 
-> A **TPROXY-visszafejtést** (5. rögzítési mód) egy **különálló**, az
-> AgentBridge előtag alatti útvonal vezérli — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` —, nem
+> A **TPROXY-visszafejtést** (5. rögzítési mód) az AgentBridge előtag alatti
+> **különálló** útvonal vezérli — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` —, nem
 > az `/api/tools/traffic-inspector/` alatt. Lásd:
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; nincs beépítve a `/docs` könyvtárba).
+> `docs/security/MITM-TPROXY-DECRYPT.md` (git; nincs beépítve a `/docs` tartalmába).
 
 ### Munkamenetek
 
@@ -485,12 +484,12 @@ Alapútvonal: `/api/tools/traffic-inspector/`
 | GET     | `/sessions`                 | Az összes mentett munkamenet listázása                                 |
 | GET     | `/sessions/{id}`            | Munkamenet-pillanatkép (minden kérés)                                  |
 | DELETE  | `/sessions/{id}`            | Munkamenet törlése                                                     |
-| GET     | `/sessions/{id}/export.har` | Munkamenet exportálása HAR 1.2 formátumban                             |
+| GET     | `/sessions/{id}/export.har` | Munkamenet exportálása HAR 1.2-ként                                    |
 
-### Belső adatfogadás (D4 tartalékmechanizmus)
+### Belső adatfogadás (D4 tartalékmegoldás)
 
-| Metódus | Útvonal            | Leírás                                                                                                                        |
-| ------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| POST    | `/internal/ingest` | Elfogadja a `server.cjs` átengedési útvonaláról érkező elfogott kérést; az `INSPECTOR_INTERNAL_INGEST_TOKEN` fejléc szükséges |
+| Metódus | Útvonal            | Leírás                                                                                                                           |
+| ------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| POST    | `/internal/ingest` | Elfogadja a `server.cjs` átengedési útvonaláról érkező elfogott kéréseket; az `INSPECTOR_INTERNAL_INGEST_TOKEN` fejléc szükséges |
 
 Teljes OpenAPI-sémák: `docs/openapi.yaml` → `Traffic Inspector` címke.

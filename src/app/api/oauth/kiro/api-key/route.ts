@@ -23,8 +23,10 @@ async function requireKiroApiKeyImportAuth(request: Request) {
  * POST /api/oauth/kiro/api-key
  *
  * Imports a long-lived Kiro / AWS CodeWhisperer API key. API-key auth has no
- * refresh token; profile discovery is best-effort because AWS rejects
- * ListAvailableProfiles for some API keys while still accepting generation calls.
+ * refresh token. The key is validated on the Amazon Q model catalog (the surface
+ * inference uses) and pinned to the detected region (`auto` probes us-east-1 then
+ * eu-central-1); profile discovery is best-effort because AWS rejects
+ * ListAvailableProfiles for API keys while still accepting generation calls.
  */
 export async function POST(request: Request) {
   const authResponse = await requireKiroApiKeyImportAuth(request);
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
 
     const { apiKey, region } = validation.data;
     const kiroService = new KiroService();
-    const credential = await kiroService.validateApiKey(apiKey, region || "us-east-1");
+    const credential = await kiroService.validateApiKey(apiKey, region || "auto");
     const email = kiroService.extractEmailFromJWT(credential.accessToken);
     const name = buildKiroApiKeyConnectionName(targetProvider, credential.region, apiKey);
 

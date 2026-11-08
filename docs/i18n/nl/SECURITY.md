@@ -31,21 +31,22 @@ Als u een beveiligingskwetsbaarheid in OmniRoute ontdekt, meld deze dan op veran
 
 ## LTS-ondersteuningsperiode (v3.9.x)
 
-Na 3.8.59 is de volgende versie **3.9.0**, waarmee de langetermijnondersteuningslijn op de
+Na 3.8.59 is de volgende versie **3.9.0**, waarmee de lijn voor langdurige ondersteuning op de
 `stable/v3`-branch wordt geopend (zie [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
 
 - **Wat `stable/v3` ontvangt:** bugfixes, beveiligingspatches en providerupdates. Nieuwe
-  functies gaan naar het v4-kanaal; stabiliteit staat voorop in de LTS-lijn. `npm install omniroute`
-  (de `latest`-dist-tag) blijft gedurende de volledige v4-cyclus op v3.
-- **Duur van de periode:** `<T-GAP-3: beslissing van eigenaar in afwachting — zie ROADMAP.md>`. De duur van
-  de periode na v4.0 GA (wanneer `latest` overschakelt naar v4) is **nog niet vastgesteld**; deze
-  sectie wordt bijgewerkt wanneer de beheerder dit bekendmaakt. Ga tot die tijd niet uit van een einddatum.
-- **Een kwetsbaarheid in de LTS-lijn melden:** hetzelfde kanaal als voor elke andere versie —
+  functies gaan naar het v4-kanaal; bij de LTS-lijn staat stabiliteit voorop. `npm install omniroute`
+  (de `latest` dist-tag) blijft gedurende de volledige v4-cyclus op v3.
+- **Duur van de periode:** `stable/v3` ontvangt **beveiligingsoplossingen en oplossingen voor kritieke regressies
+  gedurende 12 maanden na de release van 3.9.0, of tot 90 dagen nadat v4.0.0 als `latest` is gepubliceerd —
+  afhankelijk van welke datum later valt**. De resulterende einddatum wordt bij de release vastgelegd in de releaseopmerkingen van 3.9.0 en in
+  [`ROADMAP.md`](ROADMAP.md).
+- **Een kwetsbaarheid in de LTS-lijn melden:** via hetzelfde kanaal als voor elke andere versie —
   een privé-[GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  nooit een openbaar issue. Vermeld welke versie u hebt getest (bijvoorbeeld `3.9.2`); oplossingen komen terecht op
-  `stable/v3` en worden voorwaarts geport naar v4.
-- **Beveiligingsbasislijn bij de LTS-afsplitsing:** de gemeten scannerstatus, routebeveiliging en
-  bewijzen voor openbare referenties worden vastgelegd in
+  nooit een openbare issue. Vermeld welke versie u hebt getest (bijvoorbeeld `3.9.2`); oplossingen worden toegepast op
+  `stable/v3` en voorwaarts geporteerd naar v4.
+- **Beveiligingsbasislijn bij de LTS-release:** de gemeten scannerstatus en het bewijs voor routebeveiliging en
+  openbare aanmeldgegevens worden vastgelegd in
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

@@ -1,1 +1,0 @@
-- **fix(sse):** Ollama-compatible /api/chat stream now ends with a single done:true carrying tool calls, no longer drops an unterminated final line, and keeps tool calls whose arguments are malformed JSON ([#16519](https://github.com/diegosouzapw/OmniRoute/pull/16519)) — thanks @ntdat812
