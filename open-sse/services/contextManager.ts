@@ -43,6 +43,15 @@ function getEnvOverride(provider: string): number | null {
   return null;
 }
 
+/**
+ * True when the operator set a positive `CONTEXT_LENGTH_<PROVIDER>` /
+ * `CONTEXT_LENGTH_DEFAULT` override. `resolveTokenLimit` treats it as a sourced
+ * limit, so callers that gate on "has limit evidence" (combo catalog, #18609) must too.
+ */
+export function hasContextLengthEnvOverride(provider: string): boolean {
+  return getEnvOverride(provider) !== null;
+}
+
 // Reserve tokens override from environment variable
 function getReserveTokensOverride(): number | null {
   const envValue = process.env.CONTEXT_RESERVE_TOKENS;
@@ -163,6 +172,31 @@ export function isInlineBase64DocumentBlock(node: Record<string, unknown>): bool
   return matchesOpenAIFileShape(node) || matchesClaudeDocumentShape(node);
 }
 
+/** Binary audio/video is not millions of text tokens of base64 encoding. */
+function isInlineAudioVideoBlock(node: Record<string, unknown>): boolean {
+  const audio = node.input_audio;
+  if (node.type === "input_audio" && audio && typeof audio === "object") {
+    return typeof (audio as Record<string, unknown>).data === "string";
+  }
+  const carrier = node.video_url ?? node.input_video ?? node.audio_url;
+  const url =
+    typeof carrier === "string"
+      ? carrier
+      : carrier && typeof carrier === "object"
+        ? (carrier as Record<string, unknown>).url
+        : null;
+  return typeof url === "string" && /^data:(?:audio|video)\/[a-z0-9.+-]{1,64};base64,/i.test(url);
+}
+
+/** Recognize Gemini audio/video bytes that must not enter image pruning. */
+function isNonImageGeminiMedia(node: Record<string, unknown>): boolean {
+  const data = node.inlineData ?? node.inline_data;
+  if (!data || typeof data !== "object") return false;
+  const record = data as Record<string, unknown>;
+  const mime = record.mimeType ?? record.mime_type;
+  return typeof mime === "string" && !mime.toLowerCase().startsWith("image/");
+}
+
 /**
  * Detect the 5 documented inline-base64 image content-block shapes (see the
  * shape-specific matchers above).
@@ -212,7 +246,8 @@ export function pruneOlderInlineImages(
         part &&
         typeof part === "object" &&
         !Array.isArray(part) &&
-        isInlineBase64ImageBlock(part as Record<string, unknown>)
+        isInlineBase64ImageBlock(part as Record<string, unknown>) &&
+        !isNonImageGeminiMedia(part as Record<string, unknown>)
       ) {
         locations.push({ messageIndex, contentIndex });
       }
@@ -314,6 +349,7 @@ function isOmittedValue(value: unknown): boolean {
   return value === undefined || typeof value === "function" || typeof value === "symbol";
 }
 
+/** Estimate context text while excluding opaque attachment bytes from token accounting. */
 function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags): VirtualMeasure {
   if (node === null) return { chars: 4, mediaTokens: 0 };
   const type = typeof node;
@@ -363,6 +399,11 @@ function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags):
           mediaTokens += DOCUMENT_TOKEN_ESTIMATE;
           continue;
         }
+        if (isInlineAudioVideoBlock(record)) {
+          chars += DOCUMENT_PLACEHOLDER_CHARS;
+          mediaTokens += DOCUMENT_TOKEN_ESTIMATE;
+          continue;
+        }
       }
       if (isOmittedValue(item)) {
         chars += 4; // omitted values render as null inside arrays
@@ -380,6 +421,9 @@ function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags):
     return { chars: IMAGE_PLACEHOLDER_CHARS, mediaTokens: IMAGE_TOKEN_ESTIMATE };
   }
   if (isInlineBase64DocumentBlock(record)) {
+    return { chars: DOCUMENT_PLACEHOLDER_CHARS, mediaTokens: DOCUMENT_TOKEN_ESTIMATE };
+  }
+  if (isInlineAudioVideoBlock(record)) {
     return { chars: DOCUMENT_PLACEHOLDER_CHARS, mediaTokens: DOCUMENT_TOKEN_ESTIMATE };
   }
 

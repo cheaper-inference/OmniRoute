@@ -151,7 +151,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ## 可用技能
 
-OmniRoute公開了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中的 6 個A2A技能。每個技能模組都位於`src/lib/a2a/skills/`。
+OmniRoute公開了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中連結的 6 個A2A技能。每個技能模組都位於`src/lib/a2a/skills/`。
 
 | 技能       | ID                   | 描述                                                                                                        | 標籤             | 範例                       |
 | :--------- | :------------------- | :---------------------------------------------------------------------------------------------------------- | :--------------- | :------------------------- |
@@ -162,7 +162,7 @@ OmniRoute公開了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中的 6 個
 | 健康報告   | `health-report`      | 聚合每個提供者的斷路器、冷卻時間、鎖定狀態                                                                  | 健康、韌性       | “顯示所有提供者的健康狀況” |
 | 列出能力   | `list-capabilities`  | 返回完整的 45 條目代理技能目錄（23 API + 21 CLI + 1 配置）作為降價表，並使用原始SKILL.md URLs進行上下文注入 | 目錄、發現、技能 | “列出所有OmniRoute功能”    |
 
-> 代理卡應與即時 377 提供者目錄保持一致；提供者計數和free/no-auth資料源自運行時註冊表。
+> 代理卡應與即時 380 提供者目錄保持一致；提供者計數和free/no-auth資料源自運行時註冊表。
 
 ### `list-capabilities`技能詳情
 
@@ -198,15 +198,15 @@ JSON-RPC 端點 `/a2a` 是標準的 A2A 進入點。以下 REST 端點為儀表�
 
 ## 新增技能
 
-1. **建立技能檔案：** `src/lib/a2a/skills/<your-skill>.ts`
+1. **建立技能文件：** `src/lib/a2a/skills/<your-skill>.ts`
 
-   匯出一個非同步函式 `(task: A2ATask) => Promise<{ artifacts, metadata }>`。請遵循現有技能的結構，例如 `smartRouting.ts`。
+   導出異步函數`(task: A2ATask) => Promise<{ artifacts, metadata }>`。遵循`smartRouting.ts`等現有技能的形狀。
 
-2. **註冊處理常式：** 在 `src/lib/a2a/taskExecution.ts` 中，新增一個項目至 `A2A_SKILL_HANDLERS`：
+2. **註冊處理程序：**在`src/lib/a2a/taskExecution.ts`中，在`A2A_SKILL_HANDLERS`中新增一個條目：
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...現有技能
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -214,21 +214,21 @@ JSON-RPC 端點 `/a2a` 是標準的 A2A 進入點。以下 REST 端點為儀表�
    };
    ```
 
-3. **公開於代理卡片中：** 在 `src/lib/a2a/agentCardMetadata.ts`（由 `/.well-known/agent.json` 與 `/.well-known/agent-card.json` 共用）中，將以下內容附加至 `skills` 陣列：
+3. **在代理卡中公開：**在`src/lib/a2a/agentCardMetadata.ts` （由`/.well-known/agent.json`和`/.well-known/agent-card.json`共享）中，追加到`skills`陣列：
 
    ```json
    {
      "id": "your-skill",
-     "name": "您的技能",
-     "description": "簡短且聚焦於意圖的描述",
-     "tags": ["路由", "配額"],
-     "examples": ["自然語言叫用範例"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **撰寫測試：** `tests/unit/a2a-<your-skill>.test.ts`。涵蓋成功路徑與錯誤路徑。
+4. **編寫測試：** `tests/unit/a2a-<your-skill>.test.ts`.覆蓋快樂路徑+錯誤路徑。
 
-5. **記錄** 此檔案的 `Available Skills` 表格中的新技能。
+5. **文件**該文件的`Available Skills`表中的新技能。
 
 ---
 

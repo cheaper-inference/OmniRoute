@@ -198,6 +198,13 @@ export function buildManifest() {
         runAndMatch("scripts/check/check-open-sse-typecheck.mjs", /openSseTypecheckErrors=(\d+)/),
     },
     {
+      id: "buildTypecheck",
+      direction: "down",
+      baseline: () => sumTypecheckBaseline(readJson("build-typecheck-baseline.json")),
+      measure: () =>
+        runAndMatch("scripts/check/check-build-typecheck.mjs", /buildTypecheckErrors=(\d+)/),
+    },
+    {
       id: "cognitiveComplexity",
       direction: "down",
       baseline: () => val("cognitiveComplexity"),

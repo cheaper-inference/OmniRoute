@@ -16,11 +16,11 @@ AgentBridge ir OmniRoute MITM (Man-in-the-Middle — starpnieka) starpniekserver
 
 ### Kas ir AgentBridge?
 
-Kad IDE aģents (piemēram, GitHub Copilot, Cursor, Claude kods) veic API zvanu, tas tieši savienojas ar augšupējo AI nodrošinātāju (OpenAI, Anthropic utt.). AgentBridge pārtver šo savienojumu pārskatāmi TLS līmenī — bez nepieciešamības mainīt aģenta konfigurāciju — un pārraksta pieprasījumu, izmantojot OmniRoute.
+Kad IDE aģents (piemēram, GitHub Copilot, Cursor, Claude kods) veic API zvanu, tas tieši savienojas ar augšupējo AI nodrošinātāju (OpenAI, Anthropic utt.). AgentBridge pārtver šo savienojumu pārredzami TLS līmenī — neprasot nekādas aģenta konfigurācijas izmaiņas —, un pārraksta pieprasījumu, izmantojot OmniRoute.
 
 Tas nozīmē, ka jūs varat:
 
-- **Pārorientējiet jebkuru aģentu uz jebkuru pakalpojumu sniedzēju** : Copilot runā ar OpenAI? Novirziet to uz Anthropic Claude, Gemini vai kādu no OmniRoute 377 pakalpojumu sniedzējiem.
+- **Pārorientējiet jebkuru aģentu uz jebkuru pakalpojumu sniedzēju** : Copilot runā ar OpenAI? Novirziet to uz Anthropic Claude, Gemini vai kādu no OmniRoute 380 pakalpojumu sniedzējiem.
 - **Izmantojiet modeļu kartējumus** : `gemini-3-flash` → `claude-sonnet-4.7` caurspīdīgi apstrādātāja līmenī.
 - **Ievērojiet visu aģentu satiksmi** : katrs pārtvertais pieprasījums tiek publicēts [satiksmes inspektoram](./TRAFFIC_INSPECTOR.md).
 - **Pielietojiet OmniRoute elastību** : kombinētā maršrutēšana, automātiskie slēdži, atkāpšanās un izmaksu izsekošanas darbi arī IDE aģentu datplūsmai.
