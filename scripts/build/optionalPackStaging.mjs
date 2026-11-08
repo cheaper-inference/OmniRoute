@@ -12,7 +12,7 @@
  *     the CLI installer and `verify`),
  *  2. MOVES the member trees out of the staging bundle into
  *     `.build/optional-packs/<name>/node_modules/…` (same volume → cheap rename),
- *  3. emits `optional-pack-<name>.tar.gz` next to them (bsdtar; disable with
+ *  3. emits `optional-pack-<name>-<sha256>.tar.gz` next to them (disable with
  *     `OMNIROUTE_OPTIONAL_PACK_TAR=0`) for the desktop release workflow to
  *     upload as versioned assets.
  *
@@ -27,6 +27,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import {
+  archiveChecksum,
   OPTIONAL_PACKS,
   PACK_INDEX_FILENAME,
   buildPackIndexEntry,
@@ -164,6 +165,12 @@ export async function stageOptionalPacks({
     if (emitTarballs) {
       tarball = path.join(packsOutDir, indexEntry.tarball);
       tarPack(packOutDir, tarball);
+      const sha256 = await archiveChecksum(tarball);
+      const archiveName = `optional-pack-${pack.name}-${sha256}.tar.gz`;
+      const archivePath = path.join(packsOutDir, archiveName);
+      fs.renameSync(tarball, archivePath);
+      Object.assign(indexEntry, { tarball: archiveName, sha256 });
+      tarball = archivePath;
     }
     packsOut.push({ name: pack.name, removedFiles, removedBytes, tarball });
     log(

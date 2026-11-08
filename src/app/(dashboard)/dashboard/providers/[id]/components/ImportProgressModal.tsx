@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 /**
  * ImportProgressModal — Issue #3501 Phase 1k
@@ -13,6 +14,7 @@ import Icon from "@/shared/components/Icon";
 
 import { Progress } from "@omniroute/ui-kit/progress";
 import { Button, Modal } from "@/shared/components";
+import { DiscoveryDegradedNotice } from "@/shared/components/DiscoveryDegradedNotice";
 import type { ImportProgress } from "../hooks/useModelImportHandlers";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
 
@@ -43,17 +45,32 @@ export default function ImportProgressModal({
       }
     >
       <div className="flex flex-col gap-4">
+        {/* The fallback catalog notice comes first: it is the sign the operator
+            reads before the status line, and it carries the reason. */}
+        <DiscoveryDegradedNotice
+          degraded={importProgress.degraded}
+          cause={importProgress.degradedCause}
+        />
+
         {/* Status text */}
-        <div className="flex items-center gap-3">
-          {importProgress.phase === "fetching" && (
-            <Icon name="progress_activity" className="animate-spin text-text-muted" />
+        <div role="status" className="flex items-center gap-3">
+          {" "}
+          {importProgress.degraded ? (
+            <Icon name="warning" className="text-warning" />
+          ) : (
+            <>
+              {(importProgress.phase === "fetching" || importProgress.phase === "importing") && (
+                <Spinner decorative size="sm" className="text-text-muted" />
+              )}
+              {importProgress.phase === "done" && (
+                <Icon name="check_circle" className="text-success" />
+              )}
+              {importProgress.phase === "warning" && (
+                <Icon name="warning" className="text-warning" />
+              )}
+              {importProgress.phase === "error" && <Icon name="error" className="text-error" />}
+            </>
           )}
-          {importProgress.phase === "importing" && (
-            <Icon name="progress_activity" className="animate-spin text-text-muted" />
-          )}
-          {importProgress.phase === "done" && <Icon name="check_circle" className="text-success" />}
-          {importProgress.phase === "warning" && <Icon name="warning" className="text-warning" />}
-          {importProgress.phase === "error" && <Icon name="error" className="text-error" />}
           <span className="text-sm font-medium text-text-main">{importProgress.status}</span>
         </div>
 

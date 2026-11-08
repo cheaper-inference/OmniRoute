@@ -90,6 +90,7 @@ const ENCRYPTED_ENVELOPE_PREFIX = "enc:v1:";
 export const createProviderSchema = z
   .object({
     provider: z.string().min(1).max(100),
+    proxyEnabled: z.boolean().optional(),
     apiKey: z.string().max(MAX_PROVIDER_CREDENTIAL_LENGTH).optional(),
     name: z.string().min(1).max(200),
     priority: z.number().int().min(1).max(100).optional(),
@@ -376,6 +377,29 @@ const providerIdSuffixSchema = z
   .optional()
   .nullable();
 
+/** A custom JSON API node is an openai-compatible node with its own config; never a preset. */
+function addCustomJsonNodeIssues(
+  value: { apiType?: string; preset?: string; type?: string },
+  ctx: z.RefinementCtx
+): void {
+  if (value.apiType !== "custom-json") return;
+  if (value.preset) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Presets cannot create custom JSON API nodes",
+      path: ["apiType"],
+    });
+    return;
+  }
+  if ((value.type || "openai-compatible") !== "openai-compatible") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Custom JSON API nodes must use the openai-compatible type",
+      path: ["apiType"],
+    });
+  }
+}
+
 export const createProviderNodeSchema = z
   .object({
     // #6874: name/prefix are required in general, but a `preset` (e.g.
@@ -441,13 +465,7 @@ export const createProviderNodeSchema = z
         path: ["prefix"],
       });
     }
-    if (value.preset && value.apiType === "custom-json") {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Presets cannot create custom JSON API nodes",
-        path: ["apiType"],
-      });
-    }
+    addCustomJsonNodeIssues(value, ctx);
     if (value.preset === "vibeproxy-openai") {
       // Preset supplies name/prefix/apiType — but baseUrl is still mandatory
       // (a local proxy's host/port is operator-specific, unlike the generic
@@ -484,13 +502,6 @@ export const createProviderNodeSchema = z
         code: z.ZodIssueCode.custom,
         message: reservedProviderPrefixMessage(value.prefix.trim()),
         path: ["prefix"],
-      });
-    }
-    if (nodeType !== "openai-compatible" && value.apiType === "custom-json") {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Custom JSON API nodes must use the openai-compatible type",
-        path: ["apiType"],
       });
     }
     if (nodeType === "openai-compatible" && !value.apiType) {
@@ -825,6 +836,8 @@ export const validateProviderApiKeySchema = z
     runtimeKey: z.string().trim().max(65_536).optional(),
     tunnelId: z.string().trim().max(128).optional(),
     connectorName: z.string().trim().max(200).optional(),
+    // Command Code per-connection Zero Data Retention: probe with `x-cmd-zdr: 1`.
+    zdrEnabled: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.provider === "google-pse-search" && !data.cx) {

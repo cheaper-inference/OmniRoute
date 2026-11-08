@@ -2,8 +2,8 @@
  * #8965 — Antigravity quota reads must use the runtime host (daily-cloudcode-pa)
  * instead of hardcoding cloudcode-pa.googleapis.com.
  *
- * Antigravity inference, credit probe, OAuth, and the models catalog all use
- * ANTIGRAVITY_RUNTIME_BASE_URLS which starts with daily-cloudcode-pa.googleapis.com.
+ * Quota reads and credit probes use ANTIGRAVITY_RUNTIME_BASE_URLS, which starts
+ * with daily-cloudcode-pa.googleapis.com and retains the regular host fallback.
  * The two quota RPCs (retrieveUserQuota, retrieveUserQuotaSummary) were hardcoded
  * to cloudcode-pa.googleapis.com, so when only the runtime host serves them, the
  * live quota signal is lost and falls back to fetchAvailableModels.
@@ -262,4 +262,67 @@ test("#8965 behavioral impact: live quota source + weekly bucket unreachable whe
   // The weekly group quota MUST also be present because retrieveUserQuotaSummary
   // was served by the runtime host.
   assert.ok(quotas.gemini_weekly, "weekly group quota present");
+});
+
+test("quota RPC and summary retain daily-to-regular fallback", async () => {
+  const calls: Record<string, string[]> = { retrieveUserQuota: [], retrieveUserQuotaSummary: [] };
+  globalThis.fetch = async (input) => {
+    const url = new URL(typeof input === "string" || input instanceof URL ? input : input.url);
+    const rpc = url.pathname.split(":").at(-1) || "";
+    if (rpc in calls) {
+      calls[rpc].push(url.hostname);
+      if (url.hostname === "daily-cloudcode-pa.googleapis.com") {
+        return new Response("fixture daily failure", { status: 503 });
+      }
+      if (rpc === "retrieveUserQuota") {
+        return Response.json({
+          buckets: [
+            {
+              modelId: "gemini-3.8-flash-high",
+              remainingFraction: 0.4,
+              resetTime: RESET_IN_2_HOURS,
+            },
+          ],
+        });
+      }
+      return Response.json({
+        groups: [
+          {
+            displayName: "Gemini Models",
+            buckets: [
+              {
+                bucketId: "gemini-weekly",
+                displayName: "Weekly Quota",
+                remainingFraction: 0.6,
+                resetTime: RESET_IN_3_DAYS,
+              },
+            ],
+          },
+        ],
+      });
+    }
+    if (rpc === "fetchAvailableModels") {
+      return Response.json({ models: {} });
+    }
+    return Response.json({ cloudaicompanionProject: "test-project", tierId: "FREE" });
+  };
+
+  const result = await getUsageForProvider(
+    {
+      id: "conn-quota-regular-fallback",
+      provider: "antigravity",
+      accessToken: "quota-regular-fallback-token",
+      projectId: "test-project",
+      providerSpecificData: { clientProfile: "cli" },
+    },
+    { forceRefresh: true }
+  );
+  assert.ok(result && "quotas" in result);
+  const quotas = (result as UsageResult).quotas;
+  assert.equal(quotas["gemini-3.8-flash-high"].quotaSource, "retrieveUserQuota");
+  assert.equal(quotas["gemini-3.8-flash-high"].remainingPercentage, 40);
+  assert.equal(quotas.gemini_weekly.remainingPercentage, 60);
+  for (const hosts of Object.values(calls)) {
+    assert.deepEqual(hosts, ["daily-cloudcode-pa.googleapis.com", "cloudcode-pa.googleapis.com"]);
+  }
 });

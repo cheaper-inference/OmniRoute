@@ -55,32 +55,36 @@ OmniRoute HAR faile ieško Chathub WebSocket URL, išskiria `access_token` bei `
 
 > **Niekada neįtraukite tikro HAR eksporto, prieigos rakto ar atnaujinimo rakto į versijų valdymo sistemą.** Testuose ir dokumentacijoje visada turi būti naudojamos vietaženklio reikšmės.
 
-## Prieigos rakto galiojimo trukmė ir atnaujinimas
+## Prieigos rakto galiojimo laikas ir atnaujinimas
 
-`access_token` galioja trumpai (paprastai **~75 minutes**). Jam nustojus galioti, teikėjas praneša apie ryšio klaidą, todėl turite iš naujo gauti prisijungimo duomenis.
+`access_token` galioja trumpai (paprastai **~75 minutes**). Neturėdami tinkamo atnaujinimo
+rakto, pasibaigus galiojimui turite dar kartą užfiksuoti kredencialą.
 
 ### Automatinis atnaujinimas naudojant `refreshToken`
 
-Kad nereikėtų duomenų gauti iš naujo rankiniu būdu, Microsoft atnaujinimo raktą galite išsaugoti ryšio skiltyje **Advanced Settings → providerSpecificData**:
+„Microsoft 365“ teikėjo dialogo lange **Pridėti ryšį** arba **Redaguoti ryšį** atidarykite
+**Išplėstiniai nustatymai → Atnaujinimo raktas (pasirinktinai)**. Įklijuokite „Microsoft“ OAuth atnaujinimo raktą, skirtą
+`substrate.office.com/sydney` sričiai, ir išsaugokite. Įvestis yra užmaskuota ir niekada neužpildoma išsaugotu raktu. Redaguodami palikite lauką tuščią, kad išsaugotumėte esamą raktą;
+įklijuokite naują raktą, jei norite jį pakeisti.
 
-| Laukas         | Aprašymas                                                                           |
-| -------------- | ----------------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth atnaujinimo raktas, skirtas `substrate.office.com/sydney` aprėpčiai |
-| `tier`         | `individual` (numatytasis), `edu` arba `enterprise`                                 |
+Gaukite atnaujinimo raktą naudodami „Microsoft“ įrenginio kodo arba autorizacijos kodo srautą,
+apribotą iki `substrate.office.com/sydney` srities; valdymo skydas jo negauna už jus.
+Sukonfigūravus atnaujinimo raktą, „OmniRoute“ prieš užklausas patikrina `access_token`
+ir jį atnaujina tik tada, kai to reikia. Sėkmingai atnaujinus taip pat išsaugomas pasuktas atnaujinimo raktas, todėl nereikia jo užfiksuoti iš naujo, kol atnaujinimo raktas lieka galiojantis.
 
-Gaukite atnaujinimo raktą iš Microsoft įrenginio kodo arba autorizavimo kodo srauto, kurio aprėptis nustatyta į `substrate.office.com/sydney`. Nustačius `refreshToken`, OmniRoute prieš kiekvieną užklausą iš anksto atnaujina `access_token`, todėl nereikia iš naujo gauti duomenų kaskart pasibaigus ~75 minučių galiojimo laikui.
+Jei `refreshToken` nenustatytas, pasibaigus galiojimui turite rankiniu būdu iš naujo užfiksuoti
+„WebSocket“ kredencialą.
 
-Jei `refreshToken` nenustatytas, pasibaigus kiekvienam galiojimo laikotarpiui turite rankiniu būdu iš naujo gauti WebSocket prisijungimo duomenis.
+### Pakopos pasirinkimas
 
-### Lygio pasirinkimas
+| Pakopa       | Pseudonimas    | Sąsaja                             |
+| ------------ | -------------- | ---------------------------------- |
+| `individual` | _(numatytoji)_ | Vartotojams skirtas „M365 Copilot“ |
+| `edu`        | `included`     | Švietimui skirtas „M365 Copilot“   |
+| `enterprise` | `work`         | „M365 Copilot“ darbui              |
 
-| Lygis        | Alternatyvusis pavadinimas | Sąsaja                           |
-| ------------ | -------------------------- | -------------------------------- |
-| `individual` | _(numatytasis)_            | Vartotojams skirtas M365 Copilot |
-| `edu`        | `included`                 | Švietimui skirtas M365 Copilot   |
-| `enterprise` | `work`                     | M365 Copilot darbui              |
-
-Nustatykite lygį skiltyje **Advanced Settings → providerSpecificData → tier**. Lygis turi įtakos BizChat maršruto parinkimui ir prieigai prie modelių.
+Nustatykite pakopą skiltyje **Išplėstiniai nustatymai → „Copilot“ pakopa**. Pakopa turi įtakos
+„BizChat“ maršrutizavimui ir prieigai prie modelių.
 
 ## Saugumo modelis
 
@@ -95,30 +99,25 @@ Nustatykite lygį skiltyje **Advanced Settings → providerSpecificData → tier
 
 ## Trikčių šalinimas
 
-### Autentifikavimas iš karto nepavyksta
+### Autentifikavimas iškart nepavyksta
 
-- Patikrinkite, ar duomenis nukopijavote iš **WebSocket URL**, o ne iš XHR/Fetch užklausos. Prisijungimo
-  duomenys yra Chathub WebSocket ryšio `access_token` užklausos parametre,
-  o ne `Authorization: Bearer` antraštėje.
-- Įsitikinkite, kad `chathubPath` apima visą URL
-  kelio segmentą `<oid>@<tenant>`.
+- Įsitikinkite, kad nukopijavote iš **WebSocket URL**, o ne iš XHR/Fetch užklausos. Kredencialas yra `access_token` užklausos parametre, esančiame „Chathub“ WebSocket ryšyje, o ne `Authorization: Bearer` antraštėje.
+- Įsitikinkite, kad `chathubPath` apima visą `<oid>@<tenant>` segmentą iš URL kelio.
 
-### Atpažinimo ženklo galiojimas baigiasi po ~75 minučių
+### Prieigos raktas nustoja galioti maždaug po 75 minučių
 
-Tai normalu. Be `refreshToken` prieigos atpažinimo ženklas galioja trumpai. Galite:
+Tai tikėtina. Be `refreshToken` prieigos raktas galioja trumpai. Galite:
 
-- Iš naujo gauti prisijungimo duomenis iš DevTools arba
-- Išplėstiniuose nustatymuose sukonfigūruoti `refreshToken`, kad jie būtų atnaujinami automatiškai.
+- Dar kartą užfiksuoti kredencialą naudodami kūrėjo įrankius, arba
+- Dialogo lange „Add or Edit connection“ sukonfigūruoti **Išplėstiniai nustatymai → Atšaukimo raktas (nebūtina)**, kad raktas būtų automatiškai atnaujinamas.
 
-### Ryšio testas sėkmingas, tačiau pokalbis grąžina 401
+### Ryšio patikra sėkminga, bet pokalbis grąžina 401
 
-Atpažinimo ženklo galiojimas galėjo baigtis tarp patikrinimo ir pirmosios užklausos. Iš naujo gaukite
-galiojančius prisijungimo duomenis.
+Gali būti, kad prieigos raktas nustojo galioti tarp patikros ir pirmosios užklausos. Dar kartą užfiksuokite naują kredencialą.
 
-### Copilot nerodomas teikėjų sąraše
+### „Copilot“ nerodomas teikėjų sąraše
 
-Įsitikinkite, kad **Dashboard → Providers** skiltyje įjungtas `copilot-m365-web`. Kai kuriuose planuose
-teikėjas pagal numatytuosius nustatymus gali būti paslėptas.
+Įsitikinkite, kad `copilot-m365-web` įjungtas skiltyje **Valdymo skydas → Teikėjai**. Kai kuriuose planuose teikėjas pagal numatytuosius nustatymus gali būti paslėptas.
 
 ## Nuorodos
 

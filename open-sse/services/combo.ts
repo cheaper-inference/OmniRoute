@@ -37,6 +37,7 @@ import { parseModel } from "./model.ts";
 import { rejectRetiredAutoComboCandidates } from "./modelLifecycle.ts";
 import { createComboContext } from "./combo/context.ts";
 import { phaseComboSetup } from "./combo/comboSetup.ts";
+import { withComboServiceTier } from "./combo/comboServiceTier.ts";
 
 import { projectAccountTier, type ProviderCandidate } from "./autoCombo/scoring.ts";
 
@@ -63,6 +64,7 @@ import type {
   SingleModelTarget,
   ComboLogger,
   HandleComboChatOptions,
+  HandleSingleModel,
   ResolvedComboTarget,
   AutoProviderCandidate,
   HistoricalLatencyStatsEntry,
@@ -85,6 +87,7 @@ import {
   getPersistedConnectionCooldownSkipReason,
   resolvePersistedConnectionCooldownSkipReason,
   isContextOverflow400,
+  isContextOverflowFailure,
   isParamValidation400,
   isModelScoped400,
 } from "./combo/comboPredicates.ts";
@@ -93,6 +96,7 @@ export {
   getPersistedConnectionCooldownSkipReason,
   resolvePersistedConnectionCooldownSkipReason,
   isContextOverflow400,
+  isContextOverflowFailure,
   isParamValidation400,
   isModelScoped400,
 };
@@ -153,6 +157,10 @@ import {
 } from "./combo/autoConnectionScope.ts";
 import { resolveComboTargetPipeline } from "./combo/targetResolution.ts";
 import { dispatchWithCooldownRetry } from "./combo/comboAttemptLoop.ts";
+import {
+  resolveHeldTruncatedResponse,
+  type HeldTruncatedState,
+} from "./combo/truncatedStreamFailover.ts";
 import { evaluateExecuteTargetGates } from "./combo/executeTargetGates.ts";
 import { executeTargetAttempt } from "./combo/executeTargetAttempt.ts";
 import type { AttemptLoopDeps, AttemptLoopState } from "./combo/attemptLoopTypes.ts";
@@ -795,7 +803,7 @@ export async function handleComboChat(options: HandleComboChatOptions): Promise<
 async function handleComboChatInner({
   body,
   combo,
-  handleSingleModel,
+  handleSingleModel: dispatchSingleModel,
   isModelAvailable,
   log,
   settings,
@@ -815,6 +823,7 @@ async function handleComboChatInner({
   invocationId,
 }: HandleComboChatOptions): Promise<Response> {
   hiddenModelsByProvider ??= await getHiddenChatModels();
+  const handleSingleModel = withComboServiceTier(dispatchSingleModel, combo);
   const comboCtx = createComboContext({ body, combo, settings, relayOptions, log });
   const {
     strategy,
@@ -834,8 +843,16 @@ async function handleComboChatInner({
   const traceInvocationId = invocationId ?? createInvocationId();
   startComboTrace(traceInvocationId, { strategy, comboName: combo.name });
 
+  const preContentTransportRecovery =
+    clientRequestedStream && resilienceSettings.streamRecovery.enabled === true;
+  const guardedHandleSingleModel: HandleSingleModel = preContentTransportRecovery
+    ? async (...dispatchArgs) =>
+        signal?.aborted
+          ? errorResponse(499, "Client disconnected")
+          : handleSingleModel(...dispatchArgs)
+    : handleSingleModel;
   const handleSingleModelWithTimeout = buildTargetTimeoutRunner({
-    handleSingleModel,
+    handleSingleModel: guardedHandleSingleModel,
     comboTargetTimeoutMs,
     resolveTargetTimeoutMs: (target) =>
       resolveTargetTimeoutMsForTarget(
@@ -865,6 +882,8 @@ async function handleComboChatInner({
       handleSingleModelWithTimeout,
       log,
       hiddenModelsByProvider,
+      preContentTransportRecovery: resilienceSettings.streamRecovery.enabled === true,
+      signal,
     });
     if (pinnedDispatch) return pinnedDispatch;
   }
@@ -975,7 +994,8 @@ async function handleComboChatInner({
   // target pipeline below so it cannot rotate between tool rounds.
   if (getStrategyTraits(strategy).usesRoundRobinLoop && !activeNativeTurnPin) {
     const { handleRoundRobinCombo } = await import("./combo/roundRobinCombo.ts");
-    return handleRoundRobinCombo({
+    const heldAttempt: HeldTruncatedState = {};
+    const roundRobinResponse = await handleRoundRobinCombo({
       body,
       combo,
       handleSingleModel: handleSingleModelWithTimeout,
@@ -994,7 +1014,9 @@ async function handleComboChatInner({
       requestHeaders,
       relayOptions,
       perTargetAdmission,
+      heldAttempt,
     });
+    return resolveHeldTruncatedResponse(heldAttempt, roundRobinResponse);
   }
 
   // Native Codex turns must stay on their pinned target, but a pre-content
@@ -1199,7 +1221,8 @@ async function handleComboChatInner({
 
   const comboCooldownWaitEnabled = isComboCooldownWaitEligible(
     strategy,
-    resilienceSettings.comboCooldownWait
+    resilienceSettings.comboCooldownWait,
+    config
   );
   const comboCooldownAttempt = { current: pinnedLockWaitMs > 0 ? 1 : 0 };
   const comboCooldownBudgetLeftMs = {
@@ -1318,7 +1341,10 @@ async function handleComboChatInner({
   }
 
   try {
-    return await dispatchWithCooldownRetry({ state, deps, extra });
+    return resolveHeldTruncatedResponse(
+      state,
+      await dispatchWithCooldownRetry({ state, deps, extra })
+    );
   } finally {
     quotaShareConcurrencyRelease?.();
     // #11371: release the in-flight slot quota-share ordering reserved for its

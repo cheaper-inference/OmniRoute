@@ -1,4 +1,35 @@
-import { isForbiddenCustomHeaderName } from "@/shared/constants/upstreamHeaders";
+import {
+  isForbiddenCustomHeaderName,
+  isForbiddenUpstreamHeaderName,
+} from "@/shared/constants/upstreamHeaders";
+
+export { isForbiddenUpstreamHeaderName };
+
+const asHeaderObject = (value: unknown): Record<string, unknown> | null =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+
+function parseCustomHeaders(raw: unknown): Record<string, unknown> | null {
+  if (typeof raw !== "string") return asHeaderObject(raw);
+  try {
+    return asHeaderObject(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
+
+function assignHeaderCaseInsensitive(
+  headers: Record<string, string>,
+  name: string,
+  value: string
+): void {
+  const lower = name.toLowerCase();
+  for (const existing of Object.keys(headers)) {
+    if (existing.toLowerCase() === lower) delete headers[existing];
+  }
+  headers[name] = value;
+}
 
 /**
  * Apply operator-configured per-provider custom headers onto an outgoing header
@@ -16,32 +47,11 @@ export function applyCustomHeaders(
   headers: Record<string, string>,
   rawCustomHeaders: unknown
 ): void {
-  let customHeaders: Record<string, unknown> | null = null;
-  if (
-    rawCustomHeaders &&
-    typeof rawCustomHeaders === "object" &&
-    !Array.isArray(rawCustomHeaders)
-  ) {
-    customHeaders = rawCustomHeaders as Record<string, unknown>;
-  } else if (typeof rawCustomHeaders === "string") {
-    try {
-      const parsed = JSON.parse(rawCustomHeaders);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        customHeaders = parsed as Record<string, unknown>;
-      }
-    } catch {
-      /* ignore invalid JSON */
-    }
-  }
+  const customHeaders = parseCustomHeaders(rawCustomHeaders);
   if (!customHeaders) return;
-  for (const [k, v] of Object.entries(customHeaders)) {
-    if (typeof k !== "string" || typeof v !== "string") continue;
-    if (isForbiddenCustomHeaderName(k)) continue;
-    if (/[\r\n\0]/.test(k) || /[\r\n]/.test(v)) continue;
-    const lower = k.toLowerCase();
-    for (const existing of Object.keys(headers)) {
-      if (existing.toLowerCase() === lower) delete headers[existing];
-    }
-    headers[k] = v;
+  for (const [name, value] of Object.entries(customHeaders)) {
+    if (typeof value !== "string" || isForbiddenCustomHeaderName(name)) continue;
+    if (/[\r\n\0]/.test(name) || /[\r\n]/.test(value)) continue;
+    assignHeaderCaseInsensitive(headers, name, value);
   }
 }
