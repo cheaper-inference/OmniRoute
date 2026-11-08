@@ -145,6 +145,7 @@ export function inspectNewUiReferences({ cwd, snapshot, env = process.env } = {}
     const baseFiles = {};
     const headFiles = {};
     const blobReceipts = [];
+    const sourcePaths = new Set();
     let bytes = 0;
     function readSource(ref, file, required) {
       const entry = git(["ls-tree", "-lz", ref, "--", file], 65536);
@@ -161,12 +162,13 @@ export function inspectNewUiReferences({ cwd, snapshot, env = process.env } = {}
       insist(
         size <= DEFAULT_LIMITS.maxFileBytes &&
           bytes + size <= DEFAULT_LIMITS.maxTotalBytes &&
-          blobReceipts.length < DEFAULT_LIMITS.maxFiles,
+          (sourcePaths.has(file) || sourcePaths.size < DEFAULT_LIMITS.maxFiles),
         "SOURCE_READ_LIMIT"
       );
       const source = git(["cat-file", "blob", match[2]], DEFAULT_LIMITS.maxFileBytes);
       insist(Buffer.byteLength(source) === size, "INCOMPLETE_SOURCE_BLOB");
       bytes += size;
+      sourcePaths.add(file);
       blobReceipts.push({
         ref,
         path: file,

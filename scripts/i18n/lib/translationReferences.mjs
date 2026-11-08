@@ -25,6 +25,9 @@ const expectedWrapperSyntax = JSON.stringify(
   )
 );
 export const DEFAULT_LIMITS = Object.freeze({
+  // Distinct source paths across both revisions, including supporting sources.
+  // Each baseFiles/headFiles map has at most one snapshot per path. Byte and
+  // analysis-work limits still charge every snapshot, even for identical text.
   maxFiles: 128,
   maxFileBytes: 1024 * 1024,
   maxTotalBytes: 8 * 1024 * 1024,
@@ -122,7 +125,8 @@ function validateInput(input, budget) {
     );
   }
   const sources = [...Object.entries(input.baseFiles), ...Object.entries(input.headFiles)];
-  requireInput(sources.length <= budget.limits.maxFiles, "SOURCE_FILE_LIMIT");
+  const sourcePaths = new Set(sources.map(([file]) => file));
+  requireInput(sourcePaths.size <= budget.limits.maxFiles, "SOURCE_FILE_LIMIT");
   let total = 0;
   for (const [file, source] of sources) {
     requireInput(
@@ -171,7 +175,7 @@ function validateInput(input, budget) {
       row.path
     );
   }
-  return { sourceFiles: sources.length, sourceBytes: total };
+  return { sourceFiles: sources.length, sourcePaths: sourcePaths.size, sourceBytes: total };
 }
 
 function printed(node) {
