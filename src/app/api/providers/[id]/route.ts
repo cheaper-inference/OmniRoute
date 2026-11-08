@@ -49,6 +49,23 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { getQuotaCacheState } from "@/domain/quotaCacheState";
 import { retireUnreportedQuotaWindows } from "@/domain/quotaSnapshotPersistence";
 
+// providerSpecificData keys only server-side writers set (key rotation health, Antigravity
+// verification link, Alibaba free-tier quota state). A dashboard form loaded earlier carries
+// stale copies, so PUT keeps the stored value and ignores whatever the client sends.
+const SERVER_OWNED_PSD_KEY = /^(apiKeyHealth|verificationUrl|verificationAt|alibaba(No)?Free.*)$/;
+
+function keepServerOwnedPsd(
+  merged: Record<string, unknown>,
+  existing: Record<string, unknown>
+): void {
+  for (const key of Object.keys(merged)) {
+    if (SERVER_OWNED_PSD_KEY.test(key) && !(key in existing)) delete merged[key];
+  }
+  for (const key of Object.keys(existing)) {
+    if (SERVER_OWNED_PSD_KEY.test(key)) merged[key] = structuredClone(existing[key]);
+  }
+}
+
 function normalizeCodexLimitPolicy(
   incoming: unknown,
   existing: unknown
@@ -325,6 +342,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         );
       }
       const mergedPsd = { ...existingPsd, ...incomingPsd };
+      keepServerOwnedPsd(mergedPsd, existingPsd);
       if (m365Token.data.refreshToken) delete mergedPsd.refreshToken;
       delete mergedPsd.validationId;
       delete mergedPsd.runtimeKey;
