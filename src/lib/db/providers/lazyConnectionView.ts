@@ -75,6 +75,12 @@ export interface ProviderConnectionView {
   modelMap: Record<string, string> | null;
 }
 
+function toModelMapOrNull(value: unknown): Record<string, string> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, string>)
+    : null;
+}
+
 /**
  * Converts a raw DB row into a fully resolved ProviderConnectionView.
  * Credential fields have already been decrypted by the DB layer.
@@ -123,10 +129,7 @@ export function toProviderConnection(value: unknown): ProviderConnectionView {
       rateLimitMaxConcurrent !== null && rateLimitMaxConcurrent > 0 ? rateLimitMaxConcurrent : null,
     quotaWindowThresholds,
     rateLimitOverrides,
-    modelMap:
-      row.modelMap && typeof row.modelMap === "object" && !Array.isArray(row.modelMap)
-        ? (row.modelMap as Record<string, string>)
-        : null,
+    modelMap: toModelMapOrNull(row.modelMap),
   };
 }
 

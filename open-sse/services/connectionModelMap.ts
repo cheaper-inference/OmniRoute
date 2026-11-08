@@ -8,6 +8,36 @@
 
 export type ConnectionModelMap = Record<string, string> | null | undefined;
 
+/** Trimmed target the map holds for `key` as an own string entry, or null. */
+function ownMapTarget(modelMap: Record<string, string>, key: string): string | null {
+  if (!Object.hasOwn(modelMap, key)) return null;
+  const value = modelMap[key];
+  return typeof value === "string" ? value.trim() || null : null;
+}
+
+/** A target that names its own prefix stays verbatim; otherwise it keeps the request's prefix. */
+function withRequestPrefix(target: string, prefix: string): string {
+  return target.includes("/") ? target : `${prefix}${target}`;
+}
+
+function findCaseInsensitiveTarget(
+  modelMap: Record<string, string>,
+  requestedModel: string,
+  strippedModel: string,
+  prefix: string
+): string | null {
+  const lowerRequested = requestedModel.toLowerCase();
+  const lowerStripped = prefix ? strippedModel.toLowerCase() : null;
+  for (const [key, val] of Object.entries(modelMap)) {
+    const target = typeof val === "string" ? val.trim() : "";
+    if (!target) continue;
+    const lowerKey = key.trim().toLowerCase();
+    if (lowerKey === lowerRequested) return target;
+    if (lowerKey === lowerStripped) return withRequestPrefix(target, prefix);
+  }
+  return null;
+}
+
 /**
  * Resolves the effective target model from a connection's model map.
  * Supports exact matching, unprefixed stripping with prefix re-attachment or replacement,
@@ -22,10 +52,8 @@ export function resolveConnectionMappedModel(
   }
 
   // 1. Exact match on raw requestedModel
-  if (Object.hasOwn(modelMap, requestedModel) && typeof modelMap[requestedModel] === "string") {
-    const target = modelMap[requestedModel].trim();
-    if (target) return target;
-  }
+  const exact = ownMapTarget(modelMap, requestedModel);
+  if (exact) return exact;
 
   // Check prefix if model contains a slash (e.g. "provider/model")
   const slashIdx = requestedModel.indexOf("/");
@@ -34,36 +62,27 @@ export function resolveConnectionMappedModel(
   const strippedModel = hasPrefix ? requestedModel.slice(slashIdx + 1) : requestedModel;
 
   // 2. Exact match on stripped model ID
-  if (
-    hasPrefix &&
-    Object.hasOwn(modelMap, strippedModel) &&
-    typeof modelMap[strippedModel] === "string"
-  ) {
-    const target = modelMap[strippedModel].trim();
-    if (target) {
-      // If target already specifies a prefix/slash, preserve target verbatim.
-      // Otherwise re-apply the original prefix.
-      return target.includes("/") ? target : `${prefix}${target}`;
-    }
-  }
+  const stripped = hasPrefix ? ownMapTarget(modelMap, strippedModel) : null;
+  if (stripped) return withRequestPrefix(stripped, prefix);
 
   // 3. Case-insensitive fallback
-  const lowerRequested = requestedModel.toLowerCase();
-  const lowerStripped = strippedModel.toLowerCase();
+  return (
+    findCaseInsensitiveTarget(modelMap, requestedModel, strippedModel, prefix) ?? requestedModel
+  );
+}
 
-  for (const [key, val] of Object.entries(modelMap)) {
-    if (typeof val !== "string" || !val.trim()) continue;
-    const lowerKey = key.trim().toLowerCase();
-    if (lowerKey === lowerRequested) {
-      return val.trim();
-    }
-    if (hasPrefix && lowerKey === lowerStripped) {
-      const target = val.trim();
-      return target.includes("/") ? target : `${prefix}${target}`;
-    }
-  }
-
-  return requestedModel;
+/** Model columns of a usage row: the routed model stands in for whichever one is missing. */
+export function usageRowModels(
+  model: string | null | undefined,
+  requestedModel: string | null | undefined,
+  actualModel: string | null | undefined
+): { model: string; requestedModel: string; actualModel: string } {
+  const routed = model || "unknown";
+  return {
+    model: routed,
+    requestedModel: requestedModel || routed,
+    actualModel: actualModel || routed,
+  };
 }
 
 /**

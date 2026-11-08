@@ -245,34 +245,42 @@ export function sanitizeQuotaWindowThresholds(value: unknown): SanitizeResult {
   return { sanitized: Object.keys(map).length === 0 ? null : map, rejected };
 }
 
+const MODEL_MAP_ID_MAX = 200;
+
+/** Decode the stored or posted form (object or JSON text) into an object, or a reject marker. */
+function decodeConnectionModelMap(value: unknown): { parsed: unknown } | SanitizeModelMapResult {
+  if (typeof value !== "string") return { parsed: value };
+  const trimmed = value.trim();
+  if (!trimmed) return { sanitized: null, rejected: [] };
+  try {
+    return { parsed: JSON.parse(trimmed) };
+  } catch {
+    return { sanitized: null, rejected: ["(invalid-json)"] };
+  }
+}
+
+function isModelMapId(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  return trimmed.length > 0 && trimmed.length <= MODEL_MAP_ID_MAX;
+}
+
 export function sanitizeConnectionModelMap(value: unknown): SanitizeModelMapResult {
   if (value === null || value === undefined) return { sanitized: null, rejected: [] };
-  let parsed = value;
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (!trimmed) return { sanitized: null, rejected: [] };
-    try {
-      parsed = JSON.parse(trimmed);
-    } catch {
-      return { sanitized: null, rejected: ["(invalid-json)"] };
-    }
-  }
+  const decoded = decodeConnectionModelMap(value);
+  if (!("parsed" in decoded)) return decoded;
+  const { parsed } = decoded;
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     return { sanitized: null, rejected: ["(non-object)"] };
   }
   const rejected: string[] = [];
   const map: Record<string, string> = {};
   for (const [key, v] of Object.entries(parsed as Record<string, unknown>)) {
-    const trimmedKey = typeof key === "string" ? key.trim() : "";
-    if (!trimmedKey || trimmedKey.length > 200) {
+    if (!isModelMapId(key) || !isModelMapId(v)) {
       rejected.push(key);
       continue;
     }
-    if (typeof v !== "string" || !v.trim() || v.trim().length > 200) {
-      rejected.push(key);
-      continue;
-    }
-    map[trimmedKey] = v.trim();
+    map[key.trim()] = v.trim();
   }
   return { sanitized: Object.keys(map).length === 0 ? null : map, rejected };
 }

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   formatModelMapInput,
   parseModelMapInput,
-} from "../../../src/lib/providers/connectionModelMapInput.ts";
+} from "../../src/lib/providers/connectionModelMapInput.ts";
 
 test("formatModelMapInput formats map to key-value lines", () => {
   assert.equal(formatModelMapInput(null), "");

@@ -16,6 +16,7 @@ import { recordKeyQuotaUsage } from "@/domain/keyQuota";
 import { recordTokenUsage } from "../../services/tokenLimitCounter.ts";
 import { computeBillableTokens } from "./upstreamTimeouts.ts";
 import { type EffectiveServiceTier } from "./serviceTier.ts";
+import { usageRowModels } from "../../services/connectionModelMap.ts";
 
 export type RecordStreamingUsageStatsContext = {
   provider: string | null | undefined;
@@ -52,9 +53,7 @@ function persistStreamingUsageRow(usage: object, ctx: RecordStreamingUsageStatsC
   } = ctx;
   saveRequestUsage({
     provider: provider || "unknown",
-    model: model || "unknown",
-    requestedModel: requestedModel || model || "unknown",
-    actualModel: actualModel || model || "unknown",
+    ...usageRowModels(model, requestedModel, actualModel),
     tokens: usage,
     status: String(streamStatus),
     success: streamStatus === 200,

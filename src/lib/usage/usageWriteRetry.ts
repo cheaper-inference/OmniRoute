@@ -204,9 +204,14 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     timestamp,
     providerCredits,
     providerCostUsd,
-    entry.requestedModel || entry.model || null,
-    entry.actualModel || entry.model || null
+    ...usageModelColumns(entry)
   );
+}
+
+/** requested_model / actual_model columns: the routed model fills whichever one is missing. */
+function usageModelColumns(entry: UsageEntry): [string | null, string | null] {
+  const routed = entry.model || null;
+  return [entry.requestedModel || routed, entry.actualModel || routed];
 }
 
 function toFinite(value: unknown): number {

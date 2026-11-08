@@ -17,6 +17,7 @@ import { COLORS } from "../../utils/stream.ts";
 import { recordTokenUsage } from "../../services/tokenLimitCounter.ts";
 import { computeBillableTokens } from "./upstreamTimeouts.ts";
 import { type EffectiveServiceTier } from "./serviceTier.ts";
+import { usageRowModels } from "../../services/connectionModelMap.ts";
 
 export type RecordNonStreamingUsageStatsContext = {
   traceEnabled: boolean;
@@ -56,9 +57,7 @@ function persistUsageRow(usage: object, ctx: RecordNonStreamingUsageStatsContext
   } = ctx;
   saveRequestUsage({
     provider: provider || "unknown",
-    model: model || "unknown",
-    requestedModel: requestedModel || model || "unknown",
-    actualModel: actualModel || model || "unknown",
+    ...usageRowModels(model, requestedModel, actualModel),
     tokens: usage,
     status: "200",
     success: true,

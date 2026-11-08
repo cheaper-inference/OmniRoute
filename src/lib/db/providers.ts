@@ -852,8 +852,7 @@ function _insertConnectionRow(db: DbLike, conn: JsonRecord) {
       expires_in, display_name, global_priority, default_model,
       token_type, consecutive_use_count, rate_limit_protection, last_used_at, "group", max_concurrent,
       proxy_enabled, per_key_proxy_enabled, quota_visible, quota_window_thresholds_json, rate_limit_overrides_json,
-      notes, model_map,
-      created_at, updated_at
+      notes, model_map, created_at, updated_at
     ) VALUES (
       @id, @provider, @authType, @name, @email, @priority, @isActive,
       @accessToken, @refreshToken, @expiresAt, @tokenExpiresAt,
@@ -864,8 +863,7 @@ function _insertConnectionRow(db: DbLike, conn: JsonRecord) {
       @expiresIn, @displayName, @globalPriority, @defaultModel,
       @tokenType, @consecutiveUseCount, @rateLimitProtection, @lastUsedAt, @group, @maxConcurrent,
       @proxyEnabled, @perKeyProxyEnabled, @quotaVisible, @quotaWindowThresholdsJson, @rateLimitOverridesJson,
-      @notes, @modelMap,
-      @createdAt, @updatedAt
+      @notes, @modelMap, @createdAt, @updatedAt
     )
   `
   ).run({
