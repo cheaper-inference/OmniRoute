@@ -1,5 +1,6 @@
 import { posix } from "node:path";
 import { NextResponse } from "next/server";
+import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getProviderConnectionById } from "@/lib/db/providers";
 import { grokBotAgentAccess, grokBotAccessError } from "../access";
@@ -36,6 +37,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const path = typeof body.path === "string" ? body.path : "";
   if (agentId === "" || machineId === "" || path === "") {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
+  }
+  // Every sibling route refuses to spend the connection's token while an exclusive
+  // lease holds it; reading a file from the computer is the same kind of spend.
+  if (await isConnectionUnavailableToAuxiliaryActivity(id)) {
+    return NextResponse.json({ error: "exclusive_lease_active" }, { status: 409 });
   }
   const access = await grokBotAgentAccess(connection, agentId);
   if ("error" in access) return grokBotAccessError(access);

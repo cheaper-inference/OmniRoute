@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getProviderConnectionById } from "@/lib/db/providers";
 import { grokBotToken } from "../tokenSource";
+import { grokBotSendReply } from "@omniroute/open-sse/utils/grokBotOutcomes";
 import { grokBotRead } from "../../../../../(dashboard)/dashboard/grok-bot/read";
 import { grokBotSendBody } from "../../../../../(dashboard)/dashboard/grok-bot/send";
 
@@ -42,8 +43,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   try {
-    await grokBotRead({ accessToken, method: "SendGrokBotUserMessage", payload: body });
-    return NextResponse.json({ status: "submitted" });
+    const answer = await grokBotRead({
+      accessToken,
+      method: "SendGrokBotUserMessage",
+      payload: body,
+    });
+    const reply = grokBotSendReply(answer);
+    if (reply.status === "submitted") return NextResponse.json({ status: reply.status });
+    return NextResponse.json(
+      {
+        status: reply.status,
+        ...(reply.failureCode ? { failureCode: reply.failureCode } : {}),
+        ...(reply.message ? { message: reply.message } : {}),
+      },
+      { status: reply.httpStatus }
+    );
   } catch {
     return NextResponse.json({ status: "unknown" }, { status: 502 });
   }

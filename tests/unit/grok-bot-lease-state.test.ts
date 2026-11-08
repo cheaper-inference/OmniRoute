@@ -66,6 +66,11 @@ test("the real DB fence is connection-scoped and only the matching owner/generat
       },
     },
     "../../../../../(dashboard)/dashboard/grok-bot/send": send,
+    // The route maps the send answer through this module; the lease test only
+    // counts whether a dispatch happened, so an accepted answer is enough.
+    "@omniroute/open-sse/utils/grokBotOutcomes": {
+      grokBotSendReply: () => ({ status: "submitted", httpStatus: 200 }),
+    },
   };
   const source = readFileSync(
     new URL("../../src/app/api/providers/[id]/grok-bot/send/route.ts", import.meta.url),

@@ -37,6 +37,11 @@ function harness(
         return options.provider === null ? null : { provider: options.provider ?? "grok-bot" };
       },
     },
+    // Only the send route reads the delivery answer; these cases assert validation
+    // and payload forwarding, so an accepted answer stands in for it.
+    "@omniroute/open-sse/utils/grokBotOutcomes": {
+      grokBotSendReply: () => ({ status: "submitted", httpStatus: 200 }),
+    },
     "../tokenSource": {
       grokBotToken: async () => {
         events.push("token");

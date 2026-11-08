@@ -16,6 +16,7 @@ import {
   nextTranscriptRequest,
   recordedSend,
   resumeTranscript,
+  transcriptDeletionMatches,
   type TranscriptItem,
 } from "./transcript";
 
@@ -149,6 +150,24 @@ function handleFrame(
   setStatus(statusOf(presenceRef.current, Date.now(), selectedBot));
   if (seen.runState !== undefined) setRunState(seen.runState);
   const next = nextTranscriptRequest(cursor, frame);
+  if (next.cleared) {
+    // The session was replaced, so nothing from before the reset belongs on screen.
+    stream.shown = [];
+    shownByBotRef.current[`${selectedAccount}:${selectedBot}`] = [];
+    setMessages([]);
+    setCards([]);
+    setPermissions([]);
+  }
+  if (next.deleted.length > 0) {
+    // A row the service deleted has to leave every collection it could appear in.
+    const removed = (item: { entryId: string; seq: string }) =>
+      transcriptDeletionMatches(next.deleted, item);
+    stream.shown = stream.shown.filter((item) => !removed(item));
+    shownByBotRef.current[`${selectedAccount}:${selectedBot}`] = stream.shown;
+    setMessages(stream.shown);
+    setCards((held) => held.filter((item) => !removed(item)));
+    setPermissions((held) => held.filter((item) => !removed(item)));
+  }
   if (next.permissions.length > 0) setPermissions(next.permissions);
   if (next.cards.length > 0) {
     setCards((held) => {
@@ -186,13 +205,19 @@ function handleFrame(
       setSendState("recorded");
     }
   }
-  stream.request = { phase: next.phase, after: next.after };
+  stream.request = { phase: next.phase, after: next.after, generation: next.generation };
   rememberedRef.current[`${selectedAccount}:${selectedBot}`] = {
     after: stream.request.after,
     messages: stream.shown,
   };
   if (next.stop) apply({ type: "cutover" });
-  return { phase: next.phase, after: next.after, stop: next.stop };
+  return {
+    phase: next.phase,
+    after: next.after,
+    stop: next.stop,
+    halt: next.halt,
+    cleared: next.cleared,
+  };
 }
 function startTranscript(state: PageState) {
   const {
@@ -225,7 +250,7 @@ function startTranscript(state: PageState) {
   setWindowSize(40);
   apply({ type: "select", resume: resumed.phase === "live" ? "live" : "snapshot" });
   const stream: StreamView = {
-    request: { phase: resumed.phase, after: resumed.after },
+    request: { phase: resumed.phase, after: resumed.after, generation: resumed.generation },
     shown: shownByBotRef.current[`${selectedAccount}:${selectedBot}`] ?? [],
   };
   const opened = openTranscript({

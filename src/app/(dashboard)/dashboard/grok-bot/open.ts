@@ -1,5 +1,9 @@
 import type { TranscriptCursor } from "./transcript";
-export type TranscriptStep = TranscriptCursor & { stop?: boolean };
+export type TranscriptStep = TranscriptCursor & {
+  stop?: boolean;
+  cleared?: boolean;
+  halt?: boolean;
+};
 
 /** Silence long enough that the socket, not the bot, is the suspect. The watch
  *  heartbeats about every ten seconds, so a minute of nothing is a dead
@@ -8,7 +12,7 @@ export type TranscriptStep = TranscriptCursor & { stop?: boolean };
  *  talking, and the route adds no heartbeat of its own. */
 const SILENCE_MS = 60_000;
 
-type RetryKind = "drop" | "admission";
+type RetryKind = "drop" | "admission" | "fatal";
 
 type OpenTranscriptInput = {
   request: TranscriptCursor;
@@ -59,8 +63,16 @@ async function attempt(ctx: Context, request: TranscriptCursor, fails: number): 
       handlerFault = true;
       const next = ctx.input.onFrame(frame, cursor);
       handlerFault = false;
-      cursor = { phase: next.phase, after: next.after };
+      cursor = {
+        phase: next.phase,
+        after: next.after,
+        ...(next.generation === undefined ? {} : { generation: next.generation }),
+      };
       fails = 0;
+      if (next.halt) {
+        ctx.stop();
+        return { kind: "stopped" };
+      }
       if (next.stop) {
         cutover = true;
         break;
@@ -68,9 +80,22 @@ async function attempt(ctx: Context, request: TranscriptCursor, fails: number): 
     }
   } catch (error) {
     if (handlerFault) {
-      return frameHandlerFault(ctx, error);
+      // The frame handler threw, not the transport: retrying would repeat the
+      // same fault forever, so the session ends here.
+      if (ctx.input.onFault) {
+        ctx.input.onFault(error);
+        ctx.stop();
+        return { kind: "stopped" };
+      }
+      throw error;
     }
-    kind = (error as { admission?: unknown })?.admission === true ? "admission" : "drop";
+    kind =
+      (error as { admission?: unknown })?.admission === true
+        ? "admission"
+        : (error as { fatal?: unknown })?.fatal === true
+          ? "fatal"
+          : "drop";
+    if (kind === "fatal") ctx.input.onFault?.(error);
     // A read that rejects, a read that ends early and a read that goes silent are
     // the same event here: the stream stopped before we asked it to.
   } finally {
@@ -81,20 +106,10 @@ async function attempt(ctx: Context, request: TranscriptCursor, fails: number): 
   if (ctx.stopped) return { kind: "stopped" };
   if (cutover) return { kind: "cutover", cursor };
   const nextFails = fails + 1;
-  const wait = ctx.input.retryWait(nextFails, Date.now() - openedAt, kind);
+  const requestedWait = ctx.input.retryWait(nextFails, Date.now() - openedAt, kind);
+  const wait = kind === "fatal" ? -1 : requestedWait;
   if (wait < 0) return { kind: "stopped" };
   return { kind: "retry", cursor, fails: nextFails, wait };
-}
-
-function frameHandlerFault(ctx: Context, error: unknown): Outcome {
-  // The frame handler threw, not the transport: retrying would repeat the
-  // same fault forever, so the session ends here.
-  if (ctx.input.onFault) {
-    ctx.input.onFault(error);
-    ctx.stop();
-    return { kind: "stopped" };
-  }
-  throw error;
 }
 
 async function run(ctx: Context, request: TranscriptCursor, fails: number): Promise<void> {

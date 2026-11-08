@@ -5,6 +5,7 @@ import {
   grokBotCardOutcome,
   grokBotErrorStatus,
   grokBotSendOutcome,
+  grokBotSendReply,
   grokBotSendSettled,
 } from "../../open-sse/utils/grokBotOutcomes.ts";
 
@@ -83,4 +84,26 @@ test("error status is read only from object-shaped errors", () => {
   assert.equal(grokBotErrorStatus(401), undefined);
   assert.equal(grokBotErrorStatus({ status: 401 }), 401);
   assert.equal(grokBotErrorStatus({ status: "401" }), undefined);
+});
+
+test("a refused delivery is not reported as submitted", () => {
+  const reply = grokBotSendReply({
+    delivery: "GROK_BOT_USER_MESSAGE_DELIVERY_REFUSED",
+    refusal: { failureCode: "send/agent-unavailable", message: "the agent is offline" },
+  });
+  assert.equal(reply.status, "refused");
+  assert.equal(reply.httpStatus, 502);
+  assert.equal(reply.failureCode, "send/agent-unavailable");
+});
+
+test("an accepted delivery is submitted", () => {
+  const reply = grokBotSendReply({ delivery: "GROK_BOT_USER_MESSAGE_DELIVERY_ACCEPTED_BOX" });
+  assert.equal(reply.status, "submitted");
+  assert.equal(reply.httpStatus, 200);
+});
+
+test("an answer we cannot classify is unknown rather than submitted", () => {
+  const reply = grokBotSendReply({ delivery: "SOMETHING_UNMAPPED" });
+  assert.equal(reply.status, "unknown");
+  assert.equal(reply.httpStatus, 502);
 });

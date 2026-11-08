@@ -375,3 +375,46 @@ test("a refusal to admit the watch is not counted as a dead stream", async (t) =
   await new Promise((resolve) => setTimeout(resolve, 20));
   assert.deepEqual(kinds, ["admission"]);
 });
+
+test("the generation a rows frame reports reaches the next request", async (t) => {
+  const requests: Array<{ phase: string; after: string; generation?: number }> = [];
+  const opened = openTranscript({
+    request: { phase: "snapshot", after: "0" },
+    read: async function* (request, signal) {
+      requests.push(request);
+      if (request.phase === "snapshot") {
+        yield { rows: { generation: 5, entries: [{ updatedSeq: "10" }] } };
+        yield { heartbeat: true };
+        return;
+      }
+      await new Promise<void>((resolve) =>
+        signal.addEventListener("abort", () => resolve(), { once: true })
+      );
+    },
+    onFrame: (frame, cursor) => nextTranscriptRequest(cursor, frame),
+    retryWait: () => -1,
+  });
+  t.after(opened.abort);
+  await tick();
+  assert.equal(requests[1]?.phase, "live");
+  assert.equal(requests[1]?.generation, 5);
+});
+
+test("an unusable reset ends the stream instead of reconnecting", async (t) => {
+  let reads = 0;
+  const opened = openTranscript({
+    request: { phase: "live", after: "0" },
+    read: async function* (request, signal) {
+      reads += 1;
+      yield { cursorTooOld: { agentId: "agent" } };
+      await new Promise<void>((resolve) =>
+        signal.addEventListener("abort", () => resolve(), { once: true })
+      );
+    },
+    onFrame: (frame, cursor) => nextTranscriptRequest(cursor, frame),
+    retryWait: () => -1,
+  });
+  t.after(opened.abort);
+  await tick();
+  assert.equal(reads, 1);
+});

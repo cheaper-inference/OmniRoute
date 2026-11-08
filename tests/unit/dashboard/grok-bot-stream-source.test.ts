@@ -126,3 +126,25 @@ test("a snapshot that outlives its byte budget throws; a live read ignores the b
   const live = await drain(response(), { phase: "live", after: "0" }, { budget: () => "over" });
   assert.equal(live.length, 2);
 });
+
+test("the cursor's generation is sent to the route", async () => {
+  let seen = "";
+  await drain(bodyOf([]), { phase: "live", after: "10", generation: 7 }, {
+    fetchImpl: async (url: string) => {
+      seen = String(url);
+      return bodyOf([]);
+    },
+  });
+  assert.match(seen, /[?&]generation=7(&|$)/);
+});
+
+test("a cursor without a generation sends no generation parameter", async () => {
+  let seen = "";
+  await drain(bodyOf([]), { phase: "live", after: "10" }, {
+    fetchImpl: async (url: string) => {
+      seen = String(url);
+      return bodyOf([]);
+    },
+  });
+  assert.equal(/[?&]generation=/.test(seen), false);
+});

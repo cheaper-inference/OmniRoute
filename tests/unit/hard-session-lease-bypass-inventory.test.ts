@@ -203,6 +203,7 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // each route rejects ACTIVE exclusive leases before token refresh/dispatch.
     "src/app/api/providers/[id]/grok-bot/route.ts": 1,
     "src/app/api/providers/[id]/grok-bot/connector/route.ts": 1,
+    "src/app/api/providers/[id]/grok-bot/computer-file/route.ts": 1,
     "src/app/api/providers/[id]/grok-bot/draft/route.ts": 1,
     "src/app/api/providers/[id]/grok-bot/permission/route.ts": 1,
     "src/app/api/providers/[id]/grok-bot/secret/route.ts": 1,
@@ -396,6 +397,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
         "open-sse/services/tokenRefresh.ts",
         "src/app/api/providers/[id]/grok-bot/route.ts",
         "src/app/api/providers/[id]/grok-bot/connector/route.ts",
+        "src/app/api/providers/[id]/grok-bot/computer-file/route.ts",
         "src/app/api/providers/[id]/grok-bot/draft/route.ts",
         "src/app/api/providers/[id]/grok-bot/permission/route.ts",
         "src/app/api/providers/[id]/grok-bot/secret/route.ts",

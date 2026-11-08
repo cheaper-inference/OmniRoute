@@ -78,3 +78,30 @@ export function grokBotRefusal(answer: unknown): { failureCode: string; message:
     message: typeof refusal.message === "string" ? refusal.message : "",
   };
 }
+
+export type GrokBotSendReply = {
+  status: "submitted" | "refused" | "unknown";
+  httpStatus: number;
+  failureCode?: string;
+  message?: string;
+};
+
+/**
+ * Turns the send answer into the reply the dashboard should receive. A refusal is
+ * an answer the service gave, not a failure to deliver, so it must not come back as
+ * "submitted": the page would show a message that never reached anyone.
+ */
+export function grokBotSendReply(answer: unknown): GrokBotSendReply {
+  const outcome = grokBotSendOutcome(answer);
+  if (outcome === "accepted") return { status: "submitted", httpStatus: 200 };
+  if (outcome === "refused") {
+    const refusal = grokBotRefusal(answer);
+    return {
+      status: "refused",
+      httpStatus: 502,
+      failureCode: refusal?.failureCode ?? "",
+      message: refusal?.message ?? "",
+    };
+  }
+  return { status: "unknown", httpStatus: 502 };
+}

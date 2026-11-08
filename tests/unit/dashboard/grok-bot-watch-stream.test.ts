@@ -73,7 +73,6 @@ test("the upstream watch uses the requested generation", async () => {
       accessToken: "token",
       agentId: "agent-1",
       after: "0",
-      generation: 0,
       generation: 9,
       signal: new AbortController().signal,
       release: () => {},
