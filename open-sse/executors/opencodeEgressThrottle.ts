@@ -24,6 +24,8 @@ import {
   noteProxyRefusal,
   proxyEgressKey,
   recordSlowOverrun,
+  recordSlowServe,
+  transportDestinationKey,
   type ProxyRefusalKind,
 } from "../utils/proxyRefusalMemory.ts";
 import { stripIpv6Brackets } from "../utils/proxyFamily.ts";
@@ -209,6 +211,7 @@ export type AppliedProxyResolver = (targetUrl: string) => unknown;
 export interface AppliedEgressTracker {
   readAppliedKey: AppliedEgressReader;
   keyOfMember: (account: AppliedEgressAccount) => string | null;
+  destinationOfRequest: () => string | null;
   resetAttempt: () => void;
   rememberServed: (account: AppliedEgressAccount) => void;
   noteRefused: (
@@ -216,6 +219,7 @@ export interface AppliedEgressTracker {
     skipRecentlyFailed: boolean,
     kind?: ProxyRefusalKind
   ) => number | null;
+  noteServed: <T>(account: AppliedEgressAccount, result: T, waitMs: number, enabled: boolean) => T;
 }
 
 /**
@@ -225,7 +229,8 @@ export interface AppliedEgressTracker {
  */
 export function createAppliedEgressTracker(
   dispatchUrl: string,
-  resolveProxy: AppliedProxyResolver
+  resolveProxy: AppliedProxyResolver,
+  model?: string | null
 ): AppliedEgressTracker {
   const byFingerprint = new Map<string, string>();
   let attemptAmbientKey: string | null | undefined;
@@ -254,10 +259,40 @@ export function createAppliedEgressTracker(
     a: AppliedEgressAccount,
     skipRecentlyFailed: boolean,
     kind: ProxyRefusalKind = "ip_quota_429"
-  ) => noteRefusedMember(a.proxy, skipRecentlyFailed, readAppliedKey, a.fingerprint, kind);
+  ) =>
+    // Only the per-model quota 429 is scoped to the model; egress-health kinds
+    // (geo, transport, slow, unreachable) stay model-less so every model sees them.
+    noteRefusedMember(
+      a.proxy,
+      skipRecentlyFailed,
+      readAppliedKey,
+      a.fingerprint,
+      kind,
+      kind === "ip_quota_429" ? model : null
+    );
+  const destinationOfRequest = (): string | null => transportDestinationKey(dispatchUrl);
+  const noteServed = <T>(
+    a: AppliedEgressAccount,
+    result: T,
+    waitMs: number,
+    enabled: boolean
+  ): T => {
+    try {
+      if (!enabled || !(waitMs > 0)) return result;
+      const key = resolveAppliedEgressKey(a, readAppliedKey);
+      if (key === DIRECT_EGRESS_SENTINEL) return result;
+      const destination = destinationOfRequest();
+      if (destination === null) return result;
+      recordSlowServe(key, destination);
+    } catch {
+      /* evidence is best-effort; never break the request path */
+    }
+    return result;
+  };
   return {
     readAppliedKey,
     keyOfMember: (a) => (a.proxy !== null ? proxyEgressKey(a.proxy) : readAppliedKey(a)),
+    destinationOfRequest,
     resetAttempt: () => {
       attemptAmbientKey = undefined;
     },
@@ -268,6 +303,7 @@ export function createAppliedEgressTracker(
       }
     },
     noteRefused,
+    noteServed,
   };
 }
 
@@ -551,7 +587,8 @@ export function noteRefusedMember(
   skipRecentlyFailed: boolean,
   readApplied?: AppliedEgressReader | null,
   fingerprint?: string,
-  kind: ProxyRefusalKind = "ip_quota_429"
+  kind: ProxyRefusalKind = "ip_quota_429",
+  model?: string | null
 ): number | null {
   if (!skipRecentlyFailed) return null;
   const key =
@@ -559,7 +596,7 @@ export function noteRefusedMember(
       ? proxyEgressKey(proxy)
       : resolveAppliedEgressKey({ proxy, fingerprint }, readApplied);
   if (key === null || key === DIRECT_EGRESS_SENTINEL) return null;
-  return noteProxyRefusal(key, kind);
+  return noteProxyRefusal(key, kind, undefined, model);
 }
 
 /**
@@ -576,20 +613,22 @@ export function noteSlowOverrun(
   account: AppliedEgressAccount,
   skipRecentlyFailed: boolean,
   readApplied?: AppliedEgressReader | null,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
+  opts?: { destination?: string | null }
 ): number | null {
+  const destination = opts?.destination ?? null;
   if (!skipRecentlyFailed) return null;
   if (account.proxy !== null) {
     const key = proxyEgressKey(account.proxy);
     if (key === null) return null;
     recordSlowOverrun(key, nowMs);
-    if (!hasSlowOverrunEvidence(key, nowMs)) return null;
+    if (!hasSlowOverrunEvidence(key, destination, nowMs)) return null;
     return noteProxyRefusal(key, "slow", nowMs);
   }
   const key = resolveAppliedEgressKey(account, readApplied);
   if (key === DIRECT_EGRESS_SENTINEL) return null;
   recordSlowOverrun(key, nowMs);
-  if (!hasSlowOverrunEvidence(key, nowMs)) return null;
+  if (!hasSlowOverrunEvidence(key, destination, nowMs)) return null;
   return noteProxyRefusal(key, "slow", nowMs);
 }
 
@@ -726,7 +765,7 @@ export interface StallLoopWiring {
   stalled: { attempts: number };
   cooldown: (account: { proxy: { host: string; port: number } | null }) => void;
   markDirect: () => void;
-  slow?: { account: AppliedEgressAccount; enabled: boolean; read: AppliedEgressReader | null };
+  slow?: { account: AppliedEgressAccount; enabled: boolean; egress: AppliedEgressTracker };
 }
 
 /**
@@ -748,7 +787,10 @@ export function settleStalledDispatch(
   const first = loop.stalled.attempts === 0;
   loop.stalled.attempts++;
   const slow = loop.slow;
-  if (slow) noteSlowOverrun(slow.account, slow.enabled, slow.read ?? null);
+  if (slow)
+    noteSlowOverrun(slow.account, slow.enabled, slow.egress.readAppliedKey, Date.now(), {
+      destination: slow.egress.destinationOfRequest(),
+    });
   return first;
 }
 
@@ -806,6 +848,16 @@ export function lastResort429<A extends RotatableAccount>(
   cursor: { nextAccountIdx: number; lastHealthyFingerprint?: string },
   ...refusedHere: Set<string>[]
 ) {
+  return lastResort429ForModel(undefined, accounts, cursor, ...refusedHere);
+}
+
+/** {@link lastResort429} for a request whose quota refusals are scoped to `model`. */
+export function lastResort429ForModel<A extends RotatableAccount>(
+  model: string | null | undefined,
+  accounts: A[],
+  cursor: { nextAccountIdx: number; lastHealthyFingerprint?: string },
+  ...refusedHere: Set<string>[]
+) {
   let spent = false;
   const isOpen = (account: A): boolean => {
     const key = proxyKeyOf(account.proxy);
@@ -815,7 +867,7 @@ export function lastResort429<A extends RotatableAccount>(
     take(lastStatus: number | null, account: A, isCandidate: (a: A) => boolean): A | null {
       if (spent || lastStatus !== 429 || isCandidate(account)) return null;
       const saved = { ...cursor };
-      const spare = pickAccount(accounts, cursor, isOpen);
+      const spare = pickAccount(accounts, cursor, isOpen, undefined, model);
       if (!isOpen(spare)) {
         cursor.nextAccountIdx = saved.nextAccountIdx;
         cursor.lastHealthyFingerprint = saved.lastHealthyFingerprint;

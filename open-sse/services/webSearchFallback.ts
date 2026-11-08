@@ -1,4 +1,5 @@
 import { FORMATS } from "../translator/formats.ts";
+import { isSoleClaudeServerWebSearchTool } from "../translator/helpers/claudeServerWebSearch.ts";
 
 export const OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME = "omniroute_web_search";
 // Prefix match — Anthropic sends date-suffixed variants (web_search_20250305, …).
@@ -34,10 +35,17 @@ function isBuiltInWebSearchTool(tool: unknown): tool is JsonRecord {
   return WEB_SEARCH_TOOL_TYPES.test(toolType) && !toolRecord.function;
 }
 
-function isBuiltInWebSearchToolChoice(toolChoice: unknown): boolean {
+function isBuiltInWebSearchToolChoice(toolChoice: unknown, toolNames: Set<string>): boolean {
   const choice = toRecord(toolChoice);
   const toolType = typeof choice.type === "string" ? choice.type : "";
-  return WEB_SEARCH_TOOL_TYPES.test(toolType);
+  if (WEB_SEARCH_TOOL_TYPES.test(toolType)) return true;
+  // Anthropic names server tools via { type: "tool", name: "web_search" }.
+  // Do not steal an explicit choice of a preserved custom function with that name.
+  return (
+    !toolNames.has("web_search") &&
+    (toolType === "tool" || toolType === "function") &&
+    (choice.name === "web_search" || toRecord(choice.function).name === "web_search")
+  );
 }
 
 function buildFallbackDescription(tool: JsonRecord): string {
@@ -159,6 +167,7 @@ export function supportsNativeWebSearchFallbackBypass({
   targetFormat,
   nativeCodexPassthrough,
   interceptSearchOverride,
+  soleClaudeServerWebSearchTool,
 }: {
   provider?: string | null;
   sourceFormat?: string | null;
@@ -168,6 +177,10 @@ export function supportsNativeWebSearchFallbackBypass({
   // true = force interception (never bypass); false = force native bypass; undefined =
   // fall through to the native-bypass defaults below.
   interceptSearchOverride?: boolean;
+  // The Claude Code WebSearch shape: the Anthropic web_search server tool is the
+  // request's only tool. Gates the Codex Responses bypass below; computed by
+  // prepareWebSearchFallbackBody from the body it already holds.
+  soleClaudeServerWebSearchTool?: boolean;
 }): boolean {
   if (typeof interceptSearchOverride === "boolean") {
     return !interceptSearchOverride;
@@ -193,6 +206,29 @@ export function supportsNativeWebSearchFallbackBypass({
     if (provider && CLAUDE_FORMAT_PROVIDERS_WITHOUT_SERVER_TOOLS.has(provider)) return false;
     return true;
   }
+  // Claude -> Codex Responses (#16351 sibling): the Codex upstream implements the
+  // Responses API's hosted `web_search` server tool, and claude-to-openai.ts already
+  // emits it natively for an OPENAI_RESPONSES target (`{ type: "web_search" }`, from
+  // convertClaudeServerWebSearchTool). Rewriting it to the omniroute_web_search
+  // function fallback instead requires a configured /v1/search backend and otherwise
+  // leaves Claude Code's WebSearch with empty results.
+  //
+  // Gated two ways, conservatively:
+  //  - provider "codex" only. Other Responses-format providers are deliberately
+  //    excluded: chatgpt-web-codex drives a browser session and needs Tunnel-ID /
+  //    Runtime-Key for any tool request, codex-app-server is a local WS bridge whose
+  //    protocol has no hosted web_search, and the public "openai" provider's Responses
+  //    models are reasoning models reached with API keys, not the Codex lane. Extend
+  //    this set only for a provider whose upstream is known to run web_search itself.
+  //  - sole server tool only: a mixed request (server tool + client functions) keeps
+  //    the existing fallback conversion byte-for-byte.
+  if (
+    provider === "codex" &&
+    sourceFormat === FORMATS.CLAUDE &&
+    targetFormat === FORMATS.OPENAI_RESPONSES &&
+    soleClaudeServerWebSearchTool === true
+  )
+    return true;
   return false;
 }
 
@@ -266,7 +302,14 @@ export function prepareWebSearchFallbackBody<T extends WebSearchFallbackBody>(
     };
   }
 
-  if (supportsNativeWebSearchFallbackBypass(options)) {
+  if (
+    supportsNativeWebSearchFallbackBypass({
+      ...options,
+      // The "sole tool" gate for the Codex Responses bypass is derivable from the body
+      // this function already holds, so callers stay unchanged.
+      soleClaudeServerWebSearchTool: isSoleClaudeServerWebSearchTool(tools),
+    })
+  ) {
     return {
       body,
       fallback: { enabled: false, toolName: null, convertedToolCount: 0 },
@@ -290,12 +333,12 @@ export function prepareWebSearchFallbackBody<T extends WebSearchFallbackBody>(
     return true;
   });
 
-  const isResponsesTarget = options.targetFormat === FORMATS.OPENAI_RESPONSES;
+  // chatCore calls this before translateRequest: injected tools must speak the
+  // client's format. Keep the target fallback for callers without source metadata.
+  const format = options.sourceFormat ?? options.targetFormat;
 
   if (!toolNames.has(OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME)) {
-    preservedTools.unshift(
-      buildFallbackTool(toRecord(builtInSearchTools[0]), options.targetFormat)
-    );
+    preservedTools.unshift(buildFallbackTool(toRecord(builtInSearchTools[0]), format));
   }
 
   const nextBody: T = {
@@ -306,12 +349,14 @@ export function prepareWebSearchFallbackBody<T extends WebSearchFallbackBody>(
     nextBody.input = dropClientRejectionsOfFallbackCalls(body.input) as T["input"];
   }
 
-  if (isBuiltInWebSearchToolChoice(body.tool_choice)) {
-    // Match the injected tool shape: flat for Responses API, nested for Chat Completions.
+  if (isBuiltInWebSearchToolChoice(body.tool_choice, toolNames)) {
+    // Match the injected source-format tool so the normal translator can convert both.
     nextBody.tool_choice = (
-      isResponsesTarget
-        ? { type: "function", name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME }
-        : { type: "function", function: { name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } }
+      format === FORMATS.CLAUDE
+        ? { type: "tool", name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME }
+        : format === FORMATS.OPENAI_RESPONSES
+          ? { type: "function", name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME }
+          : { type: "function", function: { name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } }
     ) as T["tool_choice"];
   }
 

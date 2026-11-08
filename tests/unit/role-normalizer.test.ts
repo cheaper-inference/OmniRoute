@@ -22,7 +22,18 @@ test("#2281 normalizeDeveloperRole maps developer to system for non-openai provi
   // Without explicit preserveDeveloperRole, OpenAI-compatible providers that
   // reject `developer` (DeepSeek, MiniMax, Mimo, GLM, etc.) should default
   // to converting it to `system`.
-  for (const provider of ["deepseek", "minimax", "xiaomi-mimo", "glm", "fireworks", "together"]) {
+  // `github` (Copilot) is unverified for `developer` and custom `openai-compatible-*`
+  // nodes front arbitrary gateways — both default to `system` (opt in via compat toggle).
+  for (const provider of [
+    "deepseek",
+    "minimax",
+    "xiaomi-mimo",
+    "glm",
+    "fireworks",
+    "together",
+    "github",
+    "openai-compatible-minimax",
+  ]) {
     const result = normalizeDeveloperRole(messages, "openai", undefined, provider);
     assert.deepEqual(
       result,
@@ -34,7 +45,7 @@ test("#2281 normalizeDeveloperRole maps developer to system for non-openai provi
 
 test("#2281 normalizeDeveloperRole preserves developer for openai-family providers", () => {
   const messages = [{ role: "developer", content: "internal policy" }];
-  for (const provider of ["openai", "azure-openai", "azure", "github", "azure-openai-gov"]) {
+  for (const provider of ["openai", "azure-openai", "azure", "azure-openai-gov"]) {
     const result = normalizeDeveloperRole(messages, "openai", undefined, provider);
     assert.deepEqual(result, messages, `expected developer preserved for provider ${provider}`);
   }

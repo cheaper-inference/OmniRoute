@@ -528,13 +528,16 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Scenarie 2: Hoveddatabasefil beskadiget
+### Scenarie 2: Hoveddatabasefilen er beskadiget
 
-Gendan fra en sikkerhedskopi:
+Gendan fra sikkerhedskopi:
 
 ```bash
-omniroute sync pull --merge   # eller: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` downloader kun et komplet `.tar.gz`-arkiv fra en kørende server
+(`GET /api/db-backups/exportAll`, operatørlegitimationsoplysninger påkrævet); den gendanner ikke noget.
 
 ### Scenarie 3: Krypteringsnøgle mistet
 
@@ -547,7 +550,7 @@ omniroute sync pull --merge   # eller: omniroute backup restore <backup-id>
 SQLite returnerer `SQLITE_FULL`-fejl. Frigør diskplads, og kør derefter:
 
 ```bash
-# Opret et WAL-kontrolpunkt for at frigøre plads
+# Opret et checkpoint for WAL for at frigøre plads
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

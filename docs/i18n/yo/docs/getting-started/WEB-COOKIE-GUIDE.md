@@ -4,81 +4,81 @@
 
 ---
 
-Àwọn olùpèsè Kúkì Wẹ́ẹ̀bù ń jẹ́ kí OmniRoute lo iṣẹ́ AI kan nípasẹ̀ ìgbà ìlò aṣàwákiri rẹ tó ti wà tẹ́lẹ̀ dípò API key. Wọ́n wúlò nígbà tí o bá ti ní ààyè sí iṣẹ́ kan nípasẹ̀ ojúlé rẹ̀, tí o sì fẹ́ kí OmniRoute lo ìgbà ìlò kan náà tí a ti fìdí ìdánimọ̀ rẹ̀ múlẹ̀.
+Àwọn olùpèsè Kúkì Wẹ́ẹ̀bù ń jẹ́ kí OmniRoute lè lo iṣẹ́ AI nípasẹ̀ sáà aṣàwákiri rẹ tó ti wà tẹ́lẹ̀ dípò kọ́kọ́rọ́ API. Wọ́n wúlò nígbà tí o bá ti ní ààyè sí iṣẹ́ kan nípasẹ̀ ojúlé wẹ́ẹ̀bù rẹ̀, tí o sì fẹ́ kí OmniRoute lo sáà ìfàṣẹsí kan náà.
 
-Yàtọ̀ sí àwọn olùpèsè API-key, àwọn olùpèsè Kúkì Wẹ́ẹ̀bù máa ń fìdí ìdánimọ̀ múlẹ̀ nípa lílo àwọn ẹ̀rí ìdánimọ̀ tí aṣàwákiri rẹ fi ránṣẹ́ sí ojúlé náà.
+Láìdàbí àwọn olùpèsè tó ń lo kọ́kọ́rọ́ API, àwọn olùpèsè Kúkì Wẹ́ẹ̀bù máa ń ṣe ìfàṣẹsí nípa lílo ẹ̀rí ìdánimọ̀ tí aṣàwákiri rẹ fi ránṣẹ́ sí ojúlé wẹ́ẹ̀bù náà.
 
 ---
 
 # Kí O Tó Bẹ̀rẹ̀
 
-> **Pàtàkì:** Máa da àwọn ẹ̀rí ìdánimọ̀ kọ nígbà gbogbo láti inú **ìbéèrè nẹ́tíwọ́ọ̀kì tó ń ṣiṣẹ́ lọ́wọ́**, **kì í ṣe** láti ibi ìpamọ́ kúkì aṣàwákiri rẹ.
+> **Pàtàkì:** Máa daakọ ẹ̀rí ìdánimọ̀ láti inú **ìbéèrè nẹ́tíwọ́ọ̀kì tó ń ṣiṣẹ́**, **kì í ṣe** láti ibi ìpamọ́ kúkì aṣàwákiri rẹ.
 
-Dída àwọn kúkì kọ láti ibi tí kò tọ́ ló máa ń fa ọ̀pọ̀lọpọ̀ ìṣòro ìfìdí-ìdánimọ̀-múlẹ̀.
+Dídàakọ àwọn kúkì láti ibi tí kò tọ́ ló ń fa ọ̀pọ̀ ìṣòro ìfàṣẹsí.
 
-## MÁ ṢE da kọ láti Ibi Ìpamọ́ Kúkì
+## MÁ ṢE daakọ láti Ibi Ìpamọ́ Kúkì
 
-Ọ̀pọ̀ aṣàwákiri máa ń fi àwọn kúkì tí a ti tọ́jú hàn nípasẹ̀:
+Ọ̀pọ̀ àwọn aṣàwákiri ń fi àwọn kúkì tí a fipamọ́ hàn nípasẹ̀:
 
 ```
-Àwọn Irinṣẹ́ Olùgbéejáde
-→ Ohun Èlò (tàbí Ibi Ìpamọ́)
-→ Àwọn Kúkì
+DevTools
+→ Application (tàbí Storage)
+→ Cookies
 ```
 
-Bí ó tilẹ̀ jẹ́ pé àwọn kúkì wọ̀nyí lè dà bí ẹni pé wọ́n pé, ó ṣeé ṣe kí wọ́n jẹ́:
+Bó tilẹ̀ jẹ́ pé àwọn kúkì wọ̀nyí lè dà bí ẹni pé wọ́n tọ́, wọ́n lè jẹ́:
 
-- ti àkókò wọn ti kọjá
-- tí kò pé
-- tí àwọn kúkì tí a máa ń ránṣẹ́ lórí àwọn ìbéèrè tí a ti fìdí ìdánimọ̀ wọn múlẹ̀ nìkan kò sí nínú wọn
+- èyí tí kò bá ìgbà mu
+- èyí tí kò pé
+- èyí tí àwọn kúkì tí a máa ń fi ránṣẹ́ lórí àwọn ìbéèrè tí a ti fìdí ìdánimọ̀ wọn múlẹ̀ nìkan kò sí nínú rẹ̀
 
-Lílo àwọn iye wọ̀nyí lè fa ìkùnà ìfìdí-ìdánimọ̀-múlẹ̀, kódà bí wọ́n bá dà bí ẹni pé wọ́n wúlò.
+Lílo àwọn iye wọ̀nyí lè fa ìkùnà ìfàṣẹsí, kódà bí wọ́n bá dà bí ẹni pé wọ́n fẹsẹ̀ múlẹ̀.
 
-## Da Kọ láti Inú Ìbéèrè Tó Ń Ṣiṣẹ́ Lọ́wọ́
+## Daakọ láti Inú Ìbéèrè Tó Ń Ṣiṣẹ́
 
 Dípò bẹ́ẹ̀, lo àwọn kúkì láti inú ìbéèrè tó ṣàṣeyọrí:
 
 ```
-Àwọn Irinṣẹ́ Olùgbéejáde
-→ Nẹ́tíwọ́ọ̀kì
+DevTools
+→ Network
 → Tún ojú-ewé náà ṣe
 → Ṣí ìbéèrè ìfọ̀rọ̀wérọ̀ tàbí ìjíròrò kan
 → Àwọn Àkọlé Ìbéèrè
 → Cookie
 ```
 
-Àkọlé ìbéèrè `Cookie` ní ìwífún ìfìdí-ìdánimọ̀-múlẹ̀ gangan tí aṣàwákiri rẹ lò ní àṣeyọrí.
+Àkọlé ìbéèrè `Cookie` ní ìwífún ìfàṣẹsí gangan tí aṣàwákiri rẹ lò láṣeyọrí.
 
-Fún ọ̀pọ̀ jù lọ àwọn olùpèsè Kúkì Wẹ́ẹ̀bù, èyí ni iye tí ó yẹ kí o lẹ̀ mọ́ inú OmniRoute.
+Fún ọ̀pọ̀ àwọn olùpèsè Kúkì Wẹ́ẹ̀bù, èyí ni iye tí ó yẹ kí a lẹ̀ mọ́ inú OmniRoute.
 
 ---
 
 # Ìṣètò Gbogbogbò
 
-Ìlànà ìṣètò náà jẹ́ ọ̀kan náà fún ọ̀pọ̀ jù lọ àwọn olùpèsè Kúkì Wẹ́ẹ̀bù.
+Ìlànà ìṣètò jẹ́ ọ̀kan náà fún ọ̀pọ̀ àwọn olùpèsè Kúkì Wẹ́ẹ̀bù.
 
-1. Wọlé sí ojúlé olùpèsè náà.
-2. Ṣí Àwọn Irinṣẹ́ Olùgbéejáde ti aṣàwákiri náà.
-3. Ṣí taabu **Nẹ́tíwọ́ọ̀kì**.
+1. Wọlé sí ojúlé wẹ́ẹ̀bù olùpèsè náà.
+2. Ṣí Àwọn Ohun Èlò Olùgbéejáde aṣàwákiri náà.
+3. Ṣí taabu **Network**.
 4. Tún ojú-ewé náà ṣe.
 5. Ṣí ìbéèrè ìfọ̀rọ̀wérọ̀ tàbí ìjíròrò kan tí a ti fìdí ìdánimọ̀ rẹ̀ múlẹ̀.
-6. Da àwọn ẹ̀rí ìdánimọ̀ tí a nílò kọ.
+6. Daakọ ẹ̀rí ìdánimọ̀ tí a nílò.
 7. Ṣí OmniRoute.
 8. Lọ sí **Àwọn Olùpèsè → Ṣàfikún Olùpèsè**.
 9. Yan olùpèsè Kúkì Wẹ́ẹ̀bù rẹ.
-10. Lẹ àwọn ẹ̀rí ìdánimọ̀ náà mọ́ ọn.
-11. Tẹ **Ṣe Àyẹ̀wò Ìsopọ̀**.
+10. Lẹ ẹ̀rí ìdánimọ̀ náà mọ́ ọn.
+11. Tẹ **Dán Ìsopọ̀ Wò**.
 12. Fi olùpèsè náà pamọ́.
 
-Àwọn ẹ̀rí ìdánimọ̀ gangan tí a nílò sinmi lórí olùpèsè náà.
+Ẹ̀rí ìdánimọ̀ gangan tí a nílò sinmi lórí olùpèsè náà.
 
 ---
 
-# Àwọn Ọ̀nà Kíkó Ẹ̀rí Ìdánimọ̀ Olùpèsè
+# Àwọn Ìgbékalẹ̀ Ẹ̀rí Ìdánimọ̀ Olùpèsè
 
-Oríṣìíríṣìí ọ̀nà ni àwọn ojúlé ọ̀tọ̀ọ̀tọ̀ fi ń tọ́jú ìfìdí-ìdánimọ̀-múlẹ̀. Àwọn kan nílò kúkì nìkan, nígbà tí àwọn mìíràn lè nílò àfikún àkọlé tàbí àmì ìwọlé.
+Àwọn ojúlé wẹ́ẹ̀bù ọ̀tọ̀ọ̀tọ̀ ń tọ́jú ìfàṣẹsí ní àwọn ọ̀nà ọ̀tọ̀ọ̀tọ̀. Àwọn kan nílò kúkì nìkan, nígbà tí àwọn mìíràn lè nílò àfikún àwọn àkọlé tàbí token.
 
-| Olùpèsè                         | Ọ̀nà Kíkó Ẹ̀rí Ìdánimọ̀          | Ìtọ́sọ́nà Olùpèsè                  |
+| Olùpèsè                         | Ìgbékalẹ̀ Ẹ̀rí Ìdánimọ̀          | Ìtọ́sọ́nà Olùpèsè                  |
 | ------------------------------- | ----------------------------- | -------------------------------- |
 | Claude Web                      | Gbogbo àkọlé ìbéèrè Cookie    | `docs/providers/CLAUDE_WEB.md`   |
 | ChatGPT Web (Codex)             | Gbogbo àkọlé Cookie           | `docs/providers/CHATGPT_WEB.md`  |
@@ -88,104 +88,171 @@ Oríṣìíríṣìí ọ̀nà ni àwọn ojúlé ọ̀tọ̀ọ̀tọ̀ fi ń t
 | Grok Web                        | _(jẹ́rìí sí i)_                |                                  |
 | ...                             | ...                           | ...                              |
 
-> Ṣe àfikún sí tábìlì yìí bí a ṣe ń ṣàfikún àwọn olùpèsè Kúkì Wẹ́ẹ̀bù tuntun tàbí bí àwọn olùpèsè tó wà tẹ́lẹ̀ ṣe ń yí àwọn ohun tí wọ́n nílò fún ìfìdí-ìdánimọ̀-múlẹ̀ padà.
+> Ṣe àfikún sí tábìlì yìí bí a ṣe ń fi àwọn olùpèsè Kúkì Wẹ́ẹ̀bù tuntun kún un tàbí bí àwọn olùpèsè tó ti wà ṣe ń yí àwọn ohun tí wọ́n nílò fún ìfàṣẹsí padà.
+
+## NoTrack (notrack-web)
+
+NoTrack ([notrack.ai](https://notrack.ai)) jẹ́ pẹpẹ ìfọ̀rọ̀wérọ̀ ọ̀fẹ́ fún àwọn oníbàárà tí kò nílò ìforúkọsílẹ̀ — a máa dá ìgbà ìlò náà sílẹ̀ láìmọ ẹni tó ni ín nígbà àbẹ̀wò àkọ́kọ́, ó sì máa ń wà nìṣó nípasẹ̀ cookie mẹ́ta: `uid`, `si_usr_id`, àti `si_ses_id`. OmniRoute ń fi ìbéèrè ránṣẹ́ sí endpoint `/api/dispatch` kan náà nípasẹ̀ id awoṣe kan ṣoṣo (`notrack-c`, orúkọ àpèjúwe `ntw`).
+
+### Àwọn ìgbésẹ̀ láti sopọ̀
+
+1. Ṣí [notrack.ai](https://notrack.ai) nínú aṣàwákiri rẹ, kí o sì jẹ́ kí a ṣètò cookie ìgbà ìlò aláìlórúkọ.
+2. Ṣí **DevTools → Network**, tún ojú-ewé náà ṣe, kí o sì tẹ èyíkéyìí nínú àwọn ìbéèrè `/api`.
+3. Nínú **Àwọn Àkọlé Ìbéèrè**, ṣe àdàkọ gbogbo iye àkọlé `Cookie`.
+4. Nínú OmniRoute, lọ sí **Àwọn Olùpèsè → Ṣàfikún Olùpèsè → NoTrack Web (Ọ̀fẹ́)**.
+5. Lẹ okun cookie náà sínú ààyè `apiKey`, kí o sì **Fipamọ́**.
+
+OmniRoute máa ń yọ `uid`, `si_usr_id`, àti `si_ses_id` jáde láti inú okun tí a lẹ̀, ó sì tún àkọlé `Cookie` tó mọ́ pẹ̀lú àwọn tọkọtaya wọ̀nyẹn nìkan kọ́ — pẹ̀lú `nt_session` (àmì `ntk_…` tí a ṣètò fún àwọn àkọọ́lẹ̀ tí wọ́n ti wọlé) nígbà tí ó bá wà. Bí ọ̀kan nínú àwọn mẹ́tẹ̀ẹ̀ta bá ṣàìsí, a ó fi okun tí a lẹ̀ ní ìpilẹ̀ṣẹ̀ ránṣẹ́ láìyípadà, kí àwọn alábójútó lè ṣe àdánwò pẹ̀lú àwọn ìṣètò mìíràn.
+
+### Àwọn id awoṣe
+
+| Id awoṣe    | Orúkọ ìfihàn | Àwọn àkíyèsí                                             |
+| ----------- | ------------ | -------------------------------------------------------- |
+| `notrack-c` | NoTrack C    | Àìyípadà — awoṣe ìpínkiri òkè `C`.                       |
+| `C`         | NoTrack C    | Orúkọ àpèjúwe fún `notrack-c` (kóòdù ìpínkiri òkè gẹ́lẹ́). |
+| `notrack`   | NoTrack C    | Orúkọ àpèjúwe fún `notrack-c`.                           |
+| `ntw`       | NoTrack C    | Orúkọ àpèjúwe kúkúrú fún `notrack-c`.                    |
+
+Gbogbo id awoṣe mẹ́rẹ̀ẹ̀rin náà tọ́ka sí awoṣe ìpínkiri òkè kan náà (`C`).
+
+### Àwọn àṣàyàn ìbéèrè
+
+Olùṣiṣẹ́ náà gba àwọn ààyè àṣàyàn wọ̀nyí nínú ara ìbéèrè:
+
+| Ààyè ara              | Àìyípadà | Ète                                                                        |
+| --------------------- | -------- | -------------------------------------------------------------------------- |
+| `notrack_mode`        | `usual`  | Ìpo ìpínkiri (okun tí kò ní ìlànà pàtó; olùpèsè òkè gba `usual`, …)        |
+| `notrack_max_turns`   | `6`      | Iye àwọn ìyípo inú tí olùpèsè òkè lè ṣe kí ó tó dáhùn.                     |
+| `notrack_chat_id`     | `null`   | Tẹ̀síwájú pẹ̀lú ìfọ̀rọ̀wérọ̀ òkè tó ti wà tẹ́lẹ̀ (má fi sí fún ìfọ̀rọ̀wérọ̀ tuntun). |
+| `notrack_attachments` | `[]`     | Àkójọpọ̀ àwọn àpèjúwe asomọ́ òkè tí a máa fi kọjá tààrà.                     |
+| `notrack_regenerate`  | `false`  | Ṣètò sí `true` láti béèrè fún ìdáhùn tí a tún ṣe fún ìyípo tó ṣáájú.       |
+
+### Àwọn agbára
+
+- **Ìparí ìfọ̀rọ̀wérọ̀ aláṣàn àti aláìṣàn**.
+- **Pípè irinṣẹ́** — ṣètò `tools: [...]` lórí ìbéèrè náà; olùṣiṣẹ́ yóò ṣètò wọn sínú àdéhùn àpò ìpè-irinṣẹ́, yóò sì tú àwọn ìdáhùn awoṣe náà padà sí OpenAI `tool_calls`.
+- **`response_format`** — `json_object` àti `json_schema` ni a ṣe àtìlẹ́yìn fún. Olùṣiṣẹ́ yóò yọ JSON object àkọ́kọ́ jáde láti inú ìdáhùn awoṣe, yóò sì sọ ọ́ di okun kí ó tó dá a padà.
+- **Àmì ìrònú** — olùṣiṣẹ́ yóò ṣe àgbéjáde delta `reasoning` nígbà tí olùpèsè òkè bá fi event `thinking` ránṣẹ́.
+
+### Àwọn ààlà
+
+- Olùpèsè òkè ń fi ààlà lílò aláìlórúkọ múlẹ̀ — nígbà tí a bá dé ààlà náà, olùṣiṣẹ́ yóò fi 429 hàn pẹ̀lú ìfiránṣẹ́ tó ṣe kedere.
+- Gbogbo id awoṣe ń tọ́ka sí awoṣe ìpínkiri òkè kan náà; kò sí yíyan ọ̀tọ̀ọ̀tọ̀ fún awoṣe kọ̀ọ̀kan.
+- Olùṣiṣẹ́ náà kì í pe endpoint `/api/chats` ti olùpèsè òkè, nítorí náà a kì í ṣàkóso ìtàn ìfọ̀rọ̀wérọ̀ / àwọn ìgbà ìlò láìfọwọ́ṣe. Lo `notrack_chat_id` láti tẹ̀síwájú pẹ̀lú ìfọ̀rọ̀wérọ̀ òkè tó ti wà tẹ́lẹ̀.
 
 ---
 
-# Ohun Tí Àwọn Olùpèsè Kúkì Wẹ́ẹ̀bù Lè Ṣe àti Ohun Tí Wọn Kò Lè Ṣe
+# Ohun Tí Àwọn Olùpèsè Cookie Wẹ́ẹ̀bù Lè Ṣe àti Ohun Tí Wọn Kò Lè Ṣe
 
-Àwọn olùpèsè Kúkì Wẹ́ẹ̀bù tún máa ń lo ojú-ọlọ́pọ̀ ìfọ̀rọ̀wérọ̀ ti ojúlé kan. Wọ́n **kò** ní àwọn agbára kan náà bí àwọn API àṣẹ.
+Àwọn olùpèsè Cookie Wẹ́ẹ̀bù tún ń lo ojú-ọ̀nà ìfọ̀rọ̀wérọ̀ ojú-òpó wẹ́ẹ̀bù kan. Wọn **kò** pèsè àwọn agbára kan náà bí àwọn API ìṣèjọba.
 
 ## Ohun Tí A Ṣe Àtìlẹ́yìn Fún
 
-- Fìdí ìdánimọ̀ múlẹ̀ nípa lílo ìgbà ìlò aṣàwákiri rẹ tó ti wà tẹ́lẹ̀
-- Wọlé sí àwọn àwòṣe tó wà nípasẹ̀ àkọọ́lẹ̀ rẹ
-- Ṣàn àwọn èsì ìfọ̀rọ̀wérọ̀
+- Ṣe ìfàṣẹsí nípasẹ̀ sáà aṣàwákiri rẹ tó wà tẹ́lẹ̀
+- Lo àwọn model tó wà nípasẹ̀ àkọọ́lẹ̀ rẹ
+- Gba àwọn ìdáhùn ìfọ̀rọ̀wérọ̀ lọ́nà ṣiṣàn
 - Kò nílò API key
 
 ## Ohun Tí A Kò Ṣe Àtìlẹ́yìn Fún
 
-- Pípè iṣẹ́
-- Pípè irinṣẹ́
-- Ṣíṣàtúnṣe fáìlì láìfọwọ́ṣe
-- Àwọn ìṣàn-iṣẹ́ IDE aṣojú
-- Àwọn ẹ̀yà tó wà fún API nìkan
+- Pípe function
+- Pípe irinṣẹ́
+- Ṣíṣe àtúnṣe fáìlì láìfọwọ́ṣe
+- Àwọn ìṣàn iṣẹ́ IDE aṣojú-adaṣe
+- Àwọn ẹ̀ya ara tó wà fún API nìkan
 
-Èyí jẹ́ ìhùwàsí tí a retí, ó sì **kì í ṣe** àṣìṣe.
+Èyí jẹ́ ìhùwàsí tí a retí, kì í sì í ṣe **bug**.
 
-Tí o bá nílò ìṣiṣẹ́ irinṣẹ́, ṣíṣàtúnṣe fáìlì láìfọwọ́ṣe, tàbí àwọn ìṣàn-iṣẹ́ aṣojú mìíràn, lo **olùpèsè API-key** dípò olùpèsè Kúkì Wẹ́ẹ̀bù.
+Tí o bá nílò ìṣiṣẹ́ irinṣẹ́, àtúnṣe fáìlì láìfọwọ́ṣe, tàbí àwọn ìṣàn iṣẹ́ aṣojú mìíràn, lo **olùpèsè API-key** dípò olùpèsè Web Cookie.
 
 ---
 
 # Àkíyèsí Nípa Ìfọwọ́sí
 
-**Ṣe Àyẹ̀wò Ìsopọ̀** tó ṣàṣeyọrí tàbí ìfọwọ́sí kúkì máa ń jẹ́rìí sí i nìkan pé àwọn ẹ̀rí ìdánimọ̀ tí a pèsè dà bí ẹni pé wọ́n wà ní ọ̀nà kíkó tí a retí.
+**Test Connection** tó ṣàṣeyọrí tàbí ìfọwọ́sí cookie máa ń jẹ́rìí kìkì pé àwọn ẹ̀rí ìdánimọ̀ tí a pèsè dà bí ẹni pé wọ́n wà ní ìgúnrégé tí a retí.
 
-Títí tí a ó fi yanjú Ọ̀ràn #7857, ìfọwọ́sí tó ṣàṣeyọrí **kò ṣe ìdánilójú** pé olùpèsè náà yóò lè fìdí ìdánimọ̀ múlẹ̀ ní àṣeyọrí.
+Títí di ìgbà tí a bá yanjú Issue #7857, ìfọwọ́sí tó ṣàṣeyọrí **kò ṣe ìdánilójú** pé olùpèsè náà yóò lè ṣe ìfàṣẹsí ní àṣeyọrí.
 
-Tí ìfìdí-ìdánimọ̀-múlẹ̀ bá ṣì ń kùnà, jẹ́rìí sí i pé o da àwọn ẹ̀rí ìdánimọ̀ náà kọ láti inú ìbéèrè nẹ́tíwọ́ọ̀kì tó ń ṣiṣẹ́ lọ́wọ́ dípò ibi ìpamọ́ kúkì aṣàwákiri.
+Tí ìfàṣẹsí bá ṣì ń kùnà, ṣàyẹ̀wò pé o da àwọn ẹ̀rí ìdánimọ̀ náà láti inú ìbéèrè nẹ́tíwọ́ọ̀kì tó ń ṣiṣẹ́, dípò ibi ìpamọ́ cookie aṣàwákiri.
 
 ---
 
 # Yíyanjú Ìṣòro
 
-## Ìfìdí-Ìdánimọ̀-Múlẹ̀ Kùnà
+## Ìfàṣẹsí Kùnà
 
-Jẹ́rìí sí i pé a da àwọn ẹ̀rí ìdánimọ̀ náà kọ láti:
+Ṣàyẹ̀wò pé a da àwọn ẹ̀rí ìdánimọ̀ náà láti:
 
 ```
-Nẹ́tíwọ́ọ̀kì
-→ Àwọn Àkọlé Ìbéèrè
+Network
+→ Request Headers
 → Cookie
 ```
 
-kì í sì í ṣe láti:
+kì í ṣe láti:
 
 ```
-Ohun Èlò
-→ Àwọn Kúkì
+Application
+→ Cookies
 ```
 
 ---
 
-## Kúkì Ṣiṣẹ́ Nínú Aṣàwákiri Ṣùgbọ́n Kò Ṣiṣẹ́ Nínú OmniRoute
+## Cookie Ń Ṣiṣẹ́ Nínú Aṣàwákiri Ṣùgbọ́n Kò Ṣiṣẹ́ Nínú OmniRoute
 
-Àwọn olùpèsè kan máa ń fi àwọn kúkì tí a máa ń ránṣẹ́ nígbà àwọn ìbéèrè tí a ti fìdí ìdánimọ̀ wọn múlẹ̀ nìkan kún un.
+Àwọn olùpèsè kan máa ń fi cookie tí a fi ránṣẹ́ nígbà àwọn ìbéèrè tí a ti fọwọ́sí nìkan kún un.
 
-Tún da àwọn ẹ̀rí ìdánimọ̀ náà kọ láti inú ìbéèrè nẹ́tíwọ́ọ̀kì tuntun lẹ́yìn tí o bá ṣí ìjíròrò kan ní àṣeyọrí.
-
----
-
-## Ìgbà Ìlò Ti Parí
-
-Àwọn olùpèsè Kúkì Wẹ́ẹ̀bù máa ń lo ìgbà ìlò aṣàwákiri rẹ tó ti wà tẹ́lẹ̀.
-
-Tí ìgbà ìlò aṣàwákiri rẹ bá parí tàbí tí o bá jáde, o gbọ́dọ̀ da àkójọpọ̀ ẹ̀rí ìdánimọ̀ tuntun kọ.
+Tún da àwọn ẹ̀rí ìdánimọ̀ náà láti inú ìbéèrè nẹ́tíwọ́ọ̀kì tuntun lẹ́yìn tí o bá ṣí ìfọ̀rọ̀wérọ̀ kan ní àṣeyọrí.
 
 ---
 
-## Àyẹ̀wò Ìsopọ̀ Ṣàṣeyọrí Ṣùgbọ́n Àwọn Ìbéèrè Kùnà
+## Sáà Ti Parí
 
-Títí tí a ó fi yanjú Ọ̀ràn #7857, ṣíṣe àṣeyọrí nínú ìfọwọ́sí kò ṣe ìdánilójú pé ìbéèrè ìfìdí-ìdánimọ̀-múlẹ̀ náà yóò ṣàṣeyọrí.
+Àwọn olùpèsè Web Cookie máa ń lo sáà aṣàwákiri rẹ tó wà tẹ́lẹ̀.
 
-Tún da àwọn ẹ̀rí ìdánimọ̀ rẹ kọ láti inú ìbéèrè tuntun tí a ti fìdí ìdánimọ̀ rẹ̀ múlẹ̀ kí o tó tẹ̀ síwájú pẹ̀lú yíyanjú ìṣòro.
+Tí sáà aṣàwákiri rẹ bá parí tàbí tí o bá jáde kúrò nínú àkọọ́lẹ̀, o gbọ́dọ̀ da àkójọpọ̀ ẹ̀rí ìdánimọ̀ tuntun. Láti ṣe ìsọdọ̀tun cookie láìfọwọ́ṣe fún àwọn olùpèsè wẹ́ẹ̀bù tí a ṣe àtìlẹ́yìn fún, wo irinṣẹ́ alábàákẹ́gbẹ́ [Ẹ̀kún Aṣàwákiri Fún Ìṣiṣẹ́pọ̀ Sáà](../guides/SESSION-SYNC-EXTENSION.md).
+
+---
+
+## Test Connection Kọjá Ṣùgbọ́n Àwọn Ìbéèrè Kùnà
+
+Títí di ìgbà tí a bá yanjú Issue #7857, ìfọwọ́sí tó kọjá kò ṣe ìdánilójú pé ìbéèrè ìfàṣẹsí yóò ṣàṣeyọrí.
+
+Tún da àwọn ẹ̀rí ìdánimọ̀ rẹ láti inú ìbéèrè tuntun tí a ti fọwọ́sí, kí o tó tẹ̀ síwájú pẹ̀lú yíyanjú ìṣòro.
+
+---
+
+## ChatGPT Web Kùnà Pẹ̀lú "Unsupported ChatGPT integrity dependency"
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Ẹ̀rí ìdánimọ̀ náà dára — àṣìṣe yẹn wá láti inú bridge, kì í ṣe láti inú sáà náà. chatgpt.com máa ń yan àwọn
+module id rẹ̀ fún deployment kọ̀ọ̀kan, bridge náà sì máa ń so id olùrànlọ́wọ́ Sentinel tí ó ń dá sílẹ̀ mọ́lẹ̀ tẹ́lẹ̀, nítorí náà
+ìtúnkọ́ chatgpt.com kan tó tún lorúkọ olùrànlọ́wọ́ náà ba gbogbo turn jẹ́, bó tilẹ̀ jẹ́ pé cookie náà ṣì fẹsẹ̀ múlẹ̀. Ṣíṣe ìfàṣẹsí
+àsopọ̀ náà padà kò lè tún un ṣe.
+
+Àwọn build tó ń yanjú module náà nípasẹ̀ runtime ojú-ewé fúnra rẹ̀ kì í so id kankan mọ́lẹ̀, wọn kò sì ní ìṣòro yìí. Tí o bá rí
+àṣìṣe náà, ṣe àfikún OmniRoute sí ẹ̀yà tuntun, kí o sì tún àyẹ̀wò àsopọ̀ náà ṣe.
 
 ---
 
 # Àpẹẹrẹ Olùpèsè
 
-Fún ìtọ́sọ́nà pípé tó jẹ́ ti olùpèsè kan pàtó, wo:
+Fún ìtọ́sọ́nà ẹ̀kúnrẹ́rẹ́ tó jẹ́ ti olùpèsè kan pàtó, wo:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
-Ìtọ́sọ́nà Claude Web ṣàfihàn gbogbo ìlànà ìṣètò fún olùpèsè Kúkì Wẹ́ẹ̀bù kan, ó sì ń ṣiṣẹ́ gẹ́gẹ́ bí àpẹẹrẹ ìmúlò ìtọ́kasí.
+Ìtọ́sọ́nà Claude Web náà ṣàfihàn gbogbo ìlànà ìṣètò fún olùpèsè Web Cookie, ó sì jẹ́ àpẹẹrẹ ìmúṣẹ tí a fi ń tọ́ka sí.
 
 ---
 
-# Àwọn Ìlànà Tó Dára Jù
+# Àwọn Ìlànà Tó Dáa Jù
 
-- Da àwọn ẹ̀rí ìdánimọ̀ kọ láti inú ìbéèrè tuntun tí a ti fìdí ìdánimọ̀ rẹ̀ múlẹ̀.
-- Yẹra fún títún àwọn kúkì àtijọ́ lò.
-- Jẹ́ kí ìgbà ìlò aṣàwákiri rẹ máa ṣiṣẹ́ nígbà tí o bá ń lo àwọn olùpèsè Kúkì Wẹ́ẹ̀bù.
-- Ka àwọn kúkì tí o da kọ sí ẹ̀rí ìdánimọ̀ tó ṣe kókó.
-- Lo àwọn olùpèsè API-key nígbà tí o bá nílò pípè iṣẹ́ tàbí àwọn ìṣàn-iṣẹ́ aṣojú.
+- Da àwọn ẹ̀rí ìdánimọ̀ láti inú ìbéèrè tuntun tí a ti fọwọ́sí.
+- Yẹra fún lílo àwọn cookie àtijọ́ padà.
+- Jẹ́ kí sáà aṣàwákiri rẹ máa ṣiṣẹ́ nígbà tí o bá ń lo àwọn olùpèsè Web Cookie.
+- Ka àwọn cookie tí a da sí ẹ̀rí ìdánimọ̀ tó ní ìkọ̀kọ̀.
+- Lo àwọn olùpèsè API-key nígbà tí o bá nílò pípe function tàbí àwọn ìṣàn iṣẹ́ aṣojú.

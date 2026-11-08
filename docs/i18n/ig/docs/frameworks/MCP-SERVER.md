@@ -72,6 +72,16 @@ curl -i \
 
 Key na-enweghị `manage` (ma ọ bụ enweghị Bearer) na-eweghachi `403 LOCAL_ONLY`. E kpachapụrụ anya mee ka prefix ibe ya `/api/cli-tools/runtime/*` ghara inwe ike ịgafe mmachi ahụ — lee [Ọkwa Route Guard — Mwepu maka manage-scope](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Nkwado Origin
+
+Mgbe nkwenye gasịrị, a na-enyocha isi `Origin` nke arịrịọ ọ bụla gaa na `/api/mcp/*` — transport na ụzọ nchịkwa dịka `status`, `tools`, `audit`, `restart` — n'agbanyeghị onye na-akpọ (igodo API, tokin CLI, nnọkọ dashboard, ma ọ bụ loopback na-enweghị aha mgbe agbanyụrụ nbanye). Nke a bụ nchebe DNS rebinding nke nkọwapụta MCP Streamable HTTP chọrọ.
+
+- **Enweghị isi `Origin`** → a kwadoro ya. OmniRoute CLI, SDK na ndị ahịa IDE anaghị eziga ya.
+- **`Origin` a kwadoro** → `localhost` / `127.0.0.1` / `[::1]` na port ọ bụla, ma ọ bụ origin ọha nke OmniRoute n'onwe ya: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin nke reverse proxy a tụkwasịrị obi zigara (`OMNIROUTE_TRUST_PROXY`, naanị mgbe edobeghị base URL), ma ọ bụ onye nnabata IP loopback/LAN a na-abanye ozugbo. Naanị isi `Host` anaghị eme ka origin ọ bụla bụrụ nke a tụkwasịrị obi.
+- **`Origin` ọ bụla ọzọ, gụnyere `null`** → `403` ya na ahụ njehie JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. A ka na-anabata nnọkọ dashboard nke na-egosi tokin CSRF ziri ezi, dịka ndị ọzọ dashboard na-ede.
+
+Onye ahịa MCP nke ihe nchọgharị a na-enye n'azụ reverse proxy chọrọ `OMNIROUTE_PUBLIC_BASE_URL`; enweghị ndepụta ikike maka origins ndị ọzọ. A naghị enyocha Origin na arịrịọ mbụ CORS (`OPTIONS`); a na-enyocha arịrịọ na-esote ya.
+
 ## Nhazi IDE
 
 Lee [Nhazi MCP Client](../guides/SETUP_GUIDE.md#mcp-client-configuration) maka nhazi Claude Desktop,
@@ -289,190 +299,137 @@ A na-egbochi ma mbufe SSE ma Streamable HTTP ruo mgbe agbanyere sava MCP na Sett
 
 ---
 
-## Nkwenye & Scopes
+## Nyocha & Oke
 
-Ngwa MCP na-akpọ eriri ohere gụọ site na onye na-akpọ. Nlele ahụ bụ otu n'ime atọ
-oghere aha nọọrọ onwe ha. Ngafe site na otu onye nlele abụghị ngafe site na ndị ọzọ.
-Iwu ndị ahụ bụ [Oghere aha atọ](#three-scope-namespaces).
-Ndepụta ngwa ọrụ bụ [MCP tool scopes](#mcp-tool-scopes).
+oku ngwá ọrụ MCP gụọ ụdọ dị iche iche n'aka onye na-akpọ oku. Nyocha ahụ bụ otu n'ime oghere aha atọ nọọrọ onwe ya. Ngafe sitere n'otu nlele abụghị ngafe nke ndị ọzọ. Iwu ndị a bụ [oghere aha atọ](#three-scope-namespaces). Ngwa katalọgụ bụ [MCP scopes](#mcp-tool-scopes).
 
 ### Oghere aha atọ
 
-`manage` na igodo API, `read:compression` na ngwa MCP, na `read` na
-`oma_live_…` akara ngosi nnweta bụ onyinye atọ dị iche iche. Ndị na-akpọ oku na-eziga `read`
-akara ngosi nnweta na ụzọ njikwa na-agbanwe agbanwe na-enweta HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Ọkwa ahụ bụ `scopeSatisfies`. Ọ naghị agbakọ tebụl MCP, na MCP
-onye na-ejikọta ya anaghị agbakọ ya.
+`manage` na igodo API, `read:compression` na ngwa MCP, na `read` na akara ohere `oma_live_…` bụ onyinye atọ dị iche iche. Ndị na-akpọ oku na-eziga akara ohere `read` n'ụzọ njikwa mgbanwe na-enweta HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Ọkwa ahụ bụ `scopeSatisfies`. Ọ naghị eleta tebụl MCP, ma onye na-akụ MCP anaghị agụta ya.
 
-| Oghere aha           | Asambodo                                                             | Onye nlele                    | Ngafe na-enye ohere                           |
-| :------------------- | :------------------------------------------------------------------- | :---------------------------- | :-------------------------------------------- |
-| Nchịkwa igodo API    | `api_keys.scopes`                                                    | `hasManageScope`              | Nchịkwa REST maka igodo Bearer ahụ            |
-| Mgbakwunye igodo API | otu usoro, otu eriri kpọmkwem                                        | onye enyemaka akpọrọ n'okpuru | Naanị ikike ahụ                               |
-| MCP tool scopes      | otu usoro, ma ọ bụghị MCP `_meta`, ma ọ bụghị `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | Ngwa ọrụ ahụ, ozugbo amanye ya                |
-| Akara ngosi nnweta   | `oma_live_…`                                                         | `scopeSatisfies`              | Ụzọ njikwa nke usoro na ụzọ ya chọrọ ọkwa ahụ |
+| Oghere aha               | nzere                                                                     | Checker                   | Nfefe na-enye ohere                              |
+| :----------------------- | :------------------------------------------------------------------------ | :------------------------ | :----------------------------------------------- |
+| Njikwa igodo API         | `api_keys.scopes`                                                         | `hasManageScope`          | Njikwa REST maka igodo bearer ahụ                |
+| Ihe mgbakwunye igodo API | otu n'usoro, otu kpọmkwem eriri                                           | onye inyeaka aha n'okpuru | Naanị otu ike ahụ                                |
+| MCP ngwá ọrụ scopes      | otu n'usoro, ọzọ MCP `_meta` (HTTP/SSE naanị), ọzọ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | Ngwá ọrụ ahụ, ozugbo etinyere mmanye             |
+| Nweta akara              | `oma_live_…`                                                              | `scopeSatisfies`          | Ụzọ njikwa nke usoro ya na ụzọ ya chọrọ ọkwa ahụ |
 
-Ịmepụta asambodo ọ bụla dị na
-[Nchịkwa Nkwenye](../guides/MANAGEMENT-AUTH.md).
+A na-ekpuchi ngwupụta nzere ọ bụla na [njikwa njikwa](../guides/MANAGEMENT-AUTH.md).
 
-#### Scopes igodo API
+#### Oghere igodo API
 
 Otu usoro `api_keys.scopes` na-enye ọrụ abụọ. Ha na-eji ọrụ dị iche iche.
 
-**Nchịkwa REST.** `manage` na `admin` bụ ndị otu
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` bụ ihe na-enye ikike ụzọ njikwa maka igodo ahụ. `admin` bụ
-nwere ike ijikwa n'ụzọ ndị ahụ. Okwu `admin` ebe a abụghị
-ọkwa akara ngosi nnweta ma ọ naghị agbasa n'ime scopes ngwa MCP.
+**Management REST.** `manage` na `admin` bu ndi otu `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` bụ ihe na-enye ikike ụzọ njikwa maka igodo ahụ. `admin` nwere ike njikwa na ụzọ ndị ahụ. Okwu `admin` ebe a abụghị ọkwa nnabata ma ọ naghị agbasa n'ime oghere ngwaọrụ MCP.
 
-**Ederede mgbakwunye.** Nke ọ bụla bụ nyocha otu kpọmkwem, na nke ọ bụla na-anọ
-n'èzí `MANAGEMENT_API_KEY_SCOPES`.
+**Ụdọ mgbakwunye.** Onye ọ bụla bụ ezigbo ule otu, onye ọ bụla na-anọkwa n'èzí `MANAGEMENT_API_KEY_SCOPES`.
 
-| Scope                          | Ngafe na-enye ohere                                                                                                                                                    |
-| :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Nke na-abụghị loopback `/api/mcp/` LOCAL_ONLY carve-out naanị (`hasMcpConnectOrManageScope`). Igodo nwere `manage` ma ọ bụ `admin` ka na-agafe carve-out ahụ.          |
-| `self:usage`                   | `GET /api/v1/me/status` maka igodo a (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` na-agbakwunye scope a na mmepụta (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Quotas akaụntụ dị n'ime payload ọnọdụ ahụ (`src/lib/usage/apiKeySelfService.ts`). Ụzọ ọnọdụ ka chọrọ `self:usage`.                                                     |
-| `policy:bypass-provider-quota` | Nke a na-akpọ nkwubi okwu igodo na-awụfe iwu quota onye na-enye (`hasProviderQuotaBypassScope` na `src/sse/handlers/chat.ts`).                                         |
+| Oke                            | Nfefe na-enye ohere                                                                                                                                                  |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Nke na-abụghị loopback `/api/mcp/` LOCAL_ONLY akpụpụta naanị (`hasMcpConnectOrManageScope`). Igodo nwere `manage` ma ọ bụ `admin` ka na-agafe ihe a kpụrụ akpụ.      |
+| `self:usage`                   | `GET /api/v1/me/status` maka igodo a (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` na-agbakwunye oke a na imepụta (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Oke akaụntụ n'elu n'ime ọkwa akwụ ụgwọ ahụ (`src/lib/usage/apiKeySelfService.ts`). Ụzọ ọkwa ka na-achọ `self:usage`.                                                 |
+| `policy:bypass-provider-quota` | Ntụnye igodo a na-akpọ mafe amụma onye na-eweta-oke (`hasProviderQuotaBypassScope` na `src/sse/handlers/chat.ts`).                                                   |
 
-#### Njikọta
+#### Dakọtara
 
-Ndepụta ahụ bụ tebụl dị n'okpuru [MCP tool scopes](#mcp-tool-scopes). Ekwela
-jiri `MCP_SCOPE_LIST` na `src/shared/constants/mcpScopes.ts` dị ka ndepụta ahụ:
-ọ bụ obere akụkụ edere na mbụ. Ngwaọrụ ndị ọzọ na-ekwupụta scopes ndị ọzọ na-esote ya
-(`read:notion`, `read:skills`, `read:local-corpus`, na tebụl ndị ọzọ).
+Katalọgụ bụ tebụl n'okpuru [oghere ngwá ọrụ MCP](#mcp-tool-scopes). Ejila `MCP_SCOPE_LIST` na `src/shared/constants/mcpScopes.ts` dị ka katalọgụ ahụ: ọ bụ ntinye akwụkwọ pịnye mbụ. Ngwa ndị ọzọ na-ekwupụta ọkwa ndị ọzọ n'akụkụ ya (`read:notion`, `read:skills`, `read:local-corpus`, na tebụl ndị ọzọ).
 
-`evaluateToolScopes` na `open-sse/mcp-server/scopeEnforcement.ts` na-enye ohere oku
-mgbe scope ọ bụla achọrọ dabara na scope enyere:
+`evaluateToolScopes` na `open-sse/mcp-server/scopeEnforcement.ts` na-enye ohere oku ma ọ bụrụ na mpaghara ọ bụla achọrọ dabara na mpaghara akwadoro:
 
-- `*` dabara na scope ọ bụla achọrọ.
-- Scope enyere nke na-ejedebe na `*` dabara na scope achọrọ nke na-amalite na
-  prefix tupu kpakpando. `read:*` dabara na `read:compression`.
-- Scope ọ bụla ọzọ enyere dabara naanị eriri achọrọ yiri ya.
+- `*` dabara na mpaghara ọ bụla achọrọ.
+- Oghere enyere nke na-agwụ na `*` dabara n'ogo achọrọ nke na-amalite na nganiihu n'ihu kpakpando. `read:*` dabara `read:compression`.
+- Oke ọ bụla enyere ohere dabara naanị eriri achọrọ.
 
-Igodo nke scopes ya bụ `["manage"]` na-ada `scopeMatches` maka `read:compression`.
-Otu oku ahụ na-ada maka `admin`, `mcp:connect`, `read`, na `write` mgbe ndị ahụ
-bụ naanị eriri enyere. Enweghị usoro n'etiti scopes ngwa MCP
-karịa `*` na-eso.
+Igodo nke obosara ya bụ `["manage"]` adala `scopeMatches` maka `read:compression`. Otu oku a na-ada maka `admin`, `mcp:connect`, `read`, na `write` mgbe ndị ahụ bụ naanị eriri enyere. Enweghị usoro n'etiti oghere ngwá ọrụ MCP gafere `*` na-eso ya.
 
-Amanye ya na-agbanyụ ma ọ bụrụ na `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (ndabara
-`false`). Mgbe ọ na-agbanyụ, `evaluateToolScopes` na-enye ohere oku ma na-awụfe
-ndepụta ahụ. Mgbe ọ na-agbanye, HTTP na-eji `api_keys.scopes` nke igodo Bearer dị ka
-`authInfo` (lee [Per-key HTTP scope binding](#per-key-http-scope-binding-7895)).
-Mgbe enweghị scopes igodo na-edozi, setịpụrụ enyere na-ada site na MCP `_meta`, mgbe ahụ
-`OMNIROUTE_MCP_SCOPES`.
+Agbanyụrụ mmanye ma ọ bụrụ na `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ( `false` ndabara). Mgbe ọ gbanyụrụ, `evaluateToolScopes` na-enye ohere ịkpọ oku wee mafe katalọgụ ahụ. Mgbe ọ dị, HTTP na-eji igodo Bearer `api_keys.scopes` dị ka `authInfo` (lee [Per-key HTTP scope binding](#per-key-http-scope-binding-7895) ). Mgbe enweghị isi ihe edozi, ntọala enyere na-adaba na MCP `_meta` (a na-asọpụrụ naanị maka ndị na-akpọ HTTP/SSE, n'ime ebe HTTP auth; a na-eleghara `_meta` onye na-akpọ stdio anya n'ihi na onye ahịa na-achịkwa ya ma ọ dịghị ebu njirimara onye na-akpọ oku), wee `OMNIROUTE_MCP_SCOPES`.
 
-#### Scopes akara ngosi nnweta
+#### Oghere nnabata-token
 
-`oma_live_…` tokens (`src/lib/accessTokens/scopes.ts`) na-ebu `read`, `write`,
-ma ọ bụ `admin`. `scopeSatisfies` bụ ọkwa: `admin` na-ekpuchi `write` na `read`, na
-`write` na-ekpuchi `read`. Scopes amaghị na-ekpuchi ihe ọ bụla.
+`oma_live_…` token (`src/lib/accessTokens/scopes.ts`) na-ebu `read`, `write`, ma ọ bụ `admin`. `scopeSatisfies` bụ ọkwa: `admin` na-ekpuchi `write` na `read`, na `write` na-ekpuchi `read`. Ebe amaghị ama ekpuchighị ihe ọ bụla.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) na-atụnyere
-ọkwa ahụ na `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) tụnyere ọkwa ahụ na `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD`, na `OPTIONS` chọrọ `read`.
 - Usoro ọ bụla ọzọ chọrọ `write`.
-- Ụzọ dị na `ADMIN_SCOPE_PREFIXES` chọrọ `admin` maka usoro ọ bụla. `/api/mcp`
-  dị na ndepụta ahụ, yabụ akara ngosi nnweta `write` ka enweghị ike ịkpọ MCP HTTP
-  elu.
-- Ụzọ dị na `ADMIN_MUTATION_PREFIXES` chọrọ `admin` naanị maka mgbanwe.
+- Ụzọ na `ADMIN_SCOPE_PREFIXES` chọrọ `admin` maka usoro ọ bụla. `/api/mcp` dị na ndepụta ahụ, yabụ akara ohere `write` enweghị ike ịkpọ elu MCP HTTP.
+- Ụzọ na `ADMIN_MUTATION_PREFIXES` chọrọ `admin` naanị maka mgbanwe.
+- Ụzọ dị na `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) chọrọ `admin` naanị maka mgbanwe, na naanị n'ụzọ ahụ kpọmkwem — ọzọ `/api/settings/*` sub-ụzọ na-edebe `write`.
 
-`PATCH /api/keys/{id}` bụ mgbanwe ma ọ nọghị na ndepụta nchịkwa ndị ahụ, ya mere otu
-`read` token na-enweta 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Otu `write` ma ọ bụ `admin` access token na-emezu ụzọ ahụ. Otu dashboard JWT, loopback CLI machine-id token, na API key nwere `manage` ma ọ bụ `admin` na-aga n'ụzọ ndị ọzọ ma ọ bụghị ọkwa a na-egbochi ha.
+`PATCH /api/keys/{id}` bụ ngbanwe na ọ bụghị na ndepụta nchịkwa ndị ahụ, yabụ akara `read` na-enweta 403 `Access token scope 'read' is insufficient; 'write' required.` A `write` ma ọ bụ `admin` ohere akara na-eju ụzọ ahụ. A dashboard JWT, loopback CLI igwe-id token, yana igodo API nwere `manage` ma ọ bụ `admin` were alaka ndị ọzọ ma ọ bụghị ọkwa a ka ọ dị warara.
 
-Otu access token nke gafere `scopeSatisfies` maka `/api/mcp` agafeela naanị ọnụ ụzọ nchịkwa. Oku ngwaọrụ ka na-agba `scopeMatches` megide API-key scopes. Ọkwa access-token abụghị ntinye maka `scopeMatches`.
+Ihe ngosi ohere nke na-agafe `scopeSatisfies` maka `/api/mcp` ekpochaala naanị ọnụ ụzọ njikwa. Oku ngwaọrụ ka na-agba `scopeMatches` megide oghere igodo API. Ọkwa ohere-token abụghị ntinye na `scopeMatches`.
 
-### MCP ngwaọrụ scopes
+### MCP ngwá ọrụ scopes
 
-Mmanye scope dị n'etiti na `open-sse/mcp-server/scopeEnforcement.ts`.
-Ngwaọrụ ọ bụla chọrọ scopes akọwapụtara:
+Achịkọbara mmanye oke na `open-sse/mcp-server/scopeEnforcement.ts`. Ngwá ọrụ ọ bụla chọrọ scopes pụrụ iche:
 
-| Mpaghara              | Ngwaọrụ                                                                                                                                                                         |
-| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                               |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                       |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                          |
-| `read:quota`          | `check_quota`                                                                                                                                                                   |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                          |
-| `read:models`         | `list_models_catalog`                                                                                                                                                           |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                   |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                           |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                              |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                     |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                  |
-| `read:cache`          | `cache_stats`                                                                                                                                                                   |
-| `write:cache`         | `cache_flush`                                                                                                                                                                   |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                      |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                               |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                           |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                          |
-| `read:memory`         | `memory_search`                                                                                                                                                                 |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                    |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                              |
-| `write:skills`        | `skills_enable`                                                                                                                                                                 |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                         |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                       |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                  |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                              |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                 |
-| `read:obsidian`       | Ngwaọrụ ọgụgụ 13 — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | Ngwaọrụ ide 9 — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                  |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                               |
+| Oke                   | Ngwa                                                                                                                                                                         |
+| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                            |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                    |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                       |
+| `read:quota`          | `check_quota`                                                                                                                                                                |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                       |
+| `read:models`         | `list_models_catalog`                                                                                                                                                        |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                        |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                           |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                  |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                               |
+| `read:cache`          | `cache_stats`                                                                                                                                                                |
+| `write:cache`         | `cache_flush`                                                                                                                                                                |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                   |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                            |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                        |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                             |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                       |
+| `read:memory`         | `memory_search`                                                                                                                                                              |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                 |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                           |
+| `write:skills`        | `skills_enable`                                                                                                                                                              |
+| `execute:skills`      | `skills_execute`                                                                                                                                                             |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                             |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                      |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                    |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                             |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                               |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                           |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                              |
+| `read:obsidian`       | 13 gụọ ngwaọrụ — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`,… |
+| `write:obsidian`      | 9 dee ngwaọrụ — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`,…                |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                            |
 
-A na-akwado oghere wildcard: `read:*` na-enye oghere ọgụgụ niile, `*` na-enye ohere zuru oke.
+A na-akwado oghere kaadị ọhịa: `read:*` na-enye ohere ịgụ ihe niile, `*` na-enye ohere zuru oke.
 
 ### `mcp:connect` — ikike ụzọ dị warara (#7895)
 
-Ịbanye na HTTP/SSE MCP njem (`/api/mcp/*`) site na nke na-abụghị loopback chọrọ
-`/api/mcp/` LOCAL_ONLY carve-out (lee `docs/security/ROUTE_GUARD_TIERS.md`). N'akụkọ ihe mere eme
-carve-out ahụ na-anabata naanị igodo API `manage`/`admin`-scope zuru oke — sara mbara nke ukwuu maka onye
-na-akpọ oku nke chọrọ naanị ikwu okwu MCP. `src/shared/constants/managementScopes.ts` ugbu a
-na-ebupụ `MCP_CONNECT_SCOPE = "mcp:connect"`: oghere mgbakwunye, dị warara (otu ihe atụ dị ka
-`SELF_USAGE_SCOPE`) nke na-enye ikike naanị `/api/mcp/` bypass na
-`src/server/authz/policies/management.ts` — ọ naghị enye ohere ụzọ njikwa ọzọ
-ma echekwara ya na nzube n'èzí `MANAGEMENT_API_KEY_SCOPES`. Igodo na-ejide `manage`/`admin`
-ka na-agafe carve-out ahụ n'agbanweghị agbanwe; `mcp:connect` bụ ihe ọzọ nwere obere ikike maka
-ndị na-akpọ oku MCP dịpụrụ adịpụ, a na-enyocha ya site na `hasMcpConnectOrManageScope()`.
+Ịrute ụgbọ njem HTTP/SSE MCP (`/api/mcp/*`) site na-abụghị loopback chọrọ ihe akpụpụta `/api/mcp/` LOCAL_ONLY (lee `docs/security/ROUTE_GUARD_TIERS.md`). N'akụkọ ihe mere eme nke a kpụrụ akpụ na-anabata naanị `manage`/`admin` -scope API igodo — zuru oke maka onye na-akpọ oku nke chọrọ naanị ikwu MCP. `src/shared/constants/managementScopes.ts` na-ebupụ `MCP_CONNECT_SCOPE = "mcp:connect"` ugbu a: ihe mgbakwunye, oghere dị warara (otu ụkpụrụ dị ka `SELF_USAGE_SCOPE`) nke na-enye ikike ONLY ngafe `/api/mcp/` na `src/server/authz/policies/management.ts` — ọ naghị enye ohere njikwa-ụzọ ọzọ ma kpachapụrụ anya OUT nke `MANAGEMENT_API_KEY_SCOPES`. Igodo jide `manage`/`admin` ka na-agafe ihe a kpụrụ akpụ na-agbanweghi agbanwe; `mcp:connect` bụ ihe ùgwù dị ala maka ndị na-akpọ MCP dịpụrụ adịpụ, enyocha ya site na `hasMcpConnectOrManageScope()`.
 
-### Njikọ oghere HTTP kwa igodo (#7895)
+### Mpempe akwụkwọ HTTP kwa-igodo (#7895)
 
-N'elu HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` ugbu a na-edozi onye na-akpọ oku n'ezie
-`api_keys.scopes` site na `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-ma na-enyefe ya na MCP SDK's `transport.handleRequest(req, { authInfo })`, ya mere
-`extra.authInfo.scopes` na-erute oku ngwaọrụ ọ bụla na-egosipụta oghere igodo Bearer n'onwe ya.
-`scopeEnforcement.ts`'s `resolveCallerScopeContext()` ebutelarị `authInfo` ụzọ karịa
-`_meta` na `OMNIROUTE_MCP_SCOPES` env fallback — nke a na-ejupụta naanị isi iyi ahụ mbụ,
-nke kachasị mkpa, nke na-enweghị nri na mbụ n'elu HTTP. Mgbe igodo API na-edozi
-(enweghị isi, igodo na-ezighi ezi), `authInfo` na-anọgide `undefined` ma mkpebi na-ada site na
-meta`/env chain dị ugbu a n'agbanweghị agbanwe. Nke a anaghị atụgharị `OMNIROUTE_MCP_ENFORCE_SCOPES`'s
-ndabara — a ka ga-enyere mmanye aka n'ụzọ doro anya; mgbanwe a na-eme naanị ka
-ụzọ kwa igodo buru ụzọ ozugbo ọ dị. stdio enweghị njirimara kwa onye na-akpọ oku (lee
-`mcpCallerIdentity.ts`) ma ọ naghị emetụta — ọ na-anọgide na `_meta`/env fallback chain.
+N'ime HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` na-edozi ezi `api_keys.scopes` nke onye na-akpọ oku site na `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) wee nyefee ya na MCP SDK's `transport.handleRequest(req, { authInfo })`, yabụ `extra.authInfo.scopes` iru oku ngwaọrụ ọ bụla na-egosipụta scopes nke igodo bearer. `scopeEnforcement.ts`'s `resolveCallerScopeContext()` ebutela `authInfo` ụzọ karịa `_meta` na `OMNIROUTE_MCP_SCOPES` env fallback — nke a na-ejupụta na mbụ, isi mmalite kachasị elu, bụ nke a na-enyebughị HTTP. Mgbe ọ nweghị igodo API kpebiri (enweghị nkụnye eji isi mee, igodo na-ezighi ezi), `authInfo` na-anọ `undefined` na mkpebi ga-adaba na yinye `meta`/env dị adị agbanweghị. stdio enweghị njirimara onye na-akpọ oku (lee `mcpCallerIdentity.ts`) na ọ naghị emetụta ya site na ijiri igodo ọ bụla — ọ na-agafe nzọụkwụ `_meta` (`_meta` na-asọpụrụ naanị n'ime okwu HTTP auth, #15159) wee kpebie site na `OMNIROUTE_MCP_SCOPES` env igodo naanị.
+
+**A na-amanye mmanye maka ndị na-akpọ HTTP/SSE dị warara n'agbanyeghị `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Ịdaba `OMNIROUTE_MCP_ENFORCE_SCOPES` na `false` bụ naanị nchekwa maka local/stdio otu onye na-arụ ọrụ, ebe enweghị njirimara onye na-akpọ oku ga-emegide. `open-sse/mcp-server/server.ts::withScopeEnforcement()` na-atụgharị mmanye n'usoro ihe ọ bụla na-enweghị ihe ọ bụla (`shouldForceScopeEnforcement()` na `scopeEnforcement.ts`) mgbe ọ bụla `resolveCallerScopeContext()` kpebiri `source === "authInfo"` (ya bụ ezigbo kwa igodo HTTP nkụnye eji ikike, HTTP/SSE-only) AND igodo ahụ anaghị ejide oke `manage`/`admin` zuru ezu. Nke a na-emechi oghere ahụ ebe igodo jide ONLY dị warara `mcp:connect` gafere oghere — edepụtara n'elu dị ka enweghị ikike ma ọ bụghị `/api/mcp/` LOCAL_ONLY carve-out — nwere ike ịkpọku ngwa MCP ọ bụla ozugbo onye ọrụ nyere ohere remote/non-loopback MCP, naanị n'ihi na `OMNIROUTE_MCP_ENFORCE_SCOPES` ụgbọ mmiri `false` na ndabara. Igodo `manage`/`admin` zuru oke n'elu HTTP, yana onye ọ bụla na-akpọ stdio/local, debe omume -gated `OMNIROUTE_MCP_ENFORCE_SCOPES` adị na-agbanweghị agbanwe.
 
 ---
 
-## Ndị Ngbanwe Gburugburuwu
+## Mgbanwe Gburugburuw
 
-| Ngbanwe                                 | Ndabara                            | Ebumnuche                                                                                                                            |
-| :-------------------------------------- | :--------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`           | URL ntọala nke sava MCP na-eji mgbe ọ na-akpọ API ime OmniRoute                                                                      |
-| `OMNIROUTE_API_KEY`                     | (gụ oghere)                        | Igodo API a na-eziga dị ka `Authorization: Bearer` gaa na oku API ime                                                                |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (naanị `"true"` na-eme ya) | Mgbe agbanyere ya, scopes ndị na-adịghị ga-ajụ oku ngwaọrụ ma dekọọ `scope_denied:<reason>` na ndekọ nyocha                          |
-| `OMNIROUTE_MCP_SCOPES`                  | (gụ oghere)                        | Ndepụta scopes ndị e ji rikoma kewaa, nke a na-ewere dị ka ndị “dị” na ndabara (a na-eji ya mgbe onye na-akpọ enyeghị scopes nke ya) |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (edoghị = agbanyere)               | Mgbe edobere ya ka ọ bụrụ `0/false/off/no`, ọ na-agbanyụ mkpakọ nkọwa MCP n'oge ndebanye aha                                         |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (edoghị = agbanyere)               | Aha ọzọ maka otu njikwa ahụ dị n'elu                                                                                                 |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                            | Oke oge tupu a kwụsị ọgụgụ nchịkwa ime (ahụike, nkwụsi ike, ngwakọta, oke ojiji, ojiji)                                              |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                            | Oke oge tupu a kwụsị nzọụkwụ ndị na-eche onye na-enye ọrụ (`route_request`, `web_search`, `web_fetch`)                               |
-| `MCP_TOOL_DENY`                         | (edoghị = enweghị nzacha)          | Aha ngwaọrụ ndị e ji rikoma kewaa ka ewepụ na `tools/list` (mbelata ọnụọgụ ngwaọrụ — lee n'okpuru)                                   |
-| `MCP_TOOL_ALLOW`                        | (edoghị = enweghị nzacha)          | Aha ngwaọrụ ndị e ji rikoma kewaa ka a hapụ naanị ha (ọnọdụ ndepụta ikike — lee n'okpuru)                                            |
-| `DATA_DIR`                              | `~/.omniroute`                     | A na-ede faịlụ akara ịdị ndụ na `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                             |
+| Mgbanwe                                 | Ndabara                                      | Ebumnuche                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| :-------------------------------------- | :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                     | URL ntọala nke sava MCP na-eji mgbe ọ na-akpọ API ime OmniRoute                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `OMNIROUTE_API_KEY`                     | (efu)                                        | Igodo API a na-ebufe dị ka `Authorization: Bearer` na oku API ime                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (naanị `"true"` na-eme ka ọ rụọ ọrụ) | Mgbe e mere ka ọ rụọ ọrụ, scopes ndị na-efu efu na-egbochi oku ngwaọrụ ma dekọọ `scope_denied:<reason>` n'ime ndekọ nyocha. A na-amanyekwa mmanye a n'agbanyeghị ọkọlọtọ a maka onye ọkpụkpọ HTTP/SSE ọ bụla a chọpụtara site na nkụnye isi Authorization nke otu igodo (`source === "authInfo"`) nke na-enweghị scope `manage`/`admin` zuru ezu — dịka ọmụmaatụ, igodo nwere naanị scope ngafe dị warara `mcp:connect` — ya mere ndabara a dị nchebe naanị maka usoro otu onye nchịkwa local/stdio, ọ bụghị mgbe ọ bụla maka nnweta ime ime na-abụghị loopback |
+| `OMNIROUTE_MCP_SCOPES`                  | (efu)                                        | Ndepụta scopes e ji akara rịkọm kewaa nke a na-ewere na ha “dị” na ndabara (a na-eji ya mgbe onye ọkpụkpọ enyeghị scopes nke ya)                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (edobeghị = agbanyere)                       | Mgbe edobere ya ka ọ bụrụ `0/false/off/no`, ọ na-agbanyụ mkpakọ nkọwa MCP n'oge ndebanye aha                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (edobeghị = agbanyere)                       | Aha ọzọ maka otu njikwa ahụ dị n'elu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                      | Oge nkwụsị maka ọgụgụ njikwa ime (ahụike, nkwụsi ike, combos, quota, ojiji)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                      | Oge nkwụsị maka nzọụkwụ ndị na-eche onye na-eweta ọrụ (`route_request`, `web_search`, `web_fetch`)                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `MCP_TOOL_DENY`                         | (edobeghị = enweghị nzacha)                  | Aha ngwaọrụ ndị e ji akara rịkọm kewaa nke a ga-ewepụ na `tools/list` (mbelata ọnụọgụ ụdị ngwaọrụ — lee n'okpuru)                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `MCP_TOOL_ALLOW`                        | (edoghị = enweghị nzacha)                    | Aha ngwaọrụ ndị rikoma kewapụrụ ka edowe naanị ha (ọnọdụ ndepụta ikike — lee n'okpuru)                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `DATA_DIR`                              | `~/.omniroute`                               | A na-ede faịlụ heartbeat na `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ---
 

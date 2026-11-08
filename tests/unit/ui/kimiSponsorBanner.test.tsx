@@ -69,6 +69,26 @@ describe("KimiSponsorBanner", () => {
     expect(link?.getAttribute("title")).toBe("partnerLinkNote");
   });
 
+  it("keeps the partner-link note and the CTA ink at AA contrast (KEA-7886 P7)", async () => {
+    const container = await renderBanner("3.8.49");
+    const note = Array.from(container.querySelectorAll("span")).find(
+      (el) => el.textContent === "partnerLinkNote"
+    );
+    expect(note).toBeDefined();
+    // Was text-[9px] text-text-muted/70 (axe color-contrast on /dashboard).
+    expect(note?.className).toContain("text-text-muted");
+    expect(note?.className).not.toMatch(/text-\[9px\]|text-text-muted\/\d+/);
+    // The brand is the tint behind the banner, never the CTA fill: the CTA is a kit button, whose
+    // ink the kit keeps AA. White ink on the brand blue was 3.66:1.
+    const banner = container.querySelector<HTMLElement>("[role='complementary']");
+    expect(banner?.classList.contains("ci-brand-tint")).toBe(true);
+    expect(banner?.style.getPropertyValue("--ci-brand")).toBe("#1783ff");
+    const cta = container.querySelector("a[href]");
+    expect(cta?.className).toContain("ci-button");
+    expect(cta?.className).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+    expect(cta?.className).not.toContain("text-white");
+  });
+
   it("renders at the inclusive upper bound of the version window (v3.8.60)", async () => {
     const container = await renderBanner("3.8.60");
     expect(container.querySelector("a[href]")).not.toBeNull();

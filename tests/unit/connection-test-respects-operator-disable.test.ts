@@ -31,7 +31,7 @@ const originalFetch = globalThis.fetch;
 // When set, every validation probe waits on this promise before answering, so a
 // test can hold a connection test mid-probe while the operator acts.
 let probeGate: Promise<void> | null = null;
-globalThis.fetch = (async (input: string | URL | Request) => {
+const probeFetch = (async (input: string | URL | Request) => {
   const url =
     typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
   if (url === `${VALIDATION_BASE_URL}/models`) {
@@ -46,7 +46,8 @@ const providerNodesRoute = await import("../../src/app/api/provider-nodes/route.
 const providersRoute = await import("../../src/app/api/providers/route.ts");
 const providerByIdRoute = await import("../../src/app/api/providers/[id]/route.ts");
 const { testSingleConnection } = await import("../../src/app/api/providers/[id]/test/route.ts");
-const { OPERATOR_DISABLED_AT_KEY } = await import("../../src/lib/providers/operatorDisable.ts");
+const { OPERATOR_DISABLED_AT_KEY, isOperatorDisabled } =
+  await import("../../src/lib/providers/operatorDisable.ts");
 
 async function readJsonObject(response: Response): Promise<Record<string, unknown>> {
   const text = await response.text();
@@ -110,10 +111,24 @@ function readRow(connectionId: string): { isActive: number; psd: Record<string, 
   };
 }
 
+// Importing the routes installs the patched fetch. Put the probe in its place afterwards, so a
+// test reaches it directly and does not depend on the real lookup of a fake host failing first.
+globalThis.fetch = probeFetch;
+
 test.after(() => {
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
+
+test("operator-disable intent remains authoritative if isActive is true", () => {
+  assert.equal(
+    isOperatorDisabled({
+      isActive: true,
+      providerSpecificData: { [OPERATOR_DISABLED_AT_KEY]: new Date().toISOString() },
+    }),
+    true
+  );
 });
 
 test("a passing test does not re-enable a connection the operator switched off", async () => {

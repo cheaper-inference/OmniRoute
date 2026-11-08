@@ -28,6 +28,7 @@ const SIBLINGS: Array<[string, string]> = [
   ["scripts/dev/systemd-notify.mjs", "systemd-notify.mjs"],
   ["scripts/dev/http-method-guard.cjs", "http-method-guard.cjs"],
   ["scripts/dev/head-response-guard.cjs", "head-response-guard.cjs"],
+  ["scripts/dev/h2c-upgrade-guard.cjs", "h2c-upgrade-guard.cjs"],
   ["scripts/dev/responses-ws-proxy.mjs", "responses-ws-proxy.mjs"],
   ["src/shared/utils/httpClientAbortGuard.mjs", "httpClientAbortGuard.mjs"],
   ["scripts/dev/webdav-handler.mjs", "webdav-handler.mjs"],

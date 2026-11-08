@@ -25,6 +25,7 @@ test("SEARCH_PROVIDERS has all registered providers", () => {
   assert.ok(SEARCH_PROVIDERS["perplexity-search"], "perplexity-search should exist");
   assert.ok(SEARCH_PROVIDERS["exa-search"], "exa should exist");
   assert.ok(SEARCH_PROVIDERS["tavily-search"], "tavily should exist");
+  assert.ok(SEARCH_PROVIDERS["kimi-search"], "kimi-search should exist");
   assert.ok(SEARCH_PROVIDERS["nimble-search"], "nimble should exist");
   assert.ok(SEARCH_PROVIDERS["firecrawl"], "firecrawl should exist");
   assert.ok(SEARCH_PROVIDERS["google-pse-search"], "google-pse should exist");
@@ -41,7 +42,8 @@ test("SEARCH_PROVIDERS has all registered providers", () => {
   assert.ok(SEARCH_PROVIDERS["anysearch-search"], "anysearch-search should exist");
   // #11140: context7 provides library-docs search
   assert.ok(SEARCH_PROVIDERS["context7"], "context7 should exist");
-  assert.equal(Object.keys(SEARCH_PROVIDERS).length, 20);
+  assert.ok(SEARCH_PROVIDERS["parallel-search"], "parallel-search should exist");
+  assert.equal(Object.keys(SEARCH_PROVIDERS).length, 22);
 });
 
 test("duckduckgo-free config is a no-key, fallback-only provider", () => {
@@ -115,7 +117,7 @@ test("tavily config is correct", () => {
   assert.equal(t.baseUrl, "https://api.tavily.com/search");
   assert.equal(t.costPerQuery, 0.008);
   assert.equal(t.freeMonthlyQuota, 1000);
-  assert.deepEqual(t.searchTypes, ["web", "news"]);
+  assert.deepEqual(t.searchTypes, ["web", "news", "finance"]);
 });
 
 test("google-pse-search config is correct", () => {
@@ -175,7 +177,8 @@ test("zai-search config is correct", () => {
 
 test("getAllSearchProviders returns flat list", () => {
   const all = getAllSearchProviders();
-  assert.equal(all.length, 20);
+  assert.equal(all.length, 22);
+  assert.ok(all.some((p) => p.id === "parallel-search"));
   assert.ok(all.some((p) => p.id === "duckduckgo-free"));
   assert.ok(all.some((p) => p.id === "jina-search"));
   assert.ok(all.some((p) => p.id === "x-search"));

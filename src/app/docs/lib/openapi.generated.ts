@@ -25,7 +25,7 @@ export interface OpenApiEndpoint {
   hasRequestBody: boolean;
 }
 
-export const OPENAPI_VERSION = "3.8.51";
+export const OPENAPI_VERSION = "3.8.53";
 export const OPENAPI_TITLE = "OmniRoute API";
 
 export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
@@ -648,6 +648,17 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     hasRequestBody: false,
   },
   {
+    path: "/api/v1/media/{id}",
+    method: "GET",
+    summary: "GET media › <id>",
+    description:
+      "Serves media that a video job stored on this gateway because the provider's own result URL is auth-gated (OpenRouter `unsigned_urls`). The id is returned in the `url` of a `/api/v1/videos/generations` response. Readable by the API key that generated it, a manage-scope key or the dashboard session (same ownership rule as `/api/v1/files/{id}/content`); anything else, an unknown id or an expired file (call-log retention window) answers 404.",
+    tag: "V1 Media",
+    tags: ["V1 Media"],
+    requiresAuth: false,
+    hasRequestBody: false,
+  },
+  {
     path: "/api/v1/messages",
     method: "POST",
     summary: "Create message (Anthropic-compatible)",
@@ -671,7 +682,8 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/models",
     method: "GET",
     summary: "List available models",
-    description: "Returns all models available across configured providers.",
+    description:
+      "Returns all models available across configured providers. The discovery filters (`capability`, `min_context`, `kind`, `q`) are opt-in: without them the response is unchanged. They narrow the caller's own (key-filtered) catalog and run before `limit`/`after` paging.",
     tag: "Models",
     tags: ["Models"],
     requiresAuth: true,
@@ -686,6 +698,28 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     tags: ["V1 Models"],
     requiresAuth: false,
     hasRequestBody: false,
+  },
+  {
+    path: "/api/v1/models/health",
+    method: "GET",
+    summary: "Per-model pause state for the caller's key",
+    description:
+      "Read-only liveness view over the in-memory model lockout store. `ok` means no pause observed by this instance (not a health verdict); connection-level pauses live outside the store read here. Additive: leaves GET /v1/models and its cache untouched. `retry_after` carries the shortest remaining lockout in seconds, rounded up, only when `state` is `cooling`. One documented difference from the dispatch 429 `model_cooldown` rule: a model with one lockout-covered connection and one connection-level cooldown still reads `cooling` here, while the 429 requires every connection to carry a model cooldown.",
+    tag: "Models",
+    tags: ["Models"],
+    requiresAuth: true,
+    hasRequestBody: false,
+  },
+  {
+    path: "/api/v1/models/query",
+    method: "POST",
+    summary: "Query a model shortlist",
+    description:
+      "Filtered shortlist over the same catalog as `GET /v1/models` (same auth and per-key visibility). Results are ordered by `owned_by`, then `id`, and capped by `limit` (default 20, maximum 100).",
+    tag: "Models",
+    tags: ["Models"],
+    requiresAuth: true,
+    hasRequestBody: true,
   },
   {
     path: "/api/v1/moderations",
@@ -729,6 +763,39 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     hasRequestBody: false,
   },
   {
+    path: "/api/v1/music",
+    method: "POST",
+    summary: "Compose ElevenLabs music",
+    description:
+      "Proxies POST /v1/music using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.",
+    tag: "Audio",
+    tags: ["Audio"],
+    requiresAuth: true,
+    hasRequestBody: true,
+  },
+  {
+    path: "/api/v1/music/detailed",
+    method: "POST",
+    summary: "Compose ElevenLabs music with its composition plan",
+    description:
+      "Proxies POST /v1/music/detailed using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.",
+    tag: "Audio",
+    tags: ["Audio"],
+    requiresAuth: true,
+    hasRequestBody: true,
+  },
+  {
+    path: "/api/v1/music/detailed/stream",
+    method: "POST",
+    summary: "Stream ElevenLabs music and metadata as SSE",
+    description:
+      "Proxies POST /v1/music/detailed/stream using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.",
+    tag: "Audio",
+    tags: ["Audio"],
+    requiresAuth: true,
+    hasRequestBody: true,
+  },
+  {
     path: "/api/v1/music/generations",
     method: "GET",
     summary: "GET music › generations",
@@ -747,6 +814,28 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     tags: ["V1 Music"],
     requiresAuth: false,
     hasRequestBody: false,
+  },
+  {
+    path: "/api/v1/music/plan",
+    method: "POST",
+    summary: "Create an ElevenLabs music composition plan",
+    description:
+      "Proxies POST /v1/music/plan using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.",
+    tag: "Audio",
+    tags: ["Audio"],
+    requiresAuth: true,
+    hasRequestBody: true,
+  },
+  {
+    path: "/api/v1/music/stream",
+    method: "POST",
+    summary: "Stream ElevenLabs music",
+    description:
+      "Proxies POST /v1/music/stream using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.",
+    tag: "Audio",
+    tags: ["Audio"],
+    requiresAuth: true,
+    hasRequestBody: true,
   },
   {
     path: "/api/v1/ocr",
@@ -842,6 +931,27 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     hasRequestBody: false,
   },
   {
+    path: "/api/v1/quota-recoveries/{id}",
+    method: "DELETE",
+    summary: "Cancel a quota recovery ticket",
+    description: "",
+    tag: "V1 Quota Recoveries",
+    tags: ["V1 Quota Recoveries"],
+    requiresAuth: true,
+    hasRequestBody: false,
+  },
+  {
+    path: "/api/v1/quota-recoveries/{id}",
+    method: "GET",
+    summary: "Poll a quota recovery ticket",
+    description:
+      "Opt-in recovery of a non-streaming `POST /api/v1/chat/completions` or `POST /api/v1/responses` turn that failed with a terminal quota error. A request opts in with `x-omniroute-quota-recovery: auto`, `x-omniroute-session` and `x-omniroute-recovery-turn` (each `[A-Za-z0-9._:-]{1,128}`); it must be `stream: false`, carry no tools / tool history / `previous_response_id`, and not pin a connection. Recovery needs `STORAGE_ENCRYPTION_KEY` (the request is stored encrypted for up to 24 h). Instead of the quota error the caller then receives `202` with `recovery.poll` pointing here. Tickets are visible only to the API key that created them.",
+    tag: "V1 Quota Recoveries",
+    tags: ["V1 Quota Recoveries"],
+    requiresAuth: true,
+    hasRequestBody: false,
+  },
+  {
     path: "/api/v1/quotas/check",
     method: "GET",
     summary: "GET quotas › check",
@@ -855,50 +965,55 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/registered-keys",
     method: "GET",
     summary: "GET registered keys",
-    description: "",
+    description:
+      "Management-only, like `/api/keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Registered-keys",
     tags: ["V1 Registered-keys"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
     path: "/api/v1/registered-keys",
     method: "POST",
     summary: "POST registered keys",
-    description: "",
+    description:
+      "Management-only, like `/api/keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Registered-keys",
     tags: ["V1 Registered-keys"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
     path: "/api/v1/registered-keys/{id}",
     method: "DELETE",
     summary: "DELETE registered keys › <id>",
-    description: "",
+    description:
+      "Management-only, like `/api/keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Registered-keys",
     tags: ["V1 Registered-keys"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
     path: "/api/v1/registered-keys/{id}",
     method: "GET",
     summary: "GET registered keys › <id>",
-    description: "",
+    description:
+      "Management-only, like `/api/keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Registered-keys",
     tags: ["V1 Registered-keys"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
     path: "/api/v1/registered-keys/{id}/revoke",
     method: "POST",
     summary: "POST registered keys › <id> › revoke",
-    description: "",
+    description:
+      "Management-only, like `/api/keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Registered-keys",
     tags: ["V1 Registered-keys"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
@@ -1004,6 +1119,17 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     hasRequestBody: true,
   },
   {
+    path: "/api/v1/sound-generation",
+    method: "POST",
+    summary: "Create an ElevenLabs sound effect",
+    description:
+      "Proxies POST /v1/sound-generation using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.",
+    tag: "Audio",
+    tags: ["Audio"],
+    requiresAuth: true,
+    hasRequestBody: true,
+  },
+  {
     path: "/api/v1/speech-to-text",
     method: "POST",
     summary: "ElevenLabs speech-to-text",
@@ -1016,12 +1142,22 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
   },
   {
     path: "/api/v1/systemone",
+    method: "GET",
+    summary: "List decisions-capable models",
+    description: "Decisions entries from the unified model catalog.",
+    tag: "Decisions",
+    tags: ["Decisions"],
+    requiresAuth: true,
+    hasRequestBody: false,
+  },
+  {
+    path: "/api/v1/systemone",
     method: "POST",
-    summary: "Evaluate state with TypeSafe Jev",
+    summary: "System One typed decisions",
     description:
-      "TypeSafe System One passthrough. OmniRoute accepts provider-scoped model ids such as `typesafe/jev-latest`, removes the `typesafe/` prefix before forwarding, and preserves TypeSafe's response and error wire formats. The same operation is available at the SDK-compatible public path `/typesafe/v1/systemone`; SDK model discovery is available at `/typesafe/v1/models`.",
-    tag: "System One",
-    tags: ["System One"],
+      "One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint. Answers, probabilities and usage (tokens, cost) pass through untouched.",
+    tag: "Decisions",
+    tags: ["Decisions"],
     requiresAuth: true,
     hasRequestBody: true,
   },

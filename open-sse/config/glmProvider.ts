@@ -1,6 +1,7 @@
 import { getClaudeCodeUserAgent } from "@/shared/constants/claudeCodeClient";
 
 import { ANTHROPIC_VERSION_HEADER } from "./anthropicHeaders.ts";
+import { isUrlHost } from "../utils/urlHost.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -43,6 +44,7 @@ export const GLM_SHARED_MODELS = Object.freeze([
     toolCalling: true,
     supportsReasoning: true,
     supportedThinkingEfforts: ["low", "high", "max"],
+    supportsVision: false,
   },
   {
     id: "glm-5.3-high",
@@ -52,6 +54,7 @@ export const GLM_SHARED_MODELS = Object.freeze([
     toolCalling: true,
     supportsReasoning: true,
     supportedThinkingEfforts: ["high"],
+    supportsVision: false,
   },
   {
     id: "glm-5.3-low",
@@ -61,6 +64,7 @@ export const GLM_SHARED_MODELS = Object.freeze([
     toolCalling: true,
     supportsReasoning: true,
     supportedThinkingEfforts: ["low"],
+    supportsVision: false,
   },
   {
     // Explicit alias for the upstream default (max) — pins reasoning_effort so
@@ -72,6 +76,7 @@ export const GLM_SHARED_MODELS = Object.freeze([
     toolCalling: true,
     supportsReasoning: true,
     supportedThinkingEfforts: ["max"],
+    supportsVision: false,
   },
   {
     id: "glm-5.3-flash-high",
@@ -526,7 +531,9 @@ export function getGlmAnthropicBaseUrl(
     isCodingGlmBaseUrl(fallbackBaseUrl)
   ) {
     return GLM_ANTHROPIC_DEFAULT_BASE_URLS[
-      fallbackBaseUrl.includes("open.bigmodel.cn") ? "china" : getGlmApiRegion(providerSpecificData)
+      isUrlHost(fallbackBaseUrl, "open.bigmodel.cn")
+        ? "china"
+        : getGlmApiRegion(providerSpecificData)
     ];
   }
   if (

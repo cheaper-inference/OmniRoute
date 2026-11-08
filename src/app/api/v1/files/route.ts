@@ -1,4 +1,4 @@
-import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
+import { CORS_HEADERS, credentialRejectionHeaders, handleCorsOptions } from "@/shared/utils/cors";
 import { createFile, listFiles, formatFileResponse, countFiles } from "@/lib/db/files";
 import { NextResponse } from "next/server";
 import {
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
   if (scope.apiKey && !scope.apiKeyId) {
     return NextResponse.json(buildErrorBody(401, "Invalid API key"), {
       status: 401,
-      headers: CORS_HEADERS,
+      headers: credentialRejectionHeaders(request),
     });
   }
 
@@ -174,7 +174,7 @@ export async function GET(request: Request) {
   if (scope.apiKey && !scope.apiKeyId) {
     return NextResponse.json(buildErrorBody(401, "Invalid API key"), {
       status: 401,
-      headers: CORS_HEADERS,
+      headers: credentialRejectionHeaders(request),
     });
   }
 
@@ -196,7 +196,7 @@ export async function GET(request: Request) {
   // anonymous / unresolvable bearer → 401. `listFiles`/`countFiles` read an
   // absent owner as "every tenant", so the widening must be an explicit
   // decision here, never a fallback (GHSA-m3hp-hq9g-fpmv).
-  const listScope = resolveListScope(scope);
+  const listScope = resolveListScope(scope, policy, request);
   if (listScope.mode === "rejected") return listScope.response;
   const ownerFilter = listScope.mode === "api_key" ? listScope.apiKeyId : undefined;
 

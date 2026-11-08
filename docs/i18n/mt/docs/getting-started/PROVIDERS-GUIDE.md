@@ -8,88 +8,87 @@
 
 ---
 
-## X’Inhu Fornitur?
+## X'Inhu Fornitur?
 
-Aħseb f’fornitur bħal **operatur tat-telefonija**. Bħalma għandek bżonn operatur tat-telefonija biex tagħmel telefonati, għandek bżonn fornitur tal-IA biex tuża mudelli tal-IA. OmniRoute huwa bħal telefon li jaħdem mal-**operaturi kollha** — tista’ taqleb bejniethom awtomatikament.
+Aħseb f'fornitur bħal **operatur tat-telefonija**. Bħalma għandek bżonn operatur tat-telefonija biex tagħmel telefonati, għandek bżonn fornitur tal-IA biex tuża mudelli tal-IA. OmniRoute huwa bħal telefon li jaħdem mal-**operaturi kollha** — tista' taqleb bejniethom awtomatikament.
 
-### Tipi ta’ Fornituri
+### Tipi ta' Fornituri
 
-| Tip            | X’Inhu                              | Eżempji                           | Spiża                    |
-| -------------- | ----------------------------------- | --------------------------------- | ------------------------ |
-| **B’xejn**     | Ma jeħtieġ ebda ħlas                | Kiro, OpenCode Free, Pollinations | $0                       |
-| **API Key**    | Għandek bżonn API key               | OpenAI, Anthropic, Google         | Ħallas skont l-użu       |
-| **OAuth**      | Idħol bil-kont tiegħek              | Claude Code, GitHub Copilot       | Abbonament               |
-| **Web Cookie** | Juża s-sessjoni tal-browser tiegħek | ChatGPT Web (Codex), Gemini Web   | $0 (juża l-kont tiegħek) |
+| Tip                | X'Inhu                              | Eżempji                         | Spiża                    |
+| ------------------ | ----------------------------------- | ------------------------------- | ------------------------ |
+| **B'xejn**         | Ma jeħtieġ ebda ħlas                | Kiro, Pollinations              | $0                       |
+| **Ċavetta API**    | Għandek bżonn ċavetta API           | OpenAI, Anthropic, Google       | Ħallas skont l-użu       |
+| **OAuth**          | Idħol bil-kont tiegħek              | Claude Code, GitHub Copilot     | Abbonament               |
+| **Cookie tal-Web** | Juża s-sessjoni tal-browser tiegħek | ChatGPT Web (Codex), Gemini Web | $0 (juża l-kont tiegħek) |
 
-### Fornituri Web Cookie
+### Fornituri bil-Cookie tal-Web
 
 Ara **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** għal struzzjonijiet ġenerali dwar il-konfigurazzjoni, limitazzjonijiet, soluzzjoni tal-problemi, u gwida dwar l-awtentikazzjoni speċifika għal kull fornitur.
 ---
 
-## Bidu Mgħaġġel: Qabbad l-Ewwel Fornitur Tiegħek
+## Bidu Rapidu: Qabbad l-Ewwel Fornitur Tiegħek
 
-### Konfigurazzjoni fakultattiva tal-fornituri b’xejn fl-ewwel tħaddim
+### Konfigurazzjoni fakultattiva tal-ewwel tħaddim għal fornituri bla ħlas
 
-Il-wizard tal-ewwel tħaddim joffri kard espliċita **Ikkonfigura fornituri b’xejn**. Dan joħloq il-lista attwali
-ta’ fornituri eliġibbli mir-reġistru ta’ fornituri ta’ OmniRoute li ma jeħtiġux awtentikazzjoni, u mbagħad iħallik tirrevedi u tneħħi l-għażla ta’ kull
-fornitur qabel tikkonferma. OmniRoute juri t-twissija ta’ prekawzjoni tal-fornitur u link għas-sit tiegħu
-sabiex l-ewwel tkun tista’ tirrevedi t-termini, il-privatezza, id-disponibbiltà, u l-limiti tar-rata tal-parti terza.
+Il-wizard tal-ewwel tħaddim joffri kard espliċita **Ikkonfigura fornituri bla ħlas**. Dan joħloq il-lista
+attwali ta’ fornituri eliġibbli mir-reġistru ta’ fornituri mingħajr awtentikazzjoni ta’ OmniRoute, imbagħad iħallik tirrieżamina u tneħħi l-għażla ta’ kull
+fornitur qabel tikkonferma. OmniRoute juri l-avviż ta’ prekawzjoni tal-fornitur u link għas-sit tiegħu
+sabiex l-ewwel tkun tista’ tirrieżamina t-termini, il-privatezza, id-disponibbiltà u l-limiti tar-rata tal-parti terza.
 
-Din l-azzjoni hija fakultattiva: it-tlestija tal-wizard qatt ma toħloq konnessjonijiet ma’ fornituri b’xejn mingħajr ma tinfurmak.
-Toħloq biss il-fornituri li jkunu għadhom neqsin, ma tibdilx konnessjonijiet eżistenti personalizzati,
-u tirrapporta individwalment il-fornituri maħluqa, dawk diġà kkonfigurati, u dawk li fallew. Wara riżultat parzjali, tista’
+Din l-azzjoni hija fakultattiva: it-tlestija tal-wizard qatt ma toħloq konnessjonijiet ma’ fornituri bla ħlas b’mod sieket.
+Toħloq biss fornituri li jkunu għadhom neqsin, ma tibdilx il-konnessjonijiet eżistenti li ġew personalizzati,
+u tirrapporta individwalment il-fornituri maħluqa, dawk diġà kkonfigurati u dawk li fallew. Wara riżultat parzjali, tista’
 terġa’ tipprova b’mod sikur dawk biss li fallew.
 
-### Għażla A: Fornitur B’xejn (Ebda Karta ta’ Kreditu)
+### Għażla A: Fornitur Bla Ħlas (Mingħajr Karta ta’ Kreditu)
 
 1. Iftaħ id-dashboard fuq `http://localhost:20128`
-2. Mur fuq **Fornituri** → **Żid Fornitur**
-3. Agħżel wieħed minn dawn il-fornituri b’xejn:
-   - **Kiro AI** — Mudelli Claude b’xejn (ma jeħtieġ ebda awtentikazzjoni)
-   - **OpenCode Free** — Mudelli GPT b’xejn (ma jeħtieġ ebda awtentikazzjoni)
-   - **Pollinations** — GPT-5, Claude, Gemini b’xejn (ma teħtieġ ebda key)
-   - **LongCat** — 10M tokens b’xejn (għotja ta’ darba, teħtieġ kont + KYC)
-   - **Cloudflare AI** — Aktar minn 50 mudell, 10K newroni kuljum
+2. Mur f’**Fornituri** → **Żid Fornitur**
+3. Agħżel wieħed minn dawn il-fornituri bla ħlas:
+   - **Kiro AI** — Mudelli Claude bla ħlas (ma teħtieġ l-ebda awtentikazzjoni)
+   - **Pollinations** — GPT-5, Claude u Gemini bla ħlas (ma teħtieġ l-ebda ċavetta)
+   - **LongCat** — 10M tokens bla ħlas (għotja ta’ darba, teħtieġ kont + KYC)
+   - **Cloudflare AI** — 50+ mudell, 10K newroni/kuljum
    - **MLX Gemma 26B** — Mudell lokali għal Apple Silicon (~38.5 tok/s, ~15.9GB RAM)
    - **MLX Qwen 3.8 27B** — Mudell lokali għal Apple Silicon (~9.1 tok/s, ~13.1GB RAM)
 4. Ikklikkja **Qabbad**
-5. Lest! Issa għandek aċċess bla ħlas għall-IA.
+5. Lest! Issa għandek aċċess bla ħlas għall-AI.
 
-### Għażla B: Fornitur b’API Key (Bi Ħlas)
+### Għażla B: Fornitur b’Ċavetta tal-API (Bi Ħlas)
 
-1. Ikseb API key mis-sit web tal-fornitur:
+1. Ikseb ċavetta tal-API mis-sit web tal-fornitur:
    - **OpenAI**: https://platform.openai.com/api-keys
    - **Anthropic**: https://console.anthropic.com/
    - **Google**: https://aistudio.google.com/apikey
    - **DeepSeek**: https://platform.deepseek.com/
    - **Groq**: https://console.groq.com/
 2. Iftaħ id-dashboard fuq `http://localhost:20128`
-3. Mur fuq **Fornituri** → **Żid Fornitur**
+3. Mur f’**Fornituri** → **Żid Fornitur**
 4. Agħżel il-fornitur tiegħek
-5. Waħħal l-API key tiegħek
+5. Waħħal iċ-ċavetta tal-API tiegħek
 6. Ikklikkja **Qabbad**
 7. Lest! Issa għandek aċċess għall-mudelli ta’ dak il-fornitur.
 
 ### Għażla C: Fornitur OAuth (Abbonament)
 
 1. Iftaħ id-dashboard fuq `http://localhost:20128`
-2. Mur fuq **Fornituri** → **Żid Fornitur**
-3. Agħżel il-fornitur tiegħek (eż., Claude Code, GitHub Copilot)
+2. Mur f’**Fornituri** → **Żid Fornitur**
+3. Agħżel il-fornitur tiegħek (eż. Claude Code, GitHub Copilot)
 4. Ikklikkja **Qabbad b’OAuth**
 5. Idħol bil-kont tiegħek
 6. Lest! Issa għandek aċċess għall-mudelli tal-abbonament tiegħek.
 
 ### Għażla D: Mudelli MLX Lokali (Apple Silicon)
 
-Għal Macs b’Apple Silicon u memorja unifikata, OmniRoute jappoġġja l-konnessjoni ma’ mudelli MLX lokali li jkunu qed jaħdmu permezz ta’ `mlx-lm.server` bħala fornituri lokali regolari kompatibbli ma’ OpenAI.
+Għal Macs b’Apple Silicon u memorja unifikata, OmniRoute jappoġġja l-konnessjoni ma’ mudelli MLX lokali li jaħdmu permezz ta’ `mlx-lm.server` bħala fornituri lokali regolari kompatibbli ma’ OpenAI.
 
 #### Prerekwiżiti
 
-- **Mac b’Apple Silicon** (M1/M2/M3/M4) b’memorja unifikata ta’ 24GB jew aktar rakkomandata
+- **Apple Silicon Mac** (M1/M2/M3/M4) b’24GB+ memorja unifikata rakkomandata
 - Maniġer tal-pakketti **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
-#### Bidu Mgħaġġel
+#### Bidu Rapidu
 
 1. **Installa d-dipendenzi**:
 
@@ -112,9 +111,9 @@ Għal Macs b’Apple Silicon u memorja unifikata, OmniRoute jappoġġja l-konnes
    ```
 
 3. **Qabbad fid-Dashboard ta’ OmniRoute**:
-   - Mur fuq **Fornituri** → **Żid Fornitur**
+   - Mur f’**Fornituri** → **Żid Fornitur**
    - Agħżel **MLX Gemma 26B** jew **MLX Qwen 3.8 27B**
-   - Ikklikkja **Qabbad** (ma teħtieġ ebda API key)
+   - Ikklikkja **Qabbad** (ma teħtieġ l-ebda ċavetta tal-API)
 
 4. **Uża ma’ OpenCode**:
    ```bash
@@ -129,7 +128,7 @@ Għal Macs b’Apple Silicon u memorja unifikata, OmniRoute jappoġġja l-konnes
 
 #### Ġestjoni tal-Memorja
 
-**Importanti**: B’memorja unifikata ta’ 24GB, jista’ jaħdem **mudell MLX kbir wieħed biss kull darba**.
+**Importanti**: B’24GB ta’ memorja unifikata, jista’ jaħdem **mudell MLX kbir wieħed biss kull darba**.
 
 - Gemma 26B: ~15.9GB memorja massima
 - Qwen 3.8 27B: ~13.1GB memorja massima
@@ -140,11 +139,11 @@ Trid timmaniġġja dan manwalment:
 - Ħaddem it-tnejn fuq magni separati, jew
 - Waqqaf wieħed qabel tibda l-ieħor
 
-OmniRoute ma jimmaniġġjax awtomatikament il-proċessi tas-server MLX — huwa biss jidderieġi t-talbiet lejn l-endpoints kompatibbli ma’ OpenAI li tikkonfigura.
+OmniRoute ma jimmaniġġjax awtomatikament il-proċessi tas-server MLX — huwa jidderieġi biss it-talbiet lejn l-endpoints kompatibbli ma’ OpenAI li tikkonfigura.
 
 #### Appoġġ għas-Sejħiet tal-Għodod
 
-Iż-żewġ mudelli jappoġġjaw sejħiet tal-għodod kompatibbli ma’ OpenAI. Ittestja bi:
+Iż-żewġ mudelli jappoġġjaw sejħiet tal-għodod kompatibbli ma’ OpenAI. Ittestja b’dan:
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -157,34 +156,32 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   }'
 ```
 
-#### Soluzzjoni tal-problemi
+#### Soluzzjoni tal-Problemi
 
-| Problema                   | Soluzzjoni                                                                                         |
-| -------------------------- | -------------------------------------------------------------------------------------------------- |
-| Is-server ma jibdiex       | Iċċekkja `uv run mlx_lm.server --help` u vverifika l-IDs tal-mudelli                               |
-| Memorja insuffiċjenti      | Kun żgur li jkun qed jaħdem mudell wieħed biss; agħlaq apps oħra; iċċekkja Activity Monitor        |
-| Konnessjoni miċħuda        | Ivverifika li s-server qed jaħdem fuq il-port it-tajjeb (11435/11436)                              |
-| Risposti bil-mod           | L-ewwel talba ttella’ l-mudell fil-memorja (~30-60s); it-talbiet sussegwenti jkunu veloċi          |
-| Is-sejħa tal-għodda tfalli | Kun żgur li l-mudell jappoġġja l-għodod; iċċekkja l-logs ta’ OmniRoute għal żbalji fit-traduzzjoni |
+| Problema                        | Soluzzjoni                                                                                         |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Is-server ma jibdiex            | Iċċekkja `uv run mlx_lm.server --help` u vverifika l-IDs tal-mudelli                               |
+| Memorja insuffiċjenti           | Kun żgur li jkun qed jaħdem mudell wieħed biss; agħlaq apps oħra; iċċekkja Activity Monitor        |
+| Il-konnessjoni ġiet irrifjutata | Ivverifika li s-server qed jaħdem fuq il-port korrett (11435/11436)                                |
+| Risposti bil-mod                | L-ewwel talba ttella’ l-mudell fil-memorja (~30-60s); it-talbiet sussegwenti jkunu veloċi          |
+| Is-sejħiet tal-għodod ifallu    | Kun żgur li l-mudell jappoġġja l-għodod; iċċekkja l-logs ta’ OmniRoute għal żbalji fit-traduzzjoni |
 
 ---
 
 ## L-Aqwa Fornituri Bla Ħlas
 
-Dawn il-fornituri joffru **aċċess bla ħlas** mingħajr karta ta’ kreditu:
+Dawn il-fornituri joffru **aċċess bla ħlas** mingħajr karta ta' kreditu:
 
-| Fornitur          | Kwota Bla Ħlas                    | Mudelli                                  | Kif Tikkonnettja            |
-| ----------------- | --------------------------------- | ---------------------------------------- | --------------------------- |
-| **Kiro AI**       | 50 kreditu/xahar                  | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Ma teħtieġx awtentikazzjoni |
-| **OpenCode Free** | Bla limitu                        | GPT-4o, Claude, Gemini                   | Ma teħtieġx awtentikazzjoni |
-| **Pollinations**  | Ma teħtieġx ċavetta               | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Ma teħtieġx awtentikazzjoni |
-| **LongCat**       | 10M darba waħda                   | LongCat-2.0                              | Ċavetta API + KYC           |
-| **Cloudflare AI** | 10K newroni/kuljum                | Aktar minn 50 mudell                     | Ma teħtieġx awtentikazzjoni |
-| **NVIDIA NIM**    | ~40 RPM                           | 129 mudell                               | Teħtieġ ċavetta API         |
-| **Cerebras**      | Kreditu ta’ $5 mar-reġistrazzjoni | GLM 4.7, GPT-OSS 120B                    | Ċavetta API + karta         |
-| **Qoder**         | Bla limitu                        | Kimi-K2, DeepSeek-R1, Qwen3-coder        | Ma teħtieġx awtentikazzjoni |
+| Fornitur          | Kwota Bla Ħlas                    | Mudelli                                  | Kif Tikkonnettja              |
+| ----------------- | --------------------------------- | ---------------------------------------- | ----------------------------- |
+| **Kiro AI**       | 50 kreditu/xahar                  | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Ebda awtentikazzjoni meħtieġa |
+| **Pollinations**  | Ebda ċavetta meħtieġa             | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Ebda awtentikazzjoni meħtieġa |
+| **LongCat**       | 10M darba waħda                   | LongCat-2.0                              | Ċavetta tal-API + KYC         |
+| **Cloudflare AI** | 10K newroni/kuljum                | 50+ mudell                               | Ebda awtentikazzjoni meħtieġa |
+| **NVIDIA NIM**    | ~40 RPM                           | 129 mudell                               | Ċavetta tal-API meħtieġa      |
+| **Cerebras**      | Kreditu ta' $5 mar-reġistrazzjoni | GLM 4.7, GPT-OSS 120B                    | Ċavetta tal-API + karta       |
 
-**Suġġeriment**: Ikkonnettja diversi fornituri bla ħlas għal **AI bla ħlas u bla limitu** bi qlib awtomatiku għal fornitur alternattiv!
+**Parir**: Ikkonnettja diversi fornituri bla ħlas għal **AI bla ħlas u mingħajr limitu** b'riżerva awtomatika!
 
 ---
 
@@ -237,22 +234,22 @@ Il-fornitur tiegħek issa huwa kkonnettjat. Tista’ tużah b’`model: "auto"` 
 
 ---
 
-## L-Użu ta’ Diversi Fornituri
+## L-Użu ta’ Fornituri Multipli
 
-OmniRoute jaħdem l-aħjar ma’ **diversi fornituri**. Dan jagħtik:
+OmniRoute jaħdem l-aħjar b’**diversi fornituri**. Dan jagħtik:
 
-- **Qlib awtomatiku għal fornitur alternattiv** — Jekk fornitur wieħed ifalli, OmniRoute jipprova lil dak li jmiss
+- **Alternattiva awtomatika** — Jekk fornitur wieħed ifalli, OmniRoute jipprova lil dak li jmiss
 - **Ottimizzazzjoni tal-ispejjeż** — OmniRoute jagħżel l-orħos fornitur għal kull talba
 - **Ottimizzazzjoni tal-veloċità** — OmniRoute jagħżel l-aktar fornitur veloċi għal kull talba
 - **Ottimizzazzjoni tal-kwalità** — OmniRoute jagħżel l-aħjar fornitur għal kull kompitu
 
 ### Konfigurazzjoni Rakkomandata
 
-Ikkonnettja mill-inqas **3 fornituri** għall-aħjar esperjenza:
+Qabbad mill-inqas **3 fornituri** għall-aħjar esperjenza:
 
-1. **Fornitur wieħed bla ħlas** (Kiro, OpenCode Free, jew Pollinations) — Dejjem disponibbli
+1. **Fornitur wieħed bla ħlas** (Kiro jew Pollinations) — Dejjem disponibbli
 2. **Fornitur wieħed veloċi** (Groq, Cerebras) — Għal tweġibiet malajr
-3. **Fornitur wieħed ta’ kwalità għolja** (OpenAI, Anthropic, Google) — Għal kompiti kumplessi
+3. **Fornitur wieħed ta’ kwalità** (OpenAI, Anthropic, Google) — Għal kompiti kumplessi
 
 Imbagħad uża `model: "auto"` u OmniRoute jagħżel awtomatikament l-aħjar wieħed għal kull talba.
 
@@ -262,33 +259,73 @@ Imbagħad uża `model: "auto"` u OmniRoute jagħżel awtomatikament l-aħjar wie
 
 ### OpenAI
 
-1. Ikseb API key: https://platform.openai.com/api-keys
-2. F'OmniRoute: Providers → Add Provider → OpenAI
-3. Waħħal l-API key → Connect
+1. Ikseb ċavetta API: https://platform.openai.com/api-keys
+2. F'OmniRoute: Fornituri → Żid Fornitur → OpenAI
+3. Waħħal iċ-ċavetta API → Qabbad
 
 ### Anthropic
 
-1. Ikseb API key: https://console.anthropic.com/
-2. F'OmniRoute: Providers → Add Provider → Anthropic
-3. Waħħal l-API key → Connect
+1. Ikseb ċavetta API: https://console.anthropic.com/
+2. F'OmniRoute: Fornituri → Żid Fornitur → Anthropic
+3. Waħħal iċ-ċavetta API → Qabbad
 
 ### Google (Gemini)
 
-1. Ikseb API key: https://aistudio.google.com/apikey
-2. F'OmniRoute: Providers → Add Provider → Gemini
-3. Waħħal l-API key → Connect
+1. Ikseb ċavetta API: https://aistudio.google.com/apikey
+2. F'OmniRoute: Fornituri → Żid Fornitur → Gemini
+3. Waħħal iċ-ċavetta API → Qabbad
 
 ### DeepSeek
 
-1. Ikseb API key: https://platform.deepseek.com/
-2. F'OmniRoute: Providers → Add Provider → DeepSeek
-3. Waħħal l-API key → Connect
+1. Ikseb ċavetta API: https://platform.deepseek.com/
+2. F'OmniRoute: Fornituri → Żid Fornitur → DeepSeek
+3. Waħħal iċ-ċavetta API → Qabbad
+
+### Qoder: agħżel it-trasport tal-kredenzjali
+
+Qoder jeħtieġ kredenzjali. Iż-żewġ trasporti tiegħu għandhom kapaċitajiet differenti; isem ta' mudell
+waħdu ma jidentifikax x'tista' tagħmel konnessjoni partikolari.
+
+| Kredenzjali                               | Trasport ta' OmniRoute                              | Sejħiet għall-għodod mill-klijent                              | Streaming                                                                |
+| ----------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| PAT li jibda b'`pt-`                      | Proċess lokali `qodercli` fuq il-host ta' OmniRoute | Mhux appoġġjat                                                 | Ibbaferjat: SSE jintbagħat biss wara li s-CLI jirritorna t-tweġiba sħiħa |
+| Token ta' aċċess mhux PAT jew ċavetta API | Endpoint HTTP ta' DashScope kompatibbli ma' OpenAI  | Jgħaddi mingħajr tibdil, soġġett għall-mudell/ċavetta upstream | Mogħdija HTTP/SSE upstream                                               |
+
+Għal PAT, installa l-Qoder CLI fuq l-istess host jew container bħal OmniRoute. L-eżegwibbli
+jrid ikun jista' jinstab bħala `qodercli`, jew issettja `CLI_QODER_BIN` għall-path tal-eżegwibbli tiegħu. CLI
+installat biss fuq il-host ta' Docker ma jkunx awtomatikament preżenti fil-container. Binarji
+neqsin jipproduċu żball espliċitu li jidderiġik lejn l-installazzjoni jew l-issettjar tal-path.
+
+Il-mogħdija taċ-chat bil-PAT għandha timeout tal-proċess ta' 45 sekonda. Din tiċċattja l-konverżazzjoni fi
+prompt u tinvoka s-CLI fil-modalità ta' stampar mhux streaming. Meta titlob `stream: true`, dan ibiddel
+l-envelop tat-tweġiba għal SSE; ma jipprovdix kunsinna inkrementali ta' tokens upstream.
+Il-validazzjoni tas-CLI/elenkar tal-mudelli juża timeout separat ta' 20 sekonda. Dawn huma l-valuri
+predefiniti attwali tal-kodiċi, mhux settings konfigurabbli tad-dashboard.
+
+Uża konnessjonijiet PAT għal chat sempliċi. Talbiet ta' aġent li jġorru `tools` jew `functions`
+antiki jeskludu l-kontijiet PAT waqt l-għażla tal-kredenzjali, inklużi miri combo marbuta. Pool
+imħallat ta' Qoder xorta jista' jagħżel il-kont HTTP tiegħu. Sejħiet diretti lill-eżekutur PAT ifallu wkoll
+b'mod espliċitu qabel ma jniedu s-CLI, minflok iwarrbu d-definizzjonijiet tal-għodod fis-skiet. Din
+ir-restrizzjoni tikkonċerna għodod ipprovduti minn min isejjaħ l-API, mhux kwalunkwe għodda interna li l-Qoder
+CLI jista' juża huwa stess. Ċavetta HTTP ma tiggarantixxix li kull mudell jappoġġja l-għodod; il-verifiki
+normali tal-kapaċitajiet tal-mudell xorta japplikaw.
+
+OAuth permezz tal-browser huwa disponibbli biss meta l-amministratur jikkonfigura l-ħames settings kollha:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID`, u `QODER_OAUTH_CLIENT_SECRET`. B'mod predefinit dawn ikunu vojta; installazzjoni
+mhux konfigurata għandha tuża importazzjoni ta' kredenzjali appoġġjata minflok tassumi
+li l-fluss tad-dħul permezz tal-browser huwa lest.
+
+Referenzi tal-implimentazzjoni: [Eżekutur ta' Qoder](../../open-sse/executors/qoder.ts),
+[runtime tas-CLI](../../open-sse/services/qoderCli.ts), u
+[konfigurazzjoni OAuth](../../src/lib/oauth/constants/oauth.ts). Streaming inkrementali bil-PAT
+u timeout konfigurabbli huma titjibiet separati; din l-imġiba ma twegħedhomx.
 
 ### Groq
 
-1. Ikseb API key: https://console.groq.com/
-2. F'OmniRoute: Providers → Add Provider → Groq
-3. Waħħal l-API key → Connect
+1. Ikseb ċavetta API: https://console.groq.com/
+2. F'OmniRoute: Fornituri → Żid Fornitur → Groq
+3. Waħħal iċ-ċavetta API → Qabbad
 
 ---
 
@@ -296,27 +333,27 @@ Imbagħad uża `model: "auto"` u OmniRoute jagħżel awtomatikament l-aħjar wie
 
 ### "Għandi bżonn inħallas biex nuża OmniRoute?"
 
-**Le!** OmniRoute huwa b'xejn u open-source. Tista' tuża fornituri bla ħlas (Kiro, OpenCode Free, Pollinations) mingħajr ma tħallas xejn. Tħallas biss jekk tagħżel li tuża fornituri bi ħlas.
+**Le!** OmniRoute huwa bla ħlas u open-source. Tista' tuża fornituri bla ħlas (Kiro, Pollinations) mingħajr ma tħallas xejn. Tħallas biss jekk tagħżel li tuża fornituri bi ħlas.
 
 ### "B'liema fornitur għandi nibda?"
 
-Ibda b'**Kiro AI** — huwa b'xejn, ma jeħtieġ l-ebda API key, u jagħtik aċċess għall-mudelli Claude. Imbagħad żid aktar fornituri skont il-bżonn.
+Ibda b'**Kiro AI** — huwa bla ħlas, ma jeħtieġ l-ebda API key, u jagħtik aċċess għall-mudelli Claude. Imbagħad żid aktar fornituri skont il-ħtieġa.
 
 ### "Nista' nuża diversi fornituri fl-istess ħin?"
 
-**Iva!** Dan huwa l-iskop ewlieni ta' OmniRoute. Qabbad diversi fornituri u uża `model: "auto"` biex tħalli lil OmniRoute jagħżel l-aħjar wieħed għal kull talba.
+**Iva!** Dak hu l-iskop ewlieni ta' OmniRoute. Qabbad diversi fornituri u uża `model: "auto"` biex tħalli lil OmniRoute jagħżel l-aħjar wieħed għal kull talba.
 
 ### "X'jiġri jekk fornitur jieqaf jaħdem?"
 
-OmniRoute awtomatikament jaqbeż il-fornituri li ma jaħdmux u jipprova lil dak li jmiss. M'għandek bżonn tagħmel xejn.
+OmniRoute awtomatikament jaqbeż lill-fornituri li ma jkunux qed jaħdmu u jipprova lil dak li jkun imiss. M'għandek bżonn tagħmel xejn.
 
 ### "Kif niskonnettja fornitur?"
 
-Mur fuq Providers → ikklikkja fuq il-fornitur → ikklikkja **Disconnect**.
+Mur f'Providers → ikklikkja fuq il-fornitur → ikklikkja **Disconnect**.
 
 ### "Nista' nuża l-API keys eżistenti tiegħi?"
 
-**Iva!** Jekk diġà għandek API keys għal OpenAI, Anthropic, Google, eċċ., tista' tużahom f'OmniRoute. Sempliċement waħħalhom meta tkun qed tqabbad il-fornitur.
+**Iva!** Jekk diġà għandek API keys għal OpenAI, Anthropic, Google, eċċ., tista' tużahom f'OmniRoute. Sempliċiment waħħalhom meta tqabbad il-fornitur.
 
 ---
 

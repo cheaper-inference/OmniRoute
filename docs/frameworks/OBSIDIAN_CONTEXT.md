@@ -100,6 +100,15 @@ Obsidian config can be scoped **per API key** via the `api_key_context_sources` 
 key id, `getObsidianConfigForApiKey()` prefers that key's own token/base-URL/vault-path
 (`source: "api_key"`) and otherwise falls back to the global config (`source: "global"`).
 
+Non-sync MCP tools require a resolved caller identity before reading this configuration.
+A caller without an identity receives `Obsidian API token not configured`, and no vault
+request is sent. HTTP callers resolve through their request credentials; stdio callers
+can resolve through `OMNIROUTE_API_KEY` or `ROUTER_API_KEY`. An unresolved HTTP caller
+cannot inherit the server's environment identity. Placeholder IDs alone do not authorize
+access; a valid environment credential that resolves to `env-key` remains supported.
+Authenticated keys without per-key Obsidian configuration retain the global fallback.
+The four `obsidian_sync_*` tools keep their separate sync-token behavior.
+
 ## MCP tools (22)
 
 Defined in `open-sse/mcp-server/tools/obsidianTools.ts`. The token/base-URL are resolved

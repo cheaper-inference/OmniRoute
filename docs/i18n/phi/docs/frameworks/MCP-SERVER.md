@@ -66,6 +66,16 @@ curl -i \
 
 Ang key na walang `manage` scope (o walang Bearer) ay nagbabalik ng `403 LOCAL_ONLY`. Sadyang HINDI maaaring i-bypass ang sibling prefix na `/api/cli-tools/runtime/*` — tingnan ang [Mga Tier ng Route Guard — Eksepsyon para sa manage scope](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Pagpapatunay ng Origin
+
+Pagkatapos ng authentication, bawat request sa `/api/mcp/*` — ang mga transport at mga management route gaya ng `status`, `tools`, `audit`, `restart` — ay sinusuri ang `Origin` header, sinuman ang tumatawag (API key, CLI token, dashboard session, o anonymous loopback kapag naka-off ang login). Ito ang proteksyon laban sa DNS rebinding na hinihingi ng MCP Streamable HTTP spec.
+
+- **Walang `Origin` header** → pinapayagan. Hindi ito ipinapadala ng OmniRoute CLI, SDK at mga IDE client.
+- **Pinapayagang `Origin`** → `localhost` / `127.0.0.1` / `[::1]` sa anumang port, o ang sariling public origin ng OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, ang origin na ipinasa ng pinagkakatiwalaang reverse proxy (`OMNIROUTE_TRUST_PROXY`, kapag walang nakatakdang base URL lamang), o isang direktang ina-access na loopback/LAN IP host. Ang `Host` header lamang ay hindi kailanman nagpapagawang pinagkakatiwalaan ang isang origin.
+- **Anumang ibang `Origin`, kasama ang `null`** → `403` na may JSON-RPC error body: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Tinatanggap pa rin ang dashboard session na may valid na CSRF token, gaya ng ibang dashboard write.
+
+Ang browser MCP client na nakalagay sa likod ng reverse proxy ay nangangailangan ng `OMNIROUTE_PUBLIC_BASE_URL`; walang allow-list para sa ibang origin. Hindi sinusuri ang Origin sa CORS preflight (`OPTIONS`); sinusuri ang kasunod na request.
+
 ## Configuration ng IDE
 
 Tingnan ang [Configuration ng MCP Client](../guides/SETUP_GUIDE.md#mcp-client-configuration) para sa pag-setup ng Claude Desktop,
@@ -283,193 +293,137 @@ Parehong naka-block ang SSE at Streamable HTTP transport hanggang sa paganahin a
 
 ---
 
-## Authentication at Mga Scope
+## Authentication at Saklaw
 
-Binabasa ng mga tawag sa MCP tool ang mga string ng scope mula sa tumatawag. Ang pagsusuring iyon ay isa sa tatlong
-magkakahiwalay na namespace. Ang pagpasa sa isang checker ay hindi nangangahulugang pagpasa sa iba.
-Ang mga patakaran ay nasa [Tatlong namespace ng scope](#three-scope-namespaces).
-Ang katalogo ng tool ay nasa [Mga scope ng MCP tool](#mcp-tool-scopes).
+Ang mga tawag MCP tool ay nagbabasa ng mga string ng saklaw mula sa tumatawag. Ang tseke na iyon ay isa sa tatlong independiyenteng namespace. Ang pass mula sa isang checker ay hindi pass mula sa iba. Ang mga panuntunan ay [Tatlong saklaw na mga namespace](#three-scope-namespaces). Ang tool catalog ay [MCP tool scopes](#mcp-tool-scopes).
 
-### Tatlong namespace ng scope
+### Tatlong saklaw na namespace
 
-Ang `manage` sa isang API key, `read:compression` sa isang MCP tool, at `read` sa isang
-`oma_live_…` access token ay tatlong magkakaibang pahintulot. Ang mga tumatawag na nagpapadala ng `read`
-access token sa isang management route na nagsasagawa ng pagbabago ay makakatanggap ng HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Ang ranggong iyon ay `scopeSatisfies`. Hindi nito kinokonsulta ang talahanayan ng MCP, at hindi rin
-ito kinokonsulta ng MCP matcher.
+`manage` sa isang API key, `read:compression` sa isang MCP tool, at `read` sa isang `oma_live_…` access token ay tatlong magkakaibang mga gawad. Ang mga tumatawag na nagpapadala ng `read` access token sa isang mutating na ruta ng pamamahala ay makakakuha ng HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Ang ranggo na iyon ay `scopeSatisfies`. Hindi ito kumunsulta sa MCP table, at ang MCP matcher ay hindi kumunsulta dito.
 
-| Namespace                    | Credential                                                                       | Checker                             | Ang pinahihintulutan ng pagpasa                                                  |
-| :--------------------------- | :------------------------------------------------------------------------------- | :---------------------------------- | :------------------------------------------------------------------------------- |
-| Pamamahala gamit ang API key | `api_keys.scopes`                                                                | `hasManageScope`                    | Management REST para sa Bearer key na iyon                                       |
-| Additive ng API key          | parehong array, isang eksaktong string                                           | ang helper na pinangalanan sa ibaba | Ang isang kakayahan lamang na iyon                                               |
-| Mga scope ng MCP tool        | parehong array, kung wala ay MCP `_meta`, kung wala pa ay `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                      | Ang tool na iyon, kapag naka-on na ang pagpapatupad                              |
-| Access token                 | `oma_live_…`                                                                     | `scopeSatisfies`                    | Ang management route na nangangailangan ng ranggong iyon batay sa method at path |
+| Namespace              | kredensyal                                                                  | Checker                               | Pinapayagan ng isang pass                                                               |
+| :--------------------- | :-------------------------------------------------------------------------- | :------------------------------------ | :-------------------------------------------------------------------------------------- |
+| Pamamahala ng API-key  | `api_keys.scopes`                                                           | `hasManageScope`                      | Pamamahala ng REST para sa Bearer key na iyon                                           |
+| API-key additive       | parehong array, isang eksaktong string                                      | ang katulong na pinangalanan sa ibaba | Iyon lang ang kakayahan                                                                 |
+| mga saklaw ng MCP tool | parehong array, iba MCP `_meta` (HTTP/SSE lang), iba `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                        | Ang tool na iyon, kapag naka-on na ang pagpapatupad                                     |
+| Access token           | `oma_live_…`                                                                | `scopeSatisfies`                      | Ang ruta ng pamamahala na ang pamamaraan at landas ay nangangailangan ng ranggo na iyon |
 
-Ang pag-mint ng bawat credential ay saklaw sa
-[Authentication sa Pamamahala](../guides/MANAGEMENT-AUTH.md).
+Ang pag-minting ng bawat kredensyal ay saklaw sa [Pamamahala ng Pagpapatunay](../guides/MANAGEMENT-AUTH.md).
 
-#### Mga scope ng API key
+#### Mga saklaw ng API-key
 
-Isang `api_keys.scopes` array ang ginagamit para sa dalawang gawain. Gumagamit ang mga ito ng magkaibang function.
+Ang isang `api_keys.scopes` array ay nagpapakain ng dalawang trabaho. Gumagamit sila ng iba't ibang mga function.
 
-**Management REST.** Ang `manage` at `admin` ang mga miyembro ng
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-Ang `hasManageScope` ang nagbibigay ng awtorisasyon sa mga management route para sa key na iyon. Ang `admin` ay
-may kakayahang mamahala sa mga route na iyon. Ang salitang `admin` dito ay hindi ang
-ranggo ng access token at hindi ito lumalawak upang maging mga scope ng MCP tool.
+**Pamamahala REST.** `manage` at `admin` ay ang mga miyembro ng `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` ay kung ano ang nagpapahintulot sa mga ruta ng pamamahala para sa key na iyon. `admin` ay may kakayahang pangasiwaan sa mga rutang iyon. Ang salitang `admin` dito ay hindi ang ranggo ng access-token at hindi ito lumalawak sa mga saklaw ng MCP tool.
 
-**Mga additive na string.** Ang bawat isa ay isang eksaktong pagsusuri ng membership, at nananatili ang bawat isa
-sa labas ng `MANAGEMENT_API_KEY_SCOPES`.
+**Mga additive na string.** Ang bawat isa ay isang eksaktong pagsusulit sa pagiging miyembro, at ang bawat isa ay nananatili sa labas `MANAGEMENT_API_KEY_SCOPES`.
 
-| Scope                          | Ang pinahihintulutan ng pagpasa                                                                                                                                                            |
-| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Tanging ang non-loopback na `/api/mcp/` LOCAL_ONLY carve-out (`hasMcpConnectOrManageScope`). Papasa pa rin sa carve-out na iyon ang isang key na may `manage` o `admin`.                   |
-| `self:usage`                   | `GET /api/v1/me/status` para sa key na ito (`src/app/api/v1/me/status/route.ts`). Idinaragdag ng `POST /api/keys` ang scope na ito kapag gumagawa (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Mga upstream account quota sa loob ng status payload na iyon (`src/lib/usage/apiKeySelfService.ts`). Kinakailangan pa rin ng status route ang `self:usage`.                                |
-| `policy:bypass-provider-quota` | Nilalaktawan ng mga inference call ng key na ito ang patakaran sa provider quota (`hasProviderQuotaBypassScope` sa `src/sse/handlers/chat.ts`).                                            |
+| Saklaw                         | Pinapayagan ng isang pass                                                                                                                                                              |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Ang non-loopback `/api/mcp/` LOCAL_ONLY carve-out lang (`hasMcpConnectOrManageScope`). Ang isang susi na may `manage` o `admin` ay pumasa pa rin sa carve-out na iyon.                 |
+| `self:usage`                   | `GET /api/v1/me/status` para sa key na ito (`src/app/api/v1/me/status/route.ts`). idinaragdag ng `POST /api/keys` ang saklaw na ito sa create (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Mga upstream na quota ng account sa loob ng status payload na iyon (`src/lib/usage/apiKeySelfService.ts`). Ang ruta ng katayuan ay nangangailangan pa rin ng `self:usage`.             |
+| `policy:bypass-provider-quota` | Ang mga inference call ng key na ito ay laktawan ang patakaran ng provider-quota (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                                        |
 
 #### Pagtutugma
 
-Ang katalogo ay ang talahanayan sa ilalim ng [Mga scope ng MCP tool](#mcp-tool-scopes). Huwag
-ituring ang `MCP_SCOPE_LIST` sa `src/shared/constants/mcpScopes.ts` bilang katalogong iyon:
-ito ang orihinal na typed subset. Nagdedeklara ang mga tool na idinagdag kalaunan ng mga karagdagang scope sa tabi nito
-(`read:notion`, `read:skills`, `read:local-corpus`, at ang natitirang bahagi ng talahanayan).
+Ang catalog ay ang talahanayan sa ilalim ng [MCP tool scopes](#mcp-tool-scopes). Huwag ituring `MCP_SCOPE_LIST` sa `src/shared/constants/mcpScopes.ts` bilang catalog na iyon: ito ang orihinal na na-type na subset. Ang mga tool sa ibang pagkakataon ay nagdedeklara ng mga karagdagang saklaw sa tabi nito (`read:notion`, `read:skills`, `read:local-corpus`, at ang natitirang bahagi ng talahanayan).
 
-Pinahihintulutan ng `evaluateToolScopes` sa `open-sse/mcp-server/scopeEnforcement.ts` ang isang tawag
-kapag tumutugma ang bawat kinakailangang scope sa alinman sa mga ipinagkaloob na scope:
+`evaluateToolScopes` sa `open-sse/mcp-server/scopeEnforcement.ts` ay nagbibigay-daan sa isang tawag kapag ang bawat kinakailangang saklaw ay tumutugma sa ilang ibinigay na saklaw:
 
-- Tumutugma ang `*` sa bawat kinakailangang scope.
-- Ang isang ipinagkaloob na scope na nagtatapos sa `*` ay tumutugma sa isang kinakailangang scope na nagsisimula sa
-  prefix bago ang asterisk. Tumutugma ang `read:*` sa `read:compression`.
-- Ang bawat iba pang ipinagkaloob na scope ay tumutugma lamang sa eksaktong kaparehong kinakailangang string.
+- `*` ay tumutugma sa bawat kinakailangang saklaw.
+- Ang isang ibinigay na saklaw na nagtatapos sa `*` ay tumutugma sa kinakailangang saklaw na nagsisimula sa prefix bago ang bituin. `read:*` ay tumutugma `read:compression`.
+- Ang bawat iba pang ibinigay na saklaw ay tumutugma lamang sa kaparehong kinakailangang string.
 
-Ang isang key na may mga scope na `["manage"]` ay hindi papasa sa `scopeMatches` para sa `read:compression`.
-Hindi rin papasa ang parehong tawag para sa `admin`, `mcp:connect`, `read`, at `write` kapag ang mga iyon
-lamang ang ipinagkaloob na string. Walang hierarchy sa mga scope ng MCP tool
-maliban sa `*` sa hulihan.
+Ang isang susi na ang mga saklaw ay `["manage"]` ay nabigo `scopeMatches` para sa `read:compression`. Nabigo ang parehong tawag para sa `admin`, `mcp:connect`, `read`, at `write` kapag iyon lang ang mga pinagkaloob na string. Walang hierarchy sa mga saklaw ng MCP tool na lampas sa sumusunod na `*`.
 
-Naka-off ang pagpapatupad maliban kung `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (default
-`false`). Habang naka-off ito, pinahihintulutan ng `evaluateToolScopes` ang tawag at nilalaktawan ang
-katalogo. Habang naka-on ito, ginagamit ng HTTP ang `api_keys.scopes` ng Bearer key bilang
-`authInfo` (tingnan ang [Pag-bind ng HTTP scope kada key](#per-key-http-scope-binding-7895)).
-Kapag walang natukoy na mga scope ng key, lilipat ang ipinagkaloob na set sa MCP `_meta`, at pagkatapos ay sa
-`OMNIROUTE_MCP_SCOPES`.
+Naka-off ang pagpapatupad maliban kung `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (default `false`). Habang naka-off ito, pinapayagan ng `evaluateToolScopes` ang tawag at nilalaktawan ang catalog. Habang naka-on, ginagamit HTTP ang `api_keys.scopes` ng Bearer key bilang `authInfo` (tingnan [ang Per-key HTTP scope binding](#per-key-http-scope-binding-7895) ). Kapag walang nalutas na mga pangunahing saklaw, ang ibinigay na hanay ay mapupunta sa MCP `_meta` (pinarangalan lang para sa mga HTTP/SSE na tumatawag, sa loob ng konteksto HTTP auth; binabalewala `_meta` ng isang stdio caller dahil kinokontrol ito ng kliyente at wala itong dala na pagkakakilanlan ng bawat tumatawag), pagkatapos ay `OMNIROUTE_MCP_SCOPES`.
 
-#### Mga scope ng access token
+#### Mga saklaw ng access-token
 
-Ang mga `oma_live_…` token (`src/lib/accessTokens/scopes.ts`) ay naglalaman ng `read`, `write`,
-o `admin`. Isang ranggo ang `scopeSatisfies`: saklaw ng `admin` ang `write` at `read`, at
-saklaw ng `write` ang `read`. Walang sinasaklaw ang mga hindi kilalang scope.
+Ang mga `oma_live_…` token (`src/lib/accessTokens/scopes.ts`) ay nagdadala ng `read`, `write`, o `admin`. `scopeSatisfies` ay isang ranggo: sinasaklaw `admin` `write` at `read`, at sinasaklaw ng `write` `read`. Walang saklaw ang hindi kilalang saklaw.
 
-Inihahambing ng `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ang ranggong iyon
-sa `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+ikinukumpara ng `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ang ranggo na iyon sa `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
-- Nangangailangan ng `read` ang `GET`, `HEAD`, at `OPTIONS`.
-- Nangangailangan ng `write` ang bawat iba pang method.
-- Nangangailangan ng `admin` para sa bawat method ang mga path sa `ADMIN_SCOPE_PREFIXES`. Kasama ang `/api/mcp`
-  sa listahang iyon, kaya hindi pa rin maaaring tumawag sa MCP HTTP surface ang isang `write` access token.
-- Nangangailangan lamang ng `admin` para sa mga mutation ang mga path sa `ADMIN_MUTATION_PREFIXES`.
+- `GET`, `HEAD`, at `OPTIONS` ay nangangailangan ng `read`.
+- Ang bawat iba pang paraan ay nangangailangan ng `write`.
+- Ang mga landas sa `ADMIN_SCOPE_PREFIXES` ay nangangailangan `admin` para sa bawat pamamaraan. Nasa listahang iyon `/api/mcp`, kaya hindi pa rin matatawag ng `write` access token ang MCP HTTP surface.
+- Ang mga landas sa `ADMIN_MUTATION_PREFIXES` ay nangangailangan lamang `admin` para sa mga mutasyon.
+- Ang mga path sa `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) ay nangangailangan `admin` para lamang sa mga mutasyon, at sa eksaktong path na iyon lang — na iba pang mga `/api/settings/*` sub-ruta ay nagpapanatili `write`.
 
-Ang `PATCH /api/keys/{id}` ay isang mutation at wala sa mga admin list na iyon, kaya ang isang
-`read` token ay nakatatanggap ng 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Natutugunan ng isang `write` o `admin` access token ang rutang iyon. Ang isang dashboard JWT, ang
-loopback CLI machine-id token, at isang API key na may `manage` o `admin` ay dumaraan sa
-ibang mga branch at hindi nililimitahan ng rank na ito.
+`PATCH /api/keys/{id}` ay isang mutation at wala sa mga listahan ng admin na iyon, kaya ang isang `read` token ay tumatanggap ng 403 `Access token scope 'read' is insufficient; 'write' required.` Isang `write` o `admin` access token ang nakakatugon sa rutang iyon. Ang isang dashboard na JWT, ang loopback CLI machine-id token, at isang API key na may `manage` o `admin` ay kumukuha ng iba pang mga branch at hindi pinaliit ng ranggo na ito.
 
-Ang isang access token na pumapasa sa `scopeSatisfies` para sa `/api/mcp` ay nalampasan lamang ang
-management gate. Pinapatakbo pa rin ng mga tool call ang `scopeMatches` laban sa mga scope ng API key.
-Ang rank ng access token ay hindi isang input sa `scopeMatches`.
+Ang isang access token na pumasa sa `scopeSatisfies` para sa `/api/mcp` ay na-clear lang ang gate ng pamamahala. Ang mga tawag sa tool ay tumatakbo pa rin `scopeMatches` laban sa mga saklaw ng API-key. Ang ranggo ng access-token ay hindi isang input sa `scopeMatches`.
 
-### Mga scope ng MCP tool
+### mga saklaw ng MCP tool
 
-Nakasentralisa ang pagpapatupad ng scope sa `open-sse/mcp-server/scopeEnforcement.ts`.
-Nangangailangan ang bawat tool ng mga partikular na scope:
+Ang pagpapatupad ng saklaw ay sentralisado sa `open-sse/mcp-server/scopeEnforcement.ts`. Ang bawat tool ay nangangailangan ng mga partikular na saklaw:
 
-| Saklaw                | Mga Tool                                                                                                                                                                          |
-| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                 |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                         |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                            |
-| `read:quota`          | `check_quota`                                                                                                                                                                     |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                            |
-| `read:models`         | `list_models_catalog`                                                                                                                                                             |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                     |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                             |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                                |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                       |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                    |
-| `read:cache`          | `cache_stats`                                                                                                                                                                     |
-| `write:cache`         | `cache_flush`                                                                                                                                                                     |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                        |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                 |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                             |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                  |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                            |
-| `read:memory`         | `memory_search`                                                                                                                                                                   |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                      |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                |
-| `write:skills`        | `skills_enable`                                                                                                                                                                   |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                  |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                  |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                           |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                         |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                  |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                    |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                   |
-| `read:obsidian`       | 13 tool sa pagbasa — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 na tool sa pagsusulat — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …          |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                 |
+| Saklaw                | Mga gamit                                                                                                                                                                              |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                      |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                              |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                                 |
+| `read:quota`          | `check_quota`                                                                                                                                                                          |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                                 |
+| `read:models`         | `list_models_catalog`                                                                                                                                                                  |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                          |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                                  |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                                     |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                            |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                         |
+| `read:cache`          | `cache_stats`                                                                                                                                                                          |
+| `write:cache`         | `cache_flush`                                                                                                                                                                          |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                             |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                      |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                                  |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                       |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                                 |
+| `read:memory`         | `memory_search`                                                                                                                                                                        |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                           |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                     |
+| `write:skills`        | `skills_enable`                                                                                                                                                                        |
+| `execute:skills`      | `skills_execute`                                                                                                                                                                       |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                       |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                                |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                              |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                       |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                         |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                     |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                        |
+| `read:obsidian`       | 13 basahin ang mga tool — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 write tools — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                         |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                      |
 
-Sinusuportahan ang mga wildcard scope: ibinibigay ng `read:*` ang lahat ng read-scope, at ibinibigay ng `*` ang ganap na access.
+Sinusuportahan ang mga wildcard scope: binibigyan ng `read:*` ang lahat ng read-scope, binibigyan ng `*` ang buong access.
 
-### `mcp:connect` — limitadong kakayahan sa route (#7895)
+### `mcp:connect` — kakayahan sa makitid na ruta (#7895)
 
-Ang pag-access sa HTTP/SSE MCP transport (`/api/mcp/*`) mula sa non-loopback ay nangangailangan ng
-`/api/mcp/` LOCAL_ONLY carve-out (tingnan ang `docs/security/ROUTE_GUARD_TIERS.md`). Dati,
-tumatanggap lamang ang carve-out na iyon ng API key na may ganap na `manage`/`admin` scope—masyadong malawak para sa isang
-caller na kailangan lamang makipag-ugnayan sa MCP. Ini-export na ngayon ng `src/shared/constants/managementScopes.ts` ang
-`MCP_CONNECT_SCOPE = "mcp:connect"`: isang karagdagang limitadong scope (kaparehong precedent ng
-`SELF_USAGE_SCOPE`) na nagbibigay-awtorisasyon LAMANG sa `/api/mcp/` bypass sa
-`src/server/authz/policies/management.ts`—hindi ito nagbibigay ng access sa anumang iba pang management route
-at sadyang HINDI isinama sa `MANAGEMENT_API_KEY_SCOPES`. Ang key na may `manage`/`admin`
-ay makapapasa pa rin sa carve-out nang walang pagbabago; ang `mcp:connect` ay alternatibong may mas mababang pribilehiyo para sa
-mga remote caller na MCP lamang, na sinusuri sa pamamagitan ng `hasMcpConnectOrManageScope()`.
+Ang pag-abot sa HTTP/SSE MCP transport (`/api/mcp/*`) mula sa non-loopback ay nangangailangan ng `/api/mcp/` LOCAL_ONLY carve-out (tingnan `docs/security/ROUTE_GUARD_TIERS.md`). Sa kasaysayan, tinanggap lang ng carve-out na iyon ang buong `manage`/`admin` -scope API key — masyadong malawak para sa isang tumatawag na kailangan lang makipag-usap MCP. Nag-e-export na ngayon `src/shared/constants/managementScopes.ts` `MCP_CONNECT_SCOPE = "mcp:connect"`: isang additive, makitid na saklaw (parehong precedent bilang `SELF_USAGE_SCOPE`) na nagpapahintulot ONLY na mag-bypass ng `/api/mcp/` sa `src/server/authz/policies/management.ts` — hindi ito nagbibigay ng ibang access sa ruta ng pamamahala at sadyang pinapanatili ang OUT ng `MANAGEMENT_API_KEY_SCOPES`. Ang isang susi na may hawak na `manage`/`admin` ay pumasa pa rin sa carve-out na hindi nagbabago; `mcp:connect` ay isang alternatibong mas mababang pribilehiyo para sa mga malayuang tumatawag na MCP lamang, na sinuri sa pamamagitan ng `hasMcpConnectOrManageScope()`.
 
-### Pagbubuklod ng HTTP scope ayon sa key (#7895)
+### Per-key HTTP scope binding (#7895)
 
-Sa HTTP/SSE, nire-resolve na ngayon ng `open-sse/mcp-server/httpTransport.ts` ang aktuwal na
-`api_keys.scopes` ng caller sa pamamagitan ng `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-at ipinapasa ito sa `transport.handleRequest(req, { authInfo })` ng MCP SDK, upang ang
-`extra.authInfo.scopes` na nakararating sa bawat tool call ay sumasalamin sa sariling mga scope ng Bearer key.
-Binibigyang-priyoridad na ng `resolveCallerScopeContext()` ng `scopeEnforcement.ts` ang `authInfo` kaysa sa
-fallback na `_meta` at `OMNIROUTE_MCP_SCOPES` env—pinupunan lamang nito ang una at
-pinakamataas na priyoridad na source, na dati ay walang natatanggap sa HTTP. Kapag walang na-resolve na API key
-(walang header o invalid ang key), mananatiling `undefined` ang `authInfo` at magpapatuloy ang resolution sa
-umiiral na `meta`/env chain nang walang pagbabago. HINDI nito binabago ang default ng `OMNIROUTE_MCP_ENFORCE_SCOPES`—
-kailangan pa ring tahasang i-enable ang enforcement; tinitiyak lamang ng pagbabagong ito na
-mangunguna ang path na ayon sa key kapag na-enable na ito. Walang per-caller identity ang stdio (tingnan ang
-`mcpCallerIdentity.ts`) at hindi ito naaapektuhan—mananatili ito sa `_meta`/env fallback chain.
+Sa paglipas ng HTTP/SSE, nireresolba na ngayon `open-sse/mcp-server/httpTransport.ts` ang tunay na `api_keys.scopes` ng tumatawag sa pamamagitan `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) at ipinapasa ito sa `transport.handleRequest(req, { authInfo })` ng MCP SDK, kaya ang pag-abot ng `extra.authInfo.scopes` sa bawat tawag sa tool ay sumasalamin sa sariling mga saklaw ng Bearer key. Inuna na ng `scopeEnforcement.ts` ng `resolveCallerScopeContext()` `authInfo` kaysa sa `_meta` at `OMNIROUTE_MCP_SCOPES` env fallback — ito lang ang pumupuno sa una, pinakamataas na priyoridad na pinagmumulan, na dati ay hindi pinapakain sa HTTP. Kapag walang API key na naresolba (walang header, invalid na key), `authInfo` ay mananatiling `undefined` at ang resolution ay napupunta sa umiiral `meta`/env chain na hindi nagbabago. Ang stdio ay walang pagkakakilanlan sa bawat tumatawag (tingnan `mcpCallerIdentity.ts`) at hindi naaapektuhan ng per-key binding — ay nilalaktawan nito ang `_meta` step (`_meta` ay pinarangalan lamang sa loob ng isang HTTP auth context, #15159) at nagre-resolve mula sa `OMNIROUTE_MCP_SCOPES` env key nang mag-isa.
+
+**Pinipilit ang pagpapatupad para sa mga tumatawag HTTP/SSE na may makitid na saklaw anuman ang `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Ang pag-default ng `OMNIROUTE_MCP_ENFORCE_SCOPES` sa `false` ay ligtas lamang para sa local/stdio single-operator na daloy, kung saan walang pagkakakilanlan ng bawat tumatawag na sasakupin. Ino-on `open-sse/mcp-server/server.ts::withScopeEnforcement()` ang pagpapatupad ng saklaw ng bawat tool nang walang pasubali (`shouldForceScopeEnforcement()` sa `scopeEnforcement.ts`) sa tuwing nareresolba `resolveCallerScopeContext()` `source === "authInfo"` (ibig sabihin, isang real per-key HTTP Authorization header, HTTP/SSE-only) AND ang key na iyon ay hindi hawak ng buong saklaw ng `manage`/`admin`. Isinasara nito ang puwang kung saan ang isang key na may hawak na ONLY sa makitid `mcp:connect` bypass scope — na nakadokumento sa itaas bilang walang pahintulot kundi ang `/api/mcp/` LOCAL_ONLY carve-out — ay maaaring mag-invoke ng bawat MCP tool kapag na-enable ng operator ang remote/non-loopback MCP access, dahil lang sa `OMNIROUTE_MCP_ENFORCE_SCOPES` na nagpapadala `false` bilang default. Isang buong `manage`/`admin` key sa HTTP, at bawat stdio/local na tumatawag, panatilihing hindi nagbabago ang umiiral na gawi `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated.
 
 ---
 
 ## Mga Variable ng Kapaligiran
 
-| Variable                                | Default                                        | Layunin                                                                                                                                                                   |
-| :-------------------------------------- | :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                       | Base URL na ginagamit ng MCP server kapag tumatawag sa mga internal API ng OmniRoute                                                                                      |
-| `OMNIROUTE_API_KEY`                     | (walang laman)                                 | API key na ipinapasa bilang `Authorization: Bearer` sa mga internal na tawag sa API                                                                                       |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (`"true"` lamang ang nagpapagana nito) | Kapag pinagana, tinatanggihan ng mga nawawalang scope ang mga tawag sa tool at itinatala ang `scope_denied:<reason>` sa audit log                                         |
-| `OMNIROUTE_MCP_SCOPES`                  | (walang laman)                                 | Listahan ng mga scope na pinaghihiwalay ng kuwit at itinuturing na "available" bilang default (ginagamit kapag hindi nagbibigay ang tumatawag ng sarili nitong mga scope) |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (hindi nakatakda = naka-on)                    | Kapag itinakda sa `0/false/off/no`, hindi pinapagana ang compression ng paglalarawan ng MCP sa oras ng pagpaparehistro                                                    |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (hindi nakatakda = naka-on)                    | Alternatibong alias para sa kaparehong toggle sa itaas                                                                                                                    |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                        | Palugit bago i-abort ang mga internal na pagbasa sa pamamahala (kalusugan, katatagan, mga kumbinasyon, quota, paggamit)                                                   |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                        | Palugit bago i-abort ang mga hakbang na naghihintay sa isang provider (`route_request`, `web_search`, `web_fetch`)                                                        |
-| `MCP_TOOL_DENY`                         | (hindi nakatakda = walang filter)              | Mga pangalan ng tool na pinaghihiwalay ng kuwit na aalisin sa `tools/list` (pagbabawas ng kardinalidad ng tool — tingnan sa ibaba)                                        |
-| `MCP_TOOL_ALLOW`                        | (hindi nakatakda = walang filter)              | Mga pangalan ng tool na pinaghihiwalay ng kuwit na eksklusibong pananatilihin (allow-list mode — tingnan sa ibaba)                                                        |
-| `DATA_DIR`                              | `~/.omniroute`                                 | Isinusulat ang heartbeat file sa `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                 |
+| Variable                                | Default                                        | Layunin                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :-------------------------------------- | :--------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                       | Base URL na ginagamit ng MCP server kapag tumatawag sa mga internal API ng OmniRoute                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `OMNIROUTE_API_KEY`                     | (walang laman)                                 | API key na ipinapasa bilang `Authorization: Bearer` sa mga internal API call                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (`"true"` lamang ang nagpapagana rito) | Kapag pinagana, tatanggihan ng mga nawawalang scope ang mga tool call at itatala ang `scope_denied:<reason>` sa audit log. Sapilitan DING ipinapatupad ito anuman ang flag na ito para sa anumang HTTP/SSE caller na natukoy mula sa isang Authorization header na partikular sa key (`source === "authInfo"`) at walang buong `manage`/`admin` scope — hal. isang key na mayroon lamang ng limitadong `mcp:connect` bypass scope — kaya ligtas lamang ang default na ito para sa lokal/stdio na daloy na may iisang operator, at hindi kailanman para sa remote na non-loopback access |
+| `OMNIROUTE_MCP_SCOPES`                  | (walang laman)                                 | Allowlist ng mga scope na pinaghihiwalay ng kuwit at itinuturing na "available" bilang default (ginagamit kapag hindi nagbibigay ang caller ng sarili nitong mga scope)                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (hindi nakatakda = naka-on)                    | Kapag itinakda sa `0/false/off/no`, hindi pinapagana ang compression ng paglalarawan ng MCP sa oras ng pagpaparehistro                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (hindi nakatakda = naka-on)                    | Alternatibong alias para sa toggle ding nasa itaas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                        | Limitasyon ng oras bago i-abort ang mga internal management read (kalusugan, katatagan, mga combo, quota, paggamit)                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                        | Limitasyon ng oras bago i-abort ang mga hop na naghihintay sa isang provider (`route_request`, `web_search`, `web_fetch`)                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `MCP_TOOL_DENY`                         | (hindi nakatakda = walang filter)              | Mga pangalan ng tool na pinaghihiwalay ng kuwit na aalisin mula sa `tools/list` (pagbabawas ng bilang ng mga tool — tingnan sa ibaba)                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `MCP_TOOL_ALLOW`                        | (hindi nakatakda = walang filter)              | Mga pangalan ng tool na pinaghihiwalay ng kuwit na eksklusibong pananatilihin (allow-list mode — tingnan sa ibaba)                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `DATA_DIR`                              | `~/.omniroute`                                 | Isinusulat ang heartbeat file sa `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ---
 

@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+// KEA-7886: icons are Lucide <svg class="oi-icon" data-icon="<material name>"> via <Icon>.
 /**
  * Tests for CompressionPreviewAccordion (F7).
  *
@@ -154,8 +155,8 @@ describe("CompressionPreviewAccordion — smoke render", () => {
   it("renders the toggle button with compress icon and i18n title", async () => {
     const { container } = await renderComponent();
     // compress icon in header
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts).toContain("compress");
 
     // title text (mock returns the key)

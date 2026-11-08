@@ -57,7 +57,9 @@ export const VISION_MODEL_ID_FRAGMENTS = [
   "glm-4v",
   "glm-4.5v",
   "glm-4.6v",
-  "glm-5.3",
+  // Only Flash accepts images; the base GLM-5.3 and its effort aliases are text-only.
+  // https://docs.z.ai/guides/llm/glm-5.3
+  "glm-5.3-flash",
   "gpt-4o",
   "gpt-4.1",
   "gpt-4-turbo",
@@ -66,6 +68,7 @@ export const VISION_MODEL_ID_FRAGMENTS = [
   "gemini-1.5",
   "gemini-2",
   "gemini-3",
+  "gemini-4",
   "gemini-exp",
   "claude-3",
   "claude-fable",
@@ -85,13 +88,22 @@ export const VISION_MODEL_ID_FRAGMENTS = [
   "multimodal",
 ] as const;
 
+/** Known chat transports that cannot carry media, regardless of model-family capabilities. */
+export function isTextOnlyChatTransport(providerOrModel: string | null | undefined): boolean {
+  const provider = providerOrModel?.trim().toLowerCase().split("/")[0];
+  // The Playground executor serializes text messages only, even when the
+  // underlying model supports images through another provider's native API.
+  return provider === "cloudflare-playground" || provider === "cfp";
+}
+
 /**
  * Whether a model id looks like a vision-capable model. Case-insensitive
  * substring match against {@link VISION_MODEL_ID_FRAGMENTS}. Returns `false` for
- * empty / nullish input.
+ * empty / nullish input and known text-only transports.
  */
 export function isVisionModelId(modelId: string | null | undefined): boolean {
   if (!modelId) return false;
+  if (isTextOnlyChatTransport(modelId)) return false;
   const normalized = String(modelId).toLowerCase();
 
   // Xiaomi documents the Pro chat variants as text-only even though the base

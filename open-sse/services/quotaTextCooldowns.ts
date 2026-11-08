@@ -29,6 +29,21 @@ export interface QuotaTextFallback {
 // for the 5-hour subscription quota. Without a dedicated branch the request
 // falls through to the generic 429 retry path (~5s base cooldown).
 
+/** #18058: an explicit model entitlement is not depleted account-wide credits. */
+export function isClaudeModelCreditEntitlementText(errorText: string | null | undefined): boolean {
+  return errorText?.toLowerCase().includes("usage credits are required for this model") ?? false;
+}
+
+/** Claude-only subscription wording, isolated to keep the generic classifier bounded. */
+function isClaudeSubscriptionQuotaText(lower: string, provider?: string | null): boolean {
+  return (
+    provider === "claude" &&
+    (lower.includes("this request would exceed your account's rate limit") ||
+      lower.includes("monthly spend limit") ||
+      isClaudeModelCreditEntitlementText(lower))
+  );
+}
+
 export function isSubscriptionQuotaText(lower: string, provider?: string | null): boolean {
   return (
     lower.includes("usage limit reached") ||
@@ -41,10 +56,8 @@ export function isSubscriptionQuotaText(lower: string, provider?: string | null)
     lower.includes("plan's set usage limit") ||
     lower.includes("plan limit exceeded") ||
     lower.includes("usage limit exceeded") ||
-    // Native Claude uses this wording for a long-window quota 429. Fresh quota
-    // evidence decides model versus connection scope; other providers may use
-    // the same phrase for a short RPM throttle.
-    (provider === "claude" && lower.includes("this request would exceed your account's rate limit"))
+    // Model and account subscription limits are Claude-only, not generic RPM.
+    isClaudeSubscriptionQuotaText(lower, provider)
   );
 }
 
@@ -118,7 +131,12 @@ export function buildWeeklyQuotaFallback(
   provider?: string | null
 ): QuotaTextFallback | null {
   if (!isWeeklyUsageLimitText(errorStr.toLowerCase())) return null;
-  const parsedResetMs = parseDayGranularityResetMs(errorStr, MAX_WEEKLY_QUOTA_COOLDOWN_MS, nowMs, provider);
+  const parsedResetMs = parseDayGranularityResetMs(
+    errorStr,
+    MAX_WEEKLY_QUOTA_COOLDOWN_MS,
+    nowMs,
+    provider
+  );
   const cooldownMs =
     typeof parsedResetMs === "number" && parsedResetMs > 0
       ? parsedResetMs

@@ -11,17 +11,18 @@ AI-assistent (arkitektur, konventioner, testning, kvalitetsgrindar, git-arbetsfl
 reglerna, lärdomar om PII). Läs den i sin helhet; lägg inte till projektregler här igen. Allt nedan
 gäller ENDAST Claude Code — operativa förtydliganden av regler som redan definierats i `AGENTS.md`.
 
-## Isolering med worktree — specifikt för Claude Code
+## Worktree-isolering — Claude Code-specifikt
 
-Det fullständiga obligatoriska worktree-protokollet (bekräftelse av basgren, den kanoniska sökvägen
-`.claude/worktrees/`, `cp -al` node_modules, regler för nedmontering) finns i `AGENTS.md` → Git-arbetsflöde
-→ ”Worktree-isolering”. Punkter specifika för Claude Code:
+Det fullständiga obligatoriska worktree-protokollet (bekräftelse av basgren, `.claude/worktrees/` som
+kanonisk sökväg, `cp -al` för node_modules, regler för nedmontering) finns i
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (sammanfattat i `AGENTS.md` →
+Git-arbetsflöde → "Worktree-isolering"). Punkter specifika för Claude Code:
 
-- Bekräfta basgrenen med operatören via `AskUserQuestion` (hård regel nr 19), såvida operatören inte
-  redan har angett den.
+- Bekräfta basgrenen med operatören via `AskUserQuestion` (Hård regel #19) om de inte
+  redan har berättat det för dig.
 - Föredra det inbyggda verktyget `EnterWorktree` — det skapar redan worktrees under
-  `.claude/worktrees/` (den kanoniska sökvägen). Skapa worktree-katalogen med det dokumenterade
-  kommandot `git worktree add` och anropa sedan `EnterWorktree` med dess `path`.
+  `.claude/worktrees/` (den kanoniska sökvägen). Skapa worktreet med det dokumenterade kommandot `git
+worktree add` och anropa sedan `EnterWorktree` med dess `path`.
 
 ## Säkerhet mellan sessioner — specifikt för Claude Code
 

@@ -533,21 +533,24 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Restaure a partir do backup:
 
 ```bash
-omniroute sync pull --merge   # ou: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` apenas baixa um arquivo `.tar.gz` completo de um servidor em execução
+(`GET /api/db-backups/exportAll`, credencial de operador obrigatória); ele não restaura nada.
 
 ### Cenário 3: Chave de Criptografia Perdida
 
-**Não é possível recuperar** sem a chave. Os campos criptografados ficam ilegíveis. Adicione novamente todos os provedores de forma manual, usando novas credenciais.
+**Nenhuma recuperação é possível** sem a chave. Os campos criptografados ficam ilegíveis. Adicione novamente todos os provedores manualmente com novas credenciais.
 
 > **Mitigação**: Sempre faça backup da chave de criptografia separadamente, de preferência em um gerenciador de senhas ou KMS.
 
 ### Cenário 4: Disco Cheio
 
-O SQLite retornará erros `SQLITE_FULL`. Libere espaço em disco e execute:
+O SQLite retornará erros `SQLITE_FULL`. Libere espaço em disco e, em seguida:
 
 ```bash
-# Executa o checkpoint do WAL para liberar espaço
+# Faz checkpoint do WAL para liberar espaço
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

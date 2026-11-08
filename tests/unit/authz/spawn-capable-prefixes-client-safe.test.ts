@@ -106,19 +106,40 @@ test("SPAWN_CAPABLE_PREFIXES is defined in the server-free constants leaf with t
     "/api/cli-tools/pi-settings",
     "/api/cli-tools/smelt-settings",
     "/api/cli-tools/status",
+    "/api/cli-tools/whycodes-settings",
     // GHSA-jx89-f37j-pq89: skills handler registration + execution reach the
     // sandbox container spawn transitively.
     "/api/skills/install",
     "/api/skills/executions",
     // The CLIProxyAPI binary lifecycle under /api/version-manager/, same work as /api/services/.
     "/api/version-manager/",
+    // LOCAL_ONLY spawn / code-exec routes that were never mirrored into the deny-list
+    // (drift guard: tests/unit/authz/local-only-bypass-spawn-denylist.test.ts).
+    "/api/middleware/",
+    "/api/acp/agents",
+    "/api/system/version",
+    "/api/db-backups/exportAll",
+    "/api/db/health",
+    "/api/oauth/cursor/auto-import",
+    "/api/cli-tools/omp-settings",
+    "/api/cli-tools/letta-settings",
+    "/api/cli-tools/grok-build-settings",
+    "/api/cli-tools/forge-settings",
+    "/api/cli-tools/jcode-settings",
+    "/dashboard/providers/services/",
+    "/api/discovery/",
+    "/api/issue-agent/",
+    "/api/oauth/kiro/auto-import",
   ]) {
     assert.ok(
       SPAWN_CAPABLE_PREFIXES.includes(prefix),
       `SPAWN_CAPABLE_PREFIXES lost the spawn-capable prefix "${prefix}" during extraction`
     );
   }
-  // 20 at extraction time + 14 (GHSA-35fw-cv32-2373) + 2 (GHSA-jx89-f37j-pq89) + 1 (version-manager).
+  // 20 at extraction time + 14 (GHSA-35fw-cv32-2373) + 2 (GHSA-jx89-f37j-pq89) + 1 (version-manager)
+  // + 14 LOCAL_ONLY spawn / code-exec routes that had never been mirrored here.
+  // + 1 host-credential read (/api/oauth/kiro/auto-import) that must never be bypassable.
+  // + 1 (whycodes-settings, #14107).
   // qwen-settings is the one pre-existing entry not enumerated above.
-  assert.equal(SPAWN_CAPABLE_PREFIXES.length, 37);
+  assert.equal(SPAWN_CAPABLE_PREFIXES.length, 53);
 });

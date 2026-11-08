@@ -16,12 +16,12 @@ Think of a provider like a **phone carrier**. Just as you need a phone carrier t
 
 ### Types of Providers
 
-| Type           | What It Is                | Examples                          | Cost                   |
-| -------------- | ------------------------- | --------------------------------- | ---------------------- |
-| **Free**       | No payment required       | Kiro, OpenCode Free, Pollinations | $0                     |
-| **API Key**    | You need an API key       | OpenAI, Anthropic, Google         | Pay per use            |
-| **OAuth**      | Login with your account   | Claude Code, GitHub Copilot       | Subscription           |
-| **Web Cookie** | Uses your browser session | ChatGPT Web (Codex), Gemini Web   | $0 (uses your account) |
+| Type           | What It Is                | Examples                        | Cost                   |
+| -------------- | ------------------------- | ------------------------------- | ---------------------- |
+| **Free**       | No payment required       | Kiro, Pollinations              | $0                     |
+| **API Key**    | You need an API key       | OpenAI, Anthropic, Google       | Pay per use            |
+| **OAuth**      | Login with your account   | Claude Code, GitHub Copilot     | Subscription           |
+| **Web Cookie** | Uses your browser session | ChatGPT Web (Codex), Gemini Web | $0 (uses your account) |
 
 ### Web Cookie Providers
 
@@ -48,7 +48,6 @@ safely retry only the failures after a partial result.
 2. Go to **Providers** → **Add Provider**
 3. Select one of these free providers:
    - **Kiro AI** — Free Claude models (no auth needed)
-   - **OpenCode Free** — Free GPT models (no auth needed)
    - **Pollinations** — Free GPT-5, Claude, Gemini (no key needed)
    - **LongCat** — 10M tokens free (one-time grant, requires account + KYC)
    - **Cloudflare AI** — 50+ models, 10K neurons/day
@@ -178,13 +177,11 @@ These providers offer **free access** with no credit card:
 | Provider          | Free Quota       | Models                                   | How to Connect |
 | ----------------- | ---------------- | ---------------------------------------- | -------------- |
 | **Kiro AI**       | 50 credits/month | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | No auth needed |
-| **OpenCode Free** | Unlimited        | GPT-4o, Claude, Gemini                   | No auth needed |
 | **Pollinations**  | No key needed    | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | No auth needed |
 | **LongCat**       | 10M one-time     | LongCat-2.0                              | API key + KYC  |
 | **Cloudflare AI** | 10K neurons/day  | 50+ models                               | No auth needed |
 | **NVIDIA NIM**    | ~40 RPM          | 129 models                               | API key needed |
 | **Cerebras**      | $5 signup credit | GLM 4.7, GPT-OSS 120B                    | API key + card |
-| **Qoder**         | Unlimited        | Kimi-K2, DeepSeek-R1, Qwen3-coder        | No auth needed |
 
 **Tip**: Connect multiple free providers for **unlimited free AI** with automatic fallback!
 
@@ -252,7 +249,7 @@ OmniRoute works best with **multiple providers**. This gives you:
 
 Connect at least **3 providers** for the best experience:
 
-1. **One free provider** (Kiro, OpenCode Free, or Pollinations) — Always available
+1. **One free provider** (Kiro or Pollinations) — Always available
 2. **One fast provider** (Groq, Cerebras) — For quick responses
 3. **One quality provider** (OpenAI, Anthropic, Google) — For complex tasks
 
@@ -286,6 +283,46 @@ Then use `model: "auto"` and OmniRoute will automatically pick the best one for 
 2. In OmniRoute: Providers → Add Provider → DeepSeek
 3. Paste API key → Connect
 
+### Qoder: choose the credential transport
+
+Qoder requires credentials. Its two transports have different capabilities; a model name
+alone does not identify what a particular connection can do.
+
+| Credential                      | OmniRoute transport                            | Caller tool calling                               | Streaming                                                          |
+| ------------------------------- | ---------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
+| PAT beginning with `pt-`        | Local `qodercli` process on the OmniRoute host | Unsupported                                       | Buffered: SSE is emitted only after the CLI returns the full reply |
+| Non-PAT access token or API key | DashScope OpenAI-compatible HTTP endpoint      | Passed through, subject to the upstream model/key | Upstream HTTP/SSE path                                             |
+
+For a PAT, install the Qoder CLI on the same host or container as OmniRoute. The executable
+must be discoverable as `qodercli`, or set `CLI_QODER_BIN` to its executable path. A CLI
+installed only on the Docker host is not automatically present in the container. Missing
+binaries produce an explicit error directing you to the installation or path setting.
+
+The PAT chat path has a 45-second process timeout. It flattens the conversation into a
+prompt and invokes the CLI in non-streaming print mode. Requesting `stream: true` changes
+the response envelope to SSE; it does not provide incremental upstream token delivery.
+CLI validation/model listing uses a separate 20-second timeout. These are current code
+defaults, not configurable dashboard settings.
+
+Use PAT connections for plain chat. Agent requests carrying `tools` or legacy `functions`
+exclude PAT accounts during credential selection, including pinned combo targets. A mixed
+Qoder pool can still select its HTTP account. Direct calls to the PAT executor also fail
+explicitly before launching the CLI instead of silently dropping tool definitions. This
+restriction concerns tools supplied by the API caller, not any internal tools the Qoder
+CLI might use itself. An HTTP key does not guarantee every model supports tools; normal
+model capability checks still apply.
+
+Browser OAuth is available only when the administrator configures all five settings:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID`, and `QODER_OAUTH_CLIENT_SECRET`. They default to empty; an
+unconfigured installation should use a supported credential import instead of assuming
+that the browser sign-in flow is ready.
+
+Implementation references: [Qoder executor](../../open-sse/executors/qoder.ts),
+[CLI runtime](../../open-sse/services/qoderCli.ts), and
+[OAuth configuration](../../src/lib/oauth/constants/oauth.ts). Incremental PAT streaming
+and a configurable timeout are separate enhancements; this behavior does not promise them.
+
 ### Groq
 
 1. Get API key: https://console.groq.com/
@@ -298,7 +335,7 @@ Then use `model: "auto"` and OmniRoute will automatically pick the best one for 
 
 ### "Do I need to pay to use OmniRoute?"
 
-**No!** OmniRoute is free and open-source. You can use free providers (Kiro, OpenCode Free, Pollinations) without paying anything. You only pay if you choose to use paid providers.
+**No!** OmniRoute is free and open-source. You can use free providers (Kiro, Pollinations) without paying anything. You only pay if you choose to use paid providers.
 
 ### "Which provider should I start with?"
 

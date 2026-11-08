@@ -9,6 +9,7 @@ import {
   isResponsesShapedBody,
   projectResponsesForCli,
 } from "./commandCode/responsesProjection.ts";
+import { applyCommandCodeZdrHeader } from "./commandCode/zdr.ts";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,
@@ -16,6 +17,8 @@ import {
   type ExecuteInput,
 } from "./base.ts";
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
+import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
+import { peekCommandCodeCliStream } from "./commandCode/cliEmbeddedError.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -666,10 +669,26 @@ function usageFromCommandCode(usage: JsonRecord | null) {
       "cacheReadTokens",
       "cache_read_tokens",
     ]);
+  // Cache writes are part of the cache-inclusive inputTokens, like reads.
+  const cacheWrite =
+    firstNumber(usage, [
+      "cacheWriteInputTokens",
+      "cache_write_input_tokens",
+      "cacheCreationInputTokens",
+      "cache_creation_input_tokens",
+      "cacheWriteTokens",
+      "cache_write_tokens",
+    ]) ??
+    firstNumber(inputDetails, [
+      "cacheWriteTokens",
+      "cache_write_tokens",
+      "cacheCreationTokens",
+      "cache_creation_tokens",
+    ]);
   const noCache = firstNumber(inputDetails, ["noCacheTokens", "no_cache_tokens"]);
   const prompt =
     firstNumber(usage, ["inputTokens", "input_tokens", "promptTokens", "prompt_tokens"]) ??
-    (noCache ?? 0) + (cacheRead ?? 0);
+    (noCache ?? 0) + (cacheRead ?? 0) + (cacheWrite ?? 0);
   const reasoning =
     firstNumber(usage, ["reasoningTokens", "reasoning_tokens"]) ??
     firstNumber(outputDetails, ["reasoningTokens", "reasoning_tokens"]) ??
@@ -691,6 +710,10 @@ function usageFromCommandCode(usage: JsonRecord | null) {
     total_tokens: total,
   };
   if (cacheRead !== undefined && cacheRead > 0) result.cache_read_input_tokens = cacheRead;
+  if (cacheWrite !== undefined && cacheWrite > 0) {
+    (result.prompt_tokens_details as JsonRecord).cache_creation_tokens = cacheWrite;
+    result.cache_creation_input_tokens = cacheWrite;
+  }
   if (noCache !== undefined && noCache > 0) result.no_cache_tokens = noCache;
   if (reasoning !== undefined && reasoning > 0) result.reasoning_tokens = reasoning;
   return result;
@@ -990,6 +1013,7 @@ export class CommandCodeExecutor extends BaseExecutor {
     apiKey: string;
     signal?: AbortSignal;
     upstreamExtraHeaders?: Record<string, string>;
+    providerSpecificData?: unknown;
   }) {
     const { model, sanitizedBody, stream, apiKey, signal, upstreamExtraHeaders } = input;
     const cliUrl = this.buildCliUrl();
@@ -1004,6 +1028,7 @@ export class CommandCodeExecutor extends BaseExecutor {
       "x-session-id": randomUUID(),
     };
     mergeUpstreamExtraHeaders(cliHeaders, upstreamExtraHeaders);
+    applyCommandCodeZdrHeader(cliHeaders, input.providerSpecificData);
 
     const abortSignal = signal || undefined;
     const { body: initialCliTransformedBody, toolNameMap } = buildCommandCodeCliBody(
@@ -1011,7 +1036,7 @@ export class CommandCodeExecutor extends BaseExecutor {
       sanitizedBody,
       stream
     );
-    let cliTransformedBody: unknown = initialCliTransformedBody;
+    let cliTransformedBody = initialCliTransformedBody;
 
     let cliUpstream = await fetch(cliUrl, {
       method: "POST",
@@ -1020,18 +1045,19 @@ export class CommandCodeExecutor extends BaseExecutor {
       signal: abortSignal,
     });
 
-    // #14629: same reactive reasoning_effort recovery for the CLI fallback fetch.
+    // The CLI keeps reasoning fields in params; retries must still send the full envelope.
     const cliRecovery = await applyReasoningEffortRecovery({
       response: cliUpstream,
       url: cliUrl,
       provider: this.provider,
       model,
-      body: cliTransformedBody,
+      body: cliTransformedBody.params,
       fetchOptions: { method: "POST", headers: cliHeaders, signal: abortSignal },
       fetchFn: (fetchUrl, fetchOpts) => fetch(fetchUrl, fetchOpts),
+      serializeBody: (params) => JSON.stringify({ ...cliTransformedBody, params }),
     });
     cliUpstream = cliRecovery.response;
-    cliTransformedBody = cliRecovery.body;
+    cliTransformedBody = { ...cliTransformedBody, params: cliRecovery.body };
 
     if (!cliUpstream.ok) {
       const errorText = await cliUpstream.text().catch(() => {
@@ -1050,11 +1076,36 @@ export class CommandCodeExecutor extends BaseExecutor {
       };
     }
 
-    const response = stream
-      ? createStreamResponse(cliUpstream, model, signal, toolNameMap)
-      : await createJsonResponse(cliUpstream, model, signal, toolNameMap);
+    // An embedded `error` frame before any content fails the request with its own status.
+    const peeked = await peekCommandCodeCliStream(cliUpstream, signal);
+    const response = !peeked.ok
+      ? peeked
+      : stream
+        ? createStreamResponse(peeked, model, signal, toolNameMap)
+        : await createJsonResponse(peeked, model, signal, toolNameMap);
 
     return { response, url: cliUrl, headers: cliHeaders, transformedBody: cliTransformedBody };
+  }
+
+  /** Headers for the flat provider endpoint (chat completions / responses). */
+  private buildProviderHeaders(input: {
+    model: string;
+    apiKey: string;
+    stream: boolean;
+    upstreamExtraHeaders?: Record<string, string>;
+    providerSpecificData?: unknown;
+  }): Record<string, string> {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${input.apiKey}`,
+      Accept: input.stream ? "text/event-stream" : "application/json",
+    };
+    if (getModelTargetFormat("command-code", input.model) === "claude") {
+      headers["anthropic-version"] = ANTHROPIC_VERSION_HEADER;
+    }
+    mergeUpstreamExtraHeaders(headers, input.upstreamExtraHeaders);
+    applyCommandCodeZdrHeader(headers, input.providerSpecificData);
+    return headers;
   }
 
   async execute({ model, body, stream, credentials, signal, upstreamExtraHeaders }: ExecuteInput) {
@@ -1072,15 +1123,14 @@ export class CommandCodeExecutor extends BaseExecutor {
       ? this.buildResponsesUrl()
       : this.buildUrl(model);
 
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-      Accept: stream ? "text/event-stream" : "application/json",
-    };
-    if (getModelTargetFormat("command-code", model) === "claude") {
-      headers["anthropic-version"] = ANTHROPIC_VERSION_HEADER;
-    }
-    mergeUpstreamExtraHeaders(headers, upstreamExtraHeaders);
+    const providerSpecificData = credentials?.providerSpecificData;
+    const headers = this.buildProviderHeaders({
+      model,
+      apiKey,
+      stream,
+      upstreamExtraHeaders,
+      providerSpecificData,
+    });
 
     let upstream = await fetch(url, {
       method: "POST",
@@ -1104,6 +1154,18 @@ export class CommandCodeExecutor extends BaseExecutor {
     upstream = recovery.response;
     transformedBody = recovery.body;
 
+    upstream = await applyFieldDowngradeRecovery({
+      response: upstream,
+      url,
+      provider: this.provider,
+      model,
+      body: transformedBody,
+      fetchOptions: { method: "POST", headers, signal: abortSignal },
+      fetchFn: (fetchUrl, fetchOpts) => fetch(fetchUrl, fetchOpts),
+      serializeBody: (retryBody) => JSON.stringify(retryBody),
+      strippedFields: new Set<string>(),
+    });
+
     if (upstream.ok) {
       return { response: upstream, url, headers, transformedBody };
     }
@@ -1125,6 +1187,7 @@ export class CommandCodeExecutor extends BaseExecutor {
           apiKey,
           signal,
           upstreamExtraHeaders,
+          providerSpecificData,
         });
       }
     }

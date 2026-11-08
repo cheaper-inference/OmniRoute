@@ -1,5 +1,6 @@
 import { SEARCH_PROVIDERS } from "../config/searchRegistry.ts";
-import { SYSTEMONE_PROVIDERS } from "../config/systemoneRegistry.ts";
+import { SearchProviderChatError } from "../utils/searchProviderChatError.ts";
+import { isDecisionsOnlyProvider } from "../config/decisionsProviders.ts";
 import { assertMicrosoftDesignerWebProviderAvailable } from "@/shared/constants/designerWebRetirement";
 import { assertRuntimeProviderAvailable } from "@/shared/constants/providerRetirement";
 import { assertCommonChatGptWebProviderAvailable } from "@/shared/constants/chatgptWebRetirement";
@@ -76,7 +77,6 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   fb: () => import("./freebuff.ts").then((m) => new m.FreebuffExecutor()), // Alias
   "opencode-zen": () => import("./opencode.ts").then((m) => new m.OpencodeExecutor("opencode-zen")),
   "opencode-go": () => import("./opencode.ts").then((m) => new m.OpencodeExecutor("opencode-go")),
-  opencode: () => import("./opencode.ts").then((m) => new m.OpencodeExecutor("opencode-zen")), // Alias for opencode-zen
   vertex: () => import("./vertex.ts").then((m) => new m.VertexExecutor()),
   "vertex-partner": () => import("./vertex.ts").then((m) => new m.VertexExecutor()),
   cliproxyapi: () => import("./cliproxyapi.ts").then((m) => new m.CliproxyapiExecutor()),
@@ -135,6 +135,8 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
     import("./tencent-aistudio-web.ts").then((m) => new m.TencentAIStudioWebExecutor()),
   tasw: () => import("./tencent-aistudio-web.ts").then((m) => new m.TencentAIStudioWebExecutor()), // Alias
   ybw: () => import("./yuanbao-web.ts").then((m) => new m.YuanbaoWebExecutor()), // Alias
+  "notrack-web": () => import("./notrack-web.ts").then((m) => new m.NotrackWebExecutor()),
+  ntw: () => import("./notrack-web.ts").then((m) => new m.NotrackWebExecutor()), // Alias
   "poe-web": () => import("./poe-web.ts").then((m) => new m.PoeWebExecutor()),
   // #8969: do NOT alias canonical `poe` (API-key / api.poe.com) to PoeWebExecutor.
   // Registry declares executor:"default"; the hard-coded map previously won and
@@ -167,6 +169,8 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   gc: () => import("./grok-cli.ts").then((m) => new m.GrokCliExecutor()), // Alias
   "codebuddy-cn": () => import("./codebuddy-cn.ts").then((m) => new m.CodeBuddyCnExecutor()),
   cbcn: () => import("./codebuddy-cn.ts").then((m) => new m.CodeBuddyCnExecutor()), // Alias for codebuddy-cn
+  "codebuddy-intl": () => import("./codebuddy-intl.ts").then((m) => new m.CodeBuddyIntlExecutor()),
+  cbai: () => import("./codebuddy-intl.ts").then((m) => new m.CodeBuddyIntlExecutor()), // Alias for codebuddy-intl
   "zenmux-free": () => import("./zenmux-free.ts").then((m) => new m.ZenmuxFreeExecutor()),
   "cloudflare-playground": () =>
     import("./cloudflare-playground.ts").then((m) => new m.CloudflarePlaygroundExecutor()),
@@ -183,6 +187,13 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   "clova-studio": () => import("./clova-studio.ts").then((m) => new m.ClovaStudioExecutor()),
   "conol-web": () => import("./conol-web.ts").then((m) => new m.ConolWebExecutor()),
   cnl: () => import("./conol-web.ts").then((m) => new m.ConolWebExecutor()), // Alias
+  twinmind: () => import("./twinmind.ts").then((m) => new m.TwinmindExecutor()),
+  tm: () => import("./twinmind.ts").then((m) => new m.TwinmindExecutor()), // Alias
+  syntx: () => import("./syntx.ts").then((m) => new m.SyntxExecutor()),
+  stx: () => import("./syntx.ts").then((m) => new m.SyntxExecutor()), // Alias
+  chatplayground: () => import("./chatplayground.ts").then((m) => new m.ChatPlaygroundExecutor()),
+  cpl: () =>
+    import("./chatplayground.ts").then((m) => new m.ChatPlaygroundExecutor("chatplayground")), // Alias
 };
 
 // Bootstrap: declare every built-in alias in the ExecutorRegistry. Duplicate
@@ -213,7 +224,6 @@ const CHAT_UNSUPPORTED_CLOUD_AGENT_PROVIDERS = new Set(["jules"]);
 // provider without updating this guard fails the regression test automatically. Search
 // providers must be executed through /v1/search, never the chat-completions path.
 const CHAT_UNSUPPORTED_SEARCH_PROVIDERS = new Set(Object.keys(SEARCH_PROVIDERS));
-const CHAT_UNSUPPORTED_SYSTEMONE_PROVIDERS = new Set(Object.keys(SYSTEMONE_PROVIDERS));
 
 export async function getExecutor(provider: string): Promise<BaseExecutor> {
   assertMicrosoftDesignerWebProviderAvailable(provider);
@@ -229,15 +239,13 @@ export async function getExecutor(provider: string): Promise<BaseExecutor> {
     throw err;
   }
   if (CHAT_UNSUPPORTED_SEARCH_PROVIDERS.has(provider)) {
-    const err = new Error(
-      `Provider "${provider}" is a search provider and does not support chat completions; use the /v1/search endpoint instead.`
-    );
-    (err as Error & { status?: number }).status = 400;
-    throw err;
+    throw new SearchProviderChatError(provider);
   }
-  if (CHAT_UNSUPPORTED_SYSTEMONE_PROVIDERS.has(provider)) {
+  // #14498 — decisions-only providers (TypeSafe Jev) register for credentials,
+  // pricing and discovery but have no chat shape; dispatch is POST /v1/systemone.
+  if (isDecisionsOnlyProvider(provider)) {
     const err = new Error(
-      `Provider "${provider}" is a System One provider and does not support chat completions; use the /v1/systemone endpoint instead.`
+      `Provider "${provider}" is a System One decisions provider and does not support chat completions; use the /v1/systemone endpoint instead.`
     );
     (err as Error & { status?: number }).status = 400;
     throw err;

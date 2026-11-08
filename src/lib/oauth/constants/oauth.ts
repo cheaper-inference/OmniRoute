@@ -5,6 +5,7 @@ import {
 } from "@omniroute/open-sse/config/antigravityUpstream.ts";
 import {
   CODEBUDDY_CN_USER_AGENT,
+  CODEBUDDY_INTL_USER_AGENT,
   GITHUB_COPILOT_API_VERSION,
   GITHUB_COPILOT_CHAT_PLUGIN_VERSION,
   GITHUB_COPILOT_CHAT_USER_AGENT,
@@ -116,8 +117,38 @@ export const CODEBUDDY_CN_CONFIG = {
   refreshUrl: "https://copilot.tencent.com/v2/plugin/auth/token/refresh",
   userAgent: CODEBUDDY_CN_USER_AGENT,
   platform: "CLI",
+  domain: "copilot.tencent.com",
   pollInterval: 5000,
 };
+
+// Freebuff (freebuff.com — Codebuff free tier) Login Configuration
+// (Custom fingerprint flow, same as `freebuff login`: POST codeUrl → open loginUrl →
+// GET statusUrl?fingerprintId&fingerprintHash&expiresAt until { user.authToken }).
+// No client_id/secret — the upstream CLI ships none. The auth token is a long-lived
+// session token with no refresh grant; an expired token requires a fresh login.
+export const FREEBUFF_CONFIG = {
+  baseUrl: "https://freebuff.com",
+  codeUrl: "https://freebuff.com/api/auth/cli/code",
+  statusUrl: "https://freebuff.com/api/auth/cli/status",
+  pollInterval: 5000,
+  loginTimeoutSec: 300,
+};
+
+// CodeBuddy International (codebuddy.ai) OAuth Configuration
+export const CODEBUDDY_INTL_CONFIG = {
+  baseUrl: "https://www.codebuddy.ai",
+  stateUrl: "https://www.codebuddy.ai/v2/plugin/auth/state",
+  tokenUrl: "https://www.codebuddy.ai/v2/plugin/auth/token",
+  refreshUrl: "https://www.codebuddy.ai/v2/plugin/auth/token/refresh",
+  userAgent: CODEBUDDY_INTL_USER_AGENT,
+  platform: "ide",
+  domain: "www.codebuddy.ai",
+  pollInterval: 5000,
+};
+
+// WorkBuddy config lives with its device-flow module so this god-file only
+// re-exports. Do not alias CODEBUDDY_CN_CONFIG — different host and account.
+export { WORKBUDDY_CONFIG } from "../providers/workbuddy";
 
 // Grok Build (xAI) OAuth Configuration (Device Code + import-token fallback)
 // Public client_id resolved through resolvePublicCred so it is never a literal.
@@ -458,6 +489,15 @@ export const DEVIN_DESKTOP_CONFIG = {
   inferenceUrl: "https://inference.codeium.com",
   ideName: "windsurf",
   defaultVersion: "3.6.27",
+  // Browser sign-in reuses the Devin CLI login: PKCE (S256) on app.devin.ai, then a JSON
+  // {code, code_verifier} exchange on api.devin.ai that returns a session token. The CLI
+  // registers this exact loopback redirect, so the port is fixed.
+  authorizeUrl: "https://app.devin.ai/auth/cli/continue",
+  tokenUrl: "https://api.devin.ai/auth/cli/token",
+  codeChallengeMethod: "S256",
+  callbackPort: 59653,
+  callbackPath: "/callback",
+  callbackHost: "127.0.0.1",
 };
 
 // Zed IDE credential import — no standard OAuth flow.
@@ -520,10 +560,14 @@ export const PROVIDERS = {
   DEVIN_CLI: "devin-cli",
   TRAE: "trae",
   CODEBUDDY_CN: "codebuddy-cn",
+  FREEBUFF: "freebuff",
+  CODEBUDDY_INTL: "codebuddy-intl",
+  WORKBUDDY: "workbuddy",
   GROK_CLI: "grok-cli",
   XAI_OAUTH: "xai-oauth",
   OPENFERENCE: "openference",
   ZED: "zed",
   ZED_HOSTED: "zed-hosted",
   MUSE_CODE: "muse-code",
+  COPILOT_M365_WEB: "copilot-m365-web",
 };

@@ -7,9 +7,8 @@
  * @module shared/utils/apiAuth
  */
 
-import { cookies } from "next/headers";
 import { getOrCreateBootstrapToken, peekBootstrapToken } from "@/lib/auth/bootstrapToken";
-import { getSettings } from "@/lib/db/settings";
+import { getCachedSettings } from "@/lib/db/readCache";
 import {
   AUTHZ_HEADER_PEER_LOCALITY,
   BOOTSTRAP_TOKEN_HEADER,
@@ -403,6 +402,10 @@ export async function isDashboardSessionAuthenticated(
 
   if (!token) {
     try {
+      // Lazy: `next/headers` only resolves inside the Next.js runtime. The MCP server
+      // bundle now reaches this module through keyConnectionScope → comboTargetKeyPolicy
+      // → apiKeyPolicy (#16499) and must stay importable on plain Node.
+      const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
       token = cookieStore.get(DASHBOARD_SESSION_COOKIE)?.value || null;
     } catch {
@@ -492,7 +495,11 @@ export async function isAuthRequired(
   options?: AuthRequiredOptions
 ): Promise<boolean> {
   try {
-    const settings = await getSettings();
+    // Cached read (5s TTL): updateSettings() busts it synchronously, so
+    // requireLogin flips take effect on the very next request. Writers that
+    // bypass updateSettings() (the CLI settings-store.mjs in another process)
+    // can lag by up to the 5s TTL.
+    const settings = await getCachedSettings();
     if (settings.requireLogin === false) return false;
 
     if (

@@ -4,70 +4,70 @@
 
 ---
 
-Ponudniki Web Cookie omogočajo storitvi OmniRoute uporabo storitve umetne inteligence prek vaše obstoječe seje brskalnika namesto ključa API. Uporabni so, kadar že imate dostop do storitve prek njenega spletnega mesta in želite, da OmniRoute uporablja isto overjeno sejo.
+Ponudniki spletnih piškotkov omogočajo storitvi OmniRoute uporabo storitve umetne inteligence prek vaše obstoječe seje brskalnika namesto ključa API. Uporabni so, kadar že imate dostop do storitve prek njenega spletnega mesta in želite, da OmniRoute uporablja isto overjeno sejo.
 
-Za razliko od ponudnikov s ključem API se ponudniki Web Cookie overjajo s poverilnicami, ki jih vaš brskalnik pošlje spletnemu mestu.
+Za razliko od ponudnikov s ključi API se ponudniki spletnih piškotkov overjajo s poverilnicami, ki jih vaš brskalnik pošlje spletnemu mestu.
 
 ---
 
 # Preden začnete
 
-> **Pomembno:** Poverilnice vedno kopirajte iz **aktivne omrežne zahteve** in **ne** iz shrambe piškotkov v brskalniku.
+> **Pomembno:** Poverilnice vedno kopirajte iz **aktivnega omrežnega zahtevka** in **ne** iz shrambe piškotkov v brskalniku.
 
-Veliko težav z overjanjem povzroči kopiranje piškotkov z napačnega mesta.
+Številne težave z overjanjem nastanejo zaradi kopiranja piškotkov z napačnega mesta.
 
 ## Ne kopirajte iz shrambe piškotkov
 
 Večina brskalnikov prikaže shranjene piškotke prek:
 
 ```
-DevTools
-→ Application (ali Storage)
-→ Cookies
+Orodja za razvijalce
+→ Aplikacija (ali Shramba)
+→ Piškotki
 ```
 
 Čeprav so ti piškotki videti pravilni, so lahko:
 
 - zastareli
 - nepopolni
-- brez piškotkov, ki se pošljejo samo ob overjenih zahtevah
+- brez piškotkov, ki se pošljejo samo pri overjenih zahtevkih
 
 Uporaba teh vrednosti lahko povzroči neuspešno overjanje, tudi če so videti veljavne.
 
-## Kopirajte iz aktivne zahteve
+## Kopirajte iz aktivnega zahtevka
 
-Namesto tega uporabite piškotke iz uspešne zahteve:
+Namesto tega uporabite piškotke iz uspešnega zahtevka:
 
 ```
-DevTools
-→ Network
+Orodja za razvijalce
+→ Omrežje
 → Osvežite stran
-→ Odprite zahtevo za klepet ali pogovor
-→ Request Headers
+→ Odprite zahtevek za klepet ali pogovor
+→ Glave zahtevka
 → Cookie
 ```
 
-Glava zahteve `Cookie` vsebuje točne podatke za overjanje, ki jih je vaš brskalnik uspešno uporabil.
+Glava zahtevka `Cookie` vsebuje točne podatke za overjanje, ki jih je vaš brskalnik uspešno uporabil.
 
-Pri večini ponudnikov Web Cookie je to vrednost, ki jo morate prilepiti v OmniRoute.
+Pri večini ponudnikov spletnih piškotkov je to vrednost, ki jo morate prilepiti v OmniRoute.
 
 ---
 
 # Splošna nastavitev
 
-Postopek nastavitve je enak za večino ponudnikov Web Cookie.
+Postopek nastavitve je enak za večino ponudnikov spletnih piškotkov.
 
 1. Prijavite se na spletno mesto ponudnika.
-2. Odprite razvijalska orodja brskalnika.
-3. Odprite zavihek **Network**.
+2. Odprite orodja za razvijalce v brskalniku.
+3. Odprite zavihek **Omrežje**.
 4. Osvežite stran.
-5. Odprite overjeno zahtevo za klepet ali pogovor.
+5. Odprite overjen zahtevek za klepet ali pogovor.
 6. Kopirajte zahtevane poverilnice za overjanje.
 7. Odprite OmniRoute.
-8. Pojdite na **Providers → Add Provider**.
-9. Izberite svojega ponudnika Web Cookie.
+8. Pojdite na **Ponudniki → Dodaj ponudnika**.
+9. Izberite svojega ponudnika spletnih piškotkov.
 10. Prilepite poverilnice.
-11. Kliknite **Test Connection**.
+11. Kliknite **Preizkusi povezavo**.
 12. Shranite ponudnika.
 
 Točne zahtevane poverilnice so odvisne od ponudnika.
@@ -76,29 +76,79 @@ Točne zahtevane poverilnice so odvisne od ponudnika.
 
 # Oblike poverilnic ponudnikov
 
-Različna spletna mesta shranjujejo podatke za overjanje na različne načine. Nekatera zahtevajo samo piškotke, druga pa lahko zahtevajo dodatne glave ali žetone.
+Različna spletna mesta podatke za overjanje shranjujejo na različne načine. Nekatera zahtevajo samo piškotke, druga pa lahko zahtevajo dodatne glave ali žetone.
 
 | Ponudnik                        | Oblika poverilnic             | Vodnik za ponudnika              |
 | ------------------------------- | ----------------------------- | -------------------------------- |
-| Claude Web                      | Celotna glava zahteve Cookie  | `docs/providers/CLAUDE_WEB.md`   |
+| Claude Web                      | Celotna glava zahtevka Cookie | `docs/providers/CLAUDE_WEB.md`   |
 | ChatGPT Web (Codex)             | Celotna glava Cookie          | `docs/providers/CHATGPT_WEB.md`  |
-| Gemini Web                      | _(preverite)_                 |                                  |
-| Copilot Web                     | _(preverite)_                 | `docs/providers/COPILOT-M365.md` |
+| Gemini Web                      | _(preveriti)_                 |                                  |
+| Copilot Web                     | _(preveriti)_                 | `docs/providers/COPILOT-M365.md` |
 | Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath | `docs/providers/COPILOT-M365.md` |
-| Grok Web                        | _(preverite)_                 |                                  |
+| Grok Web                        | _(preveriti)_                 |                                  |
 | ...                             | ...                           | ...                              |
 
-> To tabelo posodobite ob dodajanju novih ponudnikov Web Cookie ali ob spremembi njihovih zahtev za overjanje.
+> To tabelo posodobite, ko so dodani novi ponudniki spletnih piškotkov ali ko obstoječi ponudniki spremenijo svoje zahteve za overjanje.
+
+## NoTrack (notrack-web)
+
+NoTrack ([notrack.ai](https://notrack.ai)) je brezplačna platforma za klepet za uporabnike, ki ne zahteva registracije — seja se ob prvem obisku ustvari anonimno in se ohranja s tremi piškotki: `uid`, `si_usr_id` in `si_ses_id`. OmniRoute posreduje isti končni naslov `/api/dispatch` prek enega identifikatorja modela (`notrack-c`, vzdevek `ntw`).
+
+### Koraki za povezavo
+
+1. V brskalniku odprite [notrack.ai](https://notrack.ai) in počakajte, da se nastavi piškotek anonimne seje.
+2. Odprite **Orodja za razvijalce → Omrežje**, osvežite stran in kliknite katero koli zahtevo `/api`.
+3. V razdelku **Glave zahteve** kopirajte celotno vrednost glave `Cookie`.
+4. V OmniRoute pojdite na **Ponudniki → Dodaj ponudnika → NoTrack Web (brezplačno)**.
+5. Prilepite niz piškotkov v polje `apiKey` in kliknite **Shrani**.
+
+OmniRoute iz prilepljenega niza izlušči `uid`, `si_usr_id` in `si_ses_id` ter znova sestavi čisto glavo `Cookie`, ki vsebuje samo te pare — in tudi `nt_session` (žeton `ntk_…`, nastavljen za prijavljene račune), kadar je prisoten. Če kateri koli od teh treh podatkov manjka, se neobdelani prilepljeni niz posreduje nespremenjen, da lahko skrbniki preizkušajo druge oblike.
+
+### Identifikatorji modelov
+
+| Identifikator modela | Prikazno ime | Opombe                                                   |
+| -------------------- | ------------ | -------------------------------------------------------- |
+| `notrack-c`          | NoTrack C    | Privzeto — zaledni model za posredovanje `C`.            |
+| `C`                  | NoTrack C    | Vzdevek za `notrack-c` (neobdelana zaledna koda modela). |
+| `notrack`            | NoTrack C    | Vzdevek za `notrack-c`.                                  |
+| `ntw`                | NoTrack C    | Kratek vzdevek za `notrack-c`.                           |
+
+Vsi štirje identifikatorji modelov se preslikajo v isti zaledni model za posredovanje (`C`).
+
+### Možnosti zahteve
+
+Izvajalnik v telesu zahteve sprejema naslednja izbirna polja:
+
+| Polje telesa          | Privzeto | Namen                                                                          |
+| --------------------- | -------- | ------------------------------------------------------------------------------ |
+| `notrack_mode`        | `usual`  | Način posredovanja (poljuben niz; zaledni sistem sprejema `usual`, …)          |
+| `notrack_max_turns`   | `6`      | Število notranjih korakov, ki jih lahko zaledni sistem izvede pred odgovorom.  |
+| `notrack_chat_id`     | `null`   | Nadaljuje obstoječi zaledni klepet (izpustite za nov klepet).                  |
+| `notrack_attachments` | `[]`     | Prepustno polje z opisniki zalednih prilog.                                    |
+| `notrack_regenerate`  | `false`  | Nastavite na `true`, da zahtevate ponovno ustvarjen odgovor za prejšnji korak. |
+
+### Zmogljivosti
+
+- **Pretočni in nepretočni** odgovori klepeta.
+- **Klicanje orodij** — v zahtevi nastavite `tools: [...]`; izvajalnik jih serializira v pogodbeno ovojnico za klice orodij in odgovore modela razčleni nazaj v OpenAI `tool_calls`.
+- **`response_format`** — podprta sta `json_object` in `json_schema`. Izvajalnik iz odgovora modela izlušči prvi objekt JSON in ga pred vrnitvijo pretvori v niz.
+- **Namig o sklepanju** — izvajalnik odda delto `reasoning`, ko zaledni sistem pošlje dogodek `thinking`.
+
+### Omejitve
+
+- Zaledni sistem uveljavlja omejitve anonimne uporabe — ko so presežene, izvajalnik vrne napako 429 s prijaznim sporočilom.
+- Vsi identifikatorji modelov se razrešijo v isti zaledni model za posredovanje; preklapljanje med posameznimi modeli ni mogoče.
+- Izvajalnik ne kliče zalednega končnega naslova `/api/chats`, zato se zgodovina klepetov oziroma seje ne upravljajo samodejno. Za nadaljevanje obstoječega zalednega klepeta uporabite `notrack_chat_id`.
 
 ---
 
-# Kaj ponudniki Web Cookie zmorejo in česa ne
+# Kaj ponudniki spletnih piškotkov zmorejo in česa ne
 
-Ponudniki Web Cookie uporabljajo vmesnik za klepet na spletnem mestu. **Ne** zagotavljajo enakih zmogljivosti kot uradni API-ji.
+Ponudniki spletnih piškotkov ponovno uporabijo spletni vmesnik za klepet. **Ne** zagotavljajo enakih zmogljivosti kot uradni API-ji.
 
 ## Podprto
 
-- Overjanje z obstoječo sejo brskalnika
+- Preverjanje pristnosti z obstoječo sejo brskalnika
 - Dostop do modelov, ki so na voljo prek vašega računa
 - Pretočno posredovanje odgovorov klepeta
 - Ključ API ni potreben
@@ -108,7 +158,7 @@ Ponudniki Web Cookie uporabljajo vmesnik za klepet na spletnem mestu. **Ne** zag
 - Klicanje funkcij
 - Klicanje orodij
 - Samodejno urejanje datotek
-- Agentski delovni tokovi v okolju IDE
+- Agentski delovni tokovi IDE
 - Funkcije, ki so na voljo samo prek API-ja
 
 To je pričakovano vedenje in **ni** napaka.
@@ -117,19 +167,19 @@ To je pričakovano vedenje in **ni** napaka.
 
 ---
 
-# Omejitev preverjanja veljavnosti
+# Opozorilo glede preverjanja veljavnosti
 
-Uspešen **Test Connection** ali uspešno preverjanje veljavnosti piškotkov samo potrdi, da so posredovane poverilnice videti v pričakovani obliki.
+Uspešen **preizkus povezave** ali preverjanje veljavnosti piškotkov potrdi le, da so navedene poverilnice videti, kot da so v pričakovani obliki.
 
-Dokler težava #7857 ni odpravljena, uspešno preverjanje veljavnosti **ne zagotavlja**, da se bo ponudnik uspešno overil.
+Dokler težava #7857 ni odpravljena, uspešno preverjanje veljavnosti **ne zagotavlja**, da bo ponudnik uspešno izvedel preverjanje pristnosti.
 
-Če overjanje še vedno ne uspe, preverite, ali ste poverilnice kopirali iz aktivne omrežne zahteve in ne iz shrambe piškotkov v brskalniku.
+Če preverjanje pristnosti še vedno ne uspe, preverite, ali ste poverilnice kopirali iz aktivne omrežne zahteve in ne iz shrambe piškotkov brskalnika.
 
 ---
 
 # Odpravljanje težav
 
-## Overjanje ne uspe
+## Preverjanje pristnosti ne uspe
 
 Preverite, ali so bile poverilnice kopirane iz:
 
@@ -160,21 +210,38 @@ Po uspešnem odprtju pogovora znova kopirajte poverilnice iz sveže omrežne zah
 
 Ponudniki Web Cookie uporabljajo vašo obstoječo sejo brskalnika.
 
-Če seja brskalnika poteče ali se odjavite, morate kopirati nov nabor poverilnic.
+Če seja brskalnika poteče ali se odjavite, morate kopirati nov nabor poverilnic. Če želite avtomatizirati obnavljanje piškotkov za podprte spletne ponudnike, si oglejte spremljevalno orodje [Razširitev za sinhronizacijo sej brskalnika](../guides/SESSION-SYNC-EXTENSION.md).
 
 ---
 
 ## Preizkus povezave uspe, zahteve pa ne
 
-Dokler težava #7857 ni odpravljena, uspešno preverjanje veljavnosti ne zagotavlja, da bo zahteva za overjanje uspešna.
+Dokler težava #7857 ni odpravljena, uspešno preverjanje veljavnosti ne zagotavlja, da bo zahteva za preverjanje pristnosti uspela.
 
 Pred nadaljnjim odpravljanjem težav znova kopirajte poverilnice iz sveže overjene zahteve.
 
 ---
 
+## ChatGPT Web ne uspe z napako "Unsupported ChatGPT integrity dependency"
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Poverilnica je ustrezna — ta napaka izvira iz mostu in ne iz seje. chatgpt.com svojim
+modulom ob vsaki uvedbi dodeli identifikatorje, most pa je prej fiksno določal identifikator pomožnega modula Sentinel, ki ga ustvari, zato je
+nova gradnja chatgpt.com, ki je preimenovala pomožni modul, onemogočila vsak obrat, čeprav je piškotek ostal veljaven. Ponovna odobritev
+povezave tega ne more odpraviti.
+
+Gradnje, ki modul razrešijo prek lastnega izvajalnega okolja strani, ne določajo fiksnega identifikatorja in nimajo te težave. Če opazite to
+napako, nadgradite OmniRoute in znova zaženite preverjanje povezave.
+
+---
+
 # Primer ponudnika
 
-Za celovit postopek, prilagojen posameznemu ponudniku, glejte:
+Za celoten vodnik, specifičen za ponudnika, glejte:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
@@ -188,4 +255,4 @@ Vodnik za Claude Web prikazuje celoten postopek nastavitve ponudnika Web Cookie 
 - Izogibajte se ponovni uporabi starih piškotkov.
 - Med uporabo ponudnikov Web Cookie ohranjajte sejo brskalnika aktivno.
 - Kopirane piškotke obravnavajte kot občutljive poverilnice.
-- Kadar potrebujete klicanje funkcij ali agentske delovne tokove, uporabite ponudnike s ključem API.
+- Ko potrebujete klicanje funkcij ali agentske delovne tokove, uporabite ponudnike s ključi API.

@@ -295,15 +295,15 @@ Peamised omadused:
 
 ---
 
-## 🔑 Sünkroonimise tunnusluba ja seadistuste komplekt _(v3.6.6+)_
+## 🔑 Sünkroonimistõendid ja konfiguratsioonipakett _(v3.6.6+)_
 
-Mitme seadme ja väliste operaatorite juurdepääs on nüüd võimalik **piiratud ulatusega sünkroonimise tunnuslubade** kaudu:
+Mitme seadme ja välise operaatori juurdepääs on nüüd võimalik **piiratud õigustega sünkroonimistõendite** kaudu:
 
-- **`POST /api/sync/tokens`** — Väljasta uus sünkroonimise tunnusluba (piiratud ulatusega, valikulise kehtivusajaga)
-- **`DELETE /api/sync/tokens/:id`** — Tühista tunnusluba
-- **`GET /api/sync/bundle`** — Laadi alla versioonipõhine, ETag-võtmega JSON-hetktõmmis kõigist mittetundlikest seadistustest (paroolid on kustutatud/varjatud)
+- **`POST /api/sync/tokens`** — Väljasta uus sünkroonimistõend (piiratud õigustega, valikulise aegumisajaga)
+- **`DELETE /api/sync/tokens/:id`** — Tühista tõend
+- **`GET /api/sync/bundle`** — Laadi alla konfiguratsiooni versioonitud, ETag-võtmega JSON-tõmmis (autenditud ainult sünkroonimistõendiga). Autentimissätted, näiteks juhtpaneeli parool, eemaldatakse, kuid teenusepakkuja identimisteave ja API-võtmed kaasatakse, seega käsitle faili saladusena
 
-Seadistuste komplekti koostab `src/lib/sync/bundle.ts`. Tarbijad võrdlevad `ETag` päisevastust, et tuvastada muudatusi täieliku sisu uuesti allalaadimata.
+Konfiguratsioonipaketi loob `src/lib/sync/bundle.ts`. Tarbijad võrdlevad vastusepäist `ETag`, et tuvastada muudatused ilma kogu sisu uuesti alla laadimata. CLI kaudu salvestab `omniroute sync bundle <outPath> --token <syncToken>` (või `OMNIROUTE_SYNC_TOKEN`) selle ainult omanikule juurdepääsetavasse faili.
 
 ---
 

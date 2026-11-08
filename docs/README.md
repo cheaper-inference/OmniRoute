@@ -34,12 +34,14 @@ Simple guides for using OmniRoute — no technical background needed.
 - [TIERS.md](guides/TIERS.md) — OmniRoute tiers explained (user guide).
 - [USAGE_QUOTA_GUIDE.md](guides/USAGE_QUOTA_GUIDE.md) — usage, quota & spend tracking.
 - [COST_TRACKING.md](guides/COST_TRACKING.md) — cost and spend tracking.
+- [TEAM_COST_CENTERS.md](guides/TEAM_COST_CENTERS.md) — Team billing attribution, reports, and soft shared budgets.
 - [FREE_PROVIDER_RANKINGS.md](guides/FREE_PROVIDER_RANKINGS.md) — free provider rankings (Arena ELO).
 - [DOCKER_GUIDE.md](guides/DOCKER_GUIDE.md) — running OmniRoute under Docker, including runtime RAM for coding agents.
 - [ELECTRON_GUIDE.md](guides/ELECTRON_GUIDE.md) — desktop (Electron) builds.
 - [TERMUX_GUIDE.md](guides/TERMUX_GUIDE.md) — running on Android via Termux.
 - [PWA_GUIDE.md](guides/PWA_GUIDE.md) — installing the dashboard as a PWA.
 - [REMOTE-MODE.md](guides/REMOTE-MODE.md) — exposing OmniRoute remotely + scoped tokens.
+- [HEADLESS.md](guides/HEADLESS.md) — headless mode: proxy engine only, no dashboard (`OMNIROUTE_HEADLESS=1` / `serve --headless`).
 - [CLI-INTEGRATIONS.md](guides/CLI-INTEGRATIONS.md) — master table of `setup-*` CLI integrations.
 - [OPENCODE-V2-PLUGIN.md](guides/OPENCODE-V2-PLUGIN.md) — installing and configuring the OpenCode v2 plugin.
 - [CLAUDE-CODE-CONFIGURATION.md](guides/CLAUDE-CODE-CONFIGURATION.md) — Claude Code CLI with OmniRoute.
@@ -125,7 +127,7 @@ Pluggable subsystems exposed to clients, agents, and operators.
 
 Combo routing, scoring, and replay.
 
-- [AUTO-COMBO.md](routing/AUTO-COMBO.md) — Auto-Combo (multi-factor scoring, 19 strategies).
+- [AUTO-COMBO.md](routing/AUTO-COMBO.md) — Auto-Combo (multi-factor scoring, 20 strategies).
 - [QUOTA_SHARE.md](routing/QUOTA_SHARE.md) — quota sharing engine.
 - [REASONING_REPLAY.md](routing/REASONING_REPLAY.md) — reasoning replay cache.
 - [REASONING_ROUTING.md](routing/REASONING_ROUTING.md) — reasoning routing rules (effort/budget rule engine).
@@ -184,6 +186,7 @@ Release, deployment, proxies, tunnels, coverage, database, monitoring.
 - [RELEASE_CHECKLIST.md](ops/RELEASE_CHECKLIST.md) — release flow checklist.
 - [RELEASE_GREEN.md](ops/RELEASE_GREEN.md) — keeping the PR queue and release branch green.
 - [BRANCHING_MODEL.md](ops/BRANCHING_MODEL.md) — branching & release model.
+- [RELEASE_STRATEGY.md](ops/RELEASE_STRATEGY.md) — LTS rail: branches, npm channels, forward-port, rail labels.
 - [MERGE_TRAIN.md](ops/MERGE_TRAIN.md) — merge queue & manual merge-train runbook.
 - [HOMOLOGATION.md](ops/HOMOLOGATION.md) — homologation suite (`npm run homolog`).
 - [QUALITY_GATE_PLAYBOOK.md](ops/QUALITY_GATE_PLAYBOOK.md) — quality-gate playbook.
@@ -191,6 +194,7 @@ Release, deployment, proxies, tunnels, coverage, database, monitoring.
 - [BRANCH_PROTECTION_MAIN.md](ops/BRANCH_PROTECTION_MAIN.md) — `main` branch protection.
 - [CONTRIBUTION_GOLDEN_PATH.md](ops/CONTRIBUTION_GOLDEN_PATH.md) — contribution golden path (focused checks per change type).
 - [COVERAGE_PLAN.md](ops/COVERAGE_PLAN.md) — test coverage plan.
+- [LTS_GO_NO_GO.md](ops/LTS_GO_NO_GO.md) — 3.9.0 LTS GO/NO-GO checklist (rail gates + closing battery).
 - [DATABASE_GUIDE.md](ops/DATABASE_GUIDE.md) — DB schema and operations.
 - [SQLITE_RUNTIME.md](ops/SQLITE_RUNTIME.md) — SQLite driver resolution chain.
 - [REDIS_PRODUCTION_CONFIG.md](ops/REDIS_PRODUCTION_CONFIG.md) — Redis production configuration.

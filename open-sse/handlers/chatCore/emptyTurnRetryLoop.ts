@@ -1,3 +1,4 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * Flush-empty-retry loop, extracted from chatCore so the credential swap
  * and its rollback live in one place (#14715).
@@ -19,6 +20,7 @@ import {
   type RetryRouting,
 } from "../../utils/emptyTurnRetry.ts";
 import { noteBufferedVerdictOutcome } from "./emptyTurnResilienceNotes.ts";
+import { hasTrustedEmptyTurn } from "../../utils/emptyTurnPolicy.ts";
 import { STREAM_RECOVERY } from "../../config/constants.ts";
 
 type LoggerLike = {
@@ -30,6 +32,7 @@ type LoggerLike = {
 type Verdict = ReturnType<typeof judgeBufferedTurn>;
 
 export interface EmptyTurnRetryDeps {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   providerResponse: Response;
   credentials: Record<string, unknown>;
   provider: string;
@@ -65,6 +68,7 @@ export interface EmptyTurnRetryDeps {
 }
 
 export interface EmptyTurnRetryResult {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   providerResponse: Response;
   finalBody: unknown;
   adopted: boolean;
@@ -78,20 +82,20 @@ export async function runEmptyTurnRetryLoop(
   // Named `getProviderCredentials` so the hard-session-lease inventory still sees this call site.
   const getProviderCredentials = deps.getProviderCredentials ?? defaultGetProviderCredentials;
   let providerResponse = deps.providerResponse;
+  let upstreamHttpSelection = deps.upstreamHttpSelection ?? null;
   let finalBody: unknown = deps.finalBody;
   let adopted = false;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const verdict = judgeBufferedTurn(
-      await readBoundedResponseOutcome(
-        providerResponse,
-        FLUSH_EMPTY_RETRY_MAX_BYTES,
-        deps.timeoutMs
-      ),
-      deps.targetFormat,
-      deps.clientResponseFormat,
-      deps.isAborted()
+    const read = await readBoundedResponseOutcome(
+      providerResponse,
+      FLUSH_EMPTY_RETRY_MAX_BYTES,
+      deps.timeoutMs
     );
+    const verdict: Verdict =
+      read.kind === "text" && !deps.isAborted() && hasTrustedEmptyTurn(providerResponse)
+        ? { kind: "pass", why: "native execution completed normally" }
+        : judgeBufferedTurn(read, deps.targetFormat, deps.clientResponseFormat, deps.isAborted());
     if (verdict.kind === "pass") {
       notePass(deps, note, verdict);
       break;
@@ -109,11 +113,12 @@ export async function runEmptyTurnRetryLoop(
     );
     if (!adoptedRetry) break;
     providerResponse = adoptedRetry.response;
+    upstreamHttpSelection = adoptedRetry.upstreamHttpSelection ?? null;
     finalBody = adoptedRetry.body;
     adopted = true;
   }
 
-  return { providerResponse, finalBody, adopted };
+  return { providerResponse, finalBody, adopted, upstreamHttpSelection };
 }
 
 function notePass(
@@ -136,6 +141,7 @@ function noteBudgetExhausted(
 }
 
 interface AdoptedRetry {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   response: Response;
   body: unknown;
 }
@@ -237,5 +243,11 @@ async function runRetryRequest(
     (retryResult as { transformedBody?: unknown })?.transformedBody ?? deps.translatedBody
   );
   deps.logTargetRequest(deps.providerUrl, deps.providerHeaders, body);
-  return { response: preparedStream, body };
+  return {
+    response: preparedStream,
+    body,
+    upstreamHttpSelection:
+      (retryResult as { upstreamHttpSelection?: HttpAttemptSelection | null })
+        ?.upstreamHttpSelection ?? null,
+  };
 }

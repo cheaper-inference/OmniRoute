@@ -4,13 +4,9 @@
 
 ---
 
-> **Versija:** v3.8.44
-> **Paskutinį kartą atnaujinta:** 2026-09-09
-> **Auditorija:** Inžinieriai, pridedantys, prižiūrintys arba derinantys įtaisytąsias paslaugas (9Router, CLIProxyAPI, Mux, Bifrost, open-wa).
+> **Versija:** v3.8.44** Paskutinį kartą atnaujinta:** 2026-10-28** Auditorija:** Inžinieriai prideda, prižiūri arba derina įterptąsias paslaugas (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Įtaisytosios paslaugos yra vietoje įdiegti pagalbiniai procesų įrankiai, kuriuos OmniRoute įdiegia, prižiūri ir
-pateikia kaip visaverčius maršruto parinkimo objektus. Kitaip nei išoriniai teikėjai (kurie internetu pasiekiami
-naudojant API raktus), įtaisytosios paslaugos veikia tame pačiame kompiuteryje kaip OmniRoute ir palaiko ryšį per grįžtamojo ryšio sąsają.
+Įterptosios paslaugos yra vietoje įdiegti proceso šoniniai įrankiai, kuriuos OmniRoute įdiegia, prižiūri ir pateikia kaip pirmos klasės maršruto parinkimo taikinius. Skirtingai nuo išorinių paslaugų teikėjų (kurie pasiekiami internetu per API klavišus), įterptosios paslaugos veikia tame pačiame įrenginyje kaip ir OmniRoute ir palaiko ryšį per kilpą.
 
 ---
 
@@ -29,36 +25,38 @@ naudojant API raktus), įtaisytosios paslaugos veikia tame pačiame kompiuteryje
 
 ## 1. Apžvalga
 
-### Kodėl integruotosios paslaugos?
+### Kodėl įterptosios paslaugos?
 
-Integruotos šešios paslaugos:
+Įterptos aštuonios paslaugos:
 
-| Paslauga        | npm paketas                                      | Numatytasis prievadas | Paskirtis                                                                                                                                                                                                           |
-| --------------- | ------------------------------------------------ | :-------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                                        |         20130         | DI maršruto parinktuvas, kurį „OmniRoute“ gali naudoti kaip antrinį teikėją. Modeliai pateikiami kaip `9router/{sub}/{model}`                                                                                       |
-| **CLIProxyAPI** | „GitHub“ leidimo dvejetainis failas (`cliproxy`) |         8317          | Vietinis tarpinio serverio adapteris, skirtas „Anthropic“ CLI autentifikavimo eigoms. Užtikrina atsarginį maršruto parinkimą, kai baigiasi OAuth prieigos raktų galiojimas                                          |
-| **Mux**         | `mux` (begalvis `mux server`)                    |         8322          | Vietinis agentų koordinavimo demonas (coder/mux). Valdomas tik jo gyvavimo ciklas — tai nėra maršruto parinkimo paskirties vieta (LLM tarpinis serveris nenaudojamas).                                              |
-| **Bifrost**     | `@maximhq/bifrost`                               |         8080          | Go DI tinklų sietuvo perdavimo posistemė. Kai veikia, ją automatiškai pasirenka perdavimo maršrutas (`/v1/relay/`)                                                                                                  |
-| **Dario**       | `@askalf/dario`                                  |         3456          | „Claude“ prenumeratos tarpinis serveris — „CLIProxyAPI“ alternatyva / atsarginė priemonė „Claude-Code“ formato srautui; įterptas raktas tampa `DARIO_ADMIN_TOKEN`, kuris apsaugo jo `/admin/*` OAuth valdymo sąsają |
-| **open-wa**     | `@open-wa/wa-automate`                           |         8323          | „WhatsApp Web“ automatizavimas (begalvis „Chromium“ per „Puppeteer“). Valdomas tik jo gyvavimo ciklas — tai nėra maršruto parinkimo paskirties vieta.                                                               |
+| Aptarnavimas           | npm paketą                                | Numatytasis prievadas | Tikslas                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------- | ----------------------------------------- | :-------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9 Maršrutizatorius** | `9router`                                 |         20130         | AI maršrutizatorius, kurį OmniRoute gali naudoti kaip antrinį tiekėją. Modeliai rodomi kaip `9router/{sub}/{model}`                                                                                                                                                                                                                                              |
+| **CLIProxyAPI**        | GitHub išleidimo dvejetainis (`cliproxy`) |         8317          | Vietinis tarpinio serverio adapteris, skirtas Anthropic CLI autentifikavimo srautams. Suteikia atsarginį maršrutą, kai baigiasi OAuth prieigos raktų galiojimo laikas                                                                                                                                                                                            |
+| **Mux**                | `mux` (be galvos `mux server`)            |         8322          | Vietinis agentas-orkestravimo demonas (coder/mux). Tik — valdomas pagal gyvavimo ciklą, o ne maršruto parinkimo tikslas (jokio LLM tarpinio serverio).                                                                                                                                                                                                           |
+| **Bifrost**            | `@maximhq/bifrost`                        |         8080          | Eikite į AI-gateway relės užpakalinę programą. Bėgant, automatiškai parenkamas pagal estafetės maršrutą (`/v1/relay/`)                                                                                                                                                                                                                                           |
+| **Dario**              | `@askalf/dario`                           |         3456          | Claude prenumeratos tarpinis serveris — alternative/failover to CLIProxyAPI Claude kodo formos srautui; įšvirkštas raktas tampa `DARIO_ADMIN_TOKEN` fiksuojančiu jo `/admin/*` OAuth valdymo plokštumą                                                                                                                                                           |
+| **atviras-wa**         | `@open-wa/wa-automate`                    |         8323          | WhatsApp Web automatizavimas (be galvos Chromium per Puppeteer). Tik — valdomas pagal gyvavimo ciklą, o ne maršruto parinkimo tikslas.                                                                                                                                                                                                                           |
+| **LLMLingua**          | `@atjsh/llmlingua-2`                      |         20135         | Greito suspaudimo šoninės priekabos — tikras LLMLingua-2 ONNX modelis ( Microsoft algoritmo JS/TS prievadas). `open-sse/services/compression/engines/llmlingua/index.ts` siunčia `/compress` per HTTP į jį ir grįžta į apdorojamą darbuotojo gijos galinę dalį, kai šoninė priekaba nuleidžiama. Tik — valdomas gyvavimo ciklu, o ne maršruto parinkimo tikslas. |
+| **dainų dėžutė**       | GitHub išleidimo dvejetainis (`singbox`)  |         20140         | TPROXY šoninė priekaba, paremta `applyTproxy()` skaidraus tarpinio serverio perėmimu (`src/mitm/tproxy/setup.ts`). Diegimo programa atsisiunčia prisegtą, kontroline suma patvirtintą leidimą. Tik — valdomas pagal gyvavimo ciklą, o ne maršruto parinkimo tikslas (jokio LLM tarpinio serverio)                                                                |
 
-Visoms šešioms taikomas tas pats priežiūros modelis:
+Visos aštuonios laikosi to paties priežiūros modelio:
 
-- „OmniRoute“ jas įdiegia kataloge `DATA_DIR/services/{name}/` (atskirai nuo paties „OmniRoute“ failo `package.json`)
-- „OmniRoute“ jas paleidžia kaip antrinius procesus ir stebi
-- „OmniRoute“ į antrinio proceso aplinką įterpia trumpalaikį API raktą ir jį pakeičia be prastovos (kai taikoma)
-- Visi valdymo maršrutai (`/api/services/*`) yra **LOCAL_ONLY** — pasiekiami tik iš grįžtamojo ryšio sąsajos (griežta taisyklė Nr. 17)
+- OmniRoute juos įdiegia pagal `DATA_DIR/services/{name}/` (atskirtas nuo paties OmniRoute `package.json`)
+- OmniRoute neršia ir stebi juos kaip vaiko procesus
+- OmniRoute įveda trumpalaikį API raktą į vaiko aplinką ir sukasi jį be prastovos (jei taikoma)
+- Visi valdymo maršrutai (`/api/services/*`) yra**LOCAL_ONLY** — pasiekiamas tik iš kilpos (17 griežta taisyklė)
 
 ### Pagrindiniai sprendimai (iš projektavimo plano)
 
-| Sprendimas                                  | Reikšmė                                                                                             |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Skydelio prieiga prie savosios „9Router“ UI | Atvirkštinis tarpinis serveris adresu `/dashboard/providers/services/9router/embed/*`               |
-| Diegimo mechanizmas                         | `npm install {package}` per `execFile` (be apvalkalo interpoliacijos)                               |
-| Naudojimo režimas                           | Teikėjas maršruto parinkimo variklyje registruojamas kaip `9router/{sub}/{model}`                   |
-| API raktų valdymas                          | „OmniRoute“ generuoja, užšifruoja saugojimo metu (AES-256-GCM) ir įterpia per aplinkos kintamuosius |
-| Skydelio vieta                              | `/dashboard/providers/services` (trys skirtukai)                                                    |
-| Automatinis paleidimas                      | Perjungiklis kiekvienai paslaugai, pagal numatytuosius nustatymus IŠJUNGTAS                         |
+| Sprendimas                                               | Vertė                                                                               |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Prieiga prie prietaisų skydelio prie 9Router vietinės UI | Atvirkštinis tarpinis serveris ties `/dashboard/providers/services/9router/embed/*` |
+| Montavimo mechanizmas                                    | `npm install {package}` per `execFile` (be apvalkalo interpoliacijos)               |
+| Vartojimo režimas                                        | Teikėjas maršruto parinkimo variklyje užregistruotas kaip `9router/{sub}/{model}`   |
+| API raktų valdymas                                       | OmniRoute generuoja, šifruoja ramybės būsenoje (AES-256-GCM) ir įleidžia per env    |
+| Prietaisų skydelio vieta                                 | `/dashboard/providers/services` (trys skirtukai)                                    |
+| Automatinis paleidimas                                   | Perjungti pagal paslaugą, numatytasis OFF                                           |
 
 ---
 
@@ -66,20 +64,20 @@ Visoms šešioms taikomas tas pats priežiūros modelis:
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  1 sluoksnis — UI                                                  │
-│  /dashboard/providers/services  (kortelės: CLIProxyAPI | 9Router | Mux)│
-│  Žurnalai realiuoju laiku (SSE), paleidimas / stabdymas / paleidimas iš naujo / naujinimas, nustatymai, diegimas│
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Apvalkalas + kortelių maršruto parinkimas pagal ?tab=│
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
 │                               ServiceLogsPanel, ApiKeyCard, ...    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP („Next.js“ fetch)
+                       │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  2 sluoksnis — API (LOCAL_ONLY — tik grįžtamojo ryšio sąsaja)      │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -88,74 +86,74 @@ Visoms šešioms taikomas tas pats priežiūros modelis:
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (atvirkštinis HTTP + WebSocket tarpinis serveris → 9Router pirminis serveris)│
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  Užkarda: LOCAL_ONLY_API_PREFIXES apima "/api/services/" ir        │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
 │        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ iškvietimai proceso viduje
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  3 sluoksnis — ServiceSupervisor (src/lib/services/)               │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   Bendrasis prižiūrėtojas (child_process.spawn)│
-│    ├── diegimas:   execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── paleidimas: spawn(node, [entrypoint], {env, cwd})           │
-│    ├── API raktas: crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── prievadas:  20130, skirtas 9Router (konfigūruojamas)        │
-│    ├── žurnalai:   stdio žiedinis 5 MB buferis → SSE įvykiai       │
-│    ├── būsena:     HTTP GET /health kas 2–5 sek., atkūrimas pagal poreikį│
-│    └── gyvavimo ciklas: SIGTERM 15 sek. → SIGKILL                  │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
+│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Paleidžiant procesą inicijuoja visas SERVICES[]│
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       Periodinis GET /v1/models → service_models lentelė│
-│  ringBuffer.ts      Ciklinis žurnalų buferis (5 MB vienai paslaugai)│
-│  healthCheck.ts     Periodinė HTTP būsenos patikra                 │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (diegimo programų adapteriai)                 │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ Su „OpenAI“ suderinamas HTTP (grįžtamasis ryšys)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  4 sluoksnis — teikėjas / maršruto parinkimas                      │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Kiekvienai užklausai iš naujo ieško prievado ir API rakto (be podėlio).│
-│    Prieš perduodant pašalina "9router/" priešdėlį iš modelio ID.    │
-│    Grąžina 503 service_not_running, jei prižiūrėtojo būsena nėra "running".│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    "9router" įrašas: isEmbeddedService: true                       │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Modeliai saugomi kaip "9router/{sub}/{model}" (su priešdėliu).   │
-│    modelSync.ts juos sinchronizuoja kas 5 min.                     │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Mux TIK valdomas gyvavimo ciklo lygmeniu (1–3 sluoksniai) — tai   │
-│  agentų orkestravimo demonas, o ne LLM tarpinis serveris, todėl jis│
-│  neturi 4 sluoksnio vykdytojo / teikėjo įrašo ir niekada nėra      │
-│  maršruto parinkimo tikslas.                                       │
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Pagrindiniai šaltinio failai
 
-| Failas                                      | Paskirtis                                                             |
-| ------------------------------------------- | --------------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Pagrindinė klasė: gyvavimo ciklas, užraktas, būsena, žiedinis buferis |
-| `src/lib/services/bootstrap.ts`             | Registravimas proceso lygmeniu ir automatinis paleidimas              |
-| `src/lib/services/registry.ts`              | Vienetono žemėlapis `tool → supervisor`                               |
-| `src/lib/services/apiKey.ts`                | Rakto generavimas, AES-256-GCM šifravimas saugant                     |
-| `src/lib/services/modelSync.ts`             | Periodinis modelių sinchronizavimas (5 min.) ir pagal poreikį         |
-| `src/lib/services/ringBuffer.ts`            | 5 MB žiedinis žurnalų buferis su SSE prenumerata                      |
-| `src/lib/services/healthCheck.ts`           | HTTP būsenos patikra (konfigūruojamas intervalas)                     |
-| `src/lib/services/installers/ninerouter.ts` | 9Router diegimas / atnaujinimas / šalinimas naudojant npm             |
-| `src/lib/services/installers/cliproxy.ts`   | CLIProxyAPI diegimas / atnaujinimas / šalinimas naudojant npm         |
-| `src/lib/services/installers/mux.ts`        | Mux diegimas / atnaujinimas / šalinimas naudojant npm                 |
-| `src/lib/services/installers/openwa.ts`     | open-wa diegimas / atnaujinimas / šalinimas naudojant npm             |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` pagalbinė funkcija                            |
-| `src/app/api/services/[name]/logs/route.ts` | Bendras SSE žurnalų galinis taškas                                    |
-| `open-sse/executors/ninerouter.ts`          | Teikėjo vykdyklė (4 sluoksnis)                                        |
+| Failas                                      | Vaidmuo                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | Pagrindinė klasė: gyvavimo ciklas, užraktas, sveikata, žiedo buferis |
+| `src/lib/services/bootstrap.ts`             | Proceso lygio registracija ir automatinis paleidimas                 |
+| `src/lib/services/registry.ts`              | Singleton žemėlapis `tool → supervisor`                              |
+| `src/lib/services/apiKey.ts`                | Raktų generavimas, AES-256-GCM šifravimas ramybės būsenoje           |
+| `src/lib/services/modelSync.ts`             | Periodinis modelio sinchronizavimas (5 min.) + pagal pareikalavimą   |
+| `src/lib/services/ringBuffer.ts`            | 5 MB apskrito žurnalo buferis su SSE prenumerata                     |
+| `src/lib/services/healthCheck.ts`           | HTTP sveikatos zondas (konfigūruojamas intervalas)                   |
+| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall, skirtas 9Router                        |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall už CLIProxyAPI                          |
+| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall Mux                                     |
+| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall, skirtas open-wa                        |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall už LLMLingua                            |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` pagalbininkas                                |
+| `src/app/api/services/[name]/logs/route.ts` | Bendrinamas SSE žurnalų galutinis taškas                             |
+| `open-sse/executors/ninerouter.ts`          | Teikėjo vykdytojas (4 sluoksnis)                                     |
 
 ---
 
@@ -209,56 +207,52 @@ lenktyniavimo sąlygų, kai, pavyzdžiui, automatinis paleidimas ir naudotojo s�
 
 ---
 
-## 4. API žinynas
+## 4. API nuoroda
 
-Visi maršrutai, esantys po `/api/services/`, yra **LOCAL_ONLY** (tik grįžtamojo ryšio sąsajai, griežta taisyklė Nr. 17).
-Ne iš grįžtamojo ryšio sąsajos gaunamos užklausos gauna `403 LOCAL_ONLY`, neatsižvelgiant į autentifikavimo prieigos raktą.
+Visi maršrutai pagal `/api/services/` yra**LOCAL_ONLY** (tik kilpa, griežta taisyklė Nr. 17). Neatgalinės užklausos gauna `403 LOCAL_ONLY` neatsižvelgiant į autentifikavimo prieigos raktą.
 
-### 4.1 9Router galiniai taškai (11 maršrutų)
+### 4.1 9Maršrutizatoriaus galiniai taškai (11 maršrutų)
 
 #### `POST /api/services/9router/install`
 
-Įdiegia 9Router iš npm. Sukuria `DATA_DIR/services/9router/` su atskirais
-`package.json` ir `node_modules/`. Nesukelia konfliktų su paties OmniRoute priklausomybėmis.
+Įdiekite 9Router iš npm. Sukuria `DATA_DIR/services/9router/` su savo `package.json` ir `node_modules/`. Neprieštarauja paties OmniRoute deps.
 
-**Užklausos turinys** (visi laukai neprivalomi):
+**Prašymo įstaiga** (visa neprivaloma):
 
 ```json
 { "version": "latest" }
 ```
 
-| Laukas    | Tipas    | Numatytoji reikšmė | Aprašymas                              |
-| --------- | -------- | ------------------ | -------------------------------------- |
-| `version` | `string` | `"latest"`         | Diegtina npm versijos žyma arba semver |
+| Laukas    | Tipas    | Numatytoji | Aprašymas                                           |
+| --------- | -------- | ---------- | --------------------------------------------------- |
+| `version` | `string` | `"latest"` | npm versijos žyma arba semver, kurią norite įdiegti |
 
 **Atsakymai:**
 
-| Būsena | Aprašymas                                                       |
-| ------ | --------------------------------------------------------------- |
-| `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`          |
-| `400`  | Netinkamas užklausos turinys (Zod patikros klaida)              |
-| `409`  | Diegimas jau vyksta (užraktas užimtas)                          |
-| `500`  | npm diegimas nepavyko — suprantamą klaidos aprašą žr. `message` |
+| Būsena | Aprašymas                                               |
+| ------ | ------------------------------------------------------- |
+| `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`  |
+| `400`  | Neteisingas užklausos turinys (Zod patvirtinimo klaida) |
+| `409`  | Jau įdiegta (užraktas laikomas)                         |
+| `500`  | npm įdiegti nepavyko — žr. `message` draugišką klaidą   |
 
-**Pastabos:** Naudojamas `execFile('npm', [...])` — be apvalkalo ir interpoliavimo (griežta taisyklė Nr. 13).
-EACCES klaidos pateikiamos suprantamais pranešimais.
+**Pastabos:** Naudoja `execFile('npm', [...])` — be apvalkalo, be interpoliacijos (griežta taisyklė Nr. 13). EACCES klaidos pateikiamos kaip draugiški pranešimai.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-Paleidžia 9Router. Užregistruoja prižiūrėtoją, jei jis dar neužregistruotas, tada iškviečia
-`supervisor.start()`. Jei paslauga jau veikia, operacija yra idempotentinė.
+Paleiskite 9 Router. Užregistruoja prižiūrėtoją, jei dar neužsiregistravo, tada skambina `supervisor.start()`. Idempotiškas, kai jau bėga.
 
-**Užklausos turinys:** nėra
+**Užklausos turinys:** jokios
 
 **Atsakymai:**
 
-| Būsena | Aprašymas                                            |
-| ------ | ---------------------------------------------------- |
-| `200`  | `ServiceStatus` objektas (žr. schemą toliau)         |
-| `409`  | 9Router neįdiegtas (`status: "not_installed"`)       |
-| `503`  | Paleisti nepavyko (proceso klaida — žr. `lastError`) |
+| Būsena | Aprašymas                                                 |
+| ------ | --------------------------------------------------------- |
+| `200`  | `ServiceStatus` objektas (žr. schemą žemiau)              |
+| `409`  | 9 Maršrutizatorius neįdiegtas (`status: "not_installed"`) |
+| `503`  | Paleisti nepavyko (proceso klaida — žr. `lastError`)      |
 
 **ServiceStatus schema:**
 
@@ -278,37 +272,34 @@ Paleidžia 9Router. Užregistruoja prižiūrėtoją, jei jis dar neužregistruot
 
 #### `POST /api/services/9router/stop`
 
-Tvarkingai sustabdo 9Router. Išsiunčia SIGTERM, laukia 15 s, tada išsiunčia SIGKILL, jei procesas vis dar veikia.
-Jei paslauga jau sustabdyta, operacija yra idempotentinė.
+Grakščiai sustabdykite 9Router. Siunčia SIGTERM, laukia 15 s, tada SIGKILL jei dar gyvas. Idempotiškas, kai jau sustojęs.
 
-**Užklausos turinys:** nėra
+**Užklausos turinys:** jokios
 
 **Atsakymai:**
 
-| Būsena | Aprašymas                                 |
-| ------ | ----------------------------------------- |
-| `200`  | `ServiceStatus` (state: "stopped")        |
-| `503`  | Sustabdyti nepavyko dėl netikėtos klaidos |
+| Būsena | Aprašymas                             |
+| ------ | ------------------------------------- |
+| `200`  | `ServiceStatus` (būklė: „sustabdyta“) |
+| `503`  | Stabdyti nepavyko netikėtai           |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-Atitinka `stop()`, po kurio, naudojant operacijos užraktą, vykdomas `start()`.
+Atitinka `stop()` tada `start()` po operacijos užraktu.
 
-**Užklausos turinys:** nėra
+**Užklausos turinys:** jokios
 
-**Atsakymai:** tokie patys kaip `start` (grąžinama galutinė `ServiceStatus` būsena).
+**Atsakymai:** toks pat kaip `start` (pateikia galutinį `ServiceStatus`).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-Atnaujina 9Router į naujesnę npm versiją. Jei paslauga veikia, ji pirmiausia sustabdoma,
-tada vykdomas npm diegimas (naujesnė versija įdiegiama į esamą vietą), o po to
-paslauga paleidžiama iš naujo.
+Atnaujina 9Router į naujesnę npm versiją. Jei paslauga veikia, ji pirmiausia sustabdoma, paleidžiamas npm diegimas (naujesnės versijos įdiegimas vietoje), o tada paslauga paleidžiama iš naujo.
 
-**Užklausos turinys** (visi laukai neprivalomi):
+**Prašymo įstaiga** (visa neprivaloma):
 
 ```json
 { "version": "latest" }
@@ -319,40 +310,37 @@ paslauga paleidžiama iš naujo.
 | Būsena | Aprašymas                                                       |
 | ------ | --------------------------------------------------------------- |
 | `200`  | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400`  | Netinkamas turinys                                              |
-| `500`  | npm atnaujinimas nepavyko                                       |
+| `400`  | Neteisingas kūnas                                               |
+| `500`  | npm atnaujinti nepavyko                                         |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-Sugeneruoja naują 9Router API raktą, užšifruoja jį saugojimo vietoje ir paleidžia paslaugą
-iš naujo (jei ji veikia), kad ši gautų naują raktą iš savo aplinkos. Senasis raktas
-nedelsiant panaikinamas.
+Sugeneruoja naują API raktą 9Router, užšifruoja jį ramybės būsenoje ir iš naujo paleidžia paslaugą (jei ji veikia), kad ji paimtų naują raktą iš savo aplinkos. Senasis raktas nedelsiant panaikinamas.
 
-**Užklausos turinys:** nėra
+**Užklausos turinys:** jokios
 
 **Atsakymai:**
 
 | Būsena | Aprašymas                                  |
 | ------ | ------------------------------------------ |
 | `200`  | `{ keyRotated: true, restarted: boolean }` |
-| `500`  | Rakto pakeisti nepavyko                    |
+| `500`  | Pasukti nepavyko                           |
 
-**Saugumas:** Naujas raktas niekada negrąžinamas atsakyme (prisijungimo duomenys nenutekinami).
-Jis užšifruotas (AES-256-GCM) saugomas lentelėje `version_manager`.
+**Saugumas:** Naujas raktas niekada nepateikiamas atsakyme (nėra kredencialų nutekėjimo). Jis saugomas užšifruotas (AES-256-GCM) `version_manager` lentelėje.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-Grąžina bendrą tiesioginę ir DB būseną, įskaitant versijos metaduomenis ir API rakto peržiūrą.
+Pateikiama kombinuota tiesioginė + DB būsena, įskaitant versijos metaduomenis ir API rakto peržiūrą.
 
 **Atsakymai:**
 
 | Būsena | Aprašymas                   |
 | ------ | --------------------------- |
-| `200`  | Žr. schemą toliau           |
+| `200`  | Žiūrėkite schemą žemiau     |
 | `500`  | Nepavyko nuskaityti būsenos |
 
 **Atsakymo schema:**
@@ -379,8 +367,7 @@ Grąžina bendrą tiesioginę ir DB būseną, įskaitant versijos metaduomenis i
 
 #### `POST /api/services/9router/auto-start`
 
-Perjungia automatinio paleidimo žymą. Kai `enabled: true`, paslauga automatiškai paleidžiama
-kitą kartą paleidus OmniRoute (jei paslauga įdiegta).
+Perjungti automatinio paleidimo vėliavėlę. Kai `enabled: true`, paslauga paleidžiama automatiškai, kai kitą kartą paleidžiama OmniRoute (jei paslauga įdiegta).
 
 **Užklausos turinys:**
 
@@ -393,164 +380,168 @@ kitą kartą paleidus OmniRoute (jei paslauga įdiegta).
 | Būsena | Aprašymas             |
 | ------ | --------------------- |
 | `200`  | `{ autoStart: true }` |
-| `400`  | Netinkamas turinys    |
+| `400`  | Neteisingas kūnas     |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-Tiesioginis 9Router stdout/stderr žiediniame buferyje esančių žurnalų SSE srautas.
+SSE gyvų žurnalų srautas iš 9Router stdout/stderr žiedo buferio.
 
 **Užklausos parametrai:**
 
-| Parametras | Tipas     | Numatytoji reikšmė | Aprašymas                                                                                                    |
-| ---------- | --------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `tail`     | `integer` | 200                | Kiek ankstesnių eilučių išsiųsti pirmiausia (daugiausia 1000)                                                |
-| `filter`   | `string`  | nėra               | Didžiųjų ir mažųjų raidžių neskiriantis poeilutės filtras (be reguliariųjų reiškinių — apsaugotas nuo ReDoS) |
+| Param    | Tipas     | Numatytoji | Aprašymas                                                                            |
+| -------- | --------- | ---------- | ------------------------------------------------------------------------------------ |
+| `tail`   | `integer` | 200        | Kiek istorinių eilučių siųsti pirmiausia (maks. 1000)                                |
+| `filter` | `string`  | jokios     | Didžiosios ir mažosios raidės nejautrus poeilutės filtras (be regex — ReDoS saugaus) |
 
-**SSE įvykiai:**
+**SSE renginiai:**
 
-| Įvykis      | Duomenys    | Aprašymas                           |
-| ----------- | ----------- | ----------------------------------- |
-| `snapshot`  | `LogLine[]` | Pradinė ankstesnių eilučių ištrauka |
-| `log`       | `LogLine`   | Tiesioginė žurnalo eilutė           |
-| `heartbeat` | `{}`        | Ryšio palaikymo signalas kas 15 s   |
+| Renginys    | Duomenys    | Aprašymas                 |
+| ----------- | ----------- | ------------------------- |
+| `snapshot`  | `LogLine[]` | Pradinė istorinė uodega   |
+| `log`       | `LogLine`   | Tiesioginė žurnalo linija |
+| `heartbeat` | `{}`        | Išlikti gyvam kas 15 s    |
 
 **LogLine schema:**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
 **Atsakymai:**
 
-| Būsena | Aprašymas                                         |
-| ------ | ------------------------------------------------- |
-| `200`  | `text/event-stream`                               |
-| `400`  | Parametras `filter` per ilgas (> 200 simbolių)    |
-| `404`  | Paslauga nerasta (prižiūrėtojas neužregistruotas) |
+| Būsena | Aprašymas                                      |
+| ------ | ---------------------------------------------- |
+| `200`  | `text/event-stream`                            |
+| `400`  | `filter` parametras per ilgas (> 200 simbolių) |
+| `404`  | Paslauga nerasta (vadovas neregistruotas)      |
 
 ---
 
-### 4.2 CLIProxyAPI galiniai taškai (10 maršrutų)
+### 4,2 CLIProxyAPI galiniai taškai (10 maršrutų)
 
-CLIProxyAPI galinių taškų struktūra tokia pati kaip 9Router, išskyrus `rotate-key`, be to,
-pridėti `accounts`, `provider-expose` ir `auto-restart-adopted`. Dabar paleidimo metu jam
-perduodamas atskiras duomenų plokštumos API raktas (`needsApiKey: true` faile
-`bootstrap.ts`, naudojamas modeliams sinchronizuoti); `status` apima mažiau laukų.
+CLIProxyAPI galinio taško forma yra tokia pati kaip 9Router atėmus `rotate-key`, plius `accounts`, `provider-expose` ir `auto-restart-adopted`. Dabar jis gauna tam skirtą duomenų plokštumos API raktą, įšvirkštą nerimo metu (`needsApiKey: true` in `bootstrap.ts`, naudojamas modelio sinchronizavimui); `status` apima mažiau laukų.
 
 | Metodas | Kelias                              | Aprašymas                                  |
 | ------- | ----------------------------------- | ------------------------------------------ |
-| `POST`  | `/api/services/cliproxy/install`    | Įdiegti CLIProxyAPI iš npm                 |
-| `POST`  | `/api/services/cliproxy/start`      | Paleisti CLIProxyAPI                       |
-| `POST`  | `/api/services/cliproxy/stop`       | Sustabdyti CLIProxyAPI                     |
-| `POST`  | `/api/services/cliproxy/restart`    | Paleisti CLIProxyAPI iš naujo              |
-| `POST`  | `/api/services/cliproxy/update`     | Atnaujinti į naujesnę versiją              |
+| `POST`  | `/api/services/cliproxy/install`    | Įdiekite CLIProxyAPI iš npm                |
+| `POST`  | `/api/services/cliproxy/start`      | Pradėkite CLIProxyAPI                      |
+| `POST`  | `/api/services/cliproxy/stop`       | Sustok CLIProxyAPI                         |
+| `POST`  | `/api/services/cliproxy/restart`    | Iš naujo paleiskite CLIProxyAPI            |
+| `POST`  | `/api/services/cliproxy/update`     | Atnaujinkite į naujesnę versiją            |
 | `GET`   | `/api/services/cliproxy/status`     | Tiesioginė + DB būsena (be `apiKeyMasked`) |
-| `POST`  | `/api/services/cliproxy/auto-start` | Įjungti arba išjungti automatinį paleidimą |
+| `POST`  | `/api/services/cliproxy/auto-start` | Perjungti automatinį paleidimą             |
 
-Bendras galinis taškas `GET /api/services/{name}/logs` (žr. §4.1) veikia visoms
-keturioms paslaugoms, naudojant dinaminį segmentą `[name]`.
-
----
-
-### 4.3 Mux galiniai taškai (8 maršrutai)
-
-Mux galinių taškų struktūra tokia pati kaip CLIProxyAPI — API sąsajoje nėra
-`rotate-key` maršruto (nešėjo prieigos raktas generuojamas taip pat kaip 9Router,
-naudojant `getOrCreateApiKey("mux")`, ir perduodamas per aplinkos kintamąjį
-`MUX_SERVER_AUTH_TOKEN`, tačiau atskiro rakto keitimo galinio taško dar nėra).
-Valdomas tik Mux gyvavimo ciklas: kitaip nei 9Router, jis neturi 4 sluoksnio vykdyklės
-ir niekada neregistruojamas kaip maršruto parinkimo teikėjas.
-
-| Metodas | Kelias                         | Aprašymas                                  |
-| ------- | ------------------------------ | ------------------------------------------ |
-| `POST`  | `/api/services/mux/install`    | Įdiegti Mux iš npm (`npm i mux`)           |
-| `POST`  | `/api/services/mux/start`      | Paleisti Mux (`mux server`)                |
-| `POST`  | `/api/services/mux/stop`       | Sustabdyti Mux                             |
-| `POST`  | `/api/services/mux/restart`    | Paleisti Mux iš naujo                      |
-| `POST`  | `/api/services/mux/update`     | Atnaujinti į naujesnę npm versiją          |
-| `GET`   | `/api/services/mux/status`     | Tiesioginė + DB būsena                     |
-| `POST`  | `/api/services/mux/auto-start` | Įjungti arba išjungti automatinį paleidimą |
+Bendras `GET /api/services/{name}/logs` galutinis taškas (žr. §4.1) veikia visoms keturioms paslaugoms, naudojančioms `[name]` dinaminį segmentą.
 
 ---
 
-### 4.4 Bifrost galiniai taškai (8 maršrutai)
+### 4.3 „Mux“ galiniai taškai (8 maršrutai)
 
-Bifrost yra Go DI šliuzo perdavimo serveris (`@maximhq/bifrost`). Jis naudoja tokią
-pačią galinių taškų struktūrą kaip CLIProxyAPI (be `rotate-key` — Bifrost pats valdo
-savo teikėjų raktus faile `config.json`, esančiame jo `-app-dir`).
+Mux galinio taško forma yra tokia pati kaip CLIProxyAPI — API paviršiuje nėra `rotate-key` maršruto (nešėjos prieigos raktas generuojamas taip pat, kaip ir 9Router per `getOrCreateApiKey("mux")` ir įšvirkščiamas per `MUX_SERVER_AUTH_TOKEN` env var, bet dar nėra skirto sukimosi galinio taško). Mux yra valdomas tik visą gyvavimo ciklą: skirtingai nei 9Router, jis neturi 4 sluoksnio vykdytojo ir niekada nėra registruotas kaip maršruto parinkimo teikėjas.
 
-| Metodas | Kelias                             | Aprašymas                                                        |
-| ------- | ---------------------------------- | ---------------------------------------------------------------- |
-| `POST`  | `/api/services/bifrost/install`    | Įdiegti Bifrost iš npm (`@maximhq/bifrost`)                      |
-| `POST`  | `/api/services/bifrost/start`      | Paleisti Bifrost per 8080 prievadą (numatytasis)                 |
-| `POST`  | `/api/services/bifrost/stop`       | Sustabdyti Bifrost                                               |
-| `POST`  | `/api/services/bifrost/restart`    | Paleisti Bifrost iš naujo                                        |
-| `POST`  | `/api/services/bifrost/update`     | Atnaujinti į naujesnę versiją                                    |
-| `GET`   | `/api/services/bifrost/status`     | Tiesioginė + DB būsena                                           |
-| `POST`  | `/api/services/bifrost/auto-start` | Įjungti arba išjungti automatinį paleidimą                       |
-| `GET`   | `/api/services/bifrost/logs`       | SSE žurnalo pabaiga (per bendrą dinaminį `[name]/logs` maršrutą) |
+| Metodas | Kelias                         | Aprašymas                           |
+| ------- | ------------------------------ | ----------------------------------- |
+| `POST`  | `/api/services/mux/install`    | Įdiekite Mux iš npm (`npm i mux`)   |
+| `POST`  | `/api/services/mux/start`      | Pradėti Mux (`mux server`)          |
+| `POST`  | `/api/services/mux/stop`       | Sustabdykite Muxą                   |
+| `POST`  | `/api/services/mux/restart`    | Iš naujo paleiskite Mux             |
+| `POST`  | `/api/services/mux/update`     | Atnaujinkite į naujesnę npm versiją |
+| `GET`   | `/api/services/mux/status`     | Tiesioginė + DB būsena              |
+| `POST`  | `/api/services/mux/auto-start` | Perjungti automatinį paleidimą      |
 
-**Maršruto parinkimo susiejimas:** Kai `BIFROST_BASE_URL` nenustatytas ir prižiūrimas
-Bifrost egzempliorius veikia, `getBifrostRoutingConfig()` (faile `routingBackend.ts`)
-automatiškai naudoja `http://127.0.0.1:{port}` kaip perdavimo bazinį URL. Aiškiai
-nustatytas aplinkos kintamasis `BIFROST_BASE_URL` visada turi pirmenybę.
+---
+
+### 4.4 Bifrost galutiniai taškai (8 maršrutai)
+
+„Bifrost“ yra „Go AI-gateway“ relės užpakalinė programa (`@maximhq/bifrost`). Jis naudoja tą pačią galinio taško formą kaip ir CLIProxyAPI (jokio `rotate-key` — Bifrost tvarko savo teikėjo raktus `config.json` po savo `-app-dir`).
+
+| Metodas | Kelias                             | Aprašymas                                                     |
+| ------- | ---------------------------------- | ------------------------------------------------------------- |
+| `POST`  | `/api/services/bifrost/install`    | Įdiekite Bifrost iš npm (`@maximhq/bifrost`)                  |
+| `POST`  | `/api/services/bifrost/start`      | Paleiskite Bifrost prie 8080 prievado (numatytasis)           |
+| `POST`  | `/api/services/bifrost/stop`       | Sustabdykite Bifrost                                          |
+| `POST`  | `/api/services/bifrost/restart`    | Iš naujo paleiskite Bifrost                                   |
+| `POST`  | `/api/services/bifrost/update`     | Atnaujinkite į naujesnę versiją                               |
+| `GET`   | `/api/services/bifrost/status`     | Tiesioginė + DB būsena                                        |
+| `POST`  | `/api/services/bifrost/auto-start` | Perjungti automatinį paleidimą                                |
+| `GET`   | `/api/services/bifrost/logs`       | SSE log tail (per bendrinamą `[name]/logs` dinaminį maršrutą) |
+
+**Maršrutizavimo laidai:** Kai `BIFROST_BASE_URL` nenustatytas ir prižiūrimas Bifrost egzempliorius veikia, `getBifrostRoutingConfig()` (in `routingBackend.ts`) automatiškai naudoja `http://127.0.0.1:{port}` kaip relės bazę URL. Aiškus `BIFROST_BASE_URL` env visada turi pirmenybę.
 
 ---
 
 ### 4.5 Dario galiniai taškai (12 maršrutų)
 
-Tokia pati gyvavimo ciklo struktūra kaip kitų paslaugų (`install`, `start`, `stop`,
-`restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`), taip pat
-prieigos raktu apsaugota OAuth valdymo plokštuma po `admin/`: `admin/accounts`,
-`admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (visi
-apsaugoti naudojant `DARIO_ADMIN_TOKEN`).
+Tokia pati gyvavimo ciklo forma kaip ir kitų paslaugų (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) ir žetonų valdoma OAuth valdymo plokštuma pagal `admin/`: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start` `admin/login-complete` `DARIO_ADMIN_TOKEN`).
 
-### 4.6 open-wa galiniai taškai (7 maršrutai)
+### 4.6 atviri galiniai taškai (7 maršrutai)
 
-open-wa (`@open-wa/wa-automate`) valdo Chromium egzempliorių be grafinės sąsajos
-(per Puppeteer), kad automatizuotų WhatsApp Web. Jis naudoja tokią pačią galinių
-taškų struktūrą kaip Mux (`rotate-key` maršruto dar nėra). Valdomas tik jo gyvavimo
-ciklas — jis nėra maršruto parinkimo paskirties vieta ir neturi 4 sluoksnio
-vykdyklės / teikėjo įrašo.
+open-wa (`@open-wa/wa-automate`) valdo begalvį Chromium egzempliorių (per Puppeteer), kad automatizuotų WhatsApp Web. Jis naudoja tą pačią galinio taško formą kaip ir Mux (dar nėra `rotate-key` maršruto). Tai yra gyvavimo ciklas valdomas tik —, o ne maršruto parinkimo tikslas, nėra 4 sluoksnio executor/provider įrašo.
 
-| Metodas | Kelias                            | Aprašymas                                                        |
-| ------- | --------------------------------- | ---------------------------------------------------------------- |
-| `POST`  | `/api/services/openwa/install`    | Įdiegti open-wa iš npm (`@open-wa/wa-automate`)                  |
-| `POST`  | `/api/services/openwa/start`      | Paleisti open-wa per 8323 prievadą (numatytasis)                 |
-| `POST`  | `/api/services/openwa/stop`       | Sustabdyti open-wa                                               |
-| `POST`  | `/api/services/openwa/restart`    | Paleisti open-wa iš naujo                                        |
-| `POST`  | `/api/services/openwa/update`     | Atnaujinti į naujesnę versiją                                    |
-| `GET`   | `/api/services/openwa/status`     | Tiesioginė + DB būsena                                           |
-| `POST`  | `/api/services/openwa/auto-start` | Įjungti arba išjungti automatinį paleidimą                       |
-| `GET`   | `/api/services/openwa/logs`       | SSE žurnalo pabaiga (per bendrą dinaminį `[name]/logs` maršrutą) |
+| Metodas | Kelias                            | Aprašymas                                                     |
+| ------- | --------------------------------- | ------------------------------------------------------------- |
+| `POST`  | `/api/services/openwa/install`    | Įdiekite open-wa iš npm (`@open-wa/wa-automate`)              |
+| `POST`  | `/api/services/openwa/start`      | Paleiskite „open-wa“ prievadą 8323 (numatytasis)              |
+| `POST`  | `/api/services/openwa/stop`       | Sustokite atvirai                                             |
+| `POST`  | `/api/services/openwa/restart`    | Iš naujo paleiskite open-wa                                   |
+| `POST`  | `/api/services/openwa/update`     | Atnaujinkite į naujesnę versiją                               |
+| `GET`   | `/api/services/openwa/status`     | Tiesioginė + DB būsena                                        |
+| `POST`  | `/api/services/openwa/auto-start` | Perjungti automatinį paleidimą                                |
+| `GET`   | `/api/services/openwa/logs`       | SSE log tail (per bendrinamą `[name]/logs` dinaminį maršrutą) |
 
-**API raktas:** įterpiamas kaip `WA_KEY` — bendroji open-wa aplinkos kintamųjų
-su `WA_*` priešdėliu perrašymo funkcija susieja jį su `--key`/`-k` CLI parinktimi
-(`dist/cli/setup.js::envArgs()`, patikrinta naudojant įdiegtą 4.76.0
-paketą). Sugeneravus naudojant `generateServiceApiKey()`, pridedamas `ow_`
-priešdėlis. open-wa nuskaito raktą iš `key`/`api_key` HTTP antraštės (ne iš
-`Authorization: Bearer`); `/api-docs*` aiškiai atleistas nuo šios patikros
-(`setupAuthenticationLayer`, esantis `dist/cli/server.js`), todėl veikimo
-patikros užklausai autentifikavimo antraštės nereikia.
+**API raktas:** įšvirkščiama kaip `WA_KEY` — open-wa bendras `WA_*` -prefixed env nepaisymas susieja jį su `--key`/`-k` CLI parinktimi (`dist/cli/setup.js::envArgs()`, patikrinta pagal įdiegtą 4.76.0 paketą). Priešdėlis `ow_` kai jį sugeneruoja `generateServiceApiKey()`. open-wa nuskaito raktą atgal iš `key`/`api_key` HTTP antraštės (ne `Authorization: Bearer`); `/api-docs*` yra aiškiai atleistas nuo patikrinimo (`setupAuthenticationLayer` in `dist/cli/server.js`), todėl sveikatos zondui nereikia autentifikavimo antraštės.
 
-**Susiejimas:** open-wa yra neoficialus ir nesusijęs su WhatsApp — prijungtam
-numeriui kyla blokavimo rizika dėl pačios WhatsApp automatizavimo aptikimo.
-Pirmą kartą paleidus, susiejimo QR kodas išvedamas į standartinę išvestį ir
-pateikiamas esamame žurnalų skydelyje / SSE sraute — ši integracija kol kas
-neturi atskiro QR vaizdo galinio taško.
+**Poravimas:** „Open-wa“ yra neoficialus ir nesusijęs su WhatsApp —, prijungtam numeriui kyla draudimas dėl paties WhatsApp“ automatikos aptikimo. Pirmą kartą paleidus, susiejimo QR kodas išspausdinamas į stdout ir pateikiamas per esamą žurnalų panel/SSE srautą — šioje integracijoje dar nėra skirto QR vaizdo galutinio taško.
 
 ---
 
-### 4.7 Atvirkštinis tarpinis serveris (9Router skydelio įterpimas)
+### 4,7 LLMLingua galiniai taškai (8 maršrutai)
 
-Skydelyje 9Router žiniatinklio naudotojo sąsaja įterpiama į iframe per vidinį
-atvirkštinį tarpinį serverį adresu:
+LLMLingua yra greito suspaudimo šoninės priekabos apvyniojimas `@atjsh/llmlingua-2` (tikras ONNX žetonų klasifikavimo modelis, atsisiųstas iš Hugging Face pirmojo `/compress` skambučio metu). Jis naudoja tą pačią galinio taško formą kaip ir Bifrost (be API klavišo — `needsApiKey: false`, jis niekada netvarko kredencialų).
+
+| Metodas | Kelias                                         | Aprašymas                                                                                 |
+| ------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `POST`  | `/api/services/llmlingua/install`              | npm-install `@atjsh/llmlingua-2` + peers, parašykite šoninio priekabos serverio scenarijų |
+| `POST`  | `/api/services/llmlingua/start`                | Paleiskite šoninę priekabą 20135 prievade (numatytasis)                                   |
+| `POST`  | `/api/services/llmlingua/stop`                 | Sustabdykite šoninę priekabą                                                              |
+| `POST`  | `/api/services/llmlingua/restart`              | Iš naujo paleiskite šoninę priekabą                                                       |
+| `POST`  | `/api/services/llmlingua/update`               | Atnaujinkite į naujesnę paketo versiją                                                    |
+| `GET`   | `/api/services/llmlingua/status`               | Tiesioginė + DB būsena                                                                    |
+| `POST`  | `/api/services/llmlingua/auto-start`           | Perjungti automatinį paleidimą                                                            |
+| `POST`  | `/api/services/llmlingua/auto-restart-adopted` | Perjungti automatinį priimto (anksčiau egzistuojančio) egzemplioriaus paleidimą iš naujo  |
+| `GET`   | `/api/services/llmlingua/logs`                 | SSE log tail (per bendrinamą `[name]/logs` dinaminį maršrutą)                             |
+
+**Priekabos sutartis:** serverio scenarijus atskleidžia `GET /health` (momentinis — modelio nelaukia) ir `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). Modelis tingiai įkeliamas per pirmąjį `/compress` skambutį.
+
+**Suspaudimo laidai:** `open-sse/services/compression/engines/llmlingua/index.ts` `httpSidecarBackend` iškviečia `LLMLINGUA_BASE_URL` (numatytasis `http://127.0.0.1:20135`) ir priima tik šoninės priekabos atsaką, kai jis yra griežtai trumpesnis už įvestį; bet koks gedimas (neveikia, skirtasis laikas, atsakas be operacijos) grįžta į proceso darbininko gijos užpakalinę programą (`./worker.ts`).
+
+---
+
+### 4,8 „Sing-box“ galinių taškų (8 maršrutai)
+
+sing-box turi tokią pačią galinio taško formą kaip ir Mux — be `rotate-key` maršruto, be API klavišo įvedimo (`needsApiKey: false` in `bootstrap.ts`). Jis valdomas tik pagal gyvavimo ciklą: niekada nebūkite routing/LLM teikėjas. `install()` atsisiunčia oficialų GitHub leidimo dvejetainį failą (`SagerNet/sing-box`) prisegtai versijai (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) ir patikrina jo SHA256 pagal kontrolinę sumą, įrašytą tame pačiame faile, prieš įrašant jį į diską — bet kokia kita prašoma versija atmetama.
+
+| Metodas | Kelias                                       | Aprašymas                                                                       |
+| ------- | -------------------------------------------- | ------------------------------------------------------------------------------- |
+| `POST`  | `/api/services/singbox/install`              | Atsisiųskite + verify“ prisegtą „sing-box“ leidimą                              |
+| `POST`  | `/api/services/singbox/start`                | Pradėti dainų dėžutę (`sing-box run -c config.json`)                            |
+| `POST`  | `/api/services/singbox/stop`                 | Sustabdykite dainų dėžutę                                                       |
+| `POST`  | `/api/services/singbox/restart`              | Iš naujo paleiskite dainavimo dėžutę                                            |
+| `POST`  | `/api/services/singbox/update`               | Re-verify/reinstall prisegtas atleidimas                                        |
+| `GET`   | `/api/services/singbox/status`               | Tiesioginė + DB būsena                                                          |
+| `POST`  | `/api/services/singbox/auto-start`           | Perjungti automatinį paleidimą                                                  |
+| `POST`  | `/api/services/singbox/auto-restart-adopted` | Perjungti automatinį iš naujo paleisti priimtą (anksčiau egzistuojantį) procesą |
+| `GET`   | `/api/services/singbox/logs`                 | SSE log tail (per bendrinamą `[name]/logs` dinaminį maršrutą)                   |
+
+**TPROXY laidai:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) įrašo `config.json` ir paleidžia prižiūrėtoją prieš `applyTproxy()` įdiegiant TPROXY ugniasienės taisykles. Jei prižiūrėtojo trūksta arba jis nepasiekia `running`, dabar jis registruojasi klaidų lygiu (o ne tyliai praryja gedimą), kad operatorius galėtų pasakyti, kad TPROXY taisyklės buvo pritaikytos be veikiančio klausytojo už jų.
+
+---
+
+### 4.9 Atvirkštinis tarpinis serveris (9 Maršrutizatoriaus prietaisų skydelio įterpimas)
+
+Prietaisų skydelis įterpia 9Router web UI į iframe per vidinį atvirkštinį tarpinį serverį adresu:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
@@ -558,19 +549,15 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 Šis tarpinis serveris:
 
-- Persiunčia užklausą į `http://127.0.0.1:{port}/{path}` (tik grįžtamojo ryšio sąsaja)
-- Pašalina gaunamas `cookie` ir `authorization` antraštes (OmniRoute seanso duomenys nenutekinami)
-- Įterpia `Authorization: Bearer {apiKey}`, skirtą 9Router autentifikavimui
-- Iš atsako pašalina `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
-- Perrašo HTML atsakus, įterpdamas `<base href>` ir normalizuodamas absoliučiuosius kelius (`/foo` → `/dashboard/.../embed/foo`)
+- Persiunčia užklausą į `http://127.0.0.1:{port}/{path}` (tik atgalinis ryšys)
+- Ištrina gaunamas `cookie` ir `authorization` antraštes (nėra OmniRoute seanso nutekėjimo)
+- Įveda `Authorization: Bearer {apiKey}` 9Router autentifikavimui
+- Iš atsakymo pašalina `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
+- Perrašo HTML atsakymus, kad įterptų `<base href>` ir normalizuotų absoliučius kelius (`/foo` → `/dashboard/.../embed/foo`)
 
-Įterpto skydelio WebSocket protokolo naujinimus apdoroja pagalbinis serveris,
-veikiantis per atskirą prievadą (žr. `src/lib/services/embedWsProxy.ts`).
+WebSocket naujinimus, skirtus įterptajam prietaisų skydeliui, tvarko papildomas serveris, esantis tam skirtame prievade (žr. `src/lib/services/embedWsProxy.ts`).
 
-**Saugumas:** įterpimo tarpinio serverio maršrutai priskiriami
-`LOCAL_ONLY_API_PREFIXES` ir yra pasiekiami tik per grįžtamojo ryšio sąsają.
-Užpuolikas, gavęs JWT per Cloudflare/Ngrok tunelį, negali per tarpinį serverį
-pasiekti įterptųjų paslaugų.
+**Saugumas:** Įterpti tarpinio serverio maršrutai yra klasifikuojami kaip `LOCAL_ONLY_API_PREFIXES` ir juos galima pasiekti tik per kilpą. Užpuolikas, gavęs JWT per Cloudflare/Ngrok tunelį, negali prisijungti prie įterptųjų paslaugų.
 
 ---
 

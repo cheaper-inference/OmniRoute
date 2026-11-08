@@ -3,20 +3,6 @@
  * Pure data; merged by apikey/index.ts via spread (god-file decomposition; semantic split).
  */
 export const APIKEY_PROVIDERS_SPECIALTY = {
-  typesafe: {
-    id: "typesafe",
-    serviceKinds: [],
-    alias: "typesafe",
-    name: "TypeSafe AI (Jev)",
-    icon: "fact_check",
-    color: "#0F766E",
-    textIcon: "TS",
-    website: "https://typesafe.ai",
-    authHint:
-      "Bearer API key for api.typesafe.ai — System One / Jev evaluation through POST /v1/systemone.",
-    apiHint:
-      "Jev returns typed decisions rather than generated text. OmniRoute preserves System One responses and accounts for input-token cost.",
-  },
   nlpcloud: {
     id: "nlpcloud",
     serviceKinds: ["llm"],
@@ -179,6 +165,23 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
       "Bearer API key for api.jina.ai — embeddings, rerank, classify, segment, and search. Dashboard keys take precedence over JINA_AI_API_KEY. This is not the Reader / r.jina.ai card and does not fetch URLs.",
     hasFree: true,
     freeNote: "10M free tokens on signup (non-commercial), no credit card required",
+  },
+  // Decision / evaluation API (System One / Jev). Not a chat provider — no
+  // chat models in the registry. Used by the jev combo strategy (#15276) and
+  // by any future System One passthrough (#13987).
+  typesafe: {
+    id: "typesafe",
+    serviceKinds: [],
+    alias: "typesafe",
+    name: "TypeSafe AI",
+    icon: "psychology",
+    color: "#4F46E5",
+    textIcon: "TS",
+    website: "https://docs.typesafe.ai",
+    authHint:
+      "Bearer API key for api.typesafe.ai. OmniRoute uses it for System One evaluation (Jev) — not chat completions. Store the key here; the jev combo strategy reads it at request time.",
+    apiHint:
+      "TypeSafe System One answers typed questions (noul / choice / score) against a state. OmniRoute does not expose TypeSafe models in chat pickers or combos.",
   },
   "fal-ai": {
     id: "fal-ai",
@@ -345,7 +348,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     subscriptionRisk: true,
     riskNoticeVariant: "oauth",
     authHint:
-      "Paste a Cursor user API key (crsr_...) from cursor.com/dashboard/api. OmniRoute exchanges it for a session token on demand; no IDE or cursor-agent install is needed. Usage bills to the Cursor plan that owns the key.",
+      "Paste a Cursor user API key (crsr_... or grok_...) from cursor.com/dashboard/api. OmniRoute exchanges it for a session token on demand; no IDE or cursor-agent install is needed. Usage bills to the Cursor plan that owns the key.",
     apiHint:
       "Same agent protocol and model catalog as the Cursor IDE provider. The Cursor CLI can also be pointed at /api/cursor-cli on this instance and authenticated with an OmniRoute API key.",
   },

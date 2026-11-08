@@ -93,7 +93,7 @@ async function mountPanel(): Promise<HTMLElement> {
 
 function engineSwitch(container: HTMLElement, id: string): HTMLButtonElement {
   const button = container.querySelector(
-    `[data-testid="engine-toggle-${id}"] button`
+    `[data-testid="engine-toggle-${id}"] [role="switch"]`
   ) as HTMLButtonElement | null;
   expect(button, `${id} toggle must exist`).toBeTruthy();
   return button!;

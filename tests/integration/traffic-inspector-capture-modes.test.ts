@@ -5,7 +5,9 @@
  *   - GET  /capture-modes — status overview
  *   - POST /capture-modes/http-proxy — start/stop (ephemeral port to avoid 8080 conflict)
  *   - POST /capture-modes/system-proxy — apply/revert (mocked OS commands)
- *   - POST /capture-modes/tls-intercept — toggle
+ *   - the dead `tls-intercept` toggle stays removed: the HTTP_PROXY listener only
+ *     CONNECT-tunnels HTTPS (src/mitm/inspector/httpProxyServer.ts), so no route,
+ *     status field or state accessor may advertise HTTPS decryption for it.
  */
 
 import test from "node:test";
@@ -25,10 +27,8 @@ const httpProxyRoute =
   await import("../../src/app/api/tools/traffic-inspector/capture-modes/http-proxy/route.ts");
 const systemProxyRoute =
   await import("../../src/app/api/tools/traffic-inspector/capture-modes/system-proxy/route.ts");
-const tlsInterceptRoute =
-  await import("../../src/app/api/tools/traffic-inspector/capture-modes/tls-intercept/route.ts");
-const { setHttpProxyHandle, getHttpProxyHandle, clearSystemProxy } =
-  await import("../../src/lib/inspector/captureState.ts");
+const captureState = await import("../../src/lib/inspector/captureState.ts");
+const { setHttpProxyHandle, getHttpProxyHandle, clearSystemProxy } = captureState;
 const { __setExec } = await import("../../src/mitm/inspector/systemProxyConfig.ts");
 
 test.beforeEach(() => {
@@ -64,12 +64,23 @@ test("GET /capture-modes: returns status of all modes", async () => {
     agentBridge: boolean;
     httpProxy: { running: boolean; port: number | null };
     systemProxy: { applied: boolean };
-    tlsIntercept: { enabled: boolean };
   };
   assert.equal(body.agentBridge, true);
   assert.equal(body.httpProxy.running, false);
   assert.equal(body.systemProxy.applied, false);
-  assert.ok("enabled" in body.tlsIntercept);
+  assert.deepEqual(Object.keys(body).sort(), [
+    "agentBridge",
+    "customHosts",
+    "httpProxy",
+    "systemProxy",
+  ]);
+});
+
+test("GET /capture-modes: does not advertise a TLS-intercept toggle", async () => {
+  const res = await captureModesRoute.GET();
+  assert.equal(res.status, 200);
+  const body = (await res.json()) as Record<string, unknown>;
+  assert.equal("tlsIntercept" in body, false);
 });
 
 // ── POST /capture-modes/http-proxy ─────────────────────────────────────────
@@ -219,32 +230,14 @@ test("system-proxy: rejects invalid action", async () => {
   assert.equal(res.status, 400);
 });
 
-// ── POST /capture-modes/tls-intercept ──────────────────────────────────────
+// ── Removed: POST /capture-modes/tls-intercept ─────────────────────────────
 
-test("tls-intercept: toggle on/off", async () => {
-  const enableReq = new Request(
-    "http://localhost/api/tools/traffic-inspector/capture-modes/tls-intercept",
-    {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ enabled: true }),
-    }
+test("tls-intercept: the dead toggle route and its state are gone", () => {
+  const routeDir = path.join(
+    process.cwd(),
+    "src/app/api/tools/traffic-inspector/capture-modes/tls-intercept"
   );
-  const enableRes = await tlsInterceptRoute.POST(enableReq);
-  assert.equal(enableRes.status, 200);
-  const enableBody = (await enableRes.json()) as { tlsIntercept: { enabled: boolean } };
-  assert.equal(enableBody.tlsIntercept.enabled, true);
-
-  const disableReq = new Request(
-    "http://localhost/api/tools/traffic-inspector/capture-modes/tls-intercept",
-    {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ enabled: false }),
-    }
-  );
-  const disableRes = await tlsInterceptRoute.POST(disableReq);
-  assert.equal(disableRes.status, 200);
-  const disableBody = (await disableRes.json()) as { tlsIntercept: { enabled: boolean } };
-  assert.equal(disableBody.tlsIntercept.enabled, false);
+  assert.equal(fs.existsSync(routeDir), false, "tls-intercept route must not exist");
+  assert.equal("isTlsInterceptEnabled" in captureState, false);
+  assert.equal("setTlsIntercept" in captureState, false);
 });

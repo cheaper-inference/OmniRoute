@@ -140,53 +140,54 @@ omniroute providers validate
 
 ### 1) Свържете доставчици и създайте API ключ
 
-1. Отворете Dashboard → `Providers` и свържете поне един доставчик (OAuth или API ключ).
+1. Отворете Dashboard → `Providers` и свържете поне един доставчик (чрез OAuth или API ключ).
 2. Отворете Dashboard → `Endpoints` и създайте API ключ.
 3. (По избор) Отворете Dashboard → `Combos` и задайте резервната си верига.
 
 ### 2) Насочете инструмента си за програмиране
 
 ```txt
-Основен URL: http://localhost:20128/v1
-API ключ:    [копирайте от страницата Endpoint]
-Модел:       if/qwen3.8-max-preview (или произволен префикс доставчик/модел)
+Базов URL: http://localhost:20128/v1
+API ключ:  [копирайте от страницата Endpoint]
+Модел:     if/qwen3.8-max-preview (или произволен префикс доставчик/модел)
 ```
 
-Ако редакторът ви не може да изпрати `Authorization: Bearer ...`, вместо това използвайте основния URL за съвместимост с вграден токен:
+Ако редакторът ви не може да изпраща `Authorization: Bearer ...`, вместо това използвайте базовия URL за съвместимост с включен токен:
 
 ```txt
-Основен URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+Базов URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
 URL за модели: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
 URL за чат: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-URL за тагове на Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+URL за Ollama Tags: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Работи с Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode и съвместими с OpenAI SDK пакети.
+Работи с Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode и съвместими с OpenAI SDK.
 
 #### Автоматично конфигуриране със `setup-*`
 
-Вместо ръчно да поставяте основния URL и ключа, позволете на OmniRoute да запише собствената конфигурация на всеки инструмент от актуалния каталог с модели. По една команда за всеки инструмент:
+Вместо да поставяте ръчно базовия URL и ключа, позволете на OmniRoute да запише собствената конфигурация на всеки инструмент от актуалния каталог с модели. По една команда за всеки инструмент:
 
 ```bash
 omniroute setup-codex        # профили в ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (съвместим с openai)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (съвместим с OpenAI)
 omniroute setup-cline        # настройки на Cline CLI + разширението за VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # извежда стъпките в приложението Cursor
 omniroute setup-roo          # импортиране в Roo Code + указател autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Всяка команда приема `--remote <url> --api-key <key>` за конфигуриране на локален инструмент спрямо **отдалечен** OmniRoute, както и `--dry-run` за предварителен преглед. За да стартирате CLI с подадени подходящи променливи на средата, без изобщо да записвате конфигурация, използвайте универсалния стартиращ инструмент `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); наследените стартиращи команди за отделните инструменти `omniroute launch` (Claude Code) и `omniroute launch-codex` (Codex) остават налични.
+Всяка команда приема `--remote <url> --api-key <key>` за конфигуриране на локален инструмент спрямо **отдалечен** OmniRoute, както и `--dry-run` за предварителен преглед. За да стартирате CLI с подадени подходящи променливи на средата, без изобщо да записвате конфигурация, използвайте универсалната команда за стартиране `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); наследените команди за стартиране за отделни инструменти `omniroute launch` (Claude Code) и `omniroute launch-codex` (Codex) остават налични.
 
-За пълната таблица (какво записва всяка команда, всички флагове, локално спрямо отдалечено използване, конвенции за основния URL с `/v1`) вижте **[CLI интеграции](./CLI-INTEGRATIONS.md)**.
+За пълната таблица (какво записва всяка команда, всички флагове, локален спрямо отдалечен режим, конвенциите за `/v1` в базовия URL) вижте **[CLI интеграции](./CLI-INTEGRATIONS.md)**.
 
-За подробна конфигурация на всеки инструмент поотделно (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot и други) вижте специалното **[Ръководство за CLI инструменти](../reference/CLI-TOOLS.md)**.
+За подробно конфигуриране на отделните инструменти (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot и други) вижте специалното **[Ръководство за CLI инструменти](../reference/CLI-TOOLS.md)**.
 
 ---
 
@@ -317,16 +318,16 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Шаблон за Void Linux (xbps-src)
 
-Потребителите на Void Linux могат да създадат собствен пакет чрез `xbps-src`. Запазете този блок като `srcpkgs/omniroute/template`:
+Потребителите на Void Linux могат да създадат нативен пакет чрез `xbps-src`. Запазете този блок като `srcpkgs/omniroute/template`:
 
 ```bash
-# Файл с шаблон за „omniroute“
+# Шаблонен файл за 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+short_desc="Универсален AI шлюз с интелигентно маршрутизиране за множество доставчици на LLM"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"

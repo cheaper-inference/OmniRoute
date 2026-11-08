@@ -72,31 +72,32 @@ na-akpọ endpoint ahụ aha ma kọwaa ihe furu efu — ya mere ihe nhọpụta
 
 ## Nhọrọ
 
-| Igodo                            | Ndabara                                   | Nkọwa                                                                                                   |
-| -------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                             | ID onye na-eweta, ID njikọta, na prefix ụdịdị na-apụta n'okpuru ya                                      |
-| `baseURL`                        | achọrọ                                    | Mgbọrọgwụ gateway, naanị `http(s)`; a na-agbakwunye suffix `/v1` ebe achọrọ                             |
-| `apiKey`                         | nzere ejikọrọ, emesịa `OMNIROUTE_API_KEY` | Igodo nkata maka `/v1/*`                                                                                |
-| `managementReadToken`            | na-eji `apiKey` ma ọ bụrụ na ọ dịghị      | Igodo maka `/api/*` — ọ na-abụkarị **ọ bụghị** otu igodo ahụ                                            |
-| `displayName`                    | `"OmniRoute"`                             | Aha onye na-eweta na picker                                                                             |
-| `timeoutMs`                      | `10000`                                   | Oge oke fetch maka endpoint ọ bụla (auto-combos na-eji 5s)                                              |
-| `modelCacheTtlMs`                | `300000`                                  | TTL cache katalọgụ; snapshot dị na diski na-eme ka mmalite oyi dị ọkụ                                   |
-| `timeouts`                       | na-eji `timeoutMs` ma ọ bụrụ na ọ dịghị   | Oke oge endpoint ọ bụla na ms: `models`, `combos`, `autoCombos`, `enrichment`                           |
-| `enrichment`                     | `true`                                    | Weta aha, ọnụahịa na oke mmefu free-tier                                                                |
-| `providerTag`                    | `true`                                    | Tinye onye na-eweta upstream ọ na-eduga na ya n'ihu aha ngosi                                           |
-| `usableOnly`                     | `false`                                   | Debe naanị ndị na-eweta gateway kọọrọ na e doziri ha                                                    |
-| `showcasePerOwner`               | `10`                                      | Ndenye nlele ndabara edebere maka onye na-eweta ọ bụla                                                  |
-| `freshPerOwner`                  | `10`                                      | Ndenye ọhụrụ nlele ndabara edebere maka onye na-eweta ọ bụla                                            |
-| `freshWindowDays`                | `90`                                      | Window ịdị ọhụrụ n'ụbọchị maka alaka ọhụrụ                                                              |
-| `usageMemory`                    | `true`                                    | Weghachite ndenye ndị ewepụrụ n'ụzọ static nke nyocha ojiji ụbọchị 30 kpọrọ aha (chọrọ token njikwa)    |
-| `visibleModels` / `hiddenModels` | `[]`                                      | Ndepụta ikike dabara kpọmkwem-ma-ọbụ-suffix; mmachibido na-emeri                                        |
-| `geminiSanitization`             | `true`                                    | Wepụ keywords JSON-Schema ndị Gemini jụrụ na schema ngwa ọrụ (a na-ebuga ngwa `$ref` n'enweghị mgbanwe) |
-| `apiFormat.allowAnthropic`       | `false`                                   | Duga ID ndị dị na ndepụta ikike site na ngọngọ Anthropic API                                            |
-| `apiFormat.anthropicModels`      | `[]`                                      | ID ụdịdị zuru ezu ndị a na-eduga na Anthropic                                                           |
-| `logLevel` / `startupDebug`      | `warn` / `false`                          | Otú logger si enye nkọwa                                                                                |
+| Igodo                            | Ndabara                                   | Nkọwa                                                                                                                                         |
+| -------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                             | Njirimara onye na-eweta, njirimara njikọ, na prefix nke model ndị ahụ ga-apụta n'okpuru ya                                                    |
+| `baseURL`                        | achọrọ                                    | Mgbọrọgwụ gateway, naanị `http(s)`; a na-agbakwunye suffix `/v1` ebe achọrọ                                                                   |
+| `apiKey`                         | nzere ejikọrọ, emesịa `OMNIROUTE_API_KEY` | Igodo nkata maka `/v1/*`                                                                                                                      |
+| `managementReadToken`            | na-eji `apiKey` ma ọ bụrụ na ọ dịghị      | Igodo maka `/api/*` — ọ naghị abụkarị **otu** igodo ahụ                                                                                       |
+| `displayName`                    | `"OmniRoute"`                             | Aha onye na-eweta n'ime ihe nhọpụta                                                                                                           |
+| `timeoutMs`                      | `10000`                                   | Oge nchere kachasị maka fetch nke endpoint ọ bụla (auto-combos na-eji sekọnd 5)                                                               |
+| `modelCacheTtlMs`                | `300000`                                  | TTL cache katalọgụ; snapshot dị na diski na-eme ka mbido oyi dị ngwa                                                                          |
+| `timeouts`                       | na-eji `timeoutMs` ma ọ bụrụ na ọ dịghị   | Oke oge endpoint ọ bụla na ms: `models`, `combos`, `autoCombos`, `enrichment`                                                                 |
+| `enrichment`                     | `true`                                    | Weta aha, ọnụahịa na oke mmefu free-tier                                                                                                      |
+| `providerTag`                    | `true`                                    | Tinye onye na-eweta upstream ọ na-eziga arịrịọ na ya dị ka prefix n'aha ngosi                                                                 |
+| `usableOnly`                     | `false`                                   | Debe naanị ndị na-eweta gateway kọọrọ na akwadoro ha                                                                                          |
+| `combosSource`                   | `"api"`                                   | `"models"` na-awụfe `/api/combos` ma bipụta ahịrị combo nke `/v1/models`; nzacha ọkwa otu na-edobe `"api"`                                    |
+| `showcasePerOwner`               | `10`                                      | Ndenye nlele ndabara a na-edobe maka onye na-eweta ọ bụla                                                                                     |
+| `freshPerOwner`                  | `10`                                      | Ndenye ọhụrụ nke nlele ndabara a na-edobe maka onye na-eweta ọ bụla                                                                           |
+| `freshWindowDays`                | `90`                                      | Ohere oge ịdị ọhụrụ n'ụbọchị maka ngalaba ọhụrụ                                                                                               |
+| `usageMemory`                    | `true`                                    | Weghachite ndenye ndị ewepụrụ n'ụzọ static nke nyocha ojiji ụbọchị 30 kpọrọ aha (ọ chọrọ token njikwa)                                        |
+| `visibleModels` / `hiddenModels` | `[]`                                      | Ndepụta ikike nke dakọtara kpọmkwem ma ọ bụ site na suffix; mmachibido na-emeri; `*` na-ebipụta katalọgụ niile (nzacha ndị ọzọ ka na-emetụta) |
+| `geminiSanitization`             | `true`                                    | Wepụ mkpụrụokwu JSON-Schema ndị Gemini na-ajụ na schema tool (`$ref` tools ka a na-ebufe n'enweghị mgbanwe)                                   |
+| `apiFormat.allowAnthropic`       | `false`                                   | Ziga ids ndị dị na ndepụta ikike site na ngọngọ Anthropic API                                                                                 |
+| `apiFormat.anthropicModels`      | `[]`                                      | Njirimara model zuru ezu ndị a na-eziga na Anthropic                                                                                          |
+| `logLevel` / `startupDebug`      | `warn` / `false`                          | Ogo nkọwa logger                                                                                                                              |
 
-Ncheta ojiji na-arụ ọrụ na ndabara. Na-enweghị token njikwa, ọ naghị arụ ọrụ
-(a na-edekọ ọkwa mmalite) ma ọ dịghị ihe a na-eweghachite.
+A na-agbanye ebe nchekwa ojiji na ndabara. Na-enweghị token njikwa, ọ naghị arụ ọrụ
+(a na-edekọ ọkwa mgbe mmalite) ma ọ dịghị ihe a na-eweghachite.
 
 ## Otu katalọgụ si anọgide na-adị ọhụrụ
 
@@ -123,13 +124,18 @@ A na-ebufe tool nwere `$ref` ka ọ dị kama iwepụ ihe ọ bụla na ya, n'ih
 reference ahụ ga-eme ka schema gbasaa ruo n'ókè nke "ịnabata ihe ọ bụla".
 Tọọ `"geminiSanitization": false` iji gbanyụọ ya.
 
-## Ịdozi nsogbu
+## Nchọpụta na ndozi nsogbu
 
-| Ihe mgbaàmà                                    | Ihe kpatara ya                                                                                               |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Picker anaghị egosi model OmniRoute ọ bụla     | Enweghị key e nwetara (lelee warning mmalite), ma ọ bụ enweghị ike ijikọ na gateway                          |
-| ID model nkịtị, enweghị combo, enweghị pricing | Endpoint njikwa jụrụ token ahụ — tọọ `managementReadToken`                                                   |
-| Session etinyere kpọmkwem na `opencode-<id>/…` | Plugin v1 bipụtara `opencode-<id>`; v2 na-ebipụta naanị `<id>`, ya mere họrọ model ahụ ọzọ n'okpuru `<id>/…` |
+| Mgbaàmà                                                        | Ihe kpatara ya                                                                                                  |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Onye nhọpụta anaghị egosi model OmniRoute ọ bụla               | Ọ dịghị key a chọtara (lelee ịdọ aka ná ntị mgbe mmalite), ma ọ bụ enweghị ike iru gateway ahụ                  |
+| Model ids nkịtị, enweghị combos, enweghị ọnụahịa               | Management endpoints jụrụ token ahụ — tọọ `managementReadToken`                                                 |
+| Catalog `freeOnly` dị mkpụmkpụ ma ọ bụ tọgbọ chakoo            | Enweghị management token ma ọ bụ token a jụrụ — gụọ ahịrị nchịkọta refresh (`unmatched-free` count) na host log |
+| Session etinyere n’ụzọ na-adịgide adịgide na `opencode-<id>/…` | Plugin v1 bipụtara `opencode-<id>`; v2 na-ebipụta naanị `<id>`, ya mere họrọ model ahụ ọzọ n’okpuru `<id>/…`    |
+
+Environment variables ga-erurịrị server process nke opencode: mgbe host
+na-agba dịka service, shell nke na-agba `opencode models` na environment nke server
+dị iche, ya mere export key ahụ n’ebe server na-agụ ya.
 
 ## Hụkwa
 

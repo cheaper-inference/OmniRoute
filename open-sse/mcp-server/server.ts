@@ -1,5 +1,9 @@
+import { realpathSync } from "node:fs";
+import { resolve as resolvePath } from "node:path";
+import { fileURLToPath } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { APP_CONFIG } from "@/shared/constants/appConfig";
 import { registerToolSearchTool } from "./toolSearch/register.ts";
 import {
   MCP_TOOLS,
@@ -41,8 +45,10 @@ import {
   buildScopeDenialMessage,
   evaluateToolScopes,
   resolveCallerScopeContext,
+  shouldForceScopeEnforcement,
   type McpToolExtraLike,
 } from "./scopeEnforcement.ts";
+import { resolveMcpToolOwnerId } from "./mcpCallerIdentity.ts";
 import {
   handleSimulateRoute,
   handleSetBudgetGuard,
@@ -62,6 +68,7 @@ import {
   handleOneproxyStats,
 } from "./tools/advancedTools.ts";
 import { handlePickFastestModel } from "./tools/pickFastestModel.ts";
+import { registerPerplexityResearchTool } from "./tools/perplexityResearch.ts";
 // #15159 M-01 — "file = register + wrap. handle* -> tools/canonical/*.ts".
 // These twelve handlers used to be defined inline below `withScopeEnforcement`,
 // which made this file a 784-line registration-and-implementation mix. They are
@@ -186,7 +193,7 @@ function withScopeEnforcement(
     const scopeCheck = evaluateToolScopes(
       toolName,
       scopeContext.scopes,
-      isMcpScopeEnforcementEnabled(),
+      isMcpScopeEnforcementEnabled() || shouldForceScopeEnforcement(scopeContext),
       toolScopes
     );
     if (!scopeCheck.allowed) {
@@ -243,7 +250,7 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
 
   const server = new McpServer({
     name: "omniroute",
-    version: process.env.npm_package_version || "1.8.1",
+    version: APP_CONFIG.version,
   });
   const mcpDescriptionCompressionEnabled = readMcpDescriptionCompressionEnabled();
   const mcpAccessibilityConfig = readMcpAccessibilityConfig();
@@ -575,6 +582,8 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
     )
   );
 
+  registerPerplexityResearchTool(server, withScopeEnforcement);
+
   server.registerTool(
     "omniroute_x_search",
     {
@@ -718,17 +727,21 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
         // @ts-ignore: dynamic zod access
         inputSchema: toolDef.inputSchema,
       },
-      withScopeEnforcement(toolDef.name, async (args, extra) => {
-        try {
-          const parsedArgs = toolDef.inputSchema.parse(args ?? {});
-          // @ts-expect-error - handler type lost through dynamic Object.values() access
-          const result = await toolDef.handler(parsedArgs, extra);
-          return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
-        } catch (err) {
-          const msg = toSafeMcpErrorMessage(err, "Agent skill tool execution failed");
-          return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
-        }
-      })
+      withScopeEnforcement(
+        toolDef.name,
+        async (args, extra) => {
+          try {
+            const parsedArgs = toolDef.inputSchema.parse(args ?? {});
+            // @ts-expect-error - handler type lost through dynamic Object.values() access
+            const result = await toolDef.handler(parsedArgs, extra);
+            return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+          } catch (err) {
+            const msg = toSafeMcpErrorMessage(err, "Agent skill tool execution failed");
+            return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
+          }
+        },
+        toolDef.scopes
+      )
     );
   });
 
@@ -980,8 +993,7 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
         withScopeEnforcement(
           toolName,
           async (args, extra) => {
-            const scopeContext = resolveCallerScopeContext(extra, Array.from(MCP_ALLOWED_SCOPES));
-            const apiKeyId = scopeContext.callerId || "mcp";
+            const apiKeyId = (await resolveMcpToolOwnerId(extra)) ?? "mcp";
             try {
               const execution = await skillExecutor.execute(
                 skill.name,
@@ -1025,7 +1037,7 @@ export async function startMcpStdio(): Promise<void> {
   // stderr before this module's own imports evaluate.
   const server = createMcpServer();
   const transport = new StdioServerTransport();
-  const version = process.env.npm_package_version || "1.8.1";
+  const version = APP_CONFIG.version;
   const stopHeartbeat = startMcpHeartbeat({
     version,
     scopesEnforced: isMcpScopeEnforcementEnabled,
@@ -1054,8 +1066,22 @@ export async function startMcpStdio(): Promise<void> {
   }
 }
 
-// If this file is run directly, start stdio server
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, "/"))) {
+// If this file is run directly, start stdio server. Compare real filesystem
+// paths — a raw `import.meta.url.endsWith(argv[1])` never matches once the path
+// needs percent-encoding in the file: URL (any space, e.g. macOS "Application
+// Support"), and symlinked installs resolve elsewhere (#18556).
+function isMcpStdioEntryRunDirectly(): boolean {
+  if (!process.argv[1]) return false;
+  try {
+    return (
+      realpathSync(fileURLToPath(import.meta.url)) === realpathSync(resolvePath(process.argv[1]))
+    );
+  } catch {
+    return false;
+  }
+}
+
+if (isMcpStdioEntryRunDirectly()) {
   startMcpStdio().catch((err) => {
     console.error("[MCP] Fatal error:", err);
     process.exit(1);

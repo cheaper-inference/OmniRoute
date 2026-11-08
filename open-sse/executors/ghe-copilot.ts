@@ -128,7 +128,15 @@ export class GheCopilotExecutor extends GithubExecutor {
     credentials: ProviderCredentials | null = null
   ): string {
     const bareModel = this.stripPrefix(model);
-    const targetFormat = getModelTargetFormat("ghe-copilot", bareModel);
+    // Honor the per-request targetFormat (synced catalog / custom model)
+    // threaded by chatCore/executionCredentials.ts, same as GithubExecutor.buildUrl.
+    const overrideTargetFormat = (
+      credentials as { providerSpecificData?: { targetFormat?: unknown } } | null
+    )?.providerSpecificData?.targetFormat;
+    const targetFormat =
+      typeof overrideTargetFormat === "string"
+        ? overrideTargetFormat
+        : getModelTargetFormat("ghe-copilot", bareModel);
     // Claude models: ALWAYS route to the Anthropic-native /v1/messages shim
     // (same as github.com Copilot), matched on the model NAME so a Claude id
     // that is missing its registry targetFormat tag still gets the native shim
@@ -136,8 +144,12 @@ export class GheCopilotExecutor extends GithubExecutor {
     if ((targetFormat === "claude" || /claude/i.test(bareModel)) && this.config.messagesUrl) {
       return this.getMessagesBase(credentials);
     }
+    const hasExplicitNonResponsesOverride =
+      typeof overrideTargetFormat === "string" && overrideTargetFormat !== "openai-responses";
     if (
-      (targetFormat === "openai-responses" || /codex|^gpt-6/i.test(bareModel)) &&
+      (targetFormat === "openai-responses" ||
+        (!hasExplicitNonResponsesOverride &&
+          (/codex/i.test(bareModel) || /^gpt-(?:[6-9]|5\.[5-9])/i.test(bareModel)))) &&
       this.supportsResponsesEndpoint(bareModel)
     ) {
       return this.getResponsesBase(credentials);

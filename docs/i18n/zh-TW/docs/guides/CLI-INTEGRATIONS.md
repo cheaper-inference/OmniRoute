@@ -4,29 +4,13 @@
 
 ---
 
-關於共用的可執行檔資訊清單、受限制的子程序環境與持久化
-Gemini 設定，請參閱 [CLI 啟動契約](./CLI-LAUNCH-CONTRACTS.md)。
+有關共享可執行清單、受限子環境和持久Gemini設置，請參閱[CLI啟動合約](./CLI-LAUNCH-CONTRACTS.md)。
 
-OmniRoute 提供一系列 `setup-*` 命令，可將程式設計
-CLI（Codex、Claude Code、OpenCode、Cline，……）設定為使用 OmniRoute 作為其後端——因此
-工具只需與**單一**端點通訊，而 OmniRoute 會將請求路由至正確的提供者，並提供
-自動容錯移轉。每個命令都會從執行中的 OmniRoute（本機或遠端）讀取**即時**模型目錄，
-並將工具本身的設定檔寫入**您的**
-電腦。在工具支援的情況下，API 金鑰會透過環境變數引用。會持久保存工具本機環境檔案的命令
-將在下文中特別註明。
+OmniRoute提供了一系列`setup-*`命令，這些命令配置編碼CLI （Codex、 Claude Code 、 OpenCode、 Cline等）以使用OmniRoute作為其後端 - 因此該工具與**一**端點和OmniRoute透過自動回退路由到正確的提供者。每個命令讀取**居住**來自正在運行的OmniRoute （本地或遠端）的模型目錄，並將工具自己的設定檔寫入**你的**機器。只要工具支持， API鍵就會被環境變數引用。下面列出了儲存工具本機環境檔案的命令。
 
-此外還有一個通用啟動器——`omniroute run <target>`——它會在注入
-正確環境變數後啟動 `claude`、`codex`、`aider`、`goose`、`opencode`、`qwen` 或 `gemini`，
-完全不會寫入任何設定。目標及其別名來自標準資訊清單 `bin/cli/cli-manifest.mjs`
-（`claude-code|cc|anthropic`、`codex-cli|openai-codex|openai`、`goose-cli`、
-`open-code`、`qwen-code`、`gemini-cli`），而 `omniroute completion` 也會提供
-由同一資訊清單衍生的目標名稱。舊版的個別工具啟動器——
-`omniroute launch`（Claude Code）與 `omniroute launch-codex`（Codex）——仍然
-可用。
+還有一個通用啟動器 - `omniroute run <target>` - 可以產生`claude`、 `codex`、 `aider`、 `goose`、 `opencode`、 `qwen`、 `gemini`或`whycodes`並注入正確的環境，而無需編寫任何配置。目標及其別名來自規範清單`bin/cli/cli-manifest.mjs` （`claude-code|cc|anthropic`、 `codex-cli|openai-codex|openai`、 `goose-cli`、 `open-code`、 `qwen-code`、 `gemini-cli`、 `why-codes|why`）， `omniroute completion`提供相同的源自清單的目標字。舊的每個工具啟動器 - `omniroute launch` (Claude Code) 和`omniroute launch-codex` (Codex) - 仍然可用。
 
-您也可以在相同的本機／遠端情境中進行提供者導入。下列
-API 優先命令會將管理驗證與提供者
-憑證分開，且絕不會在結構化輸出中顯示憑證：
+提供者入職可從相同的local/remote上下文獲得。下面的 API-first 指令將管理身分驗證與提供者憑證分開，並且從不在結構化輸出中列印憑證：
 
 ```bash
 omniroute providers add glm --credential-env GLM_API_KEY --name work
@@ -36,113 +20,69 @@ omniroute providers edit <connection-id> --default-model glm/glm-5.2
 omniroute providers remove <connection-id> --yes
 ```
 
-對於指令碼，建議使用 `--credential-stdin` 或 `--credential-env`；`--credential`
-則保留供受控的本機使用。`providers remove` 在
-非互動式終端機上需要 `--yes`，而所有五個命令都會採用目前作用中的情境，或
-全域 `--base-url`／`--api-key` 選項。
+對於腳本，首選`--credential-stdin`或`--credential-env`； `--credential`保留供受控本地使用。 `providers remove`需要非互動式終端上的`--yes` ，並且所有五個命令都遵循活動上下文或全域`--base-url`/`--api-key`選項。
 
-提供者選取器會拒絕有歧義的 ID 前綴、名稱或提供者名稱；若有多個連線相符，請使用
-完整的連線 ID。建立與編輯命令會回讀已儲存的連線，而移除命令則會驗證該連線已無法讀取。
-匯入時會略過既有的提供者／名稱配對。匯入的項目無法覆寫
-提供給 CLI 的管理端點、情境或管理憑證。
+提供者選擇器拒絕不明確的ID前綴、名稱或提供者名稱；當多個連線匹配時使用全連線ID 。建立和編輯命令讀回已儲存的連接，刪除則驗證它不再可讀。導入會跳過現有的provider/name對。匯入的條目不能覆寫提供給CLI管理端點、上下文或管理憑證。
 
-如需對兩項功能最完整的整合進行一次性手動基礎設定，請參閱
-各工具的深入說明：
+對於兩個最豐富的整合的一次性、手寫的基本設置，請參閱每個工具的深入研究：
 
-- [Claude Code 設定](./CLAUDE-CODE-CONFIGURATION.md)
-- [Codex CLI 設定](./CODEX-CLI-CONFIGURATION.md)
-- [遠端模式](./REMOTE-MODE.md) — 從您的筆記型電腦操作遠端 OmniRoute（VPS／Tailnet）
-- [VS Code Copilot Chat](./VSCODE-COPILOT.md) — OmniCopilot 擴充功能；它也能在編輯器內替您執行這些
-  `setup-*` 命令
+- [Claude代碼配置](./CLAUDE-CODE-CONFIGURATION.md)
+- [Codex CLI配置](./CODEX-CLI-CONFIGURATION.md)
+- [遠端模式](./REMOTE-MODE.md)— 從您的筆記型電腦驅動遠端OmniRoute (VPS / Tailnet)
+- [VS代碼Copilot聊天](./VSCODE-COPILOT.md)— OmniCopilot擴充；它也可以從編輯器內部為您執行這些`setup-*`指令
 
 ---
 
-## 總表
+## 主表
 
-每個指令都會遵循**作用中的情境**（使用 `omniroute connect` 設定，請參閱
-[遠端模式](./REMOTE-MODE.md)），或使用明確的 `--remote <url> --api-key <key>` 旗標。
-下方的「本機與遠端」意指：未指定旗標時，目標為 `http://localhost:20128`；
-使用 `--remote`（或作用中的遠端情境）時，則會從該伺服器擷取目錄，並將設定寫入本機。
+每個指令都尊重**主動情境**（使用`omniroute connect`設置，請參閱[遠端模式](./REMOTE-MODE.md)）或顯式`--remote <url> --api-key <key>`標誌。下面的「本地與遠端」意味著：沒有任何標誌，它的目標是`http://localhost:20128`；使用`--remote` （或活動的遠端上下文），它從該伺服器取得目錄並在本機寫入設定。
 
-| 命令                       | 工具                    | 寫入內容                                                                                                                                                   | 主要旗標                                                                                                                                   | 本機與遠端 |
-| -------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
-| `omniroute setup-codex`    | OpenAI Codex CLI        | `~/.codex/<name>.config.toml` — 每個相容的文字模型各一個設定檔（`codex --profile <name>`）                                                                 | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | 兩者       |
-| `omniroute setup-claude`   | Claude Code             | `~/.claude/profiles/<name>/settings.json` — 每個符合的模型各一個設定檔（`CLAUDE_CONFIG_DIR`）                                                              | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | 兩者       |
-| `omniroute setup-opencode` | OpenCode（OpenAI 相容） | `~/.config/opencode/opencode.json` — 包含目錄中所有模型的 `omniroute` 提供者（`opencode -m omniroute/<model>`）                                            | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | 兩者       |
-| `omniroute setup-cline`    | Cline                   | `~/.cline/data/{globalState,secrets}.json`（CLI 模式）+ 輸出 VS Code 擴充功能設定                                                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | 兩者       |
-| `omniroute setup-kilo`     | Kilo Code               | `~/.local/share/kilo/auth.json`（CLI）+ 若存在 VS Code `settings.json`，則將 `kilocode.*` 合併至其中                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | 兩者       |
-| `omniroute setup-continue` | Continue / `cn` CLI     | `~/.continue/config.yaml` — `provider: openai` 模型，金鑰透過 `${{ secrets.OMNIROUTE_API_KEY }}` 提供                                                      | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | 兩者       |
-| `omniroute setup-cursor`   | Cursor                  | 不寫入任何內容 — 輸出應用程式內的操作步驟（Cursor 設定是不透明的 SQLite）                                                                                  | `--remote` `--api-key` `--only` `--port`                                                                                                   | 兩者       |
-| `omniroute setup-roo`      | Roo Code                | `~/.omniroute/roo-settings.json`（匯入文件）+ 若存在 VS Code `settings.json`，則設定 `roo-cline.autoImportSettingsPath`                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | 兩者       |
-| `omniroute setup-crush`    | Crush                   | `~/.config/crush/crush.json` — `openai-compat` 提供者，金鑰透過 `$OMNIROUTE_API_KEY` 提供                                                                  | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | 兩者       |
-| `omniroute setup-goose`    | Goose                   | `~/.config/goose/config.yaml`（`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`）+ 輸出環境變數設定方式                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 兩者       |
-| `omniroute setup-aider`    | Aider                   | `~/.aider.conf.yml`（`openai-api-base` + `model: openai/<id>`）+ 輸出環境變數設定方式                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 兩者       |
-| `omniroute setup-qwen`     | Qwen Code               | `~/.qwen/settings.json` — V4 `modelProviders.openai` 陣列 + `~/.qwen/.env` 中的 `OMNIROUTE_API_KEY`                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | 兩者       |
-| `omniroute setup-5dive`    | 5dive（代理程式叢集）   | 不在 `$HOME` 下寫入任何內容 — 透過 `5dive agent auth set` 寫入 5dive **驗證設定檔**（`/var/lib/5dive/auth-profiles/<name>/`）；僅限 root，於叢集主機上執行 | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | 兩者       |
-| `omniroute run <target>`   | 執行階段啟動（通用）    | 不寫入任何內容 — 使用正確的環境變數和引數啟動 `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`；Qwen 和 Gemini 使用暫時的隔離主目錄             | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | 兩者       |
-| `omniroute launch`         | Claude Code             | 不寫入任何內容 — 注入 `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` 後啟動 `claude`                                                                          | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | 兩者       |
-| `omniroute launch-codex`   | OpenAI Codex CLI        | 不寫入任何內容 — 透過 `-c` 旗標注入 `omniroute` 提供者後啟動 `codex`                                                                                       | `--remote` `--api-key` `--profile`（`-p`）`--port`                                                                                         | 兩者       |
+| 命令                       | 工具                       | 它寫了什麼                                                                                                                                       | 關鍵標誌                                                                                                                                   | 本地與遠端 |
+| -------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| `omniroute setup-codex`    | OpenAI Codex CLI           | `~/.codex/<name>.config.toml` — 每個相容文字模型一個設定檔 (`codex --profile <name>`)                                                            | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | 兩個都     |
+| `omniroute setup-claude`   | Claude代碼                 | `~/.claude/profiles/<name>/settings.json` — 每個匹配模型一個設定檔 (`CLAUDE_CONFIG_DIR`)                                                         | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | 兩個都     |
+| `omniroute setup-opencode` | OpenCode （相容於 openai） | `~/.config/opencode/opencode.json` — 每個目錄模型的`omniroute`提供者 (`opencode -m omniroute/<model>`)                                           | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | 兩個都     |
+| `omniroute setup-cline`    | Cline                      | `~/.cline/data/{globalState,secrets}.json` （CLI模式） +列印VS代碼擴充設定                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | 兩個都     |
+| `omniroute setup-kilo`     | 基洛程式碼                 | `~/.local/share/kilo/auth.json` (CLI) +將`kilocode.*`合併到VS代碼`settings.json`如果存在）                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | 兩個都     |
+| `omniroute setup-continue` | 繼續/ `cn` CLI             | `~/.continue/config.yaml` — `provider: openai`型號，透過`${{ secrets.OMNIROUTE_API_KEY }}`鑰                                                     | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | 兩個都     |
+| `omniroute setup-cursor`   | Cursor                     | 什麼都沒有 — 列印應用內步驟（Cursor配置是不透明的SQLite）                                                                                        | `--remote` `--api-key` `--only` `--port`                                                                                                   | 兩個都     |
+| `omniroute setup-roo`      | 袋鼠程式碼                 | `~/.omniroute/roo-settings.json` （導入文件）如果VS代碼`settings.json`存在，則+設定`roo-cline.autoImportSettingsPath`                            | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | 兩個都     |
+| `omniroute setup-crush`    | 壓碎                       | `~/.config/crush/crush.json` — `openai-compat`提供者，透過`$OMNIROUTE_API_KEY`密鑰                                                               | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | 兩個都     |
+| `omniroute setup-zed`      | Zed                        | `~/.config/zed/settings.json` — `openai_compatible.omniroute`提供者（≤ 25 支援工具的模型），透過`$OMNIROUTE_API_KEY`鑰                           | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | 兩個都     |
+| `omniroute setup-goose`    | 鵝                         | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) +列印 env 配方                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 兩個都     |
+| `omniroute setup-aider`    | 艾德爾                     | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) +列印 env 配方                                                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 兩個都     |
+| `omniroute setup-qwen`     | Qwen代碼                   | `~/.qwen/settings.json` — `~/.qwen/.env`的 V4 `modelProviders.openai`數組+ `OMNIROUTE_API_KEY`                                                   | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | 兩個都     |
+| `omniroute setup-5dive`    | 5dive（代理艦隊）          | `$HOME`下什麼都沒有－寫了 5dive**身份驗證設定檔**（`/var/lib/5dive/auth-profiles/<name>/`）透過`5dive agent auth set`；僅 root，在艦隊主機上執行 | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | 兩個都     |
+| `omniroute setup-whycodes` | WhyCodes                   | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`);路徑是`$WHYCODES_HOME/config.toml`或`~/.whycodes/config.toml`               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 兩個都     |
+| `omniroute run <target>`   | 運行時啟動（通用）         | 什麼都沒有－使用正確的 env 和 args 產生`claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` ； Qwen和Gemini使用臨時隔離住所    | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | 兩個都     |
+| `omniroute launch`         | Claude代碼                 | 什麼都沒有－產生`claude`並注入`ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                        | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | 兩個都     |
+| `omniroute launch-codex`   | OpenAI Codex CLI           | Nothing — 產生`codex`並透過`-c`標誌注入`omniroute`提供程序                                                                                       | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | 兩個都     |
 
-旗標注意事項（已在命令原始碼中驗證）：
+關於標誌的註解（在命令來源中驗證）：
 
-- `--remote <url>` — 從遠端 OmniRoute 擷取目錄（會覆寫 `--port`
-  與作用中的內容）。`--api-key <key>` 提供該伺服器的憑證
-  （預設使用 `OMNIROUTE_API_KEY` 環境變數，或作用中內容的權杖）。
-- `--only <patterns>` — 以逗號分隔的子字串；僅保留相符的模型 ID
-  （例如 `--only glm,kimi`）。適用於 `setup-codex`、`setup-claude`、
-  `setup-opencode`、`setup-continue`、`setup-cursor`、`setup-crush`。
-- `--dry-run` — 精確印出將寫入的內容，但不會變更檔案系統。
-  適用於所有 `setup-*` 命令，**但不包括** `setup-cursor`
-  （該命令本來就不會寫入檔案）。
-- `--model <id>` — 對於無法自動探索模型的工具，此選項為必要項目
-  （或以互動方式選取）：Cline、Kilo、Roo、Goose、Qwen、Aider、5dive。
-  這些工具也接受 `--yes` 以進行非互動式執行（此時必須提供 `--model`）。
-  `setup-opencode` 接受 `--model`，以設定預設的頂層模型。
-- `omniroute run` 上的 `--model <id>` 會遵循資訊清單中各目標的連接方式
-  （`bin/cli/cli-manifest.mjs`）：**aider** 會收到 `--model openai/<id>`，
-  **opencode** 會收到 `--model omniroute/<id>`（僅在 id 尚未包含該前綴時
-  才加入）；**qwen** 與 **gemini** 會原樣收到 id；**claude** 會透過
-  `ANTHROPIC_MODEL` 取得，**goose** 會透過 `GOOSE_MODEL` 取得，而
-  **codex** 則透過 `-c model_providers.omniroute.*` 引數取得。
-  **Qwen 是唯一強制要求 `--model` 的執行目標** — 未提供該選項的
-  `omniroute run qwen` 會顯示明確錯誤並以 `2` 結束。
-- `--port <port>` — 本機 OmniRoute 連接埠（預設為 `20128`；設定
-  `--remote` 時會忽略）。所有 `setup-*` 與兩個啟動器都支援此選項。
-- `omniroute run` 結束代碼：子 CLI 自身的結束代碼會原樣傳遞；
-  `2` = 引數無效（不支援的目標、缺少必要的 `--model`、容器防護）；
-  `127` = `PATH` 中不存在目標二進位檔；由 `SIGINT`/`SIGTERM`/`SIGHUP`
-  終止啟動時為 `130`/`143`/`129`；`1` = 其他執行階段啟動失敗。
-- 兩個啟動器（`launch`、`launch-codex`）接受 `--profile <name>`，
-  用來選取由 `setup-claude` / `setup-codex` 寫入的設定檔，並可將引數
-  直接傳遞給底層的 `claude` / `codex` 二進位檔。
+- `--remote <url>` — 從遠端OmniRoute取得目錄（覆蓋`--port`和活動上下文）。 `--api-key <key>`提供該伺服器的憑證（預設為`OMNIROUTE_API_KEY`環境變量，或活動上下文的令牌）。
+- `--only <patterns>` — 逗號分隔的子字串；僅保留符合的模型IDs （例如`--only glm,kimi`）。可用於`setup-codex`、 `setup-claude`、 `setup-opencode`、 `setup-continue`、 `setup-cursor`、 `setup-crush`、 `setup-zed`。
+- `--dry-run` — 準確列印將要寫入的內容，而無需觸及檔案系統。可用於每個`setup-*`指令**除了**`setup-cursor` （從不寫入檔案）。
+- `--model <id>` — 對於沒有模型自動發現功能的工具是必要的（或交互選擇）： Cline、 Kilo、 Roo、 Goose、 Qwen、 Aider、 5dive、 WhyCodes。這些工具也接受`--yes`進行非互動式運行（然後需要`--model`）。 `setup-opencode`使用`--model`設定預設的頂級模型。
+- `omniroute run`上的`--model <id>`遵循清單的每個目標連結 (`bin/cli/cli-manifest.mjs`)：**助理**接收`--model openai/<id>`和**開放程式碼**`--model omniroute/<id>` （僅當id尚未攜帶時才添加前綴）；**麴**和**雙子座**逐字接收 ID；**克勞德**透過`ANTHROPIC_MODEL`獲取，**鵝**通過`GOOSE_MODEL`,**原因碼**透過`-P omniroute -m <id>`和**法典**透過`-c model_providers.omniroute.*`參數。**Qwen是唯一硬需要`--model`的運行目標**— 沒有它的`omniroute run qwen`會退出`2` ，並出現明確錯誤。
+- `--port <port>` — 本機OmniRoute埠（預設`20128`，設定`--remote`時忽略）。存在於所有`setup-*`和兩個啟動器上。
+- `omniroute run`退出代碼：子CLI自己的退出代碼逐字傳播； `2` =無效參數（不支援的目標、缺少必需的`--model`、容器防護）； `127` =目標`1`進位檔案不在`PATH`中； `130`/`143` = `129`當啟動由`SIGINT` `SIGTERM` `SIGHUP`
+- 兩個啟動器（`launch`、 `launch-codex`）接受`--profile <name>`來選擇由`setup-claude` / `setup-codex`編寫的配置文件，以及底層`claude` / `codex`二進位檔案的傳遞參數。
 
-設定配方也共用互動式選擇器：
+互動式選擇器也由設定食譜共用：
 
 ```bash
-# 從作用中的本機或遠端模型目錄中選取，並設定目標。
+# Pick from the active local or remote model catalog and configure the target.
 omniroute configure claude
 omniroute configure opencode --provider glm
 omniroute configure qwen --model qwen/qwen3.8-max-preview --yes
 ```
 
-`configure` 目前會委派給已測試的 `codex`、`claude`、
-`opencode`、`qwen`、`aider`、`goose`、`cline`、`continue`、`kilo`
-與 `5dive` 配方。僅供 IDE 使用、MITM 及僅供指南使用的目錄項目，
-仍採用明確的 `setup-*`／手動流程，且不會顯示為可啟動的目標。
+`configure`目前委託給`codex`、 `claude`、 `opencode`、 `qwen`、 `aider`、 `goose`、 `cline`、 `continue`、 `kilo`和`5dive`的測試配方。僅 IDE、 MITM和僅指南目錄項目保留明確`setup-*`/手動流程，且不以可啟動目標呈現。
 
-> `setup-opencode` 是**輕量級、與 OpenAI 相容**的 OpenCode 整合。
-> 另有功能更豐富的外掛程式整合 — `omniroute setup opencode` —
-> 會安裝 `@omniroute/opencode-plugin`。這些是不同的命令；上表記錄的是
-> `setup-opencode`。
+> `setup-opencode`是**輕量級 openai 相容**OpenCode整合。還有一個更豐富的插件整合 - `omniroute setup opencode` - 它安裝`@omniroute/opencode-plugin`。它們是不同的命令；上表記錄了`setup-opencode`。
 >
-> 此外掛程式分為兩個套件，分別對應一個 OpenCode 主要版本，因為兩個
-> 載入器預期不同的進入點：
-> OpenCode v1 使用 `@omniroute/opencode-plugin`，
-> OpenCode v2 使用 `@omniroute/opencode-plugin-v2`。v2 套件是新增的
-> （`0.1.0`），並遵循仍在變動中的主機合約，因此它會讀取 OpenCode
-> 植入目錄草稿的結構，而不會預先假定其形式。若要安裝，請在
-> `opencode.json` 中新增 `plugins` 項目；`omniroute setup opencode`
-> 仍會安裝 v1 套件。選項與憑證查詢順序記載於套件 README。
+> 該插件有兩個包，每個OpenCode主要一個，因為兩個加載器期望不同的入口點： `@omniroute/opencode-plugin`用於OpenCode v1， `@omniroute/opencode-plugin-v2`用於OpenCode v2。 v2 套件是新的（`0.1.0`），並遵循仍在移動的主機合約，因此它將形狀OpenCode種子讀取到目錄草稿中，而不是假設一個。透過向`opencode.json`新增`plugins`條目來安裝它； `omniroute setup opencode`仍然安裝v1套件。選項和憑證查找順序位於包README。
 
 ---
 
@@ -245,23 +185,23 @@ API 金鑰會透過 **stdin**（`--api-key=-`）交給 5dive，因此絕不會�
 
 ---
 
-## Base URL 慣例（哪些工具需要 `/v1`）
+## 基本URL約定（哪些工具需要`/v1`）
 
-OmniRoute 在 `/v1` 提供 OpenAI 介面、在根路徑提供 Anthropic 介面，
-並在 `/v1beta` 提供原生 Gemini 介面。每項整合都會依照其工具預期的形式進行設定
-（已在命令原始碼中驗證）：
+OmniRoute在`/v1`露出OpenAI表面，在根處Anthropic表面，並在`/v1beta`暴露本機Gemini表面。每個整合都連接到其工具期望的形式（在命令來源中驗證）：
 
-| 整合                                                                       | 寫入的 Base URL | `/v1`？                                    |
-| -------------------------------------------------------------------------- | --------------- | ------------------------------------------ |
-| `setup-cline` (`openAiBaseUrl`)                                            | 根路徑          | 否 — Cline 會附加 `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | 根路徑          | 否 — Goose 會附加路徑                      |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | 根路徑          | 否 — LiteLLM 會附加 `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | 包含 `/v1`      | 是                                         |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | 根路徑          | 否 — Claude Code 會附加 `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | 包含 `/v1`      | 是                                         |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | 包含 `/v1`      | 是                                         |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | 根路徑          | 否 — SDK 會附加 `/v1beta/models/…`         |
-| `setup-5dive`（驗證設定檔中的 `ANTHROPIC_BASE_URL`）                       | 根路徑          | 否 — Claude Code 會附加 `/v1/messages`     |
+| 一體化                                                                     | 基礎URL編寫 | `/v1`?                                 |
+| -------------------------------------------------------------------------- | ----------- | -------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | 根          | 否 — Cline附加`/v1/chat/completions`   |
+| `setup-goose` (`OPENAI_HOST`)                                              | 根          | 否 — Goose 附加路徑                    |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | 根          | 否 — LiteLLM附加`/v1/chat/completions` |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | 與`/v1`     | 是的                                   |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | 與`/v1`     | 是的                                   |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | 根          | 否 — Claude代碼附加`/v1/messages`      |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | 與`/v1`     | 是的                                   |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | 與`/v1`     | 是的                                   |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | 根          | 否 — SDK附加`/v1beta/models/…`         |
+| `setup-5dive` （身份驗證設定檔中的`ANTHROPIC_BASE_URL` ）                  | 根          | 否 — Claude代碼附加`/v1/messages`      |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | 與`/v1`     | 是的 — WhyCodes發布`/chat/completions` |
 
 ---
 

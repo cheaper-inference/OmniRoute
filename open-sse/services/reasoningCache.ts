@@ -23,6 +23,7 @@ import {
   getReasoningCacheStats,
   setReasoningCache,
 } from "../../src/lib/db/reasoningCache.ts";
+import { isFeatureFlagEnabled } from "../../src/shared/utils/featureFlags.ts";
 import { isInternalReasoningPlaceholder } from "../utils/reasoningPlaceholder.ts";
 
 // ──────────────── Provider/Model Detection ────────────────
@@ -68,7 +69,7 @@ const REASONING_REPLAY_MODEL_PATTERNS = [
 ];
 
 const DEEPSEEK_V4_MODEL_PATTERN = /deepseek[-/]v4(?:[-.]\d+)?[-.](flash|pro)/i;
-const K3_REASONING_REPLAY_MODEL_PATTERN = /(?:^|\/)(?:kimi-)?k3(?:$|-)/i;
+const K3_REASONING_REPLAY_MODEL_PATTERN = /(?:^|\/)(?:kimi-)?k3(?:$|[.-])/i;
 const NATIVE_K27_REASONING_REPLAY_MODEL_PATTERN = /(?:^|\/)kimi-k2\.7-code(?:$|-)/i;
 
 export function isDeepSeekReasoningModel(params: {
@@ -203,13 +204,17 @@ export function cacheReasoning(
   cacheReasoningByKey(toolCallId, provider, model, reasoning);
 }
 
+function isReasoningReplayEnabled(): boolean {
+  return isFeatureFlagEnabled("REASONING_REPLAY_ENABLED");
+}
+
 export function cacheReasoningByKey(
   key: string,
   provider: string,
   model: string,
   reasoning: string
 ): void {
-  if (!key || !reasoning) return;
+  if (!isReasoningReplayEnabled() || !key || !reasoning) return;
   // ponytail: never store the internal replay placeholder — models echo it
   // and it poisons the cache (upstream echo loop, OmniRoute #9573).
   if (isInternalReasoningPlaceholder(reasoning)) return;
@@ -384,6 +389,11 @@ export function cacheReasoningFromAssistantMessage(
  * Memory first → DB fallback → null (miss).
  */
 export function lookupReasoning(toolCallId: string): string | null {
+  if (!isReasoningReplayEnabled()) return null;
+  return lookupStoredReasoning(toolCallId);
+}
+
+function lookupStoredReasoning(toolCallId: string): string | null {
   if (!toolCallId) {
     misses++;
     return null;

@@ -72,31 +72,32 @@ indicando il nome dell'endpoint e ciò che è andato perso, affinché un seletto
 
 ## Opzioni
 
-| Chiave                           | Valore predefinito                               | Note                                                                                                                                           |
-| -------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                    | ID del provider, ID dell'integrazione e prefisso sotto il quale vengono visualizzati i modelli                                                 |
-| `baseURL`                        | obbligatorio                                     | Radice del gateway, solo `http(s)`; il suffisso `/v1` viene aggiunto dove necessario                                                           |
-| `apiKey`                         | credenziale connessa, quindi `OMNIROUTE_API_KEY` | Chiave per la chat per `/v1/*`                                                                                                                 |
-| `managementReadToken`            | usa `apiKey` come valore di riserva              | Chiave per `/api/*` — in genere **non** è la stessa                                                                                            |
-| `displayName`                    | `"OmniRoute"`                                    | Nome del provider nel selettore                                                                                                                |
-| `timeoutMs`                      | `10000`                                          | Timeout di recupero per endpoint (le combinazioni automatiche usano 5 s)                                                                       |
-| `modelCacheTtlMs`                | `300000`                                         | TTL della cache del catalogo; uno snapshot su disco accelera gli avvii a freddo                                                                |
-| `timeouts`                       | usa `timeoutMs` come valore di riserva           | Tempi massimi per endpoint in ms: `models`, `combos`, `autoCombos`, `enrichment`                                                               |
-| `enrichment`                     | `true`                                           | Recupera nomi, prezzi e limiti del piano gratuito                                                                                              |
-| `providerTag`                    | `true`                                           | Anteponi al nome visualizzato il provider upstream verso cui viene instradato                                                                  |
-| `usableOnly`                     | `false`                                          | Mantieni solo i provider che il gateway segnala come predisposti                                                                               |
-| `showcasePerOwner`               | `10`                                             | Voci della vista predefinita mantenute per provider                                                                                            |
-| `freshPerOwner`                  | `10`                                             | Voci recenti della vista predefinita mantenute per provider                                                                                    |
-| `freshWindowDays`                | `90`                                             | Finestra temporale in giorni per il ramo delle voci recenti                                                                                    |
-| `usageMemory`                    | `true`                                           | Ripristina le voci escluse staticamente indicate dall'analisi dell'utilizzo degli ultimi 30 giorni (richiede un token di gestione)             |
-| `visibleModels` / `hiddenModels` | `[]`                                             | Elenchi di inclusione per corrispondenza esatta o del suffisso; l'esclusione ha la precedenza                                                  |
-| `geminiSanitization`             | `true`                                           | Rimuove dagli schemi degli strumenti le parole chiave JSON-Schema rifiutate da Gemini (gli strumenti `$ref` vengono inoltrati senza modifiche) |
-| `apiFormat.allowAnthropic`       | `false`                                          | Instrada gli ID inclusi nell'elenco consentito attraverso il blocco API di Anthropic                                                           |
-| `apiFormat.anthropicModels`      | `[]`                                             | ID completi dei modelli instradati verso Anthropic                                                                                             |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                 | Livello di dettaglio del logger                                                                                                                |
+| Chiave                           | Predefinito                                      | Note                                                                                                                                                                        |
+| -------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                    | ID del provider, ID dell’integrazione e prefisso con cui vengono visualizzati i modelli                                                                                     |
+| `baseURL`                        | obbligatorio                                     | Radice del gateway, solo `http(s)`; il suffisso `/v1` viene aggiunto dove necessario                                                                                        |
+| `apiKey`                         | credenziale connessa, quindi `OMNIROUTE_API_KEY` | Chiave per la chat per `/v1/*`                                                                                                                                              |
+| `managementReadToken`            | usa `apiKey` come valore di ripiego              | Chiave per `/api/*`: in genere **non** è la stessa                                                                                                                          |
+| `displayName`                    | `"OmniRoute"`                                    | Nome del provider nel selettore                                                                                                                                             |
+| `timeoutMs`                      | `10000`                                          | Timeout di recupero per endpoint (le combinazioni automatiche usano 5 s)                                                                                                    |
+| `modelCacheTtlMs`                | `300000`                                         | TTL della cache del catalogo; uno snapshot su disco velocizza gli avvii a freddo                                                                                            |
+| `timeouts`                       | usa `timeoutMs` come valore di ripiego           | Limiti temporali per endpoint in ms: `models`, `combos`, `autoCombos`, `enrichment`                                                                                         |
+| `enrichment`                     | `true`                                           | Recupera nomi, prezzi e limiti del piano gratuito                                                                                                                           |
+| `providerTag`                    | `true`                                           | Anteponi al nome visualizzato il provider upstream verso cui viene instradato                                                                                               |
+| `usableOnly`                     | `false`                                          | Mantieni solo i provider che il gateway segnala come configurati                                                                                                            |
+| `combosSource`                   | `"api"`                                          | `"models"` ignora `/api/combos` e pubblica le righe delle combinazioni di `/v1/models`; i filtri a livello di membro mantengono `"api"`                                     |
+| `showcasePerOwner`               | `10`                                             | Voci della vista predefinita mantenute per ciascun provider                                                                                                                 |
+| `freshPerOwner`                  | `10`                                             | Voci recenti della vista predefinita mantenute per ciascun provider                                                                                                         |
+| `freshWindowDays`                | `90`                                             | Finestra temporale in giorni per il ramo delle voci recenti                                                                                                                 |
+| `usageMemory`                    | `true`                                           | Ripristina le voci escluse staticamente e indicate dalle analisi di utilizzo degli ultimi 30 giorni (richiede un token di gestione)                                         |
+| `visibleModels` / `hiddenModels` | `[]`                                             | Liste di elementi consentiti con corrispondenza esatta o per suffisso; le esclusioni prevalgono; `*` pubblica l’intero catalogo (gli altri filtri continuano ad applicarsi) |
+| `geminiSanitization`             | `true`                                           | Rimuove dagli schemi degli strumenti le parole chiave JSON Schema rifiutate da Gemini (gli strumenti `$ref` vengono inoltrati senza modifiche)                              |
+| `apiFormat.allowAnthropic`       | `false`                                          | Instrada gli ID presenti nella lista degli elementi consentiti tramite il blocco API di Anthropic                                                                           |
+| `apiFormat.anthropicModels`      | `[]`                                             | ID completi dei modelli instradati verso Anthropic                                                                                                                          |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                 | Livello di dettaglio del logger                                                                                                                                             |
 
 La memoria di utilizzo è attiva per impostazione predefinita. Senza un token di gestione rimane inattiva
-(all'avvio viene registrato un avviso) e non viene ripristinato nulla.
+(viene registrato un avviso all’avvio) e non viene ripristinato nulla.
 
 ## Come mantenere aggiornato il catalogo
 
@@ -113,11 +114,16 @@ Imposta `"geminiSanitization": false` per disattivare questa funzionalità.
 
 ## Risoluzione dei problemi
 
-| Sintomo                                         | Causa                                                                                                                        |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Il selettore non mostra alcun modello OmniRoute | Non è stata trovata alcuna chiave (controlla l'avviso all'avvio), oppure il gateway non è raggiungibile                      |
-| ID modello grezzi, nessuna combo, nessun prezzo | Gli endpoint di gestione hanno rifiutato il token: imposta `managementReadToken`                                             |
-| Una sessione è vincolata a `opencode-<id>/…`    | Il plugin v1 pubblicava `opencode-<id>`; v2 pubblica direttamente `<id>`, quindi seleziona nuovamente il modello in `<id>/…` |
+| Sintomo                                                | Causa                                                                                                                                  |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Il selettore non mostra alcun modello OmniRoute        | Nessuna chiave risolta (controllare l'avviso all'avvio) oppure il gateway non è raggiungibile                                          |
+| ID modello grezzi, nessuna combinazione, nessun prezzo | Gli endpoint di gestione hanno rifiutato il token — impostare `managementReadToken`                                                    |
+| Catalogo `freeOnly` breve o vuoto                      | Token di gestione assente o rifiutato — leggere la riga di riepilogo dell'aggiornamento (conteggio `unmatched-free`) nel log dell'host |
+| Una sessione associata a `opencode-<id>/…`             | Il plugin v1 pubblicava `opencode-<id>`; la v2 pubblica direttamente `<id>`, quindi riselezionare il modello sotto `<id>/…`            |
+
+Le variabili d'ambiente devono raggiungere il processo server di opencode: quando l'host
+viene eseguito come servizio, la shell che esegue `opencode models` e l'ambiente
+del server sono distinti, quindi esportare la chiave dove il server può leggerla.
 
 ## Vedi anche
 

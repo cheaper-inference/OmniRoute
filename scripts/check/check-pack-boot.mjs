@@ -43,6 +43,14 @@ export const REQUIRED_MACHINE_TOKEN_RUNTIME_FILES = Object.freeze([
   "node_modules/node-machine-id/index.js",
 ]);
 
+// Translated /docs pages (2026-11-03): the tarball carries the docs mirrors under dist/docs, and
+// the sanitizer that renders them imports jsdom, which npm installs as a declared dependency.
+// Either one missing and every translated page silently falls back to English.
+export const REQUIRED_DOCS_I18N_RUNTIME_FILES = Object.freeze([
+  "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md",
+  "node_modules/jsdom/package.json",
+]);
+
 /** Parse `npm pack --json` output into the generated tarball filename. */
 export function pickTarball(packJsonOutput) {
   const parsed = JSON.parse(packJsonOutput);
@@ -79,6 +87,12 @@ export function findMissingSqlJsRuntimeFiles(packageRoot, exists = fs.existsSync
 
 export function findMissingMachineTokenRuntimeFiles(packageRoot, exists = fs.existsSync) {
   return REQUIRED_MACHINE_TOKEN_RUNTIME_FILES.filter(
+    (relativePath) => !exists(path.join(packageRoot, relativePath))
+  );
+}
+
+export function findMissingDocsI18nRuntimeFiles(packageRoot, exists = fs.existsSync) {
+  return REQUIRED_DOCS_I18N_RUNTIME_FILES.filter(
     (relativePath) => !exists(path.join(packageRoot, relativePath))
   );
 }
@@ -216,9 +230,10 @@ function hasExited(child) {
  * reap, throw, so boot #2 cannot start against a port a zombie still holds.
  *
  * The child is spawned with detached:true, so it leads its own process group and
- * -child.pid signals the whole tree, not just the launcher.
+ * -child.pid signals the whole tree, not just the launcher. Exported for reuse by the
+ * local candidate loop (scripts/dev/candidate.mjs), which boots packaged artifacts the same way.
  */
-async function stopChild(child, graceMs = 30_000) {
+export async function stopChild(child, graceMs = 30_000) {
   if (!child?.pid) return;
   // Fast path: already reaped (crashed mid-smoke, or exited before this call) — nothing
   // left to signal or wait for.
@@ -455,6 +470,13 @@ async function main() {
       );
     }
     log("installed package contains the node-machine-id runtime");
+    const missingDocsI18nFiles = findMissingDocsI18nRuntimeFiles(packageRoot);
+    if (missingDocsI18nFiles.length > 0) {
+      throw new Error(
+        `installed package is missing the translated-docs runtime contract: ${missingDocsI18nFiles.join(", ")}`
+      );
+    }
+    log("installed package contains the translated docs mirrors and jsdom");
 
     const port = pickPort();
     const dataDir = path.join(tmp, "data");

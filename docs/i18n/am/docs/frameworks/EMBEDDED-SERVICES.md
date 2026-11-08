@@ -4,13 +4,9 @@
 
 ---
 
-> **ስሪት:** v3.8.44
-> **ለመጨረሻ ጊዜ የተዘመነው:** 2026-09-09
-> **ታዳሚዎች:** የተካተቱ አገልግሎቶችን (9Router, CLIProxyAPI, Mux, Bifrost, open-wa) የሚጨምሩ፣ የሚያስተዳድሩ ወይም ስህተት የሚፈልጉ መሐንዲሶች።
+> **ስሪት፡** v3.8.44** መጨረሻ የዘመነው፡-** 2026-10-28** ታዳሚዎች፡-** መሐንዲሶች የተካተቱ አገልግሎቶችን ማከል፣ ማቆየት ወይም ማረም (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box)።
 
-የተካተቱ አገልግሎቶች OmniRoute የሚጭናቸው፣ የሚቆጣጠራቸው እና
-እንደ ሙሉ የማዘዋወሪያ መዳረሻዎች የሚያቀርባቸው፣ በአካባቢው የተጫኑ የሂደት ተጓዳኝ መሣሪያዎች ናቸው። ከውጫዊ አቅራቢዎች (API ቁልፎችን በመጠቀም
-በበይነመረብ የሚደረስባቸው) በተለየ፣ የተካተቱ አገልግሎቶች ከOmniRoute ጋር በአንድ ማሽን ላይ ይሰራሉ እና በloopback በኩል ይገናኛሉ።
+የተከተቱ አገልግሎቶች OmniRoute የሚጭኑት፣ የሚቆጣጠሩት እና እንደ አንደኛ ደረጃ የማዞሪያ ኢላማ የሚያጋልጡ በአካባቢው የተጫኑ የሂደት የጎን መኪና መሳሪያዎች ናቸው። እንደ ውጫዊ አቅራቢዎች (በበይነመረብ ላይ በ API ቁልፎች ይደርሳሉ) ፣ የተከተቱ አገልግሎቶች ከ OmniRoute ጋር በተመሳሳይ ማሽን ይሰራሉ እና በ loopback ይገናኛሉ።
 
 ---
 
@@ -29,36 +25,38 @@
 
 ## 1. አጠቃላይ እይታ
 
-### የተካተቱ አገልግሎቶች ለምን?
+### ለምን የተካተቱ አገልግሎቶች?
 
-ስድስት አገልግሎቶች ተካትተዋል፦
+ስምንት አገልግሎቶች ተካትተዋል፡-
 
-| አገልግሎት          | npm ጥቅል                       | ነባሪ ወደብ | ዓላማ                                                                                                                                                       |
-| --------------- | ----------------------------- | :-----: | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                     |  20130  | OmniRoute እንደ ንዑስ አቅራቢ ሊጠቀምበት የሚችል AI ራውተር። ሞዴሎች በ`9router/{sub}/{model}` መልክ ይቀርባሉ                                                                       |
-| **CLIProxyAPI** | GitHub የልቀት ባይነሪ (`cliproxy`) |  8317   | ለAnthropic CLI ማረጋገጫ ፍሰቶች የአካባቢ ፕሮክሲ አስማሚ። OAuth ቶከኖች ጊዜያቸው ሲያልቅ የመጠባበቂያ ራውቲንግ ያቀርባል                                                                      |
-| **Mux**         | `mux` (ያለ በይነገጽ `mux server`) |  8322   | የአካባቢ ወኪል-ማቀናበሪያ daemon (coder/mux)። የሕይወት ዑደቱ ብቻ ይተዳደራል — የራውቲንግ ዒላማ አይደለም (የLLM ፕሮክሲ ማድረግ የለም)።                                                         |
-| **Bifrost**     | `@maximhq/bifrost`            |  8080   | በGo የተሠራ AI-ጌትዌይ ሪሌይ ባክኤንድ። በሚሠራበት ጊዜ በሪሌይ መስመሩ (`/v1/relay/`) በራስ-ሰር ይመረጣል                                                                               |
-| **Dario**       | `@askalf/dario`               |  3456   | የClaude ደንበኝነት ምዝገባ ፕሮክሲ — Claude-Code ቅርጽ ላለው ትራፊክ የCLIProxyAPI አማራጭ/የመጠባበቂያ መፍትሔ፤ የገባው ቁልፍ የ`/admin/*` OAuth መቆጣጠሪያ ክፍሉን የሚጠብቅ `DARIO_ADMIN_TOKEN` ይሆናል |
-| **open-wa**     | `@open-wa/wa-automate`        |  8323   | WhatsApp Web አውቶሜሽን (ያለ በይነገጽ Chromium በPuppeteer በኩል)። የሕይወት ዑደቱ ብቻ ይተዳደራል — የራውቲንግ ዒላማ አይደለም።                                                           |
+| አገልግሎት          | npm ጥቅል                       | ነባሪ ወደብ | ዓላማ                                                                                                                                                                                                                    |
+| --------------- | ----------------------------- | :-----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9 ራውተር**      | `9router`                     |  20130  | OmniRoute እንደ ንዑስ አቅራቢ ሊጠቀምበት የሚችል AI ራውተር። እንደ `9router/{sub}/{model}` የተጋለጡ ሞዴሎች                                                                                                                                     |
+| **CLIProxyAPI** | GitHub ልቀቅ ሁለትዮሽ (`cliproxy`) |  8317   | የአካባቢ ተኪ አስማሚ ለ Anthropic CLI auth ፍሰቶች። OAuth ቶከኖች የአገልግሎት ጊዜያቸው ሲያልቅ የመልሶ ማዘዋወርን ያቀርባል                                                                                                                               |
+| **ሙክስ**         | `mux` (ራስ የሌለው `mux server`)  |  8322   | የአካባቢ ወኪል-ኦርኬስትራ ዴሞን (coder/mux)። በህይወት ሳይክል የሚተዳደረው — ብቻ የማዞሪያ ዒላማ አይደለም ( LLM ተኪነት የለም)።                                                                                                                             |
+| **ቢፍሮስት**       | `@maximhq/bifrost`            |  8080   | የ AI-ጌትዌይ ቅብብል የኋላ የኋላ። በሚሮጥበት ጊዜ በራስ-ሰር የተመረጠ በሪሌይ መንገድ (`/v1/relay/`)                                                                                                                                                |
+| **ዳሪዮ**         | `@askalf/dario`               |  3456   | የክላውድ-የደንበኝነት ምዝገባ ተኪ — alternative/failover ወደ CLIProxyAPI ለ Claude-Code ቅርጽ ያለው ትራፊክ; የተወጋው ቁልፍ `DARIO_ADMIN_TOKEN` gating የ `/admin/*` OAuth መቆጣጠሪያ አውሮፕላን ይሆናል።                                                    |
+| **ክፍት-ዋ**       | `@open-wa/wa-automate`        |  8323   | WhatsApp የድር አውቶሜሽን (ጭንቅላት የሌለው Chromium በአሻንጉሊት በኩል)። የህይወት ዑደት የሚተዳደረው — ብቻ የማዞሪያ ኢላማ አይደለም።                                                                                                                         |
+| **LLMLingua**   | `@atjsh/llmlingua-2`          |  20135  | ፈጣን-መጭመቂያ sidecar — እውነተኛ LLMLingua-2 ONNX ሞዴል (JS/TS የ Microsoft's አልጎሪዝም ወደብ)። `open-sse/services/compression/engines/llmlingua/index.ts` በ HTTP ላይ `/compress` ወደ እሱ ይልካል። በህይወት ሳይክል የሚተዳደረው — ብቻ የማዞሪያ ኢላማ አይደለም። |
+| **መዘመር-ሳጥን**    | GitHub ልቀቅ ሁለትዮሽ (`singbox`)  |  20140  | TPROXY sidecar backing `applyTproxy()`'s transparent-proxy interception (`src/mitm/tproxy/setup.ts`)። ጫኚው የተሰካውን፣ የተረጋገጠውን መለቀቅ ያወርዳል። የህይወት ዑደት የሚተዳደረው — ብቻ የማዞሪያ ኢላማ አይደለም ( LLM ፕሮክሲ የለም)                          |
 
-ስድስቱም ተመሳሳይ የቁጥጥር ሞዴል ይከተላሉ፦
+ስምንቱም ተመሳሳይ የቁጥጥር ሞዴል ይከተላሉ፡-
 
-- OmniRoute በ`DATA_DIR/services/{name}/` ስር ይጭናቸዋል (ከOmniRoute የራሱ `package.json` ተለይተው)
-- OmniRoute እንደ ልጅ ሂደቶች ያስነሳቸዋል እና ይከታተላቸዋል
-- OmniRoute ጊዜያዊ API ቁልፍን ወደ ልጅ ሂደቱ አካባቢ ያስገባል፣ እና አገልግሎት ሳይቋረጥ ይቀይረዋል (ተፈጻሚ በሚሆንበት ጊዜ)
-- ሁሉም የአስተዳደር መስመሮች (`/api/services/*`) **LOCAL_ONLY** ናቸው — ከloopback ብቻ ተደራሽ ናቸው (ጥብቅ ደንብ #17)
+- OmniRoute በ `DATA_DIR/services/{name}/` ስር ይጭናቸዋል (ከ OmniRoute የራሱ `package.json` የተገለለ)
+- OmniRoute እንደ ሕፃን ሂደቶች ይፈልቃል እና ይከታተላቸዋል
+- OmniRoute ጊዜ ያለፈበት API ቁልፍ በልጁ አካባቢ ውስጥ በመርፌ ያለማቋረጥ ይሽከረከራል (የሚመለከተው ከሆነ)
+- ሁሉም የአስተዳደር መንገዶች (`/api/services/*`) ናቸው።**LOCAL_ONLY** — ከ loopback ብቻ ተደራሽ ነው (ከባድ ህግ ቁጥር 17)
 
-### ቁልፍ ውሳኔዎች (ከንድፍ ዕቅዱ)
+### ቁልፍ ውሳኔዎች (ከዲዛይን እቅድ)
 
-| ውሳኔ                           | እሴት                                                               |
-| ----------------------------- | ----------------------------------------------------------------- |
-| ከዳሽቦርድ ወደ 9Router ቤተኛ UI መዳረሻ | Reverse proxy በ`/dashboard/providers/services/9router/embed/*`    |
-| የመጫኛ ዘዴ                       | `npm install {package}` በ`execFile` በኩል (የshell መስፋፋት የለም)        |
-| የአጠቃቀም ሁኔታ                    | አቅራቢው በራውቲንግ ሞተሩ ውስጥ እንደ `9router/{sub}/{model}` ይመዘገባል           |
-| የAPI ቁልፍ አስተዳደር               | OmniRoute ያመነጫል፣ በማከማቻ ላይ ያመሰጥራል (AES-256-GCM)፣ እና በenv በኩል ያስገባል |
-| የዳሽቦርድ መገኛ                    | `/dashboard/providers/services` (ሦስት ትሮች)                         |
-| ራስ-ሰር መጀመር                    | ለእያንዳንዱ አገልግሎት የሚቀያየር፣ በነባሪ OFF                                   |
+| ውሳኔ                         | ዋጋ                                                               |
+| --------------------------- | ---------------------------------------------------------------- |
+| ወደ 9 ራውተር ቤተኛ UI ዳሽቦርድ መድረስ | ተገላቢጦሽ ተኪ በ `/dashboard/providers/services/9router/embed/*`      |
+| የመጫኛ ዘዴ                     | `npm install {package}` በ `execFile` በኩል (የሼል ጣልቃ ገብነት የለም)      |
+| የፍጆታ ሁነታ                    | አቅራቢው በማዞሪያ ሞተር ውስጥ እንደ `9router/{sub}/{model}` ተመዝግቧል           |
+| API ቁልፍ አስተዳደር              | OmniRoute ያመነጫል፣ በእረፍት (AES-256-GCM) ያመስጥራል፣ እና በ env በኩል ያስገባል። |
+| ዳሽቦርድ አካባቢ                  | `/dashboard/providers/services` (ሶስት ትሮች)                        |
+| በራስ-ሰር ጀምር                  | በአገልግሎት ቀያይር፣ ነባሪ OFF                                            |
 
 ---
 
@@ -66,12 +64,12 @@
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  ንብርብር 1 — UI                                                     │
-│  /dashboard/providers/services  (ትሮች፦ CLIProxyAPI | 9Router | Mux) │
-│  ቀጥታ ምዝግቦች (SSE)፣ ማስጀመር/ማቆም/ዳግም ማስጀመር/ማዘመን፣ ቅንብሮች፣ መጫን │
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Shell + በ?tab= የትር ማስተላለፊያ        │
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -79,7 +77,7 @@
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  ንብርብር 2 — API (LOCAL_ONLY — loopback ብቻ)                        │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -88,73 +86,74 @@
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (የተገላቢጦሽ HTTP + WebSocket ፕሮክሲ → ወደ 9Router upstream)        │
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  መግቢያ መቆጣጠሪያ፦ LOCAL_ONLY_API_PREFIXES "/api/services/" እና      │
-│        "/dashboard/providers/services/*/embed/" ያካትታል              │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
+│        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ በሂደቱ ውስጥ የሚደረጉ ጥሪዎች
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  ንብርብር 3 — ServiceSupervisor (src/lib/services/)                 │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   አጠቃላይ ተቆጣጣሪ (child_process.spawn)         │
-│    ├── መጫን፦      execFile('npm', ['install', pkg, '--prefix'])     │
-│    ├── ማስጀመር፦   spawn(node, [entrypoint], {env, cwd})             │
-│    ├── api_key፦    crypto.randomBytes(32) → env NINEROUTER_API_KEY │
-│    ├── ወደብ፦      20130 ለ9Router (ሊዋቀር የሚችል)                     │
-│    ├── ምዝግቦች፦   stdio ring buffer 5 MB → SSE ክስተቶች              │
-│    ├── ጤና፦        HTTP GET /health በየ2–5 s፣ የዘገየ መልሶ ማግኛ       │
-│    └── የሕይወት ዑደት፦ SIGTERM 15 s → SIGKILL                       │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
+│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       ሂደቱ ሲጀምር ሁሉንም SERVICES[] ያስነሳል               │
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       ወቅታዊ GET /v1/models → service_models ሰንጠረዥ   │
-│  ringBuffer.ts      ክብ ቅርጽ ያለው የምዝግብ ቋት (ለእያንዳንዱ አገልግሎት 5 MB)│
-│  healthCheck.ts     በየጊዜው የሚጠይቅ HTTP የጤና ምርመራ                   │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (የመጫኛ አስማሚዎች)                              │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ ከOpenAI ጋር ተኳሃኝ HTTP (loopback)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  ንብርብር 4 — አቅራቢ / ማስተላለፊያ                                    │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    ለእያንዳንዱ ጥያቄ ወደቡን እና API ቁልፉን እንደገና ያፈላልጋል (መሸጎጫ የለም)።│
-│    ፕሮክሲ ከማድረጉ በፊት ከሞዴል id የ"9router/" ቅድመ ቅጥያን ያስወግዳል።  │
-│    ተቆጣጣሪው በ"running" ሁኔታ ካልሆነ 503 service_not_running ይመልሳል። │
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    የ"9router" ግቤት፦ isEmbeddedService: true                      │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    ሞዴሎች እንደ "9router/{sub}/{model}" (ቅድመ ቅጥያ ተጨምሮባቸው) ይከማቻሉ።│
-│    በmodelSync.ts በየ5 min ይመሳሰላሉ።                              │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Mux የሕይወት ዑደቱ ብቻ የሚተዳደር ነው (ንብርብሮች 1-3) — ይህ የagent     │
-│  ማቀናበሪያ daemon እንጂ LLM ፕሮክሲ አይደለም፤ ስለዚህ የንብርብር 4        │
-│  executor/provider ግቤት የለውም፣ እንዲሁም ፈጽሞ የማስተላለፊያ ዒላማ አይሆንም።│
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### ቁልፍ የምንጭ ፋይሎች
+### ቁልፍ ምንጭ ፋይሎች
 
-| ፋይል                                         | ሚና                                        |
-| ------------------------------------------- | ----------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | ዋና ክፍል፦ የሕይወት ዑደት፣ መቆለፊያ፣ ጤናማነት፣ የቀለበት ቋት |
-| `src/lib/services/bootstrap.ts`             | የሂደት-ደረጃ ምዝገባ እና ራስ-ሰር ማስጀመር              |
-| `src/lib/services/registry.ts`              | ነጠላ አብነት ካርታ `መሣሪያ → ተቆጣጣሪ`               |
-| `src/lib/services/apiKey.ts`                | የቁልፍ ማመንጨት፣ AES-256-GCM በማከማቻ ላይ ምስጠራ     |
-| `src/lib/services/modelSync.ts`             | ወቅታዊ የሞዴል ማመሳሰል (5 ደቂቃ) + ሲጠየቅ            |
-| `src/lib/services/ringBuffer.ts`            | SSE ምዝገባ ያለው 5 MB ክብ የምዝግብ ቋት             |
-| `src/lib/services/healthCheck.ts`           | የHTTP ጤናማነት ምርመራ (ክፍተቱ ሊዋቀር የሚችል)         |
-| `src/lib/services/installers/ninerouter.ts` | ለ9Router npm መጫን/ማዘመን/ማራገፍ                |
-| `src/lib/services/installers/cliproxy.ts`   | ለCLIProxyAPI npm መጫን/ማዘመን/ማራገፍ            |
-| `src/lib/services/installers/mux.ts`        | ለMux npm መጫን/ማዘመን/ማራገፍ                    |
-| `src/lib/services/installers/openwa.ts`     | ለopen-wa npm መጫን/ማዘመን/ማራገፍ                |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` ረዳት               |
-| `src/app/api/services/[name]/logs/route.ts` | የጋራ SSE ምዝግቦች መዳረሻ                        |
-| `open-sse/executors/ninerouter.ts`          | የአቅራቢ አስፈጻሚ (ንብርብር 4)                     |
+| ፋይል                                         | ሚና                                         |
+| ------------------------------------------- | ------------------------------------------ |
+| `src/lib/services/ServiceSupervisor.ts`     | ዋና ክፍል፡ የሕይወት ዑደት፣ መቆለፊያ፣ ጤና፣ የቀለበት መያዣ    |
+| `src/lib/services/bootstrap.ts`             | የሂደት-ደረጃ ምዝገባ እና ራስ-ጀምር                    |
+| `src/lib/services/registry.ts`              | ነጠላ ካርታ `tool → supervisor`                |
+| `src/lib/services/apiKey.ts`                | ቁልፍ ትውልድ፣ በእረፍት ጊዜ AES-256-GCM ምስጠራ        |
+| `src/lib/services/modelSync.ts`             | ወቅታዊ ሞዴል ማመሳሰል (5 ደቂቃ) + በትዕዛዝ ላይ          |
+| `src/lib/services/ringBuffer.ts`            | 5 MB ክብ ሎግ ቋት ከ SSE ሰብስክራይብ ያድርጉ           |
+| `src/lib/services/healthCheck.ts`           | HTTP የጤና ምርመራ (ሊዋቀር የሚችል ክፍተት)             |
+| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall ለ 9 ራውተር      |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall ለ CLIProxyAPI |
+| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall ለሙክስ          |
+| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall ለ ክፍት-wa      |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall ለ LLMLingua   |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` አጋዥ                |
+| `src/app/api/services/[name]/logs/route.ts` | የተጋራ SSE ምዝግብ ማስታወሻዎች የመጨረሻ ነጥብ            |
+| `open-sse/executors/ninerouter.ts`          | አቅራቢ (ንብርብር 4)                             |
 
 ---
 
@@ -211,56 +210,52 @@
 
 ## 4. API ማጣቀሻ
 
-በ`/api/services/` ስር ያሉ ሁሉም መስመሮች **LOCAL_ONLY** ናቸው (loopback ብቻ፣ ጥብቅ ደንብ #17)።
-loopback ያልሆኑ ጥያቄዎች የማረጋገጫ ቶከኑ ምንም ይሁን ምን `403 LOCAL_ONLY` ይቀበላሉ።
+ሁሉም መንገዶች በ `/api/services/` ስር ናቸው።**LOCAL_ONLY** (loopback ብቻ፣ ጠንካራ ህግ ቁጥር 17)። የድግግሞሽ ያልሆኑ ጥያቄዎች የአውት ቶከን ምንም ቢሆኑም `403 LOCAL_ONLY` ይቀበላሉ።
 
-### 4.1 የ9Router መዳረሻዎች (11 መስመሮች)
+### 4.1 9 ራውተር የመጨረሻ ነጥቦች (11 መስመሮች)
 
 #### `POST /api/services/9router/install`
 
-9Routerን ከnpm ይጫናል። የራሱን `package.json` እና `node_modules/` የያዘ
-`DATA_DIR/services/9router/` ይፈጥራል። ከOmniRoute የራሱ ጥገኞች ጋር አይጋጭም።
+9 ራውተርን ከ npm ጫን። `DATA_DIR/services/9router/` በራሱ `package.json` እና `node_modules/` ይፈጥራል። ከ OmniRoute የራሱ ዴፕስ ጋር አይጋጭም።
 
-**የጥያቄ ይዘት** (ሁሉም አማራጭ ናቸው):
+**አካል ይጠይቁ** (ሁሉም አማራጭ)
 
 ```json
 { "version": "latest" }
 ```
 
-| መስክ       | ዓይነት     | ነባሪ        | መግለጫ                          |
-| --------- | -------- | ---------- | ----------------------------- |
-| `version` | `string` | `"latest"` | የሚጫነው የnpm ስሪት መለያ ወይም semver |
+| መስክ       | ዓይነት     | ነባሪ        | መግለጫ                        |
+| --------- | -------- | ---------- | --------------------------- |
+| `version` | `string` | `"latest"` | ለመጫን npm ስሪት መለያ ወይም semver |
 
-**ምላሾች:**
+**ምላሾች፡-**
 
 | ሁኔታ   | መግለጫ                                                   |
 | ----- | ------------------------------------------------------ |
 | `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }` |
-| `400` | ልክ ያልሆነ የጥያቄ ይዘት (የZod ማረጋገጫ አለመሳካት)                   |
-| `409` | ቀድሞውኑ በመጫን ላይ ነው (መቆለፊያው ተይዟል)                         |
-| `500` | የnpm ጭነት አልተሳካም — ለግልጽ የስህተት መልዕክት `message`ን ይመልከቱ    |
+| `400` | ልክ ያልሆነ የጥያቄ አካል (Zod ማረጋገጫ አለመሳካት)                    |
+| `409` | ቀድሞውንም በመጫን ላይ (መቆለፊያ ተይዟል)                            |
+| `500` | npm መጫን አልተሳካም — ለጓደኛ ስህተት `message` ይመልከቱ             |
 
-**ማስታወሻዎች:** `execFile('npm', [...])`ን ይጠቀማል — shell የለም፣ interpolation የለም (ጥብቅ ደንብ #13)።
-የEACCES ስህተቶች ግልጽና ተስማሚ መልዕክቶች ሆነው ይቀርባሉ።
+**ማስታወሻዎች፡-** `execFile('npm', [...])` — ምንም ሼል የለም, ምንም interpolation (ከባድ ህግ #13) ይጠቀማል. EACCES ስህተቶች እንደ ወዳጃዊ መልዕክቶች ብቅ አሉ።
 
 ---
 
 #### `POST /api/services/9router/start`
 
-9Routerን ያስጀምራል። አስቀድሞ ካልተመዘገበ supervisorን ይመዘግባል፣ ከዚያም
-`supervisor.start()`ን ይጠራል። አስቀድሞ እየሰራ ከሆነ በተደጋጋሚ መጥራት ተመሳሳይ ውጤት ይሰጣል።
+9 ራውተርን ያስጀምሩ። ቀድሞ ካልተመዘገበ ተቆጣጣሪን ይመዘግባል፣ ከዚያ ይደውሉ `supervisor.start()`. ቀድሞውንም በሚሮጥበት ጊዜ ደካማ።
 
-**የጥያቄ ይዘት:** የለም
+**አካል ጠይቅ፡** ምንም
 
-**ምላሾች:**
+**ምላሾች፡-**
 
-| ሁኔታ   | መግለጫ                                              |
-| ----- | ------------------------------------------------- |
-| `200` | `ServiceStatus` ነገር (ከታች ያለውን schema ይመልከቱ)       |
-| `409` | 9Router አልተጫነም (`status: "not_installed"`)        |
-| `503` | ማስጀመር አልተሳካም (የprocess ስህተት — `lastError`ን ይመልከቱ) |
+| ሁኔታ   | መግለጫ                                         |
+| ----- | -------------------------------------------- |
+| `200` | `ServiceStatus` ነገር (ከዚህ በታች ያለውን ንድፍ ይመልከቱ) |
+| `409` | 9ራውተር አልተጫነም (`status: "not_installed"`)     |
+| `503` | ጅምር አልተሳካም (የሂደቱ ስህተት — `lastError` ይመልከቱ)   |
 
-**የServiceStatus schema:**
+**ServiceStatus schema:**
 
 ```json
 {
@@ -278,84 +273,78 @@ loopback ያልሆኑ ጥያቄዎች የማረጋገጫ ቶከኑ ምንም ይ
 
 #### `POST /api/services/9router/stop`
 
-9Routerን በሥርዓት ያቆማል። SIGTERMን ይልካል፣ 15 s ይጠብቃል፣ ከዚያም አሁንም እየሰራ ከሆነ SIGKILLን ይልካል።
-አስቀድሞ ቆሞ ከሆነ በተደጋጋሚ መጥራት ተመሳሳይ ውጤት ይሰጣል።
+9 ራውተርን በጸጋ ያቁሙ። SIGTERM ን ይልካል፣ 15 ሰከንድ ይጠብቃል፣ ከዚያ SIGKILL በህይወት ካለ። ቀድሞውንም ሲቆም የማይመች።
 
-**የጥያቄ ይዘት:** የለም
+**አካል ጠይቅ፡** ምንም
 
-**ምላሾች:**
+**ምላሾች፡-**
 
-| ሁኔታ   | መግለጫ                               |
-| ----- | ---------------------------------- |
-| `200` | `ServiceStatus` (state: "stopped") |
-| `503` | ማቆም ሳይጠበቅ አልተሳካም                   |
+| ሁኔታ   | መግለጫ                        |
+| ----- | --------------------------- |
+| `200` | `ServiceStatus` (ግዛት: "ቆመ") |
+| `503` | ማቆም ሳይታሰብ አልተሳካም።           |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-በክወና መቆለፊያው ስር `stop()`ን ከዚያም `start()`ን ከመጥራት ጋር ተመሳሳይ ነው።
+በኦፕሬሽን መቆለፊያ ስር ከ `stop()` ከዚያም `start()` ጋር እኩል ነው።
 
-**የጥያቄ ይዘት:** የለም
+**አካል ጠይቅ፡** ምንም
 
-**ምላሾች:** ከ`start` ጋር ተመሳሳይ ናቸው (የመጨረሻውን `ServiceStatus` ይመልሳል)።
+**ምላሾች፡-** ልክ እንደ `start` (የመጨረሻ `ServiceStatus` ይመልሳል)።
 
 ---
 
 #### `POST /api/services/9router/update`
 
-9Routerን ወደ አዲስ የnpm ስሪት ያዘምናል። አገልግሎቱ እየሰራ ከሆነ በመጀመሪያ
-ይቆማል፣ npm install ይከናወናል (አዲሱን ስሪት በነባሩ ቦታ ላይ በመጫን)፣ ከዚያም
-አገልግሎቱ እንደገና ይጀምራል።
+9 ራውተርን ወደ አዲሱ የ npm ስሪት ያዘምናል። አገልግሎቱ እየሰራ ከሆነ በመጀመሪያ ይቆማል, npm ጫን ይሠራል (አዲሱን ስሪት በቦታ ውስጥ መጫን), እና ከዚያ አገልግሎቱ እንደገና ይጀምራል.
 
-**የጥያቄ ይዘት** (ሁሉም አማራጭ ናቸው):
+**አካል ይጠይቁ** (ሁሉም አማራጭ)
 
 ```json
 { "version": "latest" }
 ```
 
-**ምላሾች:**
+**ምላሾች፡-**
 
 | ሁኔታ   | መግለጫ                                                            |
 | ----- | --------------------------------------------------------------- |
 | `200` | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400` | ልክ ያልሆነ ይዘት                                                     |
-| `500` | የnpm ማዘመን አልተሳካም                                                |
+| `400` | ልክ ያልሆነ አካል                                                     |
+| `500` | npm ዝማኔ አልተሳካም።                                                 |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-ለ9Router አዲስ API ቁልፍ ያመነጫል፣ በማከማቻ ላይ እያለ ያመሰጥረዋል፣ እና አገልግሎቱ
-እየሰራ ከሆነ አዲሱን ቁልፍ ከenvironment እንዲያገኝ እንደገና ያስጀምረዋል። አሮጌው ቁልፍ
-ወዲያውኑ ዋጋ እንዳይኖረው ይደረጋል።
+ለ 9 ራውተር አዲስ API ቁልፍ ያመነጫል፣ በእረፍት ጊዜ ያመስጥረው እና አገልግሎቱን እንደገና ያስጀምረዋል (የሚሰራ ከሆነ) አዲሱን ቁልፍ ከአካባቢው ይወስዳል። የድሮው ቁልፍ ወዲያውኑ ተበላሽቷል።
 
-**የጥያቄ ይዘት:** የለም
+**አካል ጠይቅ፡** ምንም
 
-**ምላሾች:**
+**ምላሾች፡-**
 
 | ሁኔታ   | መግለጫ                                       |
 | ----- | ------------------------------------------ |
 | `200` | `{ keyRotated: true, restarted: boolean }` |
-| `500` | የቁልፍ መቀየር አልተሳካም                           |
+| `500` | ማሽከርከር አልተሳካም።                             |
 
-**ደህንነት:** አዲሱ ቁልፍ በምላሹ ውስጥ ፈጽሞ አይመለስም (የምስክርነት መረጃ እንዳይጋለጥ)።
-በ`version_manager` ሰንጠረዥ ውስጥ ተመስጥሮ (AES-256-GCM) ይከማቻል።
+**ደህንነት፡** አዲሱ ቁልፍ በምላሹ በጭራሽ አይመለስም (የመረጃ ፍሰት የለም)። በ `version_manager` ሠንጠረዥ ውስጥ ኢንክሪፕት የተደረገ (AES-256-GCM) ተቀምጧል።
 
 ---
 
 #### `GET /api/services/9router/status`
 
-የስሪት metadataን እና የAPI ቁልፍ ቅድመ ዕይታን ጨምሮ የቀጥታ + DB ሁኔታን በአንድ ላይ ይመልሳል።
+የስሪት ሜታዳታ እና API ቁልፍ ቅድመ እይታን ጨምሮ የተቀናጀ የቀጥታ + DB ሁኔታን ይመልሳል።
 
-**ምላሾች:**
+**ምላሾች፡-**
 
-| ሁኔታ   | መግለጫ                  |
-| ----- | --------------------- |
-| `200` | ከታች ያለውን schema ይመልከቱ |
-| `500` | ሁኔታን ማንበብ አልተሳካም      |
+| ሁኔታ   | መግለጫ               |
+| ----- | ------------------ |
+| `200` | ከታች ያለውን እቅድ ይመልከቱ |
+| `500` | የተነበበ ሁኔታ አልተሳካም።  |
 
-**የምላሽ schema:**
+**የምላሽ እቅድ፡**
 
 ```json
 {
@@ -379,194 +368,197 @@ loopback ያልሆኑ ጥያቄዎች የማረጋገጫ ቶከኑ ምንም ይ
 
 #### `POST /api/services/9router/auto-start`
 
-የራስ-ሰር ማስጀመሪያ ምልክቱን ያበራል ወይም ያጠፋል። `enabled: true` ሲሆን፣ በሚቀጥለው ጊዜ
-OmniRoute ሲነሳ አገልግሎቱ በራስ-ሰር ይጀምራል (አገልግሎቱ ከተጫነ)።
+የራስ-ጀምር ባንዲራውን ቀያይር። `enabled: true`, በሚቀጥለው ጊዜ OmniRoute ቡት (አገልግሎቱ ከተጫነ) አገልግሎቱ በራስ-ሰር ይጀምራል.
 
-**የጥያቄ ይዘት:**
+**አካል ጠይቅ፡**
 
 ```json
 { "enabled": true }
 ```
 
-**ምላሾች:**
+**ምላሾች፡-**
 
 | ሁኔታ   | መግለጫ                  |
 | ----- | --------------------- |
 | `200` | `{ autoStart: true }` |
-| `400` | ልክ ያልሆነ ይዘት           |
+| `400` | ልክ ያልሆነ አካል           |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-ከ9Router stdout/stderr ring buffer የሚመጡ የቀጥታ ምዝግቦች የSSE stream።
+የቀጥታ መዝገቦች SSE ዥረት ከ 9 ራውተር stdout/stderr ቀለበት ቋት።
 
-**የQuery መለኪያዎች:**
+**የጥያቄ መለኪያዎች፡-**
 
-| መለኪያ     | ዓይነት      | ነባሪ | መግለጫ                                                            |
-| -------- | --------- | --- | --------------------------------------------------------------- |
-| `tail`   | `integer` | 200 | በመጀመሪያ የሚላኩ የታሪካዊ መስመሮች ብዛት (ከፍተኛው 1000)                        |
-| `filter` | `string`  | የለም | ለፊደል መጠን ልዩነት ግድ የሌለው substring filter (regex የለም — ReDoS-safe) |
+| ፓራም      | ዓይነት      | ነባሪ | መግለጫ                                                |
+| -------- | --------- | --- | --------------------------------------------------- |
+| `tail`   | `integer` | 200 | መጀመሪያ ስንት ታሪካዊ መስመሮች ለመላክ (ከፍተኛ 1000)               |
+| `filter` | `string`  | ምንም | ኬዝ የማይሰማ ንዑስ ሕብረቁምፊ ማጣሪያ (regex — ReDoS-አስተማማኝ የለም) |
 
-**የSSE ክስተቶች:**
+**SSE ክስተቶች**
 
-| ክስተት        | ውሂብ         | መግለጫ                    |
-| ----------- | ----------- | ----------------------- |
-| `snapshot`  | `LogLine[]` | የመጀመሪያ ታሪካዊ የመጨረሻ መስመሮች |
-| `log`       | `LogLine`   | የቀጥታ ምዝግብ መስመር          |
-| `heartbeat` | `{}`        | በየ15 s የሚላክ keep-alive  |
+| ክስተት        | ውሂብ         | መግለጫ                  |
+| ----------- | ----------- | --------------------- |
+| `snapshot`  | `LogLine[]` | የመጀመሪያ ታሪካዊ ጅራት       |
+| `log`       | `LogLine`   | የቀጥታ የምዝግብ ማስታወሻ መስመር |
+| `heartbeat` | `{}`        | በየ 15 ሰከንድ በህይወት አቆይ  |
 
-**የLogLine schema:**
+**LogLine schema:**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
-**ምላሾች:**
+**ምላሾች፡-**
 
-| ሁኔታ   | መግለጫ                                     |
-| ----- | ---------------------------------------- |
-| `200` | `text/event-stream`                      |
-| `400` | የ`filter` መለኪያው በጣም ረጅም ነው (> 200 ቁምፊዎች) |
-| `404` | አገልግሎቱ አልተገኘም (ተቆጣጣሪው አልተመዘገበም)          |
-
----
-
-### 4.2 የCLIProxyAPI መጨረሻ ነጥቦች (10 መስመሮች)
-
-CLIProxyAPI ከ`rotate-key` በስተቀር ከ9Router ጋር ተመሳሳይ የመጨረሻ ነጥብ ቅርጽ አለው፤ በተጨማሪም
-`accounts`፣ `provider-expose` እና `auto-restart-adopted` አሉት። አሁን በማስጀመሪያ ጊዜ የሚከተት
-ራሱን የቻለ የውሂብ-አውታር API ቁልፍ ይቀበላል (`needsApiKey: true` በ
-`bootstrap.ts` ውስጥ፣ ለሞዴል ማመሳሰል የሚያገለግል)፤ `status` ጥቂት መስኮችን ያካትታል።
-
-| ዘዴ     | ዱካ                                  | መግለጫ                              |
-| ------ | ----------------------------------- | --------------------------------- |
-| `POST` | `/api/services/cliproxy/install`    | CLIProxyAPIን ከnpm ጫን              |
-| `POST` | `/api/services/cliproxy/start`      | CLIProxyAPIን አስጀምር                |
-| `POST` | `/api/services/cliproxy/stop`       | CLIProxyAPIን አቁም                  |
-| `POST` | `/api/services/cliproxy/restart`    | CLIProxyAPIን እንደገና አስጀምር          |
-| `POST` | `/api/services/cliproxy/update`     | ወደ አዲስ ስሪት አዘምን                   |
-| `GET`  | `/api/services/cliproxy/status`     | ቀጥታ + DB ሁኔታ (`apiKeyMasked` የለም) |
-| `POST` | `/api/services/cliproxy/auto-start` | ራስ-ሰር ማስጀመርን አብራ/አጥፋ              |
-
-የጋራው `GET /api/services/{name}/logs` መጨረሻ ነጥብ (§4.1ን ይመልከቱ) የ`[name]`
-ተለዋዋጭ ክፍልን በመጠቀም ለአራቱም አገልግሎቶች ይሠራል።
+| ሁኔታ   | መግለጫ                                   |
+| ----- | -------------------------------------- |
+| `200` | `text/event-stream`                    |
+| `400` | `filter` መለኪያ በጣም ረጅም ነው (> 200 chars) |
+| `404` | አገልግሎቱ አልተገኘም (ተቆጣጣሪ አልተመዘገበም)         |
 
 ---
 
-### 4.3 የMux መጨረሻ ነጥቦች (8 መስመሮች)
+### 4.2 CLIProxyAPI የመጨረሻ ነጥቦች (10 መስመሮች)
 
-Mux ከCLIProxyAPI ጋር ተመሳሳይ የመጨረሻ ነጥብ ቅርጽ አለው — በAPI
-ገጽ ላይ የ`rotate-key` መስመር የለም (የbearer token ልክ እንደ9Router
-በ`getOrCreateApiKey("mux")` ይፈጠራል እና በ`MUX_SERVER_AUTH_TOKEN` የአካባቢ ተለዋዋጭ
-በኩል ይከተታል፣ ነገር ግን እስካሁን ራሱን የቻለ የማዞሪያ መጨረሻ ነጥብ የለም)። Mux በሕይወት-ዑደት
-ብቻ የሚተዳደር ነው፦ ከ9Router በተለየ የንብርብር 4 አስፈጻሚ የለውም እና እንደ ማዞሪያ አቅራቢ ፈጽሞ አይመዘገብም።
+CLIProxyAPI ከ 9 ራውተር ሲቀነስ `rotate-key`፣ እና `accounts`፣ `provider-expose` እና `auto-restart-adopted` ጋር አንድ አይነት የመጨረሻ ነጥብ ቅርፅ አለው። አሁን የተወሰነ የውሂብ-አውሮፕላን API ቁልፍ በ spawn ላይ (`needsApiKey: true` in `bootstrap.ts`, ለሞዴል ማመሳሰል ጥቅም ላይ የዋለ) በመርፌ ይቀበላል; `status` ጥቂት መስኮችን ያካትታል።
 
-| ዘዴ     | ዱካ                             | መግለጫ                       |
-| ------ | ------------------------------ | -------------------------- |
-| `POST` | `/api/services/mux/install`    | Muxን ከnpm ጫን (`npm i mux`) |
-| `POST` | `/api/services/mux/start`      | Muxን አስጀምር (`mux server`)  |
-| `POST` | `/api/services/mux/stop`       | Muxን አቁም                   |
-| `POST` | `/api/services/mux/restart`    | Muxን እንደገና አስጀምር           |
-| `POST` | `/api/services/mux/update`     | ወደ አዲስ የnpm ስሪት አዘምን       |
-| `GET`  | `/api/services/mux/status`     | ቀጥታ + DB ሁኔታ               |
-| `POST` | `/api/services/mux/auto-start` | ራስ-ሰር ማስጀመርን አብራ/አጥፋ       |
+| ዘዴ     | መንገድ                                | መግለጫ                                |
+| ------ | ----------------------------------- | ----------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | CLIProxyAPI ከ npm ጫን                |
+| `POST` | `/api/services/cliproxy/start`      | CLIProxyAPI                         |
+| `POST` | `/api/services/cliproxy/stop`       | CLIProxyAPI አቁም                     |
+| `POST` | `/api/services/cliproxy/restart`    | CLIProxyAPI እንደገና ያስጀምሩ             |
+| `POST` | `/api/services/cliproxy/update`     | ወደ አዲሱ ስሪት ያዘምኑ                     |
+| `GET`  | `/api/services/cliproxy/status`     | የቀጥታ + DB ሁኔታ ( `apiKeyMasked` የለም) |
+| `POST` | `/api/services/cliproxy/auto-start` | ራስ-ጀምርን ቀያይር                        |
+
+የተጋራው `GET /api/services/{name}/logs` የመጨረሻ ነጥብ (§4.1 ይመልከቱ) የ `[name]` ተለዋዋጭ ክፍልን በመጠቀም ለአራቱም አገልግሎቶች ይሰራል።
 
 ---
 
-### 4.4 የBifrost መጨረሻ ነጥቦች (8 መስመሮች)
+### 4.3 ሙክስ የመጨረሻ ነጥቦች (8 መስመሮች)
 
-Bifrost የGo AI-መግቢያ ቅብብል ጀርባ-ክፍል ነው (`@maximhq/bifrost`)። ከCLIProxyAPI ጋር ተመሳሳይ
-የመጨረሻ ነጥብ ቅርጽ ይጠቀማል (`rotate-key` የለም — Bifrost የራሱን የአቅራቢ
-ቁልፎች በ`-app-dir` ስር በ`config.json` ውስጥ ያስተዳድራል)።
+ሙክስ የመጨረሻ ነጥብ ቅርፅ አለው CLIProxyAPI — ምንም `rotate-key` መንገድ በ API ወለል ላይ ነው (ተሸካሚው ማስመሰያው ልክ እንደ 9 ራውተር በ `getOrCreateApiKey("mux")` በኩል ይፈጠራል እና በ `MUX_SERVER_AUTH_TOKEN` env var በኩል የተወጋ ነው ፣ ግን እስካሁን የተወሰነ የማዞሪያ የመጨረሻ ነጥብ የለም)። ሙክስ በህይወት ሳይክል የሚተዳደር ብቻ ነው፡ ከ 9 ራውተር በተለየ የ Layer 4 ፈጻሚ የለውም እና እንደ ማዛወሪያ አቅራቢነት አልተመዘገበም።
 
-| ዘዴ     | ዱካ                                 | መግለጫ                                             |
-| ------ | ---------------------------------- | ------------------------------------------------ |
-| `POST` | `/api/services/bifrost/install`    | Bifrostን ከnpm ጫን (`@maximhq/bifrost`)            |
-| `POST` | `/api/services/bifrost/start`      | Bifrostን በወደብ 8080 አስጀምር (ነባሪ)                   |
-| `POST` | `/api/services/bifrost/stop`       | Bifrostን አቁም                                     |
-| `POST` | `/api/services/bifrost/restart`    | Bifrostን እንደገና አስጀምር                             |
-| `POST` | `/api/services/bifrost/update`     | ወደ አዲስ ስሪት አዘምን                                  |
-| `GET`  | `/api/services/bifrost/status`     | ቀጥታ + DB ሁኔታ                                     |
-| `POST` | `/api/services/bifrost/auto-start` | ራስ-ሰር ማስጀመርን አብራ/አጥፋ                             |
-| `GET`  | `/api/services/bifrost/logs`       | የSSE ምዝግብ ጭራ (በጋራው `[name]/logs` ተለዋዋጭ መስመር በኩል) |
-
-**የማዞሪያ ሽቦ ግንኙነት፦** `BIFROST_BASE_URL` ካልተዋቀረ እና በቁጥጥር ስር ያለው የBifrost
-አብነት እየሠራ ከሆነ፣ `getBifrostRoutingConfig()` (`routingBackend.ts` ውስጥ) `http://127.0.0.1:{port}`ን
-በራስ-ሰር እንደ የቅብብል መሠረታዊ URL ይጠቀማል። በግልጽ የተዋቀረ `BIFROST_BASE_URL` የአካባቢ
-ተለዋዋጭ ሁልጊዜ ቅድሚያ ይኖረዋል።
+| ዘዴ     | መንገድ                           | መግለጫ                        |
+| ------ | ------------------------------ | --------------------------- |
+| `POST` | `/api/services/mux/install`    | Muxን ከ npm (`npm i mux`) ጫን |
+| `POST` | `/api/services/mux/start`      | ሙክስ ጀምር (`mux server`)      |
+| `POST` | `/api/services/mux/stop`       | ሙክስን አቁም                    |
+| `POST` | `/api/services/mux/restart`    | Mux እንደገና ያስጀምሩ             |
+| `POST` | `/api/services/mux/update`     | ወደ አዲሱ የ npm ስሪት ያዘምኑ       |
+| `GET`  | `/api/services/mux/status`     | የቀጥታ + DB ሁኔታ               |
+| `POST` | `/api/services/mux/auto-start` | ራስ-ጀምርን ቀያይር                |
 
 ---
 
-### 4.5 የDario መጨረሻ ነጥቦች (12 መስመሮች)
+### 4.4 የቢፍሮስት የመጨረሻ ነጥቦች (8 መስመሮች)
 
-ከሌሎቹ አገልግሎቶች ጋር ተመሳሳይ የሕይወት-ዑደት ቅርጽ (`install`፣ `start`፣ `stop`፣ `restart`፣
-`update`፣ `status`፣ `auto-start`፣ `auto-restart-adopted`) አለው፤ በተጨማሪም በ`admin/` ስር
-በtoken የተገደበ OAuth መቆጣጠሪያ አውታር አለው፦ `admin/accounts`፣ `admin/import-from-omniroute`፣
-`admin/login-start`፣ `admin/login-complete` (ሁሉም በ`DARIO_ADMIN_TOKEN` የተጠበቁ ናቸው)።
+ቢፍሮስት የ Go AI-gateway ቅብብል የኋላ (`@maximhq/bifrost`) ነው። እንደ CLIProxyAPI ተመሳሳይ የመጨረሻ ነጥብ ቅርጽ ይጠቀማል (ምንም `rotate-key` — Bifrost በ `config.json` ውስጥ የራሱን የአቅራቢ ቁልፎች በ `-app-dir` ስር ያስተዳድራል)።
 
-### 4.6 የopen-wa መጨረሻ ነጥቦች (7 መስመሮች)
+| ዘዴ     | መንገድ                               | መግለጫ                                       |
+| ------ | ---------------------------------- | ------------------------------------------ |
+| `POST` | `/api/services/bifrost/install`    | ቢፍሮስትን ከ npm (`@maximhq/bifrost`) ጫን       |
+| `POST` | `/api/services/bifrost/start`      | ቢፍሮስትን በፖርት 8080 ጀምር (ነባሪ)                 |
+| `POST` | `/api/services/bifrost/stop`       | Bifrost አቁም                                |
+| `POST` | `/api/services/bifrost/restart`    | Bifrost እንደገና ያስጀምሩ                        |
+| `POST` | `/api/services/bifrost/update`     | ወደ አዲሱ ስሪት ያዘምኑ                            |
+| `GET`  | `/api/services/bifrost/status`     | የቀጥታ + DB ሁኔታ                              |
+| `POST` | `/api/services/bifrost/auto-start` | ራስ-ጀምርን ቀያይር                               |
+| `GET`  | `/api/services/bifrost/logs`       | SSE ሎግ ጅራት (በተጋራ `[name]/logs` ተለዋዋጭ መንገድ) |
 
-open-wa (`@open-wa/wa-automate`) WhatsApp Webን በራስ-ሰር ለማስኬድ ያለራስ የChromium አብነትን
-(በPuppeteer በኩል) ያንቀሳቅሳል። ከMux ጋር ተመሳሳይ የመጨረሻ ነጥብ ቅርጽ ይጠቀማል (እስካሁን
-የ`rotate-key` መስመር የለም)። በሕይወት-ዑደት ብቻ የሚተዳደር ነው — የማዞሪያ ዒላማ አይደለም፣
-የንብርብር 4 አስፈጻሚ/አቅራቢ ግቤትም የለውም።
-
-| ዘዴ     | ዱካ                                | መግለጫ                                          |
-| ------ | --------------------------------- | --------------------------------------------- |
-| `POST` | `/api/services/openwa/install`    | open-waን ከnpm (`@open-wa/wa-automate`) ይጫኑ    |
-| `POST` | `/api/services/openwa/start`      | open-waን በወደብ 8323 (ነባሪ) ያስጀምሩ                |
-| `POST` | `/api/services/openwa/stop`       | open-waን ያቁሙ                                  |
-| `POST` | `/api/services/openwa/restart`    | open-waን እንደገና ያስጀምሩ                          |
-| `POST` | `/api/services/openwa/update`     | ወደ አዲስ ስሪት ያዘምኑ                               |
-| `GET`  | `/api/services/openwa/status`     | ቀጥታ + DB ሁኔታ                                  |
-| `POST` | `/api/services/openwa/auto-start` | ራስ-ሰር ማስጀመርን ያብሩ/ያጥፉ                          |
-| `GET`  | `/api/services/openwa/logs`       | የSSE ሎግ ጭራ (በጋራ `[name]/logs` ተለዋዋጭ መስመር በኩል) |
-
-**የAPI ቁልፍ፦** እንደ `WA_KEY` ይገባል — የopen-wa አጠቃላይ `WA_*`-ቅድመ ቅጥያ ያለው የenv
-መሻሪያ ወደ `--key`/`-k` CLI አማራጭ ያዛምደዋል
-(`dist/cli/setup.js::envArgs()`፣ ከተጫነው 4.76.0
-package ጋር ተረጋግጧል)። በ`generateServiceApiKey()` ሲመነጭ `ow_` ቅድመ ቅጥያ ይኖረዋል። open-wa
-ቁልፉን ከ`key`/`api_key` HTTP ራስጌ መልሶ ያነባል (`Authorization:
-Bearer` አይደለም)፤ `/api-docs*` በግልጽ ከፍተሻው ነፃ ተደርጓል
-(`setupAuthenticationLayer` በ`dist/cli/server.js` ውስጥ)፣ ስለዚህ የጤና ምርመራው
-የማረጋገጫ ራስጌ አያስፈልገውም።
-
-**ማጣመር፦** open-wa ይፋዊ ያልሆነና ከWhatsApp ጋር ግንኙነት የሌለው ነው —
-የተገናኘው ቁጥር በWhatsApp የራስ-ሰር ሥራ መለያ ምክንያት የመታገድ ስጋት አለበት።
-በመጀመሪያው ማስጀመር ጊዜ የማጣመሪያ QR ኮድ ወደ stdout ይታተማል፣ እናም በነባሩ
-የሎጎች ፓነል/SSE ዥረት በኩል ይታያል — በዚህ ውህደት ውስጥ እስካሁን የተለየ የQR-ምስል መጨረሻ ነጥብ
-የለም።
+**የማዞሪያ መስመር፡** `BIFROST_BASE_URL` ሳይዋቀር ሲቀር እና ክትትል የሚደረግበት Bifrost ምሳሌ ሲሄድ፣ `getBifrostRoutingConfig()` (በ `routingBackend.ts` ውስጥ) በራስሰር `http://127.0.0.1:{port}` እንደ ሪሌይ መሰረት URL ይጠቀማል። ግልጽ `BIFROST_BASE_URL` env ሁል ጊዜ ቅድሚያ ይሰጣል።
 
 ---
 
-### 4.7 ተቃራኒ ፕሮክሲ (የ9Router ዳሽቦርድ መክተቻ)
+### 4.5 የዳሪዮ የመጨረሻ ነጥቦች (12 መንገዶች)
 
-ዳሽቦርዱ የ9Router የድር UIን በiframe ውስጥ በውስጣዊ ተቃራኒ
-ፕሮክሲ በኩል ይከትታል፦
+Same lifecycle shape as the other services (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) plus a token-gated OAuth control plane under `admin/`: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (all behind `DARIO_ADMIN_TOKEN`).
+
+### 4.6 ክፍት ዋ የመጨረሻ ነጥቦች (7 መስመሮች)
+
+open-wa (`@open-wa/wa-automate`) WhatsApp ድርን በራስ ሰር ለመስራት ጭንቅላት የሌለው የChromium ምሳሌ (በአሻንጉሊት በኩል) ይነዳል። ልክ እንደ Mux (ገና `rotate-key` መንገድ የለም) ተመሳሳይ የመጨረሻ ነጥብ ቅርጽ ይጠቀማል። እሱ በሕይወት ዑደት የሚተዳደረው — ብቻ ነው የማዞሪያ ኢላማ አይደለም፣ ምንም የ Layer 4 executor/provider ግቤት የለም።
+
+| ዘዴ     | መንገድ                              | መግለጫ                                       |
+| ------ | --------------------------------- | ------------------------------------------ |
+| `POST` | `/api/services/openwa/install`    | ክፍት ዋ ከ npm (`@open-wa/wa-automate`) ጫን    |
+| `POST` | `/api/services/openwa/start`      | ክፍት-wa በፖርት 8323 ይጀምሩ (ነባሪ)                |
+| `POST` | `/api/services/openwa/stop`       | ክፍት-ዋ አቁም                                  |
+| `POST` | `/api/services/openwa/restart`    | ክፍት-waን እንደገና ያስጀምሩ                        |
+| `POST` | `/api/services/openwa/update`     | ወደ አዲሱ ስሪት ያዘምኑ                            |
+| `GET`  | `/api/services/openwa/status`     | የቀጥታ + DB ሁኔታ                              |
+| `POST` | `/api/services/openwa/auto-start` | ራስ-ጀምርን ቀያይር                               |
+| `GET`  | `/api/services/openwa/logs`       | SSE ሎግ ጅራት (በተጋራ `[name]/logs` ተለዋዋጭ መንገድ) |
+
+**API ቁልፍ** እንደ `WA_KEY` — ክፍት-ዋ አጠቃላይ `WA_*` -prefixed env በ `--key`/`-k` CLI አማራጭ ላይ ይሽረው (`dist/cli/setup.js::envArgs()`፣ በተጫነው 4.76.0 ጥቅል ላይ የተረጋገጠ)። ቅድመ ቅጥያ `ow_` በ `generateServiceApiKey()` ሲፈጠር። ክፍት-ዋ ቁልፉን ከ `key`/`api_key` HTTP ራስጌ ( `Authorization: Bearer` አይደለም) ያነባል; `/api-docs*` ከቼክ በግልጽ ነፃ ነው (`setupAuthenticationLayer` በ `dist/cli/server.js`)፣ ስለዚህ የጤና ምርመራው ምንም የማረጋገጫ ርዕስ አያስፈልገውም።
+
+**ማጣመር፡** open-wa ኦፊሴላዊ ያልሆነ እና ከ WhatsApp — ጋር ግንኙነት የለውም የተገናኘው ቁጥሩ ከ WhatsApp የራሱ አውቶማቲክ ማወቂያ የመከልከል አደጋ አለው። በመጀመሪያ ጅምር ላይ፣ የማጣመሪያው QR ኮድ ወደ stdout ታትሟል እና በነባሩ Logs panel/SSE ዥረት — በኩል በዚህ ውህደት ውስጥ ምንም የተወሰነ የQR-ምስል የመጨረሻ ነጥብ የለም።
+
+---
+
+### 4.7 LLMLingua የመጨረሻ ነጥቦች (8 መስመሮች)
+
+LLMLingua ፈጣን-መጭመቂያ የጎን መኪና መጠቅለያ `@atjsh/llmlingua-2` ነው (እውነተኛ የ ONNX ማስመሰያ-ምደባ ሞዴል፣ በመጀመሪያ `/compress` ጥሪ ከመተቃቀፍ ፊት የወረደ)። እንደ Bifrost ተመሳሳይ የመጨረሻ ነጥብ ቅርጽ ይጠቀማል (ምንም API ቁልፍ — `needsApiKey: false` የለም፣ ምስክርነቶችን በጭራሽ አይይዝም)።
+
+| ዘዴ     | መንገድ                                           | መግለጫ                                                       |
+| ------ | ---------------------------------------------- | ---------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | npm-ጫን `@atjsh/llmlingua-2` + አቻዎች፣የጎን መኪና አገልጋይ ስክሪፕት ይፃፉ |
+| `POST` | `/api/services/llmlingua/start`                | የጎን መኪናውን ወደብ 20135 ይጀምሩ (ነባሪ)                             |
+| `POST` | `/api/services/llmlingua/stop`                 | የጎን መኪናውን አቁም                                              |
+| `POST` | `/api/services/llmlingua/restart`              | የጎን መኪናውን እንደገና ያስጀምሩ                                      |
+| `POST` | `/api/services/llmlingua/update`               | ወደ አዲሱ የጥቅል ስሪት ያዘምኑ                                       |
+| `GET`  | `/api/services/llmlingua/status`               | የቀጥታ + DB ሁኔታ                                              |
+| `POST` | `/api/services/llmlingua/auto-start`           | ራስ-ጀምርን ቀያይር                                               |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | የማደጎ (ቅድመ-ነባር) ምሳሌን በራስ-እንደገና ቀይር                          |
+| `GET`  | `/api/services/llmlingua/logs`                 | SSE ሎግ ጅራት (በተጋራ `[name]/logs` ተለዋዋጭ መንገድ)                 |
+
+**የጎን መኪና ውል;** የአገልጋዩ ስክሪፕት `GET /health` (ፈጣን — በአምሳያው ላይ አይጠብቅም) እና `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`) ያጋልጣል። ሞዴሉ በመጀመሪያው `/compress` ጥሪ ላይ ስንፍና ይጭናል።
+
+**የማመቅ ገመድ;** `open-sse/services/compression/engines/llmlingua/index.ts`'s `httpSidecarBackend` `LLMLINGUA_BASE_URL` (ነባሪ `http://127.0.0.1:20135`) ይደውላል እና የጎን መኪናውን ምላሽ የሚቀበለው ከመግቢያው በጣም አጭር ሲሆን; ማንኛውም አለመሳካት (የማያሄድ፣ ጊዜው የሚያበቃበት፣ ያለ ኦፕ ምላሽ) ወደ ውስጠ-ሂደት ሰራተኛ-ክር የኋላ (`./worker.ts`) ይመለሳል።
+
+---
+
+### 4.8 የዘፈን ሳጥን የመጨረሻ ነጥቦች (8 መንገዶች)
+
+ሲንግ-ቦክስ ልክ እንደ Mux — no `rotate-key` መንገድ፣ ምንም የ API ቁልፍ መርፌ የለም (`needsApiKey: false` in `bootstrap.ts`) ያለው የመጨረሻ ነጥብ ቅርፅ አለው። በህይወት ኡደት የሚተዳደረው ብቻ ነው፡ በጭራሽ routing/LLM አቅራቢ ነው። `install()` ኦፊሴላዊውን GitHub ልቀት ሁለትዮሽ (`SagerNet/sing-box`) ለተሰካው ስሪት (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) ያውርዳል እና SHA256 ወደ ተመሳሳይ ፋይል ከተጋገረ ቼክሰም ጋር በማነፃፀር ወደ — ዲስክ ከመፃፍዎ በፊት ማንኛውም ሌላ የተጠየቀ ስሪት ውድቅ ተደርጓል።
+
+| ዘዴ     | መንገድ                                         | መግለጫ                                         |
+| ------ | -------------------------------------------- | -------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | + አውርድ የተሰካውን የዘፈን ሳጥን መለቀቅ አረጋግጥ            |
+| `POST` | `/api/services/singbox/start`                | የዘፈን ሳጥን ጀምር (`sing-box run -c config.json`) |
+| `POST` | `/api/services/singbox/stop`                 | የዘፈን ሳጥን አቁም                                 |
+| `POST` | `/api/services/singbox/restart`              | የዘፈን ሳጥን እንደገና ያስጀምሩ                         |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall የተሰካው መለቀቅ               |
+| `GET`  | `/api/services/singbox/status`               | የቀጥታ + DB ሁኔታ                                |
+| `POST` | `/api/services/singbox/auto-start`           | ራስ-ጀምርን ቀያይር                                 |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | ለተቀበለ (ቅድመ-ነባር) ሂደት ራስ-ዳግም ማስጀመርን ቀይር        |
+| `GET`  | `/api/services/singbox/logs`                 | SSE ሎግ ጅራት (በተጋራ `[name]/logs` ተለዋዋጭ መንገድ)   |
+
+**TPROXY ሽቦ;** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json` ይጽፋል እና የ TPROXY ፋየርዎል ደንቦችን `applyTproxy()` በፊት ተቆጣጣሪውን ይጀምራል። ተቆጣጣሪው ከጠፋ ወይም `running` ላይ መድረስ ካልቻለ፣ አሁን በስህተት ደረጃ ተመዝግቧል (ውድቀቱን በዝምታ ከመዋጥ ይልቅ) ስለዚህ አንድ ኦፕሬተር ከኋላቸው የሚሰራ አድማጭ ሳይኖር የ TPROXY ህጎች መተግበራቸውን መንገር ይችላል።
+
+---
+
+### 4.9 የተገላቢጦሽ ፕሮክሲ (9 ራውተር ዳሽቦርድ የተከተተ)
+
+ዳሽቦርዱ የ9 ራውተር ድር UI በኢፍራም ውስጥ በውስጣዊ በግልባጭ ፕሮክሲ በኩል ይከተታል፡-
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 ```
 
-ይህ ፕሮክሲ፦
+ይህ ተኪ፡-
 
-- ጥያቄውን ወደ `http://127.0.0.1:{port}/{path}` ያስተላልፋል (loopback ብቻ)
-- ገቢ `cookie` እና `authorization` ራስጌዎችን ያስወግዳል (የOmniRoute ክፍለ ጊዜ እንዳይፈስ)
-- ለ9Router ማረጋገጫ `Authorization: Bearer {apiKey}` ያስገባል
-- `set-cookie`፣ `content-security-policy`፣ `x-frame-options`፣ `cross-origin-*`ን ከምላሹ ያስወግዳል
-- `<base href>`ን ለማስገባት እና ፍጹም ዱካዎችን መደበኛ ለማድረግ (`/foo` → `/dashboard/.../embed/foo`) የHTML ምላሾችን እንደገና ይጽፋል
+- ጥያቄውን ወደ `http://127.0.0.1:{port}/{path}` አስተላልፍ (loopback ብቻ)
+- ገቢ `cookie` እና `authorization` ራስጌዎች (የ OmniRoute ክፍለ ጊዜ መፍሰስ የለም)
+- ለ9 ራውተር ማረጋገጫ `Authorization: Bearer {apiKey}` ያስገባል።
+- ስክሪፕስ `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` ከምላሹ
+- `<base href>` ለመወጋት እና ፍጹም ዱካዎችን መደበኛ ለማድረግ HTML ምላሾችን እንደገና ይጽፋል (`/foo` → `/dashboard/.../embed/foo`)
 
-ለተከተተው ዳሽቦርድ የWebSocket ማሻሻያዎች በተለየ
-ወደብ ላይ ባለ አጋር አገልጋይ ይከናወናሉ (`src/lib/services/embedWsProxy.ts`ን ይመልከቱ)።
+ለተከተተው ዳሽቦርድ WebSocket ማሻሻያዎች የሚስተናገዱት በአንድ የተወሰነ ወደብ ላይ ባለው ተጓዳኝ አገልጋይ ነው ( `src/lib/services/embedWsProxy.ts` ይመልከቱ)።
 
-**ደህንነት፦** የመክተቻ ፕሮክሲ መስመሮች በ`LOCAL_ONLY_API_PREFIXES`
-ስር የተመደቡ ሲሆን ከloopback ብቻ ሊደረስባቸው ይችላል። በ
-Cloudflare/Ngrok tunnel በኩል JWT ያገኘ አጥቂ ወደ ተከተቱ አገልግሎቶች ፕሮክሲ ማድረግ አይችልም።
+**ደህንነት፡** የተከተቱት ተኪ መንገዶች በ `LOCAL_ONLY_API_PREFIXES` ስር የተከፋፈሉ ሲሆኑ ከ loopback ብቻ ሊገኙ ይችላሉ። በ Cloudflare/Ngrok መሿለኪያ በኩል JWT ያገኘ አጥቂ ለተከተቱ አገልግሎቶች ፕሮክሲ ማድረግ አይችልም።
 
 ---
 

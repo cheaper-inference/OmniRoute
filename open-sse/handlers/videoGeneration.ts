@@ -14,17 +14,27 @@ import { handleGoogleFlowVideoGeneration } from "./videoGeneration/googleFlowHan
 import { handleDeepinfraVideoGeneration } from "./videoGeneration/deepinfraHandler.ts";
 import { handleLeonardoVideoGeneration } from "./videoGeneration/leonardoHandler.ts";
 import { handleDashscopeVideoGeneration } from "./videoGeneration/dashscopeHandler.ts";
+import { handleMinimaxVideoGeneration } from "./videoGeneration/minimaxHandler.ts";
 import { handleNovitaVideoGeneration } from "./videoGeneration/novitaHandler.ts";
 import { handleXaiVideoGeneration } from "./videoGeneration/xaiGrokImagineHandler.ts";
 import { handleSegmindVideoGeneration } from "./videoGeneration/providers/segmind.ts";
 import { handleUcVideoGeneration } from "./videoGeneration/providers/ucVideo.ts";
 import { handleAdobeFireflyVideoGeneration } from "./videoGeneration/adobeFireflyHandler.ts";
+import { handleSyntxVideoGeneration } from "./videoGeneration/syntxHandler.ts";
 import { handleOpenAIVideoGeneration } from "./videoGeneration/openai.ts";
-import { getVideoJobPreset, handleVideoJobGeneration } from "./videoGeneration/job.ts";
 import {
+  getVideoJobPreset,
+  handleVideoJobGeneration,
+  type VideoJobCallRecord,
+} from "./videoGeneration/job.ts";
+import { abortedVideoResult, POLL_ABORTED, pollJsonAfter } from "./videoGeneration/abort.ts";
+import { sleep } from "../utils/sleep.ts";
+import {
+  downloadResultVideo,
   extractRunwayFailureMessage,
   normalizeRunwayVideoResult,
   resolvePositiveInteger,
+  resultVideoErrorText,
   resolveRunwayDuration,
   resolveRunwayPromptImage,
   resolveRunwayRatio,
@@ -43,7 +53,7 @@ import {
   extractComfyOutputFiles,
   resolveComfyUiBaseUrl,
 } from "../utils/comfyuiClient.ts";
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog, saveRequestUsage } from "@/lib/usageDb";
 import { getAllCustomModels } from "@/lib/db/models";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import {
@@ -134,13 +144,57 @@ function resolveVideoJobPollingOverrides(body: Record<string, unknown>): {
 }
 
 /**
- * Handle video generation request
+ * Record a finished job-preset generation in both usage surfaces.
+ *
+ * The job pipeline previously wrote neither, so a job-preset provider was invisible in
+ * the request log and in the usage view while the synchronous video handlers appeared
+ * in both. `path`/`duration` are the names the call-log writer reads, and `endpoint` is
+ * what the usage row reports. Injected into `handleVideoJobGeneration` so the job
+ * module keeps no dependency on the usage DB.
  */
+export async function recordVideoJobCall({
+  provider,
+  model,
+  result,
+  durationMs,
+}: VideoJobCallRecord): Promise<void> {
+  const status = result.success ? 200 : (result.status ?? 502);
+  const error = result.success ? undefined : result.error;
+  await Promise.allSettled([
+    saveCallLog({
+      method: "POST",
+      path: "/v1/videos/generations",
+      status,
+      model: `${provider}/${model}`,
+      provider,
+      duration: durationMs,
+      ...(error ? { error } : {}),
+    }),
+    saveRequestUsage({
+      provider,
+      model,
+      endpoint: "video",
+      status: String(status),
+      success: result.success,
+      latencyMs: durationMs,
+      ...(error ? { errorCode: error.slice(0, 200) } : {}),
+    }),
+  ]);
+}
 
 /**
  * Handle video generation request
  */
-export async function handleVideoGeneration({ body, credentials, log, resolvedProvider = null }) {
+export async function handleVideoGeneration({
+  body,
+  credentials,
+  log,
+  resolvedProvider = null,
+  // #16372 — route-injected media sink (owner + public origin) for auth-gated job results.
+  mediaSink = undefined,
+  signal = null,
+}) {
+  if (signal?.aborted) return abortedVideoResult();
   let { provider, model } = parseVideoModel(body.model);
   if (resolvedProvider) {
     provider = resolvedProvider;
@@ -187,6 +241,10 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
         body,
         credentials,
         log,
+        mediaSink,
+        provider,
+        recordCall: recordVideoJobCall,
+        signal,
         ...resolveVideoJobPollingOverrides(body),
       });
     }
@@ -226,6 +284,10 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
       body,
       credentials,
       log,
+      mediaSink,
+      provider,
+      recordCall: recordVideoJobCall,
+      signal,
       ...resolveVideoJobPollingOverrides(body),
     });
   }
@@ -267,11 +329,27 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
   }
 
   if (providerConfig.format === "runwayml") {
-    return handleRunwayVideoGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleRunwayVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "haiper-video") {
-    return handleHaiperVideoGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleHaiperVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "veoaifree-web") {
@@ -286,6 +364,7 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
       body,
       credentials,
       log,
+      signal,
     });
   }
 
@@ -311,6 +390,17 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
     });
   }
 
+  if (providerConfig.format === "minimax-video") {
+    return handleMinimaxVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+    });
+  }
+
   if (providerConfig.format === "segmind") {
     return handleSegmindVideoGeneration({
       model,
@@ -322,10 +412,26 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
     });
   }
   if (providerConfig.format === "novita-video") {
-    return handleNovitaVideoGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleNovitaVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
   if (providerConfig.format === "xai-video") {
-    return handleXaiVideoGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleXaiVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
   if (providerConfig.format === "uc-video") {
     // UC (uncensored.com): one handler serves both surfaces, picking by
@@ -341,6 +447,17 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
       body,
       credentials,
       log,
+    });
+  }
+  if (providerConfig.format === "syntx-video") {
+    return handleSyntxVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
     });
   }
   if (resolvedProvider) {
@@ -816,6 +933,7 @@ async function handleRunwayVideoGeneration({
   body,
   credentials,
   log,
+  signal = null,
 }) {
   const startTime = Date.now();
   const token = credentials?.apiKey || credentials?.accessToken;
@@ -912,10 +1030,7 @@ async function handleRunwayVideoGeneration({
     while (Date.now() < deadline) {
       const taskResponse = await fetch(
         buildRunwayApiUrl(`/tasks/${encodeURIComponent(taskId)}`, providerConfig.baseUrl),
-        {
-          method: "GET",
-          headers,
-        }
+        { method: "GET", headers, ...(signal ? { signal } : {}) }
       );
 
       if (!taskResponse.ok) {
@@ -944,7 +1059,7 @@ async function handleRunwayVideoGeneration({
       const status = String(task?.status || "").toUpperCase();
 
       if (status === "SUCCEEDED") {
-        const videos = await normalizeRunwayVideoResult(task, body);
+        const videos = await normalizeRunwayVideoResult(task, body, signal);
         saveCallLog({
           method: "POST",
           path: "/v1/videos/generations",
@@ -976,7 +1091,8 @@ async function handleRunwayVideoGeneration({
         return { success: false, status: 502, error: errorText };
       }
 
-      await sleep(pollIntervalMs);
+      await sleep(pollIntervalMs, signal);
+      if (signal?.aborted) return abortedVideoResult();
     }
 
     const timeoutError = `Runway task timeout after ${timeoutMs}ms (taskId=${taskId}, status=${String(
@@ -994,6 +1110,7 @@ async function handleRunwayVideoGeneration({
     }).catch(() => {});
     return { success: false, status: 504, error: timeoutError };
   } catch (err) {
+    if (signal?.aborted) return abortedVideoResult();
     if (log) log.error("VIDEO", `${provider} runway error: ${err.message}`);
     saveCallLog({
       method: "POST",
@@ -1020,6 +1137,32 @@ const RUNWAY_TERMINAL_FAILURE_STATUSES = new Set([
   "DELETED",
 ]);
 
+/** Downloads a finished Haiper video and builds the handler result. */
+async function deliverHaiperVideo({ videoUrl, model, provider, startTime, signal }) {
+  let buf: Buffer;
+  try {
+    buf = await downloadResultVideo(videoUrl, signal);
+  } catch (err) {
+    if (signal?.aborted) return abortedVideoResult();
+    return { success: false, status: 502, error: resultVideoErrorText(err) };
+  }
+  saveCallLog({
+    method: "POST",
+    path: "/v1/videos/generations",
+    status: 200,
+    model: `${provider}/${model}`,
+    provider,
+    duration: Date.now() - startTime,
+  }).catch(() => {});
+  return {
+    success: true,
+    data: {
+      created: Math.floor(Date.now() / 1000),
+      data: [{ b64_json: buf.toString("base64"), format: "mp4" }],
+    },
+  };
+}
+
 async function handleHaiperVideoGeneration({
   model,
   provider,
@@ -1027,6 +1170,7 @@ async function handleHaiperVideoGeneration({
   body,
   credentials,
   log,
+  signal = null,
 }) {
   const startTime = Date.now();
   const token = credentials?.apiKey || "";
@@ -1051,31 +1195,18 @@ async function handleHaiperVideoGeneration({
   const { job_id } = await res.json();
   const deadline = Date.now() + 300000;
   while (Date.now() < deadline) {
-    await sleep(5000);
-    const statusRes = await fetch(`${providerConfig.statusUrl}/${job_id}`, {
-      headers: { HAIPER_KEY: token },
-    });
-    const status = await statusRes.json();
+    const status = await pollJsonAfter(
+      5000,
+
+      `${providerConfig.statusUrl}/${job_id}`,
+      { HAIPER_KEY: token },
+      signal
+    );
+    if (status === POLL_ABORTED) return abortedVideoResult();
     if (status.status === "completed" || status.status === "succeeded") {
       const videoUrl = status.creation_url || status.output?.video_url;
       if (videoUrl) {
-        const videoRes = await fetch(videoUrl);
-        const buf = await videoRes.arrayBuffer();
-        saveCallLog({
-          method: "POST",
-          path: "/v1/videos/generations",
-          status: 200,
-          model: `${provider}/${model}`,
-          provider,
-          duration: Date.now() - startTime,
-        }).catch(() => {});
-        return {
-          success: true,
-          data: {
-            created: Math.floor(Date.now() / 1000),
-            data: [{ b64_json: Buffer.from(buf).toString("base64"), format: "mp4" }],
-          },
-        };
+        return deliverHaiperVideo({ videoUrl, model, provider, startTime, signal });
       }
     }
     if (status.status === "failed") {
@@ -1101,8 +1232,4 @@ async function handleHaiperVideoGeneration({
     error: "Haiper video generation timed out",
   }).catch(() => {});
   return { success: false, status: 504, error: "Haiper video generation timed out" };
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

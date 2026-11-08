@@ -14,17 +14,13 @@ export function ConversationTab({ request }: ConversationTabProps) {
   const conversation = normalizeConversation(request);
 
   if (!conversation) {
-    return (
-      <div className="p-4 text-sm text-text-muted">{t("conversationNotAvailable")}</div>
-    );
+    return <div className="p-4 text-sm text-text-muted">{t("conversationNotAvailable")}</div>;
   }
 
   const allTurns = [...conversation.request, ...conversation.response];
 
   if (allTurns.length === 0) {
-    return (
-      <div className="p-4 text-sm text-text-muted">{t("conversationNoMessages")}</div>
-    );
+    return <div className="p-4 text-sm text-text-muted">{t("conversationNoMessages")}</div>;
   }
 
   return (
@@ -32,7 +28,7 @@ export function ConversationTab({ request }: ConversationTabProps) {
       {conversation.contextKey && (
         <div className="text-xs text-text-muted mb-2">
           {t("contextFingerprint")}{" "}
-          <span className="font-mono text-blue-400">#{conversation.contextKey.slice(0, 12)}</span>
+          <span className="font-mono text-info">#{conversation.contextKey.slice(0, 12)}</span>
         </div>
       )}
       {conversation.request.length > 0 && (

@@ -15,6 +15,9 @@ test("GHE Copilot registry exposes Claude Opus 5", () => {
   assert.deepStrictEqual(opus5, {
     id: "claude-opus-5",
     name: "Claude Opus 5",
+    // contract changed by #15478: GHE Copilot Claude models declare the Claude target
+    // format so chatCore dispatches them through the Messages translator.
+    targetFormat: "claude",
     contextLength: 1000000,
     maxOutputTokens: 64000,
     // #14732 declared the thinking-effort tiers on the first-party Claude registries
@@ -93,6 +96,30 @@ test("buildUrl routes unregistered GPT-6 models to the Responses endpoint", () =
   assert.strictEqual(
     executor.buildUrl("ghe-copilot/gpt-6-luna", true, 0, credentials),
     "https://ghe.company.com/responses"
+  );
+});
+
+test("buildUrl routes gpt-5.5+ and gpt-6.x ids, registered or not, to the Responses endpoint", () => {
+  const executor = new GheCopilotExecutor({
+    gheUrl: "https://ghe.company.com",
+    clientId: "test-client",
+    clientSecret: "test-secret",
+  });
+  const credentials: ProviderCredentials = {
+    providerSpecificData: { gheUrl: "https://ghe.company.com" },
+  };
+
+  for (const model of ["gpt-5.5", "gpt-6.1-terra", "ghe-copilot/gpt-6.1-sol", "gpt-7-nova"]) {
+    assert.strictEqual(
+      executor.buildUrl(model, true, 0, credentials),
+      "https://ghe.company.com/responses",
+      model
+    );
+  }
+  // Ids outside the family stay on Chat Completions.
+  assert.strictEqual(
+    executor.buildUrl("gpt-4o", true, 0, credentials),
+    "https://ghe.company.com/chat/completions"
   );
 });
 

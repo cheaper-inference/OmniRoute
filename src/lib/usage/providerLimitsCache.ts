@@ -1,6 +1,7 @@
 import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 import { sanitizeProviderBillingStatus } from "@/shared/utils/providerBilling";
 import { GROK_BUILD_ADDITIONAL_CREDITS_URL } from "@/shared/utils/grokBilling";
+import { parseCodexPaidCredits } from "@/lib/providers/codexPaidCredits";
 
 const GROK_CLI_PROVIDER = "grok-cli";
 const GLM_RESET_CARD_PROVIDERS = new Set(["glm", "glm-cn", "glmt", "zai"]);
@@ -22,7 +23,11 @@ function hasUsableCachedData(cache: ProviderLimitsCacheEntry | null | undefined)
 export function toProviderLimitsCacheEntry(
   usage: JsonRecord,
   source: string,
-  fetchedAt = new Date().toISOString()
+  // A fetcher that serves its last known quota (e.g. Claude during a 429 cooldown) flags it
+  // `_stale` with the original read time — keep that time instead of stamping it as fresh.
+  fetchedAt = usage._stale === true && typeof usage._staleSince === "string"
+    ? usage._staleSince
+    : new Date().toISOString()
 ): ProviderLimitsCacheEntry {
   const bankedResetCredits = Number(usage.bankedResetCredits);
   return {
@@ -32,8 +37,19 @@ export function toProviderLimitsCacheEntry(
     message: typeof usage.message === "string" ? usage.message : null,
     fetchedAt,
     source,
+    ...(typeof usage.limitReached === "boolean" ? { limitReached: usage.limitReached } : {}),
+    ...(typeof usage.sparkLimitReached === "boolean"
+      ? { sparkLimitReached: usage.sparkLimitReached }
+      : {}),
+    ...(typeof usage.rateLimitReachedType === "string"
+      ? { rateLimitReachedType: usage.rateLimitReachedType }
+      : {}),
     bankedResetCredits: Number.isFinite(bankedResetCredits) ? bankedResetCredits : undefined,
+    paidCredits: parseCodexPaidCredits(usage.paidCredits),
     billing: sanitizeProviderBillingStatus(usage.billing),
+    quotaGroups: Array.isArray(usage.quotaGroups)
+      ? (usage.quotaGroups as Array<Record<string, unknown>>)
+      : undefined,
   };
 }
 

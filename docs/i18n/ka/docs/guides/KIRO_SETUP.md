@@ -116,31 +116,40 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## API გასაღების იმპორტის ნაკადი
+## API-გასაღების იმპორტის პროცესი
 
-API გასაღებით ავთენტიფიკაცია განკუთვნილია Kiro / AWS CodeWhisperer-ის ხანგრძლივი მოქმედების bearer ავტორიზაციის მონაცემებისთვის. ის
-არ იყენებს OAuth განახლებას, ამიტომ თავიდან იცილებს საზიარო OIDC სესიის გაუქმებას.
+API-გასაღებით ავთენტიფიკაცია განკუთვნილია ხანგრძლივი მოქმედების Kiro / AWS CodeWhisperer bearer ავტორიზაციის მონაცემებისთვის. ის
+არ იყენებს OAuth განახლებას, ამიტომ თავიდან იცილებს გაზიარებული OIDC სესიის გაუქმებას.
 
 ### მართვის პანელი
 
 1. გახსენით **Dashboard -> Providers -> Kiro**.
 2. აირჩიეთ **API Key**.
-3. ჩასვით API გასაღები და, სურვილისამებრ, AWS-ის რეგიონი (ნაგულისხმევად `us-east-1`).
-4. OmniRoute ამოწმებს გასაღებს და ინახავს კავშირს.
+3. ჩასვით API-გასაღები და აირჩიეთ AWS რეგიონი: **Auto-detect** (ნაგულისხმევი), **US East
+   (N. Virginia)** ან **Europe (Frankfurt)**.
+4. OmniRoute ამოწმებს გასაღებს და ინახავს კავშირს იმ რეგიონზე მიბმულად, სადაც
+   გასაღები მუშაობს.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` იღებს `auto`-ს (ნაგულისხმევი), `us-east-1`-ს ან `eu-central-1`-ს; ნებისმიერი სხვა მნიშვნელობა
+უარყოფილი იქნება HTTP 400-ით.
 
 ### შიდა კონტრაქტი
 
 API მარშრუტი გასაღებს ამოწმებს `KiroService.validateApiKey()`-ის გამოძახებით, რომელიც
-რეგიონის შესაბამის CodeWhisperer/Amazon Q-ის საბოლოო წერტილზე იყენებს `ListAvailableProfiles`-ს
-და განსაზღვრავს `profileArn`-ს.
+იძახებს `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`-ს
+(API-გასაღებით ინფერენციისთვის Amazon Q-ის მიერ გამოყენებული ინტერფეისი), თითოეული რეგიონისთვის 10-წამიანი მოლოდინის ლიმიტით.
+`auto` რეჟიმში ის ჯერ `us-east-1`-ს, შემდეგ კი `eu-central-1`-ს ცდის და ინახავს პირველ რეგიონს,
+რომელიც გასაღებს მიიღებს. თუ გასაღები ყველა კანდიდატ რეგიონში უარყოფილია, იმპორტი
+HTTP 400-ით ვერ სრულდება. შემდეგ `ListAvailableProfiles` გამოიძახება შესაძლებლობის ფარგლებში, არასავალდებულო
+`profileArn`-ის აღმოსაჩენად (AWS ამას API-გასაღებების უმეტესობისთვის უარყოფს).
 
 შენახული კავშირი იყენებს:
 
@@ -155,10 +164,13 @@ API მარშრუტი გასაღებს ამოწმებს `
 }
 ```
 
-შესრულების დროს `KiroExecutor.buildHeaders()` გასაღებს აგზავნის, როგორც
-`Authorization: Bearer <key>`, და ამატებს `tokentype: API_KEY`-ს. კვოტისა და პროფილის გამოძახებები
-იმავე მარკერს იყენებს, რათა AWS-მა bearer აღიქვას ხანგრძლივი მოქმედების API გასაღებად და არა
-OIDC ან სოციალური ქსელის წვდომის ტოკენად.
+შესრულების დროს `KiroExecutor.buildHeaders()` გასაღებს აგზავნის როგორც
+`Authorization: Bearer <key>` და ამატებს `tokentype: API_KEY`-ს. კვოტის/პროფილის გამოძახებები
+იმავე მარკერს იყენებს, რათა AWS-მა bearer ხანგრძლივი მოქმედების API-გასაღებად აღიქვას და არა
+OIDC ან სოციალური ქსელის წვდომის ტოკენად. `KiroExecutor.execute()` API-გასაღებით ინფერენციას აგზავნის მხოლოდ
+`https://q.<region>.amazonaws.com/generateAssistantResponse`-ზე — `us-east-1`-ის
+ჩათვლით — რადგან Kiro IDE-ის კარიბჭე უარყოფს `TokenType=API_KEY`-ს, ხოლო
+`codewhisperer.us-east-1` API-გასაღების payload-ებს უარყოფს, როგორც არასწორ მოთხოვნის სხეულს (HTTP 400).
 
 ---
 

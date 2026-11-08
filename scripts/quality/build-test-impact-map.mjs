@@ -3,6 +3,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { globSync } from "tinyglobby";
 
+import { extractPathLiteralEdges } from "./lib/pathLiteralEdges.mjs";
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const SRC_ROOTS = ["src", "open-sse"];
 const IMPORT_RE =
@@ -79,15 +81,102 @@ export function buildTestImpactMap(root = ROOT) {
     }
   }
   for (const k of Object.keys(map)) map[k].sort();
-  return { generatedFrom: "import-graph", sources: map, testFileCount: testFiles.length };
+  // #16068: tests that read a workflow/config/doc as a file have no import edge.
+  const artifacts = extractPathLiteralEdges({ root, testFiles });
+  return {
+    generatedFrom: "import-graph",
+    sources: map,
+    artifacts,
+    testFileCount: testFiles.length,
+  };
+}
+
+// Large enough that a map with millions of edges takes hundreds of writes rather
+// than one per element, small enough that the pending text stays negligible.
+const WRITE_CHUNK_CHARS = 1024 * 1024;
+
+/**
+ * Write one JSON value, streaming arrays and objects entry by entry.
+ *
+ * Only scalars ever reach `JSON.stringify`, so no single allocation grows with
+ * the document.
+ */
+function writeJsonValue(write, value) {
+  if (Array.isArray(value)) {
+    write("[");
+    for (let i = 0; i < value.length; i += 1) {
+      if (i > 0) write(",");
+      writeJsonValue(write, value[i]);
+    }
+    write("]");
+    return;
+  }
+  if (value !== null && typeof value === "object") {
+    const entries = Object.entries(value);
+    if (entries.length === 0) {
+      write("{}");
+      return;
+    }
+    write("{");
+    entries.forEach(([key, entryValue], index) => {
+      if (index > 0) write(",");
+      write(JSON.stringify(key) + ":");
+      writeJsonValue(write, entryValue);
+    });
+    write("}");
+    return;
+  }
+  write(JSON.stringify(value));
+}
+
+/**
+ * Write the map without ever building it as one string.
+ *
+ * `JSON.stringify` refuses to produce a string longer than V8's limit, and this
+ * map is already close to it: the release map serialises to about 502 MiB, so a
+ * branch that adds a few hundred edges made the whole gate die with
+ * "RangeError: Invalid string length" before it could report anything. Writing
+ * entry by entry through a small buffer means no string here grows with the map.
+ *
+ * That removes the limit from the writer only. `select-impacted-tests.mjs` and
+ * `check-forgotten-sibling-tests.mjs` still load the file with
+ * `readFileSync(path, "utf8")`, which throws ERR_STRING_TOO_LONG once the file
+ * passes the same limit (512 MiB). The compact output below only buys headroom
+ * until then; the readers have to stream for the ceiling to go away.
+ *
+ * Top-level entries are separated by newlines; nested values stay compact
+ * because the readers parse the whole thing anyway.
+ */
+export function writeTestImpactMap(out, map) {
+  const fd = fs.openSync(out, "w");
+  let pending = "";
+  const flush = () => {
+    if (pending) fs.writeFileSync(fd, pending);
+    pending = "";
+  };
+  const write = (text) => {
+    pending += text;
+    if (pending.length >= WRITE_CHUNK_CHARS) flush();
+  };
+  try {
+    write("{");
+    Object.entries(map).forEach(([key, value], index) => {
+      write((index > 0 ? ",\n" : "\n") + JSON.stringify(key) + ":");
+      writeJsonValue(write, value);
+    });
+    write("\n}\n");
+    flush();
+  } finally {
+    fs.closeSync(fd);
+  }
 }
 
 if (fileURLToPath(import.meta.url) === path.resolve(process.argv[1] || "")) {
   const result = buildTestImpactMap();
   const { testFileCount, ...map } = result;
   const out = path.join(ROOT, "config/quality/test-impact-map.json");
-  fs.writeFileSync(out, JSON.stringify(map, null, 2) + "\n");
+  writeTestImpactMap(out, map);
   console.log(
-    `test-impact-map: ${Object.keys(map.sources).length} source files mapped from ${testFileCount} test files`
+    `test-impact-map: ${Object.keys(map.sources).length} source files + ${Object.keys(map.artifacts).length} artifact files mapped from ${testFileCount} test files`
   );
 }

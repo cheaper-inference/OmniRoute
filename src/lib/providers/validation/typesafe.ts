@@ -1,68 +1,67 @@
-import { TYPESAFE_MODELS_URL } from "@/lib/providers/typesafe";
+/**
+ * TypeSafe AI (System One / Jev) API-key validation.
+ *
+ * Probes POST /v1/systemone with a tiny choice question. A 2xx with a parseable
+ * choice means the key works; 401/403 means invalid; everything else is treated
+ * as unavailable (credentials may still be fine).
+ */
 
-import { buildBearerHeaders } from "./headers";
-import { toValidationErrorResult, validationRead } from "./transport";
+import {
+  evaluateSystemOneChoice,
+  type SystemOneChoiceUnavailable,
+} from "@omniroute/open-sse/services/typesafe/systemOne.ts";
 
-/** Validate a TypeSafe credential without consuming inference tokens. */
-export async function validateTypeSafeProvider({
+export async function validateTypesafeProvider({
   apiKey,
-  providerSpecificData = {},
-  fetchImpl = validationRead,
+  fetchImpl,
 }: {
-  apiKey: string;
-  providerSpecificData?: Record<string, unknown>;
-  fetchImpl?: typeof validationRead;
+  apiKey?: string | null;
+  fetchImpl?: typeof fetch;
 }) {
-  try {
-    const response = await fetchImpl(TYPESAFE_MODELS_URL, {
-      method: "GET",
-      headers: buildBearerHeaders(apiKey, providerSpecificData),
-    });
+  const result = await evaluateSystemOneChoice({
+    apiKey,
+    state: "ping",
+    instructions: "Pick any option.",
+    criteria: {
+      ok: "A valid routing destination",
+      other: "Any other destination",
+    },
+    timeoutMs: 10_000,
+    fetchImpl,
+  });
 
-    if (response.ok) {
-      return {
-        valid: true,
-        error: null,
-        method: "typesafe_models",
-        testedEndpoint: `GET ${TYPESAFE_MODELS_URL}`,
-      };
-    }
+  if (result.ok) {
+    return { valid: true, error: null, method: "typesafe_systemone" };
+  }
+  // `strict: false` does not narrow the union by the boolean `ok`; past the early return it is the failure arm.
+  const failure = result as SystemOneChoiceUnavailable;
 
-    if (response.status === 401 || response.status === 403) {
-      return {
-        valid: false,
-        error: `Invalid API key (GET ${TYPESAFE_MODELS_URL})`,
-        method: "typesafe_models",
-        testedEndpoint: `GET ${TYPESAFE_MODELS_URL}`,
-      };
-    }
+  if (failure.reason === "missing_api_key") {
+    return { valid: false, error: "API key is required" };
+  }
 
-    if (response.status === 429 || response.status === 529) {
-      return {
-        valid: true,
-        error: null,
-        warning: `TypeSafe validation was rate limited (${response.status})`,
-        method: "typesafe_models",
-        testedEndpoint: `GET ${TYPESAFE_MODELS_URL}`,
-      };
-    }
+  if (failure.reason === "http_error" && (failure.status === 401 || failure.status === 403)) {
+    return { valid: false, error: "Invalid API key" };
+  }
 
-    if (response.status >= 500) {
-      return {
-        valid: false,
-        error: `TypeSafe is unavailable (${response.status})`,
-        method: "typesafe_models",
-        testedEndpoint: `GET ${TYPESAFE_MODELS_URL}`,
-      };
-    }
+  if (failure.reason === "http_error" && failure.status === 429) {
+    return {
+      valid: true,
+      error: null,
+      method: "typesafe_systemone",
+      warning: "Rate limited, but credentials appear valid",
+    };
+  }
 
+  if (failure.reason === "timeout" || failure.reason === "network_error") {
     return {
       valid: false,
-      error: `TypeSafe validation failed (${response.status})`,
-      method: "typesafe_models",
-      testedEndpoint: `GET ${TYPESAFE_MODELS_URL}`,
+      error: `TypeSafe unreachable (${failure.reason})`,
     };
-  } catch (error) {
-    return toValidationErrorResult(error);
   }
+
+  return {
+    valid: false,
+    error: failure.detail || `TypeSafe validation failed (${failure.reason})`,
+  };
 }

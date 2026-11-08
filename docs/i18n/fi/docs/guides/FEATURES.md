@@ -298,13 +298,13 @@ Keskeiset toimintatavat:
 
 ## 🔑 Synkronointitunnukset ja määrityspaketti _(v3.6.6+)_
 
-Useiden laitteiden ja ulkoisten operaattoreiden käyttö on nyt mahdollista **rajattujen synkronointitunnusten** avulla:
+Usean laitteen ja ulkoisten operaattoreiden käyttö on nyt mahdollista **rajattujen synkronointitunnusten** avulla:
 
-- **`POST /api/sync/tokens`** — Luo uusi synkronointitunnus (rajattu, valinnainen vanhenemisaika)
+- **`POST /api/sync/tokens`** — Myönnä uusi synkronointitunnus (rajattu, valinnaisella vanhentumisajalla)
 - **`DELETE /api/sync/tokens/:id`** — Peruuta tunnus
-- **`GET /api/sync/bundle`** — Lataa versioitu, ETag-tunnisteella yksilöity JSON-tilannevedos kaikista ei-arkaluonteisista asetuksista (salasanat peitettyinä)
+- **`GET /api/sync/bundle`** — Lataa versioitu, ETag-avaimella yksilöity JSON-tilannevedos määrityksistä (todennus vain synkronointitunnuksella). Todennusasetukset, kuten hallintapaneelin salasana, poistetaan, mutta palveluntarjoajien tunnistetiedot ja API-avaimet sisällytetään, joten käsittele tiedostoa salaisuutena
 
-Määrityspaketin muodostaa `src/lib/sync/bundle.ts`. Kuluttajat vertaavat `ETag`-vastausotsaketta havaitakseen muutokset ilman koko hyötykuorman lataamista uudelleen.
+Määrityspaketti luodaan tiedostossa `src/lib/sync/bundle.ts`. Käyttäjät vertaavat `ETag`-vastausotsaketta havaitakseen muutokset lataamatta koko sisältöä uudelleen. CLI:stä komento `omniroute sync bundle <outPath> --token <syncToken>` (tai `OMNIROUTE_SYNC_TOKEN`) tallentaa sen tiedostoon, johon vain omistajalla on käyttöoikeus.
 
 ---
 
@@ -316,14 +316,14 @@ Myös **hybriditunnuslaskenta** sisältyy versioon v3.6.6: kun Claude-yhteensopi
 
 ---
 
-## 🛡️ Turvalliset lähtevät haut ja SSRF-suojaus _(v3.6.6+)_
+## 🛡️ Turvallinen lähtevä haku ja SSRF-suojaus _(v3.6.6+)_
 
-Kaikki palveluntarjoajien validointi- ja mallinhakukutsut kulkevat nyt kaksitasoisen lähtevän liikenteen suojauksen läpi:
+Kaikki palveluntarjoajien validointi- ja mallien etsintäkutsut kulkevat nyt kaksikerroksisen lähtevän liikenteen suojauksen kautta:
 
-1. **URL-suojaus** (`src/shared/network/outboundUrlGuard.ts`) — Estää yksityiset, loopback- ja link-local-IP-alueet ennen vastakkeen avaamista.
-2. **Turvallisen haun kääre** (`src/shared/network/safeOutboundFetch.ts`) — Käyttää URL-suojausta, normalisoi aikakatkaisut ja yrittää tilapäisten virheiden jälkeen uudelleen eksponentiaalisella viiveellä.
+1. **URL-suojaus** (`src/shared/network/outboundUrlGuard.ts`) — Tarkistaa ensin kohteen isäntänimen tai IP-literaalin kirjoitetussa muodossaan. Vain julkiset osoitteet sallivassa tilassa turvallisen haun käärijä myös selvittää nimen osoitteen ja hylkää yksityiset osoitteet. Oletusarvoisesti se estää pilvipalvelujen metatietopäätepisteet — koko osoitealueen 169.254.0.0/16 sekä tunnetut metatietoisäntänimet. `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` estää lisäksi yksityiset osoitteet ja takaisinkytkentäisännät. `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (tai vanha `OUTBOUND_SSRF_GUARD_ENABLED=false`) poistaa tarkistukset käytöstä. Lipun hallintapaneelin valitsimella tallennettu arvo on ensisijainen sen muuttujaan nähden, ja sisäänrakennetut paikalliset palveluntarjoajat ohittavat suojauksen avaimen validoinnin aikana. Katso `docs/reference/ENVIRONMENT.md`.
+2. **Turvallisen haun käärijä** (`src/shared/network/safeOutboundFetch.ts`) — Käyttää URL-suojausta, yhdenmukaistaa aikakatkaisut ja yrittää tilapäisesti epäonnistuneita pyyntöjä uudelleen eksponentiaalisella viiveellä.
 
-Suojausrikkomukset palautetaan HTTP 422 -virheinä (`URL_GUARD_BLOCKED`) ja kirjataan vaatimustenmukaisuuden tarkastuslokiin `providerAudit.ts`-tiedoston kautta.
+Suojauksen rikkomukset ilmoitetaan virheenä `URL_GUARD_BLOCKED` — HTTP 503 funktion `getSafeOutboundFetchErrorStatus` kautta (400 mallien etsintäreitillä) — ja validoinnin aikana havaitut todelliset SSRF-estot kirjataan tarkastuslokiin tapahtumina `provider.validation.ssrf_blocked`.
 
 ---
 

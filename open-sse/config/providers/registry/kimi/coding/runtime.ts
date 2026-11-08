@@ -1,3 +1,8 @@
+import {
+  BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS,
+  canStartBackgroundRefresh,
+} from "@/shared/utils/backgroundRefresh";
+
 export const KIMI_CODING_BASE_URL = "https://api.kimi.com/coding/v1";
 export const KIMI_CODING_MODELS_URL = `${KIMI_CODING_BASE_URL}/models`;
 export const KIMI_CODING_OPENAI_URL = `${KIMI_CODING_BASE_URL}/chat/completions`;
@@ -23,10 +28,21 @@ const KIMI_CODE_STATIC_THINKING_POLICIES: Record<string, KimiCodeThinkingPolicy>
   },
 };
 
+/**
+ * Spec names that the Kimi Coding endpoint only accepts under their wire id. Mirrors
+ * MODEL_SPECS["kimi-k3"].aliases (`k3` is the Kimi Coding wire id, #8250); upstream rejects
+ * `kimi-k3-high` with "Please set model id as `k3`" (#16985).
+ */
+export const KIMI_CODING_WIRE_MODEL_ALIASES: Readonly<Record<string, string>> = {
+  "kimi-k3": "k3",
+  "kimi-k3.1-pro": "k3.1-pro",
+  "kimi-k3.1-pro-highspeed": "k3.1-pro-highspeed",
+};
+
 export function getKimiCodeStaticThinkingPolicy(modelId: unknown): KimiCodeThinkingPolicy | null {
   if (typeof modelId !== "string") return null;
   const normalizedModel = modelId.trim().toLowerCase().split("/").pop() || "";
-  if (/^k3(?:$|-)/.test(normalizedModel)) return KIMI_CODE_STATIC_THINKING_POLICIES.k3;
+  if (/^k3(?:$|[.-])/.test(normalizedModel)) return KIMI_CODE_STATIC_THINKING_POLICIES.k3;
   return KIMI_CODE_STATIC_THINKING_POLICIES[normalizedModel] || null;
 }
 
@@ -68,6 +84,9 @@ type FetchLike = typeof fetch;
 let cachedVersion: string | null = null;
 let cachedAt = 0;
 let inFlight: Promise<string> | null = null;
+// Earliest time the getter may start another background lookup: one TTL after any answer
+// (the cache below only keeps versions newer than the pin), the retry window after a failure.
+let nextBackgroundRefreshAt = 0;
 let fetchImpl: FetchLike = fetch;
 
 function parseDottedTriple(value: unknown): string | null {
@@ -112,7 +131,13 @@ function readFreshCache(): string | null {
 export function getKimiCodeCliVersion(): string {
   const override = readEnvOverride();
   if (override) return override;
-  if (typeof process !== "undefined" && !process.env.NODE_TEST_CONTEXT && !readFreshCache() && !inFlight) {
+  if (
+    canStartBackgroundRefresh() &&
+    !process.env.NODE_TEST_CONTEXT &&
+    !readFreshCache() &&
+    !inFlight &&
+    Date.now() >= nextBackgroundRefreshAt
+  ) {
     void refreshKimiCodeCliVersion();
   }
   return pickAtLeastPin(readFreshCache());
@@ -160,6 +185,9 @@ export function refreshKimiCodeCliVersion(): Promise<string> {
       cachedVersion = resolved;
       cachedAt = Date.now();
     }
+    nextBackgroundRefreshAt =
+      Date.now() +
+      (resolved ? KIMI_CODE_VERSION_CACHE_TTL_MS : BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS);
     return pickAtLeastPin(resolved ?? readFreshCache());
   })();
 
@@ -172,6 +200,7 @@ export function refreshKimiCodeCliVersion(): Promise<string> {
 
 /** Test seam: drop the registry cache so the next refresh hits the network. */
 export function resetKimiCodeCliVersionCache(): void {
+  nextBackgroundRefreshAt = 0;
   cachedVersion = null;
   cachedAt = 0;
   inFlight = null;

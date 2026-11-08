@@ -298,15 +298,15 @@ Galvenā darbība:
 
 ---
 
-## 🔑 Sinhronizācijas marķieri un konfigurācijas pakete _(v3.6.6+)_
+## 🔑 Sinhronizācijas pilnvaras un konfigurācijas pakotne _(v3.6.6+)_
 
-Vairāku ierīču un ārējā operatora piekļuve tagad ir iespējama, izmantojot **ierobežotus sinhronizācijas marķierus**:
+Piekļuve no vairākām ierīcēm un ārējiem operatoriem tagad ir iespējama, izmantojot **ierobežota tvēruma sinhronizācijas pilnvaras**:
 
-- **`POST /api/sync/tokens`** — Izdot jaunu sinhronizācijas marķieri (ierobežots, ar neobligātu derīguma termiņu)
-- **`DELETE /api/sync/tokens/:id`** — Atsaukt marķieri
-- **`GET /api/sync/bundle`** — Lejupielādēt versiju un ETag atslēgu noteiktu JSON momentuzņēmumu ar visiem nesensiitīviem iestatījumiem (paroles izņemtas)
+- **`POST /api/sync/tokens`** — Izsniedz jaunu sinhronizācijas pilnvaru (ar ierobežotu tvērumu un neobligātu derīguma termiņu)
+- **`DELETE /api/sync/tokens/:id`** — Atsauc pilnvaru
+- **`GET /api/sync/bundle`** — Lejupielādē konfigurācijas versijotu JSON momentuzņēmumu ar `ETag` identifikatoru (autentifikācija iespējama tikai ar sinhronizācijas pilnvaru). Autentifikācijas iestatījumi, piemēram, informācijas paneļa parole, tiek izņemti, taču pakalpojumu sniedzēju akreditācijas dati un API atslēgas tiek iekļautas, tādēļ uzskatiet šo failu par slepenu
 
-Konfigurācijas pakete tiek veidota ar `src/lib/sync/bundle.ts`. Patērētāji salīdzina `ETag` atbildes galveni, lai noteiktu izmaiņas bez pilnas slodzes atkārtošanas.
+Konfigurācijas pakotni izveido `src/lib/sync/bundle.ts`. Patērētāji salīdzina `ETag` atbildes galveni, lai noteiktu izmaiņas, atkārtoti nelejupielādējot visu saturu. Izmantojot CLI, `omniroute sync bundle <outPath> --token <syncToken>` (vai `OMNIROUTE_SYNC_TOKEN`) saglabā to failā, kas pieejams tikai īpašniekam.
 
 ---
 

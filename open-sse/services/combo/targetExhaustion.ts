@@ -28,7 +28,11 @@ import {
 } from "../alibabaFreeTier.ts";
 import { RateLimitReason } from "../../config/constants.ts";
 import { isProviderCircuitOpenResult, isRequestScopedUpstreamFailure } from "./comboPredicates.ts";
-import { isCloudflareFingerprintRejection } from "../errorClassifier.ts";
+import {
+  containsModelUnavailableMessage,
+  isCloudflareFingerprintRejection,
+} from "../errorClassifier.ts";
+import { isLocalModelPolicyResponse } from "../resolvedModelAccess.ts";
 // #10334 — connection-scope predicate shared with the persistence layer
 // (markAccountUnavailable) so the same-request combo skip and the persisted
 // connection cooldown agree on exactly which fallbackResult shapes qualify.
@@ -38,9 +42,11 @@ import { isAgentrouterConnectionQuotaScope } from "@/sse/services/auth";
 import { isVertexConnectionWidePermissionDenied } from "@/sse/services/vertexErrorClassifier";
 import { isSharedWalletCredits402 } from "../accountFallback/sharedWalletCredits.ts";
 import { isClaudeMinuteRateLimitText, isExplicitClaudeQuota429Text } from "../usage/claudeQuota.ts";
-import { getCachedClaudeQuotaScopeDecision } from "@/domain/quotaCache";
+import { getCachedClaudeQuotaScopeDecision } from "../claudeQuotaScopeBridge.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import { LOCAL_MODEL_COOLDOWN_HEADER } from "../../utils/localCooldownHeader.ts";
+import { isExplicitModelCapacityFailure } from "../accountFallback/perModelFailureScope.ts";
+import { isModelScopedAccessDenial } from "../accountFallback/modelScopedAccessDenial.ts";
 import type { ComboLogger, ResolvedComboTarget } from "./types.ts";
 
 // Connection-level failure statuses: the provider connection itself is likely bad (upstream
@@ -64,6 +70,31 @@ const AUTH_LEVEL_ERROR_STATUSES = [401, 403];
 // leg, leaving the rest of that provider's legs eligible.
 function isEmptyContentFailure(status: number, errorText: string): boolean {
   return status === 502 && (/empty content/i.test(errorText) || /empty response/i.test(errorText));
+}
+
+/**
+ * #14313: streamReadiness rewrites an upstream stream that dies before any non-ping event
+ * into a synthetic 502 "Stream ended before producing a non-ping SSE event" (code
+ * STREAM_EARLY_EOF / type stream_early_eof, upstream diagnostic appended after ": "). The
+ * connection was HEALTHY - it answered and opened the stream - only this MODEL's backend
+ * failed (live case: "[503] Upstream error from Nvidia: Service temporarily overloaded").
+ * Same verdict as the #5085 empty-content 502 above: a model-level transient.
+ * Connection-level exhaustion here would skip every sibling target on the same connection
+ * and fail the whole combo at its first attempt. Matched on the streamReadiness structured
+ * code/type or its exact wording.
+ */
+function isStreamEarlyEofFailure(
+  status: number,
+  errorText: string,
+  structuredError?: { code?: string; type?: string }
+): boolean {
+  if (status !== 502) return false;
+  const token = [structuredError?.code, structuredError?.type]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  if (token.includes("stream_early_eof")) return true;
+  return /stream ended before producing a non-ping sse event/i.test(errorText);
 }
 
 /** #12441 — quota/credits bodies must not take the 401/403 auth-skip path. */
@@ -120,6 +151,14 @@ export type ApplyComboTargetExhaustionOptions = {
 export type ComboTargetExhaustionResult = {
   target: ResolvedComboTarget;
   providerExhausted: boolean;
+  /**
+   * Durable exhaustion marker: the set-level key this failure wrote. Absent
+   * for transient failures (rate limit, connection error), which are replayed
+   * on the next set. `scope: "connection"` always carries `connectionId`.
+   */
+  durableExhaustion?:
+    | { scope: "provider"; provider: string }
+    | { scope: "connection"; provider: string; connectionId: string };
   isModelScopedClaudeQuota: boolean;
   isConnectionScopedClaudeQuota: boolean;
   modelScopedClaudeCooldownMs: number | null;
@@ -202,7 +241,16 @@ export function applyComboTargetExhaustion(
   const derived = deriveTargetFailure(target, opts);
   const effectiveTarget = derived.target;
   const { result, sets, log, tag, errorText, structuredError } = opts;
+  // Local key policy is neither upstream credential failure nor provider exhaustion.
+  if (isLocalModelPolicyResponse(result)) return { ...derived, providerExhausted: false };
   const provider = effectiveTarget.provider;
+  const durableMark = effectiveTarget.connectionId
+    ? ({
+        scope: "connection",
+        provider,
+        connectionId: effectiveTarget.connectionId,
+      } as const)
+    : ({ scope: "provider", provider } as const);
   const canonicalProvider = provider ? resolveProviderId(provider) : provider;
 
   // #10334: connection-scope account-wide quota exhaustion (agentrouter "额度不足";
@@ -253,12 +301,12 @@ export function applyComboTargetExhaustion(
   // rate-limited sibling account, which is the intended, safer outcome.
   if (isAgentrouterConnectionQuotaScope(provider, opts.fallbackResult)) {
     markAgentrouterConnectionQuotaExhaustion(effectiveTarget, { sets, log, tag });
-    return { ...derived, providerExhausted: true };
+    return { ...derived, providerExhausted: true, durableExhaustion: durableMark };
   }
 
   if (isSharedWalletCredits402(provider, result.status, opts.errorText)) {
     markSharedWalletCreditsExhaustion(effectiveTarget, { sets, log, tag });
-    return { ...derived, providerExhausted: true };
+    return { ...derived, providerExhausted: true, durableExhaustion: durableMark };
   }
 
   if (
@@ -278,7 +326,7 @@ export function applyComboTargetExhaustion(
       tag,
       `Native Claude quota exhausted for ${effectiveTarget.connectionId ? "connection" : "provider"}`
     );
-    return { ...derived, providerExhausted: true };
+    return { ...derived, providerExhausted: true, durableExhaustion: durableMark };
   }
 
   // #8133/#8137: auth-level failures (401/403) mean that connection's credentials are bad.
@@ -309,6 +357,9 @@ export function applyComboTargetExhaustion(
       .join(" ")
   );
   const quotaMisclassifiedAsAuth = isQuotaOrCreditsError(errorText, structuredError);
+  if (isModelScopedAccessDenial(provider, result.status, errorText, structuredError)) {
+    return { ...derived, providerExhausted: false };
+  }
   if (
     AUTH_LEVEL_ERROR_STATUSES.includes(result.status) &&
     // Cloudflare 1010 is a 403-ONLY fingerprint rejection. A 401 that merely happens to
@@ -316,6 +367,15 @@ export function applyComboTargetExhaustion(
     // auth-level exhaustion — only a 403 carrying the Cloudflare fingerprint signal does.
     !(result.status === 403 && (fingerprintToken || fingerprintText)) &&
     !quotaMisclassifiedAsAuth &&
+    // #14313: a request-scoped failure refuses the REQUEST SHAPE, never the credentials -
+    // every sibling account AND model would get the same verdict (invalid_request_error,
+    // context_length_exceeded, an upstream free-tier shape refusal, a local rate-limit).
+    // The connection-level and provider-quota branches below already exclude these
+    // (`requestScopedFailure || isRequestScopedUpstreamFailure`); without the same guard
+    // here a request-scoped 401/403 marked the connection exhausted and skipped every
+    // remaining same-connection target of the request.
+    !opts.requestScopedFailure &&
+    !isRequestScopedUpstreamFailure(structuredError) &&
     provider &&
     provider !== "unknown"
   ) {
@@ -338,8 +398,21 @@ export function applyComboTargetExhaustion(
     ) {
       return { ...derived, providerExhausted: false };
     }
+    // #14313: a 401/403 whose body names the MODEL as unsupported ("Model X is not
+    // supported" - upstream model rotation, classified MODEL_NOT_FOUND by errorClassifier
+    // #7268) is model-scoped, not a bad credential: the same connection keeps serving its
+    // sibling models. chatCore already locks the model, which is the retry protection -
+    // marking the connection here instead skipped EVERY remaining target on it via
+    // #1731v2 and failed the whole combo at its first attempt with "All models failed".
+    if (
+      containsModelUnavailableMessage(
+        [opts.errorText, opts.structuredError?.message].filter(Boolean).join(" ")
+      )
+    ) {
+      return { ...derived, providerExhausted: false };
+    }
     markAuthLevelExhaustion(effectiveTarget, { result, sets, log, tag });
-    return { ...derived, providerExhausted: true };
+    return { ...derived, providerExhausted: true, durableExhaustion: durableMark };
   }
 
   // #1731: If the entire provider quota is exhausted, mark it so subsequent
@@ -351,9 +424,13 @@ export function applyComboTargetExhaustion(
   const providerExhausted = isProviderQuotaExhausted(provider, opts);
   if (providerExhausted) {
     markProviderQuotaExhaustion(provider as string, opts);
-  } else {
-    markTransientOrConnectionLevel(effectiveTarget, opts);
+    return {
+      ...derived,
+      providerExhausted,
+      durableExhaustion: { scope: "provider", provider: provider as string },
+    };
   }
+  markTransientOrConnectionLevel(effectiveTarget, opts);
 
   return { ...derived, providerExhausted };
 }
@@ -564,10 +641,14 @@ function markConnectionLevelExhaustion(
     isProviderCircuitOpenResult(result, errorText) ||
     requestScopedFailure ||
     isRequestScopedUpstreamFailure(structuredError) ||
+    isExplicitModelCapacityFailure(result.status, errorText, rawModel) ||
     // #5085: empty-content 502 is a healthy connection returning no body — model-level, not
     // connection-level. Don't exhaust the provider; let the remaining legs (incl. same-provider)
     // be tried in-request.
     isEmptyContentFailure(result.status, errorText) ||
+    // #14313: the synthetic early-EOF 502 is the same shape - the connection answered and
+    // opened the stream, only this MODEL's backend failed before emitting an event.
+    isStreamEarlyEofFailure(result.status, errorText, structuredError) ||
     // Per-model-quota providers (gemini, github, passthrough, compatible) multiplex models
     // behind one connection. A model-level 500 (e.g. Gemini "Internal error encountered")
     // must NOT exhaust the connection — other models on the same connection may still succeed.

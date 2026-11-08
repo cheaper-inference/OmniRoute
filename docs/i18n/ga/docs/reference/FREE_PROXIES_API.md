@@ -14,7 +14,7 @@ fhreastalaí a chuireann an bealach liosta ar fáil.
 
 Filleann sé slisne scagtha, sórtáilte agus leathanachaithe mar aon le comhaireamh iomlán. Tarlaíonn
 an scagadh agus an comhaireamh in SQL, ionas gur féidir leis an gcomhéadan úsáideora an fíoriomlán
-a thaispeáint (m.sh. `Iomlán: 0`) gan gach ró a lódáil isteach sa chuimhne.
+a thaispeáint (m.sh. `Total: 0`) gan gach ró a lódáil isteach sa chuimhne.
 
 ### Paraiméadair iarratais
 
@@ -54,9 +54,9 @@ a thaispeáint (m.sh. `Iomlán: 0`) gan gach ró a lódáil isteach sa chuimhne.
 ```
 
 Léiríonn `total` an t-iomlán scagtha **roimh** an leathanú, ionas gur féidir leis an gcomhéadan úsáideora
-`Iomlán: N` agus `hasMore` a rindreáil go neamhspleách. Tá `syncErrors` eochraithe de réir aitheantas
+`Total: N` agus `hasMore` a rindreáil go neamhspleách. Tá `syncErrors` eochraithe de réir aitheantas
 foinse agus ní líontar é ach i gcás foinsí ar theip ar a sioncronú deireanach — ní bhíonn toradh
-`Iomlán: 0` ina thost riamh.
+`Total: 0` ina thost riamh.
 
 ## Cur leis an linn — `POST /api/settings/free-proxies/[id]/add-to-pool`
 

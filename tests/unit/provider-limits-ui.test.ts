@@ -417,6 +417,27 @@ test("OpenRouter credits render as a USD credit count, not a percentage row", ()
   assert.equal(freeDaily.total, 50);
 });
 
+test("Antigravity live quota models retain upstream order instead of static catalog rank", () => {
+  const quotas = providerLimitUtils.parseQuotaData("antigravity", {
+    quotas: {
+      "gemini-3.9-flash-high": { used: 2, total: 100, remainingPercentage: 98 },
+      "gemini-3.8-flash-high": { used: 2, total: 100, remainingPercentage: 98 },
+      gemini_session: {
+        used: 2,
+        total: 100,
+        remainingPercentage: 98,
+        quotaAggregate: true,
+        quotaWindow: "session",
+      },
+    },
+  });
+
+  assert.deepEqual(
+    quotas.map((quota) => quota.modelKey || quota.name),
+    ["gemini-3.9-flash-high", "gemini-3.8-flash-high", "gemini_session"]
+  );
+});
+
 test("hidden provider models are filtered from per-model quota rows", () => {
   const quotas = providerLimitUtils.parseQuotaData("antigravity", {
     quotas: {
@@ -483,9 +504,9 @@ test("usage namespace includes Provider Limits UI translation keys", () => {
 
   for (const key of [
     "statTotal",
-    "statCritical",
-    "statAlert",
-    "statHealthy",
+    "healthUnavailable",
+    "healthRestricted",
+    "healthAvailable",
     "filterPurchaseTypeLabel",
     "filterTierLabel",
     "purchaseAll",
@@ -569,5 +590,8 @@ test("grok-cli exposes the redeem button when banked reset credits are present",
   });
   assert.equal(providerLimitUtils.computeCanRedeemResetCredit("grok-cli", parsed), true);
   assert.equal(providerLimitUtils.computeCanRedeemResetCredit("codex", parsed), true);
-  assert.equal(providerLimitUtils.computeCanRedeemResetCredit("claude", parsed), false);
+  // Claude reset credits (banked usage grants + weekly session reset) redeem through the
+  // same picker as of #14728 — a genuinely unsupported provider stays the negative control.
+  assert.equal(providerLimitUtils.computeCanRedeemResetCredit("claude", parsed), true);
+  assert.equal(providerLimitUtils.computeCanRedeemResetCredit("openai", parsed), false);
 });

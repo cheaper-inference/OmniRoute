@@ -6,6 +6,7 @@ import { ensurePeerStampToken, wrapRequestListenerWithPeerStamp } from "./peer-s
 import { maybeHandleWebdav, WEBDAV_PREFIX } from "./webdav-handler.mjs";
 import methodGuard from "./http-method-guard.cjs";
 import headResponseGuard from "./head-response-guard.cjs";
+import h2cUpgradeGuard from "./h2c-upgrade-guard.cjs";
 import { resolveTlsOptions, createServerListener } from "./tls-options.mjs";
 import { getMainServerTimeoutConfig } from "./main-server-timeouts.mjs";
 import { createSystemdNotifier } from "./systemd-notify.mjs";
@@ -102,6 +103,7 @@ process.on("SIGHUP", () => void shutdown("SIGHUP"));
 
 const { wrapRequestListenerWithMethodGuard } = methodGuard;
 const { wrapRequestListenerWithHeadResponseGuard } = headResponseGuard;
+const { handleH2cUpgrade } = h2cUpgradeGuard;
 
 // Opt-in native HTTPS (#5242). Resolved once at boot: when both OMNIROUTE_TLS_CERT
 // and OMNIROUTE_TLS_KEY point at readable files we terminate TLS on the same
@@ -180,6 +182,10 @@ function proxyLiveWs(req, socket, head) {
 function wrapUpgradeListener(server, listener) {
   return async function responsesWsAwareUpgrade(req, socket, head) {
     try {
+      // A cleartext `Upgrade: h2c` (JDK HttpClient: JetBrains/Air) is not a WebSocket
+      // upgrade: answer it as plain HTTP/1.1 instead of dropping the socket.
+      if (handleH2cUpgrade(server, req, socket, head)) return;
+
       // If this server IS the LiveWS server (port 20132), the ws library's
       // own upgrade handler should process the request directly — proxying
       // /live-ws back to 127.0.0.1:20132 would create an infinite self-loop.
@@ -262,6 +268,11 @@ http.createServer = function createServerWithResponsesWs(...args) {
   const mainServerTimeouts = getMainServerTimeoutConfig();
   server.keepAliveTimeout = mainServerTimeouts.keepAliveTimeoutMs;
   server.headersTimeout = mainServerTimeouts.headersTimeoutMs;
+  if (mainServerTimeouts.tcpKeepAliveInitialDelayMs > 0) {
+    server.on("connection", (socket) => {
+      socket.setKeepAlive(true, mainServerTimeouts.tcpKeepAliveInitialDelayMs);
+    });
+  }
   const originalOn = server.on.bind(server);
   const originalAddListener = server.addListener.bind(server);
 

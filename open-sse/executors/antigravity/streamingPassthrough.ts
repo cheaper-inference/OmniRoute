@@ -1,3 +1,4 @@
+import { selectHttpResponse, type HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 // Pure streaming pass-through helpers for the Antigravity executor (#7408):
 // tap an upstream Gemini SSE Response through a credits-extraction
 // TransformStream instead of buffering the whole body in the executor, so
@@ -110,10 +111,12 @@ export function createCreditsExtractionTransform(
 
 /** Result shape returned to callers of AntigravityExecutor.execute(). */
 export type SsePassthroughResult = {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   response: Response;
   url: string;
   headers: Record<string, string>;
   transformedBody: unknown;
+  upstreamDiagnostic?: Record<string, unknown>;
 };
 
 /**
@@ -201,6 +204,7 @@ export function buildSsePassthroughResult(
   if (signal?.aborted) {
     body.cancel().catch(() => {});
     return {
+      upstreamHttpSelection: null,
       response: new Response(null, { status: 499 }),
       url,
       headers: outHeaders,
@@ -212,6 +216,7 @@ export function buildSsePassthroughResult(
     createCreditsExtractionTransform(accountId, onCreditsUpdate, 16 * 1024)
   );
   return {
+    upstreamHttpSelection: selectHttpResponse(upstream),
     response: new Response(tapped, {
       status: upstream.status,
       statusText: upstream.statusText,

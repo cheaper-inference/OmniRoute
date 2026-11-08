@@ -1,9 +1,49 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { readFetchErrorMessage } from "../../src/shared/utils/fetchError.ts";
+import { errorMessageFromBody, readFetchErrorMessage } from "../../src/shared/utils/fetchError.ts";
+import { throwIfResilienceSaveFailed } from "../../src/app/(dashboard)/dashboard/settings/components/resilienceSaveError.ts";
 
 const FALLBACK = "An error occurred";
+
+test("validation detail selection only considers the first item and trims both fields", () => {
+  for (const first of [null, "invalid", {}, { message: "   " }, { message: 7 }]) {
+    assert.equal(
+      errorMessageFromBody(
+        {
+          error: {
+            message: " generic ",
+            details: [first, { message: "later" }],
+          },
+        },
+        FALLBACK
+      ),
+      "generic"
+    );
+  }
+  assert.equal(
+    errorMessageFromBody(
+      {
+        error: {
+          details: [{ field: " name ", message: " required " }],
+        },
+      },
+      FALLBACK
+    ),
+    "name: required"
+  );
+  assert.equal(
+    errorMessageFromBody(
+      {
+        error: {
+          details: [{ field: 42, message: " required " }],
+        },
+      },
+      FALLBACK
+    ),
+    "required"
+  );
+});
 
 function jsonResponse(body: unknown, status = 500) {
   return new Response(JSON.stringify(body), {
@@ -91,4 +131,77 @@ test("keeps error.message when details are empty or malformed", async () => {
     400
   );
   assert.equal(await readFetchErrorMessage(junk, FALLBACK), "Invalid request");
+});
+
+// The resilience settings PATCH is rejected by validateBody when the dashboard
+// sends a field the schema does not accept (e.g. globalConcurrentRequests on
+// builds where it is not in requestQueueSettingsSchema). The toast must name
+// the offending field instead of the generic "Invalid request".
+test("surfaces the offending field for a resilience requestQueue rejection", async () => {
+  const res = jsonResponse(
+    {
+      error: {
+        message: "Invalid request",
+        details: [
+          {
+            field: "requestQueue",
+            message: 'Unrecognized key: "globalConcurrentRequests"',
+            keys: ["globalConcurrentRequests"],
+          },
+        ],
+      },
+    },
+    400
+  );
+  assert.equal(
+    await readFetchErrorMessage(res, FALLBACK),
+    'requestQueue: Unrecognized key: "globalConcurrentRequests"'
+  );
+});
+
+// ResilienceTab parses the PATCH body once, then used to call
+// readFetchErrorMessage on the same Response. The helper's one-read contract
+// throws on a consumed body and returns the fallback, so the toast lost the
+// validation detail. The already-parsed object must go through errorMessageFromBody.
+test("consumed response falls back; parsed body still names the requestQueue field", async () => {
+  const res = jsonResponse(
+    {
+      error: {
+        message: "Invalid request",
+        details: [
+          {
+            field: "requestQueue",
+            message: 'Unrecognized key: "globalConcurrentRequests"',
+          },
+        ],
+      },
+    },
+    400
+  );
+  const json = await res.json();
+  assert.equal(await readFetchErrorMessage(res, FALLBACK), FALLBACK);
+  assert.equal(
+    errorMessageFromBody(json, FALLBACK),
+    'requestQueue: Unrecognized key: "globalConcurrentRequests"'
+  );
+});
+
+test("throwIfResilienceSaveFailed throws the parsed body only when the save is not ok", () => {
+  const json = {
+    error: {
+      message: "Invalid request",
+      details: [
+        {
+          field: "requestQueue",
+          message: 'Unrecognized key: "globalConcurrentRequests"',
+        },
+      ],
+    },
+  };
+  const expected = errorMessageFromBody(json, FALLBACK);
+  assert.throws(() => throwIfResilienceSaveFailed(false, json, FALLBACK), {
+    name: "Error",
+    message: expected,
+  });
+  assert.doesNotThrow(() => throwIfResilienceSaveFailed(true, json, FALLBACK));
 });

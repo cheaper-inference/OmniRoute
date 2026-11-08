@@ -34,7 +34,14 @@ import { FORMATS } from "../translator/formats.ts";
 import { createSSETransformStreamWithLogger } from "../utils/stream.ts";
 import { ensureStreamReadiness } from "../utils/streamReadiness.ts";
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
+import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
+import { readBodyReasoningEffort, writeBodyReasoningEffort } from "./base/reasoningEffort.ts";
+import {
+  clampToLearned,
+  getLearnedReasoningEffort,
+} from "../services/learnedReasoningEffortCaps.ts";
 import { STREAM_READINESS_TIMEOUT_MS } from "../config/constants.ts";
+import { EFFORT_BUDGETS, THINKING_LEVEL_MAP } from "../services/thinkingBudget.ts";
 import { resolveSuppressThinkClose, THINKING_MARKER_HEADER } from "../utils/thinkCloseMarker.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -123,16 +130,56 @@ function isGlmThinkingModel(model: string): boolean {
  */
 const GLM_THINKING_DEFAULT_MAX_TOKENS = 131072;
 
-function applyGlmRequestDefaults(body: unknown, defaults?: JsonRecord | null): unknown {
+// Anthropic thinking contract, which Z.ai's /api/anthropic endpoint enforces:
+// budget_tokens >= 1024 and max_tokens > budget_tokens.
+const GLM_ANTHROPIC_MIN_THINKING_BUDGET = 1024;
+const GLM_ANTHROPIC_MIN_RESPONSE_ROOM = 1024;
+
+/**
+ * Z.ai's Anthropic endpoint rejects `thinking: { type: "enabled" }` without
+ * `budget_tokens` (HTTP 400 "missing field budget_tokens"). A client budget is
+ * kept as-is; a missing one comes from the effort tier's level budget
+ * (THINKING_LEVEL_MAP: high 24576, max 131072) or the medium effort budget for
+ * non-tier models, clamped so max_tokens keeps room for the answer. When
+ * max_tokens cannot fit the minimum budget, thinking is dropped instead of being
+ * sent invalid (same rule as fitThinkingToMaxTokens in the Claude translator).
+ */
+function ensureGlmAnthropicThinkingBudget(record: JsonRecord, effort: GlmEffortLevel | null) {
+  const thinking = asRecord(record.thinking);
+  if (thinking?.type !== "enabled") return;
+  const clientBudget = Number(thinking.budget_tokens);
+  if (Number.isFinite(clientBudget) && clientBudget > 0) return;
+
+  let budget = effort ? THINKING_LEVEL_MAP[effort] : EFFORT_BUDGETS.medium;
+  const maxTokens = Number(record.max_tokens);
+  if (Number.isFinite(maxTokens) && maxTokens > 0) {
+    budget = Math.min(budget, Math.floor(maxTokens) - GLM_ANTHROPIC_MIN_RESPONSE_ROOM);
+  }
+  if (budget < GLM_ANTHROPIC_MIN_THINKING_BUDGET) {
+    delete record.thinking;
+    return;
+  }
+  record.thinking = { ...thinking, budget_tokens: budget };
+}
+
+function applyGlmRequestDefaults(
+  body: unknown,
+  defaults?: JsonRecord | null,
+  clientThinkingType?: unknown
+): unknown {
   const record = asRecord(body);
   if (!record || !defaults) return body;
 
   const next = { ...(applyProviderRequestDefaults(record, defaults) as JsonRecord) };
   const thinkingType = typeof defaults.thinkingType === "string" ? defaults.thinkingType : null;
 
-  if (thinkingType && next.thinking === undefined) {
-    next.thinking = { type: thinkingType };
-  } else if (thinkingType && asRecord(next.thinking)?.type === "enabled") {
+  // Apply the connection default only when the client did not set a thinking
+  // type of its own; other thinking fields are merged and preserved.
+  if (
+    thinkingType &&
+    clientThinkingType === undefined &&
+    (next.thinking === undefined || asRecord(next.thinking))
+  ) {
     next.thinking = { ...asRecord(next.thinking), type: thinkingType };
   }
 
@@ -211,14 +258,15 @@ export function translateSseResponse(
   response: Response,
   provider: string,
   model: string,
-  suppressThinkClose: boolean = false
+  suppressThinkClose: boolean = false,
+  streamBufferBytes: number = GLM_STREAM_BUFFER_BYTES
 ): Response {
   if (!response.body) return response;
   // GLM is a high-throughput provider: a 64 KB queue budget keeps provider ->
   // client pacing ahead of the model's emission rate. #12179 asked for this by
   // passing a 16th positional the helper did not take (a TS2554 that never
-  // reached the TransformStream); the helper now accepts it as its last
-  // parameter, so the request finally takes effect (#12925).
+  // reached the TransformStream); the helper now accepts it in slot 18
+  // (#12925). The outer request owns pending cleanup; this adapter only translates.
   const transform = createSSETransformStreamWithLogger(
     FORMATS.CLAUDE,
     FORMATS.OPENAI,
@@ -236,7 +284,9 @@ export function translateSseResponse(
     undefined,
     undefined,
     undefined,
-    GLM_STREAM_BUFFER_BYTES
+    null,
+    streamBufferBytes,
+    false
   );
   const headers = cloneHeaders(response.headers);
   headers.set("content-type", "text/event-stream");
@@ -303,8 +353,13 @@ export class GlmExecutor extends DefaultExecutor {
     stream: boolean,
     credentials: ProviderCredentials
   ) {
+    const clientThinkingType = asRecord(asRecord(body)?.thinking)?.type;
     const cleanedBody = super.transformRequest(model, body, stream, credentials);
-    return applyGlmRequestDefaults(cleanedBody, this.config.requestDefaults as JsonRecord | null);
+    return applyGlmRequestDefaults(
+      cleanedBody,
+      this.config.requestDefaults as JsonRecord | null,
+      clientThinkingType
+    );
   }
 
   transformForTransport(
@@ -408,6 +463,11 @@ export class GlmExecutor extends DefaultExecutor {
       }
     }
 
+    const anthropicBody = asRecord(translated);
+    if (anthropicBody) {
+      ensureGlmAnthropicThinkingBudget(anthropicBody, effortTier?.effort ?? null);
+    }
+
     return translated;
   }
 
@@ -438,13 +498,27 @@ export class GlmExecutor extends DefaultExecutor {
     applyConfiguredUserAgent(headers, credentials.providerSpecificData);
     mergeUpstreamExtraHeaders(headers, input.upstreamExtraHeaders);
 
-    const transformedBody = this.transformForTransport(
+    let transformedBody = this.transformForTransport(
       input.model,
       input.body,
       input.stream,
       credentials,
       transport
     );
+
+    // Reuse only observed OpenAI capabilities; leave unknown first attempts and
+    // Anthropic's translated thinking/effort contract untouched.
+    if (transport === "openai") {
+      const learnedEfforts = getLearnedReasoningEffort(this.provider, input.model);
+      const requestedEffort = readBodyReasoningEffort(transformedBody);
+      const learnedEffort =
+        learnedEfforts && requestedEffort
+          ? clampToLearned(requestedEffort.toLowerCase(), learnedEfforts)
+          : null;
+      if (learnedEffort) {
+        transformedBody = writeBodyReasoningEffort(transformedBody, learnedEffort);
+      }
+    }
 
     const fetchStartTimeoutMs = this.getTimeoutMs();
     const timeoutController = fetchStartTimeoutMs > 0 ? new AbortController() : null;
@@ -490,6 +564,19 @@ export class GlmExecutor extends DefaultExecutor {
         log: input.log,
       });
       response = recovery.response;
+      transformedBody = recovery.body;
+      response = await applyFieldDowngradeRecovery({
+        response,
+        url,
+        provider: this.provider,
+        model: input.model,
+        body: transformedBody,
+        fetchOptions: { method: "POST", headers, signal: combinedSignal || undefined },
+        fetchFn: (fetchUrl, fetchOpts) => fetch(fetchUrl, fetchOpts),
+        serializeBody: (value) => JSON.stringify(value),
+        strippedFields: new Set<string>(),
+        log: input.log,
+      });
     }
 
     if (input.stream && response.ok) {

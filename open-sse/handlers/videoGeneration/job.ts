@@ -16,6 +16,13 @@ import {
 } from "@/shared/utils/fetchTimeout";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { sleep } from "../../utils/sleep.ts";
+import {
+  MAX_CONSECUTIVE_POLL_RETRIES,
+  computePollRetryDelayMs,
+  isRetryablePollStatus,
+  parseRetryAfterMs,
+} from "./pollRetry.ts";
+import { abortedVideoResult } from "./abort.ts";
 
 interface LogLike {
   info?: (tag: string, msg: string, meta?: unknown) => void;
@@ -100,6 +107,18 @@ export type VideoJobPreset = {
   statusFailed: string[];
   /** dot path into the poll response holding the finished video URL/array */
   resultPath: string;
+  /**
+   * When true, the finished artifact is fetched with the provider credential and
+   * stored locally, then reported as a URL on this gateway. Some providers publish
+   * results behind their own auth (OpenRouter's `unsigned_urls` point at
+   * `/api/v1/videos/{id}/content`, which 401s for anyone without the upstream key),
+   * so handing the raw URL back gives the caller something it cannot fetch.
+   * Persisting rather than inlining base64 keeps every provider's result the same
+   * shape, which combo failover depends on.
+   */
+  resultNeedsAuth?: boolean;
+  /** format reported alongside the downloaded artifact */
+  resultFormat?: string;
   maxPolls: number;
   pollIntervalMs: number;
 };
@@ -223,6 +242,40 @@ const VIDEO_JOB_PRESETS: Record<string, VideoJobPreset> = {
     maxPolls: 60,
     pollIntervalMs: 2000,
   },
+  // OpenRouter video is asynchronous and does not follow the OpenAI shape:
+  // POST /api/v1/videos answers 202 with { id, polling_url, status } and the
+  // finished clip arrives as unsigned_urls: ["https://…"]. cancelled is already
+  // terminal in isDoneStatus; expired is not, and would otherwise poll until
+  // maxPolls reports a misleading 504.
+  "openrouter-video-job": {
+    id: "openrouter-video-job",
+    displayName: "OpenRouter Video",
+    authHeaderName: "Authorization",
+    authScheme: "bearer",
+    baseUrlFallback: "https://openrouter.ai/api/v1",
+    submit: {
+      method: "POST",
+      path: "/videos",
+      buildBody: ({ model, prompt, duration, extras }) => ({
+        model,
+        prompt,
+        ...(typeof duration === "number" ? { duration } : {}),
+        ...extras,
+      }),
+    },
+    taskIdPath: "id",
+    poll: { pathTemplate: "/videos/{taskId}" },
+    statusPath: "status",
+    statusDone: ["completed"],
+    statusFailed: ["failed", "cancelled", "expired"],
+    resultPath: "unsigned_urls",
+    // The content endpoint is auth-gated by the OpenRouter key, so fetch it here
+    // and hand back the bytes.
+    resultNeedsAuth: true,
+    resultFormat: "mp4",
+    maxPolls: 180,
+    pollIntervalMs: 2000,
+  },
 };
 
 /** Resolve a configured job preset; null when the preset is unknown/none. */
@@ -230,6 +283,44 @@ export function getVideoJobPreset(presetName: unknown): VideoJobPreset | null {
   if (typeof presetName !== "string") return null;
   const preset = VIDEO_JOB_PRESETS[presetName];
   return preset ?? null;
+}
+
+type JobLog = {
+  info?: (tag: string, msg: string, meta?: unknown) => void;
+  error?: (tag: string, msg: string) => void;
+};
+
+export type VideoJobResult =
+  { success: true; data: unknown } | { success: false; status: number; error: string };
+
+/** One finished job, as handed to the injected call recorder. */
+export interface VideoJobCallRecord {
+  provider: string;
+  model: string;
+  /**
+   * Structural, not the VideoJobResult union: this workspace compiles with
+   * `strict: false` (open-sse/tsconfig.json), where a `true`/`false` property is
+   * widened to `boolean` and therefore cannot act as a discriminant. Declaring the
+   * optional members directly avoids relying on narrowing that does not happen here.
+   */
+  result: { success: boolean; status?: number; error?: string };
+  durationMs: number;
+}
+
+/**
+ * Persists a finished job (call log + usage row). Injected by the dispatcher in
+ * `../videoGeneration.ts`, which owns the usage-DB writers, so this module keeps no
+ * dependency on the app's `@/lib` layer.
+ */
+export type RecordVideoJobCall = (record: VideoJobCallRecord) => Promise<void> | void;
+
+/**
+ * Stores a downloaded artifact and returns the URL to hand back (or null when storage is
+ * unavailable). Injected by the route — owner scoping and the public origin live in src/ —
+ * so this module keeps no dependency on the app layer (#16372).
+ */
+export interface VideoMediaSink {
+  store: (bytes: Buffer, format: string) => string | null;
 }
 
 /**
@@ -242,20 +333,80 @@ export async function handleVideoJobGeneration({
   body,
   credentials,
   log,
-  maxPolls: maxPollsOverride,
-  pollIntervalMs: pollIntervalOverride,
+  maxPolls,
+  pollIntervalMs,
+  provider,
+  recordCall,
+  mediaSink,
+  signal = null,
 }: {
   model: string;
   presetName: string;
   body: Record<string, unknown>;
   credentials?: unknown;
-  log?: {
-    info?: (tag: string, msg: string, meta?: unknown) => void;
-    error?: (tag: string, msg: string) => void;
-  };
+  log?: JobLog;
   maxPolls?: number;
   pollIntervalMs?: number;
-}) {
+  /** Provider id, for the usage/call-log rows. Unknown falls back to the preset. */
+  provider?: string;
+  /** Usage/call-log recorder; when absent the job is not recorded. */
+  recordCall?: RecordVideoJobCall;
+  /** Required by presets whose result is auth-gated upstream (`resultNeedsAuth`). */
+  mediaSink?: VideoMediaSink;
+  /** Caller abort (client disconnect / combo cancel); stops submit and polling. */
+  signal?: AbortSignal | null;
+}): Promise<VideoJobResult> {
+  const startTime = Date.now();
+  const result = await runVideoJobGeneration({
+    model,
+    presetName,
+    body,
+    credentials,
+    log,
+    maxPolls,
+    pollIntervalMs,
+    mediaSink,
+    signal,
+  });
+  // Recorded here rather than on each return, so a new exit path cannot skip it.
+  // A recording failure must never turn a finished generation into an error.
+  if (recordCall) {
+    try {
+      await recordCall({
+        provider: provider || presetName,
+        model,
+        result,
+        durationMs: Date.now() - startTime,
+      });
+    } catch (error) {
+      log?.error?.("VIDEO", `Failed to record video job call: ${sanitizeErrorMessage(error)}`);
+    }
+  }
+  return result;
+}
+
+async function runVideoJobGeneration({
+  model,
+  presetName,
+  body,
+  credentials,
+  log,
+  maxPolls: maxPollsOverride,
+  pollIntervalMs: pollIntervalOverride,
+  mediaSink,
+  signal = null,
+}: {
+  model: string;
+  presetName: string;
+  body: Record<string, unknown>;
+  credentials?: unknown;
+  log?: JobLog;
+  maxPolls?: number;
+  pollIntervalMs?: number;
+  mediaSink?: VideoMediaSink;
+  signal?: AbortSignal | null;
+}): Promise<VideoJobResult> {
+  if (signal?.aborted) return abortedVideoResult();
   const preset = getVideoJobPreset(presetName);
   if (!preset) {
     return {
@@ -293,7 +444,9 @@ export async function handleVideoJobGeneration({
     headers: buildJobHeaders(preset, credentials),
     body: JSON.stringify(bodyForPreset),
     log,
+    signal,
   });
+  if (signal?.aborted) return abortedVideoResult();
   if (submitResult.ok === false) {
     return { success: false, status: submitResult.status, error: submitResult.error };
   }
@@ -319,8 +472,12 @@ export async function handleVideoJobGeneration({
   const maxPolls = maxPollsOverride ?? preset.maxPolls;
   const pollInterval = pollIntervalOverride ?? preset.pollIntervalMs;
 
+  let consecutiveRetries = 0;
+  let nextDelay = pollInterval;
   for (let attempt = 1; attempt <= maxPolls; attempt += 1) {
-    await sleep(pollInterval);
+    await sleep(nextDelay, signal);
+    if (signal?.aborted) return abortedVideoResult();
+    nextDelay = pollInterval;
     const pollUrl = `${baseUrl}${preset.poll.pathTemplate
       .replace("{taskId}", encodeURIComponent(taskId))
       .replace("{model}", encodeURIComponent(model))}`;
@@ -328,10 +485,27 @@ export async function handleVideoJobGeneration({
       method: "GET",
       headers: buildJobHeaders(preset, credentials),
       log,
+      signal,
     });
+    if (signal?.aborted) return abortedVideoResult();
     if (pollResult.ok === false) {
+      // #15536: 429/503 on a status query is transient - back off and keep polling.
+      if (
+        isRetryablePollStatus(pollResult.status) &&
+        consecutiveRetries < MAX_CONSECUTIVE_POLL_RETRIES
+      ) {
+        consecutiveRetries += 1;
+        nextDelay = computePollRetryDelayMs(
+          pollInterval,
+          consecutiveRetries,
+          pollResult.retryAfterMs
+        );
+        attempt -= 1; // transient waits do not consume the poll budget
+        continue;
+      }
       return { success: false, status: pollResult.status, error: pollResult.error };
     }
+    consecutiveRetries = 0;
 
     const status =
       readPath(pollResult.data, preset.statusPath) ??
@@ -349,6 +523,21 @@ export async function handleVideoJobGeneration({
         };
       }
       log?.info?.("VIDEO", `Job completed after ${attempt} poll(s)`);
+
+      // A result the caller cannot fetch is worse than no result: download it with
+      // the provider credential and serve it back from this gateway.
+      if (preset.resultNeedsAuth) {
+        return storeAuthGatedResult({
+          url,
+          baseUrl,
+          preset,
+          presetName,
+          credentials,
+          log,
+          mediaSink,
+        });
+      }
+
       return {
         success: true,
         data: {
@@ -410,6 +599,83 @@ function resolveJobBaseUrl(credentials: unknown, fallback: string): string {
   return normalized;
 }
 
+function sameOrigin(a: string, b: string): boolean {
+  try {
+    return new URL(a).origin === new URL(b).origin;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Download an auth-gated result with the provider credential and hand back a gateway URL.
+ * The credential is only ever sent to the provider's own origin: a result URL on any other
+ * host is rejected rather than fetched with the key attached.
+ */
+async function storeAuthGatedResult({
+  url,
+  baseUrl,
+  preset,
+  presetName,
+  credentials,
+  log,
+  mediaSink,
+}: {
+  url: string;
+  baseUrl: string;
+  preset: VideoJobPreset;
+  presetName: string;
+  credentials: unknown;
+  log?: JobLog;
+  mediaSink?: VideoMediaSink;
+}): Promise<VideoJobResult> {
+  if (!sameOrigin(url, baseUrl)) {
+    return {
+      success: false,
+      status: 502,
+      error: `Video job result is not on the provider origin (${presetName})`,
+    };
+  }
+  if (!mediaSink) {
+    return {
+      success: false,
+      status: 502,
+      error: `Video job result could not be stored for serving (${presetName})`,
+    };
+  }
+  const download = await fetchJson(url, {
+    method: "GET",
+    headers: buildJobHeaders(preset, credentials),
+    log,
+    raw: true,
+  });
+  if (download.ok === false) {
+    return { success: false, status: download.status, error: download.error };
+  }
+  if (!download.base64) {
+    return {
+      success: false,
+      status: 502,
+      error: `Video job produced an empty artifact (${presetName})`,
+    };
+  }
+  const format = preset.resultFormat ?? "mp4";
+  const servedUrl = mediaSink.store(Buffer.from(download.base64, "base64"), format);
+  if (!servedUrl) {
+    return {
+      success: false,
+      status: 502,
+      error: `Video job result could not be stored for serving (${presetName})`,
+    };
+  }
+  // Same { url, format } shape every other provider returns, so a combo's
+  // failover path and its happy path are indistinguishable to the caller.
+  return {
+    success: true,
+    data: { created: Math.floor(Date.now() / 1000), data: [{ url: servedUrl, format }] },
+  };
+}
+
 async function fetchJson(
   url: string,
   {
@@ -417,41 +683,84 @@ async function fetchJson(
     headers,
     body,
     log,
+    raw,
+    signal,
   }: {
     method: string;
     headers: Record<string, string>;
     body?: string;
     log?: LogLike;
+    /** Return the response body base64-encoded instead of parsing JSON. */
+    raw?: boolean;
+    signal?: AbortSignal | null;
   }
-): Promise<{ ok: true; data: unknown } | { ok: false; status: number; error: string }> {
+): Promise<FetchJsonResult> {
   try {
     const response = await fetchWithTimeout(url, {
       method,
       headers,
       ...(body !== undefined ? { body } : {}),
       timeoutMs: getConfiguredTimeout(),
+      // A per-call derived signal: fetchWithTimeout never removes its abort listener.
+      ...(signal ? { signal: AbortSignal.any([signal]) } : {}),
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      log?.error?.("VIDEO", `Upstream ${response.status} for ${url}: ${errorText.slice(0, 200)}`);
-      return { ok: false, status: response.status, error: errorText };
-    }
-    const data = await response.json();
-    return { ok: true, data };
+    return await readFetchJsonResponse(response, url, log, raw);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    const isTimeout =
-      err instanceof FetchTimeoutError || (err instanceof Error && err.name === "AbortError");
-    log?.error?.(
-      "VIDEO",
-      `${isTimeout ? "Timeout" : "Request error"} for ${url}: ${sanitizeErrorMessage(message)}`
-    );
+    return fetchJsonErrorResult(err, url, log, signal);
+  }
+}
+
+type FetchJsonResult =
+  | { ok: true; data?: unknown; base64?: string }
+  | { ok: false; status: number; error: string; retryAfterMs?: number };
+
+async function readFetchJsonResponse(
+  response: Response,
+  url: string,
+  log: LogLike | undefined,
+  raw: boolean | undefined
+): Promise<FetchJsonResult> {
+  if (!response.ok) {
+    const errorText = await response.text();
+    log?.error?.("VIDEO", `Upstream ${response.status} for ${url}: ${errorText.slice(0, 200)}`);
     return {
       ok: false,
-      status: isTimeout ? 504 : 502,
-      error: `Video provider error: ${sanitizeErrorMessage(message)}`,
+      status: response.status,
+      error: errorText,
+      retryAfterMs: parseRetryAfterMs(response.headers.get("retry-after")),
     };
   }
+  if (raw) {
+    const buffer = Buffer.from(await response.arrayBuffer());
+    if (buffer.length === 0) {
+      return { ok: false, status: 502, error: `Empty media body from ${url}` };
+    }
+    return { ok: true, base64: buffer.toString("base64") };
+  }
+  const data = await response.json();
+  return { ok: true, data };
+}
+
+/** Maps a thrown fetch error to a result: 499 on caller abort, 504 on timeout, else 502. */
+function fetchJsonErrorResult(
+  err: unknown,
+  url: string,
+  log: LogLike | undefined,
+  signal: AbortSignal | null | undefined
+): FetchJsonResult {
+  if (signal?.aborted) return { ok: false, status: 499, error: "Request aborted" };
+  const message = err instanceof Error ? err.message : String(err);
+  const isTimeout =
+    err instanceof FetchTimeoutError || (err instanceof Error && err.name === "AbortError");
+  log?.error?.(
+    "VIDEO",
+    `${isTimeout ? "Timeout" : "Request error"} for ${url}: ${sanitizeErrorMessage(message)}`
+  );
+  return {
+    ok: false,
+    status: isTimeout ? 504 : 502,
+    error: `Video provider error: ${sanitizeErrorMessage(message)}`,
+  };
 }
 
 const NON_VIDEO_EXTENSION = /\.(png|jpe?g|gif|webp|bmp|svg|ico)$/i;

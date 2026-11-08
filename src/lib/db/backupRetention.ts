@@ -12,6 +12,7 @@
 import fs from "fs";
 import path from "path";
 
+import { portableSnapshotFile, portableSnapshotId } from "./backupPaths";
 import type { SqliteAdapter } from "./adapters/types";
 
 export const MAX_DB_BACKUPS = 20;
@@ -128,7 +129,9 @@ export function resolveDbBackupRetention(
   env: NodeJS.ProcessEnv = process.env
 ): { maxFiles: number; retentionDays: number } {
   const maxFiles =
-    (env.DB_BACKUP_MAX_FILES ? parsePositiveInt(env.DB_BACKUP_MAX_FILES, MAX_DB_BACKUPS) : undefined) ??
+    (env.DB_BACKUP_MAX_FILES
+      ? parsePositiveInt(env.DB_BACKUP_MAX_FILES, MAX_DB_BACKUPS)
+      : undefined) ??
     getStoredInteger(db, DB_BACKUP_MAX_FILES_KEY, 1) ??
     getDatabaseSettingsKeepLastNBackups(db) ??
     MAX_DB_BACKUPS;
@@ -142,11 +145,14 @@ export function resolveDbBackupRetention(
 }
 
 /**
- * A backup "family" is the primary `.sqlite` file plus its SQLite sidecars
- * (`-wal` / `-shm` / `-journal`). Retention operates on families so a sidecar is never
- * orphaned from — or outlives — the snapshot it belongs to.
+ * A backup family is a `.sqlite` primary plus its SQLite sidecars, or a
+ * `.sqlite.zst` archive plus `.preservation-YYYYMMDD.json` receipts. Archives
+ * participate in count/age retention without being mistaken for orphaned sidecars.
+ * Unknown formats are not retention authority; detached receipts are preserved.
  */
 export function getBackupFamilyBase(filename: string) {
+  const receipt = filename.match(/^(.+\.sqlite\.zst)\.preservation-\d{8}\.json$/);
+  if (receipt) return receipt[1];
   if (filename.endsWith("-wal") || filename.endsWith("-shm")) return filename.slice(0, -4);
   if (filename.endsWith("-journal")) return filename.slice(0, -8);
   return filename;
@@ -158,7 +164,37 @@ export type BackupFamily = {
   primaryMtimeMs: number;
   latestMtimeMs: number;
   files: string[];
+  directory?: string;
 };
+
+function collectPortableFamily(backupDir: string, name: string): BackupFamily | null {
+  const base = portableSnapshotId(name);
+  if (!base) return null;
+  try {
+    const file = portableSnapshotFile(path.join(backupDir, name));
+    const stat = fs.statSync(file);
+    return {
+      base,
+      hasPrimary: true,
+      primaryMtimeMs: stat.mtimeMs,
+      latestMtimeMs: stat.mtimeMs,
+      files: [path.join(name, "snapshot.sqlite")],
+      directory: name,
+    };
+  } catch {
+    // Invalid/foreign directories and symlinks are never retention authority.
+    return null;
+  }
+}
+
+function getRegularFileStat(filePath: string): fs.Stats | null {
+  try {
+    const stat = fs.lstatSync(filePath);
+    return stat.isFile() ? stat : null;
+  } catch {
+    return null;
+  }
+}
 
 export function collectBackupFamilies(backupDir: string): BackupFamily[] {
   if (!fs.existsSync(backupDir)) return [];
@@ -167,15 +203,20 @@ export function collectBackupFamilies(backupDir: string): BackupFamily[] {
 
   for (const name of fs.readdirSync(backupDir)) {
     if (!name.startsWith("db_")) continue;
-    const base = getBackupFamilyBase(name);
-    const filePath = path.join(backupDir, name);
-
-    let stat;
-    try {
-      stat = fs.statSync(filePath);
-    } catch {
+    if (portableSnapshotId(name)) {
+      const family = collectPortableFamily(backupDir, name);
+      if (family) families.set(name, family);
       continue;
     }
+    // A db_ prefix alone does not authorize deleting an operator-owned file.
+    if (
+      !/^db_.+\.sqlite(?:-(?:wal|shm|journal)|\.zst(?:\.preservation-\d{8}\.json)?)?$/.test(name)
+    ) {
+      continue;
+    }
+    const base = getBackupFamilyBase(name);
+    const stat = getRegularFileStat(path.join(backupDir, name));
+    if (!stat) continue;
 
     const family = families.get(base) || {
       base,
@@ -187,7 +228,7 @@ export function collectBackupFamilies(backupDir: string): BackupFamily[] {
 
     family.files.push(name);
     family.latestMtimeMs = Math.max(family.latestMtimeMs, stat.mtimeMs);
-    if (name === base && name.endsWith(".sqlite")) {
+    if (name === base) {
       family.hasPrimary = true;
       family.primaryMtimeMs = stat.mtimeMs;
     }
@@ -195,7 +236,11 @@ export function collectBackupFamilies(backupDir: string): BackupFamily[] {
     families.set(base, family);
   }
 
-  return [...families.values()];
+  // Only SQLite sidecars have orphan semantics. A receipt without its archive
+  // may be the last preservation evidence, not a disposable sidecar.
+  return [...families.values()].filter(
+    (family) => family.hasPrimary || family.base.endsWith(".sqlite")
+  );
 }
 
 export type PruneResult = {
@@ -253,14 +298,27 @@ export function unlinkSyncWithRetry(
   return false;
 }
 
+function removeEmptyPortableDirectory(backupDir: string, directory?: string): void {
+  if (!directory) return;
+  try {
+    // Never recursively remove published directories: preserve any foreign content.
+    fs.rmdirSync(path.join(backupDir, directory));
+  } catch {
+    // A concurrent writer or unrelated entry keeps the directory in place.
+  }
+}
+
 /**
  * Delete backup families beyond `maxFiles` (newest kept), older than `retentionDays`
  * (0 disables the age rule), or orphaned (sidecars whose primary is already gone).
+ * Families in `exemptBases` skip the age rule only; `maxFiles` and orphan rules
+ * still apply to them.
  */
 export function pruneBackupDirectory(options: {
   backupDir: string;
   maxFiles: number;
   retentionDays: number;
+  exemptBases?: Set<string>;
 }): PruneResult {
   const { backupDir } = options;
   const maxFiles = Math.max(1, options.maxFiles);
@@ -288,7 +346,8 @@ export function pruneBackupDirectory(options: {
 
   for (const family of families) {
     const isOverflowPrimary = family.hasPrimary && !keepPrimaryBases.has(family.base);
-    const isExpired = retentionDays > 0 && family.latestMtimeMs < cutoffMs;
+    const isExempt = options.exemptBases?.has(family.base) ?? false;
+    const isExpired = retentionDays > 0 && !isExempt && family.latestMtimeMs < cutoffMs;
     const isOrphan = !family.hasPrimary;
     if (!isOverflowPrimary && !isExpired && !isOrphan) continue;
 
@@ -301,6 +360,7 @@ export function pruneBackupDirectory(options: {
       }
     }
     if (anyDeletedInFamily) {
+      removeEmptyPortableDirectory(backupDir, family.directory);
       deletedBackupFamilies += 1;
     }
   }

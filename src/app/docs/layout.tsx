@@ -6,6 +6,7 @@ import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 import { Suspense } from "react";
 import LanguageSelector from "@/shared/components/LanguageSelector";
 import { getTranslations } from "next-intl/server";
+import DocsThemeSwitch, { DocsThemeHotKey } from "./DocsThemeSwitch";
 
 export async function generateMetadata() {
   const t = await getTranslations("docs");
@@ -45,21 +46,22 @@ export default async function Layout({ children }: { children: ReactNode }) {
         secondary: true,
       },
     ],
-    githubUrl: "https://github.com/diegosouzapw/OmniRoute",
+    githubUrl: "https://github.com/cheaper-inference/OmniRoute",
+    slots: { themeSwitch: DocsThemeSwitch },
   };
 
   return (
     <RootProvider
-      theme={{
-        defaultTheme: "dark",
-        attribute: "class",
-      }}
+      // The root ThemeProvider and the pre-hydration script in src/app/layout.tsx own the <html>
+      // class. next-themes would use the same "theme" storage key as themeStore.
+      theme={{ enabled: false }}
       search={{
         options: {
           api: "/docs/api/search",
         },
       }}
     >
+      <DocsThemeHotKey />
       <DocsLayout tree={source.pageTree} {...docsLayoutOptions}>
         {children}
       </DocsLayout>

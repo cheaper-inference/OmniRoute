@@ -2,7 +2,28 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { DataTableFooter, DataTableShell } from "@omniroute/ui-kit/data-table-shell";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@omniroute/ui-kit/sheet";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { TableLoadingState } from "@omniroute/ui-kit/table-loading";
+import { Badge, Button, EmptyState, Input, Select } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 type AuditEntry = {
   id: number;
@@ -152,265 +173,248 @@ export default function ComplianceTab() {
     URL.revokeObjectURL(url);
   };
 
-  const severityClass = (value: Severity) => {
-    if (value === "critical") return "border-red-500/30 bg-red-500/10 text-red-600";
-    if (value === "warning") return "border-amber-500/30 bg-amber-500/10 text-amber-600";
-    return "border-blue-500/30 bg-blue-500/10 text-blue-600";
+  const severityTone = (value: Severity) => {
+    if (value === "critical") return "error" as const;
+    if (value === "warning") return "warning" as const;
+    return "info" as const;
   };
+
+  const pageButtons = (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setOffset((current) => Math.max(0, current - PAGE_SIZE))}
+        disabled={offset === 0 || loading}
+      >
+        {t("previous")}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setOffset((current) => current + PAGE_SIZE)}
+        disabled={!canGoNext || loading}
+      >
+        {t("next")}
+      </Button>
+    </div>
+  );
 
   return (
     <div className="space-y-5">
-      <Card className="p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-text-main">{t("title")}</h2>
-            <p className="mt-1 text-sm text-text-muted">{t("description")}</p>
-            <p className="mt-2 text-xs text-text-muted">
-              {t("showing", { count: visibleEntries.length, total: totalCount })}
-            </p>
-          </div>
+      <PageHeader
+        compact
+        title={t("title")}
+        description={t("description")}
+        actions={
           <div className="flex flex-wrap gap-2">
-            <button
+            <Button
+              variant="outline"
+              icon="refresh"
+              loading={loading}
               onClick={() => void fetchEntries()}
-              disabled={loading}
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
             >
-              <span
-                className={`material-symbols-outlined text-[16px] ${loading ? "animate-spin" : ""}`}
-              >
-                refresh
-              </span>
               {t("refresh")}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              icon="download"
               onClick={exportVisibleEntries}
               disabled={visibleEntries.length === 0}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-40"
             >
-              <span className="material-symbols-outlined text-[16px]">download</span>
               {t("export")}
-            </button>
+            </Button>
           </div>
-        </div>
-      </Card>
+        }
+      />
 
-      <Card className="p-4">
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-          <label className="space-y-1">
-            <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-              {t("eventType")}
-            </span>
-            <input
-              list="compliance-event-types"
-              value={eventType}
-              onChange={(event) => {
-                setOffset(0);
-                setEventType(event.target.value);
-              }}
-              placeholder={t("eventTypePlaceholder")}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-            <datalist id="compliance-event-types">
-              {eventTypes.map((type) => (
-                <option key={type} value={type} />
-              ))}
-            </datalist>
-          </label>
-          <label className="space-y-1">
-            <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-              {t("actor")}
-            </span>
-            <input
-              list="compliance-actors"
-              value={actor}
-              onChange={(event) => {
-                setOffset(0);
-                setActor(event.target.value);
-              }}
-              placeholder={t("actorPlaceholder")}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-            <datalist id="compliance-actors">
-              {actors.map((a) => (
-                <option key={a} value={a} />
-              ))}
-            </datalist>
-          </label>
-          <label className="space-y-1">
-            <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-              {t("severity")}
-            </span>
-            <select
+      {error && (
+        <Alert
+          variant="critical"
+          icon={<Icon name="error" size={16} />}
+          dismissLabel={t("dismissError")}
+          onDismiss={() => setError(null)}
+          description={error}
+        />
+      )}
+
+      <DataTableShell
+        filterAlignment="end"
+        resultCount={totalCount}
+        resultLabel={() => t("showing", { count: visibleEntries.length, total: totalCount })}
+        filters={
+          <>
+            <div>
+              <Input
+                label={t("eventType")}
+                list="compliance-event-types"
+                value={eventType}
+                onChange={(event) => {
+                  setOffset(0);
+                  setEventType(event.target.value);
+                }}
+                placeholder={t("eventTypePlaceholder")}
+                className="w-full sm:w-48"
+              />
+              <datalist id="compliance-event-types">
+                {eventTypes.map((type) => (
+                  <option key={type} value={type} />
+                ))}
+              </datalist>
+            </div>
+            <div>
+              <Input
+                label={t("actor")}
+                list="compliance-actors"
+                value={actor}
+                onChange={(event) => {
+                  setOffset(0);
+                  setActor(event.target.value);
+                }}
+                placeholder={t("actorPlaceholder")}
+                className="w-full sm:w-44"
+              />
+              <datalist id="compliance-actors">
+                {actors.map((a) => (
+                  <option key={a} value={a} />
+                ))}
+              </datalist>
+            </div>
+            <Select
+              label={t("severity")}
               value={severity}
               onChange={(event) => {
                 setOffset(0);
                 setSeverity(event.target.value as "all" | Severity);
               }}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full sm:w-40"
             >
               <option value="all">{t("allSeverities")}</option>
               <option value="info">{t("info")}</option>
               <option value="warning">{t("warning")}</option>
               <option value="critical">{t("critical")}</option>
-            </select>
-          </label>
-          <label className="space-y-1">
-            <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-              {t("from")}
-            </span>
-            <input
+            </Select>
+            <Input
               type="datetime-local"
+              label={t("from")}
               value={from}
               onChange={(event) => {
                 setOffset(0);
                 setFrom(event.target.value);
               }}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full sm:w-52"
             />
-          </label>
-          <label className="space-y-1">
-            <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-              {t("to")}
-            </span>
-            <input
+            <Input
               type="datetime-local"
+              label={t("to")}
               value={to}
               onChange={(event) => {
                 setOffset(0);
                 setTo(event.target.value);
               }}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full sm:w-52"
             />
-          </label>
-          <div className="flex items-end">
-            <button
-              onClick={resetFilters}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar"
-            >
+            <Button variant="ghost" onClick={resetFilters}>
               {t("clearFilters")}
-            </button>
-          </div>
-        </div>
-      </Card>
-
-      {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600">
-          {error}
-        </div>
-      )}
-
-      <Card className="overflow-hidden">
+            </Button>
+          </>
+        }
+        pagination={<DataTableFooter pagination={pageButtons} />}
+      >
         {loading ? (
-          <div className="p-8 text-center text-sm text-text-muted">{t("loading")}</div>
+          <TableLoadingState label={t("loading")} />
         ) : visibleEntries.length === 0 ? (
-          <div className="p-10 text-center">
-            <span className="material-symbols-outlined text-[40px] text-text-muted">policy</span>
-            <p className="mt-3 text-sm text-text-muted">{t("noEvents")}</p>
-          </div>
+          <EmptyState icon="policy" title={t("noEvents")} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1040px] text-left text-sm">
-              <thead className="border-b border-border bg-sidebar/40 text-xs uppercase tracking-wider text-text-muted">
-                <tr>
-                  <th className="px-4 py-3 font-medium">{t("timestamp")}</th>
-                  <th className="px-4 py-3 font-medium">{t("eventType")}</th>
-                  <th className="px-4 py-3 font-medium">{t("severity")}</th>
-                  <th className="px-4 py-3 font-medium">{t("sourceIp")}</th>
-                  <th className="px-4 py-3 font-medium">{t("userOrKey")}</th>
-                  <th className="px-4 py-3 font-medium">{t("action")}</th>
-                  <th className="px-4 py-3 font-medium">{t("result")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("details")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {visibleEntries.map((entry) => {
-                  const entrySeverity = getSeverity(entry);
-                  return (
-                    <tr key={entry.id} className="transition-colors hover:bg-sidebar/30">
-                      <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-text-muted">
-                        {formatLocalDate(entry.timestamp)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="rounded-md border border-border bg-surface px-2 py-1 font-mono text-xs text-text-main">
-                          {t.has(`eventTypes.${entry.action}`)
-                            ? t(`eventTypes.${entry.action}`)
-                            : entry.action}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex rounded-full border px-2 py-1 text-xs font-medium ${severityClass(entrySeverity)}`}
-                        >
-                          {t(entrySeverity)}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-text-muted">
-                        {entry.ip_address || entry.ip || t("notAvailable")}
-                      </td>
-                      <td className="px-4 py-3 text-text-main">{entry.actor || t("system")}</td>
-                      <td className="max-w-[220px] truncate px-4 py-3 text-text-muted">
-                        {entry.target || entry.resourceType || t("notAvailable")}
-                      </td>
-                      <td className="px-4 py-3 text-text-muted">
-                        {entry.status || t("notAvailable")}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => setSelectedEntry(entry)}
-                          className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-main transition-colors hover:bg-sidebar"
-                        >
-                          {t("viewDetails")}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <Table scrollbarLabel={t("title")} className="min-w-[1040px] text-left">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("timestamp")}</TableHead>
+                <TableHead>{t("eventType")}</TableHead>
+                <TableHead>{t("severity")}</TableHead>
+                <TableHead>{t("sourceIp")}</TableHead>
+                <TableHead>{t("userOrKey")}</TableHead>
+                <TableHead>{t("action")}</TableHead>
+                <TableHead>{t("result")}</TableHead>
+                <TableHead className="text-right">{t("details")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {visibleEntries.map((entry) => {
+                const entrySeverity = getSeverity(entry);
+                return (
+                  <TableRow key={entry.id}>
+                    <TableCell className="font-mono text-xs text-text-muted">
+                      {formatLocalDate(entry.timestamp)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge size="sm" className="font-mono">
+                        {t.has(`eventTypes.${entry.action}`)
+                          ? t(`eventTypes.${entry.action}`)
+                          : entry.action}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge size="sm" variant={severityTone(entrySeverity)}>
+                        {t(entrySeverity)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-text-muted">
+                      {entry.ip_address || entry.ip || t("notAvailable")}
+                    </TableCell>
+                    <TableCell className="text-text-main">{entry.actor || t("system")}</TableCell>
+                    <TableCell className="max-w-[220px] truncate text-text-muted">
+                      {entry.target || entry.resourceType || t("notAvailable")}
+                    </TableCell>
+                    <TableCell className="text-text-muted">
+                      {entry.status || t("notAvailable")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" onClick={() => setSelectedEntry(entry)}>
+                        {t("viewDetails")}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         )}
-      </Card>
+      </DataTableShell>
 
-      <div className="flex items-center justify-end gap-2">
-        <button
-          onClick={() => setOffset((current) => Math.max(0, current - PAGE_SIZE))}
-          disabled={offset === 0 || loading}
-          className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
-        >
-          {t("previous")}
-        </button>
-        <button
-          onClick={() => setOffset((current) => current + PAGE_SIZE)}
-          disabled={!canGoNext || loading}
-          className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
-        >
-          {t("next")}
-        </button>
-      </div>
-
-      {selectedEntry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <button
-            aria-label={t("closeDetails")}
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
-            onClick={() => setSelectedEntry(null)}
-          />
-          <div className="relative w-full max-w-3xl rounded-xl border border-border bg-surface shadow-2xl">
-            <div className="flex items-center justify-between border-b border-border p-4">
-              <h3 className="text-lg font-semibold text-text-main">{t("details")}</h3>
-              <button
-                onClick={() => setSelectedEntry(null)}
-                className="rounded-lg p-2 text-text-muted hover:bg-sidebar hover:text-text-main"
-              >
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
+      <Sheet
+        open={selectedEntry !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedEntry(null);
+        }}
+      >
+        {/* showClose={false}: the kit close button hard-codes an English label. */}
+        <SheetContent side="right" showClose={false} className="w-full sm:max-w-2xl">
+          <SheetHeader className="flex flex-row items-center justify-between gap-3">
+            <div className="min-w-0">
+              <SheetTitle>{t("details")}</SheetTitle>
+              <SheetDescription>
+                {selectedEntry
+                  ? `${selectedEntry.action} · ${formatLocalDate(selectedEntry.timestamp)}`
+                  : ""}
+              </SheetDescription>
             </div>
-            <pre className="max-h-[70vh] overflow-auto p-4 text-xs text-text-main">
-              {formatJson(selectedEntry)}
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t("closeDetails")}
+              onClick={() => setSelectedEntry(null)}
+            >
+              <Icon name="close" size={18} />
+            </Button>
+          </SheetHeader>
+          <SheetBody>
+            <pre className="overflow-auto whitespace-pre-wrap break-words rounded-lg border border-border bg-bg-subtle p-4 font-mono text-xs text-text-main">
+              {selectedEntry ? formatJson(selectedEntry) : ""}
             </pre>
-          </div>
-        </div>
-      )}
+          </SheetBody>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

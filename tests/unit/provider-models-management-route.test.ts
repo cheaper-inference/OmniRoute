@@ -178,6 +178,27 @@ test("provider-models GET keeps the original models and modelCompatOverrides con
   });
 });
 
+test("provider-models GET exposes chat-scoped visibility for legacy dashboard clients", async () => {
+  const modelId = "gemini-3.1-pro-high";
+  const url = `http://localhost/api/provider-models?provider=agy&modelId=${modelId}`;
+
+  await providerModelsRoute.PATCH(buildPatchRequest(url, { isHidden: true, modality: "chat" }));
+  let body = await getBody(
+    await providerModelsRoute.GET(
+      buildGetRequest("http://localhost/api/provider-models?provider=agy")
+    )
+  );
+  assert.equal(body.modelCompatOverrides?.find((row) => row.id === modelId)?.isHidden, true);
+
+  await providerModelsRoute.PATCH(buildPatchRequest(url, { isHidden: false, modality: "chat" }));
+  body = await getBody(
+    await providerModelsRoute.GET(
+      buildGetRequest("http://localhost/api/provider-models?provider=agy")
+    )
+  );
+  assert.equal(body.modelCompatOverrides?.find((row) => row.id === modelId)?.isHidden, false);
+});
+
 test("provider-models PATCH updates hidden flag for custom models", async () => {
   await modelsDb.addCustomModel("openai", "gpt-test", "GPT Test", "manual", "chat-completions", [
     "chat",
@@ -247,4 +268,29 @@ test("provider-models PATCH validates required fields", async () => {
 
   assert.equal(response.status, 400);
   assert.equal(body.error.message, "isHidden boolean is required");
+});
+
+test("provider-models DELETE all=true clears modelCompatOverrides as well as custom and synced models", async () => {
+  await providerModelsRoute.PATCH(
+    buildPatchRequest(
+      "http://localhost/api/provider-models?provider=agy&modelId=claude-opus-5-5-high",
+      { isHidden: true }
+    )
+  );
+  assert.equal(modelsDb.getModelCompatOverrides("agy").length, 1);
+
+  const deleteResponse = await providerModelsRoute.DELETE(
+    new Request("http://localhost/api/provider-models?provider=agy&all=true", {
+      method: "DELETE",
+    })
+  );
+  assert.equal(deleteResponse.status, 200);
+  assert.deepEqual(modelsDb.getModelCompatOverrides("agy"), []);
+
+  const getResponse = await providerModelsRoute.GET(
+    buildGetRequest("http://localhost/api/provider-models?provider=agy")
+  );
+  const body = await getBody(getResponse);
+  assert.deepEqual(body.modelCompatOverrides, []);
+  assert.deepEqual(body.hiddenModelsByProvider, {});
 });

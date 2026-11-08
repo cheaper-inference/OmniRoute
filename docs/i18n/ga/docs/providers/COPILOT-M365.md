@@ -64,39 +64,38 @@ an t-iompórtáil HAR dul in éag an JWT agus taispeánann sí an tréimhse saoi
 > **Ná cuir fíor-easpórtáil HAR, comhartha rochtana ná comhartha athnuachana faoi rialú leaganacha choíche.** Ní mór luachanna tástála agus
 > doiciméadúcháin a bheith ina n-ionadchoinneálaithe i gcónaí.
 
-## Saolré agus athnuachan an chomhartha
+## Saolré an chomhartha agus athnuachan
 
-Tá `access_token` gearrshaolach (**~75 nóiméad** de ghnáth). Tar éis dó dul in éag, tuairiscíonn an soláthraí
-earráid naisc agus ní mór duit an dintiúr a ghabháil arís.
+Tá an `access_token` gearrshaolach (de ghnáth **~75 nóiméad**). Gan chomhartha
+athnuachana inúsáidte, ní mór duit an dintiúr a athghabháil tar éis dó dul in éag.
 
 ### Athnuachan uathoibríoch le `refreshToken`
 
-Chun nach mbeidh ort é a ghabháil arís de láimh, is féidir leat comhartha athnuachana Microsoft a stóráil i
-**Ardsocruithe → providerSpecificData** an naisc:
-
-| Réimse         | Cur síos                                                                     |
-| -------------- | ---------------------------------------------------------------------------- |
-| `refreshToken` | Comhartha athnuachana Microsoft OAuth do scóip `substrate.office.com/sydney` |
-| `tier`         | `individual` (réamhshocrú), `edu`, nó `enterprise`                           |
+I ndialóg **Cuir nasc leis** nó **Cuir nasc in eagar** sholáthraí Microsoft 365, oscail
+**Ardsocruithe → Comhartha athnuachana (roghnach)**. Greamaigh comhartha athnuachana Microsoft OAuth
+don raon feidhme `substrate.office.com/sydney` agus sábháil é. Cuirtear an t-ionchur i bhfolach agus ní
+líontar é roimh ré leis an gcomhartha stóráilte. Agus tú á chur in eagar, fág bán é chun an comhartha atá ann a choinneáil;
+greamaigh comhartha nua chun é a athsholáthar.
 
 Faigh an comhartha athnuachana ó shreabhadh cód gléis nó cód údaraithe Microsoft
-atá scóipeáilte chuig `substrate.office.com/sydney`. Agus `refreshToken` socraithe, déanann OmniRoute
-`access_token` a réamh-athnuachan roimh gach iarratas, mar sin ní gá duit é a
-ghabháil arís tar éis gach dul in éag thart ar 75 nóiméad.
+a bhfuil raon feidhme `substrate.office.com/sydney` aige; ní fhaigheann an painéal é ar do shon.
+Nuair atá comhartha athnuachana cumraithe, seiceálann OmniRoute an `access_token` roimh iarratais
+agus athnuachanann sé é nuair is gá é a athnuachan amháin. Sábhálann athnuachan rathúil an comhartha athnuachana rothlaithe freisin,
+rud a sheachnaíonn athghabháil láimhe fad a fhanann an comhartha athnuachana bailí.
 
-Mura bhfuil `refreshToken` socraithe, ní mór duit an dintiúr WebSocket a ghabháil arís de láimh
+Mura bhfuil `refreshToken` socraithe, ní mór duit dintiúr WebSocket a athghabháil de láimh
 tar éis gach dul in éag.
 
 ### Roghnú sraithe
 
-| Sraith       | Ailias          | Comhéadan                    |
+| Sraith       | Ailias          | Dromchla                     |
 | ------------ | --------------- | ---------------------------- |
-| `individual` | _(réamhshocrú)_ | M365 Copilot do Thomhaltóirí |
-| `edu`        | `included`      | M365 Copilot don Oideachas   |
-| `enterprise` | `work`          | M365 Copilot don Obair       |
+| `individual` | _(réamhshocrú)_ | Copilot M365 do Thomhaltóirí |
+| `edu`        | `included`      | Copilot M365 don Oideachas   |
+| `enterprise` | `work`          | Copilot M365 don Obair       |
 
-Socraigh an tsraith in **Ardsocruithe → providerSpecificData → tier**. Bíonn tionchar ag an tsraith ar
-ródú BizChat agus ar rochtain ar shamhlacha.
+Socraigh an tsraith in **Ardsocruithe → Sraith Copilot**. Bíonn tionchar ag an tsraith
+ar ródú BizChat agus ar rochtain ar mhúnlaí.
 
 ## Samhail slándála
 
@@ -113,28 +112,29 @@ ródú BizChat agus ar rochtain ar shamhlacha.
 
 ### Teipeann ar an bhfíordheimhniú láithreach
 
-- Deimhnigh gur chóipeáil tú ón **URL WebSocket**, agus ní ó iarratas XHR/Fetch. Tá an
-  dintiúr i bparaiméadar iarratais `access_token` an naisc WebSocket Chathub
-  — níl sé i gceanntásc `Authorization: Bearer`.
-- Cinntigh go bhfuil an mhír iomlán `<oid>@<tenant>` ó chonair an URL san áireamh sa
-  `chathubPath`.
+- Deimhnigh gur chóipeáil tú ón **URL WebSocket**, ní ó iarratas XHR/Fetch. Tá an
+  dintiúr sa pharaiméadar fiosrúcháin `access_token` den nasc WebSocket Chathub
+  — ní i gceanntásc `Authorization: Bearer`.
+- Cinntigh go n-áiríonn `chathubPath` an deighleog iomlán `<oid>@<tenant>` ó chonair
+  an URL.
 
-### Téann an comhartha in éag tar éis ~75 nóiméad
+### Téann an comhartha in éag tar éis thart ar 75 nóiméad
 
-Tá coinne leis seo. Gan `refreshToken`, bíonn an comhartha rochtana gearrshaolach. Déan ceann amháin díobh seo:
+Tá sé seo ag súil leis. Gan `refreshToken`, ní mhaireann an comhartha rochtana ach
+ar feadh tréimhse ghearr. Déan ceann amháin díobh seo a leanas:
 
 - Gabh an dintiúr arís ó DevTools, nó
-- Cumraigh `refreshToken` sna hArdsocruithe le haghaidh athnuachan uathoibríoch.
+- Cumraigh **Ardsocruithe → Comhartha athnuachana (roghnach)** sa dialóg Cuir nasc leis nó Cuir nasc in eagar chun athnuachan uathoibríoch a chumasú.
 
 ### Éiríonn leis an Nasc Tástála ach tugann an comhrá 401 ar ais
 
-D’fhéadfadh an comhartha a bheith imithe in éag idir an bailíochtú agus an chéad iarratas. Gabh
-dintiúr úr arís.
+Seans go ndeachaigh an comhartha in éag idir an bailíochtú agus an chéad iarratas.
+Gabh dintiúr úr arís.
 
-### Ní bhíonn Copilot le feiceáil i liosta na soláthraithe
+### Níl Copilot le feiceáil i liosta na soláthraithe
 
-Cinntigh go bhfuil `copilot-m365-web` cumasaithe in **Deais → Soláthraithe**. D’fhéadfadh an soláthraí
-a bheith folaithe de réir réamhshocraithe i roinnt sraitheanna.
+Cinntigh go bhfuil `copilot-m365-web` cumasaithe i **Painéal → Soláthraithe**. Seans
+go mbeidh an soláthraí i bhfolach de réir réamhshocraithe i roinnt sraitheanna.
 
 ## Tagairtí
 

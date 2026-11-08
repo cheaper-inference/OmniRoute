@@ -1,8 +1,8 @@
 # open-sse/services/ — Routing Engine & Cross-Cutting Services
 
-**Purpose**: 134 service modules (top-level) powering request routing, rate limiting, quota management, token refresh, fallback strategies, and runtime state. The combo routing engine (`combo.ts`) is the core; supporting services handle resilience, accounting, and decision-making.
+**Purpose**: 293 service modules (top-level) powering request routing, rate limiting, quota management, token refresh, fallback strategies, and runtime state. The combo routing engine (`combo.ts`) is the core; supporting services handle resilience, accounting, and decision-making.
 
-Live count: `ls open-sse/services/*.ts | wc -l` (currently 134). More including sub-dirs like `autoCombo/` and `compression/`.
+Live count: `ls open-sse/services/*.ts | wc -l` (currently 293). More including sub-dirs like `autoCombo/` and `compression/`.
 
 ---
 
@@ -19,9 +19,11 @@ Live count: `ls open-sse/services/*.ts | wc -l` (currently 134). More including 
 - **`rateLimitManager.ts`** — Token bucket per API key + provider combo. Rejects before dispatch.
 - **`usage.ts`** — Per-request token/cost consumption tracking.
 - **`quotaCache.ts`** — In-memory quota snapshots, pre-loaded at startup.
+- **`ollamaPurchasedCredits.ts`** — Recognizes verified purchased USD balances before included-plan quota enforcement.
 
 ### Account & Token Management
 
+- **`providerConnectionPool.ts`** — Shared alias/custom-node connection pools for direct authentication and combo discovery; preserves node ownership and leaves caller ACL/pin filtering in place.
 - **`tokenRefresh.ts`** — OAuth token expiration detection and refresh.
 - **`accountFallback.ts`** — Account switching on quota/rate-limit. Also houses model lockout.
 - **`sessionManager.ts`** — Request session state across retries.

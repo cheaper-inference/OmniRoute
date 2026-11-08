@@ -6,6 +6,7 @@ import {
   PLUGIN_ID,
   providerIdFor,
   resolveTimeouts,
+  toResolvedOptions,
 } from "../src/options.js";
 
 describe("parsePluginOptions", () => {
@@ -284,5 +285,16 @@ describe("providerId is bounded because it reaches a filesystem path", () => {
         ok
       );
     }
+  });
+});
+
+describe("resolved relay defaults", () => {
+  it("relays the two free-signal defaults from parse to resolved options", () => {
+    const parsed = parsePluginOptions({ baseURL: "https://gw.example.com" });
+    assert.deepEqual(parsed.freeSignals, ["declared"]);
+    assert.equal(parsed.freeProviders, undefined);
+    const resolved = toResolvedOptions(parsed);
+    assert.deepEqual(resolved.freeSignals, ["declared"]);
+    assert.equal(resolved.freeProviders, undefined);
   });
 });

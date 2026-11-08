@@ -72,30 +72,31 @@ agus ainmníonn sé an críochphointe agus an méid a cailleadh — mar sin ní 
 
 ## Roghanna
 
-| Eochair                          | Réamhshocrú                                | Nótaí                                                                                                                                  |
-| -------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                              | Aitheantas an tsoláthraí, aitheantas an chomhtháthaithe, agus an réimír faoina dtaispeántar samhlacha                                  |
-| `baseURL`                        | riachtanach                                | Fréamh an gheata, `http(s)` amháin; cuirtear an iarmhír `/v1` leis nuair is gá                                                         |
-| `apiKey`                         | dintiúr nasctha, ansin `OMNIROUTE_API_KEY` | Eochair chomhrá le haghaidh `/v1/*`                                                                                                    |
-| `managementReadToken`            | téann sé siar chuig `apiKey`               | Eochair le haghaidh `/api/*` — de ghnáth **ní** hé an ceann céanna í                                                                   |
-| `displayName`                    | `"OmniRoute"`                              | Ainm an tsoláthraí sa roghnóir                                                                                                         |
-| `timeoutMs`                      | `10000`                                    | Teorainn ama aisghabhála do gach críochphointe (úsáideann teaglamaí uathoibríocha 5s)                                                  |
-| `modelCacheTtlMs`                | `300000`                                   | TTL thaisce na catalóige; réamhthéann seat diosca tosuithe fuara                                                                       |
-| `timeouts`                       | téann sé siar chuig `timeoutMs`            | Buiséid do gach críochphointe in ms: `models`, `combos`, `autoCombos`, `enrichment`                                                    |
-| `enrichment`                     | `true`                                     | Aisghabh ainmneacha, praghsáil agus buiséid na sraithe saor in aisce                                                                   |
-| `providerTag`                    | `true`                                     | Cuir an soláthraí réamhtheachtach a ndéanann sé ródú chuige mar réimír le hainm taispeána                                              |
-| `usableOnly`                     | `false`                                    | Coinnigh na soláthraithe amháin a thuairiscíonn an geata mar sholáthraithe atá cumraithe                                               |
-| `showcasePerOwner`               | `10`                                       | Iontrálacha an amhairc réamhshocraithe a choinnítear do gach soláthraí                                                                 |
-| `freshPerOwner`                  | `10`                                       | Iontrálacha úra an amhairc réamhshocraithe a choinnítear do gach soláthraí                                                             |
-| `freshWindowDays`                | `90`                                       | Fuinneog úire ina laethanta don bhrainse úr                                                                                            |
-| `usageMemory`                    | `true`                                     | Athchóirigh iontrálacha a baineadh go statach agus a ainmnítear in anailísíocht úsáide 30 lá (teastaíonn ceadchomhartha bainistíochta) |
-| `visibleModels` / `hiddenModels` | `[]`                                       | Liostaí ceada do mheaitseálacha beachta nó iarmhíre; bíonn an lámh in uachtar ag an diúltú                                             |
-| `geminiSanitization`             | `true`                                     | Bain na heochairfhocail JSON-Schema a dhiúltaíonn Gemini dóibh ó scéimeanna uirlisí (cuirtear uirlisí `$ref` ar aghaidh gan athrú)     |
-| `apiFormat.allowAnthropic`       | `false`                                    | Ródáil aitheantais ar an liosta ceada trí bhloc API Anthropic                                                                          |
-| `apiFormat.anthropicModels`      | `[]`                                       | Aitheantais iomlána samhlacha a ródaítear chuig Anthropic                                                                              |
-| `logLevel` / `startupDebug`      | `warn` / `false`                           | Mionsonracht an logálaí                                                                                                                |
+| Eochair                          | Réamhshocrú                                | Nótaí                                                                                                                                                 |
+| -------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                              | Aitheantas an tsoláthraí, aitheantas an chomhtháthaithe, agus an réimír faoina dtaispeántar samhlacha                                                 |
+| `baseURL`                        | riachtanach                                | Fréamh an gheata, `http(s)` amháin; cuirtear an iarmhír `/v1` leis nuair is gá                                                                        |
+| `apiKey`                         | dintiúr nasctha, ansin `OMNIROUTE_API_KEY` | Eochair chomhrá le haghaidh `/v1/*`                                                                                                                   |
+| `managementReadToken`            | téann sé siar chuig `apiKey`               | Eochair le haghaidh `/api/*` — de ghnáth **ní** hí an eochair chéanna í                                                                               |
+| `displayName`                    | `"OmniRoute"`                              | Ainm an tsoláthraí sa roghnóir                                                                                                                        |
+| `timeoutMs`                      | `10000`                                    | Teorainn ama aisghabhála do gach críochphointe (úsáideann uath-theaglamaí 5s)                                                                         |
+| `modelCacheTtlMs`                | `300000`                                   | TTL thaisce na catalóige; réamhthéann seat diosca tosuithe fuara                                                                                      |
+| `timeouts`                       | téann sé siar chuig `timeoutMs`            | Teorainneacha ama do gach críochphointe ina ms: `models`, `combos`, `autoCombos`, `enrichment`                                                        |
+| `enrichment`                     | `true`                                     | Faigh ainmneacha, praghsáil agus teorainneacha an tsraith in aisce                                                                                    |
+| `providerTag`                    | `true`                                     | Cuir réimír ar ainm taispeána leis an soláthraí réamhtheachtach a seoltar chuige                                                                      |
+| `usableOnly`                     | `false`                                    | Ná coinnigh ach soláthraithe a thuairiscíonn an geata mar sholáthraithe atá cumraithe                                                                 |
+| `combosSource`                   | `"api"`                                    | Scipeálann `"models"` `/api/combos` agus foilsíonn sé rónna teaglama `/v1/models`; coimeádann scagairí ar leibhéal baill `"api"`                      |
+| `showcasePerOwner`               | `10`                                       | Iontrálacha réamhshocraithe a choinnítear do gach soláthraí                                                                                           |
+| `freshPerOwner`                  | `10`                                       | Iontrálacha úra réamhshocraithe a choinnítear do gach soláthraí                                                                                       |
+| `freshWindowDays`                | `90`                                       | Fuinneog úire ina laethanta don bhrainse úr                                                                                                           |
+| `usageMemory`                    | `true`                                     | Athchóirigh iontrálacha a fágadh ar lár go statach agus atá ainmnithe ag anailísíocht úsáide 30 lá (teastaíonn comhartha bainistíochta)               |
+| `visibleModels` / `hiddenModels` | `[]`                                       | Liostaí ceada de mheaitseálacha beachta nó iarmhíre; bíonn an bua ag an diúltú; foilsíonn `*` an chatalóg iomlán (bíonn scagairí eile i bhfeidhm fós) |
+| `geminiSanitization`             | `true`                                     | Bain eochairfhocail JSON-Schema a dhiúltaíonn Gemini dóibh ó scéimeanna uirlisí (cuirtear uirlisí `$ref` ar aghaidh gan athrú)                        |
+| `apiFormat.allowAnthropic`       | `false`                                    | Seol aitheantais ar an liosta ceada tríd an mbloc API Anthropic                                                                                       |
+| `apiFormat.anthropicModels`      | `[]`                                       | Aitheantais iomlána samhlacha a sheoltar chuig Anthropic                                                                                              |
+| `logLevel` / `startupDebug`      | `warn` / `false`                           | Leibhéal mionsonraí an logálaí                                                                                                                        |
 
-Bíonn cuimhne úsáide cumasaithe de réir réamhshocraithe. Gan ceadchomhartha bainistíochta, fanann sí díomhaoin
+Bíonn cuimhne úsáide cumasaithe de réir réamhshocraithe. Gan comhartha bainistíochta, fanann sí neamhghníomhach
 (logáiltear fógra tosaithe) agus ní athchóirítear aon rud.
 
 ## Conas a choinnítear an chatalóg úr
@@ -113,11 +114,16 @@ Socraigh `"geminiSanitization": false` chun é a mhúchadh.
 
 ## Fabhtcheartú
 
-| Siomptóm                                                  | Cúis                                                                                                               |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Ní thaispeánann an roghnóir aon samhail OmniRoute         | Níor réitíodh eochair ar bith (seiceáil an rabhadh tosaithe), nó ní féidir an geata a rochtain                     |
-| Aitheantais loma samhlacha, gan teaglamaí, gan phraghsáil | Dhiúltaigh na críochphointí bainistíochta don chomhartha — socraigh `managementReadToken`                          |
-| Seisiún pionnáilte le `opencode-<id>/…`                   | D’fhoilsigh breiseán v1 `opencode-<id>`; foilsíonn v2 `<id>` lom, mar sin roghnaigh an tsamhail arís faoi `<id>/…` |
+| Siomptóm                                                 | Cúis                                                                                                                                            |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ní thaispeánann an roghnóir aon samhail OmniRoute        | Níor réitíodh aon eochair (seiceáil an rabhadh tosaithe), nó ní féidir an geata a bhaint amach                                                  |
+| Aitheantais amh samhlacha, gan teaglamaí, gan phraghsáil | Dhiúltaigh na críochphointí bainistíochta don chomhartha — socraigh `managementReadToken`                                                       |
+| Catalóg `freeOnly` ghearr nó fholamh                     | Gan chomhartha bainistíochta nó diúltaíodh don chomhartha — léigh an líne achoimre athnuachana (comhaireamh `unmatched-free`) i loga an óstaigh |
+| Seisiún pionnáilte le `opencode-<id>/…`                  | D’fhoilsigh an breiseán v1 `opencode-<id>`; foilsíonn v2 `<id>` lom, mar sin roghnaigh an tsamhail arís faoi `<id>/…`                           |
+
+Ní mór do na hathróga timpeallachta próiseas freastalaí opencode a bhaint amach: nuair a
+ritheann an t-óstach mar sheirbhís, bíonn an bhlaosc a ritheann `opencode models` agus timpeallacht
+an fhreastalaí éagsúil, mar sin easpórtáil an eochair san áit a léann an freastalaí í.
 
 ## Féach freisin
 

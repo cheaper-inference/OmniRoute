@@ -7,6 +7,8 @@
  * provider knowledge here so discovery, import, and catalog projection agree.
  */
 
+import { isDecisionsOnlyProvider } from "../config/decisionsProviders.ts";
+
 export type ModelEndpointKind =
   "chat" | "image" | "video" | "embedding" | "rerank" | "non-chat" | "unknown";
 
@@ -113,7 +115,9 @@ export function getModelEndpointDecision(
   supportedEndpoints?: readonly string[]
 ): ModelEndpointDecision {
   const explicit = classifyExplicitEndpoints(supportedEndpoints);
-  if (provider?.trim().toLowerCase() === "typesafe") {
+  // Decisions-only providers (TypeSafe Jev, #14498) are never chat models, even
+  // when a stored row carries the synthetic `["chat"]` default.
+  if (isDecisionsOnlyProvider(provider)) {
     return { kind: "non-chat", chatSelectable: false, reason: "provider-policy" };
   }
   if (provider?.trim().toLowerCase() === "openrouter") {

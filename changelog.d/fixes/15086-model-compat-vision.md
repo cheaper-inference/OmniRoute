@@ -1,1 +1,0 @@
-- **fix(capabilities):** Apply explicit model-compat vision overrides consistently to model catalog and combo capability projections while preserving provider scope and Custom Models precedence ([#15086](https://github.com/diegosouzapw/OmniRoute/pull/15086)) — thanks @xiaoyaner0201

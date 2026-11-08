@@ -12,6 +12,7 @@ import { createNextUpgradeRelay } from "./next-upgrade-relay.mjs";
 import { ensurePeerStampToken, stampPeerIp } from "./peer-stamp.mjs";
 import methodGuard from "./http-method-guard.cjs";
 import headResponseGuard from "./head-response-guard.cjs";
+import h2cUpgradeGuard from "./h2c-upgrade-guard.cjs";
 import { ensureNativeSqlite } from "./ensure-native-sqlite.mjs";
 import { isTurbopackCacheCorruption, purgeAllTurbopackCaches } from "./turbopackCacheHeal.mjs";
 import { randomUUID } from "node:crypto";
@@ -22,6 +23,7 @@ import { listenWithRetry } from "./listen-with-retry.mjs";
 
 const { maybeHandleDisallowedMethod } = methodGuard;
 const { wrapRequestListenerWithHeadResponseGuard } = headResponseGuard;
+const { handleH2cUpgrade } = h2cUpgradeGuard;
 
 // Pre-read DATA_DIR from local .env before bootstrap resolves paths
 if (!process.env.DATA_DIR) {
@@ -222,8 +224,15 @@ async function start() {
   const mainServerTimeouts = getMainServerTimeoutConfig();
   server.keepAliveTimeout = mainServerTimeouts.keepAliveTimeoutMs;
   server.headersTimeout = mainServerTimeouts.headersTimeoutMs;
+  if (mainServerTimeouts.tcpKeepAliveInitialDelayMs > 0) {
+    server.on("connection", (socket) => {
+      socket.setKeepAlive(true, mainServerTimeouts.tcpKeepAliveInitialDelayMs);
+    });
+  }
   server.on("upgrade", async (req, socket, head) => {
     try {
+      // Cleartext `Upgrade: h2c` (JDK HttpClient) is not a WebSocket upgrade: serve it as HTTP/1.1.
+      if (handleH2cUpgrade(server, req, socket, head)) return;
       const responsesWsHandled = await responsesWsProxy.handleUpgrade(req, socket, head);
       if (responsesWsHandled) return;
       const handled = await wsBridge.handleUpgrade(req, socket, head);

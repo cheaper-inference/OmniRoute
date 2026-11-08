@@ -293,15 +293,15 @@ Ključna ponašanja:
 
 ---
 
-## 🔑 Sync tokeni i konfiguracioni paket _(v3.6.6+)_
+## 🔑 Токени за синхронизацију и конфигурациони пакет _(v3.6.6+)_
 
-Pristup sa više uređaja i eksternih operatera sada je moguć preko **skopiranih sync tokena**:
+Приступ са више уређаја и приступ спољних оператера сада је могућ путем **токена за синхронизацију са ограниченим опсегом**:
 
-- **`POST /api/sync/tokens`** — Izdaje novi sync token (skopiran, sa opcionim rokom trajanja)
-- **`DELETE /api/sync/tokens/:id`** — Opoziva token
-- **`GET /api/sync/bundle`** — Preuzima verzionisan JSON snimak, ključan po ETag-u, svih osetljivih podataka koji nisu poverljivi (lozinke su prikrivene)
+- **`POST /api/sync/tokens`** — Издавање новог токена за синхронизацију (са ограниченим опсегом и опционим роком важења)
+- **`DELETE /api/sync/tokens/:id`** — Опозив токена
+- **`GET /api/sync/bundle`** — Преузимање верзионисаног JSON снимка конфигурације идентификованог помоћу `ETag` вредности (аутентификација је могућа само токеном за синхронизацију). Подешавања аутентификације, попут лозинке контролне табле, уклањају се, али акредитиви добављача и API кључеви остају укључени, па датотеку третирајте као тајну
 
-Konfiguracioni paket se generiše u `src/lib/sync/bundle.ts`. Klijenti upoređuju `ETag` zaglavlje odgovora da bi otkrili promene bez ponovnog preuzimanja celog sadržaja.
+Конфигурациони пакет се креира помоћу `src/lib/sync/bundle.ts`. Корисници пакета упоређују заглавље одговора `ETag` како би открили промене без поновног преузимања целокупног садржаја. Из CLI-ја, `omniroute sync bundle <outPath> --token <syncToken>` (или `OMNIROUTE_SYNC_TOKEN`) чува га у датотеци којој може да приступи само власник.
 
 ---
 

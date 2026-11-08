@@ -1,270 +1,234 @@
-import assert from "node:assert/strict";
+/**
+ * TypeSafe System One client + provider registration tests (#15276 PR 1).
+ */
 import test from "node:test";
+import assert from "node:assert/strict";
 
 import {
-  getAllSystemOneModels,
-  getSystemOneProvider,
-} from "../../open-sse/config/systemoneRegistry.ts";
-import {
-  handleSystemOneProxy,
-  handleTypeSafeModelsProxy,
-} from "../../open-sse/handlers/systemone.ts";
-import { getExecutor } from "../../open-sse/executors/index.ts";
-import {
-  isTypesafeJevModelId,
-  stripTypesafeModelPrefix,
-  toTypesafePublicModelId,
-} from "../../src/lib/providers/typesafe.ts";
-import { validateTypeSafeProvider } from "../../src/lib/providers/validation/typesafe.ts";
-import { v1SystemOneSchema } from "../../src/shared/validation/schemas/apiV1.ts";
+  evaluateSystemOneChoice,
+  parseSystemOneChoiceResponse,
+  TYPESAFE_MAX_CHOICE_OPTIONS,
+  TYPESAFE_MAX_STATE_CHARS,
+  TYPESAFE_PROVIDER_ID,
+  TYPESAFE_SYSTEM_ONE_PATH,
+} from "../../open-sse/services/typesafe/systemOne.ts";
+import { APIKEY_PROVIDERS } from "../../src/shared/constants/providers.ts";
+import { getRegistryEntry } from "../../open-sse/config/providerRegistry.ts";
+import { getStaticModelsForProvider } from "../../src/lib/providers/staticModels.ts";
+import { getProviderModels } from "../../open-sse/config/providerModels.ts";
+import { filterChatSelectableModels } from "../../open-sse/services/modelEndpointPolicy.ts";
+import { validateTypesafeProvider } from "../../src/lib/providers/validation/typesafe.ts";
 
-const noOpSaveCallLog = async () => {};
-
-test("TypeSafe model helpers strip only the OmniRoute provider prefix", () => {
-  assert.equal(stripTypesafeModelPrefix("typesafe/jev-latest"), "jev-latest");
-  assert.equal(stripTypesafeModelPrefix("jev-1.13.0"), "jev-1.13.0");
-  assert.equal(toTypesafePublicModelId("jev-preview"), "typesafe/jev-preview");
-  assert.equal(isTypesafeJevModelId("typesafe/jev-1.13.0"), true);
-  assert.equal(isTypesafeJevModelId("openai/gpt-5"), false);
+test("typesafe is registered as an API-key specialty provider with no chat serviceKinds", () => {
+  const entry = APIKEY_PROVIDERS.typesafe;
+  assert.ok(entry, "typesafe must exist in APIKEY_PROVIDERS");
+  assert.equal(entry.id, TYPESAFE_PROVIDER_ID);
+  assert.deepEqual(entry.serviceKinds, []);
+  assert.match(String(entry.authHint || ""), /Bearer/i);
 });
 
-test("System One schema accepts all question types and structured/null entries", () => {
-  const parsed = v1SystemOneSchema.safeParse({
-    state: { ticket: "Payouts have failed for three days" },
-    model: "typesafe/jev-latest",
-    questions: {
-      urgent: {
-        type: "noul",
-        instructions: null,
-        criteria: { true: ["time-sensitive"], false: { meaning: "not urgent" } },
-      },
-      department: {
-        type: "choice",
-        instructions: { question: "Which team?" },
-        criteria: { billing: "Payments", technical: null },
-      },
-      frustration: {
-        type: "score",
-        instructions: "How frustrated is the customer?",
-        criteria: ["Calm", { level: "Frustrated" }, ["Very angry"]],
-      },
-    },
-    future_field: { preserved: true },
-  });
-
-  assert.equal(parsed.success, true);
-  if (parsed.success) assert.deepEqual(parsed.data.future_field, { preserved: true });
+test("typesafe has no chat registry models and no static catalog", () => {
+  assert.equal(getRegistryEntry(TYPESAFE_PROVIDER_ID), null);
+  assert.equal(getStaticModelsForProvider(TYPESAFE_PROVIDER_ID), undefined);
+  assert.deepEqual(getProviderModels(TYPESAFE_PROVIDER_ID), []);
 });
 
-test("System One schema enforces Choice and Score limits", () => {
-  const tooManyChoices = Object.fromEntries(
-    Array.from({ length: 256 }, (_, index) => [`option_${index}`, null])
-  );
-  assert.equal(
-    v1SystemOneSchema.safeParse({
-      state: "state",
-      model: "jev-latest",
-      questions: {
-        invalid: { type: "choice", instructions: "Pick", criteria: tooManyChoices },
-      },
-    }).success,
-    false
-  );
-  assert.equal(
-    v1SystemOneSchema.safeParse({
-      state: "state",
-      model: "jev-latest",
-      questions: {
-        invalid: { type: "score", instructions: "Rate", criteria: ["only one"] },
-      },
-    }).success,
-    false
-  );
+test("typesafe models are absent from chat-selectable filtering", () => {
+  // Even if a stray model row were imported, empty serviceKinds + no registry
+  // means operators should never see typesafe in combo chat pickers. An empty
+  // catalog filters to empty.
+  const filtered = filterChatSelectableModels(TYPESAFE_PROVIDER_ID, []);
+  assert.deepEqual(filtered, []);
 });
 
-test("System One registry advertises provider-scoped non-chat models", () => {
-  assert.equal(getSystemOneProvider("typesafe")?.baseUrl, "https://api.typesafe.ai/v1/systemone");
-  assert.deepEqual(
-    getAllSystemOneModels().map((model) => model.id),
-    ["typesafe/jev-latest", "typesafe/jev-preview"]
-  );
-});
-
-test("TypeSafe cannot silently fall through to a chat executor", async () => {
-  await assert.rejects(getExecutor("typesafe"), (error: Error & { status?: number }) => {
-    assert.equal(error.status, 400);
-    assert.match(error.message, /System One provider/);
-    assert.match(error.message, /\/v1\/systemone/);
-    return true;
-  });
-});
-
-test("System One proxy strips no fields, forwards SDK metadata, and preserves the response", async () => {
-  let requestUrl = "";
-  let requestBody: unknown;
-  let requestHeaders = new Headers();
-  const callLogs: Array<Record<string, unknown>> = [];
-  const recordedCosts: Array<{
-    apiKeyId: string;
-    costUsd: number;
-    details?: Record<string, unknown>;
-  }> = [];
-  const fetchImpl: typeof fetch = async (input, init) => {
-    requestUrl = String(input);
-    requestBody = JSON.parse(String(init?.body));
-    requestHeaders = new Headers(init?.headers);
-    return new Response(
-      JSON.stringify({
-        model: "jev-1.13.0",
-        answers: { urgent: { type: "noul", noul: 0.95 } },
-        usage: { input_tokens: 1000, output_tokens: 20 },
-      }),
-      {
-        status: 200,
-        headers: {
-          "content-type": "application/json",
-          "x-typesafe-request-id": "ts-request-1",
-          "x-ratelimit-remaining-requests": "1199",
-        },
-      }
-    );
-  };
-
-  const body = {
-    state: "Help!",
-    model: "jev-latest",
-    questions: { urgent: { type: "noul", instructions: "Urgent?" } },
-    future_field: { preserved: true },
-  };
-  const response = await handleSystemOneProxy({
-    body,
-    credentials: { apiKey: "test-typesafe-key", connectionId: "conn-typesafe-1" },
-    provider: "typesafe",
-    requestedModel: "typesafe/jev-latest",
-    apiKeyId: "key-typesafe-1",
-    apiKeyName: "TypeSafe test key",
-    forwardedHeaders: {
-      "x-typesafe-sdk": "typesafe-sdk/0.6.0",
-      "x-typesafe-runtime": "node/24",
-    },
-    fetchImpl,
-    saveCallLogImpl: async (entry: Record<string, unknown>) => {
-      callLogs.push(entry);
-    },
-    recordCostImpl: (apiKeyId: string, costUsd: number, details) => {
-      recordedCosts.push({ apiKeyId, costUsd, details });
-    },
-  });
-
-  assert.equal(requestUrl, "https://api.typesafe.ai/v1/systemone");
-  assert.deepEqual(requestBody, body);
-  assert.equal(requestHeaders.get("authorization"), "Bearer test-typesafe-key");
-  assert.equal(requestHeaders.get("x-typesafe-sdk"), "typesafe-sdk/0.6.0");
-  assert.equal(response.status, 200);
-  assert.equal(response.headers.get("x-typesafe-request-id"), "ts-request-1");
-  assert.equal(response.headers.get("x-ratelimit-remaining-requests"), "1199");
-  assert.deepEqual(await response.json(), {
+test("parseSystemOneChoiceResponse accepts a valid choice answer", () => {
+  const result = parseSystemOneChoiceResponse({
     model: "jev-1.13.0",
-    answers: { urgent: { type: "noul", noul: 0.95 } },
-    usage: { input_tokens: 1000, output_tokens: 20 },
+    answers: {
+      route: {
+        type: "choice",
+        choice: "step-a",
+        probabilities: { "step-a": 0.72, "step-b": 0.2, "step-c": 0.08 },
+        confidence: 0.84,
+      },
+    },
+    usage: { input_tokens: 120, output_tokens: 18 },
   });
-  assert.equal(callLogs.length, 1);
-  assert.equal(callLogs[0].requestType, "systemone");
-  assert.equal(callLogs[0].model, "jev-1.13.0");
-  assert.equal(callLogs[0].apiKeyId, "key-typesafe-1");
-  assert.equal(callLogs[0].apiKeyName, "TypeSafe test key");
-  assert.ok(Math.abs(Number(callLogs[0].costUsd) - 0.000042) < 1e-12);
-  assert.equal(recordedCosts.length, 1);
-  assert.equal(recordedCosts[0].apiKeyId, "key-typesafe-1");
-  assert.ok(Math.abs(recordedCosts[0].costUsd - 0.000042) < 1e-12);
-  assert.equal(recordedCosts[0].details?.provider, "typesafe");
-  assert.equal(recordedCosts[0].details?.model, "jev-1.13.0");
-  assert.deepEqual(recordedCosts[0].details?.tokens, {
-    input_tokens: 1000,
-    output_tokens: 20,
-  });
-  assert.equal(recordedCosts[0].details?.success, true);
-  assert.equal(typeof recordedCosts[0].details?.requestId, "string");
+
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  assert.equal(result.choice, "step-a");
+  assert.equal(result.confidence, 0.84);
+  assert.equal(result.probabilities["step-a"], 0.72);
+  assert.equal(result.model, "jev-1.13.0");
+  assert.equal(result.inputTokens, 120);
+  assert.equal(result.outputTokens, 18);
 });
 
-test("System One proxy preserves TypeSafe errors and retry headers", async () => {
-  const response = await handleSystemOneProxy({
-    body: { state: "state", model: "jev-latest", questions: {} },
-    credentials: { apiKey: "test-typesafe-key" },
+test("parseSystemOneChoiceResponse rejects a malformed body", () => {
+  const result = parseSystemOneChoiceResponse({ answers: {} });
+  assert.equal(result.ok, false);
+  if (result.ok) return;
+  assert.equal(result.reason, "invalid_response");
+});
+
+test("evaluateSystemOneChoice returns missing_api_key without calling fetch", async () => {
+  let called = false;
+  const result = await evaluateSystemOneChoice({
+    apiKey: "   ",
+    state: "hi",
+    criteria: { a: "A" },
+    fetchImpl: async () => {
+      called = true;
+      return new Response("{}", { status: 200 });
+    },
+  });
+  assert.equal(called, false);
+  assert.equal(result.ok, false);
+  if (result.ok) return;
+  assert.equal(result.reason, "missing_api_key");
+});
+
+test("evaluateSystemOneChoice posts a choice question and parses the answer", async () => {
+  const calls: Array<{ url: string; init: RequestInit }> = [];
+  const result = await evaluateSystemOneChoice({
+    apiKey: "ts_test_key",
+    state: "rewrite this email",
+    criteria: { opus: "Claude Opus", glm: "GLM" },
+    fetchImpl: async (url, init) => {
+      calls.push({ url: String(url), init: init || {} });
+      return new Response(
+        JSON.stringify({
+          model: "jev-1.13.0",
+          answers: {
+            route: {
+              type: "choice",
+              choice: "glm",
+              probabilities: { opus: 0.1, glm: 0.9 },
+              confidence: 0.91,
+            },
+          },
+          usage: { input_tokens: 40, output_tokens: 10 },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    },
+  });
+
+  assert.equal(calls.length, 1);
+  assert.ok(calls[0].url.endsWith(TYPESAFE_SYSTEM_ONE_PATH));
+  const headers = calls[0].init.headers as Record<string, string>;
+  assert.equal(headers.Authorization, "Bearer ts_test_key");
+  const body = JSON.parse(String(calls[0].init.body));
+  assert.equal(body.model, "jev-latest");
+  assert.equal(body.state, "rewrite this email");
+  assert.equal(body.questions.route.type, "choice");
+  assert.deepEqual(body.questions.route.criteria, { opus: "Claude Opus", glm: "GLM" });
+
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  assert.equal(result.choice, "glm");
+  assert.equal(result.confidence, 0.91);
+});
+
+test("evaluateSystemOneChoice maps HTTP 401 to unavailable without throwing", async () => {
+  const result = await evaluateSystemOneChoice({
+    apiKey: "bad",
+    state: "hi",
+    criteria: { a: "A" },
+    fetchImpl: async () => new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 }),
+  });
+  assert.equal(result.ok, false);
+  if (result.ok) return;
+  assert.equal(result.reason, "http_error");
+  assert.equal(result.status, 401);
+  assert.equal(result.detail, "System One returned HTTP 401");
+  assert.doesNotMatch(result.detail, /unauthorized|Bearer |sk-|ts_test/);
+});
+
+test("evaluateSystemOneChoice maps AbortError to timeout without throwing", async () => {
+  const result = await evaluateSystemOneChoice({
+    apiKey: "key",
+    state: "hi",
+    criteria: { a: "A" },
+    timeoutMs: 5,
+    fetchImpl: async (_url, init) => {
+      const signal = init?.signal;
+      return await new Promise((_resolve, reject) => {
+        const onAbort = () => {
+          const err = new Error("aborted");
+          err.name = "AbortError";
+          reject(err);
+        };
+        if (signal?.aborted) onAbort();
+        else signal?.addEventListener("abort", onAbort, { once: true });
+      });
+    },
+  });
+  assert.equal(result.ok, false);
+  if (result.ok) return;
+  assert.equal(result.reason, "timeout");
+});
+
+test("evaluateSystemOneChoice truncates state and refuses more than 255 options", async () => {
+  let posted = "";
+  const long = "x".repeat(TYPESAFE_MAX_STATE_CHARS + 50);
+  const result = await evaluateSystemOneChoice({
+    apiKey: "key",
+    state: long,
+    criteria: { a: "A" },
+    fetchImpl: async (_url, init) => {
+      posted = String(init?.body);
+      return new Response(
+        JSON.stringify({
+          answers: {
+            route: { type: "choice", choice: "a", probabilities: { a: 1 }, confidence: 1 },
+          },
+        }),
+        { status: 200 }
+      );
+    },
+  });
+  assert.equal(result.ok, true);
+  assert.equal(JSON.parse(posted).state.length, TYPESAFE_MAX_STATE_CHARS);
+
+  let called = false;
+  const criteria: Record<string, string> = {};
+  for (let i = 0; i < TYPESAFE_MAX_CHOICE_OPTIONS + 1; i++) criteria[`k${i}`] = `L${i}`;
+  const tooMany = await evaluateSystemOneChoice({
+    apiKey: "key",
+    state: "hi",
+    criteria,
+    fetchImpl: async () => {
+      called = true;
+      return new Response("no", { status: 500 });
+    },
+  });
+  assert.equal(called, false);
+  assert.equal(tooMany.ok, false);
+});
+
+test("validateTypesafeProvider maps a probe without sending the key to the error", async () => {
+  const valid = await validateTypesafeProvider({
+    apiKey: "ts_live_key",
     fetchImpl: async () =>
       new Response(
-        JSON.stringify({ detail: { error_type: "rate_limit_error", message: "Slow down" } }),
-        {
-          status: 429,
-          headers: { "content-type": "application/json", "retry-after-ms": "250" },
-        }
+        JSON.stringify({
+          answers: {
+            route: { type: "choice", choice: "ok", probabilities: { ok: 1 }, confidence: 1 },
+          },
+        }),
+        { status: 200 }
       ),
-    saveCallLogImpl: noOpSaveCallLog,
   });
-
-  assert.equal(response.status, 429);
-  assert.equal(response.headers.get("retry-after-ms"), "250");
-  assert.deepEqual(await response.json(), {
-    detail: { error_type: "rate_limit_error", message: "Slow down" },
-  });
-});
-
-test("System One proxy returns TypeSafe-shaped authentication and timeout errors", async () => {
-  const noKey = await handleSystemOneProxy({
-    body: {},
-    credentials: {},
-    saveCallLogImpl: noOpSaveCallLog,
-  });
-  assert.equal(noKey.status, 401);
-  const noKeyBody = (await noKey.json()) as { detail: { error_type: string } };
-  assert.equal(noKeyBody.detail.error_type, "authentication_error");
-
-  const timeout = await handleSystemOneProxy({
-    body: {},
-    credentials: { apiKey: "test-typesafe-key" },
-    timeoutMs: 5,
-    fetchImpl: async (_input, init) =>
-      await new Promise<Response>((_resolve, reject) => {
-        init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
-      }),
-    saveCallLogImpl: noOpSaveCallLog,
-  });
-  assert.equal(timeout.status, 504);
-  const timeoutBody = (await timeout.json()) as { detail: { error_type: string } };
-  assert.equal(timeoutBody.detail.error_type, "timeout_error");
-});
-
-test("native models proxy preserves the TypeSafe {models: [...]} wire shape", async () => {
-  const response = await handleTypeSafeModelsProxy({
-    credentials: { apiKey: "test-typesafe-key" },
-    fetchImpl: async () =>
-      Response.json({
-        models: [{ name: "jev-latest", description: "Stable Jev", release_date: "2026-09-14" }],
-      }),
-    saveCallLogImpl: noOpSaveCallLog,
-  });
-  const json = (await response.json()) as { models: Array<{ name: string }> };
-  assert.equal(json.models[0].name, "jev-latest");
-});
-
-test("TypeSafe credential validator uses the authenticated, zero-inference models endpoint", async () => {
-  let auth = "";
-  const valid = await validateTypeSafeProvider({
-    apiKey: "test-typesafe-key",
-    fetchImpl: async (url, init) => {
-      assert.equal(url, "https://api.typesafe.ai/v1/models");
-      auth = new Headers(init.headers).get("authorization") || "";
-      return Response.json({ models: [] });
-    },
-  });
-  assert.equal(auth, "Bearer test-typesafe-key");
   assert.equal(valid.valid, true);
-  assert.equal(valid.method, "typesafe_models");
 
-  const invalid = await validateTypeSafeProvider({
-    apiKey: "bad-key",
-    fetchImpl: async () => Response.json({ detail: "Unauthorized" }, { status: 401 }),
+  const invalid = await validateTypesafeProvider({
+    apiKey: "ts_live_key",
+    fetchImpl: async () =>
+      new Response(JSON.stringify({ error: "nope ts_live_key" }), { status: 401 }),
   });
   assert.equal(invalid.valid, false);
-  assert.match(String(invalid.error), /Invalid API key/);
+  assert.equal(invalid.error, "Invalid API key");
+  assert.doesNotMatch(JSON.stringify(invalid), /ts_live_key/);
 });

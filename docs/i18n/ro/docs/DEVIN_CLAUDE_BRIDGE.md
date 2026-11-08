@@ -4,79 +4,93 @@
 
 ---
 
-`devin-cli-agentic` permite mediului de execuție Claude Code real să utilizeze endpointul local Anthropic
-Messages al OmniRoute, în timp ce CLI-ul oficial Devin furnizează răspunsurile modelului prin ACP stdio. Acesta
-nu modifică furnizorii existenți Anthropic, Claude OAuth, Claude Web sau `devin-cli`.
+`devin-cli-agentic` permite mediului de execuție Claude Code real să utilizeze endpointul local
+Anthropic Messages al OmniRoute, în timp ce CLI-ul oficial Devin furnizează răspunsurile modelului
+prin ACP stdio. Acesta nu modifică furnizorii existenți Anthropic, Claude OAuth, Claude Web sau
+`devin-cli`.
 
-> **Stare actuală: Claude Code fixat la versiunea `2.1.258`; ultima validare offline și live a fost înregistrată
-> pentru `2.1.220`.** Versiunea fixată `2.1.220` a finalizat trei scenarii izolate prin Devin CLI
-> `3000.2.17` și modelul `swe-1-7-lightning`; acea ultimă execuție live a demonstrat turele `Read`,
-> `Edit` și `Bash` gestionate de client, rezultate `npm test` reușite, descoperirea comenzilor și a
-> competențelor proiectului, rutarea exclusiv prin Devin și zero trafic de ieșire către Claude. Versiunea fixată a fost apoi actualizată la `2.1.258`
-> (generația CLI pe care o imită identitatea Claude a OmniRoute și prima linie care include
-> nativ nivelul Fable 5.1). Pentru noua versiune fixată, stratul de instalare și `claude --version` au fost
-> verificate pe imaginea de bază fixată, iar suita de teste unitare a punții, `compose config` și
-> demonstrația statică de izolare trec cu succes — însă scenariul simulat offline și suita live cu trei scenarii
-> nu au fost încă rulate din nou. Rulați-le din nou (consultați „Actualizarea instrumentelor fixate”) înainte de a vă baza pe
-> punte cu această versiune fixată.
+Pentru apelurile de instrumente deținute de client, direcționați prin `devin-cli-agentic` (alias `dva`),
+furnizorul compatibil cu instrumente în format Claude. Executorul ACP `devin-cli` (`dv`) moștenit
+acceptă doar text: rulează sumarizatorul Devin fără instrumente și nu poate returna apeluri de
+instrumente. Metadatele modelului său sunt marcate corespunzător, astfel încât rutarea combinată
+care necesită instrumente îl va evita.
+
+> **Stare actuală: Claude Code fixat la versiunea `2.1.258`; ultima validare offline și live a fost
+> înregistrată pentru `2.1.220`.** Versiunea fixată `2.1.220` a finalizat trei scenarii izolate prin Devin CLI
+> `3000.2.17` și modelul `swe-1-7-lightning`; acea ultimă rulare live a demonstrat execuția operațiilor
+> `Read`, `Edit` și `Bash` deținute de client, rezultate reușite pentru `npm test`, descoperirea comenzilor
+> și a abilităților proiectului, rutarea exclusiv prin Devin și absența totală a traficului de ieșire către Claude.
+> Versiunea fixată a fost apoi actualizată la `2.1.258` (generația CLI pe care o imită identitatea Claude
+> a OmniRoute și prima versiune care include nativ nivelul Fable 5.1). Pentru noua versiune fixată au fost
+> verificate stratul de instalare și `claude --version` pe imaginea de bază fixată, iar suita de teste unitare
+> a punții, `compose config` și demonstrația statică de izolare trec cu succes — însă scenariul simulat
+> offline și suita live cu trei scenarii nu au fost încă rulate din nou. Rulați-le din nou (consultați
+> „Actualizarea instrumentelor cu versiuni fixate”) înainte de a vă baza pe punte cu această versiune fixată.
 
 ## Arhitectură
 
 ```text
-Claude Code 2.1.258 (container Linux izolat, fără root)
+Claude Code 2.1.258 (container Linux izolat, fără utilizator root)
   -> http://omniroute:20128/v1/messages
   -> devin-cli-agentic (format Claude, furnizor fără autentificare)
   -> devin acp --agent-type summarizer (ACP stdio oficial, fără instrumente Devin)
   -> cont Devin în volumul dedicat devin-auth
 ```
 
-Agentul ACP implicit al CLI-ului oficial își poate executa propriile instrumente, astfel încât această punte nu îl
-utilizează. Aceasta pornește agentul ACP fix `summarizer`, al cărui mod CLI oficial nu are instrumente, și
-încadrează cererea Anthropic serializată ca urmă de execuție. Atunci când este necesară o altă
-acțiune gestionată de Claude, răspunsul trebuie să conțină exact un plic pentru instrumentul clientului. Orice
-`tool_call` sau `tool_call_update` ACP este respins înainte ca un răspuns să poată fi raportat ca
-reușit.
+Agentul ACP implicit al CLI-ului oficial își poate executa propriile instrumente, astfel încât această
+punte nu îl utilizează. Aceasta pornește agentul ACP fix `summarizer`, al cărui mod oficial din CLI nu
+dispune de instrumente, și încadrează solicitarea Anthropic serializată ca urmă de execuție. Atunci când
+este necesară o altă acțiune deținută de Claude, răspunsul trebuie să conțină exact un plic de instrument
+al clientului. Orice `tool_call` sau `tool_call_update` ACP este respins înainte ca un răspuns să poată
+fi raportat ca reușit.
 
 Serializatorul din `open-sse/executors/devin-agentic/serializer.ts` păstrează `system`,
 `text`, `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `tool_choice` și
-instrumentele furnizate de Claude Code. Imaginile și blocurile necunoscute eșuează explicit. Rezultatele mari ale instrumentelor
-utilizează un marcaj vizibil de trunchiere.
+instrumentele furnizate de Claude Code. Imaginile și blocurile necunoscute eșuează explicit. Rezultatele
+mari ale instrumentelor folosesc un marcaj vizibil de trunchiere.
 
-Parserul acceptă un singur plic independent `<tool>{...}</tool>` pentru fiecare tură a modelului. Acesta verifică
-numele în raport cu lista de instrumente a cererii, validează argumentele în raport cu schema JSON a instrumentului,
-respinge combinațiile de text narativ și acțiuni și permite o singură remediere limitată. Claude Code execută apoi
-local rezultatul Anthropic `tool_use` și trimite `tool_result` înapoi prin
-OmniRoute.
+Parserul acceptă un singur plic independent `<tool>{...}</tool>` pentru fiecare tură a modelului. Acesta
+verifică numele în raport cu lista de instrumente din solicitare, validează argumentele în raport cu JSON
+Schema al instrumentului respectiv, respinge combinațiile de text narativ și acțiuni și permite o singură
+încercare limitată de remediere. Claude Code execută apoi local `tool_use` Anthropic rezultat și trimite
+`tool_result` înapoi prin OmniRoute.
 
-## Izolare și model de amenințări
+## Rutare automată
 
-Instalarea, contul și configurația Claude de pe gazdă nu fac parte din domeniul de aplicare și sunt tratate ca
+Furnizorul este eligibil în grupurile de candidați `auto/*` ale OmniRoute atunci când nu este blocat.
+Eligibilitatea unui candidat nu garantează selectarea: strategia de rutare a combinației (de exemplu,
+ultima variantă cunoscută ca funcțională) poate prefera un alt furnizor. Utilizați `dva/<model>` sau o
+combinație care prioritizează Devin atunci când aveți nevoie ca fiecare solicitare să treacă prin Devin.
+
+## Izolarea și modelul de amenințări
+
+Instalarea, contul și configurația Claude de pe gazdă nu fac parte din domeniul de aplicare și sunt considerate
 interzise. Serviciile Compose:
 
-- rulează ca UID/GID `10001:10001`, cu un sistem de fișiere rădăcină doar în citire, capabilități eliminate și
+- rulează cu UID/GID `10001:10001`, cu un sistem de fișiere rădăcină doar în citire, capabilități eliminate și
   `no-new-privileges`;
-- utilizează un `/home/bridge` privat, un volum dedicat pentru configurația Claude, date OmniRoute izolate
+- utilizează un director privat `/home/bridge`, un volum dedicat pentru configurația Claude, date OmniRoute izolate
   și un volum `devin-auth` separat;
-- montează numai spații de lucru/dovezi `.sandbox` de unică folosință;
-- nu montează directorul personal al gazdei, Keychain, SSH, acreditări cloud sau socketul Docker;
-- construiesc medii explicite și elimină variabilele Anthropic pentru API/OAuth/rutare;
-- direcționează inferența Claude Code numai către `http://omniroute:20128`, cu o cheie exclusiv locală.
+- montează doar spații de lucru/dovezi `.sandbox` care pot fi eliminate;
+- nu montează directorul personal al gazdei, Keychain, acreditările SSH, acreditările cloud sau socketul Docker;
+- construiesc medii explicite și elimină variabilele API/OAuth/de rutare Anthropic;
+- direcționează inferența Claude Code exclusiv către `http://omniroute:20128`, folosind o cheie disponibilă numai local.
 
-Profilul offline utilizează o rețea internă. În profilul live, OmniRoute ajunge la
+Profilul offline utilizează o rețea internă. În profilul live, OmniRoute accesează
 endpointurile oficiale Devin numai prin `network-guard`; destinațiile fără legătură sunt refuzate.
-Claude Code are o protecție de ieșire separată care refuză tot traficul și poate ajunge numai la serviciul local OmniRoute
-prin `NO_PROXY`. Fișierele de audit ale protecțiilor sunt montate numai de procesul protecției respective.
-Scripturile verifică proprietarul fișierelor, modul, numărul de legături și fiecare decizie înainte de a exporta
+Claude Code are o protecție separată care refuză întregul trafic de ieșire și poate accesa numai serviciul OmniRoute
+local prin `NO_PROXY`. Fișierele de audit ale protecțiilor sunt montate numai de procesul protecției corespunzătoare. Scripturile
+verifică proprietarul fișierelor, modul, numărul de legături și fiecare decizie înainte de a exporta
 dovezi fără tokenuri.
 
-Rulați independent demonstrația de izolare:
+Rulați independent verificarea izolării:
 
 ```bash
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Aceasta validează topologia, montările denumite, setările fără root/doar în citire, rutarea locală explicită,
-absența variabilelor de mediu sensibile, absența socketului Docker, accesul blocat la
+Aceasta validează topologia, montările denumite, setările pentru utilizator non-root și doar în citire, rutarea locală
+explicită, absența variabilelor de mediu sensibile, absența socketului Docker, accesul blocat la
 `api.anthropic.com` și `claude.ai`, selectarea exclusivă a furnizorului Devin și eșecul explicit atunci când
 backendul ACP nu este disponibil.
 
@@ -88,25 +102,30 @@ Construiți imaginea cu versiuni fixate:
 ./scripts/devin-bridge/build
 ```
 
-Autentificați doar volumul Devin izolat:
+Autentificați numai volumul Devin izolat:
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/login-devin
 ```
 
-Comanda de autentificare utilizează fluxul oficial cu token manual, destinat mediilor la distanță/containerizate. Valoarea este introdusă direct în promptul CLI; nu este transmisă ca argument de proces, scrisă în Git sau copiată de pe gazdă.
+Comanda de autentificare utilizează fluxul oficial cu token manual, destinat mediilor
+remote/container. Valoarea este introdusă direct în promptul CLI; nu este transmisă ca
+argument de proces, scrisă în Git sau copiată de pe gazdă.
 
-Lansați mediul de execuție Claude Code izolat:
+Porniți mediul de execuție Claude Code izolat:
 
 ```bash
 ./scripts/devin-bridge/launch
 ```
 
-`launch` verifică din nou izolarea, autentificarea Devin și descoperirea modelelor înainte de a porni Claude Code în container. Nu rulează niciodată executabilul Claude al gazdei. Aliasurile modelelor pot fi setate în `.env.devin-bridge`; fiecare valoare configurată trebuie să păstreze prefixul `devin-cli-agentic/`.
+`launch` reverifică izolarea, autentificarea Devin și descoperirea modelelor înainte de a porni
+Claude Code în container. Nu rulează niciodată executabilul Claude al gazdei. Aliasurile modelelor pot fi
+configurate în `.env.devin-bridge`; fiecare valoare configurată trebuie să păstreze prefixul
+`devin-cli-agentic/`.
 
 ## Comenzi de validare
 
-Fluxul offline reproductibil nu necesită un cont Devin și nu are acces la Internet în timpul execuției:
+Fluxul offline reproductibil nu necesită un cont Devin și nu are acces la internet în timpul rulării:
 
 ```bash
 ./scripts/devin-bridge/test-unit
@@ -121,34 +140,42 @@ Fluxul live autentificat, care necesită activare explicită, este:
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/test-live-devin
 ```
 
-Executorul live așteaptă între scenarii pentru a evita deschiderea în rafală a sesiunilor ACP și validează evenimentele structurate din fluxul Claude în loc să se bazeze pe afirmații textuale. Cele trei scenarii ale sale demonstrează:
+Executorul live așteaptă între scenarii pentru a evita deschiderea în rafală a sesiunilor ACP și
+validează evenimentele structurate ale fluxului Claude în loc să se bazeze pe afirmații textuale. Cele trei
+scenarii ale sale demonstrează:
 
 1. citirea directă a proiectului și analiza defectelor;
-2. o operație `Edit` reală, o comandă `Bash` `npm test` controlată de client și un rezultat final;
-3. descoperirea `/bridge-check` și `bridge-proof`, citirea proiectului, încă o executare reușită a comenzii `npm test` controlate de client și finalizarea fără activități în așteptare.
+2. o operațiune `Edit` reală, un `Bash` `npm test` deținut de client și un rezultat final;
+3. `/bridge-check` împreună cu descoperirea `bridge-proof`, citirea proiectului, încă o rulare reușită
+   a comenzii `npm test` deținute de client și finalizarea fără activități în așteptare.
 
-Verificarea finală controlează și auditul de rețea Devin și impune ca auditul traficului de ieșire Claude să rămână gol.
+Verificarea finală examinează și auditul de rețea Devin și impune ca auditul traficului de ieșire Claude să
+rămână gol.
 
 ## Actualizarea instrumentelor cu versiuni fixate
 
-Imaginea fixează versiunile pentru Node, Claude Code și Devin CLI în `docker/devin-bridge/Dockerfile`. Pentru actualizare:
+Imaginea fixează versiunile pentru Node, Claude Code și Devin CLI în
+`docker/devin-bridge/Dockerfile`. Pentru actualizare:
 
 1. modificați versiunile explicite;
-2. înlocuiți sumele de control ale arhivei Devin pentru ambele arhitecturi cu valorile artefactului oficial;
-3. reconstruiți și rulați fiecare comandă de validare offline;
-4. confirmați versiunile din imagine;
+2. înlocuiți ambele sume de control ale arhivelor Devin, specifice arhitecturii, cu valorile artefactului
+   oficial;
+3. reconstruiți și executați fiecare comandă de validare offline;
+4. confirmați versiunile din interiorul imaginii;
 5. rulați din nou suita live autentificată cu trei scenarii.
 
-Nu instalați niciunul dintre instrumentele CLI la nivel global pe gazdă și nu înlocuiți verificarea sumei de control cu o descărcare neverificată.
+Nu instalați niciunul dintre cele două CLI-uri global pe gazdă și nu înlocuiți verificarea sumei de control cu o
+descărcare neverificată.
 
 ## Diagnosticare și curățare
 
 - `docker compose -f docker/devin-bridge/compose.yml --profile offline logs omniroute`
   afișează rutarea locală și erorile igienizate ale executorului.
-- `.sandbox/evidence/mock-acp.jsonl` înregistrează acțiunile ACP simulate deterministe.
+- `.sandbox/evidence/mock-acp.jsonl` înregistrează acțiunile ACP simulate și deterministe.
 - `.sandbox/evidence/claude-stream.jsonl` înregistrează execuția offline reală a Claude Code.
 - `.sandbox/evidence/live-*.jsonl` înregistrează cele trei fluxuri live validate.
-- `.sandbox/evidence/egress.jsonl` și `.sandbox/evidence/claude-egress.jsonl` sunt copii validate, fără tokenuri, ale auditurilor de protecție.
+- `.sandbox/evidence/egress.jsonl` și `.sandbox/evidence/claude-egress.jsonl` sunt copii validate,
+  fără tokenuri, ale auditurilor mecanismului de protecție.
 
 Opriți containerele și rețelele deținute, păstrând volumele de autentificare/configurare:
 
@@ -156,7 +183,7 @@ Opriți containerele și rețelele deținute, păstrând volumele de autentifica
 ./scripts/devin-bridge/clean
 ```
 
-Eliminați întregul mediu deținut de punte, inclusiv volumele denumite:
+Eliminați întregul mediu deținut de bridge, inclusiv volumele denumite:
 
 ```bash
 ./scripts/devin-bridge/clean --all
@@ -164,15 +191,15 @@ Eliminați întregul mediu deținut de punte, inclusiv volumele denumite:
 
 ## Limitări
 
-- Puntea se bazează pe rolul fix fără instrumente `summarizer`, deoarece Devin CLI `3000.2.17`
-  nu expune un agent ACP neutru fără instrumente. Adaptorul compensează răspunsurile intermediare
-  cu structură de rezumat, dar o singură încercare limitată de remediere poate totuși eșua explicit.
+- Bridge-ul se bazează pe rolul fix `summarizer`, fără instrumente, deoarece Devin CLI `3000.2.17`
+  nu expune un agent ACP neutru, fără instrumente. Adaptorul compensează răspunsurile intermediare
+  cu structură de rezumat, însă o singură încercare limitată de remediere poate totuși eșua explicit.
 - Apelurile ACP live pot returna răspunsuri tranzitorii `502`/`504`. Harness-ul spațiază scenariile;
-  o eroare persistentă rămâne de tip fail-closed și nu selectează niciodată alt furnizor.
-- Contextul ACP este reconstruit din fiecare solicitare Anthropic; nu există afinitate
-  de proces/sesiune.
-- Este acceptat un singur apel de instrument per răspuns al modelului; apelurile paralele sunt respinse.
-- Imaginile nu sunt acceptate în mod explicit. Capabilitățile de viziune, rezultatul procesului de gândire, controalele privind efortul și o fereastră de context de 1M
-  nu sunt promovate.
-- SSE utilizează evenimente valide ale ciclului de viață Anthropic, dar este emis după colectarea
-  schimbului ACP limitat; fragmentele ACP nu sunt redirecționate incremental.
+  o eroare persistentă rămâne în modul fail-closed și nu selectează niciodată alt furnizor.
+- Contextul ACP este reconstruit din fiecare cerere Anthropic; nu există afinitate la nivel de
+  proces/sesiune.
+- Este acceptat un singur apel de instrument pentru fiecare răspuns al modelului; apelurile paralele sunt respinse.
+- Imaginile nu sunt acceptate în mod explicit. Capabilitățile de vedere, rezultatul procesului de gândire, controalele de efort și o
+  fereastră de context de 1M nu sunt promovate.
+- SSE utilizează evenimente valide din ciclul de viață Anthropic, dar este emis după colectarea turei ACP
+  limitate; fragmentele ACP nu sunt transmise incremental.

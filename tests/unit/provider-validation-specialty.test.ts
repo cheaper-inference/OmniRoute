@@ -55,129 +55,6 @@ data:
 `;
 }
 
-test("Kiro API key validator resolves profiles with bearer auth", async () => {
-  const calls: Array<{ url: string; headers: Record<string, string> }> = [];
-  globalThis.fetch = async (url, init = {}) => {
-    const headers = toPlainHeaders(init.headers);
-    calls.push({ url: String(url), headers });
-
-    assert.equal(String(url), "https://codewhisperer.us-east-1.amazonaws.com");
-    assert.equal(headers.Authorization, "Bearer ksk-valid");
-    assert.equal(headers["x-amz-target"], "AmazonCodeWhispererService.ListAvailableProfiles");
-    assert.equal(headers.Accept, "application/json");
-
-    return new Response(
-      JSON.stringify({
-        profiles: [{ arn: "arn:aws:codewhisperer:us-east-1:123:profile/API" }],
-      }),
-      { status: 200 }
-    );
-  };
-
-  const result = await validateProviderApiKey({
-    provider: "kiro",
-    apiKey: "ksk-valid",
-    providerSpecificData: { region: "us-east-1" },
-  });
-
-  assert.equal(result.valid, true);
-  assert.equal(result.error, null);
-  assert.equal(result.method, "kiro_list_available_profiles");
-  assert.equal(calls.length, 1);
-});
-
-test("Kiro API key validator accepts API keys that cannot list profiles", async () => {
-  const calls: Array<{
-    url: string;
-    headers: Record<string, string>;
-    body?: Record<string, unknown>;
-  }> = [];
-  globalThis.fetch = async () => new Response("unexpected", { status: 500 });
-
-  globalThis.fetch = async (url, init = {}) => {
-    const headers = toPlainHeaders(init.headers);
-    const body = init.body ? JSON.parse(String(init.body)) : undefined;
-    calls.push({ url: String(url), headers, body });
-
-    if (calls.length === 1) {
-      return new Response(
-        JSON.stringify({
-          __type: "com.amazon.aws.codewhisperer#AccessDeniedException",
-          message: "API key authentication is not supported for this operation.",
-        }),
-        { status: 403 }
-      );
-    }
-
-    assert.equal(
-      String(url),
-      "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse"
-    );
-    assert.equal(headers.Authorization, "Bearer ksk-valid-without-profile-list");
-    assert.equal(headers.tokentype, "API_KEY");
-    assert.equal(
-      headers["X-Amz-Target"] || headers["x-amz-target"],
-      "AmazonCodeWhispererStreamingService.GenerateAssistantResponse"
-    );
-    assert.equal(body.conversationState.currentMessage.userInputMessage.modelId, "auto");
-    assert.equal(body.inferenceConfig.maxTokens, 1);
-    return new Response(new ReadableStream(), { status: 200 });
-  };
-
-  const result = await validateProviderApiKey({
-    provider: "kiro",
-    apiKey: "ksk-valid-without-profile-list",
-    providerSpecificData: { region: "us-east-1" },
-  });
-
-  assert.equal(result.valid, true);
-  assert.equal(result.error, null);
-  assert.equal(result.method, "kiro_generate_assistant_response");
-  assert.equal(calls.length, 2);
-});
-
-test("Kiro API key validator rejects runtime auth failures after profile lookup is unsupported", async () => {
-  let calls = 0;
-  globalThis.fetch = async () => {
-    calls++;
-    if (calls === 1) {
-      return new Response(
-        JSON.stringify({
-          __type: "com.amazon.aws.codewhisperer#AccessDeniedException",
-          message: "API key authentication is not supported for this operation.",
-        }),
-        { status: 403 }
-      );
-    }
-    return new Response(JSON.stringify({ message: "bearer token is invalid" }), { status: 403 });
-  };
-
-  const result = await validateProviderApiKey({
-    provider: "kiro",
-    apiKey: "ksk-runtime-invalid",
-    providerSpecificData: { region: "us-east-1" },
-  });
-
-  assert.equal(result.valid, false);
-  assert.equal(result.error, "Invalid Kiro API key or AWS region");
-  assert.equal(calls, 2);
-});
-
-test("Kiro API key validator fails as invalid instead of unsupported", async () => {
-  globalThis.fetch = async () =>
-    new Response(JSON.stringify({ message: "Access denied" }), { status: 403 });
-
-  const result = await validateProviderApiKey({
-    provider: "kiro",
-    apiKey: "ksk-invalid",
-    providerSpecificData: { region: "us-east-1" },
-  });
-
-  assert.equal(result.valid, false);
-  assert.equal(result.unsupported, false);
-  assert.match(result.error || "", /Failed to list profiles/);
-});
-
 test("specialty provider validators cover Deepgram, AssemblyAI, ElevenLabs and Inworld branches", async () => {
   globalThis.fetch = async (url, init = {}) => {
     const target = String(url);
@@ -947,6 +824,59 @@ test("google PSE validator requires cx", async () => {
 
   assert.equal(result.valid, false);
   assert.equal(result.error, "Programmable Search Engine ID (cx) is required");
+});
+
+test("google PSE validator rejects HTTP 400 (invalid key or cx) but keeps 429 valid", async () => {
+  const statuses: number[] = [];
+  let nextStatus = 400;
+  globalThis.fetch = async (url) => {
+    assert.match(String(url), /^https:\/\/www\.googleapis\.com\/customsearch\/v1/);
+    statuses.push(nextStatus);
+    return new Response(
+      JSON.stringify({
+        error: {
+          code: nextStatus,
+          status: nextStatus === 400 ? "INVALID_ARGUMENT" : "RESOURCE_EXHAUSTED",
+          message: "upstream detail that must not be echoed",
+        },
+      }),
+      { status: nextStatus }
+    );
+  };
+
+  const rejected = await validateProviderApiKey({
+    provider: "google-pse-search",
+    apiKey: "bad-google-key",
+    providerSpecificData: { cx: "bad-engine" },
+  });
+  assert.equal(rejected.valid, false);
+  assert.equal(
+    rejected.error,
+    "Google PSE validation failed. Check the API key and Search Engine ID (cx)."
+  );
+  assert.equal(String(rejected.error).includes("upstream detail"), false);
+
+  nextStatus = 429;
+  const quotaExhausted = await validateProviderApiKey({
+    provider: "google-pse-search",
+    apiKey: "good-google-key",
+    providerSpecificData: { cx: "engine-id" },
+  });
+  assert.equal(quotaExhausted.valid, true);
+  assert.equal(quotaExhausted.error, null);
+  assert.deepEqual(statuses, [400, 429]);
+});
+
+test("search validator keeps the lenient 400 policy for providers other than Google PSE", async () => {
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ error: "bad request" }), { status: 400 });
+
+  const linkup = await validateProviderApiKey({
+    provider: "linkup-search",
+    apiKey: "linkup-key",
+  });
+  assert.equal(linkup.valid, true);
+  assert.equal(linkup.error, null);
 });
 
 test("Maritalk validates with Key auth against the models endpoint", async () => {
@@ -2384,13 +2314,13 @@ test("claude-web validator: bare sessionKey value gets prefixed", async () => {
 
 // ─── gemini-web validator ────────────────────────────────────────────────────
 
-test("gemini-web validator: 200 from gemini.google.com → valid", async () => {
+test("gemini-web validator: signed-in 200 from gemini.google.com → valid", async () => {
   globalThis.fetch = async (url, init = {}) => {
     const target = String(url);
     const headers = init.headers || {};
     if (target.includes("gemini.google.com/app")) {
       assert.match((headers as Record<string, string>).Cookie || "", /__Secure-1PSID=eyJPSID/);
-      return new Response("ok", { status: 200 });
+      return new Response('<script>{"SNlM0e":"fixture-session"}</script>', { status: 200 });
     }
     throw new Error(`unexpected fetch: ${target}`);
   };

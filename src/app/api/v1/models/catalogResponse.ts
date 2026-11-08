@@ -8,10 +8,18 @@
  * mirrors the first time it was written as a duplicate.
  */
 
-import { appendNoThinkingVariants } from "@omniroute/open-sse/utils/noThinkingAlias";
+import {
+  appendNoThinkingVariants,
+  stripNoThinkingAlias,
+} from "@omniroute/open-sse/utils/noThinkingAlias";
 import { appendClaudeEffortVariants } from "@omniroute/open-sse/utils/claudeEffortVariants";
 import { appendSyncedEffortVariants } from "@omniroute/open-sse/utils/syncedEffortVariants";
-import { appendCcDiscoveryAliases } from "@omniroute/open-sse/utils/ccDiscoveryAliases";
+import {
+  appendCcDiscoveryAliases,
+  CC_DISCOVERY_PREFIX,
+  isCcDiscoveryAlias,
+} from "@omniroute/open-sse/utils/ccDiscoveryAliases";
+import { isResolvableBuiltinAutoId } from "@omniroute/open-sse/services/autoCombo/builtinCatalog";
 import {
   appendFunctionalGatewayMirrors,
   isFunctionalGatewayMirror,
@@ -25,6 +33,9 @@ import {
 import { buildFunctionalGatewayPredicate } from "./functionalGatewayPredicate";
 import { getPassthroughProviders, REGISTRY } from "@omniroute/open-sse/config/providerRegistry";
 import { hasEligibleConnectionForModel } from "@/domain/connectionModelRules";
+import { getActiveSyncedCatalog } from "@/lib/db/models/activeSyncedCatalog";
+import { getCustomModels } from "@/lib/db/models";
+import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { dedupeExactCatalogIds } from "./catalogDedupe";
 import { sortCatalogModelsProviderGrouped } from "./catalogOrder";
 import {
@@ -37,11 +48,17 @@ import {
   isModelCatalogNamesEnabled,
   isNoThinkingAliasEnabled,
   isDisableThinkingLevelVariantsEnabled,
+  isCatalogMirrorRefinementsEnabled,
 } from "@/shared/utils/featureFlags";
 import { extractApiKey } from "@/sse/services/auth";
-import { maybeOmitCatalogModelName } from "./catalogHelpers";
+import { maybeOmitCatalogModelName, withCatalogDisplayName } from "./catalogHelpers";
 import { applyCatalogPage, catalogJsonResponse, parseCatalogPage } from "./catalogPagination";
 import { isCodexModelCatalogClient } from "./catalogRequest";
+import {
+  attachCatalogPricing,
+  normalizeCatalogEntryPricing,
+  type CatalogPricingContext,
+} from "./catalogPricing";
 
 type CatalogVariantAuthorizer = (model: Record<string, any>) => boolean | Promise<boolean>;
 
@@ -80,6 +97,103 @@ async function filterUnauthorizedAppendedVariants(
 }
 
 /**
+ * #18726: the effort-variant passes synthesize `<base>-<tier>` rows after the
+ * catalog builder already applied the per-model hidden state and the exposure
+ * allow/deny list to the base rows. A row the operator hid on its own (hide
+ * `<base>-low`, keep `<base>`) does not exist yet when those filters run, so the
+ * appended variants are checked here as well, together with the per-key authorizer.
+ */
+function composeEffortVariantAuthorizer(
+  authorize: CatalogVariantAuthorizer | null,
+  isHidden: ((model: Record<string, any>) => boolean) | undefined
+): CatalogVariantAuthorizer | null {
+  if (!isHidden) return authorize;
+  if (!authorize) return (model) => !isHidden(model);
+  return (model) => !isHidden(model) && authorize(model);
+}
+
+/**
+ * #18726: the ids a synthesized effort variant answers to. The synced-effort pass
+ * runs after the mirror passes, so a variant can be derived from a mirror row
+ * (`claude/<id>`, `<gateway-alias>/<id>`, or a gateway mirror of a `no-think/` alias)
+ * and carry that row's marker. Its own id is kept so an entry that names the mirror
+ * still applies; the marker, not the prefix, tells a mirror from a real `claude/` row.
+ */
+export function syntheticVariantListingIds(model: Record<string, any>): string[] {
+  if (typeof model.id !== "string") return [];
+  const unmirrored = isFunctionalGatewayMirror(model)
+    ? model.id.slice(model.id.indexOf("/") + 1)
+    : model.id;
+  const real =
+    isCcDiscoveryAlias(model) && unmirrored.startsWith(CC_DISCOVERY_PREFIX)
+      ? unmirrored.slice(CC_DISCOVERY_PREFIX.length)
+      : unmirrored;
+  return [...new Set([model.id, unmirrored, real].map(stripNoThinkingAlias))];
+}
+
+/**
+ * CATALOG_MIRROR_REFINEMENTS_ENABLED only (refined functional-gateway mirrors).
+ *
+ * A gateway whose live catalog is authoritative rejects any model outside it at
+ * request time ("not available in the active live catalog"), so a mirror for such
+ * a model is advertised-but-dead. Match the request path (lookupModelMeta), which
+ * receives the mirrored id verbatim: an exact synced id or a custom model
+ * (case-insensitive). Deliberately NOT catalogContainsModel — its after-the-slash
+ * fallback accepts `dva/claude-sonnet-4-6` because `claude-sonnet-4-6` is listed,
+ * yet dispatch rejects it. No authoritative catalog = fail open, as there.
+ */
+async function buildGatewayLiveCatalogCheck(
+  gatewayProviderIds: string[],
+  connections: Array<{ provider?: unknown }>
+): Promise<(provider: string, modelId: string) => boolean> {
+  const gatewayLiveIds = new Map<string, { synced: Set<string>; custom: Set<string> }>();
+  for (const provider of gatewayProviderIds) {
+    if (!connections.some((c) => c.provider === provider)) continue;
+    const catalog = await getActiveSyncedCatalog(provider);
+    if (!catalog.authoritative) continue;
+    const custom: unknown = await getCustomModels(provider);
+    gatewayLiveIds.set(provider, {
+      synced: new Set(catalog.models.map((model) => model.id)),
+      custom: new Set(
+        (Array.isArray(custom) ? custom : []).flatMap((model: { id?: unknown }) =>
+          typeof model?.id === "string" ? [model.id.toLowerCase()] : []
+        )
+      ),
+    });
+  }
+  return (provider, modelId) => {
+    const ids = gatewayLiveIds.get(provider);
+    return !ids || ids.synced.has(modelId) || ids.custom.has(modelId.toLowerCase());
+  };
+}
+
+/**
+ * The `claude/<id>` discovery-mirror pass, gated 3 levels deep (global > provider >
+ * model). The per-key `allowCcDiscoveryAliases` gate is applied by the caller.
+ */
+function appendCcMirrorsWhenEnabled(
+  models: Array<Record<string, any>>,
+  mirrorRefinements: boolean,
+  providerNodeIdsByPrefix?: Record<string, string>
+): Array<Record<string, any>> {
+  const ccAliasGlobal = isCcAliasGlobalEnabled();
+  const ccAliasSettings = getCcAliasSettingsBulk();
+  if (!ccAliasGlobal && ccAliasSettings.providers.size === 0 && ccAliasSettings.models.size === 0) {
+    return models;
+  }
+  return appendCcDiscoveryAliases(
+    models,
+    buildCcAliasPredicate({
+      global: ccAliasGlobal,
+      providers: ccAliasSettings.providers,
+      models: ccAliasSettings.models,
+      providerNodeIdsByPrefix,
+    }),
+    { refined: mirrorRefinements, isResolvableAutoId: isResolvableBuiltinAutoId }
+  );
+}
+
+/**
  * Post-filter chain applied AFTER the API-key filter, so variants and mirrors are
  * only derived from models the caller may actually see.
  *
@@ -95,13 +209,27 @@ export async function applyCatalogPostFilters(
     prefixMode: string;
     aliasToProviderId: Record<string, string>;
     hideNoThinkVariants?: boolean;
+    /** Raw settings.blockedProviders; blocked gateways never carry mirrors. */
+    blockedProviders?: unknown;
     authorizeSyntheticModel?: CatalogVariantAuthorizer;
+    /**
+     * #18726: whether a synthesized effort variant is hidden by the operator's
+     * per-model visibility or exposure list. Base rows were already filtered.
+     */
+    isSyntheticVariantHidden?: (model: Record<string, any>) => boolean;
+    /** Combo targets and node prefixes for the per-entry `pricing` object. */
+    pricing?: CatalogPricingContext;
+    allowCcDiscoveryAliases?: boolean;
   }
 ): Promise<Array<Record<string, any>>> {
   const yieldTurn = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
   let finalModels = models;
   const authorizeSyntheticModel =
     ctx.authorizeSyntheticModel ?? (await resolveCatalogVariantAuthorizer(request));
+  const authorizeEffortVariant = composeEffortVariantAuthorizer(
+    authorizeSyntheticModel,
+    ctx.isSyntheticVariantHidden
+  );
 
   // variants are only generated for surviving models.
   if (new URL(request.url).searchParams.get("configuredOnly") === "true") {
@@ -110,6 +238,10 @@ export async function applyCatalogPostFilters(
       return hasEligibleConnectionForModel(ctx.connections, m.root);
     });
   }
+
+  // Price base entries before the variant/mirror passes below, so each synthetic
+  // entry copies the price of the model it routes to.
+  finalModels = await attachCatalogPricing(finalModels, ctx.pricing);
 
   // #9147: the variant-append passes each walk the full model list (O(n) per pass),
   // so a catalog-scale build must not run all of them in one synchronous stretch.
@@ -130,7 +262,7 @@ export async function applyCatalogPostFilters(
         beforeClaudeEffortVariants,
         ctx.prefixMode === "canonical" ? ctx.aliasToProviderId : undefined
       ),
-      authorizeSyntheticModel
+      authorizeEffortVariant
     );
   }
 
@@ -161,17 +293,18 @@ export async function applyCatalogPostFilters(
   // see ccDiscoveryAliases.ts) and default-off. Deliberately NOT filtered by model
   // `type` here — non-chat entries (embedding/image/etc.) get a mirror too; the
   // gate itself (default-off + explicit opt-in) is the operator's filter, not a
-  // hardcoded type allowlist.
-  const ccAliasGlobal = isCcAliasGlobalEnabled();
-  const ccAliasSettings = getCcAliasSettingsBulk();
-  if (ccAliasGlobal || ccAliasSettings.providers.size > 0 || ccAliasSettings.models.size > 0) {
-    finalModels = appendCcDiscoveryAliases(
+  // hardcoded type allowlist. The per-key flag is an outer listing gate and defaults
+  // on for backward compatibility. This pass receives the already-authorized rows,
+  // so enabling aliases can never introduce a model/combo the key could not see.
+  // CATALOG_MIRROR_REFINEMENTS_ENABLED (default off): resolved once per build. Off keeps
+  // both mirror passes exactly as before; on mirrors claude/ effort variants, drops
+  // mirrors that cannot resolve, and checks gateways against what they will receive.
+  const mirrorRefinements = isCatalogMirrorRefinementsEnabled();
+  if (ctx.allowCcDiscoveryAliases !== false) {
+    finalModels = appendCcMirrorsWhenEnabled(
       finalModels,
-      buildCcAliasPredicate({
-        global: ccAliasGlobal,
-        providers: ccAliasSettings.providers,
-        models: ccAliasSettings.models,
-      })
+      mirrorRefinements,
+      ctx.pricing?.providerNodeIdsByPrefix
     );
   }
 
@@ -186,7 +319,14 @@ export async function applyCatalogPostFilters(
   const fgGlobal = isFunctionalGatewayGlobalEnabled();
   const fgSettings = getFunctionalGatewaySettingsBulk();
   if (fgGlobal || fgSettings.providers.size > 0 || fgSettings.models.size > 0) {
-    const gatewayProviderIds = [...getPassthroughProviders()];
+    const gatewayProviderIds = mirrorRefinements
+      ? [...getPassthroughProviders()].filter(
+          (provider) => !isProviderBlockedByIdOrAlias(provider, ctx.blockedProviders)
+        )
+      : [...getPassthroughProviders()];
+    const gatewayServes = mirrorRefinements
+      ? await buildGatewayLiveCatalogCheck(gatewayProviderIds, ctx.connections)
+      : () => true;
     finalModels = appendFunctionalGatewayMirrors(finalModels, {
       gatewayProviderIds,
       isGateway: (provider) => getPassthroughProviders().has(provider),
@@ -195,13 +335,14 @@ export async function applyCatalogPostFilters(
         hasEligibleConnectionForModel(
           ctx.connections.filter((c) => c.provider === provider),
           modelId
-        ),
+        ) && gatewayServes(provider, modelId),
       gatewayHasConnection: (provider) => ctx.connections.some((c) => c.provider === provider),
       canonicalOwnerHasConnection: (owner) =>
         hasEligibleConnectionForModel(
           ctx.connections.filter((c) => c.provider === owner),
           owner
         ),
+      refined: mirrorRefinements,
     });
     finalModels = finalModels.filter((m) =>
       buildFunctionalGatewayPredicate({ global: fgGlobal, ...fgSettings })(m)
@@ -218,7 +359,7 @@ export async function applyCatalogPostFilters(
     finalModels = await filterUnauthorizedAppendedVariants(
       beforeSyncedEffortVariants,
       appendSyncedEffortVariants(beforeSyncedEffortVariants),
-      authorizeSyntheticModel
+      authorizeEffortVariant
     );
   }
 
@@ -314,6 +455,8 @@ export async function finalizeCatalogResponse(
       listedModel = fallbackContextLength
         ? { ...entry, context_length: fallbackContextLength }
         : entry;
+      listedModel = normalizeCatalogEntryPricing(listedModel, enrichmentSnapshot);
+      listedModel = withCatalogDisplayName(listedModel);
       listedModel = maybeOmitCatalogModelName(listedModel, includeModelNames);
     }
     enriched.push(listedModel);

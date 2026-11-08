@@ -4,48 +4,48 @@
 
 ---
 
-OmniRoute paleidimo metu nustato SQLite tvarkyklę naudodama 5 etapų atsarginių variantų grandinę:
+OmniRoute paleidimo metu nustato savo SQLite tvarkyklę naudodama 5 žingsnių atsarginio pasirinkimo grandinę:
 
-1. **Įtraukta `better-sqlite3`** (per `dependencies`, esančias `package.json`)
-   — sparčiausia, naudoja savąjį dvejetainį failą, įdiegiama vykdant `npm install`, kai yra kompiliavimo įrankių.
+1. **Komplektuojama `better-sqlite3`** (per `package.json` lauką `dependencies`)
+   — greičiausia, naudoja savąjį dvejetainį failą, įdiegiama vykdant `npm install`, kai yra kompiliavimo įrankių.
 
 2. **Vykdymo metu įdiegta `better-sqlite3`** (kataloge `~/.omniroute/runtime/`)
-   — įdiegiama atidėtai pirmojo paleidimo metu **ARBA** naudojant `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
-   Prieš įkeliant patikrinami savosios `.node` rinkmenos identifikaciniai baitai (ELF / Mach-O / PE),
+   — atidėtai įdiegiama pirmą kartą paleidus **ARBA** naudojant `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
+   Prieš įkeliant patikrinami savojo `.node` failo signatūros baitai (ELF / Mach-O / PE),
    kad būtų apsisaugota nuo sugadintų arba netinkamai platformai skirtų dvejetainių failų.
 
-3. **`node:sqlite`** (Node ≥22.5 standartinė biblioteka) — savosios programos komponuoti nereikia; naudojama, kai
-   abu better-sqlite3 variantai nepasiekiami. Funkcijų rinkinys ribotas.
+3. **`node:sqlite`** (Node ≥22.5 standartinė biblioteka) — nereikia savųjų komponentų kompiliavimo; naudojama, kai
+   abu better-sqlite3 variantai nesuveikia. Funkcijų rinkinys ribotas.
 
-4. **`sql.js`** (WASM) — galutinis atsarginis variantas. Veikia visur, tačiau yra lėtesnis
+4. **`sql.js`** (WASM) — paskutinis atsarginis variantas. Veikia visur, tačiau yra lėtesnis
    ir duomenis įrašo periodiškai, o ne sinchroniškai.
 
 ## Kodėl tai taip sudėtinga?
 
 - **Windows EBUSY**: `npm install -g omniroute@latest` gali nepavykti, jei ankstesnės
-  versijos `better_sqlite3.node` yra užrakinta veikiančio proceso. Įdiegimas vykdymo metu
-  į `~/.omniroute/runtime/` leidžia apeiti visuotinę npm podėlio talpyklą.
-- **Nėra kompiliavimo įrankių**: kai kuriose aplinkose (įmonių Windows be VS Build
-  Tools, minimalūs Docker atvaizdai) negalima sukompiliuoti `better-sqlite3`. Vykdymo metu naudojama
-  diegimo programa gauna iš anksto sukompiliuotą dvejetainį failą iš npm registro, o atsarginės
-  tvarkyklės užtikrina, kad OmniRoute vis tiek būtų paleista, net jei tai nepavyktų.
+  versijos `better_sqlite3.node` failą yra užrakinęs veikiantis procesas. Diegimas
+  vykdymo metu į `~/.omniroute/runtime/` leidžia apeiti visuotinę npm podėlio saugyklą.
+- **Nėra kompiliavimo įrankių**: kai kuriose aplinkose (įmonių Windows sistemose be VS Build
+  Tools, minimaliose Docker atvaizdžių sistemose) negalima sukompiliuoti `better-sqlite3`. Vykdymo metu
+  veikianti diegimo programa iš npm registro gauna iš anksto sukompiliuotą dvejetainį failą; atsarginės
+  tvarkyklės užtikrina, kad OmniRoute vis tiek bus paleista, net jei tai nepavyks.
 - **Nuo tinklo izoliuotos sistemos**: jei npm registras nepasiekiamas, `node:sqlite`
-  arba `sql.js` užtikrina bazines funkcijas.
+  arba `sql.js` užtikrina bazinį funkcionalumą.
 
-## Identifikacinių baitų tikrinimas
+## Signatūros baitų tikrinimas
 
-Prieš įkeldama vykdymo metu įdiegtą `.node` rinkmeną, OmniRoute nuskaito pirmuosius 8
-baitus ir palygina juos su žinomais platformų identifikatoriais:
+Prieš įkeldama vykdymo metu įdiegtą `.node` failą, OmniRoute nuskaito pirmuosius 8
+baitus ir palygina juos su žinomomis platformų signatūromis:
 
-| Platforma           | Baitai (šešioliktainiai) | Žyma        |
-| ------------------- | ------------------------ | ----------- |
-| Linux               | `7F 45 4C 46`            | `elf`       |
-| macOS 64 bitų BE    | `FE ED FA CF`            | `macho`     |
-| macOS 64 bitų LE    | `CF FA ED FE`            | `macho-le`  |
-| macOS universalusis | `CA FE BA BE`            | `macho-fat` |
-| Windows             | `4D 5A` (MZ)             | `pe`        |
+| Platforma              | Baitai (šešioliktainiai) | Žyma        |
+| ---------------------- | ------------------------ | ----------- |
+| Linux                  | `7F 45 4C 46`            | `elf`       |
+| macOS 64 bitų BE       | `FE ED FA CF`            | `macho`     |
+| macOS 64 bitų LE       | `CF FA ED FE`            | `macho-le`  |
+| macOS fat (universali) | `CA FE BA BE`            | `macho-fat` |
+| Windows                | `4D 5A` (MZ)             | `pe`        |
 
-Jei identifikaciniai baitai nesutampa, rinkmena ignoruojama ir pereinama prie kito atsarginio varianto.
+Jei signatūra nesutampa → failas ignoruojamas, o atsarginio pasirinkimo grandinė pereina prie kito žingsnio.
 
 ## Aktyvios tvarkyklės tikrinimas
 
@@ -60,36 +60,56 @@ const info = getDriverInfo();
 ## Rankinis valdymas
 
 ```bash
-# Praleisti parengimą po įdiegimo (kad CI diegimas būtų spartus)
+# Praleisti postinstall parengimą (greitam diegimui CI aplinkoje)
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute
 
-# Priverstinai iš naujo įdiegti vykdymo metu naudojamą better-sqlite3
+# Priverstinai iš naujo įdiegti vykdymo aplinkos better-sqlite3
 rm -rf ~/.omniroute/runtime
-omniroute  # bus įdiegta iš naujo kito paleidimo metu
+omniroute  # bus iš naujo įdiegta kito paleidimo metu
 
-# Patikrinti, kuri tvarkyklė yra aktyvi
-omniroute config db-info  # (jei tokia CLI komanda egzistuoja)
+# Patikrinti, kuri tvarkyklė aktyvi
+omniroute config db-info  # (jei CLI komanda egzistuoja)
 ```
+
+## Sinchroninių strigimų diagnostika
+
+Naudodami `better-sqlite3`, prieš paleidimą nustatykite `OMNIROUTE_SQLITE_SLOW_MS=200`, kad
+įjungtumėte sinchroninio adapterio trukmės matavimą. Pagal numatytuosius nustatymus jis išjungtas. Užbaigus operaciją,
+trukusią bent tiek milisekundžių, pateikiamas įspėjimas `[SQLITE-SLOW]`, ne dažniau kaip kartą per
+dešimt sekundžių kiekvienam adapteriui. Įspėjime nurodoma tik tvarkyklė, operacijos klasė
+(`prepare`, `get`, `all`, `run`, `exec`, `pragma`, operacija arba priežiūra) ir
+praėjęs laikas milisekundėmis: nepateikiama SQL, susiejimo reikšmių, eilučių, kelių ar išimties teksto.
+
+Tai diagnostikos priemonė, o ne skirtasis laikas ar užklausų optimizavimas. Ji negali pranešti
+apie niekada nebaigiamą operaciją, atskirti CPU darbo nuo disko laukimo, nustatyti
+tikslios SQL užklausos ar stebėti operacijų, atliekamų per tiesioginį tvarkyklės objektą.
+Asinchroninio atsarginio kopijavimo trukmė sąmoningai neįtraukiama; kitoms SQLite tvarkyklėms
+šis pasirenkamasis instrumentavimas netaikomas. Išjungus kintamąjį, atkuriamas pradinis adapteris
+be trukmės matavimo apvalkalų. Duomenų bazės schema ir išsaugota konfigūracija nekeičiamos.
+
+`/healthz` delsos įspėjimas pateikia didžiausią įvykių ciklo delsą nuo ankstesnio matavimo,
+o ne viso veikimo laikotarpio vidurkį. Prieš priskirdami strigimą SQLite ar disko gedimui,
+sugretinkite jo laiko žymas su lėtų operacijų įspėjimais ir pagrindinio kompiuterio bei saugyklos metrikomis.
 
 ## Nuorodos
 
 Realizacija:
 
-- `bin/cli/runtime/magicBytes.mjs` — dvejetainių failų identifikacinių baitų tikrinimo pagalbinės priemonės
-- `bin/cli/runtime/sqliteRuntime.mjs` — 5 etapų vykdymo aplinkos parinkiklis ir atidėto diegimo programa
+- `bin/cli/runtime/magicBytes.mjs` — dvejetainių failų signatūros baitų tikrinimo pagalbinės priemonės
+- `bin/cli/runtime/sqliteRuntime.mjs` — 5 žingsnių vykdymo aplinkos parinkiklis ir atidėto diegimo priemonė
 - `bin/cli/runtime/index.mjs` — paleidimo koordinatorius (`warmUpRuntimes()`)
-- `scripts/postinstall.mjs` — npm kabliukas po įdiegimo (nekritinis parengimas)
+- `scripts/postinstall.mjs` — npm podiegiminė gaudyklė (nekritinis parengimas)
 - `src/lib/db/core.ts` — `ensureDbInitialized()` / `getDriverInfo()` eksportai
 
-## Vieno rašančiojo topologija (HA nepalaikomas)
+## Vieno rašytojo topologija (HA nepalaikomas)
 
-Aukščiau aprašyta atsarginių tvarkyklių grandinė vis tiek vykdoma **viename procese**. Naudojant numatytąją SQLite,
-OmniRoute yra **vieno rašančiojo** sistema:
+Anksčiau aprašyta atsarginio tvarkyklių pasirinkimo grandinė vis tiek veikia **viename procese**. Numatytoji SQLite
+naudojanti OmniRoute yra **vieno rašytojo** sistema:
 
-- Nejunkite dviejų OmniRoute replikų prie tos pačios `storage.sqlite` rinkmenos.
-- Iš naujo paleidus konteinerį, vykdant Recreate diegimą, procesą nutraukus dėl OOM arba paleidus iš naujo dėl HEALTHCHECK,
-  nutraukiamos visos tuo metu aktyvios SSE sesijos. Standartiniame veikimo kelyje sesijos nėra laipsniškai užbaigiamos.
-- Jei orkestratoriaus gyvybingumo patikra lėtą `/healthz` atsaką laiko neveikiančiu, ji nutrauks vienintelę
-  repliką. Gyvybingumui tikrinti verčiau naudokite TCP, o pasirengimui — HTTP `/healthz`. Žr.
+- Nejunkite dviejų OmniRoute replikų prie to paties `storage.sqlite` failo.
+- Konteinerio paleidimas iš naujo, Recreate diegimas, nutraukimas dėl OOM arba HEALTHCHECK inicijuotas paleidimas iš naujo nutraukia
+  kiekvieną tuo metu aktyvią SSE sesiją. Standartiniame veikimo režime nėra sesijų užbaigimo mechanizmo.
+- Orkestratoriaus gyvybingumo patikra, kuri lėtą `/healthz` atsaką vertina kaip neveikiančią paslaugą, nutrauks vienintelę
+  repliką. Gyvybingumui tikrinti rinkitės TCP, o parengčiai — HTTP `/healthz`. Žr.
   [Docker vadovą — pasiekiamumas](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
-  ir [Kubernetes zondų rekomendacijas](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+  ir [Kubernetes patikrų rekomendacijas](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).

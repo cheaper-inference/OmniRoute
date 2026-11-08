@@ -43,9 +43,11 @@ test("Qwen Cloud Token Plan registers Wan image and HappyHorse video models", ()
     provider: "qwen-cloud-token-plan",
     model: "happyhorse-1.1-t2v",
   });
+  // "tts" comes from the qwen-audio-3.0-tts-plus speech registry entry.
   assert.deepEqual(resolveProviderServiceKinds("qwen-cloud-token-plan", ["llm"]).sort(), [
     "image",
     "llm",
+    "tts",
     "video",
   ]);
 });

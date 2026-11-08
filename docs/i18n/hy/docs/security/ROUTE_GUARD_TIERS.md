@@ -14,188 +14,217 @@ OmniRoute-ի կառավարման API-ի բոլոր երթուղիները դա�
 
 ### Մակարդակ 1 — LOCAL_ONLY
 
-**Կիրարկվում է՝** `isLocalOnlyPath(path)` → loopback հոսթի ստուգում
-**Շրջանցում՝** Լռելյայն՝ չկա։ Սահմանափակ բացառություն է նախատեսված
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-ում ներառված ուղիների համար, երբ հարցումը պարունակում է
-`manage` շրջանակով վավեր API բանալի (տե՛ս [Manage շրջանակի բացառությունը](#manage-scope-carve-out))։
+**Պարտադրվում է՝** `isLocalOnlyPath(path)` → loopback հոսթի ստուգում
+**Շրջանցում՝** Լռելյայնորեն չկա։ Նեղ բացառություն
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-ում գտնվող ուղիների համար, երբ հարցումը կրում է վավեր
+API բանալի `manage` շրջանակով (տե՛ս [Manage-scope բացառություն](#manage-scope-carve-out))։
 
-Այս երթուղիները ստեղծում են ենթապրոցեսներ կամ կատարում runtime կոդ։ Դրանք
-ոչ loopback տրաֆիկի համար հասանելի դարձնելը վավեր JWT ձեռք բերած հարձակվողին (օրինակ՝
-Cloudflared/Ngrok թունելի միջոցով) թույլ կտար գործարկել պրոցեսների ստեղծումը՝ հայտնի CVE
-դասի խոցելիություն ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj))։
+Այս երթուղիները գործարկում են դուստր պրոցեսներ կամ կատարում են runtime կոդ։ Դրանք
+ոչ loopback տրաֆիկին բացելը թույլ կտա հարձակվողին, ով ձեռք է բերել վավեր JWT
+(օրինակ՝ Cloudflared/Ngrok թունելի միջոցով), հրահրել պրոցեսների գործարկում — հայտնի CVE
+դաս ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj))։
 
-**Ինչ է GHSA-fhh6-4qxv-rpqj-ը (հարձակման դասը)՝** կառավարման/գործակալի սերվերը
-հասանելի է դարձնում վերջնակետ, որը գործարկում է ենթապրոցես (`npm install`, `node`, դիտարկիչ,
-պրոքսի, `git`, `tar`, …)։ Եթե այդ վերջնակետը հասանելի է հոսթից դուրս, քանի որ
-օպերատորը OmniRoute-ը տեղադրել է nginx/Cloudflare/Tailscale թունելի հետևում, և JWT-ն
-արտահոսել է, կամ նույնականացումը սխալ է կազմաձևվել, հարձակվողը «API կանչը» վերածում է «հոսթի վրա
-հրամանի կատարման» (հեռավար կոդի կատարում)։ OmniRoute-ը կանխում է դա՝ բոլոր
-ենթապրոցես ստեղծելու ունակ երթուղիներում **անվերապահորեն, նույնականացման ցանկացած ստուգումից առաջ, կիրառելով
-loopback հոսթի ստուգում**. թունելի միջոցով արտահոսած թոքենը, միևնույն է, չի կարող հասնել ենթապրոցեսի ստեղծմանը։
+**Ինչ է GHSA-fhh6-4qxv-rpqj-ը (հարձակման դասը)՝** կառավարման/գործակալ սերվերը
+բացում է endpoint, որը գործարկում է ենթապրոցես (`npm install`, `node`, դիտարկիչ,
+պրոքսի, `git`, `tar`, …)։ Եթե այդ endpoint-ը հասանելի է հոսթից դուրս — քանի որ
+օպերատորը OmniRoute-ը տեղադրել է nginx/Cloudflare/Tailscale թունելի հետևում և JWT-ն
+արտահոսել է, կամ նույնականացումը սխալ է կարգավորվել — հարձակվողը «API կանչելը» վերածում է
+«հոսթում հրաման կատարելու» (remote code execution)։ OmniRoute-ը փակում է սա՝ պարտադրելով
+**loopback հոսթի ստուգում անպայման, ցանկացած նույնականացման ստուգումից առաջ**,
+պրոցես գործարկելու ունակությամբ յուրաքանչյուր երթուղու վրա՝ թունելով արտահոսած տոկենը
+դեռևս չի կարող հասնել պրոցեսի գործարկմանը։
 
-**LOCAL_ONLY-ի ամբողջական բազմությունը։** Հեղինակավոր աղբյուրն է
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS`-ը՝
-`src/server/authz/routeGuard.ts`-ում. ստորև բերված աղյուսակն արտացոլում է ընթացիկ վիճակը։
-`check-route-guard-membership` ստուգիչը թվարկում է ենթապրոցես ստեղծելու ունակ
-նախածանցների տակ գտնվող յուրաքանչյուր `route.ts` և CI-ն ձախողում է, եթե դրանցից որևէ մեկը դասակարգված չէ որպես միայն տեղային։
+**LOCAL_ONLY-ի ամբողջական հավաքածուն։** Հեղինակավոր աղբյուրը
+`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS`-ն է
+`src/server/authz/routeGuard.ts`-ում; ստորև բերված աղյուսակը արտացոլում է ներկա վիճակը։
+`check-route-guard-membership` դարպասը թվարկում է պրոցես գործարկելու ունակությամբ
+նախածանցների ներքո գտնվող յուրաքանչյուր `route.ts` և ձախողում է CI-ն, եթե դրանցից
+որևէ մեկը դասակարգված չէ որպես local-only։
 
-| Նախածանց / օրինաչափություն                                                                               | Ինչու է այն միայն տեղային                                                                                                  |
+| Նախածանց / օրինաչափություն                                                                               | Ինչու է այն միայն լոկալ                                                                                                    |
 | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `/api/mcp/`                                                                                              | MCP սերվեր — գործարկում է stdio կամուրջներ + SSE մշակիչներ                                                                 |
-| `/api/cli-tools/runtime/`                                                                                | CLI գործիքի կատարման միջավայր — կատարում է կամայական փլագինի կոդ                                                           |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Առանձին գործիքների կարգավորումների գրիչներ, որոնք կարող են հոսթի վրա փոփոխել գործիքների բինար ֆայլերը/կազմաձևերը           |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Նույն `getCliRuntimeStatus()` գործընթացի գործարկումը, ինչ վերևի վեց հարակիցների դեպքում (GHSA-35fw-cv32-2373)              |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI գույքացուցակի ստուգումներ — յուրաքանչյուր գործիքի համար գործարկում են `command -v` / `--version` (GHSA-35fw-cv32-2373) |
+| `/api/cli-tools/runtime/`                                                                                | CLI գործիքի աշխատանքային միջավայր — կատարում է կամայական պլագինի կոդ                                                       |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Յուրաքանչյուր գործիքի կարգավորումների գրիչներ, որոնք կարող են դիպչել գործիքների բինարներին/կոնֆիգին հոսթում                |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Նույն `getCliRuntimeStatus()` գործարկումը, ինչ վերևի վեց նմանըների դեպքում (GHSA-35fw-cv32-2373)                           |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI գույքագրման հետազոտումներ — գործարկում են `command -v` / `--version` յուրաքանչյուր գործիքի համար (GHSA-35fw-cv32-2373) |
 | `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM պրոքսիի կառավարում (գործարկում/ուղղորդում է համակարգային պրոքսին)                                         |
-| `/api/modality-bridge/video/`                                                                            | Միայն վստահելի loopback-ի համար նախատեսված Video Bridge-ի կատարման միջավայրի ստուգում և ներքին արտահանման կամուրջ          |
+| `/api/modality-bridge/video/`                                                                            | Video Bridge աշխատանքային միջավայրի խիստ վստահելի-loopback հետազոտում և ներքին արդյունահանման կամուրջ                      |
 | `/api/services/`                                                                                         | Ներկառուցված ծառայություններ (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + գործարկում                     |
-| `/dashboard/providers/services/`                                                                         | Հակադարձ պրոքսի՝ դեպի ներկառուցված ծառայությունների UI-ներ                                                                 |
-| `/api/tunnels/cloudflared`                                                                               | Տեղադրում/գործարկում է cloudflared բինար ֆայլը                                                                             |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Հոսթի վրա տեղադրում/կառավարում է tailscaled-ը                                                                              |
-| `/api/copilot/`                                                                                          | Չնույնականացված LLM դրայվեր — լռելյայն միայն CLI-ի համար                                                                   |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — գործարկում է MITM սերվեր + կատարում DNS-ի փոփոխություններ                                                    |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy ունկնդիր + համակարգային պրոքսի                                                              |
-| `/api/settings/mitm`                                                                                     | Միացնում է MITM միջամտությունը (համակարգային մակարդակի պրոքսիի վիճակ)                                                      |
-| `/api/issue-agent/`                                                                                      | Խնդիրների գործակալ — ռեպոզիտորիայի նկատմամբ գործարկում է տեղային գործիքներ                                                 |
-| `/api/plugins/`, `/api/plugins`                                                                          | Փլագիններ — բեռնվում/կատարվում են `worker_threads` + `child_process`-ի միջոցով                                             |
-| `/api/middleware/`                                                                                       | Օգտատիրոջ middleware — բեռնում/կատարում է օպերատորի կոդը նույն գործընթացում                                                |
-| `/api/system/version`                                                                                    | Ինքնաթարմացում (միայն POST, GET/HEAD/OPTIONS-ը բացառված են) — գործարկում է `git checkout` + `npm install`                  |
-| `/api/db-backups/exportAll`                                                                              | Արտահանման արխիվի համար գործարկում է `tar`                                                                                 |
-| `/api/local/`                                                                                            | Մեկ սեղմումով տեղային գործարկիչներ (ներկայում՝ Redis) — գործարկում է podman/docker                                         |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom պրոքսիի կենսացիկլ — գործարկում է python CLI / ազդանշաններ է ուղարկում PID-ին                                      |
-| `/api/jobs`, `/api/jobs/`                                                                                | Առաջադրանքների գործարկիչի կառավարում — կատարում է հոսթի կողմում պլանավորված աշխատանքներ                                    |
-| `/api/oauth/cursor/auto-import`                                                                          | Հավատարմագրերը ներմուծելուց առաջ կատարում է `execFile("which", ["cursor"])`                                                |
-| `/api/oauth/kiro/auto-import`                                                                            | Հոսթից կարդում է Kiro CLI-ի հավատարմագրերի ֆայլերը                                                                         |
-| `/api/skills/collect/`                                                                                   | Հմտությունների հավաքագրում — հայտնաբերում/տեղադրում է տեղային գործիքներ                                                    |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Հմտության մշակիչի գրանցում + կատարում — հասնում են sandbox կոնտեյների գործարկմանը (GHSA-jx89)                              |
-| `/api/discovery/`                                                                                        | Տեղային ցանցի/մատակարարների հայտնաբերման ստուգումներ                                                                       |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Գործարկում է տեսանելի ինտերֆեյսով դիտարկիչ + VNC աշխատաշրջան՝ ինտերակտիվ մուտքերի համար                                    |
-| `/api/acp/agents`                                                                                        | ACP — հայտնաբերում և գործարկում է տեղային CLI գործակալների բինար ֆայլերը                                                   |
-| `/api/resilience/connections`                                                                            | Յուրաքանչյուր հաշվի կայունության JSON (սպասման շրջան, անջատիչ, արգելափակում)։ Վահանակի HTML-ը միայն տեղային չէ։            |
-| `/api/providers/cursor/agent-availability`                                                               | Վահանակի՝ տեղադրման հուշման ստուգում — գործարկում է `cursor-agent status --format json`                                    |
-| `/api/providers/{id}/login` (կանոնավոր արտահայտություն)                                                  | Գործարկում է տեսանելի ինտերֆեյսով Playwright Chromium՝ վեբ cookie-ով մուտքի համար                                          |
-| `/api/providers/volcengine-plan/connect` (կանոնավոր արտահայտություն)                                     | Տեսանելի ինտերֆեյսով ձեռքով հոսք + աշխատաշրջանի վրա հիմնված հեռախոս/SMS ավտոմուտք (գործարկում է Playwright)                |
-| `/api/providers/{id}/refresh-cursor` (կանոնավոր արտահայտություն)                                         | Cursor-ի աշխատաշրջանի ձեռքով թարմացում — ազդակ է ուղարկում `cursor-agent`-ին                                               |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (կանոնավոր արտահայտություն)                               | Ախտորոշում է Codex CLI-ի տեղային տեղադրումը (գործարկում է բինար ֆայլը)                                                     |
+| `/dashboard/providers/services/`                                                                         | Հակադարձ պրոքսի դեպի ներկառուցված ծառայությունների UI-ներ                                                                  |
+| `/api/tunnels/cloudflared`                                                                               | Տեղադրում/գործարկում է cloudflared բինարը                                                                                  |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Տեղադրում/կառավարում է tailscaled-ը հոսթում                                                                                |
+| `/api/copilot/`                                                                                          | Չվավերացված LLM դրայվեր — լռելյայնորեն միայն CLI                                                                           |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — գործարկում է MITM սերվեր + DNS փոփոխություններ                                                               |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy լսող + համակարգային պրոքսի                                                                  |
+| `/api/settings/mitm`                                                                                     | Միացնում է MITM ընդհատումը (համակարգային մակարդակի պրոքսի վիճակ)                                                           |
+| `/api/issue-agent/`                                                                                      | Issue գործակալ — գործարկում է լոկալ գործիքներ պահոցի նկատմամբ                                                              |
+| `/api/plugins/`, `/api/plugins`                                                                          | Պլագիններ — բեռնում/կատարում `worker_threads` + `child_process`-ի միջոցով                                                  |
+| `/api/middleware/`                                                                                       | Օգտագործողի middleware — բեռնում/կատարում է օպերատորի կոդը նույն գործընթացի ներսում                                        |
+| `/api/system/version`                                                                                    | Ավտոթարմացում (միայն POST; GET/HEAD/OPTIONS-ը բացառություն են) — գործարկում է `git checkout` + `npm install`               |
+| `/api/db-backups/exportAll`                                                                              | Գործարկում է `tar` արտահանման արխիվի համար                                                                                 |
+| `/api/local/`                                                                                            | Մեկ սեղմումով լոկալ գործարկիչներ (այսօր՝ Redis) — գործարկում է podman/docker                                               |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom պրոքսիի կենսաշղթա — գործարկում է python CLI / ազդանշան է ուղարկում PID-ին                                         |
+| `/api/jobs`, `/api/jobs/`                                                                                | Job-ների կատարողի կառավարում — կատարում է հոսթի կողմում պլանավորված աշխատանք                                               |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` հավատարմագրերը ներմուծելուց առաջ                                                           |
+| `/api/oauth/kiro/auto-import`                                                                            | Կարդում է Kiro CLI հավատարմագրերի ֆայլերը հոսթից                                                                           |
+| `/api/skills/collect/`                                                                                   | Հմտությունների հավաքում — հայտնաբերում/տեղադրում է լոկալ գործիքներ                                                         |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Skill մշակիչի գրանցում + կատարում — հասնում են sandbox կոնտեյների spawn-ին (GHSA-jx89)                                     |
+| `/api/discovery/`                                                                                        | Տեղական ցանցի/մատակարարի հայտնաբերման probe-ներ                                                                            |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Գործարկում է headful բրաուզեր + VNC սեսիա ինտերակտիվ մուտքերի համար                                                        |
+| `/api/acp/agents`                                                                                        | ACP — հայտնաբերում և գործարկում է տեղական CLI ագենտների երկուական ֆայլեր                                                   |
+| `/api/resilience/connections`                                                                            | Յուրաքանչյուր հաշվի resilience JSON (cooldown, breaker, lockout)։ Դաշբորդի HTML-ը local-only չէ։                           |
+| `/api/providers/cursor/agent-availability`                                                               | Դաշբորդի տեղադրման հուշման ստուգում — գործարկում է `cursor-agent status --format json`                                     |
+| `/api/providers/{id}/login` (regex)                                                                      | Գործարկում է headful Playwright Chromium web-cookie մուտքի համար                                                           |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Ձեռքով headful հոսք + սեսիայի վրա հիմնված հեռախոսի/SMS ավտոմուտք (գործարկում է Playwright)                                 |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Cursor սեսիայի ձեռքով թարմացում — հուշում է `cursor-agent`-ին                                                              |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Ախտորոշում է տեղական Codex CLI տեղադրումը (գործարկում է երկուական ֆայլը)                                                   |
 
-**Պատասխանը խախտման դեպքում՝** `403 LOCAL_ONLY`
+**Խախտման դեպքում պատասխան՝** `403 LOCAL_ONLY`
 
-#### Կառավարման տիրույթի բացառություն
+#### Manage-scope-ի բացառություն
 
-LOCAL_ONLY ուղիների ենթաբազմությանը ԿԱՐՈՂ ԵՆ հասանելիություն ստանալ նաև ոչ loopback հասցեներից, եթե և
+LOCAL_ONLY ուղիների ենթախումբը կարող է նաև հասանելի լինել ոչ-loopback-ից, եթե և
 միայն եթե հարցումը պարունակում է `Authorization: Bearer <api-key>`, որի
-մետատվյալները ներառում են `manage` տիրույթը (կամ `admin`)։ Բացառությունը
-յուրաքանչյուր ուղու համար բացահայտորեն վերահսկվում է `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-ի միջոցով, որպեսզի
-ցանկացած նոր LOCAL_ONLY ուղու համար լռելյայն վարքագիծը շարունակի լինել խիստ loopback-ով սահմանափակված։ Նույնականացում չանցած
-հարցումները և ոչ կառավարման բանալիներով հարցումները շարունակում են մերժվել
-`403 LOCAL_ONLY` պատասխանով։
+մետատվյալները ներառում են `manage` scope-ը (կամ `admin`)։ Բացառությունը
+բացահայտորեն կարգավորվում է յուրաքանչյուր ուղու համար
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-ի միջոցով, որպեսզի ցանկացած նոր
+LOCAL_ONLY ուղու լռելյայն վարքագիծը մնա խիստ loopback։ Չվավերացված
+հարցումները և ոչ-manage բանալիներով հարցումները դեռ մերժվում են
+`403 LOCAL_ONLY`-ով։
 
-Ներկայում շրջանցելի միակ նախածանցը `/api/mcp/`-ն է։ `/api/cli-tools/runtime/`-ը և
-`/api/services/`-ը միտումնավոր բացառված են, քանի որ կարող են գործարկել կամայական
-ենթագործընթացներ (`npm install`, `node`), ինչը հենց CVE-ի այն դասն է, որը
-նախատեսված է կանխելու LOCAL_ONLY մակարդակը։
+Այսօր միակ շրջանցելի նախածանցը `/api/mcp/`-ն է։ `/api/cli-tools/runtime/`-ը և
+`/api/services/`-ը դիտավորյալ բացառված են, քանի որ դրանք կարող են գործարկել
+կամայական ենթապրոցեսներ (`npm install`, `node`), ինչը հենց այն CVE դասն է,
+որի կանխման համար գոյություն ունի LOCAL_ONLY մակարդակը։
 
-**#7895 — `mcp:connect` նեղ տիրույթ՝** `/api/mcp/` բացառությունը ՆԱԵՎ ընդունում է
-նեղ `mcp:connect` տիրույթն ունեցող Bearer բանալի
+**#7895 — `mcp:connect` նեղ scope:** `/api/mcp/` բացառությունը ՆԱԵՎ ընդունում է
+Bearer բանալի, որն ունի նեղ `mcp:connect` scope-ը
 (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), որը ստուգվում է
-`src/server/authz/policies/management.ts`-ի `hasMcpConnectOrManageScope()`-ի միջոցով։
-Սա սահմանափակված է ՄԻԱՅՆ `/api/mcp/`-ով․ `mcp:connect`-ը որևէ իրավունք չի տրամադրում կառավարման այլ
-ուղիների համար (ներառյալ LOCAL_ONLY շրջանցման ցանկացած այլ նախածանց, եթե երբևէ այդպիսին ավելացվի), և այն միտումնավոր բացառված է
-`MANAGEMENT_API_KEY_SCOPES`-ից։ `manage`/`admin` ունեցող բանալին շարունակում է
-անցնել բացառության ստուգումը ճիշտ այնպես, ինչպես նախկինում․ `mcp:connect`-ը պակաս արտոնություններով
-այլընտրանք է միայն հեռակա MCP կանչողների համար, որոնց կառավարման լայն հասանելիություն հարկավոր չէ։
+`hasMcpConnectOrManageScope()`-ի միջոցով `src/server/authz/policies/management.ts`-ում։
+Սա վերաբերում է ՄԻԱՅՆ `/api/mcp/`-ին — `mcp:connect`-ը ոչ մի իրավունք չի տալիս
+որևէ այլ կառավարման route-ի վրա (ներառյալ ցանկացած այլ LOCAL_ONLY bypass
+նախածանց, եթե այն երբևէ ավելացվի), և այն դիտավորյալ բացառված է
+`MANAGEMENT_API_KEY_SCOPES`-ից։ `manage`/`admin` ունեցող բանալին դեռ անցնում է
+բացառությունը ճիշտ այնպես, ինչպես առաջ. `mcp:connect`-ը ավելի ցածր արտոնություններով
+այլընտրանք է հեռակա միայն-MCP կանչողների համար, ովքեր չպետք է լայն
+կառավարման հասանելիություն ունենան։
 
-| Հարցում                                            | Ուղի                       | Արդյունք                     |
-| -------------------------------------------------- | -------------------------- | ---------------------------- |
-| Ոչ loopback, առանց Bearer-ի                        | `/api/mcp/*`               | 403 LOCAL_ONLY               |
-| Ոչ loopback, `manage` տիրույթով Bearer             | `/api/mcp/*`               | Թույլատրել                   |
-| Ոչ loopback, `mcp:connect` տիրույթով Bearer        | `/api/mcp/*`               | Թույլատրել                   |
-| Ոչ loopback, առանց `manage`/`mcp:connect`-ի Bearer | `/api/mcp/*`               | 403 LOCAL_ONLY               |
-| Ոչ loopback, `mcp:connect` տիրույթով Bearer        | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY               |
-| Ոչ loopback, `manage` տիրույթով Bearer             | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY               |
-| Loopback, ցանկացած Bearer-ով կամ առանց դրա         | ցանկացած LOCAL_ONLY        | Թույլատրել (արգելքն անցած է) |
+| Հարցում                                            | Ուղի                       | Արդյունք                           |
+| -------------------------------------------------- | -------------------------- | ---------------------------------- |
+| Ոչ-loopback, առանց Bearer                          | `/api/mcp/*`               | 403 LOCAL_ONLY                     |
+| Ոչ-loopback, Bearer `manage` scope-ով              | `/api/mcp/*`               | Թույլատրվում է                     |
+| Ոչ-loopback, Bearer `mcp:connect` scope-ով         | `/api/mcp/*`               | Թույլատրվում է                     |
+| Ոչ-loopback, Bearer առանց `manage`/`mcp:connect`-ի | `/api/mcp/*`               | 403 LOCAL_ONLY                     |
+| Ոչ-loopback, Bearer `mcp:connect` scope-ով         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                     |
+| Ոչ-loopback, Bearer `manage` scope-ով              | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                     |
+| Loopback, ցանկացած/առանց Bearer                    | ցանկացած LOCAL_ONLY        | Թույլատրվում է (դարպասն անցնում է) |
 
-#### Օպերատորին ուղղված ցուցումներ և աուդիտ
+#### Օպերատորի ցուցումներ և աուդիտ
 
-Եթե OmniRoute-ը գործարկում եք հակադարձ պրոքսիի կամ թունելի հետևում (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok), loopback-ի ստուգումը շարունակում է պաշտպանել վերոնշյալ՝
-գործընթացներ գործարկելու ունակ ուղիները․ ոչ loopback հաճախորդի հասցեով հարցումը մերժվում է
-`403 LOCAL_ONLY` պատասխանով՝ **նույնականացման ստուգումից առաջ**, ուստի արտահոսած JWT-ն չի կարող հասնել գործընթացի գործարկմանը։ Մնում է
-օպերատորի երկու պարտականություն․
+Եթե դուք գործարկում եք OmniRoute-ը reverse proxy-ի կամ թունելի հետևում (nginx, Caddy, Cloudflare
+Tunnel, Tailscale, Ngrok), loopback ստուգումը դեռ պաշտպանում է վերոնշյալ
+spawn-կարող route-ները — հարցումը, որի կլիենտի հասցեն ոչ-loopback է, մերժվում է
+`403 LOCAL_ONLY`-ով **մինչև auth-ի գործարկվելը**, ուստի արտահոսած JWT-ն չի կարող
+հասնել spawn-ի։ Մնում են օպերատորի երկու պարտականությունները։
 
-- **Մի՛ «շտկեք» 403-ը՝ հաճախորդի IP-ն կեղծելով որպես loopback։** Եթե սահմանեք
-  `X-Forwarded-For: 127.0.0.1` կամ օգտագործեք պրոքսի, որը սկզբնաղբյուրի հասցեն վերագրում է որպես
-  loopback, կրկին կբացեք հենց RCE-ի այն դասը, որն այս մակարդակը փակում է։ Պրոքսիի միջոցով հրապարակեք
-  վահանակը/API-ն, բայց երբեք՝ գործընթացներ գործարկելու ունակ ուղիները։
-- **Կառավարման տիրույթի շրջանցումը պահեք նվազագույնի վրա։** Շրջանցելի է միայն `/api/mcp/`-ն և
-  միայն `manage` տիրույթով API բանալիով։ `SPAWN_CAPABLE_PREFIXES`-ը երբեք չի կարող
-  ավելացվել շրջանցման ցանկում․ zod սխեման մերժում է դրանք, իսկ
-  `isLocalOnlyBypassableByManageScope`-ը մերժում է դրանք կատարման ժամանակ (բազմաշերտ պաշտպանություն),
-  ինչն էլ վահանակը նկատի ունի «չի կարող շրջանցելի դառնալ» ասելով։ Դինամիկ հատվածներով
-  և ստատիկ ուղիներով՝ գործընթացներ գործարկելու ունակ երթուղիները `/api/providers/`-ի ներքո (օրինակ՝ `/login`,
-  `/refresh-cursor`) ընդգրկված են
-  `src/shared/constants/spawnCapablePrefixes.ts`-ի կանոնավոր արտահայտությունների վրա հիմնված `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` ուղեկիցով, այլ ոչ թե հարթ
-  `SPAWN_CAPABLE_PREFIXES` զանգվածով․ դրանք ներառելու համար հարթ զանգվածը պետք է ընդգրկեր
-  ամբողջ `/api/providers/` նախածանցը, ինչն անհարկի կընդլայներ երթուղիների ծառի սահմանափակումը,
-  որը հեռակա վահանակներն օրինականորեն օգտագործում են մատակարարների CRUD գործողությունների համար։
+- **Մի՛ «ուղղեք» 403-ը՝ կեղծելով client IP-ն որպես loopback։**
+  `X-Forwarded-For: 127.0.0.1` դնելը, կամ proxy-ի օգտագործումը, որը վերագրում է սկզբնական հասցեն loopback-ի, վերաբացում է հենց այն RCE դասը, որը այս մակարդակը փակում է։ Expose արեք
+  dashboard/API-ն proxy-ի միջոցով, բայց երբեք՝ spawn-capable route-ները։
+- **Պահեք manage-scope bypass-ը նվազագույն։** Միայն `/api/mcp/`-ն է bypassable, և
+  միայն `manage`-scoped API բանալիով։ `SPAWN_CAPABLE_PREFIXES`-ը երբեք չի կարող
+  ավելացվել bypass ցանկին․ zod schema-ն մերժում է դրանք, և
+  `isLocalOnlyBypassableByManageScope`-ը ժխտում է դրանք runtime-ում (defence-in-depth),
+  և հենց սա է նշանակում dashboard-ի «cannot be made bypassable»-ը։ Նույն
+  deny-list-ը պարունակում է նաև մի քանի LOCAL_ONLY route-ներ, որոնք spawn չեն անում,
+  բայց նույնպես երբեք չպետք է հեռակա հասանելի լինեն՝
+  `/api/oauth/kiro/auto-import` (կարդում է host-local Kiro credential ֆայլեր),
+  `/api/discovery/` և `/api/issue-agent/`։ Runtime
+  snapshot loader-ը նույնպես հեռացնում է նման գրառումները պահված settings տողից, և
+  legacy JSON import-ը (`/api/settings/import-json`) երբեք չի գրում bypass բանալիները։
+  Յուրաքանչյուր `LOCAL_ONLY_API_PREFIXES` գրառում պետք է լինի deny-list-ում կամ
+  վերանայված որպես bypass-eligible (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`)։
+  `/api/providers/`-ի տակ գտնվող dynamic-segment և static-path spawn-capable
+  route-ները (օր․ `/login`, `/refresh-cursor`) ծածկված են regex-ի վրա հիմնված
+  `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` ուղեկիցով
+  `src/shared/constants/spawnCapablePrefixes.ts`-ում, և ոչ թե flat
+  `SPAWN_CAPABLE_PREFIXES` զանգվածով․ flat զանգվածը ստիպված կլիներ ծածկել
+  ամբողջ `/api/providers/` prefix-ը՝ դրանք բռնելու համար, ինչը չափազանց կլայնացներ
+  route ծառը, որն հեռակա dashboard-ները օրինականորեն օգտագործում են provider CRUD-ի համար։
 
-**Հասանելիության աուդիտ** — ստուգելու համար, որ հոսթից դուրս ոչինչ չի հասնում այս ուղիներին․
+**Մուտքի աուդիտ** — ստուգելու համար, որ ոչինչ off-host-ից չի հասնում այս route-ներին.
 
-- Բացեք **Թույլտվությունների գույքագրումը** (`Authorization Inventory`)՝ `/dashboard/settings/security` հասցեում․ այն ցուցադրում է
-  ընթացիկ LOCAL_ONLY նախածանցների ցանկը, շրջանցելի նախածանցները և կոմպիլացման պահին սահմանված՝
-  գործընթաց գործարկելու ունակ («շրջանցելի դարձնել հնարավոր չէ») հավաքածուն։
-- Ձեր հակադարձ պրոքսիի / հասանելիության մատյաններում Grep-ի միջոցով փնտրեք վերևում նշված նախածանցները՝
-  զուգակցված ոչ loopback հաճախորդի հասցեի հետ։ Ցանկացած նման հարցում, որը `403 LOCAL_ONLY`-ի
-  փոխարեն վերադարձրել է `200`, նշանակում է, որ պրոքսին թաքցնում է հաճախորդի իրական IP հասցեն․ շտկեք պրոքսին։
-- Այս ուղիներից որևէ մեկի համար OmniRoute-ի մատյաններում գրանցված `403 LOCAL_ONLY`-ը նշանակում է, որ
-  պաշտպանությունն աշխատում է նախատեսվածի պես, և այն ճնշման ենթակա սխալ չէ։
+- Բացեք **Authorization Inventory**-ն `/dashboard/settings/security`-ում․ այն ցուցադրում է
+  կենդանի LOCAL_ONLY prefix ցանկը, թե որ prefix-ներն են bypassable, և compile-time
+  spawn-capable («cannot be made bypassable») հավաքածուն։
+- Grep արեք ձեր reverse-proxy / access log-երը վերևի prefix-ների համար՝ զուգակցված
+  non-loopback client հասցեի հետ։ Ցանկացած նման hit, որը վերադարձրել է `200`
+  `403 LOCAL_ONLY`-ի փոխարեն, նշանակում է, որ proxy-ն թաքցնում է իրական client IP-ն․
+  ուղղեք proxy-ն։
+- `403 LOCAL_ONLY`-ն OmniRoute-ի log-երում՝ այս ուղիներից մեկի համար, guard-ի
+  նախատեսված ձևով աշխատելն է, ոչ թե սխալ, որը պետք է ճնշել։
+
+#### Հեռակա հասանելի route-ներ call-site probe gate-ով
+
+Որոշ route-ներ պետք է հասանելի մնան հեռակա dashboard-ից, բայց գործարկում են host-side probe
+(`which <binary>`, `<binary> --version`, `tailscale status --json`) տեղային զանգահարողների համար։
+Դրանք LOCAL_ONLY չեն `GET`-ի համար․ փոխարենը handler-ը կարդում է վստահելի peer verdict-ը
+`getRequestPeerLocality()`-ով (`src/shared/utils/apiAuth.ts`) և probe-ը գործարկում է միայն
+`loopback` / `lan` զանգահարողների համար։ `remote` զանգահարողը ստանում է նույն պատասխանի
+ձևը՝ կառուցված non-spawning աղբյուրներից (persisted state, settings, fs ստուգումներ),
+նշված `probed: false`-ով։
+
+| Route                                                            | Probe, որը բաց է թողնվում remote զանգահարողների համար             |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe (`allowLocalRuntimeProbe`) և CLI-fallback spawn |
+| `GET /api/headroom/status`                                       | `which headroom` և python `--version` probe-ները                  |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew` |
+| `GET /api/tunnels/cloudflared` (GET-ը ազատված է LOCAL_ONLY-ից)   | `which cloudflared` PATH որոնում                                  |
+
+Նոր read route-ը, որը probe է անում host-ը, հետևում է նույն օրինաչափությանը, կամ
+ուղղակիորեն դասակարգվում է որպես LOCAL_ONLY։
 
 ### Մակարդակ 2 — ALWAYS_PROTECTED
 
-**Կիրառվում է՝** `isAlwaysProtectedPath(path)` → բաց թողնել `requireLogin=false` շրջանցումը  
-**Շրջանցում՝** չկա, երբ `requireLogin=false` է․ JWT-ն միշտ պարտադիր է
+**Կիրարկողը.** `isAlwaysProtectedPath(path)` → բաց թողնել `requireLogin=false` bypass-ը
+**Bypass.** Չկա, երբ `requireLogin=false`․ JWT-ն միշտ պահանջվում է
 
-Այս երթուղիները կործանարար են կամ անդառնալի։ «Առանց գաղտնաբառի»
-տեղադրման դեպքում դրանք թույլատրելը կնշանակեր, որ նույն LAN-ում գտնվող ցանկացած անձ կարող է ջնջել տվյալների բազան կամ դադարեցնել
-սերվերի գործընթացը։
+Այս route-ները ավերիչ կամ անշրջելի են։ Դրանք թույլատրելը «no-password»
+տեղադրման մեջ նշանակում է, որ ցանկացած մեկը նույն LAN-ում կարող է ջնջել
+տվյալների բազան կամ սպանել server process-ը։
 
-| Ուղի                                      | Պատճառ                                                                                  |
-| ----------------------------------------- | --------------------------------------------------------------------------------------- |
-| `/api/shutdown`                           | Դադարեցնում է սերվերի գործընթացը                                                        |
-| `/api/settings/database`                  | Տվյալների բազայի արտահանում, ներմուծում և մաքրում                                       |
-| `/api/db-backups`                         | Տվյալների բազայի ամբողջական պահուստային արխիվի հասանելիություն                          |
-| `/api/settings/export-json`               | Արտահանում է կարգավորումների ամբողջական բլոբը (ներառյալ գաղտնիքները)                    |
-| `/api/settings/import-json`               | Փոխարինում է կարգավորումների ամբողջական բլոբը                                           |
-| `/api/providers/health-autopilot/actions` | Կատարում է autopilot-ի վերականգնման գործողությունները                                   |
-| `/api/settings/obsidian`                  | Թողարկում է վերաօգտագործելի WebDAV հավատարմագրեր ցանկացած պահոցի արմատային պանակի համար |
+| Ուղի                                      | Պատճառ                                                             |
+| ----------------------------------------- | ------------------------------------------------------------------ |
+| `/api/shutdown`                           | Դադարեցնում է server process-ը                                     |
+| `/api/settings/database`                  | Տվյալների բազայի արտահանում, ներմուծում և ջնջում                   |
+| `/api/db-backups`                         | Տվյալների բազայի ամբողջական backup արխիվի մուտք                    |
+| `/api/settings/export-json`               | Արտահանում է ամբողջ settings blob-ը (ներառյալ գաղտնիքները)         |
+| `/api/settings/import-json`               | Փոխարինում է ամբողջ settings blob-ը                                |
+| `/api/providers/health-autopilot/actions` | Կատարում է autopilot remediation գործողություններ                  |
+| `/api/settings/obsidian`                  | Ստեղծում է վերօգտագործելի WebDAV creds ցանկացած vault root-ի համար |
+| `/api/relay/tokens`                       | Ստեղծում, ցուցակում, խմբագրում և չեղարկում է relay token-ները      |
+| `/api/cli-tools/apply`                    | Վերագրում է operator-ի host CLI config-ը                           |
+| `/api/cli-tools/guide-settings`           | Գրում է guide-driven CLI config ֆայլեր                             |
+| `/api/cli-tools/hermes-agent-settings`    | Գրում է Hermes agent config-ը                                      |
+| `/api/cli-tools/backups`                  | Վերականգնում և ջնջում է CLI config backup-ները                     |
+| `/api/log-export`                         | Ուղարկում է call log-երը կազմաձևված նպատակակետ                     |
+| `/api/restart`                            | Վերագործարկում է server process-ը                                  |
 
-**Պատասխան խախտման դեպքում՝** `401 Authentication required`
+**Պատասխանը խախտման դեպքում.** `401 Authentication required`
 
-`/api/settings/obsidian`-ը ներառում է իր `/webdav` ենթուղին․ `POST`-ը WebDAV ֆայլային ծառայությունը, որը
-Next.js-ից առաջ սպասարկվում է հատուկ Node շերտի կողմից՝ այս մշակման շղթայից դուրս, ուղղորդում է կանչողի ընտրած արմատային պանակ և
-վերադարձնում նոր թողարկված Basic հավատարմագրերը, `DELETE`-ը թարմացնում է դրանք, իսկ ծնող `POST`-ը պահպանում է
-Obsidian REST API-ի տոկենը։ GHSA-62vw-ն միայն քողարկում էր `GET`-ով գաղտնաբառի բացահայտումը, սակայն թողարկումը
-դեռևս գտնվում էր խափանման դեպքում բաց թողնող մակարդակում (GHSA-7pq4-8pvv-rx7r)։ `enableObsidianVaultSync()`-ը նաև
-մերժում է այն պահոցը, որը տվյալների պանակն է, գտնվում է դրա ներսում կամ պարունակում է այն։
+`/api/settings/obsidian`-ը ներառում է իր `/webdav` ենթաուղին. `POST`-ը WebDAV ֆայլային ծառայությունը — որը մատուցվում է Next.js-ից առաջ գործող հարմարեցված Node շերտի կողմից, այս pipeline-ից դուրս — ուղղորդում է դեպի զանգահարողի ընտրած արմատ և վերադարձնում նորաստեղծ Basic հավատարմագրեր, `DELETE`-ը ռոտացիայի է ենթարկում դրանք, իսկ ծնողական `POST`-ը պահպանում է Obsidian REST API տոկենը։ GHSA-62vw-ը միայն թաքցրեց `GET`-ով գաղտնաբառի բացահայտումը. թողարկումը դեռևս fail-open մակարդակում էր (GHSA-7pq4-8pvv-rx7r)։ `enableObsidianVaultSync()`-ը լրացուցիչ մերժում է vault-ը, որը հանդիսանում է տվյալների գրացուցակը, գտնվում է դրա ներսում կամ պարունակում է այն։
 
-### Նոր տեղադրման սկզբնական կարգավորումը հասանելի է միայն loopback-ից՝ ըստ իրական peer-ի, ոչ թե `Host`-ի
+#### Հավատարմագրերի արտահանումն ու վերականգնումը միայն օպերատորի համար են
 
-Երբ կառավարման գաղտնաբառ սահմանված չէ (և չկա `INITIAL_PASSWORD`), `src/shared/utils/apiAuth.ts`-ում
-գտնվող `isAuthRequired()`-ը անանուն սկզբնական կարգավորումը բաց է պահում **միայն loopback peer-երի համար**։
-Loopback-ը որոշվում է վստահելի peer ազդանշաններից՝ հետևյալ հերթականությամբ․ տոկենով նշագրված իրական TCP peer-ը
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, որը տեսնում է քաղաքականությունը), մշակման շղթայի սեփական
-`AUTHZ_HEADER_PEER_LOCALITY` վճիռը (որը տեսնում են երթուղիների մշակիչները և որին վստահում են միայն այն ժամանակ, երբ
-սահմանված է `OMNIROUTE_PEER_STAMP_TOKEN`), կամ ուղղակի կանչողների իրական socket peer-ը։ `Host` /
-`nextUrl.hostname`-ը երբեք չի ստուգվում, իսկ առաջին գաղտնաբառի գրառումը
-(`POST /api/settings/require-login`) ենթակա է նույն սահմանափակմանը և բաց չէ ցանցի յուրաքանչյուր
-peer-ի համար (GHSA-7pq4-8pvv-rx7r)։ `managementPolicy`-ն իր սեփական `peerContext` վճիռը
-բացահայտորեն փոխանցում է ներքև, որպեսզի ՍԿԶԲՆԱԿԱՆ (մինչ մաքրումը) հարցման վերնագրերը երբեք չորոշեն այն։
+Վերոնշյալ մակարդակը միայն որոշում է, թե արդյոք _ինչ-որ_ հավատարմագիր է պահանջվում։ Պահպանված հավատարմագրերը ներբեռնող ուղիները մշակիչում ավելացնում են երկրորդ ստուգում. `GET /api/settings/export-json` (վերծանված մատակարարի միացումներ և հում API բանալիներ), `GET /api/db-backups/export` (SQLite ֆայլը) և `GET /api/db-backups/exportAll` (ամբողջական արխիվը) կանչում են `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`)։ Այն ընդունում է վահանակի սեսիա, տեղական CLI սուբյեկտ կամ մուտքն անջատված օրինակ, իսկ ցանկացած շրջանակի API բանալիների (ներառյալ `manage` և `admin`) և `oma_` մուտքի տոկենների համար պատասխանում է `403`։ Կործանարար համադրելիները պահում են նույն սահմանը. `POST /api/db-backups/import` (վերբեռնված `.sqlite`, ներառյալ `dryRun=true`), `POST /api/db-backups` (պահպանված կրկնօրինակի վերականգնում ըստ id-ի) և `POST /api/settings/import-json` (հին JSON վերականգնում) փոխարինում են ակտիվ տվյալների բազան կամ կարգավորումների/միացումների/API-բանալիների ամբողջ հավաքածուն, ուստի մեքենայի հավատարմագիրը նույնպես չի կարող դրանք գործարկել։ Վերականգնման կետերի ոչնչացումը պահում է նույն սահմանը. `DELETE /api/db-backups` (մաքրում — պահել վերջին N-ը / հեռացնել D օրից հինները) և `PATCH /api/db-backups` (պահպանման կարգավորումներ), քանի որ կայուն պահպանված պահպանման կարգավորումները հենց այն են, ինչ `cleanupDbBackups()`-ը կիրառում է յուրաքանչյուր ավտոմատ կրկնօրինակումից հետո (`src/lib/db/backup.ts`), ուստի մեքենայի հավատարմագիրը, որը կարող էր պահել `keepLatest: 1`, հաջորդ սնեփշոթում կմաքրեր ամեն ինչ։ Կրկնօրինակների թվարկումն ու ստեղծումը (`GET`/`PUT /api/db-backups`) պահում են սովորական կառավարման նույնականացումը։ Սինխրոնացման տոկենի թողարկումը (`POST /api/sync/tokens`) օգտագործում է նույն օգնականը, գումարած վստահելի loopback ներքին ծառայության տոկենը։
 
-### Մակարդակ 3 — MANAGEMENT (լռելյայն)
+### Նոր տեղադրման bootstrap-ը միայն loopback-ի համար է — ըստ իրական հանգույցի, ոչ `Host`-ի
 
-Կառավարման մնացած բոլոր երթուղիները։ Նույնականացումը պարտադիր է, եթե կարգավորված չէ
-`requireLogin=false`։ CLI տոկենները կարող են նույնականացնել այս երթուղիների հարցումները (loopback + վավեր HMAC)։
+Երբ կառավարման գաղտնաբառ կազմաձևված չէ (և չկա `INITIAL_PASSWORD`), `isAuthRequired()`-ը `src/shared/utils/apiAuth.ts`-ում անանուն bootstrap-ը բաց է պահում **միայն loopback հանգույցների համար**։ Loopback-ը որոշվում է վստահելի հանգույցի ազդանշաններից՝ հերթականությամբ. տոկենով դրոշմված իրական TCP հանգույց (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, ինչ տեսնում է քաղաքականությունը), pipeline-ի սեփական `AUTHZ_HEADER_PEER_LOCALITY` եզրակացությունը (ինչ տեսնում են ուղիների մշակիչները, վստահելի միայն այն ժամանակ, երբ սահմանված է `OMNIROUTE_PEER_STAMP_TOKEN`), կամ իրական socket հանգույց ուղղակի զանգահարողների համար։ `Host` / `nextUrl.hostname` երբեք չեն դիտարկվում, և առաջին գաղտնաբառի գրանցումը (`POST /api/settings/require-login`) գտնվում է նույն սահմանափակման ներքո, այլ ոչ թե բաց է ցանցի ցանկացած հանգույցի համար (GHSA-7pq4-8pvv-rx7r)։ `managementPolicy`-ը բացահայտ ներքև է փոխանցում իր սեփական `peerContext` եզրակացությունը, ուստի ՕՐԻԳԻՆԱԼ (մինչև հեռացումը) հարցման վերնագրերը երբեք չեն որոշում դա։
+
+### Մակարդակ 3 — ԿԱՌԱՎԱՐՈՒՄ (լռելյայն)
+
+Բոլոր մնացած կառավարման ուղիները։ Նույնականացում պահանջվում է, եթե կազմաձևված չէ `requireLogin=false`։ CLI տոկենները կարող են նույնականացնել այս ուղիները (loopback + վավեր HMAC)։
 
 ## Գնահատման հերթականությունը
 

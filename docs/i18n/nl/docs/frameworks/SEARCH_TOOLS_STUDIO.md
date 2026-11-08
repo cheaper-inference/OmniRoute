@@ -37,29 +37,29 @@ Studio met drie tabbladen waarin zoeken op het web, webscraping en vergelijking 
 
 ## Tabbladen
 
-### Tabblad Zoeken
+### Zoektabblad
 
-Breidt de bestaande `SearchForm` + `ResultsPanel` + `RerankPanel` uit tot een tabblad:
+Breidt het bestaande `SearchForm` + `ResultsPanel` + `RerankPanel` uit tot een tabblad:
 
 - Zoekopdracht → resultaten (titel, URL, fragment, relevantiescore).
-- Providermetadata in het configuratievenster (kosten, quotum, status).
-- Reranksectie: kies een rerankmodel, wijzig de volgorde van resultaten en toon `positionDelta`.
+- Metagegevens van de provider in het Config-paneel (kosten, quotum, status).
+- Sectie voor herrangschikking: kies een model voor herrangschikking, rangschik resultaten opnieuw en toon `positionDelta`.
 - Lege status met CTA wanneer er geen zoekproviders zijn geconfigureerd.
 - Zoekgeschiedenis via `SearchHistory.tsx`.
 - Roept `POST /v1/search` aan (bestaand endpoint, geen wijzigingen).
 
-### Tabblad Scrapen
+### Scrapetabblad
 
-Nieuw tabblad voor het extraheren van inhoud uit een URL via `POST /v1/web/fetch` (aangemaakt in plan 05):
+Nieuw tabblad voor het extraheren van inhoud van een URL via `POST /v1/web/fetch` (aangemaakt in plan 05):
 
-- Invoer: URL + schakelaar voor volledige pagina + indelingsselector (markdown / tekst / HTML).
+- Invoer: URL + schakelaar voor volledige pagina + indelingskiezer (markdown / tekst / HTML).
 - Verzenden → ophalen → `ScrapeResult.tsx` renderen.
 - `ScrapeResult` rendert een markdownvoorbeeld + schakelaar voor onbewerkte weergave.
-- Limiet: als de responsebody groter is dan **256 KB**, toont de UI `(ingekort, onbewerkt bekijken)` en wordt de onbewerkte inhoud geopend in een Monaco-modal (D21).
-- Metadatapaneel: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latentie, kosten, responsgrootte, aantal links.
+- Limiet: als de responsbody groter is dan **256 KB**, toont de UI `(afgekapt, onbewerkt bekijken)` en opent deze de onbewerkte inhoud in een Monaco-modal (D21).
+- Metagegevenspaneel: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latentie, kosten, responsgrootte, aantal links.
 - Gebruikt de hook `useScrapeFetch.ts`.
 
-### Tabblad Vergelijken
+### Vergelijkingstabblad
 
 Voert dezelfde zoekopdracht/URL parallel uit bij maximaal **4 providers** (D22):
 
@@ -101,13 +101,13 @@ Voert dezelfde zoekopdracht/URL parallel uit bij maximaal **4 providers** (D22):
 
 ## Providercatalogus
 
-`ProviderCatalog.tsx` toont de volledige lijst met providers uit `GET /api/search/providers`
-(uitgebreid in F4 met fetch-providers):
+`ProviderCatalog.tsx` toont de volledige lijst met providers van `GET /api/search/providers`
+(in F4 uitgebreid met fetchproviders):
 
-| `kind` | `"search"` (20 providers) of `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 providers) of `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-De status wordt **op het moment van de aanvraag bepaald** door te controleren of inloggegevens aanwezig zijn en of
-alle sleutels momenteel een cooldown hebben.
+De status wordt **op het moment van de aanvraag afgeleid** door te controleren of er inloggegevens bestaan en of
+alle sleutels momenteel een afkoelperiode hebben.
 
 ---
 
@@ -127,10 +127,10 @@ Voor deze functie was slechts één backendwijziging nodig:
 
 `src/app/api/search/providers/route.ts` is uitgebreid om:
 
-- Alle 6 fetch-providers (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) in de array op te nemen.
+- Elke fetchprovider (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) in de array op te nemen.
 - `kind: "search" | "fetch"` aan elk item toe te voegen.
 - `status: "configured" | "missing" | "rate_limited"` toe te voegen, afgeleid van de actuele status van de inloggegevens.
-- Achterwaartse compatibiliteit te behouden — bestaande velden (`id`, `name`, enz.) zijn ongewijzigd.
+- Achterwaartse compatibiliteit te behouden — bestaande velden (`id`, `name`, enz.) blijven ongewijzigd.
 
 ---
 

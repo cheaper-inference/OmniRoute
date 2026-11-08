@@ -298,13 +298,13 @@ Najważniejsze zachowania:
 
 ## 🔑 Tokeny synchronizacji i pakiet konfiguracji _(v3.6.6+)_
 
-Dostęp z wielu urządzeń i dla operatorów zewnętrznych jest teraz możliwy za pośrednictwem **tokenów synchronizacji o określonym zakresie**:
+Dostęp z wielu urządzeń oraz dostęp dla operatorów zewnętrznych jest teraz możliwy za pomocą **tokenów synchronizacji o określonym zakresie**:
 
 - **`POST /api/sync/tokens`** — Wydaje nowy token synchronizacji (o określonym zakresie, z opcjonalnym terminem wygaśnięcia)
 - **`DELETE /api/sync/tokens/:id`** — Unieważnia token
-- **`GET /api/sync/bundle`** — Pobiera wersjonowaną migawkę JSON wszystkich ustawień niewrażliwych, identyfikowaną za pomocą ETag (hasła są maskowane)
+- **`GET /api/sync/bundle`** — Pobiera wersjonowany zrzut konfiguracji w formacie JSON, identyfikowany za pomocą ETag (uwierzytelnianie wyłącznie tokenem synchronizacji). Ustawienia uwierzytelniania, takie jak hasło panelu, są usuwane, ale dane uwierzytelniające dostawców i klucze API są uwzględniane, dlatego plik należy traktować jako poufny
 
-Pakiet konfiguracji jest tworzony przez `src/lib/sync/bundle.ts`. Klienci porównują nagłówek odpowiedzi `ETag`, aby wykrywać zmiany bez ponownego pobierania całej zawartości.
+Pakiet konfiguracji jest tworzony przez `src/lib/sync/bundle.ts`. Klienci porównują nagłówek odpowiedzi `ETag`, aby wykrywać zmiany bez ponownego pobierania całego ładunku. W interfejsie CLI polecenie `omniroute sync bundle <outPath> --token <syncToken>` (lub `OMNIROUTE_SYNC_TOKEN`) zapisuje go w pliku dostępnym wyłącznie dla właściciela.
 
 ---
 
@@ -316,14 +316,14 @@ W wersji v3.6.6 wprowadzono również **hybrydowe zliczanie tokenów**: gdy dost
 
 ---
 
-## 🛡️ Bezpieczne pobieranie wychodzące i ochrona przed SSRF _(v3.6.6+)_
+## 🛡️ Bezpieczne żądania wychodzące i ochrona przed SSRF _(v3.6.6+)_
 
 Wszystkie wywołania służące do walidacji dostawców i wykrywania modeli przechodzą teraz przez dwuwarstwową ochronę ruchu wychodzącego:
 
-1. **Ochrona URL** (`src/shared/network/outboundUrlGuard.ts`) — Blokuje prywatne, zwrotne i lokalne dla łącza zakresy adresów IP przed otwarciem gniazda.
-2. **Bezpieczna funkcja opakowująca pobieranie** (`src/shared/network/safeOutboundFetch.ts`) — Stosuje ochronę URL, normalizuje limity czasu i ponawia żądania po błędach przejściowych z wykładniczym wydłużaniem odstępów.
+1. **Ochrona adresów URL** (`src/shared/network/outboundUrlGuard.ts`) — Najpierw sprawdza nazwę hosta lub literał adresu IP celu w zapisanej postaci; w trybie wyłącznie publicznym opakowanie bezpiecznego pobierania rozwiązuje również nazwę i odrzuca prywatne adresy wynikowe. Domyślnie blokuje punkty końcowe metadanych chmurowych — cały zakres 169.254.0.0/16 oraz znane nazwy hostów metadanych; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` blokuje także hosty prywatne i lokalne, natomiast `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (lub starsza zmienna `OUTBOUND_SSRF_GUARD_ENABLED=false`) wyłącza te kontrole. Wartość zapisana za pomocą przełącznika flagi w panelu ma pierwszeństwo przed odpowiadającą jej zmienną, a wbudowani lokalni dostawcy pomijają ochronę podczas walidacji klucza. Zobacz `docs/reference/ENVIRONMENT.md`.
+2. **Opakowanie bezpiecznego pobierania** (`src/shared/network/safeOutboundFetch.ts`) — Stosuje ochronę adresów URL, normalizuje limity czasu i ponawia żądania po błędach przejściowych, używając wykładniczego opóźnienia.
 
-Naruszenia reguł ochrony są zgłaszane jako HTTP 422 (`URL_GUARD_BLOCKED`) i zapisywane w dzienniku audytu zgodności za pośrednictwem `providerAudit.ts`.
+Naruszenia reguł ochrony są zgłaszane jako `URL_GUARD_BLOCKED` — HTTP 503 za pośrednictwem `getSafeOutboundFetchErrorStatus` (400 w trasie wykrywania modeli) — a rzeczywiste blokady SSRF podczas walidacji są zapisywane w dzienniku audytu jako zdarzenia `provider.validation.ssrf_blocked`.
 
 ---
 

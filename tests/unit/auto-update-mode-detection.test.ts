@@ -5,10 +5,7 @@ const { resolveAutoUpdateMode, isUnderNodeModules, resolveRuntimeModuleDir, getA
   await import("../../src/lib/system/autoUpdate.ts");
 
 test("non-npm modes pass through untouched (operator choice wins)", () => {
-  assert.equal(
-    resolveAutoUpdateMode("source", { isGitRepo: false, currentDir: "/x" }),
-    "source"
-  );
+  assert.equal(resolveAutoUpdateMode("source", { isGitRepo: false, currentDir: "/x" }), "source");
   assert.equal(
     resolveAutoUpdateMode("docker-compose", {
       isGitRepo: true,
@@ -138,6 +135,9 @@ test("getAutoUpdateConfig wires the runtime probe: bundled global install → np
     compiledDir: BUNDLED_DIRNAME,
     entryScripts: ["/usr/lib/node_modules/omniroute/dist/server-ws.mjs"],
     exists: nothingExists,
+    // Bare-metal install: pin container detection off (a devbox/CI container would otherwise
+    // turn the downloaded-build case below into the Docker image mode).
+    isContainer: () => false,
   };
   assert.equal(getAutoUpdateConfig({}, probe).mode, "npm");
   assert.equal(

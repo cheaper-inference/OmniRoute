@@ -43,6 +43,113 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
+test("paid credits wait for sibling subscription quota and still fall back on credit exhaustion", async () => {
+  const quotaCache = await import("../../src/domain/quotaCache.ts");
+  const { registerQuotaFetcher } = await import("../../open-sse/services/quotaPreflight.ts");
+  const paid = await seedCodexConnection({
+    name: "paid-business",
+    accessToken: "paid-access",
+    priority: 1,
+    providerSpecificData: { allowPaidCredits: true, quotaPreflightEnabled: false },
+  });
+  const sibling = await seedCodexConnection({
+    name: "subscription-sibling",
+    accessToken: "sibling-access",
+    priority: 2,
+    providerSpecificData: { quotaPreflightEnabled: true },
+  });
+  const resetAt = futureIso(120_000);
+  quotaCache.setQuotaCache(paid.id, "codex", {
+    session: { used: 100, total: 100, remainingPercentage: 0, resetAt },
+  });
+  let available = true;
+  let siblingPercentUsed = 0.2;
+  const calls: string[] = [];
+  registerQuotaFetcher("codex", async (id) => {
+    calls.push(id);
+    const percentUsed = id === paid.id ? 1 : siblingPercentUsed;
+    return {
+      used: percentUsed * 100,
+      total: 100,
+      percentUsed,
+      resetAt,
+      windows: { session: { percentUsed, resetAt } },
+      paidCredits:
+        id === paid.id
+          ? {
+              hasCredits: available,
+              unlimited: false,
+              overageLimitReached: !available,
+              balance: null,
+            }
+          : undefined,
+    };
+  });
+  try {
+    const first = await auth.getProviderCredentialsWithQuotaPreflight(
+      "codex",
+      null,
+      null,
+      "gpt-5.5"
+    );
+    assert.equal(first.connectionId, sibling.id, "subscription quota is spent before paid credits");
+    assert.deepEqual(calls, [sibling.id]);
+    first.releaseOAuthSession?.();
+
+    siblingPercentUsed = 1;
+    quotaCache.setQuotaCache(sibling.id, "codex", {
+      session: { used: 100, total: 100, remainingPercentage: 0, resetAt },
+    });
+    calls.length = 0;
+    const selected = await auth.getProviderCredentialsWithQuotaPreflight(
+      "codex",
+      null,
+      null,
+      "gpt-5.5"
+    );
+    assert.equal(selected.connectionId, paid.id);
+    assert.deepEqual(
+      calls,
+      [paid.id],
+      "paid-credit consent requires fresh preflight despite legacy opt-out"
+    );
+    selected.releaseOAuthSession?.();
+
+    available = false;
+    calls.length = 0;
+    const next = await auth.getProviderCredentialsWithQuotaPreflight(
+      "codex",
+      null,
+      null,
+      "gpt-5.5"
+    );
+    assert.notEqual(next?.connectionId, paid.id, "exhausted credits fall back");
+    assert.equal(next?.allRateLimited, true);
+    assert.deepEqual(calls, [paid.id]);
+  } finally {
+    quotaCache.__clearForTests();
+  }
+});
+
+test("paid-credit consent does not bypass a real upstream connection cooldown", async () => {
+  const paid = await seedCodexConnection({
+    name: "paid-upstream-cooldown",
+    accessToken: "paid-cooldown-access",
+    priority: 1,
+    rateLimitedUntil: futureIso(120_000),
+    testStatus: "unavailable",
+    errorCode: 429,
+    providerSpecificData: { allowPaidCredits: true },
+  });
+  const selected = await auth.getProviderCredentialsWithQuotaPreflight(
+    "codex",
+    null,
+    paid.id,
+    "gpt-5.5"
+  );
+  assert.equal(selected.allRateLimited, true);
+});
+
 test("Codex Spark preflight cooldown leaves normal models on the same parent selectable", async () => {
   const resetAt = futureIso(120_000);
   const connection = await seedCodexConnection({

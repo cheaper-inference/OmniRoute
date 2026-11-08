@@ -114,7 +114,7 @@ test("executeChaosRun forwards the caller's apiKey as a Bearer Authorization hea
   assert.equal(capturedAuth, "Bearer sk-caller-key");
 });
 
-test("executeChaosRun omits Authorization header when no apiKey is provided (dashboard/local mode)", async () => {
+test("executeChaosRun authenticates internally when no apiKey is provided (dashboard mode)", async () => {
   await providersDb.createProviderConnection({
     provider: "openai",
     authType: "apikey",
@@ -131,7 +131,7 @@ test("executeChaosRun omits Authorization header when no apiKey is provided (das
 
   await chaosExecutor.executeChaosRun({ task: "task" });
 
-  assert.equal(capturedAuth, null);
+  assert.equal(capturedAuth?.startsWith("Bearer "), true);
 });
 
 test("executeChaosRun surfaces upstream errors per-model instead of throwing", async () => {

@@ -4,13 +4,9 @@
 
 ---
 
-> **Verze:** v3.8.44
-> **Poslední aktualizace:** 2026-09-09
-> **Cílová skupina:** Technici, kteří přidávají, udržují nebo ladí vložené služby (9Router, CLIProxyAPI, Mux, Bifrost, open-wa).
+> **Verze:** v3.8.44** Poslední aktualizace:** 2026-10-28** Publikum:** Inženýři přidávají, udržují nebo ladí vestavěné služby (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Vložené služby jsou lokálně instalované pomocné procesní nástroje, které OmniRoute instaluje, monitoruje a
-zpřístupňuje jako plnohodnotné cíle směrování. Na rozdíl od externích poskytovatelů (kteří jsou dostupní přes internet
-pomocí klíčů API) běží vložené služby na stejném počítači jako OmniRoute a komunikují přes rozhraní loopback.
+Embedded služby jsou lokálně instalované nástroje pro vedlejší procesy, které OmniRoute instaluje, dohlíží a odhaluje je jako prvotřídní směrovací cíle. Na rozdíl od externích poskytovatelů (kteří jsou osloveni přes internet pomocí klíčů API ) běží vestavěné služby na stejném počítači jako OmniRoute a komunikují přes smyčku.
 
 ---
 
@@ -29,36 +25,38 @@ pomocí klíčů API) běží vložené služby na stejném počítači jako Omn
 
 ## 1. Přehled
 
-### Proč integrované služby?
+### Proč vestavěné služby?
 
-Je integrováno šest služeb:
+Je zahrnuto osm služeb:
 
-| Služba          | npm balíček                                     | Výchozí port | Účel                                                                                                                                                                                           |
-| --------------- | ----------------------------------------------- | :----------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                                       |    20130     | AI router, který může OmniRoute používat jako dílčího poskytovatele. Modely jsou zpřístupněny ve tvaru `9router/{sub}/{model}`                                                                 |
-| **CLIProxyAPI** | Binární soubor z GitHub release (`cliproxy`)    |     8317     | Lokální proxy adaptér pro ověřovací toky Anthropic CLI. Poskytuje záložní směrování po vypršení platnosti tokenů OAuth                                                                         |
-| **Mux**         | `mux` (bez uživatelského rozhraní `mux server`) |     8322     | Lokální démon pro orchestraci agentů (coder/mux). Pouze správa životního cyklu — není cílem směrování (bez proxy přenosu LLM).                                                                 |
-| **Bifrost**     | `@maximhq/bifrost`                              |     8080     | Backend přenosové AI brány v jazyce Go. Je-li spuštěn, je automaticky vybrán přenosovou trasou (`/v1/relay/`)                                                                                  |
-| **Dario**       | `@askalf/dario`                                 |     3456     | Proxy pro předplatné Claude — alternativa/záloha ke CLIProxyAPI pro provoz ve formátu Claude Code; vložený klíč se stává `DARIO_ADMIN_TOKEN`, který chrání jeho řídicí rovinu OAuth `/admin/*` |
-| **open-wa**     | `@open-wa/wa-automate`                          |     8323     | Automatizace WhatsApp Web (bez uživatelského rozhraní, Chromium prostřednictvím Puppeteer). Pouze správa životního cyklu — není cílem směrování.                                               |
+| Servis          | npm balíček                        | Výchozí port | Účel                                                                                                                                                                                                                                                                                                                                                       |
+| --------------- | ---------------------------------- | :----------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Směrovač**   | `9router`                          |    20130     | router AI, který může OmniRoute použít jako sub-poskytovatel. Modely vystavené jako `9router/{sub}/{model}`                                                                                                                                                                                                                                                |
+| **CLIProxyAPI** | binární vydání GitHub (`cliproxy`) |     8317     | Místní proxy adaptér pro toky ověření Anthropic CLI. Poskytuje záložní směrování, když vyprší platnost tokenů OAuth                                                                                                                                                                                                                                        |
+| **Mux**         | `mux` (bezhlavý `mux server`)      |     8322     | Místní agent-orchestration démon (coder/mux). Pouze — spravované životním cyklem, nikoli cíl směrování (žádné LLM proxy).                                                                                                                                                                                                                                  |
+| **Bifrost**     | `@maximhq/bifrost`                 |     8080     | Přejít na backend relé brány AI. Při běhu, automaticky vybráno podle trasy relé (`/v1/relay/`)                                                                                                                                                                                                                                                             |
+| **Dario**       | `@askalf/dario`                    |     3456     | Claude-subscription proxy — alternative/failover to CLIProxyAPI pro provoz ve tvaru Claude-Code; vložený klíč se změní `DARIO_ADMIN_TOKEN` hradlující jeho řídicí rovinu `/admin/*` OAuth                                                                                                                                                                  |
+| **open-wa**     | `@open-wa/wa-automate`             |     8323     | WhatsApp Webová automatizace (bezhlavý Chromium přes Puppeteer). Pouze — spravované životním cyklem, nikoli cíl směrování.                                                                                                                                                                                                                                 |
+| **LLMLingua**   | `@atjsh/llmlingua-2`               |    20135     | Pohotovostní kompresní postranní vozík — skutečný model LLMLingua-2 ONNX (port JS/TS algoritmu Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` do něj odešle `/compress` přes HTTP, a když je postranní vozík vypnutý, vrátí se zpět do backendu pracovního vlákna v procesu. Pouze — řízené životním cyklem, nikoli cíl směrování. |
+| **sing-box**    | binární vydání GitHub (`singbox`)  |    20140     | TPROXY sidecar backing `applyTproxy()`'s transparent-proxy interception (`src/mitm/tproxy/setup.ts`). Instalační program stáhne připnuté vydání ověřené kontrolním součtem. Správa životního cyklu pouze — nikoli cíl směrování (žádné LLM proxying)                                                                                                       |
 
-Všech šest používá stejný model dohledu:
+Všech osm se řídí stejným modelem dohledu:
 
-- OmniRoute je instaluje do `DATA_DIR/services/{name}/` (izolovaně od vlastního souboru `package.json` OmniRoute)
-- OmniRoute je spouští a monitoruje jako podřízené procesy
-- OmniRoute vkládá do prostředí podřízeného procesu dočasný klíč API a obměňuje jej bez výpadku (kde je to relevantní)
-- Všechny trasy pro správu (`/api/services/*`) jsou **LOCAL_ONLY** — přístupné pouze z loopback rozhraní (pevné pravidlo č. 17)
+- OmniRoute je nainstaluje pod `DATA_DIR/services/{name}/` (izolované od vlastního `package.json` OmniRoute)
+- OmniRoute je vytváří a monitoruje jako podřízené procesy
+- OmniRoute vloží pomíjivý klíč API do prostředí dítěte a otočí jej bez prostojů (pokud je to možné)
+- Všechny cesty vedení (`/api/services/*`) jsou**LOCAL_ONLY** — přístupné pouze ze zpětné smyčky (tvrdé pravidlo #17)
 
-### Klíčová rozhodnutí (z návrhového plánu)
+### Klíčová rozhodnutí (z plánu návrhu)
 
-| Rozhodnutí                                | Hodnota                                                                                                |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Přístup dashboardu k nativnímu UI 9Router | Reverzní proxy na `/dashboard/providers/services/9router/embed/*`                                      |
-| Mechanismus instalace                     | `npm install {package}` prostřednictvím `execFile` (bez interpolace shellu)                            |
-| Režim použití                             | Poskytovatel registrován jako `9router/{sub}/{model}` ve směrovacím enginu                             |
-| Správa klíčů API                          | OmniRoute je generuje, šifruje při uložení (AES-256-GCM) a vkládá prostřednictvím proměnných prostředí |
-| Umístění dashboardu                       | `/dashboard/providers/services` (tři karty)                                                            |
-| Automatické spuštění                      | Přepínač pro každou službu, ve výchozím nastavení VYPNUTO                                              |
+| Rozhodnutí                                       | Hodnota                                                                     |
+| ------------------------------------------------ | --------------------------------------------------------------------------- |
+| Přístup k řídicímu panelu k nativnímu UI 9Router | Reverzní proxy na `/dashboard/providers/services/9router/embed/*`           |
+| Instalační mechanismus                           | `npm install {package}` přes `execFile` (bez interpolace shellu)            |
+| Režim spotřeby                                   | Poskytovatel registrovaný jako `9router/{sub}/{model}` ve směrovacím enginu |
+| správa klíčů API                                 | OmniRoute generuje, šifruje v klidu (AES-256-GCM) a vkládá přes env         |
+| Umístění palubní desky                           | `/dashboard/providers/services` (tři karty)                                 |
+| Auto-start                                       | Přepnout na službu, výchozí OFF                                             |
 
 ---
 
@@ -66,12 +64,12 @@ Všech šest používá stejný model dohledu:
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  Vrstva 1 — UI                                                     │
-│  /dashboard/providers/services  (karty: CLIProxyAPI | 9Router | Mux)│
-│  Živé protokoly (SSE), Spustit/Zastavit/Restartovat/Aktualizovat, Nastavení, Instalace│
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Rámec + směrování karet podle ?tab=  │
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -79,7 +77,7 @@ Všech šest používá stejný model dohledu:
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Vrstva 2 — API (LOCAL_ONLY — pouze loopback)                      │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -88,73 +86,74 @@ Všech šest používá stejný model dohledu:
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (reverzní HTTP + WebSocket proxy → upstream 9Router)            │
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  Brána: LOCAL_ONLY_API_PREFIXES zahrnuje "/api/services/" a        │
-│         "/dashboard/providers/services/*/embed/"                   │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
+│        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ volání v rámci procesu
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Vrstva 3 — ServiceSupervisor (src/lib/services/)                  │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   Obecný správce (child_process.spawn)       │
-│    ├── instalace:   execFile('npm', ['install', pkg, '--prefix'])   │
-│    ├── spuštění:    spawn(node, [entrypoint], {env, cwd})          │
-│    ├── klíč API:    crypto.randomBytes(32) → env NINEROUTER_API_KEY │
-│    ├── port:        20130 pro 9Router (konfigurovatelný)           │
-│    ├── protokoly:   kruhová vyrovnávací paměť stdio 5 MB → události SSE│
-│    ├── stav:        HTTP GET /health každé 2–5 s, opožděné zotavení│
-│    └── životní cyklus: SIGTERM 15 s → SIGKILL                      │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
+│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Inicializuje všechny SERVICES[] při spuštění procesu│
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       Pravidelný GET /v1/models → tabulka service_models│
-│  ringBuffer.ts      Kruhová vyrovnávací paměť protokolů (5 MB na službu)│
-│  healthCheck.ts     Pravidelná kontrola stavu přes HTTP            │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (instalační adaptéry)                         │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP kompatibilní s OpenAI (loopback)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Vrstva 4 — Poskytovatel / směrování                               │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Pro každý požadavek znovu vyhledá port a klíč API (bez mezipaměti).│
-│    Před předáním proxy odstraní z ID modelu prefix "9router/".      │
-│    Vrátí 503 service_not_running, pokud správce není ve stavu "running".│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    Záznam pro "9router": isEmbeddedService: true                   │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Modely jsou uloženy jako "9router/{sub}/{model}" (s prefixem).   │
-│    Synchronizace každých 5 min pomocí modelSync.ts.                │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Mux má spravován POUZE životní cyklus (vrstvy 1–3) — jde o démona │
-│  pro orchestraci agentů, nikoli LLM proxy, takže nemá executor ani │
-│  záznam poskytovatele ve vrstvě 4 a nikdy není cílem směrování.     │
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Klíčové zdrojové soubory
 
-| Soubor                                      | Role                                                                   |
-| ------------------------------------------- | ---------------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Základní třída: životní cyklus, zámek, stav, kruhová vyrovnávací paměť |
-| `src/lib/services/bootstrap.ts`             | Registrace na úrovni procesu a automatické spuštění                    |
-| `src/lib/services/registry.ts`              | Singleton mapa `nástroj → supervisor`                                  |
-| `src/lib/services/apiKey.ts`                | Generování klíčů, šifrování AES-256-GCM pro data v úložišti            |
-| `src/lib/services/modelSync.ts`             | Pravidelná synchronizace modelů (5 min) + na vyžádání                  |
-| `src/lib/services/ringBuffer.ts`            | Kruhová vyrovnávací paměť protokolů o velikosti 5 MB s odběrem SSE     |
-| `src/lib/services/healthCheck.ts`           | HTTP kontrola stavu (konfigurovatelný interval)                        |
-| `src/lib/services/installers/ninerouter.ts` | Instalace/aktualizace/odinstalace balíčku 9Router pomocí npm           |
-| `src/lib/services/installers/cliproxy.ts`   | Instalace/aktualizace/odinstalace balíčku CLIProxyAPI pomocí npm       |
-| `src/lib/services/installers/mux.ts`        | Instalace/aktualizace/odinstalace balíčku Mux pomocí npm               |
-| `src/lib/services/installers/openwa.ts`     | Instalace/aktualizace/odinstalace balíčku open-wa pomocí npm           |
-| `src/app/api/services/9router/_lib.ts`      | Pomocná funkce `getOrInitSupervisor()`                                 |
-| `src/app/api/services/[name]/logs/route.ts` | Sdílený koncový bod SSE pro protokoly                                  |
-| `open-sse/executors/ninerouter.ts`          | Exekutor poskytovatele (vrstva 4)                                      |
+| Soubor                                      | Role                                                   |
+| ------------------------------------------- | ------------------------------------------------------ |
+| `src/lib/services/ServiceSupervisor.ts`     | Core class: lifecycle, lock, health, ring buffer       |
+| `src/lib/services/bootstrap.ts`             | Registrace a automatické spuštění na úrovni procesu    |
+| `src/lib/services/registry.ts`              | Singletonová mapa `tool → supervisor`                  |
+| `src/lib/services/apiKey.ts`                | Generování klíče, šifrování AES-256-GCM v klidu        |
+| `src/lib/services/modelSync.ts`             | Periodická synchronizace modelu (5 min) + na vyžádání  |
+| `src/lib/services/ringBuffer.ts`            | 5 MB kruhová vyrovnávací paměť protokolu s odběrem SSE |
+| `src/lib/services/healthCheck.ts`           | HTTP zdravotní sonda (konfigurovatelný interval)       |
+| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall pro 9Router               |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall pro CLIProxyAPI           |
+| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall pro Mux                   |
+| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall pro open-wa               |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall pro LLMLingua             |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` pomocník                       |
+| `src/app/api/services/[name]/logs/route.ts` | Sdílený koncový bod protokolů SSE                      |
+| `open-sse/executors/ninerouter.ts`          | Exekutor poskytovatele (vrstva 4)                      |
 
 ---
 
@@ -209,58 +208,54 @@ v uživatelském rozhraní aktivují současně.
 
 ---
 
-## 4. Referenční dokumentace API
+## 4. odkaz API
 
-Všechny trasy pod `/api/services/` jsou **LOCAL_ONLY** (pouze loopback, pevné pravidlo č. 17).
-Požadavky, které nejsou z loopbacku, obdrží `403 LOCAL_ONLY` bez ohledu na ověřovací token.
+Všechny trasy pod `/api/services/` jsou**LOCAL_ONLY** (pouze zpětná smyčka, pevné pravidlo č. 17). Požadavky bez zpětné smyčky obdrží `403 LOCAL_ONLY` bez ohledu na token ověření.
 
-### 4.1 Endpointy 9Routeru (11 tras)
+### 4.1 9Koncové body směrovače (11 tras)
 
 #### `POST /api/services/9router/install`
 
-Nainstaluje 9Router z npm. Vytvoří `DATA_DIR/services/9router/` s vlastními soubory
-`package.json` a `node_modules/`. Není v konfliktu s vlastními závislostmi OmniRoute.
+Nainstalujte 9Router z npm. Vytvoří `DATA_DIR/services/9router/` s vlastním `package.json` a `node_modules/`. Není v rozporu s vlastními deps OmniRoute.
 
-**Tělo požadavku** (vše volitelné):
+**Tělo žádosti** (vše volitelné):
 
 ```json
 { "version": "latest" }
 ```
 
-| Pole      | Typ      | Výchozí    | Popis                                    |
-| --------- | -------- | ---------- | ---------------------------------------- |
-| `version` | `string` | `"latest"` | Značka verze npm nebo semver k instalaci |
+| Pole      | Typ      | Výchozí    | Popis                                 |
+| --------- | -------- | ---------- | ------------------------------------- |
+| `version` | `string` | `"latest"` | npm tag verze nebo semver k instalaci |
 
 **Odpovědi:**
 
-| Stav  | Popis                                                                      |
-| ----- | -------------------------------------------------------------------------- |
-| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                     |
-| `400` | Neplatné tělo požadavku (selhání validace Zod)                             |
-| `409` | Instalace již probíhá (zámek je držen)                                     |
-| `500` | Instalace npm selhala — uživatelsky přívětivou chybu naleznete v `message` |
+| Postavení | Popis                                                           |
+| --------- | --------------------------------------------------------------- |
+| `200`     | `{ ok: true, installedVersion: "x.y.z", path: "..." }`          |
+| `400`     | Neplatné tělo požadavku (selhání ověření Zod )                  |
+| `409`     | Již se instaluje (zámek držen)                                  |
+| `500`     | Instalace npm se nezdařila — viz `message` pro přátelskou chybu |
 
-**Poznámky:** Používá `execFile('npm', [...])` — bez shellu a bez interpolace (pevné pravidlo č. 13).
-Chyby EACCES jsou prezentovány jako uživatelsky přívětivé zprávy.
+**Poznámky:** Používá `execFile('npm', [...])` — bez shellu, bez interpolace (tvrdé pravidlo č. 13). chyby EACCES se zobrazí jako přátelské zprávy.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-Spustí 9Router. Pokud ještě není zaregistrován správce, zaregistruje jej a poté zavolá
-`supervisor.start()`. Pokud již služba běží, je operace idempotentní.
+Spusťte 9 Router. Zaregistruje supervizora, pokud ještě není zaregistrován, a zavolá `supervisor.start()`. Idempotentní, když už běží.
 
-**Tělo požadavku:** žádné
+**Tělo požadavku:** žádný
 
 **Odpovědi:**
 
-| Stav  | Popis                                                 |
-| ----- | ----------------------------------------------------- |
-| `200` | Objekt `ServiceStatus` (viz schéma níže)              |
-| `409` | 9Router není nainstalován (`status: "not_installed"`) |
-| `503` | Spuštění selhalo (chyba procesu — viz `lastError`)    |
+| Postavení | Popis                                                   |
+| --------- | ------------------------------------------------------- |
+| `200`     | objekt `ServiceStatus` (viz schéma níže)                |
+| `409`     | 9Směrovač není nainstalován (`status: "not_installed"`) |
+| `503`     | Start se nezdařil (chyba procesu — viz `lastError`)     |
 
-**Schéma ServiceStatus:**
+**schéma ServiceStatus :**
 
 ```json
 {
@@ -278,37 +273,34 @@ Spustí 9Router. Pokud ještě není zaregistrován správce, zaregistruje jej a
 
 #### `POST /api/services/9router/stop`
 
-Korektně zastaví 9Router. Odešle SIGTERM, počká 15 s a poté odešle SIGKILL, pokud proces stále běží.
-Pokud je služba již zastavena, je operace idempotentní.
+Pěkně zastavte 9Router. Odešle SIGTERM, počká 15 s, pak SIGKILL pokud je stále naživu. Idempotentní, když je již zastaven.
 
-**Tělo požadavku:** žádné
+**Tělo požadavku:** žádný
 
 **Odpovědi:**
 
-| Stav  | Popis                              |
-| ----- | ---------------------------------- |
-| `200` | `ServiceStatus` (state: "stopped") |
-| `503` | Zastavení neočekávaně selhalo      |
+| Postavení | Popis                               |
+| --------- | ----------------------------------- |
+| `200`     | `ServiceStatus` (stav: "zastaveno") |
+| `503`     | Zastavení se neočekávaně nezdařilo  |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-Odpovídá volání `stop()` a následně `start()` pod zámkem operace.
+Ekvivalent `stop()` pak `start()` pod zámkem operace.
 
-**Tělo požadavku:** žádné
+**Tělo požadavku:** žádný
 
-**Odpovědi:** stejné jako u `start` (vrací výsledný `ServiceStatus`).
+**Odpovědi:** stejné jako `start` (vrací konečné `ServiceStatus`).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-Aktualizuje 9Router na novější verzi npm. Pokud služba běží, nejprve se zastaví,
-poté se spustí instalace npm (novější verze se nainstaluje na stejné místo)
-a služba se následně restartuje.
+Aktualizuje 9Router na novější verzi npm. Pokud je služba spuštěna, je nejprve zastavena, spustí se npm install (instalace novější verze na místě) a poté se služba restartuje.
 
-**Tělo požadavku** (vše volitelné):
+**Tělo žádosti** (vše volitelné):
 
 ```json
 { "version": "latest" }
@@ -316,46 +308,43 @@ a služba se následně restartuje.
 
 **Odpovědi:**
 
-| Stav  | Popis                                                           |
-| ----- | --------------------------------------------------------------- |
-| `200` | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400` | Neplatné tělo                                                   |
-| `500` | Aktualizace npm selhala                                         |
+| Postavení | Popis                                                           |
+| --------- | --------------------------------------------------------------- |
+| `200`     | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
+| `400`     | Neplatné tělo                                                   |
+| `500`     | Aktualizace npm se nezdařila                                    |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-Vygeneruje nový klíč API pro 9Router, zašifruje jej pro uložení a restartuje službu
-(pokud běží), aby nový klíč načetla ze svého prostředí. Platnost starého klíče
-je okamžitě zrušena.
+Vygeneruje nový klíč API pro 9Router, zašifruje jej v klidu a restartuje službu (pokud je spuštěna), aby si vyzvedla nový klíč ze svého prostředí. Starý klíč je okamžitě zneplatněn.
 
-**Tělo požadavku:** žádné
+**Tělo požadavku:** žádný
 
 **Odpovědi:**
 
-| Stav  | Popis                                      |
-| ----- | ------------------------------------------ |
-| `200` | `{ keyRotated: true, restarted: boolean }` |
-| `500` | Rotace selhala                             |
+| Postavení | Popis                                      |
+| --------- | ------------------------------------------ |
+| `200`     | `{ keyRotated: true, restarted: boolean }` |
+| `500`     | Otočení se nezdařilo                       |
 
-**Zabezpečení:** Nový klíč se v odpovědi nikdy nevrací (nedochází k úniku přihlašovacích údajů).
-Je uložen v zašifrované podobě (AES-256-GCM) v tabulce `version_manager`.
+**Zabezpečení:** Nový klíč není v odpovědi nikdy vrácen (žádné nevracení pověření). Je uložen zašifrovaný (AES-256-GCM) v tabulce `version_manager`.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-Vrací kombinovaný aktuální stav a stav z DB, včetně metadat verze a náhledu klíče API.
+Vrátí kombinovaný živý stav + DB včetně metadat verze a náhledu klíče API.
 
 **Odpovědi:**
 
-| Stav  | Popis               |
-| ----- | ------------------- |
-| `200` | Viz schéma níže     |
-| `500` | Čtení stavu selhalo |
+| Postavení | Popis                    |
+| --------- | ------------------------ |
+| `200`     | Viz schéma níže          |
+| `500`     | Čtení stavu se nezdařilo |
 
-**Schéma odpovědi:**
+**Schéma odezvy:**
 
 ```json
 {
@@ -379,8 +368,7 @@ Vrací kombinovaný aktuální stav a stav z DB, včetně metadat verze a náhle
 
 #### `POST /api/services/9router/auto-start`
 
-Přepne příznak automatického spuštění. Když je `enabled: true`, služba se automaticky spustí
-při příštím spuštění OmniRoute (pokud je služba nainstalována).
+Přepněte příznak automatického spuštění. Když `enabled: true`, služba se spustí automaticky při příštím spuštění OmniRoute (pokud je služba nainstalována).
 
 **Tělo požadavku:**
 
@@ -390,186 +378,187 @@ při příštím spuštění OmniRoute (pokud je služba nainstalována).
 
 **Odpovědi:**
 
-| Stav  | Popis                 |
-| ----- | --------------------- |
-| `200` | `{ autoStart: true }` |
-| `400` | Neplatné tělo         |
+| Postavení | Popis                 |
+| --------- | --------------------- |
+| `200`     | `{ autoStart: true }` |
+| `400`     | Neplatné tělo         |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-SSE stream živých protokolů z kruhové vyrovnávací paměti stdout/stderr služby 9Router.
+SSE stream živých protokolů z kruhové vyrovnávací paměti stdout/stderr společnosti 9Router.
 
 **Parametry dotazu:**
 
-| Parametr | Typ       | Výchozí | Popis                                                                            |
-| -------- | --------- | ------- | -------------------------------------------------------------------------------- |
-| `tail`   | `integer` | 200     | Počet historických řádků, které se mají odeslat jako první (max. 1000)           |
-| `filter` | `string`  | žádný   | Filtr podřetězce bez rozlišení velikosti písmen (bez regexu — odolný vůči ReDoS) |
+| Param    | Typ       | Výchozí | Popis                                                                               |
+| -------- | --------- | ------- | ----------------------------------------------------------------------------------- |
+| `tail`   | `integer` | 200     | Kolik historických řádků odeslat jako první (max. 1000)                             |
+| `filter` | `string`  | žádný   | Filtr podřetězců bez ohledu na velikost písmen (žádný regulární výraz — ReDoS-safe) |
 
-**Události SSE:**
+**události SSE :**
 
-| Událost     | Data        | Popis                          |
-| ----------- | ----------- | ------------------------------ |
-| `snapshot`  | `LogLine[]` | Počáteční konec historie       |
-| `log`       | `LogLine`   | Řádek živého protokolu         |
-| `heartbeat` | `{}`        | Udržování spojení každých 15 s |
+| Událost     | Data        | Popis                             |
+| ----------- | ----------- | --------------------------------- |
+| `snapshot`  | `LogLine[]` | Počáteční historický ocas         |
+| `log`       | `LogLine`   | Živá čára protokolu               |
+| `heartbeat` | `{}`        | Udržujte naživu každých 15 sekund |
 
-**Schéma LogLine:**
+**schéma LogLine :**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
 **Odpovědi:**
 
-| Stav  | Popis                                                |
-| ----- | ---------------------------------------------------- |
-| `200` | `text/event-stream`                                  |
-| `400` | Parametr `filter` je příliš dlouhý (> 200 znaků)     |
-| `404` | Služba nebyla nalezena (supervizor není registrován) |
+| Postavení | Popis                                            |
+| --------- | ------------------------------------------------ |
+| `200`     | `text/event-stream`                              |
+| `400`     | Parametr `filter` je příliš dlouhý (> 200 znaků) |
+| `404`     | Služba nenalezena (nadřízený není registrován)   |
 
 ---
 
-### 4.2 Koncové body CLIProxyAPI (10 tras)
+### 4,2 CLIProxyAPI koncové body (10 tras)
 
-CLIProxyAPI má stejnou strukturu koncových bodů jako 9Router, avšak bez `rotate-key`
-a navíc s `accounts`, `provider-expose` a `auto-restart-adopted`. Nyní při spuštění
-dostává vyhrazený klíč API datové roviny (`needsApiKey: true` v
-`bootstrap.ts`, používaný k synchronizaci modelů); `status` obsahuje méně polí.
+CLIProxyAPI má stejný tvar koncového bodu jako 9Router mínus `rotate-key` plus `accounts`, `provider-expose` a `auto-restart-adopted`. Nyní obdrží vyhrazený klíč datové roviny API vložený při spawn (`needsApiKey: true` v `bootstrap.ts`, používá se pro synchronizaci modelu); `status` obsahuje méně polí.
 
-| Metoda | Cesta                               | Popis                                        |
-| ------ | ----------------------------------- | -------------------------------------------- |
-| `POST` | `/api/services/cliproxy/install`    | Nainstalovat CLIProxyAPI z npm               |
-| `POST` | `/api/services/cliproxy/start`      | Spustit CLIProxyAPI                          |
-| `POST` | `/api/services/cliproxy/stop`       | Zastavit CLIProxyAPI                         |
-| `POST` | `/api/services/cliproxy/restart`    | Restartovat CLIProxyAPI                      |
-| `POST` | `/api/services/cliproxy/update`     | Aktualizovat na novější verzi                |
-| `GET`  | `/api/services/cliproxy/status`     | Aktuální stav + stav DB (bez `apiKeyMasked`) |
-| `POST` | `/api/services/cliproxy/auto-start` | Přepnout automatické spouštění               |
+| Metoda | Cesta                               | Popis                               |
+| ------ | ----------------------------------- | ----------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | Nainstalujte CLIProxyAPI z npm      |
+| `POST` | `/api/services/cliproxy/start`      | Začněte CLIProxyAPI                 |
+| `POST` | `/api/services/cliproxy/stop`       | Stop CLIProxyAPI                    |
+| `POST` | `/api/services/cliproxy/restart`    | Restartujte CLIProxyAPI             |
+| `POST` | `/api/services/cliproxy/update`     | Aktualizujte na novější verzi       |
+| `GET`  | `/api/services/cliproxy/status`     | Živý stav + DB (bez `apiKeyMasked`) |
+| `POST` | `/api/services/cliproxy/auto-start` | Přepnout automatické spuštění       |
 
-Sdílený koncový bod `GET /api/services/{name}/logs` (viz §4.1) funguje pro všechny
-čtyři služby pomocí dynamického segmentu `[name]`.
+Sdílený koncový bod `GET /api/services/{name}/logs` (viz §4.1) funguje pro všechny čtyři služby pomocí dynamického segmentu `[name]`.
 
 ---
 
 ### 4.3 Koncové body Mux (8 tras)
 
-Mux má stejnou strukturu koncových bodů jako CLIProxyAPI — na povrchu API není trasa
-`rotate-key` (bearer token se generuje stejným způsobem jako u 9Router prostřednictvím
-`getOrCreateApiKey("mux")` a předává se pomocí proměnné prostředí `MUX_SERVER_AUTH_TOKEN`,
-ale zatím neexistuje žádný vyhrazený koncový bod pro jeho rotaci). U Mux se spravuje
-pouze životní cyklus: na rozdíl od 9Router nemá žádný executor vrstvy 4 a nikdy se
-neregistruje jako poskytovatel směrování.
+Mux má stejný tvar koncového bodu jako CLIProxyAPI — no `rotate-key` route na povrchu API (nosič je generován stejným způsobem jako 9Router přes `getOrCreateApiKey("mux")` a injektován přes `MUX_SERVER_AUTH_TOKEN` env var, ale zatím neexistuje vyhrazený koncový bod rotace). Mux je řízen pouze během životního cyklu: na rozdíl od 9Router nemá spouštěč vrstvy 4 a nikdy není registrován jako poskytovatel směrování.
 
 | Metoda | Cesta                          | Popis                                |
 | ------ | ------------------------------ | ------------------------------------ |
-| `POST` | `/api/services/mux/install`    | Nainstalovat Mux z npm (`npm i mux`) |
+| `POST` | `/api/services/mux/install`    | Nainstalujte Mux z npm (`npm i mux`) |
 | `POST` | `/api/services/mux/start`      | Spustit Mux (`mux server`)           |
-| `POST` | `/api/services/mux/stop`       | Zastavit Mux                         |
-| `POST` | `/api/services/mux/restart`    | Restartovat Mux                      |
-| `POST` | `/api/services/mux/update`     | Aktualizovat na novější verzi npm    |
-| `GET`  | `/api/services/mux/status`     | Aktuální stav + stav DB              |
-| `POST` | `/api/services/mux/auto-start` | Přepnout automatické spouštění       |
+| `POST` | `/api/services/mux/stop`       | Zastavte Mux                         |
+| `POST` | `/api/services/mux/restart`    | Restartujte Mux                      |
+| `POST` | `/api/services/mux/update`     | Aktualizujte na novější verzi npm    |
+| `GET`  | `/api/services/mux/status`     | Živý stav + DB                       |
+| `POST` | `/api/services/mux/auto-start` | Přepnout automatické spuštění        |
 
 ---
 
 ### 4.4 Koncové body Bifrost (8 tras)
 
-Bifrost je backend přenosové brány AI napsaný v Go (`@maximhq/bifrost`). Používá
-stejnou strukturu koncových bodů jako CLIProxyAPI (bez `rotate-key` — Bifrost spravuje
-vlastní klíče poskytovatelů v souboru `config.json` ve svém `-app-dir`).
+Bifrost je backend relé Go AI brány (`@maximhq/bifrost`). Používá stejný tvar koncového bodu jako CLIProxyAPI (žádné `rotate-key` — Bifrost spravuje své vlastní klíče poskytovatele v `config.json` pod svým `-app-dir`).
 
-| Metoda | Cesta                              | Popis                                                                   |
-| ------ | ---------------------------------- | ----------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | Nainstalovat Bifrost z npm (`@maximhq/bifrost`)                         |
-| `POST` | `/api/services/bifrost/start`      | Spustit Bifrost na portu 8080 (výchozí hodnota)                         |
-| `POST` | `/api/services/bifrost/stop`       | Zastavit Bifrost                                                        |
-| `POST` | `/api/services/bifrost/restart`    | Restartovat Bifrost                                                     |
-| `POST` | `/api/services/bifrost/update`     | Aktualizovat na novější verzi                                           |
-| `GET`  | `/api/services/bifrost/status`     | Aktuální stav + stav DB                                                 |
-| `POST` | `/api/services/bifrost/auto-start` | Přepnout automatické spouštění                                          |
-| `GET`  | `/api/services/bifrost/logs`       | Konec protokolu přes SSE (pomocí sdílené dynamické trasy `[name]/logs`) |
+| Metoda | Cesta                              | Popis                                                                 |
+| ------ | ---------------------------------- | --------------------------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | Nainstalujte Bifrost z npm (`@maximhq/bifrost`)                       |
+| `POST` | `/api/services/bifrost/start`      | Spustit Bifrost na portu 8080 (výchozí)                               |
+| `POST` | `/api/services/bifrost/stop`       | Zastavte Bifrost                                                      |
+| `POST` | `/api/services/bifrost/restart`    | Restartujte Bifrost                                                   |
+| `POST` | `/api/services/bifrost/update`     | Aktualizujte na novější verzi                                         |
+| `GET`  | `/api/services/bifrost/status`     | Živý stav + DB                                                        |
+| `POST` | `/api/services/bifrost/auto-start` | Přepnout automatické spuštění                                         |
+| `GET`  | `/api/services/bifrost/logs`       | SSE log tail (prostřednictvím sdílené dynamické trasy `[name]/logs` ) |
 
-**Zapojení směrování:** Pokud není nastavena proměnná `BIFROST_BASE_URL` a
-spravovaná instance Bifrost běží, funkce `getBifrostRoutingConfig()` (v souboru
-`routingBackend.ts`) automaticky použije `http://127.0.0.1:{port}` jako základní URL
-přenosové služby. Explicitně nastavená proměnná prostředí `BIFROST_BASE_URL` má vždy
-přednost.
+**Vedení kabeláže:** Když není `BIFROST_BASE_URL` nastaveno a je spuštěna dozorovaná instance Bifrost, `getBifrostRoutingConfig()` (v `routingBackend.ts`) automaticky použije `http://127.0.0.1:{port}` jako základ přenosu URL. Explicitní `BIFROST_BASE_URL` env má vždy přednost.
 
 ---
 
 ### 4.5 Koncové body Dario (12 tras)
 
-Stejná struktura životního cyklu jako u ostatních služeb (`install`, `start`, `stop`,
-`restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) plus řídicí
-rovina OAuth chráněná tokenem pod `admin/`: `admin/accounts`,
-`admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (všechny
-chráněné pomocí `DARIO_ADMIN_TOKEN`).
+Stejný tvar životního cyklu jako u ostatních služeb (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) plus řídicí rovina OAuth s tokenovou bránou pod `admin/`: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (vše za `DARIO_ADMIN_TOKEN`).
 
-### 4.6 Koncové body open-wa (7 tras)
+### 4.6 open-wa koncové body (7 cest)
 
-open-wa (`@open-wa/wa-automate`) ovládá bezhlavou instanci Chromia (prostřednictvím
-Puppeteer) za účelem automatizace WhatsApp Web. Používá stejnou strukturu koncových
-bodů jako Mux (zatím bez trasy `rotate-key`). Spravuje se pouze jeho životní cyklus
-— není cílem směrování a nemá žádný executor vrstvy 4 ani záznam poskytovatele.
+open-wa (`@open-wa/wa-automate`) řídí bezhlavou instanci Chromium (prostřednictvím Puppeteer) pro automatizaci WhatsApp Web. Používá stejný tvar koncového bodu jako Mux (zatím žádná `rotate-key` trasa). Je to řízeno pouze — během životního cyklu, není to cíl směrování, žádná položka executor/provider 4. vrstvě.
 
-| Metoda | Cesta                             | Popis                                                                       |
-| ------ | --------------------------------- | --------------------------------------------------------------------------- |
-| `POST` | `/api/services/openwa/install`    | Nainstaluje open-wa z npm (`@open-wa/wa-automate`)                          |
-| `POST` | `/api/services/openwa/start`      | Spustí open-wa na portu 8323 (výchozí)                                      |
-| `POST` | `/api/services/openwa/stop`       | Zastaví open-wa                                                             |
-| `POST` | `/api/services/openwa/restart`    | Restartuje open-wa                                                          |
-| `POST` | `/api/services/openwa/update`     | Aktualizuje na novější verzi                                                |
-| `GET`  | `/api/services/openwa/status`     | Aktuální stav + stav v DB                                                   |
-| `POST` | `/api/services/openwa/auto-start` | Přepne automatické spouštění                                                |
-| `GET`  | `/api/services/openwa/logs`       | SSE výpis protokolu (prostřednictvím sdílené dynamické trasy `[name]/logs`) |
+| Metoda | Cesta                             | Popis                                                                 |
+| ------ | --------------------------------- | --------------------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | Nainstalujte open-wa z npm (`@open-wa/wa-automate`)                   |
+| `POST` | `/api/services/openwa/start`      | Spustit open-wa na portu 8323 (výchozí)                               |
+| `POST` | `/api/services/openwa/stop`       | Zastavit open-wa                                                      |
+| `POST` | `/api/services/openwa/restart`    | Restartujte open-wa                                                   |
+| `POST` | `/api/services/openwa/update`     | Aktualizujte na novější verzi                                         |
+| `GET`  | `/api/services/openwa/status`     | Živý stav + DB                                                        |
+| `POST` | `/api/services/openwa/auto-start` | Přepnout automatické spuštění                                         |
+| `GET`  | `/api/services/openwa/logs`       | SSE log tail (prostřednictvím sdílené dynamické trasy `[name]/logs` ) |
 
-**Klíč API:** je vložen jako `WA_KEY` — obecný mechanismus open-wa pro přepsání
-pomocí proměnných prostředí s předponou `WA_*` jej mapuje na volbu CLI
-`--key`/`-k` (`dist/cli/setup.js::envArgs()`, ověřeno vůči nainstalovanému balíčku
-verze 4.76.0). Při vygenerování pomocí `generateServiceApiKey()` je opatřen předponou
-`ow_`. open-wa načítá klíč z hlavičky HTTP `key`/`api_key` (nikoli
-`Authorization: Bearer`); cesta `/api-docs*` je z kontroly explicitně vyňata
-(`setupAuthenticationLayer` v `dist/cli/server.js`), takže kontrola stavu
-nepotřebuje autentizační hlavičku.
+**klíč API :** vloženo jako `WA_KEY` — open-wa je generické přepsání `WA_*` -prefixed env mapuje na volbu `--key`/`-k` CLI (`dist/cli/setup.js::envArgs()`, ověřeno proti nainstalovanému balíčku 4.76.0). Předpona `ow_` při generování pomocí `generateServiceApiKey()`. open-wa přečte klíč zpět z hlavičky `key`/`api_key` HTTP (nikoli `Authorization: Bearer`); `/api-docs*` je výslovně vyjmuto z kontroly (`setupAuthenticationLayer` v `dist/cli/server.js`), takže sonda stavu nepotřebuje žádnou hlavičku ověření.
 
-**Párování:** open-wa je neoficiální a není přidruženo ke službě WhatsApp —
-u připojeného čísla hrozí riziko zablokování kvůli vlastní detekci automatizace
-služby WhatsApp. Při prvním spuštění se párovací QR kód vypíše na stdout
-a zpřístupní prostřednictvím stávajícího panelu Protokoly / streamu SSE —
-v této integraci zatím neexistuje vyhrazený koncový bod pro obrázek QR kódu.
+**Párování:** open-wa je neoficiální a není přidružený k WhatsApp — připojené číslo nese riziko zákazu z vlastní detekce automatizace WhatsApp. Při prvním spuštění se párovací kód QR vytiskne na stdout a zobrazí se prostřednictvím existujícího streamu Logs panel/SSE — v této integraci zatím není vyhrazený koncový bod QR obrazu.
 
 ---
 
-### 4.7 Reverzní proxy (vložený dashboard 9Router)
+### 4,7 LLMLingua koncové body (8 tras)
 
-Dashboard vkládá webové uživatelské rozhraní 9Router do prvku iframe prostřednictvím
-interní reverzní proxy na adrese:
+LLMLingua je prompt-compression sidecar wrapping `@atjsh/llmlingua-2` (skutečný model klasifikace tokenů ONNX, stažený z Hugging Face při prvním volání `/compress` ). Používá stejný tvar koncového bodu jako Bifrost (žádný klíč API — `needsApiKey: false`, nikdy nezpracovává přihlašovací údaje).
+
+| Metoda | Cesta                                          | Popis                                                                    |
+| ------ | ---------------------------------------------- | ------------------------------------------------------------------------ |
+| `POST` | `/api/services/llmlingua/install`              | npm-install `@atjsh/llmlingua-2` + peers, napište skript serveru sidecar |
+| `POST` | `/api/services/llmlingua/start`                | Spusťte postranní vozík na portu 20135 (výchozí)                         |
+| `POST` | `/api/services/llmlingua/stop`                 | Zastavte postranní vozík                                                 |
+| `POST` | `/api/services/llmlingua/restart`              | Restartujte postranní vozík                                              |
+| `POST` | `/api/services/llmlingua/update`               | Aktualizujte na novější verzi balíčku                                    |
+| `GET`  | `/api/services/llmlingua/status`               | Živý stav + DB                                                           |
+| `POST` | `/api/services/llmlingua/auto-start`           | Přepnout automatické spuštění                                            |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Přepnout automatické restartování přijaté (již existující) instance      |
+| `GET`  | `/api/services/llmlingua/logs`                 | SSE log tail (prostřednictvím sdílené dynamické trasy `[name]/logs` )    |
+
+**Smlouva o postranním vozíku:** serverový skript odkryje `GET /health` (okamžité — nečeká na modelu) a `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). Model se líně načte při prvním volání `/compress`.
+
+**Kompresní kabeláž:** `open-sse/services/compression/engines/llmlingua/index.ts` `httpSidecarBackend` volá `LLMLINGUA_BASE_URL` (výchozí `http://127.0.0.1:20135`) a přijímá odpověď postranního vozíku pouze tehdy, když je přísně kratší než vstup; jakékoli selhání (neběží, vypršel časový limit, odezva bez operace) se vrátí zpět k backendu pracovního vlákna v procesu (`./worker.ts`).
+
+---
+
+### 4.8 koncové body sing-box (8 tras)
+
+sing-box má stejný tvar koncového bodu jako Mux — bez trasy `rotate-key`, bez vkládání klíče API (`needsApiKey: false` v `bootstrap.ts`). Je řízen pouze během životního cyklu: nikdy není poskytovatelem routing/LLM. `install()` stáhne oficiální binární soubor vydání GitHub (`SagerNet/sing-box`) pro připnutou verzi (`SINGBOX_PINNED_VERSION` v `src/lib/services/installers/singbox.ts`) a ověří jeho SHA256 proti kontrolnímu součtu zapečenému do stejného souboru předtím, než jej zapíše na disk — jakákoli jiná požadovaná verze je zamítnuta.
+
+| Metoda | Cesta                                        | Popis                                                                 |
+| ------ | -------------------------------------------- | --------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Stáhněte si + a ověřte vydání připnutého sing-boxu                    |
+| `POST` | `/api/services/singbox/start`                | Spustit sing-box (`sing-box run -c config.json`)                      |
+| `POST` | `/api/services/singbox/stop`                 | Přestaň zpívat                                                        |
+| `POST` | `/api/services/singbox/restart`              | Restartujte sing-box                                                  |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall připnuté uvolnění                                 |
+| `GET`  | `/api/services/singbox/status`               | Živý stav + DB                                                        |
+| `POST` | `/api/services/singbox/auto-start`           | Přepnout automatické spuštění                                         |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Přepnout automatický restart pro přijatý (již existující) proces      |
+| `GET`  | `/api/services/singbox/logs`                 | SSE log tail (prostřednictvím sdílené dynamické trasy `[name]/logs` ) |
+
+**kabeláž TPROXY :** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) zapíše `config.json` a spustí správce, než `applyTproxy()` nainstaluje pravidla brány firewall TPROXY. Pokud supervizor chybí nebo se mu nepodaří dosáhnout `running`, zaznamená se nyní na úrovni chyby (namísto tichého spolknutí selhání), takže operátor může říct, že pravidla TPROXY byla použita, aniž by za nimi stál funkční posluchač.
+
+---
+
+### 4.9 Reverzní proxy (9 vložení řídicího panelu směrovače)
+
+Ovládací panel vkládá 9Router web UI do prvku iframe prostřednictvím interního reverzního proxy na adrese:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 ```
 
-Tato proxy:
+Tento proxy:
 
-- Předává požadavek na `http://127.0.0.1:{port}/{path}` (pouze loopback)
-- Odstraňuje příchozí hlavičky `cookie` a `authorization` (nedochází k úniku relace OmniRoute)
-- Vkládá `Authorization: Bearer {apiKey}` pro autentizaci 9Router
-- Z odpovědi odstraňuje `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
-- Přepisuje odpovědi HTML tak, aby vložila `<base href>` a normalizovala absolutní cesty (`/foo` → `/dashboard/.../embed/foo`)
+- Předá požadavek na `http://127.0.0.1:{port}/{path}` (pouze zpětná smyčka)
+- Odstraní příchozí záhlaví `cookie` a `authorization` (žádný únik relace OmniRoute )
+- Vloží `Authorization: Bearer {apiKey}` pro ověření 9Router
+- Z odpovědi odebere `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
+- Přepíše odpovědi HTML pro vložení `<base href>` a normalizuje absolutní cesty (`/foo` → `/dashboard/.../embed/foo`)
 
-Upgrady WebSocket pro vložený dashboard zpracovává doprovodný server na
-vyhrazeném portu (viz `src/lib/services/embedWsProxy.ts`).
+Upgrady WebSocket pro embedded dashboard jsou řešeny doprovodným serverem na vyhrazeném portu (viz `src/lib/services/embedWsProxy.ts`).
 
-**Zabezpečení:** Trasy vložené proxy jsou klasifikovány pod `LOCAL_ONLY_API_PREFIXES`
-a lze k nim přistupovat pouze z loopbacku. Útočník, který získá JWT prostřednictvím
-tunelu Cloudflare/Ngrok, nemůže využít proxy pro přístup k vloženým službám.
+**Zabezpečení:** Vložené proxy trasy jsou klasifikovány pod `LOCAL_ONLY_API_PREFIXES` a lze se k nim dostat pouze ze zpětné smyčky. Útočník, který získá JWT prostřednictvím tunelu Cloudflare/Ngrok nemůže proxy do embedded služeb.
 
 ---
 

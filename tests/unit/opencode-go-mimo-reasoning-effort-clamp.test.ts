@@ -159,10 +159,10 @@ describe("OpenCode provider family shares the clamp", () => {
     assert.deepEqual(sent, chatBody("mimo-v2.6-pro", "high"));
   });
 
-  it("opencode (noauth) + mimo-v2.5-free clamps max to high on the wire", async (t) => {
+  it("opencode-zen + mimo-v2.5-free clamps max to high on the wire", async (t) => {
     const sent = await captureOutbound(
       t,
-      "opencode",
+      "opencode-zen",
       "mimo-v2.5-free",
       chatBody("mimo-v2.5-free", "max")
     );
@@ -205,7 +205,10 @@ describe("models that accept max on opencode-go still receive max", () => {
         "deepseek-v4-pro",
         chatBody("deepseek-v4-pro", effort)
       );
-      assert.deepEqual(sent, chatBody("deepseek-v4-pro", "max"));
+      // deepseek-v4-pro is a Responses model on Go, so #14142's sanitizer folds the flat field
+      // into the Responses reasoning object; the effort itself stays max.
+      const { reasoning_effort: _flat, ...rest } = chatBody("deepseek-v4-pro", "max");
+      assert.deepEqual(sent, { ...rest, reasoning: { effort: "max", summary: "auto" } });
     });
   }
 

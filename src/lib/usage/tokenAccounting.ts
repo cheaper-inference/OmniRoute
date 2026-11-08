@@ -23,6 +23,17 @@ function getPromptTokenDetails(tokens: unknown): JsonRecord {
 export function getPromptCacheReadTokens(tokens: unknown): number {
   const tokenRecord = asRecord(tokens);
   const promptDetails = getPromptTokenDetails(tokenRecord);
+  // Compatibility aliases may contain zero while a later field reports a cache hit.
+  const firstPositive = [
+    tokenRecord.cacheRead,
+    tokenRecord.cache_read_input_tokens,
+    tokenRecord.cached_tokens,
+    promptDetails.cached_tokens,
+  ]
+    .map(toFiniteNumber)
+    .find((value) => value > 0);
+  if (firstPositive !== undefined) return firstPositive;
+
   return toFiniteNumber(
     tokenRecord.cacheRead ??
       tokenRecord.cache_read_input_tokens ??
@@ -103,28 +114,44 @@ export function getLoggedOutputTokens(tokens: unknown): number {
  * Return the reasoning/thinking output token count.
  * Checks multiple field locations used by different providers:
  *   - completion_tokens_details.reasoning_tokens (OpenAI, OpenRouter)
+ *   - output_tokens_details.reasoning_tokens (OpenAI Responses API, Codex)
  *   - reasoning_tokens (GitHub — top-level)
  *   - reasoning (usage_history DB format)
  */
 export function getReasoningTokens(tokens: unknown): number {
   const tokenRecord = asRecord(tokens);
   const completionDetails = asRecord(tokenRecord.completion_tokens_details);
+  const outputDetails = asRecord(tokenRecord.output_tokens_details);
   return toFiniteNumber(
-    tokenRecord.reasoning ?? tokenRecord.reasoning_tokens ?? completionDetails.reasoning_tokens
+    tokenRecord.reasoning ??
+      tokenRecord.reasoning_tokens ??
+      completionDetails.reasoning_tokens ??
+      outputDetails.reasoning_tokens
   );
 }
 
-// Non-greedy, single-capture, no nested variable-length quantifiers → ReDoS-safe.
-const THINK_BLOCK_RE = /<think>([\s\S]*?)<\/think>/gi;
+const THINK_OPEN_RE = /<think>/gi;
+const THINK_CLOSE_RE = /<\/think>/gi;
 
 type ObservedReasoning = { source: "content" | "think" | null; chars: number };
 
+// Two literal searches that only move forward, stopping at the first unclosed tag.
+// One lazy `<think>([\s\S]*?)</think>` retries from every unclosed `<think>`, which
+// is quadratic, and no-log attempts scan the untruncated response on the request path.
 function countThinkTagChars(text: string): number {
   let chars = 0;
-  for (const match of text.matchAll(THINK_BLOCK_RE)) {
-    chars += (match[1] ?? "").length;
+  let cursor = 0;
+  while (true) {
+    THINK_OPEN_RE.lastIndex = cursor;
+    const open = THINK_OPEN_RE.exec(text);
+    if (!open) return chars;
+    const contentStart = open.index + open[0].length;
+    THINK_CLOSE_RE.lastIndex = contentStart;
+    const close = THINK_CLOSE_RE.exec(text);
+    if (!close) return chars;
+    chars += close.index - contentStart;
+    cursor = close.index + close[0].length;
   }
-  return chars;
 }
 
 // #13965: Claude-format content arrays — native Claude bodies, or the same blocks

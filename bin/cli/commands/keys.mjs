@@ -1,3 +1,4 @@
+import { showKeyPolicy, setKeyPolicy } from "../key-policy.mjs";
 import { printHeading } from "../io.mjs";
 import {
   ensureProviderSchema,
@@ -10,6 +11,7 @@ import { openOmniRouteDb } from "../sqlite.mjs";
 import { loadAvailableProviders } from "../provider-catalog.mjs";
 import { apiFetch, isServerUp, isRouteUnavailableStatus } from "../api.mjs";
 import { t } from "../i18n.mjs";
+import { addProviderNodeKey, usesProviderNodeNamespace } from "../provider-node-key.mjs";
 
 function getValidProviderIds() {
   try {
@@ -110,9 +112,11 @@ export function registerKeys(program) {
   policy
     .command("set <id>")
     .description(t("keys.policy.setDescription"))
-    .option("--rate-limit <n>", t("keys.policy.rateLimitOpt"), parseInt)
-    .option("--max-cost <n>", t("keys.policy.maxCostOpt"), parseFloat)
+    .option("--rate-limit <n>", t("keys.policy.rateLimitOpt"))
+    .option("--max-cost <n>", t("keys.policy.maxCostOpt"))
     .option("--allowed-models <list>", t("keys.policy.allowedModelsOpt"))
+    .option("--model-access-mode <mode>", t("keys.policy.modelAccessModeOpt"))
+    .option("--unrestricted", t("keys.policy.unrestrictedOpt"))
     .action(async (id, opts, cmd) => {
       const globalOpts = cmd.parent.parent.optsWithGlobals();
       const exitCode = await runKeysPolicySetCommand(id, { ...opts, ...globalOpts });
@@ -165,6 +169,9 @@ export async function runKeysAddCommand(provider, apiKey, opts = {}) {
   }
 
   const providerLower = provider.toLowerCase();
+  if (usesProviderNodeNamespace(providerLower)) {
+    return addProviderNodeKey(providerLower, key, opts);
+  }
   const validIds = getValidProviderIds();
   if (validIds && !validIds.has(providerLower)) {
     console.error(t("keys.unknownProvider", { provider: providerLower }));
@@ -483,68 +490,11 @@ export async function runKeysUsageCommand(id, opts = {}) {
 }
 
 export async function runKeysPolicyShowCommand(id, opts = {}) {
-  if (!(await isServerUp())) {
-    console.error(t("common.serverOffline"));
-    return 1;
-  }
-  try {
-    const res = await apiFetch(`/api/v1/registered-keys/${encodeURIComponent(id)}/policy`, {
-      acceptNotOk: true,
-      retry: false,
-    });
-    if (!res.ok) {
-      console.error(t("common.error", { message: `HTTP ${res.status}` }));
-      return 1;
-    }
-    const data = await res.json();
-    if (opts.output === "json" || opts.json) {
-      console.log(JSON.stringify(data, null, 2));
-      return 0;
-    }
-    console.log(t("keys.policy.title") + ` (${id}):`);
-    console.log(`  rate_limit:      ${data.rateLimit ?? data.rate_limit ?? "(unset)"}`);
-    console.log(`  max_cost:        ${data.maxCost ?? data.max_cost ?? "(unset)"}`);
-    console.log(
-      `  allowed_models:  ${(data.allowedModels ?? data.allowed_models ?? []).join(", ") || "(all)"}`
-    );
-    return 0;
-  } catch (err) {
-    console.error(t("common.error", { message: err instanceof Error ? err.message : String(err) }));
-    return 1;
-  }
+  return showKeyPolicy(id, opts);
 }
 
 export async function runKeysPolicySetCommand(id, opts = {}) {
-  const body = {};
-  if (opts.rateLimit != null) body.rateLimit = Number(opts.rateLimit);
-  if (opts.maxCost != null) body.maxCost = Number(opts.maxCost);
-  if (opts.allowedModels) body.allowedModels = opts.allowedModels.split(",").map((s) => s.trim());
-
-  if (Object.keys(body).length === 0) {
-    console.error(t("keys.policy.nothingToSet"));
-    return 1;
-  }
-  if (!(await isServerUp())) {
-    console.error(t("common.serverOffline"));
-    return 1;
-  }
-  try {
-    const res = await apiFetch(`/api/v1/registered-keys/${encodeURIComponent(id)}/policy`, {
-      method: "PATCH",
-      body,
-      acceptNotOk: true,
-      retry: false,
-    });
-    if (!res.ok) {
-      console.error(t("common.error", { message: `HTTP ${res.status}` }));
-      return 1;
-    }
-    console.log(t("keys.policy.updated"));
-    return 0;
-  } catch (err) {
-    console.error(t("common.error", { message: err instanceof Error ? err.message : String(err) }));
-    return 1;
-  }
+  return setKeyPolicy(id, opts);
 }
 
 export async function runKeysExpirationListCommand(opts = {}) {

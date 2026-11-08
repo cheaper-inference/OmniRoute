@@ -38,29 +38,29 @@ Studio à trois onglets réunissant la recherche web, l’extraction de contenu 
 
 ### Onglet Recherche
 
-Fait évoluer les composants `SearchForm` + `ResultsPanel` + `RerankPanel` existants pour les intégrer dans un onglet :
+Fait évoluer les composants existants `SearchForm` + `ResultsPanel` + `RerankPanel` pour les intégrer dans un onglet :
 
 - Requête → résultats (titre, URL, extrait, score de pertinence).
-- Métadonnées du fournisseur dans le panneau Configuration (coût, quota, statut).
-- Section de reclassement : sélection d’un modèle de reclassement, réorganisation des résultats et affichage de `positionDelta`.
+- Métadonnées du fournisseur dans le volet Configuration (coût, quota, statut).
+- Section de reclassement : sélectionner un modèle de reclassement, réordonner les résultats, afficher `positionDelta`.
 - État vide avec un appel à l’action lorsqu’aucun fournisseur de recherche n’est configuré.
 - Historique des recherches via `SearchHistory.tsx`.
-- Appelle `POST /v1/search` (point de terminaison existant, aucun changement).
+- Appelle `POST /v1/search` (point de terminaison existant, aucune modification).
 
 ### Onglet Extraction
 
 Nouvel onglet permettant d’extraire le contenu d’une URL via `POST /v1/web/fetch` (créé dans le plan 05) :
 
 - Entrée : URL + option de page complète + sélecteur de format (markdown / texte / HTML).
-- Envoi → récupération → rendu de `ScrapeResult.tsx`.
-- `ScrapeResult` affiche un aperçu du markdown ainsi qu’une option permettant d’afficher le contenu brut.
+- Envoi → récupération → rendu dans `ScrapeResult.tsx`.
+- `ScrapeResult` affiche un aperçu Markdown ainsi qu’une option permettant d’afficher le contenu brut.
 - Limite : si le corps de la réponse dépasse **256 Ko**, l’interface affiche `(tronqué, afficher le contenu brut)` et ouvre le contenu brut dans une fenêtre modale Monaco (D21).
-- Panneau de métadonnées : fournisseur (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latence, coût, taille de la réponse, nombre de liens.
+- Panneau de métadonnées : fournisseur (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latence, coût, taille de la réponse, nombre de liens.
 - Utilise le hook `useScrapeFetch.ts`.
 
 ### Onglet Comparaison
 
-Exécute la même requête/URL auprès de **4 fournisseurs au maximum en parallèle** (D22) :
+Exécute la même requête/URL en parallèle auprès de **4 fournisseurs au maximum** (D22) :
 
 - Colonnes côte à côte pour chaque fournisseur.
 - Métriques : latence, coût, nombre de résultats, taille de la réponse.
@@ -101,12 +101,12 @@ Exécute la même requête/URL auprès de **4 fournisseurs au maximum en parall�
 ## Catalogue des fournisseurs
 
 `ProviderCatalog.tsx` expose la liste complète des fournisseurs provenant de `GET /api/search/providers`
-(étendue dans F4 pour inclure les fournisseurs d’extraction) :
+(étendue dans F4 pour inclure les fournisseurs de récupération) :
 
-| `kind` | `"search"` (20 fournisseurs) ou `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 fournisseurs) ou `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Le statut est **déterminé au moment de la requête** en vérifiant si les identifiants existent et si
-toutes les clés sont actuellement en période de récupération.
+toutes les clés sont actuellement en période de temporisation.
 
 ---
 
@@ -120,15 +120,15 @@ L’espace réservé pour la clé API est toujours `$OMNIROUTE_API_KEY` (D11, pa
 
 ## Modifications du backend
 
-Une seule modification du backend était nécessaire pour cette fonctionnalité :
+Une seule modification du backend a été nécessaire pour cette fonctionnalité :
 
 ### Extension de `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` a été étendu pour :
+`src/app/api/search/providers/route.ts` a été étendu afin de :
 
-- Inclure les 6 fournisseurs d’extraction (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) dans le tableau.
+- Inclure chaque fournisseur de récupération (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) dans le tableau.
 - Ajouter `kind: "search" | "fetch"` à chaque élément.
-- Ajouter `status: "configured" | "missing" | "rate_limited"` déterminé à partir de l’état actuel des identifiants.
+- Ajouter `status: "configured" | "missing" | "rate_limited"`, déterminé à partir de l’état actuel des identifiants.
 - Maintenir la rétrocompatibilité — les champs existants (`id`, `name`, etc.) restent inchangés.
 
 ---

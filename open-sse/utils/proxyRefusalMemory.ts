@@ -15,6 +15,7 @@ import type {
   RefusalState,
   SharedRefusalStore,
   SlowOverrun,
+  SlowServe,
   TransportFailure,
   TransportSuccess,
 } from "./proxyTransitionListeners.ts";
@@ -68,6 +69,7 @@ export const REFUSAL_POLICIES: {
   transport: { baseMs: 60_000; maxMs: 600_000 };
   slow: { baseMs: 60_000; maxMs: 600_000 };
   geo_blocked: { baseMs: 60_000; maxMs: 600_000 };
+  operator_reported: { baseMs: 60_000; maxMs: 600_000 };
 } = {
   /** The TCP probe could not open a connection to the proxy. */
   proxy_unreachable: { baseMs: 60_000, maxMs: 600_000 },
@@ -87,6 +89,8 @@ export const REFUSAL_POLICIES: {
   slow: { baseMs: 60_000, maxMs: 600_000 },
   /** The provider refused this region through this member; short set-aside. */
   geo_blocked: { baseMs: 60_000, maxMs: 600_000 },
+  /** The operator reported this member as failed; short set-aside. */
+  operator_reported: { baseMs: 60_000, maxMs: 600_000 },
 };
 
 export type ProxyRefusalKind = keyof typeof REFUSAL_POLICIES;
@@ -219,8 +223,18 @@ export function proxyEgressKey(proxy: unknown): string | null {
   }
 }
 
-function entryId(key: string, kind: ProxyRefusalKind): string {
-  return `${kind} ${key}`;
+// The model dimension is optional and only the quota kind has one: when the caller knows
+// which model just hit a quota 429 it is appended, so one model's refusal does not set
+// aside the whole egress for every other model. Egress-health kinds always stay model-less.
+// NUL cannot occur in an egress key or a model id, so a scoped id never aliases another.
+// When the model is absent the id is byte-identical to the model-less form.
+const MODEL_SCOPED_KIND: ProxyRefusalKind = "ip_quota_429";
+const MODEL_SEPARATOR = "\u0000";
+
+function entryId(key: string, kind: ProxyRefusalKind, model?: string | null): string {
+  return model && kind === MODEL_SCOPED_KIND
+    ? `${kind} ${key}${MODEL_SEPARATOR}${model}`
+    : `${kind} ${key}`;
 }
 
 /**
@@ -251,15 +265,21 @@ function readMemberState(
 }
 
 // Shared insert: same curve, same seq, same oldest-first eviction as entries.
-function insertState(key: string, kind: ProxyRefusalKind, nowMs: number): number {
-  const state = readState(key, kind, nowMs);
+function insertState(
+  key: string,
+  kind: ProxyRefusalKind,
+  nowMs: number,
+  model?: string | null
+): number {
+  const state = readState(key, kind, nowMs, model);
   if (state && state.until > nowMs) return -1;
   const policy = REFUSAL_POLICIES[kind];
   const streak = (state?.streak ?? 0) + 1;
   const periodMs = Math.min(policy.baseMs * 2 ** (streak - 1), policy.maxMs);
-  const id = entryId(key, kind);
+  const id = entryId(key, kind, model);
   memory.delete(id);
   memory.set(id, { streak, until: nowMs + periodMs, seq: ++store.seq.value });
+  if (model && kind === MODEL_SCOPED_KIND) store.modelScopedSeen = true;
   if (memory.size > MAX_ENTRIES) {
     const oldest = memory.keys().next().value;
     if (oldest !== undefined) memory.delete(oldest);
@@ -267,9 +287,16 @@ function insertState(key: string, kind: ProxyRefusalKind, nowMs: number): number
   return periodMs;
 }
 
-// Read one (key, kind) state, dropping it once its period ended more than 2 x maxMs ago.
-function readState(key: string, kind: ProxyRefusalKind, nowMs: number): RefusalState | undefined {
-  const id = entryId(key, kind);
+// Read one (key, kind, model?) state, dropping it once its period ended more
+// than 2 x maxMs ago. When model is null/undefined the key is the model-less
+// form; otherwise the model-scoped form.
+function readState(
+  key: string,
+  kind: ProxyRefusalKind,
+  nowMs: number,
+  model?: string | null
+): RefusalState | undefined {
+  const id = entryId(key, kind, model);
   const state = memory.get(id);
   if (state && nowMs - state.until >= 2 * REFUSAL_POLICIES[kind].maxMs) {
     memory.delete(id);
@@ -278,20 +305,84 @@ function readState(key: string, kind: ProxyRefusalKind, nowMs: number): RefusalS
   return state;
 }
 
-/** Set a proxy aside for `kind`. Returns the new period in ms, or null if nothing changed. */
+// Every model-scoped state of one (key, kind), dropped once stale like readState. Skips the
+// scan until something was actually written with a model.
+function readModelScopedStates(
+  key: string,
+  kind: ProxyRefusalKind,
+  nowMs: number
+): Array<{ id: string; state: RefusalState }> {
+  if (!store.modelScopedSeen || kind !== MODEL_SCOPED_KIND) return [];
+  const prefix = `${kind} ${key}${MODEL_SEPARATOR}`;
+  const found: Array<{ id: string; state: RefusalState }> = [];
+  for (const [id, state] of memory) {
+    if (!id.startsWith(prefix)) continue;
+    if (nowMs - state.until >= 2 * REFUSAL_POLICIES[kind].maxMs) memory.delete(id);
+    else found.push({ id, state });
+  }
+  return found;
+}
+
+// One state answering for several: a newer entry that already ended must not hide an older one
+// still in force. Keeps the end and streak of the set-aside lasting longest, and the newest seq.
+function mergeStates(
+  states: Array<RefusalState | undefined>,
+  nowMs: number
+): RefusalState | undefined {
+  const present = states.filter((state): state is RefusalState => state !== undefined);
+  if (present.length <= 1) return present[0];
+  const newestSeq = Math.max(...present.map((state) => state.seq));
+  const inForce = present.filter((state) => state.until > nowMs);
+  if (inForce.length === 0) return present.find((state) => state.seq === newestSeq);
+  const longest = inForce.reduce((a, b) => (b.until > a.until ? b : a));
+  const seq = Math.max(...inForce.map((state) => state.seq));
+  return { streak: longest.streak, until: longest.until, seq };
+}
+
+/**
+ * The set-aside in force for a (key, kind), as this reader may see it. A reader that names a
+ * model sees that model's entry and the model-less one, so model-less kinds and writers are never
+ * hidden from it. A reader with no model (pool rotation, park and replay, admin visibility,
+ * selector trigger, health sweep) cares about the egress as a whole and sees every model's entry.
+ */
+function readVisibleState(
+  key: string,
+  kind: ProxyRefusalKind,
+  nowMs: number,
+  model?: string | null
+): RefusalState | undefined {
+  const shared = readState(key, kind, nowMs);
+  if (model) return mergeStates([readState(key, kind, nowMs, model), shared], nowMs);
+  const scoped = readModelScopedStates(key, kind, nowMs).map(({ state }) => state);
+  return scoped.length === 0 ? shared : mergeStates([shared, ...scoped], nowMs);
+}
+
+/**
+ * Set a proxy aside for `kind`. Returns the new period in ms, or null if
+ * nothing changed. When `model` is given the entry is scoped to that model so
+ * one model's 429 does not set aside the egress for every other model.
+ */
 export function noteProxyRefusal(
   key: string | null,
   kind: ProxyRefusalKind,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
+  model?: string | null
 ): number | null {
   if (key === null) return null;
-  const before = readState(key, kind, nowMs);
-  const periodMs = insertState(key, kind, nowMs);
+  const before = readState(key, kind, nowMs, model);
+  const periodMs = insertState(key, kind, nowMs, model);
   if (periodMs < 0) return null;
   const streak = (before?.streak ?? 0) + 1;
-  notifyProxyTransition({ key, kind, periodMs, until: nowMs + periodMs });
+  notifyProxyTransition({
+    key,
+    kind,
+    periodMs,
+    until: nowMs + periodMs,
+    ...(model && kind === MODEL_SCOPED_KIND ? { model } : {}),
+  });
   console.warn(
-    `[ProxyRefusalMemory] set aside ${describeEgressForLog(key)} kind=${kind} periodMs=${periodMs} streak=${streak}`
+    `[ProxyRefusalMemory] set aside ${describeEgressForLog(key)} kind=${kind} periodMs=${periodMs} streak=${streak}` +
+      (model ? ` model=${model}` : "")
   );
   return periodMs;
 }
@@ -319,32 +410,60 @@ export function noteProxyMemberRefusal(
   return periodMs;
 }
 
-/** The proxy answered again: end its period now, keep the streak so a repeat doubles. */
-export function noteProxyRecovered(
-  key: string | null,
+// End one state's period now, keeping its streak so a repeat doubles.
+function endSetAside(
+  key: string,
   kind: ProxyRefusalKind,
-  nowMs: number = Date.now()
+  state: RefusalState | undefined,
+  nowMs: number,
+  model?: string | null
 ): void {
-  if (key === null) return;
-  const state = readState(key, kind, nowMs);
   if (!state || state.until <= nowMs) return;
   const policy = REFUSAL_POLICIES[kind];
   const periodMs = Math.min(policy.baseMs * 2 ** (state.streak - 1), policy.maxMs);
   const setAsideAt = state.until - periodMs;
   console.warn(
-    `[ProxyRefusalMemory] recovered ${describeEgressForLog(key)} kind=${kind} setAsideMs=${nowMs - setAsideAt} streak=${state.streak}`
+    `[ProxyRefusalMemory] recovered ${describeEgressForLog(key)} kind=${kind} setAsideMs=${nowMs - setAsideAt} streak=${state.streak}` +
+      (model ? ` model=${model}` : "")
   );
   state.until = nowMs;
 }
 
-/** A response came back through this proxy: forget every refusal kind for it. */
-export function noteProxyServed(key: string | null): void {
+/**
+ * The proxy answered again: end its period now, keep the streak so a repeat doubles. With no
+ * model this is egress-level proof (the health sweep's probe), so it ends every model's entry of
+ * this kind, exactly what it ended before entries had a model. With a model it ends only that one.
+ */
+export function noteProxyRecovered(
+  key: string | null,
+  kind: ProxyRefusalKind,
+  nowMs: number = Date.now(),
+  model?: string | null
+): void {
   if (key === null) return;
-  for (const kind of REFUSAL_KINDS) memory.delete(entryId(key, kind));
+  endSetAside(key, kind, readState(key, kind, nowMs, model), nowMs, model);
+  if (model) return;
+  for (const { id, state } of readModelScopedStates(key, kind, nowMs)) {
+    endSetAside(key, kind, state, nowMs, id.slice(id.indexOf(MODEL_SEPARATOR) + 1));
+  }
 }
 
-export function isProxyAvoided(key: string | null, nowMs: number = Date.now()): boolean {
-  return proxySetAsideSeq(key, nowMs) !== null;
+/**
+ * A response came back through this proxy: forget every refusal kind for it. A success says
+ * nothing about another model's quota, so model-scoped entries only clear for the model served.
+ */
+export function noteProxyServed(key: string | null, model?: string | null): void {
+  if (key === null) return;
+  for (const kind of REFUSAL_KINDS) memory.delete(entryId(key, kind));
+  if (model) for (const kind of REFUSAL_KINDS) memory.delete(entryId(key, kind, model));
+}
+
+export function isProxyAvoided(
+  key: string | null,
+  nowMs: number = Date.now(),
+  model?: string | null
+): boolean {
+  return proxySetAsideSeq(key, nowMs, model) !== null;
 }
 
 /**
@@ -352,11 +471,15 @@ export function isProxyAvoided(key: string | null, nowMs: number = Date.now()): 
  * null when it is not set aside. Compare with getProxyRefusalSeq() captured earlier to
  * know whether the event happened after that point.
  */
-export function proxySetAsideSeq(key: string | null, nowMs: number = Date.now()): number | null {
+export function proxySetAsideSeq(
+  key: string | null,
+  nowMs: number = Date.now(),
+  model?: string | null
+): number | null {
   if (key === null || memory.size === 0) return null;
   let latest: number | null = null;
   for (const kind of REFUSAL_KINDS) {
-    const state = readState(key, kind, nowMs);
+    const state = readVisibleState(key, kind, nowMs, model);
     if (state && state.until > nowMs && (latest === null || state.seq > latest)) {
       latest = state.seq;
     }
@@ -378,14 +501,13 @@ export interface ProxySetAsideSnapshot {
   streak: number;
 }
 
-export function snapshotProxySetAside(
-  key: string | null,
-  nowMs: number = Date.now()
+function snapshotLatestSetAside(
+  read: (kind: ProxyRefusalKind) => RefusalState | undefined,
+  nowMs: number
 ): ProxySetAsideSnapshot | null {
-  if (key === null || memory.size === 0) return null;
   let latest: (ProxySetAsideSnapshot & { seq: number }) | null = null;
   for (const kind of REFUSAL_KINDS) {
-    const state = readState(key, kind, nowMs);
+    const state = read(kind);
     if (!state || state.until <= nowMs || (latest !== null && state.seq <= latest.seq)) continue;
     // Recompute the period from the stored streak with the same doubling curve as
     // noteProxyRefusal so setAsideAt = until - periodMs (read-only, no state change).
@@ -404,6 +526,48 @@ export function snapshotProxySetAside(
   return snapshot;
 }
 
+export function snapshotProxySetAside(
+  key: string | null,
+  nowMs: number = Date.now(),
+  model?: string | null
+): ProxySetAsideSnapshot | null {
+  if (key === null || memory.size === 0) return null;
+  return snapshotLatestSetAside((kind) => readVisibleState(key, kind, nowMs, model), nowMs);
+}
+
+/**
+ * Read-only set-aside state across every refusal motive still in force for
+ * one proxy egress key. Unlike the latest-event snapshot above, quotaOnly is
+ * true only when every motive in force is a quota refusal, and endsAt is the
+ * end of the real set-aside (the latest motive end), so one stale slow or
+ * transport record cannot pass the quota filter by recency.
+ */
+export interface ProxySetAsideStatus {
+  setAside: boolean;
+  quotaOnly: boolean;
+  endsAt: number | null;
+}
+
+export function proxySetAsideStatus(
+  key: string | null,
+  nowMs: number = Date.now(),
+  model?: string | null
+): ProxySetAsideStatus {
+  if (key === null || memory.size === 0) return { setAside: false, quotaOnly: false, endsAt: null };
+  let found = false;
+  let quotaOnly = true;
+  let endsAt = 0;
+  for (const kind of REFUSAL_KINDS) {
+    const state = readVisibleState(key, kind, nowMs, model);
+    if (!state || state.until <= nowMs) continue;
+    found = true;
+    if (kind !== "ip_quota_429") quotaOnly = false;
+    if (state.until > endsAt) endsAt = state.until;
+  }
+  if (!found) return { setAside: false, quotaOnly: false, endsAt: null };
+  return { setAside: true, quotaOnly, endsAt };
+}
+
 /**
  * Read-only snapshot of the set-aside state still in force for one
  * (entry, selector member) pair, or null when the member is not set aside.
@@ -417,23 +581,7 @@ export function snapshotMemberSetAside(
   nowMs: number = Date.now()
 ): ProxySetAsideSnapshot | null {
   if (entryKey === null || member === null || memory.size === 0) return null;
-  let latest: (ProxySetAsideSnapshot & { seq: number }) | null = null;
-  for (const kind of REFUSAL_KINDS) {
-    const state = readMemberState(entryKey, member, kind, nowMs);
-    if (!state || state.until <= nowMs || (latest !== null && state.seq <= latest.seq)) continue;
-    const policy = REFUSAL_POLICIES[kind];
-    const periodMs = Math.min(policy.baseMs * 2 ** (state.streak - 1), policy.maxMs);
-    latest = {
-      kind,
-      setAsideAt: state.until - periodMs,
-      endsAt: state.until,
-      streak: state.streak,
-      seq: state.seq,
-    };
-  }
-  if (!latest) return null;
-  const { seq: _seq, ...snapshot } = latest;
-  return snapshot;
+  return snapshotLatestSetAside((kind) => readMemberState(entryKey, member, kind, nowMs), nowMs);
 }
 
 /**
@@ -534,6 +682,7 @@ export function hasProxyRefusals(): boolean {
 /** Test-only: forget everything. */
 export function __resetProxyRefusalMemoryForTesting(): void {
   memory.clear();
+  store.modelScopedSeen = false;
 }
 
 /**
@@ -682,13 +831,18 @@ export const SLOW_OVERRUN_THRESHOLD = 3;
 const MAX_SLOW_OVERRUNS = 1000;
 
 const slowOverruns: SlowOverrun[] = store.slowOverruns;
+const slowServes: SlowServe[] = store.slowServes;
 
 // Lazy purge mirrors readState: entries older than the evidence window plus
-// twice the slow cap can no longer contribute, so drop them on record.
+// twice the slow cap can no longer contribute, so drop them on record. Slow
+// serves share the same window, so one purge covers both stores.
 function purgeSlowOverruns(nowMs: number): void {
   const cutoff = nowMs - SLOW_OVERRUN_WINDOW_MS - 2 * REFUSAL_POLICIES.slow.maxMs;
   while (slowOverruns.length > 0 && slowOverruns[0].at < cutoff) {
     slowOverruns.shift();
+  }
+  while (slowServes.length > 0 && slowServes[0].at < cutoff) {
+    slowServes.shift();
   }
 }
 
@@ -702,13 +856,30 @@ export function recordSlowOverrun(key: string | null, nowMs: number = Date.now()
 
 /**
  * True when this egress waited out the headers window at least
- * SLOW_OVERRUN_THRESHOLD times inside SLOW_OVERRUN_WINDOW_MS. Overruns for
- * other keys never count.
+ * SLOW_OVERRUN_THRESHOLD times inside SLOW_OVERRUN_WINDOW_MS, with
+ * cross-egress proof: another egress served the same destination inside the
+ * window. Without any other egress active in the window the repetition alone
+ * decides (a lone upstream queue still condemns a lone member). A null
+ * destination keeps the repetition rule (callers without a destination).
  */
-export function hasSlowOverrunEvidence(key: string | null, nowMs: number = Date.now()): boolean {
+export function hasSlowOverrunEvidence(
+  key: string | null,
+  destinationOrNowMs: string | null | number = Date.now(),
+  nowMs: number = Date.now()
+): boolean {
+  const destination = typeof destinationOrNowMs === "number" ? null : (destinationOrNowMs ?? null);
+  const at = typeof destinationOrNowMs === "number" ? destinationOrNowMs : nowMs;
   if (key === null || key === "") return false;
-  purgeSlowOverruns(nowMs);
-  const from = nowMs - SLOW_OVERRUN_WINDOW_MS;
+  if (!hasSlowOverrunRepetition(key, at)) return false;
+  if (destination === null || destination === "") return true;
+  if (hasSlowServeCrossEvidence(key, destination, at)) return true;
+  return !hasOtherSlowEgressActivity(key, at);
+}
+
+// Three settled waits through the same key inside the window: repetition alone.
+function hasSlowOverrunRepetition(key: string, at: number): boolean {
+  purgeSlowOverruns(at);
+  const from = at - SLOW_OVERRUN_WINDOW_MS;
   let overruns = 0;
   for (const o of slowOverruns) {
     if (o.key === key && o.at >= from) {
@@ -719,14 +890,66 @@ export function hasSlowOverrunEvidence(key: string | null, nowMs: number = Date.
   return false;
 }
 
-/** Test-only: forget slow overruns (refusal memory is separate). */
+// Any overrun or serve by another live egress inside the window. The direct
+// sentinel never counts: it can never be accused, so it can never witness.
+function hasOtherSlowEgressActivity(key: string, at: number): boolean {
+  const from = at - SLOW_OVERRUN_WINDOW_MS;
+  for (const o of slowOverruns) {
+    if (o.key !== key && o.key !== "direct" && o.at >= from) return true;
+  }
+  for (const s of slowServes) {
+    if (s.key !== key && s.key !== "direct" && s.at >= from) return true;
+  }
+  return false;
+}
+
+/**
+ * True when another egress served the same destination inside the slow
+ * window: a headers wait answered in time there, so the destination answers
+ * and the accused member — not the destination — is at fault. The egress
+ * itself is never its own witness.
+ */
+export function hasSlowServeCrossEvidence(
+  key: string | null,
+  destination: string | null,
+  nowMs: number = Date.now()
+): boolean {
+  if (key === null || destination === null || destination === "") return false;
+  purgeSlowOverruns(nowMs);
+  const from = nowMs - SLOW_OVERRUN_WINDOW_MS;
+  return slowServes.some((s) => s.destination === destination && s.key !== key && s.at >= from);
+}
+
+/**
+ * Record one headers wait answered in time through this egress. The writers
+ * (never this store) keep the sentinel out: `direct` is never recorded, so
+ * readers need no sentinel filter. Never throws, never writes refusal memory.
+ */
+export function recordSlowServe(
+  key: string | null,
+  destination: string | null,
+  nowMs: number = Date.now()
+): void {
+  if (key === null || key === "" || destination === null || destination === "") return;
+  purgeSlowOverruns(nowMs);
+  slowServes.push({ key, destination, at: nowMs });
+  while (slowServes.length > MAX_SLOW_OVERRUNS) slowServes.shift();
+}
+
+/** Test-only: forget slow overruns and slow serves (refusal memory is separate). */
 export function __resetSlowOverrunsForTesting(): void {
   slowOverruns.length = 0;
+  slowServes.length = 0;
 }
 
 /** Test-only: current slow-overrun store size. */
 export function __slowOverrunSizeForTesting(): number {
   return slowOverruns.length;
+}
+
+/** Test-only: current slow-serve store size. */
+export function __slowServeSizeForTesting(): number {
+  return slowServes.length;
 }
 
 /** Test-only: number of (key, kind) entries held. */

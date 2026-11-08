@@ -6,15 +6,18 @@
  */
 
 import { parseModelFromRegistry, getAllModelsFromRegistry } from "./registryUtils.ts";
+import { toRegistryMusicModels as toSyntxMusicModels } from "../services/syntxMediaCatalog.ts";
 
 interface MusicModel {
   id: string;
   name: string;
   isMarket?: boolean;
+  mediaCapabilities?: Record<string, unknown>;
 }
 
 interface MusicProvider {
   id: string;
+  alias?: string;
   baseUrl: string;
   statusUrl?: string;
   /** Regional deployment of the same contract, reachable via a base-URL override. */
@@ -26,6 +29,18 @@ interface MusicProvider {
 }
 
 export const MUSIC_PROVIDERS: Record<string, MusicProvider> = {
+  elevenlabs: {
+    id: "elevenlabs",
+    baseUrl: "https://api.elevenlabs.io/v1/music",
+    authType: "apikey",
+    authHeader: "xi-api-key",
+    format: "elevenlabs-music",
+    models: [
+      { id: "music_v1", name: "Eleven Music V1" },
+      { id: "music_v2", name: "Eleven Music V2" },
+      { id: "music_v2_5", name: "Eleven Music V2.5" },
+    ],
+  },
   vertex: {
     id: "vertex",
     baseUrl: "https://us-central1-aiplatform.googleapis.com/v1",
@@ -96,6 +111,15 @@ export const MUSIC_PROVIDERS: Record<string, MusicProvider> = {
       { id: "stable-audio-open", name: "Stable Audio Open" },
       { id: "musicgen-medium", name: "MusicGen Medium" },
     ],
+  },
+  syntx: {
+    id: "syntx",
+    alias: "stx",
+    baseUrl: "https://api.syntx.ai/api/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "syntx-music",
+    models: toSyntxMusicModels(),
   },
 };
 

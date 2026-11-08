@@ -30,6 +30,18 @@ function certFilePath() {
   return path.join(certDir(), "server.crt");
 }
 
+// A legacy-leaf install is the server.crt + server.key PAIR with no CA pair
+// (cert/migration.ts::decideCertMigration). A lone server.crt resolves to the
+// root-CA model, whose active cert is ca.crt — see
+// tests/unit/agent-bridge-cert-download-active-ca.test.ts for that side.
+function writeLegacyLeaf(pem: string) {
+  fs.writeFileSync(certFilePath(), pem);
+  fs.writeFileSync(
+    path.join(certDir(), "server.key"),
+    "-----BEGIN PRIVATE KEY-----\nfake\n-----END PRIVATE KEY-----\n"
+  );
+}
+
 function resetCertDir() {
   fs.rmSync(certDir(), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(certDir(), { recursive: true });
@@ -60,7 +72,7 @@ test("GET /cert: returns exists:false when no cert file", async () => {
 
 test("GET /cert: returns exists:true when cert file present", async () => {
   const fakeCert = "-----BEGIN CERTIFICATE-----\nfake\n-----END CERTIFICATE-----\n";
-  fs.writeFileSync(certFilePath(), fakeCert);
+  writeLegacyLeaf(fakeCert);
 
   const res = await certRoute.GET();
   assert.equal(res.status, 200);
@@ -99,7 +111,7 @@ test("POST /cert: installs trust when cert exists (OS call best-effort)", async 
 MIIBpDCCAQ2gAwIBAgIUFakeMITMCertForTestingOnlyXX==
 -----END CERTIFICATE-----
 `;
-  fs.writeFileSync(certFilePath(), fakePem);
+  writeLegacyLeaf(fakePem);
 
   const res = await certRoute.POST(
     new Request("http://localhost/", {
@@ -130,7 +142,7 @@ test("GET /cert/download: 404 when no cert file", async () => {
 
 test("GET /cert/download: returns PEM content-type when cert exists", async () => {
   const fakeCert = "-----BEGIN CERTIFICATE-----\nfake\n-----END CERTIFICATE-----\n";
-  fs.writeFileSync(certFilePath(), fakeCert);
+  writeLegacyLeaf(fakeCert);
 
   const res = await downloadRoute.GET();
   assert.equal(res.status, 200);

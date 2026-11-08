@@ -6,11 +6,13 @@ export const CHATGPT_TEMPORARY_CHAT_URL = "https://chatgpt.com/?temporary-chat=t
 export const CHATGPT_COMPOSER_SELECTOR = [
   '[data-testid="prompt-textarea"]',
   "#prompt-textarea",
+  '[contenteditable="true"][role="textbox"]',
   '[contenteditable="true"][data-lexical-editor="true"]',
   '[contenteditable="true"][role="textbox"]',
   '[contenteditable="true"][role="textbox"].ProseMirror',
 ].join(", ");
 export const CHATGPT_EFFORT_CONTROL_SELECTOR = [
+  'button[data-codex-intelligence-trigger="true"]',
   'button[aria-haspopup="menu"][data-tone="neutral"]',
   'button[data-testid="model-switcher-dropdown-button"][aria-haspopup="menu"]',
 ].join(", ");
@@ -21,7 +23,7 @@ export const CHATGPT_EFFORT_MENU_SELECTOR = [
 ].join(", ");
 export const CHATGPT_EFFORT_ITEM_SELECTOR = '[role="menuitemradio"]';
 export const CHATGPT_EFFORT_SLIDER_SELECTOR =
-  '[data-model-reasoning-effort-slider] [role="slider"], [role="menuitem"][data-reasoning-slider="true"], [role="menuitem"]:has([role="status"])';
+  '[data-model-reasoning-effort-slider] [role="slider"], [role="menu"]:has([data-model-picker-view-toggle]) [role="slider"], [role="menuitem"][data-reasoning-slider="true"], [role="menuitem"]:has([role="status"])';
 export const CHATGPT_EFFORT_SLIDER_MAX_OPTIONS = 5;
 export const CHATGPT_STOP_BUTTON_SELECTOR = '[data-testid="stop-button"]';
 export const CHATGPT_COMPLETION_ACTION_SELECTOR =
@@ -167,10 +169,25 @@ export async function detectChatGptAccountCapabilities(
     }
     await new Promise((resolveSleep) => setTimeout(resolveSleep, 100));
   }
+  console.info("[ChatGPT validation] effort control ready");
   const menu = page.locator(CHATGPT_EFFORT_MENU_SELECTOR).last();
   const menuVisible = await menu.isVisible().catch(() => false);
   const menuExpanded = await effortButton.getAttribute("aria-expanded").catch(() => null);
-  if (!menuVisible && menuExpanded !== "true") await effortButton.press("Enter");
+  if (!menuVisible && menuExpanded !== "true") {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      if (attempt % 2 === 0) await effortButton.click({ force: true });
+      else await effortButton.press("Enter");
+      for (let tick = 0; tick < 10; tick += 1) {
+        if ((await effortButton.getAttribute("aria-expanded")) === "true") break;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      if ((await effortButton.getAttribute("aria-expanded")) === "true") break;
+    }
+    if ((await effortButton.getAttribute("aria-expanded")) !== "true") {
+      throw new Error("ChatGPT model selector did not open; wait for the page to finish loading");
+    }
+  }
+  console.info("[ChatGPT validation] effort menu requested");
   try {
     const efforts = menu.locator(CHATGPT_EFFORT_ITEM_SELECTOR);
     const slider = page.locator(CHATGPT_EFFORT_SLIDER_SELECTOR).filter({ visible: true }).last();

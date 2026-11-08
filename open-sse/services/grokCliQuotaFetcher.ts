@@ -33,9 +33,14 @@
  * Registration: call registerGrokCliQuotaFetcher() once at server startup.
  */
 
-import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 import { decodeGrokCreditsFrame } from "./grokCliQuotaFrame.ts";
 
 const GROK_CLI_CONFIG = {
@@ -142,7 +147,7 @@ export async function fetchGrokCliQuota(
   try {
     await throttleQuotaFetch();
 
-    const response = await fetch(url, {
+    const response = await fetchWithConnectionProxy(connectionId, url, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -152,6 +157,7 @@ export async function fetchGrokCliQuota(
       body: GRPC_WEB_EMPTY_REQUEST_FRAME,
       signal: AbortSignal.timeout(8_000),
     });
+    if (!response) return null;
 
     if (response.status === 401 || response.status === 403) {
       // Fail-open: no proactive refreshCredentials() in this PR (see Non-Goals).
@@ -187,5 +193,6 @@ export function invalidateGrokCliQuotaCache(connectionId: string): void {
  */
 export function registerGrokCliQuotaFetcher(): void {
   registerQuotaFetcher("grok-cli", fetchGrokCliQuota);
+  registerQuotaCacheInvalidator("grok-cli", invalidateGrokCliQuotaCache);
   registerMonitorFetcher("grok-cli", fetchGrokCliQuota);
 }

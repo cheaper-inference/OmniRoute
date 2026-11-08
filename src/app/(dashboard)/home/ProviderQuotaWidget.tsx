@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Card from "@/shared/components/Card";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
@@ -9,6 +12,10 @@ import QuotaMiniBar from "../dashboard/usage/components/ProviderLimits/QuotaMini
 import { PROVIDER_LABEL } from "../dashboard/usage/components/ProviderLimits/constants";
 import { translateUsageOrFallback } from "../dashboard/usage/components/ProviderLimits/i18nFallback";
 import { parseQuotaData } from "../dashboard/usage/components/ProviderLimits/quotaParsing";
+import {
+  ConnectionsAuthError,
+  fetchDashboardConnections,
+} from "../dashboard/usage/components/ProviderLimits/fetchConnections";
 import {
   formatCountdown,
   formatQuotaLabel,
@@ -49,6 +56,11 @@ function formatAutoRefreshCountdown(ms: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function RefreshGlyph({ refreshing, scheduled }: { refreshing: boolean; scheduled: boolean }) {
+  if (refreshing) return <Spinner decorative size="sm" />;
+  return <Icon name={scheduled ? "schedule" : "refresh"} size={16} />;
 }
 
 function QuotaRow({ quota }: { quota: any }) {
@@ -130,18 +142,18 @@ function ConnectionQuotas({ connection, cache }: { connection: Connection; cache
         </div>
       )}
       {optionalQuotas.length > 0 && (
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
+          icon={showOptional ? "expand_less" : "expand_more"}
+          aria-expanded={showOptional}
           onClick={() => setShowOptional((current) => !current)}
-          className="mt-2 inline-flex items-center gap-1 rounded-md border border-border bg-bg-subtle px-2 py-1 text-[11px] font-medium text-text-main hover:bg-surface transition-colors"
+          className="mt-2 h-7 min-h-7 px-2 text-[11px]"
         >
-          <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
-            {showOptional ? "expand_less" : "expand_more"}
-          </span>
           {showOptional
             ? t("showLessQuotas")
             : t("showMoreQuotas", { count: optionalQuotas.length })}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -159,6 +171,7 @@ export default function ProviderQuotaWidget({
   const [connections, setConnections] = useState<Connection[]>([]);
   const [quotaData, setQuotaData] = useState<QuotaData>({});
   const [loading, setLoading] = useState(true);
+  const [authRequired, setAuthRequired] = useState(false);
   const [refreshingAll, setRefreshingAll] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const refreshingAllRef = useRef(false);
@@ -171,13 +184,21 @@ export default function ProviderQuotaWidget({
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [connectionsResponse, quotasResponse] = await Promise.all([
-        fetch("/api/providers/client"),
+      const [connectionList, quotasResponse] = await Promise.all([
+        fetchDashboardConnections<Connection>().then(
+          (list) => {
+            setAuthRequired(false);
+            return list;
+          },
+          (error) => {
+            setAuthRequired(error instanceof ConnectionsAuthError);
+            return [] as Connection[];
+          }
+        ),
         fetch("/api/usage/provider-limits"),
       ]);
-      const connectionData = connectionsResponse.ok ? await connectionsResponse.json() : {};
       const quotaResponseData = quotasResponse.ok ? await quotasResponse.json() : {};
-      const relevant = ((connectionData.connections || []) as Connection[]).filter(
+      const relevant = connectionList.filter(
         (connection) =>
           supportsProviderQuota(connection.provider, connection) &&
           (connection.authType === "oauth" || connection.authType === "apikey")
@@ -263,9 +284,7 @@ export default function ProviderQuotaWidget({
     <Card className="w-full overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface/60 px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">
-            account_balance
-          </span>
+          <Icon name="account_balance" size={20} className="text-primary" />
           <div>
             <h2 className="text-base font-semibold text-text-main">
               {tr("providerQuota", "Provider Quota")}
@@ -277,18 +296,14 @@ export default function ProviderQuotaWidget({
             )}
           </div>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
           onClick={refreshAll}
           disabled={loading || refreshingAll}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-3 py-1.5 text-xs font-medium text-text-main transition-colors hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50"
+          className="gap-1.5 text-xs"
         >
-          <span
-            className={`material-symbols-outlined text-[16px] ${refreshingAll ? "animate-spin" : ""}`}
-            aria-hidden="true"
-          >
-            {autoRefreshIntervalMs > 0 ? "schedule" : "refresh"}
-          </span>
+          <RefreshGlyph refreshing={refreshingAll} scheduled={autoRefreshIntervalMs > 0} />
           {refreshingAll
             ? tr("refreshing", "Refreshing")
             : autoRefreshIntervalMs > 0
@@ -296,19 +311,19 @@ export default function ProviderQuotaWidget({
                   Math.max(0, autoRefreshIntervalMs - (autoRefreshClock - lastRefreshAllAt))
                 )}`
               : tr("forceRefresh", "Refresh now")}
-        </button>
+        </Button>
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 px-4 py-8 text-sm text-text-muted">
-          <span className="material-symbols-outlined animate-spin text-[16px]" aria-hidden="true">
-            progress_activity
-          </span>
+        <div role="status" className="flex items-center gap-2 px-4 py-8 text-sm text-text-muted">
+          <Spinner decorative size="sm" />
           {tr("loadingQuotas", "Loading...")}
         </div>
       ) : providerGroups.length === 0 ? (
         <div className="px-4 py-8 text-center text-sm text-text-muted">
-          {tr("noProviders", "No Providers Connected")}
+          {authRequired
+            ? tr("quotaAuthRequired", "Authentication required - sign in to the dashboard")
+            : tr("noProviders", "No Providers Connected")}
         </div>
       ) : compact ? (
         /* Compact mode: 3-column card grid, flat across all connections */

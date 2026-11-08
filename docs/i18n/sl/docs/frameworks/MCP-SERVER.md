@@ -72,6 +72,16 @@ curl -i \
 
 Ključ brez obsega `manage` (ali brez Bearer) vrne `403 LOCAL_ONLY`. Sorodne predpone `/api/cli-tools/runtime/*` namenoma NI mogoče obiti — glejte [Ravni varovanja poti — izjema za obseg manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Preverjanje Origin
+
+Po overitvi se pri vsaki zahtevi na `/api/mcp/*` — transportih in upravljalnih poteh, kot so `status`, `tools`, `audit`, `restart` — preveri glava `Origin`, ne glede na klicatelja (API ključ, žeton CLI, seja nadzorne plošče ali anonimni loopback z onemogočeno prijavo). To je zaščita pred DNS rebindingom, ki jo zahteva specifikacija MCP Streamable HTTP.
+
+- **Brez glave `Origin`** → dovoljeno. OmniRoute CLI, SDK in odjemalci IDE je ne pošiljajo.
+- **Dovoljen `Origin`** → `localhost` / `127.0.0.1` / `[::1]` na katerih koli vratih ali lastni javni origin OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin, ki ga posreduje zaupanja vreden obratni proxy (`OMNIROUTE_TRUST_PROXY`, samo če base URL ni nastavljen), ali neposredno dostopan loopback/LAN IP gostitelj. Sama glava `Host` origina nikoli ne naredi zaupanja vrednega.
+- **Kateri koli drug `Origin`, vključno z `null`** → `403` s telesom napake JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Seja nadzorne plošče z veljavnim žetonom CSRF je še vedno sprejeta, kot pri drugih zapisih nadzorne plošče.
+
+Brskalniški odjemalec MCP za obratnim proxyjem potrebuje `OMNIROUTE_PUBLIC_BASE_URL`; seznama dovoljenih drugih originov ni. Predhodna zahteva CORS (`OPTIONS`) se ne preverja glede Origin; zahteva, ki ji sledi, se.
+
 ## Konfiguracija IDE-ja
 
 Za nastavitev Claude Desktop, Cursor, Cline in združljivih odjemalcev MCP glejte [Konfiguracija odjemalca MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration).
@@ -287,107 +297,73 @@ Prenosa SSE in pretočni HTTP sta blokirana, dokler strežnik MCP ni omogočen v
 
 ---
 
-## Avtentikacija in obsegi
+## Preverjanje pristnosti in obsegi
 
-Orodje MCP bere nize obsegov od klicatelja. Ta preverba je eden od treh
-neodvisnih imenskih prostorov. Uspešen prehod enega preverjevalnika ni uspešen prehod drugih.
-Pravila so [Trije imenski prostori obsegov](#trije-imenski-prostori-obsegov).
-Katalog orodij je [Obsegi orodij MCP](#obsegi-orodij-mcp).
+orodje MCP kliče nize obsega branja od klicatelja. To preverjanje je eden od treh neodvisnih imenskih prostorov. Podaja enega podajalca ni podaja drugih. Pravila so [imenski prostori treh obsegov](#three-scope-namespaces). Katalog orodij je [MCP tool scopes](#mcp-tool-scopes).
 
-### Trije imenski prostori obsegov
+### Trije imenski prostori obsega
 
-`manage` na ključu API, `read:compression` na orodju MCP in `read` na
-dostopnem žetonu `oma_live_…` so tri različne dodelitve. Klicatelji, ki pošljejo `read`
-dostopni žeton na spreminjajočo se pot upravljanja, dobijo HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Ta rang je `scopeSatisfies`. Ne pregleduje tabele MCP, in ujemalnik MCP
-je ne pregleduje.
+`manage` na ključu API, `read:compression` na orodju MCP in `read` na žetonu dostopa `oma_live_…` so tri različna dovoljenja. Klicatelji, ki pošljejo žeton dostopa `read` na mutirano pot upravljanja, dobijo HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Ta rang je `scopeSatisfies`. Ne uporablja tabele MCP in ujemanje MCP se ne posvetuje z njo.
 
-| Imenovni prostor        | Poverilnica                                                 | Preverjevalnik            | Uspešen prehod omogoča                                  |
-| :---------------------- | :---------------------------------------------------------- | :------------------------ | :------------------------------------------------------ |
-| Upravljanje API-ključev | `api_keys.scopes`                                           | `hasManageScope`          | Upravljalni REST za ta Bearer ključ                     |
-| Dodatni API-ključ       | isto polje, en točen niz                                    | spodaj imenovani pomočnik | Samo ta ena zmožnost                                    |
-| Obsegi orodij MCP       | isto polje, sicer MCP `_meta`, sicer `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | To orodje, ko je uveljavitev vklopljena                 |
-| Dostopni žeton          | `oma_live_…`                                                | `scopeSatisfies`          | Upravljalna pot, katere metoda in pot zahtevata ta rang |
+| Imenski prostor         | Poverilnica                                                                  | Checker                   | Izkaznica dovoljuje                                     |
+| :---------------------- | :--------------------------------------------------------------------------- | :------------------------ | :------------------------------------------------------ |
+| Upravljanje ključev API | `api_keys.scopes`                                                            | `hasManageScope`          | Upravljanje REST za ta ključ nosilca                    |
+| API-ključni dodatek     | isti niz, en natančen niz                                                    | pomočnik, imenovan spodaj | Samo ta ena sposobnost                                  |
+| obseg orodja MCP        | isto polje, sicer MCP `_meta` (samo HTTP/SSE ), sicer `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | To orodje, ko je uveljavljanje vklopljeno               |
+| Žeton za dostop         | `oma_live_…`                                                                 | `scopeSatisfies`          | Pot upravljanja, katere metoda in pot zahtevata ta rang |
 
-Izdelava vsake poverilnice je zajeta v
-[Upravljalna avtentikacija](../guides/MANAGEMENT-AUTH.md).
+Kovanje vsake poverilnice je zajeto v [Preverjanje pristnosti upravljanja](../guides/MANAGEMENT-AUTH.md).
 
-#### Obsegi API-ključev
+#### Obseg ključev API
 
-Eno polje `api_keys.scopes` napaja dve nalogi. Uporabljata različne funkcije.
+Eno polje `api_keys.scopes` hrani dve opravili. Uporabljajo različne funkcije.
 
-**Upravljalni REST.** `manage` in `admin` sta člana
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` je tisto, kar avtorizira upravljalne poti za ta ključ. `admin` je
-sposoben upravljanja na teh poteh. Beseda `admin` tukaj ni
-rang dostopnega žetona in se ne razširi v obsege orodij MCP.
+**Upravljanje REST.** `manage` in `admin` sta člana `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` je tisto, kar avtorizira upravljalne poti za ta ključ. `admin` je sposoben upravljanja na teh poteh. Beseda `admin` tukaj ni rang žetona dostopa in se ne razširi na obseg orodja MCP.
 
-**Dodatni nizi.** Vsak je natančen test članstva in vsak ostane
-zunaj `MANAGEMENT_API_KEY_SCOPES`.
+**Aditivni nizi.** Vsak je natančen test članstva in vsak ostane zunaj `MANAGEMENT_API_KEY_SCOPES`.
 
-| Obseg                          | Uspešen prehod omogoča                                                                                                                                            |
+| Področje uporabe               | Izkaznica dovoljuje                                                                                                                                               |
 | :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Samo ne-povratna zanka `/api/mcp/` LOCAL_ONLY izrez (`hasMcpConnectOrManageScope`). Ključ z `manage` ali `admin` še vedno preide ta izrez.                        |
+| `mcp:connect`                  | Samo izločanje `/api/mcp/` LOCAL_ONLY brez povratne zanke (`hasMcpConnectOrManageScope`). Ključ z `manage` ali `admin` še vedno prenese to izrezovanje.           |
 | `self:usage`                   | `GET /api/v1/me/status` za ta ključ (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` doda ta obseg ob ustvarjanju (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Kvota računa navzgor znotraj te statusne vsebine (`src/lib/usage/apiKeySelfService.ts`). Pot statusa še vedno zahteva `self:usage`.                               |
-| `policy:bypass-provider-quota` | Klici sklepanja tega ključa preskočijo politiko kvote ponudnika (`hasProviderQuotaBypassScope` v `src/sse/handlers/chat.ts`).                                     |
+| `self:account-quota`           | Kvote računa navzgor znotraj tega koristnega tovora statusa (`src/lib/usage/apiKeySelfService.ts`). Statusna pot še vedno zahteva `self:usage`.                   |
+| `policy:bypass-provider-quota` | Sklepni klici tega ključa preskočijo pravilnik o kvotah ponudnika (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                                  |
 
 #### Ujemanje
 
-Katalog je tabela pod [Obsegi orodij MCP](#obsegi-orodij-mcp). Ne
-obravnavajte `MCP_SCOPE_LIST` v `src/shared/constants/mcpScopes.ts` kot ta katalog:
-to je prvotna tipizirana podskupina. Kasnejša orodja deklarirajo dodatne obsege poleg nje
-(`read:notion`, `read:skills`, `read:local-corpus` in preostanek tabele).
+Katalog je tabela pod [obsegi orodja MCP](#mcp-tool-scopes). `MCP_SCOPE_LIST` v `src/shared/constants/mcpScopes.ts` ne obravnavajte kot ta katalog: to je izvirna tipizirana podmnožica. Kasnejša orodja deklarirajo dodatne obsege zraven njega (`read:notion`, `read:skills`, `read:local-corpus` in preostali del tabele).
 
-`evaluateToolScopes` v `open-sse/mcp-server/scopeEnforcement.ts` omogoča klic
-ko se vsak zahtevani obseg ujema z nekim dodeljenim obsegom:
+`evaluateToolScopes` v `open-sse/mcp-server/scopeEnforcement.ts` dovoljuje klic, ko se vsak zahtevani obseg ujema z nekim odobrenim obsegom:
 
-- `*` se ujema z vsakim zahtevanim obsegom.
-- Dodeljeni obseg, ki se konča z `*`, se ujema z zahtevanim obsegom, ki se začne z
-  predpono pred zvezdico. `read:*` se ujema z `read:compression`.
-- Vsak drug dodeljeni obseg se ujema samo z identičnim zahtevanim nizom.
+- `*` ustreza vsakemu zahtevanemu obsegu.
+- Odobreni obseg, ki se konča z `*` se ujema z zahtevanim obsegom, ki se začne s predpono pred zvezdico. `read:*` se ujema `read:compression`.
+- Vsak drug odobreni obseg se ujema samo z enakim zahtevanim nizom.
 
-Ključ, katerega obsegi so `["manage"]`, ne uspe `scopeMatches` za `read:compression`.
-Isti klic ne uspe za `admin`, `mcp:connect`, `read` in `write`, ko so ti
-edini dodeljeni nizi. Med obsegi orodij MCP ni hierarhije
-razen končne `*`.
+Ključ, katerega obseg je `["manage"]` ne uspe `scopeMatches` za `read:compression`. Isti klic ne uspe za `admin`, `mcp:connect`, `read` in `write`, če so to edini odobreni nizi. Med obsegi orodij MCP ni hierarhije onkraj končnega `*`.
 
-Uveljavitev je izklopljena, razen če je `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (privzeto
-`false`). Medtem ko je izklopljena, `evaluateToolScopes` omogoča klic in preskoči
-katalog. Medtem ko je vklopljena, HTTP uporablja `api_keys.scopes` ključa Bearer kot
-`authInfo` (glej [Vezava obsega HTTP na ključ](#per-key-http-scope-binding-7895)).
-Ko se obsegi ključev ne razrešijo, se dodeljeni nabor prenese na MCP `_meta`, nato
-`OMNIROUTE_MCP_SCOPES`.
+Uveljavljanje je izklopljeno, razen če `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (privzeto `false`). Ko je izklopljen, `evaluateToolScopes` dovoli klic in preskoči katalog. Medtem ko je vklopljen, HTTP uporablja `api_keys.scopes` ključa nosilca kot `authInfo` (glejte [Povezovanje obsega HTTP na ključ](#per-key-http-scope-binding-7895) ). Ko noben obseg ključa ni razrešen, odobreni nabor pade skozi MCP `_meta` (upoštevano samo za klicatelje HTTP/SSE, znotraj konteksta za preverjanje HTTP ; `_meta` klicatelja stdio je prezrt, ker ga nadzoruje odjemalec in ne nosi identitete klicatelja), nato `OMNIROUTE_MCP_SCOPES`.
 
-#### Obsegi dostopnih žetonov
+#### Obseg žetona za dostop
 
-Žetoni `oma_live_…` (`src/lib/accessTokens/scopes.ts`) nosijo `read`, `write`,
-ali `admin`. `scopeSatisfies` je rang: `admin` pokriva `write` in `read`, in
-`write` pokriva `read`. Neznani obsegi ne pokrivajo ničesar.
+žetoni `oma_live_…` (`src/lib/accessTokens/scopes.ts`) nosijo `read`, `write` ali `admin`. `scopeSatisfies` je rang: `admin` pokriva `write` in `read`, `write` pa `read`. Neznani obsegi ne pokrivajo ničesar.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) primerja ta
-rang z `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) primerja to uvrstitev z `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD` in `OPTIONS` zahtevajo `read`.
 - Vsaka druga metoda zahteva `write`.
-- Poti v `ADMIN_SCOPE_PREFIXES` zahtevajo `admin` za vsako metodo. `/api/mcp`
-  je na tem seznamu, zato dostopni žeton `write` še vedno ne more klicati MCP HTTP
-  površine.
+- Poti v `ADMIN_SCOPE_PREFIXES` zahtevajo `admin` za vsako metodo. `/api/mcp` je na tem seznamu, zato žeton za dostop `write` še vedno ne more poklicati površine MCP HTTP.
 - Poti v `ADMIN_MUTATION_PREFIXES` zahtevajo `admin` samo za mutacije.
+- Poti v `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) zahtevajo `admin` samo za mutacije in samo na tej natančni poti — druge podpoti `/api/settings/*` ohranjajo `write`.
 
-`PATCH /api/keys/{id}` je mutacija in ni na teh skrbniških seznamih, zato `read` žeton prejme 403
-`Access token scope 'read' is insufficient; 'write' required.`
-`write` ali `admin` dostopni žeton ustreza tej poti. JWT nadzorne plošče, žeton `machine-id` za `loopback CLI` in API ključ z `manage` ali `admin` uporabljajo druge veje in jih ta rang ne omejuje.
+`PATCH /api/keys/{id}` je mutacija in ni na teh skrbniških seznamih, zato žeton `read` prejme 403 `Access token scope 'read' is insufficient; 'write' required.` Žeton dostopa `write` ali `admin` ustreza tej poti. Nadzorna plošča JWT, žeton ID stroja z zanko CLI in ključ API z `manage` ali `admin` imajo druge veje in niso zoženi s tem rangom.
 
-Dostopni žeton, ki prestane `scopeSatisfies` za `/api/mcp`, je prešel le upravljavska vrata. Klici orodij še vedno izvajajo `scopeMatches` proti obsegom API ključev. Rang dostopnega žetona ni vhod za `scopeMatches`.
+Žeton za dostop, ki posreduje `scopeSatisfies` za `/api/mcp` je očistil samo vrata za upravljanje. Klici orodij še vedno izvajajo `scopeMatches` proti obsegom ključev API-ja. Razvrstitev žetona dostopa ni vnos v `scopeMatches`.
 
-### Obsegi orodij MCP
+### obseg orodja MCP
 
-Izvrševanje obsega je centralizirano v `open-sse/mcp-server/scopeEnforcement.ts`.
-Vsako orodje zahteva specifične obsege:
+Uveljavljanje obsega je centralizirano v `open-sse/mcp-server/scopeEnforcement.ts`. Vsako orodje zahteva posebne obsege:
 
-| Področje              | Orodja                                                                                                                                                                             |
+| Področje uporabe      | Orodja                                                                                                                                                                             |
 | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                  |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                          |
@@ -423,31 +399,35 @@ Vsako orodje zahteva specifične obsege:
 | `write:obsidian`      | 9 orodij za pisanje — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …               |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                  |
 
-Podprti so nadomestni obsegi: `read:*` podeljuje vse obsege za branje, `*` podeljuje popoln dostop.
+Podprti so obsegi z nadomestnimi znaki: `read:*` odobri vsa področja branja, `*` odobri popoln dostop.
 
-### `mcp:connect` — ozka zmožnost poti (#7895)
+### `mcp:connect` — zmogljivost ozke poti (#7895)
 
-Dostop do HTTP/SSE MCP transporta (`/api/mcp/*`) izven povratne zanke zahteva izjemo `/api/mcp/` LOCAL_ONLY (glej `docs/security/ROUTE_GUARD_TIERS.md`). Zgodovinsko je ta izjema sprejemala le API ključ s polnim obsegom `manage`/`admin` — preširoko za klicatelja, ki potrebuje le komunikacijo z MCP. `src/shared/constants/managementScopes.ts` zdaj izvaža `MCP_CONNECT_SCOPE = "mcp:connect"`: dodaten, ozek obseg (enak precedens kot `SELF_USAGE_SCOPE`), ki avtorizira SAMO obvod `/api/mcp/` v `src/server/authz/policies/management.ts` — ne podeljuje nobenega drugega dostopa do poti upravljanja in je namerno izključen iz `MANAGEMENT_API_KEY_SCOPES`. Ključ, ki ima `manage`/`admin`, še vedno neokrnjeno preide izjemo; `mcp:connect` je alternativa z nižjimi privilegiji za oddaljene klicatelje samo za MCP, preverjena preko `hasMcpConnectOrManageScope()`.
+Doseganje transporta HTTP/SSE MCP (`/api/mcp/*`) iz brez povratne zanke zahteva izrez `/api/mcp/` LOCAL_ONLY (glejte `docs/security/ROUTE_GUARD_TIERS.md`). Zgodovinsko gledano je ta izločitev sprejela samo polni `manage`/`admin` -scope API ključ — preširok za klicatelja, ki mora govoriti samo MCP. `src/shared/constants/managementScopes.ts` zdaj izvozi `MCP_CONNECT_SCOPE = "mcp:connect"`: dodaten, ozek obseg (isti precedens kot `SELF_USAGE_SCOPE`), ki pooblasti ONLY obvod `/api/mcp/` v `src/server/authz/policies/management.ts` — ne dodeljuje nobenega drugega dostopa do poti upravljanja in se namerno ohranja OUT od `MANAGEMENT_API_KEY_SCOPES`. Tipka, ki drži `manage`/`admin` še vedno nespremenjeno prečka izrez; `mcp:connect` je alternativa z nižjimi privilegiji za oddaljene klicatelje samo MCP, preverjeno prek `hasMcpConnectOrManageScope()`.
 
 ### Vezava obsega HTTP na ključ (#7895)
 
-Preko HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` zdaj razreši dejanske `api_keys.scopes` klicatelja preko `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) in jih posreduje MCP SDK-ju `transport.handleRequest(req, { authInfo })`, tako da `extra.authInfo.scopes`, ki doseže vsak klic orodja, odraža lastne obsege ključa Bearer. Funkcija `resolveCallerScopeContext()` v `scopeEnforcement.ts` je že dajala prednost `authInfo` pred `_meta` in nadomestnim okoljem `OMNIROUTE_MCP_SCOPES` — to le napolni ta prvi, najvišje prioritetni vir, ki prej ni bil napajan preko HTTP. Ko se API ključ ne razreši (brez glave, neveljaven ključ), `authInfo` ostane `undefined` in razrešitev se nadaljuje po obstoječi verigi `meta`/okolje nespremenjeno. To NE spremeni privzete vrednosti `OMNIROUTE_MCP_ENFORCE_SCOPES` — uveljavljanje je še vedno treba izrecno omogočiti; ta sprememba le omogoča, da pot na ključ prevzame prednost, ko je omogočena. stdio nima identitete na klicatelja (glej `mcpCallerIdentity.ts`) in nanj to ne vpliva — ostane na nadomestni verigi `_meta`/okolje.
+Preko HTTP/SSE `open-sse/mcp-server/httpTransport.ts` zdaj razreši dejanski `api_keys.scopes` klicatelja prek `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) in ga posreduje MCP SDK `transport.handleRequest(req, { authInfo })`, tako da `extra.authInfo.scopes` ki doseže vsak klic orodja, odraža lastne obsege ključa nosilca. `scopeEnforcement.ts` `resolveCallerScopeContext()` je že dal prednost `authInfo` pred `_meta` in `OMNIROUTE_MCP_SCOPES` env nadomestni — to poseli samo tisti prvi vir z najvišjo prioriteto, ki je bil prej nenapajan preko HTTP. Ko se noben ključ API ne razreši (brez glave, neveljaven ključ), `authInfo` ostane `undefined` in razrešitev pade v obstoječo verigo `meta`/env nespremenjena. stdio nima identitete posameznega klicatelja (glejte `mcpCallerIdentity.ts`) in nanjo ne vpliva vezava posameznega ključa —, preskoči korak `_meta` (`_meta` je spoštovan le znotraj konteksta za preverjanje HTTP, #15159) in razreši samo s ključem `OMNIROUTE_MCP_SCOPES` env.
+
+**Uveljavljanje je vsiljeno za klicatelje HTTP/SSE ozkega obsega ne glede na `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` privzeto nastavljen na `false` je varen samo za tok z enim operaterjem local/stdio, kjer ni identitete posameznega klicatelja, proti kateri bi lahko dosegli. `open-sse/mcp-server/server.ts::withScopeEnforcement()` brezpogojno vklopi uveljavljanje obsega na orodje (`shouldForceScopeEnforcement()` v `scopeEnforcement.ts`), kadar koli `resolveCallerScopeContext()` razreši `source === "authInfo"` (tj. pravo avtorizacijsko glavo HTTP na ključ, HTTP/SSE-only) AND ta ključ ne vsebuje celotnega obsega `manage`/`admin`. S tem se zapolni vrzel, kjer bi lahko ključ, ki drži ONLY ozek obhodni obseg `mcp:connect` — zgoraj dokumentiran kot dovoljenje za nič drugega kot `/api/mcp/` LOCAL_ONLY izločanje — sicer poklical vsako orodje MCP, ko je operater omogočil dostop do remote/non-loopback MCP, preprosto zato, ker `OMNIROUTE_MCP_ENFORCE_SCOPES` privzeto pošilja `false`. Popoln ključ `manage`/`admin` nad HTTP in vsak klicatelj stdio/local ohranja obstoječe vedenje `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated nespremenjeno.
+
+---
 
 ## Okoljske spremenljivke
 
-| Spremenljivka                           | Privzeta vrednost                  | Namen                                                                                                                                           |
-| :-------------------------------------- | :--------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`           | Osnovni URL, ki ga strežnik MCP uporablja pri klicanju notranjih API-jev OmniRoute                                                              |
-| `OMNIROUTE_API_KEY`                     | (prazno)                           | Ključ API, posredovan kot `Authorization: Bearer` notranjim klicem API-ja                                                                       |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (omogoči ga samo `"true"`) | Ko je omogočeno, manjkajoči obsegi zavrnejo klice orodij in v dnevnik revizije zabeležijo `scope_denied:<reason>`                               |
-| `OMNIROUTE_MCP_SCOPES`                  | (prazno)                           | Z vejicami ločen seznam dovoljenih obsegov, ki so privzeto obravnavani kot »razpoložljivi« (uporabi se, ko klicatelj ne navede lastnih obsegov) |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (ni nastavljeno = vklopljeno)      | Ko je nastavljeno na `0/false/off/no`, onemogoči stiskanje opisov MCP ob registraciji                                                           |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (ni nastavljeno = vklopljeno)      | Nadomestni vzdevek za isto stikalo kot zgoraj                                                                                                   |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                            | Časovna omejitev za prekinitev notranjih upravljavskih branj (stanje, odpornost, kombinacije, kvota, uporaba)                                   |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                            | Časovna omejitev za prekinitev korakov, ki čakajo na ponudnika (`route_request`, `web_search`, `web_fetch`)                                     |
-| `MCP_TOOL_DENY`                         | (ni nastavljeno = brez filtra)     | Z vejicami ločena imena orodij, ki se odstranijo iz `tools/list` (zmanjšanje števila orodij — glejte spodaj)                                    |
-| `MCP_TOOL_ALLOW`                        | (ni nastavljeno = brez filtra)     | Z vejicami ločena imena orodij, ki se izključno ohranijo (način seznama dovoljenih — glejte spodaj)                                             |
-| `DATA_DIR`                              | `~/.omniroute`                     | Datoteka signala delovanja se zapisuje v `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                               |
+| Spremenljivka                           | Privzeto                           | Namen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| :-------------------------------------- | :--------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`           | Osnovni URL, ki ga strežnik MCP uporablja pri klicanju notranjih API-jev OmniRoute                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `OMNIROUTE_API_KEY`                     | (prazno)                           | Ključ API, posredovan notranjim klicem API kot `Authorization: Bearer`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (omogoči ga samo `"true"`) | Ko je omogočeno, manjkajoči obsegi zavrnejo klice orodij in v revizijski dnevnik zapišejo `scope_denied:<reason>`. Uveljavljanje je ne glede na to zastavico PRAV TAKO vedno prisilno omogočeno za vsakega klicatelja HTTP/SSE, razrešenega iz glave Authorization za posamezen ključ (`source === "authInfo"`), ki nima polnega obsega `manage`/`admin` — npr. ključ, ki ima le ozki obseg za obhod `mcp:connect` — zato je ta privzeta nastavitev varna samo za lokalni tok stdio z enim upravljavcem, nikoli pa za oddaljeni dostop zunaj povratne zanke |
+| `OMNIROUTE_MCP_SCOPES`                  | (prazno)                           | Z vejicami ločen seznam dovoljenih obsegov, ki se privzeto štejejo za »razpoložljive« (uporabi se, kadar klicatelj ne navede lastnih obsegov)                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (ni nastavljeno = vklopljeno)      | Ko je nastavljeno na `0/false/off/no`, onemogoči stiskanje opisov MCP ob registraciji                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (ni nastavljeno = vklopljeno)      | Nadomestni vzdevek za isto preklopno nastavitev kot zgoraj                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                            | Časovna omejitev za prekinitev notranjih upravljavskih branj (stanje, odpornost, kombinacije, kvota, uporaba)                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                            | Časovna omejitev za prekinitev korakov, ki čakajo na ponudnika (`route_request`, `web_search`, `web_fetch`)                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `MCP_TOOL_DENY`                         | (ni nastavljeno = brez filtra)     | Z vejicami ločena imena orodij, ki naj se izločijo iz `tools/list` (zmanjšanje števila orodij — glejte spodaj)                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `MCP_TOOL_ALLOW`                        | (nenastavljeno = brez filtra)      | Z vejicami ločena imena orodij, ki naj se izključno ohranijo (način seznama dovoljenih — glejte spodaj)                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `DATA_DIR`                              | `~/.omniroute`                     | Datoteka srčnega utripa se zapisuje v `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ---
 

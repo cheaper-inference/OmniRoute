@@ -48,7 +48,7 @@ const TEST_FILE_RE = /\.(test|spec)\.(ts|tsx|mjs)$/;
 // glob) deve aparecer textualmente — se o runner mudar, este gate exige o sync.
 export const COLLECTORS = [
   // Node native runner — test:unit / test:unit:fast / shards / test:coverage. O CI
-  // (test-unit ×8 + quality.yml fast-unit) agora chama o npm script test:unit:ci:shard
+  // (test-unit ×8) agora chama o npm script test:unit:ci:shard
   // (fonte única, plano mestre testes+CI QW-d) — o wiring é ancorado pelo NOME do script
   // nos workflows (entrada dedicada abaixo), e os globs vivem SÓ no package.json.
   { glob: "tests/unit/*.test.ts", sources: ["package.json"] },
@@ -76,19 +76,22 @@ export const COLLECTORS = [
   // Órfãos religados (plano mestre QW-c): arquivos .test.mjs (top-level + db/ + feature-triage/) — fora do glob
   // *.test.ts histórico, nunca rodava em job nenhum (53 casos recuperados).
   { glob: "tests/unit/**/*.test.mjs", sources: ["package.json"] },
-  // Wiring CI→npm script (fonte única): os jobs de unit do ci.yml e o fast-unit do
-  // quality.yml DEVEM invocar o script canônico — se renomearem/inlinarem, este gate
+  // Wiring CI→npm script (fonte única): os jobs de unit do ci.yml DEVEM invocar o script
+  // canônico (o fast-unit do quality.yml saiu em 2026-10-26: duplicava o test-unit do
+  // ci.yml em todo PR) — se renomearem/inlinarem, este gate
   // exige o sync (substitui as âncoras textuais de glob que existiam nos workflows).
   {
     glob: "tests/unit/*.test.ts",
-    sources: ["package.json", ".github/workflows/ci.yml", ".github/workflows/quality.yml"],
+    sources: ["package.json", ".github/workflows/ci.yml"],
     anchors: {
       ".github/workflows/ci.yml": "test:unit:ci:shard",
-      ".github/workflows/quality.yml": "test:unit:ci:shard",
     },
   },
-  // Node native runner — test:integration (top-level only; tests/integration/services/ NÃO roda)
+  // Node native runner — test:integration (top-level only)
   { glob: "tests/integration/*.test.ts", sources: ["package.json"] },
+  // Node native runner — test:services:int (gated RUN_SERVICES_INT=1; embedded-service
+  // installer/lifecycle tests — slow, network-dependent, never runs unopted in CI)
+  { glob: "tests/integration/services/*.test.ts", sources: ["package.json"] },
   // Node native runner — test:combo:matrix / test:integration (combo strategy decision matrix, 17 strategies)
   { glob: "tests/integration/combo-matrix/*.test.ts", sources: ["package.json"] },
   // Node native runner — test:combo:live (gated real-upstream smoke; RUN_COMBO_LIVE=1 + VPS creds)
@@ -153,8 +156,17 @@ export const COLLECTORS = [
     sources: ["vitest.config.ts"],
     anchors: { "vitest.config.ts": "tests/unit/encryption.test.ts" },
   },
-  // Playwright — test:e2e (o script passa tests/e2e/*.spec.ts; testMatch **/*.spec.ts)
-  { glob: "tests/e2e/*.spec.ts", sources: ["package.json"] },
+  // Playwright — test:e2e: o script chama o runner sem glob (assim `npm run test:e2e -- <spec>`
+  // filtra de verdade) e a coleta vem do playwright.config.ts (testDir ./tests/e2e +
+  // testMatch **/*.spec.ts).
+  {
+    glob: "tests/e2e/*.spec.ts",
+    sources: ["package.json", "playwright.config.ts"],
+    anchors: {
+      "package.json": '"test:e2e": "node scripts/dev/run-playwright-tests.mjs"',
+      "playwright.config.ts": 'testDir: "./tests/e2e"',
+    },
+  },
   // Runners custom — test:ecosystem / test:protocols:e2e (spawnam vitest com o arquivo)
   { glob: "tests/e2e/ecosystem.test.ts", sources: ["scripts/dev/run-ecosystem-tests.mjs"] },
   {

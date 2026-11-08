@@ -12,8 +12,15 @@ import {
   applyCacheHitTokensToUsage,
   applyCacheHitTokensToResponsesUsage,
 } from "./responseSanitizer/cacheHitTokens.ts";
+import {
+  ALLOWED_USAGE_FIELDS,
+  ALLOWED_RESPONSES_USAGE_FIELDS,
+} from "./responseSanitizer/usageFields.ts";
 import { stripObfuscationZeroWidth } from "../utils/zeroWidth.ts";
 import { normalizeArrayContentChunk } from "../utils/arrayContentDelta.ts";
+import { assignAliasCacheWrite } from "../utils/pickCacheCreationTokens.ts";
+import { findBalancedJsonEnd } from "./responseSanitizer/balancedJson.ts";
+import { normalizeResponsesContextUsage } from "../utils/normalizeResponsesContextUsage.ts";
 export {
   extractThinkingFromContent,
   shouldParseTextualReasoningTags,
@@ -29,31 +36,6 @@ export {
  * 3. Normalizes response id, object, and usage fields
  * 4. Converts developer role → system for non-OpenAI providers
  */
-
-const ALLOWED_USAGE_FIELDS = new Set([
-  "prompt_tokens",
-  "completion_tokens",
-  "total_tokens",
-  "cached_tokens",
-  "prompt_tokens_details",
-  "completion_tokens_details",
-  "cache_read_input_tokens",
-  "cache_creation_input_tokens",
-  // Keep through sanitize → applyClientUsageBuffer so heuristic web usage is
-  // not inflated by the default USAGE_TOKEN_BUFFER (2000).
-  "estimated",
-]);
-const ALLOWED_RESPONSES_USAGE_FIELDS = new Set([
-  "input_tokens",
-  "output_tokens",
-  "total_tokens",
-  "input_tokens_details",
-  "output_tokens_details",
-  "estimated",
-  "cost_in_usd_ticks",
-  "server_side_tool_usage_details",
-  "server_side_tool_usage",
-]);
 
 const RESPONSES_EXTRA_TOP_LEVEL_FIELDS = [
   "server_side_tool_usage_details",
@@ -74,7 +56,6 @@ function toRecord(value: unknown): JsonRecord | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   return value as JsonRecord;
 }
-
 function toString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
@@ -131,50 +112,6 @@ function stripZeroWidthValue(value: unknown): unknown {
     );
   }
   return value;
-}
-
-function findBalancedJsonEnd(text: string, startIndex: number): number {
-  if (startIndex < 0 || startIndex >= text.length || text[startIndex] !== "{") return -1;
-
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-
-  for (let index = startIndex; index < text.length; index += 1) {
-    const char = text[index];
-
-    if (inString) {
-      if (escaped) {
-        escaped = false;
-        continue;
-      }
-      if (char === "\\") {
-        escaped = true;
-        continue;
-      }
-      if (char === '"') {
-        inString = false;
-      }
-      continue;
-    }
-
-    if (char === '"') {
-      inString = true;
-      continue;
-    }
-
-    if (char === "{") {
-      depth += 1;
-      continue;
-    }
-
-    if (char === "}") {
-      depth -= 1;
-      if (depth === 0) return index;
-    }
-  }
-
-  return -1;
 }
 
 function stripInternalToolEnvelopeText(content: string): string {
@@ -524,6 +461,11 @@ function sanitizeUsage(usage: unknown): unknown {
     }
   }
   applyCacheHitTokensToUsage(usageRecord, sanitized); // DeepSeek/MiniMax/Bedrock cache-hit passthrough (#8171)
+  // OpenRouter's provider-billed USD cost: keep it only as a finite bare number.
+  const reportedCost = usageRecord.cost;
+  if (typeof reportedCost === "number" && Number.isFinite(reportedCost) && reportedCost >= 0) {
+    sanitized.cost = reportedCost;
+  }
   // Ensure required fields
   const promptTokens = toNumber(sanitized.prompt_tokens) ?? 0;
   const completionTokens = toNumber(sanitized.completion_tokens) ?? 0;
@@ -595,9 +537,7 @@ function sanitizeResponsesUsage(usage: unknown): unknown {
   ) {
     inputDetails.cache_creation_tokens = normalized.cache_creation_input_tokens;
   }
-  if (Object.keys(inputDetails).length > 0) {
-    normalized.input_tokens_details = inputDetails;
-  }
+  assignAliasCacheWrite(normalized, inputDetails);
 
   const outputDetails = toRecord(normalized.output_tokens_details) || {};
   if (normalized.reasoning_tokens !== undefined && outputDetails.reasoning_tokens === undefined) {
@@ -622,7 +562,7 @@ function sanitizeResponsesUsage(usage: unknown): unknown {
   sanitized.output_tokens = outputTokens;
   sanitized.total_tokens = totalTokens;
 
-  return sanitized;
+  return normalizeResponsesContextUsage(sanitized);
 }
 
 /**
@@ -834,6 +774,10 @@ function sanitizeResponsesStreamingEvent(parsedRecord: JsonRecord): JsonRecord {
     } else {
       delete sanitizedResponse.output_text;
     }
+    const responseUsage = toRecord(responseRecord.usage);
+    if (responseUsage) {
+      sanitizedResponse.usage = normalizeResponsesContextUsage(responseUsage);
+    }
     sanitized.response = sanitizedResponse;
   }
 
@@ -847,7 +791,6 @@ function sanitizeResponsesOutput(output: unknown): JsonRecord[] {
     .map((item, index) => sanitizeResponsesOutputItem(item, index))
     .filter((item): item is JsonRecord => item !== null);
 }
-
 function sanitizeResponsesOutputItem(item: unknown, index: number): JsonRecord | null {
   const itemRecord = toRecord(item);
   if (!itemRecord) return null;
@@ -856,11 +799,12 @@ function sanitizeResponsesOutputItem(item: unknown, index: number): JsonRecord |
 
   if (type === "message") {
     const content = sanitizeResponsesMessageContent(itemRecord.content);
+    // prettier-ignore
     const sanitized: JsonRecord = {
       id: toString(itemRecord.id) || `msg_${index}`,
       type: "message",
       role: toString(itemRecord.role) || "assistant",
-      content,
+      content, ...(itemRecord.phase ? { phase: toString(itemRecord.phase) } : {}),
     };
     return sanitized;
   }
@@ -992,6 +936,41 @@ function extractResponsesOutputText(output: JsonRecord[]): string {
   return parts.join("");
 }
 
+/** Responses `incomplete_details.reason` for a Chat Completions finish_reason, or null. */
+function incompleteReasonForFinish(finishReason: unknown): string | null {
+  if (finishReason === "length") return "max_output_tokens";
+  return finishReason === "content_filter" ? "content_filter" : null;
+}
+
+/** Chat Completions tool_calls (or the legacy function_call) as Responses function_call items. */
+function buildFunctionCallOutputs(message: JsonRecord, choice: JsonRecord): JsonRecord[] {
+  const toolCalls = Array.isArray(message.tool_calls)
+    ? message.tool_calls
+    : message.function_call
+      ? [
+          {
+            id: toString(choice.id) || "call_0",
+            type: "function",
+            function: message.function_call,
+          },
+        ]
+      : [];
+  const items: JsonRecord[] = [];
+  for (let index = 0; index < toolCalls.length; index += 1) {
+    const toolCall = toRecord(toolCalls[index]) || {};
+    const fn = toRecord(toolCall.function) || {};
+    const callId = toString(toolCall.id) || `call_${index}`;
+    items.push({
+      id: `fc_${callId}`,
+      type: "function_call",
+      call_id: callId,
+      name: toString(fn.name) || "",
+      arguments: stripZeroWidthToolArgumentJson(fn.arguments),
+    });
+  }
+  return items;
+}
+
 function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecord {
   const responseId = normalizeResponsesId(openaiResponse.id);
   const createdAt = toNumber(openaiResponse.created) ?? Math.floor(Date.now() / 1000);
@@ -1000,6 +979,7 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
     ? (toRecord(openaiResponse.choices[0]) ?? {})
     : {};
   const message = toRecord(choice.message) || {};
+  const incompleteReason = incompleteReasonForFinish(choice.finish_reason);
   const output: JsonRecord[] = [];
 
   const reasoningContent =
@@ -1020,6 +1000,7 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
       id: `msg_${responseId}_0`,
       type: "message",
       role: toString(message.role) || "assistant",
+      ...(incompleteReason ? { status: "incomplete" } : {}),
       content:
         messageContent.length > 0
           ? messageContent
@@ -1027,37 +1008,15 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
     });
   }
 
-  const toolCalls = Array.isArray(message.tool_calls)
-    ? message.tool_calls
-    : message.function_call
-      ? [
-          {
-            id: toString(choice.id) || "call_0",
-            type: "function",
-            function: message.function_call,
-          },
-        ]
-      : [];
-
-  for (let index = 0; index < toolCalls.length; index += 1) {
-    const toolCall = toRecord(toolCalls[index]) || {};
-    const fn = toRecord(toolCall.function) || {};
-    const callId = toString(toolCall.id) || `call_${index}`;
-    output.push({
-      id: `fc_${callId}`,
-      type: "function_call",
-      call_id: callId,
-      name: toString(fn.name) || "",
-      arguments: stripZeroWidthToolArgumentJson(fn.arguments),
-    });
-  }
+  output.push(...buildFunctionCallOutputs(message, choice));
 
   const sanitized: JsonRecord = {
     id: responseId,
     object: "response",
     created_at: createdAt,
     model,
-    status: "completed",
+    status: incompleteReason ? "incomplete" : "completed",
+    ...(incompleteReason ? { incomplete_details: { reason: incompleteReason } } : {}),
     background: false,
     error: null,
     output,
@@ -1154,11 +1113,12 @@ export function sanitizeStreamingChunk(parsed: unknown): unknown {
         const deltaRecord = toRecord(choiceRecord.delta);
         if (deltaRecord) {
           const delta: JsonRecord = {};
-          if (deltaRecord.role !== undefined) delta.role = deltaRecord.role;
+          // prettier-ignore
+          { if (deltaRecord.role !== undefined) delta.role = deltaRecord.role; if (typeof deltaRecord.refusal === "string") delta.refusal = deltaRecord.refusal; }
           if (deltaRecord.content !== undefined) {
             delta.content =
               typeof deltaRecord.content === "string"
-                ? collapseExcessiveNewlines(stripZeroWidthText(deltaRecord.content))
+                ? stripZeroWidthText(deltaRecord.content)
                 : deltaRecord.content;
           }
           copyOpenAICompatibleReasoningFields(deltaRecord, delta);
@@ -1186,6 +1146,8 @@ export function sanitizeStreamingChunk(parsed: unknown): unknown {
           }
           if (deltaRecord.function_call !== undefined)
             delta.function_call = stripZeroWidthFunctionArguments(deltaRecord.function_call);
+          // Generated-image deltas (gemini-to-openai inlineData) must survive the allow-list.
+          if (Array.isArray(deltaRecord.images)) delta.images = deltaRecord.images;
           c.delta = delta;
         } else {
           c.delta = choiceRecord.delta;

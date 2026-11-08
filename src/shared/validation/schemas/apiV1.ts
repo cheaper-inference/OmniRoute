@@ -501,73 +501,6 @@ export const v1RerankSchema = z
   })
   .catchall(z.unknown());
 
-const systemOneStructuredTextSchema = z.union([
-  z.string(),
-  z.record(z.string(), z.unknown()),
-  z.array(z.unknown()),
-  z.null(),
-]);
-
-const systemOneNoulQuestionSchema = z
-  .object({
-    type: z.literal("noul"),
-    instructions: systemOneStructuredTextSchema,
-    criteria: z
-      .object({
-        true: systemOneStructuredTextSchema.optional(),
-        false: systemOneStructuredTextSchema.optional(),
-      })
-      .catchall(z.unknown())
-      .optional(),
-  })
-  .catchall(z.unknown());
-
-const systemOneChoiceCriterionSchema = z.union([
-  z.string(),
-  z.record(z.string(), z.unknown()),
-  z.array(z.unknown()),
-  z.null(),
-]);
-
-const systemOneChoiceQuestionSchema = z
-  .object({
-    type: z.literal("choice"),
-    instructions: systemOneStructuredTextSchema,
-    criteria: z
-      .record(z.string().trim().min(1), systemOneChoiceCriterionSchema)
-      .refine((criteria) => Object.keys(criteria).length > 0, "criteria must not be empty")
-      .refine(
-        (criteria) => Object.keys(criteria).length <= 255,
-        "criteria must contain no more than 255 options"
-      ),
-  })
-  .catchall(z.unknown());
-
-const systemOneScoreQuestionSchema = z
-  .object({
-    type: z.literal("score"),
-    instructions: systemOneStructuredTextSchema,
-    criteria: z.array(systemOneStructuredTextSchema).min(2).max(10),
-  })
-  .catchall(z.unknown());
-
-export const systemOneQuestionSchema = z.discriminatedUnion("type", [
-  systemOneNoulQuestionSchema,
-  systemOneChoiceQuestionSchema,
-  systemOneScoreQuestionSchema,
-]);
-
-/** POST /v1/systemone — TypeSafe System One evaluation. */
-export const v1SystemOneSchema = z
-  .object({
-    state: systemOneStructuredTextSchema,
-    model: modelIdSchema,
-    questions: z
-      .record(z.string().trim().min(1), systemOneQuestionSchema)
-      .refine((questions) => Object.keys(questions).length > 0, "questions must not be empty"),
-  })
-  .catchall(z.unknown());
-
 // POST /v1/classify — Jina zero/few-shot classification (api.jina.ai).
 export const v1ClassifySchema = z
   .object({
@@ -591,6 +524,27 @@ export const v1SegmentSchema = z
     max_chunk_length: z.coerce.number().positive().optional(),
   })
   .catchall(z.unknown());
+
+// POST /v1/systemone — System One typed decisions (#13987). One `state` plus
+// typed `questions` (noul / choice / score); the backend is selected by the model id — `typesafe/…` or a bare `jev-*` alias
+// routes to native api.typesafe.ai, an `openrouter/…` prefix routes to
+// OpenRouter's alpha decisions endpoint.
+export const v1SystemOneSchema = z
+  .object({
+    model: modelIdSchema.optional(),
+    state: z.union([nonEmptyStringSchema, z.record(z.string(), z.unknown())]),
+    questions: z.record(z.string().min(1), z.unknown()),
+  })
+  .catchall(z.unknown())
+  .superRefine((value, ctx) => {
+    if (Object.keys(value.questions).length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "questions must contain at least one question",
+        path: ["questions"],
+      });
+    }
+  });
 
 export const providerChatCompletionSchema = z
   .object({
@@ -678,11 +632,11 @@ export const v1SearchSchema = z.preprocess(
       // exa-search, tavily-search, firecrawl, google-pse-search, linkup-search, ollama-search,
       // searchapi-search, youcom-search, searxng-search, zai-search, jina-search, jina-ai,
       // jina, duckduckgo-free, x-search, x_search, xquik-search, xquik, anysearch-search,
-      // anysearch (plus short aliases resolved by
+      // anysearch, parallel-search, parallel (plus short aliases resolved by
       // SEARCH_PROVIDER_ALIASES).
       provider: z.string().min(1).optional(),
       max_results: z.coerce.number().int().min(1).max(100).default(5),
-      search_type: z.enum(["web", "news", "x"]).default("web"),
+      search_type: z.enum(["web", "news", "x", "finance"]).default("web"),
       offset: z.coerce.number().int().min(0).default(0),
 
       // Locale
@@ -793,6 +747,7 @@ export const v1WebFetchSchema = z.object({
       "context7",
       "nimble-search",
       "anysearch-search",
+      "parallel-search",
     ])
     .optional(),
   format: z.enum(["markdown", "html", "links", "screenshot"]).default("markdown"),

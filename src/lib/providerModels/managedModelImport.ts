@@ -349,10 +349,14 @@ export async function importManagedModels({
     );
   }
 
-  // Prune stale/inactive connection caches for this provider
-  const activeConnections = await getProviderConnections({ provider: providerId, isActive: true });
+  // Subscription account selection requires an account-specific catalog even
+  // after reactivation. Only deleted accounts are stale for this provider.
+  const retainedConnections = await getProviderConnections({
+    provider: providerId,
+    ...(providerId === "codex" ? {} : { isActive: true }),
+  });
   const allowedConnectionIds = Array.from(
-    new Set([...activeConnections.map((c) => String(c.id)), connectionId])
+    new Set([...retainedConnections.map((c) => String(c.id)), connectionId])
   );
   await pruneStaleSyncedAvailableModelsForProvider(providerId, allowedConnectionIds);
 
