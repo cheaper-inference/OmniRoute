@@ -32,7 +32,7 @@ export const LOCAL_PROVIDER_NODE_HOSTS_ENV = "OMNIROUTE_LOCAL_PROVIDER_NODE_HOST
 // Short cloud-metadata names that resolve through a cloud VM's DNS search path (GCE
 // documents `http://metadata/`; EC2 has served `instance-data`). The fully qualified names
 // and IPs come from the shared `isCloudMetadataHost()` guard.
-const SHORT_METADATA_HOSTNAMES = new Set(["metadata", "instance-data"]);
+export const SHORT_METADATA_HOSTNAMES = new Set(["metadata", "instance-data"]);
 
 // DNS labels as Docker/Compose/Kubernetes produce them. Docker also allows `_` in names.
 // A public FQDN must not bypass the remote-node flag, outbound policy or egress proxies.

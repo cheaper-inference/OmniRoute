@@ -18,6 +18,7 @@ export interface AlertProps extends Omit<ComponentProps<"div">, "title"> {
   actions?: ReactNode;
   persistence?: AlertPersistence;
   duration?: number;
+  /** Accessible name of the dismiss button. Localized apps must pass it; defaults to "Dismiss alert". */
   dismissLabel?: string;
   onDismiss?: () => void;
   /** Keep actionable form errors visible until the caller clears them. */

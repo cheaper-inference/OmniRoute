@@ -63,7 +63,7 @@ export const ENGINE_CATALOG: Record<string, EngineMeta> = {
     description: "Whitespace/format cleanup.",
     guidance: {
       tradeoffs:
-        "Safest mode (~15% savings, <1ms latency): whitespace/dedup/formatting cleanup only, zero semantic change. Always safe to leave on.",
+        "Safest mode (<1ms latency): whitespace/dedup/formatting cleanup. Truncating earlier tool results to the lite cap is lossy and runs only when the request opts in (allow-lossy, engine:lite or a named combo).",
       lossy: false,
       cacheImpact: "none",
     },
