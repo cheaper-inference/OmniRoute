@@ -885,6 +885,24 @@ async function materializeConnection(
   };
 }
 
+const PROVIDER_EXHAUSTED_DEDUPE_MS = 10 * 60 * 1000;
+const lastProviderExhaustedAt = new Map<string, number>();
+
+/** Webhook alert when every account of a provider cools down; one per provider per window. */
+function notifyProviderExhausted(provider: string, connectionsCount: number, retryAfter: string) {
+  const now = Date.now();
+  const last = lastProviderExhaustedAt.get(provider);
+  if (last !== undefined && now - last < PROVIDER_EXHAUSTED_DEDUPE_MS) return;
+  lastProviderExhaustedAt.set(provider, now);
+  void import("@/lib/webhookDispatcher")
+    .then(({ notifyWebhookEvent }) =>
+      notifyWebhookEvent("provider.exhausted", { provider, connectionsCount, retryAfter })
+    )
+    .catch(() => {
+      /* webhook delivery is best-effort */
+    });
+}
+
 /**
  * True when the active Codex pool (narrowed by an API key's `allowedConnections`) is
  * non-empty and every account is plan-ineligible for the paid-only `requestedModel`.
@@ -1514,6 +1532,16 @@ export async function getProviderCredentials(
           options,
           allBlockedByModelCooldown ? "MODEL_INELIGIBLE" : "HEALTH_OR_COOLDOWN"
         );
+        // Only the whole provider counts: a key policy, a pin or a model-only cooldown narrows the
+        // view without taking the provider down. Excluded accounts fail the every() check below.
+        if (
+          !allBlockedByModelCooldown &&
+          !allowedConnections?.length &&
+          !forcedConnectionId &&
+          connections.every((c) => connectionFilterStatus.get(c.id) === "rateLimited")
+        ) {
+          notifyProviderExhausted(provider, connections.length, earliest);
+        }
         return {
           allRateLimited: true,
           retryAfter: earliest,

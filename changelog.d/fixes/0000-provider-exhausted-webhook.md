@@ -1,0 +1,1 @@
+- **fix(webhooks):** a new `provider.exhausted` webhook event alerts you when every account of a provider is cooling down, at most once per provider every 10 minutes.
