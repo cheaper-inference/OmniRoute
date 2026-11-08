@@ -178,6 +178,31 @@ export function resolveKnipBin(opts = {}) {
 }
 
 /**
+ * Parse knip's `--reporter json` stdout.
+ *
+ * knip >= 6.44 loads `next.config.*`, and ours calls fumadocs-mdx `createMDX()`,
+ * which prints "[MDX] generated files in …ms" to stdout before the report. The
+ * report is still intact, so read it from the first line that opens a JSON object.
+ * Output with no JSON report still throws a SyntaxError.
+ *
+ * Exported for unit testing.
+ *
+ * @param {string} stdout
+ * @returns {unknown} the parsed report
+ */
+export function parseKnipStdout(stdout) {
+  const text = String(stdout ?? "").trim();
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    const lines = text.split(/\r?\n/);
+    const start = lines.findIndex((line) => line.trimStart().startsWith("{"));
+    if (start <= 0) throw err;
+    return JSON.parse(lines.slice(start).join("\n"));
+  }
+}
+
+/**
  * Classify a knip invocation outcome.
  *
  * The subtlety this exists for: knip LEGITIMATELY exits non-zero when it finds
@@ -204,7 +229,7 @@ export function classifyKnipFailure(execError, stdout) {
   // reporting findings. This is a successful measurement, not a failure.
   if (text) {
     try {
-      JSON.parse(text);
+      parseKnipStdout(text);
       return {
         kind: "ok",
         exitCode: DEAD_CODE_EXIT.OK,
@@ -316,7 +341,7 @@ function runKnip(cwd = ROOT) {
 
   let knipJson;
   try {
-    knipJson = JSON.parse(String(stdout));
+    knipJson = parseKnipStdout(stdout);
   } catch (parseErr) {
     // Unreachable via classifyKnipFailure (it already JSON-parsed), kept as a
     // defensive guard so a future change cannot turn this into exit 2.
