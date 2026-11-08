@@ -15,6 +15,7 @@ import {
 import { handleAiHordeImageGeneration } from "../../open-sse/handlers/imageGeneration/providers/aihorde.ts";
 import { handleImageGeneration } from "../../open-sse/handlers/imageGeneration.ts";
 import { aiHordeImageCatalog } from "../../open-sse/services/aihordeImageCatalog.ts";
+import { setPinnedFetchTestOverride } from "../../src/shared/network/remoteImageFetch.ts";
 
 test("map helpers snap size, cap n, and strip prefixes", () => {
   assert.equal(stripHordeModelPrefix("aihorde/FLUX.1-schnell"), "FLUX.1-schnell");
@@ -195,6 +196,8 @@ test("an oversized R2 image download is rejected instead of buffered whole", asy
     }
     return new Response("unexpected", { status: 500 });
   }) as typeof fetch;
+  // The R2 download is DNS-pinned; route the pinned connection back to this mock.
+  setPinnedFetchTestOverride(globalThis.fetch);
 
   try {
     const result = await handleAiHordeImageGeneration({
@@ -208,6 +211,7 @@ test("an oversized R2 image download is rejected instead of buffered whole", asy
     assert.match(String(result.error), /exceeds|byte limit|too large/);
   } finally {
     globalThis.fetch = originalFetch;
+    setPinnedFetchTestOverride(undefined);
   }
 });
 

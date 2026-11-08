@@ -26,7 +26,23 @@ test("extractChatMessage returns chatId/text/messageId for a text message", () =
       from: { id: 123456789, first_name: "Benson" },
     },
   });
-  assert.deepEqual(chat, { chatId: 123456789, text: "/start", messageId: 42 });
+  // fromId (the sender) is what the user allowlist checks; it differs from
+  // chatId in groups, where every member shares the group chat id.
+  assert.deepEqual(chat, { chatId: 123456789, text: "/start", messageId: 42, fromId: 123456789 });
+});
+
+test("extractChatMessage reports the sender separately from a group chat id", () => {
+  const chat = extractChatMessage({
+    update_id: 4,
+    message: {
+      message_id: 7,
+      chat: { id: -100555, type: "group" },
+      text: "hi",
+      from: { id: 1001, first_name: "A" },
+    },
+  });
+  assert.equal(chat?.chatId, -100555);
+  assert.equal(chat?.fromId, 1001);
 });
 
 test("extractChatMessage returns null for non-message updates", () => {

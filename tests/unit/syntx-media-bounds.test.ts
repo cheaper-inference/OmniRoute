@@ -32,6 +32,9 @@ function fakeJwt(): string {
 }
 
 const credentials = { accessToken: fakeJwt() };
+// The download now runs the upstream-media URL checks (HTTPS, public address) before the
+// injected transport is called; a public IP literal passes them without a DNS lookup.
+const MEDIA_URL = "https://203.0.113.20/x.mp4";
 const noopFetch = (async () => new Response("unused", { status: 200 })) as typeof fetch;
 // A well-formed base64 data URL whose decoded size (150 MiB) exceeds the limit: the decode
 // refuses with a 400 before it allocates the bytes.
@@ -63,10 +66,7 @@ describe("syntx media size bounds", () => {
       return realGetReader();
     };
     const fetchImpl = (async () => response) as typeof fetch;
-    await assert.rejects(
-      fetchSyntxMediaBytes("https://r2.syntx.ai/x.mp4", fetchImpl),
-      isStatus(413)
-    );
+    await assert.rejects(fetchSyntxMediaBytes(MEDIA_URL, { transport: fetchImpl }), isStatus(413));
     assert.equal(getReaderCalls, 0); // no download: the reader was never opened
   });
 
@@ -87,10 +87,7 @@ describe("syntx media size bounds", () => {
         status: 200,
         headers: { "content-type": "video/mp4" },
       })) as typeof fetch;
-    await assert.rejects(
-      fetchSyntxMediaBytes("https://r2.syntx.ai/x.mp4", fetchImpl),
-      isStatus(413)
-    );
+    await assert.rejects(fetchSyntxMediaBytes(MEDIA_URL, { transport: fetchImpl }), isStatus(413));
     assert.equal(cancelled, true); // the oversized stream was cancelled, not buffered whole
   });
 
@@ -101,7 +98,8 @@ describe("syntx media size bounds", () => {
       return Promise.reject(new DOMException("This operation was aborted", "AbortError"));
     }) as typeof fetch;
     await assert.rejects(
-      fetchSyntxMediaBytes("https://r2.syntx.ai/x.mp4", fetchImpl, {
+      fetchSyntxMediaBytes(MEDIA_URL, {
+        transport: fetchImpl,
         signal: controller.signal,
       }),
       isStatus(499)
@@ -126,7 +124,8 @@ describe("syntx media size bounds", () => {
         status: 200,
         headers: { "content-type": "video/mp4" },
       })) as typeof fetch;
-    const pending = fetchSyntxMediaBytes("https://r2.syntx.ai/x.mp4", fetchImpl, {
+    const pending = fetchSyntxMediaBytes(MEDIA_URL, {
+      transport: fetchImpl,
       signal: controller.signal,
     });
     await assert.rejects(pending, isStatus(499));
@@ -153,7 +152,8 @@ describe("syntx media size bounds", () => {
       return response;
     }) as typeof fetch;
     await assert.rejects(
-      fetchSyntxMediaBytes("https://r2.syntx.ai/x.mp4", fetchImpl, {
+      fetchSyntxMediaBytes(MEDIA_URL, {
+        transport: fetchImpl,
         signal: controller.signal,
       }),
       isStatus(413) // the 413 survives the concurrent abort (not converted to 499)
@@ -169,7 +169,8 @@ describe("syntx media size bounds", () => {
       return Promise.resolve(new Response("x"));
     }) as typeof fetch;
     await assert.rejects(
-      fetchSyntxMediaBytes("https://r2.syntx.ai/x.mp4", fetchImpl, {
+      fetchSyntxMediaBytes(MEDIA_URL, {
+        transport: fetchImpl,
         signal: controller.signal,
       }),
       isStatus(499)
