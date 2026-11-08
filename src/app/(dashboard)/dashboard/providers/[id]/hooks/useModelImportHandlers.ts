@@ -36,6 +36,10 @@ export interface ImportProgress {
   logs: string[];
   error: string;
   importedCount: number;
+  /** The discovery fell back to the built-in catalog — the dialog says so. */
+  degraded?: boolean;
+  /** The reason of the fallback, when the server published one. */
+  degradedCause?: string;
 }
 
 export interface UseModelImportHandlersParams {
@@ -177,19 +181,23 @@ export function useModelImportHandlers({
         isKnownModel: (id) => existingIds.has(id),
       });
       const importWarning = classification.warning;
+      const degradedCause = classification.cause;
+      const degraded = classification.degraded;
       // B-03 (#15159): when discovery fell back to a local/cache catalog the
       // headline must not read as an authoritative "nothing to import". The
-      // server's warning becomes the status, with the success-flavoured line
-      // demoted to a log entry — the operator sees the real cause first instead
-      // of scrolling for it. Only keys that already exist in all 66 locales are
-      // used; no new translation is introduced.
+      // banner at the top of the dialog now says so — with the reason — and the
+      // server's own text moves down to the log, where the per-provider nuance
+      // belongs. Only keys that already exist in all 66 locales are used; no new
+      // translation is introduced.
       if (classification.outcome === "no-models") {
         setImportProgress((prev) => ({
           ...prev,
-          phase: "done",
-          status: classification.degraded && importWarning ? importWarning : t("noModelsFound"),
+          phase: resolveNoNewModelsPhase(importWarning, degraded),
+          status: t("noModelsFound"),
+          degraded,
+          ...(degradedCause ? { degradedCause } : {}),
           logs: [
-            ...(classification.degraded && importWarning ? [t("noModelsFound")] : []),
+            ...(degraded && importWarning ? [importWarning] : []),
             t("noModelsReturnedFromEndpoint"),
           ],
         }));
@@ -201,21 +209,15 @@ export function useModelImportHandlers({
       if (classification.outcome === "nothing-new") {
         // #15069: a degraded (local-catalog fallback) result is a terminal "warning", not a
         // success — the live provider API was never actually consulted.
-        const noNewModelsPhase = resolveNoNewModelsPhase(
-          classification.degraded ? importWarning : null
-        );
+        const noNewModelsPhase = resolveNoNewModelsPhase(importWarning, degraded);
         setImportProgress((prev) => ({
           ...prev,
           phase: noNewModelsPhase,
-          status:
-            classification.degraded && importWarning
-              ? importWarning
-              : t("allModelsAlreadyImported") || "All models already imported",
+          status: t("allModelsAlreadyImported") || "All models already imported",
+          degraded,
+          ...(degradedCause ? { degradedCause } : {}),
           logs: [
-            ...(classification.degraded && importWarning ? [t("allModelsAlreadyImported")] : []),
-            ...(importWarning && !(classification.degraded && importWarning)
-              ? [importWarning]
-              : []),
+            ...(importWarning ? [importWarning] : []),
             t("noNewModelsToImport") || "No new models to import",
           ],
           importedCount: 0,
@@ -231,6 +233,8 @@ export function useModelImportHandlers({
         total: newModels.length,
         current: 0,
         status: t("importingModelsProgress", { current: 0, total: newModels.length }),
+        degraded,
+        ...(degradedCause ? { degradedCause } : {}),
         logs: [
           ...(importWarning ? [importWarning] : []),
           t("foundModelsStartingImport", { count: newModels.length }),
@@ -341,8 +345,9 @@ export function useModelImportHandlers({
         importedCount,
       }));
 
-      if (importedCount > 0 && failures.length > 0) {
-        // A reload would wipe the failure lines before they can be read.
+      if (importedCount > 0 && (failures.length > 0 || degraded)) {
+        // A reload would wipe the failure lines before they can be read, and it
+        // would erase the degraded notice too: the list is refreshed in place.
         await fetchProviderModelMeta();
       } else if (importedCount > 0) {
         setTimeout(() => {

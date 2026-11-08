@@ -27,24 +27,22 @@ Tí a tò pọ̀:      1 - (1 - 0.80) * (1 - 0.46) = 89.2% ni a fipamọ́
 Ààlà:            1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Ohun Tó Ń Fún Pọ̀
+## Ohun Tó ń Dín Kù
 
-Kátálọ́ọ̀gù tí a kọ́ sínú rẹ̀ lọ́wọ́lọ́wọ́ ní asẹ 49 káàkiri àwọn ẹ̀ka wọ̀nyí:
+Kátálógì abínúdáà náà ló ń gbé àwọn àlẹ́mọ́ 56 wá lọ́wọ́lọ́wọ́ kúlẹ̀ àwọn ẹ̀yà wọ̀nyí:
 
-| Ẹ̀ka       | Àwọn àpẹẹrẹ                                                         |
-| --------- | ------------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                   |
-| `test`    | Vitest, Jest, Pytest, Playwright, àwọn ìdánwò Go, àwọn ìdánwò Cargo |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx       |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler       |
-| `shell`   | `ls`, `find`, `grep`, àwọn àkọsílẹ̀ shell gbogbogbò                  |
-| `docker`  | `docker ps`, àwọn àkọsílẹ̀ Docker                                    |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                             |
-| `generic` | Àbájáde JSON, àwọn stack trace, àṣàyàn ìpadà sí àbájáde gbogbogbò   |
+| Ẹ̀yà       | Àwọn àpẹẹrẹ                                                      |
+| --------- | ---------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, àwọn ìdánwò Cargo |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx    |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler    |
+| `shell`   | `ls`, `find`, `grep`, àwọn log shell gbogbogbo                   |
+| `docker`  | `docker ps`, àwọn log Docker                                     |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                          |
+| `generic` | èsí JSON, àwọn stack trace, ìsọfàni èsí gbogbogbo                |
 
-Olùṣàwárí inú `open-sse/services/compression/engines/rtk/commandDetector.ts` ń pín àbájáde sí ẹ̀ka
-kí yíyan asẹ tó wáyé. Àwọn asẹ tún lè ṣe ìbámu nípasẹ̀ pattern àṣẹ tàbí regex àbájáde nígbà tí ẹ̀ka àṣẹ
-kò bá tó.
+Ohun èlò ìmọ̀wádìí tó wà nínú `open-sse/services/compression/engines/rtk/commandDetector.ts` ló ń ka èsí sí ẹ̀yà kí ìyàn àlẹ́mọ́ tó ṣẹlẹ̀. Àwọn àlẹ́mọ́ tún lè bá a mu nípasẹ àpẹẹrẹ àṣẹ tàbí regex èsí nígbà tí ẹ̀yà àṣẹ kan bá ò tó.
 
 ## Ìpinnu Asẹ
 
@@ -351,61 +349,61 @@ node --import tsx/esm --test \
 
 ---
 
-## Àwọn Ìpele Ìgbóná (v3.8.16+)
+## Àwọn Ìpele Ìfaradà (v3.8.16+)
 
-RTK ṣe àtìlẹ́yìn fún **àwọn ìpele ìgbóná 3** tí ó ń ṣe pàṣípààrọ̀ láàárín **bí fífúnpọ̀ ṣe lágbára tó** àti **ààbò**. A ṣètò ìpele náà nípasẹ̀ `config.intensity` nínú àtòjọ ètò engine.
+RTK ṣe àtìlẹ́yìn fún **àwọn ìpele ìfaradà 3** tí wọ́n ń ṣe ìbéèrè láàrin **ìfaradà ìdínkù** àti **ààbò**. A ń ṣètò ìpele náà nípasẹ̀ `config.intensity` nínú config engine náà.
 
 ### Àwọn Ìpele 3 Náà
 
-| Ìpele              | Ààlà ìgé-kúrú           | Ìfipamọ́ token | Ewu       | Ó dára jù fún                        |
-| ------------------ | ----------------------- | ------------- | --------- | ------------------------------------ |
-| `minimal`          | ìlà 24 fún abala kọ̀ọ̀kan | ~20-40%       | Kéré púpọ̀ | Production pẹ̀lú context tó ṣe pàtàkì |
-| `standard` (àkọ́kọ́) | ìlà 24 fún abala kọ̀ọ̀kan | ~50-70%       | Kéré      | Àwọn ìgbà coding ojoojúmọ́            |
-| `aggressive`       | ìlà 16 fún abala kọ̀ọ̀kan | ~70-90%       | Àárín     | Àwọn ìgbà gígùn, ìfipamọ́ tó pọ̀ jù    |
+| Ìpele                    | Ààlà ìgekúrẹ́           | Ìfipamọ́ token | Ewu           | Ó dára jùlọ fún                      |
+| ------------------------ | ---------------------- | ------------- | ------------- | ------------------------------------ |
+| `minimal`                | ìlà 24 ní abala kọ̀ọ̀kan | ~20-40%       | Kékeré gan-an | Ìṣelọpọ̀ pẹ̀lú àyíká pàtàkì            |
+| `standard` (àiyàn àkọ́kọ́) | ìlà 24 ní abala kọ̀ọ̀kan | ~50-70%       | Kékeré        | Àwọn ìjoko kóòdù ojoojúmọ́            |
+| `aggressive`             | ìlà 16 ní abala kọ̀ọ̀kan | ~70-90%       | Àárín         | Àwọn ìjoko gígùn, ìfipamọ́ tó pọ̀ jùlọ |
 
-### Ibi Tí Ìgé-kúrú Ti Ń Ṣẹlẹ̀
+### Níbi tí Ìgekúrẹ́ ti ń Ṣẹlẹ̀
 
-Ààlà ìgé-kúrú náà kan `lineFilter.ts`:
+Ààlà ìgekúrẹ́ náà ní ipa lórí `lineFilter.ts`:
 
 ```ts
-// Láti inú open-sse/services/compression/engines/rtk/index.ts:329-330
+// Láti open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-A máa ń pa **orí** àti **ìrù** abala kọ̀ọ̀kan mọ́; a máa ń yọ àkóónú àárín kúrò nígbà tí ìgé-kúrú bá bẹ̀rẹ̀.
+A ń pa **ìbẹ̀rẹ̀** àti **ìparí** abala kọ̀ọ̀kan mọ́; a ó kọ àkóónú àárín náà sílẹ̀ nígbà tí ìgekúrẹ́ bá bẹ̀rẹ̀ iṣẹ́.
 
-### Ohun Tí Ó Dúró àti Ohun Tí A Gé Kúrò
+### Ohun tó Dúró vs. Ohun tí a Gé Kúrọ̀
 
-| Àkóónú                               | minimal    | standard     | aggressive   |
-| ------------------------------------ | ---------- | ------------ | ------------ |
-| Àwọn àṣìṣe / stack traces            | ✅ a pa mọ́ | ✅ a pa mọ́   | ✅ a pa mọ́   |
-| Àwọn ìkùnà ìdánwò                    | ✅ a pa mọ́ | ✅ a pa mọ́   | ✅ a pa mọ́   |
-| Àwọn àṣìṣe build                     | ✅ a pa mọ́ | ✅ a pa mọ́   | ✅ a pa mọ́   |
-| Àwọn ìdánwò tí ó kọjá (alálàyé)      | ✅ a pa mọ́ | 🟡 a kó jọ   | 🟡 a kó jọ   |
-| Àbájáde ìṣe ojoojúmọ́ (àwọn log info) | 🟡 a kó jọ | 🟡 a kó jọ   | ❌ a yọ kúrò |
-| Àwọn ọ̀pá ìlọsíwájú                   | 🟡 a kó jọ | ❌ a yọ kúrò | ❌ a yọ kúrò |
-| Àmì ìbẹ̀rẹ̀ / iṣẹ́ ọnà ASCII            | 🟡 a kó jọ | ❌ a yọ kúrò | ❌ a yọ kúrò |
+| Àkóónú                                | minimal     | standard     | aggressive   |
+| ------------------------------------- | ----------- | ------------ | ------------ |
+| Àwọn aṣìṣe / àtẹ̀lé stack              | ✅ a pa mọ́ọ́ | ✅ a pa mọ́ọ́  | ✅ a pa mọ́ọ́  |
+| Àwọn ìkùnà ìdánwò                     | ✅ a pa mọ́ọ́ | ✅ a pa mọ́ọ́  | ✅ a pa mọ́ọ́  |
+| Àwọn aṣìṣe build                      | ✅ a pa mọ́ọ́ | ✅ a pa mọ́ọ́  | ✅ a pa mọ́ọ́  |
+| Àṣeyọrí ìdánwò (ẹ̀kúnrẹ́rẹ́ àlàyé)       | ✅ a pa mọ́ọ́ | 🟡 a kópọ̀    | 🟡 a kópọ̀    |
+| Èsì ìṣe déédéé (àwọn log ìfitónilétí) | 🟡 a kópọ̀   | 🟡 a kópọ̀    | ❌ a kọ̀ sílẹ̀ |
+| Àwọn ọ́pá ìlọsíwájú                    | 🟡 a kópọ̀   | ❌ a kọ̀ sílẹ̀ | ❌ a kọ̀ sílẹ̀ |
+| Àsíá / àwòrán ASCII                   | 🟡 a kópọ̀   | ❌ a kọ̀ sílẹ̀ | ❌ a kọ̀ sílẹ̀ |
 
-### Yíyan Ìgbóná Tó Tọ́
+### Ìyàn Ìfaradà tó Tọ́
 
 ```
-                  Ṣé pípọ́nù context jẹ́ àjálù?
+                  Ǹjẹ́ pípàdánù àyíká jẹ́ ìbájẹ́ ńlá?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    BẸ́Ẹ̀NI       BẸ́Ẹ̀KỌ́      KÒ DÁ MI LÓJÚ
+   BẸ́Ẹ̀NI       RÁRÁ        KÒ DÁJÚ
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Báwo ni throughput Ṣe àdánwò `standard` kọ́kọ́
-      │      ṣe ṣe pàtàkì tó?  (ó ṣiṣẹ́ fún 80% àwọn
-      │           │          ọ̀ràn)
+      │     Kí lo ṣe pàtàkì  Gbìyànjú `standard`
+      │     nínú throughput? ní àkọ́kọ́ (ó ṣiṣẹ́
+      │           │          fún 80% àwọn ìṣẹ̀lẹ̀)
       │      ┌────┴────┐
       │      │         │
-      │     KÉRÉ      GÍGA
+      │    KÉKERÉ    GÍGA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -413,9 +411,9 @@ A máa ń pa **orí** àti **ìrù** abala kọ̀ọ̀kan mọ́; a máa ń yọ
       └──────┴─────────┘
 ```
 
-### Ṣíṣètò Ìgbóná
+### Ìṣètò Ìfaradà
 
-**Fún combo kọ̀ọ̀kan** (nínú àtòjọ ètò combo):
+**Fún combo kọ̀ọ̀kan** (nínú config combo):
 
 ```json
 {
@@ -428,11 +426,11 @@ A máa ń pa **orí** àti **ìrù** abala kọ̀ọ̀kan mọ́; a máa ń yọ
 }
 ```
 
-**Nípasẹ̀ ìṣètò**:
+**Ní ọ̀nà kóòdù**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) jẹ́
-`CompressionEngine` kò sì ní method `updateConfig`. Ṣàfikún-ọ̀tun àtòjọ ètò engine
-nípasẹ̀ olùrànlọ́wọ́ registry dípò rẹ̀:
+`CompressionEngine`, ó sì kò ní method `updateConfig`. Dípò èyí, ṣe àtúnṣe config
+engine kan nípasẹ̀ ohun èlò ìrànlọ́wọ́ registry:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -440,16 +438,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Ṣíṣe Ìjẹ́rìísí Ipa Náà
+### Ìṣàyẹ̀wò Ipa Náà
 
-Lo **Ẹnubodè Ìjẹ́rìísí** (wo ìsàlẹ̀) láti jẹ́rìí pé asẹ rẹ ní ààbò ní ìgbóná tí o yàn:
+Lo **Verify Gate** (wo ìsàlẹ̀) láti fìdí rẹ̀ pé àjọ rẹ ní ààbò lórí ìfaradà tí o yàn:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Àwọn asẹ kùnà ní ìgbóná aggressive");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 
