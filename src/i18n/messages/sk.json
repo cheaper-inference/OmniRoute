@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "Duplikácia automatickej kombinácie zlyhala:",
     "duplicateAutoComboUnknownError": "Neznáma chyba",
     "duplicateAutoComboTitle": "Vytvorte staticú kombináciu z {name}",
-    "fallbackSummary": "{rate}% požiadaviek použilo záložný proces, ~{skips} cieľov preskočených každou"
+    "fallbackSummary": "{rate}% požiadaviek použilo záložný proces, ~{skips} cieľov preskočených každou",
+    "jevAdmitted": "Pripustené: ešte neposúdené (živý Jev potrebuje správu používateľa). Vhodné: {models}.",
+    "jevAdmittedNone": "Pripustené: žiadne — každý cieľ je pred Jevom blokovaný.",
+    "jevHeld": "Pozdržané: žiadne, kým Jev nebeží na živej požiadavke (prah pravdepodobnosti a dominované).",
+    "jevBlocked": "Blokované: {models}.",
+    "jevBlockedNone": "Blokované: žiadne.",
+    "jevNotConfigured": "Jev nie je nakonfigurovaný",
+    "jevTestSummaryFootnote": "Riadky cieľov nižšie sú nezávislé kontroly zdravia. Pripustenie živého Jeva sa zaznamenáva do rozhodovacej stopy skutočnej chatovej požiadavky.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "náklady",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Povoliť dočasné uchovávanie súborov JPEG iba vtedy, keď overená požiadavka zároveň nastaví drilldown: true. Nespracované videá sa nikdy neuchovávajú.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Povoliť overenú podrobnú analýzu snímok",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Povoliť kľúčom API čítať a odstraňovať iba vlastné nepriehľadné identifikátory. Anonymný prístup ani prístup medzi kľúčmi nie je povolený.",
-    "modalityBridgeVideoDrilldownUsage": "Uchované súbory JPEG / bajty"
+    "modalityBridgeVideoDrilldownUsage": "Uchované súbory JPEG / bajty",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "RTK Engine",

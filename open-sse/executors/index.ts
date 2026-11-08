@@ -1,4 +1,5 @@
 import { SEARCH_PROVIDERS } from "../config/searchRegistry.ts";
+import { isDecisionsOnlyProvider } from "../config/decisionsProviders.ts";
 import { SearchProviderChatError } from "../utils/searchProviderChatError.ts";
 import { assertMicrosoftDesignerWebProviderAvailable } from "@/shared/constants/designerWebRetirement";
 import { assertRuntimeProviderAvailable } from "@/shared/constants/providerRetirement";
@@ -224,6 +225,22 @@ const CHAT_UNSUPPORTED_CLOUD_AGENT_PROVIDERS = new Set(["jules"]);
 // providers must be executed through /v1/search, never the chat-completions path.
 const CHAT_UNSUPPORTED_SEARCH_PROVIDERS = new Set(Object.keys(SEARCH_PROVIDERS));
 
+/**
+ * #14498: a decisions-only provider (TypeSafe Jev) has no chat shape; with
+ * SYSTEMONE_CHAT_GUARD_ENABLED on, chat dispatch is refused instead of letting the
+ * DefaultExecutor post the provider key to the OpenAI fallback endpoint. The flag
+ * module reads the DB, so it loads only on this path to keep the barrel light.
+ */
+async function assertDecisionsProviderChatAllowed(provider: string): Promise<void> {
+  const { isSystemOneChatGuardEnabled } = await import("@/shared/utils/featureFlags");
+  if (!isSystemOneChatGuardEnabled()) return;
+  const err = new Error(
+    `Provider "${provider}" is a System One decisions provider and does not support chat completions; use the /v1/systemone endpoint instead.`
+  );
+  (err as Error & { status?: number }).status = 400;
+  throw err;
+}
+
 export async function getExecutor(provider: string): Promise<BaseExecutor> {
   assertMicrosoftDesignerWebProviderAvailable(provider);
   assertRuntimeProviderAvailable(provider);
@@ -240,6 +257,7 @@ export async function getExecutor(provider: string): Promise<BaseExecutor> {
   if (CHAT_UNSUPPORTED_SEARCH_PROVIDERS.has(provider)) {
     throw new SearchProviderChatError(provider);
   }
+  if (isDecisionsOnlyProvider(provider)) await assertDecisionsProviderChatAllowed(provider);
   return getDefaultExecutor(provider);
 }
 

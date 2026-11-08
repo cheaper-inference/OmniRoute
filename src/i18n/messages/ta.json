@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "ஆட்டோகம்போ நகலெடுத்தல் தோல்வியடைந்தது:",
     "duplicateAutoComboUnknownError": "அறியப்படாத பிழை",
     "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்",
-    "fallbackSummary": "{rate}% கோரிக்கைகள் பின்னடைவு அடைந்தன, ஒவ்வொருமுறையும் ~{skips} இலக்குகள் தவிர்க்கப்பட்டன"
+    "fallbackSummary": "{rate}% கோரிக்கைகள் பின்னடைவு அடைந்தன, ஒவ்வொருமுறையும் ~{skips} இலக்குகள் தவிர்க்கப்பட்டன",
+    "jevAdmitted": "ஒப்புக்கொள்ளப்பட்டது: இன்னும் தீர்மானிக்கப்படவில்லை (நேரடி Jev ஒரு பயனர் செய்தி தேவை). தகுதி: {models}.",
+    "jevAdmittedNone": "ஒப்புக்கொள்ளப்பட்டது: எதுவும் இல்லை — ஒவ்வொரு இலக்கும் Jev க்கு முன் தடுக்கப்பட்டது.",
+    "jevHeld": "நடத்தப்பட்டது: Jev நேரடி கோரிக்கையில் இயங்கும் வரை எதுவும் இல்லை (நிகழ்தகவு தளம் மற்றும் ஆதிக்கம்).",
+    "jevBlocked": "தடுக்கப்பட்டது: {models}.",
+    "jevBlockedNone": "தடுக்கப்பட்டது: இல்லை.",
+    "jevNotConfigured": "Jev கட்டமைக்கப்படவில்லை",
+    "jevTestSummaryFootnote": "கீழே உள்ள இலக்கு வரிசைகள் சுயாதீனமான சுகாதார ஆய்வுகள். நேரலை Jev சேர்க்கை உண்மையான அரட்டை கோரிக்கைக்கான முடிவு ட்ரேஸில் பதிவு செய்யப்பட்டுள்ளது.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "செலவுகள்",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "அங்கீகரிக்கப்பட்ட கோரிக்கை drilldown: true என்பதையும் அமைத்தால் மட்டுமே தற்காலிக JPEG தக்கவைப்பை அனுமதிக்கவும். மூல வீடியோக்கள் ஒருபோதும் தக்கவைக்கப்படாது.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "அங்கீகரிக்கப்பட்ட சட்டக விரிவாய்வை அனுமதிக்கவும்",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API விசைகள் தங்களுக்குச் சொந்தமான ஒளிபுகா கைப்பிடிகளை மட்டுமே படிக்கவும் நீக்கவும் அனுமதிக்கவும். அநாமதேய அல்லது வேறு விசை வழி அணுகல் இல்லை.",
-    "modalityBridgeVideoDrilldownUsage": "தக்கவைக்கப்பட்ட JPEGகள் / பைட்டுகள்"
+    "modalityBridgeVideoDrilldownUsage": "தக்கவைக்கப்பட்ட JPEGகள் / பைட்டுகள்",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "RTK எஞ்சின்",

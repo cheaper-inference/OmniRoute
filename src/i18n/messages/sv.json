@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "Kopiering av automatisk kombination misslyckades:",
     "duplicateAutoComboUnknownError": "Okänt fel",
     "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}",
-    "fallbackSummary": "{rate}% av begärandedan använde en reserv, ~{skips} mål hopplat över per begärande"
+    "fallbackSummary": "{rate}% av begärandedan använde en reserv, ~{skips} mål hopplat över per begärande",
+    "jevAdmitted": "Godkända: ännu inte bedömda (live-Jev behöver ett användarmeddelande). Berättigade: {models}.",
+    "jevAdmittedNone": "Godkända: inga — varje mål är blockerat före Jev.",
+    "jevHeld": "Hållna: inga förrän Jev körs på en liveförfrågan (sannolikhetsgolv och dominerade).",
+    "jevBlocked": "Blockerade: {models}.",
+    "jevBlockedNone": "Blockerade: inga.",
+    "jevNotConfigured": "Jev är inte konfigurerad",
+    "jevTestSummaryFootnote": "Målraderna nedan är oberoende hälsosonder. Live-Jev-godkännande registreras i beslutsspåret för en riktig chattförfrågan.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "Kostnader",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Tillåt tillfällig lagring av JPEG-filer endast när den autentiserade begäran även anger drilldown: true. Råvideor lagras aldrig.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Tillåt autentiserad detaljgranskning av bildrutor",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Tillåt API-nycklar att endast läsa och radera sina egna ogenomskinliga referenser. Ingen anonym åtkomst eller åtkomst mellan nycklar.",
-    "modalityBridgeVideoDrilldownUsage": "Lagrade JPEG-filer / byte"
+    "modalityBridgeVideoDrilldownUsage": "Lagrade JPEG-filer / byte",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "RTK-motor",

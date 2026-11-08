@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "Duplicarea combinației automate a eșuat:",
     "duplicateAutoComboUnknownError": "Eroare necunoscută",
     "duplicateAutoComboTitle": "Creați o combinație statică din {name}",
-    "fallbackSummary": "{rate}% din cereri au folosit alternativ, ~{skips} ținte omise fiecare"
+    "fallbackSummary": "{rate}% din cereri au folosit alternativ, ~{skips} ținte omise fiecare",
+    "jevAdmitted": "Admise: încă neevaluate (Jev live are nevoie de un mesaj de utilizator). Eligibile: {models}.",
+    "jevAdmittedNone": "Admise: niciuna — fiecare țintă este blocată înainte de Jev.",
+    "jevHeld": "Reținute: niciuna până când Jev rulează pe o cerere live (prag de probabilitate și dominate).",
+    "jevBlocked": "Blocate: {models}.",
+    "jevBlockedNone": "Blocate: niciuna.",
+    "jevNotConfigured": "Jev nu este configurat",
+    "jevTestSummaryFootnote": "Rândurile țintă de mai jos sunt sonde de sănătate independente. Admiterea Jev live este înregistrată pe urma de decizie a unei cereri reale de chat.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "Costuri",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Permite păstrarea temporară a fișierelor JPEG numai atunci când solicitarea autentificată setează și drilldown: true. Videoclipurile brute nu sunt păstrate niciodată.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Permite analiza detaliată autentificată a cadrelor",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Permite cheilor API să citească și să șteargă numai propriile identificatoare opace. Fără acces anonim sau între chei.",
-    "modalityBridgeVideoDrilldownUsage": "Fișiere JPEG păstrate / octeți"
+    "modalityBridgeVideoDrilldownUsage": "Fișiere JPEG păstrate / octeți",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "Motor RTK",

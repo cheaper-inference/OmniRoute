@@ -4224,7 +4224,17 @@
     "duplicateAutoComboFailedPrefix": "Duplikace automatické kombinace selhala:",
     "duplicateAutoComboUnknownError": "Neznámá chyba",
     "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}",
-    "fallbackSummary": "{rate} % požadavků využilo záložní cestu, každý přeskočil průměrně ~{skips} cílů"
+    "fallbackSummary": "{rate} % požadavků využilo záložní cestu, každý přeskočil průměrně ~{skips} cílů",
+    "jevAdmitted": "Připuštěno: ještě neposouzeno (živý Jev potřebuje uživatelskou zprávu). Vhodné: {models}.",
+    "jevAdmittedNone": "Připuštěno: žádné — každý cíl je před Jevem blokován.",
+    "jevHeld": "Pozdrženo: žádné, dokud Jev neběží na živém požadavku (pravděpodobnostní práh a dominované).",
+    "jevBlocked": "Blokováno: {models}.",
+    "jevBlockedNone": "Blokováno: žádné.",
+    "jevNotConfigured": "Jev není nakonfigurován",
+    "jevTestSummaryFootnote": "Řádky cílů níže jsou nezávislé kontroly zdraví. Připuštění živého Jeva se zaznamenává do rozhodovací stopy skutečného chatového požadavku.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "Náklady",
@@ -9348,7 +9358,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Povolit dočasné uchování souborů JPEG pouze tehdy, když ověřený požadavek zároveň nastaví drilldown: true. Nezpracovaná videa se nikdy neuchovávají.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Povolit ověřený detailní rozbor snímků",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Povolit klíčům API číst a mazat pouze jejich vlastní neprůhledné identifikátory. Anonymní přístup ani přístup napříč klíči není povolen.",
-    "modalityBridgeVideoDrilldownUsage": "Uchované soubory JPEG / bajty"
+    "modalityBridgeVideoDrilldownUsage": "Uchované soubory JPEG / bajty",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "Modul RTK",

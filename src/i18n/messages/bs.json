@@ -4224,7 +4224,17 @@
     "duplicateAutoComboFailedPrefix": "Neuspjelo dupliranje auto-comba:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
     "duplicateAutoComboTitle": "Kreiraj statični combo iz {name}",
-    "fallbackSummary": "{rate}% zahtjeva je koristilo alternativni put, svaki je prosječno preskočio ~{skips} meta"
+    "fallbackSummary": "{rate}% zahtjeva je koristilo alternativni put, svaki je prosječno preskočio ~{skips} meta",
+    "jevAdmitted": "Dopušteno: još nije procijenjeno (živom Jevu treba korisnička poruka). Prikladni: {models}.",
+    "jevAdmittedNone": "Dopušteno: nijedan — svaka meta je blokirana prije Jeva.",
+    "jevHeld": "Zadržano: nijedan dok Jev ne pokrene na živom zahtjevu (prag vjerojatnosti i dominirani).",
+    "jevBlocked": "Blokirano: {models}.",
+    "jevBlockedNone": "Blokirano: nijedan.",
+    "jevNotConfigured": "Jev nije konfiguriran",
+    "jevTestSummaryFootnote": "Redovi meta ispod su neovisne zdravstvene sonde. Dopuštenje živog Jeva bilježi se na tragu odluke stvarnog zahtjeva za chat.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "Troškovi",
@@ -9348,7 +9358,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Dozvoli privremeno zadržavanje JPEG datoteka samo kada autentificirani zahtjev također postavlja drilldown: true. Izvorni videozapisi se nikada ne zadržavaju.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Dozvoli autentificiranu detaljnu analizu kadrova",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Dozvoli API ključevima da čitaju i brišu samo vlastite neprozirne identifikatore. Anonimni pristup ili pristup između različitih ključeva nije dozvoljen.",
-    "modalityBridgeVideoDrilldownUsage": "Zadržane JPEG datoteke / bajtovi"
+    "modalityBridgeVideoDrilldownUsage": "Zadržane JPEG datoteke / bajtovi",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "RTK pogon",

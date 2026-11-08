@@ -77,7 +77,9 @@ describe("feature-flags-settings count update", () => {
     // REASONING_REPLAY_ENABLED (#12486, default on) to 84; COMBO_AUTO_PRUNE_STALE_STEPS
     // (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (default on) to 86;
     // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 120);
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 123);
+    // SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED, SYSTEMONE_CHAT_GUARD_ENABLED and
+    // COMBO_JEV_STRATEGY_ENABLED (System One complements, default off) to 123.
     // SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED (#16676, default off) to 120.
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.

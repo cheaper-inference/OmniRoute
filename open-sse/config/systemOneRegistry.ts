@@ -10,6 +10,7 @@
  *   openrouter/inception/…:free  → openrouter alpha decisions (model verbatim)
  *   cloudflare-ai/jev | cf/jev   → Workers AI /ai/run           (model typesafe/jev)
  *   cloudflare-ai/clef[-flash]   → Workers AI /ai/run/@cf/cloudflare/<model>
+ *   ollama-local/<model>         → the ollama-local connection's /v1/systemone
  *
  * Anything else is not a decisions model → null (the route 400s with guidance).
  */
@@ -39,7 +40,16 @@ export const CLOUDFLARE_SYSTEMONE_MODELS: Readonly<Record<string, string>> = {
 };
 const CLOUDFLARE_SYSTEMONE_PREFIXES = ["cloudflare-ai/", "cf/"];
 
-export type SystemOneBackend = "typesafe" | "openrouter" | "cloudflare";
+/**
+ * Local Ollama (#14667). The URL comes from the `ollama-local` connection's base URL,
+ * never from the request; the model id only travels in the JSON body.
+ */
+export const OLLAMA_LOCAL_SYSTEMONE_PROVIDER_ID = "ollama-local";
+const OLLAMA_LOCAL_SYSTEMONE_PREFIX = "ollama-local/";
+/** Plain Ollama model tags (`qwen3:8b`, `library/llama3.2:latest`); no whitespace or control chars. */
+const OLLAMA_LOCAL_MODEL_ID = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}$/;
+
+export type SystemOneBackend = "typesafe" | "openrouter" | "cloudflare" | "ollama-local";
 
 export interface SystemOneTarget {
   backend: SystemOneBackend;
@@ -47,7 +57,10 @@ export interface SystemOneTarget {
   provider: string;
   /** Model id forwarded upstream (gateway prefix stripped). */
   upstreamModel: string;
-  /** Empty for "cloudflare": the URL needs the connection's account id. */
+  /**
+   * Empty for "cloudflare" (the URL needs the connection's account id) and for
+   * "ollama-local" (the URL is the connection's base URL).
+   */
   upstreamUrl: string;
 }
 
@@ -63,6 +76,18 @@ function resolveCloudflareTarget(model: string): SystemOneTarget | null | undefi
     backend: "cloudflare",
     provider: CLOUDFLARE_SYSTEMONE_PROVIDER_ID,
     upstreamModel,
+    upstreamUrl: "",
+  };
+}
+
+function resolveOllamaLocalTarget(model: string): SystemOneTarget | null | undefined {
+  if (!model.startsWith(OLLAMA_LOCAL_SYSTEMONE_PREFIX)) return undefined;
+  const id = model.slice(OLLAMA_LOCAL_SYSTEMONE_PREFIX.length);
+  if (!OLLAMA_LOCAL_MODEL_ID.test(id) || id.includes("..")) return null;
+  return {
+    backend: "ollama-local",
+    provider: OLLAMA_LOCAL_SYSTEMONE_PROVIDER_ID,
+    upstreamModel: id,
     upstreamUrl: "",
   };
 }
@@ -105,6 +130,8 @@ export function resolveSystemOneTarget(model: string | undefined): SystemOneTarg
   }
   const cloudflare = resolveCloudflareTarget(trimmed);
   if (cloudflare !== undefined) return cloudflare;
+  const ollamaLocal = resolveOllamaLocalTarget(trimmed);
+  if (ollamaLocal !== undefined) return ollamaLocal;
   if (/^jev[-/]/i.test(trimmed)) {
     return {
       backend: "typesafe",

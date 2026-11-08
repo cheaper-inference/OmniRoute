@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "Échec de la duplication de la combinaison automatique :",
     "duplicateAutoComboUnknownError": "Erreur inconnue",
     "duplicateAutoComboTitle": "Créer une combinaison statique à partir de {name}",
-    "fallbackSummary": "{rate}% des requêtes ont été basculées, environ {skips} cibles ont été ignorées par requête"
+    "fallbackSummary": "{rate}% des requêtes ont été basculées, environ {skips} cibles ont été ignorées par requête",
+    "jevAdmitted": "Admis : pas encore jugé (Jev en direct a besoin d’un message utilisateur). Éligibles : {models}.",
+    "jevAdmittedNone": "Admis : aucun — chaque cible est bloquée avant Jev.",
+    "jevHeld": "En attente : aucun jusqu’à ce que Jev s’exécute sur une requête en direct (seuil de probabilité et dominés).",
+    "jevBlocked": "Bloqués : {models}.",
+    "jevBlockedNone": "Bloqués : aucun.",
+    "jevNotConfigured": "Jev n’est pas configuré",
+    "jevTestSummaryFootnote": "Les lignes cibles ci-dessous sont des sondes de santé indépendantes. L’admission Jev en direct est enregistrée dans la trace de décision d’une vraie requête de chat.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "Coûts",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Autoriser la conservation temporaire des fichiers JPEG uniquement lorsque la requête authentifiée définit également drilldown: true. Les vidéos brutes ne sont jamais conservées.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Autoriser l’exploration détaillée des images pour les requêtes authentifiées",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Autoriser les clés API à lire et supprimer uniquement leurs propres identifiants opaques. Aucun accès anonyme ou inter-clés.",
-    "modalityBridgeVideoDrilldownUsage": "Fichiers JPEG conservés / octets"
+    "modalityBridgeVideoDrilldownUsage": "Fichiers JPEG conservés / octets",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "Moteur RTK",

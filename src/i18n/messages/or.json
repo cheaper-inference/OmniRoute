@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "ସ୍ୱୟଂଚାଳିତ କମ୍ବୋର ନକଲ କରିବାରେ ବିଫଳ:",
     "duplicateAutoComboUnknownError": "ଅଜଣା ତ୍ରୁଟି",
     "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ",
-    "fallbackSummary": "{rate}% ଆବେଦନ ଫଲବେକ୍ ହୋଇଛି, ପ୍ରତି ଆବେଦନରେ ପ୍ରାୟ ~{skips} ଟାର୍ଗେଟ୍ ଚାଲି ଯାଇଛି"
+    "fallbackSummary": "{rate}% ଆବେଦନ ଫଲବେକ୍ ହୋଇଛି, ପ୍ରତି ଆବେଦନରେ ପ୍ରାୟ ~{skips} ଟାର୍ଗେଟ୍ ଚାଲି ଯାଇଛି",
+    "jevAdmitted": "ଅନୁମୋଦିତ: ଏପର୍ଯ୍ୟନ୍ତ ନିଷ୍ପତ୍ତି ହୋଇନାହିଁ (ଲାଇଭ୍ Jev ପାଇଁ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ବାର୍ତ୍ତା ଆବଶ୍ୟକ)। ଯୋଗ୍ୟ: {models}।",
+    "jevAdmittedNone": "ଅନୁମୋଦିତ: କେହି ନୁହେଁ — Jev ପୂର୍ବରୁ ପ୍ରତ୍ୟେକ ଲକ୍ଷ୍ୟ ଅବରୋଧିତ।",
+    "jevHeld": "ଅପେକ୍ଷାରତ: ଲାଇଭ୍ ଅନୁରୋଧରେ Jev ଚାଲିବା ପର୍ଯ୍ୟନ୍ତ କେହି ନାହାନ୍ତି (ସମ୍ଭାବ୍ୟତା ସୀମା ଏବଂ ପ୍ରଭାବିତ)।",
+    "jevBlocked": "ଅବରୋଧିତ: {models}।",
+    "jevBlockedNone": "ଅବରୋଧିତ: କେହି ନୁହେଁ।",
+    "jevNotConfigured": "Jev ବିନ୍ୟାସିତ ହୋଇନାହିଁ",
+    "jevTestSummaryFootnote": "ନିମ୍ନରେ ଥିବା ଲକ୍ଷ୍ୟ ଧାଡ଼ିଗୁଡ଼ିକ ସ୍ୱତନ୍ତ୍ର ସ୍ୱାସ୍ଥ୍ୟ ପରୀକ୍ଷା। ପ୍ରକୃତ ଚାଟ୍ ଅନୁରୋଧର ନିଷ୍ପତ୍ତି ଟ୍ରେସରେ ଲାଇଭ୍ Jev ଅନୁମୋଦନ ଲେଖାଯାଏ।",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "ଖର୍ଚ୍ଚ",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "ପ୍ରମାଣୀକୃତ ଅନୁରୋଧରେ drilldown: true ମଧ୍ୟ ସେଟ୍ କରାଯାଇଥିଲେ ମାତ୍ର ଅସ୍ଥାୟୀ JPEG ସଂରକ୍ଷଣକୁ ଅନୁମତି ଦିଅନ୍ତୁ। କଚ୍ଚା ଭିଡିଓଗୁଡ଼ିକୁ କେବେବି ସଂରକ୍ଷିତ ରଖାଯାଏ ନାହିଁ।",
     "modalityBridgeVideoDrilldownRemoteEnabled": "ପ୍ରମାଣୀକୃତ ଫ୍ରେମ୍ ଡ୍ରିଲ୍-ଡାଉନ୍କୁ ଅନୁମତି ଦିଅନ୍ତୁ",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API କିଗୁଡ଼ିକୁ କେବଳ ସେମାନଙ୍କର ନିଜସ୍ୱ ଅସ୍ପଷ୍ଟ ହ୍ୟାଣ୍ଡଲ୍ଗୁଡ଼ିକ ପଢ଼ିବା ଏବଂ ବିଲୋପ କରିବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ବେନାମୀ କିମ୍ବା କ୍ରସ୍-କି ଆକ୍ସେସ୍ ନାହିଁ।",
-    "modalityBridgeVideoDrilldownUsage": "ସଂରକ୍ଷିତ JPEGଗୁଡ଼ିକ / ବାଇଟ୍ଗୁଡ଼ିକ"
+    "modalityBridgeVideoDrilldownUsage": "ସଂରକ୍ଷିତ JPEGଗୁଡ଼ିକ / ବାଇଟ୍ଗୁଡ଼ିକ",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "RTK ଇଞ୍ଜିନ୍",

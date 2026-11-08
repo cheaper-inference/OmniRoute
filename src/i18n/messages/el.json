@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "Αποτυχία αντιγραφής αυτόματου συνδυασμού:",
     "duplicateAutoComboUnknownError": "Άγνωστο σφάλμα",
     "duplicateAutoComboTitle": "Δημιουργία στατικού συνδυασμού από {name}",
-    "fallbackSummary": "{rate}% των αιτημάτων έπιασαν εναλλακτική, κάθε ένα παραλείπει σε μέσο όρο ~{skips} στόχους"
+    "fallbackSummary": "{rate}% των αιτημάτων έπιασαν εναλλακτική, κάθε ένα παραλείπει σε μέσο όρο ~{skips} στόχους",
+    "jevAdmitted": "Επιτρεπόμενα: δεν έχουν κριθεί ακόμη (το live Jev χρειάζεται μήνυμα χρήστη). Επιλέξιμα: {models}.",
+    "jevAdmittedNone": "Επιτρεπόμενα: κανένα — κάθε στόχος είναι αποκλεισμένος πριν από το Jev.",
+    "jevHeld": "Σε αναμονή: κανένα μέχρι να εκτελεστεί το Jev σε ζωντανό αίτημα (κατώφλι πιθανότητας και κυριαρχούμενα).",
+    "jevBlocked": "Αποκλεισμένα: {models}.",
+    "jevBlockedNone": "Αποκλεισμένα: κανένα.",
+    "jevNotConfigured": "Το Jev δεν είναι ρυθμισμένο",
+    "jevTestSummaryFootnote": "Οι γραμμές στόχων παρακάτω είναι ανεξάρτητες ανιχνεύσεις υγείας. Η εισδοχή live Jev καταγράφεται στο ίχνος απόφασης ενός πραγματικού αιτήματος συνομιλίας.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "Κόστη",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Να επιτρέπεται η προσωρινή διατήρηση JPEG μόνο όταν το πιστοποιημένο αίτημα ορίζει επίσης drilldown: true. Τα ανεπεξέργαστα βίντεο δεν διατηρούνται ποτέ.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Να επιτρέπεται η λεπτομερής εξέταση καρέ με πιστοποίηση",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Να επιτρέπεται στα κλειδιά API να διαβάζουν και να διαγράφουν μόνο τα δικά τους αδιαφανή αναγνωριστικά. Δεν επιτρέπεται ανώνυμη πρόσβαση ή πρόσβαση μεταξύ διαφορετικών κλειδιών.",
-    "modalityBridgeVideoDrilldownUsage": "Διατηρούμενα JPEG / byte"
+    "modalityBridgeVideoDrilldownUsage": "Διατηρούμενα JPEG / byte",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "Μηχανή RTK",

@@ -22,6 +22,7 @@ const CONNECTION_AWARE_EXPANSION_GROUP_B = new Set([
   "context-relay",
   "fusion",
   "pipeline",
+  "jev",
 ]);
 
 export type StickyLimitSource = "combo" | "combo-defaults" | "global";
@@ -56,9 +57,7 @@ export function describeStickyRoundRobinLimit(
   }
   const globalSticky = settings?.stickyRoundRobinLimit;
   return {
-    value: isPresentLimit(globalSticky)
-      ? clampStickyRoundRobinTargetLimit(globalSticky, 3)
-      : 3,
+    value: isPresentLimit(globalSticky) ? clampStickyRoundRobinTargetLimit(globalSticky, 3) : 3,
     source: "global",
   };
 }

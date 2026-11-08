@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "ล้มเหลวในการทำสำเนาคอมโบอัตโนมัติ:",
     "duplicateAutoComboUnknownError": "ข้อผิดพลาดที่ไม่ทราบสาเหตุ",
     "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}",
-    "fallbackSummary": "คำขอ {rate}% ย้ายไปใช้สำรอง แต่ละครั้งข้ามเป้าหมายประมาณ {skips} รายการ"
+    "fallbackSummary": "คำขอ {rate}% ย้ายไปใช้สำรอง แต่ละครั้งข้ามเป้าหมายประมาณ {skips} รายการ",
+    "jevAdmitted": "อนุญาตแล้ว: ยังไม่ได้ตัดสิน (Jev แบบสดต้องการข้อความผู้ใช้) ที่มีสิทธิ์: {models}",
+    "jevAdmittedNone": "อนุญาตแล้ว: ไม่มี — ทุกเป้าหมายถูกบล็อกก่อน Jev",
+    "jevHeld": "ระงับ: ไม่มีจนกว่า Jev จะทำงานบนคำขอแบบสด (เกณฑ์ความน่าจะเป็นและถูกครอง)",
+    "jevBlocked": "ถูกบล็อก: {models}",
+    "jevBlockedNone": "ถูกบล็อก: ไม่มี",
+    "jevNotConfigured": "Jev ยังไม่ได้กำหนดค่า",
+    "jevTestSummaryFootnote": "แถวเป้าหมายด้านล่างเป็นการตรวจสุขภาพอิสระ การอนุญาต Jev แบบสดถูกบันทึกบนร่องรอยการตัดสินใจของคำขอแชทจริง",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "ค่าใช้จ่าย",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "อนุญาตให้เก็บไฟล์ JPEG ชั่วคราวเฉพาะเมื่อคำขอที่ผ่านการยืนยันตัวตนกำหนด drilldown: true ด้วยเท่านั้น โดยจะไม่มีการเก็บวิดีโอต้นฉบับไว้",
     "modalityBridgeVideoDrilldownRemoteEnabled": "อนุญาตการเจาะดูรายละเอียดเฟรมสำหรับผู้ใช้ที่ผ่านการยืนยันตัวตน",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "อนุญาตให้คีย์ API อ่านและลบได้เฉพาะแฮนเดิลแบบทึบของตนเองเท่านั้น ไม่อนุญาตการเข้าถึงแบบไม่ระบุตัวตนหรือข้ามคีย์",
-    "modalityBridgeVideoDrilldownUsage": "ไฟล์ JPEG ที่เก็บไว้ / ไบต์"
+    "modalityBridgeVideoDrilldownUsage": "ไฟล์ JPEG ที่เก็บไว้ / ไบต์",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "RTK Engine",

@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "Nabigo ang pag-duplicate ng auto-combo:",
     "duplicateAutoComboUnknownError": "Hindi alam na error",
     "duplicateAutoComboTitle": "Gumawa ng static combo mula sa {name}",
-    "fallbackSummary": "{rate}% ng mga request ang nagbailback, tinatayang ~{skips} na target ang sinakrip sa bawat isa"
+    "fallbackSummary": "{rate}% ng mga request ang nagbailback, tinatayang ~{skips} na target ang sinakrip sa bawat isa",
+    "jevAdmitted": "Inamin: hindi pa hinuhusgahan (kailangan ng live na Jev ng mensahe ng user). Kwalipikado: {models}.",
+    "jevAdmittedNone": "Tinatanggap: wala — bawat target ay naharang bago ang Jev.",
+    "jevHeld": "Hinawakan: wala hanggang sa tumakbo ang Jev sa isang live na kahilingan (probability floor at dominado).",
+    "jevBlocked": "Naka-block: {models}.",
+    "jevBlockedNone": "Naka-block: wala.",
+    "jevNotConfigured": "Hindi naka-configure ang Jev",
+    "jevTestSummaryFootnote": "Ang mga target na hilera sa ibaba ay mga independiyenteng pagsusuri sa kalusugan. Ang live na Jev admission ay naitala sa bakas ng desisyon para sa isang tunay na kahilingan sa chat.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "Mga gastos",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Payagan lamang ang pansamantalang pagpapanatili ng JPEG kapag itinatakda rin ng napatotohanang kahilingan ang drilldown: true. Hindi kailanman pinapanatili ang mga raw na video.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Payagan ang napatotohanang masusing pagtingin sa frame",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Payagan ang mga API key na basahin at burahin lamang ang sarili nilang mga opaque handle. Walang anonymous o cross-key na access.",
-    "modalityBridgeVideoDrilldownUsage": "Mga pinanatiling JPEG / byte"
+    "modalityBridgeVideoDrilldownUsage": "Mga pinanatiling JPEG / byte",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "Engine ng RTK",

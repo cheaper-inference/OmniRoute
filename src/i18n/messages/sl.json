@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "Podvajanje samodejne kombinacije ni uspelo:",
     "duplicateAutoComboUnknownError": "Neznana napaka",
     "duplicateAutoComboTitle": "Ustvari statično kombinacijo iz {name}",
-    "fallbackSummary": "{rate}% zahtev je uporabilo nadomestno rešitev, vsaka je preskočila približno {skips} ciljev"
+    "fallbackSummary": "{rate}% zahtev je uporabilo nadomestno rešitev, vsaka je preskočila približno {skips} ciljev",
+    "jevAdmitted": "Sprejeto: še ni ocenjeno (živ Jev potrebuje uporabniško sporočilo). Primerni: {models}.",
+    "jevAdmittedNone": "Sprejeto: noben — vsaka tarča je blokirana pred Jevom.",
+    "jevHeld": "Zadržano: noben, dokler Jev ne teče na živi zahtevi (prag verjetnosti in dominirani).",
+    "jevBlocked": "Blokirano: {models}.",
+    "jevBlockedNone": "Blokirano: noben.",
+    "jevNotConfigured": "Jev ni konfiguriran",
+    "jevTestSummaryFootnote": "Vrstice ciljev spodaj so neodvisne sonde zdravja. Sprejem živega Jeva se zabeleži v sledi odločitve prave zahteve za klepet.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "Stroški",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Dovoli začasno hrambo datotek JPEG samo, ko overjena zahteva nastavi tudi drilldown: true. Neobdelani videoposnetki se nikoli ne hranijo.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Dovoli overjeno podrobno pregledovanje sličic",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Dovoli ključem API, da berejo in brišejo samo lastne neprosojne identifikatorje. Anonimni dostop ali dostop med različnimi ključi ni dovoljen.",
-    "modalityBridgeVideoDrilldownUsage": "Shranjene datoteke JPEG/bajti"
+    "modalityBridgeVideoDrilldownUsage": "Shranjene datoteke JPEG/bajti",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "Pogon RTK",

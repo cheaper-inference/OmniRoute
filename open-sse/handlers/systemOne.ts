@@ -25,13 +25,21 @@ import {
   cloudflareErrorMessage,
   unwrapCloudflareDecision,
 } from "./systemOneCloudflare.ts";
+import {
+  buildOllamaSystemOneBody,
+  buildOllamaSystemOneUrl,
+  validateOllamaSystemOneBody,
+} from "./systemOneOllama.ts";
 
 export interface SystemOneCredentials {
   apiKey?: string | null;
   accessToken?: string | null;
   connectionId?: string | null;
-  /** `cloudflare-ai` connections keep the Workers AI account id here. */
-  providerSpecificData?: { accountId?: unknown } | null;
+  /**
+   * `cloudflare-ai` connections keep the Workers AI account id here; `ollama-local`
+   * connections keep their base URL.
+   */
+  providerSpecificData?: { accountId?: unknown; baseUrl?: unknown } | null;
 }
 
 export interface SystemOneProxyOptions {
@@ -189,16 +197,46 @@ interface DecisionRequest {
   body: Record<string, unknown>;
 }
 
-/** Upstream URL + body for the target backend; null = unusable connection config. */
-function buildDecisionRequest(options: SystemOneProxyOptions): DecisionRequest | null {
+interface DecisionRequestError {
+  status: number;
+  message: string;
+}
+
+/** Local Ollama (#14667): its own body limits, URL from the connection's base URL. */
+function buildOllamaDecisionRequest(
+  options: SystemOneProxyOptions
+): DecisionRequest | DecisionRequestError {
+  const validation = validateOllamaSystemOneBody(options.body);
+  if (validation.ok === false) return { status: validation.status, message: validation.message };
+  let url: string;
+  try {
+    url = buildOllamaSystemOneUrl(options.credentials?.providerSpecificData?.baseUrl);
+  } catch (err) {
+    const raw = err instanceof Error ? err.message : String(err);
+    return { status: 400, message: `Invalid ollama-local base URL: ${sanitizeErrorMessage(raw)}` };
+  }
+  return { url, body: buildOllamaSystemOneBody(options.target.upstreamModel, options.body) };
+}
+
+/** Upstream URL + body for the target backend, or why the request cannot be sent. */
+function buildDecisionRequest(
+  options: SystemOneProxyOptions
+): DecisionRequest | DecisionRequestError {
   const { target, body } = options;
   if (target.backend === "cloudflare") {
-    return buildCloudflareDecisionRequest(
+    const request = buildCloudflareDecisionRequest(
       target.upstreamModel,
       options.credentials?.providerSpecificData?.accountId,
       body
     );
+    return (
+      request ?? {
+        status: 400,
+        message: `Provider ${target.provider} needs a valid Account ID (32 lowercase hex characters) in its connection settings`,
+      }
+    );
   }
+  if (target.backend === "ollama-local") return buildOllamaDecisionRequest(options);
   return {
     url: target.upstreamUrl,
     body: { model: target.upstreamModel, state: body.state, questions: body.questions },
@@ -208,7 +246,7 @@ function buildDecisionRequest(options: SystemOneProxyOptions): DecisionRequest |
 function postDecision(
   options: SystemOneProxyOptions,
   request: DecisionRequest,
-  token: string
+  token: string | null | undefined
 ): Promise<Response> {
   const fetchImpl: typeof fetch = options.fetchImpl ?? fetch;
   return fetchImpl(request.url, {
@@ -216,7 +254,8 @@ function postDecision(
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      Authorization: `Bearer ${token}`,
+      // A local Ollama needs no key; send one only when the connection has it.
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify(request.body),
   });
@@ -329,17 +368,12 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
   const provider = options.target.provider;
   const token = options.credentials?.apiKey || options.credentials?.accessToken;
 
-  if (!token) {
+  if (!token && options.target.backend !== "ollama-local") {
     return errorResponse(401, `No active credentials for provider: ${provider}`);
   }
 
   const request = buildDecisionRequest(options);
-  if (!request) {
-    return errorResponse(
-      400,
-      `Provider ${provider} needs a valid Account ID (32 lowercase hex characters) in its connection settings`
-    );
-  }
+  if (!("url" in request)) return errorResponse(request.status, request.message);
 
   try {
     const res = await postDecision(options, request, token);

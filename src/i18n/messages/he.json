@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "כשל בהעתיק קומבו אוטומטי:",
     "duplicateAutoComboUnknownError": "שגיאה לא ידועה",
     "duplicateAutoComboTitle": "צור קומבו סטטי מ־{name}",
-    "fallbackSummary": "{rate}% מהבקשות הופעל בהן נפיל, כ-{skips} יעדים נדלגו בממוצע לכל בקשה"
+    "fallbackSummary": "{rate}% מהבקשות הופעל בהן נפיל, כ-{skips} יעדים נדלגו בממוצע לכל בקשה",
+    "jevAdmitted": "מאושרים: טרם נשפטו (Jev חי זקוק להודעת משתמש). כשירים: {models}.",
+    "jevAdmittedNone": "מאושרים: אין — כל יעד חסום לפני Jev.",
+    "jevHeld": "מוחזקים: אין עד ש-Jev ירוץ על בקשה חיה (סף הסתברות ונשלטים).",
+    "jevBlocked": "חסומים: {models}.",
+    "jevBlockedNone": "חסומים: אין.",
+    "jevNotConfigured": "Jev אינו מוגדר",
+    "jevTestSummaryFootnote": "שורות היעד למטה הן בדיקות בריאות עצמאיות. קבלת Jev חיה נרשמת בעקבת ההחלטה של בקשת צ׳אט אמיתית.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "עלויות",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "יש לאפשר שמירה זמנית של קובצי JPEG רק כאשר הבקשה המאומתת מגדירה גם drilldown: true. סרטונים גולמיים לעולם אינם נשמרים.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "מתן אפשרות לתחקור פריימים למשתמשים מאומתים",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "יש לאפשר למפתחות API לקרוא ולמחוק רק את המזהים האטומים שלהם. אין לאפשר גישה אנונימית או גישה בין מפתחות.",
-    "modalityBridgeVideoDrilldownUsage": "קובצי JPEG שמורים / בתים"
+    "modalityBridgeVideoDrilldownUsage": "קובצי JPEG שמורים / בתים",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "מנוע RTK",

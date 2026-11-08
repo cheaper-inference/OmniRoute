@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "Kò ṣeé ṣe láti ṣe ẹ̀dà àkójọpọ̀ aládàáṣiṣẹ́:",
     "duplicateAutoComboUnknownError": "Àṣìṣe àìmọ̀",
     "duplicateAutoComboTitle": "Ṣẹ̀dá àkójọpọ̀ àìyípadà láti inú {name}",
-    "fallbackSummary": "{rate}% awọn ibeere ti wọle si ibeere ti a le ni, ~{skips} awọn atupale wọn di igbasilẹ si ọwọ si ọwọ"
+    "fallbackSummary": "{rate}% awọn ibeere ti wọle si ibeere ti a le ni, ~{skips} awọn atupale wọn di igbasilẹ si ọwọ si ọwọ",
+    "jevAdmitted": "Ti gba: ko tii ṣe idajọ (ifiweranṣẹ Jev nilo ifiranṣẹ olumulo kan). Ti o yẹ: {models}.",
+    "jevAdmittedNone": "Ti gba: ko si - gbogbo ibi-afẹde ti dinamọ ṣaaju Jev.",
+    "jevHeld": "Ti o waye: ko si titi ti Jev yoo fi ṣiṣẹ lori ibeere laaye (ilẹ iṣeeṣe ati ti jẹ gaba lori).",
+    "jevBlocked": "Dina: {models}.",
+    "jevBlockedNone": "Dina: ko si.",
+    "jevNotConfigured": "Jev ko ni tunto",
+    "jevTestSummaryFootnote": "Awọn ori ila ibi-afẹde ni isalẹ jẹ awọn iwadii ilera ominira. Gbigbawọle Jev Live jẹ igbasilẹ lori itọpa ipinnu fun ibeere iwiregbe gidi kan.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "Àwọn ìnáwó",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Fàyè gba pípa JPEG fún ìgbà díẹ̀ mọ́ nígbà tí ìbéèrè tí a ti fìdí rẹ̀ múlẹ̀ bá tún ṣètò drilldown: true nìkan. A kì í pa àwọn fídíò gidi mọ́ láéláé.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Fàyè gba ìṣàwárí férémù jinlẹ̀ tí a ti fìdí rẹ̀ múlẹ̀",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Fàyè gba àwọn kọ́kọ́rọ́ API láti ka àti pa àwọn àmì ìdánimọ̀ àìhàn tiwọn nìkan. Kò sí ààyè fún ìwọlé aláìlórúkọ tàbí ìwọlé láti ọ̀dọ̀ kọ́kọ́rọ́ mìíràn.",
-    "modalityBridgeVideoDrilldownUsage": "Àwọn JPEG / báìtì tí a pa mọ́"
+    "modalityBridgeVideoDrilldownUsage": "Àwọn JPEG / báìtì tí a pa mọ́",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "Ẹ́ńjìnnì RTK",

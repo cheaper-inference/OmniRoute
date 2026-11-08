@@ -536,6 +536,34 @@ export function isSystemOneCloudflareBackendEnabled(): boolean {
   }
 }
 
+/** Default-off boolean flag that fails closed when the flag store cannot be read. */
+function isDefaultOffFlagEnabled(key: string): boolean {
+  try {
+    return isFeatureFlagEnabled(key);
+  } catch (error) {
+    console.error(
+      `[featureFlags] Failed to resolve ${key}, defaulting to disabled:`,
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/** SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED (#14667, default off): /v1/systemone serves ollama-local/*. */
+export function isSystemOneOllamaLocalBackendEnabled(): boolean {
+  return isDefaultOffFlagEnabled("SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED");
+}
+
+/** SYSTEMONE_CHAT_GUARD_ENABLED (#14498, default off): chat on a decisions-only provider gets a 400. */
+export function isSystemOneChatGuardEnabled(): boolean {
+  return isDefaultOffFlagEnabled("SYSTEMONE_CHAT_GUARD_ENABLED");
+}
+
+/** COMBO_JEV_STRATEGY_ENABLED (#15279, default off): jev combos may call TypeSafe System One. */
+export function isComboJevStrategyEnabled(): boolean {
+  return isDefaultOffFlagEnabled("COMBO_JEV_STRATEGY_ENABLED");
+}
+
 /** OPENCODE_FREE_TIER_EGRESS_PROBE (default off): probe one other proxy after a FreeTierError. */
 export function isOpencodeFreeTierEgressProbeEnabled(): boolean {
   try {

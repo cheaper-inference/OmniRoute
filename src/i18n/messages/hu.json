@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "Az automatikus kombináció duplikálása sikertelen:",
     "duplicateAutoComboUnknownError": "Ismeretlen hiba",
     "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból",
-    "fallbackSummary": "{rate}% kérés vésztárhelyre váltott, átlagosan ~{skips} célpontot ugrottunk feje kérésenként"
+    "fallbackSummary": "{rate}% kérés vésztárhelyre váltott, átlagosan ~{skips} célpontot ugrottunk feje kérésenként",
+    "jevAdmitted": "Engedélyezve: még nincs elbírálva (az élő Jevhez felhasználói üzenet kell). Alkalmas: {models}.",
+    "jevAdmittedNone": "Engedélyezve: nincs — minden cél a Jev előtt blokkolva van.",
+    "jevHeld": "Felfüggesztve: nincs, amíg a Jev élő kérésen nem fut (valószínűségi küszöb és domináltak).",
+    "jevBlocked": "Blokkolva: {models}.",
+    "jevBlockedNone": "Blokkolva: nincs.",
+    "jevNotConfigured": "A Jev nincs konfigurálva",
+    "jevTestSummaryFootnote": "Az alábbi cél sorok független egészségvizsgálatok. Az élő Jev engedélyezése egy valódi chatkérés döntési nyomán kerül rögzítésre.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "Költségek",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Az ideiglenes JPEG-megőrzés csak akkor engedélyezett, ha a hitelesített kérés a drilldown: true értéket is beállítja. A nyers videókat soha nem őrizzük meg.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Hitelesített képkocka-részletezés engedélyezése",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Az API-kulcsok csak a saját átlátszatlan azonosítóikat olvashatják és törölhetik. Névtelen vagy kulcsok közötti hozzáférés nem engedélyezett.",
-    "modalityBridgeVideoDrilldownUsage": "Megőrzött JPEG-ek / bájtok"
+    "modalityBridgeVideoDrilldownUsage": "Megőrzött JPEG-ek / bájtok",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "RTK-motor",

@@ -4147,7 +4147,17 @@
     "duplicateAutoComboFailedPrefix": "Nepavyko dubliuoti automatinio kombo:",
     "duplicateAutoComboUnknownError": "Nežinoma klaida",
     "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}",
-    "fallbackSummary": "{rate}% užklausų naudojo atsarginį variantą, vidutiniškai praleido apie {skips} tikslų per užklausą"
+    "fallbackSummary": "{rate}% užklausų naudojo atsarginį variantą, vidutiniškai praleido apie {skips} tikslų per užklausą",
+    "jevAdmitted": "Priimti: dar neįvertinti (gyvajam Jev reikia vartotojo žinutės). Tinkami: {models}.",
+    "jevAdmittedNone": "Priimti: nėra — kiekvienas tikslas užblokuotas prieš Jev.",
+    "jevHeld": "Sulaikyti: nėra, kol Jev neveikia gyvoje užklausoje (tikimybės riba ir dominuojami).",
+    "jevBlocked": "Užblokuoti: {models}.",
+    "jevBlockedNone": "Užblokuoti: nėra.",
+    "jevNotConfigured": "Jev nesukonfigūruotas",
+    "jevTestSummaryFootnote": "Žemiau esančios tikslų eilutės yra nepriklausomi sveikatos zondai. Gyvojo Jev priėmimas įrašomas į tikros pokalbio užklausos sprendimo pėdsaką.",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order."
   },
   "costs": {
     "title": "Išlaidos",
@@ -9271,7 +9281,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Leisti laikinai saugoti JPEG failus tik tada, kai autentifikuotoje užklausoje taip pat nustatyta drilldown: true. Neapdoroti vaizdo įrašai niekada nesaugomi.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Leisti autentifikuotą išsamią kadrų peržiūrą",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Leisti API raktams skaityti ir šalinti tik savo nepermatomus identifikatorius. Anoniminė arba kitų raktų prieiga neleidžiama.",
-    "modalityBridgeVideoDrilldownUsage": "Išsaugoti JPEG failai / baitai"
+    "modalityBridgeVideoDrilldownUsage": "Išsaugoti JPEG failai / baitai",
+    "jev": "Jev"
   },
   "contextRtk": {
     "title": "RTK variklis",

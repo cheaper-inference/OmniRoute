@@ -31,7 +31,10 @@ import {
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
-import { isSystemOneCloudflareBackendEnabled } from "@/shared/utils/featureFlags";
+import {
+  isSystemOneCloudflareBackendEnabled,
+  isSystemOneOllamaLocalBackendEnabled,
+} from "@/shared/utils/featureFlags";
 
 function optionsResponse() {
   return new Response(null, {
@@ -54,7 +57,8 @@ export function systemOneModelsGet(pathname: string) {
 
 /**
  * Decisions backend for the request model, or the 400 to return: unknown model,
- * or a Cloudflare model while its default-off backend flag is off (#16676).
+ * or a Cloudflare (#16676) / local Ollama (#14667) model while that backend's
+ * default-off flag is off.
  */
 function resolveEnabledTarget(
   model: string | undefined
@@ -66,8 +70,10 @@ function resolveEnabledTarget(
         HTTP_STATUS.BAD_REQUEST,
         `Unknown decisions model: ${model ?? "(missing)"}. Use "typesafe/<model>", ` +
           `a bare jev-* alias, "openrouter/<vendor>/<model>" for OpenRouter-hosted decisions models, ` +
-          `or "cloudflare-ai/<jev|clef|clef-flash>" for Cloudflare Workers AI ` +
-          `(needs the SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED feature flag).`
+          `"cloudflare-ai/<jev|clef|clef-flash>" for Cloudflare Workers AI ` +
+          `(needs the SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED feature flag), ` +
+          `or "ollama-local/<model>" for a local Ollama ` +
+          `(needs the SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED feature flag).`
       ),
     };
   }
@@ -77,6 +83,15 @@ function resolveEnabledTarget(
         HTTP_STATUS.BAD_REQUEST,
         `Decisions model ${model} needs the Cloudflare Workers AI backend, which is off. ` +
           `Enable the SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED feature flag to use it.`
+      ),
+    };
+  }
+  if (target.backend === "ollama-local" && !isSystemOneOllamaLocalBackendEnabled()) {
+    return {
+      rejection: errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `Decisions model ${model} needs the local Ollama backend, which is off. ` +
+          `Enable the SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED feature flag to use it.`
       ),
     };
   }

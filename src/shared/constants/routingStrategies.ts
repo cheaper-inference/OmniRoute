@@ -19,6 +19,7 @@ export const ROUTING_STRATEGY_VALUES = [
   "cache-optimized",
   "fusion",
   "pipeline",
+  "jev",
 ] as const;
 
 export type RoutingStrategyValue = (typeof ROUTING_STRATEGY_VALUES)[number];
@@ -228,6 +229,13 @@ export const ROUTING_STRATEGIES: RoutingStrategyOption[] = [
     combosDescKey: "pipelineDesc",
     settingsDescKey: "pipelineDesc",
     icon: "linear_scale",
+  },
+  {
+    value: "jev",
+    labelKey: "jev",
+    combosDescKey: "jevDesc",
+    settingsDescKey: "jevDesc",
+    icon: "psychology",
   },
 ];
 
