@@ -1184,6 +1184,18 @@ export function getQuotaWeightedRemainingPercent(
   return Math.min(...remaining);
 }
 
+/**
+ * True while a windowless mark from an upstream refusal (a 402/403 balance answer or a
+ * long-window 429) stands. A spent window also reads 0 from
+ * getQuotaWeightedRemainingPercent, so routing that lets paid credits outlive a spent
+ * window needs this to tell the two apart. A later usage reading replaces the mark.
+ */
+export function isQuotaRefusalMarked(connectionId: string): boolean {
+  const entry = getState().cache.get(connectionId);
+  if (!entry || Object.keys(entry.quotas).length > 0) return false;
+  return isAccountQuotaExhausted(connectionId);
+}
+
 /** Epoch-ms of the observation backing this connection's snapshot, if any. */
 export function getQuotaSnapshotFetchedAt(connectionId: string): number | null {
   const entry = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
