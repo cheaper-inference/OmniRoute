@@ -92,7 +92,7 @@ test("single Codex hosted image uses its serving response; fanout omits quota", 
       credentials,
       log: null,
     });
-    assert.equal(single.success, true);
+    assert.equal(single.success, true, `single Codex image response: ${JSON.stringify(single)}`);
     assert.equal(single.telemetry?.codexQuota?.fiveHourRemainingPercent, 60);
     assert.equal(sends, 1);
     const parallel = await handleImageGeneration({
@@ -100,7 +100,7 @@ test("single Codex hosted image uses its serving response; fanout omits quota", 
       credentials,
       log: null,
     });
-    assert.equal(parallel.success, true);
+    assert.equal(parallel.success, true, `fanout Codex image response: ${JSON.stringify(parallel)}`);
     assert.equal(parallel.telemetry?.codexQuota, undefined);
     assert.equal(sends, 3);
   } finally {
