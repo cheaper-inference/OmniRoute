@@ -90,7 +90,13 @@ function normalizeKieMusicTracks(recordData: unknown): Array<Record<string, unkn
 /**
  * Handle music generation request
  */
-export async function handleMusicGeneration({ body, credentials, log, signal = null }) {
+export async function handleMusicGeneration({
+  body,
+  credentials,
+  log,
+  signal = null,
+  prepareFalInput = null,
+}) {
   const { provider, model } = parseMusicModel(body.model);
 
   if (!provider) {
@@ -134,7 +140,16 @@ export async function handleMusicGeneration({ body, credentials, log, signal = n
   }
 
   if (providerConfig.format === "fal-ai-music") {
-    return handleFalMusicGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleFalMusicGeneration({
+      prepareFalInput,
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "elevenlabs-music") {
