@@ -333,15 +333,13 @@ function claudeBlockDeltas(index: number, buffers: TextBuffers): Array<Record<st
   return frames;
 }
 
-// Claude content blocks buffer under `<blockIndex>_0` (#18006) and stream one after
-// another, so at any stop signal (a block's own content_block_stop, message_delta,
-// message_stop or the end of the stream) every block that still holds a tail is drained
-// in block order. For a well-formed stream that is exactly the block being closed; it also
-// covers a block whose content_block_stop never arrived.
-function flushClaudeFormat(store: ChoiceBufferStore, _lastJson: Record<string, unknown>): unknown {
+/** Drain the closing block only; message termination and EOF still drain all remaining blocks. */
+function flushClaudeFormat(store: ChoiceBufferStore, lastJson: Record<string, unknown>): unknown {
   const frames: Array<Record<string, unknown>> = [];
+  const closingKey = `${typeof lastJson.index === "number" ? lastJson.index : 0}_0`;
   const entries = store
     .takeAll()
+    .filter(([key]) => lastJson.type !== "content_block_stop" || key === closingKey)
     .map(([key, buffers]) => [parseInt(key.split("_")[0] || "0", 10), buffers] as const)
     .sort((a, b) => a[0] - b[0]);
   for (const [index, buffers] of entries) frames.push(...claudeBlockDeltas(index, buffers));
@@ -618,6 +616,7 @@ function flushEmptyStream(
   return remaining;
 }
 
+/** Mask credentials while retaining independent bounded tails for each streamed block. */
 export function createCredentialSseTransform(
   options?: CredentialTransformOptions
 ): TransformStream {
@@ -647,20 +646,31 @@ export function createCredentialSseTransform(
   };
   const getBuffers = store.get;
 
+  /** Finalize only the closing Claude block so other blocks keep their masking context. */
   const onFlush = (
     lastJson: unknown,
     isJsonStream = false,
     lastContentJson: unknown = null
   ): unknown => {
-    for (const [, buffers] of store.takeAll()) {
+    const last = lastJson as Record<string, unknown> | null;
+    const closingKey = `${typeof last?.index === "number" ? last.index : 0}_0`;
+    for (const [index, buffers] of store.takeAll()) {
+      if (last?.type === "content_block_stop" && index !== closingKey) continue;
       for (const key of Object.keys(buffers) as BufferedField[]) {
         if (buffers[key]) buffers[key] = markUnclosedBeginHead(redactOutsideDataUrls(buffers[key]));
       }
     }
+    const flushed = !hasRemainingBuffers(store)
+      ? null
+      : !lastJson
+        ? flushEmptyStream(getBuffers, isJsonStream)
+        : flushRemainingByShape(store, lastJson, lastContentJson);
+    // A per-block flush leaves other tails in memory; keep them charged against the limit.
     bufferedBytes = 0;
-    if (!hasRemainingBuffers(store)) return null;
-    if (!lastJson) return flushEmptyStream(getBuffers, isJsonStream);
-    return flushRemainingByShape(store, lastJson, lastContentJson);
+    for (const buffers of store.buffers.values()) {
+      for (const value of Object.values(buffers)) bufferedBytes += value.length;
+    }
+    return flushed;
   };
 
   const processor = (
