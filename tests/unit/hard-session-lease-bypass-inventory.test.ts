@@ -523,6 +523,7 @@ test("managed request surfaces are fenced centrally or rejected before independe
     "src/instrumentation-node.ts",
     "src/app/api/providers/[id]/grok-bot/route.ts",
     "src/app/api/providers/[id]/grok-bot/connector/route.ts",
+    "src/app/api/providers/[id]/grok-bot/computer-file/route.ts",
     "src/app/api/providers/[id]/grok-bot/draft/route.ts",
     "src/app/api/providers/[id]/grok-bot/permission/route.ts",
     "src/app/api/providers/[id]/grok-bot/secret/route.ts",

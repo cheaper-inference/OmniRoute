@@ -75,8 +75,11 @@ export type TranscriptState = {
 export type TranscriptDeletion = { entryId: string; seq: string };
 
 function resyncGeneration(value: unknown): number | undefined {
-  if (typeof value === "string" && /^(?:0|[1-9][0-9]*)$/.test(value)) value = Number(value);
-  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : undefined;
+  const numeric =
+    typeof value === "string" && /^(?:0|[1-9][0-9]*)$/.test(value) ? Number(value) : value;
+  return typeof numeric === "number" && Number.isSafeInteger(numeric) && numeric >= 0
+    ? numeric
+    : undefined;
 }
 
 export function transcriptDeletionMatches(
@@ -409,6 +412,10 @@ export function localRowId(
 }
 
 function bigger(left: string, right: string): string {
+  // A seq that is not a number must never win: letting one through replaces the
+  // cursor with it and every later frame compares against garbage.
+  if (!/^(?:0|[1-9][0-9]*)$/.test(right)) return left;
+  if (!/^(?:0|[1-9][0-9]*)$/.test(left)) return right;
   const a = left.replace(/^0+(?=\d)/, "");
   const b = right.replace(/^0+(?=\d)/, "");
   if (a.length !== b.length) return a.length > b.length ? left : right;
@@ -671,7 +678,9 @@ export function applyTranscriptFrame(state: TranscriptState, frame: unknown): Tr
     cards: [...(state.cards ?? [])],
     permissions: [...state.permissions],
     sealed: state.sealed || record.heartbeat === true,
-    tooOld: record.cursorTooOld !== undefined,
+    // This path runs only when the frame carries no reset, so recomputing from the
+    // record would always answer false and erase an earlier notice.
+    tooOld: state.tooOld,
   };
   const deleted: Array<{ entryId: string; seq: string }> = [];
   for (const rawDeletion of deletions) {

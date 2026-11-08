@@ -114,6 +114,7 @@ type FrameState = Pick<
   | "setRunState"
   | "setSendState"
   | "setTurnFailure"
+  | "connectionUpdatedAt"
   | "apply"
   | "pendingSendRef"
   | "rememberedRef"
@@ -139,6 +140,7 @@ function handleFrame(
     setRunState,
     setSendState,
     setTurnFailure,
+    connectionUpdatedAt,
     apply,
     pendingSendRef,
     rememberedRef,
@@ -153,12 +155,16 @@ function handleFrame(
   if (seen.runState !== undefined) setRunState(seen.runState);
   const next = nextTranscriptRequest(cursor, frame);
   if (next.cleared) {
-    // The session was replaced, so nothing from before the reset belongs on screen.
+    // The session was replaced, so nothing from before the reset belongs on screen —
+    // including the notices and dismissed cards that described the old one.
     stream.shown = [];
     shownByBotRef.current[`${selectedAccount}:${selectedBot}`] = [];
     setMessages([]);
     setCards([]);
     setPermissions([]);
+    setHistoryUnavailable(false);
+    setTurnFailure("");
+    closedNowRef.current = [];
   }
   if (next.deleted.length > 0) {
     // A row the service deleted has to leave every collection it could appear in.
@@ -212,6 +218,9 @@ function handleFrame(
   rememberedRef.current[`${selectedAccount}:${selectedBot}`] = {
     after: stream.request.after,
     generation: next.generation,
+    // The connection's timestamp is what decides whether a resumed cursor still
+    // belongs to this connection; without it every resume fell back to a snapshot.
+    seenAt: connectionUpdatedAt,
     messages: stream.shown,
   };
   if (next.halt) {

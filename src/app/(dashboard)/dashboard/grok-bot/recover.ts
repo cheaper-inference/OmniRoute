@@ -22,7 +22,7 @@ export function omittedRecoveryQuery(seq: string): { beforeSeq: string; limit: 1
   }
 }
 
-export function recoveredBody(seq: string, rows: readonly RecoveredTranscriptRow[]): string | null {
+function recoveredBody(seq: string, rows: readonly RecoveredTranscriptRow[]): string | null {
   const found = rows.find(
     (row) => row.seq === seq && typeof row.body === "string" && row.body !== ""
   );

@@ -596,3 +596,21 @@ test("a mixed-role frame reuses each row's own id on the next frame", () => {
   );
   assert.equal(new Set(replayed.map((row) => row.entryId)).size, 2);
 });
+
+test("a seq that is not a number never becomes the cursor", () => {
+  const next = nextTranscriptRequest(
+    { phase: "live", after: "5" },
+    { rows: { entries: [{ updatedSeq: "abc" }, { updatedSeq: "6" }] } }
+  );
+  assert.equal(next.after, "6", "the numeric seq still advances the cursor");
+});
+
+test("a later frame does not erase the history-unavailable notice", () => {
+  const reset = applyTranscriptFrame(
+    { cursor: "0", visible: [], cards: [], permissions: [], sealed: false },
+    { cursorTooOld: { generation: 3 } }
+  );
+  assert.equal(reset.tooOld, true);
+  const after = applyTranscriptFrame(reset, { rows: { entries: [] } });
+  assert.equal(after.tooOld, true);
+});
