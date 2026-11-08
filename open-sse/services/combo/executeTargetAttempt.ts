@@ -428,6 +428,14 @@ export async function executeTargetAttempt(
         releaseRejectedQualityResponse(qualityClone, result);
         return { ok: false, response: errorResponse(499, "Client disconnected") };
       }
+      // The per-target timers are gone once the first-output gate passed, so an abort here comes
+      // from the parent (a hedge sibling won, a fatal sibling, or the loop safety). The quality
+      // peek reports such an abort as valid; it is not a success of this target.
+      if (targetSignal?.aborted) {
+        void quality.clonedResponse?.body?.cancel().catch(() => {});
+        releaseRejectedQualityResponse(qualityClone, result);
+        return null;
+      }
       if (!quality.valid) {
         releaseRejectedQualityResponse(qualityClone, result);
         deps.log.warn(
