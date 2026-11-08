@@ -1,0 +1,1 @@
+- **perf(combo):** hash the prompt prefix once for a derived cache key and skip it when the request sets an explicit key.

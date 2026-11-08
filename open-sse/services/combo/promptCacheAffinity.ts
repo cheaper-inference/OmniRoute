@@ -1,8 +1,5 @@
 import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
-import {
-  analyzePrefix,
-  generatePromptCacheKey,
-} from "../../../src/lib/promptCache/prefixAnalyzer.ts";
+import { analyzePrefix } from "../../../src/lib/promptCache/prefixAnalyzer.ts";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import { parseModel } from "../model.ts";
 import type { ResolvedComboTarget } from "./types.ts";
@@ -100,17 +97,19 @@ export function resolvePromptCacheAffinityKey(
   if (!body) return null;
 
   const explicit = readExplicitPromptCacheKey(body);
-  const messages = normalizeResponsesInput(body);
-  const prefixAnalysis = messages ? analyzePrefix(messages) : null;
-  // The analyzer intentionally returns a legacy empty-content hash for callers
-  // that need that historical value. Affinity must not use it: a request with
-  // only a first user turn has no reusable prompt prefix and would collapse
-  // otherwise distinct conversations onto one account.
-  const prefixKey =
-    prefixAnalysis && prefixAnalysis.prefixEndIdx >= 0
-      ? generatePromptCacheKey(messages || [])
-      : "";
-  const key = explicit ?? prefixKey;
+  let key = explicit;
+  if (!key) {
+    const messages = normalizeResponsesInput(body);
+    const prefixAnalysis = messages ? analyzePrefix(messages) : null;
+    // The analyzer intentionally returns a legacy empty-content hash for callers
+    // that need that historical value. Affinity must not use it: a request with
+    // only a first user turn has no reusable prompt prefix and would collapse
+    // otherwise distinct conversations onto one account.
+    key =
+      prefixAnalysis && prefixAnalysis.prefixEndIdx >= 0
+        ? `omni-${prefixAnalysis.prefixHash.slice(0, 32)}`
+        : "";
+  }
   if (!key) return null;
 
   const source: PromptCacheAffinitySource = explicit ? "explicit" : "prefix";
