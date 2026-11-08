@@ -22,7 +22,8 @@ export async function GET(request: Request) {
     const connection = await getProviderConnectionById(parsed.data);
     if (!connection || connection.provider !== "chatgpt")
       return errorResponse(404, "ChatGPT connection not found");
-    return NextResponse.json(getConnectionLocalUsage(connection.id, connection.provider), {
+    // The row was looked up by this id and is a ChatGPT connection (checked above).
+    return NextResponse.json(getConnectionLocalUsage(parsed.data, "chatgpt"), {
       headers: { "Cache-Control": "no-store" },
     });
   } catch {

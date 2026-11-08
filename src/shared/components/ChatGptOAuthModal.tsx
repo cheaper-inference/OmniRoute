@@ -13,7 +13,7 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  reauthConnection?: { id: string } | null;
+  reauthConnection?: null | { id?: string };
 };
 async function session(body: Record<string, unknown>, fallback = "") {
   const response = await fetch("/api/oauth/chatgpt/session", {
