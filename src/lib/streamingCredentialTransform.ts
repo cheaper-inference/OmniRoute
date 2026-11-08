@@ -296,52 +296,57 @@ function hasRemainingBuffers(store: ChoiceBufferStore): boolean {
   return false;
 }
 
-function pickClaudeFlushBuffer(store: ChoiceBufferStore, blockIndex: number): TextBuffers {
-  const own = store.get(`${blockIndex}_0`);
-  if (Object.values(own).some((v) => v.length > 0)) return own;
-  for (const [, candidate] of store.takeAll()) {
-    if (Object.values(candidate).some((v) => v.length > 0)) return candidate;
+// Held-back tails of one Claude content block, each as the delta type the block actually
+// streams (text_delta / thinking_delta / input_json_delta). A single `text_delta` carrying
+// `thinking` or `partial_json` fields is ignored by Anthropic SDK accumulators, so the end
+// of a thinking summary or of a tool input was silently lost.
+function claudeBlockDeltas(index: number, buffers: TextBuffers): Array<Record<string, unknown>> {
+  const frames: Array<Record<string, unknown>> = [];
+  if (buffers.content) {
+    frames.push({
+      type: "content_block_delta",
+      index,
+      delta: { type: "text_delta", text: buffers.content },
+    });
+    buffers.content = "";
   }
-  return own;
+  const thinking = buffers.reasoning + buffers.reasoning_content;
+  if (thinking) {
+    frames.push({
+      type: "content_block_delta",
+      index,
+      delta: { type: "thinking_delta", thinking },
+    });
+    buffers.reasoning = "";
+    buffers.reasoning_content = "";
+  }
+  const partialJson = buffers.partialJson + buffers.toolArgs;
+  if (partialJson) {
+    frames.push({
+      type: "content_block_delta",
+      index,
+      delta: { type: "input_json_delta", partial_json: partialJson },
+    });
+    buffers.partialJson = "";
+    buffers.toolArgs = "";
+  }
+  return frames;
 }
 
-function flushClaudeFormat(
-  store: ChoiceBufferStore,
-  lastJson: Record<string, unknown>
-): Record<string, unknown> | null {
-  const blockIndex = typeof lastJson.index === "number" ? lastJson.index : 0;
-  // Claude content blocks buffer under `<blockIndex>_0`; a thinking block at index 0 followed
-  // by a text block at index 1 must not strand the text in a buffer that is never flushed
-  // (#18006). Prefer the block the last frame belongs to, then any non-empty block buffer.
-  const buffers = pickClaudeFlushBuffer(store, blockIndex);
-  const delta: Record<string, unknown> = { type: "text_delta" };
-  let hasDelta = false;
-  if (buffers.content) {
-    delta.text = buffers.content;
-    buffers.content = "";
-    hasDelta = true;
-  }
-  if (buffers.reasoning) {
-    delta.thinking = buffers.reasoning;
-    buffers.reasoning = "";
-    hasDelta = true;
-  }
-  if (buffers.toolArgs) {
-    delta.tool_args = buffers.toolArgs;
-    buffers.toolArgs = "";
-    hasDelta = true;
-  }
-  if (buffers.partialJson) {
-    delta.partial_json = buffers.partialJson;
-    buffers.partialJson = "";
-    hasDelta = true;
-  }
-  if (!hasDelta) return null;
-  return {
-    type: "content_block_delta",
-    index: blockIndex,
-    delta,
-  };
+// Claude content blocks buffer under `<blockIndex>_0` (#18006) and stream one after
+// another, so at any stop signal (a block's own content_block_stop, message_delta,
+// message_stop or the end of the stream) every block that still holds a tail is drained
+// in block order. For a well-formed stream that is exactly the block being closed; it also
+// covers a block whose content_block_stop never arrived.
+function flushClaudeFormat(store: ChoiceBufferStore, _lastJson: Record<string, unknown>): unknown {
+  const frames: Array<Record<string, unknown>> = [];
+  const entries = store
+    .takeAll()
+    .map(([key, buffers]) => [parseInt(key.split("_")[0] || "0", 10), buffers] as const)
+    .sort((a, b) => a[0] - b[0]);
+  for (const [index, buffers] of entries) frames.push(...claudeBlockDeltas(index, buffers));
+  if (!frames.length) return null;
+  return frames.length === 1 ? frames[0] : frames;
 }
 
 function flushResponsesFormat(
@@ -592,7 +597,8 @@ function flushRemainingByShape(
 ): unknown {
   const last = lastJson as Record<string, unknown>;
   const lastType = typeof last.type === "string" ? (last.type as string) : "";
-  if (lastType.startsWith("message") || lastType.startsWith("content_block"))
+  // A trailing `ping` is still a Claude stream: its buffered tails need typed deltas.
+  if (lastType.startsWith("message") || lastType.startsWith("content_block") || lastType === "ping")
     return flushClaudeFormat(store, last);
   if (Array.isArray(last.choices)) return flushOpenAiTextBuffers(store, last);
   if (lastType.startsWith("response.")) return flushResponsesFormat(store, last, lastType);
