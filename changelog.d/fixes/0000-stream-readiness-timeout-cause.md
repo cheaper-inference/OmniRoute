@@ -1,0 +1,1 @@
+- **fix(sse):** a stream readiness timeout now returns on time even when the provider never finishes its cancel, keeps the first upstream error message, and no longer treats `response.queued` and `response.metadata` frames as model output, so an overload after them can fail over to another account.

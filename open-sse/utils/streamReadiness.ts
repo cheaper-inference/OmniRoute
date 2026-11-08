@@ -191,6 +191,11 @@ function isPingEventType(type: string): boolean {
   return /^(?:ping|keepalive|heartbeat)$/i.test(type);
 }
 
+// Responses lifecycle frames that carry no model output. Counting them as readiness
+// would hand the stream to the client before a following overload error, which blocks
+// failover to another account. Only these two names are listed on purpose.
+const NON_OUTPUT_LIFECYCLE_TYPES = new Set(["response.queued", "response.metadata"]);
+
 function getPayloadType(payload: unknown, eventType = ""): string {
   if (!isRecord(payload)) return eventType;
   const type = payload.type ?? payload.event ?? payload.object;
@@ -226,6 +231,8 @@ function isErrorOnlyStructuredPayload(payload: Record<string, unknown>): boolean
 function hasNonPingStructuredPayload(payload: unknown, eventType = ""): boolean {
   const type = getPayloadType(payload, eventType);
   if (isPingEventType(eventType) || isPingEventType(type)) return false;
+  if (NON_OUTPUT_LIFECYCLE_TYPES.has(eventType) || NON_OUTPUT_LIFECYCLE_TYPES.has(type))
+    return false;
   if (Array.isArray(payload)) return payload.length > 0;
   if (isRecord(payload)) {
     if (Object.keys(payload).length === 0) return false;
@@ -963,6 +970,38 @@ export async function ensureStreamReadiness(
   const timeoutReason = () =>
     `Stream produced no non-ping SSE event within ${deadline - startedAt}ms (max=${maxDeadline - startedAt}ms)`;
 
+  const failOnTimeout = (): Extract<StreamReadinessResult, { ok: false }> => {
+    const classificationReason = timeoutReason();
+    // Keep the first upstream error frame: the stall hides it otherwise.
+    const upstreamDiagnostic = readinessState.upstreamDiagnostic || undefined;
+    const reason = upstreamDiagnostic
+      ? `${classificationReason}: ${upstreamDiagnostic}`
+      : classificationReason;
+    options.log?.warn?.(
+      "STREAM",
+      `${reason} (${options.provider || "provider"}/${options.model || "unknown"}) — ${describeSilence(lastChunkAt)}`
+    );
+    // The provider owns this promise and may never settle it; the deadline must still return.
+    void reader.cancel(classificationReason).catch(() => {});
+    return {
+      ok: false,
+      reason,
+      classificationReason,
+      ...(upstreamDiagnostic ? { upstreamDiagnostic } : {}),
+      code: "STREAM_READINESS_TIMEOUT",
+      type: "stream_timeout",
+      anyByteAt: lastChunkAt,
+      response: createErrorResponse(
+        HTTP_STATUS.GATEWAY_TIMEOUT,
+        classificationReason,
+        "STREAM_READINESS_TIMEOUT",
+        "stream_timeout",
+        upstreamDiagnostic,
+        buildAnyByteAtHeader(lastChunkAt)
+      ),
+    };
+  };
+
   try {
     while (true) {
       if (contentProbeDeadline && Date.now() >= contentProbeDeadline) {
@@ -970,30 +1009,7 @@ export async function ensureStreamReadiness(
         return { ok: true, response: buildReadyResponse() };
       }
       const remainingMs = (contentProbeDeadline || deadline) - Date.now();
-      if (remainingMs <= 0) {
-        const reason = timeoutReason();
-        options.log?.warn?.(
-          "STREAM",
-          `${reason} (${options.provider || "provider"}/${options.model || "unknown"}) — ${describeSilence(lastChunkAt)}`
-        );
-        await reader.cancel(reason).catch(() => {});
-        return {
-          ok: false,
-          reason,
-          classificationReason: reason,
-          code: "STREAM_READINESS_TIMEOUT",
-          type: "stream_timeout",
-          anyByteAt: lastChunkAt,
-          response: createErrorResponse(
-            HTTP_STATUS.GATEWAY_TIMEOUT,
-            reason,
-            "STREAM_READINESS_TIMEOUT",
-            "stream_timeout",
-            undefined,
-            buildAnyByteAtHeader(lastChunkAt)
-          ),
-        };
-      }
+      if (remainingMs <= 0) return failOnTimeout();
 
       let readResult: ReadableStreamReadResult<Uint8Array>;
       const deadlineBeforeRead = deadline;
@@ -1045,28 +1061,7 @@ export async function ensureStreamReadiness(
             ),
           };
         }
-        const reason = timeoutReason();
-        options.log?.warn?.(
-          "STREAM",
-          `${reason} (${options.provider || "provider"}/${options.model || "unknown"}) — ${describeSilence(lastChunkAt)}`
-        );
-        await reader.cancel(reason).catch(() => {});
-        return {
-          ok: false,
-          reason,
-          classificationReason: reason,
-          code: "STREAM_READINESS_TIMEOUT",
-          type: "stream_timeout",
-          anyByteAt: lastChunkAt,
-          response: createErrorResponse(
-            HTTP_STATUS.GATEWAY_TIMEOUT,
-            reason,
-            "STREAM_READINESS_TIMEOUT",
-            "stream_timeout",
-            undefined,
-            buildAnyByteAtHeader(lastChunkAt)
-          ),
-        };
+        return failOnTimeout();
       }
 
       if (readResult.done) {
