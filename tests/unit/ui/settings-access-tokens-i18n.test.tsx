@@ -182,14 +182,14 @@ describe("access-token settings with real Chinese catalogs", () => {
     mount();
     await screen.findByRole("table");
     fireEvent.click(screen.getByRole("button", { name: "撤销" }));
-    let dialog = screen.getByRole("dialog");
+    let dialog = screen.getByRole("alertdialog");
     expect(within(dialog).getByText("撤销访问令牌")).toBeTruthy();
     expect(within(dialog).getByText(zh.settings.accessTokensRevokeConfirm)).toBeTruthy();
     fireEvent.click(within(dialog).getByRole("button", { name: zh.common.cancel }));
-    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(fetchMock.mock.calls.some(([, init]) => init?.method === "DELETE")).toBe(false);
     fireEvent.click(screen.getByRole("button", { name: "撤销" }));
-    dialog = screen.getByRole("dialog");
+    dialog = screen.getByRole("alertdialog");
     fetchMock.mockResolvedValueOnce(reply({}, 500));
     fireEvent.click(within(dialog).getByRole("button", { name: "撤销" }));
     await screen.findByText("无法撤销令牌。");
@@ -204,7 +204,7 @@ describe("access-token settings with real Chinese catalogs", () => {
     fetchMock.mockResolvedValueOnce(
       reply({ tokens: [{ ...token, revokedAt: "2026-01-04T00:00:00Z" }] })
     );
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "撤销" }));
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "撤销" }));
     await screen.findByText("已撤销");
     await waitFor(() => expect(screen.queryByRole("button", { name: "撤销" })).toBeNull());
   });

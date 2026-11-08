@@ -21,8 +21,7 @@ const VARIANT_TO_KIT: Record<ButtonVariant, { variant: KitVariant; className?: s
   outline: { variant: "outline" },
   ghost: { variant: "ghost" },
   danger: { variant: "destructive" },
-  // kit has no warning button: outline + the `.ci-button--warning` extension in globals.css
-  warning: { variant: "outline", className: "ci-button--warning" },
+  warning: { variant: "warning" },
 };
 
 const SIZE_TO_KIT: Record<ButtonSize, KitSize> = {

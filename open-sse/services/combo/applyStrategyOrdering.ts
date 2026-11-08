@@ -21,6 +21,7 @@ import {
 } from "./targetSorters.ts";
 import { decrementInflight } from "./quotaShareInflight.ts";
 import { getStrategyTraits, type StrategyOrderingKind } from "./strategyRegistry.ts";
+import type { PreDispatchExclusion } from "./pinRecovery.ts";
 import type { ComboLike, ComboLogger, ResolvedComboTarget } from "./types.ts";
 
 /**
@@ -46,6 +47,7 @@ export interface ApplyStrategyOrderingDeps {
   log: ComboLogger;
   apiKeyAllowedConnections: string[] | null;
   sessionKey?: string | null;
+  exclusions?: PreDispatchExclusion[];
 }
 
 type StrategyOrderer = (
@@ -215,14 +217,15 @@ async function orderByCacheAffinity(
 
 async function orderByQuotaWeighted(
   orderedTargets: ResolvedComboTarget[],
-  { combo, config, log, apiKeyAllowedConnections }: ApplyStrategyOrderingDeps
+  { combo, config, log, apiKeyAllowedConnections, exclusions }: ApplyStrategyOrderingDeps
 ): Promise<ApplyStrategyOrderingResult> {
   const nextTargets = await orderTargetsByQuotaWeighted(
     orderedTargets,
     combo.name,
     config,
     log,
-    apiKeyAllowedConnections
+    apiKeyAllowedConnections,
+    exclusions
   );
   let quotaShareRelease: (() => void) | null = null;
   const winnerId = nextTargets[0]?.connectionId ?? "";
@@ -291,24 +294,32 @@ const STRATEGY_ORDERERS: Record<
     return orderedOnly(nextTargets);
   },
   "cost-optimized": orderByCost,
-  "reset-aware": async (orderedTargets, { combo, config, log, apiKeyAllowedConnections }) => {
+  "reset-aware": async (
+    orderedTargets,
+    { combo, config, log, apiKeyAllowedConnections, exclusions }
+  ) => {
     const nextTargets = await orderTargetsByResetAwareQuota(
       orderedTargets,
       combo.name,
       config,
       log,
-      apiKeyAllowedConnections
+      apiKeyAllowedConnections,
+      exclusions
     );
     log.info("COMBO", `Reset-aware ordering: ${describeFirstTarget(nextTargets)} first`);
     return orderedOnly(nextTargets);
   },
-  "reset-window": async (orderedTargets, { combo, config, log, apiKeyAllowedConnections }) => {
+  "reset-window": async (
+    orderedTargets,
+    { combo, config, log, apiKeyAllowedConnections, exclusions }
+  ) => {
     const nextTargets = await orderTargetsByResetWindow(
       orderedTargets,
       combo.name,
       config,
       log,
-      apiKeyAllowedConnections
+      apiKeyAllowedConnections,
+      exclusions
     );
     log.info("COMBO", `Reset-window ordering: ${describeFirstTarget(nextTargets)} first`);
     return orderedOnly(nextTargets);
@@ -319,12 +330,13 @@ const STRATEGY_ORDERERS: Record<
     return orderedOnly(nextTargets);
   },
   "cache-optimized": orderByCacheAffinity,
-  headroom: async (orderedTargets, { combo, log, apiKeyAllowedConnections }) => {
+  headroom: async (orderedTargets, { combo, log, apiKeyAllowedConnections, exclusions }) => {
     const nextTargets = await orderTargetsByHeadroom(
       orderedTargets,
       combo.name,
       log,
-      apiKeyAllowedConnections
+      apiKeyAllowedConnections,
+      exclusions
     );
     log.info(
       "COMBO",

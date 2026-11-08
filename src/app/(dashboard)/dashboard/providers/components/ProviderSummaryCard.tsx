@@ -43,6 +43,7 @@ interface ProviderSummaryCardProps {
   onDisplayModeChange(mode: ProviderDisplayMode): void;
   onNewProvider(): void;
   onImportFromFile(): void;
+  onImportOAuthExport?(): void;
   searchQuery: string;
   setModelSearchQuery(value: string): void;
   setSearchQuery(value: string): void;
@@ -98,6 +99,7 @@ export default function ProviderSummaryCard({
   onDisplayModeChange,
   onNewProvider,
   onImportFromFile,
+  onImportOAuthExport,
   searchQuery,
   setModelSearchQuery,
   setSearchQuery,
@@ -108,69 +110,59 @@ export default function ProviderSummaryCard({
   testingMode,
 }: ProviderSummaryCardProps) {
   const categories = [
-    { key: null, color: null, label: t("providerSummaryAll"), stat: summaryStats.all },
-    { key: "oauth", color: "bg-blue-500", label: t("oauthLabel"), stat: summaryStats.oauth },
+    { key: null, label: t("providerSummaryAll"), stat: summaryStats.all },
+    { key: "oauth", label: t("oauthLabel"), stat: summaryStats.oauth },
     {
       key: "ide",
-      color: "bg-cyan-500",
       label: providerText(t, "categoryIde", "IDE"),
       stat: summaryStats.ide,
     },
     {
       key: "free",
-      color: "bg-green-500",
       label: t("freeTier"),
       stat: summaryStats.free,
       title: t("freeAggregated"),
     },
-    { key: "no-auth", color: "bg-stone-500", label: t("noAuthLabel"), stat: summaryStats.noauth },
+    { key: "no-auth", label: t("noAuthLabel"), stat: summaryStats.noauth },
     {
       key: "upstream-proxy",
-      color: "bg-indigo-500",
       label: t("upstreamProxyLabel"),
       stat: summaryStats.upstreamproxy,
     },
-    { key: "apikey", color: "bg-amber-500", label: t("apiKeyLabel"), stat: summaryStats.apikey },
+    { key: "apikey", label: t("apiKeyLabel"), stat: summaryStats.apikey },
     {
       key: "compatible",
-      color: "bg-orange-500",
       label: t("compatibleLabel"),
       stat: summaryStats.compatible,
     },
     {
       key: "webcookie",
-      color: "bg-purple-500",
       label: providerText(t, "categoryWebCookie", "Web Cookie"),
       stat: summaryStats.webcookie,
     },
     {
       key: "search",
-      color: "bg-teal-500",
       label: providerText(t, "categorySearch", "Search"),
       stat: summaryStats.search,
     },
     {
       key: "webfetch",
-      color: "bg-orange-500",
       label: t("webFetch"),
       stat: summaryStats.webfetch,
       title: t("webFetchTooltip"),
     },
     {
       key: "audio",
-      color: "bg-rose-500",
       label: providerText(t, "categoryAudio", "Audio"),
       stat: summaryStats.audio,
     },
     {
       key: "local",
-      color: "bg-emerald-500",
       label: providerText(t, "categoryLocal", "Local"),
       stat: summaryStats.local,
     },
     {
       key: "cloudagent",
-      color: "bg-violet-500",
       label: providerText(t, "categoryCloudAgent", "Cloud Agent"),
       stat: summaryStats.cloudagent,
     },
@@ -232,6 +224,11 @@ export default function ProviderSummaryCard({
           <Button size="sm" variant="secondary" icon="upload_file" onClick={onImportFromFile}>
             {providerText(t, "importFromFile", "Import from file")}
           </Button>
+          {onImportOAuthExport && (
+            <Button size="sm" variant="secondary" icon="key_vertical" onClick={onImportOAuthExport}>
+              {providerText(t, "importOAuthExport", "Import OAuth export")}
+            </Button>
+          )}
           <Button
             size="sm"
             variant="outline"
@@ -264,7 +261,7 @@ export default function ProviderSummaryCard({
                 className="gap-1.5"
                 title={cat.title || cat.label}
               >
-                {cat.color && <CategoryDot color={cat.color} label={cat.label} />}
+                {cat.key && <CategoryDot category={cat.key} label={cat.label} />}
                 <span>{cat.label}</span>
                 {/* Full-opacity muted ink: the old opacity-70 "/total" fell to 3.28:1 on the kit
                     button (axe color-contrast, F4). */}

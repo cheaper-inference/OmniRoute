@@ -8,6 +8,7 @@
  */
 import { getFeatureFlagOverride } from "./featureFlags";
 import { getDbInstance } from "./core";
+import { loadCatalogOverrides } from "./catalogOverrides";
 
 const NAMESPACE = "functionalGatewayMirrors";
 const FLAG_KEY = "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS";
@@ -77,29 +78,8 @@ export function setFunctionalGatewayModelSetting(
   );
 }
 
-export function getFunctionalGatewaySettingsBulk(): {
-  providers: Map<string, "on" | "off">;
-  models: Map<string, "on" | "off">;
-} {
-  const db = getDbInstance();
-  const rows = db
-    .prepare("SELECT key, value FROM key_value WHERE namespace = ?")
-    .all(NAMESPACE) as Array<{ key: string; value: string }>;
-
-  const providers = new Map<string, "on" | "off">();
-  const models = new Map<string, "on" | "off">();
-
-  for (const row of rows) {
-    const setting = parseSetting(row.value);
-    if (setting === null) continue;
-    if (row.key.startsWith("provider:")) {
-      providers.set(row.key.slice("provider:".length), setting);
-    } else if (row.key.startsWith("model:")) {
-      models.set(row.key.slice("model:".length), setting);
-    }
-  }
-
-  return { providers, models };
+export function getFunctionalGatewaySettingsBulk() {
+  return loadCatalogOverrides(NAMESPACE);
 }
 
 function envForcesGlobalOn(): boolean {

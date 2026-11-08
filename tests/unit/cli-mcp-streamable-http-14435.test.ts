@@ -35,3 +35,22 @@ test("mcp call supports Streamable HTTP responses", async () => {
     globalThis.fetch = fetch;
   }
 });
+
+test("mcp call supports Streamable HTTP without a session id", async () => {
+  const fetch = globalThis.fetch;
+  const { runMcpCallCommand } = await import("../../bin/cli/commands/mcp.mjs");
+
+  try {
+    globalThis.fetch = makeMcpStreamFetch({
+      toolResult: { content: [{ type: "text", text: "ok-stateless" }] },
+      sessionMode: "stateless",
+    });
+    const result = await captureStdout(() =>
+      runMcpCallCommand("test", {}, { stream: false }, { baseUrl: "http://localhost:20128" })
+    );
+    assert.equal(result.code, 0);
+    assert.match(result.output, /ok-stateless/);
+  } finally {
+    globalThis.fetch = fetch;
+  }
+});

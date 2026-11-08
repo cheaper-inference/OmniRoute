@@ -2,11 +2,14 @@
 
 import { useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
+import { Button as KitButton } from "@omniroute/ui-kit/button";
 import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { APP_CONFIG } from "@/shared/constants/appConfig";
 import { shouldShowKimiSponsorBanner } from "./kimiSponsorBannerGate";
+import { KIMI_BRAND_COLOR } from "./providers/featuredProviders";
 
 // Official Kimi partnership tracking link — keep in sync with README.md's
 // Open Source Friends section and the aff links wired in the providers
@@ -76,15 +79,19 @@ export default function KimiSponsorBanner() {
     window.dispatchEvent(new Event(DISMISS_EVENT));
   };
 
-  // Partner identity colour (#1783FF) — brand, not a semantic status tone; kept as-is.
+  // The partner brand is the Card's tint, never the text or the CTA fill: the kit derives an AA
+  // ink and border for it in every look. The note under the CTA uses full-strength text-muted at
+  // 12px — the old 9px at 70% opacity failed AA (KEA-7886 P7).
   return (
-    <div
+    <Card
+      padding="none"
+      brandColor={KIMI_BRAND_COLOR}
       role="complementary"
       aria-label={t("foundingFriendTitle")}
-      className="mb-4 flex flex-col gap-3 rounded-lg border border-[#1783FF]/30 bg-[#1783FF]/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      className="mb-4 flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="flex min-w-0 items-start gap-3">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#1783FF]/10">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface">
           <ProviderIcon providerId="moonshot" size={24} type="color" />
         </div>
         <div className="min-w-0">
@@ -95,17 +102,19 @@ export default function KimiSponsorBanner() {
 
       <div className="flex shrink-0 items-center gap-3 self-end sm:self-auto">
         <div className="flex flex-col items-end gap-0.5">
-          <a
-            href={KIMI_PLATFORM_AFF_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={t("partnerLinkNote")}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-[#1783FF] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:brightness-110"
-          >
-            {t("cta")}
-            <Icon name="open_in_new" size={14} />
-          </a>
-          <span className="text-[9px] text-text-muted/70">{t("partnerLinkNote")}</span>
+          <KitButton asChild size="sm">
+            <a
+              href={KIMI_PLATFORM_AFF_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={t("partnerLinkNote")}
+              className="whitespace-nowrap"
+            >
+              {t("cta")}
+              <Icon name="open_in_new" size={14} />
+            </a>
+          </KitButton>
+          <span className="text-xs text-text-muted">{t("partnerLinkNote")}</span>
         </div>
         <Button
           variant="ghost"
@@ -116,6 +125,6 @@ export default function KimiSponsorBanner() {
           className="text-text-muted hover:text-text-main"
         />
       </div>
-    </div>
+    </Card>
   );
 }

@@ -203,7 +203,9 @@ test("GPT OSS and DeepSeek Reasoner models support tool calling", () => {
   // GPT OSS models should not be blocked by the heuristic
   assert.equal(modelCapabilities.supportsToolCalling("fake-provider/gpt-oss-120b"), true);
   assert.equal(modelCapabilities.supportsToolCalling("gpt-oss-120b"), true);
-  assert.equal(modelCapabilities.supportsToolCalling("nvidia/openai/gpt-oss-120b"), false); // in registry
+  // A registry entry that pins toolCalling: false still wins over the heuristic. The NVIDIA
+  // gpt-oss-120b entry that used to anchor this was retired (#18418).
+  assert.equal(modelCapabilities.supportsToolCalling("ddgw/tinfoil/gpt-oss-120b"), false); // in registry
 
   // DeepSeek Reasoner supports tool calling
   assert.equal(modelCapabilities.supportsToolCalling("deepseek-reasoner"), true);

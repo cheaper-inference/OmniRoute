@@ -27,7 +27,10 @@ import { restoreIncomingOrder } from "./rungOrder.ts";
 import {
   getModelContextLimitForModelString,
   providerSupportsEmulatedToolCalling,
+  filterTargetsByRequestCompatibility,
+  deriveRequestCompatibilityRequirements,
 } from "./comboStructure.ts";
+import { hasMediaRequirements } from "./mediaCompatibility.ts";
 import {
   calculatePromptCacheAffinityScores,
   promptCacheTargetIdentity,
@@ -47,6 +50,7 @@ import type {
   ComboLogger,
   ResolvedComboTarget,
 } from "./types.ts";
+import { normalizeAutoConnectionScope } from "./autoConnectionScope.ts";
 
 /**
  * Dependency-injected `buildAutoCandidates` — it lives in `combo.ts` (the host of
@@ -58,7 +62,8 @@ type BuildAutoCandidates = (
   comboName: string,
   sessionId?: string | null,
   resetWindowConfig?: ResetWindowConfig,
-  resilienceSettings?: ResilienceSettings | null
+  resilienceSettings?: ResilienceSettings | null,
+  apiKeyAllowedConnections?: string[] | null
 ) => Promise<AutoProviderCandidate[]>;
 
 export interface ResolveAutoStrategyDeps {
@@ -84,6 +89,7 @@ export interface ResolveAutoStrategyDeps {
   resilienceSettings: ResilienceSettings;
   log: ComboLogger;
   buildAutoCandidates: BuildAutoCandidates;
+  apiKeyAllowedConnections?: string[] | null;
 }
 
 export type ResolveAutoStrategyResult =
@@ -101,6 +107,7 @@ export interface EvaluateAutoCandidatesOptions {
   resilienceSettings?: ResilienceSettings | null;
   manifestHint?: RoutingHint | null;
   buildAutoCandidates: BuildAutoCandidates;
+  apiKeyAllowedConnections?: string[] | null;
 }
 
 export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOptions) {
@@ -109,7 +116,8 @@ export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOpti
     options.comboName,
     options.sessionId,
     options.resetWindowConfig,
-    options.resilienceSettings
+    options.resilienceSettings,
+    options.apiKeyAllowedConnections
   );
   const cacheAffinityScores = calculatePromptCacheAffinityScores(
     builtCandidates,
@@ -271,7 +279,37 @@ export async function resolveAutoStrategyOrder(
       );
     }
 
-    eligibleTargets = await expandAutoComboCandidatePool(eligibleTargets, combo);
+    eligibleTargets = await expandAutoComboCandidatePool(
+      eligibleTargets,
+      combo,
+      deps.apiKeyAllowedConnections ?? null
+    );
+  } else if (normalizeAutoConnectionScope(deps.apiKeyAllowedConnections)) {
+    eligibleTargets = await expandAutoComboCandidatePool(
+      eligibleTargets,
+      combo,
+      deps.apiKeyAllowedConnections ?? null
+    );
+  }
+
+  // Full-catalog expansion can add targets after the initial compatibility pass.
+  // Recheck before scoring so unsupported transports cannot consume the retry
+  // budget, and retain this pool even when candidate telemetry is unavailable.
+  if (hasMediaRequirements(deriveRequestCompatibilityRequirements(body))) {
+    eligibleTargets = filterTargetsByRequestCompatibility(eligibleTargets, body, log, combo.name);
+    if (eligibleTargets.length === 0) {
+      return {
+        earlyResponse: errorResponse(
+          400,
+          "No compatible media transport is available in this Auto pool",
+          {
+            code: "unsupported_media_input",
+            type: "invalid_request_error",
+          }
+        ),
+      };
+    }
+    orderedTargets = eligibleTargets;
   }
 
   const prompt = extractPromptForIntent(body);
@@ -373,6 +411,7 @@ export async function resolveAutoStrategyOrder(
       resilienceSettings: autoCandidateResilienceSettings,
       manifestHint: autoManifestHint,
       buildAutoCandidates,
+      apiKeyAllowedConnections: deps.apiKeyAllowedConnections ?? null,
     });
   for (let index = 0; index < sourceCandidates.length; index += 1) {
     sourceCandidates[index].cacheAffinity = candidates[index]?.cacheAffinity;
@@ -418,6 +457,7 @@ export async function resolveAutoStrategyOrder(
             sla: slaPolicy,
             weights,
             explorationRate,
+            manifestHint: autoManifestHint,
             messages: body.messages,
             nadir: nadirConfig,
           },
@@ -451,6 +491,7 @@ export async function resolveAutoStrategyOrder(
             budgetFallback,
             estimatedInputTokens,
             explorationRate,
+            manifestHint: autoManifestHint,
           },
           routableCandidates,
           taskType

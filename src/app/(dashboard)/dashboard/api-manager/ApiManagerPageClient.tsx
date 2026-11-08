@@ -21,6 +21,7 @@ import { CardSkeleton } from "@/shared/components/Loading";
 import Modal from "@/shared/components/Modal";
 import Toggle from "@/shared/components/Toggle";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useLocale, useTranslations } from "next-intl";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import ApiKeyFilterBar from "./components/ApiKeyFilterBar";
@@ -110,6 +111,7 @@ interface ApiKey {
   streamDefaultMode?: StreamDefaultMode;
   compressionEnabled?: boolean;
   allowAutoCombos?: boolean;
+  allowCcDiscoveryAliases?: boolean;
   catalogScope?: string;
   disableNonPublicModels?: boolean;
   allowUsageCommand?: boolean;
@@ -131,6 +133,7 @@ export default function ApiManagerPageClient() {
   const t = useTranslations("apiManager");
   const tc = useTranslations("common");
   const locale = useLocale();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const newKeyNameInputId = useId();
   const createKeyFormRef = useRef<HTMLDivElement | null>(null);
   const [keys, setKeys] = useState<ApiKey[]>([]);
@@ -478,7 +481,7 @@ export default function ApiManagerPageClient() {
       return;
     }
 
-    if (!confirm(t("deleteConfirm"))) return;
+    if (!(await requestConfirm({ message: t("deleteConfirm"), confirmText: tc("delete") }))) return;
 
     setIsSubmitting(true);
     clearPageError();
@@ -509,7 +512,7 @@ export default function ApiManagerPageClient() {
 
   const handleRegenerateKey = async (id: string) => {
     if (!id) return;
-    if (!confirm(t("regenerateConfirm"))) return;
+    if (!(await requestConfirm(t("regenerateConfirm")))) return;
 
     setIsSubmitting(true);
     clearPageError();
@@ -1259,6 +1262,7 @@ export default function ApiManagerPageClient() {
           </Button>
         </div>
       </Modal>
+      {confirmDialog}
     </div>
   );
 }

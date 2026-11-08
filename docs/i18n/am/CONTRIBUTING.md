@@ -13,21 +13,25 @@ UI/UX፣ i18n፣ CLI፣ database እና build/deploy ለውጦችን ከውሎ�
 
 ---
 
-## የልማት ዝግጅት
+## የልማት ማዋቀር
 
 ### ቅድመ ሁኔታዎች
 
-- **Node.js** `>=22.22.2 <23`፣ ወይም `>=24.0.0 <27` (የሚመከር፦ 24 LTS)
+- **Node.js** `>=22.22.2 <23`፣ ወይም `>=24.0.0 <27` (የሚመከረው፦ 24 LTS)
 - **npm** 10+
 
-> **የnpm v11+ ተጠቃሚዎች (Node 24+)፦** `npm install`ን ካስኬዱ በኋላ ኔቲቭ ሞጁሎች መጫናቸውን ያረጋግጡ፦
-> `node -e "require('better-sqlite3')"`. በ`MODULE_NOT_FOUND` ካልተሳካ፣
-> `npm approve-scripts better-sqlite3 && npm install`ን ያስኪዱ።
-> [ችግር መፍቻ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)ን ይመልከቱ።
+> **Windows ከ Node 24 ጋር፦** የአሁኑን 24 LTS patch ልቀት (ቢያንስ 24.20.0) ይጠቀሙ።
+> ቀደምት ልቀቶች `--test-force-exit` ሂደቱን ሲዘጋ የተሳካ ሙከራዎችን ተከትሎ ሊቋረጡ ይችላሉ።
+> የNode የ[Windows libuv ማስተካከያ](https://github.com/nodejs/node/pull/61999) ይህንን
+> የአሂድ ጊዜ ብልሽት ይፈታል፤ የሙከራ ማረጋገጫዎችን እና የrunner መውጫ ማረጋገጫዎችን እንደነበሩ ያስቀምጡ።
+
+> **npm v11+ ተጠቃሚዎች (Node 24+)፦** `npm install` ካስኬዱ በኋላ native modules መጫናቸውን ያረጋግጡ፦
+> `node -e "require('better-sqlite3')"`. ይህ በ `MODULE_NOT_FOUND` ካልተሳካ፣
+> `npm approve-scripts better-sqlite3 && npm install` ያስኪዱ። [የችግር መፍቻ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ይመልከቱ።
 
 - **Git**
 
-### ክሎን ማድረግ እና መጫን
+### መዝገብ ቤቱን መቅዳት እና መጫን
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -38,87 +42,87 @@ npm install
 ### የአካባቢ ተለዋዋጮች
 
 ```bash
-# .envዎን ከአብነቱ ይፍጠሩ
+# ከአብነቱ .env ፋይልዎን ይፍጠሩ
 cp .env.example .env
 
-# አስፈላጊ ምስጢሮችን ይፍጠሩ
+# አስፈላጊ ሚስጥሮችን ያመንጩ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 ለልማት ቁልፍ ተለዋዋጮች፦
 
-| ተለዋዋጭ                  | ነባሪ የልማት እሴት             | መግለጫ                |
+| ተለዋዋጭ                  | የልማት ነባሪ እሴት             | መግለጫ                |
 | ---------------------- | ------------------------ | ------------------- |
-| `PORT`                 | `20128`                  | የሰርቨር ወደብ           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | የፍሮንትኤንድ መሠረታዊ URL  |
-| `JWT_SECRET`           | (ከላይ ይፍጠሩ)               | የJWT ፊርማ ምስጢር       |
+| `PORT`                 | `20128`                  | የሰርቨር ፖርት           |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | የfrontend መነሻ URL   |
+| `JWT_SECRET`           | (ከላይ ያመንጩ)               | የJWT መፈረሚያ ሚስጥር     |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | የመጀመሪያ መግቢያ የይለፍ ቃል |
-| `APP_LOG_LEVEL`        | `info`                   | የሎግ ዝርዝርነት ደረጃ      |
+| `APP_LOG_LEVEL`        | `info`                   | የሎግ ዝርዝር ደረጃ        |
 
 ### የዳሽቦርድ ቅንብሮች
 
-ዳሽቦርዱ በአካባቢ ተለዋዋጮችም ሊዋቀሩ ለሚችሉ ባህሪያት የUI ማብሪያና ማጥፊያዎችን ያቀርባል፦
+ዳሽቦርዱ በአካባቢ ተለዋዋጮች ሊዋቀሩ ለሚችሉ ባህሪያት የUI መቀያየሪያዎችን ያቀርባል፦
 
-| የቅንብር ቦታ      | ማብሪያና ማጥፊያ   | መግለጫ                    |
-| ------------- | ------------ | ----------------------- |
-| ቅንብሮች → የላቀ   | የማረሚያ ሁነታ    | የማረሚያ ጥያቄ ሎጎችን አንቃ (UI) |
-| ቅንብሮች → አጠቃላይ | የጎን አሞሌ ታይነት | የጎን አሞሌ ክፍሎችን አሳይ/ደብቅ   |
+| የቅንብር ቦታ      | መቀያየሪያ       | መግለጫ                     |
+| ------------- | ------------ | ------------------------ |
+| ቅንብሮች → የላቀ   | የማረሚያ ሁነታ    | የማረሚያ የጥያቄ ሎጎችን አንቃ (UI) |
+| ቅንብሮች → አጠቃላይ | የጎን አሞሌ ታይነት | የጎን አሞሌ ክፍሎችን አሳይ/ደብቅ    |
 
-እነዚህ ቅንብሮች በውሂብ ጎታው ውስጥ ይቀመጣሉ፣ እንደገና ከተጀመረም በኋላ ይቆያሉ፤ ሲዋቀሩም የአካባቢ ተለዋዋጭ ነባሪ እሴቶችን ይተካሉ።
+እነዚህ ቅንብሮች በዳታቤዝ ውስጥ ይቀመጣሉ እና ከዳግም ማስነሳቶች በኋላም ይቆያሉ፤ ሲቀናበሩም የenv var ነባሪ እሴቶችን ይተካሉ።
 
-### በአካባቢያዊ ሁኔታ ማስኬድ
+### በአካባቢው ማስኬድ
 
 ```bash
-# የልማት ሁነታ (በቀጥታ እንደገና መጫን)
+# የልማት ሁነታ (ራስ-ሰር ዳግም መጫን)
 npm run dev
 
 # የምርት ግንባታ
 npm run build    # next build → .build/next/ ከዚያ assembleStandalone → dist/
 npm run start
 
-# ለአስተዋጽኦ አቅራቢ ለውጦች ፈጣን የባክኤንድ/API-ብቻ ማጠናቀር
+# ለአበርካቾች ለሚደረጉ ለውጦች ፈጣን backend/API-only ኮምፓይል
 npm run build:contributor
 
-# የልቀት ግንባታ (ንጹሕ ዳግም ግንባታ + HEAD ጠቋሚ — ለማሰማራት አስፈላጊ)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHAን ይጽፋል
+# የልቀት ግንባታ (ንጹህ ዳግም ግንባታ + HEAD sentinel — ለdeploy አስፈላጊ)
+npm run build:release   # rm -rf .build dist እና build + dist/BUILD_SHA ይጽፋል
 
-# የተለመደ የወደብ ውቅር
+# የተለመደ የፖርት ውቅር
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-የአስተዋጽኦ አቅራቢው ግንባታ የማጠናቀር-ብቻ ማረጋገጥን ያከናውናል፦ ራሱን የቻለውን
-ስርጭት አያዘጋጅም፣ እንዲሁም አማራጭ የኔቲቭ ማሸጊያ ንብረቶችን አይገነባም። ለመላክ ዝግጁ የሆነውን ጥቅል
-ማረጋገጥ ሲያስፈልግዎ መደበኛውን የምርት ግንባታ ይጠቀሙ።
+የአበርካች ግንባታው የኮምፓይል-ብቻ ማረጋገጫን ያከናውናል፤ standalone
+ስርጭቱን አያዘጋጅም ወይም አማራጭ native packaging ንብረቶችን አይገነባም። ለሚላክ ጥቅል
+ማረጋገጫ ሲያስፈልግዎት መደበኛውን የምርት ግንባታ ይጠቀሙ።
 
 ### የግንባታ ውጤት አቀማመጥ
 
-| ማውጫ       | ይዘቶች                                                                   | በGit የሚከታተል |
-| --------- | ---------------------------------------------------------------------- | ----------- |
-| `src/`    | የመተግበሪያ ምንጭ (TypeScript / TSX)                                         | አዎ          |
-| `.build/` | መካከለኛ ውጤቶች — የ`next build` ውጤት (በgit ችላ የተባለ፣ `distDir = .build/next`) | አይ          |
-| `dist/`   | ለመላክ ዝግጁ የሆነ ጥቅል — በ`assembleStandalone` የተዘጋጀ (በgit ችላ የተባለ)          | አይ          |
+| ማውጫ       | ይዘቶች                                                                | በመዝገብ የተያዘ |
+| --------- | ------------------------------------------------------------------- | ---------- |
+| `src/`    | የመተግበሪያ ምንጭ (TypeScript / TSX)                                      | አዎ         |
+| `.build/` | መካከለኛ ፋይሎች — `next build` ውጤት (gitignored, `distDir = .build/next`) | አይ         |
+| `dist/`   | ለመላክ ዝግጁ ጥቅል — በ`assembleStandalone` የተዘጋጀ (gitignored)             | አይ         |
 
-የግንባታ የሥራ ሂደቱ ነጠላ ዙር ነው፦
+የግንባታ ሂደቱ አንድ ዙር ብቻ ነው፦
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (የNext.js ውጤት)
-  └─ assembleStandalone()                 (ራሱን የቻለውን + ስታቲክ + ይፋዊ + ኔቲቭ ንብረቶችን ይቀዳል)
-       └─ ውጤት፦ dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js ውጤት)
+  └─ assembleStandalone()                 (standalone + static + public + native assets ይቀዳል)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` በተጨማሪም መጀመሪያ ሁለቱንም ማውጫዎች ያጸዳል፣ እና
-`dist/BUILD_SHA`ን (= `git rev-parse --short HEAD`) እንደ የማሰማራት ትክክለኛነት ጠቋሚ ይጽፋል።
+`npm run build:release` በተጨማሪ ሁለቱንም ማውጫዎች መጀመሪያ ያጸዳል እና
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) የማሰማራት ታማኝነት sentinel ሆኖ ይጽፋል።
 
-`npm run build:contributor` የባክኤንድ-ብቻ ግንባታ መገለጫውን ይጠቀማል። በግንባታ ጊዜ
-የዳሽቦርድ UI ፋይሎችን በጊዜያዊነት በተተኪ ይቀይራል፣ የAPI መስመር አስተናጋጆችን ያቆያል፣ እና ከግንባታው በኋላ
-ዋናዎቹን ፋይሎች ይመልሳል። የዳሽቦርድ UIን ለሚነኩ ለውጦች ወይም ለሙሉ
-የልቀት ማረጋገጫ `npm run build`ን ይጠቀሙ፤ የአስተዋጽኦ አቅራቢው መገለጫ የልቀት ግንባታውን አይተካም።
+`npm run build:contributor` backend-only የግንባታ መገለጫን ይጠቀማል። በግንባታ ጊዜ
+የዳሽቦርድ UI ፋይሎችን ለጊዜው ይተካል፣ የAPI route handlersን ያስቀራል እና
+ግንባታው ካለቀ በኋላ ዋናዎቹን ፋይሎች ይመልሳል። የዳሽቦርድ UI ላይ ለሚደረጉ ለውጦች
+ወይም ለሙሉ የልቀት ማረጋገጫ `npm run build` ይጠቀሙ፤ የአበርካች መገለጫው የልቀት ግንባታ ምትክ አይደለም።
 
-> **የVPS ማሰማራት ማስታወሻ፦** የርቀት ምስል ማውጫ `/usr/lib/node_modules/omniroute/app/`
-> አልተቀየረም። የማሰማራት ክህሎቶቹ የ`dist/`ን ይዘቶች ወደዚያ rsync ያደርጋሉ።
-> የተቀየረው በማከማቻው ውስጥ ያለው የግንባታ ውጤት ዱካ ብቻ ነው (`app/` → `dist/`)።
+> **የVPS ማሰማራት ማስታወሻ፦** የርቀት image ማውጫ `/usr/lib/node_modules/omniroute/app/`
+> አልተለወጠም። የማሰማራት skills የ`dist/` ይዘቶችን ወደዚያ ያመሳስላሉ።
+> የተንቀሳቀሰው በin-repo ያለው የግንባታ ውጤት መንገድ ብቻ ነው (`app/` → `dist/`)።
 
 ነባሪ URLs፦
 
@@ -178,77 +182,79 @@ Scopes (v3.8)፦ `db`፣ `sse`፣ `oauth`፣ `dashboard`፣ `api`፣ `cli`፣ `d
 # ሁሉም ሙከራዎች (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# አንድ የሙከራ ፋይል (የNode.js ቤተኛ test runner — አብዛኞቹ ሙከራዎች ይህን ይጠቀማሉ)
+# ነጠላ የሙከራ ፋይል (የNode.js ቤተኛ የሙከራ አስኬጅ — አብዛኞቹ ሙከራዎች ይህን ይጠቀማሉ)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# በለውጥዎ የተነኩት unit tests ብቻ (ከCI gate ጋር ተመሳሳይ TIA selector፣ #8084)
-npm run test:scoped            # በመጨረሻው commit (ወይም በworking tree) ውስጥ ያሉ ለውጦች
-npm run test:scoped:staged     # staged ለውጦች ብቻ — ከpre-commit ማስኬድ ጋር በሚገባ ይጣመራል
-npm run test:scoped:full       # በመጀመሪያ import-graph mapን እንደገና ይገነባል (ፋይሎችን ካከሉ/ካንቀሳቀሱ በኋላ)
-# Exit 1 + "run the full suite" ማለት hub file (tsconfig፣ package.json፣ …) ወይም
-# unmapped source ተለውጧል ማለት ነው — selector በደህንነት ሁኔታ ይወድቃል፤ በጭራሽ ያለማሳወቅ አይዘልም።
+# በለውጥዎ የተጎዱት የunit ሙከራዎች ብቻ (ከCI መቆጣጠሪያው ጋር ተመሳሳይ የTIA መራጭ፣ #8084)
+npm run test:scoped            # ባለፈው commit ውስጥ (ወይም በworking tree ውስጥ) ያሉ ለውጦች
+npm run test:scoped:staged     # staged የተደረጉ ለውጦች ብቻ — ከpre-commit ማስኬጃ ጋር በደንብ ይሠራል
+npm run test:scoped:full       # በመጀመሪያ የimport-graph ካርታውን እንደገና ይገንቡ (ፋይሎችን ካከሉ/ካንቀሳቀሱ በኋላ)
+# Exit 1 + "ሙሉውን suite ያስኪዱ" ማለት hub ፋይል (tsconfig, package.json, …) ወይም
+# ካርታ ያልተዘጋጀለት source ተለውጧል ማለት ነው — መራጩ በአስተማማኝ ሁኔታ ይወድቃል፣ ምንም ጊዜ ያለማሳወቅ አይዘልም።
 
-# Vitest (MCP server፣ autoCombo፣ cache)
+# Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
-# E2E ሙከራዎች (Playwrightን ይፈልጋል)
+# E2E ሙከራዎች (Playwright ያስፈልጋል)
 npm run test:e2e
 
-# የProtocol clients E2E (MCP transports፣ A2A)
+# የProtocol clients E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# የEcosystem ተኳኋኝነት ሙከራዎች
+# የEcosystem ተኳሃኝነት ሙከራዎች
 npm run test:ecosystem
 
-# የCoverage gate፦ 60% statements/lines/functions/branches
+# የCoverage መቆጣጠሪያ፦ 60% statements/lines/functions/branches
 npm run test:coverage
 npm run coverage:report
 
-# Lint + የቅርጸት ማረጋገጫ
+# የLint + format ማረጋገጫ
 npm run lint
 npm run check
 
-# Gated real-upstream combo smoke (የVPS መዳረሻ + የእውነተኛ provider credits ይፈልጋል)
-# እውነተኛ providersን ይጠቀማል — ትንሽ ወጪ አለው። በCI ውስጥ በፍጹም አይሰራም። gate ከሌለ በአግባቡ ይዘላል።
-# የሚያስፈልገው፦ ssh root@192.168.0.15 መዳረሻ (ከVPS የread-only DB snapshot ይጭናል)።
+# በመቆጣጠሪያ የተገደበ የእውነተኛ-upstream combo smoke (የVPS መዳረሻ + የእውነተኛ provider ክሬዲቶች ያስፈልጋሉ)
+# እውነተኛ providersን ያገኛል — ትንሽ ወጪ አለው። በCI ውስጥ በፍጹም አይሄድም። መቆጣጠሪያው ከሌለ ያለችግር ይዘላል።
+# የሚያስፈልገው፦ ssh root@192.168.0.15 መዳረሻ (ከVPS ላይ ተነባቢ-ብቻ የDB snapshot ይጫናል)።
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — ተራ Node ESM scripts፤ live .15 serverን በቀጥታ ይጠቀማሉ።
-# የሚያስፈልገው፦ ssh root@192.168.0.15 መዳረሻ (combos በSSH sqlite በኩል ይፈጠራሉ/ይወገዳሉ)።
-# እውነተኛ providersን ይጠቀማል (አነስተኛ ወጪ)። __live_test__* combosን ብቻ ይፈጥራል/ይሰርዛል። በCI ውስጥ በፍጹም አይሰራም።
-# REQUIRE_API_KEY=false በ.15 ላይ ስለሆነ API key አያስፈልግም፤ ነገር ግን COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ከተዋቀሩ ያከብራቸዋል።
-npm run test:combo:live:vps              # 7 HTTP scenarios (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # እውነተኛ cross-provider failover scenario ይጨምራል (በድምሩ 8)
+# Phase-3 VPS live smoke — ቀላል የNode ESM scripts፣ የቀጥታውን .15 server በቀጥታ ያገኛሉ።
+# የሚያስፈልገው፦ ssh root@192.168.0.15 መዳረሻ (combos በSSH sqlite በኩል ይፈጠራሉ/ይፈርሳሉ)።
+# እውነተኛ providersን ያገኛል (አነስተኛ ወጪ)። __live_test__* combosን ብቻ ይፈጥራል/ይሰርዛል። በCI ውስጥ በፍጹም አይሄድም።
+# REQUIRE_API_KEY=false በ.15 ላይ ስለሆነ API key አያስፈልግም፣ ነገር ግን COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ከተዋቀሩ ያከብራቸዋል።
+npm run test:combo:live:vps              # 7 የHTTP ሁኔታዎች (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # እውነተኛ የcross-provider failover ሁኔታን ይጨምራል (በአጠቃላይ 8)
 ```
 
 የCoverage ማስታወሻዎች፦
 
-- `npm run test:coverage` ለዋናው unit test suite የsource coverageን ይለካል፣ `tests/**`ን ያስወግዳል፣ እና `open-sse/**`ን ያካትታል
-- Pull requests የcoverage gateን በ**60%+** statements/lines/functions/branches ማቆየት አለባቸው
-- PR በ`src/`፣ `open-sse/`፣ `electron/`፣ ወይም `bin/` ውስጥ ያለ production codeን ከለወጠ፣ በዚያው PR ውስጥ automated testsን ማከል ወይም ማዘመን አለበት
-- `npm run coverage:report` ከቅርብ ጊዜው coverage run የተገኘውን ዝርዝር የፋይል-በ-ፋይል ሪፖርት ያትማል
-- `npm run test:coverage:legacy` ለታሪካዊ ንጽጽር የቀድሞውን metric ይጠብቃል
-- ደረጃ በደረጃ የcoverage ማሻሻያ roadmapን ለማየት `docs/ops/COVERAGE_PLAN.md`ን ይመልከቱ
+- `npm run test:coverage` ለዋናው የunit test suite የsource coverageን ይለካል፣ `tests/**`ን ያስወግዳል፣ እና `open-sse/**`ን ያካትታል
+- Pull requests የcoverage መቆጣጠሪያውን በ**60%+** statements/lines/functions/branches ማቆየት አለባቸው
+- PR በ`src/`፣ `open-sse/`፣ `electron/`፣ ወይም `bin/` ውስጥ ያለ production code ከቀየረ፣ በዚያው PR ውስጥ ራስ-ሰር ሙከራዎችን ማከል ወይም ማዘመን አለበት
+- `npm run coverage:report` ከቅርብ ጊዜው የcoverage ማስኬጃ የተገኘውን ዝርዝር የፋይል-በ-ፋይል ሪፖርት ያትማል
+- `npm run test:coverage:legacy` ለታሪካዊ ንጽጽር አሮጌውን መለኪያ ይጠብቃል
+- ደረጃ በደረጃ የcoverage ማሻሻያ ዕቅዱን ለማየት `docs/ops/COVERAGE_PLAN.md`ን ይመልከቱ
 
 ### የPull Request መስፈርቶች
 
-PR ከመክፈትዎ በፊት፣ ለለወጡት ነገር ያተኮረውን loop ለማስኬድ
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)ን ይጠቀሙ። ሙሉው unit suite (4 CI shards)፣ Vitest፣ **60%+** coverage gate፣ እና
-production build የCI ኃላፊነት ናቸው — እነዚህን በአካባቢዎ ማስኬድ PR checks አስቀድመው ከሚሰጡት ውጭ ተጨማሪ መረጃ አይሰጥም፣ እና አነስተኛ ማሽኖች ላይ hostን ሊያጨናንቅ ይችላል (#8084)፦
+PR ከመክፈትዎ በፊት፣ ለቀየሩት ነገር ያተኮረውን loop ለማስኬድ
+[የአስተዋጽኦ Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)ን ይጠቀሙ። ሙሉው unit suite (4 CI shards)፣ Vitest፣ **60%+** የcoverage መቆጣጠሪያ፣ እና
+production build የCI ኃላፊነት ናቸው — እነዚህን በአካባቢዎ ማስኬድ PR
+ማረጋገጫዎቹ አስቀድመው ከሚሰጡት በላይ መረጃ አይጨምርም፣ እና በአነስተኛ ማሽኖች ላይ hostን ሙሉ በሙሉ ሊጭን ይችላል (#8084)፦
 
 - ለውጥዎን የሚሸፍኑ የሙከራ ፋይሎችን ያስኪዱ፦ `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint`ን ያስኪዱ
-- production code በተለወጠ ቁጥር automated testsን በዚያው PR ውስጥ ያካትቱ ወይም ያዘምኑ
-- production code ሲለወጥ የተለወጡትን ወይም የታከሉትን የሙከራ ፋይሎች በPR መግለጫ ውስጥ ያካትቱ
-- የproject secrets በCI ውስጥ ሲዋቀሩ በPR ላይ ያለውን የSonarQube ውጤት ያረጋግጡ
+- production code በተቀየረ ቁጥር በዚያው PR ውስጥ ራስ-ሰር ሙከራዎችን ያካትቱ ወይም ያዘምኑ
+- በ`node:test` ፋይሎች ውስጥ፣ እያንዳንዱን ከፍተኛ-ደረጃ `await` (እንደ `await import(...)`) ከመጀመሪያው `test()` / `describe()` በፊት ያስቀምጡ፦ በ`--test-force-exit` ስር፣ ከእሱ በኋላ የተመዘገቡ ሙከራዎች ያለማሳወቅ ፈጽሞ ላይሄዱ ይችላሉ (#18045፤ በ`npm run check:test-tla-order` የሚተገበር)
+- production code በተቀየረ ጊዜ የተቀየሩትን ወይም የታከሉትን የሙከራ ፋይሎች በPR መግለጫው ውስጥ ያካትቱ
+- የproject secrets በCI ውስጥ በተዋቀሩ ጊዜ በPR ላይ ያለውን የSonarQube ውጤት ያረጋግጡ
 
-የአሁኑ የሙከራ ሁኔታ፦ **122 unit test files** የሚከተሉትን ይሸፍናሉ፦
+የአሁኑ የሙከራ ሁኔታ፦ **122 የunit test ፋይሎች** የሚከተሉትን ይሸፍናሉ፦
 
-- የProvider translators እና የቅርጸት ልወጣ
+- የProvider translators እና format conversion
 - Rate limiting፣ circuit breaker፣ እና resilience
-- Semantic cache፣ idempotency፣ እና progress tracking
+- Semantic cache፣ idempotency፣ progress tracking
 - የDatabase operations እና schema (21 DB modules)
-- OAuth flows እና authentication
+- የOAuth flows እና authentication
 - የAPI endpoint validation (Zod v4)
 - የMCP server tools እና scope enforcement
 - የMemory እና Skills systems
