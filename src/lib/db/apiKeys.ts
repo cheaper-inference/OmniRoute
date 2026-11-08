@@ -269,6 +269,15 @@ interface ApiKeyView extends JsonRecord {
   forcedModel: string | null;
 }
 
+/**
+ * `bypassCache` reads the row from SQLite and leaves this process's cache (and the Redis
+ * copy) alone: nothing is read from it and nothing is written to it. For callers that
+ * must see a revoke made by another process (the cache is only cleared locally).
+ */
+export interface ApiKeyLookupOptions {
+  bypassCache?: boolean;
+}
+
 // LRU cache for API key validation (valid keys only)
 const _keyValidationCache = new Map<string, { valid: boolean; timestamp: number }>();
 const _keyMetadataCache = new Map<string, CacheEntry<ApiKeyMetadata>>();
@@ -1372,7 +1381,10 @@ export async function setApiKeyExpiry(id: string, expiresAt: string | null): Pro
  * effect within at most CACHE_TTL even without an explicit clear in the
  * caller.
  */
-export async function validateApiKey(key: string | null | undefined) {
+export async function validateApiKey(
+  key: string | null | undefined,
+  options: ApiKeyLookupOptions = {}
+) {
   if (!key || typeof key !== "string") return false;
 
   if (isConfiguredEnvApiKey(key) || isSelfLoopBearer(key)) return true;
@@ -1381,7 +1393,7 @@ export async function validateApiKey(key: string | null | undefined) {
   const hashedKey = await hashKey(key);
   const cacheKey = hashedKey;
 
-  const cached = _keyValidationCache.get(cacheKey);
+  const cached = options.bypassCache ? undefined : _keyValidationCache.get(cacheKey);
   if (cached && now - cached.timestamp < CACHE_TTL) {
     return cached.valid;
   }
@@ -1410,6 +1422,17 @@ export async function validateApiKey(key: string | null | undefined) {
   if (typeof expiresAt === "string" && expiresAt.trim() !== "") {
     const expiresMs = Date.parse(expiresAt);
     if (Number.isFinite(expiresMs) && expiresMs <= now) return false;
+  }
+
+  if (options.bypassCache) {
+    // last_used_at is bookkeeping: a write lock held by another process must not fail
+    // a check whose reads succeeded (the Live WS heartbeat would close a valid client).
+    try {
+      markApiKeyUsed(db, row.id, now);
+    } catch {
+      // retried on the next lookup: the throttle entry is only set after a write
+    }
+    return true;
   }
 
   evictIfNeeded(_keyValidationCache);
@@ -1449,7 +1472,8 @@ export async function validateApiKey(key: string | null | undefined) {
  * Get API key metadata with caching for performance
  */
 export async function getApiKeyMetadata(
-  key: string | null | undefined
+  key: string | null | undefined,
+  options: ApiKeyLookupOptions = {}
 ): Promise<ApiKeyMetadata | null> {
   if (!key || typeof key !== "string") return null;
 
@@ -1527,7 +1551,7 @@ export async function getApiKeyMetadata(
 
   // Check cache first
   const hashedKey = await hashKey(key);
-  const cached = _keyMetadataCache.get(hashedKey);
+  const cached = options.bypassCache ? undefined : _keyMetadataCache.get(hashedKey);
   if (cached && now - cached.timestamp < CACHE_TTL) {
     return cached.value;
   }
@@ -1636,8 +1660,10 @@ export async function getApiKeyMetadata(
   setNoLog(metadata.id, metadata.noLog === true);
 
   // Cache the result
-  evictIfNeeded(_keyMetadataCache);
-  _keyMetadataCache.set(hashedKey, { value: metadata, timestamp: now });
+  if (!options.bypassCache) {
+    evictIfNeeded(_keyMetadataCache);
+    _keyMetadataCache.set(hashedKey, { value: metadata, timestamp: now });
+  }
 
   return metadata;
 }

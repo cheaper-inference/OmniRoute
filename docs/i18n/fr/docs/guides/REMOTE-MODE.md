@@ -50,31 +50,39 @@ votre ordinateur portable                OmniRoute distant (VPS)
 
 ```bash
 omniroute connect 192.168.0.15
-# Mot de passe de gestion pour http://192.168.0.15:20128: ********
-# ✔ Connecté à http://192.168.0.15:20128 — contexte '192.168.0.15' (portée : admin)
+# Mot de passe de gestion pour http://192.168.0.15:20128 : ********
+# ✔ Connecté à http://192.168.0.15:20128 — contexte « 192.168.0.15 » (portée : admin)
 ```
 
-Le flux par mot de passe émet par défaut un jeton **admin** (vous détenez le mot de passe, vous
-disposez donc déjà d’un contrôle total). Réduisez la portée avec `--scope` :
+Le flux avec mot de passe génère par défaut un jeton **admin** (vous détenez le mot
+de passe, vous disposez donc déjà d’un contrôle total). Réduisez la portée avec
+`--scope` :
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Options : `--port <p>` (lorsque l’hôte n’en spécifie aucun), `--name <ctx>` (nom du contexte),
-`--scope read|write|admin`. Une URL complète est respectée telle quelle :
+Options : `--port <p>` (lorsque l’hôte n’en possède pas), `--name <ctx>` (nom du
+contexte), `--scope read|write|admin`. Une URL complète est respectée telle quelle :
 `omniroute connect https://omni.example.com`.
 
-### Avec un jeton généré au préalable
+Lorsque l’authentification à deux facteurs du tableau de bord est activée sur le
+serveur (Settings → Security), le mot de passe seul est refusé : l’interface de
+ligne de commande demande alors le code fourni par l’application
+d’authentification (ou un code de récupération). Fournissez-le à l’avance avec
+`--totp <code>` pour une utilisation non interactive.
 
-Générez un jeton doté d’une portée dans le tableau de bord (ou avec `omniroute tokens create`) et
-collez-le — aucun mot de passe n’est nécessaire :
+### Avec un jeton pré-généré
+
+Générez un jeton avec une portée définie dans le tableau de bord (ou avec
+`omniroute tokens create`), puis collez-le — aucun mot de passe n’est nécessaire :
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-La CLI le valide via `GET /api/cli/whoami` et l’enregistre comme contexte actif.
+L’interface de ligne de commande le valide via `GET /api/cli/whoami` et
+l’enregistre comme contexte actif.
 
 ---
 
@@ -457,12 +465,12 @@ omniroute contexts remove 192-168-0-15 --yes   # supprime le contexte local (mê
 
 ## Points de terminaison de l’API (référence)
 
-| Méthode | Route                 | Authentification        | Portée                               |
-| ------- | --------------------- | ----------------------- | ------------------------------------ |
-| POST    | `/api/cli/connect`    | mot de passe de gestion | — (public, protégé par mot de passe) |
-| GET     | `/api/cli/whoami`     | jeton d’accès           | lecture                              |
-| GET     | `/api/cli/tokens`     | jeton d’accès           | administration                       |
-| POST    | `/api/cli/tokens`     | jeton d’accès           | administration                       |
-| DELETE  | `/api/cli/tokens/:id` | jeton d’accès           | administration                       |
+| Méthode | Route                 | Authentification              | Portée                                  |
+| ------- | --------------------- | ----------------------------- | --------------------------------------- |
+| POST    | `/api/cli/connect`    | mot de passe ; 2FA si activée | — (publique, protégée par mot de passe) |
+| GET     | `/api/cli/whoami`     | jeton d’accès                 | read                                    |
+| GET     | `/api/cli/tokens`     | jeton d’accès                 | admin                                   |
+| POST    | `/api/cli/tokens`     | jeton d’accès                 | admin                                   |
+| DELETE  | `/api/cli/tokens/:id` | jeton d’accès                 | admin                                   |
 
 Consultez [openapi.yaml](../openapi.yaml) pour les schémas complets.
