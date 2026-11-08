@@ -328,6 +328,27 @@ export function computeVerdict(results) {
   return { releaseGreen: hardFailures.length === 0, hardFailures, drift };
 }
 
+/** Missing scanner evidence is execution failure, never measured ratchet drift. */
+function evaluateWorkflowRun({ code, out }) {
+  const states = [...String(out).matchAll(/^workflowAuditState=([^\r\n]*)\r?$/gm)];
+  const policyCounts = ["provenanceRunnerFindings", "scheduledGuardFindings"].map((name) => {
+    const matches = [...String(out).matchAll(new RegExp(`^${name}=(\\d+)\\r?$`, "gm"))];
+    return matches.length === 1 ? Number(matches[0][1]) : null;
+  });
+  const measured =
+    states.length === 1 &&
+    states[0][1] === "MEASURED" &&
+    [0, 1].includes(code) &&
+    policyCounts.every((count) => Number.isSafeInteger(count) && count >= 0);
+  const policyFailure = policyCounts.some((count) => count > 0);
+  return {
+    kind: measured && !policyFailure ? "drift" : "hard",
+    ok: measured && !policyFailure && code === 0,
+    evidenceState: measured ? "MEASURED" : "INCOMPLETE",
+    detail: measured && !policyFailure && code === 0 ? "within baseline" : firstFailureLine(out),
+  };
+}
+
 // ─── --full-ci: reproduce the EXACT ci.yml gate set (P0, v3.8.46 post-mortem) ──
 //
 // WHY: the curated HARD/DRIFT lists above are a hand-maintained SUBSET. The v3.8.46
@@ -807,9 +828,8 @@ async function main() {
     });
   };
 
-  // A ratchet command (check:complexity, check:dead-code, …) exits 1 ONLY on a
-  // measured regression and self-skips (exit 0) when its tooling is absent — so a
-  // non-zero exit here is drift to rebaseline at release, never a contributor block.
+  // Ratchet findings remain drift. Workflow auditing additionally requires explicit
+  // measurement evidence: its exit 1 can also mean missing/broken scanner tooling.
   // ALL checks run regardless of earlier failures (the report is collected, not
   // fail-fast) so one pass surfaces every red instead of revealing them in layers.
   const driftCmd = async (id, label, cmd, cmdArgs, okDetail = "within baseline", opts) => {
@@ -819,9 +839,13 @@ async function main() {
     record({
       id,
       label,
-      kind: "drift",
-      ok: code === 0,
-      detail: code === 0 ? okDetail : firstFailureLine(out),
+      ...(id === "workflow-lint"
+        ? evaluateWorkflowRun({ code, out })
+        : {
+            kind: "drift",
+            ok: code === 0,
+            detail: code === 0 ? okDetail : firstFailureLine(out),
+          }),
     });
   };
 
@@ -964,7 +988,7 @@ async function main() {
   if (!QUICK) {
     // These are the gates that catch inherited base-red tests from cycle PRs (the v3.8.42
     // release PR exploded with 15 such reds). Non-draft code PRs into release/** run the unit
-    // suite and test:vitest per PR (quality.yml fast-unit, fast-vitest); only integration is
+    // suite and test:vitest per PR (ci.yml test-unit, test-vitest); only integration is
     // absent. These gates run SILENTLY for many minutes; the announce line above + these
     // hard ceilings keep a long-but-healthy run from being mistaken for a hang (the ceiling also
     // converts a genuine DB-handle hang into a visible failure instead of an infinite block).
@@ -1099,7 +1123,18 @@ async function main() {
         id: "pack-artifact",
         label: "Package artifact (npm pack policy)",
         run: runPackArtifactGate,
-        timeout: 20 * 60 * 1000,
+        // Covers build:cli + check:pack-artifact. Measured 2026-10-31 on an idle runner and a
+        // stationary tip: next build compiles silently for ~12 min, keeps printing, and the old
+        // 20 min ceiling killed it on every scheduled run. 40 min still turns a genuine hang
+        // into a visible failure (same reasoning as the integration ceiling above).
+        // Measured 2026-11-02: build:cli took 2237 s and 2372 s on two sweeps of the same day and
+        // check:pack-artifact about 150 s, so the 40 min ceiling left seconds of headroom and
+        // killed the second run. 60 min restored the margin for a while.
+        // Measured 2026-11-05: build:cli now takes about 52 min and check:pack-artifact about
+        // 8 min. Run 42038590490 hit the shared 60 min deadline mid-pack (52.1 + 7.9) and the
+        // green run before it passed by 40 s (51.4 + 7.9). 90 min restores real headroom; a
+        // genuine hang still fails.
+        timeout: 90 * 60 * 1000,
       });
     }
     // With --suites-from only the build lane is left for this slot.
@@ -1142,8 +1177,10 @@ async function main() {
         });
       } else {
         announce(bootLabel);
+        // Packs and installs the real tarball, so it scales with the package: the translated
+        // docs mirrors (#18869) added 8,885 files, and 15 minutes stopped being enough.
         const { code, out } = await runAsync(npmCmd, ["run", "check:pack-boot"], {
-          timeout: 15 * 60 * 1000,
+          timeout: 40 * 60 * 1000,
         });
         saveGateLog("pack-boot", out);
         record({
@@ -1200,9 +1237,13 @@ async function main() {
         // Respect the curated classification when the curated pass already ran an equivalent
         // gate under a different id — otherwise the same ratchet is reported as a HARD failure
         // here AND as drift above, in one self-contradicting verdict.
-        kind: fullCiKindFor(g.id, results),
-        ok: code === 0,
-        detail: code === 0 ? "pass" : firstFailureLine(out),
+        ...(g.id === "check:workflows"
+          ? evaluateWorkflowRun({ code, out })
+          : {
+              kind: fullCiKindFor(g.id, results),
+              ok: code === 0,
+              detail: code === 0 ? "pass" : firstFailureLine(out),
+            }),
       });
     }
   }
@@ -1247,7 +1288,13 @@ async function main() {
           releaseGreen,
           hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
           drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
-          checks: results.map((r) => ({ id: r.id, kind: r.kind, ok: r.ok, detail: r.detail })),
+          checks: results.map((r) => ({
+            id: r.id,
+            kind: r.kind,
+            ok: r.ok,
+            detail: r.detail,
+            ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
+          })),
           commandReceipts,
         },
         null,

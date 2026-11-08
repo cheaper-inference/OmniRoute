@@ -749,9 +749,11 @@ function openaiToGeminiBase(
     if (hasGoogleSearch && !hasCallableFunctionTools && !hasNativeGroundingTool) {
       result.tools.push({ googleSearch: {} });
     }
-    result.toolConfig = {
-      functionCallingConfig: convertOpenAIToolChoiceToGemini(body.tool_choice),
-    };
+    if (result.tools.some((tool) => (tool.functionDeclarations?.length ?? 0) > 0)) {
+      result.toolConfig = {
+        functionCallingConfig: convertOpenAIToolChoiceToGemini(body.tool_choice),
+      };
+    }
   } else if (hasGoogleSearch) {
     result.tools = [{ googleSearch: {} }];
   }
