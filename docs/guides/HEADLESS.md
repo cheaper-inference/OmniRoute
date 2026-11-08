@@ -76,6 +76,10 @@ headless mode too.
 | `models-dev-sync`           | models.dev capability sync (opt-in in settings)                        |
 | `live-dashboard-ws`         | Real-time dashboard WebSocket daemon (port 20132)                      |
 
+The `cloud-sync` bootstrap also starts the budget-reset, token-health and log-export jobs. In
+headless mode they do not run unless an authorized caller starts the bootstrap later with
+`GET /api/init` (`omniroute api system get-api-init`).
+
 Each skip is logged once at startup, for example:
 
 ```
@@ -192,7 +196,7 @@ After building and starting with a persistent data directory:
 ## See also
 
 - [ENVIRONMENT.md](../reference/ENVIRONMENT.md) — `OMNIROUTE_HEADLESS` and
-  `OMNIROUTE_DISABLE_BACKGROUND_SERVICES` (a separate switch that stops background schedulers
-  but keeps the dashboard).
+  `OMNIROUTE_DISABLE_BACKGROUND_SERVICES` (a separate switch that stops background schedulers,
+  including connection recovery, retention cleanup and scheduled VACUUM, but keeps the dashboard).
 - [REMOTE-MODE.md](REMOTE-MODE.md) — drive a remote (for example, headless) OmniRoute from
   your laptop with the `omniroute` CLI.

@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 /**
  * ImportProgressModal — Issue #3501 Phase 1k
@@ -52,13 +53,14 @@ export default function ImportProgressModal({
         />
 
         {/* Status text */}
-        <div className="flex items-center gap-3">
+        <div role="status" className="flex items-center gap-3">
+          {" "}
           {importProgress.degraded ? (
             <Icon name="warning" className="text-warning" />
           ) : (
             <>
               {(importProgress.phase === "fetching" || importProgress.phase === "importing") && (
-                <Icon name="progress_activity" className="animate-spin text-text-muted" />
+                <Spinner decorative size="sm" className="text-text-muted" />
               )}
               {importProgress.phase === "done" && (
                 <Icon name="check_circle" className="text-success" />
