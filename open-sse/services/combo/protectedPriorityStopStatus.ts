@@ -54,7 +54,7 @@ export function isComboEmptyPoolNoEligibleTargetsEnabled(): boolean {
  */
 export function isCrashStormBreakerEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled("CRASH_STORM_BREAKER_ENABLED");
+    return isRegisteredFeatureFlagEnabled("CRASH_STORM_BREAKER_ENABLED");
   } catch {
     // no-effect: an unreadable flag store keeps the legacy routing (breaker off)
     return false;

@@ -505,7 +505,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: true,
     warningLevel: "info",
   },
-
   // ──────────────── Policies (8) ────────────────
   {
     key: "UNPRICED_USAGE_BUDGET_POLICY",
@@ -603,7 +602,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "caution",
   },
-
   // ──────────────── Runtime (18) ────────────────
   {
     key: "UNIVERSAL_CONTEXT_HANDOFF_ENABLED",
@@ -889,7 +887,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
-
   {
     key: "NEWAPI_AGGREGATOR_BALANCE",
     label: "New-API Aggregator Balance",
@@ -1106,7 +1103,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "caution",
   },
-
   {
     key: "CATALOG_MIRROR_REFINEMENTS_ENABLED",
     label: "Catalog Mirror Refinements",
@@ -1119,7 +1115,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
-
   // ──────────────── CLI (5) ────────────────
   {
     key: "CLI_COMPAT_ALL",
@@ -1179,7 +1174,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "caution",
   },
-
   // ──────────────── Health (3) ────────────────
   {
     key: "OMNIROUTE_DISABLE_LOCAL_HEALTHCHECK",
