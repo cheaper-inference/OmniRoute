@@ -73,35 +73,44 @@ function carriesOutput(payload: string): boolean {
  * signatures add only `signature: ""` to an upstream start, which does not match a delta.
  */
 function claudeThinkingFrameKind(payload: string): string | null {
+  let parsed: unknown;
   try {
-    const parsed: unknown = JSON.parse(payload.replace(/\n/g, " "));
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
-    const event = parsed as Record<string, unknown>;
-    if (
-      event.type === "content_block_start" &&
-      event.content_block &&
-      typeof event.content_block === "object"
-    ) {
-      const blockType = (event.content_block as Record<string, unknown>).type;
-      return blockType === "thinking" || blockType === "redacted_thinking" ? blockType : null;
-    }
-    if (event.type !== "content_block_delta" || !event.delta || typeof event.delta !== "object")
-      return null;
-    const delta = event.delta as Record<string, unknown>;
-    if (delta.type === "thinking_delta") {
-      return typeof delta.thinking === "string" && delta.thinking.length > 0
-        ? "thinking_delta"
-        : null;
-    }
-    if (delta.type === "signature_delta") {
-      return typeof delta.signature === "string" && delta.signature.length > 0
-        ? "signature_delta"
-        : null;
-    }
-    return null;
+    parsed = JSON.parse(payload.replace(/\n/g, " "));
   } catch {
     return null;
   }
+  if (!isPlainRecord(parsed)) return null;
+  if (parsed.type === "content_block_start") return thinkingBlockStartKind(parsed.content_block);
+  if (parsed.type === "content_block_delta") return thinkingDeltaKind(parsed.delta);
+  return null;
+}
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function thinkingBlockStartKind(block: unknown): string | null {
+  if (!block || typeof block !== "object") return null;
+  const blockType = (block as Record<string, unknown>).type;
+  return blockType === "thinking" || blockType === "redacted_thinking" ? blockType : null;
+}
+
+/** Field of a Claude delta that must be a non-empty string for the delta to count. */
+const THINKING_DELTA_FIELDS: Record<string, string> = {
+  thinking_delta: "thinking",
+  signature_delta: "signature",
+};
+
+function thinkingDeltaKind(delta: unknown): string | null {
+  if (!delta || typeof delta !== "object") return null;
+  const record = delta as Record<string, unknown>;
+  const deltaType = typeof record.type === "string" ? record.type : "";
+  const field = Object.hasOwn(THINKING_DELTA_FIELDS, deltaType)
+    ? THINKING_DELTA_FIELDS[deltaType]
+    : undefined;
+  if (!field) return null;
+  const text = record[field];
+  return typeof text === "string" && text.length > 0 ? deltaType : null;
 }
 
 /**
@@ -275,6 +284,19 @@ export class SseOutputScanner {
   }
 }
 
+type ChunkStep = { kind: "output"; frameKind: null } | { kind: "reasoning"; frameKind: string };
+
+/**
+ * Feed one decoded chunk to the scanner and report whether the gate can open: real output,
+ * upstream Claude thinking, or a buffer overflow (treated as output). Null keeps waiting.
+ */
+function scanChunk(scanner: SseOutputScanner, text: string): ChunkStep | null {
+  if (scanner.push(text)) return { kind: "output", frameKind: null };
+  const frameKind = scanner.reasoningActivity();
+  if (frameKind) return { kind: "reasoning", frameKind };
+  return scanner.overflowedWithoutOutput() ? { kind: "output", frameKind: null } : null;
+}
+
 /**
  * Hold `response` until its body carries output, or stop waiting for one of the reasons above.
  *
@@ -326,17 +348,10 @@ export async function awaitFirstOutput(
             return;
           }
           if (!value) continue;
-          if (scanner.push(decoder.decode(value, { stream: true }))) {
-            finish("output");
-            return;
-          }
-          thinkingFrameKind = scanner.reasoningActivity();
-          if (thinkingFrameKind) {
-            finish("reasoning");
-            return;
-          }
-          if (scanner.overflowedWithoutOutput()) {
-            finish("output");
+          const step = scanChunk(scanner, decoder.decode(value, { stream: true }));
+          if (step) {
+            thinkingFrameKind = step.frameKind;
+            finish(step.kind);
             return;
           }
         }
