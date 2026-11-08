@@ -62,38 +62,38 @@ HAR-tuonti purkaa JWT:n vanhenemisajan ja näyttää tunnisteen jäljellä oleva
 > **Älä koskaan tallenna oikeaa HAR-vientiä, käyttöoikeustunnistetta tai päivitystunnistetta versionhallintaan.** Testi- ja
 > dokumentaatioarvojen on aina oltava paikkamerkkejä.
 
-## Tunnisteen voimassaoloaika ja päivittäminen
+## Tunnuksen käyttöikä ja päivittäminen
 
-`access_token` on lyhytikäinen (tavallisesti **~75 minuuttia**). Sen vanhennuttua palveluntarjoaja
-ilmoittaa yhteysvirheestä, ja tunnistetieto on tallennettava uudelleen.
+`access_token` on lyhytikäinen (tyypillisesti **~75 minuuttia**). Ilman käyttökelpoista päivitystunnusta
+tunnistetiedot on hankittava uudelleen vanhenemisen jälkeen.
 
-### Automaattinen päivittäminen `refreshToken`-arvolla
+### Automaattinen päivitys kohteella `refreshToken`
 
-Voit välttää manuaalisen uudelleentallennuksen tallentamalla Microsoftin päivitystunnisteen yhteyden
-**Advanced Settings → providerSpecificData** -kohtaan:
+Avaa Microsoft 365 -palveluntarjoajan **Lisää yhteys**- tai **Muokkaa yhteyttä** -valintaikkunassa
+**Lisäasetukset → Päivitystunnus (valinnainen)**. Liitä Microsoft OAuth -päivitystunnus
+`substrate.office.com/sydney`-käyttöoikeusaluetta varten ja tallenna. Syöte peitetään, eikä siihen
+esitäytetä koskaan tallennettua tunnusta. Kun muokkaat yhteyttä, jätä kenttä tyhjäksi, jos haluat
+säilyttää nykyisen tunnuksen; liitä uusi tunnus, jos haluat korvata sen.
 
-| Kenttä         | Kuvaus                                                                               |
-| -------------- | ------------------------------------------------------------------------------------ |
-| `refreshToken` | Microsoft OAuth -päivitystunniste `substrate.office.com/sydney`-käyttöaluetta varten |
-| `tier`         | `individual` (oletus), `edu` tai `enterprise`                                        |
+Hanki päivitystunnus Microsoftin laite- tai valtuutuskoodivuosta, jonka käyttöoikeusalueena on
+`substrate.office.com/sydney`; hallintapaneeli ei hanki sitä puolestasi.
+Kun päivitystunnus on määritetty, OmniRoute tarkistaa `access_token`-tunnuksen ennen pyyntöjä
+ja päivittää sen vain, kun päivitys on tarpeen. Onnistunut päivitys tallentaa myös kierrätetyn
+päivitystunnuksen, joten tunnistetietoja ei tarvitse hankkia uudelleen manuaalisesti niin kauan kuin
+päivitystunnus on voimassa.
 
-Hanki päivitystunniste Microsoftin laitekoodi- tai valtuutuskoodiprosessilla,
-jonka käyttöalueena on `substrate.office.com/sydney`. Kun `refreshToken` on asetettu, OmniRoute
-päivittää `access_token`-arvon ennakoivasti ennen jokaista pyyntöä, joten tunnistetietoa ei tarvitse
-tallentaa uudelleen jokaisen noin 75 minuutin vanhenemisen jälkeen.
-
-Jos `refreshToken`-arvoa ei ole asetettu, WebSocket-tunnistetieto on tallennettava manuaalisesti uudelleen
-jokaisen vanhenemisen jälkeen.
+Jos kohdetta `refreshToken` ei ole määritetty, WebSocket-tunnistetiedot on hankittava manuaalisesti
+uudelleen jokaisen vanhenemisen jälkeen.
 
 ### Tason valinta
 
-| Taso         | Alias      | Käyttöympäristö          |
-| ------------ | ---------- | ------------------------ |
-| `individual` | _(oletus)_ | Kuluttajien M365 Copilot |
-| `edu`        | `included` | Koulutuksen M365 Copilot |
-| `enterprise` | `work`     | M365 Copilot for Work    |
+| Taso         | Alias      | Käyttöliittymä              |
+| ------------ | ---------- | --------------------------- |
+| `individual` | _(oletus)_ | Kuluttajien M365 Copilot    |
+| `edu`        | `included` | Oppilaitosten M365 Copilot  |
+| `enterprise` | `work`     | M365 Copilot työympäristöön |
 
-Aseta taso kohdassa **Advanced Settings → providerSpecificData → tier**. Taso vaikuttaa
+Määritä taso kohdassa **Lisäasetukset → Copilot-taso**. Taso vaikuttaa
 BizChat-reititykseen ja mallien käyttöoikeuksiin.
 
 ## Suojausmalli
@@ -111,28 +111,23 @@ BizChat-reititykseen ja mallien käyttöoikeuksiin.
 
 ### Todennus epäonnistuu välittömästi
 
-- Varmista, että kopioit tunnistetiedon **WebSocket-URL-osoitteesta**, et XHR/Fetch-pyynnöstä. Tunnistetieto
-  on Chathub-WebSocket-yhteyden `access_token`-kyselyparametrissa
-  — ei `Authorization: Bearer`-otsakkeessa.
-- Varmista, että `chathubPath` sisältää URL-polun koko
-  `<oid>@<tenant>`-osuuden.
+- Varmista, että kopioit tunnistetiedot **WebSocket-URL-osoitteesta**, et XHR-/Fetch-pyynnöstä. Tunnistetieto on Chathub-WebSocket-yhteyden `access_token`-kyselyparametrissa — ei `Authorization: Bearer` -otsakkeessa.
+- Varmista, että `chathubPath` sisältää URL-polun täydellisen `<oid>@<tenant>`-osan.
 
 ### Tunnus vanhenee noin 75 minuutin kuluttua
 
-Tämä on odotettua. Ilman `refreshToken`-tunnusta käyttöoikeustunnus on lyhytikäinen. Voit joko:
+Tämä on odotettua. Ilman `refreshToken`-arvoa käyttöoikeustunnus on lyhytkestoinen. Toimi jommallakummalla seuraavista tavoista:
 
-- Kaapata tunnistetiedon uudelleen DevToolsista tai
-- määrittää `refreshToken`-tunnuksen lisäasetuksissa automaattista uusimista varten.
+- Kaappaa tunnistetieto uudelleen DevTools-työkaluilla tai
+- Määritä **Lisäasetukset → Päivitystunnus (valinnainen)** yhteyden Lisää tai muokkaa yhteyttä -valintaikkunassa automaattista päivitystä varten.
 
-### Yhteystesti onnistuu, mutta keskustelu palauttaa 401-virheen
+### Yhteyden testaus onnistuu, mutta chat palauttaa virheen 401
 
-Tunnus on saattanut vanhentua vahvistuksen ja ensimmäisen pyynnön välillä. Kaappaa
-uusi tunnistetieto.
+Tunnus on saattanut vanhentua vahvistuksen ja ensimmäisen pyynnön välillä. Kaappaa uusi tunnistetieto.
 
 ### Copilot ei näy palveluntarjoajien luettelossa
 
-Varmista, että `copilot-m365-web` on käytössä kohdassa **Hallintapaneeli → Palveluntarjoajat**. Palveluntarjoaja voi
-olla oletusarvoisesti piilotettu joillakin tilaustasoilla.
+Varmista, että `copilot-m365-web` on käytössä kohdassa **Koontinäyttö → Palveluntarjoajat**. Palveluntarjoaja voi olla oletusarvoisesti piilotettu joillakin palvelutasoilla.
 
 ## Viitteet
 

@@ -8,21 +8,25 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## विकासासाठी सेटअप
+## विकास सेटअप
 
-### पूर्वआवश्यकता
+### पूर्वअट
 
-- **Node.js** `>=22.22.2 <23`, किंवा `>=24.0.0 <27` (शिफारस केलेले: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, किंवा `>=24.0.0 <27` (शिफारस: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ वापरकर्ते (Node 24+):** `npm install` नंतर, नेटिव्ह मॉड्यूल्स इन्स्टॉल झाली आहेत याची खात्री करा:
-> `node -e "require('better-sqlite3')"`. ते `MODULE_NOT_FOUND` सह अयशस्वी झाल्यास,
-> `npm approve-scripts better-sqlite3 && npm install` चालवा. अधिक माहितीसाठी
-> [समस्यानिवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) पहा.
+> **Node 24 सह Windows:** सध्याचे 24 LTS पॅच रिलीज वापरा (किमान 24.20.0).
+> जुन्या रिलीजमध्ये `--test-force-exit` प्रक्रिया बंद केल्यानंतर यशस्वी चाचण्यांनंतरही प्रक्रिया
+> थांबू शकते. Node मधील [Windows libuv दुरुस्ती](https://github.com/nodejs/node/pull/61999) या
+> रनटाइम क्रॅशचे निराकरण करते; चाचणी assertions आणि runner exit तपासण्या सक्षम ठेवा.
+
+> **npm v11+ वापरकर्ते (Node 24+):** `npm install` नंतर native modules स्थापित झाले आहेत का ते तपासा:
+> `node -e "require('better-sqlite3')"`. हे `MODULE_NOT_FOUND` सह अयशस्वी झाल्यास,
+> `npm approve-scripts better-sqlite3 && npm install` चालवा. [समस्यानिवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) पहा.
 
 - **Git**
 
-### क्लोन आणि इन्स्टॉल करणे
+### क्लोन आणि स्थापना
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -30,90 +34,90 @@ cd OmniRoute
 npm install
 ```
 
-### पर्यावरणीय चल
+### पर्यावरण चल
 
 ```bash
-# टेम्प्लेटवरून तुमची .env फाइल तयार करा
+# टेम्पलेटमधून तुमची .env फाइल तयार करा
 cp .env.example .env
 
-# आवश्यक गुपिते व्युत्पन्न करा
+# आवश्यक secrets तयार करा
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-विकासासाठी महत्त्वाची चले:
+विकासासाठी महत्त्वाची चल:
 
-| चल                     | विकासासाठी डीफॉल्ट       | वर्णन                   |
+| Variable               | Development Default      | Description             |
 | ---------------------- | ------------------------ | ----------------------- |
 | `PORT`                 | `20128`                  | सर्व्हर पोर्ट           |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | फ्रंटएंडसाठी बेस URL    |
-| `JWT_SECRET`           | (वर व्युत्पन्न करा)      | JWT स्वाक्षरी गुपित     |
+| `JWT_SECRET`           | (generate above)         | JWT signing secret      |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | पहिल्या लॉगिनचा पासवर्ड |
-| `APP_LOG_LEVEL`        | `info`                   | लॉग तपशीलाची पातळी      |
+| `APP_LOG_LEVEL`        | `info`                   | लॉग तपशीलवारपणाची पातळी |
 
 ### डॅशबोर्ड सेटिंग्ज
 
-डॅशबोर्डमध्ये अशा वैशिष्ट्यांसाठी UI टॉगल्स दिली आहेत, जी पर्यावरणीय चलांद्वारेदेखील कॉन्फिगर करता येतात:
+डॅशबोर्डमध्ये अशा वैशिष्ट्यांसाठी UI टॉगल उपलब्ध आहेत, जी पर्यावरण चलांद्वारेही कॉन्फिगर केली जाऊ शकतात:
 
-| सेटिंगचे स्थान     | टॉगल               | वर्णन                          |
-| ------------------ | ------------------ | ------------------------------ |
-| सेटिंग्ज → प्रगत   | डीबग मोड           | डीबग विनंती लॉग सक्षम करा (UI) |
-| सेटिंग्ज → सामान्य | साइडबार दृश्यमानता | साइडबार विभाग दाखवा/लपवा       |
+| Setting Location    | Toggle             | Description                    |
+| ------------------- | ------------------ | ------------------------------ |
+| Settings → Advanced | Debug Mode         | डीबग विनंती लॉग सक्षम करा (UI) |
+| Settings → General  | Sidebar Visibility | साइडबार विभाग दाखवा/लपवा       |
 
-ही सेटिंग्ज डेटाबेसमध्ये संग्रहित केली जातात आणि रीस्टार्टनंतरही कायम राहतात; ती सेट केलेली असल्यास पर्यावरणीय चलांची डीफॉल्ट मूल्ये ओव्हरराइड करतात.
+ही सेटिंग्ज डेटाबेसमध्ये साठवली जातात आणि रीस्टार्टनंतरही कायम राहतात. सेट केल्यावर ती env var डीफॉल्ट्सवर अधिलिखित होतात.
 
-### स्थानिकरीत्या चालवणे
+### स्थानिक पातळीवर चालवणे
 
 ```bash
-# विकास मोड (हॉट रिलोड)
+# विकास मोड (हॉट रीलोड)
 npm run dev
 
 # उत्पादन बिल्ड
 npm run build    # next build → .build/next/ नंतर assembleStandalone → dist/
 npm run start
 
-# योगदानकर्त्यांच्या बदलांसाठी जलद बॅकएंड/API-पुरते संकलन
+# योगदानकर्त्यांच्या बदलांसाठी जलद backend/API-only compile
 npm run build:contributor
 
-# रिलीज बिल्ड (स्वच्छ रीबिल्ड + HEAD सेंटिनेल — डिप्लॉयसाठी आवश्यक)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA लिहिते
+# रिलीज बिल्ड (स्वच्छ पुनर्बिल्ड + HEAD sentinel — deploy साठी आवश्यक)
+npm run build:release   # rm -rf .build dist आणि build + dist/BUILD_SHA लिहिते
 
-# सर्वसाधारण पोर्ट कॉन्फिगरेशन
+# सामान्य पोर्ट कॉन्फिगरेशन
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-योगदानकर्ता बिल्ड केवळ संकलनाचे प्रमाणीकरण करते: ते स्वतंत्र
-वितरण असेंबल करत नाही किंवा पर्यायी नेटिव्ह पॅकेजिंग अॅसेट्स बिल्ड करत नाही. वितरित करता येणाऱ्या बंडलचे
-प्रमाणीकरण करायचे असल्यास नियमित उत्पादन बिल्ड वापरा.
+योगदानकर्ता बिल्ड केवळ compile-only प्रमाणीकरण करते: ते standalone
+distribution एकत्र करत नाही किंवा पर्यायी native packaging assets बिल्ड करत नाही. पाठवता येणाऱ्या bundle चे प्रमाणीकरण
+करायचे असल्यास नियमित production build वापरा.
 
-### बिल्ड आउटपुटची रचना
+### बिल्ड आउटपुटची मांडणी
 
-| निर्देशिका | सामग्री                                                                          | ट्रॅक केलेली |
-| ---------- | -------------------------------------------------------------------------------- | ------------ |
-| `src/`     | ॲप्लिकेशन स्रोत (TypeScript / TSX)                                               | होय          |
-| `.build/`  | मध्यवर्ती फाइल्स — `next build` आउटपुट (gitignored, `distDir = .build/next`)     | नाही         |
-| `dist/`    | वितरित करता येणारे बंडल — `assembleStandalone` द्वारे असेंबल केलेले (gitignored) | नाही         |
+| Directory | Contents                                                                  | Tracked |
+| --------- | ------------------------------------------------------------------------- | ------- |
+| `src/`    | Application source (TypeScript / TSX)                                     | होय     |
+| `.build/` | Intermediates — `next build` output (gitignored, `distDir = .build/next`) | नाही    |
+| `dist/`   | Shippable bundle — assembled by `assembleStandalone` (gitignored)         | नाही    |
 
 बिल्ड पाइपलाइन एकाच पासमध्ये चालते:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js आउटपुट)
-  └─ assembleStandalone()                 (standalone + static + public + नेटिव्ह अॅसेट्स कॉपी करते)
-       └─ आउटपुट: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (standalone + static + public + native assets कॉपी करते)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` याव्यतिरिक्त सुरुवातीला दोन्ही निर्देशिका साफ करते आणि डिप्लॉय अखंडता सेंटिनेल म्हणून
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लिहिते.
+`npm run build:release` सुरुवातीला दोन्ही डिरेक्टरी स्वच्छ करते आणि
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) हे deploy integrity sentinel म्हणून लिहिते.
 
-`npm run build:contributor` केवळ-बॅकएंड बिल्ड प्रोफाइल वापरते. बिल्ड करताना ते तात्पुरते
-डॅशबोर्ड UI फाइल्ससाठी स्टब्स वापरते, API रूट हँडलर्स कायम ठेवते आणि बिल्डनंतर मूळ फाइल्स
-पुनर्स्थापित करते. डॅशबोर्ड UI वर परिणाम करणाऱ्या बदलांसाठी किंवा संपूर्ण
-रिलीज प्रमाणीकरणासाठी `npm run build` वापरा; योगदानकर्ता प्रोफाइल हा रिलीज बिल्डचा पर्याय नाही.
+`npm run build:contributor` backend-only build profile वापरते. बिल्ड करताना ते
+डॅशबोर्ड UI फाइल्सना तात्पुरते stub करते, API route handlers ठेवते आणि बिल्डनंतर मूळ फाइल्स
+पुनर्स्थापित करते. डॅशबोर्ड UI वर परिणाम करणाऱ्या बदलांसाठी किंवा पूर्ण release प्रमाणीकरणासाठी
+`npm run build` वापरा; contributor profile हा release build चा पर्याय नाही.
 
-> **VPS डिप्लॉय नोंद:** रिमोट इमेज निर्देशिका `/usr/lib/node_modules/omniroute/app/`
-> बदललेली नाही. डिप्लॉय कौशल्ये `dist/` मधील सामग्री त्यामध्ये rsync करतात.
-> केवळ रेपॉझिटरीमधील बिल्ड आउटपुट पाथ बदलला आहे (`app/` → `dist/`).
+> **VPS deploy सूचना:** remote image directory `/usr/lib/node_modules/omniroute/app/`
+> अपरिवर्तित आहे. deploy skills `dist/` मधील सामग्री त्यात rsync करतात.
+> केवळ in-repo build output path बदलला आहे (`app/` → `dist/`).
 
 डीफॉल्ट URLs:
 

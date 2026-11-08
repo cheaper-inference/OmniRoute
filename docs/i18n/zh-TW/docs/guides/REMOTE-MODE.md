@@ -46,35 +46,38 @@ omniroute configure codex                # ← 根據遠端目錄寫入本機 Co
 
 ## 連線
 
-### 使用管理密碼（初始設定）
+### 使用管理密碼（啟動引導）
 
 ```bash
 omniroute connect 192.168.0.15
 # http://192.168.0.15:20128 的管理密碼：********
-# ✔ 已連線至 http://192.168.0.15:20128 — 內容環境 '192.168.0.15'（範圍：admin）
+# ✔ 已連線至 http://192.168.0.15:20128 — 內容「192.168.0.15」（範圍：admin）
 ```
 
-密碼流程預設會簽發 **admin** 權杖（您持有密碼，因此
-已具備完整控制權）。可使用 `--scope` 縮小權限範圍：
+密碼流程預設會簽發 **admin** 權杖（您持有密碼，因此已具備完整控制權）。使用 `--scope` 縮小權限範圍：
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-選項：`--port <p>`（當主機未指定連接埠時）、`--name <ctx>`（內容環境名稱）、
+選項：`--port <p>`（主機未指定連接埠時）、`--name <ctx>`（內容名稱）、
 `--scope read|write|admin`。完整 URL 會依原樣使用：
 `omniroute connect https://omni.example.com`。
 
+當伺服器啟用儀表板雙因素驗證時（設定 →
+安全性），僅使用密碼會被拒絕：CLI 接著會要求您輸入驗證器應用程式中的代碼
+（或復原代碼）。在非互動式使用中，請使用 `--totp <code>` 預先提供代碼。
+
 ### 使用預先產生的權杖
 
-在儀表板中產生限定範圍的權杖（或使用 `omniroute tokens create`），然後
-貼上即可——不需要密碼：
+在儀表板中（或使用 `omniroute tokens create`）產生具範圍限制的權杖，然後
+貼上權杖即可 — 不需要密碼：
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-CLI 會透過 `GET /api/cli/whoami` 驗證權杖，並將其儲存為作用中的內容環境。
+CLI 會透過 `GET /api/cli/whoami` 驗證權杖，並將其儲存為使用中的內容。
 
 ---
 
@@ -429,12 +432,12 @@ omniroute contexts remove 192-168-0-15 --yes   # 刪除本機內容（即使為�
 
 ## API 端點（參考）
 
-| 方法   | 路由                  | 驗證方式 | 權限範圍              |
-| ------ | --------------------- | -------- | --------------------- |
-| POST   | `/api/cli/connect`    | 管理密碼 | —（公開，受密碼保護） |
-| GET    | `/api/cli/whoami`     | 存取權杖 | 讀取                  |
-| GET    | `/api/cli/tokens`     | 存取權杖 | 管理                  |
-| POST   | `/api/cli/tokens`     | 存取權杖 | 管理                  |
-| DELETE | `/api/cli/tokens/:id` | 存取權杖 | 管理                  |
+| 方法   | 路由                  | 驗證                 | 範圍                    |
+| ------ | --------------------- | -------------------- | ----------------------- |
+| POST   | `/api/cli/connect`    | 密碼；若啟用則需 2FA | —（公開，但受密碼保護） |
+| GET    | `/api/cli/whoami`     | 存取權杖             | read                    |
+| GET    | `/api/cli/tokens`     | 存取權杖             | admin                   |
+| POST   | `/api/cli/tokens`     | 存取權杖             | admin                   |
+| DELETE | `/api/cli/tokens/:id` | 存取權杖             | admin                   |
 
-完整結構描述請參閱 [openapi.yaml](../openapi.yaml)。
+如需完整結構描述，請參閱 [openapi.yaml](../openapi.yaml)。
