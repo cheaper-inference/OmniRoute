@@ -286,7 +286,7 @@ Returns every flag with its effective value, source, and a summary.
     // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,
