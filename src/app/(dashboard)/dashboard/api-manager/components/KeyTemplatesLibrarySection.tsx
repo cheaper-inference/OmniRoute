@@ -8,6 +8,9 @@ import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
+import { Spinner } from "@/shared/components/Loading";
+import type { UnreadableKeyTemplate } from "@/shared/types/keyTemplates";
+import { anchorReferenceIssues } from "../keyTemplateReferenceIssues";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import KeyPolicySixTabEditor from "./KeyPolicySixTabEditor";
@@ -22,15 +25,14 @@ import {
 
 export interface KeyTemplatesLibrarySectionProps {
   templates: KeyTemplate[];
+  unreadable?: UnreadableKeyTemplate[];
+  loadError?: string | null;
+  loading?: boolean;
   onRefreshTemplates: () => Promise<void> | void;
   onUseTemplate: (template: KeyTemplate) => void;
 }
 
-export default function KeyTemplatesLibrarySection({
-  templates,
-  onRefreshTemplates,
-  onUseTemplate,
-}: KeyTemplatesLibrarySectionProps) {
+function useLibraryDraft() {
   const t = useTranslations("apiManager");
   const tc = useTranslations("common");
   const { requestConfirm, confirmDialog } = useConfirmDialog();
@@ -50,7 +52,60 @@ export default function KeyTemplatesLibrarySection({
   const [modalError, setModalError] = useState<string | null>(null);
   const [sectionError, setSectionError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [requiresReload, setRequiresReload] = useState(false);
 
+  return {
+    editorMode,
+    setEditorMode,
+    editingTemplate,
+    setEditingTemplate,
+    templateName,
+    setTemplateName,
+    templateDesc,
+    setTemplateDesc,
+    draftPolicy,
+    setDraftPolicy,
+    serverRefIssues,
+    setServerRefIssues,
+    hasEditorErrors,
+    setHasEditorErrors,
+    hasBlockingRefs,
+    setHasBlockingRefs,
+    loadingTemplateDetail,
+    setLoadingTemplateDetail,
+    modalError,
+    setModalError,
+    sectionError,
+    setSectionError,
+    isSubmitting,
+    setIsSubmitting,
+    requiresReload,
+    setRequiresReload,
+    t,
+    tc,
+    requestConfirm,
+    confirmDialog,
+    loadGeneration,
+  };
+}
+
+type LibraryDraft = ReturnType<typeof useLibraryDraft>;
+
+function useLibraryEditing(state: LibraryDraft) {
+  const {
+    setEditorMode,
+    setEditingTemplate,
+    setTemplateName,
+    setTemplateDesc,
+    setDraftPolicy,
+    setServerRefIssues,
+    setLoadingTemplateDetail,
+    setModalError,
+    isSubmitting,
+    setRequiresReload,
+    t,
+    loadGeneration,
+  } = state;
   const openCreateModal = useCallback(() => {
     loadGeneration.current++;
     setLoadingTemplateDetail(false);
@@ -61,6 +116,7 @@ export default function KeyTemplatesLibrarySection({
     setDraftPolicy(createDefaultClientKeyTemplatePolicy());
     setServerRefIssues([]);
     setModalError(null);
+    setRequiresReload(false);
   }, []);
 
   const openEditModal = useCallback(async (tpl: KeyTemplate) => {
@@ -73,26 +129,32 @@ export default function KeyTemplatesLibrarySection({
     setServerRefIssues([]);
     setModalError(null);
     setLoadingTemplateDetail(true);
+    setRequiresReload(false);
 
     try {
       const res = await fetch(`/api/key-templates/${encodeURIComponent(tpl.id)}`);
+      const data = await res.json();
+      if (generation !== loadGeneration.current) return;
       if (res.ok) {
-        const data = await res.json();
-        if (generation !== loadGeneration.current) return;
         if (data.template) {
           setEditingTemplate(data.template);
           setTemplateName(data.template.name);
           setTemplateDesc(data.template.description || "");
           setDraftPolicy(data.template.policy);
         }
-        setServerRefIssues(Array.isArray(data.referenceIssues) ? data.referenceIssues : []);
+        setServerRefIssues(anchorReferenceIssues(Array.isArray(data.referenceIssues) ? data.referenceIssues : [], data.template?.policy ?? tpl.policy));
+      } else {
+        setRequiresReload(true);
+        setModalError(extractApiErrorMessage(data, t("failedLoadTemplateDetail")));
       }
     } catch {
-      // Keep cached template snapshot if detail fetch fails
+      if (generation !== loadGeneration.current) return;
+      setRequiresReload(true);
+      setModalError(t("failedLoadTemplateDetail"));
     } finally {
       if (generation === loadGeneration.current) setLoadingTemplateDetail(false);
     }
-  }, []);
+  }, [t]);
 
   const closeEditorModal = useCallback(() => {
     if (isSubmitting) return;
@@ -103,8 +165,44 @@ export default function KeyTemplatesLibrarySection({
     setModalError(null);
   }, [isSubmitting]);
 
+  return { openCreateModal, openEditModal, closeEditorModal };
+}
+
+function submitTemplateDraft({ editorMode, editingTemplate, templateName, templateDesc, draftPolicy }: LibraryDraft) {
+  const editing = editorMode === "edit" && editingTemplate;
+  return fetch(editing ? `/api/key-templates/${encodeURIComponent(editing.id)}` : "/api/key-templates", {
+    method: editing ? "PATCH" : "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...(editing ? { revision: editing.revision } : {}),
+      name: templateName.trim(),
+      description: templateDesc.trim(),
+      policy: draftPolicy,
+    }),
+  });
+}
+
+function useSaveTemplate(state: LibraryDraft, { onRefreshTemplates }: KeyTemplatesLibrarySectionProps) {
+  const {
+    setEditorMode,
+    setEditingTemplate,
+    templateName,
+    draftPolicy,
+    setServerRefIssues,
+    hasEditorErrors,
+    hasBlockingRefs,
+    loadingTemplateDetail,
+    setModalError,
+    isSubmitting,
+    setIsSubmitting,
+    requiresReload,
+    setRequiresReload,
+    t,
+  } = state;
+  const unavailable = isSubmitting || loadingTemplateDetail || requiresReload;
+  const invalid = hasEditorErrors || hasBlockingRefs;
   const handleSaveTemplate = async () => {
-    if (isSubmitting || hasEditorErrors || hasBlockingRefs) return;
+    if (unavailable || invalid) return;
     const nameVal = validateKeyName(templateName, t);
     if (!nameVal.valid) {
       setModalError(nameVal.error || t("invalidKeyName"));
@@ -115,49 +213,25 @@ export default function KeyTemplatesLibrarySection({
     setModalError(null);
 
     try {
-      if (editorMode === "create") {
-        const res = await fetch("/api/key-templates", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: templateName.trim(),
-            description: templateDesc.trim(),
-            policy: draftPolicy,
-          }),
-        });
+      const res = await submitTemplateDraft(state);
         const data = await res.json();
-        if (!res.ok) {
-          if (Array.isArray(data?.issues)) setServerRefIssues(data.issues);
-          setModalError(extractApiErrorMessage(data, t("templateSaveFailed")));
-          return;
-        }
-        await onRefreshTemplates();
-        setEditorMode(null);
-      } else if (editorMode === "edit" && editingTemplate) {
-        const res = await fetch(`/api/key-templates/${encodeURIComponent(editingTemplate.id)}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            revision: editingTemplate.revision,
-            name: templateName.trim(),
-            description: templateDesc.trim(),
-            policy: draftPolicy,
-          }),
-        });
-        const data = await res.json();
-        if (res.status === 409) {
+        if (res.status === 409 && data.code === "REVISION_CONFLICT") {
+          setRequiresReload(true);
           setModalError(t("templateRevisionConflictError"));
           return;
         }
+        if (res.status === 409 && data.code === "TEMPLATE_NAME_CONFLICT") {
+          setModalError(t("templateNameConflictError"));
+          return;
+        }
         if (!res.ok) {
-          if (Array.isArray(data?.issues)) setServerRefIssues(data.issues);
+          if (Array.isArray(data?.issues)) setServerRefIssues(anchorReferenceIssues(data.issues, draftPolicy));
           setModalError(extractApiErrorMessage(data, t("templateSaveFailed")));
           return;
         }
         await onRefreshTemplates();
         setEditorMode(null);
         setEditingTemplate(null);
-      }
     } catch {
       setModalError(t("templateSaveFailed"));
     } finally {
@@ -165,7 +239,12 @@ export default function KeyTemplatesLibrarySection({
     }
   };
 
-  const handleDeleteTemplate = async (tpl: KeyTemplate) => {
+  return handleSaveTemplate;
+}
+
+function useDeleteTemplate(state: LibraryDraft, { onRefreshTemplates }: KeyTemplatesLibrarySectionProps) {
+  const { setSectionError, t, tc, requestConfirm } = state;
+  const handleDeleteTemplate = async (tpl: Pick<KeyTemplate, "id" | "name">) => {
     if (
       !(await requestConfirm({
         message: t("templateDeleteConfirm", { name: tpl.name }),
@@ -190,18 +269,56 @@ export default function KeyTemplatesLibrarySection({
     }
   };
 
+  return handleDeleteTemplate;
+}
+
+function useLibraryModel(props: KeyTemplatesLibrarySectionProps) {
+  const draft = useLibraryDraft();
+  const editing = useLibraryEditing(draft);
+  const handleSaveTemplate = useSaveTemplate(draft, props);
+  const handleDeleteTemplate = useDeleteTemplate(draft, props);
+  return {
+    ...props,
+    unreadable: props.unreadable ?? [],
+    loadError: props.loadError ?? null,
+    loading: props.loading ?? false,
+    ...draft,
+    ...editing,
+    handleSaveTemplate,
+    handleDeleteTemplate,
+  };
+}
+
+type LibraryModel = ReturnType<typeof useLibraryModel>;
+
+export default function KeyTemplatesLibrarySection(props: KeyTemplatesLibrarySectionProps) {
+  const model = useLibraryModel(props);
+  const {
+    sectionError,
+    setSectionError,
+    t,
+    tc,
+    confirmDialog,
+    templates,
+    unreadable,
+    loadError,
+    loading,
+    onRefreshTemplates,
+    openCreateModal,
+    handleDeleteTemplate,
+  } = model;
   return (
     <Card data-testid="key-templates-library">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 shrink-0">
-            <Icon name="bookmarks" className="text-xl text-primary" />
+            <Icon name="layers" className="text-xl text-primary" />
           </div>
           <div>
             <h3 className="font-semibold">
               {t("keyTemplatesTitle")}
               <span className="ml-1.5 text-sm font-normal text-text-muted">
-                ({templates.length})
+                ({templates.length + unreadable.length})
               </span>
             </h3>
             <p className="text-xs text-text-muted">{t("keyTemplatesDesc")}</p>
@@ -224,10 +341,19 @@ export default function KeyTemplatesLibrarySection({
         </div>
       )}
 
-      {templates.length === 0 ? (
+      {loadError && <Alert variant="critical" description={loadError} />}
+      {loading && <Spinner size="sm" />}
+      {loadError && <Button variant="outline" onClick={onRefreshTemplates}>{tc("retry")}</Button>}
+      {unreadable.map((template) => (
+        <div key={template.id} data-testid={`unreadable-template-${template.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-error/30 p-4 mb-3">
+          <div><p className="font-semibold">{template.name}</p><p className="text-xs text-error">{t("templateUnreadableStatus")} ({template.code})</p></div>
+          <Button icon="delete" variant="outline" onClick={() => handleDeleteTemplate(template)} aria-label={`${t("deleteTemplateAction")} ${template.name}`}>{tc("delete")}</Button>
+        </div>
+      ))}
+      {templates.length === 0 && unreadable.length === 0 && !loadError && !loading ? (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-lg border border-dashed border-border bg-surface/20">
           <div className="flex items-center gap-3">
-            <Icon name="bookmark_border" size={24} className="text-text-muted shrink-0" />
+            <Icon name="inventory_2" size={24} className="text-text-muted shrink-0" />
             <div>
               <p className="text-sm font-medium text-text-main">{t("noTemplatesYet")}</p>
               <p className="text-xs text-text-muted">{t("noTemplatesYetDesc")}</p>
@@ -238,17 +364,21 @@ export default function KeyTemplatesLibrarySection({
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {templates.map((tpl) => {
-            const badges = summarizeKeyTemplatePolicy(tpl.policy, t);
-            return (
-              <div
-                key={tpl.id}
-                data-testid={`template-card-${tpl.id}`}
-                className="flex flex-col justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40 hover:border-border/80 transition-colors"
-              >
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-start justify-between gap-2">
+        <TemplateCards model={model} />
+      )}
+
+      {/* Create / Edit Template Modal */}
+      <TemplateEditorModal model={model} />
+      {confirmDialog}
+    </Card>
+  );
+}
+
+
+function TemplateCardActions({ model, tpl }: { model: LibraryModel; tpl: KeyTemplate }) {
+  const { t, onUseTemplate, openEditModal, handleDeleteTemplate } = model;
+  return (
+    <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <h4 className="text-sm font-semibold text-text-main truncate">
@@ -296,6 +426,24 @@ export default function KeyTemplatesLibrarySection({
                       />
                     </div>
                   </div>
+  );
+}
+
+
+function TemplateCards({ model }: { model: LibraryModel }) {
+  const { t, templates } = model;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {templates.map((tpl) => {
+            const badges = summarizeKeyTemplatePolicy(tpl.policy, t);
+            return (
+              <div
+                key={tpl.id}
+                data-testid={`template-card-${tpl.id}`}
+                className="flex flex-col justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40 hover:border-border/80 transition-colors"
+              >
+                <div className="flex flex-col gap-2">
+                  <TemplateCardActions model={model} tpl={tpl} />
 
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {badges.map((b) => (
@@ -323,74 +471,26 @@ export default function KeyTemplatesLibrarySection({
             );
           })}
         </div>
-      )}
+  );
+}
 
-      {/* Create / Edit Template Modal */}
-      <Modal
-        isOpen={editorMode !== null}
-        title={
-          editorMode === "edit"
-            ? t("editTemplateModalTitle", { name: editingTemplate?.name ?? "" })
-            : t("newTemplateModalTitle")
-        }
-        maxWidth="max-w-4xl"
-        bodyClassName="p-6 max-h-[calc(100vh-120px)] overflow-y-auto"
-        onClose={closeEditorModal}
-      >
-        <div className="flex flex-col gap-4" data-testid="template-editor-modal">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label={t("templateNameLabel")}
-              value={templateName}
-              onChange={(e) => {
-                setTemplateName(e.target.value);
-                setModalError(null);
-              }}
-              placeholder={t("templateNamePlaceholder")}
-              maxLength={200}
-              disabled={isSubmitting || loadingTemplateDetail}
-            />
-            <Input
-              label={t("templateDescriptionLabel")}
-              value={templateDesc}
-              onChange={(e) => setTemplateDesc(e.target.value)}
-              placeholder={t("templateDescriptionPlaceholder")}
-              maxLength={500}
-              disabled={isSubmitting || loadingTemplateDetail}
-            />
-          </div>
 
-          {loadingTemplateDetail && (
-            <div className="text-xs text-text-muted flex items-center gap-2" role="status">
-              <Icon name="hourglass_empty" size={14} className="animate-spin" />
-              <span>{tc("loading")}</span>
-            </div>
-          )}
-
-          {editorMode !== null && (
-            <KeyPolicySixTabEditor
-              policy={draftPolicy}
-              onChange={(next) => setDraftPolicy(next)}
-              serverReferenceIssues={serverRefIssues}
-              onValidationStateChange={({ hasErrors, hasBlockingReferenceIssues }) => {
-                setHasEditorErrors(hasErrors);
-                setHasBlockingRefs(hasBlockingReferenceIssues);
-              }}
-              disabled={isSubmitting || loadingTemplateDetail}
-            />
-          )}
-
-          {modalError && (
-            <Alert
-              variant="critical"
-              icon={<Icon name="error" />}
-              description={modalError}
-              dismissLabel={tc("close")}
-              onDismiss={() => setModalError(null)}
-            />
-          )}
-
-          <div className="flex gap-2 pt-2">
+function TemplateEditorActions({ model }: { model: LibraryModel }) {
+  const {
+    editorMode,
+    templateName,
+    hasEditorErrors,
+    hasBlockingRefs,
+    loadingTemplateDetail,
+    isSubmitting,
+    requiresReload,
+    t,
+    tc,
+    closeEditorModal,
+    handleSaveTemplate,
+  } = model;
+  return (
+    <div className="flex gap-2 pt-2">
             <Button
               type="button"
               variant="ghost"
@@ -407,6 +507,7 @@ export default function KeyTemplatesLibrarySection({
               disabled={
                 isSubmitting ||
                 loadingTemplateDetail ||
+                requiresReload ||
                 !templateName.trim() ||
                 hasEditorErrors ||
                 hasBlockingRefs
@@ -416,9 +517,123 @@ export default function KeyTemplatesLibrarySection({
               {editorMode === "edit" ? t("saveChanges") : t("newTemplateAction")}
             </Button>
           </div>
+  );
+}
+
+
+function TemplateIdentityFields({ model }: { model: LibraryModel }) {
+  const {
+    templateName,
+    setTemplateName,
+    templateDesc,
+    setTemplateDesc,
+    loadingTemplateDetail,
+    setModalError,
+    setServerRefIssues,
+    isSubmitting,
+    t,
+  } = model;
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              label={t("templateNameLabel")}
+              value={templateName}
+              onChange={(e) => {
+                setTemplateName(e.target.value);
+                setModalError(null);
+                setServerRefIssues((issues) => issues.filter((issue) => issue.code !== "INVALID_FIELD"));
+              }}
+              placeholder={t("templateNamePlaceholder")}
+              maxLength={200}
+              disabled={isSubmitting || loadingTemplateDetail}
+            />
+            <Input
+              label={t("templateDescriptionLabel")}
+              value={templateDesc}
+              onChange={(e) => {
+                setTemplateDesc(e.target.value);
+                setServerRefIssues((issues) => issues.filter((issue) => issue.code !== "INVALID_FIELD"));
+              }}
+              placeholder={t("templateDescriptionPlaceholder")}
+              maxLength={500}
+              disabled={isSubmitting || loadingTemplateDetail}
+            />
+          </div>
+  );
+}
+
+
+function TemplateEditorModal({ model }: { model: LibraryModel }) {
+  const {
+    editorMode,
+    editingTemplate,
+    draftPolicy,
+    setDraftPolicy,
+    serverRefIssues,
+    setServerRefIssues,
+    setHasEditorErrors,
+    setHasBlockingRefs,
+    loadingTemplateDetail,
+    modalError,
+    setModalError,
+    isSubmitting,
+    requiresReload,
+    t,
+    tc,
+    openEditModal,
+    closeEditorModal,
+  } = model;
+  return (
+    <Modal
+        isOpen={editorMode !== null}
+        title={
+          editorMode === "edit"
+            ? t("editTemplateModalTitle", { name: editingTemplate?.name ?? "" })
+            : t("newTemplateModalTitle")
+        }
+        maxWidth="max-w-4xl"
+        bodyClassName="p-6 max-h-[calc(100vh-120px)] overflow-y-auto"
+        onClose={closeEditorModal}
+      >
+        <div className="flex flex-col gap-4" data-testid="template-editor-modal">
+          <TemplateIdentityFields model={model} />
+
+          {loadingTemplateDetail && (
+            <div className="text-xs text-text-muted flex items-center gap-2" role="status">
+              <Spinner size="sm" />
+              <span>{tc("loading")}</span>
+            </div>
+          )}
+
+          {editorMode !== null && (
+            <KeyPolicySixTabEditor
+              policy={draftPolicy}
+              onChange={(next) => {
+                setDraftPolicy(next);
+                setServerRefIssues((issues) => issues.filter((issue) => issue.code !== "INVALID_FIELD"));
+              }}
+              serverReferenceIssues={serverRefIssues}
+              onValidationStateChange={({ hasErrors, hasBlockingReferenceIssues }) => {
+                setHasEditorErrors(hasErrors);
+                setHasBlockingRefs(hasBlockingReferenceIssues);
+              }}
+              disabled={isSubmitting || loadingTemplateDetail || requiresReload}
+            />
+          )}
+
+          {modalError && (
+            <Alert
+              variant="critical"
+              icon={<Icon name="error" />}
+              description={modalError}
+              dismissLabel={tc("close")}
+              onDismiss={() => setModalError(null)}
+            />
+          )}
+          {requiresReload && editingTemplate && <Button variant="outline" disabled={loadingTemplateDetail || isSubmitting} onClick={() => openEditModal(editingTemplate)}>{t("templateReloadAction")}</Button>}
+
+          <TemplateEditorActions model={model} />
         </div>
       </Modal>
-      {confirmDialog}
-    </Card>
   );
 }

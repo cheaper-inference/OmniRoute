@@ -18,7 +18,7 @@ import {
   KeyTemplateNameConflictError,
   listStoredTemplates,
   readKeyPolicyRows,
-  runImmediate,
+  runDeferred,
   snapshotToTemplatePolicy,
   updateStoredTemplate,
   type PolicyDb,
@@ -30,10 +30,12 @@ import type {
   KeyTemplate,
   KeyTemplatePolicy,
   KeyTemplateRefStatus,
+  ListKeyTemplatesResponse,
   TemplateReferenceIssue,
   TemplateWarning,
   TemplateWarningCode,
 } from "@/shared/types/keyTemplates";
+import * as log from "@/sse/utils/logger";
 
 export { KeyTemplateError };
 
@@ -101,8 +103,24 @@ async function audit(action: string, target: string, details: Record<string, unk
   }
 }
 
-export function listKeyTemplates(): KeyTemplate[] {
-  return listStoredTemplates(db()).map(toTemplate);
+/** A corrupt policy does not hide other templates or prevent deleting its row by id. */
+export function listKeyTemplates(): ListKeyTemplatesResponse {
+  const result: ListKeyTemplatesResponse = { templates: [], unreadable: [] };
+  for (const stored of listStoredTemplates(db())) {
+    try {
+      result.templates.push(toTemplate(stored));
+    } catch (error) {
+      if (!(error instanceof KeyTemplateError)) throw error;
+      log.warn("key-templates", "Unreadable stored template", { id: stored.id, code: error.code });
+      result.unreadable.push({
+        id: stored.id,
+        name: stored.name,
+        revision: stored.revision,
+        code: error.code,
+      });
+    }
+  }
+  return result;
 }
 
 export function getKeyTemplate(
@@ -115,10 +133,7 @@ export function getKeyTemplate(
   return { template, referenceIssues: collectReferenceIssues(handle, template.policy) };
 }
 
-export function getKeyTemplateRefStatus(ref: {
-  id: string;
-  revision: number;
-}): KeyTemplateRefStatus {
+export function getKeyTemplateRefStatus(ref: { id: string; revision: number }): KeyTemplateRefStatus {
   const stored = getStoredTemplate(db(), ref.id);
   if (!stored) return "missing";
   return stored.revision === ref.revision ? "current" : "stale";
@@ -165,44 +180,43 @@ export function previewKeyTemplatePolicy(keyId: string): {
   referenceIssues: TemplateReferenceIssue[];
 } {
   const handle = db();
-  const rows = runImmediate(handle, () => readKeyPolicyRows(handle, keyId));
-  if (!rows) throw new KeyTemplateError(404, "KEY_NOT_FOUND", "Key not found");
-  const snapshot = snapshotToTemplatePolicy(rows, Date.now());
-  if (snapshot.problems.length > 0) {
-    throw new KeyTemplateError(
-      422,
-      "SOURCE_POLICY_UNREADABLE",
-      "The key holds settings that cannot be captured faithfully; fix them on the key first",
-      { issues: snapshot.problems, warnings: snapshot.warnings }
-    );
-  }
-  const parsed = keyTemplatePolicySchema.safeParse(snapshot.policy);
-  if (!parsed.success) {
-    throw new KeyTemplateError(
-      422,
-      "SOURCE_POLICY_UNREADABLE",
-      "The key holds settings outside the editable ranges; fix them on the key first",
-      { issues: zodIssuesToTemplateIssues(parsed.error, "policy"), warnings: snapshot.warnings }
-    );
-  }
-  // Keep the exact snapshot (zod trimming must not alter captured values silently).
-  const policy = snapshot.policy;
-  return {
-    policy,
-    warnings: snapshot.warnings,
-    referenceIssues: collectReferenceIssues(handle, policy),
-  };
+  return runDeferred(handle, () => {
+    const rows = readKeyPolicyRows(handle, keyId);
+    if (!rows) throw new KeyTemplateError(404, "KEY_NOT_FOUND", "Key not found");
+    const snapshot = snapshotToTemplatePolicy(rows, Date.now());
+    if (snapshot.problems.length > 0) {
+      throw new KeyTemplateError(
+        422,
+        "SOURCE_POLICY_UNREADABLE",
+        "The key holds settings that cannot be captured faithfully; fix them on the key first",
+        { issues: snapshot.problems, warnings: snapshot.warnings }
+      );
+    }
+    const parsed = keyTemplatePolicySchema.safeParse(snapshot.policy);
+    if (!parsed.success) {
+      throw new KeyTemplateError(
+        422,
+        "SOURCE_POLICY_UNREADABLE",
+        "The key holds settings outside the editable ranges; fix them on the key first",
+        { issues: zodIssuesToTemplateIssues(parsed.error, "policy"), warnings: snapshot.warnings }
+      );
+    }
+    // Keep the exact snapshot (zod trimming must not alter captured values silently).
+    const policy = snapshot.policy;
+    return {
+      policy,
+      warnings: snapshot.warnings,
+      referenceIssues: collectReferenceIssues(handle, policy),
+    };
+  });
 }
 
-export async function createKeyTemplateFromKey(
-  input: {
-    name: string;
-    description?: string;
-    fromKeyId: string;
-    acknowledge?: string[];
-  },
-  preview: ReturnType<typeof previewKeyTemplatePolicy>
-): Promise<{ template: KeyTemplate; warnings: TemplateWarning[] }> {
+export async function createKeyTemplateFromKey(input: {
+  name: string;
+  description?: string;
+  fromKeyId: string;
+  acknowledge?: string[];
+}, preview: ReturnType<typeof previewKeyTemplatePolicy>): Promise<{ template: KeyTemplate; warnings: TemplateWarning[] }> {
   const acknowledged = new Set(input.acknowledge ?? []);
   const pending = preview.warnings.filter(
     (warning) => warning.requiresAcknowledgement && !acknowledged.has(warning.code)

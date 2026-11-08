@@ -61,6 +61,7 @@ vi.mock("@/shared/components/Toggle", () => ({
 vi.mock("@/shared/components/Card", () => ({
   default: ({ children }) => <section>{children}</section>,
 }));
+vi.mock("@/shared/components/Loading", () => ({ Spinner: () => <span role="status">Loading</span>, CardSkeleton: () => null }));
 vi.mock("@omniroute/ui-kit/page-header", () => ({
   PageHeader: ({ title, actions }) => (
     <header>
@@ -76,9 +77,10 @@ vi.mock("@/app/(dashboard)/dashboard/api-manager/components/ApiKeyFilterBar", ()
   default: () => null,
 }));
 vi.mock("@/app/(dashboard)/dashboard/api-manager/components/KeyPolicySixTabEditor", () => ({
-  default: ({ policy, formStateOverride, onFormStateChange, onChange, disabled }) => (
+  default: ({ policy, formStateOverride, onFormStateChange, onChange, disabled, serverReferenceIssues }) => (
     <section>
       <output data-testid="editor-policy">{JSON.stringify(policy)}</output>
+      <output data-testid="editor-issues">{JSON.stringify(serverReferenceIssues)}</output>
       <output data-testid="editor-raw-ttl">{formStateOverride?.expiryTtlValue}</output>
       <button
         disabled={disabled}
@@ -169,6 +171,26 @@ beforeEach(() => {
 });
 
 describe("Save as template interaction", () => {
+  it("fetches once per key and preserves edits and new acknowledgement warnings across parent rerenders", async () => {
+    const request = vi.fn(async (_url: string, init?: RequestInit) => init?.method === "POST"
+      ? json({ code: "ACKNOWLEDGEMENT_REQUIRED", warnings: [{ code: "KEY_BANNED", message: "New warning", requiresAcknowledgement: true }] }, 409)
+      : json({ policy, warnings: [], referenceIssues: [] }));
+    vi.stubGlobal("fetch", request);
+    const props = { onClose: vi.fn(), onSaved: vi.fn() };
+    const view = render(<SaveKeyAsTemplateModal {...props} sourceKey={{ id: "source", name: "Source" }} />);
+    await waitFor(() => expect((screen.getByRole("button", { name: "saveAsTemplateAction" }) as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.change(screen.getByLabelText("templateNameLabel"), { target: { value: "Edited name" } });
+    fireEvent.click(screen.getByRole("button", { name: "saveAsTemplateAction" }));
+    await screen.findByText("New warning");
+    view.rerender(<SaveKeyAsTemplateModal {...props} sourceKey={{ id: "source", name: "Renamed source" }} />);
+    expect((screen.getByLabelText("templateNameLabel") as HTMLInputElement).value).toBe("Edited name");
+    expect(screen.getByText("New warning")).toBeTruthy();
+    expect((screen.getByRole("button", { name: "saveAsTemplateAction" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole("checkbox"));
+    view.rerender(<SaveKeyAsTemplateModal {...props} sourceKey={{ id: "source", name: "Source" }} />);
+    expect((screen.getByRole("checkbox") as HTMLInputElement).checked).toBe(true);
+    expect(request.mock.calls.filter(([, init]) => !init?.method)).toHaveLength(1);
+  });
   it("requires acknowledgement before submitting the existing-key reference", async () => {
     const request = vi.fn(async (_url: string, init?: RequestInit) =>
       init?.method === "POST"
@@ -282,7 +304,63 @@ describe("Save as template interaction", () => {
   });
 });
 
+describe("template library failures", () => {
+  it.each(["TEMPLATE_NAME_CONFLICT", "REVISION_CONFLICT"])("distinguishes %s and requires reload only for revision conflicts", async (code) => {
+    const request = vi.fn(async (_url: string, init?: RequestInit) => init?.method === "PATCH" ? json({ code }, 409) : json({ template, referenceIssues: [] }));
+    vi.stubGlobal("fetch", request);
+    render(<KeyTemplatesLibrarySection templates={[template]} onRefreshTemplates={vi.fn()} onUseTemplate={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "editTemplateAction Preset" }));
+    await waitFor(() => expect((screen.getByRole("button", { name: "saveChanges" }) as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(screen.getByRole("button", { name: "saveChanges" }));
+    await screen.findByText(code === "REVISION_CONFLICT" ? "templateRevisionConflictError" : "templateNameConflictError");
+    const reload = screen.queryByRole("button", { name: "templateReloadAction" });
+    if (code === "REVISION_CONFLICT") {
+      expect(reload).toBeTruthy();
+      expect((screen.getByRole("button", { name: "saveChanges" }) as HTMLButtonElement).disabled).toBe(true);
+      fireEvent.click(reload!);
+      await waitFor(() => expect((screen.getByRole("button", { name: "saveChanges" }) as HTMLButtonElement).disabled).toBe(false));
+    } else {
+      expect(reload).toBeNull();
+      fireEvent.change(screen.getByLabelText("templateNameLabel"), { target: { value: "Another" } });
+      expect((screen.getByRole("button", { name: "saveChanges" }) as HTMLButtonElement).disabled).toBe(false);
+    }
+  });
+
+  it("shows unreadable templates as delete-only and never presents a fetch failure as an empty library", async () => {
+    const request = vi.fn(async () => json({ deleted: true }));
+    vi.stubGlobal("fetch", request);
+    const refresh = vi.fn();
+    render(<KeyTemplatesLibrarySection templates={[]} unreadable={[{ id: "bad-policy", name: "Broken", revision: 2, code: "SOURCE_POLICY_UNREADABLE" }]} loadError="Library unavailable" onRefreshTemplates={refresh} onUseTemplate={vi.fn()} />);
+    const row = screen.getByTestId("unreadable-template-bad-policy");
+    expect(within(row).getAllByRole("button")).toHaveLength(1);
+    expect(screen.queryByText("noTemplatesYet")).toBeNull();
+    expect(screen.getByText("Library unavailable")).toBeTruthy();
+    fireEvent.click(within(row).getByRole("button", { name: "deleteTemplateAction Broken" }));
+    await waitFor(() => expect(refresh).toHaveBeenCalled());
+    expect(request).toHaveBeenCalledWith("/api/key-templates/bad-policy", { method: "DELETE" });
+  });
+});
+
 describe("template loading and draft validation", () => {
+  it("routes key creation reference errors into the actionable policy editor", async () => {
+    const issue = { path: "key.proxyId", code: "PROXY_NOT_FOUND", value: "missing-proxy", message: "Missing proxy", blocking: true };
+    const staleTemplate = { ...template, policy: { ...policy, key: { ...policy.key, proxyId: "missing-proxy" } } };
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      if (url === "/api/keys" && init?.method === "POST") return json({ code: "REFERENCE_INVALID", issues: [issue] }, 422);
+      if (url === "/api/keys") return json({ keys: [] });
+      if (url === "/api/key-templates") return json({ templates: [staleTemplate] });
+      if (url === "/api/key-templates/template-id") return json({ template: staleTemplate, referenceIssues: [] });
+      return json({});
+    }));
+    render(<ApiManagerPageClient />);
+    fireEvent.click((await screen.findAllByRole("button", { name: "createKey" }))[0]);
+    fireEvent.change(screen.getByLabelText("keyName"), { target: { value: "Fresh" } });
+    await screen.findByRole("option", { name: /Preset/ });
+    fireEvent.change(screen.getByLabelText("templatePickerLabel"), { target: { value: "template-id" } });
+    await waitFor(() => expect((screen.getByLabelText("templatePickerLabel") as HTMLSelectElement).value).toBe("template-id"));
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "createKey" }));
+    await waitFor(() => expect(JSON.parse(screen.getByTestId("editor-issues").textContent!)).toEqual([issue]));
+  });
   const first = { ...template, id: "first", name: "First" };
   const second = { ...template, id: "second", name: "Second" };
   function installPageRequests(detail: (url: string) => Promise<Response>) {

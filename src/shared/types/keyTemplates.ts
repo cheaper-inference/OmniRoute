@@ -238,6 +238,8 @@ export type TemplateReferenceIssueCode =
 export interface TemplateReferenceIssue {
   /** Dotted path into the policy, e.g. `key.allowedConnections.0` or `related.groupIds.1`. */
   path: string;
+  /** Concrete reference identity, stable after an array item before it is removed. */
+  value?: string;
   code: TemplateReferenceIssueCode;
   message: string;
   /**
@@ -275,17 +277,16 @@ export interface KeyTemplateApiError {
 
 export interface ListKeyTemplatesResponse {
   templates: KeyTemplate[];
+  /** Corrupt rows remain visible by identity and can be deleted without reading their policy. */
+  unreadable: UnreadableKeyTemplate[];
 }
 
-export type CreateKeyTemplateRequest =
-  | { name: string; description?: string; policy: KeyTemplatePolicy }
-  | {
-      name: string;
-      description?: string;
-      fromKeyId: string;
-      /** Warning codes the operator accepted (see `requiresAcknowledgement`). */
-      acknowledge?: TemplateWarningCode[];
-    };
+export interface UnreadableKeyTemplate {
+  id: string;
+  name: string;
+  revision: number;
+  code: KeyTemplateErrorCode;
+}
 
 export interface CreateKeyTemplateResponse {
   template: KeyTemplate;
@@ -297,19 +298,8 @@ export interface GetKeyTemplateResponse {
   referenceIssues: TemplateReferenceIssue[];
 }
 
-export interface UpdateKeyTemplateRequest {
-  revision: number;
-  name?: string;
-  description?: string;
-  policy?: KeyTemplatePolicy;
-}
-
 export interface UpdateKeyTemplateResponse {
   template: KeyTemplate;
-}
-
-export interface DeleteKeyTemplateResponse {
-  success: true;
 }
 
 /** `GET /api/keys/[id]/template-policy` — secret-free preview for "Save as template". */
@@ -317,14 +307,6 @@ export interface KeyTemplatePolicyPreviewResponse {
   policy: KeyTemplatePolicy;
   warnings: TemplateWarning[];
   referenceIssues: TemplateReferenceIssue[];
-}
-
-/** `POST /api/keys` body when creating a key from a final, editable policy. */
-export interface CreateKeyFromPolicyRequest {
-  name: string;
-  policy: KeyTemplatePolicy;
-  /** Informational provenance; the stored template is never re-applied over `policy`. */
-  templateRef?: { id: string; revision: number };
 }
 
 export type KeyTemplateRefStatus = "current" | "stale" | "missing";

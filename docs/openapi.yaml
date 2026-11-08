@@ -2942,7 +2942,31 @@ paths:
       description: Requires management authentication. Responses never contain key credentials.
       responses:
         "200":
-          description: Object containing the templates array; Cache-Control is no-store.
+          description: Healthy templates and unreadable identities; corrupt policies stay stored and deletable by id. Cache-Control is no-store.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [templates, unreadable]
+                properties:
+                  templates:
+                    type: array
+                    items:
+                      type: object
+                  unreadable:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, name, revision, code]
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        revision:
+                          type: integer
+                        code:
+                          type: string
         "401":
           description: Authentication required
     post:
@@ -2953,6 +2977,7 @@ paths:
         Existing-key capture may require acknowledge with warning codes. Policies include
         schemaVersion, key, related and relative-or-unlimited expiry. Credentials, identity,
         usage and history are excluded. Management-granting policies require a credential.
+        Remote CLI tokens need admin scope for mutations; read scope remains sufficient for GET.
       requestBody:
         required: true
         content:
@@ -2980,6 +3005,8 @@ paths:
           description: Invalid policy or request
         "401":
           description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
         "409":
           description: Template name conflict or acknowledgement required
         "422":
@@ -3000,7 +3027,7 @@ paths:
     patch:
       tags: [API Keys]
       summary: Edit a template with an optimistic revision check
-      description: Existing keys retain their applied policy snapshot.
+      description: Existing keys retain their applied policy snapshot. Remote CLI mutations require admin scope.
       requestBody:
         required: true
         content:
@@ -3025,6 +3052,8 @@ paths:
           description: Invalid policy or request
         "401":
           description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
         "404":
           description: Template not found
         "409":
@@ -3037,6 +3066,8 @@ paths:
           description: Object containing success true; Cache-Control is no-store.
         "401":
           description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
         "404":
           description: Template not found
   /api/keys/{id}/template-policy:

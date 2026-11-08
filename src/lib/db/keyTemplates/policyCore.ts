@@ -32,6 +32,7 @@ import type {
   TemplateReferenceIssue,
   TemplateWarning,
 } from "../../../shared/types/keyTemplates.ts";
+import { isLiteralKeyTemplateComboReference } from "../../../shared/utils/keyTemplateReferences.ts";
 
 export interface PolicyStatement {
   all: (...params: unknown[]) => unknown[];
@@ -284,9 +285,8 @@ function collectUnclassified(
   }
 }
 
-/** BEGIN IMMEDIATE … COMMIT; any thrown error rolls back every write. */
-export function runImmediate<T>(db: PolicyDb, fn: () => T): T {
-  db.exec("BEGIN IMMEDIATE");
+function runTransaction<T>(db: PolicyDb, mode: "DEFERRED" | "IMMEDIATE", fn: () => T): T {
+  db.exec(`BEGIN ${mode}`);
   try {
     const result = fn();
     db.exec("COMMIT");
@@ -299,6 +299,16 @@ export function runImmediate<T>(db: PolicyDb, fn: () => T): T {
     }
     throw error;
   }
+}
+
+/** Writer transaction: reserves a write lock before reading configuration rows. */
+export function runImmediate<T>(db: PolicyDb, fn: () => T): T {
+  return runTransaction(db, "IMMEDIATE", fn);
+}
+
+/** Consistent read-only snapshot, without reserving a write lock. */
+export function runDeferred<T>(db: PolicyDb, fn: () => T): T {
+  return runTransaction(db, "DEFERRED", fn);
 }
 
 // ──────────────── Snapshot of an existing key ────────────────
@@ -399,19 +409,14 @@ export function readKeyPolicyRows(db: PolicyDb, keyId: string): KeyPolicyRows | 
       "priority DESC, rowid"
     ),
     excluded: {
-      ssoIdentity:
-        source !== "manual" || countRows(db, "sso_identities", "api_key_id = ?", keyId) > 0,
+      ssoIdentity: source !== "manual" || countRows(db, "sso_identities", "api_key_id = ?", keyId) > 0,
       weightedAllocations:
         countRows(db, "quota_allocations", "api_key_id = ?", keyId) +
         countRows(db, "quota_allocation_model_caps", "api_key_id = ?", keyId),
       contextSources: countRows(db, "api_key_context_sources", "api_key_id = ?", keyId),
       billingTeam:
-        countRows(
-          db,
-          "api_key_billing_team_history",
-          "api_key_id = ? AND valid_to IS NULL",
-          keyId
-        ) > 0,
+        countRows(db, "api_key_billing_team_history", "api_key_id = ? AND valid_to IS NULL", keyId) >
+        0,
     },
     unclassified,
   };
@@ -693,9 +698,10 @@ function issue(
   path: string,
   code: TemplateReferenceIssue["code"],
   message: string,
-  blocking: boolean
+  blocking: boolean,
+  value?: string
 ): TemplateReferenceIssue {
-  return { path, code, message, blocking };
+  return { path, code, message, blocking, ...(value === undefined ? {} : { value }) };
 }
 
 function parseTimestamp(value: unknown): number | null {
@@ -723,6 +729,46 @@ function relatedNullableNumber(value: unknown): number | null {
 
 function nullableText(value: unknown): string | null {
   return typeof value === "string" ? value : null;
+}
+
+function captureExpiry(
+  rows: KeyPolicyRows,
+  nowMs: number,
+  warnings: TemplateWarning[]
+): KeyTemplatePolicy["expiry"] {
+  const expiresAt = rows.keyColumns.expires_at;
+  if (expiresAt === null || expiresAt === undefined) return { mode: "none" };
+  const expiresMs = parseTimestamp(expiresAt);
+  const createdMs = parseTimestamp(rows.createdAt);
+  const ttlSeconds =
+    expiresMs !== null && createdMs !== null ? Math.round((expiresMs - createdMs) / 1000) : 0;
+  if (expiresMs !== null && expiresMs <= nowMs) {
+    warnings.push(warn("KEY_EXPIRED", "The source key has expired. Keys created from the template get a fresh lifetime.", true));
+  }
+  if (ttlSeconds > 0) {
+    warnings.push(warn("EXPIRY_CONVERTED_TO_RELATIVE", `The fixed expiry date becomes a lifetime of ${ttlSeconds} seconds from creation.`, false));
+    return { mode: "relative", ttlSeconds };
+  }
+  warnings.push(warn("EXPIRY_NOT_DERIVABLE", "The source expiry cannot be expressed as a lifetime. The template has no expiry; set one in the editor if needed.", true));
+  return { mode: "none" };
+}
+
+function captureExcludedWarnings(rows: KeyPolicyRows, warnings: TemplateWarning[]): void {
+  if (rows.excluded.ssoIdentity) {
+    warnings.push(warn("SSO_IDENTITY_EXCLUDED", "The source key is bound to an SSO identity. The identity is never captured; group memberships the identity provider maintains are captured as static memberships.", true));
+  }
+  if (rows.excluded.weightedAllocations > 0) {
+    warnings.push(warn("WEIGHTED_ALLOCATION_EXCLUDED", `The source key holds ${rows.excluded.weightedAllocations} weighted quota pool allocation or cap row(s). They are shared pool settings and are not captured; pool weights stay unchanged.`, true));
+  }
+  if (rows.excluded.contextSources > 0) {
+    warnings.push(warn("CONTEXT_SOURCES_EXCLUDED", `The source key has ${rows.excluded.contextSources} context source(s). They carry credentials and are never captured.`, true));
+  }
+  if (rows.excluded.billingTeam) {
+    warnings.push(warn("BILLING_TEAM_EXCLUDED", "The source key is assigned to a billing team. Billing assignment history is not captured; assign the team after creating a key.", true));
+  }
+  if (rows.groupIds.length > 0) {
+    warnings.push(warn("GROUP_POLICY_SHARED", "Group memberships are captured. Group permissions are shared: later group edits affect every member key.", false));
+  }
 }
 
 /**
@@ -793,86 +839,8 @@ export function snapshotToTemplatePolicy(rows: KeyPolicyRows, nowMs: number): Sn
     key.isBanned = false;
   }
 
-  let expiry: KeyTemplatePolicy["expiry"] = { mode: "none" };
-  const expiresMs = parseTimestamp(rows.keyColumns.expires_at);
-  if (rows.keyColumns.expires_at !== null && rows.keyColumns.expires_at !== undefined) {
-    const createdMs = parseTimestamp(rows.createdAt);
-    const ttlSeconds =
-      expiresMs !== null && createdMs !== null ? Math.round((expiresMs - createdMs) / 1000) : 0;
-    if (expiresMs !== null && expiresMs <= nowMs) {
-      warnings.push(
-        warn(
-          "KEY_EXPIRED",
-          "The source key has expired. Keys created from the template get a fresh lifetime.",
-          true
-        )
-      );
-    }
-    if (ttlSeconds > 0) {
-      expiry = { mode: "relative", ttlSeconds };
-      warnings.push(
-        warn(
-          "EXPIRY_CONVERTED_TO_RELATIVE",
-          `The fixed expiry date becomes a lifetime of ${ttlSeconds} seconds from creation.`,
-          false
-        )
-      );
-    } else {
-      warnings.push(
-        warn(
-          "EXPIRY_NOT_DERIVABLE",
-          "The source expiry cannot be expressed as a lifetime. The template has no expiry; set one in the editor if needed.",
-          true
-        )
-      );
-    }
-  }
-
-  if (rows.excluded.ssoIdentity) {
-    warnings.push(
-      warn(
-        "SSO_IDENTITY_EXCLUDED",
-        "The source key is bound to an SSO identity. The identity is never captured; group memberships the identity provider maintains are captured as static memberships.",
-        true
-      )
-    );
-  }
-  if (rows.excluded.weightedAllocations > 0) {
-    warnings.push(
-      warn(
-        "WEIGHTED_ALLOCATION_EXCLUDED",
-        `The source key holds ${rows.excluded.weightedAllocations} weighted quota pool allocation or cap row(s). They are shared pool settings and are not captured; pool weights stay unchanged.`,
-        true
-      )
-    );
-  }
-  if (rows.excluded.contextSources > 0) {
-    warnings.push(
-      warn(
-        "CONTEXT_SOURCES_EXCLUDED",
-        `The source key has ${rows.excluded.contextSources} context source(s). They carry credentials and are never captured.`,
-        true
-      )
-    );
-  }
-  if (rows.excluded.billingTeam) {
-    warnings.push(
-      warn(
-        "BILLING_TEAM_EXCLUDED",
-        "The source key is assigned to a billing team. Billing assignment history is not captured; assign the team after creating a key.",
-        true
-      )
-    );
-  }
-  if (rows.groupIds.length > 0) {
-    warnings.push(
-      warn(
-        "GROUP_POLICY_SHARED",
-        "Group memberships are captured. Group permissions are shared: later group edits affect every member key.",
-        false
-      )
-    );
-  }
+  const expiry = captureExpiry(rows, nowMs, warnings);
+  captureExcludedWarnings(rows, warnings);
 
   const budget = rows.domainBudget;
   const quota = rows.quotaLimits;
@@ -938,9 +906,7 @@ export function snapshotToTemplatePolicy(rows: KeyPolicyRows, nowMs: number): Sn
           requestTags: tags.ok ? tags.value : [],
           tagMatchMode: rule.tag_match_mode === "all" ? "all" : "any",
           effortMode: String(rule.effort_mode ?? "inherit") as "inherit",
-          targetEffort: nullableText(
-            rule.target_effort
-          ) as KeyTemplateReasoningRule["targetEffort"],
+          targetEffort: nullableText(rule.target_effort) as KeyTemplateReasoningRule["targetEffort"],
           targetKind: String(rule.target_kind ?? "keep") as "keep",
           targetModel: nullableText(rule.target_model),
           targetComboId: nullableText(rule.target_combo_id),
@@ -959,10 +925,7 @@ export function snapshotToTemplatePolicy(rows: KeyPolicyRows, nowMs: number): Sn
 // ──────────────── Typed policy → rows ────────────────
 
 /** Converts a validated policy into rows for insertKeyPolicyRows(). */
-export function templatePolicyToRows(
-  policy: KeyTemplatePolicy,
-  nowMs: number
-): KeyPolicyInsertRows {
+export function templatePolicyToRows(policy: KeyTemplatePolicy, nowMs: number): KeyPolicyInsertRows {
   const keyColumns: Row = {};
   const key = policy.key as unknown as Row;
   for (const spec of API_KEY_POLICY_FIELDS) {
@@ -1057,17 +1020,15 @@ function existingIds(db: PolicyDb, table: string, column: string, ids: string[])
   return found;
 }
 
-const PATTERN_CHARS = /[*?[\]]/;
-
 /**
  * Checks concrete database references without pruning anything. Wildcards, routing-rule
  * names and model ids are never treated as invalid just because no row matches them.
  */
-export function collectReferenceIssues(
+function collectConnectionReferenceIssues(
   db: PolicyDb,
-  policy: KeyTemplatePolicy
-): TemplateReferenceIssue[] {
-  const issues: TemplateReferenceIssue[] = [];
+  policy: KeyTemplatePolicy,
+  issues: TemplateReferenceIssue[]
+): Set<string> {
   const { key, related } = policy;
 
   const connectionIds = [
@@ -1084,7 +1045,8 @@ export function collectReferenceIssues(
           `key.allowedConnections.${index}`,
           "CONNECTION_NOT_FOUND",
           `Connection ${id} no longer exists. It stays in the allow-list (narrowing only); remove it explicitly. Removing every entry makes the key unrestricted.`,
-          false
+          false,
+          id
         )
       );
     }
@@ -1096,7 +1058,8 @@ export function collectReferenceIssues(
           `key.preferredConnections.${index}`,
           "CONNECTION_NOT_FOUND",
           `Preferred connection ${id} no longer exists; it is kept until removed.`,
-          false
+          false,
+          id
         )
       );
     }
@@ -1108,30 +1071,44 @@ export function collectReferenceIssues(
           `related.autoCandidateOverrides.${index}.connectionId`,
           "CONNECTION_NOT_FOUND",
           `Connection ${override.connectionId} no longer exists; the override is kept as configured.`,
-          false
+          false,
+          override.connectionId
         )
       );
     }
   });
 
-  const comboNames = key.allowedCombos.filter(
-    (name) => name !== KEY_TEMPLATE_ALL_COMBOS_RULE && !PATTERN_CHARS.test(name)
-  );
+  return connections;
+}
+
+function collectComboReferenceIssues(
+  db: PolicyDb,
+  key: KeyTemplateKeyPolicy,
+  issues: TemplateReferenceIssue[]
+): void {
+  const comboNames = key.allowedCombos.filter(isLiteralKeyTemplateComboReference);
   const combos = existingIds(db, "combos", "name", comboNames);
   key.allowedCombos.forEach((name, index) => {
-    if (name === KEY_TEMPLATE_ALL_COMBOS_RULE || PATTERN_CHARS.test(name)) return;
+    if (!isLiteralKeyTemplateComboReference(name)) return;
     if (!combos.has(name)) {
       issues.push(
         issue(
           `key.allowedCombos.${index}`,
           "COMBO_NOT_FOUND",
           `No combo is named "${name}" now. The rule is kept (it may name a routing rule or a removed combo).`,
-          false
+          false,
+          name
         )
       );
     }
   });
+}
 
+function collectQuotaAndProxyIssues(
+  db: PolicyDb,
+  key: KeyTemplateKeyPolicy,
+  issues: TemplateReferenceIssue[]
+): void {
   const pools = existingIds(db, "quota_pools", "id", key.allowedQuotas);
   key.allowedQuotas.forEach((id, index) => {
     if (!pools.has(id)) {
@@ -1140,7 +1117,8 @@ export function collectReferenceIssues(
           `key.allowedQuotas.${index}`,
           "QUOTA_POOL_NOT_FOUND",
           `Quota pool ${id} no longer exists; it stays in the restriction until removed.`,
-          false
+          false,
+          id
         )
       );
     }
@@ -1152,15 +1130,22 @@ export function collectReferenceIssues(
         "key.proxyId",
         "PROXY_NOT_FOUND",
         `Proxy ${key.proxyId} no longer exists. Choose another proxy or clear it explicitly; without it traffic would not use the configured egress.`,
-        true
+        true,
+        key.proxyId
       )
     );
   }
+}
 
-  if (related.groupIds.length > 0) {
+function collectGroupIssues(
+  db: PolicyDb,
+  groupIds: string[],
+  issues: TemplateReferenceIssue[]
+): void {
+  if (groupIds.length > 0) {
     const groupsTable = hasTable(db, "key_groups");
     const stmt = groupsTable ? db.prepare("SELECT is_active FROM key_groups WHERE id = ?") : null;
-    related.groupIds.forEach((groupId, index) => {
+    groupIds.forEach((groupId, index) => {
       const row = stmt?.get(groupId) as Row | undefined;
       if (!row) {
         issues.push(
@@ -1168,7 +1153,8 @@ export function collectReferenceIssues(
             `related.groupIds.${index}`,
             "GROUP_NOT_FOUND",
             `Key group ${groupId} no longer exists. Its permissions could have restricted the key; remove the membership explicitly or pick another group.`,
-            true
+            true,
+            groupId
           )
         );
       } else if (falsy(row.is_active)) {
@@ -1177,29 +1163,38 @@ export function collectReferenceIssues(
             `related.groupIds.${index}`,
             "GROUP_INACTIVE",
             `Key group ${groupId} is inactive; the membership is kept.`,
-            false
+            false,
+            groupId
           )
         );
       }
     });
   }
+}
 
+function collectReasoningRuleIssues(
+  db: PolicyDb,
+  rules: KeyTemplateReasoningRule[],
+  connections: Set<string>,
+  issues: TemplateReferenceIssue[]
+): void {
   const ruleCombos = existingIds(
     db,
     "combos",
     "id",
-    related.reasoningRules
-      .flatMap((r) => [r.comboId, r.targetComboId])
-      .filter((id): id is string => typeof id === "string")
+    rules.flatMap((r) => [r.comboId, r.targetComboId]).filter(
+      (id): id is string => typeof id === "string"
+    )
   );
-  related.reasoningRules.forEach((rule, index) => {
+  rules.forEach((rule, index) => {
     if (rule.comboId && !ruleCombos.has(rule.comboId)) {
       issues.push(
         issue(
           `related.reasoningRules.${index}.comboId`,
           "REASONING_COMBO_NOT_FOUND",
           `Combo ${rule.comboId} no longer exists; edit or remove this reasoning rule.`,
-          true
+          true,
+          rule.comboId
         )
       );
     }
@@ -1209,7 +1204,8 @@ export function collectReferenceIssues(
           `related.reasoningRules.${index}.targetComboId`,
           "REASONING_COMBO_NOT_FOUND",
           `Target combo ${rule.targetComboId} no longer exists; edit or remove this reasoning rule.`,
-          true
+          true,
+          rule.targetComboId
         )
       );
     }
@@ -1219,12 +1215,25 @@ export function collectReferenceIssues(
           `related.reasoningRules.${index}.connectionId`,
           "REASONING_CONNECTION_NOT_FOUND",
           `Connection ${rule.connectionId} no longer exists; edit or remove this reasoning rule.`,
-          true
+          true,
+          rule.connectionId
         )
       );
     }
   });
+}
 
+/** Check concrete references, without dropping absent entries or broadening access. */
+export function collectReferenceIssues(
+  db: PolicyDb,
+  policy: KeyTemplatePolicy
+): TemplateReferenceIssue[] {
+  const issues: TemplateReferenceIssue[] = [];
+  const connections = collectConnectionReferenceIssues(db, policy, issues);
+  collectComboReferenceIssues(db, policy.key, issues);
+  collectQuotaAndProxyIssues(db, policy.key, issues);
+  collectGroupIssues(db, policy.related.groupIds, issues);
+  collectReasoningRuleIssues(db, policy.related.reasoningRules, connections, issues);
   return issues;
 }
 
@@ -1282,8 +1291,9 @@ export class KeyTemplateNameConflictError extends Error {
 }
 
 function nameTaken(db: PolicyDb, name: string, exceptId: string | null): boolean {
-  const row = db.prepare("SELECT id FROM key_templates WHERE name = ? COLLATE NOCASE").get(name) as
-    Row | undefined;
+  const row = db
+    .prepare("SELECT id FROM key_templates WHERE name = ? COLLATE NOCASE")
+    .get(name) as Row | undefined;
   return Boolean(row && row.id !== exceptId);
 }
 
@@ -1320,7 +1330,9 @@ export function insertStoredTemplate(
       input.now,
       input.now
     );
-    return rowToStored(db.prepare("SELECT * FROM key_templates WHERE id = ?").get(input.id) as Row);
+    return rowToStored(
+      db.prepare("SELECT * FROM key_templates WHERE id = ?").get(input.id) as Row
+    );
   });
 }
 
@@ -1344,7 +1356,8 @@ export function updateStoredTemplate(
   ensureKeyTemplatesTable(db);
   return runImmediate(db, (): UpdateStoredResult => {
     const current = db.prepare("SELECT * FROM key_templates WHERE id = ?").get(input.id) as
-      Row | undefined;
+      | Row
+      | undefined;
     if (!current) return { status: "not_found" };
     if (Number(current.revision) !== input.revision) {
       return { status: "conflict", currentRevision: Number(current.revision) };

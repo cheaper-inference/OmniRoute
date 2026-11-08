@@ -63,7 +63,14 @@ policy versions are refused rather than interpreted with broader defaults.
 ## Management API
 
 Template endpoints use API-key administration's management authentication. A
-policy granting management scope retains the additional credential check.
+policy granting management scope retains the additional credential check. Remote CLI
+access tokens require `admin` for template creation, editing and deletion; `read`
+remains sufficient for template reads.
+
+The list response contains healthy `templates` and a separate `unreadable` array
+with each corrupt row's ID, name, revision and error code. The dashboard shows
+those rows with a delete action and never applies an unreadable policy. A detail
+request for an unreadable row continues to fail closed.
 
 | Operation                                      | Endpoint                                           |
 | ---------------------------------------------- | -------------------------------------------------- |

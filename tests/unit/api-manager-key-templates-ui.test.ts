@@ -17,12 +17,51 @@ import {
   type KeyTemplatePolicy,
   type TemplateReferenceIssue,
 } from "../../src/app/(dashboard)/dashboard/api-manager/keyTemplatePolicyUtils.ts";
+import { anchorReferenceIssues, removeReferenceTarget, removesLastQuotaRestriction } from "../../src/app/(dashboard)/dashboard/api-manager/keyTemplateReferenceIssues.ts";
 
 const PROJECT_ROOT = join(import.meta.dirname, "../..");
 const API_MANAGER_DIR = join(PROJECT_ROOT, "src/app/(dashboard)/dashboard/api-manager");
 
 const mockT = (key: string, values?: Record<string, unknown>) =>
   values ? `${key}:${JSON.stringify(values)}` : key;
+
+test("missing narrowing references and inactive groups remain nonblocking, but missing groups block", () => {
+  const state = createDefaultPolicyEditorFormState();
+  state.allowAllConnections = false;
+  state.selectedConnections = ["stale"];
+  state.allowedQuotas = ["stale-pool"];
+  state.groupIds = ["inactive", "missing"];
+  const issues = resolveActiveReferenceIssues(state, [], {
+    connectionIds: new Set(), quotaPoolIds: new Set(), groupIds: new Set(["inactive"]), inactiveGroupIds: new Set(["inactive"]),
+  });
+  assert.deepEqual(issues.map(({ code, blocking }) => [code, blocking]), [
+    ["CONNECTION_NOT_FOUND", false], ["QUOTA_POOL_NOT_FOUND", false], ["GROUP_NOT_FOUND", true], ["GROUP_INACTIVE", false],
+  ]);
+  assert.deepEqual(editorFormStateToPolicy(state).key.allowedQuotas, ["stale-pool"]);
+  assert.deepEqual(resolveActiveReferenceIssues(state, []), [], "failed catalogs remain unknown");
+});
+
+test("stale removal is anchored by value after earlier indices shift, with a guard on the last quota", () => {
+  const policy = createDefaultKeyTemplatePolicy();
+  policy.key.allowedQuotas = ["first", "stale", "valid"];
+  const [issue] = anchorReferenceIssues([{ path: "key.allowedQuotas.1", code: "QUOTA_POOL_NOT_FOUND", message: "gone", blocking: false }], policy);
+  const state = policyToEditorFormState(policy);
+  state.allowedQuotas = ["stale", "valid"];
+  const next = removeReferenceTarget(state, issue);
+  assert.deepEqual(next.allowedQuotas, ["valid"]);
+  assert.equal(removesLastQuotaRestriction(state, next), false);
+  assert.deepEqual(removeReferenceTarget(next, issue).allowedQuotas, ["valid"]);
+  assert.deepEqual(removeReferenceTarget(state, { ...issue, value: undefined }).allowedQuotas, state.allowedQuotas);
+  const last = { ...state, allowedQuotas: ["stale"] };
+  assert.equal(removesLastQuotaRestriction(last, removeReferenceTarget(last, issue)), true);
+});
+
+test("combo patterns are preserved while literal rt-prefixed names are validated", () => {
+  const state = createDefaultPolicyEditorFormState();
+  state.allowAllCombos = false;
+  state.selectedCombos = ["team-*", "combo?", "[ab]", "rt-missing"];
+  assert.deepEqual(resolveActiveReferenceIssues(state, [], { comboNames: new Set() }).map((issue) => issue.value), ["rt-missing"]);
+});
 
 test("a nullable token reset time remains a valid default through the editor", () => {
   const policy = createDefaultKeyTemplatePolicy();
@@ -337,7 +376,7 @@ test("resolveActiveReferenceIssues clears blocking issues once missing reference
 });
 
 test("ApiManagerPageClient, modals, and 6-tab editor preserve permanent row actions and implement full Key Templates UI", () => {
-  const pageSrc = readFileSync(join(API_MANAGER_DIR, "ApiManagerPageClient.tsx"), "utf8");
+  const pageSrc = ["ApiManagerPageClient.tsx", "useKeyTemplateCreation.ts", "useCreateKeySubmission.ts"].map((file) => readFileSync(join(API_MANAGER_DIR, file), "utf8")).join("\n");
   const saveModalSrc = readFileSync(
     join(API_MANAGER_DIR, "components/SaveKeyAsTemplateModal.tsx"),
     "utf8"
@@ -346,14 +385,11 @@ test("ApiManagerPageClient, modals, and 6-tab editor preserve permanent row acti
     join(API_MANAGER_DIR, "components/KeyTemplatesLibrarySection.tsx"),
     "utf8"
   );
-  const editorSrc = readFileSync(
-    join(API_MANAGER_DIR, "components/KeyPolicySixTabEditor.tsx"),
-    "utf8"
-  );
+  const editorSrc = ["KeyPolicySixTabEditor", "KeyPolicyGeneralTab", "KeyPolicyModelsTab", "KeyPolicyCombosTab", "KeyPolicyConnectionsTab", "KeyPolicyLimitsTab", "KeyPolicyBehaviourTab"].map((name) => readFileSync(join(API_MANAGER_DIR, `components/${name}.tsx`), "utf8")).join("\n");
 
   // Existing static test invariants + new Save as template row button
   assert.ok(pageSrc.includes("newKeyAllowUsageCommand"));
-  assert.ok(pageSrc.includes("allowUsageCommand: newKeyAllowUsageCommand"));
+  assert.ok(pageSrc.includes("allowUsageCommand: draft.newKeyAllowUsageCommand"));
   assert.ok(pageSrc.includes('fetch("/api/usage/analytics?range=all&view=apiKeys")'));
   assert.ok(pageSrc.includes("const isQuotaKey"));
   assert.ok(pageSrc.includes("const quotaKeys = filteredKeys.filter(isQuotaKey)"));
@@ -367,14 +403,14 @@ test("ApiManagerPageClient, modals, and 6-tab editor preserve permanent row acti
   assert.ok(headerSlice.includes("setShowAddModal(true)"));
   assert.ok(headerSlice.includes('{t("createKey")}'));
 
-  assert.ok(pageSrc.includes('icon="bookmark_add"'));
+  assert.ok(pageSrc.includes('icon="playlist_add"'));
   assert.ok(pageSrc.includes('t("saveAsTemplate")'));
   assert.ok(pageSrc.includes("<KeyTemplatesLibrarySection"));
   assert.ok(pageSrc.includes("<SaveKeyAsTemplateModal"));
   assert.ok(pageSrc.includes("handleSelectTemplateInCreateModal"));
   assert.ok(pageSrc.includes("switchTemplateConfirmTitle"));
   assert.ok(pageSrc.includes("showFullPolicyEditor &&"));
-  assert.ok(pageSrc.includes("templateRef: selectedTemplateRef"));
+  assert.ok(pageSrc.includes("templateRef: draft.selectedTemplateRef"));
 
   // Save as template modal extracts live policy and posts fromKeyId + acknowledge
   assert.ok(saveModalSrc.includes("/template-policy"));
@@ -382,8 +418,8 @@ test("ApiManagerPageClient, modals, and 6-tab editor preserve permanent row acti
   assert.ok(saveModalSrc.includes("requiresAcknowledgement"));
 
   // Library section supports create/edit/delete/use + revision concurrency
-  assert.ok(librarySrc.includes('fetch("/api/key-templates"'));
-  assert.ok(librarySrc.includes("revision: editingTemplate.revision"));
+  assert.ok(librarySrc.includes('method: editing ? "PATCH" : "POST"'));
+  assert.ok(librarySrc.includes("revision: editing.revision"));
   assert.ok(librarySrc.includes("res.status === 409"));
   assert.ok(librarySrc.includes("onUseTemplate(tpl)"));
 
@@ -404,6 +440,10 @@ test("en.json and pl.json contain all translation keys referenced across Key Tem
     join(API_MANAGER_DIR, "components/SaveKeyAsTemplateModal.tsx"),
     join(API_MANAGER_DIR, "components/KeyTemplatesLibrarySection.tsx"),
     join(API_MANAGER_DIR, "components/KeyTemplatePolicyDetails.tsx"),
+    join(API_MANAGER_DIR, "useKeyTemplateCreation.ts"),
+    join(API_MANAGER_DIR, "useCreateKeySubmission.ts"),
+    ...["KeyPolicyGeneralTab", "KeyPolicyModelsTab", "KeyPolicyCombosTab", "KeyPolicyConnectionsTab", "KeyPolicyLimitsTab", "KeyPolicyBehaviourTab", "KeyPolicyReferenceIssues"].map((name) => join(API_MANAGER_DIR, `components/${name}.tsx`)),
+    join(API_MANAGER_DIR, "components/useKeyPolicyEditorModel.ts"),
   ];
 
   const missingEn: string[] = [];

@@ -127,10 +127,7 @@ test("template CRUD with revision checks and no-store responses", async () => {
     await post("/api/key-templates", { name: "restricted", policy: restrictedPolicy() })
   );
   assert.equal(duplicateName.status, 409);
-  assert.equal(
-    ((await duplicateName.json()) as KeyTemplateApiError).code,
-    "TEMPLATE_NAME_CONFLICT"
-  );
+  assert.equal(((await duplicateName.json()) as KeyTemplateApiError).code, "TEMPLATE_NAME_CONFLICT");
 
   const list = (await (
     await templatesRoute.GET(await makeManagementSessionRequest(`${BASE}/api/key-templates`))
@@ -182,10 +179,7 @@ test("template CRUD with revision checks and no-store responses", async () => {
 
 test("policies are strict: unknown fields such as secrets and inconsistent access are rejected", async () => {
   const sourcePolicy = restrictedPolicy();
-  const withSecret = {
-    ...sourcePolicy,
-    key: { ...sourcePolicy.key, key: "sk-should-never-be-stored" },
-  };
+  const withSecret = { ...sourcePolicy, key: { ...sourcePolicy.key, key: "sk-should-never-be-stored" } };
   const rejected = await templatesRoute.POST(
     await post("/api/key-templates", { name: "Bad", policy: withSecret })
   );
@@ -226,11 +220,7 @@ test("preview is secret-free and keeps deny-all semantics; lifecycle needs ackno
   assert.equal(body.policy.key.modelAccessMode, "restricted");
   assert.deepEqual(body.policy.key.allowedModels, []);
   assert.deepEqual(body.policy.key.allowedCombos, []);
-  assert.ok(
-    body.warnings.some(
-      (w: TemplateWarning) => w.code === "KEY_DISABLED" && w.requiresAcknowledgement
-    )
-  );
+  assert.ok(body.warnings.some((w: TemplateWarning) => w.code === "KEY_DISABLED" && w.requiresAcknowledgement));
 
   const unacknowledged = await templatesRoute.POST(
     await post("/api/key-templates", { name: "From key", fromKeyId: source.id })
@@ -293,19 +283,13 @@ test("POST /api/keys with a policy creates the complete key atomically", async (
   );
   const db = core.getDbInstance();
   assert.equal(
-    (
-      db
-        .prepare("SELECT tpm_limit FROM api_key_quota_limits WHERE api_key_id = ?")
-        .get(body.id) as { tpm_limit: number }
-    ).tpm_limit,
+    (db.prepare("SELECT tpm_limit FROM api_key_quota_limits WHERE api_key_id = ?").get(body.id) as { tpm_limit: number })
+      .tpm_limit,
     1000
   );
   assert.equal(
-    (
-      db
-        .prepare("SELECT count(*) AS n FROM api_key_token_limits WHERE api_key_id = ?")
-        .get(body.id) as { n: number }
-    ).n,
+    (db.prepare("SELECT count(*) AS n FROM api_key_token_limits WHERE api_key_id = ?").get(body.id) as { n: number })
+      .n,
     1
   );
 });
@@ -400,16 +384,12 @@ test("save-from-key stores the same snapshot that was authorized before a source
   const created = await keysRoute.POST(await post("/api/keys", { name: "Captured source" }));
   assert.equal(created.status, 201);
   const source = await created.json();
-  const { previewKeyTemplatePolicy, createKeyTemplateFromKey } =
-    await import("../../src/lib/db/keyTemplates.ts");
+  const { previewKeyTemplatePolicy, createKeyTemplateFromKey } = await import("../../src/lib/db/keyTemplates.ts");
   const captured = previewKeyTemplatePolicy(source.id);
   assert.equal(captured.policy.key.scopes.includes("manage"), false);
   await apiKeysDb.updateApiKeyPermissions(source.id, { scopes: ["manage"] });
   assert.equal(previewKeyTemplatePolicy(source.id).policy.key.scopes.includes("manage"), true);
-  const saved = await createKeyTemplateFromKey(
-    { name: "Captured policy", fromKeyId: source.id },
-    captured
-  );
+  const saved = await createKeyTemplateFromKey({ name: "Captured policy", fromKeyId: source.id }, captured);
   assert.deepEqual(saved.template.policy.key.scopes, captured.policy.key.scopes);
   assert.equal(saved.template.policy.key.scopes.includes("manage"), false);
 });
@@ -417,43 +397,25 @@ test("save-from-key stores the same snapshot that was authorized before a source
 test("policy creation rejects reasoning rules affecting other keys", async () => {
   const policy = restrictedPolicy();
   const rule = {
-    name: "Not a global rule",
-    description: "",
-    scope: "global",
-    comboId: null,
-    connectionId: null,
-    modelPattern: null,
-    sourceEffort: "any",
-    requestTags: [],
-    tagMatchMode: "any",
-    effortMode: "inherit",
-    targetEffort: null,
-    targetKind: "keep",
-    targetModel: null,
-    targetComboId: null,
-    budgetAction: "preserve",
-    budgetTokens: null,
-    priority: 0,
-    enabled: true,
+    name: "Not a global rule", description: "", scope: "global",
+    comboId: null, connectionId: null, modelPattern: null, sourceEffort: "any",
+    requestTags: [], tagMatchMode: "any", effortMode: "inherit", targetEffort: null,
+    targetKind: "keep", targetModel: null, targetComboId: null,
+    budgetAction: "preserve", budgetTokens: null, priority: 0, enabled: true,
   };
-  const response = await keysRoute.POST(
-    await post("/api/keys", {
-      name: "Isolated",
-      policy: { ...policy, related: { ...policy.related, reasoningRules: [rule] } },
-    })
-  );
+  const response = await keysRoute.POST(await post("/api/keys", {
+    name: "Isolated", policy: { ...policy, related: { ...policy.related, reasoningRules: [rule] } },
+  }));
   assert.equal(response.status, 400);
   assert.equal(apiKeysDb.getApiKeysCount(), 0);
-  assert.equal(
-    core.getDbInstance().prepare("SELECT count(*) AS n FROM reasoning_routing_rules").get().n,
-    0
-  );
+  assert.equal(core.getDbInstance().prepare("SELECT count(*) AS n FROM reasoning_routing_rules").get().n, 0);
 });
 
-test("source policy capture prevents an interleaved writer during its multi-table snapshot", async () => {
+test("deferred capture sees one snapshot even when a separate WAL writer commits between reads", async () => {
   const created = await keysRoute.POST(await post("/api/keys", { name: "Snapshot source" }));
   assert.equal(created.status, 201);
   const source = await created.json();
+  const group = groupsDb.createKeyGroup("Concurrent group");
   const db = core.getDbInstance();
   const file = (db.prepare("PRAGMA database_list").get() as { file: string }).file;
   const originalPrepare = db.prepare.bind(db);
@@ -464,37 +426,24 @@ test("source policy capture prevents an interleaved writer during its multi-tabl
     return {
       ...stmt,
       get(...args: unknown[]) {
-        const row = stmt.get(...args);
-        attempted = true;
-        // A separate process avoids mixing SQLite library lock bookkeeping in one PID.
-        const writer = spawnSync(
-          process.execPath,
-          [
-            "--max-old-space-size=128",
-            "--input-type=module",
-            "-e",
-            `
-            import { DatabaseSync } from "node:sqlite";
-            const peer = new DatabaseSync(process.argv[1]);
-            peer.exec("PRAGMA busy_timeout=0");
-            try {
-              peer.prepare("UPDATE api_keys SET model_access_mode='restricted' WHERE id=?").run(process.argv[2]);
-              process.exitCode = 2;
-            } catch (error) {
-              process.exitCode = /locked|busy/i.test(String(error.message)) ? 0 : 3;
-            } finally { peer.close(); }
-          `,
-            file,
-            source.id,
-          ],
-          { encoding: "utf8", timeout: 5000 }
-        );
-        assert.equal(
-          writer.status,
-          0,
-          "a separate writer must be blocked by the snapshot transaction"
-        );
-        return row;
+           const row = stmt.get(...args);
+           attempted = true;
+           // The first SELECT fixes the snapshot; a WAL writer must not be blocked by
+           // a reserved write lock and its newly inserted group must not leak in.
+           const writer = spawnSync(process.execPath, ["--max-old-space-size=128", "--input-type=module", "-e", `
+             import { DatabaseSync } from "node:sqlite";
+             const peer = new DatabaseSync(process.argv[1]);
+             peer.exec("PRAGMA busy_timeout=0");
+             try {
+               peer.prepare("INSERT INTO key_group_members (key_id, group_id) VALUES (?, ?)")
+                 .run(process.argv[2], process.argv[3]);
+               process.exitCode = 0;
+             } catch (error) {
+               process.exitCode = /locked|busy/i.test(String(error.message)) ? 2 : 3;
+             } finally { peer.close(); }
+           `, file, source.id, group.id], { encoding: "utf8", timeout: 5000 });
+           assert.equal(writer.status, 0, "a read snapshot must not reserve the writer lock");
+          return row;
       },
     };
   }) as typeof db.prepare;
@@ -502,6 +451,8 @@ test("source policy capture prevents an interleaved writer during its multi-tabl
     const { previewKeyTemplatePolicy } = await import("../../src/lib/db/keyTemplates.ts");
     const snapshot = previewKeyTemplatePolicy(source.id);
     assert.equal(snapshot.policy.key.modelAccessMode, "all");
+    assert.deepEqual(snapshot.policy.related.groupIds, [], "later tables must use the first SELECT snapshot");
+    assert.equal((db.prepare("SELECT count(*) AS n FROM key_group_members WHERE key_id=?").get(source.id) as { n: number }).n, 1);
     assert.equal(attempted, true);
   } finally {
     db.prepare = originalPrepare;
@@ -515,19 +466,78 @@ test("stored templates with unknown versions or invalid policy fail closed", asy
   assert.equal(response.status, 201);
   const { template } = await response.json();
   const db = core.getDbInstance();
-  const get = async () =>
-    templateRoute.GET(
-      await makeManagementSessionRequest(`${BASE}/api/key-templates/${template.id}`),
-      params(template.id)
-    );
+  const get = async () => templateRoute.GET(
+    await makeManagementSessionRequest(`${BASE}/api/key-templates/${template.id}`), params(template.id)
+  );
   db.prepare("UPDATE key_templates SET schema_version = 999 WHERE id = ?").run(template.id);
   assert.equal((await get()).status, 422);
-  db.prepare("UPDATE key_templates SET schema_version = 1, policy = '{}' WHERE id = ?").run(
-    template.id
-  );
+  db.prepare("UPDATE key_templates SET schema_version = 1, policy = '{}' WHERE id = ?").run(template.id);
   assert.equal((await get()).status, 422);
   db.prepare("UPDATE key_templates SET policy = 'invalid-json' WHERE id = ?").run(template.id);
   assert.equal((await get()).status, 422);
+});
+
+test("a corrupt stored policy remains visible for deletion while healthy templates remain readable", async () => {
+  const healthy = await templatesRoute.POST(await post("/api/key-templates", {
+    name: "Healthy", policy: restrictedPolicy(),
+  }));
+  const broken = await templatesRoute.POST(await post("/api/key-templates", {
+    name: "Broken", policy: restrictedPolicy(),
+  }));
+  const healthyId = (await healthy.json()).template.id;
+  const brokenId = (await broken.json()).template.id;
+  const db = core.getDbInstance();
+  for (const [version, policy] of [[999, "{}"], [1, "{}"], [1, "{broken"]] as const) {
+    db.prepare("UPDATE key_templates SET schema_version=?, policy=? WHERE id=?")
+      .run(version, policy, brokenId);
+    const response = await templatesRoute.GET(await makeManagementSessionRequest(`${BASE}/api/key-templates`));
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.deepEqual(body.templates.map((row: { id: string }) => row.id), [healthyId]);
+    assert.deepEqual(body.unreadable, [{
+      id: brokenId, name: "Broken", revision: 1, code: "VALIDATION_FAILED",
+    }]);
+    const detail = await templateRoute.GET(
+      await makeManagementSessionRequest(`${BASE}/api/key-templates/${brokenId}`), params(brokenId));
+    assert.equal(detail.status, 422, "individual detail must still fail closed");
+  }
+  const removed = await templateRoute.DELETE(
+    await makeManagementSessionRequest(`${BASE}/api/key-templates/${brokenId}`, { method: "DELETE" }),
+    params(brokenId));
+  assert.equal(removed.status, 200);
+  assert.equal((await (await templatesRoute.GET(
+    await makeManagementSessionRequest(`${BASE}/api/key-templates`))).json()).unreadable.length, 0);
+});
+
+test("real remote CLI tokens require admin for each template mutation but retain read access", async () => {
+  await enableManagementAuth();
+  const accessTokens = await import("../../src/lib/db/accessTokens.ts");
+  const writer = accessTokens.createAccessToken({ name: "template-writer", scope: "write" }).secret;
+  const reader = accessTokens.createAccessToken({ name: "template-reader", scope: "read" }).secret;
+  const admin = accessTokens.createAccessToken({ name: "template-admin", scope: "admin" }).secret;
+  const remote = (token: string, url: string, method = "GET", body?: unknown) => new Request(`${BASE}${url}`, {
+    method,
+    headers: { authorization: `Bearer ${token}`, ...(body ? { "content-type": "application/json" } : {}) },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+  const policy = restrictedPolicy();
+  const url = "/api/key-templates";
+  assert.equal((await templatesRoute.GET(remote(reader, url))).status, 200);
+  assert.equal((await templatesRoute.POST(remote(writer, url, "POST", { name: "No", policy }))).status, 403);
+  const created = await templatesRoute.POST(remote(admin, url, "POST", { name: "Admin", policy }));
+  assert.equal(created.status, 201);
+  const id = (await created.json()).template.id;
+  const detail = `${url}/${id}`;
+  assert.equal((await templateRoute.GET(remote(reader, detail), params(id))).status, 200);
+  assert.equal((await templateRoute.PATCH(remote(writer, detail, "PATCH", {
+    revision: 1, name: "No rename",
+  }), params(id))).status, 403);
+  const updated = await templateRoute.PATCH(remote(admin, detail, "PATCH", {
+    revision: 1, name: "Renamed",
+  }), params(id));
+  assert.equal(updated.status, 200);
+  assert.equal((await templateRoute.DELETE(remote(writer, detail, "DELETE"), params(id))).status, 403);
+  assert.equal((await templateRoute.DELETE(remote(admin, detail, "DELETE"), params(id))).status, 200);
 });
 
 test("migration 228 upgrades a prior-schema database without changing an existing key", () => {

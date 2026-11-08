@@ -13,12 +13,14 @@ import {
   KeyTemplateNameConflictError,
   listStoredTemplates,
   readKeyPolicyRows,
+  runDeferred,
   runImmediate,
   snapshotToTemplatePolicy,
   templatePolicyToRows,
   updateStoredTemplate,
 } from "../../src/lib/db/keyTemplates/policyCore.ts";
 import { createDefaultKeyTemplatePolicy } from "../../src/shared/types/keyTemplates.ts";
+import { isLiteralKeyTemplateComboReference } from "../../src/shared/utils/keyTemplateReferences.ts";
 
 const CONN_A = "11111111-1111-4111-8111-111111111111";
 const CONN_B = "22222222-2222-4222-8222-222222222222";
@@ -135,33 +137,14 @@ function count(db, sql, ...params) {
 
 test("snapshot captures every policy field and related configuration, no identity or secret", () => {
   const db = fixture();
-  const { policy, warnings, problems } = snapshotToTemplatePolicy(
-    readKeyPolicyRows(db, "src"),
-    NOW
-  );
+  const { policy, warnings, problems } = snapshotToTemplatePolicy(readKeyPolicyRows(db, "src"), NOW);
   assert.deepEqual(problems, []);
   const json = JSON.stringify(policy);
-  for (const forbidden of [
-    "SECRET-VALUE",
-    "HASH-VALUE",
-    "sk-PREFIX",
-    "Source key",
-    "machine",
-    "last_used",
-    "999",
-    "98765",
-    "ovr-1",
-    "rule-1",
-    "limit-1",
-  ]) {
+  for (const forbidden of ["SECRET-VALUE", "HASH-VALUE", "sk-PREFIX", "Source key", "machine", "last_used", "999", "98765", "ovr-1", "rule-1", "limit-1"]) {
     assert.ok(!json.includes(forbidden), `policy must not contain ${forbidden}`);
   }
   const defaults = createDefaultKeyTemplatePolicy();
-  assert.deepEqual(
-    Object.keys(policy.key).sort(),
-    Object.keys(defaults.key).sort(),
-    "complete key field set"
-  );
+  assert.deepEqual(Object.keys(policy.key).sort(), Object.keys(defaults.key).sort(), "complete key field set");
   assert.equal(policy.key.modelAccessMode, "restricted");
   assert.deepEqual(policy.key.allowedModels, [], "restricted + [] stays deny-all");
   assert.deepEqual(policy.key.allowedCombos, [], "[] combos stays deny-all");
@@ -184,27 +167,12 @@ test("snapshot captures every policy field and related configuration, no identit
   assert.equal(policy.key.dailyUsageLimitUsd, 5);
   assert.deepEqual(policy.related.groupIds, ["group-1"]);
   assert.deepEqual(policy.related.domainBudget, {
-    dailyLimitUsd: 1,
-    weeklyLimitUsd: 2,
-    monthlyLimitUsd: 3,
-    warningThreshold: 0.5,
-    resetInterval: "weekly",
-    resetTime: "06:00",
+    dailyLimitUsd: 1, weeklyLimitUsd: 2, monthlyLimitUsd: 3, warningThreshold: 0.5,
+    resetInterval: "weekly", resetTime: "06:00",
   });
-  assert.deepEqual(policy.related.quotaLimits, {
-    tpmLimit: 1000,
-    rpmLimit: 20,
-    monthlyAmountUsd: 50,
-  });
+  assert.deepEqual(policy.related.quotaLimits, { tpmLimit: 1000, rpmLimit: 20, monthlyAmountUsd: 50 });
   assert.deepEqual(policy.related.tokenLimits, [
-    {
-      scopeType: "provider",
-      scopeValue: "openai",
-      tokenLimit: 100000,
-      resetInterval: "daily",
-      resetTime: "00:00",
-      enabled: true,
-    },
+    { scopeType: "provider", scopeValue: "openai", tokenLimit: 100000, resetInterval: "daily", resetTime: "00:00", enabled: true },
   ]);
   assert.deepEqual(policy.related.autoCandidateOverrides, [
     { autoChannel: "auto/coding", connectionId: CONN_A, excluded: true },
@@ -213,9 +181,7 @@ test("snapshot captures every policy field and related configuration, no identit
   assert.equal(policy.related.reasoningRules[0].targetComboId, "combo-1");
   assert.deepEqual(policy.related.reasoningRules[0].requestTags, ["Fast"]);
   assert.deepEqual(policy.expiry, { mode: "relative", ttlSeconds: 30 * 86400 });
-  assert.ok(
-    warnings.some((w) => w.code === "EXPIRY_CONVERTED_TO_RELATIVE" && !w.requiresAcknowledgement)
-  );
+  assert.ok(warnings.some((w) => w.code === "EXPIRY_CONVERTED_TO_RELATIVE" && !w.requiresAcknowledgement));
   assert.ok(warnings.some((w) => w.code === "GROUP_POLICY_SHARED"));
   db.close();
 });
@@ -223,9 +189,7 @@ test("snapshot captures every policy field and related configuration, no identit
 test("policy roundtrip creates an equivalent independent key with fresh identity", () => {
   const db = fixture();
   const { policy } = snapshotToTemplatePolicy(readKeyPolicyRows(db, "src"), NOW);
-  runImmediate(db, () =>
-    insertKeyPolicyRows(db, identity("new"), templatePolicyToRows(policy, NOW))
-  );
+  runImmediate(db, () => insertKeyPolicyRows(db, identity("new"), templatePolicyToRows(policy, NOW)));
   const created = db.prepare("SELECT * FROM api_keys WHERE id='new'").get();
   assert.equal(created.key, "fixture-only:new");
   assert.equal(created.key_hash, "hash-new");
@@ -237,42 +201,21 @@ test("policy roundtrip creates an equivalent independent key with fresh identity
   assert.equal(created.model_access_mode, "restricted");
   const again = snapshotToTemplatePolicy(readKeyPolicyRows(db, "new"), NOW);
   assert.deepEqual(again.policy.key, policy.key, "key policy survives a full roundtrip");
-  assert.deepEqual(
-    again.policy.related,
-    policy.related,
-    "related policy survives a full roundtrip"
-  );
-  assert.equal(
-    count(
-      db,
-      "SELECT count(*) n FROM api_key_token_limits WHERE api_key_id='new' AND id <> 'limit-1'"
-    ),
-    1
-  );
-  assert.equal(
-    count(
-      db,
-      "SELECT count(*) n FROM reasoning_routing_rules WHERE api_key_id='new' AND id <> 'rule-1'"
-    ),
-    1
-  );
+  assert.deepEqual(again.policy.related, policy.related, "related policy survives a full roundtrip");
+  assert.equal(count(db, "SELECT count(*) n FROM api_key_token_limits WHERE api_key_id='new' AND id <> 'limit-1'"), 1);
+  assert.equal(count(db, "SELECT count(*) n FROM reasoning_routing_rules WHERE api_key_id='new' AND id <> 'rule-1'"), 1);
   const budget = db.prepare("SELECT * FROM domain_budgets WHERE api_key_id='new'").get();
   assert.equal(budget.warning_emitted_at, null, "budget runtime state is not copied");
   assert.equal(budget.budget_reset_at, null);
   // Independence: editing the new key never touches the source.
   db.prepare("UPDATE api_keys SET allowed_combos='[\"x\"]' WHERE id='new'").run();
-  assert.equal(
-    db.prepare("SELECT allowed_combos FROM api_keys WHERE id='src'").get().allowed_combos,
-    "[]"
-  );
+  assert.equal(db.prepare("SELECT allowed_combos FROM api_keys WHERE id='src'").get().allowed_combos, "[]");
   db.close();
 });
 
 test("legacy NULL combos stay allow-all and non-empty legacy models stay restricted", () => {
   const db = fixture();
-  db.exec(
-    "UPDATE api_keys SET allowed_combos = NULL, model_access_mode = 'all', allowed_models = '[\"m/*\"]' WHERE id='src'"
-  );
+  db.exec("UPDATE api_keys SET allowed_combos = NULL, model_access_mode = 'all', allowed_models = '[\"m/*\"]' WHERE id='src'");
   const { policy } = snapshotToTemplatePolicy(readKeyPolicyRows(db, "src"), NOW);
   assert.deepEqual(policy.key.allowedCombos, ["combo/*"]);
   assert.equal(policy.key.modelAccessMode, "restricted");
@@ -288,24 +231,13 @@ test("lifecycle and excluded settings require acknowledgement and are normalized
     INSERT INTO api_key_billing_team_history VALUES ('h','src','team',NULL);`);
   const { policy, warnings } = snapshotToTemplatePolicy(readKeyPolicyRows(db, "src"), NOW);
   const ack = new Set(warnings.filter((w) => w.requiresAcknowledgement).map((w) => w.code));
-  for (const code of [
-    "KEY_REVOKED",
-    "KEY_DISABLED",
-    "KEY_BANNED",
-    "KEY_EXPIRED",
-    "SSO_IDENTITY_EXCLUDED",
-    "WEIGHTED_ALLOCATION_EXCLUDED",
-    "CONTEXT_SOURCES_EXCLUDED",
-    "BILLING_TEAM_EXCLUDED",
-  ]) {
+  for (const code of ["KEY_REVOKED", "KEY_DISABLED", "KEY_BANNED", "KEY_EXPIRED", "SSO_IDENTITY_EXCLUDED",
+    "WEIGHTED_ALLOCATION_EXCLUDED", "CONTEXT_SOURCES_EXCLUDED", "BILLING_TEAM_EXCLUDED"]) {
     assert.ok(ack.has(code), `${code} requires acknowledgement`);
   }
   assert.equal(policy.key.isActive, true);
   assert.equal(policy.key.isBanned, false);
-  assert.ok(
-    !JSON.stringify(policy).includes("CTX-CREDENTIAL"),
-    "context-source credentials never captured"
-  );
+  assert.ok(!JSON.stringify(policy).includes("CTX-CREDENTIAL"), "context-source credentials never captured");
   db.close();
 });
 
@@ -323,23 +255,13 @@ test("unreadable stored restrictions and unclassified fields fail closed", () =>
   db.exec("UPDATE api_keys SET allowed_connections='{broken' WHERE id='src'");
   let result = snapshotToTemplatePolicy(readKeyPolicyRows(db, "src"), NOW);
   assert.ok(result.problems.some((p) => p.path === "key.allowedConnections" && p.blocking));
-  db.exec(
-    `UPDATE api_keys SET allowed_connections='["${CONN_A}"]' WHERE id='src'; ALTER TABLE api_keys ADD COLUMN future_policy TEXT DEFAULT 'off';`
-  );
+  db.exec(`UPDATE api_keys SET allowed_connections='["${CONN_A}"]' WHERE id='src'; ALTER TABLE api_keys ADD COLUMN future_policy TEXT DEFAULT 'off';`);
   result = snapshotToTemplatePolicy(readKeyPolicyRows(db, "src"), NOW);
   assert.deepEqual(result.problems, [], "unclassified column at its default is harmless");
   db.exec("UPDATE api_keys SET future_policy='on' WHERE id='src'");
   result = snapshotToTemplatePolicy(readKeyPolicyRows(db, "src"), NOW);
-  assert.ok(
-    result.problems.some(
-      (p) => p.code === "UNCLASSIFIED_SOURCE_FIELD" && p.path === "api_keys.future_policy"
-    )
-  );
-  assert.equal(
-    count(db, "SELECT count(*) n FROM api_keys"),
-    1,
-    "snapshot capture never writes a key"
-  );
+  assert.ok(result.problems.some((p) => p.code === "UNCLASSIFIED_SOURCE_FIELD" && p.path === "api_keys.future_policy"));
+  assert.equal(count(db, "SELECT count(*) n FROM api_keys"), 1, "snapshot capture never writes a key");
   db.close();
 });
 
@@ -347,35 +269,17 @@ test("reference issues never prune and only block when dropping could broaden ac
   const db = fixture();
   const policy = createDefaultKeyTemplatePolicy();
   policy.key.allowedConnections = [CONN_A, CONN_GONE];
-  policy.key.allowedCombos = ["team-combo", "gone-combo", "combo/*", "rt-*"];
+  policy.key.allowedCombos = ["team-combo", "gone-combo", "combo/*", "rt-*", "rt-concrete"];
   policy.key.allowedQuotas = ["pool-gone"];
   policy.key.proxyId = "proxy-gone";
   policy.related.groupIds = ["group-1", "group-off", "group-gone"];
-  policy.related.autoCandidateOverrides = [
-    { autoChannel: "auto/x", connectionId: CONN_GONE, excluded: true },
-  ];
-  policy.related.reasoningRules = [
-    {
-      name: "r",
-      description: "",
-      scope: "apiKey",
-      comboId: null,
-      connectionId: null,
-      modelPattern: null,
-      sourceEffort: "any",
-      requestTags: [],
-      tagMatchMode: "any",
-      effortMode: "inherit",
-      targetEffort: null,
-      targetKind: "combo",
-      targetModel: null,
-      targetComboId: "combo-gone",
-      budgetAction: "preserve",
-      budgetTokens: null,
-      priority: 0,
-      enabled: true,
-    },
-  ];
+  policy.related.autoCandidateOverrides = [{ autoChannel: "auto/x", connectionId: CONN_GONE, excluded: true }];
+  policy.related.reasoningRules = [{
+    name: "r", description: "", scope: "apiKey", comboId: null, connectionId: null, modelPattern: null,
+    sourceEffort: "any", requestTags: [], tagMatchMode: "any", effortMode: "inherit", targetEffort: null,
+    targetKind: "combo", targetModel: null, targetComboId: "combo-gone", budgetAction: "preserve",
+    budgetTokens: null, priority: 0, enabled: true,
+  }];
   const issues = collectReferenceIssues(db, policy);
   const byPath = Object.fromEntries(issues.map((i) => [i.path, i]));
   assert.equal(byPath["key.allowedConnections.1"].blocking, false);
@@ -384,46 +288,50 @@ test("reference issues never prune and only block when dropping could broaden ac
   assert.equal(byPath["key.allowedCombos.0"], undefined);
   assert.equal(byPath["key.allowedCombos.2"], undefined, "combo/* is never a reference");
   assert.equal(byPath["key.allowedCombos.3"], undefined, "patterns are never invalid by absence");
+  assert.equal(byPath["key.allowedCombos.4"].value, "rt-concrete", "rt- alone is a literal");
+  assert.equal(byPath["key.allowedConnections.1"].value, CONN_GONE);
   assert.equal(byPath["key.allowedQuotas.0"].blocking, false);
   assert.equal(byPath["key.proxyId"].blocking, true);
   assert.equal(byPath["related.groupIds.1"].code, "GROUP_INACTIVE");
+  assert.equal(byPath["related.groupIds.1"].value, "group-off");
   assert.equal(byPath["related.groupIds.2"].blocking, true);
-  assert.equal(
-    byPath["related.autoCandidateOverrides.0.connectionId"].blocking,
-    false,
-    "stale exclusions are kept"
-  );
+  assert.equal(byPath["related.autoCandidateOverrides.0.connectionId"].blocking, false, "stale exclusions are kept");
   assert.equal(byPath["related.reasoningRules.0.targetComboId"].blocking, true);
   assert.deepEqual(policy.key.allowedConnections, [CONN_A, CONN_GONE], "nothing is pruned");
   db.close();
 });
 
+test("combo reference predicate excludes wildcard rules but not concrete rt- names", () => {
+  for (const name of ["combo/*", "team?", "[ab]", "rt-*"]) {
+    assert.equal(isLiteralKeyTemplateComboReference(name), false, name);
+  }
+  for (const name of ["team-combo", "rt-concrete"]) {
+    assert.equal(isLiteralKeyTemplateComboReference(name), true, name);
+  }
+});
+
+test("deferred snapshot commits and rolls back without retaining a write lock", () => {
+  const db = fixture();
+  assert.equal(runDeferred(db, () => {
+    const before = db.prepare("SELECT name FROM api_keys WHERE id='src'").get().name;
+    return before;
+  }), "Source key");
+  // The read transaction is complete and no RESERVED writer lock is retained.
+  db.exec("UPDATE api_keys SET name='After read' WHERE id='src'");
+  assert.equal(db.prepare("SELECT name FROM api_keys WHERE id='src'").get().name, "After read");
+  assert.throws(() => runDeferred(db, () => { throw new Error("snapshot failed"); }), /snapshot failed/);
+  assert.equal(runDeferred(db, () => db.prepare("SELECT name FROM api_keys WHERE id='src'").get().name), "After read");
+  db.close();
+});
+
 test("a failing related insert rolls back the principal key", () => {
   const db = fixture();
-  db.exec(
-    "CREATE TRIGGER fail_rule BEFORE INSERT ON reasoning_routing_rules WHEN NEW.api_key_id='new' BEGIN SELECT RAISE(ABORT,'fixture'); END;"
-  );
+  db.exec("CREATE TRIGGER fail_rule BEFORE INSERT ON reasoning_routing_rules WHEN NEW.api_key_id='new' BEGIN SELECT RAISE(ABORT,'fixture'); END;");
   const { policy } = snapshotToTemplatePolicy(readKeyPolicyRows(db, "src"), NOW);
-  assert.throws(() =>
-    runImmediate(db, () =>
-      insertKeyPolicyRows(db, identity("new"), templatePolicyToRows(policy, NOW))
-    )
-  );
-  for (const table of [
-    "api_keys",
-    "key_group_members",
-    "domain_budgets",
-    "api_key_quota_limits",
-    "api_key_token_limits",
-    "auto_candidate_overrides",
-  ]) {
-    const column =
-      table === "api_keys" ? "id" : table === "key_group_members" ? "key_id" : "api_key_id";
-    assert.equal(
-      count(db, `SELECT count(*) n FROM ${table} WHERE ${column}='new'`),
-      0,
-      `${table} rolled back`
-    );
+  assert.throws(() => runImmediate(db, () => insertKeyPolicyRows(db, identity("new"), templatePolicyToRows(policy, NOW))));
+  for (const table of ["api_keys", "key_group_members", "domain_budgets", "api_key_quota_limits", "api_key_token_limits", "auto_candidate_overrides"]) {
+    const column = table === "api_keys" ? "id" : table === "key_group_members" ? "key_id" : "api_key_id";
+    assert.equal(count(db, `SELECT count(*) n FROM ${table} WHERE ${column}='new'`), 0, `${table} rolled back`);
   }
   db.close();
 });
@@ -438,10 +346,7 @@ test("key policy reasoning rules cannot escape to a global scope", () => {
     /must use apiKey scope/
   );
   assert.equal(db.prepare("SELECT count(*) AS n FROM api_keys WHERE id='new'").get().n, 0);
-  assert.equal(
-    db.prepare("SELECT count(*) AS n FROM reasoning_routing_rules WHERE scope='global'").get().n,
-    0
-  );
+  assert.equal(db.prepare("SELECT count(*) AS n FROM reasoning_routing_rules WHERE scope='global'").get().n, 0);
   db.close();
 });
 
@@ -452,10 +357,7 @@ test("a related value the schema cannot store fails instead of being dropped", (
   const { policy } = snapshotToTemplatePolicy(readKeyPolicyRows(sourceDb, "src"), NOW);
   sourceDb.close();
   assert.throws(
-    () =>
-      runImmediate(db, () =>
-        insertKeyPolicyRows(db, identity("new"), templatePolicyToRows(policy, NOW))
-      ),
+    () => runImmediate(db, () => insertKeyPolicyRows(db, identity("new"), templatePolicyToRows(policy, NOW))),
     /api_key_quota_limits/
   );
   assert.equal(count(db, "SELECT count(*) n FROM api_keys WHERE id='new'"), 0);
@@ -465,94 +367,53 @@ test("a related value the schema cannot store fails instead of being dropped", (
 test("template storage: revisions, name conflicts, deletion and snapshot independence", () => {
   const db = fixture();
   const { policy } = snapshotToTemplatePolicy(readKeyPolicyRows(db, "src"), NOW);
-  const stored = insertStoredTemplate(db, {
-    id: "t1",
-    name: "Restricted",
-    description: "",
-    policyJson: JSON.stringify(policy),
-    now: "t0",
-  });
+  const stored = insertStoredTemplate(db, { id: "t1", name: "Restricted", description: "", policyJson: JSON.stringify(policy), now: "t0" });
   assert.equal(stored.revision, 1);
   assert.throws(
-    () =>
-      insertStoredTemplate(db, {
-        id: "t2",
-        name: "restricted",
-        description: "",
-        policyJson: "{}",
-        now: "t0",
-      }),
+    () => insertStoredTemplate(db, { id: "t2", name: "restricted", description: "", policyJson: "{}", now: "t0" }),
     KeyTemplateNameConflictError
   );
   // A key created from the template is independent from later template edits.
-  runImmediate(db, () =>
-    insertKeyPolicyRows(
-      db,
-      identity("fromT"),
-      templatePolicyToRows(JSON.parse(stored.policyJson), NOW)
-    )
-  );
+  runImmediate(db, () => insertKeyPolicyRows(db, identity("fromT"), templatePolicyToRows(JSON.parse(stored.policyJson), NOW)));
   const edited = structuredClone(policy);
   edited.key.allowedCombos = ["combo/*"];
-  const updated = updateStoredTemplate(db, {
-    id: "t1",
-    revision: 1,
-    policyJson: JSON.stringify(edited),
-    now: "t1",
-  });
+  const updated = updateStoredTemplate(db, { id: "t1", revision: 1, policyJson: JSON.stringify(edited), now: "t1" });
   assert.equal(updated.status, "updated");
   assert.equal(updated.template.revision, 2);
-  assert.deepEqual(updateStoredTemplate(db, { id: "t1", revision: 1, name: "Stale", now: "t2" }), {
-    status: "conflict",
-    currentRevision: 2,
-  });
-  assert.equal(getStoredTemplate(db, "t1").name, "Restricted", "stale revision never overwrites");
-  assert.deepEqual(updateStoredTemplate(db, { id: "nope", revision: 1, now: "t3" }), {
-    status: "not_found",
-  });
-  assert.equal(
-    db.prepare("SELECT allowed_combos FROM api_keys WHERE id='fromT'").get().allowed_combos,
-    "[]"
+  assert.deepEqual(
+    updateStoredTemplate(db, { id: "t1", revision: 1, name: "Stale", now: "t2" }),
+    { status: "conflict", currentRevision: 2 }
   );
+  assert.equal(getStoredTemplate(db, "t1").name, "Restricted", "stale revision never overwrites");
+  assert.deepEqual(updateStoredTemplate(db, { id: "nope", revision: 1, now: "t3" }), { status: "not_found" });
+  assert.equal(db.prepare("SELECT allowed_combos FROM api_keys WHERE id='fromT'").get().allowed_combos, "[]");
   // Editing the source key never changes the stored template.
   db.exec("UPDATE api_keys SET allowed_models='[\"changed\"]' WHERE id='src'");
   assert.deepEqual(JSON.parse(getStoredTemplate(db, "t1").policyJson).key.allowedModels, []);
   assert.equal(deleteStoredTemplate(db, "t1"), true);
   assert.equal(deleteStoredTemplate(db, "t1"), false);
-  assert.equal(
-    count(db, "SELECT count(*) n FROM api_keys WHERE id='fromT'"),
-    1,
-    "deleting a template keeps keys"
-  );
+  assert.equal(count(db, "SELECT count(*) n FROM api_keys WHERE id='fromT'"), 1, "deleting a template keeps keys");
   assert.deepEqual(listStoredTemplates(db), []);
   db.close();
 });
 
 test("migration, core schema and lazy ensure declare the same key_templates table and index", () => {
-  const coreSource = readFileSync(new URL("../../src/lib/db/core.ts", import.meta.url), "utf8");
-  const norm = (sql) =>
-    sql
-      .replace(/\s+/g, " ")
-      .replace(/ ?([(),;]) ?/g, "$1")
-      .trim();
+  const coreSource = readFileSync(
+    new URL("../../src/lib/db/core.ts", import.meta.url),
+    "utf8"
+  );
+  const norm = (sql) => sql.replace(/\s+/g, " ").replace(/ ?([(),;]) ?/g, "$1").trim();
   const table = /CREATE TABLE IF NOT EXISTS key_templates \([\s\S]*?\n\s*\);/.exec(coreSource);
   assert.ok(table, "core schema declares key_templates");
   assert.equal(norm(table[0]), norm(KEY_TEMPLATES_TABLE_SQL));
   const migrationSource = readFileSync(
-    new URL("../../src/lib/db/migrations/228_key_templates.sql", import.meta.url),
-    "utf8"
+    new URL("../../src/lib/db/migrations/228_key_templates.sql", import.meta.url), "utf8"
   );
-  const migrationTable = /CREATE TABLE IF NOT EXISTS key_templates \([\s\S]*?\n\s*\);/.exec(
-    migrationSource
-  );
+  const migrationTable = /CREATE TABLE IF NOT EXISTS key_templates \([\s\S]*?\n\s*\);/.exec(migrationSource);
   assert.ok(migrationTable, "numbered migration declares key_templates");
   assert.equal(norm(migrationTable[0]), norm(KEY_TEMPLATES_TABLE_SQL));
   assert.ok(norm(migrationSource).includes(norm(KEY_TEMPLATES_INDEX_SQL)));
 
   assert.ok(norm(coreSource).includes(norm(KEY_TEMPLATES_INDEX_SQL)));
-  assert.match(
-    coreSource,
-    /\{ table: "key_templates", maxRows: 5_000 \}/,
-    "critical-table preservation"
-  );
+  assert.match(coreSource, /\{ table: "key_templates", maxRows: 5_000 \}/, "critical-table preservation");
 });

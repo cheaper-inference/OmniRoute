@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
   try {
-    return templateJson({ templates: listKeyTemplates() });
+    return templateJson(listKeyTemplates());
   } catch (error) {
     return templateFailure(error, "Error listing key templates");
   }
@@ -47,15 +47,12 @@ export async function POST(request: Request) {
       const template = await createKeyTemplate({ name, description, policy });
       return templateJson({ template, warnings: [] }, 201);
     }
-    const result = await createKeyTemplateFromKey(
-      {
-        name,
-        description,
-        fromKeyId: fromKeyId!,
-        acknowledge,
-      },
-      captured!
-    );
+    const result = await createKeyTemplateFromKey({
+      name,
+      description,
+      fromKeyId: fromKeyId!,
+      acknowledge,
+    }, captured!);
     return templateJson(result, 201);
   } catch (error) {
     return templateFailure(error, "Error creating key template");
