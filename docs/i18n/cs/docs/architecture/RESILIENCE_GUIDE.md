@@ -4,11 +4,13 @@
 
 ---
 
-OmniRoute má tři odlišné, ale vzájemně související mechanismy odolnosti. Každý má jiný rozsah a účel. Při ladění chování směrování je udržujte oddělené.
+OmniRoute má tři odlišné, ale související mechanismy odolnosti. Každá má jiný rozsah a účel. Při ladění směrovacího chování je uchovávejte odděleně.
 
-![Třívrstvý model odolnosti](../diagrams/exported/resilience-3layers.svg)
+![3-layer resilience model](../diagrams/exported/resilience-3layers.svg)
 
 > Zdroj: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+
+> **Přepíná přednost Env-vs-dashboard pro odolnost.** Volitelná odolnost přepíná nasazená z prostředí — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — poskytuje pouze _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean přetrvával v `resilienceSettings` (Dashboard →** Nastavení → Resilience** / `PATCH /api/resilience`, uložený v `key_value`) vítězí nad hodnotou env: normalizace (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) udržuje uloženou booleovskou hodnotu, kdykoli existuje. Nastavení takové env var na `true` v nasazení, kde je řídicí panel již uložen `false` proto nic nemění — přepněte přepínač** Nastavení → Resilience** (nebo vymažte uložené pole).
 
 ## 1. Circuit breaker poskytovatele
 
@@ -68,203 +70,188 @@ exponenciální backoff `minRetryCooldownMs → maxRetryCooldownMs`. Přepsání
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 Regresní test: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Cooldown připojení
+## 2. Prodleva připojení
 
 **Rozsah:** jedno připojení/účet/klíč poskytovatele.
 
-**Účel:** přeskočit jeden nefunkční klíč, zatímco ostatní připojení pro stejného poskytovatele dál obsluhují požadavky.
+**Účel:** přeskočit jeden nefunkční klíč, zatímco ostatní připojení stejného poskytovatele nadále obsluhují požadavky.
 
 **Implementace:**
 
-- Označení nedostupnosti: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Označení jako nedostupné: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Výběr: `getProviderCredentials*` ve stejném souboru
-- Výpočet cooldownu: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Výpočet prodlevy: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Nastavení: `src/lib/resilience/settings.ts`
 
 **Pole pro každé připojení:**
 
-- `rateLimitedUntil` — časové razítko, do kdy cooldown trvá
+- `rateLimitedUntil` — časové razítko, do kterého trvá prodleva
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — počítadlo exponenciálního backoffu
+- `backoffLevel` — čítač exponenciálního backoffu
 
-**Výchozí cooldowny:**
+**Výchozí prodlevy:**
 
-- Základ pro OAuth: 5 s
-- Základ pro API klíč: 3 s
-- API klíč 429: preferuje upstreamové hlavičky `Retry-After`/reset nebo parsovatelný text resetu
+- Základní hodnota OAuth: 5 s
+- Základní hodnota API klíče: 3 s
+- API klíč 429: upřednostňuje upstream hlavičky `Retry-After`/reset nebo text resetu, který lze analyzovat
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
 
-**Ochrana proti thundering-herd:** zabraňuje souběžným selháním nadměrně prodlužovat cooldown nebo dvakrát navyšovat `backoffLevel`.
+**Prodleva opakování pro jednotlivé poskytovatele.** Stránka s podrobnostmi poskytovatele obsahuje výběr **Prodleva opakování** (Automaticky, 15 s až 1 h). Ukládá hodnotu `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600) prostřednictvím `PATCH /api/resilience`. Pokud chyba omezení rychlosti neobsahuje upstream nápovědu k opakování, tato hodnota nahradí škálovaný backoff pro daného poskytovatele a nastaví `backoffLevel` zpět na 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Priorita pro chybu omezení rychlosti, od nejvyšší po nejnižší: upstream nápověda k opakování, poté `providerSpecificData.rotationOverrides.rateLimitResetSeconds` pro dané připojení, poté prodleva opakování pro daného poskytovatele, poté `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` z prostředí a nakonec škálovaný backoff. Automaticky toto pole odstraní. Ovlivňuje pouze důvod omezení rychlosti, nikdy terminální stavy.
 
-**Odpovědi 429 kvůli limitu souběžnosti nestoupají po žebříku backoffu.** Odpověď `429`, jejíž
-tělo hlásí limit souběžnosti („too many concurrent requests", „concurrency limit", „parallel
-request limit", GLM `并发数过高`), znamená, že účet je zdravý, ale zaneprázdněný.
-`checkFallbackError()` vrátí důvod `concurrency_limited`: okamžitě přejde na další
-připojení, toto ochladí na pevnou dobu `CONCURRENCY_LIMIT_COOLDOWN_MS` (1 s) nebo podle
-retry nápovědy z upstreamu, ponechá `backoffLevel` beze změny a nastaví `skipProviderBreaker`.
-Explicitní tělo s kvótou má stále přednost, takže tělo, které odpovídá i vzoru kvóty, zůstává
-verdiktem kvóty. Detekce: `looksLikeConcurrencyLimit()` v `src/shared/utils/classify429.ts`;
-verdikt: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()`
-(`FailureKind` breakeru) je beze změny a pro tato těla stále vrací `rate_limit`.
+**Ochrana proti efektu stáda:** zabraňuje tomu, aby souběžná selhání nadměrně prodlužovala prodlevu nebo vícekrát navyšovala `backoffLevel`.
 
-**Zaseknutí obsahu streamu účet neochlazuje.** Když se watchdog zaseknutí obsahu
-(`open-sse/utils/streamHandler.ts`) vzdá streamu, který včas neposlal žádný výstup modelu,
-`markAccountUnavailable()` zaznamená chybu na připojení, ale nenastaví žádný
-cooldown: zaseknutí patří danému požadavku, nejčastěji jde o dlouhé kolo uvažování bez
-dosavadního výstupu. Operátoři mohou chlazení znovu zapnout pomocí
-`resilienceSettings.streamStallCooldown.enabled` (výchozí `false`).
+**429 způsobené limitem souběžnosti nezvyšují úroveň backoffu.** `429`, jehož tělo uvádí limit souběžnosti („too many concurrent requests“, „concurrency limit“, „parallel request limit“, GLM `并发数过高`), znamená, že účet je v pořádku, ale zaneprázdněný. `checkFallbackError()` vrací důvod `concurrency_limited`: okamžitě přepne na další připojení, toto připojení pozastaví na pevně danou dobu `CONCURRENCY_LIMIT_COOLDOWN_MS` (1 s) nebo do upstream nápovědy k opakování, ponechá `backoffLevel` beze změny a nastaví `skipProviderBreaker`. Výslovné tělo kvóty má stále přednost, takže tělo, které zároveň odpovídá vzoru kvóty, zůstane vyhodnoceno jako kvóta. Detekce: `looksLikeConcurrencyLimit()` v `src/shared/utils/classify429.ts`; vyhodnocení: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (`FailureKind` jističe) se nemění a pro tato těla stále čte `rate_limit`.
 
-**Opt-in signál latence pro výběr účtu `p2c`.** Každý odeslaný pokus zaznamená svůj
-čas do prvního bajtu (time-to-first-byte) a výsledek pro každé připojení (a pro kombinaci
-připojení + model) do posuvného okna v paměti: posledních 20 vzorků za 15 minut
-(`open-sse/services/connectionLatencyTracker.ts`, zaznamenáváno z `safeLogEvents()` v
-`src/sse/handlers/chatHelpers.ts`). Když je `resilienceSettings.p2cLatency.weight` nad `0`
-(rozsah 0–20, výchozí `0` = vypnuto), `compareP2CConnections()` v `src/sse/services/auth.ts` přidá
-každému kandidátovi z dvojice až `weight` bodů. Polovina pochází z latence jako poměru
-k rychlejšímu kandidátovi (dvakrát pomalejší získá celou polovinu) a polovina z klouzavé
-míry chyb. Tento člen platí pouze tehdy, když mají oba kandidáti alespoň 3 vzorky, takže
-nové účty nejsou penalizovány, a jeho strop zůstává pod penalizacemi za blokovanou a
-vyčerpanou kvótu. Nepřidává vlastní okruh: selhávající účty stále řeší vrstvy cooldownu,
-zámku a breakeru. Nastavíte jej pomocí `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
+**Zastavení toku obsahu nepozastavují účet.** Když hlídací mechanismus zastavení obsahu (`open-sse/utils/streamHandler.ts`) ukončí stream, který včas neposlal žádný výstup modelu, `markAccountUnavailable()` zaznamená chybu u připojení, ale nenastaví žádnou prodlevu: zastavení se týká daného požadavku, nejčastěji dlouhého kroku uvažování, u kterého zatím nebyl odeslán žádný výstup. Provozovatelé mohou tuto funkci volitelně zapnout prostřednictvím `resilienceSettings.streamStallCooldown.enabled` (výchozí hodnota `false`).
 
-**Rámce uvažování restartují rozpočet zaseknutí obsahu.** Reasoning model může přemýšlet
-minuty před svým prvním viditelným tokenem: Claude streamuje rámce `thinking_delta`, jejichž
-text uvažování může být prázdný, a Responses API streamuje jednu položku uvažování za
-druhou. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) tyto rámce
-rozpozná a watchdog při každém z nich restartuje svůj rozpočet místo zrušení kola.
-Stále však nejde o výstup modelu, takže kolo, které skončí pouze uvažováním, je i nadále
-hlášeno jako prázdné, a kolo, které přestane uvažovat a posílá jen heartbeaty, watchdog
-stále spustí.
+**Volitelný signál latence pro výběr účtu pomocí `p2c`.** Každý odeslaný pokus zaznamenává čas do prvního bajtu a výsledek pro jednotlivá připojení (a pro kombinaci připojení a modelu) do průběžného okna v paměti: posledních 20 vzorků v rámci 15 minut (`open-sse/services/connectionLatencyTracker.ts`, zaznamenávaných z `safeLogEvents()` v `src/sse/handlers/chatHelpers.ts`). Pokud je `resilienceSettings.p2cLatency.weight` vyšší než `0` (rozsah 0–20, výchozí `0` = vypnuto), `compareP2CConnections()` v `src/sse/services/auth.ts` přidá každému kandidátovi dvojice až `weight` bodů. Polovina této hodnoty vychází z latence jako poměru k rychlejšímu kandidátovi (dvojnásobná pomalost získá celou polovinu) a polovina z průběžné míry chyb. Tento faktor se použije pouze tehdy, když oba kandidáti mají alespoň 3 vzorky, takže nové účty nejsou penalizovány, a jeho maximum zůstává pod penalizacemi za zablokovanou a vyčerpanou kvótu. Nevytváří vlastní okruh: selhávající účty jsou nadále řešeny vrstvami prodlevy, uzamčení a jističe. Nastavuje se pomocí `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-Binární rámce `reasoningContentEvent` služby Kiro s neprázdným podpisem zachovávají tuto
-aktivitu uvažování skrze executor jako prázdnou deltu `reasoning_content`. Podpis se
-dál nepředává. Metadata, neúplné rámce a prázdné podpisy rozpočet obsahu nerestartují;
-nezávislý timeout aktivního streamu a zrušení klientem platí i nadále
-(`open-sse/executors/kiro/reasoning.ts`).
+**Rámce uvažování restartují rozpočet pro zastavení obsahu.** Uvažující model může před prvním viditelným tokenem přemýšlet několik minut: Claude streamuje rámce `thinking_delta`, jejichž text uvažování může být prázdný, a Responses API streamuje jednu položku uvažování za druhou. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) tyto rámce rozpoznává a hlídací mechanismus při každém z nich restartuje svůj rozpočet namísto zrušení kroku. Stále nejde o výstup modelu, takže krok, který skončí pouze uvažováním, je nadále hlášen jako prázdný a krok, který ukončí uvažování a posílá už jen heartbeat, stále aktivuje hlídací mechanismus.
 
-**Terminální stavy (NE cooldowny):**
+Binární rámce Kiro `reasoningContentEvent` s neprázdným podpisem zachovávají tuto aktivitu uvažování prostřednictvím exekutoru jako prázdný delta údaj `reasoning_content`. Podpis se nepředává dál. Metadata, neúplné rámce a prázdné podpisy nerestartují rozpočet obsahu; nadále platí nezávislý časový limit aktivního streamu a zrušení klientem (`open-sse/executors/kiro/reasoning.ts`).
 
-- `banned` — nastavuje detekce zakázaných klíčových slov / zákazu účtu (viz [BAN_DETECTION](../security/BAN_DETECTION.md)) a také tři po sobě jdoucí odmítnutí jednotlivých požadavků z upstreamu (`request_rejected`, např. Anthropic OAuth 403 „Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); jediné odmítnutí připojení pouze ochladí
-- `expired` (přejde do terminálního stavu po omezeném počtu opakování — `EXPIRED_RETRY_MAX = 3` s exponenciálním backoffem — takže přechodné chyby OAuth se mohou samy zotavit, než je účet trvale deaktivován)
+**Terminální stavy (NEJDE o prodlevy):**
+
+- `banned` — nastavuje se detekcí zakázaného klíčového slova nebo zablokovaného účtu (viz [BAN_DETECTION](../security/BAN_DETECTION.md)). Upstream odmítnutí jednotlivých požadavků (`request_rejected`, např. Anthropic OAuth 403 „Request not allowed“) jej nikdy nenastavují: započítávají se pro jednotlivá připojení a modely a daný model se vyřadí z rotace s postupně rostoucí prodlevou omezenou na `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), nebo se připojení pozastaví, pokud není znám žádný model — `open-sse/services/requestRejectedStreak.ts`
+- `expired` (po omezeném počtu opakování přechází do terminálního stavu — `EXPIRED_RETRY_MAX = 3` s exponenciálním backoffem — aby se přechodné chyby OAuth mohly samy opravit dříve, než bude účet trvale deaktivován)
 - `credits_exhausted`
 
-Tyto stavy přetrvávají, dokud se nezmění přihlašovací údaje nebo je operátor neresetuje. Nepřepisujte terminální stavy přechodným stavem cooldownu.
+Přetrvávají, dokud se nezmění přihlašovací údaje nebo je operátor neresetuje. Terminální stavy nepřepisujte přechodným stavem cooldownu.
 
-**Líné zotavení:** když `rateLimitedUntil` uplyne, připojení se opět stává způsobilým. Po úspěšném použití `clearAccountError()` vymaže všechna pole chyb.
+**Líné obnovení:** jakmile `rateLimitedUntil` uplyne, připojení se znovu stane způsobilým. Po úspěšném použití `clearAccountError()` vymaže všechna chybová pole.
 
-### Limit využití Claude OAuth: pruh s nižší prioritou + reset limitu relace
+### Limit využití Claude OAuth: fronta s nižší prioritou + reset limitu relace
 
-**Rozsah:** jedno připojení předplatného Claude (OAuth). Obě funkce jsou **opt-in pro každé
+**Rozsah:** jedno připojení Claude (OAuth). Obě funkce jsou **volitelné pro každé
 připojení** (Upravit připojení → sekce Claude → `lowPriorityMode` / `autoLimitReset` v
-`providerSpecificData`, obě ve výchozím stavu vypnuté) a odrážejí příkazy `/low-priority` a
-`/limit-reset` nástroje Claude Code (wire-kontrakt zachycen z Claude Code 2.1.263).
+`providerSpecificData`, obě jsou ve výchozím nastavení vypnuté) a odpovídají příkazům
+Claude Code `/low-priority` a `/limit-reset` (drátový kontrakt převzatý z Claude Code 2.1.263).
 
 **Implementace:**
 
 - Stavový automat + klasifikace odpovědí: `open-sse/services/claudeLowPriority.ts`
-- Klient pro reset statusu/nároku: `open-sse/services/claudeLimitReset.ts`
-- Hook executoru (injektování hlavičky + opakování se stejným účtem): `open-sse/executors/base.ts::execute()`
-- Opt-in persistence: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Klient pro stav/claim resetu: `open-sse/services/claudeLimitReset.ts`
+- Hook executoru (vkládání hlavičky + opakování pro stejný účet): `open-sse/executors/base.ts::execute()`
+- Uložení volitelné funkce: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Spouštěč:** pětihodinová stěna využití — `429`, jejíž hlavičky nesou
-`anthropic-ratelimit-unified-status: rejected` a, když je účet způsobilý,
-`anthropic-ratelimit-unified-slow-offer: treatment`. Před tímto prvním stěnovým
-429 se nic neodesílá; nárazový 429 bez unified hlaviček prochází normální cestou cooldownu.
+**Spouštěč:** pětihodinový limit využití — `429`, jehož hlavičky obsahují
+`anthropic-ratelimit-unified-status: rejected` a v případě, že je účet způsobilý,
+`anthropic-ratelimit-unified-slow-offer: treatment`. Před prvním `429` tohoto limitu
+se nic neodesílá; dávka `429` bez sjednocených hlaviček prochází běžnou cestou cooldownu.
 
-**Nižší prioritní dráha** (`lowPriorityMode`):
+**Fronta s nižší prioritou** (`lowPriorityMode`):
 
-- Při stěnovém 429 executor nabídku přijme a okamžitě zopakuje požadavek na **stejném**
-  účtu s `anthropic-usage-limit: slow`; dráha zůstává aktivní do oznámeného
-  `anthropic-ratelimit-unified-reset` (+60s tolerance) a každý požadavek v tomto okně nese
-  tuto hlavičku. Zachycený 429 se nikdy nedostane do `handleChatCore`, takže spojení
-  **není** uvedeno do cooldownu a není z něj rotováno pryč.
-- `anthropic-ratelimit-unified-slow-status` na pozdějších odpovědích: `active` / `not_needed`
-  dráhu udržují; `slot_busy` (429) nebo `529` čekají podle serverového
-  `anthropic-ratelimit-unified-slow-retry-after` (výchozí 20 s, omezeno 5–600 s, ±30 % jitter)
-  a opakují, omezeno `anthropic-ratelimit-unified-slow-max-wait` (výchozí 20 min, omezeno
-  1 min–6 h) — po uplynutí dráha končí a desetiminutový cool-off blokuje opětovné přijetí.
-  Čekání je dodatečně omezeno zbývajícím časem vlastního timeoutu spuštění upstreamu požadavku
-  (`resolveFetchStartTimeout`, výchozí 10 min) minus 5s rezerva: bez tohoto stropu by
-  výchozí dvacetiminutový max-wait přežil požadavek a spánek by byl přerušen
-  uprostřed čekání, což by vyvolalo `TimeoutError` místo elegantního ukončení `max_wait` + cool-off.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, překlopení 5hodinového okna nebo
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (což ji ukončí jako
-  `extra_usage` při jakémkoli statusu, protože placené překročení nyní stěnu pokrývá) dráhu ukončují;
-  odpověď poté plyne do normální cesty cooldownu. `budget_exhausted` je zapamatováno do
-  oznámeného resetu rozpočtu (≤ 8 dní).
-- Kontrola stěny běží po vlastních opakováních executoru v rámci pokusu řízených stavem 400 (úprava
-  kontextu, omezení thinking/effort, automatické učení parametrů), takže stěnový 429, který se objeví
-  až při jednom z těchto opakování, je stále zachycen místo toho, aby dosáhl cesty cooldownu.
-- Stav je v paměti pro každé spojení (restart stojí jeden stěnový 429 navíc na opětovné přijetí).
+- Při `429` způsobeném limitem executor přijme nabídku a okamžitě zopakuje požadavek na
+  **stejném** účtu s `anthropic-usage-limit: slow`; fronta zůstává aktivní až do oznámeného
+  `anthropic-ratelimit-unified-reset` (+ 60 s ochranné lhůty) a každý požadavek v tomto
+  časovém okně obsahuje tuto hlavičku. Zachycený `429` se nikdy nedostane do
+  `handleChatCore`, takže připojení není uvedeno do cooldownu ani se od něj neodchází
+  rotací.
+- `anthropic-ratelimit-unified-slow-status` v pozdějších odpovědích: `active` / `not_needed`
+  frontu ponechávají aktivní; `slot_busy` (429) nebo `529` čekají po dobu určenou serverem
+  v `anthropic-ratelimit-unified-slow-retry-after` (výchozí 20 s, omezení na 5–600 s,
+  jitter ±30 %) a poté požadavek zopakují, přičemž jsou omezeny parametrem
+  `anthropic-ratelimit-unified-slow-max-wait` (výchozí 20 min, omezení na
+  1 min–6 h) — po jeho překročení fronta skončí a desetiminutový cooldown zablokuje
+  její opětovné přijetí. Čekání je navíc omezeno dobou zbývající do vlastního timeoutu
+  požadavku pro zahájení upstream požadavku (`resolveFetchStartTimeout`, ve výchozím
+  nastavení 10 min) po odečtení 5s rezervy: bez tohoto omezení by výchozí maximální
+  doba čekání 20 minut přesáhla dobu životnosti požadavku a spánek by byl přerušen
+  uprostřed čekání, což by vyvolalo `TimeoutError` namísto korektního ukončení
+  `max_wait` a cooldownu.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, přetočení
+  pětihodinového okna nebo `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true`
+  (což frontu ukončí jako `extra_usage` při jakémkoli stavu, protože limit nyní pokrývá
+  placené překročení) frontu ukončí; odpověď pak pokračuje běžnou cestou cooldownu.
+  `budget_exhausted` se zapamatuje až do oznámeného resetu rozpočtu (nejvýše 8 dní).
+- Kontrola limitu probíhá po vlastních opakováních executoru vyvolaných stavem 400
+  v rámci jednoho pokusu (úprava kontextu, omezení thinking/effort, automatické učení
+  parametrů), takže `429` způsobený limitem, který se objeví teprve při jednom z těchto
+  opakování, je stále zachycen namísto odeslání do cesty cooldownu.
+- Stav je uložen v paměti pro každé připojení (restart vyžaduje jeden další `429`
+  způsobený limitem, aby bylo možné nabídku znovu přijmout).
 
-**Reset limitu relace** (`autoLimitReset`, zkoušeno před dráhou, když jsou obě zapnuté):
+**Reset limitu relace** (`autoLimitReset`, při zapnutí obou funkcí se zkouší před frontou):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → blok `juniper_tide`;
-  když `arm: "reset"` a `available: true`,
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → blok
+  `juniper_tide`; pokud je `arm: "reset"` a `available: true`,
   `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` s
   `{ "program": "juniper_tide" }` (UUID organizace z
-  `providerSpecificData.organizationUUID`, bootstrap fallback).
-- `result: reset|not_limited` → požadavek je zopakován plnou rychlostí (bez slow hlavičky).
-  `already_used` / `not_offered` memoizují `next_available_at` (výchozí jeden týden); jakékoli
-  selhání se odkládá o 15 minut. Reset je jednou týdně a stále se započítává do
-  týdenního limitu.
+  `providerSpecificData.organizationUUID`, záložní hodnota z bootstrapu).
+- `result: reset|not_limited` → požadavek se zopakuje plnou rychlostí (bez hlavičky slow).
+  `already_used` / `not_offered` uloží do paměti `next_available_at` (výchozí jeden týden);
+  při jakémkoli selhání se použije 15minutový backoff. Reset je možný jednou týdně a
+  stále se započítává do týdenního limitu.
 
-Regresní stráže: `tests/unit/claude-low-priority-mode.test.ts`,
+Regresní ochrany: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
-### Přidružení relace (#7274)
+### Afinitní relace (#7274)
 
-**Rozsah:** jedna klientská relace (hlavička `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) připnutá k jednomu spojení, pro **jakéhokoli** poskytovatele.
+**Rozsah:** jedna relace klienta (`X-Session-Id` / `x-codex-session-id` /
+`x-omniroute-session` hlavička) připnutá k jednomu připojení, pro **libovolného poskytovatele**.
 
-**Účel:** udržet vícekrokového agenta (Claude Code, aider, vlastní agenti) na stejném účtu napříč požadavky, čímž se snižuje ztráta kontextu mezi účty a opakované cold-start 429 u poskytovatelů se stavem relace per-account.
+**Účel:** udržet víceotáčkového agenta (Claude Code, aider, vlastní agenty) na stejném
+účtu napříč požadavky, čímž se omezí ztráta kontextu mezi účty a opakované 429 při
+studeném startu u poskytovatelů se stavem relace závislým na účtu.
 
 **Implementace:**
 
-- Rozlišení TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Výběr/vytvoření připnutí: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Extrakce hlavičky (obecná, jakýkoli poskytovatel): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Perzistovaná tabulka připnutí: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Nastavení: `sessionAffinityTtlMs` (globální TTL v ms, `0` vypíná) — `src/lib/db/settings.ts`. Přejmenováno z původního Codex-only `codexSessionAffinityTtlMs` migrací `124_generic_session_affinity_ttl.sql`, která přenáší jakékoli dříve nakonfigurované Codex TTL jako novou výchozí hodnotu.
+- Řešení TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- Výběr/vytvoření pinu: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Extrakce hlavičky (obecná, libovolný poskytovatel): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Tabulka uložených pinů: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Nastavení: `sessionAffinityTtlMs` (globální TTL v ms, `0` deaktivuje) — `src/lib/db/settings.ts`.
+  Přejmenováno z nastavení `codexSessionAffinityTtlMs` určeného pouze pro Codex migrací
+  `124_generic_session_affinity_ttl.sql`, která přenese dříve nakonfigurované TTL Codexu
+  jako nový výchozí údaj.
 
-Před #7274 `resolveSessionAffinityTtlMs()` tvrdě vracela `0` pro každého poskytovatele kromě `codex`, takže nastavení TTL (a hlavičky relace) nemělo nikde jinde žádný efekt, i když mechanismus připnutí a extrakce hlaviček již byly nezávislé na poskytovateli. Oprava odstranila tento předčasný návrat; TTL se nyní po globálním nastavení nad `0` použije jednotně pro každého poskytovatele.
+Před #7274 funkce `resolveSessionAffinityTtlMs()` okamžitě vracela `0` pro každého
+poskytovatele kromě `codex`, takže nastavení TTL (a hlavičky relace) neměly nikde jinde
+žádný účinek, přestože mechanismus připnutí a extrakce hlaviček již byly nezávislé na
+poskytovateli. Oprava odstranila toto předčasné ukončení; TTL se nyní po globálním
+nastavení na hodnotu vyšší než `0` uplatňuje jednotně u všech poskytovatelů.
 
-Tři hlavičky přidružení relace nejsou nikdy předávány upstream — executory budují vlastní upstream hlavičky od základu místo předávání klientských hlaviček, takže toto zůstává pouze interním korelačním id.
+Tři hlavičky afinity relace se nikdy nepředávají upstreamu — executory vytvářejí vlastní
+upstreamové hlavičky od začátku, místo aby předávaly hlavičky klienta, takže toto zůstává
+pouze interním korelačním ID.
 
-### Exkluzivní pronájmy spojení spravovaných relací
+### Exkluzivní spravované zápůjčky připojení relací
 
-**Rozsah:** jeden aktivní spravovaný HTTP klient/relace vlastní jedno způsobilé OmniRoute spojení.
+**Rozsah:** jeden aktivní spravovaný HTTP klient/relace vlastní jedno způsobilé připojení OmniRoute.
 
-**Účel:** poskytnout trvalé exkluzivní vlastnictví spojení pro klienty, kteří potřebují tvrdé
-směrovací oplocení napříč požadavky. To se liší od přidružení relace, které je měkkou preferencí
-kontinuity: exkluzivní pronájem perzistuje stav životního cyklu v SQLite, vynucuje globální
-jedinečnost aktivního vlastníka a aktivního spojení a zamítá zastaralou generaci před
-odesláním poskytovateli.
+**Účel:** poskytovat trvalé výhradní vlastnictví připojení klientům, kteří potřebují pevnou směrovací
+bariéru napříč požadavky. To se liší od afinity relace, která představuje měkkou preferenci kontinuity:
+výhradní lease zachovává stav životního cyklu v SQLite, vynucuje globální jedinečnost aktivního vlastníka a
+aktivního připojení a odmítá zastaralou generaci před odesláním poskytovateli.
 
-Funkce je aktivována volitelně pro každý API klíč. Spravovaný klíč musí mít oprávnění `lease:exclusive` a
-explicitní neprázdný seznam `allowedConnections`. Koncový bod životního cyklu může používat libovolný HTTP klient; není
-vyžadován žádný název klienta, user-agent, poskytovatel, metoda OAuth ani model. Zápůjčka (lease) vlastní připojení,
-nikoli model, takže změna modelu zachovává vazbu, dokud připojení zůstává běžně
-způsobilé. Běžná pravidla pro model, kvóty, stav, cooldown a allowlist zůstávají rozhodující a mohou
-převést stejnou generaci na jiné volné způsobilé připojení.
+Tato funkce se aktivuje samostatně pro každý klíč API. Spravovaný klíč musí mít obor `lease:exclusive` a
+explicitní neprázdný seznam `allowedConnections`. Koncový bod životního cyklu může použít libovolný HTTP
+klient; nevyžaduje se název klienta, user-agent, poskytovatel, metoda OAuth ani model. Lease vlastní připojení,
+nikoli model, takže změna modelu zachová vazbu, pokud připojení zůstane běžně způsobilé. Běžná pravidla pro
+model, kvótu, stav, dobu cooldown a seznam povolených položek zůstávají autoritativní a mohou stejnou generaci
+přepnout na jiné volné způsobilé připojení.
 
-Životní cyklus je `POST /api/v1/session-leases` s JSON akcemi `acquire`, `renew` a `release`.
-Spravované inferenční požadavky předkládají neprůhlednou (opaque) hodnotu `X-OmniRoute-Lease-Owner` a přesnou
-hodnotu `X-OmniRoute-Lease-Generation`. Vlastník používá prefix `vlo_` následovaný 43 znaky base64url; ukládá se pouze
-jeho SHA-256 hash. Každá konečná bariéra odeslání (dispatch fence) navíc váže ID ověřeného API klíče a
-ID aktivního připojení. Hlavičky pro řízení zápůjček jsou odstraněny z logů, uchovaných snímků požadavků a
-hlaviček upstream exekutoru.
+Životní cyklus tvoří `POST /api/v1/session-leases` s akcemi JSON `acquire`, `renew` a `release`.
+Spravované požadavky na inferenci předávají neprůhlednou hodnotu `X-OmniRoute-Lease-Owner` a přesnou
+hodnotu `X-OmniRoute-Lease-Generation`. Vlastník používá předponu `vlo_` následovanou 43 znaky base64url;
+ukládá se pouze jeho hash SHA-256. Každá konečná bariéra před odesláním také váže požadavek na ID
+autentizovaného klíče API a ID aktivního připojení. Řídicí hlavičky lease se odstraňují z protokolů,
+uchovávaných snímků požadavků a hlaviček upstream exekutorů.
 
-Pokud má běžné směrování způsobilé spravované kandidáty, ale každý volný kandidát je obsazen
-cizí aktivní zápůjčkou, OmniRoute vrátí HTTP `429`, kód lease-capacity-unavailable,
-stav waiting-for-capacity a omezenou hodnotu `Retry-After` odvozenou od nejbližší relevantní expirace.
-Běžná prázdná způsobilost není konkurence o zápůjčku a zachovává svou stávající sémantiku chyb směrování.
+Pokud má běžné směrování způsobilé spravované kandidáty, ale každý volný kandidát je obsazen cizím aktivním
+lease, OmniRoute vrátí HTTP `429`, kód `lease-capacity-unavailable`, stav čekání na kapacitu a omezenou
+hodnotu `Retry-After` odvozenou od nejbližší relevantní expirace. Běžná absence způsobilých položek není
+konkurence o lease a zachovává stávající sémantiku chyb směrování.
 
 Související mechanismy zůstávají oddělené:
 
-- Obsazení OAuth relace je procesně lokální měkké (soft) rozdělení pro OAuth účty.
-- Semafor účtů udělují povolení ke konkurenci požadavků a končí dokončením požadavku.
-- Exkluzivní spravované zápůjčky relací jsou trvalé vlastnictví životního cyklu s bariérou generace.
+- Obsazení relací OAuth zajišťuje procesně lokální měkkou distribuci účtů OAuth.
+- Semafory účtů udělují povolení k souběžnosti požadavků a jejich platnost končí dokončením požadavku.
+- Výhradní spravované lease relací představují trvalé vlastnictví v rámci životního cyklu s bariérou generace.
+
+---
 
 ## 3. Blokování modelu (Model Lockout)
 
@@ -369,25 +356,25 @@ _stav_ blokování je efemérní.
 
 ---
 
-## 4. Řízení souběžnosti quota-share (v3.8.36)
+## 4. Řízení souběžnosti sdílením kvóty (v3.8.36)
 
-Účty s předplatným (GLM, MiniMax atd.) často přijímají pouze ~1–3 souběžné
-požadavky; při jejich překročení dochází k chybám 429 a cooldownům. Tento problém
-je obzvlášť naléhavý u kombinací **quota-share** (`qtSd/…`), kde několik klíčů API
-sdílí jeden upstreamový účet. Tři vrstvy zabraňují zahlcení sdíleného účtu.
+Účty předplatného (GLM, MiniMax atd.) často přijímají pouze ~1–3 souběžné
+požadavky; překročení tohoto limitu vyvolá odpovědi 429 a období ochlazení. To je
+obzvlášť závažné u kombinací **quota-share** (`qtSd/…`), kde několik klíčů API
+sdílí jeden účet u upstreamu. Sdílený účet před zahlcením chrání tři vrstvy.
 
 ### Limit souběžnosti na připojení (`max_concurrent`)
 
 Každé připojení poskytovatele může deklarovat limit `max_concurrent`
-(`provider_connections.max_concurrent`, nastavuje se v modálním okně připojení /
-API / DB). Ponechte jej prázdný, pokud nechcete žádný limit. Toto je jediný
-ovladač, který řídí níže popsanou serializační vrstvu — nastavte jej na skutečnou
+(`provider_connections.max_concurrent`, nastavený v modálním okně připojení / API / DB).
+Ponechte pole prázdné, pokud nechcete žádný limit. Jde o jediný ovládací prvek,
+který řídí níže popsanou serializační vrstvu — nastavte jej na skutečnou
 souběžnost účtu (např. GLM ~1, MiniMax ~2).
 
 ### Limity souběžnosti podle modelu (`modelConcurrency`)
 
 Připojení může navíc deklarovat přesné limity souběžnosti pro jednotlivé modely
-uvnitř své mapy `rateLimitOverrides`:
+uvnitř mapy `rateLimitOverrides`:
 
 ```json
 {
@@ -398,71 +385,83 @@ uvnitř své mapy `rateLimitOverrides`:
 }
 ```
 
-Nastavte je v modálním okně připojení (**Přepsání rate limitů → Limity
-souběžnosti podle modelu**, jeden `model=cap` na řádek) nebo pomocí
-`PATCH /api/providers/[id]` se stejnou strukturou JSON. Sémantika klíčů:
+Nastavte je v modálním okně připojení (**Rate limit overrides → Per-model
+concurrency caps**, jeden řádek `model=cap`) nebo prostřednictvím
+`PATCH /api/providers/[id]` se stejným tvarem JSON. Význam klíčů:
 
-- **Celé připojení vs. konkrétní model:** `maxConcurrent` zůstává sdíleným
-  limitem celého připojení. Pokud platí obojí, obě brány se získají atomicky
-  v rámci stejné složené brány (`global → provider → account → model`);
-  výsledné chování odpovídá přísnějšímu z platných limitů.
-- **Přesná shoda klíče modelu:** klíčem je řetězec modelu předaný exekutoru po
-  vyhodnocení směrování — obvykle holé upstreamové ID modelu (`glm-5`), nikoli
-  klientský alias `provider/model` (`zai/glm-5` neodpovídá `glm-5`). Hodnoty
-  představují limity souběžných požadavků v podobě kladných celých čísel.
-- **Místní fronta, žádné zjišťování:** přebytečné požadavky čekají v místní
-  frontě se stávající sémantikou fronty/timeoutu (typované chyby přijetí
+- **Limit pro celé připojení vs. limit konkrétního modelu:** `maxConcurrent` zůstává sdíleným
+  limitem pro celé připojení. Pokud platí oba, oba zámky se získají atomicky ve
+  stejném složeném zámku
+  (`global → provider → account → model`); výsledné chování se řídí přísnějším
+  z použitelných limitů.
+- **Přesná shoda klíče modelu:** klíč je řetězec modelu předaný exekutoru po
+  vyřešení routování — obvykle holý upstream identifikátor modelu
+  (`glm-5`), nikoli alias `provider/model` na straně klienta (`zai/glm-5` neodpovídá
+  `glm-5`). Hodnoty jsou kladná celá čísla představující limity souběžných požadavků.
+- **Lokální řazení do fronty, bez zjišťování:** nadbytečné požadavky se řadí lokálně
+  do fronty se stávající sémantikou fronty a časového limitu (typizované chyby přijetí
   `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute nezjišťuje ani
-  neodvozuje upstreamové zásady — vynucuje přesné limity, které operátor
-  nakonfiguroval. Nasycená brána modelu nikdy nezakáže poskytovatele a nikdy
-  nevytvoří trvalé zablokování modelu; upstreamové chování 429/cooldown/fallback
-  zůstává chybovou pojistkou.
-- **Rozsah na připojení a proces:** limity platí pro každé připojení v databázi
-  a jsou uchovávány v paměti, takže dvě připojení používající stejný upstreamový
-  klíč API se vzájemně nekoordinují.
-- **Nenastaveno znamená beze změny:** vynechání mapy (nebo ponechání pole
-  v dashboardu prázdné) nepřidá žádnou bránu modelu. Příklad konfigurace bez
-  uplatnění jakéhokoli univerzálního limitu poskytovatele:
+  neodvozuje zásady upstreamu — vynucuje přesně limity nakonfigurované
+  operátorem. Zcela obsazený zámek modelu nikdy nezakáže poskytovatele ani
+  nevytvoří trvalé zablokování modelu; chování při odpovědích 429, ochlazení a
+  záložním přepnutí na upstreamu zůstává bezpečnostní pojistkou pro chyby.
+- **Rozsah pro připojení a proces:** limity platí pro každé připojení v databázi
+  a jsou uchovávány v paměti, takže dvě připojení znovu používající stejný klíč API
+  se navzájem nekoordinují.
+- **Nenakonfigurovaný stav znamená beze změny:** vynechání mapy (nebo ponechání
+  pole na řídicím panelu prázdného) nepřidá žádný zámek modelu. Příklad konfigurace
+  bez deklarování univerzálního limitu poskytovatele:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serializace požadavků quota-share
+### Serializace požadavků při sdílení kvóty
 
-Když odeslání quota-share cílí na připojení, které deklaruje kladný
-`max_concurrent`, souběžné požadavky na daný **účet** jsou serializovány přes
-semafor na připojení (klíč `qsconn:<connectionId>`): přebytečné požadavky
-**čekají ve frontě** místo zahlcování účtu. Semafor je **fail-open** — nasycená
-fronta nebo timeout pokračuje bez slotu, místo aby kdykoli odmítl odeslatelný
-požadavek. Přepíná se v **Nastavení → Odolnost → Souběžnost quota-share na
-připojení** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, ve výchozím
-nastavení zapnuto). Bez limitu `max_concurrent` zůstává chování nezměněné.
+Když směrování sdílení kvóty cílí na připojení, které deklaruje kladné
+`max_concurrent`, souběžné požadavky na tento **účet** se serializují prostřednictvím
+semaforu pro jednotlivá připojení (klíč `qsconn:<connectionId>`): nadbytečné požadavky
+**čekají ve frontě**, místo aby zahltily účet. Jde o režim **fail-open** — při
+zaplnění fronty nebo vypršení časového limitu se pokračuje bez slotu, místo aby
+byl požadavek, který lze odeslat, odmítnut. Přepínač je v **Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, výchozí
+hodnota je zapnuto). Bez limitu `max_concurrent` zůstává chování beze změny.
 
-> Směrovací brána quota-share (`selectQuotaShareTarget`, DRR + P2C) je sama
-> o sobě fail-open a pouze _snižuje prioritu_ připojení, které je na limitu —
-> s poolem s jediným připojením nemůže tvrdě omezit, takže právě tento semafor
-> skutečně zadržuje záplavu.
+> Směrovací zámek sdílení kvóty (`selectQuotaShareTarget`, DRR + P2C) je sám
+> v režimu fail-open a připojení na limitu pouze _znevýhodní_ — s
+> fondem o jediném připojení nemůže vynutit pevný limit, takže právě tento semafor
+> skutečně zabraňuje zahlcení.
 
-### Opakování combo s ohledem na cooldown
+### Opakování s ohledem na ochlazení kombinací
 
-U každé strategie combo (pokud je povolena) požadavek, který by vyústil ve 429
-kvůli KRÁTKÉMU přechodnému cooldownu, vyčká jeho vypršení a znovu se odešle,
-místo aby vrátil 429 — to pokrývá okna TPM/RPM třídy Gemini (~60s retry-after)
-u vícemodelových combo, např. když oba cíle 2modelového komba narazí na rate
-limit daného modelu. Omezeno parametry `comboCooldownWait` (`enabled`,
-`maxWaitMs`, `maxAttempts`, `budgetMs`) v **Nastavení → Odolnost**. Nikdy nečeká
-při `quota_exhausted` (zamčeno do půlnoci) nebo z důvodů auth/not-found.
+U každé strategie kombinace (je-li povolena) požadavek, který by vyústil v 429
+během KRÁTKÉHO dočasného období ochlazení, na toto období počká a znovu se odešle
+místo vrácení odpovědi 429 — to pokrývá okna TPM/RPM třídy Gemini (~60 s retry-after)
+u kombinací více modelů, například když oba cíle kombinace se 2 modely narazí na
+limit rychlosti pro model. Chování je omezeno pomocí `comboCooldownWait`
+(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) v **Settings → Resilience**.
+Nikdy se nečeká na `quota_exhausted` (uzamčeno do půlnoci) ani na důvody
+související s ověřením nebo nenalezením.
 
-Stejná brána pokrývá i případ před odesláním (#16319): když jsou všechny cíle
-komba přeskočeny ještě před jakýmkoli pokusem, protože jejich model je v krátkém
-přechodném zablokování, větev s nulovým počtem pokusů počká na vypršení zámku za
-stejných limitů a znovu odešle, místo aby odpověděla `503 ALL_TARGETS_SKIPPED`
-bez nápovědy. Když není čekání povoleno (vyčerpán limit, pokusy nebo rozpočet,
-nebo je funkce vypnutá), koncová odpověď se povýší na `429 rate_limit_error`
-nesoucí `retry_after` / `reset_at` z nejbližšího vypršení přechodného zámku;
-zámky kvóty, auth a not-found si ponechávají 503 bez nápovědy.
+Kombinace může tuto funkci vypnout pomocí `config.comboCooldownWaitEnabled: false`.
+Pouze literál `false` deaktivuje tato sdílená čekání kombinací (ochlazení po
+odeslání a čekání před odesláním při otevřeném okruhu / uzamčení modelu) a
+prodloužení minimálního časového limitu čekání o rozpočet čekání. Vynechání
+nebo hodnota `true` zachovává globální zásadu; hodnota `true` nemůže globálně
+zakázané čekání povolit. Výslovně nastavené `targetTimeoutMs` má stále přednost.
+Tato možnost vypnutí nemění samostatné čekání před odesláním nativního
+připnutí tahu Codexu.
+
+Stejný zámek pokrývá případ před odesláním (#16319): když jsou všechny cíle
+kombinace přeskočeny ještě před jakýmkoli pokusem, protože jejich model se
+nachází v krátkém dočasném blokování, cesta s nulovým počtem pokusů počká na
+konec blokování podle stejných limitů a požadavek znovu odešle, místo aby vrátila
+odpověď bez nápovědy `503 ALL_TARGETS_SKIPPED`. Pokud není čekání povoleno
+(limit, počet pokusů nebo rozpočet jsou vyčerpány, případně je funkce vypnutá),
+terminální odpověď se změní na `429 rate_limit_error` a ponese `retry_after` /
+`reset_at` z nejbližšího konce dočasného blokování; blokování kvóty, ověření
+a nenalezení si ponechávají odpověď 503 bez nápovědy.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
@@ -533,30 +532,13 @@ Ochrana rate-limitu na úrovni jednotlivých připojení je sledována pomocí b
 
 ---
 
-## 6. Watchdog propustnosti pomalého streamu (#9709)
+## 6. Watchdog propustnosti pomalého toku (#9709)
 
-Volitelná pojistka `resilienceSettings.streamRecovery.throughputWatchdog` detekuje
-upstream, který stále posílá chunky, ale produkuje výstup asistenta pod
-nakonfigurovanou mírou užitečného výstupu. Je záměrně odlišný od idle timeoutu:
-heartbeaty ani metadata neresetují ani jeden z časovačů a nepočítají se jako
-pokrok. Je také odlišný od pevného limitu pokusu (#9153), který zůstává absolutním
-bezpečnostním stropem bez ohledu na kvalitu výstupu.
+Volitelný `resilienceSettings.streamRecovery.throughputWatchdog` guard detekuje upstream, který stále odesílá bloky, ale produkuje výstup asistenta pod nakonfigurovanou užitečnou výstupní rychlostí. Záměrně se liší od časového limitu nečinnosti: prezenční signály a metadata neresetují ani časovač a nepočítají se jako průběh. Liší se také od termínu tvrdého pokusu (#9153), který zůstává absolutním bezpečnostním stropem bez ohledu na kvalitu výstupu.
 
-Watchdog vyžaduje období zahřívání následované kompletním klouzavým oknem, než
-může provést abort. Počítá textové delty z Chat Completions a výstupních událostí
-Responses API (konzervativní proxy v podobě UTF-8 bajtů), ignoruje události
-obsahující pouze usage a prázdné události a pozastavuje posuzování, dokud
-probíhají události volání nástrojů nebo uvažování. Ve výchozím nastavení je
-vypnutý a lze jej zapnout pomocí `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; okno,
-zahřívání, minimální rychlost a minimální měřitelný výstup jsou omezeny
-normální vrstvou normalizace resilience-settings.
+Watchdog vyžaduje zahřívací období, po kterém následuje kompletní rolovací okno, než se může zrušit. Počítá textové delty z výstupních událostí API Dokončení a odpovědi chatu (konzervativní bajtový proxy UTF-8 ), ignoruje události pouze pro použití a prázdné události a pozastavuje posuzování, když jsou v běhu události volání nástroje nebo uvažování. Ve výchozím nastavení je zakázáno a lze jej povolit pomocí `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (tato hodnota env pouze nasadí výchozí — a uložená logická hodnota `resilienceSettings.streamRecovery.throughputWatchdog.enabled` vyhraje; viz poznámka k prioritě env-vs-dashboard v horní části této příručky); okno, zahřívání, minimální rychlost a minimální měřitelný výstup jsou ohraničeny normální vrstvou normalizace nastavení odolnosti.
 
-Když je zapnutý, abort watchdogu se aplikuje pouze na aktivní pokus o upstream.
-Před jakýmikoli klientem viditelnými bajty může stávající cesta včasného zotavení
-na stejném účtu znovu otevřít pokus. Po commitu se stream nikdy slepě nepřehrává;
-suffix může spojit pouze stávající bezpečný kontrakt pro pokračování uprostřed
-streamu. Finalizace zůstává jednorázová, takže účtování usage a uvolnění semaforu
-se neduplikují.
+Je-li povoleno, přerušení hlídacího psa se použije pouze na aktivní pokus o upstream. Před všemi bajty viditelnými pro klienta může stávající cesta předčasného obnovení stejného účtu znovu otevřít pokus. Po potvrzení se stream nikdy nepřehraje naslepo; příponu může připojit pouze stávající bezpečná smlouva o pokračování ve středním proudu. Finalizace zůstává jednorázová, takže účtování využití a vydání semaforu nejsou duplikovány.
 
 ---
 

@@ -17,6 +17,7 @@
  * after the #11205 security review), and anything else we can't service gets a
  * JSON-RPC error so the id is always settled and the turn never hangs.
  */
+import { newestChromeProfile } from "../../utils/browserProfiles.ts";
 
 // wreq-js WebSocket surface (mirrors the private type in codex.ts:71-77).
 export type CodexWreqWebSocket = {
@@ -53,8 +54,7 @@ const APPROVAL_REQUEST_METHODS = new Set<string>([
 ]);
 
 const ROUTER_APPROVAL_NOTE = "router: harness-controlled execution";
-const ROUTER_DENIAL_NOTE =
-  "router: denied by default (set codexAppServerAutoApprove to opt in)";
+const ROUTER_DENIAL_NOTE = "router: denied by default (set codexAppServerAutoApprove to opt in)";
 
 export interface CodexAppServerClientOptions {
   /** Transport factory. Defaults to the shared wreq-js websocket() when omitted. */
@@ -127,7 +127,7 @@ export class CodexAppServerClient {
     // turn never connects. The local app-server ignores the impersonation
     // fingerprint; only the Authorization bearer matters for its ws-auth.
     this.ws = await this.websocketFn(url, {
-      browser: "chrome_142",
+      browser: newestChromeProfile(),
       os: "windows",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -137,7 +137,11 @@ export class CodexAppServerClient {
   }
 
   /** Send a ClientRequest and resolve when its id-matched response arrives. */
-  request<T = unknown>(method: string, params: unknown, timeoutMs = this.defaultTimeoutMs): Promise<T> {
+  request<T = unknown>(
+    method: string,
+    params: unknown,
+    timeoutMs = this.defaultTimeoutMs
+  ): Promise<T> {
     const id = this.nextId++;
     return new Promise<T>((resolve, reject) => {
       if (!this.ws || this.closed) {
@@ -216,7 +220,9 @@ export class CodexAppServerClient {
       this.pending.delete(id);
       if (msg.error) {
         const err = msg.error as { code?: unknown; message?: unknown };
-        pending.reject(new Error(`${String(err.code ?? "error")}: ${String(err.message ?? "unknown")}`));
+        pending.reject(
+          new Error(`${String(err.code ?? "error")}: ${String(err.message ?? "unknown")}`)
+        );
       } else {
         pending.resolve(msg.result);
       }

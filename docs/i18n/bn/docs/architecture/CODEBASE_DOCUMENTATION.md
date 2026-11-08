@@ -447,8 +447,8 @@ server/
 
 ## 4. `open-sse/` — স্ট্রিমিং ইঞ্জিন ওয়ার্কস্পেস
 
-`@omniroute/open-sse` হিসেবে প্রকাশিত পৃথক npm ওয়ার্কস্পেস। এটি অনুরোধ
-প্রক্রিয়াকরণ, এক্সিকিউটর, ট্রান্সলেটর, পরিষেবা, ট্রান্সফর্মার এবং MCP সার্ভার পরিচালনা করে।
+`@omniroute/open-sse` হিসেবে প্রকাশিত পৃথক npm ওয়ার্কস্পেস। এটি রিকোয়েস্ট
+প্রসেসিং, এক্সিকিউটর, ট্রান্সলেটর, সার্ভিস, ট্রান্সফর্মার এবং MCP সার্ভারের মালিকানাধীন।
 
 ```
 open-sse/
@@ -457,127 +457,124 @@ open-sse/
 ├── tsconfig.json
 ├── types.d.ts
 ├── config/                 প্রোভাইডার রেজিস্ট্রি, হেডার প্রোফাইল, পরিচয়, …
-├── handlers/               অনুরোধ হ্যান্ডলার (চ্যাট, এমবেডিং, অডিও, ছবি, …)
-├── executors/              ১৫৬টি প্রোভাইডার এক্সিকিউটর মডিউল (এক্সিকিউটর ক্লাস + প্রতি-প্রোভাইডার সহায়ক)
+├── handlers/               রিকোয়েস্ট হ্যান্ডলার (চ্যাট, এম্বেডিং, অডিও, ছবি, …)
+├── executors/              159টি প্রোভাইডার এক্সিকিউটর মডিউল (এক্সিকিউটর ক্লাস + প্রতি-প্রোভাইডার হেল্পার)
 ├── translator/             ফরম্যাট রূপান্তর (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions স্ট্রিম ট্রান্সফর্মার
-├── services/               ৮০টির বেশি পরিষেবা মডিউল (কম্বো, ফলব্যাক, কোটা, পরিচয়, …)
-├── utils/                  স্ট্রিমিং সহায়ক, TLS ক্লায়েন্ট, AWS SigV4, প্রক্সি ফেচ, …
-└── mcp-server/             MCP সার্ভার (৩টি ট্রান্সপোর্ট, ৩৩টি স্কোপ, ১১০টি টুল)
+├── services/               80+টি সার্ভিস মডিউল (কম্বো, ফলব্যাক, কোটা, পরিচয়, …)
+├── utils/                  স্ট্রিমিং হেল্পার, TLS ক্লায়েন্ট, AWS SigV4, প্রক্সি fetch, …
+└── mcp-server/             MCP সার্ভার (3টি ট্রান্সপোর্ট, 33টি স্কোপ, 110টি টুল)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| হ্যান্ডলার              | উদ্দেশ্য                                                                    |
+| Handler                 | Purpose                                                                     |
 | ----------------------- | --------------------------------------------------------------------------- |
 | `chatCore.ts`           | প্রধান চ্যাট পাইপলাইন (ক্যাশ, রেট লিমিট, কম্বো রাউটিং, এক্সিকিউটর ডিসপ্যাচ) |
-| `responsesHandler.ts`   | OpenAI Responses API-এর এন্ট্রি পয়েন্ট                                     |
-| `embeddings.ts`         | এমবেডিং                                                                     |
+| `responsesHandler.ts`   | OpenAI Responses API এন্ট্রি পয়েন্ট                                        |
+| `embeddings.ts`         | এম্বেডিং                                                                    |
 | `imageGeneration.ts`    | ছবি তৈরি                                                                    |
 | `audioSpeech.ts`        | টেক্সট-টু-স্পিচ                                                             |
 | `audioTranscription.ts` | স্পিচ-টু-টেক্সট                                                             |
 | `videoGeneration.ts`    | ভিডিও তৈরি                                                                  |
 | `musicGeneration.ts`    | সংগীত তৈরি                                                                  |
-| `rerank.ts`             | পুনঃর্যাঙ্কিং                                                               |
+| `rerank.ts`             | রির্যাংকিং                                                                  |
 | `moderations.ts`        | মডারেশন                                                                     |
-| `search.ts`             | ওয়েব অনুসন্ধান                                                             |
+| `search.ts`             | ওয়েব সার্চ                                                                 |
 | `sseParser.ts`          | SSE ইভেন্ট পার্সার                                                          |
-| `usageExtractor.ts`     | আপস্ট্রিম স্ট্রিম থেকে টোকেনের সংখ্যা বের করে                               |
-| `responseSanitizer.ts`  | প্রোভাইডার-নির্দিষ্ট অপ্রয়োজনীয় অংশ অপসারণ করে                            |
-| `responseTranslator.ts` | প্রোভাইডারের প্রতিক্রিয়া ও ট্রান্সলেটর স্তরের মধ্যকার সংযোগ                |
+| `usageExtractor.ts`     | আপস্ট্রিম স্ট্রিম থেকে টোকেনের সংখ্যা বের করা                               |
+| `responseSanitizer.ts`  | প্রোভাইডার-নির্দিষ্ট অপ্রয়োজনীয় ডেটা বাদ দেওয়া                           |
+| `responseTranslator.ts` | প্রোভাইডার রেসপন্স এবং ট্রান্সলেটর লেয়ারের মধ্যে সংযোগ                     |
 
 ### 4.2 `open-sse/executors/`
 
-১৫৬টি শীর্ষ-স্তরের এক্সিকিউটর মডিউল (`*.ts` থেকে `base.ts`, `index.ts` এবং টেস্ট বাদ দিয়ে — এই সংখ্যা
-`npm run check:docs-counts` পরিমাপ করে)। প্রতিটি এক্সিকিউটর ক্লাস সরাসরি অথবা
-`DefaultExecutor` বা অন্য কোনো এক্সিকিউটরের মাধ্যমে `BaseExecutor` (`base.ts`) প্রসারিত করে;
-অবশিষ্ট মডিউলগুলো প্রতি-প্রোভাইডার সহায়ক (টুল স্কিমা, ফেচ/TTS অ্যাডাপ্টার, বিশেষ আচরণ হ্যান্ডলার)। এক্সিকিউটরগুলোর মধ্যে রয়েছে:
+159টি শীর্ষ-স্তরের এক্সিকিউটর মডিউল (`*.ts`, তবে `base.ts`, `index.ts` এবং টেস্ট বাদে — `npm run check:docs-counts` এই সংখ্যা পরিমাপ করে)। প্রতিটি এক্সিকিউটর ক্লাস সরাসরি অথবা `DefaultExecutor` বা অন্য কোনো এক্সিকিউটরের মাধ্যমে `BaseExecutor` (`base.ts`) প্রসারিত করে; অবশিষ্ট মডিউলগুলো হলো প্রতি-প্রোভাইডার হেল্পার (টুল স্কিমা, fetch/TTS অ্যাডাপ্টার, কোয়ার্ক হ্যান্ডলার)। এক্সিকিউটরগুলোর মধ্যে রয়েছে:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, পাশাপাশি `claudeIdentity.ts`
-(শেয়ার করা পরিচয় সহায়ক) এবং `index.ts` (রেজিস্ট্রি)।
+`pollinations`, `qoder`, `vertex`, `devin-desktop`, পাশাপাশি
+`claudeIdentity.ts` (শেয়ার করা পরিচয় হেল্পার) এবং `index.ts` (রেজিস্ট্রি)।
 
-> দ্রষ্টব্য: এখানে তালিকাভুক্ত নয় এমন প্রোভাইডারগুলোকে সাধারণ
-> OpenAI-সামঞ্জস্যপূর্ণ এক্সিকিউটর ব্যবহার করে `default.ts` পরিবেশন করে। সম্পূর্ণ প্রোভাইডার ক্যাটালগে (৩৭৬টি প্রোভাইডার)
-> রয়েছে `src/shared/constants/providers.ts`-এ।
+> নোট: এখানে তালিকাভুক্ত নয় এমন প্রোভাইডারগুলো জেনেরিক
+> OpenAI-সামঞ্জস্যপূর্ণ এক্সিকিউটর ব্যবহার করে `default.ts` দ্বারা পরিবেশিত হয়। সম্পূর্ণ প্রোভাইডার ক্যাটালগ (380টি প্রোভাইডার) রয়েছে
+> `src/shared/constants/providers.ts`-এ।
 
 ### 4.3 `open-sse/translator/`
 
-হাব-অ্যান্ড-স্পোক অনুবাদ (OpenAI হলো হাব)।
+হাব-অ্যান্ড-স্পোক ট্রান্সলেশন (OpenAI হলো হাব)।
 
-- **৯টি অনুরোধ ট্রান্সলেটর** (`translator/request/`):
+- **9টি রিকোয়েস্ট ট্রান্সলেটর** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`।
-- **৯টি প্রতিক্রিয়া ট্রান্সলেটর** (`translator/response/`):
+- **9টি রেসপন্স ট্রান্সলেটর** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
   `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
   `openai-to-claude`।
-- **৯টি সহায়ক** (`translator/helpers/`):
+- **9টি হেল্পার** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, পাশাপাশি
-  সহায়ক টেস্ট।
-- **ছবি-সংক্রান্ত সহায়ক** (`translator/image/sizeMapper.ts`)।
+  হেল্পার টেস্ট।
+- **ইমেজ হেল্পার** (`translator/image/sizeMapper.ts`)।
 - শীর্ষ-স্তর: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`।
 
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — `TransformStream`-ভিত্তিক Responses API ↔ Chat
-  Completions কনভার্টার (`responses/` রুটের ক্যাচ-অল দ্বারা ব্যবহৃত)।
+  Completions কনভার্টার (`responses/` রুটের catch-all দ্বারা ব্যবহৃত)।
 
 ### 4.5 `open-sse/services/`
 
-উল্লেখযোগ্য অংশসমূহ (সম্পূর্ণ তালিকা `open-sse/services/`-এর অধীনে):
+প্রধান অংশগুলো (সম্পূর্ণ তালিকা `open-sse/services/`-এর অধীনে):
 
-| বিবেচ্য বিষয়        | ফাইলসমূহ                                                                                                                                                                                                                                                 |
+| Concern              | Files                                                                                                                                                                                                                                                    |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Combo রাউটিং         | `combo.ts` (20টি কৌশল), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                        |
-| Auto Combo ইঞ্জিন    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| কম্বো রাউটিং         | `combo.ts` (২০টি কৌশল), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                        |
+| অটো কম্বো ইঞ্জিন     | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
 | স্থিতিস্থাপকতা       | `accountFallback.ts` (কুলডাউন + লকআউট), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                            |
 | কোটা                 | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
 | ক্যাশিং              | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | রাউটিং বুদ্ধিমত্তা   | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| মডেল ব্যবস্থাপনা     | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| কম্প্রেশন            | `compression/` — সম্পূর্ণ কম্প্রেশন ইঞ্জিনের সংযোগ                                                                                                                                                                                                       |
+| মডেল হ্যান্ডলিং      | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| কমপ্রেশন             | `compression/` — সম্পূর্ণ কমপ্রেশন ইঞ্জিনের সংযোগ                                                                                                                                                                                                        |
 | টোকেন + সেশন         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | টিয়ার / ম্যানিফেস্ট | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / নেটওয়ার্ক      | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| ব্যাচসমূহ            | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| ব্যাচ                | `batchProcessor.ts`                                                                                                                                                                                                                                      |
 | ব্যবহার              | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts`-এ সংযুক্ত **110টি অনন্য টুল** (`schemas/tools.ts`-এ 45টি ক্যানোনিক্যাল টুল +
+- `server.ts`-এ সংযুক্ত **১১০টি অনন্য টুল** (৪৫টি ক্যানোনিক্যাল `schemas/tools.ts`-এ +
   memory, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian,
-  local-corpus ও compression মডিউল — ইউনিয়নটি `countUniqueMcpTools` দ্বারা গণনা করা হয়)।
-- **3টি ট্রান্সপোর্ট**: stdio, HTTP Streamable, SSE।
-- রানটাইমে **33টি স্কোপ** প্রয়োগ করা হয় — মূল তালিকাটি `src/shared/constants/mcpScopes.ts`-এ রয়েছে, আর পূর্ণ সেটটি প্রতিটি টুল মডিউল কর্তৃক ঘোষিত স্কোপগুলোর ইউনিয়ন।
+  local-corpus এবং compression মডিউল — `countUniqueMcpTools` দ্বারা ইউনিয়ন গণনা করা হয়েছে)।
+- **৩টি ট্রান্সপোর্ট**: stdio, HTTP Streamable, SSE।
+- রানটাইমে প্রয়োগ করা **৩৩টি স্কোপ** — `src/shared/constants/mcpScopes.ts`-এ মূল তালিকা রয়েছে, সম্পূর্ণ সেটটি প্রতিটি টুল মডিউলে ঘোষিত স্কোপগুলোর ইউনিয়ন।
 - অডিট টেবিল: `mcp_tool_audit` (`audit.ts` দ্বারা পূরণ করা হয়)।
-- ফাইলসমূহ: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
+- ফাইল: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  এবং `__tests__/`-এর অধীনে থাকা টেস্টসমূহ।
+  পাশাপাশি `__tests__/`-এর অধীনে পরীক্ষাসমূহ।
 - সম্পূর্ণ টুল ক্যাটালগের জন্য [MCP-SERVER.md](../frameworks/MCP-SERVER.md) দেখুন।
 
 ### 4.7 `open-sse/config/`
 
-প্রোভাইডার রেজিস্ট্রিসমূহ (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), প্রতিটি ফরম্যাটের জন্য মডেল রেজিস্ট্রিসমূহ (`audioRegistry.ts`,
+প্রোভাইডার রেজিস্ট্রি (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), প্রতিটি ফরম্যাটের মডেল রেজিস্ট্রি (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-আইডেন্টিটি সহায়কসমূহ (`codexIdentity.ts`, `codexInstructions.ts`,
+পরিচয় সহায়ক (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-ক্রেডেনশিয়াল সহায়কসমূহ (`credentialLoader.ts`, `codexClient.ts`) এবং ক্লাউড
-অ্যাডাপ্টারসমূহ (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+শংসাপত্র সহায়ক (`credentialLoader.ts`, `codexClient.ts`), এবং ক্লাউড
+অ্যাডাপ্টার (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`)।
 
 ### 4.8 `open-sse/utils/`
 
-স্ট্রিমিং প্রিমিটিভ ও প্রোভাইডার সহায়কসমূহ: `stream.ts`, `streamHandler.ts`,
+স্ট্রিমিং প্রিমিটিভ এবং প্রদানকারী সহায়ক: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,

@@ -20,10 +20,8 @@ const AUTH_FAILURES = [
   "account_deactivated",
   "auth_required",
 ];
-const INCONCLUSIVE_FAILURES = [
-  "network_error",
-  "upstream_unavailable",
-  "upstream_rate_limited",
+const TRANSPORT_FAILURES = ["network_error", "upstream_unavailable", "upstream_rate_limited"];
+const OTHER_INCONCLUSIVE_FAILURES = [
   "upstream_ambiguous_auth_or_quota",
   "provider_error",
   "runtime_error",
@@ -33,6 +31,7 @@ const INCONCLUSIVE_FAILURES = [
   "",
   undefined,
 ];
+const INCONCLUSIVE_FAILURES = [...TRANSPORT_FAILURES, ...OTHER_INCONCLUSIVE_FAILURES];
 
 const originalFlag = process.env[FLAG];
 const restoreFlag = () => {
@@ -46,11 +45,23 @@ test.afterEach(() => {
 });
 
 test(
-  "flag off (default): any cached probe error blocks dispatch, exactly as on the release",
+  "flag off (default): only transport diagnoses bypass the legacy strict gate",
   { timeout: 2000 },
   () => {
     delete process.env[FLAG];
-    for (const type of [...AUTH_FAILURES, ...INCONCLUSIVE_FAILURES]) {
+    assert.deepEqual(TRANSPORT_FAILURES, [
+      "network_error",
+      "upstream_unavailable",
+      "upstream_rate_limited",
+    ]);
+    assert.ok(AUTH_FAILURES.length > 0 && OTHER_INCONCLUSIVE_FAILURES.length > 0);
+    for (const type of TRANSPORT_FAILURES) {
+      setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
+      assert.equal(isCredentialHealthy("synthetic"), undefined, type);
+      assert.notEqual(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
+      assert.equal(getCredentialHealth("synthetic")?.lastErrorType, type);
+    }
+    for (const type of [...AUTH_FAILURES, ...OTHER_INCONCLUSIVE_FAILURES]) {
       setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
       assert.equal(isCredentialHealthy("synthetic"), false, String(type));
       assert.equal(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
@@ -66,12 +77,22 @@ test("a throwing flag resolver fails closed to the release gate", { timeout: 200
   const store = globalThis as Record<symbol, unknown>;
   const previous = store[key];
   process.env[FLAG] = "true";
+  let resolverCalls = 0;
   try {
     store[key] = () => {
+      resolverCalls++;
       throw new Error("flag store unavailable");
     };
     setCredentialHealth("synthetic", "codex", "error", "Probe timed out", "network_error");
-    assert.equal(isCredentialHealthy("synthetic"), false);
+    assert.equal(isCredentialHealthy("synthetic"), undefined);
+    assert.notEqual(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
+    // A throwing feature-flag resolver still fails closed for OTHER diagnoses.
+    for (const type of OTHER_INCONCLUSIVE_FAILURES) {
+      setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
+      assert.equal(isCredentialHealthy("synthetic"), false, String(type));
+      assert.equal(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
+    }
+    assert.ok(resolverCalls > 0, "the throwing resolver must actually be called");
   } finally {
     if (previous === undefined) delete store[key];
     else store[key] = previous;
@@ -154,3 +175,39 @@ test(
     }
   }
 );
+
+test("two transport-failed combo targets stay eligible without hiding probe failures", () => {
+  delete process.env[FLAG];
+  for (const [id, diagnosis] of [
+    ["connection-one", "network_error"],
+    ["connection-two", "upstream_unavailable"],
+  ]) {
+    setCredentialHealth(id, "codex", "error", "Connectivity problem", diagnosis, "upstream");
+    assert.notEqual(checkCredentialGate(id, "codex", "codex/model").allowed, false);
+    assert.equal(getCredentialHealth(id)?.status, "error");
+  }
+  assert.equal(getCredentialHealthSummary().failed, 2);
+});
+
+test("blocked credential-gate messages distinguish auth failures from ambiguous probes", () => {
+  delete process.env[FLAG];
+  setCredentialHealth("auth", "codex", "error", "Invalid grant", "upstream_auth_error");
+  const bad = checkCredentialGate("auth", "codex", "codex/model");
+  assert.equal(bad.allowed, false);
+  assert.match(bad.reason ?? "", /known-bad credentials.*diagnosis: upstream_auth_error/);
+  setCredentialHealth("unknown", "codex", "error", "Unclassified", "runtime_error");
+  const ambiguous = checkCredentialGate("unknown", "codex", "codex/model");
+  assert.equal(ambiguous.allowed, false);
+  assert.match(ambiguous.reason ?? "", /failed health probe.*diagnosis: runtime_error/);
+  assert.doesNotMatch(ambiguous.reason ?? "", /known-bad credentials/);
+  setCredentialHealth("unsafe", "codex", "error", "Sensitive content", "untrusted\\nsecret");
+  assert.equal(checkCredentialGate("unsafe", "codex", "codex/model").allowed, false);
+  const sanitized = checkCredentialGate("unsafe", "codex", "codex/model").reason ?? "";
+  assert.match(sanitized, /diagnosis: unknown/);
+  assert.doesNotMatch(sanitized, /secret/);
+  // An untrusted, enum-shaped string must not bypass log sanitization either.
+  setCredentialHealth("unsafe", "codex", "error", "Private text", "secret_payload");
+  const enumShaped = checkCredentialGate("unsafe", "codex", "codex/model").reason ?? "";
+  assert.match(enumShaped, /diagnosis: unknown/);
+  assert.doesNotMatch(enumShaped, /secret_payload/);
+});

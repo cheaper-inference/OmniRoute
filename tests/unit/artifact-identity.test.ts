@@ -14,6 +14,7 @@ import {
   parseIdentityArgs,
   resolveBundler,
 } from "../../scripts/release/artifact-identity.mjs";
+import { resolveNextBuildBundlerFlag } from "../../scripts/build/build-next-isolated.mjs";
 
 // Preview-artifact identity (#8084 slice (a)): the build-once workflow binds the
 // artifact to head SHA + base SHA + lockfile fingerprint + platform/ABI + node,
@@ -121,10 +122,33 @@ test("the tarball digest is recorded but does NOT feed the reuse key", () => {
   );
 });
 
-test("resolveBundler mirrors build-next-isolated.mjs: turbopack unless OMNIROUTE_USE_TURBOPACK=0", () => {
-  assert.equal(resolveBundler({}), "turbopack");
-  assert.equal(resolveBundler({ OMNIROUTE_USE_TURBOPACK: "1" }), "turbopack");
-  assert.equal(resolveBundler({ OMNIROUTE_USE_TURBOPACK: "0" }), "webpack");
+test("resolveBundler mirrors build-next-isolated.mjs, including the low-RAM default (#18184)", () => {
+  const GiB = 1024 ** 3;
+  // Explicit overrides stay authoritative whatever the RAM.
+  assert.equal(resolveBundler({ OMNIROUTE_USE_TURBOPACK: "1" }, 8 * GiB), "turbopack");
+  assert.equal(resolveBundler({ OMNIROUTE_USE_TURBOPACK: "0" }, 64 * GiB), "webpack");
+  // Unset or blank: the build picks webpack at <= 16 GiB (or unreadable RAM), so the
+  // stamped identity must say webpack too — otherwise the reuse key lies.
+  assert.equal(resolveBundler({}, 8 * GiB), "webpack");
+  assert.equal(resolveBundler({}, 16 * GiB), "webpack");
+  assert.equal(resolveBundler({}, null), "webpack");
+  assert.equal(resolveBundler({}, 16 * GiB + 1), "turbopack");
+  assert.equal(resolveBundler({ OMNIROUTE_USE_TURBOPACK: "" }, 64 * GiB), "turbopack");
+
+  const envs = [
+    {},
+    { OMNIROUTE_USE_TURBOPACK: "" },
+    { OMNIROUTE_USE_TURBOPACK: "0" },
+    { OMNIROUTE_USE_TURBOPACK: "1" },
+    { OMNIROUTE_USE_TURBOPACK: "yes" },
+  ];
+  for (const env of envs) {
+    for (const memory of [null, 8 * GiB, 16 * GiB, 16 * GiB + 1, 64 * GiB]) {
+      assert.equal(`--${resolveBundler(env, memory)}`, resolveNextBuildBundlerFlag(env, memory));
+    }
+    // Default memory argument: both read the same host/cgroup limit.
+    assert.equal(`--${resolveBundler(env)}`, resolveNextBuildBundlerFlag(env));
+  }
 });
 
 test("parseIdentityArgs requires --base and rejects flags without values", () => {
