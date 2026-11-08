@@ -1,0 +1,1 @@
+- **fix(gemini):** tool schemas with mixed type keywords no longer fail with a Gemini 400; `items`, `properties` and `required` are dropped from nodes of the wrong type.

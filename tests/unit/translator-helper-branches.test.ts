@@ -473,9 +473,9 @@ test("geminiHelper converts content, safely parses JSON and cleans complex schem
 
   const cleaned = geminiHelper.cleanJSONSchemaForAntigravity(schema);
   assert.equal(cleaned.type, "array");
-  assert.deepEqual(cleaned.required.sort(), ["a", "b"]);
-  assert.equal(cleaned.properties.a.minLength, undefined);
-  assert.deepEqual(cleaned.properties.b.enum, ["fixed"]);
+  // The node flattens to `array`, so `properties` and `required` from allOf are pruned.
+  assert.equal(cleaned.required, undefined);
+  assert.equal(cleaned.properties, undefined);
   assert.deepEqual(cleaned.enum, ["1", "2"]);
   assert.equal(cleaned.items.type, "integer");
   assert.equal(cleaned.additionalProperties, undefined);

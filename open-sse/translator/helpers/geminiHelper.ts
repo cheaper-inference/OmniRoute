@@ -1194,5 +1194,31 @@ export function cleanJSONSchemaForAntigravity(
 
   ensureArrayItems(cleaned);
 
+  // Phase 9: Gemini rejects `items` outside ARRAY and `properties`/`required` outside OBJECT.
+  // MCP schemas mix them with other types. Runs last so earlier phases cannot re-add them.
+  function pruneKeywordsByType(obj: unknown): void {
+    if (!obj || typeof obj !== "object") return;
+
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        pruneKeywordsByType(item);
+      }
+      return;
+    }
+
+    const record = obj as JsonRecord;
+    if (typeof record.type === "string") {
+      if (record.type !== "array") delete record.items;
+      if (record.type !== "object") {
+        delete record.properties;
+        delete record.required;
+      }
+    }
+
+    forEachSubschema(record, pruneKeywordsByType);
+  }
+
+  pruneKeywordsByType(cleaned);
+
   return cleaned;
 }
