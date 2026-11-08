@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Select from "@/shared/components/Select";
 import CollapsibleSection from "@/shared/components/CollapsibleSection";
+import { pickDisplayValue } from "@/shared/utils/maskEmail";
+import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import {
   readAccountPreferences,
   type AccountPreference,
@@ -15,24 +17,13 @@ type Connection = {
   name?: string;
   email?: string;
   isActive?: boolean;
+  /** Synthesised row for a stored preference whose connection no longer exists. */
+  missing?: boolean;
 };
 
-export default function AccountPreferencesEditor({
-  value,
-  onChange,
-  disabled = false,
-  providerIds,
-}: {
-  value: unknown;
-  onChange: (value: Record<string, AccountPreference>) => void;
-  disabled?: boolean;
-  /** The builder's current candidate pool; an empty scope means no eligible providers. */
-  providerIds?: readonly string[];
-}) {
-  const t = useTranslations("accountPreferences");
+function useProviderConnections() {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
-  const preferences = readAccountPreferences(value);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -52,17 +43,43 @@ export default function AccountPreferencesEditor({
     return () => controller.abort();
   }, []);
 
+  return { connections, state };
+}
+
+export default function AccountPreferencesEditor({
+  value,
+  onChange,
+  disabled = false,
+  providerIds,
+}: {
+  value: unknown;
+  onChange: (value: Record<string, AccountPreference>) => void;
+  disabled?: boolean;
+  /** The builder's current candidate pool; an empty scope means no eligible providers. */
+  providerIds?: readonly string[];
+}) {
+  const t = useTranslations("accountPreferences");
+  const { connections, state } = useProviderConnections();
+  const emailsVisible = useEmailPrivacyStore((store) => store.emailsVisible);
+  const preferences = readAccountPreferences(value);
+
   const ids = new Set(connections.map((connection) => connection.id));
   const rows: Connection[] = [
     ...connections,
-    ...Object.keys(preferences)
+    // Only once the list loaded: before that every stored entry would look missing.
+    // Missing rows have no provider, so they bypass the pool filter to stay resettable.
+    ...(state === "ready" ? Object.keys(preferences) : [])
       .filter((id) => !ids.has(id))
       .map((id) => ({
         id,
         provider: "",
         name: t("missing", { id }),
+        missing: true,
       })),
-  ].filter((connection) => providerIds === undefined || providerIds.includes(connection.provider));
+  ].filter(
+    (connection) =>
+      connection.missing || providerIds === undefined || providerIds.includes(connection.provider)
+  );
   return (
     <CollapsibleSection
       title={t("title")}
@@ -79,7 +96,10 @@ export default function AccountPreferencesEditor({
         className="max-h-[min(50dvh,24rem)] overflow-y-auto overscroll-contain space-y-3 pr-1"
       >
         {rows.map((connection) => {
-          const label = [connection.provider, connection.name || connection.email || connection.id]
+          const label = [
+            connection.provider,
+            pickDisplayValue([connection.name, connection.email], emailsVisible, connection.id),
+          ]
             .filter(Boolean)
             .join(" · ");
           return (

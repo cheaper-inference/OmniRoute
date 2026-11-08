@@ -422,15 +422,37 @@ export async function resolveAutoStrategyOrder(
   for (let index = 0; index < sourceCandidates.length; index += 1) {
     sourceCandidates[index].cacheAffinity = candidates[index]?.cacheAffinity;
   }
+  const quotaBlockedCount = candidates.length - unfilteredCandidates.length;
+  if (quotaBlockedCount > 0) {
+    log.info(
+      "COMBO",
+      `Auto strategy: quota cutoff skipped ${quotaBlockedCount}/${candidates.length} account candidates`
+    );
+  }
+  // Checked before the account-preference filters so an all-quota-blocked pool keeps
+  // its 429 whether or not preferences are configured.
+  if (candidates.length > 0 && unfilteredCandidates.length === 0) {
+    return {
+      earlyResponse: unavailableResponse(
+        429,
+        "All auto strategy candidates are below configured quota cutoffs"
+      ),
+    };
+  }
   const hasAccountPreferences = Object.keys(accountPreferences).length > 0;
   let routableCandidates = orderAccountPreferences(unfilteredCandidates, accountPreferences);
   if (hasAccountPreferences) {
-    routableCandidates = routableCandidates.filter(
+    const eligibleCandidates = routableCandidates.filter(
       (candidate) =>
         candidate.circuitBreakerState !== "OPEN" &&
-        !candidate.statusPenalty &&
         (!candidatePool.length || candidatePool.includes(candidate.provider))
     );
+    // A soft status penalty (#4540) is last-resort, never an exclusion: penalised
+    // accounts follow every healthy account, each group kept in tier order.
+    routableCandidates = [
+      ...eligibleCandidates.filter((candidate) => !candidate.statusPenalty),
+      ...eligibleCandidates.filter((candidate) => candidate.statusPenalty),
+    ];
     if (budgetCap && routableCandidates.length) {
       const tokens = estimatedInputTokens > 0 ? estimatedInputTokens : 1000;
       const cost = (candidate: AutoProviderCandidate) =>
@@ -459,24 +481,22 @@ export async function resolveAutoStrategyOrder(
       ),
     };
   }
-  const selectionCandidates = firstAccountPreferenceTier(routableCandidates, accountPreferences);
-  const quotaBlockedCount = candidates.length - unfilteredCandidates.length;
-  if (quotaBlockedCount > 0) {
-    log.info(
-      "COMBO",
-      `Auto strategy: quota cutoff skipped ${quotaBlockedCount}/${candidates.length} account candidates`
-    );
-  }
+  const penalisedKeys = new Set(
+    hasAccountPreferences
+      ? routableCandidates
+          .filter((candidate) => candidate.statusPenalty)
+          .map((candidate) => candidate.executionKey)
+      : []
+  );
+  const healthyCandidates = routableCandidates.filter(
+    (candidate) => !penalisedKeys.has(candidate.executionKey)
+  );
+  const selectionCandidates = firstAccountPreferenceTier(
+    healthyCandidates.length > 0 ? healthyCandidates : routableCandidates,
+    accountPreferences
+  );
   // G2: Register candidates so chatCore can mark quotaSoftPenalty via setCandidateQuotaSoftPenalty.
   _registerExecutionCandidates(routableCandidates);
-  if (candidates.length > 0 && routableCandidates.length === 0) {
-    return {
-      earlyResponse: unavailableResponse(
-        429,
-        "All auto strategy candidates are below configured quota cutoffs"
-      ),
-    };
-  }
   if (routableCandidates.length > 0) {
     let selectedProvider: string | null = null;
     let selectedModel: string | null = null;
@@ -599,6 +619,12 @@ export async function resolveAutoStrategyOrder(
       )
     );
     orderedTargets = orderAccountPreferences(orderedTargets, accountPreferences);
+    if (penalisedKeys.size > 0) {
+      orderedTargets = [
+        ...orderedTargets.filter((target) => !penalisedKeys.has(target.executionKey)),
+        ...orderedTargets.filter((target) => penalisedKeys.has(target.executionKey)),
+      ];
+    }
     if (hasAccountPreferences) {
       log.info(
         "COMBO",

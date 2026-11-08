@@ -94,7 +94,8 @@ const target = {
 async function route(
   accountPreferences: Record<string, string>,
   blocked: string[] = [],
-  routerStrategy = "rules"
+  routerStrategy = "rules",
+  penalised: string[] = []
 ) {
   return resolveAutoStrategyOrder({
     orderedTargets: [target],
@@ -126,6 +127,7 @@ async function route(
         latencyStdDev: 0,
         errorRate: 0,
         quotaCutoffBlocked: blocked.includes(connectionId),
+        statusPenalty: penalised.includes(connectionId),
       })),
   });
 }
@@ -144,6 +146,31 @@ test("blocked preferred accounts never reappear in fallback; reserve remains usa
   const result = await route(prefs, ["a", "b", "c"]);
   assert.ok("orderedTargets" in result);
   assert.deepEqual(new Set(ids(result.orderedTargets)), new Set(["d", "e"]));
+});
+
+test("an all-quota-blocked pool keeps the 429 quota response with preferences configured", async () => {
+  const all = targets.map((t) => t.connectionId);
+  for (const accountPreferences of [{}, prefs]) {
+    const result = await route(accountPreferences, all);
+    assert.ok("earlyResponse" in result);
+    assert.equal(result.earlyResponse.status, 429);
+  }
+});
+
+test("soft status penalties stay last-resort candidates instead of failing closed", async () => {
+  const all = targets.map((t) => t.connectionId);
+  const result = await route(prefs, [], "rules", all);
+  assert.ok("orderedTargets" in result);
+  assert.ok(["a", "b"].includes(result.orderedTargets[0].connectionId!));
+  assert.deepEqual(new Set(ids(result.orderedTargets)), new Set(["a", "b", "c", "d", "e"]));
+});
+
+test("penalised accounts rank after every healthy account, in tier order", async () => {
+  const result = await route(prefs, [], "rules", ["a", "b"]);
+  assert.ok("orderedTargets" in result);
+  assert.equal(result.orderedTargets[0].connectionId, "c");
+  assert.deepEqual(new Set(ids(result.orderedTargets).slice(0, 3)), new Set(["c", "d", "e"]));
+  assert.deepEqual(new Set(ids(result.orderedTargets).slice(3)), new Set(["a", "b"]));
 });
 
 test("all excluded fails closed rather than routing an unbound provider fallback", async () => {

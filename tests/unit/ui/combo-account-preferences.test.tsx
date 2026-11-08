@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import AccountPreferencesEditor from "../../../src/app/(dashboard)/dashboard/combos/AccountPreferencesEditor";
 import BuilderIntelligentStep from "../../../src/app/(dashboard)/dashboard/combos/BuilderIntelligentStep";
 import type { AccountPreference } from "../../../open-sse/services/combo/accountPreferences";
+import useEmailPrivacyStore from "../../../src/store/emailPrivacyStore";
 
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  useEmailPrivacyStore.setState({ emailsVisible: false });
 });
 
 function Harness({ providerIds }: { providerIds?: string[] }) {
@@ -154,5 +156,44 @@ it("bounds long lists in a keyboard-accessible scroll region without dropping th
   expect(region.className).toContain("overflow-y-auto");
   expect(region.className).toContain("max-h-");
   expect(region.tabIndex).toBe(0);
-  expect(region.querySelectorAll('[role="combobox"],select')).toHaveLength(60);
+  // 60 live accounts plus the harness's stored a/b preferences, which have no live
+  // connection here and stay listed as resettable unavailable rows.
+  expect(region.querySelectorAll('[role="combobox"],select')).toHaveLength(62);
+  expect(screen.getByRole("combobox", { name: "Unavailable account (a)" })).toBeTruthy();
+});
+
+it("keeps preferences for deleted connections visible and resettable inside a scoped pool", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ connections: [{ id: "a", provider: "openai", name: "A" }] }),
+    })
+  );
+  render(<Harness providerIds={["openai"]} />);
+  fireEvent.click(screen.getByRole("button", { name: /Account preferences/ }));
+  const missing = await screen.findByRole("combobox", { name: "Unavailable account (b)" });
+  choose(missing, "normal", "Normal");
+  expect(JSON.parse(screen.getByTestId("value").textContent!)).toEqual({ a: "preferred" });
+});
+
+it("masks account emails in labels unless the global email visibility is on", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        connections: [{ id: "a", provider: "openai", email: "alice.smith@example.com" }],
+      }),
+    })
+  );
+  render(<Harness providerIds={["openai"]} />);
+  fireEvent.click(screen.getByRole("button", { name: /Account preferences/ }));
+  const masked = await screen.findByRole("combobox", { name: /^openai · / });
+  expect(masked.getAttribute("aria-label") ?? masked.textContent).not.toContain("alice.smith@");
+  expect(screen.queryByRole("combobox", { name: "openai · alice.smith@example.com" })).toBeNull();
+  act(() => useEmailPrivacyStore.setState({ emailsVisible: true }));
+  expect(
+    await screen.findByRole("combobox", { name: "openai · alice.smith@example.com" })
+  ).toBeTruthy();
 });
