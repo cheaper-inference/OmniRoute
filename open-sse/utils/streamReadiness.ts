@@ -70,6 +70,13 @@ export function buildAnyByteAtHeader(anyByteAt: number | null): Record<string, s
   return { [ANY_BYTE_AT_HEADER]: anyByteAt === null ? "none" : String(anyByteAt) };
 }
 
+/** Log-line suffix naming which readiness-timeout shape occurred (see anyByteAt). */
+function describeSilence(lastChunkAt: number | null): string {
+  return lastChunkAt === null
+    ? "ZERO raw bytes received (upstream went fully silent)"
+    : "raw bytes received but no content event (transport alive, upstream stalled)";
+}
+
 export function parseAnyByteAtHeader(header: string | null | undefined): number | null | undefined {
   if (header == null || header === "") return undefined;
   if (header === "none") return null;
@@ -967,11 +974,7 @@ export async function ensureStreamReadiness(
         const reason = timeoutReason();
         options.log?.warn?.(
           "STREAM",
-          `${reason} (${options.provider || "provider"}/${options.model || "unknown"}) — ${
-            lastChunkAt === null
-              ? "ZERO raw bytes received (upstream went fully silent)"
-              : "raw bytes received but no content event (transport alive, upstream stalled)"
-          }`
+          `${reason} (${options.provider || "provider"}/${options.model || "unknown"}) — ${describeSilence(lastChunkAt)}`
         );
         await reader.cancel(reason).catch(() => {});
         return {
@@ -1045,11 +1048,7 @@ export async function ensureStreamReadiness(
         const reason = timeoutReason();
         options.log?.warn?.(
           "STREAM",
-          `${reason} (${options.provider || "provider"}/${options.model || "unknown"}) — ${
-            lastChunkAt === null
-              ? "ZERO raw bytes received (upstream went fully silent)"
-              : "raw bytes received but no content event (transport alive, upstream stalled)"
-          }`
+          `${reason} (${options.provider || "provider"}/${options.model || "unknown"}) — ${describeSilence(lastChunkAt)}`
         );
         await reader.cancel(reason).catch(() => {});
         return {

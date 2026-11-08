@@ -35,9 +35,12 @@ function pingThenSilentBody(): ReadableStream<Uint8Array> {
 }
 
 test("silent upstream → anyByteAt null + header 'none'", async () => {
-  const result = await ensureStreamReadiness(new Response(silentBody(), { status: 200, headers: sse }), {
-    timeoutMs: 60,
-  });
+  const result = await ensureStreamReadiness(
+    new Response(silentBody(), { status: 200, headers: sse }),
+    {
+      timeoutMs: 60,
+    }
+  );
 
   assert.equal(result.ok, false);
   assert.equal(result.code, "STREAM_READINESS_TIMEOUT");
@@ -70,9 +73,12 @@ test("per-call stamp: a silent stream after a chatty one still reports zero byte
   );
   assert.equal(typeof chatty.anyByteAt, "number");
 
-  const silent = await ensureStreamReadiness(new Response(silentBody(), { status: 200, headers: sse }), {
-    timeoutMs: 60,
-  });
+  const silent = await ensureStreamReadiness(
+    new Response(silentBody(), { status: 200, headers: sse }),
+    {
+      timeoutMs: 60,
+    }
+  );
   assert.equal(
     silent.anyByteAt,
     null,
@@ -100,6 +106,10 @@ test("header helpers: build/parse agreement for both shapes", () => {
   assert.deepEqual(buildAnyByteAtHeader(1729123456789), { [ANY_BYTE_AT_HEADER]: "1729123456789" });
   assert.equal(parseAnyByteAtHeader("none"), null);
   assert.equal(parseAnyByteAtHeader("1729123456789"), 1729123456789);
-  assert.equal(parseAnyByteAtHeader(undefined), undefined, "absent header = unknown, not zero-bytes");
+  assert.equal(
+    parseAnyByteAtHeader(undefined),
+    undefined,
+    "absent header = unknown, not zero-bytes"
+  );
   assert.equal(parseAnyByteAtHeader("garbage"), undefined);
 });
