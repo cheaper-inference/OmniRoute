@@ -152,23 +152,30 @@ export function observeClaudeUsageHeaders(
  * the usage endpoint gave (a cached read, a stale read during a 429 cooldown, or only the
  * rate-limit message). Other failures (expired auth, transport) stay visible.
  */
+/** When the endpoint read behind `usage` was taken (NaN when unknown, 0 when there is none). */
+function endpointReadAt(usage: ClaudeUsageResult, cached: CachedClaudeUsage | undefined): number {
+  if (usage._stale) return Date.parse(String(usage._staleSince));
+  return usage.quotas ? (cached?.fetchedAt ?? 0) : 0;
+}
+
+/** Per-model weekly windows only come from the endpoint: keep them while that read is recent. */
+function recentEndpointRead(
+  cached: CachedClaudeUsage | undefined,
+  observedAt: number
+): ClaudeUsageResult | null {
+  if (!cached) return null;
+  return observedAt - cached.fetchedAt < CLAUDE_USAGE_SUCCESS_TTL_MS ? cached.value : null;
+}
+
 function preferNewerObservedUsage(key: string, usage: ClaudeUsageResult): ClaudeUsageResult {
   const observed = observedUsage.get(key);
   if (!observed) return usage;
   if (!usage.quotas && usage.message !== RATE_LIMITED_MESSAGE) return usage;
   const cached = lastSuccessfulUsage.get(key);
-  const readAt = usage._stale
-    ? Date.parse(String(usage._staleSince))
-    : usage.quotas
-      ? (cached?.fetchedAt ?? 0)
-      : 0;
+  const readAt = endpointReadAt(usage, cached);
   if (Number.isFinite(readAt) && observed.observedAt <= readAt) return usage;
 
-  // Per-model weekly windows only come from the endpoint: keep them while that read is recent.
-  const recentRead =
-    cached && observed.observedAt - cached.fetchedAt < CLAUDE_USAGE_SUCCESS_TTL_MS
-      ? cached.value
-      : null;
+  const recentRead = recentEndpointRead(cached, observed.observedAt);
   const fresh: ClaudeUsageResult = {
     ...usage,
     quotas: normalizeClaudeUsageQuotas(observed.body).quotas,
@@ -417,7 +424,6 @@ async function fetchClaudeUsage(
   }
 }
 
-/** Test-only: clear the success cache and in-flight polls. */
 /**
  * Mark the last successful read as outdated, e.g. after a reset claim changed the quota, so
  * the next read polls Anthropic instead of reusing it. It still backs a stale answer on 429.
@@ -428,6 +434,7 @@ export function expireClaudeUsageCache(accessToken?: string): void {
   if (cached) cached.expired = true;
 }
 
+/** Test-only: clear the success cache, observed headers and in-flight polls. */
 export function _resetClaudeUsagePollingState(): void {
   lastSuccessfulUsage.clear();
   observedUsage.clear();
