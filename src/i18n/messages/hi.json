@@ -7093,7 +7093,21 @@
     "chatgptConnectorLabel": "ChatGPT कस्टम कनेक्टर",
     "doctorChecking": "स्टेटस जांचा जा रहा है…",
     "doctorCheck": "डॉक्टर स्टेटस जांचें",
-    "fallbackRetryBackendTitle": "फ़ॉलबैक रीट्राई बैकएंड"
+    "fallbackRetryBackendTitle": "फ़ॉलबैक रीट्राई बैकएंड",
+    "rosebudPanel": {
+      "title": "Rosebud सदस्यता",
+      "description": "प्रत्येक खाते को एक बार अधिकृत करें. चित्र, ध्वनि या वीडियो बनाने पर उस खाते के मौजूदा Rosebud क्रेडिट खर्च होते हैं।",
+      "connect": "Rosebud खाता कनेक्ट करें",
+      "approve": "Rosebud पर अनुमोदन करें",
+      "checkAccount": "प्राधिकरण और क्रेडिट की जाँच करें",
+      "reauthorize": "पुनः प्राधिकृत",
+      "refreshModels": "मॉडल ताज़ा करें",
+      "defaultAccountName": "Rosebud खाता",
+      "balanceUnavailable": "अनुपलब्ध",
+      "accountStatus": "{status}: {account} — {balance} क्रेडिट",
+      "modelsDiscovered": "{count} मॉडल की खोज की गई। कीमतें Rosebud क्रेडिट में हैं।",
+      "requestFailed": "यह अनुरोध पूरा करने में असमर्थ. Rosebud प्राधिकरण OmniRoute सर्वर पर चलता है और इसके लिए स्थानीय या LAN पहुंच की आवश्यकता होती है।"
+    }
   },
   "settings": {
     "title": "सेटिंग्स",

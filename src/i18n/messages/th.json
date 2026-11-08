@@ -7093,7 +7093,21 @@
     "chatgptConnectorLabel": "Custom connector ของ ChatGPT",
     "doctorChecking": "กำลังตรวจสอบสถานะ…",
     "doctorCheck": "ตรวจสถานะ doctor",
-    "fallbackRetryBackendTitle": "ระบบสำรองสำหรับทดลองใหม่"
+    "fallbackRetryBackendTitle": "ระบบสำรองสำหรับทดลองใหม่",
+    "rosebudPanel": {
+      "title": "สมัครสมาชิก Rosebud",
+      "description": "อนุญาตแต่ละบัญชีหนึ่งครั้ง การสร้างภาพ เสียง หรือวิดีโอจะใช้เครดิต Rosebud ที่มีอยู่ของบัญชีนั้น",
+      "connect": "เชื่อมต่อบัญชี Rosebud",
+      "approve": "อนุมัติบน Rosebud",
+      "checkAccount": "ตรวจสอบการอนุญาตและเครดิต",
+      "reauthorize": "ให้สิทธิ์อีกครั้ง",
+      "refreshModels": "รีเฟรชโมเดล",
+      "defaultAccountName": "บัญชีRosebud",
+      "balanceUnavailable": "ไม่พร้อมใช้งาน",
+      "accountStatus": "{status}: {account} — {balance} เครดิต",
+      "modelsDiscovered": "ค้นพบโมเดล {count} ราคาอยู่ใน Rosebud เครดิต",
+      "requestFailed": "ไม่สามารถดำเนินการตามคำขอนี้ได้ การอนุญาต Rosebud ทำงานบนเซิร์ฟเวอร์ OmniRoute และต้องการการเข้าถึงภายในหรือ LAN"
+    }
   },
   "settings": {
     "title": "การตั้งค่า",

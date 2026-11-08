@@ -7093,7 +7093,21 @@
     "chatgptConnectorLabel": "Користувацький конектор ChatGPT",
     "doctorChecking": "Перевірка статусу…",
     "doctorCheck": "Перевірити статус doctor",
-    "fallbackRetryBackendTitle": "Резервний бекенд повторної спроби"
+    "fallbackRetryBackendTitle": "Резервний бекенд повторної спроби",
+    "rosebudPanel": {
+      "title": "підписка Rosebud",
+      "description": "Авторизуйте кожен обліковий запис один раз. Створення зображень, звуку чи відео витрачає наявні кредити Rosebud цього облікового запису.",
+      "connect": "Підключіть обліковий запис Rosebud",
+      "approve": "Схвалити на Rosebud",
+      "checkAccount": "Перевірте авторизацію та кредити",
+      "reauthorize": "Переавторизуйте",
+      "refreshModels": "Оновити моделі",
+      "defaultAccountName": "обліковий запис Rosebud",
+      "balanceUnavailable": "недоступний",
+      "accountStatus": "{status}: {account} — {balance} кредитів",
+      "modelsDiscovered": "Виявлено моделі {count}. Ціни вказані в кредитах Rosebud.",
+      "requestFailed": "Неможливо виконати цей запит. Авторизація Rosebud виконується на сервері OmniRoute і вимагає локального або LAN доступу."
+    }
   },
   "settings": {
     "title": "Налаштування",

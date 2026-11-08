@@ -7093,7 +7093,21 @@
     "chatgptConnectorLabel": "Egendefinert ChatGPT-tilkobling",
     "doctorChecking": "Sjekker status …",
     "doctorCheck": "Sjekk lege-status",
-    "fallbackRetryBackendTitle": "Reservert gjenntaksbackend"
+    "fallbackRetryBackendTitle": "Reservert gjenntaksbackend",
+    "rosebudPanel": {
+      "title": "Rosebud abonnement",
+      "description": "Autoriser hver konto én gang. Å lage bilder, lyd eller video bruker kontoens eksisterende Rosebud kreditter.",
+      "connect": "Koble til Rosebud kontoen",
+      "approve": "Godkjenne på Rosebud",
+      "checkAccount": "Sjekk autorisasjon og kreditter",
+      "reauthorize": "Autoriser på nytt",
+      "refreshModels": "Oppdater modellene",
+      "defaultAccountName": "Rosebud konto",
+      "balanceUnavailable": "utilgjengelig",
+      "accountStatus": "{status}: {account} — {balance} kreditter",
+      "modelsDiscovered": "{count} modeller oppdaget. Prisene er i Rosebud kreditter.",
+      "requestFailed": "Kan ikke fullføre denne forespørselen. Rosebud autorisasjon kjører på OmniRoute serveren og krever lokal eller LAN tilgang."
+    }
   },
   "settings": {
     "title": "Innstillinger",

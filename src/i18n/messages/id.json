@@ -7093,7 +7093,21 @@
     "chatgptConnectorLabel": "Konektor kustom ChatGPT",
     "doctorChecking": "Memeriksa status…",
     "doctorCheck": "Periksa status doctor",
-    "fallbackRetryBackendTitle": "Backend percobaan ulang fallback"
+    "fallbackRetryBackendTitle": "Backend percobaan ulang fallback",
+    "rosebudPanel": {
+      "title": "berlangganan Rosebud",
+      "description": "Otorisasi setiap akun satu kali. Membuat gambar, suara, atau video menghabiskan kredit Rosebud yang ada di akun tersebut.",
+      "connect": "Hubungkan akun Rosebud",
+      "approve": "Setujui di Rosebud",
+      "checkAccount": "Periksa otorisasi dan kredit",
+      "reauthorize": "Otorisasi ulang",
+      "refreshModels": "Segarkan model",
+      "defaultAccountName": "akun Rosebud",
+      "balanceUnavailable": "tidak tersedia",
+      "accountStatus": "{status}: {account} — {balance} kredit",
+      "modelsDiscovered": "model {count} ditemukan. Harga dalam kredit Rosebud.",
+      "requestFailed": "Tidak dapat menyelesaikan permintaan ini. otorisasi Rosebud berjalan di server OmniRoute dan memerlukan akses lokal atau LAN."
+    }
   },
   "settings": {
     "title": "Pengaturan",

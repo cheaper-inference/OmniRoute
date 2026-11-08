@@ -7170,7 +7170,21 @@
     "chatgptConnectorLabel": "Connettore personalizzato di ChatGPT",
     "doctorChecking": "Verifica dello stato…",
     "doctorCheck": "Verifica dello stato di doctor",
-    "fallbackRetryBackendTitle": "Backend di riprova di fallback"
+    "fallbackRetryBackendTitle": "Backend di riprova di fallback",
+    "rosebudPanel": {
+      "title": "abbonamento Rosebud",
+      "description": "Autorizza ciascun account una volta. La creazione di immagini, suoni o video spende i crediti Rosebud esistenti dell'account.",
+      "connect": "Collega l'account Rosebud",
+      "approve": "Approvare su Rosebud",
+      "checkAccount": "Controlla autorizzazione e crediti",
+      "reauthorize": "Riautorizzare",
+      "refreshModels": "Aggiorna modelli",
+      "defaultAccountName": "conto Rosebud",
+      "balanceUnavailable": "non disponibile",
+      "accountStatus": "{status}: {account} — {balance} crediti",
+      "modelsDiscovered": "scoperti modelli {count}. I prezzi sono in crediti Rosebud.",
+      "requestFailed": "Impossibile completare questa richiesta. L'autorizzazione Rosebud viene eseguita sul server OmniRoute e richiede l'accesso locale o LAN."
+    }
   },
   "settings": {
     "title": "Impostazioni",

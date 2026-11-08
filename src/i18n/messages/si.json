@@ -7093,7 +7093,21 @@
     "chatgptConnectorLabel": "ChatGPT කුසලාන සම්බන්ධකය",
     "doctorChecking": "අවස්ථාව පරීක්ෂා කරමින්...",
     "doctorCheck": "දොකටර් අවස්ථාව පරීක්ෂා කරන්න",
-    "fallbackRetryBackendTitle": "පසුබැසීම පෙරහන් මුල් පද්‍ධතිය"
+    "fallbackRetryBackendTitle": "පසුබැසීම පෙරහන් මුල් පද්‍ධතිය",
+    "rosebudPanel": {
+      "title": "Rosebud දායකත්වය",
+      "description": "එක් එක් ගිණුමට වරක් අවසර දෙන්න. රූප, ශබ්ද හෝ වීඩියෝ නිර්මාණය කිරීම එම ගිණුමේ පවතින Rosebud බැර වැය කරයි.",
+      "connect": "Rosebud ගිණුම සම්බන්ධ කරන්න",
+      "approve": "Rosebud මත අනුමත කරන්න",
+      "checkAccount": "අවසරය සහ බැර පරීක්ෂා කරන්න",
+      "reauthorize": "නැවත අවසර දෙන්න",
+      "refreshModels": "මාදිලි නැවුම් කරන්න",
+      "defaultAccountName": "Rosebud ගිණුම",
+      "balanceUnavailable": "ලබාගත නොහැක",
+      "accountStatus": "{status}: {account} — {balance} ණය",
+      "modelsDiscovered": "{count} ආකෘති සොයා ගන්නා ලදී. මිල ගණන් Rosebud ණය වල ඇත.",
+      "requestFailed": "මෙම ඉල්ලීම සම්පූර්ණ කිරීමට නොහැකි විය. Rosebud අවසරය OmniRoute සේවාදායකය මත ක්‍රියාත්මක වන අතර දේශීය හෝ LAN ප්‍රවේශය අවශ්‍ය වේ."
+    }
   },
   "settings": {
     "title": "සැකසුම්",

@@ -7093,7 +7093,21 @@
     "chatgptConnectorLabel": "ChatGPT 自訂連接器",
     "doctorChecking": "正在檢查狀態…",
     "doctorCheck": "檢查診斷狀態",
-    "fallbackRetryBackendTitle": "回退重試後端"
+    "fallbackRetryBackendTitle": "回退重試後端",
+    "rosebudPanel": {
+      "title": "Rosebud訂閱",
+      "description": "每個帳戶授權一次。建立影像、聲音或影片會花費該帳戶的現有Rosebud積分。",
+      "connect": "連接Rosebud帳戶",
+      "approve": "在Rosebud上批准",
+      "checkAccount": "檢查授權和信用",
+      "reauthorize": "重新授權",
+      "refreshModels": "刷新模型",
+      "defaultAccountName": "Rosebud帳戶",
+      "balanceUnavailable": "不可用",
+      "accountStatus": "{status}: {account} — {balance}積分",
+      "modelsDiscovered": "{count}模型被發現。價格以Rosebud積分錶示。",
+      "requestFailed": "無法完成此請求。 Rosebud授權在OmniRoute伺服器上運行，需要本地或LAN存取。"
+    }
   },
   "settings": {
     "title": "設定",

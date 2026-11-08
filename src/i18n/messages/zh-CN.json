@@ -7170,7 +7170,21 @@
     "chatgptConnectorLabel": "ChatGPT 自定义连接器",
     "doctorChecking": "正在检查状态…",
     "doctorCheck": "检查诊断状态",
-    "fallbackRetryBackendTitle": "回退重试后端"
+    "fallbackRetryBackendTitle": "回退重试后端",
+    "rosebudPanel": {
+      "title": "Rosebud订阅",
+      "description": "每个帐户授权一次。创建图像、声音或视频会花费该帐户的现有Rosebud积分。",
+      "connect": "连接Rosebud账户",
+      "approve": "在Rosebud上批准",
+      "checkAccount": "检查授权和信用",
+      "reauthorize": "重新授权",
+      "refreshModels": "刷新模型",
+      "defaultAccountName": "Rosebud账户",
+      "balanceUnavailable": "不可用",
+      "accountStatus": "{status}: {account} — {balance}积分",
+      "modelsDiscovered": "{count}模型被发现。价格以Rosebud积分表示。",
+      "requestFailed": "无法完成此请求。 Rosebud授权在OmniRoute服务器上运行，需要本地或LAN访问。"
+    }
   },
   "settings": {
     "title": "设置",

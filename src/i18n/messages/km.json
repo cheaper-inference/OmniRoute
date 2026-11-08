@@ -7170,7 +7170,21 @@
     "chatgptConnectorLabel": "ឧបករណ៍ភ្ជាប់ផ្ទាល់ខ្លួនរបស់ ChatGPT",
     "doctorChecking": "កំពុងពិនិត្យស្ថានភាព…",
     "doctorCheck": "ពិនិត្យស្ថានភាព doctor",
-    "fallbackRetryBackendTitle": "ប្រព័ន្ធបទនុកឡើងវិញ"
+    "fallbackRetryBackendTitle": "ប្រព័ន្ធបទនុកឡើងវិញ",
+    "rosebudPanel": {
+      "title": "ការជាវ Rosebud",
+      "description": "អនុញ្ញាតគណនីនីមួយៗម្តង។ ការបង្កើតរូបភាព សំឡេង ឬវីដេអូចំណាយទៅលើឥណទាន Rosebud ដែលមានស្រាប់របស់គណនីនោះ។",
+      "connect": "ភ្ជាប់គណនី Rosebud",
+      "approve": "យល់ព្រមលើ Rosebud",
+      "checkAccount": "ពិនិត្យការអនុញ្ញាត និងឥណទាន",
+      "reauthorize": "ផ្តល់សិទ្ធិឡើងវិញ",
+      "refreshModels": "ធ្វើឱ្យគំរូឡើងវិញ",
+      "defaultAccountName": "គណនីRosebud",
+      "balanceUnavailable": "មិនអាចប្រើបាន",
+      "accountStatus": "{status}: {account} — {balance} ឌីត",
+      "modelsDiscovered": "ម៉ូដែល {count} ត្រូវបានរកឃើញ។ តម្លៃគឺនៅក្នុងឥណទាន Rosebud ។",
+      "requestFailed": "មិនអាចបំពេញសំណើនេះបានទេ។ ការអនុញ្ញាត Rosebud ដំណើរការលើម៉ាស៊ីនមេ OmniRoute ហើយទាមទារការចូលប្រើមូលដ្ឋាន ឬ LAN ។"
+    }
   },
   "settings": {
     "title": "ការកំណត់",

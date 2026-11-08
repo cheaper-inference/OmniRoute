@@ -7093,7 +7093,21 @@
     "chatgptConnectorLabel": "Προσαρμοσμένος συνδέτης ChatGPT",
     "doctorChecking": "Έλεγχος κατάστασης…",
     "doctorCheck": "Έλεγχος κατάστασης γιατρού",
-    "fallbackRetryBackendTitle": "Εναλλακτικό backend επανάληψης"
+    "fallbackRetryBackendTitle": "Εναλλακτικό backend επανάληψης",
+    "rosebudPanel": {
+      "title": "συνδρομή Rosebud",
+      "description": "Εξουσιοδοτήστε κάθε λογαριασμό μία φορά. Η δημιουργία εικόνων, ήχου ή βίντεο ξοδεύει τις υπάρχουσες πιστώσεις Rosebud αυτού του λογαριασμού.",
+      "connect": "Σύνδεση λογαριασμού Rosebud",
+      "approve": "Έγκριση στο Rosebud",
+      "checkAccount": "Ελέγξτε την εξουσιοδότηση και τις πιστώσεις",
+      "reauthorize": "Επανεξουσιοδότηση",
+      "refreshModels": "Ανανέωση μοντέλων",
+      "defaultAccountName": "λογαριασμός Rosebud",
+      "balanceUnavailable": "δυσεύρετος",
+      "accountStatus": "{status}: {account} — {balance} πιστώσεις",
+      "modelsDiscovered": "Ανακαλύφθηκαν μοντέλα {count}. Οι τιμές είναι σε πιστώσεις Rosebud.",
+      "requestFailed": "Δεν είναι δυνατή η ολοκλήρωση αυτού του αιτήματος. Η εξουσιοδότηση Rosebud εκτελείται στον διακομιστή OmniRoute και απαιτεί τοπική ή LAN πρόσβαση."
+    }
   },
   "settings": {
     "title": "Ρυθμίσεις",

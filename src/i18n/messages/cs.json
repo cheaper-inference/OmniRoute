@@ -7170,7 +7170,21 @@
     "chatgptConnectorLabel": "Vlastní konektor ChatGPT",
     "doctorChecking": "Kontroluje se stav…",
     "doctorCheck": "Zkontrolovat stav diagnostiky",
-    "fallbackRetryBackendTitle": "Záložní backend pro opakování"
+    "fallbackRetryBackendTitle": "Záložní backend pro opakování",
+    "rosebudPanel": {
+      "title": "předplatné Rosebud",
+      "description": "Autorizujte každý účet jednou. Vytváření obrázků, zvuku nebo videa utrácí stávající kredity Rosebud daného účtu.",
+      "connect": "Připojte účet Rosebud",
+      "approve": "Schválit na Rosebud",
+      "checkAccount": "Zkontrolujte autorizaci a kredity",
+      "reauthorize": "Znovu autorizovat",
+      "refreshModels": "Obnovit modely",
+      "defaultAccountName": "Rosebud účet",
+      "balanceUnavailable": "nedostupný",
+      "accountStatus": "{status}: {account} — {balance} kredity",
+      "modelsDiscovered": "objeveny modely {count}. Prices are in Rosebud credits.",
+      "requestFailed": "Tento požadavek nelze dokončit. Autorizace Rosebud běží na serveru OmniRoute a vyžaduje místní nebo LAN přístup."
+    }
   },
   "settings": {
     "title": "Nastavení",

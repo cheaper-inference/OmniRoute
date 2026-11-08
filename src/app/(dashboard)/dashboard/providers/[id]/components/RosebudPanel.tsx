@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, Button } from "@/shared/components";
 
 type Connection = { id?: string; name?: string };
@@ -12,17 +13,18 @@ function ConnectionRow({
   busy: boolean;
   call: (action: string, connectionId?: string) => unknown;
 }) {
+  const t = useTranslations("providers.rosebudPanel");
   return (
     <div className="flex flex-wrap items-center gap-3">
       <span>{connection.name || "Rosebud"}</span>
       <Button disabled={busy} variant="outline" onClick={() => call("account", connection.id)}>
-        Check authorization and credits
+        {t("checkAccount")}
       </Button>
       <Button disabled={busy} variant="outline" onClick={() => call("authorize", connection.id)}>
-        Reauthorize
+        {t("reauthorize")}
       </Button>
       <Button disabled={busy} variant="outline" onClick={() => call("models", connection.id)}>
-        Refresh models
+        {t("refreshModels")}
       </Button>
     </div>
   );
@@ -35,6 +37,7 @@ export default function RosebudPanel({
   connections: Connection[];
   refresh: () => unknown;
 }) {
+  const t = useTranslations("providers.rosebudPanel");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [approval, setApproval] = useState<string | null>(null);
@@ -59,31 +62,31 @@ export default function RosebudPanel({
         setApproval(result.approval_url);
       if (action === "account")
         setMessage(
-          `${result.status}: ${result.account?.display_name || "Rosebud account"} — ${result.account?.balance ?? "unavailable"} credits`
+          t("accountStatus", {
+            status: String(result.status),
+            account: result.account?.display_name || t("defaultAccountName"),
+            balance: String(result.account?.balance ?? t("balanceUnavailable")),
+          })
         );
       if (action === "models")
-        setMessage(
-          `${result.models?.length || 0} models discovered. Prices are in Rosebud credits.`
-        );
+        setMessage(t("modelsDiscovered", { count: result.models?.length || 0 }));
       refresh();
     } catch {
-      setMessage(
-        "Unable to complete this request. Rosebud authorization runs on the OmniRoute server and requires local or LAN access."
-      );
+      setMessage(t("requestFailed"));
     } finally {
       setBusy(false);
     }
   }
   return (
     <Card className="p-4 space-y-3">
-      <h2 className="font-semibold">Rosebud subscription</h2>
-      <p>Authorize each account once. Generation uses its existing Rosebud credits.</p>
+      <h2 className="font-semibold">{t("title")}</h2>
+      <p>{t("description")}</p>
       <Button disabled={busy} onClick={() => call("connect")}>
-        Connect Rosebud account
+        {t("connect")}
       </Button>
       {approval && (
         <a href={approval} target="_blank" rel="noreferrer" className="underline">
-          Approve on Rosebud
+          {t("approve")}
         </a>
       )}
       {connections

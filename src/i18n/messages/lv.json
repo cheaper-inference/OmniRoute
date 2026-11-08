@@ -7093,7 +7093,21 @@
     "chatgptConnectorLabel": "ChatGPT pielāgots savienotājs",
     "doctorChecking": "Pārbauda statusu...",
     "doctorCheck": "Pārbaudīt ārstēšanas statusu",
-    "fallbackRetryBackendTitle": "Rezerves atkārtota mēģinājuma aizmugure"
+    "fallbackRetryBackendTitle": "Rezerves atkārtota mēģinājuma aizmugure",
+    "rosebudPanel": {
+      "title": "Rosebud abonements",
+      "description": "Autorizējiet katru kontu vienreiz. Veidojot attēlus, skaņu vai video, tiek tērēti šī konta esošie Rosebud kredīti.",
+      "connect": "Pievienojiet Rosebud kontu",
+      "approve": "Apstiprināt uz Rosebud",
+      "checkAccount": "Pārbaudiet autorizāciju un kredītus",
+      "reauthorize": "Atkārtoti autorizēt",
+      "refreshModels": "Atsvaidziniet modeļus",
+      "defaultAccountName": "Rosebud konts",
+      "balanceUnavailable": "nav pieejams",
+      "accountStatus": "{status}: {account} — {balance} kredīti",
+      "modelsDiscovered": "{count} modeļi atklāti. Cenas norādītas Rosebud kredītos.",
+      "requestFailed": "Nevar izpildīt šo pieprasījumu. Rosebud autorizācija darbojas OmniRoute serverī, un tai ir nepieciešama lokāla vai LAN piekļuve."
+    }
   },
   "settings": {
     "title": "Iestatījumi",

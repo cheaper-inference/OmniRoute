@@ -7170,7 +7170,21 @@
     "chatgptConnectorLabel": "ChatGPT xüsusi konnektoru",
     "doctorChecking": "Status yoxlanılır…",
     "doctorCheck": "Həkim statusunu yoxlayın",
-    "fallbackRetryBackendTitle": "Əvəzleyici təkrar cəhd backendi"
+    "fallbackRetryBackendTitle": "Əvəzleyici təkrar cəhd backendi",
+    "rosebudPanel": {
+      "title": "Rosebud abunə",
+      "description": "Hər hesaba bir dəfə icazə verin. Şəkil, səs və ya video yaratmaq həmin hesabın mövcud Rosebud kreditlərini xərcləyir.",
+      "connect": "Rosebud hesabını birləşdirin",
+      "approve": "Rosebud-da təsdiqləyin",
+      "checkAccount": "İcazə və kreditləri yoxlayın",
+      "reauthorize": "Yenidən icazə verin",
+      "refreshModels": "Modelləri yeniləyin",
+      "defaultAccountName": "Rosebud hesabı",
+      "balanceUnavailable": "mövcud deyil",
+      "accountStatus": "{status}: {account} — {balance} kreditlər",
+      "modelsDiscovered": "{count} modelləri aşkar edilmişdir. Qiymətlər Rosebud kreditlədir.",
+      "requestFailed": "Bu sorğunu tamamlamaq mümkün deyil. Rosebud avtorizasiyası OmniRoute serverində işləyir və yerli və ya LAN girişi tələb edir."
+    }
   },
   "settings": {
     "title": "Parametrlər",

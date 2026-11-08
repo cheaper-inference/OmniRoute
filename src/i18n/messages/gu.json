@@ -7093,7 +7093,21 @@
     "chatgptConnectorLabel": "ChatGPT કસ્ટમ કનેક્ટર",
     "doctorChecking": "સ્થિતિ તપાસવામાં…",
     "doctorCheck": "ડૉક્ટર સ્થિતિ તપાસો",
-    "fallbackRetryBackendTitle": "ફોલબેક રીટ્રી બેકએન્ડ"
+    "fallbackRetryBackendTitle": "ફોલબેક રીટ્રી બેકએન્ડ",
+    "rosebudPanel": {
+      "title": "Rosebud સબ્સ્ક્રિપ્શન",
+      "description": "દરેક ખાતાને એકવાર અધિકૃત કરો. છબીઓ, ધ્વનિ અથવા વિડિયો બનાવવાથી તે ખાતાની હાલની Rosebud ક્રેડિટનો ખર્ચ થાય છે.",
+      "connect": "Rosebud એકાઉન્ટને કનેક્ટ કરો",
+      "approve": "Rosebud પર મંજૂર કરો",
+      "checkAccount": "અધિકૃતતા અને ક્રેડિટ તપાસો",
+      "reauthorize": "ફરીથી અધિકૃત કરો",
+      "refreshModels": "મોડલ્સ રિફ્રેશ કરો",
+      "defaultAccountName": "Rosebud એકાઉન્ટ",
+      "balanceUnavailable": "અનુપલબ્ધ",
+      "accountStatus": "{status}: {account} — {balance} ક્રેડિટ્સ",
+      "modelsDiscovered": "{count} મોડેલો શોધ્યા. કિંમતો Rosebud ક્રેડિટમાં છે.",
+      "requestFailed": "આ વિનંતી પૂર્ણ કરવામાં અસમર્થ. Rosebud અધિકૃતતા OmniRoute સર્વર પર ચાલે છે અને તેને સ્થાનિક અથવા LAN ઍક્સેસની જરૂર છે."
+    }
   },
   "settings": {
     "title": "સેટિંગ્સ",

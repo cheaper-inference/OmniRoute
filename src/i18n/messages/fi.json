@@ -7093,7 +7093,21 @@
     "chatgptConnectorLabel": "ChatGPT-mukautettu liittimen",
     "doctorChecking": "Tarkistetaan tilaa…",
     "doctorCheck": "Tarkista doctor-tila",
-    "fallbackRetryBackendTitle": "Vaihtoehtoinen uudelleenyritysbackendi"
+    "fallbackRetryBackendTitle": "Vaihtoehtoinen uudelleenyritysbackendi",
+    "rosebudPanel": {
+      "title": "Rosebud-tilaus",
+      "description": "Valtuuta jokainen tili kerran. Kuvien, äänen tai videon luominen kuluttaa tilin nykyiset Rosebud hyvitykset.",
+      "connect": "Yhdistä Rosebud-tili",
+      "approve": "Hyväksy Rosebud",
+      "checkAccount": "Tarkista valtuutus ja hyvitykset",
+      "reauthorize": "Valtuuta uudelleen",
+      "refreshModels": "Päivitä mallit",
+      "defaultAccountName": "Rosebud-tili",
+      "balanceUnavailable": "ei ole saatavilla",
+      "accountStatus": "{status}: {account} — {balance} krediittiä",
+      "modelsDiscovered": "{count} malleja löydetty. Hinnat ovat Rosebud-pisteitä.",
+      "requestFailed": "Tätä pyyntöä ei voi suorittaa loppuun. Rosebud valtuutus toimii OmniRoute palvelimella ja vaatii paikallisen tai LAN -käytön."
+    }
   },
   "settings": {
     "title": "Asetukset",
