@@ -439,15 +439,23 @@ function processPII(text, redact = false, options = undefined) {
     const matches = text.match(rule.pattern);
     if (matches && matches.length > 0) {
       detections.push({ type: rule.name, count: matches.length });
-      if (redact) {
-        processed = tokenize
-          ? tokenizeMatches(processed, rule, tokenize)
-          : processed.replace(rule.pattern, rule.replacement);
-      }
+      if (redact) processed = redactRuleMatches(processed, rule, tokenize);
     }
   }
 
   return { text: processed, detections };
+}
+
+/**
+ * Redact one unvalidated rule: placeholders, or vault tokens when a minter is given.
+ * @param {string} text
+ * @param {{ name: string, pattern: RegExp, replacement: string }} rule
+ * @param {((type: string, value: string) => string | null) | undefined} tokenize
+ */
+function redactRuleMatches(text, rule, tokenize) {
+  return tokenize
+    ? tokenizeMatches(text, rule, tokenize)
+    : text.replace(rule.pattern, rule.replacement);
 }
 
 /**
