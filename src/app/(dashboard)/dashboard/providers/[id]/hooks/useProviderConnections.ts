@@ -61,6 +61,12 @@ interface ProviderConnectionsFetchResult {
   nodeResolved: boolean;
 }
 
+// "Quota check" is stored on the node's connections; the edit modal reads it off the node.
+function withCompatibleQuotaCheck(node: any, connections: ConnectionRowConnection[] | null) {
+  if (!node || !connections) return node;
+  return { ...node, quotaCheck: readCompatibleQuotaCheck(connections) };
+}
+
 async function loadProviderConnectionsData(
   providerId: string,
   isCompatible: boolean
@@ -96,10 +102,7 @@ async function loadProviderConnectionsData(
         }
       }
     }
-    // "Quota check" is stored on the node's connections; the edit modal reads it off the node.
-    if (node && connections && isCompatible) {
-      node = { ...node, quotaCheck: readCompatibleQuotaCheck(connections) };
-    }
+    if (isCompatible) node = withCompatibleQuotaCheck(node, connections);
     return { connections, node, nodeResolved };
   } catch (error) {
     console.log("Error fetching connections:", error);
