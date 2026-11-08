@@ -479,6 +479,10 @@ describe("SearchableSelectField large lists", () => {
       resize(200);
       fireEvent.keyDown(s.search, { key: "ArrowDown" });
       expect(s.getByRole("option", { name: "Model 1" }).style.top).toBe("200px");
+      resize(0);
+      expect(s.getByRole("option", { name: "Model 1" }).style.top).toBe("200px");
+      resize(200);
+      expect(s.getByRole("option", { name: "Model 1" }).style.top).toBe("200px");
       expect(s.getAllByRole("option").length).toBeLessThan(50);
     } finally {
       read.mockRestore();
