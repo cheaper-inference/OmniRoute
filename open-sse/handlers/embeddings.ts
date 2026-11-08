@@ -184,6 +184,21 @@ function fillMissingEmbeddingIndex(item: unknown, position: number): void {
   }
 }
 
+/**
+ * Many upstreams ignore `encoding_format` and answer with number arrays. The OpenAI Node SDK
+ * (v4+) asks for base64 and decodes the string, so a float array would be misread. Pack it as
+ * little-endian float32; a vector the upstream already encoded (a string) passes through.
+ */
+function packEmbeddingAsBase64(item: unknown): void {
+  if (!item || typeof item !== "object" || !("embedding" in item)) return;
+  const record = item as { embedding: unknown };
+  const vector = record.embedding;
+  if (!Array.isArray(vector) || !vector.every((value) => typeof value === "number")) return;
+  const bytes = Buffer.alloc(vector.length * 4);
+  vector.forEach((value, i) => bytes.writeFloatLE(value, i * 4));
+  record.embedding = bytes.toString("base64");
+}
+
 function failure(status: number, error: string, headers?: Headers): EmbeddingFailure {
   return { success: false, status, error, ...(headers ? { headers } : {}) };
 }
@@ -889,6 +904,7 @@ function normalizeEmbeddingData(
   if (Array.isArray(responseItems)) {
     responseItems.forEach(flattenSingleRowEmbedding);
     responseItems.forEach(fillMissingEmbeddingIndex);
+    if (runtime.body.encoding_format === "base64") responseItems.forEach(packEmbeddingAsBase64);
   }
   return {
     data,
