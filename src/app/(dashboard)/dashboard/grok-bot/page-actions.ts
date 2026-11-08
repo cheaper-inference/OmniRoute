@@ -311,6 +311,8 @@ export const submit = (state: PageState) => {
   pendingSendRef.current = messageId;
   setDraft("");
   setSendState("sending");
+  state.setTurnFailure("");
+  state.turnFailureKeyRef.current = "";
   const others = fanout.filter((account) => account !== selectedAccount);
   const origin = `${selectedAccount}:${selectedBot}`;
   void sendOnce(text, () =>

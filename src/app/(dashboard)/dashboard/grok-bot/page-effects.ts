@@ -115,6 +115,7 @@ type FrameState = Pick<
   | "setSendState"
   | "setTurnFailure"
   | "connectionUpdatedAt"
+  | "turnFailureKeyRef"
   | "apply"
   | "pendingSendRef"
   | "rememberedRef"
@@ -146,6 +147,7 @@ function handleFrame(
     rememberedRef,
     shownByBotRef,
     nextStableRef,
+    turnFailureKeyRef,
   } = state;
 
   if (selectedBot) apply({ type: "frame" });
@@ -176,7 +178,16 @@ function handleFrame(
     setCards((held) => held.filter((item) => !removed(item)));
     setPermissions((held) => held.filter((item) => !removed(item)));
   }
-  if (next.turnFailure !== undefined) setTurnFailure(next.turnFailure);
+  // A reason describes one turn: starting another turn, or watching a different bot,
+  // must not leave the previous one's text on screen.
+  const turnFailureKey = `${selectedAccount}:${selectedBot}`;
+  if (next.turnFailure !== undefined) {
+    turnFailureKeyRef.current = turnFailureKey;
+    setTurnFailure(next.turnFailure);
+  } else if (turnFailureKeyRef.current !== "" && turnFailureKeyRef.current !== turnFailureKey) {
+    turnFailureKeyRef.current = "";
+    setTurnFailure("");
+  }
   if (next.permissions.length > 0) setPermissions(next.permissions);
   if (next.cards.length > 0) {
     setCards((held) => {

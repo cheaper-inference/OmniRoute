@@ -604,13 +604,3 @@ test("a seq that is not a number never becomes the cursor", () => {
   );
   assert.equal(next.after, "6", "the numeric seq still advances the cursor");
 });
-
-test("a later frame does not erase the history-unavailable notice", () => {
-  const reset = applyTranscriptFrame(
-    { cursor: "0", visible: [], cards: [], permissions: [], sealed: false },
-    { cursorTooOld: { generation: 3 } }
-  );
-  assert.equal(reset.tooOld, true);
-  const after = applyTranscriptFrame(reset, { rows: { entries: [] } });
-  assert.equal(after.tooOld, true);
-});

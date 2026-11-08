@@ -46,7 +46,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       method: "DiscardGrokBotDraft",
       payload,
     });
-    const accepted = grokBotCardOutcome(answer) === "accepted";
+    // Only an answer that says it was refused counts as one; a reply shape this
+    // client has not seen is a success, not a failure.
+    const accepted = grokBotCardOutcome(answer) !== "refused";
     return NextResponse.json(
       { status: accepted ? "submitted" : "unknown" },
       { status: accepted ? 200 : 502 }

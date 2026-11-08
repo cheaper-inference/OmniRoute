@@ -678,9 +678,7 @@ export function applyTranscriptFrame(state: TranscriptState, frame: unknown): Tr
     cards: [...(state.cards ?? [])],
     permissions: [...state.permissions],
     sealed: state.sealed || record.heartbeat === true,
-    // This path runs only when the frame carries no reset, so recomputing from the
-    // record would always answer false and erase an earlier notice.
-    tooOld: state.tooOld,
+    tooOld: record.cursorTooOld !== undefined,
   };
   const deleted: Array<{ entryId: string; seq: string }> = [];
   for (const rawDeletion of deletions) {

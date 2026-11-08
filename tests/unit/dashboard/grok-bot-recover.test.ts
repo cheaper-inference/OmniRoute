@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { fillOmittedBodies, omittedRecoveryQuery } =
+const { fillOmittedBodies, omittedRecoveryQuery, RECOVERY_CONCURRENCY } =
   await import("../../../src/app/(dashboard)/dashboard/grok-bot/recover.ts");
 
 test("an omitted row is re-listed one seq ahead and keeps the matching body", async () => {
@@ -30,23 +30,21 @@ test("the last uint64 seq has no next cursor", () => {
   assert.equal(omittedRecoveryQuery("18446744073709551615"), null);
 });
 
-test("a frame with a long backlog recovers only the allowed number of rows", async () => {
-  const { fillOmittedBodies } = await import(
-    "../../../src/app/(dashboard)/dashboard/grok-bot/recover.ts"
-  );
+test("a long backlog is recovered in full, a few reads at a time", async () => {
   const rows = Array.from({ length: 50 }, (_, index) => ({
     seq: String(index + 1),
     bodyOmitted: true,
   }));
-  let calls = 0;
-  const filled = await fillOmittedBodies(
-    rows,
-    async () => {
-      calls += 1;
-      return [];
-    },
-    20
-  );
-  assert.equal(calls, 20, "one request per recovered row, capped");
-  assert.equal(filled.length, 50, "every row survives, recovered or not");
+  let inFlight = 0;
+  let peak = 0;
+  const filled = await fillOmittedBodies(rows, async (query) => {
+    inFlight += 1;
+    peak = Math.max(peak, inFlight);
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    inFlight -= 1;
+    return [{ seq: String(Number(query.beforeSeq) - 1), body: "b" }];
+  });
+  assert.equal(filled.filter((row) => typeof row.body === "string").length, 50, "no row dropped");
+  assert.ok(peak > 1, "reads overlap instead of running one at a time");
+  assert.ok(peak <= RECOVERY_CONCURRENCY, "peak concurrency stays within the bound");
 });
