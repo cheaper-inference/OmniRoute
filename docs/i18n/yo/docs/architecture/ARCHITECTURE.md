@@ -8,78 +8,79 @@
 
 _Ìgbà ìkẹyìn tí a ṣe àfikún: 2026-06-28_
 
-## Isọniṣoki ti Alaṣẹ
+## Àkótán Alákọ́kọ́
 
-OmniRoute jẹ ẹnu-ọna afisona AI agbegbe ati dasibodu ti a ṣe lori Next.js. O pese aaye ipari-ibaramu OpenAI kan ṣoṣo (`/v1/*`) ati awọn ọna ipa-ọna kọja ọpọlọpọ awọn olupese oke pẹlu itumọ, ipadabọ, isọdọtun ami, ati ipasẹ lilo.
+OmniRoute jẹ́ ẹnu-ọ̀nà àti dashboard ìtọ́sọ́nà AI tó ń ṣiṣẹ́ lórí kọ̀ǹpútà agbègbè, tí a kọ́ pẹ̀lú Next.js.
+Ó pèsè endpoint kan ṣoṣo tó bá OpenAI mu (`/v1/*`) ó sì ń tọ́jú ìrìnàjò sí ọ̀pọ̀ àwọn olùpèsè upstream pẹ̀lú ìtumọ̀, fallback, isọdọtun token, àti títọ́jú lílo.
 
-Awọn agbara koko:
+Àwọn agbára pàtàkì:
 
-- Ṣii-ibaramu API dada fun CLI/tools (awọn olupese 377, awọn modulu alaṣẹ 156)
-- Request/response itumọ kọja awọn ọna kika olupese
-- Awoṣe konbo fallback (ọkọọkan awoṣe pupọ)
-- Awọn igbesẹ konbo ti a ṣeto (`provider + model + connection`) pẹlu pipaṣẹ akoko ṣiṣe nipasẹ `compositeTiers`
-- Ipadabọ ipele akọọlẹ (iroyin-ọpọlọpọ fun olupese)
-- Quota preflight ati kiota-mọ P2C iroyin yiyan ni ọna iwiregbe akọkọ
-- OAuth + API-bọtini iṣakoso asopọ olupese (awọn modulu olupese OAuth 27)
-- Iṣabọ iran nipasẹ `/v1/embeddings` (awọn olupese 18)
-- Iran aworan nipasẹ `/v1/images/generations` (awọn olupese 10 +, awọn awoṣe 20 + )
-- Igbasilẹ ohun nipasẹ `/v1/audio/transcriptions` (awọn olupese 18)
-- Ọrọ-si-ọrọ nipasẹ `/v1/audio/speech` (awọn olupese ti a ṣe sinu 24)
-- Awọn iran fidio nipasẹ `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Iran orin nipasẹ `/v1/music/generations` (ComfyUI)
-- Wiwa wẹẹbu nipasẹ `/v1/search` (awọn olupese 20)
-- Awọn iwọntunwọnsi nipasẹ `/v1/moderations`
-- Atunṣe nipasẹ `/v1/rerank`
-- Ronu tag parsing (`<think>...</think>`) fun ero awọn awoṣe
-- Idahun imototo fun ibamu OpenAI SDK ti o muna
-- Iṣe deede ipa (eto → olupilẹṣẹ, olumulo → eto) fun ibaramu olupese
-- Iyipada igbejade ti a ṣeto (json_schema → Gemini respondSchema)
-- Iduroṣinṣin agbegbe fun awọn olupese, awọn bọtini, awọn inagijẹ, awọn akojọpọ, awọn eto, idiyele (awọn modulu DB 122)
-- Usage/cost titele ati ìbéèrè gedu
-- Imuṣiṣẹpọ awọsanma iyan fun ìsiṣẹpọ multi-device/state
-- IP allowlist/blocklist fun iṣakoso wiwọle API
-- Isakoso isuna ero (passthrough/auto/custom/adaptive)
-- Agbaye eto abẹrẹ kiakia
-- Ipasẹ igba ati itẹka
-- Idiwọn oṣuwọn imudara iwe-iroyin pẹlu awọn profaili kan pato ti olupese
-- Awoṣe fifọ Circuit fun resilience olupese
-- Idaabobo agbo egboogi-ãra pẹlu titiipa mutex
-- Kaṣe yiyọkuro ibeere ti o da lori Ibuwọlu
-- Layer ase: awọn ofin iye owo, eto imupadabọ, eto imulo titiipa
-- Yiyi ọrọ ọrọ: awọn akopọ imudani igba fun lilọsiwaju yiyi akọọlẹ
-- Itẹramọṣẹ ipinlẹ agbegbe (SQLite kikọ-nipasẹ kaṣe fun awọn ipadasẹhin, awọn inawo, awọn titiipa, awọn fifọ iyika)
-- Ẹrọ eto imulo fun igbelewọn ibeere aarin (lockout → budget → fallback)
-- Beere telemetry pẹlu akopọ lairi p50/p95/p99
-- Telemetry ibi-afẹde Konbo ati ilera ibi-afẹde itan-akọọlẹ nipasẹ `combo_execution_key` / `combo_step_id`
-- Ibaṣepọ ID (X-Ibeere-Id) fun wiwa kakiri opin-si-opin
-- Ṣiṣayẹwo iṣayẹwo ibamu pẹlu ijade kuro fun bọtini API
-- Ilana Eval fun idaniloju didara LLM
-- Dasibodu ilera pẹlu ipo fifọ iyika olupese akoko gidi
-- olupin MCP (awọn irinṣẹ 110) pẹlu awọn gbigbe 3 (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) pẹlu awọn ọgbọn ati igbesi aye iṣẹ-ṣiṣe
-- Eto iranti (isediwon, abẹrẹ, igbapada, akopọ)
-- Eto ogbon (iforukọsilẹ, alaṣẹ, apoti iyanrin, awọn ọgbọn ti a ṣe sinu)
-- MITM aṣoju pẹlu iṣakoso ijẹrisi ati mimu DNS
-- Tọ abẹrẹ oluso middleware
-- Opopona funmorawon kiakia pẹlu Caveman, RTK, awọn opo gigun ti tolera, awọn akojọpọ funmorawon, awọn idii ede, ati awọn atupale
-- ACP (Agent Communication Protocol) iforukọsilẹ
-- Awọn olupese OAuth apọjuwọn (awọn modulu kọọkan 22 labẹ `src/lib/oauth/providers/`)
-- Uninstall/full-uninstall awọn iwe afọwọkọ
-- OAuth ayika titunṣe igbese
-- afara WebSocket fun OpenAI-ibaramu WS ibara (`/v1/ws`)
-- Ìṣàkóso àmi ìsiṣẹpọ (issue/revoke, ETag-versioned konfigi edidi gbigba lati ayelujara)
-- GLM Thinking (`glmt`) tito olupese olupese kilasi akọkọ
-- Kika àmi arabara (olupese-ẹgbẹ `/messages/count_tokens` pẹlu ifẹhinti ifoju)
-- Awoṣe inagijẹ inagijẹ aladaaṣe (30 + awọn dialect-aṣoju agbekọja awọn aṣaaju ni ibẹrẹ)
-- Ailewu ti njade lode pẹlu ẹṣọ SSRF, ìdènà URL ikọkọ, ati atunto atunto
-- Cooldown-mọ iwiregbe tun gbiyanju pẹlu atunto `requestRetry` ati `maxRetryIntervalSec`
-- Ifọwọsi agbegbe asiko asiko pẹlu Zod ni ibẹrẹ
-- Ayẹwo ifaramọ v2 pẹlu pagination, awọn iṣẹlẹ CRUD olupese, ati SSRF dina mọ iwe afọwọsi
+- Ojú API tó bá OpenAI mu fún CLI/àwọn irinṣẹ́ (àwọn olùpèsè 380, àwọn modulu executor 159)
+- Ìtumọ̀ request/response láàárín àwọn fọ́ọ̀mù olùpèsè
+- Fallback combo model (ọ̀wọ́ọ̀wọ́ ọ̀pọ̀ model)
+- Àwọn ìgbésẹ̀ combo tó ní ìṣètò (`provider + model + connection`) pẹ̀lú títò lẹ́sẹẹsẹ̀ ní àsìkò ìṣiṣẹ́ nípasẹ̀ `compositeTiers`
+- Fallback ní ìpele account (ọ̀pọ̀ account fún olùpèsè kọ̀ọ̀kan)
+- Ìṣàyẹ̀wò quota ṣáájú request àti yíyan account P2C tó mọ quota ní ọ̀nà chat pàtàkì
+- Ìṣàkóso asopọ̀ olùpèsè OAuth àti API-key (àwọn modulu olùpèsè OAuth 27)
+- Ìṣẹ̀dá embedding nípasẹ̀ `/v1/embeddings` (àwọn olùpèsè 18)
+- Ìṣẹ̀dá àwòrán nípasẹ̀ `/v1/images/generations` (àwọn olùpèsè 10+, àwọn model 20+)
+- Ìkọ̀wé ohun sí ọ̀rọ̀ nípasẹ̀ `/v1/audio/transcriptions` (àwọn olùpèsè 18)
+- Ìyípadà ọ̀rọ̀ sí ohùn nípasẹ̀ `/v1/audio/speech` (àwọn olùpèsè 24 tí a ṣe sínú ètò)
+- Ìṣẹ̀dá fídíò nípasẹ̀ `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Ìṣẹ̀dá orin nípasẹ̀ `/v1/music/generations` (ComfyUI)
+- Ìwádìí lórí ayélujára nípasẹ̀ `/v1/search` (àwọn olùpèsè 20)
+- Moderations nípasẹ̀ `/v1/moderations`
+- Reranking nípasẹ̀ `/v1/rerank`
+- Ìtúpalẹ̀ tag ìrònú (`<think>...</think>`) fún àwọn model tó ń ṣe ìrònú
+- Ìmótótó response fún ìbámu tó muna pẹ̀lú OpenAI SDK
+- Ìṣàgbékalẹ̀ ipa (developer→system, system→user) fún ìbámu láàárín àwọn olùpèsè
+- Ìyípadà output tó ní ìṣètò (json_schema → Gemini responseSchema)
+- Ìpamọ́ agbègbè fún àwọn olùpèsè, keys, aliases, combos, settings, pricing (àwọn modulu DB 122)
+- Títọ́jú lílo/ìnáwó àti àkọsílẹ̀ request
+- Ìmúṣiṣẹ́pọ̀ cloud tí a lè yàn fún ìmúṣiṣẹ́pọ̀ ọ̀pọ̀ ẹ̀rọ/state
+- Àtòjọ àyè IP àti àtòjọ ìdènà fún ìṣàkóso àyè API
+- Ìṣàkóso isuna ìrònú (passthrough/auto/custom/adaptive)
+- Fífí system prompt kún un ní àgbáyé
+- Títọ́jú session àti fingerprinting
+- Ìdínà iyara tí a mú dára fún account kọ̀ọ̀kan pẹ̀lú àwọn profaili pàtó fún olùpèsè
+- Àpẹrẹ circuit breaker fún ìfaradà olùpèsè
+- Ààbò lòdì sí ìpọ́pọ̀ request lẹ́ẹ̀kan náà pẹ̀lú mutex locking
+- Cache ìdènà request tó tún ṣe pẹ̀lú signature
+- Layer domain: àwọn òfin ìnáwó, ìlànà fallback, àti ìlànà lockout
+- Context Relay: àwọn àkótán fífi session lé ẹlòmíràn lọ fún ìtẹ̀síwájú nígbà yíyí account
+- Ìpamọ́ state domain (cache write-through SQLite fún fallbacks, budgets, lockouts, circuit breakers)
+- Ẹ́ńjìnì policy fún àyẹ̀wò request ní àárín gbùngbùn (lockout → budget → fallback)
+- Telemetry request pẹ̀lú àkójọpọ̀ ìdádúró p50/p95/p99
+- Telemetry ibi-afẹ́ combo àti ìlera ibi-afẹ́ combo tó dá lórí ìtàn nípasẹ̀ `combo_execution_key` / `combo_step_id`
+- Correlation ID (X-Request-Id) fún títọ́pa láti ìbẹ̀rẹ̀ dé òpin
+- Àkọsílẹ̀ audit ìbámu pẹ̀lú àṣàyàn láti pa á fún API key kọ̀ọ̀kan
+- Framework eval fún ìdánilójú dídára LLM
+- Dashboard ìlera pẹ̀lú ipò circuit breaker olùpèsè ní àkókò gidi
+- MCP Server (irinṣẹ́ 110) pẹ̀lú transports 3 (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) pẹ̀lú skills àti ìgbésí ayé task
+- Ètò memory (yíyọ jáde, fífi sínú, retrieval, àti ṣókí-sọ)
+- Ètò skills (registry, executor, sandbox, àti àwọn skills tí a ṣe sínú ètò)
+- MITM proxy pẹ̀lú ìṣàkóso certificate àti DNS
+- Middleware ìṣọ́ prompt injection
+- Pipeline fífi prompt kúrú pẹ̀lú Caveman, RTK, stacked pipelines, compression combos, language packs, àti analytics
+- Registry ACP (Agent Communication Protocol)
+- Àwọn olùpèsè OAuth aládàáṣiṣẹ́ (àwọn modulu kọ̀ọ̀kan 22 lábẹ́ `src/lib/oauth/providers/`)
+- Àwọn script uninstall/full-uninstall
+- Action àtúnṣe ayíká OAuth
+- WebSocket bridge fún àwọn client OpenAI-compatible WS (`/v1/ws`)
+- Ìṣàkóso sync token (issue/revoke, ìgbàsílẹ̀ config bundle tí ETag ṣe àtọ́ka sí version)
+- GLM Thinking (`glmt`) preset olùpèsè first-class
+- Ìkà token alápapọ̀ (olùpèsè-ẹ̀gbẹ́ `/messages/count_tokens` pẹ̀lú fallback ìṣírò)
+- Ìfúnrúgbìn model alias laifọwọ́yi (àwọn ìṣàtúnṣe dialect cross-proxy 30+ ní ìbẹ̀rẹ̀ ìṣiṣẹ́)
+- Fetch outbound tó ní ààbò pẹ̀lú SSRF guard, ìdènà URL aládàáni, àti retry tí a lè ṣètò
+- Àwọn retry chat tó mọ cooldown pẹ̀lú `requestRetry` àti `maxRetryIntervalSec` tí a lè ṣètò
+- Ìmúdájú ayíká ìṣiṣẹ́ pẹ̀lú Zod ní ìbẹ̀rẹ̀
+- Audit ìbámu v2 pẹ̀lú pagination, àwọn ìṣẹ̀lẹ̀ CRUD olùpèsè, àti àkọsílẹ̀ ìmúdájú tí SSRF dènà
 
-Awoṣe asiko asiko akọkọ:
+Àwòṣe ìṣiṣẹ́ pàtàkì:
 
-- awọn ipa ọna app Next.js labẹ `src/app/api/*` ṣe imuse mejeeji dashboard APIs ati APIs ibamu
-- Kokoro SSE/routing ti o pin ni `src/sse/*` + `open-sse/*` n ṣe itọju ipaniyan olupese, itumọ, ṣiṣanwọle, ipadabọ, ati lilo
+- Àwọn app routes Next.js lábẹ́ `src/app/api/*` ló ń ṣe APIs dashboard àti APIs ìbámu
+- SSE/routing core tí a pín ní `src/sse/*` + `open-sse/*` ló ń bójú tó ìṣiṣẹ́ olùpèsè, ìtumọ̀, streaming, fallback, àti lílo
 
 ## Àwọn Àwòrán Ìtọ́kasí
 

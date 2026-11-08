@@ -25,26 +25,27 @@ omniroute launch --profile glm52  # OmniRoute-এর মাধ্যমে glm/g
 
 ---
 
-## Claude Code কীভাবে একটি gateway-এর সঙ্গে সংযুক্ত হয়
+## কিভাবে Claude কোড একটি গেটওয়ের সাথে সংযোগ করে
 
-Claude Code **Anthropic Messages API**-এর সঙ্গে যোগাযোগ করে এবং environment variable-এর
-মাধ্যমে একটি custom endpoint-এর দিকে নির্দেশিত হয় (এতে কোনো `--base-url` flag নেই):
+Claude কোড কথা বলে**Anthropic বার্তা API** এবং এনভায়রনমেন্ট ভেরিয়েবল সহ একটি কাস্টম এন্ডপয়েন্টে নির্দেশিত (এটির কোন `--base-url` পতাকা নেই):
 
-| Variable                                     | উদ্দেশ্য                                                                                           |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Gateway-এর root URL (Claude Code শেষে `/v1/messages` যোগ করে)। **কোনো `/v1` suffix নয়।**          |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` হিসেবে পাঠানো হয়—আপনার OmniRoute access token / API key ব্যবহার করুন    |
-| `ANTHROPIC_API_KEY`                          | বিকল্প: `x-api-key` হিসেবে পাঠানো হয়। উভয়টি সেট করা থাকলে `ANTHROPIC_AUTH_TOKEN` অগ্রাধিকার পায় |
-| `ANTHROPIC_MODEL`                            | একটি নির্দিষ্ট model বাধ্যতামূলক করে (`/model` picker-এর default-কে override করে)                  |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → native `/model` picker `/v1/models` থেকে `claude*`/`anthropic*` model দেখায়                 |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | প্রতি response-এ output token সীমাবদ্ধ করে (যেমন `65536`)                                          |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | auto-compaction-এর জন্য token threshold                                                            |
+| পরিবর্তনশীল                                  | উদ্দেশ্য                                                                                        |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | গেটওয়ে রুট URL (Claude কোড `/v1/messages` যুক্ত করে)।** কোনো `/v1` প্রত্যয় নেই।**             |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — হিসাবে পাঠানো আপনার OmniRoute অ্যাক্সেস টোকেন / API কী ব্যবহার করুন |
+| `ANTHROPIC_API_KEY`                          | বিকল্প: `x-api-key` হিসাবে পাঠানো হয়েছে। উভয় সেট হলে, `ANTHROPIC_AUTH_TOKEN` জিতবে            |
+| `ANTHROPIC_MODEL`                            | একটি নির্দিষ্ট মডেল জোর করে ( `/model` পিকার ডিফল্ট ওভাররাইড করে)                               |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → নেটিভ `/model` বাছাইকারী `/v1/models` থেকে `claude*`/`anthropic*` মডেলের তালিকা করে       |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | প্রতি প্রতিক্রিয়া ক্যাপ আউটপুট টোকেন (যেমন `65536`)                                            |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | স্বয়ংক্রিয় সংকোচনের জন্য টোকেন থ্রেশহোল্ড                                                     |
 
-> Env var-গুলো **startup-এর সময় একবারই পড়া হয়**—এগুলো পরিবর্তন করার পরে Claude Code restart করুন।
+> Env vars পড়া হয়** একবার স্টার্টআপে** — Claude কোড পরিবর্তন করার পর পুনরায় চালু করুন।
 
-`omniroute launch` আপনার জন্য এগুলোর সবই সেট করে: এটি সক্রিয় context থেকে base URL + token
-নির্ধারণ করে (তাই `omniroute connect <vps>` এবং তারপর `omniroute launch`
-সরাসরি কাজ করে), server-এর health check করে এবং `claude` exec করে।
+একটি নির্দিষ্ট স্ট্রিং এর পরিবর্তে ঘোরানো একটি শংসাপত্রের জন্য, `~/.claude/settings.json` এ `apiKeyHelper` একটি কমান্ডে সেট করুন যা বর্তমান শংসাপত্রটিকে stdout-এ প্রিন্ট করে। Claude কোড ডিফল্টরূপে পাঁচ মিনিটের জন্য তার আউটপুট ক্যাশ করে (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ওভাররাইড করে) এবং `Authorization: Bearer` এবং `x-api-key` উভয় ক্ষেত্রেই মান পাঠায়। স্ক্রিপ্টটি অবশ্যই শংসাপত্রটি প্রিন্ট করতে হবে এবং এর সাথে একটি ব্যানার — করতে হবে না v2.1.227 + এ সাহায্যকারীকে ব্যর্থ করে।
+
+Entra ID SSO এভাবেই কাজ করে: `scripts/cli/omniroute-sso.mjs token` একটি স্বল্পকালীন এন্ট্রা অ্যাক্সেস টোকেন প্রিন্ট করে যা API কী-এর পরিবর্তে OmniRoute যাচাই করে। [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) দেখুন।
+
+`omniroute launch` আপনার জন্য এই সমস্তগুলি সেট করে: এটি সক্রিয় প্রসঙ্গ থেকে বেস URL + টোকেন সমাধান করে (তাই `omniroute connect <vps>` তারপর `omniroute launch` ঠিক কাজ করে), সার্ভারের স্বাস্থ্য পরীক্ষা করে এবং `claude` চালায়।
 
 ---
 

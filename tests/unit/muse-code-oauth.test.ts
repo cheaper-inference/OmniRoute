@@ -175,7 +175,7 @@ test("curated catalog includes Muse Spark subscription models", () => {
     "muse-spark-1.2",
     "muse-spark-1.2-contributor",
     "muse-spark-1.1",
-    "llama-4-maverick",
+    "muse-wonder-1.0",
   ]) {
     assert.ok(ids.includes(id), `missing ${id}`);
   }
