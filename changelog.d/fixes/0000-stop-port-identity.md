@@ -1,0 +1,1 @@
+- **fix(cli):** the port fallback of `omniroute stop` no longer stops a listener whose command line does not name OmniRoute; it names the skipped pid and does not report the port free.
