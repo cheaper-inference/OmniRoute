@@ -26,6 +26,11 @@ import { availabilityScopes } from "../../src/lib/usage/availabilityScopes.ts";
 import type { ProviderLimitsCacheEntry } from "../../src/lib/db/providerLimits.ts";
 import * as f from "./quota-overview-router-fixtures.ts";
 
+// Freshness checks must use the same clock as the synthetic quota observations.
+test.beforeEach((t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: f.now });
+});
+
 type Raw = NonNullable<HealthData["raw"]> & {
   syntheticConnectionId?: string;
   modelQuotas?: Record<string, UsageQuota>;
