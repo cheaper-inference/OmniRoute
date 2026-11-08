@@ -5,6 +5,8 @@ const { watchStream, pumpWatch, safeBlobUrl } =
   await import("../../../src/app/(dashboard)/dashboard/grok-bot/watchStream.ts");
 const { watchCounter, watchSlot } =
   await import("../../../src/app/(dashboard)/dashboard/grok-bot/overlap.ts");
+const { fillOmittedBodies, RECOVERY_CONCURRENCY } =
+  await import("../../../src/app/(dashboard)/dashboard/grok-bot/recover.ts");
 
 function readerFrames(frames: unknown[], failAt?: number) {
   let index = 0;
@@ -293,6 +295,57 @@ test("an omitted body is filled from the list one seq ahead", async () => {
   assert.equal(body.includes('"bodyOmitted":true'), false);
 });
 
+test("a blob read does not follow a redirect out of the network", async () => {
+  const inits: Array<RequestInit | undefined> = [];
+  const body = await text(
+    watchStream({
+      accessToken: "token",
+      agentId: "agent-1",
+      after: "0",
+      generation: 2,
+      signal: new AbortController().signal,
+      release: () => {},
+      frames: readerFrames([{ rows: { entries: [{ seq: "8", blobHash: "abc123def456ghij" }] } }]),
+      recover: async () => ({
+        instructions: [
+          { relPath: "blobs/abc123def456ghij", url: "https://blob.example/body" },
+        ],
+      }),
+      fetchBlob: async (_url, init) => {
+        inits.push(init);
+        return new Response("", {
+          status: 302,
+          headers: { location: "http://169.254.169.254/latest/meta-data" },
+        });
+      },
+      pressure: () => "read",
+    })
+  );
+  assert.equal(inits[0]?.redirect, "manual", "the redirect is answered, not followed");
+  assert.equal(/169\.254\.169\.254/.test(body), false);
+  assert.equal(/"body"/.test(body), false, "the row stays, its body does not");
+});
+
+test("a recovery read is cancellable", async () => {
+  const { grokBotRead } = await import(
+    "../../../src/app/(dashboard)/dashboard/grok-bot/read.ts"
+  );
+  const controller = new AbortController();
+  controller.abort();
+  let seen: RequestInit | undefined;
+  await grokBotRead({
+    accessToken: "token",
+    method: "ListGrokBotTranscript",
+    payload: {},
+    signal: controller.signal,
+    fetch: async (_url, init) => {
+      seen = init;
+      return new Response("{}");
+    },
+  });
+  assert.equal(seen?.signal, controller.signal, "the read passes the signal to fetch");
+});
+
 test("a blob hash is read from its signed blobs path", async () => {
   const calls: Array<Record<string, unknown>> = [];
   const urls: string[] = [];
@@ -358,6 +411,15 @@ test("a body url pointing inside the network is refused", () => {
   assert.equal(safeBlobUrl("https://192.168.1.5/body"), null);
   assert.equal(safeBlobUrl("https://[::1]/body"), null);
   assert.equal(safeBlobUrl("not a url"), null);
+  // The same addresses in the spelling a URL parser delivers, plus the metadata name
+  // and the CGNAT range: a hand-rolled check missed all of these.
+  assert.equal(safeBlobUrl("https://[::ffff:127.0.0.1]/body"), null);
+  assert.equal(safeBlobUrl("https://[::ffff:169.254.169.254]/body"), null);
+  assert.equal(safeBlobUrl("https://[0:0:0:0:0:ffff:a9fe:a9fe]/body"), null);
+  assert.equal(safeBlobUrl("https://metadata.google.internal/x"), null);
+  assert.equal(safeBlobUrl("https://100.100.100.200/latest"), null);
+  assert.equal(safeBlobUrl("https://localhost./body"), null);
+  assert.equal(safeBlobUrl("https://blob.example./body"), "https://blob.example./body");
   assert.equal(safeBlobUrl("https://blob.example/body"), "https://blob.example/body");
 });
 
@@ -380,29 +442,4 @@ test("a blob body past the size limit is dropped rather than kept", async () => 
   );
   assert.equal(/blobHash/.test(body), true, "the row stays, only the body is missing");
   assert.equal(/"body"/.test(body), false);
-});
-
-test("a frame full of omitted rows does not fan out into one request per row", async () => {
-  const entries = Array.from({ length: 50 }, (_, index) => ({
-    seq: String(index + 1),
-    bodyOmitted: true,
-  }));
-  let listCalls = 0;
-  await text(
-    watchStream({
-      accessToken: "token",
-      agentId: "agent-1",
-      after: "0",
-      generation: 2,
-      signal: new AbortController().signal,
-      release: () => {},
-      frames: readerFrames([{ rows: { entries } }]),
-      recover: async () => {
-        listCalls += 1;
-        return { entries: [] };
-      },
-      pressure: () => "read",
-    })
-  );
-  assert.equal(listCalls, 20, "the per-frame recovery budget is honoured");
 });

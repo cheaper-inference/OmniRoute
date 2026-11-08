@@ -25,6 +25,7 @@ export async function grokBotRead(input: {
       "user-agent": "connect-es/1.6.1",
     },
     body: JSON.stringify(input.payload),
+    ...(input.signal ? { signal: input.signal } : {}),
   });
   const text = await response.text();
   let parsed: unknown = null;

@@ -1,4 +1,4 @@
-import type { TranscriptCursor } from "./transcript";
+import type { TranscriptAdvance, TranscriptCursor } from "./transcript";
 export type TranscriptStep = TranscriptCursor & {
   stop?: boolean;
   cleared?: boolean;

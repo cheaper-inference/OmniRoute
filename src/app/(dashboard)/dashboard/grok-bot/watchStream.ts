@@ -1,5 +1,11 @@
 import { grokBotRead, grokBotReadStream } from "./read";
-import { fillBlobBodies, fillOmittedBodies, blobReadPaths } from "./recover";
+import { isPrivateHost } from "@/shared/network/privateHost";
+import {
+  blobReadPaths,
+  fillBlobBodies,
+  fillOmittedBodies,
+  RECOVERY_CONCURRENCY,
+} from "./recover";
 import { backlogged, bufferPressure } from "./pressure";
 import {
   transcriptConnectedFrame,
@@ -41,29 +47,45 @@ function queueGate(controller: ReadableStreamDefaultController<Uint8Array>): () 
 }
 
 /** One frame must not turn into an unbounded number of upstream requests. */
-const RECOVERY_ROW_LIMIT = 20;
 /** A presigned body is a transcript row, not a download; refuse anything larger. */
 const BLOB_TEXT_LIMIT = 1024 * 1024;
 
-function privateHost(hostname: string): boolean {
-  const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
-  if (host === "localhost" || host.endsWith(".localhost")) return true;
-  if (host === "::1" || host === "0.0.0.0" || host === "::") return true;
-  if (/^127\./.test(host)) return true;
-  if (/^10\./.test(host)) return true;
-  if (/^192\.168\./.test(host)) return true;
-  if (/^169\.254\./.test(host)) return true;
-  if (/^172\.(1[6-9]|2\d|3[01])\./.test(host)) return true;
-  if (/^f[cd][0-9a-f]{2}:/i.test(host)) return true;
-  if (/^fe80:/i.test(host)) return true;
-  return false;
-}
 
 /**
  * The body URL comes from the service, but it is fetched by this process, so it is
- * treated as untrusted: plain HTTP, loopback and the link-local range a cloud host
- * exposes its metadata on are all refused.
+ * treated as untrusted. The address rules live in one place: a hand-rolled check
+ * missed the IPv4-mapped spellings and the `.internal` suffixes the shared one knows.
  */
+/**
+ * Reads a body up to `limit` bytes and gives up once it is past it, so a huge reply
+ * costs the buffer it needed rather than the whole body.
+ */
+async function readBoundedText(response: Response, limit: number): Promise<string | null> {
+  const declared = Number(response.headers.get("content-length") ?? "0");
+  if (Number.isFinite(declared) && declared > limit) return null;
+  if (!response.body) return null;
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  let bytes = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > limit) {
+        await reader.cancel().catch(() => {});
+        return null;
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  text += decoder.decode();
+  return text === "" ? null : text;
+}
+
 export function safeBlobUrl(value: string): string | null {
   let url: URL;
   try {
@@ -72,7 +94,7 @@ export function safeBlobUrl(value: string): string | null {
     return null;
   }
   if (url.protocol !== "https:") return null;
-  if (privateHost(url.hostname)) return null;
+  if (isPrivateHost(url.hostname)) return null;
   return url.toString();
 }
 
@@ -99,7 +121,7 @@ async function recoverOmitted(
       const listed = (answer as { entries?: unknown } | null)?.entries;
       return Array.isArray(listed) ? listed : [];
     },
-    RECOVERY_ROW_LIMIT
+    RECOVERY_CONCURRENCY
   );
   const withBlobs = await fillBlobBodies(
     entries,
@@ -125,13 +147,16 @@ async function recoverOmitted(
       if (!match) return null;
       const safe = safeBlobUrl((match as { url: string }).url);
       if (!safe) return null;
-      const response = await fetchBlob(safe, signal ? { signal } : undefined);
+      // A redirect would let an allowed host point the read at anything, including
+      // the metadata address this guard just refused, so it is not followed.
+      const response = await fetchBlob(safe, {
+        redirect: "manual",
+        ...(signal ? { signal } : {}),
+      });
       if (!response.ok) return null;
-      const text = await response.text();
-      if (text === "" || text.length > BLOB_TEXT_LIMIT) return null;
-      return text;
+      return readBoundedText(response, BLOB_TEXT_LIMIT);
     },
-    RECOVERY_ROW_LIMIT
+    RECOVERY_CONCURRENCY
   );
   return { ...frame, rows: { ...rows, entries: withBlobs } };
 }

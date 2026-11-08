@@ -73,9 +73,21 @@ function useTranscriptCards() {
   const [permissionState, setPermissionState] = useState("");
   const [historyUnavailable, setHistoryUnavailable] = useState(false);
   const rememberedRef = useRef<
-    Record<string, { after: string; generation?: number; messages: TranscriptItem[] }>
+    Record<
+      string,
+      {
+        after: string;
+        generation?: number;
+        /** The connection's timestamp when this cursor was last used, so a resume can
+         *  tell whether the cursor still belongs to the connection it came from. */
+        seenAt?: string;
+        messages: TranscriptItem[];
+      }
+    >
   >({});
   const shownByBotRef = useRef<Record<string, TranscriptItem[]>>({});
+  /** The bot a turn-failure message came from, so it does not outlive that bot. */
+  const turnFailureKeyRef = useRef("");
   const nextStableRef = useRef(0);
   return {
     messages,
@@ -97,6 +109,7 @@ function useTranscriptCards() {
     setHistoryUnavailable,
     rememberedRef,
     shownByBotRef,
+    turnFailureKeyRef,
     nextStableRef,
   };
 }
