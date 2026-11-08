@@ -53,10 +53,8 @@ export function deepseekAfterDate(range: string, now = new Date()): string {
   return date.toISOString().slice(0, 10);
 }
 
-export function buildDeepSeekSearchRequest(
-  _config: SearchProviderConfig,
-  params: DeepSeekSearchParams
-): { url: string; init: RequestInit } {
+/** Reject options DeepSeek cannot honour before a paid request is made. */
+function assertSupportedParams(params: DeepSeekSearchParams): void {
   if (!params.token) throw new Error("DeepSeek Search requires an API key");
   if (params.searchType && params.searchType !== "web") {
     throw new Error('DeepSeek Search supports only search_type "web"');
@@ -69,20 +67,24 @@ export function buildDeepSeekSearchRequest(
   if (params.contentOptions?.max_characters !== undefined) {
     throw new Error("DeepSeek Search does not support content_options.max_characters");
   }
-  const parsed = optionsSchema.safeParse(params.providerOptions ?? {});
-  if (!parsed.success) throw new Error("Invalid DeepSeek Search provider_options");
-  const options = parsed.data;
-  const includes = (params.domainFilter ?? []).filter((s) => !s.startsWith("-"));
-  const excludes = (params.domainFilter ?? []).filter((s) => s.startsWith("-"));
+}
+
+function languageOperator(language: string): string {
+  if (!/^[a-z]{2,3}(?:-[a-z]{2})?$/i.test(language)) {
+    throw new Error("Invalid DeepSeek Search language");
+  }
+  return `lang:${language}`;
+}
+
+/** The query plus site:/-site:/lang:/after: operators, bounded to 128 Unicode characters. */
+function buildDeepSeekQuery(params: DeepSeekSearchParams): string {
+  const domains = params.domainFilter ?? [];
+  const includes = domains.filter((s) => !s.startsWith("-"));
+  const excludes = domains.filter((s) => s.startsWith("-"));
   const parts = [params.query.trim()];
   if (includes.length) parts.push(includes.map(domainOperator).join(" OR "));
   parts.push(...excludes.map(domainOperator));
-  if (params.language) {
-    if (!/^[a-z]{2,3}(?:-[a-z]{2})?$/i.test(params.language)) {
-      throw new Error("Invalid DeepSeek Search language");
-    }
-    parts.push(`lang:${params.language}`);
-  }
+  if (params.language) parts.push(languageOperator(params.language));
   if (params.timeRange && params.timeRange !== "any") {
     parts.push(`after:${deepseekAfterDate(params.timeRange)}`);
   }
@@ -92,6 +94,18 @@ export function buildDeepSeekSearchRequest(
       "DeepSeek Search query including filters must contain 1 to 128 Unicode characters"
     );
   }
+  return query;
+}
+
+export function buildDeepSeekSearchRequest(
+  _config: SearchProviderConfig,
+  params: DeepSeekSearchParams
+): { url: string; init: RequestInit } {
+  assertSupportedParams(params);
+  const parsed = optionsSchema.safeParse(params.providerOptions ?? {});
+  if (!parsed.success) throw new Error("Invalid DeepSeek Search provider_options");
+  const options = parsed.data;
+  const query = buildDeepSeekQuery(params);
   return {
     url: DEEPSEEK_SEARCH_URL,
     init: {
