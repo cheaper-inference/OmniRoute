@@ -1,0 +1,1 @@
+- **fix(upstream):** a stalled or oversized upstream error body no longer holds a request slot; error bodies are read for at most 5 seconds and 64 KiB.
