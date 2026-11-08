@@ -1,0 +1,1 @@
+- **perf(bedrock):** Reuse bounded SDK clients by region, user agent, and key fingerprint, and destroy evicted clients.
