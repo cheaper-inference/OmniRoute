@@ -44,7 +44,7 @@ function AccountQuotaCard({ quota }: { quota: AccountQuotaView }) {
       </div>
 
       {quota.unavailableReason && (
-        <p className="rounded-md bg-black/5 px-2 py-1.5 text-xs text-text-muted dark:bg-white/5">
+        <p className="rounded-md bg-surface-2 px-2 py-1.5 text-xs text-text-muted">
           {t(UNAVAILABLE_KEYS[quota.unavailableReason] ?? "quotaUnavailableGeneric")}
         </p>
       )}
@@ -109,9 +109,7 @@ export function AccountQuotasSection({
       icon="account_balance"
     >
       {!visibleToKeyHolder && (
-        <p className="mb-3 text-xs text-amber-700 dark:text-amber-300">
-          {t("accountQuotasPreviewOnly")}
-        </p>
+        <p className="mb-3 text-xs text-warning">{t("accountQuotasPreviewOnly")}</p>
       )}
       {quotas.length === 0 ? (
         <EmptyNote>{t("accountQuotasEmpty")}</EmptyNote>

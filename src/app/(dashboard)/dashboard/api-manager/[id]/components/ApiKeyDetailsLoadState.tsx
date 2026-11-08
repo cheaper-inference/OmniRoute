@@ -39,11 +39,9 @@ export function ApiKeyDetailsLoadError({
   return (
     <div
       role="alert"
-      className="flex flex-col items-start gap-3 rounded-card border border-red-500/30 bg-red-500/5 p-4"
+      className="flex flex-col items-start gap-3 rounded-card border border-error/30 bg-error/5 p-4"
     >
-      <p className="text-sm text-red-700 dark:text-red-300">
-        {t(LOAD_ERROR_KEYS[error ?? "failed"])}
-      </p>
+      <p className="text-sm text-error">{t(LOAD_ERROR_KEYS[error ?? "failed"])}</p>
       <Button size="sm" variant="secondary" icon="refresh" onClick={onRetry}>
         {tc("retry")}
       </Button>

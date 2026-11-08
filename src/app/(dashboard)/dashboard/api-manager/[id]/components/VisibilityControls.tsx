@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import { Toggle } from "@/shared/components";
 import { safeApiErrorMessage, withVisibilityScopes } from "../apiKeyDetailsData";
 import type { KeyConfig } from "../apiKeyDetailsData";
 import { sendJson } from "../useApiKeyDetails";
@@ -25,29 +26,23 @@ function VisibilitySwitch({
   description: string;
   onToggle: () => void;
 }) {
-  const tc = useTranslations("common");
   return (
     <div className="flex items-start justify-between gap-3">
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <p className="text-sm font-medium text-text-main">{label}</p>
-        <p className="text-xs text-text-muted">{description}</p>
+      <div className="flex min-w-0 items-start gap-2">
+        <Icon name={icon} size={16} className="mt-0.5 shrink-0 text-text-muted" />
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <p className="text-sm font-medium text-text-main">{label}</p>
+          <p className="text-xs text-text-muted">{description}</p>
+        </div>
       </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        aria-label={label}
+      <Toggle
+        checked={checked}
         disabled={disabled}
-        onClick={onToggle}
-        className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-          checked
-            ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-            : "border-border bg-black/5 text-text-muted dark:bg-white/5"
-        }`}
-      >
-        <Icon name={icon} size={14} />
-        {checked ? tc("enabled") : tc("disabled")}
-      </button>
+        ariaLabel={label}
+        size="sm"
+        className="shrink-0"
+        onChange={() => onToggle()}
+      />
     </div>
   );
 }

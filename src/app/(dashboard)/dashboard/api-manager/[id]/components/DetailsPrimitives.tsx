@@ -83,7 +83,7 @@ export function UtilizationBar({
 }) {
   const percent = Math.round(Math.min(Math.max(Number.isFinite(value) ? value : 0, 0), 1) * 100);
   const color =
-    exceeded || percent >= 90 ? "bg-red-500" : percent >= 70 ? "bg-amber-500" : "bg-emerald-500";
+    exceeded || percent >= 90 ? "bg-error" : percent >= 70 ? "bg-warning" : "bg-success";
   return (
     <div
       role="progressbar"
@@ -91,7 +91,7 @@ export function UtilizationBar({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={percent}
-      className="h-2 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/10"
+      className="h-2 w-full overflow-hidden rounded-full bg-surface-2"
     >
       <div className={`h-full rounded-full ${color}`} style={{ width: `${percent}%` }} />
     </div>
@@ -99,10 +99,10 @@ export function UtilizationBar({
 }
 
 const BADGE_TONES = {
-  neutral: "bg-black/5 text-text-muted dark:bg-white/5",
-  good: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  warn: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  bad: "bg-red-500/10 text-red-700 dark:text-red-300",
+  neutral: "bg-surface-2 text-text-muted",
+  good: "bg-success/10 text-success",
+  warn: "bg-warning/10 text-warning",
+  bad: "bg-error/10 text-error",
 } as const;
 
 export function StatusBadge({
@@ -128,14 +128,14 @@ export function StatusBadge({
 export function SaveFeedback({ error, saved }: { error: string | null; saved?: string | null }) {
   if (error) {
     return (
-      <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+      <p role="alert" className="text-xs text-error">
         {error}
       </p>
     );
   }
   if (saved) {
     return (
-      <p role="status" className="text-xs text-emerald-700 dark:text-emerald-300">
+      <p role="status" className="text-xs text-success">
         {saved}
       </p>
     );

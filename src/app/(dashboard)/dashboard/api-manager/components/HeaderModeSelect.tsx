@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Select } from "@/shared/components";
 import {
   ANTHROPIC_RATE_LIMIT_HEADER_MODES,
   isAnthropicRateLimitHeaderMode,
@@ -31,26 +32,24 @@ export function HeaderModeSelect({
   const t = useTranslations("apiManager");
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-text-main">
-        {t("anthropicRateLimitHeadersLabel")}
-      </label>
-      <p className="text-xs text-text-muted">{t("anthropicRateLimitHeadersDesc")}</p>
-      <select
+      <Select
         id={id}
+        label={t("anthropicRateLimitHeadersLabel")}
+        hint={t("anthropicRateLimitHeadersDesc")}
         value={value}
         disabled={disabled}
         onChange={(event) => {
           const mode = event.target.value;
           if (isAnthropicRateLimitHeaderMode(mode)) onChange(mode);
         }}
-        className="w-full rounded-control border border-black/10 bg-surface px-3 py-2 text-[16px] text-text-main focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30 disabled:opacity-50 sm:w-auto sm:text-sm dark:border-white/10"
+        selectClassName="w-full sm:w-auto"
       >
         {ANTHROPIC_RATE_LIMIT_HEADER_MODES.map((mode) => (
           <option key={mode} value={mode}>
             {t(HEADER_MODE_COPY[mode].label)}
           </option>
         ))}
-      </select>
+      </Select>
       <ul className="flex flex-col gap-0.5 text-[11px] text-text-muted">
         {ANTHROPIC_RATE_LIMIT_HEADER_MODES.map((mode) => (
           <li key={mode} className={value === mode ? "text-text-main" : undefined}>

@@ -11,7 +11,7 @@ export function ApiKeyDetailsLink({ keyId, keyName }: { keyId: string; keyName: 
   return (
     <Link
       href={`/dashboard/api-manager/${encodeURIComponent(keyId)}`}
-      className="p-2 hover:bg-sky-500/10 rounded text-text-muted hover:text-sky-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-all"
+      className="p-2 hover:bg-accent/10 rounded text-text-muted hover:text-accent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-all"
       title={label}
       aria-label={label}
     >

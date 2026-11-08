@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
+import { Checkbox } from "@/shared/components";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { toggleSharedQuotaProvider } from "../selfServiceQuota";
 import type { QuotaProviderOption } from "../selfServiceQuota";
@@ -20,20 +22,26 @@ function ProviderQuotaRow({
   const t = useTranslations("apiManager");
   return (
     <li>
-      <label className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-main">
-        <input type="checkbox" checked={checked} onChange={onToggle} />
-        <span className="font-medium">{getProviderDisplayName(option.provider)}</span>
-        <span className="text-text-muted">
-          {reachable
-            ? t("sharedQuotaProviderConnections", { count: option.connectionCount })
-            : t("sharedQuotaProviderUnreachable")}
-        </span>
-        {option.quotaSupported === false && (
-          <span className="rounded bg-black/5 px-1.5 py-0.5 text-[10px] text-text-muted dark:bg-white/5">
-            {t("sharedQuotaProviderNoQuotaData")}
+      <Checkbox
+        checked={checked}
+        onChange={onToggle}
+        className="text-xs text-text-main"
+        label={
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <span className="font-medium">{getProviderDisplayName(option.provider)}</span>
+            <span className="text-text-muted">
+              {reachable
+                ? t("sharedQuotaProviderConnections", { count: option.connectionCount })
+                : t("sharedQuotaProviderUnreachable")}
+            </span>
+            {option.quotaSupported === false && (
+              <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] text-text-muted">
+                {t("sharedQuotaProviderNoQuotaData")}
+              </span>
+            )}
           </span>
-        )}
-      </label>
+        }
+      />
     </li>
   );
 }
@@ -74,26 +82,19 @@ export function ProviderQuotaPicker({
         {t("sharedQuotaProvidersTitle")}
       </legend>
       <p className="text-xs text-text-muted">{t("sharedQuotaProvidersDesc")}</p>
-      <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:gap-4">
-        <label className="inline-flex items-center gap-2 text-xs text-text-main">
-          <input
-            type="radio"
-            name={`${baseId}-mode`}
-            checked={shareAll}
-            onChange={() => onSetProviders(null)}
-          />
-          {t("sharedQuotaProvidersAll")}
-        </label>
-        <label className="inline-flex items-center gap-2 text-xs text-text-main">
-          <input
-            type="radio"
-            name={`${baseId}-mode`}
-            checked={!shareAll}
-            onChange={() => onSetProviders(providerOptions.map((option) => option.provider))}
-          />
-          {t("sharedQuotaProvidersSelected")}
-        </label>
-      </div>
+      <RadioGroup
+        name={`${baseId}-mode`}
+        aria-label={t("sharedQuotaProvidersTitle")}
+        value={shareAll ? "all" : "selected"}
+        onValueChange={(next) =>
+          onSetProviders(next === "all" ? null : providerOptions.map((option) => option.provider))
+        }
+        disabled={disabled}
+        orientation="horizontal"
+      >
+        <RadioGroupItem value="all" label={t("sharedQuotaProvidersAll")} />
+        <RadioGroupItem value="selected" label={t("sharedQuotaProvidersSelected")} />
+      </RadioGroup>
       {!shareAll && rows.length > 0 && (
         <ul className="flex flex-col gap-1 rounded-md border border-border bg-surface/40 p-2">
           {rows.map((option) => (
@@ -111,7 +112,7 @@ export function ProviderQuotaPicker({
         <p className="text-xs text-text-muted">{t("sharedQuotaProvidersNoneReachable")}</p>
       )}
       {!shareAll && selected.length === 0 && (
-        <p className="text-xs text-amber-700 dark:text-amber-300" role="status">
+        <p className="text-xs text-warning" role="status">
           {t("sharedQuotaProvidersNoneSelected")}
         </p>
       )}

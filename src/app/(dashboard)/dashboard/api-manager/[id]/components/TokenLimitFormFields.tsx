@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Input, Select } from "@/shared/components";
+import { Checkbox, Input, Select } from "@/shared/components";
 import type { ResetInterval, ScopeType, TokenLimitDraft } from "./tokenLimitsEditorTypes";
 import {
   INTERVAL_KEYS,
@@ -73,14 +73,12 @@ export function TokenLimitFormFields({
         value={draft.resetTime}
         onChange={(event) => onUpdate({ resetTime: event.target.value })}
       />
-      <label className="flex items-center gap-2 self-end pb-2 text-sm text-text-main">
-        <input
-          type="checkbox"
-          checked={draft.enabled}
-          onChange={(event) => onUpdate({ enabled: event.target.checked })}
-        />
-        {tc("enabled")}
-      </label>
+      <Checkbox
+        className="self-end pb-2 text-sm text-text-main"
+        checked={draft.enabled}
+        onChange={(event) => onUpdate({ enabled: event.target.checked })}
+        label={tc("enabled")}
+      />
     </div>
   );
 }

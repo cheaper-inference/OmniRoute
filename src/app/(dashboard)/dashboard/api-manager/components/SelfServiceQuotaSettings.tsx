@@ -35,7 +35,7 @@ export function SelfServiceQuotaSettings({
     onChange({ ...value, sharedQuotaProviders });
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
+    <div className="flex flex-col gap-3 rounded-lg border border-warning/20 bg-warning/5 p-3">
       {showProviderPicker && (
         <ProviderQuotaPicker
           baseId={baseId}
