@@ -26,6 +26,19 @@ const wire = (entryKind: string, message: unknown, updatedSeq: string, entryId =
 // `role`, `content` and the nonce we sent. Measured from a live capture.
 const reply = (text: string) => ({ message: { type: "text", content: text } });
 
+test("a rows frame carries the session generation", () => {
+  const next = nextTranscriptRequest(
+    { phase: "snapshot", after: "0" },
+    { rows: { generation: 7, entries: [] } }
+  );
+  assert.equal(next.generation, 7);
+  const zero = nextTranscriptRequest(
+    { phase: "snapshot", after: "0" },
+    { rows: { generation: 0, entries: [] } }
+  );
+  assert.equal(zero.generation, 0);
+});
+
 test("replay frames move the cursor and keep the history they carry", () => {
   // The snapshot's rows are the conversation. Dropping them until the seal left
   // a freshly opened bot blank, which is what this test used to require.

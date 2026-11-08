@@ -7,7 +7,7 @@ const { nextTranscriptRequest } =
 const wire = (entryKind: string, message: unknown, updatedSeq: string) => ({
   seq: updatedSeq,
   entryKind,
-  entryId: "e1",
+  entryId: `e${updatedSeq}`,
   updatedSeq,
   body: Buffer.from(JSON.stringify(message), "utf-8").toString("base64"),
 });
@@ -36,6 +36,10 @@ test("the first heartbeat ends the snapshot and the next request uses its cursor
     cards: [{ seq: "10", entryId: "", kind: "unknown", type: "oversize" }],
     permissions: [],
     historyUnavailable: false,
+    deleted: [],
+    cleared: false,
+    halt: false,
+    turnFailure: undefined,
   });
 
   const cutover = nextTranscriptRequest(replay, { heartbeat: true });
@@ -47,6 +51,10 @@ test("the first heartbeat ends the snapshot and the next request uses its cursor
     cards: [],
     permissions: [],
     historyUnavailable: false,
+    deleted: [],
+    cleared: false,
+    halt: false,
+    turnFailure: undefined,
   });
 });
 
@@ -60,7 +68,7 @@ test("replay on the live stream is shown", () => {
   assert.deepEqual(next.visible, [
     {
       seq: "11",
-      entryId: "e1",
+      entryId: "e11",
       role: "assistant",
       text: "missed",
       clientNonce: "",
@@ -85,30 +93,24 @@ test("the seal hands over the rows the snapshot collected", () => {
   assert.deepEqual(state.visible, [
     {
       seq: "7",
-      entryId: "e1",
+      entryId: "e7",
       role: "assistant",
       text: "hello",
       clientNonce: "",
       streaming: false,
     },
-    { seq: "8", entryId: "e1", role: "user", text: "hi", clientNonce: "", streaming: false },
+    { seq: "8", entryId: "e8", role: "user", text: "hi", clientNonce: "", streaming: false },
   ]);
 });
 
-test("a refused history is a notice, not a dead stream", () => {
-  // Measured: the service answers a request for old rows with cursorTooOld once
-  // per connection and then keeps delivering new ones, so the page has to keep
-  // the stream and say the history is gone instead of showing an empty
-  // conversation with no explanation.
+test("a refused history without a generation keeps the old cursor", () => {
   const state = nextTranscriptRequest(
-    { phase: "snapshot", after: "0" },
+    { phase: "snapshot", after: "40", generation: 2 },
     { cursorTooOld: { agentId: "c7fbc519-6499-4d7e-a75a-55813760617d" } }
   );
-  assert.equal(state.stop, false, "the request is not finished");
-  assert.equal(state.historyUnavailable, true);
-  const after = nextTranscriptRequest(
-    { phase: "snapshot", after: state.after },
-    { heartbeat: true }
-  );
-  assert.equal(after.stop, true, "the heartbeat still ends the snapshot");
+  assert.equal(state.after, "40");
+  assert.equal(state.generation, 2);
+  assert.equal(state.stop, true);
+  assert.equal(state.halt, true);
+  assert.equal(state.historyUnavailable, false);
 });

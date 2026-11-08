@@ -64,8 +64,31 @@ export type TranscriptState = {
   cards: TranscriptCard[];
   permissions: PermissionRequest[];
   sealed: boolean;
+  generation?: number;
   tooOld?: boolean;
+  deleted?: Array<{ entryId: string; seq: string }>;
+  reset?: boolean;
+  stop?: boolean;
+  turnFailure?: string;
 };
+
+export type TranscriptDeletion = { entryId: string; seq: string };
+
+function resyncGeneration(value: unknown): number | undefined {
+  if (typeof value === "string" && /^(?:0|[1-9][0-9]*)$/.test(value)) value = Number(value);
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : undefined;
+}
+
+export function transcriptDeletionMatches(
+  deletions: TranscriptDeletion[],
+  held: { entryId: string; seq: string }
+): boolean {
+  return deletions.some(
+    (deletion) =>
+      (deletion.entryId !== "" && deletion.entryId === held.entryId) ||
+      (deletion.seq !== "" && deletion.seq === held.seq)
+  );
+}
 
 type Entry = {
   updatedSeq?: unknown;
@@ -396,10 +419,13 @@ export function transcriptLines(frames: unknown[]): string[] {
   return frames.map((frame) => JSON.stringify(frame));
 }
 
-export type TranscriptCursor = { phase: "snapshot" | "live"; after: string };
+export type TranscriptCursor = { phase: "snapshot" | "live"; after: string; generation?: number };
 
 export type TranscriptAdvance = TranscriptCursor & {
   stop: boolean;
+  /** The stream itself must end. A normal snapshot seal only sets `stop` so the
+   *  next request can start; an unusable reset sets this too. */
+  halt?: boolean;
   visible: TranscriptItem[];
   cards: TranscriptCard[];
   permissions: PermissionRequest[];
@@ -409,6 +435,10 @@ export type TranscriptAdvance = TranscriptCursor & {
    * rows keep arriving after it.
    */
   historyUnavailable: boolean;
+  deleted: Array<{ entryId: string; seq: string }>;
+  /** The frame reset the session, so the rows before it are gone. */
+  cleared: boolean;
+  turnFailure?: string;
 };
 
 export function recordedSend(
@@ -482,6 +512,7 @@ export function nextTranscriptRequest(
       cards: [],
       permissions: [],
       sealed: request.phase === "live",
+      generation: request.generation,
       tooOld: false,
     },
     frame
@@ -490,11 +521,16 @@ export function nextTranscriptRequest(
   return {
     phase: seals ? "live" : request.phase,
     after: state.cursor,
-    stop: seals,
+    ...(state.generation === undefined ? {} : { generation: state.generation }),
+    stop: seals || state.reset === true || state.stop === true,
+    halt: state.stop === true,
     visible: state.visible,
     cards: state.cards,
     permissions: state.permissions,
     historyUnavailable: state.tooOld === true,
+    deleted: state.deleted ?? [],
+    cleared: state.reset === true,
+    turnFailure: state.turnFailure,
   };
 }
 
@@ -579,11 +615,45 @@ export function applyTranscriptFrame(state: TranscriptState, frame: unknown): Tr
   const record = frame as {
     replay?: unknown;
     heartbeat?: unknown;
-    cursorTooOld?: unknown;
-    rows?: { entries?: unknown };
+    cursorTooOld?: { generation?: unknown };
+    rows?: { entries?: unknown; deletes?: unknown; generation?: unknown };
+    cleared?: { newGeneration?: unknown };
+    turnFailed?: { summary?: unknown; code?: unknown };
   };
+  const clearedGeneration = resyncGeneration(record.cleared?.newGeneration);
+  const cursorGeneration = resyncGeneration(record.cursorTooOld?.generation);
+  const rowsGeneration = resyncGeneration(record.rows?.generation);
+  const generation = clearedGeneration ?? cursorGeneration ?? rowsGeneration;
+  const resetPresent = record.cursorTooOld !== undefined || record.cleared !== undefined;
+  const resetUnusable =
+    resetPresent &&
+    ((record.cleared !== undefined && clearedGeneration === undefined) ||
+      (record.cursorTooOld !== undefined && cursorGeneration === undefined));
+  if (resetPresent && resetUnusable) return { ...state, stop: true };
+  if (resetPresent) {
+    return {
+      cursor: "0",
+      visible: [],
+      cards: [],
+      permissions: [],
+      sealed: state.sealed,
+      generation,
+      reset: true,
+      tooOld: record.cursorTooOld !== undefined,
+    };
+  }
+  let turnFailure = state.turnFailure;
+  if (record.turnFailed && typeof record.turnFailed === "object") {
+    const summary = typeof record.turnFailed.summary === "string" ? record.turnFailed.summary : "";
+    const code =
+      typeof record.turnFailed.code === "string" || typeof record.turnFailed.code === "number"
+        ? String(record.turnFailed.code)
+        : "";
+    turnFailure = summary || code || "turn_failed";
+  }
   const entries = Array.isArray(record.rows?.entries) ? record.rows.entries : [];
-  const next = {
+  const deletions = Array.isArray(record.rows?.deletes) ? record.rows.deletes : [];
+  const next: TranscriptState = {
     cursor: state.cursor,
     visible: [...state.visible],
     cards: [...(state.cards ?? [])],
@@ -591,13 +661,29 @@ export function applyTranscriptFrame(state: TranscriptState, frame: unknown): Tr
     sealed: state.sealed || record.heartbeat === true,
     tooOld: record.cursorTooOld !== undefined,
   };
+  const deleted: Array<{ entryId: string; seq: string }> = [];
+  for (const rawDeletion of deletions) {
+    if (!rawDeletion || typeof rawDeletion !== "object") continue;
+    const item = rawDeletion as { entryId?: unknown; seq?: unknown; updatedSeq?: unknown };
+    const deletion = {
+      entryId: typeof item.entryId === "string" ? item.entryId : "",
+      seq: typeof item.seq === "string" ? item.seq : "",
+    };
+    if (typeof item.updatedSeq === "string") next.cursor = bigger(next.cursor, item.updatedSeq);
+    deleted.push(deletion);
+    next.visible = next.visible.filter((held) => !transcriptDeletionMatches([deletion], held));
+    next.cards = next.cards.filter((held) => !transcriptDeletionMatches([deletion], held));
+    next.permissions = next.permissions.filter(
+      (held) => !transcriptDeletionMatches([deletion], held)
+    );
+  }
   for (const entry of entries) {
     if (!entry || typeof entry !== "object") continue;
     const item = entry as Entry;
     if (typeof item.updatedSeq !== "string") continue;
     applyEntry(next, item);
   }
-  return next;
+  return { ...next, generation: generation ?? state.generation, deleted, turnFailure };
 }
 
 /**
