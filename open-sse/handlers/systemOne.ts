@@ -276,6 +276,54 @@ function resolveAnsweredModel(
   return upstreamModel || options.requestedModel || options.target.provider;
 }
 
+interface DecisionOutcome {
+  status: number;
+  ok: boolean;
+  parsed: SystemOneUpstreamResponse | null;
+  /** Raw upstream text (connection secrets already removed for Cloudflare errors). */
+  text: string;
+  usage: SystemOneUpstreamResponse["usage"];
+  answeredModel: string;
+  upstreamError: string | undefined;
+}
+
+/** Read, normalize and sanitize an upstream decisions response. */
+async function readDecisionResponse(
+  options: SystemOneProxyOptions,
+  res: Response
+): Promise<DecisionOutcome> {
+  const raw = await res.text();
+  const isCloudflare = options.target.backend === "cloudflare";
+  // Redact before parseUpstreamBody truncates a non-JSON error body: a secret
+  // cut off at the cap would no longer match exactly. Only the connection's
+  // own secrets here; the shared sanitizer runs on the extracted message, so
+  // the JSON envelope stays parseable.
+  const text = res.ok || !isCloudflare ? raw : redactConnectionSecrets(raw, options.credentials);
+  const normalized = normalizeBackendBody(
+    options.target,
+    res.status,
+    parseUpstreamBody(text),
+    options.credentials
+  );
+  const { parsed } = normalized;
+  const ok = normalized.status >= 200 && normalized.status < 300;
+  // A failed Cloudflare call never reports an upstream-supplied model name.
+  const answeredModel =
+    ok || !isCloudflare
+      ? resolveAnsweredModel(parsed, options)
+      : options.requestedModel || options.target.provider;
+  const rawError = upstreamErrorMessage(parsed);
+  return {
+    status: normalized.status,
+    ok,
+    parsed,
+    text,
+    usage: ok ? parsed?.usage : undefined,
+    answeredModel,
+    upstreamError: rawError ? safeErrorText(rawError, options) : undefined,
+  };
+}
+
 export async function handleSystemOneProxy(options: SystemOneProxyOptions): Promise<Response> {
   const startTime = Date.now();
   const provider = options.target.provider;
@@ -295,34 +343,11 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
 
   try {
     const res = await postDecision(options, request, token);
-    const raw = await res.text();
-    // Redact before parseUpstreamBody truncates a non-JSON error body: a secret
-    // cut off at the cap would no longer match exactly. Only the connection's
-    // own secrets here; the shared sanitizer runs on the extracted message, so
-    // the JSON envelope stays parseable.
-    const text =
-      res.ok || options.target.backend !== "cloudflare"
-        ? raw
-        : redactConnectionSecrets(raw, options.credentials);
-    const normalized = normalizeBackendBody(
-      options.target,
-      res.status,
-      parseUpstreamBody(text),
-      options.credentials
-    );
-    const { parsed } = normalized;
-    const ok = normalized.status >= 200 && normalized.status < 300;
-    const usage = ok ? parsed?.usage : undefined;
-    // A failed Cloudflare call never reports an upstream-supplied model name.
-    const answeredModel =
-      ok || options.target.backend !== "cloudflare"
-        ? resolveAnsweredModel(parsed, options)
-        : options.requestedModel || options.target.provider;
-    const rawError = upstreamErrorMessage(parsed);
-    const upstreamError = rawError && safeErrorText(rawError, options);
+    const { status, ok, parsed, text, usage, answeredModel, upstreamError } =
+      await readDecisionResponse(options, res);
 
     logDecisionCall(options, {
-      status: normalized.status,
+      status,
       ok,
       model: answeredModel,
       usage,
@@ -331,10 +356,7 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
     });
 
     if (!ok) {
-      return errorResponse(
-        normalized.status,
-        upstreamError || `Provider returned HTTP ${normalized.status}`
-      );
+      return errorResponse(status, upstreamError || `Provider returned HTTP ${status}`);
     }
 
     return buildSuccessResponse(parsed, {
