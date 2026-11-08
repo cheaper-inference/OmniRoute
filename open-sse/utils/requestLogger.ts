@@ -116,6 +116,7 @@ function maskSensitiveHeaders(headers: HeaderInput): Record<string, unknown> {
     }
     if (
       lowerKey === "x-omniroute-lease-owner" ||
+      lowerKey === "x-omniroute-self-hop" ||
       lowerKey === "x-opencode-relay-proxy" ||
       lowerKey === "x-opencode-relay-auth"
     ) {
