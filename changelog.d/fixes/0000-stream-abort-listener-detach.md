@@ -1,0 +1,1 @@
+- **fix(streaming):** when a client aborts a request, the stream's stall, active-time and content-stall timers now stop at once instead of staying armed until they fire.
