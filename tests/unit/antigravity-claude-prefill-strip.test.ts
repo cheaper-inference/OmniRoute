@@ -188,6 +188,19 @@ test("(g) preserves non-budget user text parts after all functionResponse parts"
   ]);
 });
 
+test("(g2) a turn that also carries functionCall parts is not reordered", () => {
+  const turn = {
+    role: "user",
+    parts: [
+      { text: "context" },
+      { functionCall: { name: "Bash", args: { command: "ls" } } },
+      { functionResponse: { name: "Bash", response: { result: "ok" } } },
+    ],
+  };
+  const normalized = normalizeAntigravityClaudeContents([turn]);
+  assert.strictEqual(normalized[0], turn);
+});
+
 test("(h) native Gemini models keep functionResponse ordering unchanged", async () => {
   const request = await transform("antigravity/gemini-3.1-pro", [
     { role: "user", parts: [{ text: "Run ls" }] },

@@ -489,6 +489,10 @@ export function normalizeAntigravityClaudeContents(contents: unknown[]): unknown
       (p) => p && typeof p === "object" && "functionResponse" in p
     );
     if (!hasFunctionResponse) return content;
+    // Only a pure tool-result turn is reordered: a turn that also carries functionCall
+    // parts is not an Anthropic tool_result message, so its part order is left as-is.
+    const hasFunctionCall = c.parts.some((p) => p && typeof p === "object" && "functionCall" in p);
+    if (hasFunctionCall) return content;
 
     const filteredParts = c.parts.filter((p) => {
       if (p && typeof p === "object" && typeof (p as { text?: unknown }).text === "string") {
