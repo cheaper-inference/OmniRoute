@@ -98,6 +98,52 @@ function alertableRemainingPercent(quota: QuotaLike): number | null {
   return Math.max(0, Math.min(100, Math.round(((total - used) / total) * 100)));
 }
 
+function displayNameField(quota: QuotaLike): { displayName?: string } {
+  return typeof quota.displayName === "string" && quota.displayName
+    ? { displayName: quota.displayName }
+    : {};
+}
+
+/**
+ * One window against the latch: returns its NEW alert, or null when it is not a window,
+ * is above the warning line (clearing its latch entry), or already alerted at this level.
+ */
+function evaluateQuotaWindow(
+  connectionId: string,
+  quota: QuotaLike,
+  latch: QuotaAlertLatch
+): QuotaWindowAlert | null {
+  const remaining = alertableRemainingPercent(quota);
+  if (remaining === null) return null;
+
+  const windowName = String(quota.name ?? "");
+  if (!windowName) return null;
+
+  const key = `${connectionId}:${windowName}`;
+  const latched = Object.prototype.hasOwnProperty.call(latch, key);
+
+  if (remaining > WARNING_REMAINING_PERCENT) {
+    // Recovery clears the latch so a later drop can alert again.
+    if (latched) delete latch[key];
+    return null;
+  }
+
+  const severity = severityFor(remaining);
+  // Already alerted at this level: stay quiet until it recovers or gets worse.
+  if (latched && (severity !== "critical" || severityFor(latch[key]) === "critical")) return null;
+
+  latch[key] = remaining;
+  return {
+    key,
+    kind: "below_threshold",
+    severity,
+    connectionId,
+    windowName,
+    ...displayNameField(quota),
+    remainingPercentage: remaining,
+  };
+}
+
 /**
  * Compare the current quota snapshot against the latch and return only the
  * NEW alerts. Mutates `latch` in place (it is the caller's persistence buffer).
@@ -117,37 +163,8 @@ export function collectQuotaWindowAlerts(
     if (allowedProviders && !allowedProviders.has(String(connection.provider ?? ""))) continue;
 
     for (const quota of connection.quotas ?? []) {
-      const remaining = alertableRemainingPercent(quota);
-      if (remaining === null) continue;
-
-      const windowName = String(quota.name ?? "");
-      if (!windowName) continue;
-
-      const key = `${connectionId}:${windowName}`;
-      const latched = Object.prototype.hasOwnProperty.call(latch, key);
-
-      if (remaining > WARNING_REMAINING_PERCENT) {
-        // Recovery clears the latch so a later drop can alert again.
-        if (latched) delete latch[key];
-        continue;
-      }
-
-      const severity = severityFor(remaining);
-      // Already alerted at this level: stay quiet until it recovers or gets worse.
-      if (latched && (severity !== "critical" || severityFor(latch[key]) === "critical")) continue;
-
-      latch[key] = remaining;
-      alerts.push({
-        key,
-        kind: "below_threshold",
-        severity,
-        connectionId,
-        windowName,
-        ...(typeof quota.displayName === "string" && quota.displayName
-          ? { displayName: quota.displayName }
-          : {}),
-        remainingPercentage: remaining,
-      });
+      const alert = evaluateQuotaWindow(connectionId, quota, latch);
+      if (alert) alerts.push(alert);
     }
   }
 
@@ -162,6 +179,51 @@ export interface ResetCreditLike {
   selectionToken?: unknown;
   creditId?: unknown;
   expiresAt?: unknown;
+}
+
+/** The credit's id and parsed expiry, or null when either is missing or unreadable. */
+function readResetCredit(
+  credit: ResetCreditLike | null | undefined
+): { creditId: string; expiresAt: string; expiresAtMs: number } | null {
+  const creditId = String(credit?.selectionToken ?? credit?.creditId ?? "").trim();
+  const expiresAt = typeof credit?.expiresAt === "string" ? credit.expiresAt : null;
+  if (!creditId || !expiresAt) return null;
+
+  const expiresAtMs = Date.parse(expiresAt);
+  if (!Number.isFinite(expiresAtMs)) return null;
+  return { creditId, expiresAt, expiresAtMs };
+}
+
+/** One credit against the latch: its NEW alert, or null when it is out of the horizon or latched. */
+function evaluateResetCredit(
+  connectionId: string,
+  credit: ResetCreditLike | null | undefined,
+  latch: QuotaAlertLatch,
+  nowMs: number,
+  horizonMs: number
+): QuotaWindowAlert | null {
+  const parsed = readResetCredit(credit);
+  if (!parsed) return null;
+  const { creditId, expiresAt, expiresAtMs } = parsed;
+
+  const remainingMs = expiresAtMs - nowMs;
+  // Already expired: nothing to save.
+  if (remainingMs <= 0) return null;
+  if (remainingMs > horizonMs) return null;
+
+  const key = `${connectionId}:credit:${creditId}`;
+  if (latch[key] === expiresAtMs) return null;
+
+  latch[key] = expiresAtMs;
+  return {
+    key,
+    kind: "reset_credit_expiring",
+    severity: "warning",
+    connectionId,
+    windowName: "banked_reset_credits",
+    creditId,
+    expiresAt,
+  };
 }
 
 /**
@@ -183,31 +245,8 @@ export function collectResetCreditExpiryAlerts(
 
   for (const [connectionId, credits] of Object.entries(creditsByConnection ?? {})) {
     for (const credit of credits ?? []) {
-      const creditId = String(credit?.selectionToken ?? credit?.creditId ?? "").trim();
-      const expiresAt = typeof credit?.expiresAt === "string" ? credit.expiresAt : null;
-      if (!creditId || !expiresAt) continue;
-
-      const expiresAtMs = Date.parse(expiresAt);
-      if (!Number.isFinite(expiresAtMs)) continue;
-
-      const remainingMs = expiresAtMs - nowMs;
-      // Already expired: nothing to save.
-      if (remainingMs <= 0) continue;
-      if (remainingMs > horizonMs) continue;
-
-      const key = `${connectionId}:credit:${creditId}`;
-      if (latch[key] === expiresAtMs) continue;
-
-      latch[key] = expiresAtMs;
-      alerts.push({
-        key,
-        kind: "reset_credit_expiring",
-        severity: "warning",
-        connectionId,
-        windowName: "banked_reset_credits",
-        creditId,
-        expiresAt,
-      });
+      const alert = evaluateResetCredit(connectionId, credit, latch, nowMs, horizonMs);
+      if (alert) alerts.push(alert);
     }
   }
 
