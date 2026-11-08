@@ -71,6 +71,32 @@ export function createDefaultCodexAutospendDeps(): CodexAutospendDeps {
   };
 }
 
+function describeError(error: unknown): string {
+  return sanitizeErrorMessage((error as Error)?.message ?? String(error));
+}
+
+/** Spend one connection's expiring credits; a failure is logged and never aborts the sweep. */
+async function spendForConnection(
+  deps: CodexAutospendDeps,
+  connectionId: string,
+  now: () => number
+): Promise<void> {
+  try {
+    const result = await deps.spend(connectionId, { now });
+    if (result.spent.length > 0) {
+      log.info("auto-spent expiring reset credits", {
+        connectionId,
+        count: result.spent.length,
+      });
+    } else if (result.error) {
+      log.warn("auto-spend error", { connectionId, error: sanitizeErrorMessage(result.error) });
+    }
+  } catch (error) {
+    // One connection must never abort the sweep for the others.
+    log.warn("auto-spend failed", { connectionId, error: describeError(error) });
+  }
+}
+
 /**
  * Run one sweep. Safe to call concurrently: a re-entrant call while already
  * running is a no-op, so a slow upstream cannot stack ticks.
@@ -94,31 +120,10 @@ export async function runCodexAutospendTick(
     });
 
     for (const connection of connections) {
-      try {
-        const result = await deps.spend(connection.id, { now });
-        if (result.spent.length > 0) {
-          log.info("auto-spent expiring reset credits", {
-            connectionId: connection.id,
-            count: result.spent.length,
-          });
-        } else if (result.error) {
-          log.warn("auto-spend error", {
-            connectionId: connection.id,
-            error: sanitizeErrorMessage(result.error),
-          });
-        }
-      } catch (error) {
-        // One connection must never abort the sweep for the others.
-        log.warn("auto-spend failed", {
-          connectionId: connection.id,
-          error: sanitizeErrorMessage((error as Error)?.message ?? String(error)),
-        });
-      }
+      await spendForConnection(deps, connection.id, now);
     }
   } catch (error) {
-    log.warn("tick error", {
-      error: sanitizeErrorMessage((error as Error)?.message ?? String(error)),
-    });
+    log.warn("tick error", { error: describeError(error) });
   } finally {
     state.running = false;
   }
@@ -136,12 +141,4 @@ export function startCodexResetCreditAutospend(): void {
     runCodexAutospendTick(createDefaultCodexAutospendDeps(), schedulerState).catch(() => undefined);
   }, CODEX_AUTOSPEND_TICK_INTERVAL_MS);
   schedulerInterval.unref?.();
-}
-
-/** Stop the in-process scheduler. Idempotent — a second call is a no-op. */
-export function stopCodexResetCreditAutospend(): void {
-  if (!schedulerInterval) return;
-  clearInterval(schedulerInterval);
-  schedulerInterval = null;
-  log.info("scheduler stopped");
 }
