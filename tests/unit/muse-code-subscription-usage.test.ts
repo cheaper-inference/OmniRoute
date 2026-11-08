@@ -16,6 +16,7 @@ const {
 } = usageModule;
 const { getMuseUsage } = await import("../../open-sse/services/usage/museCode.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
+const { waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const core = await import("../../src/lib/db/core.ts");
 const providers = await import("../../src/lib/db/providers.ts");
 
@@ -99,12 +100,26 @@ test("ignores other events and out-of-domain windows instead of clamping them", 
   );
   assert.equal(bad({ used_percent: 5, window_duration_mins: 300 }, null), null);
   assert.equal(bad({ used_percent: 5, resets_at: SESSION_RESET }, null), null, "no duration");
+  assert.equal(
+    bad({ used_percent: 5, resets_at: 1e16, window_duration_mins: 300 }, null),
+    null,
+    "a reset beyond the Date range has no instant to report"
+  );
   const weeklyOnly = bad(null, { used_percent: 7, resets_at: WEEKLY_RESET });
   assert.equal(weeklyOnly?.window, undefined);
   assert.equal(weeklyOnly?.weekly?.usedPercent, 7);
 });
 
 test("the tap passes the stream through byte for byte at every chunk boundary", async () => {
+  for (const chunkSize of [1, 2, 7, 64, museStream.length]) {
+    const crlf = museStream.replace(/\n/g, "\r\n");
+    const readings: unknown[] = [];
+    const tapped = tapMuseSubscriptionUsage(sseResponse(crlf, chunkSize), (u) => {
+      readings.push(u);
+    });
+    assert.equal(await tapped.text(), crlf, `CRLF, chunk size ${chunkSize}`);
+    assert.equal(readings.length, 1, `CRLF: one reading at chunk size ${chunkSize}`);
+  }
   for (const chunkSize of [1, 2, 7, 64, museStream.length]) {
     const readings: unknown[] = [];
     const tapped = tapMuseSubscriptionUsage(sseResponse(museStream, chunkSize), (usage) => {
@@ -129,6 +144,32 @@ test("the tap reports nothing for a stream without a usage frame, and leaves non
     tapMuseSubscriptionUsage(json, () => assert.fail("not SSE")),
     json
   );
+});
+
+test("an out-of-range frame or an oversized block never breaks the stream", async () => {
+  const outOfRange = sse([
+    {
+      event: MUSE_SUBSCRIPTION_USAGE_EVENT,
+      data: {
+        type: MUSE_SUBSCRIPTION_USAGE_EVENT,
+        subscription: { window: { used_percent: 5, resets_at: 1e16, window_duration_mins: 300 } },
+      },
+    },
+  ]);
+  const ignored: unknown[] = [];
+  const first = tapMuseSubscriptionUsage(sseResponse(outOfRange, 5), (u) => void ignored.push(u));
+  assert.equal(await first.text(), outOfRange);
+  assert.deepEqual(ignored, []);
+
+  // 3 MiB without a blank line, then the usage frame: the block is dropped, the frame still read.
+  const oversized = `data: ${"x".repeat(3 * 1024 * 1024)}\n\n` + museStream;
+  const readings: Array<{ window?: { usedPercent: number } }> = [];
+  const second = tapMuseSubscriptionUsage(sseResponse(oversized, 64 * 1024), (u) => {
+    readings.push(u);
+  });
+  assert.equal((await second.text()).length, oversized.length);
+  assert.equal(readings.length, 1);
+  assert.equal(readings[0].window?.usedPercent, 6);
 });
 
 test("a failing usage recorder never breaks the stream", async () => {
@@ -280,4 +321,7 @@ test("a Muse Code request through the chat core keeps the reading on its connect
     providerSpecificData: Record<string, unknown>;
   };
   assert.equal(row.providerSpecificData.subsTierName, "Synthetic tier", "other keys are kept");
+  // The chat core logs the call in the background; close the database only after it is saved.
+  assert.equal(await waitForCallLogSaves(10_000), true);
+  core.resetDbInstance();
 });

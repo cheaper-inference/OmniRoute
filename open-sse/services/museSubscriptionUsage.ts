@@ -55,7 +55,10 @@ function parseWindow(raw: unknown, fallbackSeconds: number | null): MuseUsageWin
   const windowSeconds = minutes !== null && minutes > 0 ? minutes * 60 : fallbackSeconds;
   if (usedPercent === null || usedPercent < 0 || usedPercent > 100) return null;
   if (resetsAt === null || resetsAt <= 0 || windowSeconds === null) return null;
-  return { usedPercent, resetAt: new Date(resetsAt * 1000).toISOString(), windowSeconds };
+  const resetDate = new Date(resetsAt * 1000);
+  // Beyond the Date range (`resets_at` > 8.64e12 s) there is no instant to report.
+  if (Number.isNaN(resetDate.getTime())) return null;
+  return { usedPercent, resetAt: resetDate.toISOString(), windowSeconds };
 }
 
 /**
@@ -83,7 +86,16 @@ export function parseMuseSubscriptionUsageEvent(
   };
 }
 
-const SSE_BLOCK_SEPARATOR = /\r?\n\r?\n/;
+/** The blank line that ends an SSE block, with LF or CRLF line endings. */
+const SSE_BLOCK_END_SOURCE = String.raw`\r?\n\r?\n`;
+/** The longest separator (`\r\n\r\n`) can start this many characters before a chunk boundary. */
+const SEPARATOR_OVERLAP = 3;
+/**
+ * The usage frame is a few hundred bytes. A block that grows past this without ending cannot be
+ * it, so its text is dropped instead of buffered (the upstream base URL is configurable per
+ * connection, so the stream is not always from a trusted host).
+ */
+const MAX_PENDING_CHARS = 1024 * 1024;
 
 /** The `response.subscription_usage` payload of one SSE block, or null for any other block. */
 function usagePayloadOf(block: string): unknown {
@@ -115,6 +127,8 @@ export function tapMuseSubscriptionUsage(
   const contentType = response.headers.get("content-type") || "";
   if (!response.body || !contentType.includes("text/event-stream")) return response;
   const decoder = new TextDecoder();
+  // Per tap: the scan resumes from `lastIndex`, so each character is searched about once.
+  const blockEnd = new RegExp(SSE_BLOCK_END_SOURCE, "g");
   let pending = "";
   let latest: MuseSubscriptionUsage | null = null;
   const inspect = (block: string) => {
@@ -125,13 +139,17 @@ export function tapMuseSubscriptionUsage(
   const tap = new TransformStream<Uint8Array, Uint8Array>({
     transform(chunk, controller) {
       controller.enqueue(chunk);
+      // Text already in `pending` held no separator, except one cut by the chunk boundary.
+      blockEnd.lastIndex = Math.max(0, pending.length - SEPARATOR_OVERLAP);
       pending += decoder.decode(chunk, { stream: true });
-      let separator = SSE_BLOCK_SEPARATOR.exec(pending);
+      let separator = blockEnd.exec(pending);
       while (separator) {
         inspect(pending.slice(0, separator.index));
         pending = pending.slice(separator.index + separator[0].length);
-        separator = SSE_BLOCK_SEPARATOR.exec(pending);
+        blockEnd.lastIndex = 0;
+        separator = blockEnd.exec(pending);
       }
+      if (pending.length > MAX_PENDING_CHARS) pending = "";
     },
     flush() {
       pending += decoder.decode();
