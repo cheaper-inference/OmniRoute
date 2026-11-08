@@ -98,13 +98,14 @@ function KeyQuotaEditorBody({
             variant="ghost"
             icon="restart_alt"
             disabled={editor.saving}
-            onClick={() => editor.clear(t("keyQuotaClearConfirm"))}
+            onClick={() => void editor.clear(t("keyQuotaClearConfirm"))}
           >
             {t("keyQuotaClear")}
           </Button>
           <SaveFeedback error={editor.error} saved={saved && !editor.error ? t("saved") : null} />
         </div>
       </div>
+      {editor.confirmDialog}
     </DetailsSection>
   );
 }

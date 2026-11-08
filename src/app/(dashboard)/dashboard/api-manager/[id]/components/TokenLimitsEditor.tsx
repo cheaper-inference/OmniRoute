@@ -82,6 +82,7 @@ export function TokenLimitsEditor({
           />
         </div>
       )}
+      {editor.confirmDialog}
     </DetailsSection>
   );
 }

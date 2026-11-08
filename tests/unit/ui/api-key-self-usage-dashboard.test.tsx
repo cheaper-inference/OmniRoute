@@ -233,6 +233,35 @@ describe("API key details page", () => {
     );
   });
 
+  it("asks through the kit confirm dialog before removing the key quota", async () => {
+    const calls = routeDetails(SELF_SERVICE_FIXTURE);
+    const nativeConfirm = vi.fn(() => true);
+    vi.stubGlobal("confirm", nativeConfirm);
+    render(<ApiKeyDetailsPageClient keyId="key-1" />);
+    const removeQuota = await screen.findByRole("button", { name: "Remove quota" });
+    const deletes = () =>
+      calls.filter((c) => c.method === "DELETE" && c.url.startsWith("/api/usage/key-quota"));
+
+    fireEvent.click(removeQuota);
+    const dialog = await screen.findByRole("alertdialog", { name: "Confirm" });
+    expect(
+      within(dialog).getByText("Remove every rate and spend quota from this key?")
+    ).toBeTruthy();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    expect(deletes()).toHaveLength(0);
+
+    fireEvent.click(removeQuota);
+    fireEvent.click(
+      within(await screen.findByRole("alertdialog", { name: "Confirm" })).getByRole("button", {
+        name: "Confirm",
+      })
+    );
+    await waitFor(() => expect(deletes()).toHaveLength(1));
+    expect(deletes()[0].url).toBe("/api/usage/key-quota?apiKeyId=key-1");
+    expect(nativeConfirm).not.toHaveBeenCalled();
+  });
+
   it("shows a sanitized error instead of the raw body when loading fails", async () => {
     routeDetails({ error: { message: "stack at x (file.ts:1)" } }, 404);
     render(<ApiKeyDetailsPageClient keyId="key-1" />);

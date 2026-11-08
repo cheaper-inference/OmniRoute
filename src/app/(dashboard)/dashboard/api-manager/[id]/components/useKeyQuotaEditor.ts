@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { parseOptionalLimitInput, safeApiErrorMessage } from "../apiKeyDetailsData";
 import type { KeyQuotaView } from "../apiKeyDetailsData";
 import { sendJson } from "../useApiKeyDetails";
@@ -26,6 +27,7 @@ export function useKeyQuotaEditor({
   const [monthly, setMonthly] = useState(toInput(quota.monthlyAmountUsd));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   const run = async (request: () => ReturnType<typeof sendJson>) => {
     setSaving(true);
@@ -54,8 +56,8 @@ export function useKeyQuotaEditor({
     );
   };
 
-  const clear = (confirmMessage: string) => {
-    if (!window.confirm(confirmMessage)) return;
+  const clear = async (confirmMessage: string) => {
+    if (!(await requestConfirm(confirmMessage))) return;
     void run(() =>
       sendJson(`/api/usage/key-quota?apiKeyId=${encodeURIComponent(keyId)}`, "DELETE")
     );
@@ -72,5 +74,6 @@ export function useKeyQuotaEditor({
     error,
     save,
     clear,
+    confirmDialog,
   };
 }

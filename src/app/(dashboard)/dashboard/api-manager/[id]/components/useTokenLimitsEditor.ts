@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { safeApiErrorMessage } from "../apiKeyDetailsData";
 import type { TokenLimitRow } from "../apiKeyDetailsData";
 import { sendJson } from "../useApiKeyDetails";
@@ -20,6 +21,7 @@ export function useTokenLimitsEditor({
   const [draft, setDraft] = useState<TokenLimitDraft | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   const scopeText = (scopeType: ScopeType, scopeValue: string) =>
     scopeType === "global"
@@ -61,8 +63,8 @@ export function useTokenLimitsEditor({
     if (ok) setDraft(null);
   };
 
-  const remove = (row: TokenLimitRow) => {
-    if (!window.confirm(t("tokenLimitDeleteConfirm"))) return;
+  const remove = async (row: TokenLimitRow) => {
+    if (!(await requestConfirm(t("tokenLimitDeleteConfirm")))) return;
     void run(() => sendJson(`/api/usage/token-limits?id=${encodeURIComponent(row.id)}`, "DELETE"));
   };
 
@@ -77,8 +79,9 @@ export function useTokenLimitsEditor({
     setError,
     scopeText,
     submit: () => void submit(),
-    remove,
+    remove: (row: TokenLimitRow) => void remove(row),
     update,
     editing: Boolean(draft?.id),
+    confirmDialog,
   };
 }
