@@ -17,64 +17,73 @@ OmniRoute વહીવટી ક્રિયાઓ, પ્રમાણીકર�
 કોઈપણ નિષ્ફળતા પર કૉલને મૌન રીતે અવગણવામાં આવે છે, જેથી ઑડિટ લૉગિંગ
 મુખ્ય રિક્વેસ્ટ પ્રવાહને વિક્ષેપિત ન કરી શકે.
 
-## શું લૉગ થાય છે
+## શું લોગ થાય છે
 
 ### વહીવટી ઑડિટ ઇવેન્ટ્સ (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })`ને કરાયેલ દરેક કૉલ
-એક પંક્તિ ઉત્પન્ન કરે છે. ઍક્શન સ્ટ્રિંગ્સ `domain.verb` (અથવા `domain.verb.outcome`)
-પૅટર્નનું અનુસરણ કરે છે. ટ્રીમાં પુષ્ટિ થયેલા ઍક્શન પ્રકારોમાં આ સામેલ છે:
+`logAuditEvent({ action, actor, target, details, ... })` માટેનો દરેક કૉલ
+એક પંક્તિ બનાવે છે. ઍક્શન સ્ટ્રિંગ્સ `domain.verb` (અથવા
+`domain.verb.outcome`) પેટર્ન અનુસરે છે. ટ્રીમાં પુષ્ટિ થયેલા ઍક્શન પ્રકારોમાં
+આનો સમાવેશ થાય છે:
 
-| ઍક્શન                                | સ્રોત                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-દરેક એન્ટ્રી `action`, `actor` (ડિફૉલ્ટ તરીકે `"system"`), `target`,
+દરેક એન્ટ્રીમાં `action`, `actor` (ડિફૉલ્ટ `"system"`), `target`,
 `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
-`request_id` અને `timestamp` કૅપ્ચર કરે છે. સંવેદનશીલ કીઓ (`apiKey`, `accessToken`,
-`refreshToken`, `password`, `*token`/`*secret`/`*apikey` સાથે મેળ ખાતી કોઈપણ કી,
-વગેરે) પંક્તિ લખાય તે પહેલાં પુનરાવર્તિત રીતે `"[redacted]"` વડે ઢાંકી દેવામાં આવે છે.
+`request_id`, અને `timestamp` કૅપ્ચર થાય છે. સંવેદનશીલ કી (`apiKey`, `accessToken`,
+`refreshToken`, `password`, `*token`/`*secret`/`*apikey` સાથે મેળ ખાતું કંઈપણ,
+વગેરે) પંક્તિ લખાય તે પહેલાં પુનરાવર્તિત રીતે `"[redacted]"` કરવામાં આવે છે.
+
+`api_key.auth.touch` પંક્તિઓ સફળ API કી મેટાડેટા અને શોધ સંબંધિત
+રીડ્સ (GET/HEAD) નોંધે છે, જે ક્યારેય રિક્વેસ્ટ લૉગ સુધી પહોંચતા નથી: કઈ કી,
+ક્યારે, અને સામાન્યકૃત પાથ; આ પંક્તિઓને એકત્રિત કરીને વધુમાં વધુ 1,000 પંક્તિઓ
+રાખવામાં આવે છે. `noLog` ધરાવતી કીઓ અને પર્યાવરણ કી છોડી દેવામાં આવે છે.
+કૉલરનું IP સરનામું અને યુઝર-એજન્ટ ત્યારે જ ઉમેરવામાં આવે છે જ્યારે
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` ફીચર ફ્લૅગ ચાલુ હોય (ડિફૉલ્ટ રૂપે
+બંધ).
 
 ### MCP ટૂલ કૉલ્સ (`mcp_tool_audit`)
 
-દરેક MCP ટૂલ આહ્વાન
-`open-sse/mcp-server/audit.ts` મારફતે એક પંક્તિ લખે છે. સ્કીમા (
-`src/lib/db/migrations/002_mcp_a2a_tables.sql`માંથી):
+દરેક MCP ટૂલ ઇન્વૉકેશન `open-sse/mcp-server/audit.ts` દ્વારા એક પંક્તિ
+લખે છે. સ્કીમા (`src/lib/db/migrations/002_mcp_a2a_tables.sql`માંથી):
 
-| કૉલમ             | નોંધો                                    |
-| ---------------- | ---------------------------------------- |
-| `id`             | આપમેળે વધતો ક્રમાંક                      |
-| `tool_name`      | MCP ટૂલ ઓળખકર્તા                         |
-| `input_hash`     | ઇનપુટનો sha256 (કોઈ પેલોડ સંગ્રહાતો નથી) |
-| `output_summary` | ટૂંકો, સંક્ષિપ્ત કરેલો સારાંશ            |
-| `duration_ms`    | વાસ્તવિક પસાર થયેલો સમય                  |
-| `api_key_id`     | કૉલ કરનાર (નલ હોઈ શકે છે)                |
-| `success`        | `1` / `0`                                |
-| `error_code`     | નિષ્ફળતા વખતે અંતિમ ભૂલ કોડ              |
-| `created_at`     | ISO ટાઇમસ્ટૅમ્પ                          |
+| Column           | Notes                               |
+| ---------------- | ----------------------------------- |
+| `id`             | ઑટોઇન્ક્રિમેન્ટ                     |
+| `tool_name`      | MCP ટૂલ ઓળખકર્તા                    |
+| `input_hash`     | ઇનપુટનો sha256 (પેલોડ સંગ્રહિત નથી) |
+| `output_summary` | ટૂંકો, કાપેલો સારાંશ                |
+| `duration_ms`    | વૉલ સમય                             |
+| `api_key_id`     | કૉલર (નલ્લ કરી શકાય તેવું)          |
+| `success`        | સફળતા માટે `1` / `0`                |
+| `error_code`     | નિષ્ફળતા સમયે અંતિમ ભૂલ કોડ         |
+| `created_at`     | ISO ટાઇમસ્ટૅમ્પ                     |
 
-### રિક્વેસ્ટ / વપરાશ લૉગ્સ
+### રિક્વેસ્ટ / ઉપયોગ લૉગ્સ
 
-આ કાર્યકારી ટેલિમેટ્રી છે (સખત અર્થમાં વહીવટી ઑડિટ નથી), પરંતુ સમાન
-રીટેન્શન પાઇપલાઇનનો ઉપયોગ કરે છે:
+આ ઑપરેશનલ ટેલિમેટ્રી છે (કડક રીતે વહીવટી ઑડિટ નથી), પરંતુ એ જ
+રીટેન્શન પાઇપલાઇન શેર કરે છે:
 
-- `usage_history` — દરેક રિક્વેસ્ટ દીઠ વપરાશનું સંકલન
-- `call_logs` — દરેક રિક્વેસ્ટનો સંપૂર્ણ લૉગ (પંક્તિ-મર્યાદાને આધીન, નીચે જુઓ)
+- `usage_history` — દરેક રિક્વેસ્ટના ઉપયોગનો રોલ-અપ
+- `call_logs` — દરેક રિક્વેસ્ટનો સંપૂર્ણ લૉગ (નીચે દર્શાવેલ પંક્તિ-મર્યાદાને આધીન)
 - `proxy_logs` — પ્રૉક્સી ટ્રાફિક લૉગ (પંક્તિ-મર્યાદાને આધીન)
-- `request_detail_logs` — જૂનો વિગતવાર રિક્વેસ્ટ લૉગ (હાજર હોય તો હજુ પણ છાંટવામાં આવે છે)
+- `request_detail_logs` — જૂનો વિગતવાર રિક્વેસ્ટ લૉગ (હાજર હોય તો હજુ પણ પ્રૂન થાય છે)
 
 ## સ્ટોરેજ સ્કીમા
 

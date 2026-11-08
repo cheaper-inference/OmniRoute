@@ -122,7 +122,9 @@ test("execution outliving the queue-wait budget completes (opencode-go 504 regre
     concurrentRequests: 1,
     requestsPerMinute: 100000,
     minTimeBetweenRequestsMs: 0,
-    maxWaitMs: 40, // queue-wait budget: 40ms
+    // Long enough for an idle queue to start the job on a loaded runner: at 40ms the job itself
+    // missed the budget and threw RATE_LIMIT_QUEUE_TIMEOUT (run 42023450814, Unit Tests 2/8).
+    maxWaitMs: 1000, // queue-wait budget: 1s
     executionMaxWaitMs: 5000, // execution backstop: 5s
   });
   rateLimitManager.enableRateLimitProtection("conn-slow-exec");
@@ -132,13 +134,12 @@ test("execution outliving the queue-wait budget completes (opencode-go 504 regre
     "conn-slow-exec",
     "gpt-4o",
     async () => {
-      await wait(300); // outlives maxWaitMs, well within the execution backstop
+      await wait(1300); // outlives maxWaitMs, well within the execution backstop
       return "ok";
     }
   );
   assert.equal(result, "ok", "execution must not be killed by the queue-wait budget");
 });
-
 
 test("#4165 a job that completes within the execution expiration is unaffected", async () => {
   await rateLimitManager.applyRequestQueueSettings({

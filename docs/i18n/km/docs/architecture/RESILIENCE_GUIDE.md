@@ -4,11 +4,13 @@
 
 ---
 
-OmniRoute មានយន្តការភាពធន់ (resilience) បីយ៉ាងដែលខុសគ្នា ប៉ុន្តែពាក់ព័ន្ធគ្នា។ នីមួយៗមានវិសាលភាព និងគោលបំណងផ្សេងគ្នា។ រក្សាពួកវាឱ្យដាច់ដោយឡែកពីគ្នា នៅពេល debug អាកប្បកិរិយា routing ។
+OmniRoute មានយន្តការបីផ្សេងគ្នាប៉ុន្តែពាក់ព័ន្ធ។ នីមួយៗមានវិសាលភាព និងគោលបំណងខុសៗគ្នា។ ទុកពួកវាឱ្យនៅដាច់ពីគ្នានៅពេលបំបាត់កំហុសផ្លូវ។
 
-![ម៉ូដែលភាពធន់ 3 ស្រទាប់](../diagrams/exported/resilience-3layers.svg)
+![3-layer resilience model](../diagrams/exported/resilience-3layers.svg)
 
-> ប្រភព: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+> ប្រភព៖ [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+
+> **env-vs-dashboard នាំមុខសម្រាប់ការបិទបើកភាពធន់។** ការជ្រើសរើសភាពធន់នឹងបិទបើកគ្រាប់ពូជពីបរិស្ថាន — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — ផ្គត់ផ្គង់តែ _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) ប៉ុណ្ណោះ។ ប៊ូលីនបានបន្តនៅក្នុង `resilienceSettings` (ផ្ទាំងគ្រប់គ្រង →** ការកំណត់ → ភាពធន់** / `PATCH /api/resilience` រក្សាទុកក្នុង `key_value`) ឈ្នះលើតម្លៃ env: normalization (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) រក្សា boolean ដែលបានរក្សាទុកនៅពេលណាដែលមាន។ ការកំណត់ env var ទៅ `true` នៅលើការដាក់ពង្រាយដែលផ្ទាំងគ្រប់គ្រងដែលបានរក្សាទុករួចហើយ `false` ដូច្នេះមិនផ្លាស់ប្តូរអ្វី — ត្រឡប់បិទបើក** ការកំណត់ → ភាពធន់** (ឬជម្រះវាលដែលបានរក្សាទុក) ជំនួសវិញ។
 
 ## 1. Circuit Breaker កម្រិត Provider
 
@@ -62,162 +64,172 @@ OmniRoute មានយន្តការភាពធន់ (resilience) បី�
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}` ។
 ការការពារ regression: `tests/unit/provider-cooldown-window-gate.test.ts` ។
 
-## 2. ពេលផ្អាកបណ្តោះអាសន្ននៃការភ្ជាប់
+## 2. ការផ្អាកការតភ្ជាប់
 
-**វិសាលភាព:** ការភ្ជាប់/គណនី/កូនសោតែមួយរបស់អ្នកផ្តល់សេវា។
+**វិសាលភាព៖** ការតភ្ជាប់/គណនី/សោ របស់អ្នកផ្គត់ផ្គង់តែមួយ។
 
-**គោលបំណង:** រំលងកូនសោដែលមានបញ្ហាមួយ ខណៈដែលការភ្ជាប់ផ្សេងទៀតសម្រាប់អ្នកផ្តល់សេវាដដែលនៅតែបន្តបម្រើ។
-
-**ការអនុវត្ត:**
-
-- សម្គាល់ថាមិនអាចប្រើបាន: `src/sse/services/auth.ts::markAccountUnavailable()`
-- ការជ្រើសរើស: `getProviderCredentials*` ក្នុងឯកសារដដែល
-- ការគណនាពេលផ្អាក: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- ការកំណត់: `src/lib/resilience/settings.ts`
-
-**វាលសម្រាប់ការភ្ជាប់នីមួយៗ:**
-
-- `rateLimitedUntil` — ស្លាកពេលវេលារហូតដល់ពេលផ្អាកផុតកំណត់
-- `testStatus: "unavailable"`
-- `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — ចំនួនកម្រិត backoff អ៊ិចស្ប៉ូណង់ស្ស៊ែល
-
-**ពេលផ្អាកលំនាំដើម:**
-
-- មូលដ្ឋាន OAuth: 5 វិនាទី
-- មូលដ្ឋាន API-key: 3 វិនាទី
-- API-key 429: ផ្តល់អាទិភាពដល់ `Retry-After`/ក្បាលសាឡើងវិញ (reset headers)/អត្ថបទសាឡើងវិញដែលអាចញ៉ាំងបាន ពីខាងលើ
-- Backoff: `baseCooldownMs * 2 ** failureIndex`
-
-**ការការពារប្រឆាំងនឹង thundering-herd:** ការពារកុំឱ្យការបរាជ័យកើតឡើងព្រមគ្នាបន្លាយពេលផ្អាកលើសកំណត់ ឬបន្ថែម `backoffLevel` ទ្វេដង។
-
-**429 ដែលកំណត់ចំនួនស្របគ្នា មិនឡើងតាមជណ្តើរ backoff ទេ។** `429` ដែលខ្លួនសារាបញ្ជាក់ពីដែនកំណត់ចំនួនស្របគ្នា ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`) មានន័យថាគណនីនៅមានសុខភាពល្អ ប៉ុន្តែកំពុងរវល់។
-`checkFallbackError()` ត្រឡប់ហេតុផល `concurrency_limited`: ប្តូរទៅការភ្ជាប់បន្ទាប់ភ្លាមៗ ផ្អាកការភ្ជាប់នេះរយៈពេលថេរ `CONCURRENCY_LIMIT_COOLDOWN_MS` (1 វិនាទី) ឬតាមសញ្ញាណែនាំពេលព្យាយាមឡើងវិញពីខាងលើ រក្សា `backoffLevel` មិនផ្លាស់ប្តូរ ហើយកំណត់ `skipProviderBreaker`។ ខ្លួនសារាដែលបញ្ជាក់ពី quota យ៉ាងច្បាស់នៅតែឈ្នះ ដូច្នេះខ្លួនសារដែលក៏ត្រូវនឹងលំនាំ quota ផងដែរ នៅតែជាការវិនិច្ឆ័យ quota។ ការរកឃើញ: `looksLikeConcurrencyLimit()` ក្នុង `src/shared/utils/classify429.ts`;
-ការវិនិច្ឆ័យ: `open-sse/services/accountFallback/concurrencyLimit429.ts`។ `classify429()` (`FailureKind` របស់ breaker) មិនបានផ្លាស់ប្តូរ ហើយនៅតែអានថា `rate_limit` សម្រាប់ខ្លួនសាទាំងនេះ។
-
-**ការរាំងស្ទះមាតិកាស្ទ្រីម មិនផ្អាកគណនីទេ។** នៅពេលដែល watchdog ការរាំងស្ទះមាតិកា
-(`open-sse/utils/streamHandler.ts`) បោះបង់ស្ទ្រីមមួយដែលមិនបានផ្ញើលទ្ធផលម៉ូដែលទាន់ពេលវេលា `markAccountUnavailable()` កត់ត្រាកំហុសលើការភ្ជាប់ ប៉ុន្តែមិនកំណត់ពេលផ្អាកទេ: ការរាំងស្ទះនោះជារបស់សំណើនោះ ជាញឹកញាប់បំផុតគឺជាជុំវិចារណាវែងដែលមិនទាន់មានលទ្ធផល។ អ្នកប្រតិបត្តិអាចជ្រើសចូលរួមម្តងទៀតជាមួយ `resilienceSettings.streamStallCooldown.enabled`
-(លំនាំដើម `false`)។
-
-**សញ្ញារយៈពេលពន្យារដែលជ្រើសចូលរួមសម្រាប់ការជ្រើសរើសគណនី `p2c`។** ការព្យាយាមដែលបានបញ្ជូននីមួយៗកត់ត្រាពេលវេលារហូតដល់បៃដំបូង និងលទ្ធផល តាមការភ្ជាប់ (និងតាមការភ្ជាប់ + ម៉ូដែល) ក្នុងបង្អួចរំកិលក្នុងអង្គចងចាំ: គំរូ 20 ចុងក្រោយក្នុងរយៈពេល 15 នាទី
-(`open-sse/services/connectionLatencyTracker.ts`, កត់ត្រាពី `safeLogEvents()` ក្នុង `src/sse/handlers/chatHelpers.ts`)។ នៅពេល `resilienceSettings.p2cLatency.weight` ខ្ពស់ជាង `0`
-(ជួរ 0-20, លំនាំដើម `0` = បិទ) `compareP2CConnections()` ក្នុង `src/sse/services/auth.ts` បន្ថែមពិន្ទុរហូតដល់ `weight` ចំណុចឱ្យគូបណ្តុះបណ្តាល់នីមួយៗនៃគូនោះ។ ពាក់កណ្តាលនៃពិន្ទុនោះមកពីរយៈពេលពន្យារជាសមាមាត្របើប្រៀបនឹងគូបណ្តុះបណ្តាល់ដែលលឿនជាង (យឺតជាងទ្វេដង ទទួលបានពាក់កណ្តាលពេញលេញ) ហើយពាក់កណ្តាលទៀតមកពីអត្រាកំហុសរំកិល។ ធាតុនេះអនុវត្តតែពេលដែលគូបណ្តុះបណ្តាល់ទាំងពីរមានគំរូយ៉ាងហោចណាស់ 3 ដូច្នេះគណនីថ្មីមិនត្រូវបានដាក់ទោស ហើយពិន្ទុអតិបរមារបស់វានៅទាបជាងការដាក់ទោស quota-បានបិទ និង quota-អស់។ វាមិនបន្ថែមសៀគ្វីផ្ទាល់ខ្លួនទេ: គណនីដែលបរាជ័យនៅតែត្រូវបានគ្រប់គ្រងដោយស្រទាប់ពេលផ្អាក ការចាក់សោ និង breaker។ កំណត់វាជាមួយ `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`។
-
-**ស៊ុមវិចារណៈចាប់ផ្តើមថវិកាការរាំងស្ទះមាតិកាឡើងវិញ។** ម៉ូដែលវិចារណៈអាចគិតជាច្រើននាទីមុននិមិត្តសញ្ញាដំបូងដែលមើលឃើញ: Claude ស្ទ្រីមស៊ុម `thinking_delta` ដែលអត្ថបទគិតរបស់វាអាចនៅទទេ ហើយ Responses API ស្ទ្រីមធាតុវិចារណៈមួយបន្ទាប់ពីមួយ។ `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) ស្គាល់ស៊ុមទាំងនេះ ហើយ watchdog ចាប់ផ្តើមថវិការបស់វាឡើងវិញលើស៊ុមនីមួយៗ ជំនួសឱ្យការបោះបង់ជុំនោះ។ ពួកវានៅតែមិនមែនជាលទ្ធផលម៉ូដែលទេ ដូច្នេះជុំដែលបញ្ចប់ដោយការវិចារណៈតែប៉ុណ្ណោះនៅតែត្រូវបានរាយការណ៍ថាទទេ ហើយជុំដែលបញ្ឈប់ការវិចារណៈ ហើយផ្ញើតែសញ្ញា heartbeat នៅតែបង្កឱ្យ watchdog ដំណើរការ។
-
-ស៊ុម `reasoningContentEvent` ពីប្រភេទ binary របស់ Kiro ដែលមានហត្ថលេខាមិនទទេ រក្សាសកម្មភាពវិចារណៈនេះតាមរយៈ executor ជាបំរែបំរួល `reasoning_content` ទទេ។ ហត្ថលេខាមិនត្រូវបានបញ្ជូនបន្តទេ។ ទិន្នន័យមេតា ស៊ុមមិនពេញលេញ និងហត្ថលេខាទទេ មិនចាប់ផ្តើមថវិកាមាតិកាឡើងវិញទេ; ពេលវេលាផុតកំណត់នៃស្ទ្រីមសកម្មឯករាជ្យ និងការបោះបង់របស់អតិថិជននៅតែអនុវត្ត (`open-sse/executors/kiro/reasoning.ts`)។
-
-**ស្ថានភាពចុងក្រោយ (មិនមែនពេលផ្អាក):**
-
-- `banned` — កំណត់ដោយការរកឃើញពាក្យគន្លឹះដែលបានហាមឃាត់ / ការរកឃើញការហាមឃាត់គណនី (មើល [BAN_DETECTION](../security/BAN_DETECTION.md)) និងដោយការបដិសេធសំណើក្នុងមួយពេលពីខាងលើបីដងជាប់គ្នា (`request_rejected`, ឧ. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ការបដិសេធតែមួយគ្រាប់ផ្អាកការភ្ជាប់បណ្តោះអាសន្នប៉ុណ្ណោះ
-- `expired` (ប្តូរទៅជាចុងក្រោយបន្ទាប់ពីការព្យាយាមឡើងវិញដែលមានដែនកំណត់ — `EXPIRED_RETRY_MAX = 3` ជាមួយ backoff អ៊ិចស្ប៉ូណង់ស្ស៊ែល — ដូច្នេះកំហុស OAuth បណ្តោះអាសន្នអាចព្យាបាលខ្លួនឯងបាន មុនពេលគណនីត្រូវបានបិទជាអចិន្ត្រៃយ៍)
-- `credits_exhausted`
-
-ស្ថានភាពទាំងនេះនៅរហូតដល់ព័ត៌មានសម្គាល់ខ្លួនផ្លាស់ប្តូរ ឬអ្នកប្រតិបត្តិកំណត់ឡើងវិញ។ កុំសរសេរជាន់ស្ថានភាពចុងក្រោយដោយស្ថានភាពផ្អាកបណ្តោះអាសន្ន។
-
-**ការស្តារឡើងវិញបែប lazy:** នៅពេល `rateLimitedUntil` កន្លងផុតទៅ ការភ្ជាប់មានសិទ្ធិឡើងវិញ។ នៅពេលប្រើប្រាស់ដោយជោគជ័យ `clearAccountError()` សម្អាតវាលកំហុសទាំងអស់។
-
-### ជញ្ជាំងការប្រើប្រាស់ Claude OAuth: គន្លងអាទិភាពទាបជាង + ការកំណត់ដែនកំណត់សម័យឡើងវិញ
-
-**វិសាលភាព:** ការភ្ជាប់ការជាវប្រចាំ Claude (OAuth) តែមួយ។ លក្ខណៈពិសេសទាំងពីរគឺ **ជ្រើសចូលរួមតាមការភ្ជាប់នីមួយៗ**
-(កែសម្រួលការភ្ជាប់ → ផ្នែក Claude → `lowPriorityMode` / `autoLimitReset` ក្នុង
-`providerSpecificData`, លំនាំដើមបិទទាំងពីរ) ហើយឆ្លុះបញ្ចាំងពាក្យបញ្ជា `/low-priority` និង
-`/limit-reset` របស់ Claude Code (កិច្ចសន្យាខ្សែត្រូវបានចាប់យកពី Claude Code 2.1.263)។
-
-**ការអនុវត្ត:**
-
-- ម៉ាស៊ីនស្ថានភាព + ការចាត់ថ្នាក់ការឆ្លើយតប៖ `open-sse/services/claudeLowPriority.ts`
-- ម៉ាស៊ីនភ្ញៀវសម្រាប់ស្ថានភាព/ការទាមទារកំណត់ឡើងវិញ៖ `open-sse/services/claudeLimitReset.ts`
-- ហុករបស់កម្មវិធីប្រតិបត្តិ (ការបញ្ចូលបឋមកថា + ការព្យាយាមឡើងវិញដោយប្រើគណនីដដែល)៖ `open-sse/executors/base.ts::execute()`
-- ការរក្សាទុកតាមការជ្រើសរើស៖ `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
-
-**កត្តាបង្ក៖** កម្រិតទប់ស្កាត់ការប្រើប្រាស់រយៈពេល 5 ម៉ោង — `429` ដែលបឋមកថារបស់វាមាន
-`anthropic-ratelimit-unified-status: rejected` ហើយនៅពេលគណនីមានសិទ្ធិ
-`anthropic-ratelimit-unified-slow-offer: treatment`។ គ្មានអ្វីត្រូវបានផ្ញើមុនពេលជួបកម្រិតទប់ស្កាត់
-429 ដំបូងនោះទេ។ 429 ជាបន្តបន្ទាប់ដែលគ្មានបឋមកថារួម នឹងឆ្លងកាត់ផ្លូវរយៈពេលសម្រាកធម្មតា។
-
-**ផ្លូវអាទិភាពទាប** (`lowPriorityMode`)៖
-
-- នៅពេលជួប 429 នៃកម្រិតទប់ស្កាត់ កម្មវិធីប្រតិបត្តិទទួលយកការផ្តល់ជូន ហើយព្យាយាមឡើងវិញភ្លាមៗដោយប្រើគណនី
-  **ដដែល** ជាមួយ `anthropic-usage-limit: slow`។ ផ្លូវនេះនៅតែសកម្មរហូតដល់
-  `anthropic-ratelimit-unified-reset` ដែលបានប្រកាស (+រយៈពេលអនុគ្រោះ 60 វិនាទី) ហើយរាល់សំណើក្នុងចន្លោះពេលនោះ
-  មានបឋមកថានេះ។ 429 ដែលត្រូវបានស្ទាក់ចាប់ មិនទៅដល់ `handleChatCore` ទេ ដូច្នេះការតភ្ជាប់
-  **មិន** ត្រូវបានដាក់ឱ្យសម្រាក ហើយក៏មិនត្រូវបានប្តូរចេញដែរ។
-- `anthropic-ratelimit-unified-slow-status` នៅលើការឆ្លើយតបបន្ទាប់ៗ៖ `active` / `not_needed`
-  រក្សាផ្លូវនេះឱ្យសកម្ម។ `slot_busy` (429) ឬ `529` រង់ចាំរយៈពេល
-  `anthropic-ratelimit-unified-slow-retry-after` របស់ម៉ាស៊ីនមេ (លំនាំដើម 20 វិនាទី កំណត់ក្នុងចន្លោះ 5–600 វិនាទី និងមាន jitter ±30%)
-  រួចព្យាយាមឡើងវិញ ដោយត្រូវបានកម្រិតតាម `anthropic-ratelimit-unified-slow-max-wait` (លំនាំដើម 20 នាទី កំណត់ក្នុងចន្លោះ
-  1 នាទី–6 ម៉ោង) — បើលើសពីនោះ ផ្លូវនេះនឹងបញ្ចប់ ហើយរយៈពេលសម្រាក 10 នាទីនឹងរារាំងការទទួលយកឡើងវិញ។ រយៈពេល
-  រង់ចាំក៏ត្រូវបានកម្រិតបន្ថែមដោយរយៈពេលដែលនៅសល់ពីពេលអស់កំណត់សម្រាប់ចាប់ផ្តើមអាប់ស្ទ្រីមរបស់សំណើផ្ទាល់
-  (`resolveFetchStartTimeout`, លំនាំដើម 10 នាទី) ដករឹម 5 វិនាទី៖ បើគ្មានកម្រិតនេះ
-  ពេលរង់ចាំអតិបរមាលំនាំដើម 20 នាទីនឹងយូរជាងអាយុកាលសំណើ ហើយការផ្អាកនឹងត្រូវបានបោះបង់
-  ខណៈកំពុងរង់ចាំ ដោយបង្ហាញ `TimeoutError` ជំនួសឱ្យការបញ្ចប់ `max_wait` ដោយរលូន + រយៈពេលសម្រាក។
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible` ការចាប់ផ្តើមវដ្តបង្អួច 5 ម៉ោងថ្មី ឬ
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (ដែលបញ្ចប់វាជា
-  `extra_usage` នៅគ្រប់ស្ថានភាព ព្រោះការប្រើប្រាស់លើសដែលបានបង់ប្រាក់ឥឡូវគ្របដណ្តប់កម្រិតទប់ស្កាត់) នឹងបញ្ចប់ផ្លូវនេះ។ បន្ទាប់មក
-  ការឆ្លើយតបនឹងបន្តទៅផ្លូវរយៈពេលសម្រាកធម្មតា។ `budget_exhausted` ត្រូវបានចងចាំរហូតដល់
-  ពេលកំណត់ថវិកាឡើងវិញដែលបានប្រកាស (≤ 8 ថ្ងៃ)។
-- ការត្រួតពិនិត្យកម្រិតទប់ស្កាត់ដំណើរការបន្ទាប់ពីការព្យាយាមឡើងវិញនៅក្នុងការព្យាយាមតែមួយរបស់កម្មវិធីប្រតិបត្តិ ដែលបង្កដោយ 400 (ការកែសម្រួល
-  បរិបទ ការកម្រិតការគិត/កម្រិតការខិតខំ និងការរៀនប៉ារ៉ាម៉ែត្រដោយស្វ័យប្រវត្តិ) ដូច្នេះ 429 នៃកម្រិតទប់ស្កាត់ដែលទើបលេចឡើង
-  នៅលើការព្យាយាមឡើងវិញណាមួយក្នុងចំណោមនោះ នៅតែត្រូវបានស្ទាក់ចាប់ ជំនួសឱ្យការទៅដល់ផ្លូវរយៈពេលសម្រាក។
-- ស្ថានភាពត្រូវបានរក្សាទុកក្នុងអង្គចងចាំតាមការតភ្ជាប់នីមួយៗ (ការចាប់ផ្តើមឡើងវិញបង្កឱ្យមាន 429 នៃកម្រិតទប់ស្កាត់បន្ថែមមួយ ដើម្បីទទួលយកឡើងវិញ)។
-
-**ការកំណត់ដែនកំណត់សម័យឡើងវិញ** (`autoLimitReset`, ត្រូវបានសាកល្បងមុនផ្លូវខាងលើ នៅពេលទាំងពីរត្រូវបានបើក)៖
-
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → ប្លុក `juniper_tide`។
-  នៅពេល `arm: "reset"` និង `available: true`,
-  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` ជាមួយ
-  `{ "program": "juniper_tide" }` (UUID របស់អង្គការពី
-  `providerSpecificData.organizationUUID` និងប្រើជម្រើសបម្រុង bootstrap)។
-- `result: reset|not_limited` → សំណើត្រូវបានព្យាយាមឡើងវិញក្នុងល្បឿនពេញលេញ (គ្មានបឋមកថាល្បឿនយឺត)។
-  `already_used` / `not_offered` រក្សាទុក `next_available_at` ក្នុងអង្គចងចាំ (លំនាំដើមមួយសប្តាហ៍)។ រាល់
-  ការបរាជ័យនឹងរង់ចាំថយក្រោយ 15 នាទី។ ការកំណត់ឡើងវិញអាចធ្វើបានម្តងក្នុងមួយសប្តាហ៍ ហើយនៅតែរាប់បញ្ចូលក្នុង
-  ដែនកំណត់ប្រចាំសប្តាហ៍។
-
-ការការពារប្រឆាំងនឹងការថយក្រោយ៖ `tests/unit/claude-low-priority-mode.test.ts`,
-`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`។
-
-### ភាពជាប់ទាក់ទងនៃសម័យ (#7274)
-
-**វិសាលភាព៖** សម័យម៉ាស៊ីនភ្ញៀវមួយ (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) ត្រូវបានភ្ជាប់ថេរទៅការតភ្ជាប់មួយ សម្រាប់អ្នកផ្តល់សេវា
-**ណាមួយ**។
-
-**គោលបំណង៖** រក្សាភ្នាក់ងារដែលធ្វើអន្តរកម្មច្រើនវគ្គ (Claude Code, aider, ភ្នាក់ងារផ្ទាល់ខ្លួន) ឱ្យប្រើគណនីដដែលនៅគ្រប់សំណើ ដោយកាត់បន្ថយការបាត់បង់បរិបទឆ្លងគណនី និង 429 ពីការចាប់ផ្តើមត្រជាក់ដដែលៗ នៅលើអ្នកផ្តល់សេវាដែលមានស្ថានភាពសម័យតាមគណនី។
+**គោលបំណង៖** រំលងសោដែលមានបញ្ហាមួយ ខណៈការតភ្ជាប់ផ្សេងទៀតសម្រាប់អ្នកផ្គត់ផ្គង់ដដែលនៅតែបម្រើសេវា។
 
 **ការអនុវត្ត៖**
 
-- ការកំណត់ TTL៖ `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- ការជ្រើសរើស/បង្កើតការភ្ជាប់ថេរ៖ `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- ការស្រង់បឋមកថា (ទូទៅ សម្រាប់អ្នកផ្តល់សេវាណាមួយ)៖ `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- តារាងការភ្ជាប់ថេរដែលបានរក្សាទុក៖ `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- ការកំណត់៖ `sessionAffinityTtlMs` (TTL សកលគិតជាមិល្លីវិនាទី `0` បិទដំណើរការ) — `src/lib/db/settings.ts`។ វាត្រូវបានប្តូរឈ្មោះពី `codexSessionAffinityTtlMs` ដែលសម្រាប់តែ Codex តាមរយៈការផ្ទេរទិន្នន័យ `124_generic_session_affinity_ttl.sql` ដែលយក TTL របស់ Codex ដែលបានកំណត់ពីមុនមកធ្វើជាតម្លៃលំនាំដើមថ្មី។
+- សម្គាល់ថាមិនអាចប្រើបាន៖ `src/sse/services/auth.ts::markAccountUnavailable()`
+- ការជ្រើសរើស៖ `getProviderCredentials*` នៅក្នុងឯកសារដដែល
+- ការគណនារយៈពេលផ្អាក៖ `open-sse/services/accountFallback.ts::checkFallbackError()`
+- ការកំណត់៖ `src/lib/resilience/settings.ts`
 
-មុន #7274, `resolveSessionAffinityTtlMs()` បញ្ចប់ភ្លាមៗដោយបង្ខំ ហើយត្រឡប់ `0` សម្រាប់អ្នកផ្តល់សេវាទាំងអស់ លើកលែងតែ `codex` ដូច្នេះការកំណត់ TTL (និងបឋមកថាសម័យ) មិនមានឥទ្ធិពលនៅកន្លែងផ្សេងទៀតទេ ទោះបីជាយន្តការភ្ជាប់ថេរ និងការស្រង់បឋមកថាមានលក្ខណៈឯករាជ្យពីអ្នកផ្តល់សេវារួចហើយក៏ដោយ។ ការកែតម្រូវបានដកការត្រឡប់មុនពេលនោះចេញ។ ឥឡូវនេះ TTL អនុវត្តដូចគ្នាចំពោះអ្នកផ្តល់សេវាទាំងអស់ នៅពេលកំណត់ជាសកលឱ្យលើស `0`។
+**វាលសម្រាប់ការតភ្ជាប់នីមួយៗ៖**
 
-បឋមកថាភាពជាប់ទាក់ទងនៃសម័យទាំងបី មិនដែលត្រូវបានបញ្ជូនបន្តទៅអាប់ស្ទ្រីមទេ — កម្មវិធីប្រតិបត្តិបង្កើតបឋមកថាអាប់ស្ទ្រីមរបស់ខ្លួនពីដំបូង ជំនួសឱ្យការបញ្ជូនបឋមកថារបស់ម៉ាស៊ីនភ្ញៀវបន្ត ដូច្នេះវានៅតែជាលេខសម្គាល់សម្រាប់ភ្ជាប់ទំនាក់ទំនងផ្ទៃក្នុងប៉ុណ្ណោះ។
+- `rateLimitedUntil` — ត្រាពេលវេលាដែលការផ្អាកនឹងផុតកំណត់
+- `testStatus: "unavailable"`
+- `lastError`, `lastErrorType`, `errorCode`
+- `backoffLevel` — ឧបករណ៍រាប់សម្រាប់ការផ្អាកកើនឡើងជាអិចស្ប៉ូណង់ស្យែល
 
-### ការជួលផ្តាច់មុខសម្រាប់ការតភ្ជាប់សម័យដែលបានគ្រប់គ្រង
+**រយៈពេលផ្អាកលំនាំដើម៖**
 
-**វិសាលភាព៖** ម៉ាស៊ីនភ្ញៀវ/សម័យ HTTP ដែលបានគ្រប់គ្រង និងកំពុងសកម្មមួយ កាន់កាប់ការតភ្ជាប់ OmniRoute ដែលមានសិទ្ធិមួយ។
+- មូលដ្ឋាន OAuth៖ 5s
+- មូលដ្ឋាន API-key៖ 3s
+- API-key 429៖ ផ្តល់អាទិភាពដល់បឋមកថា `Retry-After`/reset ពី upstream/អត្ថបទ reset ដែលអាចញែកបាន
+- Backoff៖ `baseCooldownMs * 2 ** failureIndex`
 
-**គោលបំណង៖** ផ្តល់ភាពជាម្ចាស់ការតភ្ជាប់ផ្តាច់មុខដែលមានភាពធន់ សម្រាប់ម៉ាស៊ីនភ្ញៀវដែលត្រូវការរបាំងរឹងមាំសម្រាប់ការកំណត់ផ្លូវ
-ឆ្លងកាត់សំណើនានា។ នេះខុសពីភាពជាប់ទាក់ទងនៃសម័យ ដែលជាចំណូលចិត្តទន់សម្រាប់រក្សាភាពបន្ត៖
-ការជួលផ្តាច់មុខរក្សាទុកស្ថានភាពវដ្តជីវិតក្នុង SQLite អនុវត្តភាពតែមួយគត់ជាសកលសម្រាប់ម្ចាស់សកម្ម និង
-ការតភ្ជាប់សកម្ម ហើយបដិសេធជំនាន់ហួសសម័យ មុនពេលបញ្ជូនទៅអ្នកផ្តល់សេវា។
+**ការពន្យារពេលសាកល្បងតាមអ្នកផ្គត់ផ្គង់។** ទំព័រព័ត៌មានលម្អិតរបស់អ្នកផ្គត់ផ្គង់មានជម្រើស **Retry delay** (Auto,
+15s រហូតដល់ 1h)។ វារក្សាទុក `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`
+(1–21600 តាមរយៈ `PATCH /api/resilience`)។ នៅពេលកំហុសកំណត់អត្រាមិនមានព័ត៌មានជំនួយអំពីការសាកល្បងឡើងវិញពី upstream
+តម្លៃនេះនឹងជំនួស scaled backoff សម្រាប់អ្នកផ្គត់ផ្គង់ ហើយកំណត់ `backoffLevel` ត្រឡប់ទៅ 0
+(`open-sse/services/rotationConfig.ts::overrideFor`)។ អាទិភាពសម្រាប់កំហុសកំណត់អត្រា ពីខ្ពស់ទៅទាប៖ ព័ត៌មានជំនួយអំពីការសាកល្បងឡើងវិញពី upstream បន្ទាប់មក
+`providerSpecificData.rotationOverrides.rateLimitResetSeconds` តាមការតភ្ជាប់ បន្ទាប់មកការពន្យារពេលសាកល្បងឡើងវិញតាមអ្នកផ្គត់ផ្គង់ បន្ទាប់មក
+`OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` ពី env បន្ទាប់មក scaled backoff។ Auto លុបវាលនេះ។ វាមានឥទ្ធិពលតែទៅលើមូលហេតុកំណត់អត្រាប៉ុណ្ណោះ មិនប៉ះពាល់ដល់ស្ថានភាពបញ្ចប់ឡើយ។
 
-មុខងារនេះជា opt-in សម្រាប់ API key នីមួយៗ។ Managed key ត្រូវតែមាន scope `lease:exclusive` និងបញ្ជី `allowedConnections` ដែលបានបញ្ជាក់ច្បាស់លាស់ និងមិនទទេ។ HTTP client ណាមួយក៏អាចប្រើ lifecycle endpoint បានដែរ; មិនទាមទារ client name, user-agent, provider, OAuth method ឬ model ណាមួយទេ។ Lease ជាម្ចាស់ connection មិនមែន model ទេ ដូច្នេះការផ្លាស់ប្តូរ model នៅតែរក្សា binding ខណៈពេលដែល connection នៅតែ eligible ជាធម្មតា។ ច្បាប់ model, quota, health, cooldown និង allowlist ធម្មតានៅតែមានអំណាចចុងក្រោយ ហើយអាចផ្លាស់ទី generation ដដែលទៅកាន់ connection ដែលទំនេរ និង eligible ផ្សេងទៀត។
+**ឧបករណ៍ការពារ Anti-thundering-herd៖** ការពារកំហុសដែលកើតឡើងក្នុងពេលដំណាលគ្នា មិនឱ្យពន្យារពេលផ្អាកលើសកម្រិត ឬបង្កើន `backoffLevel` ពីរដង។
 
-Lifecycle គឺ `POST /api/v1/session-leases` ជាមួយនឹង JSON actions `acquire`, `renew` និង `release`។ Managed inference requests បង្ហាញតម្លៃ opaque `X-OmniRoute-Lease-Owner` និង `X-OmniRoute-Lease-Generation` ដែលត្រឹមត្រូវ។ Owner ប្រើ `vlo_` តាមក្រោយដោយតួអក្សរ base64url ចំនួន 43; មានតែ SHA-256 hash របស់វាប៉ុណ្ណោះដែលត្រូវបានរក្សាទុក។ Final dispatch fence នីមួយៗក៏ចងភ្ជាប់ authenticated API key ID និង active connection ID ផងដែរ។ Lease control headers ត្រូវបានដកចេញពី logs, request snapshots ដែលបានរក្សាទុក និង upstream executor headers។
+**429 ពីដែនកំណត់ concurrency មិនបង្កើនកម្រិត backoff ទេ។** `429` ដែល body របស់វាបង្ហាញពីដែនកំណត់ concurrency ("too many concurrent requests", "concurrency limit", "parallel request
+limit", GLM `并发数过高`) មានន័យថាគណនីនៅមានសុខភាពល្អ ប៉ុន្តែកំពុងរវល់។
+`checkFallbackError()` ត្រឡប់មូលហេតុ `concurrency_limited`៖ បរាជ័យទៅកាន់ការតភ្ជាប់បន្ទាប់ភ្លាមៗ ផ្អាកការតភ្ជាប់នេះរយៈពេលថេរ
+`CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) ឬតាមព័ត៌មានជំនួយអំពីការសាកល្បងឡើងវិញពី upstream រក្សា `backoffLevel` មិនឱ្យផ្លាស់ប្តូរ ហើយកំណត់
+`skipProviderBreaker`។ បើ body បញ្ជាក់កូតាយ៉ាងច្បាស់ វានឹងមានអាទិភាព ដូច្នេះ body ដែលត្រូវនឹងលំនាំកូតាផងដែរ នឹងនៅតែទទួលការវិនិច្ឆ័យថាជាកូតា។ ការរកឃើញ៖ `looksLikeConcurrencyLimit()` ក្នុង `src/shared/utils/classify429.ts`;
+ការវិនិច្ឆ័យ៖ `open-sse/services/accountFallback/concurrencyLimit429.ts`។ `classify429()` ( `FailureKind` របស់ breaker) មិនផ្លាស់ប្តូរ ហើយនៅតែអាន `rate_limit` សម្រាប់ body ទាំងនេះ។
 
-ប្រសិនបើ ordinary routing មាន managed candidates ដែល eligible ប៉ុន្តែ candidate ទំនេរទាំងអស់ត្រូវបានកាន់កាប់ដោយ foreign active lease នោះ OmniRoute នឹងត្រឡប់ HTTP `429`, កូដ lease-capacity-unavailable, ស្ថានភាព waiting-for-capacity និង `Retry-After` ដែលមានដែនកំណត់ ដោយគណនាចេញពីការផុតកំណត់ដែលពាក់ព័ន្ធឆាប់បំផុត។ Empty eligibility ធម្មតាមិនមែនជា lease contention ទេ ហើយរក្សា routing error semantics ដែលមានស្រាប់របស់វា។
+**ការជាប់គាំងនៃមាតិកា stream មិនផ្អាកគណនីទេ។** នៅពេល content-stall watchdog
+(`open-sse/utils/streamHandler.ts`) បោះបង់ stream ដែលមិនបានផ្ញើលទ្ធផលពីម៉ូដែលក្នុងពេលកំណត់ `markAccountUnavailable()` កត់ត្រាកំហុសនៅលើការតភ្ជាប់ ប៉ុន្តែមិនកំណត់ការផ្អាកទេ៖ ការជាប់គាំងនេះជារបស់សំណើនោះ ហើយភាគច្រើនកើតឡើងនៅពេលវេន reasoning មានរយៈពេលយូរ ប៉ុន្តែមិនទាន់មានលទ្ធផល។ ប្រតិបត្តិករអាចជ្រើសរើសបើកមុខងារនេះវិញតាម `resilienceSettings.streamStallCooldown.enabled`
+(លំនាំដើម `false`)។
 
-យន្តការពាក់ព័ន្ធនៅតែដាច់ដោយឡែកពីគ្នា:
+**សញ្ញា latency ជាជម្រើសសម្រាប់ការជ្រើសរើសគណនី `p2c`។** រាល់ការប៉ុនប៉ងដែលត្រូវបានបញ្ជូន នឹងកត់ត្រាពេលវេលារហូតដល់ byte ដំបូង និងលទ្ធផលតាមការតភ្ជាប់នីមួយៗ (និងតាមការតភ្ជាប់ + ម៉ូដែល) នៅក្នុងបង្អួច rolling ក្នុងអង្គចងចាំ៖ គំរូ 20 ចុងក្រោយក្នុងរយៈពេល 15 នាទី
+(`open-sse/services/connectionLatencyTracker.ts`, កត់ត្រាពី `safeLogEvents()` ក្នុង
+`src/sse/handlers/chatHelpers.ts`)។ នៅពេល `resilienceSettings.p2cLatency.weight` លើស `0`
+(ចន្លោះ 0-20 លំនាំដើម `0` = បិទ), `compareP2CConnections()` ក្នុង `src/sse/services/auth.ts` នឹងបន្ថែមពិន្ទុរហូតដល់ `weight` ទៅកាន់បេក្ខជននីមួយៗនៃគូ។ ពាក់កណ្តាលនៃពិន្ទុនោះមកពី latency ជាសមាមាត្រទៅនឹងបេក្ខជនដែលលឿនជាង (យឺតជាងពីរដងនឹងទទួលពាក់កណ្តាលពិន្ទុពេញ) ហើយពាក់កណ្តាលទៀតមកពីអត្រាកំហុស rolling។ ពាក្យនេះអនុវត្តតែនៅពេលបេក្ខជនទាំងពីរមានយ៉ាងហោចណាស់ 3 គំរូប៉ុណ្ណោះ ដូច្នេះគណនីថ្មីមិនត្រូវបានពិន័យទេ ហើយកម្រិតអតិបរមារបស់វានៅតែទាបជាងការពិន័យ quota-blocked និង quota-exhausted។ វាមិនបង្កើត circuit ផ្ទាល់ខ្លួនទេ៖ គណនីដែលបរាជ័យនៅតែត្រូវបានគ្រប់គ្រងដោយស្រទាប់ cooldown, lockout និង breaker។ កំណត់វាតាម `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`។
 
-- OAuth session occupancy គឺជា soft distribution ក្នុង process សម្រាប់ OAuth accounts។
-- Account semaphores ផ្តល់ request-concurrency permits ហើយបញ្ចប់នៅពេលដែល request បញ្ចប់។
-- Exclusive managed session leases គឺជា lifecycle ownership ដែលធន់ ជាមួយនឹង generation fence។
+**reasoning frames ចាប់ផ្តើមថវិកា content-stall ឡើងវិញ។** ម៉ូដែល reasoning អាចគិតរយៈពេលជាច្រើននាទី មុន token ដែលអាចមើលឃើញដំបូង៖ Claude បញ្ជូន frame `thinking_delta` ដែលអត្ថបទ thinking អាចទទេ ហើយ Responses API បញ្ជូន reasoning item មួយបន្ទាប់ពីមួយ។ `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) ស្គាល់ frame ទាំងនេះ ហើយ watchdog ចាប់ផ្តើមថវិការបស់វាឡើងវិញនៅរាល់ frame ជំនួសឱ្យការបោះបង់វេន។ វានៅតែមិនមែនជាលទ្ធផលពីម៉ូដែលទេ ដូច្នេះវេនដែលបញ្ចប់ដោយមានតែ reasoning នឹងនៅតែត្រូវបានរាយការណ៍ថាទទេ ហើយវេនដែលឈប់ reasoning ហើយផ្ញើតែ heartbeat នឹងនៅតែធ្វើឱ្យ watchdog ដំណើរការ។
 
----
+frame `reasoningContentEvent` ប្រភេទ binary របស់ Kiro ដែលមាន signature មិនទទេ នឹងរក្សាសកម្មភាព reasoning នេះតាមរយៈ executor ជា delta `reasoning_content` ទទេ។ Signature មិនត្រូវបានបញ្ជូនបន្តទេ។ Metadata, frame មិនពេញលេញ និង signature ទទេ មិនចាប់ផ្តើមថវិកា content ឡើងវិញទេ; active-stream timeout ឯករាជ្យ និងការបោះបង់ពី client នៅតែអនុវត្ត (`open-sse/executors/kiro/reasoning.ts`)។
+
+**ស្ថានភាពបញ្ចប់ (មិនមែន cooldowns)៖**
+
+- `banned` — កំណត់ដោយការរកឃើញពាក្យគន្លឹះហាមឃាត់ / ការហាមឃាត់គណនី (សូមមើល [BAN_DETECTION](../security/BAN_DETECTION.md))។ ការបដិសេធតាមសំណើនីមួយៗពី upstream (`request_rejected` ឧ. Anthropic OAuth 403 "Request not allowed") មិនកំណត់វាទេ៖ វាត្រូវបានរាប់តាមការតភ្ជាប់ និងម៉ូដែល ហើយដកម៉ូដែលនោះចេញពី rotation ជាមួយ cooldown ដែលកើនឡើង និងកំណត់អតិបរមាត្រឹម `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) ឬផ្អាកការតភ្ជាប់ នៅពេលមិនស្គាល់ម៉ូដែល — `open-sse/services/requestRejectedStreak.ts`
+- `expired` (ផ្លាស់ទៅជាស្ថានភាពបញ្ចប់បន្ទាប់ពីការសាកល្បងឡើងវិញដែលមានដែនកំណត់ — `EXPIRED_RETRY_MAX = 3` ជាមួយ exponential backoff — ដើម្បីឱ្យកំហុស OAuth បណ្តោះអាសន្នអាចជាសះស្បើយដោយខ្លួនឯង មុនពេលគណនីត្រូវបានបិទជាអចិន្ត្រៃយ៍)
+- `credits_exhausted`
+
+វត្ថុទាំងនេះនឹងនៅតែបន្តរហូតដល់ព័ត៌មានសម្គាល់ផ្លាស់ប្តូរ ឬប្រតិបត្តិករកំណត់ឡើងវិញ។ កុំសរសេរជាន់លើស្ថានភាពបញ្ចប់ដោយស្ថានភាពផ្អាកបណ្តោះអាសន្ន។
+
+**ការស្ដារឡើងវិញដោយពន្យារ:** នៅពេល `rateLimitedUntil` ផុតកំណត់ ការតភ្ជាប់នឹងមានសិទ្ធិប្រើប្រាស់ឡើងវិញ។ នៅពេលប្រើប្រាស់ដោយជោគជ័យ `clearAccountError()` នឹងសម្អាតវាលកំហុសទាំងអស់។
+
+### ជញ្ជាំងការប្រើប្រាស់ Claude OAuth៖ ផ្លូវអាទិភាពទាប + កំណត់សម័យឡើងវិញ
+
+**វិសាលភាព៖** ការតភ្ជាប់ Claude subscription (OAuth) មួយ។ មុខងារទាំងពីរគឺ **ជាជម្រើសក្នុងមួយ
+ការតភ្ជាប់** (Edit connection → ផ្នែក Claude → `lowPriorityMode` / `autoLimitReset` ក្នុង
+`providerSpecificData` ដែលទាំងពីរមានតម្លៃបិទតាមលំនាំដើម) ហើយធ្វើត្រាប់តាមពាក្យបញ្ជា `/low-priority` និង
+`/limit-reset` របស់ Claude Code (កិច្ចសន្យា wire ត្រូវបានកត់ត្រាពី Claude Code 2.1.263)។
+
+**ការអនុវត្ត៖**
+
+- ម៉ាស៊ីនស្ថានភាព + ការចាត់ថ្នាក់ការឆ្លើយតប៖ `open-sse/services/claudeLowPriority.ts`
+- ម៉ាស៊ីនភ្ញៀវស្ថានភាព/ការទាមទារកំណត់ឡើងវិញ៖ `open-sse/services/claudeLimitReset.ts`
+- Hook របស់ executor (ការបញ្ចូល header + ការសាកល្បងឡើងវិញក្នុងគណនីដដែល)៖ `open-sse/executors/base.ts::execute()`
+- ការរក្សាទុកការជ្រើសរើសចូលរួម៖ `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+
+**ការកេះដំណើរការ៖** ជញ្ជាំងការប្រើប្រាស់ 5 ម៉ោង — `429` ដែល headers របស់វាមាន
+`anthropic-ratelimit-unified-status: rejected` និង នៅពេលគណនីមានសិទ្ធិ
+`anthropic-ratelimit-unified-slow-offer: treatment`។ មិនមានអ្វីត្រូវបានផ្ញើមុន `429` ដំបូងនៃជញ្ជាំងនេះទេ;
+`429` ដែលកើតឡើងជាបន្ទុះដោយគ្មាន unified headers នឹងប្រើផ្លូវ cooldown ធម្មតា។
+
+**ផ្លូវអាទិភាពទាប** (`lowPriorityMode`)៖
+
+- នៅពេលជួប wall 429 executor នឹងទទួលយកការផ្តល់ជូន ហើយសាកល្បងឡើងវិញភ្លាមៗជាមួយគណនី **ដដែល**
+  ដោយប្រើ `anthropic-usage-limit: slow`; ផ្លូវនេះនឹងនៅសកម្មរហូតដល់
+  `anthropic-ratelimit-unified-reset` ដែលបានប្រកាស (+ grace 60 វិនាទី) ហើយរាល់សំណើក្នុងបង្អួចនោះនឹងមាន header នេះ។ 429 ដែលត្រូវបានស្ទាក់មិនទៅដល់ `handleChatCore` ទេ ដូច្នេះការតភ្ជាប់
+  **មិន** ត្រូវបានដាក់ក្នុង cooldown ហើយក៏មិនត្រូវបានប្តូរចេញដែរ។
+- `anthropic-ratelimit-unified-slow-status` នៅលើការឆ្លើយតបបន្ទាប់៖ `active` / `not_needed`
+  នឹងរក្សាផ្លូវនេះ; `slot_busy` (429) ឬ `529` នឹងរង់ចាំតាម
+  `anthropic-ratelimit-unified-slow-retry-after` របស់ server (លំនាំដើម 20 វិនាទី, កំណត់ចន្លោះ 5–600 វិនាទី, jitter ±30%)
+  ហើយសាកល្បងឡើងវិញ ដោយមានព្រំដែនតាម `anthropic-ratelimit-unified-slow-max-wait` (លំនាំដើម 20 នាទី, កំណត់ចន្លោះ
+  1 នាទី–6 ម៉ោង) — បន្ទាប់ពីពេលនោះ ផ្លូវនេះនឹងបញ្ចប់ ហើយ cool-off រយៈពេល 10 នាទីនឹងរារាំងការទទួលយកឡើងវិញ។ ពេលរង់ចាំក៏ត្រូវបានកំណត់បន្ថែមដោយពេលវេលាដែលនៅសល់នៃ upstream-start timeout ផ្ទាល់របស់សំណើ
+  (`resolveFetchStartTimeout`, លំនាំដើម 10 នាទី) ដក 5 វិនាទី៖ បើគ្មានការកំណត់នេះ max-wait លំនាំដើម 20 នាទីនឹងលើសអាយុកាលសំណើ ហើយការគេងនឹងត្រូវបញ្ឈប់កណ្តាលពេលរង់ចាំ ដែលនាំឱ្យបង្ហាញ `TimeoutError` ជំនួសឱ្យការបញ្ចប់ `max_wait` ដោយរលូន + cool-off។
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, ការប្តូរវដ្តបង្អួច 5 ម៉ោង ឬ
+  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (ដែលបញ្ចប់វាជា
+  `extra_usage` លើស្ថានភាពណាមួយ ព្រោះ paid overage ឥឡូវគ្របដណ្តប់ជញ្ជាំងនេះ) នឹងបញ្ចប់ផ្លូវនេះ; បន្ទាប់មក
+  ការឆ្លើយតបនឹងបន្តទៅផ្លូវ cooldown ធម្មតា។ `budget_exhausted` នឹងត្រូវចងចាំរហូតដល់ការកំណត់ថវិកាឡើងវិញដែលបានប្រកាស (≤ 8 ថ្ងៃ)។
+- ការត្រួតពិនិត្យជញ្ជាំងដំណើរការបន្ទាប់ពីការសាកល្បងឡើងវិញក្នុង attempt ដដែល ដែលជំរុញដោយ 400 របស់ executor ផ្ទាល់
+  (ការកែសម្រួល context, ការកំណត់ thinking/effort, ការរៀនប៉ារ៉ាម៉ែត្រដោយស្វ័យប្រវត្តិ) ដូច្នេះ wall 429 ដែលលេចឡើងតែនៅលើការសាកល្បងឡើងវិញមួយក្នុងចំណោមនោះ ក៏នៅតែត្រូវបានស្ទាក់ ជំនួសឱ្យទៅដល់ផ្លូវ cooldown។
+- ស្ថានភាពត្រូវបានរក្សាទុកក្នុងអង្គចងចាំតាមការតភ្ជាប់ (ការចាប់ផ្តើមឡើងវិញនឹងត្រូវការ wall 429 បន្ថែមមួយទៀត ដើម្បីទទួលយកឡើងវិញ)។
+
+**ការកំណត់សម័យឡើងវិញ** (`autoLimitReset`, សាកល្បងមុនផ្លូវនេះ នៅពេលបើកទាំងពីរ)៖
+
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → ប្លុក
+  `juniper_tide`; នៅពេល `arm: "reset"` និង `available: true`,
+  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` ជាមួយ
+  `{ "program": "juniper_tide" }` (UUID របស់ organization ពី `providerSpecificData.organizationUUID`, fallback ពេល bootstrap)។
+- `result: reset|not_limited` → សំណើនឹងត្រូវសាកល្បងឡើងវិញដោយល្បឿនពេញ (គ្មាន slow header)។
+  `already_used` / `not_offered` នឹងចងចាំ `next_available_at` (លំនាំដើមមួយសប្តាហ៍); ការបរាជ័យណាមួយនឹងធ្វើ backoff 15 នាទី។ ការកំណត់ឡើងវិញនេះធ្វើបានម្តងក្នុងមួយសប្តាហ៍ ហើយនៅតែរាប់បញ្ចូលក្នុង weekly limit។
+
+ការការពារការត្រឡប់ក្រោយ៖
+`tests/unit/claude-low-priority-mode.test.ts`,
+`tests/unit/claude-limit-reset.test.ts`,
+`tests/unit/claude-low-priority-executor.test.ts`។
+
+### ភាពជាប់នឹងសម័យ (#7274)
+
+**វិសាលភាព៖** សម័យ client មួយ (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header)
+ត្រូវបានភ្ជាប់ទៅការតភ្ជាប់មួយ សម្រាប់ provider **ណាមួយ**។
+
+**គោលបំណង៖** រក្សា multi-turn agent (Claude Code, aider, custom agents) ឱ្យនៅលើគណនីដដែលក្នុងសំណើជាបន្តបន្ទាប់ ដោយកាត់បន្ថយការបាត់បង់ context រវាងគណនី និង 429 cold-start ដែលកើតឡើងដដែលៗលើ provider ដែលមានស្ថានភាពសម័យតាមគណនី។
+
+**ការអនុវត្ត៖**
+
+- ការដោះស្រាយ TTL៖ `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- ការជ្រើស/បង្កើត pin៖ `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- ការទាញយក header (ទូទៅ សម្រាប់ provider ណាមួយ)៖ `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- តារាង pin ដែលបានរក្សាទុក៖ `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- ការកំណត់៖ `sessionAffinityTtlMs` (TTL សកលគិតជា ms, `0` បិទ) — `src/lib/db/settings.ts`។ បានប្តូរឈ្មោះពី
+  `codexSessionAffinityTtlMs` ដែលមានសម្រាប់ Codex តែប៉ុណ្ណោះ ដោយ migration `124_generic_session_affinity_ttl.sql` ដែលផ្ទេរ TTL របស់ Codex ដែលបានកំណត់ពីមុន មកជាតម្លៃលំនាំដើមថ្មី។
+
+មុន #7274 `resolveSessionAffinityTtlMs()` បានបញ្ឈប់ភ្លាមៗដោយតម្លៃ `0` សម្រាប់ provider ទាំងអស់ លើកលែងតែ
+`codex` ដូច្នេះការកំណត់ TTL (និង session headers) មិនមានប្រសិទ្ធភាពនៅកន្លែងផ្សេងទៀតទេ ទោះបីជាយន្តការភ្ជាប់ និងការទាញយក header មានលក្ខណៈមិនអាស្រ័យលើ provider រួចហើយក៏ដោយ។ ការកែតម្រូវបានដក early-return នោះចេញ; ឥឡូវ TTL នឹងអនុវត្តស្មើៗគ្នាចំពោះ provider ទាំងអស់ នៅពេលកំណត់ជាសកលលើសពី `0`។
+
+session-affinity headers ទាំងបីមិនដែលត្រូវបានបញ្ជូនបន្តទៅ upstream ទេ — executors បង្កើត upstream headers ផ្ទាល់ខ្លួនពីដើម ជំនួសឱ្យការបញ្ជូន client headers ឆ្លងកាត់ ដូច្នេះវានៅតែជាលេខសម្គាល់សម្រាប់ភ្ជាប់ផ្ទៃក្នុងប៉ុណ្ណោះ។
+
+### សិទ្ធិជួលការតភ្ជាប់សម័យដែលគ្រប់គ្រងផ្តាច់មុខ
+
+**វិសាលភាព:** ម៉ាស៊ីនភ្ញៀវ/សម័យ HTTP ដែលគ្រប់គ្រងសកម្មមួយ កាន់កាប់ការតភ្ជាប់ OmniRoute ដែលមានសិទ្ធិប្រើប្រាស់មួយ។
+
+**គោលបំណង:** ផ្តល់ការកាន់កាប់ការតភ្ជាប់ផ្តាច់មុខដែលមានភាពធន់ សម្រាប់ម៉ាស៊ីនភ្ញៀវដែលត្រូវការរបងកំណត់ផ្លូវរឹងមាំឆ្លងកាត់សំណើជាច្រើន។ វាខុសពីភាពស្អិតជាប់នៃសម័យ ដែលជាចំណូលចិត្តបន្តភាពទន់៖
+ការជួលផ្តាច់មុខរក្សាទុកស្ថានភាពវដ្តជីវិតក្នុង SQLite អនុវត្តភាពផ្តាច់មុខសកលនៃម្ចាស់សកម្ម និង
+ការតភ្ជាប់សកម្ម ហើយបដិសេធជំនាន់ដែលហួសសម័យ មុនពេលបញ្ជូនទៅអ្នកផ្តល់សេវា។
+
+មុខងារនេះត្រូវជ្រើសបើកសម្រាប់ API key នីមួយៗ។ Managed key ត្រូវមានវិសាលភាព `lease:exclusive` និង
+បញ្ជី `allowedConnections` ដែលបានកំណត់យ៉ាងច្បាស់ និងមិនទទេ។ ម៉ាស៊ីនភ្ញៀវ HTTP ណាមួយអាចប្រើ endpoint វដ្តជីវិតបាន ដោយមិនចាំបាច់មាន
+ឈ្មោះម៉ាស៊ីនភ្ញៀវ user-agent អ្នកផ្តល់សេវា វិធីសាស្ត្រ OAuth ឬម៉ូដែលឡើយ។ ការជួលកាន់កាប់ការតភ្ជាប់មួយ
+មិនមែនម៉ូដែលទេ ដូច្នេះការប្តូរម៉ូដែលនឹងរក្សាការភ្ជាប់នេះ ខណៈការតភ្ជាប់នៅតែមានសិទ្ធិប្រើប្រាស់តាមធម្មតា។ ច្បាប់ធម្មតាសម្រាប់ម៉ូដែល កូតា សុខភាព រយៈពេលផ្អាក និងបញ្ជីអនុញ្ញាត នៅតែមានអាទិភាព ហើយអាចប្តូរជំនាន់ដដែលទៅកាន់ការតភ្ជាប់ទំនេរដែលមានសិទ្ធិប្រើប្រាស់ផ្សេងទៀត។
+
+វដ្តជីវិតគឺ `POST /api/v1/session-leases` ជាមួយសកម្មភាព JSON `acquire`, `renew`, និង `release`។
+សំណើ inference ដែលគ្រប់គ្រង ត្រូវបញ្ជូនតម្លៃ `X-OmniRoute-Lease-Owner` ដែលមិនបង្ហាញអត្ថន័យ និង
+`X-OmniRoute-Lease-Generation` ដែលត្រូវតែផ្គូផ្គងយ៉ាងពិតប្រាកដ។ ម្ចាស់ប្រើបុព្វបទ `vlo_` បន្តដោយ
+តួអក្សរ base64url ចំនួន 43; មានតែ hash SHA-256 របស់វាប៉ុណ្ណោះដែលត្រូវរក្សាទុក។ រាល់របងបញ្ជូនចុងក្រោយក៏ភ្ជាប់ជាមួយលេខសម្គាល់ API key ដែលបានផ្ទៀងផ្ទាត់ និងលេខសម្គាល់ការតភ្ជាប់សកម្មផងដែរ។ បឋមកថាគ្រប់គ្រងការជួល ត្រូវដកចេញពីកំណត់ហេតុ រូបថតសំណើដែលបានរក្សាទុក និងបឋមកថារបស់ upstream executor។
+
+ប្រសិនបើការកំណត់ផ្លូវធម្មតាមានបេក្ខជន managed ដែលមានសិទ្ធិប្រើប្រាស់ ប៉ុន្តែបេក្ខជនទំនេរទាំងអស់ត្រូវបានកាន់កាប់ដោយការជួលសកម្មរបស់ម្ចាស់ផ្សេង OmniRoute នឹងត្រឡប់ HTTP `429` កូដ lease-capacity-unavailable ស្ថានភាព waiting-for-capacity និង `Retry-After` ដែលមានព្រំដែនកំណត់ ដោយគណនាពីពេលផុតកំណត់ដែលពាក់ព័ន្ធឆាប់បំផុត។ ករណីគ្មានសិទ្ធិប្រើប្រាស់ធម្មតា មិនមែនជាការប្រជែងធនធានជួលទេ ហើយនៅតែប្រើន័យកំហុសនៃការកំណត់ផ្លូវដែលមានស្រាប់។
+
+យន្តការដែលពាក់ព័ន្ធនៅតែដាច់ដោយឡែកពីគ្នា៖
+
+- ការកាន់កាប់សម័យ OAuth គឺជាការចែកចាយទន់ក្នុងកម្រិតដំណើរការ សម្រាប់គណនី OAuth។
+- សេម៉ាហ្វ័រគណនី ផ្តល់សិទ្ធិអនុញ្ញាតសម្រាប់ភាពស្របគ្នានៃសំណើ ហើយបញ្ចប់នៅពេលសំណើបញ្ចប់។
+- ការជួលសម័យ managed ផ្តាច់មុខ គឺជាការកាន់កាប់វដ្តជីវិតដែលមានភាពធន់ ជាមួយរបងជំនាន់។
 
 ## 3. ការចាក់សោម៉ូដែល (Model Lockout)
 
@@ -323,17 +335,18 @@ DB ទេ — វាបាត់នៅពេល restart ។ _ការកំណ�
 
 ---
 
-## 4. ការគ្រប់គ្រង Concurrency របស់ Quota-Share (v3.8.36)
+## 4. ការគ្រប់គ្រងភាពដំណើរការស្របគ្នាតាម Quota-Share (v3.8.36)
 
-គណនីកម្រិតជាវ (GLM, MiniMax ជាដើម) ភាគច្រើនទទួលបានតែសំណើ concurrent ប្រហែល ~1–3 ប៉ុណ្ណោះ បើលើសពីនេះនឹងបង្កឲ្យមាន 429 និង cooldown។ បញ្ហានេះកាន់តែធ្ងន់ធ្ងរនៅក្រោម combo **quota-share** (`qtSd/…`) ដែលគ្លី API ជាច្រើនចែករំលែកគណនី upstream តែមួយ។ ស្រទាប់ទាំងបីខាងក្រោមជួយការពារមិនឲ្យគណនីដែលចែករំលែកគ្នាត្រូវលិចលង់។
+គណនីជាវ (GLM, MiniMax ជាដើម) ជាញឹកញាប់ទទួលយកសំណើដំណើរការស្របគ្នាតែប្រហែល 1–3 ប៉ុណ្ណោះ។ ការលើសចំនួននេះបង្កឱ្យមាន 429 និងរយៈពេល cooldown។ បញ្ហានេះកាន់តែធ្ងន់ធ្ងរក្រោម combo **quota-share** (`qtSd/…`) ដែល API key ច្រើនប្រើគណនី upstream តែមួយ។ ស្រទាប់ចំនួនបីជួយការពារគណនីរួមមិនឱ្យទទួលសំណើច្រើនហួសកម្រិត។
 
-### ដែនកំណត់ Concurrency ក្នុងមួយ Connection (`max_concurrent`)
+### កម្រិតភាពដំណើរការស្របគ្នាតាម connection (`max_concurrent`)
 
-Connection របស់ provider នីមួយៗអាចប្រកាសដែនកំណត់ `max_concurrent` (`provider_connections.max_concurrent` កំណត់នៅក្នុង connection modal / API / DB)។ ទុកឲ្យវាទទេ ប្រសិនបើមិនចង់មានដែនកំណត់។ នេះជាប៊ូតុងតែមួយគត់ដែលបញ្ជាស្រទាប់ serialization ខាងក្រោម — កំណត់វាទៅតាម concurrency ពិតប្រាកដរបស់គណនី (ឧ. GLM ~1, MiniMax ~2)។
+Provider connection នីមួយៗអាចកំណត់កម្រិតអតិបរមា `max_concurrent`
+(`provider_connections.max_concurrent` ដែលកំណត់ក្នុង connection modal / API / DB)។ ទុកវាឱ្យទទេ ប្រសិនបើមិនចង់កំណត់កម្រិត។ នេះជាប៊ូតុងតែមួយដែលគ្រប់គ្រងស្រទាប់ serialization ខាងក្រោម — កំណត់វាឱ្យស្មើនឹងភាពដំណើរការស្របគ្នាពិតប្រាកដរបស់គណនី (ឧ. GLM ប្រហែល 1, MiniMax ប្រហែល 2)។
 
-### ដែនកំណត់ Concurrency ក្នុងមួយ Model (`modelConcurrency`)
+### កម្រិតភាពដំណើរការស្របគ្នាតាម model (`modelConcurrency`)
 
-Connection ក៏អាចប្រកាសដែនកំណត់ concurrency ច្បាស់លាស់ក្នុងមួយ model បន្ថែមទៀត នៅក្នុង map `rateLimitOverrides` របស់វា៖
+Connection មួយអាចកំណត់កម្រិតភាពដំណើរការស្របគ្នាតាម model ជាក់លាក់បន្ថែមទៀតនៅក្នុងផែនទី `rateLimitOverrides`៖
 
 ```json
 {
@@ -344,30 +357,42 @@ Connection ក៏អាចប្រកាសដែនកំណត់ concurrency
 }
 ```
 
-កំណត់វានៅក្នុង connection modal (**Rate limit overrides → ដែនកំណត់ concurrency ក្នុងមួយ model**, មួយ `model=cap` ក្នុងមួយបន្ទាត់) ឬតាម `PATCH /api/providers/[id]` ដោយប្រើរូបរាង JSON ដូចគ្នា។ ន័យសំខាន់ៗ៖
+កំណត់វានៅក្នុង connection modal (**Rate limit overrides → Per-model
+concurrency caps**, មួយ `model=cap` ក្នុងមួយបន្ទាត់) ឬតាមរយៈ
+`PATCH /api/providers/[id]` ដោយប្រើទម្រង់ JSON ដូចគ្នា។ អត្ថន័យសំខាន់ៗ៖
 
-- **ទូទាំង connection បញ្ជៀបនឹង ជាក់លាក់តាម model:** `maxConcurrent` នៅតែជាដែនកំណត់រួមទូទាំង connection។ នៅពេលទាំងពីរមានប្រសិទ្ធភាព gate ទាំងពីរត្រូវបានចាប់យកជាមួយគ្នាបែប atomic នៅក្នុង composite gate ដូចគ្នា (`global → provider → account → model`); អាកប្បកិរិយាពិតប្រាកដគឺជាដែនកំណត់ដែលតឹងរ៉ឹងជាងគេ។
-- **ការផ្គូផ្គង model-key ច្បាស់លាស់:** key គឺជា string របស់ model ដែលត្រូវបានបញ្ជូនទៅ executor បន្ទាប់ពីការដោះស្រាយ routing — ធម្មតាជា id របស់ model upstream សុទ្ធ (`glm-5`) មិនមែនជា alias `provider/model` ពីខាង client ទេ (`zai/glm-5` មិនផ្គូផ្គងនឹង `glm-5`)។ តម្លៃគឺជាដែនកំណត់ចំនួនសំណើ concurrent ជាចំនួនគត់វិជ្ជមាន។
-- **តម្រង់ជួរនៅមូលដ្ឋាន គ្មានការស្វែងរក:** សំណើដែលលើសត្រូវបានតម្រង់ជួរនៅមូលដ្ឋាន ដោយប្រើន័យ queue/timeout ដែលមានស្រាប់ (កំហុស admission ដែលមានប្រភេទ `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`)។ OmniRoute មិនស្វែងរក ឬសន្និដ្ឋាន policy របស់ upstream ទេ — វាគ្រាន់តែអនុវត្តដែនកំណត់ច្បាស់លាស់ដែល operator បានកំណត់ប៉ុណ្ណោះ។ gate របស់ model ដែលពេញមិនដែលបិទ provider និងមិនដែលបង្កើតការចាក់សោ model ជាអចិន្ត្រៃយ៍ទេ; អាកប្បកិរិយា 429/cooldown/fallback របស់ upstream នៅតែជា error backstop។
-- **វិសាលភាពក្នុងមួយ connection ក្នុងមួយ process:** ដែនកំណត់គឺក្នុងមួយ connection របស់ database ហើយត្រូវបានរក្សាទុកក្នុង memory ដូច្នេះ connection ពីរដែលប្រើគ្លី API upstream ដូចគ្នានឹងមិនសម្របសម្រួលជាមួយគ្នាទេ។
-- **មិនបានកំណត់ មានន័យថា គ្មានការផ្លាស់ប្តូរ:** ការមិនដាក់ map (ឬទុកឲ្យវាល dashboard ទទេ) មិនបន្ថែម model gate ណាមួយទេ។ ឧទាហរណ៍ការកំណត់ដោយមិនបានប្រកាសដែនកំណត់ជាសកលរបស់ provider ណាមួយ៖
+- **កម្រិតទូទាំង connection ប្រៀបធៀបនឹងកម្រិតជាក់លាក់តាម model៖** `maxConcurrent` នៅតែជាកម្រិតរួមទូទាំង connection។ នៅពេលទាំងពីរត្រូវបានអនុវត្ត gate ទាំងពីរត្រូវបានទទួលជាអាតូមិកក្នុង composite gate ដូចគ្នា
+  (`global → provider → account → model`)។ អាកប្បកិរិយាដែលមានប្រសិទ្ធភាពគឺប្រើកម្រិតដែលតឹងរ៉ឹងជាង ក្នុងចំណោមកម្រិតដែលអាចអនុវត្តបាន។
+- **ផ្គូផ្គង model-key យ៉ាងត្រឹមត្រូវ៖** key គឺជា model string ដែលបានបញ្ជូនទៅ executor បន្ទាប់ពីការដោះស្រាយ routing — ជាទូទៅគឺ upstream model id ទទេ
+  (`glm-5`) មិនមែន client-side `provider/model` alias ទេ (`zai/glm-5` មិនផ្គូផ្គងនឹង `glm-5` ទេ)។ តម្លៃត្រូវតែជាកម្រិតសំណើដំណើរការស្របគ្នាដែលជាចំនួនគត់វិជ្ជមាន។
+- **ការដាក់ជួរក្នុងមូលដ្ឋាន មិនមានការស្វែងរក៖** សំណើដែលលើសកម្រិតត្រូវបានដាក់ជួរក្នុងមូលដ្ឋាន ដោយប្រើ queue/timeout semantics ដែលមានស្រាប់ (កំហុស admission ដែលមានប្រភេទ `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`)។ OmniRoute មិនស្វែងរក ឬសន្និដ្ឋានគោលការណ៍របស់ upstream ទេ — វាអនុវត្តតែកម្រិតជាក់លាក់ដែល operator បានកំណត់។ model gate ដែលពេញ មិនធ្វើឱ្យ provider ត្រូវបានបិទ ហើយក៏មិនបង្កើតការហាមឃាត់ model ជាអចិន្ត្រៃយ៍ដែរ។ អាកប្បកិរិយា upstream 429/cooldown/fallback នៅតែជាយន្តការបម្រុងទប់ស្កាត់កំហុស។
+- **វិសាលភាពតាម connection និងតាម process៖** កម្រិតត្រូវបានអនុវត្តតាម database connection នីមួយៗ ហើយរក្សាទុកក្នុង memory។ ដូច្នេះ connection ពីរដែលប្រើ upstream API key ដូចគ្នា នឹងមិនសម្របសម្រួលគ្នាទេ។
+- **មិនកំណត់មានន័យថាមិនផ្លាស់ប្តូរ៖** ការមិនដាក់ map (ឬទុកវាល dashboard ឱ្យទទេ) មិនបន្ថែម model gate ទេ។ ឧទាហរណ៍ការកំណត់ដោយមិនអះអាងកម្រិត provider ជាសកលណាមួយ៖
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### ការធ្វើ Serialization សំណើ Quota-Share
+### ការរៀបចំសំណើ Quota-share ជាស៊េរី
 
-នៅពេល dispatch របស់ quota-share គោលដៅទៅលើ connection ដែលប្រកាស `max_concurrent` ជាវិជ្ជមាន សំណើ concurrent ទៅកាន់ **គណនី** នោះត្រូវបានធ្វើ serialization តាម semaphore ក្នុងមួយ connection (key `qsconn:<connectionId>`): សំណើដែលលើស **រង់ចាំនៅក្នុងជួរ** ជំនួសឲ្យការលិចលង់គណនី។ វាជា **fail-open** — ជួរដែលពេញ ឬ timeout នឹងបន្តទៅមុខដោយគ្មាន slot ជាជាងបដិសេធសំណើដែលអាច dispatch បាន។ បិទ/បើកនៅ **Settings → Resilience → Concurrency ក្នុងមួយ connection របស់ quota-share** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, លំនាំដើមបើក)។ បើគ្មានដែនកំណត់ `max_concurrent` ទេ អាកប្បកិរិយានៅដដែល។
+នៅពេល quota-share dispatch កំណត់គោលដៅទៅកាន់ connection ដែលបានប្រកាស `max_concurrent` ជាវិជ្ជមាន សំណើដំណើរការស្របគ្នាទៅកាន់ **account** នោះត្រូវបានរៀបចំជាស៊េរីតាមរយៈ per-connection semaphore (key `qsconn:<connectionId>`)៖ សំណើដែលលើសកម្រិត **រង់ចាំក្នុងជួរ** ជំនួសឱ្យការបញ្ជូនសំណើច្រើនលើសកម្រិតទៅ account។ វា **fail-open** — queue ដែលពេញ ឬ timeout នឹងបន្តដំណើរការដោយគ្មាន slot ជំនួសឱ្យការបដិសេធសំណើដែលអាច dispatch បាន។ បើក/បិទនៅ **Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, លំនាំដើមបើក)។ បើគ្មានកម្រិត `max_concurrent` អាកប្បកិរិយានឹងមិនផ្លាស់ប្តូរ។
 
-> gate routing របស់ quota-share (`selectQuotaShareTarget`, DRR + P2C) ខ្លួនវាផ្ទាល់គឺ fail-open ហើយគ្រាន់តែ _បញ្ចុះអាទិភាព_ connection ដែលដល់ដែនកំណត់ប៉ុណ្ណោះ — ជាមួយ pool ដែលមាន connection តែមួយ វាមិនអាចកំណត់ដាច់ខាតបានទេ ដូច្នេះ semaphore នេះទើបជាអ្វីដែលទប់ទឹកជំនន់ពិតប្រាកដ។
+> quota-share routing gate (`selectQuotaShareTarget`, DRR + P2C) ខ្លួនវា
+> fail-open ហើយគ្រាន់តែ _បន្ថយអាទិភាព_ connection ដែលដល់កម្រិតប៉ុណ្ណោះ — ជាមួយ
+> single-connection pool វាមិនអាចកំណត់កម្រិតរឹងបានទេ។ ដូច្នេះ semaphore នេះហើយ
+> ដែលទប់ស្កាត់ការបញ្ជូនសំណើច្រើនលើសកម្រិតជាក់ស្តែង។
 
-### ការព្យាយាមម្តងទៀតដែលយល់ពី Cooldown របស់ Combo
+### ការសាកល្បងម្តងទៀតដែលគិតពី Combo cooldown
 
-សម្រាប់យុទ្ធសាស្ត្រ combo ទាំងអស់ (នៅពេលបើក) សំណើដែលនឹងបង្កើត 429 សម្រាប់ cooldown បណ្តោះអាសន្នខ្លី នឹងរង់ចាំរហូតអស់ រួច dispatch ម្តងទៀត ជំនួសឲ្យការត្រឡប់ 429 — នេះគ្របដណ្តប់បង្អួច TPM/RPM ប្រភេទ Gemini (~60s retry-after) នៅលើ combo ពហុ model ឧ. គោលដៅទាំងពីរនៃ combo 2-model ជាប់ rate limit ក្នុងមួយ model។ វាត្រូវបានកំណត់ដោយ `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) នៅ **Settings → Resilience**។ វាមិនដែលរង់ចាំលើ `quota_exhausted` (ចាក់សោរហូតដល់ពាក់កណ្តាលយប់) ឬមូលហេតុ auth/not-found ទេ។
+សម្រាប់ combo strategy ទាំងអស់ (នៅពេលបានបើក) សំណើដែលនឹងធ្វើឱ្យកើត 429 សម្រាប់ cooldown ខ្លីដែលជាបណ្តោះអាសន្ន នឹងរង់ចាំឱ្យ cooldown បញ្ចប់ ហើយធ្វើការ dispatch ម្តងទៀត ជំនួសឱ្យការបញ្ជូន 429 ត្រឡប់ — វាគ្របដណ្តប់បង្អួច TPM/RPM ប្រភេទ Gemini (~60s retry-after) លើ combo ច្រើន model ឧ. target ទាំងពីររបស់ combo 2-model ទទួល rate limit តាម model។ វាត្រូវបានកំណត់ព្រំដែនដោយ `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
+`budgetMs`) នៅក្នុង **Settings → Resilience**។ វាមិនដែលរង់ចាំលើ `quota_exhausted` (ត្រូវបានចាក់សោរហូតដល់ពាក់កណ្តាលអធ្រាត្រ) ឬមូលហេតុ auth/not-found ទេ។
 
-gate ដូចគ្នានេះក៏គ្របដណ្តប់ករណី pre-dispatch ផងដែរ (#16319): នៅពេលគោលដៅទាំងអស់នៃ combo ត្រូវបានរំលងមុនពេលមានការព្យាយាមណាមួយ ដោយសារ model របស់វាស្ថិតក្នុងការចាក់សោបណ្តោះអាសន្នខ្លី path ដែលគ្មានការព្យាយាមនឹងរង់ចាំសោឲ្យអស់ក្រោមដែនកំណត់ដូចគ្នា រួច dispatch ម្តងទៀត ជំនួសឲ្យការឆ្លើយតបដោយ `503 ALL_TARGETS_SKIPPED` ដែលគ្មាន hint។ នៅពេលមិនអនុញ្ញាតឲ្យរង់ចាំ (ដែនកំណត់ ចំនួនការព្យាយាម ឬថវិកាអស់ ឬមុខងារត្រូវបានបិទ) ចម្លើយចុងក្រោយត្រូវបានបង្កើនកម្រិតទៅជា `429 rate_limit_error` ដែលផ្ទុក `retry_after` / `reset_at` ពីការផុតកំណត់នៃសោបណ្តោះអាសន្នដំបូងបង្អស់; សោ quota, auth និង not-found រក្សា 503 ដែលគ្មាន hint នៅដដែល។
+Combo អាចជ្រើសមិនចូលរួមដោយប្រើ `config.comboCooldownWaitEnabled: false`។ មានតែ `false` ដែលជាតម្លៃ literal ប៉ុណ្ណោះ ទើបបិទការរង់ចាំ combo រួមទាំងនេះ (post-dispatch cooldown និង pre-dispatch circuit-open/model-lock waits) និងការពង្រីក wait-budget timeout-floor របស់វា។ ការខ្វះតម្លៃ ឬ `true` នឹងរក្សាគោលការណ៍សកល។ `true` មិនអាចបើកការរង់ចាំដែលត្រូវបានបិទជាសកលបានទេ។ `targetTimeoutMs` ដែលបានកំណត់ជាក់លាក់ នៅតែមានអាទិភាព។ ការជ្រើសមិនចូលរួមនេះ មិនផ្លាស់ប្តូរ native-Codex turn-pin pre-dispatch wait ដាច់ដោយឡែកទេ។
+
+Gate ដូចគ្នានេះក៏គ្របដណ្តប់ករណី pre-dispatch (#16319) ផងដែរ៖ នៅពេល target ទាំងអស់របស់ combo ត្រូវបានរំលងមុនពេលមានការប៉ុនប៉ងណាមួយ ព្រោះ model របស់វាស្ថិតក្នុងការចាក់សោរខ្លីដែលជាបណ្តោះអាសន្ន ផ្លូវដែលមានការប៉ុនប៉ងសូន្យនឹងរង់ចាំឱ្យការចាក់សោផុតកំណត់ក្រោមពិដានដូចគ្នា ហើយធ្វើការ dispatch ម្តងទៀត ជំនួសឱ្យការឆ្លើយតប `503 ALL_TARGETS_SKIPPED` ដែលគ្មាន hint។ នៅពេលមិនអនុញ្ញាតឱ្យរង់ចាំ (ពិដាន ការប៉ុនប៉ង ឬ budget ត្រូវបានប្រើអស់ ឬមុខងារត្រូវបានបិទ) ការឆ្លើយតបចុងក្រោយនឹងត្រូវបានដំឡើងទៅជា
+`429 rate_limit_error` ដែលមាន `retry_after` / `reset_at` ពីពេលផុតកំណត់នៃ transient lock ដែលជិតបំផុត។ quota, auth និង not-found locks នៅតែរក្សា 503 ដែលគ្មាន hint។
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
@@ -429,13 +454,13 @@ quota_exhausted / auth_error / not_found / not_found_local:
 
 ---
 
-## 6. Watchdog តាមដាន throughput ស្ទ្រីមយឺត (#9709)
+## 6. ឧបករណ៍ឃ្លាំមើលលំហូរយឺត (#9709)
 
-ការការពារ `resilienceSettings.streamRecovery.throughputWatchdog` ដែលជាជម្រើស រកឃើញ upstream ដែលនៅតែផ្ញើ chunks ប៉ុន្តែបង្កើតលទ្ធផល assistant ក្រោមអត្រាលទ្ធផលមានប្រយោជន៍ដែលបានកំណត់។ វាត្រូវបានធ្វើឱ្យខុសពី idle timeout ដោយចេតនា៖ heartbeats និង metadata មិនកំណត់ឡើងវិញឧបករណ៍រាប់ពេលណាមួយទេ ហើយមិនត្រូវបានរាប់ថាជាវឌ្ឍនភាពទេ។ វាក៏ខុសពី hard attempt deadline (#9153) ដែរ ដែលនៅតែជាព្រលឹងសុវត្ថិភាពដាច់ខាត ដោយមិនគិតពីគុណភាពលទ្ធផល។
+ឆ្មាំ `resilienceSettings.streamRecovery.throughputWatchdog` ជាជម្រើសរកឃើញខ្សែទឹកដែលនៅតែបញ្ជូនកំណាត់ ប៉ុន្តែផលិតលទ្ធផលជំនួយនៅក្រោមអត្រាទិន្នផលដែលមានប្រយោជន៍ដែលបានកំណត់រចនាសម្ព័ន្ធ។ វាខុសពីការអស់ពេលទំនេរដោយចេតនា៖ ចង្វាក់បេះដូង និងទិន្នន័យមេតាកំណត់ឡើងវិញ ទាំងកម្មវិធីកំណត់ម៉ោង និងមិនរាប់បញ្ចូលជាដំណើរការ។ វាក៏ខុសប្លែកពីថ្ងៃផុតកំណត់នៃការព្យាយាមយ៉ាងលំបាក (#9153) ដែលនៅតែជាពិដានសុវត្ថិភាពទាំងស្រុងដោយមិនគិតពីគុណភាពទិន្នផល។
 
-Watchdog ទាមទាររយៈពេល warm-up តាមដោយ rolling window ពេញលេញ មុនពេលវាអាចបោះបង់ (abort) បាន។ វារាប់ text deltas ពីព្រឹត្តិការណ៍លទ្ធផល Chat Completions និង Responses API (proxy បៃបី UTF-8 ដោយប្រុងប្រយ័ត្ន) មិនអើពើនឹងព្រឹត្តិការណ៍ដែលមានតែ usage និងព្រឹត្តិការណ៍ទទេ ហើយផ្អាកការវិនិច្ឆ័យ ខណៈពេលដែលព្រឹត្តិការណ៍ tool-call ឬ reasoning កំពុងដំណើរការ។ វាត្រូវបានបិទជាលំនាំដើម ហើយអាចបើកបានដោយ `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; window, warm-up, អត្រាអប្បបរមា និងលទ្ធផលដែលអាចវាស់វែងបានអប្បបរមា ត្រូវបានកំណត់ព្រំដោយស្រទាប់ normalization នៃការកំណត់ resilience ធម្មតា។
+អង្គការឃ្លាំមើលតម្រូវឱ្យមានការកម្តៅសាច់ដុំ អមដោយបង្អួចរំកិលពេញលេញ មុនពេលវាអាចរំលូតកូនបាន។ វារាប់បញ្ចូលអត្ថបទ deltas ពីការបញ្ចប់ការជជែក និងការឆ្លើយតប API ព្រឹត្តិការណ៍លទ្ធផល (ប្រូកស៊ី UTF-8 byte អភិរក្ស) មិនអើពើចំពោះតែការប្រើប្រាស់ និងព្រឹត្តិការណ៍ទទេ ហើយផ្អាកការវិនិច្ឆ័យខណៈពេលដែលព្រឹត្តិការណ៍ហៅឧបករណ៍ ឬហេតុផលកំពុងហោះហើរ។ វាត្រូវបានបិទតាមលំនាំដើម ហើយអាចត្រូវបានបើកដោយប្រើ `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (តម្លៃ env មានតែគ្រាប់ពូជ — លំនាំដើម `resilienceSettings.streamRecovery.throughputWatchdog.enabled` boolean ដែលបានរក្សាទុក។ សូមមើលកំណត់ចំណាំ env-vs-dashboard នាំមុខនៅផ្នែកខាងលើនៃការណែនាំនេះ); បង្អួច កំដៅឡើង អត្រាអប្បបរមា និងទិន្នផលដែលអាចវាស់វែងបានអប្បបរមាត្រូវបានចងភ្ជាប់ដោយស្រទាប់ធម្មតានៃការកំណត់ភាពធន់នឹងធម្មតា។
 
-នៅពេលបើក ការបោះបង់របស់ watchdog ត្រូវបានអនុវត្តតែលើការព្យាយាម upstream ដែលសកម្មប៉ុណ្ណោះ។ មុនពេលមានបៃណាមួយដែលអាចមើលឃើញដោយ client ផ្លូវ early-recovery គណនីដូចគ្នាដែលមានស្រាប់ អាចបើកការព្យាយាមឡើងវិញបាន។ បន្ទាប់ពី commit ស្ទ្រីមមិនត្រូវបាន replay ដោយងងឹតងងុលទេ; មានតែកិច្ចសន្យាបន្តកណ្តាលស្ទ្រីមដោយសុវត្ថិភាពដែលមានស្រាប់ប៉ុណ្ណោះ ដែលអាចប៉ះ (stitch) suffix បាន។ Finalization នៅតែជា single-shot ដូច្នេះការគណនា usage និងការដោះលែង semaphore មិនត្រូវបានស្ទួនទេ។
+នៅពេលបើកដំណើរការ ការបោះបង់ការឃ្លាំមើលត្រូវបានអនុវត្តចំពោះតែការប៉ុនប៉ងសកម្ម។ មុនពេលដែលអតិថិជនមើលឃើញបៃណាមួយ ផ្លូវសង្គ្រោះមុនដំបូងរបស់គណនីដូចគ្នាដែលមានស្រាប់អាចបើកការប៉ុនប៉ងឡើងវិញ។ បន្ទាប់ពីការប្តេជ្ញាចិត្ត ស្ទ្រីមមិនដែលចាក់ឡើងវិញដោយងងឹតងងល់ឡើយ។ មានតែកិច្ចសន្យាបន្តពាក់កណ្តាលស្ទ្រីមសុវត្ថិភាពដែលមានស្រាប់ប៉ុណ្ណោះដែលអាចភ្ជាប់បច្ច័យបាន។ ការបញ្ចប់ចុងក្រោយនៅតែជាការបាញ់ប្រហារតែមួយ ដូច្នេះគណនេយ្យនៃការប្រើប្រាស់ និងការចេញផ្សាយ semaphore មិនត្រូវបានចម្លងទេ។
 
 ---
 
