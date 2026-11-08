@@ -1,1 +1,2 @@
 - **fix(translator):** A failed Claude tool result (`is_error: true`) now reaches Gemini in the `error` field of the function response, so the model can see that the tool failed.
+- **fix(translator):** Claude `tool_choice` now reaches Gemini as `toolConfig`. `any` and a named tool force a function call, `none` turns tool calls off, and a named tool that is not in the tools list gets a clear 400.

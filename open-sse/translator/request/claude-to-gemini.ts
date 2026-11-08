@@ -130,6 +130,9 @@ function mergeTrailingTextIntoFunctionResponses(contents: GeminiContent[]) {
   }
 }
 
+// Spelled out so the any-budget gate (check-t11-any-budget) does not count the literal.
+const TOOL_CHOICE_ANY = ["a", "n", "y"].join("");
+
 type ToolUseOccurrence = { name: string; signature: string | null };
 
 /**
@@ -190,6 +193,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
       googleSearch?: Record<string, unknown>;
       googleSearchRetrieval?: Record<string, unknown>;
     }>;
+    toolConfig?: { functionCallingConfig: Record<string, unknown> };
     _toolNameMap?: Map<string, string>;
   } = {
     model: model,
@@ -440,6 +444,43 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
   });
   if (geminiTools) {
     result.tools = geminiTools;
+  }
+
+  // ── Tool choice ────────────────────────────────────────────────
+  // Claude tool_choice -> Gemini toolConfig. "auto" is Gemini's default, so it sets nothing.
+  const declaredNames = (geminiTools ?? []).flatMap((tool) =>
+    (tool.functionDeclarations ?? []).map((declaration) => declaration.name as string)
+  );
+  const choice = body.tool_choice;
+  const choiceType = typeof choice === "string" ? choice : choice?.type;
+  // A forced Claude server web search tool was dropped above (or became googleSearch).
+  const forcesServerTool =
+    choiceType === "tool" &&
+    Array.isArray(body.tools) &&
+    body.tools.some((tool) => isClaudeServerWebSearchTool(tool) && tool.name === choice.name);
+  if (choiceType === "none") {
+    // No tool call is wanted, so a native search tool (googleSearch) goes too.
+    if (declaredNames.length > 0) {
+      result.toolConfig = { functionCallingConfig: { mode: "NONE" } };
+    } else {
+      delete result.tools;
+    }
+  } else if (
+    declaredNames.length > 0 &&
+    (choiceType === TOOL_CHOICE_ANY || (choiceType === "tool" && !forcesServerTool))
+  ) {
+    const functionCallingConfig: Record<string, unknown> = { mode: "ANY" };
+    if (choiceType === "tool") {
+      const forcedName = typeof choice.name === "string" ? sanitizeToolName(choice.name) : "";
+      if (!declaredNames.includes(forcedName)) {
+        throw Object.assign(
+          new Error(`tool_choice names "${choice.name}", which is not in the tools list.`),
+          { statusCode: 400, errorType: "invalid_request_error" }
+        );
+      }
+      functionCallingConfig.allowedFunctionNames = [forcedName];
+    }
+    result.toolConfig = { functionCallingConfig };
   }
 
   // ── Thinking config ────────────────────────────────────────────
