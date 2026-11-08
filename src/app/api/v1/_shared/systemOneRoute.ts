@@ -28,6 +28,7 @@ import {
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
+import { isSystemOneCloudflareBackendEnabled } from "@/shared/utils/featureFlags";
 
 function optionsResponse() {
   return new Response(null, {
@@ -69,7 +70,16 @@ async function postHandler(request: Request): Promise<Response> {
       HTTP_STATUS.BAD_REQUEST,
       `Unknown decisions model: ${model ?? "(missing)"}. Use "typesafe/<model>", ` +
         `a bare jev-* alias, "openrouter/<vendor>/<model>" for OpenRouter-hosted decisions models, ` +
-        `or "cloudflare-ai/<jev|clef|clef-flash>" for Cloudflare Workers AI.`
+        `or "cloudflare-ai/<jev|clef|clef-flash>" for Cloudflare Workers AI ` +
+        `(needs the SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED feature flag).`
+    );
+  }
+  // #16676: the Cloudflare Workers AI backend is opt-in (default off).
+  if (target.backend === "cloudflare" && !isSystemOneCloudflareBackendEnabled()) {
+    return errorResponse(
+      HTTP_STATUS.BAD_REQUEST,
+      `Decisions model ${model} needs the Cloudflare Workers AI backend, which is off. ` +
+        `Enable the SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED feature flag to use it.`
     );
   }
 

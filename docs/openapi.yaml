@@ -15689,8 +15689,9 @@ paths:
         <model>` routes to OpenRouter's alpha decisions endpoint, and
         `cloudflare-ai/<jev|clef|clef-flash>` (alias `cf/`) runs on Cloudflare
         Workers AI through the existing `cloudflare-ai` connection (Jev draws AI
-        Gateway credits, Clef draws Workers AI neurons). Answers, probabilities
-        and usage (tokens, cost) pass through untouched.
+        Gateway credits, Clef draws Workers AI neurons; opt-in through the
+        `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED` feature flag, default off).
+        Answers, probabilities and usage (tokens, cost) pass through untouched.
       security:
         - BearerAuth: []
       requestBody:

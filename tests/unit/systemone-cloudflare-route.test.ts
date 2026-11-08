@@ -2,6 +2,7 @@
  * POST /v1/systemone served by a `cloudflare-ai` connection, end to end:
  * the stored connection's account id reaches the Workers AI URL, the
  * Cloudflare envelope is unwrapped, and the key's connection scope applies.
+ * The backend is opt-in: SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED (default off).
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -28,7 +29,16 @@ const BODY = {
   questions: { risk: { type: "choice", choices: ["low", "high"] } },
 };
 
+const FLAG = "SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED";
+const originalFlag = process.env[FLAG];
+
+test.beforeEach(() => {
+  process.env[FLAG] = "true";
+});
+
 test.after(() => {
+  if (originalFlag === undefined) delete process.env[FLAG];
+  else process.env[FLAG] = originalFlag;
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
@@ -127,6 +137,34 @@ test("cloudflare route: unknown Cloudflare models are refused before credential 
     );
     assert.equal(response.status, 400);
     assert.match(await response.text(), /Unknown decisions model/);
+    assert.equal(upstream.calls.length, 0);
+  } finally {
+    upstream.restore();
+  }
+});
+
+test("cloudflare route: with the flag at its default (off), Cloudflare models are refused without an upstream call", async () => {
+  delete process.env[FLAG];
+  const conn = await providersDb.createProviderConnection({
+    provider: "cloudflare-ai",
+    authType: "apikey",
+    name: "cf-systemone-off",
+    apiKey: "cf-route-token-off",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: { accountId: ACCOUNT },
+  });
+  const key = await apiKeysDb.createApiKey("systemone-cf-off", "machine-cf-off", [], {
+    allowedConnections: [String(conn.id)],
+  });
+  apiKeysDb.clearApiKeyCaches();
+  const upstream = stubCloudflare();
+  try {
+    for (const model of ["cf/jev", "cloudflare-ai/clef", "cloudflare-ai/clef-flash"]) {
+      const response = await systemOneRoute.POST(postRequest({ ...BODY, model }, key.key));
+      assert.equal(response.status, 400, model);
+      assert.match(await response.text(), /SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED/);
+    }
     assert.equal(upstream.calls.length, 0);
   } finally {
     upstream.restore();
