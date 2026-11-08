@@ -1,0 +1,1 @@
+- **fix(translator):** A tool message whose content is an array of text parts now reaches Gemini as one text result instead of a JSON list of `{type, text}` objects.

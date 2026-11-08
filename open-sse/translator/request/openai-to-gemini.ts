@@ -142,6 +142,19 @@ function convertOpenAIToolChoiceToGemini(choice: unknown): GeminiFunctionCalling
   return { mode: "VALIDATED" };
 }
 
+// A tool message content may be an array of text parts. Gemini should see the text itself,
+// not a JSON list of {type, text} objects. Arrays with any other part stay as they are.
+function joinToolTextParts(content: unknown): unknown {
+  if (!Array.isArray(content) || content.length === 0) return content;
+  const texts: string[] = [];
+  for (const part of content) {
+    const record = part as { type?: unknown; text?: unknown } | null;
+    if (record?.type !== "text" || typeof record.text !== "string") return content;
+    texts.push(record.text);
+  }
+  return texts.join("\n");
+}
+
 type CloudCodeEnvelope = {
   project: string;
   model?: string;
@@ -445,7 +458,7 @@ function openaiToGeminiBase(
   if (messages && Array.isArray(messages)) {
     for (const msg of messages) {
       if (msg.role === "tool" && msg.tool_call_id) {
-        toolResponses[msg.tool_call_id as string] = msg.content;
+        toolResponses[msg.tool_call_id as string] = joinToolTextParts(msg.content);
       }
     }
   }
@@ -596,7 +609,7 @@ function openaiToGeminiBase(
             const later = messages[j];
             if (later.role === "assistant" || later.role === "user") break;
             if (later.role === "tool" && later.tool_call_id) {
-              turnToolResponses[later.tool_call_id as string] = later.content;
+              turnToolResponses[later.tool_call_id as string] = joinToolTextParts(later.content);
             }
           }
 
