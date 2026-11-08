@@ -1,0 +1,2 @@
+- **fix(sse):** Preserve the minimum interval between quota requests after delayed timer wakeups, preventing queued requests from catching up in a burst ([#18849](https://github.com/cheaper-inference/OmniRoute/pull/18849)) — thanks @KiaroSama
+- **fix(api):** Deliver pinned DNS results asynchronously so immediate connection failures reject safely after socket error listeners are installed ([#18849](https://github.com/cheaper-inference/OmniRoute/pull/18849)) — thanks @KiaroSama
