@@ -1,0 +1,1 @@
+- **fix(translator):** a Claude request with a message-thread field now gets a clear 400 on routes that translate to another provider, instead of reaching the model with the earlier turns missing.
