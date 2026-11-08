@@ -19,12 +19,28 @@ import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import { CardSkeleton } from "@/shared/components/Loading";
 import Modal from "@/shared/components/Modal";
+import Select from "@/shared/components/Select";
 import Toggle from "@/shared/components/Toggle";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useLocale, useTranslations } from "next-intl";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import ApiKeyFilterBar from "./components/ApiKeyFilterBar";
+import KeyPolicySixTabEditor from "./components/KeyPolicySixTabEditor";
+import SaveKeyAsTemplateModal from "./components/SaveKeyAsTemplateModal";
+import KeyTemplatesLibrarySection from "./components/KeyTemplatesLibrarySection";
+import {
+  createDefaultPolicyEditorFormState,
+  editorFormStateToPolicy,
+  policyToEditorFormState,
+  resolveActiveReferenceIssues,
+  summarizeKeyTemplatePolicy,
+  validatePolicyEditorState,
+  type KeyTemplate,
+  type KeyTemplatePolicy,
+  type PolicyEditorFormState,
+  type TemplateReferenceIssue,
+} from "./keyTemplatePolicyUtils";
 import {
   isKeyActive,
   isExpired,
@@ -164,6 +180,29 @@ export default function ApiManagerPageClient() {
   const [statusFilter, setStatusFilter] = useState<KeyStatus | null>(null);
   const [typeFilter, setTypeFilter] = useState<KeyType | null>(null);
   const [quotaPoolGroup, setQuotaPoolGroup] = useState<Record<string, string>>({});
+
+  // Key Templates library + Save as Template + Create Key policy state
+  const [templates, setTemplates] = useState<KeyTemplate[]>([]);
+  const [saveTemplateSource, setSaveTemplateSource] = useState<ApiKey | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [selectedTemplateRef, setSelectedTemplateRef] = useState<{
+    id: string;
+    revision: number;
+  } | null>(null);
+  const [createKeyFormState, setCreateKeyFormState] = useState<PolicyEditorFormState>(() =>
+    createDefaultPolicyEditorFormState()
+  );
+  const [createKeyBaselineFormJson, setCreateKeyBaselineFormJson] = useState<string>(() =>
+    JSON.stringify(createDefaultPolicyEditorFormState())
+  );
+  const [createKeyRefIssues, setCreateKeyRefIssues] = useState<TemplateReferenceIssue[]>([]);
+  const [loadingTemplatePolicy, setLoadingTemplatePolicy] = useState(false);
+  const templateLoadGeneration = useRef(0);
+  const [editorBlockingRefs, setEditorBlockingRefs] = useState<boolean | null>(null);
+  const handleEditorValidation = useCallback((state: { hasBlockingReferenceIssues: boolean }) => {
+    setEditorBlockingRefs(state.hasBlockingReferenceIssues);
+  }, []);
+  const [showFullPolicyEditor, setShowFullPolicyEditor] = useState(false);
 
   const { copied, copy } = useCopyToClipboard();
 
@@ -331,8 +370,20 @@ export default function ApiManagerPageClient() {
     }
   };
 
-  // fetchData calls the three per-key fetchers above — declared after them so the
-  // calls are not TDZ reads (react-hooks/immutability).
+  const fetchTemplates = async () => {
+    try {
+      const res = await fetch("/api/key-templates");
+      if (res.ok) {
+        const data = await res.json();
+        setTemplates(Array.isArray(data?.templates) ? data.templates : []);
+      }
+    } catch (error) {
+      console.log("Error fetching key templates:", error);
+    }
+  };
+
+  // fetchData calls the per-key fetchers and template list fetcher above — declared after
+  // them so the calls are not TDZ reads (react-hooks/immutability).
   const fetchData = async () => {
     try {
       const res = await fetch("/api/keys");
@@ -345,6 +396,7 @@ export default function ApiManagerPageClient() {
         fetchSessionCounts(data.keys || []);
         fetchDeviceCounts(data.keys || []);
       }
+      void fetchTemplates();
     } catch (error) {
       console.log("Error fetching keys:", error);
     } finally {
@@ -363,6 +415,152 @@ export default function ApiManagerPageClient() {
   }, []);
 
   const clearPageError = useCallback(() => setPageError(null), []);
+
+  const syncCreateKeyFormState = useCallback((nextFormState: PolicyEditorFormState) => {
+    setCreateKeyFormState(nextFormState);
+    setNewKeyManageEnabled(nextFormState.manageEnabled);
+    setNewKeySelfUsageEnabled(nextFormState.selfUsageEnabled);
+    setNewKeyAccountQuotaEnabled(nextFormState.selfAccountQuotaEnabled);
+    setNewKeyAllowUsageCommand(nextFormState.allowUsageCommand);
+  }, []);
+
+  const resetCreateKeyModalState = useCallback(() => {
+    templateLoadGeneration.current++;
+    setEditorBlockingRefs(null);
+    const defaultForm = createDefaultPolicyEditorFormState();
+    setNewKeyName("");
+    syncCreateKeyFormState(defaultForm);
+    setCreateKeyBaselineFormJson(JSON.stringify(defaultForm));
+    setSelectedTemplateId("");
+    setSelectedTemplateRef(null);
+    setCreateKeyRefIssues([]);
+    setLoadingTemplatePolicy(false);
+    setShowFullPolicyEditor(false);
+    setNameError(null);
+    setCreateError(null);
+  }, [syncCreateKeyFormState]);
+
+  const draftCreatePolicy = useMemo(
+    () => editorFormStateToPolicy(createKeyFormState),
+    [createKeyFormState]
+  );
+
+  const isCreatePolicyDirty = useMemo(
+    () => JSON.stringify(createKeyFormState) !== createKeyBaselineFormJson,
+    [createKeyFormState, createKeyBaselineFormJson]
+  );
+
+  const createPolicyErrors = useMemo(
+    () => validatePolicyEditorState(createKeyFormState, t),
+    [createKeyFormState, t]
+  );
+  const hasCreatePolicyErrors = useMemo(
+    () => Object.values(createPolicyErrors).some((list) => list.length > 0),
+    [createPolicyErrors]
+  );
+
+  const activeCreateRefIssues = useMemo(
+    () => resolveActiveReferenceIssues(createKeyFormState, createKeyRefIssues),
+    [createKeyFormState, createKeyRefIssues]
+  );
+  const hasBlockingCreateRefIssues = useMemo(
+    () => editorBlockingRefs ?? activeCreateRefIssues.some((issue) => issue.blocking),
+    [activeCreateRefIssues, editorBlockingRefs]
+  );
+
+  const applyTemplateToCreateModal = useCallback(
+    async (templateId: string, fallbackTemplate?: KeyTemplate) => {
+      const generation = ++templateLoadGeneration.current;
+      setEditorBlockingRefs(null);
+      if (!templateId) {
+        setLoadingTemplatePolicy(false);
+        const defaultForm = createDefaultPolicyEditorFormState();
+        syncCreateKeyFormState(defaultForm);
+        setCreateKeyBaselineFormJson(JSON.stringify(defaultForm));
+        setSelectedTemplateId("");
+        setSelectedTemplateRef(null);
+        setCreateKeyRefIssues([]);
+        return;
+      }
+
+      setLoadingTemplatePolicy(true);
+      setCreateError(null);
+      try {
+        const res = await fetch(`/api/key-templates/${encodeURIComponent(templateId)}`);
+        const data = await res.json();
+        if (generation !== templateLoadGeneration.current) return;
+        if (res.ok && data?.template?.policy) {
+          const tpl = data.template as KeyTemplate;
+          const refIssues: TemplateReferenceIssue[] = Array.isArray(data.referenceIssues)
+            ? data.referenceIssues
+            : [];
+          const nextForm = policyToEditorFormState(tpl.policy);
+          syncCreateKeyFormState(nextForm);
+          setCreateKeyBaselineFormJson(JSON.stringify(nextForm));
+          setSelectedTemplateId(tpl.id);
+          setSelectedTemplateRef({ id: tpl.id, revision: tpl.revision });
+          setCreateKeyRefIssues(refIssues);
+          if (refIssues.length > 0) {
+            setShowFullPolicyEditor(true);
+          }
+          return;
+        }
+        if (fallbackTemplate) {
+          const nextForm = policyToEditorFormState(fallbackTemplate.policy);
+          syncCreateKeyFormState(nextForm);
+          setCreateKeyBaselineFormJson(JSON.stringify(nextForm));
+          setSelectedTemplateId(fallbackTemplate.id);
+          setSelectedTemplateRef({
+            id: fallbackTemplate.id,
+            revision: fallbackTemplate.revision,
+          });
+          setCreateKeyRefIssues([]);
+          return;
+        }
+        setCreateError(extractApiErrorMessage(data, t("failedLoadTemplateDetail")));
+      } catch {
+        if (generation !== templateLoadGeneration.current) return;
+        if (fallbackTemplate) {
+          const nextForm = policyToEditorFormState(fallbackTemplate.policy);
+          syncCreateKeyFormState(nextForm);
+          setCreateKeyBaselineFormJson(JSON.stringify(nextForm));
+          setSelectedTemplateId(fallbackTemplate.id);
+          setSelectedTemplateRef({
+            id: fallbackTemplate.id,
+            revision: fallbackTemplate.revision,
+          });
+          setCreateKeyRefIssues([]);
+        } else {
+          setCreateError(t("failedLoadTemplateDetail"));
+        }
+      } finally {
+        if (generation === templateLoadGeneration.current) setLoadingTemplatePolicy(false);
+      }
+    },
+    [syncCreateKeyFormState, t]
+  );
+
+  const handleSelectTemplateInCreateModal = async (nextTemplateId: string) => {
+    if (nextTemplateId === selectedTemplateId) return;
+    if (isCreatePolicyDirty) {
+      const confirmed = await requestConfirm({
+        title: t("switchTemplateConfirmTitle"),
+        message: t("switchTemplateConfirmMessage"),
+        confirmText: t("switchTemplateConfirmAction"),
+        variant: "warning",
+      });
+      if (!confirmed) return;
+    }
+    const fallback = templates.find((tpl) => tpl.id === nextTemplateId);
+    await applyTemplateToCreateModal(nextTemplateId, fallback);
+  };
+
+  const handleUseTemplateFromLibrary = (tpl: KeyTemplate) => {
+    resetCreateKeyModalState();
+    clearPageError();
+    setShowAddModal(true);
+    void applyTemplateToCreateModal(tpl.id, tpl);
+  };
 
   const keyCounts = useMemo(() => computeApiKeyCounts(keys), [keys]);
 
@@ -433,6 +631,16 @@ export default function ApiManagerPageClient() {
       setNameError(validation.error || t("invalidKeyName"));
       return;
     }
+    if (hasCreatePolicyErrors) {
+      setShowFullPolicyEditor(true);
+      setCreateError(Object.values(createPolicyErrors).flat()[0] || t("invalidPolicyError"));
+      return;
+    }
+    if (hasBlockingCreateRefIssues) {
+      setShowFullPolicyEditor(true);
+      setCreateError(t("staleReferenceBlockingError"));
+      return;
+    }
     const sanitizedName = sanitizeInput(newKeyName);
 
     setIsSubmitting(true);
@@ -440,17 +648,39 @@ export default function ApiManagerPageClient() {
     setCreateError(null);
 
     try {
+      const quickScopes = buildApiKeyCreateScopes({
+        manageEnabled: newKeyManageEnabled,
+        selfUsageEnabled: newKeySelfUsageEnabled,
+        selfAccountQuotaEnabled: newKeyAccountQuotaEnabled,
+      });
+      const quickFlags = {
+        scopes: quickScopes,
+        allowUsageCommand: newKeyAllowUsageCommand,
+      };
+      const mergedPolicy: KeyTemplatePolicy = {
+        ...draftCreatePolicy,
+        key: {
+          ...draftCreatePolicy.key,
+          scopes: Array.from(
+            new Set([
+              ...draftCreatePolicy.key.scopes.filter(
+                (scope) =>
+                  scope !== "manage" && scope !== "self:usage" && scope !== "self:account-quota"
+              ),
+              ...quickFlags.scopes,
+            ])
+          ),
+          allowUsageCommand: quickFlags.allowUsageCommand,
+        },
+      };
+
       const res = await fetch("/api/keys", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: sanitizedName,
-          scopes: buildApiKeyCreateScopes({
-            manageEnabled: newKeyManageEnabled,
-            selfUsageEnabled: newKeySelfUsageEnabled,
-            selfAccountQuotaEnabled: newKeyAccountQuotaEnabled,
-          }),
-          allowUsageCommand: newKeyAllowUsageCommand,
+          policy: mergedPolicy,
+          ...(selectedTemplateRef ? { templateRef: selectedTemplateRef } : {}),
         }),
       });
       const data = await res.json();
@@ -458,11 +688,7 @@ export default function ApiManagerPageClient() {
       if (res.ok) {
         setCreatedKey(data.key);
         await fetchData();
-        setNewKeyName("");
-        setNewKeyManageEnabled(false);
-        setNewKeySelfUsageEnabled(true);
-        setNewKeyAccountQuotaEnabled(false);
-        setNewKeyAllowUsageCommand(false);
+        resetCreateKeyModalState();
         setShowAddModal(false);
       } else {
         setCreateError(extractApiErrorMessage(data, t("failedCreateKey")));
@@ -1020,6 +1246,16 @@ export default function ApiManagerPageClient() {
                         aria-label={t("regenerateKey")}
                         icon="refresh"
                       />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        icon="bookmark_add"
+                        className="text-text-muted hover:text-primary opacity-100"
+                        title={t("saveAsTemplate")}
+                        aria-label={t("saveKeyAsTemplateAria", { name: key.name })}
+                        disabled={isSubmitting}
+                        onClick={() => setSaveTemplateSource(key)}
+                      />
                       <Link
                         href={`/dashboard/api-manager/${encodeURIComponent(key.id)}/access`}
                         className="p-2 hover:bg-primary/10 rounded text-text-muted hover:text-primary opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all inline-flex items-center justify-center"
@@ -1102,20 +1338,33 @@ export default function ApiManagerPageClient() {
         )}
       </Card>
 
+      {/* Key Templates Library */}
+      <KeyTemplatesLibrarySection
+        templates={templates}
+        onRefreshTemplates={fetchTemplates}
+        onUseTemplate={handleUseTemplateFromLibrary}
+      />
+
+      {/* Save Key as Template Modal */}
+      <SaveKeyAsTemplateModal
+        sourceKey={
+          saveTemplateSource ? { id: saveTemplateSource.id, name: saveTemplateSource.name } : null
+        }
+        onClose={() => setSaveTemplateSource(null)}
+        onSaved={() => {
+          void fetchTemplates();
+        }}
+      />
+
       {/* Add Key Modal */}
       <Modal
         isOpen={showAddModal}
         title={t("createKey")}
+        maxWidth={showFullPolicyEditor ? "max-w-4xl" : "max-w-xl"}
         bodyClassName="p-6 max-h-[calc(100vh-150px)] overflow-y-auto"
         onClose={() => {
           setShowAddModal(false);
-          setNewKeyName("");
-          setNewKeyManageEnabled(false);
-          setNewKeySelfUsageEnabled(true);
-          setNewKeyAccountQuotaEnabled(false);
-          setNewKeyAllowUsageCommand(false);
-          setNameError(null);
-          setCreateError(null);
+          resetCreateKeyModalState();
         }}
       >
         <div ref={createKeyFormRef} className="flex flex-col gap-4">
@@ -1135,6 +1384,53 @@ export default function ApiManagerPageClient() {
               hint={t("keyNameDesc")}
             />
           </div>
+
+          {/* Template Picker */}
+          <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-surface/40">
+            <Select
+              label={t("templatePickerLabel")}
+              value={selectedTemplateId}
+              onChange={(e) => void handleSelectTemplateInCreateModal(e.target.value)}
+              disabled={loadingTemplatePolicy || isSubmitting}
+              options={[
+                { value: "", label: t("templatePickerNone") },
+                ...templates.map((tpl) => ({
+                  value: tpl.id,
+                  label: `${tpl.name} (rev ${tpl.revision})`,
+                })),
+              ]}
+              hint={t("templatePickerHint")}
+            />
+            {loadingTemplatePolicy && (
+              <div className="flex items-center gap-2 text-xs text-text-muted">
+                <Icon name="progress_activity" size={14} className="animate-spin text-primary" />
+                <span>{t("loadingTemplatePolicy")}</span>
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              {summarizeKeyTemplatePolicy(draftCreatePolicy, t).map((badge) => (
+                <span
+                  key={badge.id}
+                  className="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-2 border border-border/60 text-[11px] font-medium text-text-secondary"
+                >
+                  {badge.label}
+                </span>
+              ))}
+              {selectedTemplateRef && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[11px] font-medium">
+                  <Icon name="bookmarks" size={12} />
+                  {t("templateSnapshotBadge", { revision: selectedTemplateRef.revision })}
+                </span>
+              )}
+              {isCreatePolicyDirty && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-warning/10 text-warning text-[11px] font-medium">
+                  <Icon name="edit_note" size={12} />
+                  {t("policyCustomizedBadge")}
+                </span>
+              )}
+            </div>
+          </div>
+
           <div className="flex items-start justify-between gap-3 p-3 rounded-lg border border-border bg-surface/40">
             <div className="flex flex-col gap-1">
               <p className="text-sm font-medium text-text-main">{t("managementAccess")}</p>
@@ -1144,7 +1440,11 @@ export default function ApiManagerPageClient() {
               size="sm"
               className="shrink-0"
               checked={newKeyManageEnabled}
-              onChange={setNewKeyManageEnabled}
+              disabled={isSubmitting || loadingTemplatePolicy}
+              onChange={(checked) => {
+                setNewKeyManageEnabled(checked);
+                setCreateKeyFormState((prev) => ({ ...prev, manageEnabled: checked }));
+              }}
               ariaLabel={t("managementAccess")}
             />
           </div>
@@ -1162,10 +1462,17 @@ export default function ApiManagerPageClient() {
                 size="sm"
                 className="shrink-0"
                 checked={newKeySelfUsageEnabled}
+                disabled={isSubmitting || loadingTemplatePolicy}
                 onChange={() =>
                   setNewKeySelfUsageEnabled((prev) => {
-                    if (prev) setNewKeyAccountQuotaEnabled(false);
-                    return !prev;
+                    const next = !prev;
+                    if (!next) setNewKeyAccountQuotaEnabled(false);
+                    setCreateKeyFormState((form) => ({
+                      ...form,
+                      selfUsageEnabled: next,
+                      selfAccountQuotaEnabled: next ? form.selfAccountQuotaEnabled : false,
+                    }));
+                    return next;
                   })
                 }
                 ariaLabel={t("ownUsageVisibility")}
@@ -1180,8 +1487,11 @@ export default function ApiManagerPageClient() {
                 size="sm"
                 className="shrink-0"
                 checked={newKeyAccountQuotaEnabled}
-                disabled={!newKeySelfUsageEnabled}
-                onChange={setNewKeyAccountQuotaEnabled}
+                disabled={isSubmitting || loadingTemplatePolicy || !newKeySelfUsageEnabled}
+                onChange={(checked) => {
+                  setNewKeyAccountQuotaEnabled(checked);
+                  setCreateKeyFormState((prev) => ({ ...prev, selfAccountQuotaEnabled: checked }));
+                }}
                 ariaLabel={t("sharedAccountQuotaVisibility")}
               />
             </div>
@@ -1194,11 +1504,46 @@ export default function ApiManagerPageClient() {
                 size="sm"
                 className="shrink-0"
                 checked={newKeyAllowUsageCommand}
-                onChange={setNewKeyAllowUsageCommand}
+                disabled={isSubmitting || loadingTemplatePolicy}
+                onChange={(checked) => {
+                  setNewKeyAllowUsageCommand(checked);
+                  setCreateKeyFormState((prev) => ({ ...prev, allowUsageCommand: checked }));
+                }}
                 ariaLabel={t("localUsageCommand")}
               />
             </div>
           </div>
+
+          {/* Expandable Full 6-Tab Policy Editor */}
+          <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface/20 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-text-main">{t("fullPolicyEditorTitle")}</p>
+                <p className="text-xs text-text-muted">{t("fullPolicyEditorDesc")}</p>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={showFullPolicyEditor ? "expand_less" : "tune"}
+                onClick={() => setShowFullPolicyEditor((prev) => !prev)}
+              >
+                {showFullPolicyEditor ? t("hideFullPolicyEditor") : t("customizeFullPolicy")}
+              </Button>
+            </div>
+            {showFullPolicyEditor && (
+              <div className="pt-2 border-t border-border/60">
+                <KeyPolicySixTabEditor
+                  policy={draftCreatePolicy}
+                  formStateOverride={createKeyFormState}
+                  onFormStateChange={syncCreateKeyFormState}
+                  onValidationStateChange={handleEditorValidation}
+                  serverReferenceIssues={createKeyRefIssues}
+                  disabled={isSubmitting || loadingTemplatePolicy}
+                />
+              </div>
+            )}
+          </div>
+
           {createError && (
             <Alert
               variant="critical"
@@ -1212,13 +1557,7 @@ export default function ApiManagerPageClient() {
             <Button
               onClick={() => {
                 setShowAddModal(false);
-                setNewKeyName("");
-                setNewKeyManageEnabled(false);
-                setNewKeySelfUsageEnabled(true);
-                setNewKeyAccountQuotaEnabled(false);
-                setNewKeyAllowUsageCommand(false);
-                setNameError(null);
-                setCreateError(null);
+                resetCreateKeyModalState();
               }}
               variant="ghost"
               fullWidth
@@ -1228,7 +1567,12 @@ export default function ApiManagerPageClient() {
             <Button
               onClick={handleCreateKey}
               fullWidth
-              disabled={!newKeyName.trim()}
+              disabled={
+                !newKeyName.trim() ||
+                loadingTemplatePolicy ||
+                hasCreatePolicyErrors ||
+                hasBlockingCreateRefIssues
+              }
               loading={isSubmitting}
             >
               {t("createKey")}
