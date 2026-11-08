@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "ebe a",
     "errNoReply": "⚠️ Enweghị azị site n'ọdụ ụzọ.",
     "btnSend": "Zipu"
+  },
+  "falNative": {
+    "title": "Nlereanya nke API Fal",
+    "description": "Chọta ebe njedebe, budata nhazi ya, ma jiri ntinye edepụtara n’akwụkwọ ntuziaka ya mee ya. Ọnọdụ ahịrị ọrụ na nnyefe data na-aga n’ihu nke Fal na-anọ iche.",
+    "connectionRequired": "Tinye njikọ nwere igodo API Fal na mbụ.",
+    "category": "Otu",
+    "endpoint": "ID ebe njedebe",
+    "reasoning": "Njikwa ntụgharị uche",
+    "input": "Ntinye JSON n’ụdị Fal (usoro ihe ndị dị n’usoro data anaghị agbanwe)",
+    "transport": "Ụzọ mbufe",
+    "run": "Mee ka nlereanya rụọ ọrụ",
+    "job": "ID ọrụ echekwara",
+    "register": "Debanye ebe njedebe ma ọ bụ nhazi ga-anọchi nke dị ugbu a",
+    "schema": "Nhazi OpenAPI 3",
+    "download": "Budata faịlụ nsonaazụ",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

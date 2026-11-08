@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "ott",
     "errNoReply": "⚠️ Nincs válasz a kaputól.",
     "btnSend": "Küldés"
+  },
+  "falNative": {
+    "title": "Natív Fal-modellek",
+    "description": "Keressen egy végpontot, töltse be a sémáját, és futtassa a dokumentált bemeneti adatokkal. A várólista állapota és a natív adatfolyam külön marad.",
+    "connectionRequired": "Először adjon hozzá egy kapcsolatot Fal API-kulccsal.",
+    "category": "Kategória",
+    "endpoint": "Végpontazonosító",
+    "reasoning": "Következtetési beállítás",
+    "input": "Natív JSON-bemenet (a tömbelemek sorrendje megmarad)",
+    "transport": "Átviteli mód",
+    "run": "Modell futtatása",
+    "job": "Mentett feladat azonosítója",
+    "register": "Végpont regisztrálása vagy séma felülbírálása",
+    "schema": "OpenAPI 3-séma",
+    "download": "Kimeneti fájl letöltése",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

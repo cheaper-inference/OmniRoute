@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "அங்கு",
     "errNoReply": "⚠️ வாயிலிடமிருந்து பதில் இல்லை.",
     "btnSend": "அனுப்பு"
+  },
+  "falNative": {
+    "title": "Fal இன் சொந்த மாதிரிகள்",
+    "description": "ஓர் இறுதிப்புள்ளியைக் கண்டறிந்து, அதன் ஸ்கீமாவை ஏற்றி, ஆவணத்தில் குறிப்பிடப்பட்ட உள்ளீடுகளுடன் இயக்கவும். வரிசையின் நிலையும் நேட்டிவ் ஸ்ட்ரீமிங்கும் தனித்தனியாகவே இருக்கும்.",
+    "connectionRequired": "முதலில் Fal API விசையைப் பயன்படுத்தும் இணைப்பைச் சேர்க்கவும்.",
+    "category": "வகை",
+    "endpoint": "இறுதிப்புள்ளி ID",
+    "reasoning": "பகுத்தறிதல் கட்டுப்பாடு",
+    "input": "நேட்டிவ் வடிவிலான JSON உள்ளீடு (அணி உறுப்புகளின் வரிசை பாதுகாக்கப்படும்)",
+    "transport": "கோரிக்கை பரிமாற்ற முறை",
+    "run": "மாதிரியை இயக்கு",
+    "job": "சேமிக்கப்பட்ட பணியின் ID",
+    "register": "இறுதிப்புள்ளி அல்லது மாற்று ஸ்கீமாவைப் பதிவுசெய்",
+    "schema": "OpenAPI 3 ஸ்கீமா",
+    "download": "வெளியீட்டுக் கோப்பைப் பதிவிறக்கு",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "orada",
     "errNoReply": "⚠️ Geçiş noktasından yanıt gelmedi.",
     "btnSend": "Gönder"
+  },
+  "falNative": {
+    "title": "Fal’a özgü modeller",
+    "description": "Bir uç nokta bulun, şemasını yükleyin ve belgelenmiş girdilerle çalıştırın. Kuyruk durumu ve Fal’a özgü akış ayrı kalır.",
+    "connectionRequired": "Önce bir Fal API anahtarı bağlantısı ekleyin.",
+    "category": "Kategori",
+    "endpoint": "Uç nokta kimliği",
+    "reasoning": "Akıl yürütme denetimi",
+    "input": "Fal’a özgü JSON girdisi (diziler sıralarını korur)",
+    "transport": "Aktarım yöntemi",
+    "run": "Modeli çalıştır",
+    "job": "Kaydedilen iş kimliği",
+    "register": "Uç nokta veya mevcut şemanın yerine kullanılacak şemayı kaydet",
+    "schema": "OpenAPI 3 şeması",
+    "download": "Çıktı dosyasını indir",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

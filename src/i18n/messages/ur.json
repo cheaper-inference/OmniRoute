@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "اتھا",
     "errNoReply": "⚠️ گیٹوے سے کوئی جواب نہیں ملا۔",
     "btnSend": "بھیجیں"
+  },
+  "falNative": {
+    "title": "Fal کے اپنے ماڈلز",
+    "description": "اینڈ پوائنٹ تلاش کریں، اس کی اسکیما لوڈ کریں اور دستاویزات میں درج ان پٹس کے ساتھ اسے چلائیں۔ قطار کی حالت اور Fal کی اپنی اسٹریمنگ الگ رہتی ہیں۔",
+    "connectionRequired": "پہلے Fal API کلید کے ساتھ ایک کنکشن شامل کریں۔",
+    "category": "زمرہ",
+    "endpoint": "اینڈ پوائنٹ کی ID",
+    "reasoning": "استدلال کا کنٹرول",
+    "input": "Fal کے اپنے فارمیٹ میں JSON ان پٹ (ارے اپنی ترتیب برقرار رکھتے ہیں)",
+    "transport": "درخواست کی ترسیل کا طریقہ",
+    "run": "ماڈل چلائیں",
+    "job": "محفوظ کردہ کام کی ID",
+    "register": "اینڈ پوائنٹ یا متبادل اسکیما رجسٹر کریں",
+    "schema": "OpenAPI 3 اسکیما",
+    "download": "آؤٹ پٹ فائل ڈاؤن لوڈ کریں",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

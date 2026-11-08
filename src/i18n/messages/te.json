@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "అక్కడ",
     "errNoReply": "⚠️ గేట్‌వే నుండి ప్రతిస్పందన లేదు.",
     "btnSend": "పంపండి"
+  },
+  "falNative": {
+    "title": "Fal యొక్క స్వంత మోడళ్లు",
+    "description": "ఎండ్‌పాయింట్‌ను కనుగొని, దాని స్కీమాను లోడ్ చేసి, డాక్యుమెంటేషన్‌లో పేర్కొన్న ఇన్‌పుట్‌లతో అమలు చేయండి. క్యూ స్థితి మరియు నేటివ్ స్ట్రీమింగ్ వేర్వేరుగా ఉంటాయి.",
+    "connectionRequired": "ముందుగా Fal API కీని ఉపయోగించే కనెక్షన్‌ను జోడించండి.",
+    "category": "వర్గం",
+    "endpoint": "ఎండ్‌పాయింట్ ID",
+    "reasoning": "రీజనింగ్ నియంత్రణ",
+    "input": "నేటివ్ ఫార్మాట్‌లో JSON ఇన్‌పుట్ (అరేల క్రమం అలాగే ఉంటుంది)",
+    "transport": "అభ్యర్థన పంపే విధానం",
+    "run": "మోడల్‌ను అమలు చేయండి",
+    "job": "సేవ్ చేసిన పని ID",
+    "register": "ఎండ్‌పాయింట్ లేదా ప్రత్యామ్నాయ స్కీమాను నమోదు చేయండి",
+    "schema": "OpenAPI 3 స్కీమా",
+    "download": "అవుట్‌పుట్ ఫైల్‌ను డౌన్‌లోడ్ చేయండి",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

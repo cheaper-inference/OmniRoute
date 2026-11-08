@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "tur",
     "errNoReply": "⚠️ Nav atbildes no vārta.",
     "btnSend": "Nosūtīt"
+  },
+  "falNative": {
+    "title": "Fal natīvie modeļi",
+    "description": "Atrodiet galapunktu, ielādējiet tā shēmu un palaidiet to ar dokumentētajiem ievades datiem. Rindas statuss un natīvā straumēšana paliek atsevišķi.",
+    "connectionRequired": "Vispirms pievienojiet savienojumu ar Fal API atslēgu.",
+    "category": "Kategorija",
+    "endpoint": "Galapunkta ID",
+    "reasoning": "Spriešanas iestatījums",
+    "input": "JSON ievade natīvajā formātā (masīvu elementu secība tiek saglabāta)",
+    "transport": "Pārsūtīšanas veids",
+    "run": "Palaist modeli",
+    "job": "Saglabātā uzdevuma ID",
+    "register": "Reģistrēt galapunktu vai aizstāt shēmu",
+    "schema": "OpenAPI 3 shēma",
+    "download": "Lejupielādēt izvades failu",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

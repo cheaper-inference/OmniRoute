@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "මිතුරා",
     "errNoReply": "⚠️ ගේට්වේව් එකෙන් පිළිතුරක් නැත.",
     "btnSend": "යවන්න"
+  },
+  "falNative": {
+    "title": "Fal හි ස්වීය ආකෘති",
+    "description": "අන්ත ලක්ෂ්‍යයක් සොයා, එහි ස්කීමාව පූරණය කර, ලේඛනවල දක්වා ඇති ආදාන භාවිතයෙන් ධාවනය කරන්න. පෝලිමේ තත්ත්වය සහ ස්වීය දත්ත ප්‍රවාහය වෙන්ව පවතී.",
+    "connectionRequired": "පළමුව Fal API යතුරක් භාවිත කරන සම්බන්ධතාවක් එක් කරන්න.",
+    "category": "කාණ්ඩය",
+    "endpoint": "අන්ත ලක්ෂ්‍යයේ ID",
+    "reasoning": "තර්කන පාලනය",
+    "input": "ස්වීය ආකෘතියේ JSON ආදානය (අරාවල මූලද්‍රව්‍ය අනුපිළිවෙළ රැකේ)",
+    "transport": "ඉල්ලීම සම්ප්‍රේෂණය කරන ක්‍රමය",
+    "run": "ආකෘතිය ධාවනය කරන්න",
+    "job": "සුරකින ලද කාර්යයේ ID",
+    "register": "අන්ත ලක්ෂ්‍යයක් හෝ ප්‍රතිස්ථාපන ස්කීමාවක් ලියාපදිංචි කරන්න",
+    "schema": "OpenAPI 3 ස්කීමාව",
+    "download": "ප්‍රතිදාන ගොනුව බාගන්න",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

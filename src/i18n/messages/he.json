@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "שם",
     "errNoReply": "⚠️ אין תגובה מהשער.",
     "btnSend": "שלח"
+  },
+  "falNative": {
+    "title": "המודלים המקוריים של Fal",
+    "description": "מצאו נקודת קצה, טענו את הסכמה שלה והפעילו אותה עם הקלט המתואר בתיעוד. מצב התור וההזרמה המקורית נשארים נפרדים.",
+    "connectionRequired": "יש להוסיף תחילה חיבור עם מפתח API של Fal.",
+    "category": "קטגוריה",
+    "endpoint": "מזהה נקודת קצה",
+    "reasoning": "בקרת הסקה",
+    "input": "קלט JSON בפורמט המקורי (סדר האיברים במערכים נשמר)",
+    "transport": "אמצעי תעבורה",
+    "run": "הפעלת מודל",
+    "job": "מזהה משימה שמורה",
+    "register": "רישום נקודת קצה או סכמה חלופית",
+    "schema": "סכמת OpenAPI 3",
+    "download": "הורדת קובץ פלט",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

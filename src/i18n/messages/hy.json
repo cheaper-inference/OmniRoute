@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "ա՛հա",
     "errNoReply": "⚠️ Գրեյթվեյից պատասխան չկա։",
     "btnSend": "Ուղարկել"
+  },
+  "falNative": {
+    "title": "Fal-ի սեփական մոդելներ",
+    "description": "Գտեք վերջնակետը, բեռնեք դրա սխեման և գործարկեք այն փաստաթղթերում նկարագրված մուտքային տվյալներով։ Հերթի կարգավիճակն ու բնօրինակ հոսքային փոխանցումը մնում են առանձին։",
+    "connectionRequired": "Նախ ավելացրեք կապ՝ Fal API բանալիով։",
+    "category": "Կատեգորիա",
+    "endpoint": "Վերջնակետի ID",
+    "reasoning": "Դատողության կարգավորում",
+    "input": "Բնօրինակ ձևաչափով JSON մուտք (զանգվածների տարրերի հերթականությունը պահպանվում է)",
+    "transport": "Հարցման փոխանցման եղանակ",
+    "run": "Գործարկել մոդելը",
+    "job": "Պահպանված առաջադրանքի ID",
+    "register": "Գրանցել վերջնակետ կամ փոխարինող սխեմա",
+    "schema": "OpenAPI 3 սխեմա",
+    "download": "Ներբեռնել արդյունքի ֆայլը",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

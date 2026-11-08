@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "der",
     "errNoReply": "⚠️ Intet svar fra gatewayen.",
     "btnSend": "Send"
+  },
+  "falNative": {
+    "title": "Fal-modeller i oprindeligt format",
+    "description": "Find et slutpunkt, indlæs dets skema, og kør det med de dokumenterede input. Køstatus og streaming i oprindeligt format forbliver adskilte.",
+    "connectionRequired": "Tilføj først en forbindelse med en Fal-API-nøgle.",
+    "category": "Kategori",
+    "endpoint": "Slutpunktets ID",
+    "reasoning": "Indstilling for ræsonnering",
+    "input": "JSON-input i oprindeligt format (rækkefølgen i arrays bevares)",
+    "transport": "Transportmetode",
+    "run": "Kør model",
+    "job": "Gemt job-ID",
+    "register": "Registrer slutpunkt eller tilsidesæt skema",
+    "schema": "OpenAPI 3-skema",
+    "download": "Hent outputfil",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

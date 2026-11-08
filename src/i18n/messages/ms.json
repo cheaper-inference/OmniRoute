@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "di sana",
     "errNoReply": "⚠️ Tiada respons daripada gerbang.",
     "btnSend": "Hantar"
+  },
+  "falNative": {
+    "title": "Model asli Fal",
+    "description": "Cari titik akhir, muatkan skemanya dan jalankan dengan input yang didokumenkan. Status baris gilir dan penstriman asli kekal berasingan.",
+    "connectionRequired": "Tambahkan sambungan dengan kunci API Fal terlebih dahulu.",
+    "category": "Kategori",
+    "endpoint": "ID titik akhir",
+    "reasoning": "Kawalan penaakulan",
+    "input": "Input JSON dalam format asli (susunan elemen tatasusunan dikekalkan)",
+    "transport": "Kaedah penghantaran permintaan",
+    "run": "Jalankan model",
+    "job": "ID tugas yang disimpan",
+    "register": "Daftar titik akhir atau skema pengganti",
+    "schema": "Skema OpenAPI 3",
+    "download": "Muat turun fail output",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

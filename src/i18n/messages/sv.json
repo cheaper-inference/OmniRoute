@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "där",
     "errNoReply": "⚠️ Inget svar från gateway.",
     "btnSend": "Skicka"
+  },
+  "falNative": {
+    "title": "Nativa Fal-modeller",
+    "description": "Hitta en slutpunkt, läs in dess schema och kör den med dokumenterade indata. Köstatus och nativ strömning förblir separata.",
+    "connectionRequired": "Lägg först till en anslutning med en API-nyckel för Fal.",
+    "category": "Kategori",
+    "endpoint": "Slutpunkts-ID",
+    "reasoning": "Styrning av resonemang",
+    "input": "Nativa JSON-indata (arrayer behåller sin ordning)",
+    "transport": "Överföringssätt",
+    "run": "Kör modell",
+    "job": "Sparat jobb-ID",
+    "register": "Registrera slutpunkt eller ersättningsschema",
+    "schema": "OpenAPI 3-schema",
+    "download": "Ladda ned resultatfil",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

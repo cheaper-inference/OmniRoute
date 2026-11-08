@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "هناك",
     "errNoReply": "⚠️ لا توجد ردود من بوابة.",
     "btnSend": "إرسال"
+  },
+  "falNative": {
+    "title": "نماذج Fal الأصلية",
+    "description": "اعثر على نقطة نهاية، وحمّل مخططها، وشغّلها باستخدام المدخلات الموضّحة في توثيقها. تظل حالة قائمة الانتظار والبث الأصلي منفصلين.",
+    "connectionRequired": "أضف أولًا اتصالًا بمفتاح API خاص بـ Fal.",
+    "category": "الفئة",
+    "endpoint": "معرّف نقطة النهاية",
+    "reasoning": "التحكم في الاستدلال",
+    "input": "مدخلات JSON بالتنسيق الأصلي (تحتفظ المصفوفات بترتيبها)",
+    "transport": "طريقة النقل",
+    "run": "تشغيل النموذج",
+    "job": "معرّف المهمة المحفوظة",
+    "register": "تسجيل نقطة نهاية أو مخطط بديل",
+    "schema": "مخطط OpenAPI 3",
+    "download": "تنزيل ملف الناتج",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

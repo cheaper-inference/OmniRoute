@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "hemm",
     "errNoReply": "⚠️ L-ebda rispost mill-gateway.",
     "btnSend": "Ibgħat"
+  },
+  "falNative": {
+    "title": "Mudelli nattivi ta’ Fal",
+    "description": "Sib punt tat-tmiem, għabbi l-iskema tiegħu u ħaddmu bl-inputs dokumentati. L-istatus tal-kju u l-istreaming nattiv jibqgħu separati.",
+    "connectionRequired": "L-ewwel żid konnessjoni b’ċavetta API ta’ Fal.",
+    "category": "Kategorija",
+    "endpoint": "ID tal-punt tat-tmiem",
+    "reasoning": "Kontroll tar-raġunament",
+    "input": "Input JSON fil-format nattiv (l-elementi fl-arrays jibqgħu fl-istess ordni)",
+    "transport": "Metodu ta’ trasport",
+    "run": "Ħaddem il-mudell",
+    "job": "ID tal-kompitu ssejvjat",
+    "register": "Irreġistra punt tat-tmiem jew issostitwixxi l-iskema",
+    "schema": "Skema OpenAPI 3",
+    "download": "Niżżel il-fajl tal-output",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

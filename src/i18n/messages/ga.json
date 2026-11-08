@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "ansin",
     "errNoReply": "⚠️ Níl aon freagra ón ngeata.",
     "btnSend": "Seol"
+  },
+  "falNative": {
+    "title": "Samhlacha dúchasacha Fal",
+    "description": "Aimsigh críochphointe, lódáil a scéimre agus rith é leis na hionchuir dhoiciméadaithe. Fanann stádas na scuaine agus an sruthú dúchasach ar leithligh.",
+    "connectionRequired": "Cuir nasc a úsáideann eochair API Fal leis ar dtús.",
+    "category": "Catagóir",
+    "endpoint": "Aitheantas an chríochphointe",
+    "reasoning": "Socrú réasúnaíochta",
+    "input": "Ionchur JSON sa bhformáid dhúchasach (coinnítear ord na n-eilimintí sna heagair)",
+    "transport": "Modh iompair",
+    "run": "Rith an tsamhail",
+    "job": "Aitheantas an taisc shábháilte",
+    "register": "Cláraigh críochphointe nó sáraigh an scéimre",
+    "schema": "Scéimre OpenAPI 3",
+    "download": "Íoslódáil an comhad aschuir",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

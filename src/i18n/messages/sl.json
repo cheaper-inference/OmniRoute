@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "tja",
     "errNoReply": "⚠️ Ni odgovora od gatewaysa.",
     "btnSend": "Pošlji"
+  },
+  "falNative": {
+    "title": "Izvorni modeli Fal",
+    "description": "Poiščite končno točko, naložite njeno shemo in jo zaženite z dokumentiranimi vhodnimi podatki. Stanje čakalne vrste in izvorno pretakanje ostajata ločena.",
+    "connectionRequired": "Najprej dodajte povezavo s ključem API Fal.",
+    "category": "Kategorija",
+    "endpoint": "ID končne točke",
+    "reasoning": "Nadzor sklepanja",
+    "input": "Izvorni vhodni podatki JSON (polja ohranijo svoj vrstni red)",
+    "transport": "Način prenosa",
+    "run": "Zaženi model",
+    "job": "ID shranjenega opravila",
+    "register": "Registriraj končno točko ali nadomestno shemo",
+    "schema": "Shema OpenAPI 3",
+    "download": "Prenesi izhodno datoteko",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

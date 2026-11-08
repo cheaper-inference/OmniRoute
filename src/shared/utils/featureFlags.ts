@@ -648,3 +648,20 @@ export function isImageGenerationLongJobsEnabled(): boolean {
     return false;
   }
 }
+
+/**
+ * Fal native gateway (#18849). Opt-in: off keeps the /v1/fal routes unavailable and every Fal
+ * compatibility request on its established shape.
+ * Fail closed: an unreadable flag store keeps the pre-flag behavior (disabled).
+ */
+export function isFalNativeEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("FAL_NATIVE_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve FAL_NATIVE_ENABLED, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}

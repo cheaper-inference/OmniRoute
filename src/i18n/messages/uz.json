@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "u yerda",
     "errNoReply": "⚠️ Vositedan javob yoʻq.",
     "btnSend": "Yuborish"
+  },
+  "falNative": {
+    "title": "Fal’ning o‘z modellari",
+    "description": "Yakuniy nuqtani toping, uning sxemasini yuklang va hujjatlarda ko‘rsatilgan kirish ma’lumotlari bilan ishga tushiring. Navbat holati va Fal’ning oqimli uzatishi alohida qoladi.",
+    "connectionRequired": "Avval Fal API kaliti bilan ulanish qo‘shing.",
+    "category": "Toifa",
+    "endpoint": "Yakuniy nuqta ID si",
+    "reasoning": "Mulohaza yuritishni boshqarish",
+    "input": "Fal formatidagi JSON kirish ma’lumotlari (massivlar o‘z tartibini saqlaydi)",
+    "transport": "Uzatish usuli",
+    "run": "Modelni ishga tushirish",
+    "job": "Saqlangan vazifa ID si",
+    "register": "Yakuniy nuqta yoki o‘rnini bosuvchi sxemani ro‘yxatdan o‘tkazish",
+    "schema": "OpenAPI 3 sxemasi",
+    "download": "Natija faylini yuklab olish",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

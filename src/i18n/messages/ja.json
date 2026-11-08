@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "ユーザー",
     "errNoReply": "⚠️ ゲートウェイからの応答がありません。",
     "btnSend": "送信"
+  },
+  "falNative": {
+    "title": "Fal ネイティブモデル",
+    "description": "エンドポイントを探し、スキーマを読み込んで、ドキュメントに記載された入力で実行します。キューの状態とネイティブストリーミングは個別に扱われます。",
+    "connectionRequired": "まず Fal API キーを使用する接続を追加してください。",
+    "category": "カテゴリ",
+    "endpoint": "エンドポイント ID",
+    "reasoning": "推論の設定",
+    "input": "ネイティブ形式の JSON 入力（配列の順序は保持されます）",
+    "transport": "リクエストの送信方式",
+    "run": "モデルを実行",
+    "job": "保存済みジョブ ID",
+    "register": "エンドポイントまたは上書き用スキーマを登録",
+    "schema": "OpenAPI 3 スキーマ",
+    "download": "出力ファイルをダウンロード",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "वहाँ",
     "errNoReply": "⚠️ गेटवे से कोई उत्तर नहीं मिला।",
     "btnSend": "भेजें"
+  },
+  "falNative": {
+    "title": "Fal के अपने मॉडल",
+    "description": "एंडपॉइंट खोजें, उसका स्कीमा लोड करें और दस्तावेज़ में बताए गए इनपुट के साथ चलाएँ। कतार की स्थिति और मूल स्ट्रीमिंग अलग-अलग रहती हैं।",
+    "connectionRequired": "पहले Fal API कुंजी वाला कनेक्शन जोड़ें।",
+    "category": "श्रेणी",
+    "endpoint": "एंडपॉइंट ID",
+    "reasoning": "तर्क नियंत्रण",
+    "input": "मूल प्रारूप में JSON इनपुट (ऐरे का क्रम बना रहता है)",
+    "transport": "अनुरोध भेजने का माध्यम",
+    "run": "मॉडल चलाएँ",
+    "job": "सहेजे गए कार्य की ID",
+    "register": "एंडपॉइंट या स्कीमा ओवरराइड पंजीकृत करें",
+    "schema": "OpenAPI 3 स्कीमा",
+    "download": "आउटपुट फ़ाइल डाउनलोड करें",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

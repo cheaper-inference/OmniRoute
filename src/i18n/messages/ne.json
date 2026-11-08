@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "तहाँ",
     "errNoReply": "⚠️ गेटविरुबाट जवाफ प्राप्त भएन।",
     "btnSend": "पठाउनुहोस्"
+  },
+  "falNative": {
+    "title": "Fal का आफ्नै मोडेलहरू",
+    "description": "एन्डपोइन्ट खोज्नुहोस्, त्यसको स्किमा लोड गर्नुहोस् र दस्तावेजमा उल्लेख गरिएका इनपुटहरूसँग चलाउनुहोस्। लामको स्थिति र मूल स्ट्रिमिङ अलग रहन्छन्।",
+    "connectionRequired": "पहिले Fal API कुञ्जी प्रयोग गर्ने जडान थप्नुहोस्।",
+    "category": "श्रेणी",
+    "endpoint": "एन्डपोइन्ट ID",
+    "reasoning": "तर्क नियन्त्रण",
+    "input": "मूल ढाँचामा JSON इनपुट (एरेहरूको क्रम कायम रहन्छ)",
+    "transport": "अनुरोध पठाउने माध्यम",
+    "run": "मोडेल चलाउनुहोस्",
+    "job": "सुरक्षित गरिएको कार्यको ID",
+    "register": "एन्डपोइन्ट वा प्रतिस्थापन स्किमा दर्ता गर्नुहोस्",
+    "schema": "OpenAPI 3 स्किमा",
+    "download": "आउटपुट फाइल डाउनलोड गर्नुहोस्",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "朋友",
     "errNoReply": "⚠️ 网关没有回复。",
     "btnSend": "发送"
+  },
+  "falNative": {
+    "title": "Fal 原生模型",
+    "description": "查找端点，加载其结构定义，并使用文档中说明的输入运行。队列状态与原生流式传输保持独立。",
+    "connectionRequired": "请先添加使用 Fal API 密钥的连接。",
+    "category": "类别",
+    "endpoint": "端点 ID",
+    "reasoning": "推理控制",
+    "input": "原生 JSON 输入（数组保留其顺序）",
+    "transport": "传输方式",
+    "run": "运行模型",
+    "job": "已保存的任务 ID",
+    "register": "注册端点或覆盖结构定义",
+    "schema": "OpenAPI 3 结构定义",
+    "download": "下载输出文件",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

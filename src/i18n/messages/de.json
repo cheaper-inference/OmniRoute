@@ -16120,5 +16120,28 @@
     "greetingFallbackName": "dort",
     "errNoReply": "⚠️ Keine Antwort vom Gateway.",
     "btnSend": "Senden"
+  },
+  "falNative": {
+    "title": "Native Fal-Modelle",
+    "description": "Entdecke einen Endpunkt, lade sein Schema und führe ihn mit den dokumentierten Eingaben aus. Warteschlangenstatus und natives Streaming bleiben getrennt.",
+    "connectionRequired": "Füge zuerst eine Verbindung mit einem Fal-API-Schlüssel hinzu.",
+    "category": "Kategorie",
+    "endpoint": "Endpunkt-ID",
+    "reasoning": "Reasoning-Einstellung",
+    "input": "Native JSON-Eingabe (die Reihenfolge der Array-Elemente bleibt erhalten)",
+    "transport": "Übertragungsart",
+    "run": "Modell ausführen",
+    "job": "Gespeicherte Auftrags-ID",
+    "register": "Endpunkt registrieren oder Schema überschreiben",
+    "schema": "OpenAPI 3-Schema",
+    "download": "Ausgabedatei herunterladen",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }
