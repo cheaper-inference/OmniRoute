@@ -2,7 +2,9 @@ import { clearHealthCheckLogCache } from "@/lib/tokenHealthCheck";
 import { setCustomBannedSignals } from "@omniroute/open-sse/services/accountFallback.ts";
 import { setOpencodeServerSettings } from "@omniroute/open-sse/services/opencodeServerSettings.ts";
 import {
+  setOperatorProviderErrorDefaults,
   setOperatorProviderErrorRules,
+  type OperatorProviderErrorDefault,
   type OperatorProviderErrorRule,
 } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
@@ -63,6 +65,7 @@ interface RuntimeSettingsSnapshot {
   customBannedSignals: string[];
   providerErrorRules: Record<string, OperatorProviderErrorRule[]> | null;
   opencodeServerUrl: string;
+  providerErrorDefaults: Record<string, OperatorProviderErrorDefault> | null;
   cliVersionOverrides: CliVersionOverrides;
 }
 
@@ -93,6 +96,7 @@ const DEFAULT_RUNTIME_SETTINGS_SNAPSHOT: RuntimeSettingsSnapshot = {
   customBannedSignals: [],
   providerErrorRules: null,
   opencodeServerUrl: "",
+  providerErrorDefaults: null,
   cliVersionOverrides: {},
 };
 
@@ -197,11 +201,26 @@ function normalizeOperatorProviderErrorRules(
       (entry): entry is OperatorProviderErrorRule =>
         !!entry &&
         typeof entry === "object" &&
-        typeof (entry as OperatorProviderErrorRule).status === "number" &&
-        typeof (entry as OperatorProviderErrorRule).match === "string" &&
+        (typeof (entry as OperatorProviderErrorRule).status === "number" ||
+          typeof (entry as OperatorProviderErrorRule).match === "string") &&
         typeof (entry as OperatorProviderErrorRule).scope === "string"
     );
     if (rules.length > 0) result[provider.toLowerCase()] = rules;
+  }
+  return Object.keys(result).length > 0 ? result : null;
+}
+
+/** Same defensive shape-check for the operator catch-all defaults. */
+function normalizeOperatorProviderErrorDefaults(
+  value: unknown
+): Record<string, OperatorProviderErrorDefault> | null {
+  if (value === null || typeof value !== "object") return null;
+  const result: Record<string, OperatorProviderErrorDefault> = {};
+  for (const [provider, entry] of Object.entries(value as Record<string, unknown>)) {
+    const cooldownMs = (entry as OperatorProviderErrorDefault | null)?.cooldownMs;
+    if (typeof cooldownMs === "number" && cooldownMs > 0) {
+      result[provider.toLowerCase()] = entry as OperatorProviderErrorDefault;
+    }
   }
   return Object.keys(result).length > 0 ? result : null;
 }
@@ -325,6 +344,7 @@ export function buildRuntimeSettingsSnapshot(
     providerErrorRules: normalizeOperatorProviderErrorRules(settings.providerErrorRules),
     opencodeServerUrl:
       typeof settings.opencode_server_url === "string" ? settings.opencode_server_url.trim() : "",
+    providerErrorDefaults: normalizeOperatorProviderErrorDefaults(settings.providerErrorDefaults),
     cliVersionOverrides: normalizeCliVersionOverrides(settings.cliVersionOverrides),
   };
 }
@@ -654,7 +674,14 @@ export async function applyRuntimeSettings(
     markChanged("opencodeServer");
   }
 
-  // CLI client-version overrides: swap the shared leaf store the [CC] /
+  if (
+    force ||
+    hasChanged(currentSnapshot.providerErrorDefaults, previousSnapshot.providerErrorDefaults)
+  ) {
+    setOperatorProviderErrorDefaults(currentSnapshot.providerErrorDefaults ?? undefined);
+  }
+
+  // CLI client-version overrides: swap the shared leaf store the Claude Code /
   // Codex identity presets read on every request. Cheap and idempotent, so it is
   // safe on every settings write (dashboard edit, import-json, config restore).
   //

@@ -51,6 +51,7 @@ export function supportsApiKeyOnFreeProvider(providerId: unknown): boolean {
 // Providers presented as one dashboard card with OAuth as the primary action
 // and a direct API-key alternative. Keep these out of FREE_APIKEY_PROVIDER_IDS.
 const DUAL_AUTH_PROVIDER_IDS = new Set([
+  "copilot-m365-web",
   "clinepass",
   "codebuddy-cn",
   "codebuddy-intl",

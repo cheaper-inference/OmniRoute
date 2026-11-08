@@ -12,6 +12,7 @@ import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/pr
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
 import { pickExpiryFirstConnection } from "./expiryFirstAccountSelection.ts";
 import { isModelScopedFailure, isQuotaExhaustedSignal } from "./modelScopedQuotaFailure.ts"; // #13548
+import { isCIPayloadQuotaFailure } from "./ciPayloadQuotaFailure.ts";
 import {
   getCachedRawProviderConnections,
   getCachedProviderNodes,
@@ -29,7 +30,7 @@ import {
 } from "@/lib/db/providers";
 import { getDbInstance } from "@/lib/db/core";
 import { getRecentEgressIpForConnection, EGRESS_IP_LOOKUP_WINDOW_MS } from "@/lib/db/proxyLogs";
-import { validateApiKey } from "@/lib/db/apiKeys";
+import { validateApiKey, type ApiKeyLookupOptions } from "@/lib/db/apiKeys";
 import {
   getActiveExclusiveConnectionLease,
   hashLeaseOwnerId,
@@ -217,6 +218,7 @@ import {
 } from "./exclusiveConnectionLeasePolicy";
 import { readHeaderValue, type AuthRequestHeaders } from "./headerReader.ts";
 import { isRequestScopedServerFailure } from "./syntheticEmptyStream.ts";
+import { getM365ReasoningCapSiblings } from "@omniroute/open-sse/services/m365ErrorPolicy.ts";
 import {
   getOAuthSessionAvailability,
   reserveOAuthSession,
@@ -2423,6 +2425,7 @@ function resolveUpstreamResetMs(fallback: {
   return fallback.quotaResetHintMs ?? null;
 }
 
+/** Record provider/account health failures while keeping upload-admission errors request-scoped. */
 export async function markAccountUnavailable(
   connectionId: string,
   status: number,
@@ -2443,6 +2446,11 @@ export async function markAccountUnavailable(
     structuredError?: { code?: string | null; type?: string | null } | null;
   } = {}
 ) {
+  // Preserve the transport's original 429; cooling Opus would hide the cause and
+  // prevent healthy small requests from using the same connection afterward.
+  if (isCIPayloadQuotaFailure(provider, status, options.structuredError?.code))
+    return { shouldFallback: false, cooldownMs: 0 };
+
   const currentMutex = markMutexes.get(connectionId) || Promise.resolve();
   let resolveMutex: (() => void) | undefined;
   markMutexes.set(
@@ -2642,6 +2650,51 @@ export async function markAccountUnavailable(
         `[T-PROBE] ${connectionId.slice(0, 8)} ${provider ?? ""} failure ${status} recorded — connection stays in the pool`
       );
       return { shouldFallback: true, cooldownMs: 0 };
+    }
+
+    // Native M365 mixes model licences/budgets and per-account throttling. Honor
+    // the classified scope before generic auth/ban and passthrough quota handling.
+    if (provider === "copilot-m365-web" && fallbackResult.ruleScope) {
+      const cooldownMs = fallbackResult.cooldownMs;
+      if (fallbackResult.ruleScope === "model" && model) {
+        for (const locked of [
+          model,
+          ...getM365ReasoningCapSiblings(
+            provider,
+            status,
+            errorText,
+            options.structuredError,
+            model
+          ),
+        ])
+          lockExactModel(
+            provider,
+            connectionId,
+            locked,
+            fallbackResult.reason || "forbidden",
+            cooldownMs
+          );
+        await updateProviderConnection(connectionId, {
+          lastErrorType: fallbackResult.reason,
+          lastError:
+            status === 403 ? "M365 model not licensed" : "M365 model priority budget exhausted",
+          lastErrorAt: new Date().toISOString(),
+          errorCode: status,
+        });
+        return { shouldFallback: true, cooldownMs };
+      }
+      if (fallbackResult.ruleScope === "connection") {
+        await updateProviderConnection(connectionId, {
+          lastErrorType: fallbackResult.reason,
+          lastError: status === 403 ? "M365 account not licensed" : "M365 account throttled",
+          lastErrorAt: new Date().toISOString(),
+          errorCode: status,
+          rateLimitedUntil: getUnavailableUntil(cooldownMs),
+          backoffLevel: fallbackResult.newBackoffLevel ?? backoffLevel,
+          testStatus: "unavailable",
+        });
+        return { shouldFallback: true, cooldownMs };
+      }
     }
 
     // #16824: a verified ModelScope model-access refusal does not invalidate
@@ -3522,12 +3575,12 @@ export function extractApiKey(request: AuthRequestLike, opts?: { allowUrl?: bool
  * persistent passthrough keys that always validate, surviving Docker
  * restarts and backup restores without DB dependency.
  */
-export async function isValidApiKey(apiKey: string) {
+export async function isValidApiKey(apiKey: string, options?: ApiKeyLookupOptions) {
   if (!apiKey) return false;
 
   // Persistent env-var key — always valid regardless of DB state (#1350)
   const envKey = process.env.OMNIROUTE_API_KEY || process.env.ROUTER_API_KEY;
   if (envKey && timingSafeCompare(apiKey, envKey)) return true;
 
-  return await validateApiKey(apiKey);
+  return await validateApiKey(apiKey, options);
 }

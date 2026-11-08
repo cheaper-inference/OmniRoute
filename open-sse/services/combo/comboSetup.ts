@@ -16,6 +16,7 @@ import {
   SKIP_UNIVERSAL_HANDOFF_FLAG,
 } from "../contextHandoff.ts";
 import { getLastSessionModel } from "../../../src/lib/db/contextHandoffs.ts";
+import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
 import { applyComboAgentMiddleware } from "../comboAgentMiddleware.ts";
 import { resolveComboSetupConfig, resolveComboTargetTimeoutMsForCombo } from "../comboConfig.ts";
 import { resolveResilienceSettings } from "../../../src/lib/resilience/settings";
@@ -57,7 +58,10 @@ function resolveContextCachePin(ctx: ComboContext): {
 } {
   const { combo, relayOptions, log } = ctx;
   const effectiveSessionId: string | null = combo.context_cache_protection
-    ? (relayOptions?.sessionId ?? deriveComboSessionKey(ctx.body))
+    ? scopeHandoffSessionId(
+        relayOptions?.sessionId ?? deriveComboSessionKey(ctx.body),
+        relayOptions?.apiKeyId
+      )
     : null;
   let pinnedModel: string | null = null;
   if (
