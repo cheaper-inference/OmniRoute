@@ -8,6 +8,8 @@ import {
   compareDisplayAccounts,
   matchesDisplayFilter,
   displayStatus,
+  isCooldownKind,
+  DISPLAY_KINDS,
 } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/availabilityDisplay.ts";
 const now = Date.parse("2099-01-01T00:00:00Z");
 const H = 3_600_000;
@@ -150,4 +152,10 @@ test("sort is green first, partial after ordinary green, descending fill, stable
     assert.equal(matchesDisplayFilter(a, "critical"), ["cd5", "cdw", "act"].includes(a.kind));
     assert.equal(matchesDisplayFilter(a, "ok"), a.kind === "ok");
   }
+});
+
+test("isCooldownKind covers exactly the cooldown kinds", () => {
+  const cooling = new Set<string>(["cd5", "cdw"]);
+  for (const kind of DISPLAY_KINDS)
+    assert.equal(isCooldownKind(kind), cooling.has(kind), `unexpected verdict for ${kind}`);
 });

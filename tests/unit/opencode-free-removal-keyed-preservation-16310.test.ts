@@ -3,10 +3,11 @@ import assert from "node:assert/strict";
 import { FREE_MODEL_BUDGETS } from "../../open-sse/config/freeModelCatalog.ts";
 import { PROVIDER_MODELS } from "../../open-sse/config/providerModels.ts";
 import { NOAUTH_PROVIDERS } from "../../src/shared/constants/providers/noauth.ts";
+import { selectModelsForImport } from "../../src/shared/utils/freeModels.ts";
 
 // The authenticated Zen rows as shipped by the catalog refresh in #17345 (2026-10-22).
-// Keep this list in step with open-sse/config/freeModelCatalog.data.ts: the point of the
-// guard is that removing the anonymous OpenCode Free provider (#16310) never drops them.
+// Removing the anonymous provider must preserve unrestricted imports of discovered
+// authenticated models, without granting client-restricted offers to generic proxies.
 const zenModels = [
   "opencode/beam-free",
   "opencode/big-pickle",
@@ -20,10 +21,29 @@ const zenModels = [
   "opencode/nemotron-3.5-super-vl-free",
 ];
 
-test("removing Free preserves every authenticated Zen catalog row", () => {
-  const actual = FREE_MODEL_BUDGETS.filter((row) => row.provider === "opencode-zen");
-  assert.deepEqual(actual.map((row) => row.modelId).sort(), [...zenModels].sort());
-  assert.ok(actual.every((row) => row.poolKey === "opencode-zen-free"));
+test("removing Free preserves authenticated Zen imports without generic free grants", () => {
+  const discovered = zenModels.map((id) => ({ id }));
+  assert.deepEqual(selectModelsForImport("opencode-zen", discovered, false), {
+    models: discovered,
+    freeFilterEmpty: false,
+  });
+  assert.deepEqual(selectModelsForImport("opencode-zen", discovered, true), {
+    models: [],
+    freeFilterEmpty: true,
+  });
+  assert.deepEqual(
+    FREE_MODEL_BUDGETS.filter((row) => row.provider === "opencode-zen"),
+    []
+  );
+  const registeredIds = new Set(PROVIDER_MODELS["opencode-zen"].map((model) => model.id));
+  for (const id of [
+    "big-pickle",
+    "deepseek-v4.1-flash-free",
+    "mimo-v2.6-flash-free",
+    "nemotron-3.5-lightning-free",
+  ]) {
+    assert.ok(registeredIds.has(id), `authenticated model remains registered: ${id}`);
+  }
 });
 
 test("Free is absent while authenticated Zen and Go model registries remain", () => {
