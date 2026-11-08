@@ -21,8 +21,9 @@ omniroute --mcp
 Or via the open-sse transport:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
 The HTTP transports (`sse` / `streamable-http`, served in-process by the dashboard server) are
@@ -151,11 +152,14 @@ Cursor, Cline, and compatible MCP client setup.
 | `omniroute_rtk_discover`            | `read:compression`  | Discover recurring noise in opt-in RTK output samples                                                                    |
 | `omniroute_rtk_learn`               | `read:compression`  | Generate a reviewable RTK filter draft from opt-in samples                                                               |
 
-CCR entries are in-memory only and disappear on restart. Each block is limited to 2 MiB, each
+CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB and cloud runtimes, which stay memory-only. Each block is limited to 2 MiB, each
 principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum
 seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the
 ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by
 the authenticated API-key principal. Audit records contain hashes and size metadata, never content.
+Operator-facing details (the two markers, client prerequisites, `codemode:false`, per-tool scopes,
+pagination, and a diagnostic matrix) live in
+[Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` reports MCP description compression separately under
 `analytics.mcpDescriptionCompression`. Those values are metadata-size estimates for MCP listable
