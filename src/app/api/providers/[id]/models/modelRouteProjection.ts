@@ -131,13 +131,13 @@ export async function buildNoAuthModelsResponse(
   const payload =
     livePayload ??
     applyDiscoveryDegradation({
-      ...buildLocalCatalogPayload(
+      ...(await buildLocalCatalogPayload(
         providerId,
         connectionId,
         excludeHidden,
         chatOnly,
         Boolean(modelsUrl)
-      ),
+      )),
       ...(liveFailure ? { failure: liveFailure } : {}),
     });
   // Keep the outcome of this discovery: the response carrying it is gone on the next read.
@@ -145,7 +145,7 @@ export async function buildNoAuthModelsResponse(
   return NextResponse.json(payload);
 }
 
-function buildLocalCatalogPayload(
+async function buildLocalCatalogPayload(
   providerId: string,
   connectionId: string,
   excludeHidden: boolean,
