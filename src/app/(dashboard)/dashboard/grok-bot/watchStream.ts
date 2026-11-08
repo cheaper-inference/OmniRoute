@@ -179,6 +179,14 @@ export function watchStream(input: {
   return new ReadableStream<Uint8Array>(
     {
       async start(controller) {
+        // The caller may have gone away before the stream was pulled. Opening the
+        // upstream watch anyway spends one of the connection's two slots and leaves
+        // it held until the read finishes.
+        if (input.signal.aborted) {
+          release();
+          controller.close();
+          return;
+        }
         const streamId = input.streamId ?? crypto.randomUUID();
         const encoder = new TextEncoder();
         controller.enqueue(encoder.encode(transcriptConnectedFrame(streamId)));

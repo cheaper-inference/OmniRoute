@@ -14,6 +14,22 @@ const SILENCE_MS = 60_000;
 
 type RetryKind = "drop" | "admission" | "fatal";
 
+/**
+ * Shapes the advance into the step the reader consumes. The reader rebuilds its next
+ * cursor from this object alone, so every field it needs has to survive the trip;
+ * generation in particular decides whether the next request is accepted at all.
+ */
+export function transcriptStep(next: TranscriptAdvance): TranscriptStep {
+  return {
+    phase: next.phase,
+    after: next.after,
+    generation: next.generation,
+    stop: next.stop,
+    halt: next.halt,
+    cleared: next.cleared,
+  };
+}
+
 type OpenTranscriptInput = {
   request: TranscriptCursor;
   read: (request: TranscriptCursor, signal: AbortSignal) => AsyncIterable<unknown>;

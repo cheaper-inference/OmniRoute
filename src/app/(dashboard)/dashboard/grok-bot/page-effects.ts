@@ -3,7 +3,7 @@
 import { useEffect, useEffectEvent } from "react";
 import { grokBotComputers } from "./computers";
 import { grokBotSkills, namedItems } from "./details";
-import { openTranscript } from "./open";
+import { openTranscript, transcriptStep } from "./open";
 import { readPresence, statusOf } from "./presence";
 import { grokBotAccounts } from "./regions";
 import { rosterEntries } from "./roster";
@@ -208,16 +208,20 @@ function handleFrame(
   stream.request = { phase: next.phase, after: next.after, generation: next.generation };
   rememberedRef.current[`${selectedAccount}:${selectedBot}`] = {
     after: stream.request.after,
+    generation: next.generation,
     messages: stream.shown,
   };
-  if (next.stop) apply({ type: "cutover" });
-  return {
-    phase: next.phase,
-    after: next.after,
-    stop: next.stop,
-    halt: next.halt,
-    cleared: next.cleared,
-  };
+  if (next.halt) {
+    // The service replaced the session in a way this reader cannot continue from.
+    // Reporting a cutover would leave the console looking like a live stream that
+    // simply went quiet, so the page moves to its lost state and offers a retry.
+    apply({ type: "fault" });
+  } else if (next.stop) {
+    apply({ type: "cutover" });
+  }
+  // open.ts builds the next cursor from this step, so the generation has to travel
+  // with it; dropping it here is what made every request after the handover fail.
+  return transcriptStep(next);
 }
 function startTranscript(state: PageState) {
   const {

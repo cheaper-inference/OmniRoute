@@ -478,7 +478,13 @@ export function liveRetry(
 export function resumeTranscript(
   saved: Record<
     string,
-    { after: string; messages?: TranscriptItem[]; cards?: TranscriptCard[]; seenAt?: string }
+    {
+      after: string;
+      generation?: number;
+      messages?: TranscriptItem[];
+      cards?: TranscriptCard[];
+      seenAt?: string;
+    }
   >,
   account: string,
   bot: string,
@@ -498,7 +504,13 @@ export function resumeTranscript(
   ) {
     return { phase: "snapshot", after: "0", generation: 0, messages: [], cards: [] };
   }
-  return { phase: "live", after: found.after, messages: [], cards: [] };
+  return {
+    phase: "live",
+    after: found.after,
+    ...(found.generation === undefined ? {} : { generation: found.generation }),
+    messages: [],
+    cards: [],
+  };
 }
 
 export function nextTranscriptRequest(

@@ -69,7 +69,9 @@ function useTranscriptCards() {
   const closedNowRef = useRef<string[]>([]);
   const [permissionState, setPermissionState] = useState("");
   const [historyUnavailable, setHistoryUnavailable] = useState(false);
-  const rememberedRef = useRef<Record<string, { after: string; messages: TranscriptItem[] }>>({});
+  const rememberedRef = useRef<
+    Record<string, { after: string; generation?: number; messages: TranscriptItem[] }>
+  >({});
   const shownByBotRef = useRef<Record<string, TranscriptItem[]>>({});
   const nextStableRef = useRef(0);
   return {

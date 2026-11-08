@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { openTranscript } from "../../../src/app/(dashboard)/dashboard/grok-bot/open";
+import { openTranscript, transcriptStep } from "../../../src/app/(dashboard)/dashboard/grok-bot/open";
 import { nextTranscriptRequest } from "../../../src/app/(dashboard)/dashboard/grok-bot/transcript";
 
 async function* frames(values: unknown[]): AsyncIterable<unknown> {
@@ -417,4 +417,30 @@ test("an unusable reset ends the stream instead of reconnecting", async (t) => {
   t.after(opened.abort);
   await tick();
   assert.equal(reads, 1);
+});
+
+test("the production step keeps the generation the next request needs", async (t) => {
+  const requests: Array<{ phase: string; after: string; generation?: number }> = [];
+  const opened = openTranscript({
+    request: { phase: "snapshot", after: "0", generation: 0 },
+    read: async function* (request, signal) {
+      requests.push(request);
+      if (request.phase === "snapshot") {
+        yield { rows: { generation: 5, entries: [{ updatedSeq: "10" }] } };
+        yield { heartbeat: true };
+        return;
+      }
+      await new Promise<void>((resolve) =>
+        signal.addEventListener("abort", () => resolve(), { once: true })
+      );
+    },
+    // transcriptStep is the shape the page really hands back, so this is the path
+    // a regression has to survive.
+    onFrame: (frame, cursor) => transcriptStep(nextTranscriptRequest(cursor, frame)),
+    retryWait: () => -1,
+  });
+  t.after(opened.abort);
+  await tick();
+  assert.equal(requests[1]?.phase, "live");
+  assert.equal(requests[1]?.generation, 5);
 });

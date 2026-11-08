@@ -1,3 +1,4 @@
+import { grokBotGeneration } from "../../../../../(dashboard)/dashboard/grok-bot/query";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getProviderConnectionById } from "@/lib/db/providers";
@@ -13,17 +14,6 @@ import { NextResponse } from "next/server";
 // Advisory: this counter lives in one process, so the cap holds for the
 // standalone server and resets on a dev reload.
 const watches = watchCounter();
-
-/**
- * The generation is opaque to this route but the upstream rejects anything that is
- * not a non-negative safe integer, so an unusable value is treated as absent rather
- * than forwarded. watchStream decides what a missing generation means.
- */
-function generationFrom(value: string | null): number | undefined {
-  if (value === null || !/^(?:0|[1-9][0-9]*)$/.test(value)) return undefined;
-  const parsed = Number(value);
-  return Number.isSafeInteger(parsed) ? parsed : undefined;
-}
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const authError = await requireManagementAuth(request);
@@ -53,7 +43,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     accessToken: token.accessToken,
     agentId: url.searchParams.get("agentId") ?? "",
     after: url.searchParams.get("after") ?? "0",
-    generation: generationFrom(url.searchParams.get("generation")),
+    generation: grokBotGeneration(url.searchParams.get("generation")) ?? undefined,
     signal: request.signal,
     release: release ?? (() => {}),
   });

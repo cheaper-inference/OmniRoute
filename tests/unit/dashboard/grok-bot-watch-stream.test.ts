@@ -322,3 +322,27 @@ test("a blob hash is read from its signed blobs path", async () => {
   assert.deepEqual(urls, ["https://blob.example/body"]);
   assert.match(body, /"body":"blob-body"/);
 });
+
+test("a request that was already aborted never opens the upstream watch", async () => {
+  let opened = 0;
+  let released = 0;
+  const controller = new AbortController();
+  controller.abort();
+  const stream = watchStream({
+    accessToken: "token",
+    agentId: "agent-1",
+    after: "0",
+    generation: 0,
+    signal: controller.signal,
+    release: () => {
+      released += 1;
+    },
+    frames: async function* () {
+      opened += 1;
+      yield { heartbeat: true };
+    },
+  });
+  await text(stream);
+  assert.equal(opened, 0, "the upstream watch must not be started");
+  assert.equal(released, 1, "the slot has to come back");
+});
