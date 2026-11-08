@@ -15,7 +15,7 @@
 
 **أنشأه [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — لا تتوقف عن البرمجة. كل أداة ذكاء اصطناعي → 380 مزودًا — أكثر من 150 منها مجانية — عبر نقطة نهاية واحدة. Claude Code وCodex وCursor وCline وCopilot وAntigravity إلى Claude / GPT / Gemini مجانًا مع التبديل التلقائي عند التعطل. يوفر الضغط المتراص RTK + Caveman نسبة 15–95% من الرموز (بمتوسط ~89%) — ولن تصل إلى الحدود أبدًا. 380 مزودًا للذكاء الاصطناعي · أكثر من 150 مستوى مجانيًا · ~1.62 مليار رمز مجاني شهريًا · 20 استراتيجية توجيه · ابدأ بتكلفة 0 دولار."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — لا تتوقف عن البرمجة. كل أداة ذكاء اصطناعي → 381 مزودًا — أكثر من 150 منها مجانية — عبر نقطة نهاية واحدة. Claude Code وCodex وCursor وCline وCopilot وAntigravity إلى Claude / GPT / Gemini مجانًا مع التبديل التلقائي عند التعطل. يوفر الضغط المتراص RTK + Caveman نسبة 15–95% من الرموز (بمتوسط ~89%) — ولن تصل إلى الحدود أبدًا. 381 مزودًا للذكاء الاصطناعي · أكثر من 150 مستوى مجانيًا · ~1.62 مليار رمز مجاني شهريًا · 20 استراتيجية توجيه · ابدأ بتكلفة 0 دولار."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                  |           v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------------- | :-------------------------: | :---------: | :-------------------: |
-| 🌐 المزوّدون                     |             352             |   **358**   |          380          |
+| 🌐 المزوّدون                     |             352             |   **358**   |          381          |
 | 🧠 معرّفات نماذج الدردشة الفريدة |            1320             |  **1374**   |         1491          |
 | 🖼️ جسر الوسائط                   | 🆕 الرؤية + الصوت + الفيديو |      ✓      |           ✓           |
 | 📡 الكتالوج المجاني للرادار      |         🆕 اختياري          |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ الميزات</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 التركيبات</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 الموفّرون</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 الموفّرون</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI و MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="الوعد — نقطة نهاية واحدة و380 موفرًا. يحافظ الإرجاع التلقائي على استمرار التوجيه ما دام هناك هدف آخر سليم متاحًا. ست ركائز: إرجاع مرن عبر 380 موفرًا · توفير يصل إلى 95% من الرموز في أعباء العمل المؤهلة · بدءًا من 0 دولار مع أكثر من 150 مستوى مجانيًا و54 موفرًا مجانيًا متكررًا/دائمًا بلا مفاتيح · 39 تكاملًا مع CLI/الوكلاء عبر إعداد واحد · توافق مع OpenAI وClaude وGemini وResponses API عبر /v1 · عناصر تحكم للإنتاج تشمل قواطع الدائرة، وتخفّي TLS، وMCP مع 110 أدوات، وA2A، والذاكرة، والضوابط الوقائية، والتقييمات، و56,000+ تصريح اختبار ثابت عبر أكثر من 7,800 ملف اختبار متعقَّب."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="الوعد — نقطة نهاية واحدة و381 موفرًا. يحافظ الإرجاع التلقائي على استمرار التوجيه ما دام هناك هدف آخر سليم متاحًا. ست ركائز: إرجاع مرن عبر 381 موفرًا · توفير يصل إلى 95% من الرموز في أعباء العمل المؤهلة · بدءًا من 0 دولار مع أكثر من 150 مستوى مجانيًا و54 موفرًا مجانيًا متكررًا/دائمًا بلا مفاتيح · 39 تكاملًا مع CLI/الوكلاء عبر إعداد واحد · توافق مع OpenAI وClaude وGemini وResponses API عبر /v1 · عناصر تحكم للإنتاج تشمل قواطع الدائرة، وتخفّي TLS، وMCP مع 110 أدوات، وA2A، والذاكرة، والضوابط الوقائية، والتقييمات، و56,000+ تصريح اختبار ثابت عبر أكثر من 7,800 ملف اختبار متعقَّب."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ما الذي يميز OmniRoute — لقطة ميزات مؤرخة مقابل 9router و OpenRouter و CLIProxyAPI و LiteLLM عبر 13 قدرة. OmniRoute: 380 مزودًا، أكثر من 150 طبقة مجانية مدمجة، 20 استراتيجية توجيه، ضغط رموز بـ 12 محركًا، خادم MCP مدمج مع 110 أدوات، بروتوكول وكيل A2A، ذاكرة دائمة، حواجز أمان، وكلاء سحابة، إخفاء بصمة TLS، سطح مكتب/Termux/PWA و67 لغة لواجهة المستخدم. OmniRoute مرخصة بترخيص MIT وقابلة للاستضافة الذاتية. قد تتغير قدرات وأعداد المنافسين؛ راجع المنهجية المرتبطة."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ما الذي يميز OmniRoute — لقطة ميزات مؤرخة مقابل 9router و OpenRouter و CLIProxyAPI و LiteLLM عبر 13 قدرة. OmniRoute: 381 مزودًا، أكثر من 150 طبقة مجانية مدمجة، 20 استراتيجية توجيه، ضغط رموز بـ 12 محركًا، خادم MCP مدمج مع 110 أدوات، بروتوكول وكيل A2A، ذاكرة دائمة، حواجز أمان، وكلاء سحابة، إخفاء بصمة TLS، سطح مكتب/Termux/PWA و67 لغة لواجهة المستخدم. OmniRoute مرخصة بترخيص MIT وقابلة للاستضافة الذاتية. قد تتغير قدرات وأعداد المنافسين؛ راجع المنهجية المرتبطة."/>
 
 <sub>📊 المنهجية الكاملة وتفاصيل كل ميزة مقابل 9router و OpenRouter و CLIProxyAPI و LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar اختياري ويستخدم طلبات GET فقط. لا يرفع عمي�
 - **🖼️ نقاط نهاية جديدة** — `/v1/ocr` (Mistral OCR) و `/v1/audio/translations` (على نمط Whisper) توسعان واجهة الوسائط. → [مرجع API](docs/reference/API_REFERENCE.md)
 - **🎨 توليد الصور / الفيديو / الصوت** — واجهة API واحدة للوسائط: xAI Grok Imagine & Novita AI للفيديو، ComfyUI، Magnific، Adobe Firefly، Segmind، ومزودو الصوت مثل ElevenLabs. → [مرجع API](docs/reference/API_REFERENCE.md)
 - **🌍 النشر والتشغيل** — `basePath` للبروكسي العكسي، اكتشاف لغة المتصفح تلقائيًا، تتبع الأجهزة لكل مفتاح، ثقة MITM بدون صلاحيات الجذر، دعم zh-TW. → [البيئة](docs/reference/ENVIRONMENT.md)
-- **🤝 مزيد من المزودين والوكلاء** — وكلاء سحابة (Codex Cloud, Cursor, Devin, Jules)، Grok Build (xAI) مع تسجيل دخول المتصفح + OAuth، بطاقة Ollama مميزة، Claude Opus 5 & Sonnet 5، شراكة رسمية مع Kimi (Code/Web/Moonshot)، Zed، Requesty، SenseNova، Yuanbao، Agnes AI… وتحديث كتالوج **380 مزود**. → [المزودون](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 مزيد من المزودين والوكلاء** — وكلاء سحابة (Codex Cloud, Cursor, Devin, Jules)، Grok Build (xAI) مع تسجيل دخول المتصفح + OAuth، بطاقة Ollama مميزة، Claude Opus 5 & Sonnet 5، شراكة رسمية مع Kimi (Code/Web/Moonshot)، Zed، Requesty، SenseNova، Yuanbao، Agnes AI… وتحديث كتالوج **381 مزود**. → [المزودون](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 شفافية التوجيه** — كل استجابة تحمل رأس `X-OmniRoute-Decision` يذكر الاستراتيجية/المزود/الزمن الذي خدمها، استراتيجية دمج جديدة `cache-optimized` + عامل `cacheAffinity` في Auto-Combo يعيد توجيه الطلبات المتكررة إلى الاتصال الذي يحمل البادئة المخزنة، ونقطة نهاية للقراءة فقط `/v1/auto-combo/{channel}/candidates` تعرض مجموعة المرشحين الحية لقناة `auto/*`. → [الدمج التلقائي](docs/routing/AUTO-COMBO.md)
 - **⚡ الأداء المحلي والبنية التحتية** — Redis محلي بنقرة واحدة، أدوات نشر مرحلية لـ Cloudflare Workers / Deno Deploy، خدمات Bifrost و Mux كمكونات مدمجة تحت الإشراف. → [الخدمات المدمجة](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 أيضًا ضمن الحزمة** — إطار عمل الإضافات + سوق الإضافات، أطر مهارات Omni/Agent/GitHub، تكامل مع Obsidian vault (22 أداة MCP)، واجهات برمجة تطبيقات Batch & Files متوافقة مع OpenAI، ذاكرة تخزين مؤقت للاستجابات الدلالية، عناصر تحفيزية مع لوحات المتصدرين، اكتشاف وكلاء ACP (15 وكيل مدمج)، تصدير السجلات المجدولة إلى BigQuery، `auto/chaos` توزيع متوازي متعدد النماذج، جسر بوت Telegram، مدير إصدارات داخل التطبيق وتصنيفات LMArena-ELO لمزودي الخدمة المجانية. → [التوثيق](docs/README.md)
@@ -689,11 +689,11 @@ omniroute configure codex          # أيضًا: claude opencode qwen aider goos
 
 <div align="center">
 
-## 🌐 380 مزوّدًا للذكاء الاصطناعي — 153 موسومة في الفهرس بأنها مجانية
+## 🌐 381 مزوّدًا للذكاء الاصطناعي — 153 موسومة في الفهرس بأنها مجانية
 
 </div>
 
-> **380 مزوّدًا مسجّلًا** ضمن مجموعات الدردشة والوسائط والبحث والمحلية ووكلاء السحابة والنظام المعتمدة، بما في ذلك **153 مزوّدًا يحمل بيانات تعريف الاكتشاف `hasFree: true`**. يغطي سجل نماذج الدردشة **239 مزوّدًا / 3,059 زوجًا مميّزًا من المزوّد والنموذج / 1,475 معرّف نموذج خام**؛ بينما يضم فهرس الميزانية المجانية المنفصل **471 صفًا لكل نموذج** و**34 مجموعة متكررة** و**54 مزوّدًا مجانيًا دائمًا ومتكررًا/من دون مفتاح**. هذه مقامات مختلفة عمدًا؛ وتوجد التعريفات والحسابات بعد إزالة التكرار من المجموعات في [مرجع المزوّدين](docs/reference/PROVIDER_REFERENCE.md) و[الخطط المجانية](docs/reference/FREE_TIERS.md).
+> **381 مزوّدًا مسجّلًا** ضمن مجموعات الدردشة والوسائط والبحث والمحلية ووكلاء السحابة والنظام المعتمدة، بما في ذلك **153 مزوّدًا يحمل بيانات تعريف الاكتشاف `hasFree: true`**. يغطي سجل نماذج الدردشة **239 مزوّدًا / 3,059 زوجًا مميّزًا من المزوّد والنموذج / 1,475 معرّف نموذج خام**؛ بينما يضم فهرس الميزانية المجانية المنفصل **471 صفًا لكل نموذج** و**34 مجموعة متكررة** و**54 مزوّدًا مجانيًا دائمًا ومتكررًا/من دون مفتاح**. هذه مقامات مختلفة عمدًا؛ وتوجد التعريفات والحسابات بعد إزالة التكرار من المجموعات في [مرجع المزوّدين](docs/reference/PROVIDER_REFERENCE.md) و[الخطط المجانية](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -732,7 +732,7 @@ omniroute configure codex          # أيضًا: claude opencode qwen aider goos
 
 ### 🆓 مجاني إلى الأبد — $0، من دون بطاقة ائتمانالتحليل code>We need answer should preserve inline `hasFree` exactly yes. Did we violate "Never change text between backticks" kept. "HTML tags exact" We translated no attrs. Fine. But term "153 carrying metadata" Arabic. Need issue "catalog-marked" okay. Could translate alt? didn't. proper names. User asks only translated markdown. We have it. Ensure source says "free-budget catalog" maybe فهرس الميزانية المجانية. good. "recurring/keyless free-forever providers" translated perhaps recurring/without key. Fine. Check hidden issue: "Every major lab" lab singular each? okay.
 
-Need perhaps "380 AI Providers" translate AI to الذكاء الاصطناعي. Fine. No need alter closing div.
+Need perhaps "381 AI Providers" translate AI to الذكاء الاصطناعي. Fine. No need alter closing div.
 
 Final already.
 

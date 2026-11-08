@@ -15,7 +15,7 @@
 
 **[Diego Souza](https://github.com/diegosouzapw) tarafından oluşturuldu**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yazmayı asla bırakmayın. Her yapay zekâ aracı → tek bir uç nokta üzerinden 380 sağlayıcı — 150’den fazlası ücretsiz. Claude Code, Codex, Cursor, Cline, Copilot ve Antigravity; otomatik geri dönüş ile ÜCRETSİZ Claude / GPT / Gemini’ye bağlanır. RTK + Caveman katmanlı sıkıştırması %15–95 daha az belirteç kullanır (ortalama ~%89) — sınırlara asla takılmayın. 380 yapay zekâ sağlayıcısı · 150’den fazla ücretsiz katman · ayda ~1,62 milyar ücretsiz belirteç · 20 yönlendirme stratejisi · Başlamak için 0 $."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yazmayı asla bırakmayın. Her yapay zekâ aracı → tek bir uç nokta üzerinden 381 sağlayıcı — 150’den fazlası ücretsiz. Claude Code, Codex, Cursor, Cline, Copilot ve Antigravity; otomatik geri dönüş ile ÜCRETSİZ Claude / GPT / Gemini’ye bağlanır. RTK + Caveman katmanlı sıkıştırması %15–95 daha az belirteç kullanır (ortalama ~%89) — sınırlara asla takılmayın. 381 yapay zekâ sağlayıcısı · 150’den fazla ücretsiz katman · ayda ~1,62 milyar ücretsiz belirteç · 20 yönlendirme stratejisi · Başlamak için 0 $."/>
 
 </div>
 
@@ -73,7 +73,7 @@ OMNIROUTE para biriktirmenize ve işinizi kolaylaştırmanıza yardımcı olduys
 
 |                                      |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------------ | :----------------------: | :---------: | :-------------------: |
-| 🌐 Sağlayıcılar                      |           352            |   **358**   |          380          |
+| 🌐 Sağlayıcılar                      |           352            |   **358**   |          381          |
 | 🧠 Benzersiz sohbet model kimlikleri |           1320           |  **1374**   |         1491          |
 | 🖼️ Modalite Köprüsü                  | 🆕 görüntü + ses + video |      ✓      |           ✓           |
 | 📡 Radar ücretsiz kataloğu           |     🆕 isteğe bağlı      |      ✓      |           ✓           |
@@ -114,7 +114,7 @@ OMNIROUTE para biriktirmenize ve işinizi kolaylaştırmanıza yardımcı olduys
   <tr>
     <td align="right"><b>⚙️ Özellikler</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinasyonlar</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Sağlayıcılar</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Sağlayıcılar</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ve MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaat — Tek bir uç nokta ve 380 sağlayıcı. Başka bir sağlıklı hedef kullanılabilir olduğu sürece otomatik geri dönüş yönlendirmeyi sürdürür. Altı temel sütun: 380 sağlayıcı genelinde dayanıklı geri dönüş · uygun iş yüklerinde %95'e varan token tasarrufu · 150'den fazla ücretsiz katman ve sürekli/anahtarsız olarak sonsuza kadar ücretsiz 54 sağlayıcıyla başlangıç maliyeti 0 $ · tek bir yapılandırmayla 39 CLI/ajan entegrasyonu · /v1 adresinde OpenAI, Claude, Gemini ve Responses API uyumluluğu · devre kesiciler, TLS gizliliği, 110 MCP aracı, A2A, bellek, koruma kuralları, değerlendirmeler ve 7.800'den fazla izlenen test dosyasındaki 56.000'den fazla statik test bildirimi dahil üretim kontrolleri."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaat — Tek bir uç nokta ve 381 sağlayıcı. Başka bir sağlıklı hedef kullanılabilir olduğu sürece otomatik geri dönüş yönlendirmeyi sürdürür. Altı temel sütun: 381 sağlayıcı genelinde dayanıklı geri dönüş · uygun iş yüklerinde %95'e varan token tasarrufu · 150'den fazla ücretsiz katman ve sürekli/anahtarsız olarak sonsuza kadar ücretsiz 54 sağlayıcıyla başlangıç maliyeti 0 $ · tek bir yapılandırmayla 39 CLI/ajan entegrasyonu · /v1 adresinde OpenAI, Claude, Gemini ve Responses API uyumluluğu · devre kesiciler, TLS gizliliği, 110 MCP aracı, A2A, bellek, koruma kuralları, değerlendirmeler ve 7.800'den fazla izlenen test dosyasındaki 56.000'den fazla statik test bildirimi dahil üretim kontrolleri."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Kombo oluşturmanız gerekmez. Modelinizi `auto` (veya bir varyantı) olarak aya
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute'u öne çıkaranlar — tarihli bir özellik anlık görüntüsü ile 9router, OpenRouter, CLIProxyAPI ve LiteLLM arasında 13 yetenek üzerinden karşılaştırma. OmniRoute: 380 sağlayıcı, 150+ yerleşik ücretsiz katman, 20 yönlendirme stratejisi, 12-motorlu token sıkıştırma, 110 araçlı yerleşik MCP sunucusu, A2A ajan protokolü, kalıcı hafıza, güvenlik önlemleri, bulut ajanları, TLS parmak izi gizliliği, Masaüstü/Termux/PWA ve 67 i18n arayüz dili. OmniRoute MIT lisanslı ve kendi sunucunda barındırılabilir. Rakip yetenekleri ve sayıları değişebilir; bağlantılı metodolojiye bakınız."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute'u öne çıkaranlar — tarihli bir özellik anlık görüntüsü ile 9router, OpenRouter, CLIProxyAPI ve LiteLLM arasında 13 yetenek üzerinden karşılaştırma. OmniRoute: 381 sağlayıcı, 150+ yerleşik ücretsiz katman, 20 yönlendirme stratejisi, 12-motorlu token sıkıştırma, 110 araçlı yerleşik MCP sunucusu, A2A ajan protokolü, kalıcı hafıza, güvenlik önlemleri, bulut ajanları, TLS parmak izi gizliliği, Masaüstü/Termux/PWA ve 67 i18n arayüz dili. OmniRoute MIT lisanslı ve kendi sunucunda barındırılabilir. Rakip yetenekleri ve sayıları değişebilir; bağlantılı metodolojiye bakınız."/>
 
 <sub>📊 Tam metodoloji &amp; özellik bazında detaylı karşılaştırma: 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar isteğe bağlıdır ve yalnızca GET kullanır. OmniRoute istemcisi isteml
 - **🖼️ Yeni uç noktalar** — `/v1/ocr` (Mistral OCR) ve `/v1/audio/translations` (Whisper tarzı) medya yüzeyini tamamlar. → [API Referansı](docs/reference/API_REFERENCE.md)
 - **🎨 Görüntü / video / ses üretimi** — medya için tek API: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind ve ElevenLabs gibi konuşma sağlayıcıları. → [API Referansı](docs/reference/API_REFERENCE.md)
 - **🌍 Dağıtım & operasyonlar** — ters proxy `basePath`, tarayıcı dili otomatik algılama, anahtar bazında cihaz takibi, kök-suz MITM güveni, zh-TW yerelleştirme. → [Çevre](docs/reference/ENVIRONMENT.md)
-- **🤝 Daha fazla sağlayıcı & ajan** — bulut ajanları (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) tarayıcı + OAuth girişi ile, Ollama birinci sınıf kart, Claude Opus 5 & Sonnet 5, Kimi resmi ortaklığı (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ve yenilenmiş **380 sağlayıcı kataloğu**. → [Sağlayıcılar](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Daha fazla sağlayıcı & ajan** — bulut ajanları (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) tarayıcı + OAuth girişi ile, Ollama birinci sınıf kart, Claude Opus 5 & Sonnet 5, Kimi resmi ortaklığı (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ve yenilenmiş **381 sağlayıcı kataloğu**. → [Sağlayıcılar](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Yönlendirme şeffaflığı** — her yanıtta, hizmet veren strateji/sağlayıcı/gecikmeyi adlandıran bir `X-OmniRoute-Decision` başlığı, yeni bir `cache-optimized` kombinasyon stratejisi + Otomatik Kombinasyon `cacheAffinity` faktörü, önbelleğe alınmış önek tutan bağlantıya tekrar istekleri yönlendirir ve salt okunur `/v1/auto-combo/{channel}/candidates` uç noktası bir `auto/*` kanalının canlı aday havuzunu gösterir. → [Otomatik Kombinasyon](docs/routing/AUTO-COMBO.md)
 - **⚡ Yerel performans & altyapı** — tek tıkla yerel Redis, Cloudflare Workers / Deno Deploy aktarıcı dağıtıcılar, Bifrost & Mux gözetimli gömülü servisler olarak. → [Gömülü Servisler](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Kutunun içinde ayrıca** — eklenti çerçevesi + pazar yeri, Omni/Agent/GitHub yetenek çerçeveleri, Obsidian vault entegrasyonu (22 MCP aracı), OpenAI uyumlu Batch & Files API'leri, anlamsal yanıt önbelleği, lider tabloları ile oyunlaştırma, ACP ajan keşfi (15 yerleşik ajan), BigQuery'ye zamanlanmış günlük dışa aktarma, `auto/chaos` paralel çoklu model fan-out, bir Telegram bot köprüsü, uygulama içi sürüm yöneticisi ve LMArena-ELO ücretsiz sağlayıcı sıralamaları. → [Dokümantasyon](docs/README.md)
@@ -689,11 +689,11 @@ kabuk geçmişinizden uzak tutar. → [CLI Entegrasyonları](docs/guides/CLI-INT
 
 <div align="center">
 
-## 🌐 380 AI Sağlayıcısı — Katalogda İşaretlenmiş 153 Ücretsiz
+## 🌐 381 AI Sağlayıcısı — Katalogda İşaretlenmiş 153 Ücretsiz
 
 </div>
 
-> **Kanonik sohbet, medya, arama, yerel, bulut aracısı ve sistem koleksiyonlarında** kayıtlı **380 sağlayıcı**; bunların **153'ü `hasFree: true` keşif meta verisini taşıyor**. Sohbet modeli kayıt defteri **239 sağlayıcıyı / 3.059 farklı sağlayıcı-model çiftini / 1.475 ham model kimliğini** kapsıyor; ayrı ücretsiz bütçe kataloğunda **471 model başına satır**, **34 yinelenen havuz** ve **54 yinelenen/anahtarsız sonsuza kadar ücretsiz sağlayıcı** bulunuyor. Bunlar tasarım gereği farklı paydalardır; tanımlar ve havuz tekilleştirilmiş hesaplamalar [Sağlayıcı Referansı](docs/reference/PROVIDER_REFERENCE.md) ile [Ücretsiz Katmanlar](docs/reference/FREE_TIERS.md) bölümünde yer alır.
+> **Kanonik sohbet, medya, arama, yerel, bulut aracısı ve sistem koleksiyonlarında** kayıtlı **381 sağlayıcı**; bunların **153'ü `hasFree: true` keşif meta verisini taşıyor**. Sohbet modeli kayıt defteri **239 sağlayıcıyı / 3.059 farklı sağlayıcı-model çiftini / 1.475 ham model kimliğini** kapsıyor; ayrı ücretsiz bütçe kataloğunda **471 model başına satır**, **34 yinelenen havuz** ve **54 yinelenen/anahtarsız sonsuza kadar ücretsiz sağlayıcı** bulunuyor. Bunlar tasarım gereği farklı paydalardır; tanımlar ve havuz tekilleştirilmiş hesaplamalar [Sağlayıcı Referansı](docs/reference/PROVIDER_REFERENCE.md) ile [Ücretsiz Katmanlar](docs/reference/FREE_TIERS.md) bölümünde yer alır.
 
 <div align="center">
 

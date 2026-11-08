@@ -15,7 +15,7 @@
 
 **Vytvořil [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikdy nepřestávejte programovat. Každý nástroj AI → 380 poskytovatelů — 150+ zdarma — prostřednictvím jediného endpointu. Claude Code, Codex, Cursor, Cline, Copilot a Antigravity do BEZPLATNÉHO Claude / GPT / Gemini s automatickým fallbackem. Komprese RTK + Caveman v několika vrstvách šetří 15–95 % tokenů (v průměru ~89 %) — nikdy nenarazíte na limity. 380 poskytovatelů AI · 150+ bezplatných tarifů · ~1,62 miliardy bezplatných tokenů měsíčně · 20 strategií směrování · začněte za 0 $."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikdy nepřestávejte programovat. Každý nástroj AI → 381 poskytovatelů — 150+ zdarma — prostřednictvím jediného endpointu. Claude Code, Codex, Cursor, Cline, Copilot a Antigravity do BEZPLATNÉHO Claude / GPT / Gemini s automatickým fallbackem. Komprese RTK + Caveman v několika vrstvách šetří 15–95 % tokenů (v průměru ~89 %) — nikdy nenarazíte na limity. 381 poskytovatelů AI · 150+ bezplatných tarifů · ~1,62 miliardy bezplatných tokenů měsíčně · 20 strategií směrování · začněte za 0 $."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                    |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Poskytovatelé                   |           352            |   **358**   |          380          |
+| 🌐 Poskytovatelé                   |           352            |   **358**   |          381          |
 | 🧠 Jedinečná ID chatovacích modelů |           1320           |  **1374**   |         1491          |
 | 🖼️ Most modalit                    | 🆕 vidění + zvuk + video |      ✓      |           ✓           |
 | 📡 Bezplatný katalog Radar         |  🆕 s možností aktivace  |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Funkce</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinace</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Poskytovatelé</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Poskytovatelé</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Příslib — Jeden endpoint a 380 poskytovatelů. Automatický fallback udržuje směrování, dokud je k dispozici jiný zdravý cíl. Šest pilířů: odolný fallback napříč 380 poskytovateli · až 95% úspora tokenů u podporovaných úloh · začátek za 0 $ se 150+ bezplatnými tarify a 54 opakovaně dostupnými nebo bezklíčovými poskytovateli zdarma navždy · 39 integrací CLI/agentů prostřednictvím jediné konfigurace · kompatibilita s API OpenAI, Claude, Gemini a Responses na /v1 · produkční řízení včetně jističů, TLS stealth, 110 nástrojů MCP, A2A, paměti, ochranných mechanismů, evaluací a více než 56 000 statických deklarací testů napříč více než 7 800 sledovanými testovacími soubory."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Příslib — Jeden endpoint a 381 poskytovatelů. Automatický fallback udržuje směrování, dokud je k dispozici jiný zdravý cíl. Šest pilířů: odolný fallback napříč 381 poskytovateli · až 95% úspora tokenů u podporovaných úloh · začátek za 0 $ se 150+ bezplatnými tarify a 54 opakovaně dostupnými nebo bezklíčovými poskytovateli zdarma navždy · 39 integrací CLI/agentů prostřednictvím jediné konfigurace · kompatibilita s API OpenAI, Claude, Gemini a Responses na /v1 · produkční řízení včetně jističů, TLS stealth, 110 nástrojů MCP, A2A, paměti, ochranných mechanismů, evaluací a více než 56 000 statických deklarací testů napříč více než 7 800 sledovanými testovacími soubory."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Všech **20** strategií — libovolně je kombinujte v jednotlivých krocích k
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Čím se OmniRoute odlišuje — zastaralý přehled funkcí vs 9router, OpenRouter, CLIProxyAPI a LiteLLM v rámci 13 schopností. OmniRoute: 380 poskytovatelů, 150+ vestavěných free tierů, 20 směrovacích strategií, 12-engine komprese tokenů, vestavěný MCP server se 110 nástroji, A2A agentní protokol, perzistentní paměť, ochranné prvky, cloudoví agenti, stealth TLS otisk, Desktop/Termux/PWA a 67 lokalizací UI. OmniRoute je pod MIT licencí a lze jej provozovat samostatně. Schopnosti a počty konkurentů se mohou měnit; viz odkazovaná metodika."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Čím se OmniRoute odlišuje — zastaralý přehled funkcí vs 9router, OpenRouter, CLIProxyAPI a LiteLLM v rámci 13 schopností. OmniRoute: 381 poskytovatelů, 150+ vestavěných free tierů, 20 směrovacích strategií, 12-engine komprese tokenů, vestavěný MCP server se 110 nástroji, A2A agentní protokol, perzistentní paměť, ochranné prvky, cloudoví agenti, stealth TLS otisk, Desktop/Termux/PWA a 67 lokalizací UI. OmniRoute je pod MIT licencí a lze jej provozovat samostatně. Schopnosti a počty konkurentů se mohou měnit; viz odkazovaná metodika."/>
 
 <sub>📊 Kompletní metodika &amp; detailní srovnání funkcí s 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -613,7 +613,7 @@ aktuálním katalogu najdete na **[radar.omniroute.online/planos](https://radar.
 - **🖼️ Nové endpointy** — `/v1/ocr` (Mistral OCR) a `/v1/audio/translations` (Whisper styl) rozšiřují mediální rozhraní. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Generování obrázků / videa / audia** — jedno API pro média: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind a poskytovatelé řeči jako ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Nasazení & provoz** — reverse-proxy `basePath`, automatická detekce jazyka prohlížeče, sledování zařízení podle klíče, root-less MITM důvěra, lokalizace zh-TW. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Více poskytovatelů & agentů** — cloudoví agenti (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s prohlížečem + OAuth přihlášením, Ollama jako první třída, Claude Opus 5 & Sonnet 5, Kimi oficiální partnerství (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… a obnovený **katalog 380 poskytovatelů**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Více poskytovatelů & agentů** — cloudoví agenti (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s prohlížečem + OAuth přihlášením, Ollama jako první třída, Claude Opus 5 & Sonnet 5, Kimi oficiální partnerství (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… a obnovený **katalog 381 poskytovatelů**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparentnost směrování** — každá odpověď obsahuje hlavičku `X-OmniRoute-Decision` s názvem strategie/poskytovatele/latence, která ji obsloužila, nová strategie kombinace `cache-optimized` + Auto-Combo faktor `cacheAffinity` směruje opakované požadavky zpět na spojení s uloženým prefixem, a pouze pro čtení endpoint `/v1/auto-combo/{channel}/candidates` zpřístupňuje živý kandidátní pool kanálu `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokální výkon & infrastruktura** — jedním kliknutím lokální Redis, nasazovače relé pro Cloudflare Workers / Deno Deploy, Bifrost & Mux jako spravované vestavěné služby. → [Vestavěné služby](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Také v balíčku** — rámec pro pluginy + tržiště, rámce pro dovednosti Omni/Agent/GitHub, integrace s Obsidian vault (22 MCP nástrojů), OpenAI-kompatibilní Batch & Files API, sémantická cache odpovědí, gamifikace s žebříčky, ACP objevování agentů (15 vestavěných agentů), plánovaný export logů do BigQuery, `auto/chaos` paralelní multi-modelové rozvětvení, most pro Telegram bota, správce verzí v aplikaci a žebříčky poskytovatelů zdarma LMArena-ELO. → [Dokumentace](docs/README.md)
@@ -697,11 +697,11 @@ mimo historii vašeho shellu. → [Integrace CLI](docs/guides/CLI-INTEGRATIONS.m
 
 <div align="center">
 
-## 🌐 380 poskytovatelů AI — 153 označených v katalogu jako bezplatní
+## 🌐 381 poskytovatelů AI — 153 označených v katalogu jako bezplatní
 
 </div>
 
-> **380 registrovaných poskytovatelů** napříč kanonickými kolekcemi pro chat, média, vyhledávání, místní prostředí, cloudové agenty a systémové služby, včetně **153 poskytovatelů s metadaty pro vyhledávání `hasFree: true`**. Registr chatovacích modelů zahrnuje **239 poskytovatelů / 3,059 různých dvojic poskytovatel–model / 1,475 nezpracovaných ID modelů**; samostatný katalog bezplatných rozpočtů obsahuje **471 řádků pro jednotlivé modely**, **34 opakujících se fondů** a **54 opakujících se / bezklíčových poskytovatelů bezplatných navždy**. Záměrně jde o různé základy výpočtu; definice a výpočty s odstraněnými duplicitami fondů najdete v dokumentech [Referenční příručka poskytovatelů](docs/reference/PROVIDER_REFERENCE.md) a [Bezplatné úrovně](docs/reference/FREE_TIERS.md).
+> **381 registrovaných poskytovatelů** napříč kanonickými kolekcemi pro chat, média, vyhledávání, místní prostředí, cloudové agenty a systémové služby, včetně **153 poskytovatelů s metadaty pro vyhledávání `hasFree: true`**. Registr chatovacích modelů zahrnuje **239 poskytovatelů / 3,059 různých dvojic poskytovatel–model / 1,475 nezpracovaných ID modelů**; samostatný katalog bezplatných rozpočtů obsahuje **471 řádků pro jednotlivé modely**, **34 opakujících se fondů** a **54 opakujících se / bezklíčových poskytovatelů bezplatných navždy**. Záměrně jde o různé základy výpočtu; definice a výpočty s odstraněnými duplicitami fondů najdete v dokumentech [Referenční příručka poskytovatelů](docs/reference/PROVIDER_REFERENCE.md) a [Bezplatné úrovně](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

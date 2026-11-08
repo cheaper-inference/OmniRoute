@@ -15,7 +15,7 @@
 
 **Δημιουργήθηκε από τον [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Μην σταματάς ποτέ να γράφεις κώδικα. Κάθε εργαλείο AI → 380 πάροχοι — 150+ δωρεάν — μέσω ενός endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity σε ΔΩΡΕΑΝ Claude / GPT / Gemini με αυτόματη εναλλακτική δρομολόγηση. Η συμπίεση RTK + Caveman σε διαδοχικά επίπεδα εξοικονομεί 15–95% των tokens (~89% κατά μέσο όρο) — δεν θα φτάσεις ποτέ τα όρια. 380 πάροχοι AI · 150+ δωρεάν επίπεδα · ~1,62B δωρεάν tokens/μήνα · 20 στρατηγικές δρομολόγησης · $0 για να ξεκινήσεις."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Μην σταματάς ποτέ να γράφεις κώδικα. Κάθε εργαλείο AI → 381 πάροχοι — 150+ δωρεάν — μέσω ενός endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity σε ΔΩΡΕΑΝ Claude / GPT / Gemini με αυτόματη εναλλακτική δρομολόγηση. Η συμπίεση RTK + Caveman σε διαδοχικά επίπεδα εξοικονομεί 15–95% των tokens (~89% κατά μέσο όρο) — δεν θα φτάσεις ποτέ τα όρια. 381 πάροχοι AI · 150+ δωρεάν επίπεδα · ~1,62B δωρεάν tokens/μήνα · 20 στρατηγικές δρομολόγησης · $0 για να ξεκινήσεις."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                            |           v3.8.50           | **v3.8.51** |       `v3.8.54+`       |
 | ------------------------------------------ | :-------------------------: | :---------: | :--------------------: |
-| 🌐 Πάροχοι                                 |             352             |   **358**   |          380           |
+| 🌐 Πάροχοι                                 |             352             |   **358**   |          381           |
 | 🧠 Μοναδικά ID μοντέλων συνομιλίας         |            1320             |  **1374**   |          1491          |
 | 🖼️ Γέφυρα τροπικοτήτων                     |  🆕 όραση + ήχος + βίντεο   |      ✓      |           ✓            |
 | 📡 Δωρεάν κατάλογος Radar                  | 🆕 προαιρετική ενεργοποίηση |      ✓      |           ✓            |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Δυνατότητες</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Συνδυασμοί</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Πάροχοι</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Πάροχοι</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Η υπόσχεση — Ένα endpoint και 380 πάροχοι. Η αυτόματη εφεδρική μετάβαση διατηρεί τη δρομολόγηση όσο υπάρχει διαθέσιμος άλλος υγιής στόχος. Έξι πυλώνες: ανθεκτική εφεδρική μετάβαση μεταξύ 380 παρόχων · έως και 95% εξοικονόμηση token σε κατάλληλους φόρτους εργασίας · $0 για την έναρξη, με περισσότερα από 150 δωρεάν πακέτα και 54 επαναλαμβανόμενους/χωρίς κλειδί δωρεάν παρόχους για πάντα · 39 ενσωματώσεις CLI/agent μέσω μίας ρύθμισης · συμβατότητα με τα API OpenAI, Claude, Gemini και Responses στο /v1 · στοιχεία ελέγχου παραγωγής, όπως circuit breakers, TLS stealth, MCP με 110 εργαλεία, A2A, μνήμη, guardrails, evals και περισσότερες από 56.000 δηλώσεις στατικών δοκιμών σε περισσότερα από 7.800 αρχεία δοκιμών που παρακολουθούνται."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Η υπόσχεση — Ένα endpoint και 381 πάροχοι. Η αυτόματη εφεδρική μετάβαση διατηρεί τη δρομολόγηση όσο υπάρχει διαθέσιμος άλλος υγιής στόχος. Έξι πυλώνες: ανθεκτική εφεδρική μετάβαση μεταξύ 381 παρόχων · έως και 95% εξοικονόμηση token σε κατάλληλους φόρτους εργασίας · $0 για την έναρξη, με περισσότερα από 150 δωρεάν πακέτα και 54 επαναλαμβανόμενους/χωρίς κλειδί δωρεάν παρόχους για πάντα · 39 ενσωματώσεις CLI/agent μέσω μίας ρύθμισης · συμβατότητα με τα API OpenAI, Claude, Gemini και Responses στο /v1 · στοιχεία ελέγχου παραγωγής, όπως circuit breakers, TLS stealth, MCP με 110 εργαλεία, A2A, μνήμη, guardrails, evals και περισσότερες από 56.000 δηλώσεις στατικών δοκιμών σε περισσότερα από 7.800 αρχεία δοκιμών που παρακολουθούνται."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Τι κάνει το OmniRoute να ξεχωρίζει — ένα στιγμιότυπο χαρακτηριστικών σε σύγκριση με 9router, OpenRouter, CLIProxyAPI και LiteLLM σε 13 δυνατότητες. OmniRoute: 380 πάροχοι, 150+ ενσωματωμένα δωρεάν πακέτα, 20 στρατηγικές δρομολόγησης, συμπίεση tokens με 12 μηχανές, ενσωματωμένος MCP server με 110 εργαλεία, πρωτόκολλο agent A2A, επίμονη μνήμη, guardrails, cloud agents, stealth αποτύπωμα TLS, Desktop/Termux/PWA και 67 τοπικές διεπαφές χρήστη. Το OmniRoute διαθέτει άδεια MIT και μπορεί να φιλοξενηθεί τοπικά. Οι δυνατότητες και οι αριθμοί των ανταγωνιστών ενδέχεται να αλλάξουν· δείτε τη συνδεδεμένη μεθοδολογία."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Τι κάνει το OmniRoute να ξεχωρίζει — ένα στιγμιότυπο χαρακτηριστικών σε σύγκριση με 9router, OpenRouter, CLIProxyAPI και LiteLLM σε 13 δυνατότητες. OmniRoute: 381 πάροχοι, 150+ ενσωματωμένα δωρεάν πακέτα, 20 στρατηγικές δρομολόγησης, συμπίεση tokens με 12 μηχανές, ενσωματωμένος MCP server με 110 εργαλεία, πρωτόκολλο agent A2A, επίμονη μνήμη, guardrails, cloud agents, stealth αποτύπωμα TLS, Desktop/Termux/PWA και 67 τοπικές διεπαφές χρήστη. Το OmniRoute διαθέτει άδεια MIT και μπορεί να φιλοξενηθεί τοπικά. Οι δυνατότητες και οι αριθμοί των ανταγωνιστών ενδέχεται να αλλάξουν· δείτε τη συνδεδεμένη μεθοδολογία."/>
 
 <sub>📊 Πλήρης μεθοδολογία &amp; λεπτομέρειες ανά χαρακτηριστικό σε σύγκριση με 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -614,7 +614,7 @@ Pix copia-e-cola:
 - **🖼️ Νέα endpoints** — `/v1/ocr` (Mistral OCR) και `/v1/audio/translations` (τύπου Whisper) συμπληρώνουν το media surface. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Δημιουργία εικόνας / βίντεο / ήχου** — ένα API για media: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, και παρόχους ομιλίας όπως ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Ανάπτυξη & λειτουργία** — reverse-proxy `basePath`, αυτόματη ανίχνευση γλώσσας browser, παρακολούθηση συσκευής ανά κλειδί, root-less MITM trust, zh-TW τοπικοποίηση. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Περισσότεροι πάροχοι & agents** — cloud agents (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) με browser + OAuth login, Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi επίσημη συνεργασία (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… και ένας ανανεωμένος **κατάλογος 380 παρόχων**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Περισσότεροι πάροχοι & agents** — cloud agents (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) με browser + OAuth login, Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi επίσημη συνεργασία (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… και ένας ανανεωμένος **κατάλογος 381 παρόχων**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Διαφάνεια δρομολόγησης** — κάθε απάντηση φέρει header `X-OmniRoute-Decision` που αναφέρει τη στρατηγική/πάροχο/καθυστέρηση που την εξυπηρέτησε, μια νέα στρατηγική combo `cache-optimized` + παράγοντας Auto-Combo `cacheAffinity` δρομολογούν επαναλαμβανόμενα αιτήματα στη σύνδεση που κρατά το cached prefix, και ένα read-only endpoint `/v1/auto-combo/{channel}/candidates` εκθέτει το ζωντανό candidate pool ενός καναλιού `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Τοπική απόδοση & υποδομή** — με ένα κλικ τοπικό Redis, αναπτύξεις relay για Cloudflare Workers / Deno Deploy, Bifrost & Mux ως επιβλεπόμενες ενσωματωμένες υπηρεσίες. → [Ενσωματωμένες Υπηρεσίες](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Επίσης στο πακέτο** — πλαίσιο προσθέτων + marketplace, πλαίσια δεξιοτήτων Omni/Agent/GitHub, ενσωμάτωση με Obsidian vault (22 εργαλεία MCP), Batch & Files APIs συμβατά με OpenAI, σημασιολογική προσωρινή αποθήκευση απαντήσεων, gamification με πίνακες κατάταξης, ανακάλυψη πρακτόρων ACP (15 ενσωματωμένοι πράκτορες), προγραμματισμένη εξαγωγή καταγραφών στο BigQuery, `auto/chaos` παράλληλο fan-out πολλαπλών μοντέλων, γέφυρα bot για Telegram, ενσωματωμένος διαχειριστής εκδόσεων και κατάταξη παρόχων LMArena-ELO χωρίς χρέωση. → [Τεκμηρίωση](docs/README.md)
@@ -698,11 +698,11 @@ omniroute configure codex          # επίσης: claude opencode qwen aider go
 
 <div align="center">
 
-## 🌐 380 πάροχοι AI — 153 επισημασμένοι στον κατάλογο ως δωρεάν
+## 🌐 381 πάροχοι AI — 153 επισημασμένοι στον κατάλογο ως δωρεάν
 
 </div>
 
-> **380 εγγεγραμμένοι πάροχοι** στις κανονικές συλλογές συνομιλίας, πολυμέσων, αναζήτησης, τοπικών, cloud-agent και συστήματος, συμπεριλαμβανομένων **153 που διαθέτουν μεταδεδομένα ανακάλυψης `hasFree: true`**. Το μητρώο μοντέλων συνομιλίας καλύπτει **239 παρόχους / 3.059 διακριτά ζεύγη παρόχου-μοντέλου / 1.475 ακατέργαστα αναγνωριστικά μοντέλων**· ο ξεχωριστός κατάλογος δωρεάν προϋπολογισμού διαθέτει **471 γραμμές ανά μοντέλο**, **34 επαναλαμβανόμενες δεξαμενές** και **54 επαναλαμβανόμενους/χωρίς κλειδί παρόχους που είναι δωρεάν για πάντα**. Πρόκειται για διαφορετικούς παρονομαστές εκ σχεδιασμού· οι ορισμοί και οι υπολογισμοί με αφαίρεση διπλοεγγραφών δεξαμενών βρίσκονται στο [Reference παρόχων](docs/reference/PROVIDER_REFERENCE.md) και στα [Δωρεάν επίπεδα](docs/reference/FREE_TIERS.md).
+> **381 εγγεγραμμένοι πάροχοι** στις κανονικές συλλογές συνομιλίας, πολυμέσων, αναζήτησης, τοπικών, cloud-agent και συστήματος, συμπεριλαμβανομένων **153 που διαθέτουν μεταδεδομένα ανακάλυψης `hasFree: true`**. Το μητρώο μοντέλων συνομιλίας καλύπτει **239 παρόχους / 3.059 διακριτά ζεύγη παρόχου-μοντέλου / 1.475 ακατέργαστα αναγνωριστικά μοντέλων**· ο ξεχωριστός κατάλογος δωρεάν προϋπολογισμού διαθέτει **471 γραμμές ανά μοντέλο**, **34 επαναλαμβανόμενες δεξαμενές** και **54 επαναλαμβανόμενους/χωρίς κλειδί παρόχους που είναι δωρεάν για πάντα**. Πρόκειται για διαφορετικούς παρονομαστές εκ σχεδιασμού· οι ορισμοί και οι υπολογισμοί με αφαίρεση διπλοεγγραφών δεξαμενών βρίσκονται στο [Reference παρόχων](docs/reference/PROVIDER_REFERENCE.md) και στα [Δωρεάν επίπεδα](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

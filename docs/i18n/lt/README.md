@@ -15,7 +15,7 @@
 
 **Sukūrė [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="„OmniRoute“ — niekada nenustokite programuoti. Kiekvienas AI įrankis → 380 teikėjų — daugiau nei 150 nemokamų — per vieną galinį tašką. „Claude Code“, „Codex“, „Cursor“, „Cline“, „Copilot“ ir „Antigravity“ į NEMOKAMĄ „Claude“ / „GPT“ / „Gemini“ su automatiniu atsarginiu maršrutizavimu. RTK + „Caveman“ sudėtinis glaudinimas sutaupo 15–95 % žetonų (~89 % vidutiniškai) — niekada nepasiekite limitų. 380 AI teikėjų · daugiau nei 150 nemokamų planų · ~1,62 mlrd. nemokamų žetonų per mėn. · 20 maršrutizavimo strategijų · pradėkite už 0 USD."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="„OmniRoute“ — niekada nenustokite programuoti. Kiekvienas AI įrankis → 381 teikėjų — daugiau nei 150 nemokamų — per vieną galinį tašką. „Claude Code“, „Codex“, „Cursor“, „Cline“, „Copilot“ ir „Antigravity“ į NEMOKAMĄ „Claude“ / „GPT“ / „Gemini“ su automatiniu atsarginiu maršrutizavimu. RTK + „Caveman“ sudėtinis glaudinimas sutaupo 15–95 % žetonų (~89 % vidutiniškai) — niekada nepasiekite limitų. 381 AI teikėjų · daugiau nei 150 nemokamų planų · ~1,62 mlrd. nemokamų žetonų per mėn. · 20 maršrutizavimo strategijų · pradėkite už 0 USD."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                 |               v3.8.50               | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :---------------------------------: | :---------: | :-------------------: |
-| 🌐 Teikėjai                     |                 352                 |   **358**   |          380          |
+| 🌐 Teikėjai                     |                 352                 |   **358**   |          381          |
 | 🧠 Unikalūs pokalbių modelių ID |                1320                 |  **1374**   |         1491          |
 | 🖼️ Modalumų sąsaja              | 🆕 vaizdas + garsas + vaizdo įrašas |      ✓      |           ✓           |
 | 📡 Nemokamas „Radar“ katalogas  |           🆕 pasirenkamas           |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Funkcijos</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Deriniai</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Teikėjai</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Teikėjai</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ir MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis taškas ir 380 teikėjų. Automatinis atsarginis perjungimas užtikrina maršrutizavimą, kol yra kitas veikiantis tinkamas taikinys. Šeši pagrindiniai privalumai: atsparus atsarginis perjungimas tarp 380 teikėjų · iki 95 % žetonų sutaupymas tinkamiems darbo krūviams · pradėti galima už 0 $, naudojant daugiau nei 150 nemokamų planų ir 54 nuolat nemokamus teikėjus, veikiančius be rakto arba su pasikartojančiu nemokamu planu · 39 CLI / agentų integracijos per vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas per /v1 · gamybinio naudojimo valdikliai, įskaitant grandinės pertraukiklius, TLS slėpimą, MCP su 110 įrankių, A2A, atmintį, apsaugos taisykles, vertinimus ir daugiau nei 56 000 statinių testų deklaracijų daugiau nei 7 800 stebimų testų failų."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis taškas ir 381 teikėjų. Automatinis atsarginis perjungimas užtikrina maršrutizavimą, kol yra kitas veikiantis tinkamas taikinys. Šeši pagrindiniai privalumai: atsparus atsarginis perjungimas tarp 381 teikėjų · iki 95 % žetonų sutaupymas tinkamiems darbo krūviams · pradėti galima už 0 $, naudojant daugiau nei 150 nemokamų planų ir 54 nuolat nemokamus teikėjus, veikiančius be rakto arba su pasikartojančiu nemokamu planu · 39 CLI / agentų integracijos per vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas per /v1 · gamybinio naudojimo valdikliai, įskaitant grandinės pertraukiklius, TLS slėpimą, MCP su 110 įrankių, A2A, atmintį, apsaugos taisykles, vertinimus ir daugiau nei 56 000 statinių testų deklaracijų daugiau nei 7 800 stebimų testų failų."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Visos **20** strategijų – derinkite jas kiekviename kombinacijos žingsnyje:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kas išskiria OmniRoute — funkcijų palyginimas su 9router, OpenRouter, CLIProxyAPI ir LiteLLM pagal 13 galimybių. OmniRoute: 380 tiekėjų, daugiau nei 150 nemokamų planų integruota, 20 maršruto parinkimo strategijų, 12 variklių žetonų suspaudimas, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, nuolatinė atmintis, apsaugos priemonės, debesų agentai, TLS pirštų atspaudų maskavimas, Desktop/Termux/PWA ir 67 i18n UI lokalės. OmniRoute turi MIT licenciją ir gali būti diegiamas savarankiškai. Konkurentų galimybės ir skaičiai gali keistis; žr. susietą metodiką."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kas išskiria OmniRoute — funkcijų palyginimas su 9router, OpenRouter, CLIProxyAPI ir LiteLLM pagal 13 galimybių. OmniRoute: 381 tiekėjų, daugiau nei 150 nemokamų planų integruota, 20 maršruto parinkimo strategijų, 12 variklių žetonų suspaudimas, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, nuolatinė atmintis, apsaugos priemonės, debesų agentai, TLS pirštų atspaudų maskavimas, Desktop/Termux/PWA ir 67 i18n UI lokalės. OmniRoute turi MIT licenciją ir gali būti diegiamas savarankiškai. Konkurentų galimybės ir skaičiai gali keistis; žr. susietą metodiką."/>
 
 <sub>📊 Visa metodika ir kiekvienos funkcijos palyginimas su 9router, OpenRouter, CLIProxyAPI ir LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -613,7 +613,7 @@ dabartinį katalogą rasite **[radar.omniroute.online/planos](https://radar.omni
 - **🖼️ Nauji galiniai taškai** — `/v1/ocr` (Mistral OCR) ir `/v1/audio/translations` (Whisper tipo) papildo medijos galimybes. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Vaizdo / vaizdo įrašų / garso generavimas** — viena API medijai: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind ir kalbos tiekėjai, tokie kaip ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Diegimas ir valdymas** — reverse-proxy `basePath`, naršyklės kalbos automatinis aptikimas, įrenginių stebėjimas pagal raktą, root-less MITM pasitikėjimas, zh-TW lokalizacija. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Daugiau tiekėjų ir agentų** — debesies agentai (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) su naršykle + OAuth prisijungimu, Ollama aukščiausios klasės kortelė, Claude Opus 5 & Sonnet 5, Kimi oficiali partnerystė (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ir atnaujintas **380 tiekėjų katalogas**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Daugiau tiekėjų ir agentų** — debesies agentai (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) su naršykle + OAuth prisijungimu, Ollama aukščiausios klasės kortelė, Claude Opus 5 & Sonnet 5, Kimi oficiali partnerystė (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ir atnaujintas **381 tiekėjų katalogas**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Maršrutizavimo skaidrumas** — kiekvienas atsakymas turi `X-OmniRoute-Decision` antraštę, nurodančią strategiją/tiekėją/delays, kuris jį aptarnavo, nauja `cache-optimized` kombinacijos strategija + Auto-Combo `cacheAffinity` faktorius nukreipia pakartotines užklausas į ryšį su talpyklos prefiksu, o tik skaitymui skirtas `/v1/auto-combo/{channel}/candidates` galinis taškas atskleidžia `auto/*` kanalo gyvą kandidatų rinkinį. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Vietinis našumas ir infrastruktūra** — vienu paspaudimu paleidžiamas vietinis Redis, Cloudflare Workers / Deno Deploy relės diegimo įrankiai, Bifrost ir Mux kaip prižiūrimos įterptosios paslaugos. → [Įterptosios paslaugos](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Taip pat komplekte** — įskiepių sistema + turgus, Omni/Agent/GitHub įgūdžių sistemos, Obsidian vault integracija (22 MCP įrankiai), OpenAI suderinamos Batch & Files API, semantinė atsakymų talpykla, žaidybinimas su lyderių lentelėmis, ACP agentų paieška (15 integruotų agentų), suplanuotas žurnalo eksportas į BigQuery, `auto/chaos` lygiagretus kelių modelių išsišakojimas, Telegram botų tiltas, programėlės vidinis versijų valdymas ir LMArena-ELO nemokamų tiekėjų reitingai. → [Dokumentacija](docs/README.md)
@@ -697,11 +697,11 @@ slaptus duomenis nuo patekimo į jūsų shell istoriją. → [CLI integracijos](
 
 <div align="center">
 
-## 🌐 380 dirbtinio intelekto teikėjų — 153 kataloge pažymėti kaip nemokami
+## 🌐 381 dirbtinio intelekto teikėjų — 153 kataloge pažymėti kaip nemokami
 
 </div>
 
-> **380 registruotų teikėjų** kanoninėse pokalbių, medijos, paieškos, vietinių, debesijos agentų ir sistemų kolekcijose, įskaitant **153 teikėjus, turinčius `hasFree: true` aptikimo metaduomenis**. Pokalbių modelių registre yra **239 teikėjai / 3 059 atskiros teikėjo ir modelio poros / 1 475 pirminiai modelių ID**; atskirame nemokamo biudžeto kataloge yra **471 eilutė pagal modelį**, **34 pasikartojantys fondai** ir **54 pasikartojantys / be rakto visam laikui nemokami teikėjai**. Tai sąmoningai skirtingi vardikliai; apibrėžtys ir pagal fondus deduplikuoti skaičiavimai pateikiami [Teikėjų žinyne](docs/reference/PROVIDER_REFERENCE.md) ir [Nemokamuose planuose](docs/reference/FREE_TIERS.md).
+> **381 registruotų teikėjų** kanoninėse pokalbių, medijos, paieškos, vietinių, debesijos agentų ir sistemų kolekcijose, įskaitant **153 teikėjus, turinčius `hasFree: true` aptikimo metaduomenis**. Pokalbių modelių registre yra **239 teikėjai / 3 059 atskiros teikėjo ir modelio poros / 1 475 pirminiai modelių ID**; atskirame nemokamo biudžeto kataloge yra **471 eilutė pagal modelį**, **34 pasikartojantys fondai** ir **54 pasikartojantys / be rakto visam laikui nemokami teikėjai**. Tai sąmoningai skirtingi vardikliai; apibrėžtys ir pagal fondus deduplikuoti skaičiavimai pateikiami [Teikėjų žinyne](docs/reference/PROVIDER_REFERENCE.md) ir [Nemokamuose planuose](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

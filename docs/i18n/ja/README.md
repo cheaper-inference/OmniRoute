@@ -15,7 +15,7 @@
 
 **[Diego Souza](https://github.com/diegosouzapw) によって作成**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — コーディングを止めない。すべての AI ツールを、1つのエンドポイント経由で 380 のプロバイダー（無料 150 以上）へ。Claude Code、Codex、Cursor、Cline、Copilot、Antigravity を、オートフォールバック対応で無料の Claude / GPT / Gemini へ接続。RTK + Caveman の積層圧縮により、トークンを 15～95%（平均約 89%）節約し、制限に到達することはありません。AI プロバイダー 380 · 無料ティア 150 以上 · 無料トークン約 16.2 億/月 · ルーティング戦略 20 種類 · $0 で開始。"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — コーディングを止めない。すべての AI ツールを、1つのエンドポイント経由で 381 のプロバイダー（無料 150 以上）へ。Claude Code、Codex、Cursor、Cline、Copilot、Antigravity を、オートフォールバック対応で無料の Claude / GPT / Gemini へ接続。RTK + Caveman の積層圧縮により、トークンを 15～95%（平均約 89%）節約し、制限に到達することはありません。AI プロバイダー 381 · 無料ティア 150 以上 · 無料トークン約 16.2 億/月 · ルーティング戦略 20 種類 · $0 で開始。"/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                 |              v3.8.50              | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :-------------------------------: | :---------: | :-------------------: |
-| 🌐 プロバイダー                 |                352                |   **358**   |          380          |
+| 🌐 プロバイダー                 |                352                |   **358**   |          381          |
 | 🧠 一意なチャットモデル ID      |               1320                |  **1374**   |         1491          |
 | 🖼️ モダリティブリッジ           | 🆕 ビジョン + オーディオ + ビデオ |      ✓      |           ✓           |
 | 📡 Radar 無料カタログ           |           🆕 オプトイン           |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ 機能</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 コンボ</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 プロバイダー</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 プロバイダー</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="OmniRouteが約束すること — 1つのエンドポイントと380のプロバイダー。別の正常なターゲットが利用可能な間は、自動フォールバックによってルーティングを継続します。6つの柱：380のプロバイダーにまたがる回復力の高いフォールバック · 対象ワークロードで最大95%のトークン削減 · 150以上の無料ティアと54の継続利用可能またはキー不要で永久無料のプロバイダーにより、0ドルから開始 · 1つの設定で39のCLI/エージェント統合 · /v1でOpenAI、Claude、Gemini、Responses APIと互換 · サーキットブレーカー、TLSステルス、MCP 110ツール、A2A、メモリ、ガードレール、評価、7,800以上の追跡テストファイルにまたがる56,000以上の静的テスト宣言など、本番環境向けの制御機能。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="OmniRouteが約束すること — 1つのエンドポイントと381のプロバイダー。別の正常なターゲットが利用可能な間は、自動フォールバックによってルーティングを継続します。6つの柱：381のプロバイダーにまたがる回復力の高いフォールバック · 対象ワークロードで最大95%のトークン削減 · 150以上の無料ティアと54の継続利用可能またはキー不要で永久無料のプロバイダーにより、0ドルから開始 · 1つの設定で39のCLI/エージェント統合 · /v1でOpenAI、Claude、Gemini、Responses APIと互換 · サーキットブレーカー、TLSステルス、MCP 110ツール、A2A、メモリ、ガードレール、評価、7,800以上の追跡テストファイルにまたがる56,000以上の静的テスト宣言など、本番環境向けの制御機能。"/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute の特長 — 9router、OpenRouter、CLIProxyAPI、LiteLLM と 13 項目で比較した機能スナップショット。OmniRoute: 380 プロバイダー、150 以上の無料枠内蔵、20 種類のルーティング戦略、12 エンジンのトークン圧縮、110 ツール内蔵 MCP サーバー、A2A エージェントプロトコル、永続メモリ、ガードレール、クラウドエージェント、TLS フィンガープリントステルス、Desktop/Termux/PWA、67 言語の UI ローカライズ。OmniRoute は MIT ライセンスでセルフホスト可能。他社機能や数値は変更される場合があります。詳細はリンク先の方法論をご覧ください。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute の特長 — 9router、OpenRouter、CLIProxyAPI、LiteLLM と 13 項目で比較した機能スナップショット。OmniRoute: 381 プロバイダー、150 以上の無料枠内蔵、20 種類のルーティング戦略、12 エンジンのトークン圧縮、110 ツール内蔵 MCP サーバー、A2A エージェントプロトコル、永続メモリ、ガードレール、クラウドエージェント、TLS フィンガープリントステルス、Desktop/Termux/PWA、67 言語の UI ローカライズ。OmniRoute は MIT ライセンスでセルフホスト可能。他社機能や数値は変更される場合があります。詳細はリンク先の方法論をご覧ください。"/>
 
 <sub>📊 9router、OpenRouter、CLIProxyAPI、LiteLLM との詳細な比較方法と各機能の詳細 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radarはオプトイン方式で、GETリクエストのみを使用します。
 - **🖼️ 新エンドポイント** — `/v1/ocr`（Mistral OCR）と `/v1/audio/translations`（Whisperスタイル）でメディア機能を拡充。→ [APIリファレンス](docs/reference/API_REFERENCE.md)
 - **🎨 画像／動画／音声生成** — 1つのAPIでメディア：xAI Grok Imagine & Novita AI動画、ComfyUI、Magnific、Adobe Firefly、Segmind、ElevenLabsなどの音声プロバイダー。→ [APIリファレンス](docs/reference/API_REFERENCE.md)
 - **🌍 デプロイ＆運用** — リバースプロキシ `basePath`、ブラウザ言語自動検出、キーごとのデバイストラッキング、ルートレスMITMトラスト、zh-TWローカライズ。→ [環境](docs/reference/ENVIRONMENT.md)
-- **🤝 さらに多くのプロバイダー＆エージェント** — クラウドエージェント（Codex Cloud, Cursor, Devin, Jules）、Grok Build（xAI）ブラウザ＋OAuthログイン、Ollama一級カード、Claude Opus 5 & Sonnet 5、Kimi公式パートナーシップ（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI… そして刷新された**380プロバイダーカタログ**。→ [プロバイダー](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 さらに多くのプロバイダー＆エージェント** — クラウドエージェント（Codex Cloud, Cursor, Devin, Jules）、Grok Build（xAI）ブラウザ＋OAuthログイン、Ollama一級カード、Claude Opus 5 & Sonnet 5、Kimi公式パートナーシップ（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI… そして刷新された**381プロバイダーカタログ**。→ [プロバイダー](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 ルーティングの透明性** — すべてのレスポンスに `X-OmniRoute-Decision` ヘッダーで戦略／プロバイダー／レイテンシを明示、新しい `cache-optimized` コンボ戦略＋Auto-Comboの `cacheAffinity` ファクターでキャッシュ済みプレフィックスを保持する接続にリピートリクエストをルーティング、読み取り専用 `/v1/auto-combo/{channel}/candidates` エンドポイントで `auto/*` チャンネルのライブ候補プールを公開。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ ローカルパフォーマンス & インフラ** — ワンクリックでローカルRedis、Cloudflare Workers / Deno Deployリレーデプロイヤー、Bifrost & Muxを監督付き組み込みサービスとして提供。→ [組み込みサービス](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 さらに同梱** — プラグインフレームワーク＋マーケットプレイス、Omni/Agent/GitHubスキルフレームワーク、Obsidian Vault統合（22 MCPツール）、OpenAI互換のBatch & Files API、セマンティックレスポンスキャッシュ、リーダーボードによるゲーミフィケーション、ACPエージェントディスカバリー（15種類の組み込みエージェント）、BigQueryへのスケジュールログエクスポート、`auto/chaos` 並列マルチモデルファンアウト、Telegramボットブリッジ、アプリ内バージョンマネージャー、LMArena-ELOフリープロバイダーランキング。→ [ドキュメント](docs/README.md)
@@ -689,11 +689,11 @@ omniroute configure codex          # 他にも: claude opencode qwen aider goose
 
 <div align="center">
 
-## 🌐 380 の AI プロバイダー — カタログ登録済み無料 153
+## 🌐 381 の AI プロバイダー — カタログ登録済み無料 153
 
 </div>
 
-> **登録済みプロバイダー 380**。正規のチャット、メディア、検索、ローカル、クラウドエージェント、システムの各コレクションにまたがり、そのうち **153 は `hasFree: true` の検出メタデータを保持**しています。チャットモデルレジストリには **239 プロバイダー / 3,059 個の一意なプロバイダー・モデルの組み合わせ / 1,475 個の未加工モデル ID** が含まれます。別個に用意された無料予算カタログには、**モデルごとの行が 471 件**、**定期プールが 34 件**、**定期利用・キー不要で永久無料のプロバイダーが 54 件**あります。これらは設計上、異なる分母を使用しています。定義とプール重複排除済みの計算については、[プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md) および [無料ティア](docs/reference/FREE_TIERS.md) を参照してください。
+> **登録済みプロバイダー 381**。正規のチャット、メディア、検索、ローカル、クラウドエージェント、システムの各コレクションにまたがり、そのうち **153 は `hasFree: true` の検出メタデータを保持**しています。チャットモデルレジストリには **239 プロバイダー / 3,059 個の一意なプロバイダー・モデルの組み合わせ / 1,475 個の未加工モデル ID** が含まれます。別個に用意された無料予算カタログには、**モデルごとの行が 471 件**、**定期プールが 34 件**、**定期利用・キー不要で永久無料のプロバイダーが 54 件**あります。これらは設計上、異なる分母を使用しています。定義とプール重複排除済みの計算については、[プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md) および [無料ティア](docs/reference/FREE_TIERS.md) を参照してください。
 
 <div align="center">
 

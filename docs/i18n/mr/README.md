@@ -15,7 +15,7 @@
 
 **निर्माते [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — कोडिंग कधीही थांबवू नका. प्रत्येक AI साधन → 380 प्रदाते — 150+ मोफत — एका एंडपॉइंटद्वारे. Claude Code, Codex, Cursor, Cline, Copilot आणि Antigravity → FREE Claude / GPT / Gemini, ऑटो-फॉलबॅकसह. RTK + Caveman स्टॅक्ड कॉम्प्रेशनमुळे 15–95% टोकन्सची (~89% सरासरी) बचत — मर्यादा कधीही गाठू नका. 380 AI प्रदाते · 150+ मोफत स्तर · ~1.62B मोफत टोकन्स/महिना · 20 रूटिंग धोरणे · सुरू करण्यासाठी $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — कोडिंग कधीही थांबवू नका. प्रत्येक AI साधन → 381 प्रदाते — 150+ मोफत — एका एंडपॉइंटद्वारे. Claude Code, Codex, Cursor, Cline, Copilot आणि Antigravity → FREE Claude / GPT / Gemini, ऑटो-फॉलबॅकसह. RTK + Caveman स्टॅक्ड कॉम्प्रेशनमुळे 15–95% टोकन्सची (~89% सरासरी) बचत — मर्यादा कधीही गाठू नका. 381 AI प्रदाते · 150+ मोफत स्तर · ~1.62B मोफत टोकन्स/महिना · 20 रूटिंग धोरणे · सुरू करण्यासाठी $0."/>
 
 </div>
 
@@ -73,7 +73,7 @@ OMNIROUTE ने पैसे वाचवण्यात आणि तुमच
 
 |                           |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 प्रदाते                |            352             |   **358**   |          380          |
+| 🌐 प्रदाते                |            352             |   **358**   |          381          |
 | 🧠 अद्वितीय चॅट मॉडेल IDs |            1320            |  **1374**   |         1491          |
 | 🖼️ मोडॅलिटी ब्रिज         | 🆕 दृष्टी + ऑडिओ + व्हिडिओ |      ✓      |           ✓           |
 | 📡 Radar विनामूल्य कॅटलॉग |         🆕 opt-in          |      ✓      |           ✓           |
@@ -114,7 +114,7 @@ OMNIROUTE ने पैसे वाचवण्यात आणि तुमच
   <tr>
     <td align="right"><b>⚙️ वैशिष्ट्ये</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 कॉम्बोज</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 प्रदाते</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 प्रदाते</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI आणि MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="वचन — एक एंडपॉइंट आणि 380 प्रदाते. दुसरे निरोगी लक्ष्य उपलब्ध असेपर्यंत स्वयंचलित फॉलबॅक रूटिंग सुरू ठेवतो. सहा आधारस्तंभ: 380 प्रदात्यांमध्ये लवचिक फॉलबॅक · पात्र वर्कलोडवर टोकन खर्चात 95% पर्यंत बचत · 150+ विनामूल्य स्तर आणि 54 पुनरावर्ती/keyless कायमस्वरूपी विनामूल्य प्रदात्यांसह सुरुवात करण्यासाठी $0 · एका कॉन्फिगद्वारे 39 CLI/agent एकत्रीकरणे · /v1 वर OpenAI, Claude, Gemini आणि Responses API सुसंगतता · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals आणि 7,800+ ट्रॅक केलेल्या टेस्ट फाइल्समधील 56,000+ स्थिर टेस्ट घोषणांसह उत्पादन नियंत्रण."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="वचन — एक एंडपॉइंट आणि 381 प्रदाते. दुसरे निरोगी लक्ष्य उपलब्ध असेपर्यंत स्वयंचलित फॉलबॅक रूटिंग सुरू ठेवतो. सहा आधारस्तंभ: 381 प्रदात्यांमध्ये लवचिक फॉलबॅक · पात्र वर्कलोडवर टोकन खर्चात 95% पर्यंत बचत · 150+ विनामूल्य स्तर आणि 54 पुनरावर्ती/keyless कायमस्वरूपी विनामूल्य प्रदात्यांसह सुरुवात करण्यासाठी $0 · एका कॉन्फिगद्वारे 39 CLI/agent एकत्रीकरणे · /v1 वर OpenAI, Claude, Gemini आणि Responses API सुसंगतता · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals आणि 7,800+ ट्रॅक केलेल्या टेस्ट फाइल्समधील 56,000+ स्थिर टेस्ट घोषणांसह उत्पादन नियंत्रण."/>
 
 <br/>
 <br/>
@@ -688,11 +688,11 @@ omniroute configure codex          # तसेच: claude opencode qwen aider go
 
 <div align="center">
 
-## 🌐 380 AI प्रदाते — कॅटलॉगमध्ये चिन्हांकित 153 मोफत
+## 🌐 381 AI प्रदाते — कॅटलॉगमध्ये चिन्हांकित 153 मोफत
 
 </div>
 
-> **380 नोंदणीकृत प्रदाते** अधिकृत chat, media, search, local, cloud-agent आणि system संग्रहांमध्ये उपलब्ध आहेत; यांपैकी **153 प्रदात्यांकडे `hasFree: true` शोध मेटाडेटा आहे**. Chat model registry मध्ये **239 प्रदाते / 3,059 स्वतंत्र provider-model जोड्या / 1,475 raw model IDs** समाविष्ट आहेत; स्वतंत्र free-budget catalog मध्ये **471 प्रति-मॉडेल नोंदी**, **34 पुनरावर्ती पूल** आणि **54 पुनरावर्ती/कीलेस कायमस्वरूपी मोफत प्रदाते** आहेत. हे वेगवेगळे भाजक जाणीवपूर्वक वापरले आहेत; व्याख्या आणि pool-deduped गणना [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) आणि [Free Tiers](docs/reference/FREE_TIERS.md) मध्ये उपलब्ध आहेत.
+> **381 नोंदणीकृत प्रदाते** अधिकृत chat, media, search, local, cloud-agent आणि system संग्रहांमध्ये उपलब्ध आहेत; यांपैकी **153 प्रदात्यांकडे `hasFree: true` शोध मेटाडेटा आहे**. Chat model registry मध्ये **239 प्रदाते / 3,059 स्वतंत्र provider-model जोड्या / 1,475 raw model IDs** समाविष्ट आहेत; स्वतंत्र free-budget catalog मध्ये **471 प्रति-मॉडेल नोंदी**, **34 पुनरावर्ती पूल** आणि **54 पुनरावर्ती/कीलेस कायमस्वरूपी मोफत प्रदाते** आहेत. हे वेगवेगळे भाजक जाणीवपूर्वक वापरले आहेत; व्याख्या आणि pool-deduped गणना [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) आणि [Free Tiers](docs/reference/FREE_TIERS.md) मध्ये उपलब्ध आहेत.
 
 <div align="center">
 

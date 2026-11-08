@@ -15,7 +15,7 @@
 
 **Dicipta oleh [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan berhenti menulis kod. Setiap alat AI → 380 penyedia — 150+ percuma — melalui satu titik akhir. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke Claude / GPT / Gemini PERCUMA dengan sandaran automatik. Mampatan berlapis RTK + Caveman menjimatkan 15–95% token (purata ~89%) — jangan sesekali mencapai had. 380 penyedia AI · 150+ peringkat percuma · ~1.62B token percuma/bulan · 20 strategi penghalaan · $0 untuk bermula."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan berhenti menulis kod. Setiap alat AI → 381 penyedia — 150+ percuma — melalui satu titik akhir. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke Claude / GPT / Gemini PERCUMA dengan sandaran automatik. Mampatan berlapis RTK + Caveman menjimatkan 15–95% token (purata ~89%) — jangan sesekali mencapai had. 381 penyedia AI · 150+ peringkat percuma · ~1.62B token percuma/bulan · 20 strategi penghalaan · $0 untuk bermula."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                 |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Penyedia                     |           352           |   **358**   |          380          |
+| 🌐 Penyedia                     |           352           |   **358**   |          381          |
 | 🧠 ID model sembang unik        |          1320           |  **1374**   |         1491          |
 | 🖼️ Jambatan modaliti            | 🆕 visi + audio + video |      ✓      |           ✓           |
 | 📡 Katalog percuma Radar        |    🆕 pilihan sertai    |      ✓      |           ✓           |
@@ -113,7 +113,7 @@
   <tr>
     <td align="right"><b>⚙️ Ciri</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinasi</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Penyedia</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Penyedia</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -249,7 +249,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu titik akhir dan 380 pembekal. Sandaran automatik memastikan penghalaan diteruskan selagi sasaran sihat yang lain masih tersedia. Enam tunjang: sandaran berdaya tahan merentas 380 pembekal · sehingga 95% penjimatan token untuk beban kerja yang layak · $0 untuk bermula dengan 150+ peringkat percuma dan 54 pembekal percuma selama-lamanya yang berulang/tanpa kunci · 39 integrasi CLI/agen melalui satu konfigurasi · keserasian dengan API OpenAI, Claude, Gemini dan Responses di /v1 · kawalan produksi termasuk pemutus litar, penyamaran TLS, 110 alat MCP, A2A, memori, kawalan perlindungan, penilaian dan 56,000+ pengisytiharan ujian statik merentas 7,800+ fail ujian yang dijejaki."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu titik akhir dan 381 pembekal. Sandaran automatik memastikan penghalaan diteruskan selagi sasaran sihat yang lain masih tersedia. Enam tunjang: sandaran berdaya tahan merentas 381 pembekal · sehingga 95% penjimatan token untuk beban kerja yang layak · $0 untuk bermula dengan 150+ peringkat percuma dan 54 pembekal percuma selama-lamanya yang berulang/tanpa kunci · 39 integrasi CLI/agen melalui satu konfigurasi · keserasian dengan API OpenAI, Claude, Gemini dan Responses di /v1 · kawalan produksi termasuk pemutus litar, penyamaran TLS, 110 alat MCP, A2A, memori, kawalan perlindungan, penilaian dan 56,000+ pengisytiharan ujian statik merentas 7,800+ fail ujian yang dijejaki."/>
 
 <br/>
 <br/>
@@ -509,7 +509,7 @@ Kesemua **20** strategi — campur & padankan bagi setiap langkah kombo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membezakan OmniRoute — gambaran ciri bertarikh vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM merentasi 13 keupayaan. OmniRoute: 380 penyedia, lebih 150 pelan percuma terbina dalam, 20 strategi penghalaan, pemampatan token 12-enjin, pelayan MCP terbina dalam dengan 110 alat, protokol ejen A2A, memori berterusan, pagar keselamatan, ejen awan, penyamaran cap jari TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute dilesenkan MIT dan boleh dihoskan sendiri. Keupayaan dan bilangan pesaing mungkin berubah; lihat metodologi yang dipautkan."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membezakan OmniRoute — gambaran ciri bertarikh vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM merentasi 13 keupayaan. OmniRoute: 381 penyedia, lebih 150 pelan percuma terbina dalam, 20 strategi penghalaan, pemampatan token 12-enjin, pelayan MCP terbina dalam dengan 110 alat, protokol ejen A2A, memori berterusan, pagar keselamatan, ejen awan, penyamaran cap jari TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute dilesenkan MIT dan boleh dihoskan sendiri. Keupayaan dan bilangan pesaing mungkin berubah; lihat metodologi yang dipautkan."/>
 
 <sub>📊 Metodologi penuh &amp; perincian setiap ciri berbanding 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -604,7 +604,7 @@ Radar adalah secara ikut serta dan GET sahaja. Klien OmniRoute tidak memuat naik
 - **🖼️ Endpoint baharu** — `/v1/ocr` (Mistral OCR) dan `/v1/audio/translations` (gaya Whisper) melengkapkan permukaan media. → [Rujukan API](docs/reference/API_REFERENCE.md)
 - **🎨 Penjanaan imej / video / audio** — satu API untuk media: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, dan penyedia suara seperti ElevenLabs. → [Rujukan API](docs/reference/API_REFERENCE.md)
 - **🌍 Penyebaran & operasi** — `basePath` proksi songsang, pengesanan bahasa pelayar automatik, penjejakan peranti per-kunci, MITM root-less trust, setempat zh-TW. → [Persekitaran](docs/reference/ENVIRONMENT.md)
-- **🤝 Lebih banyak penyedia & ejen** — ejen awan (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) dengan log masuk pelayar + OAuth, kad Ollama kelas pertama, Claude Opus 5 & Sonnet 5, kerjasama rasmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… dan katalog **380 penyedia** yang diperbaharui. → [Penyedia](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Lebih banyak penyedia & ejen** — ejen awan (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) dengan log masuk pelayar + OAuth, kad Ollama kelas pertama, Claude Opus 5 & Sonnet 5, kerjasama rasmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… dan katalog **381 penyedia** yang diperbaharui. → [Penyedia](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Ketelusan penghalaan** — setiap respons membawa header `X-OmniRoute-Decision` yang menamakan strategi/penyedia/latensi yang melayannya, strategi kombo `cache-optimized` baharu + faktor Auto-Combo `cacheAffinity` menghala semula permintaan berulang ke sambungan yang memegang awalan cache, dan endpoint baca sahaja `/v1/auto-combo/{channel}/candidates` mendedahkan kolam calon langsung saluran `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Prestasi & infrastruktur tempatan** — Redis tempatan satu klik, penyebar relay Cloudflare Workers / Deno Deploy, Bifrost & Mux sebagai perkhidmatan terbenam yang diawasi. → [Perkhidmatan Terbenam](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Juga disertakan** — rangka kerja plugin + pasaran, rangka kerja kemahiran Omni/Agent/GitHub, integrasi peti simpan Obsidian (22 alat MCP), API Batch & Files serasi OpenAI, cache respons semantik, gamifikasi dengan papan pendahulu, penemuan ejen ACP (15 ejen terbina dalam), eksport log berjadual ke BigQuery, `auto/chaos` fan-out multi-model selari, jambatan bot Telegram, pengurus versi dalam aplikasi dan penarafan penyedia percuma LMArena-ELO. → [Dokumentasi](docs/README.md)
@@ -688,11 +688,11 @@ masuk dalam sejarah shell anda. → [Integrasi CLI](docs/guides/CLI-INTEGRATIONS
 
 <div align="center">
 
-## 🌐 380 Penyedia AI — 153 Ditandai Katalog sebagai Percuma
+## 🌐 381 Penyedia AI — 153 Ditandai Katalog sebagai Percuma
 
 </div>
 
-> **380 penyedia berdaftar** merentas koleksi chat, media, carian, tempatan, ejen awan dan sistem kanonik, termasuk **153 yang membawa metadata penemuan `hasFree: true`**. Pendaftaran model chat merangkumi **239 penyedia / 3,059 pasangan penyedia-model berbeza / 1,475 ID model mentah**; katalog belanjawan percuma yang berasingan mempunyai **471 baris bagi setiap model**, **34 kolam berulang** dan **54 penyedia percuma selama-lamanya yang berulang/tanpa kunci**. Ini ialah penyebut yang berbeza mengikut reka bentuk; definisi dan pengiraan yang dinyahpendua mengikut kolam tersedia dalam [Rujukan Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Peringkat Percuma](docs/reference/FREE_TIERS.md).
+> **381 penyedia berdaftar** merentas koleksi chat, media, carian, tempatan, ejen awan dan sistem kanonik, termasuk **153 yang membawa metadata penemuan `hasFree: true`**. Pendaftaran model chat merangkumi **239 penyedia / 3,059 pasangan penyedia-model berbeza / 1,475 ID model mentah**; katalog belanjawan percuma yang berasingan mempunyai **471 baris bagi setiap model**, **34 kolam berulang** dan **54 penyedia percuma selama-lamanya yang berulang/tanpa kunci**. Ini ialah penyebut yang berbeza mengikut reka bentuk; definisi dan pengiraan yang dinyahpendua mengikut kolam tersedia dalam [Rujukan Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Peringkat Percuma](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

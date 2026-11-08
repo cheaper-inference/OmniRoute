@@ -15,7 +15,7 @@
 
 **נוצר על ידי [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — לעולם אל תפסיקו לתכנת. כל כלי AI → 380 ספקים — 150+ בחינם — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot ו-Antigravity אל Claude / GPT / Gemini בחינם, עם מעבר אוטומטי במקרה של כשל. דחיסה משולבת של RTK + Caveman חוסכת 15–95% מהטוקנים (ממוצע של ~89%) — לעולם לא תגיעו למגבלות. 380 ספקי AI · יותר מ-150 מסלולים בחינם · ~1.62 מיליארד טוקנים בחינם בחודש · 20 אסטרטגיות ניתוב · $0 להתחלה."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — לעולם אל תפסיקו לתכנת. כל כלי AI → 381 ספקים — 150+ בחינם — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot ו-Antigravity אל Claude / GPT / Gemini בחינם, עם מעבר אוטומטי במקרה של כשל. דחיסה משולבת של RTK + Caveman חוסכת 15–95% מהטוקנים (ממוצע של ~89%) — לעולם לא תגיעו למגבלות. 381 ספקי AI · יותר מ-150 מסלולים בחינם · ~1.62 מיליארד טוקנים בחינם בחודש · 20 אסטרטגיות ניתוב · $0 להתחלה."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                             |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 ספקים                    |          352          |   **358**   |          380          |
+| 🌐 ספקים                    |          352          |   **358**   |          381          |
 | 🧠 מזהי מודלי צ'אט ייחודיים |         1320          |  **1374**   |         1491          |
 | 🖼️ גשר מודאליות             | 🆕 חזות + שמע + וידאו |      ✓      |           ✓           |
 | 📡 קטלוג Radar החינמי       |       🆕 opt-in       |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ תכונות</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 שילובים</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 ספקים</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 ספקים</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ו-MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ההבטחה — נקודת קצה אחת ו-380 ספקים. חלופה אוטומטית שומרת על הניתוב כל עוד יעד בריא אחר זמין. שישה עמודי תווך: חלופה עמידה בין 380 ספקים · חיסכון של עד 95% בעלויות טוקנים בעומסי עבודה מתאימים · $0 להתחלה עם יותר מ-150 מסלולים חינמיים ו-54 ספקים חינמיים חוזרים או ללא מפתח, הזמינים לתמיד · 39 אינטגרציות CLI/agent באמצעות תצורה אחת · תאימות ל-OpenAI, Claude, Gemini ול-Responses API ב-/v1 · בקרות ייצור הכוללות מפסקי מעגל, הסוואת TLS, 110 כלי MCP, A2A, זיכרון, מעקות בטיחות, הערכות ויותר מ-56,000 הצהרות בדיקה סטטיות ביותר מ-7,800 קובצי בדיקה במעקב."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ההבטחה — נקודת קצה אחת ו-381 ספקים. חלופה אוטומטית שומרת על הניתוב כל עוד יעד בריא אחר זמין. שישה עמודי תווך: חלופה עמידה בין 381 ספקים · חיסכון של עד 95% בעלויות טוקנים בעומסי עבודה מתאימים · $0 להתחלה עם יותר מ-150 מסלולים חינמיים ו-54 ספקים חינמיים חוזרים או ללא מפתח, הזמינים לתמיד · 39 אינטגרציות CLI/agent באמצעות תצורה אחת · תאימות ל-OpenAI, Claude, Gemini ול-Responses API ב-/v1 · בקרות ייצור הכוללות מפסקי מעגל, הסוואת TLS, 110 כלי MCP, A2A, זיכרון, מעקות בטיחות, הערכות ויותר מ-56,000 הצהרות בדיקה סטטיות ביותר מ-7,800 קובצי בדיקה במעקב."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="מה מייחד את OmniRoute — צילום מצב תכונות עדכני מול 9router, OpenRouter, CLIProxyAPI ו-LiteLLM ב-13 יכולות. OmniRoute: 380 ספקים, מעל 150 שכבות חינמיות מובנות, 20 אסטרטגיות ניתוב, דחיסת טוקנים ב-12 מנועים, שרת MCP מובנה עם 110 כלים, פרוטוקול סוכנים A2A, זיכרון מתמשך, מסילות הגנה, סוכנים בענן, הסוואת טביעת אצבע TLS, Desktop/Termux/PWA ו-67 שפות ממשק משתמש. OmniRoute ברישיון MIT וניתן לאירוח עצמי. יכולות ומתחרים עשויים להשתנות; ראו את המתודולוגיה המקושרת."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="מה מייחד את OmniRoute — צילום מצב תכונות עדכני מול 9router, OpenRouter, CLIProxyAPI ו-LiteLLM ב-13 יכולות. OmniRoute: 381 ספקים, מעל 150 שכבות חינמיות מובנות, 20 אסטרטגיות ניתוב, דחיסת טוקנים ב-12 מנועים, שרת MCP מובנה עם 110 כלים, פרוטוקול סוכנים A2A, זיכרון מתמשך, מסילות הגנה, סוכנים בענן, הסוואת טביעת אצבע TLS, Desktop/Termux/PWA ו-67 שפות ממשק משתמש. OmniRoute ברישיון MIT וניתן לאירוח עצמי. יכולות ומתחרים עשויים להשתנות; ראו את המתודולוגיה המקושרת."/>
 
 <sub>📊 מתודולוגיה מלאה &amp; פירוט לפי תכונה מול 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar הוא שירות אופציונלי המבוסס על GET בלבד. לק�
 - **🖼️ נקודות קצה חדשות** — `/v1/ocr` (Mistral OCR) ו-`/v1/audio/translations` (בסגנון Whisper) משלימות את ממשק המדיה. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 יצירת תמונה / וידאו / אודיו** — API אחד למדיה: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, וספקי דיבור כמו ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 פריסה ותפעול** — `basePath` בפרוקסי הפוך, זיהוי שפת דפדפן אוטומטי, מעקב מכשירים לכל מפתח, MITM ללא root, לוקליזציה zh-TW. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 עוד ספקים וסוכנים** — סוכני ענן (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) עם דפדפן + כניסת OAuth, כרטיס Ollama ייעודי, Claude Opus 5 & Sonnet 5, שותפות רשמית עם Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… וקטלוג **380 ספקים** מעודכן. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 עוד ספקים וסוכנים** — סוכני ענן (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) עם דפדפן + כניסת OAuth, כרטיס Ollama ייעודי, Claude Opus 5 & Sonnet 5, שותפות רשמית עם Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… וקטלוג **381 ספקים** מעודכן. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 שקיפות ניתוב** — כל תגובה נושאת כותרת `X-OmniRoute-Decision` עם שם האסטרטגיה/ספק/השהיה ששירתה אותה, אסטרטגיית קומבו חדשה `cache-optimized` + פקטור Auto-Combo `cacheAffinity` מנתבים בקשות חוזרות לאותו חיבור עם קידומת במטמון, ו-`/v1/auto-combo/{channel}/candidates` לקריאה בלבד חושף את מאגר המועמדים החי של ערוץ `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ ביצועים ותשתית מקומית** — Redis מקומי בלחיצה אחת, מפריסי relay ל-Cloudflare Workers / Deno Deploy, Bifrost & Mux כשירותים מוטמעים ומפוקחים. → [שירותים מוטמעים](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 גם כלול בערכה** — מסגרת פלאגינים + מרקטפלייס, מסגרות כישורים ל-Omni/Agent/GitHub, אינטגרציה עם Obsidian vault (22 כלי MCP), APIs תואמי OpenAI ל-Batch & Files, מטמון תגובות סמנטי, גיימיפיקציה עם לוחות מובילים, גילוי סוכני ACP (15 סוכנים מובנים), ייצוא לוגים מתוזמן ל-BigQuery, `auto/chaos` פיצול למודלים מרובים במקביל, גשר בוט ל-Telegram, מנהל גרסאות מובנה באפליקציה ודירוגי ספקים חינמיים LMArena-ELO. → [תיעוד](docs/README.md)
@@ -688,11 +688,11 @@ omniroute configure codex          # גם: claude opencode qwen aider goose gemi
 
 <div align="center">
 
-## 🌐 380 ספקי AI — 153 מסומנים כחינמיים בקטלוג
+## 🌐 381 ספקי AI — 153 מסומנים כחינמיים בקטלוג
 
 </div>
 
-> **380 ספקים רשומים** באוספים הקנוניים של צ'אט, מדיה, חיפוש, מקומי, סוכני ענן ומערכת, כולל **153 הנושאים מטא־נתוני גילוי `hasFree: true`**. מרשם מודלי הצ'אט כולל **239 ספקים / 3,059 צמדי ספק-מודל ייחודיים / 1,475 מזהי מודלים גולמיים**; בקטלוג התקציב החינמי הנפרד יש **471 שורות לפי מודל**, **34 מאגרים חוזרים** ו־**54 ספקים חינמיים לתמיד, חוזרים וללא מפתח**. אלה מכנים שונים בכוונה; ההגדרות והחישובים לאחר ביטול כפילויות במאגרים נמצאים ב־[מדריך הספקים](docs/reference/PROVIDER_REFERENCE.md) וב־[הרמות החינמיות](docs/reference/FREE_TIERS.md).
+> **381 ספקים רשומים** באוספים הקנוניים של צ'אט, מדיה, חיפוש, מקומי, סוכני ענן ומערכת, כולל **153 הנושאים מטא־נתוני גילוי `hasFree: true`**. מרשם מודלי הצ'אט כולל **239 ספקים / 3,059 צמדי ספק-מודל ייחודיים / 1,475 מזהי מודלים גולמיים**; בקטלוג התקציב החינמי הנפרד יש **471 שורות לפי מודל**, **34 מאגרים חוזרים** ו־**54 ספקים חינמיים לתמיד, חוזרים וללא מפתח**. אלה מכנים שונים בכוונה; ההגדרות והחישובים לאחר ביטול כפילויות במאגרים נמצאים ב־[מדריך הספקים](docs/reference/PROVIDER_REFERENCE.md) וב־[הרמות החינמיות](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

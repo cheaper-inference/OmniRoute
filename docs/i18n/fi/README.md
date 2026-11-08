@@ -15,7 +15,7 @@
 
 **Tekijä: [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Älä koskaan lopeta koodaamista. Jokainen tekoälytyökalu → 380 palveluntarjoajaa — yli 150 ilmaista — yhden päätepisteen kautta. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity ilmaisiin Claude-, GPT- ja Gemini-palveluihin automaattisella varajärjestelmällä. RTK- ja Caveman-pinottu pakkaus säästää 15–95 % tokeneista (keskimäärin noin 89 %) — älä koskaan saavuta rajoja. 380 tekoälypalveluntarjoajaa · yli 150 ilmaista tasoa · noin 1,62 miljardia ilmaista tokenia kuukaudessa · 20 reititysstrategiaa · 0 $ aloitukseen."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Älä koskaan lopeta koodaamista. Jokainen tekoälytyökalu → 381 palveluntarjoajaa — yli 150 ilmaista — yhden päätepisteen kautta. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity ilmaisiin Claude-, GPT- ja Gemini-palveluihin automaattisella varajärjestelmällä. RTK- ja Caveman-pinottu pakkaus säästää 15–95 % tokeneista (keskimäärin noin 89 %) — älä koskaan saavuta rajoja. 381 tekoälypalveluntarjoajaa · yli 150 ilmaista tasoa · noin 1,62 miljardia ilmaista tokenia kuukaudessa · 20 reititysstrategiaa · 0 $ aloitukseen."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                     |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------------- | :--------------------: | :---------: | :-------------------: |
-| 🌐 Palveluntarjoajat                |          352           |   **358**   |          380          |
+| 🌐 Palveluntarjoajat                |          352           |   **358**   |          381          |
 | 🧠 Yksilölliset chat-mallitunnukset |          1320          |  **1374**   |         1491          |
 | 🖼️ Modaliteettisilta                | 🆕 näkö + ääni + video |      ✓      |           ✓           |
 | 📡 Radarin ilmainen luettelo        |     🆕 hyväksyntä      |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Ominaisuudet</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Yhdistelmät</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Palveluntarjoajat</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Palveluntarjoajat</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 380 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen käynnissä, kun toinen toimintakuntoinen kohde on käytettävissä. Kuusi pilaria: kestävä varareititys 380 palveluntarjoajan välillä · jopa 95 %:n tokenisäästöt kelvollisissa työkuormissa · 0 dollaria aloitukseen, yli 150 maksutonta tasoa ja 54 toistuvasti tai ilman avainta ikuisesti maksutonta palveluntarjoajaa · 39 CLI-/agentti-integraatiota yhden määrityksen kautta · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus osoitteessa /v1 · tuotantotason hallintaominaisuudet, kuten katkaisimet, TLS-stealth, MCP:n 110 työkalua, A2A, muisti, suojaukset, arvioinnit sekä yli 56 000 staattista testimääritystä yli 7 800 seuratun testitiedoston joukossa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 381 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen käynnissä, kun toinen toimintakuntoinen kohde on käytettävissä. Kuusi pilaria: kestävä varareititys 381 palveluntarjoajan välillä · jopa 95 %:n tokenisäästöt kelvollisissa työkuormissa · 0 dollaria aloitukseen, yli 150 maksutonta tasoa ja 54 toistuvasti tai ilman avainta ikuisesti maksutonta palveluntarjoajaa · 39 CLI-/agentti-integraatiota yhden määrityksen kautta · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus osoitteessa /v1 · tuotantotason hallintaominaisuudet, kuten katkaisimet, TLS-stealth, MCP:n 110 työkalua, A2A, muisti, suojaukset, arvioinnit sekä yli 56 000 staattista testimääritystä yli 7 800 seuratun testitiedoston joukossa."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Kaikki **20** strategiaa — yhdistele vapaasti yhdistelmän jokaisessa vaiheess
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mikä erottaa OmniRouten muista — vanhentunut ominaisuustaulukko vs 9router, OpenRouter, CLIProxyAPI ja LiteLLM 13 ominaisuuden osalta. OmniRoute: 380 tarjoajaa, 150+ sisäänrakennettua ilmaistasoa, 20 reititysstrategiaa, 12-moottorinen token-kompressio, sisäänrakennettu MCP-palvelin 110 työkalulla, A2A-agenttiprotokolla, pysyvä muisti, turvakaiteet, pilviagentit, TLS-sormenjäljen piilotus, Desktop/Termux/PWA ja 67 i18n UI-kieltä. OmniRoute on MIT-lisensoitu ja itse isännöitävissä. Kilpailijoiden ominaisuudet ja määrät voivat muuttua; katso linkitetty metodologia."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mikä erottaa OmniRouten muista — vanhentunut ominaisuustaulukko vs 9router, OpenRouter, CLIProxyAPI ja LiteLLM 13 ominaisuuden osalta. OmniRoute: 381 tarjoajaa, 150+ sisäänrakennettua ilmaistasoa, 20 reititysstrategiaa, 12-moottorinen token-kompressio, sisäänrakennettu MCP-palvelin 110 työkalulla, A2A-agenttiprotokolla, pysyvä muisti, turvakaiteet, pilviagentit, TLS-sormenjäljen piilotus, Desktop/Termux/PWA ja 67 i18n UI-kieltä. OmniRoute on MIT-lisensoitu ja itse isännöitävissä. Kilpailijoiden ominaisuudet ja määrät voivat muuttua; katso linkitetty metodologia."/>
 
 <sub>📊 Koko metodologia &amp; ominaisuuskohtaiset yksityiskohdat vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -614,7 +614,7 @@ nykyisestä luettelosta on osoitteessa **[radar.omniroute.online/planos](https:/
 - **🖼️ Uudet päätepisteet** — `/v1/ocr` (Mistral OCR) ja `/v1/audio/translations` (Whisper-tyylinen) täydentävät mediasovellusrajapinnan. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Kuvan / videon / äänen generointi** — yksi API mediaan: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind sekä puhepalvelut kuten ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Käyttöönotto & operointi** — reverse-proxy `basePath`, selaimen kieliautomaattitunnistus, avainkohtainen laitejäljitys, rootiton MITM-luottamus, zh-TW-lokalisaatio. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Lisää tarjoajia & agentteja** — pilviagentit (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) selaimella + OAuth-kirjautuminen, Ollama ensiluokkainen kortti, Claude Opus 5 & Sonnet 5, Kimi virallinen kumppanuus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ja päivitetty **380-tarjoajan katalogi**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Lisää tarjoajia & agentteja** — pilviagentit (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) selaimella + OAuth-kirjautuminen, Ollama ensiluokkainen kortti, Claude Opus 5 & Sonnet 5, Kimi virallinen kumppanuus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ja päivitetty **381-tarjoajan katalogi**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Reitityksen läpinäkyvyys** — jokainen vastaus sisältää `X-OmniRoute-Decision`-otsikon, jossa mainitaan strategia/tarjoaja/viive, uusi `cache-optimized` yhdistelmästrategia + Auto-Combo `cacheAffinity`-tekijä reitittää toistuvat pyynnöt takaisin yhteyteen, jolla on välimuistissa oleva alku, ja vain luku -päätepiste `/v1/auto-combo/{channel}/candidates` paljastaa `auto/*` kanavan elävän ehdokasjoukon. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Paikallinen suorituskyky & infrastruktuuri** — yhdellä klikkauksella paikallinen Redis, Cloudflare Workers / Deno Deploy -välityspalveluiden käyttöönotto, Bifrost & Mux valvottuina upotettuina palveluina. → [Upotetut palvelut](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Myös mukana paketissa** — liitännäiskehys + markkinapaikka, Omni/Agent/GitHub-taitokehykset, Obsidian-vault-integraatio (22 MCP-työkalua), OpenAI-yhteensopivat Batch & Files -rajapinnat, semanttinen vastausvälimuisti, pelillistäminen tulostaulukoilla, ACP-agenttien löytäminen (15 sisäänrakennettua agenttia), ajastettu lokien vienti BigQueryyn, `auto/chaos` rinnakkainen monimallifaniutus, Telegram-bottisilta, sisäänrakennettu versiohallinta ja LMArena-ELO ilmaiset tarjoajarankingit. → [Dokumentaatio](docs/README.md)
@@ -698,11 +698,11 @@ komentorivihistoriastasi. → [CLI-integraatiot](docs/guides/CLI-INTEGRATIONS.md
 
 <div align="center">
 
-## 🌐 380 tekoälyntarjoajaa — 153 luetteloon merkittyä maksutonta
+## 🌐 381 tekoälyntarjoajaa — 153 luetteloon merkittyä maksutonta
 
 </div>
 
-> **380 rekisteröityä tarjoajaa** kanonisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, mukaan lukien **153 tarjoajaa, joilla on `hasFree: true` -löytömetatieto**. Keskustelumallirekisteri kattaa **239 tarjoajaa / 3 059 erillistä tarjoaja–malli-paria / 1 475 raakaa mallitunnistetta**; erillisessä maksuttoman budjetin luettelossa on **471 mallikohtaista riviä**, **34 toistuvaa poolia** ja **54 toistuvasti tai avaimetta toimivaa ikuisesti maksutonta tarjoajaa**. Nämä ovat tarkoituksella eri nimittäjiä; määritelmät ja poolien deduplikointiin perustuvat laskelmat ovat saatavilla kohdissa [Tarjoajaviite](docs/reference/PROVIDER_REFERENCE.md) ja [Maksuttomat tasot](docs/reference/FREE_TIERS.md).
+> **381 rekisteröityä tarjoajaa** kanonisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, mukaan lukien **153 tarjoajaa, joilla on `hasFree: true` -löytömetatieto**. Keskustelumallirekisteri kattaa **239 tarjoajaa / 3 059 erillistä tarjoaja–malli-paria / 1 475 raakaa mallitunnistetta**; erillisessä maksuttoman budjetin luettelossa on **471 mallikohtaista riviä**, **34 toistuvaa poolia** ja **54 toistuvasti tai avaimetta toimivaa ikuisesti maksutonta tarjoajaa**. Nämä ovat tarkoituksella eri nimittäjiä; määritelmät ja poolien deduplikointiin perustuvat laskelmat ovat saatavilla kohdissa [Tarjoajaviite](docs/reference/PROVIDER_REFERENCE.md) ja [Maksuttomat tasot](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

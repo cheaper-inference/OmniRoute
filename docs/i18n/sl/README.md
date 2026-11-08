@@ -15,7 +15,7 @@
 
 **Ustvaril [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikoli ne prenehajte programirati. Vsako orodje umetne inteligence → 380 ponudnikov — 150+ brezplačnih — prek ene končne točke. Claude Code, Codex, Cursor, Cline, Copilot in Antigravity v BREZPLAČNE Claude / GPT / Gemini z avtomatskim preklopom. Zloženo stiskanje RTK + Caveman prihrani 15–95 % žetonov (povprečno ~89 %) — nikoli ne dosezite omejitev. 380 ponudnikov umetne inteligence · 150+ brezplačnih paketov · ~1,62 milijarde brezplačnih žetonov/mesec · 20 strategij usmerjanja · Začnite za 0 $."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikoli ne prenehajte programirati. Vsako orodje umetne inteligence → 381 ponudnikov — 150+ brezplačnih — prek ene končne točke. Claude Code, Codex, Cursor, Cline, Copilot in Antigravity v BREZPLAČNE Claude / GPT / Gemini z avtomatskim preklopom. Zloženo stiskanje RTK + Caveman prihrani 15–95 % žetonov (povprečno ~89 %) — nikoli ne dosezite omejitev. 381 ponudnikov umetne inteligence · 150+ brezplačnih paketov · ~1,62 milijarde brezplačnih žetonov/mesec · 20 strategij usmerjanja · Začnite za 0 $."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                       |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Ponudniki                          |            352            |   **358**   |          380          |
+| 🌐 Ponudniki                          |            352            |   **358**   |          381          |
 | 🧠 Enolični ID-ji klepetalnih modelov |           1320            |  **1374**   |         1491          |
 | 🖼️ Most za modalnosti                 |   🆕 vid + zvok + video   |      ✓      |           ✓           |
 | 📡 Katalog brezplačnih vsebin Radar   | 🆕 z možnostjo privolitve |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Funkcije</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinacije</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Ponudniki</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Ponudniki</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obljuba — ena končna točka in 380 ponudnikov. Samodejni nadomestni preklop ohrani usmerjanje, dokler je na voljo drug zdrav cilj. Šest stebrov: odporen nadomestni preklop med 380 ponudniki · do 95 % prihranka žetonov pri ustreznih delovnih obremenitvah · začnite za 0 $ s 150+ brezplačnimi paketi in 54 brezplačnimi ponudniki za vedno, ki se obnavljajo ali ne zahtevajo ključa · 39 integracij CLI/agentov prek ene konfiguracije · združljivost z API-ji OpenAI, Claude, Gemini in Responses na /v1 · produkcijski nadzor, vključno z odklopniki, prikritostjo TLS, 110 orodji MCP, A2A, pomnilnikom, zaščitnimi omejitvami, evalvacijami ter 56.000+ statičnimi deklaracijami testov v več kot 7.800 spremljanih datotekah testov."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obljuba — ena končna točka in 381 ponudnikov. Samodejni nadomestni preklop ohrani usmerjanje, dokler je na voljo drug zdrav cilj. Šest stebrov: odporen nadomestni preklop med 381 ponudniki · do 95 % prihranka žetonov pri ustreznih delovnih obremenitvah · začnite za 0 $ s 150+ brezplačnimi paketi in 54 brezplačnimi ponudniki za vedno, ki se obnavljajo ali ne zahtevajo ključa · 39 integracij CLI/agentov prek ene konfiguracije · združljivost z API-ji OpenAI, Claude, Gemini in Responses na /v1 · produkcijski nadzor, vključno z odklopniki, prikritostjo TLS, 110 orodji MCP, A2A, pomnilnikom, zaščitnimi omejitvami, evalvacijami ter 56.000+ statičnimi deklaracijami testov v več kot 7.800 spremljanih datotekah testov."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Vseh **20** strategij — poljubno jih kombinirajte pri vsakem koraku kombinacij
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kaj loči OmniRoute — posnetek funkcij v primerjavi z 9router, OpenRouter, CLIProxyAPI in LiteLLM glede na 13 zmogljivosti. OmniRoute: 380 ponudnikov, več kot 150 vgrajenih brezplačnih paketov, 20 strategij usmerjanja, 12-motorno stiskanje žetonov, vgrajen MCP strežnik s 110 orodji, A2A agentni protokol, trajni pomnilnik, varovalke, oblačni agenti, prikritje TLS prstnega odtisa, Desktop/Termux/PWA in 67 jezikovnih lokalizacij uporabniškega vmesnika. OmniRoute ima MIT licenco in ga je mogoče gostiti samostojno. Zmogljivosti in število konkurentov se lahko spreminjajo; glejte povezano metodologijo."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kaj loči OmniRoute — posnetek funkcij v primerjavi z 9router, OpenRouter, CLIProxyAPI in LiteLLM glede na 13 zmogljivosti. OmniRoute: 381 ponudnikov, več kot 150 vgrajenih brezplačnih paketov, 20 strategij usmerjanja, 12-motorno stiskanje žetonov, vgrajen MCP strežnik s 110 orodji, A2A agentni protokol, trajni pomnilnik, varovalke, oblačni agenti, prikritje TLS prstnega odtisa, Desktop/Termux/PWA in 67 jezikovnih lokalizacij uporabniškega vmesnika. OmniRoute ima MIT licenco in ga je mogoče gostiti samostojno. Zmogljivosti in število konkurentov se lahko spreminjajo; glejte povezano metodologijo."/>
 
 <sub>📊 Celotna metodologija &amp; podrobnosti po funkcijah v primerjavi z 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -613,7 +613,7 @@ trenutnem katalogu najdete na **[radar.omniroute.online/planos](https://radar.om
 - **🖼️ Novi končni točki** — `/v1/ocr` (Mistral OCR) in `/v1/audio/translations` (Whisper-style) dopolnjujeta medijsko površino. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Generiranje slik / videa / zvoka** — en API za medije: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind in ponudniki govora kot ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Namestitev & upravljanje** — reverse-proxy `basePath`, samodejno zaznavanje jezika brskalnika, sledenje napravam po ključu, MITM zaupanje brez root dostopa, lokalizacija zh-TW. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Več ponudnikov & agentov** — cloud agenti (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) z brskalnikom + OAuth prijavo, Ollama kot prva izbira, Claude Opus 5 & Sonnet 5, uradno partnerstvo s Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… in prenovljen **katalog 380 ponudnikov**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Več ponudnikov & agentov** — cloud agenti (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) z brskalnikom + OAuth prijavo, Ollama kot prva izbira, Claude Opus 5 & Sonnet 5, uradno partnerstvo s Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… in prenovljen **katalog 381 ponudnikov**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Preglednost usmerjanja** — vsak odgovor vsebuje glavo `X-OmniRoute-Decision` z imenom strategije/ponudnika/zamude, nova strategija kombinacije `cache-optimized` + Auto-Combo faktor `cacheAffinity` usmerja ponovljene zahteve nazaj na povezavo z ujemajočim predpomnjenim začetkom, in samo-za-branje `/v1/auto-combo/{channel}/candidates` končna točka razkriva živo kandidatno skupino kanala `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokalna zmogljivost in infrastruktura** — enoklikovni lokalni Redis, Cloudflare Workers / Deno Deploy relejni izvajalniki, Bifrost & Mux kot nadzorovane vgrajene storitve. → [Vgrajene storitve](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Tudi v paketu** — ogrodje za vtičnike + tržnica, ogrodja za veščine Omni/Agent/GitHub, integracija z Obsidian vault (22 MCP orodij), z OpenAI združljivi Batch & Files API-ji, semantična predpomnilna odgovorov, gamifikacija z lestvicami najboljših, odkrivanje agentov ACP (15 vgrajenih agentov), načrtovan izvoz dnevnikov v BigQuery, `auto/chaos` vzporedno razpošiljanje na več modelov, most do Telegram bota, vgrajeni upravljalnik različic in LMArena-ELO lestvice brezplačnih ponudnikov. → [Dokumentacija](docs/README.md)
@@ -697,11 +697,11 @@ izven zgodovine vaše lupine. → [CLI integracije](docs/guides/CLI-INTEGRATIONS
 
 <div align="center">
 
-## 🌐 380 ponudnikov umetne inteligence — 153 označenih kot brezplačni v katalogu
+## 🌐 381 ponudnikov umetne inteligence — 153 označenih kot brezplačni v katalogu
 
 </div>
 
-> **380 registriranih ponudnikov** v kanoničnih zbirkah za klepet, medije, iskanje, lokalne storitve, agente v oblaku in sistemske storitve, vključno s **153 ponudniki z metapodatki za odkrivanje `hasFree: true`**. Register modelov za klepet zajema **239 ponudnikov / 3.059 različnih parov ponudnik–model / 1.475 neobdelanih ID-jev modelov**; ločeni katalog brezplačnih paketov ima **471 vrstic na model**, **34 ponavljajočih se paketov** in **54 ponudnikov z brezplačnim dostopom za vedno, ki se ponavlja oziroma ne zahteva ključa**. To so namerno različni imenovalci; definicije in izračuni z odstranitvijo podvojenih paketov so na voljo v [referenci ponudnikov](docs/reference/PROVIDER_REFERENCE.md) in [brezplačnih paketih](docs/reference/FREE_TIERS.md).
+> **381 registriranih ponudnikov** v kanoničnih zbirkah za klepet, medije, iskanje, lokalne storitve, agente v oblaku in sistemske storitve, vključno s **153 ponudniki z metapodatki za odkrivanje `hasFree: true`**. Register modelov za klepet zajema **239 ponudnikov / 3.059 različnih parov ponudnik–model / 1.475 neobdelanih ID-jev modelov**; ločeni katalog brezplačnih paketov ima **471 vrstic na model**, **34 ponavljajočih se paketov** in **54 ponudnikov z brezplačnim dostopom za vedno, ki se ponavlja oziroma ne zahteva ključa**. To so namerno različni imenovalci; definicije in izračuni z odstranitvijo podvojenih paketov so na voljo v [referenci ponudnikov](docs/reference/PROVIDER_REFERENCE.md) in [brezplačnih paketih](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

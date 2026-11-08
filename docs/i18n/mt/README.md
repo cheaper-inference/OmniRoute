@@ -15,7 +15,7 @@
 
 **Maħluq minn [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Qatt tieqaf tikkodifika. Kull għodda tal-IA → 380 fornitur — 150+ b’xejn — permezz ta’ endpoint wieħed. Claude Code, Codex, Cursor, Cline, Copilot u Antigravity f’Claude / GPT / Gemini B’XEJN b’fallback awtomatiku. Il-kompressjoni kombinata ta’ RTK + Caveman tiffranka 15–95% tat-tokens (~89% bħala medja) — qatt ma tilħaq il-limiti. 380 fornitur tal-IA · 150+ pjan b’livell b’xejn · ~1.62B token b’xejn/xahar · 20 strateġija ta’ routing · $0 biex tibda."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Qatt tieqaf tikkodifika. Kull għodda tal-IA → 381 fornitur — 150+ b’xejn — permezz ta’ endpoint wieħed. Claude Code, Codex, Cursor, Cline, Copilot u Antigravity f’Claude / GPT / Gemini B’XEJN b’fallback awtomatiku. Il-kompressjoni kombinata ta’ RTK + Caveman tiffranka 15–95% tat-tokens (~89% bħala medja) — qatt ma tilħaq il-limiti. 381 fornitur tal-IA · 150+ pjan b’livell b’xejn · ~1.62B token b’xejn/xahar · 20 strateġija ta’ routing · $0 biex tibda."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                    |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 Fornituri                       |            352             |   **358**   |          380          |
+| 🌐 Fornituri                       |            352             |   **358**   |          381          |
 | 🧠 IDs uniċi tal-mudelli taċ-chat  |            1320            |  **1374**   |         1491          |
 | 🖼️ Pont tal-modalitajiet           | 🆕 viżjoni + awdjo + vidjo |      ✓      |           ✓           |
 | 📡 Katalgu b’xejn ta’ Radar        |         🆕 opt-in          |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Karatteristiċi</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinazzjonijiet</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Fornituri</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Fornituri</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Il-Wegħda — Endpoint wieħed u 380 fornitur. Il-fallback awtomatiku jżomm ir-routing għaddej sakemm ikun hemm destinazzjoni oħra b’saħħitha disponibbli. Sitt pilastri: fallback reżiljenti fost 380 fornitur · sa 95% iffrankar fuq it-tokens għall-ammonti ta’ xogħol eliġibbli · $0 biex tibda b’aktar minn 150 livell b’xejn u 54 fornitur rikorrenti/bla ċavetta b’xejn għal dejjem · 39 integrazzjoni ta’ CLI/aġenti permezz ta’ konfigurazzjoni waħda · kompatibbiltà mal-APIs ta’ OpenAI, Claude, Gemini u Responses fuq /v1 · kontrolli għall-produzzjoni inklużi circuit breakers, stealth tat-TLS, 110 għodda MCP, A2A, memorja, guardrails, evals u aktar minn 56,000 dikjarazzjoni ta’ test statiku fost aktar minn 7,800 fajl tat-test tracked."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Il-Wegħda — Endpoint wieħed u 381 fornitur. Il-fallback awtomatiku jżomm ir-routing għaddej sakemm ikun hemm destinazzjoni oħra b’saħħitha disponibbli. Sitt pilastri: fallback reżiljenti fost 381 fornitur · sa 95% iffrankar fuq it-tokens għall-ammonti ta’ xogħol eliġibbli · $0 biex tibda b’aktar minn 150 livell b’xejn u 54 fornitur rikorrenti/bla ċavetta b’xejn għal dejjem · 39 integrazzjoni ta’ CLI/aġenti permezz ta’ konfigurazzjoni waħda · kompatibbiltà mal-APIs ta’ OpenAI, Claude, Gemini u Responses fuq /v1 · kontrolli għall-produzzjoni inklużi circuit breakers, stealth tat-TLS, 110 għodda MCP, A2A, memorja, guardrails, evals u aktar minn 56,000 dikjarazzjoni ta’ test statiku fost aktar minn 7,800 fajl tat-test tracked."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ L-**20** strateġija kollha — ħallat u qabbel f’kull pass tal-combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="X'jagħmel lil OmniRoute differenti — snapshot ta' karatteristiċi skaduti kontra 9router, OpenRouter, CLIProxyAPI u LiteLLM fuq 13-il kapaċità. OmniRoute: 380 providers, 150+ free tiers mibnija ġewwa, 20 strateġija ta' routing, 12-engine token compression, MCP server mibni ġewwa b'110 għodda, protokoll agent A2A, memorja persistenti, guardrails, agents fuq il-cloud, stealth TLS fingerprint, Desktop/Termux/PWA u 67 lokalità UI għal i18n. OmniRoute hija liċenzjata MIT u tista' tospita waħdek. Il-kapaċitajiet u n-numri tal-kompetituri jistgħu jinbidlu; ara l-metodoloġija marbuta."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="X'jagħmel lil OmniRoute differenti — snapshot ta' karatteristiċi skaduti kontra 9router, OpenRouter, CLIProxyAPI u LiteLLM fuq 13-il kapaċità. OmniRoute: 381 providers, 150+ free tiers mibnija ġewwa, 20 strateġija ta' routing, 12-engine token compression, MCP server mibni ġewwa b'110 għodda, protokoll agent A2A, memorja persistenti, guardrails, agents fuq il-cloud, stealth TLS fingerprint, Desktop/Termux/PWA u 67 lokalità UI għal i18n. OmniRoute hija liċenzjata MIT u tista' tospita waħdek. Il-kapaċitajiet u n-numri tal-kompetituri jistgħu jinbidlu; ara l-metodoloġija marbuta."/>
 
 <sub>📊 Metodoloġija sħiħa &amp; dettalji għal kull karatteristika kontra 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar huwa fakultattiv u juża GET biss. Il-klijent OmniRoute ma jtellax prompts
 - **🖼️ Endpoints ġodda** — `/v1/ocr` (Mistral OCR) u `/v1/audio/translations` (stil Whisper) jikkumplimentaw is-surface tal-media. → [Referenza API](docs/reference/API_REFERENCE.md)
 - **🎨 Ġenerazzjoni ta' immaġni / vidjo / awdjo** — API waħda għall-media: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, u providers tal-leħen bħal ElevenLabs. → [Referenza API](docs/reference/API_REFERENCE.md)
 - **🌍 Deploy & operazzjonijiet** — `basePath` reverse-proxy, auto-detect tal-lingwa tal-browser, tracking tal-apparat għal kull key, MITM trust mingħajr root, lokalizzazzjoni zh-TW. → [Ambjent](docs/reference/ENVIRONMENT.md)
-- **🤝 Aktar providers & agents** — agents cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) b'login browser + OAuth, Ollama first-class card, Claude Opus 5 & Sonnet 5, sħubija uffiċjali ma' Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… u katalogu aġġornat ta' **380 provider**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Aktar providers & agents** — agents cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) b'login browser + OAuth, Ollama first-class card, Claude Opus 5 & Sonnet 5, sħubija uffiċjali ma' Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… u katalogu aġġornat ta' **381 provider**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Trasparenza fir-routing** — kull risposta ġġorr header `X-OmniRoute-Decision` li jismu l-istrateġija/provider/latency li serviet, strateġija ġdida ta' combo `cache-optimized` + Auto-Combo `cacheAffinity` factor jirritornaw talbiet ripetuti lura għall-konnessjoni li għandha l-prefix cached, u endpoint read-only `/v1/auto-combo/{channel}/candidates` jesponi pool ta' kandidati ħajjin ta' channel `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Prestazzjoni u infrastruttura lokali** — Redis lokali b’klikk waħda, deployers ta’ relay għal Cloudflare Workers / Deno Deploy, Bifrost & Mux bħala servizzi inkorporati u ssorveljati. → [Servizzi Inkorporati](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Kollox fil-kaxxa wkoll** — qafas ta’ plugins + suq, qfief ta’ ħiliet Omni/Agent/GitHub, integrazzjoni ma’ Obsidian vault (22 għodda MCP), APIs Batch & Files kompatibbli ma’ OpenAI, cache semantiku tar-risposti, gamifikazzjoni b’leaderboards, skoperta ta’ aġenti ACP (15 aġent mibni ġewwa), esportazzjoni skedata tal-logs għal BigQuery, `auto/chaos` fan-out parallel b’diversi mudelli, bridge għal bot ta’ Telegram, maniġer tal-verżjoni fl-app u klassifiki ta’ fornituri ħielsa LMArena-ELO. → [Dokumentazzjoni](docs/README.md)
@@ -689,11 +689,11 @@ mill-istorja tas-shell tiegħek. → [CLI Integrations](docs/guides/CLI-INTEGRAT
 
 <div align="center">
 
-## 🌐 380 Fornitur tal-IA — 153 Immarkati bħala B’xejn fil-Katalgu
+## 🌐 381 Fornitur tal-IA — 153 Immarkati bħala B’xejn fil-Katalgu
 
 </div>
 
-> **380 fornitur irreġistrat** fil-kollezzjonijiet kanoniċi taċ-chat, tal-midja, tat-tfittxija, lokali, tal-aġenti tal-cloud u tas-sistema, inklużi **153 li għandhom metadata ta’ skoperta `hasFree: true`**. Ir-reġistru tal-mudelli taċ-chat ikopri **239 fornitur / 3,059 par distint ta’ fornitur-mudell / 1,475 ID mhux ipproċessat tal-mudelli**; il-katalgu separat tal-baġit b’xejn għandu **471 ringiela għal kull mudell**, **34 pool rikorrenti** u **54 fornitur rikorrenti/bla ċavetta b’xejn għal dejjem**. Dawn huma denominaturi differenti skont id-disinn; id-definizzjonijiet u l-kalkoli deduplikati skont il-pool jinsabu fir-[Referenza tal-Fornituri](docs/reference/PROVIDER_REFERENCE.md) u fil-[Livelli B’xejn](docs/reference/FREE_TIERS.md).
+> **381 fornitur irreġistrat** fil-kollezzjonijiet kanoniċi taċ-chat, tal-midja, tat-tfittxija, lokali, tal-aġenti tal-cloud u tas-sistema, inklużi **153 li għandhom metadata ta’ skoperta `hasFree: true`**. Ir-reġistru tal-mudelli taċ-chat ikopri **239 fornitur / 3,059 par distint ta’ fornitur-mudell / 1,475 ID mhux ipproċessat tal-mudelli**; il-katalgu separat tal-baġit b’xejn għandu **471 ringiela għal kull mudell**, **34 pool rikorrenti** u **54 fornitur rikorrenti/bla ċavetta b’xejn għal dejjem**. Dawn huma denominaturi differenti skont id-disinn; id-definizzjonijiet u l-kalkoli deduplikati skont il-pool jinsabu fir-[Referenza tal-Fornituri](docs/reference/PROVIDER_REFERENCE.md) u fil-[Livelli B’xejn](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

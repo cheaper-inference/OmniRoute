@@ -73,7 +73,7 @@
 
 |                                         |           v3.8.50            | **v3.8.51** |       `v3.8.54+`        |
 | --------------------------------------- | :--------------------------: | :---------: | :---------------------: |
-| 🌐 ပံ့ပိုးပေးသူများ                     |             352              |   **358**   |           380           |
+| 🌐 ပံ့ပိုးပေးသူများ                     |             352              |   **358**   |           381           |
 | 🧠 ထူးခြားသော chat model ID များ        |             1320             |  **1374**   |          1491           |
 | 🖼️ မီဒီယာအမျိုးအစား Bridge              | 🆕 မြင်ကွင်း + အသံ + ဗီဒီယို |      ✓      |            ✓            |
 | 📡 Radar အခမဲ့ catalog                  |          🆕 opt-in           |      ✓      |            ✓            |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ လုပ်ဆောင်ချက်များ</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 ပေါင်းစပ်မှုများ</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 ပံ့ပိုးသူများ</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 ပံ့ပိုးသူများ</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ကတိပြုချက် — endpoint တစ်ခုနှင့် provider 380 ခု။ ကျန်းမာနေသော အခြား target တစ်ခု ရှိနေသရွေ့ အလိုအလျောက် fallback သည် routing ကို ဆက်လက်လုပ်ဆောင်စေသည်။ အဓိကအချက်ခြောက်ချက် — provider 380 ခုအနှံ့ ခံနိုင်ရည်ရှိသော fallback · သတ်မှတ်ချက်နှင့်ကိုက်ညီသော workload များတွင် token ကုန်ကျစရိတ် 95% အထိ သက်သာခြင်း · free tier 150+ ခုနှင့် ထပ်တလဲလဲ/သော့မလိုသော အမြဲတမ်းအခမဲ့ provider 54 ခုဖြင့် $0 မှ စတင်နိုင်ခြင်း · config တစ်ခုတည်းမှတစ်ဆင့် CLI/agent integration 39 ခု · /v1 တွင် OpenAI, Claude, Gemini နှင့် Responses API compatibility · circuit breaker များ၊ TLS stealth၊ MCP tool 110 ခု၊ A2A၊ memory၊ guardrails၊ evals နှင့် tracked test file 7,800+ ခုအတွင်း static test declaration 56,000+ ခု အပါအဝင် production ထိန်းချုပ်မှုများ။"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ကတိပြုချက် — endpoint တစ်ခုနှင့် provider 381 ခု။ ကျန်းမာနေသော အခြား target တစ်ခု ရှိနေသရွေ့ အလိုအလျောက် fallback သည် routing ကို ဆက်လက်လုပ်ဆောင်စေသည်။ အဓိကအချက်ခြောက်ချက် — provider 381 ခုအနှံ့ ခံနိုင်ရည်ရှိသော fallback · သတ်မှတ်ချက်နှင့်ကိုက်ညီသော workload များတွင် token ကုန်ကျစရိတ် 95% အထိ သက်သာခြင်း · free tier 150+ ခုနှင့် ထပ်တလဲလဲ/သော့မလိုသော အမြဲတမ်းအခမဲ့ provider 54 ခုဖြင့် $0 မှ စတင်နိုင်ခြင်း · config တစ်ခုတည်းမှတစ်ဆင့် CLI/agent integration 39 ခု · /v1 တွင် OpenAI, Claude, Gemini နှင့် Responses API compatibility · circuit breaker များ၊ TLS stealth၊ MCP tool 110 ခု၊ A2A၊ memory၊ guardrails၊ evals နှင့် tracked test file 7,800+ ခုအတွင်း static test declaration 56,000+ ခု အပါအဝင် production ထိန်းချုပ်မှုများ။"/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ strategy **20** ခုလုံးကို ကွန်ဘိုအဆင့်
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ကို ထူးခြားစေသောအချက်များ — 9router, OpenRouter, CLIProxyAPI နှင့် LiteLLM တို့နှင့် ၁၃ မျိုးသောစွမ်းရည်များအပေါ် အချိန်နှင့်တပြေးညီ feature snapshot တစ်ခု။ OmniRoute: 380 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA နှင့် 67 i18n UI locales ပါဝင်သည်။ OmniRoute သည် MIT-licensed ဖြစ်ပြီး ကိုယ်တိုင်တပ်ဆင်နိုင်သည်။ ယှဉ်ပြိုင်သူများ၏စွမ်းရည်နှင့်အရေအတွက်များသည် ပြောင်းလဲနိုင်သည်။ ဆက်စပ် methodology ကို အောက်ပါလင့်ခ်တွင်ကြည့်ပါ။"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ကို ထူးခြားစေသောအချက်များ — 9router, OpenRouter, CLIProxyAPI နှင့် LiteLLM တို့နှင့် ၁၃ မျိုးသောစွမ်းရည်များအပေါ် အချိန်နှင့်တပြေးညီ feature snapshot တစ်ခု။ OmniRoute: 381 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA နှင့် 67 i18n UI locales ပါဝင်သည်။ OmniRoute သည် MIT-licensed ဖြစ်ပြီး ကိုယ်တိုင်တပ်ဆင်နိုင်သည်။ ယှဉ်ပြိုင်သူများ၏စွမ်းရည်နှင့်အရေအတွက်များသည် ပြောင်းလဲနိုင်သည်။ ဆက်စပ် methodology ကို အောက်ပါလင့်ခ်တွင်ကြည့်ပါ။"/>
 
 <sub>📊 9router, OpenRouter, CLIProxyAPI နှင့် LiteLLM တို့နှင့် methodology အပြည့်အစုံနှင့် feature တစ်ခုချင်းစီ၏အသေးစိတ် → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -607,7 +607,7 @@ Radar သည် opt-in ဖြစ်ပြီး GET-only ဖြစ်ပါသ�
 - **🖼️ Endpoint အသစ်များ** — `/v1/ocr` (Mistral OCR) နဲ့ `/v1/audio/translations` (Whisper-style) တို့ media surface ကို ပြည့်စုံစေပါတယ်။ → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Image / video / audio ဖန်တီးမှု** — media အတွက် API တစ်ခုတည်း: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, ElevenLabs စတဲ့ speech provider တွေပါဝင်ပါတယ်။ → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment & ops** — reverse-proxy `basePath`, browser-language auto-detect, per-key device tracking, root-less MITM trust, zh-TW localization ပါဝင်ပါတယ်။ → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Provider နဲ့ agent အသစ်များ** — cloud agent (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ကို browser + OAuth login နဲ့, Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… နဲ့ အသစ်ပြန်လည်ပြင်ဆင်ထားတဲ့ **380-provider catalog** ပါဝင်ပါတယ်။ → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Provider နဲ့ agent အသစ်များ** — cloud agent (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ကို browser + OAuth login နဲ့, Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… နဲ့ အသစ်ပြန်လည်ပြင်ဆင်ထားတဲ့ **381-provider catalog** ပါဝင်ပါတယ်။ → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Routing transparency** — every response မှာ `X-OmniRoute-Decision` header ပါဝင်ပြီး ဘယ် strategy/provider/latency နဲ့ ဆောင်ရွက်ခဲ့တာဆိုတာ ဖော်ပြပေးပါတယ်၊ `cache-optimized` combo strategy အသစ်နဲ့ Auto-Combo `cacheAffinity` factor က cache prefix ကို ကိုင်ထားတဲ့ connection ကို route repeat request ပြန်ပို့ပေးပါတယ်၊ read-only `/v1/auto-combo/{channel}/candidates` endpoint က `auto/*` channel ရဲ့ live candidate pool ကို ပြသပေးပါတယ်။ → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ ဒေသတွင်း စွမ်းဆောင်ရည်နှင့် အောက်ခံအခြေခံအဆောက်အအုံ** — တစ်ချက်နှိပ်၍ ဒေသတွင်း Redis, Cloudflare Workers / Deno Deploy relay deployers, Bifrost & Mux ကို စောင့်ကြပ်ထည့်သွင်းထားသော embedded services အဖြစ် အသုံးပြုနိုင်သည်။ → [Embedded Services](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 ထပ်မံပါဝင်သည်များ** — plugin framework + marketplace, Omni/Agent/GitHub skills frameworks, Obsidian vault ပေါင်းစပ်မှု (၂၂ MCP tools), OpenAI-compatible Batch & Files APIs, semantic response cache, leaderboards ဖြင့် gamification, ACP agent ရှာဖွေမှု (တပ်ဆင်ပြီးသား agent ၁၅ ခု), BigQuery သို့ အချိန်ဇယားသတ်မှတ်ပြီး log export, `auto/chaos` parallel multi-model fan-out, Telegram bot bridge, app အတွင်း version manager နှင့် LMArena-ELO free-provider rankings ပါဝင်သည်။ → [Docs](docs/README.md)
@@ -691,11 +691,11 @@ omniroute configure codex          # ထို့အပြင်: claude opencod
 
 <div align="center">
 
-## 🌐 AI Provider 380 ခု — Catalog တွင် အခမဲ့အဖြစ် မှတ်သားထားသော 153 ခု
+## 🌐 AI Provider 381 ခု — Catalog တွင် အခမဲ့အဖြစ် မှတ်သားထားသော 153 ခု
 
 </div>
 
-> **မှတ်ပုံတင်ထားသော provider 380 ခု** ကို canonical chat၊ media၊ search၊ local၊ cloud-agent နှင့် system collection များအနှံ့ ထည့်သွင်းထားပြီး၊ ၎င်းတို့အနက် **153 ခုတွင် `hasFree: true` ရှာဖွေတွေ့ရှိမှု metadata ပါဝင်သည်**။ Chat model registry တွင် **provider 239 ခု / ကွဲပြားသော provider-model အတွဲ 3,059 ခု / မူရင်း model ID 1,475 ခု** ပါဝင်သည်။ ထို့အပြင် သီးခြား free-budget catalog တွင် **model တစ်ခုချင်းစီအလိုက် row 471 ခု**၊ **ထပ်တလဲလဲအသုံးပြုနိုင်သော pool 34 ခု** နှင့် **အမြဲတမ်းအခမဲ့ဖြစ်ပြီး ထပ်တလဲလဲအသုံးပြုနိုင်သော/keyless provider 54 ခု** ပါဝင်သည်။ ဤကိန်းဂဏန်းများသည် ရည်ရွယ်ချက်ရှိရှိ denominator မတူညီကြခြင်းဖြစ်ပြီး၊ အဓိပ္ပာယ်ဖွင့်ဆိုချက်များနှင့် pool-deduped တွက်ချက်မှုများကို [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) နှင့် [Free Tiers](docs/reference/FREE_TIERS.md) တွင် ကြည့်ရှုနိုင်သည်။
+> **မှတ်ပုံတင်ထားသော provider 381 ခု** ကို canonical chat၊ media၊ search၊ local၊ cloud-agent နှင့် system collection များအနှံ့ ထည့်သွင်းထားပြီး၊ ၎င်းတို့အနက် **153 ခုတွင် `hasFree: true` ရှာဖွေတွေ့ရှိမှု metadata ပါဝင်သည်**။ Chat model registry တွင် **provider 239 ခု / ကွဲပြားသော provider-model အတွဲ 3,059 ခု / မူရင်း model ID 1,475 ခု** ပါဝင်သည်။ ထို့အပြင် သီးခြား free-budget catalog တွင် **model တစ်ခုချင်းစီအလိုက် row 471 ခု**၊ **ထပ်တလဲလဲအသုံးပြုနိုင်သော pool 34 ခု** နှင့် **အမြဲတမ်းအခမဲ့ဖြစ်ပြီး ထပ်တလဲလဲအသုံးပြုနိုင်သော/keyless provider 54 ခု** ပါဝင်သည်။ ဤကိန်းဂဏန်းများသည် ရည်ရွယ်ချက်ရှိရှိ denominator မတူညီကြခြင်းဖြစ်ပြီး၊ အဓိပ္ပာယ်ဖွင့်ဆိုချက်များနှင့် pool-deduped တွက်ချက်မှုများကို [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) နှင့် [Free Tiers](docs/reference/FREE_TIERS.md) တွင် ကြည့်ရှုနိုင်သည်။
 
 <div align="center">
 

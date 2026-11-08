@@ -15,7 +15,7 @@
 
 **[Diego Souza](https://github.com/diegosouzapw) tomonidan yaratilgan**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Dasturlashni hech qachon to‘xtatmang. Har bir AI vositasi → bitta endpoint orqali 380 ta provayder — 150+ tasi bepul. Claude Code, Codex, Cursor, Cline, Copilot va Antigravity → avtomatik zaxira yo‘naltirish bilan BEPUL Claude / GPT / Gemini’ga. RTK + Caveman’ning birgalikdagi siqishi tokenlarni 15–95% tejaydi (o‘rtacha ~89%) — limitlarga hech qachon yetib bormang. 380 ta AI provayderi · 150+ ta bepul tarif · oyiga ~1,62 mlrd bepul token · 20 ta yo‘naltirish strategiyasi · boshlash uchun $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Dasturlashni hech qachon to‘xtatmang. Har bir AI vositasi → bitta endpoint orqali 381 ta provayder — 150+ tasi bepul. Claude Code, Codex, Cursor, Cline, Copilot va Antigravity → avtomatik zaxira yo‘naltirish bilan BEPUL Claude / GPT / Gemini’ga. RTK + Caveman’ning birgalikdagi siqishi tokenlarni 15–95% tejaydi (o‘rtacha ~89%) — limitlarga hech qachon yetib bormang. 381 ta AI provayderi · 150+ ta bepul tarif · oyiga ~1,62 mlrd bepul token · 20 ta yo‘naltirish strategiyasi · boshlash uchun $0."/>
 
 </div>
 
@@ -73,7 +73,7 @@ OMNIROUTE pul tejashingizga va ishingizni osonlashtirishga yordam bergan bo‘ls
 
 |                                           |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 Provayderlar                           |            352             |   **358**   |          380          |
+| 🌐 Provayderlar                           |            352             |   **358**   |          381          |
 | 🧠 Noyob chat model ID'lari               |            1320            |  **1374**   |         1491          |
 | 🖼️ Modallik ko‘prigi                      | 🆕 ko‘rish + audio + video |      ✓      |           ✓           |
 | 📡 Radar bepul katalogi                   |        🆕 ixtiyoriy        |      ✓      |           ✓           |
@@ -114,7 +114,7 @@ OMNIROUTE pul tejashingizga va ishingizni osonlashtirishga yordam bergan bo‘ls
   <tr>
     <td align="right"><b>⚙️ Imkoniyatlar</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinatsiyalar</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Provayderlar</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Provayderlar</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI va MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Va’da — bitta endpoint va 380 ta provayder. Boshqa sogʻlom nishon mavjud boʻlsa, avtomatik zaxira yoʻnaltirish ishlashda davom etadi. Oltita asosiy ustun: 380 ta provayder boʻylab barqaror zaxira yoʻnaltirish · mos ish yuklamalarida tokenlarni 95% gacha tejash · 150 dan ortiq bepul tarif va abadiy bepul boʻlgan 54 ta takrorlanuvchi/kalitsiz provayder bilan $0 dan boshlash · bitta konfiguratsiya orqali 39 ta CLI/agent integratsiyasi · /v1 manzilida OpenAI, Claude, Gemini va Responses API bilan moslik · avtomatik uzgichlar, TLS yashirinligi, MCP 110 ta vosita, A2A, xotira, himoya qoidalari, baholashlar hamda 7 800 dan ortiq kuzatiladigan test fayllaridagi 56 000 dan ortiq statik test deklaratsiyalarini oʻz ichiga olgan ishlab chiqarish boshqaruv vositalari."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Va’da — bitta endpoint va 381 ta provayder. Boshqa sogʻlom nishon mavjud boʻlsa, avtomatik zaxira yoʻnaltirish ishlashda davom etadi. Oltita asosiy ustun: 381 ta provayder boʻylab barqaror zaxira yoʻnaltirish · mos ish yuklamalarida tokenlarni 95% gacha tejash · 150 dan ortiq bepul tarif va abadiy bepul boʻlgan 54 ta takrorlanuvchi/kalitsiz provayder bilan $0 dan boshlash · bitta konfiguratsiya orqali 39 ta CLI/agent integratsiyasi · /v1 manzilida OpenAI, Claude, Gemini va Responses API bilan moslik · avtomatik uzgichlar, TLS yashirinligi, MCP 110 ta vosita, A2A, xotira, himoya qoidalari, baholashlar hamda 7 800 dan ortiq kuzatiladigan test fayllaridagi 56 000 dan ortiq statik test deklaratsiyalarini oʻz ichiga olgan ishlab chiqarish boshqaruv vositalari."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Barcha **20** ta strategiya — har bir combo bosqichida aralashtirib qoʻllang:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRouteʼni boshqalardan ajratib turadigan jihatlar — 9router, OpenRouter, CLIProxyAPI va LiteLLM bilan 13 ta imkoniyat bo‘yicha taqqoslangan, sanaga oid funksiyalar jadvali. OmniRoute: 380 ta provayder, 150+ bepul tariflar ichiga o‘rnatilgan, 20 ta marshrutlash strategiyasi, 12 dvigatelli token siqish, 110 ta vosita bilan o‘rnatilgan MCP server, A2A agent protokoli, doimiy xotira, xavfsizlik cheklovlari, bulut agentlari, TLS fingerprint yashirinligi, Desktop/Termux/PWA va 67 ta i18n UI lokalizatsiyasi. OmniRoute MIT-litsenziyali va o‘zingizda joylashtirish mumkin. Raqobatchilarning imkoniyatlari va sonlari o‘zgarishi mumkin; bog‘langan metodologiyani ko‘ring."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRouteʼni boshqalardan ajratib turadigan jihatlar — 9router, OpenRouter, CLIProxyAPI va LiteLLM bilan 13 ta imkoniyat bo‘yicha taqqoslangan, sanaga oid funksiyalar jadvali. OmniRoute: 381 ta provayder, 150+ bepul tariflar ichiga o‘rnatilgan, 20 ta marshrutlash strategiyasi, 12 dvigatelli token siqish, 110 ta vosita bilan o‘rnatilgan MCP server, A2A agent protokoli, doimiy xotira, xavfsizlik cheklovlari, bulut agentlari, TLS fingerprint yashirinligi, Desktop/Termux/PWA va 67 ta i18n UI lokalizatsiyasi. OmniRoute MIT-litsenziyali va o‘zingizda joylashtirish mumkin. Raqobatchilarning imkoniyatlari va sonlari o‘zgarishi mumkin; bog‘langan metodologiyani ko‘ring."/>
 
 <sub>📊 To‘liq metodologiya va har bir funksiya bo‘yicha tafsilotlar 9router, OpenRouter, CLIProxyAPI va LiteLLM bilan taqqoslanadi → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar ixtiyoriy ravishda yoqiladi va faqat GET so‘rovlaridan foydalanadi. Omni
 - **🖼️ Yangi endpointlar** — `/v1/ocr` (Mistral OCR) va `/v1/audio/translations` (Whisper-uslubida) media yuzasini to‘ldiradi. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Rasm / video / audio generatsiyasi** — media uchun yagona API: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind va ElevenLabs kabi nutq provayderlari. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Joylashtirish va operatsiyalar** — teskari proksi `basePath`, brauzer tili avtomatik aniqlash, har bir kalit uchun qurilma kuzatuvi, root-siz MITM ishonchi, zh-TW lokalizatsiyasi. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Ko‘proq provayder va agentlar** — bulut agentlari (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) brauzer + OAuth login bilan, Ollama birinchi darajali karta, Claude Opus 5 & Sonnet 5, Kimi rasmiy hamkorligi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… va yangilangan **380-provadery katalogi**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Ko‘proq provayder va agentlar** — bulut agentlari (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) brauzer + OAuth login bilan, Ollama birinchi darajali karta, Claude Opus 5 & Sonnet 5, Kimi rasmiy hamkorligi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… va yangilangan **381-provadery katalogi**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Marshrutlash shaffofligi** — har bir javobda xizmat ko‘rsatgan strategiya/provayder/kechikishni ko‘rsatuvchi `X-OmniRoute-Decision` sarlavhasi, yangi `cache-optimized` kombinatsion strategiya + Auto-Combo `cacheAffinity` faktori keshlangan prefiksni ushlab turgan ulanishga so‘rovlarni qayta yo‘naltiradi, va faqat o‘qish uchun `/v1/auto-combo/{channel}/candidates` endpointi `auto/*` kanalining jonli nomzodlar havzasini ko‘rsatadi. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Mahalliy unumdorlik va infratuzilma** — bir marta bosish orqali mahalliy Redis, Cloudflare Workers / Deno Deploy relay deployerlari, Bifrost va Mux nazorat ostidagi ichki xizmatlar sifatida. → [Ichki Xizmatlar](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Qutida yana nimalar bor** — plaginlar uchun ramka va marketplace, Omni/Agent/GitHub ko‘nikmalari ramkalari, Obsidian vault integratsiyasi (22 ta MCP asboblari), OpenAI bilan mos Batch va Files API’lari, semantik javob kesh, reytinglar bilan gamifikatsiya, ACP agentlarni aniqlash (15 ta o‘rnatilgan agent), BigQuery’ga rejalashtirilgan log eksporti, `auto/chaos` parallel ko‘p-model fan-out, Telegram bot ko‘prigi, ilova ichidagi versiya menejeri va LMArena-ELO bepul-provayder reytinglari. → [Hujjatlar](docs/README.md)
@@ -689,11 +689,11 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
 
 <div align="center">
 
-## 🌐 380 ta AI provayderi — katalogda bepul deb belgilanganlari 153 ta
+## 🌐 381 ta AI provayderi — katalogda bepul deb belgilanganlari 153 ta
 
 </div>
 
-> **380 ta roʻyxatdan oʻtgan provayder** kanonik chat, media, qidiruv, lokal, bulut-agent va tizim toʻplamlari boʻylab mavjud bo‘lib, ulardan **153 tasi `hasFree: true` aniqlash metamaʼlumotiga ega**. Chat modellari reyestri **239 ta provayder / 3,059 ta noyob provayder-model juftligi / 1,475 ta xom model ID**ni qamrab oladi; alohida bepul byudjet katalogida esa **har bir model uchun 471 ta qator**, **34 ta takrorlanuvchi hovuz** va **54 ta takrorlanuvchi/kalitsiz, doimo bepul provayder** mavjud. Bular ataylab turlicha maxrajlardir; taʼriflar va hovuzlar bo‘yicha takrorlanishlar olib tashlangan hisob-kitoblar [Provayder maʼlumotnomasi](docs/reference/PROVIDER_REFERENCE.md) va [Bepul tariflar](docs/reference/FREE_TIERS.md)da keltirilgan.
+> **381 ta roʻyxatdan oʻtgan provayder** kanonik chat, media, qidiruv, lokal, bulut-agent va tizim toʻplamlari boʻylab mavjud bo‘lib, ulardan **153 tasi `hasFree: true` aniqlash metamaʼlumotiga ega**. Chat modellari reyestri **239 ta provayder / 3,059 ta noyob provayder-model juftligi / 1,475 ta xom model ID**ni qamrab oladi; alohida bepul byudjet katalogida esa **har bir model uchun 471 ta qator**, **34 ta takrorlanuvchi hovuz** va **54 ta takrorlanuvchi/kalitsiz, doimo bepul provayder** mavjud. Bular ataylab turlicha maxrajlardir; taʼriflar va hovuzlar bo‘yicha takrorlanishlar olib tashlangan hisob-kitoblar [Provayder maʼlumotnomasi](docs/reference/PROVIDER_REFERENCE.md) va [Bepul tariflar](docs/reference/FREE_TIERS.md)da keltirilgan.
 
 <div align="center">
 

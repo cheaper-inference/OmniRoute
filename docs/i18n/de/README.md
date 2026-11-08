@@ -15,7 +15,7 @@
 
 **Erstellt von [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Höre niemals auf zu programmieren. Jedes KI-Tool → 380 Anbieter — 150+ kostenlos — über einen einzigen Endpunkt. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity in KOSTENLOSES Claude / GPT / Gemini mit automatischem Fallback. RTK + Caveman-gestapelte Komprimierung spart 15–95 % Tokens (~89 % im Durchschnitt) — erreiche niemals Limits. 380 KI-Anbieter · 150+ kostenlose Tarife · ~1,62 Mrd. kostenlose Tokens/Monat · 20 Routing-Strategien · Start bei 0 $."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Höre niemals auf zu programmieren. Jedes KI-Tool → 381 Anbieter — 150+ kostenlos — über einen einzigen Endpunkt. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity in KOSTENLOSES Claude / GPT / Gemini mit automatischem Fallback. RTK + Caveman-gestapelte Komprimierung spart 15–95 % Tokens (~89 % im Durchschnitt) — erreiche niemals Limits. 381 KI-Anbieter · 150+ kostenlose Tarife · ~1,62 Mrd. kostenlose Tokens/Monat · 20 Routing-Strategien · Start bei 0 $."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                               |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Anbieter                   |           352           |   **358**   |          380          |
+| 🌐 Anbieter                   |           352           |   **358**   |          381          |
 | 🧠 Eindeutige Chat-Modell-IDs |          1320           |  **1374**   |         1491          |
 | 🖼️ Modalitätsbrücke           | 🆕 Bild + Audio + Video |      ✓      |           ✓           |
 | 📡 Kostenloser Radar-Katalog  |        🆕 Opt-in        |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Funktionen</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Anbieter</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Anbieter</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Das Versprechen — Ein Endpunkt und 380 Anbieter. Automatisches Fallback hält das Routing aufrecht, solange ein anderes gesundes Ziel verfügbar ist. Sechs Säulen: ausfallsicheres Fallback über 380 Anbieter · bis zu 95 % Token-Einsparungen bei geeigneten Workloads · Start bei 0 $ mit mehr als 150 kostenlosen Tarifen und 54 wiederkehrenden bzw. schlüssellosen, dauerhaft kostenlosen Anbietern · 39 CLI-/Agent-Integrationen über eine Konfiguration · Kompatibilität mit OpenAI-, Claude-, Gemini- und Responses API unter /v1 · Produktionsfunktionen einschließlich Circuit Breakern, TLS-Stealth, MCP mit 110 Tools, A2A, Speicher, Guardrails, Evaluierungen sowie 56.000+ statischen Testdeklarationen in mehr als 7.800 erfassten Testdateien."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Das Versprechen — Ein Endpunkt und 381 Anbieter. Automatisches Fallback hält das Routing aufrecht, solange ein anderes gesundes Ziel verfügbar ist. Sechs Säulen: ausfallsicheres Fallback über 381 Anbieter · bis zu 95 % Token-Einsparungen bei geeigneten Workloads · Start bei 0 $ mit mehr als 150 kostenlosen Tarifen und 54 wiederkehrenden bzw. schlüssellosen, dauerhaft kostenlosen Anbietern · 39 CLI-/Agent-Integrationen über eine Konfiguration · Kompatibilität mit OpenAI-, Claude-, Gemini- und Responses API unter /v1 · Produktionsfunktionen einschließlich Circuit Breakern, TLS-Stealth, MCP mit 110 Tools, A2A, Speicher, Guardrails, Evaluierungen sowie 56.000+ statischen Testdeklarationen in mehr als 7.800 erfassten Testdateien."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Alle **20** Strategien — pro Combo-Schritt frei kombinierbar:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Was OmniRoute auszeichnet — eine Momentaufnahme der Funktionen im Vergleich zu 9router, OpenRouter, CLIProxyAPI und LiteLLM über 13 Fähigkeiten hinweg. OmniRoute: 380 Anbieter, 150+ integrierte Free-Tiers, 20 Routing-Strategien, 12-Engine Token-Kompression, integrierter MCP-Server mit 110 Tools, A2A-Agentenprotokoll, persistenter Speicher, Leitplanken, Cloud-Agenten, TLS-Fingerprint-Stealth, Desktop/Termux/PWA und 67 i18n UI-Sprachversionen. OmniRoute ist MIT-lizenziert und selbst hostbar. Die Fähigkeiten und Zahlen der Wettbewerber können sich ändern; siehe die verlinkte Methodik."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Was OmniRoute auszeichnet — eine Momentaufnahme der Funktionen im Vergleich zu 9router, OpenRouter, CLIProxyAPI und LiteLLM über 13 Fähigkeiten hinweg. OmniRoute: 381 Anbieter, 150+ integrierte Free-Tiers, 20 Routing-Strategien, 12-Engine Token-Kompression, integrierter MCP-Server mit 110 Tools, A2A-Agentenprotokoll, persistenter Speicher, Leitplanken, Cloud-Agenten, TLS-Fingerprint-Stealth, Desktop/Termux/PWA und 67 i18n UI-Sprachversionen. OmniRoute ist MIT-lizenziert und selbst hostbar. Die Fähigkeiten und Zahlen der Wettbewerber können sich ändern; siehe die verlinkte Methodik."/>
 
 <sub>📊 Vollständige Methodik &amp; Detailvergleich pro Funktion vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -614,7 +614,7 @@ zum aktuellen Katalog finden Sie unter **[radar.omniroute.online/planos](https:/
 - **🖼️ Neue Endpunkte** — `/v1/ocr` (Mistral OCR) und `/v1/audio/translations` (Whisper-Style) vervollständigen die Medien-Schnittstelle. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Bild- / Video- / Audio-Generierung** — Eine API für Medien: xAI Grok Imagine & Novita AI Video, ComfyUI, Magnific, Adobe Firefly, Segmind und Sprachdienste wie ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment & Betrieb** — Reverse-Proxy `basePath`, automatische Browser-Spracherkennung, Geräte-Tracking pro Schlüssel, rootloses MITM-Trust, zh-TW-Lokalisierung. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Weitere Anbieter & Agenten** — Cloud-Agenten (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) mit Browser + OAuth-Login, Ollama als erstklassige Karte, Claude Opus 5 & Sonnet 5, Kimi offizielle Partnerschaft (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… und ein aktualisierter **380-Anbieter-Katalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Weitere Anbieter & Agenten** — Cloud-Agenten (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) mit Browser + OAuth-Login, Ollama als erstklassige Karte, Claude Opus 5 & Sonnet 5, Kimi offizielle Partnerschaft (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… und ein aktualisierter **381-Anbieter-Katalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Routing-Transparenz** — Jede Antwort enthält einen `X-OmniRoute-Decision` Header mit Strategie/Anbieter/Latenz, die sie bedient hat, eine neue `cache-optimized` Kombostrategie + Auto-Combo `cacheAffinity` Faktor routet Wiederholungsanfragen zurück zur Verbindung mit dem gecachten Präfix, und ein schreibgeschützter `/v1/auto-combo/{channel}/candidates` Endpunkt zeigt den Live-Kandidatenpool eines `auto/*` Channels an. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokale Leistung & Infrastruktur** — Ein-Klick-lokales Redis, Cloudflare Workers / Deno Deploy Relay-Deployers, Bifrost & Mux als überwachte eingebettete Dienste. → [Eingebettete Dienste](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Ebenfalls enthalten** — Plugin-Framework + Marktplatz, Omni/Agent/GitHub Skills-Frameworks, Obsidian Vault-Integration (22 MCP-Tools), OpenAI-kompatible Batch- & Files-APIs, semantischer Antwort-Cache, Gamification mit Bestenlisten, ACP-Agenten-Entdeckung (15 integrierte Agenten), geplante Protokollexporte nach BigQuery, `auto/chaos` paralleles Multi-Model-Fan-Out, eine Telegram-Bot-Bridge, ein integrierter Versionsmanager und LMArena-ELO Free-Provider-Rankings. → [Dokumentation](docs/README.md)
@@ -698,11 +698,11 @@ aus deiner Shell-Historie heraus. → [CLI-Integrationen](docs/guides/CLI-INTEGR
 
 <div align="center">
 
-## 🌐 380 KI-Anbieter — 153 im Katalog als kostenlos markiert
+## 🌐 381 KI-Anbieter — 153 im Katalog als kostenlos markiert
 
 </div>
 
-> **380 registrierte Anbieter** in den kanonischen Sammlungen für Chat, Medien, Suche, lokale Dienste, Cloud-Agenten und Systeme, darunter **153 mit `hasFree: true`-Erkennungsmetadaten**. Die Chatmodell-Registry umfasst **239 Anbieter / 3.059 eindeutige Anbieter-Modell-Paare / 1.475 Rohmodell-IDs**; der separate Katalog für kostenlose Budgets enthält **471 Zeilen pro Modell**, **34 wiederkehrende Kontingente** und **54 wiederkehrende/kostenlose Anbieter ohne Schlüssel auf Dauer**. Diese Nenner unterscheiden sich absichtlich; Definitionen und pool-deduplizierte Berechnungen finden Sie in der [Anbieterreferenz](docs/reference/PROVIDER_REFERENCE.md) und unter [Kostenlose Tarife](docs/reference/FREE_TIERS.md).
+> **381 registrierte Anbieter** in den kanonischen Sammlungen für Chat, Medien, Suche, lokale Dienste, Cloud-Agenten und Systeme, darunter **153 mit `hasFree: true`-Erkennungsmetadaten**. Die Chatmodell-Registry umfasst **239 Anbieter / 3.059 eindeutige Anbieter-Modell-Paare / 1.475 Rohmodell-IDs**; der separate Katalog für kostenlose Budgets enthält **471 Zeilen pro Modell**, **34 wiederkehrende Kontingente** und **54 wiederkehrende/kostenlose Anbieter ohne Schlüssel auf Dauer**. Diese Nenner unterscheiden sich absichtlich; Definitionen und pool-deduplizierte Berechnungen finden Sie in der [Anbieterreferenz](docs/reference/PROVIDER_REFERENCE.md) und unter [Kostenlose Tarife](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

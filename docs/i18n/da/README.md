@@ -15,7 +15,7 @@
 
 **Oprettet af [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Stop aldrig med at kode. Alle AI-værktøjer → 380 udbydere — 150+ gratis — gennem ét endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity til GRATIS Claude / GPT / Gemini med automatisk fallback. RTK + Caveman-stablet komprimering sparer 15–95 % tokens (~89 % i gennemsnit) — ram aldrig grænserne. 380 AI-udbydere · 150+ gratis niveauer · ~1,62 mia. gratis tokens/md. · 20 routingstrategier · $0 for at komme i gang."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Stop aldrig med at kode. Alle AI-værktøjer → 381 udbydere — 150+ gratis — gennem ét endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity til GRATIS Claude / GPT / Gemini med automatisk fallback. RTK + Caveman-stablet komprimering sparer 15–95 % tokens (~89 % i gennemsnit) — ram aldrig grænserne. 381 AI-udbydere · 150+ gratis niveauer · ~1,62 mia. gratis tokens/md. · 20 routingstrategier · $0 for at komme i gang."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                |       v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------ | :------------------: | :---------: | :-------------------: |
-| 🌐 Udbydere                    |         352          |   **358**   |          380          |
+| 🌐 Udbydere                    |         352          |   **358**   |          381          |
 | 🧠 Unikke chatmodel-id'er      |         1320         |  **1374**   |         1491          |
 | 🖼️ Modalitetsbro               | 🆕 syn + lyd + video |      ✓      |           ✓           |
 | 📡 Radars gratis katalog       |      🆕 tilvalg      |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Funktioner</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinationer</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Udbydere</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Udbydere</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ét endpoint og 380 udbydere. Automatisk fallback holder routingen i gang, så længe der er et andet sundt mål tilgængeligt. Seks søjler: robust fallback på tværs af 380 udbydere · op til 95 % tokenbesparelse på kvalificerede arbejdsbelastninger · $0 for at komme i gang med over 150 gratis niveauer og 54 tilbagevendende/nøglefri udbydere, der er gratis for altid · 39 CLI-/agentintegrationer gennem én konfiguration · kompatibilitet med OpenAI, Claude, Gemini og Responses API på /v1 · produktionskontroller, herunder kredsløbsafbrydere, TLS-stealth, MCP med 110 værktøjer, A2A, hukommelse, sikkerhedsregler, evalueringer og over 56.000 statiske testdeklarationer på tværs af over 7.800 registrerede testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ét endpoint og 381 udbydere. Automatisk fallback holder routingen i gang, så længe der er et andet sundt mål tilgængeligt. Seks søjler: robust fallback på tværs af 381 udbydere · op til 95 % tokenbesparelse på kvalificerede arbejdsbelastninger · $0 for at komme i gang med over 150 gratis niveauer og 54 tilbagevendende/nøglefri udbydere, der er gratis for altid · 39 CLI-/agentintegrationer gennem én konfiguration · kompatibilitet med OpenAI, Claude, Gemini og Responses API på /v1 · produktionskontroller, herunder kredsløbsafbrydere, TLS-stealth, MCP med 110 værktøjer, A2A, hukommelse, sikkerhedsregler, evalueringer og over 56.000 statiske testdeklarationer på tværs af over 7.800 registrerede testfiler."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Alle **20** strategier — kombinér frit for hvert trin i en combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Hvad adskiller OmniRoute — et øjebliksbillede af funktioner sammenlignet med 9router, OpenRouter, CLIProxyAPI og LiteLLM på tværs af 13 funktioner. OmniRoute: 380 udbydere, 150+ gratis niveauer indbygget, 20 routingstrategier, 12-engine tokenkomprimering, indbygget MCP-server med 110 værktøjer, A2A-agentprotokol, vedvarende hukommelse, sikkerhedsforanstaltninger, cloud-agenter, TLS-fingeraftryksmaskering, Desktop/Termux/PWA og 67 i18n UI-sprog. OmniRoute er MIT-licenseret og kan selv-hostes. Konkurrenters funktioner og antal kan ændre sig; se den linkede metodebeskrivelse."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Hvad adskiller OmniRoute — et øjebliksbillede af funktioner sammenlignet med 9router, OpenRouter, CLIProxyAPI og LiteLLM på tværs af 13 funktioner. OmniRoute: 381 udbydere, 150+ gratis niveauer indbygget, 20 routingstrategier, 12-engine tokenkomprimering, indbygget MCP-server med 110 værktøjer, A2A-agentprotokol, vedvarende hukommelse, sikkerhedsforanstaltninger, cloud-agenter, TLS-fingeraftryksmaskering, Desktop/Termux/PWA og 67 i18n UI-sprog. OmniRoute er MIT-licenseret og kan selv-hostes. Konkurrenters funktioner og antal kan ændre sig; se den linkede metodebeskrivelse."/>
 
 <sub>📊 Fuld metodebeskrivelse &amp; detaljer pr. funktion vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -614,7 +614,7 @@ adgangskrav og det aktuelle katalog på **[radar.omniroute.online/planos](https:
 - **🖼️ Nye endpoints** — `/v1/ocr` (Mistral OCR) og `/v1/audio/translations` (Whisper-stil) fuldender medieoverfladen. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Billede / video / lydgenerering** — én API til medier: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind og taleudbydere som ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Udrulning & drift** — reverse-proxy `basePath`, browser-sprog autodetektion, pr. nøgle enhedssporing, root-løs MITM-tillid, zh-TW lokalisation. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Flere udbydere & agenter** — cloud-agenter (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) med browser + OAuth-login, Ollama førsteklasses kort, Claude Opus 5 & Sonnet 5, Kimi officiel partnerskab (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… og et opdateret **380-udbyder katalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Flere udbydere & agenter** — cloud-agenter (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) med browser + OAuth-login, Ollama førsteklasses kort, Claude Opus 5 & Sonnet 5, Kimi officiel partnerskab (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… og et opdateret **381-udbyder katalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Routinggennemsigtighed** — hvert svar bærer en `X-OmniRoute-Decision` header der navngiver strategi/udbyder/forsinkelse der servicerede det, en ny `cache-optimized` kombinationsstrategi + Auto-Combo `cacheAffinity` faktor ruter gentagne forespørgsler tilbage til forbindelsen med det cachede præfiks, og et skrivebeskyttet `/v1/auto-combo/{channel}/candidates` endpoint eksponerer en `auto/*` kanals live kandidatpulje. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokal ydeevne & infrastruktur** — ét-klik lokal Redis, Cloudflare Workers / Deno Deploy relay deployere, Bifrost & Mux som overvågede indlejrede tjenester. → [Indlejrede Tjenester](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Også inkluderet** — plugin-rammeværk + markedsplads, Omni/Agent/GitHub færdighedsrammer, Obsidian vault integration (22 MCP-værktøjer), OpenAI-kompatible Batch & Files API'er, semantisk svarkache, gamification med ranglister, ACP agentopdagelse (15 indbyggede agenter), planlagt logeksport til BigQuery, `auto/chaos` parallel multi-model fan-out, en Telegram bot-bro, en indbygget versionshåndtering og LMArena-ELO gratis-udbyder ranglister. → [Dokumentation](docs/README.md)
@@ -698,11 +698,11 @@ af din shell-historik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🌐 380 AI-udbydere — 153 markeret som gratis i kataloget
+## 🌐 381 AI-udbydere — 153 markeret som gratis i kataloget
 
 </div>
 
-> **380 registrerede udbydere** på tværs af de autoritative samlinger for chat, medier, søgning, lokale tjenester, cloud-agenter og systemer, herunder **153 med `hasFree: true`-metadata til opdagelse**. Chatmodellens register dækker **239 udbydere / 3.059 unikke udbyder-model-par / 1.475 rå model-id'er**; det separate katalog over gratis budgetter har **471 rækker pr. model**, **34 tilbagevendende puljer** og **54 tilbagevendende/gratis-for-evigt-udbydere uden nøgle**. Dette er forskellige nævnere med vilje; definitioner og puljededuplikerede beregninger findes i [Udbyderreference](docs/reference/PROVIDER_REFERENCE.md) og [Gratis niveauer](docs/reference/FREE_TIERS.md).
+> **381 registrerede udbydere** på tværs af de autoritative samlinger for chat, medier, søgning, lokale tjenester, cloud-agenter og systemer, herunder **153 med `hasFree: true`-metadata til opdagelse**. Chatmodellens register dækker **239 udbydere / 3.059 unikke udbyder-model-par / 1.475 rå model-id'er**; det separate katalog over gratis budgetter har **471 rækker pr. model**, **34 tilbagevendende puljer** og **54 tilbagevendende/gratis-for-evigt-udbydere uden nøgle**. Dette er forskellige nævnere med vilje; definitioner og puljededuplikerede beregninger findes i [Udbyderreference](docs/reference/PROVIDER_REFERENCE.md) og [Gratis niveauer](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

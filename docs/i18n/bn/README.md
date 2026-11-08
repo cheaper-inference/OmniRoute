@@ -15,7 +15,7 @@
 
 **তৈরি করেছেন [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — কখনো কোডিং থামাবেন না। প্রতিটি AI টুল → 380টি প্রোভাইডার — 150+টি বিনামূল্যে — একটি এন্ডপয়েন্টের মাধ্যমে। Claude Code, Codex, Cursor, Cline, Copilot ও Antigravity-কে স্বয়ংক্রিয় fallback সহ বিনামূল্যের Claude / GPT / Gemini-তে সংযুক্ত করুন। RTK + Caveman-এর স্তরভিত্তিক কমপ্রেশন 15–95% টোকেন (~89% গড়) সাশ্রয় করে — কখনো সীমায় পৌঁছাবেন না। 380টি AI প্রোভাইডার · 150+টি বিনামূল্যের টিয়ার · ~1.62B বিনামূল্যের টোকেন/মাস · 20টি রাউটিং কৌশল · $0 থেকে শুরু করুন।"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — কখনো কোডিং থামাবেন না। প্রতিটি AI টুল → 381টি প্রোভাইডার — 150+টি বিনামূল্যে — একটি এন্ডপয়েন্টের মাধ্যমে। Claude Code, Codex, Cursor, Cline, Copilot ও Antigravity-কে স্বয়ংক্রিয় fallback সহ বিনামূল্যের Claude / GPT / Gemini-তে সংযুক্ত করুন। RTK + Caveman-এর স্তরভিত্তিক কমপ্রেশন 15–95% টোকেন (~89% গড়) সাশ্রয় করে — কখনো সীমায় পৌঁছাবেন না। 381টি AI প্রোভাইডার · 150+টি বিনামূল্যের টিয়ার · ~1.62B বিনামূল্যের টোকেন/মাস · 20টি রাউটিং কৌশল · $0 থেকে শুরু করুন।"/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                  |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------------- | :--------------------: | :---------: | :-------------------: |
-| 🌐 প্রদানকারী                    |          352           |   **358**   |          380          |
+| 🌐 প্রদানকারী                    |          352           |   **358**   |          381          |
 | 🧠 অনন্য চ্যাট মডেল ID           |          1320          |  **1374**   |         1491          |
 | 🖼️ মডালিটি ব্রিজ                 | 🆕 ভিশন + অডিও + ভিডিও |      ✓      |           ✓           |
 | 📡 Radar-এর বিনামূল্যের ক্যাটালগ |       🆕 ঐচ্ছিক        |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ বৈশিষ্ট্য</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 কম্বো</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 প্রদানকারী</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 প্রদানকারী</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ও MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="প্রতিশ্রুতি — একটি এন্ডপয়েন্ট এবং 380টি প্রদানকারী। অন্য একটি সুস্থ target উপলভ্য থাকা পর্যন্ত স্বয়ংক্রিয় fallback রাউটিং চালু রাখে। ছয়টি স্তম্ভ: 380টি প্রদানকারীজুড়ে স্থিতিশীল fallback · যোগ্য workload-এ সর্বোচ্চ 95% token সাশ্রয় · 150টিরও বেশি free tier এবং 54টি recurring/keyless free-forever প্রদানকারীর মাধ্যমে $0-তে শুরু · একটি config-এর মাধ্যমে 39টি CLI/agent integration · /v1-এ OpenAI, Claude, Gemini এবং Responses API compatibility · circuit breaker, TLS stealth, MCP 110 tools, A2A, memory, guardrail, eval এবং 7,800টিরও বেশি tracked test file জুড়ে 56,000টিরও বেশি static test declaration-সহ production control।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="প্রতিশ্রুতি — একটি এন্ডপয়েন্ট এবং 381টি প্রদানকারী। অন্য একটি সুস্থ target উপলভ্য থাকা পর্যন্ত স্বয়ংক্রিয় fallback রাউটিং চালু রাখে। ছয়টি স্তম্ভ: 381টি প্রদানকারীজুড়ে স্থিতিশীল fallback · যোগ্য workload-এ সর্বোচ্চ 95% token সাশ্রয় · 150টিরও বেশি free tier এবং 54টি recurring/keyless free-forever প্রদানকারীর মাধ্যমে $0-তে শুরু · একটি config-এর মাধ্যমে 39টি CLI/agent integration · /v1-এ OpenAI, Claude, Gemini এবং Responses API compatibility · circuit breaker, TLS stealth, MCP 110 tools, A2A, memory, guardrail, eval এবং 7,800টিরও বেশি tracked test file জুড়ে 56,000টিরও বেশি static test declaration-সহ production control।"/>
 
 <br/>
 <br/>
@@ -688,11 +688,11 @@ omniroute configure codex          # এছাড়াও: claude opencode qwen
 
 <div align="center">
 
-## 🌐 380টি AI প্রদানকারী — ক্যাটালগে চিহ্নিত 153টি বিনামূল্যে
+## 🌐 381টি AI প্রদানকারী — ক্যাটালগে চিহ্নিত 153টি বিনামূল্যে
 
 </div>
 
-> **380টি নিবন্ধিত প্রদানকারী** canonical chat, media, search, local, cloud-agent এবং system সংগ্রহজুড়ে রয়েছে, যার মধ্যে **153টি `hasFree: true` discovery metadata বহন করে**। chat model registry-তে **239টি প্রদানকারী / 3,059টি স্বতন্ত্র provider-model জোড়া / 1,475টি raw model ID** রয়েছে; পৃথক free-budget catalog-এ রয়েছে **471টি per-model row**, **34টি recurring pool** এবং **54টি recurring/keyless free-forever provider**। এগুলো নকশাগতভাবে ভিন্ন denominator; সংজ্ঞা এবং pool-deduped হিসাব [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ও [Free Tiers](docs/reference/FREE_TIERS.md)-এ রয়েছে।
+> **381টি নিবন্ধিত প্রদানকারী** canonical chat, media, search, local, cloud-agent এবং system সংগ্রহজুড়ে রয়েছে, যার মধ্যে **153টি `hasFree: true` discovery metadata বহন করে**। chat model registry-তে **239টি প্রদানকারী / 3,059টি স্বতন্ত্র provider-model জোড়া / 1,475টি raw model ID** রয়েছে; পৃথক free-budget catalog-এ রয়েছে **471টি per-model row**, **34টি recurring pool** এবং **54টি recurring/keyless free-forever provider**। এগুলো নকশাগতভাবে ভিন্ন denominator; সংজ্ঞা এবং pool-deduped হিসাব [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ও [Free Tiers](docs/reference/FREE_TIERS.md)-এ রয়েছে।
 
 <div align="center">
 

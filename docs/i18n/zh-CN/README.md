@@ -15,7 +15,7 @@
 
 **由 [Diego Souza](https://github.com/diegosouzapw) 创建**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停下编码。每个 AI 工具 → 380 个提供者 — 其中 150+ 个免费 — 通过一个端点接入。Claude Code、Codex、Cursor、Cline、Copilot 和 Antigravity 接入免费的 Claude / GPT / Gemini，并支持自动回退。RTK + Caveman 堆叠式压缩可节省 15–95% 的令牌（平均约 89%）— 永远不会触及限制。380 个 AI 提供者 · 150+ 个免费层级 · 每月约 1.62B 个免费令牌 · 20 种路由策略 · $0 起步。"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停下编码。每个 AI 工具 → 381 个提供者 — 其中 150+ 个免费 — 通过一个端点接入。Claude Code、Codex、Cursor、Cline、Copilot 和 Antigravity 接入免费的 Claude / GPT / Gemini，并支持自动回退。RTK + Caveman 堆叠式压缩可节省 15–95% 的令牌（平均约 89%）— 永远不会触及限制。381 个 AI 提供者 · 150+ 个免费层级 · 每月约 1.62B 个免费令牌 · 20 种路由策略 · $0 起步。"/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                     |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
 | ------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 供应商           |          352          |   **358**   |          380          |
+| 🌐 供应商           |          352          |   **358**   |          381          |
 | 🧠 唯一聊天模型 ID  |         1320          |  **1374**   |         1491          |
 | 🖼️ 模态桥接         | 🆕 视觉 + 音频 + 视频 |      ✓      |           ✓           |
 | 📡 Radar 免费目录   |      🆕 可选加入      |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ 功能</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 组合</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 提供者</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 提供者</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI 和 MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="我们的承诺——一个端点和 380 个提供者。当另一个健康目标可用时，自动故障转移会保持路由运行。六大支柱：跨 380 个提供者的弹性故障转移 · 符合条件的工作负载最高可节省 95% 的 token · 零成本起步，提供 150 多个免费层级以及 54 个持续提供免费服务/免密钥永久免费提供者 · 通过一个配置支持 39 个 CLI/代理集成 · 在 /v1 提供 OpenAI、Claude、Gemini 和 Responses API 兼容性 · 生产级控制功能，包括断路器、TLS 隐身、MCP 110 个工具、A2A、记忆、护栏、评估，以及跨 7,800 多个受跟踪测试文件的 56,000 多项静态测试声明。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="我们的承诺——一个端点和 381 个提供者。当另一个健康目标可用时，自动故障转移会保持路由运行。六大支柱：跨 381 个提供者的弹性故障转移 · 符合条件的工作负载最高可节省 95% 的 token · 零成本起步，提供 150 多个免费层级以及 54 个持续提供免费服务/免密钥永久免费提供者 · 通过一个配置支持 39 个 CLI/代理集成 · 在 /v1 提供 OpenAI、Claude、Gemini 和 Responses API 兼容性 · 生产级控制功能，包括断路器、TLS 隐身、MCP 110 个工具、A2A、记忆、护栏、评估，以及跨 7,800 多个受跟踪测试文件的 56,000 多项静态测试声明。"/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的独特之处——与 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 项能力上的带日期功能快照对比。OmniRoute：380 个提供者，内置 150 多个免费层级，20 种路由策略，支持 12 个引擎的令牌压缩，内置 MCP 服务器并提供 110 个工具，A2A 智能体协议，持久化记忆，防护栏，云端智能体，TLS 指纹隐身，Desktop/Termux/PWA，以及支持 67 种 i18n UI 语言环境。OmniRoute 采用 MIT 许可证并支持自托管。竞争对手的功能和数量可能会发生变化；请参阅链接的方法说明。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的独特之处——与 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 项能力上的带日期功能快照对比。OmniRoute：381 个提供者，内置 150 多个免费层级，20 种路由策略，支持 12 个引擎的令牌压缩，内置 MCP 服务器并提供 110 个工具，A2A 智能体协议，持久化记忆，防护栏，云端智能体，TLS 指纹隐身，Desktop/Termux/PWA，以及支持 67 种 i18n UI 语言环境。OmniRoute 采用 MIT 许可证并支持自托管。竞争对手的功能和数量可能会发生变化；请参阅链接的方法说明。"/>
 
 <sub>📊 完整的方法说明及与 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 的逐项功能详情 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar 需主动选择启用，且仅使用 GET 请求。OmniRoute 客户端不�
 - **🖼️ 新端点** — `/v1/ocr`（Mistral OCR）和 `/v1/audio/translations`（Whisper 风格）补齐了媒体功能。→ [API 参考](docs/reference/API_REFERENCE.md)
 - **🎨 图像 / 视频 / 音频生成** — 使用一个 API 处理媒体：xAI Grok Imagine 和 Novita AI 视频、ComfyUI、Magnific、Adobe Firefly、Segmind，以及 ElevenLabs 等语音提供者。→ [API 参考](docs/reference/API_REFERENCE.md)
 - **🌍 部署与运维** — 反向代理 `basePath`、浏览器语言自动检测、逐密钥设备跟踪、无 root 的 MITM 信任，以及 zh-TW 本地化。→ [环境](docs/reference/ENVIRONMENT.md)
-- **🤝 更多提供者与智能体** — 云端智能体（Codex Cloud、Cursor、Devin、Jules）、支持浏览器 + OAuth 登录的 Grok Build（xAI）、一等支持的 Ollama 卡片、Claude Opus 5 和 Sonnet 5、Kimi 官方合作伙伴（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及焕新的 **380 个提供者目录**。→ [提供者](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 更多提供者与智能体** — 云端智能体（Codex Cloud、Cursor、Devin、Jules）、支持浏览器 + OAuth 登录的 Grok Build（xAI）、一等支持的 Ollama 卡片、Claude Opus 5 和 Sonnet 5、Kimi 官方合作伙伴（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及焕新的 **381 个提供者目录**。→ [提供者](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 路由透明度** — 每个响应都带有 `X-OmniRoute-Decision` 标头，用于标明为其提供服务的策略/提供者/延迟；新增的 `cache-optimized` 组合策略，以及 Auto-Combo 的 `cacheAffinity` 因子，会将重复请求路由回持有缓存前缀的连接；只读端点 `/v1/auto-combo/{channel}/candidates` 会公开某个 `auto/*` 通道的实时候选池。→ [自动组合](docs/routing/AUTO-COMBO.md)。
 - **⚡ 本地性能与基础设施** — 一键式本地 Redis、Cloudflare Workers / Deno Deploy 中继部署器，以及作为受监管嵌入式服务运行的 Bifrost 与 Mux。→ [嵌入式服务](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 开箱即用的更多功能** — 插件框架与市场、Omni/Agent/GitHub 技能框架、Obsidian 库集成（22 个 MCP 工具）、兼容 OpenAI 的 Batch 与 Files API、语义响应缓存、带排行榜的游戏化机制、ACP 智能体发现（15 个内置智能体）、定时将日志导出到 BigQuery、`auto/chaos` 并行多模型扇出、Telegram 机器人桥接、应用内版本管理器，以及 LMArena-ELO 免费提供者排名。→ [文档](docs/README.md)
@@ -689,11 +689,11 @@ Shell 历史记录中。→ [CLI 集成](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🌐 380 个 AI 提供者 — 153 个在目录中标记为免费
+## 🌐 381 个 AI 提供者 — 153 个在目录中标记为免费
 
 </div>
 
-> **380 个已注册的提供者**，涵盖规范聊天、媒体、搜索、本地、云端代理和系统集合，其中包括 **153 个携带 `hasFree: true` 发现元数据的提供者**。聊天模型注册表涵盖 **239 个提供者 / 3,059 个不同的提供者-模型组合 / 1,475 个原始模型 ID**；独立的免费额度目录包含 **471 条按模型记录**、**34 个周期性额度池**以及 **54 个周期性/无需密钥的永久免费提供者**。这些分母经过有意区分；定义以及去重额度池后的计算方式详见[提供者参考](docs/reference/PROVIDER_REFERENCE.md)和[免费层级](docs/reference/FREE_TIERS.md)。
+> **381 个已注册的提供者**，涵盖规范聊天、媒体、搜索、本地、云端代理和系统集合，其中包括 **153 个携带 `hasFree: true` 发现元数据的提供者**。聊天模型注册表涵盖 **239 个提供者 / 3,059 个不同的提供者-模型组合 / 1,475 个原始模型 ID**；独立的免费额度目录包含 **471 条按模型记录**、**34 个周期性额度池**以及 **54 个周期性/无需密钥的永久免费提供者**。这些分母经过有意区分；定义以及去重额度池后的计算方式详见[提供者参考](docs/reference/PROVIDER_REFERENCE.md)和[免费层级](docs/reference/FREE_TIERS.md)。
 
 <div align="center">
 

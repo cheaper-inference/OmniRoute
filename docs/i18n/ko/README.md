@@ -15,7 +15,7 @@
 
 **[Diego Souza](https://github.com/diegosouzapw)가 제작**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 코딩을 멈추지 마세요. 모든 AI 도구를 하나의 엔드포인트를 통해 380개의 제공업체(무료 제공업체 150개 이상)로 연결합니다. Claude Code, Codex, Cursor, Cline, Copilot 및 Antigravity를 무료 Claude / GPT / Gemini로 연결하며 자동 대체 기능을 제공합니다. RTK + Caveman 스택형 압축으로 토큰을 15–95% 절약(평균 약 89%)하여 한도에 도달하지 않습니다. AI 제공업체 380개 · 무료 요금제 150개 이상 · 월 약 16.2억 개의 무료 토큰 · 라우팅 전략 20개 · $0부터 시작."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 코딩을 멈추지 마세요. 모든 AI 도구를 하나의 엔드포인트를 통해 381개의 제공업체(무료 제공업체 150개 이상)로 연결합니다. Claude Code, Codex, Cursor, Cline, Copilot 및 Antigravity를 무료 Claude / GPT / Gemini로 연결하며 자동 대체 기능을 제공합니다. RTK + Caveman 스택형 압축으로 토큰을 15–95% 절약(평균 약 89%)하여 한도에 도달하지 않습니다. AI 제공업체 381개 · 무료 요금제 150개 이상 · 월 약 16.2억 개의 무료 토큰 · 라우팅 전략 20개 · $0부터 시작."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                        |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 제공업체            |            352            |   **358**   |          380          |
+| 🌐 제공업체            |            352            |   **358**   |          381          |
 | 🧠 고유 채팅 모델 ID   |           1320            |  **1374**   |         1491          |
 | 🖼️ 모달리티 브리지     | 🆕 비전 + 오디오 + 비디오 |      ✓      |           ✓           |
 | 📡 Radar 무료 카탈로그 |         🆕 옵트인         |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ 기능</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 콤보</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 제공자</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 제공자</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="약속 — 하나의 엔드포인트와 380개 제공자. 다른 정상 대상이 사용 가능한 동안 자동 폴백이 라우팅을 유지합니다. 6가지 핵심 요소: 380개 제공자에 걸친 복원력 있는 폴백 · 적격 워크로드에서 최대 95% 토큰 절약 · 150개 이상의 무료 티어와 54개의 반복 제공 또는 키 없이 영구 무료인 제공자를 통해 $0로 시작 · 하나의 구성으로 39개의 CLI/에이전트 통합 · /v1에서 OpenAI, Claude, Gemini 및 Responses API 호환 · 회로 차단기, TLS 스텔스, MCP 110개 도구, A2A, 메모리, 가드레일, 평가 및 7,800개 이상의 추적 테스트 파일에 걸친 56,000개 이상의 정적 테스트 선언을 포함한 프로덕션 제어 기능."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="약속 — 하나의 엔드포인트와 381개 제공자. 다른 정상 대상이 사용 가능한 동안 자동 폴백이 라우팅을 유지합니다. 6가지 핵심 요소: 381개 제공자에 걸친 복원력 있는 폴백 · 적격 워크로드에서 최대 95% 토큰 절약 · 150개 이상의 무료 티어와 54개의 반복 제공 또는 키 없이 영구 무료인 제공자를 통해 $0로 시작 · 하나의 구성으로 39개의 CLI/에이전트 통합 · /v1에서 OpenAI, Claude, Gemini 및 Responses API 호환 · 회로 차단기, TLS 스텔스, MCP 110개 도구, A2A, 메모리, 가드레일, 평가 및 7,800개 이상의 추적 테스트 파일에 걸친 56,000개 이상의 정적 테스트 선언을 포함한 프로덕션 제어 기능."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute만의 차별점 — 9router, OpenRouter, CLIProxyAPI, LiteLLM과 13가지 기능에 대한 최신 기능 스냅샷 비교. OmniRoute: 380개 공급자, 150개 이상의 무료 티어 내장, 20가지 라우팅 전략, 12엔진 토큰 압축, 110개 도구가 내장된 MCP 서버, A2A 에이전트 프로토콜, 영속 메모리, 가드레일, 클라우드 에이전트, TLS 지문 스텔스, Desktop/Termux/PWA 및 67개 i18n UI 로케일 지원. OmniRoute는 MIT 라이선스이며 자체 호스팅이 가능합니다. 경쟁 제품의 기능 및 수치는 변경될 수 있습니다. 자세한 내용은 링크된 방법론을 참고하세요."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute만의 차별점 — 9router, OpenRouter, CLIProxyAPI, LiteLLM과 13가지 기능에 대한 최신 기능 스냅샷 비교. OmniRoute: 381개 공급자, 150개 이상의 무료 티어 내장, 20가지 라우팅 전략, 12엔진 토큰 압축, 110개 도구가 내장된 MCP 서버, A2A 에이전트 프로토콜, 영속 메모리, 가드레일, 클라우드 에이전트, TLS 지문 스텔스, Desktop/Termux/PWA 및 67개 i18n UI 로케일 지원. OmniRoute는 MIT 라이선스이며 자체 호스팅이 가능합니다. 경쟁 제품의 기능 및 수치는 변경될 수 있습니다. 자세한 내용은 링크된 방법론을 참고하세요."/>
 
 <sub>📊 전체 방법론 및 기능별 상세 비교: 9router, OpenRouter, CLIProxyAPI, LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar는 선택적으로 사용할 수 있으며 GET 전용입니다. OmniRoute 
 - **🖼️ 신규 엔드포인트** — `/v1/ocr`(Mistral OCR) 및 `/v1/audio/translations`(Whisper 스타일)로 미디어 기능 완성. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 이미지/비디오/오디오 생성** — 하나의 API로 미디어 지원: xAI Grok Imagine & Novita AI 비디오, ComfyUI, Magnific, Adobe Firefly, Segmind, ElevenLabs 등 음성 공급자. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 배포 및 운영** — 리버스 프록시 `basePath`, 브라우저 언어 자동 감지, 키별 디바이스 추적, 루트리스 MITM 신뢰, zh-TW 현지화. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 더 많은 공급자 및 에이전트** — 클라우드 에이전트(Codex Cloud, Cursor, Devin, Jules), Grok Build(xAI) 브라우저+OAuth 로그인, Ollama 1급 카드, Claude Opus 5 & Sonnet 5, Kimi 공식 파트너십(Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… 그리고 새로워진 **380개 공급자 카탈로그**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 더 많은 공급자 및 에이전트** — 클라우드 에이전트(Codex Cloud, Cursor, Devin, Jules), Grok Build(xAI) 브라우저+OAuth 로그인, Ollama 1급 카드, Claude Opus 5 & Sonnet 5, Kimi 공식 파트너십(Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… 그리고 새로워진 **381개 공급자 카탈로그**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 라우팅 투명성** — 모든 응답에 전략/공급자/지연시간을 명시하는 `X-OmniRoute-Decision` 헤더 포함, 새로운 `cache-optimized` 콤보 전략 + Auto-Combo `cacheAffinity` 요소로 캐시된 프리픽스를 가진 연결로 반복 요청 라우팅, 읽기 전용 `/v1/auto-combo/{channel}/candidates` 엔드포인트로 `auto/*` 채널의 실시간 후보 풀 공개. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ 로컬 성능 및 인프라** — 원클릭 로컬 Redis, Cloudflare Workers / Deno Deploy 릴레이 배포기, Bifrost & Mux를 감독되는 임베디드 서비스로 제공. → [임베디드 서비스](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 박스 안의 추가 기능** — 플러그인 프레임워크 + 마켓플레이스, Omni/Agent/GitHub 스킬 프레임워크, Obsidian 볼트 통합 (22 MCP 도구), OpenAI 호환 Batch & Files API, 시맨틱 응답 캐시, 리더보드와 함께하는 게임화, ACP 에이전트 탐색 (15개 내장 에이전트), BigQuery로 예약 로그 내보내기, `auto/chaos` 병렬 멀티모델 팬아웃, 텔레그램 봇 브릿지, 인앱 버전 관리자 및 LMArena-ELO 무료 제공자 랭킹. → [문서](docs/README.md)
@@ -689,11 +689,11 @@ omniroute configure codex          # 또한: claude opencode qwen aider goose ge
 
 <div align="center">
 
-## 🌐 380개의 AI 제공업체 — 카탈로그에 표시된 무료 제공업체 153개
+## 🌐 381개의 AI 제공업체 — 카탈로그에 표시된 무료 제공업체 153개
 
 </div>
 
-> **등록된 제공업체 380개**가 표준 채팅, 미디어, 검색, 로컬, 클라우드 에이전트 및 시스템 컬렉션에 걸쳐 포함되어 있으며, 이 중 **153개는 `hasFree: true` 검색 메타데이터를 보유**합니다. 채팅 모델 레지스트리에는 **239개 제공업체 / 3,059개의 고유 제공업체-모델 쌍 / 1,475개의 원시 모델 ID**가 포함되어 있습니다. 별도의 무료 예산 카탈로그에는 **모델별 행 471개**, **반복 풀 34개**, **반복 사용 가능/키리스 영구 무료 제공업체 54개**가 있습니다. 이는 의도적으로 서로 다른 분모입니다. 정의와 풀 중복 제거 계산은 [제공업체 참조](docs/reference/PROVIDER_REFERENCE.md) 및 [무료 티어](docs/reference/FREE_TIERS.md)에 정리되어 있습니다.
+> **등록된 제공업체 381개**가 표준 채팅, 미디어, 검색, 로컬, 클라우드 에이전트 및 시스템 컬렉션에 걸쳐 포함되어 있으며, 이 중 **153개는 `hasFree: true` 검색 메타데이터를 보유**합니다. 채팅 모델 레지스트리에는 **239개 제공업체 / 3,059개의 고유 제공업체-모델 쌍 / 1,475개의 원시 모델 ID**가 포함되어 있습니다. 별도의 무료 예산 카탈로그에는 **모델별 행 471개**, **반복 풀 34개**, **반복 사용 가능/키리스 영구 무료 제공업체 54개**가 있습니다. 이는 의도적으로 서로 다른 분모입니다. 정의와 풀 중복 제거 계산은 [제공업체 참조](docs/reference/PROVIDER_REFERENCE.md) 및 [무료 티어](docs/reference/FREE_TIERS.md)에 정리되어 있습니다.
 
 <div align="center">
 

@@ -15,7 +15,7 @@
 
 **[Diego Souza](https://github.com/diegosouzapw) द्वारा सिर्जना गरिएको**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — कोडिङ कहिल्यै नरोक्नुहोस्। प्रत्येक AI उपकरण → एउटा एन्डपोइन्टमार्फत 380 प्रदायक — 150+ निःशुल्क — । Claude Code, Codex, Cursor, Cline, Copilot र Antigravity लाई auto-fallback सहित FREE Claude / GPT / Gemini मा जोड्नुहोस्। RTK + Caveman को संयुक्त कम्प्रेसनले 15–95% टोकन (~89% औसत) बचत गर्छ — सीमामा कहिल्यै नठोक्किनुहोस्। 380 AI प्रदायक · 150+ निःशुल्क टियर · ~1.62B निःशुल्क टोकन/महिना · 20 राउटिङ रणनीति · सुरु गर्न $0।"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — कोडिङ कहिल्यै नरोक्नुहोस्। प्रत्येक AI उपकरण → एउटा एन्डपोइन्टमार्फत 381 प्रदायक — 150+ निःशुल्क — । Claude Code, Codex, Cursor, Cline, Copilot र Antigravity लाई auto-fallback सहित FREE Claude / GPT / Gemini मा जोड्नुहोस्। RTK + Caveman को संयुक्त कम्प्रेसनले 15–95% टोकन (~89% औसत) बचत गर्छ — सीमामा कहिल्यै नठोक्किनुहोस्। 381 AI प्रदायक · 150+ निःशुल्क टियर · ~1.62B निःशुल्क टोकन/महिना · 20 राउटिङ रणनीति · सुरु गर्न $0।"/>
 
 </div>
 
@@ -73,7 +73,7 @@ OMNIROUTE ले तपाईंलाई पैसा बचत गर्न �
 
 |                               |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 सेवा प्रदायकहरू            |           352            |   **358**   |          380          |
+| 🌐 सेवा प्रदायकहरू            |           352            |   **358**   |          381          |
 | 🧠 अद्वितीय च्याट मोडेल IDहरू |           1320           |  **1374**   |         1491          |
 | 🖼️ मोडालिटी ब्रिज             | 🆕 भिजन + अडियो + भिडियो |      ✓      |           ✓           |
 | 📡 रडार निःशुल्क क्याटलग      |   🆕 वैकल्पिक-सदस्यता    |      ✓      |           ✓           |
@@ -114,7 +114,7 @@ OMNIROUTE ले तपाईंलाई पैसा बचत गर्न �
   <tr>
     <td align="right"><b>⚙️ सुविधाहरू</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 कम्बोहरू</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 प्रदायकहरू</a></td>
+    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 प्रदायकहरू</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI र MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="प्रतिज्ञा — एउटा endpoint र 380 प्रदायकहरू। अर्को स्वस्थ target उपलब्ध हुँदासम्म स्वचालित fallback ले रुटिङ जारी राख्छ। छ वटा आधारहरू: 380 प्रदायकहरूमा resilient fallback · योग्य workloadहरूमा 95% सम्म token बचत · 150+ निःशुल्क tiers र 54 recurring/keyless सधैँ निःशुल्क प्रदायकहरूसहित सुरु गर्न $0 · एउटै config मार्फत 39 CLI/agent integrations · /v1 मा OpenAI, Claude, Gemini र Responses API compatibility · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals तथा 7,800+ tracked test files मा 56,000+ static test declarations लगायतका production controls।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="प्रतिज्ञा — एउटा endpoint र 381 प्रदायकहरू। अर्को स्वस्थ target उपलब्ध हुँदासम्म स्वचालित fallback ले रुटिङ जारी राख्छ। छ वटा आधारहरू: 381 प्रदायकहरूमा resilient fallback · योग्य workloadहरूमा 95% सम्म token बचत · 150+ निःशुल्क tiers र 54 recurring/keyless सधैँ निःशुल्क प्रदायकहरूसहित सुरु गर्न $0 · एउटै config मार्फत 39 CLI/agent integrations · /v1 मा OpenAI, Claude, Gemini र Responses API compatibility · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals तथा 7,800+ tracked test files मा 56,000+ static test declarations लगायतका production controls।"/>
 
 <br/>
 <br/>
@@ -697,11 +697,11 @@ omniroute configure codex          # साथै: claude opencode qwen aider go
 
 <div align="center">
 
-## 🌐 380 AI प्रदायकहरू — क्याटलगमा चिह्नित 153 निःशुल्क
+## 🌐 381 AI प्रदायकहरू — क्याटलगमा चिह्नित 153 निःशुल्क
 
 </div>
 
-> **380 दर्ता गरिएका प्रदायकहरू** प्रमाणिक च्याट, मिडिया, खोज, स्थानीय, क्लाउड-एजेन्ट र प्रणाली सङ्ग्रहहरूमा समेटिएका छन्, जसमा **`hasFree: true` डिस्कभरी मेटाडेटा भएका 153 प्रदायकहरू** पनि छन्। च्याट मोडेल रजिस्ट्रीमा **239 प्रदायकहरू / 3,059 विशिष्ट प्रदायक-मोडेल जोडीहरू / 1,475 कच्चा मोडेल ID हरू** समेटिएका छन्; छुट्टै निःशुल्क-बजेट क्याटलगमा **471 प्रति-मोडेल पङ्क्तिहरू**, **34 आवर्ती पूलहरू** र **54 आवर्ती/कुञ्जीविहीन सदैव-निःशुल्क प्रदायकहरू** छन्। यी फरक भाजकहरू उद्देश्यपूर्वक राखिएका हुन्; परिभाषा र पूल-डुप्लिकेसन हटाएर गरिएका गणनाहरू [प्रदायक सन्दर्भ](docs/reference/PROVIDER_REFERENCE.md) र [निःशुल्क तहहरू](docs/reference/FREE_TIERS.md) मा उपलब्ध छन्।
+> **381 दर्ता गरिएका प्रदायकहरू** प्रमाणिक च्याट, मिडिया, खोज, स्थानीय, क्लाउड-एजेन्ट र प्रणाली सङ्ग्रहहरूमा समेटिएका छन्, जसमा **`hasFree: true` डिस्कभरी मेटाडेटा भएका 153 प्रदायकहरू** पनि छन्। च्याट मोडेल रजिस्ट्रीमा **239 प्रदायकहरू / 3,059 विशिष्ट प्रदायक-मोडेल जोडीहरू / 1,475 कच्चा मोडेल ID हरू** समेटिएका छन्; छुट्टै निःशुल्क-बजेट क्याटलगमा **471 प्रति-मोडेल पङ्क्तिहरू**, **34 आवर्ती पूलहरू** र **54 आवर्ती/कुञ्जीविहीन सदैव-निःशुल्क प्रदायकहरू** छन्। यी फरक भाजकहरू उद्देश्यपूर्वक राखिएका हुन्; परिभाषा र पूल-डुप्लिकेसन हटाएर गरिएका गणनाहरू [प्रदायक सन्दर्भ](docs/reference/PROVIDER_REFERENCE.md) र [निःशुल्क तहहरू](docs/reference/FREE_TIERS.md) मा उपलब्ध छन्।
 
 <div align="center">
 
