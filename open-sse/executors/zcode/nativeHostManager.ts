@@ -345,4 +345,8 @@ export class NativeZcodeHostManager {
 }
 
 /** Shared per-account hosts for inference and quota readback. */
-export const nativeZcodeHosts = new NativeZcodeHostManager();
+const processGlobals = globalThis as typeof globalThis & {
+  __omnirouteNativeZcodeHosts?: NativeZcodeHostManager;
+};
+export const nativeZcodeHosts = (processGlobals.__omnirouteNativeZcodeHosts ??=
+  new NativeZcodeHostManager());

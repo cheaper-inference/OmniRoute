@@ -158,3 +158,10 @@ test("managed child excludes caller exec arguments, reuses identity, and closes 
   }
   assert.throws(() => process.kill(pid!, 0), { code: "ESRCH" });
 });
+
+test("native host singleton is shared across independently loaded server chunks", async () => {
+  const moduleUrl = new URL("../../open-sse/executors/zcode/nativeHostManager.ts", import.meta.url);
+  const first = await import(`${moduleUrl.href}?chunk=inference`);
+  const second = await import(`${moduleUrl.href}?chunk=quota`);
+  assert.equal(first.nativeZcodeHosts, second.nativeZcodeHosts);
+});
