@@ -16,11 +16,11 @@ AgentBridge የOmniRoute MITM (Man-in-the-Middle) ፕሮክሲ ሲሆን፣ ከI
 
 ### AgentBridge ምንድን ነው?
 
-IDE ወኪል (ለምሳሌ፣ GitHub Copilot፣ Cursor፣ Claude Code) የ API ጥሪ ሲያደርግ፣ በቀጥታ ወደ ላይኛው AI አቅራቢ (OpenAI፣ Anthropic፣ ወዘተ) ይገናኛል። AgentBridge ያንን ግንኙነት በ TLS ደረጃ - ምንም አይነት የወኪል ውቅር ለውጥ ሳያስፈልገው - ያቋርጣል እና ጥያቄውን በ OmniRoute በኩል ይጽፋል።
+IDE ወኪል (ለምሳሌ፣ GitHub Copilot፣ Cursor፣ Claude Code) የ API ጥሪ ሲያደርግ፣ በቀጥታ ወደ ላይኛው AI አቅራቢ (OpenAI፣ Anthropic፣ ወዘተ) ይገናኛል። AgentBridge ያንን ግንኙነት በ TLS ደረጃ — ምንም አይነት የወኪል ውቅር መቀየር ሳያስፈልገው — ጠልፎ በ OmniRoute በኩል ጥያቄውን እንደገና ይጽፋል።
 
 ይህ ማለት የሚከተሉትን ማድረግ ይችላሉ:
 
-- **ማንኛውንም ወኪል ወደ ማንኛውም አገልግሎት አቅራቢ ያዙሩ** Copilot ማውራት OpenAI? ወደ Anthropic Claude, Gemini, ወይም ወደ ማንኛውም የ OmniRoute 377 አቅራቢዎች አዙረው።
+- **ማንኛውንም ወኪል ወደ ማንኛውም አገልግሎት አቅራቢ ያዙሩ** Copilot ማውራት OpenAI? ወደ Anthropic Claude, Gemini, ወይም ወደ ማንኛውም OmniRoute 380 አቅራቢዎች አዙረው።
 - **የሞዴል ካርታዎችን ተግብር** : `gemini-3-flash` → `claude-sonnet-4.7` በግልፅ በተቆጣጣሪው ደረጃ።
 - **ሁሉንም የወኪል ትራፊክ ይከታተሉ** እያንዳንዱ የተጠለፈ ጥያቄ [ለትራፊክ ተቆጣጣሪው](./TRAFFIC_INSPECTOR.md) ታትሟል።
 - **OmniRoute የመቋቋም ችሎታን ይተግብሩ** ለ IDE ወኪል ትራፊክም የኮምቦ ማዘዋወር፣ ወረዳ መግቻ፣ ውድቀት እና የወጪ መከታተያ ስራ።

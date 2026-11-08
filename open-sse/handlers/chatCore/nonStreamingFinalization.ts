@@ -1,3 +1,4 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * Request-level finalization for non-streaming chat.
  * Success and failure each write usage/cost/quota/attempt/pending once.
@@ -93,6 +94,7 @@ export async function finalizeToolLoopError(input: {
     usage?: FailureUsageAggregate | null
   ) => void;
   persistAttemptLogs: (params: PersistAttemptLogsArgs) => void;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   trackPendingRequest: (
     model: string,
     provider: string,
@@ -117,6 +119,7 @@ export async function finalizeToolLoopError(input: {
     scheduleQuota: () => {},
     writeAttempt: () => {
       input.persistAttemptLogs({
+        upstreamHttpSelection: input.upstreamHttpSelection ?? null,
         status: err.status,
         error: err.error || "Provider request failed",
         providerRequest: input.providerRequest,
