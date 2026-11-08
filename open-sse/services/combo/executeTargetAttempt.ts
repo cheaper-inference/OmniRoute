@@ -1123,7 +1123,16 @@ export async function executeTargetAttempt(
     // upstream 400s on the same GitHub models, all day). isModelLocked()
     // is checked before dispatch (see the pre-check above this loop), so
     // this lockout is honored on the next request.
-    if (result.status === 400 && isModelScoped400(errorText) && provider && rawModel) {
+    // A combo with a single target has no sibling to fall back to, so the lock would
+    // only turn every later request into a local refusal for the whole hour, even after
+    // the upstream serves the model again. Lock only when another target can take over.
+    if (
+      result.status === 400 &&
+      isModelScoped400(errorText) &&
+      provider &&
+      rawModel &&
+      state.orderedTargets.length > 1
+    ) {
       lockModelIfPerModelQuota(
         provider,
         targetWithConnection.connectionId || "",

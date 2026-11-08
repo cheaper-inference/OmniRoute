@@ -1,0 +1,1 @@
+- **fix(combo):** A combo with one target no longer locks that model for an hour after a "model not supported" 400, so the next request reaches the upstream again once it serves the model
