@@ -71,6 +71,35 @@ function buildReasoningDelta(message: JsonRecord): JsonRecord | null {
   return Object.keys(delta).length > 0 ? delta : null;
 }
 
+function isToolCallIndex(value: unknown): value is number {
+  return Number.isInteger(value) && (value as number) >= 0;
+}
+
+/**
+ * Stream deltas need a distinct `index` per tool call: non-stream tool_calls have
+ * none, and readers default a missing one to 0, so calls sharing a slot merge or
+ * evict each other. Keep the first use of each valid index; every missing, invalid
+ * or repeated one takes the lowest free slot. Non-object entries pass through.
+ */
+function withToolCallIndexes(toolCalls: unknown[]): unknown[] {
+  const used = new Set<number>();
+  const kept = new Set<unknown>();
+  for (const tc of toolCalls) {
+    if (isRecord(tc) && isToolCallIndex(tc.index) && !used.has(tc.index)) {
+      used.add(tc.index);
+      kept.add(tc);
+    }
+  }
+
+  let nextFree = 0;
+  return toolCalls.map((tc) => {
+    if (!isRecord(tc) || kept.has(tc)) return tc;
+    while (used.has(nextFree)) nextFree += 1;
+    used.add(nextFree);
+    return { ...tc, index: nextFree };
+  });
+}
+
 function sseEvent(payload: JsonRecord): string {
   return `data: ${JSON.stringify(payload)}\n\n`;
 }
@@ -119,7 +148,7 @@ export function synthesizeOpenAiSseFromJson(jsonText: string): string {
       emitDelta({ content: message.content });
     }
     if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
-      emitDelta({ tool_calls: message.tool_calls });
+      emitDelta({ tool_calls: withToolCallIndexes(message.tool_calls) });
     }
 
     const finishReason = normalizeOpenAICompatibleFinishReasonString(choice.finish_reason);

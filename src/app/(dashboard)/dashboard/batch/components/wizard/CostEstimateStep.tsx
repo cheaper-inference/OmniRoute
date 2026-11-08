@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Button from "@/shared/components/Button";
 import { estimateBatchCost } from "@/lib/batches/costEstimator";
 import type { CostEstimate } from "@/lib/batches/types";
@@ -60,8 +61,8 @@ export default function CostEstimateStep({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 gap-3">
-        <Icon name="progress_activity" size={30} className="text-accent animate-spin" />
+      <div role="status" className="flex flex-col items-center justify-center py-12 gap-3">
+        <Spinner decorative size="lg" className="text-accent" />
         <span className="text-sm text-text-muted">{t("wizardCostEstimating")}</span>
       </div>
     );
@@ -151,7 +152,7 @@ export default function CostEstimateStep({
       <Button size="lg" fullWidth onClick={onCreate} disabled={creating} className="gap-2">
         {creating ? (
           <>
-            <Icon name="progress_activity" size={14} className="animate-spin" />
+            <Spinner decorative size="xs" />
             {t("wizardCreating")}
           </>
         ) : (

@@ -6,6 +6,7 @@ import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
 import { Card } from "@/shared/components";
 import type { SkillsProvider } from "@/lib/skills/providerSettings";
+import type { JSX } from "react";
 
 interface MarketplaceSkill {
   name: string;

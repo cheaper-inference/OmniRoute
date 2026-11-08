@@ -64,39 +64,39 @@ HAR idxalı JWT-nin bitmə vaxtını deşifrə edir və tokenin qalan etibarlıl
 > **Heç vaxt real HAR ixracını, giriş tokenini və ya yeniləmə tokenini repozitoriyaya əlavə etməyin.** Test və
 > sənədləşdirmə dəyərləri həmişə yer tutucular olmalıdır.
 
-## Tokenin etibarlılıq müddəti və yenilənməsi
+## Tokenin istifadə müddəti və yenilənməsi
 
-`access_token` qısamüddətlidir (adətən **~75 dəqiqə**). Etibarlılıq müddəti bitdikdən sonra provayder
-bağlantı xətası bildirir və giriş məlumatını yenidən əldə etməlisiniz.
+`access_token` qısa müddətlidir (adətən **~75 dəqiqə**). İstifadə edilə bilən yeniləmə
+tokeni olmadan, müddət bitdikdən sonra kredensialı yenidən əldə etməlisiniz.
 
-### `refreshToken` ilə avtomatik yenilənmə
+### `refreshToken` ilə avtomatik yeniləmə
 
-Əl ilə yenidən əldə etməyə ehtiyac qalmaması üçün Microsoft yeniləmə tokenini bağlantının
-**Advanced Settings → providerSpecificData** bölməsində saxlaya bilərsiniz:
+Microsoft 365 provayderinin **Add connection** və ya **Edit connection** dialoqunda
+**Advanced Settings → Refresh token (optional)** bölməsini açın. `substrate.office.com/sydney`
+scope-u üçün Microsoft OAuth yeniləmə tokenini yapışdırın və yadda saxlayın. Daxiletmə sahəsi
+maskalanır və saxlanılmış token heç vaxt əvvəlcədən doldurulmur. Redaktə edərkən mövcud tokeni
+saxlamaq üçün sahəni boş buraxın; onu əvəz etmək üçün yeni token yapışdırın.
 
-| Sahə           | Təsvir                                                                           |
-| -------------- | -------------------------------------------------------------------------------- |
-| `refreshToken` | `substrate.office.com/sydney` əhatə dairəsi üçün Microsoft OAuth yeniləmə tokeni |
-| `tier`         | `individual` (standart), `edu` və ya `enterprise`                                |
+Yeniləmə tokenini `substrate.office.com/sydney` scope-u ilə Microsoft device-code və ya
+authorization-code axınından əldə edin; idarə paneli bunu sizin üçün əldə etmir.
+Yeniləmə tokeni konfiqurasiya edildikdə, OmniRoute sorğulardan əvvəl `access_token`-i yoxlayır
+və yalnız yenilənməsi lazım olduqda onu yeniləyir. Uğurlu yeniləmə həmçinin dəyişdirilmiş
+yeniləmə tokenini saxlayır; beləliklə, yeniləmə tokeni etibarlı qaldığı müddətdə onu əl ilə
+yenidən əldə etməyə ehtiyac qalmır.
 
-Yeniləmə tokenini `substrate.office.com/sydney` əhatə dairəsinə malik Microsoft cihaz kodu və ya avtorizasiya kodu axını vasitəsilə
-əldə edin. `refreshToken` təyin edildikdə OmniRoute hər sorğudan əvvəl
-`access_token` dəyərini öncədən yeniləyir, buna görə də hər ~75 dəqiqəlik etibarlılıq müddəti bitdikdən sonra
-onu yenidən əldə etməyinizə ehtiyac qalmır.
-
-`refreshToken` təyin edilməyibsə, hər etibarlılıq müddəti bitdikdən sonra WebSocket giriş məlumatını əl ilə
+`refreshToken` təyin edilməyibsə, hər müddət bitməsindən sonra WebSocket kredensialını əl ilə
 yenidən əldə etməlisiniz.
 
-### Səviyyənin seçilməsi
+### Səviyyə seçimi
 
-| Səviyyə      | Alias        | Platforma                |
-| ------------ | ------------ | ------------------------ |
-| `individual` | _(standart)_ | İstehlakçı M365 Copilot  |
-| `edu`        | `included`   | Təhsil üçün M365 Copilot |
-| `enterprise` | `work`       | İş üçün M365 Copilot     |
+| Səviyyə      | Ləqəb       | Səth                    |
+| ------------ | ----------- | ----------------------- |
+| `individual` | _(default)_ | İstehlakçı M365 Copilot |
+| `edu`        | `included`  | Təhsil M365 Copilot     |
+| `enterprise` | `work`      | İş üçün M365 Copilot    |
 
-Səviyyəni **Advanced Settings → providerSpecificData → tier** bölməsində təyin edin. Səviyyə
-BizChat marşrutlaşdırmasına və modelə girişə təsir göstərir.
+Səviyyəni **Advanced Settings → Copilot tier** bölməsində təyin edin. Səviyyə
+BizChat marşrutlaşdırmasına və modelə girişə təsir edir.
 
 ## Təhlükəsizlik modeli
 
@@ -113,28 +113,23 @@ BizChat marşrutlaşdırmasına və modelə girişə təsir göstərir.
 
 ### Autentifikasiya dərhal uğursuz olur
 
-- Məlumatı XHR/Fetch sorğusundan deyil, **WebSocket URL-indən** köçürdüyünüzü yoxlayın. Giriş
-  məlumatı `Authorization: Bearer` başlığında deyil, Chathub WebSocket
-  bağlantısının `access_token` sorğu parametrindədir.
-- `chathubPath` dəyərinin URL
-  yolundakı tam `<oid>@<tenant>` seqmentini ehtiva etdiyinə əmin olun.
+- XHR/Fetch sorğusundan deyil, **WebSocket URL**-dən kopyaladığınızı yoxlayın. Kimlik məlumatı Chathub WebSocket bağlantısının `access_token` sorğu parametrində yerləşir — `Authorization: Bearer` başlığında deyil.
+- `chathubPath`-ə URL yolundakı tam `<oid>@<tenant>` seqmentinin daxil olduğundan əmin olun.
 
-### Tokenin müddəti təxminən 75 dəqiqədən sonra bitir
+### Token ~75 dəqiqədən sonra vaxtını başa vurur
 
-Bu, gözlənilən davranışdır. `refreshToken` olmadan giriş tokeni qısamüddətlidir. Aşağıdakılardan birini edin:
+Bu gözlənilən haldır. `refreshToken` olmadan giriş tokeninin istifadə müddəti qısadır. Aşağıdakılardan birini edin:
 
-- Giriş məlumatını DevTools-dan yenidən əldə edin və ya
-- Avtomatik yeniləmə üçün Qabaqcıl Parametrlərdə `refreshToken` konfiqurasiya edin.
+- Kimlik məlumatını DevTools-dan yenidən əldə edin, yaxud
+- Avtomatik yeniləmə üçün bağlantının əlavə edilməsi və ya redaktəsi dialoqunda **Qabaqcıl parametrlər → Yeniləmə tokeni (istəyə bağlı)** seçimini konfiqurasiya edin.
 
-### Bağlantı testi uğurlu olur, lakin söhbət 401 xətası qaytarır
+### Bağlantını sınaqdan keçirmə uğurludur, lakin söhbət 401 qaytarır
 
-Tokenin müddəti yoxlama ilə ilk sorğu arasında bitmiş ola bilər. Yeni
-giriş məlumatını yenidən əldə edin.
+Token doğrulama ilə ilk sorğu arasında vaxtını başa vurmuş ola bilər. Təzə kimlik məlumatını yenidən əldə edin.
 
-### Copilot provayder siyahısında görünmür
+### Copilot provayderlər siyahısında görünmür
 
-**Dashboard → Providers** bölməsində `copilot-m365-web` provayderinin aktiv olduğuna əmin olun. Bəzi
-səviyyələrdə provayder standart olaraq gizlədilə bilər.
+`copilot-m365-web`-in **İdarə paneli → Provayderlər** bölməsində aktiv olduğundan əmin olun. Bəzi tariflərdə provayder standart olaraq gizlədilə bilər.
 
 ## İstinadlar
 
