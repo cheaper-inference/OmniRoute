@@ -553,6 +553,52 @@ export function decryptQuiet(
   return result;
 }
 
+let keyStoreDecryptable: boolean | null = null;
+
+/** Result of the last probeStoredSecrets() run: null until it runs, or when it cannot tell. */
+export function getKeyStoreDecryptable(): boolean | null {
+  return keyStoreDecryptable;
+}
+
+const PROBE_SAMPLE_SQL = `SELECT v FROM (
+  SELECT api_key AS v FROM provider_connections WHERE api_key LIKE 'enc:v1:%'
+  UNION ALL SELECT access_token FROM provider_connections WHERE access_token LIKE 'enc:v1:%'
+  UNION ALL SELECT key FROM api_keys WHERE key LIKE 'enc:v1:%'
+) LIMIT 5`;
+
+/**
+ * Decrypt a few stored secrets once, at boot, to tell a wrong STORAGE_ENCRYPTION_KEY from a
+ * single bad row. Returns true when any sample decrypts, false when none do (logged once),
+ * null when encryption is off, no secret is stored, or the tables cannot be read.
+ * `db` is passed in because core.ts imports this module.
+ */
+export function probeStoredSecrets(db: {
+  prepare: (sql: string) => { all: () => unknown[] };
+}): boolean | null {
+  keyStoreDecryptable = null;
+  if (!isEncryptionEnabled()) return null;
+
+  let samples: Array<{ v?: unknown }>;
+  try {
+    samples = db.prepare(PROBE_SAMPLE_SQL).all() as Array<{ v?: unknown }>;
+  } catch {
+    return null;
+  }
+  if (samples.length === 0) return null;
+
+  keyStoreDecryptable = samples.some((row) => {
+    return typeof row.v === "string" && decrypt(row.v, { quiet: true }) !== null;
+  });
+  if (!keyStoreDecryptable) {
+    console.error(
+      "[Encryption] STORAGE_ENCRYPTION_KEY cannot decrypt the stored credentials. The database " +
+        "and the key are probably from different installs. Restore the original key, or " +
+        "re-enter the provider credentials."
+    );
+  }
+  return keyStoreDecryptable;
+}
+
 /**
  * Encrypt sensitive fields in a connection object (mutates in-place).
  * After decryption that required legacy key, re-encrypt with static key

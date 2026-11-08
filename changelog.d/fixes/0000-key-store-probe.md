@@ -1,0 +1,1 @@
+- **fix(encryption):** A new stored-secret probe decrypts a few stored credentials once and reports whether `STORAGE_ENCRYPTION_KEY` opens the database. A key and a database from different installs now give one clear error, not one failure per provider. The boot call and the health field are not wired yet.
