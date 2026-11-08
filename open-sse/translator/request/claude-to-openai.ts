@@ -45,6 +45,19 @@ function normalizeOpenAIReasoningEffort(effort: unknown): string | undefined {
   return normalized || undefined;
 }
 
+// The turn's effort is the last role=system directive that carries one (Claude Code
+// mid-conversation directive); the top-level output_config is only the cached default.
+function lastSystemDirectiveEffort(messages: unknown): string | undefined {
+  if (!Array.isArray(messages)) return undefined;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (message?.role !== "system") continue;
+    const effort = normalizeOpenAIReasoningEffort(message.output_config?.effort);
+    if (effort) return effort;
+  }
+  return undefined;
+}
+
 function toStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -345,7 +358,10 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
   // Reasoning effort: map Claude-side thinking controls to OpenAI reasoning_effort.
   // Priority: output_config.effort > enabled thinking budget > explicit opt-out fallback.
   // Budget buckets match the reverse mapping in thinkingBudget.ts::setCustomBudget.
-  const outputEffort = normalizeOpenAIReasoningEffort(body.output_config?.effort) || "";
+  const outputEffort =
+    lastSystemDirectiveEffort(body.messages) ||
+    normalizeOpenAIReasoningEffort(body.output_config?.effort) ||
+    "";
   if (outputEffort) {
     result.reasoning_effort = outputEffort;
   } else if (body.thinking?.type === "enabled" && typeof body.thinking.budget_tokens === "number") {
