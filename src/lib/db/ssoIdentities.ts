@@ -14,7 +14,7 @@
  */
 
 import { getDbInstance } from "./core";
-import { createApiKey, deleteApiKey } from "./apiKeys";
+import { clearApiKeyCaches, createApiKey, deleteApiKey } from "./apiKeys";
 import { addKeyToGroup, getKeyGroupsForApiKey, removeKeyFromGroup } from "./apiKeyGroups";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import * as log from "@/sse/utils/logger";
@@ -115,7 +115,10 @@ export function setSsoKeyActive(apiKeyId: string, active: boolean): boolean {
   const result = db
     .prepare("UPDATE api_keys SET is_active = ? WHERE id = ?")
     .run(active ? 1 : 0, apiKeyId);
-  return (result.changes ?? 0) > 0;
+  const changed = (result.changes ?? 0) > 0;
+  // A cached pass would keep a deactivated key authenticating until the cache TTL ends.
+  if (changed) clearApiKeyCaches();
+  return changed;
 }
 
 /** Skips all writes when the resolved set matches `previous`, the common case. */
