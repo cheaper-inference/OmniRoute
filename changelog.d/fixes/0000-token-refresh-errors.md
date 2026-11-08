@@ -1,0 +1,1 @@
+- **fix(oauth):** Classify expired and revoked refresh tokens as terminal without disabling accounts for client configuration errors.
