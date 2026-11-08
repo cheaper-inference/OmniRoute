@@ -1,4 +1,4 @@
-import { requireRosebudAccess } from "@/lib/rosebud/authorization";
+import { requireRosebudAccess, requireRosebudLocalPeer } from "@/lib/rosebud/authorization";
 import { discoverRosebud, projectRosebudCatalog } from "@/lib/rosebud/provider";
 import { NextResponse } from "next/server";
 import {
@@ -236,8 +236,8 @@ export async function GET(
     if (provider === "rosebud") {
       const denied = await requireRosebudAccess(request, id);
       if (denied) return denied;
-      if (!["loopback", "lan"].includes(request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) || ""))
-        return errorResponse(403, "Rosebud discovery requires local or LAN access");
+      const remote = requireRosebudLocalPeer(request);
+      if (remote) return remote;
       return NextResponse.json(
         projectRosebudCatalog(await discoverRosebud(id), { chatOnly, excludeHidden })
       );

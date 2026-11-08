@@ -1,6 +1,5 @@
-import { requireRosebudSyncAccess } from "@/lib/rosebud/authorization";
+import { requireRosebudLocalPeer, requireRosebudSyncAccess } from "@/lib/rosebud/authorization";
 import { discoverRosebud } from "@/lib/rosebud/provider";
-import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { NextResponse } from "next/server";
 import { defaultLogger as log } from "@omniroute/open-sse/utils/logger";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
@@ -450,8 +449,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (connection.provider === "rosebud") {
       const denied = await requireRosebudSyncAccess(request, id);
       if (denied) return denied;
-      if (getRequestPeerLocality(request) === "remote")
-        return NextResponse.json({ error: "Local Rosebud access required" }, { status: 403 });
+      const remote = requireRosebudLocalPeer(request);
+      if (remote) return remote;
       const catalog = await discoverRosebud(id);
       const images = catalog.models.filter((model) => model.type === "image");
       return NextResponse.json({

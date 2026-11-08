@@ -36,6 +36,17 @@ export async function requireRosebudAccess(request: Request, connectionId?: stri
   return null;
 }
 
+const ROSEBUD_LOCAL_PEERS = new Set(["loopback", "lan"]);
+
+/**
+ * Rosebud discovery and sync run the local CLI, so its HTTP routes admit only loopback or LAN
+ * peers. One helper keeps every route on the same peer verdict and the same allowed set.
+ */
+export function requireRosebudLocalPeer(request: Request): Response | null {
+  if (ROSEBUD_LOCAL_PEERS.has(getRequestPeerLocality(request))) return null;
+  return errorResponse(403, "Rosebud requires local or LAN access");
+}
+
 /** The scheduler's own loopback sync may refresh a catalog; everyone else needs normal access. */
 export async function requireRosebudSyncAccess(request: Request, connectionId: string) {
   if (
