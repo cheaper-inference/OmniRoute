@@ -17,7 +17,8 @@ import { buildOpenAiCompatibleRegistryEntry } from "../../shared.ts";
  * GET /models is key-scoped. A Standard key lists the catalog except
  * jzs-max-3.0; a Dedicated key lists only jzs-max-3.0. Nothing is seeded:
  * context, prices, and aliases stay on the live list for the key the operator
- * stored. No referral query params.
+ * stored. The connection-test selector uses only that key's synced cache; an
+ * empty cache with auto-fetch disabled stays empty. No referral query params.
  */
 export const jzstokenProvider: RegistryEntry = buildOpenAiCompatibleRegistryEntry({
   id: "jzstoken",

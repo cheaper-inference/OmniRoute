@@ -10,7 +10,7 @@ import Checkbox from "./Checkbox";
 import Input from "./Input";
 import { cn } from "@/shared/utils/cn";
 import {
-  buildPassthroughAliasModels,
+  buildPassthroughPickerModels,
   buildNodeAliasModels,
   shouldConfirmSelectAll,
   parseHiddenModelsByProvider,
@@ -46,7 +46,11 @@ import {
 import { hasEligibleConnectionForModel } from "@/domain/connectionModelRules";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
-import { fetchProviderModels, type ProviderDegradation } from "./modelSelectDiscovery";
+import {
+  fetchPassthroughSyncedModels,
+  fetchProviderModels,
+  type ProviderDegradation,
+} from "./modelSelectDiscovery";
 import { DiscoveryDegradedNotice } from "./DiscoveryDegradedNotice";
 
 // Model/combo chips: compact pill on the kit outline Button (toggle via aria-pressed).
@@ -160,6 +164,9 @@ export default function ModelSelectModal({
     localStorage.setItem("modelSelectShowConfiguredOnly", String(showConfiguredOnly));
   }, [showConfiguredOnly]);
   const [fetchedModels, setFetchedModels] = useState<Record<string, any[]>>({});
+  const [syncedPassthroughModels, setSyncedPassthroughModels] = useState<Record<string, unknown[]>>(
+    {}
+  );
   // Providers whose list comes from the built-in catalog, with the reason.
   const [degradedProviders, setDegradedProviders] = useState<Record<string, ProviderDegradation>>(
     {}
@@ -243,6 +250,11 @@ export default function ModelSelectModal({
     let cancelled = false;
 
     const loadCustomProviderModels = async () => {
+      const synced = await fetchPassthroughSyncedModels(
+        activeProviders.map((provider) => provider.provider)
+      );
+      if (!cancelled) setSyncedPassthroughModels(synced);
+
       const customProviderIds = activeProviders
         .filter((p) => shouldFetchLiveModels(p.provider))
         .map((p) => p.provider);
@@ -334,36 +346,20 @@ export default function ModelSelectModal({
         isProviderModelHidden(hiddenModelsByProvider, providerId, modelId);
 
       if (providerInfo.passthroughModels) {
-        // Passthrough aliases are stored prefixed by the canonical providerId
-        // (e.g. "github/gpt-4"), not the public alias (e.g. "gh/"), so we must
-        // filter/strip by providerId — matching the sibling custom-provider
-        // branch below. (port: decolua/9router#485)
-        const aliasModels = buildPassthroughAliasModels(
-          modelAliases as Record<string, string>,
-          providerId
-        ).filter((am) => !isHiddenForProvider(am.id));
-
-        // Merge custom models for passthrough providers
-        const customEntries = providerCustomModels
-          .filter((cm) => !aliasModels.some((am) => am.id === cm.id))
-          .filter((cm) => !isHiddenForProvider(cm.id))
-          .map((cm) => ({
-            id: cm.id,
-            name: cm.name || cm.id,
-            value: `${alias}/${cm.id}`,
-            isCustom: true,
-            source: normalizeModelCatalogSource(cm.source) === "imported" ? "imported" : "custom",
-          }));
-
-        const allModels = [...aliasModels, ...customEntries];
+        const allModels = buildPassthroughPickerModels({
+          providerId,
+          alias,
+          modelAliases: modelAliases as Record<string, string>,
+          customModels: providerCustomModels,
+          syncedModels: syncedPassthroughModels[providerId] || [],
+          isHidden: isHiddenForProvider,
+        });
 
         if (allModels.length > 0) {
           const matchedNode = providerNodes.find((node) => node.id === providerId);
-          const displayName = matchedNode?.name || providerInfo.name;
-
           groups[providerId] = {
-            name: displayName,
-            alias: alias,
+            name: matchedNode?.name || providerInfo.name,
+            alias,
             color: providerInfo.color,
             models: allModels,
           };
@@ -489,6 +485,7 @@ export default function ModelSelectModal({
     customModels,
     fetchedModels,
     hiddenModelsByProvider,
+    syncedPassthroughModels,
   ]);
 
   // Filter combos by search query

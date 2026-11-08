@@ -2,12 +2,113 @@
 // unit-testable (the component itself lives inside a useMemo and is not
 // directly exercisable by node:test). Keep these free of React imports.
 
+import { filterChatSelectableModels } from "@omniroute/open-sse/services/modelEndpointPolicy.ts";
+import { APIKEY_PROVIDERS } from "@/shared/constants/providers";
+import { normalizeModelCatalogSource } from "@/shared/utils/modelCatalogSearch";
+
 export type PassthroughAliasModel = {
   id: string;
   name: string;
   value: string;
   source: "alias";
 };
+
+/**
+ * Passthrough providers that should list already-synced models in the legacy
+ * combo picker. Routing stays passthrough: the flag does not seed a catalog
+ * or turn discovery on.
+ */
+export function providerShowsSyncedInPassthroughPicker(providerId: string): boolean {
+  const entry = (APIKEY_PROVIDERS as Record<string, { showSyncedInPassthroughPicker?: boolean }>)[
+    providerId
+  ];
+  return entry?.showSyncedInPassthroughPicker === true;
+}
+
+type PickerCustomModel = {
+  id?: string;
+  name?: string;
+  source?: string;
+};
+
+export type PassthroughPickerModel = {
+  id: string;
+  name: string;
+  value: string;
+  source: "alias" | "imported" | "custom";
+  isCustom?: boolean;
+};
+
+function readSyncedPickerRows(
+  models: unknown[]
+): Array<{ id: string; name: string; supportedEndpoints?: string[] }> {
+  const rows: Array<{ id: string; name: string; supportedEndpoints?: string[] }> = [];
+  for (const raw of models) {
+    if (!raw || typeof raw !== "object") continue;
+    const record = raw as Record<string, unknown>;
+    if (typeof record.id !== "string" || record.id.length === 0) continue;
+    const name =
+      typeof record.name === "string" && record.name.length > 0 ? record.name : record.id;
+    const supportedEndpoints = Array.isArray(record.supportedEndpoints)
+      ? record.supportedEndpoints.filter(
+          (endpoint): endpoint is string => typeof endpoint === "string"
+        )
+      : undefined;
+    rows.push({
+      id: record.id,
+      name,
+      ...(supportedEndpoints && supportedEndpoints.length > 0 ? { supportedEndpoints } : {}),
+    });
+  }
+  return rows;
+}
+
+/**
+ * Alias and custom rows for a passthrough provider, plus synced rows when the
+ * provider opts in. Synced ids that already have an alias or custom row are
+ * left to that row. Hidden and non-chat ids are dropped.
+ */
+export function buildPassthroughPickerModels(opts: {
+  providerId: string;
+  alias: string;
+  modelAliases: Record<string, string>;
+  customModels: PickerCustomModel[];
+  syncedModels: unknown[];
+  isHidden: (modelId: string) => boolean;
+}): PassthroughPickerModel[] {
+  const aliasModels = buildPassthroughAliasModels(opts.modelAliases, opts.providerId).filter(
+    (model) => !opts.isHidden(model.id)
+  );
+  const customEntries = opts.customModels.flatMap((model) => {
+    if (typeof model.id !== "string" || model.id.length === 0) return [];
+    if (aliasModels.some((aliasModel) => aliasModel.id === model.id)) return [];
+    if (opts.isHidden(model.id)) return [];
+    return [
+      {
+        id: model.id,
+        name: model.name || model.id,
+        value: `${opts.alias}/${model.id}`,
+        isCustom: true as const,
+        source:
+          normalizeModelCatalogSource(model.source) === "imported"
+            ? ("imported" as const)
+            : ("custom" as const),
+      },
+    ];
+  });
+  const taken = new Set([...aliasModels, ...customEntries].map((model) => model.id));
+  const syncedEntries = providerShowsSyncedInPassthroughPicker(opts.providerId)
+    ? filterChatSelectableModels(opts.providerId, readSyncedPickerRows(opts.syncedModels))
+        .filter((model) => !taken.has(model.id) && !opts.isHidden(model.id))
+        .map((model) => ({
+          id: model.id,
+          name: model.name || model.id,
+          value: `${opts.alias}/${model.id}`,
+          source: "imported" as const,
+        }))
+    : [];
+  return [...aliasModels, ...customEntries, ...syncedEntries];
+}
 
 /**
  * Build the alias-derived model rows for a passthrough provider.

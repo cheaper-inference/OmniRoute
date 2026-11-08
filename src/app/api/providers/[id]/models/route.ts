@@ -141,6 +141,7 @@ import {
   normalizeSapModelsResponse,
   normalizeAzureModelsResponse,
 } from "./discovery/normalizers";
+import { usesConnectionScopedSyncedCatalog } from "./connectionScopedCatalog";
 import { isNamedOpenAIStyleProvider } from "./discovery/providerSets";
 import { buildStaleEncryptionKeyResponse } from "./staleEncryptionGuard";
 import {
@@ -350,12 +351,16 @@ export async function GET(
           chatOnly
         );
 
-    // Check for synced models from ANY connection of this provider.
-    // When sync has been performed (even on a different connection),
-    // use the synced list as the authoritative source instead of static models.
+    // Synced rows from any connection of this provider replace the static
+    // catalog. Key-scoped gateways stay on this connection's own cache:
+    // `cachedDiscoveryModels` above is already connection-scoped, and borrowing
+    // a sibling key would show models this key cannot call.
     let providerSyncedModels: ReturnType<typeof toDiscoveryCatalogModel>[] | null = null;
     try {
-      const allSynced = usesCuratedModelsOnly ? [] : await getSyncedAvailableModels(provider);
+      const allSynced =
+        usesCuratedModelsOnly || usesConnectionScopedSyncedCatalog(provider)
+          ? []
+          : await getSyncedAvailableModels(provider);
       const selectableSynced = filterModelsForRoute(provider, allSynced, chatOnly);
       if (selectableSynced.length > 0) {
         providerSyncedModels = selectableSynced.map((model) => toDiscoveryCatalogModel(model));

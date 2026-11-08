@@ -17,7 +17,10 @@ export const jzstokenGateway = {
     icon: "hub",
     color: "#14532D",
     textIcon: "JZS",
+    // Any id stays routable. Synced rows still fill the legacy combo picker
+    // when this connection has no aliases or custom models.
     passthroughModels: true,
+    showSyncedInPassthroughPicker: true,
     website: "https://jzstoken.com",
     hasFree: false,
     authHint:
