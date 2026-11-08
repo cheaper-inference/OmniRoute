@@ -48,18 +48,29 @@ function policyWithQuickPermissions(draft: CreateDraft): KeyTemplatePolicy {
 }
 
 function sanitizeKeyName(name: string) {
-  return name.replace(/[<>"']/g, "").trim().slice(0, 200);
+  return name
+    .replace(/[<>"']/g, "")
+    .trim()
+    .slice(0, 200);
 }
 
-export function useCreateKeySubmission(draft: CreateDraft, options: {
-  isSubmitting: boolean;
-  setIsSubmitting: (submitting: boolean) => void;
-  focusName: () => void;
-  onCreated: (key: string) => Promise<void>;
-}) {
+export function useCreateKeySubmission(
+  draft: CreateDraft,
+  options: {
+    isSubmitting: boolean;
+    setIsSubmitting: (submitting: boolean) => void;
+    focusName: () => void;
+    onCreated: (key: string) => Promise<void>;
+  }
+) {
   const t = useTranslations("apiManager");
   return async () => {
-    if (options.isSubmitting || draft.loadingTemplatePolicy || !canSubmitDraft(draft, options.focusName, t)) return;
+    if (
+      options.isSubmitting ||
+      draft.loadingTemplatePolicy ||
+      !canSubmitDraft(draft, options.focusName, t)
+    )
+      return;
     options.setIsSubmitting(true);
     draft.setNameError(null);
     draft.setCreateError(null);
@@ -69,7 +80,8 @@ export function useCreateKeySubmission(draft: CreateDraft, options: {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: sanitizeKeyName(draft.newKeyName), policy,
+          name: sanitizeKeyName(draft.newKeyName),
+          policy,
           ...(draft.selectedTemplateRef ? { templateRef: draft.selectedTemplateRef } : {}),
         }),
       });
@@ -78,7 +90,7 @@ export function useCreateKeySubmission(draft: CreateDraft, options: {
         await options.onCreated(data.key);
       } else {
         if (res.status === 422 && Array.isArray(data?.issues)) {
-          draft.setCreateKeyRefIssues(anchorReferenceIssues(data.issues, policy));
+          draft.setCreateKeyRefIssues(anchorReferenceIssues(data.issues, policy, draft.createKeyFormState));
           draft.setShowFullPolicyEditor(true);
         }
         draft.setCreateError(extractApiErrorMessage(data, t("failedCreateKey")));

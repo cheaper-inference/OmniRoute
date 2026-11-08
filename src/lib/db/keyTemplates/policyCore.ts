@@ -21,10 +21,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import {
-  KEY_TEMPLATE_ALL_COMBOS_RULE,
-  KEY_TEMPLATE_SCHEMA_VERSION,
-} from "../../../shared/types/keyTemplates.ts";
+import { KEY_TEMPLATE_SCHEMA_VERSION } from "../../../shared/types/keyTemplates.ts";
 import type {
   KeyTemplateKeyPolicy,
   KeyTemplatePolicy,
@@ -32,6 +29,7 @@ import type {
   TemplateReferenceIssue,
   TemplateWarning,
 } from "../../../shared/types/keyTemplates.ts";
+import { API_KEY_POLICY_FIELDS, parseField, strictList, truthy, falsy, toFiniteNumber } from "./fieldParsing.ts";
 import { isLiteralKeyTemplateComboReference } from "../../../shared/utils/keyTemplateReferences.ts";
 
 export interface PolicyStatement {
@@ -62,90 +60,7 @@ export const API_KEY_IDENTITY_COLUMNS = [
 export const API_KEY_HISTORY_COLUMNS = ["last_used_at"] as const;
 export const API_KEY_LIFECYCLE_COLUMNS = ["revoked_at", "expires_at"] as const;
 
-type FieldKind =
-  | "modelAccessMode"
-  | "list"
-  | "combos"
-  | "boolFalse"
-  | "boolTrue"
-  | "schedule"
-  | "rateLimits"
-  | "nullableInt"
-  | "int0"
-  | "nullablePositive"
-  | "nullableString"
-  | "enum";
-
-interface FieldSpec {
-  column: string;
-  field: keyof KeyTemplateKeyPolicy;
-  kind: FieldKind;
-  values?: readonly string[];
-  fallback?: string;
-}
-
-/** Every persisted policy column of api_keys, in a stable order. */
-export const API_KEY_POLICY_FIELDS: readonly FieldSpec[] = [
-  { column: "model_access_mode", field: "modelAccessMode", kind: "modelAccessMode" },
-  { column: "allowed_models", field: "allowedModels", kind: "list" },
-  { column: "blocked_models", field: "blockedModels", kind: "list" },
-  { column: "allowed_combos", field: "allowedCombos", kind: "combos" },
-  { column: "allowed_connections", field: "allowedConnections", kind: "list" },
-  { column: "preferred_connections", field: "preferredConnections", kind: "list" },
-  { column: "allowed_quotas", field: "allowedQuotas", kind: "list" },
-  { column: "no_log", field: "noLog", kind: "boolFalse" },
-  { column: "auto_resolve", field: "autoResolve", kind: "boolFalse" },
-  { column: "is_active", field: "isActive", kind: "boolTrue" },
-  { column: "is_banned", field: "isBanned", kind: "boolFalse" },
-  { column: "access_schedule", field: "accessSchedule", kind: "schedule" },
-  { column: "max_requests_per_day", field: "maxRequestsPerDay", kind: "nullableInt" },
-  { column: "max_requests_per_minute", field: "maxRequestsPerMinute", kind: "nullableInt" },
-  { column: "throttle_delay_ms", field: "throttleDelayMs", kind: "nullableInt" },
-  { column: "rate_limits", field: "rateLimits", kind: "rateLimits" },
-  { column: "max_sessions", field: "maxSessions", kind: "int0" },
-  { column: "ip_allowlist", field: "ipAllowlist", kind: "list" },
-  { column: "scopes", field: "scopes", kind: "list" },
-  { column: "proxy_id", field: "proxyId", kind: "nullableString" },
-  { column: "allowed_endpoints", field: "allowedEndpoints", kind: "list" },
-  {
-    column: "stream_default_mode",
-    field: "streamDefaultMode",
-    kind: "enum",
-    values: ["legacy", "json"],
-    fallback: "legacy",
-  },
-  {
-    column: "codex_service_mode",
-    field: "codexServiceMode",
-    kind: "enum",
-    values: ["inherit", "default", "priority", "flex"],
-    fallback: "inherit",
-  },
-  {
-    column: "cache_default_mode",
-    field: "cacheDefaultMode",
-    kind: "enum",
-    values: ["legacy", "bypass"],
-    fallback: "legacy",
-  },
-  { column: "disable_non_public_models", field: "disableNonPublicModels", kind: "boolFalse" },
-  { column: "allow_usage_command", field: "allowUsageCommand", kind: "boolFalse" },
-  { column: "usage_limit_enabled", field: "usageLimitEnabled", kind: "boolFalse" },
-  { column: "daily_usage_limit_usd", field: "dailyUsageLimitUsd", kind: "nullablePositive" },
-  { column: "weekly_usage_limit_usd", field: "weeklyUsageLimitUsd", kind: "nullablePositive" },
-  { column: "chaos_mode_enabled", field: "chaosModeEnabled", kind: "boolFalse" },
-  { column: "compression_enabled", field: "compressionEnabled", kind: "boolTrue" },
-  { column: "allow_auto_combos", field: "allowAutoCombos", kind: "boolTrue" },
-  { column: "allow_cc_discovery_aliases", field: "allowCcDiscoveryAliases", kind: "boolTrue" },
-  {
-    column: "catalog_scope",
-    field: "catalogScope",
-    kind: "enum",
-    values: ["all", "combos", "models"],
-    fallback: "all",
-  },
-  { column: "forced_model", field: "forcedModel", kind: "nullableString" },
-];
+export { API_KEY_POLICY_FIELDS } from "./fieldParsing.ts";
 
 export const API_KEY_POLICY_COLUMNS = API_KEY_POLICY_FIELDS.map((spec) => spec.column);
 
@@ -546,146 +461,6 @@ export function insertKeyPolicyRows(
 
 // ──────────────── Raw rows → typed template policy ────────────────
 
-type Parsed<T> = { ok: true; value: T } | { ok: false };
-
-function parseJson(value: unknown): Parsed<unknown> {
-  if (typeof value !== "string") return { ok: true, value };
-  try {
-    return { ok: true, value: JSON.parse(value) };
-  } catch {
-    return { ok: false };
-  }
-}
-
-function strictList(value: unknown, emptyValue: string[]): Parsed<string[]> {
-  if (value === null || value === undefined) return { ok: true, value: emptyValue };
-  if (typeof value === "string" && value.trim() === "") return { ok: true, value: emptyValue };
-  const parsed = parseJson(typeof value === "string" ? value.trim() : value);
-  if (!parsed.ok) return { ok: false };
-  if (parsed.value === null) return { ok: true, value: emptyValue };
-  if (!Array.isArray(parsed.value)) return { ok: false };
-  if (!parsed.value.every((entry) => typeof entry === "string")) return { ok: false };
-  return { ok: true, value: [...(parsed.value as string[])] };
-}
-
-function truthy(value: unknown): boolean {
-  return value === true || value === 1 || value === "1" || value === 1n;
-}
-
-function falsy(value: unknown): boolean {
-  return value === false || value === 0 || value === "0" || value === 0n;
-}
-
-function toFiniteNumber(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "bigint") return Number(value);
-  if (typeof value === "string" && value.trim() !== "") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-  return null;
-}
-
-function parseField(spec: FieldSpec, raw: unknown, row: Row): Parsed<unknown> {
-  switch (spec.kind) {
-    case "modelAccessMode": {
-      // Same rule as the runtime: a non-empty legacy allow-list always stays restrictive.
-      const models = strictList(row.allowed_models, []);
-      if (models.ok && models.value.length > 0) return { ok: true, value: "restricted" };
-      return { ok: true, value: raw === "restricted" ? "restricted" : "all" };
-    }
-    case "list":
-      return strictList(raw, []);
-    case "combos":
-      // Legacy NULL rows are allow-all; an explicit [] is deny-all.
-      return strictList(raw, [KEY_TEMPLATE_ALL_COMBOS_RULE]);
-    case "boolFalse":
-      return { ok: true, value: truthy(raw) };
-    case "boolTrue":
-      return { ok: true, value: !falsy(raw) };
-    case "schedule": {
-      if (raw === null || raw === undefined || (typeof raw === "string" && raw.trim() === "")) {
-        return { ok: true, value: null };
-      }
-      const parsed = parseJson(raw);
-      if (!parsed.ok || !parsed.value || typeof parsed.value !== "object") return { ok: false };
-      const obj = parsed.value as Row;
-      if (
-        typeof obj.enabled !== "boolean" ||
-        typeof obj.from !== "string" ||
-        typeof obj.until !== "string" ||
-        typeof obj.tz !== "string" ||
-        !Array.isArray(obj.days) ||
-        !obj.days.every((d) => typeof d === "number" && Number.isInteger(d) && d >= 0 && d <= 6)
-      ) {
-        return { ok: false };
-      }
-      return {
-        ok: true,
-        value: {
-          enabled: obj.enabled,
-          from: obj.from,
-          until: obj.until,
-          days: [...(obj.days as number[])],
-          tz: obj.tz,
-        },
-      };
-    }
-    case "rateLimits": {
-      if (raw === null || raw === undefined || (typeof raw === "string" && raw.trim() === "")) {
-        return { ok: true, value: null };
-      }
-      const parsed = parseJson(raw);
-      if (!parsed.ok) return { ok: false };
-      if (parsed.value === null) return { ok: true, value: null };
-      if (!Array.isArray(parsed.value)) return { ok: false };
-      const rules = parsed.value as unknown[];
-      if (
-        !rules.every(
-          (rule) =>
-            rule !== null &&
-            typeof rule === "object" &&
-            typeof (rule as Row).limit === "number" &&
-            typeof (rule as Row).window === "number"
-        )
-      ) {
-        return { ok: false };
-      }
-      return {
-        ok: true,
-        value: rules.map((rule) => ({ limit: (rule as Row).limit, window: (rule as Row).window })),
-      };
-    }
-    case "nullableInt": {
-      if (raw === null || raw === undefined || raw === "") return { ok: true, value: null };
-      const n = toFiniteNumber(raw);
-      return n === null ? { ok: false } : { ok: true, value: n };
-    }
-    case "int0": {
-      if (raw === null || raw === undefined || raw === "") return { ok: true, value: 0 };
-      const n = toFiniteNumber(raw);
-      return n === null ? { ok: false } : { ok: true, value: Math.max(0, n) };
-    }
-    case "nullablePositive": {
-      // Runtime semantics: only a positive amount is a limit.
-      const n = toFiniteNumber(raw);
-      return { ok: true, value: n !== null && n > 0 ? n : null };
-    }
-    case "nullableString": {
-      if (typeof raw !== "string") return { ok: true, value: null };
-      const trimmed = raw.trim();
-      return { ok: true, value: trimmed === "" ? null : trimmed };
-    }
-    case "enum": {
-      const values = spec.values ?? [];
-      return {
-        ok: true,
-        value: typeof raw === "string" && values.includes(raw) ? raw : spec.fallback,
-      };
-    }
-  }
-}
-
 function warn(
   code: TemplateWarning["code"],
   message: string,
@@ -771,6 +546,106 @@ function captureExcludedWarnings(rows: KeyPolicyRows, warnings: TemplateWarning[
   }
 }
 
+function captureKeyFields(rows: KeyPolicyRows, problems: TemplateReferenceIssue[]): Row {
+  const key: Row = {};
+  for (const spec of API_KEY_POLICY_FIELDS) {
+    const parsed = parseField(spec, rows.keyColumns[spec.column], rows.keyColumns);
+    if (!parsed.ok) {
+      problems.push(issue(`key.${spec.field}`, "UNREADABLE_SOURCE_FIELD",
+        `The stored value of ${spec.field} cannot be read; fix it on the key before saving a template.`, true));
+      continue;
+    }
+    key[spec.field] = parsed.value;
+  }
+  for (const field of rows.unclassified) {
+    problems.push(issue(`${field.table}.${field.column}`, "UNCLASSIFIED_SOURCE_FIELD",
+      `${field.table}.${field.column} holds a value this version cannot capture; refusing to drop it silently.`, true));
+  }
+  return key;
+}
+
+function normalizeCapturedLifecycle(rows: KeyPolicyRows, key: Row, warnings: TemplateWarning[]): void {
+  const revokedAt = rows.keyColumns.revoked_at;
+  if (typeof revokedAt === "string" && revokedAt.trim() !== "") {
+    warnings.push(warn("KEY_REVOKED",
+      "The source key is revoked. The template will not carry the revocation; keys created from it start usable.", true));
+  }
+  if (key.isActive === false) {
+    warnings.push(warn("KEY_DISABLED",
+      "The source key is disabled. The template is normalized to active; switch it off in the editor to keep new keys disabled.", true));
+    key.isActive = true;
+  }
+  if (key.isBanned === true) {
+    warnings.push(warn("KEY_BANNED", "The source key is banned. The template is normalized to not banned.", true));
+    key.isBanned = false;
+  }
+}
+
+function captureReasoningRules(rows: KeyPolicyRows, problems: TemplateReferenceIssue[]): KeyTemplateReasoningRule[] {
+  return rows.reasoningRules.map((rule, index) => {
+    const tags = strictList(rule.request_tags, []);
+    if (!tags.ok) {
+      problems.push(issue(`related.reasoningRules.${index}.requestTags`, "UNREADABLE_SOURCE_FIELD",
+        "The stored request tags of this reasoning rule cannot be read.", true));
+    }
+    return {
+      name: String(rule.name ?? ""),
+      description: typeof rule.description === "string" ? rule.description : "",
+      scope: String(rule.scope) as KeyTemplateReasoningRule["scope"],
+      comboId: nullableText(rule.combo_id),
+      connectionId: nullableText(rule.connection_id),
+      modelPattern: nullableText(rule.model_pattern),
+      sourceEffort: String(rule.source_effort ?? "any") as "any",
+      requestTags: tags.ok ? tags.value : [],
+      tagMatchMode: rule.tag_match_mode === "all" ? "all" : "any",
+      effortMode: String(rule.effort_mode ?? "inherit") as "inherit",
+      targetEffort: nullableText(rule.target_effort) as KeyTemplateReasoningRule["targetEffort"],
+      targetKind: String(rule.target_kind ?? "keep") as "keep",
+      targetModel: nullableText(rule.target_model),
+      targetComboId: nullableText(rule.target_combo_id),
+      budgetAction: String(rule.budget_action ?? "preserve") as "preserve",
+      budgetTokens: relatedNullableNumber(rule.budget_tokens),
+      priority: relatedNumber(rule.priority, 0),
+      enabled: rule.enabled === undefined ? true : !falsy(rule.enabled),
+    };
+  });
+}
+
+function captureRelated(rows: KeyPolicyRows, problems: TemplateReferenceIssue[]): KeyTemplatePolicy["related"] {
+  const budget = rows.domainBudget;
+  const quota = rows.quotaLimits;
+  return {
+    groupIds: [...rows.groupIds],
+    domainBudget: budget ? {
+      dailyLimitUsd: relatedNumber(budget.daily_limit_usd, 0),
+      weeklyLimitUsd: relatedNumber(budget.weekly_limit_usd, 0),
+      monthlyLimitUsd: relatedNumber(budget.monthly_limit_usd, 0),
+      warningThreshold: relatedNumber(budget.warning_threshold, 0.8),
+      resetInterval: (typeof budget.reset_interval === "string" ? budget.reset_interval : "daily") as "daily",
+      resetTime: typeof budget.reset_time === "string" ? budget.reset_time : "00:00",
+    } : null,
+    quotaLimits: quota ? {
+      tpmLimit: relatedNullableNumber(quota.tpm_limit),
+      rpmLimit: relatedNullableNumber(quota.rpm_limit),
+      monthlyAmountUsd: relatedNullableNumber(quota.monthly_amount_usd),
+    } : null,
+    tokenLimits: rows.tokenLimits.map((limit) => ({
+      scopeType: String(limit.scope_type) as "global",
+      scopeValue: typeof limit.scope_value === "string" ? limit.scope_value : "",
+      tokenLimit: relatedNumber(limit.token_limit, 0),
+      resetInterval: (typeof limit.reset_interval === "string" ? limit.reset_interval : "monthly") as "monthly",
+      resetTime: nullableText(limit.reset_time),
+      enabled: limit.enabled === undefined ? true : !falsy(limit.enabled),
+    })),
+    autoCandidateOverrides: rows.autoCandidateOverrides.map((override) => ({
+      autoChannel: String(override.auto_channel),
+      connectionId: String(override.connection_id),
+      excluded: override.excluded === undefined ? true : truthy(override.excluded),
+    })),
+    reasoningRules: captureReasoningRules(rows, problems),
+  };
+}
+
 /**
  * Converts a snapshot into a typed, lifecycle-normalized template policy. Nothing is
  * dropped silently: unreadable or unclassified values are blocking problems, excluded
@@ -779,144 +654,14 @@ function captureExcludedWarnings(rows: KeyPolicyRows, warnings: TemplateWarning[
 export function snapshotToTemplatePolicy(rows: KeyPolicyRows, nowMs: number): SnapshotResult {
   const warnings: TemplateWarning[] = [];
   const problems: TemplateReferenceIssue[] = [];
-  const key: Row = {};
-  for (const spec of API_KEY_POLICY_FIELDS) {
-    const raw = rows.keyColumns[spec.column];
-    const parsed = parseField(spec, raw, rows.keyColumns);
-    if (!parsed.ok) {
-      problems.push(
-        issue(
-          `key.${spec.field}`,
-          "UNREADABLE_SOURCE_FIELD",
-          `The stored value of ${spec.field} cannot be read; fix it on the key before saving a template.`,
-          true
-        )
-      );
-      continue;
-    }
-    key[spec.field] = parsed.value;
-  }
-  for (const field of rows.unclassified) {
-    problems.push(
-      issue(
-        `${field.table}.${field.column}`,
-        "UNCLASSIFIED_SOURCE_FIELD",
-        `${field.table}.${field.column} holds a value this version cannot capture; refusing to drop it silently.`,
-        true
-      )
-    );
-  }
-
-  // Lifecycle normalization (explicit, acknowledged).
-  const revokedAt = rows.keyColumns.revoked_at;
-  if (typeof revokedAt === "string" && revokedAt.trim() !== "") {
-    warnings.push(
-      warn(
-        "KEY_REVOKED",
-        "The source key is revoked. The template will not carry the revocation; keys created from it start usable.",
-        true
-      )
-    );
-  }
-  if (key.isActive === false) {
-    warnings.push(
-      warn(
-        "KEY_DISABLED",
-        "The source key is disabled. The template is normalized to active; switch it off in the editor to keep new keys disabled.",
-        true
-      )
-    );
-    key.isActive = true;
-  }
-  if (key.isBanned === true) {
-    warnings.push(
-      warn(
-        "KEY_BANNED",
-        "The source key is banned. The template is normalized to not banned.",
-        true
-      )
-    );
-    key.isBanned = false;
-  }
-
+  const key = captureKeyFields(rows, problems);
+  normalizeCapturedLifecycle(rows, key, warnings);
   const expiry = captureExpiry(rows, nowMs, warnings);
   captureExcludedWarnings(rows, warnings);
-
-  const budget = rows.domainBudget;
-  const quota = rows.quotaLimits;
   const policy: KeyTemplatePolicy = {
     schemaVersion: KEY_TEMPLATE_SCHEMA_VERSION,
     key: key as unknown as KeyTemplateKeyPolicy,
-    related: {
-      groupIds: [...rows.groupIds],
-      domainBudget: budget
-        ? {
-            dailyLimitUsd: relatedNumber(budget.daily_limit_usd, 0),
-            weeklyLimitUsd: relatedNumber(budget.weekly_limit_usd, 0),
-            monthlyLimitUsd: relatedNumber(budget.monthly_limit_usd, 0),
-            warningThreshold: relatedNumber(budget.warning_threshold, 0.8),
-            resetInterval: (typeof budget.reset_interval === "string"
-              ? budget.reset_interval
-              : "daily") as "daily",
-            resetTime: typeof budget.reset_time === "string" ? budget.reset_time : "00:00",
-          }
-        : null,
-      quotaLimits: quota
-        ? {
-            tpmLimit: relatedNullableNumber(quota.tpm_limit),
-            rpmLimit: relatedNullableNumber(quota.rpm_limit),
-            monthlyAmountUsd: relatedNullableNumber(quota.monthly_amount_usd),
-          }
-        : null,
-      tokenLimits: rows.tokenLimits.map((limit) => ({
-        scopeType: String(limit.scope_type) as "global",
-        scopeValue: typeof limit.scope_value === "string" ? limit.scope_value : "",
-        tokenLimit: relatedNumber(limit.token_limit, 0),
-        resetInterval: (typeof limit.reset_interval === "string"
-          ? limit.reset_interval
-          : "monthly") as "monthly",
-        resetTime: nullableText(limit.reset_time),
-        enabled: limit.enabled === undefined ? true : !falsy(limit.enabled),
-      })),
-      autoCandidateOverrides: rows.autoCandidateOverrides.map((override) => ({
-        autoChannel: String(override.auto_channel),
-        connectionId: String(override.connection_id),
-        excluded: override.excluded === undefined ? true : truthy(override.excluded),
-      })),
-      reasoningRules: rows.reasoningRules.map((rule, index) => {
-        const tags = strictList(rule.request_tags, []);
-        if (!tags.ok) {
-          problems.push(
-            issue(
-              `related.reasoningRules.${index}.requestTags`,
-              "UNREADABLE_SOURCE_FIELD",
-              "The stored request tags of this reasoning rule cannot be read.",
-              true
-            )
-          );
-        }
-        return {
-          name: String(rule.name ?? ""),
-          description: typeof rule.description === "string" ? rule.description : "",
-          scope: String(rule.scope) as KeyTemplateReasoningRule["scope"],
-          comboId: nullableText(rule.combo_id),
-          connectionId: nullableText(rule.connection_id),
-          modelPattern: nullableText(rule.model_pattern),
-          sourceEffort: String(rule.source_effort ?? "any") as "any",
-          requestTags: tags.ok ? tags.value : [],
-          tagMatchMode: rule.tag_match_mode === "all" ? "all" : "any",
-          effortMode: String(rule.effort_mode ?? "inherit") as "inherit",
-          targetEffort: nullableText(rule.target_effort) as KeyTemplateReasoningRule["targetEffort"],
-          targetKind: String(rule.target_kind ?? "keep") as "keep",
-          targetModel: nullableText(rule.target_model),
-          targetComboId: nullableText(rule.target_combo_id),
-          budgetAction: String(rule.budget_action ?? "preserve") as "preserve",
-          budgetTokens: relatedNullableNumber(rule.budget_tokens),
-          priority: relatedNumber(rule.priority, 0),
-          enabled: rule.enabled === undefined ? true : !falsy(rule.enabled),
-        };
-      }),
-    },
+    related: captureRelated(rows, problems),
     expiry,
   };
   return { policy, warnings, problems };
@@ -925,7 +670,7 @@ export function snapshotToTemplatePolicy(rows: KeyPolicyRows, nowMs: number): Sn
 // ──────────────── Typed policy → rows ────────────────
 
 /** Converts a validated policy into rows for insertKeyPolicyRows(). */
-export function templatePolicyToRows(policy: KeyTemplatePolicy, nowMs: number): KeyPolicyInsertRows {
+function serializeKeyColumns(policy: KeyTemplatePolicy, nowMs: number): Row {
   const keyColumns: Row = {};
   const key = policy.key as unknown as Row;
   for (const spec of API_KEY_POLICY_FIELDS) {
@@ -952,10 +697,13 @@ export function templatePolicyToRows(policy: KeyTemplatePolicy, nowMs: number): 
     policy.expiry.mode === "relative"
       ? new Date(nowMs + policy.expiry.ttlSeconds * 1000).toISOString()
       : null;
+  return keyColumns;
+}
 
+/** Preserve the complete related configuration independently of key-column encoding. */
+function serializeRelatedRows(policy: KeyTemplatePolicy): Omit<KeyPolicyInsertRows, "keyColumns"> {
   const { related } = policy;
   return {
-    keyColumns,
     groupIds: [...related.groupIds],
     domainBudget: related.domainBudget
       ? {
@@ -1008,6 +756,11 @@ export function templatePolicyToRows(policy: KeyTemplatePolicy, nowMs: number): 
       enabled: rule.enabled ? 1 : 0,
     })),
   };
+}
+
+/** Converts a validated policy into rows for insertKeyPolicyRows(). */
+export function templatePolicyToRows(policy: KeyTemplatePolicy, nowMs: number): KeyPolicyInsertRows {
+  return { keyColumns: serializeKeyColumns(policy, nowMs), ...serializeRelatedRows(policy) };
 }
 
 // ──────────────── Reference validation ────────────────

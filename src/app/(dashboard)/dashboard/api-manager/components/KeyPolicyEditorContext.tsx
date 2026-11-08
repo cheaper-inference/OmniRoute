@@ -3,7 +3,9 @@
 import { createContext, useContext } from "react";
 import type { useKeyPolicyEditorModel } from "./useKeyPolicyEditorModel";
 
-export const KeyPolicyEditorContext = createContext<ReturnType<typeof useKeyPolicyEditorModel> | null>(null);
+export const KeyPolicyEditorContext = createContext<ReturnType<
+  typeof useKeyPolicyEditorModel
+> | null>(null);
 
 export function useKeyPolicyEditor() {
   const context = useContext(KeyPolicyEditorContext);

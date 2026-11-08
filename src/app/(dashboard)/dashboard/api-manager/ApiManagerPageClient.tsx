@@ -28,10 +28,7 @@ import ApiKeyFilterBar from "./components/ApiKeyFilterBar";
 import KeyPolicySixTabEditor from "./components/KeyPolicySixTabEditor";
 import SaveKeyAsTemplateModal from "./components/SaveKeyAsTemplateModal";
 import KeyTemplatesLibrarySection from "./components/KeyTemplatesLibrarySection";
-import {
-  summarizeKeyTemplatePolicy,
-  type KeyTemplate,
-} from "./keyTemplatePolicyUtils";
+import { summarizeKeyTemplatePolicy, type KeyTemplate } from "./keyTemplatePolicyUtils";
 import {
   isKeyActive,
   isExpired,
@@ -1135,7 +1132,9 @@ export default function ApiManagerPageClient() {
               value={newKeyName}
               onChange={(e) => {
                 setNewKeyName(e.target.value);
-                templateCreation.setCreateKeyRefIssues((issues) => issues.filter((issue) => issue.code !== "INVALID_FIELD"));
+                templateCreation.setCreateKeyRefIssues((issues) =>
+                  issues.filter((issue) => issue.code !== "INVALID_FIELD")
+                );
                 setNameError(null);
               }}
               placeholder={t("keyNamePlaceholder")}

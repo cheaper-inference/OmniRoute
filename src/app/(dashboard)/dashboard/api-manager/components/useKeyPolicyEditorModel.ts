@@ -49,11 +49,7 @@ export function useKeyPolicyEditorModel(props: KeyPolicySixTabEditorProps) {
     catalogSets,
   } = useKeyPolicyCatalog();
 
-  const [newBlockedPattern, setNewBlockedPattern] = useState("");
-  const [newIpCidr, setNewIpCidr] = useState("");
-  const [newExtraScope, setNewExtraScope] = useState("");
-  const [newOverrideChannel, setNewOverrideChannel] = useState("auto");
-  const [newOverrideConnId, setNewOverrideConnId] = useState("");
+  const inputs = usePolicyDraftInputs();
 
   const {
     permissionModels,
@@ -68,13 +64,17 @@ export function useKeyPolicyEditorModel(props: KeyPolicySixTabEditorProps) {
     customModelPattern,
     setCustomModelPattern,
   } = useModelSelection(formState, allModels, t);
-  const {
-    activeIssues,
-    tabErrors,
-    tabIssueMap,
-    hasBlockingReferenceIssues,
-  } = usePolicyValidation(formState, issueSnapshot, editedIssues, serverReferenceIssues, catalogSets, onValidationStateChange, t);
+  const { activeIssues, tabErrors, tabIssueMap, hasBlockingReferenceIssues } = usePolicyValidation(
+    formState,
+    issueSnapshot,
+    editedIssues,
+    serverReferenceIssues,
+    catalogSets,
+    onValidationStateChange,
+    t
+  );
   return {
+    ...inputs,
     permissionModels,
     t,
     tc,
@@ -90,16 +90,6 @@ export function useKeyPolicyEditorModel(props: KeyPolicySixTabEditorProps) {
     modelsLoaded,
     searchModel,
     setSearchModel,
-    newBlockedPattern,
-    setNewBlockedPattern,
-    newIpCidr,
-    setNewIpCidr,
-    newExtraScope,
-    setNewExtraScope,
-    newOverrideChannel,
-    setNewOverrideChannel,
-    newOverrideConnId,
-    setNewOverrideConnId,
     activeIssues,
     tabErrors,
     tabIssueMap,
@@ -117,16 +107,28 @@ export function useKeyPolicyEditorModel(props: KeyPolicySixTabEditorProps) {
   };
 }
 
-function usePolicyDraft({ policy, formStateOverride, onFormStateChange, onChange, serverReferenceIssues = EMPTY_ISSUES }: KeyPolicySixTabEditorProps) {
+function usePolicyDraft({
+  policy,
+  formStateOverride,
+  onFormStateChange,
+  onChange,
+  serverReferenceIssues = EMPTY_ISSUES,
+}: KeyPolicySixTabEditorProps) {
   const [baselinePolicy, setBaselinePolicy] = useState<KeyTemplatePolicy>(policy);
   const [internalFormState, setFormState] = useState<PolicyEditorFormState>(() =>
     policyToEditorFormState(policy)
   );
   const formState = formStateOverride ?? internalFormState;
-  const [issueSnapshot, setIssueSnapshot] = useState(() => ({ source: serverReferenceIssues, issues: anchorReferenceIssues(serverReferenceIssues, policy) }));
+  const [issueSnapshot, setIssueSnapshot] = useState(() => ({
+    source: serverReferenceIssues,
+    issues: anchorReferenceIssues(serverReferenceIssues, policy, formState),
+  }));
   const [editedIssues, setEditedIssues] = useState<readonly TemplateReferenceIssue[] | null>(null);
   if (issueSnapshot.source !== serverReferenceIssues) {
-    setIssueSnapshot({ source: serverReferenceIssues, issues: anchorReferenceIssues(serverReferenceIssues, policy) });
+    setIssueSnapshot({
+      source: serverReferenceIssues,
+      issues: anchorReferenceIssues(serverReferenceIssues, policy, formState),
+    });
   }
 
   // Sync when external policy reference changes (e.g., template selection or modal reset)
@@ -137,7 +139,8 @@ function usePolicyDraft({ policy, formStateOverride, onFormStateChange, onChange
     setFormState(policyToEditorFormState(policy));
   }
 
-  const commitState = useCallback((next: PolicyEditorFormState) => {
+  const commitState = useCallback(
+    (next: PolicyEditorFormState) => {
       const nextPolicy = editorFormStateToPolicy(next);
       const dirty = JSON.stringify(nextPolicy) !== JSON.stringify(baselinePolicy);
       if (!formStateOverride) setFormState(next);
@@ -145,22 +148,34 @@ function usePolicyDraft({ policy, formStateOverride, onFormStateChange, onChange
       setEditedIssues(serverReferenceIssues);
       onFormStateChange?.(next);
       onChange?.(nextPolicy, dirty);
-  }, [baselinePolicy, formStateOverride, onFormStateChange, onChange, serverReferenceIssues]);
+    },
+    [baselinePolicy, formStateOverride, onFormStateChange, onChange, serverReferenceIssues]
+  );
   return { formState, commitState, issueSnapshot, editedIssues };
 }
 
-function useConfirmedPolicyUpdate(formState: PolicyEditorFormState, commitState: (state: PolicyEditorFormState) => void, disabled: boolean) {
+function useConfirmedPolicyUpdate(
+  formState: PolicyEditorFormState,
+  commitState: (state: PolicyEditorFormState) => void,
+  disabled: boolean
+) {
   const t = useTranslations("apiManager");
   const tc = useTranslations("common");
   const { requestConfirm, confirmDialog } = useConfirmDialog();
   const currentForm = useRef(formState);
-  useEffect(() => { currentForm.current = formState; }, [formState]);
+  useEffect(() => {
+    currentForm.current = formState;
+  }, [formState]);
   const updateState = useCallback(
     async (updater: (prev: PolicyEditorFormState) => PolicyEditorFormState) => {
       if (disabled) return;
       const next = updater(formState);
       if (removesLastQuotaRestriction(formState, next)) {
-        const confirmed = await requestConfirm({ message: t("templateRemoveLastQuotaConfirm"), confirmText: tc("confirm"), variant: "warning" });
+        const confirmed = await requestConfirm({
+          message: t("templateRemoveLastQuotaConfirm"),
+          confirmText: tc("confirm"),
+          variant: "warning",
+        });
         if (!confirmed || currentForm.current !== formState) return;
       }
       commitState(next);
@@ -171,9 +186,24 @@ function useConfirmedPolicyUpdate(formState: PolicyEditorFormState, commitState:
   return { updateState, confirmDialog };
 }
 
-function usePolicyValidation(formState: PolicyEditorFormState, issueSnapshot: ReturnType<typeof usePolicyDraft>["issueSnapshot"], editedIssues: readonly TemplateReferenceIssue[] | null, serverReferenceIssues: readonly TemplateReferenceIssue[], catalogSets: ReturnType<typeof useKeyPolicyCatalog>["catalogSets"], onValidationStateChange: KeyPolicySixTabEditorProps["onValidationStateChange"], t: (key: string) => string) {
+function usePolicyValidation(
+  formState: PolicyEditorFormState,
+  issueSnapshot: ReturnType<typeof usePolicyDraft>["issueSnapshot"],
+  editedIssues: readonly TemplateReferenceIssue[] | null,
+  serverReferenceIssues: readonly TemplateReferenceIssue[],
+  catalogSets: ReturnType<typeof useKeyPolicyCatalog>["catalogSets"],
+  onValidationStateChange: KeyPolicySixTabEditorProps["onValidationStateChange"],
+  t: (key: string) => string
+) {
   const activeIssues = useMemo(
-    () => resolveActiveReferenceIssues(formState, issueSnapshot.issues.filter((issue) => issue.code !== "INVALID_FIELD" || editedIssues !== serverReferenceIssues), catalogSets),
+    () =>
+      resolveActiveReferenceIssues(
+        formState,
+        issueSnapshot.issues.filter(
+          (issue) => issue.code !== "INVALID_FIELD" || editedIssues !== serverReferenceIssues
+        ),
+        catalogSets
+      ),
     [formState, issueSnapshot, editedIssues, serverReferenceIssues, catalogSets]
   );
 
@@ -214,7 +244,11 @@ function usePolicyValidation(formState: PolicyEditorFormState, issueSnapshot: Re
   return { activeIssues, tabErrors, tabIssueMap, hasBlockingReferenceIssues };
 }
 
-function useModelSelection(formState: PolicyEditorFormState, allModels: Model[], t: (key: string) => string) {
+function useModelSelection(
+  formState: PolicyEditorFormState,
+  allModels: Model[],
+  t: (key: string) => string
+) {
   const [searchModel, setSearchModel] = useState("");
   // Models grouping
   const permissionModels = useMemo(() => withClaudeCodeDefaultModel(allModels), [allModels]);
@@ -283,4 +317,13 @@ function useModelSelection(formState: PolicyEditorFormState, allModels: Model[],
     customModelPattern,
     setCustomModelPattern,
   };
+}
+
+function usePolicyDraftInputs() {
+  const [newBlockedPattern, setNewBlockedPattern] = useState("");
+  const [newIpCidr, setNewIpCidr] = useState("");
+  const [newExtraScope, setNewExtraScope] = useState("");
+  const [newOverrideChannel, setNewOverrideChannel] = useState("auto");
+  const [newOverrideConnId, setNewOverrideConnId] = useState("");
+  return { newBlockedPattern, setNewBlockedPattern, newIpCidr, setNewIpCidr, newExtraScope, setNewExtraScope, newOverrideChannel, setNewOverrideChannel, newOverrideConnId, setNewOverrideConnId };
 }

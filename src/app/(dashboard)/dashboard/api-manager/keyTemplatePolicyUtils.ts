@@ -208,7 +208,7 @@ export interface PolicyEditorFormState {
   selectedCombos: string[];
   allowAutoCombos: boolean;
   allowCcDiscoveryAliases: boolean;
-  autoCandidateOverrides: KeyTemplateAutoCandidateOverride[];
+  autoCandidateOverrides: (KeyTemplateAutoCandidateOverride & { clientRowId?: string })[];
 
   // Connections
   allowAllConnections: boolean;
@@ -253,7 +253,7 @@ export interface PolicyEditorFormState {
   chaosModeEnabled: boolean;
   allowUsageCommand: boolean;
   groupIds: string[];
-  reasoningRules: KeyTemplateReasoningRule[];
+  reasoningRules: (KeyTemplateReasoningRule & { clientRowId?: string })[];
 }
 
 function defaultTimeZone(): string {
@@ -316,7 +316,9 @@ export function createDefaultPolicyEditorFormState(): PolicyEditorFormState {
   return policyToEditorFormState(createDefaultClientKeyTemplatePolicy());
 }
 
-export function policyToEditorFormState(policyInput?: KeyTemplatePolicy | null): PolicyEditorFormState {
+export function policyToEditorFormState(
+  policyInput?: KeyTemplatePolicy | null
+): PolicyEditorFormState {
   const policy = policyInput ?? createDefaultClientKeyTemplatePolicy();
   return {
     ...readGeneralForm(policy),
@@ -330,11 +332,26 @@ export function policyToEditorFormState(policyInput?: KeyTemplatePolicy | null):
     ...readQuotaForm(policy),
     ...readBudgetForm(policy),
     ...readTokensForm(policy),
-    ...readBehaviourForm(policy)
+    ...readBehaviourForm(policy),
   };
 }
 
-function readGeneralForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "isActive" | "isBanned" | "manageEnabled" | "selfUsageEnabled" | "selfAccountQuotaEnabled" | "bypassProviderQuotaPolicyEnabled" | "extraScopes" | "allowAllEndpoints" | "selectedEndpoints" | "ipAllowlist" | "proxyId"> {
+function readGeneralForm(
+  policyInput: KeyTemplatePolicy
+): Pick<
+  PolicyEditorFormState,
+  | "isActive"
+  | "isBanned"
+  | "manageEnabled"
+  | "selfUsageEnabled"
+  | "selfAccountQuotaEnabled"
+  | "bypassProviderQuotaPolicyEnabled"
+  | "extraScopes"
+  | "allowAllEndpoints"
+  | "selectedEndpoints"
+  | "ipAllowlist"
+  | "proxyId"
+> {
   const policy = policyInput;
   const key = policy.key;
   const allowedEndpoints = Array.isArray(key.allowedEndpoints) ? [...key.allowedEndpoints] : [];
@@ -362,11 +379,13 @@ function readGeneralForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormS
     allowAllEndpoints,
     selectedEndpoints: allowedEndpoints,
     ipAllowlist: Array.isArray(key.ipAllowlist) ? [...key.ipAllowlist] : [],
-    proxyId: key.proxyId ?? ""
+    proxyId: key.proxyId ?? "",
   };
 }
 
-function readExpiryForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "expiryMode" | "expiryTtlValue" | "expiryTtlUnit"> {
+function readExpiryForm(
+  policyInput: KeyTemplatePolicy
+): Pick<PolicyEditorFormState, "expiryMode" | "expiryTtlValue" | "expiryTtlUnit"> {
   const policy = policyInput;
   const expiry = policy.expiry;
   const ttlDecomposed = decomposeTtlSeconds(
@@ -375,11 +394,21 @@ function readExpiryForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormSt
   return {
     expiryMode: expiry?.mode === "relative" ? "relative" : "none",
     expiryTtlValue: ttlDecomposed.value,
-    expiryTtlUnit: ttlDecomposed.unit
+    expiryTtlUnit: ttlDecomposed.unit,
   };
 }
 
-function readModelsForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "allowAllModels" | "selectedModels" | "blockedModels" | "catalogScope" | "disableNonPublicModels" | "forcedModel"> {
+function readModelsForm(
+  policyInput: KeyTemplatePolicy
+): Pick<
+  PolicyEditorFormState,
+  | "allowAllModels"
+  | "selectedModels"
+  | "blockedModels"
+  | "catalogScope"
+  | "disableNonPublicModels"
+  | "forcedModel"
+> {
   const policy = policyInput;
   const key = policy.key;
   const allowedModels = Array.isArray(key.allowedModels) ? [...key.allowedModels] : [];
@@ -390,11 +419,20 @@ function readModelsForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormSt
     blockedModels,
     catalogScope: key.catalogScope ?? "all",
     disableNonPublicModels: key.disableNonPublicModels === true,
-    forcedModel: key.forcedModel ?? ""
+    forcedModel: key.forcedModel ?? "",
   };
 }
 
-function readCombosForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "allowAllCombos" | "selectedCombos" | "allowAutoCombos" | "allowCcDiscoveryAliases" | "autoCandidateOverrides"> {
+function readCombosForm(
+  policyInput: KeyTemplatePolicy
+): Pick<
+  PolicyEditorFormState,
+  | "allowAllCombos"
+  | "selectedCombos"
+  | "allowAutoCombos"
+  | "allowCcDiscoveryAliases"
+  | "autoCandidateOverrides"
+> {
   const policy = policyInput;
   const key = policy.key;
   const related = policy.related;
@@ -407,12 +445,17 @@ function readCombosForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormSt
     allowAutoCombos: key.allowAutoCombos !== false,
     allowCcDiscoveryAliases: key.allowCcDiscoveryAliases !== false,
     autoCandidateOverrides: Array.isArray(related?.autoCandidateOverrides)
-      ? related.autoCandidateOverrides.map((o) => ({ ...o }))
-      : []
+      ? related.autoCandidateOverrides.map((o, index) => ({ ...o, clientRowId: `aco-${index}` }))
+      : [],
   };
 }
 
-function readConnectionsForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "allowAllConnections" | "selectedConnections" | "selectedPreferredConnections"> {
+function readConnectionsForm(
+  policyInput: KeyTemplatePolicy
+): Pick<
+  PolicyEditorFormState,
+  "allowAllConnections" | "selectedConnections" | "selectedPreferredConnections"
+> {
   const policy = policyInput;
   const key = policy.key;
   const allowedConnections = Array.isArray(key.allowedConnections)
@@ -429,11 +472,16 @@ function readConnectionsForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorF
       preferredConnections,
       allowAllConnections,
       allowedConnections
-    )
+    ),
   };
 }
 
-function readRatesForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "maxSessions" | "throttleDelayMs" | "maxRequestsPerDay" | "maxRequestsPerMinute" | "rateLimits"> {
+function readRatesForm(
+  policyInput: KeyTemplatePolicy
+): Pick<
+  PolicyEditorFormState,
+  "maxSessions" | "throttleDelayMs" | "maxRequestsPerDay" | "maxRequestsPerMinute" | "rateLimits"
+> {
   const policy = policyInput;
   const key = policy.key;
   return {
@@ -442,11 +490,16 @@ function readRatesForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormSta
       typeof key.throttleDelayMs === "number" && key.throttleDelayMs > 0 ? key.throttleDelayMs : 0,
     maxRequestsPerDay: numberToInputString(key.maxRequestsPerDay),
     maxRequestsPerMinute: numberToInputString(key.maxRequestsPerMinute),
-    rateLimits: Array.isArray(key.rateLimits) ? key.rateLimits.map((r) => ({ ...r })) : []
+    rateLimits: Array.isArray(key.rateLimits) ? key.rateLimits.map((r) => ({ ...r })) : [],
   };
 }
 
-function readScheduleForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "scheduleEnabled" | "scheduleFrom" | "scheduleUntil" | "scheduleDays" | "scheduleTz"> {
+function readScheduleForm(
+  policyInput: KeyTemplatePolicy
+): Pick<
+  PolicyEditorFormState,
+  "scheduleEnabled" | "scheduleFrom" | "scheduleUntil" | "scheduleDays" | "scheduleTz"
+> {
   const policy = policyInput;
   const key = policy.key;
   const schedule = key.accessSchedule;
@@ -455,22 +508,32 @@ function readScheduleForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorForm
     scheduleFrom: schedule?.from ?? "08:00",
     scheduleUntil: schedule?.until ?? "18:00",
     scheduleDays: Array.isArray(schedule?.days) ? [...schedule.days] : [1, 2, 3, 4, 5],
-    scheduleTz: schedule?.tz ?? defaultTimeZone()
+    scheduleTz: schedule?.tz ?? defaultTimeZone(),
   };
 }
 
-function readUsageForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "usageLimitEnabled" | "dailyUsageLimitUsd" | "weeklyUsageLimitUsd" | "allowedQuotas"> {
+function readUsageForm(
+  policyInput: KeyTemplatePolicy
+): Pick<
+  PolicyEditorFormState,
+  "usageLimitEnabled" | "dailyUsageLimitUsd" | "weeklyUsageLimitUsd" | "allowedQuotas"
+> {
   const policy = policyInput;
   const key = policy.key;
   return {
     usageLimitEnabled: key.usageLimitEnabled === true,
     dailyUsageLimitUsd: numberToInputString(key.dailyUsageLimitUsd),
     weeklyUsageLimitUsd: numberToInputString(key.weeklyUsageLimitUsd),
-    allowedQuotas: Array.isArray(key.allowedQuotas) ? [...key.allowedQuotas] : []
+    allowedQuotas: Array.isArray(key.allowedQuotas) ? [...key.allowedQuotas] : [],
   };
 }
 
-function readQuotaForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "quotaLimitsEnabled" | "quotaTpmLimit" | "quotaRpmLimit" | "quotaMonthlyUsd"> {
+function readQuotaForm(
+  policyInput: KeyTemplatePolicy
+): Pick<
+  PolicyEditorFormState,
+  "quotaLimitsEnabled" | "quotaTpmLimit" | "quotaRpmLimit" | "quotaMonthlyUsd"
+> {
   const policy = policyInput;
   const related = policy.related;
   const quotaLimits = related?.quotaLimits;
@@ -483,11 +546,22 @@ function readQuotaForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormSta
         (quotaLimits.monthlyAmountUsd ?? 0) > 0),
     quotaTpmLimit: numberToInputString(quotaLimits?.tpmLimit),
     quotaRpmLimit: numberToInputString(quotaLimits?.rpmLimit),
-    quotaMonthlyUsd: numberToInputString(quotaLimits?.monthlyAmountUsd)
+    quotaMonthlyUsd: numberToInputString(quotaLimits?.monthlyAmountUsd),
   };
 }
 
-function readBudgetForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "domainBudgetEnabled" | "domainDailyLimitUsd" | "domainWeeklyLimitUsd" | "domainMonthlyLimitUsd" | "domainWarningThresholdPct" | "domainResetInterval" | "domainResetTime"> {
+function readBudgetForm(
+  policyInput: KeyTemplatePolicy
+): Pick<
+  PolicyEditorFormState,
+  | "domainBudgetEnabled"
+  | "domainDailyLimitUsd"
+  | "domainWeeklyLimitUsd"
+  | "domainMonthlyLimitUsd"
+  | "domainWarningThresholdPct"
+  | "domainResetInterval"
+  | "domainResetTime"
+> {
   const policy = policyInput;
   const related = policy.related;
   const domainBudget = related?.domainBudget;
@@ -503,21 +577,37 @@ function readBudgetForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormSt
       ? String((domainBudget.warningThreshold ?? 0.8) * 100)
       : "80",
     domainResetInterval: domainBudget?.resetInterval ?? "daily",
-    domainResetTime: domainBudget?.resetTime ?? "00:00"
+    domainResetTime: domainBudget?.resetTime ?? "00:00",
   };
 }
 
-function readTokensForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "tokenLimits"> {
+function readTokensForm(
+  policyInput: KeyTemplatePolicy
+): Pick<PolicyEditorFormState, "tokenLimits"> {
   const policy = policyInput;
   const related = policy.related;
   return {
     tokenLimits: Array.isArray(related?.tokenLimits)
       ? related.tokenLimits.map((tl) => ({ ...tl }))
-      : []
+      : [],
   };
 }
 
-function readBehaviourForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFormState, "noLog" | "autoResolve" | "streamDefaultMode" | "cacheDefaultMode" | "codexServiceMode" | "compressionEnabled" | "chaosModeEnabled" | "allowUsageCommand" | "groupIds" | "reasoningRules"> {
+function readBehaviourForm(
+  policyInput: KeyTemplatePolicy
+): Pick<
+  PolicyEditorFormState,
+  | "noLog"
+  | "autoResolve"
+  | "streamDefaultMode"
+  | "cacheDefaultMode"
+  | "codexServiceMode"
+  | "compressionEnabled"
+  | "chaosModeEnabled"
+  | "allowUsageCommand"
+  | "groupIds"
+  | "reasoningRules"
+> {
   const policy = policyInput ?? createDefaultClientKeyTemplatePolicy();
   const key = policy.key;
   const related = policy.related;
@@ -532,26 +622,47 @@ function readBehaviourForm(policyInput: KeyTemplatePolicy): Pick<PolicyEditorFor
     allowUsageCommand: key.allowUsageCommand === true,
     groupIds: Array.isArray(related?.groupIds) ? [...related.groupIds] : [],
     reasoningRules: Array.isArray(related?.reasoningRules)
-      ? related.reasoningRules.map((r) => ({
+      ? related.reasoningRules.map((r, index) => ({
+          clientRowId: `rr-${index}`,
           ...r,
           requestTags: Array.isArray(r.requestTags) ? [...r.requestTags] : [],
         }))
-      : []
+      : [],
   };
 }
-
-
 
 export function editorFormStateToPolicy(state: PolicyEditorFormState): KeyTemplatePolicy {
   return {
     schemaVersion: 1,
-    key: { ...writeModelsPolicy(state), ...writeConnectionsPolicy(state), ...writeLifecyclePolicy(state), ...writeSchedulePolicy(state), ...writeRatesPolicy(state), ...writePermissionsPolicy(state), ...writeProtocolPolicy(state), ...writeUsagePolicy(state), ...writeDiscoveryPolicy(state) },
-    related: { ...writeGroupIds(state), ...writeDomainBudget(state), ...writeQuotaLimits(state), ...writeTokenLimits(state), ...writeAutoCandidateOverrides(state), ...writeReasoningRules(state) },
+    key: {
+      ...writeModelsPolicy(state),
+      ...writeConnectionsPolicy(state),
+      ...writeLifecyclePolicy(state),
+      ...writeSchedulePolicy(state),
+      ...writeRatesPolicy(state),
+      ...writePermissionsPolicy(state),
+      ...writeProtocolPolicy(state),
+      ...writeUsagePolicy(state),
+      ...writeDiscoveryPolicy(state),
+    },
+    related: {
+      ...writeGroupIds(state),
+      ...writeDomainBudget(state),
+      ...writeQuotaLimits(state),
+      ...writeTokenLimits(state),
+      ...writeAutoCandidateOverrides(state),
+      ...writeReasoningRules(state),
+    },
     expiry: writeExpiry(state),
   };
 }
 
-function writeModelsPolicy(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["key"], "modelAccessMode" | "allowedModels" | "blockedModels" | "allowedCombos"> {
+function writeModelsPolicy(
+  state: PolicyEditorFormState
+): Pick<
+  KeyTemplatePolicy["key"],
+  "modelAccessMode" | "allowedModels" | "blockedModels" | "allowedCombos"
+> {
   const modelAccess = buildModelAccessSavePayload({
     allowAll: state.allowAllModels,
     selectedModels: state.selectedModels,
@@ -563,11 +674,13 @@ function writeModelsPolicy(state: PolicyEditorFormState): Pick<KeyTemplatePolicy
     modelAccessMode: modelAccess.modelAccessMode,
     allowedModels: modelAccess.allowedModels,
     blockedModels: [...state.blockedModels],
-    allowedCombos
+    allowedCombos,
   };
 }
 
-function writeConnectionsPolicy(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["key"], "allowedConnections" | "preferredConnections" | "allowedQuotas"> {
+function writeConnectionsPolicy(
+  state: PolicyEditorFormState
+): Pick<KeyTemplatePolicy["key"], "allowedConnections" | "preferredConnections" | "allowedQuotas"> {
   const allowedConnections = state.allowAllConnections
     ? []
     : state.selectedConnections.filter((id) => typeof id === "string" && id.trim().length > 0);
@@ -580,37 +693,44 @@ function writeConnectionsPolicy(state: PolicyEditorFormState): Pick<KeyTemplateP
     allowedConnections,
     preferredConnections,
     allowedQuotas: state.allowedQuotas.filter(
-        (id) => typeof id === "string" && id.trim().length > 0
-      )
+      (id) => typeof id === "string" && id.trim().length > 0
+    ),
   };
 }
 
-function writeLifecyclePolicy(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["key"], "noLog" | "autoResolve" | "isActive" | "isBanned"> {
-
+function writeLifecyclePolicy(
+  state: PolicyEditorFormState
+): Pick<KeyTemplatePolicy["key"], "noLog" | "autoResolve" | "isActive" | "isBanned"> {
   return {
     noLog: state.noLog,
     autoResolve: state.autoResolve,
     isActive: state.isActive,
-    isBanned: state.isBanned
+    isBanned: state.isBanned,
   };
 }
 
-function writeSchedulePolicy(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["key"], "accessSchedule"> {
-
+function writeSchedulePolicy(
+  state: PolicyEditorFormState
+): Pick<KeyTemplatePolicy["key"], "accessSchedule"> {
   return {
     accessSchedule: state.scheduleEnabled
-        ? {
-            enabled: true,
-            from: state.scheduleFrom || "08:00",
-            until: state.scheduleUntil || "18:00",
-            days: state.scheduleDays,
-            tz: state.scheduleTz || "UTC",
-          }
-        : null
+      ? {
+          enabled: true,
+          from: state.scheduleFrom || "08:00",
+          until: state.scheduleUntil || "18:00",
+          days: state.scheduleDays,
+          tz: state.scheduleTz || "UTC",
+        }
+      : null,
   };
 }
 
-function writeRatesPolicy(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["key"], "maxRequestsPerDay" | "maxRequestsPerMinute" | "throttleDelayMs" | "rateLimits" | "maxSessions"> {
+function writeRatesPolicy(
+  state: PolicyEditorFormState
+): Pick<
+  KeyTemplatePolicy["key"],
+  "maxRequestsPerDay" | "maxRequestsPerMinute" | "throttleDelayMs" | "rateLimits" | "maxSessions"
+> {
   const throttle = Math.max(0, Math.min(300000, Math.floor(Number(state.throttleDelayMs) || 0)));
   const maxSessions = Math.max(0, Math.floor(Number(state.maxSessions) || 0));
   return {
@@ -618,11 +738,13 @@ function writeRatesPolicy(state: PolicyEditorFormState): Pick<KeyTemplatePolicy[
     maxRequestsPerMinute: parseOptionalPositiveInt(state.maxRequestsPerMinute),
     throttleDelayMs: throttle > 0 ? throttle : null,
     rateLimits: state.rateLimits.length > 0 ? state.rateLimits : null,
-    maxSessions
+    maxSessions,
   };
 }
 
-function writePermissionsPolicy(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["key"], "ipAllowlist" | "scopes" | "proxyId" | "allowedEndpoints"> {
+function writePermissionsPolicy(
+  state: PolicyEditorFormState
+): Pick<KeyTemplatePolicy["key"], "ipAllowlist" | "scopes" | "proxyId" | "allowedEndpoints"> {
   const scopes = mergeApiKeyPermissionScopes(state.extraScopes, {
     manageEnabled: state.manageEnabled,
     selfUsageEnabled: state.selfUsageEnabled,
@@ -633,50 +755,74 @@ function writePermissionsPolicy(state: PolicyEditorFormState): Pick<KeyTemplateP
     ipAllowlist: state.ipAllowlist.filter((ip) => typeof ip === "string" && ip.trim().length > 0),
     scopes,
     proxyId: state.proxyId.trim() || null,
-    allowedEndpoints: state.allowAllEndpoints ? [] : state.selectedEndpoints
+    allowedEndpoints: state.allowAllEndpoints ? [] : state.selectedEndpoints,
   };
 }
 
-function writeProtocolPolicy(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["key"], "streamDefaultMode" | "codexServiceMode" | "cacheDefaultMode" | "disableNonPublicModels" | "allowUsageCommand"> {
-
+function writeProtocolPolicy(
+  state: PolicyEditorFormState
+): Pick<
+  KeyTemplatePolicy["key"],
+  | "streamDefaultMode"
+  | "codexServiceMode"
+  | "cacheDefaultMode"
+  | "disableNonPublicModels"
+  | "allowUsageCommand"
+> {
   return {
     streamDefaultMode: state.streamDefaultMode,
     codexServiceMode: state.codexServiceMode,
     cacheDefaultMode: state.cacheDefaultMode,
     disableNonPublicModels: state.disableNonPublicModels,
-    allowUsageCommand: state.allowUsageCommand
+    allowUsageCommand: state.allowUsageCommand,
   };
 }
 
-function writeUsagePolicy(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["key"], "usageLimitEnabled" | "dailyUsageLimitUsd" | "weeklyUsageLimitUsd"> {
-
+function writeUsagePolicy(
+  state: PolicyEditorFormState
+): Pick<
+  KeyTemplatePolicy["key"],
+  "usageLimitEnabled" | "dailyUsageLimitUsd" | "weeklyUsageLimitUsd"
+> {
   return {
     usageLimitEnabled: state.usageLimitEnabled,
     dailyUsageLimitUsd: parseOptionalPositiveNumber(state.dailyUsageLimitUsd),
-    weeklyUsageLimitUsd: parseOptionalPositiveNumber(state.weeklyUsageLimitUsd)
+    weeklyUsageLimitUsd: parseOptionalPositiveNumber(state.weeklyUsageLimitUsd),
   };
 }
 
-function writeDiscoveryPolicy(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["key"], "chaosModeEnabled" | "compressionEnabled" | "allowAutoCombos" | "allowCcDiscoveryAliases" | "catalogScope" | "forcedModel"> {
-
+function writeDiscoveryPolicy(
+  state: PolicyEditorFormState
+): Pick<
+  KeyTemplatePolicy["key"],
+  | "chaosModeEnabled"
+  | "compressionEnabled"
+  | "allowAutoCombos"
+  | "allowCcDiscoveryAliases"
+  | "catalogScope"
+  | "forcedModel"
+> {
   return {
     chaosModeEnabled: state.chaosModeEnabled,
     compressionEnabled: state.compressionEnabled,
     allowAutoCombos: state.allowAutoCombos,
     allowCcDiscoveryAliases: state.allowCcDiscoveryAliases,
     catalogScope: state.catalogScope,
-    forcedModel: state.forcedModel.trim() || null
+    forcedModel: state.forcedModel.trim() || null,
   };
 }
 
-function writeGroupIds(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["related"], "groupIds"> {
-
+function writeGroupIds(
+  state: PolicyEditorFormState
+): Pick<KeyTemplatePolicy["related"], "groupIds"> {
   return {
-    groupIds: state.groupIds.filter((id) => typeof id === "string" && id.trim().length > 0)
+    groupIds: state.groupIds.filter((id) => typeof id === "string" && id.trim().length > 0),
   };
 }
 
-function writeDomainBudget(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["related"], "domainBudget"> {
+function writeDomainBudget(
+  state: PolicyEditorFormState
+): Pick<KeyTemplatePolicy["related"], "domainBudget"> {
   const domainDaily = parseOptionalPositiveNumber(state.domainDailyLimitUsd) ?? 0;
   const domainWeekly = parseOptionalPositiveNumber(state.domainWeeklyLimitUsd) ?? 0;
   const domainMonthly = parseOptionalPositiveNumber(state.domainMonthlyLimitUsd) ?? 0;
@@ -694,11 +840,13 @@ function writeDomainBudget(state: PolicyEditorFormState): Pick<KeyTemplatePolicy
       }
     : null;
   return {
-    domainBudget
+    domainBudget,
   };
 }
 
-function writeQuotaLimits(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["related"], "quotaLimits"> {
+function writeQuotaLimits(
+  state: PolicyEditorFormState
+): Pick<KeyTemplatePolicy["related"], "quotaLimits"> {
   const quotaTpm = parseOptionalPositiveNumber(state.quotaTpmLimit);
   const quotaRpm = parseOptionalPositiveNumber(state.quotaRpmLimit);
   const quotaMonthly = parseOptionalPositiveNumber(state.quotaMonthlyUsd);
@@ -711,37 +859,40 @@ function writeQuotaLimits(state: PolicyEditorFormState): Pick<KeyTemplatePolicy[
         }
       : null;
   return {
-    quotaLimits
+    quotaLimits,
   };
 }
 
-function writeTokenLimits(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["related"], "tokenLimits"> {
-
+function writeTokenLimits(
+  state: PolicyEditorFormState
+): Pick<KeyTemplatePolicy["related"], "tokenLimits"> {
   return {
     tokenLimits: state.tokenLimits.map((tl) => ({
-        ...tl,
-        scopeValue: tl.scopeType === "global" ? "" : tl.scopeValue.trim(),
-      }))
+      ...tl,
+      scopeValue: tl.scopeType === "global" ? "" : tl.scopeValue.trim(),
+    })),
   };
 }
 
-function writeAutoCandidateOverrides(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["related"], "autoCandidateOverrides"> {
-
+function writeAutoCandidateOverrides(
+  state: PolicyEditorFormState
+): Pick<KeyTemplatePolicy["related"], "autoCandidateOverrides"> {
   return {
     autoCandidateOverrides: state.autoCandidateOverrides.filter(
-        (o) => o.autoChannel.trim().length > 0 && o.connectionId.trim().length > 0
-      )
+      (o) => o.autoChannel.trim().length > 0 && o.connectionId.trim().length > 0
+    ).map(withoutClientRowId),
   };
 }
 
-function writeReasoningRules(state: PolicyEditorFormState): Pick<KeyTemplatePolicy["related"], "reasoningRules"> {
-
+function writeReasoningRules(
+  state: PolicyEditorFormState
+): Pick<KeyTemplatePolicy["related"], "reasoningRules"> {
   return {
     reasoningRules: state.reasoningRules.map((r) => ({
-        ...r,
-        name: r.name.trim(),
-        description: r.description.trim(),
-      }))
+      ...withoutClientRowId(r),
+      name: r.name.trim(),
+      description: r.description.trim(),
+    })),
   };
 }
 
@@ -757,30 +908,53 @@ function writeExpiry(state: PolicyEditorFormState): KeyTemplateExpiry {
   return expiry;
 }
 
-
 export function mapReferenceIssueToTab(path: string): AccessEditorTab {
   const groups: Array<[AccessEditorTab, string[]]> = [
     ["models", ["key.allowedModels", "key.blockedModels", "key.forcedModel"]],
     ["combos", ["key.allowedCombos", "related.autoCandidateOverrides"]],
     ["connections", ["key.allowedConnections", "key.preferredConnections"]],
-    ["limits", ["key.allowedQuotas", "related.domainBudget", "related.quotaLimits", "related.tokenLimits", "key.rateLimits", "key.accessSchedule"]],
+    [
+      "limits",
+      [
+        "key.allowedQuotas",
+        "related.domainBudget",
+        "related.quotaLimits",
+        "related.tokenLimits",
+        "key.rateLimits",
+        "key.accessSchedule",
+      ],
+    ],
     ["behaviour", ["related.groupIds", "related.reasoningRules"]],
   ];
   const clean = path.replace(/^policy\./, "");
-  return groups.find(([, prefixes]) => prefixes.some((prefix) => clean.startsWith(prefix)))?.[0] ?? "general";
+  return (
+    groups.find(([, prefixes]) => prefixes.some((prefix) => clean.startsWith(prefix)))?.[0] ??
+    "general"
+  );
 }
 
 export { resolveActiveReferenceIssues } from "./keyTemplateReferenceIssues.ts";
 
-export function validatePolicyEditorState(state: PolicyEditorFormState, t?: (key: string, values?: Record<string, unknown>) => string): Record<AccessEditorTab, string[]> {
+export function validatePolicyEditorState(
+  state: PolicyEditorFormState,
+  t?: (key: string, values?: Record<string, unknown>) => string
+): Record<AccessEditorTab, string[]> {
   const tr = t ?? ((key: string) => key);
   return {
     general: [...validateExpiryFields(state, tr)],
     models: [],
     combos: [],
-    connections: [...validateConnectionsFields(state, tr), ...validateExclusiveLeaseFields(state, tr)],
-    limits: [...validateThrottleFields(state, tr), ...validateSessionsFields(state, tr), ...validateRatesFields(state, tr), ...validateTokensFields(state, tr)],
-    behaviour: [...validateReasoningFields(state, tr)]
+    connections: [
+      ...validateConnectionsFields(state, tr),
+      ...validateExclusiveLeaseFields(state, tr),
+    ],
+    limits: [
+      ...validateThrottleFields(state, tr),
+      ...validateSessionsFields(state, tr),
+      ...validateRatesFields(state, tr),
+      ...validateTokensFields(state, tr),
+    ],
+    behaviour: [...validateReasoningFields(state, tr)],
   };
 }
 
@@ -795,7 +969,10 @@ function validateExpiryFields(state: PolicyEditorFormState, tr: (key: string) =>
   return errors;
 }
 
-function validateConnectionsFields(state: PolicyEditorFormState, tr: (key: string) => string): string[] {
+function validateConnectionsFields(
+  state: PolicyEditorFormState,
+  tr: (key: string) => string
+): string[] {
   const errors: string[] = [];
   if (!state.allowAllConnections && state.selectedConnections.length === 0) {
     errors.push(tr("selectAtLeastOneConnection"));
@@ -803,7 +980,10 @@ function validateConnectionsFields(state: PolicyEditorFormState, tr: (key: strin
   return errors;
 }
 
-function validateExclusiveLeaseFields(state: PolicyEditorFormState, tr: (key: string) => string): string[] {
+function validateExclusiveLeaseFields(
+  state: PolicyEditorFormState,
+  tr: (key: string) => string
+): string[] {
   const errors: string[] = [];
   if (state.extraScopes.includes("lease:exclusive")) {
     if (state.allowAllConnections || state.selectedConnections.length === 0) {
@@ -813,7 +993,10 @@ function validateExclusiveLeaseFields(state: PolicyEditorFormState, tr: (key: st
   return errors;
 }
 
-function validateThrottleFields(state: PolicyEditorFormState, tr: (key: string) => string): string[] {
+function validateThrottleFields(
+  state: PolicyEditorFormState,
+  tr: (key: string) => string
+): string[] {
   const errors: string[] = [];
   if (state.throttleDelayMs < 0 || state.throttleDelayMs > 300000) {
     errors.push(tr("throttleDelayRangeError"));
@@ -821,7 +1004,10 @@ function validateThrottleFields(state: PolicyEditorFormState, tr: (key: string) 
   return errors;
 }
 
-function validateSessionsFields(state: PolicyEditorFormState, tr: (key: string) => string): string[] {
+function validateSessionsFields(
+  state: PolicyEditorFormState,
+  tr: (key: string) => string
+): string[] {
   const errors: string[] = [];
   if (state.maxSessions < 0) {
     errors.push(tr("maxSessionsNegativeError"));
@@ -859,7 +1045,10 @@ function validateTokensFields(state: PolicyEditorFormState, tr: (key: string) =>
   return errors;
 }
 
-function validateReasoningFields(state: PolicyEditorFormState, tr: (key: string) => string): string[] {
+function validateReasoningFields(
+  state: PolicyEditorFormState,
+  tr: (key: string) => string
+): string[] {
   const errors: string[] = [];
   for (const rule of state.reasoningRules) {
     if (
@@ -889,8 +1078,6 @@ function validateReasoningFields(state: PolicyEditorFormState, tr: (key: string)
   return errors;
 }
 
-
-
 export interface PolicySummaryBadge {
   id: string;
   label: string;
@@ -898,11 +1085,24 @@ export interface PolicySummaryBadge {
   icon: string;
 }
 
-export function summarizeKeyTemplatePolicy(policy: KeyTemplatePolicy, t: (key: string, values?: Record<string, unknown>) => string): PolicySummaryBadge[] {
-  return [...summarizeModels(policy, t), ...summarizeCombos(policy, t), ...summarizeConnections(policy, t), ...summarizeCatalog(policy, t), ...summarizeLifecycle(policy, t), ...summarizeLimits(policy, t)];
+export function summarizeKeyTemplatePolicy(
+  policy: KeyTemplatePolicy,
+  t: (key: string, values?: Record<string, unknown>) => string
+): PolicySummaryBadge[] {
+  return [
+    ...summarizeModels(policy, t),
+    ...summarizeCombos(policy, t),
+    ...summarizeConnections(policy, t),
+    ...summarizeCatalog(policy, t),
+    ...summarizeLifecycle(policy, t),
+    ...summarizeLimits(policy, t),
+  ];
 }
 
-function summarizeModels(policy: KeyTemplatePolicy, t: (key: string, values?: Record<string, unknown>) => string): PolicySummaryBadge[] {
+function summarizeModels(
+  policy: KeyTemplatePolicy,
+  t: (key: string, values?: Record<string, unknown>) => string
+): PolicySummaryBadge[] {
   const badges: PolicySummaryBadge[] = [];
   const k = policy.key;
   if (k.modelAccessMode === "restricted") {
@@ -939,11 +1139,13 @@ function summarizeModels(policy: KeyTemplatePolicy, t: (key: string, values?: Re
     });
   }
 
-
   return badges;
 }
 
-function summarizeCombos(policy: KeyTemplatePolicy, t: (key: string, values?: Record<string, unknown>) => string): PolicySummaryBadge[] {
+function summarizeCombos(
+  policy: KeyTemplatePolicy,
+  t: (key: string, values?: Record<string, unknown>) => string
+): PolicySummaryBadge[] {
   const badges: PolicySummaryBadge[] = [];
   const k = policy.key;
   if (k.allowedCombos.includes(KEY_TEMPLATE_ALL_COMBOS_RULE)) {
@@ -969,11 +1171,13 @@ function summarizeCombos(policy: KeyTemplatePolicy, t: (key: string, values?: Re
     });
   }
 
-
   return badges;
 }
 
-function summarizeConnections(policy: KeyTemplatePolicy, t: (key: string, values?: Record<string, unknown>) => string): PolicySummaryBadge[] {
+function summarizeConnections(
+  policy: KeyTemplatePolicy,
+  t: (key: string, values?: Record<string, unknown>) => string
+): PolicySummaryBadge[] {
   const badges: PolicySummaryBadge[] = [];
   const k = policy.key;
   if (k.allowedConnections.length > 0) {
@@ -985,11 +1189,13 @@ function summarizeConnections(policy: KeyTemplatePolicy, t: (key: string, values
     });
   }
 
-
   return badges;
 }
 
-function summarizeCatalog(policy: KeyTemplatePolicy, t: (key: string, values?: Record<string, unknown>) => string): PolicySummaryBadge[] {
+function summarizeCatalog(
+  policy: KeyTemplatePolicy,
+  t: (key: string, values?: Record<string, unknown>) => string
+): PolicySummaryBadge[] {
   const badges: PolicySummaryBadge[] = [];
   const k = policy.key;
   if (k.catalogScope && k.catalogScope !== "all") {
@@ -1009,11 +1215,13 @@ function summarizeCatalog(policy: KeyTemplatePolicy, t: (key: string, values?: R
     });
   }
 
-
   return badges;
 }
 
-function summarizeLifecycle(policy: KeyTemplatePolicy, t: (key: string, values?: Record<string, unknown>) => string): PolicySummaryBadge[] {
+function summarizeLifecycle(
+  policy: KeyTemplatePolicy,
+  t: (key: string, values?: Record<string, unknown>) => string
+): PolicySummaryBadge[] {
   const badges: PolicySummaryBadge[] = [];
   const k = policy.key;
   if (k.scopes.includes("manage")) {
@@ -1050,11 +1258,13 @@ function summarizeLifecycle(policy: KeyTemplatePolicy, t: (key: string, values?:
     });
   }
 
-
   return badges;
 }
 
-function summarizeLimits(policy: KeyTemplatePolicy, t: (key: string, values?: Record<string, unknown>) => string): PolicySummaryBadge[] {
+function summarizeLimits(
+  policy: KeyTemplatePolicy,
+  t: (key: string, values?: Record<string, unknown>) => string
+): PolicySummaryBadge[] {
   const badges: PolicySummaryBadge[] = [];
   const k = policy.key;
   const r = policy.related;
@@ -1084,4 +1294,11 @@ function summarizeLimits(policy: KeyTemplatePolicy, t: (key: string, values?: Re
   }
 
   return badges;
+}
+
+/** Client-only identities must never become a persisted or submitted key policy. */
+function withoutClientRowId<T extends object>(row: T): Omit<T, "clientRowId"> {
+  const policy = { ...row };
+  delete (policy as { clientRowId?: string }).clientRowId;
+  return policy;
 }

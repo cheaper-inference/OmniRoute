@@ -28,7 +28,14 @@ const TABS: Array<{ id: AccessEditorTab; icon: string; labelKey: string }> = [
   { id: "behaviour", icon: "toggle_on", labelKey: "tabBehaviour" },
 ];
 
-const TAB_COMPONENTS = { general: KeyPolicyGeneralTab, models: KeyPolicyModelsTab, combos: KeyPolicyCombosTab, connections: KeyPolicyConnectionsTab, limits: KeyPolicyLimitsTab, behaviour: KeyPolicyBehaviourTab };
+const TAB_COMPONENTS = {
+  general: KeyPolicyGeneralTab,
+  models: KeyPolicyModelsTab,
+  combos: KeyPolicyCombosTab,
+  connections: KeyPolicyConnectionsTab,
+  limits: KeyPolicyLimitsTab,
+  behaviour: KeyPolicyBehaviourTab,
+};
 
 export default function KeyPolicySixTabEditor(props: KeyPolicySixTabEditorProps) {
   const model = useKeyPolicyEditorModel(props);
@@ -44,51 +51,53 @@ export default function KeyPolicySixTabEditor(props: KeyPolicySixTabEditorProps)
   const ActiveTab = TAB_COMPONENTS[activeTab];
   return (
     <KeyPolicyEditorContext.Provider value={model}>
-    <div className="flex flex-col gap-4" data-testid="key-policy-six-tab-editor">
-      {activeIssues.length > 0 && (
-        <Alert
-          variant={hasBlockingReferenceIssues ? "critical" : "warning"}
-          icon={<Icon name={hasBlockingReferenceIssues ? "error" : "warning"} />}
-          title={
-            hasBlockingReferenceIssues
-              ? t("templateStaleReferencesBlockingTitle")
-              : t("templateStaleReferencesWarningTitle")
-          }
-          description={
-            hasBlockingReferenceIssues
-              ? t("templateStaleReferencesBlockingDesc")
-              : t("templateStaleReferencesWarningDesc")
-          }
-        />
-      )}
+      <div className="flex flex-col gap-4" data-testid="key-policy-six-tab-editor">
+        {activeIssues.length > 0 && (
+          <Alert
+            variant={hasBlockingReferenceIssues ? "critical" : "warning"}
+            icon={<Icon name={hasBlockingReferenceIssues ? "error" : "warning"} />}
+            title={
+              hasBlockingReferenceIssues
+                ? t("templateStaleReferencesBlockingTitle")
+                : t("templateStaleReferencesWarningTitle")
+            }
+            description={
+              hasBlockingReferenceIssues
+                ? t("templateStaleReferencesBlockingDesc")
+                : t("templateStaleReferencesWarningDesc")
+            }
+          />
+        )}
 
-      <Tabs
-        variant="underline"
-        value={activeTab}
-        onValueChange={(next) => setActiveTab(next as AccessEditorTab)}
-        className="flex flex-col gap-4"
-      >
-        <PolicyTabList />
-
-        <TabsContent
+        <Tabs
+          variant="underline"
           value={activeTab}
-          id={`policy-panel-${activeTab}`}
-          aria-labelledby={`policy-tab-${activeTab}`}
-          className="focus:outline-none"
+          onValueChange={(next) => setActiveTab(next as AccessEditorTab)}
+          className="flex flex-col gap-4"
         >
-          <Card className="p-4 sm:p-5">
-            <fieldset disabled={disabled} className="m-0 min-w-0 border-0 p-0 flex flex-col gap-4">
-              <KeyPolicyReferenceIssues />
-              <TabErrorList errors={tabErrors[activeTab]} />
+          <PolicyTabList />
 
-               <ActiveTab />
+          <TabsContent
+            value={activeTab}
+            id={`policy-panel-${activeTab}`}
+            aria-labelledby={`policy-tab-${activeTab}`}
+            className="focus:outline-none"
+          >
+            <Card className="p-4 sm:p-5">
+              <fieldset
+                disabled={disabled}
+                className="m-0 min-w-0 border-0 p-0 flex flex-col gap-4"
+              >
+                <KeyPolicyReferenceIssues />
+                <TabErrorList errors={tabErrors[activeTab]} />
 
-            </fieldset>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
-    {model.confirmDialog}
+                <ActiveTab />
+              </fieldset>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+      {model.confirmDialog}
     </KeyPolicyEditorContext.Provider>
   );
 }
@@ -96,38 +105,38 @@ export default function KeyPolicySixTabEditor(props: KeyPolicySixTabEditorProps)
 function PolicyTabList() {
   const { t, tabErrors, tabIssueMap } = useKeyPolicyEditor();
   return (
-        <TabsList aria-label={t("accessEditorTabsLabel")}>
-          {TABS.map((tabDef) => {
-            const errCount =
-              (tabErrors[tabDef.id]?.length ?? 0) +
-              (tabIssueMap[tabDef.id]?.filter((i) => i.blocking).length ?? 0);
-            const warnCount = tabIssueMap[tabDef.id]?.filter((i) => !i.blocking).length ?? 0;
-            return (
-              <TabsTrigger
-                key={tabDef.id}
-                value={tabDef.id}
-                id={`policy-tab-${tabDef.id}`}
-                aria-controls={`policy-panel-${tabDef.id}`}
-                icon={<Icon name={tabDef.icon} size={16} />}
-                className="whitespace-nowrap"
+    <TabsList aria-label={t("accessEditorTabsLabel")}>
+      {TABS.map((tabDef) => {
+        const errCount =
+          (tabErrors[tabDef.id]?.length ?? 0) +
+          (tabIssueMap[tabDef.id]?.filter((i) => i.blocking).length ?? 0);
+        const warnCount = tabIssueMap[tabDef.id]?.filter((i) => !i.blocking).length ?? 0;
+        return (
+          <TabsTrigger
+            key={tabDef.id}
+            value={tabDef.id}
+            id={`policy-tab-${tabDef.id}`}
+            aria-controls={`policy-panel-${tabDef.id}`}
+            icon={<Icon name={tabDef.icon} size={16} />}
+            className="whitespace-nowrap"
+          >
+            <span>{t(tabDef.labelKey)}</span>
+            {errCount > 0 && (
+              <span
+                className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-error text-bg"
+                title={t("errorBadgeLabel", { count: errCount })}
               >
-                <span>{t(tabDef.labelKey)}</span>
-                {errCount > 0 && (
-                  <span
-                    className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-error text-bg"
-                    title={t("errorBadgeLabel", { count: errCount })}
-                  >
-                    {errCount}
-                  </span>
-                )}
-                {errCount === 0 && warnCount > 0 && (
-                  <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-warning text-bg">
-                    {warnCount}
-                  </span>
-                )}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
+                {errCount}
+              </span>
+            )}
+            {errCount === 0 && warnCount > 0 && (
+              <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-warning text-bg">
+                {warnCount}
+              </span>
+            )}
+          </TabsTrigger>
+        );
+      })}
+    </TabsList>
   );
 }

@@ -67,7 +67,6 @@ test("the global system prompt is operator-only: a write token cannot rewrite it
   assert.equal(inferRequiredScope("PUT", "/api/settings/combo-defaults"), "write");
 });
 
-
 test("key template writes require admin while reads and unrelated routes retain their scopes", () => {
   for (const method of ["POST", "PATCH", "DELETE"]) {
     assert.equal(inferRequiredScope(method, "/api/key-templates"), "admin");

@@ -47,12 +47,15 @@ export async function POST(request: Request) {
       const template = await createKeyTemplate({ name, description, policy });
       return templateJson({ template, warnings: [] }, 201);
     }
-    const result = await createKeyTemplateFromKey({
-      name,
-      description,
-      fromKeyId: fromKeyId!,
-      acknowledge,
-    }, captured!);
+    const result = await createKeyTemplateFromKey(
+      {
+        name,
+        description,
+        fromKeyId: fromKeyId!,
+        acknowledge,
+      },
+      captured!
+    );
     return templateJson(result, 201);
   } catch (error) {
     return templateFailure(error, "Error creating key template");

@@ -13,7 +13,10 @@ import {
 
 const modelRuleList = z.array(z.string().trim().min(1)).max(1000);
 const resetIntervalSchema = z.enum(["daily", "weekly", "monthly"]);
-const hhmmSchema = z.string().trim().regex(/^\d{2}:\d{2}$/, "Time must be in HH:MM format");
+const hhmmSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{2}:\d{2}$/, "Time must be in HH:MM format");
 const nullableCount = z.number().int().min(0).nullable();
 
 export const keyTemplateKeyPolicySchema = z
@@ -169,7 +172,11 @@ const reasoningRuleSchema = z
     });
     if (!result.success) {
       for (const zodIssue of result.error.issues) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: zodIssue.message, path: zodIssue.path });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: zodIssue.message,
+          path: zodIssue.path,
+        });
       }
     }
   });

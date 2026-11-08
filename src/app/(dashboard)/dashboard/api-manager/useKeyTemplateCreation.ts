@@ -15,7 +15,7 @@ import {
 } from "./keyTemplatePolicyUtils";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import type { UnreadableKeyTemplate } from "@/shared/types/keyTemplates";
-import { anchorReferenceIssues } from "./keyTemplateReferenceIssues";
+import { anchorReferenceIssues, clearFieldValidationIssues } from "./keyTemplateReferenceIssues";
 
 export function useKeyTemplateCreation() {
   const t = useTranslations("apiManager");
@@ -72,7 +72,12 @@ function useTemplateLibraryList() {
   return { templates, unreadableTemplates, templatesError, templatesLoading, fetchTemplates };
 }
 
-function useCreatePolicyValidation(createKeyFormState: PolicyEditorFormState, createKeyBaselineFormJson: string, createKeyRefIssues: TemplateReferenceIssue[], editorBlockingRefs: boolean | null) {
+function useCreatePolicyValidation(
+  createKeyFormState: PolicyEditorFormState,
+  createKeyBaselineFormJson: string,
+  createKeyRefIssues: TemplateReferenceIssue[],
+  editorBlockingRefs: boolean | null
+) {
   const t = useTranslations("apiManager");
   const draftCreatePolicy = useMemo(
     () => editorFormStateToPolicy(createKeyFormState),
@@ -132,16 +137,21 @@ function useCreateDraftValues() {
   );
   const [createKeyRefIssues, setCreateKeyRefIssues] = useState<TemplateReferenceIssue[]>([]);
   const [loadingTemplatePolicy, setLoadingTemplatePolicy] = useState(false);
-  const templateLoadGeneration = useRef(0);
+  const templateLoadGenerationRef = useRef(0);
   const [editorBlockingRefs, setEditorBlockingRefs] = useState<boolean | null>(null);
   const handleEditorValidation = useCallback((state: { hasBlockingReferenceIssues: boolean }) => {
     setEditorBlockingRefs(state.hasBlockingReferenceIssues);
   }, []);
   const [showFullPolicyEditor, setShowFullPolicyEditor] = useState(false);
-  const setCreateKeyFormState = useCallback((update: PolicyEditorFormState | ((previous: PolicyEditorFormState) => PolicyEditorFormState)) => {
-    setRawCreateKeyFormState(update);
-    setCreateKeyRefIssues((issues) => issues.filter((issue) => issue.code !== "INVALID_FIELD"));
-  }, []);
+  const setCreateKeyFormState = useCallback(
+    (
+      update: PolicyEditorFormState | ((previous: PolicyEditorFormState) => PolicyEditorFormState)
+    ) => {
+      setRawCreateKeyFormState(update);
+      setCreateKeyRefIssues(clearFieldValidationIssues);
+    },
+    []
+  );
 
   return {
     newKeyName,
@@ -174,7 +184,7 @@ function useCreateDraftValues() {
     setEditorBlockingRefs,
     showFullPolicyEditor,
     setShowFullPolicyEditor,
-    templateLoadGeneration,
+    templateLoadGenerationRef,
     handleEditorValidation,
   };
 }
@@ -201,19 +211,19 @@ function useCreatePolicyDraft() {
     editorBlockingRefs,
     setEditorBlockingRefs,
     setShowFullPolicyEditor,
-    templateLoadGeneration,
+    templateLoadGenerationRef,
   } = values;
   const syncCreateKeyFormState = useCallback((nextFormState: PolicyEditorFormState) => {
-    setCreateKeyRefIssues((issues) => issues.filter((issue) => issue.code !== "INVALID_FIELD"));
+    setCreateKeyRefIssues(clearFieldValidationIssues);
     setCreateKeyFormState(nextFormState);
     setNewKeyManageEnabled(nextFormState.manageEnabled);
     setNewKeySelfUsageEnabled(nextFormState.selfUsageEnabled);
     setNewKeyAccountQuotaEnabled(nextFormState.selfAccountQuotaEnabled);
     setNewKeyAllowUsageCommand(nextFormState.allowUsageCommand);
-  }, []);
+  }, [setCreateKeyFormState, setCreateKeyRefIssues, setNewKeyAccountQuotaEnabled, setNewKeyAllowUsageCommand, setNewKeyManageEnabled, setNewKeySelfUsageEnabled]);
 
   const resetCreateKeyModalState = useCallback(() => {
-    templateLoadGeneration.current++;
+    templateLoadGenerationRef.current++;
     setEditorBlockingRefs(null);
     const defaultForm = createDefaultPolicyEditorFormState();
     setNewKeyName("");
@@ -226,9 +236,14 @@ function useCreatePolicyDraft() {
     setShowFullPolicyEditor(false);
     setNameError(null);
     setCreateError(null);
-  }, [syncCreateKeyFormState]);
+  }, [syncCreateKeyFormState, setCreateError, setCreateKeyBaselineFormJson, setCreateKeyRefIssues, setEditorBlockingRefs, setLoadingTemplatePolicy, setNameError, setNewKeyName, setSelectedTemplateId, setSelectedTemplateRef, setShowFullPolicyEditor, templateLoadGenerationRef]);
 
-  const validation = useCreatePolicyValidation(createKeyFormState, createKeyBaselineFormJson, createKeyRefIssues, editorBlockingRefs);
+  const validation = useCreatePolicyValidation(
+    createKeyFormState,
+    createKeyBaselineFormJson,
+    createKeyRefIssues,
+    editorBlockingRefs
+  );
   return { ...values, syncCreateKeyFormState, resetCreateKeyModalState, ...validation };
 }
 
@@ -245,52 +260,51 @@ function useApplyTemplateToDraft(draft: CreatePolicyDraft) {
     setLoadingTemplatePolicy,
     setEditorBlockingRefs,
     setShowFullPolicyEditor,
-    templateLoadGeneration,
+    templateLoadGenerationRef,
     syncCreateKeyFormState,
   } = draft;
   return async (templateId: string) => {
-      const generation = ++templateLoadGeneration.current;
-      setEditorBlockingRefs(null);
-      if (!templateId) {
-        setLoadingTemplatePolicy(false);
-        const defaultForm = createDefaultPolicyEditorFormState();
-        syncCreateKeyFormState(defaultForm);
-        setCreateKeyBaselineFormJson(JSON.stringify(defaultForm));
-        setSelectedTemplateId("");
-        setSelectedTemplateRef(null);
-        setCreateKeyRefIssues([]);
+    const generation = ++templateLoadGenerationRef.current;
+    setEditorBlockingRefs(null);
+    if (!templateId) {
+      setLoadingTemplatePolicy(false);
+      const defaultForm = createDefaultPolicyEditorFormState();
+      syncCreateKeyFormState(defaultForm);
+      setCreateKeyBaselineFormJson(JSON.stringify(defaultForm));
+      setSelectedTemplateId("");
+      setSelectedTemplateRef(null);
+      setCreateKeyRefIssues([]);
+      return;
+    }
+
+    setLoadingTemplatePolicy(true);
+    setCreateError(null);
+    try {
+      const res = await fetch(`/api/key-templates/${encodeURIComponent(templateId)}`);
+      const data = await res.json();
+      if (generation !== templateLoadGenerationRef.current) return;
+      if (res.ok && data?.template?.policy) {
+        const tpl = data.template as KeyTemplate;
+        const refIssues: TemplateReferenceIssue[] = Array.isArray(data.referenceIssues)
+          ? data.referenceIssues
+          : [];
+        const nextForm = policyToEditorFormState(tpl.policy);
+        syncCreateKeyFormState(nextForm);
+        setCreateKeyBaselineFormJson(JSON.stringify(nextForm));
+        setSelectedTemplateId(tpl.id);
+        setSelectedTemplateRef({ id: tpl.id, revision: tpl.revision });
+        setCreateKeyRefIssues(anchorReferenceIssues(refIssues, tpl.policy));
+        if (refIssues.length > 0) {
+          setShowFullPolicyEditor(true);
+        }
         return;
       }
-
-      setLoadingTemplatePolicy(true);
-      setCreateError(null);
-      try {
-        const res = await fetch(`/api/key-templates/${encodeURIComponent(templateId)}`);
-        const data = await res.json();
-        if (generation !== templateLoadGeneration.current) return;
-        if (res.ok && data?.template?.policy) {
-          const tpl = data.template as KeyTemplate;
-          const refIssues: TemplateReferenceIssue[] = Array.isArray(data.referenceIssues)
-            ? data.referenceIssues
-            : [];
-          const nextForm = policyToEditorFormState(tpl.policy);
-          syncCreateKeyFormState(nextForm);
-          setCreateKeyBaselineFormJson(JSON.stringify(nextForm));
-          setSelectedTemplateId(tpl.id);
-          setSelectedTemplateRef({ id: tpl.id, revision: tpl.revision });
-          setCreateKeyRefIssues(anchorReferenceIssues(refIssues, tpl.policy));
-          if (refIssues.length > 0) {
-            setShowFullPolicyEditor(true);
-          }
-          return;
-        }
-        setCreateError(extractApiErrorMessage(data, t("failedLoadTemplateDetail")));
-      } catch {
-        if (generation !== templateLoadGeneration.current) return;
-        setCreateError(t("failedLoadTemplateDetail"));
-      } finally {
-        if (generation === templateLoadGeneration.current) setLoadingTemplatePolicy(false);
-      }
-    };
-
+      setCreateError(extractApiErrorMessage(data, t("failedLoadTemplateDetail")));
+    } catch {
+      if (generation !== templateLoadGenerationRef.current) return;
+      setCreateError(t("failedLoadTemplateDetail"));
+    } finally {
+      if (generation === templateLoadGenerationRef.current) setLoadingTemplatePolicy(false);
+    }
+  };
 }

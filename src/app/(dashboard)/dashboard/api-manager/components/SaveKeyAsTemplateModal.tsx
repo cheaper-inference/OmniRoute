@@ -32,10 +32,19 @@ export default function SaveKeyAsTemplateModal({
   onSaved,
 }: SaveKeyAsTemplateModalProps) {
   if (!sourceKey) return null;
-  return <SaveKeyAsTemplateForm key={sourceKey.id} sourceKey={sourceKey} onClose={onClose} onSaved={onSaved} />;
+  return (
+    <SaveKeyAsTemplateForm
+      key={sourceKey.id}
+      sourceKey={sourceKey}
+      onClose={onClose}
+      onSaved={onSaved}
+    />
+  );
 }
 
-type SaveFormProps = Omit<SaveKeyAsTemplateModalProps, "sourceKey"> & { sourceKey: { id: string; name: string } };
+type SaveFormProps = Omit<SaveKeyAsTemplateModalProps, "sourceKey"> & {
+  sourceKey: { id: string; name: string };
+};
 
 function useTemplatePreview(sourceKey: { id: string }) {
   const t = useTranslations("apiManager");
@@ -49,9 +58,7 @@ function useTemplatePreview(sourceKey: { id: string }) {
 
     const loadPreview = async () => {
       try {
-        const res = await fetch(
-          `/api/keys/${encodeURIComponent(sourceKey.id)}/template-policy`
-        );
+        const res = await fetch(`/api/keys/${encodeURIComponent(sourceKey.id)}/template-policy`);
         const data = await res.json();
         if (cancelled) return;
         if (!res.ok) {
@@ -159,7 +166,9 @@ function useSaveTemplateModel({ sourceKey, onClose, onSaved }: SaveFormProps) {
     }
   };
 
-  const summaryBadges = preview.previewPolicy ? summarizeKeyTemplatePolicy(preview.previewPolicy, t) : [];
+  const summaryBadges = preview.previewPolicy
+    ? summarizeKeyTemplatePolicy(preview.previewPolicy, t)
+    : [];
 
   return {
     name,
@@ -201,77 +210,70 @@ function SaveKeyAsTemplateForm(props: SaveFormProps) {
   );
 }
 
-
 function CapturedPolicySummary({ model }: { model: SaveTemplateModel }) {
   const { t, summaryBadges } = model;
   return (
     <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
-            <p className="text-xs font-semibold text-text-main">
-              {t("templateCapturedSnapshotHeading")}
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {summaryBadges.map((b) => (
-                <span
-                  key={b.id}
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium ${
-                    b.tone === "success"
-                      ? "bg-success/10 text-success"
-                      : b.tone === "warning"
-                        ? "bg-warning/10 text-warning"
-                        : b.tone === "error"
-                          ? "bg-error/10 text-error"
-                          : b.tone === "info"
-                            ? "bg-info/10 text-info"
-                            : "bg-surface-2 text-text-muted"
-                  }`}
-                >
-                  <Icon name={b.icon} size={12} />
-                  {b.label}
-                </span>
-              ))}
-            </div>
-            <p className="text-[11px] text-text-muted pt-1">
-              {t("templateExclusionsNote")}
-            </p>
-          </div>
+      <p className="text-xs font-semibold text-text-main">{t("templateCapturedSnapshotHeading")}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {summaryBadges.map((b) => (
+          <span
+            key={b.id}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium ${
+              b.tone === "success"
+                ? "bg-success/10 text-success"
+                : b.tone === "warning"
+                  ? "bg-warning/10 text-warning"
+                  : b.tone === "error"
+                    ? "bg-error/10 text-error"
+                    : b.tone === "info"
+                      ? "bg-info/10 text-info"
+                      : "bg-surface-2 text-text-muted"
+            }`}
+          >
+            <Icon name={b.icon} size={12} />
+            {b.label}
+          </span>
+        ))}
+      </div>
+      <p className="text-[11px] text-text-muted pt-1">{t("templateExclusionsNote")}</p>
+    </div>
   );
 }
-
 
 function CaptureWarnings({ model }: { model: SaveTemplateModel }) {
   const { acknowledgedCodes, t, toggleAcknowledge, warnings } = model;
   return (
     <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-warning/40 bg-warning/10">
-            <p className="text-xs font-semibold text-warning flex items-center gap-1.5">
-              <Icon name="warning" size={16} />
-              {t("templateWarningsHeading")}
-            </p>
-            {warnings.map((w) => (
-              <div
-                key={w.code}
-                className="flex flex-col gap-1.5 p-2.5 rounded border border-warning/30 bg-surface/80"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="text-xs text-text-main">{w.message}</span>
-                  <code className="text-[10px] font-mono text-text-muted shrink-0">{w.code}</code>
-                </div>
-                {w.requiresAcknowledgement && (
-                  <Checkbox
-                    checked={acknowledgedCodes.has(w.code)}
-                    onChange={() => toggleAcknowledge(w.code)}
-                    label={
-                      <span className="text-xs font-medium text-warning">
-                        {t("templateAcknowledgeWarningLabel")}
-                      </span>
-                    }
-                  />
-                )}
-              </div>
-            ))}
+      <p className="text-xs font-semibold text-warning flex items-center gap-1.5">
+        <Icon name="warning" size={16} />
+        {t("templateWarningsHeading")}
+      </p>
+      {warnings.map((w) => (
+        <div
+          key={w.code}
+          className="flex flex-col gap-1.5 p-2.5 rounded border border-warning/30 bg-surface/80"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <span className="text-xs text-text-main">{w.message}</span>
+            <code className="text-[10px] font-mono text-text-muted shrink-0">{w.code}</code>
           </div>
+          {w.requiresAcknowledgement && (
+            <Checkbox
+              checked={acknowledgedCodes.has(w.code)}
+              onChange={() => toggleAcknowledge(w.code)}
+              label={
+                <span className="text-xs font-medium text-warning">
+                  {t("templateAcknowledgeWarningLabel")}
+                </span>
+              }
+            />
+          )}
+        </div>
+      ))}
+    </div>
   );
 }
-
 
 function CaptureActions({ model }: { model: SaveTemplateModel }) {
   const {
@@ -287,70 +289,57 @@ function CaptureActions({ model }: { model: SaveTemplateModel }) {
   } = model;
   return (
     <div className="flex gap-2 pt-2">
-          <Button
-            type="button"
-            variant="ghost"
-            fullWidth
-            onClick={onClose}
-            disabled={isSaving}
-          >
-            {tc("cancel")}
-          </Button>
-          <Button
-            type="button"
-            fullWidth
-            loading={isSaving}
-            disabled={
-              isSaving ||
-              loadingPreview ||
-              !!previewError ||
-              !name.trim() ||
-              !allRequiredAcknowledged
-            }
-            onClick={handleSave}
-          >
-            {t("saveAsTemplateAction")}
-          </Button>
-        </div>
+      <Button type="button" variant="ghost" fullWidth onClick={onClose} disabled={isSaving}>
+        {tc("cancel")}
+      </Button>
+      <Button
+        type="button"
+        fullWidth
+        loading={isSaving}
+        disabled={
+          isSaving || loadingPreview || !!previewError || !name.trim() || !allRequiredAcknowledged
+        }
+        onClick={handleSave}
+      >
+        {t("saveAsTemplateAction")}
+      </Button>
+    </div>
   );
 }
-
 
 function CaptureNameField({ model }: { model: SaveTemplateModel }) {
   const { name, setName, setSaveError, isSaving, t } = model;
   return (
     <Input
-          label={t("templateNameLabel")}
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-            setSaveError(null);
-          }}
-          placeholder={t("templateNamePlaceholder")}
-          maxLength={200}
-          disabled={isSaving}
-        />
+      label={t("templateNameLabel")}
+      value={name}
+      onChange={(e) => {
+        setName(e.target.value);
+        setSaveError(null);
+      }}
+      placeholder={t("templateNamePlaceholder")}
+      maxLength={200}
+      disabled={isSaving}
+    />
   );
 }
-
 
 function CaptureReferenceWarnings({ model }: { model: SaveTemplateModel }) {
   const { t, referenceIssues } = model;
   return (
     <div className="flex flex-col gap-1.5 p-3 rounded-lg border border-warning/30 bg-warning/10">
-            <p className="text-xs font-semibold text-warning flex items-center gap-1.5">
-              <Icon name="warning" size={15} />
-              {t("templatePreviewReferenceIssuesTitle")}
-            </p>
-            {referenceIssues.map((issue) => (
-              <p key={`${issue.path}-${issue.code}`} className="text-xs text-warning">
-                <code className="font-mono text-[11px]">{issue.path}</code>: {issue.message}
-              </p>
-            ))}
-          </div>
+      <p className="text-xs font-semibold text-warning flex items-center gap-1.5">
+        <Icon name="warning" size={15} />
+        {t("templatePreviewReferenceIssuesTitle")}
+      </p>
+      {referenceIssues.map((issue) => (
+        <p key={`${issue.path}-${issue.code}`} className="text-xs text-warning">
+          <code className="font-mono text-[11px]">{issue.path}</code>: {issue.message}
+        </p>
+      ))}
+    </div>
   );
 }
-
 
 function CaptureFormFields({ model }: { model: SaveTemplateModel }) {
   const {
@@ -369,62 +358,56 @@ function CaptureFormFields({ model }: { model: SaveTemplateModel }) {
   } = model;
   return (
     <div className="flex flex-col gap-4" data-testid="save-as-template-modal">
-        <p className="text-xs text-text-muted">{t("saveAsTemplateDesc")}</p>
+      <p className="text-xs text-text-muted">{t("saveAsTemplateDesc")}</p>
 
-        <CaptureNameField model={model} />
+      <CaptureNameField model={model} />
 
-        <Input
-          label={t("templateDescriptionLabel")}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder={t("templateDescriptionPlaceholder")}
-          maxLength={500}
-          disabled={isSaving}
+      <Input
+        label={t("templateDescriptionLabel")}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder={t("templateDescriptionPlaceholder")}
+        maxLength={500}
+        disabled={isSaving}
+      />
+
+      {loadingPreview && (
+        <div
+          className="flex items-center gap-2 p-4 rounded-lg border border-border bg-surface/40 text-xs text-text-muted"
+          role="status"
+          aria-live="polite"
+        >
+          <Spinner size="sm" />
+          <span>{t("templateLoadingPreview")}</span>
+        </div>
+      )}
+
+      {previewError && (
+        <Alert
+          variant="critical"
+          icon={<Icon name="error" />}
+          title={t("templatePreviewRefusedTitle")}
+          description={previewError}
         />
+      )}
 
-        {loadingPreview && (
-          <div
-            className="flex items-center gap-2 p-4 rounded-lg border border-border bg-surface/40 text-xs text-text-muted"
-            role="status"
-            aria-live="polite"
-          >
-            <Spinner size="sm" />
-            <span>{t("templateLoadingPreview")}</span>
-          </div>
-        )}
+      {previewPolicy && <CapturedPolicySummary model={model} />}
 
-        {previewError && (
-          <Alert
-            variant="critical"
-            icon={<Icon name="error" />}
-            title={t("templatePreviewRefusedTitle")}
-            description={previewError}
-          />
-        )}
+      {referenceIssues.length > 0 && <CaptureReferenceWarnings model={model} />}
 
-        {previewPolicy && (
-          <CapturedPolicySummary model={model} />
-        )}
+      {warnings.length > 0 && <CaptureWarnings model={model} />}
 
-        {referenceIssues.length > 0 && (
-          <CaptureReferenceWarnings model={model} />
-        )}
+      {saveError && (
+        <Alert
+          variant="critical"
+          icon={<Icon name="error" />}
+          description={saveError}
+          dismissLabel={tc("close")}
+          onDismiss={() => setSaveError(null)}
+        />
+      )}
 
-        {warnings.length > 0 && (
-          <CaptureWarnings model={model} />
-        )}
-
-        {saveError && (
-          <Alert
-            variant="critical"
-            icon={<Icon name="error" />}
-            description={saveError}
-            dismissLabel={tc("close")}
-            onDismiss={() => setSaveError(null)}
-          />
-        )}
-
-        <CaptureActions model={model} />
-      </div>
+      <CaptureActions model={model} />
+    </div>
   );
 }

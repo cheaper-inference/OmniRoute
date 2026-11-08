@@ -133,7 +133,10 @@ export function getKeyTemplate(
   return { template, referenceIssues: collectReferenceIssues(handle, template.policy) };
 }
 
-export function getKeyTemplateRefStatus(ref: { id: string; revision: number }): KeyTemplateRefStatus {
+export function getKeyTemplateRefStatus(ref: {
+  id: string;
+  revision: number;
+}): KeyTemplateRefStatus {
   const stored = getStoredTemplate(db(), ref.id);
   if (!stored) return "missing";
   return stored.revision === ref.revision ? "current" : "stale";
@@ -211,12 +214,15 @@ export function previewKeyTemplatePolicy(keyId: string): {
   });
 }
 
-export async function createKeyTemplateFromKey(input: {
-  name: string;
-  description?: string;
-  fromKeyId: string;
-  acknowledge?: string[];
-}, preview: ReturnType<typeof previewKeyTemplatePolicy>): Promise<{ template: KeyTemplate; warnings: TemplateWarning[] }> {
+export async function createKeyTemplateFromKey(
+  input: {
+    name: string;
+    description?: string;
+    fromKeyId: string;
+    acknowledge?: string[];
+  },
+  preview: ReturnType<typeof previewKeyTemplatePolicy>
+): Promise<{ template: KeyTemplate; warnings: TemplateWarning[] }> {
   const acknowledged = new Set(input.acknowledge ?? []);
   const pending = preview.warnings.filter(
     (warning) => warning.requiresAcknowledgement && !acknowledged.has(warning.code)

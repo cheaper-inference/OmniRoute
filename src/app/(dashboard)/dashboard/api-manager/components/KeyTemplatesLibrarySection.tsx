@@ -10,7 +10,7 @@ import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
 import { Spinner } from "@/shared/components/Loading";
 import type { UnreadableKeyTemplate } from "@/shared/types/keyTemplates";
-import { anchorReferenceIssues } from "../keyTemplateReferenceIssues";
+import { anchorReferenceIssues, clearFieldValidationIssues } from "../keyTemplateReferenceIssues";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import KeyPolicySixTabEditor from "./KeyPolicySixTabEditor";
@@ -20,6 +20,7 @@ import {
   validateKeyName,
   type KeyTemplate,
   type KeyTemplatePolicy,
+  type PolicyEditorFormState,
   type TemplateReferenceIssue,
 } from "../keyTemplatePolicyUtils";
 
@@ -44,11 +45,12 @@ function useLibraryDraft() {
   const [draftPolicy, setDraftPolicy] = useState<KeyTemplatePolicy>(() =>
     createDefaultClientKeyTemplatePolicy()
   );
+  const [draftFormState, setDraftFormState] = useState<PolicyEditorFormState | undefined>(undefined);
   const [serverRefIssues, setServerRefIssues] = useState<TemplateReferenceIssue[]>([]);
   const [hasEditorErrors, setHasEditorErrors] = useState(false);
   const [hasBlockingRefs, setHasBlockingRefs] = useState(false);
   const [loadingTemplateDetail, setLoadingTemplateDetail] = useState(false);
-  const loadGeneration = useRef(0);
+  const loadGenerationRef = useRef(0);
   const [modalError, setModalError] = useState<string | null>(null);
   const [sectionError, setSectionError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,6 +67,8 @@ function useLibraryDraft() {
     setTemplateDesc,
     draftPolicy,
     setDraftPolicy,
+    draftFormState,
+    setDraftFormState,
     serverRefIssues,
     setServerRefIssues,
     hasEditorErrors,
@@ -85,7 +89,7 @@ function useLibraryDraft() {
     tc,
     requestConfirm,
     confirmDialog,
-    loadGeneration,
+    loadGenerationRef,
   };
 }
 
@@ -98,91 +102,114 @@ function useLibraryEditing(state: LibraryDraft) {
     setTemplateName,
     setTemplateDesc,
     setDraftPolicy,
+    setDraftFormState,
     setServerRefIssues,
     setLoadingTemplateDetail,
     setModalError,
     isSubmitting,
     setRequiresReload,
     t,
-    loadGeneration,
+    loadGenerationRef,
   } = state;
   const openCreateModal = useCallback(() => {
-    loadGeneration.current++;
+    loadGenerationRef.current++;
     setLoadingTemplateDetail(false);
     setEditorMode("create");
     setEditingTemplate(null);
     setTemplateName("");
     setTemplateDesc("");
     setDraftPolicy(createDefaultClientKeyTemplatePolicy());
+    setDraftFormState(undefined);
     setServerRefIssues([]);
     setModalError(null);
     setRequiresReload(false);
-  }, []);
+  }, [loadGenerationRef, setDraftPolicy, setDraftFormState, setEditingTemplate, setEditorMode, setLoadingTemplateDetail, setModalError, setRequiresReload, setServerRefIssues, setTemplateDesc, setTemplateName]);
 
-  const openEditModal = useCallback(async (tpl: KeyTemplate) => {
-    const generation = ++loadGeneration.current;
-    setEditorMode("edit");
-    setEditingTemplate(tpl);
-    setTemplateName(tpl.name);
-    setTemplateDesc(tpl.description || "");
-    setDraftPolicy(tpl.policy);
-    setServerRefIssues([]);
-    setModalError(null);
-    setLoadingTemplateDetail(true);
-    setRequiresReload(false);
+  const openEditModal = useCallback(
+    async (tpl: KeyTemplate) => {
+      const generation = ++loadGenerationRef.current;
+      setEditorMode("edit");
+      setEditingTemplate(tpl);
+      setTemplateName(tpl.name);
+      setTemplateDesc(tpl.description || "");
+      setDraftPolicy(tpl.policy);
+      setDraftFormState(undefined);
+      setServerRefIssues([]);
+      setModalError(null);
+      setLoadingTemplateDetail(true);
+      setRequiresReload(false);
 
-    try {
-      const res = await fetch(`/api/key-templates/${encodeURIComponent(tpl.id)}`);
-      const data = await res.json();
-      if (generation !== loadGeneration.current) return;
-      if (res.ok) {
-        if (data.template) {
-          setEditingTemplate(data.template);
-          setTemplateName(data.template.name);
-          setTemplateDesc(data.template.description || "");
-          setDraftPolicy(data.template.policy);
+      try {
+        const res = await fetch(`/api/key-templates/${encodeURIComponent(tpl.id)}`);
+        const data = await res.json();
+        if (generation !== loadGenerationRef.current) return;
+        if (res.ok) {
+          if (data.template) {
+            setEditingTemplate(data.template);
+            setTemplateName(data.template.name);
+            setTemplateDesc(data.template.description || "");
+            setDraftPolicy(data.template.policy);
+          }
+          setServerRefIssues(
+            anchorReferenceIssues(
+              Array.isArray(data.referenceIssues) ? data.referenceIssues : [],
+              data.template?.policy ?? tpl.policy
+            )
+          );
+        } else {
+          setRequiresReload(true);
+          setModalError(extractApiErrorMessage(data, t("failedLoadTemplateDetail")));
         }
-        setServerRefIssues(anchorReferenceIssues(Array.isArray(data.referenceIssues) ? data.referenceIssues : [], data.template?.policy ?? tpl.policy));
-      } else {
+      } catch {
+        if (generation !== loadGenerationRef.current) return;
         setRequiresReload(true);
-        setModalError(extractApiErrorMessage(data, t("failedLoadTemplateDetail")));
+        setModalError(t("failedLoadTemplateDetail"));
+      } finally {
+        if (generation === loadGenerationRef.current) setLoadingTemplateDetail(false);
       }
-    } catch {
-      if (generation !== loadGeneration.current) return;
-      setRequiresReload(true);
-      setModalError(t("failedLoadTemplateDetail"));
-    } finally {
-      if (generation === loadGeneration.current) setLoadingTemplateDetail(false);
-    }
-  }, [t]);
+    },
+    [t, loadGenerationRef, setDraftPolicy, setDraftFormState, setEditingTemplate, setEditorMode, setLoadingTemplateDetail, setModalError, setRequiresReload, setServerRefIssues, setTemplateDesc, setTemplateName]
+  );
 
   const closeEditorModal = useCallback(() => {
     if (isSubmitting) return;
-    loadGeneration.current++;
+    loadGenerationRef.current++;
     setLoadingTemplateDetail(false);
     setEditorMode(null);
     setEditingTemplate(null);
     setModalError(null);
-  }, [isSubmitting]);
+  }, [isSubmitting, loadGenerationRef, setEditingTemplate, setEditorMode, setLoadingTemplateDetail, setModalError]);
 
   return { openCreateModal, openEditModal, closeEditorModal };
 }
 
-function submitTemplateDraft({ editorMode, editingTemplate, templateName, templateDesc, draftPolicy }: LibraryDraft) {
+function submitTemplateDraft({
+  editorMode,
+  editingTemplate,
+  templateName,
+  templateDesc,
+  draftPolicy,
+}: LibraryDraft) {
   const editing = editorMode === "edit" && editingTemplate;
-  return fetch(editing ? `/api/key-templates/${encodeURIComponent(editing.id)}` : "/api/key-templates", {
-    method: editing ? "PATCH" : "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      ...(editing ? { revision: editing.revision } : {}),
-      name: templateName.trim(),
-      description: templateDesc.trim(),
-      policy: draftPolicy,
-    }),
-  });
+  return fetch(
+    editing ? `/api/key-templates/${encodeURIComponent(editing.id)}` : "/api/key-templates",
+    {
+      method: editing ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...(editing ? { revision: editing.revision } : {}),
+        name: templateName.trim(),
+        description: templateDesc.trim(),
+        policy: draftPolicy,
+      }),
+    }
+  );
 }
 
-function useSaveTemplate(state: LibraryDraft, { onRefreshTemplates }: KeyTemplatesLibrarySectionProps) {
+function useSaveTemplate(
+  state: LibraryDraft,
+  { onRefreshTemplates }: KeyTemplatesLibrarySectionProps
+) {
   const {
     setEditorMode,
     setEditingTemplate,
@@ -214,24 +241,25 @@ function useSaveTemplate(state: LibraryDraft, { onRefreshTemplates }: KeyTemplat
 
     try {
       const res = await submitTemplateDraft(state);
-        const data = await res.json();
-        if (res.status === 409 && data.code === "REVISION_CONFLICT") {
-          setRequiresReload(true);
-          setModalError(t("templateRevisionConflictError"));
-          return;
-        }
-        if (res.status === 409 && data.code === "TEMPLATE_NAME_CONFLICT") {
-          setModalError(t("templateNameConflictError"));
-          return;
-        }
-        if (!res.ok) {
-          if (Array.isArray(data?.issues)) setServerRefIssues(anchorReferenceIssues(data.issues, draftPolicy));
-          setModalError(extractApiErrorMessage(data, t("templateSaveFailed")));
-          return;
-        }
-        await onRefreshTemplates();
-        setEditorMode(null);
-        setEditingTemplate(null);
+      const data = await res.json();
+      if (res.status === 409 && data.code === "REVISION_CONFLICT") {
+        setRequiresReload(true);
+        setModalError(t("templateRevisionConflictError"));
+        return;
+      }
+      if (res.status === 409 && data.code === "TEMPLATE_NAME_CONFLICT") {
+        setModalError(t("templateNameConflictError"));
+        return;
+      }
+      if (!res.ok) {
+        if (Array.isArray(data?.issues))
+          setServerRefIssues(anchorReferenceIssues(data.issues, draftPolicy, state.draftFormState));
+        setModalError(extractApiErrorMessage(data, t("templateSaveFailed")));
+        return;
+      }
+      await onRefreshTemplates();
+      setEditorMode(null);
+      setEditingTemplate(null);
     } catch {
       setModalError(t("templateSaveFailed"));
     } finally {
@@ -242,7 +270,10 @@ function useSaveTemplate(state: LibraryDraft, { onRefreshTemplates }: KeyTemplat
   return handleSaveTemplate;
 }
 
-function useDeleteTemplate(state: LibraryDraft, { onRefreshTemplates }: KeyTemplatesLibrarySectionProps) {
+function useDeleteTemplate(
+  state: LibraryDraft,
+  { onRefreshTemplates }: KeyTemplatesLibrarySectionProps
+) {
   const { setSectionError, t, tc, requestConfirm } = state;
   const handleDeleteTemplate = async (tpl: Pick<KeyTemplate, "id" | "name">) => {
     if (
@@ -309,25 +340,7 @@ export default function KeyTemplatesLibrarySection(props: KeyTemplatesLibrarySec
   } = model;
   return (
     <Card data-testid="key-templates-library">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 shrink-0">
-            <Icon name="layers" className="text-xl text-primary" />
-          </div>
-          <div>
-            <h3 className="font-semibold">
-              {t("keyTemplatesTitle")}
-              <span className="ml-1.5 text-sm font-normal text-text-muted">
-                ({templates.length + unreadable.length})
-              </span>
-            </h3>
-            <p className="text-xs text-text-muted">{t("keyTemplatesDesc")}</p>
-          </div>
-        </div>
-        <Button icon="add" variant="secondary" onClick={openCreateModal}>
-          {t("newTemplateAction")}
-        </Button>
-      </div>
+      <TemplateLibraryHeader model={model} />
 
       {sectionError && (
         <div className="mb-4">
@@ -343,11 +356,31 @@ export default function KeyTemplatesLibrarySection(props: KeyTemplatesLibrarySec
 
       {loadError && <Alert variant="critical" description={loadError} />}
       {loading && <Spinner size="sm" />}
-      {loadError && <Button variant="outline" onClick={onRefreshTemplates}>{tc("retry")}</Button>}
+      {loadError && (
+        <Button variant="outline" onClick={onRefreshTemplates}>
+          {tc("retry")}
+        </Button>
+      )}
       {unreadable.map((template) => (
-        <div key={template.id} data-testid={`unreadable-template-${template.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-error/30 p-4 mb-3">
-          <div><p className="font-semibold">{template.name}</p><p className="text-xs text-error">{t("templateUnreadableStatus")} ({template.code})</p></div>
-          <Button icon="delete" variant="outline" onClick={() => handleDeleteTemplate(template)} aria-label={`${t("deleteTemplateAction")} ${template.name}`}>{tc("delete")}</Button>
+        <div
+          key={template.id}
+          data-testid={`unreadable-template-${template.id}`}
+          className="flex items-center justify-between gap-3 rounded-lg border border-error/30 p-4 mb-3"
+        >
+          <div>
+            <p className="font-semibold">{template.name}</p>
+            <p className="text-xs text-error">
+              {t("templateUnreadableStatus")} ({template.code})
+            </p>
+          </div>
+          <Button
+            icon="delete"
+            variant="outline"
+            onClick={() => handleDeleteTemplate(template)}
+            aria-label={`${t("deleteTemplateAction")} ${template.name}`}
+          >
+            {tc("delete")}
+          </Button>
         </div>
       ))}
       {templates.length === 0 && unreadable.length === 0 && !loadError && !loading ? (
@@ -374,106 +407,99 @@ export default function KeyTemplatesLibrarySection(props: KeyTemplatesLibrarySec
   );
 }
 
-
 function TemplateCardActions({ model, tpl }: { model: LibraryModel; tpl: KeyTemplate }) {
   const { t, onUseTemplate, openEditModal, handleDeleteTemplate } = model;
   return (
     <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-semibold text-text-main truncate">
-                          {tpl.name}
-                        </h4>
-                        <span className="px-1.5 py-0.5 rounded bg-surface-2 text-text-muted text-[10px] font-mono shrink-0">
-                          v{tpl.revision}
-                        </span>
-                      </div>
-                      {tpl.description && (
-                        <p className="text-xs text-text-muted line-clamp-2 mt-0.5">
-                          {tpl.description}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="primary"
-                        icon="vpn_key"
-                        onClick={() => onUseTemplate(tpl)}
-                        aria-label={`${t("useTemplateAction")} ${tpl.name}`}
-                      >
-                        {t("useTemplateAction")}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="icon-sm"
-                        variant="ghost"
-                        icon="edit"
-                        title={t("editTemplateAction")}
-                        aria-label={`${t("editTemplateAction")} ${tpl.name}`}
-                        onClick={() => openEditModal(tpl)}
-                      />
-                      <Button
-                        type="button"
-                        size="icon-sm"
-                        variant="ghost"
-                        icon="delete"
-                        className="text-error"
-                        title={t("deleteTemplateAction")}
-                        aria-label={`${t("deleteTemplateAction")} ${tpl.name}`}
-                        onClick={() => handleDeleteTemplate(tpl)}
-                      />
-                    </div>
-                  </div>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-text-main truncate">{tpl.name}</h4>
+          <span className="px-1.5 py-0.5 rounded bg-surface-2 text-text-muted text-[10px] font-mono shrink-0">
+            v{tpl.revision}
+          </span>
+        </div>
+        {tpl.description && (
+          <p className="text-xs text-text-muted line-clamp-2 mt-0.5">{tpl.description}</p>
+        )}
+      </div>
+      <div className="flex items-center gap-1 shrink-0">
+        <Button
+          type="button"
+          size="sm"
+          variant="primary"
+          icon="vpn_key"
+          onClick={() => onUseTemplate(tpl)}
+          aria-label={`${t("useTemplateAction")} ${tpl.name}`}
+        >
+          {t("useTemplateAction")}
+        </Button>
+        <Button
+          type="button"
+          size="icon-sm"
+          variant="ghost"
+          icon="edit"
+          title={t("editTemplateAction")}
+          aria-label={`${t("editTemplateAction")} ${tpl.name}`}
+          onClick={() => openEditModal(tpl)}
+        />
+        <Button
+          type="button"
+          size="icon-sm"
+          variant="ghost"
+          icon="delete"
+          className="text-error"
+          title={t("deleteTemplateAction")}
+          aria-label={`${t("deleteTemplateAction")} ${tpl.name}`}
+          onClick={() => handleDeleteTemplate(tpl)}
+        />
+      </div>
+    </div>
   );
 }
-
 
 function TemplateCards({ model }: { model: LibraryModel }) {
   const { t, templates } = model;
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {templates.map((tpl) => {
-            const badges = summarizeKeyTemplatePolicy(tpl.policy, t);
-            return (
-              <div
-                key={tpl.id}
-                data-testid={`template-card-${tpl.id}`}
-                className="flex flex-col justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40 hover:border-border/80 transition-colors"
-              >
-                <div className="flex flex-col gap-2">
-                  <TemplateCardActions model={model} tpl={tpl} />
+      {templates.map((tpl) => {
+        const badges = summarizeKeyTemplatePolicy(tpl.policy, t);
+        return (
+          <div
+            key={tpl.id}
+            data-testid={`template-card-${tpl.id}`}
+            className="flex flex-col justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40 hover:border-border/80 transition-colors"
+          >
+            <div className="flex flex-col gap-2">
+              <TemplateCardActions model={model} tpl={tpl} />
 
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {badges.map((b) => (
-                      <span
-                        key={b.id}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium ${
-                          b.tone === "success"
-                            ? "bg-success/10 text-success"
-                            : b.tone === "warning"
-                              ? "bg-warning/10 text-warning"
-                              : b.tone === "error"
-                                ? "bg-error/10 text-error"
-                                : b.tone === "info"
-                                  ? "bg-info/10 text-info"
-                                  : "bg-surface-2 text-text-muted"
-                        }`}
-                      >
-                        <Icon name={b.icon} size={12} />
-                        {b.label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {badges.map((b) => (
+                  <span
+                    key={b.id}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium ${
+                      b.tone === "success"
+                        ? "bg-success/10 text-success"
+                        : b.tone === "warning"
+                          ? "bg-warning/10 text-warning"
+                          : b.tone === "error"
+                            ? "bg-error/10 text-error"
+                            : b.tone === "info"
+                              ? "bg-info/10 text-info"
+                              : "bg-surface-2 text-text-muted"
+                    }`}
+                  >
+                    <Icon name={b.icon} size={12} />
+                    {b.label}
+                  </span>
+                ))}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
-
 
 function TemplateEditorActions({ model }: { model: LibraryModel }) {
   const {
@@ -491,35 +517,34 @@ function TemplateEditorActions({ model }: { model: LibraryModel }) {
   } = model;
   return (
     <div className="flex gap-2 pt-2">
-            <Button
-              type="button"
-              variant="ghost"
-              fullWidth
-              onClick={closeEditorModal}
-              disabled={isSubmitting}
-            >
-              {tc("cancel")}
-            </Button>
-            <Button
-              type="button"
-              fullWidth
-              loading={isSubmitting}
-              disabled={
-                isSubmitting ||
-                loadingTemplateDetail ||
-                requiresReload ||
-                !templateName.trim() ||
-                hasEditorErrors ||
-                hasBlockingRefs
-              }
-              onClick={handleSaveTemplate}
-            >
-              {editorMode === "edit" ? t("saveChanges") : t("newTemplateAction")}
-            </Button>
-          </div>
+      <Button
+        type="button"
+        variant="ghost"
+        fullWidth
+        onClick={closeEditorModal}
+        disabled={isSubmitting}
+      >
+        {tc("cancel")}
+      </Button>
+      <Button
+        type="button"
+        fullWidth
+        loading={isSubmitting}
+        disabled={
+          isSubmitting ||
+          loadingTemplateDetail ||
+          requiresReload ||
+          !templateName.trim() ||
+          hasEditorErrors ||
+          hasBlockingRefs
+        }
+        onClick={handleSaveTemplate}
+      >
+        {editorMode === "edit" ? t("saveChanges") : t("newTemplateAction")}
+      </Button>
+    </div>
   );
 }
-
 
 function TemplateIdentityFields({ model }: { model: LibraryModel }) {
   const {
@@ -535,33 +560,32 @@ function TemplateIdentityFields({ model }: { model: LibraryModel }) {
   } = model;
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label={t("templateNameLabel")}
-              value={templateName}
-              onChange={(e) => {
-                setTemplateName(e.target.value);
-                setModalError(null);
-                setServerRefIssues((issues) => issues.filter((issue) => issue.code !== "INVALID_FIELD"));
-              }}
-              placeholder={t("templateNamePlaceholder")}
-              maxLength={200}
-              disabled={isSubmitting || loadingTemplateDetail}
-            />
-            <Input
-              label={t("templateDescriptionLabel")}
-              value={templateDesc}
-              onChange={(e) => {
-                setTemplateDesc(e.target.value);
-                setServerRefIssues((issues) => issues.filter((issue) => issue.code !== "INVALID_FIELD"));
-              }}
-              placeholder={t("templateDescriptionPlaceholder")}
-              maxLength={500}
-              disabled={isSubmitting || loadingTemplateDetail}
-            />
-          </div>
+      <Input
+        label={t("templateNameLabel")}
+        value={templateName}
+        onChange={(e) => {
+          setTemplateName(e.target.value);
+          setModalError(null);
+          setServerRefIssues(clearFieldValidationIssues);
+        }}
+        placeholder={t("templateNamePlaceholder")}
+        maxLength={200}
+        disabled={isSubmitting || loadingTemplateDetail}
+      />
+      <Input
+        label={t("templateDescriptionLabel")}
+        value={templateDesc}
+        onChange={(e) => {
+          setTemplateDesc(e.target.value);
+          setServerRefIssues(clearFieldValidationIssues);
+        }}
+        placeholder={t("templateDescriptionPlaceholder")}
+        maxLength={500}
+        disabled={isSubmitting || loadingTemplateDetail}
+      />
+    </div>
   );
 }
-
 
 function TemplateEditorModal({ model }: { model: LibraryModel }) {
   const {
@@ -585,55 +609,91 @@ function TemplateEditorModal({ model }: { model: LibraryModel }) {
   } = model;
   return (
     <Modal
-        isOpen={editorMode !== null}
-        title={
-          editorMode === "edit"
-            ? t("editTemplateModalTitle", { name: editingTemplate?.name ?? "" })
-            : t("newTemplateModalTitle")
-        }
-        maxWidth="max-w-4xl"
-        bodyClassName="p-6 max-h-[calc(100vh-120px)] overflow-y-auto"
-        onClose={closeEditorModal}
-      >
-        <div className="flex flex-col gap-4" data-testid="template-editor-modal">
-          <TemplateIdentityFields model={model} />
+      isOpen={editorMode !== null}
+      title={
+        editorMode === "edit"
+          ? t("editTemplateModalTitle", { name: editingTemplate?.name ?? "" })
+          : t("newTemplateModalTitle")
+      }
+      maxWidth="max-w-4xl"
+      bodyClassName="p-6 max-h-[calc(100vh-120px)] overflow-y-auto"
+      onClose={closeEditorModal}
+    >
+      <div className="flex flex-col gap-4" data-testid="template-editor-modal">
+        <TemplateIdentityFields model={model} />
 
-          {loadingTemplateDetail && (
-            <div className="text-xs text-text-muted flex items-center gap-2" role="status">
-              <Spinner size="sm" />
-              <span>{tc("loading")}</span>
-            </div>
-          )}
+        {loadingTemplateDetail && (
+          <div className="text-xs text-text-muted flex items-center gap-2" role="status">
+            <Spinner size="sm" />
+            <span>{tc("loading")}</span>
+          </div>
+        )}
 
-          {editorMode !== null && (
-            <KeyPolicySixTabEditor
-              policy={draftPolicy}
-              onChange={(next) => {
-                setDraftPolicy(next);
-                setServerRefIssues((issues) => issues.filter((issue) => issue.code !== "INVALID_FIELD"));
-              }}
-              serverReferenceIssues={serverRefIssues}
-              onValidationStateChange={({ hasErrors, hasBlockingReferenceIssues }) => {
-                setHasEditorErrors(hasErrors);
-                setHasBlockingRefs(hasBlockingReferenceIssues);
-              }}
-              disabled={isSubmitting || loadingTemplateDetail || requiresReload}
-            />
-          )}
+        {editorMode !== null && (
+          <KeyPolicySixTabEditor
+          onFormStateChange={model.setDraftFormState}
+            policy={draftPolicy}
+            onChange={(next) => {
+              setDraftPolicy(next);
+              setServerRefIssues((issues) =>
+                issues.filter((issue) => issue.code !== "INVALID_FIELD")
+              );
+            }}
+            serverReferenceIssues={serverRefIssues}
+            onValidationStateChange={({ hasErrors, hasBlockingReferenceIssues }) => {
+              setHasEditorErrors(hasErrors);
+              setHasBlockingRefs(hasBlockingReferenceIssues);
+            }}
+            disabled={isSubmitting || loadingTemplateDetail || requiresReload}
+          />
+        )}
 
-          {modalError && (
-            <Alert
-              variant="critical"
-              icon={<Icon name="error" />}
-              description={modalError}
-              dismissLabel={tc("close")}
-              onDismiss={() => setModalError(null)}
-            />
-          )}
-          {requiresReload && editingTemplate && <Button variant="outline" disabled={loadingTemplateDetail || isSubmitting} onClick={() => openEditModal(editingTemplate)}>{t("templateReloadAction")}</Button>}
+        {modalError && (
+          <Alert
+            variant="critical"
+            icon={<Icon name="error" />}
+            description={modalError}
+            dismissLabel={tc("close")}
+            onDismiss={() => setModalError(null)}
+          />
+        )}
+        {requiresReload && editingTemplate && (
+          <Button
+            variant="outline"
+            disabled={loadingTemplateDetail || isSubmitting}
+            onClick={() => openEditModal(editingTemplate)}
+          >
+            {t("templateReloadAction")}
+          </Button>
+        )}
 
-          <TemplateEditorActions model={model} />
+        <TemplateEditorActions model={model} />
+      </div>
+    </Modal>
+  );
+}
+
+function TemplateLibraryHeader({ model }: { model: LibraryModel }) {
+  const { t, templates, unreadable, openCreateModal } = model;
+  return (
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 shrink-0">
+            <Icon name="layers" className="text-xl text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold">
+              {t("keyTemplatesTitle")}
+              <span className="ml-1.5 text-sm font-normal text-text-muted">
+                ({templates.length + unreadable.length})
+              </span>
+            </h3>
+            <p className="text-xs text-text-muted">{t("keyTemplatesDesc")}</p>
+          </div>
         </div>
-      </Modal>
+        <Button icon="add" variant="secondary" onClick={openCreateModal}>
+          {t("newTemplateAction")}
+        </Button>
+      </div>
   );
 }
