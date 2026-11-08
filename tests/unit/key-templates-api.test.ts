@@ -529,3 +529,56 @@ test("stored templates with unknown versions or invalid policy fail closed", asy
   db.prepare("UPDATE key_templates SET policy = 'invalid-json' WHERE id = ?").run(template.id);
   assert.equal((await get()).status, 422);
 });
+
+test("migration 228 upgrades a prior-schema database without changing an existing key", () => {
+  const id = "00000000-0000-4000-8000-000000000001";
+  const db = core.getDbInstance();
+  db.prepare(
+    "INSERT INTO api_keys (id, name, key, created_at, no_log, scopes) VALUES (?, ?, ?, ?, ?, ?)"
+  ).run(
+    id,
+    "Existing before templates",
+    ["fixture-only", "upgrade"].join("-"),
+    "2026-11-08T12:00:00.000Z",
+    1,
+    JSON.stringify(["self:usage"])
+  );
+  const query = "SELECT id, name, no_log, scopes FROM api_keys WHERE id = ?";
+  const before = db.prepare(query).get(id);
+  // Remove only this additive migration's objects and version marker to reproduce v227.
+  db.exec("DROP TABLE key_templates");
+  db.prepare("DELETE FROM _omniroute_migrations WHERE CAST(version AS INTEGER) = 228").run();
+  assert.equal(
+    Number(
+      (
+        db
+          .prepare("SELECT max(CAST(version AS INTEGER)) AS v FROM _omniroute_migrations")
+          .get() as { v: number }
+      ).v
+    ),
+    227
+  );
+  core.resetDbInstance();
+  apiKeysDb.resetApiKeyState();
+  const upgraded = core.getDbInstance();
+  assert.equal(
+    Number(
+      (
+        upgraded
+          .prepare("SELECT max(CAST(version AS INTEGER)) AS v FROM _omniroute_migrations")
+          .get() as { v: number }
+      ).v
+    ),
+    228
+  );
+  assert.deepEqual(upgraded.prepare(query).get(id), before);
+  assert.equal(
+    (upgraded.prepare("SELECT count(*) AS n FROM key_templates").get() as { n: number }).n,
+    0
+  );
+  assert.equal(
+    (upgraded.prepare("PRAGMA integrity_check").get() as { integrity_check: string })
+      .integrity_check,
+    "ok"
+  );
+});

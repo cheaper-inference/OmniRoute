@@ -1896,7 +1896,7 @@ export default function KeyPolicySixTabEditor({
                     {formState.quotaLimitsEnabled && (
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-border/50">
                         <Input
-                          label="TPM Limit"
+                          label={t("tpmLimitLabel")}
                           type="number"
                           min={0}
                           step="any"
@@ -1906,7 +1906,7 @@ export default function KeyPolicySixTabEditor({
                           }
                         />
                         <Input
-                          label="RPM Limit"
+                          label={t("rpmLimitLabel")}
                           type="number"
                           min={0}
                           step="any"
@@ -1916,7 +1916,7 @@ export default function KeyPolicySixTabEditor({
                           }
                         />
                         <Input
-                          label="Monthly Cap (USD)"
+                          label={t("monthlyLimitUsdLabel")}
                           type="number"
                           min={0}
                           step="0.01"
