@@ -1,5 +1,10 @@
 import { DefaultExecutor } from "./default.ts";
 import { museCodeSessionHeaders } from "./museCodeIdentity.ts";
+import {
+  recordMuseSubscriptionUsage,
+  tapMuseSubscriptionUsage,
+  type MuseSubscriptionUsage,
+} from "../services/museSubscriptionUsage.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -63,6 +68,22 @@ export class MuseCodeExecutor extends DefaultExecutor {
       ...record,
       prompt_cache_retention: requestedRetention,
     };
+  }
+
+  /**
+   * Muse Code ends every Responses stream with a `response.subscription_usage` frame (the
+   * session-window and weekly allowance used). The client still receives the stream byte for
+   * byte; the reading is kept on the connection for the usage page and quota routing.
+   */
+  async execute(input: Parameters<DefaultExecutor["execute"]>[0]) {
+    const result = await super.execute(input);
+    const connectionId = input.credentials?.connectionId;
+    if (!connectionId) return result;
+    const record = (usage: MuseSubscriptionUsage) =>
+      recordMuseSubscriptionUsage(connectionId, usage);
+    if (result instanceof Response) return tapMuseSubscriptionUsage(result, record);
+    if (!result?.response) return result;
+    return { ...result, response: tapMuseSubscriptionUsage(result.response, record) };
   }
 }
 

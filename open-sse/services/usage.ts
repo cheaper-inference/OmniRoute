@@ -309,7 +309,7 @@ export async function getUsageForProvider(
       // Daily neurons from GraphQL Analytics (needs Account Analytics: Read on the token).
       return await getCloudflareAiUsage(apiKey || "", providerSpecificData);
     case "muse-code":
-      // Muse Code has no usage/balance API. Return persisted subscription metadata.
+      // Muse Code: the session/weekly usage Meta reported with the last response, plus the tier.
       return await getMuseUsage(accessToken, providerSpecificData, id || "");
     default:
       return { message: `Usage API not implemented for ${provider}` };
