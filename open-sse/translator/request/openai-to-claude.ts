@@ -590,6 +590,28 @@ export function openaiToClaudeRequest(
     }
   }
 
+  // Anthropic answers 400 "must define tools" when the history holds tool_use blocks but the
+  // request declares no tools (an agent that loaded its tools late). Declare each called tool
+  // as a stub and forbid calling it. Names Anthropic would reject are skipped.
+  if (!result.tools?.length) {
+    const stubNames = new Set<string>();
+    for (const message of result.messages) {
+      for (const block of Array.isArray(message.content) ? message.content : []) {
+        if (block.type === "tool_use" && /^[a-zA-Z0-9_-]{1,128}$/.test(String(block.name))) {
+          stubNames.add(String(block.name));
+        }
+      }
+    }
+    if (stubNames.size > 0) {
+      result.tools = [...stubNames].map((name) => ({
+        name,
+        description: "Called earlier in this conversation; not available now.",
+        input_schema: { type: "object", properties: {} },
+      }));
+      result.tool_choice = { type: "none" };
+    }
+  }
+
   // response_format: inject JSON structured output instruction into system prompt.
   // Claude doesn't natively support response_format, so we insert a system-level instruction.
   // NOTE: systemParts are consumed later (after this block) — they're accumulated here.
