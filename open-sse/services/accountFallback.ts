@@ -26,6 +26,7 @@ import {
   type ProviderErrorRuleMatch,
 } from "../config/providerErrorRules.ts";
 import * as rot from "./rotationConfig.ts";
+import { getM365FailureScope } from "./m365ErrorPolicy.ts";
 import { isContentPolicyRefusal } from "../utils/contentPolicyError.ts";
 import { isRequestScopedMisalignmentRefusal } from "../utils/providerSafety.ts";
 import { isRegistryPassthroughProvider } from "./passthroughRegistry.ts";
@@ -1997,6 +1998,27 @@ export function checkFallbackError(
     };
   }
 
+  const m365Scope = getM365FailureScope(provider, status, errorText, structuredError);
+  if (m365Scope) {
+    const reason = status === 403 ? "forbidden" : RateLimitReason.RATE_LIMIT_EXCEEDED;
+    // Native throttles announce their reset even when generic retry hints are disabled.
+    const hint = detectRetryHint();
+    const fallback = buildRetryableFallback(reason);
+    return {
+      ...fallback,
+      ...(hint
+        ? {
+            cooldownMs: hint.retryAfterMs,
+            baseCooldownMs: hint.retryAfterMs,
+            usedUpstreamRetryHint: true,
+            retryHintSource: hint.provenance,
+            newBackoffLevel: 0,
+          }
+        : {}),
+      ruleScope: m365Scope,
+      skipProviderBreaker: true,
+    };
+  }
   const isRateLimitStatus = status === HTTP_STATUS.RATE_LIMITED;
   const preserveQuota429 = shouldPreserveQuotaSignals(provider, errorText);
   const shouldUseQuotaSignal = !isRateLimitStatus || preserveQuota429;

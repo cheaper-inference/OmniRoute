@@ -55,6 +55,33 @@ interface PaletteItem {
   subgroupLabel?: string;
 }
 
+const SCORE_EXACT_LABEL = 4;
+const SCORE_LABEL_PREFIX = 3;
+const SCORE_LABEL_SUBSTRING = 2;
+const SCORE_OTHER_FIELD = 1;
+
+// Same folding as the kit Command filter, which keeps its copy private: a query it lets through
+// must score the same, so "configuracoes" ranks "Configurações" as a label match.
+function fold(text: string) {
+  return text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
+}
+
+/**
+ * Relevance of one palette item for a folded query. Only orders the rows: the kit filter decides
+ * which ones show, so a 0 here can still be a visible row (every word found, but split across
+ * fields, as in "logs monitoring").
+ */
+function matchScore(item: PaletteItem, q: string): number {
+  const label = fold(item.label);
+  if (label === q) return SCORE_EXACT_LABEL;
+  if (label.startsWith(q) || label.split(/\s+/).some((word) => word.startsWith(q))) {
+    return SCORE_LABEL_PREFIX;
+  }
+  if (label.includes(q)) return SCORE_LABEL_SUBSTRING;
+  const otherFields = [item.subtitle, item.sectionLabel, item.subgroupLabel];
+  return otherFields.some((field) => field && fold(field).includes(q)) ? SCORE_OTHER_FIELD : 0;
+}
+
 interface PaletteSubgroup {
   subgroupId: string | null;
   subgroupLabel: string | null;
@@ -193,10 +220,27 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
     [hiddenItems, radarAdminUrl, safeTranslate, activePreset]
   );
 
+  // #17915: rows are ranked, not left in sidebar order, so a broad query such as "log" reaches the
+  // Logs page before "Log export" or the substring hit in "Radar Catalog". Ties keep the shorter
+  // label first (the closer match), then the sidebar order.
+  const ranked = useMemo(() => {
+    const q = fold(query).trim();
+    if (!q) return allItems;
+    return allItems
+      .map((item, index) => ({ item, index, score: matchScore(item, q) }))
+      .sort(
+        (a, b) =>
+          b.score - a.score || a.item.label.length - b.item.label.length || a.index - b.index
+      )
+      .map((entry) => entry.item);
+  }, [allItems, query]);
+
+  // Sections and subgroups appear in the order of their best match. The kit reads its options from
+  // the DOM, so the arrow keys and Enter follow this order with nothing else to keep in step.
   const grouped = useMemo<PaletteGroup[]>(() => {
     const groups: PaletteGroup[] = [];
     const sectionById = new Map<string, PaletteGroup>();
-    allItems.forEach((item) => {
+    ranked.forEach((item) => {
       // Look up the section/subgroup by id across the whole list, not just the
       // previous item — a section's children can interleave root items and
       // groups (e.g. "omni-proxy" has a trailing root item after its groups),
@@ -225,7 +269,7 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
       subgroup.items.push(item);
     });
     return groups;
-  }, [allItems]);
+  }, [ranked]);
 
   const handleNavigate = useCallback(
     (href: string, external: boolean) => {
