@@ -66,14 +66,33 @@ function mostCommonName(offers: ModelOffer[]): string {
   return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
 }
 
+/** A search matches a group by model or by any offering provider, keeping every offer. */
 function groupMatchesSearch(group: ModelComparisonGroup, searchQuery: string): boolean {
   return (
     matchesSearch(group.key, searchQuery) ||
     group.offers.some(
       (offer) =>
-        matchesSearch(offer.modelId, searchQuery) || matchesSearch(offer.modelName, searchQuery)
+        matchesSearch(offer.modelId, searchQuery) ||
+        matchesSearch(offer.modelName, searchQuery) ||
+        matchesSearch(offer.providerId, searchQuery) ||
+        matchesSearch(offer.providerAlias, searchQuery)
     )
   );
+}
+
+/**
+ * The Compare empty-state message: the "search for a model" hint only fits an unsearched,
+ * unfiltered list; after a search, or when the filters leave no provider, it is the provider
+ * view's "no match" text.
+ */
+export function compareEmptyMessageKey({
+  searchQuery,
+  providerCount,
+}: {
+  searchQuery: string;
+  providerCount: number;
+}): "pricingCompareEmpty" | "noProvidersMatch" {
+  return searchQuery.trim() || providerCount === 0 ? "noProvidersMatch" : "pricingCompareEmpty";
 }
 
 /**
