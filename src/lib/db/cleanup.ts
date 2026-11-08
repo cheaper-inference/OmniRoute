@@ -4,11 +4,14 @@
  * @module lib/db/cleanup
  */
 
+import path from "path";
+
 import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { rollupUsageHistoryBeforeDate } from "@/lib/usage/aggregateHistory";
 import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 
-import { getDbInstance } from "./core";
+import { DATA_DIR, DB_BACKUPS_DIR, getDbInstance } from "./core";
+import { removeStaleSnapshotTemps } from "./backupRetention";
 import { getUserDatabaseSettings } from "./databaseSettings";
 import { maintainSqlitePlannerStats } from "./sqlitePlannerStats";
 import {
@@ -1083,6 +1086,8 @@ export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Pr
     console.log(`[Cleanup] ${label} cleanup freed ${result.totalDeleted} rows.`);
   }
 
+  // The prune pauses while a snapshot temp directory exists; drop the ones a killed upgrade left.
+  removeStaleSnapshotTemps(DB_BACKUPS_DIR ?? path.join(DATA_DIR, "db_backups"));
   pruneDbBackupsOutsideMigrationWindow();
 
   // Always run: it also drains pages left over from a previous capped pass or
