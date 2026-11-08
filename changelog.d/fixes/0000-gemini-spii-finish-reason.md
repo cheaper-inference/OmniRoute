@@ -1,0 +1,1 @@
+- **fix(chat):** Gemini replies blocked for sensitive personal information (`SPII`) or unsafe images (`IMAGE_SAFETY`) now return `finish_reason: "content_filter"` instead of an unknown raw value that strict OpenAI clients treat as a provider fault.
