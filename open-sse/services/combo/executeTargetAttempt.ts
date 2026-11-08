@@ -771,7 +771,13 @@ export async function executeTargetAttempt(
           }
         }
       }
-      recordSuccessfulComboStickyBinding(deps, effectiveConnectionId, modelStr); // LKGP (#919):
+      recordSuccessfulComboStickyBinding(
+        deps,
+        target.connectionId,
+        effectiveConnectionId,
+        modelStr
+      );
+      // LKGP (#919):
       if (provider) {
         const connId = effectiveConnectionId || undefined;
         recordLkgpPin({

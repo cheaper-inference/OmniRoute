@@ -380,23 +380,30 @@ export function recordStickyBinding(
   }
 }
 
-/** Record the successful attempt's effective account, and Jev's selected model when applicable. */
+/**
+ * Record the successful attempt's sticky binding. Every strategy except `jev` keeps the
+ * pre-#15279 behavior exactly: bind the declared target connection, no namespace. `jev`
+ * binds the account that actually served (the selected-connection header) together with
+ * the model Jev chose, scoped to the combo, so the next turn stays on both.
+ */
 export function recordSuccessfulComboStickyBinding(
   context: {
     sticky: { messageHash: string | null };
     combo: { name: string };
     strategy: string;
   },
-  connectionId: string,
+  declaredConnectionId: string | null | undefined,
+  effectiveConnectionId: string,
   modelStr: string
 ): void {
-  if (!context.sticky.messageHash || !connectionId) return;
-  recordStickyBinding(
-    context.sticky.messageHash,
-    connectionId,
-    context.combo.name,
-    context.strategy === "jev" ? modelStr : undefined
-  );
+  const { messageHash } = context.sticky;
+  if (!messageHash) return;
+  if (context.strategy !== "jev") {
+    if (declaredConnectionId) recordStickyBinding(messageHash, declaredConnectionId);
+    return;
+  }
+  if (!effectiveConnectionId) return;
+  recordStickyBinding(messageHash, effectiveConnectionId, context.combo.name, modelStr);
 }
 
 /** Remove a binding (e.g. after the connection is confirmed unhealthy). */
