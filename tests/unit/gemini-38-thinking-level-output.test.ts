@@ -1,8 +1,9 @@
 /**
  * Gemini 3.8 Flash talks thinking_level (low|medium|high), not the 3.7 numeric
- * thinkingBudget Omni still emits. includeThoughts:true also shares
- * maxOutputTokens with hidden thoughts, so a review-sized max_tokens=65536
- * request starves visible completion (finish=length, ~2.6k text).
+ * thinkingBudget Omni still emits: a 24576 numeric budget on a review-sized
+ * max_tokens=65536 request starved visible completion (finish=length, ~2.6k text).
+ * includeThoughts stays on by default so thought summaries stream while the
+ * model thinks (see gemini-thinking-level-default-thoughts.test.ts).
  *
  * Tests hit openaiToGeminiRequest / openaiToAntigravityRequest / claudeToGeminiRequest
  * at the write sites so a helper cannot stay green with the call gone.
@@ -86,23 +87,23 @@ test("agy/gemini-3.8-flash-high prefix emits thinkingLevel high", () => {
   assert.equal(tc?.thinkingBudget, undefined);
 });
 
-test("gemini-3.8 review-shaped request does not default-inject includeThoughts", () => {
+test("gemini-3.8 review-shaped request keeps maxOutputTokens and streams thoughts", () => {
   const result = openaiToGeminiRequest("gemini-3.8-flash-high", reviewBody(), false) as GeminiReq;
   assert.equal(result.generationConfig?.maxOutputTokens, 65536);
   assert.equal(result.generationConfig?.thinkingConfig?.thinkingLevel, "high");
-  assert.equal(result.generationConfig?.thinkingConfig?.includeThoughts, undefined);
+  assert.equal(result.generationConfig?.thinkingConfig?.includeThoughts, true);
 });
 
-test("gemini-3.8 includeThoughts is set only when the client asked for thoughts", () => {
-  const silent = thinkingConfigOf("gemini-3.8-flash-high", { reasoning_effort: "high" });
-  assert.equal(silent?.includeThoughts, undefined);
+test("gemini-3.8 includeThoughts is on unless the client opts out", () => {
+  const byDefault = thinkingConfigOf("gemini-3.8-flash-high", { reasoning_effort: "high" });
+  assert.equal(byDefault?.includeThoughts, true);
 
-  const asked = thinkingConfigOf("gemini-3.8-flash-high", {
+  const optedOut = thinkingConfigOf("gemini-3.8-flash-high", {
     reasoning_effort: "high",
-    includeThoughts: true,
+    includeThoughts: false,
   });
-  assert.equal(asked?.includeThoughts, true);
-  assert.equal(asked?.thinkingLevel, "high");
+  assert.equal(optedOut?.includeThoughts, undefined);
+  assert.equal(optedOut?.thinkingLevel, "high");
 });
 
 test("gemini-3.8 reasoning_effort none stays an explicit off-switch", () => {
@@ -134,7 +135,7 @@ test("Antigravity envelope keeps maxOutputTokens 65536 and thinkingLevel for 3.8
   assert.equal(gc?.maxOutputTokens, 65536);
   assert.equal(gc?.thinkingConfig?.thinkingLevel, "high");
   assert.equal(gc?.thinkingConfig?.thinkingBudget, undefined);
-  assert.equal(gc?.thinkingConfig?.includeThoughts, undefined);
+  assert.equal(gc?.thinkingConfig?.includeThoughts, true);
 });
 
 test("gemini-3.8 thinking.budget_tokens maps thinkingLevel, not thinkingBudget", () => {
@@ -143,7 +144,7 @@ test("gemini-3.8 thinking.budget_tokens maps thinkingLevel, not thinkingBudget",
   });
   assert.equal(tc?.thinkingLevel, "high");
   assert.equal(tc?.thinkingBudget, undefined);
-  assert.equal(tc?.includeThoughts, undefined);
+  assert.equal(tc?.includeThoughts, true);
 });
 
 test("claude-to-gemini gemini-3.8 budget_tokens maps thinkingLevel", () => {
@@ -158,10 +159,10 @@ test("claude-to-gemini gemini-3.8 budget_tokens maps thinkingLevel", () => {
   ) as GeminiReq;
   assert.equal(result.generationConfig?.thinkingConfig?.thinkingLevel, "high");
   assert.equal(result.generationConfig?.thinkingConfig?.thinkingBudget, undefined);
-  assert.equal(result.generationConfig?.thinkingConfig?.includeThoughts, undefined);
+  assert.equal(result.generationConfig?.thinkingConfig?.includeThoughts, true);
 });
 
-test("claude-to-gemini gemini-3.8-flash-high emits thinkingLevel, not includeThoughts", () => {
+test("claude-to-gemini gemini-3.8-flash-high emits thinkingLevel and streams thoughts", () => {
   const result = claudeToGeminiRequest(
     "gemini-3.8-flash-high",
     {
@@ -174,7 +175,7 @@ test("claude-to-gemini gemini-3.8-flash-high emits thinkingLevel, not includeTho
   assert.equal(result.generationConfig?.maxOutputTokens, 65536);
   assert.equal(result.generationConfig?.thinkingConfig?.thinkingLevel, "high");
   assert.equal(result.generationConfig?.thinkingConfig?.thinkingBudget, undefined);
-  assert.equal(result.generationConfig?.thinkingConfig?.includeThoughts, undefined);
+  assert.equal(result.generationConfig?.thinkingConfig?.includeThoughts, true);
 });
 
 test("gemini38ThinkingLevelFromBudget rejects budget <= 0", () => {
