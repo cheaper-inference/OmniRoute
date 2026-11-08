@@ -157,7 +157,10 @@ test("preserves legacy assistant-role markup and new search-unit markers", async
   };
   for (const selector of [
     '[data-message-author-role="assistant"]',
+    '[data-content-search-unit-key$=":assistant"]',
     '[data-chatgpt-search-unit-key$=":assistant"]',
+    '[data-turn-key]:has([data-conversation-role="assistant"],[data-chatgpt-agent-turn-start])',
+    'section[data-turn="assistant"]',
   ]) {
     const page = pageWithDocument({
       querySelectorAll(query: string) {
@@ -169,4 +172,42 @@ test("preserves legacy assistant-role markup and new search-unit markers", async
     });
     assert.equal((await privateReadAssistant(sessionWithPage(page))).text, "Legacy answer");
   }
+});
+
+test("uses the first matching assistant selector when layouts overlap", async () => {
+  const selected = {
+    textContent: "Preferred search-unit answer",
+    querySelector() {
+      return null;
+    },
+  };
+  const fallback = {
+    textContent: "Fallback conversation-role answer",
+    querySelector() {
+      return null;
+    },
+  };
+  const visited: string[] = [];
+  const page = pageWithDocument({
+    querySelectorAll(selector: string) {
+      visited.push(selector);
+      if (selector === '[data-content-search-unit-key$=":assistant"]') return [selected];
+      if (selector === '[data-conversation-role="assistant"]') return [fallback];
+      return [];
+    },
+    querySelector() {
+      return null;
+    },
+  });
+
+  assert.deepEqual(await privateReadAssistant(sessionWithPage(page)), {
+    count: 1,
+    text: "Preferred search-unit answer",
+    streaming: false,
+    emptyNode: false,
+  });
+  assert.deepEqual(visited, [
+    '[data-message-author-role="assistant"]',
+    '[data-content-search-unit-key$=":assistant"]',
+  ]);
 });
