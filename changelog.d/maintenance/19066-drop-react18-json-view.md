@@ -1,0 +1,1 @@
+- **chore(deps):** `react18-json-view` leaves the dependencies (and its transitive `copy-to-clipboard` and `toggle-selection`): the dashboard inspects JSON with the kit `JsonTree` since #19174 ([#19066](https://github.com/cheaper-inference/OmniRoute/issues/19066))
