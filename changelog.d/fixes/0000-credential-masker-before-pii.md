@@ -1,1 +1,1 @@
-- **fix(guardrails):** With PII and credential masking both on, an API token in a request or a non-streaming response is now redacted as one credential. Before, the phone rule masked the digits in its middle and left the rest in clear.
+- **fix(guardrails):** With PII and credential masking both on, an API token in a request, a non-streaming response or a streamed response is now redacted as one credential. Before, the phone rule masked the digits in its middle and left the rest in clear.
