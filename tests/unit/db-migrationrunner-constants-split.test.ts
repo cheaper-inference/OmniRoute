@@ -29,7 +29,7 @@ import {
 // ── small tables — full snapshot ─────────────────────────────────────────────
 
 describe("migrationRunner/constants — exact small-table snapshots", () => {
-  it("LEGACY_VERSION_SLOT_MIGRATIONS is the 9-entry list, in order", () => {
+  it("LEGACY_VERSION_SLOT_MIGRATIONS is the 16-entry list, in order", () => {
     assert.deepEqual(
       LEGACY_VERSION_SLOT_MIGRATIONS.map((m) => `${m.version}:${m.name}`),
       [
@@ -42,6 +42,13 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
         "033:add_batch_id_to_call_logs",
         "046:remove_status_from_files",
         "051:remove_status_from_files",
+        "140:ccr_blocks",
+        "141:api_key_cache_default_mode",
+        "142:connection_runtime_state",
+        "176:provider_connection_synced_models_at",
+        "177:xp_action_counts",
+        "178:memory_fts_skip_access_updates",
+        "197:model_capabilities_reasoning_efforts",
       ]
     );
   });
@@ -177,19 +184,19 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-15), {
       fromVersion: "194",
       fromName: "api_key_self_service_settings",
-      toVersion: "229",
+      toVersion: "228",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-14), {
       fromVersion: "197",
       fromName: "api_key_self_service_settings",
-      toVersion: "229",
+      toVersion: "228",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-13), {
       fromVersion: "207",
       fromName: "api_key_self_service_settings",
-      toVersion: "229",
+      toVersion: "228",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-12), {
@@ -201,25 +208,25 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-11), {
       fromVersion: "213",
       fromName: "api_key_self_service_settings",
-      toVersion: "229",
+      toVersion: "228",
       toName: "api_key_self_service_settings",
     });
-    // #14833 agent-session builds (190/191 through 214/215) now live at 230/231
+    // #14833 agent-session builds (190/191 through 214/215) now live at 229/230
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.slice(-10).map(
         (e) => `${e.fromVersion}_${e.fromName}->${e.toVersion}_${e.toName}`
       ),
       [
-        "190_agent_sessions->230_agent_sessions",
-        "191_usage_history_agent_session_id->231_usage_history_agent_session_id",
-        "197_agent_sessions->230_agent_sessions",
-        "198_usage_history_agent_session_id->231_usage_history_agent_session_id",
-        "198_agent_sessions->230_agent_sessions",
-        "199_usage_history_agent_session_id->231_usage_history_agent_session_id",
-        "208_agent_sessions->230_agent_sessions",
-        "209_usage_history_agent_session_id->231_usage_history_agent_session_id",
-        "214_agent_sessions->230_agent_sessions",
-        "215_usage_history_agent_session_id->231_usage_history_agent_session_id",
+        "190_agent_sessions->229_agent_sessions",
+        "191_usage_history_agent_session_id->230_usage_history_agent_session_id",
+        "197_agent_sessions->229_agent_sessions",
+        "198_usage_history_agent_session_id->230_usage_history_agent_session_id",
+        "198_agent_sessions->229_agent_sessions",
+        "199_usage_history_agent_session_id->230_usage_history_agent_session_id",
+        "208_agent_sessions->229_agent_sessions",
+        "209_usage_history_agent_session_id->230_usage_history_agent_session_id",
+        "214_agent_sessions->229_agent_sessions",
+        "215_usage_history_agent_session_id->230_usage_history_agent_session_id",
       ]
     );
   });

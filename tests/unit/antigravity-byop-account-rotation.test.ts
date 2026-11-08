@@ -130,7 +130,7 @@ test("Antigravity BYOP 422 rotates to a sibling account and the request succeeds
         { status: 200, headers: { "Content-Type": "application/json" } }
       );
     }
-    if (new URL(request.url).hostname === "cloudcode-pa.googleapis.com") {
+    if (new URL(request.url).hostname === "daily-cloudcode-pa.googleapis.com") {
       modelCalls.push({
         token: (request.headers.get("authorization") || "").replace(/^Bearer\s+/i, ""),
       });
@@ -250,7 +250,7 @@ test("streaming Antigravity BYOP 422 still rotates — execute must not cancel t
         { status: 200, headers: { "Content-Type": "application/json" } }
       );
     }
-    if (new URL(request.url).hostname === "cloudcode-pa.googleapis.com") {
+    if (new URL(request.url).hostname === "daily-cloudcode-pa.googleapis.com") {
       modelCalls.push({
         token: (request.headers.get("authorization") || "").replace(/^Bearer\s+/i, ""),
       });

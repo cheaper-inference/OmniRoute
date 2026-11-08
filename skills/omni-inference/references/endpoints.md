@@ -114,6 +114,8 @@
 - [`POST /api/v1/responses/{path}`](#post-apiv1responsespath)
 - [`GET /api/v1/search/analytics`](#get-apiv1searchanalytics)
 - [`POST /api/v1/segment`](#post-apiv1segment)
+- [`GET /api/v1/systemone`](#get-apiv1systemone)
+- [`POST /api/v1/systemone`](#post-apiv1systemone)
 - [`GET /api/v1/video-bridge/drilldown`](#get-apiv1video-bridgedrilldown)
 - [`DELETE /api/v1/video-bridge/drilldown`](#delete-apiv1video-bridgedrilldown)
 - [`GET /api/v1/videos/generations`](#get-apiv1videosgenerations)
@@ -1356,22 +1358,56 @@ curl -X POST http://localhost:20128/api/v1/segment \
   -d '{}'
 ```
 
-### GET /api/v1/video-bridge/drilldown
+### GET /api/v1/systemone
 
-GET video bridge › drilldown
+List decisions-capable models
+
+Decisions entries from the unified model catalog.
 
 ```bash
-curl http://localhost:20128/api/v1/video-bridge/drilldown \
+curl http://localhost:20128/api/v1/systemone \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/v1/systemone
+
+System One typed decisions
+
+One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint. Answers, probabilities and usage (tokens, cost) pass through untouched.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/systemone \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/v1/video-bridge/drilldown
+
+Read authenticated tenant-bound video frame variants
+
+Requires explicit remote drill-down operator consent and an authenticated API key. A nonempty API-key endpoint allowlist must include video. Resolves an opaque handle from the x-omniroute-video-drilldown chat response header; never accepts a client principal, raw video or session ID. JSON including Base64 is limited to 32 MiB. Unknown, expired and cross-key handles return indistinguishable 404 responses. Handles are process-local and expire after ten minutes or a restart.
+
+```bash
+# Set OMNIROUTE_VIDEO_HANDLE to one handle from the chat response's
+# x-omniroute-video-drilldown header, obtained with the same API key.
+curl --get http://localhost:20128/api/v1/video-bridge/drilldown \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  --data-urlencode "handle=$OMNIROUTE_VIDEO_HANDLE"
 ```
 
 ### DELETE /api/v1/video-bridge/drilldown
 
-DELETE video bridge › drilldown
+Delete an authenticated owner's video drill-down handle
+
+Idempotent; unknown, expired or cross-key handles remove zero entries. Releases retained frames and accounting for the owner only. Remote operator consent and a valid API key are always required. A nonempty API-key endpoint allowlist must include video.
 
 ```bash
-curl -X DELETE http://localhost:20128/api/v1/video-bridge/drilldown \
-  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+# Set OMNIROUTE_VIDEO_HANDLE to one handle from the chat response's
+# x-omniroute-video-drilldown header, obtained with the same API key.
+curl --get -X DELETE http://localhost:20128/api/v1/video-bridge/drilldown \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  --data-urlencode "handle=$OMNIROUTE_VIDEO_HANDLE"
 ```
 
 ### GET /api/v1/videos/generations
