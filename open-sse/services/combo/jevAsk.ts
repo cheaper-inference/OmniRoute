@@ -1,7 +1,7 @@
 /** Shared TypeSafe System One ask port for the Jev model and runtime-unit paths (opt-in). */
 
 import { getProviderCredentials } from "../../../src/sse/services/auth.ts";
-import { isComboJevStrategyEnabled } from "../../../src/shared/utils/featureFlags.ts";
+import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
 import {
   evaluateSystemOneChoice,
   TYPESAFE_PROVIDER_ID,
@@ -18,7 +18,7 @@ export function createJevAsk(args: {
   return async ({ state, criteria }) => {
     // TypeSafe is a paid third-party call: it needs COMBO_JEV_STRATEGY_ENABLED, never just a
     // stored key. Off → no credential read, no request; the combo keeps the operator's order.
-    if (!isComboJevStrategyEnabled()) {
+    if (!isRegisteredFeatureFlagEnabled("COMBO_JEV_STRATEGY_ENABLED")) {
       args.log.info("COMBO", "[jev] COMBO_JEV_STRATEGY_ENABLED is off; keeping preference order");
       return { ok: false, reason: "unavailable" };
     }

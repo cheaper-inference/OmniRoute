@@ -554,16 +554,6 @@ export function isSystemOneOllamaLocalBackendEnabled(): boolean {
   return isDefaultOffFlagEnabled("SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED");
 }
 
-/** SYSTEMONE_CHAT_GUARD_ENABLED (#14498, default off): chat on a decisions-only provider gets a 400. */
-export function isSystemOneChatGuardEnabled(): boolean {
-  return isDefaultOffFlagEnabled("SYSTEMONE_CHAT_GUARD_ENABLED");
-}
-
-/** COMBO_JEV_STRATEGY_ENABLED (#15279, default off): jev combos may call TypeSafe System One. */
-export function isComboJevStrategyEnabled(): boolean {
-  return isDefaultOffFlagEnabled("COMBO_JEV_STRATEGY_ENABLED");
-}
-
 /** OPENCODE_FREE_TIER_EGRESS_PROBE (default off): probe one other proxy after a FreeTierError. */
 export function isOpencodeFreeTierEgressProbeEnabled(): boolean {
   try {
