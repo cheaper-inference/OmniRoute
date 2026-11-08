@@ -11,6 +11,8 @@ import { fetch, type Dispatcher } from "undici";
 import {
   clearDispatcherCache,
   createProxyDispatcher,
+  getDedicatedCodexImageDispatcher,
+  getDedicatedCodexImageProxyDispatcher,
   getDefaultDispatcher,
   getRetryDispatcher,
   getProxyRetryDispatcher,
@@ -228,6 +230,26 @@ test("default dispatchers still negotiate HTTP/2 when the flag is unset", async 
       dispatchers.add(dispatcher);
       const response = await fetch(upstreamUrl, { dispatcher, signal: AbortSignal.timeout(5000) });
       assert.deepEqual(await response.json(), { protocol: "2.0", bytes: 0 });
+    }
+  } finally {
+    process.env[flag] = "false";
+    clearDispatcherCache();
+  }
+});
+
+test("dedicated Codex image dispatchers stay on HTTP/1.1 while upstream HTTP/2 is enabled", async () => {
+  delete process.env[flag];
+  clearDispatcherCache();
+  try {
+    const proxyUrl = (server: net.Server, scheme: string, auth = "test:password@") =>
+      `${scheme}://${auth}127.0.0.1:${(server.address() as net.AddressInfo).port}`;
+    await request(getDedicatedCodexImageDispatcher(120_000), 1024);
+    for (const url of [
+      proxyUrl(plainProxy, "http"),
+      proxyUrl(secureProxy, "https"),
+      proxyUrl(socksProxy, "socks5", ""),
+    ]) {
+      await request(getDedicatedCodexImageProxyDispatcher(url, 120_000), 1024);
     }
   } finally {
     process.env[flag] = "false";

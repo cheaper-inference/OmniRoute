@@ -3,10 +3,19 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { createManagementSessionToken } from "../helpers/managementSession.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omni-log-export-routes-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.STORAGE_ENCRYPTION_KEY = "log-export-routes-test-key";
+
+// These routes require a dashboard session in every mode (login enabled or not).
+const SESSION_COOKIE = `auth_token=${await createManagementSessionToken()}`;
+function authed(url: string, init: RequestInit = {}): Request {
+  const headers = new Headers(init.headers);
+  headers.set("cookie", SESSION_COOKIE);
+  return new Request(url, { ...init, headers });
+}
 
 const coreDb = await import("../../src/lib/db/core.ts");
 const destinationsRoute = await import("../../src/app/api/log-export/destinations/route.ts");
@@ -60,7 +69,7 @@ function asError(body: ApiBody): { message: string; details: ValidationDetail[] 
 }
 
 function jsonRequest(url: string, method: string, body?: unknown): Request {
-  return new Request(url, {
+  return authed(url, {
     method,
     headers: { "Content-Type": "application/json" },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -91,7 +100,7 @@ test.after(() => {
 });
 
 test("GET_types_ReturnsRenderableFieldDescriptorsForEveryDestination", async () => {
-  const response = await typesRoute.GET(new Request("http://localhost/api/log-export/types"));
+  const response = await typesRoute.GET(authed("http://localhost/api/log-export/types"));
   const body = (await response.json()) as ApiBody;
 
   assert.equal(response.status, 200);
@@ -153,7 +162,7 @@ test("POST_destinations_InvalidDatasetName_IsRejectedByTheTypeSchema", async () 
 test("GET_destinations_ListsThemWithSecretsRedacted", async () => {
   await createDestination();
   const response = await destinationsRoute.GET(
-    new Request("http://localhost/api/log-export/destinations")
+    authed("http://localhost/api/log-export/destinations")
   );
   const body = (await response.json()) as ApiBody;
 
@@ -206,7 +215,7 @@ test("PUT_destination_EnabledToggle_PersistsWithoutTouchingTheConfig", async () 
 
 test("GET_destination_UnknownId_Returns404", async () => {
   const response = await destinationRoute.GET(
-    new Request("http://localhost/api/log-export/destinations/missing"),
+    authed("http://localhost/api/log-export/destinations/missing"),
     { params: Promise.resolve({ id: "missing" }) }
   );
   const body = (await response.json()) as ApiBody;
@@ -221,13 +230,13 @@ test("DELETE_destination_RemovesItAndIsIdempotentlySafe", async () => {
   const id = created.destination.id;
 
   const first = await destinationRoute.DELETE(
-    new Request("http://localhost/api/log-export/destinations/" + id, { method: "DELETE" }),
+    authed("http://localhost/api/log-export/destinations/" + id, { method: "DELETE" }),
     { params: Promise.resolve({ id }) }
   );
   assert.equal(first.status, 200);
 
   const second = await destinationRoute.DELETE(
-    new Request("http://localhost/api/log-export/destinations/" + id, { method: "DELETE" }),
+    authed("http://localhost/api/log-export/destinations/" + id, { method: "DELETE" }),
     { params: Promise.resolve({ id }) }
   );
   assert.equal(second.status, 404);
@@ -235,7 +244,7 @@ test("DELETE_destination_RemovesItAndIsIdempotentlySafe", async () => {
 
 test("GET_status_ReportsTheHourlyScheduleAndBacklog", async () => {
   await createDestination();
-  const response = await statusRoute.GET(new Request("http://localhost/api/log-export/status"));
+  const response = await statusRoute.GET(authed("http://localhost/api/log-export/status"));
   const body = (await response.json()) as ApiBody;
 
   assert.equal(response.status, 200);
@@ -256,7 +265,7 @@ test("POST_destinations_EncryptionDisabled_RefusesToStoreTheCredentialInPlaintex
     assert.match(String(body.error), /STORAGE_ENCRYPTION_KEY/);
 
     const list = await destinationsRoute.GET(
-      new Request("http://localhost/api/log-export/destinations")
+      authed("http://localhost/api/log-export/destinations")
     );
     const listed = (await list.json()) as ApiBody;
     assert.equal(listed.destinations.length, 0, "nothing is persisted when the guard fires");

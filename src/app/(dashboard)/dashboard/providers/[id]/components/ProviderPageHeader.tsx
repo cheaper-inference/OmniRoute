@@ -78,8 +78,7 @@ export default function ProviderPageHeader({
       href={noticeUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-sm font-medium underline underline-offset-2 opacity-70 hover:opacity-100 transition-opacity inline-flex items-center gap-1"
-      style={{ color: providerInfo.color }}
+      className="text-sm font-medium text-primary underline underline-offset-2 hover:text-text-main transition-colors inline-flex items-center gap-1"
     >
       <Icon name="open_in_new" size={16} />
       {t("getApiKey")}
@@ -100,6 +99,7 @@ export default function ProviderPageHeader({
       }
       title={
         <span className="inline-flex items-center gap-4">
+          {/* The brand colour is only a tint behind the icon; text uses neutral/primary tokens. */}
           <span
             className="inline-flex items-center justify-center rounded-lg"
             style={{ backgroundColor: `${providerInfo.color}15` }}
@@ -124,8 +124,7 @@ export default function ProviderPageHeader({
               href={providerInfo.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline inline-flex items-center gap-2"
-              style={{ color: providerInfo.color }}
+              className="hover:underline hover:text-primary inline-flex items-center gap-2"
               title={showPartnerNote ? kimiPartnerLinkNote : undefined}
               aria-label={
                 showPartnerNote ? `${providerInfo.name} — ${kimiPartnerLinkNote}` : undefined
@@ -153,8 +152,7 @@ export default function ProviderPageHeader({
               variant="ghost"
               size="sm"
               onClick={onOpenTutorial}
-              className="h-auto min-h-0 px-0 text-sm font-medium underline underline-offset-2 opacity-70 hover:bg-transparent hover:opacity-100"
-              style={{ color: providerInfo.color }}
+              className="h-auto min-h-0 px-0 text-sm font-medium text-primary underline underline-offset-2 hover:bg-transparent hover:text-text-main"
             >
               Tutorial
             </Button>

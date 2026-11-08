@@ -1,6 +1,7 @@
 import {
   finalizeMostRecentPendingRequest,
   finalizePendingRequestById,
+  type PendingRequestIdentity,
 } from "@/lib/usage/usageHistory.ts";
 
 import { HTTP_STATUS } from "../config/constants.ts";
@@ -228,7 +229,7 @@ export function finalizeStreamRequestLog({
   errorCode,
   onWarn,
 }: {
-  pendingRequestId: string;
+  pendingRequestId: PendingRequestIdentity;
   model: string;
   provider: string;
   connectionId: string | null;
@@ -240,14 +241,15 @@ export function finalizeStreamRequestLog({
   onWarn?: (error: unknown) => void;
 }) {
   try {
-    const completedById = finalizePendingRequestById(pendingRequestId, {
-      providerResponse,
-      clientResponse,
-      status,
-      error: error || null,
-      errorCode: errorCode || null,
-    });
-    if (!completedById) {
+    if (pendingRequestId) {
+      finalizePendingRequestById(pendingRequestId, {
+        providerResponse,
+        clientResponse,
+        status,
+        error: error || null,
+        errorCode: errorCode || null,
+      });
+    } else {
       finalizeMostRecentPendingRequest(model, provider, connectionId, {
         providerResponse,
         clientResponse,

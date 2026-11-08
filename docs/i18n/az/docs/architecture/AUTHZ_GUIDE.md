@@ -17,51 +17,128 @@ OmniRoute hər bir API sorğusunu yoxlayan, marşrutdan xəbərdar avtorizasiya 
 
 ### 1. API açarı (Bearer)
 
-OpenAI/Anthropic/Gemini ilə uyğun müştəri API-ləri üçün və açarın `manage` əhatəsi olduqda bir neçə idarəetmə marşrutu üçün istifadə olunur.
+OpenAI/Anthropic/Gemini ilə uyğun müştəri API-ləri və açarın `manage` əhatə dairəsi olduqda bir neçə idarəetmə marşrutu üçün istifadə olunur.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-`isValidApiKey()` / `extractApiKey()` funksiyaları `src/sse/services/auth.ts` faylında yoxlanılır və `src/shared/utils/apiAuth.ts` vasitəsilə yenidən ixrac edilir. Yoxlayıcı `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` mühit dəyişənlərini daimi keçid açarları kimi də qəbul edir (#1350 issue).
+`src/sse/services/auth.ts` daxilindəki `isValidApiKey()` / `extractApiKey()` tərəfindən yoxlanılır və `src/shared/utils/apiAuth.ts` vasitəsilə yenidən ixrac olunur. Validator həmçinin davamlı ötürmə açarları kimi `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` mühit dəyişənlərini də qəbul edir (issue #1350).
 
-### 2. İdarəetmə paneli sessiyası (auth_token cookie)
+### 2. İdarə paneli sessiyası (auth_token cookie)
 
-İdarəetmə paneli səhifələri və admin əməliyyatları üçün.
+İdarə paneli səhifələri və administrator əməliyyatları üçün.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Cookie yalnız JWT yoxlanıldıqda **və** `authenticated: true` daşıdıqda sessiya sayılır (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Cookie-dən istifadə edən hər bir komponent — idarəetmə paneli marşrut qoruyucusu (`isDashboardSessionAuthenticated()`), authz pipeline yenilənməsi, WebSocket əl sıxışması, canlı server, `/api/settings/require-login` və `/api/auth/status` — bu köməkçi funksiyadan keçir.
-`JWT_SECRET` ilə imzalanmış digər JWT-lər də mövcuddur — Cursor CLI keçidi açar sahibləri üçün `iss "omniroute" / aud "cursor-cli"` tokenləri buraxır — və bunlar heç vaxt sessiya deyil (#13298).
+Cookie yalnız JWT yoxlanıldıqda **və** `authenticated: true` daşıdıqda sessiya hesab olunur
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Cookie-dən istifadə edən hər bir komponent (idarə panelinin marşrut qoruyucusu (`isDashboardSessionAuthenticated()`), authz pipeline refresh, WebSocket handshake, live server, `/api/settings/require-login`, `/api/auth/status`) həmin köməkçi funksiyadan keçir.
+`JWT_SECRET` ilə imzalanmış digər JWT-lər də mövcuddur — Cursor CLI passthrough açar sahibləri üçün
+`iss "omniroute" / aud "cursor-cli"` tokenləri yaradır — və onlar heç vaxt sessiya hesab olunmur
+(#13298).
 
-`isDashboardSessionAuthenticated()` ilə `src/shared/utils/apiAuth.ts` faylında yoxlanılır. Pipeline 30 günlük ömrünün 7 gündən az qalmış hissəsində JWT-ni avtomatik yeniləyir.
+`src/shared/utils/apiAuth.ts` daxilindəki `isDashboardSessionAuthenticated()` tərəfindən yoxlanılır. Pipeline 30 günlük müddətdə 7 gündən az vaxt qaldıqda JWT-ni avtomatik yeniləyir.
 
-Sessiya 30 gün bitmədən də sona çata bilər: hər buraxıcı `mintDashboardSessionToken` vasitəsilə keçir (verilmə vaxtı `iat` və identifikator `jti`), yoxlayıcı isə iki ayarı yoxlayır. `sessionsValidAfter` parolun dəyişdirilməsi ilə təyin olunur, beləliklə ondan əvvəl verilmiş bütün sessiyalar etibarsız olur (parolu dəyişən brauzer yeni cookie alır). `revokedDashboardSessions` siyahısına isə `POST /api/auth/logout` çıxış edilmiş sessiyanın `jti` dəyərini əlavə edir. Əvvəlki buraxılışın verdiyi sessiyalarda bu iddialar yoxdur və ilk parol dəyişikliyinə qədər etibarlı qalırlar. Ayarlar oxuna bilmirsə, sessiyaya etibar edilmir.
+Sessiya 30 günlük müddət başa çatmamış da bitə bilər, çünki hər bir token yaradan komponent `mintDashboardSessionToken` funksiyasından keçir (`iat` yaradılma vaxtı və `jti` identifikatoru ilə) və verifier iki ayarı yoxlayır: parol dəyişikliyi ilə təyin olunan `sessionsValidAfter` — bu ayardan əvvəl verilmiş bütün sessiyaların yoxlanılmasını dayandırır (parolu dəyişən brauzer yeni cookie əldə edir) — və `POST /api/auth/logout` çıxış edilmiş sessiyanın `jti` dəyərini əlavə edən `revokedDashboardSessions`. Daha köhnə buraxılış tərəfindən yaradılmış sessiyalar bu claim-lərin heç birini daşımır və ilk parol dəyişikliyinə qədər etibarlı qalır. Ayarlar oxuna bilmədikdə sessiyaya etibar edilmir.
 
-Bəzi idarəetmə marşrutları **hər iki** rejimi qəbul edir: açarın `manage` (və ya `admin`) əhatəsi varsa, cookie VƏ YA `Bearer <key>`. v3.8-də əlavə olunan "API çağırışları ilə konfiqurasiya edilə bilən" iş axını bunu mümkün edir.
+Bəzi idarəetmə marşrutları **hər iki** rejimi qəbul edir: cookie və ya API açarının `manage` (və ya `admin`) əhatə dairəsi olduqda `Bearer <key>`. Bu, v3.8-də əlavə edilmiş “API çağırışları vasitəsilə konfiqurasiya edilə bilən” iş prosesini mümkün edir.
 
-#### Könüllü OIDC giriş qapısı (#6973)
+#### İstəyə bağlı OIDC giriş məhdudiyyəti (#6973)
 
-İdarəetmə paneli admin girişi standart parol girişinin yanında **könüllü** OIDC (OpenID Connect) axınını da dəstəkləyir — parol girişi heç vaxt silinmir, yalnız əlavə olunur:
+İdarə panelinin administrator girişi standart parol girişi ilə yanaşı **istəyə bağlı aktivləşdirilən** OIDC (OpenID Connect) axınını da dəstəkləyir
+— parol girişi heç vaxt silinmir, yalnız
+tamamlanır:
 
-- Yalnız `settings.oidcEnabled === true` **və** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` hamısı konfiqurasiya olunduqda aktivdir (Parametrlər → Autentifikasiya). Əks halda `GET /api/auth/oidc/login` `400` qaytarır.
-- `GET /api/auth/oidc/login` `authorization_endpoint`-i emitentin `/.well-known/openid-configuration` sənədindən tapır (tapılmazsa `<issuer>/authorize` istifadə olunur), yönləndirmə URI-sini gələn sorğudan qurur (`x-forwarded-proto` nəzərə alınaraq) və təsadüfi `state` dəyəri ilə, `httpOnly` `oidc_state` cookie-də saxlayaraq IdP-yə yönləndirir.
-- `GET /api/auth/oidc/callback` `state`-i yoxlayır, icazə kodunu dəyişdirir və ID tokenin imzasını emitentin JWKS-i vasitəsilə yoxlayır (`jose` `createRemoteJWKSet`, hər JWKS URI üçün keşlənir), `issuer`/`audience` yoxlamaları ilə. `oidcAllowedSubjects` icazə siyahısı tələb olunur: tokenin `sub` iddiası və ya `email` iddiası ilə uyğunlaşır. E-poçt iddiası yalnız `email_verified === true` olduqda qəbul edilir, beləliklə IdP-də təsdiqlənməmiş e-poçt heç vaxt bu qapıdan keçə bilməz. Girişlər olmadıqda callback hər girişi rədd edir (`not_configured`).
-- Uğurlu girişdə parol girişinin verdiyi **eyni** 30 günlük `auth_token` JWT-ni verir (`src/app/api/auth/login/route.ts`), beləliklə idarəetmə paneli sessiya pipeline-ının qalan hissəsi (avtomatik yeniləmə, cookie bayraqları) dəyişmir — OIDC yalnız cookie-nin necə yaradıldığını dəyişir, verdiyi icazəni yox.
-- Hər `oidc*` parametri (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS` siyahısındadır (`src/shared/constants/securityImpactingSettings.ts`): gövdə idarəetmə parolunu `currentPassword` kimi daşımadıqca `PATCH /api/settings` `400 PASSWORD_REQUIRED` qaytarır (parol yanlışdırsa `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin` parolla _girişi_ (`POST /api/auth/login`) qadağan edir, lakin saxlanılan parol hash-ini qoruyur; yenidən autentifikasiya hələ də onu `currentPassword` ilə yoxlayır.
-- `corsOrigins` və `bruteForceProtection` də `SECURITY_IMPACTING_SETTINGS_KEYS` siyahısındadır: birini boşaltmaq giriş müdafiəsini zəiflədir, buna görə eyni yenidən autentifikasiyanı (`currentPassword`) tələb edirlər (Təhlükəsizlik tabı bunu soruşur) və JSON idxalı onları atır.
-- Hər təhlükəsizlik siyasəti açarı — `SECURITY_IMPACTING_SETTINGS_KEYS` girişləri, hər `oidc*` açarı və idarəetmə paneli sessiya vəziyyəti — `PATCH /api/settings`-də **yalnız operator üçündür**: `manage` əhatəli API açarı və ya `oma_` giriş tokeni düzgün `currentPassword` göndərsə belə `403` alır, rədd etmə isə `reason: OPERATOR_REQUIRED` ilə `settings.update_failed` kimi audit olunur (`src/lib/api/operatorCredential.ts`-dəki `requireOperatorCredential()`). Adi parametrlər (mövzu, göstərmə seçimləri) `manage` açarı və ya `admin` giriş tokeni üçün yazıla bilən qalır. `/api/settings`-də hər dəyişiklik (və `/api/settings/require-login`) `admin` giriş tokeni əhatəsi tələb edir (`src/server/authz/accessScopes.ts`-dəki `ADMIN_MUTATION_EXACT_PATHS`, dəqiq yol uyğunluğu ilə); `GET` `read` tələb edir, digər `/api/settings/*` alt-marşrutları (proxilər, combo defoltları, model ləqəbləri, sıxılma, təmizləmələr…) isə metoddan çıxarılan `write` əhatəsini saxlayır.
-- `POST /api/settings/import-json` bu yenidən autentifikasiyanı keçir, buna görə yazmadan əvvəl `IMPORT_STRIPPED_SETTINGS_KEYS`-dəki (eyni fayl) bütün açarları atır: parolu və `currentPassword`-u, hər `SECURITY_IMPACTING_SETTINGS_KEYS` girişini və idarəetmə paneli sessiya vəziyyətini (`sessionsValidAfter`, `revokedDashboardSessions`). Buna görə köhnə ehtiyat nüsxəni idxal etmək parol dəyişikliyi və ya çıxış ilə bitmiş sessiyanı geri qaytara bilməz.
-- Yalnız `settings.oidcEnabled === true` **və** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` hamısı konfiqurasiya olunduqda aktivdir (Parametrlər → Autentifikasiya). Əks halda `GET /api/auth/oidc/login` `400` qaytarır.
-- `GET /api/auth/oidc/login` `authorization_endpoint`-i emitentin `/.well-known/openid-configuration` sənədindən tapır (tapılmazsa `<issuer>/authorize` istifadə olunur), yönləndirmə URI-sini gələn sorğudan qurur (`x-forwarded-proto` nəzərə alınaraq) və təsadüfi `state` dəyəri ilə, `httpOnly` `oidc_state` cookie-də saxlayaraq IdP-yə yönləndirir.
-- `GET /api/auth/oidc/callback` `state`-i yoxlayır, icazə kodunu dəyişdirir və ID tokenin imzasını emitentin JWKS-i vasitəsilə yoxlayır (`jose` `createRemoteJWKSet`, hər JWKS URI üçün keşlənir), `issuer`/`audience` yoxlamaları ilə. `oidcAllowedSubjects` icazə siyahısı tələb olunur: tokenin `sub` iddiası və ya `email` iddiası ilə uyğunlaşır. E-poçt iddiası yalnız `email_verified === true` olduqda qəbul edilir, beləliklə IdP-də təsdiqlənməmiş e-poçt heç vaxt bu qapıdan keçə bilməz. Girişlər olmadıqda callback hər girişi rədd edir (`not_configured`).
-- Uğurlu girişdə parol girişinin verdiyi **eyni** 30 günlük `auth_token` JWT-ni verir (`src/app/api/auth/login/route.ts`), beləliklə idarəetmə paneli sessiya pipeline-ının qalan hissəsi (avtomatik yeniləmə, cookie bayraqları) dəyişmir — OIDC yalnız cookie-nin necə yaradıldığını dəyişir, verdiyi icazəni yox.
-- Hər `oidc*` parametri (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS` siyahısındadır (`src/shared/constants/securityImpactingSettings.ts`): gövdə idarəetmə parolunu `currentPassword` kimi daşımadıqca `PATCH /api/settings` `400 PASSWORD_REQUIRED` qaytarır (parol yanlışdırsa `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin` parolla _girişi_ (`POST /api/auth/login`) qadağan edir, lakin saxlanılan parol hash-ini qoruyur; yenidən autentifikasiya hələ də onu `currentPassword` ilə yoxlayır.
-- `corsOrigins` və `bruteForceProtection` də `SECURITY_IMPACTING_SETTINGS_KEYS` siyahısındadır: birini boşaltmaq giriş müdafiəsini zəiflədir, buna görə eyni yenidən autentifikasiyanı (`currentPassword`) tələb edirlər (Təhlükəsizlik tabı bunu soruşur) və JSON idxalı onları atır.
-- Hər təhlükəsizlik siyasəti açarı — `SECURITY_IMPACTING_SETTINGS_KEYS` girişləri, hər `oidc*` açarı və idarəetmə paneli sessiya vəziyyəti — `PATCH /api/settings`-də **yalnız operator üçündür**: `manage` əhatəli API açarı və ya `oma_` giriş tokeni düzgün `currentPassword` göndərsə belə `403` alır, rədd etmə isə `reason: OPERATOR_REQUIRED` ilə `settings.update_failed` kimi audit olunur (`src/lib/api/operatorCredential.ts`-dəki `requireOperatorCredential()`). Adi parametrlər (mövzu, göstərmə seçimləri) `manage` açarı və ya `admin` giriş tokeni üçün yazıla bilən qalır. `/api/settings`-də hər dəyişiklik (və `/api/settings/require-login`) `admin` giriş tokeni əhatəsi tələb edir (`src/server/authz/accessScopes.ts`-dəki `ADMIN_MUTATION_EXACT_PATHS`, dəqiq yol uyğunluğu ilə); `GET` `read` tələb edir, digər `/api/settings/*` alt-marşrutları (proxilər, combo defoltları, model ləqəbləri, sıxılma, təmizləmələr…) isə metoddan çıxarılan `write` əhatəsini saxlayır.
-- `POST /api/settings/import-json` bu yenidən autentifikasiyanı keçir, buna görə yazmadan əvvəl `IMPORT_STRIPPED_SETTINGS_KEYS`-dəki (eyni fayl) bütün açarları atır: parolu və `currentPassword`-u, hər `SECURITY_IMPACTING_SETTINGS_KEYS` girişini və idarəetmə paneli sessiya vəziyyətini (`sessionsValidAfter`, `revokedDashboardSessions`). Buna görə köhnə ehtiyat nüsxəni idxal etmək parol dəyişikliyi və ya çıxış ilə bitmiş sessiyanı geri qaytara bilməz.
+- Yalnız `settings.oidcEnabled === true` **və** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` parametrlərinin hamısı konfiqurasiya edildikdə aktivdir (Parametrlər → Auth).
+  Əks halda `GET /api/auth/oidc/login` `400` qaytarır.
+- `GET /api/auth/oidc/login` issuer-in `/.well-known/openid-configuration` ünvanından
+  `authorization_endpoint`-i müəyyən edir (`<issuer>/authorize` ünvanına geri qayıdır),
+  yönləndirmə URI-sini daxil olan sorğu əsasında qurur (`x-forwarded-proto`-nu nəzərə alır)
+  və təsadüfi `state` dəyərini `httpOnly` `oidc_state` kukisində saxlayaraq
+  IdP-yə yönləndirir.
+- `GET /api/auth/oidc/callback` `state` dəyərini yoxlayır, avtorizasiya kodunu mübadilə edir
+  və issuer-in JWKS-i vasitəsilə ID token-in imzasını yoxlayır
+  (`jose`-un `createRemoteJWKSet` funksiyası, JWKS URI üzrə keşlənir); bu zaman
+  `issuer` / `audience` yoxlamaları da aparılır. Panelə giriş üçün boş olmayan
+  `oidcAllowedSubjects` siyahısı, `oidcAdmissionClaim` siyasəti və ya hər ikisi tələb olunur.
+  Mövzu siyahısı yalnız `email_verified === true` olduqda `sub` və ya `email` ilə uyğunlaşdırılır.
+  İxtiyari claim siyasəti nöqtələrlə ayrılmış ID-token claim yolunu
+  (məsələn, `realm_access.roles`) və qəbul edilən dəyərlər massivini qəbul edir;
+  həll edilmiş claim sətirlərdən ibarət massiv olmalı və qəbul edilən dəyərlərdən ən azı birini
+  ehtiva etməlidir. Hər iki siyasət konfiqurasiya edilibsə, hər ikisi keçməlidir.
+  Çatışmayan və ya düzgün formatda olmayan claim-lər təhlükəsiz şəkildə rədd edilir və
+  siyasətlərdən heç biri olmadıqda callback girişi rədd edir (`not_configured`).
+  Yalnız mövzuya əsaslanan mövcud konfiqurasiyalar dəyişmədən işləməyə davam edir.
+- Keycloak adətən realm rollarını ID token-lərinə deyil, access token-lərinə yerləşdirir.
+  `admin` realm rolunu tələb etmək üçün bu client üçün `realm_access.roles` dəyərini
+  **ID token**-inə daxil edən protokol mapper-i konfiqurasiya edin, sonra
+  `oidcAdmissionClaim` parametrini `{ "path": "realm_access.roles", "values": ["admin"] }`
+  olaraq təyin edin. Yalnız rollara əsaslanan girişə icazə verməzdən əvvəl bu client üçün
+  faktiki ID-token claim-ini yoxlayın; tətbiq access-token rollarını oxumur. IdP tərəfində
+  tokenin rədd edilməsi bu tətbiq yoxlamasını tamamlaya bilər, lakin onu əvəz etmir.
+- Uğurlu olduqda parol ilə girişin yaratdığı **tamamilə eyni** 30 günlük `auth_token` JWT-sini
+  (`src/app/api/auth/login/route.ts`) yaradır; beləliklə panel sessiyasının qalan prosesi
+  (avtomatik yeniləmə, kuki bayraqları) dəyişməz qalır — OIDC yalnız kukinin necə yaradıldığını
+  əvəz edir, onun verdiyi icazələri deyil. IdP rollarında/qruplarında edilən dəyişikliklər
+  mövcud OmniRoute sessiyalarını etibarsız etmir; onların müddətini çıxış, parolun dəyişdirilməsi
+  və ya sessiyanın başa çatması müəyyən edir.
+- Hər bir `oidc*` parametri (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`)
+  `SECURITY_IMPACTING_SETTINGS_KEYS` daxilindədir
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  sorğusu body-də idarəetmə parolu `currentPassword` kimi göndərilmədikdə
+  `400 PASSWORD_REQUIRED` qaytarır (parol səhv olduqda `401 PASSWORD_MISMATCH`).
+  `oidcDisablePasswordLogin` parol ilə _girişi_ (`POST /api/auth/login`) rədd edir,
+  lakin saxlanılmış parol heşini qoruyur və yenidən autentifikasiya zamanı
+  `currentPassword` yenə onunla yoxlanılır.
+- `corsOrigins` və `bruteForceProtection` da `SECURITY_IMPACTING_SETTINGS_KEYS`
+  daxilindədir: bunlardan hər hansı birinin zəiflədilməsi giriş müdafiəsini zəiflətdiyinə görə
+  onlar üçün də eyni `currentPassword` yenidən autentifikasiyası tələb olunur
+  (Security bölməsi bunu istəyir) və JSON idxalı onları silir.
+- Hər bir təhlükəsizlik siyasəti açarı — `SECURITY_IMPACTING_SETTINGS_KEYS` daxilindəki
+  qeydlər, bütün `oidc*` açarları və panel sessiyasının vəziyyəti — `PATCH /api/settings`
+  üçün yalnız **operator** tərəfindən istifadə oluna bilər: idarəetmə əhatəli API açarı və ya
+  `oma_` access token-i düzgün `currentPassword` göndərsə belə `403` ilə rədd edilir və bu
+  rədd `settings.update_failed`, `reason: OPERATOR_REQUIRED` kimi audit jurnalına yazılır
+  (`requireOperatorCredential()` in `src/lib/api/operatorCredential.ts`).
+  Adi parametrlər (tema, görünüş seçimləri) `manage` açarı və ya `admin` access token-i
+  tərəfindən yazıla bilər. `/api/settings`-in özündə (həmçinin
+  `/api/settings/require-login` ünvanında) edilən hər bir dəyişiklik üçün də
+  `admin` access-token əhatəsi tələb olunur
+  (`ADMIN_MUTATION_EXACT_PATHS` in `src/server/authz/accessScopes.ts`, dəqiq yol uyğunluğu);
+  `GET` olaraq `read` olaraq qalır, digər `/api/settings/*` alt-marşrutları
+  (proksilər, combo standartları, model ləqəbləri, sıxışdırma, təmizləmələr və s.)
+  isə metod əsasında müəyyən edilən `write` əhatəsini saxlayır.
+- `POST /api/settings/import-json` bu yenidən autentifikasiyanı atlayır; buna görə yazmazdan
+  əvvəl `IMPORT_STRIPPED_SETTINGS_KEYS` daxilindəki hər bir açarı (eyni faylda) silir:
+  parol və `currentPassword`, `SECURITY_IMPACTING_SETTINGS_KEYS` daxilindəki bütün qeydlər
+  və panel sessiyasının vəziyyəti (`sessionsValidAfter`, `revokedDashboardSessions`).
+  Köhnə ehtiyat nüsxənin idxal edilməsi parol dəyişikliyi və ya çıxış nəticəsində artıq başa çatmış
+  sessiyanı buna görə yenidən aktivləşdirə bilməz.
+
+#### İstəyə bağlı TOTP iki faktorlu giriş (#16619)
+
+Parametrlər → Security bölməsindən qeydiyyata alınır; operator onu aktiv edənədək deaktivdir
+(`src/server/auth/dashboardMfa.ts`).
+
+- **Əhatə etdikləri:** parol ilə giriş (`POST /api/auth/login`, bundan sonra
+  `POST /api/auth/mfa/verify` tələb olunur) və `omniroute connect` (`POST /api/cli/connect`,
+  yalnız paroldan ibarət mübadiləni rədd edir və kodu `totp` kimi qəbul edir).
+- **Əhatə etmədikləri:** OIDC / SSO ilə giriş (`/api/auth/oidc/callback`) OmniRoute TOTP kodunu
+  tələb etmir. O, identifikasiya provayderinin öz ikinci amilindən istifadə edir; buna görə də
+  OIDC aktivdirsə, MFA-nı IdP-də məcburi edin.
+- **Bərpa** (cihaz itirildikdə, bərpa kodları qalmadıqda və ya, məsələn,
+  `STORAGE_ENCRYPTION_KEY` dəyişdikdən sonra, amil artıq doğrulana bilmədikdə):
+  1. Serveri `OMNIROUTE_DISABLE_MFA=true` ilə yenidən başladın.
+  2. Birbaşa hostun özündə (loopback peer və `http://localhost:20128` kimi loopback `Host` ilə)
+     parol ilə daxil olun. İkinci amil yalnız həmin mənşə üçün ötürülür; bütün digər mənşələr
+     hələ də kod tələb edir.
+  3. Settings → Security → Disable bölməsində parolu daxil edin və kod sahəsini boş saxlayın. `POST /api/auth/mfa/disable` yalnız dəyişən təyin edildikdə və sorğu hostdan gəldikdə `code` olmadan gövdəni qəbul edir; buna baxmayaraq, hələ də dashboard sessiyasını və cari parolu tələb edir və `auth.mfa.disabled` hadisəsi, `secondFactor: "recovery_switch"` ilə auditə yazılır.
+  4. `OMNIROUTE_DISABLE_MFA` dəyişənini ləğv edin, serveri yenidən başladın və lazım gələrsə yenidən qeydiyyatdan keçin.
 
 ## Marşrut sinifləri
 
@@ -75,60 +152,61 @@ Bəzi idarəetmə marşrutları **hər iki** rejimi qəbul edir: açarın `manag
 
 Bəzi `MANAGEMENT` əməliyyatları **yalnız operator üçündür**: `manage` açarı kifayət etmir. Saxlanılan etimadnamələrin ixracı (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), canlı məlumatların üzərinə ehtiyat nüsxəsinin bərpası (`dryRun=true` daxil olmaqla `POST /api/db-backups/import`, identifikatora görə bərpa `POST /api/db-backups` və `POST /api/settings/import-json`) və bərpa nöqtələrinin məhv edilməsi (`DELETE /api/db-backups` təmizləməsi və `PATCH /api/db-backups`, çünki saxladığı saxlama müddəti hər ehtiyat nüsxəsindən sonrakı avtomatik təmizləməni idarə edir) idarəetmə paneli sessiyası, yerli CLI subyekti və ya söndürülmüş giriş tələb edir. Sinxronizasiya tokeni vermək (`POST /api/sync/tokens`) və `admin` CLI giriş tokeni vermək (`POST /api/cli/tokens`) bütün giriş rejimlərində idarəetmə paneli sessiyası və ya yerli CLI subyekti tələb edir. İstənilən əhatəli API açarları və `oma_` giriş tokenləri operator etimadnaməsi deyil: tələb olunduqda `403` alırlar. Yoxlama `src/lib/api/operatorCredential.ts`-dədir (`resolveOperatorCredential()` / `requireOperatorCredential()`). Giriş parametrlərinin dəyişdirilməsi də yalnız operator üçündür: parol mövcud olduqdan sonra `POST /api/settings/require-login` (idarəetmə parolunu təyin etmək / `requireLogin`-i dəyişmək) yalnız bu etimadnamələri qəbul edir — ilk quraşdırma bootstrap pəncərəsi (hələ parol yoxdursa) dəyişməz qalır — və idarəetmə paneli sessiyası parolu əvəz etmək üçün `currentPassword` göndərməlidir (yoxdursa və ya səhvdirsə `403`, `settings.update_failed` kimi audit olunur). Yerli CLI və girişi söndürülmüş instansiya bərpa yolunu saxlayır və parolu onsuz təyin edə bilər, çünki ikisi də məlumat qovluğuna sahib olan hosta bağlıdır.
 
-## Konveyer
+## Boru kəməri
 
 ```
-Daxil olan sorğu → src/proxy.ts
-  → src/server/authz/pipeline.ts daxilində runAuthzPipeline()
-    1. Etibarlı daxili başlıqları sil (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Sorğu identifikatoru yarat, marşrutu classifyRoute() vasitəsilə təsnif et
-    3. Əgər pathname == "/" olarsa → /dashboard ünvanına yönləndir
-    4. Boşaltma rejimindədirsə (nizamlı dayandırma) və /api/* olarsa → 503
-    5. GET olmayan /api/* sorğusudursa → checkBodySize() qoruyucusunu yoxla
-    6. Əgər OPTIONS olarsa → CORS ilkin sorğusuna 204 cavabı ver
-    7. Əgər options.enforce == false olarsa → marşrut sinfi başlıqları ilə dəyişiklik etmədən ötür
-    8. Əks halda: POLICIES[routeClass].evaluate(ctx)
-       - icazə ver  → x-omniroute-auth-{kind,id,label,scopes} əlavə et → NextResponse.next()
-       - rədd et → correlation_id ilə JSON xətası (idarə paneli səhifələri → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Etibarlı daxili başlıqlar (`src/server/authz/headers.ts` daxilində müəyyən edilib) təsnifatdan əvvəl **daxil olan sorğulardan silinir** — müştərilər subyekti təqlid etmək üçün `x-omniroute-auth-*` başlıqlarını əvvəlcədən təyin edə bilməzlər.
+Etibarlı daxili başlıqlar ( `src/server/authz/headers.ts` ilə müəyyən edilir) bunlardır** daxil olan sorğulardan məhrum edilmişdir** təsnifatdan əvvəl — müştəriləri subyekti təqlid etmək üçün `x-omniroute-auth-*` əvvəlcədən doldura bilməzlər.
 
 ### Siyasət müqavilələri
 
-Hər marşrut sinfinin `src/server/authz/policies/` daxilində bir siyasəti var:
+Hər bir marşrut sinfinin `src/server/authz/policies/`-da siyasəti var:
 
 - **`publicPolicy`** (`policies/public.ts`) — həmişə `allow({ kind: "anonymous", id: "anonymous" })` qaytarır.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer açarını çıxarır və `validateApiKey()` vasitəsilə doğrulayır. Yalnız effektiv `REQUIRE_API_KEY` funksiya bayrağı deaktiv olduqda anonim girişə keçid edir. Effektiv bayraq `isRequireApiKeyEnabled()` vasitəsilə müəyyən edilir (`DB funksiya bayrağı əvəzləməsi > process.env.REQUIRE_API_KEY > standart dəyər`), beləliklə, İdarə Panelindəki Funksiya Bayraqları və mühit dəyişənləri `/api/v1/*`, `/api/v1beta/*` və aliasları ardıcıl şəkildə idarə edir; həlledici xətaları zamanı giriş bağlı saxlanılır. Müştəri API-si marşrutlarında idarə paneli sessiyası ilə edilən sorğulara icazə verir (idarə panelinin model kataloqu tərəfindən istifadə edilən `/api/v1/models` daxil olmaqla).
-- **`managementPolicy`** (`policies/management.ts`) — idarə paneli sessiyasını, daxili model sinxronlaşdırma sorğularını (`/api/providers/[name]/(sync-models|models)` ilə uyğunlaşdırılır) qəbul edir və ya `isAuthRequired()` false qaytardıqda yoxlamanı tamamilə ötürür. Bearer tokeni təqdim edildikdə, lakin etibarsız olduqda 403 (`AUTH_001`), əks halda isə 401 qaytarır. Həmçinin hər hansı autentifikasiya şaxəsindən əvvəl marşrut qoruyucusu səviyyələrini (LOCAL_ONLY / ALWAYS_PROTECTED) tətbiq edir — baxın: [Marşrut Qoruyucusu Səviyyələri](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` daxilindəki LOCAL_ONLY yollarına (hazırda: `/api/mcp/`) Bearer açarı `manage` əhatə dairəsinə malik olduqda loopback olmayan ünvanlardan giriş mümkündür; bütün digər LOCAL_ONLY yolları əhatə dairəsindən asılı olmayaraq yalnız loopback üçün əlçatan qalır.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — Daşıyıcını çıxarır, `validateApiKey()` vasitəsilə təsdiq edir. Yalnız effektiv `REQUIRE_API_KEY` funksiyasının bayrağı deaktiv edildikdə anonimə keçir. Effektiv bayraq `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) vasitəsilə həll edilir, beləliklə, İdarə Paneli Xüsusiyyətləri Bayraqlar və mühit dəyişənləri `/api/v1/*`, `/api/v1beta/*` və ləqəbləri ardıcıl olaraq idarə edir; həlledici uğursuzluqlar bağlandı. Müştəri API marşrutları üzrə (o cümlədən tablosuna model kataloqu tərəfindən istifadə edilən `/api/v1/models`) panel-sessiya sorğularına icazə verir. Entra ID SSO aktivləşdirildikdə, struktur olaraq Entra tokeni (üç base64url seqmenti, `RS*` alg, `kid`) olan Daşıyıcı SSO filialı tərəfindən idarə olunur.** əvvəl** `validateApiKey()` və onun hökmü yekun — o, heç vaxt API açarı yoluna və ya degraddan anonim filiala düşmür, ona görə də identifikasiya provayderinin kəsilməsi açıq girişə çevrilə bilməz. Statik API düymələri təsirlənmir. [Entra ID SSO](../security/ENTRA_SSO.md) baxın.
+- **`managementPolicy`** (`policies/management.ts`) — tablosuna seansı, daxili model sinxronizasiya sorğularını qəbul edir ( `/api/providers/[name]/(sync-models|models)` ilə uyğun gəlir) və ya `isAuthRequired()` yalnış qaytardıqda tamamilə ötür. Daşıyıcı nişanı mövcud olduqda, lakin etibarsız olduqda 403 (`AUTH_001`) qaytarır, əks halda 401. Həmçinin marşrut qoruyucu səviyyələrini (LOCAL_ONLY / ALWAYS_PROTECTED) hər hansı auth filialından əvvəl tətbiq edir — Baxın [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` da (bu gün: `/api/mcp/`) LOCAL_ONLY yollarına Daşıyıcı açarı `manage` əhatə dairəsini daşıdıqda qeyri-döngüdən daxil ola bilər; bütün digər LOCAL_ONLY yolları əhatə dairəsindən asılı olmayaraq ciddi geri dönmə olaraq qalır.
 
-Uğurlu siyasət `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` olan `AuthSubject` qaytarır. Aşağı axındakı işləyicilər autentifikasiya məntiqini yenidən icra etmək əvəzinə onu `src/server/authz/assertAuth.ts` daxilindəki `assertAuth(request, "CLIENT_API")` vasitəsilə oxuya bilərlər.
+Uğurlu siyasət `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ilə `AuthSubject` qaytarır. Aşağı axın işləyiciləri auth məntiqini yenidən işə salmaq əvəzinə onu `src/server/authz/assertAuth.ts` -də `assertAuth(request, "CLIENT_API")` vasitəsilə oxuya bilər.
 
-## Açıq marşrutların siyahısı
+## İctimai marşrutların siyahısı
 
-`src/shared/constants/publicApiRoutes.ts` açıq şəkildə müəyyən edilmiş icazə siyahısıdır:
+`src/shared/constants/publicApiRoutes.ts` açıq icazə siyahısını dəqiq müəyyən edir:
 
-Siyahı **formasına** görə bölünüb və bu bölgü kritik əhəmiyyət daşıyır (GHSA-74g9-q8f6-793h): prefiks
-`startsWith()` ilə uyğunlaşdırılır, buna görə də başlanğıc simvollarını paylaşan bütün bitişik yollarla uyğun gəlir.
-Prefiks kimi `/api/usage/om-usage`, `/api/usage/om-usage<anything>` yolunu AÇIQ kimi işarələyirdi və Next bunu
-öz autentifikasiyası olmayan `/api/usage/[connectionId]` işləyicisinə yönləndirirdi.
+Siyahı **formaya** görə bölünüb və bu bölgü təhlükəsizlik baxımından vacibdir (GHSA-74g9-q8f6-793h): prefiks
+`startsWith()` ilə uyğunlaşdırılır, buna görə də başlanğıc simvollarını paylaşan bütün qonşu yollarla da uyğunlaşır.
+`/api/usage/om-usage` prefiks kimi `/api/usage/om-usage<anything>` yolunu PUBLIC olaraq işarələyir və Next bunu
+`/api/usage/[connectionId]` marşrutuna yönləndirir — öz autentifikasiyası olmayan işləyici.
 
 ```ts
-// Həqiqi alt ağaclar. Hər bir element "/" ilə bitməlidir (vahid testi ilə yoxlanılır).
+// Həqiqi alt ağaclar. Hər bir giriş "/" ilə bitməlidir (vahid testi ilə təsdiqlənir).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify daxilində CLIENT_API kimi qəbul edilir, "autentifikasiyasız açıq" kimi deyil
+  "/api/v1/", // classify-də CLIENT_API kimi qəbul edilir, "autentifikasiyasız ictimai" kimi yox
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Dəqiq uyğunlaşdırılan tək marşrutlar (sonda maili xətt ilə və ya onsuz).
+// Yalnız sonundakı slash olub-olmamasından asılı olmayaraq DƏQİQ uyğunlaşdırılan tək marşrutlar.
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
+  "/api/auth/mfa/verify", // qoşulma seçilmiş TOTP üçün girişin 2-ci addımı; MFA gözləməsində olan cookie tələb olunur
   "/api/init",
   "/api/sync/bundle",
   "/api/cli/connect",
@@ -136,20 +214,20 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/skills/collect/chaos",
 ]);
 
-// Həmçinin CORS mənşə məhdudiyyətinin yumşaldılması tətbiq olunan yalnız oxuma üçün tək marşrutlar.
+// CORS origin məhdudiyyətinin yumşaldılmasını da tətbiq edən yalnız oxuma üçün tək marşrutlar.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS məhdudiyyətinin yumşaldılması OLMADAN yalnız oxuma üçün tək marşrut.
+// CORS məhdudiyyətinin yumşaldılması TƏTBİQ OLUNMAYAN yalnız oxuma üçün tək marşrut.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Yalnız oxuma üçün marşrutlar yalnız təhlükəsiz metodlar üçün açıqdır. Qeyd: `classifyRoute()` `/api/v1/*` və `/api/v1beta/*` marşrutlarını PUBLIC ehtiyat uyğunluğundan çıxarır — Bearer açarı siyasətinin hələ də tətbiq olunması üçün bunlar həmişə `CLIENT_API` olur.
+Yalnız oxuma üçün olan marşrutlar yalnız təhlükəsiz metodlar üçün ictimaidir. Qeyd: `classifyRoute()` `/api/v1/*` və `/api/v1beta/*` marşrutlarını PUBLIC ehtiyat variantından çıxarır — bunlar həmişə `CLIENT_API` olur, buna görə Bearer açarı siyasəti yenə tətbiq edilir.
 
 ## Yeni marşrutun əlavə edilməsi
 
@@ -251,23 +329,23 @@ Müştəri API açarının tətbiqi birbaşa `process.env.REQUIRE_API_KEY` oxuma
 
 ## Sazlama
 
-Konveyer cavablara həmişə aşağıdakı başlıqları əlavə edir:
+Boru kəməri həmişə cavabları möhürləyir:
 
 ```
-x-request-id:               <korrelyasiya identifikatoru, xəta gövdələrində təkrarlanır>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Autentifikasiya edilmiş sorğular üçün yuxarı axındakı (işləyici tərəfindəki) sorğu başlıqlarına həmçinin aşağıdakılar daxildir:
+Doğrulanmış sorğular üçün yuxarı (işləyici tərəfi) sorğu başlıqlarına da daxildir:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<son-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (ixtiyari)
-x-omniroute-auth-scopes:    vergüllə ayrılmış siyahı
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-İşləyicilərin daxilində `assertAuth(req, expectedClass)` istifadə edin — aralıq proqram təminatı keçildikdə o, `AUTHZ_NOT_INITIALIZED` kodu ilə `AuthzAssertionError` xətası yaradır (testlərdə konfiqurasiya reqressiyalarını aşkar etmək üçün faydalıdır).
+İşləyicilərin içərisində `assertAuth(req, expectedClass)` istifadə edin — əgər ara proqram yan keçibsə, `AuthzAssertionError` kodunu `AUTHZ_NOT_INITIALIZED` ilə atır (testlərdə konfiqurasiya reqressiyalarını tutmaq üçün faydalıdır).
 
 ## Həmçinin baxın
 

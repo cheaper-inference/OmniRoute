@@ -9,18 +9,32 @@
  * roll over unspent; that lost quota is the whole reason this strategy exists.
  *
  * This module never imports auth.ts (no cycle); it reads the same per-connection
- * quota cache auth.ts reads and reuses the combo quota scorer.
+ * quota cache auth.ts reads (hydrated from `quota_snapshots` on a miss) and
+ * reuses the combo quota scorer. Optional scope narrows multi-window quotas to
+ * the requested model family before scoring.
  */
 
-import { getQuotaCache } from "@/domain/quotaCache";
+import { getQuotaCacheOrSnapshot } from "@/domain/quotaCache";
 import { toNumber } from "@/shared/utils/numeric";
+import {
+  expiryFirstQuotaProvider,
+  expiryFirstWindowName,
+  getExpiryFirstQuotaMetrics,
+  getExpiryFirstPlan,
+  selectExpiryFirstQuotaWindowNames,
+  type ExpiryFirstScope,
+} from "./expiryFirstMetrics.ts";
 import {
   resolveExpiryFirstConfig,
   scoreExpiryFirstQuota,
 } from "@omniroute/open-sse/services/combo/quotaScoring.ts";
 
 interface QuotaCacheView {
-  quotas?: Record<string, { remainingPercentage?: number; resetAt?: string | null }>;
+  provider?: string;
+  quotas?: Record<
+    string,
+    { remainingPercentage?: number; resetAt?: string | null; fractionReported?: boolean }
+  >;
 }
 
 interface ExpiryFirstCandidate {
@@ -28,6 +42,7 @@ interface ExpiryFirstCandidate {
   priority?: number | null;
   backoffLevel?: number | null;
   lastUsedAt?: string | null;
+  providerSpecificData?: Record<string, unknown> | null;
 }
 
 function toStringOrNull(value: unknown): string | null {
@@ -45,22 +60,44 @@ function toStringOrNull(value: unknown): string | null {
  * tell "no telemetry" apart from "telemetry says empty".
  */
 export function buildConnectionQuotaWindowsView(
-  connectionId: string
+  connectionId: string,
+  scope?: ExpiryFirstScope
 ): Record<string, unknown> | null {
-  const quotas = (getQuotaCache(connectionId) as QuotaCacheView | null)?.quotas;
+  const entry = getQuotaCacheOrSnapshot(connectionId) as QuotaCacheView | null;
+  const quotas = entry?.quotas;
   if (!quotas) return null;
 
-  const windows: Record<string, { percentUsed: number; resetAt: string | null }> = {};
-  for (const [windowName, quota] of Object.entries(quotas)) {
+  const windows: Record<
+    string,
+    { percentUsed: number | null; resetAt: string | null; fractionReported?: false }
+  > = {};
+  let hasReportedWindow = false;
+  const quotaNames = Object.keys(quotas);
+  const provider = expiryFirstQuotaProvider(entry?.provider, scope?.provider);
+  const windowNames = scope ? selectExpiryFirstQuotaWindowNames(quotaNames, scope) : quotaNames;
+  for (const windowName of windowNames) {
+    const quota = quotas[windowName];
+    if (!quota) continue;
+    if (quota.fractionReported === false) {
+      // Keep reset telemetry without turning the cache's sentinel zero into an
+      // exhausted fraction (or promoting a short session to the deadline).
+      windows[expiryFirstWindowName(provider, windowName, quotaNames)] = {
+        percentUsed: null,
+        resetAt: toStringOrNull(quota.resetAt),
+        fractionReported: false,
+      };
+      continue;
+    }
     const remainingPercent = toNumber(quota?.remainingPercentage, Number.NaN);
     if (!Number.isFinite(remainingPercent)) continue;
-    windows[windowName.toLowerCase()] = {
+    hasReportedWindow = true;
+    windows[expiryFirstWindowName(provider, windowName, quotaNames)] = {
       percentUsed: Math.min(1, Math.max(0, 1 - remainingPercent / 100)),
       resetAt: toStringOrNull(quota?.resetAt),
     };
   }
 
-  return Object.keys(windows).length > 0 ? { windows } : null;
+  return hasReportedWindow ? { windows } : null;
 }
 
 /**
@@ -79,14 +116,30 @@ export function selectExpiryFirstConnection<T extends ExpiryFirstCandidate>(
   connections: readonly T[],
   settings: Record<string, unknown> | null,
   resolveQuotaView: (connectionId: string) => Record<string, unknown> | null,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
+  scope?: ExpiryFirstScope,
+  resolveMetrics: (
+    connection: T,
+    scope: ExpiryFirstScope,
+    nowMs: number
+  ) => ReturnType<typeof getExpiryFirstQuotaMetrics> = (connection, metricsScope) =>
+    getExpiryFirstQuotaMetrics(
+      connection.id,
+      getExpiryFirstPlan(connection.providerSpecificData),
+      metricsScope
+    )
 ): T | null {
   if (connections.length === 0) return null;
 
   const config = resolveExpiryFirstConfig(settings);
   const scored = connections.map((candidate) => ({
     candidate,
-    score: scoreExpiryFirstQuota(resolveQuotaView(candidate.id), config, nowMs).score,
+    score: scoreExpiryFirstQuota(
+      resolveQuotaView(candidate.id),
+      config,
+      nowMs,
+      scope ? resolveMetrics(candidate, scope, nowMs) : undefined
+    ).score,
   }));
   scored.sort((a, b) => {
     if (a.score !== b.score) return b.score - a.score; // most urgent first
@@ -122,13 +175,19 @@ export function selectExpiryFirstConnection<T extends ExpiryFirstCandidate>(
  */
 export function pickExpiryFirstConnection<T extends ExpiryFirstCandidate>(
   orderedConnections: readonly T[],
-  settings: unknown
+  settings: unknown,
+  scope?: ExpiryFirstScope
 ): T {
+  const resolveScopedView = (connectionId: string) =>
+    buildConnectionQuotaWindowsView(connectionId, scope);
+
   return (
     selectExpiryFirstConnection(
       orderedConnections,
       settings as Record<string, unknown> | null,
-      buildConnectionQuotaWindowsView
+      resolveScopedView,
+      Date.now(),
+      scope
     ) ?? orderedConnections[0]
   );
 }

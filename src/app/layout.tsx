@@ -12,9 +12,17 @@ import { PwaRegister } from "@/shared/components/PwaRegister";
 import { LocaleAutoDetect } from "@/shared/components/LocaleAutoDetect";
 import { HIDDEN_TAB_REVEAL_SCRIPT } from "@/shared/utils/hiddenTabReveal";
 import { BasePathNetworkProvider } from "@/shared/components/BasePathNetworkProvider";
+import { PWA_THEME_COLORS } from "@/shared/constants/pwaThemeColors";
+import { EDITIONS_APPEARANCE_VALUE } from "@/shared/constants/appearancePalette";
+import { THEME_BOOT_SCRIPT } from "@/shared/utils/themeBootScript";
 
 export const viewport: Viewport = {
-  themeColor: "#0b0f1a",
+  // Page background of the default (Editions) palette per colour scheme (pwaThemeColors.ts).
+  // THEME_BOOT_SCRIPT and the theme store rewrite these tags to the stored palette and mode.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: PWA_THEME_COLORS.light },
+    { media: "(prefers-color-scheme: dark)", color: PWA_THEME_COLORS.dark },
+  ],
   viewportFit: "cover",
 };
 
@@ -65,7 +73,16 @@ export default async function RootLayout({ children }) {
   const isRtl = RTL_LOCALES.includes(locale as (typeof RTL_LOCALES)[number]);
 
   return (
-    <html lang={locale} dir={isRtl ? "rtl" : "ltr"} className="ci-theme" suppressHydrationWarning>
+    // `data-ci-appearance="editions"` is the default palette (the kit's Editions look), rendered
+    // by the server so the first paint has it even without JS; THEME_BOOT_SCRIPT removes it for
+    // a visitor who chose Classic, before paint.
+    <html
+      lang={locale}
+      dir={isRtl ? "rtl" : "ltr"}
+      className="ci-theme"
+      data-ci-appearance={EDITIONS_APPEARANCE_VALUE}
+      suppressHydrationWarning
+    >
       <head>
         {/* #16245: seed React's $RT so Suspense reveals while the tab is hidden. */}
         <script dangerouslySetInnerHTML={{ __html: HIDDEN_TAB_REVEAL_SCRIPT }} />
@@ -125,18 +142,12 @@ export default async function RootLayout({ children }) {
                   };
                 }
               }
-              try {
-                const stored = localStorage.getItem('theme');
-                const parsed = stored ? JSON.parse(stored) : null;
-                const theme = parsed?.state?.theme || 'system';
-                const dark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                document.documentElement.classList.toggle('dark', dark);
-                document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-                document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
-              } catch (e) {}
             `,
           }}
         />
+        {/* Theme + palette before paint (light/dark and Editions/Classic from the persisted
+            `theme` store), so the first frame already has the stored look. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       {/* No skip link here: its #main-content target exists only in the dashboard shell, which
           renders its own skip link as the first tab stop (F4). */}

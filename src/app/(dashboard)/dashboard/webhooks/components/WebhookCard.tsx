@@ -4,6 +4,7 @@ import { useState } from "react";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { WebhookDeliveriesPanel } from "./WebhookDeliveriesPanel";
 
 export type WebhookKind = "slack" | "telegram" | "discord" | "custom";
@@ -95,11 +96,7 @@ export function WebhookCard({
             title={t("testWebhook")}
             aria-label={t("testWebhook")}
           >
-            <Icon
-              name={isTesting ? "sync" : "send"}
-              size={18}
-              className={isTesting ? "animate-spin" : undefined}
-            />
+            {isTesting ? <Spinner decorative size="sm" /> : <Icon name="send" size={18} />}
           </Button>
           <Button
             variant="ghost"
