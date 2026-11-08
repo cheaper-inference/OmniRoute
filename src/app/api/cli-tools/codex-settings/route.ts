@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
-import { parse as parseStrictToml } from "smol-toml";
+import { parse as parseToml, stringify as stringifyToml } from "smol-toml";
 import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
 import {
   ensureCliConfigWriteAllowed,
@@ -33,110 +33,27 @@ import {
 const getCodexConfigPath = () => getCliConfigPaths("codex").config;
 const getCodexAuthPath = () => getCliConfigPaths("codex").auth;
 const getCodexDir = () => path.dirname(getCodexConfigPath());
-// TOML basic strings treat a backslash as an escape and this file's writer does not escape,
-// so the catalog path is stored with forward slashes (Codex accepts them on Windows).
+// The catalog path is stored with forward slashes (Codex accepts them on Windows).
 const toTomlPath = (filePath: string) => filePath.replace(/\\/g, "/");
 
-// Parse TOML config to object (simple parser for codex config)
-const parseToml = (content: string) => {
-  const result: Record<string, any> = { _root: {}, _sections: {} };
-  let currentSection = "_root";
+type TomlDoc = Record<string, unknown>;
 
-  content.split("\n").forEach((line) => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) return;
+const asRecord = (value: unknown): TomlDoc =>
+  value && typeof value === "object" && !Array.isArray(value) ? (value as TomlDoc) : {};
 
-    // Section header like [model_providers.omniroute]
-    const sectionMatch = trimmed.match(/^\[(.+)\]$/);
-    if (sectionMatch) {
-      currentSection = sectionMatch[1];
-      result._sections[currentSection] = {};
-      return;
-    }
+// The whole document is parsed and written back with a full TOML parser, so every value the
+// merge does not own (arrays, inline tables, quoted keys, arrays of tables) stays valid TOML.
+// A config.toml that Codex itself could not load throws here and is refused, never rewritten.
+// shortcut: comments and formatting are not kept (smol-toml has no comment model), only values.
+const parseConfig = (content: string): TomlDoc => parseToml(content) as TomlDoc;
+const toToml = (doc: TomlDoc) => stringifyToml(doc) + "\n";
 
-    // Key = value
-    const kvMatch = trimmed.match(/^([^=]+)\s*=\s*(.+)$/);
-    if (kvMatch) {
-      let key = kvMatch[1].trim();
-      const rawValue = kvMatch[2].trim();
-      // Strip quotes from key (TOML quoted keys like "gpt-5.3-codex")
-      if (
-        (key.startsWith('"') && key.endsWith('"')) ||
-        (key.startsWith("'") && key.endsWith("'"))
-      ) {
-        key = key.slice(1, -1);
-      }
-      // Parse value preserving TOML types (integers, floats, booleans)
-      let parsedValue: string | number | boolean = rawValue;
-      if (rawValue === "true") {
-        parsedValue = true;
-      } else if (rawValue === "false") {
-        parsedValue = false;
-      } else if (
-        (rawValue.startsWith('"') && rawValue.endsWith('"')) ||
-        (rawValue.startsWith("'") && rawValue.endsWith("'"))
-      ) {
-        // Quoted string — strip quotes, keep as string
-        parsedValue = rawValue.slice(1, -1);
-      } else if (/^-?\d+$/.test(rawValue)) {
-        // Integer literal (unquoted)
-        parsedValue = parseInt(rawValue, 10);
-      } else if (/^-?\d+\.\d+$/.test(rawValue)) {
-        // Float literal (unquoted)
-        parsedValue = parseFloat(rawValue);
-      }
-      // Arrays and other complex values stay as raw strings
-      if (currentSection === "_root") {
-        result._root[key] = parsedValue;
-      } else {
-        result._sections[currentSection][key] = parsedValue;
-      }
-    }
+// migrateCodexFeatureFlags reads `[features]` from `_sections`; the parsed document is that map.
+const migrateFeatureFlags = (doc: TomlDoc) =>
+  migrateCodexFeatureFlags({
+    _root: {},
+    _sections: doc as Record<string, Record<string, unknown>>,
   });
-
-  return result;
-};
-
-// The merge below works on the lightweight line parser above, which silently
-// drops lines it does not understand. Validate with a real TOML parser first so
-// a config.toml that Codex itself could not load is refused instead of being
-// rewritten from whatever fragments the line parser recovered.
-const parseValidatedToml = (content: string) => {
-  parseStrictToml(content);
-  return parseToml(content);
-};
-
-// Format a TOML value: arrays and booleans stay unquoted, strings get quoted
-const formatTomlValue = (value: unknown): string => {
-  if (typeof value === "boolean") return value ? "true" : "false";
-  if (typeof value === "number") return String(value);
-  // Preserve pre-formatted TOML arrays (e.g. ["a", "b"])
-  if (typeof value === "string" && value.startsWith("[") && value.endsWith("]")) return value;
-  if (typeof value === "string") return `"${value}"`;
-  return `"${value}"`;
-};
-
-// Convert parsed object back to TOML string
-const toToml = (parsed: Record<string, any>) => {
-  let lines: string[] = [];
-
-  // Root level keys
-  Object.entries(parsed._root).forEach(([key, value]) => {
-    lines.push(`${key} = ${formatTomlValue(value)}`);
-  });
-
-  // Sections
-  Object.entries(parsed._sections).forEach(([section, values]) => {
-    lines.push("");
-    lines.push(`[${section}]`);
-    Object.entries(values).forEach(([key, value]) => {
-      const formattedKey = key.includes(".") ? `"${key}"` : key;
-      lines.push(`${formattedKey} = ${formatTomlValue(value)}`);
-    });
-  });
-
-  return lines.join("\n") + "\n";
-};
 
 // Read current config.toml
 const readConfig = async () => {
@@ -258,52 +175,49 @@ export async function POST(request: Request) {
     // be read or parsed is not an empty config: the merge below writes the result
     // back, which would replace every provider/MCP server in config.toml and the
     // ChatGPT OAuth tokens in auth.json. Only ENOENT means "start fresh".
-    const parsed: Record<string, any> = (await readExistingConfig(
-      configPath,
-      parseValidatedToml
-    )) ?? {
-      _root: {},
-      _sections: {},
-    };
+    const doc: TomlDoc = (await readExistingConfig(configPath, parseConfig)) ?? {};
     const authData: Record<string, any> =
       (await readExistingConfig(authPath, parseJsonObject)) ?? {};
 
     // Carry the user's intent forward off the deprecated Codex feature flag (#1327).
-    migrateCodexFeatureFlags(parsed);
+    migrateFeatureFlags(doc);
 
     // Update only OmniRoute related fields (api_key goes to auth.json, not config.toml)
-    parsed._root.model = model;
+    doc.model = model;
 
     if (reasoningEffort && reasoningEffort !== "none") {
       // Optional Codex reasoning effort.
-      parsed._root.model_reasoning_effort = reasoningEffort;
+      doc.model_reasoning_effort = reasoningEffort;
     } else {
-      delete parsed._root.model_reasoning_effort;
+      delete doc.model_reasoning_effort;
     }
 
     const effectiveWireApi = wireApi ?? "responses";
     const normalizedBaseUrl = normalizeCodexBaseUrl(baseUrl, effectiveWireApi);
 
     // Always create a custom provider to reliably pass wire_api and use OMNIROUTE_API_KEY
-    parsed._root.model_provider = "omniroute";
-    parsed._sections["model_providers.omniroute"] = {
-      name: "OmniRoute",
-      base_url: normalizedBaseUrl,
-      wire_api: effectiveWireApi,
-      env_key: "OPENAI_API_KEY",
+    doc.model_provider = "omniroute";
+    doc.model_providers = {
+      ...asRecord(doc.model_providers),
+      omniroute: {
+        name: "OmniRoute",
+        base_url: normalizedBaseUrl,
+        wire_api: effectiveWireApi,
+        env_key: "OPENAI_API_KEY",
+      },
     };
-    delete parsed._root.openai_base_url;
+    delete doc.openai_base_url;
 
     // Process model aliases into notice.model_migrations
+    const notice = asRecord(doc.notice);
     if (modelMappings && Object.keys(modelMappings).length > 0) {
-      if (!parsed._sections["notice.model_migrations"]) {
-        parsed._sections["notice.model_migrations"] = {};
-      }
-      for (const [from, to] of Object.entries(modelMappings)) {
-        parsed._sections["notice.model_migrations"][from] = to;
-      }
-    } else {
-      delete parsed._sections["notice.model_migrations"];
+      doc.notice = {
+        ...notice,
+        model_migrations: { ...asRecord(notice.model_migrations), ...modelMappings },
+      };
+    } else if ("model_migrations" in notice) {
+      delete notice.model_migrations;
+      if (Object.keys(notice).length === 0) delete doc.notice;
     }
 
     // Point Codex's /model picker at an OmniRoute catalog. Fail-open: on any failure
@@ -315,11 +229,11 @@ export async function POST(request: Request) {
         selectedModels: [model, ...Object.values(modelMappings ?? {})],
         listModels: () => listOmniRouteChatModels(request),
       });
-      if (catalog.catalogPath) parsed._root.model_catalog_json = toTomlPath(catalog.catalogPath);
+      if (catalog.catalogPath) doc.model_catalog_json = toTomlPath(catalog.catalogPath);
     }
 
     // Write merged config
-    const configContent = toToml(parsed);
+    const configContent = toToml(doc);
     await fs.writeFile(configPath, configContent);
 
     // Update auth.json with OPENAI_API_KEY (Codex reads this first)
@@ -366,47 +280,45 @@ export async function DELETE(request: Request) {
     // Backup current configs before resetting
     await createMultiBackup("codex", [configPath, getCodexAuthPath()]);
 
-    // Read and parse existing config
-    let parsed: Record<string, any> = { _root: {}, _sections: {} };
-    try {
-      const existingConfig = await fs.readFile(configPath, "utf-8");
-      parsed = parseToml(existingConfig);
-    } catch (error: any) {
-      if (error.code === "ENOENT") {
-        return NextResponse.json({
-          success: true,
-          message: "No config file to reset",
-        });
-      }
-      throw error;
+    // Read and parse existing config; a file that does not parse is refused, not rewritten.
+    const doc = await readExistingConfig(configPath, parseConfig);
+    if (doc === null) {
+      return NextResponse.json({
+        success: true,
+        message: "No config file to reset",
+      });
     }
 
     // Carry the user's intent forward off the deprecated Codex feature flag (#1327).
-    migrateCodexFeatureFlags(parsed);
+    migrateFeatureFlags(doc);
 
     // Remove OmniRoute related root fields
-    delete parsed._root.openai_base_url;
+    delete doc.openai_base_url;
 
-    if (parsed._root.model_provider === "omniroute") {
-      delete parsed._root.model;
-      delete parsed._root.model_provider;
+    if (doc.model_provider === "omniroute") {
+      delete doc.model;
+      delete doc.model_provider;
     }
 
     // Remove omniroute provider section
-    delete parsed._sections["model_providers.omniroute"];
+    const providers = asRecord(doc.model_providers);
+    if ("omniroute" in providers) {
+      delete providers.omniroute;
+      if (Object.keys(providers).length === 0) delete doc.model_providers;
+    }
 
     // Remove the model catalog only when it is the one OmniRoute wrote
     const codexDir = getCodexDir();
-    const catalogValue = parsed._root.model_catalog_json;
+    const catalogValue = doc.model_catalog_json;
     if (
       typeof catalogValue === "string" &&
       toTomlPath(catalogValue) === toTomlPath(getCodexCatalogPath(codexDir))
     ) {
-      delete parsed._root.model_catalog_json;
+      delete doc.model_catalog_json;
     }
 
     // Write updated config
-    const configContent = toToml(parsed);
+    const configContent = toToml(doc);
     await fs.writeFile(configPath, configContent);
 
     // Remove OPENAI_API_KEY from auth.json
@@ -440,6 +352,8 @@ export async function DELETE(request: Request) {
       message: "OmniRoute settings removed successfully",
     });
   } catch (error) {
+    const refusal = configClobberRefusalResponse(error);
+    if (refusal) return refusal;
     console.log("Error resetting codex settings:", error);
     return NextResponse.json({ error: "Failed to reset codex settings" }, { status: 500 });
   }

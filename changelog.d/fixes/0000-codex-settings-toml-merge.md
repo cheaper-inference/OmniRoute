@@ -1,0 +1,1 @@
+- **fix(codex):** applying or resetting Codex settings keeps multi-line arrays, inline tables, quoted project keys and arrays of tables in `config.toml` instead of corrupting them.
