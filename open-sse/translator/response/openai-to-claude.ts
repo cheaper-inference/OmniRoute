@@ -747,8 +747,14 @@ export function openaiToClaudeResponse(chunk, state) {
           // Always buffer the raw stream so shimmed tools can re-emit a
           // corrected JSON at stop time.
           const existingArgs = toolInfo.argBuffer || "";
-          const nextArgs = appendToolCallArgumentDelta(existingArgs, tc.function.arguments);
-          let deltaStr = nextArgs.slice(existingArgs.length);
+          const incomingArgs = tc.function.arguments;
+          const nextArgs = appendToolCallArgumentDelta(existingArgs, incomingArgs);
+          // The new bytes are the tail of the short incoming fragment. Slicing the grown
+          // buffer would flatten it, and each slice would then pin the whole old prefix.
+          let deltaStr =
+            typeof incomingArgs === "string"
+              ? incomingArgs.slice(incomingArgs.length - (nextArgs.length - existingArgs.length))
+              : nextArgs.slice(existingArgs.length);
           toolInfo.argBuffer = nextArgs;
 
           if (!toolInfo.startEmitted || toolInfo.shimmed || !deltaStr) {

@@ -936,7 +936,10 @@ export function createResponsesApiTransformStream(
 
                 const existingArgs = state.funcArgsBuf[tcIdx] || "";
                 const nextArgs = appendToolCallArgumentDelta(existingArgs, deltaStr);
-                const emittedDelta = nextArgs.slice(existingArgs.length);
+                // Tail of the short fragment, not a slice of the grown buffer (a slice pins the old prefix).
+                const emittedDelta = deltaStr.slice(
+                  deltaStr.length - (nextArgs.length - existingArgs.length)
+                );
                 state.funcArgsBuf[tcIdx] = nextArgs;
 
                 if (

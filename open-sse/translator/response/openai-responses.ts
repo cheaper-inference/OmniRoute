@@ -764,7 +764,10 @@ function emitToolCall(state, emit, tc) {
       state.funcArgsEscapeState[tcIdx]
     );
     const nextArgs = appendToolCallArgumentDelta(existingArgs, sanitized);
-    const emittedDelta = nextArgs.slice(existingArgs.length);
+    // Tail of the short fragment, not a slice of the grown buffer (a slice pins the old prefix).
+    const emittedDelta = sanitized.slice(
+      sanitized.length - (nextArgs.length - existingArgs.length)
+    );
     state.funcArgsBuf[tcIdx] = nextArgs;
 
     if (refCallId && emittedDelta && !isCustomTool && state.funcItemAdded[tcIdx]) {
