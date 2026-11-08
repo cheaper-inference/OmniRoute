@@ -1,0 +1,1 @@
+- **fix(embeddings):** CLOVA Studio and Bedrock embeddings no longer answer 400 for `encoding_format: "base64"`; they return base64 float32 vectors, so OpenAI Node SDK v4+ clients work with them.

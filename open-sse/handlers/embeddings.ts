@@ -562,9 +562,6 @@ function resolveSingleTexts(runtime: EmbeddingRuntime): string[] | EmbeddingFail
   ) {
     return failure(400, "CLOVA Studio embedding v2 accepts non-empty text strings only");
   }
-  if (runtime.body.encoding_format === "base64") {
-    return failure(400, "CLOVA Studio embedding v2 supports float encoding only");
-  }
   if (runtime.body.dimensions !== undefined && Number(runtime.body.dimensions) !== 1024) {
     return failure(400, "CLOVA Studio embedding v2 has a fixed dimension of 1024");
   }
@@ -743,9 +740,6 @@ async function prepareBedrockTransport(
 ): Promise<void> {
   const family = bedrockEmbeddingFamily(runtime.model || "");
   if (!family) throw new Error(`Unsupported Bedrock embedding model: ${runtime.model}`);
-  if (runtime.body.encoding_format === "base64") {
-    throw new Error("Bedrock embeddings support float encoding only");
-  }
   const items = await collectBedrockEmbeddingItems(runtime.body.input);
   if (items.length === 0) throw new Error("Embedding input was empty");
 
