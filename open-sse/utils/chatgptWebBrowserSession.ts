@@ -757,7 +757,11 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
         return {
           url: location.href.replace("https://chatgpt.com", ""),
           activeId: (document.activeElement as HTMLElement | null)?.id ?? null,
-          promptLen: (document.querySelector("#prompt-textarea")?.textContent ?? "").length,
+          promptLen:
+            (
+              document.querySelector('div.ProseMirror[contenteditable="true"]') ??
+              document.querySelector("#prompt-textarea")
+            )?.textContent?.length ?? 0,
           editables: nodes.map((node) => ({
             id: node.id,
             cls: String(node.className).slice(0, 28),
@@ -820,9 +824,7 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
     // Enter is the reliable submit; the send button can render before it is enabled.
     await this.page.keyboard.press("Enter");
     await this.page.waitForTimeout(COMPOSER_SUBMIT_MS);
-    const submitted = await this.page.evaluate(
-      () => (document.querySelector("#prompt-textarea")?.textContent ?? "").trim().length === 0
-    );
+    const submitted = (await this.readComposerText()).trim().length === 0;
     if (!submitted) {
       const send = this.page.locator('[data-testid="send-button"]').first();
       if (await send.isEnabled().catch(() => false)) await send.click();
@@ -866,9 +868,13 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
 
   /** Whitespace-normalised composer text, so ProseMirror's block boundaries do not matter. */
   private async readComposerText(): Promise<string> {
-    return this.page.evaluate(() =>
-      (document.querySelector("#prompt-textarea")?.textContent ?? "").replace(/\s+/g, " ")
-    );
+    return this.page.evaluate(() => {
+      const composer =
+        document.querySelector<HTMLElement>('div.ProseMirror[contenteditable="true"]') ??
+        document.querySelector<HTMLElement>("#prompt-textarea") ??
+        document.querySelector<HTMLElement>('[contenteditable="true"]');
+      return (composer?.textContent ?? "").replace(/\s+/g, " ");
+    });
   }
 
   private async countAssistantMessages(): Promise<number> {
