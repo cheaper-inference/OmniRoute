@@ -6,6 +6,7 @@ import { backupDbFile, setDbBackupMaxFiles } from "./backup";
 import { toBooleanSetting, toStrictBooleanSetting } from "./booleanSetting";
 import { DATA_DIR, SQLITE_FILE, applyDatabaseOptimizationSettings, getDbInstance } from "./core";
 import { invalidateDbCache } from "./readCache";
+import { getCallLogRetentionDays } from "../logEnv";
 import { registerDbStateResetter } from "./stateReset";
 import {
   CACHE_SECRET_MASK,
@@ -348,6 +349,9 @@ function collectPersistedRetention(rows: PersistedRetentionRow[]): {
 
   return found;
 }
+/** Migration 046 seeds the flat `callLogs` key with this value. It is not an operator choice. */
+const CALL_LOG_RETENTION_SEED_DAYS = 90;
+
 /**
  * Reads the dashboard-persisted request log retention without applying defaults.
  *
@@ -409,13 +413,17 @@ export function getPersistedCallLogRetentionDays(): number | null {
   let resolved: number | null = null;
   if (found.nested !== null) resolved = found.nested;
   else if (found.settings !== null) resolved = found.settings;
-  else if (found.flat !== null && found.flat !== 90) resolved = found.flat;
+  else if (found.flat !== null && found.flat !== CALL_LOG_RETENTION_SEED_DAYS)
+    resolved = found.flat;
   setCachedPersistedCallLogRetentionDays(resolved);
   return resolved;
 }
 
 export function getUserDatabaseSettings(): UserDatabaseSettings {
   const settings = cloneDefaultSettings();
+  // Until the operator saves an age, request-log rotation uses CALL_LOG_RETENTION_DAYS or 7 days
+  // (resolveCallLogRetentionDays). Show and clean up with that same age.
+  settings.retention.callLogs = getCallLogRetentionDays();
   const mainSettings = readNamespace("settings");
   const databaseSettingsValue = mainSettings[DATABASE_SETTINGS_NAMESPACE];
 
@@ -424,7 +432,12 @@ export function getUserDatabaseSettings(): UserDatabaseSettings {
   }
 
   mergeTopLevelSections(settings, mainSettings);
-  mergeDatabaseSettingsNamespace(settings, readNamespace(DATABASE_SETTINGS_NAMESPACE));
+  const databaseSettingsRows = readNamespace(DATABASE_SETTINGS_NAMESPACE);
+  // The migration seed is not a saved value; rotation ignores it too (#13308 guard).
+  if (databaseSettingsRows.callLogs === CALL_LOG_RETENTION_SEED_DAYS) {
+    delete databaseSettingsRows.callLogs;
+  }
+  mergeDatabaseSettingsNamespace(settings, databaseSettingsRows);
   mergeRuntimeLogSettings(settings, mainSettings);
   normalizeOptimizationSettings(settings);
   decryptCacheSecrets(settings.cache as unknown as Record<string, unknown>);
