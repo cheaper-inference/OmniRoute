@@ -1,0 +1,1 @@
+- **fix(mcp):** one skill with a duplicate MCP tool name no longer stops the later skills from getting tools. The duplicate is skipped and logged.
