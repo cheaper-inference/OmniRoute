@@ -1,1 +1,0 @@
-- **fix(antigravity):** store Google verification and appeal links for Antigravity CLI (`agy`) connections on `403` responses, ensuring the unlock/appeal button appears in the dashboard for `agy` connections just as it does for `antigravity`.
