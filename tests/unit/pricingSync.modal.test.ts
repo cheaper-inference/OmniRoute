@@ -2,6 +2,19 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { transformToOmniRoute } from "../../src/lib/pricingSync.ts";
 
+test("transformToOmniRoute preserves ordinary and annotated OCR page tariffs in USD", () => {
+  const out = transformToOmniRoute({
+    "mistral-ocr-latest": {
+      mode: "ocr",
+      litellm_provider: "mistral",
+      ocr_cost_per_page: 0.004,
+      ocr_cost_per_annotated_page: 0.005,
+    },
+  });
+  assert.equal(out.mistral?.["mistral-ocr-latest"]?.ocr_cost_per_page, 0.004);
+  assert.equal(out.mistral?.["mistral-ocr-latest"]?.ocr_cost_per_annotated_page, 0.005);
+});
+
 test("transformToOmniRoute ingests an image model's per-image cost", () => {
   const out = transformToOmniRoute({
     "dall-e-3": {

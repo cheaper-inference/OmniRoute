@@ -36,6 +36,7 @@ type PricingEntry = {
   output_cost_per_video_per_second?: number;
   search_unit_cost?: number;
   ocr_cost_per_page?: number;
+  ocr_cost_per_annotated_page?: number;
 };
 
 type PricingModels = Record<string, PricingEntry>;
@@ -61,6 +62,7 @@ interface LiteLLMModelInfo {
   output_cost_per_video_per_second?: number;
   search_unit_cost?: number;
   ocr_cost_per_page?: number;
+  ocr_cost_per_annotated_page?: number;
 }
 
 interface SyncStatus {
@@ -151,6 +153,7 @@ export function transformToOmniRoute(raw: Record<string, LiteLLMModelInfo>): Pri
       "output_cost_per_video_per_second",
       "search_unit_cost",
       "ocr_cost_per_page",
+      "ocr_cost_per_annotated_page",
     ] as const;
 
     const hasToken = info.input_cost_per_token != null || info.output_cost_per_token != null;
