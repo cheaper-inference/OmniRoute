@@ -60,6 +60,7 @@ export { toSnakeCase, toCamelCase, objToSnake, rowToCamel, cleanNulls } from "./
 export { isNativeSqliteLoadError, isSqliteDriverUnavailableError };
 import {
   ensureProviderConnectionsColumns,
+  dropPrefixDuplicateIndexes,
   ensureUsageHistoryAccountIndex,
   ensureUsageHistoryColumns,
   ensureCallLogsColumns,
@@ -341,8 +342,6 @@ const SCHEMA_SQL = `
     error_code TEXT,
     timestamp TEXT NOT NULL
   );
-  CREATE INDEX IF NOT EXISTS idx_uh_timestamp ON usage_history(timestamp);
-  CREATE INDEX IF NOT EXISTS idx_uh_provider ON usage_history(provider);
   CREATE INDEX IF NOT EXISTS idx_uh_model ON usage_history(model);
   CREATE INDEX IF NOT EXISTS idx_uh_connection_timestamp ON usage_history(connection_id, timestamp);
 
@@ -1311,6 +1310,7 @@ export function getDbInstance(): SqliteDatabase {
     // Fresh installs need the same post-migration index guarantee as upgraded
     // databases, including recovery from an interrupted migration 127 attempt.
     ensureUsageHistoryAccountIndex(db);
+    dropPrefixDuplicateIndexes(db);
 
     applyStoredDatabaseOptimizationSettings(db);
 

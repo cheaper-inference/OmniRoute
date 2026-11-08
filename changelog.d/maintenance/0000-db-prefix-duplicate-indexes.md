@@ -1,0 +1,1 @@
+- **perf(db):** startup drops three redundant SQLite indexes on usage and call logs (`idx_uh_provider`, `idx_uh_timestamp`, `idx_call_logs_request_type`), so each logged request writes fewer index pages.
