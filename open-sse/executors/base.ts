@@ -122,6 +122,7 @@ import { applyPeerTraceHeader } from "@/shared/resilience/peerRouting";
 import { applyClineProtocolHeaders } from "@/shared/utils/clineAuth";
 import { isProbeContext } from "@/shared/utils/probeOrigin";
 import { assertDispatchUrlAllowed, dispatchGuarded } from "./dispatchPin.ts";
+import { dispatchWithGzipBody } from "./base/gzipRequestBody.ts";
 // Header helpers extracted to a pure leaf; re-exported for external importers
 // (executors + tests) that import them from "./base.ts".
 export {
@@ -976,6 +977,21 @@ export class BaseExecutor {
       if (advisorResultsReplaced) {
         transformedBody = replaceRedactedAdvisorResults(transformedBody).body;
       }
+      // Fields an upstream already rejected with a 400 in this execute() stay stripped
+      // on a re-run or fallback URL; strippedFields blocks a second strip-and-retry.
+      if (strippedFields.size > 0 && transformedBody && typeof transformedBody === "object") {
+        const record = transformedBody as Record<string, unknown>;
+        const msgFields = [...strippedFields].filter((f) => f.startsWith("messages.*."));
+        for (const f of strippedFields) if (!f.startsWith("messages.*.")) delete record[f];
+        if (msgFields.length > 0 && Array.isArray(record.messages)) {
+          record.messages = record.messages.map((m) => {
+            if (!m || typeof m !== "object") return m;
+            const copy = { ...(m as Record<string, unknown>) };
+            for (const f of msgFields) delete copy[f.slice("messages.*.".length)];
+            return copy;
+          });
+        }
+      }
 
       // Re-synchronize skills beta with the finalized transformed body (#14200):
       syncSkillsBeta(headers, this.provider, transformedBody, usesClaudeCodeProtocol);
@@ -1037,17 +1053,20 @@ export class BaseExecutor {
               model,
               requestCredentials,
               (url, init) =>
-                observeProviderHttpSend(
-                  {
-                    provider: this.provider,
-                    model:
-                      typeof (serializedBody as Record<string, unknown> | null)?.model === "string"
-                        ? String((serializedBody as Record<string, unknown>).model)
-                        : model,
-                    connectionId: requestCredentials?.connectionId ?? null,
-                    endpoint: "unknown",
-                  },
-                  () => this.dispatchRequest(url, init, requestCredentials)
+                dispatchWithGzipBody(this.provider, url, init, (gzipUrl, gzipInit) =>
+                  observeProviderHttpSend(
+                    {
+                      provider: this.provider,
+                      model:
+                        typeof (serializedBody as Record<string, unknown> | null)?.model ===
+                        "string"
+                          ? String((serializedBody as Record<string, unknown>).model)
+                          : model,
+                      connectionId: requestCredentials?.connectionId ?? null,
+                      endpoint: "unknown",
+                    },
+                    () => this.dispatchRequest(gzipUrl, gzipInit, requestCredentials)
+                  )
                 )
             )(requestUrl, optionsWithSignal);
           } finally {
