@@ -63,7 +63,14 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "workbuddy",
 ]);
 
-const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
+const TOKEN_PASTE_PROVIDERS = new Set([
+  "devin-desktop",
+  "devin-cli",
+  "grok-cli",
+  "claude",
+  "antigravity",
+  "agy",
+]);
 const IMPORT_TOKEN_ONLY_PROVIDERS = new Set(["devin-cli"]);
 // Devin Desktop opens on the key import (its long-standing default); browser sign-in is a tab.
 const PASTE_FIRST_PROVIDERS = new Set([...IMPORT_TOKEN_ONLY_PROVIDERS, "devin-desktop", "claude"]);

@@ -7,6 +7,7 @@
  * requests pre-clamp, and retry the same URL once. Mirrors
  * applyReasoningEffortRecovery's contract.
  */
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import {
   clampTopLevelMaxTokens,
@@ -75,10 +76,7 @@ export async function applyMaxTokensRecovery(
     return notRecoverable;
   }
 
-  const errText = await response
-    .clone()
-    .text()
-    .catch(() => "");
+  const errText = await readResponseTextWithinCap(response.clone()).catch(() => "");
   const ceiling = parseMaxTokensCeiling(errText);
   if (ceiling === null) {
     return notRecoverable;

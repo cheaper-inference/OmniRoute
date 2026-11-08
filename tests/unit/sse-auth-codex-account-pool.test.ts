@@ -131,6 +131,52 @@ test("paid credits wait for sibling subscription quota and still fall back on cr
   }
 });
 
+test("an unknown quota read skips a paid-credit account for that request without locking it", async () => {
+  const { registerQuotaFetcher } = await import("../../open-sse/services/quotaPreflight.ts");
+  const paid = await seedCodexConnection({
+    name: "paid-unknown-quota",
+    accessToken: "paid-access",
+    providerSpecificData: { allowPaidCredits: true },
+  });
+  let readable = false;
+  registerQuotaFetcher("codex", async () =>
+    readable
+      ? {
+          used: 10,
+          total: 100,
+          percentUsed: 0.1,
+          resetAt: futureIso(120_000),
+          windows: { session: { percentUsed: 0.1, resetAt: futureIso(120_000) } },
+          paidCredits: { hasCredits: true, unlimited: false, overageLimitReached: false },
+        }
+      : null
+  );
+  try {
+    const whileUnknown = await auth.getProviderCredentialsWithQuotaPreflight(
+      "codex",
+      null,
+      null,
+      "gpt-5.5"
+    );
+    assert.equal(whileUnknown.allRateLimited, true, "unknown quota stays fail-closed (#13337)");
+
+    const stored = await providersDb.getProviderConnectionById(paid.id);
+    assert.equal(stored?.testStatus, "active");
+    assert.equal(stored?.rateLimitedUntil ?? null, null);
+
+    readable = true;
+    const afterRecovery = await auth.getProviderCredentialsWithQuotaPreflight(
+      "codex",
+      null,
+      null,
+      "gpt-5.5"
+    );
+    assert.equal(afterRecovery.connectionId, paid.id, "no cooldown outlives the failed read");
+  } finally {
+    registerQuotaFetcher("codex", async () => null);
+  }
+});
+
 test("paid-credit consent does not bypass a real upstream connection cooldown", async () => {
   const paid = await seedCodexConnection({
     name: "paid-upstream-cooldown",
