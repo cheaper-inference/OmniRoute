@@ -501,7 +501,7 @@ export async function GET(
         // OpenRouter's embeddingRegistry catalog) into the live-discovery
         // response; the live /v1/models endpoint only lists chat models, and
         // the specialty catalog otherwise only reached local_catalog fallback.
-        const mergedModels = mergeSpecialtyCatalogIntoLiveModels(models, provider);
+        const mergedModels = mergeSpecialtyCatalogIntoLiveModels(discoveredModels, provider);
         return buildResponse({
           provider,
           connectionId,
