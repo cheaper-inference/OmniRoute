@@ -13,17 +13,17 @@ OmniRoute ima cevovod za avtorizacijo, ki je odvisen od poti in varuje vsako zah
 
 > Vir: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## Dva načina avtentikacije
+## Dva načina preverjanja pristnosti
 
-### 1. API ključ (Bearer)
+### 1. Ključ API-ja (Bearer)
 
-Uporablja se za klientske API-je, združljive z OpenAI/Anthropic/Gemini, in za nekatere upravljavske poti, kadar ima ključ obseg `manage`.
+Uporablja se za odjemalske API-je, združljive z OpenAI/Anthropic/Gemini, in nekaj upravljalnih poti, ko ima ključ obseg `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Preverja ga `isValidApiKey()` / `extractApiKey()` v `src/sse/services/auth.ts` in se ponovno izvozi prek `src/shared/utils/apiAuth.ts`. Validator sprejema tudi okoljski spremenljivki `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` kot trajna prehodna ključa (issue #1350).
+Preverjata ga `isValidApiKey()` / `extractApiKey()` v `src/sse/services/auth.ts`, njun vnovični izvoz pa poteka prek `src/shared/utils/apiAuth.ts`. Preverjevalnik sprejema tudi spremenljivki okolja `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` kot trajna ključa za posredovanje (issue #1350).
 
 ### 2. Seja nadzorne plošče (piškotek auth_token)
 
@@ -33,26 +33,117 @@ Za strani nadzorne plošče in skrbniške operacije.
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Piškotek je seja samo, če JWT uspešno preveri **in** vsebuje `authenticated: true` (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Vsak prejemnik piškotka (zaščitnik poti nadzorne plošče (`isDashboardSessionAuthenticated()`), osvežitev v cevovodu authz, rokovanje WebSocket, živi strežnik, `/api/settings/require-login`, `/api/auth/status`) gre prek tega pomočnika. Obstajajo tudi drugi JWT-ji, podpisani z `JWT_SECRET` — prehod CLI Cursor za imetnike ključa izdaja žetone `iss "omniroute" / aud "cursor-cli"` — in nikoli niso seje (#13298).
+Piškotek je seja samo, kadar je JWT preverjen **in** vsebuje `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Vsak
+uporabnik piškotka (zaščita poti nadzorne plošče (`isDashboardSessionAuthenticated()`), osveževanje v cevovodu avtorizacije, rokovanje s stiskom WebSocket, aktivni
+strežnik, `/api/settings/require-login`, `/api/auth/status`) gre prek tega pomočnika.
+Obstajajo tudi drugi JWT-ji, podpisani z `JWT_SECRET` — posredovanje Cursor CLI
+izdaja žetone z `iss "omniroute" / aud "cursor-cli"` za imetnike ključev — in nikoli niso seje
+(#13298).
 
-Preverja ga `isDashboardSessionAuthenticated()` v `src/shared/utils/apiAuth.ts`. Cevovod samodejno osveži JWT, ko mu preostane manj kot 7 dni od njegove 30-dnevne veljavnosti.
+Preverja jo `isDashboardSessionAuthenticated()` v `src/shared/utils/apiAuth.ts`. Cevovod samodejno osveži JWT, ko je do izteka njegove 30-dnevne veljavnosti manj kot 7 dni.
 
-Seja se lahko konča pred koncem 30 dni, ker vsak izdajatelj poteka prek `mintDashboardSessionToken` (čas izdaje `iat` in identifikator `jti`), preverjalnik pa preveri dve nastavitvi: `sessionsValidAfter`, ki ga nastavi sprememba gesla, zato vsaka seja, izdana pred njo, neha veljati (brskalnik, ki je spremenil geslo, dobi nov piškotek), in `revokedDashboardSessions`, kamor `POST /api/auth/logout` doda `jti` odjavljene seje. Seje, izdane z starejšo izdajo, ti zahtevki nimajo in ostanejo veljavne do prve spremembe gesla. Če nastavitev ni mogoče prebrati, seja ni zaupanja vredna.
+Seja se lahko konča tudi pred iztekom 30 dni, saj vsak izdajatelj uporablja `mintDashboardSessionToken` (čas izdaje `iat` in ID `jti`), preverjevalnik pa preverja dve nastavitvi: `sessionsValidAfter`, nastavljeno ob spremembi gesla, zaradi česar se vsaka seja, izdana pred tem, preneha preverjati (brskalnik, v katerem je bilo geslo spremenjeno, dobi svež piškotek), in `revokedDashboardSessions`, v katerega `POST /api/auth/logout` doda `jti` odjavljene seje. Seje, izdane s starejšo različico, ne vsebujejo nobene od teh trditev in ostanejo veljavne do prve spremembe gesla. Če nastavitev ni mogoče prebrati, seja ni zaupanja vredna.
 
-Nekatere upravljavske poti sprejmejo **kateri koli** od obeh načinov: piškotek ALI `Bearer <key>`, kadar ima API ključ obseg `manage` (ali `admin`). Prav to omogoča potek dela »konfiguracija prek klicev API«, dodan v v3.8.
+Nekatere upravljalne poti sprejemajo **kateri koli** način: piškotek ALI `Bearer <key>`, kadar ima ključ API-ja obseg `manage` (ali `admin`). To omogoča potek dela »konfiguriranje prek klicev API«, dodan v različici v3.8.
 
-#### Izbirna prijava OIDC (#6973)
+#### Izbirna prijavna zapora OIDC (#6973)
 
-Skrbniška prijava v nadzorno ploščo podpira tudi izbirni tok OIDC (OpenID Connect) poleg privzete prijave z geslom — prijava z geslom se nikoli ne odstrani, temveč le dopolni:
+Skrbniška prijava v nadzorno ploščo podpira tudi **izbirni** tok OIDC (OpenID Connect)
+poleg privzete prijave z geslom — prijava z geslom ni nikoli odstranjena, temveč le
+dopolnjena:
 
-- Onemogočeno, razen če sta `settings.oidcEnabled === true` **in** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` vsi nastavljeni (Settings → Auth). `GET /api/auth/oidc/login` sicer vrne `400`.
-- `GET /api/auth/oidc/login` iz `/.well-known/openid-configuration` izdajatelja odkrije `authorization_endpoint` (sicer uporabi `<issuer>/authorize`), iz dohodne zahteve sestavi redirect URI (upošteva `x-forwarded-proto`) in preusmeri na IdP z naključnim `state`, shranjenim v piškotku `oidc_state` z zastavico `httpOnly`.
-- `GET /api/auth/oidc/callback` preveri `state`, zamenja avtorizacijsko kodo in preveri podpis ID žetona prek JWKS izdajatelja (`createRemoteJWKSet` iz `jose`, predpomnjeno po URI-ju JWKS) s preverjanjem `issuer`/`audience`. Seznam `oidcAllowedSubjects` je obvezen: ujema se z zahtevkom `sub` žetona ali z zahtevkom `email` — zahtevek e-pošte se upošteva le, kadar je `email_verified === true`, tako da neoverjen e-poštni naslov pri IdP-ju nikoli ne prestopi vrat — brez vnosov pa povratni klic zavrne vsako prijavo (`not_configured`).
-- Ob uspehu izda **popolnoma enak** 30-dnevni JWT `auth_token` kot prijava z geslom (`src/app/api/auth/login/route.ts`), zato ostali del cevovoda seje nadzorne plošče (samodejno osveževanje, zastavice piškotka) ostane nespremenjen — OIDC nadomesti le način izdaje piškotka, ne pa tega, kar daje.
-- Vsaka nastavitev `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) je v `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` vrne `400 PASSWORD_REQUIRED`, razen če telo ne vsebuje gesla upravljanja kot `currentPassword` (`401 PASSWORD_MISMATCH`, če je napačno). `oidcDisablePasswordLogin` onemogoči prijavo _z geslom_ (`POST /api/auth/login`), vendar ohrani shranjeno zgoščeno vrednost gesla, ponovna avtentikacija pa še vedno preverja `currentPassword` proti njej.
-- `corsOrigins` in `bruteForceProtection` sta prav tako v `SECURITY_IMPACTING_SETTINGS_KEYS`: njuno sprostitev oslabi obrambo prijave, zato zahtevata enako ponovno avtentikacijo z `currentPassword` (zavihek Security jo zahteva), uvoz JSON pa ju izpusti.
-- Vsak ključ varnostne politike — vnosi `SECURITY_IMPACTING_SETTINGS_KEYS`, vsak ključ `oidc*` in stanje seje nadzorne plošče — je v `PATCH /api/settings` **samo za upravitelja**: ključ API z obsegom manage ali žeton za dostop `oma_` dobi `403`, tudi če pošlje pravilen `currentPassword`, zavrnitev pa se revidira kot `settings.update_failed` z `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` v `src/lib/api/operatorCredential.ts`). Običajne nastavitve (tema, nastavitve prikaza) ostanejo zapisljive za ključ `manage` ali žeton za dostop `admin`. Vsaka sprememba samega `/api/settings` (in tudi `/api/settings/require-login`) zahteva tudi obseg žetona za dostop `admin` (`ADMIN_MUTATION_EXACT_PATHS` v `src/server/authz/accessScopes.ts`, natančno ujemanje poti); `GET` ostane `read`, ostale podpoti `/api/settings/*` (posredniki, privzete nastavitve combo, aliasi modelov, stiskanje, čiščenja …) pa ohranijo obseg `write`, izveden iz metode.
-- `POST /api/settings/import-json` to ponovno avtentikacijo preskoči, zato pred zapisom odstrani vsak ključ iz `IMPORT_STRIPPED_SETTINGS_KEYS` (ista datoteka): geslo in `currentPassword`, vsak vnos `SECURITY_IMPACTING_SETTINGS_KEYS` ter stanje seje nadzorne plošče (`sessionsValidAfter`, `revokedDashboardSessions`). Uvoz starejše varnostne kopije tako ne more obuditi seje, ki sta jo končala sprememba gesla ali odjava.
+- Onemogočeno, razen če je `settings.oidcEnabled === true` **in** so
+  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` vsi konfigurirani (Settings → Auth).
+  `GET /api/auth/oidc/login` sicer vrne `400`.
+- `GET /api/auth/oidc/login` izdajateljevo končno točko `authorization_endpoint` poišče v
+  `/.well-known/openid-configuration` (uporabi `<issuer>/authorize` kot nadomestno možnost),
+  preusmeritveni URI sestavi iz vhodne zahteve (upošteva `x-forwarded-proto`) in uporabnika
+  preusmeri k IdP-ju z naključnim `state`, shranjenim v piškotku `oidc_state` z zastavico
+  `httpOnly`.
+- `GET /api/auth/oidc/callback` preveri `state`, zamenja avtorizacijsko kodo in preveri podpis
+  žetona ID prek izdajateljevega JWKS-ja
+  (`jose`'s `createRemoteJWKSet`, predpomnjenega za vsak URI JWKS) s preverjanjem
+  `issuer`/`audience`. Za dostop do nadzorne plošče je potreben neprazen seznam
+  `oidcAllowedSubjects`, pravilnik `oidcAdmissionClaim` ali oboje. Seznam zadeva se ujema z
+  `sub` ali `email` samo, če je `email_verified === true`. Izbirni pravilnik za zahtevek
+  uporablja z vejicami ločeno pot do zahtevka v žetonu ID (na primer,
+  `realm_access.roles`) in polje sprejetih vrednosti; razrešeni zahtevek mora biti polje nizov,
+  ki vsebuje vsaj eno sprejeto vrednost. Če sta konfigurirana oba pravilnika, morata biti
+  uspešna oba. Manjkajoči ali nepravilno oblikovani zahtevki se obravnavajo kot neuspešni in
+  brez katerega koli od pravilnikov povratni klic zavrne prijavo (`not_configured`).
+  Obstoječe konfiguracije, ki uporabljajo samo zadevo, ostanejo nespremenjene.
+- Keycloak običajno preslika vloge področja v žetone za dostop, ne nujno v žetone ID. Če želite
+  zahtevati vlogo področja `admin`, konfigurirajte preslikovalnik protokola za to stranko, ki
+  v svoj **žeton ID** vključi `realm_access.roles`, nato nastavite
+  `oidcAdmissionClaim` na `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Preden omogočite dostop samo na podlagi vloge, preverite dejanski zahtevek žetona ID za to
+  stranko; aplikacija ne bere vlog iz žetona za dostop. Zavrnitev žetona na strani IdP-ja lahko
+  to preverjanje na strani aplikacije dopolni, vendar ga ne nadomesti.
+- Ob uspehu izda **popolnoma enak** 30-dnevni JWT `auth_token`, kot ga izda prijava z geslom
+  (`src/app/api/auth/login/route.ts`), zato preostali potek seje nadzorne plošče (samodejno
+  osveževanje, zastavice piškotkov) ostane nespremenjen — OIDC nadomesti samo način izdaje
+  piškotka, ne pa tudi pravic, ki jih ta podeljuje. Spremembe vlog/skupin pri IdP-ju ne
+  razveljavijo obstoječih sej OmniRoute; njihovo trajanje še naprej določajo odjava, sprememba
+  gesla ali potek seje.
+- Vsaka nastavitev `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) je v
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  vrne `400 PASSWORD_REQUIRED`, razen če telo vsebuje skrbniško geslo kot
+  `currentPassword` (`401 PASSWORD_MISMATCH`, če je napačno).
+  `oidcDisablePasswordLogin` zavrne prijavo z geslom (`POST /api/auth/login`), vendar ohrani
+  shranjeni zgoščeni zapis gesla, ponovno preverjanje pristnosti pa še vedno preverja
+  `currentPassword` glede na ta zapis.
+- `corsOrigins` in `bruteForceProtection` sta prav tako v `SECURITY_IMPACTING_SETTINGS_KEYS`:
+  rahljanje katere koli od teh nastavitev oslabi zaščito prijave, zato zahtevata enako ponovno
+  preverjanje pristnosti z `currentPassword` (zavihek Varnost ga zahteva), uvoz JSON pa ju
+  odstrani.
+- Vsak ključ varnostnega pravilnika — vnosi v `SECURITY_IMPACTING_SETTINGS_KEYS`, vsak ključ
+  `oidc*` in stanje seje nadzorne plošče — je pri `PATCH /api/settings` **samo za
+  operaterja**: ključ API z obsegom manage ali žeton dostopa `oma_` je zavrnjen s `403`, tudi
+  če pošlje pravilen `currentPassword`, zavrnitev pa se zabeleži kot
+  `settings.update_failed` z `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` v `src/lib/api/operatorCredential.ts`).
+  Običajne nastavitve (tema, nastavitve prikaza) je še vedno mogoče zapisovati s ključem
+  `manage` ali žetonom dostopa `admin`. Vsaka sprememba samega `/api/settings` (in
+  `/api/settings/require-login`) zahteva tudi obseg žetona dostopa `admin`
+  (`ADMIN_MUTATION_EXACT_PATHS` v `src/server/authz/accessScopes.ts`, ujemanje natančne poti);
+  `GET` še naprej uporablja `read`, druge podpoti `/api/settings/*` (posredniki, privzete
+  kombinacije, vzdevki modelov, stiskanje, čiščenja …) pa ohranijo obseg `write`, določen na
+  podlagi metode.
+- `POST /api/settings/import-json` preskoči to ponovno preverjanje pristnosti, zato pred
+  zapisovanjem odstrani vse ključe v `IMPORT_STRIPPED_SETTINGS_KEYS` (ista datoteka):
+  geslo in `currentPassword`, vse vnose `SECURITY_IMPACTING_SETTINGS_KEYS` ter stanje seje
+  nadzorne plošče (`sessionsValidAfter`, `revokedDashboardSessions`).
+  Uvoz starejše varnostne kopije zato ne more znova oživiti seje, ki jo je sprememba gesla ali
+  odjava že končala.
+
+#### Izbirna prijava z dvofaktorsko avtentikacijo TOTP (#16619)
+
+Vpis se izvede v Nastavitve → Varnost; možnost je izklopljena, dokler je operater ne vklopi
+(`src/server/auth/dashboardMfa.ts`).
+
+- **Kaj zajema:** prijavo z geslom (`POST /api/auth/login`, ki nato zahteva
+  `POST /api/auth/mfa/verify`) in `omniroute connect` (`POST /api/cli/connect`,
+  ki zavrne izmenjavo samo z geslom in kodo posreduje kot `totp`).
+- **Česa ne zajema:** prijava OIDC / SSO (`/api/auth/oidc/callback`) ne zahteva
+  TOTP za OmniRoute. Zanaša se na drugi faktor ponudnika identitete, zato
+  vsilite MFA v IdP-ju, če je OIDC omogočen.
+- **Obnovitev** (izgubljena naprava, ko ni več obnovitvenih kod ali faktorja ni
+  več mogoče preveriti, na primer po spremembi `STORAGE_ENCRYPTION_KEY`):
+  1. Znova zaženite strežnik z `OMNIROUTE_DISABLE_MFA=true`.
+  2. Na samem gostitelju (povezava loopback in `Host` loopback, na primer
+     `http://localhost:20128`) se prijavite z geslom. Drugi faktor je preskočen
+     samo za ta izvor; vsak drug izvor še vedno zahteva kodo.
+  3. V Nastavitve → Varnost → Onemogoči vnesite geslo in pustite kodo prazno.
+     `POST /api/auth/mfa/disable` sprejme telo brez `code` samo, ko je
+     spremenljivka nastavljena in zahteva prihaja iz gostitelja; še vedno zahteva
+     sejo nadzorne plošče in trenutno geslo ter se zabeleži kot
+     `auth.mfa.disabled` z `secondFactor: "recovery_switch"`.
+  4. Odstranite nastavitev `OMNIROUTE_DISABLE_MFA`, znova zaženite strežnik in
+     se po potrebi znova registrirajte.
 
 ## Razredi poti
 
@@ -69,55 +160,58 @@ Nekatera dejanja `MANAGEMENT` so **samo za upravitelja**: ključ `manage` ni dov
 ## Cevovod
 
 ```
-Dohodna zahteva → src/proxy.ts
-  → runAuthzPipeline() v src/server/authz/pipeline.ts
-    1. Odstrani zaupanja vredne notranje glave (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Ustvari ID zahteve in razvrsti pot prek classifyRoute()
-    3. Če pathname == "/" → preusmeri na /dashboard
-    4. Če poteka zaustavljanje (nadzorovana zaustavitev) in /api/* → 503
-    5. Če metoda ni GET in /api/* → zaščita checkBodySize()
-    6. Če OPTIONS → predhodna zahteva CORS 204
-    7. Če options.enforce == false → posreduje naprej z glavami razreda poti
-    8. Sicer: POLICIES[routeClass].evaluate(ctx)
-       - dovoli  → doda x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - zavrni → napaka JSON s correlation_id (strani nadzorne plošče → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Zaupanja vredne notranje glave (določene v `src/server/authz/headers.ts`) so **odstranjene iz dohodnih zahtev** pred razvrstitvijo — odjemalci ne morejo vnaprej nastaviti `x-omniroute-auth-*`, da bi se izdajali za subjekt.
+Zaupanja vredne notranje glave (definirane v `src/server/authz/headers.ts`) so** izločen iz dohodnih zahtev** pred klasifikacijo odjemalci — ne morejo vnaprej zapolniti `x-omniroute-auth-*`, da bi oponašali subjekt.
 
-### Pogodbe pravilnikov
+### Zavarovalne pogodbe
 
 Vsak razred poti ima pravilnik v `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — vedno vrne `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — pridobi Bearer in ga preveri prek `validateApiKey()`. Na anonimni dostop preide le, ko je veljavna funkcijska zastavica `REQUIRE_API_KEY` onemogočena. Veljavna zastavica se razreši prek `isRequireApiKeyEnabled()` (`preglasitev funkcijske zastavice v podatkovni zbirki > process.env.REQUIRE_API_KEY > privzeta vrednost`), zato funkcijske zastavice nadzorne plošče in okoljske spremenljivke dosledno urejajo `/api/v1/*`, `/api/v1beta/*` ter vzdevke; napake razreševalnika povzročijo varno zavrnitev dostopa. Na poteh odjemalskega API-ja dovoljuje zahteve s sejo nadzorne plošče (vključno z `/api/v1/models`, ki jo uporablja katalog modelov nadzorne plošče).
-- **`managementPolicy`** (`policies/management.ts`) — sprejme sejo nadzorne plošče, notranje zahteve za sinhronizacijo modelov (ujemanje z `/api/providers/[name]/(sync-models|models)`) ali preverjanje v celoti preskoči, če `isAuthRequired()` vrne false. Ko je žeton Bearer prisoten, vendar neveljaven, vrne 403 (`AUTH_001`), sicer pa 401. Pred katero koli vejo avtentikacije uveljavi tudi ravni varovanja poti (LOCAL_ONLY / ALWAYS_PROTECTED) — glejte [Ravni varovanja poti](../security/ROUTE_GUARD_TIERS.md). Do poti LOCAL_ONLY v `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (trenutno: `/api/mcp/`) je mogoče dostopati iz naslovov, ki niso povratne zanke, kadar ima ključ Bearer obseg `manage`; vse druge poti LOCAL_ONLY ostanejo strogo omejene na povratno zanko ne glede na obseg.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — izvleče nosilca, potrdi prek `validateApiKey()`. Preide v anonimno samo, če je zastavica učinkovite funkcije `REQUIRE_API_KEY` onemogočena. Učinkovita zastavica se razreši prek `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), tako da zastavice funkcij nadzorne plošče in spremenljivke okolja dosledno urejajo `/api/v1/*`, `/api/v1beta/*` in vzdevke; napake razreševalnika se ne zaprejo. Omogoča zahteve za sejo nadzorne plošče na odjemalskih poteh API (vključno z `/api/v1/models`, ki ga uporablja katalog modelov nadzorne plošče). Ko je Entra ID SSO omogočen, nosilec, ki je strukturno žeton Entra (trije segmenti base64url, `RS*` alg, `kid`), obravnava veja SSO** prej** `validateApiKey()` in njegova razsodba je dokončna — nikoli ne pade skozi pot ključa API-ja ali vejo degrade-to-anonymous, tako da izpad ponudnika identitete ne more postati odprt dostop. Statični ključi API niso prizadeti. Glejte [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — sprejme sejo nadzorne plošče, notranje zahteve za sinhronizacijo modela (ujemajo se z `/api/providers/[name]/(sync-models|models)`) ali v celoti preskoči, če `isAuthRequired()` vrne false. Vrne 403 (`AUTH_001`), če je nosilni žeton prisoten, vendar neveljaven, 401 sicer. Prav tako uveljavlja stopnje zaščite poti (LOCAL_ONLY / ALWAYS_PROTECTED) pred katero koli vejo avtorizacije — glejte [Stopnje zaščite poti](../security/ROUTE_GUARD_TIERS.md). do poti LOCAL_ONLY v `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (danes: `/api/mcp/`) je mogoče dostopati brez povratne zanke, ko nosilni ključ nosi obseg `manage` ; vse druge poti LOCAL_ONLY ostanejo s strogo povratno zanko ne glede na obseg.
 
-Uspešen pravilnik vrne `AuthSubject` s `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Nadaljnji obdelovalniki ga lahko preberejo prek `assertAuth(request, "CLIENT_API")` v `src/server/authz/assertAuth.ts`, namesto da bi znova izvajali logiko avtentikacije.
+Uspešen pravilnik vrne `AuthSubject` z `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Nadaljnji obdelovalci ga lahko preberejo prek `assertAuth(request, "CLIENT_API")` v `src/server/authz/assertAuth.ts` namesto ponovnega zagona auth logike.
 
 ## Seznam javnih poti
 
 `src/shared/constants/publicApiRoutes.ts` je izrecni seznam dovoljenih poti:
 
-Seznam je razdeljen glede na **obliko**, ta razdelitev pa je varnostno ključna (GHSA-74g9-q8f6-793h): predpona se primerja z `startsWith()`, zato se ujema tudi z vsako sosednjo potjo, ki ima enake začetne znake.
-Predpona `/api/usage/om-usage` je označila `/api/usage/om-usage<anything>` kot JAVNO, Next pa to razreši v `/api/usage/[connectionId]` — obravnavalnik brez lastnega preverjanja pristnosti.
+Seznam je razdeljen glede na **obliko**, ta razdelitev pa je ključnega pomena (GHSA-74g9-q8f6-793h): predpona
+se ujema z uporabo `startsWith()`, zato se ujema tudi z vsako sosednjo potjo, ki ima enake začetne znake.
+`/api/usage/om-usage` kot predpona označi `/api/usage/om-usage<anything>` kot PUBLIC, Next pa to razreši
+v `/api/usage/[connectionId]` — obravnavo brez lastnega preverjanja pristnosti.
 
 ```ts
-// Pristna poddrevesa. Vsak vnos se MORA končati z "/" (kar preverja test enote).
+// Prava poddrevesa. Vsak vnos se MORA končati z "/"; to preverja test enote.
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // pri razvrščanju se obravnava kot CLIENT_API, ne kot javna pot »brez preverjanja pristnosti«
+  "/api/v1/", // v classify se obravnava kot CLIENT_API, ne kot "javno brez preverjanja pristnosti"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Posamezne poti, ki se ujemajo NATANČNO (s končno poševnico ali brez nje).
+// Posamezne poti, ki se ujemajo NATANČNO (z zaključnim poševnim znakom ali brez njega).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
+  "/api/auth/mfa/verify", // 2. korak prijave za izbirni TOTP; potreben je piškotek MFA-pending
   "/api/init",
   "/api/sync/bundle",
   "/api/cli/connect",
@@ -125,20 +219,20 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/skills/collect/chaos",
 ]);
 
-// Posamezne poti samo za branje, za katere velja tudi omilitev izvora CORS.
+// Posamezne poti samo za branje, za katere velja tudi sprostitev izvora CORS.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Posamezna pot samo za branje BREZ omilitve CORS.
+// Posamezna pot samo za branje, za katero sprostitev izvora CORS NE velja.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Poti samo za branje so javne **samo** za varne metode. Opomba: `classifyRoute()` izloči `/api/v1/*` in `/api/v1beta/*` iz privzete razvrstitve PUBLIC — te poti so vedno `CLIENT_API`, zato pravilnik za ključ Bearer še vedno velja.
+Poti samo za branje so javne **le** za varne metode. Opomba: `classifyRoute()` izloči `/api/v1/*` in `/api/v1beta/*` iz javnega nadaljevanja — ti sta vedno `CLIENT_API`, zato zanju še vedno velja pravilnik ključa Bearer.
 
 ## Dodajanje nove poti
 
@@ -239,23 +333,23 @@ Končne točke `/api/v1/agents/tasks/*` in `/api/resilience/model-cooldowns` **z
 
 ## Odpravljanje napak
 
-Cevovod odzivom vedno doda naslednje glave:
+Cevovod vedno žigosa odgovore z:
 
 ```
-x-request-id:               <ID korelacije, ponovljen v telesih napak>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Pri overjenih zahtevah glave zahteve v zalednem sistemu (na strani obdelovalnika) vključujejo tudi:
+Za preverjene zahteve glave zahtevkov navzgor (na strani upravljavca) vključujejo tudi:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<zadnje 4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (neobvezno)
-x-omniroute-auth-scopes:    seznam, ločen z vejicami
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Znotraj obdelovalnikov uporabite `assertAuth(req, expectedClass)` — ta sproži izjemo `AuthzAssertionError` s kodo `AUTHZ_NOT_INITIALIZED`, če je bila vmesna programska oprema zaobidena (uporabno za odkrivanje regresij konfiguracije v testih).
+Uporabite `assertAuth(req, expectedClass)` znotraj rokovalcev — vrže `AuthzAssertionError` s kodo `AUTHZ_NOT_INITIALIZED` če je bila vmesna programska oprema zaobljena (koristno za lovljenje regresij konfiguracije pri testih).
 
 ## Glejte tudi
 

@@ -81,10 +81,11 @@ try {
 // Lower a value (and re-run) whenever a violation is fixed.
 // Lowered 2026-10-22 after the Keak CI UI Kit migration (KEA-7886): measured 0 / 1 / 0 / 0 with
 // REQUIRE_AXE=1 (login was 1, /dashboard 4, providers 3, settings 5). The one /dashboard violation
-// left is color-contrast on the partner banners (brand colours, owner decision).
+// left was color-contrast on the /home partner banners; lowered to 0 on 2026-10-25 after their
+// notes and the Kimi CTA ink went AA (KEA-7886 P7).
 const VIOLATION_BASELINES: Record<string, number> = {
   "/login": 0,
-  "/dashboard": 1,
+  "/dashboard": 0,
   "/dashboard/providers": 0,
   "/dashboard/settings": 0,
 };

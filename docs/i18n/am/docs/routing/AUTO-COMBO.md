@@ -452,54 +452,55 @@ curl -X POST http://localhost:20128/api/combos \
 
 ## API
 
-**የተለየ `POST /api/combos/auto` endpoint የለም** — Auto-Combo በሁለት መንገዶች ጥቅም ላይ ይውላል፦
+**የተለየ `POST /api/combos/auto` መጨረሻ ነጥብ የለም** — Auto-Combo በሁለት መንገዶች ጥቅም ላይ ይውላል፦
 
-1. **ዜሮ-ውቅር (የሚመከር):** `model: "auto"` ወይም `model: "auto/<variant>"` ያለውን ማንኛውንም የውይይት ማጠናቀቂያ ጥያቄ ይላኩ። ምናባዊው ፋብሪካ ለእያንዳንዱ ጥያቄ comboውን ይገነባል — ምንም ዘላቂ ማከማቻ ወይም የAPI ጥሪዎች አያስፈልጉም።
+1. **ዜሮ-ውቅር (የሚመከር)፦** ማንኛውንም የውይይት ማጠናቀቂያ ጥያቄ በ`model: "auto"` ወይም `model: "auto/<variant>"` ይላኩ። ምናባዊው ፋብሪካ ለእያንዳንዱ ጥያቄ comboውን ይገነባል — ምንም ዘላቂ ማከማቻ ወይም የAPI ጥሪዎች አያስፈልጉም።
 
-2. **በ`strategy: "auto"` የተከማቸ combo:** በ`POST /api/combos` በኩል መደበኛ combo ይፍጠሩና `strategy: "auto"`ን ከ`config.auto.weights` / `config.auto.candidatePool` ጋር ያዘጋጁ። ተመሳሳዩ የውጤት አሰጣጥ ሞተር ጥቅም ላይ ይውላል፤ comboው በ`combos` ውስጥ ይከማቻል፣ እንዲሁም በID እንደገና ጥቅም ላይ ሊውል ይችላል።
+2. **በ`strategy: "auto"` የተከማቸ combo፦** መደበኛ combo በ`POST /api/combos` ይፍጠሩ እና `strategy: "auto"`ን ከ`config.auto.weights` / `config.auto.candidatePool` ጋር ያዘጋጁ። ተመሳሳዩ የውጤት አሰጣጥ ሞተር ጥቅም ላይ ይውላል፤ comboው በ`combos` ውስጥ ተከማችቶ በID እንደገና ጥቅም ላይ ሊውል ይችላል።
 
-ለማግኘት፣ `GET /api/combos/auto` እያንዳንዱን ልዩነት ከተፈታው የእጩዎች ስብስብ እና `context_length` / `max_output_tokens` ጋር ይዘረዝራል — ይህም በእጩዎቹ ስብስብ መስኮቶች ውስጥ ያለው ከፍተኛው እሴት ነው። ደንበኞች (ለምሳሌ የopencode plugin) ከ`0` ይልቅ እነዚህን እሴቶች ማሳወቅ አለባቸው፦ ዜሮ የሆነ context የopencodeን ራስ-ሰር ማጠቃለል ሙሉ በሙሉ ያሰናክላል፣ ይህም የgatewayው የታሪክ ማጽዳት contextን እስኪያጠፋ ድረስ sessions እንዲያድጉ ያደርጋል። ከፍተኛውን እሴት ማሳወቅ ደህንነቱ የተጠበቀ ነው፤ ምክንያቱም የauto-combo context ቅድመ-ማጣሪያ ከመጠን በላይ የሆኑ ጥያቄዎችን ሰፊ መስኮት ወዳላቸው እጩዎች ይመራል።
+ለማግኘት፣ `GET /api/combos/auto` እያንዳንዱን ልዩነት ከተወሰነው የእጩዎች ስብስብ እና `context_length` / `max_output_tokens` ጋር ይዘረዝራል — ይህም በእጩዎች ስብስቡ መስኮቶች ውስጥ ያለው MAX ነው። ደንበኞች (ለምሳሌ፣ opencode plugin) ከ`0` ይልቅ እነዚህን እሴቶች ማሳወቅ አለባቸው፦ ዜሮ ዐውደ-ጽሑፍ የopencodeን ራስ-ሰር መጭመቅ ሙሉ በሙሉ ያሰናክላል፣ ይህም የgateway የታሪክ ማጽዳት ዐውደ-ጽሑፉን እስኪያጠፋ ድረስ ክፍለ ጊዜዎች እንዲያድጉ ያደርጋል። MAXን ማሳወቅ ደህንነቱ የተጠበቀ ነው፣ ምክንያቱም የauto-combo ዐውደ-ጽሑፍ ቅድመ-ማጣሪያ ከመጠን በላይ ትልቅ ጥያቄዎችን ሰፊ መስኮት ወዳላቸው እጩዎች ይመራል።
 
 ```bash
-# የዜሮ-ውቅር አጠቃቀም (combo መፍጠር አያስፈልግም)
+# የዜሮ-ውቅር አጠቃቀም (combo መፍጠር ሳያስፈልግ)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# በመደበኛው combos endpoint በኩል የሚከማች auto combo
+# በመደበኛው combos መጨረሻ ነጥብ በኩል የተከማቸ auto combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### የAuto router ስልቶች
+### የAuto router ስትራቴጂዎች
 
 የተከማቹ `strategy: "auto"` combos `config.routerStrategy`ን (ወይም የቆየውን
-`config.auto.routerStrategy`) ከሚከተሉት ወደ አንዱ ማዘጋጀት ይችላሉ፦
+`config.auto.routerStrategy`) ከሚከተሉት አንዱ እንዲሆን ሊያዘጋጁ ይችላሉ፦
 
 - `rules` — ነባሪ ክብደት ያለው የውጤት አሰጣጥ
-- `score` — ከተዋቀሩት ክብደቶች ከፍተኛውን ውጤት ይመርጣል። ፍጹም እኩል ውጤቶች የተዋቀረውን
-  የእጩዎች ቅደም ተከተል ይጠብቃሉ፤ ነባሩ `explorationRate` ከሙሉው ደረጃ የተሰጠው ስብስብ ናሙና ይወስዳል።
+- `score` — ከተዋቀሩት መካከል ከፍተኛውን ክብደት ያለው ውጤት ይመርጣል። ፍጹም እኩል ውጤቶች የተዋቀረውን
+  የእጩዎች ቅደም ተከተል ይጠብቃሉ፤ አሁን ያለው `explorationRate` ከሙሉው ደረጃ ከተሰጠው ስብስብ ናሙና ይወስዳል።
 - `cost` / `eco` — በጣም ርካሹ ጤናማ provider
 - `latency` / `fast` — ከአስተማማኝነት ቅጣት ጋር ዝቅተኛው p95 latency
-- `sla-aware` / `sla` — የp95 latency፣ error-rate እና አማራጭ
-  የወጪ SLOsን የሚያሟሉ እጩዎችን ይመርጣል
-- `lkgp` — በመጨረሻ ጥሩ እንደሆነ የታወቀው provider በቅድሚያ
-- `nadir` — promptው በስብስቡ ውስጥ የትኛውን model እንደሚፈልግ የ[Nadir](https://getnadir.com)ን decision API ይጠይቃል፤
-  በምርጫ የሚነቃ ሲሆን፣ ካልተሳካ ወደ `rules` ይመለሳል
+- `sla-aware` / `sla` — የp95 latency፣ የስህተት መጠን እና አማራጭ
+  የወጪ SLOዎችን የሚያሟሉ እጩዎችን ይመርጣል
+- `lkgp` — በመጀመሪያ የመጨረሻው የሚታወቀው ጥሩ provider
+- `nadir` — በስብስቡ ውስጥ promptው የትኛውን model እንደሚፈልግ የ[Nadir](https://getnadir.com) ውሳኔ APIን ይጠይቃል፤
+  በምርጫ የሚነቃ ሲሆን፣ ካልተሳካ ወደ `rules` በክፍት ሁኔታ ይመለሳል
 
-### የRouter ስልቶች በዝርዝር
+### የRouter ስትራቴጂዎች በዝርዝር
 
-የauto-combo ሞተር በ`config.routerStrategy` (ወይም በቀድሞው `config.auto.routerStrategy`)
-ሊቀያየሩ የሚችሉ 7 ተሰኪ **RouterStrategy** ትግበራዎችን ያቀርባል።
-እያንዳንዱ ስልት `RoutingContext` (የተግባር ዓይነት፣ የtool/vision ፍንጮች፣ የtoken ግምት፣ አማራጭ የSLA ፖሊሲ፣ አማራጭ
-በመጨረሻ ጥሩ እንደሆነ የታወቀ provider) ተሰጥቶት ከእጩዎች ስብስብ አንድ provider ይመርጣል።
+የauto-combo ሞተር በ`config.routerStrategy` (ወይም በቆየው `config.auto.routerStrategy`)
+በኩል መቀያየር የሚችሏቸውን 7 ሊሰኩ የሚችሉ **RouterStrategy** ትግበራዎችን ያቀርባል።
+እያንዳንዱ ስትራቴጂ `RoutingContext` ሲሰጠው ከእጩዎች ስብስቡ አንድ provider ይመርጣል
+(የተግባር አይነት፣ የመሣሪያ/ምስል ፍንጮች፣ የtoken ግምት፣ አማራጭ የSLA ፖሊሲ፣ አማራጭ
+የመጨረሻው የሚታወቅ ጥሩ provider)።
 
-#### 1. `rules` (ነባሪ) — ባለ16-ምክንያቶች ክብደት ያለው የውጤት አሰጣጥ
+#### 1. `rules` (ነባሪ) — ባለ16-ምክንያት ክብደት ያለው የውጤት አሰጣጥ
 
-ነባሩን የውጤት አሰጣጥ ሞተር ይጠቀልላል። `OPEN` circuit-breaker
-ያላቸውን እጩዎች አጣርቶ ካስወጣ በኋላ፣ አሁን ባለው የተግባር ዓይነትና `getTaskFitness()` `scorePool()`ን በማስኬድ፣
+አሁን ያለውን የውጤት አሰጣጥ ሞተር ይጠቀልላል። `OPEN` የcircuit-breaker
+እጩዎችን ያጣራል፣ ከዚያም `scorePool()`ን ከአሁኑ የተግባር አይነት እና `getTaskFitness()` ጋር በማስኬድ
 ከፍተኛውን ውጤት ያገኘውን provider ይመርጣል።
 
 ```ts
@@ -520,16 +521,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**መቼ መጠቀም እንዳለብዎት**: ነባሪ። በሁሉም ምልክቶች መካከል ሚዛናዊ የሆነ መጣጣም ሲፈልጉ ይጠቀሙ።
+**መቼ መጠቀም እንዳለብዎት**፦ ነባሪ። በሁሉም ምልክቶች መካከል ሚዛናዊ ማመቻቸት ሲፈልጉ ይጠቀሙ።
 
-**ተለዋጭ ስም**: `rules` (ተለዋጭ ስም የለውም)
+**ተለዋጭ ስም**፦ `rules` (ተለዋጭ ስም የለውም)
 
 ---
 
 #### 2. `cost` / `eco` — በጣም ርካሹ ጤናማ provider
 
-የእጩዎችን ስብስብ በ`costPer1MTokens` (ከዝቅተኛ ወደ ከፍተኛ) ደርድሮ በጣም ርካሹን ይመርጣል።
-መጀመሪያ `OPEN` እጩዎችን አጣርቶ ያስወጣል።
+የእጩዎችን ስብስብ በ`costPer1MTokens` (ከዝቅተኛ ወደ ከፍተኛ) ይደረድራል እና በጣም ርካሹን ይመርጣል።
+በመጀመሪያ `OPEN` እጩዎችን ያጣራል።
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -544,16 +545,16 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**መቼ መጠቀም እንዳለብዎት**: ለወጪ ትኩረት የሚሰጡ workloads፣ batch processing ወይም የጀርባ ሥራዎች።
+**መቼ መጠቀም እንዳለብዎት**፦ ለወጪ ትኩረት የሚሰጡ የሥራ ጫናዎች፣ የቡድን ማቀናበር ወይም የጀርባ ሥራዎች።
 
-**ተለዋጭ ስሞች**: `cost`፣ `eco`
+**ተለዋጭ ስሞች**፦ `cost`፣ `eco`
 
 ---
 
 #### 3. `latency` / `fast` — ከአስተማማኝነት ቅጣት ጋር ዝቅተኛው p95 latency
 
-በ`p95LatencyMs + (errorRate * 1000)` ይደረድራል። የerror-rate ቅጣት፣
-ስማዊ latencyያቸው ዝቅተኛ ቢሆንም እንኳ አስተማማኝ ያልሆኑ providers ዝቅ ብለው ደረጃ እንዲያገኙ ያረጋግጣል።
+በ`p95LatencyMs + (errorRate * 1000)` ይደረድራል። የስህተት መጠን ቅጣቱ፣
+የተገለጸው latencyያቸው ዝቅተኛ ቢሆንም እንኳ አስተማማኝ ያልሆኑ providers ዝቅተኛ ደረጃ እንዲሰጣቸው ያረጋግጣል።
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -570,28 +571,28 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**መቼ መጠቀም እንዳለብዎት**: እንደ ቅጽበታዊ ውይይት፣ autocomplete ወይም
-መስተጋብራዊ የcoding ረዳቶች ያሉ ለlatency ትኩረት የሚሰጡ workloads።
+**መቼ መጠቀም እንዳለብዎት**፦ እንደ ቅጽበታዊ ውይይት፣ autocomplete ወይም
+በይነተገናኝ የኮድ ረዳቶች ያሉ ለlatency ትኩረት የሚሰጡ የሥራ ጫናዎች።
 
-**ተለዋጭ ስሞች**: `latency`፣ `fast`
+**ተለዋጭ ስሞች**፦ `latency`፣ `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — የlatency/error/cost SLO ተገዢነት
+#### 4. `sla-aware` / `sla` — የlatency/ስህተት/ወጪ SLO ተገዢነት
 
 እያንዳንዱ እጩ የተዋቀረውን የSLO ፖሊሲ ምን ያህል በደንብ እንደሚያሟላ መሠረት ውጤት ይሰጠዋል፦
 
-| መለኪያ       | ክብደት | ቀመር                                               |
-| ---------- | ---- | ------------------------------------------------- |
-| የመዘግየት ነጥብ | 35%  | `threshold / max(value, ε)`                       |
-| የስህተት ነጥብ  | 35%  | `threshold / max(value, ε)`                       |
-| የጤናማነት ነጥብ | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
-| የወጪ ነጥብ    | 10%  | `threshold / max(value, ε)` ወይም በተቃራኒ የተስተካከለ     |
-| የመረጋጋት ነጥብ | 5%   | በተቃራኒ የተስተካከለ የመዘግየት መደበኛ ልዩነት                    |
+| መለኪያ       | ክብደት | ቀመር                                                |
+| ---------- | ---- | -------------------------------------------------- |
+| የመዘግየት ነጥብ | 35%  | `threshold / max(value, ε)`                        |
+| የስህተት ነጥብ  | 35%  | `threshold / max(value, ε)`                        |
+| የጤና ነጥብ    | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)  |
+| የወጪ ነጥብ    | 10%  | `threshold / max(value, ε)` ወይም በተገላቢጦሽ መደበኛ የተደረገ |
+| የመረጋጋት ነጥብ | 5%   | በተገላቢጦሽ መደበኛ የተደረገ የመዘግየት መደበኛ ልዩነት                |
 
-`hardConstraints: true` ሲሆን፣ እጩዎች በዋናነት በ**የጥሰት ነጥብ**
-(ማንኛውንም SLO ምን ያህል እንዳለፉ)፣ ከዚያም በጥምር ነጥብ ይደረደራሉ። አለበለዚያ
-በጥምር ነጥቡ ብቻ ይደረደራሉ።
+`hardConstraints: true` ሲሆን፣ እጩዎች በዋናነት በ**ጥሰት ነጥብ**
+(ማንኛውንም SLO ምን ያህል እንደሚያልፉ)፣ ከዚያም በድምር ነጥብ ይደረደራሉ። አለበለዚያ
+የድምር ነጥቡ ብቻ ጥቅም ላይ ይውላል።
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -600,12 +601,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... እያንዳንዱን እጩ ከመመሪያው አንጻር ነጥብ ይሰጣል፦ { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... እያንዳንዱን እጩ በፖሊሲው መሠረት ነጥብ ይሰጣል፦ { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**የSLA መስኮች** (በጥምር ውቅሩ ላይ ይዘጋጃሉ):
+**የSLA መስኮች** (በጥምር ውቅሩ ላይ የሚዋቀሩ):
 
 ```json
 {
@@ -620,17 +621,17 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**መቼ መጠቀም እንዳለብዎት**: ጥብቅ የመዘግየት፣ የስህተት መጠን ወይም የወጪ በጀት ላላቸው የምርት ስራ ጫናዎች።
+**መቼ መጠቀም እንደሚገባ**: ጥብቅ የመዘግየት፣ የስህተት መጠን ወይም የወጪ በጀት ላላቸው የምርት የሥራ ጫናዎች።
 
 **ተለዋጭ ስሞች**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — በመጨረሻ ጥሩ መሆኑ የታወቀው አቅራቢ በቅድሚያ
+#### 5. `lkgp` — በመጨረሻ ጥሩ ሆኖ የታወቀው አቅራቢ መጀመሪያ
 
-**በመጨረሻ ጥሩ መሆኑ የታወቀውን አቅራቢ** (ከተዋቀረ) በቅድሚያ ይሞክራል፣ ከዚያም ወደ
-`rules` ስልት ይመለሳል። ለክፍለ-ጊዜ ቋሚነት ጠቃሚ ነው — በውይይት ውስጥ
-የክትትል ጥያቄዎችን ያው አቅራቢ ያስተናግዳል።
+**በመጨረሻ ጥሩ ሆኖ የታወቀውን አቅራቢ** (ከተዋቀረ) መጀመሪያ ይሞክራል፣ ከዚያም ወደ
+`rules` ስልት ይመለሳል። ለክፍለ ጊዜ ተጣባቂነት ጠቃሚ ነው — በውይይት ውስጥ
+ተከታይ ጥያቄዎችን ያው አቅራቢ ያስተናግዳል።
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -651,27 +652,27 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // ወደ rules ስልት መመለስ
+    // ወደ rules ስልት ተመለስ
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**መቼ መጠቀም እንዳለብዎት**: የክትትል ጥያቄዎችን ያው አቅራቢ እንዲያስተናግድ
-በሚፈልጉባቸው ባለብዙ-ዙር ውይይቶች (ለምሳሌ፣ ለመሸጎጫ፣ ለአውድ ቀጣይነት ወይም ለዋጋ ወጥነት)።
+**መቼ መጠቀም እንደሚገባ**: ተከታይ ጥያቄዎችን ያው አቅራቢ እንዲያስተናግድ
+በሚፈልጉባቸው ባለብዙ ዙር ውይይቶች (ለምሳሌ፣ ለመሸጎጫ፣ ለዐውድ ቀጣይነት ወይም ለዋጋ አወጣጥ ወጥነት)።
 
 **ተለዋጭ ስም**: `lkgp` (ተለዋጭ ስም የለውም)
 
 ---
 
-#### 6. `nadir` — በNadir በኩል ጥያቄውን ያገናዘበ የሞዴል ምርጫ
+#### 6. `nadir` — Nadirን በመጠቀም ጥያቄን የሚያገናዝብ የሞዴል ምርጫ
 
-ከላይ ያሉት እያንዳንዱ ስልት እጩዎቹን በራሱ የቴሌሜትሪ ውሂብ መሠረት ደረጃ ያወጣል፤ አንዳቸውም
-ጥያቄውን አያነቡም። `nadir` የመጨረሻውን የተጠቃሚ ዙር ከፑሉ የሞዴል መለያዎች ጋር ወደ
-[Nadir](https://getnadir.com) የውሳኔ API (`POST /v1/bucket`) ይልካል፣ እና Nadir
-ከዚያ ዝርዝር የመረጠው ሞዴል ጋር ይመራል (`simple` → ብቃት ያለው በጣም ርካሹ ሞዴል፣ `complex` →
-እጅግ የላቀው)። ያንን ሞዴል የሚያገለግለው ግንኙነት አሁንም በ`rules` ይመረጣል፣ ስለዚህ ኮታ፣
-ጤናማነት እና ወጪ የትኛው መለያ እንደሚመረጥ መወሰናቸውን ይቀጥላሉ።
+ከላይ ያሉት እያንዳንዱ ስልቶች እጩዎቹን በራሳቸው የቴሌሜትሪ መረጃ መሠረት ያስቀድማሉ፤ አንዳቸውም
+ጥያቄውን አያነቡም። `nadir` የመጨረሻውን የተጠቃሚ ዙር ከpool የሞዴል ids ጋር ወደ
+[Nadir](https://getnadir.com) የውሳኔ API (`POST /v1/bucket`) ይልካል፣ እንዲሁም Nadir ከዚያ ዝርዝር
+ወደሚመርጠው ሞዴል ይመራል (`simple` → ብቃት ካላቸው ሞዴሎች በጣም ርካሹ፣ `complex` → በጣም
+የላቀው)። ያንን ሞዴል የሚያቀርበው ግንኙነት አሁንም በ`rules` ይመረጣል፣ ስለዚህ ኮታ፣
+ጤና እና ወጪ የትኛው መለያ እንደሚመረጥ መወሰናቸውን ይቀጥላሉ።
 
 ```json
 {
@@ -687,31 +688,34 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` እና `OMNIROUTE_NADIR_BASE_URL` ለሁለቱ ሕብረቁምፊዎች የአካባቢ ተለዋዋጭ ምትኮች ናቸው።
-`baseUrl` የሚያስፈልገው Nadir በራስዎ አገልጋይ ላይ ሲስተናገድ ብቻ ነው (በመጨረሻ ያለ `/v1` ተቀባይነት አለው)።
-ቁልፍ የሌላቸው ጥሪዎች ወደ Nadir ስም-አልባ ደረጃ ይገባሉ፣ ይህም በእያንዳንዱ IP የጥሪ መጠን ገደብ አለው።
+`OMNIROUTE_NADIR_API_KEY` እና `OMNIROUTE_NADIR_BASE_URL` ለሁለቱ ሕብረቁምፊዎች የአካባቢ ተለዋዋጭ አማራጮች ናቸው።
+`baseUrl` የሚያስፈልገው በራስ ለሚስተናገድ Nadir ብቻ ነው (በመጨረሻ ያለ `/v1` ተቀባይነት አለው)።
+ቁልፍ የሌላቸው ጥሪዎች በየIP የጥሪ መጠን ገደብ ወዳለበት የNadir ማንነት አልባ ደረጃ ይገባሉ። ቁልፍ ካለ
+([አንድ ይፍጠሩ](https://app.getnadir.com/dashboard/api-keys))፣ እያንዳንዱ ውሳኔ
+በNadir ዳሽቦርድዎ ላይ ይመዘገባል። ሙሉ ውቅር እና ማረጋገጫ፦
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/)።
 
-ከሳጥኑ የሚወጣው፦ የመጨረሻው የተጠቃሚ መልእክት ጽሑፍ (የመጀመሪያዎቹ 16k ቁምፊዎች)፣ የእጩ
-ሞዴል መለያዎች እና `source: "omniroute"` የሰርጥ መለያ። የስርዓት ጥያቄ፣ ታሪክ፣ መሣሪያዎች ወይም
+ከሳጥኑ የሚወጣው፦ የመጨረሻው የተጠቃሚ መልዕክት ጽሑፍ (የመጀመሪያዎቹ 16k ቁምፊዎች)፣ የእጩ
+ሞዴል ids እና የ`source: "omniroute"` ሰርጥ መለያ። ምንም የስርዓት ጥያቄ፣ ታሪክ፣ መሣሪያዎች ወይም
 ራስጌዎች አይላኩም።
 
-የውድቀት ባህሪው ክፍት-በሆነ-ሁኔታ-መውደቅ ነው፦ የጊዜ ማብቂያ (ነባሪው 2000 ms)፣ non-2xx፣ የማይደረስበት
-አስተናጋጅ፣ ቅርጹ የተበላሸ ምላሽ ወይም ከፑሉ ውጪ የሆነ ምርጫ ወደ `rules`
-ውሳኔ ይመለሳል፣ እና ምክንያቱ `NadirStrategy: fallback (…)` በሚለው ይጀምራል። ከከሸፈ ጥሪ በኋላ
-ስልቱ ኔትወርኩን ለ30 s ያልፋል፣ ስለዚህ መቋረጥ በእያንዳንዱ ጥያቄ አንድ የጊዜ ማብቂያ ከማስከተል ይልቅ
-በየ30 s አንድ የጊዜ ማብቂያ ብቻ ያስከትላል። Nadir በተጨባጭ ምርጫውን ሲያደርግ ብቻ የማዘዋወር ክስተቶች
-`strategy: "nadir"` ብለው ሪፖርት ያደርጋሉ።
+የብልሽት ባህሪው ሥራን የሚቀጥል ነው፦ የጊዜ ገደብ ማለፍ (ነባሪው 2000 ms)፣ non-2xx፣ ሊደረስበት የማይችል
+host፣ የተበላሸ ምላሽ ወይም ከpool ውጭ የሆነ ምርጫ ወደ `rules`
+ውሳኔ ይመለሳል፣ እና ምክንያቱ በ`NadirStrategy: fallback (…)` ቅድመ ቅጥያ ይጀምራል። ከከሸፈ ጥሪ በኋላ
+ስልቱ ለ30 s አውታረ መረቡን ይዘላል፣ ስለዚህ መቋረጥ በእያንዳንዱ ጥያቄ አንድ የጊዜ ገደብ ማለፍ ከማስከተል ይልቅ
+በየ30 s አንድ ብቻ ያስከትላል። Nadir ምርጫውን በትክክል ሲያደርግ ብቻ የማዞሪያ ክስተቶች
+`strategy: "nadir"` ይዘግባሉ።
 
-**መቼ መጠቀም እንዳለብዎት**: የተለያዩ የሞዴል ደረጃዎችን (አንድ አነስተኛ፣ አንድ መካከለኛ
-እና አንድ እጅግ የላቀ ሞዴል) ባካተተ ፑል ላይ የተደባለቀ የክብደት ደረጃ ያለው ትራፊክ፣ ሁልጊዜ እጅግ የላቀውን መጠቀም ሊቀንሱት የሚፈልጉት ወጪ ሲሆን።
+**መቼ መጠቀም እንደሚገባ**: የተለያዩ የሞዴል ደረጃዎችን (አንድ ትንሽ፣ አንድ መካከለኛ
+እና አንድ እጅግ የላቀ ሞዴል) በሚያካትት pool ላይ ለተቀላቀለ የአስቸጋሪነት ደረጃ ያለው ትራፊክ፣ ሁልጊዜ እጅግ የላቀውን ሞዴል መጠቀም ሊቀንሱት የሚፈልጉት ወጪ ሲሆን።
 
 **ተለዋጭ ስም**: `nadir` (ተለዋጭ ስም የለውም)
 
 ---
 
-### ብጁ የራውተር ስልቶች
+### ብጁ የማዞሪያ ስልቶች
 
-በይፋዊ API በኩል የራስዎን `RouterStrategy` ትግበራ መመዝገብ ይችላሉ፦
+የራስዎን `RouterStrategy` ትግበራ በይፋዊ APIው በኩል መመዝገብ ይችላሉ፦
 
 ```ts
 import {
@@ -724,7 +728,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // የማዘዋወር አመክንዮዎን እዚህ ያስገቡ
+    // የማዞሪያ አመክንዮዎን እዚህ ያስገቡ
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -752,18 +756,18 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ---
 
-### የራውተር ስልት መምረጫ መመሪያ
+### የማዞሪያ ስልት ምርጫ መመሪያ
 
-| የአጠቃቀም ሁኔታ       | ስልት         | ምክንያት                           |
-| ---------------- | ----------- | ------------------------------- |
-| ሚዛናዊ የስራ ጫና      | `rules`     | ነባሪ — ሁሉንም መለኪያዎች ግምት ውስጥ ያስገባል |
-| ወጪን መቀነስ         | `cost`      | ሁልጊዜ በጣም ርካሹን ይመርጣል             |
-| መዘግየትን መቀነስ      | `latency`   | ፈጣኑን አስተማማኝ አቅራቢ ይመርጣል          |
-| ጥብቅ SLOዎች        | `sla-aware` | በp95/ስህተት/ወጪ ገደቦች ያጣራል          |
-| ባለብዙ-ዙር ውይይት     | `lkgp`      | የክፍለ-ጊዜ ቋሚነት                    |
-| የተደባለቀ የክብደት ደረጃ | `nadir`     | ለእያንዳንዱ ጥያቄ የሞዴል ደረጃውን ይመርጣል    |
+| የአጠቃቀም ሁኔታ     | ስትራቴጂ       | ምክንያት                        |
+| -------------- | ----------- | ---------------------------- |
+| ሚዛናዊ የሥራ ጫና    | `rules`     | ነባሪ — ሁሉንም ሁኔታዎች ከግምት ያስገባል  |
+| ወጪን መቀነስ       | `cost`      | ሁልጊዜ ዋጋው ዝቅተኛውን ይመርጣል        |
+| መዘግየትን መቀነስ    | `latency`   | ፈጣኑንና አስተማማኙን አቅራቢ ይመርጣል     |
+| ጥብቅ SLOዎች      | `sla-aware` | በp95/ስህተት/ወጪ ገደቦች መሠረት ያጣራል  |
+| ባለብዙ-ዙር ውይይት   | `lkgp`      | የክፍለ ጊዜ ቋሚነት                 |
+| የተቀላቀለ አስቸጋሪነት | `nadir`     | ለእያንዳንዱ ጥያቄ የሞዴል ደረጃውን ይመርጣል |
 
-SLAን ያገናዘቡ መስኮች፦
+SLAን የሚያገናዝቡ መስኮች፦
 
 ```json
 {

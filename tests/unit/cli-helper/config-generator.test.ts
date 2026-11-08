@@ -149,7 +149,7 @@ describe("config-generator", () => {
         apiKey: "sk-xxx",
       });
       assert.ok(Array.isArray(results));
-      assert.strictEqual(results.length, 7); // claude, codex, opencode, cline, kilocode, continue, hermes
+      assert.strictEqual(results.length, 8); // claude, codex, opencode, cline, kilocode, continue, hermes, whycodes (#14107)
     });
   });
 
