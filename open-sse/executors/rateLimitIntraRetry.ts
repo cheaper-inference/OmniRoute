@@ -1,4 +1,5 @@
 import { parseDetailedRetryHintFromJsonBody } from "../services/retryAfterJson.ts";
+import { readErrorBodyText } from "../utils/error.ts";
 
 /**
  * Upper bound (ms) on an upstream 429 retry hint for which the executor's
@@ -31,10 +32,8 @@ function retryAfterHeaderMs(headers: Headers | null | undefined): number | null 
 export async function readRateLimitRetryHintMs(response: Response): Promise<number | null> {
   const headerMs = retryAfterHeaderMs(response.headers);
   if (headerMs !== null) return headerMs;
-  const text = await response
-    .clone()
-    .text()
-    .catch(() => "");
+  // Capped at 64 KiB and 5 s like every upstream error body; over the cap or a stall gives no hint.
+  const text = await readErrorBodyText(response.clone()).catch(() => "");
   if (!text) return null;
   return parseDetailedRetryHintFromJsonBody(text, Number.MAX_SAFE_INTEGER)?.retryAfterMs ?? null;
 }
