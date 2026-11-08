@@ -245,6 +245,9 @@ type TranslateState = ReturnType<typeof initState> & {
   usage?: unknown;
   cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
   finishReason?: unknown;
+  /** Responses translator: finish_reason seen, response.completed waits for a usage chunk. */
+  awaitingTrailingUsage?: boolean;
+  completedSent?: boolean;
   copilotCompatibleReasoning?: boolean;
   /** Suppress the `</think>` close marker for clients that render it verbatim (#5245). */
   suppressThinkClose?: boolean;
@@ -1102,6 +1105,12 @@ export function createSSEStream(options: StreamOptions = {}) {
   // Idle timeout state — closes stream if provider stops sending data
   let lastChunkTime = Date.now();
   let idleTimer: ReturnType<typeof setInterval> | null = null;
+  // Responses client: finish_reason arrived but no usage trailer or [DONE] yet.
+  let deferredCompletionTimer: ReturnType<typeof setTimeout> | null = null;
+  const clearDeferredCompletionTimer = () => {
+    if (deferredCompletionTimer) clearTimeout(deferredCompletionTimer);
+    deferredCompletionTimer = null;
+  };
   let streamTimedOut = false;
   const claudeEmptyResponseLifecycle = createClaudeEmptyResponseLifecycle();
   // #12398: `timing.firstByteAt` doubles as "any upstream chunk ever arrived".
@@ -2781,11 +2790,29 @@ export function createSSEStream(options: StreamOptions = {}) {
               emitTranslatedClientItem(controller, item);
             }
           }
+
+          // The Responses translator defers response.completed for a trailing usage
+          // chunk. If neither usage nor [DONE] follows, flush it after a short grace.
+          if (state?.awaitingTrailingUsage && !state.completedSent && !deferredCompletionTimer) {
+            deferredCompletionTimer = setTimeout(() => {
+              deferredCompletionTimer = null;
+              try {
+                for (const item of translateResponse(targetFormat, sourceFormat, null, state) ||
+                  []) {
+                  emitTranslatedClientItem(controller, item);
+                }
+              } catch {
+                // Stream already closed or errored; nothing left to complete.
+              }
+            }, 3000);
+            deferredCompletionTimer.unref?.();
+          }
         }
       },
 
       async flush(controller) {
         flushing = true;
+        clearDeferredCompletionTimer();
         // Clean up idle watchdog timer
         if (idleTimer) {
           clearIdleTimer();
