@@ -16,6 +16,7 @@ import { isPassiveCodex, resolvePassiveCodex } from "./tokenRefresh/passiveCodex
 import { PROVIDERS } from "../config/constants.ts";
 import { getCodexAuthIdentityHeaders } from "../config/codexClient.ts";
 import { runWithProxyContext } from "../utils/proxyFetch.ts";
+import { sanitizeErrorMessage } from "../utils/errorSanitization.ts";
 import { serializeRefresh } from "./refreshSerializer.ts";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import {
@@ -306,7 +307,8 @@ async function refreshActiveAccessToken(
       const errorText = await response.text();
       log?.error?.("TOKEN_REFRESH", `Failed to refresh token for ${provider}`, {
         status: response.status,
-        error: errorText,
+        // The OAuth server can echo the refresh token or client secret back in its error body.
+        error: sanitizeErrorMessage(errorText),
       });
       const code = extractOAuthErrorCode(errorText);
       if (code === "invalid_grant" || code === "invalid_request") {
