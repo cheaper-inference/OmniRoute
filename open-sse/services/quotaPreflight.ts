@@ -41,6 +41,9 @@ import {
   selectAntigravityQuotaWindowNames,
 } from "./antigravityQuotaFamily.ts";
 
+// Combo ordering reads this here so that it needs no open-sse -> src edge of its own.
+export { isCodexPaidCreditsBacked } from "@/lib/providers/codexPaidCredits";
+
 export interface PreflightQuotaResult {
   proceed: boolean;
   reason?: string;
