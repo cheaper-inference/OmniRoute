@@ -433,7 +433,11 @@ export async function updateSettings(
   });
   tx();
   backupDbFile("pre-write");
-  invalidateDbCache("settings"); // Bust the read cache immediately
+  // learnedRateLimits is runtime-only (no catalog reader): keep the /v1/models cache for it.
+  const updateKeys = Object.keys(updates);
+  const skipModelCatalog =
+    updateKeys.length > 0 && updateKeys.every((k) => k === "learnedRateLimits");
+  invalidateDbCache("settings", undefined, { skipModelCatalog }); // Bust the read cache immediately
 
   // Bust proxy resolution cache when proxy toggle settings change
   const PROXY_TOGGLE_KEYS = ["proxyEnabled", "perKeyProxyEnabled"];

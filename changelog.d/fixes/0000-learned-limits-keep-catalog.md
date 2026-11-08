@@ -1,0 +1,1 @@
+- **fix(settings):** saving learned rate limits no longer clears the `/v1/models` catalog cache, so the next model-list poll stays fast.
