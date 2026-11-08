@@ -17,6 +17,7 @@ export interface CustomModelEntry {
   source?: string;
   apiFormat?: string;
   supportedEndpoints?: string[];
+  endpointCapabilitySource?: string;
   inputTokenLimit?: number;
   outputTokenLimit?: number;
   isHidden?: boolean;

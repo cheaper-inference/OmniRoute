@@ -7,7 +7,7 @@
  * the reap: the failed pool is evicted, the healthy pool survives, and the
  * cloud reap happens at most once per window under a persistent outage.
  */
-import { describe, it, afterEach } from "node:test";
+import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 
 import {
@@ -29,9 +29,12 @@ import {
   __dispatcherReapSizeForTest,
 } from "../../open-sse/utils/proxyDispatcherReap.ts";
 import { proxyFetch } from "../../open-sse/utils/proxyFetch.ts";
+import { useDirectMockHosts } from "../helpers/directMockHosts.ts";
 
 const CLOUD_HOST = "api.example.com";
 const LOCAL_HOST = "host.docker.internal";
+
+beforeEach((t) => useDirectMockHosts(t, CLOUD_HOST));
 
 afterEach(() => {
   clearDispatcherCache();

@@ -8,6 +8,7 @@ export const mistralProvider: RegistryEntry = {
   baseUrl: "https://api.mistral.ai/v1/chat/completions",
   authType: "apikey",
   authHeader: "bearer",
+  toolNameMaxLength: 64,
   defaultContextLength: 262144,
   models: [
     {
