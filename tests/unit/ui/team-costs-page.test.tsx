@@ -336,7 +336,7 @@ describe("real team costs components", () => {
     expect(writes()).toHaveLength(0);
     await click("Assign");
     expect(writes()).toHaveLength(0);
-    expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain(
+    expect(document.body.querySelector('[role="alertdialog"]')?.textContent).toContain(
       "from “Beta” to “Alpha”"
     );
     await click("Confirm");
@@ -350,7 +350,7 @@ describe("real team costs components", () => {
     expect(writes()).toHaveLength(0);
     mutationStatus = 403;
     await click("Confirm");
-    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.body.querySelector('[role="alertdialog"]')).not.toBeNull();
     expect(document.body.textContent).toContain(en.teamCosts.forbidden);
     expect(writes()[0][0]).toBe("/api/teams/a/members?apiKeyId=member");
   });
@@ -431,7 +431,8 @@ describe("real team costs components", () => {
     await act(async () => control(en.teamCosts.selectTeam).click());
     const input = control("Search teams");
     expect(input.getAttribute("role")).toBe("combobox");
-    expect(document.activeElement).toBe(input);
+    // focus is restored on the next frame after the kit popover closes
+    await vi.waitFor(() => expect(document.activeElement).toBe(input));
     await change("Search teams", "Beta");
     expect(options()).toHaveLength(1);
     expect(container.querySelector("main h2")?.textContent).toBe("Alpha");
@@ -448,7 +449,8 @@ describe("real team costs components", () => {
     expect(nav.query).toBe("?team=b");
     expect(container.querySelector("main h2")?.textContent).toBe("Beta");
     expect(listbox()).toBeNull();
-    expect(document.activeElement).toBe(control(en.teamCosts.selectTeam));
+    // focus is restored on the next frame after the kit popover closes
+    await vi.waitFor(() => expect(document.activeElement).toBe(control(en.teamCosts.selectTeam)));
   });
   it("supports keyboard dismissal, resets search, and disables team selection while editing", async () => {
     await render();
@@ -464,7 +466,8 @@ describe("real team costs components", () => {
     );
     expect(listbox()).toBeNull();
     expect(nav.query).toBe("?team=a");
-    expect(document.activeElement).toBe(trigger);
+    // focus is restored on the next frame after the kit popover closes
+    await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
     await act(async () => trigger.click());
     expect(control("Search teams").value).toBe("");
     expect(options()).toHaveLength(2);

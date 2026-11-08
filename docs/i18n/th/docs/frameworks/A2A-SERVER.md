@@ -163,7 +163,7 @@ OmniRoute เปิดเผย 6 ทักษะ A2A แบบมีสาย�
 | รายงานสุขภาพ            | `health-report`      | รวมเซอร์กิตเบรกเกอร์ คูลดาวน์ สถานะการล็อคต่อผู้ให้บริการ                                                                             | สุขภาพความยืดหยุ่น       | "แสดงสถานะสุขภาพของผู้ให้บริการทั้งหมด"      |
 | ความสามารถของรายการ     | `list-capabilities`  | ส่งคืนแค็ตตาล็อกทักษะตัวแทน 45 รายการเต็ม (23 API + 21 CLI + 1 config) เป็นตารางมาร์กดาวน์ที่มี SKILL.md URLs แบบดิบสำหรับการฉีดบริบท | แคตตาล็อก การค้นพบ ทักษะ | "แสดงรายการความสามารถ OmniRoute ทั้งหมด"     |
 
-> บัตรตัวแทนควรสอดคล้องกับแค็ตตาล็อกของผู้ให้บริการ 377 รายที่ใช้งานอยู่ จำนวนผู้ให้บริการและข้อมูลเมตา free/no-auth มาจากรีจิสทรีรันไทม์
+> บัตรตัวแทนควรสอดคล้องกับแค็ตตาล็อกผู้ให้บริการ 380 รายที่ใช้งานอยู่ จำนวนผู้ให้บริการและข้อมูลเมตา free/no-auth มาจากรีจิสทรีรันไทม์
 
 ### รายละเอียดทักษะ `list-capabilities`
 
@@ -197,17 +197,17 @@ OmniRoute เปิดเผย 6 ทักษะ A2A แบบมีสาย�
 
 ---
 
-## การเพิ่มสกิลใหม่
+## การเพิ่มทักษะใหม่
 
-1. **สร้างไฟล์สกิล:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **สร้างไฟล์ทักษะ:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   ส่งออกฟังก์ชัน async `(task: A2ATask) => Promise<{ artifacts, metadata }>` ให้เป็นไปตามโครงสร้างของสกิลที่มีอยู่ เช่น `smartRouting.ts`
+   ส่งออกฟังก์ชัน async `(task: A2ATask) => Promise<{ artifacts, metadata }>` ติดตามรูปทรงของทักษะที่มีอยู่ เช่น `smartRouting.ts`.
 
-2. **ลงทะเบียนแฮนด์เลอร์:** ใน `src/lib/a2a/taskExecution.ts` ให้เพิ่มรายการลงใน `A2A_SKILL_HANDLERS`:
+2. **ตัวจัดการการลงทะเบียน:** ใน `src/lib/a2a/taskExecution.ts` ให้เพิ่มรายการไปที่ `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...สกิลที่มีอยู่
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ OmniRoute เปิดเผย 6 ทักษะ A2A แบบมีสาย�
    };
    ```
 
-3. **แสดงใน Agent Card:** ใน `src/app/.well-known/agent.json/route.ts` ให้เพิ่มต่อท้ายอาร์เรย์ `skills`:
+3. **เปิดเผยในบัตรตัวแทน:** ใน `src/lib/a2a/agentCardMetadata.ts` (แชร์โดย `/.well-known/agent.json` และ `/.well-known/agent-card.json`) ให้ต่อท้ายอาร์เรย์ `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "สกิลของคุณ",
-     "description": "คำอธิบายสั้น ๆ ที่มุ่งเน้นเจตนา",
-     "tags": ["การกำหนดเส้นทาง", "โควตา"],
-     "examples": ["ตัวอย่างการเรียกใช้ด้วยภาษาธรรมชาติ"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **เขียนการทดสอบ:** `tests/unit/a2a-<your-skill>.test.ts` ให้ครอบคลุมทั้งกรณีสำเร็จ + กรณีข้อผิดพลาด
+4. **เขียนแบบทดสอบ:** `tests/unit/a2a-<your-skill>.test.ts` ครอบคลุมเส้นทางข้อผิดพลาด + ของเส้นทางแห่งความสุข
 
-5. **จัดทำเอกสาร** สำหรับสกิลใหม่ในตาราง `Available Skills` ของไฟล์นี้
+5. **เอกสาร** ทักษะใหม่ในตาราง `Available Skills` ของไฟล์นี้
 
 ---
 

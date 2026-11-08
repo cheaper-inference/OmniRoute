@@ -1,0 +1,1 @@
+- **fix(ci):** retire the extract-zip, MSAL and basic-ftp advisories by moving promptfoo to 0.125.1 with scoped Azure identity and get-uri overrides, keep the injection-guard nightly evaluating HTTP 400 JSON bodies, and lower the `vulnCount` ratchet from 27 to the measured 7 ([#18174](https://github.com/cheaper-inference/OmniRoute/pull/18174))

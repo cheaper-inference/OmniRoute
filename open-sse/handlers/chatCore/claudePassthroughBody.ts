@@ -14,9 +14,14 @@
 import { shouldUseMidConversationSystem } from "../../executors/claudeIdentity.ts";
 import { ensureCacheControlOnLastUserMessage } from "../../services/claudeCodeConstraints.ts";
 import { hoistDeferredToolsForTarget } from "../../translator/helpers/claudeDeferredTools.ts";
-import { splitMisplacedToolResults } from "../../translator/helpers/claudeHelper.ts";
+import {
+  disableManualThinkingWithoutFinalBlock,
+  splitMisplacedToolResults,
+  type ClaudeRequestBody,
+} from "../../translator/helpers/claudeHelper.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { sanitizeAnthropicPassthroughHistory } from "./anthropicPassthroughHistory.ts";
+import { normalizeAdvisorToolModels } from "./claudeAdvisorTool.ts";
 import {
   extractSystemRoleMessages,
   hoistLeadingTextSystemMessages,
@@ -66,20 +71,30 @@ export function buildClaudePassthroughBody({
   );
   translatedBody._disableToolPrefix = true;
 
-  // Sanitize historical thinking-block signatures for Anthropic-native Claude OAuth.
+  const isFirstPartyAnthropic = provider === "claude" || provider === "anthropic";
+  // Sanitize historical thinking-block signatures for first-party Anthropic (OAuth + API key).
   // Only Anthropic's first-party API validates these signatures (token-bound); third-party
   // Claude-shape providers do not. See redactPassthroughThinkingSignatures + issue #2454.
-  if (provider === "claude") {
+  if (isFirstPartyAnthropic) {
     // Also drops foreign server_tool_use ids (z.ai `call_…`) that fail ^srvtoolu_ (9router#3685).
     translatedBody.messages = sanitizeAnthropicPassthroughHistory(
       translatedBody.messages
     ) as typeof translatedBody.messages;
+    // Manual `enabled` thinking needs a thinking block on the final tool_use turn; with none
+    // left (unsigned ones were dropped) turn thinking off instead of injecting a placeholder.
+    disableManualThinkingWithoutFinalBlock(translatedBody as ClaudeRequestBody);
 
     stripClaudeRejectedTopLevelFields(translatedBody, clientHeaders);
+  }
+  if (provider === "claude" || provider === "anthropic") {
+    // Claude Code names the advisor tool's model with the OmniRoute alias (claude-opus-5.5).
+    normalizeAdvisorToolModels(translatedBody);
   }
 
   // Legacy models reject role:"system" messages. Supported models accept
   // them behind a beta, and hoisting them breaks the prompt cache prefix.
+  // Only the native `claude` dispatch sends that beta (selectBetaFlags); the
+  // `anthropic` API-key dispatch does not, so it always hoists.
   if (isClaudeCodeSemanticPassthrough) {
     if (provider !== "claude" || !shouldUseMidConversationSystem(translatedBody, effectiveModel)) {
       extractSystemRoleMessages(translatedBody);
@@ -99,8 +114,8 @@ export function buildClaudePassthroughBody({
         translatedBody.messages as ClaudeMessage[]
       ) as typeof translatedBody.messages;
     }
-    if (provider === "claude") {
-      ensureCacheControlOnLastUserMessage(translatedBody);
+    if (isFirstPartyAnthropic) {
+      ensureCacheControlOnLastUserMessage(translatedBody, { countTools: provider === "anthropic" });
     }
   } else {
     // Same guard as the CC-bridge path: only preserve tool_result blocks
