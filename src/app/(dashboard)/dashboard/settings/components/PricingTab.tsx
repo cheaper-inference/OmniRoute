@@ -19,10 +19,20 @@ import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { FilterSelect, HeroStat, SyncMini } from "./PricingTabHelpers";
+import {
+  collectConnectedProviderIds,
+  isPricingProviderConfigured,
+  modelsMatchingSearch,
+  providersForComparison,
+  type PricingDisplayMode,
+} from "./pricingTabFilters";
+import { buildModelComparison } from "./pricingCompare";
+import PricingCompareView from "./PricingCompareView";
 
 type CoverageFilter = "all" | "lt50" | "gte50lt100" | "full";
 type AuthFilter = "all" | "oauth" | "apikey" | "unknown";
 type SortKey = "modelsDesc" | "coverageDesc" | "coverageAsc" | "nameAsc";
+type ViewMode = "providers" | "compare";
 
 const INITIAL_VISIBLE = 20;
 const VISIBLE_INCREMENT = 30;
@@ -83,13 +93,17 @@ type PricingBundle = {
   pricing?: Record<string, Record<string, Record<string, number>>>;
   sources?: Record<string, Record<string, PricingSource>>;
   sync?: SyncStatus;
+  connectedProviderIds?: Set<string>;
+  blockedProviders?: string[];
 };
 
 async function fetchPricingBundle(): Promise<PricingBundle> {
-  const [catalogRes, pricingRes, syncRes] = await Promise.all([
+  const [catalogRes, pricingRes, syncRes, connectionsRes, settingsRes] = await Promise.all([
     fetch("/api/pricing/models"),
     fetch("/api/pricing?includeSources=1"),
     fetch("/api/pricing/sync"),
+    fetch("/api/providers"),
+    fetch("/api/settings", { cache: "no-store" }),
   ]);
   const bundle: PricingBundle = {};
   if (catalogRes.ok) {
@@ -106,6 +120,16 @@ async function fetchPricingBundle(): Promise<PricingBundle> {
   if (syncRes.ok) {
     bundle.sync = (await syncRes.json()) as SyncStatus;
   }
+  if (connectionsRes.ok) {
+    const { connections } = (await connectionsRes.json()) as { connections?: unknown };
+    bundle.connectedProviderIds = collectConnectedProviderIds(
+      Array.isArray(connections) ? connections : []
+    );
+  }
+  if (settingsRes.ok) {
+    const { blockedProviders } = (await settingsRes.json()) as { blockedProviders?: unknown };
+    bundle.blockedProviders = Array.isArray(blockedProviders) ? blockedProviders : [];
+  }
   return bundle;
 }
 
@@ -118,6 +142,8 @@ export default function PricingTab() {
     Record<string, Record<string, PricingSource>>
   >({});
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
+  const [connectedProviderIds, setConnectedProviderIds] = useState<Set<string>>(new Set());
+  const [blockedProviders, setBlockedProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -126,6 +152,8 @@ export default function PricingTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [coverageFilter, setCoverageFilter] = useState<CoverageFilter>("all");
   const [authFilter, setAuthFilter] = useState<AuthFilter>("all");
+  const [displayMode, setDisplayMode] = useState<PricingDisplayMode>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("providers");
   const [sortKey, setSortKey] = useState<SortKey>("modelsDesc");
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const [editedProviders, setEditedProviders] = useState<Set<string>>(new Set());
@@ -134,6 +162,7 @@ export default function PricingTab() {
     message: string;
   } | null>(null);
   const t = useTranslations("settings");
+  const tGlobal = useTranslations();
   const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   const showStatus = useCallback((tone: "success" | "error" | "info", message: string) => {
@@ -146,6 +175,8 @@ export default function PricingTab() {
     if (bundle.pricing) setPricingData(bundle.pricing);
     if (bundle.sources) setPricingSources(bundle.sources);
     if (bundle.sync) setSyncStatus(bundle.sync);
+    if (bundle.connectedProviderIds) setConnectedProviderIds(bundle.connectedProviderIds);
+    if (bundle.blockedProviders) setBlockedProviders(bundle.blockedProviders);
     setLoading(false);
   }, []);
 
@@ -221,8 +252,13 @@ export default function PricingTab() {
       );
     };
 
+    const matchesDisplayMode = (p: (typeof allProviders)[number]) =>
+      displayMode === "all" ||
+      isPricingProviderConfigured(p, connectedProviderIds, blockedProviders);
+
     const filtered = allProviders.filter(
-      (p) => providerMatchesSearch(p) && matchesCoverage(p) && matchesAuth(p)
+      (p) =>
+        providerMatchesSearch(p) && matchesCoverage(p) && matchesAuth(p) && matchesDisplayMode(p)
     );
 
     // Sort
@@ -242,7 +278,38 @@ export default function PricingTab() {
         break;
     }
     return sorted;
-  }, [allProviders, searchQuery, coverageFilter, authFilter, sortKey]);
+  }, [
+    allProviders,
+    searchQuery,
+    coverageFilter,
+    authFilter,
+    displayMode,
+    connectedProviderIds,
+    blockedProviders,
+    sortKey,
+  ]);
+
+  // #18642: model-centric view — the providers the auth and Configured filters keep,
+  // grouped by model with each offer's price, cheapest first.
+  const compareGroups = useMemo(() => {
+    if (viewMode !== "compare") return [];
+    const providers = providersForComparison(allProviders, {
+      authFilter,
+      displayMode,
+      connectedProviderIds,
+      blockedProviders,
+    });
+    return buildModelComparison(providers, pricingData, { searchQuery });
+  }, [
+    viewMode,
+    allProviders,
+    authFilter,
+    displayMode,
+    connectedProviderIds,
+    blockedProviders,
+    pricingData,
+    searchQuery,
+  ]);
 
   const authCounts = useMemo(() => {
     const counts = { oauth: 0, apikey: 0, unknown: 0 };
@@ -255,13 +322,21 @@ export default function PricingTab() {
     return counts;
   }, [allProviders]);
 
+  const configuredCount = useMemo(
+    () =>
+      allProviders.filter((p) =>
+        isPricingProviderConfigured(p, connectedProviderIds, blockedProviders)
+      ).length,
+    [allProviders, connectedProviderIds, blockedProviders]
+  );
+
   const coverageGapCount = useMemo(
     () => allProviders.filter((p) => p.modelCount > 0 && p.pricedModels / p.modelCount < 1).length,
     [allProviders]
   );
 
   // Reset visible count when filters change (state adjustment during render)
-  const filtersKey = `${searchQuery}|${coverageFilter}|${authFilter}|${sortKey}`;
+  const filtersKey = `${viewMode}|${searchQuery}|${coverageFilter}|${authFilter}|${displayMode}|${sortKey}`;
   const [prevFiltersKey, setPrevFiltersKey] = useState(filtersKey);
   if (prevFiltersKey !== filtersKey) {
     setPrevFiltersKey(filtersKey);
@@ -644,14 +719,39 @@ export default function PricingTab() {
           />
 
           <FilterSelect
-            label={t("pricingCoverage")}
-            value={coverageFilter}
-            onChange={(v) => setCoverageFilter(v as CoverageFilter)}
+            label={t("pricingView")}
+            value={viewMode}
+            onChange={(v) => setViewMode(v as ViewMode)}
+            options={[
+              { value: "providers", label: t("pricingViewByProvider") },
+              { value: "compare", label: t("pricingViewCompare") },
+            ]}
+          />
+
+          {viewMode === "providers" && (
+            <FilterSelect
+              label={t("pricingCoverage")}
+              value={coverageFilter}
+              onChange={(v) => setCoverageFilter(v as CoverageFilter)}
+              options={[
+                { value: "all", label: `${t("pricingAll")} (${allProviders.length})` },
+                { value: "lt50", label: "<50%" },
+                { value: "gte50lt100", label: "50–99%" },
+                { value: "full", label: "100%" },
+              ]}
+            />
+          )}
+
+          <FilterSelect
+            label={t("providers")}
+            value={displayMode}
+            onChange={(v) => setDisplayMode(v as PricingDisplayMode)}
             options={[
               { value: "all", label: `${t("pricingAll")} (${allProviders.length})` },
-              { value: "lt50", label: "<50%" },
-              { value: "gte50lt100", label: "50–99%" },
-              { value: "full", label: "100%" },
+              {
+                value: "configured",
+                label: `${tGlobal("providers.showConfiguredOnly")} (${configuredCount})`,
+              },
             ]}
           />
 
@@ -670,33 +770,38 @@ export default function PricingTab() {
             ]}
           />
 
-          <FilterSelect
-            label={t("pricingSort")}
-            value={sortKey}
-            onChange={(v) => setSortKey(v as SortKey)}
-            options={[
-              { value: "modelsDesc", label: t("pricingMostModels") },
-              { value: "coverageDesc", label: t("pricingHighestCoverage") },
-              { value: "coverageAsc", label: t("pricingLowestCoverage") },
-              { value: "nameAsc", label: t("pricingNameAscending") },
-            ]}
-          />
+          {viewMode === "providers" && (
+            <FilterSelect
+              label={t("pricingSort")}
+              value={sortKey}
+              onChange={(v) => setSortKey(v as SortKey)}
+              options={[
+                { value: "modelsDesc", label: t("pricingMostModels") },
+                { value: "coverageDesc", label: t("pricingHighestCoverage") },
+                { value: "coverageAsc", label: t("pricingLowestCoverage") },
+                { value: "nameAsc", label: t("pricingNameAscending") },
+              ]}
+            />
+          )}
         </div>
 
         {/* Quick shortcuts */}
         <div className="flex items-center gap-2 flex-wrap text-[11px]">
-          <Button
-            variant={coverageFilter === "lt50" ? "warning" : "outline"}
-            size="sm"
-            icon="warning"
-            aria-pressed={coverageFilter === "lt50"}
-            onClick={() => setCoverageFilter(coverageFilter === "lt50" ? "all" : "lt50")}
-          >
-            {t("pricingCoverageGaps")} ({coverageGapCount})
-          </Button>
+          {viewMode === "providers" && (
+            <Button
+              variant={coverageFilter === "lt50" ? "warning" : "outline"}
+              size="sm"
+              icon="warning"
+              aria-pressed={coverageFilter === "lt50"}
+              onClick={() => setCoverageFilter(coverageFilter === "lt50" ? "all" : "lt50")}
+            >
+              {t("pricingCoverageGaps")} ({coverageGapCount})
+            </Button>
+          )}
           {(searchQuery ||
             coverageFilter !== "all" ||
             authFilter !== "all" ||
+            displayMode !== "all" ||
             sortKey !== "modelsDesc" ||
             selectedProvider) && (
             <Button
@@ -707,6 +812,7 @@ export default function PricingTab() {
                 setSearchQuery("");
                 setCoverageFilter("all");
                 setAuthFilter("all");
+                setDisplayMode("all");
                 setSortKey("modelsDesc");
                 setSelectedProvider(null);
               }}
@@ -714,68 +820,117 @@ export default function PricingTab() {
               {t("pricingClearFilters")}
             </Button>
           )}
-          <span className="text-text-muted ml-auto">
-            {t("pricingShowingProviders", {
-              visible: displayProviders.length,
-              total: totalFiltered,
-            })}
-            {totalFiltered !== allProviders.length &&
-              ` ${t("pricingFilteredFrom", { count: allProviders.length })}`}
-          </span>
+          <ShowingCount
+            viewMode={viewMode}
+            compareTotal={compareGroups.length}
+            visibleCount={visibleCount}
+            displayedProviders={displayProviders.length}
+            filteredProviders={totalFiltered}
+            allProviders={allProviders.length}
+          />
         </div>
       </div>
 
+      {viewMode === "compare" && (
+        <PricingCompareView
+          groups={compareGroups}
+          visibleCount={visibleCount}
+          onShowMore={() => setVisibleCount((c) => c + VISIBLE_INCREMENT)}
+          showMoreIncrement={VISIBLE_INCREMENT}
+        />
+      )}
+
       {/* Provider list */}
-      <div className="flex flex-col gap-2">
-        {displayProviders.map((provider) => (
-          <ProviderSection
-            key={provider.alias}
-            provider={provider}
-            pricingData={pricingData[provider.pricingKey || provider.alias] || {}}
-            sourceMap={pricingSources[provider.pricingKey || provider.alias] || {}}
-            isExpanded={expandedProviders.has(provider.alias)}
-            isEdited={editedProviders.has(provider.pricingKey || provider.alias)}
-            onToggle={() => toggleProvider(provider.alias)}
-            onPricingChange={(model, field, value) =>
-              handlePricingChange(provider.pricingKey || provider.alias, model, field, value)
-            }
-            onSave={() => void saveProvider(provider.alias, provider.pricingKey)}
-            onReset={() => void resetProvider(provider.alias, provider.pricingKey)}
-            saving={saving}
-            getSourceLabel={getSourceLabel}
-          />
-        ))}
+      {viewMode === "providers" && (
+        <div className="flex flex-col gap-2">
+          {displayProviders.map((provider) => (
+            <ProviderSection
+              key={provider.alias}
+              provider={provider}
+              visibleModels={modelsMatchingSearch(provider, provider.models, searchQuery)}
+              pricingData={pricingData[provider.pricingKey || provider.alias] || {}}
+              sourceMap={pricingSources[provider.pricingKey || provider.alias] || {}}
+              isExpanded={expandedProviders.has(provider.alias)}
+              isEdited={editedProviders.has(provider.pricingKey || provider.alias)}
+              onToggle={() => toggleProvider(provider.alias)}
+              onPricingChange={(model, field, value) =>
+                handlePricingChange(provider.pricingKey || provider.alias, model, field, value)
+              }
+              onSave={() => void saveProvider(provider.alias, provider.pricingKey)}
+              onReset={() => void resetProvider(provider.alias, provider.pricingKey)}
+              saving={saving}
+              getSourceLabel={getSourceLabel}
+            />
+          ))}
 
-        {displayProviders.length === 0 && (
-          <EmptyState
-            compact
-            icon={<Icon name="search_off" size={24} />}
-            title={t("noProvidersMatch")}
-          />
-        )}
+          {displayProviders.length === 0 && (
+            <EmptyState
+              compact
+              icon={<Icon name="search_off" size={24} />}
+              title={t("noProvidersMatch")}
+            />
+          )}
 
-        {visibleCount < totalFiltered && (
-          <Button
-            variant="outline"
-            size="sm"
-            icon="expand_more"
-            onClick={() => setVisibleCount((c) => c + VISIBLE_INCREMENT)}
-            className="mt-2 mx-auto"
-          >
-            {t("pricingShowMoreProviders", {
-              count: Math.min(VISIBLE_INCREMENT, totalFiltered - visibleCount),
-              remaining: totalFiltered - visibleCount,
-            })}
-          </Button>
-        )}
-      </div>
+          {visibleCount < totalFiltered && (
+            <Button
+              variant="outline"
+              size="sm"
+              icon="expand_more"
+              onClick={() => setVisibleCount((c) => c + VISIBLE_INCREMENT)}
+              className="mt-2 mx-auto"
+            >
+              {t("pricingShowMoreProviders", {
+                count: Math.min(VISIBLE_INCREMENT, totalFiltered - visibleCount),
+                remaining: totalFiltered - visibleCount,
+              })}
+            </Button>
+          )}
+        </div>
+      )}
       {confirmDialog}
     </div>
   );
 }
 
+/** "Showing N of M": model cards in Compare models, providers (and the unfiltered total) otherwise. */
+function ShowingCount({
+  viewMode,
+  compareTotal,
+  visibleCount,
+  displayedProviders,
+  filteredProviders,
+  allProviders,
+}: {
+  viewMode: ViewMode;
+  compareTotal: number;
+  visibleCount: number;
+  displayedProviders: number;
+  filteredProviders: number;
+  allProviders: number;
+}) {
+  const t = useTranslations("settings");
+  if (viewMode === "compare") {
+    return (
+      <span className="text-text-muted ml-auto">
+        {t("pricingShowingProviders", {
+          visible: Math.min(visibleCount, compareTotal),
+          total: compareTotal,
+        })}
+      </span>
+    );
+  }
+  return (
+    <span className="text-text-muted ml-auto">
+      {t("pricingShowingProviders", { visible: displayedProviders, total: filteredProviders })}
+      {filteredProviders !== allProviders &&
+        ` ${t("pricingFilteredFrom", { count: allProviders })}`}
+    </span>
+  );
+}
+
 function ProviderSection({
   provider,
+  visibleModels,
   pricingData,
   sourceMap,
   isExpanded,
@@ -788,6 +943,8 @@ function ProviderSection({
   getSourceLabel,
 }: {
   provider: PricingCatalogProvider;
+  /** The provider's models narrowed to the current search. */
+  visibleModels: PricingCatalogModel[];
   pricingData: Record<string, Record<string, number>>;
   sourceMap: Record<string, PricingSource>;
   isExpanded: boolean;
@@ -950,7 +1107,7 @@ function ProviderSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {provider.models.map((model) => (
+              {visibleModels.map((model) => (
                 <ModelRow
                   key={model.id}
                   model={model}
