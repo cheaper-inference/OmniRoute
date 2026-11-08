@@ -1,6 +1,42 @@
 import type { ModelPricingRegistry } from "./modelPricingRegistry.ts";
 
-export type UsageStatus = "success" | "failed" | "rate_limited" | "timeout" | "cancelled";
+export type UsageStatus =
+  "success" | "failed" | "rate_limited" | "timeout" | "cancelled" | "incomplete";
+
+export type UsageOutcome = "completed" | "failed" | "incomplete" | "aborted";
+
+const TERMINAL_OUTCOMES: Record<string, UsageOutcome> = {
+  completed: "completed",
+  "response.completed": "completed",
+  failed: "failed",
+  "response.failed": "failed",
+  incomplete: "incomplete",
+  "response.incomplete": "incomplete",
+  body_stall: "incomplete",
+  body_overflow: "incomplete",
+  cancelled: "aborted",
+  canceled: "aborted",
+  "response.cancelled": "aborted",
+  "response.canceled": "aborted",
+};
+
+/**
+ * One outcome class for every consumer. A recorded fact (client abort, terminal event)
+ * beats the HTTP status, so a 200 that carried `response.incomplete` is not "completed".
+ * Only a row with no known terminal fact falls back to the status code.
+ */
+export function classifyUsageOutcome(facts: {
+  status?: number | null;
+  terminalStatus?: string | null;
+  aborted?: boolean;
+}): UsageOutcome {
+  if (facts.aborted) return "aborted";
+  const terminal = TERMINAL_OUTCOMES[String(facts.terminalStatus ?? "").toLowerCase()];
+  if (terminal) return terminal;
+  const status = Number(facts.status);
+  if (status === 499) return "aborted";
+  return status >= 200 && status < 400 ? "completed" : "failed";
+}
 
 export interface UsageRecord {
   id: string;
@@ -53,7 +89,8 @@ export function summarizeUsage(records: UsageRecord[]) {
     (summary, record) => {
       summary.requests += 1;
       summary.successes += record.status === "success" ? 1 : 0;
-      summary.failures += record.status === "success" ? 0 : 1;
+      summary.incomplete += record.status === "incomplete" ? 1 : 0;
+      summary.failures += record.status === "success" || record.status === "incomplete" ? 0 : 1;
       summary.inputTokens += record.inputTokens ?? 0;
       summary.outputTokens += record.outputTokens ?? 0;
       summary.totalTokens += record.totalTokens ?? 0;
@@ -68,6 +105,7 @@ export function summarizeUsage(records: UsageRecord[]) {
       requests: 0,
       successes: 0,
       failures: 0,
+      incomplete: 0,
       inputTokens: 0,
       outputTokens: 0,
       totalTokens: 0,
