@@ -72,31 +72,32 @@ navodeći krajnju točku i što je izgubljeno — tako degradirani odabirnik nik
 
 ## Opcije
 
-| Ključ                            | Zadano                                           | Napomene                                                                                                                                     |
-| -------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                    | ID pružatelja, ID integracije i prefiks pod kojim se modeli prikazuju                                                                        |
-| `baseURL`                        | obavezno                                         | Korijenski URL pristupnika, samo `http(s)`; sufiks `/v1` dodaje se gdje je potrebno                                                          |
-| `apiKey`                         | povezane vjerodajnice, zatim `OMNIROUTE_API_KEY` | Ključ za razgovor za `/v1/*`                                                                                                                 |
-| `managementReadToken`            | koristi `apiKey` kao rezervnu vrijednost         | Ključ za `/api/*` — obično **nije** isti                                                                                                     |
-| `displayName`                    | `"OmniRoute"`                                    | Naziv pružatelja u izborniku                                                                                                                 |
-| `timeoutMs`                      | `10000`                                          | Vremensko ograničenje dohvaćanja po krajnjoj točki (automatske kombinacije koriste 5 s)                                                      |
-| `modelCacheTtlMs`                | `300000`                                         | TTL predmemorije kataloga; snimka na disku ubrzava hladna pokretanja                                                                         |
-| `timeouts`                       | koristi `timeoutMs` kao rezervnu vrijednost      | Vremenska ograničenja po krajnjoj točki u ms: `models`, `combos`, `autoCombos`, `enrichment`                                                 |
-| `enrichment`                     | `true`                                           | Dohvaćanje naziva, cijena i ograničenja besplatne razine                                                                                     |
-| `providerTag`                    | `true`                                           | Dodavanje prefiksa nazivu za prikaz s izvornim pružateljem na kojeg usmjerava                                                                |
-| `usableOnly`                     | `false`                                          | Zadržavanje samo pružatelja koje pristupnik prijavljuje kao omogućene                                                                        |
-| `showcasePerOwner`               | `10`                                             | Broj unosa po pružatelju koji se zadržavaju u zadanom prikazu                                                                                |
-| `freshPerOwner`                  | `10`                                             | Broj novih unosa po pružatelju koji se zadržavaju u zadanom prikazu                                                                          |
-| `freshWindowDays`                | `90`                                             | Razdoblje svježine u danima za granu novih unosa                                                                                             |
-| `usageMemory`                    | `true`                                           | Vraćanje statički uklonjenih unosa navedenih u analitici upotrebe za 30 dana (zahtijeva token za upravljanje)                                |
-| `visibleModels` / `hiddenModels` | `[]`                                             | Popisi dopuštenih točnih vrijednosti ili sufiksa; zabrana ima prednost; `*` objavljuje cijeli katalog (ostali filtri i dalje se primjenjuju) |
-| `geminiSanitization`             | `true`                                           | Uklanjanje ključnih riječi JSON Schema koje Gemini odbija iz shema alata (alati s `$ref` prosljeđuju se neizmijenjeni)                       |
-| `apiFormat.allowAnthropic`       | `false`                                          | Usmjeravanje dopuštenih ID-ova kroz blok Anthropic API-ja                                                                                    |
-| `apiFormat.anthropicModels`      | `[]`                                             | Puni ID-ovi modela koji se usmjeravaju na Anthropic                                                                                          |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                 | Opširnost zapisivanja                                                                                                                        |
+| Ključ                            | Zadano                                           | Napomene                                                                                                                                           |
+| -------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                    | ID pružatelja, ID integracije i prefiks pod kojim se modeli prikazuju                                                                              |
+| `baseURL`                        | obavezno                                         | Korijen pristupnika, samo `http(s)`; sufiks `/v1` dodaje se gdje je potreban                                                                       |
+| `apiKey`                         | povezana vjerodajnica, zatim `OMNIROUTE_API_KEY` | Ključ za razgovor za `/v1/*`                                                                                                                       |
+| `managementReadToken`            | koristi `apiKey` kao rezervnu vrijednost         | Ključ za `/api/*` — obično **nije** isti                                                                                                           |
+| `displayName`                    | `"OmniRoute"`                                    | Naziv pružatelja u izborniku                                                                                                                       |
+| `timeoutMs`                      | `10000`                                          | Vremensko ograničenje dohvaćanja po krajnjoj točki (automatske kombinacije koriste 5 s)                                                            |
+| `modelCacheTtlMs`                | `300000`                                         | TTL predmemorije kataloga; snimka na disku ubrzava hladna pokretanja                                                                               |
+| `timeouts`                       | koristi `timeoutMs` kao rezervnu vrijednost      | Ograničenja po krajnjoj točki u ms: `models`, `combos`, `autoCombos`, `enrichment`                                                                 |
+| `enrichment`                     | `true`                                           | Dohvaćanje naziva, cijena i ograničenja besplatne razine                                                                                           |
+| `providerTag`                    | `true`                                           | Dodavanje prefiksa nazivu za prikaz s izvornim pružateljem kojem se zahtjev usmjerava                                                              |
+| `usableOnly`                     | `false`                                          | Zadržavanje samo pružatelja koje pristupnik prijavljuje kao dodijeljene                                                                            |
+| `combosSource`                   | `"api"`                                          | `"models"` preskače `/api/combos` i objavljuje retke kombinacija iz `/v1/models`; filtri na razini članova zadržavaju `"api"`                      |
+| `showcasePerOwner`               | `10`                                             | Unosi zadržani po pružatelju u zadanom prikazu                                                                                                     |
+| `freshPerOwner`                  | `10`                                             | Svježi unosi zadržani po pružatelju u zadanom prikazu                                                                                              |
+| `freshWindowDays`                | `90`                                             | Razdoblje svježine u danima za granu svježih unosa                                                                                                 |
+| `usageMemory`                    | `true`                                           | Vraćanje statički uklonjenih unosa navedenih u analitici upotrebe za 30 dana (zahtijeva token za upravljanje)                                      |
+| `visibleModels` / `hiddenModels` | `[]`                                             | Popisi dopuštenih modela prema točnom podudaranju ili sufiksu; zabrana ima prednost; `*` objavljuje cijeli katalog (ostali filtri i dalje vrijede) |
+| `geminiSanitization`             | `true`                                           | Uklanjanje ključnih riječi JSON Schema koje Gemini odbija iz shema alata (alati s `$ref` prosljeđuju se neizmijenjeni)                             |
+| `apiFormat.allowAnthropic`       | `false`                                          | Usmjeravanje dopuštenih ID-jeva kroz blok Anthropic API-ja                                                                                         |
+| `apiFormat.anthropicModels`      | `[]`                                             | Puni ID-jevi modela usmjereni prema Anthropicu                                                                                                     |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                 | Opširnost zapisivanja                                                                                                                              |
 
-Pamćenje upotrebe zadano je uključeno. Bez tokena za upravljanje ostaje neaktivno
-(pri pokretanju se zapisuje obavijest) i ništa se ne vraća.
+Pamćenje upotrebe uključeno je prema zadanim postavkama. Bez tokena za upravljanje ostaje neaktivno
+(pri pokretanju se bilježi obavijest) i ništa se ne vraća.
 
 ## Kako katalog ostaje ažuran
 

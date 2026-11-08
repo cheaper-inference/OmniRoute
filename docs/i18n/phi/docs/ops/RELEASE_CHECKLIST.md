@@ -109,79 +109,79 @@ Muling bina-validate ng susunod na full run sa release branch ang nilaktawang co
 Awtomatikong nilalaktawan ng mga tests-only diff (lahat ng file ay nasa ilalim ng `tests/`, walang nasa ilalim ng `tests/e2e/`) ang E2E
 matrix, nang walang anumang label.
 
-## Detalyadong Checklist
+## Detalyadong Talaan ng mga Dapat Suriin
 
 ### Bago ang release
 
-- [ ] Na-merge na sa `release/vX.Y.0` ang lahat ng PR na nakatuon sa release na ito
-- [ ] Naisara na o nailipat sa susunod na milestone ang lahat ng bukas na Linear/issue item para sa bersyong ito
-- [ ] Pumapasa ang CI sa branch na `release/vX.Y.0`
-- [ ] Walang marker na `TODO(release)` sa code: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Napapanahon ang Docker base image (kasalukuyang `node:24.15.0-trixie-slim`)
+- [ ] Naisama na sa `release/vX.Y.0` ang lahat ng PR na nakalaan para sa release na ito
+- [ ] Naisara na o nailipat sa susunod na milestone ang lahat ng bukas na item sa Linear/issue para sa bersyong ito
+- [ ] Matagumpay ang CI sa branch na `release/vX.Y.0`
+- [ ] Walang mga marker na `TODO(release)` sa code: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Napapanahon ang base image ng Docker (kasalukuyang `node:24.15.0-trixie-slim`)
 
 ### Bersyon at Changelog
 
-- [ ] Patakbuhin ang `/version-bump-cc <patch|minor|major>` (Claude Code skill)
+- [ ] Patakbuhin ang `/version-bump-cc <patch|minor|major>` (skill ng Claude Code)
   - Ina-update ang bersyon sa `package.json`, `electron/package.json`
   - Muling binubuo ang `CHANGELOG.md` mula sa mga git commit mula noong huling tag
   - Ina-update ang mga badge sa README.md
-- [ ] Manu-manong suriin ang CHANGELOG.md at linisin ang mga commit message kung kinakailangan
-- [ ] Tiyaking katumbas ng bersyon sa `package.json` ang pinakabagong seksyong semver sa `CHANGELOG.md`
+- [ ] Manu-manong suriin ang CHANGELOG.md at linisin ang mga mensahe ng commit kung kinakailangan
+- [ ] Tiyaking katumbas ng bersyon sa `package.json` ang pinakabagong seksyon ng semver sa `CHANGELOG.md`
 - [ ] Panatilihin ang `## [Unreleased]` bilang unang seksyon ng changelog para sa paparating na gawain
 - [ ] I-update ang `docs/openapi.yaml` → dapat katumbas ng bersyon sa `package.json` ang `info.version`
 
 ### Kalidad ng Code
 
-- [ ] `npm run lint` — 0 error (umiiral na dati ang mga warning)
-- [ ] `npm run typecheck:core` — malinis
-- [ ] `npm run typecheck:noimplicit:core` — malinis (strict)
-- [ ] `npm run check:cycles:ratchet` — `cycles ≤ metrics.cycles.value` (`quality-baseline.json`; `check:cycles`: `cycles > 0 → exit 1`, #15281)
-- [ ] `npm run check:any-budget:t11` — pasok sa budget
-- [ ] `npm run check:route-validation:t06` — malinis
-- [ ] `npm run check:node-runtime` — natutugunan ang minimum na sinusuportahang runtime (`>=22.22.2 <23`, `>=24.0.0 <27`, ayon sa `SUPPORTED_NODE_RANGE` sa `src/shared/utils/nodeRuntimeSupport.ts`; nakaayon sa `engines` ng `package.json`)
+- [ ] `npm run lint` — 0 error (dati nang umiiral ang mga babala)
+- [ ] `npm run typecheck:core` — walang problema
+- [ ] `npm run typecheck:noimplicit:core` — walang problema (mahigpit)
+- [ ] `npm run check:cycles:ratchet` — pasok sa nakapirming limitasyon ng `metrics.cycles` (ang mismong `check:cycles` ay nag-e-exit nang 1 kapag may anumang cycle, #15281)
+- [ ] `npm run check:any-budget:t11` — pasok sa badyet
+- [ ] `npm run check:route-validation:t06` — walang problema
+- [ ] `npm run check:node-runtime` — natugunan ang pinakamababang sinusuportahang runtime (`>=22.22.2 <23`, `>=24.0.0 <27`, ayon sa `SUPPORTED_NODE_RANGE` sa `src/shared/utils/nodeRuntimeSupport.ts`; nakaayon sa `engines` ng `package.json`)
 
 ### Pagsubok
 
 - [ ] `npm run test:unit` — pumasa
 - [ ] `npm run test:vitest` — pumasa (MCP server, autoCombo, cache)
-- [ ] `npm run test:coverage` — natugunan ang gate na 60/60/60/60 (mga statement/line/function/branch)
-- [ ] `npm run test:integration` — pumasa (kung may epekto ang mga pagbabago sa DB / mga handler)
-- [ ] `npm run test:combo:matrix` — pumasa (matrix ng combo strategy: deterministikong pinatutunayan ang mga desisyon sa pagpili ng lahat ng 19 na pampublikong routing strategy; patakbuhin kapag binabago ang combo routing, strategy resolution, o fallback logic)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **opsyonal/manwal** (gated real-upstream smoke; kumukuha ng read-only na DB snapshot mula sa VPS na `root@192.168.0.15`; gumagamit ng mga totoong provider, gumagastos ng credits; hindi kailanman tumatakbo sa CI; maayos na nilalaktawan kapag wala ang gate)
-- [ ] `npm run test:combo:live:vps` — **opsyonal/manwal** (Phase-3 VPS live smoke: 7 HTTP scenario laban sa live na `.15` server gamit ang plain Node ESM; nangangailangan ng `ssh root@192.168.0.15`; gumagawa/nagbubura lamang ng mga combo na `__live_test__*`; gumagamit ng mga totoong provider; hindi kailanman tumatakbo sa CI)
+- [ ] `npm run test:coverage` — natugunan ang hangganang 60/60/60/60 (mga statement/linya/function/branch)
+- [ ] `npm run test:integration` — pumasa (kung may pagbabago sa DB / mga handler)
+- [ ] `npm run test:combo:matrix` — pumasa (matrix ng combo strategy: tiyak na pinatutunayan ang mga pasya sa pagpili ng lahat ng 19 na pampublikong routing strategy; patakbuhin kapag binabago ang combo routing, paglutas ng strategy, o fallback logic)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **opsyonal/manwal** (may-gate na smoke test sa tunay na upstream; kumukuha ng read-only na snapshot ng DB mula sa VPS na `root@192.168.0.15`; gumagamit ng mga tunay na provider at kumokonsumo ng credits; hindi kailanman tumatakbo sa CI; maayos na nilalaktawan kapag wala ang gate)
+- [ ] `npm run test:combo:live:vps` — **opsyonal/manwal** (live smoke test ng Yugto-3 sa VPS: 7 HTTP scenario laban sa live na `.15` server gamit ang plain Node ESM; nangangailangan ng `ssh root@192.168.0.15`; gumagawa/nagbubura lamang ng mga combo na `__live_test__*`; gumagamit ng mga tunay na provider; hindi kailanman tumatakbo sa CI)
 - [ ] `npm run test:e2e` — pumasa (mga pagbabago sa UI)
 - [ ] `npm run test:protocols:e2e` — pumasa (mga pagbabago sa MCP/A2A)
 - [ ] `npm run test:ecosystem` — pumasa
 
-### Mga Hook (Na-validate ng Husky)
+### Mga Hook (Napatunayan ng Husky)
 
-Nasa `.husky/` ang mga Husky hook at awtomatikong tumatakbo sa mga operasyon ng git.
+Matatagpuan ang mga Husky hook sa `.husky/` at awtomatikong tumatakbo sa mga operasyon ng git.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** mabilis at deterministikong mga gate — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (in-activate noong 2026-06-13). Sadyang hindi kasama ang `test:unit` (mabagal; sakop ng CI job na `test-unit`).
-  - Manu-manong patakbuhin ang `npm run test:unit` bago mag-push ng mga release branch.
+- **pre-push:** mabibilis at deterministikong gate — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (inaktibo noong 2026-06-13). Sadyang hindi kasama ang `test:unit` (mabagal; saklaw ng job na `test-unit` sa CI).
+  - Manu-manong patakbuhin ang `npm run test:unit` bago i-push ang mga release branch.
 
-Kung bumagsak ang isang hook: ayusin ang pinagmumulan ng problema, huwag itong lampasan gamit ang `--no-verify`.
+Kung pumalya ang isang hook: ayusin ang pinagmumulan ng problema, huwag itong lampasan gamit ang `--no-verify`.
 
-### Conventional Commits
+### Mga Conventional Commit
 
-Dapat sumunod ang lahat ng commit na isasama sa release sa format na `type(scope): subject`.
+Dapat sundin ng lahat ng commit na kasama sa release ang format na `type(scope): subject`.
 
-**Mga valid na type:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**Mga wastong type:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Mga valid na scope:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Mga wastong scope:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
 Mga breaking change: magdagdag ng footer na `BREAKING CHANGE:` o `!` pagkatapos ng scope (hal. `feat(api)!: drop /v0`).
 
 ### Dokumentasyon
 
 - [ ] Pumapasa ang `npm run check:docs-sync` (awtomatikong pinapatakbo ng pre-commit)
-- [ ] Pumapasa ang `npm run check:docs-all` (pangkalahatan: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] Lumalabas ang `npm run check:env-doc-sync` na may 0 — buo ang kontrata ng env sa pagitan ng code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md`
-- [ ] Lumalabas ang `npm run check:doc-links` na may 0 — walang sirang panloob na markdown reference pagkatapos ng muling pagsasaayos
+- [ ] Pumapasa ang `npm run check:docs-all` (pinagsama-sama: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] Nag-e-exit nang 0 ang `npm run check:env-doc-sync` — buo ang kontrata ng env sa pagitan ng code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md`
+- [ ] Nag-e-exit nang 0 ang `npm run check:doc-links` — walang sirang panloob na markdown reference pagkatapos ng muling pagsasaayos
 - [ ] Nasuri ang `docs/architecture/ARCHITECTURE.md` para sa paglihis ng storage/runtime
 - [ ] Nasuri ang `docs/guides/TROUBLESHOOTING.md` para sa paglihis ng env var at operasyon
-- [ ] Kung nagbago ang `.env.example`: na-update ang `docs/reference/ENVIRONMENT.md`
+- [ ] Kung binago ang `.env.example`: na-update ang `docs/reference/ENVIRONMENT.md`
 - [ ] Kung may UI ang bagong feature: binabanggit ito ng `docs/guides/USER_GUIDE.md`
 - [ ] Kung may API ang bagong feature: na-update ang `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml`
 - [ ] Kung isang module ang bagong feature: may nakalaang `docs/<MODULE>.md`
@@ -189,42 +189,42 @@ Mga breaking change: magdagdag ng footer na `BREAKING CHANGE:` o `!` pagkatapos 
 
 ### i18n
 
-- [ ] Lumalabas ang `npm run i18n:check` na may 0 — naka-sync ang estado ng pagsasalin (`.i18n-state.json`) sa mga source doc (walang nalihis na source sa strict mode; katanggap-tanggap ang babala sa warn-mode para sa mga huling-minutong pag-aayos sa doc, ngunit dapat itong maging 0 bago mag-tag)
-- [ ] Lumalabas ang `npm run i18n:check-ui-coverage` na may 0 — nasa o higit sa 80% na pinakamababang coverage ang bawat locale ng UI
-- [ ] Nag-uulat ang `npm run i18n:sync-ui:dry` ng 0 nawawalang key sa lahat ng 42 locale
-- [ ] Kung nagbago ang mga source doc sa English, patakbuhin ang `npm run i18n:run` (nangangailangan ng `OMNIROUTE_TRANSLATION_API_KEY` sa `.env`) bago mag-tag
-- [ ] Maaaring ipagpaliban sa susunod na release ang maliliit na kontribusyon sa pagsasalin (subaybayan sa CHANGELOG)
+- [ ] Nag-e-exit nang 0 ang `npm run i18n:check` — naka-sync ang estado ng translation (`.i18n-state.json`) sa pinagmulang dokumentasyon (walang nalihis na source sa strict mode; katanggap-tanggap ang advisory ng warn-mode para sa mga huling-minutong pagwawasto sa dokumentasyon, ngunit dapat itong maging 0 bago mag-tag)
+- [ ] Nag-e-exit nang 0 ang `npm run i18n:check-ui-coverage` — nasa o lampas sa 80% na pinakamababang coverage ang bawat locale ng UI
+- [ ] Nag-uulat ang `npm run i18n:sync-ui:dry` ng 0 nawawalang key sa lahat ng 66 na target na locale (bawat locale maliban sa source na `en`)
+- [ ] Kung binago ang pinagmulang dokumentasyong Ingles, patakbuhin ang `npm run i18n:run` (nangangailangan ng `OMNIROUTE_TRANSLATION_API_KEY` sa `.env`) bago mag-tag
+- [ ] Maaaring ipagpaliban sa susunod na release ang maliliit na kontribusyon sa translation (subaybayan sa CHANGELOG)
 
 ### Mga Migration ng Database
 
 - [ ] Kung may mga bagong file ang `src/lib/db/migrations/`:
   - [ ] Idempotent ang bawat migration (`CREATE TABLE IF NOT EXISTS`, atbp.)
   - [ ] Nakabalot sa mga transaction ang mga migration
-  - [ ] Tama ang pagkakanumero (walang puwang sa sequence)
-- [ ] Subukan sa bagong install: burahin ang `~/.omniroute/omniroute.db` at patakbuhin ang `npm run dev`
-- [ ] Subukan sa umiiral na install: i-backup ang DB, patakbuhin ang migration, beripikahin ang schema
-- [ ] Wastong pinapangasiwaan ang mga WAL file (`-wal`, `-shm`) kung muling isinusulat ng migration ang mga table
+  - [ ] Tama ang pagkakasunod-sunod ng numero (walang puwang sa sequence)
+- [ ] Subukan sa bagong installation: burahin ang `~/.omniroute/omniroute.db` at patakbuhin ang `npm run dev`
+- [ ] Subukan sa umiiral na installation: i-backup ang DB, patakbuhin ang migration, at beripikahin ang schema
+- [ ] Maayos na napapangasiwaan ang mga WAL file (`-wal`, `-shm`) kung muling isinusulat ng migration ang mga table
 
-### Catalog ng Provider (Bineripika ng Zod)
+### Katalogo ng Provider (Na-validate ng Zod)
 
-- [ ] Balido ang Zod schema ng `src/shared/constants/providers.ts` sa oras ng pag-load
+- [ ] Valid ang Zod schema ng `src/shared/constants/providers.ts` sa oras ng pag-load
   - [ ] May lahat ng kinakailangang field ang lahat ng provider (`id`, `label`, `kind`, atbp.)
   - [ ] May ibinigay na `freeNote` para sa mga bagong libreng provider
   - [ ] Nakarehistro ang `oauthConfig` ng mga OAuth provider sa `src/lib/oauth/constants/oauth.ts`
 - [ ] Kung nagdagdag ng bagong provider: may katumbas na executor sa `open-sse/executors/`
 - [ ] Kung hindi OpenAI ang format: may translator sa `open-sse/translator/`
 - [ ] Nakarehistro ang mga model sa `open-sse/config/providerRegistry.ts`
-- [ ] Saklaw ng mga unit test sa `tests/unit/` ang pag-uuri at routing ng provider
+- [ ] Saklaw ng mga unit test sa `tests/unit/` ang pag-uuri at pagruruta ng provider
 
 ### Desktop (Electron)
 
-Kung nagbago ang `electron/`:
+Kung nabago ang `electron/`:
 
 - [ ] Pumapasa ang `npm run electron:smoke:packaged`
 - [ ] Nasubukan ang mga build para sa kahit isa sa `:win`, `:mac`, `:linux`
-- [ ] Hindi pa nag-expire ang mga certificate sa pag-sign ng code (kung nagsa-sign)
-- [ ] Tugma ang version ng `electron/package.json` sa root na `package.json`
-- [ ] Na-update ang pointer ng channel para sa awtomatikong pag-update kung magre-release sa `stable`
+- [ ] Hindi pa nag-expire ang mga code signing cert (kung nagsa-sign)
+- [ ] Tugma ang bersyon ng `electron/package.json` sa root na `package.json`
+- [ ] Na-update ang pointer ng auto-update channel kung magre-release sa `stable`
 
 ### Layout ng Build
 
@@ -237,28 +237,28 @@ Gumagamit ang repository ng tatlong magkakaibang output directory — huwag kail
 | `dist/`   | Naipapamahaging npm bundle — binuo ng `assembleStandalone`     | Hindi (gitignored) |
 
 > **Tala para sa operator:** nananatiling `/usr/lib/node_modules/omniroute/app/` ang directory ng image sa remote VPS.
-> Ang **in-repo** na output ng build lamang ang inilipat (`app/` → `dist/`). Ini-rsync ng mga deploy skill
+> Tanging ang **nasa-repository** na build output ang inilipat (`app/` → `dist/`). Ini-rsync ng mga deploy skill
 > ang mga nilalaman ng `dist/` papunta sa remote na `app/` dir — walang kinakailangang pagbabago sa path ng VPS.
 
-**Daloy na iisang build lamang:**
+**Daloy ng iisang build:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (paglilinis)
+  └─ rm -rf .build dist          (linisin)
   └─ next build → .build/next/   (mga intermediate)
   └─ assembleStandalone          (kinokopya ang standalone + static + public + natives → dist/)
   └─ nagsusulat ng dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-HUWAG patakbuhin ang `npm run build` na susundan ng hiwalay na `npm run build:cli` para sa deploy — gamitin ang
+HUWAG patakbuhin ang `npm run build` na sinusundan ng hiwalay na `npm run build:cli` para sa pag-deploy — gamitin ang
 `npm run build:release`, na nagsasagawa ng malinis na rebuild + sentinel sa iisang command.
 
-### Pagpapatunay ng Artifact
+### Pag-validate ng Artifact
 
-- [ ] Matagumpay ang `npm run build:release` at `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Matagumpay ang `npm run build:release` at ang `dist/BUILD_SHA` == `git rev-parse --short HEAD`
 - [ ] Malinis ang `npm run check:pack-artifact` — walang `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, o iba pang lokal na residue
 - [ ] Umiiral ang `dist/server.js` pagkatapos ng build
-- [ ] Opsyonal na lokal na smoke test ng packaged runtime: pagkatapos ng `npm run dev:candidate -- build`, bino-boot ng `npm run dev:candidate -- validate` ang naka-package na tarball sa nakahiwalay na `DATA_DIR` at sinusuri ang `/api/health` + `/v1/models` (tingnan ang [Ginintuang Landas ng Kontribusyon](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] Opsyonal na lokal na smoke test ng packaged runtime: Pagkatapos ng `npm run dev:candidate -- build`, bino-boot ng `npm run dev:candidate -- validate` ang naka-pack na tarball sa isang nakahiwalay na `DATA_DIR` at sinusuri ang `/api/health` + `/v1/models` (tingnan ang [Golden Path ng Kontribusyon](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
 
 ### Pag-tag at Pag-release
 
@@ -274,18 +274,18 @@ HUWAG patakbuhin ang `npm run build` na susundan ng hiwalay na `npm run build:cl
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Deploy
+### Pag-deploy
 
-Ginagamit ng mga deploy skill ang magaan na daloy ng rsync — walang `npm pack`, walang `npm i -g`:
+Ginagamit ng mga deploy skill ang magaang daloy ng rsync — walang `npm pack`, walang `npm i -g`:
 
 - [ ] Gamitin ang deploy skill na tumutugma sa target:
   - `/deploy-vps-local-cc` — lokal na VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — pareho
-- [ ] Bago mag-deploy, kumpirmahing `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Dapat patakbuhin ang build kung saan tunay ang `node_modules` (pangunahing checkout o worktree na na-`npm ci` — HINDI worktree na naka-symlink)
+- [ ] Bago mag-deploy, tiyaking ang `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Dapat patakbuhin ang build kung saan tunay ang `node_modules` (pangunahing checkout o worktree na ginamitan ng `npm ci` — HINDI isang naka-symlink na worktree)
 - [ ] I-smoke test ang na-deploy na instance:
-  - Buksan ang `/dashboard/health` → tiyaking tumutugma sa release ang version string
+  - Buksan ang `/dashboard/health` → tiyaking tugma sa release ang string ng bersyon
   - Magpatakbo ng `/v1/chat/completions` request laban sa isang kilalang provider
   - Tiyaking nagbabalik ang `/api/monitoring/health` ng mga circuit breaker na `CLOSED`
   - Kumpirmahing tumutugon ang mga MCP transport (`/mcp` HTTP, `/mcp-sse` SSE)
@@ -294,26 +294,26 @@ Ginagamit ng mga deploy skill ang magaan na daloy ng rsync — walang `npm pack`
 
 - [ ] Patakbuhin ang `/capture-release-evidences-cc` (Claude Code skill)
   - Kumukuha ng mga WebP screenshot/recording ng mga bagong feature
-  - Inilalakip ang mga ito sa release notes / blog post
+  - Nag-a-attach sa mga release note / blog post
 - [ ] I-update ang GitHub Discussions / Discord gamit ang anunsyo ng release
-- [ ] Magbukas ng milestone para sa susunod na version
+- [ ] Magbukas ng milestone para sa susunod na bersyon
 - [ ] Kung kritikal: i-pin ang talakayan o mag-post sa `news.json` para sa in-app banner
 
-### Gate para sa pampublikong paglulunsad ng Radar
+### Gate ng pampublikong paglulunsad ng Radar
 
-Sadyang naka-commit ang anunsyo ng Radar na may `active: false`. Ang pag-activate ay isang hiwalay na
-pagbabago pagkatapos mapatunayan ang bawat item sa ibaba:
+Ang anunsyo ng Radar ay sinadyang i-commit na may `active: false`. Hiwalay na
+pagbabago ang pag-activate pagkatapos magkaroon ng ebidensya ang bawat item sa ibaba:
 
-- [ ] Naka-merge ang lahat ng magkakasunod na Radar PR at green ang release-tip CI
-- [ ] I-deploy at i-smoke test ang mga OSS Radar route habang naka-off pa rin bilang default ang `RADAR_ENABLED`
+- [ ] Naka-merge na ang lahat ng magkakasunod na Radar PR at green ang release-tip CI
+- [ ] I-deploy at i-smoke test ang mga OSS Radar route habang naka-off pa rin ang `RADAR_ENABLED` bilang default
 - [ ] I-smoke test ang `GET /planos`, `/termos`, `/privacidade`, at `/reembolso` sa nakatalagang Radar host
-- [ ] Itala ang pagkakakilanlan/contact/address ng operator at ang legal review na inaprubahan ng may-ari sa pribadong serbisyo
+- [ ] Itala ang pagkakakilanlan/contact/address ng operator at ang legal review na inaprubahan ng owner sa pribadong serbisyo
 - [ ] Subukan ang Stripe Checkout at ang signed webhook sa test mode lamang
-- [ ] Subukan ang isang encrypted na paghahatid ng transactional email gamit ang aprubadong sender/domain
-- [ ] Patunayan ang pag-restore ng backup at ang isang pinangangasiwaang research run na may limitadong budget
-- [ ] Aprubahan ang patakaran sa pagsusuri ng BRL/PIX bago tumanggap ng ebidensya ng donasyon
-- [ ] I-enable lamang ang pampublikong Checkout pagkatapos ng mga naunang gate, saka i-activate ang bagong `news.json` ID
-- [ ] Tiyaking gumagamit ang Home banner ng naka-localize na kopya at muling lumilitaw ang isang bagong ID matapos i-dismiss ang mas lumang ID
+- [ ] Subukan ang isang encrypted na pagpapadala ng transactional email gamit ang aprubadong sender/domain
+- [ ] Patunayan ang pag-restore ng backup at ang isang pinangangasiwaang research run na may limitasyon sa badyet
+- [ ] Aprubahan ang patakaran sa pag-review ng BRL/PIX bago tumanggap ng ebidensya ng donasyon
+- [ ] I-enable lamang ang pampublikong Checkout pagkatapos maipasa ang mga naunang gate, saka i-activate ang bagong `news.json` ID
+- [ ] Tiyaking gumagamit ang Home banner ng naka-localize na teksto at muling lumilitaw ang isang bagong ID pagkatapos i-dismiss ang mas lumang ID
 
 ## Smoke test ng Embedded Services (v3.8.4+)
 

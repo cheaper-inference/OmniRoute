@@ -111,6 +111,7 @@ export async function POST(request: Request) {
     if (result.statusCode !== undefined) body.statusCode = result.statusCode;
     if (result.rateLimited) body.rateLimited = true;
     if (result.retryAfter !== undefined) body.retryAfter = result.retryAfter;
+    if (result.skipped) body.skipped = true;
 
     return NextResponse.json(body, { status: result.httpStatus });
   } catch (error: unknown) {

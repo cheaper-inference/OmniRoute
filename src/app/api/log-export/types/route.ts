@@ -11,7 +11,7 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { describeLogExportDestinationTypes } from "@/lib/logExport/registry";
 
 export async function GET(request: Request) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   try {

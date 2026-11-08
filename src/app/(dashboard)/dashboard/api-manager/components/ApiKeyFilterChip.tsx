@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/shared/components/Button";
 import { cn } from "@/shared/utils/cn";
 
 interface ApiKeyFilterChipProps {
@@ -18,22 +19,20 @@ export default function ApiKeyFilterChip({
   onClick,
 }: ApiKeyFilterChipProps) {
   return (
-    <button
+    <Button
+      variant={isActive ? "primary" : "outline"}
+      size="sm"
+      aria-pressed={isActive}
       onClick={onClick}
-      className={cn(
-        "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-        isActive
-          ? "bg-primary text-white border-primary"
-          : "bg-bg-subtle border-border text-text-muted hover:text-text-primary hover:border-primary/30"
-      )}
+      className="gap-1.5 rounded-full text-xs"
     >
       {dotColor && <span className={cn("size-2 rounded-full shrink-0", dotColor)} />}
       <span>{label}</span>
       {count !== undefined && (
-        <span className={cn("text-[11px]", isActive ? "text-white/80" : "text-text-muted")}>
+        <span className={cn("text-[11px]", isActive ? "opacity-80" : "text-text-muted")}>
           {count}
         </span>
       )}
-    </button>
+    </Button>
   );
 }

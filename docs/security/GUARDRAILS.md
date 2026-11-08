@@ -44,6 +44,13 @@ Lower priority numbers run **first**.
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
+The GLM 5.3 base model and `glm-5.3-{low,high,max}` have explicit
+`supportsVision:false` registry/spec metadata. The GLM 5.3 Flash variants
+remain native-vision models. Claude Code's `/v1/messages` route enters the
+shared `handleChat` pre-call guardrail chain **before** Claude-to-OpenAI
+translation; nested `Read` tool-result images must be described or handled
+before that translation lifts them into OpenAI `image_url` content (#17069).
+
 Intercepts image-bearing requests aimed at **non-vision models** and either
 reroutes the whole request to a vision-capable model or replaces the image
 parts with text descriptions produced by a configurable vision model before
@@ -58,11 +65,13 @@ Flow:
    (`visionBridgeHelpers.ts`), which delegates to the **unified media
    detector** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` — the
    single source of truth shared with the combo compatibility filter.
-   Extraction is allowlisted to top-level parts of the shapes
-   `replaceImageParts` can splice back (the extract↔replace contract): OpenAI
-   `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL
-   `source.type:"url"`, and Responses API `input_image`. Nested hits and
-   indicator-only shapes are combo-filter material and are never extracted.
+   Extraction is allowlisted to the shapes `replaceImageParts` can splice
+   back (the extract↔replace contract): OpenAI `image_url`, Anthropic base64
+   `source.type:"base64"`, Anthropic URL `source.type:"url"`, and Responses
+   API `input_image`. Matching images nested inside Claude Code
+   `tool_result.content` and Responses tool outputs are also extracted and
+   replaced at their original paths; indicator-only shapes are combo-filter
+   material and are not extracted.
    Skip if none found.
 3. Resolve runtime config via `resolveVisionBridgeRuntimeSettings()`
    (`src/shared/constants/modalityBridgeDefaults.ts`): new `modalityBridge*`
@@ -75,20 +84,23 @@ Flow:
 5. Describe path: cap images at `maxImages`, compose the task-aware prompt,
    consult the describe cache, call the vision model **in parallel**
    (`Promise.allSettled`), and inject `[Image N]: <description>` text parts in
-   their place. A failed describe yields `null` and the original image part is
-   **preserved** (#4012) — except on the combo describe path when every
-   describe failed, where a confirmed non-vision upstream gets an
-   `(unavailable — no vision-capable provider connected)` stub instead (#8430).
+   their place. A failed describe yields `null`: the raw image is preserved for
+   unknown/vision-capable targets (#4012), but a **confirmed text-only direct
+   target** or zero-vision combo gets an explicit
+   `(unavailable — no vision-capable provider connected)` text stub for
+   every undescribed image, including partial failures and images beyond the
+   describe-call cap (#17069). The existing all-failed combo describe fallback
+   remains in place (#8430).
 6. Return `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
    `processingTimeMs`, `visionModel`).
 
 #### Mode selector (`modalityBridgeVisionMode`)
 
-| Mode       | Default | Behavior                                                                                                                                                                                                                                                |
-| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔       | Legacy heuristic, untouched (#6640/#7204): non-combo/`auto/` models reroute to the best vision model unless the original model already has usable credentials (then describe); combo targets always describe.                                           |
-| `describe` |         | Always describe — the reroute block is skipped entirely; the user's chosen model always answers.                                                                                                                                                        |
-| `reroute`  |         | Force reroute: the keep-credentialed-model guard is bypassed. The reroute-**target** credential guard still applies — when no usable vision target exists, the request falls through to describe so raw images never reach a text-only backend (#8430). |
+| Mode       | Default | Behavior                                                                                                                                                                                                                                                            |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔       | Legacy heuristic, untouched (#6640/#7204): non-combo/`auto/` models reroute to the best vision model unless the original model already has usable credentials (then describe); combo targets always describe.                                                       |
+| `describe` |         | Always describe — the reroute block is skipped entirely; the user's chosen model always answers.                                                                                                                                                                    |
+| `reroute`  |         | Force reroute: the keep-credentialed-model guard is bypassed. The reroute-**target** credential guard still applies — when no usable vision target exists, the bridge blocks with a clear error rather than describing or sending raw images to a text-only target. |
 
 Forced modes short-circuit **before** the auto heuristic runs; `auto` behavior
 is byte-identical to the pre-PR-1 guardrail.
@@ -105,9 +117,11 @@ enforces that key's connection and model policy again. `enforceApiKeyPolicy()`
 honors that header only together with the self-loop bearer, so it can only
 narrow access, and an id that does not resolve is rejected.
 
-If no vision model is permitted for the key, the describe path steps aside and
-the request passes through unchanged, the same fail-open behavior as a disabled
-guardrail (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+If no vision model is permitted for the key, a **confirmed text-only
+target** rejects the image request locally with a clear HTTP 400 instead of
+forwarding image bytes to an incapable upstream (#17069). For targets with
+unknown or native vision capability, the describe path retains its previous
+fail-open behavior (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
 Requests without a key, and keys without these restrictions, behave exactly as
 before.
 
@@ -334,9 +348,9 @@ metrics/abort/cleanup — is hidden behind `processVideoPart` in
 That module also defines the explicit port boundaries `VideoMediaBrokerPort`
 (acquiring bytes and extracting sampled frames), `VideoAudioTranscriptionPort`
 (fusing a caller-declared audio transcript with the sampled captions), and
-`VideoDrilldownPort` (the frame drill-down persistence boundary; not yet wired
-into `processVideoPart` — only the separate `/api/modality-bridge/video/drilldown`
-route writes drill-down entries today).
+`VideoDrilldownPort` (the legacy raw-store shape). Production STT and frame retention
+are composed around the describing port through `createVideoSttAdapter` and
+`createVideoDrilldownAdapter`; the latter uses the shared opaque-handle lifecycle.
 
 The public `/v1` request path never imports or invokes a subprocess. Remote
 videos are downloaded under a 50 MiB bound; inline base64 videos have a
@@ -592,11 +606,48 @@ derivation version, creation time, server-computed content hash, and hashed pare
 reference plus the trusted caller's parent-content hash. Cancellation is checked
 between asynchronous decode/hash phases before the atomic cache commit.
 
-This tranche does not yet connect a production producer to the route and does not
-provide multi-resolution variant selection. The transparent Video Bridge request
-path therefore incurs no added work, while tenant-bound principal derivation and
-the full FU-08 multi-resolution lifecycle remain explicit follow-up work rather
-than documented as complete behavior.
+The production producer reuses already-derived broker frames only after successful
+visual analysis, with no second video download/extraction. It requires operator
+`modalityBridgeVideoDrilldownEnabled=true`, strict per-part `drilldown: true`, and
+an authenticated API-key record ID. Client-declared principal/session values never
+establish ownership. Without all three conditions it does not hash, resize or retain
+additional frames. Retention failure preserves the usable visual response. Consented
+requests bypass the whole-video result cache so cached results never replay handles.
+
+Successful JSON and SSE responses expose at most four opaque handles in the bounded
+`x-omniroute-video-drilldown` header. Authorized browser origins can read that header
+without broadening the CORS origin policy. New handles use `v1.<32-byte random base64url
+token>`, and the registry retains only
+their SHA-256 hashes. The reader/header parser also accepts legacy 64-hex tokens.
+The authenticated public consumer is
+`GET /api/v1/video-bridge/drilldown?handle=...`, independently gated by
+`modalityBridgeVideoDrilldownRemoteEnabled=true`. Explicit persisted false revokes
+access even when the legacy `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` env
+fallback is enabled. Production retention has the analogous legacy
+`OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` fallback. Both fallbacks default off.
+
+The consumer derives ownership from the authenticated key and applies key policy:
+both GET and DELETE belong to the `video` endpoint category, including the `/v1`
+and `/api/v1` aliases. Keys with a nonempty endpoint allowlist must include `video`;
+unrestricted keys remain compatible. The consumer
+returns the same 404 for unknown, expired and another key's handles. It accepts
+`variant=preview|standard|detail` (maximum JPEG dimension 320/640/1280, never upscaled),
+`limit=1..8` (or the legacy `frames` alias, never both), zero-based `page`, and optional
+`start`/`end` focus seconds. Duplicate
+query keys and reversed focus windows are rejected. Each returned variant has a hash
+of its actual content and actual resolution metadata, linked to the retained source.
+Variants are derived on read rather than stored as extra retained copies. The JSON
+response, including Base64/envelope, is capped at 32 MiB; an oversized page returns
+413 and the client must request fewer frames. Reads check cancellation around each
+resize and recheck handle validity before returning. `DELETE` by owner is idempotent;
+deletion or TTL expiry releases the retained source and usage accounting.
+
+The shared store is process-local: handles expire on restart and are not transferable
+between independent OmniRoute processes. Management stats expose effective retention/
+remote policy and aggregate retained entries/bytes only, never media, references,
+principal IDs or handles. The Video settings panel shows those values and can persist
+both consent switches. This implementation documentation is not live deployment or
+promotion evidence; real-model acceptance is tracked separately.
 
 Frames are captioned sequentially with the configured Video model. An empty
 Video override inherits the Vision setting; if both are empty, the Vision
@@ -683,7 +734,15 @@ does not switch masking on: that is still `PII_REDACTION_ENABLED` (request) and
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Unset means every
   type (the behaviour before this setting existed). The request engine's
   `ssn_us` pattern maps to `ssn`. Templates (Minimal, Standard, Financial,
-  Brazilian, USA, Full) only fill the checkboxes in the UI.
+  Brazilian, USA, GDPR, POPIA, Full) only fill the checkboxes in the UI.
+- **GDPR and POPIA identifiers** — twelve built-in ids covering EU and South
+  African personal identifiers (table below). Their regexes, validators and
+  jurisdiction tags live in one table, `src/shared/utils/piiPatterns.ts`, which
+  both the response sanitizer (`src/lib/piiSanitizer.ts`) and the request
+  masker (`src/shared/utils/inputSanitizer.ts`) consume. A match is redacted
+  only when its validator accepts it; a bare run of digits is never enough. An
+  operator who saved a narrowed selection before these ids existed keeps the
+  behaviour it had until the new ids are ticked.
 - **Custom patterns** — up to 20 regex or wildcard patterns (`*` = up to 64
   non-whitespace characters, `?` = one). Matches become `[CUSTOM_REDACTED]`.
   Every pattern goes through `compilePiiCustomPattern()`
@@ -707,7 +766,38 @@ The settings live in the `key_value` table (namespace `pii_settings`,
 | `POST` | `/api/settings/pii/test` | Dry-run one pattern against a sample of at most 8 KB; nothing is stored |
 
 All three require management auth and validate the body with Zod
-(`src/shared/validation/schemas/piiSettings.ts`).
+(`src/shared/validation/schemas/piiSettings.ts`). With login disabled
+(`requireLogin=false`) `GET` and the test endpoint are open, but `PUT` still
+needs a dashboard session, a `manage`-scope API key, an `oma_` access token
+with write scope or higher, or the CLI token or internal-service token sent
+from loopback.
+
+#### GDPR (EU) and POPIA (South Africa) identifiers
+
+| Id                  | Identifier               | Validation                                                                           |
+| ------------------- | ------------------------ | ------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                     | Known country, exact length for that country, ISO 13616 MOD-97-10                    |
+| `eu_vat`            | EU VAT number            | Known member-state prefix and that state's number format (no VIES lookup)            |
+| `es_dni_nie`        | Spanish DNI / NIE        | Control letter (value mod 23); NIE is `X/Y/Z` + 7 digits                             |
+| `it_codice_fiscale` | Italian Codice Fiscale   | Control letter from the odd/even position tables                                     |
+| `pl_pesel`          | Polish PESEL             | Weighted checksum and an encoded birth date that exists                              |
+| `nl_bsn`            | Dutch BSN                | 11-proof (weights 9..2, -1)                                                          |
+| `de_steuer_id`      | German Steuer-ID         | ISO 7064 Mod 11,10 plus the digit-structure rules (no leading 0)                     |
+| `se_personnummer`   | Swedish personnummer     | Luhn over the last ten digits and a plausible birth date (10 or 12 digits)           |
+| `za_id`             | South African ID number  | Luhn over all 13 digits, valid birth month/day, citizenship digit 0 or 1             |
+| `za_phone`          | South African phone      | `+27` / `27` prefix, or the national `0..` form written with a space or hyphen       |
+| `za_vat`            | South African VAT number | 10 digits starting with `4` **and** "VAT" / "BTW" in the 48 characters before        |
+| `za_tax_ref`        | South African tax ref.   | 10 digits starting `0`-`3`, Luhn, **and** "tax" / "SARS" in the 48 characters before |
+
+Because the digit-only formats collide with order numbers, build numbers and
+timestamps, the weakest ones (`za_vat`, `za_tax_ref`) need the keyword cue, and
+a bare ten-digit `0..` number is not treated as a South African phone number.
+Spaced IBANs (`GB29 NWBK ...`) are not matched. On the streaming path the cue is
+looked up inside the current chunk only. The ids sit ahead of the generic phone
+patterns, so a validated identifier keeps its own placeholder
+(`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). The `gdpr` and `popia` templates
+select the EU and South African ids respectively. Masking itself stays opt-in
+(Hard Rule #20): nothing here changes a feature-flag default.
 
 ### Prompt Injection (`promptInjection.ts`)
 
@@ -936,9 +1026,9 @@ deliberately when the behavior changes.
   transform applies (when `PII_RESPONSE_SANITIZATION` is on). A credential
   echoed back in a streamed response is not redacted.
 - **Disable channels vs. the middleware (by design):** the middleware evaluates
-  prompt injection with its own call to `evaluatePromptInjection()`, which
-  ignores the body-only disable list the middleware passes it. `block` mode is a mandatory boundary that
-  caller-controlled disables cannot bypass, on chat-family routes included
+  prompt injection with its own call to `evaluatePromptInjection()`, without
+  passing any caller-controlled disable list. `block` mode is a mandatory
+  boundary that caller-controlled disables cannot bypass, including on chat-family routes
   ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Disabling
   `prompt-injection` only skips the registry guardrail.
 

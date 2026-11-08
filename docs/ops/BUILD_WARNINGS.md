@@ -1,7 +1,7 @@
 ---
 title: "Build Warnings Reference"
 version: 3.8.52
-lastUpdated: 2026-10-11
+lastUpdated: 2026-10-18
 ---
 
 # Build Warnings Reference
@@ -94,6 +94,28 @@ allow-listed set of gate/generator scripts. If you install with Bun you may see:
   the supported `npm ci` path runs them, and `npm run check:native-deps` verifies that
   every externalized package resolves afterward.
 
-If a Bun-invoked gate script fails with `bun: not found`, the tree is stale — re-run
-`npm install`. If `node_modules/bun/bin/bun.exe` is a tiny shell-script placeholder instead
-of the real binary, its `postinstall` was skipped; run `cd node_modules/bun && node install.js`.
+### Bun script-runner failures
+
+Bun runs only the allow-listed gate/generator scripts (`check:provider-consistency`,
+`check:compression-budget`, `check:known-symbols`, `gen:provider-reference`,
+`bench:compression`) plus the `test:bun:db` smoke suite — see `AGENTS.md` → Environment.
+After pulling the lockfile change, run `npm install` so `bun` resolves locally (a stale
+`node_modules` will fail those scripts with `bun: not found`).
+
+**Two distinct Bun failures, two different fixes — do not confuse them.**
+
+- **(a) `bun: not found`** → the tree is stale; `npm install`.
+- **(b) Bun exists but refuses to run** → `node_modules/bun/bin/bun.exe` is still the
+  ~450-byte **bash placeholder** the package ships, because its `postinstall` was skipped
+  (`npm install --ignore-scripts`, or a package manager that skips lifecycle scripts). The real
+  binary is already on disk in the platform package (e.g.
+  `node_modules/@oven/bun-windows-x64/bin/bun.exe`, ~86 MB), so nothing is missing and
+  re-running `npm install` on an already-satisfied tree may not fix it. Fix:
+  `cd node_modules/bun && node install.js`.
+
+**On Windows the error is actively misleading** — `cmd.exe` asks the loader to run a bash
+script, which reports `This version of … is not compatible with the version of Windows you're running`,
+which reads like an OS/architecture problem but means "this is not a Windows executable".
+Confirm the real cause with `ls -l node_modules/bun/bin/bun.exe` (a few hundred bytes =
+placeholder). Either way `node --import tsx <script>` is the validated byte-identical fallback
+for all four scripts.

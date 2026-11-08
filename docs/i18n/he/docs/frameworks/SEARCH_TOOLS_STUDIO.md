@@ -36,36 +36,36 @@ Search Tools Studio הופך את `/dashboard/search-tools` מסביבת ניס�
 
 ## לשוניות
 
-### לשונית החיפוש
+### לשונית חיפוש
 
-מרחיבה את `SearchForm` + `ResultsPanel` + `RerankPanel` הקיימים לכדי לשונית:
+מפתחת את `SearchForm` + `ResultsPanel` + `RerankPanel` הקיימים לכדי לשונית:
 
-- שאילתה → תוצאות (כותרת, URL, תקציר, ציון רלוונטיות).
-- מטא-נתוני הספק בחלונית ההגדרות (עלות, מכסה, סטטוס).
-- מקטע דירוג מחדש: בחירת מודל לדירוג מחדש, סידור מחדש של התוצאות והצגת `positionDelta`.
+- שאילתה ← תוצאות (כותרת, URL, קטע טקסט, ציון רלוונטיות).
+- מטא-נתונים של הספק בחלונית התצורה (עלות, מכסה, סטטוס).
+- מקטע דירוג מחדש: בחירת מודל לדירוג מחדש, סידור מחדש של התוצאות, הצגת `positionDelta`.
 - מצב ריק עם קריאה לפעולה כאשר לא מוגדרים ספקי חיפוש.
 - היסטוריית חיפוש באמצעות `SearchHistory.tsx`.
 - קריאה אל `POST /v1/search` (נקודת קצה קיימת, ללא שינויים).
 
-### לשונית הגירוד
+### לשונית חילוץ
 
 לשונית חדשה לחילוץ תוכן מ-URL באמצעות `POST /v1/web/fetch` (נוצרה בתוכנית 05):
 
-- קלט: URL + מתג לדף מלא + בורר תבנית (Markdown / טקסט / HTML).
-- שליחה → שליפה → עיבוד `ScrapeResult.tsx`.
-- `ScrapeResult` מציג תצוגה מקדימה של Markdown + מתג לתצוגה גולמית.
-- מגבלה: אם גוף התגובה גדול מ-**256 KB**, ממשק המשתמש מציג `(קוצץ, הצג תצוגה גולמית)` ופותח את התוכן הגולמי בחלון Monaco (D21).
-- חלונית מטא-נתונים: ספק (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), זמן השהיה, עלות, גודל התגובה ומספר הקישורים.
+- קלט: URL + מתג לעמוד מלא + בורר פורמט (Markdown / טקסט / HTML).
+- שליחה ← אחזור ← עיבוד `ScrapeResult.tsx`.
+- `ScrapeResult` מציג תצוגה מקדימה של Markdown + מתג להצגת התוכן הגולמי.
+- מגבלה: אם גוף התגובה גדול מ-**256 KB**, ממשק המשתמש מציג `(קוצר, הצגת תוכן גולמי)` ופותח את התוכן הגולמי בחלון Monaco מודאלי (D21).
+- חלונית מטא-נתונים: ספק (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), זמן השהיה, עלות, גודל תגובה, מספר קישורים.
 - שימוש ב-hook‏ `useScrapeFetch.ts`.
 
-### לשונית ההשוואה
+### לשונית השוואה
 
-מריצה את אותה שאילתה/כתובת URL במקביל אצל עד **4 ספקים** (D22):
+מריצה את אותה שאילתה/כתובת URL אצל עד **4 ספקים במקביל** (D22):
 
-- עמודות זו לצד זו עבור כל ספק.
-- מדדים: זמן השהיה, עלות, מספר תוצאות וגודל התגובה.
-- חישוב חפיפת כתובות URL עבור חיפוש (מספר כתובות ה-URL המשותפות לעומת התוצאה הראשונית).
-- קריאה אל `POST /v1/search` (חיפוש) או אל `POST /v1/web/fetch` (גירוד) עבור כל ספק.
+- עמודות זו לצד זו, אחת לכל ספק.
+- מדדים: זמן השהיה, עלות, מספר תוצאות, גודל תגובה.
+- חישוב חפיפת URL עבור חיפוש (מספר כתובות ה-URL המשותפות לעומת התוצאה הראשונית).
+- קריאה אל `POST /v1/search` (חיפוש) או אל `POST /v1/web/fetch` (חילוץ), עבור כל ספק.
 
 ---
 
@@ -100,10 +100,10 @@ Search Tools Studio הופך את `/dashboard/search-tools` מסביבת ניס�
 
 ## קטלוג ספקים
 
-`ProviderCatalog.tsx` חושף את רשימת הספקים המלאה מ-`GET /api/search/providers`
-(הורחבה ב-F4 כדי לכלול ספקי אחזור):
+`ProviderCatalog.tsx` חושף את רשימת הספקים המלאה מ־`GET /api/search/providers`
+(שהורחבה ב־F4 כדי לכלול ספקי אחזור):
 
-| `kind` | `"search"` (20 ספקים) או `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 ספקים) או `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 הסטטוס **נגזר בזמן הבקשה** באמצעות בדיקה אם קיימים פרטי גישה ואם
 כל המפתחות נמצאים כעת בתקופת צינון.
@@ -126,7 +126,7 @@ Search Tools Studio הופך את `/dashboard/search-tools` מסביבת ניס�
 
 הקובץ `src/app/api/search/providers/route.ts` הורחב כדי:
 
-- לכלול במערך את כל 6 ספקי האחזור (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`).
+- לכלול כל ספק אחזור (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) במערך.
 - להוסיף `kind: "search" | "fetch"` לכל פריט.
 - להוסיף `status: "configured" | "missing" | "rate_limited"` הנגזר ממצב פרטי הגישה בזמן אמת.
 - לשמור על תאימות לאחור — השדות הקיימים (`id`, `name` וכו׳) נותרו ללא שינוי.

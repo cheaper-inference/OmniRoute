@@ -10,6 +10,7 @@ import os from "node:os";
 import path from "node:path";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-call-log-id-collision-"));
 process.env.DATA_DIR = testDataDir;
@@ -81,7 +82,7 @@ test("saveCallLog without an id persists a UUID primary key, not Date.now()-coun
     duration: 1,
     tokens: { in: 1, out: 1 },
   });
-  assert.equal(await callLogs.waitForCallLogSaves(10_000), true);
+  assert.equal(await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
   const rows = allCallLogRows();
   assert.equal(rows.length, 1);
   assert.match(rows[0].id, UUID_RE);
@@ -101,7 +102,7 @@ test("two persistAttemptLogs sharing a 6-char dashboard traceId both land as row
   try {
     persistAttemptLogs({ status: 502, error: "first attempt" }, baseCtx({ traceId }));
     persistAttemptLogs({ status: 200, tokens: { input: 1, output: 2 } }, baseCtx({ traceId }));
-    assert.equal(await callLogs.waitForCallLogSaves(10_000), true);
+    assert.equal(await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
     await new Promise((resolve) => setImmediate(resolve));
     await new Promise((resolve) => setImmediate(resolve));
 
@@ -166,7 +167,7 @@ test("saveCallLog retries UNIQUE on an explicit id instead of dropping the secon
     duration: 3,
     tokens: { in: 2, out: 3 },
   });
-  assert.equal(await callLogs.waitForCallLogSaves(10_000), true);
+  assert.equal(await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
 
   const rows = allCallLogRows();
   assert.equal(rows.length, 2, "UNIQUE must not swallow the second insert");
@@ -197,7 +198,7 @@ test("a repeated explicit id with the same timestamp does not overwrite the firs
   };
   await callLogs.saveCallLog({ ...base, status: 500, error: "first attempt detail" });
   await callLogs.saveCallLog({ ...base, status: 502, error: "second attempt detail" });
-  assert.equal(await callLogs.waitForCallLogSaves(10_000), true);
+  assert.equal(await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
 
   const rows = coreDb
     .getDbInstance()

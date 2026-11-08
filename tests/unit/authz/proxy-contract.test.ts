@@ -68,6 +68,8 @@ test("proxy.ts config.matcher covers every /api/* route plus dashboard and v1 al
     '"/:respseg([rR][eE][sS][pP][oO][nN][sS][eE][sS])/:path*"',
     '"/:codexseg([cC][oO][dD][eE][xX])/:path*"',
     '"/:modelsseg([mM][oO][dD][eE][lL][sS])"',
+    // CLIProxyAPI management compatibility (/v0/management/* rewrite).
+    '"/:v0seg([vV]0)/:path*"',
   ];
   for (const matcher of requiredMatchers) {
     assert.ok(

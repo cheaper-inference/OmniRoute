@@ -1,1 +1,0 @@
-- **ci:** the nightly a11y job no longer builds the dashboard on the light runner pool — a new `a11y-build` job builds it once on the build pool and hands the artefact over; the a11y job boots it on a fresh `DATA_DIR` and pipes the server output into the log (#16853).

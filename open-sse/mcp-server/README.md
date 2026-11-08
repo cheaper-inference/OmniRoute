@@ -81,7 +81,8 @@ Add to your MCP client configuration:
       "command": "npx",
       "args": ["tsx", "open-sse/mcp-server/server.ts"],
       "env": {
-        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+        "OMNIROUTE_BASE_URL": "http://localhost:20128",
+        "OMNIROUTE_API_KEY": "your-key"
       }
     }
   }
@@ -98,7 +99,8 @@ Add to your MCP client configuration:
         "command": "npx",
         "args": ["tsx", "open-sse/mcp-server/server.ts"],
         "env": {
-          "OMNIROUTE_BASE_URL": "http://localhost:20128"
+          "OMNIROUTE_BASE_URL": "http://localhost:20128",
+          "OMNIROUTE_API_KEY": "your-key"
         }
       }
     }
@@ -164,9 +166,13 @@ omniroute --mcp
 | 32  | `omniroute_ccr_delete`              | `write:compression` | Delete a caller-owned CCR block                                              |
 | 33  | `omniroute_ccr_stats`               | `read:compression`  | Report caller usage, bounded-store limits, and lifecycle counters            |
 
-CCR storage is bounded and in-memory only: 2 MiB per block, 16 MiB per principal, 64 MiB global,
-with a 24-hour default TTL. Full MCP retrieval is capped at 256 KiB; larger blocks use ranged or
-grep retrieval. All lifecycle operations are isolated by the authenticated caller principal.
+CCR storage is bounded and two-tier: a hot in-memory tier (2 MiB per block, 16 MiB per
+principal, 64 MiB global, 24-hour default TTL) backed by a durable SQLite tier on local,
+non-cloud runtimes (blocks over 512 KB and cloud runtimes stay memory-only). Full MCP
+retrieval is capped at 256 KiB; larger blocks use ranged or grep retrieval. All lifecycle
+operations are isolated by the authenticated caller principal. The operator reference (two
+markers, per-tool scopes, retrieval pagination, diagnostic matrix) is
+[docs/compression/COMPRESSION_ENGINES.md — Prerequisites / operator guide](../../docs/compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 MCP listable metadata descriptions are compressed at registration/list time when description
 compression is enabled. `omniroute_compression_status` exposes those savings separately as
@@ -686,4 +692,4 @@ mcp-server/
 
 ## License
 
-Part of [OmniRoute](https://github.com/diegosouzapw/OmniRoute) — MIT License.
+Part of [OmniRoute](https://github.com/cheaper-inference/OmniRoute) — MIT License.

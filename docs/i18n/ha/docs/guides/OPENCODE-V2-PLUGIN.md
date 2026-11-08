@@ -72,30 +72,31 @@ yana bayyana endpoint ɗin da abin da aka rasa — don kada mai zaɓe da ya ragu
 
 ## Zaɓuɓɓuka
 
-| Maɓalli                          | Tsoho                                                   | Bayanan kula                                                                                                                     |
-| -------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                           | ID na mai samarwa, ID na haɗawa, da prefix ɗin da samfura suke bayyana a ƙarƙashinsa                                             |
-| `baseURL`                        | wajibi                                                  | Tushen gateway, `http(s)` kawai; ana ƙara suffix ɗin `/v1` inda ake buƙata                                                       |
-| `apiKey`                         | bayanan shaidar da aka haɗa, sannan `OMNIROUTE_API_KEY` | Maɓallin chat na `/v1/*`                                                                                                         |
-| `managementReadToken`            | yana komawa ga `apiKey`                                 | Maɓalli na `/api/*` — yawanci **ba** iri ɗaya ba                                                                                 |
-| `displayName`                    | `"OmniRoute"`                                           | Sunan mai samarwa a cikin mai zaɓe                                                                                               |
-| `timeoutMs`                      | `10000`                                                 | Iyakar lokacin fetch ga kowane endpoint (auto-combos suna amfani da 5s)                                                          |
-| `modelCacheTtlMs`                | `300000`                                                | TTL na cache ɗin kundin; snapshot na faifai yana hanzarta farawa daga sanyi                                                      |
-| `timeouts`                       | yana komawa ga `timeoutMs`                              | Kasafin lokaci ga kowane endpoint a ms: `models`, `combos`, `autoCombos`, `enrichment`                                           |
-| `enrichment`                     | `true`                                                  | Fetch na sunaye, farashi da kasafin matakin kyauta                                                                               |
-| `providerTag`                    | `true`                                                  | Sanya sunan mai samarwa na sama da yake tura buƙata zuwa gare shi a farkon sunan nuni                                            |
-| `usableOnly`                     | `false`                                                 | Bar kawai masu samarwar da gateway ya bayyana a matsayin waɗanda aka tanada                                                      |
-| `showcasePerOwner`               | `10`                                                    | Shigarwar kallon tsoho da ake riƙewa ga kowane mai samarwa                                                                       |
-| `freshPerOwner`                  | `10`                                                    | Sabbin shigarwar kallon tsoho da ake riƙewa ga kowane mai samarwa                                                                |
-| `freshWindowDays`                | `90`                                                    | Tsawon lokacin sabunta bayanai a kwanaki don reshen sabbin bayanai                                                               |
-| `usageMemory`                    | `true`                                                  | Maido da shigarwar da aka cire ta tsayayyen tsari waɗanda nazarin amfani na kwanaki 30 ya ambata (yana buƙatar management token) |
-| `visibleModels` / `hiddenModels` | `[]`                                                    | Jerin izini na daidai-ko-suffix; hanawa ce ke rinjaye; `*` yana wallafa cikakken kundin (sauran matatu har yanzu suna aiki)      |
-| `geminiSanitization`             | `true`                                                  | Cire keywords na JSON-Schema da Gemini ke ƙi daga tool schemas (ana tura tools na `$ref` ba tare da canji ba)                    |
-| `apiFormat.allowAnthropic`       | `false`                                                 | Tura IDs da ke cikin jerin izini ta hanyar shingen Anthropic API                                                                 |
-| `apiFormat.anthropicModels`      | `[]`                                                    | Cikakkun IDs na samfuran da ake tura wa Anthropic                                                                                |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                        | Yawan bayanan da logger ke fitarwa                                                                                               |
+| Maɓalli                          | Tsoho                                                   | Bayani                                                                                                                                      |
+| -------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                           | ID na mai samarwa, ID na haɗawa, da prefix ɗin da samfura suke bayyana a ƙarƙashinsa                                                        |
+| `baseURL`                        | wajibi                                                  | Tushen gateway, `http(s)` kawai; ana ƙara ƙarshen `/v1` inda ake buƙata                                                                     |
+| `apiKey`                         | bayanan shaidar da aka haɗa, sannan `OMNIROUTE_API_KEY` | Maɓallin taɗi don `/v1/*`                                                                                                                   |
+| `managementReadToken`            | yana komawa ga `apiKey`                                 | Maɓalli don `/api/*` — yawanci **ba** ɗaya yake da wancan ba                                                                                |
+| `displayName`                    | `"OmniRoute"`                                           | Sunan mai samarwa a cikin mai zaɓi                                                                                                          |
+| `timeoutMs`                      | `10000`                                                 | Iyakar lokacin fetch ga kowane endpoint (auto-combos suna amfani da 5s)                                                                     |
+| `modelCacheTtlMs`                | `300000`                                                | TTL na cache ɗin kundin; hoton da aka adana a diski yana hanzarta farawa daga sanyi                                                         |
+| `timeouts`                       | yana komawa ga `timeoutMs`                              | Kasafin lokaci ga kowane endpoint a ms: `models`, `combos`, `autoCombos`, `enrichment`                                                      |
+| `enrichment`                     | `true`                                                  | Nemo sunaye, farashi da kasafin matakin kyauta                                                                                              |
+| `providerTag`                    | `true`                                                  | Sanya sunan mai samarwa na asali da ake tura buƙata zuwa gare shi a farkon sunan nuni                                                       |
+| `usableOnly`                     | `false`                                                 | Riƙe masu samarwa kawai waɗanda gateway ya nuna cewa an tanada su                                                                           |
+| `combosSource`                   | `"api"`                                                 | `"models"` yana tsallake `/api/combos` kuma yana wallafa layukan combo na `/v1/models`; matata na matakin memba suna riƙe `"api"`           |
+| `showcasePerOwner`               | `10`                                                    | Shigarwar kallon tsoho da ake riƙewa ga kowane mai samarwa                                                                                  |
+| `freshPerOwner`                  | `10`                                                    | Sabbin shigarwar kallon tsoho da ake riƙewa ga kowane mai samarwa                                                                           |
+| `freshWindowDays`                | `90`                                                    | Tsawon lokacin sabo a cikin kwanaki don reshen sabbin abubuwa                                                                               |
+| `usageMemory`                    | `true`                                                  | Maido da shigarwar da aka cire ta atomatik waɗanda nazarin amfani na kwanaki 30 ya ambata (yana buƙatar token na gudanarwa)                 |
+| `visibleModels` / `hiddenModels` | `[]`                                                    | Jerin izini na cikakken suna ko ƙarshen suna; hanawa ce ke da rinjaye; `*` yana wallafa cikakken kundin (sauran matata har yanzu suna aiki) |
+| `geminiSanitization`             | `true`                                                  | Cire kalmomin JSON-Schema da Gemini ba ya karɓa daga schemas na kayan aiki (ana tura kayan aikin `$ref` ba tare da canji ba)                |
+| `apiFormat.allowAnthropic`       | `false`                                                 | Tura IDs da ke cikin jerin izini ta hanyar ɓangaren Anthropic API                                                                           |
+| `apiFormat.anthropicModels`      | `[]`                                                    | Cikakkun IDs na samfura da ake tura wa Anthropic                                                                                            |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                        | Yawan bayanan da logger ke fitarwa                                                                                                          |
 
-Usage memory yana kunne ta tsohuwa. Idan babu management token, ba ya yin komai
+Ƙwaƙwalwar amfani tana kunne ta tsohuwa. Idan babu token na gudanarwa, ba ta yin komai
 (ana rubuta sanarwar farawa a log) kuma ba a maido da komai.
 
 ## Yadda kundin ke ci gaba da kasancewa sabo

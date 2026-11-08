@@ -13,10 +13,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTaskManager } from "@/lib/a2a/taskManager";
 import { logRoutingDecision } from "@/lib/a2a/routingLogger";
+import { resolveA2AComboAttribution } from "@/lib/a2a/resolveComboAttribution";
 import { createA2AStream, SSE_HEADERS } from "@/lib/a2a/streaming";
 import { A2A_SKILL_HANDLERS, executeA2ATaskWithState } from "@/lib/a2a/taskExecution";
 import { getSettings } from "@/lib/db/settings";
 import { authenticateA2ARequest, resolveA2AOwner } from "@/lib/a2a/authenticate";
+import type { A2ACallerContext } from "@/lib/a2a/selfLoopAuth";
+import { extractApiKey } from "@/sse/services/auth";
 
 // ============ A2A v1.0 ↔ v0.3 compatibility layer ============
 // A2A 1.0 renamed the JSON-RPC methods (message/send → SendMessage,
@@ -188,6 +191,9 @@ export async function POST(req: NextRequest) {
   // GHSA-jcm5-6wpp-wjj8: scope every task read/mutation below to the caller's
   // owner id (hashed API key; undefined under the keyless local-first posture).
   const callerOwner = await resolveA2AOwner(req);
+  // Skills that call back into OmniRoute send this caller's API key. Only a
+  // caller without one (a dashboard session) gets OMNIROUTE_API_KEY instead.
+  const caller: A2ACallerContext = { apiKey: extractApiKey(req) };
 
   // A2A 1.0 method-name compatibility (SendMessage → message/send, etc.)
   const isV1Method = method in V1_METHOD_ALIASES;
@@ -214,21 +220,31 @@ export async function POST(req: NextRequest) {
       const task = tm.createTask({ skill, messages, metadata: params?.metadata }, callerOwner);
       try {
         tm.updateTask(task.id, "working");
-        const result = await handler(task);
+        const result = await handler(task, caller);
         tm.updateTask(task.id, "completed", result.artifacts);
 
         // Log routing decision
         if (skill === "smart-routing" && result.metadata) {
           const smartMetadata = result.metadata as {
             routing_explanation?: string;
+            requested_combo?: string | null;
+            confirmed_combo?: string | null;
+            dispatched_model?: string;
+            response_model?: string;
             cost_envelope?: { actual?: number };
           };
+          const attribution = resolveA2AComboAttribution(smartMetadata);
           logRoutingDecision({
             taskType: (params?.metadata?.role as string) || "general",
-            comboId: (params?.metadata?.combo as string) || "default",
+            comboId: attribution.comboId,
+            requestedCombo: attribution.requestedCombo,
             providerSelected:
               smartMetadata.routing_explanation?.match(/"([^"]+)"/)?.[1] || "unknown",
-            modelUsed: (params?.metadata?.model as string) || "auto",
+            modelUsed:
+              smartMetadata.response_model ||
+              smartMetadata.dispatched_model ||
+              (params?.metadata?.model as string) ||
+              "auto",
             score: 1,
             factors: [],
             fallbacksTriggered: [],
@@ -282,7 +298,7 @@ export async function POST(req: NextRequest) {
 
       const stream = createA2AStream(
         task,
-        async (t) => executeA2ATaskWithState(tm, t, handler),
+        async (t) => executeA2ATaskWithState(tm, t, (st) => handler(st, caller)),
         req.signal,
         {
           onStart: () => tm.beginStream(),

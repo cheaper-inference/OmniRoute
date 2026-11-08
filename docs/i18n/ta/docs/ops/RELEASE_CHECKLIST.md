@@ -112,136 +112,136 @@ Tests மட்டும் கொண்ட diffs (`tests/`-இன் கீழ�
 
 ## விரிவான சரிபார்ப்புப் பட்டியல்
 
-### வெளியீட்டுக்கு முன்
+### வெளியீட்டிற்கு முன்
 
-- [ ] இந்த வெளியீட்டை இலக்காகக் கொண்ட அனைத்து PR-களும் `release/vX.Y.0`-இல் merge செய்யப்பட்டுள்ளன
-- [ ] இந்த version-க்கான திறந்துள்ள அனைத்து Linear/issue உருப்படிகளும் மூடப்பட்டுள்ளன அல்லது அடுத்த milestone-க்கு மாற்றப்பட்டுள்ளன
-- [ ] `release/vX.Y.0` branch-இல் CI வெற்றி நிலையில் உள்ளது
-- [ ] code-இல் `TODO(release)` markers இல்லை: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker base image புதுப்பித்த நிலையில் உள்ளது (தற்போது `node:24.15.0-trixie-slim`)
+- [ ] இந்த வெளியீட்டை இலக்காகக் கொண்ட அனைத்து PR-களும் `release/vX.Y.0` உடன் ஒன்றிணைக்கப்பட்டுள்ளன
+- [ ] இந்தப் பதிப்பிற்கான திறந்துள்ள அனைத்து Linear/issue உருப்படிகளும் மூடப்பட்டுள்ளன அல்லது அடுத்த மைல்கல்லுக்கு நகர்த்தப்பட்டுள்ளன
+- [ ] `release/vX.Y.0` கிளையில் CI வெற்றிகரமாக உள்ளது
+- [ ] குறியீட்டில் `TODO(release)` குறியீடுகள் இல்லை: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker அடிப்படை image புதுப்பித்த நிலையில் உள்ளது (தற்போது `node:24.15.0-trixie-slim`)
 
-### Version மற்றும் Changelog
+### பதிப்பு & மாற்றப் பதிவு
 
-- [ ] `/version-bump-cc <patch|minor|major>`-ஐ இயக்கவும் (Claude Code skill)
-  - `package.json`, `electron/package.json` ஆகியவற்றின் versions-ஐ உயர்த்துகிறது
-  - கடைசி tag-க்குப் பிந்தைய git commits-இலிருந்து `CHANGELOG.md`-ஐ மீண்டும் உருவாக்குகிறது
-  - README.md badges-ஐப் புதுப்பிக்கிறது
-- [ ] CHANGELOG.md-ஐ கைமுறையாகச் சரிபார்த்து, தேவைப்பட்டால் commit messages-ஐச் சீரமைக்கவும்
-- [ ] `CHANGELOG.md`-இன் சமீபத்திய semver பகுதி `package.json` version-க்கு சமமாக இருப்பதை உறுதிசெய்யவும்
-- [ ] வரவிருக்கும் பணிக்காக `## [Unreleased]`-ஐ முதல் changelog பகுதியாக வைத்திருக்கவும்
-- [ ] `docs/openapi.yaml`-ஐப் புதுப்பிக்கவும் → `info.version`, `package.json` version-க்கு சமமாக இருக்க வேண்டும்
+- [ ] `/version-bump-cc <patch|minor|major>`-ஐ இயக்கவும் (Claude Code திறன்)
+  - `package.json`, `electron/package.json` ஆகியவற்றின் பதிப்புகளை உயர்த்துகிறது
+  - கடைசி tag-க்குப் பிறகான git commit-களிலிருந்து `CHANGELOG.md`-ஐ மீண்டும் உருவாக்குகிறது
+  - README.md badge-களைப் புதுப்பிக்கிறது
+- [ ] CHANGELOG.md-ஐ கைமுறையாக மதிப்பாய்வு செய்து, தேவைப்பட்டால் commit செய்திகளைச் சீரமைக்கவும்
+- [ ] `CHANGELOG.md`-இல் உள்ள சமீபத்திய semver பிரிவு, `package.json` பதிப்புக்குச் சமமாக இருப்பதை உறுதிப்படுத்தவும்
+- [ ] வரவிருக்கும் பணிகளுக்காக `## [Unreleased]`-ஐ மாற்றப் பதிவின் முதல் பிரிவாக வைத்திருக்கவும்
+- [ ] `docs/openapi.yaml` → `info.version`, `package.json` பதிப்புக்குச் சமமாக இருக்க வேண்டும்
 
-### Code தரம்
+### குறியீட்டுத் தரம்
 
-- [ ] `npm run lint` — 0 errors (warnings முன்பே இருந்தவை)
+- [ ] `npm run lint` — 0 பிழைகள் (எச்சரிக்கைகள் ஏற்கனவே இருந்தவை)
 - [ ] `npm run typecheck:core` — சிக்கல்கள் இல்லை
-- [ ] `npm run typecheck:noimplicit:core` — சிக்கல்கள் இல்லை (strict)
-- [ ] `npm run check:cycles:ratchet` — `cycles ≤ metrics.cycles.value` (`quality-baseline.json`; `check:cycles`: `cycles > 0 → exit 1`, #15281)
-- [ ] `npm run check:any-budget:t11` — budget வரம்பிற்குள் உள்ளது
+- [ ] `npm run typecheck:noimplicit:core` — சிக்கல்கள் இல்லை (கடுமையானது)
+- [ ] `npm run check:cycles:ratchet` — நிலைப்படுத்தப்பட்ட `metrics.cycles` உச்சவரம்பிற்குள் உள்ளது (வெறும் `check:cycles`, ஏதேனும் cycle இருந்தால் 1 என்ற நிலையுடன் வெளியேறும், #15281)
+- [ ] `npm run check:any-budget:t11` — ஒதுக்கீட்டு வரம்பிற்குள் உள்ளது
 - [ ] `npm run check:route-validation:t06` — சிக்கல்கள் இல்லை
-- [ ] `npm run check:node-runtime` — ஆதரிக்கப்படும் runtime குறைந்தபட்சம் பூர்த்தி செய்யப்பட்டுள்ளது (`>=22.22.2 <23`, `>=24.0.0 <27`; `src/shared/utils/nodeRuntimeSupport.ts`-இல் உள்ள `SUPPORTED_NODE_RANGE`-இன்படி; `package.json`-இன் `engines` உடன் ஒத்திசைக்கப்பட்டுள்ளது)
+- [ ] `npm run check:node-runtime` — ஆதரிக்கப்படும் குறைந்தபட்ச runtime வரம்பு பூர்த்திசெய்யப்பட்டுள்ளது (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts`-இல் உள்ள `SUPPORTED_NODE_RANGE`-இன்படி; `package.json`-இன் `engines` உடன் ஒத்திசைக்கப்பட்டுள்ளது)
 
 ### சோதனை
 
-- [ ] `npm run test:unit` — வெற்றி
-- [ ] `npm run test:vitest` — வெற்றி (MCP server, autoCombo, cache)
-- [ ] `npm run test:coverage` — 60/60/60/60 gate பூர்த்தி செய்யப்பட்டுள்ளது (statements/lines/functions/branches)
-- [ ] `npm run test:integration` — வெற்றி (மாற்றங்கள் DB / handlers-ஐத் தொட்டால்)
-- [ ] `npm run test:combo:matrix` — வெற்றி (combo strategy matrix: பொதுவான 19 routing strategies அனைத்தின் selection decisions-ஐத் தீர்மானகரமாக நிரூபிக்கிறது; combo routing, strategy resolution அல்லது fallback logic-ஐ மாற்றும்போது இயக்கவும்)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **விருப்பத்திற்குரியது/கைமுறை** (gate செய்யப்பட்ட உண்மையான-upstream smoke; VPS `root@192.168.0.15`-இலிருந்து read-only DB snapshot-ஐப் பெறுகிறது; உண்மையான providers-ஐ அணுகுவதால் credits செலவாகும்; CI-இல் ஒருபோதும் இயங்காது; gate இல்லையெனில் சிக்கலின்றித் தவிர்க்கப்படும்)
-- [ ] `npm run test:combo:live:vps` — **விருப்பத்திற்குரியது/கைமுறை** (Phase-3 VPS live smoke: எளிய Node ESM வழியாக live `.15` server-க்கு எதிரான 7 HTTP scenarios; `ssh root@192.168.0.15` தேவை; `__live_test__*` combos-ஐ மட்டுமே உருவாக்கி/நீக்குகிறது; உண்மையான providers-ஐ அணுகுகிறது; CI-இல் ஒருபோதும் இயங்காது)
-- [ ] `npm run test:e2e` — வெற்றி (UI மாற்றங்கள்)
-- [ ] `npm run test:protocols:e2e` — வெற்றி (MCP/A2A மாற்றங்கள்)
-- [ ] `npm run test:ecosystem` — வெற்றி
+- [ ] `npm run test:unit` — தேர்ச்சி
+- [ ] `npm run test:vitest` — தேர்ச்சி (MCP server, autoCombo, cache)
+- [ ] `npm run test:coverage` — 60/60/60/60 வரம்பு பூர்த்திசெய்யப்பட்டுள்ளது (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — தேர்ச்சி (மாற்றங்கள் DB / handlers-ஐத் தொட்டிருந்தால்)
+- [ ] `npm run test:combo:matrix` — தேர்ச்சி (combo strategy matrix: பொதுவாகக் கிடைக்கும் 19 routing strategy-களின் தேர்வு முடிவுகள் அனைத்தையும் நிர்ணயிக்கப்பட்ட முறையில் நிரூபிக்கிறது; combo routing, strategy resolution அல்லது fallback logic-ஐ மாற்றும்போது இயக்கவும்)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **விருப்பத்திற்குரியது/கைமுறை** (கட்டுப்படுத்தப்பட்ட உண்மையான upstream smoke சோதனை; VPS `root@192.168.0.15`-இலிருந்து வாசிப்பதற்கு மட்டும் அனுமதிக்கப்பட்ட DB snapshot-ஐப் பெறுகிறது; உண்மையான provider-களை அணுகுகிறது, credit-கள் செலவாகும்; CI-இல் ஒருபோதும் இயங்காது; gate இல்லையெனில் சிக்கலின்றித் தவிர்க்கப்படும்)
+- [ ] `npm run test:combo:live:vps` — **விருப்பத்திற்குரியது/கைமுறை** (கட்டம்-3 VPS நேரடி smoke சோதனை: சாதாரண Node ESM வழியாக நேரடி `.15` server-க்கு எதிரான 7 HTTP சூழல்கள்; `ssh root@192.168.0.15` தேவை; `__live_test__*` combo-களை மட்டுமே உருவாக்கி/நீக்குகிறது; உண்மையான provider-களை அணுகுகிறது; CI-இல் ஒருபோதும் இயங்காது)
+- [ ] `npm run test:e2e` — தேர்ச்சி (UI மாற்றங்கள்)
+- [ ] `npm run test:protocols:e2e` — தேர்ச்சி (MCP/A2A மாற்றங்கள்)
+- [ ] `npm run test:ecosystem` — தேர்ச்சி
 
-### Hooks (Husky மூலம் சரிபார்க்கப்பட்டது)
+### Hook-கள் (Husky மூலம் சரிபார்க்கப்பட்டவை)
 
-Husky hooks `.husky/`-இல் உள்ளன; git செயல்பாடுகளின்போது தானாக இயங்கும்.
+Husky hook-கள் `.husky/`-இல் உள்ளன; git செயல்பாடுகளின்போது தானாக இயங்குகின்றன.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** விரைவான, தீர்மானகரமான gates — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 அன்று செயல்படுத்தப்பட்டது). `test:unit` வேண்டுமென்றே விலக்கப்பட்டுள்ளது (மெதுவானது; CI `test-unit` job மூலம் கையாளப்படுகிறது).
-  - release branches-ஐ push செய்வதற்கு முன் `npm run test:unit`-ஐ கைமுறையாக இயக்கவும்.
+- **pre-push:** வேகமான, நிர்ணயிக்கப்பட்ட gate-கள் — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 அன்று செயல்படுத்தப்பட்டது). `test:unit` வேண்டுமென்றே விலக்கப்பட்டுள்ளது (மெதுவானது; CI `test-unit` job மூலம் உள்ளடக்கப்படுகிறது).
+  - வெளியீட்டுக் கிளைகளை push செய்வதற்கு முன் `npm run test:unit`-ஐ கைமுறையாக இயக்கவும்.
 
 ஒரு hook தோல்வியடைந்தால்: அடிப்படைச் சிக்கலைச் சரிசெய்யவும்; `--no-verify` மூலம் அதைத் தவிர்க்க வேண்டாம்.
 
-### Conventional Commits
+### வழக்கமான Commit-கள்
 
-வெளியீட்டில் சேரவுள்ள அனைத்து commits-உம் `type(scope): subject` வடிவத்தைப் பின்பற்ற வேண்டும்.
+வெளியீட்டில் சேரவுள்ள அனைத்து commit-களும் `type(scope): subject` வடிவமைப்பைப் பின்பற்ற வேண்டும்.
 
-**செல்லுபடியாகும் types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**செல்லுபடியாகும் type-கள்:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**செல்லுபடியாகும் scopes:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**செல்லுபடியாகும் scope-கள்:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
 முறிவை ஏற்படுத்தும் மாற்றங்கள்: `BREAKING CHANGE:` footer-ஐ அல்லது scope-க்குப் பிறகு `!`-ஐச் சேர்க்கவும் (எ.கா. `feat(api)!: drop /v0`).
 
 ### ஆவணப்படுத்தல்
 
-- [ ] `npm run check:docs-sync` வெற்றிபெறுகிறது (pre-commit மூலம் தானாக இயக்கப்படும்)
-- [ ] `npm run check:docs-all` வெற்றிபெறுகிறது (ஒட்டுமொத்தச் சோதனை: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` 0-ஐக் கொண்டு வெளியேறுகிறது — குறியீடு ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` சூழல் ஒப்பந்தம் சீராக உள்ளது
-- [ ] `npm run check:doc-links` 0-ஐக் கொண்டு வெளியேறுகிறது — மறுகட்டமைப்புக்குப் பிறகு செயலிழந்த உள் markdown குறிப்புகள் எதுவும் இல்லை
-- [ ] சேமிப்பகம்/இயக்கநேர வேறுபாடுகளுக்காக `docs/architecture/ARCHITECTURE.md` மதிப்பாய்வு செய்யப்பட்டது
-- [ ] சூழல் மாறிகள் மற்றும் செயல்பாட்டு வேறுபாடுகளுக்காக `docs/guides/TROUBLESHOOTING.md` மதிப்பாய்வு செய்யப்பட்டது
+- [ ] `npm run check:docs-sync` தேர்ச்சி பெறுகிறது (pre-commit மூலம் தானாக இயக்கப்படும்)
+- [ ] `npm run check:docs-all` தேர்ச்சி பெறுகிறது (ஒருங்கிணைந்தது: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync`, 0 என்ற நிலையுடன் வெளியேறுகிறது — குறியீடு ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ஒப்பந்தம் பாதிக்கப்படாமல் உள்ளது
+- [ ] `npm run check:doc-links`, 0 என்ற நிலையுடன் வெளியேறுகிறது — மறுகட்டமைப்பிற்குப் பிறகு உடைந்த உள் markdown மேற்கோள்கள் இல்லை
+- [ ] storage/runtime வேறுபாடுகளுக்காக `docs/architecture/ARCHITECTURE.md` மதிப்பாய்வு செய்யப்பட்டுள்ளது
+- [ ] env var மற்றும் செயல்பாட்டு வேறுபாடுகளுக்காக `docs/guides/TROUBLESHOOTING.md` மதிப்பாய்வு செய்யப்பட்டுள்ளது
 - [ ] `.env.example` மாறியிருந்தால்: `docs/reference/ENVIRONMENT.md` புதுப்பிக்கப்பட்டுள்ளது
 - [ ] புதிய அம்சத்திற்கு UI இருந்தால்: `docs/guides/USER_GUIDE.md` அதைக் குறிப்பிடுகிறது
 - [ ] புதிய அம்சத்திற்கு API இருந்தால்: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` புதுப்பிக்கப்பட்டுள்ளன
-- [ ] புதிய அம்சம் ஒரு தொகுதியாக இருந்தால்: அதற்கெனத் தனிப்பட்ட `docs/<MODULE>.md` உள்ளது
-- [ ] இணக்கத்தன்மையை முறிக்கும் மாற்றமாக இருந்தால்: `docs/guides/TROUBLESHOOTING.md`-இல் இடம்பெயர்வு குறிப்பு உள்ளது
+- [ ] புதிய அம்சம் ஒரு module என்றால்: அதற்கென `docs/<MODULE>.md` உள்ளது
+- [ ] முறிவை ஏற்படுத்தும் மாற்றமாக இருந்தால்: `docs/guides/TROUBLESHOOTING.md`-இல் migration குறிப்பு உள்ளது
 
 ### i18n
 
-- [ ] `npm run i18n:check` 0-ஐக் கொண்டு வெளியேறுகிறது — மொழிபெயர்ப்பு நிலை (`.i18n-state.json`) மூல ஆவணங்களுடன் ஒத்திசைவில் உள்ளது (கடுமையான பயன்முறையில் விலகிய மூலங்கள் இல்லை; கடைசி நேர ஆவணத் திருத்தங்களுக்கு எச்சரிக்கைப் பயன்முறை அறிவுரை ஏற்கத்தக்கது, ஆனால் tag செய்வதற்கு முன் இது 0 ஆக இருக்க வேண்டும்)
-- [ ] `npm run i18n:check-ui-coverage` 0-ஐக் கொண்டு வெளியேறுகிறது — ஒவ்வொரு UI மொழிப்பிராந்தியமும் 80% உள்ளடக்கக் குறைந்தபட்ச வரம்பில் அல்லது அதற்கு மேல் உள்ளது
-- [ ] `npm run i18n:sync-ui:dry` அனைத்து 42 மொழிப்பிராந்தியங்களிலும் விடுபட்ட விசைகள் 0 எனத் தெரிவிக்கிறது
+- [ ] `npm run i18n:check`, 0 என்ற நிலையுடன் வெளியேறுகிறது — மொழிபெயர்ப்பு நிலை (`.i18n-state.json`) மூல ஆவணங்களுடன் ஒத்திசைவில் உள்ளது (strict mode-இல் வேறுபட்ட மூலங்கள் இல்லை; கடைசி நேர ஆவணத் திருத்தங்களுக்கு warn-mode அறிவுரை ஏற்கத்தக்கது, ஆனால் tag செய்வதற்கு முன் இது 0 ஆக இருக்க வேண்டும்)
+- [ ] `npm run i18n:check-ui-coverage`, 0 என்ற நிலையுடன் வெளியேறுகிறது — ஒவ்வொரு UI locale-மும் 80% coverage குறைந்தபட்ச வரம்பில் அல்லது அதற்கு மேல் உள்ளது
+- [ ] `npm run i18n:sync-ui:dry`, இலக்காக உள்ள அனைத்து 66 locale-களிலும் விடுபட்ட key-கள் 0 எனத் தெரிவிக்கிறது (`en` மூலத்தைத் தவிர ஒவ்வொரு locale-மும்)
 - [ ] மூல ஆங்கில ஆவணங்கள் மாறியிருந்தால், tag செய்வதற்கு முன் `npm run i18n:run`-ஐ இயக்கவும் (`.env`-இல் `OMNIROUTE_TRANSLATION_API_KEY` தேவை)
-- [ ] மொழிபெயர்ப்புப் பங்களிப்புகள் சிறியவையாக இருந்தால் அடுத்த வெளியீட்டிற்கு ஒத்திவைக்கலாம் (CHANGELOG-இல் கண்காணிக்கவும்)
+- [ ] மொழிபெயர்ப்புப் பங்களிப்புகள் சிறியவை என்றால், அவற்றை அடுத்த வெளியீட்டிற்குத் தள்ளிவைக்கலாம் (CHANGELOG-இல் கண்காணிக்கவும்)
 
-### தரவுத்தள இடம்பெயர்வுகள்
+### தரவுத்தள Migration-கள்
 
 - [ ] `src/lib/db/migrations/`-இல் புதிய கோப்புகள் இருந்தால்:
-  - [ ] ஒவ்வொரு இடம்பெயர்வும் மீளியக்கத்தக்கது (`CREATE TABLE IF NOT EXISTS` போன்றவை)
-  - [ ] இடம்பெயர்வுகள் பரிவர்த்தனைகளில் சுற்றப்பட்டுள்ளன
+  - [ ] ஒவ்வொரு migration-மும் idempotent ஆக உள்ளது (`CREATE TABLE IF NOT EXISTS`, போன்றவை)
+  - [ ] Migration-கள் transaction-களில் மடக்கப்பட்டுள்ளன
   - [ ] சரியாக எண்ணிடப்பட்டுள்ளன (வரிசையில் இடைவெளிகள் இல்லை)
 - [ ] புதிய நிறுவலில் சோதிக்கவும்: `~/.omniroute/omniroute.db`-ஐ நீக்கி `npm run dev`-ஐ இயக்கவும்
-- [ ] ஏற்கனவே உள்ள நிறுவலில் சோதிக்கவும்: DB-ஐக் காப்புப் பிரதி எடுத்து, இடம்பெயர்வை இயக்கி, schema-ஐச் சரிபார்க்கவும்
-- [ ] இடம்பெயர்வு அட்டவணைகளை மீண்டும் எழுதினால் WAL கோப்புகள் (`-wal`, `-shm`) சரியாகக் கையாளப்படுகின்றன
+- [ ] ஏற்கனவே உள்ள நிறுவலில் சோதிக்கவும்: DB-ஐ backup செய்து, migration-ஐ இயக்கி, schema-ஐச் சரிபார்க்கவும்
+- [ ] migration அட்டவணைகளை மீண்டும் எழுதினால், WAL கோப்புகள் (`-wal`, `-shm`) சரியாகக் கையாளப்படுகின்றன
 
 ### வழங்குநர் பட்டியல் (Zod மூலம் சரிபார்க்கப்பட்டது)
 
-- [ ] ஏற்றப்படும் நேரத்தில் `src/shared/constants/providers.ts` Zod schema செல்லுபடியாக உள்ளது
-  - [ ] அனைத்து வழங்குநர்களுக்கும் தேவையான புலங்கள் (`id`, `label`, `kind` போன்றவை) உள்ளன
+- [ ] ஏற்றும் நேரத்தில் `src/shared/constants/providers.ts` Zod schema செல்லுபடியாக உள்ளது
+  - [ ] அனைத்து வழங்குநர்களும் தேவையான புலங்களைக் (`id`, `label`, `kind` போன்றவை) கொண்டுள்ளன
   - [ ] புதிய இலவச வழங்குநர்களுக்கு `freeNote` வழங்கப்பட்டுள்ளது
-  - [ ] OAuth வழங்குநர்களின் `oauthConfig`, `src/lib/oauth/constants/oauth.ts`-இல் பதிவுசெய்யப்பட்டுள்ளது
-- [ ] புதிய வழங்குநர் சேர்க்கப்பட்டிருந்தால்: அதற்குரிய executor `open-sse/executors/`-இல் உள்ளது
-- [ ] OpenAI அல்லாத வடிவமாக இருந்தால்: translator `open-sse/translator/`-இல் உள்ளது
-- [ ] Models, `open-sse/config/providerRegistry.ts`-இல் பதிவுசெய்யப்பட்டுள்ளன
-- [ ] `tests/unit/`-இல் உள்ள அலகுச் சோதனைகள் வழங்குநர் வகைப்பாடு மற்றும் வழிப்படுத்தலை உள்ளடக்குகின்றன
+  - [ ] OAuth வழங்குநர்களின் `oauthConfig`, `src/lib/oauth/constants/oauth.ts` இல் பதிவுசெய்யப்பட்டுள்ளது
+- [ ] புதிய வழங்குநர் சேர்க்கப்பட்டிருந்தால்: அதற்குரிய executor `open-sse/executors/` இல் உள்ளது
+- [ ] OpenAI அல்லாத வடிவமைப்பாக இருந்தால்: translator `open-sse/translator/` இல் உள்ளது
+- [ ] Models, `open-sse/config/providerRegistry.ts` இல் பதிவுசெய்யப்பட்டுள்ளன
+- [ ] `tests/unit/` இல் உள்ள unit tests, வழங்குநர் வகைப்பாடு மற்றும் routing ஆகியவற்றைச் சோதிக்கின்றன
 
 ### Desktop (Electron)
 
-`electron/` மாறியிருந்தால்:
+`electron/` மாற்றப்பட்டிருந்தால்:
 
 - [ ] `npm run electron:smoke:packaged` வெற்றிபெறுகிறது
-- [ ] `:win`, `:mac`, `:linux` ஆகியவற்றில் குறைந்தது ஒன்றிற்கான build சோதிக்கப்பட்டுள்ளது
-- [ ] குறியீட்டுக் கையொப்பச் சான்றிதழ்கள் காலாவதியாகவில்லை (கையொப்பமிடப்பட்டால்)
-- [ ] `electron/package.json` பதிப்பு, மூல `package.json` பதிப்புடன் பொருந்துகிறது
-- [ ] `stable`-க்கு வெளியிடுவதாக இருந்தால் தானியங்குப் புதுப்பிப்பு channel pointer புதுப்பிக்கப்பட்டுள்ளது
+- [ ] `:win`, `:mac`, `:linux` ஆகியவற்றில் குறைந்தது ஒன்றிற்கான builds சோதிக்கப்பட்டுள்ளன
+- [ ] Code signing certs காலாவதியாகவில்லை (signing செய்தால்)
+- [ ] `electron/package.json` version, மூல `package.json` உடன் பொருந்துகிறது
+- [ ] `stable` க்கு வெளியிடுவதாக இருந்தால் auto-update channel pointer புதுப்பிக்கப்பட்டுள்ளது
 
 ### Build அமைப்பு
 
-களஞ்சியம் மூன்று தனித்துவமான வெளியீட்டு அடைவுகளைப் பயன்படுத்துகிறது — அவற்றை ஒருபோதும் குழப்ப வேண்டாம்:
+இந்த repository மூன்று தனித்துவமான output directories-ஐப் பயன்படுத்துகிறது — அவற்றை ஒருபோதும் குழப்ப வேண்டாம்:
 
-| அடைவு     | நோக்கம்                                                                         | கண்காணிக்கப்படுகிறதா? |
-| --------- | ------------------------------------------------------------------------------- | --------------------- |
-| `src/`    | பயன்பாட்டு மூலக்குறியீடு (TypeScript / TSX)                                     | ஆம்                   |
-| `.build/` | Build இடைநிலைகள் — `next build` வெளியீடு (`distDir`)                            | இல்லை (gitignored)    |
-| `dist/`   | விநியோகிக்கக்கூடிய npm bundle — `assembleStandalone` மூலம் ஒருங்கிணைக்கப்பட்டது | இல்லை (gitignored)    |
+| Directory | நோக்கம்                                                                    | கண்காணிக்கப்படுகிறதா? |
+| --------- | -------------------------------------------------------------------------- | --------------------- |
+| `src/`    | Application source (TypeScript / TSX)                                      | ஆம்                   |
+| `.build/` | Build intermediates — `next build` output (`distDir`)                      | இல்லை (gitignored)    |
+| `dist/`   | விநியோகிக்கக்கூடிய npm bundle — `assembleStandalone` மூலம் தொகுக்கப்பட்டது | இல்லை (gitignored)    |
 
-> **இயக்குநர் குறிப்பு:** தொலைநிலை VPS image அடைவு தொடர்ந்து `/usr/lib/node_modules/omniroute/app/` ஆகவே உள்ளது.
-> **களஞ்சியத்திற்குள் உள்ள** build வெளியீடு மட்டுமே நகர்த்தப்பட்டது (`app/` → `dist/`). Deploy skills,
-> `dist/` உள்ளடக்கங்களைத் தொலைநிலை `app/` அடைவிற்குள் rsync செய்கின்றன — VPS பாதையில் எந்த மாற்றமும் தேவையில்லை.
+> **Operator குறிப்பு:** தொலைநிலை VPS image directory தொடர்ந்து `/usr/lib/node_modules/omniroute/app/` ஆகவே இருக்கும்.
+> **Repository-க்குள் உள்ள** build output மட்டுமே நகர்த்தப்பட்டது (`app/` → `dist/`). Deploy skills,
+> `dist/` உள்ளடக்கங்களைத் தொலைநிலை `app/` dir-க்கு rsync செய்கின்றன — VPS path மாற்றங்கள் எதுவும் தேவையில்லை.
 
-**ஒற்றை-build ஓட்டம்:**
+**ஒற்றை-build செயல்முறை:**
 
 ```
 npm run build:release
@@ -251,23 +251,23 @@ npm run build:release
   └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Deploy செய்வதற்கு `npm run build`-ஐ இயக்கிவிட்டு, அதைத் தொடர்ந்து தனியாக `npm run build:cli`-ஐ இயக்க வேண்டாம் — ஒரே கட்டளையில் சுத்தமான மறுகட்டமைப்பு + sentinel-ஐச் செய்யும்
-`npm run build:release`-ஐப் பயன்படுத்தவும்.
+Deploy செய்வதற்கு `npm run build` ஐ இயக்கிய பின்னர் தனியாக `npm run build:cli` ஐ இயக்க வேண்டாம் — ஒரே command-இல் clean rebuild + sentinel செய்யும்
+`npm run build:release` ஐப் பயன்படுத்தவும்.
 
 ### Artifact சரிபார்ப்பு
 
 - [ ] `npm run build:release` வெற்றிபெறுகிறது மற்றும் `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` சுத்தமாக உள்ளது — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` அல்லது பிற உள்ளூர் எச்சங்கள் எதுவும் இல்லை
+- [ ] `npm run check:pack-artifact` clean ஆக உள்ளது — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` அல்லது பிற உள்ளூர் எச்சங்கள் எதுவும் இல்லை
 - [ ] Build-க்குப் பிறகு `dist/server.js` உள்ளது
-- [ ] விருப்பத்திற்குரிய உள்ளூர் தொகுக்கப்பட்ட இயக்கநேர smoke சோதனை: `npm run dev:candidate -- build`-க்குப் பிறகு `npm run dev:candidate -- validate`, தொகுக்கப்பட்ட tarball-ஐத் தனிமைப்படுத்தப்பட்ட `DATA_DIR`-இல் தொடங்கி `/api/health` + `/v1/models` ஆகியவற்றைச் சரிபார்க்கிறது ([பங்களிப்புக்கான முதன்மைப் பாதை](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) பார்க்கவும்)
+- [ ] விருப்பத்திற்குரிய உள்ளூர் packaged-runtime smoke: `npm run dev:candidate -- build` க்குப் பிறகு `npm run dev:candidate -- validate`, தனிமைப்படுத்தப்பட்ட `DATA_DIR` இல் packed tarball-ஐத் தொடங்கி `/api/health` + `/v1/models` ஆகியவற்றைச் சரிபார்க்கிறது ([Contribution Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) பார்க்கவும்)
 
-### Tag செய்தல் மற்றும் வெளியீடு
+### Tagging & வெளியீடு
 
-- [ ] `/generate-release-cc`-ஐ இயக்கவும் (Claude Code skill):
+- [ ] `/generate-release-cc` ஐ இயக்கவும் (Claude Code skill):
   - `vX.Y.Z` tag-ஐ உருவாக்குகிறது
   - Tag மற்றும் branch-ஐ push செய்கிறது
   - Changelog உள்ளடக்கத்துடன் GitHub Release-ஐத் திறக்கிறது
-  - Electron நிறுவிகளை இணைக்கிறது (build செய்யப்பட்டிருந்தால்)
+  - Electron installers-ஐ இணைக்கிறது (build செய்யப்பட்டிருந்தால்)
 - [ ] அல்லது கைமுறையாக:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -277,43 +277,44 @@ Deploy செய்வதற்கு `npm run build`-ஐ இயக்கிவ�
 
 ### Deploy
 
-Deploy skills இலகுவான rsync ஓட்டத்தைப் பயன்படுத்துகின்றன — `npm pack` இல்லை, `npm i -g` இல்லை:
+Deploy skills, இலகுவான rsync செயல்முறையைப் பயன்படுத்துகின்றன — `npm pack` இல்லை, `npm i -g` இல்லை:
 
 - [ ] இலக்குடன் பொருந்தும் deploy skill-ஐப் பயன்படுத்தவும்:
   - `/deploy-vps-local-cc` — உள்ளூர் VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — இரண்டும்
-- [ ] deploy செய்வதற்கு முன், `dist/BUILD_SHA` == `git rev-parse --short HEAD` என்பதை உறுதிப்படுத்தவும்
-- [ ] `node_modules` உண்மையாக உள்ள இடத்தில்தான் build இயங்க வேண்டும் (முதன்மை checkout அல்லது `npm ci` இயக்கப்பட்ட worktree — symlink செய்யப்பட்ட worktree அல்ல)
-- [ ] deploy செய்யப்பட்ட instance-ஐ smoke test செய்யவும்:
-  - `/dashboard/health`-ஐத் திறந்து → version string வெளியீட்டுடன் பொருந்துகிறதா எனச் சரிபார்க்கவும்
-  - அறியப்பட்ட provider ஒன்றுக்கு எதிராக `/v1/chat/completions` request ஒன்றை இயக்கவும்
-  - `/api/monitoring/health`, `CLOSED` circuit breakers-ஐ வழங்குகிறதா எனச் சரிபார்க்கவும்
-  - MCP transports பதிலளிக்கின்றனவா என்பதை உறுதிப்படுத்தவும் (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] Deploy செய்வதற்கு முன், `dist/BUILD_SHA` == `git rev-parse --short HEAD` என்பதை உறுதிப்படுத்தவும்
+- [ ] `node_modules` உண்மையாக இருக்கும் இடத்தில் build இயக்கப்பட வேண்டும் (முதன்மை checkout அல்லது `npm ci` செய்யப்பட்ட worktree — symlink செய்யப்பட்ட worktree அல்ல)
+- [ ] Deploy செய்யப்பட்ட instance-ஐ smoke test செய்யவும்:
+  - `/dashboard/health` ஐத் திறந்து → version string வெளியீட்டுடன் பொருந்துகிறதா எனச் சரிபார்க்கவும்
+  - அறியப்பட்ட வழங்குநருக்கு எதிராக `/v1/chat/completions` request ஒன்றை இயக்கவும்
+  - `/api/monitoring/health`, `CLOSED` circuit breakers-ஐத் திருப்பி அளிக்கிறதா எனச் சரிபார்க்கவும்
+  - MCP transports பதிலளிக்கின்றனவா என உறுதிப்படுத்தவும் (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### வெளியீட்டிற்குப் பின்
+### வெளியீட்டிற்குப் பிந்தைய பணிகள்
 
-- [ ] `/capture-release-evidences-cc`-ஐ இயக்கவும் (Claude Code skill)
-  - புதிய அம்சங்களின் WebP screenshots/recordings-ஐப் பதிவு செய்கிறது
+- [ ] `/capture-release-evidences-cc` ஐ இயக்கவும் (Claude Code skill)
+  - புதிய அம்சங்களின் WebP screenshots/recordings-ஐப் பதிவுசெய்கிறது
   - அவற்றை release notes / blog post உடன் இணைக்கிறது
 - [ ] வெளியீட்டு அறிவிப்புடன் GitHub Discussions / Discord-ஐப் புதுப்பிக்கவும்
-- [ ] அடுத்த version-க்கான milestone-ஐத் திறக்கவும்
-- [ ] முக்கியமானதாக இருந்தால்: discussion-ஐ pin செய்யவும் அல்லது பயன்பாட்டிலுள்ள banner-க்காக `news.json`-இல் பதிவிடவும்
+- [ ] அடுத்த version-க்கு milestone ஒன்றைத் திறக்கவும்
+- [ ] மிக முக்கியமானதாக இருந்தால்: discussion-ஐ pin செய்யவும் அல்லது பயன்பாட்டிற்குள் காட்டப்படும் banner-க்காக `news.json` இல் இடுகையிடவும்
 
 ### Radar பொது வெளியீட்டு gate
 
-Radar அறிவிப்பு திட்டமிட்டே `active: false` உடன் commit செய்யப்பட்டுள்ளது. கீழேயுள்ள ஒவ்வொரு உருப்படிக்கும் ஆதாரம் கிடைத்த பிறகு, activation ஒரு தனி மாற்றமாகச் செய்யப்படும்:
+Radar அறிவிப்பு திட்டமிட்டே `active: false` உடன் commit செய்யப்பட்டுள்ளது. கீழே உள்ள ஒவ்வொரு உருப்படிக்கும் ஆதாரம் கிடைத்த பிறகு மேற்கொள்ளப்படும் தனி
+மாற்றமே activation ஆகும்:
 
-- [ ] அடுக்கப்பட்ட அனைத்து Radar PR-களும் merge செய்யப்பட்டு, release-tip CI பச்சையாக இருக்க வேண்டும்
-- [ ] இயல்புநிலையில் `RADAR_ENABLED` தொடர்ந்து முடக்கப்பட்டிருக்கும்போது, OSS Radar routes-ஐ deploy செய்து smoke test செய்யவும்
-- [ ] குறிப்பிடப்பட்ட Radar host-இல் `GET /planos`, `/termos`, `/privacidade`, மற்றும் `/reembolso` ஆகியவற்றை smoke test செய்யவும்
-- [ ] தனிப்பட்ட service-இல் operator அடையாளம்/தொடர்பு/முகவரி மற்றும் owner அங்கீகரித்த சட்ட மதிப்பாய்வைப் பதிவு செய்யவும்
-- [ ] test mode-இல் மட்டும் Stripe Checkout மற்றும் கையொப்பமிடப்பட்ட webhook-ஐச் சோதிக்கவும்
-- [ ] அங்கீகரிக்கப்பட்ட sender/domain மூலம் மறையாக்கப்பட்ட transactional-email delivery ஒன்றைச் சோதிக்கவும்
-- [ ] backup restore மற்றும் மேற்பார்வையிடப்பட்ட, budget வரம்புக்குட்பட்ட research run ஒன்றை நிரூபிக்கவும்
+- [ ] அடுக்கப்பட்ட அனைத்து Radar PRs-உம் merge செய்யப்பட்டுள்ளன மற்றும் release-tip CI பச்சையாக உள்ளது
+- [ ] `RADAR_ENABLED` இயல்புநிலையில் தொடர்ந்து off ஆக இருக்கும்போது OSS Radar routes-ஐ deploy செய்து smoke test செய்யவும்
+- [ ] குறிப்பிடப்பட்ட Radar host இல் `GET /planos`, `/termos`, `/privacidade`, மற்றும் `/reembolso` ஆகியவற்றை smoke test செய்யவும்
+- [ ] தனியார் service இல் operator அடையாளம்/contact/address மற்றும் owner அங்கீகரித்த சட்ட மதிப்பாய்வைப் பதிவுசெய்யவும்
+- [ ] Stripe Checkout மற்றும் signed webhook-ஐ test mode இல் மட்டும் சோதிக்கவும்
+- [ ] அங்கீகரிக்கப்பட்ட sender/domain மூலம் ஒரு encrypted transactional-email delivery-ஐச் சோதிக்கவும்
+- [ ] Backup restore மற்றும் மேற்பார்வையிடப்பட்ட, budget வரம்பிடப்பட்ட ஒரு research run ஆகியவற்றை நிரூபிக்கவும்
 - [ ] நன்கொடை ஆதாரத்தை ஏற்றுக்கொள்வதற்கு முன் BRL/PIX மதிப்பாய்வுக் கொள்கையை அங்கீகரிக்கவும்
-- [ ] முந்தைய gates நிறைவடைந்த பிறகு மட்டுமே பொது Checkout-ஐ இயக்கி, பின்னர் புதிய `news.json` ID-ஐச் செயல்படுத்தவும்
-- [ ] Home banner உள்ளூர்மயமாக்கப்பட்ட உரையைப் பயன்படுத்துவதையும், பழைய ID ஒன்று dismiss செய்யப்பட்ட பிறகு புதிய ID மீண்டும் தோன்றுவதையும் சரிபார்க்கவும்
+- [ ] முந்தைய gates முடிந்த பிறகே public Checkout-ஐ இயக்கி, பின்னர் புதிய `news.json` ID-ஐ activate செய்யவும்
+- [ ] Home banner, மொழியாக்கப்பட்ட copy-ஐப் பயன்படுத்துகிறது என்பதையும், பழைய ID ஒன்று dismiss செய்யப்பட்ட பிறகு புதிய ID மீண்டும் தோன்றுகிறது என்பதையும் சரிபார்க்கவும்
 
 ## உட்பொதிக்கப்பட்ட சேவைகளுக்கான ஸ்மோக் சோதனை (v3.8.4+)
 

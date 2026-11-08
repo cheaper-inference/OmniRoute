@@ -38,34 +38,34 @@ Studio na may tatlong tab, na pinag-iisa ang paghahanap sa web, pag-scrape sa we
 
 ### Tab na Search
 
-Pinapalawak nito ang kasalukuyang `SearchForm` + `ResultsPanel` + `RerankPanel` bilang isang tab:
+Ginagawang isang tab ang kasalukuyang `SearchForm` + `ResultsPanel` + `RerankPanel`:
 
-- Query → mga resulta (pamagat, URL, snippet, relevance score).
-- Metadata ng provider sa Config pane (gastos, quota, status).
-- Seksyon ng rerank: pumili ng rerank model, muling ayusin ang mga resulta, ipakita ang `positionDelta`.
+- Query → mga resulta (pamagat, URL, snippet, marka ng kaugnayan).
+- Metadata ng provider sa pane na Config (gastos, quota, status).
+- Seksyong Rerank: pumili ng rerank model, muling ayusin ang mga resulta, ipakita ang `positionDelta`.
 - Empty state na may CTA kapag walang naka-configure na search provider.
 - History ng paghahanap sa pamamagitan ng `SearchHistory.tsx`.
-- Tumatawag sa `POST /v1/search` (kasalukuyang endpoint, walang pagbabago).
+- Tinatawag ang `POST /v1/search` (kasalukuyang endpoint, walang pagbabago).
 
 ### Tab na Scrape
 
-Bagong tab para sa pag-extract ng content mula sa isang URL sa pamamagitan ng `POST /v1/web/fetch` (ginawa sa plan 05):
+Bagong tab para sa pagkuha ng content mula sa isang URL sa pamamagitan ng `POST /v1/web/fetch` (ginawa sa plan 05):
 
-- Input: URL + toggle para sa buong page + selector ng format (markdown / text / HTML).
-- I-submit → i-fetch → i-render ang `ScrapeResult.tsx`.
-- Nagre-render ang `ScrapeResult` ng preview na markdown + toggle para sa raw.
-- Limitasyon: kung ang response body ay higit sa **256 KB**, ipapakita ng UI ang `(pinaikli, tingnan ang raw)` at bubuksan ang raw sa isang Monaco modal (D21).
-- Panel ng metadata: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latency, gastos, laki ng response, bilang ng mga link.
-- Ginagamit ang `useScrapeFetch.ts` hook.
+- Input: URL + toggle para sa buong page + tagapili ng format (markdown / text / HTML).
+- I-submit → kunin → i-render ang `ScrapeResult.tsx`.
+- Nagre-render ang `ScrapeResult` ng preview ng markdown + toggle para sa raw na content.
+- Limitasyon: kung ang response body ay > **256 KB**, ipinapakita ng UI ang `(pinaikli, tingnan ang raw)` at binubuksan ang raw na content sa isang Monaco modal (D21).
+- Panel ng metadata: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latency, gastos, laki ng response, bilang ng mga link.
+- Ginagamit ang hook na `useScrapeFetch.ts`.
 
 ### Tab na Compare
 
 Pinapatakbo ang parehong query/URL sa hanggang **4 na provider nang sabay-sabay** (D22):
 
-- Magkatabing column para sa bawat provider.
+- Magkakatabing column para sa bawat provider.
 - Mga sukatan: latency, gastos, bilang ng resulta, laki ng response.
-- Pagkalkula ng overlap ng URL para sa paghahanap (bilang ng magkakaparehong URL kumpara sa paunang resulta).
-- Tumatawag sa `POST /v1/search` (paghahanap) o `POST /v1/web/fetch` (pag-scrape) para sa bawat provider.
+- Pagkalkula ng overlap ng URL para sa search (bilang ng magkakaparehong URL kumpara sa paunang resulta).
+- Tinatawag ang `POST /v1/search` (search) o `POST /v1/web/fetch` (scrape) para sa bawat provider.
 
 ---
 
@@ -103,9 +103,9 @@ Pinapatakbo ang parehong query/URL sa hanggang **4 na provider nang sabay-sabay*
 Inilalantad ng `ProviderCatalog.tsx` ang kumpletong listahan ng provider mula sa `GET /api/search/providers`
 (pinalawak sa F4 upang isama ang mga fetch provider):
 
-| `kind` | `"search"` (20 provider) o `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 provider) o `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Ang status ay **tinutukoy sa oras ng request** sa pamamagitan ng pagsusuri kung may mga credential at kung
+Ang status ay **tinutukoy sa oras ng request** sa pamamagitan ng pagsuri kung may mga credential at kung
 ang lahat ng key ay kasalukuyang nasa cooldown.
 
 ---
@@ -126,10 +126,10 @@ Isang pagbabago lamang sa backend ang kinailangan para sa feature na ito:
 
 Pinalawak ang `src/app/api/search/providers/route.ts` upang:
 
-- Isama ang lahat ng 6 na fetch provider (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) sa array.
-- Magdagdag ng `kind: "search" | "fetch"` sa bawat item.
-- Magdagdag ng `status: "configured" | "missing" | "rate_limited"` na tinutukoy mula sa live na estado ng credential.
-- Panatilihin ang backward compatibility — hindi binago ang mga kasalukuyang field (`id`, `name`, atbp.).
+- Isama ang bawat fetch provider (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) sa array.
+- Idagdag ang `kind: "search" | "fetch"` sa bawat item.
+- Idagdag ang `status: "configured" | "missing" | "rate_limited"` na hinango mula sa kasalukuyang estado ng credential.
+- Panatilihin ang backward compatibility — hindi binago ang mga umiiral na field (`id`, `name`, atbp.).
 
 ---
 

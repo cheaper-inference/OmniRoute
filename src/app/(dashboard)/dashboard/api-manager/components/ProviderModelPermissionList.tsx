@@ -1,9 +1,13 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { Checkbox } from "@omniroute/ui-kit/checkbox";
 import { getProviderDisplayName } from "@/lib/display/names";
-import { Input } from "@/shared/components";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
+import { cn } from "@/shared/utils/cn";
 import {
   isModelIndividuallyToggleable,
   restoreProviderScopeSelection,
@@ -66,19 +70,13 @@ function ProviderSelectionCheckbox({
   indeterminate: boolean;
   onChange: () => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (inputRef.current) inputRef.current.indeterminate = indeterminate;
-  }, [indeterminate]);
-
   return (
-    <input
-      ref={inputRef}
-      type="checkbox"
+    <Checkbox
       aria-label={`${provider} model access`}
       checked={checked}
+      indeterminate={indeterminate}
       onChange={onChange}
-      className="w-4 h-4 rounded border-border accent-[var(--color-primary)] cursor-pointer shrink-0"
+      className="shrink-0"
     />
   );
 }
@@ -96,6 +94,7 @@ const ProviderModelPermissionList = memo(function ProviderModelPermissionList({
   onClaudeCodeDefaultDeselected,
 }: ProviderModelPermissionListProps) {
   const t = useTranslations("apiManager");
+  const tc = useTranslations("common");
 
   const providerModelRefs = useMemo(() => allModels.map(getModelRef), [allModels]);
 
@@ -180,20 +179,21 @@ const ProviderModelPermissionList = memo(function ProviderModelPermissionList({
           icon="search"
         />
         {searchModel && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => onSearchChange("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main"
-          >
-            <span className="material-symbols-outlined text-[18px]">close</span>
-          </button>
+            className="absolute inset-y-0 right-1 my-auto text-text-muted"
+            aria-label={tc("clear")}
+            icon="close"
+          />
         )}
       </div>
 
       <div className="max-h-[280px] overflow-y-auto border border-border rounded-lg divide-y divide-border">
         {modelsByProvider.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-6 text-text-muted">
-            <span className="material-symbols-outlined text-2xl mb-1">search_off</span>
+            <Icon name="search_off" className="text-2xl mb-1" />
             <p className="text-xs">{t("noModelsFound")}</p>
           </div>
         ) : (
@@ -215,20 +215,23 @@ const ProviderModelPermissionList = memo(function ProviderModelPermissionList({
             return (
               <div key={provider} className="group">
                 <div className="w-full flex items-center gap-2 px-3 py-2 hover:bg-surface/50 transition-colors text-left">
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => onToggleExpand(provider)}
-                    className="flex items-center shrink-0"
+                    className="shrink-0"
                     aria-label={provider}
+                    aria-expanded={expandedProviders.has(provider)}
                   >
-                    <span
-                      className={`material-symbols-outlined text-base transition-transform duration-200 ${
-                        expandedProviders.has(provider) ? "rotate-90" : ""
-                      }`}
-                    >
-                      chevron_right
-                    </span>
-                  </button>
+                    <Icon
+                      name="chevron_right"
+                      size={16}
+                      className={cn(
+                        "transition-transform duration-200",
+                        expandedProviders.has(provider) && "rotate-90"
+                      )}
+                    />
+                  </Button>
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <ProviderSelectionCheckbox
                       provider={provider}
@@ -239,13 +242,14 @@ const ProviderModelPermissionList = memo(function ProviderModelPermissionList({
                         else handleSnapshotToggleProvider(provider, models);
                       }}
                     />
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => onToggleExpand(provider)}
-                      className="text-xs font-semibold text-text-main truncate"
+                      className="h-auto min-h-0 px-1 text-xs font-semibold text-text-main truncate"
                     >
                       {provider}
-                    </button>
+                    </Button>
                     <span className="text-[10px] text-text-muted bg-surface px-1 py-0.5 rounded shrink-0">
                       {models.length}
                     </span>
@@ -270,20 +274,18 @@ const ProviderModelPermissionList = memo(function ProviderModelPermissionList({
                           { ownedBy: model.owned_by }
                         );
                         return (
-                          <button
+                          <Button
                             key={model.id}
-                            type="button"
+                            size="sm"
+                            variant={isSelected ? "primary" : "outline"}
+                            aria-pressed={isSelected}
                             disabled={!isToggleable}
                             onClick={() => handleToggleModel(model)}
-                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-mono transition-all ${
-                              isSelected
-                                ? "bg-primary text-white"
-                                : "bg-surface border border-border text-text-muted hover:border-primary/50 hover:text-text-main"
-                            } ${isToggleable ? "" : "opacity-70 cursor-not-allowed"}`}
+                            className="h-auto min-h-0 gap-1 rounded-full px-2 py-1 text-[10px] font-mono"
                             title={model.id}
                           >
                             {getModelDisplayName(model.id)}
-                          </button>
+                          </Button>
                         );
                       })}
                     </div>

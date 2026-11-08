@@ -64,7 +64,7 @@ export default function RequestCountByProviderDateTable({
       {loading && rows.length === 0 ? (
         <div className="text-center text-text-muted text-sm py-8">{tCommon("loading")}</div>
       ) : error ? (
-        <div className="text-center text-red-500 text-sm py-8">
+        <div className="text-center text-error text-sm py-8">
           {tCommon("errorShort")}: {error}
         </div>
       ) : sorted.length === 0 ? (

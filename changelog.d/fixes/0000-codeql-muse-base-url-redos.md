@@ -1,1 +1,0 @@
-- **fix(muse):** `normalizeMuseBaseUrl()` stripped trailing slashes with `/\/+$/`, which backtracks quadratically on a long run of slashes (about 5 s for a 50k-slash base URL). It now uses the linear `stripTrailingSlashes()` helper; two unit tests that picked a mocked upstream by URL substring now compare the parsed host instead (CodeQL #1155, #1153, #1148).

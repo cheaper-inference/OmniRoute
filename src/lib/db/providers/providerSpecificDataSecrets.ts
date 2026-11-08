@@ -1,3 +1,5 @@
+import { isWordPressLoggedInKey } from "@omniroute/open-sse/utils/wordpressSessionKey.ts";
+
 /**
  * Declared providerSpecificData fields that contain credentials and must use the
  * same at-rest encryption as top-level connection tokens (#16836).
@@ -110,6 +112,7 @@ export const PROVIDER_SPECIFIC_SECRET_FIELDS = [
   "ucCookies",
   "ucClientCookie",
   "clientCookie",
+  "wordpress_logged_in",
 ] as const;
 
 /**
@@ -129,6 +132,15 @@ export const PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS = [
 ] as const;
 
 export type ProviderSpecificSecretField = (typeof PROVIDER_SPECIFIC_SECRET_FIELDS)[number];
+
+/** Declared secret fields plus any dynamically-named secret key present in `data`. */
+export function providerSpecificSecretKeysIn(data: Record<string, unknown>): string[] {
+  const keys: string[] = [...PROVIDER_SPECIFIC_SECRET_FIELDS];
+  for (const key of Object.keys(data)) {
+    if (!keys.includes(key) && isWordPressLoggedInKey(key)) keys.push(key);
+  }
+  return keys;
+}
 
 type SecretTransform = (
   secret: string,
@@ -169,9 +181,9 @@ export function mapProviderSpecificDataSecrets(data: unknown, transform: SecretT
   if (!data || typeof data !== "object" || Array.isArray(data)) return data;
   const original = data as Record<string, unknown>;
   let updated: Record<string, unknown> | null = null;
-  for (const field of PROVIDER_SPECIFIC_SECRET_FIELDS) {
+  for (const field of providerSpecificSecretKeysIn(original)) {
     const secret = original[field];
-    const value = mapSecretValue(secret, field, transform);
+    const value = mapSecretValue(secret, field as ProviderSpecificSecretField, transform);
     if (value !== secret) {
       updated ??= { ...original };
       updated[field] = value;

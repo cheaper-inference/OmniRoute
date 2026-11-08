@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { validateCopilotM365WebProvider } from "../../src/lib/providers/validation/webProvidersB.ts";
 import { extractM365CredentialFromHar } from "../../src/shared/utils/m365HarImport.ts";
 import {
   resolveConnectionParams,
@@ -18,12 +19,15 @@ describe("M365 HAR host compatibility (#16327)", () => {
     "eu.m365.cloud.microsoft",
     "copilot.microsoft.com",
     "substrate.office.com",
+    "substrate.svc.cloud.microsoft",
+    "SUBSTRATE.SVC.CLOUD.MICROSOFT:443",
     "M365.CLOUD.MICROSOFT:443",
   ]) {
-    it(`preserves ${host} from HAR through execution`, () => {
+    it(`preserves ${host} from HAR through validation and execution`, async () => {
       const imported = extractM365CredentialFromHar(har(url(host)));
       assert.equal(imported.ok, true);
       if (!imported.ok) return;
+      assert.equal((await validateCopilotM365WebProvider({ apiKey: imported.apiKey })).valid, true);
       const params = resolveConnectionParams({ apiKey: imported.apiKey });
       assert.ok(!("error" in params));
       assert.equal(params.host, host.toLowerCase().replace(":443", ""));
@@ -59,6 +63,16 @@ describe("M365 HAR host compatibility (#16327)", () => {
   for (const unsafe of [
     url("m365.cloud.microsoft.attacker.invalid"),
     url("attacker.invalid"),
+    url("substrate.svc.cloud.microsoft.attacker.invalid"),
+    url("sub.substrate.svc.cloud.microsoft"),
+    url("other.svc.cloud.microsoft"),
+    url("user@substrate.svc.cloud.microsoft"),
+    url("substrate.svc.cloud.microsoft:8443"),
+    url("substrate.svc.cloud.microsoft").replace("wss:", "ws:"),
+    url("substrate.svc.cloud.microsoft").replace("wss:", "https:"),
+    url("substrate.svc.cloud.microsoft").replace("Chathub", "StreamHub"),
+    url("substrate.svc.cloud.microsoft").replace(path, "user@tenant/extra"),
+    url("substrate.svc.cloud.microsoft").replace(path, "%ZZ"),
     url("m365.cloud.microsoft:8443"),
     url("user@m365.cloud.microsoft"),
     url("m365.cloud.microsoft").replace("wss:", "ws:"),
@@ -66,9 +80,10 @@ describe("M365 HAR host compatibility (#16327)", () => {
     url("substrate.office.com").replace(path, "user@tenant%3Bhost=attacker.invalid"),
     url("substrate.office.com").replace(path, "user@tenant%3Faccess_token=other"),
   ]) {
-    it(`rejects unsafe HAR URL ${unsafe.replace(token, "REDACTED")}`, () => {
+    it(`rejects unsafe HAR URL ${unsafe.replace(token, "REDACTED")}`, async () => {
       const imported = extractM365CredentialFromHar(har(unsafe));
       assert.equal(imported.ok, false);
+      assert.equal((await validateCopilotM365WebProvider({ apiKey: unsafe })).valid, false);
       const params = resolveConnectionParams({ apiKey: unsafe });
       assert.ok("error" in params);
       if ("error" in params) assert.ok(!params.error.includes(token));

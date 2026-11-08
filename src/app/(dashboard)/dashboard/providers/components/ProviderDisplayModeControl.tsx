@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import type { ProviderDisplayMode } from "../providerPageStorage";
 
 type ProviderMessageTranslator = ((key: string, values?: Record<string, unknown>) => string) & {
@@ -79,7 +81,7 @@ export default function ProviderDisplayModeControl({
 
   return (
     <div
-      className="flex items-center rounded-lg border border-border bg-bg-subtle p-0.5"
+      className="flex w-full items-center rounded-lg border border-border bg-bg-subtle p-0.5 sm:w-auto"
       role="radiogroup"
       aria-label={providerText(t, "providerDisplayMode", "Provider display mode")}
       data-testid="provider-display-mode-control"
@@ -92,12 +94,14 @@ export default function ProviderDisplayModeControl({
             title={option.title}
             data-testid={`provider-display-mode-${option.mode}`}
             data-active={isActive ? "true" : "false"}
-            className={`inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors ${
+            className={`inline-flex h-7 grow items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors sm:grow-0 ${
               isActive
                 ? "bg-bg-primary text-text-main shadow-sm"
                 : "text-text-muted hover:bg-bg-primary/70 hover:text-text-main"
             } ${option.disabled ? "cursor-not-allowed opacity-50" : ""}`}
           >
+            {/* kit-exception: Visually hidden native radio: the label is the visible control and the radio
+                carries the radiogroup semantics and keyboard model (kit-faithful exception). */}
             <input
               type="radio"
               name="provider-display-mode"
@@ -108,9 +112,7 @@ export default function ProviderDisplayModeControl({
               className="sr-only"
               aria-label={option.title}
             />
-            <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-              {option.icon}
-            </span>
+            <Icon name={option.icon} size={14} />
             <span>{option.label}</span>
           </label>
         );

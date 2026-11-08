@@ -309,25 +309,20 @@ OmniRoute'i kombinatsioonimootor toetab **20 marsruutimisstrateegiat** (deklaree
 Range rotatsiooni jaoks kasutage `round-robin`; võrdsed kaalud strateegia `weighted` puhul annavad statistilise, mitte
 range tasakaalu.
 
-### Agentne pipeline-režiim
+### Agendipõhise konveieri režiim
 
-`pipeline`-kombinatsioon, millel on vähemalt kaks mudelit, saab valida planeerija/täitja marsruutimise (planner/executor routing), kasutades `config.agenticOrchestration.enabled`. Esimene sihtmärk vastutab planeerimise ja lõplike vastuste eest; teine sihtmärk väljastab kliendipoolseid tööriistakutseid. OmniRoute tuvastab päringuprotokollist tööriista tulemuste jätkud, küsib planeerijalt, kas on vaja veel ühte tööriistaringi, ja määrab dünaamiliselt kas täitja või planeerija kliendile suunatud lõppsammuks.
+Vähemalt kahe mudeliga `pipeline`-kombinatsioon võib kasutada plaanija/täitja marsruutimist valikuga
+`config.agenticOrchestration.enabled`. Esimene sihtmudel vastutab plaanimise ja lõppvastuste eest;
+teine sihtmudel väljastab kliendinatiivseid tööriistakutseid. OmniRoute tuvastab päringu protokolli
+põhjal tööriistatulemuste jätkupäringud, küsib plaanijalt, kas vaja on veel üht tööriistavooru,
+ning valib dünaamiliselt kliendile suunatud viimaseks etapiks kas täitja või plaanija.
 
-Valikuline `config.agenticOrchestration.contextCompaction` rakendab eraldi kasuliku koormuse eelarvet enne iga planeerija või täitja väljastamist. Lubage see selgesõnaliselt:
-
-```json
-{
-  "enabled": true,
-  "defaultMaxChars": 400000,
-  "targetRatio": 0.72,
-  "toolResultMaxChars": 24000,
-  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
-}
-```
-
-Need on operaatori valitud serialiseeritud JSON-i märgimahud (character budgets), mitte žetoonide kontekstiaknad või garanteeritud ülesvoolu piirangud. Täpsed mudeli ID-d kirjutavad vaikeseaded üle. Üle läve eemaldab tihendamine (compaction) identsed tööriistade definitsioonid, kärbib liiga suuri tööriistade tõendusmaterjale kokkuvõttega (digest) ja eemaldab vanad täielikud ajaloo grupid sihtsuhte saavutamiseks. See säilitab süsteemi/arendaja juhised, viimase kasutaja päringu, viimase tööriistaringi, sealhulgas paralleelsed kutsed/tulemused, ja Gemini juhtiva marsruutimisjuhise. Ülaltaseme juhised ja tööriistade seaded säilitatakse. Väljajätmise marker salvestab eemaldatud ajaloo; see on deterministlik kärpimine, mitte semantiline kokkuvõte. Kui kinnitatud kontekst ületab endiselt eelarvet, tagastab päring 413 enne mudeliga ühenduse võtmist. Kui tihendamine on keelatud või jääb alla läve, läbib päring süsteemi muutmata kujul.
-
-Täiendavad mudelid pärast teist sihtmärki on järjestatud täitja varukoopiad. Ebaõnnestunud HTTP-vastus või transpordierand liigub edasi järgmise täitja juurde, kandes sama planeerija otsust ja natiivseid tööriistu, kuid kasutades selle täitja enda sammu viipa (step prompt) ja lahendatud ühendust. Esimene edukas vastus tagastatakse muutmata kujul, sealhulgas SSE-voogedastus; pärast eduka voo algust tekkinud tõrkeid ei saa siin uuesti proovida. Kui kõik täitjad ebaõnnestuvad, tagastatakse viimane tõrge. Kliendi katkestused peatavad väljastamise.
+Teisele sihtmudelile järgnevad lisamudelid on järjestatud täitja varuvariandid. Nurjunud
+HTTP-vastus või transpordierand viib järgmise täitja juurde, säilitades
+sama plaanija otsuse ja natiivsed tööriistad, kuid kasutades selle täitja enda etapi viipa ning
+lahendatud ühendust. Esimene edukas vastus tagastatakse muutmata kujul, sealhulgas
+SSE-voogedastus; pärast eduka voo käivitumist tekkinud tõrgete korral ei saa siin uuesti proovida.
+Kui kõik täitjad nurjuvad, tagastatakse viimane tõrge. Kliendipoolsed katkestused peatavad edastamise.
 
 ```json
 {
@@ -339,7 +334,11 @@ Täiendavad mudelid pärast teist sihtmärki on järjestatud täitja varukoopiad
 }
 ```
 
-Täitja võib ühes vastuses väljastada mitu sõltumatut kutset. Sõltuvad kutsed käsitletakse hilisemates kliendi tööriista-tulemuse voorudes, kusjuures planeerija vaatab iga tulemuse üle. `maxToolRounds` vaikeväärtus on `8` ja see aktsepteerib väärtusi `1`–`32`; kui see on saavutatud, peab planeerija koostama parima võimaliku lõpliku vastuse. Sisemised planeerija otsused puhverdatakse, samas kui valitud kliendile suunatud vastus säilitab algse voogedastuse eelistuse.
+Täitja võib ühes vastuses väljastada mitu sõltumatut kutset. Sõltuvaid kutseid
+käsitletakse kliendi hilisemates tööriistatulemuste voorudes ning plaanija vaatab iga tulemuse üle.
+`maxToolRounds` vaikeväärtus on `8` ja lubatud vahemik on `1`–`32`; piirmäära saavutamisel peab plaanija
+koostama parima saadaoleva lõppvastuse. Plaanija sisemised otsused puhverdatakse, samal ajal kui
+valitud kliendile suunatud vastus säilitab algse voogedastuseelistuse.
 
 ### `round-robin`-strateegia püsipaketid ja kontode laiendamine
 
@@ -442,56 +441,56 @@ See tähendab, et **uue pakkujaga `auto/*` lubatud lisamine laieneb automaatselt
 
 ## API
 
-**Spetsiaalset `POST /api/combos/auto` lõpp-punkti ei ole** — Auto-Combo kasutamiseks on kaks võimalust:
+**Spetsiaalset lõpp-punkti `POST /api/combos/auto` ei ole** — Auto-Combo kasutamiseks on kaks võimalust:
 
-1. **Nullkonfiguratsioon (soovitatav):** saatke suvaline vestluse lõpetamise päring mudeliga `model: "auto"` või `model: "auto/<variant>"`. Virtuaalne tehas loob kombinatsiooni iga päringu jaoks — püsiv salvestamine ega API-kutsed pole vajalikud.
+1. **Nullkonfiguratsioon (soovitatav):** saatke suvaline vestluse lõpetamise päring väärtusega `model: "auto"` või `model: "auto/<variant>"`. Virtuaalne tehas loob kombinatsiooni iga päringu jaoks eraldi — püsivat salvestamist ega API-kutseid pole vaja.
 
-2. **Püsiv kombinatsioon strateegiaga `strategy: "auto"`:** looge tavaline kombinatsioon päringuga `POST /api/combos` ning määrake `strategy: "auto"` koos väärtustega `config.auto.weights` / `config.auto.candidatePool`. Kasutatakse sama hindamismootorit; kombinatsioon salvestatakse tabelisse `combos` ja seda saab ID alusel uuesti kasutada.
+2. **Püsiv kombinatsioon väärtusega `strategy: "auto"`:** looge tavaline kombinatsioon lõpp-punkti `POST /api/combos` kaudu ning määrake `strategy: "auto"` koos väärtustega `config.auto.weights` / `config.auto.candidatePool`. Kasutatakse sama hindamismootorit; kombinatsioon salvestatakse tabelisse `combos` ja seda saab ID alusel korduvalt kasutada.
 
-Avastamiseks loetleb `GET /api/combos/auto` kõik variandid koos nende lahendatud kandidaatide kogumiga ning väärtustega `context_length` / `max_output_tokens` — kandidaatide kogumi kontekstiakende MAKSIMUM. Kliendid (nt opencode'i pistikprogramm) peavad reklaamima neid väärtusi, mitte väärtust `0`: nullsuurusega kontekst keelab opencode'i automaatse tihendamise täielikult, lastes seanssidel kasvada seni, kuni lüüsi ajaloo puhastamine konteksti hävitab. MAKSIMUMI reklaamimine on ohutu, sest automaatse kombinatsiooni konteksti eelfilter suunab liiga suured päringud suure kontekstiaknaga kandidaatidele.
+Avastamiseks loetleb `GET /api/combos/auto` kõik variandid koos nende lahendatud kandidaatide kogumiga ning väärtustega `context_length` / `max_output_tokens` — kandidaatide kogumi kontekstiakende MAKSIMUM. Kliendid (nt opencode'i plugin) peavad reklaamima neid väärtusi, mitte väärtust `0`: nullkontekst keelab opencode'i automaatse tihendamise täielikult, võimaldades seanssidel kasvada seni, kuni lüüsi ajaloopuhastus konteksti hävitab. MAKSIMUMI reklaamimine on ohutu, sest automaatkombinatsiooni konteksti eelfilter suunab liiga suured päringud suure kontekstiaknaga kandidaatidele.
 
 ```bash
-# Nullkonfiguratsiooniga kasutamine (kombinatsiooni loomist pole vaja)
+# Nullkonfiguratsiooniga kasutamine (kombinatsiooni ei looda)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Püsiv automaatne kombinatsioon tavalise kombinatsioonide lõpp-punkti kaudu
+# Püsiv automaatkombinatsioon tavalise kombinatsioonide lõpp-punkti kaudu
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Automaatse marsruuteri strateegiad
+### Automaatruuteri strateegiad
 
-Püsivad `strategy: "auto"` kombinatsioonid võivad määrata väljale `config.routerStrategy` (või pärandväljale
-`config.auto.routerStrategy`) ühe järgmistest väärtustest:
+Püsivad `strategy: "auto"` kombinatsioonid võivad määrata võtme `config.routerStrategy` (või pärandvõtme
+`config.auto.routerStrategy`) üheks järgmistest:
 
 - `rules` — vaikimisi kaalutud hindamine
 - `score` — valib suurima konfigureeritud kaalutud skoori. Täpsete viikide korral säilitatakse konfigureeritud
   kandidaatide järjekord; olemasolev `explorationRate` teeb valimi kogu järjestatud kogumist.
-- `cost` / `eco` — odavaim töökorras pakkuja
-- `latency` / `fast` — väikseim p95 latentsus koos töökindluse trahviga
-- `sla-aware` / `sla` — eelistab kandidaate, mis vastavad p95 latentsuse, veamäära ja valikulistele
-  kulu SLO-dele
-- `lkgp` — esmalt viimane teadaolevalt hea pakkuja
+- `cost` / `eco` — odavaim töökorras teenusepakkuja
+- `latency` / `fast` — väikseim p95 latentsus koos töökindlustrahviga
+- `sla-aware` / `sla` — eelistab kandidaate, mis vastavad p95 latentsuse, veamäära ja valikuliste
+  kulude SLO-de nõuetele
+- `lkgp` — viimane teadaolevalt toimiv teenusepakkuja esimesena
 - `nadir` — küsib [Nadiri](https://getnadir.com) otsustus-API-lt, millist kogumis olevat mudelit
-  viip vajab; nõuab sõnaselget aktiveerimist ja tõrke korral lülitub avatult strateegiale `rules`
+  viip vajab; nõuab selgesõnalist lubamist ja tõrke korral kasutab strateegiat `rules`
 
-### Marsruuteri strateegiad üksikasjalikult
+### Ruuteri strateegiad üksikasjalikult
 
-Automaatse kombinatsiooni mootor pakub 7 ühendatavat **RouterStrategy** teostust, mida
-saab vahetada välja `config.routerStrategy` (või pärandvälja `config.auto.routerStrategy`) kaudu.
-Iga strateegia valib kandidaatide kogumist ühe pakkuja, võttes aluseks `RoutingContext`-i
-(ülesande tüüp, tööriista-/nägemisvihjed, hinnanguline lubade arv, valikuline SLA-poliitika, valikuline
-viimane teadaolevalt hea pakkuja).
+Automaatkombinatsiooni mootor pakub 7 ühendatavat **RouterStrategy** teostust, mida
+saate vahetada võtme `config.routerStrategy` (või pärandvõtme `config.auto.routerStrategy`) kaudu.
+Iga strateegia valib kandidaatide kogumist ühe teenusepakkuja, lähtudes objektist `RoutingContext`
+(ülesande tüüp, tööriista-/nägemisvihjed, hinnanguline sõnemite arv, valikuline SLA-poliitika, valikuline
+viimane teadaolevalt toimiv teenusepakkuja).
 
 #### 1. `rules` (vaikimisi) — 16 teguriga kaalutud hindamine
 
-Ümbritseb olemasolevat hindamismootorit. Filtreerib välja kaitselüliti olekus `OPEN`
-olevad kandidaadid, käivitab seejärel funktsiooni `scorePool()` praeguse ülesandetüübi ja funktsiooniga `getTaskFitness()`
-ning valib kõrgeima skooriga pakkuja.
+Ümbritseb olemasolevat hindamismootorit. Filtreerib välja kaitselüliti olekuga `OPEN`
+kandidaadid, seejärel käivitab `scorePool()` praeguse ülesandetüübi ja funktsiooniga `getTaskFitness()`,
+valides suurima skooriga teenusepakkuja.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -511,16 +510,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Millal kasutada**: vaikimisi. Kasutage, kui soovite kõigi signaalide vahel tasakaalustatud kompromissi.
+**Millal kasutada**: vaikimisi. Kasutage siis, kui soovite kõigi signaalide vahel tasakaalustatud kompromissi.
 
 **Alias**: `rules` (alias puudub)
 
 ---
 
-#### 2. `cost` / `eco` — odavaim töökorras pakkuja
+#### 2. `cost` / `eco` — odavaim töökorras teenusepakkuja
 
-Sordib kandidaatide kogumi välja `costPer1MTokens` järgi (kasvavalt) ja valib odavaima.
-Filtreerib esmalt välja olekus `OPEN` kandidaadid.
+Sordib kandidaatide kogumi väärtuse `costPer1MTokens` järgi (kasvavalt) ja valib odavaima.
+Esmalt filtreerib välja olekuga `OPEN` kandidaadid.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -535,16 +534,16 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Millal kasutada**: kulutundlikud töökoormused, pakktöötlus või tausttööd.
+**Millal kasutada**: kulutundlikud töökoormused, pakktöötlus või taustatööd.
 
 **Aliased**: `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — väikseim p95 latentsus koos töökindluse trahviga
+#### 3. `latency` / `fast` — väikseim p95 latentsus koos töökindlustrahviga
 
-Sordib avaldise `p95LatencyMs + (errorRate * 1000)` järgi. Veamäära trahv tagab,
-et ebausaldusväärsed pakkujad järjestatakse madalamale isegi siis, kui nende nominaalne latentsus on väike.
+Sordib valemi `p95LatencyMs + (errorRate * 1000)` järgi. Veamäära trahv tagab,
+et ebausaldusväärsed teenusepakkujad paigutatakse madalamale isegi siis, kui nende nominaalne latentsus on väike.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -561,27 +560,27 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Millal kasutada**: latentsustundlikud töökoormused, nagu reaalajas vestlus, automaattäide või
+**Millal kasutada**: latentsustundlikud töökoormused, nagu reaalajas vestlus, automaatteksti lõpetamine või
 interaktiivsed programmeerimisabilised.
 
 **Aliased**: `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — latentsuse/veamäära/kulu SLO-de järgimine
+#### 4. `sla-aware` / `sla` — vastavus latentsuse/veamäära/kulude SLO-dele
 
 Hindab iga kandidaati selle järgi, kui hästi see vastab konfigureeritud SLO-poliitikale:
 
-| Tegur           | Kaal | Valem                                             |
-| --------------- | ---- | ------------------------------------------------- |
-| Latentsusskoor  | 35%  | `threshold / max(value, ε)`                       |
-| Veaskoor        | 35%  | `threshold / max(value, ε)`                       |
-| Terviseskoor    | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
-| Kulukoor        | 10%  | `threshold / max(value, ε)` või pöördnormeeritud  |
-| Stabiilsusskoor | 5%   | latentsuse standardhälve pöördnormeerituna        |
+| Tegur             | Kaal | Valem                                                    |
+| ----------------- | ---- | -------------------------------------------------------- |
+| Latentsuse skoor  | 35%  | `threshold / max(value, ε)`                              |
+| Vea skoor         | 35%  | `threshold / max(value, ε)`                              |
+| Tervise skoor     | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)        |
+| Kulude skoor      | 10%  | `threshold / max(value, ε)` või pööratud normaliseeritud |
+| Stabiilsuse skoor | 5%   | latentsuse standardhälbe pööratud normaliseeritud        |
 
-Kui `hardConstraints: true`, sorditakse kandidaadid esmalt **rikkumisskoori**
-(juhul kui palju nad mõnda SLO-d ületavad) ja seejärel koondskoori järgi. Vastasel juhul
+Kui `hardConstraints: true`, sorditakse kandidaadid esmalt **rikkumise skoori**
+(kui palju nad mõnda SLO-d ületavad) ja seejärel koondskoori järgi. Vastasel juhul
 kasutatakse ainult koondskoori.
 
 ```ts
@@ -591,12 +590,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... hindab iga kandidaati poliitika alusel: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... hindab iga kandidaati eeskirjade alusel: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA väljad** (määratakse kombokonfiguratsioonis):
+**SLA väljad** (määratakse kombineeritud konfiguratsioonis):
 
 ```json
 {
@@ -611,17 +610,17 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Millal kasutada**: rangete latentsus-, veamäära- või kulupiirangutega tootmiskoormuste korral.
+**Millal kasutada**: rangete latentsus-, veamäära- või kulupiirangutega tootmiskoormuste puhul.
 
 **Aliased**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — viimane teadaolevalt hea pakkuja esimesena
+#### 5. `lkgp` — esmalt viimane teadaolevalt töötav pakkuja
 
-Proovib kõigepealt **viimast teadaolevalt head pakkujat** (kui see on määratud) ja kasutab
-seejärel varuvariandina strateegiat `rules`. Kasulik seansi püsivuseks — sama pakkuja
-teenindab vestluse jätkupäringuid.
+Proovib esmalt **viimast teadaolevalt töötavat pakkujat** (kui see on määratud), seejärel kasutab
+varuvariandina strateegiat `rules`. Kasulik seansi sidususe tagamiseks — sama pakkuja teenindab
+vestluse jätkupäringuid.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -648,21 +647,21 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Millal kasutada**: mitme vooruga vestluste korral, kus soovite, et sama pakkuja
-teenindaks jätkupäringuid (nt vahemällu salvestamise, konteksti järjepidevuse või hinnastamise ühtsuse tõttu).
+**Millal kasutada**: mitme vooruga vestluste puhul, kus soovite, et sama pakkuja teenindaks
+jätkupäringuid (nt vahemällu salvestamise, konteksti järjepidevuse või hinnastamise ühtsuse tõttu).
 
 **Alias**: `lkgp` (alias puudub)
 
 ---
 
-#### 6. `nadir` — viibast teadlik mudelivalik Nadiri kaudu
+#### 6. `nadir` — viibast lähtuv mudelivalik Nadiri kaudu
 
-Kõik eespool kirjeldatud strateegiad järjestavad kandidaate oma telemeetria põhjal; ükski neist ei loe
-päringut. `nadir` saadab kasutaja viimase vooru koos kogumi mudeli-ID-dega
+Kõik eespool kirjeldatud strateegiad järjestavad kandidaate oma telemeetria alusel; ükski neist ei loe
+päringut. `nadir` saadab viimase kasutajavooru koos kogumi mudeli-ID-dega
 [Nadiri](https://getnadir.com) otsustus-API-le (`POST /v1/bucket`) ja suunab päringu mudelile,
-mille Nadir sellest menüüst valib (`simple` → odavaim piisavalt võimekas mudel, `complex` → kõige
-võimekam tippmudel). Seda mudelit teenindav ühendus valitakse endiselt strateegiaga `rules`, seega määravad
-kvoot, seisund ja kulu jätkuvalt, millist kontot kasutatakse.
+mille Nadir sellest valikust valib (`simple` → odavaim sobiv mudel, `complex` → kõige võimekam
+tippmudel). Seda mudelit teenindav ühendus valitakse endiselt strateegiaga `rules`, seega määravad
+konto valiku jätkuvalt kvoot, seisund ja kulu.
 
 ```json
 {
@@ -679,30 +678,33 @@ kvoot, seisund ja kulu jätkuvalt, millist kontot kasutatakse.
 ```
 
 `OMNIROUTE_NADIR_API_KEY` ja `OMNIROUTE_NADIR_BASE_URL` on nende kahe stringi
-keskkonnapõhised varuväärtused. `baseUrl` on vajalik ainult isemajutatud Nadiri korral (lõpus olev `/v1` on lubatud).
-Võtmeta päringud suunatakse Nadiri anonüümsesse teenusetasemesse, mille päringusagedust piiratakse IP-aadressi alusel.
+keskkonnamuutujapõhised varuvariandid. `baseUrl` on vajalik ainult isemajutatud Nadiri puhul
+(lõpus olev `/v1` on lubatud). Võtmeta kutsed suunatakse Nadiri anonüümsesse teenusekihti, millele
+rakendatakse IP-põhist kiirusepiirangut. Võtme kasutamisel
+([looge võti](https://app.getnadir.com/dashboard/api-keys)) logitakse iga otsus teie Nadiri
+juhtpaneelile. Täielikud seadistus- ja kontrollimisjuhised:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Süsteemist väljub järgmine teave: kasutaja viimase sõnumi tekst (esimesed 16 000 märki), kandidaatmudelite
-ID-d ja kanali märgend `source: "omniroute"`. Süsteemiviipa, ajalugu, tööriistu ega
-päiseid ei saadeta.
+Mis süsteemist väljub: viimase kasutajasõnumi tekst (esimesed 16 000 märki), kandidaatmudelite
+ID-d ja kanali silt `source: "omniroute"`. Süsteemiviipa, ajalugu, tööriistu ega päiseid ei saadeta.
 
-Tõrke korral jätkatakse tööd: ajalõpp (vaikimisi 2000 ms), mitte-2xx-vastus, kättesaamatu
-host, vigane vastus või valik väljaspool kogumit lahendatakse strateegia `rules`
-otsusega ning põhjusele lisatakse eesliide `NadirStrategy: fallback (…)`. Pärast nurjunud kutset
-jätab strateegia võrgupäringud 30 sekundiks vahele, mistõttu põhjustab katkestus ühe ajalõpu iga 30 sekundi kohta,
-mitte ühe iga päringu kohta. Marsruutimissündmused teatavad `strategy: "nadir"` ainult siis, kui Nadir
-tegi valiku tegelikult ise.
+Tõrke korral jätkatakse tööd: ajalõpp (vaikimisi 2000 ms), muu kui 2xx-vastus, kättesaamatu
+host, vigane vastus või kogumiväline valik lahendatakse strateegia `rules`
+otsusega ning põhjuse ette lisatakse `NadirStrategy: fallback (…)`. Pärast nurjunud kutset jätab
+strateegia võrgupäringud 30 sekundiks vahele, mistõttu põhjustab katkestus ühe ajalõpu iga 30 sekundi
+järel, mitte ühe iga päringu kohta. Marsruutimissündmused kajastavad väärtust `strategy: "nadir"`
+ainult siis, kui valiku tegi tegelikult Nadir.
 
-**Millal kasutada**: erineva keerukusega liikluse korral kogumis, mis hõlmab eri mudelitasemeid (väike, keskmine
-ja tippmudel), kui soovite vähendada alati tippmudeli kasutamise kulu.
+**Millal kasutada**: erineva raskusastmega liikluse puhul mudelikogumis, mis hõlmab eri tasemete
+mudeleid (väike, keskmine ja tippmudel), kui soovite vähendada alati tippmudeli kasutamise kulu.
 
 **Alias**: `nadir` (alias puudub)
 
 ---
 
-### Kohandatud marsruuteristrateegiad
+### Kohandatud marsruutimisstrateegiad
 
-Saate avaliku API kaudu registreerida oma `RouterStrategy` teostuse:
+Avaliku API kaudu saate registreerida oma `RouterStrategy` teostuse:
 
 ```ts
 import {
@@ -715,7 +717,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Teie marsruutimisloogika siin
+    // Teie marsruutimisloogika
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -743,18 +745,18 @@ Seejärel kasutage seda:
 
 ---
 
-### Marsruuteristrateegia valimise juhend
+### Marsruutimisstrateegia valimise juhend
 
-| Kasutusjuht              | Strateegia  | Põhjus                                  |
-| ------------------------ | ----------- | --------------------------------------- |
-| Tasakaalustatud koormus  | `rules`     | Vaikimisi — arvestab kõiki tegureid     |
-| Kulude minimeerimine     | `cost`      | Valib alati odavaima                    |
-| Latentsuse minimeerimine | `latency`   | Valib kiireima usaldusväärse pakkuja    |
-| Ranged SLO-d             | `sla-aware` | Filtreerib p95/vea/kulu lävendite järgi |
-| Mitme vooruga vestlus    | `lkgp`      | Seansi püsivus                          |
-| Erinev keerukus          | `nadir`     | Valib viiba põhjal mudelitaseme         |
+| Kasutusjuht                | Strateegia  | Põhjus                                       |
+| -------------------------- | ----------- | -------------------------------------------- |
+| Tasakaalustatud töökoormus | `rules`     | Vaikimisi — arvestab kõiki tegureid          |
+| Kulude minimeerimine       | `cost`      | Valib alati odavaima                         |
+| Latentsuse minimeerimine   | `latency`   | Valib kiireima usaldusväärse teenusepakkuja  |
+| Ranged SLO-d               | `sla-aware` | Filtreerib p95/veamäära/kulu lävendite järgi |
+| Mitmevooruline vestlus     | `lkgp`      | Seansi püsivus                               |
+| Erinev raskusaste          | `nadir`     | Valib iga viiba jaoks sobiva mudelitaseme    |
 
-SLA-teadliku strateegia väljad:
+SLA-teadlikud väljad:
 
 ```json
 {

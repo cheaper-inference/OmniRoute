@@ -1,1 +1,0 @@
-- fix(providers): codebuddy-cn thinking models can inline replayed `reasoning_content` as a `<thought>` block across turns, so it survives a gateway that drops the field — opt-in via the default-off `CODEBUDDY_CN_INLINE_REASONING` flag (#13632)

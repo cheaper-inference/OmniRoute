@@ -1,1 +1,0 @@
-- Preserve Windows CLI `.cmd`/`.bat` shell selection in Linux-built bundles without routing direct executables through the shell (#16547).

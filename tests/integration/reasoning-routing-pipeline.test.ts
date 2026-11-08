@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createChatPipelineHarness } from "./_chatPipelineHarness.ts";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const harness = await createChatPipelineHarness("reasoning-routing-pipeline");
 // Imported only AFTER the harness has set DATA_DIR and opened the DB: a static
@@ -88,7 +89,7 @@ test("chat pipeline applies a reasoning model/effort rule once and records route
   const callLog = await waitFor(async () => {
     const log = await getLatestCallLog();
     return log?.detailState === "ready" ? log : null;
-  });
+  }, CALL_LOG_SETTLE_TIMEOUT_MS);
 
   assert.equal(response.status, 200);
   assert.equal(fetchCalls.length, 1);

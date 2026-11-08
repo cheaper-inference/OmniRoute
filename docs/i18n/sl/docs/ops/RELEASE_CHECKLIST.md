@@ -114,28 +114,28 @@ preskočijo matriko E2E brez kakršne koli oznake.
 ### Pred izdajo
 
 - [ ] Vsi PR-ji, namenjeni tej izdaji, so združeni v `release/vX.Y.0`
-- [ ] Vsi odprti elementi Linear/issue za to različico so zaprti ali prestavljeni v naslednji mejnik
+- [ ] Vsi odprti elementi v Linearju oziroma težave za to različico so zaprti ali prestavljeni v naslednji mejnik
 - [ ] CI je uspešen na veji `release/vX.Y.0`
-- [ ] V kodi ni označevalcev `TODO(release)`: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] V kodi ni oznak `TODO(release)`: `grep -r "TODO(release)" src/ open-sse/`
 - [ ] Osnovna slika Docker je posodobljena (trenutno `node:24.15.0-trixie-slim`)
 
 ### Različica in dnevnik sprememb
 
 - [ ] Zaženite `/version-bump-cc <patch|minor|major>` (veščina Claude Code)
-  - Posodobi različico v `package.json`, `electron/package.json`
-  - Ponovno ustvari `CHANGELOG.md` iz commitov git od zadnje oznake
+  - Poviša različico v `package.json`, `electron/package.json`
+  - Znova ustvari `CHANGELOG.md` iz potrditev git od zadnje oznake
   - Posodobi značke v README.md
-- [ ] Ročno preglejte CHANGELOG.md in po potrebi uredite sporočila commitov
-- [ ] Prepričajte se, da je najnovejši razdelek semver v `CHANGELOG.md` enak različici v `package.json`
+- [ ] Ročno preglejte CHANGELOG.md in po potrebi popravite sporočila potrditev
+- [ ] Zagotovite, da je najnovejši razdelek semver v `CHANGELOG.md` enak različici v `package.json`
 - [ ] Ohranite `## [Unreleased]` kot prvi razdelek dnevnika sprememb za prihajajoče delo
 - [ ] Posodobite `docs/openapi.yaml` → `info.version` mora biti enak različici v `package.json`
 
 ### Kakovost kode
 
-- [ ] `npm run lint` — 0 napak (opozorila so obstajala že prej)
+- [ ] `npm run lint` — 0 napak (opozorila že obstajajo)
 - [ ] `npm run typecheck:core` — brez napak
 - [ ] `npm run typecheck:noimplicit:core` — brez napak (strogo)
-- [ ] `npm run check:cycles:ratchet` — `cycles ≤ metrics.cycles.value` (`quality-baseline.json`; `check:cycles`: `cycles > 0 → exit 1`, #15281)
+- [ ] `npm run check:cycles:ratchet` — znotraj zamrznjene zgornje meje `metrics.cycles` (goli `check:cycles` se ob vsakem ciklu konča s kodo 1, #15281)
 - [ ] `npm run check:any-budget:t11` — znotraj omejitve
 - [ ] `npm run check:route-validation:t06` — brez napak
 - [ ] `npm run check:node-runtime` — dosežena je najnižja podprta različica izvajalnega okolja (`>=22.22.2 <23`, `>=24.0.0 <27`, skladno s `SUPPORTED_NODE_RANGE` v `src/shared/utils/nodeRuntimeSupport.ts`; usklajeno z `engines` v `package.json`)
@@ -145,27 +145,27 @@ preskočijo matriko E2E brez kakršne koli oznake.
 - [ ] `npm run test:unit` — uspešno
 - [ ] `npm run test:vitest` — uspešno (strežnik MCP, autoCombo, predpomnilnik)
 - [ ] `npm run test:coverage` — prag 60/60/60/60 dosežen (stavki/vrstice/funkcije/veje)
-- [ ] `npm run test:integration` — uspešno (če spremembe zadevajo zbirko podatkov / obdelovalnike)
-- [ ] `npm run test:combo:matrix` — uspešno (matrika strategij combo: deterministično dokaže odločitve izbire vseh 19 javnih strategij usmerjanja; zaženite ob spremembah usmerjanja combo, razreševanja strategij ali nadomestne logike)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **neobvezno/ročno** (pogojni preizkus z resničnimi nadrejenimi sistemi; iz VPS `root@192.168.0.15` pridobi posnetek zbirke podatkov samo za branje; uporablja resnične ponudnike in porablja dobroimetje; nikoli se ne izvaja v CI; brez pogoja je korektno preskočen)
-- [ ] `npm run test:combo:live:vps` — **neobvezno/ročno** (živi preizkus VPS 3. faze: 7 scenarijev HTTP proti živemu strežniku `.15` prek navadnega Node ESM; zahteva `ssh root@192.168.0.15`; ustvari/izbriše samo kombinacije `__live_test__*`; uporablja resnične ponudnike; nikoli se ne izvaja v CI)
+- [ ] `npm run test:integration` — uspešno (če spremembe posegajo v podatkovno zbirko/obdelovalnike)
+- [ ] `npm run test:combo:matrix` — uspešno (matrika kombiniranih strategij: deterministično dokaže odločitve izbire vseh 19 javnih strategij usmerjanja; zaženite ob posegih v kombinirano usmerjanje, razreševanje strategij ali nadomestno logiko)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **izbirno/ročno** (omejen preizkus z resničnimi nadrejenimi sistemi; pridobi posnetek podatkovne zbirke samo za branje iz VPS `root@192.168.0.15`; uporablja resnične ponudnike in porablja dobroimetje; nikoli se ne izvaja v CI; brez omogočitve se pravilno preskoči)
+- [ ] `npm run test:combo:live:vps` — **izbirno/ročno** (preizkus VPS v živo 3. faze: 7 scenarijev HTTP proti strežniku `.15` v živo prek navadnega Node ESM; zahteva `ssh root@192.168.0.15`; ustvari/izbriše samo kombinacije `__live_test__*`; uporablja resnične ponudnike; nikoli se ne izvaja v CI)
 - [ ] `npm run test:e2e` — uspešno (spremembe uporabniškega vmesnika)
 - [ ] `npm run test:protocols:e2e` — uspešno (spremembe MCP/A2A)
 - [ ] `npm run test:ecosystem` — uspešno
 
-### Kavlji (preverjeno s Husky)
+### Kavlji (preverjeni s Huskyjem)
 
-Kavlji Husky so v `.husky/` in se samodejno izvajajo pri operacijah git.
+Kavlji Husky so v `.husky/` in se samodejno izvedejo med operacijami git.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** hitra deterministična preverjanja — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktivirano 2026-06-13). Namenoma ne vključuje `test:unit` (počasno; pokriva ga opravilo CI `test-unit`).
-  - Pred potiskanjem vej izdaje ročno zaženite `npm run test:unit`.
+- **pred potrditvijo:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **pred pošiljanjem:** hitra deterministična preverjanja — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktivirano 2026-06-13). Namenoma izključuje `test:unit` (počasen; pokriva ga opravilo CI `test-unit`).
+  - Pred pošiljanjem vej izdaje ročno zaženite `npm run test:unit`.
 
-Če kavelj spodleti: odpravite osnovno težavo in ga ne obidite z `--no-verify`.
+Če kavelj ne uspe: odpravite osnovno težavo in ga ne zaobidite z `--no-verify`.
 
-### Conventional Commits
+### Konvencionalne potrditve
 
-Vsi commiti, namenjeni izdaji, morajo upoštevati obliko `type(scope): subject`.
+Vse potrditve, namenjene izdaji, morajo upoštevati obliko `type(scope): subject`.
 
 **Veljavne vrste:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
@@ -175,97 +175,97 @@ Prelomne spremembe: dodajte nogo `BREAKING CHANGE:` ali `!` za obsegom (npr. `fe
 
 ### Dokumentacija
 
-- [ ] `npm run check:docs-sync` uspe (samodejno se zažene prek pre-commit)
-- [ ] `npm run check:docs-all` uspe (krovni pregled: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` se konča s kodo 0 — pogodba okolja med kodo ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` je celovita
-- [ ] `npm run check:doc-links` se konča s kodo 0 — po prestrukturiranju ni nedelujočih notranjih sklicev v markdownu
-- [ ] `docs/architecture/ARCHITECTURE.md` je pregledan glede odstopanj shrambe/izvajalnega okolja
-- [ ] `docs/guides/TROUBLESHOOTING.md` je pregledan glede odstopanj spremenljivk okolja in operativnih postopkov
-- [ ] Če se je `.env.example` spremenila: `docs/reference/ENVIRONMENT.md` je posodobljen
-- [ ] Če ima nova funkcionalnost uporabniški vmesnik: `docs/guides/USER_GUIDE.md` jo omenja
+- [ ] `npm run check:docs-sync` je uspešen (samodejno ga zažene kavelj pred potrditvijo)
+- [ ] `npm run check:docs-all` je uspešen (krovno preverjanje: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` se konča s kodo 0 — pogodba okolja med kodo ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` je nespremenjena
+- [ ] `npm run check:doc-links` se konča s kodo 0 — po prestrukturiranju ni pokvarjenih notranjih sklicev Markdown
+- [ ] `docs/architecture/ARCHITECTURE.md` je pregledan glede odstopanj v shranjevanju/izvajalnem okolju
+- [ ] `docs/guides/TROUBLESHOOTING.md` je pregledan glede odstopanj spremenljivk okolja in delovanja
+- [ ] Če je bila datoteka `.env.example` spremenjena: `docs/reference/ENVIRONMENT.md` je posodobljen
+- [ ] Če ima nova funkcionalnost uporabniški vmesnik: omenjena je v `docs/guides/USER_GUIDE.md`
 - [ ] Če ima nova funkcionalnost API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` sta posodobljena
-- [ ] Če je nova funkcionalnost modul: obstaja namenski `docs/<MODULE>.md`
-- [ ] Če gre za nezdružljivo spremembo: `docs/guides/TROUBLESHOOTING.md` vsebuje opombo o migraciji
+- [ ] Če je nova funkcionalnost modul: obstaja namenska datoteka `docs/<MODULE>.md`
+- [ ] Če gre za prelomno spremembo: `docs/guides/TROUBLESHOOTING.md` vsebuje opombo o selitvi
 
 ### i18n
 
-- [ ] `npm run i18n:check` se konča s kodo 0 — stanje prevodov (`.i18n-state.json`) je usklajeno z izvornimi dokumenti (v strogem načinu ni odstopajočih virov; svetovalna opozorila v opozorilnem načinu so sprejemljiva za popravke dokumentacije v zadnjem trenutku, vendar mora biti pred označevanjem izdaje rezultat 0)
+- [ ] `npm run i18n:check` se konča s kodo 0 — stanje prevodov (`.i18n-state.json`) je usklajeno z izvorno dokumentacijo (v strogem načinu ni spremenjenih izvorov; opozorilni način je sprejemljiv za popravke dokumentacije tik pred izdajo, vendar mora biti rezultat pred označevanjem 0)
 - [ ] `npm run i18n:check-ui-coverage` se konča s kodo 0 — vsaka področna nastavitev uporabniškega vmesnika dosega ali presega prag 80-odstotne pokritosti
-- [ ] `npm run i18n:sync-ui:dry` poroča o 0 manjkajočih ključih v vseh 42 področnih nastavitvah
-- [ ] Če so se izvorni angleški dokumenti spremenili, pred označevanjem izdaje zaženite `npm run i18n:run` (zahteva `OMNIROUTE_TRANSLATION_API_KEY` v `.env`)
-- [ ] Prispevki k prevodom se lahko, če so manjši, odložijo do naslednje izdaje (zabeležite v CHANGELOG)
+- [ ] `npm run i18n:sync-ui:dry` poroča o 0 manjkajočih ključih v vseh 66 ciljnih področnih nastavitvah (vseh razen izvorne `en`)
+- [ ] Če se je spremenila izvorna angleška dokumentacija, pred označevanjem zaženite `npm run i18n:run` (zahteva `OMNIROUTE_TRANSLATION_API_KEY` v `.env`)
+- [ ] Prispevke k prevodom je mogoče prestaviti v naslednjo izdajo, če so manjši (zabeležite jih v CHANGELOG)
 
-### Migracije podatkovne zbirke
+### Selitve podatkovne zbirke
 
 - [ ] Če so v `src/lib/db/migrations/` nove datoteke:
-  - [ ] Vsaka migracija je idempotentna (`CREATE TABLE IF NOT EXISTS` itd.)
-  - [ ] Migracije so ovite v transakcije
+  - [ ] Vsaka selitev je idempotentna (`CREATE TABLE IF NOT EXISTS` itd.)
+  - [ ] Selitve so ovite v transakcije
   - [ ] Pravilno so oštevilčene (brez vrzeli v zaporedju)
-- [ ] Preskusite pri sveži namestitvi: izbrišite `~/.omniroute/omniroute.db` in zaženite `npm run dev`
-- [ ] Preskusite pri obstoječi namestitvi: varnostno kopirajte podatkovno zbirko, zaženite migracijo in preverite shemo
-- [ ] Datoteke WAL (`-wal`, `-shm`) so pravilno obravnavane, če migracija na novo zapisuje tabele
+- [ ] Preizkusite na sveži namestitvi: izbrišite `~/.omniroute/omniroute.db` in zaženite `npm run dev`
+- [ ] Preizkusite na obstoječi namestitvi: varnostno kopirajte podatkovno zbirko, izvedite selitev in preverite shemo
+- [ ] Datoteke WAL (`-wal`, `-shm`) so pravilno obravnavane, če selitev prepisuje tabele
 
 ### Katalog ponudnikov (preverjen z Zod)
 
 - [ ] Shema Zod v `src/shared/constants/providers.ts` je veljavna ob nalaganju
-  - [ ] Vsi ponudniki imajo obvezna polja (`id`, `label`, `kind` itd.)
-  - [ ] Za nove brezplačne ponudnike je naveden `freeNote`
+  - [ ] Vsi ponudniki imajo zahtevana polja (`id`, `label`, `kind` itd.)
+  - [ ] Za nove brezplačne ponudnike je podan `freeNote`
   - [ ] Ponudniki OAuth imajo `oauthConfig` registriran v `src/lib/oauth/constants/oauth.ts`
-- [ ] Če je dodan nov ponudnik: ustrezni izvajalnik v `open-sse/executors/`
-- [ ] Če oblika ni OpenAI: pretvornik v `open-sse/translator/`
+- [ ] Če je dodan nov ponudnik: ustrezen izvajalnik v `open-sse/executors/`
+- [ ] Če oblika ni OpenAI: prevajalnik v `open-sse/translator/`
 - [ ] Modeli so registrirani v `open-sse/config/providerRegistry.ts`
 - [ ] Testi enot v `tests/unit/` pokrivajo razvrščanje ponudnikov in usmerjanje
 
 ### Namizna aplikacija (Electron)
 
-Če se je `electron/` spremenil:
+Če je bila mapa `electron/` spremenjena:
 
-- [ ] `npm run electron:smoke:packaged` uspe
-- [ ] Graditve so preizkušene za vsaj eno od možnosti `:win`, `:mac`, `:linux`
+- [ ] `npm run electron:smoke:packaged` uspešno prestane
+- [ ] Gradnje so preizkušene za vsaj enega od `:win`, `:mac`, `:linux`
 - [ ] Potrdila za podpisovanje kode niso potekla (če se uporablja podpisovanje)
-- [ ] Različica v `electron/package.json` se ujema z različico v korenskem `package.json`
-- [ ] Kazalec kanala za samodejne posodobitve je posodobljen, če se izdaja v kanal `stable`
+- [ ] Različica v `electron/package.json` se ujema s korenskim `package.json`
+- [ ] Kazalec kanala za samodejne posodobitve je posodobljen, če se izdaja v `stable`
 
-### Razporeditev graditve
+### Razporeditev gradnje
 
-Repozitorij uporablja tri ločene izhodne imenike — nikoli jih ne zamenjujte:
+Repozitorij uporablja tri ločene izhodne imenike — nikoli jih ne zamešajte:
 
-| Imenik    | Namen                                                      | Sleden?         |
-| --------- | ---------------------------------------------------------- | --------------- |
-| `src/`    | Izvorna koda aplikacije (TypeScript / TSX)                 | Da              |
-| `.build/` | Vmesni rezultati graditve — izhod `next build` (`distDir`) | Ne (gitignored) |
-| `dist/`   | Distribucijski paket npm — sestavi ga `assembleStandalone` | Ne (gitignored) |
+| Imenik    | Namen                                                     | Sleden?            |
+| --------- | --------------------------------------------------------- | ------------------ |
+| `src/`    | Izvorna koda aplikacije (TypeScript / TSX)                | Da                 |
+| `.build/` | Vmesni rezultati gradnje — izhod `next build` (`distDir`) | Ne (prezrt v gitu) |
+| `dist/`   | Dobavljivi paket npm — sestavi ga `assembleStandalone`    | Ne (prezrt v gitu) |
 
-> **Opomba za upravljavca:** imenik slike na oddaljenem VPS ostaja `/usr/lib/node_modules/omniroute/app/`.
-> Premaknil se je samo izhod graditve **znotraj repozitorija** (`app/` → `dist/`). Orodja za uvajanje z rsync
-> sinhronizirajo vsebino `dist/` v oddaljeni imenik `app/` — poti na VPS ni treba spreminjati.
+> **Opomba za operaterja:** imenik slike na oddaljenem VPS ostaja `/usr/lib/node_modules/omniroute/app/`.
+> Premaknjen je bil samo izhod gradnje **znotraj repozitorija** (`app/` → `dist/`). Veščine za uvedbo z rsync
+> prenesejo vsebino `dist/` v oddaljeni imenik `app/` — spremembe poti na VPS niso potrebne.
 
-**Potek z eno graditvijo:**
+**Potek ene gradnje:**
 
 ```
 npm run build:release
   └─ rm -rf .build dist          (čiščenje)
   └─ next build → .build/next/   (vmesni rezultati)
-  └─ assembleStandalone          (kopira samostojni paket + statične datoteke + javne datoteke + izvorne module → dist/)
-  └─ zapiše dist/BUILD_SHA       (kontrolna oznaka HEAD)
+  └─ assembleStandalone          (kopira standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (kontrolna oznaka HEAD)
 ```
 
-Za uvajanje NE zaženite `npm run build`, ki mu sledi ločeni `npm run build:cli` — uporabite
-`npm run build:release`, ki z enim ukazom izvede čisto ponovno graditev in ustvari kontrolno oznako.
+Za uvedbo NE zaženite `npm run build`, ki mu sledi ločen `npm run build:cli` — uporabite
+`npm run build:release`, ki z enim ukazom izvede čisto ponovno gradnjo in ustvari kontrolno oznako.
 
-### Preverjanje artefaktov
+### Preverjanje artefakta
 
 - [ ] `npm run build:release` uspe in `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` ne odkrije težav — ni `app.__qa_backup`, `scripts/scratch`, `package-lock.json` ali drugih lokalnih ostankov
-- [ ] Po graditvi obstaja `dist/server.js`
-- [ ] Izbirni lokalni hitri preskus paketiranega izvajalnega okolja: `npm run dev:candidate -- validate` po ukazu `npm run dev:candidate -- build` zažene paket tarball z izoliranim `DATA_DIR` ter preveri `/api/health` + `/v1/models` (glejte [Priporočeni postopek za prispevke](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run check:pack-artifact` je čist — brez `app.__qa_backup`, `scripts/scratch`, `package-lock.json` ali drugih lokalnih ostankov
+- [ ] `dist/server.js` obstaja po gradnji
+- [ ] Izbirni lokalni hitri preizkus zapakiranega izvajalnega okolja: `npm run dev:candidate -- validate` po `npm run dev:candidate -- build` zažene zapakirani tarball z izoliranim `DATA_DIR` ter preveri `/api/health` + `/v1/models` (glejte [Zlata pot prispevanja](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
 
 ### Označevanje in izdaja
 
 - [ ] Zaženite `/generate-release-cc` (veščina Claude Code):
   - Ustvari oznako `vX.Y.Z`
   - Potisne oznako in vejo
-  - Odpre izdajo GitHub z besedilom dnevnika sprememb
+  - Odpre izdajo GitHub z dnevnikom sprememb v telesu
   - Priloži namestitvene programe Electron (če so bili zgrajeni)
 - [ ] Ali ročno:
   ```bash
@@ -274,45 +274,45 @@ Za uvajanje NE zaženite `npm run build`, ki mu sledi ločeni `npm run build:cli
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Uvajanje
+### Uvedba
 
-Orodja za uvajanje uporabljajo lahki potek z rsync — brez `npm pack` in brez `npm i -g`:
+Veščine za uvedbo uporabljajo lahek potek rsync — brez `npm pack` in brez `npm i -g`:
 
-- [ ] Uporabite zmožnost za uvedbo, ki ustreza cilju:
+- [ ] Uporabite veščino za uvedbo, ki ustreza cilju:
   - `/deploy-vps-local-cc` — lokalni VPS (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
+  - `/deploy-vps-akamai-cc` — VPS Akamai (69.164.221.35)
   - `/deploy-vps-both-cc` — oba
 - [ ] Pred uvedbo potrdite, da je `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Gradnja se mora izvesti tam, kjer je `node_modules` dejanski imenik (glavna delovna kopija ali delovno drevo, v katerem je bil izveden `npm ci` — NE delovno drevo s simbolno povezavo)
+- [ ] Gradnja se mora izvajati tam, kjer je `node_modules` pravi imenik (glavna delovna kopija ali delovno drevo, v katerem je bil izveden `npm ci` — NE delovno drevo s simbolno povezavo)
 - [ ] Izvedite hitri preizkus uvedenega primerka:
   - Odprite `/dashboard/health` → preverite, ali se niz različice ujema z izdajo
-  - Izvedite zahtevo `/v1/chat/completions` proti znanemu ponudniku
-  - Preverite, ali `/api/monitoring/health` vrne odklopnike v stanju `CLOSED`
+  - Izvedite zahtevo `/v1/chat/completions` pri znanem ponudniku
+  - Preverite, ali `/api/monitoring/health` vrne odklopnike stanja `CLOSED`
   - Potrdite, da se transporti MCP odzivajo (`/mcp` HTTP, `/mcp-sse` SSE)
 
 ### Po izdaji
 
-- [ ] Zaženite `/capture-release-evidences-cc` (zmožnost Claude Code)
+- [ ] Zaženite `/capture-release-evidences-cc` (veščina Claude Code)
   - Zajame posnetke zaslona/posnetke novih funkcij v obliki WebP
-  - Priloži jih opombam ob izdaji/objavi v spletnem dnevniku
-- [ ] Posodobite GitHub Discussions/Discord z obvestilom o izdaji
+  - Priloži jih opombam ob izdaji / objavi v spletnem dnevniku
+- [ ] Posodobite GitHub Discussions / Discord z obvestilom o izdaji
 - [ ] Odprite mejnik za naslednjo različico
 - [ ] Če je kritično: pripnite razpravo ali objavite v `news.json` za pasico v aplikaciji
 
-### Kontrolna točka za javno izdajo Radarja
+### Kontrolna točka za javno uvedbo Radarja
 
-Obvestilo Radarja je namenoma objavljeno v repozitoriju z `active: false`. Aktivacija je ločena
-sprememba, ki se izvede, ko so za vse spodnje postavke zagotovljena dokazila:
+Obvestilo Radar je namenoma potrjeno z `active: false`. Aktivacija je ločena
+sprememba, izvedena šele po predložitvi dokazov za vsako spodnjo postavko:
 
-- [ ] Vsi naloženi Radarjevi PR-ji so združeni in CI za vrh izdaje je uspešen
-- [ ] Uvedite in hitro preizkusite odprtokodne Radarjeve poti, pri čemer je `RADAR_ENABLED` še vedno privzeto izklopljen
-- [ ] Hitro preizkusite `GET /planos`, `/termos`, `/privacidade` in `/reembolso` na določenem gostitelju Radarja
-- [ ] V zasebni storitvi zabeležite identiteto/kontakt/naslov upravljavca in pravni pregled, ki ga je odobril lastnik
-- [ ] Izvedite Stripe Checkout in podpisani spletni kavelj samo v preizkusnem načinu
-- [ ] Izvedite eno dostavo šifriranega transakcijskega e-poštnega sporočila z odobrenim pošiljateljem/domeno
-- [ ] Dokažite obnovitev varnostne kopije in en nadzorovan raziskovalni zagon z omejenim proračunom
-- [ ] Pred sprejemom dokazila o donaciji odobrite pravilnik pregleda za BRL/PIX
-- [ ] Javni Checkout omogočite šele po izpolnitvi predhodnih kontrolnih točk, nato pa aktivirajte novi ID v `news.json`
+- [ ] Vsi zaporedno naloženi PR-ji za Radar so združeni in CI na konici izdaje je uspešen
+- [ ] Uvedite in hitro preizkusite odprtokodne poti Radar, pri čemer je `RADAR_ENABLED` privzeto še vedno izklopljen
+- [ ] Hitro preizkusite `GET /planos`, `/termos`, `/privacidade` in `/reembolso` na določenem gostitelju Radar
+- [ ] V zasebni storitvi zabeležite identiteto/kontakt/naslov operaterja in pravni pregled, ki ga je odobril lastnik
+- [ ] Stripe Checkout in podpisani webhook preizkusite samo v preizkusnem načinu
+- [ ] Preizkusite eno šifrirano dostavo transakcijskega e-poštnega sporočila z odobrenim pošiljateljem/domeno
+- [ ] Dokažite obnovitev varnostne kopije in eno nadzorovano raziskovalno izvajanje z omejenim proračunom
+- [ ] Pred sprejemanjem dokazil o donacijah odobrite pravilnik pregleda BRL/PIX
+- [ ] Javni Checkout omogočite šele po uspešno opravljenih predhodnih kontrolnih točkah, nato pa aktivirajte novi ID v `news.json`
 - [ ] Preverite, ali domača pasica uporablja lokalizirano besedilo in ali se novi ID znova prikaže po opustitvi starejšega ID-ja
 
 ## Hitri preizkus vgrajenih storitev (v3.8.4+)

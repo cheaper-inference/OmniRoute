@@ -1,1 +1,0 @@
-- **fix(oauth):** the dashboard OIDC login now sends a PKCE challenge and a nonce, and the callback refuses an id_token that does not echo the nonce ([#17072](https://github.com/diegosouzapw/OmniRoute/pull/17072)) — thanks @maxmad64bis

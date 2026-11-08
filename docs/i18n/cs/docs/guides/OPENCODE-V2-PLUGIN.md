@@ -72,31 +72,32 @@ zobrazí varování s názvem endpointu a informací o tom, co chybí — zhorš
 
 ## Možnosti
 
-| Klíč                             | Výchozí hodnota                                        | Poznámky                                                                                                                        |
-| -------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                          | ID poskytovatele, ID integrace a prefix, pod kterým se modely zobrazují                                                         |
-| `baseURL`                        | povinné                                                | Kořenová adresa brány, pouze `http(s)`; přípona `/v1` se přidává tam, kde je potřeba                                            |
-| `apiKey`                         | připojené přihlašovací údaje, poté `OMNIROUTE_API_KEY` | Klíč pro chat pro `/v1/*`                                                                                                       |
-| `managementReadToken`            | použije `apiKey`, pokud není nastaveno                 | Klíč pro `/api/*` — obvykle **není** stejný                                                                                     |
-| `displayName`                    | `"OmniRoute"`                                          | Název poskytovatele ve výběru                                                                                                   |
-| `timeoutMs`                      | `10000`                                                | Časový limit načítání pro jednotlivé koncové body (automatické kombinace používají 5 s)                                         |
-| `modelCacheTtlMs`                | `300000`                                               | TTL mezipaměti katalogu; diskový snímek urychluje studené starty                                                                |
-| `timeouts`                       | použije `timeoutMs`, pokud není nastaveno              | Limity pro jednotlivé koncové body v ms: `models`, `combos`, `autoCombos`, `enrichment`                                         |
-| `enrichment`                     | `true`                                                 | Načítat názvy, ceny a limity bezplatné úrovně                                                                                   |
-| `providerTag`                    | `true`                                                 | Přidat před zobrazovaný název poskytovatele, ke kterému směruje                                                                 |
-| `usableOnly`                     | `false`                                                | Ponechat pouze poskytovatele, které brána hlásí jako zřízené                                                                    |
-| `showcasePerOwner`               | `10`                                                   | Počet položek na poskytovatele zachovaných ve výchozím zobrazení                                                                |
-| `freshPerOwner`                  | `10`                                                   | Počet nových položek na poskytovatele zachovaných ve výchozím zobrazení                                                         |
-| `freshWindowDays`                | `90`                                                   | Časové okno aktuálnosti ve dnech pro větev nových položek                                                                       |
-| `usageMemory`                    | `true`                                                 | Obnovit staticky vyřazené položky uvedené v analytice využití za 30 dní (vyžaduje token pro správu)                             |
-| `visibleModels` / `hiddenModels` | `[]`                                                   | Seznamy povolených přesnou shodou nebo příponou; zákaz má přednost; `*` zveřejní celý katalog (ostatní filtry se stále použijí) |
-| `geminiSanitization`             | `true`                                                 | Odstranit ze schémat nástrojů klíčová slova JSON Schema, která Gemini odmítá (nástroje s `$ref` se předávají beze změny)        |
-| `apiFormat.allowAnthropic`       | `false`                                                | Směrovat povolená ID přes blok API Anthropic                                                                                    |
-| `apiFormat.anthropicModels`      | `[]`                                                   | Úplná ID modelů směrovaných do Anthropic                                                                                        |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                       | Úroveň podrobnosti protokolování                                                                                                |
+| Klíč                             | Výchozí hodnota                                        | Poznámky                                                                                                                                   |
+| -------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `providerId`                     | `"omniroute"`                                          | ID poskytovatele, ID integrace a prefix, pod kterým se modely zobrazují                                                                    |
+| `baseURL`                        | povinné                                                | Kořenová adresa brány, pouze `http(s)`; přípona `/v1` se přidává podle potřeby                                                             |
+| `apiKey`                         | připojené přihlašovací údaje, poté `OMNIROUTE_API_KEY` | Klíč pro chat pro `/v1/*`                                                                                                                  |
+| `managementReadToken`            | použije `apiKey` jako záložní hodnotu                  | Klíč pro `/api/*` — obvykle **nejde** o stejný klíč                                                                                        |
+| `displayName`                    | `"OmniRoute"`                                          | Název poskytovatele ve výběru                                                                                                              |
+| `timeoutMs`                      | `10000`                                                | Časový limit načítání pro jednotlivé koncové body (automatické kombinace používají 5 s)                                                    |
+| `modelCacheTtlMs`                | `300000`                                               | TTL mezipaměti katalogu; snímek na disku urychluje studené starty                                                                          |
+| `timeouts`                       | použije `timeoutMs` jako záložní hodnotu               | Časové limity jednotlivých koncových bodů v ms: `models`, `combos`, `autoCombos`, `enrichment`                                             |
+| `enrichment`                     | `true`                                                 | Načítat názvy, ceny a limity bezplatné úrovně                                                                                              |
+| `providerTag`                    | `true`                                                 | Před zobrazovaný název přidat poskytovatele vyšší úrovně, ke kterému směruje                                                               |
+| `usableOnly`                     | `false`                                                | Ponechat pouze poskytovatele, které brána uvádí jako zřízené                                                                               |
+| `combosSource`                   | `"api"`                                                | `"models"` přeskočí `/api/combos` a zveřejní řádky kombinací z `/v1/models`; filtry na úrovni členů zachovají `"api"`                      |
+| `showcasePerOwner`               | `10`                                                   | Počet položek zachovaných pro každého poskytovatele ve výchozím zobrazení                                                                  |
+| `freshPerOwner`                  | `10`                                                   | Počet nových položek zachovaných pro každého poskytovatele ve výchozím zobrazení                                                           |
+| `freshWindowDays`                | `90`                                                   | Časové okno aktuálnosti ve dnech pro větev nových položek                                                                                  |
+| `usageMemory`                    | `true`                                                 | Obnovit staticky vyřazené položky uvedené v analytice využití za 30 dní (vyžaduje token pro správu)                                        |
+| `visibleModels` / `hiddenModels` | `[]`                                                   | Seznamy povolených položek s přesnou nebo koncovou shodou; zákaz má přednost; `*` zveřejní celý katalog (ostatní filtry se nadále použijí) |
+| `geminiSanitization`             | `true`                                                 | Odstranit ze schémat nástrojů klíčová slova JSON Schema, která Gemini odmítá (nástroje s `$ref` se předávají beze změny)                   |
+| `apiFormat.allowAnthropic`       | `false`                                                | Směrovat povolená ID prostřednictvím bloku API Anthropic                                                                                   |
+| `apiFormat.anthropicModels`      | `[]`                                                   | Úplná ID modelů směrovaných do Anthropic                                                                                                   |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                       | Podrobnost protokolování                                                                                                                   |
 
 Paměť využití je ve výchozím nastavení zapnutá. Bez tokenu pro správu zůstává neaktivní
-(při spuštění se zapíše upozornění do protokolu) a nic se neobnoví.
+(při spuštění se zaprotokoluje upozornění) a nic se neobnoví.
 
 ## Jak katalog zůstává aktuální
 

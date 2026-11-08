@@ -54,7 +54,7 @@ const isIsolatedRuntime = (step: Step) =>
 test("a11y-build builds the production dashboard once on the build pool and uploads it", () => {
   assert.ok(build, "nightly-resilience.yml must define the a11y-build job");
   assert.match(build["runs-on"] ?? "", /omni-build/, "the build runs where builds fit");
-  assert.match(build.if ?? "", /github\.repository == 'diegosouzapw\/OmniRoute'/);
+  assert.match(build.if ?? "", /github\.repository == 'cheaper-inference\/OmniRoute'/);
 
   const isolated = indexOfStep(build, isIsolatedRuntime, "isolated DATA_DIR");
   const install = indexOfStep(build, (s) => s.run?.trim() === "npm ci", "npm ci");
@@ -105,6 +105,17 @@ test("a11y boots the downloaded build on a fresh DATA_DIR and never builds itsel
     !a11y.steps.some((s) => /npm run build\b|build-next-isolated/.test(s.run ?? "")),
     "the a11y job must not build"
   );
+});
+
+test("a11y boots the artefact on a hosted runner, where the download takes seconds", () => {
+  // Run 39156364797 (2026-10-18): on the light pool the 1.2 GB artefact took 1,416 s to download
+  // and the 30-minute job timeout cancelled the job while it was still extracting, before the
+  // axe suite ran. Hosted runners pull the same class of artefact in ~10 s (the per-PR E2E
+  // shards, 518 MB in 7-10 s), booting a prebuilt standalone server fits them, and a fresh VM
+  // has no port or $HOME left behind by other jobs.
+  assert.equal(a11y["runs-on"], "ubuntu-latest");
+  const timeout = (a11y as Job & { "timeout-minutes"?: number })["timeout-minutes"] ?? 0;
+  assert.ok(timeout >= 30, `timeout-minutes is ${timeout}`);
 });
 
 test("playwright.config pipes the webServer stdout only when asked", () => {

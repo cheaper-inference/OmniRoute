@@ -15,6 +15,7 @@ import {
   writeMediaFile,
 } from "../../../src/lib/media/mediaStore.ts";
 import { getVideoProvider } from "../../../open-sse/config/videoRegistry.ts";
+import { isUrlHost } from "../../../open-sse/utils/urlHost.ts";
 
 const gatewaySink = (ownerId: string | null = null) =>
   createMediaSink({ origin: "https://gw.example/", ownerId });
@@ -238,7 +239,7 @@ test("the provider credential is never sent to a result URL on another origin", 
         headers: { "content-type": "application/json" },
       });
     }
-    if (url.startsWith("https://evil.example")) return new Response("stolen", { status: 200 });
+    if (isUrlHost(url, "evil.example")) return new Response("stolen", { status: 200 });
     return new Response(
       JSON.stringify({
         id: "job-x",
@@ -261,7 +262,7 @@ test("the provider credential is never sent to a result URL on another origin", 
     assert.equal(result.success, false);
     assert.equal(result.status, 502);
     assert.equal(
-      calls.some((call) => call.url.startsWith("https://evil.example")),
+      calls.some((call) => isUrlHost(call.url, "evil.example")),
       false,
       "the off-origin result URL must not be fetched"
     );

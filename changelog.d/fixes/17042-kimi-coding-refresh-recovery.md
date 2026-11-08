@@ -1,1 +1,0 @@
-- **fix(oauth):** Kimi Coding retains its refresh token after a rejected OAuth refresh so the bounded health-check retries can recover instead of becoming stuck in `no_refresh_token`; Codex/OpenAI token-rotation handling is unchanged ([#17042](https://github.com/diegosouzapw/OmniRoute/pull/17042)) — thanks @fabioKoruja00

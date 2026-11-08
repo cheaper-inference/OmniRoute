@@ -1,6 +1,10 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { FREE_MODEL_BUDGETS, computeFreeModelTotals } from "../../open-sse/config/freeModelCatalog.ts";
+import { createHash } from "node:crypto";
+import {
+  FREE_MODEL_BUDGETS,
+  computeFreeModelTotals,
+} from "../../open-sse/config/freeModelCatalog.ts";
 import {
   isCatalogFreeModel,
   isFreeForProvider,
@@ -28,7 +32,20 @@ const formerlyMisclassifiedIds = [
 describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
   it("retains honest release catalog counts and never counts SiliconFlow as statically uncapped", () => {
     const totals = computeFreeModelTotals();
-    assert.equal(totals.modelCount, 468);
+    // The 484 inherited identities include 13 onomeo rows added by #16325.
+    // Measured 2026-10-28 inventory subtracts five
+    // priced Ollama grants, three retired offers, two AINative grants and ten OpenCode-only offers.
+    // Includes the release base NVIDIA Nemotron 3.5 identity rename.
+    // 464 → 465 on the v3.8.54 base: #16315/#18579 add two sourced Token Harbor :free routes,
+    // and #18418 drops NVIDIA's retired openai/gpt-oss-120b endpoint.
+    // Pin identities as well as the total so unrelated replacement is visible.
+    const identities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`).sort();
+    assert.equal(new Set(identities).size, 465);
+    assert.equal(
+      createHash("sha256").update(identities.join("\n")).digest("hex"),
+      "098c2c2eeed42c3c99ad93ec8e92d0d65146e6db8f66c4c920a2b4b414fe7732"
+    );
+    assert.equal(totals.modelCount, 465);
     assert.equal(totals.poolCount, 34);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
   });
@@ -68,10 +85,19 @@ describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
     const priced = { id, pricing: { prompt: "4", completion: "16" }, isFree: true };
     assert.equal(hasPayloadPaidEvidence(priced), true);
     assert.equal(isFreeModel("siliconflow", priced), false);
-    assert.equal(isFreeModel("siliconflow", { id, free: true, pricing: { input: 0, output: 16 } }), false);
-    assert.equal(isFreeModel("siliconflow", { id, free: false, pricing: { prompt: 0, completion: 0 } }), false);
+    assert.equal(
+      isFreeModel("siliconflow", { id, free: true, pricing: { input: 0, output: 16 } }),
+      false
+    );
+    assert.equal(
+      isFreeModel("siliconflow", { id, free: false, pricing: { prompt: 0, completion: 0 } }),
+      false
+    );
     assert.equal(isModelFreeBadge("siliconflow", { ...priced, name: "DeepSeek R1 Free" }), false);
-    assert.equal(isModelFreeBadge("siliconflow", { ...priced, name: "DeepSeek R1 Free" }, { strict: true }), false);
+    assert.equal(
+      isModelFreeBadge("siliconflow", { ...priced, name: "DeepSeek R1 Free" }, { strict: true }),
+      false
+    );
     assert.equal(isModelFreeBadge("siliconflow", { id, name: "DeepSeek R1 Free" }), false);
   });
 
@@ -83,7 +109,11 @@ describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
     assert.equal(providerHasFreeModels("siliconflow"), true);
     assert.equal(isFreeModel("siliconflow", verifiedLiveFree), true);
     assert.equal(isFreeModel("siliconflow", zeroPrice), true);
-    const imported = selectModelsForImport("siliconflow", [verifiedLiveFree, zeroPrice, unknown, priced], true);
+    const imported = selectModelsForImport(
+      "siliconflow",
+      [verifiedLiveFree, zeroPrice, unknown, priced],
+      true
+    );
     assert.deepEqual(imported.models, [verifiedLiveFree, zeroPrice]);
     assert.equal(imported.freeFilterEmpty, false);
     assert.deepEqual(selectModelsForImport("siliconflow", [unknown, priced], true), {
@@ -95,7 +125,9 @@ describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
   });
 
   it("keeps other providers' static free lists intact", () => {
-    const staticFree = FREE_MODEL_BUDGETS.find((row) => row.provider !== "siliconflow" && row.freeType === "recurring-daily");
+    const staticFree = FREE_MODEL_BUDGETS.find(
+      (row) => row.provider !== "siliconflow" && row.freeType === "recurring-daily"
+    );
     assert.ok(staticFree);
     assert.equal(isFreeModel(staticFree.provider, { id: staticFree.modelId }), true);
   });

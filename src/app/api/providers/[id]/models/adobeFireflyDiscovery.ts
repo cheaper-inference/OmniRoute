@@ -9,6 +9,7 @@ import {
   type AdobeFireflyCatalogModel,
 } from "@omniroute/open-sse/services/adobeFireflyModels.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import type { DiscoveryFailure } from "@/shared/discovery/degradedCause";
 
 type AdobeProviderData = { cookie?: unknown; access_token?: unknown; accessToken?: unknown };
 
@@ -16,6 +17,8 @@ interface AdobeProviderModelsResult {
   models: Array<Record<string, unknown>>;
   source: "api" | "local_catalog";
   warning?: string;
+  /** Why the live catalog was not used — a code or an HTTP status, never a message. */
+  failure?: DiscoveryFailure;
 }
 
 function toModelResponse(model: AdobeFireflyCatalogModel): Record<string, unknown> {
@@ -36,11 +39,12 @@ function toModelResponse(model: AdobeFireflyCatalogModel): Record<string, unknow
   };
 }
 
-function fallback(warning: string): AdobeProviderModelsResult {
+function fallback(warning: string, failure: DiscoveryFailure): AdobeProviderModelsResult {
   return {
     models: getAdobeFireflyFallbackCatalog().map(toModelResponse),
     source: "local_catalog",
     warning,
+    failure,
   };
 }
 
@@ -64,12 +68,18 @@ export async function getAdobeModels(
     const models = mapDiscoveredToCatalog(await discoverAdobeFireflyModels(token, fetchImpl));
     return models.length > 0
       ? { models: models.map(toModelResponse), source: "api" }
-      : fallback("Adobe Firefly discovery returned no callable image or video models");
+      : fallback(
+          "Adobe Firefly discovery returned no callable image or video models",
+          // The upstream answered but offered no usable model.
+          { code: "EMPTY_CATALOG" }
+        );
   } catch (error) {
     return fallback(
       `Adobe Firefly discovery unavailable: ${sanitizeErrorMessage(
         error instanceof Error ? error.message : String(error)
-      )}`
+      )}`,
+      // The discovery threw; its reason is not readable.
+      {}
     );
   }
 }

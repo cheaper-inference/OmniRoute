@@ -13,6 +13,7 @@
 
 import { getModelContextLimit } from "../../src/lib/modelCapabilities";
 import { parseModel } from "./model.ts";
+import { resolveProviderModelAlias } from "./modelCanonicalization.ts";
 import {
   CONTEXT_OVERFLOW_REGEX,
   containsModelUnavailableMessage,
@@ -138,6 +139,9 @@ const FAMILY_FALLBACK_TEMPLATES: Record<string, readonly string[]> = {
   ],
   "claude-sonnet-4-6": ["claude-sonnet-4-5-20250929", "claude-sonnet-4-20250514"],
   "claude-sonnet-4-5-20250929": ["claude-sonnet-4-6", "claude-sonnet-4-20250514"],
+
+  // Claude Haiku family
+  "claude-haiku-5-5": ["claude-haiku-4-5-20251001", "claude-haiku-4.5", "claude-haiku-4-5"],
 };
 
 // ── Error Detection ──────────────────────────────────────────────────────────
@@ -318,6 +322,7 @@ function isFamilyFallbackCandidateEligible(
 ): boolean {
   const parsedCandidate = parseModel(candidate);
   const candidateModel = parsedCandidate.model || candidate;
+  const wireModel = resolveProviderModelAlias(provider, candidateModel);
   // A public prefix can select a different runtime identity than its catalog id
   // (agy/ routes to antigravity). Bare wire ids retain the explicit provider hint.
   const visibilityProvider = parsedCandidate.providerAlias
@@ -325,7 +330,8 @@ function isFamilyFallbackCandidateEligible(
     : provider;
   return (
     isVisible(candidate, visibilityProvider) &&
-    !isModelLocked(provider, connectionId, candidateModel)
+    !isModelLocked(provider, connectionId, candidateModel) &&
+    !isModelLocked(provider, connectionId, wireModel)
   );
 }
 

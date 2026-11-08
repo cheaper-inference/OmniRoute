@@ -1,12 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { APIKEY_PROVIDERS_ENTERPRISE } = await import(
-  "../../src/shared/constants/providers/apikey/enterprise-cloud.ts"
-);
-const { APIKEY_PROVIDERS_INFERENCE } = await import(
-  "../../src/shared/constants/providers/apikey/inference-hosts.ts"
-);
+const { APIKEY_PROVIDERS_ENTERPRISE } =
+  await import("../../src/shared/constants/providers/apikey/enterprise-cloud.ts");
+const { APIKEY_PROVIDERS_INFERENCE } =
+  await import("../../src/shared/constants/providers/apikey/inference-hosts.ts");
 const { WEB_COOKIE_PROVIDERS } = await import("../../src/shared/constants/providers/web-cookie.ts");
 
 // #5461 — Scaleway's `website` pointed at https://www.scaleway.com/en/ai/generative-apis
@@ -35,12 +33,30 @@ test("#5470 Together AI no longer advertises a free tier and warns about the pre
 });
 
 // #5534 — the M365 Copilot authHint gave no concrete steps and the reporter's guessed
-// method (Authorization header) is wrong; the credential lives on the Chathub WS URL.
-test("#5534 M365 Copilot authHint gives concrete DevTools WebSocket steps", () => {
+// method (Authorization header) was wrong. Native Microsoft sign-in replaced manual token
+// capture: the hint now routes users there, and the concrete DevTools steps live in the
+// sign-in dialog, which captures the nativeclient request URL rather than any header.
+test("#5534 M365 Copilot authHint routes to native sign-in, whose dialog gives concrete DevTools steps", async () => {
   const m365 = (WEB_COOKIE_PROVIDERS as Record<string, any>)["copilot-m365-web"];
   assert.ok(m365, "copilot-m365-web provider must exist");
   const hint: string = m365.authHint || "";
-  assert.ok(/websocket|\bWS\b/i.test(hint), "hint must point at the WebSocket (WS) tab");
-  assert.ok(/DevTools/i.test(hint), "hint must reference DevTools");
-  assert.ok(/access_token/.test(hint), "hint must name the access_token");
+  assert.match(hint, /native Microsoft sign-in/i, "hint must point at native Microsoft sign-in");
+  assert.match(hint, /HAR import/i, "hint must name the legacy import path for captured sessions");
+  assert.doesNotMatch(hint, /Authorization/i, "hint must never suggest an Authorization header");
+
+  const { default: en } = await import("../../src/i18n/messages/en.json", {
+    with: { type: "json" },
+  });
+  const dialog = (en as { oauthModal: Record<string, string> }).oauthModal;
+  assert.match(dialog.m365StepNetwork, /DevTools → Network/, "the dialog names the DevTools panel");
+  assert.match(
+    dialog.m365StepNetwork,
+    /Preserve log/,
+    "the dialog keeps the request across redirects"
+  );
+  assert.match(
+    dialog.m365StepCopy,
+    /login\.microsoftonline\.com\/common\/oauth2\/nativeclient/,
+    "the dialog names the exact request to copy"
+  );
 });

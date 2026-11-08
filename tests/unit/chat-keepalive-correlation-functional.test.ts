@@ -20,6 +20,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-chat-keepalive-func-"));
 process.env.DATA_DIR = dataDir;
@@ -152,7 +153,7 @@ test("slow streaming chat request persists keepalive bytes in the call-log row",
   // find the recent row carrying ours, then re-read it in full (summary rows lack
   // the pipeline payloads). Persistence is async, so poll briefly.
   const { getCallLogs, getCallLogById } = await import("../../src/lib/usage/callLogs.ts");
-  const deadline = Date.now() + 5_000;
+  const deadline = Date.now() + CALL_LOG_SETTLE_TIMEOUT_MS;
   let row: Record<string, unknown> | null = null;
   while (!row && Date.now() < deadline) {
     const recent = (await getCallLogs({ limit: 10 })) as Array<Record<string, unknown>>;

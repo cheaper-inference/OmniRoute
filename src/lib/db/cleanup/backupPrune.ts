@@ -9,36 +9,18 @@
  *
  * @module lib/db/cleanup/backupPrune
  */
-import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
+import { hashFileSync } from "../backupFileHash";
 import { tryOpenSync } from "../adapters/driverFactory";
 import type { SqliteAdapter } from "../adapters/types";
-import { pruneBackupDirectory, resolveDbBackupRetention } from "../backupRetention";
+import {
+  collectBackupFamilies,
+  pruneBackupDirectory,
+  resolveDbBackupRetention,
+} from "../backupRetention";
 import { DB_BACKUPS_DIR, DATA_DIR, getDbInstance } from "../core";
-
-/**
- * Hash a file with SHA-256. Local copy of the migration snapshot helper: importing
- * it from the migration runner would pull its logger chain into this module.
- */
-function hashFileSync(filePath: string): string {
-  const hash = createHash("sha256");
-  const fd = fs.openSync(filePath, "r");
-  const buffer = Buffer.allocUnsafe(1024 * 1024);
-  let position = 0;
-  try {
-    while (true) {
-      const bytesRead = fs.readSync(fd, buffer, 0, buffer.length, position);
-      if (bytesRead === 0) break;
-      hash.update(buffer.subarray(0, bytesRead));
-      position += bytesRead;
-    }
-  } finally {
-    fs.closeSync(fd);
-  }
-  return hash.digest("hex");
-}
 
 /**
  * Resolve the SHA of the pre-migration snapshot the current migration would reuse,
@@ -76,6 +58,25 @@ export function resolveReusedPreMigrationSha(
   }
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+// Checked a minute past the cutoff pruneBackupDirectory uses, so clock movement
+// between the two reads can only make this check compute the hash more often.
+const EXPIRY_CHECK_SLACK_MS = 60 * 1000;
+const PRE_MIGRATION_BASE = /^db_state-[0-9a-f]{64}_pre-migration\.sqlite$/;
+
+/**
+ * The reused-snapshot exemption only skips the age rule, so it can only change
+ * the result when a pre-migration snapshot family is old enough to expire.
+ * Without one, the full-database VACUUM INTO that computes the hash would run
+ * on the main thread for nothing. Uses the same family scan as the prune.
+ */
+function hasExpirablePreMigrationSnapshot(backupDir: string, retentionDays: number): boolean {
+  const cutoffMs = Date.now() - retentionDays * DAY_MS + EXPIRY_CHECK_SLACK_MS;
+  return collectBackupFamilies(backupDir).some(
+    (family) => PRE_MIGRATION_BASE.test(family.base) && family.latestMtimeMs < cutoffMs
+  );
+}
+
 /**
  * Prune backup families outside the migration window, using the operator's
  * configured retention. Runs from the scheduled pass (startup + periodic), never
@@ -100,7 +101,10 @@ export function pruneDbBackupsOutsideMigrationWindow(options?: { backupDir?: str
     }
     const db = getDbInstance();
     const { maxFiles, retentionDays } = resolveDbBackupRetention(db);
-    const sha = retentionDays > 0 ? resolveReusedPreMigrationSha(db, backupDir) : null;
+    const sha =
+      retentionDays > 0 && hasExpirablePreMigrationSnapshot(backupDir, retentionDays)
+        ? resolveReusedPreMigrationSha(db, backupDir)
+        : null;
     const result = pruneBackupDirectory({
       backupDir,
       maxFiles,

@@ -109,165 +109,165 @@ reshe na release (ci gaba da tabbatar da release mai kore) — hanyar tana tsall
 Canje-canjen da suka shafi tests kawai (duk fayiloli suna ƙarƙashin `tests/`, babu ko ɗaya ƙarƙashin `tests/e2e/`) suna tsallake tsarin E2E
 ta atomatik, ba tare da wani lakabi ba.
 
-## Cikakken Jerin Dubawa
+## Jerin Bincike Mai Cikakken Bayani
 
-### Kafin Release
+### Kafin fitarwa
 
-- [ ] An haɗa duk PRs da aka nufa don wannan release zuwa `release/vX.Y.0`
-- [ ] An rufe duk buɗaɗɗun abubuwan Linear/issue na wannan version ko an tura su zuwa milestone na gaba
-- [ ] CI ya yi kore a reshen `release/vX.Y.0`
-- [ ] Babu alamomin `TODO(release)` a cikin code: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker base image ya kasance na zamani (a halin yanzu `node:24.15.0-trixie-slim`)
+- [ ] An haɗa duk PR da aka nufa don wannan fitarwar zuwa `release/vX.Y.0`
+- [ ] An rufe duk abubuwan Linear/issue da suke buɗe na wannan sigar ko an tura su zuwa matakin gaba
+- [ ] CI yana nasara a reshen `release/vX.Y.0`
+- [ ] Babu alamomin `TODO(release)` a cikin lamba: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker base image yana sabuntacce (a halin yanzu `node:24.15.0-trixie-slim`)
 
-### Version da Changelog
+### Siga da Rajistar Sauye-sauye
 
 - [ ] Gudanar da `/version-bump-cc <patch|minor|major>` (ƙwarewar Claude Code)
-  - Yana ɗaga versions na `package.json`, `electron/package.json`
+  - Yana ɗaga sigar `package.json`, `electron/package.json`
   - Yana sake samar da `CHANGELOG.md` daga git commits tun daga tag na ƙarshe
-  - Yana sabunta badges na README.md
-- [ ] Yi bitar CHANGELOG.md da hannu kuma a gyara commit messages idan ya cancanta
-- [ ] Tabbatar cewa sabon sashen semver a cikin `CHANGELOG.md` ya yi daidai da version na `package.json`
-- [ ] Bar `## [Unreleased]` a matsayin sashen farko na changelog don aikin da ke tafe
-- [ ] Sabunta `docs/openapi.yaml` → dole `info.version` ya yi daidai da version na `package.json`
+  - Yana sabunta bajojin README.md
+- [ ] Bincika CHANGELOG.md da hannu kuma gyara saƙonnin commit idan ya cancanta
+- [ ] Tabbatar cewa sabon sashe na semver a cikin `CHANGELOG.md` ya yi daidai da sigar `package.json`
+- [ ] Bar `## [Unreleased]` a matsayin sashe na farko na rajistar sauye-sauye don aikin da ke tafe
+- [ ] Sabunta `docs/openapi.yaml` → dole ne `info.version` ya yi daidai da sigar `package.json`
 
-### Ingancin Code
+### Ingancin Lamba
 
-- [ ] `npm run lint` — errors 0 (warnings sun riga sun kasance)
+- [ ] `npm run lint` — kurakurai 0 (gargaɗin sun riga sun kasance)
 - [ ] `npm run typecheck:core` — babu matsala
-- [ ] `npm run typecheck:noimplicit:core` — babu matsala (strict)
-- [ ] `npm run check:cycles:ratchet` — `cycles ≤ metrics.cycles.value` (`quality-baseline.json`; `check:cycles`: `cycles > 0 → exit 1`, #15281)
-- [ ] `npm run check:any-budget:t11` — yana cikin budget
+- [ ] `npm run typecheck:noimplicit:core` — babu matsala (mai tsauri)
+- [ ] `npm run check:cycles:ratchet` — yana cikin daskararren iyakar `metrics.cycles` (`check:cycles` shi kaɗai yana fita da 1 idan akwai kowane zagaye, #15281)
+- [ ] `npm run check:any-budget:t11` — yana cikin kasafin da aka ware
 - [ ] `npm run check:route-validation:t06` — babu matsala
 - [ ] `npm run check:node-runtime` — an cika mafi ƙarancin runtime da ake tallafawa (`>=22.22.2 <23`, `>=24.0.0 <27`, bisa `SUPPORTED_NODE_RANGE` a cikin `src/shared/utils/nodeRuntimeSupport.ts`; ya yi daidai da `engines` na `package.json`)
 
-### Gwaje-gwaje
+### Gwaji
 
 - [ ] `npm run test:unit` — ya wuce
-- [ ] `npm run test:vitest` — ya wuce (MCP server, autoCombo, cache)
-- [ ] `npm run test:coverage` — an cika ƙa'idar 60/60/60/60 (statements/lines/functions/branches)
-- [ ] `npm run test:integration` — ya wuce (idan canje-canje sun shafi DB / handlers)
-- [ ] `npm run test:combo:matrix` — ya wuce (combo strategy matrix: yana tabbatar da shawarwarin zaɓi na duk dabarun routing 19 na jama'a ta hanya mai maimaituwa; a gudanar idan an taɓa combo routing, strategy resolution, ko fallback logic)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **na zaɓi/da hannu** (gwajin smoke na real-upstream mai ƙuntatawa; yana samo snapshot na DB mai karantawa kawai daga VPS `root@192.168.0.15`; yana tuntuɓar providers na gaske, yana kashe credits; ba ya taɓa gudana a CI; yana tsallakewa cikin tsabta idan babu gate)
-- [ ] `npm run test:combo:live:vps` — **na zaɓi/da hannu** (gwajin smoke na VPS kai-tsaye na Phase-3: yanayin HTTP guda 7 a kan sabar `.15` mai aiki ta plain Node ESM; yana buƙatar `ssh root@192.168.0.15`; yana ƙirƙira/goge combos masu `__live_test__*` kawai; yana tuntuɓar providers na gaske; ba ya taɓa gudana a CI)
-- [ ] `npm run test:e2e` — ya wuce (canje-canjen UI)
-- [ ] `npm run test:protocols:e2e` — ya wuce (canje-canjen MCP/A2A)
+- [ ] `npm run test:vitest` — ya wuce (sabar MCP, autoCombo, ma'ajiyar wucin gadi)
+- [ ] `npm run test:coverage` — an cika sharadin 60/60/60/60 (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — ya wuce (idan sauye-sauyen sun shafi DB / handlers)
+- [ ] `npm run test:combo:matrix` — ya wuce (matrix na dabarun combo: yana tabbatar da shawarwarin zaɓi na dukkan dabarun routing na jama'a guda 19 cikin ƙayyadadden tsari; gudanar da shi idan an taɓa combo routing, warware dabaru, ko tsarin fallback)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **na zaɓi/da hannu** (gwajin smoke na ainihin upstream mai shamaki; yana samo snapshot na DB mai karantawa kawai daga VPS `root@192.168.0.15`; yana tuntuɓar providers na ainihi, yana kashe credits; ba ya taɓa gudana a CI; yana tsallakewa ba tare da matsala ba idan babu shamakin)
+- [ ] `npm run test:combo:live:vps` — **na zaɓi/da hannu** (gwajin smoke na VPS kai tsaye na Mataki na 3: yanayin HTTP guda 7 a kan sabar `.15` mai aiki ta hanyar Node ESM kai tsaye; yana buƙatar `ssh root@192.168.0.15`; yana ƙirƙira/share combos na `__live_test__*` kawai; yana tuntuɓar providers na ainihi; ba ya taɓa gudana a CI)
+- [ ] `npm run test:e2e` — ya wuce (sauye-sauyen UI)
+- [ ] `npm run test:protocols:e2e` — ya wuce (sauye-sauyen MCP/A2A)
 - [ ] `npm run test:ecosystem` — ya wuce
 
 ### Hooks (Husky ya tabbatar)
 
-Husky hooks suna cikin `.husky/` kuma suna gudana ta atomatik yayin git operations.
+Hooks na Husky suna cikin `.husky/` kuma suna gudana ta atomatik yayin ayyukan git.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** matakan tantancewa masu sauri kuma masu sakamako iri ɗaya — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (an kunna 2026-06-13). Da gangan ba ya haɗa `test:unit` (yana da jinkiri; CI job na `test-unit` yana rufe shi).
-  - Gudanar da `npm run test:unit` da hannu kafin tura release branches.
+- **pre-push:** ƙofofin dubawa masu sauri da tabbataccen sakamako — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (an kunna 2026-06-13). Da gangan ba ya haɗa da `test:unit` (yana ɗaukar lokaci; aikin CI `test-unit` yana rufe shi).
+  - Gudanar da `npm run test:unit` da hannu kafin tura rassan fitarwa.
 
-Idan hook ya gaza: gyara ainihin matsalar, kada a tsallake shi da `--no-verify`.
+Idan hook ya gaza: gyara ainihin matsalar, kada a kewaye shi da `--no-verify`.
 
-### Conventional Commits
+### Commits Masu Tsari
 
-Duk commits da za su shiga release dole ne su bi tsarin `type(scope): subject`.
+Duk commits da za su shiga fitarwa dole ne su bi tsarin `type(scope): subject`.
 
-**Valid types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**Nau'ikan da suka inganta:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Valid scopes:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Iyakokin da suka inganta:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-Canje-canje masu karya jituwa: ƙara footer na `BREAKING CHANGE:` ko `!` bayan scope (misali `feat(api)!: drop /v0`).
+Sauye-sauye masu karya dacewa: ƙara bayanin ƙasa na `BREAKING CHANGE:` ko `!` bayan scope (misali `feat(api)!: drop /v0`).
 
 ### Takardu
 
-- [ ] `npm run check:docs-sync` ya yi nasara (pre-commit ne ke gudanar da shi ta atomatik)
-- [ ] `npm run check:docs-all` ya yi nasara (mai tattarawa: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` ya fita da 0 — yarjejeniyar env tsakanin lamba ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` tana nan daram
-- [ ] `npm run check:doc-links` ya fita da 0 — babu lalatattun manazartun markdown na ciki bayan sake tsara tsarin
-- [ ] An duba `docs/architecture/ARCHITECTURE.md` don karkacewar ma'ajiya/runtime
-- [ ] An duba `docs/guides/TROUBLESHOOTING.md` don karkacewar env var da ayyukan gudanarwa
+- [ ] `npm run check:docs-sync` ya wuce (pre-commit yana gudanar da shi ta atomatik)
+- [ ] `npm run check:docs-all` ya wuce (haɗaɗɗen dubawa: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` yana fita da 0 — yarjejeniyar env tsakanin lamba ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` tana nan daram
+- [ ] `npm run check:doc-links` yana fita da 0 — babu karyayyun manazartun markdown na ciki bayan sake tsara tsarin
+- [ ] An binciki `docs/architecture/ARCHITECTURE.md` don karkacewar ma'ajiya/runtime
+- [ ] An binciki `docs/guides/TROUBLESHOOTING.md` don karkacewar env var da ayyukan gudanarwa
 - [ ] Idan `.env.example` ya canza: an sabunta `docs/reference/ENVIRONMENT.md`
 - [ ] Idan sabon fasali yana da UI: `docs/guides/USER_GUIDE.md` ya ambace shi
 - [ ] Idan sabon fasali yana da API: an sabunta `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml`
-- [ ] Idan sabon fasali module ne: akwai keɓaɓɓen `docs/<MODULE>.md`
-- [ ] Idan canjin mai karya dacewa ne: `docs/guides/TROUBLESHOOTING.md` yana da bayanin ƙaura
+- [ ] Idan sabon fasali module ne: akwai takamaiman `docs/<MODULE>.md`
+- [ ] Idan sauyi ne mai karya dacewa: `docs/guides/TROUBLESHOOTING.md` yana da bayanin ƙaura
 
 ### i18n
 
-- [ ] `npm run i18n:check` ya fita da 0 — yanayin fassara (`.i18n-state.json`) yana daidaita da takardun tushe (babu tushe masu karkacewa a strict mode; gargaɗin warn-mode abin karɓa ne don gyare-gyaren takardu na ƙarshe, amma ya kamata ya zama 0 kafin sanya tag)
-- [ ] `npm run i18n:check-ui-coverage` ya fita da 0 — kowane locale na UI yana kan ko sama da mafi ƙarancin ɗaukar hoto na 80%
-- [ ] `npm run i18n:sync-ui:dry` ya bayar da rahoton maɓallan da suka ɓace 0 a dukkan locale 42
-- [ ] Idan takardun tushe na Turanci sun canza, gudanar da `npm run i18n:run` (yana buƙatar `OMNIROUTE_TRANSLATION_API_KEY` a cikin `.env`) kafin sanya tag
-- [ ] Ana iya ɗage gudummawar fassara zuwa sakin gaba idan ƙanana ne (a bi diddigi a CHANGELOG)
+- [ ] `npm run i18n:check` yana fita da 0 — yanayin fassara (`.i18n-state.json`) yana aiki tare da takardun tushe (babu tushe da ya karkace a strict mode; shawarar warn-mode abin karɓa ce don gyare-gyaren takardu na minti na ƙarshe, amma ya kamata ya zama 0 kafin sanya tag)
+- [ ] `npm run i18n:check-ui-coverage` yana fita da 0 — kowane UI locale yana kan ko sama da mafi ƙarancin ɗaukar hoto na 80%
+- [ ] `npm run i18n:sync-ui:dry` yana bayar da rahoton maɓallan da suka ɓace guda 0 a duk locales da aka nufa guda 66 (kowane locale ban da tushen `en`)
+- [ ] Idan takardun Ingilishi na tushe sun canza, gudanar da `npm run i18n:run` (yana buƙatar `OMNIROUTE_TRANSLATION_API_KEY` a cikin `.env`) kafin sanya tag
+- [ ] Ana iya ɗage gudummawar fassara zuwa fitarwa ta gaba idan ƙanana ne (a bibiyi su a CHANGELOG)
 
-### Ƙaurawar Database
+### Ƙaurar Rumbun Bayanai
 
-- [ ] Idan `src/lib/db/migrations/` yana da sabbin fayiloli:
-  - [ ] Kowace ƙaura idempotent ce (`CREATE TABLE IF NOT EXISTS`, da sauransu)
-  - [ ] An naɗe ƙaurar cikin transactions
-  - [ ] An yi musu lambobi daidai (babu giɓi a jerin)
-- [ ] Gwada a sabon shigarwa: goge `~/.omniroute/omniroute.db` sannan gudanar da `npm run dev`
-- [ ] Gwada a shigarwar da take akwai: yi ajiyar DB, gudanar da ƙaura, tabbatar da schema
-- [ ] An sarrafa fayilolin WAL (`-wal`, `-shm`) daidai idan ƙaura ta sake rubuta tables
+- [ ] Idan `src/lib/db/migrations/` yana da sababbin fayiloli:
+  - [ ] Kowace ƙaura idempotent ce (`CREATE TABLE IF NOT EXISTS`, da sauransu.)
+  - [ ] An naɗe ƙaurarrakin cikin transactions
+  - [ ] An yi musu lambobi daidai (babu giɓi a jeri)
+- [ ] Yi gwaji a sabon shigarwa: share `~/.omniroute/omniroute.db` sannan gudanar da `npm run dev`
+- [ ] Yi gwaji a shigarwar da take akwai: yi ajiyar DB, gudanar da ƙaura, tabbatar da schema
+- [ ] An sarrafa fayilolin WAL (`-wal`, `-shm`) daidai idan ƙaura tana sake rubuta tables
 
-### Katalogin Provider (Zod-validated)
+### Kundin Masu Bayarwa (wanda Zod ya inganta)
 
-- [ ] Schema na Zod a `src/shared/constants/providers.ts` yana aiki a lokacin load
-  - [ ] Duk providers suna da fields da ake buƙata (`id`, `label`, `kind`, da sauransu)
-  - [ ] An samar da `freeNote` ga sabbin providers na kyauta
-  - [ ] Providers na OAuth suna da `oauthConfig` da aka yi wa rajista a `src/lib/oauth/constants/oauth.ts`
-- [ ] Idan an ƙara sabon provider: akwai executor mai dacewa a `open-sse/executors/`
-- [ ] Idan tsarin ba na OpenAI ba ne: akwai translator a `open-sse/translator/`
-- [ ] An yi wa models rajista a `open-sse/config/providerRegistry.ts`
-- [ ] Unit tests a `tests/unit/` sun rufe rarraba provider da routing
+- [ ] Tsarin Zod na `src/shared/constants/providers.ts` yana aiki daidai a lokacin lodawa
+  - [ ] Duk masu bayarwa suna da filayen da ake buƙata (`id`, `label`, `kind`, da sauransu)
+  - [ ] An samar da `freeNote` ga sabbin masu bayarwa na kyauta
+  - [ ] Masu bayarwa na OAuth suna da `oauthConfig` da aka yi wa rajista a `src/lib/oauth/constants/oauth.ts`
+- [ ] Idan an ƙara sabon mai bayarwa: akwai executor da ya dace a `open-sse/executors/`
+- [ ] Idan tsarin ba na OpenAI ba ne: akwai mai fassara a `open-sse/translator/`
+- [ ] An yi wa samfura rajista a `open-sse/config/providerRegistry.ts`
+- [ ] Gwaje-gwajen raka'a a `tests/unit/` sun rufe rarrabawa da turawar masu bayarwa
 
-### Desktop (Electron)
+### Kwamfutar Tebur (Electron)
 
 Idan `electron/` ya canza:
 
 - [ ] `npm run electron:smoke:packaged` ya yi nasara
-- [ ] An gwada builds na aƙalla ɗaya daga cikin `:win`, `:mac`, `:linux`
+- [ ] An gwada build na aƙalla ɗaya daga cikin `:win`, `:mac`, `:linux`
 - [ ] Takardun shaidar sanya hannu kan lamba ba su ƙare ba (idan ana sanya hannu)
-- [ ] Version na `electron/package.json` ya yi daidai da na tushen `package.json`
-- [ ] An sabunta channel pointer na auto-update idan ana fitarwa zuwa `stable`
+- [ ] Sigar `electron/package.json` ta yi daidai da ta tushen `package.json`
+- [ ] An sabunta manunin tashar sabuntawa ta atomatik idan ana fitarwa zuwa `stable`
 
 ### Tsarin Build
 
-Repository ɗin yana amfani da output directories guda uku mabambanta — kada a taɓa gauraya su:
+Ma'ajiyar tana amfani da manyan fayilolin fitarwa guda uku mabambanta — kada a taɓa gauraya su:
 
-| Directory | Manufa                                                                 | Ana bibiyarsa?   |
-| --------- | ---------------------------------------------------------------------- | ---------------- |
-| `src/`    | Tushen application (TypeScript / TSX)                                  | E                |
-| `.build/` | Matsakaitan build — output na `next build` (`distDir`)                 | A'a (gitignored) |
-| `dist/`   | npm bundle mai shirye don aikawa — `assembleStandalone` ne ya haɗa shi | A'a (gitignored) |
+| Babban fayil | Manufa                                                                | Ana bibiyarsa?   |
+| ------------ | --------------------------------------------------------------------- | ---------------- |
+| `src/`       | Asalin lambar manhaja (TypeScript / TSX)                              | E                |
+| `.build/`    | Abubuwan tsaka-tsakin build — fitarwar `next build` (`distDir`)       | A'a (gitignored) |
+| `dist/`      | Kundin npm da za a iya jigilarwa — wanda `assembleStandalone` ya haɗa | A'a (gitignored) |
 
-> **Bayanin mai gudanarwa:** directory na image na VPS mai nisa har yanzu yana nan a `/usr/lib/node_modules/omniroute/app/`.
-> Output na build na **cikin-repo** ne kawai ya matsa (`app/` → `dist/`). Skills na deploy suna yin rsync
-> na abubuwan da ke cikin `dist/` zuwa dir na `app/` mai nisa — ba a buƙatar canza path na VPS.
+> **Bayanin mai gudanarwa:** babban fayil ɗin hoton VPS na nesa yana nan a `/usr/lib/node_modules/omniroute/app/`.
+> Fitarwar build ta **cikin ma'ajiyar kawai** ce ta koma (`app/` → `dist/`). Ƙwarewar deploy suna rsync
+> abubuwan da ke cikin `dist/` zuwa babban fayil ɗin `app/` na nesa — ba a buƙatar canza kowace hanyar VPS.
 
-**Gudanarwar build guda ɗaya:**
+**Tsarin build guda ɗaya:**
 
 ```
 npm run build:release
   └─ rm -rf .build dist          (tsaftacewa)
-  └─ next build → .build/next/   (matsakaita)
+  └─ next build → .build/next/   (abubuwan tsaka-tsaki)
   └─ assembleStandalone          (yana kwafe standalone + static + public + natives → dist/)
   └─ yana rubuta dist/BUILD_SHA  (alamar tsaro ta HEAD)
 ```
 
-KADA KA gudanar da `npm run build` sannan wani `npm run build:cli` daban don deploy — yi amfani da
-`npm run build:release` wanda ke yin cikakken rebuild mai tsabta + alamar tsaro a umarni guda.
+KADA a gudanar da `npm run build` sannan a bi shi da `npm run build:cli` daban don deploy — yi amfani da
+`npm run build:release`, wanda ke yin cikakken sake build mai tsafta tare da alamar tsaro a umarni guda.
 
 ### Tabbatar da Artifact
 
 - [ ] `npm run build:release` ya yi nasara kuma `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` yana da tsabta — babu `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, ko wasu ragowar gida
+- [ ] `npm run check:pack-artifact` yana da tsafta — babu `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, ko wasu ragowar fayilolin gida
 - [ ] `dist/server.js` yana nan bayan build
-- [ ] Gwajin smoke na packaged-runtime na gida na zaɓi: `npm run dev:candidate -- validate` bayan `npm run dev:candidate -- build` yana kunna packed tarball a keɓantaccen `DATA_DIR` kuma yana duba `/api/health` + `/v1/models` (duba [Hanyar Zinariya ta Gudummawa](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] Gwajin smoke na packaged-runtime na gida na zaɓi: `npm run dev:candidate -- validate` bayan `npm run dev:candidate -- build` yana kunna tarball ɗin da aka shirya a kan keɓantaccen `DATA_DIR` kuma yana duba `/api/health` + `/v1/models` (duba [Hanyar Zinariya ta Gudummawa](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
 
-### Sanya Tag & Saki
+### Sanya Tag & Fitarwa
 
-- [ ] Gudanar da `/generate-release-cc` (Claude Code skill):
+- [ ] Gudanar da `/generate-release-cc` (ƙwarewar Claude Code):
   - Yana ƙirƙirar tag `vX.Y.Z`
-  - Yana tura tag da branch
-  - Yana buɗe GitHub Release tare da bayanin changelog
-  - Yana haɗa installers na Electron (idan an gina su)
-- [ ] Ko da hannu:
+  - Yana tura tag da reshe
+  - Yana buɗe GitHub Release tare da bayanan canje-canje
+  - Yana haɗa masu shigar da Electron (idan an yi build)
+- [ ] Ko kuma da hannu:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
@@ -276,44 +276,44 @@ KADA KA gudanar da `npm run build` sannan wani `npm run build:cli` daban don dep
 
 ### Deploy
 
-Skills na deploy suna amfani da tsarin rsync mai sauƙi — babu `npm pack`, babu `npm i -g`:
+Ƙwarewar deploy suna amfani da tsarin rsync mai sauƙi — babu `npm pack`, babu `npm i -g`:
 
 - [ ] Yi amfani da ƙwarewar deploy da ta dace da wurin da ake nufi:
   - `/deploy-vps-local-cc` — VPS na gida (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
-  - `/deploy-vps-both-cc` — dukansu
-- [ ] Kafin yin deploy, tabbatar `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Dole ne a gudanar da build a inda `node_modules` yake na ainihi (babban checkout ko worktree da aka yi wa `npm ci` — BA worktree mai symlink ba)
-- [ ] Yi smoke test ga instance da aka yi wa deploy:
-  - Buɗe `/dashboard/health` → duba cewa string ɗin version ya dace da release
-  - Gudanar da buƙatar `/v1/chat/completions` a kan sanannen provider
-  - Tabbatar `/api/monitoring/health` yana dawo da circuit breakers masu matsayin `CLOSED`
-  - Tabbatar MCP transports suna amsawa (`/mcp` HTTP, `/mcp-sse` SSE)
+  - `/deploy-vps-akamai-cc` — VPS na Akamai (69.164.221.35)
+  - `/deploy-vps-both-cc` — duka biyun
+- [ ] Kafin deploy, tabbatar da `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Dole ne a gudanar da build inda `node_modules` yake na gaske (babban checkout ko worktree da aka yi wa `npm ci` — BA worktree mai symlink ba)
+- [ ] Yi gwajin smoke ga instance ɗin da aka yi deploy:
+  - Buɗe `/dashboard/health` → duba cewa rubutun siga ya yi daidai da fitarwar
+  - Gudanar da buƙatar `/v1/chat/completions` ga sanannen mai bayarwa
+  - Tabbatar cewa `/api/monitoring/health` yana dawo da circuit breakers masu matsayin `CLOSED`
+  - Tabbatar cewa hanyoyin jigilar MCP suna amsawa (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Bayan release
+### Bayan fitarwa
 
 - [ ] Gudanar da `/capture-release-evidences-cc` (ƙwarewar Claude Code)
   - Yana ɗaukar hotunan allo/rikodin WebP na sabbin fasaloli
-  - Yana haɗa su da bayanan release / rubutun blog
-- [ ] Sabunta GitHub Discussions / Discord da sanarwar release
-- [ ] Buɗe milestone don version na gaba
-- [ ] Idan yana da matuƙar muhimmanci: liƙa discussion a sama ko wallafa a `news.json` don banner na cikin manhaja
+  - Yana haɗa su da bayanan fitarwa / rubutun bulogi
+- [ ] Sabunta GitHub Discussions / Discord da sanarwar fitarwa
+- [ ] Buɗe milestone don siga ta gaba
+- [ ] Idan yana da matuƙar muhimmanci: manne tattaunawar ko wallafa a `news.json` don banner na cikin manhaja
 
 ### Ƙofar ƙaddamar da Radar ga jama'a
 
-An commit da sanarwar Radar da gangan tare da `active: false`. Kunna ta wani canji ne na daban
+Da gangan aka commit sanarwar Radar da `active: false`. Kunna ta wani canji ne na daban
 bayan an gabatar da shaida ga kowane abu da ke ƙasa:
 
-- [ ] An merge duk stacked Radar PRs kuma CI na release-tip yana kore
-- [ ] Yi deploy da smoke test ga hanyoyin OSS Radar yayin da `RADAR_ENABLED` har yanzu yake a kashe ta tsohuwa
-- [ ] Yi smoke test ga `GET /planos`, `/termos`, `/privacidade`, da `/reembolso` a kan Radar host da aka ambata
-- [ ] Yi rikodin shaidar mai gudanarwa/lambar tuntuɓa/adireshi da bita ta doka da mai shi ya amince da ita a cikin private service
-- [ ] Gwada Stripe Checkout da signed webhook a test mode kawai
-- [ ] Gwada isar da transactional email guda ɗaya da aka rufaffen bayanansa ta amfani da sender/domain da aka amince da shi
-- [ ] Tabbatar da maido da backup da research run guda ɗaya da aka sa ido a kai kuma aka kayyade kasafin kuɗinsa
-- [ ] Amince da manufar bita ta BRL/PIX kafin karɓar shaidar gudummawa
-- [ ] Kunna Checkout na jama'a ne kawai bayan an cika ƙofofin da suka gabata, sannan kunna sabon ID na `news.json`
-- [ ] Tabbatar banner na Home yana amfani da rubutu da aka keɓance ga yare kuma sabon ID yana sake bayyana bayan an yi watsi da tsohon ID
+- [ ] An haɗa duk Radar PRs da aka jera kuma CI na release-tip yana kore
+- [ ] Yi deploy da gwajin smoke ga hanyoyin OSS Radar yayin da `RADAR_ENABLED` har yanzu yake a kashe ta tsoho
+- [ ] Yi gwajin smoke ga `GET /planos`, `/termos`, `/privacidade`, da `/reembolso` a kan host ɗin Radar da aka ambata
+- [ ] Yi rikodin asali/lambar tuntuɓa/adireshin mai gudanarwa da bitar doka da mai shi ya amince da ita a cikin sabis mai zaman kansa
+- [ ] Gwada Stripe Checkout da webhook mai sanya hannu a yanayin gwaji kawai
+- [ ] Gwada isar da imel na mu'amala guda ɗaya da aka ɓoye tare da mai aikawa/domain da aka amince da shi
+- [ ] Tabbatar da maido da madadin bayanai da gudanar da bincike guda ɗaya ƙarƙashin kulawa tare da iyakantaccen kasafin kuɗi
+- [ ] Amince da manufar bitar BRL/PIX kafin karɓar shaidar gudummawa
+- [ ] Kunna Checkout na jama'a ne kawai bayan an cika ƙofofin da suka gabata, sannan kunna sabon `news.json` ID
+- [ ] Tabbatar cewa banner na Home yana amfani da rubutun da aka keɓance bisa harshe kuma sabon ID yana sake bayyana bayan an yi watsi da tsohon ID
 
 ## Gwajin smoke na Sabis da Aka Girkawa (v3.8.4+)
 

@@ -1,1 +1,0 @@
-- cli: `omniroute doctor`, `status` and `config` no longer print Node 24's DEP0190 warning on Windows: the CLI tool detector now probes `.cmd`/`.bat` shims through `cmd.exe` with an argument array instead of `shell: true` plus arguments ([#17021](https://github.com/diegosouzapw/OmniRoute/pull/17021)) — thanks @pacocartones

@@ -14,6 +14,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-image-usage-accounting-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -67,7 +68,7 @@ type CallLogRow = {
 };
 
 async function resetStorage() {
-  assert.equal(await waitForCallLogSaves(5_000), true);
+  assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
   globalThis.fetch = originalFetch;
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
@@ -81,7 +82,7 @@ test.beforeEach(async () => {
 });
 
 test.after(async () => {
-  assert.equal(await waitForCallLogSaves(5_000), true);
+  assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
   globalThis.fetch = originalFetch;
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
@@ -128,7 +129,11 @@ function usageRows(): UsageRow[] {
 }
 
 async function callLogRows(pathPrefix: string): Promise<CallLogRow[]> {
-  assert.equal(await waitForCallLogSaves(5_000), true, "call log writes must settle");
+  assert.equal(
+    await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS),
+    true,
+    "call log writes must settle"
+  );
   return core
     .getDbInstance()
     .prepare(
