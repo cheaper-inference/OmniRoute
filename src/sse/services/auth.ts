@@ -109,7 +109,7 @@ import {
   hasPerModelQuota,
   hasPerModelFailureScope,
   getRuntimeProviderProfile,
-  recordModelLockoutFailure,
+  recordModelLockoutFailure as recordModelLockoutFailureBase,
   retryHintBypassesMaxCooldownMs,
   isProviderModelUnsupported400,
 } from "@omniroute/open-sse/services/accountFallback.ts";
@@ -801,6 +801,27 @@ function createSelectionLock(key: string) {
 // Prevents multiple concurrent requests from marking the same connection
 // unavailable in parallel, which was the root cause of cascading 502 lockouts.
 const markMutexes = new Map<string, Promise<void>>();
+
+// Requests in flight when a fault starts all fail with it. While the model is still locked for
+// the same reason, a repeat hit is the same episode and must not climb the backoff ladder; a
+// longer upstream hint than the cooldown already applied still extends the lock.
+// shortcut: guards the markAccountUnavailable sites only, the combo and chat.ts callers of
+// accountFallback.recordModelLockoutFailure still count every hit; move the guard there to cover them.
+function recordModelLockoutFailure(...args: Parameters<typeof recordModelLockoutFailureBase>): {
+  cooldownMs: number;
+  failureCount: number;
+} {
+  const [provider, connectionId, model, reason, , , , options] = args;
+  const lock = getModelLockoutInfo(provider, connectionId, model);
+  if (lock && lock.reason === reason && lock.remainingMs > 0) {
+    const appliedMs = lock.remainingMs + Date.now() - Date.parse(lock.lockedAt);
+    const hintMs = options?.exactCooldownMs;
+    if (typeof hintMs !== "number" || hintMs <= appliedMs) {
+      return { cooldownMs: lock.remainingMs, failureCount: lock.failureCount };
+    }
+  }
+  return recordModelLockoutFailureBase(...args);
+}
 
 // Strict-Random shuffle deck moved to src/shared/utils/shuffleDeck.ts
 // auth.ts uses getNextFromDeckSync inside the provider-scoped selection mutex.
