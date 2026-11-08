@@ -5,6 +5,7 @@ import { getModelTargetFormat } from "../../config/providerModels.ts";
 import { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 import { sanitizeToolId } from "./schemaCoercion.ts";
 import { isRestoredClaudeThinkingBlock } from "../../services/claudeThinkingStore.ts";
+import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
 
 /**
  * The DEFAULT blob is a real encrypted thought from an unrelated
@@ -472,6 +473,24 @@ export function createDefaultClaudeCacheControl(provider?: string | null): {
     : { type: "ephemeral", ttl: "1h" };
 }
 
+export const CLAUDE_CACHE_TAIL_TTL_1H_FLAG = "CLAUDE_CACHE_TAIL_TTL_1H";
+
+/**
+ * Cache marker for the conversation tail (second-to-last user turn and last
+ * assistant turn). Defaults to the 5m TTL (no ttl field), so cost and wire shape
+ * stay as before. With the opt-in CLAUDE_CACHE_TAIL_TTL_1H flag the tail takes the
+ * same TTL as system/tools: 1h, or 5m on Vertex. A 1h write costs 2x input vs
+ * 1.25x for 5m, but survives pauses longer than five minutes.
+ */
+export function createClaudeTailCacheControl(provider?: string | null): {
+  type: string;
+  ttl?: string;
+} {
+  return isRegisteredFeatureFlagEnabled(CLAUDE_CACHE_TAIL_TTL_1H_FLAG)
+    ? createDefaultClaudeCacheControl(provider)
+    : { type: "ephemeral" };
+}
+
 /** True when the body carries at least one cache_control marker anywhere
  * (system blocks, message content blocks, or tools). Used to decide whether
  * preserve-mode has anything to preserve. */
@@ -677,6 +696,7 @@ export function prepareClaudeRequest(
     // - cache the second-to-last user turn for conversation reuse
     // - cache the last assistant turn so the next user turn can reuse it
     // Skip in passthrough mode to preserve client's cache_control markers
+    const tailCacheTtl = createClaudeTailCacheControl(provider).ttl;
     if (!preserveCacheControl && supportsPromptCaching) {
       const userMessageIndexes = filtered.reduce<number[]>((indexes, msg, index) => {
         if (msg?.role === "user") indexes.push(index);
@@ -685,7 +705,7 @@ export function prepareClaudeRequest(
       const secondToLastUserIndex =
         userMessageIndexes.length >= 2 ? userMessageIndexes[userMessageIndexes.length - 2] : -1;
       if (secondToLastUserIndex >= 0) {
-        markMessageCacheControl(filtered[secondToLastUserIndex]);
+        markMessageCacheControl(filtered[secondToLastUserIndex], tailCacheTtl);
       }
     }
 
@@ -730,7 +750,7 @@ export function prepareClaudeRequest(
           !preserveCacheControl &&
           supportsPromptCaching &&
           !lastAssistantProcessed &&
-          markMessageCacheControl(msg)
+          markMessageCacheControl(msg, tailCacheTtl)
         ) {
           lastAssistantProcessed = true;
         }

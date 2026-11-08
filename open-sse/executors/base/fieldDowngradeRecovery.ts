@@ -5,12 +5,14 @@
 // field (a field named on `messages[*]` is dropped from a rebuilt messages
 // array instead); "Unsupported parameter" errors are optionally persisted to
 // the provider's param blocklist (#6625).
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import {
   getParamFilterConfig,
   addParamToBlocklist,
   isAutoLearnGloballyEnabled,
 } from "@/lib/db/paramFilters";
 import { HTTP_STATUS } from "../../config/constants.ts";
+import { isK31RejectionFinal } from "../../utils/kimiK31.ts";
 import {
   findOffendingField,
   detectRejectedMessageFields,
@@ -158,10 +160,9 @@ export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams):
     return response;
   }
   const record = body as Record<string, unknown>;
-  const errText = await response
-    .clone()
-    .text()
-    .catch(() => "");
+  if (isK31RejectionFinal(params.model, record)) return response;
+
+  const errText = await readResponseTextWithinCap(response.clone()).catch(() => "");
   const offending = findOffendingField(errText);
   if (
     offending &&

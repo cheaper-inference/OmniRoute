@@ -1,4 +1,5 @@
 import { createHash, randomBytes, randomUUID } from "crypto";
+import { canStartBackgroundRefresh } from "@/shared/utils/backgroundRefresh";
 import { setUserAgentHeader } from "../executors/base/headers.ts";
 import { generateSessionId } from "../services/sessionManager.ts";
 import {
@@ -144,7 +145,12 @@ export function resolveOpencodeCliDefaults(
   // throws); the default below reads the cache synchronously so synthesis never blocks.
   // Skipped under test runners: their globalThis.fetch stubs count dispatches, and the
   // registry lookup would be counted as one (same guard as adobeFireflySession).
-  if (!process.env.NODE_TEST_CONTEXT && !process.env.VITEST && process.env.NODE_ENV !== "test") {
+  if (
+    canStartBackgroundRefresh() &&
+    !process.env.NODE_TEST_CONTEXT &&
+    !process.env.VITEST &&
+    process.env.NODE_ENV !== "test"
+  ) {
     void refreshOpencodeCliVersion();
   }
   const synthesizedUA = v2Fingerprint
@@ -187,20 +193,28 @@ function base62From(bytes: Buffer, length: number): string {
  *
  * `msg_` ids are not value-checked upstream, so they keep the plain hash render.
  */
-function canonicalId(prefix: "ses_" | "msg_", seed?: string): string {
+function canonicalId(prefix: "ses_" | "msg_", seed?: string, recent = false): string {
   const bytes = seed
     ? createHash("sha256").update(`opencode\u0000${prefix}\u0000${seed}`).digest()
     : randomBytes(32);
   if (prefix === "ses_") {
     // Top 36 bits of hash[0:5]: bytes 0-3 plus the high nibble of byte 4, exactly as
     // opencode2api's descendingTimePart() reads them into the timestamp half.
-    const ts36 =
+    const hashed =
       ((BigInt(bytes[0]) << 28n) |
         (BigInt(bytes[1]) << 20n) |
         (BigInt(bytes[2]) << 12n) |
         (BigInt(bytes[3]) << 4n) |
         (BigInt(bytes[4]) >> 4n)) &
       OPENCODE_SESSION_TS_MAX;
+    // Relay mode (the Bun path of the free tier): the upstream then also refuses a session
+    // whose decoded timestamp is far from now (measured 2026-11-05: hash-random timestamps
+    // 429, timestamps up to 17 days old 200). The time part is then the current UTC day
+    // start minus a hash-derived offset below one day: stable per conversation within a day.
+    const dayMs = 86_400_000n;
+    const ts36 = recent
+      ? ((BigInt(Date.now()) / dayMs) * dayMs - (hashed % dayMs)) & OPENCODE_SESSION_TS_MAX
+      : hashed;
     // OpenCode's own math, counter pinned to 1: ~(ts << 12 | 1) over 48 bits.
     const value = ~((ts36 << 12n) | OPENCODE_SESSION_COUNTER) & OPENCODE_SESSION_MASK_48;
     return `${prefix}${value.toString(16).padStart(12, "0")}${base62From(bytes.subarray(6), 14)}`;
@@ -443,6 +457,17 @@ function keepsClientUserAgent(
   return keepAgentUserAgent && !isGenericClientUserAgent(userAgent);
 }
 
+/** Relay mode: the upstream refuses a session whose decoded timestamp is older than 17 days. */
+const RELAY_SESSION_MAX_AGE_MS = 17n * 86_400_000n;
+
+function isRecentSessionValue(session: string): boolean {
+  const decoded = ~BigInt(`0x${session.slice(4, 16)}`) & OPENCODE_SESSION_MASK_48;
+  const ts = decoded >> 12n;
+  const now = BigInt(Date.now()) & OPENCODE_SESSION_TS_MAX;
+  const age = (now - ts + (OPENCODE_SESSION_TS_MAX + 1n)) & OPENCODE_SESSION_TS_MAX;
+  return age < RELAY_SESSION_MAX_AGE_MS;
+}
+
 function applyCliDefaults(
   headers: Record<string, string>,
   cliDefaults: { userAgent: string; client: string; project: string },
@@ -473,14 +498,20 @@ function applyCliDefaults(
   // compliant encoding). The ungated surfaces (opencode-go, #15311) keep the client's
   // session untouched, so the value check applies only when `reencodeSession` is set.
   const clientSessionId = headers["x-opencode-session"]?.trim();
-  const canonicalClientSession = reencodeSession
+  const recentSession = reencodeSession && !!process.env.OPENCODE_FREE_TIER_RELAY_URL?.trim();
+  const validClientSession = reencodeSession
     ? isValidOpencodeSessionValue(clientSessionId)
+    : undefined;
+  const canonicalClientSession = reencodeSession
+    ? validClientSession && (!recentSession || isRecentSessionValue(validClientSession))
+      ? validClientSession
+      : undefined
     : clientSessionId && OPENCODE_SESSION_PATTERN.test(clientSessionId)
       ? clientSessionId
       : undefined;
   const session = clientSessionId
-    ? (canonicalClientSession ?? canonicalId("ses_", clientSessionId))
-    : canonicalId("ses_", generateSessionId(sessionBody ?? null) ?? undefined);
+    ? (canonicalClientSession ?? canonicalId("ses_", clientSessionId, recentSession))
+    : canonicalId("ses_", generateSessionId(sessionBody ?? null) ?? undefined, recentSession);
   headers["x-opencode-session"] = session;
   if (v2Fingerprint && reencodeSession) applyV2FreeTierSessionHeaders(headers, session);
 }
