@@ -1,0 +1,1 @@
+- **fix(usage):** Record successful OCR page costs and embedding batch usage in analytics, budgets, the request-cost ledger and daily rollups; preserve provider-reported charges, unknown-cost handling and no-log privacy ([#19325](https://github.com/cheaper-inference/OmniRoute/pull/19325)) — thanks @tiangao88
