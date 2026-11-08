@@ -7,7 +7,7 @@ const { sanitizeOpenAIResponse } = await import("../../open-sse/handlers/respons
 
 type ClaudeEvent = {
   type: string;
-  content_block?: { type?: string; name?: string };
+  content_block?: { type?: string; name?: string; input?: unknown };
   delta?: { type?: string; text?: string; partial_json?: string };
 };
 
@@ -187,4 +187,49 @@ test("OpenAI sanitizer: an unclosed dots block or partial opener in a whole body
     assert.equal(sanitized.choices[0].message.tool_calls, undefined);
     assert.equal(sanitized.choices[0].finish_reason, "stop");
   }
+});
+
+test("Claude stream: JSON-fallback arguments that are not a JSON object stay as text, no throw", () => {
+  for (const args of ['"city=Boston"', '"[1,2]"', "[1,2]", "42"]) {
+    const block = `<dots_function_call>{"name":"get_weather","arguments":${args}}</dots_function_call>`;
+    const events = runStream([{ name: "get_weather" }], [block]);
+    assert.equal(toolUses(events).length, 0);
+    assert.equal(textOf(events), block);
+  }
+});
+
+test("Claude stream: JSON-fallback string arguments holding a JSON object become the tool input", () => {
+  const block =
+    '<dots_function_call>{"name":"get_weather","arguments":"{\\"city\\":\\"Boston\\"}"}</dots_function_call>';
+  const events = runStream([{ name: "get_weather" }], [block]);
+  assert.equal(toolUses(events).length, 1);
+  assert.deepEqual(toolUses(events)[0].content_block?.input, { city: "Boston" });
+  assert.equal(textOf(events), "");
+});
+
+test("OpenAI sanitizer: JSON-fallback string arguments always reach tool_calls as a JSON object", () => {
+  const ok =
+    '<dots_function_call>{"name":"get_weather","arguments":"{\\"city\\":\\"Boston\\"}"}</dots_function_call>';
+  const bad =
+    '<dots_function_call>{"name":"get_weather","arguments":"city=Boston"}</dots_function_call>';
+  const run = (content: string) =>
+    sanitizeOpenAIResponse({
+      id: "chatcmpl-dots",
+      object: "chat.completion",
+      created: 1,
+      model: "gpt-test",
+      choices: [{ index: 0, message: { role: "assistant", content }, finish_reason: "stop" }],
+    }) as {
+      choices: Array<{
+        message: {
+          content: string | null;
+          tool_calls?: Array<{ function: { arguments: string } }>;
+        };
+      }>;
+    };
+  const parsed = run(ok).choices[0].message;
+  assert.deepEqual(JSON.parse(parsed.tool_calls?.[0].function.arguments ?? ""), { city: "Boston" });
+  const kept = run(bad).choices[0].message;
+  assert.equal(kept.tool_calls, undefined);
+  assert.equal(kept.content, bad);
 });

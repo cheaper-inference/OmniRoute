@@ -293,8 +293,14 @@ function parseJsonBody(inner: string, index: ToolIndex): DotsToolCall | undefine
   if (typeof rawName !== "string" || !rawName) return undefined;
   const toolName = resolveToolName(index, rawName);
   if (toolName === null) return undefined;
-  const rawArgs = parsed.arguments || parsed.args || parsed.parameters || {};
-  return makeToolCall(toolName, typeof rawArgs === "string" ? rawArgs : JSON.stringify(rawArgs));
+  const args = argumentsObject(parsed.arguments || parsed.args || parsed.parameters || {});
+  if (!args) return undefined;
+  return makeToolCall(toolName, JSON.stringify(args));
+}
+
+/** Tool arguments must be a JSON object (inline or as a JSON string); anything else is unusable. */
+function argumentsObject(rawArgs: unknown): JsonRecord | null {
+  return asRecord(typeof rawArgs === "string" ? tryParseJson(rawArgs, null) : rawArgs);
 }
 
 function parseBlockInner(inner: string, index: ToolIndex): DotsToolCall | undefined {
