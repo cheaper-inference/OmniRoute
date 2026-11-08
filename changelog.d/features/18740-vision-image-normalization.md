@@ -1,0 +1,1 @@
+- **feat(vision):** opt-in `OMNIROUTE_IMAGE_NORMALIZATION` normalizes inline base64 images before dispatch (RGB, ≤4096px long edge, ~4MP, baseline JPEG/PNG) so Qwen2-VL-style vision pipelines stop 400ing or hanging on oversized/exotic images ([#18740](https://github.com/cheaper-inference/OmniRoute/pull/18740)) — thanks @jjxyxsjr

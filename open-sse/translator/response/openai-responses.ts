@@ -363,7 +363,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
       closeReasoning(state, emit);
     }
     const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
-    closeMessage(state, emit, msgIdx);
+    // A post-tool-call message lives at its relocated index (msgIndexAlias);
+    // close it there, or later text would append to it across this call.
+    closeMessage(state, emit, aliasedMessageIndex(state, msgIdx));
     for (const tc of delta.tool_calls) {
       emitToolCall(state, emit, tc);
     }
@@ -504,10 +506,30 @@ function nextFreeMessageIndex(state, requestedIdx) {
   return candidate;
 }
 
-function emitTextContent(state, emit, idx, content) {
-  if (state.msgItemDone[idx]) {
+// The requested index and the index the message item actually lives at can
+// differ: post-tool-call text is re-homed (below), and a tool call may already
+// hold the requested index. Remember the relocation per requested index so
+// later deltas for the SAME logical message reuse it — without the alias every
+// delta re-ran the relocation scan and opened yet another message item.
+function resolveMessageIndex(state, requestedIdx) {
+  let idx = aliasedMessageIndex(state, requestedIdx);
+  if (
+    state.msgItemDone[idx] ||
+    (!state.msgItemAdded[idx] && state.funcAllocatedOutputIndexes?.[idx])
+  ) {
     idx = nextFreeMessageIndex(state, idx);
+    (state.msgIndexAlias ??= {})[requestedIdx] = idx;
   }
+  return idx;
+}
+
+// Where the message requested at `requestedIdx` actually lives (see above).
+function aliasedMessageIndex(state, requestedIdx) {
+  return state.msgIndexAlias?.[requestedIdx] ?? requestedIdx;
+}
+
+function emitTextContent(state, emit, idx, content) {
+  idx = resolveMessageIndex(state, idx);
   if (!state.msgItemAdded[idx]) {
     state.msgItemAdded[idx] = true;
     const msgId = `msg_${state.responseId}_${idx}`;
@@ -667,10 +689,35 @@ function emitToolCallAdded(state, emit, idx, outputIndex, terminal = false) {
   }
 }
 
+// Allocate a tool call's output_index ONCE per upstream index and reuse it for
+// the whole lifecycle. The base is recomputed from live message state, so a
+// message opened or relocated after the call's first delta used to shift the
+// close-time index away from the added-time index (clients keying items by
+// output_index see the identity change mid-flight). Also never land on an
+// index a message item already holds.
+function allocateToolOutputIndex(state, tcIdx) {
+  if (!state.funcOutputIndex) state.funcOutputIndex = {};
+  if (state.funcOutputIndex[tcIdx] === undefined) {
+    let candidate = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx);
+    while (state.msgItemAdded[candidate]) candidate += 1;
+    state.funcOutputIndex[tcIdx] = candidate;
+  }
+  return state.funcOutputIndex[tcIdx];
+}
+
+// Reuse the index the call was announced at (allocateToolOutputIndex); the
+// fallback covers states built before any emitToolCall ran.
+function announcedToolOutputIndex(state, tcIdx) {
+  return (
+    state.funcOutputIndex?.[tcIdx] ??
+    toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx)
+  );
+}
+
 function emitToolCall(state, emit, tc) {
   const tcIdx = tc.index ?? 0;
   const lifecycle = translatorToolCallLifecycle(state);
-  const outputIndex = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx);
+  const outputIndex = allocateToolOutputIndex(state, tcIdx);
   // Record every allocated tool-call output_index so a post-close text
   // relocation (nextFreeMessageIndex) can never collide with it.
   if (!state.funcAllocatedOutputIndexes) state.funcAllocatedOutputIndexes = {};
@@ -734,7 +781,7 @@ function emitToolCall(state, emit, tc) {
 function closeToolCall(state, emit, idx, recordAsCompleted = true) {
   const callId = state.funcCallIds[idx];
   if (callId && !state.funcItemDone[idx]) {
-    const normalizedIndex = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, idx);
+    const normalizedIndex = announcedToolOutputIndex(state, idx);
     const args = state.funcArgsBuf[idx] || "{}";
     emitToolCallAdded(state, emit, idx, normalizedIndex, true);
     const selection = translatorToolCallLifecycle(state).get(idx)!;
