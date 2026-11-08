@@ -1038,3 +1038,19 @@ test("Audit rows of a social login record the outcome and no code, token or clie
     assert.ok(!rows.includes(secret), `${secret} must not reach the audit log`);
   }
 });
+
+test("A social login writes setupComplete only once, so later sign-ins do not bump the settings revision", async () => {
+  // @ts-ignore
+  const { startDashboardSession } = await import("../../src/lib/auth/socialLogin.ts");
+  // @ts-ignore
+  const { getSettings, getSettingsRevision } = await import("@/lib/db/settings");
+
+  assert.equal(await startDashboardSession(makeTestCookieStore(), false), true);
+  assert.equal((await getSettings()).setupComplete, true);
+  const revisionAfterFirst = await getSettingsRevision();
+
+  // Another tab holding this revision must not get a 409 because someone else signed in.
+  assert.equal(await startDashboardSession(makeTestCookieStore(), false), true);
+  assert.equal(await startDashboardSession(makeTestCookieStore(), false), true);
+  assert.equal(await getSettingsRevision(), revisionAfterFirst);
+});

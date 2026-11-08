@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { updateSettings } from "@/lib/db/settings";
+import { getSettings, updateSettings } from "@/lib/db/settings";
 import {
   DASHBOARD_SESSION_COOKIE,
   getDashboardJwtSecret,
@@ -153,7 +153,7 @@ export async function getJsonWithBearer(
 }
 
 /**
- * Completes a successful social login: marks setup complete, mints the dashboard session through
+ * Completes a successful social login: marks setup complete (once), mints the dashboard session through
  * the canonical minter (with `iat` + `jti`, so sign-out and a password change end it like any
  * other session) and sets the `auth_token` cookie. Returns false when no JWT secret is available.
  */
@@ -162,7 +162,10 @@ export async function startDashboardSession(
   secure: boolean
 ): Promise<boolean> {
   try {
-    await updateSettings({ setupComplete: true });
+    // Write only the first time: every write bumps the settings revision, which would make another
+    // dashboard tab's next `expectedRevision` save fail with 409 just because someone signed in.
+    const current = await getSettings();
+    if (current.setupComplete !== true) await updateSettings({ setupComplete: true });
   } catch {
     // non-fatal
   }
