@@ -1,7 +1,7 @@
 // Codex workspace metadata for the provider dashboard: the ChatGPT accounts
 // endpoint names the workspace a connection is bound to (personal plan vs.
 // Business seat), which the OAuth id_token does not carry.
-import { test } from "node:test";
+import { beforeEach, test } from "node:test";
 import assert from "node:assert/strict";
 import {
   CODEX_ACCOUNTS_CHECK_URL,
@@ -9,9 +9,15 @@ import {
   parseCodexWorkspaceInfo,
 } from "../../open-sse/services/usage/codexWorkspace.ts";
 import {
+  CODEX_WORKSPACE_INFO_FAILURE_BACKOFF_MS,
   CODEX_WORKSPACE_INFO_TTL_MS,
+  resetCodexWorkspaceInfoBackoff,
   syncCodexWorkspaceInfoIfNeeded,
 } from "../../src/lib/usage/codexWorkspaceSync.ts";
+
+beforeEach(() => {
+  resetCodexWorkspaceInfoBackoff();
+});
 
 // Shape of https://chatgpt.com/backend-api/accounts/check/v4-2023-04-27 for a
 // user with a personal Pro plan and a seat in a Business workspace.
@@ -182,4 +188,72 @@ test("syncCodexWorkspaceInfoIfNeeded leaves the connection unchanged when lookup
     fetchInfo: async () => INFO,
   });
   assert.equal(writeFails, connection);
+});
+
+test("syncCodexWorkspaceInfoIfNeeded backs off after a failed lookup instead of retrying every refresh", async () => {
+  let lookups = 0;
+  let clock = NOW;
+  let answer: typeof INFO | null = null;
+  const deps = {
+    persist: async () => {},
+    fetchInfo: async () => {
+      lookups++;
+      return answer;
+    },
+    now: () => clock,
+  };
+  const connection = { id: "conn-blocked", provider: "codex", accessToken: "token-1" };
+
+  await syncCodexWorkspaceInfoIfNeeded(connection, deps);
+  assert.equal(lookups, 1);
+
+  // Usage refreshes inside the backoff window do not hit the endpoint again.
+  clock = NOW + 5 * 60_000;
+  await syncCodexWorkspaceInfoIfNeeded(connection, deps);
+  clock = NOW + CODEX_WORKSPACE_INFO_FAILURE_BACKOFF_MS - 1;
+  await syncCodexWorkspaceInfoIfNeeded(connection, deps);
+  assert.equal(lookups, 1);
+
+  // The backoff is per connection.
+  await syncCodexWorkspaceInfoIfNeeded({ ...connection, id: "conn-other" }, deps);
+  assert.equal(lookups, 2);
+
+  // Once the window passes, the lookup is retried and a success clears the backoff.
+  clock = NOW + CODEX_WORKSPACE_INFO_FAILURE_BACKOFF_MS;
+  answer = INFO;
+  const synced = await syncCodexWorkspaceInfoIfNeeded(connection, deps);
+  assert.equal(lookups, 3);
+  assert.equal((synced.providerSpecificData as Record<string, unknown>).workspaceName, "Acme Ltd");
+});
+
+test("syncCodexWorkspaceInfoIfNeeded merges the workspace keys onto the row as it is at write time", async () => {
+  const writes: Array<Record<string, unknown>> = [];
+  const connection = {
+    id: "conn-1",
+    provider: "codex",
+    accessToken: "token-1",
+    providerSpecificData: { workspaceId: "ws-business", cooldownUntil: null },
+  };
+  const result = await syncCodexWorkspaceInfoIfNeeded(connection, {
+    persist: async (_id, psd) => {
+      writes.push(psd);
+    },
+    fetchInfo: async () => INFO,
+    // Another path stored a field while the lookup was in flight.
+    loadProviderSpecificData: async (id) => {
+      assert.equal(id, "conn-1");
+      return { workspaceId: "ws-business", cooldownUntil: "2026-10-28T11:00:00.000Z" };
+    },
+    now: () => NOW,
+  });
+  const expected = {
+    workspaceId: "ws-business",
+    cooldownUntil: "2026-10-28T11:00:00.000Z",
+    workspaceName: "Acme Ltd",
+    workspaceStructure: "workspace",
+    workspaceRole: "owner",
+    workspaceInfoFetchedAt: "2026-10-28T10:00:00.000Z",
+  };
+  assert.deepEqual(writes, [expected]);
+  assert.deepEqual(result.providerSpecificData, expected);
 });

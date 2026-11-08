@@ -1107,6 +1107,9 @@ async function fetchLiveProviderLimitsWithOptions(
         conn = await syncCodexWorkspaceInfoIfNeeded(conn, {
           persist: (id, providerSpecificData) =>
             updateProviderConnection(id, { providerSpecificData }),
+          loadProviderSpecificData: async (id) =>
+            ((await getProviderConnectionById(id)) as unknown as ProviderConnectionLike | null)
+              ?.providerSpecificData,
         });
       }
 

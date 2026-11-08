@@ -6,6 +6,23 @@ import {
 // Workspace names and seats change rarely; one lookup a week per connection.
 export const CODEX_WORKSPACE_INFO_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
+// A failed lookup (blocked endpoint, 403, proxy) is not retried on every usage
+// refresh: the label is display-only and each attempt can wait for the timeout.
+export const CODEX_WORKSPACE_INFO_FAILURE_BACKOFF_MS = 60 * 60 * 1000;
+
+const lastFailureAt = new Map<string, number>();
+
+/** Test hook: forget every recorded lookup failure. */
+export function resetCodexWorkspaceInfoBackoff(): void {
+  lastFailureAt.clear();
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
 interface CodexConnectionLike {
   id: string;
   provider?: string;
@@ -24,6 +41,12 @@ export interface CodexWorkspaceSyncDeps {
     options: { connectionId?: string }
   ) => Promise<CodexWorkspaceInfo | null>;
   now?: () => number;
+  /**
+   * Reads the connection's current providerSpecificData right before the write,
+   * so fields another path stored during the lookup are kept: only the
+   * workspace keys are merged onto it.
+   */
+  loadProviderSpecificData?: (connectionId: string) => Promise<unknown>;
 }
 
 /**
@@ -37,14 +60,18 @@ export async function syncCodexWorkspaceInfoIfNeeded<T extends CodexConnectionLi
   deps: CodexWorkspaceSyncDeps
 ): Promise<T> {
   if (connection.provider !== "codex" || !connection.accessToken) return connection;
-  const psd =
-    connection.providerSpecificData && typeof connection.providerSpecificData === "object"
-      ? (connection.providerSpecificData as Record<string, unknown>)
-      : {};
+  const psd = asRecord(connection.providerSpecificData);
   const now = (deps.now ?? Date.now)();
   const fetchedAt =
     typeof psd.workspaceInfoFetchedAt === "string" ? Date.parse(psd.workspaceInfoFetchedAt) : NaN;
   if (Number.isFinite(fetchedAt) && now - fetchedAt < CODEX_WORKSPACE_INFO_TTL_MS) {
+    return connection;
+  }
+  const failedAt = lastFailureAt.get(connection.id);
+  if (
+    failedAt !== undefined &&
+    Math.abs(now - failedAt) < CODEX_WORKSPACE_INFO_FAILURE_BACKOFF_MS
+  ) {
     return connection;
   }
 
@@ -54,16 +81,24 @@ export async function syncCodexWorkspaceInfoIfNeeded<T extends CodexConnectionLi
     workspaceId,
     { connectionId: connection.id }
   );
-  if (!info) return connection;
+  if (!info) {
+    lastFailureAt.set(connection.id, now);
+    return connection;
+  }
+  lastFailureAt.delete(connection.id);
 
-  const nextPsd: Record<string, unknown> = {
-    ...psd,
+  const workspaceFields: Record<string, unknown> = {
     workspaceName: info.workspaceName,
     workspaceStructure: info.workspaceStructure,
     workspaceRole: info.workspaceRole,
     workspaceInfoFetchedAt: new Date(now).toISOString(),
   };
+  let nextPsd: Record<string, unknown> = { ...psd, ...workspaceFields };
   try {
+    if (deps.loadProviderSpecificData) {
+      const latest = asRecord(await deps.loadProviderSpecificData(connection.id));
+      nextPsd = { ...latest, ...workspaceFields };
+    }
     await deps.persist(connection.id, nextPsd);
   } catch (error) {
     console.warn(
