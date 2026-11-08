@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 
 import Modal from "./Modal";
+import M365OAuthModal from "./M365OAuthModal";
 import Button from "./Button";
 import Input from "./Input";
 import Textarea from "./Textarea";
@@ -62,7 +63,14 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "workbuddy",
 ]);
 
-const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
+const TOKEN_PASTE_PROVIDERS = new Set([
+  "devin-desktop",
+  "devin-cli",
+  "grok-cli",
+  "claude",
+  "antigravity",
+  "agy",
+]);
 const IMPORT_TOKEN_ONLY_PROVIDERS = new Set(["devin-cli"]);
 // Devin Desktop opens on the key import (its long-standing default); browser sign-in is a tab.
 const PASTE_FIRST_PROVIDERS = new Set([...IMPORT_TOKEN_ONLY_PROVIDERS, "devin-desktop", "claude"]);
@@ -141,7 +149,21 @@ async function pollDeviceCodeOnce(
  * - Localhost: Auto callback via popup message
  * - Remote: Manual paste callback URL
  */
-export default function OAuthModal({
+export default function OAuthModal(props: OAuthModalProps) {
+  if (props.provider === "copilot-m365-web") {
+    return props.isOpen ? (
+      <M365OAuthModal
+        key={props.reauthConnection?.id || "new"}
+        connectionId={props.reauthConnection?.id}
+        onClose={props.onClose}
+        onSuccess={props.onSuccess}
+      />
+    ) : null;
+  }
+  return <LegacyOAuthModal {...props} />;
+}
+
+function LegacyOAuthModal({
   isOpen,
   provider,
   providerInfo,
