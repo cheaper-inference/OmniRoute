@@ -218,6 +218,7 @@ import {
 } from "./exclusiveConnectionLeasePolicy";
 import { readHeaderValue, type AuthRequestHeaders } from "./headerReader.ts";
 import { isRequestScopedServerFailure } from "./syntheticEmptyStream.ts";
+import { getM365ReasoningCapSiblings } from "@omniroute/open-sse/services/m365ErrorPolicy.ts";
 import {
   getOAuthSessionAvailability,
   reserveOAuthSession,
@@ -2649,6 +2650,51 @@ export async function markAccountUnavailable(
         `[T-PROBE] ${connectionId.slice(0, 8)} ${provider ?? ""} failure ${status} recorded — connection stays in the pool`
       );
       return { shouldFallback: true, cooldownMs: 0 };
+    }
+
+    // Native M365 mixes model licences/budgets and per-account throttling. Honor
+    // the classified scope before generic auth/ban and passthrough quota handling.
+    if (provider === "copilot-m365-web" && fallbackResult.ruleScope) {
+      const cooldownMs = fallbackResult.cooldownMs;
+      if (fallbackResult.ruleScope === "model" && model) {
+        for (const locked of [
+          model,
+          ...getM365ReasoningCapSiblings(
+            provider,
+            status,
+            errorText,
+            options.structuredError,
+            model
+          ),
+        ])
+          lockExactModel(
+            provider,
+            connectionId,
+            locked,
+            fallbackResult.reason || "forbidden",
+            cooldownMs
+          );
+        await updateProviderConnection(connectionId, {
+          lastErrorType: fallbackResult.reason,
+          lastError:
+            status === 403 ? "M365 model not licensed" : "M365 model priority budget exhausted",
+          lastErrorAt: new Date().toISOString(),
+          errorCode: status,
+        });
+        return { shouldFallback: true, cooldownMs };
+      }
+      if (fallbackResult.ruleScope === "connection") {
+        await updateProviderConnection(connectionId, {
+          lastErrorType: fallbackResult.reason,
+          lastError: status === 403 ? "M365 account not licensed" : "M365 account throttled",
+          lastErrorAt: new Date().toISOString(),
+          errorCode: status,
+          rateLimitedUntil: getUnavailableUntil(cooldownMs),
+          backoffLevel: fallbackResult.newBackoffLevel ?? backoffLevel,
+          testStatus: "unavailable",
+        });
+        return { shouldFallback: true, cooldownMs };
+      }
     }
 
     // #16824: a verified ModelScope model-access refusal does not invalidate

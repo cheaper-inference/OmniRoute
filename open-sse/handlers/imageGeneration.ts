@@ -75,6 +75,7 @@ import { handleAiHordeImageGeneration } from "./imageGeneration/providers/aihord
 import * as codexImages from "./imageGeneration/providers/codexImages.ts";
 import { handleZenmuxImageGeneration } from "./imageGeneration/providers/zenmux.ts";
 import { handleMuseImageGeneration } from "./imageGeneration/providers/museImage.ts";
+import { handleM365ImageGeneration } from "./imageGeneration/providers/m365Image.ts";
 import { handleGeminiAiImageGeneration } from "./imageGeneration/providers/geminiAiStudio.ts";
 import { handleBlackForestLabsImageGeneration } from "./imageGeneration/providers/blackForestLabs.ts";
 import {
@@ -396,6 +397,8 @@ const FAL_PRESET_SIZES = {
  * @param {object} options.credentials - Provider credentials { apiKey, accessToken }
  * @param {object} options.log - Logger
  * @param {string} [options.resolvedProvider] - Pre-resolved provider ID (from route layer custom model resolution)
+ * @param {function} [options.onCredentialsRefreshed] - Persists credentials a provider refreshed
+ *   while serving the request (a rotated OAuth refresh token); providers that refresh call it.
  * @param {string|null} [options.peerLocality] - Trusted "loopback"|"lan"|"remote" verdict
  *   forwarded from `AUTHZ_HEADER_PEER_LOCALITY` (src/server/authz/headers.ts). Only consumed by
  *   spawn-capable providers (e.g. cursor-agent-image) to enforce Hard Rules #15/#17 without
@@ -412,6 +415,7 @@ export async function handleImageGeneration({
   // #16260 — IMAGE_GENERATION_LONG_JOBS, injected by the routes (the flag lives in src/):
   // `{ resolveTimeoutMs }` for the OpenAI-compatible path. Null keeps the default behavior.
   longJobs = null,
+  onCredentialsRefreshed = undefined,
 }) {
   // Retirement guards: the retired-provider sets hold bare provider ids only, so testing
   // the `<provider>/` prefix (or the whole model when it carries no slash) covers both the
@@ -555,6 +559,19 @@ export async function handleImageGeneration({
       credentials,
       log,
       signal,
+    });
+  }
+
+  if (providerConfig.format === "m365-image") {
+    return handleM365ImageGeneration({
+      model,
+      provider,
+      body,
+      credentials,
+      log,
+      signal,
+      onCredentialsRefreshed,
+      deps: { saveCallLog },
     });
   }
 
