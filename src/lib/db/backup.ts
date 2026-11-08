@@ -13,7 +13,7 @@ import {
   DB_BACKUPS_DIR,
   DATA_DIR,
 } from "./core";
-import { listBackupIds, resolveBackupFile } from "./backupPaths";
+import { listBackupIds, resolveBackupFile, verifyContentAddressedSnapshot } from "./backupPaths";
 import { chmodQuiet, DB_SECRET_DIR_MODE, DB_SECRET_FILE_MODE } from "./filePermissions";
 import { resetAllDbModuleState } from "./stateReset";
 import {
@@ -499,6 +499,9 @@ export async function restoreDbBackup(backupId: string) {
   if (!fs.existsSync(backupPath)) {
     throw new Error(`Backup not found: ${backupId}`);
   }
+
+  // A content-addressed snapshot must still hash to the SHA-256 in its id.
+  verifyContentAddressedSnapshot(backupId, backupPath);
 
   // Validate backup integrity
   try {

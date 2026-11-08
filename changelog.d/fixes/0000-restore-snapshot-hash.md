@@ -1,0 +1,1 @@
+- **fix(backup):** restoring a pre-migration snapshot now fails when the file bytes no longer match the hash in the snapshot name.
