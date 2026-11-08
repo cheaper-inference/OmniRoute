@@ -40,6 +40,11 @@ const PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
+  // Login step 2 for opt-in TOTP two-factor: no session exists yet. The handler only
+  // acts on a valid short-lived MFA-pending cookie and shares the login brute-force guard.
+  // EXACT: the sibling enrollment routes (/api/auth/mfa/setup|enable|disable|status) are
+  // management routes.
+  "/api/auth/mfa/verify",
   // Entra SSO discovery for CLI sign-in helpers: tenant id, public client id
   // and API audience. All three are already public (they appear in the
   // authorization URL the user's browser visits); the Graph client secret is
@@ -47,7 +52,6 @@ const PUBLIC_API_ROUTES_EXACT = new Set([
   // it is what tells them how to obtain one.
   // EXACT, not a prefix: nothing else under /api/auth/sso/ is public.
   "/api/auth/sso/config",
-  "/api/init",
   "/api/sync/bundle",
   // Remote-mode bootstrap: exchange the management password for a scoped CLI
   // access token. The handler enforces its own password check + lockout — there

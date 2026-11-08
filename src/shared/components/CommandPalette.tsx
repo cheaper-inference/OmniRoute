@@ -3,6 +3,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@omniroute/ui-kit/command";
 import { Dialog, DialogContent, DialogTitle } from "@omniroute/ui-kit/dialog";
 import {
   SIDEBAR_SECTIONS,
@@ -15,10 +23,8 @@ import {
   type SidebarItemDefinition,
   type SidebarSectionChild,
 } from "@/shared/constants/sidebarVisibility";
-import { cn } from "@/shared/utils/cn";
 import Button from "./Button";
 import Icon from "./Icon";
-import Input from "./Input";
 
 function isSidebarGroup(
   child: SidebarSectionChild
@@ -49,10 +55,37 @@ interface PaletteItem {
   subgroupLabel?: string;
 }
 
+const SCORE_EXACT_LABEL = 4;
+const SCORE_LABEL_PREFIX = 3;
+const SCORE_LABEL_SUBSTRING = 2;
+const SCORE_OTHER_FIELD = 1;
+
+// Same folding as the kit Command filter, which keeps its copy private: a query it lets through
+// must score the same, so "configuracoes" ranks "Configurações" as a label match.
+function fold(text: string) {
+  return text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
+}
+
+/**
+ * Relevance of one palette item for a folded query. Only orders the rows: the kit filter decides
+ * which ones show, so a 0 here can still be a visible row (every word found, but split across
+ * fields, as in "logs monitoring").
+ */
+function matchScore(item: PaletteItem, q: string): number {
+  const label = fold(item.label);
+  if (label === q) return SCORE_EXACT_LABEL;
+  if (label.startsWith(q) || label.split(/\s+/).some((word) => word.startsWith(q))) {
+    return SCORE_LABEL_PREFIX;
+  }
+  if (label.includes(q)) return SCORE_LABEL_SUBSTRING;
+  const otherFields = [item.subtitle, item.sectionLabel, item.subgroupLabel];
+  return otherFields.some((field) => field && fold(field).includes(q)) ? SCORE_OTHER_FIELD : 0;
+}
+
 interface PaletteSubgroup {
   subgroupId: string | null;
   subgroupLabel: string | null;
-  items: { item: PaletteItem; flatIndex: number }[];
+  items: PaletteItem[];
 }
 
 interface PaletteGroup {
@@ -61,13 +94,34 @@ interface PaletteGroup {
   subgroups: PaletteSubgroup[];
 }
 
+function PaletteOption({
+  item,
+  onNavigate,
+}: {
+  item: PaletteItem;
+  onNavigate: (href: string, external: boolean) => void;
+}) {
+  return (
+    <CommandItem
+      value={item.label}
+      keywords={[item.subtitle, item.sectionLabel, item.subgroupLabel].filter(
+        (keyword): keyword is string => Boolean(keyword)
+      )}
+      icon={<Icon name={item.icon} size={18} />}
+      description={item.subtitle || undefined}
+      shortcut={item.external ? <Icon name="open_in_new" size={14} /> : undefined}
+      onSelect={() => onNavigate(item.href, item.external)}
+    >
+      {item.label}
+    </CommandItem>
+  );
+}
+
 function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const t = useTranslations("sidebar");
   const inputRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
   const [query, setQuery] = useState("");
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [radarAdminUrl, setRadarAdminUrl] = useState<unknown>(null);
@@ -96,11 +150,6 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
         // ignore aborts and fetch failures; palette still works with empty hidden set
       });
     return () => ctrl.abort();
-  }, []);
-
-  useEffect(() => {
-    const id = setTimeout(() => inputRef.current?.focus(), 30);
-    return () => clearTimeout(id);
   }, []);
 
   const safeTranslate = useCallback(
@@ -171,22 +220,27 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
     [hiddenItems, radarAdminUrl, safeTranslate, activePreset]
   );
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+  // #17915: rows are ranked, not left in sidebar order, so a broad query such as "log" reaches the
+  // Logs page before "Log export" or the substring hit in "Radar Catalog". Ties keep the shorter
+  // label first (the closer match), then the sidebar order.
+  const ranked = useMemo(() => {
+    const q = fold(query).trim();
     if (!q) return allItems;
-    return allItems.filter(
-      (item) =>
-        item.label.toLowerCase().includes(q) ||
-        item.subtitle?.toLowerCase().includes(q) ||
-        item.sectionLabel.toLowerCase().includes(q) ||
-        item.subgroupLabel?.toLowerCase().includes(q)
-    );
+    return allItems
+      .map((item, index) => ({ item, index, score: matchScore(item, q) }))
+      .sort(
+        (a, b) =>
+          b.score - a.score || a.item.label.length - b.item.label.length || a.index - b.index
+      )
+      .map((entry) => entry.item);
   }, [allItems, query]);
 
+  // Sections and subgroups appear in the order of their best match. The kit reads its options from
+  // the DOM, so the arrow keys and Enter follow this order with nothing else to keep in step.
   const grouped = useMemo<PaletteGroup[]>(() => {
     const groups: PaletteGroup[] = [];
     const sectionById = new Map<string, PaletteGroup>();
-    filtered.forEach((item, flatIndex) => {
+    ranked.forEach((item) => {
       // Look up the section/subgroup by id across the whole list, not just the
       // previous item — a section's children can interleave root items and
       // groups (e.g. "omni-proxy" has a trailing root item after its groups),
@@ -212,10 +266,10 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
         };
         section.subgroups.push(subgroup);
       }
-      subgroup.items.push({ item, flatIndex });
+      subgroup.items.push(item);
     });
     return groups;
-  }, [filtered]);
+  }, [ranked]);
 
   const handleNavigate = useCallback(
     (href: string, external: boolean) => {
@@ -228,37 +282,6 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
     },
     [onClose, router]
   );
-
-  useEffect(() => {
-    // Escape is handled by the kit Dialog (onOpenChange(false) → onClose), not here, so it
-    // never fires onClose twice.
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev + 1) % Math.max(1, filtered.length));
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIndex(
-          (prev) => (prev - 1 + Math.max(1, filtered.length)) % Math.max(1, filtered.length)
-        );
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        const item = filtered[selectedIndex];
-        if (item) {
-          handleNavigate(item.href, item.external);
-        }
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [filtered, selectedIndex, handleNavigate]);
-
-  useEffect(() => {
-    const list = listRef.current;
-    if (!list) return;
-    const el = list.querySelector<HTMLElement>(`[data-flat-index="${selectedIndex}"]`);
-    el?.scrollIntoView({ block: "nearest" });
-  }, [selectedIndex]);
 
   return (
     <Dialog
@@ -276,127 +299,61 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
           e.preventDefault();
           if (opener?.isConnected) opener.focus();
         }}
-        className="top-[10vh] max-w-3xl overflow-hidden p-0 [animation-name:ci-fade-in] [transform:translateX(-50%)]"
+        className="top-[10vh] max-w-3xl [animation-name:ci-fade-in] [transform:translateX(-50%)]"
       >
         <DialogTitle className="ci-sr-only">{t("commandPalette.title")}</DialogTitle>
-        <div className="flex items-center gap-3 border-b border-border px-5 py-3">
-          <Input
+        <Command
+          query={query}
+          onQueryChange={setQuery}
+          className="[--ci-command-list-max-height:60vh]"
+        >
+          <CommandInput
             ref={inputRef}
-            type="search"
-            icon="search"
-            className="flex-1 [&_.ci-input-shell]:border-0 [&_.ci-input-shell]:bg-transparent [&_.ci-input-shell]:shadow-none"
-            inputClassName="[&::-webkit-search-cancel-button]:appearance-none"
             placeholder={t("commandPalette.searchPlaceholder")}
             aria-label={t("commandPalette.searchPlaceholder")}
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setSelectedIndex(0);
-            }}
-            autoComplete="off"
-            spellCheck={false}
+            trailing={
+              <>
+                {query && (
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    tabIndex={-1}
+                    aria-label={t("commandPalette.clearSearch")}
+                    onClick={() => {
+                      setQuery("");
+                      // The press took focus here, and this button unmounts with the query.
+                      inputRef.current?.focus();
+                    }}
+                  >
+                    <Icon name="close" size={16} />
+                  </Button>
+                )}
+                <kbd className="hidden shrink-0 rounded border border-border bg-bg-subtle px-1.5 py-0.5 font-mono text-[10px] text-text-muted sm:inline-flex">
+                  Esc
+                </kbd>
+              </>
+            }
           />
-          {query && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              tabIndex={-1}
-              aria-label={t("commandPalette.clearSearch")}
-              onClick={() => {
-                setQuery("");
-                setSelectedIndex(0);
-              }}
-            >
-              <Icon name="close" size={16} />
-            </Button>
-          )}
-          <kbd className="hidden shrink-0 rounded border border-border bg-bg-subtle px-1.5 py-0.5 font-mono text-[10px] text-text-muted sm:inline-flex">
-            Esc
-          </kbd>
-        </div>
-
-        {grouped.length > 0 ? (
-          <ul
-            ref={listRef}
-            role="listbox"
-            aria-label={t("commandPalette.title")}
-            className="custom-scrollbar max-h-[60vh] overflow-y-auto py-2"
-          >
+          <CommandList aria-label={t("commandPalette.title")} className="custom-scrollbar">
             {grouped.map((group) => (
-              <li key={group.sectionId} role="presentation">
-                <div className="ci-eyebrow sticky top-0 z-10 border-b border-border bg-surface px-5 py-1.5">
-                  {group.sectionLabel}
-                </div>
-                <ul role="group" aria-label={group.sectionLabel}>
-                  {group.subgroups.map((subgroup) => (
-                    <li
-                      key={`${group.sectionId}::${subgroup.subgroupId ?? "_root"}`}
-                      role="presentation"
-                    >
-                      {subgroup.subgroupLabel && (
-                        <div className="px-5 pt-2 pb-1 text-[10px] font-medium uppercase tracking-wide text-text-muted">
-                          {subgroup.subgroupLabel}
-                        </div>
-                      )}
-                      <ul
-                        role={subgroup.subgroupLabel ? "group" : "presentation"}
-                        aria-label={subgroup.subgroupLabel ?? undefined}
-                      >
-                        {subgroup.items.map(({ item, flatIndex }) => {
-                          const selected = flatIndex === selectedIndex;
-                          return (
-                            <li
-                              key={item.id}
-                              role="option"
-                              aria-selected={selected}
-                              data-flat-index={flatIndex}
-                            >
-                              {/* kit-exception: Native button styled as the kit menu row (.ci-menu__item). */}
-                              <button
-                                type="button"
-                                className={cn(
-                                  "ci-menu__item w-full gap-3 py-2.5 text-start",
-                                  subgroup.subgroupLabel ? "ps-10 pe-5" : "px-5",
-                                  selected ? "bg-surface-2 text-heading" : "text-text-main"
-                                )}
-                                onClick={() => handleNavigate(item.href, item.external)}
-                                onMouseEnter={() => setSelectedIndex(flatIndex)}
-                              >
-                                <span
-                                  className={cn(
-                                    "shrink-0",
-                                    selected ? "text-heading" : "text-text-muted"
-                                  )}
-                                >
-                                  <Icon name={item.icon} size={18} />
-                                </span>
-                                <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm font-medium">{item.label}</p>
-                                  {item.subtitle && (
-                                    <p className="truncate text-xs text-text-muted">
-                                      {item.subtitle}
-                                    </p>
-                                  )}
-                                </div>
-                                {item.external && (
-                                  <span className="shrink-0 text-text-muted">
-                                    <Icon name="open_in_new" size={14} />
-                                  </span>
-                                )}
-                              </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </li>
-                  ))}
-                </ul>
-              </li>
+              <CommandGroup key={group.sectionId} heading={group.sectionLabel}>
+                {group.subgroups.map((subgroup) => {
+                  const options = subgroup.items.map((item) => (
+                    <PaletteOption key={item.id} item={item} onNavigate={handleNavigate} />
+                  ));
+                  return subgroup.subgroupLabel ? (
+                    <CommandGroup key={subgroup.subgroupId} heading={subgroup.subgroupLabel}>
+                      {options}
+                    </CommandGroup>
+                  ) : (
+                    options
+                  );
+                })}
+              </CommandGroup>
             ))}
-          </ul>
-        ) : (
-          <div className="py-10 text-center text-sm text-text-muted">{t("noResults")}</div>
-        )}
+          </CommandList>
+          <CommandEmpty>{t("noResults")}</CommandEmpty>
+        </Command>
 
         <div className="flex items-center gap-4 border-t border-border px-5 py-2 text-[11px] text-text-muted">
           <span className="flex items-center gap-1">

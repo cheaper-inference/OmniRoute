@@ -17,6 +17,7 @@ process.env.JWT_SECRET = "test-jwt-secret-16320";
 
 const loginRoute = await import("../../src/app/api/auth/login/route.ts");
 const shouldWarn = loginRoute.authRouteInternals.shouldWarnMissingJwtSecret;
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 const BUILD_SIGNAL_KEYS = ["NEXT_PHASE", "OMNIROUTE_BUILDING", "npm_lifecycle_event"] as const;
 const saved = {
@@ -29,6 +30,7 @@ function clearBuildSignals() {
 }
 
 test.after(() => {
+  resetDbInstance();
   for (const [key, value] of Object.entries(saved)) {
     if (value === undefined) delete process.env[key];
     else process.env[key] = value;

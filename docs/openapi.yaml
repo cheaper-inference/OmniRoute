@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: OmniRoute API
-  version: 3.8.53
+  version: 3.8.54
   description: |
     OmniRoute is a local-first AI API proxy router. It provides an OpenAI-compatible
     endpoint that routes requests to multiple AI providers with load balancing,
@@ -43,6 +43,8 @@ tags:
     description: Content moderation
   - name: Rerank
     description: Document reranking
+  - name: Decisions
+    description: System One typed decisions (Jev)
   - name: Search
     description: Unified web, news, and X search
   - name: Models
@@ -1565,6 +1567,9 @@ paths:
         "200":
           description: Chat completion response (or SSE stream)
           headers:
+            X-OmniRoute-Video-Drilldown:
+              description: Up to four comma-separated opaque handles after explicitly consented authenticated video analysis; absent without retained frames. Also available on SSE success responses.
+              schema: { type: string, maxLength: 259 }
             X-OmniRoute-Response-Cost:
               schema:
                 type: string
@@ -1731,7 +1736,7 @@ paths:
             `POST /api/v1/chat/completions`), including `X-OmniRoute-Request-Id`
             and `X-OmniRoute-Version`.
         "401":
-          $ref: "#/components/responses/Unauthorized"
+          $ref: "#/components/responses/AnthropicUnauthorized"
 
   /api/v1/messages/count_tokens:
     post:
@@ -1748,6 +1753,8 @@ paths:
       responses:
         "200":
           description: Token count
+        "401":
+          $ref: "#/components/responses/AnthropicUnauthorized"
 
   /api/v1/responses:
     post:
@@ -2622,6 +2629,7 @@ paths:
     post:
       tags: [Providers]
       summary: Auto-detect and import the local Antigravity CLI (agy) login from disk
+      x-loopback-only: true
       x-always-protected: true
       responses:
         "200":
@@ -2688,6 +2696,33 @@ paths:
       responses:
         "200":
           description: Provider model list
+    post:
+      tags: [Provider Nodes]
+      summary: Add a custom model
+      description: >-
+        Requires management authentication. On a compatible provider node the
+        stored modelId is the bare upstream id: a leading copy of the node's
+        prefix is stripped (and canonical providers' slashed ids pass through
+        untouched). The response echoes the stored id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, modelId]
+              properties:
+                provider:
+                  type: string
+                modelId:
+                  type: string
+                modelName:
+                  type: string
+      responses:
+        "200":
+          description: Model added (echoes the stored id)
+        "400":
+          description: Invalid request body
     put:
       tags: [Provider Nodes]
       summary: Update model metadata or per-model overrides
@@ -2735,6 +2770,8 @@ paths:
         exact JSON model field. Specialized executors and other providers are unsupported;
         session pools, extra-key rotation, HTTP redirects and credential refresh are refused.
         Active runtime plugins also fail closed; plugin policies are not silently skipped.
+        On a compatible provider node the inserted modelId is stored as the
+        bare upstream id (a leading copy of the node's prefix is stripped).
       security:
         - BearerAuth: []
       requestBody:
@@ -4824,11 +4861,18 @@ paths:
                 name: { type: string }
                 scope: { type: string, enum: [read, write, admin] }
                 expiresInDays: { type: integer, minimum: 1, maximum: 3650 }
+                totp:
+                  type: string
+                  description: >
+                    Required while dashboard two-factor authentication is enabled — a
+                    6-digit TOTP code or a single-use recovery code.
       responses:
         "200":
           description: Token minted (token returned once)
         "401":
-          description: Invalid password
+          description: >
+            Invalid password, or two-factor authentication is enabled and `totp` is
+            missing or wrong (body carries `mfaRequired: true`)
         "429":
           description: Too many failed attempts
 
@@ -7171,13 +7215,140 @@ paths:
                   minLength: 1
       responses:
         "200":
-          description: JWT token returned
+          description: >
+            Session cookie set. When two-factor authentication is enabled the body is
+            `{ success: false, mfaRequired: true }` instead and only a short-lived
+            MFA-pending cookie is set; finish with `POST /api/auth/mfa/verify`.
         "400":
           description: Invalid login request
         "401":
           description: Invalid password
         "403":
           description: Password setup required
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/verify:
+    post:
+      tags: [System]
+      summary: Complete a two-factor sign-in
+      description: >
+        Login step 2 (public). Trades the MFA-pending cookie set by `/api/auth/login`
+        plus a TOTP or recovery code for the dashboard session cookie. Shares the
+        login brute-force lockout; a TOTP step and a recovery code are each accepted once.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, minLength: 1, maxLength: 64 }
+      responses:
+        "200":
+          description: Session cookie set (`method` is `totp` or `backup_code`)
+        "400":
+          description: Invalid request body
+        "401":
+          description: Invalid code, or the pending sign-in expired (`mfaExpired`)
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/status:
+    get:
+      tags: [System]
+      summary: Two-factor authentication status
+      responses:
+        "200":
+          description: "`enabled`, `backupCodesRemaining`, `enabledAt`, `recoverySwitchSet`"
+        "401":
+          description: Authentication required
+
+  /api/auth/mfa/setup:
+    post:
+      tags: [System]
+      summary: Start two-factor enrollment
+      description: >
+        Re-authenticates with the current password and returns a candidate TOTP secret,
+        its `otpauth://` URI and a QR code (PNG data URI). Nothing is persisted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string, minLength: 1 }
+      responses:
+        "200":
+          description: Enrollment secret, otpauth URI and QR code
+        "401":
+          description: Invalid password
+        "409":
+          description: Two-factor authentication is already enabled
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/enable:
+    post:
+      tags: [System]
+      summary: Finish two-factor enrollment
+      description: >
+        Persists the secret (encrypted at rest) once the current password and a code
+        generated from it both verify. Returns ten single-use recovery codes, shown once.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password, secret, code]
+              properties:
+                password: { type: string, minLength: 1 }
+                secret: { type: string, description: Base32 secret from /api/auth/mfa/setup }
+                code: { type: string }
+      responses:
+        "200":
+          description: Enabled; `backupCodes` returned once
+        "401":
+          description: Invalid password or code
+        "409":
+          description: Two-factor authentication is already enabled
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/disable:
+    post:
+      tags: [System]
+      summary: Turn two-factor authentication off
+      description: |
+        Requires the current password and a live TOTP or recovery code. While
+        `OMNIROUTE_DISABLE_MFA=true` is set, a request from the host itself (loopback
+        peer and loopback `Host`) may omit `code` to remove a factor that can no longer
+        be verified; the session and password are still required.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string, minLength: 1 }
+                code:
+                  type: string
+                  description: Required unless the host recovery switch applies.
+      responses:
+        "200":
+          description: Disabled; secret and recovery codes removed
+        "400":
+          description: Invalid body, or `code` missing outside the host recovery switch
+        "401":
+          description: Invalid password or code
+        "409":
+          description: Two-factor authentication is not enabled
         "429":
           description: Too many failed attempts
 
@@ -7982,7 +8153,7 @@ paths:
       x-loopback-only: true
       tags: [System]
       summary: Read a bounded Video Bridge drill-down slice
-      description: Internal loopback/token-authenticated lookup into a short-lived cache isolated by an opaque principal, session, and media reference. It never downloads media or starts a subprocess; start/end and frame count only select already materialized, canonicalized JPEG frames whose dimensions were derived from their bytes. This cache substrate is not yet wired to the transparent Video Bridge request path and does not yet expose multi-resolution selection.
+      description: Internal loopback/token-authenticated raw cache substrate, isolated by an opaque principal, session and media reference. It never downloads media or starts a subprocess. The transparent producer and authenticated public variant consumer use their own shared opaque-handle lifecycle at /api/v1/video-bridge/drilldown; this raw endpoint does not expose multi-resolution selection.
       security: []
       parameters:
         - in: header
@@ -11806,10 +11977,70 @@ paths:
     get:
       tags:
         - Logs
-      summary: "GET logs › console"
+      summary: Read retained application console history
+      description: >-
+        Requires management access. Reads the active file and retained OmniRoute
+        timestamped rotations, returning the newest page in display order. The
+        default range is all retained history, not only the last hour. Reads are
+        bounded to 64 files, 4096 directory entries and 8 MiB per request; individual
+        lines above 256 KiB are skipped. A cursor continues older pages and is bound
+        to the original filters and file identity. Deleted or replaced history
+        requires a fresh request. Retention settings are unchanged.
+      parameters:
+        - in: query
+          name: range
+          schema:
+            type: string
+            enum: [1h, 24h, 7d, all]
+            default: all
+        - in: query
+          name: level
+          schema:
+            type: string
+            enum: [all, trace, debug, info, warn, error, fatal]
+            default: all
+        - in: query
+          name: component
+          schema:
+            type: string
+            maxLength: 128
+        - in: query
+          name: limit
+          description: Positive integer; values above 2000 are clamped.
+          schema:
+            type: integer
+            minimum: 1
+            default: 500
+        - in: query
+          name: cursor
+          description: Opaque value returned by X-Console-Next-Cursor.
+          schema:
+            type: string
+            maxLength: 1800
       responses:
         "200":
-          description: OK
+          description: Console entries in display order; an empty page can still have a cursor.
+          headers:
+            X-Console-Next-Cursor:
+              description: Opaque cursor for older retained history, when available.
+              schema:
+                type: string
+            X-Console-Truncated:
+              description: Whether a scan, directory, file or line bound was reached.
+              schema:
+                type: string
+                enum: ["true", "false"]
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+        "400":
+          description: Invalid query or cursor/filter mismatch.
+        "410":
+          description: Retained history changed; refresh without a cursor.
   /api/logs/detail:
     get:
       tags:
@@ -14297,6 +14528,71 @@ paths:
       responses:
         "200":
           description: OK
+  /api/system/metrics:
+    get:
+      tags:
+        - System
+      summary: Host and OmniRoute process CPU and memory
+      description: >-
+        Management-tier (dashboard session or management API key) snapshot behind the home-page
+        system metrics cards. CPU percentages are deltas since the previous call that was at least
+        400 ms earlier, so the first call after process start (and any call inside the 400 ms
+        window) returns the last computed value, which is `0` before the first delta. Host values
+        come from `os.cpus()` / `os.totalmem()` / `os.freemem()` and describe the host, not a
+        container limit; the process CPU percentage is normalised by the host core count. Sent
+        with `Cache-Control: no-store, no-cache, must-revalidate`.
+      responses:
+        "200":
+          description: Host and process metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [host, process]
+                properties:
+                  host:
+                    type: object
+                    required: [cpuPercent, memory, cpuCount, platform]
+                    properties:
+                      cpuPercent:
+                        type: number
+                        minimum: 0
+                        maximum: 100
+                        description: Host CPU busy share since the previous sample, 0-100.
+                      memory:
+                        type: object
+                        required: [totalBytes, usedBytes, freeBytes, usedPercent]
+                        properties:
+                          totalBytes: { type: integer }
+                          usedBytes: { type: integer }
+                          freeBytes: { type: integer }
+                          usedPercent: { type: number, minimum: 0, maximum: 100 }
+                      cpuCount: { type: integer, minimum: 0 }
+                      platform:
+                        type: string
+                        description: Node.js `process.platform`.
+                  process:
+                    type: object
+                    required: [cpuPercent, memory, uptimeSeconds, pid]
+                    properties:
+                      cpuPercent:
+                        type: number
+                        minimum: 0
+                        maximum: 100
+                        description: OmniRoute process CPU share of the whole host, 0-100.
+                      memory:
+                        type: object
+                        required: [rssBytes, heapUsedBytes, heapTotalBytes]
+                        properties:
+                          rssBytes: { type: integer }
+                          heapUsedBytes: { type: integer }
+                          heapTotalBytes: { type: integer }
+                      uptimeSeconds: { type: integer }
+                      pid: { type: integer }
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/system/version:
     get:
       tags:
@@ -15382,21 +15678,147 @@ paths:
       responses:
         "200":
           description: OK
-  /api/v1/video-bridge/drilldown:
-    delete:
-      tags:
-        - V1 Video-bridge
-      summary: "DELETE video bridge › drilldown"
+  /api/v1/systemone:
+    post:
+      tags: [Decisions]
+      summary: System One typed decisions
+      description: >-
+        One `state` plus typed `questions` (`noul` / `choice` / `score`); the
+        backend is selected by the model id — `typesafe/jev-*` or a bare
+        `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/
+        <model>` routes to OpenRouter's alpha decisions endpoint. Answers,
+        probabilities and usage (tokens, cost) pass through untouched.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [state, questions]
+              properties:
+                model:
+                  type: string
+                state:
+                  description: Decision context — a string or an object map.
+                questions:
+                  type: object
       responses:
         "200":
-          description: OK
+          description: >-
+            Upstream passthrough: `{ model, answers, usage }` with calibrated
+            probabilities. Carries the `X-OmniRoute-*` cost-telemetry headers.
+        "400":
+          description: Unknown decisions model or invalid body.
+        "401":
+          description: Missing or invalid gateway API key / provider credentials.
     get:
-      tags:
-        - V1 Video-bridge
-      summary: "GET video bridge › drilldown"
+      tags: [Decisions]
+      summary: List decisions-capable models
+      description: Decisions entries from the unified model catalog.
+      security:
+        - BearerAuth: []
       responses:
         "200":
-          description: OK
+          description: Model list (same shape as GET /api/v1/models).
+  /api/v1/video-bridge/drilldown:
+    get:
+      tags: [System]
+      summary: Read authenticated tenant-bound video frame variants
+      description: Requires explicit remote drill-down operator consent and an authenticated API key. A nonempty API-key endpoint allowlist must include video. Resolves an opaque handle from the x-omniroute-video-drilldown chat response header; never accepts a client principal, raw video or session ID. JSON including Base64 is limited to 32 MiB. Unknown, expired and cross-key handles return indistinguishable 404 responses. Handles are process-local and expire after ten minutes or a restart.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: handle
+          required: true
+          schema: { type: string, pattern: "^(?:v1\\.[A-Za-z0-9_-]{43}|[0-9a-f]{64})$" }
+        - in: query
+          name: variant
+          schema: { type: string, enum: [preview, standard, detail], default: detail }
+          description: JPEG maximum dimension 320, 640 or 1280 respectively; never upscaled.
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 8 }
+          description: Page frame limit; cannot be combined with the legacy frames alias.
+        - in: query
+          name: frames
+          schema: { type: integer, minimum: 1, maximum: 8 }
+          deprecated: true
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 0, default: 0 }
+        - in: query
+          name: start
+          schema: { type: number, minimum: 0 }
+        - in: query
+          name: end
+          schema: { type: number, minimum: 0 }
+          description: Must follow start when both bounds are supplied. Duplicate or unknown query keys are rejected.
+      responses:
+        "200":
+          description: No-store page with actual variant derivation metadata and bounded JPEG frames
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [derivation, durationSeconds, frames, hasMore, page, variant]
+                properties:
+                  derivation:
+                    {
+                      type: object,
+                      description: "Content hash, parent hash, policy, version, creation time and actual JPEG resolution.",
+                    }
+                  durationSeconds: { type: number }
+                  focusWindow: { type: object }
+                  frames:
+                    type: array
+                    maxItems: 8
+                    items:
+                      type: object
+                      required: [dataUri, timestampSeconds, width, height]
+                      properties:
+                        dataUri: { type: string }
+                        timestampSeconds: { type: number }
+                        width: { type: integer }
+                        height: { type: integer }
+                  hasMore: { type: boolean }
+                  page: { type: integer, minimum: 0 }
+                  variant: { type: string, enum: [preview, standard, detail] }
+        "400": { description: Invalid or ambiguous query }
+        "401": { description: Authentication required or invalid API key }
+        "403": { description: Remote access disabled or API-key policy denied }
+        "404": { description: "Unknown, expired or cross-key handle" }
+        "413": { description: Serialized response exceeds 32 MiB; request fewer frames }
+        "499": { description: Request cancelled }
+        "503": { description: Temporarily unavailable; sanitized error }
+    delete:
+      tags: [System]
+      summary: Delete an authenticated owner's video drill-down handle
+      description: Idempotent; unknown, expired or cross-key handles remove zero entries. Releases retained frames and accounting for the owner only. Remote operator consent and a valid API key are always required. A nonempty API-key endpoint allowlist must include video.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: handle
+          required: true
+          schema: { type: string, pattern: "^(?:v1\\.[A-Za-z0-9_-]{43}|[0-9a-f]{64})$" }
+      responses:
+        "200":
+          description: No-store deletion result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [removed]
+                properties:
+                  removed: { type: integer, minimum: 0, maximum: 1 }
+        "400": { description: Invalid handle or ambiguous query }
+        "401": { description: Authentication required or invalid API key }
+        "403": { description: Remote access disabled or API-key policy denied }
+        "499": { description: Request cancelled }
+        "503": { description: Temporarily unavailable; sanitized error }
   /api/v1/videos/generations:
     get:
       tags:
@@ -15978,6 +16400,34 @@ components:
               error:
                 type: string
                 example: Unauthorized
+    AnthropicUnauthorized:
+      description: >-
+        Missing or invalid API key on the Anthropic Messages endpoints, returned in
+        Anthropic's error envelope so Anthropic clients (Claude Code, Anthropic SDKs)
+        show the message. The correlation id is on the `x-request-id` header.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [type, error]
+            properties:
+              type:
+                type: string
+                enum: [error]
+              error:
+                type: object
+                required: [type, message]
+                properties:
+                  type:
+                    type: string
+                    enum: [authentication_error]
+                  message:
+                    type: string
+          example:
+            type: error
+            error:
+              type: authentication_error
+              message: Invalid API key
     ManagementAuthenticationRequired:
       description: Authentication required for management routes
       content:
@@ -17549,6 +17999,16 @@ components:
           example: model
         owned_by:
           type: string
+        name:
+          type: string
+          description: >-
+            Human-readable display name. Built-in models use the registry name and
+            synced models the provider's published name; a model with neither gets
+            a name derived from its id (for example `claude-opus-5-5` becomes
+            `Claude Opus 5.5`). A name shared by several providers is prefixed with
+            the provider (`gh/GPT-5.5`). Omitted when the `MODEL_CATALOG_INCLUDE_NAMES`
+            feature flag is off.
+          example: GLM 5.3 Flash
         pricing:
           $ref: "#/components/schemas/ModelPricing"
 
