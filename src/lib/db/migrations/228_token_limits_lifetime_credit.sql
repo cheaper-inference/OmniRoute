@@ -1,10 +1,10 @@
 -- Add lifetime token credit while preserving existing limits, counters and reset logs.
 -- Child rows are backed up because DROP TABLE cascades under foreign_keys=ON.
 
-DROP TABLE IF EXISTS temp.aktl218_counters;
-DROP TABLE IF EXISTS temp.aktl218_reset_logs;
-CREATE TEMP TABLE aktl218_counters AS SELECT * FROM api_key_token_counters;
-CREATE TEMP TABLE aktl218_reset_logs AS SELECT * FROM api_key_token_limit_reset_logs;
+DROP TABLE IF EXISTS temp.aktl228_counters;
+DROP TABLE IF EXISTS temp.aktl228_reset_logs;
+CREATE TEMP TABLE aktl228_counters AS SELECT * FROM api_key_token_counters;
+CREATE TEMP TABLE aktl228_reset_logs AS SELECT * FROM api_key_token_limit_reset_logs;
 
 CREATE TABLE IF NOT EXISTS api_key_token_limits_new (
   id              TEXT PRIMARY KEY,
@@ -34,10 +34,10 @@ ALTER TABLE api_key_token_limits_new RENAME TO api_key_token_limits;
 CREATE INDEX IF NOT EXISTS idx_aktl_api_key_id ON api_key_token_limits (api_key_id);
 
 INSERT OR IGNORE INTO api_key_token_counters (limit_id, window_start, tokens_used, updated_at)
-SELECT limit_id, window_start, tokens_used, updated_at FROM temp.aktl218_counters;
+SELECT limit_id, window_start, tokens_used, updated_at FROM temp.aktl228_counters;
 
 INSERT OR IGNORE INTO api_key_token_limit_reset_logs (id, limit_id, reset_at, prev_tokens, window_start)
-SELECT id, limit_id, reset_at, prev_tokens, window_start FROM temp.aktl218_reset_logs;
+SELECT id, limit_id, reset_at, prev_tokens, window_start FROM temp.aktl228_reset_logs;
 
-DROP TABLE temp.aktl218_counters;
-DROP TABLE temp.aktl218_reset_logs;
+DROP TABLE temp.aktl228_counters;
+DROP TABLE temp.aktl228_reset_logs;
