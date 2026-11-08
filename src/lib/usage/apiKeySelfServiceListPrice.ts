@@ -86,6 +86,16 @@ export const defaultListPriceCache = createListPriceCache();
 
 const cutsByPricingTable = new WeakMap<object, number[]>();
 
+/** The smallest whole prompt size a pricing row's `long_context` tier applies to, or null. */
+function longContextCut(row: unknown): number | null {
+  const tier = (row as { long_context?: unknown } | null)?.long_context;
+  if (!tier || typeof tier !== "object" || Array.isArray(tier)) return null;
+  const { threshold, inclusive } = tier as { threshold?: unknown; inclusive?: unknown };
+  const limit = Number(threshold);
+  if (!Number.isFinite(limit) || limit <= 0) return null;
+  return inclusive === true ? Math.ceil(limit) : Math.floor(limit) + 1;
+}
+
 /**
  * Prompt-size band cuts for listApiKeyUsageSlices: for every pricing row's `long_context` tier,
  * the smallest whole prompt size its tier applies to (`inclusive`: at the threshold, otherwise
@@ -100,12 +110,8 @@ export function collectLongContextCuts(pricingTable: unknown): number[] {
   for (const models of Object.values(pricingTable)) {
     if (!models || typeof models !== "object") continue;
     for (const row of Object.values(models as Record<string, unknown>)) {
-      const tier = (row as { long_context?: unknown } | null)?.long_context;
-      if (!tier || typeof tier !== "object" || Array.isArray(tier)) continue;
-      const { threshold, inclusive } = tier as { threshold?: unknown; inclusive?: unknown };
-      const limit = Number(threshold);
-      if (!Number.isFinite(limit) || limit <= 0) continue;
-      cuts.add(inclusive === true ? Math.ceil(limit) : Math.floor(limit) + 1);
+      const cut = longContextCut(row);
+      if (cut !== null) cuts.add(cut);
     }
   }
   const sorted = [...cuts].sort((a, b) => a - b);
