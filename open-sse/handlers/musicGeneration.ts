@@ -38,6 +38,7 @@ import {
   upstreamMediaErrorText,
 } from "@/shared/network/remoteImageFetch";
 import { handleFalMusicGeneration } from "./mediaGeneration/fal.ts";
+import { handleGeminiMusicGeneration } from "./mediaGeneration/geminiMusic.ts";
 import { handleSyntxMusicGeneration } from "./syntxAudio.ts";
 import { handleMinimaxMusicGeneration } from "./mediaGeneration/minimaxMusic.ts";
 import { handleElevenLabsMusicGeneration } from "./mediaGeneration/elevenLabsMusic.ts";
@@ -154,6 +155,18 @@ export async function handleMusicGeneration({
 
   if (providerConfig.format === "elevenlabs-music") {
     return handleElevenLabsMusicGeneration({ model, body, credentials });
+  }
+
+  if (providerConfig.format === "gemini-lyria") {
+    return handleGeminiMusicGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "comfyui") {

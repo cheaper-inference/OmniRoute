@@ -1,0 +1,2 @@
+- **fix(codex):** Preserve reasoning-summary delivery, deferred function-tool loading and explicitly requested reasoning effort through Chat-to-Responses translation without suppressing a reactive credential refresh.
+- **fix(dashboard):** Return structured, sanitized console-log read errors and keep live polling available after an older-history page fails or its cursor expires.
