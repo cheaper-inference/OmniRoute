@@ -772,8 +772,18 @@ export async function cleanupExpiredLogs() {
   let trimmedProxyLogs = 0;
 
   try {
-    const r1 = db.prepare("DELETE FROM usage_history WHERE timestamp < ?").run(usageCutoff);
-    deletedUsage = r1.changes;
+    // Archive into daily_usage_summary first, on a whole-day boundary: the rollup rewrites a
+    // day from the raw rows left, so a partly archived day would lose its totals next pass.
+    // If the rollup fails, keep the raw rows (same guard as cleanupUsageHistory).
+    const usageCutoffDate = usageCutoff.slice(0, 10);
+    const { rollupUsageHistoryBeforeDate } = await import("../usage/aggregateHistory");
+    const rollup = await rollupUsageHistoryBeforeDate(usageCutoffDate);
+    if (rollup.errors > 0) {
+      console.error("[Compliance] Skipping usage_history deletion: pre-delete rollup failed.");
+    } else {
+      const r1 = db.prepare("DELETE FROM usage_history WHERE timestamp < ?").run(usageCutoffDate);
+      deletedUsage = r1.changes;
+    }
   } catch {
     /* table may not exist */
   }
