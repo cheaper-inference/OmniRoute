@@ -11,6 +11,11 @@
  *   - per-event xAI SSE → Gemini streamGenerateContent chunks
  */
 
+import {
+  geminiFunctionParameters,
+  geminiResponseSchema,
+} from "@omniroute/open-sse/translator/helpers/geminiFunctionParameters.ts";
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface GeminiInlineData {
@@ -51,6 +56,7 @@ interface GeminiFunctionDeclaration {
   name: string;
   description?: string;
   parameters?: unknown;
+  parametersJsonSchema?: unknown;
 }
 
 interface GeminiTool {
@@ -69,6 +75,7 @@ interface GeminiGenerationConfig {
   maxOutputTokens?: number;
   stopSequences?: string[];
   responseSchema?: unknown;
+  responseJsonSchema?: unknown;
   thinkingConfig?: GeminiThinkingConfig;
 }
 
@@ -227,7 +234,7 @@ function extractFunctionItems(parts: GeminiPart[]): XaiInputItem[] {
 
 /**
  * Convert Gemini tools[] into xAI tools[].
- * Gemini: [{ functionDeclarations: [{ name, description, parameters }] }, ...]
+ * Gemini: [{ functionDeclarations: [{ name, description, parameters | parametersJsonSchema }] }, ...]
  * xAI:    [{ type: "function", function: { name, description, parameters } }, ...]
  */
 function toolsGeminiToXai(tools: GeminiTool[]): XaiTool[] | undefined {
@@ -242,7 +249,7 @@ function toolsGeminiToXai(tools: GeminiTool[]): XaiTool[] | undefined {
           function: {
             name: fn.name,
             description: fn.description,
-            parameters: fn.parameters ?? { type: "object" },
+            parameters: geminiFunctionParameters(fn) ?? { type: "object" },
           },
         });
       }
@@ -301,8 +308,8 @@ export function geminiRequestToXaiResponses(
   if (cfg.topP != null) out.top_p = cfg.topP;
   if (cfg.maxOutputTokens != null) out.max_output_tokens = cfg.maxOutputTokens;
   if (cfg.stopSequences) out.stop = cfg.stopSequences;
-  if (cfg.responseSchema)
-    out.text = { format: { type: "json_schema", schema: cfg.responseSchema } };
+  const responseSchema = geminiResponseSchema(cfg);
+  if (responseSchema) out.text = { format: { type: "json_schema", schema: responseSchema } };
   if (cfg.thinkingConfig?.thinkingBudget != null) {
     const b = cfg.thinkingConfig.thinkingBudget;
     if (b >= 16000) out.reasoning = { effort: "high" };

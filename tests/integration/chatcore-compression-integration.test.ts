@@ -985,6 +985,7 @@ test("chatCore integration: modular compression records analytics row best-effor
 
     assert.equal(summary.totalRequests, 1);
     assert.ok(summary.totalTokensSaved > 0, "Analytics should record token savings");
+    // Lite executes as a safe stacked pipeline, but analytics reports the configured mode.
     assert.equal(summary.byMode.lite.count, 1);
     assert.equal(summary.byProvider.openai.count, 1);
     assert.equal(summary.realUsage.requestsWithReceipts, 1);
