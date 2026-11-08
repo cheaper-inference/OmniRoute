@@ -629,57 +629,49 @@ function applyEntry(state: TranscriptState, item: Entry): void {
   }
 }
 
-export function applyTranscriptFrame(state: TranscriptState, frame: unknown): TranscriptState {
-  if (!frame || typeof frame !== "object") return state;
-  const record = frame as {
-    replay?: unknown;
-    heartbeat?: unknown;
-    cursorTooOld?: { generation?: unknown };
-    rows?: { entries?: unknown; deletes?: unknown; generation?: unknown };
-    cleared?: { newGeneration?: unknown };
-    turnFailed?: { summary?: unknown; code?: unknown };
-  };
-  const clearedGeneration = resyncGeneration(record.cleared?.newGeneration);
-  const cursorGeneration = resyncGeneration(record.cursorTooOld?.generation);
-  const rowsGeneration = resyncGeneration(record.rows?.generation);
-  const generation = clearedGeneration ?? cursorGeneration ?? rowsGeneration;
-  const resetPresent = record.cursorTooOld !== undefined || record.cleared !== undefined;
-  const resetUnusable =
-    resetPresent &&
-    ((record.cleared !== undefined && clearedGeneration === undefined) ||
-      (record.cursorTooOld !== undefined && cursorGeneration === undefined));
-  if (resetPresent && resetUnusable) return { ...state, stop: true };
-  if (resetPresent) {
-    return {
-      cursor: "0",
-      visible: [],
-      cards: [],
-      permissions: [],
-      sealed: state.sealed,
-      generation,
-      reset: true,
-      tooOld: record.cursorTooOld !== undefined,
-    };
-  }
-  let turnFailure = state.turnFailure;
-  if (record.turnFailed && typeof record.turnFailed === "object") {
-    const summary = typeof record.turnFailed.summary === "string" ? record.turnFailed.summary : "";
-    const code =
-      typeof record.turnFailed.code === "string" || typeof record.turnFailed.code === "number"
-        ? String(record.turnFailed.code)
-        : "";
-    turnFailure = summary || code || "turn_failed";
-  }
-  const entries = Array.isArray(record.rows?.entries) ? record.rows.entries : [];
-  const deletions = Array.isArray(record.rows?.deletes) ? record.rows.deletes : [];
-  const next: TranscriptState = {
-    cursor: state.cursor,
-    visible: [...state.visible],
-    cards: [...(state.cards ?? [])],
-    permissions: [...state.permissions],
-    sealed: state.sealed || record.heartbeat === true,
-    tooOld: record.cursorTooOld !== undefined,
-  };
+type FrameRecord = {
+  replay?: unknown;
+  heartbeat?: unknown;
+  cursorTooOld?: { generation?: unknown };
+  rows?: { entries?: unknown; deletes?: unknown; generation?: unknown };
+  cleared?: { newGeneration?: unknown };
+  turnFailed?: { summary?: unknown; code?: unknown };
+};
+
+type ResetOutcome =
+  | { kind: "none"; generation: number | undefined }
+  | { kind: "unusable" }
+  | { kind: "reset"; generation: number | undefined; tooOld: boolean };
+
+/**
+ * A frame either replaces the conversation, refuses to because it cannot name the new
+ * generation, or carries none of that. Naming the generations here keeps the branch
+ * count in one place instead of spreading it through the frame handler.
+ */
+function resetOutcome(record: FrameRecord): ResetOutcome {
+  const cleared = resyncGeneration(record.cleared?.newGeneration);
+  const cursor = resyncGeneration(record.cursorTooOld?.generation);
+  const rows = resyncGeneration(record.rows?.generation);
+  const generation = cleared ?? cursor ?? rows;
+  const present = record.cursorTooOld !== undefined || record.cleared !== undefined;
+  if (!present) return { kind: "none", generation };
+  const unusable =
+    (record.cleared !== undefined && cleared === undefined) ||
+    (record.cursorTooOld !== undefined && cursor === undefined);
+  if (unusable) return { kind: "unusable" };
+  return { kind: "reset", generation, tooOld: record.cursorTooOld !== undefined };
+}
+
+function turnFailureOf(record: FrameRecord, previous: string | undefined): string | undefined {
+  if (!record.turnFailed || typeof record.turnFailed !== "object") return previous;
+  const summary = typeof record.turnFailed.summary === "string" ? record.turnFailed.summary : "";
+  const rawCode = record.turnFailed.code;
+  const code = typeof rawCode === "string" || typeof rawCode === "number" ? String(rawCode) : "";
+  return summary || code || "turn_failed";
+}
+
+/** Removals name what left the conversation, and each one also moves the cursor. */
+function applyDeletions(next: TranscriptState, deletions: readonly unknown[]) {
   const deleted: Array<{ entryId: string; seq: string }> = [];
   for (const rawDeletion of deletions) {
     if (!rawDeletion || typeof rawDeletion !== "object") continue;
@@ -691,18 +683,63 @@ export function applyTranscriptFrame(state: TranscriptState, frame: unknown): Tr
     if (typeof item.updatedSeq === "string") next.cursor = bigger(next.cursor, item.updatedSeq);
     deleted.push(deletion);
     next.visible = next.visible.filter((held) => !transcriptDeletionMatches([deletion], held));
-    next.cards = next.cards.filter((held) => !transcriptDeletionMatches([deletion], held));
+    next.cards = (next.cards ?? []).filter(
+      (held) => !transcriptDeletionMatches([deletion], held)
+    );
     next.permissions = next.permissions.filter(
       (held) => !transcriptDeletionMatches([deletion], held)
     );
   }
+  return deleted;
+}
+
+function applyEntries(next: TranscriptState, entries: readonly unknown[]) {
   for (const entry of entries) {
     if (!entry || typeof entry !== "object") continue;
     const item = entry as Entry;
+    // A row without a sequence cannot be ordered, so it is left for a later frame.
     if (typeof item.updatedSeq !== "string") continue;
     applyEntry(next, item);
   }
-  return { ...next, generation: generation ?? state.generation, deleted, turnFailure };
+}
+
+export function applyTranscriptFrame(state: TranscriptState, frame: unknown): TranscriptState {
+  if (!frame || typeof frame !== "object") return state;
+  const record = frame as FrameRecord;
+  const reset = resetOutcome(record);
+  if (reset.kind === "unusable") return { ...state, stop: true };
+  if (reset.kind === "reset") {
+    return {
+      cursor: "0",
+      visible: [],
+      cards: [],
+      permissions: [],
+      sealed: state.sealed,
+      generation: reset.generation,
+      reset: true,
+      tooOld: reset.tooOld,
+    };
+  }
+  const entries = Array.isArray(record.rows?.entries) ? record.rows.entries : [];
+  const deletions = Array.isArray(record.rows?.deletes) ? record.rows.deletes : [];
+  const next: TranscriptState = {
+    cursor: state.cursor,
+    visible: [...state.visible],
+    cards: [...(state.cards ?? [])],
+    permissions: [...state.permissions],
+    sealed: state.sealed || record.heartbeat === true,
+    // Reaching here means the frame carried no reset, which is the only path that
+    // raises the history-unavailable notice.
+    tooOld: false,
+  };
+  const deleted = applyDeletions(next, deletions);
+  applyEntries(next, entries);
+  return {
+    ...next,
+    generation: reset.generation ?? state.generation,
+    deleted,
+    turnFailure: turnFailureOf(record, state.turnFailure),
+  };
 }
 
 /**
@@ -713,6 +750,31 @@ export function applyTranscriptFrame(state: TranscriptState, frame: unknown): Tr
 export type TranscriptTerminalCode =
   "auth" | "permission" | "quota" | "protocol" | "unknown" | "timeout" | "unavailable";
 
+/** Each classification is a status group plus the words the service uses for it. */
+const TERMINAL_RULES: ReadonlyArray<{
+  code: TranscriptTerminalCode;
+  statuses: readonly number[];
+  words: readonly string[];
+}> = [
+  { code: "auth", statuses: [401], words: ["unauthenticated", "http_401"] },
+  { code: "permission", statuses: [403], words: ["permission_denied", "http_403"] },
+  { code: "quota", statuses: [429], words: ["resource_exhausted", "rate limit"] },
+  {
+    code: "protocol",
+    statuses: [400],
+    words: ["invalid_argument", "incomplete envelope", "protocol error"],
+  },
+  { code: "timeout", statuses: [408, 504], words: ["timeout", "deadline"] },
+  { code: "unavailable", statuses: [], words: ["unavailable", "terminated"] },
+];
+
+const RETRYABLE: ReadonlySet<TranscriptTerminalCode> = new Set([
+  "quota",
+  "timeout",
+  "unavailable",
+  "unknown",
+]);
+
 export function transcriptTerminal(
   error: unknown,
   streamId: string
@@ -720,29 +782,12 @@ export function transcriptTerminal(
   const status = (error as { status?: unknown } | null)?.status;
   const http = typeof status === "number" ? status : 0;
   const text = (error instanceof Error ? error.message : String(error)).toLowerCase();
-  let code: TranscriptTerminalCode = "unknown";
-  if (http === 401 || text.includes("unauthenticated") || text.includes("http_401")) code = "auth";
-  else if (http === 403 || text.includes("permission_denied") || text.includes("http_403"))
-    code = "permission";
-  else if (http === 429 || text.includes("resource_exhausted") || text.includes("rate limit"))
-    code = "quota";
-  else if (
-    http === 400 ||
-    text.includes("invalid_argument") ||
-    text.includes("incomplete envelope") ||
-    text.includes("protocol error")
-  )
-    code = "protocol";
-  else if (http === 408 || http === 504 || text.includes("timeout") || text.includes("deadline"))
-    code = "timeout";
-  else if (http >= 500 || text.includes("unavailable") || text.includes("terminated"))
-    code = "unavailable";
-  return {
-    code,
-    retryable:
-      code === "quota" || code === "timeout" || code === "unavailable" || code === "unknown",
-    streamId,
-  };
+  const match = TERMINAL_RULES.find(
+    (rule) => rule.statuses.includes(http) || rule.words.some((word) => text.includes(word))
+  );
+  // A 5xx that matched no rule above is still the service being unavailable.
+  const code = match?.code ?? (http >= 500 ? "unavailable" : "unknown");
+  return { code, retryable: RETRYABLE.has(code), streamId };
 }
 
 export function transcriptConnectedFrame(streamId: string): string {

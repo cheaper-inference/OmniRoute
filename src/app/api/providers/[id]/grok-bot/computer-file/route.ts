@@ -37,6 +37,25 @@ export function computerFilePathAllowed(path: string, roots: string[]): boolean 
   });
 }
 
+async function computersFor(accessToken: string) {
+  return grokBotComputers(
+    await grokBotRead({
+      accessToken,
+      method: "ListGrokBotUserComputers",
+      payload: {},
+    })
+  );
+}
+
+/** Everything the client could not read comes back as one of two answers. */
+function fileFailure(error: unknown): NextResponse {
+  const message = error instanceof Error ? error.message : "";
+  if (message === "computer file too large") {
+    return NextResponse.json({ error: "file_too_large" }, { status: 413 });
+  }
+  return NextResponse.json({ error: "file_unavailable" }, { status: 502 });
+}
+
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
@@ -55,14 +74,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
   const access = await grokBotAgentAccess(connection, agentId);
   if ("error" in access) return grokBotAccessError(access);
-  const computers = grokBotComputers(
-    await grokBotRead({
-      accessToken: access.accessToken,
-      method: "ListGrokBotUserComputers",
-      payload: {},
-    })
+  const computer = (await computersFor(access.accessToken)).find(
+    (item) => item.machineId === machineId
   );
-  const computer = computers.find((item) => item.machineId === machineId);
   const roots = [computer?.localRoot ?? "", computer?.terminalsFolder ?? ""].filter(Boolean);
   if (!computer || !computerFilePathAllowed(path, roots)) {
     return NextResponse.json({ error: "path_not_allowed" }, { status: 403 });
@@ -78,10 +92,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       headers: { "content-type": "application/octet-stream" },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "";
-    if (message === "computer file too large") {
-      return NextResponse.json({ error: "file_too_large" }, { status: 413 });
-    }
-    return NextResponse.json({ error: "file_unavailable" }, { status: 502 });
+    return fileFailure(error);
   }
 }
