@@ -444,11 +444,11 @@ Ciallaíonn sé seo go **leathnaíonn soláthraí nua le `auto/*` cumasaithe go 
 
 Níl **aon chríochphointe tiomnaithe `POST /api/combos/auto` ann** — úsáidtear Auto-Combo ar dhá bhealach:
 
-1. **Gan chumraíocht (molta):** Seol aon iarratas comhlánaithe comhrá le `model: "auto"` nó `model: "auto/<variant>"`. Tógann an mhonarcha fhíorúil an teaglaim do gach iarratas — níl aon bhuanseasmhacht ná glaonna API de dhíth.
+1. **Gan chumraíocht (molta):** Seol aon iarratas comhlánaithe comhrá le `model: "auto"` nó `model: "auto/<variant>"`. Tógann an mhonarcha fhíorúil an teaglaim do gach iarratas — níl marthanacht ná glaonna API ag teastáil.
 
-2. **Teaglaim bhuanaithe le `strategy: "auto"`:** Cruthaigh gnáth-theaglaim trí `POST /api/combos` agus socraigh `strategy: "auto"` mar aon le `config.auto.weights` / `config.auto.candidatePool`. Úsáidtear an t-inneall scórála céanna; stóráiltear an teaglaim in `combos` agus is féidir í a athúsáid de réir ID.
+2. **Teaglaim mharthanach le `strategy: "auto"`:** Cruthaigh teaglaim rialta trí `POST /api/combos` agus socraigh `strategy: "auto"` mar aon le `config.auto.weights` / `config.auto.candidatePool`. Úsáidtear an t-inneall scórála céanna; stóráiltear an teaglaim in `combos` agus is féidir í a athúsáid de réir a haitheantais.
 
-Le haghaidh fionnachtana, liostaíonn `GET /api/combos/auto` gach malairt lena linn iarrthóirí réitithe mar aon le `context_length` / `max_output_tokens` — an LUACH IS AIRDE thar fhuinneoga na linne iarrthóirí. Ní mór do chliaint (m.sh. an breiseán opencode) na luachanna seo a fhógairt in ionad `0`: díchumasaíonn comhthéacs nialasach uathdhlúthú opencode go hiomlán, rud a ligeann do sheisiúin fás go dtí go scriosann glanadh stair an gheata an comhthéacs. Tá sé sábháilte an LUACH IS AIRDE a fhógairt toisc go seolann réamhscagaire comhthéacs na huath-theaglaime iarratais rómhóra chuig iarrthóirí a bhfuil fuinneoga móra acu.
+Le haghaidh aimsithe, liostaíonn `GET /api/combos/auto` gach malairt lena linn iarrthóirí réitithe mar aon le `context_length` / `max_output_tokens` — an MAX thar fhuinneoga na linne iarrthóirí. Ní mór do chliaint (m.sh. an breiseán opencode) na luachanna seo a fhógairt in ionad `0`: díchumasaíonn comhthéacs nialasach uathdhlúthú opencode go hiomlán, rud a ligeann do sheisiúin fás go dtí go scriosann glanadh staire an gheata an comhthéacs. Tá sé sábháilte MAX a fhógairt toisc go seolann réamhscagaire comhthéacs na huath-theaglaime iarratais rómhóra chuig iarrthóirí a bhfuil fuinneoga móra acu.
 
 ```bash
 # Úsáid gan chumraíocht (gan teaglaim a chruthú)
@@ -457,39 +457,39 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Uath-theaglaim bhuanaithe tríd an ngnáthchríochphointe teaglamaí
+# Uath-theaglaim mharthanach trí chríochphointe rialta na dteaglam
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Straitéisí uath-ródaire
+### Straitéisí an uath-ródaire
 
-Is féidir le teaglamaí buanaithe `strategy: "auto"` `config.routerStrategy` (nó an seanleagan
+Is féidir le teaglamaí marthanacha `strategy: "auto"` `config.routerStrategy` (nó an leagan oidhreachta
 `config.auto.routerStrategy`) a shocrú mar cheann díobh seo:
 
 - `rules` — scóráil ualaithe réamhshocraithe
-- `score` — roghnaíonn sé an scór ualaithe cumraithe is airde. I gcás comhscóir bheachta, caomhnaítear ord cumraithe na
-  n-iarrthóirí; samplálann an `explorationRate` reatha ón linn iomlán rangaithe.
+- `score` — roghnaíonn sé an scór ualaithe cumraithe is airde. I gcás comhscóir bheachta, caomhnaítear ord cumraithe
+  na n-iarrthóirí; samplálann an `explorationRate` reatha ón linn rangaithe iomlán.
 - `cost` / `eco` — an soláthraí sláintiúil is saoire
-- `latency` / `fast` — an aga folaigh p95 is ísle le pionós iontaofachta
-- `sla-aware` / `sla` — tugtar tús áite d'iarrthóirí a chomhlíonann aga folaigh p95, ráta earráide, agus
-  SLOanna costais roghnacha
-- `lkgp` — an soláthraí maith deireanach a bhí ar eolas ar dtús
+- `latency` / `fast` — an aga folaigh p95 is ísle, le pionós iontaofachta
+- `sla-aware` / `sla` — tugtar tús áite d’iarrthóirí a chomhlíonann SLOanna maidir le haga folaigh p95, ráta earráide agus, go roghnach,
+  costas
+- `lkgp` — an soláthraí maith deireanach is eol ar dtús
 - `nadir` — iarr ar API cinnteoireachta [Nadir](https://getnadir.com) cén tsamhail sa linn atá de dhíth ar an
-  leid; rogha isteach, agus i gcás teipe filltear ar `rules` gan bac a chur ar an iarratas
+  leid; rogha an úsáideora, agus má theipeann air, filleann sé go hoscailte ar `rules`
 
-### Straitéisí ródaire go mion
+### Straitéisí an ródaire go mion
 
-Nochtann inneall na huath-theaglaime 7 gcur i bhfeidhm inmhalartaithe de **RouterStrategy** ar féidir
-leat iad a mhalartú trí `config.routerStrategy` (nó an seanleagan `config.auto.routerStrategy`).
+Nochtann inneall na huath-theaglaime 7 gcur chun feidhme inphlugáilte de **RouterStrategy** ar féidir
+leat iad a mhalartú trí `config.routerStrategy` (nó an leagan oidhreachta `config.auto.routerStrategy`).
 Roghnaíonn gach straitéis soláthraí amháin ón linn iarrthóirí, bunaithe ar `RoutingContext`
-(cineál taisc, leideanna uirlise/físe, meastachán comharthaí, polasaí SLA roghnach, soláthraí
-maith deireanach roghnach).
+(cineál taisc, leideanna uirlise/físe, meastachán comharthaí, polasaí roghnach SLA, soláthraí roghnach
+maith deireanach is eol).
 
 #### 1. `rules` (réamhshocrú) — scóráil ualaithe 16 fhachtóir
 
-Cuimsíonn sé seo an t-inneall scórála reatha. Scagann sé amach iarrthóirí scoradáin chiorcaid
+Timfhilleann sé an t-inneall scórála reatha. Scagann sé amach iarrthóirí scoradáin chiorcaid
 `OPEN`, ansin ritheann sé `scorePool()` leis an gcineál taisc reatha agus `getTaskFitness()`,
 agus roghnaíonn sé an soláthraí leis an scór is airde.
 
@@ -511,7 +511,7 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Cathain is ceart é a úsáid**: Réamhshocrú. Úsáid é nuair atá cothromaíocht idir na comharthaí uile uait.
+**Cathain is ceart é a úsáid**: Mar réamhshocrú. Úsáid é nuair atá comhréiteach cothrom uait idir na comharthaí uile.
 
 **Ailias**: `rules` (gan ailias)
 
@@ -519,8 +519,8 @@ class RulesStrategyImpl implements RouterStrategy {
 
 #### 2. `cost` / `eco` — an soláthraí sláintiúil is saoire
 
-Sórtálann sé linn na n-iarrthóirí de réir `costPer1MTokens` (in ord ardaitheach) agus roghnaíonn sé an ceann is saoire.
-Scagann sé amach iarrthóirí `OPEN` ar dtús.
+Sórtálann sé an linn iarrthóirí de réir `costPer1MTokens` (in ord ardaitheach) agus roghnaíonn sé an ceann is saoire.
+Scagann sé iarrthóirí `OPEN` amach ar dtús.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -535,13 +535,13 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Cathain is ceart é a úsáid**: Ualaí oibre atá íogair ó thaobh costais de, próiseáil bhaisce, nó tascanna cúlra.
+**Cathain is ceart é a úsáid**: Ualaí oibre atá íogair ó thaobh costais de, baiscphróiseáil, nó jabanna cúlra.
 
 **Ailiasanna**: `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — an aga folaigh p95 is ísle le pionós iontaofachta
+#### 3. `latency` / `fast` — an aga folaigh p95 is ísle, le pionós iontaofachta
 
 Sórtálann sé de réir `p95LatencyMs + (errorRate * 1000)`. Cinntíonn an pionós ráta earráide
 go rangaítear soláthraithe neamhiontaofa níos ísle fiú má tá a n-aga folaigh ainmniúil íseal.
@@ -561,28 +561,28 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Cathain is ceart é a úsáid**: Ualaí oibre atá íogair d'aga folaigh, amhail comhrá fíor-ama, uathchríochnú, nó
+**Cathain is ceart é a úsáid**: Ualaí oibre atá íogair ó thaobh aga folaigh de, amhail comhrá fíor-ama, uathchríochnú, nó
 cúntóirí idirghníomhacha códaithe.
 
 **Ailiasanna**: `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — comhlíonadh SLO maidir le haga folaigh/earráidí/costas
+#### 4. `sla-aware` / `sla` — comhlíonadh SLO maidir le haga folaigh/earráid/costas
 
 Scórálann sé gach iarrthóir de réir cé chomh maith agus a chomhlíonann sé an polasaí SLO cumraithe:
 
-| Fachtóir          | Ualú | Foirmle                                                  |
-| ----------------- | ---- | -------------------------------------------------------- |
-| Scór aga folaigh  | 35%  | `threshold / max(value, ε)`                              |
-| Scór earráide     | 35%  | `threshold / max(value, ε)`                              |
-| Scór sláinte      | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)        |
-| Scór costais      | 10%  | `threshold / max(value, ε)` nó normalú inbhéartach       |
-| Scór cobhsaíochta | 5%   | diall caighdeánach normalaithe inbhéartach d'aga folaigh |
+| Fachtóir          | Meáchan | Foirmle                                                    |
+| ----------------- | ------- | ---------------------------------------------------------- |
+| Scór aga folaigh  | 35%     | `threshold / max(value, ε)`                                |
+| Scór earráide     | 35%     | `threshold / max(value, ε)`                                |
+| Scór sláinte      | 15%     | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)          |
+| Scór costais      | 10%     | `threshold / max(value, ε)` nó normalú inbhéartach         |
+| Scór cobhsaíochta | 5%      | diall caighdeánach normalaithe inbhéartach don aga folaigh |
 
 Nuair atá `hardConstraints: true`, déantar na hiarrthóirí a shórtáil go príomha de réir **scór sáraithe**
-(a fhad a sháraíonn siad aon SLO), agus ansin de réir an scóir chomhchodaigh. Seachas sin, ní úsáidtear ach
-an scór comhchodach.
+(a fhad a sháraíonn siad aon SLO), agus ansin de réir scór ilchodach. Seachas sin, ní úsáidtear ach
+an scór ilchodach.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -591,7 +591,7 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... tugtar scór do gach iarrthóir i gcoinne an bheartais: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scóráiltear gach iarrthóir in aghaidh an bheartais: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
@@ -617,10 +617,10 @@ class SLAStrategyImpl implements RouterStrategy {
 
 ---
 
-#### 5. `lkgp` — an soláthraí maith is deireanaí ar eolas ar dtús
+#### 5. `lkgp` — an soláthraí maith deireanach is eol ar dtús
 
-Baintear triail as an **soláthraí maith is deireanaí ar eolas** (má tá sé socraithe) ar dtús, agus ansin úsáidtear
-an straitéis `rules` mar chúltaca. Tá sé seo úsáideach do ghreamaitheacht seisiúin — láimhseálann an soláthraí céanna
+Baineann sé triail as an **soláthraí maith deireanach is eol** (má tá sé socraithe) ar dtús, agus ansin téann sé siar chuig
+an straitéis `rules`. Tá sé úsáideach le haghaidh greamaitheacht seisiúin — láimhseálann an soláthraí céanna
 iarratais leantacha i gcomhrá.
 
 ```ts
@@ -642,14 +642,14 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Úsáid an straitéis rules mar chúltaca
+    // Téigh siar chuig straitéis rules
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
 **Cathain is ceart é a úsáid**: Comhráite ilsealacha inar mian leat go láimhseálfadh an soláthraí céanna
-iarratais leantacha (m.sh., ar mhaithe le taisceadh, leanúnachas comhthéacs nó comhsheasmhacht praghsála).
+iarratais leantacha (m.sh., le haghaidh taisceadh, leanúnachas comhthéacs nó comhsheasmhacht praghsála).
 
 **Ailias**: `lkgp` (gan ailias)
 
@@ -658,10 +658,10 @@ iarratais leantacha (m.sh., ar mhaithe le taisceadh, leanúnachas comhthéacs n�
 #### 6. `nadir` — roghnú samhla atá feasach ar an leid trí Nadir
 
 Rangaíonn gach straitéis thuas na hiarrthóirí de réir a teiliméadrachta féin; ní léann aon cheann acu
-an t-iarratas. Seolann `nadir` an seal úsáideora is deireanaí, chomh maith le haitheantais samhlacha na linne, chuig
-API cinnteoireachta [Nadir](https://getnadir.com) (`POST /v1/bucket`) agus seolann sé an t-iarratas chuig an tsamhail
-a roghnaíonn Nadir ón roghchlár sin (`simple` → an tsamhail inniúil is saoire, `complex` → an
-tsamhail cheannródaíoch). Roghnaítear an nasc a fhreastalaíonn ar an tsamhail sin fós le `rules`, ionas go leanann cuóta,
+an t-iarratas. Seolann `nadir` an seal úsáideora deireanach mar aon le IDanna samhlacha na linne chuig
+API cinnteoireachta [Nadir](https://getnadir.com) (`POST /v1/bucket`) agus ródaíonn sé chuig an tsamhail
+a roghnaíonn Nadir ón roghchlár sin (`simple` → an tsamhail inniúil is saoire, `complex` → an tsamhail
+cheannródaíoch). Roghnaíonn `rules` fós an nasc a fhreastalaíonn ar an tsamhail sin, ionas go leanann cuóta,
 sláinte agus costas de bheith ag cinneadh cén cuntas a úsáidfear.
 
 ```json
@@ -678,23 +678,26 @@ sláinte agus costas de bheith ag cinneadh cén cuntas a úsáidfear.
 }
 ```
 
-Is cúltacaí timpeallachta iad `OMNIROUTE_NADIR_API_KEY` agus `OMNIROUTE_NADIR_BASE_URL` don dá
+Is luachanna cúltaca timpeallachta iad `OMNIROUTE_NADIR_API_KEY` agus `OMNIROUTE_NADIR_BASE_URL` don dá
 theaghrán. Ní theastaíonn `baseUrl` ach amháin le haghaidh Nadir féinóstáilte (glactar le `/v1` ag an deireadh).
-Cuirtear glaonna gan eochair ar shraith anaithnid Nadir, atá teoranta de réir ráta in aghaidh an IP.
+Téann glaonna gan eochair chuig sraith anaithnid Nadir, a bhfuil teorainn ráta uirthi de réir IP. Le heochair
+([cruthaigh ceann](https://app.getnadir.com/dashboard/api-keys)), logáiltear gach cinneadh
+ar do dheais Nadir. Socrú agus fíorú iomlán:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-An méid a fhágann an córas: téacs na teachtaireachta úsáideora is deireanaí (an chéad 16k carachtar), aitheantais
-na samhlacha iarrthacha agus clib chainéil `source: "omniroute"`. Ní sheoltar leid chórais, stair, uirlisí ná
+An méid a fhágann an bosca: téacs na teachtaireachta úsáideora deireanaí (an chéad 16k carachtar), IDanna
+na samhlacha iarrthacha agus clib chainéil `source: "omniroute"`. Ní sheoltar aon leid chórais, stair, uirlisí ná
 ceanntásca.
 
-Is é an t-iompar i gcás teipe ná fanacht oscailte: réitítear teorainn ama (2000 ms de réir réamhshocraithe), freagra nach 2xx é, óstach
-nach féidir a shroicheadh, freagra míchumtha nó roghnú lasmuigh den linn chuig cinneadh `rules`,
+Bíonn an córas oscailte ar theip: réitíonn teorainn ama (2000 ms de réir réamhshocraithe), freagra nach 2xx é, óstach
+nach féidir a bhaint amach, freagra míchumtha nó roghnú lasmuigh den linn chuig cinneadh `rules`,
 agus cuirtear `NadirStrategy: fallback (…)` roimh an gcúis. Tar éis glao teipthe, seachnaíonn an
 straitéis an líonra ar feadh 30 s, ionas go gcosnaíonn briseadh seirbhíse teorainn ama amháin gach 30 s seachas
 ceann amháin in aghaidh an iarratais. Ní thuairiscíonn teagmhais ródúcháin `strategy: "nadir"` ach amháin nuair a rinne Nadir
 an rogha i ndáiríre.
 
-**Cathain is ceart é a úsáid**: trácht le leibhéil mheasctha deacrachta ar linn a chuimsíonn sraitheanna samhlacha (samhail bheag, ceann mheánach
-agus ceann cheannródaíoch), nuair is mian leat an costas a bhaineann leis an tsamhail cheannródaíoch a úsáid i gcónaí a laghdú.
+**Cathain is ceart é a úsáid**: trácht de dheacracht mheasctha ar linn a chuimsíonn sraitheanna éagsúla samhlacha (samhail bheag, samhail mheánach
+agus samhail cheannródaíoch), nuair is mian leat an costas a bhaineann leis an tsamhail cheannródaíoch a úsáid i gcónaí a laghdú.
 
 **Ailias**: `nadir` (gan ailias)
 
@@ -743,16 +746,16 @@ Ansin bain úsáid aisti:
 
 ---
 
-### Treoir roghnúcháin do straitéis ródaire
+### Treoir roghnúcháin straitéise ródaire
 
-| Cás úsáide              | Straitéis   | Cúis                                             |
-| ----------------------- | ----------- | ------------------------------------------------ |
-| Ualach oibre cothrom    | `rules`     | Réamhshocrú — cuirtear gach fachtóir san áireamh |
-| Costas a íoslaghdú      | `cost`      | Roghnaítear an ceann is saoire i gcónaí          |
-| Aga folaigh a íoslaghdú | `latency`   | Roghnaítear an soláthraí iontaofa is tapúla      |
-| SLOanna dochta          | `sla-aware` | Scagtar de réir tairseacha p95/earráide/costais  |
-| Comhrá ilseal           | `lkgp`      | Greamaitheacht seisiúin                          |
-| Deacracht mheasctha     | `nadir`     | Roghnaítear sraith na samhla de réir na leide    |
+| Cás úsáide                | Straitéis   | Cúis                                            |
+| ------------------------- | ----------- | ----------------------------------------------- |
+| Ualach oibre cothromaithe | `rules`     | Réamhshocrú — cuirtear gach toisc san áireamh   |
+| Costas a íoslaghdú        | `cost`      | Roghnaítear an ceann is saoire i gcónaí         |
+| Aga folaigh a íoslaghdú   | `latency`   | Roghnaítear an soláthraí iontaofa is tapúla     |
+| SLOanna dochta            | `sla-aware` | Scagtar de réir tairseacha p95/earráide/costais |
+| Comhrá ilseal             | `lkgp`      | Seasmhacht seisiúin                             |
+| Deacracht mheasctha       | `nadir`     | Roghnaítear sraith na samhla do gach leid       |
 
 Réimsí atá feasach ar SLA:
 

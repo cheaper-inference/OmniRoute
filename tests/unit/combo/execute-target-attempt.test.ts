@@ -1084,3 +1084,114 @@ test("a body-specific 400 stop is not a fallback", async () => {
   assert.equal(result?.response?.status, 400);
   assert.equal(state.fallbackCount, 0, "stopping the combo is not a fallback");
 });
+
+test("quality-rejected 200 clears the stale LKGP pin", async () => {
+  const { executeTargetAttempt } =
+    await import("../../../open-sse/services/combo/executeTargetAttempt.ts");
+  const target = modelTarget({ connectionId: "c-fail" });
+  const calls: unknown[][] = [];
+  const deps = baseDeps({
+    maxRetries: 0,
+    clientRequestedStream: false,
+    combo: { id: "combo-quality", name: "t", models: [] },
+    clearStaleLKGP(...args) {
+      calls.push(["clearStaleLKGP", ...args]);
+    },
+    handleSingleModelWithTimeout: async () => emptyContent200("c-fail"),
+    sticky: { targets: [], messageHash: "h", stuck: true },
+  });
+  const state = emptyState({
+    orderedTargets: [target],
+    abortControllers: new Map([[0, new AbortController()]]),
+  });
+  const result = await executeTargetAttempt({
+    index: 0,
+    state,
+    deps,
+    targetForAttempt: target,
+    profile: {},
+    protectedPriorityTarget: false,
+  });
+  assert.equal(result, null);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][1], "t");
+  assert.equal(calls[0][2], target.executionKey);
+  assert.equal(calls[0][3], "combo-quality");
+  assert.equal(calls[0][5], "COMBO");
+  assert.equal(calls[0][6], undefined);
+  assert.equal(calls[0][7], target);
+});
+
+test("quality-accepted 200 keeps the LKGP pin", async () => {
+  const { executeTargetAttempt } =
+    await import("../../../open-sse/services/combo/executeTargetAttempt.ts");
+  const target = modelTarget({ connectionId: "c-live" });
+  const calls: unknown[][] = [];
+  const deps = baseDeps({
+    maxRetries: 0,
+    clientRequestedStream: false,
+    combo: { id: "combo-quality", name: "t", models: [] },
+    clearStaleLKGP(...args) {
+      calls.push(["clearStaleLKGP", ...args]);
+    },
+    handleSingleModelWithTimeout: async () =>
+      new Response(JSON.stringify({ choices: [{ message: { content: "ok" } }] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+  });
+  const state = emptyState({
+    orderedTargets: [target],
+    abortControllers: new Map([[0, new AbortController()]]),
+  });
+  const result = await executeTargetAttempt({
+    index: 0,
+    state,
+    deps,
+    targetForAttempt: target,
+    profile: {},
+    protectedPriorityTarget: false,
+  });
+  assert.equal(result?.ok, true);
+  assert.equal(calls.length, 0);
+});
+
+test("classic failure still clears the stale LKGP pin", async () => {
+  const { executeTargetAttempt } =
+    await import("../../../open-sse/services/combo/executeTargetAttempt.ts");
+  const target = modelTarget({ connectionId: "c-fail" });
+  const calls: unknown[][] = [];
+  const deps = baseDeps({
+    maxRetries: 0,
+    combo: { id: "combo-quality", name: "t", models: [] },
+    clearStaleLKGP(...args) {
+      calls.push(["clearStaleLKGP", ...args]);
+    },
+    handleSingleModelWithTimeout: async () => new Response("upstream exploded", { status: 500 }),
+  });
+  const state = emptyState({
+    orderedTargets: [target],
+    abortControllers: new Map([[0, new AbortController()]]),
+  });
+  const result = await executeTargetAttempt({
+    index: 0,
+    state,
+    deps,
+    targetForAttempt: target,
+    profile: {},
+    protectedPriorityTarget: false,
+  });
+  assert.equal(result, null);
+  assert.ok(calls.length >= 1);
+  assert.ok(
+    calls.some(
+      (call) =>
+        call[1] === "t" &&
+        call[2] === target.executionKey &&
+        call[3] === "combo-quality" &&
+        call[5] === "COMBO" &&
+        call[6] === undefined &&
+        call[7] === target
+    )
+  );
+});

@@ -72,11 +72,15 @@ test("stripUnsupportedParams: github strips temperature for GPT-5.4+ and GPT-6.x
     "gpt-6-astra",
     "gpt-6.0",
     "gpt-6.1-sol",
+    "gpt-6.1-terra",
     "GPT-6.10",
   ]) {
     const body: Record<string, unknown> = { temperature: 0.7, top_p: 1 };
     stripUnsupportedParams("github", model, body);
-    assert.deepEqual(body, { top_p: 1 }, `${model}: temperature must be stripped`);
+    assert.deepEqual(body, { top_p: 1 }, `${model}: temperature must be stripped for github`);
+    const gheBody: Record<string, unknown> = { temperature: 0.7, top_p: 1 };
+    stripUnsupportedParams("ghe-copilot", model, gheBody);
+    assert.deepEqual(gheBody, { top_p: 1 }, `${model}: temperature must be stripped for ghe-copilot`);
   }
 });
 
@@ -242,14 +246,15 @@ test("STRIP_RULES is non-empty and every rule has a drop list, a clamp mechanism
   assert.ok(__STRIP_RULES_FOR_TEST.length > 0);
   for (const rule of __STRIP_RULES_FOR_TEST) {
     const hasDrop = Array.isArray(rule.drop) && rule.drop.length > 0;
+    const hasDropIfNull = Array.isArray(rule.dropIfNull) && rule.dropIfNull.length > 0;
     const hasClamp = rule.clampToModelMaxOutput === true || Number.isFinite(rule.maxOutputCap);
     const hasThinkingMap =
       typeof rule.mapThinkingType === "object" &&
       rule.mapThinkingType !== null &&
       Object.keys(rule.mapThinkingType).length > 0;
     assert.ok(
-      hasDrop || hasClamp || hasThinkingMap,
-      "rule must either drop params, clamp max output, or map a thinking type"
+      hasDrop || hasDropIfNull || hasClamp || hasThinkingMap,
+      "rule must either drop params (always or only when null), clamp max output, or map a thinking type"
     );
     assert.ok(typeof rule.match === "function" || rule.match instanceof RegExp);
   }

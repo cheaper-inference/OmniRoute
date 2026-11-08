@@ -1,4 +1,12 @@
 import { createSseTextTransform, type FieldCategory } from "./sseTextTransform";
+import {
+  bufferField,
+  flushOpenAiTextBuffers,
+  type BufferedField,
+  type TextBuffers,
+} from "./sseTextBuffers";
+import { CredentialOverflow } from "./credentialOverflow";
+import { credentialSafeCut } from "./credentialStreamBoundary";
 import { redactCredentials } from "./guardrails/credentialMasker";
 
 export interface CredentialTransformOptions {
@@ -16,6 +24,12 @@ const DEFAULT_WINDOW_SIZE = 512;
 const DEFAULT_MAX_BUFFERED_CHOICES = 32;
 const DEFAULT_MAX_BUFFERED_BYTES = 65536;
 const MAX_PARTIAL_PROBE = 256;
+
+// Mirror of src/lib/guardrails/registry.ts: HeadersLike (kept local: the
+// symbol is not exported from that module). Used to type `args.headers` so it
+// is assignable both to the fake resolver signature (headers: unknown) and to
+// the production resolver imported from ./guardrails (headers: HeadersLike).
+type HeadersLike = Headers | Record<string, unknown> | null | undefined;
 
 function resolveWindowSize(options?: CredentialTransformOptions): number {
   if (options?.windowSize !== undefined) return Math.max(1, options.windowSize);
@@ -58,7 +72,7 @@ export async function resolveCredentialGate(args: {
   }) => string[];
   apiKeyInfo?: unknown;
   body?: unknown;
-  headers?: unknown;
+  headers?: HeadersLike;
 }): Promise<CredentialGate> {
   let enabled = false;
   try {
@@ -72,10 +86,22 @@ export async function resolveCredentialGate(args: {
   }
   let disabled: string[] = [];
   try {
-    const resolver =
-      args.resolveDisabledGuardrails ?? (await import("./guardrails")).resolveDisabledGuardrails;
-    disabled =
-      resolver({ apiKeyInfo: args.apiKeyInfo, body: args.body, headers: args.headers }) ?? [];
+    if (args.resolveDisabledGuardrails) {
+      disabled =
+        args.resolveDisabledGuardrails({
+          apiKeyInfo: args.apiKeyInfo,
+          body: args.body,
+          headers: args.headers,
+        }) ?? [];
+    } else {
+      const { resolveDisabledGuardrails } = await import("./guardrails");
+      disabled =
+        resolveDisabledGuardrails({
+          apiKeyInfo: args.apiKeyInfo as Record<string, unknown> | null | undefined,
+          body: args.body,
+          headers: args.headers as Headers | Record<string, unknown> | null | undefined,
+        }) ?? [];
+    }
   } catch {
     disabled = [];
   }
@@ -221,36 +247,28 @@ function redactOutsideDataUrls(text: string): string {
 }
 
 type ChoiceBufferStore = {
-  buffers: Map<string, Record<FieldCategory, string>>;
-  get: (index: string | number) => Record<FieldCategory, string>;
-  takeAll: () => Array<[string, Record<FieldCategory, string>]>;
+  buffers: Map<string, TextBuffers>;
+  get: (index: string | number) => TextBuffers;
+  takeAll: () => Array<[string, TextBuffers]>;
   clearAll: () => void;
 };
 
-function createChoiceBufferStore(
-  maxBufferedChoices: number,
-  onEvict: (evicted: Record<FieldCategory, string>, into: Record<FieldCategory, string>) => void
-): ChoiceBufferStore {
-  const buffers = new Map<string, Record<FieldCategory, string>>();
-  const get = (index: string | number): Record<FieldCategory, string> => {
+function createChoiceBufferStore(maxBufferedChoices: number): ChoiceBufferStore {
+  const buffers = new Map<string, TextBuffers>();
+  const get = (index: string | number): TextBuffers => {
     const key = String(index);
     const existing = buffers.get(key);
     if (existing) return existing;
-    const buf: Record<FieldCategory, string> = {
+    if (buffers.size >= maxBufferedChoices)
+      throw new Error("[PII] Credential stream choice limit exceeded");
+    const buf: TextBuffers = {
       content: "",
       reasoning: "",
+      reasoning_content: "",
       toolArgs: "",
       partialJson: "",
     };
     buffers.set(key, buf);
-    if (buffers.size > maxBufferedChoices) {
-      const oldest = buffers.keys().next().value as string | undefined;
-      if (oldest !== undefined && oldest !== key) {
-        const victim = buffers.get(oldest);
-        if (victim) onEvict(victim, buf);
-        buffers.delete(oldest);
-      }
-    }
     return buf;
   };
   return {
@@ -261,6 +279,7 @@ function createChoiceBufferStore(
       for (const buf of buffers.values()) {
         buf.content = "";
         buf.reasoning = "";
+        buf.reasoning_content = "";
         buf.toolArgs = "";
         buf.partialJson = "";
       }
@@ -270,150 +289,64 @@ function createChoiceBufferStore(
 
 function hasRemainingBuffers(store: ChoiceBufferStore): boolean {
   for (const [, buffers] of store.takeAll()) {
-    for (const key of Object.keys(buffers) as FieldCategory[]) {
+    for (const key of Object.keys(buffers) as BufferedField[]) {
       if (buffers[key].length > 0) return true;
     }
   }
   return false;
 }
 
-function flushClaudeFormat(
-  store: ChoiceBufferStore,
-  lastJson: Record<string, unknown>
-): Record<string, unknown> | null {
-  const buffers = store.get("0_0");
-  const delta: Record<string, unknown> = { type: "text_delta" };
-  let hasDelta = false;
+// Held-back tails of one Claude content block, each as the delta type the block actually
+// streams (text_delta / thinking_delta / input_json_delta). A single `text_delta` carrying
+// `thinking` or `partial_json` fields is ignored by Anthropic SDK accumulators, so the end
+// of a thinking summary or of a tool input was silently lost.
+function claudeBlockDeltas(index: number, buffers: TextBuffers): Array<Record<string, unknown>> {
+  const frames: Array<Record<string, unknown>> = [];
   if (buffers.content) {
-    delta.text = buffers.content;
+    frames.push({
+      type: "content_block_delta",
+      index,
+      delta: { type: "text_delta", text: buffers.content },
+    });
     buffers.content = "";
-    hasDelta = true;
   }
-  if (buffers.reasoning) {
-    delta.thinking = buffers.reasoning;
+  const thinking = buffers.reasoning + buffers.reasoning_content;
+  if (thinking) {
+    frames.push({
+      type: "content_block_delta",
+      index,
+      delta: { type: "thinking_delta", thinking },
+    });
     buffers.reasoning = "";
-    hasDelta = true;
+    buffers.reasoning_content = "";
   }
-  if (buffers.toolArgs) {
-    delta.tool_args = buffers.toolArgs;
-    buffers.toolArgs = "";
-    hasDelta = true;
-  }
-  if (buffers.partialJson) {
-    delta.partial_json = buffers.partialJson;
+  const partialJson = buffers.partialJson + buffers.toolArgs;
+  if (partialJson) {
+    frames.push({
+      type: "content_block_delta",
+      index,
+      delta: { type: "input_json_delta", partial_json: partialJson },
+    });
     buffers.partialJson = "";
-    hasDelta = true;
+    buffers.toolArgs = "";
   }
-  if (!hasDelta) return null;
-  return {
-    type: "content_block_delta",
-    index: typeof lastJson.index === "number" ? lastJson.index : 0,
-    delta,
-  };
+  return frames;
 }
 
-type OpenAiChoice = { index?: unknown; delta?: Record<string, unknown> };
-
-function missingChoiceIndexes(
-  store: ChoiceBufferStore,
-  present: Set<number>
-): Array<{ choiceIdx: number; choiceBuf: Record<FieldCategory, string> }> {
-  const missing: Array<{ choiceIdx: number; choiceBuf: Record<FieldCategory, string> }> = [];
-  for (const [compositeKey, choiceBuf] of store.takeAll()) {
-    const choiceIdx = parseInt(compositeKey.split("_")[0] || "0", 10);
-    if (
-      !present.has(choiceIdx) &&
-      (choiceBuf.content || choiceBuf.reasoning || choiceBuf.toolArgs)
-    ) {
-      missing.push({ choiceIdx, choiceBuf });
-    }
-  }
-  return missing;
-}
-
-function drainTextField(
-  delta: Record<string, unknown>,
-  key: string,
-  value: string,
-  clear: () => void
-): void {
-  if (value) {
-    delta[key] = value;
-    clear();
-  } else {
-    delete delta[key];
-  }
-}
-
-function drainToolCalls(
-  delta: Record<string, unknown>,
-  choiceBuf: Record<FieldCategory, string>,
-  toolEntries: Array<[string, Record<FieldCategory, string>]>
-): void {
-  if (!choiceBuf.toolArgs && toolEntries.length === 0) {
-    delete delta.tool_calls;
-    return;
-  }
-  if (!delta.tool_calls) delta.tool_calls = [];
-  const toolCalls = delta.tool_calls as Array<Record<string, unknown>>;
-  if (choiceBuf.toolArgs) {
-    toolCalls.push({ index: 0, function: { arguments: choiceBuf.toolArgs } });
-    choiceBuf.toolArgs = "";
-  }
-  for (const [key, buf] of toolEntries) {
-    if (!buf.toolArgs) continue;
-    const toolIdx = parseInt(key.split("_")[1] || "0", 10);
-    toolCalls.push({ index: toolIdx, function: { arguments: buf.toolArgs } });
-    buf.toolArgs = "";
-  }
-}
-
-function drainOneChoice(store: ChoiceBufferStore, choice: OpenAiChoice): void {
-  const choiceIdx = typeof choice.index === "number" ? choice.index : 0;
-  const toolEntries = store
+// Claude content blocks buffer under `<blockIndex>_0` (#18006) and stream one after
+// another, so at any stop signal (a block's own content_block_stop, message_delta,
+// message_stop or the end of the stream) every block that still holds a tail is drained
+// in block order. For a well-formed stream that is exactly the block being closed; it also
+// covers a block whose content_block_stop never arrived.
+function flushClaudeFormat(store: ChoiceBufferStore, _lastJson: Record<string, unknown>): unknown {
+  const frames: Array<Record<string, unknown>> = [];
+  const entries = store
     .takeAll()
-    .filter(([key]) => key.startsWith(`${choiceIdx}_`) && key !== `${choiceIdx}_0`);
-  const choiceBuf = store.get(`${choiceIdx}_0`);
-  if (!choice.delta) choice.delta = {};
-  const delta = choice.delta as Record<string, unknown>;
-  drainTextField(delta, "content", choiceBuf.content, () => {
-    choiceBuf.content = "";
-  });
-  drainTextField(delta, "reasoning_content", choiceBuf.reasoning, () => {
-    choiceBuf.reasoning = "";
-  });
-  drainToolCalls(delta, choiceBuf, toolEntries);
-  if (choiceBuf.partialJson) {
-    delta.partial_json = choiceBuf.partialJson;
-    choiceBuf.partialJson = "";
-  }
-}
-
-function flushOpenAiChoices(
-  store: ChoiceBufferStore,
-  lastJson: Record<string, unknown>
-): Record<string, unknown> {
-  // `lastJson` was already forwarded to the client. Keep only its envelope
-  // (id/model/created) and per-choice index; the flush event carries the held-back
-  // tails alone. Re-sending its delta duplicated tool_calls headers (id/name/
-  // arguments) and corrupted the client-side accumulated arguments.
-  const finalJson = JSON.parse(JSON.stringify(lastJson)) as {
-    choices: OpenAiChoice[];
-    usage?: unknown;
-  };
-  delete finalJson.usage;
-  finalJson.choices = finalJson.choices.map((c) =>
-    typeof c.index === "number" ? { index: c.index, delta: {} } : { delta: {} }
-  );
-  const presentIndexes = new Set(
-    finalJson.choices.map((c) => c.index).filter((idx): idx is number => typeof idx === "number")
-  );
-  for (const { choiceIdx } of missingChoiceIndexes(store, presentIndexes)) {
-    finalJson.choices.push({ index: choiceIdx, delta: {} });
-    presentIndexes.add(choiceIdx);
-  }
-  for (const choice of finalJson.choices) drainOneChoice(store, choice);
-  return finalJson;
+    .map(([key, buffers]) => [parseInt(key.split("_")[0] || "0", 10), buffers] as const)
+    .sort((a, b) => a[0] - b[0]);
+  for (const [index, buffers] of entries) frames.push(...claudeBlockDeltas(index, buffers));
+  if (!frames.length) return null;
+  return frames.length === 1 ? frames[0] : frames;
 }
 
 function flushResponsesFormat(
@@ -541,11 +474,12 @@ function populateRemainingBuffers(
 }
 
 type DrainState = {
+  overflow: CredentialOverflow;
   windowSize: number;
   maxBufferedBytes: number;
   bufferedBytes: () => number;
-  replace: (buffers: Record<FieldCategory, string>, field: FieldCategory, rest: string) => void;
-  append: (buffers: Record<FieldCategory, string>, field: FieldCategory, ownText: string) => void;
+  replace: (buffers: TextBuffers, field: BufferedField, rest: string) => void;
+  append: (buffers: TextBuffers, field: BufferedField, ownText: string) => void;
 };
 
 function backOffSurrogate(text: string, cut: number): number {
@@ -556,8 +490,6 @@ function backOffSurrogate(text: string, cut: number): number {
   return cut;
 }
 
-const UNCLOSED_BEGIN = /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----[\s\S]*$/;
-const CLOSED_END = /-----END (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----/;
 const BEGIN_HEAD = "-----BEGIN";
 const BEGIN_HEADER_PATTERN = /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----/;
 const END_MARKER_PATTERN = /-----END (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----/;
@@ -583,89 +515,79 @@ function findUnclosedBeginIndex(text: string): number | undefined {
 }
 
 /**
- * Stamp an unclosed key header at flush time, keeping the already-marked
- * tail. Mirrors the cap path (drainOverflowHead): a header that never
- * closes is never emitted in clear.
+ * Redact an unclosed private-key block in full at flush time.
+ * Its body may contain incomplete credentials that cannot be safely emitted,
+ * so the marker replaces both the header and the remaining body.
  */
 function markUnclosedBeginHead(text: string): string {
   const at = findUnclosedBeginIndex(text);
   if (at === undefined) return text;
   const head = BEGIN_HEADER_PATTERN.exec(text.slice(at, at + BEGIN_HEADER_SLICE));
   if (!head) return text;
-  return `${text.slice(0, at)}[REDACTED:private_key]${text.slice(at + head[0].length)}`;
+  return `${text.slice(0, at)}[REDACTED:private_key]`;
 }
 
-function drainOverflowHead(
-  state: DrainState,
-  buffers: Record<FieldCategory, string>,
-  field: FieldCategory,
-  sanitized: string
-): string | null {
-  const unclosedBegin = sanitized.match(UNCLOSED_BEGIN);
-  if (unclosedBegin && !CLOSED_END.test(sanitized)) {
-    state.replace(buffers, field, sanitized.slice(unclosedBegin.index! + unclosedBegin[0].length));
-    return "[REDACTED:private_key]";
+function drainOverflow(state: DrainState, buffers: TextBuffers, field: BufferedField): string {
+  const raw = buffers[field];
+  const desired = Math.max(0, raw.length - Math.min(state.windowSize, state.maxBufferedBytes));
+  const unclosed = findUnclosedBeginIndex(raw) ?? raw.length;
+  const cut = backOffSurrogate(raw, Math.min(credentialSafeCut(raw, desired), unclosed));
+  const head = redactOutsideDataUrls(raw.slice(0, cut));
+  const rest = raw.slice(cut);
+  const otherBytes = state.bufferedBytes() - raw.length;
+  if (otherBytes + rest.length <= state.maxBufferedBytes) {
+    state.replace(buffers, field, rest);
+    return head;
   }
-  return null;
-}
-
-function drainOverflow(
-  state: DrainState,
-  buffers: Record<FieldCategory, string>,
-  field: FieldCategory
-): string {
-  const sanitized = redactOutsideDataUrls(buffers[field]);
-  const marked = drainOverflowHead(state, buffers, field, sanitized);
-  if (marked !== null) return marked;
-  const overflow = state.bufferedBytes() - state.maxBufferedBytes;
-  let cut = Math.min(sanitized.length, Math.max(1, overflow));
-  const partial = findCredentialPartialTailIndex(sanitized.slice(0, cut));
-  if (partial !== undefined && partial < cut) cut = partial;
-  const head = sanitized.slice(0, backOffSurrogate(sanitized, cut));
-  state.replace(buffers, field, sanitized.slice(head.length));
-  return head;
+  const drained = state.overflow.drain(buffers, field, rest, redactOutsideDataUrls);
+  state.replace(buffers, field, drained.remaining);
+  return head + drained.emitted;
 }
 
 function drainWindow(
   state: DrainState,
-  buffers: Record<FieldCategory, string>,
-  field: FieldCategory,
+  buffers: TextBuffers,
+  field: BufferedField,
   isStopSignal: boolean
 ): string {
-  const sanitized = redactOutsideDataUrls(buffers[field]);
+  const raw = buffers[field];
   if (isStopSignal) {
     // The flush event is emitted before the chunk carrying finish_reason, so a
     // tail held back from that chunk would reach the client out of order. Drain
     // it whole here; key headers are stamped as in onFlush.
     state.replace(buffers, field, "");
-    return markUnclosedBeginHead(sanitized);
+    return markUnclosedBeginHead(redactOutsideDataUrls(raw));
   }
-  let emitLength = Math.max(0, sanitized.length - state.windowSize);
-  const partial = findCredentialPartialTailIndex(sanitized);
+  let emitLength = credentialSafeCut(raw, Math.max(0, raw.length - state.windowSize));
+  const partial = findCredentialPartialTailIndex(raw);
   if (partial !== undefined && emitLength > partial) emitLength = partial;
   // A key header without a closing marker anywhere after it is never
   // emitted in clear, however far past the tail probe it already sits.
-  const unclosedBegin = findUnclosedBeginIndex(sanitized);
+  const unclosedBegin = findUnclosedBeginIndex(raw);
   if (unclosedBegin !== undefined && emitLength > unclosedBegin) emitLength = unclosedBegin;
-  emitLength = backOffSurrogate(sanitized, emitLength);
-  const toEmit = sanitized.slice(0, emitLength);
-  state.replace(buffers, field, sanitized.slice(emitLength));
-  return toEmit;
+  emitLength = backOffSurrogate(raw, emitLength);
+  state.replace(buffers, field, raw.slice(emitLength));
+  return redactOutsideDataUrls(raw.slice(0, emitLength));
 }
 
 function appendAndDrain(
   state: DrainState,
   store: ChoiceBufferStore,
-  field: FieldCategory,
+  field: BufferedField,
   index: string | number,
   ownText: string,
   isStopSignal: boolean
 ): string {
   const buffers = store.get(index);
-  state.append(buffers, field, ownText);
-  if (!isStopSignal && state.bufferedBytes() > state.maxBufferedBytes)
-    return drainOverflow(state, buffers, field);
-  return drainWindow(state, buffers, field, isStopSignal);
+  const continuation = state.overflow.consume(buffers, field, ownText);
+  state.append(buffers, field, continuation.remaining);
+  const emitted =
+    !isStopSignal && state.bufferedBytes() > state.maxBufferedBytes
+      ? drainOverflow(state, buffers, field)
+      : drainWindow(state, buffers, field, isStopSignal);
+  if (state.bufferedBytes() > state.maxBufferedBytes)
+    throw new Error("[PII] Credential stream buffer limit exceeded");
+  return continuation.emitted + emitted;
 }
 
 function flushRemainingByShape(
@@ -675,16 +597,17 @@ function flushRemainingByShape(
 ): unknown {
   const last = lastJson as Record<string, unknown>;
   const lastType = typeof last.type === "string" ? (last.type as string) : "";
-  if (lastType.startsWith("message") || lastType.startsWith("content_block"))
+  // A trailing `ping` is still a Claude stream: its buffered tails need typed deltas.
+  if (lastType.startsWith("message") || lastType.startsWith("content_block") || lastType === "ping")
     return flushClaudeFormat(store, last);
-  if (Array.isArray(last.choices)) return flushOpenAiChoices(store, last);
+  if (Array.isArray(last.choices)) return flushOpenAiTextBuffers(store, last);
   if (lastType.startsWith("response.")) return flushResponsesFormat(store, last, lastType);
   if (Array.isArray(last.candidates)) return flushGeminiFormat(store, last);
   return flushGenericFormat(store, (lastContentJson || lastJson) as Record<string, unknown>);
 }
 
 function flushEmptyStream(
-  getBuffers: (index: string | number) => Record<FieldCategory, string>,
+  getBuffers: (index: string | number) => TextBuffers,
   isJsonStream: boolean
 ): unknown {
   const buffers = getBuffers("0_0");
@@ -706,15 +629,9 @@ export function createCredentialSseTransform(
   const track = (before: string, after: string) => {
     bufferedBytes += after.length - before.length;
   };
-  const store = createChoiceBufferStore(maxBufferedChoices, (evicted, into) => {
-    for (const field of ["content", "reasoning", "toolArgs", "partialJson"] as const) {
-      if (evicted[field]) {
-        track(evicted[field], "");
-        into[field] += evicted[field];
-      }
-    }
-  });
+  const store = createChoiceBufferStore(maxBufferedChoices);
   const state: DrainState = {
+    overflow: new CredentialOverflow(),
     windowSize,
     maxBufferedBytes,
     bufferedBytes: () => bufferedBytes,
@@ -736,7 +653,7 @@ export function createCredentialSseTransform(
     lastContentJson: unknown = null
   ): unknown => {
     for (const [, buffers] of store.takeAll()) {
-      for (const key of Object.keys(buffers) as FieldCategory[]) {
+      for (const key of Object.keys(buffers) as BufferedField[]) {
         if (buffers[key]) buffers[key] = markUnclosedBeginHead(redactOutsideDataUrls(buffers[key]));
       }
     }
@@ -748,13 +665,15 @@ export function createCredentialSseTransform(
 
   const processor = (
     text: string,
-    field: FieldCategory,
+    category: FieldCategory,
     isStopSignal = false,
     index: string | number = "0_0",
-    isSnapshot = false
+    isSnapshot = false,
+    fieldName?: string
   ): string => {
+    const field = bufferField(category, fieldName);
     if (isSnapshot) return redactOutsideDataUrls(text);
-    return appendAndDrain(state, store, field, index, redactOutsideDataUrls(text), isStopSignal);
+    return appendAndDrain(state, store, field, index, text, isStopSignal);
   };
 
   return createSseTextTransform(processor, onFlush, undefined, { processToolArgs: true });

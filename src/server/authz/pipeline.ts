@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getCachedSettings } from "../../lib/db/readCache";
+import { getCachedBodySizeSettings } from "../../lib/db/readCache";
 import { isDraining } from "../../lib/gracefulShutdown";
 import { checkBodySize, getBodySizeLimit } from "../../shared/middleware/bodySizeGuard";
 import {
@@ -9,7 +9,16 @@ import {
   getDashboardJwtSecret,
 } from "@/shared/utils/dashboardSessionToken";
 import { generateRequestId } from "../../shared/utils/requestId";
+import {
+  buildAnthropicErrorBody,
+  isAnthropicMessagesPath,
+} from "../../shared/utils/anthropicErrorEnvelope";
 import { applyCorsHeaders } from "../cors/origins";
+import {
+  buildMcpInvalidOriginBody,
+  isMcpOriginGuardedPath,
+  validateMcpRequestOrigin,
+} from "../origin/mcpOrigin";
 import { validateBrowserMutationOrigin } from "../origin/publicOrigin";
 import { classifyRoute } from "./classify";
 import { validateDashboardCsrfToken } from "./csrf";
@@ -65,14 +74,22 @@ function rejectionResponse(
   classification: RouteClassification,
   requestId: string
 ): NextResponse {
+  // Claude Code only shows a /v1/messages 401 in Anthropic's error envelope;
+  // the correlation id stays on the x-request-id header.
+  const anthropicAuthError =
+    outcome.status === 401 &&
+    classification.routeClass === "CLIENT_API" &&
+    isAnthropicMessagesPath(classification.normalizedPath);
   const response = NextResponse.json(
-    {
-      error: {
-        code: outcome.code,
-        message: outcome.message,
-        correlation_id: requestId,
-      },
-    },
+    anthropicAuthError
+      ? buildAnthropicErrorBody("authentication_error", outcome.message)
+      : {
+          error: {
+            code: outcome.code,
+            message: outcome.message,
+            correlation_id: requestId,
+          },
+        },
     { status: outcome.status }
   );
   response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
@@ -209,6 +226,12 @@ function invalidOriginResponse(requestId: string): NextResponse {
   return response;
 }
 
+function mcpInvalidOriginResponse(requestId: string): NextResponse {
+  const response = NextResponse.json(buildMcpInvalidOriginBody(requestId), { status: 403 });
+  response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
+  return response;
+}
+
 function isUnsafeMutationMethod(method: string): boolean {
   return !["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase());
 }
@@ -225,7 +248,7 @@ function stampRouteResponse(
 
 async function getBodySizeSettings(): Promise<Record<string, unknown> | undefined> {
   try {
-    return await getCachedSettings();
+    return await getCachedBodySizeSettings();
   } catch (error) {
     console.warn(
       "[Authz] Failed to load request body limit settings:",
@@ -420,8 +443,33 @@ export async function runAuthzPipeline(
     }
 
     const rejection = rejectionResponse(outcome, classification, requestId);
+    // Rejections keep the presence-based relax: their bodies are fixed error
+    // envelopes (no data), and browser/Electron clients with a revoked or
+    // mistyped key must still be able to read the 401 instead of an opaque
+    // CORS failure (#5242).
     applyCorsHeaders(rejection, request, corsRelaxOrigin);
     return rejection;
+  }
+
+  // MCP Streamable HTTP spec: Origin MUST be validated on every connection, for
+  // every caller — API key, CLI token, dashboard session or anonymous loopback
+  // (requireLogin=false). Runs here, not in the route handlers, because only the
+  // original request still carries the token-stamped peer headers the trusted
+  // proxy / direct-LAN origin candidates are derived from. A dashboard session
+  // that proves same-origin with its CSRF token keeps the fallback it already has
+  // for mutations below (tunnel-served dashboards without a configured base URL).
+  if (isMcpOriginGuardedPath(guardedPathname)) {
+    const mcpOriginVerdict = validateMcpRequestOrigin(request);
+    const csrfOriginFallback =
+      !mcpOriginVerdict.ok &&
+      outcome.subject.kind === "dashboard_session" &&
+      validateDashboardCsrfToken(request);
+    if (!mcpOriginVerdict.ok && !csrfOriginFallback) {
+      const rejection = mcpInvalidOriginResponse(requestId);
+      rejection.headers.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
+      applyCorsHeaders(rejection, request);
+      return rejection;
+    }
   }
 
   if (
@@ -445,7 +493,20 @@ export async function runAuthzPipeline(
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
   response.headers.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
-  applyCorsHeaders(response, request, corsRelaxOrigin);
+  // Only relax CORS for a CLIENT_API request whose credential actually
+  // validated. requestCarriesTokenOrPreflight() looks at header presence, and on
+  // a keyless install (REQUIRE_API_KEY=false) clientApiPolicy serves an
+  // unvalidated credential as anonymous; an anonymous response keeps the
+  // fail-closed origin policy.
+  const relaxForValidatedCredential =
+    corsRelaxOrigin &&
+    (classification.routeClass !== "CLIENT_API" || outcome.subject.kind !== "anonymous");
+  applyCorsHeaders(response, request, relaxForValidatedCredential);
+  if (corsRelaxOrigin && !relaxForValidatedCredential) {
+    // The anonymous response still negotiates content-encoding: keep the
+    // `Vary: Accept-Encoding` that applyCorsHeaders() stamps on this surface (#6737).
+    response.headers.append("Vary", "Accept-Encoding");
+  }
   if (managementDashboardRoute) {
     await refreshDashboardSessionIfNeeded(response, request);
   }

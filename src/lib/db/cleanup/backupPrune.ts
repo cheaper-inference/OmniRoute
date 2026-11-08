@@ -15,7 +15,11 @@ import path from "path";
 import { hashFileSync } from "../backupFileHash";
 import { tryOpenSync } from "../adapters/driverFactory";
 import type { SqliteAdapter } from "../adapters/types";
-import { pruneBackupDirectory, resolveDbBackupRetention } from "../backupRetention";
+import {
+  collectBackupFamilies,
+  pruneBackupDirectory,
+  resolveDbBackupRetention,
+} from "../backupRetention";
 import { DB_BACKUPS_DIR, DATA_DIR, getDbInstance } from "../core";
 
 /**
@@ -54,6 +58,25 @@ export function resolveReusedPreMigrationSha(
   }
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+// Checked a minute past the cutoff pruneBackupDirectory uses, so clock movement
+// between the two reads can only make this check compute the hash more often.
+const EXPIRY_CHECK_SLACK_MS = 60 * 1000;
+const PRE_MIGRATION_BASE = /^db_state-[0-9a-f]{64}_pre-migration\.sqlite$/;
+
+/**
+ * The reused-snapshot exemption only skips the age rule, so it can only change
+ * the result when a pre-migration snapshot family is old enough to expire.
+ * Without one, the full-database VACUUM INTO that computes the hash would run
+ * on the main thread for nothing. Uses the same family scan as the prune.
+ */
+function hasExpirablePreMigrationSnapshot(backupDir: string, retentionDays: number): boolean {
+  const cutoffMs = Date.now() - retentionDays * DAY_MS + EXPIRY_CHECK_SLACK_MS;
+  return collectBackupFamilies(backupDir).some(
+    (family) => PRE_MIGRATION_BASE.test(family.base) && family.latestMtimeMs < cutoffMs
+  );
+}
+
 /**
  * Prune backup families outside the migration window, using the operator's
  * configured retention. Runs from the scheduled pass (startup + periodic), never
@@ -78,7 +101,10 @@ export function pruneDbBackupsOutsideMigrationWindow(options?: { backupDir?: str
     }
     const db = getDbInstance();
     const { maxFiles, retentionDays } = resolveDbBackupRetention(db);
-    const sha = retentionDays > 0 ? resolveReusedPreMigrationSha(db, backupDir) : null;
+    const sha =
+      retentionDays > 0 && hasExpirablePreMigrationSnapshot(backupDir, retentionDays)
+        ? resolveReusedPreMigrationSha(db, backupDir)
+        : null;
     const result = pruneBackupDirectory({
       backupDir,
       maxFiles,

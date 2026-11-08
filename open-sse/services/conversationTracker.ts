@@ -426,6 +426,17 @@ export function findReconnectMatch(
 
   for (let s = 0; s < chainTurns.length; s++) {
     if (budget.stepsLeft <= 0) break;
+    // A run starting at s verifies at most chainTurns.length - s turns. Once
+    // that cannot beat the current best — shorter, or equal while the best
+    // already holds the preferred anchorHasChild===false — no later start can
+    // win the election either, so stop. Without this, a continuation request
+    // (which always ends with turns not recorded yet, so the full-length exit
+    // below never fires) re-walks the chain from every later start until the
+    // whole step budget is spent.
+    if (best) {
+      const remaining = chainTurns.length - s;
+      if (remaining < bestLength || (remaining === bestLength && !best.anchorHasChild)) break;
+    }
     const anchors = index.byContentHash.get(turnHashes[s]);
     if (!anchors) continue;
     for (const anchorNodeId of anchors) {

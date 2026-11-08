@@ -5,6 +5,17 @@ import os from "node:os";
 import path from "node:path";
 import { proxyConfigToUrl } from "../../open-sse/utils/proxyDispatcher.ts";
 
+// ──────────────── Integration: family survives the resolveProxyForConnection cascade ──
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-resolve-family-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+process.env.API_KEY_SECRET = "test-secret";
+
+const core = await import("../../src/lib/db/core.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
+const proxiesDb = await import("../../src/lib/db/proxies.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
+const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
+
 describe("resolved proxy config → URL family encoding", () => {
   it("encodes ipv6 family resolved from a connection's proxy", () => {
     const resolved = { type: "socks5", host: "proxy.example.com", port: 1080, family: "ipv6" };
@@ -21,17 +32,6 @@ describe("resolved proxy config → URL family encoding", () => {
     assert.ok(!url!.includes("family="), url!);
   });
 });
-
-// ──────────────── Integration: family survives the resolveProxyForConnection cascade ──
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-resolve-family-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
-process.env.API_KEY_SECRET = "test-secret";
-
-const core = await import("../../src/lib/db/core.ts");
-const providersDb = await import("../../src/lib/db/providers.ts");
-const proxiesDb = await import("../../src/lib/db/proxies.ts");
-const settingsDb = await import("../../src/lib/db/settings.ts");
-const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 
 async function resetStorage() {
   delete process.env.INITIAL_PASSWORD;

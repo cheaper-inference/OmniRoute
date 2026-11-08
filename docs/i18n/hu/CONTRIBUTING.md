@@ -8,17 +8,25 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Fejlesztői környezet beállítása
+## Fejlesztői beállítás
 
 ### Előfeltételek
 
 - **Node.js** `>=22.22.2 <23`, vagy `>=24.0.0 <27` (ajánlott: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ felhasználók (Node 24+):** Az `npm install` futtatása után ellenőrizze, hogy a natív modulok telepítve lettek-e:
-> `node -e "require('better-sqlite3')"`. Ha `MODULE_NOT_FOUND` hibával meghiúsul,
-> futtassa az `npm approve-scripts better-sqlite3 && npm install` parancsot. Lásd:
-> [Hibaelhárítás](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Windows Node 24-gyel:** használja a jelenlegi 24 LTS javítókiadását (legalább 24.20.0).
+> A korábbi kiadások sikeres tesztek után is leállhatnak, amikor a `--test-force-exit` bezárja a
+> folyamatot. A Node [Windows libuv-javítása](https://github.com/nodejs/node/pull/61999) kezeli
+> ezt a futásidejű összeomlást; hagyja engedélyezve a teszt-ellenőrzéseket és a futtató kilépési
+> ellenőrzéseit.
+
+> **npm v11+ felhasználók (Node 24+):** Az `npm install` után ellenőrizze, hogy a natív modulok
+> telepítve lettek-e:
+> `node -e "require('better-sqlite3')"`. Ha a parancs `MODULE_NOT_FOUND` hibával sikertelen,
+> futtassa a `npm approve-scripts better-sqlite3 && npm install` parancsot. Lásd a
+> [Hibaelhárítás](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)
+> oldalt.
 
 - **Git**
 
@@ -36,88 +44,91 @@ npm install
 # Hozza létre a .env fájlt a sablonból
 cp .env.example .env
 
-# Hozza létre a szükséges titkos értékeket
+# Generálja a szükséges titkos kulcsokat
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-A fejlesztés legfontosabb változói:
+A fejlesztéshez fontos változók:
 
-| Változó                | Fejlesztési alapérték    | Leírás                           |
-| ---------------------- | ------------------------ | -------------------------------- |
-| `PORT`                 | `20128`                  | A kiszolgáló portja              |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | A frontend alap URL-je           |
-| `JWT_SECRET`           | (létrehozása fent)       | JWT-aláírási titkos kulcs        |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Az első bejelentkezés jelszava   |
-| `APP_LOG_LEVEL`        | `info`                   | A naplózás részletességi szintje |
+| Változó                | Alapértelmezett fejlesztési érték | Leírás                           |
+| ---------------------- | --------------------------------- | -------------------------------- |
+| `PORT`                 | `20128`                           | A szerver portja                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`          | A frontend alap-URL-je           |
+| `JWT_SECRET`           | (a fentiek szerint generálandó)   | A JWT-aláírás titkos kulcsa      |
+| `INITIAL_PASSWORD`     | `CHANGEME`                        | Az első bejelentkezési jelszó    |
+| `APP_LOG_LEVEL`        | `info`                            | A naplózás részletességi szintje |
 
-### A vezérlőpult beállításai
+### Irányítópult beállításai
 
-A vezérlőpult felületi kapcsolókat biztosít olyan funkciókhoz, amelyek környezeti változókkal is konfigurálhatók:
+Az irányítópult felhasználói felületi kapcsolókat biztosít az olyan funkciókhoz, amelyek
+környezeti változókon keresztül is beállíthatók:
 
-| Beállítás helye         | Kapcsoló             | Leírás                                             |
-| ----------------------- | -------------------- | -------------------------------------------------- |
-| Beállítások → Speciális | Hibakeresési mód     | A hibakeresési kérésnaplók engedélyezése (felület) |
-| Beállítások → Általános | Oldalsáv láthatósága | Az oldalsáv szakaszainak megjelenítése/elrejtése   |
+| Beállítás helye     | Kapcsoló           | Leírás                                           |
+| ------------------- | ------------------ | ------------------------------------------------ |
+| Settings → Advanced | Debug Mode         | Hibakeresési kérésnaplók engedélyezése (UI)      |
+| Settings → General  | Sidebar Visibility | Az oldalsáv szakaszainak megjelenítése/elrejtése |
 
-Ezeket a beállításokat az adatbázis tárolja, így újraindítások után is megmaradnak, és beállításuk esetén felülírják a környezeti változók alapértékeit.
+Ezek a beállítások az adatbázisban tárolódnak, és újraindítások között is megmaradnak,
+ha be vannak állítva, felülírva a környezeti változók alapértelmezett értékeit.
 
 ### Helyi futtatás
 
 ```bash
-# Fejlesztői mód (automatikus újratöltés)
+# Fejlesztési mód (gyors újratöltés)
 npm run dev
 
-# Éles összeállítás
-npm run build    # next build → .build/next/, majd assembleStandalone → dist/
+# Éles build
+npm run build    # next build → .build/next/ majd assembleStandalone → dist/
 npm run start
 
-# Gyors, csak háttérrendszer/API-fordítás a közreműködők módosításaihoz
+# Gyors, csak backend/API fordítás a közreműködői módosításokhoz
 npm run build:contributor
 
-# Kiadási összeállítás (tiszta újraépítés + HEAD-ellenőrzőjel — kötelező a telepítéshez)
-npm run build:release   # rm -rf .build dist, majd összeállítás + a dist/BUILD_SHA kiírása
+# Kiadási build (tiszta újrafordítás + HEAD-jelző — telepítéshez kötelező)
+npm run build:release   # rm -rf .build dist && build + létrehozza a dist/BUILD_SHA fájlt
 
-# Gyakori portkonfiguráció
+# Gyakori portbeállítás
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-A közreműködői összeállítás csak fordítási ellenőrzést végez: nem állítja össze az önálló
-disztribúciót, és nem készíti el az opcionális natív csomagolási összetevőket. Használja a szokásos éles összeállítást,
-ha a szállítható csomagot kell ellenőriznie.
+A közreműködői build csak fordítási ellenőrzést hajt végre: nem állítja össze az önálló
+disztribúciót, és nem építi fel az opcionális natív csomagolási eszközöket. Használja a
+hagyományos éles buildet, amikor a telepíthető csomagot szeretné ellenőrizni.
 
-### Az összeállítás kimeneti elrendezése
+### A build kimenetének felépítése
 
-| Könyvtár  | Tartalom                                                                                            | Verziókövetett |
-| --------- | --------------------------------------------------------------------------------------------------- | -------------- |
-| `src/`    | Az alkalmazás forráskódja (TypeScript / TSX)                                                        | Igen           |
-| `.build/` | Köztes fájlok — a `next build` kimenete (git által figyelmen kívül hagyva, `distDir = .build/next`) | Nem            |
-| `dist/`   | Szállítható csomag — az `assembleStandalone` állítja össze (git által figyelmen kívül hagyva)       | Nem            |
+| Könyvtár  | Tartalom                                                                      | Követett |
+| --------- | ----------------------------------------------------------------------------- | -------- |
+| `src/`    | Az alkalmazás forráskódja (TypeScript / TSX)                                  | Igen     |
+| `.build/` | Köztes fájlok — a `next build` kimenete (gitignored, `distDir = .build/next`) | Nem      |
+| `dist/`   | Telepíthető csomag — az `assembleStandalone` állítja össze (gitignored)       | Nem      |
 
-Az összeállítási folyamat egyetlen menetből áll:
+A buildfolyamat egyetlen lépésből áll:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js-kimenet)
-  └─ assembleStandalone()                 (átmásolja az önálló csomagot, valamint a static, public és natív összetevőket)
+  └─ next build → .build/next/standalone  (Next.js kimenet)
+  └─ assembleStandalone()                 (az önálló csomagot + statikus + nyilvános + natív eszközöket másolja)
        └─ kimenet: dist/                  (server.js, .next/static/, public/, node_modules/)
 ```
 
-Az `npm run build:release` ezenfelül először mindkét könyvtárat megtisztítja, majd
-telepítési integritást ellenőrző jelként kiírja a `dist/BUILD_SHA` fájlt (= `git rev-parse --short HEAD`).
+Az `npm run build:release` ezenfelül először törli mindkét könyvtár tartalmát, majd létrehozza a
+`dist/BUILD_SHA` fájlt (= `git rev-parse --short HEAD`) telepítési integritási jelzőként.
 
-Az `npm run build:contributor` a csak háttérrendszeres összeállítási profilt használja. Az összeállítás során ideiglenesen helyettesíti
-a vezérlőpult felületének fájljait, megtartja az API-útvonalkezelőket, majd az összeállítás után visszaállítja az eredeti fájlokat.
-A vezérlőpult felületét érintő módosításokhoz vagy a kiadás teljes körű ellenőrzéséhez használja az `npm run build` parancsot;
-a közreműködői profil nem helyettesíti a kiadási összeállítást.
+Az `npm run build:contributor` a csak backendhez használható buildprofilt alkalmazza. A build
+során ideiglenesen helyettesíti az irányítópult felhasználói felületének fájljait, megtartja
+az API-útvonalak kezelőit, majd a build után visszaállítja az eredeti fájlokat. Az
+irányítópult felhasználói felületét érintő módosításokhoz vagy a teljes kiadási ellenőrzéshez
+használja az `npm run build` parancsot; a közreműködői profil nem helyettesíti a kiadási buildet.
 
-> **Megjegyzés VPS-re történő telepítéshez:** a távoli lemezkép `/usr/lib/node_modules/omniroute/app/`
-> könyvtára változatlan marad. A telepítési eljárások a `dist/` tartalmát szinkronizálják bele az rsync segítségével.
-> Csak a repozitóriumon belüli összeállítási kimenet elérési útja változott (`app/` → `dist/`).
+> **VPS-telepítési megjegyzés:** a távoli `/usr/lib/node_modules/omniroute/app/` képfájl-könyvtár
+> változatlan marad. A telepítési készségek a `dist/` tartalmát rsync segítségével másolják bele.
+> Csak a repozitóriumon belüli buildkimenet útvonala változott (`app/` → `dist/`).
 
 Alapértelmezett URL-ek:
 
-- **Vezérlőpult**: `http://localhost:20128/dashboard`
+- **Irányítópult**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -170,32 +181,32 @@ Hatókörök (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, 
 ## Tesztek futtatása
 
 ```bash
-# Minden teszt (unit + vitest + ecosystem + e2e)
+# Minden teszt (egységtesztek + Vitest + ökoszisztéma + E2E)
 npm run test:all
 
 # Egyetlen tesztfájl (a Node.js natív tesztfuttatója — a legtöbb teszt ezt használja)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Csak a módosítás által érintett unit tesztek (ugyanaz a TIA-szelektor, mint a CI ellenőrzésénél, #8084)
+# Csak a módosítás által érintett egységtesztek (ugyanaz a TIA-szelektor, mint a CI-kapuban, #8084)
 npm run test:scoped            # az utolsó commitban (vagy a munkafában) lévő módosítások
-npm run test:scoped:staged     # csak a stage-elt módosítások — jól használható pre-commit futtatással
-npm run test:scoped:full       # először újraépíti az importgráf-térképet (fájlok hozzáadása/áthelyezése után)
-# Az 1-es kilépési kód + "run the full suite" azt jelenti, hogy egy központi fájl (tsconfig, package.json, …) vagy egy
-# nem feltérképezett forrás módosult — a szelektor biztonságosan hibázik, soha nem hagy ki csendben teszteket.
+npm run test:scoped:staged     # csak az előkészített módosítások — jól használható pre-commit futtatással
+npm run test:scoped:full       # előbb újraépíti az importgráf leképezését (fájlok hozzáadása/áthelyezése után)
+# Az 1-es kilépési kód + „futtassa a teljes tesztcsomagot” azt jelenti, hogy egy központi fájl (tsconfig, package.json, …) vagy egy
+# leképezetlen forrás módosult — a szelektor biztonságosan hibára fut, és soha nem hagy ki semmit észrevétlenül.
 
 # Vitest (MCP-kiszolgáló, autoCombo, gyorsítótár)
 npm run test:vitest
 
-# E2E tesztek (Playwright szükséges)
+# E2E-tesztek (Playwright szükséges)
 npm run test:e2e
 
-# Protokollkliensek E2E tesztjei (MCP-transzportok, A2A)
+# Protokollkliensek E2E-tesztjei (MCP-transzportok, A2A)
 npm run test:protocols:e2e
 
 # Ökoszisztéma-kompatibilitási tesztek
 npm run test:ecosystem
 
-# Lefedettségi küszöb: 60% utasítás-/sor-/függvény-/áglefedettség
+# Lefedettségi küszöb: 60% az utasítások/sorok/függvények/elágazások esetén
 npm run test:coverage
 npm run coverage:report
 
@@ -203,51 +214,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Feltételes, valós upstream combo smoke teszt (VPS-hozzáférést és valós szolgáltatói krediteket igényel)
-# VALÓS szolgáltatókat ér el — kis költséggel jár. SOHA nem fut CI-ben. A feltétel nélkül szabályosan kihagyásra kerül.
+# Kapuzott, valódi külső szolgáltatásokat használó combo-gyorsteszt (VPS-hozzáférést + valódi szolgáltatói krediteket igényel)
+# VALÓDI szolgáltatókat hív meg — némi költséggel jár. SOHA nem fut CI-ben. A kapu nélkül szabályosan kihagyásra kerül.
 # Szükséges: ssh root@192.168.0.15 hozzáférés (egy írásvédett DB-pillanatképet tölt be a VPS-ről).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# 3. fázisú élő VPS smoke teszt — egyszerű Node ESM-szkriptek, amelyek közvetlenül az élő .15-ös kiszolgálót érik el.
-# Szükséges: ssh root@192.168.0.15 hozzáférés (a combók létrehozása/lebontása SSH-n keresztül, sqlite használatával történik).
-# VALÓS szolgáltatókat ér el (kis költséggel). Csak __live_test__* combókat hoz létre/töröl. SOHA nem fut CI-ben.
-# A .15-ös gépen REQUIRE_API_KEY=false, ezért nincs szükség API-kulcsra, de ha be vannak állítva, figyelembe veszi a COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY értékét.
-npm run test:combo:live:vps              # 7 HTTP-forgatókönyv (prioritásos/round-robin/súlyozott/költségalapú/fúziós/automatikus + állapot)
-npm run test:combo:live:vps:failover     # hozzáad egy valós, szolgáltatók közötti feladatátvételi forgatókönyvet (összesen 8)
+# 3. fázisú VPS élő gyorsteszt — egyszerű Node ESM-szkriptek, közvetlenül az élő .15-ös kiszolgálót hívják meg.
+# Szükséges: ssh root@192.168.0.15 hozzáférés (a combo-k létrehozása/lebontása SSH-n keresztül, sqlite használatával történik).
+# VALÓDI szolgáltatókat hív meg (kis költséggel). Csak __live_test__* combo-kat hoz létre/töröl. SOHA nem fut CI-ben.
+# A .15-ös gépen REQUIRE_API_KEY=false, így nincs szükség API-kulcsra, de figyelembe veszi a COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY értékét, ha be van állítva.
+npm run test:combo:live:vps              # 7 HTTP-forgatókönyv (prioritásos/ciklikus/súlyozott/költség/fúzió/automatikus + állapotellenőrzés)
+npm run test:combo:live:vps:failover     # hozzáad egy valódi, szolgáltatók közötti feladatátvételi forgatókönyvet (összesen 8)
 ```
 
-Megjegyzések a lefedettségről:
+Megjegyzések a lefedettséghez:
 
-- Az `npm run test:coverage` méri a forráskód lefedettségét a fő unit tesztcsomaghoz, kizárja a `tests/**` fájlokat, és tartalmazza az `open-sse/**` fájlokat
-- A pull requesteknek fenn kell tartaniuk a **60%+** utasítás-/sor-/függvény-/áglefedettségi küszöböt
-- Ha egy PR módosítja a `src/`, `open-sse/`, `electron/` vagy `bin/` könyvtárban lévő éles kódot, ugyanabban a PR-ben automatizált teszteket is hozzá kell adnia vagy frissítenie kell
+- Az `npm run test:coverage` a fő egységtesztcsomag forráskód-lefedettségét méri, kizárja a `tests/**` fájlokat, és tartalmazza az `open-sse/**` fájlokat
+- A pull requesteknek az utasítások/sorok/függvények/elágazások lefedettségi küszöbét **60%+** értéken kell tartaniuk
+- Ha egy PR módosítja az éles kódot a `src/`, `open-sse/`, `electron/` vagy `bin/` könyvtárban, ugyanabban a PR-ben automatizált teszteket is hozzá kell adni vagy frissíteni kell
 - Az `npm run coverage:report` kiírja a legutóbbi lefedettségi futtatás részletes, fájlonkénti jelentését
 - Az `npm run test:coverage:legacy` megőrzi a régebbi mérőszámot a korábbi eredményekkel való összehasonlításhoz
-- A lefedettség szakaszos fejlesztési ütemtervét lásd a `docs/ops/COVERAGE_PLAN.md` fájlban
+- A lefedettség fokozatos javításának ütemtervét lásd a `docs/ops/COVERAGE_PLAN.md` fájlban
 
-### Pull request követelményei
+### Pull requestek követelményei
 
 PR megnyitása előtt használd a
-[hozzájárulási Golden Path útmutatót](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), hogy lefuttasd a módosításaidhoz
-tartozó célzott ciklust. A teljes unit tesztcsomag (4 CI-shard), a Vitest, a **60%+** lefedettségi küszöb és
-az éles build a CI felelőssége — helyi futtatásuk nem ad olyan további információt, amelyet a PR
-ellenőrzései ne biztosítanának, kisebb gépeken pedig túlterhelhetik a rendszert (#8084):
+[hozzájárulás ajánlott folyamatát](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), hogy lefuttasd a módosításaidhoz
+tartozó célzott ciklust. A teljes egységtesztcsomagért (4 CI-szegmens), a Vitestért, a **60%+** lefedettségi küszöbért és
+az éles buildért a CI felel — ezek helyi futtatása nem ad olyan többletinformációt, amelyet a PR
+ellenőrzései ne biztosítanának, kisebb gépeken pedig teljesen leterhelheti a gazdagépet (#8084):
 
 - Futtasd a módosításodat lefedő tesztfájlokat: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Futtasd az `npm run lint` parancsot
-- Éles kód módosításakor ugyanabban a PR-ben adj hozzá vagy frissíts automatizált teszteket
-- Ha az éles kód módosult, a PR leírásában tüntesd fel a módosított vagy hozzáadott tesztfájlokat
-- Ellenőrizd a SonarQube eredményét a PR-ben, ha a projekt titkos értékei be vannak állítva a CI-ben
+- Ha az éles kód módosul, ugyanabban a PR-ben adj hozzá vagy frissíts automatizált teszteket
+- A `node:test` fájlokban minden legfelső szintű `await` kifejezést (például `await import(...)`) az első `test()` / `describe()` elé helyezz: a `--test-force-exit` használatakor az utána regisztrált tesztek észrevétlenül kimaradhatnak (#18045; ezt az `npm run check:test-tla-order` kényszeríti ki)
+- Ha az éles kód módosult, a PR leírásában sorold fel a módosított vagy hozzáadott tesztfájlokat
+- Ellenőrizd a SonarQube eredményét a PR-en, ha a projekt titkos értékei konfigurálva vannak a CI-ben
 
-A tesztek jelenlegi állapota: **122 unit tesztfájl**, amelyek az alábbiakat fedik le:
+A tesztek jelenlegi állapota: **122 egységtesztfájl**, amelyek a következőket fedik le:
 
 - Szolgáltatói fordítók és formátumkonverzió
-- Sebességkorlátozás, áramkör-megszakító és hibatűrés
+- Sebességkorlátozás, megszakító és ellenálló képesség
 - Szemantikus gyorsítótár, idempotencia, folyamatkövetés
 - Adatbázis-műveletek és séma (21 DB-modul)
 - OAuth-folyamatok és hitelesítés
 - API-végpontok validációja (Zod v4)
-- MCP-kiszolgálóeszközök és hatókörök kikényszerítése
+- MCP-kiszolgálóeszközök és hatókör-kikényszerítés
 - Memória- és Skills-rendszerek
 
 ---

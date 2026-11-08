@@ -1,6 +1,8 @@
 import { CORS_HEADERS } from "../utils/cors.ts";
-import { upstreamErrorResponse } from "../utils/audioResponse.ts";
+import { audioErrorResponse, upstreamErrorResponse } from "../utils/audioResponse.ts";
 import { Buffer } from "node:buffer";
+import { buildMultipartBody, getUploadedFileName } from "../utils/audioMultipart.ts";
+export { buildMultipartBody } from "../utils/audioMultipart.ts";
 /**
  * Audio Transcription Handler
  *
@@ -22,16 +24,24 @@ import {
   type AudioProvider,
 } from "../config/audioRegistry.ts";
 import { buildAuthHeaders } from "../config/registryUtils.ts";
+import { SafeOutboundFetchError, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
+import { isSameOrigin } from "../utils/sameOrigin.ts";
 import { kieExecutor } from "../executors/kie.ts";
 import { vertexTranscribe } from "../executors/vertexMedia.ts";
+import {
+  GEMINI_LIVE_MAX_INPUT_BYTES,
+  geminiLiveTranscribe,
+} from "../executors/geminiLiveTranscribe.ts";
 import { errorResponse } from "../utils/error.ts";
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
 import { isJsonObject } from "../utils/kieTask.ts";
 import { handleOpenRouterTranscription } from "./openrouterTranscription.ts";
+import { handleGrokTranscription } from "./grokMedia.ts";
 import { handleSyntxTranscription } from "./syntxAudio.ts";
 import {
   hasTranscriptionInput,
   resolveTranscriptionFileOrResponse,
+  type RemoteMediaFetcher,
 } from "../utils/transcriptionRemoteAudio.ts";
 
 type TranscriptionCredentials = {
@@ -61,71 +71,6 @@ export { upstreamErrorResponse };
  */
 function isValidPathSegment(segment: string): boolean {
   return !segment.includes("..") && !segment.includes("//");
-}
-
-/**
- * A `.opus` file is Opus audio in an Ogg container (RFC 7845) — the same bytes
- * a client would otherwise name `.ogg`. Whisper-compatible upstreams pick the
- * decoder from the *filename* and their allow-list
- * (`flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm`) has no `opus`, so
- * `note.opus` 400s while byte-identical `note.ogg` succeeds. Since
- * `/v1/audio/speech` emits `audio/opus` for `response_format=opus`, clients
- * round-tripping their own voice notes hit this constantly. Relabel to the
- * container that actually describes the bytes.
- */
-function normalizeUploadExtension(name: string): string {
-  return name.replace(/\.opus$/i, ".ogg");
-}
-
-function getUploadedFileName(file: Blob & { name?: unknown }): string {
-  return typeof file.name === "string" && file.name.length > 0
-    ? normalizeUploadExtension(file.name)
-    : "audio.wav";
-}
-
-/**
- * `body` is `Uint8Array<ArrayBuffer>`, not bare `Uint8Array`: `new Uint8Array(n)`
- * is always ArrayBuffer-backed, and only that narrower form satisfies `BodyInit`
- * (the bare type widens to `ArrayBufferLike`, which admits `SharedArrayBuffer`).
- */
-export async function buildMultipartBody(
-  file: Blob & { name?: unknown },
-  fields: Record<string, string>,
-  fileFieldName = "file"
-): Promise<{ body: Uint8Array<ArrayBuffer>; contentType: string }> {
-  const boundary = "----OmniRouteAudioBoundary" + Date.now().toString(36);
-  const parts: Uint8Array[] = [];
-  const encoder = new TextEncoder();
-
-  for (const [name, value] of Object.entries(fields)) {
-    parts.push(
-      encoder.encode(
-        `--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`
-      )
-    );
-  }
-
-  const fileName = getUploadedFileName(file)
-    .replace(/["]/g, "_")
-    .replace(/[\r\n]/g, "_");
-  const fileBytes = new Uint8Array(await file.arrayBuffer());
-  parts.push(
-    encoder.encode(
-      `--${boundary}\r\nContent-Disposition: form-data; name="${fileFieldName}"; filename="${fileName}"\r\nContent-Type: ${file.type || "application/octet-stream"}\r\n\r\n`
-    )
-  );
-  parts.push(fileBytes);
-  parts.push(encoder.encode(`\r\n--${boundary}--\r\n`));
-
-  const totalLength = parts.reduce((sum, p) => sum + p.length, 0);
-  const body = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const part of parts) {
-    body.set(part, offset);
-    offset += part.length;
-  }
-
-  return { body, contentType: "multipart/form-data; boundary=" + boundary };
 }
 
 /**
@@ -418,6 +363,12 @@ async function handleGladiaTranscription(providerConfig, file, modelId, token) {
   if (!resultUrl) {
     return errorResponse(502, "Gladia did not return a result_url");
   }
+  // The poll sends x-gladia-key, so only poll Gladia's own API origin. fetch() drops
+  // Authorization on a cross-origin redirect but keeps custom headers, so redirects are
+  // refused rather than followed.
+  if (!isSameOrigin(resultUrl, providerConfig.baseUrl)) {
+    return errorResponse(502, "Gladia returned a result_url outside its API origin");
+  }
 
   // Step 3: Poll for completion (max 120s)
   const maxWait = 120_000;
@@ -425,23 +376,62 @@ async function handleGladiaTranscription(providerConfig, file, modelId, token) {
 
   while (Date.now() - start < maxWait) {
     await new Promise((r) => setTimeout(r, 2000));
+    const polled = await pollGladiaResultOnce(resultUrl, authHeaders);
+    if (polled instanceof Response) return polled;
+    if (!polled) continue;
 
-    const pollRes = await fetch(resultUrl, { headers: authHeaders });
-    if (!pollRes.ok) continue;
-
-    const result = await pollRes.json();
-
-    if (result.status === "done") {
-      const text = result.result?.transcription?.full_transcript || "";
+    if (polled.status === "done") {
+      const text = polled.result?.transcription?.full_transcript || "";
       return Response.json({ text }, { headers: { ...CORS_HEADERS } });
     }
 
-    if (result.status === "error") {
-      return errorResponse(500, result.error_code || result.error || "Gladia transcription failed");
+    if (polled.status === "error") {
+      return errorResponse(500, polled.error_code || polled.error || "Gladia transcription failed");
     }
   }
 
   return errorResponse(504, "Gladia transcription timed out after 120s");
+}
+
+/**
+ * One Gladia result_url poll. Returns the JSON body on a successful HTTP response,
+ * an error Response when the URL redirects or resolves to a blocked address, or null
+ * when the attempt should be retried.
+ */
+type GladiaPollBody = {
+  status?: string;
+  error_code?: string;
+  error?: string;
+  result?: { transcription?: { full_transcript?: string } };
+};
+
+async function pollGladiaResultOnce(
+  resultUrl: string,
+  authHeaders: Record<string, string>
+): Promise<GladiaPollBody | Response | null> {
+  let pollRes: Response;
+  try {
+    pollRes = await safeOutboundFetch(resultUrl, {
+      headers: authHeaders,
+      guard: "public-only",
+      pinDns: true,
+      timeoutMs: 15_000,
+    });
+  } catch (err) {
+    const code = err instanceof SafeOutboundFetchError ? err.code : "";
+    if (code === "REDIRECT_BLOCKED") {
+      return errorResponse(502, "Gladia result_url answered with a redirect");
+    }
+    if (code === "URL_GUARD_BLOCKED") {
+      return errorResponse(502, "Gladia result_url resolves to a blocked address");
+    }
+    return null;
+  }
+  if (!pollRes.ok) {
+    await pollRes.body?.cancel().catch(() => {});
+    return null;
+  }
+  return (await pollRes.json()) as GladiaPollBody;
 }
 
 type SonioxToken = {
@@ -948,6 +938,45 @@ async function handleSpeechmaticsTranscription(providerConfig, file, modelId, to
   return pollSpeechmaticsJob(`${baseUrl}/${jobId}`, authHeaders);
 }
 
+function optionalFormString(formData: FormData, key: string): string | undefined {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : undefined;
+}
+
+/**
+ * Gemini Live (BidiGenerateContent WebSocket) file-mode transcription.
+ * Rejects oversized uploads before buffering them a second time.
+ */
+async function handleGeminiLiveTranscription(
+  providerConfig: AudioProvider,
+  file: Blob,
+  modelId: string | null,
+  credentials: TranscriptionCredentials | null | undefined,
+  formData: FormData,
+  signal?: AbortSignal | null
+): Promise<Response> {
+  if (file.size > GEMINI_LIVE_MAX_INPUT_BYTES) {
+    return errorResponse(413, "Audio file is too large for Gemini Live transcription");
+  }
+  try {
+    const text = await geminiLiveTranscribe(credentials ?? {}, {
+      model: modelId as string,
+      audioBuffer: Buffer.from(await file.arrayBuffer()),
+      prompt: optionalFormString(formData, "prompt"),
+      language: optionalFormString(formData, "language"),
+      baseUrl: providerConfig.baseUrl,
+      signal: signal ?? undefined,
+    });
+    return Response.json({ text }, { headers: { ...CORS_HEADERS } });
+  } catch (err) {
+    const error = err as { message?: string; status?: number };
+    return errorResponse(
+      typeof error?.status === "number" ? error.status : 500,
+      `Gemini Live transcription failed: ${error?.message || "unknown error"}`
+    );
+  }
+}
+
 function resolveTranscriptionToken(
   providerConfig: AudioProvider,
   credentials?: TranscriptionCredentials | null
@@ -969,11 +998,17 @@ export async function handleAudioTranscription({
   credentials,
   resolvedProvider = null,
   resolvedModel = null,
+  remoteMediaFetcher = null,
+  signal = null,
 }: {
   formData: FormData;
   credentials?: TranscriptionCredentials | null;
   resolvedProvider?: AudioProvider | null;
   resolvedModel?: string | null;
+  /** SSRF-hardened downloader for `url` input, injected by the API route. */
+  remoteMediaFetcher?: RemoteMediaFetcher | null;
+  /** Client request abort signal; kills spawned helpers (Gemini Live ffmpeg) on disconnect. */
+  signal?: AbortSignal | null;
 }): Promise<Response> {
   const model = formData.get("model");
   if (typeof model !== "string" || !model) {
@@ -1002,7 +1037,7 @@ export async function handleAudioTranscription({
   if (!providerConfig) {
     return errorResponse(
       400,
-      `No transcription provider found for model "${model}". Available: openai, openrouter, groq, deepgram, assemblyai, nvidia, huggingface, qwen, gladia, rev-ai, speechmatics`
+      `No transcription provider found for model "${model}". Available: openai, openrouter, groq, deepgram, assemblyai, nvidia, huggingface, qwen, gladia, rev-ai, speechmatics, gemini`
     );
   }
 
@@ -1014,11 +1049,29 @@ export async function handleAudioTranscription({
 
   // Fetch URL input into a local file. Never forward Telegram URLs/tokens
   // or other caller-controlled URLs to the upstream STT provider.
-  const resolvedFile = await resolveTranscriptionFileOrResponse(formData);
+  const resolvedFile = await resolveTranscriptionFileOrResponse(
+    formData,
+    remoteMediaFetcher ?? undefined
+  );
   if ("response" in resolvedFile) return resolvedFile.response;
   const file = resolvedFile.file;
 
   // Route to provider-specific handler
+  if (providerConfig.format === "gemini-live") {
+    return handleGeminiLiveTranscription(
+      providerConfig,
+      file,
+      modelId,
+      credentials,
+      formData,
+      signal
+    );
+  }
+
+  if (providerConfig.format === "grok-stt") {
+    return handleGrokTranscription(providerConfig, file, modelId, credentials, formData);
+  }
+
   if (providerConfig.format === "vertex-gemini") {
     try {
       const buffer = Buffer.from(await file.arrayBuffer());
@@ -1133,6 +1186,6 @@ export async function handleAudioTranscription({
     });
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
-    return errorResponse(500, `Transcription request failed: ${error.message}`);
+    return audioErrorResponse(500, `Transcription request failed: ${error.message}`);
   }
 }

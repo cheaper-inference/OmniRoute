@@ -43,6 +43,23 @@ function projectManagementStreamChunks(
   };
 }
 
+// Duration of a completed in-memory preview. Prefer the recorded duration, then
+// the completion time, so a finished request does not appear to keep growing.
+function resolveInMemoryDuration(inMem: {
+  startedAt: number;
+  durationMs?: unknown;
+  completedAt?: unknown;
+}): number {
+  if (typeof inMem.durationMs === "number" && Number.isFinite(inMem.durationMs)) {
+    return inMem.durationMs;
+  }
+  const endedAt =
+    typeof inMem.completedAt === "number" && Number.isFinite(inMem.completedAt)
+      ? inMem.completedAt
+      : Date.now();
+  return endedAt - inMem.startedAt;
+}
+
 // Best-effort parse of the accumulated SSE `data:` lines captured live for an
 // in-flight request (open-sse/utils/requestLogger.ts's appendConvertedChunk
 // mutates these arrays in place as chunks arrive, so this reflects "the reply
@@ -147,7 +164,12 @@ export async function GET(
     ) {
       try {
         const completed = getCompletedDetails();
-        const inMem = completed.get(id);
+        const direct = completed.get(id);
+        // The listed durable ID differs from the reused public preview ID.
+        const inMem = persistedRequest
+          ? ([...completed.values()].find((detail) => detail.persistedLogId === id) ??
+            (direct?.attemptGeneration ? undefined : direct))
+          : direct;
         if (inMem) {
           const safeStreamChunks = projectManagementStreamChunks(inMem.streamChunks);
           const pipelinePayloads: any = {
@@ -166,7 +188,7 @@ export async function GET(
             model: inMem.model,
             provider: inMem.provider,
             connectionId: inMem.connectionId,
-            duration: Date.now() - inMem.startedAt,
+            duration: resolveInMemoryDuration(inMem),
             detailState: "in-memory",
             active: false,
             error: sanitizeErrorMessage(inMem.error) || null,
@@ -178,8 +200,8 @@ export async function GET(
           persistedRequest = persistedRequest
             ? {
                 ...persistedRequest,
-                pipelinePayloads: persistedRequest.pipelinePayloads || pipelinePayloads,
-                hasPipelineDetails: persistedRequest.hasPipelineDetails || true,
+                pipelinePayloads,
+                hasPipelineDetails: true,
               }
             : minimal;
         }

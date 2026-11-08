@@ -4,11 +4,13 @@
  * @module lib/db/cleanup
  */
 
+import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { rollupUsageHistoryBeforeDate } from "@/lib/usage/aggregateHistory";
 import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 
 import { getDbInstance } from "./core";
 import { getUserDatabaseSettings } from "./databaseSettings";
+import { maintainSqlitePlannerStats } from "./sqlitePlannerStats";
 import {
   describeReclaim,
   reclaimFreedPages,
@@ -22,6 +24,7 @@ import {
   deleteCallLogArtifacts,
   deleteFromTableBefore,
   deleteFromTableBeforeInBatches,
+  deleteWholeDaysBefore,
   tableExists,
   type DeleteByPeriodTarget,
 } from "./cleanup/usagePurge";
@@ -76,7 +79,6 @@ export async function cleanupQuotaSnapshots(): Promise<CleanupResult> {
  * Clean up old call_logs based on retention settings.
  */
 export async function cleanupCallLogs(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.callLogs;
@@ -87,13 +89,19 @@ export async function cleanupCallLogs(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM call_logs WHERE timestamp < ?");
-    const runResult = stmt.run(cutoffISO);
-    result.deleted = runResult.changes;
+    // Batched (10k rows per statement, yielding between batches): a single
+    // DELETE over a retention backlog holds the event loop for seconds.
+    // `result` doubles as the running total, so a failed batch still reports
+    // the rows the earlier batches removed.
+    await deleteFromTableBeforeInBatches(
+      { table: "call_logs", column: "timestamp", cutoff: "iso" },
+      cutoffISO,
+      { progress: result }
+    );
 
     console.log(`[Cleanup] Deleted ${result.deleted} call_logs older than ${retentionDays} days`);
   } catch (err: unknown) {
-    console.error("[Cleanup] Error cleaning call_logs:", err);
+    console.error(`[Cleanup] Error cleaning call_logs (${result.deleted} rows deleted):`, err);
     result.errors++;
   }
 
@@ -104,7 +112,6 @@ export async function cleanupCallLogs(): Promise<CleanupResult> {
  * Clean up old usage_history based on retention settings.
  */
 export async function cleanupUsageHistory(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.usageHistory;
@@ -134,15 +141,16 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
   }
 
   try {
-    const stmt = db.prepare("DELETE FROM usage_history WHERE timestamp < ?");
-    const runResult = stmt.run(cutoffDateStr);
-    result.deleted = runResult.changes;
+    // Same day boundary as the rollup above. One whole day per statement,
+    // not fixed-size batches: the rollup overwrites a day's summary from the
+    // raw rows left, so an interrupted run must never leave part of a day.
+    await deleteWholeDaysBefore("usage_history", "timestamp", cutoffDateStr, result);
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} usage_history older than ${retentionDays} days`
     );
   } catch (err: unknown) {
-    console.error("[Cleanup] Error cleaning usage_history:", err);
+    console.error(`[Cleanup] Error cleaning usage_history (${result.deleted} rows deleted):`, err);
     result.errors++;
   }
 
@@ -820,6 +828,7 @@ const RESET_USAGE_HISTORY_PERIOD_MS: Record<TimedResetUsageHistoryPeriod, number
 export interface ResetUsageHistoryResult extends CleanupResult {
   deletedUsageHistory: number;
   deletedDailySummary: number;
+  deletedDailyTeamSummary: number;
   deletedHourlySummary: number;
   deletedCallLogs: number;
   deletedCallLogArtifacts: number;
@@ -868,6 +877,12 @@ const RESET_TARGETS: Array<
     column: "date",
     cutoff: "date",
     resultKey: "deletedDailySummary",
+  },
+  {
+    table: "daily_team_usage_summary",
+    column: "date",
+    cutoff: "date",
+    resultKey: "deletedDailyTeamSummary",
   },
   {
     table: "hourly_usage_summary",
@@ -946,6 +961,7 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     deleted: 0,
     deletedUsageHistory: 0,
     deletedDailySummary: 0,
+    deletedDailyTeamSummary: 0,
     deletedHourlySummary: 0,
     deletedCallLogs: 0,
     deletedCallLogArtifacts: 0,
@@ -1086,6 +1102,9 @@ export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Pr
   } catch (reclaimErr) {
     console.error(`[Cleanup] Space reclamation after ${phase} cleanup failed:`, reclaimErr);
   }
+
+  // Independent of retention settings; runs after migrations, never on a request path.
+  maintainSqlitePlannerStats();
 }
 /**
  * Start the background cleanup scheduler. Runs cleanup on startup and then
@@ -1098,6 +1117,13 @@ export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Pr
  */
 export function startCleanupScheduler(): void {
   if (_cleanupSchedulerTimer) return;
+
+  if (isBackgroundServicesDisabled()) {
+    console.log(
+      "[Cleanup] Background cleanup scheduler disabled (OMNIROUTE_DISABLE_BACKGROUND_SERVICES)."
+    );
+    return;
+  }
 
   // Run cleanup 30s after startup (let the server initialize first).
   setTimeout(async () => {
