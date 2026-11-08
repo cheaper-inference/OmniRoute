@@ -30,6 +30,68 @@ function isOpencodeRequestRefusal(status: number, body: string): boolean {
   );
 }
 
+type OpencodeProbeResult = {
+  valid: boolean;
+  error: string | null;
+  warning?: string;
+};
+
+/** Catalog URL for the Test: an explicit override, else the registry's test/models URL. */
+function resolveOpencodeModelsUrl(provider: string, psd: Record<string, unknown>): string {
+  const entry = getRegistryEntry(provider);
+  const baseUrl = resolveBaseUrl(
+    { ...entry, baseUrl: entry?.testKeyBaseUrl || entry?.baseUrl },
+    psd
+  );
+  const overrideModelsUrl = typeof psd.modelsUrl === "string" ? psd.modelsUrl.trim() : "";
+  return (
+    overrideModelsUrl || entry?.testKeyModelsUrl || entry?.modelsUrl || addModelsSuffix(baseUrl)
+  );
+}
+
+/** `x-api-key` auth plus the discovery CLI identity; never a bearer (#17996). */
+function buildOpencodeProbeHeaders(
+  apiKey: string | undefined,
+  psd: Record<string, unknown>
+): Record<string, string> {
+  return {
+    Accept: "application/json",
+    ...(apiKey ? { "x-api-key": apiKey } : {}),
+    ...buildOpencodeBackgroundHeaders({ seed: readWorkspaceSeed(psd) }),
+  };
+}
+
+/** Maps the catalog probe response to a validation result. */
+async function mapOpencodeProbeResponse(response: Response): Promise<OpencodeProbeResult> {
+  if (response.ok) return { valid: true, error: null };
+  if (response.status === 401) return { valid: false, error: "Invalid API key" };
+
+  if (response.status === 403 || response.status === 451) {
+    const body = await response.text().catch(() => "");
+    if (isOpencodeRequestRefusal(response.status, body)) {
+      return {
+        valid: false,
+        error: `OpenCode refused this client's identity (${response.status}); the API key was not rejected`,
+      };
+    }
+    return { valid: false, error: "Invalid API key" };
+  }
+
+  if (response.status === 429) {
+    return {
+      valid: true,
+      error: null,
+      warning: "Provider accepted the key but is rate limited (429)",
+    };
+  }
+
+  if (response.status >= 500) {
+    return { valid: false, error: `Provider unavailable (${response.status})` };
+  }
+
+  return { valid: false, error: `Validation failed: ${response.status}` };
+}
+
 /**
  * Connection test for the OpenCode family (opencode-zen, opencode-go).
  *
@@ -55,57 +117,14 @@ export async function validateOpencodeProvider({
   providerSpecificData?: Record<string, unknown> | null;
   isLocal?: boolean;
 }) {
-  const entry = getRegistryEntry(provider);
   const psd = providerSpecificData || {};
-  const baseUrl = resolveBaseUrl(
-    { ...entry, baseUrl: entry?.testKeyBaseUrl || entry?.baseUrl },
-    psd
-  );
-  const overrideModelsUrl = typeof psd.modelsUrl === "string" ? psd.modelsUrl.trim() : "";
-  const modelsUrl =
-    overrideModelsUrl || entry?.testKeyModelsUrl || entry?.modelsUrl || addModelsSuffix(baseUrl);
-
   try {
     const response = await validationRead(
-      modelsUrl,
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          ...(apiKey ? { "x-api-key": apiKey } : {}),
-          ...buildOpencodeBackgroundHeaders({ seed: readWorkspaceSeed(psd) }),
-        },
-      },
+      resolveOpencodeModelsUrl(provider, psd),
+      { method: "GET", headers: buildOpencodeProbeHeaders(apiKey, psd) },
       isLocal
     );
-
-    if (response.ok) return { valid: true, error: null };
-    if (response.status === 401) return { valid: false, error: "Invalid API key" };
-
-    if (response.status === 403 || response.status === 451) {
-      const body = await response.text().catch(() => "");
-      if (isOpencodeRequestRefusal(response.status, body)) {
-        return {
-          valid: false,
-          error: `OpenCode refused this client's identity (${response.status}); the API key was not rejected`,
-        };
-      }
-      return { valid: false, error: "Invalid API key" };
-    }
-
-    if (response.status === 429) {
-      return {
-        valid: true,
-        error: null,
-        warning: "Provider accepted the key but is rate limited (429)",
-      };
-    }
-
-    if (response.status >= 500) {
-      return { valid: false, error: `Provider unavailable (${response.status})` };
-    }
-
-    return { valid: false, error: `Validation failed: ${response.status}` };
+    return await mapOpencodeProbeResponse(response);
   } catch (error: unknown) {
     return toValidationErrorResult(error);
   }
