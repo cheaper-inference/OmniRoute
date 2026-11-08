@@ -1,7 +1,7 @@
 ---
 title: "ChatPlayground Provider Integration"
-version: 3.8.52
-lastUpdated: 2026-10-11
+version: 3.8.53
+lastUpdated: 2026-10-24
 ---
 
 # ChatPlayground Provider Integration
@@ -64,30 +64,50 @@ To configure a ChatPlayground connection, you only need **two cookies**, both ob
 
 ---
 
-## Supported Endpoints & Models
+## Supported Endpoints & Model Catalog
 
-ChatPlayground routes models to three distinct backend paths:
+ChatPlayground routes models to three distinct backend paths. The **authoritative model roster is discovered at runtime** — OmniRoute resolves every request's model against the live, unauthenticated `GET https://app.chatplayground.ai/api/models` catalog, so new/retired models and endpoint moves take effect without a release:
+
+- The live catalog is cached in memory for **10 minutes** (single in-flight fetch guard, 15s timeout).
+- On a discovery outage (network failure, timeout, malformed payload), OmniRoute falls back to the **last good live catalog**, or to a **bundled offline catalog** (`CHATPLAYGROUND_FALLBACK_MODELS` in `open-sse/services/chatplaygroundModels.ts`, snapshot captured 2026-10-20) if none was ever loaded.
+- The catalog feeds endpoint routing (`azure` / `lmsys` / `perplexity`), the upstream `model`/`modelName`/`botId` values, and model discovery through `/api/providers/{id}/models`.
+
+The three endpoint families (with catalog rows from the bundled snapshot as of 2026-10-20 — the live catalog is the source of truth):
 
 ### 1. Azure Endpoint (`https://app.chatplayground.ai/api/chat/azure`)
 
-- **GPT**: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `gpt-5.5`, `gpt-5.5-pro`, `gpt-4.5`, `gpt-4o`
-- **Claude**: `claude-sonnet-5`, `claude-sonnet-4-6`, `claude-opus-4-8`, `claude-opus-4-6`, `claude-haiku-4-5`
-- **Gemini**: `gemini-3-flash`, `gemini-3-pro`
+- **GPT**: `gpt-6.1-sol`, `gpt-6-luna`
+- **Claude**: `claude-sonnet-5-5`, `claude-haiku-5-5`, `claude-opus-5-5`, `claude-fable-5-1`
+- **Gemini**: `gemini-3.8-flash-l`, `gemini-3.8-flash`, `gemini-3.1-pro`
 - **DeepSeek**: `deepseek-v4-pro`, `deepseek-v4-flash`
+- **Kimi**: `kimi-k2.6`
+- **xAI**: `grok-4.6`, `grok-4.7`
 - **Mistral**: `mistral-large-3`
 
 ### 2. LMSYS Endpoint (`https://app.chatplayground.ai/api/chat/lmsys`)
 
-- **Kimi**: `kimi-k3`, `kimi-k2.6`
-- **Llama**: `llama-4-scout`, `llama-3.3-70b`
-- **Qwen**: `qwen3.8-max`, `qwen3.7-plus`
-- **Grok**: `grok-4.5`, `grok-4`
-- **Other**: `command-a`, `minimax-m3`, `glm-5`
+- **Kimi**: `kimi-k3`
+- **Llama**: `llama-4-scout`, `llama-4-maverick`
+- **Qwen**: `qwen3.8-max`, `qwen3.7-plus`, `qwen3.6-flash`
+- **DeepSeek**: `deepseek-r1`
+- **Cohere**: `command-a`, `command-r-plus`
+- **GLM**: `glm-5.3`, `glm-5.3-flash`
+- **Other**: `minimax-m3`, `nova-2-lite-v1`, `mimo-v2.6-pro`, `hy3`
 
 ### 3. Perplexity Endpoint (`https://app.chatplayground.ai/api/chat/perplexity`)
 
-- `perplexity-sonar-pro` / `sonar-pro`
-- `sonar`
+- `perplexity-sonar`, `perplexity-sonar-pro`, `perplexity-sonar-reasoning-pro`
+
+### Model ID Resolution (Strict — No Pass-Through)
+
+A request's `model` string is resolved against the catalog with **no synthesis fallback**; unrecognized models are rejected up front with `400: ChatPlayground model not found or invalid`. Resolution order:
+
+1. Provider prefixes `chatplayground/`, `cpl/`, `cpl.`, `cp.`, `cpl:`, `cp:` are stripped first (chained prefixes collapse, e.g. `cpl/chatplayground/gpt-6-luna` → `gpt-6-luna`).
+2. Case-insensitive match against the catalog's `id`, then `modelName`, then `displayName`.
+3. Vendor-prefixed IDs fall back by suffix: `openai/gpt-6-luna` resolves to `gpt-6-luna`.
+4. If nothing matches in the live catalog, the bundled fallback catalog is tried before rejecting — so a model the live roster just dropped still routes rather than erroring.
+
+Only catalog rows with `group: "chat"` are considered.
 
 ### Dynamic Model Discovery, Pricing Plans & Credit Weights
 
@@ -124,12 +144,13 @@ ChatPlayground also offers lifetime deals on platforms like StackSocial:
 
 While ChatPlayground's public marketing organizes models into "Basic" vs "Advanced", the internal API exposes:
 
-- `premiumOnly: boolean`: Upstream subscriber-gate boolean. Models with `premiumOnly: true` (e.g. `gpt-5.6-sol`, `claude-sonnet-5`, `claude-opus-4-8`, `gpt-5.5-pro`) require an active paid plan (Pro or Unlimited/Lifetime). When accessed from a free account, the API rejects with HTTP 403: _"This model is only available to active subscribers. Please upgrade your plan."_ Models with `premiumOnly: false` (e.g. `gpt-5.6-terra`, `gpt-5.6-luna`, `deepseek-v4-pro`, `grok-4.5`) are accessible across all tiers.
-- `creditWeight: number`: Deductions multiplier per query against your plan allowance:
-  - `0.5`: Lightweight models (`gemini-3.5-flash-lite`, `deepseek-v4-flash`, `sonar`)
-  - `1.0`: Standard models (`gpt-5.6-terra`, `gpt-5.6-luna`, `deepseek-v4-pro`, `kimi-k2.6`, `llama-4-scout`, `qwen3.7-plus`, `command-a`, `grok-4.5`, `mistral-large-3`)
-  - `1.5 - 2.0`: Heavy / flagship reasoning models (`gemini-3-pro`, `gpt-5.5-pro`, `claude-opus-4-8`)
-- `active: boolean`: Upstream availability toggle.
+- `premiumOnly: boolean`: Upstream subscriber-gate boolean. Models with `premiumOnly: true` (e.g. `gpt-6.1-sol`, `claude-sonnet-5-5`, `claude-opus-5-5`, `kimi-k3`, `qwen3.8-max`) require an active paid plan (Pro or Unlimited/Lifetime). When accessed from a free account, the API rejects with HTTP 403: _"This model is only available to active subscribers. Please upgrade your plan."_ Models with `premiumOnly: false` (e.g. `gpt-6-luna`, `deepseek-v4-pro`, `grok-4.7`, `glm-5.3-flash`) are accessible across all tiers.
+- `creditWeight: number`: Deductions multiplier per query against your plan allowance. Current catalog weights range from `1` to `10`:
+  - `1`: Standard models (`gpt-6-luna`, `deepseek-v4-pro`, `deepseek-v4-flash`, `kimi-k2.6`, `llama-4-scout`, `qwen3.7-plus`, `command-a`, `mistral-large-3`, `nova-2-lite-v1`, all `perplexity-*`)
+  - `2`: Mid-tier (`grok-4.6`, `grok-4.7`, `gemini-3.8-flash-l`, `glm-5.3`, `glm-5.3-flash`)
+  - `3–5`: Flagship (`gemini-3.8-flash`, `gemini-3.1-pro`, `gpt-6.1-sol`, `kimi-k3`)
+  - `7–10`: Heavy reasoning (`claude-haiku-5-5`: 7, `claude-sonnet-5-5` / `claude-opus-5-5` / `claude-fable-5-1`: 10)
+- `active: boolean`: Upstream availability toggle. OmniRoute's resolver does not filter on this flag — inactive rows still route — but the upstream API may reject requests for them.
 - `group: string`: Filtered to `"chat"` for conversational text completions.
 
 ---
@@ -165,6 +186,8 @@ ChatPlayground enforces a strict server-side boundary of **15,000 characters per
 - OmniRoute's `ChatPlaygroundExecutor` strips these sentinel tokens on the fly and translates the output into OpenAI-standard Server-Sent Events (`data: {"choices":[{"delta":{"content":"..."}}]}\n\n`) terminating with `data: [DONE]\n\n`.
 - For non-streaming requests, a standard `chat.completion` response envelope is returned.
 - Upstream returns a complete response for Perplexity queries rather than incremental SSE chunks; when `stream: true` is requested on Perplexity queries, OmniRoute synthesizes standard SSE chunks so streaming OpenAI clients remain fully compatible.
+- **CITATIONS stripping**: The Perplexity endpoint appends a `CITATIONS:[...]` metadata blob to its answer stream (the web client parses it for citation links rather than rendering it). OmniRoute removes both whole `CITATIONS:` lines and inline `CITATIONS:` runs to end-of-line (e.g. `…Canberra**.[1]CITATIONS:[…]`), so clients never see the raw marker. Citation text before the marker is preserved; the structured citation list itself is dropped.
+- **Per-endpoint payload contract**: request bodies mirror what web.chatplayground.ai sends per endpoint family — `azure`: `messages`, `model`, `chatId`, `isRegenerate`, `promptTemplate`, `fileUrl`, `botId`, `submissionId`, `noSave`; `lmsys`: `messages`, `model`, `botId` (required — the API 500s without it); `perplexity`: `messages`, `modelName`, `botId` (required).
 
 ---
 
@@ -173,7 +196,7 @@ ChatPlayground enforces a strict server-side boundary of **15,000 characters per
 ### 1. Tool Functions (Not Supported Upstream)
 
 - **Ignored by Upstream**: ChatPlayground's web backend does not support native function calling or tool execution. When an OpenAI-format `tools` parameter is passed, the upstream API returns HTTP 200, but models **ignore the tool definitions** and produce standard conversational text without generating structured `tool_calls`.
-- **Emulated Support**: Classified with `toolCalling: "emulated"` in `src/shared/constants/providers/web-cookie.ts`. If tool calling is required by an agentic client, OmniRoute handles it via prompt-based tool emulation.
+- **Emulated Support**: Classified with `toolCalling: "emulated"` in `src/shared/constants/providers/web-cookie-chatplayground.ts`. If tool calling is required by an agentic client, OmniRoute handles it via prompt-based tool emulation.
 
 ### 2. Thinking & Reasoning Content
 

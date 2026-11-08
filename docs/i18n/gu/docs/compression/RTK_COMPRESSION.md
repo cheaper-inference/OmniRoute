@@ -29,22 +29,20 @@ Caveman ઇનપુટ:  46% બચત
 
 ## તે શું સંકુચિત કરે છે
 
-બિલ્ટ-ઇન કૅટલૉગ હાલમાં આ શ્રેણીઓમાં 49 ફિલ્ટર્સ પ્રદાન કરે છે:
+બિલ્ટ-ઇન કેટલોગ હાલમાં આ કેટેગરીઓમાં 56 ફિલ્ટર્સ સાથે આવે છે:
 
-| શ્રેણી    | ઉદાહરણો                                                       |
+| કેટેગરી   | ઉદાહરણો                                                       |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go ટેસ્ટ્સ, Cargo ટેસ્ટ્સ   |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo ટેસ્ટ્સ  |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, સામાન્ય શેલ લૉગ્સ                       |
-| `docker`  | `docker ps`, Docker લૉગ્સ                                     |
+| `shell`   | `ls`, `find`, `grep`, સામાન્ય શેલ લોગ્સ                       |
+| `docker`  | `docker ps`, Docker લોગ્સ                                     |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON આઉટપુટ, સ્ટૅક ટ્રેસ, સામાન્ય આઉટપુટ ફૉલબૅક               |
+| `generic` | JSON આઉટપુટ, સ્ટેક ટ્રેસ, સામાન્ય આઉટપુટ ફોલબેક               |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts`માં આવેલું ડિટેક્ટર ફિલ્ટર પસંદગી
-પહેલાં આઉટપુટનું વર્ગીકરણ કરે છે. જ્યારે કમાન્ડ ક્લાસ પૂરતો ન હોય ત્યારે ફિલ્ટર્સ કમાન્ડ પેટર્ન અથવા આઉટપુટ રેગેક્સ દ્વારા પણ
-મેળ ખાઈ શકે છે.
+`open-sse/services/compression/engines/rtk/commandDetector.ts` માં રહેલો ડિટેક્ટર ફિલ્ટર પસંદગી પહેલાં આઉટપુટને વર્ગીકૃત કરે છે. જ્યારે કમાન્ડ ક્લાસ પૂરતો ન હોય ત્યારે ફિલ્ટર્સ કમાન્ડ પેટર્ન અથવા આઉટપુટ regex દ્વારા પણ મેળ ખાઈ શકે છે.
 
 ## ફિલ્ટર રિઝોલ્યુશન
 
@@ -357,61 +355,61 @@ node --import tsx/esm --test \
 
 ---
 
-## તીવ્રતાના સ્તરો (v3.8.16+)
+## તીવ્રતા સ્તરો (v3.8.16+)
 
-RTK **3 તીવ્રતાના સ્તરો**ને સપોર્ટ કરે છે, જે **compression aggressiveness** અને **સલામતી** વચ્ચે સંતુલન સાધે છે. engine config માં `config.intensity` દ્વારા સ્તર સેટ થાય છે.
+RTK **3 તીવ્રતા સ્તરો**ને સપોર્ટ કરે છે જે **કમ્પ્રેશન આક્રમકતા** અને **સુરક્ષા** વચ્ચે ટ્રેડ-ઓફ કરે છે. આ સ્તર એન્જિન કોન્ફિગમાં `config.intensity` દ્વારા સેટ થાય છે.
 
 ### 3 સ્તરો
 
-| સ્તર                 | Truncation threshold | Token બચત | જોખમ     | આ માટે શ્રેષ્ઠ                      |
-| -------------------- | -------------------- | --------- | -------- | ----------------------------------- |
-| `minimal`            | વિભાગ દીઠ 24 લાઇન્સ  | ~20-40%   | ખૂબ ઓછું | નિર્ણાયક context ધરાવતું Production |
-| `standard` (ડિફૉલ્ટ) | વિભાગ દીઠ 24 લાઇન્સ  | ~50-70%   | ઓછું     | દૈનિક coding sessions               |
-| `aggressive`         | વિભાગ દીઠ 16 લાઇન્સ  | ~70-90%   | મધ્યમ    | લાંબા sessions, મહત્તમ બચત          |
+| સ્તર                 | ટ્રંકેશન થ્રેશોલ્ડ        | ટોકન બચત | જોખમ     | શેના માટે શ્રેષ્ઠ                   |
+| -------------------- | ------------------------- | -------- | -------- | ----------------------------------- |
+| `minimal`            | દરેક સેક્શન માટે 24 લાઇનો | ~20-40%  | ખૂબ ઓછું | ક્રિટિકલ કોન્ટેક્સ્ટ સાથે પ્રોડક્શન |
+| `standard` (ડિફોલ્ટ) | દરેક સેક્શન માટે 24 લાઇનો | ~50-70%  | ઓછું     | રોજિંદા કોડિંગ સેશન્સ               |
+| `aggressive`         | દરેક સેક્શન માટે 16 લાઇનો | ~70-90%  | મધ્યમ    | લાંબા સેશન્સ, મહત્તમ બચત            |
 
-### Truncation ક્યાં થાય છે
+### ટ્રંકેશન ક્યાં થાય છે
 
-truncation threshold `lineFilter.ts`ને અસર કરે છે:
+ટ્રંકેશન થ્રેશોલ્ડ `lineFilter.ts` ને અસર કરે છે:
 
 ```ts
-// open-sse/services/compression/engines/rtk/index.ts:329-330માંથી
+// open-sse/services/compression/engines/rtk/index.ts:329-330 થી
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-દરેક વિભાગની **શરૂઆત** અને **અંત** બંને જાળવવામાં આવે છે; truncation અમલમાં આવે ત્યારે મધ્યવર્તી સામગ્રી દૂર કરવામાં આવે છે.
+દરેક સેક્શનનો **હેડ** અને **ટેલ** બંને સાચવવામાં આવે છે; જ્યારે ટ્રંકેશન લાગુ થાય ત્યારે મધ્યની સામગ્રી કાઢી નાખવામાં આવે છે.
 
-### શું જળવાય છે અને શું કાપવામાં આવે છે
+### શું રહે છે vs. શું કટ થાય છે
 
-| સામગ્રી                    | minimal       | standard      | aggressive    |
-| -------------------------- | ------------- | ------------- | ------------- |
-| Errors / stack traces      | ✅ જળવાય છે   | ✅ જળવાય છે   | ✅ જળવાય છે   |
-| Test failures              | ✅ જળવાય છે   | ✅ જળવાય છે   | ✅ જળવાય છે   |
-| Build errors               | ✅ જળવાય છે   | ✅ જળવાય છે   | ✅ જળવાય છે   |
-| Test passes (verbose)      | ✅ જળવાય છે   | 🟡 સંકોચાય છે | 🟡 સંકોચાય છે |
-| Routine output (info logs) | 🟡 સંકોચાય છે | 🟡 સંકોચાય છે | ❌ દૂર થાય છે |
-| Progress bars              | 🟡 સંકોચાય છે | ❌ દૂર થાય છે | ❌ દૂર થાય છે |
-| Banner / ASCII art         | 🟡 સંકોચાય છે | ❌ દૂર થાય છે | ❌ દૂર થાય છે |
+| સામગ્રી                  | minimal     | standard        | aggressive      |
+| ------------------------ | ----------- | --------------- | --------------- |
+| એરર / સ્ટેક ટ્રેસ        | ✅ સાચવેલું | ✅ સાચવેલું     | ✅ સાચવેલું     |
+| ટેસ્ટ નિષ્ફળતા           | ✅ સાચવેલું | ✅ સાચવેલું     | ✅ સાચવેલું     |
+| બિલ્ડ એરર                | ✅ સાચવેલું | ✅ સાચવેલું     | ✅ સાચવેલું     |
+| ટેસ્ટ પાસ (વર્બોઝ)       | ✅ સાચવેલું | 🟡 સંકુચિત      | 🟡 સંકુચિત      |
+| રૂટિન આઉટપુટ (ઇન્ફો લોગ) | 🟡 સંકુચિત  | 🟡 સંકુચિત      | ❌ કાઢી નાખેલું |
+| પ્રોગ્રેસ બાર            | 🟡 સંકુચિત  | ❌ કાઢી નાખેલું | ❌ કાઢી નાખેલું |
+| બેનર / ASCII આર્ટ        | 🟡 સંકુચિત  | ❌ કાઢી નાખેલું | ❌ કાઢી નાખેલું |
 
 ### યોગ્ય તીવ્રતા પસંદ કરવી
 
 ```
-                  શું context ગુમાવવું વિનાશક છે?
+                  શું કોન્ટેક્સ્ટ ગુમાવવો વિનાશક છે?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     હા          ના       ખાતરી નથી
+     હા          ના        ખાતરી નથી
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      throughput કેટલું  પહેલાં `standard` અજમાવો
-      │      નિર્ણાયક છે?     (80% કિસ્સાઓ માટે
-      │           │          કાર્ય કરે છે)
+      │      થ્રુપુટ કેટલો    પહેલા `standard` અજમાવો
+      │      ક્રિટિકલ છે?    (80% કિસ્સાઓમાં કામ
+      │           │          કરે છે)
       │      ┌────┴────┐
       │      │         │
-      │     ઓછું      વધુ
+      │     ઓછું      વધારે
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -419,9 +417,9 @@ config.intensity === "aggressive" ? 16 : 24,
       └──────┴─────────┘
 ```
 
-### તીવ્રતા configure કરવી
+### તીવ્રતા કોન્ફિગર કરવી
 
-**Per-combo** (combo config માં):
+**પ્રતિ-કોમ્બો** (કોમ્બો કોન્ફિગમાં):
 
 ```json
 {
@@ -437,8 +435,8 @@ config.intensity === "aggressive" ? 16 : 24,
 **પ્રોગ્રામેટિક રીતે**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) એક
-`CompressionEngine` છે અને તેમાં `updateConfig` method નથી. તેના બદલે registry helper
-દ્વારા engine નું config અપડેટ કરો:
+`CompressionEngine` છે અને તેની પાસે `updateConfig` મેથડ નથી. તેના બદલે
+રજિસ્ટ્રી હેલ્પર દ્વારા એન્જિનનો કોન્ફિગ અપડેટ કરો:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -446,16 +444,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### અસરની ચકાસણી
+### અસર ચકાસવી
 
-તમારી પસંદ કરેલી તીવ્રતા પર તમારું filter સલામત છે તેની ખાતરી કરવા માટે **ચકાસણી ગેટ** (નીચે જુઓ) નો ઉપયોગ કરો:
+તમારી પસંદ કરેલી તીવ્રતાએ તમારો ફિલ્ટર સુરક્ષિત છે તે ખાતરી કરવા માટે **વેરિફાય ગેટ** (નીચે જુઓ) નો ઉપયોગ કરો:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("આક્રમક તીવ્રતા પર filters નિષ્ફળ ગયા");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

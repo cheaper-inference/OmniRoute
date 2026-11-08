@@ -62,6 +62,7 @@ const STRIP_RULES: StripRule[] = [
   { match: /claude/i, drop: ["diagnostics"] },
   // GitHub Copilot GPT-5.4+ and GPT-6.x: temperature unsupported.
   { provider: "github", match: isGithubTemperatureUnsupportedModel, drop: ["temperature"] },
+  { provider: "ghe-copilot", match: isGithubTemperatureUnsupportedModel, drop: ["temperature"] },
   // OpenAI GPT-5.0 family (gpt-5, gpt-5-mini, gpt-5-nano, dated snapshots) always
   // reasons and rejects sampling params with HTTP 400 "Unsupported parameter:
   // 'temperature' is not supported with this model" (same for top_p). Agent
@@ -134,10 +135,10 @@ const STRIP_RULES: StripRule[] = [
   { provider: "glm", match: /^glm-4\.6v$/i, clampToModelMaxOutput: true },
   // Azure gpt-4o-mini deployments cap completion tokens at 16384 and 400 on
   // anything larger: "max_tokens is too large: 32000. This model supports at
-  // most 16384 completion tokens". OmniRoute's own tool-calling floor
-  // (DEFAULT_MIN_TOKENS = 32000, applied by adjustMaxTokens) raises even a tiny
-  // explicit max_tokens to 32000 whenever tools are present, so every agentic
-  // client trips this on its first turn. PROVIDER_MAX_TOKENS is not the right
+  // most 16384 completion tokens". The 32000 used to come from OmniRoute's own
+  // tool-calling floor (DEFAULT_MIN_TOKENS, applied by adjustMaxTokens); every
+  // translator now honors an explicit client cap, but agentic clients still send
+  // 32000+ themselves on their first turn. PROVIDER_MAX_TOKENS is not the right
   // lever here: it is provider-wide, and the same Azure resource also serves
   // GPT-5 deployments whose ceiling is far higher. Azure deployment names are
   // operator-chosen, hence a prefix match rather than an exact id, and the

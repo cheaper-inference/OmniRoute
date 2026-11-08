@@ -1,5 +1,6 @@
 "use client";
 import { useTranslations } from "next-intl";
+import { Kbd, KbdGroup } from "@omniroute/ui-kit/kbd";
 import { Modal } from "@/shared/components";
 
 type AdaptaTutorialModalProps = {
@@ -51,12 +52,10 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
             <div>
               <p className="font-medium">{t("step2Title")}</p>
               <p className="text-text-muted mt-0.5">
-                {t("step2DescPrefix")}{" "}
-                <kbd className="bg-surface-2 px-1.5 py-0.5 rounded text-xs font-mono">F12</kbd>{" "}
-                {t("or")}{" "}
-                <kbd className="bg-surface-2 px-1.5 py-0.5 rounded text-xs font-mono">
-                  Cmd+Option+I
-                </kbd>{" "}
+                {t("step2DescPrefix")} <Kbd>F12</Kbd> {t("or")}{" "}
+                <KbdGroup>
+                  <Kbd>Cmd</Kbd>+<Kbd>Option</Kbd>+<Kbd>I</Kbd>
+                </KbdGroup>{" "}
                 {t("step2DescSuffix")}
               </p>
             </div>

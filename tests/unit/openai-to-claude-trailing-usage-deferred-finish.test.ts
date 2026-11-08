@@ -187,7 +187,7 @@ test("trailing choices-empty chunk with tool_calls finish_reason preserves tool_
                 {
                   index: 0,
                   id: "call_123",
-                  function: { name: "get_weather", arguments: "{\"city\":\"Beijing\"}" },
+                  function: { name: "get_weather", arguments: '{"city":"Beijing"}' },
                 },
               ],
             },
@@ -226,4 +226,143 @@ test("trailing choices-empty chunk with tool_calls finish_reason preserves tool_
     },
     { type: "message_stop" },
   ]);
+});
+
+function joinDeltas(events: Array<Record<string, unknown>>, deltaType: string): string {
+  return events
+    .filter((event) => (event.delta as Record<string, unknown> | undefined)?.type === deltaType)
+    .map((event) =>
+      String(
+        (event.delta as Record<string, unknown>).partial_json ??
+          (event.delta as Record<string, unknown>).text ??
+          ""
+      )
+    )
+    .join("");
+}
+
+// The deferred finish chunk is re-processed when the trailing usage chunk (or EOF)
+// arrives. Its delta was already emitted on the pass that received it, so the
+// replay must not re-emit the trailing fragment — otherwise an OpenAI→Claude
+// client concatenating input_json_delta receives the final fragment twice and the
+// assembled tool input is no longer valid JSON.
+test("trailing usage flush does not replay the finish chunk's tool-arg fragment", () => {
+  const state = createState();
+  const events = collectEvents(
+    [
+      {
+        id: "chatcmpl-18065-tool-tail",
+        model: "accounts/fireworks/models/kimi-k3",
+        choices: [
+          {
+            index: 0,
+            delta: {
+              tool_calls: [
+                {
+                  index: 0,
+                  id: "call_tail",
+                  function: { name: "run_python", arguments: '{"code":"print(1)' },
+                },
+              ],
+            },
+            finish_reason: null,
+          },
+        ],
+      },
+      {
+        id: "chatcmpl-18065-tool-tail",
+        model: "accounts/fireworks/models/kimi-k3",
+        choices: [
+          {
+            index: 0,
+            delta: { tool_calls: [{ index: 0, function: { arguments: '"}' } }] },
+            finish_reason: "tool_calls",
+          },
+        ],
+      },
+      {
+        id: "chatcmpl-18065-tool-tail",
+        model: "accounts/fireworks/models/kimi-k3",
+        choices: [],
+        usage: TRAILING_USAGE,
+      },
+    ],
+    state
+  );
+
+  assert.equal(joinDeltas(events, "input_json_delta"), '{"code":"print(1)"}');
+  assert.equal(events.filter((event) => event.type === "message_stop").length, 1);
+  const messageDelta = events.find((event) => event.type === "message_delta");
+  assert.equal(messageDelta?.delta?.stop_reason, "tool_use");
+});
+
+test("stream-end flush does not replay the finish chunk's tool-arg fragment", () => {
+  const state = createState();
+  const events = collectEvents(
+    [
+      {
+        id: "chatcmpl-18065-tool-tail-eof",
+        model: "accounts/fireworks/models/kimi-k3",
+        choices: [
+          {
+            index: 0,
+            delta: {
+              tool_calls: [
+                {
+                  index: 0,
+                  id: "call_tail_eof",
+                  function: { name: "run_python", arguments: '{"code":"print(1)' },
+                },
+              ],
+            },
+            finish_reason: null,
+          },
+        ],
+      },
+      {
+        id: "chatcmpl-18065-tool-tail-eof",
+        model: "accounts/fireworks/models/kimi-k3",
+        choices: [
+          {
+            index: 0,
+            delta: { tool_calls: [{ index: 0, function: { arguments: '"}' } }] },
+            finish_reason: "tool_calls",
+          },
+        ],
+      },
+      null,
+    ],
+    state
+  );
+
+  assert.equal(joinDeltas(events, "input_json_delta"), '{"code":"print(1)"}');
+  assert.equal(events.filter((event) => event.type === "message_stop").length, 1);
+});
+
+test("trailing usage flush does not replay the finish chunk's trailing text", () => {
+  const state = createState();
+  const events = collectEvents(
+    [
+      {
+        id: "chatcmpl-18065-text-tail",
+        model: "accounts/fireworks/models/kimi-k3",
+        choices: [{ index: 0, delta: { content: "Hello" }, finish_reason: null }],
+      },
+      {
+        id: "chatcmpl-18065-text-tail",
+        model: "accounts/fireworks/models/kimi-k3",
+        choices: [{ index: 0, delta: { content: " world" }, finish_reason: "stop" }],
+      },
+      {
+        id: "chatcmpl-18065-text-tail",
+        model: "accounts/fireworks/models/kimi-k3",
+        choices: [],
+        usage: TRAILING_USAGE,
+      },
+    ],
+    state
+  );
+
+  assert.equal(joinDeltas(events, "text_delta"), "Hello world");
+  assert.equal(events.filter((event) => event.type === "message_stop").length, 1);
 });

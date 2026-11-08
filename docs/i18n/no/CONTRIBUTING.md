@@ -15,8 +15,13 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`, eller `>=24.0.0 <27` (anbefalt: 24 LTS)
 - **npm** 10+
 
-> **Brukere av npm v11+ (Node 24+):** Etter `npm install` må du kontrollere at integrerte moduler ble installert:
-> `node -e "require('better-sqlite3')"`. Hvis kommandoen mislykkes med `MODULE_NOT_FOUND`,
+> **Windows med Node 24:** bruk den gjeldende 24 LTS-oppdateringen (minst 24.20.0).
+> Tidligere versjoner kan avslutte etter vellykkede tester når `--test-force-exit` lukker
+> prosessen. Node sin [Windows libuv-fiks](https://github.com/nodejs/node/pull/61999) løser
+> dette kjøretidskrasjet; behold testpåstandene og kontrollene av avslutning av testkjøreren aktivert.
+
+> **Brukere av npm v11+ (Node 24+):** Etter `npm install` må du kontrollere at native moduler ble installert:
+> `node -e "require('better-sqlite3')"`. Hvis dette mislykkes med `MODULE_NOT_FOUND`,
 > kjør `npm approve-scripts better-sqlite3 && npm install`. Se
 > [Feilsøking](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -43,77 +48,79 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Viktige variabler for utvikling:
 
-| Variabel               | Standardverdi for utvikling | Beskrivelse                   |
-| ---------------------- | --------------------------- | ----------------------------- |
-| `PORT`                 | `20128`                     | Serverport                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Basis-URL for grensesnittet   |
-| `JWT_SECRET`           | (generer ovenfor)           | Hemmelighet for JWT-signering |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | Passord ved første innlogging |
-| `APP_LOG_LEVEL`        | `info`                      | Detaljnivå for logging        |
+| Variabel               | Standard for utvikling   | Beskrivelse                   |
+| ---------------------- | ------------------------ | ----------------------------- |
+| `PORT`                 | `20128`                  | Serverport                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis-URL for frontend        |
+| `JWT_SECRET`           | (generer ovenfor)        | Hemmelighet for JWT-signering |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Passord ved første pålogging  |
+| `APP_LOG_LEVEL`        | `info`                   | Detaljnivå for logger         |
 
 ### Innstillinger for kontrollpanelet
 
-Kontrollpanelet har brytere for funksjoner som også kan konfigureres via miljøvariabler:
+Kontrollpanelet tilbyr UI-brytere for funksjoner som også kan konfigureres via miljøvariabler:
 
-| Plassering av innstilling | Bryter                    | Beskrivelse                                     |
-| ------------------------- | ------------------------- | ----------------------------------------------- |
-| Innstillinger → Avansert  | Feilsøkingsmodus          | Aktiver feilsøkingslogger for forespørsler (UI) |
-| Innstillinger → Generelt  | Synlighet for sidepanelet | Vis/skjul deler av sidepanelet                  |
+| Plassering i innstillinger | Bryter                   | Beskrivelse                                     |
+| -------------------------- | ------------------------ | ----------------------------------------------- |
+| Innstillinger → Avansert   | Feilsøkingsmodus         | Aktiver feilsøkingslogger for forespørsler (UI) |
+| Innstillinger → Generelt   | Synlighet for sidestolpe | Vis/skjul deler av sidestolpen                  |
 
-Disse innstillingene lagres i databasen og beholdes på tvers av omstarter. Når de er angitt, overstyrer de standardverdiene fra miljøvariablene.
+Disse innstillingene lagres i databasen og beholdes på tvers av omstarter. Når de er angitt,
+overstyrer de standardverdiene for miljøvariablene.
 
-### Lokal kjøring
+### Kjøre lokalt
 
 ```bash
-# Utviklingsmodus (automatisk innlasting)
+# Utviklingsmodus (automatisk omlasting)
 npm run dev
 
 # Produksjonsbygg
 npm run build    # next build → .build/next/ og deretter assembleStandalone → dist/
 npm run start
 
-# Rask kompilering kun for backend/API ved bidragsyterendringer
+# Rask backend-/API-kompilering for bidragsyterendringer
 npm run build:contributor
 
-# Utgivelsesbygg (ren ombygging + HEAD-kontrollmarkør — påkrevd for distribusjon)
-npm run build:release   # rm -rf .build dist && build + skriver dist/BUILD_SHA
+# Bygg for utgivelse (ren ombygging + HEAD-markør — nødvendig for utrulling)
+npm run build:release   # rm -rf .build dist og bygg + skriver dist/BUILD_SHA
 
 # Vanlig portkonfigurasjon
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bidragsyterbygget utfører kun validering ved kompilering: det setter ikke sammen den frittstående
-distribusjonen og bygger heller ikke valgfrie integrerte pakkeressurser. Bruk det vanlige produksjonsbygget når
-du må validere pakken som skal distribueres.
+Bidragsyterbygget utfører validering som bare omfatter kompilering: Det setter ikke sammen
+den frittstående distribusjonen og bygger ikke valgfrie native pakkeressurser. Bruk det
+vanlige produksjonsbygget når du må validere pakken som skal distribueres.
 
-### Oppsett for byggutdata
+### Struktur for byggeutdata
 
-| Katalog   | Innhold                                                                         | Versjonsstyrt |
-| --------- | ------------------------------------------------------------------------------- | ------------- |
-| `src/`    | Kildekode for applikasjonen (TypeScript / TSX)                                  | Ja            |
-| `.build/` | Mellomprodukter — utdata fra `next build` (gitignored, `distDir = .build/next`) | Nei           |
-| `dist/`   | Distribuerbar pakke — satt sammen av `assembleStandalone` (gitignored)          | Nei           |
+| Katalog   | Innhold                                                                              | Sporingsstatus |
+| --------- | ------------------------------------------------------------------------------------ | -------------- |
+| `src/`    | Kildekode for applikasjonen (TypeScript / TSX)                                       | Ja             |
+| `.build/` | Mellomliggende filer — utdata fra `next build` (gitignored, `distDir = .build/next`) | Nei            |
+| `dist/`   | Pakke klar for distribusjon — satt sammen av `assembleStandalone` (gitignored)       | Nei            |
 
-Byggeprosessen består av én gjennomkjøring:
+Byggeprosessen består av én gjennomgang:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (utdata fra Next.js)
-  └─ assembleStandalone()                 (kopierer frittstående + statiske + offentlige + integrerte ressurser)
-       └─ utdata: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js-utdata)
+  └─ assembleStandalone()                 (kopierer standalone + static + public + native assets)
+       └─ utdata: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` tømmer i tillegg begge katalogene først og skriver
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en kontrollmarkør for distribusjonsintegritet.
+`npm run build:release` rydder i tillegg begge katalogene først og skriver
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en integritetsmarkør for utrulling.
 
-`npm run build:contributor` bruker byggeprofilen som kun omfatter backend. Den erstatter midlertidig
-UI-filene for kontrollpanelet med plassholdere under byggingen, beholder API-rutebehandlerne og gjenoppretter originalfilene
-etter byggingen. Bruk `npm run build` for endringer som påvirker brukergrensesnittet i kontrollpanelet eller for fullstendig
-validering av utgivelsen. Bidragsyterprofilen er ikke en erstatning for utgivelsesbygget.
+`npm run build:contributor` bruker byggeprofilen som bare omfatter backend. Den erstatter
+midlertidig UI-filer for kontrollpanelet med stubber under byggingen, beholder
+API-rutebehandlerne og gjenoppretter originalfilene etter bygget. Bruk `npm run build`
+for endringer som påvirker UI-et i kontrollpanelet, eller for full validering av utgivelsen;
+bidragsyterprofilen er ikke en erstatning for bygget for utgivelse.
 
-> **Merknad om VPS-distribusjon:** Den eksterne bildekatalogen `/usr/lib/node_modules/omniroute/app/`
-> er uendret. Distribusjonsfunksjonene bruker rsync til å overføre innholdet i `dist/` til den.
-> Bare banen til byggutdataene i repositoriet er endret (`app/` → `dist/`).
+> **Merknad om VPS-utrulling:** den eksterne bildeklatalogen `/usr/lib/node_modules/omniroute/app/`
+> er uendret. Utrullingsferdighetene rsync-er innholdet i `dist/` til den.
+> Bare utdatastien for bygging i repositoriet er flyttet (`app/` → `dist/`).
 
 Standard-URL-er:
 

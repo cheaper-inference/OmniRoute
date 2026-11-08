@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import CliStatusBadge from "./CliStatusBadge";
 
 import { Button, Card, ManualConfigModal, ModelSelectModal } from "@/shared/components";
@@ -397,8 +398,8 @@ export default function GrokBuildToolCard({
       {isExpanded && (
         <div className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
           {checking && (
-            <div className="flex items-center gap-2 text-text-muted">
-              <Icon name="progress_activity" className="animate-spin" />
+            <div role="status" className="flex items-center gap-2 text-text-muted">
+              <Spinner decorative size="sm" />
               <span>{t("checkingCli", { tool: "Grok Build" })}</span>
             </div>
           )}
@@ -452,10 +453,10 @@ export default function GrokBuildToolCard({
           </div>
           {selectedEndpoint === CUSTOM_ENDPOINT && (
             <div className={rowClass}>
-              <span className={labelClass}>Custom URL</span>
+              <span className={labelClass}>{t("customUrl")}</span>
               <Icon name="arrow_forward" size={14} className="text-text-muted" />
               <Input
-                aria-label="Custom endpoint"
+                aria-label={t("customEndpointAria")}
                 className="min-w-0 w-auto flex-1"
                 inputClassName="text-xs"
                 type="url"
@@ -479,7 +480,7 @@ export default function GrokBuildToolCard({
               value={effectiveKeyId}
               onChange={(event) => setSelectedKeyId(event.target.value)}
             >
-              <option value="">Use the OmniRoute default key</option>
+              <option value="">{t("useDefaultKey")}</option>
               {apiKeys.map((key) => (
                 <option key={key.id} value={key.id}>
                   {key.key || key.name || key.id}
@@ -500,7 +501,7 @@ export default function GrokBuildToolCard({
               {t("selectModel")}
             </Button>
             <Input
-              aria-label="Main model"
+              aria-label={t("mainModelAria")}
               className="min-w-0 w-auto flex-1"
               inputClassName="text-xs"
               value={model}
@@ -672,7 +673,7 @@ export default function GrokBuildToolCard({
       <ManualConfigModal
         isOpen={showManual}
         onClose={() => setShowManual(false)}
-        title="Grok Build manual config"
+        title={t("manualConfigTitle")}
         configs={[{ filename: "~/.grok/config.toml", content: manualToml }]}
       />
     </Card>
