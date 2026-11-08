@@ -112,6 +112,7 @@ import { validateAiHordeProvider } from "./validation/aihorde";
 import { validateDifyProvider } from "./validation/dify";
 import { validateZyloApiProvider } from "./validation/zylo";
 import { validateInceptionProvider } from "./validation/inception";
+import { validateParetoProvider } from "./validation/pareto";
 import { validateClineProvider } from "./validation/cline";
 import { validateKilocodeProvider } from "./validation/kilocode";
 import { validateAdobeFireflyProvider } from "./validation/adobeFirefly";
@@ -278,6 +279,10 @@ export async function validateProviderApiKey({
     // Inception Labs serves GET /v1/models without authentication (200 for any key), so the
     // generic OpenAI-like probe greened bogus keys. Probe the authenticated chat route instead.
     inception: validateInceptionProvider,
+    // Pareto Inference serves GET /v1/models without authentication, so the generic probe
+    // would green any key. Its chat route authenticates first (401) and refuses a non-streamed
+    // request with 400 streaming_only before holding credits, so the probe is never billed.
+    pareto: validateParetoProvider,
     // Cline and ClinePass serve unauthenticated GET /v1/models (open catalog returning 200 for any key)
     // and require streaming + Cline client headers on /chat/completions. Probe the authenticated route.
     cline: validateClineProvider,
