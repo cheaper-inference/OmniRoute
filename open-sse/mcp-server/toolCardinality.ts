@@ -6,10 +6,10 @@
  * manifest saves tokens in the model's context window ("layer 5"
  * compression).
  *
- * ACTIVATION NOTE: The live MCP server registration loop in server.ts is
- * UNCHANGED by this file. This is a pure utility; wiring it into the server
- * startup path is a separate follow-up task. The default server behaviour
- * remains identical to before.
+ * ACTIVATION NOTE: Tool-cardinality filtering is wired into createMcpServer()
+ * in server.ts via registerTool. MCP_TOOL_DENY and MCP_TOOL_ALLOW enable the
+ * filter on an opt-in basis; with both unset, the complete tool manifest is
+ * announced unchanged.
  *
  * Key rules for reduceToolManifest:
  *  1. A tool is kept if any of its scopes intersects `allowScopes` (when set).

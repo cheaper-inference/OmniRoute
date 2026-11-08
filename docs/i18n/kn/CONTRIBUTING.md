@@ -20,14 +20,17 @@ UI/UX, i18n, CLI, ಡೇಟಾಬೇಸ್ ಮತ್ತು ನಿರ್ಮಾಣ
 - **Node.js** `>=22.22.2 <23`, ಅಥವಾ `>=24.0.0 <27` (ಶಿಫಾರಸು: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ ಬಳಕೆದಾರರು (Node 24+):** `npm install` ನಂತರ, ನೇಟಿವ್ ಮಾಡ್ಯೂಲ್ಗಳು ಸ್ಥಾಪನೆಯಾಗಿವೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ:
+> **Node 24 ಹೊಂದಿರುವ Windows:** ಪ್ರಸ್ತುತ 24 LTS ಪ್ಯಾಚ್ ಬಿಡುಗಡೆಯನ್ನು (ಕನಿಷ್ಠ 24.20.0) ಬಳಸಿ.
+> ಹಿಂದಿನ ಬಿಡುಗಡೆಗಳಲ್ಲಿ `--test-force-exit` ಪ್ರಕ್ರಿಯೆಯನ್ನು ಮುಚ್ಚಿದ ನಂತರ ಯಶಸ್ವಿ ಪರೀಕ್ಷೆಗಳ ಬಳಿಕವೂ ಸ್ಥಗಿತಗೊಳ್ಳಬಹುದು.
+> Node ನ [Windows libuv ಪರಿಹಾರ](https://github.com/nodejs/node/pull/61999) ಈ ರನ್ಟೈಮ್ ಕ್ರ್ಯಾಶ್ ಅನ್ನು ಪರಿಹರಿಸುತ್ತದೆ; ಪರೀಕ್ಷಾ assertions ಮತ್ತು runner exit ಪರಿಶೀಲನೆಗಳನ್ನು ಸಕ್ರಿಯವಾಗಿಯೇ ಇರಿಸಿ.
+
+> **npm v11+ ಬಳಕೆದಾರರು (Node 24+):** `npm install` ನಂತರ, native modules ಸ್ಥಾಪಿತವಾಗಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ:
 > `node -e "require('better-sqlite3')"`. ಇದು `MODULE_NOT_FOUND` ದೋಷದೊಂದಿಗೆ ವಿಫಲವಾದರೆ,
-> `npm approve-scripts better-sqlite3 && npm install` ಅನ್ನು ಚಲಾಯಿಸಿ. ನೋಡಿ:
-> [ದೋಷನಿವಾರಣೆ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> `npm approve-scripts better-sqlite3 && npm install` ಅನ್ನು ರನ್ ಮಾಡಿ. [ಸಮಸ್ಯೆ ಪರಿಹಾರ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ನೋಡಿ.
 
 - **Git**
 
-### ಕ್ಲೋನ್ ಮತ್ತು ಸ್ಥಾಪನೆ
+### ಕ್ಲೋನ್ ಮಾಡಿ ಮತ್ತು ಇನ್ಸ್ಟಾಲ್ ಮಾಡಿ
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -46,28 +49,28 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ಅಭಿವೃದ್ಧಿಗೆ ಪ್ರಮುಖ ಚರಗಳು:
+ಅಭಿವೃದ್ಧಿಗಾಗಿ ಪ್ರಮುಖ ಚರಗಳು:
 
 | ಚರ                     | ಅಭಿವೃದ್ಧಿಯ ಡೀಫಾಲ್ಟ್      | ವಿವರಣೆ                |
 | ---------------------- | ------------------------ | --------------------- |
 | `PORT`                 | `20128`                  | ಸರ್ವರ್ ಪೋರ್ಟ್         |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ಫ್ರಂಟ್ಎಂಡ್ನ ಮೂಲ URL   |
-| `JWT_SECRET`           | (ಮೇಲಿನಂತೆ ರಚಿಸಿ)         | JWT ಸಹಿ ರಹಸ್ಯ         |
+| `JWT_SECRET`           | (ಮೇಲೆ ರಚಿಸಿ)             | JWT ಸಹಿ ರಹಸ್ಯ         |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | ಮೊದಲ ಲಾಗಿನ್ ಪಾಸ್ವರ್ಡ್ |
-| `APP_LOG_LEVEL`        | `info`                   | ಲಾಗ್ ವಿವರದ ಮಟ್ಟ       |
+| `APP_LOG_LEVEL`        | `info`                   | ಲಾಗ್ ವಿವರ ಮಟ್ಟ        |
 
 ### ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಸೆಟ್ಟಿಂಗ್ಗಳು
 
-ಪರಿಸರ ಚರಗಳ ಮೂಲಕವೂ ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದಾದ ವೈಶಿಷ್ಟ್ಯಗಳಿಗೆ ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಟಾಗಲ್ಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ:
+ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪರಿಸರ ಚರಗಳ ಮೂಲಕವೂ ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದಾದ ವೈಶಿಷ್ಟ್ಯಗಳಿಗಾಗಿ UI ಟಾಗಲ್ಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ:
 
 | ಸೆಟ್ಟಿಂಗ್ ಸ್ಥಳ         | ಟಾಗಲ್           | ವಿವರಣೆ                                    |
 | ---------------------- | --------------- | ----------------------------------------- |
 | ಸೆಟ್ಟಿಂಗ್ಗಳು → ಸುಧಾರಿತ | ಡೀಬಗ್ ಮೋಡ್      | ಡೀಬಗ್ ವಿನಂತಿ ಲಾಗ್ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ (UI) |
 | ಸೆಟ್ಟಿಂಗ್ಗಳು → ಸಾಮಾನ್ಯ | ಸೈಡ್ಬಾರ್ ಗೋಚರತೆ | ಸೈಡ್ಬಾರ್ ವಿಭಾಗಗಳನ್ನು ತೋರಿಸಿ/ಮರೆಮಾಡಿ       |
 
-ಈ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಡೇಟಾಬೇಸ್ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಮರುಪ್ರಾರಂಭಗಳ ನಂತರವೂ ಉಳಿಯುತ್ತವೆ; ಹೊಂದಿಸಿದಾಗ ಅವು ಪರಿಸರ ಚರಗಳ ಡೀಫಾಲ್ಟ್ಗಳನ್ನು ಅತಿಕ್ರಮಿಸುತ್ತವೆ.
+ಈ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಡೇಟಾಬೇಸ್ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಮರುಪ್ರಾರಂಭಗಳಾದರೂ ಉಳಿಯುತ್ತವೆ; ಹೊಂದಿಸಿದಾಗ ಇವು env var ಡೀಫಾಲ್ಟ್ಗಳನ್ನು ಮೀರಿಸುತ್ತವೆ.
 
-### ಸ್ಥಳೀಯವಾಗಿ ಚಲಾಯಿಸುವುದು
+### ಸ್ಥಳೀಯವಾಗಿ ರನ್ ಮಾಡುವುದು
 
 ```bash
 # ಅಭಿವೃದ್ಧಿ ಮೋಡ್ (ಹಾಟ್ ರೀಲೋಡ್)
@@ -77,48 +80,43 @@ npm run dev
 npm run build    # next build → .build/next/ ನಂತರ assembleStandalone → dist/
 npm run start
 
-# ಕೊಡುಗೆದಾರರ ಬದಲಾವಣೆಗಳಿಗಾಗಿ ವೇಗವಾದ ಬ್ಯಾಕೆಂಡ್/API-ಮಾತ್ರ ಕಂಪೈಲ್
+# ಕೊಡುಗೆದಾರರ ಬದಲಾವಣೆಗಳಿಗಾಗಿ ವೇಗದ backend/API-only ಕಂಪೈಲ್
 npm run build:contributor
 
 # ಬಿಡುಗಡೆ ಬಿಲ್ಡ್ (ಸ್ವಚ್ಛ ಮರುಬಿಲ್ಡ್ + HEAD ಸೆಂಟಿನಲ್ — ಡಿಪ್ಲಾಯ್ಗೆ ಅಗತ್ಯ)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ಅನ್ನು ಬರೆಯುತ್ತದೆ
+npm run build:release   # rm -rf .build dist ಮತ್ತು build + dist/BUILD_SHA ಬರೆಯುತ್ತದೆ
 
 # ಸಾಮಾನ್ಯ ಪೋರ್ಟ್ ಕಾನ್ಫಿಗರೇಶನ್
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ಕೊಡುಗೆದಾರರ ಬಿಲ್ಡ್ ಕಂಪೈಲ್-ಮಾತ್ರ ಮೌಲ್ಯಮಾಪನವನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ: ಇದು ಸ್ವತಂತ್ರ
-ವಿತರಣೆಯನ್ನು ಜೋಡಿಸುವುದಿಲ್ಲ ಅಥವಾ ಐಚ್ಛಿಕ ನೇಟಿವ್ ಪ್ಯಾಕೇಜಿಂಗ್ ಅಸೆಟ್ಗಳನ್ನು ನಿರ್ಮಿಸುವುದಿಲ್ಲ. ವಿತರಿಸಬಹುದಾದ ಬಂಡಲ್ ಅನ್ನು
-ಮೌಲ್ಯೀಕರಿಸಬೇಕಾದಾಗ ಸಾಮಾನ್ಯ ಪ್ರೊಡಕ್ಷನ್ ಬಿಲ್ಡ್ ಅನ್ನು ಬಳಸಿ.
+ಕೊಡುಗೆದಾರರ ಬಿಲ್ಡ್ ಕಂಪೈಲ್-ಮಾತ್ರ ಪರಿಶೀಲನೆಯನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ: ಇದು standalone distribution ಅನ್ನು ಜೋಡಿಸುವುದಿಲ್ಲ ಅಥವಾ ಐಚ್ಛಿಕ native packaging assets ಅನ್ನು ಬಿಲ್ಡ್ ಮಾಡುವುದಿಲ್ಲ. ಶಿಪ್ ಮಾಡಬಹುದಾದ bundle ಅನ್ನು ಪರಿಶೀಲಿಸಬೇಕಾದಾಗ ನಿಯಮಿತ ಪ್ರೊಡಕ್ಷನ್ ಬಿಲ್ಡ್ ಬಳಸಿ.
 
 ### ಬಿಲ್ಡ್ ಔಟ್ಪುಟ್ ವಿನ್ಯಾಸ
 
-| ಡೈರೆಕ್ಟರಿ | ವಿಷಯಗಳು                                                                 | ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆಯೇ |
-| --------- | ----------------------------------------------------------------------- | -------------------- |
-| `src/`    | ಅಪ್ಲಿಕೇಶನ್ ಮೂಲ (TypeScript / TSX)                                       | ಹೌದು                 |
-| `.build/` | ಮಧ್ಯಂತರಗಳು — `next build` ಔಟ್ಪುಟ್ (gitignored, `distDir = .build/next`) | ಇಲ್ಲ                 |
-| `dist/`   | ವಿತರಿಸಬಹುದಾದ ಬಂಡಲ್ — `assembleStandalone` ಮೂಲಕ ಜೋಡಿಸಲಾಗಿದೆ (gitignored) | ಇಲ್ಲ                 |
+| ಡೈರೆಕ್ಟರಿ | ವಿಷಯಗಳು                                                                    | ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆಯೇ |
+| --------- | -------------------------------------------------------------------------- | -------------------- |
+| `src/`    | ಅಪ್ಲಿಕೇಶನ್ ಮೂಲ (TypeScript / TSX)                                          | ಹೌದು                 |
+| `.build/` | ಮಧ್ಯಂತರಗಳು — `next build` ಔಟ್ಪುಟ್ (gitignored, `distDir = .build/next`)    | ಇಲ್ಲ                 |
+| `dist/`   | ಶಿಪ್ ಮಾಡಬಹುದಾದ bundle — `assembleStandalone` ಮೂಲಕ ಜೋಡಿಸಲಾಗಿದೆ (gitignored) | ಇಲ್ಲ                 |
 
-ಬಿಲ್ಡ್ ಪೈಪ್ಲೈನ್ ಒಂದೇ ಪಾಸ್ನಲ್ಲಿ ನಡೆಯುತ್ತದೆ:
+ಬಿಲ್ಡ್ ಪೈಪ್ಲೈನ್ ಒಂದೇ ಹಂತದಲ್ಲಿ ನಡೆಯುತ್ತದೆ:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js ಔಟ್ಪುಟ್)
-  └─ assembleStandalone()                 (standalone + static + public + ನೇಟಿವ್ ಅಸೆಟ್ಗಳನ್ನು ನಕಲಿಸುತ್ತದೆ)
-       └─ ಔಟ್ಪುಟ್: dist/                 (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (standalone + static + public + native assets ಅನ್ನು ನಕಲಿಸುತ್ತದೆ)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ಹೆಚ್ಚುವರಿಯಾಗಿ ಮೊದಲು ಎರಡೂ ಡೈರೆಕ್ಟರಿಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸುತ್ತದೆ ಮತ್ತು
-ಡಿಪ್ಲಾಯ್ ಸಮಗ್ರತೆಯ ಸೆಂಟಿನಲ್ ಆಗಿ `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ಅನ್ನು ಬರೆಯುತ್ತದೆ.
+`npm run build:release` ಹೆಚ್ಚುವರಿಯಾಗಿ ಮೊದಲು ಎರಡೂ ಡೈರೆಕ್ಟರಿಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ಡಿಪ್ಲಾಯ್ ಸಮಗ್ರತೆಯ ಸೆಂಟಿನಲ್ ಆಗಿ
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ಅನ್ನು ಬರೆಯುತ್ತದೆ.
 
-`npm run build:contributor` ಬ್ಯಾಕೆಂಡ್-ಮಾತ್ರ ಬಿಲ್ಡ್ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬಳಸುತ್ತದೆ. ಇದು ಬಿಲ್ಡ್ ಮಾಡುವಾಗ
-ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಫೈಲ್ಗಳಿಗೆ ತಾತ್ಕಾಲಿಕ ಸ್ಟಬ್ಗಳನ್ನು ಬಳಸುತ್ತದೆ, API ರೂಟ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ ಮತ್ತು ಬಿಲ್ಡ್
-ನಂತರ ಮೂಲ ಫೈಲ್ಗಳನ್ನು ಮರುಸ್ಥಾಪಿಸುತ್ತದೆ. ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುವ ಬದಲಾವಣೆಗಳಿಗೆ ಅಥವಾ ಸಂಪೂರ್ಣ
-ಬಿಡುಗಡೆ ಮೌಲ್ಯಮಾಪನಕ್ಕಾಗಿ `npm run build` ಅನ್ನು ಬಳಸಿ; ಕೊಡುಗೆದಾರರ ಪ್ರೊಫೈಲ್ ಬಿಡುಗಡೆ ಬಿಲ್ಡ್ಗೆ ಪರ್ಯಾಯವಲ್ಲ.
+`npm run build:contributor` backend-only ಬಿಲ್ಡ್ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬಳಸುತ್ತದೆ. ಬಿಲ್ಡ್ ಮಾಡುವಾಗ ಇದು ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಫೈಲ್ಗಳನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ stub ಮಾಡುತ್ತದೆ, API route handlers ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ ಮತ್ತು ಬಿಲ್ಡ್ ನಂತರ ಮೂಲ ಫೈಲ್ಗಳನ್ನು ಮರುಸ್ಥಾಪಿಸುತ್ತದೆ. ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುವ ಬದಲಾವಣೆಗಳಿಗಾಗಿ ಅಥವಾ ಸಂಪೂರ್ಣ ಬಿಡುಗಡೆ ಪರಿಶೀಲನೆಗಾಗಿ `npm run build` ಬಳಸಿ; ಕೊಡುಗೆದಾರರ ಪ್ರೊಫೈಲ್ ಬಿಡುಗಡೆ ಬಿಲ್ಡ್ಗೆ ಪರ್ಯಾಯವಲ್ಲ.
 
-> **VPS ಡಿಪ್ಲಾಯ್ ಸೂಚನೆ:** ರಿಮೋಟ್ ಇಮೇಜ್ ಡೈರೆಕ್ಟರಿ `/usr/lib/node_modules/omniroute/app/`
-> ಬದಲಾಗಿಲ್ಲ. ಡಿಪ್ಲಾಯ್ ಸ್ಕಿಲ್ಗಳು `dist/` ನ ವಿಷಯಗಳನ್ನು rsync ಮೂಲಕ ಅದಕ್ಕೆ ವರ್ಗಾಯಿಸುತ್ತವೆ.
-> ರೆಪೊಸಿಟರಿಯೊಳಗಿನ ಬಿಲ್ಡ್ ಔಟ್ಪುಟ್ ಪಥ ಮಾತ್ರ ಬದಲಾಗಿದೆ (`app/` → `dist/`).
+> **VPS ಡಿಪ್ಲಾಯ್ ಸೂಚನೆ:** ರಿಮೋಟ್ image ಡೈರೆಕ್ಟರಿ `/usr/lib/node_modules/omniroute/app/`
+> ಬದಲಾಗುವುದಿಲ್ಲ. ಡಿಪ್ಲಾಯ್ skills `dist/` ನ ವಿಷಯಗಳನ್ನು ಅದರಲ್ಲಿ rsync ಮಾಡುತ್ತವೆ.
+> ರೆಪೊಸಿಟರಿಯೊಳಗಿನ ಬಿಲ್ಡ್ ಔಟ್ಪುಟ್ ಮಾರ್ಗ ಮಾತ್ರ ಬದಲಾಗಿದೆ (`app/` → `dist/`).
 
 ಡೀಫಾಲ್ಟ್ URLಗಳು:
 
@@ -177,15 +175,15 @@ refactor(db): consolidate rate limit tables
 # ಎಲ್ಲಾ ಪರೀಕ್ಷೆಗಳು (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# ಒಂದೇ ಪರೀಕ್ಷಾ ಫೈಲ್ (Node.js ಸ್ಥಳೀಯ test runner — ಹೆಚ್ಚಿನ ಪರೀಕ್ಷೆಗಳು ಇದನ್ನು ಬಳಸುತ್ತವೆ)
+# ಒಂದೇ ಪರೀಕ್ಷಾ ಫೈಲ್ (Node.js ಸ್ಥಳೀಯ ಪರೀಕ್ಷಾ ರನ್ನರ್ — ಹೆಚ್ಚಿನ ಪರೀಕ್ಷೆಗಳು ಇದನ್ನೇ ಬಳಸುತ್ತವೆ)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# ನಿಮ್ಮ ಬದಲಾವಣೆಯಿಂದ ಪ್ರಭಾವಿತವಾದ unit ಪರೀಕ್ಷೆಗಳು ಮಾತ್ರ (CI gate ನಂತೆಯೇ ಅದೇ TIA selector, #8084)
+# ನಿಮ್ಮ ಬದಲಾವಣೆಯಿಂದ ಪ್ರಭಾವಿತವಾದ unit ಪರೀಕ್ಷೆಗಳು ಮಾತ್ರ (CI gate, #8084 ನಲ್ಲಿರುವ ಅದೇ TIA selector)
 npm run test:scoped            # ಕೊನೆಯ commit ನಲ್ಲಿನ ಬದಲಾವಣೆಗಳು (ಅಥವಾ working tree)
-npm run test:scoped:staged     # staged ಬದಲಾವಣೆಗಳು ಮಾತ್ರ — pre-commit ಚಾಲನೆಯೊಂದಿಗೆ ಚೆನ್ನಾಗಿ ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆ
-npm run test:scoped:full       # ಮೊದಲು import-graph map ಅನ್ನು ಮರುನಿರ್ಮಿಸಿ (ಫೈಲ್ಗಳನ್ನು ಸೇರಿಸಿದ/ಸರಿಸಿದ ನಂತರ)
-# Exit 1 + "run the full suite" ಎಂದರೆ hub ಫೈಲ್ (tsconfig, package.json, …) ಅಥವಾ map ಮಾಡದ
-# source ಬದಲಾಗಿದೆ — selector ಸುರಕ್ಷಿತವಾಗಿ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ, ಅದು ಎಂದಿಗೂ ಸದ್ದಿಲ್ಲದೆ ಬಿಟ್ಟುಬಿಡುವುದಿಲ್ಲ.
+npm run test:scoped:staged     # staged ಬದಲಾವಣೆಗಳು ಮಾತ್ರ — pre-commit run ಜೊತೆಗೆ ಉತ್ತಮವಾಗಿ ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆ
+npm run test:scoped:full       # ಮೊದಲು import-graph map ಅನ್ನು ಮರುನಿರ್ಮಿಸುತ್ತದೆ (ಫೈಲ್ಗಳನ್ನು ಸೇರಿಸಿದ/ಸ್ಥಳಾಂತರಿಸಿದ ನಂತರ)
+# Exit 1 + "ಸಂಪೂರ್ಣ suite ಅನ್ನು ಚಲಾಯಿಸಿ" ಎಂದರೆ hub ಫೈಲ್ (tsconfig, package.json, …) ಅಥವಾ
+# map ಮಾಡದ source ಬದಲಾಗಿದೆ — selector ಸುರಕ್ಷಿತವಾಗಿ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ, ಅದು ಎಂದಿಗೂ ಮೌನವಾಗಿ ಬಿಟ್ಟುಬಿಡುವುದಿಲ್ಲ.
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
@@ -208,14 +206,14 @@ npm run lint
 npm run check
 
 # Gate ಮಾಡಲಾದ ನೈಜ-upstream combo smoke (VPS ಪ್ರವೇಶ + ನೈಜ provider credits ಅಗತ್ಯವಿದೆ)
-# ನೈಜ providers ಅನ್ನು ಬಳಸುತ್ತದೆ — ಸ್ವಲ್ಪ ವೆಚ್ಚವಾಗುತ್ತದೆ. CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ. Gate ಇಲ್ಲದಿದ್ದರೆ ಸ್ವಚ್ಛವಾಗಿ ಬಿಟ್ಟುಬಿಡುತ್ತದೆ.
-# ಅಗತ್ಯವಿರುವುದು: ssh root@192.168.0.15 ಪ್ರವೇಶ (VPS ನಿಂದ read-only DB snapshot ಅನ್ನು source ಮಾಡುತ್ತದೆ).
+# ನೈಜ providers ಅನ್ನು ಬಳಸುತ್ತದೆ — ಸ್ವಲ್ಪ ವೆಚ್ಚವಾಗುತ್ತದೆ. CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ. Gate ಇಲ್ಲದಿದ್ದರೆ ಸರಿಯಾಗಿ ಬಿಟ್ಟುಬಿಡುತ್ತದೆ.
+# ಅಗತ್ಯ: ssh root@192.168.0.15 ಪ್ರವೇಶ (VPS ನಿಂದ read-only DB snapshot ಅನ್ನು source ಮಾಡುತ್ತದೆ).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — ಸರಳ Node ESM scripts, live .15 server ಅನ್ನು ನೇರವಾಗಿ ಬಳಸುತ್ತವೆ.
-# ಅಗತ್ಯವಿರುವುದು: ssh root@192.168.0.15 ಪ್ರವೇಶ (SSH sqlite ಮೂಲಕ combos ರಚಿಸಲಾಗುತ್ತದೆ/ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ).
-# ನೈಜ providers ಅನ್ನು ಬಳಸುತ್ತದೆ (ಸಣ್ಣ ವೆಚ್ಚ). ಕೇವಲ __live_test__* combos ಅನ್ನು ರಚಿಸುತ್ತದೆ/ಅಳಿಸುತ್ತದೆ. CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ.
-# .15 ನಲ್ಲಿ REQUIRE_API_KEY=false ಆದ್ದರಿಂದ API key ಅಗತ್ಯವಿಲ್ಲ, ಆದರೆ ಹೊಂದಿಸಿದ್ದರೆ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ಅನ್ನು ಗೌರವಿಸುತ್ತದೆ.
+# Phase-3 VPS live smoke — ಸರಳ Node ESM scripts, ನೇರವಾಗಿ live .15 server ಅನ್ನು ಬಳಸುತ್ತವೆ.
+# ಅಗತ್ಯ: ssh root@192.168.0.15 ಪ್ರವೇಶ (SSH sqlite ಮೂಲಕ combos ರಚಿಸಲಾಗುತ್ತದೆ/ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ).
+# ನೈಜ providers ಅನ್ನು ಬಳಸುತ್ತದೆ (ಸ್ವಲ್ಪ ವೆಚ್ಚ). __live_test__* combos ಅನ್ನು ಮಾತ್ರ ರಚಿಸುತ್ತದೆ/ಅಳಿಸುತ್ತದೆ. CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ.
+# .15 ನಲ್ಲಿ REQUIRE_API_KEY=false ಇರುವುದರಿಂದ API key ಅಗತ್ಯವಿಲ್ಲ, ಆದರೆ ಹೊಂದಿಸಿದ್ದರೆ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ಅನ್ನು ಗೌರವಿಸುತ್ತದೆ.
 npm run test:combo:live:vps              # 7 HTTP ಸನ್ನಿವೇಶಗಳು (priority/round-robin/weighted/cost/fusion/auto + health)
 npm run test:combo:live:vps:failover     # ನೈಜ cross-provider failover ಸನ್ನಿವೇಶವನ್ನು ಸೇರಿಸುತ್ತದೆ (ಒಟ್ಟು 8)
 ```
@@ -223,9 +221,9 @@ npm run test:combo:live:vps:failover     # ನೈಜ cross-provider failover ಸ
 Coverage ಟಿಪ್ಪಣಿಗಳು:
 
 - `npm run test:coverage` ಮುಖ್ಯ unit test suite ಗಾಗಿ source coverage ಅನ್ನು ಅಳೆಯುತ್ತದೆ, `tests/**` ಅನ್ನು ಹೊರತುಪಡಿಸುತ್ತದೆ ಮತ್ತು `open-sse/**` ಅನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ
-- Pull requests ಗಳು statements/lines/functions/branches ಗಾಗಿ coverage gate ಅನ್ನು **60%+** ನಲ್ಲಿ ಉಳಿಸಬೇಕು
+- Pull requests ಗಳು statements/lines/functions/branches ಗಳ coverage gate ಅನ್ನು **60%+** ನಲ್ಲಿ ಉಳಿಸಬೇಕು
 - PR ಒಂದು `src/`, `open-sse/`, `electron/`, ಅಥವಾ `bin/` ನಲ್ಲಿನ production code ಅನ್ನು ಬದಲಾಯಿಸಿದರೆ, ಅದೇ PR ನಲ್ಲಿ automated tests ಅನ್ನು ಸೇರಿಸಬೇಕು ಅಥವಾ ನವೀಕರಿಸಬೇಕು
-- `npm run coverage:report` ಇತ್ತೀಚಿನ coverage run ನಿಂದ ವಿವರವಾದ file-by-file ವರದಿಯನ್ನು ಮುದ್ರಿಸುತ್ತದೆ
+- `npm run coverage:report` ಇತ್ತೀಚಿನ coverage run ನ ವಿವರವಾದ file-by-file report ಅನ್ನು ಮುದ್ರಿಸುತ್ತದೆ
 - `npm run test:coverage:legacy` ಐತಿಹಾಸಿಕ ಹೋಲಿಕೆಗಾಗಿ ಹಳೆಯ metric ಅನ್ನು ಉಳಿಸುತ್ತದೆ
 - ಹಂತ ಹಂತದ coverage ಸುಧಾರಣಾ roadmap ಗಾಗಿ `docs/ops/COVERAGE_PLAN.md` ನೋಡಿ
 
@@ -233,20 +231,21 @@ Coverage ಟಿಪ್ಪಣಿಗಳು:
 
 PR ತೆರೆಯುವ ಮೊದಲು, ನೀವು ಬದಲಾಯಿಸಿದ ವಿಷಯಕ್ಕಾಗಿ ಕೇಂದ್ರೀಕೃತ loop ಅನ್ನು ಚಲಾಯಿಸಲು
 [Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ಬಳಸಿ. ಸಂಪೂರ್ಣ unit suite (4 CI shards), Vitest, **60%+** coverage gate ಮತ್ತು
-production build ಇವು CI ಯ ಜವಾಬ್ದಾರಿ — ಅವುಗಳನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಚಲಾಯಿಸುವುದರಿಂದ PR
-ಪರಿಶೀಲನೆಗಳು ಈಗಾಗಲೇ ನಿಮಗೆ ನೀಡದ ಯಾವುದೇ ಹೆಚ್ಚುವರಿ ಸಂಕೇತ ದೊರೆಯುವುದಿಲ್ಲ ಮತ್ತು ಸಣ್ಣ ಯಂತ್ರಗಳಲ್ಲಿ ಅದು host ಅನ್ನು ಪೂರ್ತಿಯಾಗಿ ಬಳಸಬಹುದು (#8084):
+production build ಇವು CI ಯ ಜವಾಬ್ದಾರಿಯಾಗಿವೆ — ಅವುಗಳನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಚಲಾಯಿಸುವುದರಿಂದ PR
+ಪರಿಶೀಲನೆಗಳು ಈಗಾಗಲೇ ನೀಡದ ಯಾವುದೇ ಹೆಚ್ಚುವರಿ ಸೂಚನೆ ಸಿಗುವುದಿಲ್ಲ ಮತ್ತು ಸಣ್ಣ ಯಂತ್ರಗಳಲ್ಲಿ ಅದು host ಅನ್ನು ಸಂಪೂರ್ಣವಾಗಿ ಬಳಸಿಕೊಳ್ಳಬಹುದು (#8084):
 
 - ನಿಮ್ಮ ಬದಲಾವಣೆಯನ್ನು ಒಳಗೊಳ್ಳುವ test files ಅನ್ನು ಚಲಾಯಿಸಿ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` ಚಲಾಯಿಸಿ
 - production code ಬದಲಾದಾಗಲೆಲ್ಲ ಅದೇ PR ನಲ್ಲಿ automated tests ಅನ್ನು ಸೇರಿಸಿ ಅಥವಾ ನವೀಕರಿಸಿ
+- `node:test` files ನಲ್ಲಿ, ಪ್ರತಿಯೊಂದು top-level `await` ಅನ್ನು (ಉದಾಹರಣೆಗೆ `await import(...)`) ಮೊದಲ `test()` / `describe()` ಗಿಂತ ಮೊದಲು ಇರಿಸಿ: `--test-force-exit` ಅಡಿಯಲ್ಲಿ, ಅದರ ನಂತರ ನೋಂದಾಯಿಸಿದ tests ಮೌನವಾಗಿ ಎಂದಿಗೂ ಚಲಿಸದೆ ಇರಬಹುದು (#18045; ಇದನ್ನು `npm run check:test-tla-order` ಜಾರಿಗೊಳಿಸುತ್ತದೆ)
 - production code ಬದಲಾದಾಗ ಬದಲಾಯಿಸಿದ ಅಥವಾ ಸೇರಿಸಿದ test files ಅನ್ನು PR ವಿವರಣೆಯಲ್ಲಿ ಸೇರಿಸಿ
-- project secrets ಅನ್ನು CI ನಲ್ಲಿ configure ಮಾಡಿದ್ದರೆ PR ನಲ್ಲಿನ SonarQube ಫಲಿತಾಂಶವನ್ನು ಪರಿಶೀಲಿಸಿ
+- CI ನಲ್ಲಿ project secrets configure ಮಾಡಿರುವಾಗ PR ನಲ್ಲಿನ SonarQube ಫಲಿತಾಂಶವನ್ನು ಪರಿಶೀಲಿಸಿ
 
-ಪ್ರಸ್ತುತ test ಸ್ಥಿತಿ: ಇವುಗಳನ್ನು ಒಳಗೊಂಡ **122 unit test files**:
+ಪ್ರಸ್ತುತ ಪರೀಕ್ಷಾ ಸ್ಥಿತಿ: ಇವುಗಳನ್ನು ಒಳಗೊಂಡಿರುವ **122 unit test files**:
 
 - Provider translators ಮತ್ತು format conversion
 - Rate limiting, circuit breaker ಮತ್ತು resilience
-- Semantic cache, idempotency, progress tracking
+- Semantic cache, idempotency ಮತ್ತು progress tracking
 - Database operations ಮತ್ತು schema (21 DB modules)
 - OAuth flows ಮತ್ತು authentication
 - API endpoint validation (Zod v4)

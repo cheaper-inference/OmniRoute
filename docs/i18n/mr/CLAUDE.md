@@ -11,16 +11,18 @@
 PII मधून घेतलेले धडे). ते पूर्णपणे वाचा; प्रकल्पाचे नियम येथे पुन्हा जोडू नका. खालील सर्व बाबी केवळ
 Claude Code ला लागू होतात — `AGENTS.md` मध्ये आधीच परिभाषित केलेल्या नियमांचे कार्यात्मक परिष्करण.
 
-## Worktree विलगीकरण — Claude Code साठी विशिष्ट बाबी
+## वर्कट्री विलगीकरण — Claude Code-विशिष्ट बाबी
 
-संपूर्ण अनिवार्य worktree प्रोटोकॉल (बेस-ब्रँचची पुष्टी, `.claude/worktrees/` प्रमाणित
-पथ, `cp -al` node_modules, teardown नियम) `AGENTS.md` → Git Workflow → "Worktree
-isolation" मध्ये आहे. Claude-Code-विशिष्ट मुद्दे:
+संपूर्ण अनिवार्य वर्कट्री प्रोटोकॉल (बेस-ब्रँच पुष्टीकरण, `.claude/worktrees/` कॅनॉनिकल
+पथ, `cp -al` node_modules, टिअरडाउन नियम)
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) मध्ये आहे (`AGENTS.md` →
+Git Workflow → "Worktree isolation" मध्ये सारांशित). Claude-Code-विशिष्ट मुद्दे:
 
-- ऑपरेटरने बेस ब्रँच आधीच सांगितली नसेल, तर `AskUserQuestion` द्वारे तिची पुष्टी करा (कठोर नियम #19).
-- मूळ `EnterWorktree` साधनाला प्राधान्य द्या — ते आधीच `.claude/worktrees/`
-  (प्रमाणित पथ) अंतर्गत worktrees तयार करते. दस्तऐवजीकरण केलेल्या `git
-worktree add` कमांडने worktree तयार करा, त्यानंतर त्याच्या `path` सह `EnterWorktree` कॉल करा.
+- `AskUserQuestion` द्वारे ऑपरेटरकडून बेस ब्रँचची पुष्टी करा (कठोर नियम #19), जर त्यांनी
+  आधीच सांगितलेले नसेल तर.
+- नेटिव्ह `EnterWorktree` टूलला प्राधान्य द्या — ते आधीच
+  `.claude/worktrees/` (कॅनॉनिकल पथ) खाली वर्कट्री तयार करते. दस्तऐवजीकरण केलेल्या `git
+worktree add` कमांडने वर्कट्री तयार करा, नंतर त्याच्या `path` सह `EnterWorktree` कॉल करा.
 
 ## सत्रांमधील सुरक्षितता — Claude Code साठी विशिष्ट बाबी
 

@@ -38,13 +38,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/diegosouzapw/OmniRoute.git",
+    "url": "git+https://github.com/cheaper-inference/OmniRoute.git",
     "directory": "@omniroute/opencode-provider"
   },
   "bugs": {
-    "url": "https://github.com/diegosouzapw/OmniRoute/issues"
+    "url": "https://github.com/cheaper-inference/OmniRoute/issues"
   },
-  "homepage": "https://github.com/diegosouzapw/OmniRoute/tree/main/%40omniroute/opencode-provider#readme",
+  "homepage": "https://github.com/cheaper-inference/OmniRoute/tree/main/%40omniroute/opencode-provider#readme",
   "engines": {
     "node": ">=22.22.3"
   },

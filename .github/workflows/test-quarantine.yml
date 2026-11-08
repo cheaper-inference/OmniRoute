@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   quarantine:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

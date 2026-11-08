@@ -3,9 +3,14 @@
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Slider } from "@omniroute/ui-kit/slider";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
+import Icon from "@/shared/components/Icon";
+import Select from "@/shared/components/Select";
+import { cn } from "@/shared/utils/cn";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,6 +44,19 @@ interface Combo {
   targets: string;
   isActive: boolean;
 }
+
+const formatTokens = (value: number) =>
+  value >= 1000 ? `${Math.round(value / 100) / 10}K` : String(value);
+const PROMPT_TOKEN_PRESETS = [500, 4000, 32000, 100000].map((value) => ({
+  value,
+  label: formatTokens(value),
+}));
+
+const TARGET_TONE: Partial<Record<TargetSimulation["status"], string>> = {
+  available: "border-success/30 bg-success/5",
+  error: "border-error/30 bg-error/5",
+  unknown: "border-warning/30 bg-warning/5",
+};
 
 // ── Status helpers ───────────────────────────────────────────────────────────
 
@@ -117,12 +135,7 @@ export default function ComboPlaygroundClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold">{t("playgroundTitle")}</h1>
-          <p className="text-sm text-text-muted mt-1">{t("playgroundDescription")}</p>
-        </div>
-      </div>
+      <PageHeader compact title={t("playgroundTitle")} description={t("playgroundDescription")} />
 
       {/* Configuration Panel */}
       <Card>
@@ -131,46 +144,37 @@ export default function ComboPlaygroundClient() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Combo Selector */}
-            <div>
-              <label className="block text-sm font-medium mb-1">{t("comboLabel")}</label>
-              <select
-                className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-sm"
-                value={selectedComboId}
-                onChange={(e) => setSelectedComboId(e.target.value)}
-              >
-                {combos.length === 0 && (
-                  <option value="">{t("playgroundNoCombosConfigured")}</option>
-                )}
-                {combos.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} ({c.strategy}, {c.isActive ? t("active") : t("inactive")})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label={t("comboLabel")}
+              value={selectedComboId}
+              onChange={(e) => setSelectedComboId(e.target.value)}
+              disabled={combos.length === 0}
+              placeholder={combos.length === 0 ? t("playgroundNoCombosConfigured") : undefined}
+              options={combos.map((c) => ({
+                value: c.id,
+                label: `${c.name} (${c.strategy}, ${c.isActive ? t("active") : t("inactive")})`,
+              }))}
+            />
 
             {/* Prompt Tokens */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                {t("playgroundEstimatedPromptTokens")}: <strong>{promptTokens}</strong>
-              </label>
-              <input
-                type="range"
-                min={100}
-                max={100000}
-                step={100}
-                value={promptTokens}
-                onChange={(e) => setPromptTokens(Number(e.target.value))}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-text-muted mt-1">
-                <span>100</span>
-                <span>100K</span>
-              </div>
-            </div>
+            <Slider
+              label={t("playgroundEstimatedPromptTokens")}
+              presetsLabel={t("playgroundEstimatedPromptTokens")}
+              min={100}
+              max={100000}
+              step={100}
+              value={promptTokens}
+              onValueChange={setPromptTokens}
+              presets={PROMPT_TOKEN_PRESETS}
+            />
           </div>
 
-          <Button onClick={simulate} disabled={loading || combos.length === 0}>
+          <Button
+            icon="play_arrow"
+            onClick={simulate}
+            loading={loading}
+            disabled={combos.length === 0}
+          >
             {loading ? t("playgroundSimulating") : t("playgroundSimulateRoute")}
           </Button>
         </div>
@@ -182,9 +186,9 @@ export default function ComboPlaygroundClient() {
           {/* Combo Overview */}
           <Card>
             <div className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold">{t("playgroundRoutingPath")}</h2>
-                <div className="flex items-center gap-3 text-sm">
+                <div className="flex flex-wrap items-center gap-3 text-sm">
                   <span className="text-text-muted">
                     {t("playgroundStrategy")}: <strong>{result.strategy}</strong>
                   </span>
@@ -207,24 +211,12 @@ export default function ComboPlaygroundClient() {
                     {i > 0 && (
                       <div className="flex justify-center py-1">
                         <div className="flex flex-col items-center text-text-muted">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                            />
-                          </svg>
+                          <Icon name="arrow_downward" size={16} />
                           {result.strategy === "priority" && (
-                            <span className="text-[10px]">{t("playgroundFallback")}</span>
+                            <span className="text-xs">{t("playgroundFallback")}</span>
                           )}
                           {result.strategy === "weighted" && (
-                            <span className="text-[10px]">
+                            <span className="text-xs">
                               {t("playgroundWeight", { value: target.rank })}
                             </span>
                           )}
@@ -234,17 +226,12 @@ export default function ComboPlaygroundClient() {
 
                     {/* Target Card */}
                     <div
-                      className={`border rounded-lg p-3 ${
-                        target.status === "available"
-                          ? "border-green-500/30 bg-green-500/5"
-                          : target.status === "error"
-                            ? "border-red-500/30 bg-red-500/5"
-                            : target.status === "unknown"
-                              ? "border-yellow-500/30 bg-yellow-500/5"
-                              : "border-border bg-surface/50"
-                      }`}
+                      className={cn(
+                        "border rounded-lg p-3",
+                        TARGET_TONE[target.status] ?? "border-border bg-surface/50"
+                      )}
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">
                             {target.rank}
@@ -254,7 +241,7 @@ export default function ComboPlaygroundClient() {
                             <div className="text-xs text-text-muted font-mono">{target.model}</div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
                           <StatusTag status={target.status} />
                           <span className="text-xs text-text-muted">
                             ${target.estimatedCost.toFixed(6)}
@@ -280,12 +267,12 @@ export default function ComboPlaygroundClient() {
           {result.warnings.length > 0 && (
             <Card>
               <div className="p-4 space-y-2">
-                <h3 className="text-sm font-semibold text-yellow-600 dark:text-yellow-400">
+                <h3 className="text-sm font-semibold text-warning">
                   {t("playgroundWarningCount", { count: result.warnings.length })}
                 </h3>
                 {result.warnings.map((w, i) => (
                   <p key={i} className="text-sm text-text-muted flex items-start gap-2">
-                    <span className="text-yellow-500 mt-0.5">⚠️</span>
+                    <Icon name="warning" size={16} className="mt-0.5 shrink-0 text-warning" />
                     {w}
                   </p>
                 ))}
@@ -296,12 +283,12 @@ export default function ComboPlaygroundClient() {
           {result.errors.length > 0 && (
             <Card>
               <div className="p-4 space-y-2">
-                <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">
+                <h3 className="text-sm font-semibold text-error">
                   {t("playgroundErrorCount", { count: result.errors.length })}
                 </h3>
                 {result.errors.map((e, i) => (
-                  <p key={i} className="text-sm text-red-500 flex items-start gap-2">
-                    <span className="mt-0.5">🚫</span>
+                  <p key={i} className="text-sm text-error flex items-start gap-2">
+                    <Icon name="block" size={16} className="mt-0.5 shrink-0" />
                     {e}
                   </p>
                 ))}

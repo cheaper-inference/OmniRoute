@@ -1,3 +1,4 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * Request-level finalization for non-streaming chat.
  * Success and failure each write usage/cost/quota/attempt/pending once.
@@ -9,7 +10,7 @@ import type {
   ServerOwnedToolLoopResult,
 } from "@/lib/skills/toolLoopTypes.ts";
 import type { PersistAttemptLogsArgs } from "./attemptLogging.ts";
-import type { PendingRequestMetadata } from "@/lib/usage/usageHistory.ts";
+import type { PendingRequestIdentity, PendingRequestMetadata } from "@/lib/usage/usageHistory.ts";
 import { type FailureUsageAggregate, toFailureUsageAggregate } from "./failureUsage.ts";
 
 export type NonStreamingFinalizationPlan =
@@ -93,15 +94,16 @@ export async function finalizeToolLoopError(input: {
     usage?: FailureUsageAggregate | null
   ) => void;
   persistAttemptLogs: (params: PersistAttemptLogsArgs) => void;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   trackPendingRequest: (
     model: string,
     provider: string,
     connectionId?: string,
     isPending?: boolean,
     metadata?: PendingRequestMetadata,
-    pendingRequestId?: string
+    pendingRequestId?: PendingRequestIdentity
   ) => void;
-  pendingRequestId?: string;
+  pendingRequestId?: PendingRequestIdentity;
 }): Promise<ChatCoreErrorResult> {
   const plan = buildNonStreamingFinalizationPlan(input.loop);
   const err = plan.kind === "failure" ? plan.error : missingError();
@@ -117,6 +119,7 @@ export async function finalizeToolLoopError(input: {
     scheduleQuota: () => {},
     writeAttempt: () => {
       input.persistAttemptLogs({
+        upstreamHttpSelection: input.upstreamHttpSelection ?? null,
         status: err.status,
         error: err.error || "Provider request failed",
         providerRequest: input.providerRequest,

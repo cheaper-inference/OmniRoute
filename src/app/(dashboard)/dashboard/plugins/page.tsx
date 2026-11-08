@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Card, Button, EmptyState } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
 import { useNotificationStore } from "@/store/notificationStore";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useTranslations } from "next-intl";
 
 interface PluginInfo {
@@ -18,6 +21,7 @@ interface PluginInfo {
 export default function PluginsPage() {
   const { addNotification } = useNotificationStore();
   const t = useTranslations("plugins");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [plugins, setPlugins] = useState<PluginInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
@@ -77,7 +81,7 @@ export default function PluginsPage() {
   };
 
   const handleUninstall = async (name: string) => {
-    if (!confirm(t("uninstallConfirm", { name }))) return;
+    if (!(await requestConfirm(t("uninstallConfirm", { name })))) return;
     try {
       const res = await fetch(`/api/plugins/${name}`, { method: "DELETE" });
       if (res.ok) {
@@ -90,42 +94,43 @@ export default function PluginsPage() {
   };
 
   if (loading) {
-    return <div className="p-6">{t("loading")}</div>;
+    return (
+      <div role="status" className="p-6 text-text-muted">
+        {t("loading")}
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-      </div>
-
-      <div className="flex items-center justify-end">
-        <Button onClick={handleScan} disabled={scanning}>
-          {scanning ? t("scanning") : t("scanForPlugins")}
-        </Button>
-      </div>
+      <PageHeader
+        compact
+        title={t("title")}
+        actions={
+          <Button onClick={handleScan} disabled={scanning}>
+            {scanning ? t("scanning") : t("scanForPlugins")}
+          </Button>
+        }
+      />
       {plugins.length === 0 ? (
         <EmptyState title={t("noPlugins")} description={t("noPluginsDescription")} />
       ) : (
         <div className="grid gap-4">
           {plugins.map((plugin) => (
-            <Card key={plugin.name} className="p-4">
+            <Card key={plugin.name} padding="sm">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold">{plugin.name}</h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-text-muted">
                     v{plugin.version}
                     {plugin.author ? ` by ${plugin.author}` : ""}
                     {plugin.description ? ` — ${plugin.description}` : ""}
                   </p>
                   <div className="mt-1 flex gap-1">
                     {plugin.hooks.map((hook) => (
-                      <span
-                        key={hook}
-                        className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700"
-                      >
+                      <Badge key={hook} variant="info" size="sm">
                         {hook}
-                      </span>
+                      </Badge>
                     ))}
                   </div>
                 </div>
@@ -145,6 +150,7 @@ export default function PluginsPage() {
           ))}
         </div>
       )}
+      {confirmDialog}
     </div>
   );
 }

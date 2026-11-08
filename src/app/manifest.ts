@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { PWA_THEME_COLORS } from "@/shared/constants/pwaThemeColors";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -9,8 +10,11 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "any",
-    background_color: "#0b0f1a",
-    theme_color: "#0b0f1a",
+    // The manifest holds one colour: the default (Editions) light background. It is fetched
+    // once per install, without the visitor's palette (stored in localStorage, not a cookie), so
+    // it can't follow Classic; the live viewport theme-color in layout.tsx does, per mode.
+    background_color: PWA_THEME_COLORS.light,
+    theme_color: PWA_THEME_COLORS.light,
     categories: ["developer-tools", "productivity", "utilities"],
     lang: "en",
     dir: "ltr",

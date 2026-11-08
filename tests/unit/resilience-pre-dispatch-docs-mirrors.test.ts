@@ -57,12 +57,18 @@ test("every resilience mirror includes the pre-dispatch retry and terminal contr
   assert.equal(missing.length, 0, missing.slice(0, 8).join(", "));
 });
 
-test("resilience mirror provenance describes current source and target bytes", () => {
+test("resilience mirror provenance describes the translated target bytes", () => {
+  // Source-vs-state drift is the i18n drift gate's call (check-translation-drift.mjs, PR-scoped
+  // since 2026-10-20) — asserting it here made every inherited RESILIENCE_GUIDE drift a red unit
+  // shard on unrelated PRs. The unit test pins what no gate re-checks: each mirror still holds
+  // the bytes its record describes.
   const entry = state.sources[relativeSource];
-  assert.equal(entry.source_hash, hash(current));
   for (const [locale, info] of Object.entries(entry.locales)) {
-    assert.equal(info.source_hash, hash(current));
-    assert.equal(info.target_hash, hash(read(`docs/i18n/${locale}/${relativeSource}`)));
+    assert.equal(
+      info.target_hash,
+      hash(read(`docs/i18n/${locale}/${relativeSource}`)),
+      `${locale}: mirror bytes differ from the recorded translation`
+    );
   }
 });
 
