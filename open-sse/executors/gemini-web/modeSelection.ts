@@ -31,6 +31,11 @@
  * on a live account, never from guesswork.
  */
 
+import {
+  GEMINI_WEB_ARGON_MODEL,
+  isGeminiWebArgonEnabled,
+} from "../../config/providers/registry/gemini/web/index.ts";
+
 /** Reasons `selectGeminiUiMode`/`selectGeminiModel` can fail closed. */
 export type GeminiModeSelectionFailureReason =
   "control_not_found" | "indicator_not_found" | "indicator_mismatch" | "unknown_model";
@@ -52,8 +57,9 @@ export interface GeminiWebModeDescriptor {
 }
 
 /**
- * Model -> Gemini UI mode map for the three `gweb/<model>` ids advertised by
- * `open-sse/config/providers/registry/gemini/web/index.ts`. Keep the two
+ * Model -> Gemini UI mode map for the `gweb/<model>` ids advertised by
+ * `open-sse/config/providers/registry/gemini/web/index.ts` (gemini-4-argon only
+ * when OMNIROUTE_GEMINI_WEB_ARGON_ENABLED is on, #16573). Keep the two
  * catalogs in sync: an advertised model with no entry here fails closed as
  * `unknown_model` (see `resolveGeminiModelMode`), which is the intended,
  * honest behavior for a model this module cannot yet select.
@@ -176,6 +182,9 @@ export async function selectGeminiUiMode(
 }
 
 export function resolveGeminiModelMode(modelId: string): GeminiWebModeDescriptor | null {
+  // #16573: gemini-4-argon is opt-in until its selectors are checked live; with
+  // the switch off it stays an unknown model, exactly as before it was added.
+  if (modelId === GEMINI_WEB_ARGON_MODEL.id && !isGeminiWebArgonEnabled()) return null;
   return GEMINI_WEB_MODEL_MODES[modelId] ?? null;
 }
 
