@@ -21,6 +21,8 @@ const { CHATGPT_WEB_PAGE_URL } = await import("../../open-sse/utils/chatgptWebEx
 const { Assessor } = await import("../../src/domain/assessment/assessor.ts");
 const { resolveSelfLoopBearer } =
   await import("../../src/shared/middleware/chatAdmissionIdentity.ts");
+const { SELF_HOP_HEADER, ownListenerSelfHopToken } =
+  await import("../../open-sse/utils/selfHop.ts");
 
 const originalFetch = globalThis.fetch;
 const WEB_SESSION_MODEL = "deepseek-web/deepseek-v4-pro-think";
@@ -40,9 +42,16 @@ function countUpstreamCalls(): { calls: number } {
   return counter;
 }
 
-/** A probe as OmniRoute sends it in-process (the model runner): marked, with the self-loop bearer. */
+/**
+ * A probe as OmniRoute sends it in-process (the model runner): marked, with the self-loop bearer
+ * and this process's self-hop token, which a live-test mark needs to be honored.
+ */
 function ownProbe(mark: string): Record<string, string> {
-  return { "X-Internal-Test": mark, Authorization: `Bearer ${resolveSelfLoopBearer()}` };
+  return {
+    "X-Internal-Test": mark,
+    [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
+    Authorization: `Bearer ${resolveSelfLoopBearer()}`,
+  };
 }
 
 function chatRequest(model: string, headers: Record<string, string> = {}) {
@@ -88,6 +97,23 @@ for (const mark of ["combo-health-check", "assessment"]) {
     assert.equal(upstream.calls, 0);
   });
 }
+
+test("an assessment mark is gated even without this process's token", async () => {
+  // The assessor posts to its configured base URL, which is not always the listener the self-hop
+  // stamp covers. The mark only makes its own request stricter, so the gate reads it as sent.
+  const upstream = countUpstreamCalls();
+  const response = await chatRoute.POST(
+    chatRequest(WEB_SESSION_MODEL, {
+      "X-Internal-Test": "assessment",
+      Authorization: `Bearer ${resolveSelfLoopBearer()}`,
+    })
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 422);
+  assert.equal(body.error.code, CHAT_PROBE_NOT_ISOLATED_CODE);
+  assert.equal(upstream.calls, 0);
+});
 
 test("an ordinary request to the same model is not a probe and is not refused by the gate", async () => {
   // A usable web-session connection, so the request can reach the provider.
