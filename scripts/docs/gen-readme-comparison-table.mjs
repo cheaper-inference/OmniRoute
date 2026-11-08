@@ -114,7 +114,7 @@ export async function renderComparisonTable() {
       `  <text x="44" y="96" class="sub">${esc(C.headline[0])}<tspan class="cmp-strong">${esc(C.headline[1])}</tspan></text>\n` +
       `  <rect x="36" y="126" width="1128" height="596" rx="12" class="surface" stroke-width="1"/>\n` +
       stripes +
-      // The one lime moment: the OmniRoute column, a soft accent fill behind ink text.
+      // The one accent moment: the OmniRoute column, a soft accent fill behind ink text.
       `  <rect x="352" y="126" width="176" height="596" rx="12" class="accent-soft stroke-accent" stroke-width="1.5"/>\n` +
       headers +
       `  <line x1="44" y1="162" x2="1156" y2="162" class="rule" stroke-width="1"/>\n` +
