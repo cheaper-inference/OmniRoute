@@ -85,46 +85,48 @@ function TokenLimitCard({
   );
 }
 
-export default function TokenLimitSettings({ apiKeyId }: { apiKeyId: string }) {
+type TokenLimitsState = ReturnType<typeof useTokenLimits>;
+
+function TokenLimitHeader({ state, onAdd }: { state: TokenLimitsState; onAdd: () => void }) {
   const t = useTranslations("tokenLimits");
-  const [draft, setDraft] = useState<TokenLimitReport | null | undefined>(undefined);
-  const [deleting, setDeleting] = useState<TokenLimitReport | null>(null);
-  const state = useTokenLimits(apiKeyId, draft !== undefined || !!deleting);
   return (
-    <section
-      className="rounded-lg border border-border bg-surface/40 p-4 flex flex-col gap-4"
-      aria-label={t("title")}
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-medium">{t("title")}</h2>
-          <p className="text-xs text-text-muted">{t("description")}</p>
-          <p className="text-xs text-text-muted">{t("independentSave")}</p>
-          <p className="text-xs text-text-muted">{t("enforcementHint")}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={state.busy || state.loading}
-            onClick={() => void state.refresh()}
-          >
-            {t("refresh")}
-          </Button>
-          {!state.loading && !state.error && (
-            <Button type="button" size="sm" disabled={state.busy} onClick={() => setDraft(null)}>
-              {t("add")}
-            </Button>
-          )}
-        </div>
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-sm font-medium">{t("title")}</h2>
+        <p className="text-xs text-text-muted">{t("description")}</p>
+        <p className="text-xs text-text-muted">{t("independentSave")}</p>
+        <p className="text-xs text-text-muted">{t("enforcementHint")}</p>
       </div>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={state.busy || state.loading}
+          onClick={() => void state.refresh()}
+        >
+          {t("refresh")}
+        </Button>
+        {!state.loading && !state.error && (
+          <Button type="button" size="sm" disabled={state.busy} onClick={onAdd}>
+            {t("add")}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TokenLimitStatus({ state, editing }: { state: TokenLimitsState; editing: boolean }) {
+  const t = useTranslations("tokenLimits");
+  return (
+    <>
       {state.notice && (
         <p role="status" className="text-sm text-success">
           {state.notice}
         </p>
       )}
-      {state.error && draft === undefined && (
+      {state.error && !editing && (
         <p role="alert" className="text-sm text-error">
           {state.error}
         </p>
@@ -137,6 +139,22 @@ export default function TokenLimitSettings({ apiKeyId }: { apiKeyId: string }) {
       {!state.loading && !state.error && state.limits.length === 0 && (
         <p className="text-sm text-text-muted">{t("empty")}</p>
       )}
+    </>
+  );
+}
+
+export default function TokenLimitSettings({ apiKeyId }: { apiKeyId: string }) {
+  const t = useTranslations("tokenLimits");
+  const [draft, setDraft] = useState<TokenLimitReport | null | undefined>(undefined);
+  const [deleting, setDeleting] = useState<TokenLimitReport | null>(null);
+  const state = useTokenLimits(apiKeyId, draft !== undefined || !!deleting);
+  return (
+    <section
+      className="rounded-lg border border-border bg-surface/40 p-4 flex flex-col gap-4"
+      aria-label={t("title")}
+    >
+      <TokenLimitHeader state={state} onAdd={() => setDraft(null)} />
+      <TokenLimitStatus state={state} editing={draft !== undefined} />
       {state.limits.map((limit) => (
         <TokenLimitCard
           key={limit.id}
