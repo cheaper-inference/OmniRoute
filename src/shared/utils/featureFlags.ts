@@ -520,6 +520,22 @@ export function isOpencodePoolReselectEnabled(): boolean {
   }
 }
 
+/**
+ * SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED (#16676, default off): /v1/systemone serves the
+ * cloudflare-ai/* decisions models. Fail-closed: an unreadable flag store keeps them refused.
+ */
+export function isSystemOneCloudflareBackendEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
 /** OPENCODE_FREE_TIER_EGRESS_PROBE (default off): probe one other proxy after a FreeTierError. */
 export function isOpencodeFreeTierEgressProbeEnabled(): boolean {
   try {
