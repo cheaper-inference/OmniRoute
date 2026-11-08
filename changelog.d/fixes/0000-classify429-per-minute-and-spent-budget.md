@@ -1,0 +1,1 @@
+- **fix(resilience):** A 429 that names a per-minute limit is a rate limit even when it carries the `insufficient_quota` code, so a throttle no longer earns the one-hour quota cooldown. A spent LiteLLM key ("Budget has been exceeded") now counts as out of quota and gets a long lockout instead of minute retries.
