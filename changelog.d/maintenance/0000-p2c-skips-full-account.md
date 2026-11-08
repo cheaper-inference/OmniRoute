@@ -1,0 +1,1 @@
+- **perf(combo):** The `p2c` strategy now draws only among accounts with free concurrency slots, so a request no longer queues behind a full account while a sibling account is idle
