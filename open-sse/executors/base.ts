@@ -90,6 +90,7 @@ import {
   stripTrailingAssistantInputForProvider,
 } from "../services/contextManager.ts";
 import {
+  normalizeClaudeFinalAssistantWhitespace,
   requiresUserLastMessage,
   stripTrailingAssistantTurns,
 } from "../services/assistantPrefill.ts";
@@ -1459,6 +1460,10 @@ export class BaseExecutor {
             // trailing text-only assistant turn with 400. Strip here so combo
             // failover does not burn the next account on the same body.
             tb.messages = stripTrailingAssistantForProvider(stripped, this.provider);
+            // Anthropic reads an assistant-last turn as a prefill and 400s on trailing whitespace.
+            if (isClaude) {
+              tb.messages = normalizeClaudeFinalAssistantWhitespace(tb.messages as JsonRecord[]);
+            }
             // Per-connection opt-in for relays that ban assistant prefill.
             if (requiresUserLastMessage(requestCredentials?.providerSpecificData)) {
               const userLast = stripTrailingAssistantTurns(tb.messages as JsonRecord[]);
