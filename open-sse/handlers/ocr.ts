@@ -114,6 +114,14 @@ export async function handleOcr({
   credentials,
   fetchImpl = fetch,
   sleepImpl = defaultSleep,
+  onSuccess = null as
+    | ((result: {
+        provider: string;
+        model: string;
+        usageInfo?: Record<string, unknown>;
+        requestId: string;
+      }) => Promise<number | null>)
+    | null,
 }) {
   const startTime = Date.now();
   if (!body.document) {
@@ -177,14 +185,32 @@ export async function handleOcr({
     }
 
     const parsed = transformation.parseResponse(data);
+    const requestId = generateRequestId();
+    let costUsd: number | null = 0;
+    if (onSuccess) {
+      try {
+        costUsd = await onSuccess({
+          provider: providerId,
+          model: modelId,
+          usageInfo: parsed.usage_info,
+          requestId,
+        });
+      } catch {
+        // Accounting is best-effort; never turn a delivered OCR result into a
+        // provider error (which would invite a duplicate, billable extraction).
+        console.error("[OCR accounting] Failed to record completed request");
+        costUsd = null;
+      }
+    }
     const headers = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {
       provider: providerId,
       model: modelId,
-      costUsd: 0,
+      costUsd,
       latencyMs: Date.now() - startTime,
-      requestId: generateRequestId(),
+      requestId,
     });
+    if (costUsd === null) headers.delete("X-OmniRoute-Response-Cost");
     return new Response(JSON.stringify(parsed), { status: 200, headers });
   } catch (err) {
     const safeErrorMessage = sanitizeErrorMessage(err).trim() || "OCR request failed";

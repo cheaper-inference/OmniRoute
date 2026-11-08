@@ -10,15 +10,21 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const { updatePricing } = await import("../../src/lib/db/settings.ts");
+const { waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const { createEmbeddingResponse } = await import("../../src/lib/embeddings/service.ts");
 const { OMNIROUTE_RESPONSE_HEADERS } = await import("../../src/shared/constants/headers.ts");
 
-test.after(() => {
+test.after(async () => {
+  await waitForCallLogSaves(10_000);
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("createEmbeddingResponse emits X-OmniRoute-* cost telemetry headers on success", async () => {
+  // An unknown tariff is not a zero-dollar bill. Seed the known tariff this
+  // header-format test needs and verify the amount, not just its formatting.
+  await updatePricing({ mistral: { "mistral-embed": { input: 0.1, output: 0 } } });
   // Seed a credentialed apikey connection so getProviderCredentials resolves and
   // the success path runs (no real upstream is hit — fetch is mocked below).
   await providersDb.createProviderConnection({
@@ -49,6 +55,7 @@ test("createEmbeddingResponse emits X-OmniRoute-* cost telemetry headers on succ
 
     const cost = res.headers.get(OMNIROUTE_RESPONSE_HEADERS.responseCost);
     assert.ok(cost, "X-OmniRoute-Response-Cost header must be present");
+    assert.ok(Math.abs(Number(cost) - (PROMPT_TOKENS * 0.1) / 1_000_000) < 1e-15);
     assert.match(
       cost,
       /^\d+\.\d{10}$/,
