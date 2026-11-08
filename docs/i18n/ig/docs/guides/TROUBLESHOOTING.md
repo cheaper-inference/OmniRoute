@@ -33,39 +33,43 @@ Nsogbu ndị a na-ahụkarị na ihe ngwọta ha maka OmniRoute.
 
 ---
 
-## Nchọpụta Nsogbu Zuru Ezu
+## Nchọpụta Nsogbu zuru ezu
 
 ---
 
-### Mmachi Ọsọ na Ndị Na-enye Ọrụ Efughị Ụgwọ (429 / 400 / 401)
+### Mmachi Ọnụego n’aka Ndị Na-enye Ọrụ efu (429 / 400 / 401)
 
-**Mgbaàmà**: Mgbe ị na-eji `model: "auto"` na ndị na-enye ọrụ efughị ụgwọ/na-achọghị nyocha njirimara (auggie, wdg.), mgbe ụfọdụ ị na-enweta `HTTP 429`, `400`, ma ọ bụ `401` kama azịza. Arịrịọ ndị ahụ na-aga nke ọma mgbe ị nwara otu prompt ahụ ọzọ obere oge gachara, mana akpaaka (ọrụ cron, agents, scripts) na-akwụsị na ọdịda mbụ.
+**Mgbaàmà**: Mgbe ị na-eji `model: "auto"` na ndị na-enye ọrụ efu/enweghị nkwenye (auggie, wdg.), mgbe ụfọdụ ị na-enweta `HTTP 429`, `400`, ma ọ bụ `401` kama azịza. Arịrịọ ndị ahụ na-aga nke ọma mgbe a nwara otu ngwa ahụ ọzọ obere oge gachara, mana akpaaka (ọrụ cron, agents, scripts) na-adaba na njehie mbụ.
 
 **Ihe kpatara ya**: Ụdị ọdịda atọ nọọrọ onwe ha na-agbakọta:
 
-1. **Mmachi ọsọ nke onye na-enye ọrụ (`429`)**: Ọkwa efughị ụgwọ nwere ike ịmanye oke ojiji n'ime windo oge ọ bụla. Ọtụtụ oku yiri ibe ha n'otu oge na-emecha oke ahụ, ya mere a na-ajụ arịrịọ na-esote ruo mgbe windo ahụ malitegharịrị.
-2. **Model mebiri emebi na passthrough (`400`/`401`)**: Ọdọ `auto/*` nwere ike ịgụnye model passthrough ndị edebanyere na katalọgụ mana enweghị credentials na-arụ ọrụ (→ `401`). Auto-router na-anwale otu, ọ daa, njehie ahụ agbasa tupu fallback amalite.
-3. **Mmụba concurrency (`429` mgbe ibu dị ukwuu)**: Mgbe ọtụtụ nnọkọ agent/cron na-akpọ `auto` n'otu oge, mkpokọta ọsọ arịrịọ na-agafe ihe ndị na-enye ọrụ efughị ụgwọ nwere ike ịnagide, ya mere a na-akara oku ziri ezi dị ka mmegbu.
+1. **Mmachi ọnụego onye na-enye ọrụ (`429`)**: Ọkwa efu nwere ike itinye oke ọnụ ọgụgụ arịrịọ n’ime oge a kapịrị ọnụ. Oku ndị na-aga n’otu oge na-eji oke ahụ agwụ, ya mere a na-ajụ arịrịọ ọzọ ruo mgbe oge ahụ malitegharịrị.
+2. **Model mebiri emebi na passthrough (`400`/`401`)**: Ọdọ mmiri `auto/*` nwere ike ịgụnye ụdị passthrough ndị edebanyere aha na katalọgụ mana enweghị nzere na-arụ ọrụ (→ `401`). Auto-router na-anwale otu n’ime ha, ọ daa, njehie ahụ agafee tupu fallback amalite.
+3. **Mmụba concurrency (`429` n’okpuru ibu)**: Mgbe ọtụtụ nnọkọ agent/cron kụrụ `auto` n’otu oge, ọnụego arịrịọ jikọtara ọnụ gafere ihe ndị na-enye ọrụ efu na-anabata, ya mere a na-akpọ oku ziri ezi dị ka mmegbu.
 
-**Ndozi akwadoro (ndị obodo kọrọ ya, 2026-08-10)**: hazie environment variables atọ ka ntụgharị, concurrency, na fallback nwee ike ịnagide mgbanwe nke ọkwa efughị ụgwọ kama ịkwụsị n'ihi ya:
+**Ndozi a kwadoro (obodo kọrọ ya, 2026-08-10)**: Hazie mgbanwe gburugburu atọ ndị a ka ntụgharị, concurrency, na fallback wee nagide mgbanwe nke ọkwa efu kama ịkwụsị n’ihi ya:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # gaa na model/onye na-enye ọrụ ọzọ mgbe 400/401 mere (na-awụfe model passthrough ndị mebiri emebi)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # oke nnabata doro anya maka arịrịọ dị arọ (anaghị edobe ya na ndabara: enweghị oke ọnụọgụ arịrịọ, lee ndetu dị n'okpuru)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # bulie oge nchere a kpaara oke ka ọ gafee ndabara RATE_LIMIT_MAX_WAIT_MS maka upstream ndị dị nwayọ
+export OMNIROUTE_ROTATE_ON_400=true           # gaa n’ụdị/onye na-enye ọrụ ọzọ mgbe 400/401 gasịrị (na-awụpụ ụdị passthrough ndị mebiri emebi)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # oke nnabata doro anya maka arịrịọ dị arọ (a naghị edo ya na ndabara: enweghị oke ọnụ ọgụgụ arịrịọ, lee ndetu dị n’okpuru)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # bulie oge nchere a kpara ókè gafere ndabara RATE_LIMIT_MAX_WAIT_MS maka ndị upstream dị nwayọ
 ```
 
-Debe ndị a na process environment nke OmniRoute (daemon ahụ, dịka site na LaunchAgent plist ma ọ bụ `systemctl edit`), wee malitegharịa OmniRoute. Rotation flag bụ ihe otu kachasị nwee mmetụta: ọ na-agbanwe ọdịda siri ike ka ọ bụrụ nnwale ọzọ a na-adịghị ahụ anya megide onye na-enye ọrụ dị mma n'ime ọdọ ahụ.
+Tinye ndị a na gburugburu usoro OmniRoute (daemon ahụ, dịka site na LaunchAgent plist ma ọ bụ `systemctl edit`), wee malitegharịa OmniRoute. Ọkọlọtọ ntụgharị bụ ihe na-akacha enye uru: ọ na-agbanwe ọdịda siri ike ka ọ bụrụ nnwale doro anya ọzọ megide onye na-enye ọrụ dị mma n’ime ọdọ mmiri ahụ.
 
-**Ndetu**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` na-amachi ọnụọgụ arịrịọ dị arọ — ndị nwere context ogologo — nwere ike ịrụ ọrụ n'otu oge; oke ahụ bụ ọnụ ụzọ nnabata, ọ bụghị ihe mmachi ọsọ nke onye na-enye ọrụ. **Mmelite #503-fanout:** anaghịzi edobe var a na ndabara (ugbu a ọ na-amachi naanị mgbe ahaziri ya kpọmkwem, dịka e mere n'elu) — kama, a na-achịkwa nnabata arịrịọ dị arọ site na byte budget ewepụtara na-akpaghị aka (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) nke na-agbanwe onwe ya dabere na oke memory n'ezie nke host, ya mere deployment ọhụrụ kwesịrị ịhụ `503 chat_admission_busy` rejects pere mpe nke ukwuu n'ebughị ụzọ hazie var a ma ọlị; ịhazi ya kpọmkwem ebe a ka na-arụ ọrụ dịka e si dee ya. A na-amachi explicit byte-budget overrides n'etiti 8 MiB–2 GiB. `413 body_exceeds_budget` abụghị ihe na-adịru nwa oge: bulie byte budget ahụ, wedata `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, ma ọ bụ bulie oke memory nke process. Mwepụ `inflight_bytes_budget` bụ esemokwu nwa oge, a ka nwekwara ike ịnwale ya ọzọ. A na-achịkwa mmachi ọsọ nke onye na-enye ọrụ ọ bụla (`open-sse/services/rateLimitManager.ts`) iche site na `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, na `RATE_LIMIT_AUTO_ENABLE` — lee `.env.example`.
+**Ndetu**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` na-egbochi ọnụọgụ arịrịọ dị arọ — ndị nwere context ogologo — nwere ike ịgba ọsọ n’otu oge; oke a bụ ọnụ ụzọ nnabata, ọ bụghị onye na-achịkwa ọnụego onye na-enye ọrụ. **Mmelite #503-fanout:** a naghị edo var a ọzọ na ndabara (ọ na-arụ ọrụ naanị mgbe a haziri ya nke ọma, dịka n’elu) — kama, mmefu arịrịọ dị arọ na-eji mmefu byte nke a na-emepụta na-akpaghị aka (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) nke na-agbanwe onwe ya dabere n’oke ebe nchekwa nke host ahụ n’eziokwu, ya mere deployment ọhụrụ kwesịrị ịhụ mbelata dị ukwuu na ọjụjụ `503 chat_admission_busy` n’enweghị ịtọ var a ma ọlị; ịtọ ya nke ọma ebe a ka na-arụ ọrụ kpọmkwem dịka akwụkwọ a si kọwaa. Mgbanwe mmefu byte doro anya na-ejedebe na 8 MiB–2 GiB. `413 body_exceeds_budget` abụghị ihe na-adịru nwa oge: bulie mmefu byte ahụ, belata `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ma ọ bụ oke ahụ echekwara maka request body, ma ọ bụ bulie oke ebe nchekwa usoro ahụ. Mbelata `inflight_bytes_budget` bụ esemokwu nwa oge, ọ ka nwekwara ike ịnwale ọzọ. Mmachi ọnụego nke onye na-enye ọrụ ọ bụla (`open-sse/services/rateLimitManager.ts`) na-achịkwa ya iche site na `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, na `RATE_LIMIT_AUTO_ENABLE` — lee `.env.example`.
 
-**Otu esi enyocha na ọ rụrụ ọrụ**: mee ka agent/cron gị gbaa ọsọ ugboro abụọ n'otu ntabi anya ma gosi na ha abụọ gara nke ọma. Tupu ndozi ahụ, agba nke abụọ na-ewepụtakarị `429`/`401`. Mgbe ndozi ahụ gasịrị, a na-anwale ọdịda (ọ bụrụ na ọ dị) ọzọ n'ụzọ a na-adịghị ahụ anya, oku ahụ emechaa. Ị nwekwara ike iji `curl /monitoring/health` wee lelee field `rateLimitedUntil` na njikọ ndị na-enye ọrụ yana `circuitBreakers.providerBreakers[].state` maka ndị na-enye ọrụ emetụtara — state ahụ bụ otu n'ime `CLOSED`, `DEGRADED`, `OPEN`, ma ọ bụ `HALF_OPEN` (lee `src/shared/utils/circuitBreaker.ts`), onye na-enye ọrụ nke na-aga n'ihu na-ada ga-agbanwe `CLOSED → DEGRADED → OPEN` tupu windo nrụgharị ekwe ka probe gafee (`HALF_OPEN`).
+**Ndetu maka nkwalite: oke request body echekwara na-emetụtakwa chat ugbu a.** Oke echekwara na mbụ n’okpuru Settings > Advanced > Request Body Limit (`maxBodySizeMb`) na-emetụtakwa `/v1/chat/completions` na `/v1/responses` ugbu a. Tupu mgbanwe a, ụzọ abụọ ndị a na-anabata ihe ruru 50 MB n’agbanyeghị ihe echekwara, ya mere nrụnye nwere oke echekwara dị ala ga-amalite ịjụ chat bodies gafere ya. Nrụnye nke na-echekwabeghị oke ọ bụla na-edobe ndabara 50 MB.
 
-**Ọ bụrụ na ị ka na-ahụ 429**: account na-arụ ọrụ maka onye na-enye ọrụ ahụ emechala _quota_ ya n'ezie (ọ bụghị naanị mmachi ọsọ). Tinye account nke abụọ maka otu onye na-enye ọrụ ahụ na dashboard OmniRoute → Providers → Accounts, ma ọ bụ tinye onye na-enye ọrụ efughị ụgwọ ọzọ na ngwakọta ahụ (dịka `routeway`, `auggie`). Rotation na-enyere naanị na mmachi ọsọ/400/401 nwa oge; mmecha quota kpamkpam chọrọ credential nke abụọ ma ọ bụ onye na-enye ọrụ ọzọ.
+Ọjụjụ ahụ bụ HTTP `413` nke `error.code` ya bụ `PAYLOAD_TOO_LARGE` na `error.type` ya bụ `payload_too_large`. Ozi ahụ na-akpọ aha oke dị na-arụ ọrụ: `Request body too large. Maximum allowed: 10 MB` mgbe `Content-Length` ekwuputara karịrị ya, ma ọ bụ `Request body too large for chat completions (max 10 MB).` mgbe byte ndị a gụrụ n’eziokwu karịrị ya. Nke a abụghị otu ihe na `413 body_exceeds_budget` dị n’elu, nke sitere na mmefu ebe nchekwa, setting a anaghị agbanwekwa ya.
 
-**Ọ bụrụ na ị na-ahụ 403 na model vision (`auto/vision`, `bazaarlink/*`)**: account ejikọrọ enweghị plan akwụ ụgwọ nke gụnyere vision, ma ọ bụ API key enweghị permissions zuru ezu. Nyochaa na dashboard onye na-enye ọrụ na scope nke key ahụ gụnyere vision/multimodal, ma ọ bụ jikọọ account ọkwa akwụ ụgwọ ma debe ya dị ka vision target.
+Iji bulie oke ahụ, chekwaa uru dị elu na `/dashboard/settings/advanced`, ma ọ bụ zipu `PATCH /api/settings` na `{"maxBodySizeMb": 50}`. A na-anabata uru site na 1 ruo 500 MB, ọ na-arụ ọrụ n’enweghị ịmalitegharịa, 50 na-eweghachite oke chat gara aga. Oke abụọ ọzọ ka nwere ike ịkwụsị body buru ibu: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, mgbe edoziri ya, na-ejikwa oke echekwara; annotation Kubernetes ingress `proxy-body-size` (`50m` na manifests e zipụrụ) kwesịkwara ịkwalite iche maka ihe ọ bụla gafere 50 MB.
 
----
+**Otu esi enyocha na ọ rụrụ ọrụ**: gbaa agent/cron gị ugboro abụọ n’usoro ngwa ngwa ma kwado na ha abụọ gara nke ọma. Tupu ndozi ahụ, ọsọ nke abụọ na-atụkarị `429`/`401`. Mgbe ndozi ahụ gasịrị, a ga-anwale ọdịda ọ bụla (ọ bụrụ na ọ dị) ọzọ n’enweghị ihe onye ọrụ hụrụ, oku ahụ agwụkwa nke ọma. Ị nwekwara ike ịgba `curl /monitoring/health` ma lelee mpaghara `rateLimitedUntil` dị na njikọ ndị na-enye ọrụ yana `circuitBreakers.providerBreakers[].state` maka ndị na-enye ọrụ metụtara — steeti ahụ bụ otu n’ime `CLOSED`, `DEGRADED`, `OPEN`, ma ọ bụ `HALF_OPEN` (lee `src/shared/utils/circuitBreaker.ts`), onye na-enye ọrụ nke na-aga n’ihu ida ga-agbanwe `CLOSED → DEGRADED → OPEN` tupu windo nrụpụta ekwe ka probe gafee (`HALF_OPEN`).
+
+**Ọ bụrụ na ị ka na-ahụ 429**: akaụntụ na-arụ ọrụ maka onye na-enye ọrụ ahụ ejirila _quota_ ya n’ezie (ọ bụghị naanị rate). Tinye akaụntụ nke abụọ maka otu onye na-enye ọrụ ahụ na dashboard OmniRoute → Providers → Accounts, ma ọ bụ jikọta onye na-enye ọrụ efu ọzọ (dịka `routeway`, `auggie`). Ntughari na-enyere naanị n’ọnọdụ rate/400/401 na-adịru nwa oge; quota agwụla kpamkpam chọrọ nzere nke abụọ ma ọ bụ onye na-enye ọrụ ọzọ.
+
+**Ọ bụrụ na ị hụ 403 na ụdị vision (`auto/vision`, `bazaarlink/*`)**: akaụntụ ejikọrọ enweghị atụmatụ akwụ ụgwọ nke gụnyere vision, ma ọ bụ igodo API enweghị ikike zuru ezu. Nyochaa na dashboard onye na-enye ọrụ ahụ na oke igodo ahụ gụnyere vision/multimodal, ma ọ bụ jikọọ akaụntụ ọkwa akwụ ụgwọ ma debe ya dịka ebumnuche vision.
 
 ## Ịdọ aka ná ntị npm install (ERESOLVE / peer / deprecated)
 

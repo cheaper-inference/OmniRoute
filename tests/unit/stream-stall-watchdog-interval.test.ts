@@ -151,9 +151,16 @@ test("pipeWithDisconnect still reports a stalled upstream with SSE_STALL_WATCHDO
       stallTimeoutMs: 50,
     })
   );
+  // Interval-mode stall detection runs on ONE unref'd setInterval, by design, so a
+  // stalled stream cannot keep the process alive on its own. That leaves this test's
+  // drain loop as the only pending work, and node exits the loop before the 50ms
+  // watchdog can fire ("Promise resolution is still pending"). Hold the loop with a
+  // referenced timer of our own instead of leaning on another watchdog's timer.
+  const keepAlive = setTimeout(() => {}, 5_000);
   const reader = stream.getReader();
   while (!(await reader.read()).done) {
     // drain until the watchdog ends the stream
   }
+  clearTimeout(keepAlive);
   assert.equal(onErrorMessage, "stream stall timeout");
 });
