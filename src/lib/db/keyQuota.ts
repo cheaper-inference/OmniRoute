@@ -255,6 +255,10 @@ export function incrementKeyQuotaCounter(
        consumed = consumed + excluded.consumed,
        updated_at = excluded.updated_at`
   ).run(apiKeyId, dimensionKey, bucket, delta, nowMs);
+  // Reads use the current and the previous bucket only; older rows never count again.
+  db.prepare(
+    "DELETE FROM api_key_quota_counters WHERE api_key_id = ? AND dimension_key = ? AND bucket_index < ?"
+  ).run(apiKeyId, dimensionKey, bucket - 1);
 }
 
 /**
