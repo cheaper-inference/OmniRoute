@@ -8,9 +8,12 @@ import path from "node:path";
 // default off; also needs PROXY_SKIP_RECENTLY_FAILED for the refusal signal):
 // a pool member whose recently observed egress address matches a refused
 // member's address ranks just below healthy members for providers whose quota
-// is bucketed by egress address — without ever excluding anyone. A member with
-// two distinct observed addresses in the 30 min window is opaque and never
-// ranked. With either flag off (the default) or a provider outside that list
+// is bucketed by egress address — without ever excluding anyone. A member
+// whose observed addresses stay inside a single IPv4 range carries that
+// range's key, so two members rotating inside one range are told apart like
+// two members sharing one address; a member whose addresses cross two ranges
+// stays unknown, and so does a member whose window was cut by the read
+// ceiling. With either flag off (the default) or a provider outside that list
 // the order stays exactly the plain rotation.
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-shared-egress-"));
@@ -22,6 +25,7 @@ const proxiesDb = await import("../../src/lib/db/proxies.ts");
 const rotation = await import("../../src/lib/db/proxies/rotation.ts");
 const memory = await import("../../open-sse/utils/proxyRefusalMemory.ts");
 const proxyLogger = await import("../../src/lib/proxyLogger.ts");
+const operatorStore = await import("../../src/lib/db/proxyOperatorEgress.ts");
 const { noteProxyOutcome } = await import("../../src/sse/handlers/proxyOutcomeMemory.ts");
 
 function resetStorage() {
@@ -250,7 +254,7 @@ test("functional: with the flag off the pool serves the head even when egress is
   }
 });
 
-test("a member with two distinct egress addresses in the window is opaque: not demoted", () => {
+test("a member rotating inside one range is not demoted by an exact address", () => {
   const a = member();
   const b = member();
   refuse(a);
@@ -259,8 +263,10 @@ test("a member with two distinct egress addresses in the window is opaque: not d
   logEgress(b, "203.0.113.99");
   flush();
   const pred = hotFor([a, b]);
-  // b is opaque (two addresses): not demoted. a is refused (avoided), so it
-  // still ranks last by the refusal signal; b serves first.
+  // b rotates inside one range, so it carries the range key: a range key never
+  // equals the exact address a was refused on, so b is not demoted. a is
+  // refused (avoided), so it still ranks last by the refusal signal; b serves
+  // first.
   assert.equal(pred(b), false);
   const ranked = rotation.rankPoolCandidates([a, b], { sharesHotEgress: pred });
   assert.deepEqual(
@@ -307,5 +313,190 @@ test("skip on plus new flag off never demotes for shared egress", () => {
     );
   } finally {
     process.env.PROXY_POOL_SHARED_EGRESS_ORDER = "true";
+  }
+});
+
+test("a member whose two observed addresses sit in one range carries that range key", () => {
+  const a = member();
+  // Two /24s of the same /16: the member carries the range key, never the
+  // exact addresses it was seen on.
+  logEgress(a, "203.0.113.7");
+  logEgress(a, "203.0.114.9");
+  flush();
+  const keys = rotation.readEgressKeysForMember(a).keys;
+  assert.ok(keys.has("r16:203.0.0.0/16"));
+  assert.equal(keys.has("203.0.113.7"), false);
+  assert.equal(keys.has("203.0.114.9"), false);
+  assert.equal(keys.size, 1);
+});
+
+test("two members of one range: the refused one ranks the other after a member of another range", () => {
+  const a = member();
+  const b = member();
+  const c = member();
+  refuse(a);
+  // a and b rotate inside the same /16, on addresses they never share; c sits
+  // on a single address of another range.
+  logEgress(a, "203.0.113.7");
+  logEgress(a, "203.0.114.9");
+  logEgress(b, "203.0.120.3");
+  logEgress(b, "203.0.121.4");
+  logEgress(c, "198.51.100.9");
+  flush();
+  const ranked = rotation.rankPoolCandidates([a, b, c], { sharesHotEgress: hotFor([a, b, c]) });
+  // The range key is what a and b share: c, on another range, serves first,
+  // b is demoted below it, and nobody is removed.
+  assert.equal(ranked.length, 3);
+  assert.deepEqual(
+    ranked.map((m) => m.host),
+    [c.host, b.host, a.host]
+  );
+});
+
+test("a member whose addresses cross two ranges stays unknown", () => {
+  const refused = member();
+  const crossing = member();
+  const oneRange = member();
+  refuse(refused);
+  logEgress(refused, "203.0.113.7");
+  logEgress(refused, "203.0.114.9");
+  logEgress(crossing, "203.0.113.7");
+  logEgress(crossing, "198.51.100.9");
+  logEgress(oneRange, "203.0.120.3");
+  logEgress(oneRange, "203.0.121.4");
+  flush();
+  // Two ranges in the window: the member reads as unknown and carries no key.
+  assert.equal(rotation.readEgressKeysForMember(crossing).keys.size, 0);
+  const pred = hotFor([refused, crossing, oneRange]);
+  assert.equal(pred(crossing), false);
+  // Control: the same predicate demotes a member that stays inside one range.
+  assert.equal(pred(oneRange), true);
+});
+
+test("with the flag off the order is the plain rotation order", () => {
+  const a = member();
+  const b = member();
+  const c = member();
+  refuse(a);
+  logEgress(a, "203.0.113.7");
+  logEgress(a, "203.0.114.9");
+  logEgress(b, "203.0.120.3");
+  logEgress(b, "203.0.121.4");
+  logEgress(c, "198.51.100.9");
+  flush();
+  delete process.env.PROXY_POOL_SHARED_EGRESS_ORDER;
+  try {
+    // Flag off: the shared-egress signal is inert, so the order is the plain
+    // rotation order — the refused member last, the other two in input order.
+    const off = rotation.rankPoolCandidates([a, b, c], { sharesHotEgress: hotFor([a, b, c]) });
+    assert.deepEqual(
+      off.map((m) => m.host),
+      [b.host, c.host, a.host]
+    );
+  } finally {
+    process.env.PROXY_POOL_SHARED_EGRESS_ORDER = "true";
+  }
+  // Same data, flag on: the member sharing the refused member's range is
+  // demoted below the member of another range.
+  const on = rotation.rankPoolCandidates([a, b, c], { sharesHotEgress: hotFor([a, b, c]) });
+  assert.deepEqual(
+    on.map((m) => m.host),
+    [c.host, b.host, a.host]
+  );
+});
+
+test("an IPv6 member keeps its /64 key", () => {
+  const a = member();
+  const b = member();
+  const c = member();
+  logEgress(a, "2001:db8:1::1");
+  logEgress(b, "2001:db8:1::2");
+  logEgress(c, "2001:db8:2::1");
+  logEgress(c, "2001:db8:3::1");
+  flush();
+  // One IPv6 address: the /64 key, unchanged.
+  assert.deepEqual([...rotation.readEgressKeysForMember(a).keys], ["v6:2001:db8:1:0"]);
+  // Two addresses of one /64 collapse to that same key.
+  assert.deepEqual([...rotation.readEgressKeysForMember(b).keys], ["v6:2001:db8:1:0"]);
+  // Two different /64s are two ranges: the member stays unknown.
+  assert.equal(rotation.readEgressKeysForMember(c).keys.size, 0);
+});
+
+test("a member whose window holds more addresses than the read ceiling reads as unknown", () => {
+  const a = member();
+  for (let i = 1; i <= 11; i++) logEgress(a, `203.0.113.${i}`);
+  flush();
+  // The read is cut at the ceiling: the window is not shown to stay inside one
+  // range, so the member reads as unknown.
+  assert.equal(rotation.readEgressKeysForMember(a).keys.size, 0);
+});
+
+test("a window cut at the read ceiling with one IPv6 /64 still reads as unknown", () => {
+  const a = member();
+  for (let i = 1; i <= 11; i++) logEgress(a, `2001:db8:1::${i.toString(16)}`);
+  flush();
+  // One /64 key, but eleven rows were observed: the ceiling says the window
+  // may hold more, so the member stays unknown.
+  assert.equal(rotation.readEgressKeysForMember(a).keys.size, 0);
+});
+
+test("a member showing both address families reads as unknown", () => {
+  const a = member();
+  logEgress(a, "203.0.113.7");
+  logEgress(a, "2001:db8:1::1");
+  flush();
+  // Another family is another range.
+  assert.equal(rotation.readEgressKeysForMember(a).keys.size, 0);
+});
+
+test("an unusable address is refused", () => {
+  const a = member();
+  logEgress(a, "not-an-ip");
+  logEgress(a, "203.0.113.7");
+  flush();
+  // The unusable address is dropped and the usable one stays the exact key:
+  // no range key is invented out of an address nobody can read.
+  assert.deepEqual([...rotation.readEgressKeysForMember(a).keys], ["203.0.113.7"]);
+});
+
+test("the hot egress cache never grows past 200 entries", () => {
+  rotation.__resetHotEgressCacheForTesting();
+  try {
+    const first = member();
+    logEgress(first, "203.0.113.7");
+    flush();
+    // 201 distinct members read: the cache keeps at most 200 entries, so the
+    // first one is evicted.
+    for (let i = 0; i < 200; i++) rotation.readEgressKeysForMember(member());
+    logEgress(first, "203.0.114.9");
+    flush();
+    // The entry was evicted, so this read is fresh and sees the new address.
+    assert.deepEqual([...rotation.readEgressKeysForMember(first).keys], ["r16:203.0.0.0/16"]);
+  } finally {
+    rotation.__resetHotEgressCacheForTesting();
+  }
+});
+
+test("the operator source keeps exact keys", () => {
+  const a = member();
+  process.env.PROXY_OPERATOR_EGRESS_ENABLED = "true";
+  try {
+    operatorStore.upsertOperatorEgress([
+      {
+        host: a.host,
+        port: a.port,
+        addresses: ["203.0.113.7", "203.0.114.9"],
+        observedAt: new Date().toISOString(),
+      },
+    ]);
+    // The operator pushes exact addresses: two of them stay two keys, even
+    // inside one range.
+    assert.deepEqual([...rotation.readEgressKeysForMember(a).keys].sort(), [
+      "203.0.113.7",
+      "203.0.114.9",
+    ]);
+  } finally {
+    delete process.env.PROXY_OPERATOR_EGRESS_ENABLED;
+    rotation.__resetHotEgressCacheForTesting();
   }
 });

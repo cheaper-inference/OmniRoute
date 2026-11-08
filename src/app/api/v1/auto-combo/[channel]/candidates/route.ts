@@ -8,7 +8,7 @@
  */
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
+import { CORS_HEADERS, credentialRejectionHeaders, handleCorsOptions } from "@/shared/utils/cors";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 import { getApiKeyRequestScope } from "@/app/api/v1/_helpers/apiKeyScope";
 import {
@@ -42,7 +42,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ chan
   if (!scope.isSessionAuth && scope.apiKey && !scope.apiKeyId) {
     return NextResponse.json(buildErrorBody(401, "Invalid API key"), {
       status: 401,
-      headers: CORS_HEADERS,
+      headers: credentialRejectionHeaders(request),
     });
   }
 

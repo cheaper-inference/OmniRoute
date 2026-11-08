@@ -1,0 +1,18 @@
+/* integration-resources styles. Load after ci-ui.css (styles/core.css). */
+@layer theme, base, components, utilities;
+/* Follow-up resources stay compact and separate from the integration directory. */
+.ci-integration-resources { display: grid; gap: var(--ci-space-4); min-width: 0; padding-top: var(--ci-space-6); border-top: 1px solid var(--ci-color-border-subtle); }
+.ci-integration-resources header { display: grid; gap: var(--ci-space-2); }
+.ci-integration-resources h3, .ci-integration-resources p { margin: 0; }
+.ci-integration-resources h3 { font: var(--ci-font-weight-semibold) var(--ci-font-size-base)/1.5 var(--ci-font-ui); color: var(--ci-color-heading); }
+.ci-integration-resources p { font-size: var(--ci-font-size-sm); line-height: 1.6; color: var(--ci-color-text-muted); }
+.ci-integration-resources__summary { display: flex; align-items: center; gap: var(--ci-space-3); text-align: left; min-width: 0; }
+.ci-integration-resources__summary > span:last-child { display: grid; gap: var(--ci-space-1); min-width: 0; }
+.ci-integration-resources__summary strong { font-weight: var(--ci-font-weight-semibold); font-size: var(--ci-font-size-sm); color: var(--ci-color-heading); }
+.ci-integration-resources__summary > span:last-child > span { font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-regular); line-height: 1.6; color: var(--ci-color-text-muted); }
+.ci-integration-resources__icon { display: flex; align-items: center; justify-content: center; flex: none; width: 32px; height: 32px; border-radius: var(--ci-radius-control); background: var(--ci-color-surface-subtle); color: var(--ci-color-heading); }
+.ci-integration-resources__icon svg { width: 16px; height: 16px; }
+.ci-integration-resources__body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--ci-space-3); padding-top: var(--ci-space-2); }
+.ci-integration-resources__body ul { display: grid; gap: var(--ci-space-2); margin: 0; padding-left: var(--ci-space-5); font-size: var(--ci-font-size-sm); line-height: 1.7; color: var(--ci-color-text-muted); }
+.ci-integration-resources__body code { padding: 1px 4px; border: 1px solid var(--ci-color-border-subtle); border-radius: var(--ci-radius-surface); font: .9em var(--ci-font-mono); overflow-wrap: anywhere; color: var(--ci-color-heading); }
+.ci-integration-resources__actions { display: flex; flex-wrap: wrap; gap: var(--ci-space-2); }

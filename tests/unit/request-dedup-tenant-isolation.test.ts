@@ -226,7 +226,7 @@ test("the tenant namespace cannot be forged by a colliding request body", () => 
   assert.ok(h1.startsWith("a."), "namespace must prefix the digest");
 });
 
-test("chatCore passes the caller's API key id into the dedup hash", async () => {
+test("chatCore passes the caller's API key id and selected connection into the dedup hash", async () => {
   const { readFileSync } = await import("node:fs");
   const { fileURLToPath } = await import("node:url");
   const source = readFileSync(
@@ -234,7 +234,9 @@ test("chatCore passes the caller's API key id into the dedup hash", async () => 
     "utf8"
   );
   assert.ok(
-    /computeRequestHash\(\s*dedupRequestBody\s*,\s*apiKeyInfo\?\.id/.test(source),
-    "the dedup hash must be namespaced by the calling API key (GHSA-6c7w-56xp-wpc6)"
+    /computeRequestHash\(\s*dedupRequestBody\s*,\s*`\$\{apiKeyInfo\?\.id \?\? ""\}:\$\{getCurrentConnectionId\(\) \?\? ""\}`/.test(
+      source
+    ),
+    "the dedup hash must be namespaced by the calling API key (GHSA-6c7w-56xp-wpc6) and by the selected connection (pinned-connection isolation)"
   );
 });

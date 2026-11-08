@@ -108,7 +108,13 @@ export function AccordionItem({ className, value, disabled = false, ...props }: 
   );
 }
 
-export function AccordionTrigger({ className, children, ...props }: ComponentProps<"button">) {
+export interface AccordionTriggerProps extends ComponentProps<"button"> {
+  icon?: ReactNode;
+  /** Optional/selected count stays visually separate from the question. */
+  meta?: ReactNode;
+}
+
+export function AccordionTrigger({ className, children, icon, meta, ...props }: AccordionTriggerProps) {
   const { openValues, toggle, baseId } = useAccordionContext("AccordionTrigger");
   const { value, disabled } = useItemContext("AccordionTrigger");
   const open = openValues.includes(value);
@@ -126,7 +132,9 @@ export function AccordionTrigger({ className, children, ...props }: ComponentPro
         onClick={() => toggle(value)}
         {...props}
       >
-        <span>{children}</span><ChevronDown className="ci-accordion__icon" aria-hidden="true" />
+        <span className="ci-accordion__label">{icon && <span className="ci-accordion__leading" aria-hidden="true">{icon}</span>}<span>{children}</span></span>
+        {meta != null && <span className="ci-accordion__meta">{meta}</span>}
+        <ChevronDown className="ci-accordion__icon" aria-hidden="true" />
       </button>
     </h3>
   );
@@ -142,6 +150,7 @@ export function AccordionContent({ className, children, ...props }: ComponentPro
       id={`${baseId}-content-${value}`}
       aria-labelledby={`${baseId}-trigger-${value}`}
       aria-hidden={!open}
+      inert={!open || undefined}
       data-state={open ? "open" : "closed"}
       className={cn("ci-accordion__content", className)}
     >

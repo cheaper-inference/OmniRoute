@@ -5,6 +5,9 @@ import path from "path";
 export default defineConfig({
   test: {
     environment: "jsdom",
+    // jsdom + React suites routinely need 5–7 s on the shared hosted runner (Release-Green
+    // 2026-10-28: 8 UI tests "timed out in 5000ms" that pass in ~1 s locally).
+    testTimeout: 20000,
     globals: true,
     setupFiles: ["./tests/_setup/vitestUiPolyfills.ts"],
     pool: "threads",
