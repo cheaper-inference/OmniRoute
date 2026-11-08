@@ -1,5 +1,6 @@
 import { isNoAuthProviderKey } from "@/shared/utils/noAuthProviders";
 import { isOpencodeFreeTierRefusalForProvider } from "../../executors/opencodeGeoBlock.ts";
+import { getM365FailureScope } from "../../services/m365ErrorPolicy.ts";
 import { isProviderSafetyRefusalBody } from "../../utils/providerSafety.ts";
 
 /**
@@ -25,6 +26,9 @@ export async function shouldSkipCredentialRefresh(
     .text()
     .catch(() => null); // an unreadable body cannot carry a safety code; keep the refresh
   if (bodyText !== null && isProviderSafetyRefusalBody(response.status, bodyText)) return true;
+  // Neither model nor account licence entitlements change by rotating the token.
+  if (response.status === 403 && getM365FailureScope(provider, response.status, bodyText) !== null)
+    return true;
   if (!provider.toLowerCase().startsWith("opencode")) return false;
   return isOpencodeFreeTierRefusalForProvider(provider, response.status, bodyText);
 }

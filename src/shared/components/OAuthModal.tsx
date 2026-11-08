@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 
 import Modal from "./Modal";
+import M365OAuthModal from "./M365OAuthModal";
 import Button from "./Button";
 import Input from "./Input";
 import Textarea from "./Textarea";
@@ -141,7 +142,21 @@ async function pollDeviceCodeOnce(
  * - Localhost: Auto callback via popup message
  * - Remote: Manual paste callback URL
  */
-export default function OAuthModal({
+export default function OAuthModal(props: OAuthModalProps) {
+  if (props.provider === "copilot-m365-web") {
+    return props.isOpen ? (
+      <M365OAuthModal
+        key={props.reauthConnection?.id || "new"}
+        connectionId={props.reauthConnection?.id}
+        onClose={props.onClose}
+        onSuccess={props.onSuccess}
+      />
+    ) : null;
+  }
+  return <LegacyOAuthModal {...props} />;
+}
+
+function LegacyOAuthModal({
   isOpen,
   provider,
   providerInfo,
