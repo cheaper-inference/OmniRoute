@@ -1,0 +1,1 @@
+- **fix(usage):** Track STT, TTS and image charges once per physical provider attempt, prefer exact provider USD over estimates, and reconcile binary OpenRouter speech on its selected EU/global origin without retrying synthesis ([#19331](https://github.com/cheaper-inference/OmniRoute/pull/19331)) — thanks @tiangao88
