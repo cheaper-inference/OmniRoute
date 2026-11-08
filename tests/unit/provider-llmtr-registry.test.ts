@@ -47,6 +47,10 @@ test("llmtr seeds a small chat catalog and accepts other ids via passthrough", (
   assert.ok(ids.includes("qwen/qwen3.8-27b-free"));
   assert.ok(ids.includes("llmtr/qwen3-8-27b"));
   assert.equal(new Set(ids).size, ids.length, "seed ids must be unique");
+  const names = providerRegistry.llmtr.models.map((m: { name: string }) =>
+    m.name.toLowerCase().replace(/\s+/g, "")
+  );
+  assert.equal(new Set(names).size, names.length, "seed display names must be distinguishable");
   assert.equal(isValidModel("llmtr", "qwen/qwen3.8-27b-free"), true);
   assert.equal(isValidModel("llmtr", "llmtr/qwen3-8-27b"), true);
   assert.equal(isValidModel("llmtr", "some-account-scoped-model"), true);
