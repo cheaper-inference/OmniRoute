@@ -280,6 +280,9 @@ export function useModelImportHandlers({
             ...(typeof model.endpointCapabilitySource === "string"
               ? { endpointCapabilitySource: model.endpointCapabilitySource }
               : {}),
+            ...(typeof model.supportsVision === "boolean"
+              ? { supportsVision: model.supportsVision }
+              : {}),
             ...(typeof model.dimensions === "number" && model.dimensions > 0
               ? { dimensions: model.dimensions }
               : {}),
@@ -289,6 +292,9 @@ export function useModelImportHandlers({
             ...(typeof model.modelType === "string" ? { modelType: model.modelType } : {}),
             ...(typeof model.inputTokenLimit === "number" && model.inputTokenLimit > 0
               ? { max_input_tokens: model.inputTokenLimit }
+              : {}),
+            ...(typeof model.outputTokenLimit === "number" && model.outputTokenLimit > 0
+              ? { max_output_tokens: model.outputTokenLimit }
               : {}),
             ...(typeof model.targetFormat === "string" ? { targetFormat: model.targetFormat } : {}),
           }),
