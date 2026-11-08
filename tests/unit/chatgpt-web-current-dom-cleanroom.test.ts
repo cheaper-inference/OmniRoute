@@ -16,7 +16,7 @@ function pageWithDocument(fixture: object, overrides: Record<string, unknown> = 
       try {
         return await callback(argument);
       } finally {
-        if (previous === undefined) delete globals.document;
+        if (previous === undefined) Reflect.deleteProperty(globals, "document");
         else globals.document = previous;
       }
     },
