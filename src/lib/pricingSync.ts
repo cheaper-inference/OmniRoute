@@ -380,6 +380,17 @@ export async function syncPricingFromSources(opts?: {
     const providerCount = Object.keys(aggregated).length;
 
     if (!dryRun) {
+      // A truncated upstream file must not replace a good map: saveSyncedPricing() is a
+      // full replace. Half the stored size still passes, so real removals sync.
+      const storedCount = Object.values(getSyncedPricing()).reduce(
+        (sum, models) => sum + Object.keys(models).length,
+        0
+      );
+      if (modelCount === 0 || modelCount * 2 < storedCount) {
+        throw new Error(
+          `Fetched price map rejected: ${modelCount} models, stored map has ${storedCount}`
+        );
+      }
       saveSyncedPricing(aggregated);
       lastSyncTime = new Date().toISOString();
       lastSyncModelCount = modelCount;
