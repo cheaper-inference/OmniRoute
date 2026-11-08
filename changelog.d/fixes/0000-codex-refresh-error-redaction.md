@@ -1,0 +1,1 @@
+- **fix(oauth):** a failed Codex token refresh no longer writes the raw OAuth error body to the logs, so echoed tokens and client secrets stay out of them.
