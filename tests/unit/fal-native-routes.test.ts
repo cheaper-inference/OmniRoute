@@ -81,7 +81,7 @@ test.beforeEach(() => {
       );
       return Response.json({ models: [imageDefinition], has_more: false, next_cursor: null });
     }
-    if (target.includes("https://fal.run/openai/gpt-image-2.5/")) {
+    if (target.startsWith("https://fal.run/openai/gpt-image-")) {
       return Response.json({ images: [{ url: "data:image/png;base64,CAkK" }] });
     }
     if (target.startsWith("https://api.fal.ai/"))
@@ -403,9 +403,9 @@ test("image edit multipart preserves additional fields and ordered references", 
   assert.equal(posted.mask_url, "data:image/png;base64,BwgJ");
 });
 
-function imageEditForm(variant: string, fields: Record<string, string>): FormData {
+function imageEditForm(variant: string, fields: Record<string, string>, version = "2.5"): FormData {
   const form = new FormData();
-  form.set("model", `fal-ai/openai/gpt-image-2.5/${variant}/edit`);
+  form.set("model", `fal-ai/openai/gpt-image-${version}/${variant}/edit`);
   form.set("prompt", "123");
   for (const [name, value] of Object.entries(fields)) form.set(name, value);
   form.append("image", new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" }), "first.png");
@@ -448,6 +448,108 @@ for (const variant of ["flare", "sunburst"]) {
     assert.deepEqual(posted.image_urls, ["data:image/png;base64,AQID"]);
   });
 }
+
+// Recorded from api.fal.ai/v1/models with expand=openapi-3.0 on 2026-11-07.
+// Sunburst 2.6 declares GIF frame count 2–16 and duration 20–2000 ms as integers.
+for (const [count, duration] of [
+  [2, 20],
+  [9, 205],
+  [16, 2000],
+]) {
+  test(`image edit multipart GIF preserves numeric controls ${count}/${duration}`, async () => {
+    const response = await postImageEditForm(
+      imageEditForm(
+        "sunburst",
+        {
+          output_format: "gif",
+          frame_count: String(count),
+          frame_duration_ms: String(duration),
+        },
+        "2.6"
+      )
+    );
+    assert.equal(response.status, 200, await response.clone().text());
+    const posted = sent.find(
+      (call) => call.url === "https://fal.run/openai/gpt-image-2.6/sunburst/edit"
+    )!.body!;
+    assert.equal(posted.output_format, "gif");
+    assert.equal(posted.frame_count, count);
+    assert.equal(posted.frame_duration_ms, duration, "provider owns rounding to 10 ms");
+    assert.equal(posted.prompt, "123", "numeric-looking text must remain text");
+    assert.deepEqual(posted.image_urls, ["data:image/png;base64,AQID"]);
+  });
+}
+
+for (const field of ["frame_count", "frame_duration_ms"]) {
+  const outsideBounds = field === "frame_count" ? ["1", "17"] : ["19", "2001"];
+  for (const value of [
+    "",
+    " ",
+    "NaN",
+    "Infinity",
+    "1e309",
+    "9x",
+    '"9"',
+    "true",
+    "null",
+    "[]",
+    "[9]",
+    "{}",
+    "0",
+    "-1",
+    "9.5",
+    ...outsideBounds,
+  ]) {
+    test(`image edit multipart GIF rejects ${field}=${JSON.stringify(value)} before inference`, async () => {
+      const response = await postImageEditForm(
+        imageEditForm("sunburst", { output_format: "gif", [field]: value }, "2.6")
+      );
+      assert.equal(response.status, 400, await response.clone().text());
+      assert.equal(
+        sent.some((call) => call.url.startsWith("https://fal.run/")),
+        false
+      );
+    });
+  }
+  test(`image edit multipart GIF does not coerce ${field} inside fal_input`, async () => {
+    const response = await postImageEditForm(
+      imageEditForm(
+        "sunburst",
+        {
+          output_format: "gif",
+          fal_input: JSON.stringify({ [field]: field === "frame_count" ? "9" : "200" }),
+        },
+        "2.6"
+      )
+    );
+    assert.equal(response.status, 400, await response.clone().text());
+    assert.equal(
+      sent.some((call) => call.url.startsWith("https://fal.run/")),
+      false
+    );
+  });
+}
+
+test("image edit multipart GIF preserves typed fal_input overrides", async () => {
+  const response = await postImageEditForm(
+    imageEditForm(
+      "sunburst",
+      {
+        output_format: "gif",
+        frame_count: "9",
+        frame_duration_ms: "200",
+        fal_input: JSON.stringify({ frame_count: 12, frame_duration_ms: 300 }),
+      },
+      "2.6"
+    )
+  );
+  assert.equal(response.status, 200, await response.clone().text());
+  const posted = sent.find(
+    (call) => call.url === "https://fal.run/openai/gpt-image-2.6/sunburst/edit"
+  )!.body!;
+  assert.equal(posted.frame_count, 12);
+  assert.equal(posted.frame_duration_ms, 300);
+});
 
 for (const value of [
   "",

@@ -42,6 +42,8 @@ async function readMultipartOptions(formData: FormData): Promise<Record<string, 
           "enable_thinking",
           "enable_safety_checker",
           "output_compression",
+          "frame_count",
+          "frame_duration_ms",
           "fal_input",
           "image_size",
         ].includes(key)
