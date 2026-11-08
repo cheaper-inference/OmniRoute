@@ -30,31 +30,30 @@ sample; the original options-keyed index is retained so typing does not pay a ne
 
 ## Visual matrix
 
-The eight screenshots were reviewed and delivered privately to the requester. Public screenshot
-publication is pending separate approval; this commit contains code, measurements and text evidence only. English is LTR, Persian is RTL, and both themes use the real
+The eight screenshots were reviewed. English is LTR, Persian is RTL, and both themes use the real
 kit tokens and app CSS. The popup stays inside every viewport with no horizontal document overflow.
 Its body portal is outside the Modal DOM. At mobile size its bottom extends past the Modal border
 while remaining visible, directly exercising the clipping case. These facts are also recorded in
 [visual-matrix.json](visual-matrix.json).
 
-| Viewport           | English light | English dark | Persian light | Persian dark |
-| ------------------ | ------------- | ------------ | ------------- | ------------ |
-| Desktop 1280 × 800 | Pass          | Pass         | Pass          | Pass         |
-| Mobile 390 × 844   | Pass          | Pass         | Pass          | Pass         |
+| Viewport           | English light                 | English dark                 | Persian light                 | Persian dark                 |
+| ------------------ | ----------------------------- | ---------------------------- | ----------------------------- | ---------------------------- |
+| Desktop 1280 × 800 | [Image](en-desktop-light.png) | [Image](en-desktop-dark.png) | [Image](fa-desktop-light.png) | [Image](fa-desktop-dark.png) |
+| Mobile 390 × 844   | [Image](en-mobile-light.png)  | [Image](en-mobile-dark.png)  | [Image](fa-mobile-light.png)  | [Image](fa-mobile-dark.png)  |
 
 Additional checks:
 
 - Filtering and Enter select exact `model-04999`, not its label or query. Reopening reveals the
-  selected tail row completely: [geometry](tail-geometry.json).
+  selected tail row completely: [screenshot](fa-mobile-dark-tail.png), [geometry](tail-geometry.json).
 - ArrowDown wraps from the last row to the placeholder; ArrowUp returns to the last row. The active
   descendant remains mounted with logical position/set-size: [record](keyboard-wrap.json).
 - A 193.53px multilingual row wraps without row overlap or horizontal overflow and is fully visible
-  at the tail: [geometry](long-row-geometry.json).
+  at the tail: [screenshot](fa-mobile-dark-long-row.png), [geometry](long-row-geometry.json).
 - The first Escape closes only the selector; the second closes the Modal. Reopening works.
 - Persian provider search and account `39` search return the expected synthetic entities. Account
   selection commits `account-39`; returning to automatic mode exposes restrictions again.
 - A selected account restriction remains selected while another query hides it and after clearing
-  the query. The private screenshot set includes this state.
+  the query: [screenshot](fa-desktop-light-restrictions.png).
 
 This is isolated integration acceptance using the actual ComboStepSelectors, selector, Modal,
 translations and global styles. It is not a booted dashboard/Next.js end-to-end test, device-emulation
