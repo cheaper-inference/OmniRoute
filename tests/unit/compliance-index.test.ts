@@ -317,3 +317,49 @@ test("cleanupExpiredLogs tolerates missing tables and logAuditEvent failures wit
     proxyLogsMaxRows: result.proxyLogsMaxRows,
   });
 });
+
+// This pass runs at boot and removes usage rows that the daily summaries are built
+// from. Without a rollup first, whatever aged out while the process was down leaves
+// the summaries with the rows.
+test("cleanupExpiredLogs rolls usage into the daily summary before deleting it", async () => {
+  const db = core.getDbInstance();
+  db.exec("DELETE FROM usage_history; DELETE FROM daily_usage_summary");
+  const oldTs = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const insert = db.prepare(
+    "INSERT INTO usage_history (provider, model, tokens_input, tokens_output, timestamp) VALUES (?, ?, ?, ?, ?)"
+  );
+  insert.run("openai", "gpt-4o", 100, 50, oldTs);
+  insert.run("openai", "gpt-4o", 100, 50, oldTs);
+
+  const result = await compliance.cleanupExpiredLogs();
+
+  assert.equal(result.deletedUsage, 2, "the stale rows are removed");
+  const summary = db
+    .prepare("SELECT COALESCE(SUM(total_requests), 0) AS n FROM daily_usage_summary")
+    .get() as { n: number };
+  assert.equal(summary.n, 2, "and they reached the daily summary first");
+});
+
+test("cleanupExpiredLogs keeps the usage rows when the rollup fails", async () => {
+  const db = core.getDbInstance();
+  db.exec("DELETE FROM usage_history; DELETE FROM daily_usage_summary");
+  const oldTs = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  db.prepare(
+    "INSERT INTO usage_history (provider, model, tokens_input, tokens_output, timestamp) VALUES (?, ?, ?, ?, ?)"
+  ).run("openai", "gpt-4o", 100, 50, oldTs);
+  db.exec(
+    `CREATE TEMP TRIGGER fail_rollup BEFORE INSERT ON daily_usage_summary
+     BEGIN SELECT RAISE(ABORT, 'injected rollup failure'); END`
+  );
+
+  try {
+    const result = await compliance.cleanupExpiredLogs();
+    assert.equal(result.deletedUsage, 0, "nothing is deleted when the rollup failed");
+  } finally {
+    db.exec("DROP TRIGGER IF EXISTS temp.fail_rollup");
+  }
+
+  const remaining = (db.prepare("SELECT COUNT(*) AS n FROM usage_history").get() as { n: number })
+    .n;
+  assert.equal(remaining, 1, "the uncounted row is still on disk");
+});

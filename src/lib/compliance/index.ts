@@ -772,10 +772,35 @@ export async function cleanupExpiredLogs() {
   let trimmedProxyLogs = 0;
 
   try {
-    const r1 = db.prepare("DELETE FROM usage_history WHERE timestamp < ?").run(usageCutoff);
-    deletedUsage = r1.changes;
-  } catch {
-    /* table may not exist */
+    const { tableExists } = await import("../db/cleanup/usagePurge");
+    if (tableExists("usage_history")) {
+      // This pass runs at boot, before the periodic retention job, and the rows it
+      // removes are the only source daily_usage_summary and daily_team_usage_summary
+      // are built from. Roll them up first, or that usage leaves the summaries with
+      // the rows. A rollup that fails or reports errors leaves the rows alone instead
+      // of dropping them uncounted; the next pass collects them once it can roll up.
+      let rolledUp = false;
+      try {
+        const { rollupUsageHistoryBeforeDate } = await import("../usage/aggregateHistory");
+        const rollup = await rollupUsageHistoryBeforeDate(usageCutoff);
+        rolledUp = rollup.errors === 0;
+        if (!rolledUp) {
+          console.error("[compliance] usage rollup reported errors; usage_history rows are kept");
+        }
+      } catch (error) {
+        console.error("[compliance] usage rollup failed; usage_history rows are kept", error);
+      }
+      if (rolledUp) {
+        try {
+          const r1 = db.prepare("DELETE FROM usage_history WHERE timestamp < ?").run(usageCutoff);
+          deletedUsage = r1.changes;
+        } catch (error) {
+          console.error("[compliance] could not delete old usage_history rows", error);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("[compliance] could not reach usage_history", error);
   }
 
   try {
