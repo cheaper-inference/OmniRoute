@@ -3,7 +3,7 @@
  */
 
 import { getDbInstance } from "./core";
-import { backupDbFile } from "./backup";
+import { backupDbFile, backupDbFileAwaited } from "./backup";
 import { PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels.ts";
 import {
   getProxyRefusalSeq,
@@ -405,6 +405,13 @@ export async function updateSettings(
     }
   }
 
+  // Snapshot the state BEFORE the write, and wait for it: a snapshot started after the
+  // commit holds the new value, so it could not roll this change back. A failed routine
+  // snapshot is logged and must not block the settings write.
+  await backupDbFileAwaited("pre-write").catch((error: unknown) => {
+    console.error("[DB] Pre-write backup failed:", error instanceof Error ? error.message : error);
+  });
+
   const db = getDbInstance();
   const insert = db.prepare(
     "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('settings', ?, ?)"
@@ -421,7 +428,6 @@ export async function updateSettings(
     insert.run(SETTINGS_REVISION_KEY, JSON.stringify(currentRevision + 1));
   });
   tx();
-  backupDbFile("pre-write");
   invalidateDbCache("settings"); // Bust the read cache immediately
 
   // Bust proxy resolution cache when proxy toggle settings change
