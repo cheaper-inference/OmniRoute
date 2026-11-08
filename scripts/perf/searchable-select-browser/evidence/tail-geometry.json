@@ -1,0 +1,25 @@
+{
+  "active": {
+    "bottom": 760.25,
+    "height": 53.1875,
+    "left": 74,
+    "right": 336,
+    "top": 707.0625,
+    "width": 262,
+    "x": 74,
+    "y": 707.0625
+  },
+  "activeText": "مدل آزمایشی 04999 · OpenAImodel-04999 · Synthetic QA fixture",
+  "list": {
+    "bottom": 764,
+    "height": 320,
+    "left": 60,
+    "right": 340,
+    "top": 444,
+    "width": 280,
+    "x": 60,
+    "y": 444
+  },
+  "scrollHeight": 240118,
+  "top": 239798
+}

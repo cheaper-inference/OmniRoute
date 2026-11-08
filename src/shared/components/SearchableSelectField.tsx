@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  useEffect,
   useId,
   useMemo,
   useRef,
   useState,
   type ReactNode,
+  type CSSProperties,
   type KeyboardEvent,
 } from "react";
 import { useTranslations } from "next-intl";
@@ -21,6 +21,7 @@ import {
   indexEntityOptions,
   type EntitySearchOption,
 } from "@/shared/utils/entitySearch";
+import { useSelectWindow } from "./useSelectWindow";
 
 export type SearchableSelectOption = EntitySearchOption;
 export interface SearchableSelectFieldProps {
@@ -98,7 +99,7 @@ function usePickerState(props: SearchableSelectFieldProps) {
 }
 
 function findActiveOption(
-  options: SearchableSelectOption[],
+  options: readonly SearchableSelectOption[],
   value: string | undefined,
   query: string
 ) {
@@ -154,8 +155,12 @@ function useFieldLabels(props: SearchableSelectFieldProps) {
 function useSearchableField(props: SearchableSelectFieldProps) {
   const state = usePickerState(props);
   const labels = useFieldLabels(props);
+  const searching = state.query.trim() !== "";
   const index = useMemo(() => indexEntityOptions(props.options), [props.options]);
-  const matches = useMemo(() => filterEntityOptions(index, state.query), [index, state.query]);
+  const matches = useMemo(
+    () => (searching ? filterEntityOptions(index, state.query) : props.options),
+    [index, state.query, searching, props.options]
+  );
   const active = props.loading
     ? undefined
     : findActiveOption(matches, state.activeValue, state.query);
@@ -164,12 +169,6 @@ function useSearchableField(props: SearchableSelectFieldProps) {
     props.loading ||
     matches.length === 0 ||
     (state.query.trim() !== "" && matches.every((option) => option.alwaysVisible));
-  useEffect(() => {
-    if (state.open && activeIndex >= 0)
-      document
-        .getElementById(`${labels.listId}-${activeIndex}`)
-        ?.scrollIntoView?.({ block: "nearest" });
-  }, [state.open, activeIndex, labels.listId, state.query]);
   function select(option: SearchableSelectOption) {
     if (props.disabled || props.loading || option.disabled) return;
     if (option.value !== props.value) props.onValueChange(option.value);
@@ -297,11 +296,16 @@ function OptionRow({
   state,
   option,
   index,
-}: PartProps & { option: SearchableSelectOption; index: number }) {
+  style,
+}: PartProps & { option: SearchableSelectOption; index: number; style?: CSSProperties }) {
   return (
     <div
       id={`${state.listId}-${index}`}
       role="option"
+      data-option-index={index}
+      aria-posinset={index + 1}
+      aria-setsize={state.matches.length}
+      style={style}
       aria-label={[option.label, option.description].filter(Boolean).join(" ")}
       aria-selected={option.value === props.value}
       aria-disabled={option.disabled || undefined}
@@ -327,18 +331,55 @@ function OptionRow({
 }
 
 function OptionList({ props, state }: PartProps) {
+  const { ref, indexes, offsets, enabled, onScroll } = useSelectWindow(
+    props.loading ? 0 : state.matches.length,
+    state.activeIndex
+  );
+  const rows = indexes.map((index) => (
+    <OptionRow
+      key={state.matches[index].value}
+      props={props}
+      state={state}
+      option={state.matches[index]}
+      index={index}
+      style={
+        enabled
+          ? {
+              position: "absolute",
+              top: offsets[index],
+              width: "100%",
+            }
+          : undefined
+      }
+    />
+  ));
   return (
     <div
       id={state.listId}
       role="listbox"
+      ref={ref}
+      onScroll={onScroll}
+      style={{
+        overflowAnchor: "none",
+        contain: "layout paint",
+        // Radix publishes available height after initial layout. Bound that first
+        // layout too, before an estimated spacer can expand the viewport.
+        maxHeight: "min(20rem, calc(var(--radix-popover-content-available-height, 25rem) - 5rem))",
+      }}
       aria-label={state.accessibleLabel}
       aria-busy={props.loading || undefined}
       className="ci-searchable-select__options"
     >
-      {!props.loading &&
-        state.matches.map((option, index) => (
-          <OptionRow key={option.value} props={props} state={state} option={option} index={index} />
-        ))}
+      {enabled ? (
+        <div
+          role="presentation"
+          style={{ position: "relative", height: offsets[state.matches.length] }}
+        >
+          {rows}
+        </div>
+      ) : (
+        rows
+      )}
       {state.showStatus && (
         <p role="status" className="ci-searchable-select__empty">
           {state.statusText}
@@ -390,7 +431,7 @@ function FieldPopup({ props, state }: PartProps) {
       }}
     >
       <QueryField props={props} state={state} />
-      <OptionList props={props} state={state} />
+      <OptionList key={state.query} props={props} state={state} />
     </PopoverContent>
   );
 }

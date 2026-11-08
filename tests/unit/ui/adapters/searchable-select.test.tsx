@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import React from "react";
 import userEvent from "@testing-library/user-event";
-import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import SearchableSelectField from "@/shared/components/SearchableSelectField";
+import * as entitySearch from "@/shared/utils/entitySearch";
 import Modal from "@/shared/components/Modal";
 
 const options = [
@@ -387,5 +388,201 @@ describe("SearchableSelectField real kit composition", () => {
     fireEvent.keyDown(s.getByRole("combobox"), { key: "Escape" });
     fireEvent.click(s.getByRole("button", { name: "Second" }));
     expect(s.getByRole("combobox").getAttribute("aria-controls")).not.toBe(first);
+  });
+});
+
+describe("SearchableSelectField large lists", () => {
+  it("builds the options index before typing and reuses it between keystrokes", () => {
+    const index = vi.spyOn(entitySearch, "indexEntityOptions");
+    try {
+      const s = setup();
+      expect(index).toHaveBeenCalledTimes(1);
+      fireEvent.change(s.search, { target: { value: "ren" } });
+      expect(index).toHaveBeenCalledTimes(1);
+      fireEvent.change(s.search, { target: { value: "renee" } });
+      expect(index).toHaveBeenCalledTimes(1);
+    } finally {
+      index.mockRestore();
+    }
+  });
+
+  it("uses fractional untransformed observer sizes during popover scale animation", () => {
+    const OriginalObserver = globalThis.ResizeObserver;
+    const callbacks = new Map<Element, ResizeObserverCallback>();
+    globalThis.ResizeObserver = class {
+      constructor(private callback: ResizeObserverCallback) {}
+      observe(target: Element) {
+        callbacks.set(target, this.callback);
+      }
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+    try {
+      const s = setup({ options: large, value: "model/0" });
+      const first = s.getByRole("option", { name: "Model 0" });
+      act(() => {
+        // Only the virtual-list observer receives this row's border-box report.
+        callbacks.get(first)!(
+          [
+            {
+              target: first,
+              borderBoxSize: [{ blockSize: 120.75, inlineSize: 200 }],
+            } as unknown as ResizeObserverEntry,
+          ],
+          {} as ResizeObserver
+        );
+      });
+      expect(s.getByRole("option", { name: "Model 1" }).style.top).toBe("120.75px");
+      fireEvent.keyDown(s.search, { key: "ArrowDown" });
+      expect(s.getByRole("option", { name: "Model 1" }).style.top).toBe("120.75px");
+    } finally {
+      globalThis.ResizeObserver = OriginalObserver;
+    }
+  });
+
+  it("measures resized wrapped rows without synchronous reads or fixed heights", () => {
+    const OriginalObserver = globalThis.ResizeObserver;
+    const callbacks = new Map<Element, ResizeObserverCallback>();
+    globalThis.ResizeObserver = class {
+      constructor(private callback: ResizeObserverCallback) {}
+      observe(target: Element) {
+        callbacks.set(target, this.callback);
+      }
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+    const read = vi
+      .spyOn(HTMLElement.prototype, "offsetHeight", "get")
+      .mockImplementation(function (this: HTMLElement) {
+        if (this.dataset.optionIndex !== undefined) throw new Error("Forced row layout");
+        return 0;
+      });
+    try {
+      const s = setup({ options: large, value: "model/0" });
+      const first = s.getByRole("option", { name: "Model 0" });
+      function resize(height: number) {
+        act(() =>
+          callbacks.get(first)!(
+            [
+              {
+                target: first,
+                borderBoxSize: [{ blockSize: height, inlineSize: 200 }],
+              } as unknown as ResizeObserverEntry,
+            ],
+            {} as ResizeObserver
+          )
+        );
+      }
+      resize(120);
+      expect(first.style.height).toBe("");
+      expect(s.getByRole("option", { name: "Model 1" }).style.top).toBe("120px");
+      resize(200);
+      fireEvent.keyDown(s.search, { key: "ArrowDown" });
+      expect(s.getByRole("option", { name: "Model 1" }).style.top).toBe("200px");
+      expect(s.getAllByRole("option").length).toBeLessThan(50);
+    } finally {
+      read.mockRestore();
+      globalThis.ResizeObserver = OriginalObserver;
+    }
+  });
+
+  const large = Array.from({ length: 5000 }, (_, index) => ({
+    value: `model/${index}`,
+    label: `Model ${index}`,
+    disabled: index === 4999,
+  }));
+
+  it("reveals the selected tail after measured spacer height commits, including padding", () => {
+    const OriginalObserver = globalThis.ResizeObserver;
+    const callbacks = new Map<Element, ResizeObserverCallback>();
+    globalThis.ResizeObserver = class {
+      constructor(private callback: ResizeObserverCallback) {}
+      observe(target: Element) {
+        callbacks.set(target, this.callback);
+      }
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+    try {
+      const s = setup({ options: large.slice(0, -1), value: "model/4998" });
+      const list = s.getByRole("listbox");
+      list.style.padding = "4px";
+      const spacer = list.firstElementChild as HTMLElement;
+      const last = s.getByRole("option", { name: "Model 4998" });
+      let position = list.scrollTop;
+      Object.defineProperty(list, "clientHeight", { configurable: true, value: 320 });
+      Object.defineProperty(list, "scrollTop", {
+        configurable: true,
+        get: () => position,
+        // Browsers clamp scrolling against the currently committed spacer, not React state.
+        set: (next: number) => {
+          position = Math.min(next, parseFloat(spacer.style.height) + 8 - 320);
+        },
+      });
+      act(() =>
+        callbacks.get(last)!(
+          [
+            {
+              target: last,
+              borderBoxSize: [{ blockSize: 120, inlineSize: 200 }],
+            } as unknown as ResizeObserverEntry,
+          ],
+          {} as ResizeObserver
+        )
+      );
+      expect(parseFloat(last.style.top) + 120 + 8).toBeLessThanOrEqual(list.scrollTop + 320);
+      expect(last.style.height).toBe("");
+      expect(s.getAllByRole("option").length).toBeLessThan(50);
+    } finally {
+      globalThis.ResizeObserver = OriginalObserver;
+    }
+  });
+
+  it("never expands the render window to an unsettled Radix viewport height", () => {
+    const height = vi
+      .spyOn(HTMLElement.prototype, "clientHeight", "get")
+      .mockImplementation(function (this: HTMLElement) {
+        return this.getAttribute("role") === "listbox" ? 240000 : 0;
+      });
+    try {
+      const s = setup({ options: large, value: "model/0" });
+      expect(s.getAllByRole("option").length).toBeLessThan(50);
+      expect(s.getByRole("listbox").style.maxHeight).toContain("25rem");
+      fireEvent.keyDown(s.search, { key: "ArrowUp" });
+      expect(s.getAllByRole("option").length).toBeLessThan(50);
+      expect(
+        document
+          .getElementById(s.search.getAttribute("aria-activedescendant")!)
+          ?.getAttribute("data-value")
+      ).toBe("model/4998");
+    } finally {
+      height.mockRestore();
+    }
+  });
+
+  it("bounds mounted rows and keeps wrapped keyboard navigation mounted with exact IDs", () => {
+    const s = setup({ options: large, value: "model/0" });
+    expect(s.getAllByRole("option").length).toBeLessThan(50);
+    fireEvent.keyDown(s.search, { key: "ArrowUp" });
+    const active = document.getElementById(s.search.getAttribute("aria-activedescendant")!);
+    expect(active?.getAttribute("data-value")).toBe("model/4998");
+    expect(active?.getAttribute("aria-posinset")).toBe("4999");
+    expect(active?.getAttribute("aria-setsize")).toBe("5000");
+    expect(s.getAllByRole("option").length).toBeLessThan(50);
+    fireEvent.keyDown(s.search, { key: "Enter" });
+    expect(s.onValueChange).toHaveBeenCalledExactlyOnceWith("model/4998");
+  });
+
+  it("reaches the tail by scrolling, then resets the window when filtering", () => {
+    const s = setup({ options: large, value: "model/0" });
+    const list = s.getByRole("listbox");
+    fireEvent.scroll(list, { target: { scrollTop: 5000 * 48 } });
+    expect(s.getByRole("option", { name: "Model 4998" })).toBeTruthy();
+    expect(document.getElementById(s.search.getAttribute("aria-activedescendant")!)).toBeTruthy();
+    expect(s.getAllByRole("option").length).toBeLessThan(50);
+    fireEvent.change(s.search, { target: { value: "model/1234" } });
+    expect(s.getAllByRole("option")).toHaveLength(1);
+    fireEvent.keyDown(s.search, { key: "Enter" });
+    expect(s.onValueChange).toHaveBeenCalledExactlyOnceWith("model/1234");
   });
 });
