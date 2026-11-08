@@ -10,76 +10,77 @@ _पछिल्लो अद्यावधिक: 2026-06-28_
 
 ## कार्यकारी सारांश
 
-OmniRoute एक स्थानीय AI रूटिङ गेटवे र Next.js मा निर्मित ड्यासबोर्ड हो। यसले एकल ओपनएआई-कम्प्याटिबल एन्डपोइन्ट (`/v1/*`) प्रदान गर्दछ र अनुवाद, फलब्याक, टोकन रिफ्रेस, र प्रयोग ट्र्याकिङको साथ धेरै अपस्ट्रीम प्रदायकहरूमा ट्राफिकलाई मार्ग गर्दछ।
+OmniRoute Next.js मा निर्मित स्थानीय AI रुटिङ गेटवे र ड्यासबोर्ड हो।
+यसले एउटै OpenAI-compatible endpoint (`/v1/*`) प्रदान गर्छ र अनुवाद, fallback, token refresh, तथा usage tracking सहित विभिन्न upstream प्रदायकहरूमा ट्राफिक रुट गर्छ।
 
-मूल क्षमताहरू:
+मुख्य क्षमताहरू:
 
-- CLI/tools को लागि OpenAI- संगत API सतह (377 प्रदायकहरू, 156 कार्यकारी मोड्युलहरू)
-- प्रदायक ढाँचाहरूमाRequest/response अनुवाद
-- मोडेल कम्बो फलब्याक (बहु मोडेल अनुक्रम)
-- `compositeTiers` द्वारा रनटाइम अर्डरको साथ संरचित कम्बो चरणहरू (`provider + model + connection`)
-- खाता-स्तर फलब्याक (प्रति प्रदायक बहु-खाता)
-- मुख्य च्याट मार्गमा कोटा प्रीफ्लाइट र कोटा-सचेत P2C खाता चयन
-- OAuth + API-कुञ्जी प्रदायक जडान व्यवस्थापन (27 OAuth प्रदायक मोड्युलहरू)
-- `/v1/embeddings` मार्फत एम्बेडिङ जेनेरेशन (१८ प्रदायकहरू)
-- `/v1/images/generations` मार्फत छवि उत्पादन (10 + प्रदायकहरू, 20 + मोडेलहरू)
-- `/v1/audio/transcriptions` मार्फत अडियो ट्रान्सक्रिप्शन (१८ प्रदायकहरू)
-- `/v1/audio/speech` मार्फत टेक्स्ट-टू-स्पीच (24 बिल्ट-इन प्रदायकहरू)
-- `/v1/videos/generations` मार्फत भिडियो उत्पादन (ComfyUI + SD WebUI)
-- `/v1/music/generations` (ComfyUI) मार्फत संगीत पुस्ता
-- `/v1/search` मार्फत वेब खोज (20 प्रदायकहरू)
-- `/v1/moderations` मार्फत मध्यस्थता
-- `/v1/rerank` मार्फत पुन: श्रेणीकरण
-- तर्क मोडेलहरूको लागि ट्याग पार्सिङ (`<think>...</think>`) सोच्नुहोस्
-- कडा OpenAI SDK अनुकूलताको लागि प्रतिक्रिया सेनिटाइजेशन
-- क्रस-प्रदायक अनुकूलताको लागि भूमिका सामान्यीकरण (विकासकर्ता→ प्रणाली, प्रणाली→ प्रयोगकर्ता)
-- संरचित आउटपुट रूपान्तरण (json_schema → Gemini responseSchema)
-- प्रदायकहरू, कुञ्जीहरू, उपनामहरू, कम्बोहरू, सेटिङहरू, मूल्य निर्धारण (122 DB मोड्युलहरू) को लागि स्थानीय दृढता
-- Usage/cost ट्र्याकिङ र अनुरोध लगिङ
-- multi-device/state सिंकको लागि वैकल्पिक क्लाउड सिंक
-- API पहुँच नियन्त्रणको लागिIP allowlist/blocklist
-- सोच बजेट व्यवस्थापन (passthrough/auto/custom/adaptive)
-- ग्लोबल सिस्टम प्रम्प्ट इंजेक्शन
-- सत्र ट्र्याकिङ र फिंगरप्रिन्टिङ
-- प्रति-खाता विस्तारित दर प्रदायक-विशेष प्रोफाइलहरूको साथ सीमित
-- प्रदायक लचिलोपनको लागि सर्किट ब्रेकर ढाँचा
-- म्युटेक्स लकको साथ एन्टी-थन्डरिङ झुण्ड संरक्षण
-- हस्ताक्षर-आधारित अनुरोध डुप्लिकेशन क्यास
-- डोमेन तह: लागत नियम, फलब्याक नीति, तालाबन्दी नीति
-- सन्दर्भ रिले: खाता रोटेशन निरन्तरताको लागि सत्र ह्यान्डअफ सारांश
-- डोमेन राज्य दृढता (फलब्याकहरू, बजेटहरू, लकआउटहरू, सर्किट ब्रेकरहरूको लागिSQLite राइट-थ्रु क्यास)
-- केन्द्रीकृत अनुरोध मूल्याङ्कनको लागि नीति इन्जिन (लकआउट → बजेट → फलब्याक)
-- p50/p95/p99 विलम्बता एकत्रीकरणको साथ टेलिमेट्री अनुरोध गर्नुहोस्
-- कम्बो लक्ष्य टेलिमेट्री र ऐतिहासिक कम्बो लक्ष्य स्वास्थ्य `combo_execution_key` / `combo_step_id` मार्फत
-- अन्त-देखि-अन्त ट्रेसिङको लागि सहसंबंध ID (X-Request-Id)
-- प्रति API कुञ्जी अप्ट-आउटको साथ अनुपालन लेखापरीक्षण लगिङ
-- LLM गुणस्तर आश्वासनको लागि Eval फ्रेमवर्क
-- वास्तविक समय प्रदायक सर्किट ब्रेकर स्थिति संग स्वास्थ्य ड्यासबोर्ड
-- MCP सर्भर (110 उपकरणहरू) 3 ट्रान्सपोर्टहरू (stdio/SSE/Streamable HTTP)
-- A2A सर्भर (JSON-RPC 2.0 + SSE) कौशल र कार्य जीवनचक्रको साथ
-- मेमोरी प्रणाली (निकासी, इंजेक्शन, पुन: प्राप्ति, सारांश)
-- कौशल प्रणाली (रजिस्ट्री, कार्यकारी, स्यान्डबक्स, निर्मित कौशल)
-- प्रमाणपत्र व्यवस्थापन र DNS ह्यान्डलिंगको साथ MITM प्रोक्सी
-- प्रम्प्ट इन्जेक्शन गार्ड मिडलवेयर
-- Caveman, RTK, स्ट्याक्ड पाइपलाइनहरू, कम्प्रेसन कम्बोहरू, भाषा प्याकहरू, र एनालिटिक्सको साथ प्रम्प्ट कम्प्रेसन पाइपलाइन
-- ACP (एजेन्ट कम्युनिकेसन प्रोटोकल) रजिस्ट्री
-- मोड्युलर OAuth प्रदायकहरू ( `src/lib/oauth/providers/` अन्तर्गत 22 व्यक्तिगत मोड्युलहरू)
-- Uninstall/full-uninstall लिपिहरू
-- OAuth वातावरण मर्मत कार्य
-- ओपनएआई-कम्प्याटिबल WS ग्राहकहरूको लागिWebSocket ब्रिज (`/v1/ws`)
-- सिंक टोकन व्यवस्थापन (issue/revoke, ETag-संस्करण कन्फिग बन्डल डाउनलोड)
-- GLM सोच (`glmt`) प्रथम श्रेणी प्रदायक प्रिसेट
-- हाइब्रिड टोकन गणना (प्रदायक-साइड `/messages/count_tokens` अनुमान फलब्याक संग)
-- मोडेल उपनाम स्वत: सीडिङ (स्टार्टअपमा 30 + क्रस-प्रोक्सी बोली सामान्यीकरण)
-- SSRF गार्ड, निजी URL अवरुद्ध, र कन्फिगर योग्य पुन: प्रयासको साथ सुरक्षित आउटबाउन्ड फेच
-- Cooldown-Aware च्याटले कन्फिगर योग्य `requestRetry` र `maxRetryIntervalSec` सँग पुन: प्रयास गर्दछ
-- स्टार्टअपमा Zod सँग रनटाइम वातावरण प्रमाणीकरण
-- पृष्ठांकन, प्रदायक CRUD घटनाहरू, र SSRF-ब्लक गरिएको प्रमाणीकरण लगिङको साथ अनुपालन अडिट v2
+- CLI/tools का लागि OpenAI-compatible API surface (380 प्रदायक, 159 executor modules)
+- प्रदायकका ढाँचाहरूबीच request/response अनुवाद
+- Model combo fallback (बहु-मोडल अनुक्रम)
+- Structured combo steps (`provider + model + connection`) र `compositeTiers` मार्फत runtime ordering
+- Account-level fallback (प्रति प्रदायक बहु-खाता)
+- मुख्य chat path मा quota preflight र quota-aware P2C account selection
+- OAuth + API-key प्रदायक connection management (27 OAuth provider modules)
+- `/v1/embeddings` मार्फत embedding generation (18 प्रदायक)
+- `/v1/images/generations` मार्फत image generation (10+ प्रदायक, 20+ मोडल)
+- `/v1/audio/transcriptions` मार्फत audio transcription (18 प्रदायक)
+- `/v1/audio/speech` मार्फत text-to-speech (24 built-in providers)
+- `/v1/videos/generations` मार्फत video generation (ComfyUI + SD WebUI)
+- `/v1/music/generations` मार्फत music generation (ComfyUI)
+- `/v1/search` मार्फत web search (20 प्रदायक)
+- `/v1/moderations` मार्फत moderations
+- `/v1/rerank` मार्फत reranking
+- Reasoning models का लागि think tag parsing (`<think>...</think>`)
+- Strict OpenAI SDK compatibility का लागि response sanitization
+- Cross-provider compatibility का लागि role normalization (developer→system, system→user)
+- Structured output conversion (json_schema → Gemini responseSchema)
+- Providers, keys, aliases, combos, settings, pricing का लागि local persistence (122 DB modules)
+- Usage/cost tracking र request logging
+- Multi-device/state sync का लागि वैकल्पिक cloud sync
+- API access control का लागि IP allowlist/blocklist
+- Thinking budget management (passthrough/auto/custom/adaptive)
+- Global system prompt injection
+- Session tracking र fingerprinting
+- Provider-specific profiles सहित per-account enhanced rate limiting
+- Provider resilience का लागि circuit breaker pattern
+- Mutex locking सहित anti-thundering herd protection
+- Signature-based request deduplication cache
+- Domain layer: cost rules, fallback policy, lockout policy
+- Context Relay: account rotation continuity का लागि session handoff summaries
+- Domain state persistence (fallbacks, budgets, lockouts, circuit breakers का लागि SQLite write-through cache)
+- Centralized request evaluation का लागि policy engine (lockout → budget → fallback)
+- p50/p95/p99 latency aggregation सहित request telemetry
+- `combo_execution_key` / `combo_step_id` मार्फत combo target telemetry र historical combo target health
+- End-to-end tracing का लागि Correlation ID (X-Request-Id)
+- प्रति API key opt-out सहित compliance audit logging
+- LLM quality assurance का लागि eval framework
+- Real-time provider circuit breaker status सहित health dashboard
+- 3 transports (stdio/SSE/Streamable HTTP) सहित MCP Server (110 tools)
+- Skills र task lifecycle सहित A2A Server (JSON-RPC 2.0 + SSE)
+- Memory system (extraction, injection, retrieval, summarization)
+- Skills system (registry, executor, sandbox, built-in skills)
+- Certificate management र DNS handling सहित MITM proxy
+- Prompt injection guard middleware
+- Caveman, RTK, stacked pipelines, compression combos, language packs, तथा analytics सहित prompt compression pipeline
+- ACP (Agent Communication Protocol) registry
+- Modular OAuth providers (`src/lib/oauth/providers/` अन्तर्गत 22 individual modules)
+- Uninstall/full-uninstall scripts
+- OAuth environment repair action
+- OpenAI-compatible WS clients (`/v1/ws`) का लागि WebSocket bridge
+- Sync token management (issue/revoke, ETag-versioned config bundle download)
+- GLM Thinking (`glmt`) first-class provider preset
+- Hybrid token counting (estimation fallback सहित provider-side `/messages/count_tokens`)
+- Model alias auto-seeding (startup मा 30+ cross-proxy dialect normalizations)
+- SSRF guard, private URL blocking, तथा configurable retry सहित safe outbound fetch
+- Configurable `requestRetry` र `maxRetryIntervalSec` सहित cooldown-aware chat retries
+- Startup मा Zod सहित runtime environment validation
+- Pagination, provider CRUD events, तथा SSRF-blocked validation logging सहित compliance audit v2
 
-प्राथमिक रनटाइम मोडेल:
+प्राथमिक runtime model:
 
-- `src/app/api/*` अन्तर्गत Next.js एप मार्गहरूले ड्यासबोर्ड APIs र अनुकूलता APIs दुवै लागू गर्दछ
-- `src/sse/*` + `open-sse/*` मा साझा गरिएको SSE/routing कोरले प्रदायक कार्यान्वयन, अनुवाद, स्ट्रिमिङ, फलब्याक, र प्रयोग ह्यान्डल गर्छ
+- `src/app/api/*` अन्तर्गतका Next.js app routes ले dashboard APIs र compatibility APIs दुवै कार्यान्वयन गर्छन्
+- `src/sse/*` + `open-sse/*` मा रहेको shared SSE/routing core ले provider execution, translation, streaming, fallback, तथा usage सम्हाल्छ
 
 ## सन्दर्भ आरेखहरू
 

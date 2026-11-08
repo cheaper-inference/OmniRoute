@@ -1,0 +1,1 @@
+- **fix(sse):** A forced `tool_choice` sent to a Claude-format provider now names the same `proxy_`-prefixed tool that `tools` declares, so Anthropic no longer rejects the request. ([#19000](https://github.com/cheaper-inference/OmniRoute/pull/19000))
