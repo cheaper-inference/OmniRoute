@@ -161,6 +161,8 @@ estimates, not an invoice, and do not include currency conversion, tax or discou
   caller cancels, OmniRoute queries its generation ID on the **same** configured
   OpenRouter origin. An EU request never falls back to the global origin. This is
   a bounded, read-only lookup; synthesis is not retried for accounting.
+  Billing records can appear after the audio has finished: lookup retries run
+  in the background for up to about 52 seconds, including network deadlines.
 - During that lookup, the audio response has `X-OmniRoute-Cost-Status: pending`
   and no response-cost header. Its final charge appears in usage history,
   analytics and the key ledger after reconciliation. If metadata is unavailable,

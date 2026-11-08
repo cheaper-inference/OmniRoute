@@ -92,7 +92,6 @@ for (const data of [
   { id: "different", total_cost: 0.1 },
   { id: "gen-test", total_cost: -1 },
   { id: "gen-test", total_cost: "0.01" },
-  { id: "gen-test" },
 ]) {
   test(`invalid generation billing stays unknown: ${JSON.stringify(data)}`, async () => {
     globalThis.fetch = async () => Response.json({ data });
@@ -137,4 +136,71 @@ test("oversized metadata is cancelled, never retained as an accounting payload",
   );
   await response.arrayBuffer();
   assert.equal(await speechUsage(response), null);
+});
+
+test("late generation records are reconciled without another paid synthesis", async (context) => {
+  context.mock.timers.enable({ apis: ["setTimeout"] });
+  let calls = 0;
+  globalThis.fetch = async () =>
+    ++calls < 6
+      ? new Response(null, { status: 404 })
+      : Response.json({ data: { id: "gen-test", total_cost: 0.0004433 } });
+  const source = upstream();
+  const response = trackOpenRouterSpeech(
+    source,
+    source,
+    "https://eu.openrouter.ai/api/v1/audio/speech",
+    "test-key"
+  );
+  await response.arrayBuffer();
+  for (let i = 0; i < 8; i++) {
+    await new Promise((resolve) => setImmediate(resolve));
+    context.mock.timers.tick(20_000);
+  }
+  assert.deepEqual(await speechUsage(response), { cost_usd: 0.0004433 });
+  assert.equal(calls, 6);
+});
+
+test("a pending generation row is retried until its actual charge is populated", async (context) => {
+  context.mock.timers.enable({ apis: ["setTimeout"] });
+  let calls = 0;
+  globalThis.fetch = async () =>
+    Response.json({ data: { id: "gen-test", total_cost: ++calls < 6 ? null : 0.0004433 } });
+  const source = upstream();
+  const response = trackOpenRouterSpeech(
+    source,
+    source,
+    "https://eu.openrouter.ai/api/v1/audio/speech",
+    "test-key"
+  );
+  await response.arrayBuffer();
+  for (let i = 0; i < 8; i++) {
+    await new Promise((resolve) => setImmediate(resolve));
+    context.mock.timers.tick(20_000);
+  }
+  assert.deepEqual(await speechUsage(response), { cost_usd: 0.0004433 });
+  assert.equal(calls, 6);
+});
+
+test("unavailable generation metadata stays bounded and unknown, never zero", async (context) => {
+  context.mock.timers.enable({ apis: ["setTimeout"] });
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    return new Response(null, { status: 404 });
+  };
+  const source = upstream();
+  const response = trackOpenRouterSpeech(
+    source,
+    source,
+    "https://eu.openrouter.ai/api/v1/audio/speech",
+    "test-key"
+  );
+  await response.arrayBuffer();
+  for (let i = 0; i < 10; i++) {
+    await new Promise((resolve) => setImmediate(resolve));
+    context.mock.timers.tick(20_000);
+  }
+  assert.equal(await speechUsage(response), null);
+  assert.equal(calls, 8);
 });

@@ -32,8 +32,11 @@ function generationUrl(baseUrl: string, id: string): URL | null {
 async function generationUsage(url: URL, token: string): Promise<Record<string, number> | null> {
   // Only the existing generation is queried. Never retry a paid synthesis, switch
   // providers, or send an EU key to the global endpoint. No credentials/payloads in logs.
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, attempt * 250));
+  // Generation billing is eventually consistent after the audio finishes. Keep
+  // this off the audio delivery path; eight reads + deadlines stay below 52s.
+  const delays = [0, 250, 500, 1_500, 3_000, 5_000, 10_000, 15_000];
+  for (const delay of delays) {
+    if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
     try {
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -70,6 +73,7 @@ async function generationUsage(url: URL, token: string): Promise<Record<string, 
       }
       const data = JSON.parse(new TextDecoder().decode(bytes))?.data;
       const cost = data?.total_cost;
+      if (data?.id === url.searchParams.get("id") && cost == null) continue;
       if (
         data?.id !== url.searchParams.get("id") ||
         typeof cost !== "number" ||
@@ -91,6 +95,7 @@ async function generationUsage(url: URL, token: string): Promise<Record<string, 
       return null;
     }
   }
+  console.warn("[Speech accounting] Generation billing remained unavailable after bounded retries");
   return null;
 }
 
