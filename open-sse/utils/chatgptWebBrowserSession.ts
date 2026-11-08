@@ -792,7 +792,7 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
     // A pooled page can be left in a state where the composer accepts no text (observed as
     // "0 chars present" after a previous turn or a challenge redirect). Reload the first-party
     // page and retry once before failing the turn.
-    const insertOnce = async (): Promise<boolean> => {
+    const insertOnce = async (): Promise<import("playwright").Locator | null> => {
       const composer = await this.resolveComposer();
       await composer.click();
       await composer.focus().catch(() => {});
@@ -809,12 +809,15 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
       const deadline = Date.now() + COMPOSER_TYPED_TIMEOUT_MS;
       while (Date.now() < deadline) {
         await this.page.waitForTimeout(COMPOSER_SETTLE_MS);
-        if (composerAcceptedPrompt(expectedTail, await this.readComposerText())) return true;
+        if (composerAcceptedPrompt(expectedTail, await this.readComposerText(composer))) {
+          return composer;
+        }
       }
-      return false;
+      return null;
     };
 
-    if (!(await insertOnce())) {
+    let composer = await insertOnce();
+    if (!composer) {
       console.warn(
         `[chatgpt-web] composer rejected the first insert: ${JSON.stringify(await this.describeComposerState())}`
       );
@@ -822,7 +825,8 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
         .goto(this.pageUrl, { waitUntil: "domcontentloaded", timeout: 30_000 })
         .catch(() => {});
       await this.page.waitForTimeout(COMPOSER_SETTLE_MS);
-      if (!(await insertOnce())) {
+      composer = await insertOnce();
+      if (!composer) {
         console.warn(
           `[chatgpt-web] composer rejected the reload retry: ${JSON.stringify(await this.describeComposerState())}`
         );
@@ -835,7 +839,7 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
     // Enter is the reliable submit; the send button can render before it is enabled.
     await this.page.keyboard.press("Enter");
     await this.page.waitForTimeout(COMPOSER_SUBMIT_MS);
-    const submitted = (await this.readComposerText()).trim().length === 0;
+    const submitted = (await this.readComposerText(composer).catch(() => "")).trim().length === 0;
     if (!submitted) {
       const send = this.page.locator('[data-testid="send-button"]').first();
       if (await send.isEnabled().catch(() => false)) await send.click();
@@ -877,15 +881,9 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
     return retry;
   }
 
-  /** Whitespace-normalised composer text, so ProseMirror's block boundaries do not matter. */
-  private async readComposerText(): Promise<string> {
-    return this.page.evaluate(() => {
-      const composer =
-        document.querySelector<HTMLElement>('div.ProseMirror[contenteditable="true"]') ??
-        document.querySelector<HTMLElement>("#prompt-textarea") ??
-        document.querySelector<HTMLElement>('[contenteditable="true"]');
-      return (composer?.textContent ?? "").replace(/\s+/g, " ");
-    });
+  /** Read the same visible composer that received the text, even if hidden nodes remain. */
+  private async readComposerText(composer: import("playwright").Locator): Promise<string> {
+    return ((await composer.textContent({ timeout: 1_000 })) ?? "").replace(/\s+/g, " ");
   }
 
   private async countAssistantMessages(): Promise<number> {
@@ -989,16 +987,19 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
     return this.page
       .evaluate((selectors) => {
         let nodes: HTMLElement[] = [];
+        let matchedSelector: string | null = null;
         for (const selector of selectors) {
           const matches = Array.from(document.querySelectorAll<HTMLElement>(selector));
           if (matches.length) {
             nodes = matches;
+            matchedSelector = selector;
             break;
           }
         }
         const last = nodes[nodes.length - 1];
         return {
           url: location.href.replace("https://chatgpt.com", ""),
+          assistantSelector: matchedSelector,
           roles: nodes.map((n) =>
             n.getAttribute("data-message-author-role") ??
             n.getAttribute("data-conversation-role") ??
