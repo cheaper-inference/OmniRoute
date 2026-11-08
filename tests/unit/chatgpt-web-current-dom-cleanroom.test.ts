@@ -28,10 +28,15 @@ function sessionWithPage(page: import("playwright").Page) {
   return new PlaywrightChatGptWebBrowserSession(page);
 }
 
-function privateReadComposer(session: PlaywrightChatGptWebBrowserSession): Promise<string> {
+function privateReadComposer(
+  session: PlaywrightChatGptWebBrowserSession,
+  composer: import("playwright").Locator
+): Promise<string> {
   return (
-    session as unknown as { readComposerText(): Promise<string> }
-  ).readComposerText();
+    session as unknown as {
+      readComposerText(composer: import("playwright").Locator): Promise<string>;
+    }
+  ).readComposerText(composer);
 }
 
 function privateReadAssistant(session: PlaywrightChatGptWebBrowserSession) {
@@ -49,24 +54,26 @@ function privateReadAssistant(session: PlaywrightChatGptWebBrowserSession) {
 
 test("reads the current ProseMirror composer without the legacy prompt ID", async () => {
   const editable = { textContent: "What is 1 + 1? Reply with only the number." };
-  const page = pageWithDocument({
-    querySelector(selector: string) {
-      return selector === 'div.ProseMirror[contenteditable="true"]' ? editable : null;
+  const page = pageWithDocument({});
+  const composer = {
+    async textContent() {
+      return editable.textContent;
     },
-  });
+  } as unknown as import("playwright").Locator;
   assert.equal(
-    await privateReadComposer(sessionWithPage(page)),
+    await privateReadComposer(sessionWithPage(page), composer),
     "What is 1 + 1? Reply with only the number."
   );
 });
 
 test("retains support for the legacy prompt-textarea composer", async () => {
-  const page = pageWithDocument({
-    querySelector(selector: string) {
-      return selector === "#prompt-textarea" ? { textContent: "legacy\ncomposer" } : null;
+  const page = pageWithDocument({});
+  const composer = {
+    async textContent() {
+      return "legacy\ncomposer";
     },
-  });
-  assert.equal(await privateReadComposer(sessionWithPage(page)), "legacy composer");
+  } as unknown as import("playwright").Locator;
+  assert.equal(await privateReadComposer(sessionWithPage(page), composer), "legacy composer");
 });
 
 test("uses the send-button fallback if Enter leaves ProseMirror text in place", async () => {
@@ -102,6 +109,9 @@ test("uses the send-button fallback if Enter leaves ProseMirror text in place", 
                 if (selector === '[data-testid="send-button"]') clickedSend += 1;
               },
               async focus() {},
+              async textContent() {
+                return editable.textContent;
+              },
               async isEnabled() {
                 return true;
               },
@@ -123,6 +133,62 @@ test("uses the send-button fallback if Enter leaves ProseMirror text in place", 
   });
   assert.equal(pressedEnter, 1);
   assert.equal(clickedSend, 1);
+});
+
+test("reads the resolved visible legacy composer even with hidden ProseMirror markup", async () => {
+  const prompt = "What is 1 + 1?";
+  const hidden = { textContent: "hidden stale prompt" };
+  let visibleText = "";
+  let sendClicks = 0;
+  const visible = {
+    get textContent() {
+      return visibleText;
+    },
+    focus() {},
+  };
+  const page = pageWithDocument(
+    {
+      activeElement: visible,
+      querySelector(selector: string) {
+        if (selector === 'div.ProseMirror[contenteditable="true"]') return hidden;
+        if (selector === "#prompt-textarea") return visible;
+        return null;
+      },
+      execCommand(_command: string, _showUI: boolean, text: string) {
+        visibleText = text;
+        return true;
+      },
+    },
+    {
+      locator(selector: string) {
+        return {
+          first() {
+            return {
+              async isVisible() {
+                return selector === "#prompt-textarea";
+              },
+              async click() {
+                if (selector === '[data-testid="send-button"]') sendClicks += 1;
+              },
+              async focus() {},
+              async textContent() {
+                return selector === "#prompt-textarea" ? visibleText : hidden.textContent;
+              },
+              async isEnabled() {
+                return true;
+              },
+            };
+          },
+        };
+      },
+      keyboard: { async press() {} },
+      async waitForTimeout() {},
+    }
+  );
+
+  await sessionWithPage(page).submitPromptViaComposer({ prompt, attachments: [] });
+  assert.equal(visibleText, prompt);
+  assert.equal(sendClicks, 1);
 });
 
 test("reads the current conversation-role assistant markup", async () => {
