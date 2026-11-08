@@ -126,6 +126,36 @@ import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
 import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 
 /**
+ * Vertex answers a shared-capacity 429 (the whole region is busy) with a bare `RESOURCE_EXHAUSTED`
+ * "Resource exhausted. Please try again later." and no `details`. It says nothing about this
+ * account's quota, so the combo must not lock the model for it. Mirrors the matcher of the same
+ * name in src/sse/services/auth.ts (account path). shortcut: a local copy, because that one is
+ * private and auth.ts is not part of this change; export it there and import it here to dedupe.
+ */
+function isVertexSharedCapacity429(
+  provider: string | null | undefined,
+  status: number,
+  errorText: string
+): boolean {
+  if (status !== 429 || (provider !== "vertex" && provider !== "vertex-partner")) return false;
+  try {
+    const parsed = JSON.parse(errorText);
+    const error = (Array.isArray(parsed) ? parsed[0] : parsed)?.error;
+    const message = typeof error?.message === "string" ? error.message : "";
+    const hasDetails = Array.isArray(error?.details) && error.details.length > 0;
+    return (
+      error?.status === "RESOURCE_EXHAUSTED" &&
+      !hasDetails &&
+      /resource exhausted/i.test(message) &&
+      /try again later/i.test(message) &&
+      !/quota|provisioned throughput/i.test(message)
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Executes an admitted target with configured retries and response validation. Returns a
  * success or terminal response, or a nonterminal result when the loop may try another target.
  */
@@ -1140,6 +1170,12 @@ export async function executeTargetAttempt(
       });
     }
 
+    // Shared Vertex capacity is not this model's fault: no model lockout (auth.ts does the same).
+    const vertexSharedCapacity = isVertexSharedCapacity429(
+      provider,
+      result.status,
+      failure.bodyText ?? ""
+    );
     const quotaExhausted = isQuotaExhaustionFailure(failure, provider, rawModel, profile);
     recordQuotaExhaustionClassification(result, quotaExhausted);
     // Balance exhaustion is upstream truth about credits, and it outranks the
@@ -1220,7 +1256,8 @@ export async function executeTargetAttempt(
         rawModel &&
         retry === 0 &&
         shouldRecordModelLockoutForComboFailure(scopedFailure, structuredError) &&
-        !isConnectionScopedClaudeQuota
+        !isConnectionScopedClaudeQuota &&
+        !vertexSharedCapacity
       ) {
         const mlSettings = resolveModelLockoutSettings(deps.settings);
         if (mlSettings.enabled && mlSettings.errorCodes.includes(result.status)) {
@@ -1318,7 +1355,8 @@ export async function executeTargetAttempt(
       provider &&
       rawModel &&
       shouldRecordModelLockoutForComboFailure(scopedFailure, structuredError) &&
-      !isConnectionScopedClaudeQuota
+      !isConnectionScopedClaudeQuota &&
+      !vertexSharedCapacity
     ) {
       const mlSettings = resolveModelLockoutSettings(deps.settings);
       if (mlSettings.enabled && mlSettings.errorCodes.includes(result.status)) {
