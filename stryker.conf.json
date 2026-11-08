@@ -248,6 +248,7 @@
       "tests/unit/classifyLockoutReason-403.test.ts",
       "tests/unit/chat-adaptive-admission-binding.test.ts",
       "tests/unit/chat-combo-live-test.test.ts",
+      "tests/unit/internal-test-mark-trust.test.ts",
       "tests/unit/chat-context-relay.test.ts",
       "tests/unit/chat-cooldown-aware-retry.test.ts",
       "tests/unit/chat-helpers.test.ts",
