@@ -1,4 +1,5 @@
 import type { A2ATask, TaskArtifact } from "./taskManager";
+import type { A2ACallerContext } from "./selfLoopAuth";
 import { appendA2ATaskEvent } from "@/lib/db/a2aTasks";
 import { memoryManager } from "@/lib/memory/manager";
 import { logger } from "@omniroute/open-sse/utils/logger";
@@ -133,28 +134,31 @@ export async function collectMemoryHits(
   }
 }
 
-export type A2ASkillHandler = (task: A2ATask) => Promise<StreamTaskResult>;
+export type A2ASkillHandler = (
+  task: A2ATask,
+  caller?: A2ACallerContext
+) => Promise<StreamTaskResult>;
 
 export const A2A_SKILL_HANDLERS: Record<string, A2ASkillHandler> = {
-  "smart-routing": async (task) => {
+  "smart-routing": async (task, caller) => {
     const skillModule = await import("./skills/smartRouting");
-    return skillModule.executeSmartRouting(task);
+    return skillModule.executeSmartRouting(task, caller);
   },
-  "quota-management": async (task) => {
+  "quota-management": async (task, caller) => {
     const skillModule = await import("./skills/quotaManagement");
-    return skillModule.executeQuotaManagement(task);
+    return skillModule.executeQuotaManagement(task, caller);
   },
   "provider-discovery": async (task) => {
     const skillModule = await import("./skills/providerDiscovery");
     return skillModule.executeProviderDiscovery(task);
   },
-  "cost-analysis": async (task) => {
+  "cost-analysis": async (task, caller) => {
     const skillModule = await import("./skills/costAnalysis");
-    return skillModule.executeCostAnalysis(task);
+    return skillModule.executeCostAnalysis(task, caller);
   },
-  "health-report": async (task) => {
+  "health-report": async (task, caller) => {
     const skillModule = await import("./skills/healthReport");
-    return skillModule.executeHealthReport(task);
+    return skillModule.executeHealthReport(task, caller);
   },
   "list-capabilities": async (task) => {
     const skillModule = await import("./skills/listCapabilities");

@@ -30,96 +30,94 @@ Solicitação do cliente
 
 ---
 
-## Modos de compactação
+## Modos de compressão
 
 ### Desativado
 
-Nenhuma compactação é aplicada. Todas as mensagens passam sem alterações.
+Nenhuma compressão aplicada. Todas as mensagens passam sem alterações.
 
-### Modo leve (~15% de economia, latência <1ms)
+### Modo Lite (~15% de economia, <1ms de latência)
 
-O modo mais seguro — nenhuma alteração semântica, apenas limpeza de formatação:
+O modo mais seguro — limpeza de formatação. O truncamento dos resultados de ferramentas é com perdas, portanto o
+caminho padrão (sem `allow-lossy`, `engine:lite` ou ativação explícita de uma combinação nomeada) executa o modo lite com
+`compressToolResults: false`: os resultados anteriores das ferramentas chegam ao provedor sem alterações.
 
-| Técnica                  | Descrição                                               |
-| ------------------------ | ------------------------------------------------------- |
-| `collapseWhitespace`     | Mescla linhas em branco consecutivas e espaços no final |
-| `dedupSystemPrompt`      | Remove mensagens de sistema duplicadas                  |
-| `compressToolResults`    | Compacta saídas detalhadas de ferramentas/funções       |
-| `removeRedundantContent` | Remove instruções repetidas                             |
-| `replaceImageUrls`       | Encurta URIs de dados de imagem em base64               |
+| Técnica                  | Descrição                                                                                                             |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Mescla linhas em branco consecutivas e espaços à direita                                                              |
+| `dedupSystemPrompt`      | Remove mensagens de sistema duplicadas                                                                                |
+| `compressToolResults`    | Trunca resultados anteriores das ferramentas até o limite do lite (com perdas: somente com uma solicitação explícita) |
+| `removeRedundantContent` | Remove instruções repetidas                                                                                           |
+| `replaceImageUrls`       | Encurta URIs de dados de imagens em base64                                                                            |
 
 **Ideal para:** Uso contínuo e fluxos de trabalho críticos para a segurança.
 
-### Modo padrão (~30% de economia)
+### Modo Standard (~30% de economia)
 
-Inspirado no [Caveman](https://github.com/JuliusBrussee/caveman) — remove palavras supérfluas e formulações prolixas, preservando o significado:
+Inspirado no [Caveman](https://github.com/JuliusBrussee/caveman) — remove palavras de preenchimento e formulações prolixas, preservando o significado:
 
-- Remove palavras supérfluas ("por favor", "eu acho", "basicamente", "na verdade")
-- Condensa frases prolixas ("a fim de" → "para", "como resultado de" → "porque")
-- Remove atenuações de cortesia ("Você se importaria...", "Se você pudesse...")
-- Mais de 30 regras de regex ajustadas para prompts de programação
+- Remove palavras de preenchimento ("please", "I think", "basically", "actually")
+- Condensa frases prolixas ("in order to" → "to", "as a result of" → "because")
+- Remove ressalvas de polidez ("Would you mind...", "If you could possibly...")
+- Mais de 30 regras de expressão regular ajustadas para prompts de programação
 
-**Ideal para:** Fluxos diários de programação e equipes preocupadas com custos.
+**Ideal para:** Fluxos de trabalho diários de programação e equipes preocupadas com custos.
 
-### Modo agressivo (~50% de economia)
+### Modo Aggressive (~50% de economia)
 
 Gerenciamento inteligente do histórico para sessões longas:
 
-- **Envelhecimento de mensagens** — mensagens mais antigas são compactadas progressivamente
-- **Compactação de resultados de ferramentas** — saídas longas de ferramentas são truncadas ou omitidas (primeiras/últimas linhas,
-  filtragem de linhas correspondentes, compactação de chaves JSON)
-- **Proteções de integridade estrutural** — garantem que os pares `tool_use` + `tool_result` permaneçam consistentes
-- **Reconhecimento da janela de contexto** — respeita os limites de tokens de cada modelo
+- **Envelhecimento de mensagens** — mensagens mais antigas são comprimidas progressivamente
+- **Compressão de resultados de ferramentas** — saídas longas de ferramentas são truncadas ou omitidas (primeiras/últimas linhas,
+  filtragem por linhas correspondentes, compactação de chaves JSON)
+- **Proteções de integridade estrutural** — garante que os pares `tool_use` + `tool_result` permaneçam consistentes
+- **Consciência da janela de contexto** — respeita os limites de tokens por modelo
 
 **Ideal para:** Sessões prolongadas de depuração e bases de código grandes.
 
-### Modo ultra (~75% de economia)
+### Modo Ultra (~75% de economia)
 
-Compactação máxima para cenários com restrições críticas de tokens:
+Compressão máxima para cenários críticos em tokens:
 
-- **Poda heurística** — poda de tokens de texto com base em pontuação
-- **Preservação de estrutura** — blocos de código delimitados, código inline, URLs e identificadores são
-  substituídos temporariamente por marcadores e reinseridos literalmente, sem nunca serem podados
-- **Camada SLM opcional** — um pequeno modelo local pode refinar a poda quando configurado
-- Independente do modo agressivo: não executa envelhecimento de mensagens, compactação de resultados
-  de ferramentas nem o sumarizador de fallback (somente uma falha da camada SLM pode encaminhar uma
-  etapa de fallback pelo modo agressivo)
+- **Poda heurística** — poda de tokens baseada em pontuação no texto em prosa
+- **Preservação da estrutura** — blocos de código cercados, código inline, URLs e identificadores são preservados e reinseridos
+  literalmente, nunca podados
+- **Camada SLM opcional** — um modelo local pequeno pode refinar a poda quando configurado
+- Independente do modo Aggressive: não executa envelhecimento de mensagens, compressão de resultados de ferramentas
+  nem o sumarizador de fallback (somente uma falha da camada SLM pode encaminhar uma passagem de fallback pelo modo aggressive)
 
 **Ideal para:** Quando você atinge repetidamente os limites de contexto.
 
-### Modo RTK (faixa upstream de 60-90%)
+### Modo RTK (faixa upstream de 60–90%)
 
-O modo RTK é otimizado para saídas detalhadas de ferramentas que aparecem em sessões de agentes de programação:
+O modo RTK é otimizado para saídas prolixas de ferramentas que aparecem em sessões de agentes de programação:
 
-- Detecta classes de comandos/saídas, como `git status`, `git diff`, `git log`, executores de testes,
-  builds do TypeScript/Vite/Webpack, ESLint/Biome/Prettier, auditorias/instalações npm, logs do Docker, saídas
-  de infraestrutura e saídas genéricas de shell
+- Detecta classes de comandos/saídas como `git status`, `git diff`, `git log`, executores de testes,
+  builds de TypeScript/Vite/Webpack, ESLint/Biome/Prettier, auditorias/instalações do npm, logs do Docker, saídas de infraestrutura
+  e saídas genéricas do shell
 - Aplica pacotes de filtros JSON de `open-sse/services/compression/engines/rtk/filters/`
-- Importa filtros do schema TOML v1 do RTK a partir de arquivos `filters.toml` globais ou do projeto, com
-  validação por testes inline e controle de confiança para arquivos do projeto
-- Inclui 55 filtros integrados com amostras de verificação inline
-- Remove sequências de controle ANSI, barras de progresso, linhas repetidas e ruídos que não exigem ação
+- Importa filtros de esquema TOML v1 do RTK a partir de arquivos `filters.toml` do projeto ou globais, com validação de
+  testes inline e controle de confiança para arquivos do projeto
+- Inclui 56 filtros integrados com amostras de verificação inline
+- Remove sequências de controle ANSI, barras de progresso, linhas repetidas e ruído não acionável
 - Preserva falhas, erros, avisos, arquivos alterados, resumos e o final de saídas longas
-- Oferece suporte a filtros de projeto sujeitos a controle de confiança, filtros globais e recuperação
-  opcional da saída bruta com dados sensíveis ocultados
+- Oferece suporte a filtros de projeto controlados por confiança, filtros globais e recuperação opcional da saída bruta redigida
 
-**Ideal para:** Sessões de agentes com transcrições de shell, build, teste, git, grep e saídas de arquivos.
+**Ideal para:** Sessões de agentes com transcrições de shell, build, teste, git, grep e saída de arquivos.
 
-### Modo empilhado (faixa elegível de 78-95%)
+### Modo Stacked (faixa elegível de 78–95%)
 
-O modo empilhado executa vários mecanismos de compactação em uma ordem determinística. O pipeline padrão é:
+O modo Stacked executa vários mecanismos de compressão em uma ordem determinística. O pipeline padrão é:
 
 ```txt
 RTK -> Caveman
 ```
 
-Essa ordem mantém primeiro a saída de terminal/ferramenta compacta e, em seguida, aplica a condensação
-semântica do Caveman ao prompt em linguagem natural restante. Os pipelines empilhados podem ser
-configurados globalmente ou por meio de combinações de compactação atribuídas a combinações de roteamento.
+Essa ordem mantém primeiro a saída do terminal/ferramenta compacta e, em seguida, aplica a condensação semântica do Caveman
+ao prompt restante em linguagem natural. Os pipelines Stacked podem ser configurados globalmente ou por meio de
+combinações de compressão atribuídas a combinações de roteamento.
 
-**Ideal para:** Contextos mistos com grandes logs de ferramentas, além de instruções humanas ou resumos do assistente.
-
----
+**Ideal para:** Contexto misto com grandes logs de ferramentas e instruções humanas ou resumos do assistente.
 
 ## Cálculo da economia upstream
 
@@ -172,84 +170,89 @@ Com Stacked:    10K-2.5K tokens enviados     (faixa elegível de 78-95% com RTK+
 
 ## Configuração
 
-### Painel
+### Dashboard
 
-Acesse `Dashboard → Context & Cache`:
+Navegue até `Dashboard → Context & Cache`:
 
-- **Caveman** — seleção de modo, pacotes de idiomas, pré-visualização e padrões globais
-- **RTK** — pré-visualização do filtro de comandos, configurações de segurança do RTK e catálogo de filtros
-- **Compression Combos** — pipelines de mecanismos nomeados atribuídos a combinações de roteamento
-- **Auto-Trigger Threshold** — ativa automaticamente a compactação quando a contagem de tokens excede o limite
+- **Caveman** — seleção de modo, pacotes de idioma, visualização e padrões globais
+- **RTK** — visualização do filtro de comandos, configurações de segurança do RTK e catálogo de filtros
+- **Compression Combos** — pipelines de mecanismo nomeados atribuídos a combos de roteamento
+- **Auto-Trigger Threshold** — ativa automaticamente a compressão quando a contagem de tokens excede o limite
 
-### Substituição por combinação
+### Substituição por combo
 
-Em `Dashboard → Context & Cache → Compression Combos`, atribua uma combinação de compactação a uma
-combinação de roteamento:
+Em `Dashboard → Context & Cache → Compression Combos`, atribua um combo de compressão a um
+combo de roteamento:
 
 ```txt
-Combinação: "free-tier-fallback"
-  Combinação de compactação: "coding-agent-stack"
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
   Pipeline: RTK -> Caveman
-  Destinos:
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-Isso permite usar compactação empilhada em provedores gratuitos/de programação, mantendo o modo leve
-nas assinaturas pagas.
+Isso permite usar compressão empilhada com provedores gratuitos/de codificação, mantendo o modo lite em
+assinaturas pagas.
 
-Essa atribuição de "Substituição por combinação" é um controle diferente da substituição do **modo de
-compactação da combinação de roteamento** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses
-— o esquema do campo também aceita `rtk`, `stacked` e `omniglyph`) — essa substituição não seleciona
-um pipeline nomeado de combinação de compactação; ela apenas define o campo `compressionMode`
-consultado por `resolveCompressionPlan`. Ela pode ser definida no cartão da combinação
-(`Dashboard → Combos`) ou, desde a #6760, por combinação de roteamento na lista "Assign to routing" em
-`Dashboard → Context & Cache → Compression Combos`, ao lado da caixa de seleção de atribuição de
-pipeline documentada acima. Ambas as interfaces persistem por meio do mesmo endpoint
+Essa atribuição de "Per-Combo Override" é um controle diferente da substituição de **routing-combo compression
+mode** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — o esquema do campo também aceita
+`rtk`, `stacked` e `omniglyph`) — essa substituição não seleciona um pipeline de compression-combo
+nomeado; ela apenas define o campo `compressionMode` consultado por
+`resolveCompressionPlan`. Ela pode ser definida no cartão do combo (`Dashboard → Combos`) ou, desde
+#6760, por combo de roteamento na lista "Assign to routing" em
+`Dashboard → Context & Cache → Compression Combos`, logo ao lado da caixa de seleção de atribuição do pipeline
+documentada acima. Ambas as interfaces persistem por meio do mesmo endpoint
 `PUT /api/combos/{id}`.
 
-### Substituição por solicitação
+### Substituição por requisição
 
-Envie o cabeçalho de solicitação `x-omniroute-compression` para substituir o plano de compactação de
-uma única solicitação. Ele tem a precedência mais alta — prevalece sobre a substituição da combinação
-de roteamento, o perfil ativo, o acionamento automático e o padrão do painel. Valores desconhecidos
-são ignorados (a solicitação nunca é rejeitada), e o controle global principal ainda se aplica a tudo:
-quando a compactação está desativada globalmente, o cabeçalho não pode ativá-la. Valores:
+Envie o cabeçalho de requisição `x-omniroute-compression` para substituir o plano de compressão de uma única
+requisição. Ele tem a maior precedência — prevalece sobre a substituição do combo de roteamento, o perfil ativo,
+o acionamento automático e o padrão do painel. Valores desconhecidos são ignorados (a requisição nunca é rejeitada) e
+o interruptor mestre global ainda controla tudo: quando a compressão está desativada globalmente, o cabeçalho não pode
+ativá-la. Valores:
 
-| Valor         | Efeito                                                                                                                  |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Nenhuma compactação para esta solicitação.                                                                              |
-| `default`     | O perfil padrão derivado do painel (ignora o perfil ativo). Mecanismos com perdas permanecem desativados.               |
-| `safe`        | O mesmo que omitir o cabeçalho: apenas desduplicação e redução de espaços em branco.                                    |
-| `allow-lossy` | Mantém o plano do operador desta solicitação, incluindo resumos, filtros de relevância e reescritas de estilo.          |
-| `engine:<id>` | Um único mecanismo quando habilitado, por exemplo, `engine:rtk`. Essa é a ativação por solicitação para esse mecanismo. |
-| `<combo>`     | Uma combinação nomeada, correspondente primeiro pelo nome (sem diferenciar maiúsculas de minúsculas) e depois pelo id.  |
+| Valor         | Efeito                                                                                                                        |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `off`         | Nenhuma compressão para esta requisição.                                                                                      |
+| `default`     | O perfil Default derivado do painel (ignora o perfil ativo). Mecanismos com perdas permanecem desativados.                    |
+| `safe`        | Igual a omitir o cabeçalho.                                                                                                   |
+| `allow-lossy` | Mantém o plano do operador desta requisição, incluindo resumos, filtros de relevância e reescritas de estilo.                 |
+| `engine:<id>` | Um único mecanismo quando ativado, por exemplo, `engine:rtk`. Esta é a ativação explícita por requisição para esse mecanismo. |
+| `<combo>`     | Um combo nomeado, correspondido primeiro pelo nome (sem distinção entre maiúsculas e minúsculas) e depois pelo id.            |
 
-Sem `allow-lossy`, `engine:<id>` ou uma combinação nomeada, mecanismos com perdas não são aplicados.
-A solicitação ainda recebe desduplicação de sessão e redução de espaços em branco quando a
-compactação está ativada.
+Sem `allow-lossy`, `engine:<id>` ou um combo nomeado, mecanismos com perdas não são aplicados. Quando um
+Default, acionamento automático ou substituição de roteamento com perdas é rebaixado, o OmniRoute mantém as
+etapas reconhecidas sem perdas do pipeline empilhado configurado, na ordem configurada. Ele recorre a
+`session-dedup → lite` somente quando nenhuma etapa configurada sem perdas permanece.
+
+A visualização **Effective pipeline** do painel de Configurações mostra o plano comum em estado persistente. Quando
+um acionamento automático pode ser executado, a mesma visualização também mostra seu pipeline efetivo condicional,
+para que o painel e a resolução em tempo de execução sem cabeçalho permaneçam alinhados.
 
 O plano aplicado é retornado no cabeçalho de resposta
-`X-OmniRoute-Compression: <mode>; source=<source>`, em que `<source>` é um entre `request-header`,
-`routing-override`, `active-profile`, `auto-trigger`, `default` ou `off`.
+`X-OmniRoute-Compression: <mode>; source=<source>`, onde `<source>` é um destes valores:
+`request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` ou `off`.
 
 ### API
 
 ```bash
-# Obter as configurações de compactação
+# Obter configurações de compressão
 curl http://localhost:20128/api/settings/compression
 
-# Atualizar as configurações de compactação
+# Atualizar configurações de compressão
 curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# Pré-visualizar um payload RTK/empilhado específico
+# Visualizar uma carga específica de RTK/stacked
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# Listar pacotes de filtros RTK
+# Listar pacotes de filtros do RTK
 curl http://localhost:20128/api/context/rtk/filters
 
 # Testar o RTK diretamente com metadados opcionais do comando

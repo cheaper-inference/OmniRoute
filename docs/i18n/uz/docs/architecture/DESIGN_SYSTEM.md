@@ -4,142 +4,93 @@
 
 ---
 
-> **Holat:** boshqaruv paneli **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) asosida yaratilgan va
-> `packages/ui-kit` ish maydoni sifatida vendoring qilingan (`@omniroute/ui-kit`; yuqori oqim nusxasi
-> `packages/ui-kit/UPSTREAM.md` faylida mahkamlangan va `npm run check:ui-kit-snapshot` orqali himoyalangan). Yorugʻ mavzu kanonik
-> mavzu hisoblanadi; standart afzallik — `system`. Aksent rangi — Keak laymi (`--ci-color-accent`). Inter
-> (harflar oraligʻi 0, `--ci-letter-spacing-ui`) — UI shrift oilasi, Instrument Serif esa faqat katta va siyrak
-> displey matni (`.ci-dashboard-display`) uchun, IBM Plex Mono esa kod uchun ishlatiladi — barchasi
-> `src/app/globals.css` faylining yuqori qismidagi `@fontsource/*` importlari orqali lokal joylashtirilgan. Barcha ikonalar Lucide gliflaridir.
+> **Holati:** asboblar paneli ustiga qurilgan** Keak CI UI to'plami** (`@keak/cheaper-inference-ui-kit`), ish maydoni `packages/ui-kit` (`@omniroute/ui-kit`; yuqori oqim snapshoti `packages/ui-kit/UPSTREAM.md` ga mahkamlanadi va `npm run check:ui-kit-snapshot` tomonidan himoyalanadi) sifatida sotiladi. Nur - kanonik mavzu; standart afzallik `system`. Standart palitrasi to'plamga tegishli** Nashrlar** tashqi ko'rinish (issiq qog'oz neytrallari va mis aksenti `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Sozlamalar → Tashqi ko'rinish → Ranglar palitrasi taklif qiladi** Klassik** , ohak aksenti bilan to'plamning asosiy belgilari. Switzer UI, displey va kod matni (`--ci-font-ui`; `--ci-font-display` va `--ci-font-mono` to'g'ridan-to'g'ri) uchun yagona oila bo'lib, to'plamning o'zi (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tomonidan import qilingan) tomonidan o'z-o'zidan joylashtirilgan. Shveytsariya skriptlarida glif bo'yicha glif (`src/app/globals.css`) bo'yicha tushish yo'q: kirill, yunon va vetnam uchun Inter va arab yozuvi uchun faqat `html[dir="rtl"]` ostida Vazirmatn. Har bir belgi Lucid glifidir.
 
-## 1. Komponentlar qayerda joylashgan
+## 1. Narsalar yashaydigan joy
 
-- **Toʻplam.** `packages/ui-kit/src` yuqori oqimdagi `src/` katalogining
-  `packages/ui-kit/UPSTREAM.md` faylida mahkamlangan commitdagi baytma-bayt nusxasidir (bu faylda litsenziya
-  ruxsati ham qayd etilgan); `PATCHES.md` mahalliy yamoqlarni sanab oʻtadi (hozircha yoʻq). U yigʻishsiz
-  manba sifatida ishlatiladi: `next.config.mjs` uni transpilatsiya qiladi, `tsconfig.json` esa
-  `@omniroute/ui-kit` → `packages/ui-kit/src` va `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` mosliklarini belgilaydi (`vitest.config.ts` va `vitest.mcp.config.ts` ham xuddi
-  shu taxallusni saqlaydi). Toʻplam komponentini uning quyi yoʻli orqali import qiling
-  (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), hech qachon
-  `@omniroute/ui-kit` umumiy eksporti orqali emas: umumiy eksport har bir import qiluvchiga barcha
-  komponentlarni (jumladan, sana tanlagichni) tortib kiradi. Toʻplam uslublar jadvali
-  `src/app/globals.css` orqali ulanadi (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokenlar.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` tokenlarini eʼlon qiladi;
-  `src/app/globals.css` ularni eski OmniRoute nomlari (`--color-*`, `--radius-*`,
-  `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) bilan bogʻlaydi, shuning
-  uchun mavjud `var(--color-*)` murojaatlari va Tailwind yordamchi klasslari ishlashda davom etadi. Yangi
-  kod Tailwind yordamchi klasslari (`bg-surface`, `text-text-muted`, `border-border`, `text-success`,
-  `bg-success-bg`, `bg-chart-1`…) yoki toʻplam klasslaridan foydalanadi — hech qachon hex qiymatdan emas
-  (`tests/unit/design-kit-bridge.test.ts` bu bogʻlanishni nazorat qiladi). `text-primary`
-  `--text-color-primary` orqali `--color-primary-ink` qiymatiga mos keladi (yorugʻ mavzuda lime-800,
-  qorongʻi mavzuda esa laym aksenti), shu sababli asosiy matn oʻqilishi oson boʻlib qoladi,
-  `bg-primary`/`border-primary` esa laym yuzasini saqlaydi. Diagramma qatorlari
-  `--color-chart-1` … `--color-chart-5` dan foydalanadi.
-- **Mavzular.** `<html className="ci-theme">` (`src/app/layout.tsx`) hujjatni toʻplam mavzusiga ulaydi.
-  Afzal koʻriladigan mavzu `light`, `dark` yoki `system` boʻlishi mumkin
-  (`src/shared/constants/appConfig.ts` ichida `THEME_CONFIG.defaultTheme = "system"`; `system`
-  `prefers-color-scheme` ga amal qiladi). `src/store/themeStore.ts` ichidagi `applyTheme()` funksiyasi
-  (gidratatsiyadan oldin bajariladigan `src/app/layout.tsx` ichidagi ichki boshlangʻich skript ham aynan
-  shu mantiqni takrorlaydi) `data-theme="dark"|"light"` ni oʻrnatadi va `<html>` elementidagi `.dark`
-  klassini bir vaqtda almashtiradi. Toʻplamning qorongʻi tokenlar toʻplami `data-theme="dark"` asosida
-  tanlanadi (`packages/ui-kit/src/ci-tokens.css`); OmniRouteʼning oʻz qorongʻi mavzu qayta belgilashlari
-  (`globals.css` ichidagi `.dark` bloki) va eski Tailwind `dark:` yordamchi klasslari `.dark` klassiga
-  asoslanadi. Aksent rang andozalari mavjud emas: aksent har doim toʻplamdan olinadi, eski yigʻilishdan
-  saqlanib qolgan andoza esa ombor yuklanganda olib tashlanadi.
-- **Komponentlar (adapterlar).** `src/shared/components/index.tsx` OmniRoute komponent APIʼsini (bir xil
-  nomlar, standart eksportlar va proplar) saqlab qoladi, uning ortidagi primitivlar esa toʻplam ustidagi
-  adapterlardir: shakllar (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`,
-  `Card`), ustki qatlamlar va fikr-mulohaza (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`,
-  `NotificationToast`, `EmptyState`, `Loading`), tuzilma (`Collapsible`, `CollapsibleSection`,
-  `SegmentedControl`, `Breadcrumbs`, `Avatar`) hamda jadvallar (`DataTable`, `FilterBar`,
-  `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter toʻplam komponentini quyi yoʻl orqali import
-  qilib, eski proplarni unga moslaydi — masalan, `Button variant="primary"` toʻplamdagi `default`
-  tugmasidir (`--ci-button-primary-*`: yorugʻ mavzuda teskari yuza, qorongʻi mavzuda esa
-  `--ci-color-accent-foreground` matn rangiga ega aksent), `danger` — `destructive`, `warning` esa
-  `outline` va `.ci-button--warning` kengaytmasidan iborat. `globals.css` oxiridagi (`@layer components`)
-  `.ci-button--warning` va `.ci-badge[data-tone]` qoidalari toʻplam klasslari ustiga qoʻshilgan OmniRoute
-  kengaytmalaridir. `tests/unit/ui/adapters/*.test.tsx` har bir adapterni qatʼiy tekshiradi.
-- **Qobiq.** `src/app/(dashboard)/layout.tsx` `DashboardLayout` ni render qiladi, u esa
-  `src/shared/components/layouts/DashboardShell.tsx` ni render qiladi: bu toʻplamdagi `SidebarProvider` /
-  `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) boʻlib, OmniRoute navigatsiya mantiqi
-  `src/shared/components/Sidebar.tsx` ichida joylashgan. `#main-content` ga olib boruvchi “kontentga
-  oʻtish” havolasi fokus olish mumkin boʻlgan birinchi elementdir. `src/shared/components/Header.tsx`
-  toʻplamdagi `SidebarTrigger` ni (qobiqdagi yon panelni almashtiruvchi yagona boshqaruv), Keak
-  `ProductSwitcher` komponentini va buyruqlar palitrasini ochuvchi boshqaruvni oʻz ichiga oladi; u yoʻnalish
-  sarlavhasini faqat `#main-content` ichida toʻplamning `PageHeader` (`.ci-page-header`) komponenti
-  oʻrnatilmagan paytda koʻrsatadi, shuning uchun oʻz `PageHeader` komponentiga ega sahifada faqat bitta
-  `h1` boʻladi. `src/shared/components/CommandPalette.tsx` — toʻplamdagi `Dialog`.
-- **Ikonkalar.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) nomni (ekranlarda
-  ishlatiladigan Material Symbols lugʻatini) `ICON_MAP` (`src/shared/constants/iconMap.ts`) orqali Lucide
-  glifiga moslaydi. Material Symbols shrifti va paketi olib tashlangan: xaritada mavjud boʻlmagan nom
-  neytral oʻrinbosar glifni (`data-icon-missing="true"`) render qiladi va production muhitidan tashqarida
-  konsolga ogohlantirish chiqaradi. `npm run gen:icon-map` xaritada mavjud boʻlmagan, ammo
-  foydalanilayotgan nomlarni chiqaradi (`tests/unit/icon-map-coverage.test.ts` Lucide ikonkasi boʻlmagan
-  har qanday nomda muvaffaqiyatsiz tugaydi; `tests/unit/icon-map-object-values.test.ts` qidiruv
-  obyektlarida saqlangan nomlarni qamrab oladi);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` literal
-  `<span className="material-symbols-outlined">` spanlarini `<Icon>` ga qayta yozadi.
-- **Brend.** `src/shared/components/OmniRouteLogo.tsx` toʻplamni oʻrab turadi: standart eksport
-  `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` ni (ichki SVG, `basePath` bilan xavfsiz)
-  render qiladi, `OmniRouteLockup` esa `ProductLockup product="omniroute"` ni (foydalanish imkoniyati uchun
-  nomi “Keak OmniRoute”) yoki oq yorliqli operatorlar uchun ularning oʻz `name`/`logoSrc` qiymatlarini
-  render qiladi. Mahsulot almashtirgich manzillari `src/shared/constants/keakProducts.ts` ichida joylashgan
-  (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Mustaqil ekranlar —
-  `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` va
-  `src/shared/components/ErrorPageScaffold.tsx` — lokapni koʻrsatadi;
-  `tests/unit/brand-pages-static.test.ts` buni nazorat qiladi.
+- **To'plam.** `packages/ui-kit/src` `packages/ui-kit/UPSTREAM.md` -da qadalgan commitdagi yuqori oqim `src/` ning bayt-bayt nusxasi (bu litsenziya avtorizatsiyasini ham qayd etadi); `PATCHES.md` mahalliy yamoqlarni ro'yxatga oladi (yo'q). U manba sifatida iste'mol qilinadi, hech qanday tuzilmasiz: `next.config.mjs` uni transpilyatsiya qiladi va `tsconfig.json` xaritalari `@omniroute/ui-kit` → `packages/ui-kit/src` va `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` va `vitest.mcp.config.ts` bir xil taxallusga ega). To'plam komponentini pastki yo'li (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) bo'yicha import qiling, hech qachon `@omniroute/ui-kit` barrelidan o'tmang: barrel har bir komponentni (jumladan, sana tanlagichni) har bir importerga tortadi. To'plam uslublar jadvali `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, to'liq varaq: yadro `ci-ui.css` plus har bir naqsh oilasi) orqali kiradi.
+- **Tokenlar.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` tokenlarini e'lon qiladi; `src/app/globals.css` ularni eski OmniRoute nomlariga (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) bog‘laydi, shuning uchun mavjud `var(--color-*)` o‘qiydi va Tailwind yordam dasturlari ishlashda davom etadi. Yangi kod Tailwind utilitalaridan (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) yoki to'plam sinflaridan — hech qachon hex qiymatidan foydalanmaydi (`tests/unit/design-kit-bridge.test.ts` ko'prikni amalga oshiradi). `text-primary` `--text-color-primary` orqali `--color-primary-ink` ga o'tadi, shuning uchun `bg-primary`/`border-primary` urg'u yuzasini saqlab turganda asosiy matn o'qilishi mumkin bo'lib qoladi: Nashrlar ostida bu to'plamning `--ci-color-accent-active` (yorug'likda chuqur mis `#99562f`, qorong'ida mis aksan); Klassik ostida, yorug'likda lime-800 va qorong'ida ohak urg'usi. Diagramma seriyalari `--color-chart-1` … `--color-chart-8` foydalanadi, ularning har biri matn uchun xavfsiz `--color-chart-N-ink` va noaniq `--color-chart-N-subtle` chip rangiga ega, to‘plam seriyasi tartibida (`ciChartSeriesOrder`) tayinlangan.
+- **Mavzular.** `<html className="ci-theme">` (`src/app/layout.tsx`) hujjatni to'plam mavzusiga tanlaydi. Afzallik `light`, `dark` yoki `system` (`THEME_CONFIG.defaultTheme = "system"` in `src/shared/constants/appConfig.ts`; `system` `prefers-color-scheme` dan keyin keladi). `src/store/themeStore.ts` dagi `applyTheme()` ( `THEME_BOOT_SCRIPT` bilan aks ettirilgan, hidratsiyadan oldin ishlaydigan `src/app/layout.tsx` ichiga chizilgan) `data-theme="dark"|"light"` o‘rnatadi va `<html>` da `.dark` sinfini birga almashtiradi. To'plamning qorong'u tokenlar to'plami `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) ga o'rnatilgan; OmniRoute ning o'ziga xos qorong'u bekor qilishlari ( `globals.css` dagi `.dark` bloki) va `.dark` sinfidagi eski Tailwind `dark:` yordamchi dasturlari kaliti. Urg'u ranglarini oldindan sozlash mavjud emas: aksan har doim to'plamdan keladi va do'kon yuklanganda eski tuzilishdagi doimiy oldindan o'rnatilgan sozlamalar o'chiriladi.
+- **Palitralar.** Ikkita, ikkalasi ham to'plamdan (`src/shared/constants/appearancePalette.ts`): `editions`, standart va `classic`. Nashrlar to'plamning `<html>` bo'yicha `data-ci-appearance="editions"` atributi bo'lib, `ci-editions.css` ( `ci-ui.css` tomonidan import qilingan) `data-theme` bilan birlashadi; Klassik - bu atributning yo'qligi. Ildiz tartibi server-atributni ko'rsatadi, shuning uchun hech narsa saqlanmagan (yoki JS yo'q) tashrif buyuruvchi har bir — boshqaruv panelida, login, `/status`, xato sahifalarida, `/docs` va PWA Nashrlarni oladi. Tanlov bir xil `theme` doʻkonidagi mavzu yonida saqlanadi (`palette`, `setPalette()`, `applyPalette()` ) va `src/store/themeStore.ts` tomonidan boʻyashdan `THEME_BOOT_SCRIPT` qoʻllaniladi (`src/shared/utils/themeBootScript.ts`, maketning `<head>` ga kiritilgan ), bu atributni faqat saqlangan palitra `"classic"` boʻlganda olib tashlaydi; `src/app/global-error.tsx`, ildiz tartibidan tashqari, uni bir xil do'kondan qo'llaydi. `data-ci-appearance` boshqa elementga qo'ymang: to'plam unga `html:root:has([data-ci-appearance="editions"])` bilan mos keladi, shuning uchun bir avlod butun hujjatni almashtiradi. Editions `data-ci-editions-variant="landing"` varianti boshqaruv paneli uchun emas, balki marketing sahifalari uchun. Brauzer chrome: server birlamchi nashrlarni `viewport.themeColor` (har bir `prefers-color-scheme` uchun bitta teg) va veb-manifest — `PWA_THEME_COLORS` `src/shared/constants/pwaThemeColors.ts` da, `tests/unit/pwa-theme-colors.test.ts` tomonidan `ci-editions.css` ga mahkamlangan `--ci-color-background` (`#f3f1e9` / `#11120f`) Nashrlarining bir oynasini ko‘rsatadi. Keyin jonli `<meta name="theme-color">` saqlangan palitra va rejimga amal qiladi: `THEME_BOOT_SCRIPT` bo'yoqdan oldin teglarni qayta yozadi va mavzular do'konining harakatlari har bir o'zgarishda buni amalga oshiradi (`resolveThemeColor()` / `applyThemeColor()` `src/shared/utils/themeColorMeta.ts` ichida, `CLASSIC_PAGE_BACKGROUND` to'plamning `ciTokens` dan o'qiladi). Aniq light/dark mavzusi har bir tegni ushbu rejimga o'rnatadi; `system` har bir sxema uchun bitta rangni saqlaydi. Manifest Nashrlar bo'lib qoladi: u har bir o'rnatishda bir marta, afzal ko'rmasdan olinadi. Monako o'z ranglarini zonddan o'qiydi (`monacoKitTheme.ts`); Nashrlar ostida prob o'qilishi bir sinxron o'tish uchun `data-theme` ildizini aylantiradi, chunki to'plam light/dark nashrlarini ildizdan hal qiladi.
+- **Komponentlar (adapterlar).** `src/shared/components/index.tsx` OmniRoute komponentini API (xuddi shu nomlar, standart eksport va rekvizitlar) saqlaydi va uning orqasidagi ibtidoiylar to‘plam ustidagi adapterlardir: shakllar (`Button`, `Input` `Loading` `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),`Modal`,`ConfirmModal`/ teskari aloqa `Tooltip`,`InfoTooltip`, `NotificationToast`, `EmptyState`), struktura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) va jadvallar (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter to'plam komponentini pastki yo'l bo'yicha import qiladi va unga eski rekvizitlarni joylashtiradi — masalan `Button variant="primary"` - to'plam `default` tugmasi (`--ci-button-primary-*`: yorug'likdagi teskari sirt, qorong'uda `--ci-color-accent-foreground` siyoh bilan urg'u), `danger` - `destructive` va `warning` `warning` kit. `Badge` holati variantlari to'plam ohanglari va `<option>` bolalar bilan `Select` to'plamni `NativeSelect` ko'rsatadi. `tests/unit/ui/adapters/*.test.tsx` pin har bir adapter.
+- **Shell.** `src/app/(dashboard)/layout.tsx` `src/shared/components/layouts/DashboardShell.tsx` ni ko'rsatadigan `DashboardLayout` beradi: `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) to'plami OmniRoute ning `src/shared/components/Sidebar.tsx` navigatsiya mantig'i bilan. `#main-content` ga "kontentga o'tish" havolasi birinchi diqqatni qaratadigan elementdir. `src/shared/components/Header.tsx` `SidebarTrigger` to'plamini (qobiqning yagona yon panelini almashtirish), Keak `ProductSwitcher` va buyruqlar palitrasini ochish vositasini o'z ichiga oladi; `#main-content` ichida hech qanday to'plam `PageHeader` (`.ci-page-header`) o'rnatilmaganda faqat marshrut sarlavhasini ko'rsatadi, shuning uchun o'z `PageHeader` ega sahifa bitta `h1` ega bo'ladi. `src/shared/components/CommandPalette.tsx` - bu `Dialog` to'plami.
+- **Belgilar.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) `ICON_MAP` (`src/shared/constants/iconMap.ts`) orqali ismni (ekranlar ishlatadigan moddiy belgilar lug‘ati) Lucide glifiga o‘zgartiradi. Material Symbols shrifti va paketi yo‘q bo‘lib ketdi: xaritada etishmayotgan nom neytral to‘ldiruvchi glifini (`data-icon-missing="true"`) ko‘rsatadi va ishlab chiqarishdan tashqarida konsol ogohlantirishini qayd qiladi. `npm run gen:icon-map` ishlatilayotgan va xaritada etishmayotgan nomlarni chop etadi (`tests/unit/icon-map-coverage.test.ts` Lucide belgisisiz istalgan nomda bajarilmaydi; `tests/unit/icon-map-object-values.test.ts` qidiruv obyektlarida saqlangan nomlarni qamrab oladi); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` literal `<span className="material-symbols-outlined">` oralig'ini `<Icon>` ga qayta yozadi.
+- **Brend.** `src/shared/components/OmniRouteLogo.tsx` to'plamni o'rab oladi: standart eksport `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) va `OmniRouteLockup` `ProductLockup product="omniroute"` ("Keak OmniRoute" kirish mumkin) yoki oq yorliqli operatorlar uchun o'z `name`/`logoSrc` ni ko'rsatadi. Mahsulot-switcher manzillari `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) da yashaydi. — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` va `src/shared/components/ErrorPageScaffold.tsx` — mustaqil ekranlari blokirovkani ko'rsatadi; `tests/unit/brand-pages-static.test.ts` uni qo'riqlaydi.
 
 ## 2. Qoidalar
 
-1. Tokenlar, hech qachon literallar emas. Ataylab saqlab qolingan istisnolar: har doim qorong'u bo'lgan konsol terminali va `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — literal hex kerak bo'lgan chaqiruvchilar uchun kit status palitrasining resolved-hex ko'zgudagi nusxasi. Kategorik palitralar endi istisno emas: ular kitning beshta chart tokenidan (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts` orqali, routing strategiyalari uchun esa `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` orqali foydalanadi; ReactFlow edge'lari va orkestratsiya canvas'i mavzuga mos `--orch-status-*` o'zgaruvchilarini o'qiydi (`src/shared/components/flow/edgeStyles.ts`).
-2. `packages/ui-kit/src` ni hech qachon qo'lda patch qilmang: `scripts/dev/sync-ui-kit.sh <commit>` bilan sinxronlang; pre-commit tekshiruvi `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) pinned upstream commit'dan farq qiladigan har qanday baytda muvaffaqiyatsiz bo'ladi (upstream clone, ya'ni `UI_KIT_CLONE` yoki `_references/cheaper-inference-ui-kit`, mavjud bo'lmasa, ogohlantirish bilan o'tkazib yuboradi). Kitda biror narsa yetishmasa, uni adapterda yoki ekranda chetlab o'ting va upstream'dan so'rang.
-3. Kit matn standartlari ingliz tilida (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit komponenti matn render qilganda har doim `useTranslations(...)` dan tarjima qilingan satrlarni uzating.
-4. Tailwind utility'lari kit komponent klasslaridan ustun keladi (kit `@layer theme, base, components, utilities` ni e'lon qiladi va uning qoidalari `components` da joylashgan) — utility'lardan spacing va layout uchun foydalaning, kit komponentlarini qayta ranglash uchun emas.
-5. Sarlavhalar: sahifa va bo'lim sarlavhalari uchun `.ci-heading` (Inter, tracking'siz); `.ci-dashboard-display` (Instrument Serif) faqat katta, kam joy egallaydigan display matn uchun, masalan, xatolik sahifasining status kodi.
-6. `tests/unit/dashboard-kit-sweep.test.ts` kit joriy etilishini himoya qiladi: `src/app` yoki `src/shared/components` ostida Material ligature span bo'lmasligi kerak; dashboard daraxtida (`src/app/(dashboard)` va `src/shared/components`) xom `<select>`, `<textarea>` yoki `<table>` bo'lmasligi va sanab o'tilgan istisnolardan (`Select` adapterining native branch'i, `RequestLoggerDetail`) tashqarida qo'lda yozilgan `role="dialog"` bo'lmasligi kerak; u yerdagi har bir xom `<button>` yoki `<input>` dan ko'pi bilan 3 qator yuqorida tugaydigan, `kit-exception:` (sababi ko'rsatilgan holda) ni o'z ichiga olgan izoh bo'lishi shart; palitra hue'lari va `dark:` variantlari faqat test sanab o'tgan fayllarda.
-7. PR'dan oldin ikkala mavzuni va 390 px viewport'ni tekshiring (skrinshotlar); `tests/e2e/a11y.spec.ts` axe'ni ishga tushiradi.
+1. Tokenlar, hech qachon harflar. Maqsadli istisnolar: har doim qorong'i konsol terminali va `STATUS_HEX` (`src/shared/constants/statusColors.ts`), so'zma-so'z olti burchakli qo'ng'iroq qiluvchilar uchun to'plam holati palitrasining hal qilingan olti burchakli oynasi. Kategoriyali palitralar endi bundan mustasno emas: ular to'plamning sakkizta diagramma tokenida (`--color-chart-1..8`, plus `-ink`/`-subtle`) to'plam ketma-ketligi tartibida, `src/shared/utils/categoricalPalette.ts` orqali va marshrutlash strategiyalari uchun `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow qirralari va orkestratsiya tuvali mavzudan xabardor `--orch-status-*` o'zgaruvchilarni (`src/shared/components/flow/edgeStyles.ts`) o'qiydi.
+2. Hech qachon `packages/ui-kit/src` qo'lda tuzatmang: `scripts/dev/sync-ui-kit.sh <commit>` bilan sinxronlash; `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) oldidan kirish eshigi mahkamlangan yuqori oqimdan farq qiluvchi har qanday baytda ishlamay qoladi (yuqori oqim klonlari, `UI_KIT_CLONE` yoki `_references/cheaper-inference-ui-kit` yo‘q bo‘lganda, u ogohlantirish bilan o‘tkazib yuboriladi). To'plamda biror narsa etishmayotgan bo'lsa, uni adapter yoki ekranda aylantiring va uni yuqoridan so'rang.
+3. To'plam matni standarti inglizcha (`label = "Loading"`, `loadingLabel = "Loading table"`…) — to'plam komponenti matnni ko'rsatganda `useTranslations(...)` dan tarjima qilingan satrlarni o'tkazadi.
+4. Tailwind yordam dasturlari to'plam komponentlari sinflari ustidan g'alaba qozonadi (kit `@layer theme, base, components, utilities` e'lon qiladi va uning qoidalari `components` yashaydi) — utilitalardan to'plam komponentlarini qayta bo'yash uchun emas, balki oraliq va tartib uchun foydalanadi.
+5. Sarlavhalar: sahifa va bo'lim sarlavhalari uchun `.ci-heading` ; `.ci-dashboard-display` faqat xato sahifasi holati kodi kabi katta, siyrak ekran matni uchun. Ikkalasi ham Shveytsariyadan foydalanadi.
+6. `tests/unit/dashboard-kit-sweep.test.ts` to'plamni qabul qilishni qo'riqlaydi: `src/app` yoki `src/shared/components` ostida moddiy ligature oralig'i yo'q; asboblar paneli daraxtida (`src/app/(dashboard)` va `src/shared/components`) hech qanday xom `<select>`, `<textarea>` yoki `<table>` va sanab o‘tilgan istisnolardan tashqari qo‘lda o‘ralgan `role="dialog"` yo‘q ( `Select` adapterning mahalliy filiali, `RequestLoggerDetail`); har bir raw `<button>` yoki `<input>` u erda eng ko'p 3 satr ustida tugaydigan `kit-exception:` (sabab bilan) bo'lgan izoh kerak; palitra ranglari va `dark:` variantlari faqat test ro'yxatidagi fayllarda.
+7. PR (skrinshotlar) oldidan ikkala mavzuni va 390 px ko'rish oynasini tekshiring; `tests/e2e/a11y.spec.ts` bolta ishlaydi.
 
-## 3. Ekran qoʻshish
+## 3. Ekran qo'shish
 
-1. Sahifani kitdagi `PageHeader` (`@omniroute/ui-kit/page-header`, dashboard ichida `compact`) bilan boshlang — sarlavha, tavsif va `actions`. Shunda shell sarlavhasi oʻz sarlavhasini olib tashlaydi.
-2. Boshqaruv elementlarini `@/shared/components` (adapterlar) orqali yarating va adapter mavjud boʻlmagan hollarda kit komponentlarini quyi yoʻl orqali ishlating (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
-3. Ikonkalar: `<Icon name="…" />`. Yangi nomni semantik jihatdan mos Lucide komponenti bilan `ICON_MAP` ichiga qoʻshing; `npm run gen:icon-map` hali yetishmayotgan nomlarni koʻrsatadi.
-4. Ranglar: semantik utilitalar (`text-success`, `bg-warning-bg`, `border-border`…) va diagramma qatorlari uchun `var(--color-chart-N)`; ranglarning hex qiymatlari va faqat rangni takrorlaydigan `dark:` variantlaridan foydalanmang.
-5. Matn: har bir satr, shu jumladan kit komponentlariga uzatiladigan yorliqlar ham `useTranslations` orqali olinadi. Yangi kalitlarni `src/i18n/messages/en.json`, `pt-BR.json` va `vi.json` fayllariga qoʻshing (Vetnam tili muvofiqligi testi har bir inglizcha kalitni mahkamlaydi); boshqa lokalizatsiyalar i18n sinxronlash orqali toʻldiriladi.
-6. PR yuborishdan oldin quyidagi nazoratlarni ishga tushiring: `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `npm run check:dashboard-typecheck` (`iconMap.ts` ichidagi takrorlangan importni aniqlaydigan yagona tekshiruv), `npm run check:ui-icu` va ekranning oʻz testlari.
+1. Sahifani kit `PageHeader` (`@omniroute/ui-kit/page-header`, dashboard ichida `compact`) bilan oching
+   — sarlavha, tavsif va `actions`. Shunda shell header o'z sarlavhasini olib tashlaydi.
+2. Kontrollarni `@/shared/components` dan (adapterlar) qurish va adapter mavjud bo'lmagan joyda kit komponentlaridan subpath orqali
+   foydalaning (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   `Slider`…).
+3. Ikonkalar: `<Icon name="…" />`. Yangi nom `ICON_MAP` ga semantik jihatdan mos Lucide
+   komponenti bilan kiritiladi; `npm run gen:icon-map` hali yetishmayotgan nomlarni ro'yxatlaydi.
+4. Ranglar: semantik utilitlar (`text-success`, `bg-warning-bg`, `border-border`…) va chart seriyalari uchun
+   `var(--color-chart-N)`; hex qiymatlar va faqat rangni takrorlaydigan `dark:` variantlari yo'q.
+5. Matn: kit komponentlariga uzatadigan labellaringiz ham kiritilgan holda, har bir satr
+   `useTranslations` dan keladi. Yangi kalitlar `src/i18n/messages/en.json`, `pt-BR.json` va `vi.json` ga kiritiladi
+   (Vyetnam paritet testi har bir ingliz kalitini pin qiladi); qolgan lokallar i18n sync tomonidan to'ldiriladi.
+6. PR dan oldin himoyachilarni ishga tushiring: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (`iconMap.ts` dagi takrorlangan importni ushlaydigan yagona tekshiruv),
+   `npm run check:ui-icu` va ekranning o'z testlari.
 
-## 4. Adapterni qoʻshish yoki oʻzgartirish
+## 4. Adapter qo'shish yoki o'zgartirish
 
-1. `src/shared/components/index.tsx` faylining ommaviy API interfeysini saqlang: eksport nomlari, standart eksportlar va
-   qabul qilinadigan props bir xil boʻlishi kerak. Eski props qiymatlarini adapter ichida toʻplamga moslang (`Button.tsx` faylidagi `VARIANT_TO_KIT`,
-   `SIZE_TO_KIT` ga qarang).
-2. Toʻplamni quyi yoʻl orqali import qiling (`@omniroute/ui-kit/<component>`).
-3. Toʻplamdagi kamchiliklar uchun vaqtinchalik yechimlar adapterda (yoki tuzatish uslubga oid boʻlsa, `globals.css` faylidagi `@layer components` ichida)
-   joylashishi kerak, hech qachon `packages/ui-kit/src` ichida emas.
-4. `tests/unit/ui/adapters/<name>.test.tsx` faylini qoʻshing yoki yangilang. Koʻp joyda chaqiriladigan adapter uchun oʻzgarishdan
-   oldingi va keyingi render qilingan belgilashni solishtiring — ichki oraliq yoki oʻrovchi elementlardagi oʻzgarishlar har bir ekranga taʼsir qiladi.
+1. `src/shared/components/index.tsx` ning ommaviy API'sini saqlang: bir xil eksport nomlari, default eksportlar va
+   qabul qilinadigan props'lar. Legacy props'larni adapter ichida kit'ga moslang (`Button.tsx` ga qarang:
+   `VARIANT_TO_KIT`, `SIZE_TO_KIT`).
+2. Kit'ni subpath orqali import qiling (`@omniroute/ui-kit/<component>`).
+3. Kit'dagi bo'shliqlar uchun workaround'lar adapterda yashaydi (yoki tuzatish uslub bo'lsa, `globals.css` dagi
+   `@layer components` ichida), hech qachon `packages/ui-kit/src` da emas.
+4. `tests/unit/ui/adapters/<name>.test.tsx` ni qo'shing yoki yangilang. Ko'plab chaqiruvchilarga ega adapter uchun,
+   o'zgarishdan oldin va keyingi render qilingan razmetkani solishtiring — padding yoki wrapper o'zgarishlari har
+   bir ekranga tarqaladi.
 
-## 5. Toʻplamni yangilash
+## 5. To'plamni yangilash
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` yuqori oqimdagi `src/` katalogini koʻrsatilgan commit holatida
-`packages/ui-kit/src` ichiga nusxalaydi va ruxsat etilgan yagona oʻzgartirishni qoʻllaydi (nisbiy importlardan `.js` suffiksini olib tashlaydi).
-Shundan soʻng: `git diff packages/ui-kit` natijasini tekshiring, har ikkala mavzuda provayderlar, sozlamalar, kombinatsiyalar,
-foydalanish va endpointni vizual tekshiruvdan oʻtkazing, `npm run check:ui-kit-snapshot` va `npm run test:vitest:ui` buyruqlarini
-ishga tushiring hamda yuqori oqimdagi oʻzgarishlar jurnali bilan PR oching.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` ga biriktirilgan versiyani yuqoridagi reponing eng yangi `v*` yorlig'i bilan taqqoslaydi va reliz tugashi bilan sinxronlash buyrug'ini chop etadi.
 
-## 6. Maʼlumotnoma indeksi
+Kundalik `UI Kit upstream watch` ish jarayoni (`.github/workflows/ui-kit-upstream-watch.yml`) bir xil tekshiruvni amalga oshiradi. PIN orqada turganda, `scripts/ci/ui-kit-sync-pr.sh` bitta sinxronlash PR eng yuqori `release/vX.Y.Z` shoxiga, `chore/ui-kit-sync-latest` aylanma novdasiga qarshi ochiq holda ushlab turadi. U hech qachon birlashtirilmaydi: har bir to'plam hali ham mahalliy VPS ni vizual tekshirishga muhtoj. Yangi versiya chiqqanda filial qayta quriladi va aks holda yolg'iz qoladi. Qo'lda bosilgan majburiyatlari bo'lgan ochiq PR ustiga yozilmaydi va saqlovchi yopilgan birlashtirilmagan versiya uchun PR yangiroq versiyaga qadar yopiq qoladi.
 
-- `src/app/globals.css` — token koʻprigi, `.dark` qayta belgilashlari, OmniRoute `@layer components` kengaytmalari
-- `packages/ui-kit/UPSTREAM.md` — biriktirilgan yuqori oqim commiti va litsenziya ruxsati; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` va uning yonidagi adapterlar; `src/shared/components/layouts/DashboardShell.tsx`,
-  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
-  `scripts/dev/codemod-material-icons.mjs`
+Hech qanday PR ochilmaganda (maqsadli versiya muzlatilgan, PR qo‘l bilan bosilgan, PR yopilgan yoki PR tokeni o‘rnatilmagan) ish jarayoni nima uchun ekanligini ko‘rsatadigan bitta kuzatuv muammosini ochiq qoldiradi.
+
+Ish jarayoni ikkita sirdan foydalanadi:
+
+- `secrets.UI_KIT_READ_TOKEN`: yuqori oqim repo uchun faqat o‘qish uchun mo‘ljallangan token. Ish oqimi yuqori oqimda oʻqiy olmasa (token yoʻq, ishlamay qolgan token yoki GitHub kirish imkoni boʻlmasa) ishga tushirish yashil boʻlib qoladi, lekin ogohlantirish yozadi va bitta alohida masala ochiq qoladi, bu esa keyingi ishga tushirish yuqori oqimni qayta oʻqishi mumkin boʻlgandan keyin oʻzini yopib qoʻyadi.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: ushbu omborda Contents and Pull so'rovlarini yozish uchun ruxsatga ega nozik token. Standart `GITHUB_TOKEN` bu yerda PRs yarata olmaydi va u ochilgan PR CI ishga tushirmaydi. Ushbu belgisiz ish jarayoni faqat filialni itaradi.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` yuqoridagi `src/` o‘sha majburiyatda (`latest` = eng yangi `v*` tegi) `packages/ui-kit/src` ga ko‘chiradi, yagona ruxsat etilgan transformatsiyani qo‘llaydi (nisbiy importdan `.js` qo‘shimchasini olib tashlaydi) va ish maydonining `packages/ui-kit/package.json` va `package-lock.json` versiyasini yuqori oqimga o‘rnatadi. Keyin: `git diff packages/ui-kit` ni ko'rib chiqing, ikkala mavzuda provayderlar, sozlamalar, kombinatsiyalar, foydalanish va oxirgi nuqtani vizual tarzda o'tkazing, `npm run check:ui-kit-snapshot` va `npm run test:vitest:ui` ni ishga tushiring va yuqoridagi o'zgarishlar jurnali bilan PR oching.
+
+## 6. README diagrammalar
+
+Ildiz `README.md` o'rnatgan o'n ikki diagramma (`docs/diagrams/*.svg`) statik tasvirga qo'llaniladigan to'plam bo'lib, ular qo'lda chizilmagan holda yaratiladi: `scripts/docs/gen-readme-*.mjs` da 13 ta generator fayli (o'n ikkita diagramma va `gen-readme-diagrams.mjs` drayveri) va `tests/unit/docs/readme-*-svg.test.ts` da 12 ta eskirish testi, har bir diagrammada bittadan, har bir bayt-kommitatsiya qilingan faylga ega bo'lgan generator. `test-unit`).
+
+- **Tokenlar.** `scripts/docs/readme-diagram-theme.mjs` Nashrlar palitrasini (standart ko'rinish) `packages/ui-kit/src/ci-editions.css` dan nusxa ko'chiradi ( `tests/unit/docs/readme-diagram-theme.test.ts` tomonidan ushbu faylga mahkamlangan, bu ikkala sxemadagi har bir sirtdagi har bir matn rangi uchun WCAG AA ham tekshiradi; bitta istisno, yorug'lik `warn`, to'plamning 10% qorayganligi haqidagi ogohlantirishdir, chunki to'plam qiymati 4,46 ga teng bo'lib, kitning rolini belgilaydi: turi shkalasi (`ci-tokens.css`): Switzer to'plamning og'irliklarida (400/500/600, displeyda 500) va hamma narsani kuzatish, kod rollaridan (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) tashqari, ular IBM Plex Mono, ekran dentifikatorlari va faqat buyruqlar uchun URLs Yorug'lik qiymatlari `:root` ustida, qorong'i qiymatlar `prefers-color-scheme: dark` orqasida, fayl ichida joylashadi, shuning uchun har bir tasvir GitHub da tomoshabin sxemasiga amal qiladi.
+- **Shriftlar.** GitHub Markdown hech qanday CSS ga ega emas va camo proksi-server har bir tashqi yukni bloklaydi, shuning uchun kit turi fayl ichida harakatlanishi kerak. `scripts/docs/readme-outline.mjs`, har bir generatorning so'nggi bosqichi, Shveytsar rollarini HarfBuzz bilan shakllantiradi va ularni vektor konturlari (`<defs>` yo'llari va `<use>`) sifatida chizadi, Shveytsarning o'z ko'rsatkichlari bo'yicha chizilgan strelkalar va geometrik belgilar bilan. Konturlar, hech qachon oʻrnatilgan shrift: Shveytsariya litsenziyasi (`packages/ui-kit/src/fonts/FFL.txt`) yozma roziligisiz subsetlash va formatni oʻzgartirishni taqiqlaydi va vektor chizmalariga ruxsat beradi, shuning uchun Switzer `@font-face` yoki `data:` URI ni qayta kiritmang. Faylda qolgan bitta shrift OFL IBM Plex Mono kichik to'plami bo'lib, u haqiqiy kod matni (`scripts/docs/readme-fonts.mjs`) bo'lib qoladi, bu belgilardan tuzilgan; u joylashtira olmaydigan har qanday glif tashlaydi.
+- **Qayta tiklash.** `npm run docs:readme-diagrams` barcha o'n ikkitasini README tartibida qayta yozadi va o'z o'lchami bilan har bir fayl uchun bitta qatorni chop etadi. Yagona generator ham o'z-o'zidan ishlaydi (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` `node --import tsx/esm` kerak, chunki uning raqamlari `open-sse/config/freeModelCatalog.ts` dagi jonli katalog yuklagichidan keladi; katalog o'zgarishining CI natijasi `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` da). Generator va SVG birgalikda bajaring.
+- **Isbot.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` faylni GitHub qanday xizmat qilsa ( `<img>` yorlig‘i, camo ning `Content-Security-Policy`, `image/svg+xml`), yorug‘ va qorong‘i freymni suratga oladi va tashqi shrift so‘rovlari haqida xabar beradi (0 bo‘lishi kerak).
+- **Byudjet.** Har bir fayl uchun 200 KB dan kam (har bir eskirish testi buni tasdiqlaydi); 500 KB har qanday README tasviri uchun qattiq chegaradir ( SVG studio validator qoidasi).
+- **O'zgarishsiz nusxa ko'chiring, darvozadan sanaydi.** Rebrend so'zlarni emas, balki turini va palitrasini o'zgartirdi: har bir generator o'z diagramma nusxasini `*_COPY` konstantasida olib yuradi (yoki uni jonli katalogdan tuzadi), bu ham chizilgan matn, ham kontur bosqichining kiritilishi hisoblanadi. Kanonik raqamlar `<text>` tugunlarida qoladi (belgilanganidan keyin ko'rinmas, `fill-opacity:0`), `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) tomonidan o'qiladi; gate o'qiydigan diagrammalarning eskirish testlari ham yaratilgan faylda o'zining validatorlarini ishga tushiradi, shuning uchun koddan o'zgargan raqam sinovdan o'tolmaydi — darvoza o'qigan manbani tuzatadi, generatordagi raqamni hech qachon.
+
+## 7. Malumot indeksi
+
+- `src/app/globals.css` — token ko‘prigi, `.dark` bekor qilish, OmniRoute `@layer components` kengaytmalari
+- `packages/ui-kit/UPSTREAM.md` — pinned upstream commit va litsenziya avtorizatsiyasi; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` va uning yonidagi adapterlar; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
-  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

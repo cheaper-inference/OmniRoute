@@ -11,57 +11,74 @@ OmniRoute ń ṣàkọsílẹ̀ àwọn ìṣe ìṣàkóso, àwọn ìṣẹ̀l
 
 Ìmúlò náà wà nínú `src/lib/compliance/index.ts` (T-43 — "Àwọn Ìṣàkóso Ìbámu") àti `src/lib/compliance/providerAudit.ts`. Àwọn ìkọ̀wé àyẹ̀wò kì í dá àṣìṣe jáde láé: nígbà ìkùnà èyíkéyìí, a máa foju kọ ìpè náà láìsọ ohunkóhun kí ṣíṣe àkọsílẹ̀ àyẹ̀wò má bàa dá ìṣàn ìbéèrè pàtàkì dúró.
 
-## Ohun Tí A Ń Ṣàkọsílẹ̀
+## Ohun Tí A Ń Kọ Sílẹ̀
 
 ### Àwọn ìṣẹ̀lẹ̀ àyẹ̀wò ìṣàkóso (`audit_log`)
 
-Gbogbo ìpè sí `logAuditEvent({ action, actor, target, details, ... })` máa ń ṣẹ̀dá ìlà kan. Àwọn ọ̀rọ̀ ìṣe ń tẹ̀lé àpẹẹrẹ `domain.verb` (tàbí `domain.verb.outcome`). Àwọn irú ìṣe tí a ti fìdí rẹ̀ múlẹ̀ nínú igi orísun pẹ̀lú:
+Gbogbo ìpè sí `logAuditEvent({ action, actor, target, details, ... })` máa ń ṣe
+ìlà kan. Àwọn ọ̀rọ̀ ìṣe máa ń tẹ̀lé àpẹẹrẹ
+`domain.verb` (tàbí `domain.verb.outcome`). Àwọn irú ìṣe tí a ti fìdí rẹ̀
+múlẹ̀ nínú kóòdù ni:
 
-| Ìṣe                                  | Orísun                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Àkọsílẹ̀ kọ̀ọ̀kan máa ń gba `action`, `actor` (tí iye àìyípadà rẹ̀ jẹ́ `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id`, àti `timestamp`. Àwọn kọ́kọ́rọ́ tó ní ìmọ̀ ìkọ̀kọ̀ (`apiKey`, `accessToken`, `refreshToken`, `password`, ohunkóhun tó bá ìlànà `*token`/`*secret`/`*apikey` mu, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) ni a máa ń fi `"[redacted]"` rọ́pò lọ́nà àtúnṣe-jinlẹ̀ kí a tó kọ ìlà náà.
+Àkọsílẹ̀ kọ̀ọ̀kan máa ń gba `action`, `actor` (àìpẹ̀yà sí `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, àti `timestamp`. Àwọn kọ́kọ́rọ́ tó ní ìmọ̀lára (`apiKey`, `accessToken`,
+`refreshToken`, `password`, ohunkóhun tó bá `*token`/`*secret`/`*apikey`
+mu, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) máa ń ṣe àtúnkọ̀ pẹ̀lú ọ̀nà àtúnkọ̀ àtẹ̀gùn sí
+`"[redacted]"` kí a tó kọ ìlà náà sílẹ̀.
 
-### Àwọn ìpè irinṣẹ́ MCP (`mcp_tool_audit`)
+Àwọn ìlà `api_key.auth.touch` máa ń ṣe àkọsílẹ̀ àṣeyọrí metadata kọ́kọ́rọ́ API àti àwọn
+ìkàwé ìṣàwárí (GET/HEAD) tí kò dé ìwé ìbéèrè: kọ́kọ́rọ́ wo, ìgbà wo, àti ọ̀nà tí a
+ṣe ìṣọ̀kan, tí a sì kó jọ tí a sì fi opin sí ìlà 1,000. Àwọn kọ́kọ́rọ́ pẹ̀lú
+`noLog` àti kọ́kọ́rọ́ àyíká ni a máa ń fo kọjá. Adirẹsi IP àti aṣojú-olùmúlò ẹni tó
+ń pè ni a máa ń fi kún un nìkan nígbà tí asia àfidámọ̀
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` bá wà ní titan (ó wà ní pipa ní àkọ́kọ́).
 
-Gbogbo ìpè irinṣẹ́ MCP máa ń kọ ìlà kan nípasẹ̀
-`open-sse/mcp-server/audit.ts`. Àwòrán ètò (láti
+### Àwọn ìpè irinṣẹ MCP (`mcp_tool_audit`)
+
+Gbogbo ìpè irinṣẹ MCP máa ń kọ ìlà kan nípasẹ̀
+`open-sse/mcp-server/audit.ts`. Àtòkọ̀ (gẹ́gẹ́ bí ó ti wà nínú
 `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Kọ́lámù           | Àwọn àkíyèsí                        |
-| ---------------- | ----------------------------------- |
-| `id`             | ń pọ̀ sí i fúnra rẹ̀                  |
-| `tool_name`      | àmì ìdánimọ̀ irinṣẹ́ MCP              |
-| `input_hash`     | sha256 ti ìwọlé (a kò tọ́jú payload) |
-| `output_summary` | àkótán kúkúrú tí a gé kù            |
-| `duration_ms`    | àkókò gidi tí ó lò                  |
-| `api_key_id`     | olùpè (ó lè jẹ́ òfo)                 |
-| `success`        | `1` / `0`                           |
-| `error_code`     | kóòdù àṣìṣe ìkẹyìn nígbà ìkùnà      |
-| `created_at`     | àmì-àkókò ISO                       |
+| Column           | Notes                                           |
+| ---------------- | ----------------------------------------------- |
+| `id`             | àfikún aládàáṣe                                 |
+| `tool_name`      | ìdánimọ̀ irinṣẹ MCP                              |
+| `input_hash`     | sha256 ti àbájáde àkóónú (a kò fi payload pamọ́) |
+| `output_summary` | àkótán kúkúrú tí a gé kúrú                      |
+| `duration_ms`    | àkókò gidi                                      |
+| `api_key_id`     | ẹni tó pè (ó lè jẹ́ asán)                        |
+| `success`        | `1` / `0`                                       |
+| `error_code`     | kóòdù àṣìṣe ìkẹyìn nígbà ìkùnà                  |
+| `created_at`     | àmì àkókò ISO                                   |
 
-### Àwọn àkọsílẹ̀ ìbéèrè / lílò
+### Àwọn àkọsílẹ̀ ìbéèrè / ìlò
 
-Ìwọ̀nyí jẹ́ tẹlémẹ́trì iṣẹ́ (kì í ṣe àyẹ̀wò ìṣàkóso ní kíkún) ṣùgbọ́n wọ́n ń lo ìlànà ìtọ́jú kan náà:
+Wọ̀nyí jẹ́ telemetry iṣẹ́ (kì í ṣe àyẹ̀wò ìṣàkóso ní ìtumọ̀ kíkún) ṣùgbọ́n wọ́n ń
+pín ìlànà ìpamọ́ àkọsílẹ̀ kan náà:
 
-- `usage_history` — àkójọpọ̀ lílò fún ìbéèrè kọ̀ọ̀kan
-- `call_logs` — àkọsílẹ̀ kíkún fún ìbéèrè kọ̀ọ̀kan (ó wà lábẹ́ òpin iye ìlà, wo ìsàlẹ̀)
-- `proxy_logs` — àkọsílẹ̀ ìrìn-àjò proxy (ó wà lábẹ́ òpin iye ìlà)
-- `request_detail_logs` — àkọsílẹ̀ ìbéèrè alálàyé àtijọ́ (a ṣì máa ń yọ àwọn ti kò ṣe pàtàkì kúrò bí ó bá wà)
+- `usage_history` — àkójọpọ̀ ìlò fún ìbéèrè kọ̀ọ̀kan
+- `call_logs` — àkọsílẹ̀ kíkún fún ìbéèrè kọ̀ọ̀kan (ó wà lábẹ́ ìdíwọ́ iye ìlà, wo nísàlẹ̀)
+- `proxy_logs` — àkọsílẹ̀ ìrìnàjò proxy (ó wà lábẹ́ ìdíwọ́ iye ìlà)
+- `request_detail_logs` — àkọsílẹ̀ ìbéèrè ẹ̀kúnrẹ́rẹ́ àtijọ́ (a ṣì máa ń gé e kúrò bí ó bá wà)
 
 ## Ẹ̀dà Ìṣètò Ibi Ìpamọ́
 

@@ -48,6 +48,11 @@ for (const id of MUST_NOT_BE_RESPONSES) {
 
 // OpenAI-native models that MUST use openai-responses targetFormat under ghe-copilot
 const MUST_BE_RESPONSES = [
+  "gpt-6.1-terra",
+  "gpt-6.1-sol",
+  "gpt-6-luna",
+  "gpt-6-sol",
+  "gpt-6-astra",
   "gpt-5.6-sol",
   "gpt-5.6-terra",
   "gpt-5.6-luna",
