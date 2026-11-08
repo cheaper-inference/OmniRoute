@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { OAUTH_ENDPOINTS } from "../../../config/constants.ts";
 import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
-import { buildFormParams } from "../shared.ts";
+import { buildFormParams, type RefreshLogger } from "../shared.ts";
 
 const UNRECOVERABLE_CODES = new Set(["invalid_grant", "invalid_token", "token_expired"]);
 
-function readErrorCode(errorText) {
+function readErrorCode(errorText: string): string | null {
   try {
     const parsed = JSON.parse(errorText);
     return parsed?.error?.code || (typeof parsed?.error === "string" ? parsed.error : null);
@@ -16,10 +15,10 @@ function readErrorCode(errorText) {
 
 // A refused refresh: a used or expired refresh token (or a 401) needs a new sign-in; anything
 // else is transient and retried with backoff.
-async function refreshFailure(response, log) {
+async function refreshFailure(response: Response, log: RefreshLogger) {
   const errorText = await response.text();
   const errorCode = readErrorCode(errorText);
-  if (UNRECOVERABLE_CODES.has(errorCode) || response.status === 401) {
+  if ((errorCode && UNRECOVERABLE_CODES.has(errorCode)) || response.status === 401) {
     const code = errorCode || "unauthorized";
     log?.error?.(
       "TOKEN_REFRESH",
@@ -43,7 +42,11 @@ async function refreshFailure(response, log) {
  * (rhrt_*): each refresh returns a new pair and the old one stops working at once. Access
  * tokens (rhat_*) last an hour, refresh tokens 30 days.
  */
-export async function refreshRenderhourToken(refreshToken, log, proxyConfig: unknown = null) {
+export async function refreshRenderhourToken(
+  refreshToken: string,
+  log: RefreshLogger,
+  proxyConfig: unknown = null
+) {
   try {
     const response = await runWithProxyContext(proxyConfig, () =>
       fetch(OAUTH_ENDPOINTS.renderhour.token, {
@@ -61,7 +64,11 @@ export async function refreshRenderhourToken(refreshToken, log, proxyConfig: unk
     );
     if (!response.ok) return await refreshFailure(response, log);
 
-    const tokens = await response.json();
+    const tokens = (await response.json()) as {
+      access_token?: string;
+      refresh_token?: string;
+      expires_in?: number;
+    };
     log?.info?.("TOKEN_REFRESH", "Successfully refreshed RenderHour token", {
       hasNewAccessToken: !!tokens.access_token,
       hasNewRefreshToken: !!tokens.refresh_token,
@@ -73,7 +80,10 @@ export async function refreshRenderhourToken(refreshToken, log, proxyConfig: unk
       expiresIn: tokens.expires_in,
     };
   } catch (error) {
-    log?.error?.("TOKEN_REFRESH", `Network error refreshing RenderHour token: ${error.message}`);
+    log?.error?.(
+      "TOKEN_REFRESH",
+      `Network error refreshing RenderHour token: ${error instanceof Error ? error.message : String(error)}`
+    );
     return null;
   }
 }
