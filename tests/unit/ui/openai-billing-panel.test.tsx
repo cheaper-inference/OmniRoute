@@ -56,11 +56,13 @@ it("submits optional credentials only to the billing endpoint and clears the pas
   render(<OpenAIBillingPanel />);
   await screen.findByText("notConfigured");
   fireEvent.click(screen.getByText("configure"));
-  fireEvent.change(screen.getByLabelText("organizationId"), { target: { value: "org-one" } });
-  fireEvent.change(screen.getByLabelText("adminKey"), { target: { value: "test-admin-secret" } });
+  fireEvent.change(screen.getByLabelText(/^organizationId\*?$/), { target: { value: "org-one" } });
+  fireEvent.change(screen.getByLabelText(/^adminKey\*?$/), {
+    target: { value: "test-admin-secret" },
+  });
   fireEvent.click(screen.getByRole("button", { name: "save" }));
   await waitFor(() =>
-    expect((screen.getByLabelText("adminKey") as HTMLInputElement).value).toBe("")
+    expect((screen.getByLabelText(/^adminKey\*?$/) as HTMLInputElement).value).toBe("")
   );
   expect(fetchMock.mock.calls.find(([, options]) => options?.method === "PUT")).toEqual([
     "/api/usage/openai-costs",
