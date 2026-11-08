@@ -1,0 +1,1 @@
+- **fix(mitm):** removing a MITM host (repair, stop, reset, custom host delete) deletes only the `127.0.0.1` and `::1` lines OmniRoute wrote; other lines in the hosts file that name the same host are kept.

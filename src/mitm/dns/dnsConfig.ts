@@ -204,7 +204,8 @@ const targetHost = process.argv[2];
 const content = fs.readFileSync(filePath, "utf8");
 const filtered = content.split(/\\r?\\n/).filter((line) => {
   const parts = line.trim().split(/\\s+/).filter(Boolean);
-  return !(parts.length >= 2 && parts.includes(targetHost));
+  // Drop only the two lines addDNSEntries writes: loopback IP + this one host.
+  return !(parts.length === 2 && (parts[0] === "127.0.0.1" || parts[0] === "::1") && parts[1] === targetHost);
 });
 fs.writeFileSync(filePath, filtered.join("\\n").replace(/\\n*$/, "\\n"));
 `;
@@ -241,7 +242,7 @@ export async function removeDNSEntries(
       "          $lines = Get-Content -LiteralPath $hostsFile;\n" +
       "          $filtered = $lines | Where-Object {\n" +
       "            $part = ($_ -split '\\s+') | Where-Object { $_ };\n" +
-      "            -not ($part.Length -ge 2 -and ($targetHosts -contains $part[1]))\n" +
+      "            -not ($part.Length -eq 2 -and ($part[0] -eq '127.0.0.1' -or $part[0] -eq '::1') -and ($targetHosts -contains $part[1]))\n" +
       "          };\n" +
       "          Set-Content -LiteralPath $hostsFile -Value $filtered;\n        ";
     await commands.runElevatedPowerShell(script);
