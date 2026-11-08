@@ -35,6 +35,7 @@ import { workbuddy } from "./workbuddy";
 import { zed } from "./zed";
 import { zedHosted } from "./zed-hosted";
 import { museCode } from "./muse-code";
+import { copilotM365 } from "./copilot-m365-web";
 
 export const PROVIDERS = {
   claude,
@@ -76,6 +77,7 @@ export const PROVIDERS = {
   zed,
   "zed-hosted": zedHosted,
   "muse-code": museCode,
+  "copilot-m365-web": copilotM365,
 };
 
 export default PROVIDERS;
