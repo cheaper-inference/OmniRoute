@@ -40,49 +40,99 @@ function queueGate(controller: ReadableStreamDefaultController<Uint8Array>): () 
   };
 }
 
+/** One frame must not turn into an unbounded number of upstream requests. */
+const RECOVERY_ROW_LIMIT = 20;
+/** A presigned body is a transcript row, not a download; refuse anything larger. */
+const BLOB_TEXT_LIMIT = 1024 * 1024;
+
+function privateHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (host === "localhost" || host.endsWith(".localhost")) return true;
+  if (host === "::1" || host === "0.0.0.0" || host === "::") return true;
+  if (/^127\./.test(host)) return true;
+  if (/^10\./.test(host)) return true;
+  if (/^192\.168\./.test(host)) return true;
+  if (/^169\.254\./.test(host)) return true;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(host)) return true;
+  if (/^f[cd][0-9a-f]{2}:/i.test(host)) return true;
+  if (/^fe80:/i.test(host)) return true;
+  return false;
+}
+
+/**
+ * The body URL comes from the service, but it is fetched by this process, so it is
+ * treated as untrusted: plain HTTP, loopback and the link-local range a cloud host
+ * exposes its metadata on are all refused.
+ */
+export function safeBlobUrl(value: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "https:") return null;
+  if (privateHost(url.hostname)) return null;
+  return url.toString();
+}
+
 async function recoverOmitted(
   frame: unknown,
   accessToken: string,
   agentId: string,
   read: typeof grokBotRead = grokBotRead,
-  fetchBlob: (url: string) => Promise<Response> = fetch
+  fetchBlob: (url: string, init?: RequestInit) => Promise<Response> = fetch,
+  signal?: AbortSignal
 ): Promise<unknown> {
   if (!frame || typeof frame !== "object") return frame;
   const rows = (frame as { rows?: { entries?: unknown } }).rows;
   if (!rows || !Array.isArray(rows.entries)) return frame;
-  const entries = await fillOmittedBodies(rows.entries, async (query) => {
-    const answer = await read({
-      accessToken,
-      method: "ListGrokBotTranscriptEntries",
-      payload: { agentId, sessionId: "", ...query },
-    });
-    const listed = (answer as { entries?: unknown } | null)?.entries;
-    return Array.isArray(listed) ? listed : [];
-  });
-  const withBlobs = await fillBlobBodies(entries, async (hash) => {
-    const paths = blobReadPaths([hash]);
-    if (paths.length === 0) return null;
-    const signed = await read({
-      accessToken,
-      method: "PresignSandBoxStoreReads",
-      payload: { relPaths: paths },
-    });
-    const instructions = (signed as { instructions?: unknown } | null)?.instructions;
-    const match = Array.isArray(instructions)
-      ? instructions.find(
-          (item) =>
-            item &&
-            typeof item === "object" &&
-            (item as { relPath?: unknown }).relPath === paths[0] &&
-            typeof (item as { url?: unknown }).url === "string"
-        )
-      : null;
-    if (!match) return null;
-    const response = await fetchBlob((match as { url: string }).url);
-    if (!response.ok) return null;
-    const text = await response.text();
-    return text === "" ? null : text;
-  });
+  const entries = await fillOmittedBodies(
+    rows.entries,
+    async (query) => {
+      const answer = await read({
+        accessToken,
+        method: "ListGrokBotTranscriptEntries",
+        payload: { agentId, sessionId: "", ...query },
+        signal,
+      });
+      const listed = (answer as { entries?: unknown } | null)?.entries;
+      return Array.isArray(listed) ? listed : [];
+    },
+    RECOVERY_ROW_LIMIT
+  );
+  const withBlobs = await fillBlobBodies(
+    entries,
+    async (hash) => {
+      const paths = blobReadPaths([hash]);
+      if (paths.length === 0) return null;
+      const signed = await read({
+        accessToken,
+        method: "PresignSandBoxStoreReads",
+        payload: { relPaths: paths },
+        signal,
+      });
+      const instructions = (signed as { instructions?: unknown } | null)?.instructions;
+      const match = Array.isArray(instructions)
+        ? instructions.find(
+            (item) =>
+              item &&
+              typeof item === "object" &&
+              (item as { relPath?: unknown }).relPath === paths[0] &&
+              typeof (item as { url?: unknown }).url === "string"
+          )
+        : null;
+      if (!match) return null;
+      const safe = safeBlobUrl((match as { url: string }).url);
+      if (!safe) return null;
+      const response = await fetchBlob(safe, signal ? { signal } : undefined);
+      if (!response.ok) return null;
+      const text = await response.text();
+      if (text === "" || text.length > BLOB_TEXT_LIMIT) return null;
+      return text;
+    },
+    RECOVERY_ROW_LIMIT
+  );
   return { ...frame, rows: { ...rows, entries: withBlobs } };
 }
 
@@ -163,7 +213,7 @@ export function watchStream(input: {
   streamId?: string;
   frames?: FramesReader;
   recover?: typeof grokBotRead;
-  fetchBlob?: (url: string) => Promise<Response>;
+  fetchBlob?: (url: string, init?: RequestInit) => Promise<Response>;
   pressure?: () => Backpressure;
 }): ReadableStream<Uint8Array> {
   const readFrames = input.frames ?? grokBotReadStream;
@@ -234,7 +284,8 @@ export function watchStream(input: {
                 input.accessToken,
                 input.agentId,
                 input.recover,
-                input.fetchBlob
+                input.fetchBlob,
+                upstream.signal
               ),
           });
         } finally {

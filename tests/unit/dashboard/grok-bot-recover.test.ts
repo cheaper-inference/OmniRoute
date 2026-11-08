@@ -29,3 +29,24 @@ test("a row from a different seq does not fill the omitted body", async () => {
 test("the last uint64 seq has no next cursor", () => {
   assert.equal(omittedRecoveryQuery("18446744073709551615"), null);
 });
+
+test("a frame with a long backlog recovers only the allowed number of rows", async () => {
+  const { fillOmittedBodies } = await import(
+    "../../../src/app/(dashboard)/dashboard/grok-bot/recover.ts"
+  );
+  const rows = Array.from({ length: 50 }, (_, index) => ({
+    seq: String(index + 1),
+    bodyOmitted: true,
+  }));
+  let calls = 0;
+  const filled = await fillOmittedBodies(
+    rows,
+    async () => {
+      calls += 1;
+      return [];
+    },
+    20
+  );
+  assert.equal(calls, 20, "one request per recovered row, capped");
+  assert.equal(filled.length, 50, "every row survives, recovered or not");
+});

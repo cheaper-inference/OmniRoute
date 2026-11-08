@@ -31,9 +31,13 @@ export function recoveredBody(seq: string, rows: readonly RecoveredTranscriptRow
 
 export async function fillOmittedBodies<T extends OmittedTranscriptRow>(
   rows: readonly T[],
-  list: (query: { beforeSeq: string; limit: 1 }) => Promise<readonly RecoveredTranscriptRow[]>
+  list: (query: { beforeSeq: string; limit: 1 }) => Promise<readonly RecoveredTranscriptRow[]>,
+  /** Recovery costs one request per row, so a frame that arrives with a long
+   *  backlog recovers only what this allows and leaves the rest for a later frame. */
+  limit = Number.POSITIVE_INFINITY
 ): Promise<T[]> {
   const filled: T[] = [];
+  let recovered = 0;
   for (const row of rows) {
     if (typeof row.body === "string" && row.body !== "") {
       filled.push(row);
@@ -44,12 +48,13 @@ export async function fillOmittedBodies<T extends OmittedTranscriptRow>(
       continue;
     }
     const query = omittedRecoveryQuery(row.seq);
-    if (!query) {
+    if (!query || recovered >= limit) {
       filled.push(row);
       continue;
     }
-    const recovered = await list(query);
-    const body = recoveredBody(row.seq, recovered);
+    recovered += 1;
+    const listed = await list(query);
+    const body = recoveredBody(row.seq, listed);
     filled.push(body ? { ...row, body, bodyOmitted: false } : row);
   }
   return filled;
@@ -63,18 +68,21 @@ export function blobReadPaths(hashes: readonly string[]): string[] {
 
 export async function fillBlobBodies<T extends OmittedTranscriptRow>(
   rows: readonly T[],
-  readBlob: (hash: string) => Promise<string | null>
+  readBlob: (hash: string) => Promise<string | null>,
+  limit = Number.POSITIVE_INFINITY
 ): Promise<T[]> {
   const filled: T[] = [];
+  let read = 0;
   for (const row of rows) {
     if (typeof row.body === "string" && row.body !== "") {
       filled.push(row);
       continue;
     }
-    if (typeof row.blobHash !== "string") {
+    if (typeof row.blobHash !== "string" || read >= limit) {
       filled.push(row);
       continue;
     }
+    read += 1;
     const body = await readBlob(row.blobHash);
     filled.push(body ? { ...row, body } : row);
   }

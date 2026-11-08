@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { watchStream, pumpWatch } =
+const { watchStream, pumpWatch, safeBlobUrl } =
   await import("../../../src/app/(dashboard)/dashboard/grok-bot/watchStream.ts");
 const { watchCounter, watchSlot } =
   await import("../../../src/app/(dashboard)/dashboard/grok-bot/overlap.ts");
@@ -345,4 +345,64 @@ test("a request that was already aborted never opens the upstream watch", async 
   await text(stream);
   assert.equal(opened, 0, "the upstream watch must not be started");
   assert.equal(released, 1, "the slot has to come back");
+});
+
+test("a body url pointing inside the network is refused", () => {
+  // The service supplies this url, but this process fetches it, so a link-local
+  // address or a loopback name must never be reached.
+  assert.equal(safeBlobUrl("http://blob.example/body"), null);
+  assert.equal(safeBlobUrl("https://127.0.0.1/body"), null);
+  assert.equal(safeBlobUrl("https://169.254.169.254/latest/meta-data"), null);
+  assert.equal(safeBlobUrl("https://localhost/body"), null);
+  assert.equal(safeBlobUrl("https://10.1.2.3/body"), null);
+  assert.equal(safeBlobUrl("https://192.168.1.5/body"), null);
+  assert.equal(safeBlobUrl("https://[::1]/body"), null);
+  assert.equal(safeBlobUrl("not a url"), null);
+  assert.equal(safeBlobUrl("https://blob.example/body"), "https://blob.example/body");
+});
+
+test("a blob body past the size limit is dropped rather than kept", async () => {
+  const body = await text(
+    watchStream({
+      accessToken: "token",
+      agentId: "agent-1",
+      after: "0",
+      generation: 2,
+      signal: new AbortController().signal,
+      release: () => {},
+      frames: readerFrames([{ rows: { entries: [{ seq: "8", blobHash: "abc123def456ghij" }] } }]),
+      recover: async () => ({
+        instructions: [{ relPath: "blobs/abc123def456ghij", url: "https://blob.example/body" }],
+      }),
+      fetchBlob: async () => new Response("x".repeat(1024 * 1024 + 1)),
+      pressure: () => "read",
+    })
+  );
+  assert.equal(/blobHash/.test(body), true, "the row stays, only the body is missing");
+  assert.equal(/"body"/.test(body), false);
+});
+
+test("a frame full of omitted rows does not fan out into one request per row", async () => {
+  const entries = Array.from({ length: 50 }, (_, index) => ({
+    seq: String(index + 1),
+    bodyOmitted: true,
+  }));
+  let listCalls = 0;
+  await text(
+    watchStream({
+      accessToken: "token",
+      agentId: "agent-1",
+      after: "0",
+      generation: 2,
+      signal: new AbortController().signal,
+      release: () => {},
+      frames: readerFrames([{ rows: { entries } }]),
+      recover: async () => {
+        listCalls += 1;
+        return { entries: [] };
+      },
+      pressure: () => "read",
+    })
+  );
+  assert.equal(listCalls, 20, "the per-frame recovery budget is honoured");
 });
