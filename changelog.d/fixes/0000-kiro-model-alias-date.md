@@ -1,0 +1,1 @@
+- **fix(kiro):** Kiro requests with a dated Claude snapshot id (for example `claude-sonnet-4-5-20250929`) or a mixed-case id (for example `MiniMax-M2.5`) now reach Kiro as the plain lowercase model id instead of failing with an invalid model id error.
