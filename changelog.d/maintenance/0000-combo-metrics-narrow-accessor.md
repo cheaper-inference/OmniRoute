@@ -1,0 +1,1 @@
+- **perf(combo):** combo metrics gained single-entry accessors for one target or one model, so least-used and power-of-two ordering can read one entry instead of copying the whole metrics view on every request.
