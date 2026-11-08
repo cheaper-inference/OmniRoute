@@ -16,16 +16,17 @@
  * The cut response is held, not discarded: when no later target succeeds, the combo
  * returns the last partial result (`length`), exactly what a single target returns.
  */
-import { emit } from "./rrDashboardEvents.ts";
+import { emit, selectedConnectionIdOf } from "./rrDashboardEvents.ts";
 import { recordComboRequest } from "../comboMetrics.ts";
 import { isTruncatedStreamResponse } from "../../utils/truncatedStreamPolicy.ts";
 import type { AttemptLoopDeps, AttemptLoopState } from "./attemptLoopTypes.ts";
+import type { ComboOutcomeKind } from "./comboErrorAggregation.ts";
 import { toRecordedTarget } from "./comboPredicates.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 
 export const TRUNCATED_STREAM_COMBO_REASON = "upstream stream cut before its terminal signal";
 
-type HeldTruncatedState = Pick<AttemptLoopState, "heldTruncatedResponse">;
+export type HeldTruncatedState = Pick<AttemptLoopState, "heldTruncatedResponse">;
 
 /** A cut non-streaming attempt the combo should fail over from. */
 export function isTruncatedComboAttempt(
@@ -43,8 +44,7 @@ function cancelBody(response: Response | null | undefined): void {
   void response?.body?.cancel().catch(() => {});
 }
 
-/** Record the cut attempt as a retryable target failure and hold its partial result. */
-export function recordTruncatedStreamAttempt(opts: {
+type HeldAttemptFailure = {
   result: Response;
   modelStr: string;
   provider: string;
@@ -52,21 +52,23 @@ export function recordTruncatedStreamAttempt(opts: {
   target: ResolvedComboTarget;
   state: AttemptLoopState;
   deps: Pick<AttemptLoopDeps, "combo" | "log" | "startTime" | "strategy">;
-}): void {
-  const { result, modelStr, target, state, deps } = opts;
-  deps.log.warn(
-    "COMBO",
-    `Model ${modelStr} returned a stream cut before its terminal signal — trying the next target`
-  );
-  state.lastError = TRUNCATED_STREAM_COMBO_REASON;
+};
+
+/** Keep `result` as the combo's answer of last resort, releasing any earlier one. */
+export function holdAttemptResponse(state: HeldTruncatedState, result: Response): void {
+  if (state.heldTruncatedResponse !== result) cancelBody(state.heldTruncatedResponse);
+  state.heldTruncatedResponse = result;
+}
+
+/** Record a 200 the combo moves on from: a target failure with no health signal. */
+export function recordHeldAttemptFailure(
+  opts: HeldAttemptFailure & { reason: string; code: string; kind: ComboOutcomeKind }
+): void {
+  const { result, modelStr, target, state, deps, reason, code, kind } = opts;
+  const connectionId = selectedConnectionIdOf(result) || target.connectionId;
+  state.lastError = reason;
   state.lastStatus = 502;
-  state.comboErrors.push({
-    model: modelStr,
-    status: 502,
-    error: TRUNCATED_STREAM_COMBO_REASON,
-    kind: "upstream",
-    code: "stream_truncated",
-  });
+  state.comboErrors.push({ model: modelStr, status: 502, error: reason, kind, code });
   recordComboRequest(deps.combo.name, modelStr, {
     success: false,
     latencyMs: Date.now() - deps.startTime,
@@ -82,11 +84,25 @@ export function recordTruncatedStreamAttempt(opts: {
     targetIndex: opts.targetIndex,
     provider: opts.provider,
     model: modelStr,
-    error: TRUNCATED_STREAM_COMBO_REASON,
+    error: reason,
     latencyMs: Date.now() - deps.startTime,
+    ...(connectionId ? { connectionId } : {}),
   });
-  if (state.heldTruncatedResponse !== result) cancelBody(state.heldTruncatedResponse);
-  state.heldTruncatedResponse = result;
+  holdAttemptResponse(state, result);
+}
+
+/** Record the cut attempt as a retryable target failure and hold its partial result. */
+export function recordTruncatedStreamAttempt(opts: HeldAttemptFailure): void {
+  opts.deps.log.warn(
+    "COMBO",
+    `Model ${opts.modelStr} returned a stream cut before its terminal signal — trying the next target`
+  );
+  recordHeldAttemptFailure({
+    ...opts,
+    reason: TRUNCATED_STREAM_COMBO_REASON,
+    code: "stream_truncated",
+    kind: "upstream",
+  });
 }
 
 /**

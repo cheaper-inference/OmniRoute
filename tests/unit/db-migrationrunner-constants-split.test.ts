@@ -29,7 +29,7 @@ import {
 // ── small tables — full snapshot ─────────────────────────────────────────────
 
 describe("migrationRunner/constants — exact small-table snapshots", () => {
-  it("LEGACY_VERSION_SLOT_MIGRATIONS is the 9-entry list, in order", () => {
+  it("LEGACY_VERSION_SLOT_MIGRATIONS is the 16-entry list, in order", () => {
     assert.deepEqual(
       LEGACY_VERSION_SLOT_MIGRATIONS.map((m) => `${m.version}:${m.name}`),
       [
@@ -42,6 +42,13 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
         "033:add_batch_id_to_call_logs",
         "046:remove_status_from_files",
         "051:remove_status_from_files",
+        "140:ccr_blocks",
+        "141:api_key_cache_default_mode",
+        "142:connection_runtime_state",
+        "176:provider_connection_synced_models_at",
+        "177:xp_action_counts",
+        "178:memory_fts_skip_access_updates",
+        "197:model_capabilities_reasoning_efforts",
       ]
     );
   });
@@ -70,8 +77,8 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 46 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 46);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 47 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 47);
     for (const e of RENAMED_MIGRATION_COMPATIBILITY) {
       assert.equal(typeof e.fromVersion, "string");
       assert.equal(typeof e.fromName, "string");
@@ -177,19 +184,19 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-5), {
       fromVersion: "194",
       fromName: "api_key_self_service_settings",
-      toVersion: "229",
+      toVersion: "228",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-4), {
       fromVersion: "197",
       fromName: "api_key_self_service_settings",
-      toVersion: "229",
+      toVersion: "228",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-3), {
       fromVersion: "207",
       fromName: "api_key_self_service_settings",
-      toVersion: "229",
+      toVersion: "228",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-2), {
@@ -201,9 +208,21 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-1), {
       fromVersion: "213",
       fromName: "api_key_self_service_settings",
-      toVersion: "229",
+      toVersion: "228",
       toName: "api_key_self_service_settings",
     });
+    // Builds pushed before the release filled 223–227 shipped the settings table as 229.
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.find(
+        (e) => e.fromVersion === "229" && e.fromName === "api_key_self_service_settings"
+      ),
+      {
+        fromVersion: "229",
+        fromName: "api_key_self_service_settings",
+        toVersion: "228",
+        toName: "api_key_self_service_settings",
+      }
+    );
   });
 
   it("name-locks every published Team draft slot to canonical migration 215", () => {

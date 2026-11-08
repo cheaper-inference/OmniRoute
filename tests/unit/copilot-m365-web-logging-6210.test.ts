@@ -11,6 +11,7 @@
  * to the WebSocket constructor still carries the secret, proving redaction is real.
  */
 import test from "node:test";
+import { EventEmitter } from "node:events";
 import assert from "node:assert/strict";
 import {
   CopilotM365WebExecutor,
@@ -34,28 +35,40 @@ function makeCapturingLog(sink: LogEntry[]): ExecutorLog {
  * frame with `{}` (ack), and once the chat invocation is sent replays `frames`.
  */
 function makeFakeWsCtor(frames: Array<Record<string, unknown>>, captured: { url?: string }) {
-  return class FakeWS {
-    private handlers: Record<string, (arg?: unknown) => void> = {};
+  return class FakeWS extends EventEmitter {
+    readyState = 0;
     constructor(url: string) {
+      super();
       captured.url = url;
-      setImmediate(() => this.handlers.open?.());
-    }
-    on(event: string, cb: (arg?: unknown) => void) {
-      this.handlers[event] = cb;
-      return this;
+      setImmediate(() => {
+        if (this.readyState !== 0) return;
+        this.readyState = 1;
+        this.emit("open");
+      });
     }
     send(data: unknown) {
+      assert.equal(this.readyState, 1, "cannot send unless the socket is OPEN");
       const str = typeof data === "string" ? data : String(data);
       if (str.includes('"protocol":"json"')) {
-        setImmediate(() => this.handlers.message?.(Buffer.from(encodeFrame({}))));
+        setImmediate(() => this.emit("message", Buffer.from(encodeFrame({}))));
       } else if (str.includes('"target":"chat"')) {
         setImmediate(() => {
-          for (const frame of frames) this.handlers.message?.(Buffer.from(encodeFrame(frame)));
+          for (const frame of frames) this.emit("message", Buffer.from(encodeFrame(frame)));
         });
       }
     }
     close() {
-      /* no-op */
+      if (this.readyState >= 2) return;
+      this.readyState = 2;
+      setImmediate(() => {
+        this.readyState = 3;
+        this.emit("close", 1000, Buffer.alloc(0));
+      });
+    }
+    terminate() {
+      if (this.readyState === 3) return;
+      this.readyState = 3;
+      setImmediate(() => this.emit("close", 1006, Buffer.alloc(0)));
     }
   };
 }
@@ -80,9 +93,7 @@ test("copilot-m365-web: WS path emits debug logs for handshake + first frame [#6
     { type: 1, target: "update", arguments: [{ messages: [{ text: "Hi there", author: "bot" }] }] },
     { type: 3 },
   ];
-  const restore = __setCopilotM365WebSocketForTesting(
-    makeFakeWsCtor(frames, captured) as never
-  );
+  const restore = __setCopilotM365WebSocketForTesting(makeFakeWsCtor(frames, captured) as never);
   const sink: LogEntry[] = [];
   try {
     await drainStream(new CopilotM365WebExecutor(), makeCapturingLog(sink));
@@ -107,9 +118,7 @@ test("copilot-m365-web: WS path emits debug logs for handshake + first frame [#6
 test("copilot-m365-web: logged WS URL is redacted — access_token never leaks [#6210]", async () => {
   const captured: { url?: string } = {};
   const frames = [{ type: 3 }];
-  const restore = __setCopilotM365WebSocketForTesting(
-    makeFakeWsCtor(frames, captured) as never
-  );
+  const restore = __setCopilotM365WebSocketForTesting(makeFakeWsCtor(frames, captured) as never);
   const sink: LogEntry[] = [];
   try {
     await drainStream(new CopilotM365WebExecutor(), makeCapturingLog(sink));
@@ -122,9 +131,7 @@ test("copilot-m365-web: logged WS URL is redacted — access_token never leaks [
   // the executor redacts before logging.
   assert.ok(captured.url?.includes(SECRET), "sanity: raw WS URL should contain the token");
 
-  const connectLog = sink.find(
-    (e) => e.tag === "M365_WS" && e.message.startsWith("connecting")
-  );
+  const connectLog = sink.find((e) => e.tag === "M365_WS" && e.message.startsWith("connecting"));
   assert.ok(connectLog, "expected a 'connecting' debug log");
   assert.ok(
     connectLog.message.includes("access_token=REDACTED"),
