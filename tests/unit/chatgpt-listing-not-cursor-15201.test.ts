@@ -11,6 +11,9 @@ import path from "node:path";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-15201-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+// Cold catalog builds are bounded by CATALOG_BUILD_TIMEOUT_MS (#12627); keep it out of the way
+// so a loaded host answers the real catalog instead of the 503 build-timeout fallback.
+process.env.CATALOG_BUILD_TIMEOUT_MS = "120000";
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");

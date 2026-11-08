@@ -33,6 +33,26 @@ interface EmptyConnectionsPlaceholderProps {
   t: ProviderMessageTranslator;
 }
 
+/** ChatGPT connects only through the official sign-in button; every other provider adds a row. */
+function PrimaryAddButton({
+  providerId,
+  providerSupportsPat,
+  onClick,
+  t,
+}: {
+  providerId: string;
+  providerSupportsPat: boolean;
+  onClick: () => void;
+  t: ProviderMessageTranslator;
+}) {
+  if (providerId === "chatgpt") return <ChatGptSignInButton opensDialog onClick={onClick} />;
+  return (
+    <Button icon="add" onClick={onClick}>
+      {providerSupportsPat ? "Add PAT" : t("addConnection")}
+    </Button>
+  );
+}
+
 export default function EmptyConnectionsPlaceholder({
   isOAuth,
   isCompatible,
@@ -90,16 +110,12 @@ export default function EmptyConnectionsPlaceholder({
             </>
           ) : (
             <>
-              {providerId === "chatgpt" ? (
-                <ChatGptSignInButton
-                  opensDialog
-                  onClick={() => gateConnectionFlow(openPrimaryAddFlow)}
-                />
-              ) : (
-                <Button icon="add" onClick={() => gateConnectionFlow(openPrimaryAddFlow)}>
-                  {providerSupportsPat ? "Add PAT" : t("addConnection")}
-                </Button>
-              )}
+              <PrimaryAddButton
+                providerId={providerId}
+                providerSupportsPat={providerSupportsPat}
+                onClick={() => gateConnectionFlow(openPrimaryAddFlow)}
+                t={t}
+              />
               {providerId === "qoder" && (
                 <Button variant="secondary" onClick={() => gateConnectionFlow(onOpenOAuthModal)}>
                   Experimental OAuth

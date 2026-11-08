@@ -31,18 +31,16 @@ export default function ChatGptOAuthModal(props: Props) {
   return props.isOpen ? <ChatGptOAuthDialog {...props} /> : null;
 }
 
-function ChatGptOAuthDialog({ isOpen, onClose, onSuccess, reauthConnection }: Props) {
-  const t = useTranslations("chatgptSignIn");
+type Translator = ReturnType<typeof useTranslations>;
+type ChatGptAttemptView = { state: string; authUrl: string };
+
+/** Server-side attempt lifecycle: start (cancelling any previous attempt), and cancel on unmount. */
+function useChatGptAttempt(connectionId: string | undefined, t: Translator) {
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
-  const [warning, setWarning] = useState("");
-  const [callbackUrl, setCallbackUrl] = useState("");
-  const [attempt, setAttempt] = useState<{ state: string; authUrl: string } | null>(null);
+  const [attempt, setAttempt] = useState<ChatGptAttemptView | null>(null);
   const stateRef = useRef<string | null>(null);
   const generation = useRef(0);
-  const [done, setDone] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
-  const connectionId = reauthConnection?.id;
 
   const start = useCallback(async () => {
     const current = ++generation.current;
@@ -81,6 +79,132 @@ function ChatGptOAuthDialog({ isOpen, onClose, onSuccess, reauthConnection }: Pr
     };
   }, [start]);
 
+  return { busy, setBusy, error, setError, attempt, setAttempt, stateRef, generation, start };
+}
+
+function ChatGptSignInDone({
+  warning,
+  showWelcome,
+  onFinish,
+  t,
+}: {
+  warning: string;
+  showWelcome: boolean;
+  onFinish: () => void;
+  t: Translator;
+}) {
+  return (
+    <div className="space-y-4">
+      <p role="status">{t("connected")}</p>
+      {warning && <p className="rounded-lg border border-amber-500 p-3">{warning}</p>}
+      {showWelcome ? (
+        <ChatGptPlanWelcome onDismiss={onFinish} />
+      ) : (
+        <Button onClick={onFinish}>{t("done")}</Button>
+      )}
+    </div>
+  );
+}
+
+function ChatGptSignInStep({
+  attempt,
+  busy,
+  isReauth,
+  t,
+}: {
+  attempt: ChatGptAttemptView | null;
+  busy: boolean;
+  isReauth: boolean;
+  t: Translator;
+}) {
+  const intent = isReauth ? "continue" : "signin";
+  return (
+    <section className="space-y-3">
+      <h3 className="font-semibold">{t("signInStep")}</h3>
+      <p className="text-sm text-text-muted">{t("signInHelp")}</p>
+      {attempt ? (
+        <ChatGptSignInButton intent={intent} href={attempt.authUrl} />
+      ) : (
+        <ChatGptSignInButton intent={intent} busy={busy} disabled />
+      )}
+    </section>
+  );
+}
+
+function ChatGptCallbackStep({
+  attempt,
+  busy,
+  callbackUrl,
+  onCallbackUrlChange,
+  onSubmit,
+  onStartOver,
+  t,
+}: {
+  attempt: ChatGptAttemptView | null;
+  busy: boolean;
+  callbackUrl: string;
+  onCallbackUrlChange: (value: string) => void;
+  onSubmit: () => void;
+  onStartOver: () => void;
+  t: Translator;
+}) {
+  return (
+    <section className="space-y-3">
+      <h3 className="font-semibold">{t("callbackStep")}</h3>
+      <p id="chatgpt-callback-help" className="text-sm text-text-muted">
+        {t("callbackHelp", { redirectUri })}
+      </p>
+      <form
+        className="space-y-3"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit();
+        }}
+      >
+        <label className="block space-y-2">
+          <span>{t("callbackLabel")}</span>
+          <textarea
+            className="w-full rounded-lg border border-border bg-bg-input p-3 font-mono text-sm"
+            value={callbackUrl}
+            onChange={(event) => onCallbackUrlChange(event.target.value)}
+            placeholder={redirectUri + "?code=…&state=…&client_id=…"}
+            aria-describedby="chatgpt-callback-help"
+            autoComplete="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            maxLength={16384}
+            rows={4}
+            disabled={!attempt || busy}
+          />
+        </label>
+        <Button
+          type="submit"
+          disabled={!attempt || busy || !callbackUrl.trim()}
+          loading={busy && !!attempt}
+        >
+          {t("complete")}
+        </Button>
+      </form>
+      <p className="text-sm text-text-muted">{t("expires")}</p>
+      <Button variant="secondary" disabled={busy} onClick={onStartOver}>
+        {t("startOver")}
+      </Button>
+    </section>
+  );
+}
+
+/** Validates the pasted callback locally, then completes the attempt server-side. */
+function useChatGptCompletion(
+  lifecycle: ReturnType<typeof useChatGptAttempt>,
+  connectionId: string | undefined,
+  t: Translator
+) {
+  const { busy, setBusy, setError, attempt, stateRef, generation } = lifecycle;
+  const [warning, setWarning] = useState("");
+  const [callbackUrl, setCallbackUrl] = useState("");
+  const [done, setDone] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+
   async function complete() {
     if (!attempt || busy) return;
     setError("");
@@ -114,9 +238,28 @@ function ChatGptOAuthDialog({ isOpen, onClose, onSuccess, reauthConnection }: Pr
     }
   }
 
+  return { warning, callbackUrl, setCallbackUrl, done, showWelcome, complete };
+}
+
+function ChatGptOAuthDialog({ isOpen, onClose, onSuccess, reauthConnection }: Props) {
+  const t = useTranslations("chatgptSignIn");
+  const connectionId = reauthConnection?.id;
+  const lifecycle = useChatGptAttempt(connectionId, t);
+  const { busy, setBusy, error, setError, attempt, setAttempt, start } = lifecycle;
+  const { warning, callbackUrl, setCallbackUrl, done, showWelcome, complete } =
+    useChatGptCompletion(lifecycle, connectionId, t);
+
   function finish() {
     if (showWelcome) acknowledgeChatGptPlan();
     onSuccess();
+  }
+
+  function startOver() {
+    setBusy(true);
+    setError("");
+    setCallbackUrl("");
+    setAttempt(null);
+    void start();
   }
 
   return (
@@ -128,91 +271,22 @@ function ChatGptOAuthDialog({ isOpen, onClose, onSuccess, reauthConnection }: Pr
       className="max-h-[90vh] overflow-y-auto"
     >
       <div className="space-y-6">
-        {!done && (
+        {done ? (
+          <ChatGptSignInDone warning={warning} showWelcome={showWelcome} onFinish={finish} t={t} />
+        ) : (
           <>
             <p className="text-text-muted">{t("description")}</p>
             <p className="rounded-lg border border-border p-3 text-sm">{t("eligibility")}</p>
-          </>
-        )}
-        {done ? (
-          <div className="space-y-4">
-            <p role="status">{t("connected")}</p>
-            {warning && <p className="rounded-lg border border-amber-500 p-3">{warning}</p>}
-            {showWelcome ? (
-              <ChatGptPlanWelcome onDismiss={finish} />
-            ) : (
-              <Button onClick={finish}>{t("done")}</Button>
-            )}
-          </div>
-        ) : (
-          <>
-            <section className="space-y-3">
-              <h3 className="font-semibold">{t("signInStep")}</h3>
-              <p className="text-sm text-text-muted">{t("signInHelp")}</p>
-              {attempt ? (
-                <ChatGptSignInButton
-                  intent={connectionId ? "continue" : "signin"}
-                  href={attempt.authUrl}
-                />
-              ) : (
-                <ChatGptSignInButton
-                  intent={connectionId ? "continue" : "signin"}
-                  busy={busy}
-                  disabled
-                />
-              )}
-            </section>
-            <section className="space-y-3">
-              <h3 className="font-semibold">{t("callbackStep")}</h3>
-              <p id="chatgpt-callback-help" className="text-sm text-text-muted">
-                {t("callbackHelp", { redirectUri })}
-              </p>
-              <form
-                className="space-y-3"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void complete();
-                }}
-              >
-                <label className="block space-y-2">
-                  <span>{t("callbackLabel")}</span>
-                  <textarea
-                    className="w-full rounded-lg border border-border bg-bg-input p-3 font-mono text-sm"
-                    value={callbackUrl}
-                    onChange={(event) => setCallbackUrl(event.target.value)}
-                    placeholder={redirectUri + "?code=…&state=…&client_id=…"}
-                    aria-describedby="chatgpt-callback-help"
-                    autoComplete="off"
-                    autoCapitalize="off"
-                    spellCheck={false}
-                    maxLength={16384}
-                    rows={4}
-                    disabled={!attempt || busy}
-                  />
-                </label>
-                <Button
-                  type="submit"
-                  disabled={!attempt || busy || !callbackUrl.trim()}
-                  loading={busy && !!attempt}
-                >
-                  {t("complete")}
-                </Button>
-              </form>
-              <p className="text-sm text-text-muted">{t("expires")}</p>
-              <Button
-                variant="secondary"
-                disabled={busy}
-                onClick={() => {
-                  setBusy(true);
-                  setError("");
-                  setCallbackUrl("");
-                  setAttempt(null);
-                  void start();
-                }}
-              >
-                {t("startOver")}
-              </Button>
-            </section>
+            <ChatGptSignInStep attempt={attempt} busy={busy} isReauth={!!connectionId} t={t} />
+            <ChatGptCallbackStep
+              attempt={attempt}
+              busy={busy}
+              callbackUrl={callbackUrl}
+              onCallbackUrlChange={setCallbackUrl}
+              onSubmit={() => void complete()}
+              onStartOver={startOver}
+              t={t}
+            />
             {error && (
               <p role="alert" className="rounded-lg border border-red-500 p-3 text-red-400">
                 {error}

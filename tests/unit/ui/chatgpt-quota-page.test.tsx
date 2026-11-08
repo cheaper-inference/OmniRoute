@@ -5,6 +5,37 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import ProviderLimits from "@/app/(dashboard)/dashboard/usage/components/ProviderLimits";
 
+// The global next-intl mock (tests/_setup/vitestUiPolyfills.ts) has no useFormatter/useNow,
+// which the account health stats rendered for a connection now need. Keep the real English
+// copy (the assertions below read it) and add a real formatter with a fixed clock.
+vi.mock("next-intl", async () => {
+  const { createFormatter, createTranslator } = await import("use-intl/core");
+  const en = (await import("../../../src/i18n/messages/en.json")).default;
+  const translators = new Map<string, ReturnType<typeof createTranslator>>();
+  const formatter = createFormatter({ locale: "en" });
+  const now = new Date();
+  return {
+    useTranslations: (namespace?: string) => {
+      const key = namespace ?? "";
+      if (!translators.has(key))
+        translators.set(
+          key,
+          createTranslator({
+            locale: "en",
+            messages: en as Record<string, unknown>,
+            namespace,
+            onError: () => {},
+            getMessageFallback: ({ key: missing }) => missing,
+          })
+        );
+      return translators.get(key);
+    },
+    useLocale: () => "en",
+    useFormatter: () => formatter,
+    useNow: () => now,
+    NextIntlClientProvider: ({ children }: { children?: React.ReactNode }) => children,
+  };
+});
 vi.mock("@/store/emailPrivacyStore", () => ({
   default: (select: (state: { emailsVisible: boolean }) => unknown) =>
     select({ emailsVisible: false }),
@@ -22,7 +53,12 @@ afterEach(() => {
 });
 
 it("shows ChatGPT usage management without calling an unsupported quota endpoint", async () => {
-  vi.stubGlobal("localStorage", { getItem: () => null, setItem: () => {} });
+  // The quota page now opens on the health overview; the per-connection cards under test
+  // live in the full layout.
+  vi.stubGlobal("localStorage", {
+    getItem: (key: string) => (key === "omniroute:limits:layoutMode" ? "full" : null),
+    setItem: () => {},
+  });
   const fetchMock = vi.fn(async (input: string | URL | Request) => {
     const url = String(input);
     if (url === "/api/providers/client")

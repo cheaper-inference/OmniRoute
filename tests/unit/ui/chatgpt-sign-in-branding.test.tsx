@@ -15,6 +15,11 @@ vi.mock("@/shared/components", () => ({
   Button: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
     <button onClick={onClick}>{children}</button>
   ),
+  // The toolbar also imports these (Select since the release's Codex service-mode picker);
+  // they are not under test here.
+  DistributeProxiesButton: () => null,
+  Select: () => null,
+  Toggle: () => null,
 }));
 
 const t = (key: string) => key;

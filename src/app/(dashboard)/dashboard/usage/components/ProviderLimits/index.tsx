@@ -220,6 +220,18 @@ function FilterChip({
   );
 }
 
+/**
+ * SIWC exposes usage management in ChatGPT settings, not a quota polling API; automatic
+ * requests also wait until a live request is allowed.
+ */
+function skipsQuotaFetch(
+  provider: string,
+  automatic: boolean | undefined,
+  canRequestLive: () => boolean
+): boolean {
+  return provider === "chatgpt" || (automatic === true && !canRequestLive());
+}
+
 export default function ProviderLimits({
   showFilters = true,
   autoRefreshInterval = 0,
@@ -421,9 +433,7 @@ export default function ProviderLimits({
       provider: string,
       options: { force?: boolean; automatic?: boolean } = {}
     ) => {
-      if (options.automatic && !canRequestLive()) return;
-      // SIWC exposes usage management in ChatGPT settings, not a quota polling API.
-      if (provider === "chatgpt") return;
+      if (skipsQuotaFetch(provider, options.automatic, canRequestLive)) return;
       const force = options?.force === true;
       const now = Date.now();
       const lastFetch = lastFetchTimeRef.current[connectionId] || 0;
