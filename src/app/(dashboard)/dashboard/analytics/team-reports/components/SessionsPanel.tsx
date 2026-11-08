@@ -2,9 +2,17 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 
 import type { AgentSessionRecentUsage, AgentSessionRecord } from "@/lib/db/agentSessions";
-import { Modal, Select } from "@/shared/components";
+import { Button, Modal, Select } from "@/shared/components";
 import { fmtCompact, formatCost } from "@/shared/utils/formatting";
 
 import { formatDateTime, splitTokens } from "./format";
@@ -31,42 +39,48 @@ function RecentRequestsTable({ requests }: { requests: AgentSessionRecentUsage[]
   const tokenLabels = useTokenLabels();
   return (
     <div className="max-h-[50vh] overflow-auto">
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="border-b border-border/30 text-left text-text-muted">
-            <th className="py-2 px-2">{t("colTime")}</th>
-            <th className="py-2 px-2">{t("provider")}</th>
-            <th className="py-2 px-2">{t("colModel")}</th>
-            <th className="py-2 px-2 text-right">{tokenLabels.input}</th>
-            <th className="py-2 px-2 text-right">{tokenLabels.output}</th>
-            <th className="py-2 px-2 text-right">{tokenLabels.cache}</th>
-            <th className="py-2 px-2 text-right">{t("colLatency")}</th>
-            <th className="py-2 px-2">{t("colStatus")}</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table className="text-xs" scrollbarLabel={t("recentRequests")}>
+        <TableHeader>
+          <TableRow className="text-left text-text-muted">
+            <TableHead className="py-2 px-2">{t("colTime")}</TableHead>
+            <TableHead className="py-2 px-2">{t("provider")}</TableHead>
+            <TableHead className="py-2 px-2">{t("colModel")}</TableHead>
+            <TableHead className="py-2 px-2 text-right">{tokenLabels.input}</TableHead>
+            <TableHead className="py-2 px-2 text-right">{tokenLabels.output}</TableHead>
+            <TableHead className="py-2 px-2 text-right">{tokenLabels.cache}</TableHead>
+            <TableHead className="py-2 px-2 text-right">{t("colLatency")}</TableHead>
+            <TableHead className="py-2 px-2">{t("colStatus")}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {requests.map((request) => (
-            <tr key={request.id} className="border-b border-border/10">
-              <td className="py-1.5 px-2 text-text-muted">{formatDateTime(request.timestamp)}</td>
-              <td className="py-1.5 px-2">{request.provider ?? "-"}</td>
-              <td className="py-1.5 px-2 font-mono">{request.model ?? "-"}</td>
-              <td className="py-1.5 px-2 text-right tabular-nums">
+            <TableRow key={request.id}>
+              <TableCell className="py-1.5 px-2 text-text-muted">
+                {formatDateTime(request.timestamp)}
+              </TableCell>
+              <TableCell className="py-1.5 px-2">{request.provider ?? "-"}</TableCell>
+              <TableCell className="py-1.5 px-2 font-mono">{request.model ?? "-"}</TableCell>
+              <TableCell className="py-1.5 px-2 text-right tabular-nums">
                 {fmtCompact(splitTokens(request.tokens).input)}
-              </td>
-              <td className="py-1.5 px-2 text-right tabular-nums">
+              </TableCell>
+              <TableCell className="py-1.5 px-2 text-right tabular-nums">
                 {fmtCompact(splitTokens(request.tokens).output)}
-              </td>
-              <td className="py-1.5 px-2 text-right tabular-nums">
+              </TableCell>
+              <TableCell className="py-1.5 px-2 text-right tabular-nums">
                 <CacheTokens split={splitTokens(request.tokens)} />
-              </td>
-              <td className="py-1.5 px-2 text-right tabular-nums">{request.latencyMs}ms</td>
-              <td className={`py-1.5 px-2 ${request.success ? "text-green-500" : "text-red-500"}`}>
+              </TableCell>
+              <TableCell className="py-1.5 px-2 text-right tabular-nums">
+                {request.latencyMs}ms
+              </TableCell>
+              <TableCell
+                className={`py-1.5 px-2 ${request.success ? "text-success" : "text-error"}`}
+              >
                 {request.status ?? (request.success ? "ok" : "error")}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -154,14 +168,9 @@ function SortControls({
         onChange={(event) => onSort(event.target.value as SessionSort)}
         options={SORT_FIELDS.map((field) => ({ value: field, label: t(`sort_${field}`) }))}
       />
-      <button
-        type="button"
-        onClick={onToggleOrder}
-        className="h-9 rounded-lg border border-border px-3 text-xs"
-        aria-label={desc ? t("sortDesc") : t("sortAsc")}
-      >
+      <Button variant="outline" onClick={onToggleOrder}>
         {desc ? t("sortDesc") : t("sortAsc")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -176,31 +185,37 @@ function SessionRow({
   const t = useTranslations("reports");
   const tokens = splitTokens(session.tokens);
   return (
-    <tr className="border-b border-border/10 transition-colors hover:bg-surface/20">
-      <td className="py-2.5 px-3 font-medium">{session.apiKeyName ?? session.apiKeyId ?? "-"}</td>
-      <td className="py-2.5 px-3 font-mono text-xs">{session.projectName ?? "-"}</td>
-      <td className="py-2.5 px-3 text-text-muted">{session.client ?? "-"}</td>
-      <td className="py-2.5 px-3 font-mono text-xs text-text-muted">{session.gitBranch ?? "-"}</td>
-      <td className="py-2.5 px-3 text-right tabular-nums">{session.requestCount}</td>
-      <td className="py-2.5 px-3 text-right tabular-nums">{fmtCompact(tokens.input)}</td>
-      <td className="py-2.5 px-3 text-right tabular-nums">{fmtCompact(tokens.output)}</td>
-      <td className="py-2.5 px-3 text-right tabular-nums">
+    <TableRow>
+      <TableCell className="py-2.5 px-3 font-medium">
+        {session.apiKeyName ?? session.apiKeyId ?? "-"}
+      </TableCell>
+      <TableCell className="py-2.5 px-3 font-mono text-xs">{session.projectName ?? "-"}</TableCell>
+      <TableCell className="py-2.5 px-3 text-text-muted">{session.client ?? "-"}</TableCell>
+      <TableCell className="py-2.5 px-3 font-mono text-xs text-text-muted">
+        {session.gitBranch ?? "-"}
+      </TableCell>
+      <TableCell className="py-2.5 px-3 text-right tabular-nums">{session.requestCount}</TableCell>
+      <TableCell className="py-2.5 px-3 text-right tabular-nums">
+        {fmtCompact(tokens.input)}
+      </TableCell>
+      <TableCell className="py-2.5 px-3 text-right tabular-nums">
+        {fmtCompact(tokens.output)}
+      </TableCell>
+      <TableCell className="py-2.5 px-3 text-right tabular-nums">
         <CacheTokens split={tokens} />
-      </td>
-      <td className="py-2.5 px-3 text-right font-mono tabular-nums text-green-500">
+      </TableCell>
+      <TableCell className="py-2.5 px-3 text-right font-mono tabular-nums text-success">
         {formatCost(session.costUsd)}
-      </td>
-      <td className="py-2.5 px-3 text-text-muted">{formatDateTime(session.lastSeenAt)}</td>
-      <td className="py-2.5 px-3 text-right">
-        <button
-          type="button"
-          onClick={() => onSelect(session.id)}
-          className="rounded px-2 py-1 text-xs text-primary hover:bg-primary/10"
-        >
+      </TableCell>
+      <TableCell className="py-2.5 px-3 text-text-muted">
+        {formatDateTime(session.lastSeenAt)}
+      </TableCell>
+      <TableCell className="py-2.5 px-3 text-right">
+        <Button variant="ghost" size="sm" onClick={() => onSelect(session.id)}>
           {t("details")}
-        </button>
-      </td>
-    </tr>
+        </Button>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -214,30 +229,28 @@ function SessionsTable({
   const t = useTranslations("reports");
   const tokenLabels = useTokenLabels();
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border/30 text-left text-xs uppercase tracking-wider text-text-muted">
-            <th className="py-2 px-3">{t("member")}</th>
-            <th className="py-2 px-3">{t("project")}</th>
-            <th className="py-2 px-3">{t("client")}</th>
-            <th className="py-2 px-3">{t("colBranch")}</th>
-            <th className="py-2 px-3 text-right">{t("colRequests")}</th>
-            <th className="py-2 px-3 text-right">{tokenLabels.input}</th>
-            <th className="py-2 px-3 text-right">{tokenLabels.output}</th>
-            <th className="py-2 px-3 text-right">{tokenLabels.cache}</th>
-            <th className="py-2 px-3 text-right">{t("colCost")}</th>
-            <th className="py-2 px-3">{t("colLastActive")}</th>
-            <th className="py-2 px-3" />
-          </tr>
-        </thead>
-        <tbody>
-          {sessions.map((session) => (
-            <SessionRow key={session.id} session={session} onSelect={onSelect} />
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Table className="text-sm" scrollbarLabel={t("tab_sessions")}>
+      <TableHeader>
+        <TableRow className="text-left text-xs uppercase tracking-wider text-text-muted">
+          <TableHead className="py-2 px-3">{t("member")}</TableHead>
+          <TableHead className="py-2 px-3">{t("project")}</TableHead>
+          <TableHead className="py-2 px-3">{t("client")}</TableHead>
+          <TableHead className="py-2 px-3">{t("colBranch")}</TableHead>
+          <TableHead className="py-2 px-3 text-right">{t("colRequests")}</TableHead>
+          <TableHead className="py-2 px-3 text-right">{tokenLabels.input}</TableHead>
+          <TableHead className="py-2 px-3 text-right">{tokenLabels.output}</TableHead>
+          <TableHead className="py-2 px-3 text-right">{tokenLabels.cache}</TableHead>
+          <TableHead className="py-2 px-3 text-right">{t("colCost")}</TableHead>
+          <TableHead className="py-2 px-3">{t("colLastActive")}</TableHead>
+          <TableHead className="py-2 px-3" />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sessions.map((session) => (
+          <SessionRow key={session.id} session={session} onSelect={onSelect} />
+        ))}
+      </TableBody>
+    </Table>
   );
 }
 
@@ -255,23 +268,18 @@ function Pager({
   const t = useTranslations("reports");
   return (
     <div className="flex items-center justify-between border-t border-border/30 pt-3 text-xs">
-      <button
-        type="button"
-        disabled={page === 0}
-        onClick={() => onPage(page - 1)}
-        className="rounded border border-border px-3 py-1 disabled:opacity-40"
-      >
+      <Button variant="outline" size="sm" disabled={page === 0} onClick={() => onPage(page - 1)}>
         {t("previous")}
-      </button>
+      </Button>
       <span className="text-text-muted">{t("pageOf", { page: page + 1, pages, total })}</span>
-      <button
-        type="button"
+      <Button
+        variant="outline"
+        size="sm"
         disabled={page + 1 >= pages}
         onClick={() => onPage(page + 1)}
-        className="rounded border border-border px-3 py-1 disabled:opacity-40"
       >
         {t("next")}
-      </button>
+      </Button>
     </div>
   );
 }

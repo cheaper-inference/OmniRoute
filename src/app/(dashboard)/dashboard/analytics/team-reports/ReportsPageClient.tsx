@@ -246,7 +246,7 @@ export default function ReportsPageClient() {
       />
 
       {failed && (
-        <p className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-500">
+        <p className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error">
           {t("loadFailed")}
         </p>
       )}

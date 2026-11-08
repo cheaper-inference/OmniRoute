@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import type { AgentSessionReport, ReportBreakdownRow } from "@/lib/usage/agentSessionReports";
-import { Input, SegmentedControl, Select } from "@/shared/components";
+import { Button, Input, SegmentedControl, Select } from "@/shared/components";
 
 import { TIME_PRESETS, type ReportFilterState, type TimePreset } from "../reportFilters";
 
@@ -52,9 +52,9 @@ export default function ReportFilters({
           options={TIME_PRESETS.map((value) => ({ value, label: t(`preset_${value}`) }))}
         />
         {hasDimensionFilter && (
-          <button type="button" onClick={onClear} className="text-xs text-primary hover:underline">
+          <Button variant="ghost" size="sm" onClick={onClear}>
             {t("clearFilters")}
-          </button>
+          </Button>
         )}
       </div>
 
