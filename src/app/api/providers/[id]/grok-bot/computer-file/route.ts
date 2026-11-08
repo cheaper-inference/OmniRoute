@@ -10,6 +10,12 @@ import { grokBotRead } from "../../../../../(dashboard)/dashboard/grok-bot/read"
 
 export function computerFilePathAllowed(path: string, roots: string[]): boolean {
   if (!posix.isAbsolute(path)) return false;
+  if (path.includes("\u0000")) return false;
+  // The client resolves this path on its own filesystem, where a symlink can sit in
+  // front of a `..`. Normalising first folds that away and reports a path that looks
+  // contained while the client walks out of it, so a parent segment is refused
+  // outright instead.
+  if (path.split("/").includes("..")) return false;
   const target = posix.normalize(path);
   return roots.some((root) => {
     if (!posix.isAbsolute(root)) return false;
@@ -61,12 +67,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const bytes = await grokBotComputerFile({
       accessToken: access.accessToken,
       machineId,
+      signal: request.signal,
       path,
     });
     return new NextResponse(Buffer.from(bytes), {
       headers: { "content-type": "application/octet-stream" },
     });
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message === "computer file too large") {
+      return NextResponse.json({ error: "file_too_large" }, { status: 413 });
+    }
     return NextResponse.json({ error: "file_unavailable" }, { status: 502 });
   }
 }

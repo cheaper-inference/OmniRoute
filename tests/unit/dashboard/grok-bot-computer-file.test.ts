@@ -51,3 +51,39 @@ test("a computer file stream without a final chunk is rejected", async () => {
     /incomplete/
   );
 });
+
+function fileFrame(payload: unknown): Uint8Array {
+  const body = new TextEncoder().encode(JSON.stringify(payload));
+  const frame = new Uint8Array(5 + body.length);
+  frame[1] = (body.length >>> 24) & 255;
+  frame[2] = (body.length >>> 16) & 255;
+  frame[3] = (body.length >>> 8) & 255;
+  frame[4] = body.length & 255;
+  frame.set(body, 5);
+  return frame;
+}
+
+test("a file past the limit is refused instead of buffered", async () => {
+  const big = "x".repeat(200);
+  const frames = [
+    fileFrame({ file: { data: Buffer.from(big).toString("base64") } }),
+    fileFrame({ file: { data: Buffer.from(big).toString("base64"), last: true } }),
+  ];
+  const bytes = new Uint8Array(frames.reduce((sum, f) => sum + f.length, 0));
+  let offset = 0;
+  for (const frame of frames) {
+    bytes.set(frame, offset);
+    offset += frame.length;
+  }
+  await assert.rejects(
+    () =>
+      grokBotComputerFile({
+        accessToken: "token",
+        machineId: "machine-1",
+        path: "/home/houminxi/terminals/probe.txt",
+        limitBytes: 100,
+        fetch: async () => new Response(bytes, { status: 200 }),
+      }),
+    /computer file too large/
+  );
+});

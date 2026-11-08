@@ -9,6 +9,8 @@ export async function grokBotRead(input: {
   accessToken: string;
   method: string;
   payload: Record<string, unknown>;
+  /** A recovery read runs between frames, so it has to be cancellable too. */
+  signal?: AbortSignal;
   fetch?: ReadFetch;
 }): Promise<unknown> {
   const send = input.fetch ?? fetch;

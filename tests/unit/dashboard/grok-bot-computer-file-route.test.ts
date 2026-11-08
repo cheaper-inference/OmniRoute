@@ -12,3 +12,14 @@ test("a computer file path must stay inside a published root", () => {
   assert.equal(computerFilePathAllowed("/home/houminxi/terminals/../../etc/passwd", roots), false);
   assert.equal(computerFilePathAllowed("/etc/passwd", ["/etc/"]), true);
 });
+
+test("a parent segment is refused even when it normalises inside the root", () => {
+  // A symlink named `link` makes `link/..` resolve elsewhere on the client, while
+  // normalising the string reports a path that looks contained.
+  assert.equal(computerFilePathAllowed("/home/houminxi/link/../outside/secret.txt", ["/home/houminxi"]), false);
+  assert.equal(computerFilePathAllowed("/home/houminxi/../etc/passwd", ["/home/houminxi"]), false);
+});
+
+test("a path with a NUL byte is refused", () => {
+  assert.equal(computerFilePathAllowed("/home/houminxi/terminals/a\u0000b.txt", ["/home/houminxi"]), false);
+});
