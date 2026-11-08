@@ -323,6 +323,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "upstream_request_cancelled",
   "upstream_response_error",
   "upstream_response_failed",
+  "upstream_response_too_large",
   "upstream_server_error",
   "upstream_timeout",
   "upstream_websocket_connect_failed",
