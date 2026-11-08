@@ -1,1 +1,2 @@
 - **fix(logs):** One large pasted screenshot no longer erases the request text from the call log. The stored request copy shows each inline image as a short size note, such as `[inline image: image/png, 600000 bytes, 800000 base64 chars]`.
+- **fix(responses):** A continued Responses turn (`previous_response_id`) no longer sends the call log placeholder `[omitted: encrypted reasoning, N chars]` upstream as encrypted reasoning. The placeholder is dropped from the rebuilt history.

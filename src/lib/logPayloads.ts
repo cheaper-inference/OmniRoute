@@ -66,6 +66,11 @@ function encryptedReasoningOmissionMarker(length?: number): string {
     : `[omitted: encrypted reasoning, ${length} chars]`;
 }
 
+/** True for the placeholder that stands in for encrypted reasoning in a stored log copy. */
+export function isEncryptedReasoningOmissionMarker(value: unknown): boolean {
+  return typeof value === "string" && value.startsWith("[omitted: encrypted reasoning");
+}
+
 // Matches a JSON string field in captured SSE text. Alternatives inside the value are disjoint,
 // keeping the scan linear even for large encrypted blobs.
 const SERIALIZED_ENCRYPTED_REASONING_RE = /(\"encrypted_content\"\s*:\s*\")((?:\\.|[^\"\\])*)\"/g;
