@@ -291,3 +291,17 @@ test("importToken_UserinfoReturnsNoEmail_Returns400AndPersistsNothing", async ()
   }
   assert.equal((await antigravityRows()).length, 0, "No email-less connection may be persisted");
 });
+
+test("importToken_NestedTokenJson_ExtractsCamelCaseRefreshToken", async () => {
+  const probes = stubGoogleServices({ email: USER_EMAIL, projectId: PROJECT_ID });
+
+  const jsonInput = JSON.stringify({ token: { refreshToken: `  ${REFRESH_TOKEN}  ` } });
+  const { status, body } = await importToken("antigravity", { token: jsonInput });
+
+  assert.equal(status, 200);
+  assert.equal(body.success, true);
+  const [row] = await antigravityRows();
+  assert.equal(row.refreshToken, REFRESH_TOKEN);
+  const tokenProbe = probes.find((p) => p.url.includes("oauth2.googleapis.com/token"));
+  assert.match(tokenProbe?.body || "", new RegExp(encodeURIComponent(REFRESH_TOKEN)));
+});

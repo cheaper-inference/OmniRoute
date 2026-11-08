@@ -282,51 +282,74 @@ export class AntigravityRefreshTokenError extends Error {
   readonly status = 400;
 }
 
-function extractRefreshToken(input: unknown): string {
-  if (typeof input === "string") {
-    const trimmed = input.trim();
-    if (!trimmed) return "";
-    if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-      try {
-        const parsed = JSON.parse(trimmed);
-        return extractRefreshToken(parsed);
-      } catch {
-        return trimmed;
-      }
-    }
+function trimmedString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function refreshTokenFromRecord(record: Record<string, unknown>): string {
+  const nested =
+    record.token && typeof record.token === "object"
+      ? (record.token as Record<string, unknown>)
+      : {};
+  const candidates = [
+    record.refresh_token,
+    record.refreshToken,
+    nested.refresh_token,
+    nested.refreshToken,
+  ];
+  return candidates.map(trimmedString).find(Boolean) ?? "";
+}
+
+function refreshTokenFromString(input: string): string {
+  const trimmed = input.trim();
+  if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) return trimmed;
+  try {
+    return extractRefreshToken(JSON.parse(trimmed));
+  } catch {
     return trimmed;
   }
+}
+
+function extractRefreshToken(input: unknown): string {
+  if (typeof input === "string") return refreshTokenFromString(input);
   if (input && typeof input === "object" && !Array.isArray(input)) {
-    const record = input as Record<string, unknown>;
-    const nestedToken =
-      record.token && typeof record.token === "object"
-        ? (record.token as Record<string, unknown>)
-        : null;
-    const candidates = [
-      record.refresh_token,
-      record.refreshToken,
-      nestedToken?.refresh_token,
-      nestedToken?.refreshToken,
-    ];
-    for (const c of candidates) {
-      if (typeof c === "string" && c.trim()) {
-        return c.trim();
-      }
-    }
+    return refreshTokenFromRecord(input as Record<string, unknown>);
   }
   return "";
 }
 
-async function importAntigravityRefreshToken(
+function googleErrorDetail(errorText: string): string {
+  try {
+    const parsed = JSON.parse(errorText);
+    return parsed.error_description || parsed.error || errorText;
+  } catch {
+    return errorText;
+  }
+}
+
+function toAntigravityTokenPayload(
+  tokenData: Record<string, unknown>,
+  submittedRefreshToken: string
+): AntigravityTokenPayload {
+  const accessToken = typeof tokenData.access_token === "string" ? tokenData.access_token : "";
+  if (!accessToken) {
+    throw new AntigravityRefreshTokenError(
+      "Google OAuth token exchange did not return an access token"
+    );
+  }
+  return {
+    access_token: accessToken,
+    expires_in: typeof tokenData.expires_in === "number" ? tokenData.expires_in : undefined,
+    refresh_token: trimmedString(tokenData.refresh_token) || submittedRefreshToken,
+    scope: typeof tokenData.scope === "string" ? tokenData.scope : undefined,
+  };
+}
+
+async function exchangeAntigravityRefreshToken(
   config: AntigravityOAuthConfig,
   clientProfile: AntigravityClientProfile,
-  rawToken: unknown
-) {
-  const refreshToken = extractRefreshToken(rawToken);
-  if (!refreshToken) {
-    throw new AntigravityRefreshTokenError("Refresh token is missing or empty");
-  }
-
+  refreshToken: string
+): Promise<AntigravityTokenPayload> {
   const bodyParams: Record<string, string> = {
     grant_type: "refresh_token",
     client_id: config.clientId,
@@ -345,39 +368,29 @@ async function importAntigravityRefreshToken(
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    let detail = errorText;
-    try {
-      const parsed = JSON.parse(errorText);
-      detail = parsed.error_description || parsed.error || errorText;
-    } catch {}
+    const detail = googleErrorDetail(await response.text());
     throw new AntigravityRefreshTokenError(
       `Google OAuth refresh token validation failed: ${detail}`
     );
   }
 
-  const tokenData = (await response.json()) as Record<string, unknown>;
-  const accessToken = typeof tokenData.access_token === "string" ? tokenData.access_token : "";
-  if (!accessToken) {
-    throw new AntigravityRefreshTokenError(
-      "Google OAuth token exchange did not return an access token"
-    );
+  return toAntigravityTokenPayload(
+    (await response.json()) as Record<string, unknown>,
+    refreshToken
+  );
+}
+
+async function importAntigravityRefreshToken(
+  config: AntigravityOAuthConfig,
+  clientProfile: AntigravityClientProfile,
+  rawToken: unknown
+) {
+  const refreshToken = extractRefreshToken(rawToken);
+  if (!refreshToken) {
+    throw new AntigravityRefreshTokenError("Refresh token is missing or empty");
   }
 
-  const expiresIn = typeof tokenData.expires_in === "number" ? tokenData.expires_in : undefined;
-  const returnedRefreshToken =
-    typeof tokenData.refresh_token === "string" && tokenData.refresh_token.trim()
-      ? tokenData.refresh_token.trim()
-      : refreshToken;
-  const scope = typeof tokenData.scope === "string" ? tokenData.scope : undefined;
-
-  const tokens: AntigravityTokenPayload = {
-    access_token: accessToken,
-    expires_in: expiresIn,
-    refresh_token: returnedRefreshToken,
-    scope,
-  };
-
+  const tokens = await exchangeAntigravityRefreshToken(config, clientProfile, refreshToken);
   const extra = await postExchangeAntigravity(config, clientProfile, tokens);
   // Without an email the import route can only match rows by the freshly minted access
   // token, so every re-import of the same account would add a duplicate row. Persist
