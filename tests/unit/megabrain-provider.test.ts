@@ -240,6 +240,19 @@ test("usage: Free has no plan limits, a rejected token asks to sign in again", a
   assert.match(missing.message ?? "", /not connected/);
 });
 
+test("usage: a failed request does not leak proxy credentials or stack paths (Hard Rule #12)", async () => {
+  globalThis.fetch = (async () => {
+    throw new Error(
+      "request to http://proxyuser:proxy-secret-42@10.0.0.9:8080/ failed\n" +
+        "    at fetchWithConnectionProxy (/home/runner/omniroute/open-sse/services/connectionProxyFetch.ts:88:11)"
+    );
+  }) as typeof fetch;
+  const failed = (await getMegabrainUsage("mb-token")) as { message?: string };
+  assert.match(failed.message ?? "", /^MegaBrain usage request failed/);
+  assert.doesNotMatch(failed.message ?? "", /proxy-secret-42/);
+  assert.doesNotMatch(failed.message ?? "", /connectionProxyFetch\.ts/);
+});
+
 test("usage wiring: Provider Limits shows the session and weekly bars", async () => {
   assert.equal(supportsProviderQuota("megabrain"), true);
   recordFetch([

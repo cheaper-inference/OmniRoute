@@ -9,6 +9,7 @@
  * 5-hour session limit and a weekly limit, each as a percentage used with its reset time.
  * Free has no limits from MegaBrain (its requests are paid from credits).
  */
+import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { clampPercentage, toNumber, toRecord } from "./scalars.ts";
 import { parseResetTime, type UsageQuota } from "./quota.ts";
@@ -85,7 +86,11 @@ export async function getMegabrainUsage(token: string | null | undefined, connec
       ? await fetchWithConnectionProxy(connectionId, url, init)
       : await globalThis.fetch(url, init);
   } catch (error) {
-    return { message: `MegaBrain usage request failed: ${(error as Error).message}` };
+    return {
+      message: `MegaBrain usage request failed: ${sanitizeErrorMessage(
+        error instanceof Error ? error.message : String(error)
+      )}`,
+    };
   }
   if (!response) return { message: "MegaBrain usage request failed." };
   if (response.status === 401 || response.status === 403) {
