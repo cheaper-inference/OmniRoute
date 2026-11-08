@@ -88,6 +88,9 @@ export function classifyField(key: string, parentKey = ""): FieldCategory | null
   if (key === "text" && parentKey === "reasoning_details") {
     return "reasoning";
   }
+  if (key === "data" && parentKey === "reasoning_details") {
+    return null; // Opaque encrypted reasoning payload — pass through untouched.
+  }
   if (METADATA_KEYS.has(key)) {
     return null;
   }
