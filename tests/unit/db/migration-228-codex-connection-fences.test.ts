@@ -141,3 +141,45 @@ test("non-Codex rows and malformed metadata stay usable across provider transiti
     db.close();
   }
 });
+
+test("the column healer gives a legacy provider_connections table every column the fence triggers read", async () => {
+  const { tryOpenSync } = await import("../../../src/lib/db/adapters/driverFactory.ts");
+  const { ensureProviderConnectionsColumns } = await import("../../../src/lib/db/schemaColumns.ts");
+  const db = tryOpenSync(":memory:");
+  assert.ok(db, "expected a synchronous sqlite adapter for :memory:");
+  try {
+    // A pre-001 lineage: CREATE TABLE IF NOT EXISTS never added the 001 credential columns.
+    db.exec(`CREATE TABLE provider_connections (
+      id TEXT PRIMARY KEY, provider TEXT NOT NULL, is_active INTEGER DEFAULT 1,
+      created_at TEXT, updated_at TEXT
+    );
+    CREATE TABLE key_value (namespace TEXT, key TEXT, value TEXT, PRIMARY KEY(namespace, key))`);
+    ensureProviderConnectionsColumns(db);
+    db.exec(
+      fs.readFileSync(
+        new URL(
+          "../../../src/lib/db/migrations/177_provider_connection_synced_models_at.sql",
+          import.meta.url
+        ),
+        "utf8"
+      )
+    );
+    db.exec(migration);
+    db.prepare("INSERT INTO provider_connections (id, provider) VALUES ('a', 'codex')").run();
+    db.prepare("INSERT INTO provider_connections (id, provider) VALUES ('b', 'openai')").run();
+    assert.doesNotThrow(() =>
+      db
+        .prepare("UPDATE provider_connections SET access_token = 'synthetic-a' WHERE id = 'a'")
+        .run()
+    );
+    assert.doesNotThrow(() =>
+      db.prepare("UPDATE provider_connections SET is_active = 0 WHERE id = 'b'").run()
+    );
+    const fence = db
+      .prepare("SELECT credential_revision FROM codex_connection_fences WHERE connection_id = 'a'")
+      .get() as { credential_revision: number };
+    assert.equal(fence.credential_revision, 1);
+  } finally {
+    db.close?.();
+  }
+});

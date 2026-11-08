@@ -29,6 +29,14 @@ export function ensureProviderConnectionsColumns(db: SqliteDatabase) {
       ["default_model", "TEXT"], // legacy-schema hole; later data migrations read it
       ["last_ping_at", "TEXT"], // added by 123_quota_auto_ping; back-filled here for divergent lineages
       ["last_pinged_reset_key", "TEXT"], // added by 123_quota_auto_ping; back-filled here for divergent lineages
+      // 001 columns a pre-001 legacy table can lack; the Codex fence triggers (228) read them on
+      // every provider_connections UPDATE, so a missing one would fail every write.
+      ["access_token", "TEXT"],
+      ["project_id", "TEXT"],
+      ["test_status", "TEXT"],
+      ["last_error", "TEXT"],
+      ["last_error_at", "TEXT"],
+      ["rate_limited_until", "TEXT"],
     ]) {
       if (!columnNames.has(column)) {
         db.exec(`ALTER TABLE provider_connections ADD COLUMN ${column} ${type}`);
