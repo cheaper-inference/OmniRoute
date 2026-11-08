@@ -96,6 +96,23 @@ export interface GeminiToolCallState extends GeminiUsageState {
   toolCallAccum?: Record<number, { id: string; name: string; arguments: string }>;
 }
 
+/**
+ * Pick the accumulator slot for a streamed tool-call fragment. A numeric `index` is used
+ * as sent. Some OpenAI-compatible endpoints omit it: then a fragment that brings a new
+ * id, different from the latest call's id, starts the next call; any other fragment
+ * continues the latest call.
+ */
+export function resolveToolCallIndex(
+  accum: Record<number, { id: string }>,
+  tc: { index?: number; id?: string }
+): number {
+  if (typeof tc.index === "number") return tc.index;
+  const keys = Object.keys(accum).map(Number);
+  if (keys.length === 0) return 0;
+  const latest = Math.max(...keys);
+  return tc.id && accum[latest].id && tc.id !== accum[latest].id ? latest + 1 : latest;
+}
+
 interface GeminiCandidate {
   content: { role: "model"; parts: GeminiPart[] };
   index: number;
@@ -147,7 +164,7 @@ export function openAIChunkToGeminiChunk(
   if (state && Array.isArray(delta.tool_calls)) {
     const accum = (state.toolCallAccum ??= {});
     for (const tc of delta.tool_calls) {
-      const idx = tc.index ?? 0;
+      const idx = resolveToolCallIndex(accum, tc);
       const entry = (accum[idx] ??= { id: "", name: "", arguments: "" });
       if (tc.id) entry.id = tc.id;
       if (tc.function?.name) entry.name += tc.function.name;
