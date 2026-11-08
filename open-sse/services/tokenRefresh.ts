@@ -66,6 +66,7 @@ import { refreshKiroToken } from "./tokenRefresh/providers/kiro.ts";
 import { refreshQoderToken } from "./tokenRefresh/providers/qoder.ts";
 import { refreshGitHubToken } from "./tokenRefresh/providers/github.ts";
 import { refreshCopilotToken } from "./tokenRefresh/providers/copilot.ts";
+import { refreshM365Token } from "./tokenRefresh/providers/m365.ts";
 
 export {
   refreshCodebuddyCnToken,
@@ -250,6 +251,7 @@ export function getActiveOnPersist(): RefreshPersistFn | undefined {
 
 export function refreshAccessToken(provider, token, creds, log, proxy: unknown = null) {
   if (isPassiveCodex(provider)) return resolvePassiveCodex(creds);
+  if (provider === "copilot-m365-web") return refreshM365Token(token, creds, log, proxy);
   return refreshActiveAccessToken(provider, token, creds, log, proxy);
 }
 
@@ -429,6 +431,9 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
       return result;
     }
 
+    case "copilot-m365-web":
+      return await refreshM365Token(credentials.refreshToken, credentials, log, proxyConfig);
+
     case "claude":
       return await refreshClaudeOAuthToken(credentials.refreshToken, log, proxyConfig);
 
@@ -515,6 +520,7 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
  */
 export function supportsTokenRefresh(provider) {
   const explicitlySupported = new Set([
+    "copilot-m365-web",
     "gemini",
     "antigravity",
     "agy",

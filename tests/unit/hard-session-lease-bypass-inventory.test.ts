@@ -188,6 +188,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/models/test-all/route.ts": 1,
     "src/app/api/monitoring/health/route.ts": 1,
     "src/app/api/oauth/[provider]/[action]/route.ts": 4,
+    // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
+    // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
+    "src/app/api/oauth/[provider]/[action]/m365Auth.ts": 1,
     "src/app/api/oauth/codex/import/route.ts": 1,
     "src/app/api/oauth/kiro/api-key/route.ts": 1,
     "src/app/api/oauth/kiro/auto-import/route.ts": 2,
