@@ -174,7 +174,7 @@ export function geminiToClaudeResponse(chunk, state) {
         results.push({
           type: "content_block_start",
           index: idx,
-          content_block: { type: "thinking", thinking: "" },
+          content_block: { type: "thinking", thinking: "", signature: "" },
         });
         results.push({
           type: "content_block_delta",
