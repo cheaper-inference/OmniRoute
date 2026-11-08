@@ -77,13 +77,37 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 60 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 60);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 64 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 64);
     for (const e of RENAMED_MIGRATION_COMPATIBILITY) {
       assert.equal(typeof e.fromVersion, "string");
       assert.equal(typeof e.fromName, "string");
       assert.equal(typeof e.toVersion, "string");
       assert.equal(typeof e.toName, "string");
+    }
+  });
+
+  it("shifts the published 229–232 stack rows down one slot, lowest first", () => {
+    const keys = RENAMED_MIGRATION_COMPATIBILITY.map(
+      (e) => `${e.fromVersion}_${e.fromName}->${e.toVersion}_${e.toName}`
+    );
+    const shift = [
+      "229_api_key_self_service_settings->228_api_key_self_service_settings",
+      "230_agent_sessions->229_agent_sessions",
+      "231_usage_history_agent_session_id->230_usage_history_agent_session_id",
+      "232_agent_session_messages->231_agent_session_messages",
+    ];
+    const start = keys.indexOf(shift[0]);
+    assert.ok(start >= 0);
+    assert.deepEqual(keys.slice(start, start + shift.length), shift);
+    // Each shift must run before any entry that moves a row into the slot it frees.
+    const firstInto = (version: string) =>
+      RENAMED_MIGRATION_COMPATIBILITY.findIndex(
+        (e) => e.toVersion === version && e.fromVersion !== String(Number(version) + 1)
+      );
+    for (const version of ["229", "230", "231"]) {
+      const into = firstInto(version);
+      if (into >= 0) assert.ok(into > start, `an entry moves a row into ${version} first`);
     }
   });
 
