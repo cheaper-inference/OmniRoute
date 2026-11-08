@@ -41,6 +41,7 @@ function harness(
     // and payload forwarding, so an accepted answer stands in for it.
     "@omniroute/open-sse/utils/grokBotOutcomes": {
       grokBotSendReply: () => ({ status: "submitted", httpStatus: 200 }),
+      grokBotCardOutcome: () => "accepted",
     },
     "../tokenSource": {
       grokBotToken: async () => {

@@ -5,7 +5,8 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getProviderConnectionById } from "@/lib/db/providers";
 import { grokBotToken } from "../tokenSource";
 import { grokBotRead } from "../../../../../(dashboard)/dashboard/grok-bot/read";
-import { secretReply, cardAccepted } from "../../../../../(dashboard)/dashboard/grok-bot/cards";
+import { secretReply } from "../../../../../(dashboard)/dashboard/grok-bot/cards";
+import { grokBotCardOutcome } from "@omniroute/open-sse/utils/grokBotOutcomes";
 import { permissionFailure } from "../../../../../(dashboard)/dashboard/grok-bot/permission";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -46,7 +47,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       method: "SubmitGrokBotSecret",
       payload,
     });
-    const accepted = cardAccepted(answer);
+    const accepted = grokBotCardOutcome(answer) === "accepted";
     return NextResponse.json(
       { status: accepted ? "submitted" : "unknown" },
       { status: accepted ? 200 : 502 }

@@ -64,10 +64,6 @@ export function grokBotCardOutcome(
   return "unknown";
 }
 
-export function grokBotSendSettled(answer: unknown): boolean {
-  const status = (answer as { status?: unknown } | null)?.status;
-  return status === 2 || status === "ACCEPTED";
-}
 
 export function grokBotRefusal(answer: unknown): { failureCode: string; message: string } | null {
   const body = record(answer);

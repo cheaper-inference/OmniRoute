@@ -101,19 +101,3 @@ export function draftDiscard(input: { agentId: string; entryId: string }): Draft
   return { agentId: input.agentId, entryId: input.entryId, sessionId: "" };
 }
 
-export function cardAccepted(answer: unknown): boolean {
-  if (answer === null) return true;
-  if (typeof answer !== "object") return false;
-  const body = answer as Record<string, unknown>;
-  // A refusal is an answer, not the absence of one. `accepted: false` and
-  // `dispatched: false` are how the service says it declined, and reading them as
-  // success is what made a discarded card look like an applied one.
-  if (body.accepted === false || body.dispatched === false) return false;
-  return !(
-    "error" in body ||
-    "code" in body ||
-    "refusal" in body ||
-    "status" in body ||
-    "message" in body
-  );
-}

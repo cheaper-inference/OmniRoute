@@ -6,7 +6,6 @@ import {
   grokBotErrorStatus,
   grokBotSendOutcome,
   grokBotSendReply,
-  grokBotSendSettled,
 } from "../../open-sse/utils/grokBotOutcomes.ts";
 
 test("send acceptance requires an accepted delivery, not HTTP success alone", () => {
@@ -67,14 +66,6 @@ test("card answers distinguish accepted, refused, and uncertain", () => {
   }
   for (const answer of [{ unexpected: "shape" }, null, {}]) {
     assert.equal(grokBotCardOutcome(answer, { allowEmpty: false }), "unknown");
-  }
-});
-
-test("only an accepted send status settles an uncertain delivery", () => {
-  assert.equal(grokBotSendSettled({ status: 2 }), true);
-  assert.equal(grokBotSendSettled({ status: "ACCEPTED" }), true);
-  for (const status of [0, 1, 3, 4, 5, "UNKNOWN_DURABILITY", "PENDING"]) {
-    assert.equal(grokBotSendSettled({ status }), false);
   }
 });
 
