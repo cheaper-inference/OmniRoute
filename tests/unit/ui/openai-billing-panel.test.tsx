@@ -69,3 +69,10 @@ it("submits optional credentials only to the billing endpoint and clears the pas
     }),
   ]);
 });
+
+it("treats a response without an organizations list as a load error instead of crashing", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) }));
+  render(<OpenAIBillingPanel />);
+  expect(await screen.findByText("loadError")).toBeTruthy();
+  expect(screen.queryByText("notConfigured")).toBeNull();
+});
