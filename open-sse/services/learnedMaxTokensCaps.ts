@@ -12,7 +12,11 @@
  * pre-clamp with zero extra round-trips.
  */
 
-const learnedCaps = new Map<string, number>();
+import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
+
+// Model names come from client requests: cap the map (LRU). An evicted model costs one more
+// clamp-and-retry round-trip to learn its ceiling again.
+const learnedCaps = boundedMap<number>("learned-max-tokens-caps", 1000, "lru");
 
 function capKey(provider: string | null | undefined, model: string | null | undefined): string {
   return `${(provider || "").toLowerCase()}::${(model || "").toLowerCase()}`;

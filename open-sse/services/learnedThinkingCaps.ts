@@ -21,6 +21,8 @@
  * a restart may re-learn at the cost of one upstream 400.
  */
 
+import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
+
 // Known Gemini thinking-budget ceilings, highest first. 32768 is the pro-tier
 // cap; 24576 is the flash-tier cap (gemini-2.5-flash in MODEL_SPECS); 8192 is a
 // conservative floor that every thinking-capable Gemini accepts. A failed budget
@@ -37,7 +39,7 @@ const GEMINI_STEPDOWN: readonly number[] = [32768, 24576, 8192];
 export const GEMINI_FALLBACK_THINKING_CAP: number = GEMINI_STEPDOWN[0];
 
 // key: `${provider}:${model}` lowercased → highest budget known to be accepted.
-const learnedCaps = new Map<string, number>();
+const learnedCaps = boundedMap<number>("learned-thinking-caps", 1000, "lru");
 
 function buildKey(provider: string | null | undefined, model: string | null | undefined): string {
   const p = typeof provider === "string" ? provider.trim().toLowerCase() : "";
@@ -99,9 +101,10 @@ export function recordLearnedThinkingCap(
  */
 export function parseThinkingBudgetMax(errText: unknown): number | null {
   if (typeof errText !== "string" || !errText) return null;
-  const match = /thinking_?budget[^\d-]*(?:must be in the range|range)[^\d-]*\[\s*-?\d+\s*,\s*(\d+)\s*\]/i.exec(
-    errText
-  );
+  const match =
+    /thinking_?budget[^\d-]*(?:must be in the range|range)[^\d-]*\[\s*-?\d+\s*,\s*(\d+)\s*\]/i.exec(
+      errText
+    );
   if (!match) return null;
   const max = Number(match[1]);
   return Number.isFinite(max) ? max : null;

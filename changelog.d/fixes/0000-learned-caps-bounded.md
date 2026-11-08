@@ -1,0 +1,1 @@
+- **fix(routing):** learned max_tokens, thinking-budget and reasoning-effort ceilings are now capped at 1,000 provider/model entries, so client-sent model names cannot grow gateway memory without limit.
