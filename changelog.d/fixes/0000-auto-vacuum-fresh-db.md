@@ -1,0 +1,1 @@
+- **fix(db):** a new database is now created with incremental auto-vacuum from the first page, so the weekly vacuum frees space in small steps and no longer needs a one-time rebuild of the whole file to switch modes.
