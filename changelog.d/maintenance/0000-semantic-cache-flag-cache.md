@@ -1,0 +1,1 @@
+- **perf(db):** the semantic-cache enabled check can now be answered from memory instead of reloading both settings namespaces and decrypting the cache secrets. The flag is cleared on every database settings write and on every database reset.
