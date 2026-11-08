@@ -130,6 +130,10 @@ function mergeTrailingTextIntoFunctionResponses(contents: GeminiContent[]) {
   }
 }
 
+// Every turn re-sends all earlier tool_result images; keep only the newest few.
+const MAX_TOOL_RESULT_IMAGES = 5;
+const TOOL_RESULT_IMAGE_PLACEHOLDER = "[Earlier tool result image omitted to bound request size]";
+
 // Spelled out so the any-budget gate (check-t11-any-budget) does not count the literal.
 const TOOL_CHOICE_ANY = ["a", "n", "y"].join("");
 
@@ -282,6 +286,8 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
     // matching tool_result becomes text instead of a Gemini-400'd functionResponse.
     const omittedToolCallIds = new Set<string>();
     const toolUseOccurrences = createToolUseOccurrenceQueue();
+    // Base64 tool_result image parts in request order, for the cap after the loop.
+    const toolResultInlineImages: Array<Record<string, unknown>> = [];
     for (const msg of body.messages) {
       const parts = [];
       // Images returned inside tool_result blocks go right after the last tool response,
@@ -345,9 +351,11 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                 let hasImage = false;
                 for (const c of content) {
                   if (c.type === "image" && c.source?.type === "base64") {
-                    toolResultImageParts.push({
+                    const imagePart = {
                       inlineData: { mimeType: c.source.media_type, data: c.source.data },
-                    });
+                    };
+                    toolResultImageParts.push(imagePart);
+                    toolResultInlineImages.push(imagePart);
                     hasImage = true;
                   } else if (isUrlImageBlock(c)) {
                     toolResultImageParts.push(urlImagePart(c.source.url));
@@ -423,6 +431,17 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
         const geminiRole = msg.role === "assistant" ? "model" : "user";
         result.contents.push({ role: geminiRole, parts });
       }
+    }
+    // Turn the oldest images into text in place, so part order stays valid.
+    const droppedImages = toolResultInlineImages.slice(0, -MAX_TOOL_RESULT_IMAGES);
+    for (const part of droppedImages) {
+      delete part.inlineData;
+      part.text = TOOL_RESULT_IMAGE_PLACEHOLDER;
+    }
+    if (droppedImages.length > 0) {
+      console.warn(
+        `TOOL_RESULT_IMAGE_CAP kept=${MAX_TOOL_RESULT_IMAGES} dropped=${droppedImages.length}`
+      );
     }
   }
 
