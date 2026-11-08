@@ -6,6 +6,7 @@ import { getTaskManager, type TaskState } from "@/lib/a2a/taskManager";
 import { authorizeA2ATaskRoute } from "@/app/api/a2a/_auth";
 import { createConductorTask } from "@/lib/conductor/hubProxy";
 import { getSettings } from "@/lib/db/settings";
+import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 
 const VALID_TASK_STATES = new Set<TaskState>([
   "submitted",
@@ -92,7 +93,9 @@ export function tokensMatch(provided: string, expected: string): boolean {
 }
 
 /**
- * Mesma semântica de auth do JSON-RPC A2A (src/app/a2a/route.ts): Bearer vs OMNIROUTE_API_KEY; aberto se não configurada.
+ * Legacy POST gate: Bearer vs OMNIROUTE_API_KEY; open when it is not set.
+ * POST only applies it when REQUIRE_API_KEY is off, on top of
+ * authorizeA2ATaskRoute, so that posture keeps requiring the env key.
  *
  * Exported as a test seam only — not part of the route contract.
  */
@@ -108,13 +111,28 @@ export function authenticateA2A(request: Request): boolean {
  * Só skills da frota (`conductor` / `conductor-cli-<profile>` — as anunciadas no
  * Agent Card) são delegáveis; os estados voltam pelo espelho SSE→A2A (RF1).
  */
-export async function POST(request: Request) {
-  if (!authenticateA2A(request)) {
+
+/**
+ * POST auth: the GET gate first, then the legacy OMNIROUTE_API_KEY check when
+ * REQUIRE_API_KEY is off. Returns a 401 Response, or null when the caller may continue.
+ */
+async function authorizeConductorTaskPost(request: Request): Promise<Response | null> {
+  // POST used to check only OMNIROUTE_API_KEY and ignored REQUIRE_API_KEY,
+  // so it was open when that env key was unset. Run the GET gate first.
+  const auth = await authorizeA2ATaskRoute(request);
+  if (auth instanceof Response) return auth;
+  if (!isRequireApiKeyEnabled() && !authenticateA2A(request)) {
     return NextResponse.json(
       { error: "Unauthorized: missing or invalid API key" },
       { status: 401 }
     );
   }
+  return null;
+}
+
+export async function POST(request: Request) {
+  const denied = await authorizeConductorTaskPost(request);
+  if (denied) return denied;
   const settings = await getSettings();
   if (settings.a2aEnabled !== true) {
     return NextResponse.json(

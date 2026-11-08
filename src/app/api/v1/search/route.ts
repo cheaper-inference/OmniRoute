@@ -13,6 +13,8 @@ import {
   isUnconfiguredLoopbackSearchProvider,
   SEARCH_PROVIDERS,
   getSearchCredentialFallbacks,
+  autoSearchCandidates,
+  admitsAutoCandidate,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { buildErrorBody, errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
@@ -245,48 +247,26 @@ async function postHandler(request: Request, context: unknown) {
       );
     }
   } else {
-    // Auto-select — try the resolved provider first, then iterate others by cost
-    const selectedCredentials = await resolveSearchExecutionCredentials(
-      providerConfig,
-      allowedConnections
-    );
-    if (isAllRateLimitedCredentials(selectedCredentials)) {
-      firstRateLimitedCredentials = {
-        providerId: providerConfig.id,
-        credentials: selectedCredentials,
-      };
-    } else {
-      credentials = selectedCredentials;
-    }
+    // Auto-select: walk the same admitted, cost-ranked candidates executeWebSearch uses
+    // (a configured SearXNG included), so /v1/search and the web_search tool agree even
+    // when two providers tie on cost. selectProvider's pick is only a seed for errors.
+    const sortedIds = autoSearchCandidates(body.search_type)
+      .filter((provider) => !isProviderBlockedByIdOrAlias(provider.id, blockedProviders))
+      .map((p) => p.id);
 
-    if (!credentials) {
-      // Sort by cost to find cheapest with credentials (fallback-only providers
-      // are reached via the last-resort step below, never the primary pick).
-      const sortedIds = Object.values(SEARCH_PROVIDERS)
-        .filter(
-          (provider) =>
-            !provider.fallbackOnly &&
-            supportsSearchType(provider, body.search_type) &&
-            !isProviderBlockedByIdOrAlias(provider.id, blockedProviders)
-        )
-        .sort((a, b) => a.costPerQuery - b.costPerQuery)
-        .map((p) => p.id);
-
-      for (const pid of sortedIds) {
-        if (pid === providerConfig.id) continue;
-        const altConfig = getSearchProvider(pid);
-        const altCreds = altConfig
-          ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
-          : null;
-        if (isAllRateLimitedCredentials(altCreds)) {
-          firstRateLimitedCredentials ??= { providerId: pid, credentials: altCreds };
-          continue;
-        }
-        if (altConfig && altCreds) {
-          providerConfig = altConfig;
-          credentials = altCreds;
-          break;
-        }
+    for (const pid of sortedIds) {
+      const altConfig = getSearchProvider(pid);
+      const altCreds = altConfig
+        ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
+        : null;
+      if (isAllRateLimitedCredentials(altCreds)) {
+        firstRateLimitedCredentials ??= { providerId: pid, credentials: altCreds };
+        continue;
+      }
+      if (altConfig && admitsAutoCandidate(altConfig, altCreds)) {
+        providerConfig = altConfig;
+        credentials = altCreds;
+        break;
       }
     }
 
@@ -336,15 +316,9 @@ async function postHandler(request: Request, context: unknown) {
       );
     }
 
-    // Find alternate for failover — must bind credentials to the matched provider.
-    // Exclude fallback-only providers; they are only used by the last-resort step.
-    const otherIds = Object.values(SEARCH_PROVIDERS)
-      .filter(
-        (provider) => !provider.fallbackOnly && supportsSearchType(provider, body.search_type)
-      )
-      .sort((a, b) => a.costPerQuery - b.costPerQuery)
-      .map((p) => p.id)
-      .filter((id) => id !== providerConfig.id);
+    // Find alternate for failover — must bind credentials to the matched provider. It comes
+    // from the same unblocked candidates; the other fallback-only providers stay last-resort.
+    const otherIds = sortedIds.filter((id) => id !== providerConfig.id);
 
     for (const pid of otherIds) {
       const altConfig = getSearchProvider(pid);
@@ -352,7 +326,7 @@ async function postHandler(request: Request, context: unknown) {
         ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
         : null;
       if (isAllRateLimitedCredentials(creds)) continue;
-      if (creds) {
+      if (altConfig && admitsAutoCandidate(altConfig, creds)) {
         alternateProviderId = pid;
         alternateCredentials = creds;
         break;

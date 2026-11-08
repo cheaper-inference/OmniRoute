@@ -5,7 +5,9 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Button from "@/shared/components/Button";
+import type { JSX } from "react";
 
 // Lazy-load react-markdown to reduce initial bundle size.
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
@@ -91,7 +93,7 @@ export function SkillPreviewPane({
               className="text-text-muted hover:text-text-main"
               aria-label={t("refresh")}
             >
-              <Icon name="refresh" size={14} className={loading ? "animate-spin" : undefined} />
+              {loading ? <Spinner decorative size="xs" /> : <Icon name="refresh" size={14} />}
             </Button>
           )}
           <Button
