@@ -223,7 +223,8 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // Runcrate (#18061) registers id "runcrate" with the same alias — one more
   // (434 -> 435). Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 435.
   // Gisoo (#18112) adds id and alias "gisoo" (+1 distinct prefix: 435 -> 436).
-  assert.equal(RESERVED_PREFIX_COUNT, 436);
+  // #14308 registers Ashna, Atria, GapGPT and Hooshyar (id == alias each): +4 (436 -> 440).
+  assert.equal(RESERVED_PREFIX_COUNT, 440);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("runcrate"), true);
