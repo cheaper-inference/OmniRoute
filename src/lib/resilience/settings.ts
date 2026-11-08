@@ -240,6 +240,28 @@ function normalizeAntigravityToggle(
   return { enabled: toBoolean(asRecord(section).enabled, toBoolean(legacyEnabled, fallback)) };
 }
 
+function normalizeCooldownProfiles(
+  source: unknown,
+  fallback: ResilienceSettings["connectionCooldown"]
+): ResilienceSettings["connectionCooldown"] {
+  const sections = asRecord(source);
+  return {
+    oauth: normalizeConnectionCooldownProfile(sections.oauth, fallback.oauth),
+    apikey: normalizeConnectionCooldownProfile(sections.apikey, fallback.apikey),
+  };
+}
+
+function normalizeBreakerProfiles(
+  source: unknown,
+  fallback: ResilienceSettings["providerBreaker"]
+): ResilienceSettings["providerBreaker"] {
+  const sections = asRecord(source);
+  return {
+    oauth: normalizeProviderBreakerProfile(sections.oauth, fallback.oauth),
+    apikey: normalizeProviderBreakerProfile(sections.apikey, fallback.apikey),
+  };
+}
+
 function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
   const profiles = asRecord(settings.providerProfiles);
   const defaults = asRecord(settings.rateLimitDefaults);
@@ -388,26 +410,11 @@ export function resolveResilienceSettings(
       fallback.antigravityTimingTelemetry.enabled
     ),
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
-    connectionCooldown: {
-      oauth: normalizeConnectionCooldownProfile(
-        asRecord(current.connectionCooldown).oauth,
-        fallback.connectionCooldown.oauth
-      ),
-      apikey: normalizeConnectionCooldownProfile(
-        asRecord(current.connectionCooldown).apikey,
-        fallback.connectionCooldown.apikey
-      ),
-    },
-    providerBreaker: {
-      oauth: normalizeProviderBreakerProfile(
-        asRecord(current.providerBreaker).oauth,
-        fallback.providerBreaker.oauth
-      ),
-      apikey: normalizeProviderBreakerProfile(
-        asRecord(current.providerBreaker).apikey,
-        fallback.providerBreaker.apikey
-      ),
-    },
+    connectionCooldown: normalizeCooldownProfiles(
+      current.connectionCooldown,
+      fallback.connectionCooldown
+    ),
+    providerBreaker: normalizeBreakerProfiles(current.providerBreaker, fallback.providerBreaker),
     tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
       current.tokenRefreshBreaker,
       fallback.tokenRefreshBreaker
@@ -464,26 +471,11 @@ export function mergeResilienceSettings(
       updates.antigravityTimingTelemetry, undefined, current.antigravityTimingTelemetry.enabled
     ),
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
-    connectionCooldown: {
-      oauth: normalizeConnectionCooldownProfile(
-        updates.connectionCooldown?.oauth,
-        current.connectionCooldown.oauth
-      ),
-      apikey: normalizeConnectionCooldownProfile(
-        updates.connectionCooldown?.apikey,
-        current.connectionCooldown.apikey
-      ),
-    },
-    providerBreaker: {
-      oauth: normalizeProviderBreakerProfile(
-        updates.providerBreaker?.oauth,
-        current.providerBreaker.oauth
-      ),
-      apikey: normalizeProviderBreakerProfile(
-        updates.providerBreaker?.apikey,
-        current.providerBreaker.apikey
-      ),
-    },
+    connectionCooldown: normalizeCooldownProfiles(
+      updates.connectionCooldown,
+      current.connectionCooldown
+    ),
+    providerBreaker: normalizeBreakerProfiles(updates.providerBreaker, current.providerBreaker),
     tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
       updates.tokenRefreshBreaker,
       current.tokenRefreshBreaker
