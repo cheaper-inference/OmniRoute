@@ -148,6 +148,7 @@ test("OAuth provider registry: ids and flow types", () => {
     zed: "import_token",
     "zed-hosted": "authorization_code",
     "muse-code": "device_code",
+    "copilot-m365-web": "authorization_code_pkce",
   });
   // Aliases share the same module object.
   assert.equal(registry.PROVIDERS["amazon-q"], registry.PROVIDERS.kiro);
