@@ -1,4 +1,5 @@
 import type { LegacyModel as ModelV2 } from "../legacy-model.js";
+import { buildAuthHeaders } from "./auth-headers.js";
 import { normaliseFreeLabel } from "./naming.js";
 
 export interface OmniRouteRawModelEntry {
@@ -74,11 +75,7 @@ export const defaultOmniRouteModelsFetcher: OmniRouteModelsFetcher = async (
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        ...(headers ?? {}),
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: buildAuthHeaders(headers, apiKey),
       signal: controller.signal,
     });
     if (!res.ok) {

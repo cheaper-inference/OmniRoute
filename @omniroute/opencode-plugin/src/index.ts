@@ -365,6 +365,20 @@ function trimLeadingDashes(value: string): string {
   return i === 0 ? value : value.slice(i);
 }
 
+// Header names are case-insensitive, but a plain object spread is not: a
+// caller-supplied `authorization` key would survive next to `Authorization`
+// and fetch would combine both values into one invalid header. `Headers.set`
+// replaces the value regardless of casing, so the token we own always wins
+// while every other caller header is preserved.
+function buildAuthHeaders(
+  extraHeaders: Record<string, string> | undefined,
+  apiKey: string
+): Headers {
+  const headers = new Headers({ Accept: "application/json", ...(extraHeaders ?? {}) });
+  headers.set("Authorization", `Bearer ${apiKey}`);
+  return headers;
+}
+
 /**
  * Resolve effective options from the optional plugin-options object,
  * applying defaults. Centralises the providerId fallback so every hook
@@ -1290,11 +1304,7 @@ export const defaultOmniRouteModelsFetcher: OmniRouteModelsFetcher = async (
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        ...(headers ?? {}),
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: buildAuthHeaders(headers, apiKey),
       signal: controller.signal,
     });
     if (!res.ok) {
@@ -1574,11 +1584,7 @@ export const defaultOmniRouteCombosFetcher: OmniRouteCombosFetcher = async (
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        ...(headers ?? {}),
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: buildAuthHeaders(headers, apiKey),
       signal: controller.signal,
     });
     if (!res.ok) {
@@ -1837,11 +1843,7 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
   const out: OmniRouteEnrichmentMap = new Map();
   if (!baseURL || !apiKey) return out;
   const root = baseURL.replace(/\/v1\/?$/, "").replace(/\/$/, "");
-  const headers = {
-    Accept: "application/json",
-    ...(extraHeaders ?? {}),
-    Authorization: `Bearer ${apiKey}`,
-  };
+  const headers = buildAuthHeaders(extraHeaders, apiKey);
 
   // ── 1. Catalog with nice display names ────────────────────────────────
   const catalogAc = new AbortController();
@@ -2495,11 +2497,7 @@ export const defaultOmniRouteCompressionMetaFetcher: OmniRouteCompressionMetaFet
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        ...(headers ?? {}),
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: buildAuthHeaders(headers, apiKey),
       signal: ac.signal,
     });
     if (!res.ok) return empty;
@@ -2653,11 +2651,7 @@ export const defaultOmniRouteProvidersFetcher: OmniRouteProvidersFetcher = async
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        ...(headers ?? {}),
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: buildAuthHeaders(headers, apiKey),
       signal: ac.signal,
     });
     if (!res.ok) return empty;

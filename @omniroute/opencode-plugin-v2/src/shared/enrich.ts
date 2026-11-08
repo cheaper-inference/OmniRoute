@@ -1,4 +1,5 @@
 import type { LegacyModel as ModelV2 } from "../legacy-model.js";
+import { buildAuthHeaders } from "./auth-headers.js";
 import { buildModelDisplayName } from "./naming.js";
 import type { FreeModelFreeType } from "./naming.js";
 
@@ -369,11 +370,7 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
   const compatiblePublicPrefixes = new Set<string>();
   if (!baseURL || !apiKey) return out;
   const root = trimTrailingSlashes(baseURL.replace(/\/v1\/?$/, ""));
-  const headers = {
-    Accept: "application/json",
-    ...(extraHeaders ?? {}),
-    Authorization: `Bearer ${apiKey}`,
-  };
+  const headers = buildAuthHeaders(extraHeaders, apiKey);
 
   // 1. Catalog with nice display names.
   const catalogAc = new AbortController();

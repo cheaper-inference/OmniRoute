@@ -1,4 +1,5 @@
 import type { LegacyModel } from "../legacy-model.js";
+import { buildAuthHeaders } from "./auth-headers.js";
 import { type ApiFormatV2, type OmniRouteRawModelEntry, resolveApiBlockV2 } from "./models-map.js";
 
 export interface OmniRouteRawComboMemberRef {
@@ -92,11 +93,7 @@ export const defaultOmniRouteCombosFetcher: OmniRouteCombosFetcher = async (
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        ...(headers ?? {}),
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: buildAuthHeaders(headers, apiKey),
       signal: controller.signal,
     });
     if (!res.ok) {

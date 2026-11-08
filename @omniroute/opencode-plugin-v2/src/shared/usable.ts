@@ -1,4 +1,5 @@
 import type { OmniRouteEnrichmentMap } from "./enrich.js";
+import { buildAuthHeaders } from "./auth-headers.js";
 import type { OmniRouteRawCombo } from "./combos-map.js";
 
 /** Subset of `/api/providers` connections read by the usableOnly filter. */
@@ -53,11 +54,7 @@ export const defaultOmniRouteProvidersFetcher: OmniRouteProvidersFetcher = async
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        ...(headers ?? {}),
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: buildAuthHeaders(headers, apiKey),
       signal: ac.signal,
     });
     if (!res.ok) {
