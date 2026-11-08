@@ -10,6 +10,7 @@ const DEFAULT_CALL_LOG_MAX_ENTRIES = 10000;
 const DEFAULT_CALL_LOGS_TABLE_MAX_ROWS = 100000;
 const DEFAULT_CALL_LOG_PIPELINE_MAX_SIZE_KB = 512;
 const DEFAULT_PROXY_LOGS_TABLE_MAX_ROWS = 100000;
+const DEFAULT_CALL_LOG_MIN_FREE_DISK_MB = 512;
 /**
  * Default app log path, anchored to DATA_DIR (never `process.cwd()`).
  *
@@ -145,6 +146,15 @@ export function getCallLogPipelineMaxSizeBytes(): number {
       process.env.CALL_LOG_PIPELINE_MAX_SIZE_KB,
       DEFAULT_CALL_LOG_PIPELINE_MAX_SIZE_KB
     ) * 1024
+  );
+}
+
+/** Free bytes on the call_logs volume under which artifact writes are skipped. 0 disables the check. */
+export function getCallLogMinFreeDiskBytes(): number {
+  return (
+    parseNonNegativeInt(process.env.CALL_LOG_MIN_FREE_DISK_MB, DEFAULT_CALL_LOG_MIN_FREE_DISK_MB) *
+    1024 *
+    1024
   );
 }
 
