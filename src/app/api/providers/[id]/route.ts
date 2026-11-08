@@ -46,6 +46,8 @@ import { chatGptWebStorageStateFromCookieHeader } from "@omniroute/open-sse/util
 import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
 import { parseM365RefreshToken } from "@/lib/providers/m365RefreshToken";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import { getQuotaCacheState } from "@/domain/quotaCacheState";
+import { retireUnreportedQuotaWindows } from "@/domain/quotaSnapshotPersistence";
 
 function normalizeCodexLimitPolicy(
   incoming: unknown,
@@ -425,6 +427,14 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const updated = await updateProviderConnection(id, updateData);
+
+    // A new key starts with a clean quota state: the old key's exhausted snapshot must not pause
+    // it, in this process (cache entry) or after a restart (snapshot hydration). History stays.
+    if (updated && updateData.apiKey !== undefined && updateData.apiKey !== existing.apiKey) {
+      const { cache } = getQuotaCacheState();
+      retireUnreportedQuotaWindows(id, existing.provider, {}, cache.get(id) ?? null);
+      cache.delete(id);
+    }
 
     if (isActive === true && existing.provider === "codex") {
       // Await catalog repair so the next request can use a newly enabled account.
