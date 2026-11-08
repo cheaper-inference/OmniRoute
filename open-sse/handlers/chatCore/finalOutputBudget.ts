@@ -58,7 +58,14 @@ export function enforceFinalOutputTokenBudget({
       `estimated ${outputBudget.estimatedInputTokens} input tokens, ${exceededInputCap ? `max input ${outputBudget.maxInputTokens}` : `limit ${outputBudget.contextLimit}`}. ` +
       `Reduce the prompt or route to a model with a larger ${exceededInputCap ? "input limit" : "context window"}.`;
     log?.warn?.("CONTEXT", message);
-    return { ok: false, message };
+    // Claude Code compacts only on Anthropic's own overflow wording and reads both counts from it.
+    return {
+      ok: false,
+      message:
+        sourceFormat === FORMATS.CLAUDE
+          ? `prompt is too long: ${outputBudget.estimatedInputTokens} tokens > ${outputBudget.maxInputTokens ?? outputBudget.contextLimit} maximum`
+          : message,
+    };
   }
   if (outputBudget.adjustedFields.length > 0) {
     // A field can also be adjusted by *removal* (invalid/non-positive value), which

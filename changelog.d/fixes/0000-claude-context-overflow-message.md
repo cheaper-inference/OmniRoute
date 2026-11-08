@@ -1,0 +1,1 @@
+- **fix(claude):** a Claude Code session on a non-Anthropic route now gets "prompt is too long: N tokens > M maximum" when the prompt exceeds the context window, so Claude Code compacts the conversation instead of stopping.
