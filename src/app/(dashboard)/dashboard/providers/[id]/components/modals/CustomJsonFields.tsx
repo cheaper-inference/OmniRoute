@@ -22,17 +22,111 @@ type CustomJsonFieldsProps = {
   t: ProviderMessageTranslator;
 };
 
+type ExtraFieldRowProps = {
+  field: CustomJsonExtraField;
+  onPatch: (next: Partial<CustomJsonExtraField>) => void;
+  onRemove: () => void;
+  t: ProviderMessageTranslator;
+};
+
+/** One optional template field: name, value type (text or JSON) and value. */
+function ExtraFieldRow({ field, onPatch, onRemove, t }: ExtraFieldRowProps) {
+  return (
+    <div className="flex items-end gap-2" data-testid="custom-json-field-row">
+      <Input
+        label={t("customJsonFieldName")}
+        value={field.name}
+        onChange={(e) => onPatch({ name: e.target.value })}
+        placeholder="project_id"
+        className="flex-1"
+      />
+      <Select
+        label={t("customJsonFieldType")}
+        value={field.type}
+        onChange={(e) => onPatch({ type: e.target.value === "json" ? "json" : "text" })}
+      >
+        <option value="text">{t("customJsonFieldTypeText")}</option>
+        <option value="json">{t("customJsonFieldTypeJson")}</option>
+      </Select>
+      <Input
+        label={t("customJsonFieldValue")}
+        value={field.value}
+        onChange={(e) => onPatch({ value: e.target.value })}
+        placeholder={field.type === "json" ? "0.5" : "{{prompt}}"}
+        className="flex-1"
+      />
+      <Button variant="ghost" size="sm" aria-label={t("customJsonRemoveField")} onClick={onRemove}>
+        <Icon name="close" size={14} />
+      </Button>
+    </div>
+  );
+}
+
+type ExtraFieldsEditorProps = {
+  fields: CustomJsonExtraField[];
+  onChange: (next: CustomJsonExtraField[]) => void;
+  t: ProviderMessageTranslator;
+};
+
+/** "Simple fields" template mode: model + messages are implicit, extra rows are optional. */
+function ExtraFieldsEditor({ fields, onChange, t }: ExtraFieldsEditorProps) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-xs text-text-muted">{t("customJsonDefaultFieldsHint")}</p>
+      {fields.map((field) => (
+        <ExtraFieldRow
+          key={field.id}
+          field={field}
+          onPatch={(next) =>
+            onChange(fields.map((row) => (row.id === field.id ? { ...row, ...next } : row)))
+          }
+          onRemove={() => onChange(fields.filter((row) => row.id !== field.id))}
+          t={t}
+        />
+      ))}
+      <Button
+        variant="secondary"
+        size="sm"
+        className="self-start"
+        onClick={() => onChange([...fields, newCustomJsonField()])}
+      >
+        {t("customJsonAddField")}
+      </Button>
+    </div>
+  );
+}
+
+type TemplateJsonEditorProps = {
+  value: string;
+  onChange: (next: string) => void;
+  t: ProviderMessageTranslator;
+};
+
+/** "Full JSON" template mode: the whole request template as JSON text. */
+function TemplateJsonEditor({ value, onChange, t }: TemplateJsonEditorProps) {
+  const templateTextId = useId();
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={templateTextId} className="text-sm font-medium">
+        {t("customJsonTemplateModeJson")}
+      </label>
+      <Textarea
+        id={templateTextId}
+        rows={8}
+        spellCheck={false}
+        className="font-mono text-xs"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
 /** Custom JSON API node settings: method, auth, request template, response path. */
 export default function CustomJsonFields({ value, onChange, t }: CustomJsonFieldsProps) {
   const [modeError, setModeError] = useState<CustomJsonFormError | null>(null);
-  const templateTextId = useId();
   const patch = (next: Partial<CustomJsonFormState>) => onChange({ ...value, ...next });
-  const patchField = (id: string, next: Partial<CustomJsonExtraField>) =>
-    patch({
-      extraFields: value.extraFields.map((field) =>
-        field.id === id ? { ...field, ...next } : field
-      ),
-    });
+  const patchFields = (extraFields: CustomJsonExtraField[]) => patch({ extraFields });
 
   const changeMode = (mode: CustomJsonTemplateMode) => {
     const switched = switchCustomJsonTemplateMode(value, mode);
@@ -85,73 +179,13 @@ export default function CustomJsonFields({ value, onChange, t }: CustomJsonField
         </p>
       )}
       {value.templateMode === "fields" ? (
-        <div className="flex flex-col gap-2">
-          <p className="text-xs text-text-muted">{t("customJsonDefaultFieldsHint")}</p>
-          {value.extraFields.map((field) => (
-            <div
-              key={field.id}
-              className="flex items-end gap-2"
-              data-testid="custom-json-field-row"
-            >
-              <Input
-                label={t("customJsonFieldName")}
-                value={field.name}
-                onChange={(e) => patchField(field.id, { name: e.target.value })}
-                placeholder="project_id"
-                className="flex-1"
-              />
-              <Select
-                label={t("customJsonFieldType")}
-                value={field.type}
-                onChange={(e) =>
-                  patchField(field.id, { type: e.target.value === "json" ? "json" : "text" })
-                }
-              >
-                <option value="text">{t("customJsonFieldTypeText")}</option>
-                <option value="json">{t("customJsonFieldTypeJson")}</option>
-              </Select>
-              <Input
-                label={t("customJsonFieldValue")}
-                value={field.value}
-                onChange={(e) => patchField(field.id, { value: e.target.value })}
-                placeholder={field.type === "json" ? "0.5" : "{{prompt}}"}
-                className="flex-1"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label={t("customJsonRemoveField")}
-                onClick={() =>
-                  patch({ extraFields: value.extraFields.filter((row) => row.id !== field.id) })
-                }
-              >
-                <Icon name="close" size={14} />
-              </Button>
-            </div>
-          ))}
-          <Button
-            variant="secondary"
-            size="sm"
-            className="self-start"
-            onClick={() => patch({ extraFields: [...value.extraFields, newCustomJsonField()] })}
-          >
-            {t("customJsonAddField")}
-          </Button>
-        </div>
+        <ExtraFieldsEditor fields={value.extraFields} onChange={patchFields} t={t} />
       ) : (
-        <div className="flex flex-col gap-1">
-          <label htmlFor={templateTextId} className="text-sm font-medium">
-            {t("customJsonTemplateModeJson")}
-          </label>
-          <Textarea
-            id={templateTextId}
-            rows={8}
-            spellCheck={false}
-            className="font-mono text-xs"
-            value={value.requestTemplateText}
-            onChange={(e) => patch({ requestTemplateText: e.target.value })}
-          />
-        </div>
+        <TemplateJsonEditor
+          value={value.requestTemplateText}
+          onChange={(requestTemplateText) => patch({ requestTemplateText })}
+          t={t}
+        />
       )}
       <Input
         label={t("customJsonResponsePathLabel")}
