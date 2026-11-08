@@ -379,6 +379,14 @@ async function importAntigravityRefreshToken(
   };
 
   const extra = await postExchangeAntigravity(config, clientProfile, tokens);
+  // Without an email the import route can only match rows by the freshly minted access
+  // token, so every re-import of the same account would add a duplicate row. Persist
+  // only a token that resolves to a real account identity.
+  if (!extra.userInfo?.email) {
+    throw new AntigravityRefreshTokenError(
+      "Google accepted the refresh token but did not return an account identity; nothing was saved"
+    );
+  }
   const extraWithClient: AntigravityPostExchange = {
     ...extra,
     oauthClient: isCustomAntigravityClient(config) ? `custom:${config.clientId}` : "builtin",

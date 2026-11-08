@@ -273,3 +273,21 @@ test("importToken_SupportsAgyProvider", async () => {
   assert.equal(rows[0].providerSpecificData?.clientProfile, "cli");
   await providersDb.deleteProviderConnection(rows[0].id);
 });
+
+test("importToken_UserinfoReturnsNoEmail_Returns400AndPersistsNothing", async () => {
+  // Google accepts the refresh token but the identity lookup fails: without an
+  // email the import would match rows only by the freshly minted access token,
+  // so every re-import of the same account would create a duplicate row.
+  stubGoogleServices({ email: null, projectId: PROJECT_ID });
+
+  const first = await importToken("antigravity", { token: REFRESH_TOKEN });
+  const second = await importToken("antigravity", { token: REFRESH_TOKEN });
+
+  for (const { status, body } of [first, second]) {
+    assert.equal(status, 400);
+    assert.equal(body.success, false);
+    assert.match(body.error, /account identity/i);
+    assert.doesNotMatch(body.error, new RegExp(REFRESH_TOKEN.replace(/[/]/g, "\\/")));
+  }
+  assert.equal((await antigravityRows()).length, 0, "No email-less connection may be persisted");
+});

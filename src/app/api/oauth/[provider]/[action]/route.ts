@@ -887,8 +887,7 @@ export async function POST(
           ? new Date(Date.now() + tokenData.expiresIn * 1000).toISOString()
           : null;
 
-        const getAntigravityDegradedState = antigravityDegradedProjectState;
-        const degradedProject = getAntigravityDegradedState(provider, tokenData);
+        const degradedProject = antigravityDegradedProjectState(provider, tokenData);
 
         // Tokens without an identity (e.g. a Claude setup-token) match on the token itself,
         // so re-pasting the same token updates its connection instead of duplicating it.

@@ -11768,7 +11768,7 @@
     "tabPasteSetupToken": "Token de configuração",
     "claudeSetupTokenDescription": "Execute `claude setup-token` em um terminal e cole o token que ele exibe. Ele é válido por um ano e não tem token de atualização. O OmniRoute envia uma requisição de teste à Anthropic antes de salvá-lo.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
-    "tabPasteRefreshToken": "Atualizar token",
+    "tabPasteRefreshToken": "Token de atualização",
     "antigravityRefreshTokenDescription": "Cole seu token de atualização Google OAuth para Antigravity. OmniRoute valida e troca antes de salvar.",
     "antigravityRefreshTokenPlaceholder": "1//..."
   },
