@@ -229,6 +229,7 @@ test("v1 image models GET exposes current Codex image models and hides inactive 
   assert.deepEqual(
     ids.filter((id) => id.startsWith("codex/")),
     [
+      "codex/gpt-6.1-sol-image",
       "codex/gpt-5.6-sol-image",
       "codex/gpt-5.6-terra-image",
       "codex/gpt-5.6-luna-image",
@@ -594,6 +595,35 @@ test("v1 image edit POST keeps non-Codex providers single-reference", async () =
   const body = (await response.json()) as ErrorResponseBody;
   assert.equal(response.status, 400);
   assert.match(body.error.message, /only one reference image/i);
+});
+
+test("v1 image edit POST accepts Codex cx/gpt-6.1-sol (#18687)", async () => {
+  await seedConnection("codex", { apiKey: "codex-oauth-token" });
+
+  let upstreamModel: unknown = null;
+  globalThis.fetch = async (_url, options: RequestInit = {}) => {
+    upstreamModel = JSON.parse(String(options.body || "{}")).model;
+    const event = {
+      type: "response.output_item.done",
+      item: { type: "image_generation_call", id: "ig_sol", status: "completed", result: "c29s" },
+    };
+    return new Response(`data: ${JSON.stringify(event)}\n\ndata: [DONE]\n\n`, {
+      status: 200,
+      headers: { "content-type": "text/event-stream" },
+    });
+  };
+
+  const response = await imageEditRoute.POST(
+    new Request("http://localhost/api/v1/images/edits", {
+      method: "POST",
+      body: createCodexEditForm("make the apple green", { model: "cx/gpt-6.1-sol" }),
+    })
+  );
+  const body = (await response.json()) as ImageResponseBody;
+
+  assert.equal(response.status, 200);
+  assert.equal(body.data[0].b64_json, "c29s");
+  assert.equal(upstreamModel, "gpt-6.1-sol");
 });
 
 test("v1 image edit POST rejects unsupported Codex models and MIME mismatches", async () => {

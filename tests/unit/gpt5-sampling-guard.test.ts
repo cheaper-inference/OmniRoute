@@ -93,6 +93,32 @@ test("gpt-6 + temperature + active reasoning strips sampling (gpt-[56] widen)", 
   assert.equal(none.temperature, 0.4);
 });
 
+test("gpt-6 strips temperature+top_p when reasoning_effort is omitted (gpt-6 defaults to reasoning on)", () => {
+  const body = {
+    model: "gpt-6-luna",
+    temperature: 0.1,
+    top_p: 0.9,
+    messages: [],
+  };
+  const result = stripGpt5SamplingWhenReasoning(body, "openai", "gpt-6-luna");
+  assert.equal(result.temperature, undefined);
+  assert.equal(result.top_p, undefined);
+
+  const nestedNone = stripGpt5SamplingWhenReasoning(
+    { model: "gpt-6-luna", temperature: 0.4, reasoning: { effort: "none" } },
+    "openai",
+    "gpt-6-luna"
+  );
+  assert.equal(nestedNone.temperature, 0.4);
+
+  const suffixNone = stripGpt5SamplingWhenReasoning(
+    { model: "gpt-6-luna-none", temperature: 0.4 },
+    "openai",
+    "gpt-6-luna-none"
+  );
+  assert.equal(suffixNone.temperature, 0.4);
+});
+
 test("returns the same reference when no sampling params are present", () => {
   const body = { model: "gpt-5.4", reasoning_effort: "high", messages: [] };
   const result = stripGpt5SamplingWhenReasoning(body, "openai", "gpt-5.4");

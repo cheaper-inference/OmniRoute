@@ -158,6 +158,7 @@
     "providers.responses",
     "providers.responsesApi",
     "providers.responsesPath",
+    "proxyLog.egressIpFamily",
     "search.domainPlaceholder",
     "search.fileSearch",
     "search.rawJson",

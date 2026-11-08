@@ -1,14 +1,14 @@
 ---
 title: "Provider Reference"
 version: 3.8.53
-lastUpdated: 2026-10-29
+lastUpdated: 2026-11-05
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-10-29
+> **Last generated:** 2026-11-05
 
 Total providers: **380**. See category breakdown below.
 
@@ -93,7 +93,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `chatplayground` | `cpl` | ChatPlayground | Web cookie | [link](https://web.chatplayground.ai) | Paste your Clerk session token or full cookie export containing __client and __session from web.chatplayground.ai. OmniRoute auto-mints fresh short-lived Clerk session JWTs. | emulated |
 | `claude-web` | `cw` | Claude Web | Web cookie | [link](https://claude.ai) | Paste your session cookie from claude.ai | none |
 | `conol-web` | `cnl` | Conol (Unofficial/Experimental) | Web cookie | [link](https://conol.ai) | Use browser sign-in, or paste the full Cookie header from conol.ai. The __Secure-better-auth.session_token cookie is required. | — |
-| `copilot-m365-web` | `m365copilot` | Microsoft 365 Copilot (BizChat) | Web cookie | [link](https://m365.cloud.microsoft/chat) | Sign in at m365.cloud.microsoft/chat, then open DevTools → Network → filter 'WS' → click the Chathub WebSocket connection. Copy both the access_token query parameter AND the account-specific Chathub path segment from its request URL (wss://…/Chathub/<path>?…&access_token=…). It is NOT an Authorization: Bearer header on an XHR/Fetch request. The token is short-lived; this is an unofficial integration. Optional: store a refresh_token in providerSpecificData.refreshToken (any Microsoft device-code/refresh flow for the substrate.office.com/sydney scopes) and OmniRoute pre-flight-refreshes the access token itself — otherwise re-capture after every ~75 min expiry. | — |
+| `copilot-m365-web` | `m365copilot` | Microsoft 365 Copilot | Web cookie | [link](https://m365.cloud.microsoft/chat) | Use native Microsoft sign-in to connect your work or school account. Legacy HAR import remains available for captured Chathub sessions; manually imported credentials may expire. Model availability depends on your account and license. This is an unofficial integration. | emulated |
 | `copilot-web` | `copilot` | Microsoft Copilot Web | Web cookie | [link](https://copilot.microsoft.com) | Paste the access_token from an authenticated copilot.microsoft.com request (DevTools → Network → Authorization), or export a HAR while logged in | — |
 | `deepseek-web` | `ds-web` | DeepSeek Web | Web cookie | [link](https://chat.deepseek.com) | Paste your userToken from chat.deepseek.com — DevTools → Application → Local Storage → userToken | emulated |
 | `doubao-web` | `db` | Dola Web (ByteDance) | Web cookie | [link](https://www.dola.com) | Paste the full Cookie header from www.dola.com. It should include sessionid, ttwid, and s_v_web_id. If s_v_web_id is unavailable, fp=verify_... from a chat/completion request URL can be used as a fallback. | — |
@@ -468,7 +468,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 - Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (per-model details): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (158 implementations)
+- Executors: [`open-sse/executors/`](../../open-sse/executors/) (164 implementations)
 - Translators: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## See Also
