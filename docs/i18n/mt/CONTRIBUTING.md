@@ -13,21 +13,25 @@ u mal-passi ta' rikonċiljazzjoni.
 
 ---
 
-## Konfigurazzjoni tal-Iżvilupp
+## Setup tal-Iżvilupp
 
 ### Prerekwiżiti
 
 - **Node.js** `>=22.22.2 <23`, jew `>=24.0.0 <27` (rakkomandat: 24 LTS)
 - **npm** 10+
 
-> **Utenti ta' npm v11+ (Node 24+):** Wara `npm install`, ivverifika li l-moduli nattivi ġew installati:
-> `node -e "require('better-sqlite3')"`. Jekk ifalli b'`MODULE_NOT_FOUND`,
-> ħaddem `npm approve-scripts better-sqlite3 && npm install`. Ara
-> [Soluzzjoni tal-Problemi](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Windows b’Node 24:** uża r-rilaxx attwali tal-garża 24 LTS (mill-inqas 24.20.0).
+> Rilaxxi preċedenti jistgħu jwaqqfu l-proċess wara testijiet li jirnexxu meta `--test-force-exit` jagħlaq il-proċess. Il-[Windows libuv fix](https://github.com/nodejs/node/pull/61999) ta’ Node jindirizza
+> dan il-crash tar-runtime; żomm l-asserzjonijiet tat-testijiet u l-verifiki tal-ħruġ tar-runner attivati.
+
+> **Utenti ta’ npm v11+ (Node 24+):** Wara `npm install`, ivverifika li l-moduli nattivi ġew installati:
+> `node -e "require('better-sqlite3')"`. Jekk ifalli b’`MODULE_NOT_FOUND`,
+> eżegwixxi `npm approve-scripts better-sqlite3 && npm install`. Ara
+> [Issolvi l-problemi](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Ikklona u Installa
+### Klonazzjoni u Installazzjoni
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -38,7 +42,7 @@ npm install
 ### Varjabbli tal-Ambjent
 
 ```bash
-# Oħloq il-fajl .env tiegħek mill-mudell
+# Oħloq il-.env tiegħek mill-mudell
 cp .env.example .env
 
 # Iġġenera s-sigrieti meħtieġa
@@ -48,79 +52,74 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Varjabbli ewlenin għall-iżvilupp:
 
-| Varjabbli              | Valur Predefinit tal-Iżvilupp | Deskrizzjoni                    |
-| ---------------------- | ----------------------------- | ------------------------------- |
-| `PORT`                 | `20128`                       | Port tas-server                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`      | URL bażi għall-frontend         |
-| `JWT_SECRET`           | (iġġenera hawn fuq)           | Sigriet għall-iffirmar tal-JWT  |
-| `INITIAL_PASSWORD`     | `CHANGEME`                    | Password tal-ewwel login        |
-| `APP_LOG_LEVEL`        | `info`                        | Livell ta' dettall tar-reġistru |
+| Varjabbli              | Valur Default għall-Iżvilupp | Deskrizzjoni                |
+| ---------------------- | ---------------------------- | --------------------------- |
+| `PORT`                 | `20128`                      | Port tas-server             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | URL bażi għall-frontend     |
+| `JWT_SECRET`           | (iġġenera hawn fuq)          | Sigriet għall-iffirmar JWT  |
+| `INITIAL_PASSWORD`     | `CHANGEME`                   | Password tal-ewwel login    |
+| `APP_LOG_LEVEL`        | `info`                       | Livell ta’ dettall tal-logs |
 
 ### Settings tad-Dashboard
 
-Id-dashboard jipprovdi kontrolli fl-UI għal funzjonalitajiet li jistgħu jiġu kkonfigurati wkoll permezz tal-varjabbli tal-ambjent:
+Id-dashboard tipprovdi toggles tal-UI għal karatteristiċi li jistgħu jiġu kkonfigurati wkoll permezz tal-varjabbli tal-ambjent:
 
-| Post tas-Setting     | Kontroll                         | Deskrizzjoni                                 |
-| -------------------- | -------------------------------- | -------------------------------------------- |
-| Settings → Avvanzati | Modalità ta' Debug               | Attiva r-reġistri tat-talbiet tad-debug (UI) |
-| Settings → Ġenerali  | Viżibbiltà tal-Istrixxa tal-Ġenb | Uri/aħbi t-taqsimiet tal-istrixxa tal-ġenb   |
+| Post tas-Setting    | Toggle             | Deskrizzjoni                             |
+| ------------------- | ------------------ | ---------------------------------------- |
+| Settings → Advanced | Debug Mode         | Attiva l-logs tat-talbiet tad-debug (UI) |
+| Settings → General  | Sidebar Visibility | Uri/aħbi s-sezzjonijiet tas-sidebar      |
 
-Dawn is-settings jinħażnu fid-database u jibqgħu fis-seħħ bejn startjar mill-ġdid, filwaqt li jieħdu preċedenza fuq il-valuri predefiniti tal-varjabbli tal-ambjent meta jkunu ssettjati.
+Dawn is-settings jinħażnu fid-database u jibqgħu validi wara restarts, filwaqt li jissuperaw il-valuri default tal-varjabbli tal-ambjent meta jiġu ssettjati.
 
 ### Tħaddim Lokalment
 
 ```bash
-# Modalità tal-iżvilupp (rikarigu awtomatiku)
+# Modalità tal-iżvilupp (aġġornament awtomatiku)
 npm run dev
 
-# Build tal-produzzjoni
+# Bini tal-produzzjoni
 npm run build    # next build → .build/next/ imbagħad assembleStandalone → dist/
 npm run start
 
-# Kompilazzjoni rapida tal-backend/API biss għal bidliet mill-kontributuri
+# Kompilazzjoni veloċi tal-backend/API biss għall-bidliet tal-kontributuri
 npm run build:contributor
 
-# Build tar-rilaxx (build mill-ġdid nadif + sentinella HEAD — meħtieġ għad-deployment)
-npm run build:release   # rm -rf .build dist && build + jikteb dist/BUILD_SHA
+# Bini tar-rilaxx (bini mill-ġdid nadif + sentinel HEAD — meħtieġ għad-deploy)
+npm run build:release   # rm -rf .build dist imbagħad build + jikteb dist/BUILD_SHA
 
 # Konfigurazzjoni komuni tal-port
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Il-build tal-kontributur iwettaq validazzjoni permezz tal-kompilazzjoni biss: ma jiġborx id-distribuzzjoni
-standalone u lanqas jibni l-assi fakultattivi tal-ippakkjar nattiv. Uża l-build regolari tal-produzzjoni meta
-jkollok bżonn tivvalida l-pakkett lest għad-distribuzzjoni.
+Il-bini tal-kontributur iwettaq validazzjoni li tinkludi biss il-kompilazzjoni: ma jiġborx id-distribuzzjoni standalone u lanqas ma jibni l-assi nattivi fakultattivi tal-pakkett. Uża l-bini regolari tal-produzzjoni meta jkollok bżonn tivvalida l-pakkett lest għat-tqassim.
 
-### Struttura tal-Output tal-Build
+### Struttura tal-Output tal-Bini
 
-| Direttorju | Kontenut                                                                         | Traċċat |
-| ---------- | -------------------------------------------------------------------------------- | ------- |
-| `src/`     | Kodiċi sors tal-applikazzjoni (TypeScript / TSX)                                 | Iva     |
-| `.build/`  | Fajls intermedji — output ta' `next build` (gitignored, `distDir = .build/next`) | Le      |
-| `dist/`    | Pakkett lest għad-distribuzzjoni — miġbur minn `assembleStandalone` (gitignored) | Le      |
+| Direttorju | Kontenut                                                                   | Traċċat |
+| ---------- | -------------------------------------------------------------------------- | ------- |
+| `src/`     | Kodiċi sors tal-applikazzjoni (TypeScript / TSX)                           | Iva     |
+| `.build/`  | Intermedji — output ta’ `next build` (gitignored, `distDir = .build/next`) | Le      |
+| `dist/`    | Pakkett lest għat-tqassim — miġbur minn `assembleStandalone` (gitignored)  | Le      |
 
-Il-pipeline tal-build jitwettaq f'pass wieħed:
+Il-pipeline tal-bini huwa pass wieħed:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (output ta' Next.js)
+  └─ next build → .build/next/standalone  (output ta’ Next.js)
   └─ assembleStandalone()                 (jikkopja standalone + static + public + assi nattivi)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` barra minn hekk inaddaf iż-żewġ direttorji l-ewwel u jikteb
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bħala sentinella tal-integrità tad-deployment.
+`npm run build:release` inaddaf iż-żewġ direttorji l-ewwel u jikteb ukoll
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bħala sentinel tal-integrità tad-deploy.
 
-`npm run build:contributor` juża l-profil tal-build tal-backend biss. Huwa jissostitwixxi temporanjament
-il-fajls tal-UI tad-dashboard b'verżjonijiet stub waqt il-build, iżomm il-handlers tar-rotot tal-API, u jirrestawra l-fajls oriġinali
-wara l-build. Uża `npm run build` għal bidliet li jaffettwaw l-UI tad-dashboard jew għal
-validazzjoni sħiħa tar-rilaxx; il-profil tal-kontributur mhuwiex sostitut għall-build tar-rilaxx.
+`npm run build:contributor` juża l-profil tal-bini għall-backend biss. Temporanjament jissostitwixxi l-fajls tal-UI tad-dashboard waqt il-bini, iżomm il-handlers tar-rotot tal-API, u jirrestawra l-fajls oriġinali wara l-bini. Uża `npm run build` għal bidliet li jaffettwaw l-UI tad-dashboard jew għall-validazzjoni sħiħa tar-rilaxx; il-profil tal-kontributur mhuwiex sostitut għall-bini tar-rilaxx.
 
-> **Nota dwar deployment fuq VPS:** id-direttorju remot tal-image `/usr/lib/node_modules/omniroute/app/`
-> ma nbidilx. Il-mekkaniżmi tad-deployment jużaw rsync biex jikkopjaw fih il-kontenut ta' `dist/`.
-> Inbidlet biss il-mogħdija tal-output tal-build fir-repożitorju (`app/` → `dist/`).
+> **Nota dwar id-deploy fuq VPS:** id-direttorju remot tal-immaġni `/usr/lib/node_modules/omniroute/app/`
+> ma jinbidilx. Il-ħiliet tad-deploy jużaw rsync biex jissinkronizzaw il-kontenut ta’ `dist/` fih.
+> Inbidel biss il-passaġġ tal-output tal-bini fir-repo (`app/` → `dist/`).
 
-URLs predefiniti:
+URLs default:
 
 - **Dashboard**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`

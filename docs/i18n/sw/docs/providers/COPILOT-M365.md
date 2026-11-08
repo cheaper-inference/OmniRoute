@@ -64,38 +64,37 @@ Uingizaji wa HAR husimbua muda wa kuisha kwa JWT na huonyesha muda uliosalia wa 
 > **Usiwahi kuweka kwenye commit uhamisho halisi wa HAR, tokeni ya ufikiaji, au tokeni ya kuonyesha upya.** Thamani za majaribio na
 > nyaraka lazima ziwe vishikilia nafasi kila wakati.
 
-## Muda wa tokeni na uonyeshaji upya
+## Muda wa uhai wa tokeni na kuhuisha
 
-`access_token` ni ya muda mfupi (kwa kawaida **~dakika 75**). Baada ya kuisha, mtoa huduma
-huripoti hitilafu ya muunganisho na lazima unase kitambulisho upya.
+`access_token` ina muda mfupi wa uhai (kwa kawaida **~dakika 75**). Bila tokeni ya kuhuisha
+inayotumika, lazima unakili tena kitambulisho baada ya muda wake kuisha.
 
-### Uonyeshaji upya kiotomatiki kwa `refreshToken`
+### Kuhuisha kiotomatiki kwa kutumia `refreshToken`
 
-Ili kuepuka kunasa upya mwenyewe, unaweza kuhifadhi tokeni ya kuonyesha upya ya Microsoft katika
-**Advanced Settings → providerSpecificData** ya muunganisho:
+Katika kidirisha cha **Ongeza muunganisho** au **Hariri muunganisho** cha mtoa huduma wa Microsoft 365, fungua
+**Mipangilio ya kina → Tokeni ya kuhuisha (si lazima)**. Bandika tokeni ya kuhuisha ya Microsoft OAuth
+yenye wigo wa `substrate.office.com/sydney` kisha uhifadhi. Ingizo linafichwa na kamwe halijaziwi
+mapema kwa tokeni iliyohifadhiwa. Unapohariri, liachie wazi ili kuhifadhi tokeni iliyopo;
+bandika tokeni mpya ili kuibadilisha.
 
-| Sehemu         | Maelezo                                                                               |
-| -------------- | ------------------------------------------------------------------------------------- |
-| `refreshToken` | Tokeni ya kuonyesha upya ya Microsoft OAuth kwa upeo wa `substrate.office.com/sydney` |
-| `tier`         | `individual` (chaguo-msingi), `edu`, au `enterprise`                                  |
+Pata tokeni ya kuhuisha kutoka kwenye mtiririko wa msimbo wa kifaa au msimbo wa uidhinishaji wa Microsoft
+uliowekewa wigo wa `substrate.office.com/sydney`; dashibodi haikupatii tokeni hiyo. Ukiwa umesanidi tokeni ya kuhuisha,
+OmniRoute hukagua `access_token` kabla ya maombi na kuihuisha tu inapohitaji kuhuishwa. Kuhuisha kwa mafanikio
+pia huhifadhi tokeni ya kuhuisha iliyobadilishwa, hivyo kuepuka kunakili tena kwa mikono mradi tokeni ya kuhuisha
+bado ni halali.
 
-Pata tokeni ya kuonyesha upya kutoka kwenye mtiririko wa Microsoft wa msimbo wa kifaa au msimbo wa uidhinishaji
-wenye upeo wa `substrate.office.com/sydney`. `refreshToken` ikiwa imewekwa, OmniRoute
-huonyesha upya `access_token` kabla ya kila ombi, kwa hivyo huhitaji
-kunasa upya baada ya kila muda wa ~dakika 75 kuisha.
+Ikiwa `refreshToken` haijawekwa, lazima unakili tena kitambulisho cha WebSocket kwa mikono
+baada ya kila muda wa uhai kuisha.
 
-Ikiwa `refreshToken` haijawekwa, lazima unase upya kitambulisho cha WebSocket mwenyewe
-baada ya kila muda kuisha.
+### Uchaguzi wa daraja
 
-### Uteuzi wa kiwango
+| Daraja       | Jina mbadala      | Kiolesura                    |
+| ------------ | ----------------- | ---------------------------- |
+| `individual` | _(chaguo-msingi)_ | Copilot ya M365 ya watumiaji |
+| `edu`        | `included`        | Copilot ya M365 ya elimu     |
+| `enterprise` | `work`            | Copilot ya M365 ya kazini    |
 
-| Kiwango      | Lakabu            | Kiolesura                         |
-| ------------ | ----------------- | --------------------------------- |
-| `individual` | _(chaguo-msingi)_ | M365 Copilot ya Watumiaji Binafsi |
-| `edu`        | `included`        | M365 Copilot ya Elimu             |
-| `enterprise` | `work`            | M365 Copilot ya Kazi              |
-
-Weka kiwango katika **Advanced Settings → providerSpecificData → tier**. Kiwango huathiri
+Weka daraja katika **Mipangilio ya kina → Daraja la Copilot**. Daraja hili huathiri
 uelekezaji wa BizChat na ufikiaji wa modeli.
 
 ## Muundo wa usalama
@@ -113,28 +112,23 @@ uelekezaji wa BizChat na ufikiaji wa modeli.
 
 ### Uthibitishaji unashindwa mara moja
 
-- Thibitisha kuwa ulinakili kutoka kwenye **URL ya WebSocket**, si kutoka kwenye ombi la XHR/Fetch. Hati
-  tambulishi iko katika kigezo cha hoja cha `access_token` cha muunganisho wa Chathub WebSocket
-  — si katika kichwa cha `Authorization: Bearer`.
-- Hakikisha `chathubPath` inajumuisha sehemu kamili ya `<oid>@<tenant>` kutoka kwenye njia ya
-  URL.
+- Thibitisha kuwa umenakili kutoka kwenye **WebSocket URL**, si kutoka kwenye ombi la XHR/Fetch. Kitambulisho kiko katika kigezo cha hoja `access_token` cha muunganisho wa Chathub WebSocket — si katika kichwa cha `Authorization: Bearer`.
+- Hakikisha `chathubPath` inajumuisha sehemu kamili ya `<oid>@<tenant>` kutoka kwenye njia ya URL.
 
-### Tokeni inaisha baada ya takribani dakika 75
+### Tokeni inaisha muda baada ya takriban dakika 75
 
-Hili linatarajiwa. Bila `refreshToken`, tokeni ya ufikiaji ni ya muda mfupi. Unaweza:
+Hili linatarajiwa. Bila `refreshToken`, tokeni ya ufikiaji ina muda mfupi wa matumizi. Fanya mojawapo ya yafuatayo:
 
-- Kunasa tena hati tambulishi kutoka DevTools, au
-- Kusanidi `refreshToken` katika Mipangilio ya Kina ili ionyeshwe upya kiotomatiki.
+- Nasa tena kitambulisho kutoka kwenye DevTools, au
+- Sanidi **Advanced Settings → Refresh token (optional)** katika kisanduku cha mazungumzo cha Add or Edit connection kwa ajili ya kusasisha kiotomatiki.
 
-### Jaribio la Muunganisho linafaulu lakini gumzo linarejesha 401
+### Test Connection inafaulu lakini chat inarudisha 401
 
-Huenda muda wa tokeni uliisha kati ya uthibitishaji na ombi la kwanza. Nasa tena
-hati tambulishi mpya.
+Huenda tokeni iliisha muda kati ya uthibitishaji na ombi la kwanza. Nasa tena kitambulisho kipya.
 
 ### Copilot haionekani katika orodha ya watoa huduma
 
-Hakikisha `copilot-m365-web` imewezeshwa katika **Dashibodi → Watoa Huduma**. Huenda mtoa huduma
-amefichwa kwa chaguomsingi katika baadhi ya viwango.
+Hakikisha `copilot-m365-web` imewezeshwa katika **Dashboard → Providers**. Mtoa huduma huyo huenda akafichwa kwa chaguo-msingi katika viwango fulani.
 
 ## Marejeleo
 

@@ -14,13 +14,13 @@
 
 ## Bu nima
 
-OmniRoute 377 ta provayderni ro'yxatdan o'tkazadi, shu jumladan 155 ta katalog yozuvlari belgilangan**free/no-auth** (no-auth, free-tier OAuth yoki free-tier API key — [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) va to'liq [Free Tiers katalogiga](../reference/FREE_TIERS.md) qarang). Qo'lga olish: bepul provayderlar model sifati bo'yicha juda farq qiladi. Chegaraviy modelga xizmat ko'rsatuvchi avtorizatsiyasiz provayder kichik eski modelga xizmat ko'rsatuvchidan ko'ra ancha foydalidir.
+OmniRoute 380 ta provayderni ro'yxatga oladi, shu jumladan 155 ta katalog yozuvlari belgilangan**free/no-auth** (auth no-auth, free-tier OAuth yoki free-tier API kaliti — [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) va to'liq [Free Tiers katalogiga](../reference/FREE_TIERS.md) qarang). Qo'lga olish: bepul provayderlar model sifati bo'yicha juda farq qiladi. Chegaraviy modelga xizmat ko'rsatuvchi avtorizatsiyasiz provayder kichik eski modelga xizmat ko'rsatuvchidan ancha foydali.
 
 **Bepul provayderlar reytingi** javoblar"** Qaysi bepul provayder menga eng yaxshi modelni beradi?** " bilan har bir bepul provayderning katalogiga qo'shilish orqali** olomon manbalaridan olingan sifat ballari** dan** Arena AI yetakchilar jadvali** (inson-afzal ELO, LMArena chatbot arenasining orqasida xuddi shu fikr). Keyin provayderlar ularning kuchiga qarab tartiblanadi** Eng yaxshi bepul model** .
 
 Reyting uchta haqiqiy manbadan hisoblanadi:
 
-1. Bepul provayderlar ro'yxati - `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` yozuvlari `hasFree` (`src/shared/constants/providers.ts`) bilan belgilanadi.
+1. Bepul provayder — `NOAUTH_PROVIDERS`, shuningdek, `hasFree` (`src/shared/constants/providers.ts`) bilan belgilangan `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` yozuvlarini ro'yxatga oladi.
 2. Provayderlar reestridan (`open-sse/config/providerRegistry.ts`) har bir provayderning model katalogi.
 3. Arena ELO sinxronlash mexanizmi (`src/lib/arenaEloSync.ts`) tomonidan `model_intelligence` DB jadvalida saqlanadigan ELO-dan olingan vazifalarga mos ballar.
 

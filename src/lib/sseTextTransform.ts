@@ -88,6 +88,9 @@ export function classifyField(key: string, parentKey = ""): FieldCategory | null
   if (key === "text" && parentKey === "reasoning_details") {
     return "reasoning";
   }
+  if (key === "data" && parentKey === "reasoning_details") {
+    return null; // Opaque encrypted reasoning payload — pass through untouched.
+  }
   if (METADATA_KEYS.has(key)) {
     return null;
   }
@@ -141,7 +144,8 @@ export function createSseTextTransform(
     field: FieldCategory,
     isStopSignal?: boolean,
     index?: string | number,
-    isSnapshot?: boolean
+    isSnapshot?: boolean,
+    fieldName?: string
   ) => string,
   onFlush?: (lastJson: any, isJsonStream?: boolean, lastContentJson?: any) => any,
   onCancel?: () => void,
@@ -238,6 +242,8 @@ export function createSseTextTransform(
             for (const key of Object.keys(obj)) {
               if (typeof obj[key] === "string") {
                 const val = obj[key];
+                // Preserve Chat Completions aliases without changing native-format routing.
+                const fieldName = Array.isArray(json.choices) ? key : undefined;
                 const field =
                   key === "delta" && obj === json && isResponsesToolArgsDelta(json)
                     ? "toolArgs"
@@ -247,14 +253,21 @@ export function createSseTextTransform(
                 }
                 if (field === "toolArgs" || field === "partialJson") {
                   if (opts?.processToolArgs === true) {
-                    obj[key] = processor(val, field, isStopSignal, compositeKey, isSnapshot);
+                    obj[key] = processor(
+                      val,
+                      field,
+                      isStopSignal,
+                      compositeKey,
+                      isSnapshot,
+                      fieldName
+                    );
                   } else {
                     obj[key] = val;
                   }
                   matched = true;
                   continue;
                 }
-                obj[key] = processor(val, field, isStopSignal, compositeKey, isSnapshot);
+                obj[key] = processor(val, field, isStopSignal, compositeKey, isSnapshot, fieldName);
                 matched = true;
               } else if (typeof obj[key] === "object") {
                 sanitizeObject(obj[key], choiceIdx, toolIdx, isArray ? parentKey : key);

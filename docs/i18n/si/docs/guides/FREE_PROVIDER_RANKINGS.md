@@ -14,14 +14,14 @@
 
 ## එය කුමක්ද
 
-OmniRoute විසින් සපයන්නන් 377ක් ලියාපදිංචි කරන අතර, නාමාවලි ඇතුළත් කිරීම් 155ක් සලකුණු කර ඇත**free/no-auth** (no-auth, free-tier OAuth, or free-tier API key — [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) සහ සම්පූර්ණ [Free Tiers බහලුම](../reference/FREE_TIERS.md) බලන්න ). අල්ලා ගැනීම: නොමිලේ සපයන්නන් මාදිලියේ ගුණාත්මක භාවයෙන් විශාල ලෙස වෙනස් වේ. මායිම් ආකෘතියකට සේවය කරන සහතික නොවන සැපයුම්කරුවෙකු කුඩා ලෙගසි මාදිලියකට සේවය කරන කෙනෙකුට වඩා ප්‍රයෝජනවත් වේ.
+සලකුණු කර ඇති නාමාවලි ඇතුළත් කිරීම් 155ක් ඇතුළුව, සපයන්නන් 380ක්OmniRoute ලියාපදිංචි කරයි**free/no-auth** (no-auth, free-tier OAuth, or free-tier API key — [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) සහ සම්පූර්ණ [Free Tiers බහලුම](../reference/FREE_TIERS.md) බලන්න ). අල්ලා ගැනීම: නොමිලේ සපයන්නන් මාදිලියේ ගුණාත්මක භාවයෙන් විශාල ලෙස වෙනස් වේ. මායිම් ආකෘතියකට සේවය කරන සත්‍යාපනයක් නොමැති සැපයුම්කරුවෙකු කුඩා ලෙගසි මාදිලියකට සේවය කරන කෙනෙකුට වඩා ප්‍රයෝජනවත් වේ.
 
 **නොමිලේ සපයන්නන්ගේ ශ්‍රේණිගත කිරීම්** පිළිතුරු "** මට හොඳම ආකෘතිය ලබා දෙන්නේ කුමන නොමිලේ සපයන්නාද?** "එක් එක් නොමිලේ සපයන්නාගේ නාමාවලියට සම්බන්ධ වීමෙන්** සමූහයා පදනම් කරගත් ගුණාත්මක ලකුණු** සිට** Arena AI ප්‍රමුඛ පුවරුව** (human-preference ELO, LMArena chatbot Arena පිටුපස එකම අදහස). එවිට සැපයුම්කරුවන් ඔවුන්ගේ ශක්තියෙන් ශ්‍රේණිගත කරනු ලැබේ** හොඳම නිදහස් ආකෘතිය** .
 
 ශ්‍රේණිගත කිරීම සැබෑ මූලාශ්‍ර තුනකින් ගණනය කෙරේ:
 
-1. නොමිලේ සපයන්නා ලැයිස්තු — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ඇතුළත් කිරීම් සලකුණු කර ඇත `hasFree` (`src/shared/constants/providers.ts`).
-2. සපයන්නාගේ රෙජිස්ට්‍රි (`open-sse/config/providerRegistry.ts`) වෙතින් සෑම සැපයුම්කරුවෙකුගේම ආකෘති නාමාවලිය.
+1. නොමිලේ සපයන්නා — `NOAUTH_PROVIDERS` ලැයිස්තුගත කරයි , plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ඇතුළත් කිරීම් සලකුණු කළ `hasFree` (`src/shared/constants/providers.ts`).
+2. සැපයුම්කරුගේ රෙජිස්ට්රි (`open-sse/config/providerRegistry.ts`) වෙතින් සෑම සැපයුම්කරුවෙකුගේම ආකෘති නාමාවලිය.
 3. Arena ELO සමමුහුර්ත එන්ජිම (`src/lib/arenaEloSync.ts`) මගින් `model_intelligence` DB වගුවේ ගබඩා කර ඇති ELO-ව්‍යුත්පන්න කාර්ය යෝග්‍යතා ලකුණු.
 
 සම්බන්ධ වීමේ තර්කය `src/lib/freeProviderRankings.ts` හි ජීවත් වේ.
