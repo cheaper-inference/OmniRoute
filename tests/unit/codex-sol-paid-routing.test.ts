@@ -249,3 +249,25 @@ test("plan gate helpers only narrow Codex pools for paid-only models", () => {
     true
   );
 });
+
+test("isCodexPoolPlanIneligibleForModel reports pools made only of Free/Go accounts", async () => {
+  assert.equal(await auth.isCodexPoolPlanIneligibleForModel("gpt-6-sol"), false, "empty pool");
+
+  const free = await seedCodex("free", 1);
+  const go = await seedCodex("go", 2);
+  assert.equal(await auth.isCodexPoolPlanIneligibleForModel("codex/gpt-5.6-sol"), true);
+  assert.equal(await auth.isCodexPoolPlanIneligibleForModel("gpt-6-luna"), false, "not paid-only");
+
+  const plus = await seedCodex("plus", 3);
+  assert.equal(await auth.isCodexPoolPlanIneligibleForModel("gpt-6-sol"), false, "mixed pool");
+  assert.equal(
+    await auth.isCodexPoolPlanIneligibleForModel("gpt-6-sol", [free.id, go.id]),
+    true,
+    "key restricted to Free/Go accounts"
+  );
+  assert.equal(
+    await auth.isCodexPoolPlanIneligibleForModel("gpt-6-sol", [free.id, plus.id]),
+    false,
+    "key that still reaches a paid account"
+  );
+});
