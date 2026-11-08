@@ -49,6 +49,8 @@ const {
 // is set by the harness before any import triggers DB init).
 const { recordSessionModelUsage, getHandoff } =
   await import("../../../src/lib/db/contextHandoffs.ts");
+const { scopeHandoffSessionId } =
+  await import("../../../open-sse/services/combo/handoffSessionScope.ts");
 
 // A minimal but valid handoff-JSON blob that parseHandoffJSON will accept.
 // Must have at minimum a non-empty "summary" field.
@@ -63,9 +65,10 @@ const COMBO_NAME = "m-relay-handoff";
 // The session ID must use the external-session format: extractExternalSessionId in chat.ts
 // reads "x-session-id" (not "x-omniroute-session-id") and prefixes the result with "ext:".
 // We must seed session_model_history with this exact "ext:"-prefixed ID so that
-// getLastSessionModel(relayOptions.sessionId, comboName) returns the prior model.
+// getLastSessionModel(<scoped session id>, comboName) returns the prior model.
 const SESSION_HEADER_VALUE = "relay-handoff-session-001";
-const SESSION_ID = `ext:${SESSION_HEADER_VALUE}`; // matches what extractExternalSessionId produces
+// Rows are stored per caller; these requests carry no API key.
+const SESSION_ID = scopeHandoffSessionId(`ext:${SESSION_HEADER_VALUE}`, null)!;
 const PREV_MODEL = "gemini/gemini-2.5-flash"; // the "old" model — must differ from combo target
 const CURR_MODEL = "openai/gpt-4o-mini"; // the combo target model (provider/model format)
 

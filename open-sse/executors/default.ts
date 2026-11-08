@@ -21,7 +21,7 @@ import {
 import { isOfficialAnthropicBaseUrl } from "../utils/anthropicHost.ts";
 import { applyProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { stripUnsupportedParams } from "../translator/paramSupport.ts";
-import { applyRegistryToolNameLengthAliases } from "./toolNameLengthAlias.ts";
+import { applyToolNameLengthAliases, resolveToolNameMaxLength } from "./toolNameLengthAlias.ts";
 import {
   injectReasoningContentForThinkingModel,
   shouldInjectReasoningContentPlaceholder,
@@ -60,6 +60,8 @@ import {
   normalizeGigachatChatUrl,
 } from "@/lib/providers/validation/urlHelpers";
 import { forwardOpencodeClientHeaders } from "../utils/opencodeHeaders.ts";
+import { floorMuseOutputTokens } from "./default/museCode.ts";
+import { defaultPerplexityAgentMaxOutputTokens } from "./default/perplexityAgentDefaults.ts";
 import { resolveZaiUrl } from "./default/zaiFormatOverride.ts";
 import { normalizePoolConfig, rejectStrictPool } from "./default/poolConfig.ts";
 import { isForceStreamProvider } from "./default/forceStreamBody.ts";
@@ -72,26 +74,6 @@ import { applyRegistryBodyRepairs } from "../utils/strictChatHistory.ts";
 import { withWorkbuddyHeaders, sanitizeWorkbuddyBody } from "../utils/workbuddyGateway.ts";
 
 const NVIDIA_TOOL_CALL_ID_PATTERN = /^[A-Za-z0-9]{9}$/;
-const PERPLEXITY_AGENT_DEFAULT_MAX_OUTPUT_TOKENS = 4096;
-
-function defaultPerplexityAgentMaxOutputTokens<T>(body: T): T {
-  if (!body || typeof body !== "object" || Array.isArray(body)) return body;
-
-  const record = body as Record<string, unknown>;
-  if (
-    record.max_output_tokens !== undefined ||
-    record.max_completion_tokens !== undefined ||
-    record.max_tokens !== undefined
-  ) {
-    return body;
-  }
-
-  return {
-    ...record,
-    max_output_tokens: PERPLEXITY_AGENT_DEFAULT_MAX_OUTPUT_TOKENS,
-  } as T;
-}
-
 const ZAI_GLM_53_OPENAI_MODEL_PATTERN = /^glm-5\.3(?:-flash)?$/i;
 const ZAI_GLM_53_EFFORT_MODEL_PATTERN = /^(glm-5\.3(?:-flash)?)-(low|high|max)$/i;
 
@@ -740,10 +722,13 @@ export class DefaultExecutor extends BaseExecutor {
       { type?: string; json_schema?: { schema?: unknown } } | undefined;
     if (!rf) return body;
 
-    // openai-compatible-* providers accept json_object natively — only the
-    // json_schema form needs downgrading there. kilocode rejects BOTH forms,
-    // so it enters the strip path below regardless.
+    // openai-compatible-* accept json_object natively; only json_schema needs downgrading there.
+    // kilocode rejects BOTH forms, so it strips below. Non-JSON formats (text/unknown/malformed)
+    // get no JSON prompt: kilocode still drops the field it rejects, others pass through.
+    const { response_format: _dropped, ...rest } = record;
     if (isOpenAiCompatible && rf.type === "json_object") return body;
+    if (rf.type !== "json_schema" && rf.type !== "json_object")
+      return isKiloCode ? (rest as T) : body;
     // Native DeepSeek accepts `text` and `json_object` — only json_schema is
     // rewritten, and always (a schema-less json_schema 400s there too).
     if (isDeepSeek && rf.type !== "json_schema") return body;
@@ -765,7 +750,7 @@ export class DefaultExecutor extends BaseExecutor {
       if (typeof sys.content === "string") {
         sys.content = `${sys.content}\n\n${prompt}`;
       } else if (Array.isArray(sys.content)) {
-        sys.content.push({ type: "text", text: `\n\n${prompt}` });
+        sys.content = [...sys.content, { type: "text", text: `\n\n${prompt}` }];
       }
     } else {
       messages.unshift({ role: "system", content: prompt });
@@ -775,10 +760,7 @@ export class DefaultExecutor extends BaseExecutor {
     // both json_schema AND json_object 400 with `param: response_format`) — strip
     // it entirely and rely on the schema prompt. openai-compatible-* providers
     // accept json_object, so keep the downgrade there.
-    if (isKiloCode) {
-      const { response_format: _dropped, ...rest } = record;
-      return { ...rest, messages } as T;
-    }
+    if (isKiloCode) return { ...rest, messages } as T;
     return { ...record, messages, response_format: { type: "json_object" } } as T;
   }
 
@@ -835,6 +817,7 @@ export class DefaultExecutor extends BaseExecutor {
     if (this.provider === "perplexity-agent") {
       withDefaults = defaultPerplexityAgentMaxOutputTokens(withDefaults);
     }
+    if (this.provider === "muse-code") withDefaults = floorMuseOutputTokens(withDefaults);
 
     if (this.provider === "nvidia") normalizeNvidiaToolCallIds(withDefaults);
     if (this.provider === "openai") withDefaults = normalizeOpenAIToolCallIds(withDefaults);
@@ -1069,7 +1052,10 @@ export class DefaultExecutor extends BaseExecutor {
       }
     }
 
-    applyRegistryToolNameLengthAliases(this.provider, withDefaults);
+    applyToolNameLengthAliases(
+      withDefaults,
+      resolveToolNameMaxLength(this.provider, credentials?.providerSpecificData)
+    );
 
     if (this.provider === "workbuddy") {
       withDefaults = sanitizeWorkbuddyBody(withDefaults);

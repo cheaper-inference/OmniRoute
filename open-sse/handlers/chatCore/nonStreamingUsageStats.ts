@@ -69,7 +69,8 @@ function recordBillableTokens(
   usage: object,
   apiKeyInfo: RecordNonStreamingUsageStatsContext["apiKeyInfo"],
   provider: string | null | undefined,
-  model: string | null | undefined
+  model: string | null | undefined,
+  requestStartedAt: number
 ): void {
   if (!apiKeyInfo?.id) return;
   try {
@@ -79,7 +80,13 @@ function recordBillableTokens(
     // usage. Mirrors recordTokenUsage's swallow-and-continue.
     recordKeyQuotaUsage(apiKeyInfo.id, billable);
     if (billable > 0)
-      recordTokenUsage(apiKeyInfo.id, provider || "unknown", model || "unknown", billable);
+      recordTokenUsage(
+        apiKeyInfo.id,
+        provider || "unknown",
+        model || "unknown",
+        billable,
+        requestStartedAt
+      );
   } catch {
     // never block the response on counter recording
   }
@@ -93,5 +100,5 @@ export function recordNonStreamingUsageStats(
 
   if (ctx.traceEnabled) logUsageTrace(usage, ctx.provider, ctx.connectionId);
   persistUsageRow(usage, ctx);
-  recordBillableTokens(usage, ctx.apiKeyInfo, ctx.provider, ctx.model);
+  recordBillableTokens(usage, ctx.apiKeyInfo, ctx.provider, ctx.model, ctx.startTime);
 }

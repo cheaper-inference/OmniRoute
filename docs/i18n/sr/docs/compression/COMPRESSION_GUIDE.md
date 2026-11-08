@@ -30,95 +30,94 @@ OmniRoute примењује модуларни ток компресије уп
 
 ---
 
-## Режими компресије
+## Režimi kompresije
 
-### Искључено
+### Isključeno
 
-Компресија се не примењује. Све поруке пролазе без измена.
+Kompresija se ne primenjuje. Sve poruke prolaze neizmenjene.
 
-### Лагани режим (уштеда од ~15%, кашњење <1ms)
+### Lagani režim (~15% uštede, <1 ms kašnjenja)
 
-Најбезбеднији режим — без семантичких промена, само чишћење форматирања:
+Najbezbedniji režim — čišćenje formatiranja. Skraćivanje rezultata alata je uz gubitak podataka, pa podrazumevana
+putanja (bez `allow-lossy`, `engine:lite` ili eksplicitnog uključivanja imenovane kombinacije) pokreće lagani režim sa
+`compressToolResults: false`: prethodni rezultati alata stižu do provajdera neizmenjeni.
 
-| Техника                  | Опис                                                           |
-| ------------------------ | -------------------------------------------------------------- |
-| `collapseWhitespace`     | Спаја узастопне празне редове и уклања размаке на крају редова |
-| `dedupSystemPrompt`      | Уклања дуплиране системске поруке                              |
-| `compressToolResults`    | Компримује опширне излазе алата/функција                       |
-| `removeRedundantContent` | Уклања поновљена упутства                                      |
-| `replaceImageUrls`       | Скраћује URI-је са base64 подацима слика                       |
+| Tehnika                  | Opis                                                                                                           |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Spajanje uzastopnih praznih redova i završnih razmaka                                                          |
+| `dedupSystemPrompt`      | Uklanjanje dupliranih sistemskih poruka                                                                        |
+| `compressToolResults`    | Skraćivanje prethodnih rezultata alata na ograničenje laganog režima (sa gubitkom: samo uz eksplicitni zahtev) |
+| `removeRedundantContent` | Uklanjanje ponovljenih instrukcija                                                                             |
+| `replaceImageUrls`       | Skraćivanje URI-jeva podataka slika kodiranih u base64                                                         |
 
-**Најбоље за:** Сталну употребу и токове рада код којих је безбедност критична.
+**Najbolje za:** Stalnu upotrebu i radne tokove kritične po bezbednost.
 
-### Стандардни режим (уштеда од ~30%)
+### Standardni režim (~30% uštede)
 
-Инспирисан пројектом [Caveman](https://github.com/JuliusBrussee/caveman) — уклања сувишне речи и опширне формулације, уз очување значења:
+Inspirisan projektom [Caveman](https://github.com/JuliusBrussee/caveman) — uklanja poštapalice i opširne formulacije uz očuvanje značenja:
 
-- Уклања сувишне речи („молим“, „мислим“, „у суштини“, „заправо“)
-- Сажима опширне фразе („како би“ → „да“, „као резултат тога што“ → „јер“)
-- Уклања учтиво ублажавање исказа („Да ли бисте могли...“, „Ако бисте можда могли...“)
-- Више од 30 regex правила прилагођених упитима за програмирање
+- Uklanja poštapalice („please“, „I think“, „basically“, „actually“)
+- Sažima opširne fraze („in order to“ → „to“, „as a result of“ → „because“)
+- Uklanja učtivo ublažavanje („Would you mind...“, „If you could possibly...“)
+- Više od 30 regex pravila prilagođenih programerskim promptovima
 
-**Најбоље за:** Свакодневне токове рада у програмирању и тимове који воде рачуна о трошковима.
+**Najbolje za:** Svakodnevne programerske radne tokove i timove kojima je važna kontrola troškova.
 
-### Агресивни режим (уштеда од ~50%)
+### Agresivni režim (~50% uštede)
 
-Паметно управљање историјом за дуге сесије:
+Pametno upravljanje istorijom za duge sesije:
 
-- **Старење порука** — старије поруке се постепено све више компримују
-- **Компресија резултата алата** — дугачки излази алата се скраћују или изостављају (први/последњи редови,
-  филтрирање редова са подударањима, сажимање JSON кључева)
-- **Механизми за очување структурног интегритета** — обезбеђују да парови `tool_use` + `tool_result` остану доследни
-- **Уважавање контекстног прозора** — поштује ограничења броја токена за сваки модел
+- **Starenje poruka** — starije poruke se postepeno kompresuju
+- **Kompresija rezultata alata** — dugi izlazi alata se skraćuju ili izostavljaju (prvi/poslednji redovi,
+  filtriranje redova sa podudaranjima, sažimanje JSON ključeva)
+- **Zaštite strukturnog integriteta** — obezbeđuju doslednost parova `tool_use` + `tool_result`
+- **Svest o kontekstnom prozoru** — poštuje ograničenja broja tokena za svaki model
 
-**Најбоље за:** Дуге сесије отклањања грешака и велике базе кода.
+**Najbolje za:** Produžene sesije otklanjanja grešaka i velike baze koda.
 
-### Ултра режим (уштеда од ~75%)
+### Ultra režim (~75% uštede)
 
-Максимална компресија за сценарије у којима је број токена критичан:
+Maksimalna kompresija za scenarije kritične po broj tokena:
 
-- **Хеуристичко скраћивање** — скраћивање токена у прозном тексту на основу бодовања
-- **Очување структуре** — ограђени блокови кода, уметнути кôд, URL-ови и идентификатори се
-  привремено замењују ознакама и поново умећу без измена; никада се не скраћују
-- **Опциони SLM ниво** — мали локални модел може додатно да побољша скраћивање када је конфигурисан
-- Независан је од агресивног режима: не примењује старење порука, компресију резултата алата
-  нити резервни механизам за сажимање (само неуспех SLM нивоа може да усмери резервни пролаз кроз
-  агресивни режим)
+- **Heurističko proređivanje** — proređivanje tokena proze na osnovu ocene
+- **Očuvanje strukture** — ograđeni blokovi koda, umetnuti kod, URL-ovi i identifikatori se privremeno sklanjaju i
+  ponovo umeću doslovno, nikada se ne proređuju
+- **Opcioni SLM nivo** — mali lokalni model može da doradi proređivanje kada je konfigurisan
+- Nezavisan od agresivnog režima: ne izvršava starenje poruka, kompresiju rezultata alata
+  niti rezervni sažimač (samo neuspeh SLM nivoa može preusmeriti rezervni prolaz kroz agresivni režim)
 
-**Најбоље за:** Ситуације у којима често достижете ограничења контекста.
+**Najbolje za:** Situacije kada stalno nailazite na ograničenja konteksta.
 
-### RTK режим (опсег од 60–90% пре слања)
+### RTK režim (60–90% ulaznog raspona)
 
-RTK режим је оптимизован за опширне излазе алата који се појављују у сесијама агената за програмирање:
+RTK režim je optimizovan za opširne izlaze alata koji se pojavljuju u sesijama sa programerskim agentima:
 
-- Открива класе команди/излаза као што су `git status`, `git diff`, `git log`, покретачи тестова,
-  TypeScript/Vite/Webpack процеси изградње, ESLint/Biome/Prettier, npm провере/инсталације, Docker евиденције, инфраструктурни
-  излаз и генерички излаз љуске
-- Примењује пакете JSON филтера из `open-sse/services/compression/engines/rtk/filters/`
-- Увози филтере RTK TOML шеме v1 из пројектних или глобалних `filters.toml` датотека, уз проверу
-  уграђених тестова и условљавање поверењем за пројектне датотеке
-- Испоручује се са 55 уграђених филтера и примерима за проверу
-- Уклања ANSI контролне секвенце, траке напретка, поновљене редове и неважан шум
-- Чува неуспехе, грешке, упозорења, измењене датотеке, сажетке и завршни део дугачког излаза
-- Подржава пројектне филтере условљене поверењем, глобалне филтере и опциони опоравак редигованог необрађеног излаза
+- Prepoznaje klase komandi/izlaza kao što su `git status`, `git diff`, `git log`, pokretači testova,
+  TypeScript/Vite/Webpack izgradnje, ESLint/Biome/Prettier, npm audit/instalacije, Docker dnevnici, infrastrukturni
+  izlaz i generički izlaz ljuske
+- Primenjuje JSON pakete filtera iz `open-sse/services/compression/engines/rtk/filters/`
+- Uvozi RTK TOML šemu v1 filtera iz projektnih ili globalnih datoteka `filters.toml`, uz validaciju ugrađenih testova
+  i proveru poverenja za projektne datoteke
+- Isporučuje 56 ugrađenih filtera sa ugrađenim uzorcima za proveru
+- Uklanja ANSI kontrolne sekvence, trake napretka, ponovljene redove i neaktivnu buku
+- Očuvava neuspehe, greške, upozorenja, izmenjene datoteke, sažetke i kraj dugog izlaza
+- Podržava projektne filtere za koje je potrebno poverenje, globalne filtere i opcioni oporavak sirovog izlaza sa uklonjenim osetljivim podacima
 
-**Најбоље за:** Сесије агената са транскриптима љуске, изградње, тестова, git, grep и излаза датотека.
+**Najbolje za:** Sesije agenata sa transkriptima ljuske, izgradnje, testova, git-a, grep-a i izlaza datoteka.
 
-### Наслагани режим (опсег од 78–95% садржаја који испуњава услове)
+### Složeni režim (78–95% opsega podobnog za kompresiju)
 
-Наслагани режим покреће више механизама за компресију детерминистичким редоследом. Подразумевани ток је:
+Složeni režim pokreće više mašina za kompresiju determinističkim redosledom. Podrazumevani cevovod je:
 
 ```txt
 RTK -> Caveman
 ```
 
-Тај редослед прво сажима излаз терминала/алата, а затим примењује Caveman семантичко сажимање на
-преостали упит на природном језику. Наслагани токови могу да се конфигуришу глобално или путем
-комбинација компресије додељених комбинацијама усмеравања.
+Ovaj redosled prvo sažima izlaz terminala/alata, a zatim primenjuje semantičko sažimanje pomoću Caveman-a na
+preostali prompt na prirodnom jeziku. Složeni cevovodi mogu se globalno konfigurisati ili putem kombinacija kompresije
+dodeljenih kombinacijama rutiranja.
 
-**Најбоље за:** Мешовити контекст са великим евиденцијама алата и људским упутствима или сажетцима асистента.
-
----
+**Najbolje za:** Mešoviti kontekst sa velikim dnevnicima alata, uz ljudske instrukcije ili sažetke asistenta.
 
 ## Математика уштеде из изворних пројеката
 
@@ -188,17 +187,17 @@ Caveman режим излаза одговора је засебан: када �
 
 ### Контролна табла
 
-Идите на `Контролна табла → Контекст и кеш`:
+Идите на `Dashboard → Context & Cache`:
 
 - **Caveman** — избор режима, језички пакети, преглед и глобалне подразумеване вредности
-- **RTK** — преглед филтера команди, RTK безбедносна подешавања и каталог филтера
-- **Комбинације компресије** — именовани ланци механизама додељени комбинацијама рутирања
-- **Праг аутоматског активирања** — аутоматски активира компресију када број токена премаши праг
+- **RTK** — преглед филтрирања команди, RTK безбедносна подешавања и каталог филтера
+- **Compression Combos** — именовани ланци машина додељени комбинацијама за рутирање
+- **Auto-Trigger Threshold** — аутоматски активира компресију када број токена премаши праг
 
 ### Замена по комбинацији
 
-У одељку `Контролна табла → Контекст и кеш → Комбинације компресије` доделите комбинацију компресије комбинацији
-рутирања:
+У `Dashboard → Context & Cache → Compression Combos`, доделите комбинацију компресије комбинацији
+за рутирање:
 
 ```txt
 Combo: "free-tier-fallback"
@@ -209,62 +208,70 @@ Combo: "free-tier-fallback"
     2. if/qwen3.8-max-preview
 ```
 
-Ово вам омогућава да користите вишеслојну компресију код бесплатних добављача и добављача за програмирање, док задржавате лаки режим за плаћене
-претплате.
+Ово вам омогућава да користите наслагану компресију код бесплатних провајдера и провајдера за
+кодирање, уз задржавање lite режима на плаћеним претплатама.
 
-Ова додела „Замене по комбинацији“ представља засебну контролу у односу на замену **режима компресије комбинације
-рутирања** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — шема овог поља
-такође прихвата `rtk`, `stacked` и `omniglyph`) — та замена не бира именовани ланац
-комбинације компресије; она само поставља поље `compressionMode` које користи
-`resolveCompressionPlan`. Може се подесити на картици комбинације (`Контролна табла → Комбинације`) или, почев од
-#6760, за сваку комбинацију рутирања у листи „Додели рутирању“ у одељку
-`Контролна табла → Контекст и кеш → Комбинације компресије`, одмах поред поља за потврду доделе ланца
-описаног изнад. Обе површине чувају податке преко исте крајње тачке `PUT /api/combos/{id}`.
+Ова додела „Per-Combo Override“ је другачија контрола од замене **режима компресије комбинације
+за рутирање** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — шема поља такође
+прихвата `rtk`, `stacked` и `omniglyph`) — та замена не бира именовани ланац комбинације
+компресије; она само поставља поље `compressionMode` које користи
+`resolveCompressionPlan`. Може се поставити на картици комбинације (`Dashboard → Combos`) или,
+почевши од #6760, по комбинацији за рутирање на листи „Assign to routing“ у одељку
+`Dashboard → Context & Cache → Compression Combos`, одмах поред поља за потврду доделе ланца
+описаног изнад. Обе површине чувају податке преко исте крајње тачке
+`PUT /api/combos/{id}`.
 
 ### Замена по захтеву
 
-Пошаљите заглавље захтева `x-omniroute-compression` да бисте заменили план компресије за један
-захтев. Оно има највиши приоритет — надјачава замену комбинације рутирања, активни профил,
-аутоматско активирање и подразумевану вредност на панелу. Непознате вредности се занемарују (захтев се никада не одбија), а
-глобални главни прекидач и даље контролише све: када је компресија глобално искључена, заглавље је не може
-укључити. Вредности:
+Пошаљите заглавље захтева `x-omniroute-compression` да бисте заменили план компресије за
+појединачни захтев. Оно има највећи приоритет — надјачава замену комбинације за рутирање,
+активни профил, аутоматско активирање и подразумевану вредност панела. Непознате вредности се
+занемарују (захтев се никада не одбија), а глобални главни прекидач и даље управља свиме: када
+је компресија глобално искључена, заглавље не може да је укључи. Вредности:
 
-| Вредност      | Ефекат                                                                                                    |
-| ------------- | --------------------------------------------------------------------------------------------------------- |
-| `off`         | Нема компресије за овај захтев.                                                                           |
-| `default`     | Подразумевани профил изведен из панела (игнорише активни профил). Механизми са губицима остају искључени. |
-| `safe`        | Исто као када се заглавље изостави: само дедупликација и сажимање размака.                                |
-| `allow-lossy` | Задржава операторски план овог захтева, укључујући сажетке, филтере релевантности и измене стила.         |
-| `engine:<id>` | Један механизам када је омогућен, нпр. `engine:rtk`. Ово је укључивање тог механизма по захтеву.          |
-| `<combo>`     | Именована комбинација, која се прво подудара по имену (без обзира на величину слова), а затим по ID-у.    |
+| Вредност      | Ефекат                                                                                                      |
+| ------------- | ----------------------------------------------------------------------------------------------------------- |
+| `off`         | Нема компресије за овај захтев.                                                                             |
+| `default`     | Подразумевани профил изведен из панела (занемарује активни профил). Машине са губицима остају искључене.    |
+| `safe`        | Исто као када се заглавље изостави.                                                                         |
+| `allow-lossy` | Задржава операторски план овог захтева, укључујући сажетке, филтере релевантности и преписивања стила.      |
+| `engine:<id>` | Једна машина када је омогућена, нпр. `engine:rtk`. Ово је експлицитно укључивање те машине за један захтев. |
+| `<combo>`     | Именована комбинација, најпре упоређена по имену (без разлике у великим и малим словима), а затим по ID-ју. |
 
-Без `allow-lossy`, `engine:<id>` или именоване комбинације, механизми са губицима се не примењују. Захтев
-и даље добија дедупликацију сесије и сажимање размака када је компресија укључена.
+Без `allow-lossy`, `engine:<id>` или именоване комбинације, машине са губицима се не примењују.
+Када се подразумевана вредност са губицима, аутоматско активирање или замена при рутирању
+смањи, OmniRoute задржава препознате кораке без губитака из конфигурисаног наслаганог ланца,
+тим редоследом. Враћа се на `session-dedup → lite` само када ниједан конфигурисани корак без
+губитака не преостане.
 
-Примењени план се враћа у заглављу одговора `X-OmniRoute-Compression: <mode>; source=<source>`,
-при чему је `<source>` једно од `request-header`, `routing-override`, `active-profile`,
-`auto-trigger`, `default` или `off`.
+Преглед **Effective pipeline** на панелу Settings приказује уобичајени план у стању мировања.
+Када аутоматско активирање може да се изврши, исти преглед приказује и његов условни ефективни
+ланац, тако да резолуција током рада у панелу и без заглавља остане усклађена.
+
+Примењени план се враћа у заглављу одговора
+`X-OmniRoute-Compression: <mode>; source=<source>`, где је `<source>` једна од вредности
+`request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` или `off`.
 
 ### API
 
 ```bash
-# Преузимање подешавања компресије
+# Преузми подешавања компресије
 curl http://localhost:20128/api/settings/compression
 
-# Ажурирање подешавања компресије
+# Ажурирај подешавања компресије
 curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# Преглед одређеног RTK/stacked садржаја
+# Прикажи преглед одређеног RTK/stacked садржаја
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# Навођење пакета RTK филтера
+# Наведи RTK пакете филтера
 curl http://localhost:20128/api/context/rtk/filters
 
-# Директно тестирање RTK-а са опционим метаподацима команде
+# Тестирај RTK директно са опционим метаподацима команде
 curl -X POST http://localhost:20128/api/context/rtk/test \
   -H "Content-Type: application/json" \
   -d '{"command":"npm test","text":"FAIL tests/example.test.ts\nError: boom"}'
