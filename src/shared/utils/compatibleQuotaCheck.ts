@@ -17,7 +17,8 @@
  */
 import {
   ANTHROPIC_COMPATIBLE_PREFIX,
-  OPENAI_COMPATIBLE_PREFIX,
+  isAnthropicCompatibleProvider,
+  isOpenAICompatibleProvider,
 } from "@/shared/constants/providers";
 
 const STANDARD_CREDITS_QUOTA_PRESET = "standard-credits";
@@ -49,11 +50,7 @@ function asRecord(value: unknown): JsonRecord | null {
 
 /** `openai-compatible-*` and `anthropic-compatible-*` (CC-compatible included). */
 export function isCompatibleQuotaProvider(providerId: unknown): boolean {
-  return (
-    typeof providerId === "string" &&
-    (providerId.startsWith(OPENAI_COMPATIBLE_PREFIX) ||
-      providerId.startsWith(ANTHROPIC_COMPATIBLE_PREFIX))
-  );
+  return isOpenAICompatibleProvider(providerId) || isAnthropicCompatibleProvider(providerId);
 }
 
 /** Anthropic-compatible upstreams authenticate with `x-api-key`; everything else with Bearer. */
