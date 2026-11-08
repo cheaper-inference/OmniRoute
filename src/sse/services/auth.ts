@@ -166,7 +166,10 @@ import {
   WEB_COOKIE_PROVIDERS,
 } from "@/shared/constants/providers";
 import { isModelExcludedByConnection } from "@/domain/connectionModelRules";
-import { isCodexPlanEligibleForModel } from "@omniroute/open-sse/services/codexPlanEligibility.ts";
+import {
+  filterCodexPlanEligible,
+  isConnectionPlanEligible,
+} from "@omniroute/open-sse/services/codexPlanEligibility.ts";
 import {
   isRequestedModelAdvertised,
   loadAdvertisedModelsForConnections,
@@ -1166,11 +1169,7 @@ export async function getProviderCredentials(
         allConnections = allConnections.filter(qoderSupportsCallerTools);
       }
       // An ineligible Codex plan cannot make a paid-only model appear rate-limited.
-      if (provider === "codex" && requestedModel) {
-        allConnections = allConnections.filter((connection) =>
-          isCodexPlanEligibleForModel(connection.providerSpecificData, requestedModel)
-        );
-      }
+      allConnections = filterCodexPlanEligible(provider, allConnections, requestedModel);
       log.debug("AUTH", `${provider} | all connections (incl inactive): ${allConnections.length}`);
       if (allConnections.length > 0) {
         const earliest = getEarliestRateLimitedUntil(allConnections);
@@ -1301,10 +1300,9 @@ export async function getProviderCredentials(
         connectionFilterStatus.set(c.id, "modelExcluded");
         return false;
       }
-      // Paid-only Codex models must never be sent to Free/Go/unknown accounts.
+      // Paid-only Codex models must never be sent to accounts with a recorded Free/Go plan.
       // Filter before routing modes so even an explicit probe cannot select one.
-      if (provider === "codex" && requestedModel &&
-          !isCodexPlanEligibleForModel(c.providerSpecificData, requestedModel)) {
+      if (!isConnectionPlanEligible(provider, c.providerSpecificData, requestedModel)) {
         connectionFilterStatus.set(c.id, "codexPlanIneligible");
         return false;
       }
@@ -1428,14 +1426,9 @@ export async function getProviderCredentials(
     });
 
     if (availableConnections.length === 0) {
-      // Only model-eligible accounts may contribute to this model's retry/cooldown hint.
-      const cooldownEligibleConnections =
-        provider === "codex" && requestedModel
-          ? connections.filter((connection) =>
-              isCodexPlanEligibleForModel(connection.providerSpecificData, requestedModel)
-            )
-          : connections;
-      const cooldownStates: CooldownInspectionState[] = cooldownEligibleConnections.map((connection) => {
+      // Only plan-eligible accounts may contribute to this model's retry/cooldown hint.
+      const planEligible = filterCodexPlanEligible(provider, connections, requestedModel);
+      const cooldownStates: CooldownInspectionState[] = planEligible.map((connection) => {
         const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
         const codexScopeCooldownMs =
           provider === "codex"
