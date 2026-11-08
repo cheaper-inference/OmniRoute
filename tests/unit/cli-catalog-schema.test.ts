@@ -22,9 +22,17 @@ test("Every CLI_TOOLS entry passes CliCatalogEntrySchema.parse() without error",
   }
 });
 
+// The catalog's Pi entry no longer ships a codeBlock title (#18603 dropped it),
+// but the schema still accepts the optional field; a title on a manual
+// configuration block must survive parsing instead of being stripped.
 test("Pi manual configuration title survives catalog parsing", () => {
-  const parsed = CliCatalogEntrySchema.parse(CLI_TOOLS.pi);
+  const pi = CLI_TOOLS.pi;
+  const parsed = CliCatalogEntrySchema.parse({
+    ...pi,
+    codeBlock: { ...pi.codeBlock, title: "~/.pi/agent/models.json" },
+  });
   assert.equal(parsed.codeBlock?.title, "~/.pi/agent/models.json");
+  assert.equal(parsed.codeBlock?.code, pi.codeBlock?.code);
 });
 
 test("CliCatalogSchema.parse() accepts the full CLI_TOOLS record", () => {
