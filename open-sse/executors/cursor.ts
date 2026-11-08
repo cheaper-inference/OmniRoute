@@ -28,6 +28,8 @@ import {
   flattenMessages,
   messageContentToText,
   openAIToolsToMcpDefs,
+  decodeInteractionQuery,
+  encodeInteractionResponseFrame,
   type ChatMessage,
   type CursorTurnUsage,
   type EncodedImage,
@@ -450,18 +452,26 @@ export function buildCursorUsage(ctx: StreamCtx, body: { messages?: ChatMessage[
     (ctx.tokenDelta > 0
       ? ctx.tokenDelta
       : estimateOutputTokens(ctx.totalText.length + ctx.thinkingText.length));
-  ctx.reportedUsage = { prompt: promptTokens, completion: completionTokens, cached: 0 };
+  const priorPrompt = ctx.priorReportedUsage?.lastPrompt ?? ctx.priorReportedUsage?.prompt ?? 0;
+  const cachedTokens =
+    metered?.cacheReadTokens ??
+    (priorPrompt > 0 ? Math.min(promptTokens, Math.max(0, priorPrompt)) : undefined);
+  ctx.reportedUsage = {
+    prompt: promptTokens,
+    completion: completionTokens,
+    cached: cachedTokens ?? 0,
+  };
   const usage: Record<string, unknown> = {
     prompt_tokens: promptTokens,
     completion_tokens: completionTokens,
     total_tokens: promptTokens + completionTokens,
     estimated: true,
   };
-  if (metered?.cacheReadTokens !== undefined || metered?.cacheWriteTokens !== undefined) {
+  if (cachedTokens !== undefined || metered?.cacheWriteTokens !== undefined) {
     usage.prompt_tokens_details = {
-      ...(metered.cacheReadTokens !== undefined ? { cached_tokens: metered.cacheReadTokens } : {}),
+      ...(cachedTokens !== undefined ? { cached_tokens: cachedTokens } : {}),
       // The estimate covers the whole prompt, so the write is inside prompt_tokens.
-      ...(metered.cacheWriteTokens !== undefined
+      ...(metered?.cacheWriteTokens !== undefined
         ? { cache_creation_tokens: metered.cacheWriteTokens, cache_creation_in_prompt: true }
         : {}),
     };
@@ -809,6 +819,25 @@ export function processFrame(
           ctx.requiresColdResume = true;
         }
         ctx.endReason = "tool_calls";
+      }
+    }
+  }
+
+  // 2c. InteractionQuery responder: auto-reply to hosted tool queries
+  // (webSearch, askQuestion, switchMode, exaSearch, exaFetch, createPlan, webFetch)
+  // so turns don't stall.
+  const iq = decodeInteractionQuery(payload);
+  if (iq && opts.h2Req) {
+    const dk = `iq:${iq.id}`;
+    if (!ackedExecIds.has(dk)) {
+      ackedExecIds.add(dk);
+      const frame = encodeInteractionResponseFrame(iq.id, iq.variantField);
+      if (frame) {
+        try {
+          opts.h2Req.write(frame);
+        } catch (e) {
+          debugLog("[cursor-agent] interaction_query write failed:", (e as Error).message);
+        }
       }
     }
   }
@@ -1535,6 +1564,7 @@ export class CursorExecutor extends BaseExecutor {
             prompt: (prior?.prompt ?? 0) + now.prompt,
             completion: (prior?.completion ?? 0) + now.completion,
             cached: (prior?.cached ?? 0) + now.cached,
+            lastPrompt: now.prompt,
           };
         }
         cursorSessionManager.release(sessionToUse, "awaiting_tool_result");

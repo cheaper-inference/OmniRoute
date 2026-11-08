@@ -26,6 +26,7 @@ interface EmptyConnectionsPlaceholderProps {
   onOpenOAuthModal: () => void;
   onOpenImportCodex: () => void;
   onOpenImportClaude: () => void;
+  onOpenImportAgy?: () => void;
   onOpenImportGemini: () => void;
   onOpenImportGrokCli: () => void;
   t: ProviderMessageTranslator;
@@ -46,6 +47,7 @@ export default function EmptyConnectionsPlaceholder({
   onOpenOAuthModal,
   onOpenImportCodex,
   onOpenImportClaude,
+  onOpenImportAgy,
   onOpenImportGemini,
   onOpenImportGrokCli,
   t,
@@ -124,6 +126,17 @@ export default function EmptyConnectionsPlaceholder({
                   onClick={() => gateConnectionFlow(onOpenImportGrokCli)}
                 >
                   Import auth
+                </Button>
+              )}
+              {providerId === "agy" && onOpenImportAgy && (
+                <Button
+                  variant="secondary"
+                  icon="upload_file"
+                  onClick={() => gateConnectionFlow(onOpenImportAgy)}
+                >
+                  {typeof t.has === "function" && t.has("importAgyAuth")
+                    ? t("importAgyAuth")
+                    : "Import auth"}
                 </Button>
               )}
             </>

@@ -38,63 +38,59 @@ Kadangi šis skaičius yra įvertis:
 
 ## Kaip apskaičiuojamos išlaidos
 
-### Kainodaros šaltinis
+### Kainos šaltinis
 
-Kainos gaunamos iš kainų lentelės, parenkamos pagal šią pirmumo tvarką
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Išlaidos gaunamos iš sujungtos kainodaros lentelės [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), šia eilės tvarka (** aukščiausia pirma** ):
 
-1. **Naudotojo pakeitimai** — kainos, kurias nustatote valdymo skydelyje / per `PATCH /api/pricing`.
-2. **Sinchronizuota išorinė kainodara** — gaunama iš viešo „LiteLLM“
-   `model_prices_and_context_window.json`, kai sinchronizavimas įjungtas (saugoma atskiroje
-   `pricing_synced` vardų srityje, todėl niekada neperrašo jūsų pakeitimų).
-3. **Kode įrašytos numatytosios reikšmės** — pateikiamos kartu su „OmniRoute“.
+1. **Vartotojas nepaiso** — kainos, nustatytos prietaisų skydelyje arba per `PATCH /api/pricing` ( `pricing` vardų sritis).
+2. **Models.dev sinchronizavimas** — kainodara, gauta iš `https://models.dev/api.json` ( `models_dev_pricing` vardų erdvės).
+3. **LiteLLM sinchronizavimas** — kainos gautos iš LiteLLM viešosios `model_prices_and_context_window.json` ( `pricing_synced` vardų erdvės).
+4. **Užkoduoti numatytieji nustatymai** — tarifai išsiųsti [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Išorinės kainodaros sinchronizavimas yra **pasirenkamas** ir pagal numatytuosius nustatymus išjungtas. Susiję aplinkos kintamieji
-(žr. [`.env.example`](../../.env.example)):
+Tam pačiam provider/model vertės iš aukštesnio prioriteto sluoksnių perrašo atitinkamus laukus žemesniuose sluoksniuose; Laukai, kurių nėra viršutiniame sluoksnyje, vis tiek gali būti iš apatinio sluoksnio. Užsakymas yra fiksuotas net tada, kai abi nepriklausomos sinchronizavimo užduotys vykdomos vienu metu. `GET /api/pricing?includeSources=1` pateikia `pricing` ir `sourceMap`, kurių kiekvieno modelio etiketės (`user`, `modelsDev`, `litellm`, `default`) identifikuoja aukščiausio prioriteto sluoksnį, kuriame yra tas modelis.
 
-| Aplinkos kintamasis     | Numatytoji reikšmė | Paskirtis                                                                   |
-| ----------------------- | ------------------ | --------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`            | Įjungti foninį „LiteLLM“ kainodaros sinchronizavimą paleidimo metu.         |
-| `PRICING_SYNC_INTERVAL` | `86400`            | Sinchronizavimo intervalas **sekundėmis** (numatyta — kasdien).             |
-| `PRICING_SYNC_SOURCES`  | `litellm`          | Kableliais atskirtas šaltinių sąrašas (šiuo metu palaikomas tik `litellm`). |
+**LiteLLM sinchronizavimas** yra pasirenkamas, pagal numatytuosius nustatymus išjungtas. Jo aplinkos kintamieji (žr. [`.env.example`](../../.env.example) ) yra šie:
+
+| Env var                 | Numatytoji | Tikslas                                                                             |
+| ----------------------- | ---------- | ----------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`    | Įgalinti foninį LiteLLM kainų sinchronizavimą.                                      |
+| `PRICING_SYNC_INTERVAL` | `86400`    | Sinchronizavimo intervalas sekundėmis (kasdien).                                    |
+| `PRICING_SYNC_SOURCES`  | `litellm`  | Šaltinio pasirinkimas tik šiam sinchronizavimui; šiuo metu palaikoma tik `litellm`. |
+
+**Models.dev sinchronizavimas** yra atskirtas nuo LiteLLM sinchronizavimo ir pagal numatytuosius nustatymus taip pat yra išjungtas. Įjunkite jį nustatymuose (models.dev sync) arba naudokite šiuos kintamuosius:
+
+| Env var                    | Numatytoji    | Tikslas                                                                                                                                                          |
+| -------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nustatyta)_ | Atšaukti nustatymą seka perjungiklį Nustatymai; `1/true/on/yes` priverstinai įjungia ir `0/false/off/no` priverstinai išjungia (net jei parametrai tai įgalina). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Numatytasis models.dev sinchronizavimo intervalas sekundėmis (kasdien).                                                                                          |
+
+`PRICING_SYNC_SOURCES` daro** ne** įgalinti models.dev; jis valdo tik LiteLLM sinchronizavimą. Ištrynus vartotojo nepaisymą, sinchronizuojama vardų erdvė neišvaloma; įsigalioja kitas galimas kainodaros sluoksnis. Jei modelis neįkainojamas, prieš pridėdami rankinį nepaisymą patikrinkite sinchronizavimo nustatymus ir `sourceMap`.
 
 ### Kainos formulė
 
-Kiekvienos užklausos kaina apskaičiuojama pagal žetonų skaičių ir milijonui žetonų taikomus tarifus,
-nurodytus [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Kaina apskaičiuojama už užklausą pagal atpažinimo ženklų skaičių ir milijono žetonų tarifus [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Įvesties žetonai** (atėmus podėlio skaitymo ir podėlio kūrimo žetonus) × `input` tarifas.
-- **Podėlio skaitymo žetonai** × `cached` tarifas (jei jo nėra, naudojamas įvesties tarifas).
-- **Podėlio kūrimo žetonai** × `cache_creation` tarifas (jei jo nėra, naudojamas įvesties tarifas).
-- **Išvesties žetonai** × `output` tarifas.
-- **Samprotavimo žetonai** × `reasoning` tarifas (jei jo nėra, naudojamas išvesties tarifas).
+- **Įvesties žetonai** (atėmus talpyklos skaitymus ir talpyklos kūrimo žetonus) × `input` greitis.
+- **Talpyklos skaitymo žetonai** × `cached` norma (sugrįžta į įvesties dažnį).
+- **Talpyklos kūrimo žetonai** × `cache_creation` norma (sugrįžta į įvesties dažnį).
+- **Išvesties žetonai** × `output` norma.
+- **Samprotavimo žetonai** × `reasoning` greitis (sugrįžta į išvesties spartą).
 
-Visi tarifai laikomi USD už 1 000 000 žetonų. „Codex“ „fast“ / „priority“ arba
-„flex“ paslaugos lygiui taikomas kainos daugiklis (`getCodexFastCostMultiplier`) — pvz., „flex“
-apmokestinamas taikant 50 % nuolaidą žetonams, kuri valdymo skydelyje rodoma kaip **„flex“ sutaupymas**.
+Visi tarifai interpretuojami kaip USD už 1 000 000 žetonų. Codex „greitai“ / „prioritetinė“ arba „lanksti“ paslaugų pakopai taikomas sąnaudų daugiklis (`getCodexFastCostMultiplier`) — pvz., „flex“ apmokestinama su 50 % prieigos rakto nuolaida, pateikiama kaip** lankstus taupymas** prietaisų skydelyje.
 
-Pirmiausia modelių pavadinimai normalizuojami (pašalinami tiekėjo kelio prefiksai, pvz., `openai/` arba
-`accounts/fireworks/models/`), kad istorinės eilutės ir toliau atitiktų kainą.
+Pirmiausia normalizuojami modelių pavadinimai (tiekėjo kelio priešdėliai, pvz., `openai/` arba `accounts/fireworks/models/` pašalinami), todėl istorinės eilutės vis tiek atitinka kainą.
 
-### Kaip registruojamos išlaidos
+### Kaip įrašomos išlaidos
 
-- Užklausos kaina apskaičiuojama gavus atsakymą ir registruojama nelaukiant rezultato, todėl
-  klientui niekada nepridedama delsa. Bendros kvotos naudojimas suplanuojamas kitam
-  įvykių ciklo žingsniui per [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- API rakto išlaidos kaupiamos buferyje ir paketais įrašomos naudojant
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (numatytasis įrašymo intervalas — 60 s,
-  1 000 įrašų buferis). Galima konfigūruoti naudojant:
+- Kaina už užklausą apskaičiuojama po atsakymo ir užregistruojama, kad „pamiršk ir pamiršk“, todėl klientui ji niekada nepadidina delsos. Pasidalintos kvotos sunaudojimas suplanuotas kito įvykio ciklo varnele per [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- API rakto išlaidos buferizuojamos ir išleidžiamos partijomis [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (numatytasis 60 s praplovimo intervalas, 1 000 įrašų buferis). Derinamas per:
 
-  | Aplinkos kintamasis                 | Numatytoji reikšmė | Paskirtis                                                  |
-  | ----------------------------------- | ------------------ | ---------------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`            | Įrašymo intervalas milisekundėmis.                         |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`             | Didžiausias buferyje laikomų įrašų skaičius prieš įrašymą. |
+  | Env var                             | Numatytoji | Tikslas                                       |
+  | ----------------------------------- | ---------- | --------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Praplovimo intervalas milisekundėmis.         |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Maksimalus buferinis įrašas prieš praplovimą. |
 
-Valdymo skydelio kainų duomenys **nėra** nuskaitomi iš kiekvienoje eilutėje saugomos dolerio sumos — jie
-kaskart iš naujo apskaičiuojami pagal žetonų skaičių ir dabartinę kainų lentelę, kai tik
-vykdoma analizės galinio taško užklausa. Tai reiškia, kad ištaisius neteisingą kainą (ir pakartotinai sinchronizavus)
-istoriniai kainų įverčiai atnaujinami atgaline data.
+Prietaisų skydelio išlaidų skaičiai yra tokie** ne** nuskaityti iš saugomos eilutėje doleriais sumos — jie yra perskaičiuojami iš karto pagal prieigos raktų skaičių ir dabartinę kainodaros lentelę kiekvieną kartą, kai vykdomas analizės galutinis taškas. Tai reiškia, kad neteisingos kainos pataisymas (ir pakartotinis sinchronizavimas) atnaujina istorinių išlaidų įvertinimus atgaline data.
 
 ---
 
@@ -142,51 +138,48 @@ Išlaidų srityje taip pat yra šie puslapiai (visi po `/dashboard/costs/`):
 
 ## API galiniai taškai
 
-Visiems jiems būtinas valdymo autentifikavimas (loopback/JWT, naudojant `requireManagementAuth`), nebent
-nurodyta kitaip.
+Visa tai reikalauja valdymo autentifikavimo (loopback/JWT, per `requireManagementAuth`), jei nenurodyta.
 
 ### Naudojimo ir išlaidų analizė
 
-| Metodas | Galinis taškas           | Paskirtis                                                                                                                                                                                  |
-| ------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET`   | `/api/usage/analytics`   | Išsami išlaidų ir naudojimo analizė: suvestinė, dienos tendencija, pagal teikėją / modelį / API raktą / paskyrą / lygį. Užklausa: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`   | `/api/usage/utilization` | Kiekvieno teikėjo kvotos naudojimas laikui bėgant. Užklausa: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                                  |
-| `GET`   | `/api/usage/history`     | Neapdorotos naudojimo istorijos eilutės.                                                                                                                                                   |
-| `GET`   | `/api/usage/call-logs`   | Atskirų užklausų iškvietimų žurnalai (modelis, žetonai, kaina, delsa, būsena).                                                                                                             |
-| `GET`   | `/api/usage/quota`       | Teikėjo kvotos būsena.                                                                                                                                                                     |
-| `GET`   | `/api/usage/proxy-logs`  | Tarpinio serverio užklausų žurnalai.                                                                                                                                                       |
+| Metodas | Galutinis taškas         | Tikslas                                                                                                                                                                |
+| ------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`   | `/api/usage/analytics`   | Visa cost/usage analitika: santrauka, dienos tendencija, pagal provider/model/API key/account/tier. Užklausa: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`   | `/api/usage/utilization` | Teikėjo kvotos panaudojimas laikui bėgant. Užklausa: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                      |
+| `GET`   | `/api/usage/history`     | Neapdorotos naudojimo istorijos eilutės.                                                                                                                               |
+| `GET`   | `/api/usage/call-logs`   | Skambučių žurnalai pagal užklausą (modelis, prieigos raktai, kaina, delsa, būsena).                                                                                    |
+| `GET`   | `/api/usage/quota`       | Teikėjo kvotos būsena.                                                                                                                                                 |
+| `GET`   | `/api/usage/proxy-logs`  | Tarpinio serverio užklausų žurnalai.                                                                                                                                   |
 
 ### Biudžetai
 
-| Metodas | Galinis taškas           | Paskirtis                                                                                        |
-| ------- | ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `GET`   | `/api/usage/budget`      | Vieno API rakto išlaidų suvestinė ir biudžeto patikra (būtinas `apiKeyId` užklausos parametras). |
-| `POST`  | `/api/usage/budget`      | Nustatyti API rakto dienos / savaitės / mėnesio limitus USD ir įspėjimo slenkstį.                |
-| `GET`   | `/api/usage/budget/bulk` | Masinės API raktų biudžetų suvestinės.                                                           |
+| Metodas | Galutinis taškas         | Tikslas                                                                                         |
+| ------- | ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `GET`   | `/api/usage/budget`      | Išlaidų suvestinė + biudžeto patikra vienam API raktui (reikia `apiKeyId` užklausos parametro). |
+| `POST`  | `/api/usage/budget`      | Nustatykite daily/weekly/monthly USD ribos + įspėjimo slenkstį API klavišui.                    |
+| `GET`   | `/api/usage/budget/bulk` | Masinės biudžeto suvestinės per API klavišus.                                                   |
 
-> Biudžeto API aprėptis nustatoma pagal **API raktą** (`apiKeyId`). Limitai, kuriuos grąžina
-> `GET /api/usage/budget`, apima `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> `warningThreshold` ir einamąsias bendras sumas (`totalCostToday`, `totalCostMonth`, …).
+> Biudžeto API aprėptis pagal**API raktas** (`apiKeyId`). `GET /api/usage/budget` grąžinamos ribos apima `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` ir einamąsias sumas (`totalCostToday`, `totalCostMonth`, ...).
 
 ### Kainodara
 
-| Metodas  | Galinis taškas          | Paskirtis                                                                                                                                      |
-| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Dabartinė sujungta kainodara (naudotojo + sinchronizuota + numatytoji). Naudokite `?includeSources=1`, kad matytumėte kiekvieno įrašo šaltinį. |
-| `PATCH`  | `/api/pricing`          | Pakeisti `{ provider: { model: { input, output, cached, … } } }` kainodarą.                                                                    |
-| `DELETE` | `/api/pricing`          | Atkurti numatytąją kainodarą (aprėptį galima pasirinktinai nustatyti naudojant `?provider=&model=`).                                           |
-| `GET`    | `/api/pricing/defaults` | Rodyti numatytuosius atsarginius tarifus už 1 mln. vienetų.                                                                                    |
-| `GET`    | `/api/pricing/models`   | Kainodara pagal modelį.                                                                                                                        |
-| `POST`   | `/api/pricing/sync`     | Suaktyvinti rankinį sinchronizavimą iš išorinių šaltinių (LiteLLM).                                                                            |
-| `GET`    | `/api/pricing/sync`     | Dabartinė sinchronizavimo būsena.                                                                                                              |
-| `DELETE` | `/api/pricing/sync`     | Išvalyti visus sinchronizuotus kainodaros duomenis.                                                                                            |
+| Metodas  | Galutinis taškas        | Tikslas                                                                                                                                                              |
+| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Sujungta keturių sluoksnių kainodara (vartotojas, models.dev, LiteLLM, numatytieji). `?includeSources=1` grąžina `pricing` + `sourceMap`.                            |
+| `PATCH`  | `/api/pricing`          | Nepaisyti `{ provider: { model: { input, output, cached, … } } }` kainodaros.                                                                                        |
+| `DELETE` | `/api/pricing`          | Pašalinti naudotojo kainų nepaisymą (pasirinktinai aprėpia `?provider=&model=`); sinchronizuoti įkainiai arba įtaisytieji numatytieji nustatymai lieka atsarginiais. |
+| `GET`    | `/api/pricing/defaults` | Rodyti numatytuosius per-1M atsarginius rodiklius.                                                                                                                   |
+| `GET`    | `/api/pricing/models`   | Kaina nustatyta pagal modelį.                                                                                                                                        |
+| `POST`   | `/api/pricing/sync`     | Suaktyvinkite rankinį sinchronizavimą iš išorinių šaltinių (LiteLLM).                                                                                                |
+| `GET`    | `/api/pricing/sync`     | Dabartinė sinchronizavimo būsena.                                                                                                                                    |
+| `DELETE` | `/api/pricing/sync`     | Išvalyti tik su LiteLLM sinchronizuojamą kainodarą (`pricing_synced`); models.dev duomenys yra atskiri.                                                              |
 
-### Kiti su išlaidomis susiję galiniai taškai
+### Kiti su sąnaudomis susiję galutiniai taškai
 
-| Metodas | Galinis taškas                | Paskirtis                                                                   |
-| ------- | ----------------------------- | --------------------------------------------------------------------------- |
-| `GET`   | `/api/free-tier/summary`      | Nemokamo modelio žetonų suma, šį mėnesį panaudotas kiekis ir likęs limitas. |
-| `GET`   | `/api/quota/pools/[id]/usage` | Bendrinamos kvotos telkinio naudojimas.                                     |
+| Metodas | Galutinis taškas              | Tikslas                                                                                  |
+| ------- | ----------------------------- | ---------------------------------------------------------------------------------------- |
+| `GET`   | `/api/free-tier/summary`      | Nemokamo modelio prieigos raktų sumos, panaudotos šį mėnesį ir likęs nemokamas leidimas. |
+| `GET`   | `/api/quota/pools/[id]/usage` | Bendros kvotos fondo naudojimas.                                                         |
 
 ---
 
