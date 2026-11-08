@@ -16,6 +16,11 @@ vi.mock("../../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/
   ),
 }));
 
+// Load the grid's module graph once while the file is collected, so the first
+// test does not pay the cold transform inside its own timeout; every test still
+// re-imports a fresh copy after vi.resetModules().
+import "../../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/QuotaCardGrid";
+
 const DIR = "../../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits";
 const ORDER_KEY = "omniroute:limits:providerOrder";
 const IDS = ["claude", "antigravity", "codex"];
