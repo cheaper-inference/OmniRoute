@@ -24,6 +24,7 @@ import { guardHostConfigTarget } from "../utils/config-home-guard.mjs";
 import { detectLocalCliProvider } from "../utils/localCliAvailability.mjs";
 import { loadAvailableProviders } from "../provider-catalog.mjs";
 import { isLoopbackUrl } from "../api.mjs";
+import { buildClaudeEnv } from "./launch.mjs";
 import {
   categoriseModel,
   isCodexCompatibleTextModel,
@@ -94,20 +95,33 @@ export function inheritedAnthropicKeyWarning(env = process.env) {
   if (!key || !String(key).trim()) return null;
   return (
     "ANTHROPIC_API_KEY is set in this shell. Claude Code sends it as x-api-key and asks " +
-    "\"Detected a custom API key in your environment\" — if ANTHROPIC_BASE_URL is not " +
+    '"Detected a custom API key in your environment" — if ANTHROPIC_BASE_URL is not ' +
     "picked up, that key goes to api.anthropic.com and you get a real Anthropic 401. " +
     "Unset it, or use `omniroute launch --profile <name>` (it strips every inherited " +
     "ANTHROPIC_* var before spawning claude)."
   );
 }
 
-/** Build the settings.json content for one Claude Code profile. */
-export function buildProfileSettings(modelId, baseUrl, cfg) {
+/**
+ * Build the settings.json content for one Claude Code profile.
+ * `contextWindow` is the model's real window from the catalog; without it the profile table's
+ * `cfg.ctx` is used. The window rule (compact at 85% below 200k, else 190000) is the one
+ * `omniroute launch` applies, so it is read from `buildClaudeEnv` instead of copied.
+ */
+export function buildProfileSettings(modelId, baseUrl, cfg, contextWindow) {
+  const window = buildClaudeEnv({}, baseUrl, undefined, {
+    contextWindow: contextWindow ?? cfg?.ctx,
+  });
   const env = {
     ANTHROPIC_BASE_URL: baseUrl,
     ANTHROPIC_MODEL: modelId,
     CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY: "1",
-    CLAUDE_CODE_AUTO_COMPACT_WINDOW: "190000",
+    ...(window.CLAUDE_CODE_AUTO_COMPACT_WINDOW
+      ? { CLAUDE_CODE_AUTO_COMPACT_WINDOW: window.CLAUDE_CODE_AUTO_COMPACT_WINDOW }
+      : {}),
+    ...(window.CLAUDE_CODE_MAX_CONTEXT_TOKENS
+      ? { CLAUDE_CODE_MAX_CONTEXT_TOKENS: window.CLAUDE_CODE_MAX_CONTEXT_TOKENS }
+      : {}),
   };
   const settings = {
     $schema: "https://json.schemastore.org/claude-code-settings.json",
@@ -217,7 +231,10 @@ export async function syncClaudeProfilesFromModels(models, opts = {}) {
 
     const dir = join(profilesRoot, cfg.name);
     const filePath = join(dir, "settings.json");
-    const content = buildProfileSettings(id, baseUrl, cfg);
+    // Same order as `omniroute launch`: max_input_tokens, then context_length.
+    const catalogWindow =
+      typeof m === "string" ? undefined : (m.max_input_tokens ?? m.context_length);
+    const content = buildProfileSettings(id, baseUrl, cfg, catalogWindow);
 
     if (dryRun) {
       log(`\n── [dry-run] ${filePath} ──`);

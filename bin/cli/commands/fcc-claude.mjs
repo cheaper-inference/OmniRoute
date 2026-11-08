@@ -267,6 +267,33 @@ export async function runVersionStatusCommand() {
   console.log();
 }
 
+// ─── Routed model window ─────────────────────────────────────────────────────
+
+/**
+ * Real context window of the model in a pass-through `--model` argument, from GET /v1/models
+ * (max_input_tokens, then context_length), or undefined. Fail-open: never blocks the launch.
+ * shortcut: same lookup as launch.mjs (runLaunchCommand); launch.mjs does not export it and is
+ * not part of this change. Export it there and import it here when launch.mjs is next touched.
+ */
+async function fetchRoutedContextWindow(baseUrl, authToken, claudeArgs) {
+  const at = claudeArgs.findIndex((a) => a === "--model" || String(a).startsWith("--model="));
+  if (at < 0) return undefined;
+  const flag = String(claudeArgs[at]);
+  const model = flag === "--model" ? String(claudeArgs[at + 1] ?? "") : flag.slice(8);
+  if (!model) return undefined;
+  try {
+    const res = await fetch(`${baseUrl}/v1/models`, {
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return undefined;
+    const entry = (await res.json())?.data?.find((m) => m?.id === model);
+    return entry?.max_input_tokens ?? entry?.context_length;
+  } catch {
+    return undefined;
+  }
+}
+
 // ─── Main launcher (reuses launch.mjs's buildClaudeEnv + resolveLaunchTarget) ─
 
 /**
@@ -315,7 +342,9 @@ export async function runFccClaude(opts = {}, claudeArgs = []) {
   }
 
   // Build the claude env (reuses launch.mjs's buildClaudeEnv).
-  const env = buildClaudeEnv(process.env, baseUrl, authToken);
+  const env = buildClaudeEnv(process.env, baseUrl, authToken, {
+    contextWindow: await fetchRoutedContextWindow(baseUrl, authToken, claudeArgs),
+  });
 
   // Locate the claude binary.
   const { command, shell } = await resolveClaudeSpawn(process.platform);
