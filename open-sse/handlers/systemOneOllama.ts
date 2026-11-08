@@ -3,18 +3,13 @@
  *
  * A local Ollama serves typed decisions at `<host>/v1/systemone` with the same
  * `{ model, state, questions }` body and `{ model, answers, usage }` answer as
- * TypeSafe. The host is the `ollama-local` connection's base URL (default
- * `http://localhost:11434/v1`), never a request field. Ollama's contract is
+ * TypeSafe. The host is the `ollama-local` connection's base URL, resolved by the
+ * route (src/app/api/v1/_shared/systemOneOllamaUrl.ts) into `target.upstreamUrl`,
+ * never a request field. Ollama's contract is
  * narrower than native Jev, so the differences are checked here before any
  * upstream call: 2–26 candidates per choice/score question, at most 64
  * questions, no chat sampling fields, raw base64 images only, and a body cap.
  */
-
-import { LOCAL_PROVIDERS } from "@/shared/constants/providers/local";
-import { parseAndValidateNonMetadataUrl } from "@/shared/network/outboundUrlGuard";
-
-export const OLLAMA_LOCAL_SYSTEMONE_DEFAULT_BASE_URL =
-  LOCAL_PROVIDERS["ollama-local"]?.localDefault || "http://localhost:11434/v1";
 
 const MIN_CANDIDATES = 2;
 const MAX_CANDIDATES = 26;
@@ -37,34 +32,6 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null;
-}
-
-/**
- * Turn the connection's base URL (`…/v1`, `…/v1/chat/completions`, `…/api/chat`, a bare
- * host) into its `/v1/systemone` URL. Throws on an unparseable URL, a cloud-metadata host,
- * or Ollama cloud, which does not serve System One.
- */
-export function buildOllamaSystemOneUrl(baseUrl: unknown): string {
-  const base =
-    typeof baseUrl === "string" && baseUrl.trim()
-      ? baseUrl.trim()
-      : OLLAMA_LOCAL_SYSTEMONE_DEFAULT_BASE_URL;
-  const url = parseAndValidateNonMetadataUrl(base);
-  const host = url.hostname.toLowerCase();
-  if (host === "ollama.com" || host.endsWith(".ollama.com")) {
-    throw new Error(
-      "Ollama cloud does not support System One; configure a local Ollama connection"
-    );
-  }
-  url.search = "";
-  url.hash = "";
-  url.pathname =
-    url.pathname
-      .replace(/\/+$/, "")
-      .replace(/\/(?:chat\/completions|completions|embeddings|systemone)$/i, "")
-      .replace(/\/api\/chat$/i, "")
-      .replace(/\/v1$/i, "") + "/v1/systemone";
-  return url.toString();
 }
 
 function candidateCount(question: Record<string, unknown>): number | null {

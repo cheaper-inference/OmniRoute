@@ -29,7 +29,7 @@ import { partitionJevTargetsForAsk } from "./jevBlockChecker.ts";
 import type { JevPartition } from "./jevEligibility.ts";
 import { recordComboDecision } from "./decisionTrace.ts";
 import type { resolveComboSetupConfig } from "../comboConfig.ts";
-import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
+import type { JevResilienceSettings as ResilienceSettings } from "./jevBlockChecker.ts";
 import type { NativeTurnPin } from "./nativeCodexTurnPin.ts";
 import type {
   ComboLike,

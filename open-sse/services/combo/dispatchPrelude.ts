@@ -920,6 +920,41 @@ type RuntimeUnitDispatchArgs = {
   runCombo: RunCombo;
 };
 
+/**
+ * Runtime-unit order for the strategy. `jev` (#15276) asks System One which units run
+ * and keeps the operator's order for failover; every other strategy uses its own order.
+ */
+async function orderRuntimeUnitsForStrategy(
+  args: RuntimeUnitDispatchArgs,
+  executeModeUnits: ResolvedComboUnit[]
+): Promise<RuntimeUnitOrdering | { earlyResponse: Response }> {
+  const { body, combo, config, strategy, allCombos, log, settings } = args;
+  if (strategy !== "jev") {
+    return orderRuntimeUnits({ strategy, executeModeUnits, combo, config, settings });
+  }
+  const jevOrdering = await orderJevRuntimeUnits({
+    units: executeModeUnits,
+    body,
+    comboName: combo.name,
+    config,
+    settings,
+    allCombos: allCombos ?? [],
+    apiKeyAllowedConnections: args.apiKeyAllowedConnections,
+    hiddenModelsByProvider: args.hiddenModelsByProvider,
+    isModelAvailable: args.isModelAvailable,
+    invocationId: args.invocationId,
+    signal: args.signal,
+    log,
+  });
+  if (jevOrdering.earlyResponse) return { earlyResponse: jevOrdering.earlyResponse };
+  return {
+    units: jevOrdering.units,
+    executionStrategy: jevOrdering.executionStrategy,
+    stickyLimit: null,
+    stickyTargets: executeModeUnits,
+  };
+}
+
 /** Dispatch a runtime unit after resolving its target and request compatibility. */
 export async function tryRuntimeUnitDispatch(
   args: RuntimeUnitDispatchArgs
@@ -948,41 +983,14 @@ export async function tryRuntimeUnitDispatch(
   const runtimeUnitsSupported = getStrategyTraits(strategy).runtimeUnitOrder !== "unsupported";
   if (!hasExecutableComboRef || !runtimeUnitsSupported) return null;
 
-  let runtimeUnits: ResolvedComboUnit[];
-  let unitExecutionStrategy: string;
-  let runtimeStickyLimit: number | null = null;
-  let runtimeStickyTargets: ResolvedComboUnit[] = executeModeUnits;
-  if (strategy === "jev") {
-    const jevOrdering = await orderJevRuntimeUnits({
-      units: executeModeUnits,
-      body,
-      comboName: combo.name,
-      config,
-      settings,
-      allCombos: allCombos ?? [],
-      apiKeyAllowedConnections: args.apiKeyAllowedConnections,
-      hiddenModelsByProvider: args.hiddenModelsByProvider,
-      isModelAvailable: args.isModelAvailable,
-      invocationId: args.invocationId,
-      signal: args.signal,
-      log,
-    });
-    if (jevOrdering.earlyResponse) return jevOrdering.earlyResponse;
-    runtimeUnits = jevOrdering.units;
-    unitExecutionStrategy = jevOrdering.executionStrategy;
-  } else {
-    const ordering = await orderRuntimeUnits({
-      strategy,
-      executeModeUnits,
-      combo,
-      config,
-      settings,
-    });
-    runtimeUnits = ordering.units;
-    unitExecutionStrategy = ordering.executionStrategy;
-    runtimeStickyLimit = ordering.stickyLimit;
-    runtimeStickyTargets = ordering.stickyTargets;
-  }
+  const ordering = await orderRuntimeUnitsForStrategy(args, executeModeUnits);
+  if ("earlyResponse" in ordering) return ordering.earlyResponse;
+  const {
+    units: runtimeUnits,
+    executionStrategy: unitExecutionStrategy,
+    stickyLimit: runtimeStickyLimit,
+    stickyTargets: runtimeStickyTargets,
+  } = ordering;
 
   const execution = await executeRuntimeUnitCombo({
     body,

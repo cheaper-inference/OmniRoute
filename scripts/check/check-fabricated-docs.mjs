@@ -584,14 +584,22 @@ export function buildCodebaseIndex(root = ROOT) {
   // Every key in FEATURE_FLAG_DEFINITIONS is therefore a real, env-overridable
   // knob (docs/reference/FEATURE_FLAGS.md documents the catalog 1:1).
   function readFeatureFlagContract() {
+    // featureFlagDefinitions.ts plus the per-area modules it spreads in
+    // (featureFlagDefinitionsSystemOne.ts, …).
+    const dir = path.join(root, "src", "shared", "constants");
+    let files = [];
     try {
-      const t = fs.readFileSync(
-        path.join(root, "src", "shared", "constants", "featureFlagDefinitions.ts"),
-        "utf8"
-      );
-      for (const m of t.matchAll(/^\s*key:\s*"([A-Z][A-Z0-9_]+)"/gm)) envVars.add(m[1]);
+      files = fs.readdirSync(dir).filter((name) => /^featureFlagDefinitions\w*\.ts$/.test(name));
     } catch {
       /* ignore */
+    }
+    for (const name of files) {
+      try {
+        const t = fs.readFileSync(path.join(dir, name), "utf8");
+        for (const m of t.matchAll(/^\s*key:\s*"([A-Z][A-Z0-9_]+)"/gm)) envVars.add(m[1]);
+      } catch {
+        /* ignore */
+      }
     }
   }
   readFeatureFlagContract();

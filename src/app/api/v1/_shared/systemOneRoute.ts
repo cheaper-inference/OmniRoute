@@ -16,7 +16,7 @@ import {
   clearRecoveredProviderState,
 } from "@/sse/services/auth";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
-import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import { errorResponse, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
@@ -31,6 +31,7 @@ import {
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
+import { buildOllamaSystemOneUrl } from "@/app/api/v1/_shared/systemOneOllamaUrl";
 import {
   isSystemOneCloudflareBackendEnabled,
   isSystemOneOllamaLocalBackendEnabled,
@@ -98,6 +99,29 @@ function resolveEnabledTarget(
   return { target };
 }
 
+/**
+ * Backends whose URL depends on the selected connection: `ollama-local` (#14667) posts
+ * to that connection's base URL, never to a request field.
+ */
+function bindConnectionUrl(
+  target: SystemOneTarget,
+  credentials: SystemOneCredentials
+): { target: SystemOneTarget } | { rejection: Response } {
+  if (target.backend !== "ollama-local") return { target };
+  try {
+    const upstreamUrl = buildOllamaSystemOneUrl(credentials.providerSpecificData?.baseUrl);
+    return { target: { ...target, upstreamUrl } };
+  } catch (err) {
+    const raw = err instanceof Error ? err.message : String(err);
+    return {
+      rejection: errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `Invalid ollama-local base URL: ${sanitizeErrorMessage(raw)}`
+      ),
+    };
+  }
+}
+
 async function postHandler(request: Request): Promise<Response> {
   let rawBody: unknown;
   try {
@@ -143,12 +167,15 @@ async function postHandler(request: Request): Promise<Response> {
     return rateLimitedProviderResponse(target.provider, credentials);
   }
 
+  // The key-scope-blocked and all-rate-limited sentinels were refused above;
+  // what is left is a real credential record.
+  const bound = bindConnectionUrl(target, credentials as SystemOneCredentials);
+  if ("rejection" in bound) return bound.rejection;
+
   const response = await handleSystemOneProxy({
     path: new URL(request.url).pathname,
-    target,
+    target: bound.target,
     body,
-    // The key-scope-blocked and all-rate-limited sentinels were refused above;
-    // what is left is a real credential record.
     credentials: credentials as SystemOneCredentials,
     requestedModel: model ?? null,
   });

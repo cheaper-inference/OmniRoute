@@ -23,8 +23,9 @@ const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const systemOneRoute = await import("../../src/app/api/v1/systemone/route.ts");
 const { resolveSystemOneTarget } = await import("../../open-sse/config/systemOneRegistry.ts");
 const { handleSystemOneProxy } = await import("../../open-sse/handlers/systemOne.ts");
-const { buildOllamaSystemOneUrl, validateOllamaSystemOneBody } =
-  await import("../../open-sse/handlers/systemOneOllama.ts");
+const { validateOllamaSystemOneBody } = await import("../../open-sse/handlers/systemOneOllama.ts");
+const { buildOllamaSystemOneUrl } =
+  await import("../../src/app/api/v1/_shared/systemOneOllamaUrl.ts");
 
 const FLAG = "SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED";
 const originalFlag = process.env[FLAG];
@@ -122,8 +123,10 @@ test("validation: Ollama's candidate, question and field limits", () => {
 
 test("handler: posts to the connection's Ollama with no Authorization when it has no key", async () => {
   const { calls, fetchImpl } = stubFetch();
-  const target = resolveSystemOneTarget("ollama-local/qwen3:8b");
-  assert.ok(target);
+  const resolved = resolveSystemOneTarget("ollama-local/qwen3:8b");
+  assert.ok(resolved);
+  // The route binds the connection's base URL into the target before the handler runs.
+  const target = { ...resolved, upstreamUrl: buildOllamaSystemOneUrl("http://127.0.0.1:11434/v1") };
   const response = await handleSystemOneProxy({
     path: "/v1/systemone",
     target,
@@ -147,6 +150,21 @@ test("handler: posts to the connection's Ollama with no Authorization when it ha
     questions: BODY.questions,
     keep_alive: "5m",
   });
+});
+
+test("handler: an ollama-local target without a bound URL is refused before any call", async () => {
+  const { calls, fetchImpl } = stubFetch();
+  const target = resolveSystemOneTarget("ollama-local/qwen3:8b");
+  assert.ok(target);
+  const response = await handleSystemOneProxy({
+    path: "/v1/systemone",
+    target,
+    body: BODY,
+    credentials: { apiKey: "", connectionId: null, providerSpecificData: {} },
+    fetchImpl,
+  });
+  assert.equal(response.status, 400);
+  assert.equal(calls.length, 0);
 });
 
 test("handler: an Ollama-invalid body is refused before any upstream call", async () => {

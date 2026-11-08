@@ -7,7 +7,7 @@
  * next-intl so every locale can translate them.
  */
 
-import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
+import type { JevResilienceSettings as ResilienceSettings } from "./jevBlockChecker.ts";
 import { partitionJevTargetsForAsk } from "./jevBlockChecker.ts";
 import type { ComboLogger, IsModelAvailable, ResolvedComboTarget } from "./types.ts";
 

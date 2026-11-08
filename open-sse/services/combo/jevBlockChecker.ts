@@ -8,6 +8,8 @@ import { checkCredentialGate } from "../credentialGate.ts";
 import { isProviderInCooldown } from "../providerCooldownTracker.ts";
 import { parseModel } from "../model.ts";
 import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
+/** Re-exported so the other Jev modules need no import edge of their own into src/. */
+export type JevResilienceSettings = ResilienceSettings;
 import { findOpenCircuitBreaker, readConnectionForCooldownGate } from "./executeTargetGates.ts";
 import { resolvePersistedConnectionCooldownSkipReason } from "./comboPredicates.ts";
 import { resolveQuotaExhaustionCutoffForTarget } from "./quotaExhaustionCutoff.ts";

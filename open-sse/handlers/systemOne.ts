@@ -25,11 +25,7 @@ import {
   cloudflareErrorMessage,
   unwrapCloudflareDecision,
 } from "./systemOneCloudflare.ts";
-import {
-  buildOllamaSystemOneBody,
-  buildOllamaSystemOneUrl,
-  validateOllamaSystemOneBody,
-} from "./systemOneOllama.ts";
+import { buildOllamaSystemOneBody, validateOllamaSystemOneBody } from "./systemOneOllama.ts";
 
 export interface SystemOneCredentials {
   apiKey?: string | null;
@@ -37,7 +33,7 @@ export interface SystemOneCredentials {
   connectionId?: string | null;
   /**
    * `cloudflare-ai` connections keep the Workers AI account id here; `ollama-local`
-   * connections keep their base URL.
+   * connections keep their base URL (resolved by the route).
    */
   providerSpecificData?: { accountId?: unknown; baseUrl?: unknown } | null;
 }
@@ -202,20 +198,22 @@ interface DecisionRequestError {
   message: string;
 }
 
-/** Local Ollama (#14667): its own body limits, URL from the connection's base URL. */
+/**
+ * Local Ollama (#14667): its own body limits; the route has already resolved the
+ * connection's base URL into `target.upstreamUrl`.
+ */
 function buildOllamaDecisionRequest(
   options: SystemOneProxyOptions
 ): DecisionRequest | DecisionRequestError {
   const validation = validateOllamaSystemOneBody(options.body);
   if (validation.ok === false) return { status: validation.status, message: validation.message };
-  let url: string;
-  try {
-    url = buildOllamaSystemOneUrl(options.credentials?.providerSpecificData?.baseUrl);
-  } catch (err) {
-    const raw = err instanceof Error ? err.message : String(err);
-    return { status: 400, message: `Invalid ollama-local base URL: ${sanitizeErrorMessage(raw)}` };
+  if (!options.target.upstreamUrl) {
+    return { status: 400, message: "The ollama-local connection has no usable base URL" };
   }
-  return { url, body: buildOllamaSystemOneBody(options.target.upstreamModel, options.body) };
+  return {
+    url: options.target.upstreamUrl,
+    body: buildOllamaSystemOneBody(options.target.upstreamModel, options.body),
+  };
 }
 
 /** Upstream URL + body for the target backend, or why the request cannot be sent. */
