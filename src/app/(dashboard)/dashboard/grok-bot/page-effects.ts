@@ -113,6 +113,7 @@ type FrameState = Pick<
   | "setStatus"
   | "setRunState"
   | "setSendState"
+  | "setTurnFailure"
   | "apply"
   | "pendingSendRef"
   | "rememberedRef"
@@ -137,6 +138,7 @@ function handleFrame(
     setStatus,
     setRunState,
     setSendState,
+    setTurnFailure,
     apply,
     pendingSendRef,
     rememberedRef,
@@ -168,6 +170,7 @@ function handleFrame(
     setCards((held) => held.filter((item) => !removed(item)));
     setPermissions((held) => held.filter((item) => !removed(item)));
   }
+  if (next.turnFailure !== undefined) setTurnFailure(next.turnFailure);
   if (next.permissions.length > 0) setPermissions(next.permissions);
   if (next.cards.length > 0) {
     setCards((held) => {

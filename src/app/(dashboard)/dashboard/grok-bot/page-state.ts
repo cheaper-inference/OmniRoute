@@ -32,6 +32,7 @@ function useAccountSelection() {
   const [routines, setRoutines] = useState<GrokBotRoutine[]>([]);
   const [rosterLoading, setRosterLoading] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [turnFailure, setTurnFailure] = useState("");
   return {
     accounts,
     setAccounts,
@@ -43,6 +44,8 @@ function useAccountSelection() {
     setRoster,
     computers,
     setComputers,
+    turnFailure,
+    setTurnFailure,
     computerPath,
     setComputerPath,
     computerFileState,

@@ -153,6 +153,7 @@ function conversationState(
     needsSignIn,
     blocked,
     linkLost,
+    turnFailure,
   } = state;
   return {
     blocked,
@@ -175,6 +176,7 @@ function conversationState(
     sendState,
     stateLabel: t(statusKey(status)),
     terminal: isTerminal(session),
+    turnFailure,
   };
 }
 export function ConversationCard({ state }: { state: PageState }) {

@@ -516,6 +516,8 @@ export type ConversationState = {
   stateLabel: string;
   runState: string;
   linkLost: boolean;
+  /** What the service said when the turn failed; empty when it said nothing. */
+  turnFailure: string;
   blocked: boolean;
   needsSignIn: boolean;
   historyUnavailable: boolean;
@@ -647,7 +649,11 @@ export function ConversationPanel({
         {state.linkLost ? (
           <p className="px-4 text-sm text-text-muted">
             {state.needsSignIn ? t("conversationSignIn") : t("conversationLost")}
+            {state.turnFailure !== "" ? ` (${state.turnFailure})` : ""}
           </p>
+        ) : null}
+        {!state.linkLost && state.turnFailure !== "" ? (
+          <p className="px-4 text-sm text-text-muted">{state.turnFailure}</p>
         ) : null}
         {state.blocked ? (
           <p className="px-4 text-sm text-text-muted">{t("conversationBlocked")}</p>
