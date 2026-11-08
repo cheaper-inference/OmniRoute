@@ -6,19 +6,25 @@
  */
 
 import type { A2ATask, TaskArtifact } from "../taskManager";
+import {
+  buildSelfLoopHeaders,
+  UnsafeSelfLoopTargetError,
+  type A2ACallerContext,
+} from "../selfLoopAuth";
 import { normalizeQuotaResponse } from "@/shared/contracts/quota";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
 
 const OMNIROUTE_BASE_URL = resolveOmniRouteBaseUrl();
-const OMNIROUTE_API_KEY = process.env.OMNIROUTE_API_KEY || "";
 
-async function quotaFetch(path: string): Promise<any> {
+async function quotaFetch(path: string, caller?: A2ACallerContext): Promise<any> {
   const url = `${OMNIROUTE_BASE_URL}${path}`;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(OMNIROUTE_API_KEY ? { Authorization: `Bearer ${OMNIROUTE_API_KEY}` } : {}),
-  };
-  const res = await fetch(url, { headers, signal: AbortSignal.timeout(10000) });
+  const headers = buildSelfLoopHeaders(caller, OMNIROUTE_BASE_URL);
+  const res = await fetch(url, {
+    headers,
+    signal: AbortSignal.timeout(10000),
+    // Never follow a redirect while carrying the caller's API key.
+    redirect: "error",
+  });
   if (!res.ok) throw new Error(`API [${res.status}]`);
   return res.json();
 }
@@ -28,13 +34,22 @@ export interface QuotaManagementResult {
   metadata: Record<string, unknown>;
 }
 
-export async function executeQuotaManagement(task: A2ATask): Promise<QuotaManagementResult> {
+export async function executeQuotaManagement(
+  task: A2ATask,
+  caller?: A2ACallerContext
+): Promise<QuotaManagementResult> {
   const query = task.input.messages[task.input.messages.length - 1]?.content?.toLowerCase() || "";
 
   const [quotaRaw, combosRaw] = await Promise.allSettled([
-    quotaFetch("/api/usage/quota"),
-    quotaFetch("/api/combos"),
+    quotaFetch("/api/usage/quota", caller),
+    quotaFetch("/api/combos", caller),
   ]);
+
+  // Rejected sub-requests degrade to empty data, but a refused base URL means no
+  // call went out at all, and "0 providers" would read as a real answer.
+  if (quotaRaw.status === "rejected" && quotaRaw.reason instanceof UnsafeSelfLoopTargetError) {
+    throw quotaRaw.reason;
+  }
 
   const quota =
     quotaRaw.status === "fulfilled"

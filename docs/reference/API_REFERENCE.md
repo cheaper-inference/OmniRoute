@@ -404,6 +404,11 @@ return an error rather than an empty success. Model access depends on the ZenMux
 See [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) and
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
+A Microsoft 365 Copilot sign-in connection serves `copilot-m365-web/m365-copilot-image`
+through Copilot's built-in image tool: one Copilot turn per image (`n` 1–4), `size` steering
+only the orientation, and images returned inline (`b64_json`, or a data URL for
+`response_format: "url"`). See [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+
 ```bash
 # List all image models
 GET /v1/images/generations
@@ -865,6 +870,17 @@ Web/search provider abstraction (Tavily, Brave, Exa, Serper, etc.).
 | GET    | `/v1/search/analytics` | Per-provider hit/latency/cache stats                                                 |
 
 **Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Search policy enforced via `enforceApiKeyPolicy`.
+
+**Auto-select:** without `provider`, the cheapest provider with a configured connection runs
+first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are
+used only when nothing else is configured. A self-hosted SearXNG counts as configured once its
+connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it
+then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover,
+including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL
+or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token
+ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never
+a failover and stays a last resort, used only when no other provider is configured or when
+requested by name, so it does send the token in cleartext in those two cases.
 
 ### Exa and Tavily `provider_options`
 
@@ -1472,6 +1488,34 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/video/runtime` | GET        | Strict trusted-loopback check before management auth/probe; sanitized FFmpeg/ffprobe availability and versions (no-store)                                                                                                                                                                                                                                                                    |
 | `/api/modality-bridge/video/extract` | POST       | Internal authenticated trusted-loopback byte broker; 50 MiB input, bounded queue/32 MiB output, `503` capacity, `499` disconnect, `504` deadline; not a public upload API                                                                                                                                                                                                                    |
 
+### Video frame drill-down
+
+`GET /api/v1/video-bridge/drilldown` reads a tenant-bound opaque handle returned in
+`x-omniroute-video-drilldown` after an explicitly consented Video Bridge request.
+Both reads and `DELETE` always require a valid API key and the operator's independent
+`modalityBridgeVideoDrilldownRemoteEnabled` permission. Production retention additionally
+requires `modalityBridgeVideoDrilldownEnabled` and strict per-part `drilldown: true`.
+If the key has a nonempty endpoint allowlist, it must include `video` for both
+GET and DELETE, whether the caller uses `/v1` or `/api/v1`.
+
+GET query: required `handle`; optional `variant` (`preview`, `standard`, `detail`),
+`limit` (1–8; legacy `frames` is accepted but cannot be combined with `limit`),
+zero-based `page`, and `start`/`end` seconds. When both focus bounds
+are supplied, `end` must be greater than `start`. Duplicate/unknown query keys are
+rejected. Successful responses contain `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant`, and optional `focusWindow`; no-store JSON is capped at
+32 MiB including Base64. Oversized output returns 413; request fewer frames.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` returns `{ "removed": 0|1 }`.
+Unknown, expired and cross-key GETs are indistinguishable 404 responses; cross-key
+DELETE cannot remove the owner's entry. Disabled access returns 403, missing/invalid
+authentication 401, invalid queries 400, cancellation 499 and temporary errors 503.
+Handles are process-local, expire after ten minutes, and do not survive a restart.
+New handles use `v1.` plus a 32-byte random Base64URL token; only token hashes are
+retained. Legacy 64-hex tokens remain syntactically readable for compatibility.
+See [Video Bridge guardrails](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+for consent, quotas and variant derivation details.
+
 ### Backup & Export/Import
 
 | Endpoint                    | Method | Description                                                             |
@@ -1578,7 +1622,7 @@ These endpoints mirror Gemini's API format for clients that expect native Gemini
 
 | Endpoint                 | Method | Description                                            |
 | ------------------------ | ------ | ------------------------------------------------------ |
-| `/api/init`              | GET    | Application initialization check (used on first run)   |
+| `/api/init`              | GET    | Start background sync services (management auth)       |
 | `/api/tags`              | GET    | Ollama-compatible model tags (for Ollama clients)      |
 | `/api/restart`           | POST   | Trigger graceful server restart                        |
 | `/api/shutdown`          | POST   | Trigger graceful server shutdown                       |
