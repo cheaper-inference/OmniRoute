@@ -1,0 +1,1 @@
+- **fix(routing):** Intent and complexity routing now ignore the protocol blocks that Claude Code and Codex add to user messages (such as `<system-reminder>`), so a plain question is no longer sent to the code tier because of the wrapper text.
