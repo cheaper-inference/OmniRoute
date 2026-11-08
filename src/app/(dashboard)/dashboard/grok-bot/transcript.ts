@@ -608,3 +608,49 @@ export function applyTranscriptFrame(state: TranscriptState, frame: unknown): Tr
 export function transcriptErrorFrame(): string {
   return "event: error\ndata: {}\n\n";
 }
+export type TranscriptTerminalCode =
+  "auth" | "permission" | "quota" | "protocol" | "unknown" | "timeout" | "unavailable";
+
+export function transcriptTerminal(
+  error: unknown,
+  streamId: string
+): { code: TranscriptTerminalCode; retryable: boolean; streamId: string } {
+  const status = (error as { status?: unknown } | null)?.status;
+  const http = typeof status === "number" ? status : 0;
+  const text = (error instanceof Error ? error.message : String(error)).toLowerCase();
+  let code: TranscriptTerminalCode = "unknown";
+  if (http === 401 || text.includes("unauthenticated") || text.includes("http_401")) code = "auth";
+  else if (http === 403 || text.includes("permission_denied") || text.includes("http_403"))
+    code = "permission";
+  else if (http === 429 || text.includes("resource_exhausted") || text.includes("rate limit"))
+    code = "quota";
+  else if (
+    http === 400 ||
+    text.includes("invalid_argument") ||
+    text.includes("incomplete envelope") ||
+    text.includes("protocol error")
+  )
+    code = "protocol";
+  else if (http === 408 || http === 504 || text.includes("timeout") || text.includes("deadline"))
+    code = "timeout";
+  else if (http >= 500 || text.includes("unavailable") || text.includes("terminated"))
+    code = "unavailable";
+  return {
+    code,
+    retryable:
+      code === "quota" || code === "timeout" || code === "unavailable" || code === "unknown",
+    streamId,
+  };
+}
+
+export function transcriptConnectedFrame(streamId: string): string {
+  return `event: connected\ndata: ${JSON.stringify({ streamId })}\n\n`;
+}
+
+export function transcriptDataFrame(value: unknown): string {
+  return `event: frame\ndata: ${JSON.stringify(value)}\n\n`;
+}
+
+export function transcriptTerminalFrame(error: unknown, streamId: string): string {
+  return `event: terminal\ndata: ${JSON.stringify(transcriptTerminal(error, streamId))}\n\n`;
+}

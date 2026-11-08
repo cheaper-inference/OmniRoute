@@ -20,3 +20,15 @@ export function grokBotReadQuery(input: { agentId?: string }): GrokBotReadPlan {
   }
   return { method: "ListGrokBotAgents", payload: {} };
 }
+
+export function grokBotAfter(value: string): string | null {
+  if (!/^(?:0|[1-9][0-9]{0,19})$/.test(value)) return null;
+  return BigInt(value) <= 18_446_744_073_709_551_615n ? value : null;
+}
+
+export function grokBotGeneration(value: string | null): number | null {
+  if (value === null || value === "") return null;
+  if (!/^(?:0|[1-9][0-9]{0,15})$/.test(value)) return null;
+  const generation = BigInt(value);
+  return generation <= 9_007_199_254_740_991n ? Number(generation) : null;
+}

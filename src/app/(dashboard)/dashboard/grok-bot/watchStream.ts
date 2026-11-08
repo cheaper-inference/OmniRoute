@@ -200,7 +200,7 @@ export function watchStream(input: {
                   agentId: input.agentId,
                   sessionId: "",
                   generation: input.generation,
-                  afterUpdatedSeq: input.after === "0" ? "" : input.after,
+                  afterUpdatedSeq: input.after,
                 },
               ],
               inlineBodyMaxBytes: 65_536,
