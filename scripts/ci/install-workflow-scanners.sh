@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Release-Green tooling, independent of the target revision being audited.
+# Pinned workflow tooling shared by PR gates and Release-Green observers.
 set -euo pipefail
 
 if [[ "$(uname -s)/$(uname -m)" != "Linux/x86_64" ]]; then
@@ -10,8 +10,21 @@ fi
 scanner_dir=$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/workflow-scanners.XXXXXX")
 mkdir -p "$scanner_dir/bin"
 
-curl --fail --silent --show-error --location --retry 3 --output "$scanner_dir/actionlint.tar.gz" \
-  https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+# The browser release URL can return a 92-byte HTTP 504 page. Use the release
+# asset API through the authenticated runner CLI, and retry failed downloads at most three times.
+# Never execute an installer from a mutable branch or extract unverified bytes.
+for attempt in 1 2 3; do
+  if gh release download v1.7.12 --repo rhysd/actionlint \
+    --pattern actionlint_1.7.12_linux_amd64.tar.gz \
+    --output "$scanner_dir/actionlint.tar.gz" --clobber; then
+    break
+  fi
+  if [[ "$attempt" == 3 ]]; then
+    echo "actionlint download failed after three attempts" >&2
+    exit 1
+  fi
+  sleep "$attempt"
+done
 # Digests from the release assets, pinned with the versions (never fetched as
 # trust material at install time). Verify bytes before extraction or execution.
 printf '%s  %s\n' 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8 \

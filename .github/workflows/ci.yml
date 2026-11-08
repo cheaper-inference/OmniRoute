@@ -429,12 +429,12 @@ jobs:
       #     every gate then self-skips and the metric is never produced. We instead
       #     use `gh release download`, which is preinstalled on GitHub runners and
       #     authenticated via GITHUB_TOKEN (5000 req/hr) — robust under load.
-      #   • actionlint keeps its official download script; zizmor stays on pipx.
+      # Workflow scanners are installed separately and must both verify successfully.
       # We `set +e` (no single failure aborts the step), ALWAYS export $GITHUB_PATH
       # at the end, and print diagnostics so the next CI run proves exactly what
       # installed. The job is continue-on-error too, so an install hiccup never
       # blocks the build.
-      - name: Install advisory security scanners (gitleaks/osv/actionlint/zizmor)
+      - name: Install advisory security scanners (gitleaks/osv/oasdiff)
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -449,18 +449,6 @@ jobs:
           rm -rf /tmp/osv && mkdir -p /tmp/osv
           gh release download --repo google/osv-scanner --pattern '*linux_amd64' --dir /tmp/osv
           install -m 0755 /tmp/osv/*linux_amd64 "$HOME/.local/bin/osv-scanner"
-          # actionlint — official download script
-          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) latest "$HOME/.local/bin"
-          # zizmor — PyPI (pipx preferred, pip --user fallback); lands in ~/.local/bin.
-          # PINNED on purpose. Unpinned, the runner installed whatever PyPI served that day and
-          # measured 1 finding MORE than the devbox on the identical commit (190 vs 189) during
-          # the v3.8.49 cycle — which cost a second rebaseline push per release, chasing a
-          # number that was never the code's. The ratchet compares counts across machines, so
-          # the auditor version has to be the same on both. Bump this deliberately, and
-          # rebaseline in the same commit: check-workflows.mjs now prints `zizmorVersion=` next
-          # to the count so the new number is traceable to the tool that produced it.
-          ZIZMOR_VERSION=1.25.2
-          pipx install "zizmor==$ZIZMOR_VERSION" || pip install --user "zizmor==$ZIZMOR_VERSION"
           # oasdiff — download latest linux amd64 tarball via gh (authed), extract binary
           rm -rf /tmp/oasd && mkdir -p /tmp/oasd
           gh release download --repo oasdiff/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
@@ -470,10 +458,14 @@ jobs:
           # diagnostics — prove what installed on the next CI run
           ls -la "$HOME/.local/bin"
           "$HOME/.local/bin/gitleaks" version || true
-          "$HOME/.local/bin/actionlint" -version || true
           "$HOME/.local/bin/osv-scanner" --version || true
           "$HOME/.local/bin/oasdiff" --version || true
-          zizmor --version || true
+      # Required auditors use verified, pinned artifacts in a fresh PATH directory.
+      # Installation failure is INCOMPLETE, never a skipped or zero-finding audit.
+      - name: Prepare pinned workflow scanners
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci/install-workflow-scanners.sh
       # BLOCKING ratchet (Etapa 2): secretFindings must not regress vs the baseline.
       # --ratchet exits 1 on a measured regression; it SKIPs (exit 0) when gitleaks
       # is absent (a missing binary never blocks).
