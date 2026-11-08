@@ -9,14 +9,26 @@ import { grokBotComputers } from "../../../../../(dashboard)/dashboard/grok-bot/
 import { grokBotRead } from "../../../../../(dashboard)/dashboard/grok-bot/read";
 
 export function computerFilePathAllowed(path: string, roots: string[]): boolean {
-  if (!posix.isAbsolute(path)) return false;
   if (path.includes("\u0000")) return false;
   // The client resolves this path on its own filesystem, where a symlink can sit in
   // front of a `..`. Normalising first folds that away and reports a path that looks
   // contained while the client walks out of it, so a parent segment is refused
-  // outright instead.
-  if (path.split("/").includes("..")) return false;
-  const target = posix.normalize(path);
+  // outright instead. The client may also decode escapes or treat a backslash as a
+  // separator, so the segment check runs on the literal text and on its once-decoded
+  // form, split on both separators. A malformed escape is refused rather than guessed.
+  const forms = [path];
+  try {
+    const decoded = decodeURIComponent(path);
+    if (decoded !== path) forms.push(decoded);
+  } catch {
+    return false;
+  }
+  for (const form of forms) {
+    const separators = form.replace(/\\/g, "/");
+    if (!posix.isAbsolute(separators)) return false;
+    if (separators.split("/").includes("..")) return false;
+  }
+  const target = posix.normalize(forms[forms.length - 1].replace(/\\/g, "/"));
   return roots.some((root) => {
     if (!posix.isAbsolute(root)) return false;
     const base = posix.normalize(root).replace(/\/+$/, "") || "/";

@@ -21,6 +21,31 @@ function source(chunks: Uint8Array[]) {
   });
   return { stream, wasCancelled: () => cancelled };
 }
+it("refuses a frame that grows past the cap instead of buffering it", async () => {
+  const body = Buffer.from(JSON.stringify({ pad: "x".repeat(4096) }));
+  const header = Buffer.alloc(5);
+  header[0] = 0;
+  header.writeUInt32BE(body.length, 1);
+  const big = Buffer.concat([header, body]);
+  const { stream } = source([big]);
+  await assert.rejects(async () => {
+    for await (const _ of readConnectFrames(stream, 1024)) {
+      // draining is the point: the guard has to fire before the frame is decoded
+    }
+  }, /exceeds the size cap/);
+});
+
+it("accepts the same frame when the cap allows it", async () => {
+  const body = Buffer.from(JSON.stringify({ pad: "x".repeat(4096) }));
+  const header = Buffer.alloc(5);
+  header[0] = 0;
+  header.writeUInt32BE(body.length, 1);
+  const { stream } = source([Buffer.concat([header, body]), frame({}, 0x02)]);
+  const values: unknown[] = [];
+  for await (const value of readConnectFrames(stream, 64 * 1024)) values.push(value);
+  assert.equal(values.length, 1);
+});
+
 async function collect(stream: ReadableStream<Uint8Array>): Promise<unknown[]> {
   const values: unknown[] = [];
   for await (const value of readConnectFrames(stream)) values.push(value);

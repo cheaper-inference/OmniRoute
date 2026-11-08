@@ -9,8 +9,16 @@ const END_STREAM_FLAG = 0x02;
  * only place a failed stream reports why, so its error is thrown instead of
  * being dropped on the floor; a trailer without an error just ends the read.
  */
+/**
+ * A frame is accumulated in memory before it is decoded, so an oversized one is a way
+ * to spend this process's heap: the cap rejects it instead of buffering it. Transcript
+ * frames carry text and a blob is fetched from its own url, so this is generous.
+ */
+export const MAX_CONNECT_FRAME_BYTES = 16 * 1024 * 1024;
+
 export async function* readConnectFrames(
-  stream: ReadableStream<Uint8Array>
+  stream: ReadableStream<Uint8Array>,
+  maxFrameBytes = MAX_CONNECT_FRAME_BYTES
 ): AsyncGenerator<unknown> {
   const reader = stream.getReader();
   const decoder = new TextDecoder();
@@ -20,6 +28,9 @@ export async function* readConnectFrames(
       const { done, value } = await reader.read();
       if (done) return;
       const chunk = new Uint8Array(pending.length + value.length);
+      if (chunk.length > maxFrameBytes) {
+        throw new Error("grok-bot stream frame exceeds the size cap");
+      }
       chunk.set(pending);
       chunk.set(value, pending.length);
       pending = chunk;
