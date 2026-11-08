@@ -5,6 +5,7 @@
  * @changes
  * - [2026-07-28] [Cursor Grok 4.5] - Brand-neutral default OpenAI keepalive id/model
  */
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import {
   buildResponsesInProgressPayload,
   createResponsesInProgressTracker,
@@ -16,6 +17,24 @@ const HEARTBEAT_ENCODER = new TextEncoder();
 const OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD = buildResponsesInProgressPayload();
 
 export const DEFAULT_SSE_HEARTBEAT_INTERVAL_MS = 15_000;
+
+/** Transport liveness without inventing a response identity or lifecycle event. */
+export const RESPONSES_KEEPALIVE_FRAME = HEARTBEAT_ENCODER.encode("\n\n");
+
+/**
+ * Responses keepalive shape (RESPONSES_TRANSPORT_KEEPALIVE_ENABLED, default off). Off, timers send
+ * the spec-valid response.in_progress event, as they always did. On, they send only a blank line,
+ * which a synthetic snapshot cannot replace in the official SDK, but which also dispatches no SSE
+ * event, so a client watchdog that resets only on events would not be reset.
+ */
+export function isResponsesTransportKeepaliveEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("RESPONSES_TRANSPORT_KEEPALIVE_ENABLED");
+  } catch {
+    // no-effect: an unreadable flag store keeps the response.in_progress keepalive
+    return false;
+  }
+}
 
 /** Shared Responses API heartbeat frame for early and mid-stream keepalives. */
 export const OPENAI_RESPONSES_IN_PROGRESS_FRAME = HEARTBEAT_ENCODER.encode(
@@ -63,7 +82,8 @@ function buildHeartbeatPayload(
         object: "chat.completion.chunk",
         created: Math.floor(Date.now() / 1000),
         model: opts.chunkModel ?? "keepalive",
-        choices: [{ index: 0, delta: {}, finish_reason: null }],
+        // Transport liveness must not initialize a client message before its role (#18410).
+        choices: [],
       };
       return `data: ${JSON.stringify(payload)}\n\n`;
     }
@@ -97,6 +117,36 @@ export function sseCommentsEnabled(): boolean {
   return normalized === "on" || normalized === "true" || normalized === "1" || normalized === "yes";
 }
 
+/**
+ * Tracks SSE framing over raw bytes so a timer never splices a heartbeat mid-event.
+ * Scans ASCII separators, not payload characters. A chunk can end inside JSON, a CRLF
+ * pair or a UTF-8 code point; no timer may splice bytes there.
+ */
+function createSseFramingTracker() {
+  let atEventBoundary = true;
+  let lineHasBytes = false;
+  let pendingCR = false;
+  return {
+    note(chunk: Uint8Array): void {
+      for (const byte of chunk) {
+        if (pendingCR) {
+          pendingCR = false;
+          if (byte === 10) continue;
+        }
+        if (byte === 10 || byte === 13) {
+          atEventBoundary = !lineHasBytes;
+          lineHasBytes = false;
+          pendingCR = byte === 13;
+        } else {
+          lineHasBytes = true;
+          atEventBoundary = false;
+        }
+      }
+    },
+    atBoundary: (): boolean => atEventBoundary,
+  };
+}
+
 export function createSseHeartbeatTransform({
   intervalMs = DEFAULT_SSE_HEARTBEAT_INTERVAL_MS,
   signal,
@@ -116,10 +166,11 @@ export function createSseHeartbeatTransform({
   }
 
   let intervalId: ReturnType<typeof setInterval> | undefined;
+  const isResponsesShape = shape === HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS;
+  const transportOnly = isResponsesShape && isResponsesTransportKeepaliveEnabled();
   const responsesTracker =
-    shape === HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS
-      ? createResponsesInProgressTracker()
-      : null;
+    isResponsesShape && !transportOnly ? createResponsesInProgressTracker() : null;
+  const framing = createSseFramingTracker();
 
   const stop = () => {
     if (!intervalId) return;
@@ -135,15 +186,20 @@ export function createSseHeartbeatTransform({
           return;
         }
 
+        if (!framing.atBoundary()) return;
         try {
           controller.enqueue(
-            HEARTBEAT_ENCODER.encode(
-              buildHeartbeatPayload(shape, {
-                chunkId,
-                chunkModel,
-                responsesPayload: responsesTracker ? () => responsesTracker.payload() : undefined,
-              })
-            )
+            transportOnly
+              ? RESPONSES_KEEPALIVE_FRAME
+              : HEARTBEAT_ENCODER.encode(
+                  buildHeartbeatPayload(shape, {
+                    chunkId,
+                    chunkModel,
+                    responsesPayload: responsesTracker
+                      ? () => responsesTracker.payload()
+                      : undefined,
+                  })
+                )
           );
         } catch {
           stop();
@@ -158,6 +214,7 @@ export function createSseHeartbeatTransform({
     },
 
     transform(chunk, controller) {
+      framing.note(chunk);
       responsesTracker?.observe(chunk);
       controller.enqueue(chunk);
     },

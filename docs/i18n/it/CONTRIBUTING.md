@@ -8,16 +8,21 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Configurazione dell'ambiente di sviluppo
+## Configurazione dello sviluppo
 
 ### Prerequisiti
 
 - **Node.js** `>=22.22.2 <23`, oppure `>=24.0.0 <27` (consigliato: 24 LTS)
 - **npm** 10+
 
+> **Windows con Node 24:** usa la versione patch LTS corrente della serie 24 (almeno 24.20.0).
+> Le versioni precedenti possono terminare il processo dopo test completati correttamente quando `--test-force-exit` chiude il
+> processo. La [correzione di Windows per libuv](https://github.com/nodejs/node/pull/61999) di Node
+> risolve questo arresto anomalo del runtime; mantieni abilitate le asserzioni dei test e le verifiche di uscita del runner.
+
 > **Utenti di npm v11+ (Node 24+):** dopo `npm install`, verifica che i moduli nativi siano stati installati:
-> `node -e "require('better-sqlite3')"`. Se il comando non riesce e restituisce `MODULE_NOT_FOUND`,
-> esegui `npm approve-scripts better-sqlite3 && npm install`. Consulta
+> `node -e "require('better-sqlite3')"`. Se restituisce `MODULE_NOT_FOUND`,
+> esegui `npm approve-scripts better-sqlite3 && npm install`. Consulta la
 > [Risoluzione dei problemi](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
@@ -30,7 +35,7 @@ cd OmniRoute
 npm install
 ```
 
-### Variabili di ambiente
+### Variabili d'ambiente
 
 ```bash
 # Crea il tuo .env dal modello
@@ -41,26 +46,26 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Variabili principali per lo sviluppo:
+Variabili chiave per lo sviluppo:
 
-| Variabile              | Valore predefinito di sviluppo | Descrizione                   |
-| ---------------------- | ------------------------------ | ----------------------------- |
-| `PORT`                 | `20128`                        | Porta del server              |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`       | URL di base per il frontend   |
-| `JWT_SECRET`           | (generato sopra)               | Segreto per la firma dei JWT  |
-| `INITIAL_PASSWORD`     | `CHANGEME`                     | Password per il primo accesso |
-| `APP_LOG_LEVEL`        | `info`                         | Livello di verbosità dei log  |
+| Variabile              | Valore predefinito per lo sviluppo | Descrizione                  |
+| ---------------------- | ---------------------------------- | ---------------------------- |
+| `PORT`                 | `20128`                            | Porta del server             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | URL di base del frontend     |
+| `JWT_SECRET`           | (genera sopra)                     | Segreto per la firma JWT     |
+| `INITIAL_PASSWORD`     | `CHANGEME`                         | Password del primo accesso   |
+| `APP_LOG_LEVEL`        | `info`                             | Livello di dettaglio dei log |
 
 ### Impostazioni della dashboard
 
-La dashboard fornisce opzioni nell'interfaccia per funzionalità che possono essere configurate anche tramite variabili di ambiente:
+La dashboard fornisce interruttori nell'interfaccia utente per funzionalità che possono essere configurate anche tramite variabili d'ambiente:
 
-| Posizione dell'impostazione | Opzione                         | Descrizione                                     |
+| Posizione dell'impostazione | Interruttore                    | Descrizione                                     |
 | --------------------------- | ------------------------------- | ----------------------------------------------- |
-| Impostazioni → Avanzate     | Modalità di debug               | Abilita i log di debug delle richieste (UI)     |
-| Impostazioni → Generali     | Visibilità della barra laterale | Mostra/nasconde le sezioni della barra laterale |
+| Settings → Advanced         | Modalità debug                  | Abilita i log delle richieste di debug (UI)     |
+| Settings → General          | Visibilità della barra laterale | Mostra/nasconde le sezioni della barra laterale |
 
-Queste impostazioni vengono archiviate nel database e persistono tra i riavvii, sovrascrivendo i valori predefiniti delle variabili di ambiente quando vengono configurate.
+Queste impostazioni sono archiviate nel database e persistono tra i riavvii, sostituendo i valori predefiniti delle variabili d'ambiente quando impostate.
 
 ### Esecuzione in locale
 
@@ -69,52 +74,52 @@ Queste impostazioni vengono archiviate nel database e persistono tra i riavvii, 
 npm run dev
 
 # Build di produzione
-npm run build    # next build → .build/next/, quindi assembleStandalone → dist/
+npm run build    # next build → .build/next/ e poi assembleStandalone → dist/
 npm run start
 
-# Compilazione rapida del solo backend/API per le modifiche dei contributori
+# Compilazione rapida solo backend/API per le modifiche dei contributori
 npm run build:contributor
 
-# Build di rilascio (ricompilazione pulita + sentinella HEAD — richiesta per il deployment)
-npm run build:release   # rm -rf .build dist && build + scrive dist/BUILD_SHA
+# Build di rilascio (ricompilazione pulita + sentinel HEAD — richiesto per il deploy)
+npm run build:release   # rm -rf .build dist e poi build + scrive dist/BUILD_SHA
 
 # Configurazione comune della porta
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-La build per i contributori esegue esclusivamente la convalida della compilazione: non assembla la
-distribuzione standalone né genera le risorse native opzionali per il packaging. Usa la normale build
-di produzione quando devi convalidare il bundle distribuibile.
+La build per i contributori esegue la validazione della sola compilazione: non assembla la
+distribuzione standalone né crea gli asset nativi opzionali. Usa la normale build di produzione quando
+devi validare il bundle pronto per la distribuzione.
 
 ### Struttura dell'output della build
 
-| Directory | Contenuto                                                                          | Tracciata |
-| --------- | ---------------------------------------------------------------------------------- | --------- |
-| `src/`    | Codice sorgente dell'applicazione (TypeScript / TSX)                               | Sì        |
-| `.build/` | File intermedi — output di `next build` (ignorato da git, `distDir = .build/next`) | No        |
-| `dist/`   | Bundle distribuibile — assemblato da `assembleStandalone` (ignorato da git)        | No        |
+| Directory | Contenuto                                                                            | Tracciata |
+| --------- | ------------------------------------------------------------------------------------ | --------- |
+| `src/`    | Codice sorgente dell'applicazione (TypeScript / TSX)                                 | Sì        |
+| `.build/` | File intermedi — output di `next build` (gitignored, `distDir = .build/next`)        | No        |
+| `dist/`   | Bundle pronto per la distribuzione — assemblato da `assembleStandalone` (gitignored) | No        |
 
-La pipeline di build viene eseguita in un singolo passaggio:
+La pipeline di build è un'unica passata:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (output di Next.js)
-  └─ assembleStandalone()                 (copia standalone + file statici + public + risorse native)
+  └─ assembleStandalone()                 (copia standalone + static + public + asset nativi)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` pulisce inoltre entrambe le directory prima dell'esecuzione e scrive
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) come sentinella per l'integrità del deployment.
+`npm run build:release` pulisce inoltre entrambe le directory prima della build e scrive
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) come indicatore di integrità per il deploy.
 
-`npm run build:contributor` utilizza il profilo di build del solo backend. Durante la build sostituisce
-temporaneamente i file dell'interfaccia della dashboard con stub, mantiene i gestori delle route API e
-ripristina i file originali al termine della build. Usa `npm run build` per le modifiche che interessano
-l'interfaccia della dashboard o per una convalida completa del rilascio; il profilo per i contributori
-non sostituisce la build di rilascio.
+`npm run build:contributor` utilizza il profilo di build solo backend. Sostituisce temporaneamente
+i file dell'interfaccia della dashboard con stub durante la build, mantiene i gestori delle route API
+e ripristina i file originali al termine della build. Usa `npm run build` per le modifiche che
+interessano l'interfaccia della dashboard o per la validazione completa del rilascio; il profilo per
+i contributori non sostituisce la build di rilascio.
 
-> **Nota sul deployment su VPS:** la directory dell'immagine remota `/usr/lib/node_modules/omniroute/app/`
-> rimane invariata. Le procedure di deployment sincronizzano tramite rsync il contenuto di `dist/` al suo interno.
-> È cambiato soltanto il percorso dell'output della build nel repository (`app/` → `dist/`).
+> **Nota sul deploy VPS:** la directory remota dell'immagine `/usr/lib/node_modules/omniroute/app/`
+> non viene modificata. Le procedure di deploy eseguono il comando rsync dei contenuti di `dist/` al suo interno.
+> È cambiato solo il percorso dell'output della build all'interno del repository (`app/` → `dist/`).
 
 URL predefiniti:
 

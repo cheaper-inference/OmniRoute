@@ -209,8 +209,30 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // A later pushed #14771 build used the upstream mirror-URL slot.
     fromVersion: "218",
     fromName: "api_key_self_service_settings",
-    toVersion: "229",
+    toVersion: "228",
     toName: "api_key_self_service_settings",
+  },
+  // Before the release filled 223–227, the stack builds (#14771, #14833) shipped 229–231.
+  // They now start at 228; shift them down in ascending order so each slot is free before
+  // the next row moves into it. The runner only moves a row whose slot now holds another
+  // file, so the 231 row stays (and 230 re-applies as a no-op) until a migration takes 231.
+  {
+    fromVersion: "229",
+    fromName: "api_key_self_service_settings",
+    toVersion: "228",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    fromVersion: "230",
+    fromName: "agent_sessions",
+    toVersion: "229",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "231",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "230",
+    toName: "usage_history_agent_session_id",
   },
   {
     // The index also circulated as 207 before upstream provider cleanup claimed it.
@@ -280,21 +302,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // Early self-service stack builds occupied the upstream attempt-timing slot.
     fromVersion: "194",
     fromName: "api_key_self_service_settings",
-    toVersion: "229",
+    toVersion: "228",
     toName: "api_key_self_service_settings",
   },
   {
     // Later self-service stack builds (#14771) used 197, now proxy_subscription_core_config.
     fromVersion: "197",
     fromName: "api_key_self_service_settings",
-    toVersion: "229",
+    toVersion: "228",
     toName: "api_key_self_service_settings",
   },
   {
     // #14771 builds then used 207, now remove_opencode_free_provider.
     fromVersion: "207",
     fromName: "api_key_self_service_settings",
-    toVersion: "229",
+    toVersion: "228",
     toName: "api_key_self_service_settings",
   },
   {
@@ -309,70 +331,70 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // #14771 builds on release/v3.8.53 then used 213, now api_key_preferred_connections.
     fromVersion: "213",
     fromName: "api_key_self_service_settings",
-    toVersion: "229",
+    toVersion: "228",
     toName: "api_key_self_service_settings",
   },
   {
     // Agent-session builds (#14833) shipped agent_sessions + usage_history.agent_session_id
     // as 190/191, then 197/198, 198/199, 208/209 and 214/215. Upstream owns all of those
-    // slots (call_logs_content_provenance … team_cost_centers); they now live at 230/231.
+    // slots (call_logs_content_provenance … team_cost_centers); they now live at 229/230.
     fromVersion: "190",
     fromName: "agent_sessions",
-    toVersion: "230",
+    toVersion: "229",
     toName: "agent_sessions",
   },
   {
     fromVersion: "191",
     fromName: "usage_history_agent_session_id",
-    toVersion: "231",
+    toVersion: "230",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "197",
     fromName: "agent_sessions",
-    toVersion: "230",
+    toVersion: "229",
     toName: "agent_sessions",
   },
   {
     fromVersion: "198",
     fromName: "usage_history_agent_session_id",
-    toVersion: "231",
+    toVersion: "230",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "198",
     fromName: "agent_sessions",
-    toVersion: "230",
+    toVersion: "229",
     toName: "agent_sessions",
   },
   {
     fromVersion: "199",
     fromName: "usage_history_agent_session_id",
-    toVersion: "231",
+    toVersion: "230",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "208",
     fromName: "agent_sessions",
-    toVersion: "230",
+    toVersion: "229",
     toName: "agent_sessions",
   },
   {
     fromVersion: "209",
     fromName: "usage_history_agent_session_id",
-    toVersion: "231",
+    toVersion: "230",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "214",
     fromName: "agent_sessions",
-    toVersion: "230",
+    toVersion: "229",
     toName: "agent_sessions",
   },
   {
     fromVersion: "215",
     fromName: "usage_history_agent_session_id",
-    toVersion: "231",
+    toVersion: "230",
     toName: "usage_history_agent_session_id",
   },
 ] as const;
@@ -387,6 +409,23 @@ export const LEGACY_VERSION_SLOT_MIGRATIONS = [
   { version: "033", name: "add_batch_id_to_call_logs" },
   { version: "046", name: "remove_status_from_files" },
   { version: "051", name: "remove_status_from_files" },
+  // A renumbering shifted 140-143 in pairs, leaving the ledger holding the old
+  // arrangement: ccr_blocks at 139 and 140, api_key_cache_default_mode at 141
+  // and 143. In each pair exactly one row still matches a file (ccr_blocks at
+  // 139, api_key_cache_default_mode at 143), so only the other row is listed
+  // here. Its occupancy is what stopped the file now belonging at that version
+  // from being back-filled; radar_referrals_cache and the two
+  // proxy_subscriptions columns were the visible casualties. Releasing a slot
+  // replays that version's file after everything newer has run, so an entry here
+  // needs a file that is safe out of order, or a guard in isSchemaAlreadyApplied
+  // (178 has one: its file would otherwise overwrite the trigger 203 installed).
+  { version: "140", name: "ccr_blocks" },
+  { version: "141", name: "api_key_cache_default_mode" },
+  { version: "142", name: "connection_runtime_state" },
+  { version: "176", name: "provider_connection_synced_models_at" },
+  { version: "177", name: "xp_action_counts" },
+  { version: "178", name: "memory_fts_skip_access_updates" },
+  { version: "197", name: "model_capabilities_reasoning_efforts" },
 ] as const;
 
 export const SUPERSEDED_DUPLICATE_MIGRATIONS = [

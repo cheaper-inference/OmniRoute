@@ -1,3 +1,4 @@
+import { logicalCallSql } from "../db/logicalCallSql";
 import { getComboById, getCombos } from "@/lib/db/combos";
 import { getDbInstance } from "@/lib/db/core";
 import {
@@ -289,7 +290,7 @@ function buildUsageSkew(
          COUNT(*) as requests,
          SUM(COALESCE(tokens_in, 0) + COALESCE(tokens_out, 0)) as totalTokens
        FROM call_logs
-       WHERE combo_name = ?
+       WHERE ${logicalCallSql()} AND combo_name = ?
          AND timestamp >= ?
        GROUP BY model`
     )
@@ -341,7 +342,7 @@ function buildPerformance(comboName: string, since: string): ComboHealthMetrics[
          SUM(CASE WHEN status >= 200 AND status < 400 THEN 1 ELSE 0 END) as successCount,
          AVG(duration) as avgLatencyMs
        FROM call_logs
-       WHERE combo_name = ?
+       WHERE ${logicalCallSql()} AND combo_name = ?
          AND timestamp >= ?`
     )
     .get(comboName, since) as PerformanceRow | undefined;
@@ -389,7 +390,7 @@ function getHistoricalTargetMetrics(comboName: string, since: string): Historica
            duration,
            timestamp
          FROM call_logs
-         WHERE combo_name = ?
+         WHERE ${logicalCallSql()} AND combo_name = ?
            AND timestamp >= ?
            AND (
              NULLIF(combo_execution_key, '') IS NOT NULL

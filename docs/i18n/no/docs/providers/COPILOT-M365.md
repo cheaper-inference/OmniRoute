@@ -65,39 +65,37 @@ importen dekoder JWT-utløpstiden og viser tokenets gjenværende levetid.
 > **Aldri legg inn en ekte HAR-eksport, et tilgangstoken eller et oppdateringstoken i versjonskontroll.** Verdier i tester og
 > dokumentasjon må alltid være plassholdere.
 
-## Tokenlevetid og oppdatering
+## Tokenets levetid og fornyelse
 
-`access_token` er kortlivet (vanligvis **~75 minutter**). Etter utløp rapporterer leverandøren
-en tilkoblingsfeil, og du må hente inn påloggingsinformasjonen på nytt.
+`access_token` har kort levetid (vanligvis **~75 minutter**). Uten et brukbart fornyelsestoken
+må du hente legitimasjonen på nytt etter at den utløper.
 
-### Automatisk oppdatering med `refreshToken`
+### Automatisk fornyelse med `refreshToken`
 
-For å unngå manuell ny innhenting kan du lagre et Microsoft-oppdateringstoken i tilkoblingens
-**Advanced Settings → providerSpecificData**:
+I Microsoft 365-leverandørens dialogboks **Add connection** eller **Edit connection** åpner du
+**Advanced Settings → Refresh token (optional)**. Lim inn et Microsoft OAuth-fornyelsestoken
+for området `substrate.office.com/sydney`, og lagre. Inndatafeltet er maskert og forhåndsutfylles aldri med det lagrede tokenet. Når du redigerer, lar du feltet stå tomt for å beholde det eksisterende tokenet;
+lim inn et nytt token for å erstatte det.
 
-| Felt           | Beskrivelse                                                                  |
-| -------------- | ---------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth-oppdateringstoken for omfanget `substrate.office.com/sydney` |
-| `tier`         | `individual` (standard), `edu` eller `enterprise`                            |
+Hent fornyelsestokenet fra en Microsoft-enhetskode- eller autorisasjonskodeflyt
+med området `substrate.office.com/sydney`; dashbordet henter det ikke for deg.
+Når et fornyelsestoken er konfigurert, kontrollerer OmniRoute `access_token` før forespørsler
+og fornyer det bare når det må fornyes. En vellykket fornyelse lagrer også det roterte fornyelsestokenet,
+slik at du unngår å hente legitimasjonen på nytt manuelt så lenge fornyelsestokenet fortsatt er gyldig.
 
-Hent oppdateringstokenet fra en Microsoft-enhetskode- eller autorisasjonskodeflyt
-med omfanget `substrate.office.com/sydney`. Når `refreshToken` er angitt, oppdaterer OmniRoute
-`access_token` før hver forespørsel, slik at du ikke trenger å
-hente det inn på nytt etter hvert utløp på ~75 minutter.
-
-Hvis `refreshToken` ikke er angitt, må du manuelt hente inn WebSocket-påloggingsinformasjonen på nytt
-etter hvert utløp.
+Hvis `refreshToken` ikke er angitt, må du hente WebSocket-legitimasjonen på nytt manuelt
+etter hver utløpelse.
 
 ### Valg av nivå
 
-| Nivå         | Alias        | Grensesnitt                 |
-| ------------ | ------------ | --------------------------- |
-| `individual` | _(standard)_ | M365 Copilot for forbrukere |
-| `edu`        | `included`   | M365 Copilot for utdanning  |
-| `enterprise` | `work`       | M365 Copilot for arbeid     |
+| Nivå         | Alias       | Grensesnitt            |
+| ------------ | ----------- | ---------------------- |
+| `individual` | _(default)_ | Consumer M365 Copilot  |
+| `edu`        | `included`  | Education M365 Copilot |
+| `enterprise` | `work`      | M365 Copilot for Work  |
 
-Angi nivået under **Advanced Settings → providerSpecificData → tier**. Nivået påvirker
-BizChat-rutingen og modelltilgangen.
+Angi nivået under **Advanced Settings → Copilot tier**. Nivået påvirker
+BizChat-ruting og modelltilgang.
 
 ## Sikkerhetsmodell
 
@@ -112,30 +110,25 @@ BizChat-rutingen og modelltilgangen.
 
 ## Feilsøking
 
-### Autentiseringen mislykkes umiddelbart
+### Autentisering mislykkes umiddelbart
 
-- Kontroller at du kopierte fra **WebSocket URL**, ikke fra en XHR/Fetch-forespørsel. Påloggings-
-  informasjonen finnes i spørringsparameteren `access_token` for Chathub WebSocket-
-  tilkoblingen – ikke i en `Authorization: Bearer`-header.
-- Kontroller at `chathubPath` inneholder hele `<oid>@<tenant>`-segmentet fra URL-
-  banen.
+- Kontroller at du kopierte fra **WebSocket-URL-en**, ikke fra en XHR-/Fetch-forespørsel. Påloggingsopplysningene finnes i spørringsparameteren `access_token` for Chathub-WebSocket-tilkoblingen — ikke i et `Authorization: Bearer`-hode.
+- Sørg for at `chathubPath` inneholder hele `<oid>@<tenant>`-segmentet fra URL-banen.
 
-### Tokenet utløper etter ~75 minutter
+### Tokenet utløper etter ca. 75 minutter
 
-Dette er forventet. Uten et `refreshToken` er tilgangstokenet kortlivet. Du kan enten:
+Dette er forventet. Uten en `refreshToken` har tilgangstokenet kort levetid. Du kan enten:
 
-- Hente påloggingsinformasjonen på nytt fra DevTools, eller
-- Konfigurere et `refreshToken` i Advanced Settings for automatisk oppdatering.
+- Hente påloggingsopplysningene på nytt fra DevTools, eller
+- Konfigurere **Avanserte innstillinger → Oppdateringstoken (valgfritt)** i dialogboksen Legg til eller rediger tilkobling for automatisk fornyelse.
 
-### Test Connection lykkes, men chatten returnerer 401
+### Tilkoblingstesten lykkes, men chat returnerer 401
 
-Tokenet kan ha utløpt mellom valideringen og den første forespørselen. Hent ny
-påloggingsinformasjon.
+Tokenet kan ha utløpt mellom valideringen og den første forespørselen. Hent en ny påloggingsopplysning.
 
 ### Copilot vises ikke i leverandørlisten
 
-Kontroller at `copilot-m365-web` er aktivert under **Dashboard → Providers**. Leverandøren kan
-være skjult som standard i enkelte nivåer.
+Kontroller at `copilot-m365-web` er aktivert under **Instrumentbord → Leverandører**. Leverandøren kan være skjult som standard i enkelte nivåer.
 
 ## Referanser
 
