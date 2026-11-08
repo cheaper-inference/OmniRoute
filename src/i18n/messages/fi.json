@@ -6327,6 +6327,15 @@
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "quotaRefreshCurrent": "Päivitä nykyinen kiintiö",
+    "quotaRefreshCurrentHint": "Hakee tämän tilin nykyisen kiintiön kuluttamatta nollauskrediittejä.",
+    "quotaRefreshing": "Tarkistetaan kiintiötä…",
+    "quotaRefreshFresh": "Kiintiö tarkistettu. Palvelin määrittää tilin käytettävyyden.",
+    "quotaRefreshFailed": "Kiintiön tarkistus epäonnistui. Aiemmat tiedot säilyivät ennallaan.",
+    "quotaRefreshStale": "Palvelin palautti vanhoja kiintiötietoja. Tämä ei ole uusi havainto.",
+    "quotaRefreshPartial": "Vain osa kiintiötiedoista on saatavilla.",
+    "quotaWindowUnavailable": "Kiintiö ajanjaksolle {window} ei ole saatavilla",
+    "quotaConnectionRefreshFailed": "Kiintiön tarkistus päättyi, mutta tililuetteloa ei voitu päivittää.",
     "disableCoolingDescription": "Ohita tilapäinen jäädytysaika, jotta tämä yhteys pysyy käytettävissä myös palautettavien virheiden jälkeen (lopulliset tilat, kuten estetty/vanhentunut, ovat edelleen voimassa).",
     "disableCoolingLabel": "Poista jäädytysaika käytöstä tälle yhteydelle",
     "keepMidConversationSystemDescription": "Jätä keskustelun puolivälissä lähetetyt järjestelmäviestit viestiluetteloon sen sijaan, että siirrät ne ylimmän tason järjestelmäkehotteeseen, jotta kehotteiden välimuisti osuu jatkuvasti käännöksissä. Ota käyttöön vain, jos tämä ylävirta hyväksyy roolin \"järjestelmä\" viestien sisällä (muuten se vastaa 400).",
@@ -9261,7 +9270,12 @@
       "statsTitle": "Havainnot uudelleenkäynnistyksen jälkeen",
       "statsEmpty": "Ei vielä havaintoja.",
       "statsRequest": "Pyynnöt"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "Säilytä videosta johdetut kuvaruudut",
+    "modalityBridgeVideoDrilldownEnabledDesc": "Salli tilapäinen JPEG-kuvien säilytys vain, kun todennetussa pyynnössä on myös asetettu drilldown: true. Raakavideoita ei koskaan säilytetä.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "Salli todennettu kuvaruutujen tarkastelu",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Salli API-avainten lukea ja poistaa vain omia läpinäkymättömiä tunnisteitaan. Anonyymi käyttö tai käyttö eri avainten välillä ei ole sallittua.",
+    "modalityBridgeVideoDrilldownUsage": "Säilytetyt JPEG-kuvat / tavut"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -15199,6 +15213,63 @@
       "save": "Tallenna säännöt",
       "saved": "Jäähysäännöt tallennettu",
       "saveFailed": "Jäähysääntöjen tallentaminen epäonnistui"
+    },
+    "errorRules": {
+      "title": "Virheiden jäähysäännöt",
+      "subtitle": "Tunnista palveluntarjoajan virheet HTTP-tilan, virhetekstin tai molempien perusteella ja valitse, mitä jäähdytetään ja kuinka kauan. Nämä säännöt ajetaan ennen sisäänrakennettuja.",
+      "rulesHeading": "Säännöt",
+      "rulesEmpty": "Ei vielä sääntöjä.",
+      "addRule": "Lisää sääntö",
+      "provider": "Palveluntarjoaja",
+      "providerPlaceholder": "esim. openai",
+      "status": "HTTP-tila",
+      "statusPlaceholder": "Mikä tahansa",
+      "match": "Virheteksti sisältää",
+      "matchPlaceholder": "Mikä tahansa teksti",
+      "matchHint": "Ensimmäinen täsmäävä sääntö voittaa. Virheteksti on tavallista tekstiä, kirjainkoolla ei ole väliä, eikä se ole säännöllinen lauseke. Tyhjä kenttä täsmää kaikkeen.",
+      "scope": "Jäähdytä",
+      "scopes": {
+        "connection": "Tämä yhteys",
+        "model": "Vain tämä malli",
+        "provider": "Koko palveluntarjoaja"
+      },
+      "reason": "Syy",
+      "reasonAuto": "Automaattinen",
+      "reasons": {
+        "quota_exhausted": "Kiintiö käytetty",
+        "rate_limit_exceeded": "Nopeusraja ylitetty",
+        "auth_error": "Todennusvirhe",
+        "model_capacity": "Malli ylikuormitettu",
+        "server_error": "Palvelinvirhe",
+        "unknown": "Muu"
+      },
+      "duration": "Kesto",
+      "durations": {
+        "auto": "Oletus",
+        "30m": "30 minuuttia",
+        "1h": "1 tunti",
+        "5h": "5 tuntia",
+        "24h": "24 tuntia",
+        "custom": "Mukautettu"
+      },
+      "customMinutes": "Minuutit (1–43200)",
+      "remove": "Poista",
+      "defaultsHeading": "Oletus täsmäämättömille virheille",
+      "defaultsHint": "Valinnainen, palveluntarjoajakohtainen. Käytetään vain, kun mikään sääntö ei täsmää 402-, 403-, 408-, 429- tai 5xx-virheeseen. Pyyntövirheisiin, kuten 400, se ei koskaan vaikuta.",
+      "defaultsEmpty": "Oletusta ei ole asetettu. Täsmäämättömät virheet käsitellään sisäänrakennetusti.",
+      "addDefault": "Lisää oletus",
+      "errors": {
+        "provider": "Anna palveluntarjoaja.",
+        "condition": "Aseta HTTP-tila, virheteksti tai molemmat.",
+        "status": "Käytä tilaa väliltä 100–599.",
+        "duration": "Anna 1–43200 minuuttia.",
+        "duplicateDefault": "Tällä palveluntarjoajalla on jo oletus.",
+        "tooMany": "Enintään 50 sääntöä."
+      },
+      "save": "Tallenna virhesäännöt",
+      "saved": "Virhesäännöt tallennettu",
+      "saveFailed": "Virhesääntöjä ei voitu tallentaa",
+      "loadFailed": "Virhesääntöjä ei voitu ladata"
     },
     "list": {
       "title": "Reitityksen ulkopuolella olevat yhteydet",

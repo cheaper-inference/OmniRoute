@@ -6327,6 +6327,15 @@
     "failedUpdateCodexPaidCredits": "No se pudo actualizar la política de créditos de pago de Codex",
     "allowCodexPaidCreditsLabel": "Permitir créditos de pago de Codex",
     "allowCodexPaidCreditsDescription": "Permite que esta cuenta use créditos de pago cuando su cuota de suscripción alcance el umbral. Requiere créditos disponibles informados por OpenAI; puede generar cargos. Los límites de Spark y los enfriamientos del proveedor siguen aplicándose. La disponibilidad de créditos se comprueba aunque la verificación previa de cuota esté desactivada, salvo que el filtrado local de cuota esté totalmente desactivado (verificación previa de cuota y política de límites, ambas desactivadas).",
+    "quotaRefreshCurrent": "Actualizar cuota actual",
+    "quotaRefreshCurrentHint": "Consulta la cuota actual de esta cuenta sin gastar créditos de restablecimiento.",
+    "quotaRefreshing": "Consultando cuota…",
+    "quotaRefreshFresh": "Cuota consultada. El servidor determina la disponibilidad de la cuenta.",
+    "quotaRefreshFailed": "No se pudo consultar la cuota. Los datos anteriores no han cambiado.",
+    "quotaRefreshStale": "El servidor devolvió datos antiguos de cuota. No son una observación nueva.",
+    "quotaRefreshPartial": "Solo está disponible una parte de la cuota.",
+    "quotaWindowUnavailable": "Cuota de {window} no disponible",
+    "quotaConnectionRefreshFailed": "La consulta de cuota terminó, pero no se pudo actualizar la lista de cuentas.",
     "disableCoolingDescription": "Omite el tiempo de espera transitorio para que esta conexión siga siendo apta incluso después de errores recuperables (los estados terminales, como bloqueado o caducado, siguen siendo aplicables).",
     "disableCoolingLabel": "Desactivar el tiempo de espera para esta conexión",
     "keepMidConversationSystemDescription": "Deje los mensajes del sistema enviados a mitad de la conversación dentro de la lista de mensajes en lugar de moverlos al mensaje del sistema de nivel superior, para que el caché de mensajes siga apareciendo en todos los turnos. Habilítelo solo si este upstream acepta el rol \"sistema\" dentro de los mensajes (de lo contrario, responde 400).",
@@ -9261,7 +9270,12 @@
       "statsTitle": "Detecciones desde el reinicio",
       "statsEmpty": "Aún no hay detecciones.",
       "statsRequest": "Solicitudes"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "Retener fotogramas derivados del vídeo",
+    "modalityBridgeVideoDrilldownEnabledDesc": "Permitir la retención temporal de JPEG solo cuando la solicitud autenticada también indique drilldown: true. El vídeo original nunca se retiene.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "Permitir la consulta autenticada de fotogramas",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Permitir que cada clave de API consulte y elimine únicamente sus propios handles opacos. Sin acceso anónimo ni entre claves.",
+    "modalityBridgeVideoDrilldownUsage": "JPEG retenidos / bytes"
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -15199,6 +15213,63 @@
       "save": "Guardar reglas",
       "saved": "Reglas de enfriamiento guardadas",
       "saveFailed": "No se pudieron guardar las reglas de enfriamiento"
+    },
+    "errorRules": {
+      "title": "Reglas de enfriamiento por error",
+      "subtitle": "Detecta errores del proveedor por estado HTTP, texto del error o ambos, y elige qué enfriar y durante cuánto tiempo. Estas reglas se aplican antes que las integradas.",
+      "rulesHeading": "Reglas",
+      "rulesEmpty": "Aún no hay reglas.",
+      "addRule": "Añadir regla",
+      "provider": "Proveedor",
+      "providerPlaceholder": "p. ej. openai",
+      "status": "Estado HTTP",
+      "statusPlaceholder": "Cualquiera",
+      "match": "El texto del error contiene",
+      "matchPlaceholder": "Cualquier texto",
+      "matchHint": "Gana la primera regla que coincida. El texto del error es texto plano sin distinguir mayúsculas, no una expresión regular. Deja un campo vacío para que coincida con todo.",
+      "scope": "Enfriar",
+      "scopes": {
+        "connection": "Esta conexión",
+        "model": "Solo este modelo",
+        "provider": "Todo el proveedor"
+      },
+      "reason": "Motivo",
+      "reasonAuto": "Automático",
+      "reasons": {
+        "quota_exhausted": "Cuota agotada",
+        "rate_limit_exceeded": "Límite de tasa alcanzado",
+        "auth_error": "Error de autenticación",
+        "model_capacity": "Modelo saturado",
+        "server_error": "Error del servidor",
+        "unknown": "Otro"
+      },
+      "duration": "Duración",
+      "durations": {
+        "auto": "Predeterminada",
+        "30m": "30 minutos",
+        "1h": "1 hora",
+        "5h": "5 horas",
+        "24h": "24 horas",
+        "custom": "Personalizada"
+      },
+      "customMinutes": "Minutos (de 1 a 43200)",
+      "remove": "Quitar",
+      "defaultsHeading": "Valor predeterminado para fallos sin regla",
+      "defaultsHint": "Opcional, por proveedor. Solo se aplica cuando ninguna regla coincide con un error 402, 403, 408, 429 o 5xx. Los errores de solicitud como 400 nunca se ven afectados.",
+      "defaultsEmpty": "Sin valor predeterminado. Los errores sin regla mantienen el comportamiento integrado.",
+      "addDefault": "Añadir valor predeterminado",
+      "errors": {
+        "provider": "Introduce un proveedor.",
+        "condition": "Indica un estado HTTP, un texto de error o ambos.",
+        "status": "Usa un estado entre 100 y 599.",
+        "duration": "Introduce de 1 a 43200 minutos.",
+        "duplicateDefault": "Este proveedor ya tiene un valor predeterminado.",
+        "tooMany": "Como máximo 50 reglas."
+      },
+      "save": "Guardar reglas de error",
+      "saved": "Reglas de error guardadas",
+      "saveFailed": "No se pudieron guardar las reglas de error",
+      "loadFailed": "No se pudieron cargar las reglas de error"
     },
     "list": {
       "title": "Conexiones fuera de enrutamiento",
