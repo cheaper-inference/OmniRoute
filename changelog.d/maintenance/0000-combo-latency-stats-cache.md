@@ -1,0 +1,1 @@
+- **perf(combo):** reuse auto-combo latency statistics for 10 seconds and coalesce concurrent reads.
