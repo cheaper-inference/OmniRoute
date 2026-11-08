@@ -47,6 +47,7 @@ import { getSettings } from "@/lib/db/settings";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { saveCallLog } from "@/lib/usageDb";
+import { lockBorrowedSearchKey, searchKeyLockModel } from "@/lib/search/executeWebSearch";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -104,9 +105,12 @@ async function resolveSearchCredentials(
 
   for (const fallbackId of getSearchCredentialFallbacks(providerId)) {
     const fallbackCredentials = withoutKeyScopeBlocked(
-      await getProviderCredentialsWithQuotaPreflight(fallbackId, null, allowedConnections).catch(
-        () => null
-      )
+      await getProviderCredentialsWithQuotaPreflight(
+        fallbackId,
+        null,
+        allowedConnections,
+        searchKeyLockModel(providerId)
+      ).catch(() => null)
     );
     if (fallbackCredentials && !isAllRateLimitedCredentials(fallbackCredentials)) {
       return fallbackCredentials;
@@ -408,6 +412,7 @@ async function postHandler(request: Request, context: unknown) {
       });
 
       if (!result.success) {
+        lockBorrowedSearchKey(providerConfig.id, credentials, result.status);
         throw new SearchError(result.error || "Search failed", result.status || 502);
       }
 
