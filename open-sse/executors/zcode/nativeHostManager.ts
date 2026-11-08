@@ -108,6 +108,22 @@ export async function prepareNativeAccountState(root: string, account: NativeAcc
   return { directory, serverRoot: join(directory, ".zcode", "server"), secret, fingerprint };
 }
 
+/** Return the first complete pinned runtime, retaining the previous version as fallback. */
+async function firstAvailableRuntime(candidates: unknown[]): Promise<string | undefined> {
+  for (const root of candidates) {
+    if (typeof root !== "string" || !root.startsWith("/")) continue;
+    try {
+      await Promise.all(
+        ["node", "server-core.js", "zcode.cjs"].map((file) => access(join(root, file)))
+      );
+      return root;
+    } catch {
+      // Preserve the last installed version when a selected directory is missing.
+    }
+  }
+  return undefined;
+}
+
 export async function resolveNativeRuntime(dataDirectory = resolveDataDir()): Promise<string> {
   if (process.env.ZCODE_NATIVE_RUNTIME) {
     const root = resolve(process.env.ZCODE_NATIVE_RUNTIME);
@@ -125,17 +141,8 @@ export async function resolveNativeRuntime(dataDirectory = resolveDataDir()): Pr
       throw new NativeSessionError("The pinned ZCode runtime manifest is invalid", 503);
   }
   if (pointer) {
-    for (const root of [pointer.runtime, pointer.previousRuntime]) {
-      if (typeof root !== "string" || !root.startsWith("/")) continue;
-      try {
-        await Promise.all(
-          ["node", "server-core.js", "zcode.cjs"].map((file) => access(join(root, file)))
-        );
-        return root;
-      } catch {
-        // Preserve the last installed version when a selected directory is missing.
-      }
-    }
+    const pinned = await firstAvailableRuntime([pointer.runtime, pointer.previousRuntime]);
+    if (pinned) return pinned;
     throw new NativeSessionError("The pinned ZCode runtime is unavailable", 503);
   }
   const releases = join(homedir(), ".zcode", "server", "releases");

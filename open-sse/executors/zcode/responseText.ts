@@ -1,3 +1,24 @@
+/** Read one balanced reasoning wrapper while preserving its inner text. */
+function consumeThought(content: string, start: number) {
+  const tags = /<\/?think>/g;
+  tags.lastIndex = start;
+  let depth = 1;
+  let cursor = start;
+  let thought = "";
+  let closeEnd = -1;
+  for (let tag = tags.exec(content); tag; tag = tags.exec(content)) {
+    thought += content.slice(cursor, tag.index);
+    cursor = tags.lastIndex;
+    depth += tag[0] === "<think>" ? 1 : -1;
+    if (depth === 0) {
+      closeEnd = cursor;
+      break;
+    }
+  }
+  if (closeEnd < 0) thought += content.slice(cursor);
+  return { thought, closeEnd };
+}
+
 /** Native ZCode sometimes returns reasoning wrappers inside its final text. */
 export function normalizeZcodeResponseText(text: string, reasoning = "") {
   const thoughts = reasoning ? [reasoning] : [];
@@ -13,22 +34,7 @@ export function normalizeZcodeResponseText(text: string, reasoning = "") {
     }
     const open = content.match(/^\s*<think>\s*/);
     if (!open) break;
-    const tags = /<\/?think>/g;
-    tags.lastIndex = open[0].length;
-    let depth = 1;
-    let cursor = open[0].length;
-    let thought = "";
-    let closeEnd = -1;
-    for (let tag = tags.exec(content); tag; tag = tags.exec(content)) {
-      thought += content.slice(cursor, tag.index);
-      cursor = tags.lastIndex;
-      depth += tag[0] === "<think>" ? 1 : -1;
-      if (depth === 0) {
-        closeEnd = cursor;
-        break;
-      }
-    }
-    if (closeEnd < 0) thought += content.slice(cursor);
+    const { thought, closeEnd } = consumeThought(content, open[0].length);
     if (thought.trim()) thoughts.push(thought.trim());
     content = closeEnd < 0 ? "" : content.slice(closeEnd).trimStart();
   }

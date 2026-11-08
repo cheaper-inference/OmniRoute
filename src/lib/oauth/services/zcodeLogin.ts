@@ -142,6 +142,83 @@ export async function startZcodeLogin(
     throw error;
   }
 }
+
+function connectionResult(session: Session, id: string) {
+  return {
+    status: "ok" as const,
+    connection: { id, provider: "zcode", family: session.family },
+  };
+}
+
+async function normalizeReadySession(session: Session) {
+  if (!session.ready || session.normalized) return;
+  if (session.family === "zai")
+    session.ready.accessToken = await exchangeZaiBusinessToken(session.ready.accessToken);
+  session.normalized = true;
+}
+
+async function persistReadySession(
+  sessionId: string,
+  session: Session,
+  persist: (
+    family: ZcodeFamily,
+    result: Ready,
+    receipt: string,
+    targetConnectionId?: string
+  ) => Promise<{ id: string }>
+) {
+  await normalizeReadySession(session);
+  const connection = await persist(
+    session.family,
+    session.ready!,
+    createHash("sha256").update(sessionId).digest("hex"),
+    session.targetConnectionId
+  );
+  session.connectionId = connection.id;
+  session.ready = undefined;
+  session.pollToken = "";
+  return connectionResult(session, connection.id);
+}
+
+async function receiveReadySession(sessionId: string, session: Session) {
+  const data = await upstream(
+    `/oauth/cli/poll/${encodeURIComponent(session.flowId)}`,
+    session.pollToken
+  );
+  if (session.expiresAt <= Date.now()) {
+    sessions.delete(sessionId);
+    return { status: "expired" as const };
+  }
+  if (data.status === "pending") return { status: "pending" as const };
+  if (data.status === "failed") {
+    sessions.delete(sessionId);
+    return { status: "failed" as const };
+  }
+  const user = obj(data.user),
+    provider = obj(data[session.family]);
+  const token = text(data.token),
+    accessToken = text(provider.access_token) ?? text(provider.accessToken),
+    userId = text(user.user_id);
+  if (data.status !== "ready" || !token || !accessToken || !userId)
+    throw new Error("Invalid Z-code OAuth poll response");
+  const refreshToken =
+    session.family === "bigmodel"
+      ? (text(provider.refresh_token) ?? text(provider.refreshToken))
+      : undefined;
+  session.ready = {
+    status: "ready",
+    token,
+    accessToken,
+    userId,
+    name: text(user.name),
+    email: text(user.email),
+    ...(refreshToken ? { refreshToken } : {}),
+  };
+  // Keep the grant until persistence is reconciled; a retry never polls upstream again.
+  session.pollToken = "";
+  return null;
+}
+
 export async function pollZcodeLogin(
   sessionId: string,
   owner: string,
@@ -155,86 +232,14 @@ export async function pollZcodeLogin(
   prune();
   const session = sessions.get(sessionId);
   if (!session || session.owner !== owner) return { status: "expired" as const };
-  if (session.connectionId)
-    return {
-      status: "ok" as const,
-      connection: { id: session.connectionId, provider: "zcode", family: session.family },
-    };
+  if (session.connectionId) return connectionResult(session, session.connectionId);
   if (session.busy) return { status: "pending" as const };
   session.busy = true;
-  const normalize = async () => {
-    if (session.ready && !session.normalized) {
-      if (session.family === "zai")
-        session.ready.accessToken = await exchangeZaiBusinessToken(session.ready.accessToken);
-      session.normalized = true;
-    }
-  };
   try {
-    if (session.ready) {
-      await normalize();
-      const connection = await persist(
-        session.family,
-        session.ready,
-        createHash("sha256").update(sessionId).digest("hex"),
-        session.targetConnectionId
-      );
-      session.connectionId = connection.id;
-      session.ready = undefined;
-      session.pollToken = "";
-      return {
-        status: "ok" as const,
-        connection: { id: connection.id, provider: "zcode", family: session.family },
-      };
-    }
-    const data = await upstream(
-      `/oauth/cli/poll/${encodeURIComponent(session.flowId)}`,
-      session.pollToken
-    );
-    if (session.expiresAt <= Date.now()) {
-      sessions.delete(sessionId);
-      return { status: "expired" as const };
-    }
-    if (data.status === "pending") return { status: "pending" as const };
-    if (data.status === "failed") {
-      sessions.delete(sessionId);
-      return { status: "failed" as const };
-    }
-    const user = obj(data.user),
-      provider = obj(data[session.family]);
-    const token = text(data.token),
-      accessToken = text(provider.access_token) ?? text(provider.accessToken),
-      userId = text(user.user_id);
-    if (data.status !== "ready" || !token || !accessToken || !userId)
-      throw new Error("Invalid Z-code OAuth poll response");
-    const refreshToken =
-      session.family === "bigmodel"
-        ? (text(provider.refresh_token) ?? text(provider.refreshToken))
-        : undefined;
-    const ready: Ready = {
-      status: "ready",
-      token,
-      accessToken,
-      userId,
-      name: text(user.name),
-      email: text(user.email),
-      ...(refreshToken ? { refreshToken } : {}),
-    };
-    // Keep the grant until persistence is reconciled; a retry never polls upstream again.
-    session.ready = ready;
-    session.pollToken = "";
-    await normalize();
-    const connection = await persist(
-      session.family,
-      ready,
-      createHash("sha256").update(sessionId).digest("hex"),
-      session.targetConnectionId
-    );
-    session.connectionId = connection.id;
-    session.ready = undefined;
-    return {
-      status: "ok" as const,
-      connection: { id: connection.id, provider: "zcode", family: session.family },
-    };
+    if (session.ready) return await persistReadySession(sessionId, session, persist);
+    const result = await receiveReadySession(sessionId, session);
+    if (result) return result;
+    return await persistReadySession(sessionId, session, persist);
   } finally {
     session.busy = false;
   }

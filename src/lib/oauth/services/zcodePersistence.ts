@@ -7,6 +7,17 @@ import type { Ready, ZcodeFamily } from "./zcodeLogin";
 
 export class ZcodeReauthMismatchError extends Error {}
 
+function isMatchingReauthorizationTarget(
+  target: { authType?: string; providerSpecificData?: unknown } | undefined,
+  family: ZcodeFamily,
+  userId: string
+) {
+  const data = target?.providerSpecificData as Record<string, unknown> | undefined;
+  return Boolean(
+    target && target.authType === "oauth" && data?.family === family && data.userId === userId
+  );
+}
+
 /** A receipt lookup bypasses the connection cache, including after a post-insert error. */
 export async function persistZcodeConnection(
   family: ZcodeFamily,
@@ -23,12 +34,7 @@ export async function persistZcodeConnection(
   if (targetConnectionId) {
     const target = existing.find((row: { id?: string }) => row.id === targetConnectionId);
     const data = target?.providerSpecificData as Record<string, unknown> | undefined;
-    if (
-      !target ||
-      target.authType !== "oauth" ||
-      data?.family !== family ||
-      data.userId !== credentials.userId
-    ) {
+    if (!isMatchingReauthorizationTarget(target, family, credentials.userId)) {
       throw new ZcodeReauthMismatchError("The signed-in account does not match this connection");
     }
     const updated = await updateProviderConnection(targetConnectionId, {

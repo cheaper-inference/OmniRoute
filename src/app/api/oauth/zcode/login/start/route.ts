@@ -13,6 +13,23 @@ const schema = z.object({
   family: z.enum(["zai", "bigmodel"]),
   connectionId: z.string().uuid().optional(),
 });
+
+async function isValidReauthorizationTarget(connectionId: string, family: string) {
+  const connection = await getProviderConnectionById(connectionId);
+  const data = connection?.providerSpecificData;
+  const account =
+    data && typeof data === "object" && !Array.isArray(data)
+      ? (data as Record<string, unknown>)
+      : null;
+  return Boolean(
+    connection &&
+    connection.provider === "zcode" &&
+    connection.authType === "oauth" &&
+    account?.family === family &&
+    typeof account.userId === "string"
+  );
+}
+
 export async function POST(request: Request) {
   const auth = await requireManagementAuth(request, {
     invalidApiKeyStatus: 401,
@@ -24,25 +41,14 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   try {
-    if (parsed.data.connectionId) {
-      const connection = await getProviderConnectionById(parsed.data.connectionId);
-      const data = connection?.providerSpecificData;
-      const account =
-        data && typeof data === "object" && !Array.isArray(data)
-          ? (data as Record<string, unknown>)
-          : null;
-      if (
-        !connection ||
-        connection.provider !== "zcode" ||
-        connection.authType !== "oauth" ||
-        account?.family !== parsed.data.family ||
-        typeof account?.userId !== "string"
-      ) {
-        return NextResponse.json(
-          { error: "Invalid Z-code account for reauthorization" },
-          { status: 400 }
-        );
-      }
+    if (
+      parsed.data.connectionId &&
+      !(await isValidReauthorizationTarget(parsed.data.connectionId, parsed.data.family))
+    ) {
+      return NextResponse.json(
+        { error: "Invalid Z-code account for reauthorization" },
+        { status: 400 }
+      );
     }
     return NextResponse.json(
       await startZcodeLogin(
