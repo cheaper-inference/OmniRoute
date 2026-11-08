@@ -13,6 +13,7 @@ import {
 // antigravity/sseCollect.ts submodule pattern.
 import { mergeAbortSignals, type ExecutorLog } from "../base.ts";
 import { applyFingerprint, isCliCompatEnabled } from "../../config/cliFingerprints.ts";
+import { copyAntigravityRequestForSerialization } from "./requestSerializationCopy.ts";
 import {
   buildAntigravityUpstreamError,
   projectAntigravityValidationDiagnostic,
@@ -249,24 +250,6 @@ export function buildAntigravity429ErrorMessage(errorJson: unknown): string {
   return errorMessage;
 }
 
-function cloneAntigravityRequestBody(body: unknown): unknown {
-  if (!body || typeof body !== "object") {
-    return body;
-  }
-
-  let clone: unknown;
-  try {
-    clone = structuredClone(body);
-  } catch {
-    clone = JSON.parse(JSON.stringify(body));
-  }
-
-  if (clone && typeof clone === "object") {
-    delete (clone as Record<string, unknown>)._toolNameMap;
-  }
-  return clone;
-}
-
 function getToolNameMap(body: Record<string, unknown>): Map<string, string> | null {
   return body._toolNameMap instanceof Map ? body._toolNameMap : null;
 }
@@ -291,7 +274,7 @@ function serializeAntigravityRequest(
   headers: Record<string, string>,
   body: unknown
 ): { headers: Record<string, string>; bodyString: string } {
-  const serializedBody = cloneAntigravityRequestBody(body);
+  const serializedBody = copyAntigravityRequestForSerialization(body);
 
   if (!isCliCompatEnabled(provider)) {
     return { headers, bodyString: JSON.stringify(serializedBody) };
