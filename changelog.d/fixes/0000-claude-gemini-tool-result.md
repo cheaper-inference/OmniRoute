@@ -1,0 +1,1 @@
+- **fix(translator):** A failed Claude tool result (`is_error: true`) now reaches Gemini in the `error` field of the function response, so the model can see that the tool failed.

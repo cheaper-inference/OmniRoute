@@ -70,10 +70,13 @@ function appendTextToFunctionResponse(
   textParts: string[]
 ): boolean {
   const response = part.functionResponse?.response;
-  if (!response || typeof response.result !== "string") return false;
+  // A failed tool_result carries its text in `error`, a successful one in `result`.
+  const key = typeof response?.result === "string" ? "result" : "error";
+  const current = response?.[key];
+  if (!response || typeof current !== "string") return false;
   const combinedText = textParts.join("\n");
   if (!combinedText) return false;
-  response.result = response.result ? `${response.result}\n${combinedText}` : combinedText;
+  response[key] = current ? `${current}\n${combinedText}` : combinedText;
   return true;
 }
 
@@ -379,7 +382,10 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                 functionResponse: {
                   ...(stripFunctionCallId ? {} : { id: toolUseId }),
                   name,
-                  response: { result: sanitizeFunctionResponseData(content) },
+                  response: {
+                    [block.is_error === true ? "error" : "result"]:
+                      sanitizeFunctionResponseData(content),
+                  },
                 },
               });
               afterLastToolResult = parts.length;
