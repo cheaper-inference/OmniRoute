@@ -4,6 +4,7 @@ import type {
 } from "../utils/providerHttpAttempts.ts";
 import { finalizeTranslatedRequest } from "./chatCore/translatedRequestFinalize.ts";
 import { isPassiveCodex } from "../services/tokenRefresh/passiveCodex.ts";
+import { enforceResponsesToolHistory } from "../translator/helpers/responsesToolHistory.ts";
 import {
   injectMemoryAndSkills,
   mergeInjectedFallbackOwnerNames,
@@ -363,6 +364,7 @@ export async function handleChatCore(args: Parameters<typeof handleChatCoreInner
   return withResilienceActionsContext([args], (forwarded) => handleChatCoreInner(forwarded));
 }
 
+/** Process a chat request through admission, translation, dispatch, and response handling. */
 async function handleChatCoreInner({
   body,
   modelInfo,
@@ -2218,6 +2220,9 @@ async function handleChatCoreInner({
     );
 
   try {
+    if (sourceFormat === FORMATS.OPENAI_RESPONSES) {
+      enforceResponsesToolHistory(body as Record<string, unknown>);
+    }
     if (nativeResponsesPassthrough) {
       translatedBody = stampNativeResponsesPassthroughBody(
         applyReasoningRuleDirective(body, "openai-responses") as Record<string, unknown>,
@@ -2423,19 +2428,35 @@ async function handleChatCoreInner({
   // Request tool metadata, Kiro/Claude tool dispatch fixes, the response tool-name map, the
   // upstream model id, the previous_response_id policy and the Codex effort guard: extracted to
   // chatCore/translatedRequestFinalize.ts (chatCore slice 2).
-  const finalizedRequest = finalizeTranslatedRequest({
-    translatedBody,
-    body,
-    provider,
-    alias,
-    effectiveModel,
-    sourceFormat,
-    targetFormat,
-    isClaudePassthrough,
-    credentials,
-    previousResponseIdMode: settings.responsesPreviousResponseIdMode,
-    log,
-  });
+  let finalizedRequest: ReturnType<typeof finalizeTranslatedRequest>;
+  try {
+    finalizedRequest = finalizeTranslatedRequest({
+      translatedBody,
+      body,
+      provider,
+      alias,
+      effectiveModel,
+      sourceFormat,
+      targetFormat,
+      isClaudePassthrough,
+      credentials,
+      previousResponseIdMode: settings.responsesPreviousResponseIdMode,
+      log,
+    });
+  } catch (error) {
+    // Final continuation policy can invalidate otherwise valid source history.
+    // Release this request's owner before invoking fallible error/plugin handling.
+    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestOwner ?? pendingRequestId);
+    return await buildRequestTranslationErrorResult({
+      error,
+      traceId,
+      body,
+      model,
+      provider,
+      apiKeyInfo,
+      log,
+    });
+  }
   translatedBody = finalizedRequest.translatedBody;
   const { requestToolIdentityMap, toolNameMap } = finalizedRequest;
 
