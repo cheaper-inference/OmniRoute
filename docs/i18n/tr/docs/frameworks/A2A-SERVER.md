@@ -165,7 +165,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ile bağlantılı 6
 | Sağlık Raporu       | `health-report`      | Sağlayıcı başına devre kesiciyi, bekleme süresini ve kilitleme durumunu toplar                                                                             | sağlık, dayanıklılık      | "Tüm sağlayıcıların sağlık durumunu göster"     |
 | Yetenekleri Listele | `list-capabilities`  | 45 girişli tam Ajan Becerileri kataloğunu (23 API + 21 CLI + 1 config), bağlam ekleme için ham SKILL.md URLs içeren bir işaretleme tablosu olarak döndürür | katalog, keşif, beceriler | "Tüm OmniRoute yeteneklerini listele"           |
 
-> Temsilci Kartı, canlı 377 sağlayıcı kataloğuyla uyumlu tutulmalıdır; sağlayıcı sayıları ve free/no-auth meta verileri çalışma zamanı kayıt defterinden alınır.
+> Temsilci Kartı, canlı 380 sağlayıcı kataloğuyla uyumlu tutulmalıdır; sağlayıcı sayıları ve free/no-auth meta verileri çalışma zamanı kayıt defterinden alınır.
 
 ### `list-capabilities` Beceri Detayı
 
@@ -201,15 +201,15 @@ JSON-RPC uç noktası `/a2a`, standart A2A giriş noktasıdır. Aşağıdaki RES
 
 ## Yeni Bir Beceri Ekleme
 
-1. **Beceri dosyasını oluşturun:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Beceri dosyası oluştur:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` biçiminde bir async fonksiyon dışa aktarın. `smartRouting.ts` gibi mevcut becerilerin yapısını izleyin.
+   Bir eşzamansız işlevi `(task: A2ATask) => Promise<{ artifacts, metadata }>` dışa aktarın. `smartRouting.ts` gibi mevcut becerilerin şeklini takip edin.
 
-2. **İşleyiciyi kaydedin:** `src/lib/a2a/taskExecution.ts` dosyasında `A2A_SKILL_HANDLERS` içine bir girdi ekleyin:
+2. **Kayıt işleyicisi:** `src/lib/a2a/taskExecution.ts` `A2A_SKILL_HANDLERS` bir giriş ekleyin:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...mevcut beceriler
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -217,7 +217,7 @@ JSON-RPC uç noktası `/a2a`, standart A2A giriş noktasıdır. Aşağıdaki RES
    };
    ```
 
-3. **Agent Card'da kullanıma sunun:** `src/lib/a2a/agentCardMetadata.ts` dosyasında (`/.well-known/agent.json` ve `/.well-known/agent-card.json` tarafından paylaşılır), `skills` dizisine şunu ekleyin:
+3. **Temsilci Kartında Gösterim:** `src/lib/a2a/agentCardMetadata.ts` ( `/.well-known/agent.json` ve `/.well-known/agent-card.json` tarafından paylaşılır), `skills` dizisine ekleyin:
 
    ```json
    {
@@ -229,9 +229,9 @@ JSON-RPC uç noktası `/a2a`, standart A2A giriş noktasıdır. Aşağıdaki RES
    }
    ```
 
-4. **Testleri yazın:** `tests/unit/a2a-<your-skill>.test.ts`. Başarılı senaryoyu ve hata senaryosunu kapsayın.
+4. **Testleri yazın:** `tests/unit/a2a-<your-skill>.test.ts`. Mutlu yolu + hata yolunu örtün.
 
-5. **Yeni beceriyi** bu dosyanın `Available Skills` tablosunda belgeleyin.
+5. **Belge** bu dosyanın `Available Skills` tablosundaki yeni beceri.
 
 ---
 
