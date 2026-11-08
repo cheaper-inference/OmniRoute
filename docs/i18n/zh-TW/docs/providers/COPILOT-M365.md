@@ -57,32 +57,30 @@ OmniRoute 會掃描 HAR 以尋找 Chathub WebSocket URL、擷取 `access_token` 
 
 > **切勿提交真實的 HAR 匯出檔、存取權杖或重新整理權杖。** 測試和文件中的值一律必須使用預留位置。
 
-## 權杖有效期限與重新整理
+## Token 存留時間與重新整理
 
-`access_token` 的有效期很短（通常約為 **75 分鐘**）。到期後，提供者會回報連線錯誤，您必須重新擷取憑證。
+`access_token` 的有效期限很短（通常為 **~75 分鐘**）。如果沒有可用的重新整理
+權杖，您必須在憑證過期後重新擷取憑證。
 
 ### 使用 `refreshToken` 自動重新整理
 
-若要避免手動重新擷取，您可以在連線的 **Advanced Settings → providerSpecificData** 中儲存 Microsoft 重新整理權杖：
+在 Microsoft 365 提供者的 **新增連線** 或 **編輯連線** 對話方塊中，開啟
+**進階設定 → 重新整理權杖（選用）**。貼上適用於 `substrate.office.com/sydney` 範圍的 Microsoft OAuth 重新整理權杖，然後儲存。輸入內容會被遮罩，且不會預先填入已儲存的權杖。編輯時，留白即可保留現有權杖；貼上新的權杖則會取代它。
 
-| 欄位           | 說明                                                                     |
-| -------------- | ------------------------------------------------------------------------ |
-| `refreshToken` | 適用於 `substrate.office.com/sydney` 範圍的 Microsoft OAuth 重新整理權杖 |
-| `tier`         | `individual`（預設）、`edu` 或 `enterprise`                              |
+從限定於 `substrate.office.com/sydney` 範圍的 Microsoft 裝置程式碼或授權程式碼流程取得重新整理權杖；儀表板不會代您取得。設定重新整理權杖後，OmniRoute 會在提出要求前檢查 `access_token`，並只在需要重新整理時進行重新整理。成功重新整理後，也會儲存輪替後的重新整理權杖，因此只要重新整理權杖仍然有效，就不需要手動重新擷取。
 
-透過範圍設定為 `substrate.office.com/sydney` 的 Microsoft 裝置代碼或授權代碼流程取得重新整理權杖。設定 `refreshToken` 後，OmniRoute 會在每次請求前預先重新整理 `access_token`，因此無須在每次約 75 分鐘的有效期屆滿後重新擷取。
+如果未設定 `refreshToken`，您必須在每次過期後手動重新擷取 WebSocket 憑證。
 
-如果未設定 `refreshToken`，則每次到期後都必須手動重新擷取 WebSocket 憑證。
+### 層級選取
 
-### 層級選擇
-
-| 層級         | 別名       | 使用介面              |
+| 層級         | 別名       | 介面                  |
 | ------------ | ---------- | --------------------- |
-| `individual` | _（預設）_ | 消費者版 M365 Copilot |
+| `individual` | _(預設)_   | 消費者版 M365 Copilot |
 | `edu`        | `included` | 教育版 M365 Copilot   |
-| `enterprise` | `work`     | M365 Copilot for Work |
+| `enterprise` | `work`     | 工作版 M365 Copilot   |
 
-請在 **Advanced Settings → providerSpecificData → tier** 中設定層級。該層級會影響 BizChat 路由和模型存取權限。
+在 **進階設定 → Copilot 層級** 中設定層級。層級會影響
+BizChat 路由和模型存取權。
 
 ## 安全性模型
 
@@ -96,25 +94,23 @@ OmniRoute 會掃描 HAR 以尋找 Chathub WebSocket URL、擷取 `access_token` 
 
 ### 驗證立即失敗
 
-- 請確認您是從 **WebSocket URL** 複製，而不是從 XHR/Fetch 請求複製。認證資訊位於 Chathub WebSocket
-  連線的 `access_token` 查詢參數中，而不是位於 `Authorization: Bearer` 標頭中。
-- 請確認 `chathubPath` 包含 URL
-  路徑中完整的 `<oid>@<tenant>` 區段。
+- 確認您是從 **WebSocket URL** 複製，而不是從 XHR/Fetch 請求複製。認證憑證位於 Chathub WebSocket 連線的 `access_token` 查詢參數中，而不是 `Authorization: Bearer` 標頭中。
+- 確保 `chathubPath` 包含 URL 路徑中的完整 `<oid>@<tenant>` 區段。
 
-### 權杖約在 75 分鐘後到期
+### Token 在約 75 分鐘後過期
 
-這是預期行為。若沒有 `refreshToken`，存取權杖的有效期很短。您可以：
+這是預期行為。若沒有 `refreshToken`，存取權杖的有效時間很短。您可以：
 
-- 從 DevTools 重新擷取認證資訊，或
-- 在「進階設定」中設定 `refreshToken`，以自動重新整理。
+- 從 DevTools 重新擷取憑證，或
+- 在「新增或編輯連線」對話方塊中，於 **進階設定 → Refresh token (optional)** 設定自動重新整理。
 
-### 測試連線成功，但聊天功能傳回 401
+### 測試連線成功，但聊天回傳 401
 
-權杖可能已在驗證完成後、首次請求送出前到期。請重新擷取新的認證資訊。
+權杖可能在驗證與第一次請求之間已過期。請重新擷取最新的憑證。
 
 ### Copilot 未出現在提供者清單中
 
-請確認已在 **Dashboard → Providers** 中啟用 `copilot-m365-web`。在某些方案層級中，此提供者可能預設為隱藏。
+確認已在 **Dashboard → Providers** 中啟用 `copilot-m365-web`。在某些方案中，提供者可能預設為隱藏。
 
 ## 參考資料
 

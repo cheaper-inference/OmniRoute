@@ -219,19 +219,18 @@ Tous les points de terminaison MITM nécessitent une authentification de gestion
 
 ---
 
-## Remplacement des User-Agent — variables d’environnement (section 12 de `.env.example`)
+## L'agent utilisateur remplace les variables d'environnement — (section `.env.example` 12)
 
-| Variable                 | Valeur par défaut                                               |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| Variable            | Défaut                                        |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Utilisées par `open-sse/executors/base.ts::buildHeaders()` via une recherche dynamique. **Mettez-les à jour lorsque les fournisseurs publient de nouvelles versions de leurs CLI** — les chaînes UA obsolètes finissent par être rejetées comme provenant de clients trop anciens.
+Consommé par `open-sse/executors/base.ts::buildHeaders()` via une recherche dynamique.** Supprimez-les lorsque les fournisseurs publient de nouvelles versions CLI** Les chaînes UA obsolètes — commencent à être rejetées en tant que clients obsolètes.
 
 ## Options du mode de compatibilité CLI (section 13 de `.env.example`)
 

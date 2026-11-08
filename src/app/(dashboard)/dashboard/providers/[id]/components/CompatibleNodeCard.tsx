@@ -8,6 +8,7 @@ import { Card, Button } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { getApiLabel, getApiPath } from "../providerPageHelpers";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 interface ProviderNode {
   baseUrl?: string;
@@ -42,6 +43,7 @@ export default function CompatibleNodeCard({
   onOpenEditNodeModal,
   t,
 }: CompatibleNodeCardProps) {
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const router = useRouter();
 
   return (
@@ -90,7 +92,7 @@ export default function CompatibleNodeCard({
             icon="delete"
             onClick={async () => {
               if (
-                !confirm(
+                !(await requestConfirm(
                   t("deleteCompatibleNodeConfirm", {
                     type: isCcCompatible
                       ? t("ccCompatibleLabel")
@@ -98,7 +100,7 @@ export default function CompatibleNodeCard({
                         ? t("anthropic")
                         : t("openai"),
                   })
-                )
+                ))
               )
                 return;
               try {
@@ -126,6 +128,7 @@ export default function CompatibleNodeCard({
           </div>
         </div>
       )}
+      {confirmDialog}
     </Card>
   );
 }

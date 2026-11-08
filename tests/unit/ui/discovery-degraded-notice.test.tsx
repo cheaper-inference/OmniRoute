@@ -82,17 +82,26 @@ function renderHook(params: UseModelImportHandlersParams): { get: () => HookResu
 }
 
 beforeEach(() => {
+  // Successful imports intentionally reload the page after 2s; own that timer in each test.
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
   (
     globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
   ).IS_REACT_ACT_ENVIRONMENT = true;
 });
 
 afterEach(() => {
-  for (const { root, el } of roots.splice(0)) {
-    act(() => root.unmount());
-    el.remove();
+  try {
+    for (const { root, el } of roots.splice(0)) {
+      act(() => root.unmount());
+      el.remove();
+    }
+  } finally {
+    // Do not navigate after jsdom teardown or leak fake timers into the next test.
+    vi.clearAllTimers();
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
   }
-  vi.unstubAllGlobals();
 });
 
 function mockCatalog(payload: Record<string, unknown>) {
@@ -209,6 +218,7 @@ describe("the model import dialog", () => {
     expect(progress.degradedCause).toBe("HTTP 500");
     // The dialog keeps the notice: the page must not reload under the operator.
     expect(setTimeoutSpy.mock.calls.some(([, delay]) => delay === 2000)).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
     expect(fetchProviderModelMeta).toHaveBeenCalled();
     setTimeoutSpy.mockRestore();
   });
@@ -275,7 +285,11 @@ describe("the model import dialog", () => {
     expect(progress.phase).toBe("done");
     expect(progress.degraded).toBeFalsy();
     expect(progress.degradedCause).toBeUndefined();
-    expect(setTimeoutSpy.mock.calls.some(([, delay]) => delay === 2000)).toBe(true);
+    expect(setTimeoutSpy.mock.calls.filter(([, delay]) => delay === 2000)).toHaveLength(1);
+    expect(vi.getTimerCount()).toBe(1);
+    // Closing the completion modal must not cancel the page-level navigation.
+    act(() => hook.get().setShowImportModal(false));
+    expect(vi.getTimerCount()).toBe(1);
     setTimeoutSpy.mockRestore();
   });
 
@@ -367,7 +381,8 @@ describe("the status icon of the model import dialog", () => {
     return line;
   }
 
-  const kitIcons = (line: Element) => line.querySelectorAll("[data-icon]");
+  // The running phases draw the kit Spinner; every other state a Lucide icon.
+  const kitIcons = (line: Element) => line.querySelectorAll("[data-icon], [data-slot='spinner']");
   const legacySpans = (line: Element) => line.querySelectorAll("span.material-symbols-outlined");
 
   for (const phase of PHASES) {
@@ -391,7 +406,10 @@ describe("the status icon of the model import dialog", () => {
             ? "warning"
             : phase === "error"
               ? "error"
-              : "progress_activity"
+              : null
+      );
+      expect(kitIcons(line)[0].getAttribute("data-slot")).toBe(
+        phase === "fetching" || phase === "importing" ? "spinner" : null
       );
     });
   }

@@ -163,7 +163,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ನಲ್ಲಿ ವ
 | ಆರೋಗ್ಯ ವರದಿ        | `health-report`      | ಪ್ರತಿ ಪೂರೈಕೆದಾರರಿಗೆ ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್, ಕೂಲ್ಡೌನ್, ಲಾಕ್ಔಟ್ ಸ್ಥಿತಿಯನ್ನು ಒಟ್ಟುಗೂಡಿಸುತ್ತದೆ                                                                                       | ಆರೋಗ್ಯ, ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ        | "ಎಲ್ಲಾ ಪೂರೈಕೆದಾರರ ಆರೋಗ್ಯ ಸ್ಥಿತಿಯನ್ನು ತೋರಿಸಿ"        |
 | ಪಟ್ಟಿ ಸಾಮರ್ಥ್ಯಗಳು  | `list-capabilities`  | ಕಾಂಟೆಕ್ಸ್ಟ್ ಇಂಜೆಕ್ಷನ್ಗಾಗಿ ಕಚ್ಚಾ SKILL.md URLs ನೊಂದಿಗೆ ಮಾರ್ಕ್ಡೌನ್ ಟೇಬಲ್ನಂತೆ ಪೂರ್ಣ 45-ಪ್ರವೇಶ ಏಜೆಂಟ್ ಸ್ಕಿಲ್ಸ್ ಕ್ಯಾಟಲಾಗ್ (23 API + 21 CLI + 1 ಕಾನ್ಫಿಗರ್) ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ | ಕ್ಯಾಟಲಾಗ್, ಅನ್ವೇಷಣೆ, ಕೌಶಲ್ಯಗಳು | "ಎಲ್ಲಾ OmniRoute ಸಾಮರ್ಥ್ಯಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡಿ"         |
 
-> ಏಜೆಂಟ್ ಕಾರ್ಡ್ ಅನ್ನು ಲೈವ್ 377-ಪ್ರೊವೈಡರ್ ಕ್ಯಾಟಲಾಗ್ನೊಂದಿಗೆ ಜೋಡಿಸಬೇಕು; ಪೂರೈಕೆದಾರರ ಎಣಿಕೆಗಳು ಮತ್ತು free/no-auth ಮೆಟಾಡೇಟಾವನ್ನು ರನ್ಟೈಮ್ ರಿಜಿಸ್ಟ್ರಿಯಿಂದ ಪಡೆಯಲಾಗಿದೆ.
+> ಏಜೆಂಟ್ ಕಾರ್ಡ್ ಅನ್ನು ಲೈವ್ 380-ಪ್ರೊವೈಡರ್ ಕ್ಯಾಟಲಾಗ್ನೊಂದಿಗೆ ಜೋಡಿಸಬೇಕು; ಪೂರೈಕೆದಾರರ ಎಣಿಕೆಗಳು ಮತ್ತು free/no-auth ಮೆಟಾಡೇಟಾವನ್ನು ರನ್ಟೈಮ್ ರಿಜಿಸ್ಟ್ರಿಯಿಂದ ಪಡೆಯಲಾಗಿದೆ.
 
 ### `list-capabilities` ಕೌಶಲ್ಯ ವಿವರ
 
@@ -197,17 +197,17 @@ JSON-RPC ಎಂಡ್ಪಾಯಿಂಟ್ `/a2a` ಅಂಗೀಕೃತ A2A ಪ�
 
 ---
 
-## ಹೊಸ ಕೌಶಲ್ಯವನ್ನು ಸೇರಿಸುವುದು
+## ಹೊಸ ಕೌಶಲ್ಯವನ್ನು ಸೇರಿಸಲಾಗುತ್ತಿದೆ
 
 1. **ಕೌಶಲ್ಯ ಫೈಲ್ ರಚಿಸಿ:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` ಎಂಬ async function ಅನ್ನು export ಮಾಡಿ. `smartRouting.ts` ನಂತಹ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಕೌಶಲ್ಯಗಳ ವಿನ್ಯಾಸವನ್ನು ಅನುಸರಿಸಿ.
+   ಅಸಿಂಕ್ ಫಂಕ್ಷನ್ ಅನ್ನು ರಫ್ತು ಮಾಡಿ `(task: A2ATask) => Promise<{ artifacts, metadata }>`. `smartRouting.ts` ನಂತಹ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಕೌಶಲ್ಯಗಳ ಆಕಾರವನ್ನು ಅನುಸರಿಸಿ.
 
-2. **ಹ್ಯಾಂಡ್ಲರ್ ನೋಂದಾಯಿಸಿ:** `src/lib/a2a/taskExecution.ts` ನಲ್ಲಿ, `A2A_SKILL_HANDLERS` ಗೆ ಒಂದು ನಮೂದನ್ನು ಸೇರಿಸಿ:
+2. **ರಿಜಿಸ್ಟರ್ ಹ್ಯಾಂಡ್ಲರ್:** `src/lib/a2a/taskExecution.ts` ನಲ್ಲಿ, `A2A_SKILL_HANDLERS` ಗೆ ನಮೂದನ್ನು ಸೇರಿಸಿ:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಕೌಶಲ್ಯಗಳು
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ JSON-RPC ಎಂಡ್ಪಾಯಿಂಟ್ `/a2a` ಅಂಗೀಕೃತ A2A ಪ�
    };
    ```
 
-3. **Agent Card ನಲ್ಲಿ ಪ್ರಕಟಿಸಿ:** `src/lib/a2a/agentCardMetadata.ts` ನಲ್ಲಿ (`/.well-known/agent.json` ಮತ್ತು `/.well-known/agent-card.json` ಎರಡೂ ಇದನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತವೆ), `skills` array ಗೆ ಇದನ್ನು ಸೇರಿಸಿ:
+3. **ಏಜೆಂಟ್ ಕಾರ್ಡ್ನಲ್ಲಿ ಬಹಿರಂಗಪಡಿಸಿ:** `src/lib/a2a/agentCardMetadata.ts` ನಲ್ಲಿ ( `/.well-known/agent.json` ಮತ್ತು `/.well-known/agent-card.json` ಯಿಂದ ಹಂಚಿಕೊಳ್ಳಲಾಗಿದೆ), `skills` ಅರೇಗೆ ಸೇರಿಸಿ:
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC ಎಂಡ್ಪಾಯಿಂಟ್ `/a2a` ಅಂಗೀಕೃತ A2A ಪ�
    }
    ```
 
-4. **ಪರೀಕ್ಷೆಗಳನ್ನು ಬರೆಯಿರಿ:** `tests/unit/a2a-<your-skill>.test.ts`. ಯಶಸ್ವಿ ಮಾರ್ಗ + ದೋಷದ ಮಾರ್ಗವನ್ನು ಒಳಗೊಳ್ಳಿ.
+4. **ಪರೀಕ್ಷೆಗಳನ್ನು ಬರೆಯಿರಿ:** `tests/unit/a2a-<your-skill>.test.ts`. ಸಂತೋಷದ ಮಾರ್ಗ + ದೋಷ ಮಾರ್ಗವನ್ನು ಕವರ್ ಮಾಡಿ.
 
-5. **ದಾಖಲಿಸಿ:** ಈ ಫೈಲ್ನ `Available Skills` table ನಲ್ಲಿ ಹೊಸ ಕೌಶಲ್ಯವನ್ನು ದಾಖಲಿಸಿ.
+5. **ಡಾಕ್ಯುಮೆಂಟ್** ಈ ಫೈಲ್ನ `Available Skills` ಕೋಷ್ಟಕದಲ್ಲಿ ಹೊಸ ಕೌಶಲ್ಯ.
 
 ---
 

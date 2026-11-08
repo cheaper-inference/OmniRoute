@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import { Button } from "@/shared/components";
 import type { ProgressState } from "./useCatalogTestRunner";
 
@@ -21,18 +22,13 @@ function CatalogBulkProgress({ running, progress }: { running: boolean; progress
   if (running) {
     return (
       <div className="flex items-center gap-3">
-        <div className="h-2 w-32 overflow-hidden rounded-full bg-border sm:w-48">
-          <div
-            className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${percent}%` }}
-            role="progressbar"
-            aria-label={t("bulkTestProgress")}
-            aria-valuenow={percent}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuetext={progressText}
-          />
-        </div>
+        <Progress
+          className="w-32 sm:w-48"
+          aria-label={t("bulkTestProgress")}
+          aria-valuetext={progressText}
+          value={percent}
+          animate={false}
+        />
         <span className="text-xs font-medium text-text-muted" aria-hidden="true">
           {progressText}
         </span>
@@ -93,6 +89,7 @@ export default function CatalogBulkActionBar({
   onTestFiltered,
   onCancel,
   onClearResults,
+  onAssign,
   visibilityActions,
 }: {
   selectedCount: number;
@@ -104,6 +101,7 @@ export default function CatalogBulkActionBar({
   onTestFiltered: () => void;
   onCancel: () => void;
   onClearResults: () => void;
+  onAssign?: () => void;
   visibilityActions?: CatalogVisibilityActions;
 }) {
   const t = useTranslations("modelCatalog");
@@ -111,6 +109,17 @@ export default function CatalogBulkActionBar({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-bg-subtle px-4 py-2.5">
       <div className="flex flex-wrap items-center gap-2">
+        {onAssign && (
+          <Button
+            variant="secondary"
+            size="sm"
+            data-testid="assign-keys-btn"
+            disabled={selectedCount === 0 || running}
+            onClick={onAssign}
+          >
+            {t("assignToKeys")}
+          </Button>
+        )}
         <Button
           variant="secondary"
           size="sm"

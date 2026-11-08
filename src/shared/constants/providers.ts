@@ -169,8 +169,10 @@ export const AGGREGATOR_PROVIDER_IDS = new Set([
   "logfare",
   "seekai",
   "tokenmarket",
+  "tokenharbor",
   "demonroute",
   "daoxe",
+  "gisoo",
   "llmtr",
 ]);
 
