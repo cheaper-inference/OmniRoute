@@ -247,31 +247,42 @@ export function finalizeCfToolCalls(
   const accepted: CfParsedToolCall[] = [];
 
   for (const call of calls) {
-    const args = parseLooseJsonObject(call.arguments);
-    if (!args) return null;
-
-    let bound = false;
-    if (args._nonce !== undefined) {
-      if (args._nonce !== nonce) return null;
-      delete args._nonce;
-      bound = true;
-    }
-
-    const name = declared.has(call.name)
-      ? call.name
-      : requested.length > 0
-        ? resolveRequestedToolName(call.name, requested)
-        : null;
-    if (!name) return null;
-
-    if (!validateToolArguments(tools, name, args)) return null;
-
-    // Only re-serialize when the binding was stripped; otherwise the model's
-    // argument bytes reach the client untouched.
-    accepted.push(bound ? { ...call, name, arguments: JSON.stringify(args) } : { ...call, name });
+    const finalized = finalizeCfToolCall(call, tools, nonce, requested, declared);
+    if (!finalized) return null;
+    accepted.push(finalized);
   }
 
   return accepted;
+}
+
+/** One call through `finalizeCfToolCalls`'s checks; null when any of them rejects it. */
+function finalizeCfToolCall(
+  call: CfParsedToolCall,
+  tools: unknown,
+  nonce: string,
+  requested: ReturnType<typeof getRequestedToolNames>,
+  declared: Set<string>
+): CfParsedToolCall | null {
+  const args = parseLooseJsonObject(call.arguments);
+  if (!args) return null;
+
+  let bound = false;
+  if (args._nonce !== undefined) {
+    if (args._nonce !== nonce) return null;
+    delete args._nonce;
+    bound = true;
+  }
+
+  let name: string | null = null;
+  if (declared.has(call.name)) name = call.name;
+  else if (requested.length > 0) name = resolveRequestedToolName(call.name, requested);
+  if (!name) return null;
+
+  if (!validateToolArguments(tools, name, args)) return null;
+
+  // Only re-serialize when the binding was stripped; otherwise the model's
+  // argument bytes reach the client untouched.
+  return bound ? { ...call, name, arguments: JSON.stringify(args) } : { ...call, name };
 }
 
 /** Split text into chunks no longer than `maxChars`, preferring line breaks. */
@@ -349,39 +360,7 @@ export function hasMalformedCfToolIntent(
       text
     );
 
-  // A JSON envelope that names a declared tool *and* looks like a call attempt
-  // (it carries an arguments field, or it is the whole reply) is tool intent
-  // even when the payload did not survive the parser — a truncated object, a
-  // name the caller does not declare, arguments that are not an object. Prose
-  // that merely quotes a tool's schema (`{"name": "read", "description": …}`)
-  // must not trigger a retry.
-  // Any `"type": <scalar>` pair counts: the contract marks calls with
-  // `"tool_call"`, and a wrong discriminator (`"shell"`, `"gun"`, `5`) is the
-  // same intent botched, not prose. Anchored to `{` or `,` and a JSON scalar
-  // terminated by `,`/`}` so a sentence merely naming the `type` field does
-  // not count. Only consulted when the parser read no call, so a reply that
-  // carried a well-formed call is never retried.
-  // JSON-schema type keywords never count (`{"type": "string"}` quoted in prose).
-  // A quoted JSON *schema* is the exception: there `type` is a schema keyword
-  // (`{"name":"bash","type":"object","properties":{…}}`), so a reply carrying
-  // `properties` has its `type` pair ignored rather than read as a botched
-  // discriminator — quoting a schema is prose, and retrying it forever would
-  // starve the turn.
-  const quotedSchema = /"properties"\s*:/.test(text);
-  const jsonIntent =
-    /"tool_calls"\s*:/.test(text) ||
-    /"_nonce"\s*:/.test(text) ||
-    (!quotedSchema &&
-      /[{\[,]\s*"type"\s*:\s*(?:"(?!(?:object|string|number|integer|boolean|array|null)")[^"]*"|[\d.]+|true|false|null)\s*[,}]/.test(
-        text
-      )) ||
-    (toolNames.some((name) =>
-      new RegExp(`"name"\\s*:\\s*"${escapeRegex(name)}"`, "i").test(text)
-    ) &&
-      (/"arguments"\s*:/.test(text) || isStandaloneCfJsonText(text))) ||
-    // A standalone JSON object carrying an arguments field but no readable
-    // name is a call that lost its envelope, not an answer.
-    (isStandaloneCfJsonText(text) && /"(arguments|args|parameters|input)"\s*:/.test(text));
+  const jsonIntent = hasCfJsonToolIntent(text, toolNames);
 
   if (!opensABlock && !callIntent && !jsonIntent) return false;
 
@@ -394,6 +373,47 @@ export function hasMalformedCfToolIntent(
       ? availableTools
       : [{ name: "dummy", parameters: {} }, ...toolNames.map((name) => ({ name, parameters: {} }))];
   return parseCfToolCalls(text, probe).length === 0;
+}
+
+/**
+ * True when the text carries a JSON tool-call attempt (see `hasMalformedCfToolIntent`).
+ *
+ * A JSON envelope that names a declared tool *and* looks like a call attempt
+ * (it carries an arguments field, or it is the whole reply) is tool intent
+ * even when the payload did not survive the parser — a truncated object, a
+ * name the caller does not declare, arguments that are not an object. Prose
+ * that merely quotes a tool's schema (`{"name": "read", "description": …}`)
+ * must not trigger a retry.
+ * Any `"type": <scalar>` pair counts: the contract marks calls with
+ * `"tool_call"`, and a wrong discriminator (`"shell"`, `"gun"`, `5`) is the
+ * same intent botched, not prose. Anchored to `{` or `,` and a JSON scalar
+ * terminated by `,`/`}` so a sentence merely naming the `type` field does
+ * not count. Only consulted when the parser read no call, so a reply that
+ * carried a well-formed call is never retried.
+ * JSON-schema type keywords never count (`{"type": "string"}` quoted in prose).
+ * A quoted JSON *schema* is the exception: there `type` is a schema keyword
+ * (`{"name":"bash","type":"object","properties":{…}}`), so a reply carrying
+ * `properties` has its `type` pair ignored rather than read as a botched
+ * discriminator — quoting a schema is prose, and retrying it forever would
+ * starve the turn.
+ */
+function hasCfJsonToolIntent(text: string, toolNames: string[]): boolean {
+  const quotedSchema = /"properties"\s*:/.test(text);
+  return (
+    /"tool_calls"\s*:/.test(text) ||
+    /"_nonce"\s*:/.test(text) ||
+    (!quotedSchema &&
+      /[{\[,]\s*"type"\s*:\s*(?:"(?!(?:object|string|number|integer|boolean|array|null)")[^"]*"|[\d.]+|true|false|null)\s*[,}]/.test(
+        text
+      )) ||
+    (toolNames.some((name) =>
+      new RegExp(`"name"\\s*:\\s*"${escapeRegex(name)}"`, "i").test(text)
+    ) &&
+      (/"arguments"\s*:/.test(text) || isStandaloneCfJsonText(text))) ||
+    // A standalone JSON object carrying an arguments field but no readable
+    // name is a call that lost its envelope, not an answer.
+    (isStandaloneCfJsonText(text) && /"(arguments|args|parameters|input)"\s*:/.test(text))
+  );
 }
 
 /**
@@ -451,30 +471,35 @@ export function stripCfToolResults(text: string): string {
  * instead of the raw argument object. Normalize both shapes.
  */
 function unwrapToolPayload(content: string): { name: string | null; argsJson: string } {
+  let parsed: unknown;
   try {
-    const parsed = JSON.parse(content);
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      const obj = parsed as Record<string, unknown>;
-      if (typeof obj.name === "string" && obj.arguments !== undefined) {
-        let argsJson =
-          typeof obj.arguments === "string" ? obj.arguments : JSON.stringify(obj.arguments);
-        // An envelope-shaped call is self-contained (`{"name", "arguments"}`), so a
-        // replayed one is indistinguishable from a fresh one. Carry its `_nonce`
-        // into the arguments, where the binding check can see it — otherwise it
-        // would pass as an unbound call and be executed again.
-        if (obj._nonce !== undefined) {
-          const inner = parseLooseJsonObject(argsJson);
-          if (inner && inner._nonce === undefined) {
-            argsJson = JSON.stringify({ ...inner, _nonce: obj._nonce });
-          }
-        }
-        return { name: obj.name, argsJson };
-      }
-    }
+    parsed = JSON.parse(content);
   } catch {
-    /* not the wrapped format */
+    return { name: null, argsJson: content }; // not the wrapped format
   }
-  return { name: null, argsJson: content };
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return { name: null, argsJson: content };
+  }
+  const obj = parsed as Record<string, unknown>;
+  if (typeof obj.name !== "string" || obj.arguments === undefined) {
+    return { name: null, argsJson: content };
+  }
+  const argsJson =
+    typeof obj.arguments === "string" ? obj.arguments : JSON.stringify(obj.arguments);
+  return { name: obj.name, argsJson: carryEnvelopeNonce(argsJson, obj._nonce) };
+}
+
+/**
+ * An envelope-shaped call is self-contained (`{"name", "arguments"}`), so a
+ * replayed one is indistinguishable from a fresh one. Carry its `_nonce` into
+ * the arguments, where the binding check can see it — otherwise it would pass
+ * as an unbound call and be executed again.
+ */
+function carryEnvelopeNonce(argsJson: string, envelopeNonce: unknown): string {
+  if (envelopeNonce === undefined) return argsJson;
+  const inner = parseLooseJsonObject(argsJson);
+  if (!inner || inner._nonce !== undefined) return argsJson;
+  return JSON.stringify({ ...inner, _nonce: envelopeNonce });
 }
 
 /**
@@ -499,30 +524,7 @@ function extractPayloadFromAttrs(attrs: string): string | null {
 function extractEmbeddedJson(raw: string): string | null {
   // Payloads embedded in markup often have escaped quotes; unescape first so
   // the brace/quote scan below is not thrown off.
-  const text = raw.replace(/\\"/g, '"').replace(/\\'/g, "'");
-  const start = text.search(/[[{]/);
-  if (start === -1) return null;
-  const open = text[start];
-  const close = open === "{" ? "}" : "]";
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  for (let i = start; i < text.length; i++) {
-    const ch = text[i];
-    if (inString) {
-      if (escaped) escaped = false;
-      else if (ch === "\\") escaped = true;
-      else if (ch === '"') inString = false;
-      continue;
-    }
-    if (ch === '"') inString = true;
-    else if (ch === open) depth++;
-    else if (ch === close) {
-      depth--;
-      if (depth === 0) return text.slice(start, i + 1);
-    }
-  }
-  return null;
+  return extractBalancedJson(raw.replace(/\\"/g, '"').replace(/\\'/g, "'"));
 }
 
 /**
@@ -584,20 +586,326 @@ function xmlParamsToArguments(
   const args: Record<string, unknown> = {};
   for (const [rawKey, rawValue] of params) {
     const key = single ?? rawKey;
-    const type = props?.[key]?.type;
-    if (type === "number") {
-      const num = Number(rawValue);
-      args[key] = Number.isFinite(num) ? num : rawValue;
-    } else if (type === "integer") {
-      const num = Number.parseInt(rawValue, 10);
-      args[key] = Number.isFinite(num) ? num : rawValue;
-    } else if (type === "boolean") {
-      args[key] = /^(true|1|yes)$/i.test(rawValue);
-    } else {
-      args[key] = rawValue;
-    }
+    args[key] = coerceXmlParam(rawValue, props?.[key]?.type);
   }
   return args;
+}
+
+/** Coerce one XML parameter by its declared JSON-schema type; strings stay strings. */
+function coerceXmlParam(rawValue: string, type: unknown): unknown {
+  if (type === "number") {
+    const num = Number(rawValue);
+    return Number.isFinite(num) ? num : rawValue;
+  }
+  if (type === "integer") {
+    const num = Number.parseInt(rawValue, 10);
+    return Number.isFinite(num) ? num : rawValue;
+  }
+  if (type === "boolean") return /^(true|1|yes)$/i.test(rawValue);
+  return rawValue;
+}
+
+/**
+ * State shared by the patterns of one `parseCfToolCalls` run: the calls read so
+ * far and the spans already turned into a call, so a later pattern does not
+ * emit duplicates. Each span is [start, end) into `text`.
+ */
+interface CfParseContext {
+  text: string;
+  availableTools: CfToolDef[];
+  calls: CfParsedToolCall[];
+  handledSpans: Array<[number, number]>;
+  isHandled: (start: number, end: number) => boolean;
+}
+
+/** Declared tool tags (plus "shell") and the lookup that keeps the caller's spelling. */
+interface CfKnownTags {
+  names: Set<string>;
+  resolve: (tagName: string) => string | null;
+}
+
+function newCfCallId(): string {
+  return `call_${crypto.randomUUID().slice(0, 8)}`;
+}
+
+/** Record a call, and claim its span when one is given. */
+function pushCfCall(
+  ctx: CfParseContext,
+  name: string,
+  args: string,
+  span?: [number, number]
+): void {
+  ctx.calls.push({ id: newCfCallId(), name, arguments: args });
+  if (span) ctx.handledSpans.push(span);
+}
+
+/** The `name="..."` attribute of a tag, or null. */
+function attrToolName(attrs: string): string | null {
+  const match = attrs.match(/name\s*=\s*["']([^"']+)["']/i);
+  return match ? match[1] : null;
+}
+
+/** A tag's payload: its body, else JSON carried in its attributes. */
+function tagPayload(attrs: string, body: string): string {
+  return body.trim() || extractPayloadFromAttrs(attrs) || extractEmbeddedJson(attrs) || "";
+}
+
+/**
+ * Resolve the call name from a hint, falling back to inference from the
+ * argument shape. Null when the hint is rejected or nothing can be inferred.
+ */
+function resolveHintedCall(
+  hint: string | null,
+  argsJson: string,
+  availableTools: CfToolDef[]
+): { name: string; argsJson: string } | null {
+  const resolved = applyToolNameHint(hint, argsJson, availableTools);
+  if (!resolved) return null;
+  const name = resolved.name ?? inferToolName(resolved.argsJson, availableTools);
+  return name ? { name, argsJson: resolved.argsJson } : null;
+}
+
+/**
+ * Pattern 1 for a body that is not JSON: `<tool name="read"><path>a.py</path></tool>`
+ * — XML-style arguments inside an explicit `<tool>` wrapper. Pattern 3b cannot
+ * see this one because the tag is `tool`, not the tool's name.
+ */
+function readWrapperXmlCall(
+  ctx: CfParseContext,
+  match: RegExpExecArray,
+  attrs: string,
+  content: string
+): void {
+  const xmlName = attrToolName(attrs);
+  const xmlParams = extractXmlParams(content);
+  if (!xmlName || !xmlParams) return;
+  const def = ctx.availableTools.find((t) => t.name === xmlName);
+  pushCfCall(ctx, xmlName, JSON.stringify(xmlParamsToArguments(xmlParams, def)), [
+    match.index,
+    match.index + match[0].length,
+  ]);
+}
+
+/** Pattern 1, one match. Returns the regex index to resume from, or null to go on. */
+function readWrapperTagMatch(ctx: CfParseContext, match: RegExpExecArray): number | null {
+  const attrs = match[1];
+  const body = match[2];
+  const content = tagPayload(attrs, body);
+  // Only accept tool calls whose arguments normalize to valid JSON
+  const normalized = normalizeToolArguments(content);
+  if (!normalized) {
+    readWrapperXmlCall(ctx, match, attrs, content);
+    return null;
+  }
+  // Handle format: <tool>{"name": "shell", "arguments": {...}}</tool>
+  const unwrapped = unwrapToolPayload(normalized);
+  const attrName = attrToolName(attrs);
+
+  // A nameless generic wrapper that carries a nested tool tag is a container,
+  // not a call: step past its opener and let the loop match the inner tag.
+  // Before this, the wrapper body was accepted as a nameless payload (the
+  // embedded JSON was extracted from the markup), the inner name was never
+  // read, and the call resolved to the caller's first tool.
+  const nameless = !unwrapped.name && !attrName;
+  if (nameless && !/^\s*[[{]/.test(body) && hasNestedToolTag(body, ctx.availableTools)) {
+    return match.index + match[0].indexOf(">") + 1;
+  }
+
+  const call = resolveHintedCall(
+    unwrapped.name ?? attrName,
+    unwrapped.argsJson,
+    ctx.availableTools
+  );
+  if (call) pushCfCall(ctx, call.name, call.argsJson, [match.index, match.index + match[0].length]);
+  return null;
+}
+
+/**
+ * Pattern 1: <tool name="...">...</tool> or <tool>...</tool>. Also accepts
+ * the `<tool_call>` / `<tool-call>` / `<toolcall>` / `<function_call>`
+ * spellings many models are trained on (e.g.
+ * `<tool_call>{"name":"bash","arguments":{...}}</tool_call>`).
+ */
+function parseWrapperTagCalls(ctx: CfParseContext): void {
+  const toolTagRegex = new RegExp(
+    `<\\s*${CF_WRAPPER_TAG_SOURCE}\\b([^>]*)>([\\s\\S]*?)<\\s*\\/\\s*${CF_WRAPPER_TAG_SOURCE}\\s*>`,
+    "gi"
+  );
+  let match: RegExpExecArray | null;
+  while ((match = toolTagRegex.exec(ctx.text)) !== null) {
+    const resumeAt = readWrapperTagMatch(ctx, match);
+    if (resumeAt !== null) toolTagRegex.lastIndex = resumeAt;
+  }
+}
+
+/**
+ * Pattern 1b: recover malformed `<tool ...>` tags where a `>` inside the JSON
+ * payload (e.g. `{"command": "ls > out.txt"}`) truncated the attribute scan
+ * above. Re-scan the whole tag body for a balanced JSON payload.
+ */
+function parseLooseWrapperTagCalls(ctx: CfParseContext): void {
+  const looseToolRegex = new RegExp(
+    `<\\s*${CF_WRAPPER_TAG_SOURCE}\\b([\\s\\S]*?)<\\s*\\/\\s*${CF_WRAPPER_TAG_SOURCE}\\s*>`,
+    "gi"
+  );
+  let match: RegExpExecArray | null;
+  while ((match = looseToolRegex.exec(ctx.text)) !== null) {
+    const start = match.index;
+    const end = start + match[0].length;
+    if (ctx.isHandled(start, end)) continue;
+    const inner = match[1];
+    const nameMatch = inner.match(/name\s*=\s*["']?([A-Za-z_][\w.-]*)/i);
+    if (!nameMatch) continue;
+    const embedded = extractEmbeddedJson(inner);
+    const normalized = embedded ? normalizeToolArguments(embedded) : null;
+    if (!normalized) continue;
+    const unwrapped = unwrapToolPayload(normalized);
+    pushCfCall(ctx, unwrapped.name ?? nameMatch[1], unwrapped.argsJson, [start, end]);
+  }
+}
+
+/**
+ * Pattern 1c: `<tool ...>` with no closing tag. Models hit their output
+ * limit mid-payload, or simply omit `</tool>`; the call used to be dropped
+ * and its markup leaked to the client as text. Deliberately narrow: only an
+ * opening tag whose remainder carries no closing tag at all and whose body
+ * starts with the JSON payload. A `<tool:name>` body belongs to Pattern 2, a
+ * body with any closing tag belongs to Pattern 1, and prose that merely
+ * mentions `<tool>` is left alone.
+ */
+function parseOpenOnlyWrapperCalls(ctx: CfParseContext): void {
+  const openOnlyRegex = new RegExp(`<\\s*${CF_WRAPPER_TAG_SOURCE}\\b([^>]*)>([\\s\\S]*)$`, "gi");
+  let match: RegExpExecArray | null;
+  while ((match = openOnlyRegex.exec(ctx.text)) !== null) {
+    const start = match.index;
+    if (ctx.isHandled(start, start + 1)) continue;
+    if (/^\s*:/.test(match[1])) continue;
+    const body = match[2].trim();
+    if (/<\s*\//.test(body) || !/^[[{]/.test(body)) continue;
+    const normalized = normalizeToolArguments(body);
+    if (!normalized) continue;
+    const unwrapped = unwrapToolPayload(normalized);
+    const call = resolveHintedCall(
+      unwrapped.name ?? attrToolName(match[1]),
+      unwrapped.argsJson,
+      ctx.availableTools
+    );
+    if (call) pushCfCall(ctx, call.name, call.argsJson, [start, ctx.text.length]);
+  }
+}
+
+/** Pattern 2: <tool:name>...</tool:name> (alternative form) */
+function parseToolNameTagCalls(ctx: CfParseContext): void {
+  const toolNameTagRegex = /<\s*tool:(\w+)>([\s\S]*?)<\s*\/\s*tool:\1\s*>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = toolNameTagRegex.exec(ctx.text)) !== null) {
+    const normalized = normalizeToolArguments(match[2].trim());
+    if (!normalized) continue;
+    const unwrapped = unwrapToolPayload(normalized);
+    // Claimed, so Pattern 6 does not read the same block again through its
+    // `<tool:name>` fallback.
+    pushCfCall(ctx, unwrapped.name ?? match[1], unwrapped.argsJson, [
+      match.index,
+      match.index + match[0].length,
+    ]);
+  }
+}
+
+/**
+ * Tags Pattern 3 accepts: any declared tool name, plus "shell", which the
+ * playground models emit even when the caller named the tool differently.
+ * Tags are matched case-insensitively (models write `<Read>`); the name handed
+ * to the client must keep the caller's declared spelling.
+ */
+function knownCfToolTags(availableTools: CfToolDef[]): CfKnownTags {
+  const names = new Set(availableTools.map((t) => t.name));
+  names.add("shell");
+  const resolve = (tagName: string): string | null =>
+    names.has(tagName) ? tagName : resolveDeclaredToolName(tagName, availableTools);
+  return { names, resolve };
+}
+
+/**
+ * Pattern 3: <toolname>...</toolname> — the tool name IS the tag.
+ * Observed live across models: <shell>, <bash>, <glob>, <read>, ...
+ */
+function parseKnownTagJsonCalls(ctx: CfParseContext, known: CfKnownTags): void {
+  const anyToolTagRegex = /<\s*([a-zA-Z_][\w.-]*)\b([^>]*)>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = anyToolTagRegex.exec(ctx.text)) !== null) {
+    const tagName = known.resolve(match[1]);
+    if (!tagName) continue;
+    const start = match.index;
+    if (ctx.isHandled(start, start + 1)) continue;
+    const normalized = normalizeToolArguments(tagPayload(match[2], match[3]));
+    if (!normalized) continue;
+    const unwrapped = unwrapToolPayload(normalized);
+    const resolved = applyToolNameHint(
+      unwrapped.name ?? tagName,
+      unwrapped.argsJson,
+      ctx.availableTools
+    );
+    if (!resolved) continue;
+    pushCfCall(ctx, resolved.name ?? tagName, resolved.argsJson, [start, start + match[0].length]);
+  }
+}
+
+/**
+ * Pattern 3b: <toolname><param>value</param></toolname> — XML-style arguments
+ * instead of a JSON body, so Pattern 3 above (which needs JSON) drops them.
+ * Observed live: a single turn carrying five calls at once —
+ *   <read><path>a.py</path></read>
+ *   <shell><command>ps aux | grep x</command></shell>
+ * Every declared tool name is accepted, in document order, so a turn that
+ * batches several reads keeps its ordering.
+ */
+function parseKnownTagXmlCalls(ctx: CfParseContext, known: CfKnownTags): void {
+  const xmlToolRegex = /<\s*([a-zA-Z_][\w.-]*)\b([^>]*)>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = xmlToolRegex.exec(ctx.text)) !== null) {
+    const tagName = known.resolve(match[1]);
+    if (!tagName) continue;
+    const start = match.index;
+    if (ctx.isHandled(start, start + 1)) continue;
+    const body = match[3].trim();
+    // A JSON body belongs to Pattern 3; do not also read it as XML params.
+    if (!body || /^[[{]/.test(body)) continue;
+    const params = extractXmlParams(body);
+    if (!params) continue;
+    const def = ctx.availableTools.find((t) => t.name === tagName);
+    pushCfCall(ctx, tagName, JSON.stringify(xmlParamsToArguments(params, def)), [
+      start,
+      start + match[0].length,
+    ]);
+  }
+}
+
+/** Pattern 4: name({"arg": value}) — function-call style, observed live. */
+function parseCallStyleCalls(ctx: CfParseContext, known: CfKnownTags): void {
+  const callStyleRegex = /\b([a-zA-Z_][\w.-]*)\s*\(\s*(\{[\s\S]*?\}|\[[\s\S]*?\])\s*\)/g;
+  let match: RegExpExecArray | null;
+  while ((match = callStyleRegex.exec(ctx.text)) !== null) {
+    const callName = match[1];
+    if (!known.names.has(callName)) continue;
+    const normalized = normalizeToolArguments(match[2]);
+    if (!normalized) continue;
+    const unwrapped = unwrapToolPayload(normalized);
+    pushCfCall(ctx, unwrapped.name ?? callName, unwrapped.argsJson);
+  }
+}
+
+/** Pattern 5: name(arg="value", flag=true) — Python/named-argument style. */
+function parseNamedArgCalls(ctx: CfParseContext, known: CfKnownTags): void {
+  const namedArgRegex = /\b([a-zA-Z_][\w.-]*)\s*\(([^()]*)\)/g;
+  let match: RegExpExecArray | null;
+  while ((match = namedArgRegex.exec(ctx.text)) !== null) {
+    const callName = match[1];
+    if (!known.names.has(callName)) continue;
+    const inner = match[2].trim();
+    if (!inner.includes("=")) continue;
+    const parsed = parseNamedArgs(inner);
+    if (parsed) pushCfCall(ctx, callName, JSON.stringify(parsed));
+  }
 }
 
 /**
@@ -621,255 +929,24 @@ export function parseCfToolCalls(
 ): CfParsedToolCall[] {
   if (!text) return [];
 
-  const calls: CfParsedToolCall[] = [];
-  // Spans already turned into a tool call, so the loose fallback below does not
-  // emit duplicates. Each entry is [start, end) into `text`.
   const handledSpans: Array<[number, number]> = [];
-  const isHandled = (start: number, end: number) =>
-    handledSpans.some(([s, e]) => start < e && end > s);
-
-  // Pattern 1: <tool name="...">...</tool> or <tool>...</tool>. Also accepts
-  // the `<tool_call>` / `<tool-call>` / `<toolcall>` / `<function_call>`
-  // spellings many models are trained on (e.g.
-  // `<tool_call>{"name":"bash","arguments":{...}}</tool_call>`).
-  const toolTagRegex = new RegExp(
-    `<\\s*${CF_WRAPPER_TAG_SOURCE}\\b([^>]*)>([\\s\\S]*?)<\\s*\\/\\s*${CF_WRAPPER_TAG_SOURCE}\\s*>`,
-    "gi"
-  );
-  let match: RegExpExecArray | null;
-  while ((match = toolTagRegex.exec(text)) !== null) {
-    const attrs = match[1];
-    const content =
-      match[2].trim() || extractPayloadFromAttrs(attrs) || extractEmbeddedJson(attrs) || "";
-    // Only accept tool calls whose arguments normalize to valid JSON
-    const normalized = normalizeToolArguments(content);
-    if (!normalized) {
-      // `<tool name="read"><path>a.py</path></tool>` — XML-style arguments
-      // inside an explicit `<tool>` wrapper. Pattern 3b cannot see this one
-      // because the tag is `tool`, not the tool's name.
-      const xmlName = attrs.match(/name\s*=\s*["']([^"']+)["']/i);
-      const xmlParams = extractXmlParams(content);
-      if (xmlName && xmlParams) {
-        const def = availableTools.find((t) => t.name === xmlName[1]);
-        calls.push({
-          id: `call_${crypto.randomUUID().slice(0, 8)}`,
-          name: xmlName[1],
-          arguments: JSON.stringify(xmlParamsToArguments(xmlParams, def)),
-        });
-        handledSpans.push([match.index, match.index + match[0].length]);
-      }
-      continue;
-    }
-    // Handle format: <tool>{"name": "shell", "arguments": {...}}</tool>
-    const unwrapped = unwrapToolPayload(normalized);
-    const nameMatch = attrs.match(/name\s*=\s*["']([^"']+)["']/i);
-
-    // A nameless generic wrapper that carries a nested tool tag is a container,
-    // not a call: step past its opener and let the loop match the inner tag.
-    // Before this, the wrapper body was accepted as a nameless payload (the
-    // embedded JSON was extracted from the markup), the inner name was never
-    // read, and the call resolved to the caller's first tool.
-    const body = match[2];
-    if (
-      !unwrapped.name &&
-      !nameMatch &&
-      !/^\s*[[{]/.test(body) &&
-      hasNestedToolTag(body, availableTools)
-    ) {
-      toolTagRegex.lastIndex = match.index + match[0].indexOf(">") + 1;
-      continue;
-    }
-
-    const resolved = applyToolNameHint(
-      unwrapped.name ?? (nameMatch ? nameMatch[1] : null),
-      unwrapped.argsJson,
-      availableTools
-    );
-    if (!resolved) continue;
-    const name = resolved.name ?? inferToolName(resolved.argsJson, availableTools);
-    if (name) {
-      calls.push({
-        id: `call_${crypto.randomUUID().slice(0, 8)}`,
-        name,
-        arguments: resolved.argsJson,
-      });
-      handledSpans.push([match.index, match.index + match[0].length]);
-    }
-  }
-
-  // Pattern 1b: recover malformed `<tool ...>` tags where a `>` inside the JSON
-  // payload (e.g. `{"command": "ls > out.txt"}`) truncated the attribute scan
-  // above. Re-scan the whole tag body for a balanced JSON payload.
-  const looseToolRegex = new RegExp(
-    `<\\s*${CF_WRAPPER_TAG_SOURCE}\\b([\\s\\S]*?)<\\s*\\/\\s*${CF_WRAPPER_TAG_SOURCE}\\s*>`,
-    "gi"
-  );
-  while ((match = looseToolRegex.exec(text)) !== null) {
-    const start = match.index;
-    const end = start + match[0].length;
-    if (isHandled(start, end)) continue;
-    const inner = match[1];
-    const nameMatch = inner.match(/name\s*=\s*["']?([A-Za-z_][\w.-]*)/i);
-    if (!nameMatch) continue;
-    const embedded = extractEmbeddedJson(inner);
-    if (!embedded) continue;
-    const normalized = normalizeToolArguments(embedded);
-    if (!normalized) continue;
-    const unwrapped = unwrapToolPayload(normalized);
-    calls.push({
-      id: `call_${crypto.randomUUID().slice(0, 8)}`,
-      name: unwrapped.name ?? nameMatch[1],
-      arguments: unwrapped.argsJson,
-    });
-    handledSpans.push([start, end]);
-  }
-
-  // Pattern 1c: `<tool ...>` with no closing tag. Models hit their output
-  // limit mid-payload, or simply omit `</tool>`; the call used to be dropped
-  // and its markup leaked to the client as text. Deliberately narrow: only an
-  // opening tag whose remainder carries no closing tag at all and whose body
-  // starts with the JSON payload. A `<tool:name>` body belongs to Pattern 2, a
-  // body with any closing tag belongs to Pattern 1, and prose that merely
-  // mentions `<tool>` is left alone.
-  const openOnlyRegex = new RegExp(`<\\s*${CF_WRAPPER_TAG_SOURCE}\\b([^>]*)>([\\s\\S]*)$`, "gi");
-  while ((match = openOnlyRegex.exec(text)) !== null) {
-    const start = match.index;
-    if (isHandled(start, start + 1)) continue;
-    if (/^\s*:/.test(match[1])) continue;
-    const body = match[2].trim();
-    if (/<\s*\//.test(body) || !/^[[{]/.test(body)) continue;
-    const normalized = normalizeToolArguments(body);
-    if (!normalized) continue;
-    const unwrapped = unwrapToolPayload(normalized);
-    const attrName = match[1].match(/name\s*=\s*["']([^"']+)["']/i);
-    const resolved = applyToolNameHint(
-      unwrapped.name ?? (attrName ? attrName[1] : null),
-      unwrapped.argsJson,
-      availableTools
-    );
-    if (!resolved) continue;
-    const name = resolved.name ?? inferToolName(resolved.argsJson, availableTools);
-    if (!name) continue;
-    calls.push({
-      id: `call_${crypto.randomUUID().slice(0, 8)}`,
-      name,
-      arguments: resolved.argsJson,
-    });
-    handledSpans.push([start, text.length]);
-  }
-
-  // Pattern 2: <tool:name>...</tool:name> (alternative form)
-  const toolNameTagRegex = /<\s*tool:(\w+)>([\s\S]*?)<\s*\/\s*tool:\1\s*>/gi;
-  while ((match = toolNameTagRegex.exec(text)) !== null) {
-    const tagName = match[1];
-    const content = match[2].trim();
-    const normalized = normalizeToolArguments(content);
-    if (!normalized) continue;
-    const unwrapped = unwrapToolPayload(normalized);
-    calls.push({
-      id: `call_${crypto.randomUUID().slice(0, 8)}`,
-      name: unwrapped.name ?? tagName,
-      arguments: unwrapped.argsJson,
-    });
-    // Claimed, so Pattern 6 does not read the same block again through its
-    // `<tool:name>` fallback.
-    handledSpans.push([match.index, match.index + match[0].length]);
-  }
-
-  // Pattern 3: <toolname>...</toolname> — the tool name IS the tag.
-  // Observed live across models: <shell>, <bash>, <glob>, <read>, ...
-  // Accept any tag whose name matches a declared tool (plus "shell", which the
-  // playground models emit even when the caller named the tool differently).
-  const knownTagNames = new Set(availableTools.map((t) => t.name));
-  knownTagNames.add("shell");
-  // Tags are matched case-insensitively (models write `<Read>`); the name handed
-  // to the client must keep the caller's declared spelling.
-  const resolveKnownTag = (tagName: string): string | null => {
-    if (knownTagNames.has(tagName)) return tagName;
-    return resolveDeclaredToolName(tagName, availableTools);
+  const ctx: CfParseContext = {
+    text,
+    availableTools,
+    calls: [],
+    handledSpans,
+    isHandled: (start, end) => handledSpans.some(([s, e]) => start < e && end > s),
   };
-  const anyToolTagRegex = /<\s*([a-zA-Z_][\w.-]*)\b([^>]*)>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
-  while ((match = anyToolTagRegex.exec(text)) !== null) {
-    const tagName = resolveKnownTag(match[1]);
-    if (!tagName) continue;
-    const start = match.index;
-    if (isHandled(start, start + 1)) continue;
-    const content =
-      match[3].trim() || extractPayloadFromAttrs(match[2]) || extractEmbeddedJson(match[2]) || "";
-    const normalized = normalizeToolArguments(content);
-    if (!normalized) continue;
-    const unwrapped = unwrapToolPayload(normalized);
-    const resolved = applyToolNameHint(
-      unwrapped.name ?? tagName,
-      unwrapped.argsJson,
-      availableTools
-    );
-    if (!resolved) continue;
-    calls.push({
-      id: `call_${crypto.randomUUID().slice(0, 8)}`,
-      name: resolved.name ?? tagName,
-      arguments: resolved.argsJson,
-    });
-    handledSpans.push([start, start + match[0].length]);
-  }
 
-  // Pattern 3b: <toolname><param>value</param></toolname> — XML-style arguments
-  // instead of a JSON body, so Pattern 3 above (which needs JSON) drops them.
-  // Observed live: a single turn carrying five calls at once —
-  //   <read><path>a.py</path></read>
-  //   <shell><command>ps aux | grep x</command></shell>
-  // Every declared tool name is accepted, in document order, so a turn that
-  // batches several reads keeps its ordering.
-  const xmlToolRegex = /<\s*([a-zA-Z_][\w.-]*)\b([^>]*)>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
-  while ((match = xmlToolRegex.exec(text)) !== null) {
-    const tagName = resolveKnownTag(match[1]);
-    if (!tagName) continue;
-    const start = match.index;
-    if (isHandled(start, start + 1)) continue;
-    const body = match[3].trim();
-    // A JSON body belongs to Pattern 3; do not also read it as XML params.
-    if (!body || /^[[{]/.test(body)) continue;
-    const params = extractXmlParams(body);
-    if (!params) continue;
-    const def = availableTools.find((t) => t.name === tagName);
-    calls.push({
-      id: `call_${crypto.randomUUID().slice(0, 8)}`,
-      name: tagName,
-      arguments: JSON.stringify(xmlParamsToArguments(params, def)),
-    });
-    handledSpans.push([start, start + match[0].length]);
-  }
-
-  // Pattern 4: name({"arg": value}) — function-call style, observed live.
-  const callStyleRegex = /\b([a-zA-Z_][\w.-]*)\s*\(\s*(\{[\s\S]*?\}|\[[\s\S]*?\])\s*\)/g;
-  while ((match = callStyleRegex.exec(text)) !== null) {
-    const callName = match[1];
-    if (!knownTagNames.has(callName)) continue;
-    const normalized = normalizeToolArguments(match[2]);
-    if (!normalized) continue;
-    const unwrapped = unwrapToolPayload(normalized);
-    calls.push({
-      id: `call_${crypto.randomUUID().slice(0, 8)}`,
-      name: unwrapped.name ?? callName,
-      arguments: unwrapped.argsJson,
-    });
-  }
-
-  // Pattern 5: name(arg="value", flag=true) — Python/named-argument style.
-  const namedArgRegex = /\b([a-zA-Z_][\w.-]*)\s*\(([^()]*)\)/g;
-  while ((match = namedArgRegex.exec(text)) !== null) {
-    const callName = match[1];
-    if (!knownTagNames.has(callName)) continue;
-    const inner = match[2].trim();
-    if (!inner.includes("=")) continue;
-    const parsed = parseNamedArgs(inner);
-    if (!parsed) continue;
-    calls.push({
-      id: `call_${crypto.randomUUID().slice(0, 8)}`,
-      name: callName,
-      arguments: JSON.stringify(parsed),
-    });
-  }
+  parseWrapperTagCalls(ctx);
+  parseLooseWrapperTagCalls(ctx);
+  parseOpenOnlyWrapperCalls(ctx);
+  parseToolNameTagCalls(ctx);
+  const known = knownCfToolTags(availableTools);
+  parseKnownTagJsonCalls(ctx, known);
+  parseKnownTagXmlCalls(ctx, known);
+  parseCallStyleCalls(ctx, known);
+  parseNamedArgCalls(ctx, known);
 
   // Pattern 5b: the JSON protocol — the shape the contract asks for. A call
   // arrives as a bare JSON value (an object, or an array of them for a
@@ -879,9 +956,9 @@ export function parseCfToolCalls(
   // twice.
   const json = parseCfJsonCalls(text, availableTools, {
     nonce: options?.nonce,
-    isHandled,
+    isHandled: ctx.isHandled,
   });
-  calls.push(...json.calls);
+  ctx.calls.push(...json.calls);
   handledSpans.push(...json.spans);
 
   // Pattern 6 — last resort. An opening tool tag whose JSON body is complete but
@@ -895,9 +972,44 @@ export function parseCfToolCalls(
   // this can only add calls, never change one, and it only accepts a body that
   // starts immediately after the opener (whitespace allowed) — never a JSON
   // object plucked out of prose.
-  calls.push(...recoverCompleteBodiesWithWrongCloser(text, availableTools, isHandled));
+  ctx.calls.push(...recoverCompleteBodiesWithWrongCloser(text, availableTools, ctx.isHandled));
 
-  return calls;
+  return ctx.calls;
+}
+
+/**
+ * The call one wrong-closer opener carries, and where the scan resumes, or null
+ * when the opener does not start a recoverable block.
+ */
+function recoverWrongCloserBlock(
+  text: string,
+  match: RegExpExecArray,
+  availableTools: CfToolDef[]
+): { call: CfParsedToolCall; resumeAt: number } | null {
+  const tag = match[1];
+  const declared = resolveDeclaredToolName(tag, availableTools);
+  if (!declared && !CF_GENERIC_TOOL_TAGS.has(tag.toLowerCase())) return null;
+  // The payload has to begin right after the opener.
+  const bodyStart = match.index + match[0].length;
+  const rest = text.slice(bodyStart);
+  if (!/^\s*[[{]/.test(rest)) return null;
+  const body = extractBalancedJson(rest);
+  const normalized = body ? normalizeToolArguments(body) : null;
+  if (!body || !normalized) return null;
+  const unwrapped = unwrapToolPayload(normalized);
+  // `<tool:read>` — the name lives in the attribute suffix, and Pattern 2
+  // needs a matching closer this shape does not have.
+  const colonName = match[2].match(/^\s*:\s*([A-Za-z_][\w.-]*)/);
+  const hint =
+    unwrapped.name ?? attrToolName(match[2]) ?? (colonName ? colonName[1] : null) ?? declared;
+  const call = resolveHintedCall(hint, unwrapped.argsJson, availableTools);
+  if (!call) return null;
+  return {
+    call: { id: newCfCallId(), name: call.name, arguments: call.argsJson },
+    // Do not rescan the body: a `<` inside a JSON string is not an opener, and a
+    // second recovery from inside this payload would double the call.
+    resumeAt: text.indexOf(body, bodyStart) + body.length,
+  };
 }
 
 /**
@@ -920,44 +1032,11 @@ function recoverCompleteBodiesWithWrongCloser(
   const openerRegex = /<\s*([A-Za-z_][\w.-]*)\b([^>]*)>/g;
   let match: RegExpExecArray | null;
   while ((match = openerRegex.exec(text)) !== null) {
-    const start = match.index;
-    if (isHandled(start, start + 1)) continue;
-    const tag = match[1];
-    const declared = resolveDeclaredToolName(tag, availableTools);
-    const isWrapper = CF_GENERIC_TOOL_TAGS.has(tag.toLowerCase());
-    if (!declared && !isWrapper) continue;
-    // `<tool:read>` — the name lives in the attribute suffix, and Pattern 2
-    // needs a matching closer this shape does not have.
-    const colonName = match[2].match(/^\s*:\s*([A-Za-z_][\w.-]*)/);
-    // The payload has to begin right after the opener.
-    const bodyStart = start + match[0].length;
-    const rest = text.slice(bodyStart);
-    if (!/^\s*[[{]/.test(rest)) continue;
-    const body = extractBalancedJson(rest);
-    if (!body) continue;
-    const normalized = normalizeToolArguments(body);
-    if (!normalized) continue;
-    const unwrapped = unwrapToolPayload(normalized);
-    const attrName = match[2].match(/name\s*=\s*["']([^"']+)["']/i);
-    const resolved = applyToolNameHint(
-      unwrapped.name ??
-        (attrName ? attrName[1] : null) ??
-        (colonName ? colonName[1] : null) ??
-        declared,
-      unwrapped.argsJson,
-      availableTools
-    );
-    if (!resolved) continue;
-    const name = resolved.name ?? inferToolName(resolved.argsJson, availableTools);
-    if (!name) continue;
-    recovered.push({
-      id: `call_${crypto.randomUUID().slice(0, 8)}`,
-      name,
-      arguments: resolved.argsJson,
-    });
-    // Do not rescan the body: a `<` inside a JSON string is not an opener, and a
-    // second recovery from inside this payload would double the call.
-    openerRegex.lastIndex = text.indexOf(body, bodyStart) + body.length;
+    if (isHandled(match.index, match.index + 1)) continue;
+    const block = recoverWrongCloserBlock(text, match, availableTools);
+    if (!block) continue;
+    recovered.push(block.call);
+    openerRegex.lastIndex = block.resumeAt;
   }
   return recovered;
 }
@@ -968,31 +1047,7 @@ function recoverCompleteBodiesWithWrongCloser(
  */
 function parseNamedArgs(inner: string): Record<string, unknown> | null {
   const args: Record<string, unknown> = {};
-  // Split on commas that are not inside quotes.
-  const parts: string[] = [];
-  let current = "";
-  let quote: string | null = null;
-  for (const ch of inner) {
-    if (quote) {
-      current += ch;
-      if (ch === quote) quote = null;
-      continue;
-    }
-    if (ch === '"' || ch === "'") {
-      quote = ch;
-      current += ch;
-      continue;
-    }
-    if (ch === ",") {
-      parts.push(current);
-      current = "";
-      continue;
-    }
-    current += ch;
-  }
-  parts.push(current);
-
-  for (const part of parts) {
+  for (const part of splitUnquotedCommas(inner)) {
     const eq = part.indexOf("=");
     if (eq === -1) return null;
     const key = part.slice(0, eq).trim();
@@ -1001,6 +1056,27 @@ function parseNamedArgs(inner: string): Record<string, unknown> | null {
     args[key] = parseScalar(rawValue);
   }
   return Object.keys(args).length > 0 ? args : null;
+}
+
+/** Split on commas that are not inside quotes. */
+function splitUnquotedCommas(inner: string): string[] {
+  const parts: string[] = [];
+  let current = "";
+  let quote: string | null = null;
+  for (const ch of inner) {
+    if (quote) {
+      if (ch === quote) quote = null;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+    } else if (ch === ",") {
+      parts.push(current);
+      current = "";
+      continue;
+    }
+    current += ch;
+  }
+  parts.push(current);
+  return parts;
 }
 
 function parseScalar(raw: string): unknown {

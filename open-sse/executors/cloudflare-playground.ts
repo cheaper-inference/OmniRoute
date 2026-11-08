@@ -141,6 +141,72 @@ function waitForRetryDelay(ms: number, signal?: AbortSignal | null): Promise<voi
   });
 }
 
+const EXPECTED_FORMAT = "Here is the expected format:\n";
+const RETRY_WITH_VALID_NAME = "Retry with a valid tool name from the list above.";
+
+/**
+ * The text around the schema example and tool list in each targeted reminder:
+ * `<lead><schema>\n\nAvailable tools: <names><tail>`.
+ */
+const TOOL_RETRY_REMINDER_PARTS: Partial<
+  Record<CfToolGateFailure, { lead: string; tail: string }>
+> = {
+  invalid_json: {
+    lead:
+      "Your previous response was not valid JSON. The tool contract requires a single JSON object (or an array of them) " +
+      "with no syntax errors. " +
+      EXPECTED_FORMAT,
+    tail: "\nReply with ONLY the JSON call(s), no markdown, no explanation.",
+  },
+  missing_type: {
+    lead:
+      "Your previous response is missing the required 'type' field. Every tool call must include " +
+      '"type": "tool_call" to mark it as a call. ' +
+      EXPECTED_FORMAT,
+    tail: "\nRetry with the correct type field.",
+  },
+  wrong_type: {
+    lead:
+      'Your previous response has an invalid "type" value. It must be exactly "tool_call" (case-sensitive). ' +
+      EXPECTED_FORMAT,
+    tail: '\nRetry with type set to exactly "tool_call".',
+  },
+  missing_name: {
+    lead:
+      "Your previous response is missing the required 'name' field. Every tool call must specify " +
+      "which tool to invoke. " +
+      EXPECTED_FORMAT,
+    tail: "\n" + RETRY_WITH_VALID_NAME,
+  },
+  invalid_name: {
+    lead: "Your previous response specified a tool name that is not available. " + EXPECTED_FORMAT,
+    tail: "\n" + RETRY_WITH_VALID_NAME,
+  },
+  missing_arguments: {
+    lead:
+      "Your previous response is missing the required 'arguments' field, or it is null/empty. " +
+      "Every tool call must include an 'arguments' object with the tool's declared parameters. " +
+      EXPECTED_FORMAT,
+    tail: "\nRetry with a valid arguments object.",
+  },
+  fabricated_result: {
+    lead:
+      "Your previous response invented a tool result: it contained a " +
+      '{"tool_result": ...} object for a tool that has not been run. ' +
+      "No tool has executed in this conversation yet, and you must never write a tool's " +
+      "output yourself — only the harness can return one. " +
+      "Take the action instead. Reply with ONLY the JSON call:\n",
+    tail: "\nThe harness will run the tool and send you its real result as the next message.",
+  },
+  empty_response: {
+    lead:
+      "Your previous response was empty — it carried neither text nor a tool call, so there " +
+      "was nothing for the client to act on. Perform the next concrete step now. If it needs " +
+      "a tool, reply with ONLY the JSON call:\n",
+    tail: "",
+  },
+};
+
 /**
  * Build a targeted corrective reminder based on the specific validation failure.
  */
@@ -149,116 +215,27 @@ export function buildToolRetryReminder(
   availableTools: CfToolDef[],
   nonce: string
 ): string {
+  const parts = TOOL_RETRY_REMINDER_PARTS[failure];
+  if (!parts) return malformedIntentReminder(nonce);
   const toolNames = availableTools.map((t) => t.name).join(", ");
   const schemaExample =
     '{"type": "tool_call", "name": "<tool>", "arguments": {...}, "_nonce": "' + nonce + '"}';
+  return parts.lead + schemaExample + "\n\nAvailable tools: " + toolNames + parts.tail;
+}
 
-  switch (failure) {
-    case "invalid_json":
-      return (
-        "Your previous response was not valid JSON. The tool contract requires a single JSON object (or an array of them) " +
-        "with no syntax errors. " +
-        "Here is the expected format:\n" +
-        schemaExample +
-        "\n\n" +
-        "Available tools: " +
-        toolNames +
-        "\n" +
-        "Reply with ONLY the JSON call(s), no markdown, no explanation."
-      );
-    case "missing_type":
-      return (
-        "Your previous response is missing the required 'type' field. Every tool call must include " +
-        '"type": "tool_call" to mark it as a call. ' +
-        "Here is the expected format:\n" +
-        schemaExample +
-        "\n\n" +
-        "Available tools: " +
-        toolNames +
-        "\n" +
-        "Retry with the correct type field."
-      );
-    case "wrong_type":
-      return (
-        'Your previous response has an invalid "type" value. It must be exactly "tool_call" (case-sensitive). ' +
-        "Here is the expected format:\n" +
-        schemaExample +
-        "\n\n" +
-        "Available tools: " +
-        toolNames +
-        "\n" +
-        'Retry with type set to exactly "tool_call".'
-      );
-    case "missing_name":
-      return (
-        "Your previous response is missing the required 'name' field. Every tool call must specify " +
-        "which tool to invoke. " +
-        "Here is the expected format:\n" +
-        schemaExample +
-        "\n\n" +
-        "Available tools: " +
-        toolNames +
-        "\n" +
-        "Retry with a valid tool name from the list above."
-      );
-    case "invalid_name":
-      return (
-        "Your previous response specified a tool name that is not available. " +
-        "Here is the expected format:\n" +
-        schemaExample +
-        "\n\n" +
-        "Available tools: " +
-        toolNames +
-        "\n" +
-        "Retry with a valid tool name from the list above."
-      );
-    case "missing_arguments":
-      return (
-        "Your previous response is missing the required 'arguments' field, or it is null/empty. " +
-        "Every tool call must include an 'arguments' object with the tool's declared parameters. " +
-        "Here is the expected format:\n" +
-        schemaExample +
-        "\n\n" +
-        "Available tools: " +
-        toolNames +
-        "\n" +
-        "Retry with a valid arguments object."
-      );
-    case "fabricated_result":
-      return (
-        "Your previous response invented a tool result: it contained a " +
-        '{"tool_result": ...} object for a tool that has not been run. ' +
-        "No tool has executed in this conversation yet, and you must never write a tool's " +
-        "output yourself — only the harness can return one. " +
-        "Take the action instead. Reply with ONLY the JSON call:\n" +
-        schemaExample +
-        "\n\nAvailable tools: " +
-        toolNames +
-        "\nThe harness will run the tool and send you its real result as the next message."
-      );
-    case "empty_response":
-      return (
-        "Your previous response was empty — it carried neither text nor a tool call, so there " +
-        "was nothing for the client to act on. Perform the next concrete step now. If it needs " +
-        "a tool, reply with ONLY the JSON call:\n" +
-        schemaExample +
-        "\n\nAvailable tools: " +
-        toolNames
-      );
-    case "malformed_intent":
-    default:
-      return (
-        "Your previous response contained a tool call that the client could not read, so it was rejected. " +
-        "Retry the requested next action from scratch, following the tool contract exactly: " +
-        "reply with ONLY a JSON object (or an array of them for several calls) shaped like " +
-        '{"type": "tool_call", "name": "<tool>", "arguments": {...}, "_nonce": "' +
-        nonce +
-        '"}, with the ' +
-        "arguments as a single JSON object and the _nonce binding copied verbatim. " +
-        "If your previous reply was cut off, send every call again, complete: a single object, or one " +
-        "array holding all of them. No XML tags and no code fences."
-      );
-  }
+/** The reminder for `malformed_intent`, and for any failure without its own text. */
+function malformedIntentReminder(nonce: string): string {
+  return (
+    "Your previous response contained a tool call that the client could not read, so it was rejected. " +
+    "Retry the requested next action from scratch, following the tool contract exactly: " +
+    "reply with ONLY a JSON object (or an array of them for several calls) shaped like " +
+    '{"type": "tool_call", "name": "<tool>", "arguments": {...}, "_nonce": "' +
+    nonce +
+    '"}, with the ' +
+    "arguments as a single JSON object and the _nonce binding copied verbatim. " +
+    "If your previous reply was cut off, send every call again, complete: a single object, or one " +
+    "array holding all of them. No XML tags and no code fences."
+  );
 }
 
 /**

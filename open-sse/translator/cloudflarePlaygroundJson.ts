@@ -94,140 +94,153 @@ function repairUnescapedInnerQuotes(text: string): string {
 }
 
 /**
- * Lenient JSON parser for model output: accepts unquoted keys, single-quoted
- * strings, bare (unquoted) string values, trailing commas and real newlines.
- * Only used when strict `JSON.parse` fails, so it never changes well-formed
- * payloads.
+ * Recursive-descent reader behind `parseLooseJson`, one method per JSON
+ * production so each stays small.
  */
-function parseLooseJson(input: string): unknown {
-  let i = 0;
-  const s = input;
-  const skipWs = () => {
-    while (i < s.length && /\s/.test(s[i])) i++;
-  };
+class LooseJsonReader {
+  private i = 0;
+  private readonly s: string;
 
-  const parseString = (quote: string): string => {
-    i++; // opening quote
+  constructor(input: string) {
+    this.s = input;
+  }
+
+  read(): unknown {
+    const value = this.parseValue();
+    this.skipWs();
+    if (this.i !== this.s.length) throw new Error("trailing data");
+    return value;
+  }
+
+  private skipWs(): void {
+    while (this.i < this.s.length && /\s/.test(this.s[this.i])) this.i++;
+  }
+
+  /** Decode the escape sequence at the cursor (the backslash included). */
+  private parseEscape(): string {
+    const next = this.s[this.i + 1] ?? "";
+    this.i += 2;
+    if (next === "n") return "\n";
+    if (next === "t") return "\t";
+    if (next === "r") return "\r";
+    if (next !== "u") return next;
+    const decoded = String.fromCharCode(parseInt(this.s.slice(this.i, this.i + 4), 16));
+    this.i += 4;
+    return decoded;
+  }
+
+  private parseString(quote: string): string {
+    this.i++; // opening quote
     let out = "";
-    while (i < s.length) {
-      const c = s[i];
+    while (this.i < this.s.length) {
+      const c = this.s[this.i];
       if (c === "\\") {
-        const next = s[i + 1] ?? "";
-        i += 2;
-        if (next === "n") out += "\n";
-        else if (next === "t") out += "\t";
-        else if (next === "r") out += "\r";
-        else if (next === "u") {
-          out += String.fromCharCode(parseInt(s.slice(i, i + 4), 16));
-          i += 4;
-        } else out += next;
+        out += this.parseEscape();
         continue;
       }
       if (c === quote) {
-        i++;
+        this.i++;
         return out;
       }
       out += c;
-      i++;
+      this.i++;
     }
     throw new Error("unterminated string");
-  };
+  }
 
-  const parseBare = (): unknown => {
-    const start = i;
-    while (i < s.length && !/[,}\]:]/.test(s[i])) i++;
-    const raw = s.slice(start, i).trim();
+  private parseBare(): unknown {
+    const start = this.i;
+    while (this.i < this.s.length && !/[,}\]:]/.test(this.s[this.i])) this.i++;
+    const raw = this.s.slice(start, this.i).trim();
     if (!raw) throw new Error("empty value");
     if (raw === "true") return true;
     if (raw === "false") return false;
     if (raw === "null") return null;
     if (/^-?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(raw)) return Number(raw);
     return raw;
-  };
-
-  const parseObject = (): Record<string, unknown> => {
-    i++; // {
-    const obj: Record<string, unknown> = {};
-    skipWs();
-    if (s[i] === "}") {
-      i++;
-      return obj;
-    }
-    while (i < s.length) {
-      skipWs();
-      let key: string;
-      if (s[i] === '"' || s[i] === "'") {
-        key = parseString(s[i]);
-      } else {
-        const start = i;
-        while (i < s.length && !/[:}\s]/.test(s[i])) i++;
-        key = s.slice(start, i).trim();
-      }
-      skipWs();
-      if (s[i] !== ":") throw new Error("expected ':'");
-      i++;
-      obj[key] = parseValue();
-      skipWs();
-      if (s[i] === ",") {
-        i++;
-        skipWs();
-        if (s[i] === "}") {
-          i++;
-          return obj;
-        }
-        continue;
-      }
-      if (s[i] === "}") {
-        i++;
-        return obj;
-      }
-      throw new Error("expected ',' or '}'");
-    }
-    throw new Error("unterminated object");
-  };
-
-  const parseArray = (): unknown[] => {
-    i++; // [
-    const arr: unknown[] = [];
-    skipWs();
-    if (s[i] === "]") {
-      i++;
-      return arr;
-    }
-    while (i < s.length) {
-      arr.push(parseValue());
-      skipWs();
-      if (s[i] === ",") {
-        i++;
-        skipWs();
-        if (s[i] === "]") {
-          i++;
-          return arr;
-        }
-        continue;
-      }
-      if (s[i] === "]") {
-        i++;
-        return arr;
-      }
-      throw new Error("expected ',' or ']'");
-    }
-    throw new Error("unterminated array");
-  };
-
-  function parseValue(): unknown {
-    skipWs();
-    const ch = s[i];
-    if (ch === "{") return parseObject();
-    if (ch === "[") return parseArray();
-    if (ch === '"' || ch === "'") return parseString(ch);
-    return parseBare();
   }
 
-  const value = parseValue();
-  skipWs();
-  if (i !== s.length) throw new Error("trailing data");
-  return value;
+  /** An object key: quoted, or bare up to the colon. */
+  private parseKey(): string {
+    const ch = this.s[this.i];
+    if (ch === '"' || ch === "'") return this.parseString(ch);
+    const start = this.i;
+    while (this.i < this.s.length && !/[:}\s]/.test(this.s[this.i])) this.i++;
+    return this.s.slice(start, this.i).trim();
+  }
+
+  /** Consume a container's opener; true when it is empty (its closer consumed too). */
+  private openContainer(close: string): boolean {
+    this.i++;
+    this.skipWs();
+    if (this.s[this.i] !== close) return false;
+    this.i++;
+    return true;
+  }
+
+  /**
+   * Consume what follows a member: true when the container closed (a trailing
+   * comma allowed), false when another member follows.
+   */
+  private afterMember(close: string): boolean {
+    this.skipWs();
+    if (this.s[this.i] === ",") {
+      this.i++;
+      this.skipWs();
+      if (this.s[this.i] !== close) return false;
+      this.i++;
+      return true;
+    }
+    if (this.s[this.i] === close) {
+      this.i++;
+      return true;
+    }
+    throw new Error(`expected ',' or '${close}'`);
+  }
+
+  private parseObject(): Record<string, unknown> {
+    const obj: Record<string, unknown> = {};
+    if (this.openContainer("}")) return obj;
+    while (this.i < this.s.length) {
+      this.skipWs();
+      const key = this.parseKey();
+      this.skipWs();
+      if (this.s[this.i] !== ":") throw new Error("expected ':'");
+      this.i++;
+      obj[key] = this.parseValue();
+      if (this.afterMember("}")) return obj;
+    }
+    throw new Error("unterminated object");
+  }
+
+  private parseArray(): unknown[] {
+    const arr: unknown[] = [];
+    if (this.openContainer("]")) return arr;
+    while (this.i < this.s.length) {
+      arr.push(this.parseValue());
+      if (this.afterMember("]")) return arr;
+    }
+    throw new Error("unterminated array");
+  }
+
+  private parseValue(): unknown {
+    this.skipWs();
+    const ch = this.s[this.i];
+    if (ch === "{") return this.parseObject();
+    if (ch === "[") return this.parseArray();
+    if (ch === '"' || ch === "'") return this.parseString(ch);
+    return this.parseBare();
+  }
+}
+
+/**
+ * Lenient JSON parser for model output: accepts unquoted keys, single-quoted
+ * strings, bare (unquoted) string values, trailing commas and real newlines.
+ * Only used when strict `JSON.parse` fails, so it never changes well-formed
+ * payloads.
+ */
+function parseLooseJson(input: string): unknown {
+  return new LooseJsonReader(input).read();
 }
 
 /**
@@ -243,27 +256,8 @@ function parseLooseJson(input: string): unknown {
 export function extractBalancedJson(text: string): string | null {
   const start = text.search(/[[{]/);
   if (start === -1) return null;
-  const open = text[start];
-  const close = open === "{" ? "}" : "]";
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  for (let i = start; i < text.length; i++) {
-    const ch = text[i];
-    if (inString) {
-      if (escaped) escaped = false;
-      else if (ch === "\\") escaped = true;
-      else if (ch === '"') inString = false;
-      continue;
-    }
-    if (ch === '"') inString = true;
-    else if (ch === open) depth++;
-    else if (ch === close) {
-      depth--;
-      if (depth === 0) return text.slice(start, i + 1);
-    }
-  }
-  return null;
+  const end = matchJsonEnd(text, start);
+  return end === -1 ? null : text.slice(start, end);
 }
 
 /**
@@ -322,26 +316,43 @@ interface CfJsonSpan {
 /** Index just past the JSON value that opens at `start`, or -1 when unbalanced. */
 export function matchJsonEnd(text: string, start: number): number {
   const open = text[start];
-  const close = open === "{" ? "}" : "]";
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
+  const scan: JsonScanState = {
+    open,
+    close: open === "{" ? "}" : "]",
+    depth: 0,
+    inString: false,
+    escaped: false,
+  };
   for (let i = start; i < text.length; i++) {
-    const ch = text[i];
-    if (inString) {
-      if (escaped) escaped = false;
-      else if (ch === "\\") escaped = true;
-      else if (ch === '"') inString = false;
-      continue;
-    }
-    if (ch === '"') inString = true;
-    else if (ch === open) depth++;
-    else if (ch === close) {
-      depth--;
-      if (depth === 0) return i + 1;
-    }
+    if (advanceJsonScan(scan, text[i])) return i + 1;
   }
   return -1;
+}
+
+/** State of the string-aware bracket scan behind `matchJsonEnd`. */
+interface JsonScanState {
+  open: string;
+  close: string;
+  depth: number;
+  inString: boolean;
+  escaped: boolean;
+}
+
+/** Feed one character to the scan; true when it closes the outermost value. */
+function advanceJsonScan(scan: JsonScanState, ch: string): boolean {
+  if (scan.inString) {
+    if (scan.escaped) scan.escaped = false;
+    else if (ch === "\\") scan.escaped = true;
+    else if (ch === '"') scan.inString = false;
+    return false;
+  }
+  if (ch === '"') scan.inString = true;
+  else if (ch === scan.open) scan.depth++;
+  else if (ch === scan.close) {
+    scan.depth--;
+    return scan.depth === 0;
+  }
+  return false;
 }
 
 /** Every top-level JSON value in the text, in document order. */
@@ -575,6 +586,19 @@ function cfCallsFromJsonValue(
     return cfCallsFromJsonValue(nested, availableTools, nonce, standalone);
   }
 
+  const call = cfCallFromJsonObject(obj, availableTools, nonce, standalone);
+  return call ? [call] : [];
+}
+
+/** The tool name and raw arguments one envelope object carries. */
+interface CfJsonEnvelope {
+  name: string | null;
+  /** Undefined for the flattened form, where the arguments are the other keys. */
+  argsSource: unknown;
+}
+
+/** Read the name and arguments out of an envelope, in any accepted spelling. */
+function readCfJsonEnvelope(obj: Record<string, unknown>): CfJsonEnvelope {
   let name: string | null = null;
   let argsSource: unknown;
 
@@ -587,83 +611,120 @@ function cfCallsFromJsonValue(
   }
 
   if (name === null) {
-    for (const key of CF_JSON_NAME_KEYS) {
-      if (typeof obj[key] === "string") {
-        name = obj[key] as string;
-        break;
-      }
-    }
+    const key = CF_JSON_NAME_KEYS.find((candidate) => typeof obj[candidate] === "string");
+    if (key) name = obj[key] as string;
   }
 
   if (argsSource === undefined) {
-    for (const key of CF_JSON_ARG_KEYS) {
-      if (obj[key] !== undefined) {
-        argsSource = obj[key];
-        break;
-      }
-    }
+    const key = CF_JSON_ARG_KEYS.find((candidate) => obj[candidate] !== undefined);
+    if (key) argsSource = obj[key];
   }
 
-  const envelopeNonce = typeof obj._nonce === "string" ? obj._nonce : undefined;
-  // The contract's discriminator. Optional on purpose: the envelope without it
-  // is still the same three keys, and models drop fields. When present it is a
-  // stronger signal than "the name happens to match a declared tool", so it
-  // also makes an envelope with a fuzzy or unknown name a *call attempt* — the
-  // finalizer then rejects it and the turn is retried instead of the reply being
-  // returned as text with a call buried in it.
-  const discriminated = isCfCallTypeValue(obj);
-  let args: Record<string, unknown> | null = null;
+  return { name, argsSource };
+}
 
-  if (argsSource !== undefined) {
-    if (typeof argsSource === "string") {
-      const normalized = normalizeToolArguments(argsSource);
-      args = normalized ? parseLooseJsonObject(normalized) : null;
-    } else if (argsSource && typeof argsSource === "object" && !Array.isArray(argsSource)) {
-      args = { ...(argsSource as Record<string, unknown>) };
-    }
-    if (!args) return [];
-  } else {
+/** The envelope's argument object, or null when it carries no usable one. */
+function cfJsonEnvelopeArgs(
+  obj: Record<string, unknown>,
+  argsSource: unknown
+): Record<string, unknown> | null {
+  if (argsSource === undefined) {
     // Flattened form: every key that is not envelope metadata is an argument.
-    args = {};
+    const args: Record<string, unknown> = {};
     for (const [key, entry] of Object.entries(obj)) {
       if (!CF_JSON_META_KEYS.has(key)) args[key] = entry;
     }
-    if (Object.keys(args).length === 0) return [];
+    return Object.keys(args).length > 0 ? args : null;
   }
+  if (typeof argsSource === "string") {
+    const normalized = normalizeToolArguments(argsSource);
+    return normalized ? parseLooseJsonObject(normalized) : null;
+  }
+  if (argsSource && typeof argsSource === "object" && !Array.isArray(argsSource)) {
+    return { ...(argsSource as Record<string, unknown>) };
+  }
+  return null;
+}
 
-  // Carry the envelope nonce into the arguments, where the binding check reads
-  // it — the canonical shape keeps it beside `arguments`, not inside.
-  if (envelopeNonce !== undefined && args._nonce === undefined) args._nonce = envelopeNonce;
+/** What an envelope offers as proof that it is a call meant for this request. */
+interface CfJsonCallSignals {
+  /** The envelope wrote a tool name. */
+  named: boolean;
+  /** The arguments were the envelope's other keys (no `arguments` field). */
+  flattened: boolean;
+  /** The whole reply is this envelope. */
+  standalone: boolean;
+  /** The envelope carries this request's nonce. */
+  boundToRequest: boolean;
+  /** The envelope declares the contract's `"type": "tool_call"`. */
+  discriminated: boolean;
+}
 
-  const argsJson = JSON.stringify(args);
-  const resolved = applyToolNameHint(name, argsJson, availableTools);
-  if (!resolved) return [];
-  const resolvedName = resolved.name ?? inferToolName(resolved.argsJson, availableTools);
-  if (!resolvedName) return [];
-  const declared = resolveDeclaredToolName(resolvedName, availableTools);
-
-  const boundToRequest = nonce !== undefined && envelopeNonce === nonce;
+/** Whether a resolved envelope has enough proof to be executed as a call. */
+function isTrustedCfJsonCall(
+  signals: CfJsonCallSignals,
+  declared: string | null | undefined,
+  resolvedName: string,
+  args: Record<string, unknown>,
+  availableTools: CfToolDef[]
+): boolean {
+  const vouched = signals.boundToRequest || signals.discriminated;
   // An unnamed payload is only trustworthy when it carries this request's nonce.
-  if (name === null && !boundToRequest && !discriminated) return [];
-  if (!declared && !boundToRequest && !discriminated) return [];
+  if (!signals.named && !vouched) return false;
+  if (!declared && !vouched) return false;
   // The flattened form is drift, so it needs a second signal before it is
   // executed: the whole reply is the envelope, the envelope is bound to this
   // request, it declares its own type, or it carries at least one argument the
   // tool actually declares. That is what separates
   // `{"name": "read", "path": "a.ts"}` from a schema the model quoted while
   // explaining (`{"name": "read", "description": ...}`).
-  if (argsSource === undefined && !standalone && !boundToRequest && !discriminated) {
-    const named = declared ?? resolvedName;
-    if (!named || !hasDeclaredArgument(named, args, availableTools)) return [];
-  }
+  if (!signals.flattened || signals.standalone || vouched) return true;
+  const named = declared ?? resolvedName;
+  return Boolean(named) && hasDeclaredArgument(named, args, availableTools);
+}
 
-  return [
-    {
-      id: `call_${crypto.randomUUID().slice(0, 8)}`,
-      name: declared ?? resolvedName,
-      arguments: resolved.argsJson,
-    },
-  ];
+/** Turn one envelope object (not an array, not a `tool_calls` wrapper) into a call. */
+function cfCallFromJsonObject(
+  obj: Record<string, unknown>,
+  availableTools: CfToolDef[],
+  nonce: string | undefined,
+  standalone: boolean
+): CfParsedToolCall | null {
+  const { name, argsSource } = readCfJsonEnvelope(obj);
+  const envelopeNonce = typeof obj._nonce === "string" ? obj._nonce : undefined;
+  const args = cfJsonEnvelopeArgs(obj, argsSource);
+  if (!args) return null;
+
+  // Carry the envelope nonce into the arguments, where the binding check reads
+  // it — the canonical shape keeps it beside `arguments`, not inside.
+  if (envelopeNonce !== undefined && args._nonce === undefined) args._nonce = envelopeNonce;
+
+  const resolved = applyToolNameHint(name, JSON.stringify(args), availableTools);
+  if (!resolved) return null;
+  const resolvedName = resolved.name ?? inferToolName(resolved.argsJson, availableTools);
+  if (!resolvedName) return null;
+  const declared = resolveDeclaredToolName(resolvedName, availableTools);
+
+  const signals: CfJsonCallSignals = {
+    named: name !== null,
+    flattened: argsSource === undefined,
+    standalone,
+    boundToRequest: nonce !== undefined && envelopeNonce === nonce,
+    // The contract's discriminator. Optional on purpose: the envelope without it
+    // is still the same three keys, and models drop fields. When present it is a
+    // stronger signal than "the name happens to match a declared tool", so it
+    // also makes an envelope with a fuzzy or unknown name a *call attempt* — the
+    // finalizer then rejects it and the turn is retried instead of the reply
+    // being returned as text with a call buried in it.
+    discriminated: isCfCallTypeValue(obj),
+  };
+  if (!isTrustedCfJsonCall(signals, declared, resolvedName, args, availableTools)) return null;
+
+  return {
+    id: `call_${crypto.randomUUID().slice(0, 8)}`,
+    name: declared ?? resolvedName,
+    arguments: resolved.argsJson,
+  };
 }
 
 /**

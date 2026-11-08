@@ -296,6 +296,25 @@ test("ANTI-OVER-SUPPRESSION: a truly fabricated env var IS still flagged", () =>
   );
 });
 
+test("env-var: a feature flag defined in a split catalog section (featureFlagDefinitionsCli.ts) is NOT flagged", () => {
+  const found = findingsFor({
+    files: {
+      "src/shared/constants/featureFlagDefinitions.ts":
+        'export const FEATURE_FLAG_DEFINITIONS = [\n  {\n    key: "MAIN_CATALOG_FLAG_XYZ",\n  },\n];\n',
+      "src/shared/constants/featureFlagDefinitionsCli.ts":
+        'export const CLI_FEATURE_FLAG_DEFINITIONS = [\n  {\n    key: "SPLIT_CATALOG_FLAG_XYZ",\n  },\n];\n',
+    },
+    docs: {
+      "flags.md": "Set `MAIN_CATALOG_FLAG_XYZ` or `SPLIT_CATALOG_FLAG_XYZ` to opt in.\n",
+    },
+  });
+  assert.ok(!found.has("env-var::MAIN_CATALOG_FLAG_XYZ"));
+  assert.ok(
+    !found.has("env-var::SPLIT_CATALOG_FLAG_XYZ"),
+    "a flag key in any featureFlagDefinitions*.ts file is a real env-overridable knob"
+  );
+});
+
 test("ANTI-OVER-SUPPRESSION: a fabricated API path with no backing route.ts IS still flagged", () => {
   const found = findingsFor({
     files: { "src/app/api/cloud/auth/route.ts": "export async function GET() {}\n" },
