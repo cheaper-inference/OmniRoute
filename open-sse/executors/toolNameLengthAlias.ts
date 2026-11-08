@@ -68,6 +68,21 @@ export function applyRegistryToolNameLengthAliases(
 }
 
 /**
+ * The registry `toolNameMaxLength`, else the connection's
+ * `providerSpecificData.toolNameMaxLength`: custom OpenAI chat-format compatible nodes never
+ * have a registry entry, so this is how they opt in for a stricter upstream.
+ */
+export function resolveToolNameMaxLength(
+  provider: string,
+  providerSpecificData: unknown
+): number | undefined {
+  const connectionLimit = isRecord(providerSpecificData)
+    ? providerSpecificData.toolNameMaxLength
+    : undefined;
+  return getRegistryEntry(provider)?.toolNameMaxLength ?? (connectionLimit as number | undefined);
+}
+
+/**
  * OpenCode chat-completions 400s on tool names over 64 chars (Claude Code MCP names
  * hit this). Called last, on the final body, so the request-scoped `_toolNameMap`
  * restores the originals in the response. Only the OpenAI chat surface is aliased;

@@ -64,39 +64,36 @@ pag-import ng HAR ang pag-expire ng JWT at ipinapakita ang natitirang tagal ng t
 > **Huwag kailanman mag-commit ng totoong HAR export, access token, o refresh token.** Ang mga value para sa pagsubok at
 > dokumentasyon ay dapat palaging mga placeholder.
 
-## Tagal at pag-refresh ng token
+## Tagal ng token at pag-refresh
 
-Panandalian ang `access_token` (karaniwang **~75 minuto**). Pagkatapos itong mag-expire, mag-uulat ang provider
-ng error sa koneksyon at kailangan mong kunin muli ang kredensyal.
+Maikli ang buhay ng `access_token` (karaniwang **~75 minuto**). Kung walang magagamit na refresh
+token, kailangan mong kuning muli ang credential pagkatapos ng pag-expire.
 
 ### Awtomatikong pag-refresh gamit ang `refreshToken`
 
-Upang maiwasan ang manu-manong muling pagkuha, maaari kang mag-imbak ng Microsoft refresh token sa
-**Advanced Settings → providerSpecificData** ng koneksyon:
-
-| Field          | Paglalarawan                                                                 |
-| -------------- | ---------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth refresh token para sa scope na `substrate.office.com/sydney` |
-| `tier`         | `individual` (default), `edu`, o `enterprise`                                |
+Sa dialog na **Add connection** o **Edit connection** ng provider na Microsoft 365, buksan ang
+**Advanced Settings → Refresh token (optional)**. I-paste ang Microsoft OAuth refresh token
+para sa scope na `substrate.office.com/sydney` at i-save. Naka-mask ang input at hindi nito kailanman awtomatikong pinupunan ang nakaimbak na token. Kapag nag-e-edit, iwan itong blangko upang panatilihin ang kasalukuyang token;
+mag-paste ng bagong token upang palitan ito.
 
 Kunin ang refresh token mula sa isang Microsoft device-code o authorization-code flow
-na naka-scope sa `substrate.office.com/sydney`. Kapag nakatakda ang `refreshToken`, nire-refresh muna ng OmniRoute
-ang `access_token` bago ang bawat kahilingan, kaya hindi mo na kailangang kunin itong muli
-pagkatapos ng bawat ~75 minutong pag-expire.
+na naka-scope sa `substrate.office.com/sydney`; hindi ito kinukuha ng dashboard para sa iyo.
+Kapag may naka-configure na refresh token, sinusuri ng OmniRoute ang `access_token` bago ang mga request
+at nire-refresh lamang ito kapag kailangan nang i-refresh. Kapag matagumpay ang pag-refresh, sine-save rin nito ang pinalitang refresh token, kaya hindi na kailangang kuning muli nang mano-mano habang nananatiling valid ang refresh token.
 
-Kung hindi nakatakda ang `refreshToken`, kailangan mong manu-manong kunin muli ang kredensyal ng WebSocket
+Kung hindi nakatakda ang `refreshToken`, kailangan mong kuning muli nang mano-mano ang credential ng WebSocket
 pagkatapos ng bawat pag-expire.
 
 ### Pagpili ng tier
 
-| Tier         | Alias       | Surface                        |
-| ------------ | ----------- | ------------------------------ |
-| `individual` | _(default)_ | M365 Copilot para sa Consumer  |
-| `edu`        | `included`  | M365 Copilot para sa Edukasyon |
-| `enterprise` | `work`      | M365 Copilot para sa Trabaho   |
+| Tier         | Alias       | Surface                |
+| ------------ | ----------- | ---------------------- |
+| `individual` | _(default)_ | Consumer M365 Copilot  |
+| `edu`        | `included`  | Education M365 Copilot |
+| `enterprise` | `work`      | M365 Copilot for Work  |
 
-Itakda ang tier sa **Advanced Settings → providerSpecificData → tier**. Naaapektuhan ng tier
-ang pagruruta ng BizChat at access sa modelo.
+Itakda ang tier sa **Advanced Settings → Copilot tier**. Nakaaapekto ang tier
+sa pagruruta ng BizChat at pag-access sa modelo.
 
 ## Modelo ng seguridad
 
@@ -111,30 +108,30 @@ ang pagruruta ng BizChat at access sa modelo.
 
 ## Pag-troubleshoot
 
-### Agad na nabibigo ang pagpapatotoo
+### Agarang nabibigo ang pagpapatotoo
 
-- Tiyaking mula sa **WebSocket URL** ka kumopya, hindi mula sa isang XHR/Fetch request. Ang
-  credential ay nasa `access_token` query parameter ng Chathub WebSocket
-  connection — hindi sa isang `Authorization: Bearer` header.
-- Tiyaking kasama sa `chathubPath` ang buong `<oid>@<tenant>` segment mula sa URL
-  path.
+- Tiyaking kinopya mo mula sa **WebSocket URL**, hindi mula sa isang XHR/Fetch request. Ang
+  credential ay nasa query parameter na `access_token` ng koneksyon sa Chathub WebSocket
+  — wala ito sa header na `Authorization: Bearer`.
+- Tiyaking kasama sa `chathubPath` ang buong segment na `<oid>@<tenant>` mula sa path ng URL.
 
-### Nag-e-expire ang token pagkalipas ng ~75 minuto
+### Nag-e-expire ang token makalipas ang ~75 minuto
 
-Inaasahan ito. Kung walang `refreshToken`, panandalian lang ang access token. Maaari mong:
+Inaasahan ito. Kung walang `refreshToken`, panandalian lang ang access token. Gawin ang alinman sa mga sumusunod:
 
 - Kunin muli ang credential mula sa DevTools, o
-- Mag-configure ng `refreshToken` sa Advanced Settings para sa awtomatikong pag-refresh.
+- I-configure ang **Advanced Settings → Refresh token (optional)** sa dialog na Add o Edit
+  connection para sa awtomatikong pag-refresh.
 
-### Pumapasa ang Test Connection ngunit nagbabalik ng 401 ang chat
+### Pumapasa ang Test Connection ngunit nagbabalik ang chat ng 401
 
-Maaaring nag-expire ang token sa pagitan ng validation at ng unang request. Kunin muli ang isang
+Maaaring nag-expire ang token sa pagitan ng validation at ng unang request. Kumuha muli ng
 bagong credential.
 
-### Hindi lumalabas ang Copilot sa listahan ng provider
+### Hindi lumilitaw ang Copilot sa listahan ng provider
 
 Tiyaking naka-enable ang `copilot-m365-web` sa **Dashboard → Providers**. Maaaring
-nakatago bilang default ang provider sa ilang tier.
+nakatago ang provider bilang default sa ilang tier.
 
 ## Mga sanggunian
 

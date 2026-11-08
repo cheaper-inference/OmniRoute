@@ -146,10 +146,7 @@ describe("ResultNarrated", () => {
         <ResultNarrated result={result} onSeeTranslatedJson={vi.fn()} onSeePipeline={vi.fn()} />
       );
     });
-    const icons = Array.from(container.querySelectorAll("svg.oi-icon")).map((el) =>
-      el.getAttribute("data-icon")
-    );
-    expect(icons).toContain("progress_activity");
+    expect(container.querySelector('[data-slot="spinner"]')).not.toBeNull();
     // Text should contain the i18n key with Gemini substituted
     expect(container.textContent).toContain("Gemini");
   });
@@ -169,10 +166,7 @@ describe("ResultNarrated", () => {
         <ResultNarrated result={result} onSeeTranslatedJson={vi.fn()} onSeePipeline={vi.fn()} />
       );
     });
-    const icons = Array.from(container.querySelectorAll("svg.oi-icon")).map((el) =>
-      el.getAttribute("data-icon")
-    );
-    expect(icons).toContain("progress_activity");
+    expect(container.querySelector('[data-slot="spinner"]')).not.toBeNull();
     expect(container.textContent).toContain("OpenAI");
   });
 

@@ -12,6 +12,7 @@ import {
   OCR_PROVIDERS,
 } from "../config/ocrRegistry.ts";
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
+import { isSameOrigin } from "../utils/sameOrigin.ts";
 import { buildSanitizedUpstreamErrorResponse } from "../utils/upstreamErrorResponse.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
@@ -163,6 +164,11 @@ export async function handleOcr({
     const pollUrl = transformation.pollUrl?.(res) ?? null;
     let data: unknown;
     if (pollUrl) {
+      // Operation-Location comes from the response, and the poll carries the subscription key.
+      // Only poll the endpoint the request went to (Azure serves it from the same resource).
+      if (!isSameOrigin(pollUrl, url)) {
+        return errorResponse(502, "OCR provider returned a poll URL outside its endpoint");
+      }
       const authHeader = buildAuthHeader(providerConfig.authHeader, token);
       data = await pollOcrOperation({ pollUrl, authHeader, fetchImpl, sleepImpl });
       if (data instanceof Response) return data;
@@ -207,11 +213,19 @@ function buildAuthHeader(authHeader: string, token: string): Record<string, stri
 async function pollOcrOperation({ pollUrl, authHeader, fetchImpl, sleepImpl }) {
   for (let attempt = 0; attempt < OCR_POLL_MAX_ATTEMPTS; attempt++) {
     await sleepImpl(OCR_POLL_INTERVAL_MS);
+    // fetch() keeps custom headers such as Ocp-Apim-Subscription-Key across a cross-origin
+    // redirect, so a redirect is refused instead of followed.
     const pollRes = await fetchImpl(pollUrl, {
       method: "GET",
       headers: authHeader,
+      redirect: "manual",
     });
+    if (pollRes.status >= 300 && pollRes.status < 400) {
+      await pollRes.body?.cancel().catch(() => {});
+      return errorResponse(502, "OCR poll URL answered with a redirect");
+    }
     if (!pollRes.ok) {
+      await pollRes.body?.cancel().catch(() => {});
       console.error("[OCR] poll error", pollRes.status);
       return errorResponse(502, "OCR analysis failed");
     }

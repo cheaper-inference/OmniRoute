@@ -4,6 +4,7 @@ import {
   settlePendingFirstChunk,
 } from "../../lib/proxyLogger";
 import { updateAttemptTiming } from "../../lib/db/proxyLogs";
+import type { EgressObservation } from "../../lib/proxyEgress";
 import {
   isFirstChunkTimingEnabled,
   sanitizeTimingMs,
@@ -66,17 +67,17 @@ function asProxyConfig(value: unknown): ProxyConfig {
   return (value as ProxyConfig) || null;
 }
 
-// Resolve the egress IP (the IP the upstream actually saw) from cache — never
-// blocking the request. Warm it in the background for next time. null until
-// the first warm completes; direct (no proxy) is also tracked.
-async function resolveCachedEgress(proxy: unknown): Promise<string | null> {
+// Resolve the egress addresses (the addresses the upstream actually saw) from
+// cache — never blocking the request. Warm them in the background for next
+// time. null until the first warm completes; direct (no proxy) is also tracked.
+async function resolveCachedEgress(proxy: unknown): Promise<EgressObservation | null> {
   try {
-    const { getCachedEgressIp, warmEgressIp } = await import("../../lib/proxyEgress");
+    const { getCachedEgressObservation, warmEgressIp } = await import("../../lib/proxyEgress");
     const { proxyConfigToUrl } = await import("@omniroute/open-sse/utils/proxyDispatcher.ts");
     const proxyUrl = proxy ? proxyConfigToUrl(proxy) : null;
-    const cached = getCachedEgressIp(proxyUrl);
+    const observation = getCachedEgressObservation(proxyUrl);
     warmEgressIp(proxyUrl);
-    return cached;
+    return observation;
   } catch {
     // egress visibility is best-effort; never break the request path
     return null;
@@ -93,10 +94,12 @@ function extractClientIp(clientRawRequest: ProxyJournalInput["clientRawRequest"]
   return typeof rawIpValue === "string" ? rawIpValue.split(",")[0].trim() : null;
 }
 
-async function resolveEgressPerProxy(outlets: unknown[]): Promise<Map<unknown, string | null>> {
+async function resolveEgressPerProxy(
+  outlets: unknown[]
+): Promise<Map<unknown, EgressObservation | null>> {
   // One cache read per distinct outlet (a retry through the same proxy reads
   // once): repeated sends usually share outlets, so the map stays tiny.
-  const egressIps = new Map<unknown, string | null>();
+  const egressIps = new Map<unknown, EgressObservation | null>();
   for (const outlet of outlets) {
     if (!egressIps.has(outlet)) egressIps.set(outlet, await resolveCachedEgress(outlet));
   }
@@ -161,6 +164,18 @@ export function attemptTimingPair(attempt: AttemptJournalEntry | null | undefine
   };
 }
 
+/**
+ * The addresses a log row carries for an outlet: the reported one and the one
+ * observed for each family. A family that was not observed stays null.
+ */
+function egressFields(observation: EgressObservation | null) {
+  return {
+    egressIp: observation?.ip ?? null,
+    egressIpv4: observation?.ipv4 ?? null,
+    egressIpv6: observation?.ipv6 ?? null,
+  };
+}
+
 function logAbandonedRow(
   attempt: AttemptJournalEntry,
   index: number,
@@ -171,13 +186,14 @@ function logAbandonedRow(
     credentials: ProxyJournalInput["credentials"];
     comboName: string | null;
     clientIp: string | null;
-    egressIps: Map<unknown, string | null>;
+    egressIps: Map<unknown, EgressObservation | null>;
     rotationAccount: string | null;
     correlationId: string | null;
   }
 ): void {
   const { proxyInfo, provider, model, credentials, comboName } = shared;
   const timing = attemptTimingPair(attempt);
+  const egress = shared.egressIps.get(attempt.proxy) ?? null;
   const entry = logProxyEvent({
     status: attemptTextStatus(attempt),
     proxy: asProxyConfig(attempt.proxy),
@@ -186,7 +202,7 @@ function logAbandonedRow(
     provider,
     targetUrl: `${provider}/${model}`,
     clientIp: shared.clientIp,
-    egressIp: shared.egressIps.get(attempt.proxy) ?? null,
+    ...egressFields(egress),
     latencyMs: attempt.durationMs ?? 0,
     error: attempt.error || null,
     connectionId: credentials.connectionId,
@@ -246,6 +262,7 @@ export async function logProxyJournal(input: ProxyJournalInput): Promise<void> {
   }
 
   const servedTiming = servedTimingPair(attempts);
+  const servedEgress = egressIps.get(proxyInfo?.proxy) ?? null;
   const servedEntry = logProxyEvent({
     status: result.success
       ? "success"
@@ -258,7 +275,7 @@ export async function logProxyJournal(input: ProxyJournalInput): Promise<void> {
     provider,
     targetUrl: `${provider}/${model}`,
     clientIp,
-    egressIp: egressIps.get(proxyInfo?.proxy) ?? null,
+    ...egressFields(servedEgress),
     latencyMs: proxyLatency,
     error: result.success ? null : result.error || null,
     connectionId: credentials.connectionId,

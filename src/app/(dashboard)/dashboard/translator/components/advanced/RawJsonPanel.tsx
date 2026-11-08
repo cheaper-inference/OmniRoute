@@ -3,6 +3,7 @@
 // Direct module import: tests stub the barrel Button with a reduced prop set.
 import IconButton from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { cn } from "@/shared/utils/cn";
 
 import { useState, useCallback, useEffect, useMemo } from "react";
@@ -430,13 +431,7 @@ export default function RawJsonPanel({
                           {FORMAT_META[detectedFormat]?.label ?? detectedFormat}
                         </Badge>
                       )}
-                      {detecting && (
-                        <Icon
-                          name="progress_activity"
-                          size={14}
-                          className="text-text-muted animate-spin"
-                        />
-                      )}
+                      {detecting && <Spinner size="xs" className="text-text-muted" />}
                     </div>
                     <div className="flex items-center gap-1">
                       <IconButton
