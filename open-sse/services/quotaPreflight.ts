@@ -19,7 +19,7 @@
  */
 
 import { isCompatibleProviderConnectionId } from "@/shared/utils/compatibleProviderId";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
 import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
 // #14359 — import the leaf, NOT "@/domain/quotaCache": quotaCache → usage.ts → usage/openrouter.ts →
@@ -31,6 +31,7 @@ import {
   isCodexPaidCreditsEnabled,
   type CodexPaidCredits,
 } from "@/lib/providers/codexPaidCredits";
+import { filterCodexQuotaWindows } from "./codexQuotaWindowPolicy.ts";
 import {
   fetchNewApiAggregatorQuota,
   invalidateNewApiAggregatorQuotaCache,
@@ -39,6 +40,9 @@ import {
   isAntigravityQuotaProvider,
   selectAntigravityQuotaWindowNames,
 } from "./antigravityQuotaFamily.ts";
+
+// Combo ordering reads this here so that it needs no open-sse -> src edge of its own.
+export { isCodexPaidCreditsBacked } from "@/lib/providers/codexPaidCredits";
 
 export interface PreflightQuotaResult {
   proceed: boolean;
@@ -139,6 +143,10 @@ const quotaFetcherRegistry = new Map<string, QuotaFetcher>();
 
 export function registerQuotaFetcher(provider: string, fetcher: QuotaFetcher): void {
   quotaFetcherRegistry.set(provider, fetcher);
+}
+
+export function getRegisteredQuotaFetchers(): ReadonlyMap<string, QuotaFetcher> {
+  return new Map(quotaFetcherRegistry);
 }
 
 export function getQuotaFetcher(provider: string): QuotaFetcher | undefined {
@@ -246,10 +254,13 @@ function exhaustedResult(
   };
 }
 
-function windowsForScope(
+export function windowsForScope(
   windows: NonNullable<QuotaInfo["windows"]>,
   scope?: QuotaCutoffScope
 ): NonNullable<QuotaInfo["windows"]> {
+  if (scope?.provider === "codex") {
+    return filterCodexQuotaWindows(windows, scope.providerSpecificData);
+  }
   if (!scope?.requestedModel || !isAntigravityQuotaProvider(scope.provider ?? null)) {
     return windows;
   }
@@ -308,7 +319,7 @@ function evaluateQuotaGroup(
   return { exhausted, worstPercent: Math.max(0, worstPercent), worstWindow, worstResetAt };
 }
 
-function groupQuotaWindowsByBase(
+export function groupQuotaWindowsByBase(
   windows: NonNullable<QuotaInfo["windows"]>
 ): Map<string, Array<[string, QuotaWindowInfo]>> {
   const groups = new Map<string, Array<[string, QuotaWindowInfo]>>();
@@ -413,7 +424,10 @@ function windowedQuotaCutoffResult(
   if (isAntigravityQuotaProvider(scope?.provider ?? null) && scope?.requestedModel) {
     return { proceed: true, quotaPercent: quota.percentUsed };
   }
-  if (quota.limitReached === true) return limitReachedResult(quota);
+  // An aggregate signal cannot re-enable a Codex window explicitly removed by its toggle.
+  if (quota.limitReached === true && !(scope?.provider === "codex" && scopedWindows !== windows)) {
+    return limitReachedResult(quota);
+  }
   return { proceed: true, quotaPercent: quota.percentUsed };
 }
 
@@ -505,7 +519,7 @@ export function resolveDynamicQuotaFetcher(
   if (!psd || psd.newApiAggregatorBalance !== true) return undefined;
 
   // Feature flag must be enabled
-  if (!isFeatureFlagEnabled("NEWAPI_AGGREGATOR_BALANCE")) return undefined;
+  if (!isRegisteredFeatureFlagEnabled("NEWAPI_AGGREGATOR_BALANCE")) return undefined;
 
   // The aggregator fetcher has no static registrar, so its invalidator is
   // registered on the first dynamic resolution — the same moment the fetcher's

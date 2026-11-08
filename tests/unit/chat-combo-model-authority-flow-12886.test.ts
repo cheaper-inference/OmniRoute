@@ -28,6 +28,8 @@ const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const { SELF_HOP_HEADER, ownListenerSelfHopToken } =
+  await import("../../open-sse/utils/selfHop.ts");
 const proxyLogger = await import("../../src/lib/proxyLogger.ts");
 const { handleChat } = await import("../../src/sse/handlers/chat.ts");
 const originalFetch = globalThis.fetch;
@@ -140,7 +142,10 @@ test("live-test marker does not let a non-granted named combo dispatch a blocked
   };
 
   const response = await handleChat(
-    comboRequest(key.key, { "X-Internal-Test": "combo-health-check" })
+    comboRequest(key.key, {
+      "X-Internal-Test": "combo-health-check",
+      [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
+    })
   );
 
   assert.equal(response.status, 403);

@@ -27,7 +27,10 @@ import { restoreIncomingOrder } from "./rungOrder.ts";
 import {
   getModelContextLimitForModelString,
   providerSupportsEmulatedToolCalling,
+  filterTargetsByRequestCompatibility,
+  deriveRequestCompatibilityRequirements,
 } from "./comboStructure.ts";
+import { hasMediaRequirements } from "./mediaCompatibility.ts";
 import {
   calculatePromptCacheAffinityScores,
   promptCacheTargetIdentity,
@@ -289,6 +292,26 @@ export async function resolveAutoStrategyOrder(
     );
   }
 
+  // Full-catalog expansion can add targets after the initial compatibility pass.
+  // Recheck before scoring so unsupported transports cannot consume the retry
+  // budget, and retain this pool even when candidate telemetry is unavailable.
+  if (hasMediaRequirements(deriveRequestCompatibilityRequirements(body))) {
+    eligibleTargets = filterTargetsByRequestCompatibility(eligibleTargets, body, log, combo.name);
+    if (eligibleTargets.length === 0) {
+      return {
+        earlyResponse: errorResponse(
+          400,
+          "No compatible media transport is available in this Auto pool",
+          {
+            code: "unsupported_media_input",
+            type: "invalid_request_error",
+          }
+        ),
+      };
+    }
+    orderedTargets = eligibleTargets;
+  }
+
   const prompt = extractPromptForIntent(body);
   const systemPrompt = typeof combo?.system_message === "string" ? combo.system_message : undefined;
   const intentConfig = getIntentConfig(settings, combo);
@@ -434,6 +457,7 @@ export async function resolveAutoStrategyOrder(
             sla: slaPolicy,
             weights,
             explorationRate,
+            manifestHint: autoManifestHint,
             messages: body.messages,
             nadir: nadirConfig,
           },
@@ -467,6 +491,7 @@ export async function resolveAutoStrategyOrder(
             budgetFallback,
             estimatedInputTokens,
             explorationRate,
+            manifestHint: autoManifestHint,
           },
           routableCandidates,
           taskType

@@ -33,6 +33,7 @@ const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
 const runtimePorts = await import("../../src/lib/runtime/ports.ts");
 const route = await import("../../src/app/api/combos/test/route.ts");
+const { SELF_HOP_HEADER, isOwnListenerSelfHop } = await import("../../open-sse/utils/selfHop.ts");
 
 const originalFetch = globalThis.fetch;
 
@@ -144,6 +145,7 @@ test("combo test route marks a model healthy only when it returns assistant text
   assert.equal(fetchCalls.length, 1);
   assert.equal(fetchCalls[0].url, expectedInternalUrl("/v1/chat/completions"));
   assert.equal(fetchCalls[0].init.headers["X-Internal-Test"], "combo-health-check");
+  assert.ok(isOwnListenerSelfHop(fetchCalls[0].init.headers[SELF_HOP_HEADER]));
   assert.equal(fetchCalls[0].init.headers["X-OmniRoute-No-Cache"], "true");
   assert.match(fetchCalls[0].init.headers["X-Request-Id"], /^combo-test-/);
   assert.equal(forwardedBody.model, "openrouter/openai/gpt-5.4");
@@ -567,7 +569,7 @@ test("combo test route aborts in-flight probes when the client disconnects", asy
   }
 });
 
-test("combo test route stops probing once the total budget is spent", async () => {
+test("combo test route still probes every target beyond 180s accumulated elapsed time", async () => {
   await createTestCombo(["provider/first", "provider/second", "provider/third"]);
 
   const probed: string[] = [];
@@ -576,12 +578,15 @@ test("combo test route stops probing once the total budget is spent", async () =
   Date.now = () => clock;
 
   globalThis.fetch = async (_url, init: RequestInit = {}) => {
-    probed.push(JSON.parse(String(init.body)).model);
-    clock += route.COMBO_TEST_TOTAL_TIMEOUT_MS;
-    return new Response(JSON.stringify({ error: { message: "boom" } }), {
-      status: 502,
-      headers: { "content-type": "application/json" },
-    });
+    const model = JSON.parse(String(init.body)).model as string;
+    probed.push(model);
+    // Simulate completed probes with long elapsed times. The old cumulative
+    // deadline skipped later targets even when they would have passed.
+    clock += 180_000;
+    if (model === "provider/third") {
+      return Response.json({ choices: [{ message: { role: "assistant", content: "healthy" } }] });
+    }
+    return Response.json({ error: { message: "boom" } }, { status: 502 });
   };
 
   try {
@@ -589,10 +594,22 @@ test("combo test route stops probing once the total budget is spent", async () =
     const body = (await response.json()) as ComboTestBody;
 
     assert.equal(response.status, 200);
-    assert.deepEqual(probed, ["provider/first"]);
+    assert.deepEqual(probed, ["provider/first", "provider/second", "provider/third"]);
     assert.equal(body.results.length, 3);
-    assert.equal(body.results[1].error, "Timeout (180s total)");
-    assert.equal(body.results[2].error, "Timeout (180s total)");
+    assert.deepEqual(
+      body.results.map((result) => ({ status: result.status, statusCode: result.statusCode })),
+      [
+        { status: "error", statusCode: 502 },
+        { status: "error", statusCode: 502 },
+        { status: "ok", statusCode: undefined },
+      ]
+    );
+    assert.deepEqual(
+      body.results.slice(0, 2).map((result) => result.error),
+      ["boom", "boom"]
+    );
+    assert.equal(body.resolvedBy, "provider/third");
+    assert.equal(body.results[2].responseText, "healthy");
   } finally {
     Date.now = realNow;
   }
