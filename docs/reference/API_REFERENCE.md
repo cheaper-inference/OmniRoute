@@ -13,6 +13,8 @@ Core reference for the OmniRoute API. It covers the public `/v1` surface and the
 For the focused OpenAI-compatible protocol and provider capability matrix, see
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
 
+Each deployment serves its own copy of the spec at `/openapi.yaml`, generated from `docs/openapi.yaml` during the build. It carries the build's version and a relative server URL (`./`), so requests stay on the host that served the document. A tool that imports the downloaded file has no such host, and needs the base URL set by hand.
+
 ---
 
 ## Table of Contents
@@ -401,6 +403,11 @@ HTTPS URL or a base64 data URL when only image bytes are available. Empty/filter
 return an error rather than an empty success. Model access depends on the ZenMux account.
 See [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) and
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+A Microsoft 365 Copilot sign-in connection serves `copilot-m365-web/m365-copilot-image`
+through Copilot's built-in image tool: one Copilot turn per image (`n` 1–4), `size` steering
+only the orientation, and images returned inline (`b64_json`, or a data URL for
+`response_format: "url"`). See [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
 # List all image models
@@ -864,6 +871,17 @@ Web/search provider abstraction (Tavily, Brave, Exa, Serper, etc.).
 
 **Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Search policy enforced via `enforceApiKeyPolicy`.
 
+**Auto-select:** without `provider`, the cheapest provider with a configured connection runs
+first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are
+used only when nothing else is configured. A self-hosted SearXNG counts as configured once its
+connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it
+then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover,
+including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL
+or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token
+ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never
+a failover and stays a last resort, used only when no other provider is configured or when
+requested by name, so it does send the token in cleartext in those two cases.
+
 ### Exa and Tavily `provider_options`
 
 Exa and Tavily read provider-specific fields from a namespaced bag:
@@ -891,7 +909,8 @@ The generic `time_range` now reaches both providers: Exa gets `startPublishedDat
 timestamp) and Tavily gets `start_date` (`YYYY-MM-DD`). An explicit date in `provider_options`
 overrides the mapped one.
 
-Exa results keep `id`, `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
+Exa results keep `id`, `highlights` (every highlight, not only the first one used as the
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
 `provider_raw`. Tavily results keep `images` and `favicon`.
 
 Linkup search cost is recorded at $0.005 for `depth` `fast` and `standard` and $0.05 for
@@ -1293,6 +1312,12 @@ values in `modelOutputOverrides`, including models without a custom-model row. T
 uses the runtime `max_output_tokens` capability and survives a model re-sync. The OpenAI-compatible
 provider page offers the same edit/clear controls and marks models with explicit vision support.
 
+On a compatible provider node, the write paths (`POST`, `PUT`, `PATCH`, `DELETE` and
+`/api/provider-models/validate-and-add`) store the model id as the bare upstream id: an id
+pasted from a prefixed listing has any leading stack of the node's own prefix collapsed, and
+responses echo the stored id. Canonical providers' slashed ids (e.g. `nvidia/nemotron-…`) are
+stored verbatim. `/v1/models` never emits a stacked `<prefix>/<prefix>/<model>` id.
+
 Custom Chat Completions nodes adapt explicit reasoning opt-outs to the upstream backend. A
 successful connection test automatically selects chat-template controls for each exact model ID
 whose `/models` entry proves a recognized `owned_by` value: `vllm`, `sglang`, or `llamacpp`.
@@ -1337,11 +1362,35 @@ verdicts; the second stage can still produce its requested visible reasoning as 
 
 | Endpoint              | Method   | Description                   |
 | --------------------- | -------- | ----------------------------- |
+| `/api/models`         | GET/PUT  | Model list / alias update     |
 | `/api/models/alias`   | GET/POST | Model aliases                 |
 | `/api/models/catalog` | GET      | All models by provider + type |
 | `/api/combos*`        | Various  | Combo management              |
 | `/api/keys*`          | Various  | API key management            |
 | `/api/pricing`        | GET      | Model pricing                 |
+
+#### Model limit provenance
+
+`GET /api/models?withLimits=1` (also `true`; `0`/`false` or omitting it keeps the default
+payload unchanged) adds `contextWindow`, `maxInputTokens`, `maxOutputTokens` and a `capsSource`
+object to every model row. `capsSource` names the rule that supplied each limit, so a
+surprising limit (for example 128k on a 1M model) can be traced to its origin. The resolved
+values are the same ones routing uses; the flag only adds fields and never changes a value.
+Any other `withLimits` value is rejected with `400`.
+
+| `capsSource` value                           | Origin                                                                 |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `override:context`                           | Persisted context-window override (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | Persisted `max_input_tokens` / `max_output_tokens` capability override |
+| `static-authoritative:<provider>/<model>`    | Static authoritative context-window table                              |
+| `synced:<provider>/<model>`                  | models.dev synced capability row                                       |
+| `registry:<provider>/<model>`                | Provider registry entry                                                |
+| `spec:<model>`                               | Static model spec                                                      |
+| `effort-base:` prefix                        | Row borrowed from the base model of an effort-suffixed variant         |
+| `none`                                       | No source declares the limit (value is `null`)                         |
+
+Implementation: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts`
+and the precedence chains in `src/lib/modelCapabilityLimits.ts`.
 
 ### Usage & Analytics
 
@@ -1438,6 +1487,34 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | In-memory `attempts`, successes/`bridged`, failures, cache hits, `totalLatencyMs`, `latencySamples`, sample-denominated `averageLatencyMs`, and last-use time (reset on restart; management auth)                                                                                                                                                                                            |
 | `/api/modality-bridge/video/runtime` | GET        | Strict trusted-loopback check before management auth/probe; sanitized FFmpeg/ffprobe availability and versions (no-store)                                                                                                                                                                                                                                                                    |
 | `/api/modality-bridge/video/extract` | POST       | Internal authenticated trusted-loopback byte broker; 50 MiB input, bounded queue/32 MiB output, `503` capacity, `499` disconnect, `504` deadline; not a public upload API                                                                                                                                                                                                                    |
+
+### Video frame drill-down
+
+`GET /api/v1/video-bridge/drilldown` reads a tenant-bound opaque handle returned in
+`x-omniroute-video-drilldown` after an explicitly consented Video Bridge request.
+Both reads and `DELETE` always require a valid API key and the operator's independent
+`modalityBridgeVideoDrilldownRemoteEnabled` permission. Production retention additionally
+requires `modalityBridgeVideoDrilldownEnabled` and strict per-part `drilldown: true`.
+If the key has a nonempty endpoint allowlist, it must include `video` for both
+GET and DELETE, whether the caller uses `/v1` or `/api/v1`.
+
+GET query: required `handle`; optional `variant` (`preview`, `standard`, `detail`),
+`limit` (1–8; legacy `frames` is accepted but cannot be combined with `limit`),
+zero-based `page`, and `start`/`end` seconds. When both focus bounds
+are supplied, `end` must be greater than `start`. Duplicate/unknown query keys are
+rejected. Successful responses contain `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant`, and optional `focusWindow`; no-store JSON is capped at
+32 MiB including Base64. Oversized output returns 413; request fewer frames.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` returns `{ "removed": 0|1 }`.
+Unknown, expired and cross-key GETs are indistinguishable 404 responses; cross-key
+DELETE cannot remove the owner's entry. Disabled access returns 403, missing/invalid
+authentication 401, invalid queries 400, cancellation 499 and temporary errors 503.
+Handles are process-local, expire after ten minutes, and do not survive a restart.
+New handles use `v1.` plus a 32-byte random Base64URL token; only token hashes are
+retained. Legacy 64-hex tokens remain syntactically readable for compatibility.
+See [Video Bridge guardrails](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+for consent, quotas and variant derivation details.
 
 ### Backup & Export/Import
 
@@ -1545,7 +1622,7 @@ These endpoints mirror Gemini's API format for clients that expect native Gemini
 
 | Endpoint                 | Method | Description                                            |
 | ------------------------ | ------ | ------------------------------------------------------ |
-| `/api/init`              | GET    | Application initialization check (used on first run)   |
+| `/api/init`              | GET    | Start background sync services (management auth)       |
 | `/api/tags`              | GET    | Ollama-compatible model tags (for Ollama clients)      |
 | `/api/restart`           | POST   | Trigger graceful server restart                        |
 | `/api/shutdown`          | POST   | Trigger graceful server shutdown                       |
@@ -1654,6 +1731,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 `deepgram/nova-3` request does **not** use OpenRouter.
 
 **Supported formats:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** file-mode transcription over the Gemini Live
+WebSocket (requires a Gemini API key). The upload is converted to 16 kHz mono PCM with `ffmpeg`
+(must be on `PATH`, unless the file is already a 16 kHz mono PCM WAV), streamed to the session and
+the finalized text is returned as `{ "text": "..." }`. Optional `language` and `prompt` form fields
+are forwarded. Limits: uploads above 25 MiB or decoded audio longer than 10 minutes answer
+`413`; a conversion that runs longer than 60 s is killed and answers `504`. The API key is sent
+in the `x-goog-api-key` header only, never in the WebSocket URL.
 
 ---
 

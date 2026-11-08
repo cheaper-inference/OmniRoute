@@ -1,9 +1,12 @@
+import type { PrefixShadowedDiagnostic } from "@/shared/utils/providerConnectionStatus";
 import type { CodexGlobalServiceMode } from "@/lib/providers/codexFastTier";
 import type { CodexAccountPoolProjection } from "@omniroute/open-sse/services/codexAccount/index.ts";
 import type { DiscoveryStateRecord } from "@/lib/db/discoveryState";
 import type { ProviderQuotaCacheEntry } from "../hooks/useProviderQuota";
+import type { QuotaRefreshState } from "../hooks/providerQuotaRefresh";
 
 export interface ConnectionRowConnection {
+  prefixShadowed?: PrefixShadowedDiagnostic | null;
   id?: string;
   provider?: string;
   name?: string;
@@ -91,5 +94,6 @@ export interface ConnectionRowProps {
   /** Latest cached usage/limits snapshot for this account (see useProviderQuota). */
   quotaCache?: ProviderQuotaCacheEntry | null;
   quotaRefreshing?: boolean;
+  quotaRefreshState?: QuotaRefreshState;
   onRefreshQuota?: () => void;
 }

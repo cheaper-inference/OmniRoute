@@ -37,7 +37,10 @@ export async function GET(request: Request) {
 
 /** PUT /api/settings/pii — replace the per-type selection and/or the custom pattern list. */
 export async function PUT(request: Request) {
-  const authError = await requireManagementAuth(request);
+  // Keeps needing a credential with login disabled, like the PII_* feature
+  // flags: an empty selection turns masking off for every client while the
+  // flag still reads as on.
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   let rawBody: unknown;

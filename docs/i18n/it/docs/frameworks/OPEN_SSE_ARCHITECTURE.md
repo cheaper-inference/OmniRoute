@@ -486,13 +486,13 @@ Questo gestisce:
 
 `open-sse/config/` contiene il livello di configurazione:
 
-| File                          | Scopo                                                      |
-| ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Registro del modello di chat sul catalogo del provider 377 |
-| `providerModels.ts`           | Alias del modello, mappatura del formato                   |
-| `constants.ts`                | Timeout, limiti, codici di stato                           |
-| `defaultThinkingSignature.ts` | Firma di pensiero Claude predefinita                       |
-| `modelStrip.ts` (nei servizi) | Eliminazione dei campi per provider                        |
+| File                          | Scopo                                                     |
+| ----------------------------- | --------------------------------------------------------- |
+| `providerRegistry.ts`         | Registro del modello di chat sul catalogo di 380 provider |
+| `providerModels.ts`           | Alias del modello, mappatura del formato                  |
+| `constants.ts`                | Timeout, limiti, codici di stato                          |
+| `defaultThinkingSignature.ts` | Firma di pensiero Claude predefinita                      |
+| `modelStrip.ts` (nei servizi) | Eliminazione dei campi per provider                       |
 
 ### Schema del registro dei fornitori
 

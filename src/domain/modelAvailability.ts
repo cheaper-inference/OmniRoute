@@ -4,6 +4,7 @@ import {
   clearModelLock,
   type ModelLockoutInfo,
 } from "@omniroute/open-sse/services/accountFallback";
+import { canonicalizeExactModel } from "@omniroute/open-sse/services/accountFallback/exactModelLock";
 import { isModelExcludedByConnection } from "./connectionModelRules";
 
 export type AvailabilityReportItem = Pick<
@@ -26,7 +27,11 @@ export function getAvailabilityReport(): AvailabilityReportItem[] {
 
 export function clearModelUnavailability(provider: string, model: string): boolean {
   const all = getAllModelLockouts();
-  const matching = all.filter((e) => e.provider === provider && e.model === model);
+  // Exact locks list their canonical id, which can differ from the id the caller holds.
+  const exactModel = canonicalizeExactModel(provider, model);
+  const matching = all.filter(
+    (e) => e.provider === provider && (e.model === model || e.model === exactModel)
+  );
   if (matching.length === 0) return false;
   let cleared = false;
   for (const entry of matching) {
