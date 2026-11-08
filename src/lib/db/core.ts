@@ -761,14 +761,6 @@ function offloadLegacyCallLogDetails(db: SqliteDatabase) {
         detail_state = 'ready'
     WHERE id = @id
   `);
-  const markMissingStmt = db.prepare(`
-    UPDATE call_logs
-    SET detail_state = 'missing',
-        artifact_relpath = NULL,
-        artifact_size_bytes = NULL,
-        artifact_sha256 = NULL
-    WHERE id = ?
-  `);
 
   let failed = 0;
   const tx = db.transaction(() => {
@@ -814,8 +806,9 @@ function offloadLegacyCallLogDetails(db: SqliteDatabase) {
         buildArtifactRelativePath(artifact.summary.timestamp, artifact.summary.id)
       );
       if (!artifactResult) {
+        // Keep the row 'legacy-inline': its body still lives in the legacy table, and the next
+        // boot's selector must find it again before that table is dropped.
         failed++;
-        markMissingStmt.run(row.id);
         continue;
       }
 
