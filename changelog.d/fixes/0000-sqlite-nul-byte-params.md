@@ -1,0 +1,1 @@
+- **fix(db):** On the `node:sqlite` fallback driver, text saved with a NUL byte is no longer cut at that byte. The NUL byte is removed and the rest of the text is kept.
