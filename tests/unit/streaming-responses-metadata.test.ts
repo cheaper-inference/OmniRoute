@@ -29,6 +29,7 @@ type Event = {
   sequence_number?: number;
   [key: string]: unknown;
 };
+/** Feed fragmented SSE through the real transforms and verify emitted event framing. */
 async function run(transforms: TransformStream[], events: Event[], done = true) {
   const input = events.map((e) => `event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`);
   if (done) input.push("data: [DONE]\n\n");
@@ -523,4 +524,30 @@ test("credential: indexed done cannot prematurely drain an anonymous split secre
     ]
   );
   assert.equal(text(out), "[REDACTED:openai]");
+});
+
+test("credential: conflicting Responses identities fail closed without logging the raw chunk", async (t) => {
+  const logged: unknown[][] = [];
+  t.mock.method(console, "error", (...args: unknown[]) => logged.push(args));
+  const secret = "synthetic-sensitive-payload";
+  const events: Event[] = [
+    { type: "response.output_text.delta", item_id: "m", delta: "first" },
+    { type: "response.output_text.delta", output_index: 0, delta: "second" },
+    { type: "response.output_text.delta", output_index: 0, item_id: "m", delta: secret },
+  ];
+  const source = new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const event of events) {
+        controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`));
+      }
+      controller.close();
+    },
+  });
+  await assert.rejects(
+    new Response(source.pipeThrough(createCredentialSseTransform())).text(),
+    /Conflicting Responses stream identities/
+  );
+  assert.equal(logged.length, 1);
+  assert.equal(logged[0].at(-1), "[REDACTED_DUE_TO_PII]");
+  assert.ok(!JSON.stringify(logged).includes(secret));
 });

@@ -203,6 +203,11 @@ export function checkIfSnapshot(json: any): boolean {
 
 const fallbackDecoder = new TextDecoder();
 
+/**
+ * Parse fragmented SSE and process provider payload fields without changing event framing.
+ * Snapshots are processed independently; buffered tails drain before stop events or EOF.
+ * Responses lanes use schema-aware routing and may release processor state after draining.
+ */
 export function createSseTextTransform(
   processor: (
     text: string,

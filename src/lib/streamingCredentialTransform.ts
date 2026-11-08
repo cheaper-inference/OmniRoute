@@ -618,6 +618,10 @@ function flushEmptyStream(
   return remaining;
 }
 
+/**
+ * Mask credentials across SSE fragments with bounded per-lane buffers and fail-closed limits.
+ * Snapshots are masked directly; drained Responses lanes release their continuation state.
+ */
 export function createCredentialSseTransform(
   options?: CredentialTransformOptions
 ): TransformStream {

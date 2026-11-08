@@ -29,7 +29,11 @@ const TERMINALS = new Set([
 const object = (value: unknown): JsonObject | undefined =>
   value && typeof value === "object" && !Array.isArray(value) ? (value as JsonObject) : undefined;
 
-/** Select Responses payloads by schema; never feed protocol metadata into a text buffer. */
+/**
+ * Process Responses payloads in item/part lanes while preserving protocol metadata.
+ * Snapshots bypass rolling buffers; matching done/terminal events drain and release lanes.
+ * Conflicting identities fail closed without logging the unredacted SSE chunk.
+ */
 export function createResponsesSseText(
   processor: Processor,
   processToolArgs = false,
@@ -49,7 +53,7 @@ export function createResponsesSseText(
   const learnIdentity = (event: JsonObject) => {
     const keys = identityKeys(event);
     const known = keys.map((key) => identities.get(key)).filter((key) => key !== undefined);
-    if (new Set(known).size > 1) throw new Error("Conflicting Responses stream identities");
+    if (new Set(known).size > 1) throw new Error("[PII] Conflicting Responses stream identities");
     const identity = known[0] ?? keys[0];
     if (identity !== undefined) for (const key of keys) identities.set(key, identity);
     const id = event.item_id ?? object(event.item)?.id;
