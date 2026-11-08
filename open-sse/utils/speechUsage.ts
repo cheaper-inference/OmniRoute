@@ -1,0 +1,140 @@
+/** OpenRouter binary TTS carries its billing identity in a header, not in the audio bytes. */
+const usageByResponse = new WeakMap<Response, Promise<Record<string, number> | null>>();
+
+export function speechUsage(
+  response: Response
+): Promise<Record<string, number> | null> | undefined {
+  return usageByResponse.get(response);
+}
+
+function generationUrl(baseUrl: string, id: string): URL | null {
+  try {
+    const url = new URL(baseUrl);
+    if (
+      url.protocol !== "https:" ||
+      url.port ||
+      url.username ||
+      url.password ||
+      !["openrouter.ai", "eu.openrouter.ai"].includes(url.hostname) ||
+      url.pathname !== "/api/v1/audio/speech" ||
+      !/^[\w-]{1,160}$/.test(id)
+    )
+      return null;
+    url.pathname = "/api/v1/generation";
+    url.search = "";
+    url.searchParams.set("id", id);
+    return url;
+  } catch {
+    return null;
+  }
+}
+
+async function generationUsage(url: URL, token: string): Promise<Record<string, number> | null> {
+  // Only the existing generation is queried. Never retry a paid synthesis, switch
+  // providers, or send an EU key to the global endpoint. No credentials/payloads in logs.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, attempt * 250));
+    try {
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(2_000),
+        redirect: "error",
+      });
+      if (response.status === 404) {
+        await response.body?.cancel();
+        continue;
+      }
+      if (!response.ok) {
+        await response.body?.cancel();
+        return null;
+      }
+      const reader = response.body?.getReader();
+      if (!reader) return null;
+      const chunks: Uint8Array[] = [];
+      let size = 0;
+      while (true) {
+        const next = await reader.read();
+        if (next.done) break;
+        size += next.value.byteLength;
+        if (size > 65_536) {
+          await reader.cancel();
+          return null;
+        }
+        chunks.push(next.value);
+      }
+      const bytes = new Uint8Array(size);
+      let offset = 0;
+      for (const chunk of chunks) {
+        bytes.set(chunk, offset);
+        offset += chunk.byteLength;
+      }
+      const data = JSON.parse(new TextDecoder().decode(bytes))?.data;
+      const cost = data?.total_cost;
+      if (
+        data?.id !== url.searchParams.get("id") ||
+        typeof cost !== "number" ||
+        !Number.isFinite(cost) ||
+        cost < 0
+      )
+        return null;
+      const usage: Record<string, number> = { cost_usd: cost };
+      for (const [target, source] of [
+        ["input_tokens", "native_tokens_prompt"],
+        ["output_tokens", "native_tokens_completion"],
+      ]) {
+        const count = data[source];
+        if (typeof count === "number" && Number.isSafeInteger(count) && count >= 0)
+          usage[target] = count;
+      }
+      return usage;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/** Backpressure-preserving passthrough; reconciliation starts only after completion/cancellation. */
+export function trackOpenRouterSpeech(
+  upstream: Response,
+  response: Response,
+  baseUrl: string,
+  token: string | null
+): Response {
+  const id = upstream.headers.get("X-Generation-Id");
+  const url = id ? generationUrl(baseUrl, id) : null;
+  if (!url || !token || !response.body) return response;
+  const reader = response.body.getReader();
+  let finish!: () => void;
+  const completed = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  const body = new ReadableStream<Uint8Array>(
+    {
+      async pull(controller) {
+        try {
+          const next = await reader.read();
+          if (next.done) {
+            finish();
+            controller.close();
+          } else controller.enqueue(next.value);
+        } catch (error) {
+          finish();
+          controller.error(error);
+        }
+      },
+      async cancel(reason) {
+        finish();
+        await reader.cancel(reason);
+      },
+    },
+    { highWaterMark: 0 }
+  );
+  const result = new Response(body, { status: response.status, headers: response.headers });
+  result.headers.set("X-Generation-Id", id!);
+  usageByResponse.set(
+    result,
+    completed.then(() => generationUsage(url, token))
+  );
+  return result;
+}

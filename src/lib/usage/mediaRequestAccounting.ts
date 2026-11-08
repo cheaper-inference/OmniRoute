@@ -1,0 +1,156 @@
+import { recordCost, recordUnpricedBudgetUsage } from "@/domain/costRules";
+import { attachOmniRouteMetaToResponse } from "@/domain/omnirouteResponseMeta";
+import { getPricingForModel } from "../db/settings/pricing";
+import { calculateCostDetailed, getPricingLookupModels } from "./costCalculator";
+import { readReportedCost } from "./creditMeteredProviders";
+import { isFlatRateProvider } from "./flatRateProviders";
+import { saveRequestUsage } from "./usageHistory";
+
+export type MediaBillingUnit = "second" | "character" | "image";
+export interface MediaRequestIdentity {
+  provider: string;
+  model: string;
+  endpoint: string;
+  apiKeyId?: string | null;
+  apiKeyName?: string | null;
+  connectionId?: string | null;
+  comboStrategy?: string | null;
+  startTime: number;
+  requestId: string;
+}
+export interface MediaBill {
+  costUsd: number | null;
+  reportedCostUsd: number | null;
+  unit: MediaBillingUnit;
+  quantity: number | null;
+  unitPriceUsd: number | null;
+  usage: Record<string, number>;
+  pricingFailed?: boolean;
+}
+
+const nonNegative = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0;
+
+/** Keep billing scalars, never transcripts, prompts, image bytes or arbitrary upstream fields. */
+export function normalizeMediaUsage(value: unknown): Record<string, number> {
+  const source = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const usage: Record<string, number> = {};
+  for (const key of [
+    "input",
+    "output",
+    "input_tokens",
+    "output_tokens",
+    "prompt_tokens",
+    "completion_tokens",
+    "cache_read_input_tokens",
+    "cache_creation_input_tokens",
+    "cost_usd",
+    "cost_in_usd_ticks",
+    "seconds",
+  ]) {
+    if (nonNegative(source[key])) usage[key] = source[key];
+  }
+  if (!nonNegative(usage.cost_usd) && nonNegative(source.cost)) usage.cost_usd = source.cost;
+  return usage;
+}
+
+/** Exact provider USD wins. Otherwise snapshot only a tariff with a measured billing dimension. */
+export async function priceMediaRequest(input: {
+  provider: string;
+  model: string;
+  unit: MediaBillingUnit;
+  quantity?: number | null;
+  usage?: unknown;
+}): Promise<MediaBill> {
+  const usage = normalizeMediaUsage(input.usage);
+  const quantity = nonNegative(input.quantity) ? input.quantity : null;
+  const reportedCostUsd = readReportedCost(input.provider, usage).providerCostUsd;
+  const bill: MediaBill = {
+    costUsd: reportedCostUsd,
+    reportedCostUsd,
+    unit: input.unit,
+    quantity,
+    unitPriceUsd: null,
+    usage,
+  };
+  if (reportedCostUsd !== null) return bill;
+  try {
+    const model = input.model.startsWith(`${input.provider}/`)
+      ? input.model.slice(input.provider.length + 1)
+      : input.model;
+    for (const key of getPricingLookupModels(input.provider, model)) {
+      const pricing = await getPricingForModel(input.provider, key);
+      if (!pricing) continue;
+      // Token-priced image APIs can report real token counts as well as images.
+      const hasTokens = [
+        "input",
+        "output",
+        "input_tokens",
+        "output_tokens",
+        "prompt_tokens",
+        "completion_tokens",
+      ].some((key) => nonNegative(usage[key]));
+      const hasTokenPrice = [
+        "input",
+        "output",
+        "input_cost_per_token",
+        "output_cost_per_token",
+      ].some((key) => nonNegative(pricing[key]));
+      if (hasTokens && hasTokenPrice) {
+        const cost = await calculateCostDetailed(input.provider, key, usage);
+        if (cost.priced && nonNegative(cost.costUsd)) bill.costUsd = cost.costUsd;
+        return bill;
+      }
+      const rate =
+        input.unit === "image"
+          ? (pricing.output_cost_per_image ?? pricing.input_cost_per_image)
+          : input.unit === "second"
+            ? (pricing.input_cost_per_second ?? pricing.output_cost_per_second)
+            : (pricing.input_cost_per_character ?? pricing.output_cost_per_character);
+      if (quantity !== null && nonNegative(rate) && nonNegative(rate * quantity)) {
+        bill.costUsd = rate * quantity;
+        bill.unitPriceUsd = rate;
+      }
+      return bill;
+    }
+  } catch {
+    bill.pricingFailed = true;
+    console.error("[Media accounting] Pricing lookup failed; cost remains unknown");
+  }
+  return bill;
+}
+
+/** One physical successful attempt, including combos. No wrapper-level second debit. */
+export async function recordMediaRequest(
+  input: MediaRequestIdentity,
+  bill: MediaBill
+): Promise<void> {
+  await saveRequestUsage(
+    {
+      ...input,
+      tokens: bill.usage,
+      calculatedCostUsd: bill.reportedCostUsd === null ? bill.costUsd : null,
+      billingUnit: bill.unit,
+      billingQuantity: bill.quantity,
+      billingUnitPriceUsd: bill.unitPriceUsd,
+      status: "200",
+      success: true,
+      latencyMs: Date.now() - input.startTime,
+    },
+    { deduplicate: false }
+  );
+  if (!input.apiKeyId || isFlatRateProvider(input.provider)) return;
+  if (bill.costUsd === null) recordUnpricedBudgetUsage(input.apiKeyId, input);
+  else recordCost(input.apiKeyId, bill.costUsd, { ...input, tokens: bill.usage, success: true });
+}
+
+/** Unknown is not free. The final asynchronous TTS charge is visible in usage/ledger, not headers. */
+export function attachMediaResponseMeta(
+  response: Response,
+  metadata: Parameters<typeof attachOmniRouteMetaToResponse>[1] & { costUsd: number | null }
+): Response {
+  const result = attachOmniRouteMetaToResponse(response, metadata);
+  if (metadata.costUsd === null) result.headers.delete("X-OmniRoute-Response-Cost");
+  result.headers.set("X-OmniRoute-Cost-Status", metadata.costUsd === null ? "unknown" : "recorded");
+  return result;
+}
