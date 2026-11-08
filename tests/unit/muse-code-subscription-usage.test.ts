@@ -1,6 +1,7 @@
 // Muse Code reports subscription usage on every Responses stream (`response.subscription_usage`,
-// after `response.completed`). The executor must pass the stream through unchanged, keep the
-// reading on the connection, and the usage fetcher must report it as session/weekly windows.
+// after `response.completed`). The provider request path must pass the stream through unchanged
+// and keep the reading on the connection; the usage fetcher must report it as session/weekly
+// windows.
 import test from "node:test";
 import assert from "node:assert/strict";
 
@@ -11,9 +12,10 @@ const {
   tapMuseSubscriptionUsage,
   readStoredMuseSubscriptionUsage,
   museUsageQuotas,
+  observeMuseSubscriptionUsage,
 } = usageModule;
 const { getMuseUsage } = await import("../../open-sse/services/usage/museCode.ts");
-const { MuseCodeExecutor } = await import("../../open-sse/executors/muse-code.ts");
+const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
 const core = await import("../../src/lib/db/core.ts");
 const providers = await import("../../src/lib/db/providers.ts");
 
@@ -194,47 +196,88 @@ test("a malformed stored reading is treated as no reading", async () => {
   assert.match(String(result.message), /first request/);
 });
 
-test("the executor keeps the reading on its connection and streams the response unchanged", async () => {
+test("only Muse Code responses from a real (non-probe) connection are observed", async () => {
+  const untouched = sseResponse(museStream);
+  const notProbe = async () => false;
+  for (const input of [
+    { provider: "openai", connectionId: "c1", isProbe: notProbe },
+    { provider: "muse-code", connectionId: null, isProbe: notProbe },
+    { provider: "muse-code", connectionId: "c1", isProbe: async () => true },
+  ]) {
+    assert.equal(
+      await observeMuseSubscriptionUsage({ ...input, response: untouched }),
+      untouched,
+      JSON.stringify({ ...input, isProbe: undefined })
+    );
+  }
+  const observed = await observeMuseSubscriptionUsage({
+    provider: "muse-code",
+    connectionId: "c1",
+    response: sseResponse(museStream),
+    isProbe: notProbe,
+  });
+  assert.equal(await observed.text(), museStream);
+});
+
+async function storedUsageOf(connectionId: string): Promise<unknown> {
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    const row = (await providers.getProviderConnectionById(connectionId)) as {
+      providerSpecificData?: Record<string, unknown>;
+    } | null;
+    if (row?.providerSpecificData?.subscriptionUsage)
+      return row.providerSpecificData.subscriptionUsage;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  return undefined;
+}
+
+test("a Muse Code request through the chat core keeps the reading on its connection", async () => {
   core.resetDbInstance();
-  const connection = await providers.createProviderConnection({
+  const connection = (await providers.createProviderConnection({
     provider: "muse-code",
     authType: "oauth",
     name: "Muse fixture",
     accessToken: "fixture-inference-key",
     providerSpecificData: { subsTierName: "Synthetic tier" },
-  });
-  const connectionId = String((connection as { id: string }).id);
+  })) as { id: string };
+  const body = { model: "muse-spark-1.3-contributor", input: "hi", stream: true };
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async () => sseResponse(museStream, 3)) as typeof fetch;
   try {
-    const result = await new MuseCodeExecutor().execute({
-      model: "muse-spark-1.3-contributor",
-      body: { model: "muse-spark-1.3-contributor", input: "hi", stream: true },
-      stream: true,
-      credentials: { accessToken: "fixture-inference-key", connectionId },
-      signal: null,
-    } as Parameters<MuseCodeExecutor["execute"]>[0]);
-    const response = result instanceof Response ? result : result.response;
-    assert.equal(await response.text(), museStream);
+    const result = (await handleChatCore({
+      body,
+      modelInfo: {
+        provider: "muse-code",
+        model: "muse-spark-1.3-contributor",
+        extendedContext: false,
+      },
+      credentials: {
+        accessToken: "fixture-inference-key",
+        connectionId: connection.id,
+        providerSpecificData: { subsTierName: "Synthetic tier" },
+      },
+      clientRawRequest: {
+        endpoint: "/v1/responses",
+        body,
+        headers: new Headers({ accept: "text/event-stream" }),
+      },
+      userAgent: "unit-test",
+      isCombo: false,
+      log: { debug() {}, info() {}, warn() {}, error() {} },
+    })) as { success: boolean; response?: Response; error?: string };
+    assert.equal(result.success, true, result.error);
+    assert.ok(result.response);
+    await result.response.text();
   } finally {
     globalThis.fetch = originalFetch;
   }
-  let stored: unknown;
-  for (let attempt = 0; attempt < 200 && !stored; attempt += 1) {
-    await new Promise((resolve) => setTimeout(resolve, 5));
-    const row = (await providers.getProviderConnectionById(connectionId)) as {
-      providerSpecificData?: Record<string, unknown>;
-    } | null;
-    stored = row?.providerSpecificData?.subscriptionUsage;
-  }
-  const reading = readStoredMuseSubscriptionUsage(stored);
+  const reading = readStoredMuseSubscriptionUsage(await storedUsageOf(connection.id));
   assert.ok(reading, "the reading was stored on the connection");
   assert.equal(reading.tierId, "synthetic-tier");
   assert.equal(reading.window?.usedPercent, 6);
   assert.equal(reading.weekly?.usedPercent, 4);
-  const row = (await providers.getProviderConnectionById(connectionId)) as {
+  const row = (await providers.getProviderConnectionById(connection.id)) as {
     providerSpecificData: Record<string, unknown>;
   };
   assert.equal(row.providerSpecificData.subsTierName, "Synthetic tier", "other keys are kept");
-  core.resetDbInstance();
 });

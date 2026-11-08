@@ -170,6 +170,23 @@ export async function recordMuseSubscriptionUsage(
   }
 }
 
+/**
+ * Read the usage frame off a Muse Code response, for the connection that served it. Every other
+ * provider's response, a response without a connection, and a live-test probe (which must not
+ * write account state) are returned untouched.
+ */
+export async function observeMuseSubscriptionUsage(input: {
+  provider: string;
+  connectionId: unknown;
+  response: Response;
+  isProbe: () => Promise<boolean>;
+}): Promise<Response> {
+  const { provider, connectionId, response } = input;
+  if (provider !== "muse-code" || !connectionId || (await input.isProbe())) return response;
+  const id = String(connectionId);
+  return tapMuseSubscriptionUsage(response, (usage) => recordMuseSubscriptionUsage(id, usage));
+}
+
 function readWindow(raw: unknown): MuseUsageWindow | null {
   const record = asRecord(raw);
   if (!record) return null;
