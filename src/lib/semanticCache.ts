@@ -104,6 +104,19 @@ function getHeaderValue(
 
 // ─── Singleton ─────────────────
 
+// One long answer must not evict every other entry from the small memory tier (the SQLite tier
+// still stores it). The estimate matches LRUCache: 2 bytes per JSON character.
+const DEFAULT_MAX_ENTRY_BYTES = 256 * 1024;
+
+function getMaxEntryBytes(): number {
+  const configured = parseInt(process.env.SEMANTIC_CACHE_MAX_ENTRY_BYTES || "", 10);
+  return configured > 0 ? configured : DEFAULT_MAX_ENTRY_BYTES;
+}
+
+function exceedsEntryCap(payloadJson: string): boolean {
+  return payloadJson.length * 2 > getMaxEntryBytes();
+}
+
 let memoryCache: LRUCache | null = null;
 
 function getMemoryCache() {
@@ -374,10 +387,12 @@ export function getCachedResponse(signature) {
       const parsed = JSON.parse(responsePayload);
       const tokensSaved = toNumber(record.tokens_saved, 0);
       // Promote to memory cache
-      getMemoryCache().set(signature, {
-        response: parsed,
-        tokensSaved,
-      });
+      if (!exceedsEntryCap(responsePayload)) {
+        getMemoryCache().set(signature, {
+          response: parsed,
+          tokensSaved,
+        });
+      }
       // Update hit count in DB
       db.prepare("UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ?").run(
         signature
@@ -427,8 +442,19 @@ export function recordSemanticCacheHit(signature: string, tokensSaved = 0): void
 export function setCachedResponse(signature, model, response, tokensSaved = 0, ttlMs = 3600000) {
   const ttl = parseInt(process.env.SEMANTIC_CACHE_TTL_MS || String(ttlMs), 10);
 
-  // 1. Memory cache
-  getMemoryCache().set(signature, { response, tokensSaved }, ttl);
+  let payloadJson: string | undefined;
+  try {
+    payloadJson = JSON.stringify(response);
+  } catch {
+    // Unserializable: memory tier only, as before.
+  }
+
+  // 1. Memory cache. An oversized answer drops any older entry for the key so it cannot go stale.
+  if (payloadJson !== undefined && exceedsEntryCap(payloadJson)) {
+    getMemoryCache().delete(signature);
+  } else {
+    getMemoryCache().set(signature, { response, tokensSaved }, ttl);
+  }
 
   // 2. SQLite
   try {
