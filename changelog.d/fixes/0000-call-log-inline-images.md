@@ -1,0 +1,1 @@
+- **fix(logs):** One large pasted screenshot no longer erases the request text from the call log. The stored request copy shows each inline image as a short size note, such as `[inline image: image/png, 600000 bytes, 800000 base64 chars]`.

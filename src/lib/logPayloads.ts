@@ -416,6 +416,66 @@ export function omitEncryptedReasoningForLog(payload: unknown): unknown {
   return omitted;
 }
 
+// Marker for one inline base64 image in a stored copy, e.g.
+// "[inline image: image/png, 600000 bytes, 800000 base64 chars]".
+function inlineImageMarker(mime: string, base64: string): string {
+  const padding = base64.endsWith("==") ? 2 : base64.endsWith("=") ? 1 : 0;
+  const bytes = Math.floor((base64.length * 3) / 4) - padding;
+  return `[inline image: ${mime}, ${bytes} bytes, ${base64.length} base64 chars]`;
+}
+
+function inlineImageDataUrlMarker(value: string): string | null {
+  if (!value.startsWith("data:image/")) return null;
+  const comma = value.indexOf(",");
+  const header = comma > 0 && comma <= 200 ? value.slice(5, comma) : "";
+  if (!header.endsWith(";base64")) return null;
+  return inlineImageMarker(header.slice(0, header.indexOf(";")), value.slice(comma + 1));
+}
+
+/**
+ * Replace inline base64 images with a size marker: data:image/...;base64 URLs, Anthropic
+ * `{ media_type, data }` sources and Google `inlineData` / `inline_data` blobs. One pasted
+ * screenshot is larger than the call log artifact cap and used to push the whole request
+ * body out of the log. Copy-on-write: a subtree without an image keeps its identity and the
+ * input is never mutated. Only for stored request copies: the continuation store replays
+ * the pipeline copy upstream, which must keep the real image.
+ */
+export function redactInlineImageDataUrls(value: unknown): unknown {
+  if (typeof value === "string") return inlineImageDataUrlMarker(value) ?? value;
+  if (!value || typeof value !== "object" || isOpaqueBinary(value)) return value;
+
+  if (Array.isArray(value)) {
+    let copy: unknown[] | null = null;
+    value.forEach((item, index) => {
+      const next = redactInlineImageDataUrls(item);
+      if (next === item) return;
+      copy ??= value.slice();
+      copy[index] = next;
+    });
+    return copy ?? value;
+  }
+
+  const record = value as JsonRecord;
+  const mime = record.media_type ?? record.mimeType ?? record.mime_type;
+  const isImageBlob = typeof mime === "string" && mime.startsWith("image/");
+  let copy: JsonRecord | null = null;
+  for (const [key, item] of Object.entries(record)) {
+    const next =
+      isImageBlob && key === "data" && typeof item === "string" && item.length > 0
+        ? inlineImageMarker(mime, item)
+        : redactInlineImageDataUrls(item);
+    if (next === item) continue;
+    copy ??= { ...record };
+    copy[key] = next;
+  }
+  return copy ?? record;
+}
+
+/** Stored copy of a request body: the usual protection, with inline images replaced. */
+export function protectRequestBodyForLog(payload: unknown): unknown {
+  return protectPayloadForLog(redactInlineImageDataUrls(normalizePayloadForLog(payload)));
+}
+
 export function redactPayload(payload: unknown): unknown {
   if (!payload || typeof payload !== "object") return payload;
   if (isOpaqueBinary(payload)) return describeOpaqueBinary(payload);
