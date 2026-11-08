@@ -22,6 +22,8 @@ export interface DialogContentProps extends Omit<ComponentProps<typeof DialogPri
   showCloseButton?: boolean;
   /** Wider review forms while retaining viewport scrolling on small screens. */
   size?: "default" | "wide";
+  /** Accessible name of the built-in close button. Defaults to "Close dialog". */
+  closeLabel?: string;
   overlayClassName?: string;
 }
 
@@ -30,6 +32,7 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(func
   overlayClassName,
   showCloseButton = true,
   size = "default",
+  closeLabel = "Close dialog",
   forceMount,
   children,
   ...props
@@ -51,7 +54,7 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(func
       >
         {children}
         {showCloseButton ? (
-          <DialogPrimitive.Close className="ci-dialog__close" aria-label="Close dialog">
+          <DialogPrimitive.Close className="ci-dialog__close" aria-label={closeLabel}>
             <X aria-hidden="true" />
           </DialogPrimitive.Close>
         ) : null}

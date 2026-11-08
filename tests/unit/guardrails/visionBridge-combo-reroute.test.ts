@@ -58,7 +58,7 @@ async function createCombo(name, models, overrides = {}) {
 
 const VISION_MODEL = "openai/gpt-4o";
 const TEXT_MODEL_A = "google/gemma-2-27b";
-const TEXT_MODEL_B = "mistral/mistral-large-latest";
+const TEXT_MODEL_B = "mistral/codestral-latest";
 
 // Fail loudly if the static vision heuristic drifts: these fixtures drive
 // every assertion in this file.

@@ -45,6 +45,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/search/providers/route.ts": 3,
     "src/app/api/v1/_shared/elevenLabsProxy.ts": 1,
     "src/app/api/v1/_shared/fishAudioProxy.ts": 1,
+    // #13987: System One decisions (/v1/systemone), same
+    // scoped quota-preflight credential lookup as /v1/classify (class B).
+    "src/app/api/v1/_shared/systemOneRoute.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
@@ -185,6 +188,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/models/test-all/route.ts": 1,
     "src/app/api/monitoring/health/route.ts": 1,
     "src/app/api/oauth/[provider]/[action]/route.ts": 4,
+    // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
+    // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
+    "src/app/api/oauth/[provider]/[action]/m365Auth.ts": 1,
     "src/app/api/oauth/codex/import/route.ts": 1,
     "src/app/api/oauth/kiro/api-key/route.ts": 1,
     "src/app/api/oauth/kiro/auto-import/route.ts": 2,
@@ -537,16 +543,16 @@ test("managed request surfaces are fenced centrally or rejected before independe
   );
   const rotationPolicySites = [
     ...nonStreamingLeg.matchAll(
-      /allowAccountRotation: !managedLease && comboStrategy !== "context-relay"/g
+      /allowAccountRotation:\s*!managedLease && comboStrategy !== "context-relay" && !forcedConnectionId/g
     ),
     ...streamingLeg.matchAll(
-      /allowAccountRotation: !managedLease && comboStrategy !== "context-relay"/g
+      /allowAccountRotation:\s*!managedLease && comboStrategy !== "context-relay" && !forcedConnectionId/g
     ),
   ];
   assert.equal(
     rotationPolicySites?.length,
     2,
-    "both the streaming and the non-streaming leg must derive account rotation from !managedLease"
+    "both the streaming and the non-streaming leg must derive account rotation from !managedLease and the connection pin"
   );
   assert.match(pipeline, /const canRotateAccount = policy\.allowAccountRotation && !isolateProbe;/);
   assert.match(pipeline, /canRotateAccount &&\s*target\.provider === "codex"/);
