@@ -199,6 +199,8 @@ export function runMemoryExtractionGate(input: {
   memoryOwnerId: string | null | undefined;
   memorySettings: { enabled?: boolean | null; maxTokens?: number | null } | null | undefined;
   videoBridgeObserved: boolean;
+  /** Reversible PII vault minted tokens for this request: they would be stored dead. */
+  piiTokensMinted?: boolean;
   pipelineSessionId: string;
   requestBody: Record<string, unknown> | null | undefined;
   responseBody: Record<string, unknown> | null | undefined;
@@ -209,13 +211,14 @@ export function runMemoryExtractionGate(input: {
     memoryOwnerId,
     memorySettings,
     videoBridgeObserved,
+    piiTokensMinted,
     pipelineSessionId,
     requestBody,
     responseBody,
     extractFacts,
     log,
   } = input;
-  if (!memoryOwnerId) return;
+  if (!memoryOwnerId || piiTokensMinted) return;
 
   const allowed = shouldExtractMemory({
     enabled: memorySettings?.enabled,

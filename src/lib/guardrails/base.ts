@@ -19,6 +19,12 @@ export interface GuardrailContext {
   sourceFormat?: string | null;
   stream?: boolean;
   targetFormat?: string | null;
+  /**
+   * Reversible PII vault of this request (src/lib/pii/tokenVault.ts). Set only by handleChat
+   * when PII_REDACTION_ENABLED and PII_REVERSIBLE_VAULT_ENABLED are on; only the pii-masker
+   * mints with it. `tokenize` returns null when the vault refuses a value (limits).
+   */
+  tokenVault?: { tokenize: (type: string, value: string) => string | null } | null;
 }
 
 export interface GuardrailResult<TValue = unknown> {

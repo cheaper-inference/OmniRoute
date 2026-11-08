@@ -291,6 +291,7 @@ import {
   shouldDeferAntigravityQuotaStateToCaller,
 } from "../services/accountFallback.ts";
 import { saveIdempotencyWithConfiguredWindow } from "@/lib/idempotencyLayer";
+import { hasMintedPiiTokens } from "@/lib/pii/tokenVault";
 
 import { computeRequestHash, shouldDeduplicate } from "../services/requestDedup.ts";
 import {
@@ -435,6 +436,10 @@ async function handleChatCoreInner({
   // (chatCore/memoryExtraction.ts::runMemoryExtractionGate).
   const videoBridgeObserved: boolean =
     (videoBridgeLog as VideoBridgeLogParam | undefined)?.observed === true;
+  // Reversible PII vault: tokens minted for this request resolve only inside it, so memory and
+  // the idempotency / semantic cache writes are skipped. Read here, while the request scope is
+  // live; the streaming tail runs after it.
+  const piiTokensMinted = hasMintedPiiTokens();
   // resume flag from chat.ts, noted under the attempt store opened above.
   notePreviousResponseResumed(previousResponseResumed);
   const resilienceSettings = resolveResilienceSettings(cachedSettings);
@@ -3391,6 +3396,7 @@ async function handleChatCoreInner({
       reqLogger,
       requestToolIdentityMap,
       resolveReportedServiceTier,
+      piiTokensMinted,
       runMemoryExtractionGate,
       runPluginOnResponseHook,
       sanitizeErrorMessage,
@@ -3492,6 +3498,7 @@ async function handleChatCoreInner({
     pendingRequestOwner,
     persistAttemptLogs,
     persistFailureUsage,
+    piiTokensMinted,
     pipelineSessionId,
     provider,
     providerHeaders,

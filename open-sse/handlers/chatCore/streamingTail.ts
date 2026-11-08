@@ -155,6 +155,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     traceId,
     translatedBody,
     videoBridgeObserved,
+    piiTokensMinted,
   } = deps;
   let providerResponse, finalBody, effectiveServiceTier;
   providerResponse = deps.providerResponse;
@@ -626,6 +627,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
         memoryOwnerId,
         memorySettings,
         videoBridgeObserved,
+        piiTokensMinted,
         pipelineSessionId,
         requestBody: body as Record<string, unknown>,
         responseBody: (streamResponseBody ?? null) as Record<string, unknown> | null,
@@ -647,6 +649,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       streamUsage,
       log,
       videoTranscriptSensitive: videoBridgeObserved,
+      piiTokensMinted,
     });
 
     // Plugin onStreamComplete hook — fire-and-forget, fail-open (#9571)
