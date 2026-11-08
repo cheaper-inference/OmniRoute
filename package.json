@@ -549,6 +549,21 @@
     "sharp": true,
     "onnxruntime-node": false
   },
+  "trustedDependencies": [
+    "better-sqlite3",
+    "esbuild",
+    "@swc/core",
+    "@parcel/watcher",
+    "keytar",
+    "protobufjs",
+    "unrs-resolver",
+    "@playwright/browser-chromium",
+    "bun",
+    "libxmljs2",
+    "opencode-ai",
+    "@huggingface/transformers",
+    "sharp"
+  ],
   "overrides": {
     "browserslist": "^4.28.8",
     "joi": "^18.2.9",
