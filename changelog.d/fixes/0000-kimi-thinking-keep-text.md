@@ -1,0 +1,1 @@
+- **fix(kimi):** an assistant thinking block that arrives without a signature keeps its reasoning text on the way to Kimi, instead of being dropped.

@@ -808,7 +808,9 @@ function getContentBlocksFromMessage(
           // prepareClaudeRequest treats any non-empty signature on the latest assistant turn as
           // genuine and forwards the block verbatim, so the fake signature 400s upstream. This
           // mirrors the stricter "non-empty string" check already used in claudeHelper.ts.
-          if (part.type === "thinking" && !part.signature) {
+          // Kimi ignores signatures (prepareClaudeRequest strips the field), so its
+          // unsigned block keeps the reasoning text it must see on replay.
+          if (part.type === "thinking" && !part.signature && !isKimiCoding) {
             continue; // drop — no replayable signature (empty or absent)
           }
           if (part.type === "redacted_thinking" && part.data === "") {
