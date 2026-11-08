@@ -64,38 +64,35 @@ HAR-importálás dekódolja a JWT lejárati idejét, és megjeleníti a token h�
 > **Soha ne véglegesítsen valódi HAR-exportot, hozzáférési tokent vagy frissítési tokent a verziókövető rendszerben.** A tesztelési és
 > dokumentációs értékeknek mindig helyőrzőknek kell lenniük.
 
-## A token élettartama és frissítése
+## Token élettartama és frissítése
 
-Az `access_token` rövid élettartamú (jellemzően **~75 perc**). A lejárat után a szolgáltató
-kapcsolati hibát jelez, és újból rögzítenie kell a hitelesítő adatot.
+Az `access_token` rövid élettartamú (jellemzően **~75 perc**). Használható refresh token
+nélkül a lejárat után újra le kell kérnie a hitelesítő adatot.
 
-### Automatikus frissítés `refreshToken` használatával
+### Automatikus frissítés a `refreshToken` használatával
 
-A manuális újbóli rögzítés elkerüléséhez Microsoft-frissítési tokent tárolhat a kapcsolat
-**Advanced Settings → providerSpecificData** beállításában:
+A Microsoft 365-szolgáltató **Kapcsolat hozzáadása** vagy **Kapcsolat szerkesztése** párbeszédpanelén nyissa meg a
+**Speciális beállítások → Refresh token (nem kötelező)** lehetőséget. Illesszen be egy Microsoft OAuth refresh tokent a
+`substrate.office.com/sydney` hatókörhöz, majd mentse. A beviteli mező maszkolt, és a tárolt token soha nem jelenik meg előre kitöltve. Szerkesztéskor hagyja üresen a mezőt a meglévő token megtartásához;
+új token beillesztésével lecserélheti azt.
 
-| Mező           | Leírás                                                                      |
-| -------------- | --------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth-frissítési token a `substrate.office.com/sydney` hatókörhöz |
-| `tier`         | `individual` (alapértelmezett), `edu` vagy `enterprise`                     |
+A refresh tokent egy `substrate.office.com/sydney` hatókörre beállított Microsoft eszközkód- vagy engedélykód-alapú folyamatból szerezze be; az irányítópult nem szerzi be Ön helyett.
+Beállított refresh token esetén az OmniRoute a kérések előtt ellenőrzi az `access_token` értékét,
+és csak akkor frissíti, amikor szükséges. A sikeres frissítés a rotált refresh tokent is menti,
+így nincs szükség manuális újralekérésre, amíg a refresh token érvényes marad.
 
-A frissítési tokent egy, a `substrate.office.com/sydney` hatókörre korlátozott Microsoft eszközkódos vagy engedélyezésikód-folyamatból szerezheti be.
-Ha a `refreshToken` be van állítva, az OmniRoute minden kérés előtt előzetesen frissíti az `access_token` értékét, így nem kell
-minden ~75 perces lejárat után újból rögzítenie azt.
-
-Ha a `refreshToken` nincs beállítva, minden lejárat után manuálisan kell újból
-rögzítenie a WebSocket hitelesítő adatát.
+Ha a `refreshToken` nincs beállítva, minden lejárat után manuálisan újra le kell kérnie a WebSocket hitelesítő adatát.
 
 ### Szint kiválasztása
 
-| Szint        | Alias               | Felület                 |
-| ------------ | ------------------- | ----------------------- |
-| `individual` | _(alapértelmezett)_ | Fogyasztói M365 Copilot |
-| `edu`        | `included`          | Oktatási M365 Copilot   |
-| `enterprise` | `work`              | M365 Copilot for Work   |
+| Szint        | Alias               | Felület                |
+| ------------ | ------------------- | ---------------------- |
+| `individual` | _(alapértelmezett)_ | Consumer M365 Copilot  |
+| `edu`        | `included`          | Education M365 Copilot |
+| `enterprise` | `work`              | M365 Copilot for Work  |
 
-Állítsa be a szintet az **Advanced Settings → providerSpecificData → tier** menüpontban. A szint hatással van
-a BizChat útválasztására és a modellekhez való hozzáférésre.
+A szintet a **Speciális beállítások → Copilot-szint** alatt állíthatja be. A szint hatással van
+a BizChat-útválasztásra és a modellhozzáférésre.
 
 ## Biztonsági modell
 
@@ -106,25 +103,25 @@ a BizChat útválasztására és a modellekhez való hozzáférésre.
 
 ## Hibaelhárítás
 
-### A hitelesítés azonnal sikertelen
+### A hitelesítés azonnal meghiúsul
 
-- Ellenőrizze, hogy a **WebSocket URL-ből** másolta-e, nem pedig egy XHR/Fetch-kérésből. A hitelesítő adat a Chathub WebSocket-kapcsolat `access_token` lekérdezési paraméterében található — nem egy `Authorization: Bearer` fejlécben.
-- Győződjön meg arról, hogy a `chathubPath` tartalmazza az URL elérési útjának teljes `<oid>@<tenant>` szegmensét.
+- Ellenőrizze, hogy a **WebSocket URL**-ből másolt-e, nem pedig egy XHR/Fetch-kérésből. A hitelesítő adat a Chathub WebSocket-kapcsolatának `access_token` lekérdezési paraméterében található — nem egy `Authorization: Bearer` fejlécben.
+- Győződjön meg arról, hogy a `chathubPath` tartalmazza az URL elérési útjából származó teljes `<oid>@<tenant>` szegmenst.
 
 ### A token körülbelül 75 perc után lejár
 
-Ez az elvárt működés. `refreshToken` nélkül a hozzáférési token rövid élettartamú. Válassza az alábbi lehetőségek egyikét:
+Ez várható. `refreshToken` nélkül a hozzáférési token rövid élettartamú. Vagy:
 
-- Rögzítse újra a hitelesítő adatot a DevTools segítségével, vagy
-- Állítson be egy `refreshToken` értéket a Speciális beállításokban az automatikus frissítéshez.
+- Rögzítse újra a hitelesítő adatot a DevToolsból, vagy
+- Állítsa be a **Speciális beállítások → Frissítési token (opcionális)** lehetőséget a Kapcsolat hozzáadása vagy szerkesztése párbeszédpanelen az automatikus frissítéshez.
 
 ### A kapcsolat tesztelése sikeres, de a csevegés 401-es hibát ad vissza
 
-Előfordulhat, hogy a token az ellenőrzés és az első kérés között lejárt. Rögzítsen újra egy friss hitelesítő adatot.
+Lehetséges, hogy a token az ellenőrzés és az első kérés között lejárt. Rögzítsen újra egy friss hitelesítő adatot.
 
 ### A Copilot nem jelenik meg a szolgáltatók listájában
 
-Győződjön meg arról, hogy a `copilot-m365-web` engedélyezve van az **Irányítópult → Szolgáltatók** területen. Egyes csomagszinteken a szolgáltató alapértelmezés szerint rejtve lehet.
+Győződjön meg arról, hogy a `copilot-m365-web` engedélyezve van az **Irányítópult → Szolgáltatók** menüpontban. Egyes csomagszinteken a szolgáltató alapértelmezés szerint rejtve lehet.
 
 ## Hivatkozások
 

@@ -11,6 +11,7 @@
  * import edge.
  */
 
+import type { PendingRequestOwner } from "../../utils/pendingRequestCleanup.ts";
 import { STREAM_DISCONNECT_GRACE_PERIOD_MS } from "../../config/constants.ts";
 import type { StreamControllerOptions } from "../../utils/streamControllerTypes.ts";
 import { createStreamController } from "../../utils/streamHandler.ts";
@@ -34,7 +35,7 @@ export function createChatStreamController<TScope>({
 }: {
   getClientDisconnectFinalize: () => ((event: DisconnectEvent) => boolean) | null;
   getPipelineStreamError: () => PipelineStreamErrorHandler | null;
-  pendingScope: TScope;
+  pendingScope: TScope & { connectionId?: string | null; owner?: PendingRequestOwner };
   finalizePendingScope: (
     scope: TScope,
     metadata: { status: number; error: string; errorCode: string }
@@ -72,8 +73,8 @@ export function createChatStreamController<TScope>({
     onError: (event) => getPipelineStreamError()?.(event),
     provider,
     model,
-    connectionId,
-    pendingRequestId,
+    connectionId: pendingScope.connectionId ?? connectionId,
+    pendingRequestId: pendingScope.owner ?? pendingRequestId,
     clientResponseFormat,
     clientAbortSignal,
     allowCompletedToolHandoffGrace,

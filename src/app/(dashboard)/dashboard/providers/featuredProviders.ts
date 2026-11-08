@@ -18,10 +18,8 @@
 
 /**
  * Official Kimi (Moonshot AI) brand blue — matches the Kimi app icon
- * (#1783FF on white). Card accent classes in `ProviderCard.tsx` use this exact
- * hex as Tailwind arbitrary values (Tailwind's JIT scanner requires a static
- * literal in the className string, so it cannot reference this constant
- * directly) — keep them in sync with this value if it ever changes.
+ * (#1783FF on white). The partner cards, chips and banners pass it to the kit's
+ * `brandColor` / `brandTintVars`, which derive the tint, ink and border from it.
  */
 export const KIMI_BRAND_COLOR = "#1783FF";
 

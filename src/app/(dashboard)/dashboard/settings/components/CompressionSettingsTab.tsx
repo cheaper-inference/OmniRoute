@@ -8,6 +8,7 @@ import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
 import Toggle from "@/shared/components/Toggle";
+import { Tile } from "@omniroute/ui-kit/tile";
 import { useTranslations } from "next-intl";
 import CompressionTokenSaverCard, {
   type CompressionTokenSaverConfig,
@@ -417,34 +418,18 @@ export default function CompressionSettingsTab() {
               {MODES.map((m) => {
                 const active = config.defaultMode === m.value;
                 return (
-                  // kit-exception: a two-line mode tile (icon, title, description); the kit
-                  // Button is a single-line pill. Kit tokens + the global :focus-visible ring.
-                  <button
+                  // Kit Tile: the mode tiles keep their aria-pressed toggle semantics.
+                  <Tile
                     key={m.value}
-                    type="button"
-                    aria-pressed={active}
+                    layout="stacked"
+                    pressed={active}
                     onClick={() => save({ defaultMode: m.value })}
                     disabled={saving}
-                    className={`flex items-start gap-3 p-3 rounded-lg border text-start transition-all disabled:opacity-60 ${
-                      active
-                        ? "border-info/50 bg-info/5 ring-1 ring-info/20"
-                        : "border-border/50 hover:border-border hover:bg-surface/30"
-                    }`}
-                  >
-                    <Icon
-                      name={m.icon}
-                      size={20}
-                      className={`mt-0.5 ${active ? "text-info" : "text-text-muted"}`}
-                    />
-                    <div className="min-w-0">
-                      <p className={`text-sm font-medium ${active ? "text-info" : ""}`}>
-                        {t(m.labelKey)}
-                      </p>
-                      <p className="text-xs text-text-muted mt-0.5 leading-relaxed">
-                        {t(m.descKey)}
-                      </p>
-                    </div>
-                  </button>
+                    icon={<Icon name={m.icon} />}
+                    title={t(m.labelKey)}
+                    description={t(m.descKey)}
+                    className="p-3"
+                  />
                 );
               })}
             </div>
