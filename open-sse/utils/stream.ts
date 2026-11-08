@@ -394,9 +394,14 @@ function addNamespaceChildNames(names: Set<string>, children: unknown[]): void {
   }
 }
 
+// An EMPTY set means the request body declared no tools at all: quoted
+// `[Tool call: ...]` text can never be a real call. `null` means unknown (no body,
+// or tools whose names could not be read), which keeps the permissive behaviour.
 function extractAllowedToolNames(body: unknown): Set<string> | null {
+  if (!asPlainRecord(body)) return null;
   const record = asRecord(body);
   const tools = record.tools;
+  if (tools == null || (Array.isArray(tools) && tools.length === 0)) return new Set();
   if (!Array.isArray(tools)) return null;
   const names = new Set<string>();
   for (const tool of tools) {
@@ -419,7 +424,7 @@ function collectPassthroughTextualToolCall(
 ): ToolCall | null {
   const parsed = parseTextualToolCallFromContent(text);
   if (!parsed) return null;
-  if (allowedToolNames?.size && !allowedToolNames.has(parsed.name)) return null;
+  if (allowedToolNames && !allowedToolNames.has(parsed.name)) return null;
   const key = `textual:${toolCalls.size}`;
   const toolCall: ToolCall = {
     id: `call_${Date.now()}_${toolCalls.size}`,
@@ -923,6 +928,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   const passthroughToolCalls = new Map<string, ToolCall>();
   let passthroughToolCallSeq = 0;
   const allowedToolNames = extractAllowedToolNames(body);
+  const noToolsDeclared = allowedToolNames?.size === 0;
   let skipPassthroughEvent = false;
   const thinkState = initThinkState(mode === STREAM_MODE.PASSTHROUGH, provider, model);
 
@@ -1141,8 +1147,9 @@ export function createSSEStream(options: StreamOptions = {}) {
       const incomingContent = delta.content;
       const bufferedCandidate = passthroughBufferedTextualToolCallContent + incomingContent;
       if (
-        passthroughBufferedTextualToolCallContent ||
-        containsTextualToolCallCandidate(incomingContent)
+        !noToolsDeclared &&
+        (passthroughBufferedTextualToolCallContent ||
+          containsTextualToolCallCandidate(incomingContent))
       ) {
         const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
         if (parsedCandidate?.kind === "complete") {
@@ -1783,8 +1790,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                     const bufferedCandidate =
                       passthroughBufferedTextualToolCallContent + incomingDelta;
                     if (
-                      passthroughBufferedTextualToolCallContent ||
-                      containsTextualToolCallCandidate(incomingDelta)
+                      !noToolsDeclared &&
+                      (passthroughBufferedTextualToolCallContent ||
+                        containsTextualToolCallCandidate(incomingDelta))
                     ) {
                       const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
                       if (parsedCandidate?.kind === "complete") {
@@ -2066,12 +2074,13 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // before it can seed an empty `response.completed.response.output`,
                   // in case a future code path pushes a commentary item into it
                   // without going through the response.completed branch above.
-                  const backfillCandidates = shouldDropResponsesCommentary
-                    ? filterResponsesCommentaryFromItems(
-                        passthroughResponsesOutputItems,
-                        isResponsesCommentaryMessageItem
-                      ).items
-                    : passthroughResponsesOutputItems;
+                  const backfillCandidates =
+                    shouldDropResponsesCommentary && parsed.type === "response.completed"
+                      ? filterResponsesCommentaryFromItems(
+                          passthroughResponsesOutputItems,
+                          isResponsesCommentaryMessageItem
+                        ).items
+                      : passthroughResponsesOutputItems;
                   const backfilled = backfillResponsesCompletedOutput(parsed, backfillCandidates);
                   const usageNormalized = normalizeUsage(parsed);
                   if (
@@ -2235,6 +2244,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // sanitizeStreamingChunk, so the raw line must not be forwarded.
                   const hadArrayContent = Array.isArray(rawDelta?.content);
                   const nativeFailure = nativeFinishFailure(parsed); // before sanitize drops it
+                  const rawToolCallCount = Array.isArray(rawDelta?.tool_calls)
+                    ? rawDelta.tool_calls.length
+                    : 0;
 
                   // Client sanitization may remove diagnostic status fields.
                   // Capture provider evidence first without changing token totals.
@@ -2309,6 +2321,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // upstream delta did not already carry.
                   const needsReserialization =
                     hadArrayContent ||
+                    // sanitize dropped empty tool_call placeholders from this chunk
+                    rawToolCallCount > (delta?.tool_calls?.length ?? 0) ||
                     splitMixedReasoningContent ||
                     thinkParsed ||
                     hadReasoningAlias ||
