@@ -1,8 +1,8 @@
 # open-sse/services/ — Routing Engine & Cross-Cutting Services
 
-**Purpose**: 134 service modules (top-level) powering request routing, rate limiting, quota management, token refresh, fallback strategies, and runtime state. The combo routing engine (`combo.ts`) is the core; supporting services handle resilience, accounting, and decision-making.
+**Purpose**: 293 service modules (top-level) powering request routing, rate limiting, quota management, token refresh, fallback strategies, and runtime state. The combo routing engine (`combo.ts`) is the core; supporting services handle resilience, accounting, and decision-making.
 
-Live count: `ls open-sse/services/*.ts | wc -l` (currently 134). More including sub-dirs like `autoCombo/` and `compression/`.
+Live count: `ls open-sse/services/*.ts | wc -l` (currently 293). More including sub-dirs like `autoCombo/` and `compression/`.
 
 ---
 
@@ -34,7 +34,6 @@ Live count: `ls open-sse/services/*.ts | wc -l` (currently 134). More including 
 - **`intentClassifier.ts`** — Request intent classification for intelligent routing.
 - **`taskAwareRouter.ts`** — Task-type-based routing (reasoning → o1, code-gen → Cursor).
 - **`targetRequestSanitizer.ts`** — Final provider/model-aware parameter sanitation after routing resolution and before executor dispatch.
-- **`connectionModelMap.ts`** — Connection-level model mapping (`modelMap`) resolving requested models to target models per connection.
 - **`thinkingBudget.ts`** — Thinking token allocation for o1/o3 models.
 - **`contextManager.ts`** — Routing context injection (system prompts, memory).
 

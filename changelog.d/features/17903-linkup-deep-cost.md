@@ -1,1 +1,0 @@
-- **feat(search):** Linkup `depth: "deep"` is recorded at $0.05 per call instead of $0.005 ([#17903](https://github.com/diegosouzapw/OmniRoute/pull/17903)) — thanks @yourspraveen
