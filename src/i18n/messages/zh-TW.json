@@ -16134,7 +16134,7 @@
     "conversationEmpty": "選擇一個機器人生成器以檢視對話。",
     "conversationOlder": "較早消息",
     "rosterLoading": "閱讀機器人...",
-    "pickAccountFirst": "",
+    "pickAccountFirst": "請先選擇帳號。",
     "detailsTitle": "細節",
     "fanoutTitle": "也發送至",
     "attachButton": "附",
@@ -16168,13 +16168,13 @@
     "chiefOfStaff": "幕僚長",
     "connectorAllow": "允許",
     "connectorSkip": "跳過",
-    "connectorAlwaysBot": "",
-    "connectorAlwaysTeam": "",
+    "connectorAlwaysBot": "一律允許此機器人",
+    "connectorAlwaysTeam": "一律允許團隊機器人",
     "connectorAllowChannel": "允許進入頻道",
     "cardFailed": "答案没有到达机器人。卡還在這裡。",
     "widgetSubmit": "提交",
     "widgetCustom": "發送自訂答案",
     "widgetDismiss": "解僱",
-    "unsupportedMessage": ""
+    "unsupportedMessage": "此處不支援這則訊息。"
   }
 }
