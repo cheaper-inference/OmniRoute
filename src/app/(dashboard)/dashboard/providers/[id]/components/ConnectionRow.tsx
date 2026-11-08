@@ -25,6 +25,7 @@ import { normalizeCodexLimitPolicy, providerText } from "../providerPageHelpers"
 import { getCodexPlanLabel } from "../codexPlanLabel";
 import CodexAccountDetails from "./CodexAccountDetails";
 import ConnectionQuotaPanel from "./ConnectionQuotaPanel";
+import ConnectionQuotaRefreshButton from "./ConnectionQuotaRefreshButton";
 import ConnectionIdChip from "./ConnectionIdChip";
 import {
   isProviderQuotaVisible,
@@ -139,6 +140,7 @@ export default function ConnectionRow({
   onToggleProxyEnabled,
   quotaCache,
   quotaRefreshing,
+  quotaRefreshState,
   onRefreshQuota,
 }: ConnectionRowProps) {
   const t = useTranslations("providers");
@@ -401,6 +403,14 @@ export default function ConnectionRow({
                 {t(statusPresentation.errorBadge.labelKey)}
               </Badge>
             )}
+            {connection.prefixShadowed && connection.isActive !== false && (
+              <span
+                className="text-xs text-warning truncate max-w-[300px]"
+                title={connection.prefixShadowed.message}
+              >
+                {connection.prefixShadowed.code}: {connection.prefixShadowed.message}
+              </span>
+            )}
             {shouldShowConnectionLastError(connection) && (
               <span
                 className={`text-xs truncate max-w-[300px] ${statusPresentation.errorTextClass}`}
@@ -448,6 +458,13 @@ export default function ConnectionRow({
               <ProviderQuotaVisibilityToggle
                 visible={quotaVisible}
                 onToggle={onToggleQuotaVisibility}
+              />
+            )}
+            {connection.provider === "codex" && onRefreshQuota && (
+              <ConnectionQuotaRefreshButton
+                refreshing={quotaRefreshing}
+                state={quotaRefreshState}
+                onRefresh={onRefreshQuota}
               />
             )}
             {onToggleAutoSync && (
@@ -893,7 +910,7 @@ export default function ConnectionRow({
             connection={connection}
             cache={quotaCache}
             refreshing={quotaRefreshing}
-            onRefresh={onRefreshQuota}
+            onRefresh={connection.provider === "codex" ? undefined : onRefreshQuota}
           />
         </div>
       ) : null}

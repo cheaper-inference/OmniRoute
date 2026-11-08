@@ -1,6 +1,7 @@
 /**
  * KEA-7886 P8 (lote 6 p10) — the Monaco editor theme is built from the kit CSS variables read at
- * runtime, not from a hard-coded hex palette. Pure helpers only (no DOM, no Monaco).
+ * runtime, not from a hard-coded hex palette. Pure helpers, plus a minimal fake document for the
+ * probe read (no jsdom cascade, no Monaco).
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -11,6 +12,7 @@ import {
   defineKitMonacoThemes,
   kitMonacoThemeName,
   parseCssColor,
+  readKitEditorPalette,
   toMonacoHex,
   type KitEditorPalette,
 } from "../../src/shared/components/monacoKitTheme";
@@ -104,4 +106,77 @@ test("defineKitMonacoThemes is a no-op without a DOM (SSR) and never throws", ()
   const available = defineKitMonacoThemes(monaco, undefined);
   assert.equal(calls.length, 0);
   assert.equal(available.size, 0);
+});
+
+// --- Editions palette: the probe read follows the ROOT's data-theme -----------------------------
+// ci-editions.css picks light/dark from `html:root[data-theme]` with selectors that outrank any
+// probe attribute, so the fake below resolves every variable from the root's data-theme when the
+// root carries data-ci-appearance (Editions), and from the probe's own data-theme otherwise
+// (Classic: `.ci-theme[data-theme="dark"]` matches the probe).
+const EDITIONS_LIGHT_SURFACE = "#faf9f4";
+const EDITIONS_DARK_SURFACE = "#191a16";
+
+function fakeDocument(pageTheme: "light" | "dark", editions: boolean) {
+  const readsAt: string[] = [];
+  const attrs = new Map<string, string>(editions ? [["data-ci-appearance", "editions"]] : []);
+  const documentElement = {
+    dataset: { theme: pageTheme } as Record<string, string | undefined>,
+    hasAttribute: (name: string) => attrs.has(name),
+  };
+  const valueFor = (theme: string | undefined, cssVar: string) => {
+    if (cssVar === "--ci-color-surface")
+      return theme === "dark" ? EDITIONS_DARK_SURFACE : EDITIONS_LIGHT_SURFACE;
+    return theme === "dark" ? "#f2f0e8" : "#20211c";
+  };
+  const doc = {
+    documentElement,
+    body: { appendChild: () => undefined },
+    createElement: () => {
+      const probe = {
+        className: "",
+        dataset: {} as Record<string, string>,
+        style: {} as Record<string, string>,
+        setAttribute: () => undefined,
+        remove: () => undefined,
+      };
+      return probe;
+    },
+    defaultView: {
+      getComputedStyle: (probe: { dataset: Record<string, string> }) => {
+        const effective = editions ? documentElement.dataset.theme : probe.dataset.theme;
+        readsAt.push(String(documentElement.dataset.theme));
+        return { getPropertyValue: (cssVar: string) => valueFor(effective, cssVar) };
+      },
+    },
+  };
+  return { doc: doc as unknown as Document, documentElement, readsAt };
+}
+
+test("Editions: a dark probe on a light page reads dark values and restores the page theme", () => {
+  const { doc, documentElement, readsAt } = fakeDocument("light", true);
+  const dark = readKitEditorPalette(true, doc);
+  assert.equal(dark.surface, EDITIONS_DARK_SURFACE, "the vs-dark editor gets the dark surface");
+  assert.deepEqual(readsAt, ["dark"], "the root was flipped for the read");
+  assert.equal(documentElement.dataset.theme, "light", "…and restored right after");
+  const light = readKitEditorPalette(false, doc);
+  assert.equal(light.surface, EDITIONS_LIGHT_SURFACE);
+  assert.deepEqual(readsAt, ["dark", "light"], "an on-theme read does not touch the root");
+});
+
+test("Classic: the probe's own data-theme decides, and the root is never flipped", () => {
+  const { doc, documentElement, readsAt } = fakeDocument("light", false);
+  const dark = readKitEditorPalette(true, doc);
+  assert.equal(dark.surface, EDITIONS_DARK_SURFACE);
+  assert.deepEqual(readsAt, ["light"], "no root flip without data-ci-appearance");
+  assert.equal(documentElement.dataset.theme, "light");
+});
+
+test("Editions on a dark page registers the light kit theme too (the Classic skip is lifted)", () => {
+  const defined: string[] = [];
+  const monaco = { editor: { defineTheme: (name: string) => void defined.push(name) } };
+  const { doc, documentElement } = fakeDocument("dark", true);
+  const available = defineKitMonacoThemes(monaco, doc);
+  assert.deepEqual(defined, [KIT_MONACO_THEME.dark, KIT_MONACO_THEME.light]);
+  assert.ok(available.has(KIT_MONACO_THEME.light));
+  assert.equal(documentElement.dataset.theme, "dark", "the page theme is back to dark");
 });

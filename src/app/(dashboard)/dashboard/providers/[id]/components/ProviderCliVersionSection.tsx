@@ -11,13 +11,16 @@
  * on every connection) on top of the env var and the captured pin.
  *
  * Rendered only for `claude` and `codex`: those are the only two kinds wired
- * into the override store (src/shared/constants/cliVersions.ts).
+ * into the override store (open-sse/config/cliVersions.ts).
  */
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Input from "@/shared/components/Input";
 import { useNotificationStore } from "@/store/notificationStore";
 import { providerText, type ProviderMessageTranslator } from "../providerPageHelpers";
-import type { CliVersionSource, CliVersionStatus } from "@/shared/constants/cliVersions";
+import type { CliVersionSource, CliVersionStatus } from "@omniroute/open-sse/config/cliVersions.ts";
 
 interface ProviderCliVersionSectionProps {
   providerId: string;
@@ -177,10 +180,10 @@ function useCliVersionData(providerId: string | null, t: ProviderMessageTranslat
 
 function CliVersionSectionSkeleton() {
   return (
-    <div className="rounded-xl border border-border bg-white p-5 dark:bg-zinc-950">
-      <div className="h-5 w-64 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
-      <div className="mt-4 h-16 animate-pulse rounded bg-zinc-100 dark:bg-zinc-900" />
-    </div>
+    <Card padding="sm" className="p-5">
+      <div className="h-5 w-64 animate-pulse rounded bg-bg-subtle" />
+      <div className="mt-4 h-16 animate-pulse rounded bg-bg-subtle" />
+    </Card>
   );
 }
 
@@ -216,19 +219,6 @@ function VersionSummary({ t, status }: { t: ProviderMessageTranslator; status: C
   );
 }
 
-function ActionButton(props: { label: string; onClick: () => void; disabled: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={props.onClick}
-      disabled={props.disabled}
-      className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-main hover:border-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      {props.label}
-    </button>
-  );
-}
-
 export default function ProviderCliVersionSection({ providerId }: ProviderCliVersionSectionProps) {
   const t = useTranslations("providers");
   // Hooks run unconditionally (rules of hooks). The load effect is a no-op for
@@ -246,7 +236,7 @@ export default function ProviderCliVersionSection({ providerId }: ProviderCliVer
   // read as a hung request; say what happened instead.
   if (!status) {
     return (
-      <div className="rounded-xl border border-border bg-white p-5 dark:bg-zinc-950">
+      <Card padding="sm" className="p-5">
         <h2 className="text-base font-semibold text-text-main mb-1">
           {providerText(t, "cliVersionSectionTitle", "Advertised CLI client version")}
         </h2>
@@ -257,7 +247,7 @@ export default function ProviderCliVersionSection({ providerId }: ProviderCliVer
             "Could not load the current CLI version settings."
           )}
         </p>
-      </div>
+      </Card>
     );
   }
 
@@ -266,7 +256,7 @@ export default function ProviderCliVersionSection({ providerId }: ProviderCliVer
   const unchanged = nextValue === (status.version ?? null);
 
   return (
-    <div className="rounded-xl border border-border bg-white p-5 dark:bg-zinc-950">
+    <Card padding="sm" className="p-5">
       <h2 className="text-base font-semibold text-text-main mb-1">
         {providerText(t, "cliVersionSectionTitle", "Advertised CLI client version")}
       </h2>
@@ -277,8 +267,10 @@ export default function ProviderCliVersionSection({ providerId }: ProviderCliVer
       <VersionSummary t={t} status={status} />
 
       <div className="mb-3 flex items-center gap-2">
-        <input
+        <Input
           type="text"
+          className="flex-1"
+          inputClassName="text-xs"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -292,26 +284,31 @@ export default function ProviderCliVersionSection({ providerId }: ProviderCliVer
             "Override version; blank clears"
           )}
           aria-label={providerText(t, "cliVersionInputLabel", "Override version")}
-          className="flex-1 rounded-lg border border-border bg-sidebar/50 px-3 py-1.5 text-xs text-text-main placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
         />
-        <ActionButton
-          label={providerText(t, "cliVersionSaveButton", "Save")}
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => void save(nextValue)}
           disabled={saving || unchanged}
-        />
-        <ActionButton
-          label={providerText(t, "cliVersionResetButton", "Reset to default")}
+        >
+          {providerText(t, "cliVersionSaveButton", "Save")}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => {
             setDraft("");
             void save(null);
           }}
           disabled={saving || status.version === null}
-        />
+        >
+          {providerText(t, "cliVersionResetButton", "Reset to default")}
+        </Button>
       </div>
 
       <p className="text-xs text-text-muted leading-relaxed">
         {providerText(t, copy.caveatKey, copy.caveat)}
       </p>
-    </div>
+    </Card>
   );
 }

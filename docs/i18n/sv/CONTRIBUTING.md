@@ -8,14 +8,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Utvecklingsmiljö
+## Utvecklingskonfiguration
 
 ### Förutsättningar
 
-- **Node.js** `>=22.22.2 <23` eller `>=24.0.0 <27` (rekommenderat: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, eller `>=24.0.0 <27` (rekommenderas: 24 LTS)
 - **npm** 10+
 
-> **För användare av npm v11+ (Node 24+):** Efter `npm install`, verifiera att de systemspecifika modulerna har installerats:
+> **Windows med Node 24:** använd den aktuella 24 LTS-korrigeringsversionen (minst 24.20.0).
+> Äldre versioner kan avslutas efter lyckade tester när `--test-force-exit` stänger
+> processen. Node:s [Windows libuv-korrigering](https://github.com/nodejs/node/pull/61999) åtgärdar
+> denna krasch i runtime; behåll testkontrollerna och kontrollerna av körarens avslut aktiverade.
+
+> **Användare av npm v11+ (Node 24+):** Efter `npm install` ska du verifiera att inbyggda moduler har installerats:
 > `node -e "require('better-sqlite3')"`. Om kommandot misslyckas med `MODULE_NOT_FOUND`,
 > kör `npm approve-scripts better-sqlite3 && npm install`. Se
 > [Felsökning](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -36,7 +41,7 @@ npm install
 # Skapa din .env från mallen
 cp .env.example .env
 
-# Generera nödvändiga hemligheter
+# Generera obligatoriska hemligheter
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
@@ -48,76 +53,76 @@ Viktiga variabler för utveckling:
 | `PORT`                 | `20128`                      | Serverport                       |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Bas-URL för frontend             |
 | `JWT_SECRET`           | (generera ovan)              | Hemlighet för JWT-signering      |
-| `INITIAL_PASSWORD`     | `CHANGEME`                   | Lösenord vid första inloggningen |
+| `INITIAL_PASSWORD`     | `CHANGEME`                   | Lösenord för första inloggningen |
 | `APP_LOG_LEVEL`        | `info`                       | Detaljnivå för loggning          |
 
-### Inställningar i kontrollpanelen
+### Inställningar för instrumentpanelen
 
-Kontrollpanelen innehåller reglage för funktioner som även kan konfigureras via miljövariabler:
+Instrumentpanelen innehåller UI-reglage för funktioner som även kan konfigureras via miljövariabler:
 
-| Inställningens plats      | Reglage               | Beskrivning                               |
-| ------------------------- | --------------------- | ----------------------------------------- |
-| Inställningar → Avancerat | Felsökningsläge       | Aktivera felsökningsloggar för anrop (UI) |
-| Inställningar → Allmänt   | Sidofältets synlighet | Visa/dölj avsnitt i sidofältet            |
+| Inställningens plats | Reglage            | Beskrivning                                    |
+| -------------------- | ------------------ | ---------------------------------------------- |
+| Settings → Advanced  | Debug Mode         | Aktivera felsökningsloggar för begäranden (UI) |
+| Settings → General   | Sidebar Visibility | Visa/dölj avsnitt i sidofältet                 |
 
-Dessa inställningar lagras i databasen och finns kvar efter omstarter. När de har angetts åsidosätter de miljövariablernas standardvärden.
+Dessa inställningar lagras i databasen och finns kvar efter omstarter. När de har angetts åsidosätter de standardvärdena för miljövariablerna.
 
-### Köra lokalt
+### Kör lokalt
 
 ```bash
 # Utvecklingsläge (automatisk omladdning)
 npm run dev
 
 # Produktionsbygge
-npm run build    # next build → .build/next/ och därefter assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Snabb kompilering enbart av backend/API för bidragsgivares ändringar
+# Snabb backend-/API-kompilering för bidragsgivares ändringar
 npm run build:contributor
 
-# Versionsbygge (ren ombyggnad + HEAD-kontrollmarkör — krävs för driftsättning)
-npm run build:release   # rm -rf .build dist && bygger + skriver dist/BUILD_SHA
+# Releasebygge (ren ombyggnad + HEAD-sentinell — krävs för driftsättning)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # Vanlig portkonfiguration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bygget för bidragsgivare utför endast kompileringsvalidering: det skapar inte den fristående
-distributionen och bygger inte heller valfria systemspecifika paketeringsresurser. Använd det vanliga produktionsbygget när
-du behöver validera det leveransklara paketet.
+Bidragsgivarbygget utför validering som endast omfattar kompilering: det sammanställer inte
+den fristående distributionen och bygger inte valfria inbyggda paketeringstillgångar. Använd
+det vanliga produktionsbygget när du behöver validera det leveransklara paketet.
 
-### Katalogstruktur för byggutdata
+### Layout för byggutdata
 
-| Katalog   | Innehåll                                                                              | Versionshanterad |
-| --------- | ------------------------------------------------------------------------------------- | ---------------- |
-| `src/`    | Applikationens källkod (TypeScript / TSX)                                             | Ja               |
-| `.build/` | Mellanresultat — utdata från `next build` (ignoreras av Git, `distDir = .build/next`) | Nej              |
-| `dist/`   | Leveransklart paket — sammanställt av `assembleStandalone` (ignoreras av Git)         | Nej              |
+| Katalog   | Innehåll                                                                   | Versionshanterad |
+| --------- | -------------------------------------------------------------------------- | ---------------- |
+| `src/`    | Programmets källkod (TypeScript / TSX)                                     | Ja               |
+| `.build/` | Mellanresultat — `next build`-utdata (gitignored, `distDir = .build/next`) | Nej              |
+| `dist/`   | Leveransklart paket — sammanställt av `assembleStandalone` (gitignored)    | Nej              |
 
-Byggprocessen utförs i ett enda steg:
+Byggprocessen består av ett enda steg:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (utdata från Next.js)
-  └─ assembleStandalone()                 (kopierar fristående paket + statiska filer + offentliga filer + systemspecifika resurser)
-       └─ utdata: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js-utdata)
+  └─ assembleStandalone()                 (kopierar standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` rensar dessutom båda katalogerna först och skriver
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en kontrollmarkör för driftsättningens integritet.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en integritetssentinell för driftsättning.
 
-`npm run build:contributor` använder byggprofilen enbart för backend. Den ersätter tillfälligt
-kontrollpanelens UI-filer med stubbar under bygget, behåller API-rutthanterarna och återställer originalfilerna
-efter bygget. Använd `npm run build` för ändringar som påverkar kontrollpanelens UI eller för fullständig
-versionsvalidering; bidragsgivarprofilen ersätter inte versionsbygget.
+`npm run build:contributor` använder backendens enda byggprofil. Den ersätter tillfälligt
+filer för instrumentpanelens UI med stubbar under bygget, behåller API-routarnas hanterare
+och återställer originalfilerna efter bygget. Använd `npm run build` för ändringar som påverkar
+instrumentpanelens UI eller för fullständig releasevalidering; bidragsgivarprofilen ersätter inte releasebygget.
 
-> **Anmärkning om driftsättning på VPS:** fjärrbildens katalog `/usr/lib/node_modules/omniroute/app/`
-> är oförändrad. Driftsättningsverktygen använder rsync för att synkronisera innehållet i `dist/` till den.
-> Endast sökvägen för byggutdata i kodförrådet har ändrats (`app/` → `dist/`).
+> **Obs! om VPS-driftsättning:** den fjärranslutna bildkatalogen `/usr/lib/node_modules/omniroute/app/`
+> är oförändrad. Driftsättningsfärdigheterna rsync:ar innehållet i `dist/` till den.
+> Endast byggutdatasökvägen i projektet flyttades (`app/` → `dist/`).
 
 Standard-URL:er:
 
-- **Kontrollpanel**: `http://localhost:20128/dashboard`
+- **Instrumentpanel**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
