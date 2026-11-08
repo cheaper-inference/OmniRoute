@@ -13,21 +13,26 @@ UI/UX、i18n、CLI、数据库和构建/部署更改到其合同、重点测试�
 
 ---
 
-## 开发环境设置
+## 开发设置
 
-### 前置要求
+### 前置条件
 
 - **Node.js** `>=22.22.2 <23`，或 `>=24.0.0 <27`（推荐：24 LTS）
 - **npm** 10+
 
-> **npm v11+ 用户（Node 24+）：** 执行 `npm install` 后，请验证原生模块是否已安装：
-> `node -e "require('better-sqlite3')"`。如果执行失败并提示 `MODULE_NOT_FOUND`，
-> 请运行 `npm approve-scripts better-sqlite3 && npm install`。请参阅
+> **使用 Node 24 的 Windows 用户：** 使用当前的 24 LTS 补丁版本（至少为 24.20.0）。
+> 较早版本可能会在测试成功后因 `--test-force-exit` 关闭进程而中止。
+> Node 的 [Windows libuv 修复](https://github.com/nodejs/node/pull/61999)解决了
+> 此运行时崩溃问题；请保持测试断言和运行器退出检查启用。
+
+> **npm v11+ 用户（Node 24+）：** 执行 `npm install` 后，验证原生模块是否已安装：
+> `node -e "require('better-sqlite3')"`. 如果因 `MODULE_NOT_FOUND` 失败，
+> 执行 `npm approve-scripts better-sqlite3 && npm install`。请参阅
 > [故障排除](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)。
 
 - **Git**
 
-### 克隆与安装
+### 克隆并安装
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -38,86 +43,89 @@ npm install
 ### 环境变量
 
 ```bash
-# 使用模板创建 .env
+# 从模板创建 .env 文件
 cp .env.example .env
 
-# 生成所需密钥
+# 生成所需的密钥
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-开发环境的关键变量：
+开发所需的关键变量：
 
-| 变量                   | 开发环境默认值           | 说明             |
+| 变量                   | 开发默认值               | 描述             |
 | ---------------------- | ------------------------ | ---------------- |
 | `PORT`                 | `20128`                  | 服务器端口       |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 前端基础 URL     |
-| `JWT_SECRET`           | （按上述方式生成）       | JWT 签名密钥     |
+| `JWT_SECRET`           | （如上所述生成）         | JWT 签名密钥     |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | 首次登录密码     |
 | `APP_LOG_LEVEL`        | `info`                   | 日志详细程度级别 |
 
-### 仪表板设置
+### 控制面板设置
 
-仪表板为也可通过环境变量配置的功能提供了 UI 开关：
+控制面板提供了用于切换功能的 UI 控件，这些功能也可以通过环境变量进行配置：
 
-| 设置位置    | 开关         | 说明                   |
+| 设置位置    | 切换项       | 描述                   |
 | ----------- | ------------ | ---------------------- |
 | 设置 → 高级 | 调试模式     | 启用调试请求日志（UI） |
-| 设置 → 常规 | 侧边栏可见性 | 显示/隐藏侧边栏区域    |
+| 设置 → 常规 | 侧边栏可见性 | 显示/隐藏侧边栏部分    |
 
-这些设置存储在数据库中，并在重启后继续保留；设置后，它们将覆盖环境变量的默认值。
+这些设置存储在数据库中，并会在重启后保持；设置后将覆盖环境变量的默认值。
 
-### 在本地运行
+### 本地运行
 
 ```bash
 # 开发模式（热重载）
 npm run dev
 
 # 生产构建
-npm run build    # next build → .build/next/，然后执行 assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# 针对贡献者更改的快速后端/API 单独编译
+# 针对贡献者更改的快速后端/API-only 编译
 npm run build:contributor
 
-# 发布构建（全新构建 + HEAD 哨兵文件——部署时必需）
-npm run build:release   # rm -rf .build dist && 执行构建 + 写入 dist/BUILD_SHA
+# 发布构建（清理重建 + HEAD 标记——部署所需）
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # 常用端口配置
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-贡献者构建仅执行编译验证：它不会组装独立分发包，也不会构建可选的原生打包资源。当你需要验证可发布的软件包时，请使用常规生产构建。
+贡献者构建仅执行编译验证：不会组装独立分发包，也不会构建可选的原生打包资源。
+需要验证可发布软件包时，请使用常规生产构建。
 
 ### 构建输出布局
 
-| 目录      | 内容                                                                | 是否跟踪 |
-| --------- | ------------------------------------------------------------------- | -------- |
-| `src/`    | 应用程序源代码（TypeScript / TSX）                                  | 是       |
-| `.build/` | 中间产物——`next build` 输出（被 git 忽略，`distDir = .build/next`） | 否       |
-| `dist/`   | 可发布软件包——由 `assembleStandalone` 组装（被 git 忽略）           | 否       |
+| 目录      | 内容                                                                    | 已跟踪 |
+| --------- | ----------------------------------------------------------------------- | ------ |
+| `src/`    | 应用程序源代码（TypeScript / TSX）                                      | 是     |
+| `.build/` | 中间文件 — `next build` 输出（已被 gitignore，`distDir = .build/next`） | 否     |
+| `dist/`   | 可发布软件包 — 由 `assembleStandalone` 组装（已被 gitignore）           | 否     |
 
-构建流水线仅执行一次：
+构建管道为单次执行：
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  （Next.js 输出）
-  └─ assembleStandalone()                 （复制 standalone + static + public + 原生资源）
-       └─ 输出：dist/                     （server.js、.next/static/、public/、node_modules/）
+  └─ next build → .build/next/standalone  (Next.js 输出)
+  └─ assembleStandalone()                 (复制 standalone + static + public + native assets)
+       └─ output: dist/                   (server.js、.next/static/、public/、node_modules/)
 ```
 
-`npm run build:release` 还会先清理这两个目录，并写入
-`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）作为部署完整性哨兵文件。
+`npm run build:release` 会在此基础上先清理两个目录，并写入
+`dist/BUILD_SHA`（即 `git rev-parse --short HEAD`），作为部署完整性标记。
 
-`npm run build:contributor` 使用仅后端构建配置。它会在构建期间临时存根化仪表板 UI 文件，保留 API 路由处理程序，并在构建后恢复原始文件。对于影响仪表板 UI 的更改或完整发布验证，请使用 `npm run build`；贡献者配置不能替代发布构建。
+`npm run build:contributor` 使用仅后端构建配置文件。构建期间会临时替换控制面板 UI
+文件，保留 API 路由处理程序，并在构建完成后恢复原始文件。对于会影响控制面板 UI
+的更改或完整的发布验证，请使用 `npm run build`；贡献者配置文件不能替代发布构建。
 
 > **VPS 部署说明：** 远程镜像目录 `/usr/lib/node_modules/omniroute/app/`
-> 保持不变。部署技能会通过 rsync 将 `dist/` 的内容同步到其中。
+> 保持不变。部署技能会将 `dist/` 的内容 rsync 到该目录。
 > 只有仓库内的构建输出路径发生了变化（`app/` → `dist/`）。
 
 默认 URL：
 
-- **仪表板**：`http://localhost:20128/dashboard`
+- **控制面板**：`http://localhost:20128/dashboard`
 - **API**：`http://localhost:20128/v1`
 
 ---
@@ -170,26 +178,26 @@ refactor(db): consolidate rate limit tables
 ## 运行测试
 
 ```bash
-# 所有测试（unit + vitest + ecosystem + e2e）
+# 所有测试（单元测试 + vitest + 生态系统 + e2e）
 npm run test:all
 
-# 单个测试文件（Node.js 原生测试运行器——大多数测试使用此运行器）
+# 单个测试文件（Node.js 原生测试运行器——大多数测试使用此方式）
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# 仅运行受更改影响的单元测试（与 CI 门禁使用相同的 TIA 选择器，#8084）
-npm run test:scoped            # 上一次提交中的更改（或工作树中的更改）
-npm run test:scoped:staged     # 仅暂存的更改——适合与提交前运行配合使用
-npm run test:scoped:full       # 首先重建导入图映射（添加/移动文件后）
-# 退出码为 1 且提示“run the full suite”表示某个中心文件（tsconfig、package.json 等）或未映射的源文件发生了更改——
-# 选择器会安全失败，绝不会静默跳过。
+# 仅运行受你的更改影响的单元测试（与 CI 门禁使用相同的 TIA 选择器，#8084）
+npm run test:scoped            # 上一次提交（或工作树）中的更改
+npm run test:scoped:staged     # 仅暂存的更改——很适合与 pre-commit 运行搭配使用
+npm run test:scoped:full       # 先重新构建导入图映射（添加/移动文件后）
+# 退出码 1 +“运行完整测试套件”表示某个枢纽文件（tsconfig、package.json 等）或
+# 未映射的源文件发生了更改——选择器会安全失败，绝不会静默跳过。
 
-# Vitest（MCP server、autoCombo、cache）
+# Vitest（MCP 服务器、autoCombo、缓存）
 npm run test:vitest
 
 # E2E 测试（需要 Playwright）
 npm run test:e2e
 
-# 协议客户端 E2E（MCP transports、A2A）
+# 协议客户端 E2E（MCP 传输、A2A）
 npm run test:protocols:e2e
 
 # 生态系统兼容性测试
@@ -203,51 +211,53 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# 受门禁控制的真实上游组合冒烟测试（需要 VPS 访问权限 + 真实 provider 额度）
-# 会调用真实 provider——会产生少量费用。绝 NEVER 在 CI 中运行。没有门禁时会正常跳过。
-# 需要：ssh root@192.168.0.15 访问权限（从 VPS 获取只读 DB 快照）。
+# 受门控的真实上游组合冒烟测试（需要 VPS 访问权限 + 真实提供者额度）
+# 会调用真实提供者——产生少量费用。绝不在 CI 中运行。未启用门控时会正常跳过。
+# 要求：拥有 ssh root@192.168.0.15 访问权限（从 VPS 获取只读数据库快照）。
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS 实时冒烟测试——纯 Node ESM 脚本，直接调用实时 .15 server。
-# 需要：ssh root@192.168.0.15 访问权限（通过 SSH sqlite 创建/拆除组合）。
-# 会调用真实 provider（少量费用）。仅创建/删除 __live_test__* 组合。绝 NEVER 在 CI 中运行。
-# .15 上的 REQUIRE_API_KEY=false，因此不需要 API key，但如果设置了 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY，则会遵循其配置。
-npm run test:combo:live:vps              # 7 个 HTTP 场景（priority/round-robin/weighted/cost/fusion/auto + health）
-npm run test:combo:live:vps:failover     # 添加一个真实的跨 provider 故障转移场景（共 8 个）
+# 第 3 阶段 VPS 实时冒烟测试——使用纯 Node ESM 脚本，直接调用实时 .15 服务器。
+# 要求：拥有 ssh root@192.168.0.15 访问权限（通过 SSH sqlite 创建/销毁组合）。
+# 会调用真实提供者（产生少量费用）。仅创建/删除 __live_test__* 组合。绝不在 CI 中运行。
+# .15 上的 REQUIRE_API_KEY=false，因此无需 API 密钥，但如果设置了 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY，则会遵循其设置。
+npm run test:combo:live:vps              # 7 个 HTTP 场景（优先级/轮询/加权/成本/融合/自动 + 健康检查）
+npm run test:combo:live:vps:failover     # 添加一个真实的跨提供者故障转移场景（共 8 个）
 ```
 
 覆盖率说明：
 
-- `npm run test:coverage` 测量主单元测试套件的源代码覆盖率，排除 `tests/**`，并包含 `open-sse/**`
-- Pull Request 必须将覆盖率门禁维持在语句/行/函数/分支 **60% 以上**
-- 如果 PR 更改了 `src/`、`open-sse/`、`electron/` 或 `bin/` 中的生产代码，则必须在同一个 PR 中添加或更新自动化测试
-- `npm run coverage:report` 会输出最近一次覆盖率运行的逐文件详细报告
+- `npm run test:coverage` 测量主要单元测试套件的源代码覆盖率，排除 `tests/**`，并包含 `open-sse/**`
+- 拉取请求必须确保语句/行/函数/分支的覆盖率门禁均保持在 **60%+**
+- 如果 PR 更改了 `src/`、`open-sse/`、`electron/` 或 `bin/` 中的生产代码，则必须在同一 PR 中添加或更新自动化测试
+- `npm run coverage:report` 输出最近一次覆盖率运行中逐文件的详细报告
 - `npm run test:coverage:legacy` 保留旧版指标，以便进行历史比较
-- 分阶段覆盖率改进路线图请参阅 `docs/ops/COVERAGE_PLAN.md`
+- 有关分阶段提高覆盖率的路线图，请参阅 `docs/ops/COVERAGE_PLAN.md`
 
-### Pull Request 要求
+### 拉取请求要求
 
-在创建 PR 之前，请使用
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) 为
-所做的更改运行聚焦循环。完整的单元测试套件（4 个 CI 分片）、Vitest、**60% 以上**的覆盖率门禁以及
-生产构建由 CI 负责——在本地运行它们不会提供 PR 检查无法提供的额外信号，并且在较小的机器上可能会使主机过载（#8084）：
+在创建 PR 前，请按照
+[贡献黄金路径](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)，针对你的更改运行聚焦验证循环。
+完整的单元测试套件（4 个 CI 分片）、Vitest、**60%+** 覆盖率门禁以及生产构建均由
+CI 负责——在本地运行这些项目不会提供 PR 检查之外的额外信号，而且可能会耗尽
+配置较低机器的主机资源（#8084）：
 
-- 运行覆盖所做更改的测试文件：`node --import tsx/esm --test tests/unit/<file>.test.ts`
+- 运行覆盖你的更改的测试文件：`node --import tsx/esm --test tests/unit/<file>.test.ts`
 - 运行 `npm run lint`
-- 每当生产代码发生更改时，在同一个 PR 中添加或更新自动化测试
-- 当生产代码发生更改时，在 PR 描述中包含已更改或新增的测试文件
-- 当项目密钥已在 CI 中配置时，检查 PR 上的 SonarQube 结果
+- 每当生产代码发生更改时，都应在同一 PR 中添加或更新自动化测试
+- 在 `node:test` 文件中，将每个顶层 `await`（例如 `await import(...)`）放在第一个 `test()` / `describe()` 之前：使用 `--test-force-exit` 时，在它之后注册的测试可能永远不会运行且不会有任何提示（#18045；由 `npm run check:test-tla-order` 强制执行）
+- 当生产代码发生更改时，在 PR 描述中列出已更改或新增的测试文件
+- 当 CI 中配置了项目密钥时，检查 PR 上的 SonarQube 结果
 
 当前测试状态：**122 个单元测试文件**，覆盖：
 
-- Provider translator 和格式转换
-- 速率限制、熔断器和弹性
-- 语义缓存、幂等性、进度跟踪
-- 数据库操作和 schema（21 个 DB 模块）
+- 提供者转换器和格式转换
+- 速率限制、断路器和弹性能力
+- 语义缓存、幂等性和进度跟踪
+- 数据库操作和架构（21 个数据库模块）
 - OAuth 流程和身份验证
-- API endpoint 验证（Zod v4）
-- MCP server 工具和作用域强制执行
-- Memory 和 Skills 系统
+- API 端点验证（Zod v4）
+- MCP 服务器工具和作用域强制执行
+- 记忆和技能系统
 
 ---
 

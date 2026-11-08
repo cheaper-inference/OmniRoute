@@ -99,6 +99,8 @@ export interface EmbeddingHandlerOptions {
   allowedConnections?: string[] | null;
   /** GHSA-3w2r: combo per-target model gate for the caller key (undefined = none). */
   isComboTargetAllowed?: (targetModelStr: string) => Promise<boolean>;
+  requestedModel?: string | null;
+  comboName?: string | null;
 }
 
 export async function createEmbeddingResponse(
@@ -106,12 +108,23 @@ export async function createEmbeddingResponse(
   options: EmbeddingHandlerOptions = {}
 ): Promise<Response> {
   const modelStr = body.model;
+  const requestedModel = options.requestedModel ?? modelStr;
   const startTime = Date.now();
 
-  if (!modelStr.includes("/")) {
+  if (!modelStr.includes("/") || modelStr.startsWith("combo/")) {
     try {
-      const combo = await getComboByName(modelStr);
+      let combo = await getComboByName(modelStr);
+      if (
+        (!combo || !Array.isArray(combo.models) || combo.models.length === 0) &&
+        modelStr.startsWith("combo/")
+      ) {
+        combo = await getComboByName(modelStr.slice("combo/".length));
+      }
       if (combo) {
+        const resolvedComboName =
+          typeof combo.name === "string" && combo.name.trim()
+            ? combo.name
+            : modelStr.replace(/^combo\//, "");
         let allCombos: Awaited<ReturnType<typeof getCombos>> = [];
         try {
           allCombos = await getCombos();
@@ -122,7 +135,16 @@ export async function createEmbeddingResponse(
         // different models are not comparable). The generic combo engine has no
         // notion of embedding families, so reject loudly here before dispatch.
         // See _tasks/features-v3.8.12/01-embeddings-combo-family-guard.plan.md.
-        const dimConflict = findEmbeddingComboDimensionConflict(combo as any, allCombos as any);
+        // A pinned `dimensions` (the client's, else the combo's) is what every target is asked
+        // for, so the guard compares that effective size instead of the registry default.
+        const pinnedDimensions = Number(
+          body.dimensions ?? (combo as Record<string, unknown>).dimensions
+        );
+        const dimConflict = findEmbeddingComboDimensionConflict(
+          combo as any,
+          allCombos as any,
+          Number.isFinite(pinnedDimensions) ? pinnedDimensions : undefined
+        );
         if (dimConflict.conflict) {
           return errorResponse(
             HTTP_STATUS.BAD_REQUEST,
@@ -159,6 +181,8 @@ export async function createEmbeddingResponse(
             return createEmbeddingResponse(newBody, {
               ...options,
               connectionId: target?.connectionId || options.connectionId,
+              requestedModel,
+              comboName: options.comboName || resolvedComboName,
             });
           },
           isModelAvailable: options.isComboTargetAllowed,
@@ -534,6 +558,8 @@ export async function createEmbeddingResponse(
       clientRawRequest: options.clientRawRequest || null,
       apiKeyId: options.apiKeyId || null,
       apiKeyName: options.apiKeyName || null,
+      requestedModel,
+      comboName: options.comboName || null,
       // #10347 — thread the selected connection id so handleEmbedding can cool the
       // account on a hard upstream failure (previously always null on /v1/embeddings).
       connectionId:

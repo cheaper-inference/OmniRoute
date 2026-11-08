@@ -181,8 +181,10 @@ describe("QdrantConfigCard", () => {
     await act(async () => {
       tutorial?.click();
     });
-    expect(container.querySelector("[role='dialog']")).toBeTruthy();
-    expect(container.textContent).toContain("Rafa Martins");
+    expect(document.body.querySelector("[role='dialog']")).toBeTruthy();
+    expect(document.body.querySelector("[role='dialog']")?.textContent).toContain(
+      "qdrantTutorialCredits"
+    );
   });
 
   it("test connection button calls /api/settings/qdrant/health", async () => {

@@ -2,6 +2,9 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
 
 interface ApiKeyInfo {
   id: string;
@@ -28,6 +31,7 @@ export default function ApiKeyFilterDropdown({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Close on click outside
   useEffect(() => {
@@ -45,7 +49,11 @@ export default function ApiKeyFilterDropdown({
   useEffect(() => {
     if (!open) return;
     function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        // Focus goes back to the trigger (disclosure pattern).
+        triggerRef.current?.focus();
+      }
     }
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
@@ -90,72 +98,71 @@ export default function ApiKeyFilterDropdown({
 
   return (
     <div className="relative" ref={ref}>
-      <button
-        type="button"
+      <Button
+        size="sm"
+        variant={isAllSelected ? "outline" : "secondary"}
         onClick={() => setOpen((v) => !v)}
-        className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
-          isAllSelected
-            ? "border-border/50 bg-black/[0.03] text-text-muted hover:text-text-main dark:bg-white/[0.03]"
-            : "border-primary/40 bg-primary/10 text-primary"
-        }`}
+        ref={triggerRef}
+        aria-expanded={open}
+        className={`h-8 min-h-8 gap-1.5 px-3 text-xs ${isAllSelected ? "text-text-muted" : ""}`}
       >
-        <span className="material-symbols-outlined text-[14px]">vpn_key</span>
+        <Icon name="vpn_key" size={14} />
         {buttonLabel}
-        <span
-          className={`material-symbols-outlined text-[14px] transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
-        >
-          expand_more
-        </span>
-      </button>
+        <Icon
+          name="expand_more"
+          size={14}
+          className={`transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </Button>
 
       {open && (
-        <div
-          className="absolute left-0 top-full z-50 mt-1.5 w-[260px] rounded-xl border border-border/50 bg-surface shadow-xl"
-          style={{ backdropFilter: "blur(16px)" }}
-        >
+        <div className="absolute left-0 top-full z-50 mt-1.5 w-[260px] rounded-xl border border-border/50 bg-surface shadow-xl">
           {/* Search */}
           {available.length > 5 && (
             <div className="border-b border-border/30 p-2">
-              <input
-                type="text"
+              <Input
+                type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t("filterSearchKeys")}
-                className="w-full rounded-md border border-border/30 bg-black/[0.03] px-2.5 py-1.5 text-xs text-text-main placeholder:text-text-muted focus:outline-none focus:border-primary dark:bg-white/[0.03]"
+                aria-label={t("filterSearchKeys")}
+                icon="search"
                 autoFocus
               />
             </div>
           )}
 
-          <div className="max-h-[280px] overflow-y-auto p-1.5">
+          {/* A disclosure with a group of toggle buttons (aria-pressed), not an ARIA menu: Tab moves
+              through the keys, Escape closes and returns focus to the trigger. */}
+          <div
+            role="group"
+            aria-label={buttonLabel}
+            className="max-h-[280px] overflow-y-auto p-1.5"
+          >
             {/* All Keys option */}
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-pressed={isAllSelected}
               onClick={selectAll}
-              className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
-                isAllSelected
-                  ? "bg-primary/10 text-primary font-semibold"
-                  : "text-text-muted hover:bg-black/[0.04] hover:text-text-main dark:hover:bg-white/[0.04]"
+              className={`h-auto min-h-0 w-full justify-start gap-2.5 px-2.5 py-2 text-left text-xs ${
+                isAllSelected ? "bg-accent-light font-semibold text-text-main" : "text-text-muted"
               }`}
             >
               <span
                 className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
                   isAllSelected
-                    ? "border-primary bg-primary text-white"
+                    ? "border-primary bg-primary text-accent-foreground"
                     : "border-border/60 bg-transparent"
                 }`}
               >
-                {isAllSelected && (
-                  <span className="material-symbols-outlined text-[12px]">check</span>
-                )}
+                {isAllSelected && <Icon name="check" size={12} />}
               </span>
               {t("filterAllKeys")}
               <span className="ml-auto text-[10px] text-text-muted font-normal">
                 {available.length}
               </span>
-            </button>
+            </Button>
 
             {/* Divider */}
             <div className="my-1 h-px bg-border/20" />
@@ -165,30 +172,28 @@ export default function ApiKeyFilterDropdown({
               const isChecked = selected.includes(key.id);
 
               return (
-                <button
+                <Button
                   key={key.id}
-                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-pressed={isChecked}
                   onClick={() => toggleKey(key.id)}
-                  className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
-                    isChecked
-                      ? "bg-primary/[0.06] text-text-main"
-                      : "text-text-muted hover:bg-black/[0.04] hover:text-text-main dark:hover:bg-white/[0.04]"
+                  className={`h-auto min-h-0 w-full justify-start gap-2.5 px-2.5 py-2 text-left text-xs ${
+                    isChecked ? "text-text-main" : "text-text-muted"
                   }`}
                   title={key.name || key.id}
                 >
                   <span
                     className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
                       isChecked
-                        ? "border-primary bg-primary text-white"
+                        ? "border-primary bg-primary text-accent-foreground"
                         : "border-border/60 bg-transparent"
                     }`}
                   >
-                    {isChecked && (
-                      <span className="material-symbols-outlined text-[12px]">check</span>
-                    )}
+                    {isChecked && <Icon name="check" size={12} />}
                   </span>
                   <span className="truncate">{maskKeyName(key.name || key.id)}</span>
-                </button>
+                </Button>
               );
             })}
 

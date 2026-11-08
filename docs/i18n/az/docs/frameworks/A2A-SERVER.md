@@ -43,11 +43,11 @@ A2A **Endpoints → A2A** keçidi ilə idarə olunur və standart olaraq deaktiv
 
 ---
 
-## JSON-RPC 2.0 metodları
+## JSON-RPC 2.0 Metodları
 
-### `message/send` — Sinxron icra
+### `message/send` — Sinxron İcra
 
-Bacarıqa mesaj göndərir və tam cavabı gözləyir.
+Bacarıq moduluna mesaj göndərir və tam cavabı gözləyir.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` üçün `metadata.combo`, şlüz sorğusunda `metadata.model` dəyərini açıq şəkildə əvəz edir; o, nəzərə alınmayan `x-combo` JSON sahəsi kimi deyil, həqiqi `model` kimi göndərilir. Şlüzün standart API açarı və hər bir hədəf üzrə avtorizasiya qaydaları qüvvədə qalır. Yanlış və ya boş kombinasiya rədd edilir.
+
+Nəticə `requested_combo` (çağıranın niyyəti), `dispatched_model` (faktiki şlüz sorğusu), `response_model` (şlüz cavabı) və `confirmed_combo` sahələrini təqdim edir. Şlüz kombinasiyanı açıq şəkildə müəyyən etmədikdə sonuncu sahə `null` olur. A2A qərar jurnalları icranı yalnız təsdiqlənmiş kombinasiyaya aid edir və təsdiqlənməmiş sorğunu `requestedCombo` kimi saxlayır.
+
 **Cavab:**
 
 ```json
@@ -76,30 +80,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE axını
+### `message/stream` — SSE Axın Ötürməsi
 
-`message/send` ilə eynidir, lakin real vaxt axını üçün server tərəfindən göndərilən hadisələri qaytarır.
+`message/send` ilə eynidir, lakin real vaxt rejimində axın ötürməsi üçün Server-Sent Events qaytarır.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +113,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE hadisələri:**
+**SSE Hadisələri:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +123,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Tapşırıq statusunun sorğulanması
+### `tasks/get` — Tapşırıq Statusunun Sorğulanması
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +132,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Tapşırığın ləğv edilməsi
+### `tasks/cancel` — Tapşırığın Ləğv Edilməsi
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,22 +145,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Mövcud Bacarıqlar
 
-OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` daxilində bağlanmış 6 A2A bacarığını təqdim edir. Hər bacarıq modulu `src/lib/a2a/skills/` qovluğunda yerləşir.
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` də simli 6 A2A bacarığını ifşa edir. Hər bir bacarıq modulu `src/lib/a2a/skills/`-də yaşayır.
 
-| Bacarıq             | ID                   | Təsvir                                                                                                                                                                    | Teqlər                     | Nümunələr                                         |
-| :------------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------------------ |
-| Ağıllı Yönləndirmə  | `smart-routing`      | OmniRoute-un kombo mühərriki + qiymətləndirmə sistemindən istifadə edərək promptu optimal provayder/kombo üzərindən yönləndirir                                           | routing, providers         | "Bu promptu ən yaxşı model üzərindən yönləndir"   |
-| Kvota İdarəetməsi   | `quota-management`   | Hər provayder üzrə kvota vəziyyətini bildirir, çağıranlara nə vaxt məhdudlaşdırma/provayder dəyişmə qərarı verməkdə kömək edir                                            | quota, providers           | "anthropic üçün kvotanı yoxla"                    |
-| Provayder Kəşfi     | `provider-discovery` | Quraşdırılmış provayderləri imkanlar, pulsuz səviyyə bayraqları, OAuth statusu ilə siyahıya alır                                                                          | providers, discovery       | "Hansı provayderlər mövcuddur?"                   |
-| Xərc Təhlili        | `cost-analysis`      | Kataloq + son istifadə məlumatları əsasında sorğu/söhbətin dəyərini təxmin edir                                                                                           | cost, usage                | "Bu söhbətin xərcini təxmin et"                   |
-| Sağlamlıq Hesabatı  | `health-report`      | Hər provayder üzrə circuit breaker, cooldown, lockout vəziyyətini aqreqasiya edir                                                                                         | health, resilience         | "Bütün provayderlərin sağlamlıq statusunu göstər" |
-| İmkanların Siyahısı | `list-capabilities`  | Kontekst inyeksiyası üçün xam SKILL.md URL-ləri ilə birlikdə 45 elementlik tam Agent Skills kataloqunu (23 API + 21 CLI + 1 konfiqurasiya) markdown cədvəli kimi qaytarır | catalog, discovery, skills | "Bütün OmniRoute imkanlarını siyahıya al"         |
+| Bacarıq                | ID                   | Təsvir                                                                                                                                                     | Teqlər                        | Nümunələr                                             |
+| :--------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :---------------------------------------------------- |
+| Ağıllı marşrutlaşdırma | `smart-routing`      | OmniRoute-nin kombin mühərriki + hesabından istifadə edərək, optimal provider/combo vasitəsilə sorğu yönləndirir                                           | marşrutlaşdırma, provayderlər | "Bu əmri ən yaxşı model vasitəsilə yönləndirin"       |
+| Kvota İdarəetmə        | `quota-management`   | Provayderə görə kvota vəziyyəti haqqında hesabat verir, zəng edənlərə nə vaxt throttle/switch qərarına gəlməyə kömək edir                                  | kvota, provayderlər           | "Antropik üçün kvotanı yoxlayın"                      |
+| Provayder kəşfi        | `provider-discovery` | İmkanları, sərbəst səviyyəli bayraqları, OAuth statusu olan quraşdırılmış provayderləri siyahıya alır                                                      | təminatçılar, kəşf            | "Hansı provayderlər mövcuddur?"                       |
+| Xərclərin təhlili      | `cost-analysis`      | Kataloq + son istifadəni nəzərə alaraq request/conversation nın qiymətini təxmin edir                                                                      | xərc, istifadə                | "Bu söhbətin təxmini dəyəri"                          |
+| Sağlamlıq Hesabatı     | `health-report`      | Bir provayder üçün dövrə açarı, soyuducu, kilidləmə vəziyyəti                                                                                              | sağlamlıq, dözümlülük         | "Bütün provayderlərin sağlamlıq vəziyyətini göstərin" |
+| Bacarıqların siyahısı  | `list-capabilities`  | Tam 45 girişli Agent Bacarıqları kataloqunu (23 API + 21 CLI + 1 konfiqurasiya) kontekst inyeksiyası üçün xam SKILL.md URLs ilə qeyd cədvəli kimi qaytarır | kataloq, kəşf, bacarıqlar     | "Bütün OmniRoute imkanlarını sadalayın"               |
 
-> Agent Card canlı 375 provayderli kataloqla uyğun saxlanılmalıdır; provayder sayları və pulsuz/autentifikasiyasız metadata runtime reyestrindən götürülür.
+> Agent Kartı canlı 380 provayder kataloqu ilə uyğunlaşdırılmalıdır; provayder sayları və free/no-auth metadata icra vaxtı reyestrindən əldə edilir.
 
-### `list-capabilities` Bacarıq Təfərrüatları
+### `list-capabilities` Bacarıq Təfərrüatı
 
-`list-capabilities` bacarığı API çağırışları göndərməzdən əvvəl OmniRoute-un nəyi təqdim etdiyini kəşf etməli olan xarici agentlər üçün xüsusilə faydalıdır. O, strukturlaşdırılmış markdown cədvəl artefaktı qaytarır:
+`list-capabilities` bacarığı API zəngləri göndərməzdən əvvəl OmniRoute nələri ifşa etdiyini kəşf etməli olan xarici agentlər üçün xüsusilə faydalıdır. Strukturlaşdırılmış işarələmə cədvəli artefaktını qaytarır:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -172,7 +169,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` daxilində bağlanm
 ...
 ```
 
-Hər sətir `rawUrl` sütununu ehtiva edir, beləliklə agentlər tam SKILL.md faylını dərhal əldə edə bilərlər. `metadata.totalSkills` sahəsi kataloq ölçüsünü əks etdirir (bu gün 45). İmplementasiya: `src/lib/a2a/skills/listCapabilities.ts`. Həmçinin bax: [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Hər bir sıra `rawUrl` sütununu ehtiva edir ki, agentlər dərhal tam SKILL.md əldə edə bilsinlər. `metadata.totalSkills` sahəsi kataloq ölçüsünü əks etdirir (bu gün 45). İcra: `src/lib/a2a/skills/listCapabilities.ts`. Həmçinin baxın [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -193,17 +190,17 @@ JSON-RPC son nöqtəsi `/a2a` əsas A2A giriş nöqtəsidir. Aşağıdakı REST 
 
 ---
 
-## Yeni Bacarığın Əlavə Edilməsi
+## Yeni Bacarıq əlavə etmək
 
-1. **Bacarıq faylını yaradın:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Bacarıq faylı yaradın:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` formasında asinxron funksiya ixrac edin. `smartRouting.ts` kimi mövcud bacarıqların strukturunu izləyin.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` async funksiyasını ixrac edin. `smartRouting.ts` kimi mövcud bacarıqların formasına əməl edin.
 
-2. **İşləyicini qeydiyyatdan keçirin:** `src/lib/a2a/taskExecution.ts` faylında `A2A_SKILL_HANDLERS` obyektinə giriş əlavə edin:
+2. **Qeydiyyat işləyicisi:** `src/lib/a2a/taskExecution.ts` da `A2A_SKILL_HANDLERS`-ə giriş əlavə edin:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...mövcud bacarıqlar
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -211,7 +208,7 @@ JSON-RPC son nöqtəsi `/a2a` əsas A2A giriş nöqtəsidir. Aşağıdakı REST 
    };
    ```
 
-3. **Agent Kartında təqdim edin:** `src/app/.well-known/agent.json/route.ts` faylında `skills` massivinə əlavə edin:
+3. **Agent Kartında ifşa:** `src/lib/a2a/agentCardMetadata.ts` da ( `/.well-known/agent.json` və `/.well-known/agent-card.json` tərəfindən paylaşılır), `skills` massivinə əlavə edin:
 
    ```json
    {
@@ -223,9 +220,9 @@ JSON-RPC son nöqtəsi `/a2a` əsas A2A giriş nöqtəsidir. Aşağıdakı REST 
    }
    ```
 
-4. **Testlər yazın:** `tests/unit/a2a-<your-skill>.test.ts`. Uğurlu icra ssenarisini və xəta ssenarisini əhatə edin.
+4. **Testləri yazın:** `tests/unit/a2a-<your-skill>.test.ts`. Xoşbəxt yolu + xəta yolunu əhatə edin.
 
-5. **Yeni bacarığı** bu fayldakı `Available Skills` cədvəlində sənədləşdirin.
+5. **Sənəd** bu faylın `Available Skills` cədvəlindəki yeni bacarıq.
 
 ---
 
@@ -262,9 +259,9 @@ təqdim edilib → icra olunur → tamamlanıb
 
 ---
 
-## İnteqrasiya Nümunələri
+## İnteqrasiya nümunələri
 
-### Python (requests)
+### Python (istəklər)
 
 ```python
 import requests
@@ -283,7 +280,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (gətirmək)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
 import { CertStatusIcon } from "./shared/CertStatusIcon";
 import { UpstreamCaField } from "./UpstreamCaField";
 import { BypassListEditor } from "./BypassListEditor";
@@ -9,7 +14,9 @@ import type { AgentBridgeServerState } from "../AgentBridgePageClient";
 
 interface AgentBridgeServerCardProps {
   serverState: AgentBridgeServerState;
-  onAction: (action: "start" | "stop" | "restart" | "trust-cert" | "regenerate-cert") => Promise<void>;
+  onAction: (
+    action: "start" | "stop" | "restart" | "trust-cert" | "regenerate-cert"
+  ) => Promise<void>;
   onUpstreamCaSave: (path: string) => Promise<void>;
   onBypassSave: (patterns: string[]) => Promise<void>;
   bypassPatterns: string[];
@@ -31,7 +38,9 @@ export function AgentBridgeServerCard({
   const [expanded, setExpanded] = useState(false);
   const [upstreamCa, setUpstreamCa] = useState(serverState.upstreamCa ?? "");
 
-  const runAction = async (action: "start" | "stop" | "restart" | "trust-cert" | "regenerate-cert") => {
+  const runAction = async (
+    action: "start" | "stop" | "restart" | "trust-cert" | "regenerate-cert"
+  ) => {
     setLoading(action);
     try {
       await onAction(action);
@@ -43,30 +52,21 @@ export function AgentBridgeServerCard({
   const isRunning = serverState.running;
 
   return (
-    <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+    <Card padding="none" className="overflow-hidden">
       {/* Header row */}
-      <div className="flex items-center justify-between px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <span className="material-symbols-outlined text-[20px] text-primary">link</span>
+      <div className="flex items-center justify-between gap-3 px-5 py-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="rounded-control bg-bg-subtle p-2 text-text-main">
+            <Icon name="link" size={20} />
           </div>
-          <div>
-            <h2 className="text-sm font-semibold text-text-main flex items-center gap-2">
+          <div className="min-w-0">
+            <h2 className="ci-heading flex flex-wrap items-center gap-2 text-sm">
               {t("serverCardTitle") || "AgentBridge Server"}
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                  isRunning
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                    : "bg-zinc-500/10 text-zinc-500 dark:text-zinc-400"
-                }`}
-              >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${isRunning ? "bg-emerald-500 animate-pulse" : "bg-zinc-400"}`}
-                />
+              <Badge variant={isRunning ? "success" : "default"} size="sm" dot>
                 {isRunning ? t("statusRunning") || "Running" : t("statusStopped") || "Stopped"}
-              </span>
+              </Badge>
             </h2>
-            <div className="flex items-center gap-3 mt-0.5 text-xs text-text-muted">
+            <div className="mt-0.5 flex flex-wrap items-center gap-3 text-xs text-text-muted">
               <span>
                 {t("serverPort") || "Port"}: {serverState.port ?? 443}
               </span>
@@ -78,7 +78,8 @@ export function AgentBridgeServerCard({
               )}
               {serverState.interceptedCount !== undefined && (
                 <span>
-                  {t("serverIntercepted") || "Intercepted"}: {serverState.interceptedCount.toLocaleString()}
+                  {t("serverIntercepted") || "Intercepted"}:{" "}
+                  {serverState.interceptedCount.toLocaleString()}
                 </span>
               )}
               {serverState.lastStartedAt && (
@@ -91,111 +92,102 @@ export function AgentBridgeServerCard({
           </div>
         </div>
 
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          icon={expanded ? "expand_less" : "expand_more"}
           onClick={() => setExpanded((v) => !v)}
-          className="text-text-muted hover:text-text-main transition-colors"
-          aria-label={expanded ? "Collapse" : "Expand"}
-        >
-          <span className="material-symbols-outlined text-[18px]">
-            {expanded ? "expand_less" : "expand_more"}
-          </span>
-        </button>
+          aria-expanded={expanded}
+          aria-label={expanded ? t("hideServerSettings") : t("showServerSettings")}
+        />
       </div>
 
       {/* Action buttons */}
       <div className="flex flex-wrap gap-2 px-5 pb-4">
-        <button
-          type="button"
+        <Button
+          size="sm"
+          variant="primary"
+          icon="play_arrow"
           onClick={() => runAction("start")}
           disabled={isRunning || loading !== null}
           aria-label={t("startServer")}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 px-3 py-1.5 text-xs font-medium hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
         >
-          <span className="material-symbols-outlined text-[14px]">play_arrow</span>
           {loading === "start" ? t("starting") || "Starting…" : t("startServer") || "Start"}
-        </button>
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          size="sm"
+          variant="danger"
+          icon="stop"
           onClick={() => runAction("stop")}
           disabled={!isRunning || loading !== null}
           aria-label={t("stopServer")}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-red-500/10 text-red-600 px-3 py-1.5 text-xs font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50"
         >
-          <span className="material-symbols-outlined text-[14px]">stop</span>
           {loading === "stop" ? t("stopping") || "Stopping…" : t("stopServer") || "Stop"}
-        </button>
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          size="sm"
+          variant="outline"
+          icon="refresh"
           onClick={() => runAction("restart")}
           disabled={loading !== null}
           aria-label={t("restartServer")}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 text-amber-600 px-3 py-1.5 text-xs font-medium hover:bg-amber-500/20 transition-colors disabled:opacity-50"
         >
-          <span className="material-symbols-outlined text-[14px]">refresh</span>
-          {loading === "restart" ? t("restarting") || "Restarting…" : t("restartServer") || "Restart"}
-        </button>
+          {loading === "restart"
+            ? t("restarting") || "Restarting…"
+            : t("restartServer") || "Restart"}
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          size="sm"
+          variant="outline"
+          icon="security"
           onClick={() => runAction("trust-cert")}
           disabled={loading !== null}
           aria-label={t("trustCert")}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500/10 text-blue-600 px-3 py-1.5 text-xs font-medium hover:bg-blue-500/20 transition-colors disabled:opacity-50"
         >
-          <span className="material-symbols-outlined text-[14px]">security</span>
           {loading === "trust-cert" ? t("trusting") || "Trusting…" : t("trustCert") || "Trust Cert"}
-        </button>
+        </Button>
 
         <a
           href="/api/tools/agent-bridge/cert/download"
           download
           aria-label={t("downloadCert")}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-violet-500/10 text-violet-600 px-3 py-1.5 text-xs font-medium hover:bg-violet-500/20 transition-colors"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
         >
-          <span className="material-symbols-outlined text-[14px]">download</span>
+          <Icon name="download" size={14} />
           {t("downloadCert") || "Download Cert"}
         </a>
 
-        <button
-          type="button"
+        <Button
+          size="sm"
+          variant="outline"
+          icon="autorenew"
           onClick={() => runAction("regenerate-cert")}
           disabled={loading !== null}
           aria-label={t("regenerateCert")}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-500/10 text-text-muted px-3 py-1.5 text-xs font-medium hover:bg-zinc-500/20 transition-colors disabled:opacity-50"
         >
-          <span className="material-symbols-outlined text-[14px]">autorenew</span>
           {loading === "regenerate-cert"
             ? t("regenerating") || "Regenerating…"
             : t("regenerateCert") || "Regenerate Cert"}
-        </button>
+        </Button>
       </div>
 
       {/* Expanded: CA + Bypass */}
       {expanded && (
-        <div className="px-5 pb-5 border-t border-border/30 pt-4 flex flex-col gap-5">
-          <UpstreamCaField
-            value={upstreamCa}
-            onChange={setUpstreamCa}
-            onSave={onUpstreamCaSave}
-          />
+        <div className="flex flex-col gap-5 border-t border-border px-5 pt-4 pb-5">
+          <UpstreamCaField value={upstreamCa} onChange={setUpstreamCa} onSave={onUpstreamCaSave} />
           <div>
-            <h4 className="text-xs font-semibold text-text-main mb-2">
-              {t("bypassSectionTitle") || "Bypass List"}
-            </h4>
-            <p className="text-xs text-text-muted mb-3">
+            <h3 className="ci-heading mb-2 text-xs">{t("bypassSectionTitle") || "Bypass List"}</h3>
+            <p className="mb-3 text-xs text-text-muted">
               {t("bypassSectionDesc") ||
                 "Hosts matching these patterns are tunneled directly (no TLS decryption). Defaults include banks, .gov, and corporate SSO."}
             </p>
-            <BypassListEditor
-              patterns={bypassPatterns}
-              onSave={onBypassSave}
-            />
+            <BypassListEditor patterns={bypassPatterns} onSave={onBypassSave} />
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

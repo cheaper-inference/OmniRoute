@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@omniroute/ui-kit/table";
 import Card from "@/shared/components/Card";
+import EmptyState from "@/shared/components/EmptyState";
 import Button from "@/shared/components/Button";
 import Select from "@/shared/components/Select";
 import Toggle from "@/shared/components/Toggle";
@@ -26,21 +28,23 @@ function useVisibleConnections(
   );
 }
 
-function TableHead() {
+function CooldownTableHeader() {
   const t = useTranslations("resilienceCooldowns");
   const columns = ["connection", "provider", "status", "remaining", "lockouts", "lastError"];
   return (
-    <thead className="text-left text-xs uppercase text-text-muted">
-      <tr>
-        <th className="px-3 py-2" />
+    <TableHeader>
+      <TableRow>
+        <TableHead className="w-10">
+          <span className="sr-only">{t("list.select")}</span>
+        </TableHead>
         {columns.map((column) => (
-          <th key={column} className="px-3 py-2">
-            {t(`list.columns.${column}`)}
-          </th>
+          <TableHead key={column}>{t(`list.columns.${column}`)}</TableHead>
         ))}
-        <th className="px-3 py-2" />
-      </tr>
-    </thead>
+        <TableHead>
+          <span className="sr-only">{t("list.clear")}</span>
+        </TableHead>
+      </TableRow>
+    </TableHeader>
   );
 }
 
@@ -69,24 +73,23 @@ function ConnectionsTable({
   onToggle: (id: string, checked: boolean) => void;
   onClear: (id: string) => void;
 }) {
+  const t = useTranslations("resilienceCooldowns");
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <TableHead />
-        <tbody>
-          {connections.map((connection) => (
-            <CooldownRow
-              key={connection.id}
-              connection={connection}
-              selected={selected.has(connection.id)}
-              busy={busy}
-              onToggle={onToggle}
-              onClear={onClear}
-            />
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Table scrollbarLabel={t("list.title")}>
+      <CooldownTableHeader />
+      <TableBody>
+        {connections.map((connection) => (
+          <CooldownRow
+            key={connection.id}
+            connection={connection}
+            selected={selected.has(connection.id)}
+            busy={busy}
+            onToggle={onToggle}
+            onClear={onClear}
+          />
+        ))}
+      </TableBody>
+    </Table>
   );
 }
 
@@ -156,7 +159,7 @@ export default function CooldownConnectionsCard({
         </div>
       </div>
       {visible.length === 0 ? (
-        <p className="text-sm text-text-muted">{t("list.empty")}</p>
+        <EmptyState icon="timer_off" title={t("list.empty")} />
       ) : (
         <ConnectionsTable
           connections={visible}

@@ -16,6 +16,10 @@ import { useTranslations, useLocale } from "next-intl";
 // vitest/jsdom component test. Direct imports resolve identically under Next.js.
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
+import { Skeleton } from "@/shared/components/Loading";
+import Select from "@/shared/components/Select";
 import Toggle from "@/shared/components/Toggle";
 import {
   ENGINE_IDS,
@@ -26,9 +30,14 @@ import {
   outputStyleMeta,
 } from "../../../../../../open-sse/services/compression/outputStyles/catalog.ts";
 import {
+  deriveEffectiveAutoTriggerPreviewPlan,
   deriveEffectivePreviewPlan,
   type NamedCombos,
 } from "../../../../../../open-sse/services/compression/deriveEffectivePreviewPlan.ts";
+import {
+  DEFAULT_COMPRESSION_CONFIG,
+  type CompressionConfig as RuntimeCompressionConfig,
+} from "../../../../../../open-sse/services/compression/types.ts";
 import EngineGuidanceDetail from "./EngineGuidanceDetail";
 import {
   DEFAULT_CONTEXT_BUDGET,
@@ -51,7 +60,12 @@ interface CavemanOutputModeConfig {
 
 interface CompressionConfig {
   enabled: boolean;
+  defaultMode?: RuntimeCompressionConfig["defaultMode"];
+  autoTriggerMode?: RuntimeCompressionConfig["autoTriggerMode"];
   autoTriggerTokens: number;
+  comboOverrides?: RuntimeCompressionConfig["comboOverrides"];
+  stackedPipeline?: RuntimeCompressionConfig["stackedPipeline"];
+  enginesExplicit?: boolean;
   preserveSystemPrompt: boolean;
   preserveSystemPromptMode?: "always" | "whenNoCache" | "never";
   engines: Record<string, EngineToggle>;
@@ -185,9 +199,11 @@ function LiveZoneToggle({
 function AutoTriggerInput({
   value,
   onCommit,
+  ariaLabel,
 }: {
   value: number;
   onCommit: (tokens: number) => void;
+  ariaLabel: string;
 }) {
   // The edit not saved yet, or null while the field shows the current value.
   const [draft, setDraft] = useState<string | null>(null);
@@ -202,8 +218,10 @@ function AutoTriggerInput({
     if (tokens !== value) onCommit(tokens);
   };
   return (
-    <input
+    <Input
       type="number"
+      aria-label={ariaLabel}
+      inputClassName="h-8 min-h-8 w-24"
       min={AUTO_TRIGGER_MIN}
       max={AUTO_TRIGGER_MAX}
       value={draft ?? String(value)}
@@ -216,7 +234,6 @@ function AutoTriggerInput({
         }
         if (e.key === "Enter") commit(e.currentTarget.value);
       }}
-      className="w-24 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
     />
   );
 }
@@ -235,48 +252,44 @@ function AdaptiveContextBudgetDial({
   // the panel has no selected-model context here; 200k is Claude-class default.
   const target = getAdaptiveTargetSummary(contextBudget, 200000);
   return (
-    <div className="mb-4 space-y-2 rounded-md border border-border/60 bg-bg-subtle px-3 py-2">
-      <label className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium text-text-main">{t("compressionAdaptiveMode")}</span>
-        <select
-          data-testid="context-budget-mode-select"
-          value={contextBudget.mode ?? "off"}
+    <div className="mb-4 space-y-2 rounded-md border border-border bg-bg-subtle px-3 py-2">
+      <Select
+        compact
+        label={t("compressionAdaptiveMode")}
+        selectClassName="w-44"
+        data-testid="context-budget-mode-select"
+        value={contextBudget.mode ?? "off"}
+        onChange={(e) => {
+          const mode = e.target.value;
+          if (CONTEXT_BUDGET_MODES.has(mode as ContextBudgetConfig["mode"])) {
+            onChange({ mode: mode as ContextBudgetConfig["mode"] });
+          }
+        }}
+        disabled={saving}
+      >
+        <option value="off">{t("compressionAdaptiveModeOff")}</option>
+        <option value="floor">{t("compressionAdaptiveModeFloor")}</option>
+        <option value="replace-autotrigger">{t("compressionAdaptiveModeReplace")}</option>
+      </Select>
+      {(contextBudget.mode ?? "off") !== "off" && (
+        <Select
+          compact
+          label={t("compressionAdaptivePolicy")}
+          selectClassName="w-44"
+          data-testid="context-budget-policy-select"
+          value={contextBudget.policy ?? "reserve-output"}
           onChange={(e) => {
-            const mode = e.target.value;
-            if (CONTEXT_BUDGET_MODES.has(mode as ContextBudgetConfig["mode"])) {
-              onChange({ mode: mode as ContextBudgetConfig["mode"] });
+            const policy = e.target.value;
+            if (CONTEXT_BUDGET_POLICIES.has(policy as ContextBudgetConfig["policy"])) {
+              onChange({ policy: policy as ContextBudgetConfig["policy"] });
             }
           }}
           disabled={saving}
-          className="w-44 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
         >
-          <option value="off">{t("compressionAdaptiveModeOff")}</option>
-          <option value="floor">{t("compressionAdaptiveModeFloor")}</option>
-          <option value="replace-autotrigger">{t("compressionAdaptiveModeReplace")}</option>
-        </select>
-      </label>
-      {(contextBudget.mode ?? "off") !== "off" && (
-        <label className="flex items-center justify-between gap-3">
-          <span className="text-sm font-medium text-text-main">
-            {t("compressionAdaptivePolicy")}
-          </span>
-          <select
-            data-testid="context-budget-policy-select"
-            value={contextBudget.policy ?? "reserve-output"}
-            onChange={(e) => {
-              const policy = e.target.value;
-              if (CONTEXT_BUDGET_POLICIES.has(policy as ContextBudgetConfig["policy"])) {
-                onChange({ policy: policy as ContextBudgetConfig["policy"] });
-              }
-            }}
-            disabled={saving}
-            className="w-44 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
-          >
-            <option value="reserve-output">{t("compressionAdaptivePolicyReserve")}</option>
-            <option value="percentage">{t("compressionAdaptivePolicyPercentage")}</option>
-            <option value="absolute">{t("compressionAdaptivePolicyAbsolute")}</option>
-          </select>
-        </label>
+          <option value="reserve-output">{t("compressionAdaptivePolicyReserve")}</option>
+          <option value="percentage">{t("compressionAdaptivePolicyPercentage")}</option>
+          <option value="absolute">{t("compressionAdaptivePolicyAbsolute")}</option>
+        </Select>
       )}
       <div data-testid="adaptive-target-preview" className="text-xs text-text-muted">
         {target.enabled
@@ -305,6 +318,24 @@ function derivedPreviewText(
   return t("compressionDerivedMode", { mode: derived.mode });
 }
 
+function buildPreviewConfig(config: CompressionConfig): RuntimeCompressionConfig {
+  return {
+    ...DEFAULT_COMPRESSION_CONFIG,
+    enabled: config.enabled,
+    defaultMode: config.defaultMode ?? DEFAULT_COMPRESSION_CONFIG.defaultMode,
+    autoTriggerMode: config.autoTriggerMode,
+    autoTriggerTokens: config.autoTriggerTokens,
+    preserveSystemPrompt: config.preserveSystemPrompt,
+    preserveSystemPromptMode: config.preserveSystemPromptMode,
+    comboOverrides: config.comboOverrides ?? {},
+    stackedPipeline: config.stackedPipeline,
+    engines: config.engines,
+    enginesExplicit: config.enginesExplicit,
+    activeComboId: config.activeComboId,
+    contextBudget: config.contextBudget,
+  };
+}
+
 export default function CompressionPanel() {
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
@@ -328,13 +359,15 @@ export default function CompressionPanel() {
   const [status, setStatus] = useState<"" | "saved" | "error">("");
   const saveGenRef = useRef(0);
   const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(
-    () => () => {
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
       if (statusTimerRef.current !== null) clearTimeout(statusTimerRef.current);
       saveGenRef.current++;
-    },
-    []
-  );
+    };
+  }, []);
   // The last config the server confirmed.
   const lastConfirmedRef = useRef(config);
   // Saves still waiting on the server, oldest first.
@@ -459,6 +492,7 @@ export default function CompressionPanel() {
   // error or the timeout) may still have been stored — the re-read below picks that up.
   const save = async (updates: Partial<CompressionConfig>) => {
     saveGenRef.current += 1;
+    if (statusTimerRef.current !== null) clearTimeout(statusTimerRef.current);
     if (pendingRef.current.length === 0) {
       batchFailedRef.current = false;
       setStatus("");
@@ -480,6 +514,7 @@ export default function CompressionPanel() {
       threw = true;
       console.error("Failed to save compression settings:", error);
     }
+    if (!mountedRef.current) return;
     pendingRef.current = pendingRef.current.filter((pending) => pending !== updates);
     if (ok) {
       for (const key of Object.keys(updates)) {
@@ -498,6 +533,7 @@ export default function CompressionPanel() {
     const latestGen = saveGenRef.current;
     if (statusTimerRef.current !== null) clearTimeout(statusTimerRef.current);
     statusTimerRef.current = setTimeout(() => {
+      statusTimerRef.current = null;
       if (latestGen === saveGenRef.current) setStatus("");
     }, SAVED_STATUS_CLEAR_MS);
   };
@@ -543,12 +579,15 @@ export default function CompressionPanel() {
     }
   };
 
-  const derived = deriveEffectivePreviewPlan(config, namedCombos);
+  const previewConfig = buildPreviewConfig(config);
+  const derived = deriveEffectivePreviewPlan(previewConfig, namedCombos);
+  const autoTriggerDerived = deriveEffectiveAutoTriggerPreviewPlan(previewConfig, namedCombos);
   const derivedText = derivedPreviewText(derived, t);
   if (loading) {
     return (
-      <Card className="p-6">
-        <p className="text-sm text-text-muted">{t("loading")}</p>
+      <Card className="p-6" aria-busy="true">
+        <span className="ci-sr-only">{t("loading")}</span>
+        <Skeleton className="h-24 w-full" />
       </Card>
     );
   }
@@ -557,7 +596,7 @@ export default function CompressionPanel() {
     return (
       <Card className="p-6">
         <div className="flex items-center justify-between gap-4">
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="text-sm text-error">
             {t("compressionTitle")}: {tCommon("failedToLoad")}
           </p>
           <Button
@@ -580,10 +619,8 @@ export default function CompressionPanel() {
       {/* Master */}
       <div className="mb-5 flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-blue-500/10 p-2 text-blue-500">
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              compress
-            </span>
+          <div className="rounded-lg bg-info/10 p-2 text-info">
+            <Icon name="compress" size={20} />
           </div>
           <div>
             <h3 className="text-lg font-semibold">{t("compressionTitle")}</h3>
@@ -596,22 +633,19 @@ export default function CompressionPanel() {
               className="mt-0.5 inline-flex items-center gap-1 text-xs text-primary hover:underline"
             >
               {t("compressionGuidanceFullGuideLink")}
-              <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
-                open_in_new
-              </span>
+              <Icon name="open_in_new" size={12} />
             </a>
           </div>
         </div>
         <div className="flex items-center gap-3">
           {status === "saved" && (
-            <span className="flex items-center gap-1 text-xs font-medium text-emerald-500">
-              <span className="material-symbols-outlined text-[14px]">check_circle</span>{" "}
-              {t("saved")}
+            <span className="flex items-center gap-1 text-xs font-medium text-success">
+              <Icon name="check_circle" size={14} /> {t("saved")}
             </span>
           )}
           {status === "error" && (
-            <span className="flex items-center gap-1 text-xs font-medium text-red-500">
-              <span className="material-symbols-outlined text-[14px]">error</span> {t("saveFailed")}
+            <span className="flex items-center gap-1 text-xs font-medium text-error">
+              <Icon name="error" size={14} /> {t("saveFailed")}
             </span>
           )}
           <Toggle
@@ -627,10 +661,20 @@ export default function CompressionPanel() {
       {/* Derived pipeline preview */}
       <div
         data-testid="derived-pipeline-preview"
-        className="mb-4 rounded-md border border-border/60 bg-bg-subtle px-3 py-2 text-xs text-text-muted"
+        className="mb-4 space-y-1 rounded-md border border-border bg-bg-subtle px-3 py-2 text-xs text-text-muted"
       >
-        <span className="font-medium text-text-main">{t("compressionEffectivePipeline")}</span>{" "}
-        {derivedText}
+        <div>
+          <span className="font-medium text-text-main">{t("compressionEffectivePipeline")}</span>{" "}
+          {derivedText}
+        </div>
+        {autoTriggerDerived && (
+          <div data-testid="auto-trigger-pipeline-preview">
+            <span className="font-medium text-text-main">
+              {t("compressionSettingsAutoTriggerMode")}
+            </span>{" "}
+            {derivedPreviewText(autoTriggerDerived, t)}
+          </div>
+        )}
       </div>
 
       {/* Adaptive context-budget dial — mode/policy persist via PUT contextBudget */}
@@ -645,7 +689,9 @@ export default function CompressionPanel() {
       />
 
       {/* Engine grid */}
-      <div className={`divide-y divide-border ${config.enabled ? "" : "opacity-60"}`}>
+      {/* No list-wide opacity while compression is off (it put the rows under AA, 19 axe nodes):
+          the selects and toggles carry their own disabled look (F4). */}
+      <div className="divide-y divide-border" data-disabled={config.enabled ? undefined : "true"}>
         {ENGINE_IDS.map((id) => {
           const meta = engineMeta(id);
           const engine = config.engines[id] ?? { enabled: false };
@@ -679,18 +725,20 @@ export default function CompressionPanel() {
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 {levels && (
-                  <select
+                  <Select
+                    aria-label={engineLabel}
                     value={level}
                     onChange={(e) => setEngine(id, { level: e.target.value })}
                     disabled={!config.enabled || !engine.enabled || saving}
-                    className="w-28 rounded border border-border bg-surface px-2 py-1 text-xs text-text-main"
+                    nativeSize="sm"
+                    selectClassName="w-28 text-xs"
                   >
                     {levels.map((lvl) => (
                       <option key={lvl} value={lvl}>
                         {t(`compressionLevel.${lvl}`)}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 )}
                 <span data-testid={`engine-toggle-${id}`}>
                   <Toggle
@@ -708,7 +756,7 @@ export default function CompressionPanel() {
       </div>
 
       {/* Output Styles — response-output instruction injection (Phase 4A, catalog-driven) */}
-      <div className="mt-2 flex flex-col gap-3 border-t border-border/30 py-3">
+      <div className="mt-2 flex flex-col gap-3 border-t border-border py-3">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-text-main">
             {t("compressionSettingsOutputStyles")}
@@ -736,21 +784,23 @@ export default function CompressionPanel() {
                 {meta.description && <p className="text-xs text-text-muted">{styleDescription}</p>}
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <select
+                <Select
+                  aria-label={styleLabel}
+                  nativeSize="sm"
+                  selectClassName="w-28 text-xs"
                   data-testid={`output-style-level-${id}`}
                   value={sel?.level ?? "full"}
                   onChange={(e) =>
                     setOutputStyle(id, { level: e.target.value as CavemanIntensity })
                   }
                   disabled={!sel || saving}
-                  className="w-28 rounded border border-border bg-surface px-2 py-1 text-xs text-text-main"
                 >
                   {CAVEMAN_OUTPUT_LEVELS.map((lvl) => (
                     <option key={lvl} value={lvl}>
                       {t(`compressionLevel.${lvl}`)}
                     </option>
                   ))}
-                </select>
+                </Select>
                 <span data-testid={`output-style-toggle-${id}`}>
                   <Toggle
                     size="sm"
@@ -768,20 +818,19 @@ export default function CompressionPanel() {
 
       {/* Ultra SLM tier — Phase 4 (B): pick the `ultra`-mode engine (heuristic Tier-A
           or the opt-in LLMLingua-2 SLM Tier-B) + best-effort pre-warm. */}
-      <div className="mt-2 flex flex-col gap-3 border-t border-border/30 py-3">
-        <label className="flex items-center justify-between">
-          <span className="text-sm font-medium text-text-main">{t("compressionUltraEngine")}</span>
-          <select
-            data-testid="ultra-engine-select"
-            value={config.ultraEngine ?? "heuristic"}
-            onChange={(e) => save({ ultraEngine: e.target.value === "slm" ? "slm" : "heuristic" })}
-            disabled={saving}
-            className="w-44 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
-          >
-            <option value="heuristic">{t("compressionUltraEngineHeuristic")}</option>
-            <option value="slm">{t("compressionUltraEngineSlm")}</option>
-          </select>
-        </label>
+      <div className="mt-2 flex flex-col gap-3 border-t border-border py-3">
+        <Select
+          compact
+          label={t("compressionUltraEngine")}
+          selectClassName="w-44"
+          data-testid="ultra-engine-select"
+          value={config.ultraEngine ?? "heuristic"}
+          onChange={(e) => save({ ultraEngine: e.target.value === "slm" ? "slm" : "heuristic" })}
+          disabled={saving}
+        >
+          <option value="heuristic">{t("compressionUltraEngineHeuristic")}</option>
+          <option value="slm">{t("compressionUltraEngineSlm")}</option>
+        </Select>
 
         {config.ultraEngine === "slm" && (
           <>
@@ -803,7 +852,7 @@ export default function CompressionPanel() {
       </div>
 
       {/* mcpAccessibility — writes its own endpoint / separate store */}
-      <div className="flex flex-col gap-2 border-t border-border/30 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 border-t border-border py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-text-main">{t("mcpAccessibilityTitle")}</p>
           <p className="mt-0.5 text-xs text-text-muted">{t("mcpAccessibilityDescription")}</p>
@@ -819,40 +868,40 @@ export default function CompressionPanel() {
       </div>
 
       {/* General */}
-      <div className="space-y-3 border-t border-border/30 pt-4">
+      <div className="space-y-3 border-t border-border pt-4">
         <h4 className="text-sm font-medium text-text-main">{t("compressionGeneral")}</h4>
-        <label className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <span className="text-sm text-text-muted">{t("compressionAutoTrigger")}</span>
           <div className="flex items-center gap-2">
             <AutoTriggerInput
+              ariaLabel={t("compressionAutoTrigger")}
               value={config.autoTriggerTokens}
               onCommit={(autoTriggerTokens) => save({ autoTriggerTokens })}
             />
             <span className="text-xs text-text-muted">{t("tokens")}</span>
           </div>
-        </label>
-        <label className="flex items-center justify-between">
-          <span className="text-sm text-text-muted">{t("compressionPreserveSystem")}</span>
-          <select
-            value={
-              config.preserveSystemPromptMode ??
-              (config.preserveSystemPrompt === false ? "whenNoCache" : "always")
-            }
-            onChange={(e) =>
-              save({
-                preserveSystemPromptMode: e.target.value as "always" | "whenNoCache" | "never",
-              })
-            }
-            disabled={saving}
-            aria-label={t("compressionPreserveSystem")}
-            data-testid="preserve-system-mode-select"
-            className="w-36 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
-          >
-            <option value="always">{t("compressionPreserveSystemAlways")}</option>
-            <option value="whenNoCache">{t("compressionPreserveSystemWhenNoCache")}</option>
-            <option value="never">{t("compressionPreserveSystemNever")}</option>
-          </select>
-        </label>
+        </div>
+        <Select
+          compact
+          label={t("compressionPreserveSystem")}
+          selectClassName="w-36"
+          value={
+            config.preserveSystemPromptMode ??
+            (config.preserveSystemPrompt === false ? "whenNoCache" : "always")
+          }
+          onChange={(e) =>
+            save({
+              preserveSystemPromptMode: e.target.value as "always" | "whenNoCache" | "never",
+            })
+          }
+          disabled={saving}
+          aria-label={t("compressionPreserveSystem")}
+          data-testid="preserve-system-mode-select"
+        >
+          <option value="always">{t("compressionPreserveSystemAlways")}</option>
+          <option value="whenNoCache">{t("compressionPreserveSystemWhenNoCache")}</option>
+          <option value="never">{t("compressionPreserveSystemNever")}</option>
+        </Select>
         <LiveZoneToggle
           enabled={config.liveZone?.enabled === true}
           saving={saving}

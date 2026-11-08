@@ -10,7 +10,7 @@ function OverflowNodeImpl({ data }: { data: OrchNode }) {
   const count = Object.values(data.counts ?? {}).reduce((a, b) => a + (b ?? 0), 0);
   return (
     <div
-      className="rounded-lg border border-dashed border-border bg-surface/60 px-3 py-2 text-xs text-muted cursor-pointer"
+      className="rounded-lg border border-dashed border-border bg-surface/60 px-3 py-2 text-xs text-text-muted cursor-pointer"
       aria-label={t("overflowMore", { count })}
     >
       {t("overflowMore", { count })}

@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 // Phase 1t.6 extraction — Issue #3501
 import { Button } from "@/shared/components";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
@@ -24,6 +26,7 @@ interface EmptyConnectionsPlaceholderProps {
   onOpenOAuthModal: () => void;
   onOpenImportCodex: () => void;
   onOpenImportClaude: () => void;
+  onOpenImportAgy?: () => void;
   onOpenImportGemini: () => void;
   onOpenImportGrokCli: () => void;
   t: ProviderMessageTranslator;
@@ -44,6 +47,7 @@ export default function EmptyConnectionsPlaceholder({
   onOpenOAuthModal,
   onOpenImportCodex,
   onOpenImportClaude,
+  onOpenImportAgy,
   onOpenImportGemini,
   onOpenImportGrokCli,
   t,
@@ -51,7 +55,7 @@ export default function EmptyConnectionsPlaceholder({
   return (
     <div className="text-center py-12">
       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-        <span className="material-symbols-outlined text-[32px]">{isOAuth ? "lock" : "key"}</span>
+        <Icon name={isOAuth ? "lock" : "key"} size={32} />
       </div>
       <p className="text-text-main font-medium mb-1">{t("noConnectionsYet")}</p>
       <p className="text-sm text-text-muted mb-4">{t("addFirstConnectionHint")}</p>
@@ -122,6 +126,17 @@ export default function EmptyConnectionsPlaceholder({
                   onClick={() => gateConnectionFlow(onOpenImportGrokCli)}
                 >
                   Import auth
+                </Button>
+              )}
+              {providerId === "agy" && onOpenImportAgy && (
+                <Button
+                  variant="secondary"
+                  icon="upload_file"
+                  onClick={() => gateConnectionFlow(onOpenImportAgy)}
+                >
+                  {typeof t.has === "function" && t.has("importAgyAuth")
+                    ? t("importAgyAuth")
+                    : "Import auth"}
                 </Button>
               )}
             </>

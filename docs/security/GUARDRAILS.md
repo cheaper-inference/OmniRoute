@@ -348,9 +348,9 @@ metrics/abort/cleanup — is hidden behind `processVideoPart` in
 That module also defines the explicit port boundaries `VideoMediaBrokerPort`
 (acquiring bytes and extracting sampled frames), `VideoAudioTranscriptionPort`
 (fusing a caller-declared audio transcript with the sampled captions), and
-`VideoDrilldownPort` (the frame drill-down persistence boundary; not yet wired
-into `processVideoPart` — only the separate `/api/modality-bridge/video/drilldown`
-route writes drill-down entries today).
+`VideoDrilldownPort` (the legacy raw-store shape). Production STT and frame retention
+are composed around the describing port through `createVideoSttAdapter` and
+`createVideoDrilldownAdapter`; the latter uses the shared opaque-handle lifecycle.
 
 The public `/v1` request path never imports or invokes a subprocess. Remote
 videos are downloaded under a 50 MiB bound; inline base64 videos have a
@@ -606,11 +606,48 @@ derivation version, creation time, server-computed content hash, and hashed pare
 reference plus the trusted caller's parent-content hash. Cancellation is checked
 between asynchronous decode/hash phases before the atomic cache commit.
 
-This tranche does not yet connect a production producer to the route and does not
-provide multi-resolution variant selection. The transparent Video Bridge request
-path therefore incurs no added work, while tenant-bound principal derivation and
-the full FU-08 multi-resolution lifecycle remain explicit follow-up work rather
-than documented as complete behavior.
+The production producer reuses already-derived broker frames only after successful
+visual analysis, with no second video download/extraction. It requires operator
+`modalityBridgeVideoDrilldownEnabled=true`, strict per-part `drilldown: true`, and
+an authenticated API-key record ID. Client-declared principal/session values never
+establish ownership. Without all three conditions it does not hash, resize or retain
+additional frames. Retention failure preserves the usable visual response. Consented
+requests bypass the whole-video result cache so cached results never replay handles.
+
+Successful JSON and SSE responses expose at most four opaque handles in the bounded
+`x-omniroute-video-drilldown` header. Authorized browser origins can read that header
+without broadening the CORS origin policy. New handles use `v1.<32-byte random base64url
+token>`, and the registry retains only
+their SHA-256 hashes. The reader/header parser also accepts legacy 64-hex tokens.
+The authenticated public consumer is
+`GET /api/v1/video-bridge/drilldown?handle=...`, independently gated by
+`modalityBridgeVideoDrilldownRemoteEnabled=true`. Explicit persisted false revokes
+access even when the legacy `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` env
+fallback is enabled. Production retention has the analogous legacy
+`OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` fallback. Both fallbacks default off.
+
+The consumer derives ownership from the authenticated key and applies key policy:
+both GET and DELETE belong to the `video` endpoint category, including the `/v1`
+and `/api/v1` aliases. Keys with a nonempty endpoint allowlist must include `video`;
+unrestricted keys remain compatible. The consumer
+returns the same 404 for unknown, expired and another key's handles. It accepts
+`variant=preview|standard|detail` (maximum JPEG dimension 320/640/1280, never upscaled),
+`limit=1..8` (or the legacy `frames` alias, never both), zero-based `page`, and optional
+`start`/`end` focus seconds. Duplicate
+query keys and reversed focus windows are rejected. Each returned variant has a hash
+of its actual content and actual resolution metadata, linked to the retained source.
+Variants are derived on read rather than stored as extra retained copies. The JSON
+response, including Base64/envelope, is capped at 32 MiB; an oversized page returns
+413 and the client must request fewer frames. Reads check cancellation around each
+resize and recheck handle validity before returning. `DELETE` by owner is idempotent;
+deletion or TTL expiry releases the retained source and usage accounting.
+
+The shared store is process-local: handles expire on restart and are not transferable
+between independent OmniRoute processes. Management stats expose effective retention/
+remote policy and aggregate retained entries/bytes only, never media, references,
+principal IDs or handles. The Video settings panel shows those values and can persist
+both consent switches. This implementation documentation is not live deployment or
+promotion evidence; real-model acceptance is tracked separately.
 
 Frames are captioned sequentially with the configured Video model. An empty
 Video override inherits the Vision setting; if both are empty, the Vision
@@ -697,7 +734,15 @@ does not switch masking on: that is still `PII_REDACTION_ENABLED` (request) and
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Unset means every
   type (the behaviour before this setting existed). The request engine's
   `ssn_us` pattern maps to `ssn`. Templates (Minimal, Standard, Financial,
-  Brazilian, USA, Full) only fill the checkboxes in the UI.
+  Brazilian, USA, GDPR, POPIA, Full) only fill the checkboxes in the UI.
+- **GDPR and POPIA identifiers** — twelve built-in ids covering EU and South
+  African personal identifiers (table below). Their regexes, validators and
+  jurisdiction tags live in one table, `src/shared/utils/piiPatterns.ts`, which
+  both the response sanitizer (`src/lib/piiSanitizer.ts`) and the request
+  masker (`src/shared/utils/inputSanitizer.ts`) consume. A match is redacted
+  only when its validator accepts it; a bare run of digits is never enough. An
+  operator who saved a narrowed selection before these ids existed keeps the
+  behaviour it had until the new ids are ticked.
 - **Custom patterns** — up to 20 regex or wildcard patterns (`*` = up to 64
   non-whitespace characters, `?` = one). Matches become `[CUSTOM_REDACTED]`.
   Every pattern goes through `compilePiiCustomPattern()`
@@ -721,7 +766,38 @@ The settings live in the `key_value` table (namespace `pii_settings`,
 | `POST` | `/api/settings/pii/test` | Dry-run one pattern against a sample of at most 8 KB; nothing is stored |
 
 All three require management auth and validate the body with Zod
-(`src/shared/validation/schemas/piiSettings.ts`).
+(`src/shared/validation/schemas/piiSettings.ts`). With login disabled
+(`requireLogin=false`) `GET` and the test endpoint are open, but `PUT` still
+needs a dashboard session, a `manage`-scope API key, an `oma_` access token
+with write scope or higher, or the CLI token or internal-service token sent
+from loopback.
+
+#### GDPR (EU) and POPIA (South Africa) identifiers
+
+| Id                  | Identifier               | Validation                                                                           |
+| ------------------- | ------------------------ | ------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                     | Known country, exact length for that country, ISO 13616 MOD-97-10                    |
+| `eu_vat`            | EU VAT number            | Known member-state prefix and that state's number format (no VIES lookup)            |
+| `es_dni_nie`        | Spanish DNI / NIE        | Control letter (value mod 23); NIE is `X/Y/Z` + 7 digits                             |
+| `it_codice_fiscale` | Italian Codice Fiscale   | Control letter from the odd/even position tables                                     |
+| `pl_pesel`          | Polish PESEL             | Weighted checksum and an encoded birth date that exists                              |
+| `nl_bsn`            | Dutch BSN                | 11-proof (weights 9..2, -1)                                                          |
+| `de_steuer_id`      | German Steuer-ID         | ISO 7064 Mod 11,10 plus the digit-structure rules (no leading 0)                     |
+| `se_personnummer`   | Swedish personnummer     | Luhn over the last ten digits and a plausible birth date (10 or 12 digits)           |
+| `za_id`             | South African ID number  | Luhn over all 13 digits, valid birth month/day, citizenship digit 0 or 1             |
+| `za_phone`          | South African phone      | `+27` / `27` prefix, or the national `0..` form written with a space or hyphen       |
+| `za_vat`            | South African VAT number | 10 digits starting with `4` **and** "VAT" / "BTW" in the 48 characters before        |
+| `za_tax_ref`        | South African tax ref.   | 10 digits starting `0`-`3`, Luhn, **and** "tax" / "SARS" in the 48 characters before |
+
+Because the digit-only formats collide with order numbers, build numbers and
+timestamps, the weakest ones (`za_vat`, `za_tax_ref`) need the keyword cue, and
+a bare ten-digit `0..` number is not treated as a South African phone number.
+Spaced IBANs (`GB29 NWBK ...`) are not matched. On the streaming path the cue is
+looked up inside the current chunk only. The ids sit ahead of the generic phone
+patterns, so a validated identifier keeps its own placeholder
+(`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). The `gdpr` and `popia` templates
+select the EU and South African ids respectively. Masking itself stays opt-in
+(Hard Rule #20): nothing here changes a feature-flag default.
 
 ### Prompt Injection (`promptInjection.ts`)
 

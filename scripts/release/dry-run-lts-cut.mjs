@@ -75,6 +75,7 @@ const BUMP_FILES = Object.freeze([
   "electron/package.json",
   "package-lock.json",
   "docs/openapi.yaml",
+  "public/openapi.yaml",
 ]);
 
 /** Workflows that stay dormant until the cut (docs/ops/RELEASE_STRATEGY.md → branches/channels). */
@@ -398,6 +399,7 @@ const BUMPERS = Object.freeze({
   "electron/package.json": bumpManifest,
   "package-lock.json": bumpLockfile,
   "docs/openapi.yaml": bumpOpenApi,
+  "public/openapi.yaml": bumpOpenApi,
 });
 
 // ── plan ────────────────────────────────────────────────────────────────────

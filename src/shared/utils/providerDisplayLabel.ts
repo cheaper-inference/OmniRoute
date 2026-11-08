@@ -15,27 +15,25 @@ export function getProviderDisplayLabel(
   providerNodes?: Array<{ id?: string; prefix?: string; name?: string }>
 ): string | null {
   if (!provider) return "-";
-  if (provider.startsWith("openai-compatible-") || provider.startsWith("anthropic-compatible-")) {
-    // Try to find user-defined name from provider nodes
-    if (providerNodes?.length) {
-      const matchedNode = providerNodes.find(
-        (node) => node.id === provider || node.prefix === provider
-      );
-      if (matchedNode?.name) return matchedNode.name;
-    }
-    // Fallback to generic labels
-    if (provider.startsWith("openai-compatible-")) {
-      const suffix = provider.replace("openai-compatible-", "");
-      const parts = suffix.split("-");
-      if (parts.length > 1 && parts[1]?.length >= 8) return `OAI-COMPAT`;
-      return `OAI: ${suffix.slice(0, 16).toUpperCase()}`;
-    }
-    if (provider.startsWith("anthropic-compatible-")) {
-      const suffix = provider.replace("anthropic-compatible-", "");
-      const parts = suffix.split("-");
-      if (parts.length > 1 && parts[1]?.length >= 8) return `ANT-COMPAT`;
-      return `ANT: ${suffix.slice(0, 16).toUpperCase()}`;
-    }
+  if (!provider.startsWith("openai-compatible-") && !provider.startsWith("anthropic-compatible-")) {
+    return null; // Not a compatible provider, use default PROVIDER_COLORS
   }
-  return null; // Not a compatible provider, use default PROVIDER_COLORS
+  // Try to find user-defined name from provider nodes
+  if (providerNodes?.length) {
+    const matchedNode = providerNodes.find(
+      (node) => node.id === provider || node.prefix === provider
+    );
+    if (matchedNode?.name) return matchedNode.name;
+  }
+  // Fallback to generic labels
+  if (provider.startsWith("openai-compatible-")) {
+    const suffix = provider.replace("openai-compatible-", "");
+    const parts = suffix.split("-");
+    if (parts.length > 1 && parts[1]?.length >= 8) return `OAI-COMPAT`;
+    return `OAI: ${suffix.slice(0, 16).toUpperCase()}`;
+  }
+  const suffix = provider.replace("anthropic-compatible-", "");
+  const parts = suffix.split("-");
+  if (parts.length > 1 && parts[1]?.length >= 8) return `ANT-COMPAT`;
+  return `ANT: ${suffix.slice(0, 16).toUpperCase()}`;
 }
