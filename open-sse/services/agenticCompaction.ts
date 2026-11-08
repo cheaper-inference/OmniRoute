@@ -121,6 +121,24 @@ function compactionLedger(key: string, omitted: number): Body {
     : { role: "system", content: text };
 }
 
+const isInstruction = (item: Body): boolean => item.role === "system" || item.role === "developer";
+
+/**
+ * Pruning removes the oldest groups one at a time, so it can stop right after a user turn and
+ * leave the reply to it first. Native Anthropic bodies must open with a user turn, so keep
+ * dropping unpinned groups until the retained conversation starts with one again.
+ */
+function dropLeadingReplies(groups: Body[][], pinned: Set<Body[]>, removed: Set<Body[]>): number {
+  let omitted = 0;
+  for (const group of groups) {
+    if (removed.has(group) || group.every(isInstruction)) continue;
+    if (pinned.has(group) || (group[0].role === "user" && !isResult(group[0]))) break;
+    removed.add(group);
+    omitted += group.length;
+  }
+  return omitted;
+}
+
 function pruneHistory(
   body: Body,
   key: string,
@@ -151,6 +169,8 @@ function pruneHistory(
     omitted += group.length;
     ledger = compactionLedger(key, omitted);
   }
+  if (removed.size > 0) omitted += dropLeadingReplies(groups, pinned, removed);
+  if (omitted > 0) ledger = compactionLedger(key, omitted);
   const kept = groups.filter((group) => !removed.has(group)).flat();
   body[key] = ledger ? [ledger, ...kept] : kept;
 }
@@ -183,9 +203,7 @@ export function compactAgenticBody(
   const pinned = new Set(
     groups.filter(
       (group, index) =>
-        group.some(
-          (item) => item.role === "system" || item.role === "developer" || item === latestUser
-        ) ||
+        group.some((item) => isInstruction(item) || item === latestUser) ||
         // prependSystemInstruction represents Gemini's routing instruction as first user content.
         (key === "contents" && index === 0) ||
         index === groups.length - 1

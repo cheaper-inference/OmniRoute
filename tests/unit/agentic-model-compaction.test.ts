@@ -370,6 +370,15 @@ function referencePruning(fixture: HistoryFixture, limit: number, ratio: number)
     omitted += group.length;
     render();
   }
+  // A retained conversation must open with a user turn, never with the reply to a dropped one.
+  for (const [index, group] of fixture.groups.entries()) {
+    if (!omitted) break;
+    if (!kept.includes(group) || group.every((item) => item.role === "system")) continue;
+    if (fixture.pinned.has(index) || group[0].role === "user") break;
+    kept.splice(kept.indexOf(group), 1);
+    omitted += group.length;
+    render();
+  }
   const after = JSON.stringify(body).length;
   return { body, before, after, limit, compacted: after < before, overLimit: after > limit };
 }
@@ -408,4 +417,49 @@ test("empty and absent histories keep exact payload accounting when fixed contex
       assert.equal(result.overLimit, true);
       assert.equal(result.after, JSON.stringify(result.body).length);
     }
+});
+
+test("pruning never leaves an assistant turn as the first non-system message", () => {
+  const firstTurn = (messages: Array<{ role: string; content: unknown }>) =>
+    messages.find((item) => item.role !== "system" && item.role !== "developer");
+  // Dropping only the large user turn already fits the budget; the reply that answered it
+  // must go too, because native Anthropic bodies must open the conversation with a user turn.
+  const anthropic = compactAgenticBody(
+    {
+      messages: [
+        { role: "system", content: "sys" },
+        { role: "user", content: "x".repeat(11_000) },
+        { role: "assistant", content: "old answer" },
+        { role: "user", content: "current task" },
+      ],
+    },
+    "p/small",
+    config
+  );
+  const messages = anthropic.body.messages as Array<{ role: string; content: unknown }>;
+  assert.equal(anthropic.compacted, true);
+  assert.equal(firstTurn(messages)?.role, "user");
+  assert.equal(firstTurn(messages)?.content, "current task");
+  assert.doesNotMatch(JSON.stringify(messages), /old answer/);
+  assert.match(String(messages[0].content), /2 entries omitted/);
+
+  const responses = compactAgenticBody(
+    {
+      input: [
+        { role: "developer", content: "sys" },
+        { role: "user", content: "x".repeat(11_000) },
+        { type: "function_call", call_id: "old", name: "read", arguments: "{}" },
+        { type: "function_call_output", call_id: "old", output: "old evidence" },
+        { role: "assistant", content: "old answer" },
+        { role: "user", content: "current task" },
+      ],
+    },
+    "p/small",
+    config
+  );
+  const input = responses.body.input as Array<{ role?: string; content?: unknown }>;
+  assert.equal(input[0].role, "system");
+  assert.equal(input[1].role, "developer");
+  assert.deepEqual(input.slice(2), [{ role: "user", content: "current task" }]);
+  assert.match(String(input[0].content), /4 entries omitted/);
 });
