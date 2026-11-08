@@ -25,6 +25,7 @@
     "config/i18n.json",
     ".npmrc",
     "scripts/ops/opencode-free-relay.ts",
+    "scripts/ops/install-zcode-native-runtime.mjs",
     "scripts/build/postinstall.mjs",
     "scripts/build/betterSqlitePrebuildTarget.mjs",
     "scripts/build/fixPlaywrightAndroid.mjs",

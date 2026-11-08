@@ -90,7 +90,7 @@ export default function EmptyConnectionsPlaceholder({
           ) : (
             <>
               <Button icon="add" onClick={() => gateConnectionFlow(openPrimaryAddFlow)}>
-                {providerSupportsPat ? "Add PAT" : t("addConnection")}
+                {providerSupportsPat && providerId !== "zcode" ? "Add PAT" : t("addConnection")}
               </Button>
               {providerId === "qoder" && (
                 <Button variant="secondary" onClick={() => gateConnectionFlow(onOpenOAuthModal)}>

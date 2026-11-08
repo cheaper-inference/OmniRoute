@@ -49,6 +49,7 @@ export interface ProviderConnectionView {
   apiKey: string | null;
   accessToken: string | null;
   refreshToken: string | null;
+  idToken: string | null;
   tokenExpiresAt: string | null;
   expiresAt: string | null;
   projectId: string | null;
@@ -102,6 +103,7 @@ export function toProviderConnection(value: unknown): ProviderConnectionView {
     apiKey: toStringOrNull(row.apiKey),
     accessToken: toStringOrNull(row.accessToken),
     refreshToken: toStringOrNull(row.refreshToken),
+    idToken: toStringOrNull(row.idToken),
     tokenExpiresAt: toStringOrNull(row.tokenExpiresAt),
     expiresAt: toStringOrNull(row.expiresAt),
     projectId: toStringOrNull(row.projectId),
@@ -129,7 +131,7 @@ export function toProviderConnection(value: unknown): ProviderConnectionView {
  * Creates a lazy-decrypting ProviderConnectionView from a raw (ciphertext)
  * DB row. First calls toProviderConnection for full type coercion (isActive
  * boolean, providerSpecificData object, etc.), then proxies credential
- * fields (apiKey, accessToken, refreshToken) to decrypt-only-on-first-access.
+ * fields (apiKey, accessToken, refreshToken, idToken) to decrypt-only-on-first-access.
  *
  * Non-credential reads hit the already-coerced view directly at zero cost.
  */
@@ -152,6 +154,9 @@ export function createLazyConnectionView(row: Record<string, unknown>): Provider
         refreshToken: toStringOrNull(
           decryptQuiet(base.refreshToken, { connectionId, provider, field: "refreshToken" })
         ),
+        idToken: toStringOrNull(
+          decryptQuiet(base.idToken, { connectionId, provider, field: "idToken" })
+        ),
       };
     }
     return decrypted;
@@ -159,7 +164,12 @@ export function createLazyConnectionView(row: Record<string, unknown>): Provider
 
   return new Proxy(base, {
     get: (_target, prop: string | symbol) => {
-      if (prop === "apiKey" || prop === "accessToken" || prop === "refreshToken") {
+      if (
+        prop === "apiKey" ||
+        prop === "accessToken" ||
+        prop === "refreshToken" ||
+        prop === "idToken"
+      ) {
         return ensureDecrypted()[prop];
       }
       if (prop === "providerSpecificData") {

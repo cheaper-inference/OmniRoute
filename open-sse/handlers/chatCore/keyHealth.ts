@@ -65,6 +65,33 @@ function isCredentialFailure(status: number, failureDetail: string): boolean {
   return CREDENTIAL_FAILURE_PATTERNS.some((pattern) => pattern.test(failureDetail));
 }
 
+// A tariff limit must not mask an account credential, ban, or provider failure.
+export function isZcodeTariffQuota429(
+  provider: string | null,
+  authType: unknown,
+  status: number,
+  detail: string
+): boolean {
+  if (
+    authType !== "oauth" ||
+    status !== 429 ||
+    ![
+      "zcode",
+      "zc",
+      "zcode-start",
+      "zc-start",
+      "zcode-individual",
+      "zc-individual",
+      "zcode-cn-start",
+      "zcode-cn-individual",
+    ].includes(provider ?? "")
+  )
+    return false;
+  return !/\b(?:bann?ed|suspend(?:ed)?|unauthori[sz]ed|forbidden|invalid[ _-]+(?:token|credential|api[ _-]?key)|expired[ _-]+(?:token|credential)|authentication|provider[ _-]+(?:error|unavailable|overloaded)|server[ _-]+(?:error|overloaded))\b/i.test(
+    detail
+  );
+}
+
 export function recordKeyHealthStatus(
   status: number,
   creds: Record<string, unknown> | null | undefined,
@@ -166,6 +193,9 @@ export function recordKeyHealthStatus(
           ? connId
           : null;
     if (hasPerModelQuota(provider429)) {
+      return;
+    }
+    if (isZcodeTariffQuota429(provider429, creds?.authType, status, failureDetail)) {
       return;
     }
     const cooldownMs = retryAfterMs && retryAfterMs > 0 ? retryAfterMs : DEFAULT_KEY_COOLDOWN_MS;

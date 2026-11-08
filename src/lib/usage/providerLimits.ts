@@ -224,6 +224,8 @@ function shouldRefreshProviderLimitsCache(
 
 export function isSupportedUsageConnection(connection: ProviderConnectionLike | null): boolean {
   if (!connection?.provider) return false;
+  if (["zcode", "zcode-start", "zcode-individual"].includes(connection.provider))
+    return connection.authType === "oauth";
 
   if (connection.authType === "oauth") {
     return supportsProviderQuota(connection.provider, connection);
@@ -231,6 +233,20 @@ export function isSupportedUsageConnection(connection: ProviderConnectionLike | 
   if (connection.authType !== "apikey" && connection.authType !== "api_key") return false;
   if (PROVIDER_LIMITS_APIKEY_PROVIDERS.has(connection.provider)) return true;
   return supportsProviderQuota(connection.provider, connection);
+}
+
+function mergeZcodeUsageCache(
+  provider: string,
+  next: ProviderLimitsCacheEntry,
+  previous: ProviderLimitsCacheEntry | null | undefined
+): ProviderLimitsCacheEntry {
+  // Never retain stale account/plan results after an unavailable readback.
+  if (
+    ["zcode", "zcode-start", "zcode-individual"].includes(provider) &&
+    (Array.isArray(next.quotaGroups) || (next.message && !next.quotas))
+  )
+    return next;
+  return mergeProviderLimitsCacheEntry(provider, next, previous);
 }
 
 function withStatus(error: Error, status: number): Error & { status: number } {
@@ -1232,7 +1248,7 @@ export async function fetchAndPersistProviderLimits(
     cacheReadObservedAt(connection, usage, readStartedAt)
   );
   const previous = getProviderLimitsCache(connectionId);
-  const cache = mergeProviderLimitsCacheEntry(connection.provider, newCache, previous);
+  const cache = mergeZcodeUsageCache(connection.provider, newCache, previous);
 
   // Don't persist error-only entries (429 etc.) — would wipe prior good cache.
   // Serve the prior entry instead; only successful fetches update the cache.
@@ -1294,7 +1310,7 @@ async function fetchUsageCacheForSync(connection: ProviderConnectionLike, source
     source,
     cacheReadObservedAt(connection, usage, readStartedAt)
   );
-  const cache = mergeProviderLimitsCacheEntry(connection.provider, nextCache, existingCache);
+  const cache = mergeZcodeUsageCache(connection.provider, nextCache, existingCache);
   return { connectionId: connection.id, cache };
 }
 

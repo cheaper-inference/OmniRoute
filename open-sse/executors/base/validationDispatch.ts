@@ -1,6 +1,7 @@
 export type ProviderCredentials = {
   accessToken?: string;
   refreshToken?: string;
+  idToken?: string;
   apiKey?: string;
   email?: string | null;
   projectId?: string | null;

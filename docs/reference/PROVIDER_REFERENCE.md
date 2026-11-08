@@ -1,16 +1,16 @@
 ---
 title: "Provider Reference"
-version: 3.8.53
-lastUpdated: 2026-11-05
+version: 3.8.54
+lastUpdated: 2026-11-08
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-11-05
+> **Last generated:** 2026-11-08
 
-Total providers: **380**. See category breakdown below.
+Total providers: **384**. See category breakdown below.
 
 ## Categories
 
@@ -34,7 +34,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 ---
 
-## No-auth Providers (no key required) (9)
+## No-auth Providers (no key required) (13)
 
 | ID | Alias | Name | Tags | Website | Notes | Tool calling |
 |----|-------|------|------|---------|-------|--------------|
@@ -46,7 +46,11 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `duckduckgo-web` | `ddgw` | DuckDuckGo AI Chat | No-auth | [link](https://duckduckgo.com/duckchat) | No credentials required — DuckDuckGo AI Chat is anonymous and free. | emulated |
 | `uncloseai` | `unc` | UncloseAI | No-auth | [link](https://uncloseai.com) | No auth required. API accepts any non-empty string as key for identification. If older built-in models return 404, use Available Models → Import from /models or Auto-Sync; verified live model: turboderp/Qwen3.8-27B-exl3. | emulated |
 | `veoaifree-web` | `veo-free` | Veo AI Free | No-auth, video | [link](https://veoaifree.com) | No auth required. Rate limited to 6 requests/hour per IP. | — |
-| `zcode` | `zc` | ZCode (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | No API key stored by OmniRoute. The local ZCode app-server uses the existing builtin:zai-coding-plan login. | — |
+| `zcode` | `zc` | ZCode (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | Add a Z.ai or BigModel account through ZCode sign-in. Each account supports separate Start and Individual routes. | — |
+| `zcode-cn-individual` | `zc-cn-individual` | ZCode China Individual (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | Select an account added under ZCode. This route uses its Individual Coding Plan quota. | — |
+| `zcode-cn-start` | `zc-cn-start` | ZCode China Start (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | Select an account added under ZCode. This route uses its Start Plan quota. | — |
+| `zcode-individual` | `zc-individual` | ZCode Individual (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | Select an account added under ZCode. This route uses its Individual Coding Plan quota. | — |
+| `zcode-start` | `zc-start` | ZCode Start (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | Select an account added under ZCode. This route uses its Start Plan quota. | — |
 
 ## OAuth Providers (28)
 
@@ -468,7 +472,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 - Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (per-model details): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (164 implementations)
+- Executors: [`open-sse/executors/`](../../open-sse/executors/) (169 implementations)
 - Translators: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## See Also

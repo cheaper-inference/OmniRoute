@@ -377,6 +377,7 @@ export async function testOAuthConnection(
     const error = "Provider test not supported";
     return {
       valid: false,
+      skipped: true,
       error,
       refreshed: false,
       diagnosis: classifyFailure({ error, unsupported: true }),

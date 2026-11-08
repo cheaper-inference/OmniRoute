@@ -174,7 +174,17 @@ describe("auto/<family> materialization (#6453)", () => {
     // `cloudflare-playground` joined on the same rule — its registry
     // (open-sse/config/providers/registry/cloudflare-playground/index.ts) advertises
     // zai-org/glm-5.2 and zai-org/glm-4.7-flash, so it genuinely serves the family.
-    assert.deepEqual(providerIds, ["auggie", "cloudflare-playground", "glm", "zai", "zcode"]);
+    assert.deepEqual(providerIds, [
+      "auggie",
+      "cloudflare-playground",
+      "glm",
+      "zai",
+      "zcode",
+      "zcode-cn-individual",
+      "zcode-cn-start",
+      "zcode-individual",
+      "zcode-start",
+    ]);
     // Every candidate must be a glm-family model (the Cartesian pool now surfaces
     // each backend's full glm line-up, not only the glm-5.2 default), and the
     // connected openai/gpt-4o-mini backend must be excluded — same family

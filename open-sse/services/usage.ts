@@ -98,6 +98,7 @@ import { getChatPlaygroundUsage } from "./usage/chatplayground.ts";
 import { getTokenRouterUsage } from "./usage/tokenrouter.ts";
 import { getCloudflareAiUsage } from "./usage/cloudflareAi.ts";
 import { getMuseUsage } from "./usage/museCode.ts";
+import { getManagedZcodeUsage, getZcodeUsage } from "./usage/zcode.ts";
 
 type JsonRecord = Record<string, unknown>;
 type UsageProviderConnection = JsonRecord & {
@@ -155,6 +156,14 @@ export async function getUsageForProvider(
   }
 
   switch (provider) {
+    case "zcode":
+    case "zcode-individual":
+      return await getManagedZcodeUsage(connection);
+    case "zcode-start":
+      if (connection.authType === "oauth") return await getManagedZcodeUsage(connection);
+      if (id === "virtual:zcode-start" && connection.authType === "none")
+        return await getZcodeUsage(provider);
+      return { message: "ZCode account quota is unavailable" };
     case "github":
       return await getGitHubUsage(accessToken, providerSpecificData, id || "");
     case "antigravity":

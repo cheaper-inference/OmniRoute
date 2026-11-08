@@ -741,12 +741,40 @@ export function getClaudeQuotaPreflightResetAt(
   return decisionForLatestClaudeReset(windows, "connection", now)?.resetAt ?? null;
 }
 
+/** Whether a cached ZCode OAuth observation is attributable to this tariff. */
+export function isQuotaScopeApplicable(
+  connectionId: string,
+  provider: string,
+  authType?: string | null
+): boolean {
+  if (authType !== "oauth") return true;
+  const target = resolveProviderId(provider);
+  const targetPlan = ["zcode", "zcode-start", "zcode-cn-start"].includes(target)
+    ? "start"
+    : ["zcode-individual", "zcode-cn-individual"].includes(target)
+      ? "individual"
+      : null;
+  if (!targetPlan) return true;
+  const entry = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
+  if (!entry) return true;
+  // The bare connection provider `zcode` does not identify the plan observed.
+  const source = resolveProviderId(entry.provider);
+  const sourcePlan = ["zcode-start", "zcode-cn-start"].includes(source)
+    ? "start"
+    : ["zcode-individual", "zcode-cn-individual"].includes(source)
+      ? "individual"
+      : null;
+  return sourcePlan === targetPlan;
+}
+
 export function isQuotaExhaustedForRequest(
   connectionId: string,
   provider: string,
   requestedModel: string | null = null,
-  providerSpecificData?: unknown
+  providerSpecificData?: unknown,
+  authType?: string | null
 ): boolean {
+  if (!isQuotaScopeApplicable(connectionId, provider, authType)) return false;
   if (isQuotaHealthy(connectionId)) return false;
   if (isCodexQuotaFilteringDisabled(provider, providerSpecificData)) return false;
   if (isClaudeExtraUsageAllowed(provider, providerSpecificData)) return false;
@@ -952,6 +980,7 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
 
   const quotas: Record<string, QuotaInfo> = {};
   let provider = "";
+  const snapshotScopes = new Set<string>();
   let fetchedAt = 0;
   let windowDurationMs: number | null = null;
 
@@ -968,6 +997,8 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
     const windowKey = camelSnapshot.windowKey ?? snapshot.window_key;
     if (!windowKey) continue;
     provider = provider || snapshot.provider || "";
+    const snapshotProvider = resolveProviderId(snapshot.provider || "");
+    snapshotScopes.add(snapshotProvider);
     let fractionReported: false | undefined;
     const rawData = camelSnapshot.rawData ?? snapshot.raw_data;
     try {
@@ -1003,6 +1034,20 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
   if (Object.keys(quotas).length === 0) return null;
   const exhausted = isExhausted(quotas);
 
+  // Mixed persisted tariff windows cannot be attributed to either plan.
+  if (
+    snapshotScopes.size > 1 &&
+    [...snapshotScopes].some((scope) =>
+      [
+        "zcode",
+        "zcode-start",
+        "zcode-individual",
+        "zcode-cn-start",
+        "zcode-cn-individual",
+      ].includes(scope)
+    )
+  )
+    provider = "zcode";
   const entry: QuotaCacheEntry = {
     connectionId,
     provider,

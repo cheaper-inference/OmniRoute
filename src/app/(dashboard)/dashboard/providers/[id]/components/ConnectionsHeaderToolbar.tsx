@@ -325,7 +325,9 @@ export default function ConnectionsHeaderToolbar({
             ) : (
               <>
                 <Button size="sm" icon="add" onClick={() => gateConnectionFlow(openPrimaryAddFlow)}>
-                  {providerSupportsPat ? providerText(t, "addPat", "Add PAT") : t("add")}
+                  {providerSupportsPat && providerId !== "zcode"
+                    ? providerText(t, "addPat", "Add PAT")
+                    : t("add")}
                 </Button>
                 {(providerId === "volcengine-agent-plan" ||
                   providerId === "volcengine-coding-plan") &&
