@@ -19,6 +19,7 @@ import { AI_HORDE_IMAGE_PROVIDER } from "./providers/registry/aihorde/imageModel
 import { toRegistryImageModels as toSyntxImageModels } from "../services/syntxMediaCatalog.ts";
 import { ZENMUX_IMAGE_PROVIDER } from "./providers/registry/zenmux/imageModels.ts";
 import { MUSE_CODE_IMAGE_PROVIDER } from "./providers/registry/muse-code/imageModels.ts";
+import { COPILOT_M365_IMAGE_PROVIDER } from "./providers/registry/copilot-m365-web/imageModels.ts";
 import { CODEX_IMAGE_PROVIDER } from "./providers/registry/codex/imageModels.ts";
 import { GROK_BUILD_PROXY_BASE_URL } from "./grokBuildEndpoints.ts";
 
@@ -196,6 +197,7 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
 
   zenmux: ZENMUX_IMAGE_PROVIDER,
   "muse-code": MUSE_CODE_IMAGE_PROVIDER,
+  "copilot-m365-web": COPILOT_M365_IMAGE_PROVIDER,
   agnes: {
     id: "agnes",
     baseUrl: "https://apihub.agnes-ai.com/v1/images/generations",
