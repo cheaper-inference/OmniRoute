@@ -24,6 +24,10 @@ import os from "node:os";
 import path from "node:path";
 import test, { mock } from "node:test";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+import { waitForConnectionFollowUps } from "../../src/lib/providers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-revalidate-16190-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -91,8 +95,6 @@ async function readJsonObject(response: Response): Promise<Record<string, unknow
   }
 }
 
-const settle = () => new Promise((resolve) => setTimeout(resolve, 50));
-
 async function createConnection(node: string): Promise<string> {
   const nodeResponse = await providerNodesRoute.POST(
     await makeManagementSessionRequest("http://localhost/api/provider-nodes", {
@@ -122,8 +124,8 @@ async function createConnection(node: string): Promise<string> {
   );
   const body = await readJsonObject(response);
   assert.equal(response.status, 201, `create connection failed: ${JSON.stringify(body)}`);
-  // POST fires a background auto-test; let it land before the test acts.
-  await settle();
+  // POST starts the connection's auto-test as a follow-up; let it settle before the test acts.
+  assert.equal(await waitForConnectionFollowUps(10_000), true);
   return (body.connection as { id: string }).id;
 }
 

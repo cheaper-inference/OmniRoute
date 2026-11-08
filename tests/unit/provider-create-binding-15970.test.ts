@@ -5,6 +5,9 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { MockAgent, setGlobalDispatcher } from "undici";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "provider-binding-15970-"));
 Object.assign(process.env, {
@@ -23,17 +26,11 @@ const nodes = await import("../../src/lib/db/providers/nodes.ts");
 const connections = await import("../../src/lib/db/providers.ts");
 const { POST } = await import("../../src/app/api/providers/route.ts");
 const { makeManagementSessionRequest } = await import("../helpers/managementSession.ts");
-// Every connection the route creates is auto-tested in the background (fire-and-forget), so
-// that probe can call fetch after its own test has ended. Each test therefore gets its own
-// fixture key, and a recorded call that carries an earlier test's key is told apart from
-// the current test's calls instead of being blamed on it.
-const FIXTURE_KEY_PREFIX = "sk-fixture-only-15970";
-let fixtureKey = "";
-const earlierKeys: string[] = [];
+const { waitForConnectionFollowUps } =
+  await import("../../src/lib/providers/connectionFollowUps.ts");
 const fetchCalls: string[] = [];
-globalThis.fetch = async (input, init) => {
-  const request = new Request(input, init);
-  fetchCalls.push([request.url, ...request.headers.entries()].join(" "));
+globalThis.fetch = async (input) => {
+  fetchCalls.push(String(input instanceof Request ? input.url : input));
   return Response.json({ data: [], models: [] });
 };
 
@@ -42,8 +39,6 @@ test.beforeEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(dataDir, { recursive: true });
   fetchCalls.length = 0;
-  if (fixtureKey) earlierKeys.push(fixtureKey);
-  fixtureKey = `${FIXTURE_KEY_PREFIX}-${randomUUID()}`;
 });
 test.after(async () => {
   await new Promise<void>((resolve) => setTimeout(resolve, 20));
@@ -74,7 +69,7 @@ async function post(provider: string, providerSpecificData?: Record<string, unkn
       body: {
         provider,
         name: "Binding fixture",
-        apiKey: fixtureKey,
+        apiKey: "sk-fixture-only-15970",
         ...(providerSpecificData ? { providerSpecificData } : {}),
         ...extra,
       },
@@ -84,12 +79,14 @@ async function post(provider: string, providerSpecificData?: Record<string, unkn
 }
 
 async function assertRejected(result: Response, reason = /conflict/i) {
+  // Anything the request started in the background has run, so every upstream call it made is
+  // already recorded below (and an earlier test's follow-ups settled before this test began).
+  assert.equal(await waitForConnectionFollowUps(10_000), true);
   const body = JSON.stringify(await result.json());
   assert.equal(result.status, 400, body);
   assert.match(body, reason);
   assert.equal((await connections.getProviderConnections()).length, 0);
-  const ownCalls = fetchCalls.filter((call) => !earlierKeys.some((key) => call.includes(key)));
-  assert.equal(ownCalls.length, 0, "conflict must not start credential validation upstream");
+  assert.equal(fetchCalls.length, 0, "conflict must not start credential validation upstream");
   assert.doesNotMatch(body, /sk-fixture|first\.invalid|second\.invalid|at \//);
 }
 

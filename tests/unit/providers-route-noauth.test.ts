@@ -5,6 +5,9 @@ import os from "node:os";
 import path from "node:path";
 import { MockAgent, setGlobalDispatcher } from "undici";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 // uncloseai is in NOAUTH_PROVIDERS and is not in FREE_APIKEY_PROVIDER_IDS, so
 // isManagedProviderConnectionId() does not admit it. POST still returned

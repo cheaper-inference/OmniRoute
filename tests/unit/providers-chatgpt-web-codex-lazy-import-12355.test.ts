@@ -25,18 +25,20 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
 
-const STATIC_IMPORT_RE = /^import\s+[\s\S]*?from\s+["']@omniroute\/open-sse\/services\/chatgptWebCodexAdmin\.ts["'];?\s*$/m;
-const DYNAMIC_IMPORT_RE = /await import\(["']@omniroute\/open-sse\/services\/chatgptWebCodexAdmin\.ts["']\)/;
+settleConnectionFollowUpsAfterEachTest();
+
+const STATIC_IMPORT_RE =
+  /^import\s+[\s\S]*?from\s+["']@omniroute\/open-sse\/services\/chatgptWebCodexAdmin\.ts["'];?\s*$/m;
+const DYNAMIC_IMPORT_RE =
+  /await import\(["']@omniroute\/open-sse\/services\/chatgptWebCodexAdmin\.ts["']\)/;
 
 function readSource(relativePath: string): string {
   return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
 }
 
-for (const routePath of [
-  "src/app/api/providers/route.ts",
-  "src/app/api/providers/[id]/route.ts",
-]) {
+for (const routePath of ["src/app/api/providers/route.ts", "src/app/api/providers/[id]/route.ts"]) {
   test(`${routePath} does not statically import chatgptWebCodexAdmin.ts`, () => {
     const source = readSource(routePath);
     assert.doesNotMatch(
@@ -54,9 +56,7 @@ for (const routePath of [
 }
 
 test("the chatgpt-web-codex-doctor route is intentionally exempt (every request there already is that provider)", () => {
-  const source = readSource(
-    "src/app/api/providers/[id]/chatgpt-web-codex-doctor/route.ts"
-  );
+  const source = readSource("src/app/api/providers/[id]/chatgpt-web-codex-doctor/route.ts");
   assert.match(
     source,
     STATIC_IMPORT_RE,
