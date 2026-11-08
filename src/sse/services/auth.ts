@@ -167,6 +167,11 @@ import {
 } from "@/shared/constants/providers";
 import { isModelExcludedByConnection } from "@/domain/connectionModelRules";
 import {
+  filterCodexPlanEligible,
+  isCodexPaidOnlyModel,
+  isConnectionPlanEligible,
+} from "@omniroute/open-sse/services/codexPlanEligibility.ts";
+import {
   isRequestedModelAdvertised,
   loadAdvertisedModelsForConnections,
 } from "./connectionModelInventory";
@@ -877,6 +882,25 @@ async function materializeConnection(
 }
 
 /**
+ * True when the active Codex pool (narrowed by an API key's `allowedConnections`) is
+ * non-empty and every account is plan-ineligible for the paid-only `requestedModel`.
+ * Lets a caller explain an empty credential result as "needs a paid plan" instead of
+ * "no credentials".
+ */
+export async function isCodexPoolPlanIneligibleForModel(
+  requestedModel: string | null | undefined,
+  allowedConnections: string[] | null = null
+): Promise<boolean> {
+  if (!isCodexPaidOnlyModel(requestedModel)) return false;
+  const rows = await getCachedRawProviderConnections({ provider: "codex", isActive: true });
+  const active = (Array.isArray(rows) ? rows : []).map(createLazyConnectionView);
+  const pool = allowedConnections?.length
+    ? active.filter((connection) => allowedConnections.includes(connection.id))
+    : active;
+  return pool.length > 0 && filterCodexPlanEligible("codex", pool, requestedModel).length === 0;
+}
+
+/**
  * Get provider credentials from localDb
  * Filters out unavailable accounts and returns the selected account based on strategy
  * @param {string} provider - Provider name
@@ -1164,6 +1188,8 @@ export async function getProviderCredentials(
       if (resolvedId === "qoder" && options.requireToolCalling) {
         allConnections = allConnections.filter(qoderSupportsCallerTools);
       }
+      // An ineligible Codex plan cannot make a paid-only model appear rate-limited.
+      allConnections = filterCodexPlanEligible(provider, allConnections, requestedModel);
       log.debug("AUTH", `${provider} | all connections (incl inactive): ${allConnections.length}`);
       if (allConnections.length > 0) {
         const earliest = getEarliestRateLimitedUntil(allConnections);
@@ -1294,6 +1320,12 @@ export async function getProviderCredentials(
         connectionFilterStatus.set(c.id, "modelExcluded");
         return false;
       }
+      // Paid-only Codex models must never be sent to accounts with a recorded Free/Go plan.
+      // Filter before routing modes so even an explicit probe cannot select one.
+      if (!isConnectionPlanEligible(provider, c.providerSpecificData, requestedModel)) {
+        connectionFilterStatus.set(c.id, "codexPlanIneligible");
+        return false;
+      }
       if (
         requestedModel &&
         ((c.provider === "codex" && advertisedModelsByConnection.get(c.id)?.size === 0) ||
@@ -1414,7 +1446,9 @@ export async function getProviderCredentials(
     });
 
     if (availableConnections.length === 0) {
-      const cooldownStates: CooldownInspectionState[] = connections.map((connection) => {
+      // Only plan-eligible accounts may contribute to this model's retry/cooldown hint.
+      const planEligible = filterCodexPlanEligible(provider, connections, requestedModel);
+      const cooldownStates: CooldownInspectionState[] = planEligible.map((connection) => {
         const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
         const codexScopeCooldownMs =
           provider === "codex"
