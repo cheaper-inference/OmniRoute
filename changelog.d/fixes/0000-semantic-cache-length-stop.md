@@ -1,1 +1,0 @@
-- **fix(sse):** A reply cut by the output-token limit keeps `finish_reason: "length"` when it holds tool calls, and the semantic cache no longer stores cut replies (also Responses `status: "incomplete"` and cut tool-call arguments).
