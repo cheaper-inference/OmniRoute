@@ -1,8 +1,12 @@
-// @ts-nocheck
 import {
   BedrockRuntimeClient,
   ConverseCommand,
   ConverseStreamCommand,
+  type ConverseStreamCommandInput,
+  type InferenceConfiguration,
+  type Message,
+  type SystemContentBlock,
+  type ToolConfiguration,
 } from "@aws-sdk/client-bedrock-runtime";
 import { randomUUID } from "node:crypto";
 
@@ -110,7 +114,14 @@ function createToolUseIdNormalizer(messages) {
   };
 }
 
-function textBlocksFromContent(content, options = {}) {
+function textBlocksFromContent(
+  content: unknown,
+  options: {
+    normalizeId?: (id: string) => string;
+    skipToolUseIds?: ReadonlySet<unknown>;
+    answeredToolUseIds?: ReadonlySet<unknown>;
+  } = {}
+) {
   if (typeof content === "string") return content.trim() ? [{ text: content }] : [];
   if (!Array.isArray(content)) return [];
 
@@ -349,7 +360,9 @@ function messagesFromOpenAI(messages) {
     }
 
     const toolCalls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
-    const toolCallIds = new Set(toolCalls.map((call) => normalizeId(call?.id)).filter(Boolean));
+    const toolCallIds: Set<string> = new Set(
+      toolCalls.map((call) => normalizeId(call?.id)).filter((id): id is string => Boolean(id))
+    );
     const content = textBlocksFromContent(message.content, {
       skipToolUseIds: toolCallIds,
       answeredToolUseIds,
@@ -391,7 +404,7 @@ function messagesFromOpenAI(messages) {
   return sanitizeBedrockToolPairs(converted);
 }
 
-function toolConfigFromOpenAI(tools, toolChoice) {
+function toolConfigFromOpenAI(tools, toolChoice): ToolConfiguration | undefined {
   if (!Array.isArray(tools) || tools.length === 0) return undefined;
   const bedrockTools = [];
   for (const tool of tools) {
@@ -409,7 +422,10 @@ function toolConfigFromOpenAI(tools, toolChoice) {
   }
   if (bedrockTools.length === 0) return undefined;
 
-  const config = { tools: bedrockTools };
+  const config: {
+    tools: typeof bedrockTools;
+    toolChoice?: ToolConfiguration["toolChoice"];
+  } = { tools: bedrockTools };
   if (toolChoice === "required") config.toolChoice = { any: {} };
   else if (toolChoice === "auto") config.toolChoice = { auto: {} };
   else if (toolChoice && typeof toolChoice === "object") {
@@ -423,7 +439,7 @@ function toolConfigFromOpenAI(tools, toolChoice) {
 export function openAIToBedrockConverse(model, body) {
   const request = asRecord(body);
   const messages = Array.isArray(request.messages) ? request.messages : [];
-  const inferenceConfig = {};
+  const inferenceConfig: Record<string, unknown> = {};
 
   const maxTokens = request.max_tokens ?? request.max_completion_tokens;
   if (typeof maxTokens === "number") inferenceConfig.maxTokens = Math.max(1, Math.floor(maxTokens));
@@ -433,7 +449,16 @@ export function openAIToBedrockConverse(model, body) {
   else if (typeof request.stop === "string" && request.stop)
     inferenceConfig.stopSequences = [request.stop];
 
-  const payload = {
+  // A concrete shape, not a Record: the result is handed to ConverseCommand, whose
+  // input type requires modelId.
+  const payload: {
+    modelId: string;
+    messages: Message[];
+    system?: SystemContentBlock[];
+    inferenceConfig?: InferenceConfiguration;
+    toolConfig?: ToolConfiguration;
+    additionalModelRequestFields?: ConverseStreamCommandInput["additionalModelRequestFields"];
+  } = {
     modelId: model,
     messages: messagesFromOpenAI(messages),
   };
@@ -508,7 +533,7 @@ function contentBlocksToOpenAIMessage(blocks) {
     }
   }
 
-  const message = { role: "assistant", content: text.join("") };
+  const message: Record<string, unknown> = { role: "assistant", content: text.join("") };
   if (reasoning.length > 0) message.reasoning_content = reasoning.join("");
   if (toolCalls.length > 0) {
     message.content = message.content || null;
@@ -544,7 +569,7 @@ function done() {
 }
 
 function openAIChunk(model, delta, finishReason = null, usage = undefined) {
-  const chunk = {
+  const chunk: Record<string, unknown> = {
     id: `chatcmpl-bedrock-${model}`,
     object: "chat.completion.chunk",
     created: Math.floor(Date.now() / 1000),
@@ -740,8 +765,28 @@ function createOpenAIStreamFromBedrock(stream, model) {
   });
 }
 
+// The executor consumes only these fields; injected clients need not supply SDK
+// metadata or a message role that the OpenAI response converter does not read.
+interface BedrockClientOutput {
+  output?: { message?: { content?: unknown[] } };
+  stopReason?: string;
+  usage?: unknown;
+  stream?: AsyncIterable<unknown>;
+}
+
+interface BedrockClientLike {
+  send: (
+    command: ConverseCommand | ConverseStreamCommand,
+    options?: { abortSignal?: AbortSignal }
+  ) => Promise<BedrockClientOutput>;
+}
+
 export class BedrockExecutor extends BaseExecutor {
-  constructor(clientFactory = null) {
+  // Tests inject a stub, so this names only the method the executor calls rather
+  // than the SDK client class.
+  private readonly clientFactory: ((credentials: unknown) => BedrockClientLike) | null;
+
+  constructor(clientFactory: ((credentials: unknown) => BedrockClientLike) | null = null) {
     super("bedrock", PROVIDERS.bedrock || { format: "openai" });
     this.clientFactory = clientFactory;
   }
@@ -761,7 +806,7 @@ export class BedrockExecutor extends BaseExecutor {
     };
   }
 
-  createClient(credentials) {
+  createClient(credentials): BedrockClientLike {
     if (this.clientFactory) return this.clientFactory(credentials);
     const region = resolveBedrockRegion(credentials?.providerSpecificData);
     const customUserAgent = getCustomUserAgent(credentials?.providerSpecificData);

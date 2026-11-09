@@ -5,6 +5,7 @@ import { getProviderModels } from "../config/providerModels.ts";
 // such as `nemotron-ultra` is never collapsed (#16027).
 const REGISTERED_EFFORT_SUFFIXES = [
   "none",
+  "minimal",
   "low",
   "medium",
   "high",

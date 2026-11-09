@@ -24,23 +24,27 @@ omniroute launch --profile glm52  # OmniRoute를 통해 glm/glm-5.2를 사용하
 
 ---
 
-## Claude Code가 게이트웨이에 연결되는 방식
+## Claude Code가 게이트웨이에 연결하는 방법
 
-Claude Code는 **Anthropic Messages API**를 사용하며 환경 변수를 통해 사용자 지정 엔드포인트를 가리킵니다(`--base-url` 플래그는 지원하지 않음).
+Claude 코드는**Anthropic 메시지 API** 환경 변수가 있는 사용자 정의 엔드포인트를 가리킵니다( `--base-url` 플래그가 없음).
 
-| 변수                                         | 용도                                                                                          |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | 게이트웨이 루트 URL(Claude Code가 `/v1/messages`를 추가). **`/v1` 접미사를 포함하지 마세요.** |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …`로 전송 — OmniRoute 액세스 토큰/API 키를 사용                        |
-| `ANTHROPIC_API_KEY`                          | 대안: `x-api-key`로 전송. 둘 다 설정된 경우 `ANTHROPIC_AUTH_TOKEN`이 우선                     |
-| `ANTHROPIC_MODEL`                            | 특정 모델 강제 지정(`/model` 선택기의 기본값 재정의)                                          |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → 기본 `/model` 선택기에 `/v1/models`의 `claude*`/`anthropic*` 모델 표시                  |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | 응답당 출력 토큰 수 제한(예: `65536`)                                                         |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | 자동 압축을 위한 토큰 임계값                                                                  |
+| 변하기 쉬운                                  | 목적                                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | 게이트웨이 루트 URL (Claude 코드에 `/v1/messages` 추가).** `/v1` 접미사가 없습니다.**  |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — 로 전송됨 OmniRoute 액세스 토큰/ API 키를 사용하세요.      |
+| `ANTHROPIC_API_KEY`                          | 대안: `x-api-key` 로 전송됩니다. 둘 다 설정되면 `ANTHROPIC_AUTH_TOKEN` 승리합니다.     |
+| `ANTHROPIC_MODEL`                            | 특정 모델 강제 적용( `/model` 선택기 기본값 재정의)                                    |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → 기본 `/model` 선택기는 `/v1/models` 의 `claude*`/`anthropic*` 모델을 나열합니다. |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | 응답당 출력 토큰 제한(예: `65536`)                                                     |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | 자동 압축을 위한 토큰 임계값                                                           |
 
-> 환경 변수는 **시작 시 한 번만** 읽힙니다. 변경한 후 Claude Code를 다시 시작하세요.
+> 환경 변수를 읽습니다.** 시작 시 한 번** — Claude 코드를 변경한 후 다시 시작합니다.
 
-`omniroute launch`는 이러한 변수를 모두 자동으로 설정합니다. 활성 컨텍스트에서 기본 URL과 토큰을 확인하므로 `omniroute connect <vps>` 후 `omniroute launch`를 실행하면 바로 작동하며, 서버 상태를 확인한 다음 `claude`를 실행합니다.
+고정 문자열 대신 회전하는 자격 증명의 경우 `~/.claude/settings.json` 의 `apiKeyHelper` 현재 자격 증명을 stdout에 인쇄하는 명령으로 설정합니다. Claude 코드는 기본적으로 5분 동안 출력을 캐시하고(`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` 이를 재정의함) 값을 `Authorization: Bearer` 및 `x-api-key` 모두로 보냅니다. 스크립트는 자격 증명을 인쇄해야 하며 — 와 함께 배너를 인쇄하면 v2.1.227 + 의 도우미가 실패합니다.
+
+이것이 Entra ID SSO 작동하는 방식입니다. `scripts/cli/omniroute-sso.mjs token` API 키 대신 OmniRoute 확인하는 단기 Entra 액세스 토큰을 인쇄합니다. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) 참조하세요.
+
+`omniroute launch` 이 모든 것을 설정합니다. 활성 컨텍스트에서 기본 URL + 토큰을 확인하고(따라서 `omniroute connect <vps>` 다음 `omniroute launch` 작동함) 서버 상태를 확인하고 `claude` 실행합니다.
 
 ---
 

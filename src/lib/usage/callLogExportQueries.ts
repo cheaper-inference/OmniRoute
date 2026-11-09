@@ -38,6 +38,7 @@ type ExportSourceRow = {
   account: string | null;
   connection_id: string | null;
   duration: number | null;
+  ttft_ms: number | null;
   tokens_in: number | null;
   tokens_out: number | null;
   tokens_cache_read: number | null;
@@ -92,6 +93,7 @@ function mapExportRow(row: ExportSourceRow): LogExportRecord {
     account: row.resolved_account || row.account,
     connectionId: row.connection_id,
     duration: toNumberOrNull(row.duration),
+    ttftMs: toNumberOrNull(row.ttft_ms),
     tokensIn: toNumberOrNull(row.tokens_in),
     tokensOut: toNumberOrNull(row.tokens_out),
     tokensCacheRead: toNumberOrNull(row.tokens_cache_read),

@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { buildSync } from "esbuild";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-call-log-worker-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -103,7 +105,32 @@ test("worker resolution covers npm, standalone, source, and missing layouts", ()
         entryFile: null,
         fileExists: fs.existsSync,
       }),
-      { workerFile: sourceWorker, execArgv: ["--import", "tsx/esm"] }
+      { workerFile: sourceWorker, execArgv: [] }
+    );
+
+    const cwdSourceRoot = path.join(layoutRoot, "cwd-source");
+    const cwdSourceWorker = path.join(cwdSourceRoot, "src/lib/usage/callLogArtifactWorker.ts");
+    createWorker(cwdSourceWorker);
+    assert.deepEqual(
+      resolveCallLogArtifactWorker({
+        moduleDir: path.join(layoutRoot, "compiled-chunk"),
+        cwd: cwdSourceRoot,
+        entryFile: null,
+        fileExists: fs.existsSync,
+      }),
+      { workerFile: cwdSourceWorker, execArgv: [] }
+    );
+
+    const moduleJs = path.join(sourceDir, "callLogArtifactWorker.js");
+    createWorker(moduleJs);
+    assert.deepEqual(
+      resolveCallLogArtifactWorker({
+        moduleDir: sourceDir,
+        cwd: standaloneRoot,
+        entryFile: path.join(npmRoot, "server.js"),
+        fileExists: fs.existsSync,
+      }),
+      { workerFile: moduleJs, execArgv: [] }
     );
 
     const missingRoot = path.join(layoutRoot, "missing");
@@ -126,12 +153,80 @@ test("worker resolution covers npm, standalone, source, and missing layouts", ()
   const resolved = resolveCallLogArtifactWorker();
   assert.equal(fs.existsSync(resolved.workerFile), true);
   assert.equal(path.basename(resolved.workerFile), "callLogArtifactWorker.ts");
-  assert.deepEqual(resolved.execArgv, ["--import", "tsx/esm"]);
+  assert.deepEqual(resolved.execArgv, []);
 
   const source = fs.readFileSync("src/lib/usage/callLogArtifactWriter.ts", "utf8");
   assert.doesNotMatch(source, /firstAncestorWith|MAX_WALK_UP|runtimeAnchors/);
   assert.doesNotMatch(source, /new Worker\(/);
   assert.match(source, /Reflect\.construct\(Worker/);
+});
+
+test("packaged JS bundles execute from standalone and scoped node_modules layouts", () => {
+  const layoutRoot = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-worker-bundle-"));
+  try {
+    const bundle = buildSync({
+      entryPoints: ["src/lib/usage/callLogArtifactWorker.ts"],
+      bundle: true,
+      platform: "node",
+      packages: "external",
+      format: "esm",
+      write: false,
+    }).outputFiles[0].text;
+
+    for (const scoped of [false, true]) {
+      const runtimeRoot = scoped
+        ? path.join(layoutRoot, "node_modules", "@omniroute", "runtime")
+        : path.join(layoutRoot, "standalone");
+      const workerFile = path.join(runtimeRoot, "src/lib/usage/callLogArtifactWorker.js");
+      fs.mkdirSync(path.dirname(workerFile), { recursive: true });
+      fs.writeFileSync(workerFile, bundle);
+      if (scoped) {
+        fs.writeFileSync(path.join(runtimeRoot, "package.json"), '{"type":"module"}');
+      }
+      const entryFile = path.join(runtimeRoot, "server.cjs");
+      fs.writeFileSync(
+        entryFile,
+        [
+          'const fs = require("node:fs");',
+          'const { Worker } = require("node:worker_threads");',
+          'const { pathToFileURL } = require("node:url");',
+          "const worker = new Worker(pathToFileURL(process.argv[2]), { execArgv: [] });",
+          'worker.on("error", (error) => { console.error(error); process.exitCode = 1; });',
+          'worker.once("message", async (reply) => {',
+          "  console.log(JSON.stringify(reply));",
+          "  await worker.terminate();",
+          "});",
+          'worker.postMessage({ id: 1, artifact: JSON.parse(fs.readFileSync(0, "utf8")),',
+          "  environment: { dataDir: process.argv[3] } });",
+        ].join("\n")
+      );
+      const resolved = resolveCallLogArtifactWorker({
+        moduleDir: path.join(runtimeRoot, ".next/server/chunks"),
+        cwd: layoutRoot,
+        entryFile,
+      });
+      assert.deepEqual(resolved, { workerFile, execArgv: [] });
+      const artifact = buildArtifact(scoped ? "scoped-bundle" : "standalone-bundle");
+      const result = spawnSync(process.execPath, [entryFile, resolved.workerFile, runtimeRoot], {
+        input: JSON.stringify(artifact),
+        encoding: "utf8",
+        timeout: 20_000,
+      });
+      assert.equal(result.status, 0, result.stderr);
+      const reply = JSON.parse(result.stdout);
+      assert.equal(reply.id, 1);
+      assert.ok(reply.result);
+      const serialized = fs.readFileSync(
+        path.join(runtimeRoot, "call_logs", reply.result.relPath),
+        "utf8"
+      );
+      assert.deepEqual(JSON.parse(serialized), artifact);
+      assert.equal(reply.result.sizeBytes, Buffer.byteLength(serialized));
+      assert.match(reply.result.sha256, /^[0-9a-f]{8}$/);
+    }
+  } finally {
+    fs.rmSync(layoutRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
 });
 
 test("async worker writes call-log artifact and returns matching metadata", async () => {

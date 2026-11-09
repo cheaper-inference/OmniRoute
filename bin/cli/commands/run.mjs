@@ -16,7 +16,7 @@ import os from "node:os";
 import { join } from "node:path";
 import { spawn, execFileSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
 import { quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import {
@@ -30,7 +30,7 @@ function isBlank(value) {
   return value === undefined || value === null || String(value).trim() === "";
 }
 
-function toAuthSource(targetOpts) {
+function toAuthSource(targetOpts, baseUrl) {
   const explicit =
     !isBlank(targetOpts.token) || !isBlank(targetOpts.apiKey) || !isBlank(targetOpts["api-key"]);
   if (explicit) return "option";
@@ -41,8 +41,10 @@ function toAuthSource(targetOpts) {
   }
 
   try {
+    // Same rule as the launch resolvers: the context token only goes to the
+    // context's own origin, so only then is it the source.
     const context = resolveActiveContext(targetOpts.context || process.env.OMNIROUTE_CONTEXT);
-    if (context && (context.accessToken || context.apiKey)) return "context";
+    if (contextCredentialFor(context, baseUrl)) return "context";
   } catch {
     // no active context
   }
@@ -142,7 +144,7 @@ async function buildClaudePlan(rawOpts, args = []) {
     args: spawnArgs,
     model: merged.model || undefined,
     envDiff: envPreview(process.env, env),
-    authSource: toAuthSource(rawOpts),
+    authSource: toAuthSource(rawOpts, baseUrl),
     commandDisplay: describeCommand(commandSpec.command, commandSpec.shell),
   };
 }
@@ -176,7 +178,7 @@ async function buildCodexPlan(rawOpts, args = []) {
     args: spawnArgs,
     model: merged.model || undefined,
     envDiff: envPreview(process.env, env),
-    authSource: toAuthSource(rawOpts),
+    authSource: toAuthSource(rawOpts, baseUrl),
     commandDisplay: describeCommand(commandSpec.command, commandSpec.shell),
     providerArgs,
     profileArgs,
@@ -223,6 +225,9 @@ function genericEnv(baseEnv, kind, baseUrl, authToken, model, options = {}) {
       delete env[key];
     }
     if (kind === "opencode" && key === "OPENCODE_CONFIG_CONTENT") delete env[key];
+    if (kind === "whycodes" && /^(OPENAI_API_KEY|OPENAI_API_BASE|OPENAI_BASE_URL)$/.test(key)) {
+      delete env[key];
+    }
     if (kind === "qwen" && (key === "QWEN_HOME" || key === "OMNIROUTE_API_KEY")) {
       delete env[key];
     }
@@ -262,6 +267,10 @@ function genericEnv(baseEnv, kind, baseUrl, authToken, model, options = {}) {
       },
     });
   } else if (kind === "qwen") {
+    env.OMNIROUTE_API_KEY = token;
+  } else if (kind === "whycodes") {
+    // `-P omniroute` reads OMNIROUTE_API_KEY; never OPENAI_API_KEY, which a configured
+    // `openai` fallback would send to api.openai.com.
     env.OMNIROUTE_API_KEY = token;
   } else if (kind === "gemini") {
     // Verified against @google/gemini-cli 0.50.0: the SDK appends
@@ -324,7 +333,8 @@ async function buildGenericPlan(target, rawOpts, args = []) {
     throw new Error("Qwen Code requires --model in non-interactive OmniRoute launches");
   }
   const modelArgs = modelArgsForTarget(target, model);
-  const fullArgs = [...modelArgs, ...args];
+  const providerArgs = target === "whycodes" ? ["-P", "omniroute"] : [];
+  const fullArgs = [...providerArgs, ...modelArgs, ...args];
   const env = genericEnv(process.env, target, baseUrl, authToken, model, rawOpts);
 
   return {
@@ -335,7 +345,7 @@ async function buildGenericPlan(target, rawOpts, args = []) {
     args: quoteShellArgsForSpawn(fullArgs, process.platform, commandSpec.shell),
     model: model || undefined,
     envDiff: envPreview(process.env, env),
-    authSource: toAuthSource(rawOpts),
+    authSource: toAuthSource(rawOpts, baseUrl),
     commandDisplay: describeCommand(commandSpec.command, commandSpec.shell),
     modelArgs,
     configOverlay:
@@ -360,6 +370,28 @@ async function healthCheckForRun(baseUrl) {
   }
 }
 
+// WhyCodes reads a custom provider's base URL only from config.toml, so `-P omniroute`
+// needs the entry `omniroute setup-whycodes` writes. Fail early with that hint instead of
+// letting WhyCodes reject an unknown provider, and flag a base URL that is not this target.
+async function checkWhyCodesProvider(baseUrl) {
+  const { readWhyCodesProviderBaseUrl } = await import("./setup-whycodes.mjs");
+  const configured = await readWhyCodesProviderBaseUrl();
+  if (configured === null) {
+    console.error(
+      "WhyCodes has no [providers.omniroute] entry yet. Run `omniroute setup-whycodes` first."
+    );
+    return false;
+  }
+  const trim = (url) => String(url).replace(/\/+$/, "").replace(/\/v1$/, "");
+  if (configured && trim(configured) !== trim(baseUrl)) {
+    console.error(
+      `WhyCodes will use its configured base_url ${configured}, not ${baseUrl}. ` +
+        "Re-run `omniroute setup-whycodes` (with --remote) to point it here."
+    );
+  }
+  return true;
+}
+
 async function runGenericTarget(target, rawOpts, args) {
   const { baseUrl, authToken } = resolveLaunchTarget({
     ...rawOpts,
@@ -376,6 +408,8 @@ async function runGenericTarget(target, rawOpts, args) {
     return 2;
   }
   const modelArgs = modelArgsForTarget(target, model);
+  const providerArgs = target === "whycodes" ? ["-P", "omniroute"] : [];
+  if (target === "whycodes" && !(await checkWhyCodesProvider(baseUrl))) return 2;
   const commandSpec = resolveGenericSpawn(target);
   const childEnv = genericEnv(process.env, target, baseUrl, authToken, model, rawOpts);
   let overlayHome;
@@ -398,7 +432,11 @@ async function runGenericTarget(target, rawOpts, args) {
 
   const child = spawn(
     commandSpec.command,
-    quoteShellArgsForSpawn([...modelArgs, ...args], process.platform, commandSpec.shell),
+    quoteShellArgsForSpawn(
+      [...providerArgs, ...modelArgs, ...args],
+      process.platform,
+      commandSpec.shell
+    ),
     {
       env: childEnv,
       stdio: "inherit",

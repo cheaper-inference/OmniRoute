@@ -19,7 +19,7 @@
 import type { AutoVariant } from "./autoPrefix";
 import { classifyTier } from "../tierResolver";
 import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
-import { isVisionModelId } from "@/shared/constants/visionModels";
+import { isTextOnlyChatTransport, isVisionModelId } from "@/shared/constants/visionModels";
 import { isVisionBridgeForcedModel } from "@/shared/constants/visionBridgeDefaults";
 
 export type AutoCategory = "coding" | "reasoning" | "vision" | "chat" | "multimodal";
@@ -131,6 +131,7 @@ export function buildAutoCandidateFilter(
 
   if (category === "vision" || category === "multimodal") {
     checks.push((c) => {
+      if (isTextOnlyChatTransport(c.provider)) return false;
       if (c.resolvedSupportsVision !== undefined) {
         // #vision-pool: same bridge exclusion as the on-demand path below —
         // registry entries whose catalog overstates vision support are forced

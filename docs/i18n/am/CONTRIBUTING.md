@@ -13,21 +13,25 @@ UI/UX፣ i18n፣ CLI፣ database እና build/deploy ለውጦችን ከውሎ�
 
 ---
 
-## የልማት ዝግጅት
+## የልማት ማዋቀር
 
 ### ቅድመ ሁኔታዎች
 
-- **Node.js** `>=22.22.2 <23`፣ ወይም `>=24.0.0 <27` (የሚመከር፦ 24 LTS)
+- **Node.js** `>=22.22.2 <23`፣ ወይም `>=24.0.0 <27` (የሚመከረው፦ 24 LTS)
 - **npm** 10+
 
-> **የnpm v11+ ተጠቃሚዎች (Node 24+)፦** `npm install`ን ካስኬዱ በኋላ ኔቲቭ ሞጁሎች መጫናቸውን ያረጋግጡ፦
-> `node -e "require('better-sqlite3')"`. በ`MODULE_NOT_FOUND` ካልተሳካ፣
-> `npm approve-scripts better-sqlite3 && npm install`ን ያስኪዱ።
-> [ችግር መፍቻ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)ን ይመልከቱ።
+> **Windows ከ Node 24 ጋር፦** የአሁኑን 24 LTS patch ልቀት (ቢያንስ 24.20.0) ይጠቀሙ።
+> ቀደምት ልቀቶች `--test-force-exit` ሂደቱን ሲዘጋ የተሳካ ሙከራዎችን ተከትሎ ሊቋረጡ ይችላሉ።
+> የNode የ[Windows libuv ማስተካከያ](https://github.com/nodejs/node/pull/61999) ይህንን
+> የአሂድ ጊዜ ብልሽት ይፈታል፤ የሙከራ ማረጋገጫዎችን እና የrunner መውጫ ማረጋገጫዎችን እንደነበሩ ያስቀምጡ።
+
+> **npm v11+ ተጠቃሚዎች (Node 24+)፦** `npm install` ካስኬዱ በኋላ native modules መጫናቸውን ያረጋግጡ፦
+> `node -e "require('better-sqlite3')"`. ይህ በ `MODULE_NOT_FOUND` ካልተሳካ፣
+> `npm approve-scripts better-sqlite3 && npm install` ያስኪዱ። [የችግር መፍቻ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ይመልከቱ።
 
 - **Git**
 
-### ክሎን ማድረግ እና መጫን
+### መዝገብ ቤቱን መቅዳት እና መጫን
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -38,87 +42,87 @@ npm install
 ### የአካባቢ ተለዋዋጮች
 
 ```bash
-# .envዎን ከአብነቱ ይፍጠሩ
+# ከአብነቱ .env ፋይልዎን ይፍጠሩ
 cp .env.example .env
 
-# አስፈላጊ ምስጢሮችን ይፍጠሩ
+# አስፈላጊ ሚስጥሮችን ያመንጩ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 ለልማት ቁልፍ ተለዋዋጮች፦
 
-| ተለዋዋጭ                  | ነባሪ የልማት እሴት             | መግለጫ                |
+| ተለዋዋጭ                  | የልማት ነባሪ እሴት             | መግለጫ                |
 | ---------------------- | ------------------------ | ------------------- |
-| `PORT`                 | `20128`                  | የሰርቨር ወደብ           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | የፍሮንትኤንድ መሠረታዊ URL  |
-| `JWT_SECRET`           | (ከላይ ይፍጠሩ)               | የJWT ፊርማ ምስጢር       |
+| `PORT`                 | `20128`                  | የሰርቨር ፖርት           |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | የfrontend መነሻ URL   |
+| `JWT_SECRET`           | (ከላይ ያመንጩ)               | የJWT መፈረሚያ ሚስጥር     |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | የመጀመሪያ መግቢያ የይለፍ ቃል |
-| `APP_LOG_LEVEL`        | `info`                   | የሎግ ዝርዝርነት ደረጃ      |
+| `APP_LOG_LEVEL`        | `info`                   | የሎግ ዝርዝር ደረጃ        |
 
 ### የዳሽቦርድ ቅንብሮች
 
-ዳሽቦርዱ በአካባቢ ተለዋዋጮችም ሊዋቀሩ ለሚችሉ ባህሪያት የUI ማብሪያና ማጥፊያዎችን ያቀርባል፦
+ዳሽቦርዱ በአካባቢ ተለዋዋጮች ሊዋቀሩ ለሚችሉ ባህሪያት የUI መቀያየሪያዎችን ያቀርባል፦
 
-| የቅንብር ቦታ      | ማብሪያና ማጥፊያ   | መግለጫ                    |
-| ------------- | ------------ | ----------------------- |
-| ቅንብሮች → የላቀ   | የማረሚያ ሁነታ    | የማረሚያ ጥያቄ ሎጎችን አንቃ (UI) |
-| ቅንብሮች → አጠቃላይ | የጎን አሞሌ ታይነት | የጎን አሞሌ ክፍሎችን አሳይ/ደብቅ   |
+| የቅንብር ቦታ      | መቀያየሪያ       | መግለጫ                     |
+| ------------- | ------------ | ------------------------ |
+| ቅንብሮች → የላቀ   | የማረሚያ ሁነታ    | የማረሚያ የጥያቄ ሎጎችን አንቃ (UI) |
+| ቅንብሮች → አጠቃላይ | የጎን አሞሌ ታይነት | የጎን አሞሌ ክፍሎችን አሳይ/ደብቅ    |
 
-እነዚህ ቅንብሮች በውሂብ ጎታው ውስጥ ይቀመጣሉ፣ እንደገና ከተጀመረም በኋላ ይቆያሉ፤ ሲዋቀሩም የአካባቢ ተለዋዋጭ ነባሪ እሴቶችን ይተካሉ።
+እነዚህ ቅንብሮች በዳታቤዝ ውስጥ ይቀመጣሉ እና ከዳግም ማስነሳቶች በኋላም ይቆያሉ፤ ሲቀናበሩም የenv var ነባሪ እሴቶችን ይተካሉ።
 
-### በአካባቢያዊ ሁኔታ ማስኬድ
+### በአካባቢው ማስኬድ
 
 ```bash
-# የልማት ሁነታ (በቀጥታ እንደገና መጫን)
+# የልማት ሁነታ (ራስ-ሰር ዳግም መጫን)
 npm run dev
 
 # የምርት ግንባታ
 npm run build    # next build → .build/next/ ከዚያ assembleStandalone → dist/
 npm run start
 
-# ለአስተዋጽኦ አቅራቢ ለውጦች ፈጣን የባክኤንድ/API-ብቻ ማጠናቀር
+# ለአበርካቾች ለሚደረጉ ለውጦች ፈጣን backend/API-only ኮምፓይል
 npm run build:contributor
 
-# የልቀት ግንባታ (ንጹሕ ዳግም ግንባታ + HEAD ጠቋሚ — ለማሰማራት አስፈላጊ)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHAን ይጽፋል
+# የልቀት ግንባታ (ንጹህ ዳግም ግንባታ + HEAD sentinel — ለdeploy አስፈላጊ)
+npm run build:release   # rm -rf .build dist እና build + dist/BUILD_SHA ይጽፋል
 
-# የተለመደ የወደብ ውቅር
+# የተለመደ የፖርት ውቅር
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-የአስተዋጽኦ አቅራቢው ግንባታ የማጠናቀር-ብቻ ማረጋገጥን ያከናውናል፦ ራሱን የቻለውን
-ስርጭት አያዘጋጅም፣ እንዲሁም አማራጭ የኔቲቭ ማሸጊያ ንብረቶችን አይገነባም። ለመላክ ዝግጁ የሆነውን ጥቅል
-ማረጋገጥ ሲያስፈልግዎ መደበኛውን የምርት ግንባታ ይጠቀሙ።
+የአበርካች ግንባታው የኮምፓይል-ብቻ ማረጋገጫን ያከናውናል፤ standalone
+ስርጭቱን አያዘጋጅም ወይም አማራጭ native packaging ንብረቶችን አይገነባም። ለሚላክ ጥቅል
+ማረጋገጫ ሲያስፈልግዎት መደበኛውን የምርት ግንባታ ይጠቀሙ።
 
 ### የግንባታ ውጤት አቀማመጥ
 
-| ማውጫ       | ይዘቶች                                                                   | በGit የሚከታተል |
-| --------- | ---------------------------------------------------------------------- | ----------- |
-| `src/`    | የመተግበሪያ ምንጭ (TypeScript / TSX)                                         | አዎ          |
-| `.build/` | መካከለኛ ውጤቶች — የ`next build` ውጤት (በgit ችላ የተባለ፣ `distDir = .build/next`) | አይ          |
-| `dist/`   | ለመላክ ዝግጁ የሆነ ጥቅል — በ`assembleStandalone` የተዘጋጀ (በgit ችላ የተባለ)          | አይ          |
+| ማውጫ       | ይዘቶች                                                                | በመዝገብ የተያዘ |
+| --------- | ------------------------------------------------------------------- | ---------- |
+| `src/`    | የመተግበሪያ ምንጭ (TypeScript / TSX)                                      | አዎ         |
+| `.build/` | መካከለኛ ፋይሎች — `next build` ውጤት (gitignored, `distDir = .build/next`) | አይ         |
+| `dist/`   | ለመላክ ዝግጁ ጥቅል — በ`assembleStandalone` የተዘጋጀ (gitignored)             | አይ         |
 
-የግንባታ የሥራ ሂደቱ ነጠላ ዙር ነው፦
+የግንባታ ሂደቱ አንድ ዙር ብቻ ነው፦
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (የNext.js ውጤት)
-  └─ assembleStandalone()                 (ራሱን የቻለውን + ስታቲክ + ይፋዊ + ኔቲቭ ንብረቶችን ይቀዳል)
-       └─ ውጤት፦ dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js ውጤት)
+  └─ assembleStandalone()                 (standalone + static + public + native assets ይቀዳል)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` በተጨማሪም መጀመሪያ ሁለቱንም ማውጫዎች ያጸዳል፣ እና
-`dist/BUILD_SHA`ን (= `git rev-parse --short HEAD`) እንደ የማሰማራት ትክክለኛነት ጠቋሚ ይጽፋል።
+`npm run build:release` በተጨማሪ ሁለቱንም ማውጫዎች መጀመሪያ ያጸዳል እና
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) የማሰማራት ታማኝነት sentinel ሆኖ ይጽፋል።
 
-`npm run build:contributor` የባክኤንድ-ብቻ ግንባታ መገለጫውን ይጠቀማል። በግንባታ ጊዜ
-የዳሽቦርድ UI ፋይሎችን በጊዜያዊነት በተተኪ ይቀይራል፣ የAPI መስመር አስተናጋጆችን ያቆያል፣ እና ከግንባታው በኋላ
-ዋናዎቹን ፋይሎች ይመልሳል። የዳሽቦርድ UIን ለሚነኩ ለውጦች ወይም ለሙሉ
-የልቀት ማረጋገጫ `npm run build`ን ይጠቀሙ፤ የአስተዋጽኦ አቅራቢው መገለጫ የልቀት ግንባታውን አይተካም።
+`npm run build:contributor` backend-only የግንባታ መገለጫን ይጠቀማል። በግንባታ ጊዜ
+የዳሽቦርድ UI ፋይሎችን ለጊዜው ይተካል፣ የAPI route handlersን ያስቀራል እና
+ግንባታው ካለቀ በኋላ ዋናዎቹን ፋይሎች ይመልሳል። የዳሽቦርድ UI ላይ ለሚደረጉ ለውጦች
+ወይም ለሙሉ የልቀት ማረጋገጫ `npm run build` ይጠቀሙ፤ የአበርካች መገለጫው የልቀት ግንባታ ምትክ አይደለም።
 
-> **የVPS ማሰማራት ማስታወሻ፦** የርቀት ምስል ማውጫ `/usr/lib/node_modules/omniroute/app/`
-> አልተቀየረም። የማሰማራት ክህሎቶቹ የ`dist/`ን ይዘቶች ወደዚያ rsync ያደርጋሉ።
-> የተቀየረው በማከማቻው ውስጥ ያለው የግንባታ ውጤት ዱካ ብቻ ነው (`app/` → `dist/`)።
+> **የVPS ማሰማራት ማስታወሻ፦** የርቀት image ማውጫ `/usr/lib/node_modules/omniroute/app/`
+> አልተለወጠም። የማሰማራት skills የ`dist/` ይዘቶችን ወደዚያ ያመሳስላሉ።
+> የተንቀሳቀሰው በin-repo ያለው የግንባታ ውጤት መንገድ ብቻ ነው (`app/` → `dist/`)።
 
 ነባሪ URLs፦
 

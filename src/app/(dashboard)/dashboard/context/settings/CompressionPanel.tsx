@@ -30,9 +30,14 @@ import {
   outputStyleMeta,
 } from "../../../../../../open-sse/services/compression/outputStyles/catalog.ts";
 import {
+  deriveEffectiveAutoTriggerPreviewPlan,
   deriveEffectivePreviewPlan,
   type NamedCombos,
 } from "../../../../../../open-sse/services/compression/deriveEffectivePreviewPlan.ts";
+import {
+  DEFAULT_COMPRESSION_CONFIG,
+  type CompressionConfig as RuntimeCompressionConfig,
+} from "../../../../../../open-sse/services/compression/types.ts";
 import EngineGuidanceDetail from "./EngineGuidanceDetail";
 import {
   DEFAULT_CONTEXT_BUDGET,
@@ -55,7 +60,12 @@ interface CavemanOutputModeConfig {
 
 interface CompressionConfig {
   enabled: boolean;
+  defaultMode?: RuntimeCompressionConfig["defaultMode"];
+  autoTriggerMode?: RuntimeCompressionConfig["autoTriggerMode"];
   autoTriggerTokens: number;
+  comboOverrides?: RuntimeCompressionConfig["comboOverrides"];
+  stackedPipeline?: RuntimeCompressionConfig["stackedPipeline"];
+  enginesExplicit?: boolean;
   preserveSystemPrompt: boolean;
   preserveSystemPromptMode?: "always" | "whenNoCache" | "never";
   engines: Record<string, EngineToggle>;
@@ -308,6 +318,24 @@ function derivedPreviewText(
   return t("compressionDerivedMode", { mode: derived.mode });
 }
 
+function buildPreviewConfig(config: CompressionConfig): RuntimeCompressionConfig {
+  return {
+    ...DEFAULT_COMPRESSION_CONFIG,
+    enabled: config.enabled,
+    defaultMode: config.defaultMode ?? DEFAULT_COMPRESSION_CONFIG.defaultMode,
+    autoTriggerMode: config.autoTriggerMode,
+    autoTriggerTokens: config.autoTriggerTokens,
+    preserveSystemPrompt: config.preserveSystemPrompt,
+    preserveSystemPromptMode: config.preserveSystemPromptMode,
+    comboOverrides: config.comboOverrides ?? {},
+    stackedPipeline: config.stackedPipeline,
+    engines: config.engines,
+    enginesExplicit: config.enginesExplicit,
+    activeComboId: config.activeComboId,
+    contextBudget: config.contextBudget,
+  };
+}
+
 export default function CompressionPanel() {
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
@@ -331,13 +359,15 @@ export default function CompressionPanel() {
   const [status, setStatus] = useState<"" | "saved" | "error">("");
   const saveGenRef = useRef(0);
   const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(
-    () => () => {
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
       if (statusTimerRef.current !== null) clearTimeout(statusTimerRef.current);
       saveGenRef.current++;
-    },
-    []
-  );
+    };
+  }, []);
   // The last config the server confirmed.
   const lastConfirmedRef = useRef(config);
   // Saves still waiting on the server, oldest first.
@@ -462,6 +492,7 @@ export default function CompressionPanel() {
   // error or the timeout) may still have been stored — the re-read below picks that up.
   const save = async (updates: Partial<CompressionConfig>) => {
     saveGenRef.current += 1;
+    if (statusTimerRef.current !== null) clearTimeout(statusTimerRef.current);
     if (pendingRef.current.length === 0) {
       batchFailedRef.current = false;
       setStatus("");
@@ -483,6 +514,7 @@ export default function CompressionPanel() {
       threw = true;
       console.error("Failed to save compression settings:", error);
     }
+    if (!mountedRef.current) return;
     pendingRef.current = pendingRef.current.filter((pending) => pending !== updates);
     if (ok) {
       for (const key of Object.keys(updates)) {
@@ -501,6 +533,7 @@ export default function CompressionPanel() {
     const latestGen = saveGenRef.current;
     if (statusTimerRef.current !== null) clearTimeout(statusTimerRef.current);
     statusTimerRef.current = setTimeout(() => {
+      statusTimerRef.current = null;
       if (latestGen === saveGenRef.current) setStatus("");
     }, SAVED_STATUS_CLEAR_MS);
   };
@@ -546,7 +579,9 @@ export default function CompressionPanel() {
     }
   };
 
-  const derived = deriveEffectivePreviewPlan(config, namedCombos);
+  const previewConfig = buildPreviewConfig(config);
+  const derived = deriveEffectivePreviewPlan(previewConfig, namedCombos);
+  const autoTriggerDerived = deriveEffectiveAutoTriggerPreviewPlan(previewConfig, namedCombos);
   const derivedText = derivedPreviewText(derived, t);
   if (loading) {
     return (
@@ -626,10 +661,20 @@ export default function CompressionPanel() {
       {/* Derived pipeline preview */}
       <div
         data-testid="derived-pipeline-preview"
-        className="mb-4 rounded-md border border-border bg-bg-subtle px-3 py-2 text-xs text-text-muted"
+        className="mb-4 space-y-1 rounded-md border border-border bg-bg-subtle px-3 py-2 text-xs text-text-muted"
       >
-        <span className="font-medium text-text-main">{t("compressionEffectivePipeline")}</span>{" "}
-        {derivedText}
+        <div>
+          <span className="font-medium text-text-main">{t("compressionEffectivePipeline")}</span>{" "}
+          {derivedText}
+        </div>
+        {autoTriggerDerived && (
+          <div data-testid="auto-trigger-pipeline-preview">
+            <span className="font-medium text-text-main">
+              {t("compressionSettingsAutoTriggerMode")}
+            </span>{" "}
+            {derivedPreviewText(autoTriggerDerived, t)}
+          </div>
+        )}
       </div>
 
       {/* Adaptive context-budget dial — mode/policy persist via PUT contextBudget */}
@@ -685,7 +730,8 @@ export default function CompressionPanel() {
                     value={level}
                     onChange={(e) => setEngine(id, { level: e.target.value })}
                     disabled={!config.enabled || !engine.enabled || saving}
-                    selectClassName="ci-select-native--sm w-28 text-xs"
+                    nativeSize="sm"
+                    selectClassName="w-28 text-xs"
                   >
                     {levels.map((lvl) => (
                       <option key={lvl} value={lvl}>
@@ -740,7 +786,8 @@ export default function CompressionPanel() {
               <div className="flex shrink-0 items-center gap-2">
                 <Select
                   aria-label={styleLabel}
-                  selectClassName="ci-select-native--sm w-28 text-xs"
+                  nativeSize="sm"
+                  selectClassName="w-28 text-xs"
                   data-testid={`output-style-level-${id}`}
                   value={sel?.level ?? "full"}
                   onChange={(e) =>

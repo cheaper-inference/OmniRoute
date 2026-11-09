@@ -1,5 +1,6 @@
 import { MCP_TOOL_MAP } from "./schemas/tools.ts";
 import { hasManageScope } from "../../src/shared/constants/managementScopes.ts";
+import { hasMcpHttpAuthContext } from "./httpAuthContext.ts";
 
 type AuthInfoLike = {
   clientId?: string;
@@ -70,23 +71,34 @@ function scopeMatches(grantedScope: string, requiredScope: string): boolean {
   return false;
 }
 
+function resolveCallerId(extra: McpToolExtraLike | undefined): string {
+  return (
+    (typeof extra?.authInfo?.clientId === "string" && extra.authInfo.clientId.trim()) ||
+    (typeof extra?.sessionId === "string" && extra.sessionId.trim()) ||
+    "anonymous"
+  );
+}
+
 export function resolveCallerScopeContext(
   extra: McpToolExtraLike | undefined,
   fallbackScopes: readonly string[] = []
 ): CallerScopeContext {
-  const callerId =
-    (typeof extra?.authInfo?.clientId === "string" && extra.authInfo.clientId.trim()) ||
-    (typeof extra?.sessionId === "string" && extra.sessionId.trim()) ||
-    "anonymous";
+  const callerId = resolveCallerId(extra);
 
   const authScopes = normalizeScopeList(extra?.authInfo?.scopes);
   if (authScopes.length > 0) {
     return { callerId, scopes: authScopes, source: "authInfo" };
   }
 
-  const metaScopes = extractMetaScopeList(extra?._meta);
-  if (metaScopes.length > 0) {
-    return { callerId, scopes: metaScopes, source: "meta" };
+  // #15159: request _meta is client-controlled and carries no per-caller identity on a local
+  // transport, so it is only honored inside an HTTP auth context. A stdio caller falls through
+  // to the env key instead — the operator's own grant — rather than to scopes the caller
+  // claims for itself.
+  if (hasMcpHttpAuthContext()) {
+    const metaScopes = extractMetaScopeList(extra?._meta);
+    if (metaScopes.length > 0) {
+      return { callerId, scopes: metaScopes, source: "meta" };
+    }
   }
 
   const fallback = normalizeScopeList(fallbackScopes);

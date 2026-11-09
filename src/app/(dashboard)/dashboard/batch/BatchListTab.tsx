@@ -12,12 +12,15 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import { matchesSearch } from "@/shared/utils/turkishText";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
+import { useNotificationStore } from "@/store/notificationStore";
 import BatchDetailModal from "./BatchDetailModal";
 import ExpirationBadge from "./components/ExpirationBadge";
 import ProgressBarBicolor from "./components/ProgressBarBicolor";
@@ -191,6 +194,7 @@ function BatchRowActions({
 }>) {
   const t = useTranslations("common");
   const actions = useBatchActions({ onRefresh, t });
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   const isTerminal = ["completed", "failed", "cancelled", "expired"].includes(batch.status);
   const canCancel = ["validating", "in_progress", "finalizing"].includes(batch.status);
@@ -204,7 +208,7 @@ function BatchRowActions({
           variant="ghost"
           size="icon-sm"
           onClick={async () => {
-            if (window.confirm(t("batchDetailCancelConfirm"))) {
+            if (await requestConfirm(t("batchDetailCancelConfirm"))) {
               await actions.cancel(batch.id);
             }
           }}
@@ -259,7 +263,12 @@ function BatchRowActions({
           variant="ghost"
           size="icon-sm"
           onClick={async () => {
-            if (window.confirm(t("batchActionRetryConfirm", { n: batch.requestCountsFailed }))) {
+            if (
+              await requestConfirm({
+                message: t("batchActionRetryConfirm", { n: batch.requestCountsFailed }),
+                variant: "primary",
+              })
+            ) {
               await actions.retry({
                 id: batch.id,
                 inputFileId: batch.inputFileId,
@@ -310,6 +319,7 @@ function BatchRowActions({
           <Icon name={deletingId === batch.id ? "hourglass_empty" : "delete"} size={13} />
         </Button>
       )}
+      {confirmDialog}
     </div>
   );
 }
@@ -324,6 +334,7 @@ export default function BatchListTab({
   onRefresh,
 }: Readonly<BatchListTabProps>) {
   const t = useTranslations("common");
+  const notify = useNotificationStore();
   const [selectedBatch, setSelectedBatch] = useState<BatchRecord | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -353,11 +364,11 @@ export default function BatchListTab({
 
       // Surface the notice if the chunk ceiling was hit
       if (hasMore) {
-        window.alert("Removed a large number of batches. Click again to clear the rest.");
+        notify.warning(t("batchListRemoveCompletedPartial"));
       }
     } catch (error) {
       console.error("An error occurred while removing batches:", error);
-      window.alert("An error occurred while removing batches.");
+      notify.error(t("batchListRemoveCompletedFailed"));
     } finally {
       setRemovingCompleted(false);
       onRefresh?.(); // Uses your component's actual refresh prop
@@ -447,7 +458,7 @@ export default function BatchListTab({
               <TableRow>
                 <TableCell colSpan={10} className="py-10 text-center text-text-muted">
                   <div role="status" className="flex items-center justify-center gap-2">
-                    <Icon name="progress_activity" size={20} className="animate-spin text-accent" />
+                    <Spinner decorative size="sm" className="text-accent" />
                     {t("batchListLoading")}
                   </div>
                 </TableCell>
@@ -509,7 +520,7 @@ export default function BatchListTab({
                     <TableCell className="min-w-[140px]">
                       {batch.status === "validating" ? (
                         <div className="flex items-center gap-2 text-xs text-warning">
-                          <Icon name="hourglass_top" size={14} className="animate-spin" />
+                          <Spinner decorative size="xs" />
                           {t("batchListValidating")}
                         </div>
                       ) : total > 0 ? (

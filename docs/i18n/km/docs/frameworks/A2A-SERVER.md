@@ -145,22 +145,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## ជំនាញដែលមាន
 
-OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលត្រូវបានភ្ជាប់នៅក្នុង `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`។ ម៉ូឌុលជំនាញនីមួយៗស្ថិតនៅក្នុង `src/lib/a2a/skills/`។
+OmniRoute លាតត្រដាងជំនាញ A2A ចំនួន 6 ដែលមានខ្សែនៅក្នុង `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`។ ម៉ូឌុលជំនាញនីមួយៗរស់នៅក្នុង `src/lib/a2a/skills/`។
 
-| ជំនាញ              | ID                   | ការពិពណ៌នា                                                                                                                                    | ស្លាក                      | ឧទាហរណ៍                                   |
-| :----------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :---------------------------------------- |
-| Smart Routing      | `smart-routing`      | ផ្តល់ផ្លូវ prompt តាម provider/combo ដែលល្អបំផុត ដោយប្រើ combo engine របស់ OmniRoute រួមជាមួយការវាយពិន្ទុ                                     | routing, providers         | "ផ្តល់ផ្លូវ prompt នេះតាមម៉ូដែលល្អបំផុត"  |
-| Quota Management   | `quota-management`   | រាយការណ៍ស្ថានភាព quota តាម provider នីមួយៗ និងជួយអ្នកហៅសម្រេចចិត្តពេលណាត្រូវ throttle/ប្តូរ                                                   | quota, providers           | "ពិនិត្យ quota សម្រាប់ anthropic"         |
-| Provider Discovery | `provider-discovery` | រាយបញ្ជី provider ដែលបានដំឡើង ជាមួយសមត្ថភាព ទង់ free-tier និងស្ថានភាព OAuth                                                                   | providers, discovery       | "តើមាន provider អ្វីខ្លះដែលអាចប្រើបាន?"   |
-| Cost Analysis      | `cost-analysis`      | ប៉ាន់ស្មានថ្លៃដើមនៃសំណើ/ការសន្ទនា ដោយផ្អែកលើកាតាឡុក និងការប្រើប្រាស់ថ្មីៗ                                                                     | cost, usage                | "ប៉ាន់ស្មានថ្លៃដើមសម្រាប់ការសន្ទនានេះ"    |
-| Health Report      | `health-report`      | បូកបញ្ចូលស្ថានភាព circuit breaker, cooldown និង lockout តាម provider នីមួយៗ                                                                   | health, resilience         | "បង្ហាញស្ថានភាពសុខភាពនៃ provider ទាំងអស់" |
-| List Capabilities  | `list-capabilities`  | ត្រឡប់កាតាឡុក Agent Skills ពេញលេញចំនួន 45 ធាតុ (23 API + 21 CLI + 1 config) ជាតារាង markdown ដែលមាន URL ឆៅរបស់ SKILL.md សម្រាប់ការបញ្ចូលបរិបទ | catalog, discovery, skills | "រាយបញ្ជីសមត្ថភាពទាំងអស់របស់ OmniRoute"   |
+| ជំនាញ                 | ID                   | ការពិពណ៌នា                                                                                                                          | ស្លាក                   | ឧទាហរណ៍                                        |
+| :-------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------- | :---------------------- | :--------------------------------------------- |
+| ផ្លូវឆ្លាតវៃ          | `smart-routing`      | បញ្ជូនការជម្រុញតាមរយៈ provider/combo ល្អបំផុតដោយប្រើម៉ាស៊ីនបន្សំរបស់ OmniRoute+ ពិន្ទុ                                              | ផ្លូវ, អ្នកផ្តល់សេវា    | "នាំផ្លូវនេះតាមគំរូល្អបំផុត"                   |
+| ការគ្រប់គ្រងកូតា      | `quota-management`   | របាយការណ៍តាមរដ្ឋកូតារបស់អ្នកផ្តល់សេវា ជួយអ្នកហៅទូរស័ព្ទសម្រេចចិត្តថាពេលណាត្រូវ throttle/switch                                      | កូតា អ្នកផ្តល់សេវា      | "ពិនិត្យកូតាសម្រាប់អនាធិបតេយ្យ"                |
+| ការរកឃើញអ្នកផ្តល់សេវា | `provider-discovery` | រាយបញ្ជីអ្នកផ្តល់សេវាដែលបានដំឡើងដែលមានសមត្ថភាព ទង់ថ្នាក់ឥតគិតថ្លៃ ស្ថានភាព OAuth                                                    | អ្នកផ្តល់សេវា, ការរកឃើញ | "តើអ្នកផ្តល់សេវាអ្វីខ្លះ?"                     |
+| ការវិភាគថ្លៃដើម       | `cost-analysis`      | តម្លៃប៉ាន់ស្មាននៃ request/conversation ដែលបានផ្តល់ឱ្យកាតាឡុក + ការប្រើប្រាស់ថ្មីៗ                                                   | ការចំណាយ, ការប្រើប្រាស់ | "តម្លៃប៉ាន់ស្មានសម្រាប់ការសន្ទនានេះ"           |
+| របាយការណ៍សុខភាព       | `health-report`      | សរុបការបំបែកសៀគ្វី ការចុះត្រជាក់ ស្ថានភាពចាក់សោរក្នុងមួយអ្នកផ្តល់សេវា                                                               | សុខភាព ភាពធន់           | "បង្ហាញស្ថានភាពសុខភាពរបស់អ្នកផ្តល់សេវាទាំងអស់" |
+| បញ្ជីសមត្ថភាព         | `list-capabilities`  | ត្រឡប់កាតាឡុកជំនាញភ្នាក់ងារ 45 ធាតុពេញលេញ (23 API + 21 CLI + 1 config) ជាតារាង markdown ជាមួយ SKILL.md URLs ឆៅសម្រាប់ការបញ្ចូលបរិបទ | កាតាឡុក ការរកឃើញ ជំនាញ  | "រាយបញ្ជីសមត្ថភាព OmniRoute ទាំងអស់"           |
 
-> Agent Card គួរតែត្រូវបានរក្សាឱ្យស្របគ្នាជាមួយកាតាឡុក provider ចំនួន 375 ដែលកំពុងដំណើរការ។ ចំនួន provider និង metadata អំពី free/no-auth ត្រូវបានយកមកពី runtime registry។
+> កាតភ្នាក់ងារគួរតែត្រូវបានរក្សាទុកឱ្យស្របតាមកាតាឡុកអ្នកផ្តល់សេវា 381 ផ្ទាល់។ ចំនួនអ្នកផ្តល់សេវា និងទិន្នន័យមេតា free/no-auth ត្រូវបានប្រភពចេញពីបញ្ជីឈ្មោះពេលដំណើរការ។
 
-### ព័ត៌មានលម្អិតអំពីជំនាញ `list-capabilities`
+### `list-capabilities` លម្អិតជំនាញ
 
-ជំនាញ `list-capabilities` មានប្រយោជន៍ជាពិសេសសម្រាប់ agent ខាងក្រៅដែលត្រូវការស្វែងរកអ្វីដែល OmniRoute ផ្តល់ជូន មុនពេលផ្ញើការហៅ API។ វាត្រឡប់ artifact ជាតារាង markdown ដែលមានរចនាសម្ព័ន្ធ៖
+ជំនាញ `list-capabilities` មានប្រយោជន៍ជាពិសេសសម្រាប់ភ្នាក់ងារខាងក្រៅដែលត្រូវការស្វែងរកអ្វីដែល OmniRoute លាតត្រដាងមុនពេលផ្ញើការហៅ API ។ វាត្រឡប់វត្ថុបុរាណតារាង markdown ដែលមានរចនាសម្ព័ន្ធ៖
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -169,46 +169,54 @@ OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលត្�
 ...
 ```
 
-ជួរដេកនីមួយៗរួមមានជួរឈរ `rawUrl` ដើម្បីឱ្យ agent អាចទាញយក SKILL.md ពេញលេញបានភ្លាមៗ។ វាល `metadata.totalSkills` ឆ្លុះបញ្ចាំងទំហំកាតាឡុក (45 នាពេលបច្ចុប្បន្ន)។ ការអនុវត្ត៖ `src/lib/a2a/skills/listCapabilities.ts`។ សូមមើលផងដែរ [AGENT-SKILLS.md](./AGENT-SKILLS.md)។
+ជួរនីមួយៗរួមបញ្ចូលជួរឈរ `rawUrl` ដូច្នេះភ្នាក់ងារអាចទៅយក SKILL.md ពេញលេញភ្លាមៗ។ វាល `metadata.totalSkills` ឆ្លុះទំហំកាតាឡុក (45 ថ្ងៃនេះ) ។ ការអនុវត្ត៖ `src/lib/a2a/skills/listCapabilities.ts`។ សូមមើលផងដែរ [AGENT-SKILLS.md](./AGENT-SKILLS.md) ។
 
 ---
 
-## REST API (ជំនួយបន្ថែម)
+## REST API (ជំនួយ)
 
-ចំណុចបញ្ចប់ JSON-RPC `/a2a` គឺជាចំណុចចូល A2A ផ្លូវការ។ ចំណុចបញ្ចប់ REST ខាងក្រោមផ្តល់នូវការចូលប្រើបន្ថែមសម្រាប់ផ្ទាំងគ្រប់គ្រង និងឧបករណ៍ខាងក្រៅ៖
+ចំណុចបញ្ចប់ JSON-RPC `/a2a` គឺជាចំណុចចូល A2A របស់ Canonical ។ ចំណុចបញ្ចប់ REST ខាងក្រោមផ្តល់នូវការចូលប្រើជំនួយសម្រាប់ផ្ទាំងគ្រប់គ្រង និងឧបករណ៍ខាងក្រៅ៖
 
-| ចំណុចបញ្ចប់                  | វិធីសាស្ត្រ | ការពិពណ៌នា                                                      | ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ                         |
-| :--------------------------- | :---------- | :-------------------------------------------------------------- | :----------------------------------------------- |
-| `/api/a2a/status`            | GET         | ស្ថានភាពម៉ាស៊ីនមេ និងជំនាញដែលបានចុះឈ្មោះ                        | (សាធារណៈ)                                        |
-| `/api/a2a/tasks`             | GET         | រាយបញ្ជីកិច្ចការជាមួយតម្រង                                      | ការគ្រប់គ្រង                                     |
-| `/api/a2a/tasks/[id]`        | GET         | ទាញយកកិច្ចការតាម ID                                             | ការគ្រប់គ្រង                                     |
-| `/api/a2a/tasks/[id]/cancel` | POST        | បោះបង់កិច្ចការដែលកំពុងដំណើរការ                                  | ការគ្រប់គ្រង                                     |
-| `/.well-known/agent.json`    | GET         | កាតភ្នាក់ងារ (ការស្វែងរក A2A)                                   | (សាធារណៈ, រក្សាទុកក្នុងឃ្លាំងសម្ងាត់ 3600s)      |
-| `/api/a2a/tasks`             | POST        | ការប្រគល់ការងារចូលទៅកាន់ក្រុម OmniConductor (Conductor PRD RF5) | Bearer ធៀបនឹង `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| ចំណុចបញ្ចប់                  | វិធីសាស្រ្ត | ការពិពណ៌នា                                                   | សិទ្ធិ                                                                                              |
+| :--------------------------- | :---------- | :----------------------------------------------------------- | :-------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET         | ស្ថានភាពម៉ាស៊ីនមេ ជំនាញដែលបានចុះឈ្មោះ                        | (សាធារណៈ)                                                                                           |
+| `/api/a2a/tasks`             | GET         | រាយបញ្ជីកិច្ចការជាមួយតម្រង                                   | ការគ្រប់គ្រង ឬ API key (សូមមើលខាងក្រោម)                                                             |
+| `/api/a2a/tasks/[id]`        | GET         | ទទួលបានភារកិច្ចដោយ ID                                        | ការគ្រប់គ្រង ឬ API key (សូមមើលខាងក្រោម)                                                             |
+| `/api/a2a/tasks/[id]/cancel` | POST        | បោះបង់កិច្ចការដែលកំពុងដំណើរការ                               | ការគ្រប់គ្រង ឬ API key (សូមមើលខាងក្រោម)                                                             |
+| `/.well-known/agent.json`    | GET         | កាតភ្នាក់ងារ (ការរកឃើញ A2A )                                 | (សាធារណៈ 3600s)                                                                                     |
+| `/api/a2a/tasks`             | POST        | គណៈប្រតិភូចូលមកក្នុងកងនាវា OmniConductor (Conductor PRD RF5) | ដូចគ្នានឹង `GET` បូក `OMNIROUTE_API_KEY` ប្រសិនបើកំណត់ខណៈពេលដែល `REQUIRE_API_KEY` បិទ; `a2aEnabled` |
 
-**ការប្រគល់ការងារចូលពី Conductor (`POST /api/a2a/tasks`):** ភ្នាក់ងារ A2A ខាងក្រៅប្រគល់ការងារសរសេរកូដទៅក្រុម OmniConductor តាមរយៈ OmniRoute។ ខ្លឹមសារសំណើ៖ `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — មានតែជំនាញរបស់ក្រុម Conductor ប៉ុណ្ណោះ (ជំនាញដែលបានប្រកាសនៅលើកាតភ្នាក់ងារ) ដែលអាចត្រូវបានប្រគល់ការងារ; `metadata.conductor.repo.url` ត្រូវតែមាន (ក្រុមនេះធ្វើការលើ git repos)។ ផ្លូវនេះបម្លែងទៅជា `POST /v1/tasks` របស់ hub ដោយប្រើ `CONDUCTOR_ORCHESTRATOR_TOKEN` នៅផ្នែកម៉ាស៊ីនមេ (ប្រើ `CONDUCTOR_HUB_TOKEN` ជាជម្រើសបម្រុង) ហើយត្រឡប់ `201 { conductor_task_id, state: "submitted" }`; ស្ថានភាពកិច្ចការត្រូវបានបញ្ជូនត្រឡប់តាមរយៈកញ្ចក់ SSE→A2A (RF1) ហើយអាចមើលឃើញតាមរយៈ `GET /api/a2a/tasks?skill=conductor`។
+តើអ្នកណាឆ្លងកាត់ផ្លូវ `/api/a2a/tasks*` អាស្រ័យលើការចូល និងការកំណត់ API-key៖
+
+- `requireLogin=true` (លំនាំដើម)៖ ឧបករណ៍កណ្តាលទទួលស្គាល់តែព័ត៌មានបញ្ជាក់ពីការគ្រប់គ្រងប៉ុណ្ណោះ (សម័យផ្ទាំងគ្រប់គ្រង, `manage` -scope API key, `oma_` access token) និង `OMNIROUTE_API_KEY`។ គ្រាប់ចុចសន្និដ្ឋានធម្មតាទទួលបាន `403`។ នៅក្នុងបឋមកថា `Authorization` ឧបករណ៍កណ្ដាលយកតែ `OMNIROUTE_API_KEY` ជា `Bearer <key>`; គ្រាប់ចុចទទេ ឬផ្ទាំងមួយបន្ទាប់ពី `Bearer` ទទួលបាន `401`។
+- `requireLogin=false` ឬបង្អួចរង្វិលជុំមុនពេលចាប់ផ្តើមដំណើរការ៖ ជាមួយ `REQUIRE_API_KEY=true` គ្រាប់ចុច OmniRoute API ត្រឹមត្រូវ ឬលិខិតសម្គាល់ការគ្រប់គ្រងត្រូវបានទទួលយក និងអ្នកហៅចូលអនាមិកទទួលបាន `401`; ជាមួយ `REQUIRE_API_KEY` បិទផ្លូវត្រូវបានបើក។
+- `POST /api/a2a/tasks` បន្ថែមទៀតតម្រូវឱ្យ `OMNIROUTE_API_KEY` ក្នុងបឋមកថា `Authorization` នៅពេលអថេរនោះត្រូវបានកំណត់ ហើយ `REQUIRE_API_KEY` ត្រូវបានបិទ។ បឋមកថាផ្សេងទៀតដូចជា `x-api-key` មិនរាប់នៅទីនោះទេ។ ជាមួយនឹងការបិទ ឬមុនពេលចាប់ផ្តើមដំណើរការ សោឆ្លងកាត់ដោយមានឬគ្មានបុព្វបទ `Bearer` ; ជាមួយនឹងការចូល មានតែ `Bearer <key>` ប៉ុណ្ណោះដែលឆ្លងកាត់ឧបករណ៍កណ្តាល។
+
+កន្លែងណាដែលត្រូវការព័ត៌មានសម្ងាត់ សញ្ញាសម្ងាត់ `read` -scope `oma_` ដំណើរការសម្រាប់ `GET` ប៉ុណ្ណោះ។
+
+**ប្រតិភូអ្នកនាំផ្លូវចូល (`POST /api/a2a/tasks`):** ភ្នាក់ងារ A2A ខាងក្រៅប្រគល់ការងារការសរសេរកូដទៅកងនាវា OmniConductor តាមរយៈ OmniRoute។ តួខ្លួន៖ `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — មានតែជំនាញដឹកនាំកងនាវាប៉ុណ្ណោះ (ដែលត្រូវបានប្រកាសនៅលើកាតភ្នាក់ងារ) អាចផ្ទេរសិទ្ធិបាន; `metadata.conductor.repo.url` ត្រូវបានទាមទារ (កងនាវាដំណើរការនៅលើ git repos) ។ ផ្លូវបកប្រែទៅ `POST /v1/tasks` របស់មជ្ឈមណ្ឌលដោយប្រើ `CONDUCTOR_ORCHESTRATOR_TOKEN` ខាងម៉ាស៊ីនមេ ( `CONDUCTOR_HUB_TOKEN` ត្រឡប់ក្រោយ) ហើយត្រឡប់ `201 { conductor_task_id, state: "submitted" }`; ស្ថានភាពកិច្ចការហូរត្រឡប់មកវិញតាមរយៈកញ្ចក់ SSE→A2A (RF1) ហើយអាចមើលឃើញតាមរយៈ `GET /api/a2a/tasks?skill=conductor`។
 
 ---
 
-## ការបន្ថែមជំនាញថ្មី
+## ការបន្ថែមជំនាញថ្មី។
 
 1. **បង្កើតឯកសារជំនាញ៖** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Export អនុគមន៍ async `(task: A2ATask) => Promise<{ artifacts, metadata }>`។ អនុវត្តតាមទម្រង់របស់ជំនាញដែលមានស្រាប់ដូចជា `smartRouting.ts`។
+   នាំចេញមុខងារ async `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`។ ធ្វើតាមរូបរាងជំនាញដែលមានស្រាប់ដូចជា `smartRouting.ts`។ ប្រសិនបើជំនាញហៅត្រឡប់ចូលទៅក្នុង OmniRoute លើ HTTP បង្កើតបឋមកថាជាមួយ `buildSelfLoopHeaders(caller)` ពី `src/lib/a2a/selfLoopAuth.ts` ដូច្នេះការហៅទូរសព្ទដំណើរការដោយគ្រាប់ចុចរបស់អ្នកហៅ A2A មិនមែន `OMNIROUTE_API_KEY` ហើយឆ្លងកាត់ `redirect: "error"` ទៅ `fetch` ដូច្នេះការប្តូរទិសមិនដែលទទួលបានសោនោះទេ។ ជំនួយបង្កើតតែបឋមកថា; ជំនាញនីមួយៗកំណត់គោលការណ៍បញ្ជូនបន្តដោយខ្លួនឯង។ វាបោះ `UnsafeSelfLoopTargetError` ជាជាងភ្ជាប់សោនៅពេលដែល URL មូលដ្ឋានដែលបានដោះស្រាយគឺ http ធម្មតានៅខាងក្រៅបណ្តាញឯកជន (loopback, container or service name, and private addresses is fine) ឬមានព័ត៌មានបញ្ជាក់អត្តសញ្ញាណ ដូច្នេះជំនាញដែលលេបការហៅដែលបដិសេធត្រូវតែលុបចោលកំហុសនោះ។
 
-2. **ចុះឈ្មោះ handler៖** នៅក្នុង `src/lib/a2a/taskExecution.ts` បន្ថែមធាតុមួយទៅ `A2A_SKILL_HANDLERS`៖
+2. **ចុះឈ្មោះអ្នកដោះស្រាយ៖** នៅក្នុង `src/lib/a2a/taskExecution.ts` បន្ថែមធាតុទៅ `A2A_SKILL_HANDLERS`៖
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ជំនាញដែលមានស្រាប់
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **បង្ហាញក្នុងកាតភ្នាក់ងារ៖** នៅក្នុង `src/app/.well-known/agent.json/route.ts` បន្ថែមទៅខាងចុងនៃ array `skills`៖
+3. **បង្ហាញក្នុងកាតភ្នាក់ងារ៖** ក្នុង `src/lib/a2a/agentCardMetadata.ts` (ចែករំលែកដោយ `/.well-known/agent.json` និង `/.well-known/agent-card.json`) បន្ថែមទៅអារេ `skills` ៖
 
    ```json
    {
@@ -220,9 +228,9 @@ OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលត្�
    }
    ```
 
-4. **សរសេរការធ្វើតេស្ត៖** `tests/unit/a2a-<your-skill>.test.ts`។ គ្របដណ្តប់ទាំងករណីជោគជ័យ + ករណីមានកំហុស។
+4. **សរសេរការធ្វើតេស្ត៖** `tests/unit/a2a-<your-skill>.test.ts` គ្របដណ្តប់ផ្លូវរីករាយ + ផ្លូវកំហុស។
 
-5. **ចងក្រងឯកសារ** សម្រាប់ជំនាញថ្មីនៅក្នុងតារាង `Available Skills` របស់ឯកសារនេះ។
+5. **ឯកសារ** ជំនាញថ្មីនៅក្នុងតារាង `Available Skills` របស់ឯកសារនេះ។
 
 ---
 
@@ -261,7 +269,7 @@ OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលត្�
 
 ## ឧទាហរណ៍នៃការរួមបញ្ចូល
 
-### Python (requests)
+### Python (សំណើ)
 
 ```python
 import requests
@@ -280,7 +288,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (ទៅយក)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

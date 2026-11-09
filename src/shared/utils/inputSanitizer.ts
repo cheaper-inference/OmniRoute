@@ -7,9 +7,11 @@
  * @module inputSanitizer
  */
 
+import { getFeatureFlagOverride } from "@/lib/db/featureFlags";
 import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
 import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
+import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
 
 // ─── Prompt Injection Patterns ───────────────────────────────────────
 
@@ -115,11 +117,22 @@ const SCAN_GAP = "\n[GAP]\n";
 
 // ─── PII Patterns ────────────────────────────────────────────────────
 
-/** @type {Array<{name: string, pattern: RegExp, replacement: string}>} */
+/** @type {Array<{name: string, pattern: RegExp, replacement: string, validate?: (match: string, context: string) => boolean}>} */
 const PII_PATTERNS = [
   {
     name: "email",
-    pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+    // The same matches as `\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b`, in linear
+    // time. That form tried every word boundary inside a run like "ab-ab-ab-..." and
+    // scanned to the end of the run each time, so an 80 KB message blocked the event
+    // loop for about 4 s. A match now starts only where the old one could:
+    //  - at the first word character of a run of local-part characters, or
+    //  - right after a letter, on one of [.%+-]: where the old pattern resumed after a
+    //    match that ended inside such a run ("a@b.co-x@c.dd"). Only this case is
+    //    bounded, at 65 characters: the separator plus the RFC 5321 local-part limit
+    //    of 64. A longer glued address now matches in part or not at all, and an
+    //    address glued on after it can match from inside its domain.
+    pattern:
+      /(?:\b(?<=(?:^|[^A-Za-z0-9._%+-])[.%+-]*)[A-Za-z0-9._%+-]+|(?<=[A-Za-z])(?=[.%+-])[A-Za-z0-9._%+-]{1,65})@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
     replacement: "[EMAIL_REDACTED]",
   },
   {
@@ -137,6 +150,18 @@ const PII_PATTERNS = [
     pattern: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
     replacement: "[CARD_REDACTED]",
   },
+
+  // GDPR (EU) and POPIA (ZA) identifiers, shared with the response-side sanitizer
+  // (src/shared/utils/piiPatterns.ts). Each match is redacted only when its
+  // validator accepts it, and the group sits ahead of the generic phone pattern so a
+  // validated ID keeps its own label. Order numbers, timestamps and identifiers such as
+  // `gpt4o` or `gh12abc` stay untouched.
+  ...buildGdprPopiaRules().map((rule) => ({
+    name: rule.name,
+    pattern: rule.regex,
+    replacement: rule.replacement,
+    validate: rule.validate,
+  })),
   {
     name: "phone_br",
     pattern: /\b\(?\d{2}\)?\s?\d{4,5}-?\d{4}\b/g,
@@ -152,15 +177,37 @@ const PII_PATTERNS = [
 // ─── Configuration ────────────────────────────────────────────────────
 
 /**
- * Get sanitizer configuration from environment.
+ * Get sanitizer configuration. Dashboard-set DB overrides win over the env vars
+ * so the Feature Flags UI actually controls these flags (DB > ENV > default,
+ * matching resolveFeatureFlag and the INJECTION_GUARD_MODE reader in
+ * promptInjection.ts). DB-only reads here preserve the env fallback chain and
+ * defaults when no override is stored; an unavailable flag store falls back to
+ * the env-based behavior.
  * @returns {{ enabled: boolean, mode: string, piiRedaction: boolean }}
  */
 function getConfig() {
+  let overrides: Record<string, string | undefined> = {};
+  try {
+    overrides = {
+      enabled: getFeatureFlagOverride("INPUT_SANITIZER_ENABLED"),
+      piiRedaction: getFeatureFlagOverride("PII_REDACTION_ENABLED"),
+    };
+  } catch {
+    overrides = {};
+  }
   return {
     // Default ON (opt-out). Truthy/falsy parsing accepts true/1/yes/on and false/0/no/off.
-    enabled: parseEnvBoolean(process.env.INPUT_SANITIZER_ENABLED, true),
+    enabled:
+      overrides.enabled !== undefined
+        ? parseEnvBoolean(overrides.enabled, true)
+        : parseEnvBoolean(process.env.INPUT_SANITIZER_ENABLED, true),
+    // INPUT_SANITIZER_MODE has no registered flag (the dashboard cannot set it),
+    // so it stays env-only. It is reserved for prompt-injection policy.
     mode: process.env.INPUT_SANITIZER_MODE || "warn", // "warn" | "block" | "redact"
-    piiRedaction: parseEnvBoolean(process.env.PII_REDACTION_ENABLED, false),
+    piiRedaction:
+      overrides.piiRedaction !== undefined
+        ? parseEnvBoolean(overrides.piiRedaction, false)
+        : parseEnvBoolean(process.env.PII_REDACTION_ENABLED, false),
     blockThreshold: resolveBlockThreshold(),
   };
 }
@@ -329,6 +376,14 @@ function processPII(text, redact = false, options = undefined) {
   let processed = text;
 
   for (const rule of resolvePiiRules(options)) {
+    if (rule.validate) {
+      const validated = redactValidatedMatches(processed, rule, redact);
+      if (validated.count > 0) {
+        detections.push({ type: rule.name, count: validated.count });
+        processed = validated.text;
+      }
+      continue;
+    }
     const matches = text.match(rule.pattern);
     if (matches && matches.length > 0) {
       detections.push({ type: rule.name, count: matches.length });
@@ -339,6 +394,27 @@ function processPII(text, redact = false, options = undefined) {
   }
 
   return { text: processed, detections };
+}
+
+/**
+ * Count (and optionally redact) only the matches the rule's validator accepts.
+ * @param {string} text
+ * @param {{ pattern: RegExp, replacement: string, validate: (match: string, context: string) => boolean }} rule
+ * @param {boolean} redact
+ * @returns {{ text: string, count: number }}
+ */
+function redactValidatedMatches(text, rule, redact) {
+  let count = 0;
+  let output = "";
+  let cursor = 0;
+  for (const match of text.matchAll(rule.pattern)) {
+    const index = match.index ?? 0;
+    if (!rule.validate(match[0], precedingContext(text, index))) continue;
+    count++;
+    output += text.slice(cursor, index) + rule.replacement;
+    cursor = index + match[0].length;
+  }
+  return { text: redact ? output + text.slice(cursor) : text, count };
 }
 
 /**

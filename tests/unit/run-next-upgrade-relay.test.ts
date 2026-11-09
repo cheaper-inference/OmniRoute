@@ -55,7 +55,7 @@ function createNextStandIn(httpServer?: unknown) {
 }
 
 const okFetch = (async () =>
-  new Response(JSON.stringify({ path: "/v1/ws" }), {
+  new Response(JSON.stringify({ path: "/v1/ws", originChecked: true }), {
     status: 200,
     headers: { "content-type": "application/json" },
   })) as typeof fetch;

@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Các kỹ năng khả dụng
+## Kỹ năng có sẵn
 
-OmniRoute cung cấp 6 kỹ năng A2A được kết nối trong `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Mỗi module kỹ năng nằm trong `src/lib/a2a/skills/`.
+OmniRoute bộc lộ 6 kỹ năng A2A có trong `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Mỗi mô-đun kỹ năng tồn tại trong `src/lib/a2a/skills/`.
 
-| Kỹ năng            | ID                   | Mô tả                                                                                                                                        | Thẻ                        | Ví dụ                                        |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------- |
-| Smart Routing      | `smart-routing`      | Định tuyến một prompt qua provider/combo tối ưu bằng combo engine + cơ chế chấm điểm của OmniRoute                                           | routing, providers         | "Định tuyến prompt này qua mô hình tốt nhất" |
-| Quota Management   | `quota-management`   | Báo cáo trạng thái quota theo từng provider, giúp phía gọi quyết định khi nào cần điều tiết/chuyển đổi                                       | quota, providers           | "Kiểm tra quota của anthropic"               |
-| Provider Discovery | `provider-discovery` | Liệt kê các provider đã cài đặt cùng với capabilities, cờ free-tier, trạng thái OAuth                                                        | providers, discovery       | "Có những provider nào khả dụng?"            |
-| Cost Analysis      | `cost-analysis`      | Ước tính chi phí của một request/cuộc hội thoại dựa trên catalog + mức sử dụng gần đây                                                       | cost, usage                | "Ước tính chi phí cho cuộc hội thoại này"    |
-| Health Report      | `health-report`      | Tổng hợp trạng thái circuit breaker, cooldown, lockout theo từng provider                                                                    | health, resilience         | "Hiển thị tình trạng của tất cả provider"    |
-| List Capabilities  | `list-capabilities`  | Trả về toàn bộ catalog Agent Skills gồm 45 mục (23 API + 21 CLI + 1 config) dưới dạng bảng markdown kèm URL SKILL.md thô để chèn vào context | catalog, discovery, skills | "Liệt kê tất cả khả năng của OmniRoute"      |
+| Kỹ năng               | ID                   | Sự miêu tả                                                                                                                                   | Thẻ                         | Ví dụ                                                      |
+| :-------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------- | :--------------------------------------------------------- |
+| Định tuyến thông minh | `smart-routing`      | Định tuyến lời nhắc thông qua provider/combo tối ưu bằng cách sử dụng tính năng ghi điểm + của công cụ kết hợp OmniRoute                     | định tuyến, nhà cung cấp    | "Định tuyến lời nhắc này thông qua mô hình tốt nhất"       |
+| Quản lý hạn ngạch     | `quota-management`   | Báo cáo trạng thái hạn ngạch của mỗi nhà cung cấp, giúp người gọi quyết định thời điểm throttle/switch                                       | hạn ngạch, nhà cung cấp     | "Kiểm tra hạn ngạch cho nhân loại"                         |
+| Khám phá nhà cung cấp | `provider-discovery` | Liệt kê các nhà cung cấp đã cài đặt với các khả năng, cờ cấp miễn phí, trạng thái OAuth                                                      | nhà cung cấp, khám phá      | "Có những nhà cung cấp nào?"                               |
+| Phân tích chi phí     | `cost-analysis`      | Ước tính chi phí của một request/conversation dựa trên danh mục + sử dụng gần đây                                                            | chi phí, cách sử dụng       | "Ước tính chi phí cho cuộc trò chuyện này"                 |
+| Báo cáo sức khỏe      | `health-report`      | Tổng hợp bộ ngắt mạch, thời gian hồi chiêu, trạng thái khóa cho mỗi nhà cung cấp                                                             | sức khỏe, khả năng phục hồi | "Hiển thị tình trạng sức khỏe của tất cả các nhà cung cấp" |
+| Liệt kê khả năng      | `list-capabilities`  | Trả về danh mục Kỹ năng đặc vụ gồm 45 mục đầy đủ (23 API + 21 CLI + 1 config) dưới dạng bảng đánh dấu với SKILL.md URLs thô để chèn ngữ cảnh | danh mục, khám phá, kỹ năng | "Liệt kê tất cả các khả năng OmniRoute "                   |
 
-> Agent Card cần được giữ đồng bộ với catalog 375 provider đang hoạt động; số lượng provider cùng metadata free/no-auth được lấy từ registry tại runtime.
+> Thẻ Đại lý phải được giữ phù hợp với danh mục nhà cung cấp 381 trực tiếp; số lượng nhà cung cấp và siêu dữ liệu free/no-auth có nguồn gốc từ sổ đăng ký thời gian chạy.
 
 ### Chi tiết kỹ năng `list-capabilities`
 
-Kỹ năng `list-capabilities` đặc biệt hữu ích cho các agent bên ngoài cần khám phá những gì OmniRoute cung cấp trước khi gửi các lệnh gọi API. Nó trả về một artifact là bảng markdown có cấu trúc:
+Kỹ năng `list-capabilities` đặc biệt hữu ích cho các tác nhân bên ngoài cần khám phá những gì OmniRoute bộc lộ trước khi gửi cuộc gọi API. Nó trả về một tạo phẩm bảng đánh dấu có cấu trúc:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,46 +176,54 @@ Kỹ năng `list-capabilities` đặc biệt hữu ích cho các agent bên ngo�
 ...
 ```
 
-Mỗi hàng đều bao gồm cột `rawUrl` để các agent có thể fetch ngay SKILL.md đầy đủ. Trường `metadata.totalSkills` phản ánh kích thước catalog (45 ở thời điểm hiện tại). Triển khai: `src/lib/a2a/skills/listCapabilities.ts`. Xem thêm [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Mỗi hàng bao gồm cột `rawUrl` để các tổng đài viên có thể tìm nạp toàn bộ SKILL.md ngay lập tức. Trường `metadata.totalSkills` phản ánh kích thước danh mục (45 ngày nay). Thực hiện: `src/lib/a2a/skills/listCapabilities.ts`. Xem thêm [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## REST API (bổ trợ)
+## REST API (phụ trợ)
 
-Điểm cuối JSON-RPC `/a2a` là điểm truy cập A2A chính thức. Các điểm cuối REST bên dưới cung cấp quyền truy cập bổ trợ cho bảng điều khiển và công cụ bên ngoài:
+Điểm cuối JSON-RPC `/a2a` là điểm vào A2A chuẩn. Điểm cuối REST bên dưới cung cấp quyền truy cập phụ trợ cho bảng thông tin và công cụ bên ngoài:
 
-| Điểm cuối                    | Phương thức | Mô tả                                              | Xác thực                                                |
-| :--------------------------- | :---------- | :------------------------------------------------- | :------------------------------------------------------ |
-| `/api/a2a/status`            | GET         | Trạng thái máy chủ, các kỹ năng đã đăng ký         | (công khai)                                             |
-| `/api/a2a/tasks`             | GET         | Liệt kê tác vụ kèm bộ lọc                          | quản trị                                                |
-| `/api/a2a/tasks/[id]`        | GET         | Lấy tác vụ theo ID                                 | quản trị                                                |
-| `/api/a2a/tasks/[id]/cancel` | POST        | Hủy tác vụ đang chạy                               | quản trị                                                |
-| `/.well-known/agent.json`    | GET         | Agent Card (khám phá A2A)                          | (công khai, được lưu vào bộ nhớ đệm 3600 giây)          |
-| `/api/a2a/tasks`             | POST        | Ủy quyền đến đội OmniConductor (Conductor PRD RF5) | Bearer đối chiếu với `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Điểm cuối                    | Phương pháp | Sự miêu tả                                                       | Xác thực                                                                                                 |
+| :--------------------------- | :---------- | :--------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET         | Trạng thái máy chủ, kỹ năng đã đăng ký                           | (công cộng)                                                                                              |
+| `/api/a2a/tasks`             | GET         | Liệt kê các nhiệm vụ với bộ lọc                                  | quản lý hoặc khóa API (xem bên dưới)                                                                     |
+| `/api/a2a/tasks/[id]`        | GET         | Nhận nhiệm vụ bằng ID                                            | quản lý hoặc khóa API (xem bên dưới)                                                                     |
+| `/api/a2a/tasks/[id]/cancel` | POST        | Hủy tác vụ đang chạy                                             | quản lý hoặc khóa API (xem bên dưới)                                                                     |
+| `/.well-known/agent.json`    | GET         | Thẻ đại lý (khám phá A2A )                                       | (công khai, được lưu trong bộ nhớ đệm 3600 giây)                                                         |
+| `/api/a2a/tasks`             | POST        | Phái đoàn trong nước đến đội OmniConductor (Nhạc trưởng PRD RF5) | giống như `GET`, cộng với `OMNIROUTE_API_KEY` nếu được đặt trong khi `REQUIRE_API_KEY` tắt; `a2aEnabled` |
 
-**Ủy quyền Conductor đầu vào (`POST /api/a2a/tasks`):** các tác nhân A2A bên ngoài ủy quyền công việc lập trình cho đội OmniConductor thông qua OmniRoute. Phần thân: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — chỉ các kỹ năng của đội Conductor (những kỹ năng được công bố trên Agent Card) mới có thể được ủy quyền; `metadata.conductor.repo.url` là bắt buộc (đội làm việc trên các kho git). Tuyến này chuyển đổi thành `POST /v1/tasks` của hub bằng `CONDUCTOR_ORCHESTRATOR_TOKEN` phía máy chủ (dự phòng bằng `CONDUCTOR_HUB_TOKEN`) và trả về `201 { conductor_task_id, state: "submitted" }`; trạng thái tác vụ được truyền ngược qua cơ chế phản chiếu SSE→A2A (RF1) và có thể xem qua `GET /api/a2a/tasks?skill=conductor`.
+Ai đi qua các tuyến `/api/a2a/tasks*` tùy thuộc vào cài đặt đăng nhập và khóa API:
+
+- `requireLogin=true` (mặc định): phần mềm trung gian chỉ thừa nhận thông tin xác thực quản lý (phiên bảng điều khiển, khóa `manage` -scope API, mã thông báo truy cập `oma_` ) và `OMNIROUTE_API_KEY`. Khóa suy luận đơn giản nhận được `403`. Trong tiêu đề `Authorization` phần mềm trung gian chỉ lấy `OMNIROUTE_API_KEY` là `Bearer <key>`; một phím trống hoặc một tab sau `Bearer` nhận được `401`.
+- `requireLogin=false` hoặc cửa sổ lặp lại trước khi tham gia: với `REQUIRE_API_KEY=true` mọi khóa OmniRoute API hợp lệ hoặc thông tin xác thực quản lý đều được chấp nhận và người gọi ẩn danh sẽ nhận được `401`; với `REQUIRE_API_KEY` tắt các tuyến đường đang mở.
+- `POST /api/a2a/tasks` cũng yêu cầu `OMNIROUTE_API_KEY` trong tiêu đề `Authorization` khi biến đó được đặt và `REQUIRE_API_KEY` bị tắt. Các tiêu đề khác, chẳng hạn như `x-api-key`, không được tính ở đó. Khi đăng nhập hoặc trước khi đăng nhập, khóa sẽ được chuyển có hoặc không có tiền tố `Bearer` ; khi đăng nhập, chỉ `Bearer <key>` mới vượt qua được phần mềm trung gian.
+
+Trong trường hợp cần có thông tin xác thực, mã thông báo `read` -scope `oma_` chỉ hoạt động cho `GET`.
+
+**Đoàn trưởng trong nước (`POST /api/a2a/tasks`):** các đại lý A2A bên ngoài ủy quyền công việc mã hóa cho nhóm OmniConductor thông qua OmniRoute. Nội dung: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — chỉ các kỹ năng của đội nhạc trưởng (những kỹ năng được thông báo trên Thẻ đại lý) mới có thể được ủy quyền; `metadata.conductor.repo.url` là bắt buộc (nhóm hoạt động trên kho git). Tuyến đường chuyển sang `POST /v1/tasks` của trung tâm bằng cách sử dụng `CONDUCTOR_ORCHESTRATOR_TOKEN` phía máy chủ (dự phòng `CONDUCTOR_HUB_TOKEN`) và trả về `201 { conductor_task_id, state: "submitted" }`; trạng thái nhiệm vụ quay trở lại qua gương SSE→A2A (RF1) và hiển thị qua `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Thêm kỹ năng mới
+## Thêm một kỹ năng mới
 
-1. **Tạo tệp kỹ năng:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Tạo tập tin kỹ năng:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Xuất một hàm bất đồng bộ `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Tuân theo cấu trúc của các kỹ năng hiện có như `smartRouting.ts`.
+   Xuất hàm không đồng bộ `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Thực hiện theo hình dạng của các kỹ năng hiện có như `smartRouting.ts`. Nếu kỹ năng gọi lại OmniRoute qua HTTP, hãy tạo tiêu đề bằng `buildSelfLoopHeaders(caller)` từ `src/lib/a2a/selfLoopAuth.ts` để cuộc gọi chạy bằng khóa của người gọi A2A chứ không phải `OMNIROUTE_API_KEY` và chuyển `redirect: "error"` đến `fetch` để chuyển hướng không bao giờ lấy được khóa. Người trợ giúp chỉ xây dựng các tiêu đề; mỗi kỹ năng sẽ tự thiết lập chính sách chuyển hướng. Nó ném `UnsafeSelfLoopTargetError` thay vì đính kèm khóa khi URL cơ sở được giải quyết là http đơn giản bên ngoài mạng riêng (loopback, vùng chứa hoặc tên dịch vụ và địa chỉ riêng đều được) hoặc giữ thông tin xác thực, do đó, một kỹ năng nuốt các cuộc gọi bị từ chối phải ghi lại lỗi đó.
 
-2. **Đăng ký trình xử lý:** trong `src/lib/a2a/taskExecution.ts`, thêm một mục vào `A2A_SKILL_HANDLERS`:
+2. **Đăng ký xử lý:** trong `src/lib/a2a/taskExecution.ts`, thêm một mục vào `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...các kỹ năng hiện có
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Công khai trong Agent Card:** trong `src/app/.well-known/agent.json/route.ts`, thêm vào mảng `skills`:
+3. **Hiển thị trong Thẻ đại lý:** trong `src/lib/a2a/agentCardMetadata.ts` (được chia sẻ bởi `/.well-known/agent.json` và `/.well-known/agent-card.json`), nối vào mảng `skills` :
 
    ```json
    {
@@ -227,9 +235,9 @@ Mỗi hàng đều bao gồm cột `rawUrl` để các agent có thể fetch nga
    }
    ```
 
-4. **Viết kiểm thử:** `tests/unit/a2a-<your-skill>.test.ts`. Bao quát luồng thành công + luồng lỗi.
+4. **Viết bài kiểm tra:** `tests/unit/a2a-<your-skill>.test.ts`. Che đường dẫn lỗi + đường dẫn hạnh phúc.
 
-5. **Ghi lại tài liệu** cho kỹ năng mới trong bảng `Available Skills` của tệp này.
+5. **Tài liệu** kỹ năng mới trong bảng `Available Skills` của tệp này.
 
 ---
 
@@ -268,7 +276,7 @@ Các tác vụ hết hạn sau `ttlMinutes` (mặc định 5 phút) — được
 
 ## Ví dụ tích hợp
 
-### Python (requests)
+### Python (yêu cầu)
 
 ```python
 import requests
@@ -287,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (tìm nạp)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

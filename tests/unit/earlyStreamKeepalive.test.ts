@@ -71,20 +71,34 @@ test("slow path forwards SSE stream content", async () => {
 
 // ── Handler rejection → error frame ───────────────────────────────────────
 
-test("handler rejection emits error frame", async () => {
-  const delayed = new Promise<Response>((_resolve, reject) =>
-    setTimeout(() => reject(new Error("handler failed")), 10)
-  );
+test("handler rejection emits error frame", { timeout: 10000 }, async () => {
+  let rejectHandler!: (reason: Error) => void;
+  const delayed = new Promise<Response>((_resolve, reject) => {
+    rejectHandler = reject;
+  });
 
   const result = await withEarlyStreamKeepalive(delayed, {
     thresholdMs: 5,
     intervalMs: 50,
   });
 
+  rejectHandler(new Error("handler failed"));
   assert.equal(result.status, 200);
   const text = await drainStream(result.body!);
   assert.ok(text.includes("Upstream stream failed before completion"));
 });
+
+test(
+  "handler rejection before commitment stays a fast-path rejection",
+  { timeout: 10000 },
+  async () => {
+    const error = new Error("handler failed before commitment");
+    await assert.rejects(
+      withEarlyStreamKeepalive(Promise.reject(error), { thresholdMs: 5 }),
+      (actual) => actual === error
+    );
+  }
+);
 
 // ── Client abort stops keepalive ──────────────────────────────────────────
 

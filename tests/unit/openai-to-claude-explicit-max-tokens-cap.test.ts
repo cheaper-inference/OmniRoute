@@ -2,7 +2,8 @@
 // present. Clients that keep Anthropic's prompt cache warm re-send the last request
 // with a 1-token cap; the tool floor (DEFAULT_MIN_TOKENS) used to inflate it to 32000,
 // so every "warm" request generated thousands of output tokens.
-// The other translators (claude/gemini/antigravity -> openai) keep the tool floor.
+// The claude/gemini/antigravity -> openai translators honor it too (see
+// translator-explicit-max-tokens-cap-5180.test.ts).
 import test from "node:test";
 import assert from "node:assert/strict";
 
@@ -51,12 +52,13 @@ test("openai->claude keeps max_tokens > budget_tokens when thinking is enabled w
   );
 });
 
-test("claude->openai keeps the tool floor for a small cap", () => {
+test("claude->openai honors a small explicit cap instead of the tool floor", () => {
   const claudeTools = [{ name: "f", input_schema: { type: "object", properties: {} } }];
   const out = claudeToOpenAIRequest(
     "gpt-x",
     { messages, tools: claudeTools, max_tokens: 4096 },
     false
   );
-  assert.equal(out.max_tokens, DEFAULT_MIN_TOKENS);
+  assert.equal(out.max_tokens, 4096);
+  assert.notEqual(out.max_tokens, DEFAULT_MIN_TOKENS);
 });

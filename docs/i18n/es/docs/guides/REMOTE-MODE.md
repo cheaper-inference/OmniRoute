@@ -46,35 +46,39 @@ tu portátil                              OmniRoute remoto (VPS)
 
 ## Conexión
 
-### Con la contraseña de gestión (configuración inicial)
+### Con la contraseña de administración (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
-# Contraseña de gestión para http://192.168.0.15:20128: ********
-# ✔ Conectado a http://192.168.0.15:20128 — contexto '192.168.0.15' (alcance: admin)
+# Contraseña de administración para http://192.168.0.15:20128: ********
+# ✔ Conectado a http://192.168.0.15:20128 — contexto '192.168.0.15' (ámbito: admin)
 ```
 
-El flujo con contraseña emite de forma predeterminada un token **admin** (si tienes la contraseña,
-ya dispones de control total). Reduce el alcance con `--scope`:
+El flujo de contraseña genera un token de **administrador** de forma predeterminada (tienes la contraseña, por lo que ya dispones de control total). Reduce el ámbito con `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Opciones: `--port <p>` (cuando el host no incluye uno), `--name <ctx>` (nombre del contexto),
+Opciones: `--port <p>` (cuando el host no tiene ninguno), `--name <ctx>` (nombre del contexto),
 `--scope read|write|admin`. Una URL completa se respeta tal cual:
 `omniroute connect https://omni.example.com`.
 
+Cuando el servidor tiene habilitada la autenticación de dos factores del panel (Configuración →
+Seguridad), la contraseña por sí sola se rechaza: la CLI solicita entonces el código de la
+aplicación de autenticación (o un código de recuperación). Pásalo de antemano con `--totp <code>` para
+usarlo de forma no interactiva.
+
 ### Con un token generado previamente
 
-Genera un token con alcance limitado en el panel de control (o con `omniroute tokens create`) y
-pégalo; no se necesita contraseña:
+Genera un token con ámbito en el panel (o con `omniroute tokens create`) y
+pégalo — no se necesita contraseña:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-La CLI lo valida mediante `GET /api/cli/whoami` y lo guarda como contexto activo.
+La CLI lo valida mediante `GET /api/cli/whoami` y lo guarda como el contexto activo.
 
 ---
 
@@ -455,12 +459,12 @@ omniroute contexts remove 192-168-0-15 --yes   # elimina el contexto local (aunq
 
 ## Endpoints de la API (referencia)
 
-| Método | Ruta                  | Autenticación         | Ámbito                                |
-| ------ | --------------------- | --------------------- | ------------------------------------- |
-| POST   | `/api/cli/connect`    | contraseña de gestión | — (público, protegido por contraseña) |
-| GET    | `/api/cli/whoami`     | token de acceso       | lectura                               |
-| GET    | `/api/cli/tokens`     | token de acceso       | administración                        |
-| POST   | `/api/cli/tokens`     | token de acceso       | administración                        |
-| DELETE | `/api/cli/tokens/:id` | token de acceso       | administración                        |
+| Método | Ruta                  | Autenticación                    | Ámbito                                |
+| ------ | --------------------- | -------------------------------- | ------------------------------------- |
+| POST   | `/api/cli/connect`    | contraseña; 2FA si está activado | — (público, protegido por contraseña) |
+| GET    | `/api/cli/whoami`     | token de acceso                  | lectura                               |
+| GET    | `/api/cli/tokens`     | token de acceso                  | administración                        |
+| POST   | `/api/cli/tokens`     | token de acceso                  | administración                        |
+| DELETE | `/api/cli/tokens/:id` | token de acceso                  | administración                        |
 
 Consulta [openapi.yaml](../openapi.yaml) para ver los esquemas completos.
