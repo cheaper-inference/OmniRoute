@@ -315,10 +315,10 @@ test("#3500 getHeatmapRows — groups by date, respects conditions", () => {
 });
 
 // ---------------------------------------------------------------------------
-// getModelUsageRows
+// getDailyCostRows as the per-model view (the shared grain behind the old getModelUsageRows)
 // ---------------------------------------------------------------------------
 
-test("#3500 getModelUsageRows — returns per-model aggregates", () => {
+test("#3500 getDailyCostRows — returns per-model aggregates", () => {
   const rawCutoffDate = "2020-01-01";
   const ts = "2025-06-01T10:00:00.000Z";
 
@@ -349,7 +349,7 @@ test("#3500 getModelUsageRows — returns per-model aggregates", () => {
     apiKeyParams: {},
   });
 
-  const rows = mod.getModelUsageRows(unifiedSource, unifiedParams);
+  const rows = mod.getDailyCostRows(unifiedSource, unifiedParams);
   const row = rows.find((r) => r.model === "gpt-5" && r.provider === "openai");
 
   assert.ok(row, "gpt-5/openai row present");
@@ -361,10 +361,10 @@ test("#3500 getModelUsageRows — returns per-model aggregates", () => {
 });
 
 // ---------------------------------------------------------------------------
-// getProviderCostRows
+// getDailyCostRows as the provider cost view (the shared grain behind the old getProviderCostRows)
 // ---------------------------------------------------------------------------
 
-test("#3500 getProviderCostRows — groups by provider+model+serviceTier", () => {
+test("#3500 getDailyCostRows — passes provider cache tokens through", () => {
   const rawCutoffDate = "2020-01-01";
   const ts = "2025-07-01T12:00:00.000Z";
 
@@ -385,7 +385,7 @@ test("#3500 getProviderCostRows — groups by provider+model+serviceTier", () =>
     apiKeyParams: {},
   });
 
-  const rows = mod.getProviderCostRows(unifiedSource, unifiedParams);
+  const rows = mod.getDailyCostRows(unifiedSource, unifiedParams);
   const row = rows.find((r) => r.provider === "gemini");
 
   assert.ok(row, "gemini row present");
@@ -485,10 +485,10 @@ test("#3500 getApiKeyMetadataRows — returns api key metadata with lastUsed", (
 });
 
 // ---------------------------------------------------------------------------
-// getServiceTierUsageRows
+// getDailyCostRows as the service-tier view (the shared grain behind the old getServiceTierUsageRows)
 // ---------------------------------------------------------------------------
 
-test("#3500 getServiceTierUsageRows — groups by serviceTier+provider+model", () => {
+test("#3500 getDailyCostRows — splits requests and tokens by serviceTier", () => {
   const rawCutoffDate = "2020-01-01";
   const ts = "2025-09-01T12:00:00.000Z";
 
@@ -525,7 +525,7 @@ test("#3500 getServiceTierUsageRows — groups by serviceTier+provider+model", (
     apiKeyParams: {},
   });
 
-  const rows = mod.getServiceTierUsageRows(unifiedSource, unifiedParams);
+  const rows = mod.getDailyCostRows(unifiedSource, unifiedParams);
 
   const flexRow = rows.find((r) => r.serviceTier === "flex" && r.model === "gpt-5");
   const stdRow = rows.find((r) => r.serviceTier === "standard" && r.model === "gpt-5");
