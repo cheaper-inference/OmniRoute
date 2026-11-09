@@ -154,7 +154,7 @@ src/
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Страница на таблото за управление на Traffic Inspector — DevTools разделена, 7 подробни раздела, 4 превключвателя на режима на заснемане, запис на сесия, оцветяване на контекста. i18n PT-BR + EN. Вижте `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                          |
 | `app/(dashboard)/dashboard/activity/`                                        | Страница с канал за активност (група B): `page.tsx` (сървър) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — вижте `docs/architecture/MONITORING_SECTIONS.md`                                                                                                        |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Страница за споделяне на квота (група B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                      |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Конфигурационна страница на план на доставчик (група B): `page.tsx` + `ProviderPlanConfigClient.tsx` — размери на квота за отмяна на връзка                                                                                                                                                                                |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Страница за конфигурация на плана на доставчика (група B): `page.tsx` + `ProviderPlanConfigClient.tsx` — размери на квота за отмяна на връзка                                                                                                                                                                              |
 | `app/docs/`                                                                  | Вграден преглед на документация (изобразява `docs/*.md`)                                                                                                                                                                                                                                                                   |
 | `app/landing/`                                                               | Маркетингова целева страница                                                                                                                                                                                                                                                                                               |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Страници, свързани с удостоверяване                                                                                                                                                                                                                                                                                        |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | Компонент на таблото API: адаптери над `packages/ui-kit` — вижте `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: имена на икони, използвани от екраните → Lucide компоненти (`<Icon>`)                     |
-| `constants/providers.ts`         | **380 доставчици** със Zod валидиране (източник на истината)                                          |
+| `constants/providers.ts`         | **381 доставчици** със Zod валидиране (източник на истината)                                          |
 | `constants/cliTools.ts`          | Външен регистър CLI инструменти                                                                       |
 | `constants/routingStrategies.ts` | **20 стратегии за маршрутизиране** с приоритети                                                       |
 | `constants/publicApiRoutes.ts`   | Маршрути, които изискват удостоверяване на носител (срещу управление).                                |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Външни CLI интеграции + Вътрешни OmniRoute CLI                                                 |
 | `I18N.md`                   | i18n архитектура, добавяне на език, 67 локализации                                             |
 | `UNINSTALL.md`              | Чисти стъпки за деинсталиране                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Автоматично генерирано** каталог от 380 доставчици (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Автоматично генерирано** каталог от 381 доставчици (regen: `npm run gen:provider-reference`) |
 
 ### Подсистема за дълбоки гмуркания
 
@@ -460,11 +460,11 @@ open-sse/
 
 ### Поддиректории
 
-| Поддиректория         | Цел                                                                                                                                                                                               |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Локализирани преводи на документи (41 езика)                                                                                                                                                      |
-| `docs/screenshots/`   | Графични активи за ръководства                                                                                                                                                                    |
-| `_tasks/superpowers/` | Plans/specs от суперсили (`writing-plans`/`brainstorming`) + изследване — изолирано, отделно версияно репо, игнорирано от главното дърво. Вижте CLAUDE.md → „Артефакти за планиране и проучване“. |
+| Поддиректория         | Цел                                                                                                                                                                                                |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Локализирани преводи на документи (41 езика)                                                                                                                                                       |
+| `docs/screenshots/`   | Графични активи за ръководства                                                                                                                                                                     |
+| `_tasks/superpowers/` | Plans/specs от суперсили (`writing-plans`/`brainstorming`) + изследвания — изолирано репо с отделни версии, игнорирано от основното дърво. Вижте CLAUDE.md → „Артефакти за планиране и проучване“. |
 
 ---
 
