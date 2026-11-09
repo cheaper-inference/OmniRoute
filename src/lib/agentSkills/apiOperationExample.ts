@@ -29,7 +29,25 @@ function dashboardExample({ path, method }: Operation, baseUrl: string): string[
 }
 
 function bearerExample({ path, method }: Operation, baseUrl: string): string[] {
+  if (path === "/api/keys/import" && method === "POST") {
+    return [
+      ': "${IMPORTED_API_KEY:?Set the caller-supplied sk- key to import}"',
+      `curl -X POST ${baseUrl}${path} \\`,
+      '  -H "Authorization: Bearer <YOUR_TOKEN>" \\',
+      '  -H "Content-Type: application/json" \\',
+      '  -d "{\\"name\\":\\"Imported key\\",\\"key\\":\\"$IMPORTED_API_KEY\\"}"',
+    ];
+  }
   const curlMethod = method === "GET" ? "" : `-X ${method} `;
+  if (path === "/api/v1/video-bridge/drilldown" && ["GET", "DELETE"].includes(method)) {
+    return [
+      "# Set OMNIROUTE_VIDEO_HANDLE to one handle from the chat response's",
+      "# x-omniroute-video-drilldown header, obtained with the same API key.",
+      `curl --get ${curlMethod}${baseUrl}${path} \\`,
+      '  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \\',
+      '  --data-urlencode "handle=$OMNIROUTE_VIDEO_HANDLE"',
+    ];
+  }
   const hasJsonBody = ["POST", "PUT", "PATCH"].includes(method);
   return [
     `curl ${curlMethod}${baseUrl}${path} \\`,

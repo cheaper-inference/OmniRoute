@@ -1,0 +1,1 @@
+- **test:** replace wall-clock bounds with mock timers and request watchdogs, and isolate `HOME`, umask and host scheduling in 23 unit test files that could flake on loaded runners ([#19323](https://github.com/cheaper-inference/OmniRoute/pull/19323))
