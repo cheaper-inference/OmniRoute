@@ -17,3 +17,20 @@ test("extractPromptForIntent skips harness wrappers", () => {
   assert.equal(prompt.trim(), "Name three mammals that live in the ocean.");
   assert.equal(classifyWithConfig(prompt, DEFAULT_INTENT_CONFIG), "medium");
 });
+
+const WRAPPED = "<system-reminder>use function and class, import const async</system-reminder>\n";
+const ASK = "Name three mammals that live in the ocean.";
+
+test("extractPromptForIntent skips harness wrappers in input and prompt bodies too", () => {
+  const bodies = [
+    { input: `${WRAPPED}${ASK}` },
+    { input: [{ content: `${WRAPPED}${ASK}` }] },
+    { input: [{ text: `${WRAPPED}${ASK}` }] },
+    { prompt: `${WRAPPED}${ASK}` },
+  ];
+  for (const body of bodies) {
+    const prompt = extractPromptForIntent(body);
+    assert.equal(prompt.trim(), ASK, JSON.stringify(body));
+    assert.equal(classifyWithConfig(prompt, DEFAULT_INTENT_CONFIG), "medium");
+  }
+});
