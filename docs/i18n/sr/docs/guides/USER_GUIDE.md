@@ -353,82 +353,82 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Deployment
+## 🚀 Деплоимент
 
-### Globalna npm instalacija (preporučeno)
+### Глобална нпм инсталација (препоручено)
 
 ```bash
 npm install -g omniroute
 
-# Kreirajte konfiguracioni direktorijum
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Kreirajte .env fajl (pogledajte .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Pokrenite server
+# Start server
 omniroute
-# Ili sa prilagođenim portom:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`.
+CLI аутоматски учитава `.env` из `~/.omniroute/.env` или `./.env`. `./.env` у радном директоријуму може да постави само кратку листу дозвољених кључева (портови, `REQUIRE_API_KEY`, подешавања локализације и боје); све остало стави у `~/.omniroute/.env`. Погледајте [уговоре о покретању CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Tray mod
+### Траи моде
 
-Pokrenite OmniRoute u sistemskoj traci:
+Покрените OmniRoute у системској палети:
 
 ```bash
 omniroute serve --tray
 ```
 
-Komanda se vraća nakon što su server i tray spremni.
+Команда се враћа након што су сервер и треј спремни.
 
-Server se nastavlja bez terminala.
+Сервер наставља рад без терминала.
 
-Tray mod podržava macOS, Windows i grafičke Linux sesije. Tray mod ne otvara automatski dashboard.
+Режим траке подржава macOS, Windows и графичке Linux сесије. Режим лежишта не отвара контролну таблу аутоматски.
 
-Koristite tray meni za ove radnje:
+Користите мени траке за ове радње:
 
-- Otvorite dashboard.
-- Otvorite `/dashboard/logs`.
-- Promenite auto-pokretanje.
-- Zaustavite OmniRoute.
+- Отворите контролну таблу.
+- Отвори `/dashboard/logs`.
+- Промените аутоматско покретање.
+- Стоп OmniRoute.
 
-Nemojte kombinovati `--tray` sa ovim opcijama:
+Немојте комбиновати `--tray` са овим опцијама:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Ovi modovi zahtevaju drugačije vlasništvo procesa.
+Ови режими захтевају различито власништво над процесом.
 
-Omogućite pokretanje pri sledećoj prijavi na mašinu:
+Омогућите покретање при следећој пријави машине:
 
 ```bash
 omniroute autostart enable
 ```
 
-Auto-pokretanje koristi tray mod na macOS, Windows i grafičkim Linux sesijama. Headless Linux koristi postojeći systemd korisnički servis.
+Аутоматско покретање користи режим траке на macOS, Windows и графичким Linux сесијама. Хеадлесс Linux користи постојећи системд кориснички сервис.
 
-Onemogućite pokretanje pri prijavi:
+Онемогућите покретање приликом пријављивања:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Deinstalacija
+### Деинсталирање
 
-Kada vam OmniRoute više nije potreban, obezbeđujemo dve brze skripte za čisto uklanjanje:
+Када вам више не треба OmniRoute, нудимо две брзе скрипте за чисто уклањање:
 
-| Komanda                  | Radnja                                                                                              |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Uklanja sistemsku aplikaciju, ali **zadržava vašu bazu podataka i konfiguracije** u `~/.omniroute`. |
-| `npm run uninstall:full` | Uklanja aplikaciju I trajno **briše sve konfiguracije, ključeve i baze podataka**.                  |
+| Цомманд                  | Акција                                                                              |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Уклања системску апликацију али** чува ваше DB и конфигурације** у `~/.omniroute`.  |
+| `npm run uninstall:full` | Трајно уклања апликацију AND** брише све конфигурације, кључеве и базе података** . |
 
-> Napomena: Da biste izvršili ove komande, idite u folder OmniRoute projekta (ako ste ga klonirali) i pokrenite ih. Alternativno, ako je instaliran globalno, možete jednostavno pokrenuti `npm uninstall -g omniroute`.
+> Напомена: Да бисте покренули ове команде, идите до фасцикле пројекта OmniRoute (ако сте је клонирали) и покрените их. Алтернативно, ако је глобално инсталиран, можете једноставно покренути `npm uninstall -g omniroute`.
 
-### VPS Deployment
+### VPS Деплоимент
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -444,25 +444,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Ili: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 Deployment (Mala memorija)
+### PM2 имплементација (мало меморије)
 
-Za servere sa ograničenom RAM memorijom, koristite opciju za ograničenje memorije:
+За сервере са ограниченим RAM, користите опцију ограничења меморије:
 
 ```bash
-# Sa 512MB ograničenjem (podrazumevano)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Ili sa prilagođenim ograničenjem memorije
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Ili korišćenjem ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Kreirajte `ecosystem.config.js`:
+Направите `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -487,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Izgradite image (podrazumevano = runner-cli sa unapred instaliranim codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Portabilni mod (preporučeno)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Za mod integrisan sa host sistemom sa CLI binarnim fajlovima, pogledajte Docker sekciju u glavnoj dokumentaciji.
+За режим интегрисан у хост са CLI бинарним датотекама, погледајте Docker одељак у главним документима.
 
-### Void Linux (xbps-src)
+### Воид Linux (кбпс-срц)
 
-Void Linux korisnici mogu da paketuju i instaliraju OmniRoute nativno koristeći `xbps-src` framework za cross-kompilaciju. Ovo automatizuje samostalnu Node.js izgradnju zajedno sa potrebnim `better-sqlite3` native bindings.
+Воид Linux корисници могу да пакују и инсталирају OmniRoute изворно користећи `xbps-src` оквир за унакрсну компилацију. Ово аутоматизује Node.js самосталну изградњу заједно са потребним `better-sqlite3` изворним везама.
 
 <details>
-<summary><b>Pogledajte xbps-src template</b></summary>
+<summary><b>Погледајте шаблон кбпс-срц</b></summary>
 
 ```bash
-# Template fajl za 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -525,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Odredite ciljnu CPU arhitekturu za node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -534,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Instalirajte sve zavisnosti – preskočite skripte
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Izgradite Next.js standalone bundle
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopirajte statičke resurse u standalone
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompajlirajte better-sqlite3 native binding
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Postavite kompajlirani binding u standalone bundle
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Uklonite arhitekturno-specifične sharp bundle-ove
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopirajte pino runtime zavisnosti izostavljene Next.js statičkom analizom:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -570,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Sprečite uklanjanje praznih Next.js app router direktorijuma post-install hook-om
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -596,32 +596,32 @@ post_install() {
 
 </details>
 
-### Environment Variables
+### Променљиве окружења
 
-| Varijabla                               | Podrazumevano                        | Opis                                                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Tajni ključ za potpisivanje JWT-a (**promeniti u produkciji**)                                                                              |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Lozinka za prvu prijavu                                                                                                                     |
-| `DATA_DIR`                              | `~/.omniroute`                       | Direktorijum za podatke (db, korišćenje, logovi)                                                                                            |
-| `PORT`                                  | podrazumevano po framework-u         | Servisni port (`20128` u primerima)                                                                                                         |
-| `HOSTNAME`                              | podrazumevano po framework-u         | Host za bind (Docker podrazumevano koristi `0.0.0.0`)                                                                                       |
-| `NODE_ENV`                              | podrazumevano za runtime             | Postavite na `production` za deploy                                                                                                         |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Javni base URL prikazan dashboard-u i izložen serveru (zamenjuje zastareli `BASE_URL`)                                                      |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Base URL endpoint-a za cloud sinhronizaciju (zamenjuje zastareli `CLOUD_URL`)                                                               |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC tajni ključ za generisane API ključeve                                                                                                 |
-| `REQUIRE_API_KEY`                       | `false`                              | Zahteva Bearer API ključ na `/v1/*`                                                                                                         |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Dozvoljava autentifikovanim korisnicima dashboard-a da otkriju kompletne uskladištene vrednosti API ključa na zahtev                        |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Server-side interval za osvežavanje keširanih podataka o Provider Limits; dugmad za osvežavanje u UI-u i dalje pokreću ručnu sinhronizaciju |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Onemogućava automatske SQLite snapshotove pre pisanja/uvoza/vraćanja; ručne rezervne kopije i dalje rade                                    |
-| `APP_LOG_TO_FILE`                       | `true`                               | Omogućava izlaz aplikacionih i audit logova na disk                                                                                         |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Prisiljava `Secure` auth cookie (iza HTTPS reverse proxy-ja)                                                                                |
-| `CLOUDFLARED_BIN`                       | nepostavljeno                        | Koristi postojeći `cloudflared` binarni fajl umesto upravljanog preuzimanja                                                                 |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport za upravljane Quick Tunnels (`http2`, `quic`, ili `auto`)                                                                         |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Ograničenje Node.js heap-a u MB                                                                                                             |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Maksimalan broj unosa u prompt cache-u                                                                                                      |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Maksimalan broj unosa u semantic cache-u                                                                                                    |
+| Променљива                              | Подразумевано             | Опис                                                                                                                                                     |
+| --------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(аутоматски генерисано)_ | тајна потписивања JWT — се аутоматски генерише при првом покретању и остаје на `server.env`; експлицитно подесите када је директоријум података ефемеран |
+| `INITIAL_PASSWORD`                      | _(неподешено)_            | Прва лозинка за пријаву. Инсталације npm/source почињу са `CHANGEME`: замените га. Неподешено: чаробњак за укључивање                                    |
+| `DATA_DIR`                              | `~/.omniroute`            | Директоријум података (дб, употреба, евиденције)                                                                                                         |
+| `PORT`                                  | оквир подразумевани       | Сервисни порт (`20128` у примерима)                                                                                                                      |
+| `HOSTNAME`                              | оквир подразумевани       | Повежите хост (Docker је подразумевано подешен на `0.0.0.0`)                                                                                             |
+| `NODE_ENV`                              | рунтиме дефаулт           | Поставите `production` за примену                                                                                                                        |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Јавна база URL се појавила на контролној табли и изложена серверу (замењује застарели `BASE_URL`)                                                        |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | База крајње тачке за синхронизацију у облаку URL (замењује застарели `CLOUD_URL`)                                                                        |
+| `API_KEY_SECRET`                        | _(аутоматски генерисано)_ | HMAC тајна за генерисане API кључеве — се аутоматски генерише при првом покретању и остаје на `server.env`                                               |
+| `REQUIRE_API_KEY`                       | `false`                   | Примените кључ носиоца API на `/v1/*`                                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                   | Дозволите аутентификованим корисницима контролне табле да открију пуне сачуване вредности API кључева на захтев                                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Каденца освежавања на страни сервера за кеширане податке о ограничењима добављача; UI дугмад за освежавање и даље покрећу ручну синхронизацију           |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | Онемогући аутоматске SQLite снимке пре writes/import/restore; ручне резервне копије и даље раде                                                          |
+| `APP_LOG_TO_FILE`                       | `true`                    | Омогућава излаз евиденције апликација и ревизије на диск                                                                                                 |
+| `AUTH_COOKIE_SECURE`                    | `false`                   | Форце `Secure` аутх цоокие (иза HTTPS обрнутог проксија)                                                                                                 |
+| `CLOUDFLARED_BIN`                       | унсет                     | Користите постојећи `cloudflared` бинарни фајл уместо управљаног преузимања                                                                              |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | Транспорт за управљане брзе тунеле (`http2`, `quic` или `auto`)                                                                                          |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js ограничење гомиле у MB                                                                                                                           |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | Максимални број брзих уноса у кеш меморију                                                                                                               |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | Максимални унос семантичког кеша                                                                                                                         |
 
-Za kompletnu referencu environment varijabli, pogledajte [README](../README.md).
+За пуну референцу променљиве окружења, погледајте [README](../README.md).
 
 ---
 
