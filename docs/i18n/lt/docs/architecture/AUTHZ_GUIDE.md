@@ -156,17 +156,17 @@ Užregistruojamas per Nustatymai → Saugumas; išjungtas, kol operatorius jo ne
   4. Pašalinkite `OMNIROUTE_DISABLE_MFA` reikšmę, paleiskite serverį iš naujo ir, jei reikia, dar kartą
      užregistruokite veiksnį.
 
-## Maršrutų klasės
+## Maršruto klasės
 
-`src/server/authz/types.ts` apibrėžia tris klases. Bet koks maršrutas, kurio nepavyksta deterministiškai priskirti klasei, numatytai patenka į `MANAGEMENT`.
+`src/server/authz/types.ts` apibrėžia tris klases; bet koks maršrutas, kurio negalima klasifikuoti deterministiškai, grįžta į `MANAGEMENT`.
 
-| Klasė        | Aprašymas                                                                                                                                                               | Reikalingas autentifikavimas                                    |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `PUBLIC`     | Aiškiai saugūs maršrutai: prisijungimas, atsijungimas, būsena, inicializavimas, sveikatos patikra ir pradinės sąrankos paleidimas.                                      | Nėra                                                            |
-| `CLIENT_API` | Modelių aptarnavimo galiniai taškai: `/api/v1/*`, `/api/v1beta/*`, taip pat pseudonimai `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer raktas, kai įjungta funkcijos vėliava `REQUIRE_API_KEY`  |
-| `MANAGEMENT` | Valdymo skydelio puslapiai, nustatymai, teikėjai, raktai, administravimo ir diagnostikos galiniai taškai.                                                               | Valdymo skydelio sesija ARBA Bearer su `manage` taikymo sritimi |
+| Klasė        | Aprašymas                                                                                                                                                           | Reikalingas autentifikavimas                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `PUBLIC`     | Aiškiai saugūs maršrutai — prisijungimas, atsijungimas, būsena, sveikata, įkrovos įkrovimas.                                                                        | Nėra                                                                        |
+| `CLIENT_API` | Modelio aptarnavimo galiniai taškai — `/api/v1/*`, `/api/v1beta/*` ir slapyvardžiai `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Nešiklio raktas, kai įjungta efektyvi `REQUIRE_API_KEY` funkcijos vėliavėlė |
+| `MANAGEMENT` | Informacijos suvestinės puslapiai, nustatymai, teikėjai, raktai, administratoriaus ir diagnostikos galutiniai taškai.                                               | Prietaisų skydelio seansas OR Bearer su `manage` apimtimi                   |
 
-Kai kurie `MANAGEMENT` veiksmai yra **tik operatoriui**: vien `manage` raktas nepakanka. Saugomų prisijungimo duomenų eksportas (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), atsarginės kopijos atkūrimas virš dabartinių duomenų (`POST /api/db-backups/import`, įskaitant `dryRun=true`, `POST /api/db-backups` atkūrimas pagal id, `POST /api/settings/import-json`) ir atkūrimo taškų naikinimas (`DELETE /api/db-backups` valymas ir `PATCH /api/db-backups`, nes išsaugota saugojimo trukmė valdo automatinį išvalymą po kiekvienos atsarginės kopijos) reikalauja valdymo skydelio sesijos, vietinio CLI tapatybės arba kad prisijungimas būtų išjungtas. Sinchronizavimo žetono išdavimas (`POST /api/sync/tokens`) ir `admin` taikymo srities CLI prieigos žetono kūrimas (`POST /api/cli/tokens`) reikalauja valdymo skydelio sesijos arba vietinio CLI tapatybės visuose prisijungimo režimuose. API raktai bet kurios taikymo srities ir `oma_` prieigos žetonai nėra operatoriaus prisijungimo duomenys: kai jų reikia, jie gauna `403`. Patikra yra faile `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Prisijungimo nustatymų keitimas taip pat tik operatoriui: `POST /api/settings/require-login` (nustatyti administravimo slaptažodį / perjungti `requireLogin`) priima tik šiuos prisijungimo duomenis, kai slaptažodis jau yra. Pirminio paleidimo bootstrap langas (slaptažodžio dar nėra) lieka nepakitęs, o valdymo skydelio sesija, norėdama pakeisti slaptažodį, turi pateikti `currentPassword` (`403`, kai jo nėra arba jis neteisingas, įrašoma kaip `settings.update_failed`). Vietinis CLI ir egzempliorius su išjungtu prisijungimu išlaiko atkūrimo kelią ir gali nustatyti slaptažodį be jo, nes abu susieti su duomenų katalogą valdančiu serveriu.
+Keletas `MANAGEMENT` veiksmų yra** tik operatoriui** : `manage` klavišo neužtenka. Išsaugotų kredencialų eksportavimas (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), atsarginės kopijos atkūrimas naudojant tiesioginius duomenis (`POST /api/db-backups/import` įskaitant `dryRun=true`, `POST /api/db-backups` atkūrimas pagal id , `POST /api/settings/import-json`), atkūrimo taškų naikinimas (`DELETE /api/db-backups` valymas ir `PATCH /api/db-backups` nes saugojimas, kurio reikia, po kiekvienos automatinės atsarginės plokštės datos atsarginės kopijos). CLI tema arba prisijungimas išjungtas. Norint išduoti sinchronizavimo prieigos raktą (`POST /api/sync/tokens`) ir sukurti `admin` CLI prieigos prieigos raktą (`POST /api/cli/tokens`), kiekviename prisijungimo režime reikalingas prietaisų skydelio seansas arba vietinis CLI objektas. bet kokios apimties API raktai ir `oma_` prieigos prieigos raktai nėra operatoriaus kredencialai: jie gauna `403` kai jų reikia. Čekis gyvena `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Prisijungimo parametrus taip pat gali keisti tik operatorius: `POST /api/settings/require-login` (nustatyti valdymo slaptažodį / perjungti `requireLogin`) priima tik tuos kredencialus, kai yra slaptažodis — pirmojo paleidimo įkrovos langas (slaptažodžio dar nėra) nepakeičiamas — ir prietaisų skydelio sesija turi siųsti `currentPassword` kad pakeistų slaptažodį (`403`, kai jis patikrintas kaip neteisingas `settings.update_failed`). Vietinis CLI ir egzempliorius su išjungtu prisijungimu išlaiko atkūrimo kelią ir gali nustatyti slaptažodį be jo, nes abu yra susieti su pagrindiniu kompiuteriu, kuriam priklauso duomenų katalogas.
 
 ## Dujotiekis
 
@@ -199,51 +199,47 @@ Sėkminga politika grąžina `AuthSubject` su `kind ∈ { client_api_key, dashbo
 
 ## Viešųjų maršrutų sąrašas
 
-`src/shared/constants/publicApiRoutes.ts` yra aiškus leidžiamų maršrutų sąrašas:
+`src/shared/constants/publicApiRoutes.ts` yra aiškus leidimų sąrašas:
 
-Sąrašas suskirstytas pagal **formą**, o šis skirstymas yra svarbus (GHSA-74g9-q8f6-793h): prefiksas
-tikrinamas naudojant `startsWith()`, todėl jis taip pat sutampa su kiekvienu gretimu keliu, turinčiu tuos pačius
-pradinius simbolius. Prefiksas `/api/usage/om-usage` pažymi `/api/usage/om-usage<anything>` kaip PUBLIC, o Next
-išsprendžia tai į `/api/usage/[connectionId]` — apdorotoją, kuris neturi atskiro autentifikavimo.
+Sąrašas suskirstytas pagal** forma** , o padalijimas yra nešantis (GHSA-74g9-q8f6-793h): priešdėlis suderinamas su `startsWith()`, taigi jis taip pat atitinka kiekvieną gretimą kelią, dalijantį pagrindinius simbolius. `/api/usage/om-usage` kaip priešdėlis pažymėtas `/api/usage/om-usage<anything>` PUBLIC, o Next išsprendžia, kad `/api/usage/[connectionId]` — tvarkytojas, neturintis savo autentifikavimo.
 
 ```ts
-// Tikri po-medžiai. Kiekvienas įrašas PRIVALO baigtis "/" (tai tikrinama vienetiniu testu).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // klasifikuojamas kaip CLIENT_API, o ne kaip „no-auth public“
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Pavieniai maršrutai, sutampantys TIKSLIAI (su galiniu pasviruoju brūkšniu arba be jo).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // 2-asis prisijungimo veiksmas pasirenkamam TOTP; reikalingas MFA-pending slapukas
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Tik skaitymui skirti pavieniai maršrutai, kuriems taip pat taikoma CORS kilmės išimtis.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Tik skaitymui skirtas pavienis maršrutas, kuriam CORS išimtis NETAIKOMA.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Tik skaitymui skirti maršrutai yra vieši **tik** naudojant saugius metodus. Pastaba: `classifyRoute()` neįtraukia `/api/v1/*` ir `/api/v1beta/*` į PUBLIC atsarginį atvejį — jie visada yra `CLIENT_API`, todėl jiems vis dar taikoma Bearer rakto politika.
+Tik skaitomi maršrutai yra vieši** tik** saugiems metodams. Pastaba: `classifyRoute()` neįtraukia `/api/v1/*` ir `/api/v1beta/*` į PUBLIC kritimo — jie visada yra `CLIENT_API` todėl nešiklio rakto politika vis tiek taikoma.
 
 ## Naujo maršruto pridėjimas
 
@@ -319,15 +315,15 @@ Jis lieka išjungtas, nebent `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Šis reitingas taikomas tik prieigos rakto
 kredencialui. Žr. [Valdymo autentifikavimas](../guides/MANAGEMENT-AUTH.md).
 
-## Reikalaujamo autentifikavimo jungiklis
+## Reikalingas autentifikavimas
 
-`isAuthRequired()` faile `src/shared/utils/apiAuth.ts` nusprendžia, ar užklausai apskritai taikomas **koks nors** autentifikavimas:
+`isAuthRequired()` `src/shared/utils/apiAuth.ts` nusprendžia, ar** bet koks** Auth vykdomas užklausai:
 
-- `settings.requireLogin === false` → autentifikavimas visame pasaulyje išjungtas, išskyrus visada apsaugotą lygmenį (žr. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) ir iškvietimus, kurie išduoda prisijungimo duomenis, kuriuos jis priima. Šie iškvietimai reikalauja tų pačių prisijungimo duomenų, kaip ir įjungus prisijungimą: sinchronizavimo žetonų išdavimas, CLI prieigos žetonų išdavimas bet kurios taikymo srities, API rakto su `manage`/`admin` taikymo sritimi kūrimas, tos srities suteikimas raktui arba tokio rakto perkūrimas ar rodymas (`requireCredentialForManagementScopedKey()` faile `src/lib/api/requireManagementAuth.ts`). Raktai tik išvadoms lieka atviri.
-- Slaptažodis nesukonfigūruotas **ir** nėra aplinkos kintamojo `INITIAL_PASSWORD` → bootstrap režimas leidžia pradinės sąrankos vedlį ir loopback užklausas, tačiau viešosios tinklo užklausos vis tiek reikalauja prisijungimo duomenų.
-- Bet kuri DB klaida → uždaro prieigą (saugu pagal numatytuosius nustatymus).
+- `settings.requireLogin === false` → autentifikavimas yra išjungtas visame pasaulyje, išskyrus visada apsaugotą pakopą (žr. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) ir iškvietimus, išduodančius kredencialus, kuriuos ji priima, kuriems reikalingi tie patys kredencialai kaip ir prisijungiant: sinchronizavimo prieigos raktų išdavimas, CLI prieigos prieigos raktų kalimas bet kokia apimtimi, API rakto suteikimas / `manage` taikymo sritis `requireCredentialForManagementScopedKey()` `admin` `src/lib/api/requireManagementAuth.ts`). Tik išvados raktai lieka atidaryti. Įrašant apsaugotos funkcijos vėliavėlę (`REQUIRE_API_KEY`, kitas saugos žymas ir SSRF / TLS / MCP taikymo srities / smėlio dėžės vėliavėles, išvardytas [Funkcijų vėliavėlėse](../reference/FEATURE_FLAGS.md#rest-api) ) ir išsaugant PII maskavimo nustatymus (`PUT /api/settings/pii`), taip pat reikia kredencialų.
+- Nekonfigūruotas slaptažodis** ir** no `INITIAL_PASSWORD` env var → įkrovos režimas leidžia įjungimo vedlį ir atgalinio ryšio užklausas, tačiau atviroms tinklo užklausoms vis tiek reikia kredencialų. Išimtis: norint parašyti apsaugotos funkcijos vėliavėlę ir išsaugoti PII maskavimo nustatymus (`PUT /api/settings/pii`), reikia kredencialo net iš grįžtamojo ryšio, todėl vien atgalinio ciklo neužtenka.
+- Bet kokia DB klaida → nepavyksta uždaryti (saugus pagal numatytuosius nustatymus).
 
-Kliento API raktų vykdymui naudojama `isRequireApiKeyEnabled()` iš `src/shared/utils/featureFlags.ts`, o ne tiesioginis `process.env.REQUIRE_API_KEY` nuskaitymas. Tai svarbu įdiegtiems egzemplioriams: `REQUIRE_API_KEY` perjungimas Dashboard → Feature Flags išsaugo DB perrašymą ir iš karto veikia `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ir kitus kliento API autentifikavimo patikrinimus, kurie naudoja šią pagalbinę funkciją. Jei funkcijų vėliavų saugyklos nepavyksta perskaityti, kliento API autentifikavimas uždaro prieigą ir reikalauja rakto.
+Kliento API rakto vykdymas naudoja `isRequireApiKeyEnabled()` `src/shared/utils/featureFlags.ts`, o ne tiesioginį `process.env.REQUIRE_API_KEY` skaitymą. Tai svarbu įdiegtiems egzemplioriams: perjungus `REQUIRE_API_KEY` prietaisų skydelyje → funkcijų vėliavėlės išsaugo DB nepaisymą ir iš karto paveikia `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ir kitus kliento API autentifikavimo patikrinimus, kurie naudojasi šiuo pagalbininku. Jei funkcijos vėliavėlės saugyklos nuskaityti nepavyksta, kliento API autentifikavimas nepavyksta uždaryti ir reikia rakto.
 
 ## Nesuderinamas pakeitimas — v3.8.0
 
