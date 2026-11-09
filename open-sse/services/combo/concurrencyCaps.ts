@@ -19,7 +19,11 @@
  * shrinking (Quality Gate / #3501).
  */
 
-import { getCachedProviderConnectionById } from "@/lib/db/readCache";
+import { getCachedProviderConnectionById, getCachedSettings } from "@/lib/db/readCache";
+import { resolveResilienceSettings } from "@/lib/resilience/settings";
+import { resolveProviderId } from "@/shared/constants/providers";
+import { buildAccountSemaphoreKey } from "../accountSemaphore.ts";
+import { resolveConnectionConcurrencyCap } from "../adaptiveConnectionConcurrency.ts";
 import { effectiveMaxConcurrency } from "./comboPredicates.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 
@@ -28,7 +32,18 @@ export async function lookupPositiveCap(connectionId: string): Promise<number | 
   try {
     const conn = await getCachedProviderConnectionById(connectionId);
     const raw = (conn as { maxConcurrent?: number | null } | null)?.maxConcurrent;
-    return typeof raw === "number" && Number.isFinite(raw) && raw > 0 ? raw : null;
+    const provider = (conn as { provider?: string } | null)?.provider;
+    if (!provider) return typeof raw === "number" && raw > 0 ? raw : null;
+    // Fast path avoids a settings read for existing explicit caps.
+    if (typeof raw === "number" && raw > 0) return raw;
+    const settings = resolveResilienceSettings(await getCachedSettings());
+    const defaultCap =
+      settings.providerQuotaOverrides[resolveProviderId(provider)]?.defaultConnectionConcurrency;
+    return resolveConnectionConcurrencyCap(
+      raw,
+      defaultCap,
+      buildAccountSemaphoreKey({ provider, accountKey: connectionId })
+    );
   } catch {
     return null; // fail-open: never block routing on a lookup error
   }
