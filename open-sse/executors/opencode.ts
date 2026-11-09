@@ -1568,14 +1568,12 @@ export class OpencodeExecutor extends BaseExecutor {
   }
 
   /**
-   * #12633: OpenCode Zen's `/v1/responses` endpoint (reached when
-   * `_requestFormat === "openai-responses"`, e.g. Muse Spark Contributor
-   * models) requires `x-api-key`, not `Authorization: Bearer` — unlike the
-   * default `/chat/completions` endpoint on the same host, which accepts
-   * Bearer. Scoped by baseUrl (not provider id/alias) so this only applies to
-   * the main Zen host (`opencode` / `opencode-zen`, both `https://opencode.ai/zen/v1`)
-   * and never to opencode-go, which serves Responses-format models from a
-   * different upstream (`https://opencode.ai/zen/go/v1`) that expects Bearer.
+   * #12633 / #19315: OpenCode Zen's `/v1/responses` endpoint (reached when
+   * `_requestFormat === "openai-responses"`, e.g. Muse Spark, GPT-5.6, Grok
+   * models) expects `x-api-key` for the gated public lane, while OpenCode
+   * Console keys require `Authorization: Bearer` (otherwise answering 401
+   * "Missing API key."). For keyed requests we send both headers so both
+   * console and gateway contracts are satisfied.
    */
   private usesZenApiKeyAuth(): boolean {
     return this._requestFormat === "openai-responses" && this.config?.baseUrl === ZEN_BASE_URL;
@@ -1604,8 +1602,13 @@ export class OpencodeExecutor extends BaseExecutor {
     );
 
     if (key) {
-      if (this._requestFormat === "claude" || this.usesZenApiKeyAuth()) {
+      if (this._requestFormat === "claude") {
         headers["x-api-key"] = key;
+      } else if (this.usesZenApiKeyAuth()) {
+        headers["x-api-key"] = key;
+        if (!gatedScope) {
+          headers["Authorization"] = `Bearer ${key}`;
+        }
       } else if (isGoGeminiWire(this._requestFormat, this._surface())) {
         headers["x-goog-api-key"] = key;
       } else {
