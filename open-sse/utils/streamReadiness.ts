@@ -857,6 +857,11 @@ export function prependBufferedChunks(
   });
 }
 
+// Ceiling on bytes held before the first readiness signal. Comment-only or non-JSON bodies
+// never signal readiness, so without it they grow with upstream rate x deadline. Kept far
+// above one real first frame (a Responses `response.created` echoes instructions and tools).
+const PRE_SIGNAL_MAX_BYTES = 1024 * 1024;
+
 class StreamReadinessReadTimeout extends Error {
   constructor() {
     super("STREAM_READINESS_TIMEOUT");
@@ -1258,6 +1263,31 @@ export async function ensureStreamReadiness(
         return {
           ok: true,
           response: buildReadyResponse(),
+        };
+      }
+
+      if (bufferedBytes > PRE_SIGNAL_MAX_BYTES) {
+        const reason = `Stream sent ${bufferedBytes} bytes without a non-ping SSE event (limit=${PRE_SIGNAL_MAX_BYTES})`;
+        options.log?.warn?.(
+          "STREAM",
+          `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
+        );
+        await reader.cancel(reason).catch(() => {});
+        return {
+          ok: false,
+          reason,
+          classificationReason: reason,
+          code: "STREAM_READINESS_TIMEOUT",
+          type: "stream_timeout",
+          anyByteAt: lastChunkAt,
+          response: createErrorResponse(
+            HTTP_STATUS.GATEWAY_TIMEOUT,
+            reason,
+            "STREAM_READINESS_TIMEOUT",
+            "stream_timeout",
+            undefined,
+            buildAnyByteAtHeader(lastChunkAt)
+          ),
         };
       }
     }
