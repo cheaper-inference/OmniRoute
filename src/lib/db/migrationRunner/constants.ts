@@ -240,6 +240,85 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "231",
     toName: "daily_cached_input",
   },
+  {
+    // Earlier traffic candidates occupied slots now owned by release migrations.
+    fromVersion: "206",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "207",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "213",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "214",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "215",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "217",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "218",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "223",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "224",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "225",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "226",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "228",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "229",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
   // PR #10409 circulated through these draft slots before the current release
   // claimed them. The name guard is mandatory: canonical migrations using the
   // same numbers must never be rehomed as Team state.
@@ -278,6 +357,20 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "team_cost_centers",
     toVersion: "215",
     toName: "team_cost_centers",
+  },
+  {
+    // A later pushed #14771 build used the upstream mirror-URL slot.
+    fromVersion: "218",
+    fromName: "api_key_self_service_settings",
+    toVersion: "233",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    // The index also circulated as 207 before upstream provider cleanup claimed it.
+    fromVersion: "207",
+    fromName: "recreate_turn_nodes_content_hash_index",
+    toVersion: "211",
+    toName: "recreate_turn_nodes_content_hash_index",
   },
   {
     fromVersion: "134",
@@ -335,6 +428,56 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "proxy_pool_rotation",
     toVersion: "101",
     toName: "api_key_usage_limits",
+  },
+  {
+    // Early self-service stack builds occupied the upstream attempt-timing slot.
+    fromVersion: "194",
+    fromName: "api_key_self_service_settings",
+    toVersion: "233",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    // Later self-service stack builds (#14771) used 197, now proxy_subscription_core_config.
+    fromVersion: "197",
+    fromName: "api_key_self_service_settings",
+    toVersion: "233",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    // #14771 builds then used 207, now remove_opencode_free_provider.
+    fromVersion: "207",
+    fromName: "api_key_self_service_settings",
+    toVersion: "233",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    // #14771 builds shipped the turn-node index recreate as 206 (now codex_wakeup_tasks);
+    // release/v3.8.53 ships the same migration as 211.
+    fromVersion: "206",
+    fromName: "recreate_turn_nodes_content_hash_index",
+    toVersion: "211",
+    toName: "recreate_turn_nodes_content_hash_index",
+  },
+  {
+    // #14771 builds on release/v3.8.53 then used 213, now api_key_preferred_connections.
+    fromVersion: "213",
+    fromName: "api_key_self_service_settings",
+    toVersion: "233",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    // #14771 builds then used 228, now purge_orphaned_provider_catalogs.
+    fromVersion: "228",
+    fromName: "api_key_self_service_settings",
+    toVersion: "233",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    // #14771 builds then used 229, now api_key_five_hour_limit.
+    fromVersion: "229",
+    fromName: "api_key_self_service_settings",
+    toVersion: "233",
+    toName: "api_key_self_service_settings",
   },
 ] as const;
 

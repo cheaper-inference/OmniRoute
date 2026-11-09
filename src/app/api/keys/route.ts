@@ -15,6 +15,7 @@ import {
   templateJson,
   validationError,
 } from "@/lib/api/keyTemplateHttp";
+import { getApiKeySelfServiceSettings } from "@/lib/db/apiKeySelfServiceSettings";
 
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncKeysToCloudIfEnabled } from "@/lib/api/keyCloudSync";
@@ -84,6 +85,7 @@ export async function GET(request: Request) {
     const keys = await getApiKeys(dbLimit, offset);
     const maskedKeys = keys.map((k) => ({
       ...k,
+      ...getApiKeySelfServiceSettings(typeof k.id === "string" ? k.id : ""),
       key: maskStoredApiKey(k.key),
     }));
 
