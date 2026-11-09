@@ -172,19 +172,23 @@ test("grok-build: requires the managed default and chat completions backend", as
 
 // ── Droid / Openclaw / Kilo ───────────────────────────────────────────────────
 
-test("droid: returns 'configured' when JSON config contains sk_omniroute marker", async () => {
+test("droid: returns 'configured' when customModels has an OmniRoute entry on this port", async () => {
   const configPath = await writeTempFile(
     "droid.json",
-    JSON.stringify({ apiKey: "sk_omniroute_somekey", baseUrl: "http://localhost:20128/v1" })
+    JSON.stringify({
+      customModels: [{ id: "custom:OmniRoute-0", baseUrl: "http://localhost:20128/v1" }],
+    })
   );
   const result = await checkToolConfigStatus("droid", configPath);
   assert.equal(result, "configured");
 });
 
-test("openclaw: returns 'configured' when JSON config contains omniroute text", async () => {
+test("openclaw: returns 'configured' when models.providers.omniroute is on this port", async () => {
   const configPath = await writeTempFile(
     "openclaw.json",
-    JSON.stringify({ openAiBaseUrl: "http://omniroute.local/v1", openAiApiKey: "sk-test" })
+    JSON.stringify({
+      models: { providers: { omniroute: { baseUrl: "http://localhost:20128/v1" } } },
+    })
   );
   const result = await checkToolConfigStatus("openclaw", configPath);
   assert.equal(result, "configured");
