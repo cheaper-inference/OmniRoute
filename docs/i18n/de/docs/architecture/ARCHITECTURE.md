@@ -14,7 +14,7 @@ OmniRoute ist ein lokales AI Routing-Gateway und Dashboard, das auf Next.js basi
 
 Kernkompetenzen:
 
-- OpenAI-kompatible API Oberfläche für CLI/tools (377 Anbieter, 156 Executor-Module)
+- OpenAI-kompatible API Oberfläche für CLI/tools (381 Anbieter, 159 Executor-Module)
 - Request/response -Übersetzung über Anbieterformate hinweg
 - Modell-Combo-Fallback (Multi-Modell-Sequenz)
 - Strukturierte Kombinationsschritte (`provider + model + connection`) mit Laufzeitreihenfolge nach `compositeTiers`
@@ -33,7 +33,7 @@ Kernkompetenzen:
 - Denken Sie an Tag-Parsing (`<think>...</think>`) für Argumentationsmodelle
 - Antwortbereinigung für strikte OpenAI SDK Kompatibilität
 - Rollennormalisierung (Entwickler → System, System → Benutzer) für anbieterübergreifende Kompatibilität
-- Strukturierte Ausgabekonvertierung (json_schema → Gemini ResponseSchema)
+- Strukturierte Ausgabekonvertierung (json_schema → Gemini responseSchema)
 - Lokale Persistenz für Anbieter, Schlüssel, Aliase, Kombinationen, Einstellungen, Preise (122 DB Module)
 - Usage/cost -Verfolgung und Anforderungsprotokollierung
 - Optionale Cloud-Synchronisierung für multi-device/state -Synchronisierung
@@ -47,7 +47,7 @@ Kernkompetenzen:
 - Signaturbasierter Anforderungsdeduplizierungs-Cache
 - Domänenschicht: Kostenregeln, Fallback-Richtlinie, Sperrrichtlinie
 - Kontext-Relay: Zusammenfassungen der Sitzungsübergaben für die Kontinuität der Kontorotation
-- Persistenz des Domänenstatus (SQLite -Write-Through-Cache für Fallbacks, Budgets, Sperrungen, Leistungsschalter)
+- Persistenz des Domänenstatus (SQLite -Durchschreibcache für Fallbacks, Budgets, Sperrungen, Leistungsschalter)
 - Richtlinien-Engine für zentralisierte Anfrageauswertung (Lockout → Budget → Fallback)
 - Fordern Sie Telemetrie mit p50/p95/p99 -Latenzaggregation an
 - Combo-Ziel-Telemetrie und historischer Combo-Zielzustand über `combo_execution_key` / `combo_step_id`
@@ -404,7 +404,7 @@ Der `src/domain/` -Namespace zentralisiert Richtlinienentscheidungen, sodass Rou
 - Connection/model Regelverknüpfer: `src/domain/connectionModelRules.ts`
 - Schnappschüsse der Modellverfügbarkeit: `src/domain/modelAvailability.ts`
 - Ablaufverfolgung des Anbieters: `src/domain/providerExpiration.ts`
-- Kontingent-Cache: `src/domain/quotaCache.ts`
+- Kontingent-Cache: `src/domain/quotaCache.ts`. Anbieter fügen Kontingentfenster hinzu und entfernen sie (OpenAI hat das 5-Stunden Codex Fenster für einige Pläne gelöscht), sodass eine Nutzung, die den Adapter des Anbieters als vollständig bestätigt (`quotasComplete`, siehe `src/lib/usage/usageReading.ts`) liest, der vollständige Fenstersatz des Kontos ist: ein Fenster, das früher bekannt war, aber nicht darin vorhanden ist, wird zurückgezogen, im Cache, im `quota_snapshots` wird ein Neustart rehydriert (ein angehängter Einstellungsdatensatz), im persistenten Codex Kontingentstatus und in den Sättigungs-Buckets von Claude. Teilbeweise (Antwortheader, veraltete Kopien) aktualisieren nur die darin enthaltenen Fenster.
 - Abbauzustand: `src/domain/degradation.ts`
 - Konfigurationsprüfung: `src/domain/configAudit.ts`
 - OmniRoute Antwortmetadaten-Builder: `src/domain/omnirouteResponseMeta.ts`
@@ -428,7 +428,7 @@ Die vollständigen Routenklassifizierungsregeln finden Sie unter [`docs/architec
 
 ### F. Workflow FSM und Task-Aware Router
 
-Ein durch eine Finite-State-Maschine gesteuerter Router, der über der Kombinationsauswahl liegt, um den Datenverkehr basierend auf der erkannten Workflow-Stufe (Planung, Ausführung, Überprüfung) und der Affinität zur Hintergrundaufgabe zu leiten.
+Ein durch eine Finite-State-Maschine gesteuerter Router, der über der Combo-Auswahl liegt, um den Datenverkehr basierend auf der erkannten Workflow-Phase (Planung, Ausführung, Überprüfung) und der Affinität zur Hintergrundaufgabe zu leiten.
 
 - Workflow FSM: `open-sse/services/workflowFSM.ts`
 - Aufgabenbewusster Router: `open-sse/services/taskAwareRouter.ts`

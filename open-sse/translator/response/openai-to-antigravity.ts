@@ -1,5 +1,6 @@
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
+import { buildGeminiUsageMetadata } from "./geminiUsageMetadata.ts";
 
 type AntigravityCandidate = {
   content: {
@@ -25,12 +26,7 @@ export function openaiToAntigravityResponse(chunk, state) {
   if (!chunk) return null;
 
   const choice = chunk.choices?.[0];
-  if (!choice) {
-    if (chunk.usage) {
-      state._usage = chunk.usage;
-    }
-    return null;
-  }
+  if (!choice) return chunk.usage ? usageOnlyChunkResponse(chunk.usage, state) : null;
 
   const delta = choice.delta || {};
   const finishReason = choice.finish_reason;
@@ -101,6 +97,7 @@ export function openaiToAntigravityResponse(chunk, state) {
 
   // Finish reason mapping
   if (finishReason) {
+    state._finishSent = true;
     const reasonMap = {
       stop: "STOP",
       length: "MAX_TOKENS",
@@ -125,20 +122,33 @@ export function openaiToAntigravityResponse(chunk, state) {
   // Usage metadata
   const usage = chunk.usage || state._usage;
   if (usage) {
-    response.usageMetadata = {
-      promptTokenCount: usage.prompt_tokens || 0,
-      candidatesTokenCount: usage.completion_tokens || 0,
-      totalTokenCount: usage.total_tokens || 0,
-    };
-    if (usage.completion_tokens_details?.reasoning_tokens) {
-      response.usageMetadata.thoughtsTokenCount = usage.completion_tokens_details.reasoning_tokens;
-    }
-    if (usage.prompt_tokens_details?.cached_tokens) {
-      response.usageMetadata.cachedContentTokenCount = usage.prompt_tokens_details.cached_tokens;
-    }
+    response.usageMetadata = buildGeminiUsageMetadata(usage);
+    state._usageSent = true;
   }
 
   return { response };
+}
+
+// OpenAI upstreams called with `stream_options.include_usage` send usage in a
+// separate final chunk with `choices: []`, after the finish chunk. The finish
+// chunk is already out by then, so forward it as its own chunk (empty text part,
+// no finishReason) unless usage already went out. Usage seen before the finish
+// chunk stays stashed for it (see openaiToAntigravityResponse).
+function usageOnlyChunkResponse(usage, state) {
+  if (!state._finishSent) {
+    state._usage = usage;
+    return null;
+  }
+  if (state._usageSent) return null;
+  state._usageSent = true;
+  return {
+    response: {
+      candidates: [{ content: { role: "model", parts: [{ text: "" }] } }],
+      modelVersion: state._modelVersion,
+      responseId: state._responseId,
+      usageMetadata: buildGeminiUsageMetadata(usage),
+    },
+  };
 }
 
 // Register

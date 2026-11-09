@@ -162,7 +162,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` માં વાય
 | આરોગ્ય અહેવાલ     | `health-report`      | પ્રદાતા દીઠ એકંદર સર્કિટ બ્રેકર, કૂલડાઉન, લોકઆઉટ સ્થિતિ                                                                                              | આરોગ્ય, સ્થિતિસ્થાપકતા | "તમામ પ્રદાતાઓની આરોગ્ય સ્થિતિ બતાવો"        |
 | સૂચિ ક્ષમતાઓ      | `list-capabilities`  | સંદર્ભ ઇન્જેક્શન માટે કાચા SKILL.md URLs સાથે માર્કડાઉન ટેબલ તરીકે સંપૂર્ણ 45-એન્ટ્રી એજન્ટ સ્કિલ્સ કૅટેલોગ (23 API + 21 CLI + 1 રૂપરેખા) પરત કરે છે | સૂચિ, શોધ, કુશળતા      | "બધી OmniRoute ક્ષમતાઓની સૂચિ બનાવો"         |
 
-> એજન્ટ કાર્ડને લાઇવ 377-પ્રદાતા કેટેલોગ સાથે સંરેખિત રાખવું જોઈએ; પ્રદાતાની ગણતરીઓ અને free/no-auth મેટાડેટા રનટાઇમ રજિસ્ટ્રીમાંથી મેળવવામાં આવે છે.
+> એજન્ટ કાર્ડને લાઇવ 381-પ્રદાતા કેટેલોગ સાથે સંરેખિત રાખવું જોઈએ; પ્રદાતાની ગણતરીઓ અને free/no-auth મેટાડેટા રનટાઇમ રજિસ્ટ્રીમાંથી મેળવવામાં આવે છે.
 
 ### `list-capabilities` કૌશલ્ય વિગતો
 
@@ -181,40 +181,48 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` માં વાય
 
 ## REST API (સહાયક)
 
-JSON-RPC એન્ડપોઇન્ટ `/a2a` પ્રમાણભૂત A2A પ્રવેશબિંદુ છે. નીચેના REST એન્ડપોઇન્ટ્સ ડૅશબોર્ડ્સ અને બાહ્ય ટૂલિંગ માટે સહાયક ઍક્સેસ પ્રદાન કરે છે:
+JSON-RPC એન્ડપોઇન્ટ `/a2a` એ કેનોનિકલ A2A એન્ટ્રી પોઇન્ટ છે. નીચે આપેલા REST એન્ડપોઇન્ટ્સ ડેશબોર્ડ્સ અને બાહ્ય ટૂલિંગ માટે સહાયક ઍક્સેસ પ્રદાન કરે છે:
 
-| એન્ડપોઇન્ટ                   | પદ્ધતિ | વર્ણન                                                       | પ્રમાણીકરણ                                        |
-| :--------------------------- | :----- | :---------------------------------------------------------- | :------------------------------------------------ |
-| `/api/a2a/status`            | GET    | સર્વરની સ્થિતિ, નોંધાયેલ સ્કિલ્સ                            | (જાહેર)                                           |
-| `/api/a2a/tasks`             | GET    | ફિલ્ટર્સ સાથે ટાસ્ક્સની યાદી                                | મેનેજમેન્ટ                                        |
-| `/api/a2a/tasks/[id]`        | GET    | ID દ્વારા ટાસ્ક મેળવો                                       | મેનેજમેન્ટ                                        |
-| `/api/a2a/tasks/[id]/cancel` | POST   | ચાલી રહેલો ટાસ્ક રદ કરો                                     | મેનેજમેન્ટ                                        |
-| `/.well-known/agent.json`    | GET    | Agent Card (A2A શોધ)                                        | (જાહેર, 3600s માટે કૅશ કરેલું)                    |
-| `/api/a2a/tasks`             | POST   | OmniConductor ફ્લીટને ઇનબાઉન્ડ ડેલિગેશન (Conductor PRD RF5) | Bearer વિરુદ્ધ `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| અંતિમ બિંદુ                  | પદ્ધતિ | વર્ણન                                                       | ઓથ                                                                                                 |
+| :--------------------------- | :----- | :---------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | સર્વર સ્થિતિ, નોંધાયેલ કુશળતા                               | (જાહેર)                                                                                            |
+| `/api/a2a/tasks`             | GET    | ફિલ્ટર્સ સાથે કાર્યોની સૂચિ બનાવો                           | મેનેજમેન્ટ અથવા API કી (નીચે જુઓ)                                                                  |
+| `/api/a2a/tasks/[id]`        | GET    | ID દ્વારા કાર્ય મેળવો                                       | મેનેજમેન્ટ અથવા API કી (નીચે જુઓ)                                                                  |
+| `/api/a2a/tasks/[id]/cancel` | POST   | ચાલી રહેલ કાર્ય રદ કરો                                      | મેનેજમેન્ટ અથવા API કી (નીચે જુઓ)                                                                  |
+| `/.well-known/agent.json`    | GET    | એજન્ટ કાર્ડ (A2A શોધ)                                       | (સાર્વજનિક, કેશ્ડ 3600)                                                                            |
+| `/api/a2a/tasks`             | POST   | OmniConductor ફ્લીટમાં ઇનબાઉન્ડ ડેલિગેશન (કન્ડક્ટર PRD RF5) | `GET`, વત્તા `OMNIROUTE_API_KEY` જો સેટ કરેલ હોય તો જ્યારે `REQUIRE_API_KEY` બંધ હોય; `a2aEnabled` |
 
-**ઇનબાઉન્ડ Conductor ડેલિગેશન (`POST /api/a2a/tasks`):** બાહ્ય A2A એજન્ટ્સ OmniRoute મારફતે OmniConductor ફ્લીટને કોડિંગ કાર્ય સોંપે છે. બોડી: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — ફક્ત Conductor ફ્લીટ સ્કિલ્સ (Agent Card પર જાહેર કરેલી) જ સોંપી શકાય છે; `metadata.conductor.repo.url` આવશ્યક છે (ફ્લીટ git રિપોઝિટરીઝ પર કામ કરે છે). રૂટ સર્વર-સાઇડ `CONDUCTOR_ORCHESTRATOR_TOKEN` (ફૉલબૅક `CONDUCTOR_HUB_TOKEN`) નો ઉપયોગ કરીને તેને હબના `POST /v1/tasks` માં રૂપાંતરિત કરે છે અને `201 { conductor_task_id, state: "submitted" }` પરત કરે છે; ટાસ્કની સ્થિતિઓ SSE→A2A મિરર (RF1) મારફતે પાછી પ્રવાહિત થાય છે અને `GET /api/a2a/tasks?skill=conductor` દ્વારા જોઈ શકાય છે.
+`/api/a2a/tasks*` રૂટ પર કોણ પહોંચે છે તે લોગિન અને API-કી સેટિંગ્સ પર આધાર રાખે છે:
+
+- `requireLogin=true` (ડિફૉલ્ટ): મિડલવેર માત્ર મેનેજમેન્ટ ઓળખપત્રો (ડૅશબોર્ડ સત્ર, `manage` -scope API કી, `oma_` ઍક્સેસ ટોકન) અને `OMNIROUTE_API_KEY` સ્વીકારે છે. સાદી અનુમાન કીને `403` મળે છે. `Authorization` હેડરમાં મિડલવેર માત્ર `OMNIROUTE_API_KEY` `Bearer <key>` તરીકે લે છે; `Bearer` `401` મળ્યા પછી એકદમ કી અથવા ટેબ.
+- `requireLogin=false`, અથવા ઓનબોર્ડિંગ પહેલાં લૂપબેક વિન્ડો: `REQUIRE_API_KEY=true` સાથે કોઈપણ માન્ય OmniRoute API કી અથવા મેનેજમેન્ટ ઓળખપત્ર સ્વીકારવામાં આવે છે અને અનામી કૉલર્સને `401` મળે છે; `REQUIRE_API_KEY` બંધ સાથે માર્ગો ખુલ્લા છે.
+- `POST /api/a2a/tasks` વધુમાં `Authorization` હેડરમાં `OMNIROUTE_API_KEY` જરૂર પડે છે જ્યારે તે ચલ સેટ હોય અને `REQUIRE_API_KEY` બંધ હોય. અન્ય હેડરો, જેમ કે `x-api-key`, ત્યાં ગણતરી કરતા નથી. લોગિન ઓફ સાથે અથવા ઓનબોર્ડિંગ પહેલાં કી `Bearer` ઉપસર્ગ સાથે અથવા વગર પસાર થાય છે; લૉગિન ઑન સાથે, માત્ર `Bearer <key>` જ મિડલવેરમાંથી પસાર થાય છે.
+
+જ્યાં ઓળખપત્રની આવશ્યકતા હોય, ત્યાં `read` -scope `oma_` ટોકન માત્ર `GET` માટે જ કામ કરે છે.
+
+**ઇનબાઉન્ડ કંડક્ટર પ્રતિનિધિમંડળ (`POST /api/a2a/tasks`):** બાહ્ય A2A એજન્ટો OmniRoute દ્વારા OmniConductor ફ્લીટને કોડિંગ કાર્ય સોંપે છે. મુખ્ય ભાગ: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — માત્ર કંડક્ટર ફ્લીટ કૌશલ્યો (જે એજન્ટ કાર્ડ પર જાહેર કરવામાં આવ્યા છે) સોંપી શકાય તેવા છે; `metadata.conductor.repo.url` જરૂરી છે (કાફલો git repos પર કામ કરે છે). રૂટ સર્વર-સાઇડ `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) નો ઉપયોગ કરીને હબના `POST /v1/tasks` માં અનુવાદ કરે છે અને `201 { conductor_task_id, state: "submitted" }` પરત કરે છે; કાર્ય સ્થિતિઓ SSE→A2A મિરર (RF1) દ્વારા પાછા વહે છે અને `GET /api/a2a/tasks?skill=conductor` દ્વારા દૃશ્યમાન છે.
 
 ---
 
-## નવી સ્કિલ ઉમેરવી
+## નવું કૌશલ્ય ઉમેરવું
 
-1. **સ્કિલ ફાઇલ બનાવો:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **કુશળતા ફાઇલ બનાવો:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` સ્વરૂપનું async function export કરો. `smartRouting.ts` જેવી હાલની સ્કિલ્સના માળખાને અનુસરો.
+   async ફંક્શન `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>` નિકાસ કરો. `smartRouting.ts` જેવી હાલની કુશળતાના આકારને અનુસરો. જો કૌશલ્ય પાછા HTTP પર OmniRoute માં કૉલ કરે છે, તો `src/lib/a2a/selfLoopAuth.ts` થી `buildSelfLoopHeaders(caller)` સાથે હેડર બનાવો જેથી કૉલ `OMNIROUTE_API_KEY` નહીં, A2A કૉલરની કી વડે ચાલે અને `redirect: "error"` ને `fetch` માં પાસ કરો જેથી રીડાયરેક્ટને ક્યારેય કી ન મળે. સહાયક ફક્ત હેડરો બનાવે છે; દરેક કૌશલ્ય રીડાયરેક્ટ પોલિસી પોતે સેટ કરે છે. જ્યારે ઉકેલાયેલ આધાર URL ખાનગી નેટવર્કની બહાર સાદો HTTP હોય (લૂપબેક, કન્ટેનર અથવા સેવાનું નામ અને ખાનગી સરનામાં સારા હોય) અથવા ઓળખપત્રો ધરાવે છે ત્યારે તે કી જોડવાને બદલે `UnsafeSelfLoopTargetError` ફેંકે છે, તેથી એક કૌશલ્ય કે જે નકારેલા કૉલ્સને ગળી જાય છે તેણે તે ભૂલને પુનઃથ્રોવી જોઈએ.
 
-2. **હેન્ડલર રજિસ્ટર કરો:** `src/lib/a2a/taskExecution.ts` માં, `A2A_SKILL_HANDLERS` માં એક એન્ટ્રી ઉમેરો:
+2. **નોંધણી હેન્ડલર:** `src/lib/a2a/taskExecution.ts` માં, `A2A_SKILL_HANDLERS` માં એન્ટ્રી ઉમેરો:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...હાલની સ્કિલ્સ
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Agent Card માં ઉપલબ્ધ કરાવો:** `src/lib/a2a/agentCardMetadata.ts` માં (`/.well-known/agent.json` અને `/.well-known/agent-card.json` બંને દ્વારા શેર કરાયેલ), `skills` array માં ઉમેરો:
+3. **એજન્ટ કાર્ડમાં એક્સપોઝ કરો:** `src/lib/a2a/agentCardMetadata.ts` માં ( `/.well-known/agent.json` અને `/.well-known/agent-card.json` દ્વારા વહેંચાયેલ), `skills` એરેમાં જોડો:
 
    ```json
    {
@@ -226,9 +234,9 @@ JSON-RPC એન્ડપોઇન્ટ `/a2a` પ્રમાણભૂત A2A �
    }
    ```
 
-4. **ટેસ્ટ્સ લખો:** `tests/unit/a2a-<your-skill>.test.ts`. સફળતા પાથ + ભૂલ પાથને આવરી લો.
+4. **પરીક્ષણો લખો:** `tests/unit/a2a-<your-skill>.test.ts` કવર હેપી પાથ + એરર પાથ.
 
-5. **આ ફાઇલના `Available Skills` ટેબલમાં નવી સ્કિલનું દસ્તાવેજીકરણ કરો.**
+5. **દસ્તાવેજ** આ ફાઇલના `Available Skills` ટેબલમાં નવી કુશળતા.
 
 ---
 
@@ -267,7 +275,7 @@ JSON-RPC એન્ડપોઇન્ટ `/a2a` પ્રમાણભૂત A2A �
 
 ## એકીકરણ ઉદાહરણો
 
-### પાયથોન (વિનંતી)
+### પાયથોન (વિનંતીઓ)
 
 ```python
 import requests

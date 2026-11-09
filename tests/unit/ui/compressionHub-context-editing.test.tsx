@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { NextIntlClientProvider } from "next-intl";
 import messages from "../../../src/i18n/messages/en.json";
+import { KIT_ALERT_DISMISS } from "./helpers/kitAlert";
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -167,6 +168,12 @@ describe("CompressionHub — Context Editing", () => {
     const text = container.textContent ?? "";
     expect(text).toContain("available for Claude (Anthropic) only");
     expect(text).toContain("we do not rewrite the message");
+
+    const note = Array.from(container.querySelectorAll('[data-slot="alert"]')).find((alert) =>
+      alert.textContent?.includes("available for Claude (Anthropic) only")
+    );
+    expect(note).toBeTruthy();
+    expect(note!.querySelector(KIT_ALERT_DISMISS)).toBeNull();
   });
 
   it("PUTs contextEditing: { enabled: true } when the toggle is flipped on", async () => {

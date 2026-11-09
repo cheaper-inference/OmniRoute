@@ -107,7 +107,7 @@ jednu površinu bez ostalih uzrokuje pad testnog skupa umjesto tihog odstupanja.
 
 ---
 
-## 1. Katalog CLI Code (27 alata)
+## 1. Katalog CLI Code (28 alata)
 
 Svi alati koji se pojavljuju u `/dashboard/cli-code`. Oni sa `baseUrlSupport: none` povezani su preko MITM ili ručnog vodiča umjesto prilagođene baze URL:
 
@@ -134,6 +134,7 @@ Svi alati koji se pojavljuju u `/dashboard/cli-code`. Oni sa `baseUrlSupport: no
 | grok-build      | Grok Build                 | xAI                    | puna           | običaj         | false        |
 | crush           | Crush                      | OSS (šarm)             | puna           | običaj         | false        |
 | qwen            | Qwen Code                  | Alibaba                | puna           | vodič          | istina       |
+| openclaude      | OpenClaude                 | Gitlawb (OSS)          | puna           | vodič          | false        |
 | zed             | Zed                        | Zed Industries         | puna           | vodič          | false        |
 | kursor          | Cursor                     | Anysphere              | nijedan        | vodič          | false        |
 | antigravitacija | Antigravity                | Google                 | nijedan        | mitm           | false        |
@@ -219,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Rukovatelji postavkama za nove alate
+## 6. Rukovaoci postavki za nove alate
 
-Novi alati sa `configType: "custom"` imaju namjenske API rute za postavke:
+Novi alati sa `configType: "custom"` imaju namjenske postavke API rute:
 
-| Ruta                                        | Alat                                                                            |
-| ------------------------------------------- | ------------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                         |
-| `POST /api/cli-tools/jcode-settings`        | jcode (opcija --base-url)                                                       |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, zastarjelo)                                      |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primarno + zastarjela `~/.deepseek` sinhronizacija) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                           |
-| `POST /api/cli-tools/pi-settings`           | Pi agent za programiranje                                                       |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                           |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + namjenski `.env` ključ)                    |
+| Ruta                                        | Alat                                                                             |
+| ------------------------------------------- | -------------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                          |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url zastava)                                                       |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, naslijeđe)                                        |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primarni + naslijeđeni `~/.deepseek` sinhronizacija) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                            |
+| `POST /api/cli-tools/pi-settings`           | Pi kodirajući agent (`~/.pi/agent/models.json`, `providers.omniroute`)           |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                            |
+| `POST /api/cli-tools/qwen-settings`         | Qwen kod (`~/.qwen/settings.json` + namjenski `.env` ključ)                      |
 
-Sve rute koriste `sanitizeErrorMessage()` za odgovore o greškama (strogo pravilo br. 12).
+Sve rute koriste `sanitizeErrorMessage()` za odgovore na greške (tvrdo pravilo #12).
 
 ---
 
@@ -295,17 +296,17 @@ Dostupni su potpuni prijevodi za PT-BR i EN. Ostalih 39 lokalizacija automatski 
 
 ### Korak 1 — Nabavite OmniRoute API ključ
 
-1. Otvorite `/dashboard/api-manager` → **Kreiraj API ključ**
-2. Dodijelite mu naziv (npr. `cli-tools`) i odaberite sve dozvole
-3. Kopirajte ključ — trebat će vam za svaki CLI u nastavku
+1. Otvori `/dashboard/api-manager` →** Kreirajte API ključ**
+2. Dajte mu ime (npr. `cli-tools`) i odaberite sve dozvole
+3. Kopirajte ključ — koji će vam trebati za svaki CLI ispod
 
-> Vaš ključ izgleda ovako: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Vaš ključ izgleda kao: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
 ### Korak 2 — Instalirajte CLI alate
 
-Svi alati zasnovani na npm-u zahtijevaju Node.js 22.22.2+ ili 24.x:
+Svi alati zasnovani na npm zahtijevaju Node.js 22.22.2 + ili 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,49 +327,48 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (može se pokrenuti putem `omniroute run gemini` → /v1beta sučelje)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Zasnovan na Rustu
+cargo install smelt  # Rust-based
 
-# Pi agent za programiranje
-# pogledajte https://github.com/zechnerj/pi-coding-agent za instalaciju
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# pogledajte https://github.com/1jehuang/jcode za instalaciju
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Korak 3 — Konfigurišite putem kontrolne ploče
+### Korak 3 — Konfigurišite preko Dashboard-a
 
-1. Idite na `http://localhost:20128/dashboard/cli-code`
+1. Idi `http://localhost:20128/dashboard/cli-code`
 2. Pronađite svoj alat u mreži
-3. Kliknite karticu da otvorite stranicu s detaljima alata
-4. Odaberite svoj API ključ i osnovni URL
-5. Kliknite **Primijeni konfiguraciju** ili kopirajte isječak za ručnu konfiguraciju
+3. Kliknite na karticu da otvorite stranicu sa detaljima alata
+4. Odaberite svoj API ključ i bazu URL
+5. Kliknite** Primijeni Config** ili kopirajte isječak ručne konfiguracije
 
 ---
 
 ### Korak 4 — Postavite globalne varijable okruženja
 
 ```bash
-# Univerzalna krajnja tačka OmniRoutea
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI čita GOOGLE_GEMINI_BASE_URL u KORIJENU (njegov SDK sam dodaje /v1beta/...)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Za **udaljeni server** zamijenite `localhost:20128` IP adresom ili domenom servera,
-> npr. `http://<your-server-ip>:20128`.
+> Za a** udaljeni server** zamijenite `localhost:20128` sa serverom IP ili domenom, npr. `http://<your-server-ip>:20128`.
 
 ---
 
@@ -377,7 +377,7 @@ export GEMINI_API_KEY="sk-your-omniroute-key"
 #### Claude Code
 
 ```bash
-# Kreirajte ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Koristite korijen objedinjenog Anthropic pristupnika za Claude Code. Ovdje nemojte dodavati `/v1`.
+Koristite objedinjeni korijen Anthropic gatewaya za Claude kod. Nemojte dodavati `/v1` ovdje.
 
 **Test:** `claude "say hello"`
 
@@ -396,10 +396,7 @@ Koristite korijen objedinjenog Anthropic pristupnika za Claude Code. Ovdje nemoj
 
 #### OpenAI Codex
 
-Moderni Codex (v0.137+) čita samo `~/.codex/config.toml` — stari
-`config.yaml` pripada zastarjelom npm CLI-ju i zanemaruje se bez upozorenja. API
-ključ ostaje u varijabli okruženja `OMNIROUTE_API_KEY` (`env_key`), nikada
-unutar datoteke:
+Moderni Codex (v0.137 +) čita `~/.codex/config.toml` samo — stari `config.yaml` pripada naslijeđenom npm CLI i tiho se ignorira. Ključ API ostaje u `OMNIROUTE_API_KEY` varijabli okruženja (`env_key`), nikada unutar datoteke:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -414,7 +411,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Potpuna referenca (profili, `wire_api`, kontekstni prozori): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Puna referenca (profili, `wire_api`, kontekstni prozori): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
 **Test:** `codex "what is 2+2?"`
 
@@ -447,12 +444,42 @@ EOF
 
 **Test:** `opencode`
 
-> Koristite `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> za slanje varijanti s razmišljanjem.
+> Koristite `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` za slanje varijanti razmišljanja.
 
 ---
 
-#### Cline (CLI ili VS Code)
+#### Pi kodirajući agent
+
+Instalirajte službeni paket Pi Coding Agent sa `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi čita prilagođene provajdere iz `~/.pi/agent/models.json`; postavite `PI_CODING_AGENT_DIR` da premjesti cijeli direktorij agenta. Kontrolna tabla prati tu opciju. Pi ne otkriva modele iz prilagođenih krajnjih tačaka, tako da OmniRoute upisuje odabrani model u `models[]` koristeći Pi-jev `openai-completions` API i OmniRoute OpenAI kompatibilnu `/v1` krajnju tačku.
+
+U**CLI → Pi** , odaberite krajnju tačku, API ključ i model, pregledajte pregled dobavljača, a zatim primijenite. Pregled je fragment provajdera: spojite `providers.omniroute` u vaš postojeći `models.json` kada ručno konfigurirate Pi tako da drugi provajderi i postavke ostanu netaknuti.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi ponovo učitava `models.json` kada otvorite `/model`. Testirajte konfiguriranu rutu s ID-om provajdera i ID-om modela koje ste odabrali:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Reference: [Pi modeli i prilagođeni provajderi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [varijable Pi okruženja](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [uputstva za instalaciju Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (CLI ili VS kod)
 
 **CLI način rada:**
 
@@ -466,14 +493,13 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code način rada:**
-Postavke proširenja Cline → API Provider: `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
+**VS Code mod:** Cline postavke ekstenzije → API Dobavljač: `OpenAI Compatible` → Baza URL: `http://localhost:20128/v1`
 
-Ili koristite kontrolnu ploču OmniRoute → **CLI alati → Cline → Primijeni konfiguraciju**.
+Ili koristite OmniRoute kontrolnu tablu →**CLI Alati → Cline → Primijeni konfig** .
 
 ---
 
-#### KiloCode (CLI ili VS Code)
+#### KiloCode (CLI ili VS kod)
 
 **CLI način rada:**
 
@@ -481,7 +507,7 @@ Ili koristite kontrolnu ploču OmniRoute → **CLI alati → Cline → Primijeni
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code postavke:**
+**Postavke VS koda:**
 
 ```json
 {
@@ -490,13 +516,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Ili koristite kontrolnu ploču OmniRoute → **CLI alati → KiloCode → Primijeni konfiguraciju**.
+Ili koristite OmniRoute kontrolnu tablu →**CLI Alati → KiloCode → Primijeni konfig** .
 
 ---
 
-#### Continue (VS Code proširenje)
+#### Nastavi (VS Code Extension)
 
-Uredite `~/.continue/config.yaml`:
+Uredi `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -508,13 +534,13 @@ models:
     default: true
 ```
 
-Ponovo pokrenite VS Code nakon uređivanja.
+Ponovo pokrenite VS kod nakon uređivanja.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Koristite ovo kada je VS Code Insiders konfigurisan za modele prilagođenih krajnjih tačaka i želite da OmniRoute radi bez prilagođenog polja zaglavlja.
+Koristite ovo kada je VS Code Insiders konfigurisan za prilagođene modele krajnjih tačaka i želite da OmniRoute radi bez prilagođenog polja zaglavlja.
 
 **Preporučena lokacija:**
 
@@ -543,29 +569,28 @@ Koristite ovo kada je VS Code Insiders konfigurisan za modele prilagođenih kraj
 ]
 ```
 
-**Napomene:**
+**napomene:**
 
-- Zamijenite `sk-your-omniroute-key` API ključem kreiranim u OmniRouteu.
-- Polje `url` treba upućivati na `/api/v1/vscode/{token}/chat/completions`.
-- Polje `modelsUrl` treba upućivati na `/api/v1/vscode/{token}/models`.
-- Dajte prednost standardnom toku `/v1` + Bearer zaglavlje kada klijent podržava prilagođena zaglavlja.
-- Tokeni ugrađeni u URL predstavljaju rezervno rješenje za kompatibilnost i mogu se pojaviti u zapisnicima uređivača ili historiji proxyja.
+- Zamijenite `sk-your-omniroute-key` sa API ključem kreiranim u OmniRoute.
+- Polje `url` treba da ukazuje na `/api/v1/vscode/{token}/chat/completions`.
+- Polje `modelsUrl` treba da ukazuje na `/api/v1/vscode/{token}/models`.
+- Preferirajte normalan `/v1` + tok zaglavlja nosioca kada klijent podržava prilagođena zaglavlja.
+- Tokeni ugrađeni u URL su rezervni za kompatibilnost i mogu se pojaviti u dnevnikima uređivača ili povijesti proxyja.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Prijavite se na svoj AWS/Kiro račun:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI koristi vlastitu autentifikaciju — OmniRoute nije potreban kao pozadinski sistem za sam Kiro CLI.
-# Koristite kiro-cli uz OmniRoute za druge alate.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-Za desktop aplikaciju **Kiro IDE** koristite MITM krajnju tačku koju OmniRoute izlaže
-na `/dashboard/cli-tools → Kiro`.
+Za**Kiro IDE** desktop aplikaciju, koristite MITM krajnju tačku izloženu OmniRoute pod `/dashboard/cli-tools → Kiro`.
 
 ---
 

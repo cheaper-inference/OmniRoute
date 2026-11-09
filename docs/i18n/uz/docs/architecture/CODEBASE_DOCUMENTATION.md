@@ -455,7 +455,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -485,11 +485,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ta yuqori darajadagi ijrochi modullari (`*.ts` minus `base.ts`, `index.ts` va testlar - `npm run check:docs-counts` o'lchovlari soni). Har bir bajaruvchi sinfi `BaseExecutor` (`base.ts`) ni bevosita yoki `DefaultExecutor` yoki boshqa bajaruvchi orqali kengaytiradi; qolgan modullar provayder uchun yordamchilardir (asbob sxemalari, fetch/TTS adapterlari, quik ishlovchilar). Ijrochilarga quyidagilar kiradi:
+159 ta yuqori darajadagi ijrochi modullari (`*.ts` minus `base.ts`, `index.ts` va testlar — `npm run check:docs-counts` o'lchovlari). Har bir bajaruvchi sinfi `BaseExecutor` (`base.ts`) ni bevosita yoki `DefaultExecutor` yoki boshqa bajaruvchi orqali kengaytiradi; qolgan modullar provayder uchun yordamchilardir (asbob sxemalari, fetch/TTS adapterlari, quik ishlov beruvchilar). Ijrochilarga quyidagilar kiradi:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode` `petals` `perplexity-web`, `pollinations`, `qoder`, plus `devin-desktop`(birgalikda identifikatsiya yordamchisi) va `claudeIdentity.ts` (ro'yxatga olish kitobi) `index.ts`
 
-> Eslatma: bu yerda sanab o‘tilmagan provayderlarga `default.ts` umumiy OpenAI-mos ijrochi yordamida xizmat ko‘rsatadi. To'liq provayderlar katalogi (377 provayder) `src/shared/constants/providers.ts` da yashaydi.
+> Eslatma: bu yerda sanab o‘tilmagan provayderlarga `default.ts` umumiy OpenAI-mos ijrochi yordamida xizmat ko‘rsatadi. To'liq provayderlar katalogi (381 ta provayder) `src/shared/constants/providers.ts` da yashaydi.
 
 ### 4.3 `open-sse/translator/`
 
@@ -503,7 +503,7 @@ Hub-and-spoke tarjimasi (OpenAI - bu markaz).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Responses API ↔ Chat Completions converter ( `responses/` route catch-all tomonidan ishlatiladi).
+- `responsesTransformer.ts` — `TransformStream` -based Javoblar API ↔ Chatni yakunlash konvertori ( `responses/` marshruti tomonidan foydalaniladi).
 
 ### 4.5 `open-sse/services/`
 
@@ -518,7 +518,7 @@ Diqqatga sazovor joylar ( `open-sse/services/` ostida to'liq ro'yxat):
 | Keshlash                  | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Marshrutlash razvedkasi   | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Modelga ishlov berish     | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Siqish                    | `compression/` - to'liq siqish dvigatel simlari                                                                                                                                                                                                          |
+| Siqish                    | `compression/` — to'liq siqish dvigatel simlari                                                                                                                                                                                                          |
 | Token + sessiyasi         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Darajali/manifest         | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / tarmoq               | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -527,9 +527,9 @@ Diqqatga sazovor joylar ( `open-sse/services/` ostida to'liq ro'yxat):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 ta noyob vositalar** `server.ts` -da simli ( `schemas/tools.ts` + xotirasida 45 ta kanonik, ko'nikmalar, GitHub-ko'nikmalar, hovuz, o'yinlashtirish, plagin, Notion, Obsidian, mahalliy korpus va siqish modullari - `countUniqueMcpTools` tomonidan hisoblangan ittifoq).
+- **110 ta noyob vositalar** `server.ts` simli ( `schemas/tools.ts` + xotirasida 45 ta kanonik, ko'nikmalar, GitHub-ko'nikmalar, hovuz, o'yinlashtirish, plagin, Notion, Obsidian, mahalliy korpus va siqish modullari — birlashmasi `countUniqueMcpTools` bilan hisoblanadi).
 - **3 ta transport** : stdio, HTTP Streamable, SSE.
-- **33 ta maydon** ish vaqtida amalga oshiriladi — `src/shared/constants/mcpScopes.ts` dagi asosiy roʻyxat, toʻliq toʻplam har bir asbob moduli tomonidan eʼlon qilingan qamrovlar birligidir.
+- **33 ta maydon** `src/shared/constants/mcpScopes.ts` da ishlash vaqtida — asosiy roʻyxatida amalga oshiriladi, toʻliq toʻplam har bir asbob moduli tomonidan eʼlon qilingan qamrovlar birligidir.
 - Audit jadvali: `mcp_tool_audit` ( `audit.ts` bilan to'ldirilgan).
 - Fayllar: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus `__tests__/` ostidagi testlar.
 - To'liq vositalar katalogi uchun [MCP-SERVER.md](../frameworks/MCP-SERVER.md) qarang.

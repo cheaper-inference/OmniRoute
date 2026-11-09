@@ -1,1 +1,0 @@
-- **feat(providers):** Add Gisoo (`gisoo`), a prepaid OpenAI-compatible multi-model relay, as an API-key provider with live model discovery from `/api/v1/models` ([#18112](https://github.com/cheaper-inference/OmniRoute/pull/18112)) — thanks @netarz

@@ -234,6 +234,12 @@ export interface ProviderQuotaOverrideSettings {
   concurrency?: number;
   /** Shared concurrency cap across every connection for this provider. */
   providerConcurrency?: number;
+  /**
+   * Fixed connection cooldown (seconds) after a rate-limit error when the upstream sent no
+   * retry hint. Replaces the scaled exponential backoff for this provider; a per-connection
+   * `rotationOverrides.rateLimitResetSeconds` still wins. Missing = engine default ("Auto").
+   */
+  rateLimitCooldownSeconds?: number;
 }
 
 export interface StreamRecoverySettings {
@@ -271,7 +277,13 @@ export interface StreamThroughputWatchdogSettings {
   minUsefulBytes: number;
 }
 
+/** Controls sanitized timing of the real Antigravity physical HTTP sends. */
+export interface AntigravityTimingTelemetrySettings {
+  enabled: boolean;
+}
+
 export interface ResilienceSettings {
+  antigravityTimingTelemetry: AntigravityTimingTelemetrySettings;
   requestQueue: RequestQueueSettings;
   connectionCooldown: Record<AuthCategory, ConnectionCooldownProfileSettings>;
   providerBreaker: Record<AuthCategory, ProviderBreakerProfileSettings>;
@@ -289,6 +301,7 @@ export interface ResilienceSettings {
 }
 
 export interface ResilienceSettingsPatch {
+  antigravityTimingTelemetry?: Partial<AntigravityTimingTelemetrySettings>;
   requestQueue?: Partial<RequestQueueSettings>;
   connectionCooldown?: Partial<Record<AuthCategory, Partial<ConnectionCooldownProfileSettings>>>;
   providerBreaker?: Partial<Record<AuthCategory, Partial<ProviderBreakerProfileSettings>>>;

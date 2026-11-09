@@ -13,53 +13,71 @@ Phần triển khai nằm trong `src/lib/compliance/index.ts` (T-43 — "Kiểm 
 
 ## Những gì được ghi nhật ký
 
-### Các sự kiện kiểm toán quản trị (`audit_log`)
+### Sự kiện kiểm tra quản trị (`audit_log`)
 
-Mỗi lệnh gọi `logAuditEvent({ action, actor, target, details, ... })` tạo ra một hàng. Chuỗi hành động tuân theo mẫu `domain.verb` (hoặc `domain.verb.outcome`). Các loại hành động đã được xác nhận trong cây mã nguồn bao gồm:
+Mỗi lần gọi `logAuditEvent({ action, actor, target, details, ... })` sẽ tạo
+một hàng. Chuỗi hành động tuân theo mẫu `domain.verb` (hoặc
+`domain.verb.outcome`). Các loại hành động đã được xác nhận trong mã nguồn
+bao gồm:
 
-| Hành động                            | Nguồn                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Hành động                            | Nguồn                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Mỗi mục ghi lại `action`, `actor` (mặc định là `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` và `timestamp`. Các khóa nhạy cảm (`apiKey`, `accessToken`, `refreshToken`, `password`, mọi khóa khớp với `*token`/`*secret`/`*apikey`, v.v.) được che giấu đệ quy thành `"[redacted]"` trước khi hàng được ghi.
+Mỗi mục ghi lại `action`, `actor` (mặc định là `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` và `timestamp`. Các khóa nhạy cảm (`apiKey`, `accessToken`,
+`refreshToken`, `password`, mọi khóa khớp với `*token`/`*secret`/`*apikey`,
+v.v.) được đệ quy che lại thành `"[redacted]"` trước khi hàng được ghi.
 
-### Các lệnh gọi công cụ MCP (`mcp_tool_audit`)
+Các hàng `api_key.auth.touch` ghi lại siêu dữ liệu khóa API thành công và các
+lần đọc phát hiện (GET/HEAD) không bao giờ đi vào nhật ký yêu cầu: khóa nào,
+thời điểm nào và đường dẫn đã chuẩn hóa, được gộp và giới hạn ở 1.000 hàng.
+Các khóa có `noLog` và khóa môi trường sẽ bị bỏ qua. Địa chỉ IP và user-agent
+của bên gọi chỉ được thêm khi cờ tính năng
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` được bật (mặc định là tắt).
 
-Mỗi lần gọi công cụ MCP đều ghi một hàng thông qua `open-sse/mcp-server/audit.ts`. Lược đồ (từ `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+### Các lần gọi công cụ MCP (`mcp_tool_audit`)
 
-| Cột              | Ghi chú                                  |
-| ---------------- | ---------------------------------------- |
-| `id`             | tự động tăng                             |
-| `tool_name`      | mã định danh công cụ MCP                 |
-| `input_hash`     | sha256 của đầu vào (không lưu tải trọng) |
-| `output_summary` | bản tóm tắt ngắn, đã cắt bớt             |
-| `duration_ms`    | thời gian thực tế                        |
-| `api_key_id`     | bên gọi (có thể null)                    |
-| `success`        | `1` / `0`                                |
-| `error_code`     | mã lỗi cuối cùng khi thất bại            |
-| `created_at`     | dấu thời gian ISO                        |
+Mỗi lần gọi công cụ MCP sẽ ghi một hàng thông qua
+`open-sse/mcp-server/audit.ts`. Lược đồ (từ
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-### Nhật ký yêu cầu / mức sử dụng
+| Cột              | Ghi chú                                |
+| ---------------- | -------------------------------------- |
+| `id`             | tự động tăng                           |
+| `tool_name`      | mã định danh công cụ MCP               |
+| `input_hash`     | sha256 của đầu vào (không lưu payload) |
+| `output_summary` | bản tóm tắt ngắn, đã cắt ngắn          |
+| `duration_ms`    | thời gian thực tế                      |
+| `api_key_id`     | bên gọi (có thể rỗng)                  |
+| `success`        | `1` / `0`                              |
+| `error_code`     | mã lỗi cuối cùng khi thất bại          |
+| `created_at`     | dấu thời gian ISO                      |
 
-Đây là dữ liệu đo từ xa vận hành (không hoàn toàn là kiểm toán quản trị), nhưng sử dụng chung quy trình lưu giữ:
+### Nhật ký yêu cầu / sử dụng
 
-- `usage_history` — tổng hợp mức sử dụng theo từng yêu cầu
+Đây là dữ liệu đo từ xa vận hành (không hoàn toàn là kiểm tra quản trị) nhưng
+sử dụng chung quy trình lưu giữ:
+
+- `usage_history` — dữ liệu tổng hợp mức sử dụng theo từng yêu cầu
 - `call_logs` — nhật ký đầy đủ theo từng yêu cầu (chịu giới hạn số hàng, xem bên dưới)
 - `proxy_logs` — nhật ký lưu lượng proxy (chịu giới hạn số hàng)
-- `request_detail_logs` — nhật ký yêu cầu chi tiết cũ (vẫn được lược bỏ nếu tồn tại)
+- `request_detail_logs` — nhật ký yêu cầu chi tiết cũ (vẫn được dọn dẹp nếu tồn tại)
 
 ## Lược đồ lưu trữ
 

@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 eksekveringsmoduler på øverste niveau (`*.ts` minus `base.ts`, `index.ts` og tests - antallet `npm run check:docs-counts` måler). Hver executor-klasse udvider `BaseExecutor` (`base.ts`), direkte eller gennem `DefaultExecutor` eller en anden executor; de resterende moduler er hjælpere pr. udbyder (værktøjsskemaer, fetch/TTS adaptere, quirk-handlere). Eksekutører inkluderer:
+159 eksekveringsmoduler på øverste niveau (`*.ts` minus `base.ts`, `index.ts` og tests — count `npm run check:docs-counts` måler). Hver executor-klasse udvider `BaseExecutor` (`base.ts`), direkte eller gennem `DefaultExecutor` eller en anden executor; de resterende moduler er hjælpere pr. udbyder (værktøjsskemaer, fetch/TTS adaptere, quirk-handlere). Eksekutører inkluderer:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, `claudeIdentity.ts` and `index.ts` (registrering).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (shared identity helper) and `index.ts` (registry).
 
-> Bemærk: udbydere, der ikke er angivet her, betjenes af `default.ts` ved hjælp af den generiske OpenAI-kompatible eksekvering. Det fulde udbyderkatalog (377 udbydere) findes i `src/shared/constants/providers.ts`.
+> Bemærk: udbydere, der ikke er angivet her, betjenes af `default.ts` ved hjælp af den generiske OpenAI-kompatible eksekvering. Det fulde udbyderkatalog (381 udbydere) findes i `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ Hub-and-spoke-oversættelse (OpenAI er omdrejningspunktet).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Svar API ↔ Chat-afslutningskonverter (bruges af `responses/` -ruten catch-all).
+- `responsesTransformer.ts` — `TransformStream` -based Svar API ↔ Chat-afslutningskonverter (bruges af `responses/` ruten catch-all).
 
 ### 4.5 `open-sse/services/`
 
@@ -528,16 +528,16 @@ Højdepunkter (fuld liste under `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unikke værktøjer** kablet i `server.ts` (45 kanoniske i `schemas/tools.ts` + hukommelse, færdigheder, GitHub-færdigheder, pool, gamification, plugin, Notion, Obsidian, lokalkorpus og komprimeringsmoduler - union tælles af `countUniqueMcpTools`).
+- **110 unikke værktøjer** kablet i `server.ts` (45 kanoniske i `schemas/tools.ts` + hukommelse, færdigheder, GitHub-færdigheder, pool, gamification, plugin, Notion, Obsidian, lokalkorpus og komprimeringsmoduler — union tælles af `countUniqueMcpTools`).
 - **3 transporter** : stdio, HTTP Streamable, SSE.
-- **33 omfang** håndhæves ved kørsel — basisliste i `src/shared/constants/mcpScopes.ts`, fuldt sæt er foreningen af omfanget erklæret af hvert værktøjsmodul.
+- **33 omfang** håndhævet ved runtime — base list i `src/shared/constants/mcpScopes.ts`, fuld sæt er foreningen af omfanget erklæret af hvert værktøjsmodul.
 - Revisionstabel: `mcp_tool_audit` (befolket af `audit.ts`).
 - Filer: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus test under `__tests__/`.
 - Se [MCP-SERVER.md](../frameworks/MCP-SERVER.md) for det fulde værktøjskatalog.
 
 ### 4.7 `open-sse/config/`
 
-Udbyderregistreringer (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), `toolCloaking.ts` per format (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identitetshjælpere (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `defaultThinkingSignature.ts`), legitimationshjælpere (`credentialLoader.ts`, `cliFingerprints.ts`) og cloud `codexClient.ts` adaptere (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, zqy `registryUtils.ts` zqz, `oci.ts`, `glmProvider.ts`, `maritalk.ts`, `runway.ts` `petals.ts` `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`).
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

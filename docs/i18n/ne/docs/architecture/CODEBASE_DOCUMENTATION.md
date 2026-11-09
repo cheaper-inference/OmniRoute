@@ -445,7 +445,7 @@ server/
 
 ---
 
-## 4. `open-sse/` - स्ट्रिमिङ इन्जिन कार्यस्थान
+## 4. `open-sse/` — स्ट्रिमिङ इन्जिन कार्यस्थान
 
 अलग npm कार्यस्थान `@omniroute/open-sse` को रूपमा प्रकाशित। अनुरोध प्रशोधन, कार्यान्वयनकर्ता, अनुवादक, सेवा, ट्रान्सफर्मर, र MCP सर्भरको स्वामित्व छ।
 
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -487,11 +487,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 शीर्ष-स्तर निर्वाहक मोड्युलहरू (`*.ts` माइनस `base.ts`, `index.ts` र परीक्षणहरू - गणना `npm run check:docs-counts` उपायहरू)। प्रत्येक निर्वाहक वर्गले `BaseExecutor` (`base.ts`), प्रत्यक्ष वा `DefaultExecutor` वा अर्को एक्जिक्युटर मार्फत विस्तार गर्दछ; बाँकी मोड्युलहरू प्रति-प्रदायक सहयोगीहरू हुन् (उपकरण योजनाहरू, fetch/TTS एडेप्टरहरू, quirk ह्यान्डलरहरू)। कार्यकारीहरू समावेश छन्:
+159 शीर्ष-स्तर निष्पादक मोड्युलहरू (`*.ts` माइनस `base.ts`, `index.ts` र परीक्षणहरू — गणना `npm run check:docs-counts` उपायहरू)। प्रत्येक निर्वाहक वर्गले `BaseExecutor` (`base.ts`), प्रत्यक्ष वा `DefaultExecutor` वा अर्को एक्जिक्युटर मार्फत विस्तार गर्दछ; बाँकी मोड्युलहरू प्रति-प्रदायक सहयोगीहरू हुन् (उपकरण योजनाहरू, fetch/TTS एडेप्टरहरू, quirk ह्यान्डलरहरू)। कार्यकारीहरू समावेश छन्:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, plus `claudeIdentity.ts` (साझा पहिचान सहायक) र `index.ts` (रजिस्ट्री) `devin-desktop`
 
-> नोट: यहाँ सूचीबद्ध नगरिएका प्रदायकहरूलाई जेनेरिक OpenAI-compatible executor को प्रयोग गरेर `default.ts` द्वारा सेवा दिइन्छ। पूर्ण प्रदायक सूची (377 प्रदायकहरू) `src/shared/constants/providers.ts` मा बस्छन्।
+> नोट: यहाँ सूचीबद्ध नगरिएका प्रदायकहरूलाई जेनेरिक OpenAI-compatible executor को प्रयोग गरेर `default.ts` द्वारा सेवा दिइन्छ। पूर्ण प्रदायक सूची (381 प्रदायकहरू) `src/shared/constants/providers.ts` मा बस्छन्।
 
 ### 4.3 `open-sse/translator/`
 
@@ -505,7 +505,7 @@ open-sse/
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based प्रतिक्रियाहरू API ↔ च्याट पूरा कन्भर्टर ( `responses/` मार्ग क्याच-अल द्वारा प्रयोग गरिएको)।
+- `responsesTransformer.ts` — `TransformStream` -based प्रतिक्रियाहरू API ↔ च्याट पूर्णता कन्भर्टर ( `responses/` मार्ग क्याच-अल द्वारा प्रयोग गरिएको)।
 
 ### 4.5 `open-sse/services/`
 
@@ -520,7 +520,7 @@ open-sse/
 | क्यासिङ          | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | राउटिंग बुद्धि   | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | मोडेल ह्यान्डलिङ | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| सङ्कुचन          | `compression/` - पूर्ण कम्प्रेसन इन्जिन तारिङ                                                                                                                                                                                                            |
+| सङ्कुचन          | `compression/` — पूर्ण कम्प्रेसन इन्जिन तारिङ                                                                                                                                                                                                            |
 | टोकन + सत्र      | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | टियर / प्रकट     | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / नेटवर्क     | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -529,12 +529,12 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 अद्वितीय उपकरणहरू** `server.ts` मा तार (45 `schemas/tools.ts` + मेमोरीमा क्यानोनिकल, कौशल, GitHub- कौशल, पूल, गेमिफिकेशन, प्लगइन, Notion, Obsidian, स्थानीय-कोर्पस र कम्प्रेसन मोड्युलहरू — `countUniqueMcpTools` द्वारा गणना गरिएको संघ)।
+- **110 अद्वितीय उपकरणहरू** `server.ts` मा तार (45 `schemas/tools.ts` + मेमोरीमा क्यानोनिकल, कौशल, GitHub- कौशल, पूल, गेमिफिकेशन, प्लगइन, Notion, Obsidian, स्थानीय-कोर्पस र कम्प्रेसन मोड्युलहरू — संघ `countUniqueMcpTools` द्वारा गणना गरिएको)।
 - **3 यातायात** : stdio, HTTP स्ट्रिमेबल, SSE।
-- **33 स्कोपहरू** रनटाइममा लागू हुन्छ — `src/shared/constants/mcpScopes.ts` मा आधार सूची, पूर्ण सेट प्रत्येक उपकरण मोड्युलद्वारा घोषित स्कोपहरूको संघ हो।
+- **33 स्कोपहरू** `src/shared/constants/mcpScopes.ts` मा रनटाइम — आधार सूचीमा लागू, पूर्ण सेट प्रत्येक उपकरण मोड्युल द्वारा घोषित स्कोपहरूको संघ हो।
 - लेखापरीक्षण तालिका: `mcp_tool_audit` ( `audit.ts` द्वारा जनसंख्या भएको)।
 - फाइलहरू: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, प्लस `__tests__/` अन्तर्गत परीक्षणहरू।
-- पूरा उपकरण सूचीको लागि [MCP-SERVER.md](../frameworks/MCP-SERVER.md) हेर्नुहोस्।
+- पूर्ण उपकरण सूचीको लागि [MCP-SERVER.md](../frameworks/MCP-SERVER.md) हेर्नुहोस्।
 
 ### 4.7 `open-sse/config/`
 

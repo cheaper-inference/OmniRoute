@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ម៉ូឌុលប្រតិបត្តិកម្រិតកំពូល (`*.ts` ដក `base.ts`, `index.ts` និងការធ្វើតេស្ត - វិធានការ `npm run check:docs-counts` រាប់) ។ រាល់ថ្នាក់ប្រតិបត្តិករពង្រីក `BaseExecutor` (`base.ts`) ដោយផ្ទាល់ ឬតាមរយៈ `DefaultExecutor` ឬប្រតិបត្តិករផ្សេងទៀត; ម៉ូឌុលដែលនៅសេសសល់គឺជាអ្នកជំនួយពីអ្នកផ្តល់សេវា (គ្រោងការណ៍ឧបករណ៍, អាដាប់ទ័រ fetch/TTS, ឧបករណ៍ដោះស្រាយ quirk) ។ អ្នកប្រតិបត្តិរួមមានៈ
+159 ម៉ូឌុលប្រតិបត្តិកម្រិតកំពូល (`*.ts` ដក `base.ts`, `index.ts` និងការធ្វើតេស្ត — វិធានការ `npm run check:docs-counts` រាប់) ។ រាល់ថ្នាក់ប្រតិបត្តិករពង្រីក `BaseExecutor` (`base.ts`) ដោយផ្ទាល់ ឬតាមរយៈ `DefaultExecutor` ឬប្រតិបត្តិករផ្សេងទៀត; ម៉ូឌុលដែលនៅសេសសល់គឺជាអ្នកជំនួយពីអ្នកផ្តល់សេវា (គ្រោងការណ៍ឧបករណ៍, អាដាប់ទ័រ fetch/TTS, ឧបករណ៍ដោះស្រាយ quirk) ។ អ្នកប្រតិបត្តិរួមមានៈ
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `claudeIdentity.ts` () និងចែករំលែក `devin-desktop` `index.ts`
 
-> ចំណាំ៖ អ្នកផ្តល់សេវាដែលមិនបានរាយបញ្ជីនៅទីនេះត្រូវបានបម្រើដោយ `default.ts` ដោយប្រើកម្មវិធីប្រតិបត្តិដែលត្រូវគ្នានឹង OpenAI ទូទៅ។ កាតាឡុកអ្នកផ្តល់សេវាពេញលេញ (អ្នកផ្តល់សេវា 377) រស់នៅក្នុង `src/shared/constants/providers.ts`។
+> ចំណាំ៖ អ្នកផ្តល់សេវាដែលមិនបានរាយបញ្ជីនៅទីនេះត្រូវបានបម្រើដោយ `default.ts` ដោយប្រើកម្មវិធីប្រតិបត្តិដែលត្រូវគ្នានឹង OpenAI ទូទៅ។ កាតាឡុកអ្នកផ្តល់សេវាពេញលេញ (អ្នកផ្តល់សេវា 381) រស់នៅក្នុង `src/shared/constants/providers.ts`។
 
 ### 4.3 `open-sse/translator/`
 
@@ -519,7 +519,7 @@ open-sse/
 | ឃ្លាំងសម្ងាត់             | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | កំណត់ផ្លូវឆ្លាតវៃ         | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | ការគ្រប់គ្រងគំរូ          | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| ការបង្ហាប់                | `compression/` - ខ្សែភ្លើងម៉ាស៊ីនបង្ហាប់ពេញលេញ                                                                                                                                                                                                           |
+| ការបង្ហាប់                | `compression/` — ខ្សែភ្លើងម៉ាស៊ីនបង្ហាប់ពេញលេញ                                                                                                                                                                                                           |
 | វគ្គ Token +              | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | ថ្នាក់ / បង្ហាញ           | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / បណ្តាញ               | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -530,7 +530,7 @@ open-sse/
 
 - **ឧបករណ៍ពិសេសចំនួន 110** មានខ្សែនៅក្នុង `server.ts` (45 canonical នៅក្នុងអង្គចងចាំ `schemas/tools.ts` +, ជំនាញ, GitHub-skills, pool, gamification, plugin, Notion, Obsidian, local-corpus and compression modules — union រាប់ដោយ `countUniqueMcpTools`)។
 - **3 ការដឹកជញ្ជូន** ៖ stdio, HTTP Streamable, SSE។
-- **33 វិសាលភាព** បានអនុវត្តនៅពេលដំណើរការ — បញ្ជីមូលដ្ឋាននៅក្នុង `src/shared/constants/mcpScopes.ts` សំណុំពេញលេញគឺជាសហជីពនៃវិសាលភាពដែលបានប្រកាសដោយម៉ូឌុលឧបករណ៍នីមួយៗ។
+- **33 វិសាលភាព** បង្ខំឱ្យដំណើរការបញ្ជីមូលដ្ឋាន — ក្នុង `src/shared/constants/mcpScopes.ts` សំណុំពេញលេញគឺជាសហជីពនៃវិសាលភាពដែលបានប្រកាសដោយម៉ូឌុលឧបករណ៍នីមួយៗ។
 - តារាងសវនកម្ម៖ `mcp_tool_audit` (បញ្ចូលដោយ `audit.ts`)។
 - ឯកសារ៖ `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, បូកនឹងការធ្វើតេស្តក្រោម `__tests__/`។
 - សូមមើល [MCP-SERVER.md](../frameworks/MCP-SERVER.md) សម្រាប់កាតាឡុកឧបករណ៍ពេញលេញ។
@@ -541,7 +541,7 @@ open-sse/
 
 ### 4.8 `open-sse/utils/`
 
-ការស្ទ្រីមបុព្វបទ និងអ្នកផ្តល់ជំនួយ៖ `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts` `usageTracking.ts` `progressTracker.ts` `error.ts` `cors.ts` `logger.ts` `requestLogger.ts`, `sleep.ts` `ollamaTransform.ts`
+ការស្ទ្រីមបឋមនិងអ្នកផ្តល់ជំនួយ៖ `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts` `usageTracking.ts` `progressTracker.ts` `error.ts` `cors.ts` `logger.ts` `requestLogger.ts`, `sleep.ts` `ollamaTransform.ts`
 
 ---
 

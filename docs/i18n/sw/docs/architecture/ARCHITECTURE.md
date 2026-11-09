@@ -14,7 +14,7 @@ OmniRoute ni lango la ndani AI la uelekezaji na dashibodi iliyojengwa juu ya Nex
 
 Uwezo wa msingi:
 
-- Uso wa API unaoendana na OpenAI kwa CLI/tools (watoa huduma 377, moduli 156 za watekelezaji)
+- Uso wa API unaoendana na OpenAI kwa CLI/tools (watoa huduma 381, moduli 159 za watekelezaji)
 - Request/response tafsiri katika miundo ya mtoaji
 - Mfano mbadala wa mseto (mfuatano wa miundo mingi)
 - Hatua za mchanganyiko zilizoundwa (`provider + model + connection`) na kuagiza wakati wa kukimbia na `compositeTiers`
@@ -33,7 +33,7 @@ Uwezo wa msingi:
 - Fikiria uchanganuzi wa lebo (`<think>...</think>`) kwa mifano ya hoja
 - Usafishaji wa majibu kwa utangamano madhubuti wa OpenAI SDK
 - Urekebishaji wa jukumu (mfumo wa → wa msanidi, mtumiaji wa → wa mfumo) kwa utangamano wa mtoaji mtambuka
-- Ubadilishaji wa pato lililoundwa (json_schema → Gemini majibuSchema)
+- Ubadilishaji wa matokeo yaliyopangwa (json_schema → Gemini responseSchema)
 - Uvumilivu wa ndani kwa watoa huduma, funguo, lakabu, mchanganyiko, mipangilio, bei (moduli 122 DB )
 - Usage/cost kufuatilia na kuomba ukataji miti
 - Usawazishaji wa hiari wa wingu kwa ulandanishi multi-device/state
@@ -402,7 +402,7 @@ Kwa utunzi wa seti ya sheria na urekebishaji wa kizingiti, angalia [`docs/securi
 
 ### D. Tabaka la Kikoa
 
-Nafasi ya majina `src/domain/` huweka maamuzi ya sera katikati ili vidhibiti njia si lazima vikusanye mantiki lockout/budget/fallback wenyewe.
+Nafasi ya majina `src/domain/` huweka maamuzi ya sera katikati ili wasimamizi wa njia wasilazimike kukusanya mantiki lockout/budget/fallback wenyewe.
 
 - Injini ya sera: `src/domain/policyEngine.ts` — mahali pa kuingilia moja kwa ajili ya tathmini ya kabla ya utekelezaji (kufungia → bajeti → kuagiza mbadala)
 - Sheria za gharama: `src/domain/costRules.ts`
@@ -413,7 +413,7 @@ Nafasi ya majina `src/domain/` huweka maamuzi ya sera katikati ili vidhibiti nji
 - Connection/model kiunganishi cha sheria: `src/domain/connectionModelRules.ts`
 - Muundo wa picha za upatikanaji: `src/domain/modelAvailability.ts`
 - Ufuatiliaji wa mwisho wa muda wa mtoa huduma: `src/domain/providerExpiration.ts`
-- Akiba ya sehemu: `src/domain/quotaCache.ts`
+- Akiba ya sehemu: `src/domain/quotaCache.ts`. Watoa huduma huongeza na kuondoa madirisha ya upendeleo (OpenAI ilidondosha dirisha Codex la saa 5 kwa baadhi ya mipango), kwa hivyo matumizi ya usomaji wa adapta ya mtoa huduma huthibitisha kuwa imekamilika (`quotasComplete`, ona `src/lib/usage/usageReading.ts`) ni seti kamili ya dirisha la akaunti: dirisha linalojulikana mapema lakini halipo limeachwa, kwenye akiba, kwenye rekodi ya kuanza tena programu `quota_snapshots` (rekodi ya kuanza tena) hali ya mgawo wa Codex na ndoo za kueneza za Claude. Ushahidi wa kiasi (vijajuu vya majibu, nakala za zamani) husasisha tu madirisha inayobeba.
 - Hali ya uharibifu: `src/domain/degradation.ts`
 - Ukaguzi wa usanidi: `src/domain/configAudit.ts`
 - mjenzi wa metadata ya majibu OmniRoute : `src/domain/omnirouteResponseMeta.ts`

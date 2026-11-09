@@ -4,11 +4,9 @@
 
 ---
 
-> **版本：** v3.8.44
-> **最後更新：** 2026-09-16
-> **適用對象：** 新增、維護或偵錯嵌入式服務（9Router、CLIProxyAPI、Mux、Bifrost、open-wa、LLMLingua）的工程師。
+> **版本：** v3.8.44**最後更新：** 2026-10-28**觀眾：**工程師新增、維護或除錯嵌入式服務（9Router、 CLIProxyAPI、Mux、Bifrost、open-wa、 LLMLingua、sing-box）。
 
-嵌入式服務是安裝於本機的行程伴隨工具，由 OmniRoute 負責安裝、監督，並將其公開為一級路由目標。不同於外部提供者（透過網際網路使用 API 金鑰連線），嵌入式服務與 OmniRoute 在同一台機器上執行，並透過迴送介面進行通訊。
+嵌入式服務是本地安裝的進程邊車工具， OmniRoute將其安裝、監督並公開為一流的路由目標。與外部提供者（透過API金鑰透過網際網路存取）不同，嵌入式服務與OmniRoute運作在同一台機器上，並透過環回進行通訊。
 
 ---
 
@@ -27,58 +25,59 @@
 
 ## 1. 概述
 
-### 為什麼使用嵌入式服務？
+### 為什麼選擇嵌入式服務？
 
-內嵌了七項服務：
+嵌入了八項服務：
 
-| 服務            | npm 套件                            | 預設連接埠 | 用途                                                                                                                                                                                                                                                                    |
-| --------------- | ----------------------------------- | :--------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                           |   20130    | OmniRoute 可作為次級提供者使用的 AI 路由器。模型會公開為 `9router/{sub}/{model}`                                                                                                                                                                                        |
-| **CLIProxyAPI** | GitHub 發行版二進位檔（`cliproxy`） |    8317    | 用於 Anthropic CLI 驗證流程的本機代理配接器。當 OAuth 權杖過期時提供備援路由                                                                                                                                                                                            |
-| **Mux**         | `mux`（無介面的 `mux server`）      |    8322    | 本機代理程式協調守護程序（coder/mux）。僅管理生命週期——不是路由目標（不進行 LLM 代理）。                                                                                                                                                                                |
-| **Bifrost**     | `@maximhq/bifrost`                  |    8080    | Go AI 閘道轉送後端。執行時，會由轉送路由（`/v1/relay/`）自動選取                                                                                                                                                                                                        |
-| **Dario**       | `@askalf/dario`                     |    3456    | Claude 訂閱代理——針對 Claude-Code 形式的流量，作為 CLIProxyAPI 的替代方案／容錯移轉；注入的金鑰會成為 `DARIO_ADMIN_TOKEN`，用以保護其 `/admin/*` OAuth 控制平面                                                                                                         |
-| **open-wa**     | `@open-wa/wa-automate`              |    8323    | WhatsApp Web 自動化（透過 Puppeteer 使用無介面的 Chromium）。僅管理生命週期——不是路由目標。                                                                                                                                                                             |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                |   20135    | 提示詞壓縮輔助服務——真正的 LLMLingua-2 ONNX 模型（Microsoft 演算法的 JS/TS 移植版）。`open-sse/services/compression/engines/llmlingua/index.ts` 會透過 HTTP 將 `/compress` 分派至該服務；當輔助服務停機時，則改用程序內的工作執行緒後端。僅管理生命週期——不是路由目標。 |
+| 服務            | npm 包                            | 預設連接埠 | 目的                                                                                                                                                                                                                                                |
+| --------------- | --------------------------------- | :--------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9路由器**     | `9router`                         |   20130    | OmniRoute可以將AI路由器用作子提供者。模型暴露為`9router/{sub}/{model}`                                                                                                                                                                              |
+| **CLIProxyAPI** | GitHub發布二進位檔案 (`cliproxy`) |    8317    | Anthropic CLI身份驗證流的本機代理適配器。當OAuth令牌過期時提供後備路由                                                                                                                                                                              |
+| **多路復用器**  | `mux` （無頭`mux server`）        |    8322    | 本地代理編排守護程式 (coder/mux)。僅由生命週期管理—而不是路由目標（無LLM代理）。                                                                                                                                                                    |
+| **比佛羅斯特**  | `@maximhq/bifrost`                |    8080    | 進入人工智慧閘道中繼後端。運行時，由中繼路由（`/v1/relay/`）自動選擇                                                                                                                                                                                |
+| **達裡奧**      | `@askalf/dario`                   |    3456    | Claude-訂閱代理— alternative/failover到CLIProxyAPI ，用於 Claude-Code 形流量；注入的金鑰變成`DARIO_ADMIN_TOKEN`門控其`/admin/*` OAuth控制平面                                                                                                       |
+| **開放瓦**      | `@open-wa/wa-automate`            |    8323    | WhatsApp Web 自動化（透過 Puppeteer 的無頭 Chromium）。僅由生命週期管理—而不是路由目標。                                                                                                                                                            |
+| **LLMLingua**   | `@atjsh/llmlingua-2`              |   20135    | 提示壓縮 sidecar — real LLMLingua-2 ONNX模型（ Microsoft演算法的JS/TS埠）。 `open-sse/services/compression/engines/llmlingua/index.ts`透過HTTP將`/compress`分派給它，當 sidecar 關閉時，回退到進程內工作執行緒後端。僅受生命週期管理—而非路由目標。 |
+| **唱盒**        | GitHub發布二進位檔案 (`singbox`)  |   20140    | TPROXY sidecar 支援`applyTproxy()`的透明代理攔截（`src/mitm/tproxy/setup.ts`）。安裝程式下載固定的、經過校驗和驗證的版本。僅生命週期管理的— ，不是路由目標（無LLM代理）                                                                             |
 
-這七項服務皆採用相同的監管模型：
+所有八個都遵循相同的監管模型：
 
-- OmniRoute 會將它們安裝於 `DATA_DIR/services/{name}/` 下（與 OmniRoute 自身的 `package.json` 隔離）
-- OmniRoute 會將它們作為子程序啟動並加以監控
-- OmniRoute 會將暫時性 API 金鑰注入子程序的環境中，並在不中斷服務的情況下輪替金鑰（如適用）
-- 所有管理路由（`/api/services/*`）皆為 **LOCAL_ONLY**——只能從迴路介面存取（硬性規則 #17）
+- OmniRoute將它們安裝在`DATA_DIR/services/{name}/`下（與OmniRoute自己的`package.json`隔離）
+- OmniRoute產生並監控它們作為子進程
+- OmniRoute將臨時API密鑰注入子環境並在不停機的情況下輪換它（如果適用）
+- 所有管理路線（`/api/services/*`）都是**LOCAL_ONLY** —只能從環回存取（硬規則#17）
 
-### 關鍵決策（源自設計方案）
+### 關鍵決策（來自設計計劃）
 
-| 決策                       | 值                                                                  |
-| -------------------------- | ------------------------------------------------------------------- |
-| 儀表板存取 9Router 原生 UI | 位於 `/dashboard/providers/services/9router/embed/*` 的反向代理     |
-| 安裝機制                   | 透過 `execFile` 執行 `npm install {package}`（不使用 shell 插值）   |
-| 使用模式                   | 在路由引擎中將提供者註冊為 `9router/{sub}/{model}`                  |
-| API 金鑰管理               | OmniRoute 產生金鑰、進行靜態加密（AES-256-GCM），並透過環境變數注入 |
-| 儀表板位置                 | `/dashboard/providers/services`（三個分頁）                         |
-| 自動啟動                   | 各服務可個別切換，預設為關閉                                        |
+| 決定                      | 價值                                                      |
+| ------------------------- | --------------------------------------------------------- |
+| 儀表板存取 9Router 原生UI | `/dashboard/providers/services/9router/embed/*`的反向代理 |
+| 安裝機構                  | `npm install {package}`透過`execFile` （無外殼內插）      |
+| 消費方式                  | 提供者在路由引擎中註冊為`9router/{sub}/{model}`           |
+| API密鑰管理               | OmniRoute產生、靜態加密 (AES-256-GCM)，並透過 env 注入    |
+| 儀表板位置                | `/dashboard/providers/services` （三個選項卡）            |
+| 自動啟動                  | 每個服務切換，預設OFF                                     |
 
 ---
 
-## 2. 架構 — 4 層
+## 2.架構— 4層
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  第 1 層 — UI                                                      │
-│  /dashboard/providers/services  （分頁：CLIProxyAPI | 9Router | Mux）│
-│  即時日誌（SSE）、啟動/停止/重新啟動/更新、設定、安裝              │
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               外殼 + 依 ?tab= 進行分頁路由          │
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
 │                               ServiceLogsPanel, ApiKeyCard, ...    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP（Next.js fetch）
+                       │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  第 2 層 — API（LOCAL_ONLY — 僅限迴路介面）                        │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -87,74 +86,74 @@
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    （反向 HTTP + WebSocket Proxy → 9Router 上游）                  │
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  閘門：LOCAL_ONLY_API_PREFIXES 包含 "/api/services/" 與            │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
 │        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ 行程內呼叫
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  第 3 層 — ServiceSupervisor（src/lib/services/）                  │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   通用監督器（child_process.spawn）          │
-│    ├── 安裝：     execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── 啟動：     spawn(node, [entrypoint], {env, cwd})            │
-│    ├── API 金鑰： crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── 連接埠：   9Router 使用 20130（可設定）                     │
-│    ├── 日誌：     stdio 5 MB 環形緩衝區 → SSE 事件                 │
-│    ├── 健康狀態： 每 2–5 秒 HTTP GET /health，延遲復原             │
-│    └── 生命週期： SIGTERM 15 秒 → SIGKILL                          │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
+│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       在行程啟動時啟動所有 SERVICES[]                │
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       定期 GET /v1/models → service_models 資料表    │
-│  ringBuffer.ts      環形日誌緩衝區（每個服務 5 MB）                │
-│  healthCheck.ts     輪詢 HTTP 健康狀態探查                         │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      （安裝程式介接器）                             │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ OpenAI 相容 HTTP（迴路介面）
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  第 4 層 — 提供者／路由                                            │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    每次請求時重新查詢連接埠與 API 金鑰（不快取）。                 │
-│    在代理前從模型 ID 移除 "9router/" 前綴。                        │
-│    若監督器並非處於 "running" 狀態，則傳回 503 service_not_running。│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    "9router" 的項目：isEmbeddedService: true                       │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    模型儲存為 "9router/{sub}/{model}"（含前綴）。                   │
-│    由 modelSync.ts 每 5 分鐘同步一次。                             │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Mux 僅受生命週期管理（第 1–3 層）— 它是代理程式協調守護行程，     │
-│  並非 LLM Proxy，因此沒有第 4 層的執行器／提供者項目，且絕不會     │
-│  成為路由目標。                                                    │
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### 關鍵原始碼檔案
+### 關鍵來源文件
 
-| 檔案                                        | 角色                                           |
-| ------------------------------------------- | ---------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | 核心類別：生命週期、鎖定、健康狀態、環形緩衝區 |
-| `src/lib/services/bootstrap.ts`             | 行程層級的註冊與自動啟動                       |
-| `src/lib/services/registry.ts`              | 單例映射 `tool → supervisor`                   |
-| `src/lib/services/apiKey.ts`                | 金鑰產生、AES-256-GCM 靜態加密                 |
-| `src/lib/services/modelSync.ts`             | 定期模型同步（5 分鐘）及隨需同步               |
-| `src/lib/services/ringBuffer.ts`            | 具備 SSE 訂閱功能的 5 MB 環形日誌緩衝區        |
-| `src/lib/services/healthCheck.ts`           | HTTP 健康狀態探測（間隔可設定）                |
-| `src/lib/services/installers/ninerouter.ts` | 針對 9Router 執行 npm 安裝／更新／解除安裝     |
-| `src/lib/services/installers/cliproxy.ts`   | 針對 CLIProxyAPI 執行 npm 安裝／更新／解除安裝 |
-| `src/lib/services/installers/mux.ts`        | 針對 Mux 執行 npm 安裝／更新／解除安裝         |
-| `src/lib/services/installers/openwa.ts`     | 針對 open-wa 執行 npm 安裝／更新／解除安裝     |
-| `src/lib/services/installers/llmlingua.ts`  | 針對 LLMLingua 執行 npm 安裝／更新／解除安裝   |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` 輔助函式               |
-| `src/app/api/services/[name]/logs/route.ts` | 共用 SSE 日誌端點                              |
-| `open-sse/executors/ninerouter.ts`          | 提供者執行器（第 4 層）                        |
+| 文件                                        | 角色                                         |
+| ------------------------------------------- | -------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | 核心類別：生命週期、鎖、健康度、環形緩衝區   |
+| `src/lib/services/bootstrap.ts`             | 進程級註冊和自動啟動                         |
+| `src/lib/services/registry.ts`              | 單例地圖`tool → supervisor`                  |
+| `src/lib/services/apiKey.ts`                | 金鑰產生、靜態AES-256-GCM加密                |
+| `src/lib/services/modelSync.ts`             | 定期模型同步（5 分鐘） +點播                 |
+| `src/lib/services/ringBuffer.ts`            | 5 MB循環日誌緩衝區與SSE訂閱                  |
+| `src/lib/services/healthCheck.ts`           | HTTP運轉狀況探測（可設定間隔）               |
+| `src/lib/services/installers/ninerouter.ts` | 9Router 的 npm install/update/uninstall      |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall用於CLIProxyAPI  |
+| `src/lib/services/installers/mux.ts`        | 用於 Mux 的 npm install/update/uninstall     |
+| `src/lib/services/installers/openwa.ts`     | 用於 open-wa 的 npm install/update/uninstall |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall用於LLMLingua    |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()`助手                  |
+| `src/app/api/services/[name]/logs/route.ts` | 共享SSE日誌端點                              |
+| `open-sse/executors/ninerouter.ts`          | 提供者執行者（第 4 層）                      |
 
 ---
 
@@ -207,58 +206,54 @@
 
 ---
 
-## 4. API 參考
+## API參考
 
-`/api/services/` 下的所有路由皆為 **LOCAL_ONLY**（僅限迴路位址，硬性規則 #17）。
-無論驗證權杖為何，非迴路位址的請求都會收到 `403 LOCAL_ONLY`。
+`/api/services/`下的所有路線都是**LOCAL_ONLY** （僅環回，硬性規則#17）。無論身分驗證令牌為何，非環回請求都會接收`403 LOCAL_ONLY` 。
 
-### 4.1 9Router 端點（11 條路由）
+### 4.1 9個路由器端點（11條路由）
 
 #### `POST /api/services/9router/install`
 
-從 npm 安裝 9Router。建立包含其自身 `package.json` 與 `node_modules/` 的
-`DATA_DIR/services/9router/`。不會與 OmniRoute 自身的相依套件衝突。
+從 npm 安裝 9Router。使用自己的`package.json`和`node_modules/`創建`DATA_DIR/services/9router/` 。與OmniRoute自己的部門不衝突。
 
-**請求主體**（皆為選填）：
+**請求正文**（全部可選）：
 
 ```json
 { "version": "latest" }
 ```
 
-| 欄位      | 類型     | 預設值     | 說明                           |
+| 場地      | 類型     | 預設       | 描述                           |
 | --------- | -------- | ---------- | ------------------------------ |
 | `version` | `string` | `"latest"` | 要安裝的 npm 版本標籤或 semver |
 
 **回應：**
 
-| 狀態碼 | 說明                                                   |
-| ------ | ------------------------------------------------------ |
-| `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }` |
-| `400`  | 無效的請求主體（Zod 驗證失敗）                         |
-| `409`  | 已在安裝中（鎖定中）                                   |
-| `500`  | npm 安裝失敗——請查看 `message` 以取得易讀的錯誤訊息    |
+| 地位  | 描述                                                   |
+| ----- | ------------------------------------------------------ |
+| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }` |
+| `400` | 請求正文無效（Zod驗證失敗）                            |
+| `409` | 已安裝（已鎖定）                                       |
+| `500` | npm 安裝失敗—查看`message`是否有友善錯誤               |
 
-**注意：** 使用 `execFile('npm', [...])`——不使用 shell，也不進行插值（硬性規則 #13）。
-EACCES 錯誤會以易讀的訊息呈現。
+**筆記：**使用`execFile('npm', [...])` —無 shell，無內插（硬規則#13）。 EACCES錯誤以友善訊息的形式出現。
 
 ---
 
 #### `POST /api/services/9router/start`
 
-啟動 9Router。若尚未註冊監督器，則先註冊，然後呼叫
-`supervisor.start()`。已在執行時，此操作具冪等性。
+啟動9路由器。如果尚未註冊，則註冊主管，然後呼叫`supervisor.start()`。已經運行時冪等。
 
-**請求主體：** 無
+**請求正文：**沒有任何
 
 **回應：**
 
-| 狀態碼 | 說明                                          |
-| ------ | --------------------------------------------- |
-| `200`  | `ServiceStatus` 物件（請參閱下方結構描述）    |
-| `409`  | 尚未安裝 9Router（`status: "not_installed"`） |
-| `503`  | 啟動失敗（程序錯誤——請查看 `lastError`）      |
+| 地位  | 描述                                       |
+| ----- | ------------------------------------------ |
+| `200` | `ServiceStatus`物件（請參閱下面的架構）    |
+| `409` | 9路由器未安裝（`status: "not_installed"`） |
+| `503` | 啟動失敗（進程錯誤—參見`lastError`）       |
 
-**ServiceStatus 結構描述：**
+**ServiceStatus架構：**
 
 ```json
 {
@@ -276,36 +271,34 @@ EACCES 錯誤會以易讀的訊息呈現。
 
 #### `POST /api/services/9router/stop`
 
-正常停止 9Router。傳送 SIGTERM、等待 15 秒，若程序仍在執行，則傳送 SIGKILL。
-已停止時，此操作具冪等性。
+優雅地停止 9Router。發送SIGTERM，等待 15 秒，如果還活著，則發送SIGKILL 。已經停止時冪等。
 
-**請求主體：** 無
+**請求正文：**沒有任何
 
 **回應：**
 
-| 狀態碼 | 說明                                |
-| ------ | ----------------------------------- |
-| `200`  | `ServiceStatus`（state: "stopped"） |
-| `503`  | 停止時發生非預期失敗                |
+| 地位  | 描述                                 |
+| ----- | ------------------------------------ |
+| `200` | `ServiceStatus` （狀態：「已停止」） |
+| `503` | 停止意外失敗                         |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-等同於在操作鎖定下依序執行 `stop()` 與 `start()`。
+相當於操作鎖下的`stop()`然後`start()` 。
 
-**請求主體：** 無
+**請求正文：**沒有任何
 
-**回應：** 與 `start` 相同（傳回最終的 `ServiceStatus`）。
+**回應：**與`start`相同（返回最終`ServiceStatus`）。
 
 ---
 
 #### `POST /api/services/9router/update`
 
-將 9Router 更新至較新的 npm 版本。若服務正在執行，會先將其停止，
-接著執行 npm 安裝（就地安裝較新版本），然後重新啟動服務。
+將 9Router 更新到較新的 npm 版本。如果服務正在運行，則首先停止它，運行 npm install （就地安裝較新的版本），然後重新啟動服務。
 
-**請求主體**（皆為選填）：
+**請求正文**（全部可選）：
 
 ```json
 { "version": "latest" }
@@ -313,45 +306,43 @@ EACCES 錯誤會以易讀的訊息呈現。
 
 **回應：**
 
-| 狀態碼 | 說明                                                            |
-| ------ | --------------------------------------------------------------- |
-| `200`  | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400`  | 無效的主體                                                      |
-| `500`  | npm 更新失敗                                                    |
+| 地位  | 描述                                                            |
+| ----- | --------------------------------------------------------------- |
+| `200` | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
+| `400` | 無效的身體                                                      |
+| `500` | npm 更新失敗                                                    |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-為 9Router 產生新的 API 金鑰、加密靜態儲存，並重新啟動服務
-（若正在執行），使其從環境中取得新金鑰。舊金鑰會立即失效。
+為 9Router 產生新的API鑰，對其進行靜態加密，然後重新啟動服務（如果正在執行），以便它可以從其環境中取得新金鑰。舊密鑰立即失效。
 
-**請求主體：** 無
+**請求正文：**沒有任何
 
 **回應：**
 
-| 狀態碼 | 說明                                       |
-| ------ | ------------------------------------------ |
-| `200`  | `{ keyRotated: true, restarted: boolean }` |
-| `500`  | 輪替失敗                                   |
+| 地位  | 描述                                       |
+| ----- | ------------------------------------------ |
+| `200` | `{ keyRotated: true, restarted: boolean }` |
+| `500` | 旋轉失敗                                   |
 
-**安全性：** 回應絕不會傳回新金鑰（不會洩漏憑證）。
-該金鑰會以加密形式（AES-256-GCM）儲存在 `version_manager` 資料表中。
+**安全：**新密鑰永遠不會在回應中返回（無憑證洩漏）。它以加密方式 (AES-256-GCM) 儲存在`version_manager`表中。
 
 ---
 
 #### `GET /api/services/9router/status`
 
-傳回合併的即時狀態與資料庫狀態，包括版本中繼資料及 API 金鑰預覽。
+傳回組合的即時+ DB狀態，包括版本元資料和API金鑰預覽。
 
 **回應：**
 
-| 狀態碼 | 說明               |
-| ------ | ------------------ |
-| `200`  | 請參閱下方結構描述 |
-| `500`  | 狀態讀取失敗       |
+| 地位  | 描述             |
+| ----- | ---------------- |
+| `200` | 請參閱下面的架構 |
+| `500` | 狀態讀取失敗     |
 
-**回應結構描述：**
+**回應架構：**
 
 ```json
 {
@@ -375,10 +366,9 @@ EACCES 錯誤會以易讀的訊息呈現。
 
 #### `POST /api/services/9router/auto-start`
 
-切換自動啟動旗標。當 `enabled: true` 時，服務會在 OmniRoute 下次啟動時自動
-啟動（前提是已安裝該服務）。
+切換自動啟動標誌。當`enabled: true`時，該服務會在下次OmniRoute啟動時自動啟動（如果已安裝服務）。
 
-**請求主體：**
+**請求正文：**
 
 ```json
 { "enabled": true }
@@ -386,213 +376,187 @@ EACCES 錯誤會以易讀的訊息呈現。
 
 **回應：**
 
-| 狀態碼 | 說明                  |
-| ------ | --------------------- |
-| `200`  | `{ autoStart: true }` |
-| `400`  | 無效的主體            |
+| 地位  | 描述                  |
+| ----- | --------------------- |
+| `200` | `{ autoStart: true }` |
+| `400` | 無效的身體            |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-來自 9Router stdout/stderr 環形緩衝區的即時日誌 SSE 串流。
+來自 9Router 的stdout/stderr環形緩衝區的SSE即時日誌流。
 
 **查詢參數：**
 
-| 參數     | 類型      | 預設值 | 說明                                                     |
-| -------- | --------- | ------ | -------------------------------------------------------- |
-| `tail`   | `integer` | 200    | 最初要傳送的歷史記錄行數（上限為 1000）                  |
-| `filter` | `string`  | 無     | 不區分大小寫的子字串篩選器（不使用 regex——可防止 ReDoS） |
+| 參數     | 類型      | 預設     | 描述                                                   |
+| -------- | --------- | -------- | ------------------------------------------------------ |
+| `tail`   | `integer` | 200      | 首先發送多少條歷史行（最多 1000 條）                   |
+| `filter` | `string`  | 沒有任何 | 不區分大小寫的子字串過濾器（無正規表示式— ReDoS 安全） |
 
-**SSE 事件：**
+**SSE活動：**
 
-| 事件        | 資料        | 說明                       |
-| ----------- | ----------- | -------------------------- |
-| `snapshot`  | `LogLine[]` | 初始的歷史尾端記錄         |
-| `log`       | `LogLine`   | 即時日誌行                 |
-| `heartbeat` | `{}`        | 每 15 秒傳送一次以保持連線 |
+| 事件        | 數據        | 描述                     |
+| ----------- | ----------- | ------------------------ |
+| `snapshot`  | `LogLine[]` | 初始歷史尾部             |
+| `log`       | `LogLine`   | 即時日誌行               |
+| `heartbeat` | `{}`        | 每 15 秒保持一次活動狀態 |
 
-**LogLine 結構描述：**
+**LogLine架構：**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
 **回應：**
 
-| 狀態  | 說明                              |
-| ----- | --------------------------------- |
-| `200` | `text/event-stream`               |
-| `400` | `filter` 參數過長（> 200 個字元） |
-| `404` | 找不到服務（supervisor 尚未註冊） |
+| 地位  | 描述                             |
+| ----- | -------------------------------- |
+| `200` | `text/event-stream`              |
+| `400` | `filter`參數太長（> 200 個字元） |
+| `404` | 未找到服務（主管未註冊）         |
 
 ---
 
-### 4.2 CLIProxyAPI 端點（10 條路由）
+### 4.2 CLIProxyAPI端點（10條路由）
 
-CLIProxyAPI 的端點結構與 9Router 相同，但不含 `rotate-key`，並新增
-`accounts`、`provider-expose` 和 `auto-restart-adopted`。現在，它會接收一個在啟動時注入的
-專用資料平面 API 金鑰（`bootstrap.ts` 中的 `needsApiKey: true`，
-用於模型同步）；`status` 包含的欄位較少。
+CLIProxyAPI與 9Router 有相同的端點形狀，減去`rotate-key`，加上`accounts`、 `provider-expose`和`auto-restart-adopted`。它現在接收在生成時注入的專用資料平面API密鑰（ `bootstrap.ts`中的`needsApiKey: true` ，用於模型同步）； `status`包含的字段較少。
 
-| 方法   | 路徑                                | 說明                                  |
-| ------ | ----------------------------------- | ------------------------------------- |
-| `POST` | `/api/services/cliproxy/install`    | 從 npm 安裝 CLIProxyAPI               |
-| `POST` | `/api/services/cliproxy/start`      | 啟動 CLIProxyAPI                      |
-| `POST` | `/api/services/cliproxy/stop`       | 停止 CLIProxyAPI                      |
-| `POST` | `/api/services/cliproxy/restart`    | 重新啟動 CLIProxyAPI                  |
-| `POST` | `/api/services/cliproxy/update`     | 更新至較新版本                        |
-| `GET`  | `/api/services/cliproxy/status`     | 即時 + DB 狀態（不含 `apiKeyMasked`） |
-| `POST` | `/api/services/cliproxy/auto-start` | 切換自動啟動                          |
+| 方法   | 小路                                | 描述                             |
+| ------ | ----------------------------------- | -------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | 從 npm 安裝CLIProxyAPI           |
+| `POST` | `/api/services/cliproxy/start`      | 啟動CLIProxyAPI                  |
+| `POST` | `/api/services/cliproxy/stop`       | 停止CLIProxyAPI                  |
+| `POST` | `/api/services/cliproxy/restart`    | 重啟CLIProxyAPI                  |
+| `POST` | `/api/services/cliproxy/update`     | 更新到新版本                     |
+| `GET`  | `/api/services/cliproxy/status`     | 實時+ DB狀態（無`apiKeyMasked`） |
+| `POST` | `/api/services/cliproxy/auto-start` | 切換自動啟動                     |
 
-共用的 `GET /api/services/{name}/logs` 端點（請參閱 §4.1）透過
-`[name]` 動態區段支援全部四項服務。
+共享`GET /api/services/{name}/logs`端點（請參閱第 4.1 節）適用於使用`[name]`動態段的所有四種服務。
 
 ---
 
-### 4.3 Mux 端點（8 條路由）
+### 4.3 Mux端點（8個路由）
 
-Mux 的端點結構與 CLIProxyAPI 相同——API 介面中沒有 `rotate-key` 路由
-（Bearer Token 的產生方式與 9Router 相同，透過
-`getOrCreateApiKey("mux")` 產生，並經由 `MUX_SERVER_AUTH_TOKEN` 環境變數注入，但
-目前尚無專用的輪替端點）。Mux 僅由生命週期管理：與
-9Router 不同，它沒有第 4 層執行器，也永遠不會註冊為路由提供者。
+Mux 具有與CLIProxyAPI —相同的端點形狀，在API表面中沒有`rotate-key`路由（不記名令牌的產生方式與 9Router 透過`getOrCreateApiKey("mux")`方式相同，並透過`MUX_SERVER_AUTH_TOKEN`環境變數注入，但還沒有專用的旋轉端點）。 Mux 僅受生命週期管理：與 9Router 不同，它沒有第 4 層執行器，並且從未註冊為路由提供者。
 
-| 方法   | 路徑                           | 說明                           |
-| ------ | ------------------------------ | ------------------------------ |
-| `POST` | `/api/services/mux/install`    | 從 npm 安裝 Mux（`npm i mux`） |
-| `POST` | `/api/services/mux/start`      | 啟動 Mux（`mux server`）       |
-| `POST` | `/api/services/mux/stop`       | 停止 Mux                       |
-| `POST` | `/api/services/mux/restart`    | 重新啟動 Mux                   |
-| `POST` | `/api/services/mux/update`     | 更新至較新的 npm 版本          |
-| `GET`  | `/api/services/mux/status`     | 即時 + DB 狀態                 |
-| `POST` | `/api/services/mux/auto-start` | 切換自動啟動                   |
+| 方法   | 小路                           | 描述                          |
+| ------ | ------------------------------ | ----------------------------- |
+| `POST` | `/api/services/mux/install`    | 從 npm (`npm i mux`) 安裝 Mux |
+| `POST` | `/api/services/mux/start`      | 啟動復用器 (`mux server`)     |
+| `POST` | `/api/services/mux/stop`       | 停止復用器                    |
+| `POST` | `/api/services/mux/restart`    | 重新啟動多工器                |
+| `POST` | `/api/services/mux/update`     | 更新到較新的 npm 版本         |
+| `GET`  | `/api/services/mux/status`     | 實時+ DB狀態                  |
+| `POST` | `/api/services/mux/auto-start` | 切換自動啟動                  |
 
 ---
 
-### 4.4 Bifrost 端點（8 條路由）
+### 4.4 Bifrost 端點（8 條路線）
 
-Bifrost 是以 Go 編寫的 AI 閘道中繼後端（`@maximhq/bifrost`）。它採用與
-CLIProxyAPI 相同的端點結構（沒有 `rotate-key`——Bifrost 會在其 `-app-dir`
-下的 `config.json` 中管理自己的提供者金鑰）。
+Bifrost 是一個 Go AI 閘道中繼後端 (`@maximhq/bifrost`)。它使用與CLIProxyAPI相同的端點形狀（沒有`rotate-key` — Bifrost 在`config.json`中的`-app-dir`下管理自己的提供者金鑰）。
 
-| 方法   | 路徑                               | 說明                                              |
-| ------ | ---------------------------------- | ------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | 從 npm 安裝 Bifrost（`@maximhq/bifrost`）         |
-| `POST` | `/api/services/bifrost/start`      | 在連接埠 8080（預設值）上啟動 Bifrost             |
-| `POST` | `/api/services/bifrost/stop`       | 停止 Bifrost                                      |
-| `POST` | `/api/services/bifrost/restart`    | 重新啟動 Bifrost                                  |
-| `POST` | `/api/services/bifrost/update`     | 更新至較新版本                                    |
-| `GET`  | `/api/services/bifrost/status`     | 即時 + DB 狀態                                    |
-| `POST` | `/api/services/bifrost/auto-start` | 切換自動啟動                                      |
-| `GET`  | `/api/services/bifrost/logs`       | SSE 日誌追蹤（透過共用的 `[name]/logs` 動態路由） |
+| 方法   | 小路                               | 描述                                          |
+| ------ | ---------------------------------- | --------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | 從 npm (`@maximhq/bifrost`) 安裝 Bifrost      |
+| `POST` | `/api/services/bifrost/start`      | 在連接埠 8080 上啟動 Bifrost（預設）          |
+| `POST` | `/api/services/bifrost/stop`       | 停止碧霜                                      |
+| `POST` | `/api/services/bifrost/restart`    | 重新啟動 Bifrost                              |
+| `POST` | `/api/services/bifrost/update`     | 更新到新版本                                  |
+| `GET`  | `/api/services/bifrost/status`     | 實時+ DB狀態                                  |
+| `POST` | `/api/services/bifrost/auto-start` | 切換自動啟動                                  |
+| `GET`  | `/api/services/bifrost/logs`       | SSE log tail（透過共享`[name]/logs`動態路由） |
 
-**路由連接：** 當未設定 `BIFROST_BASE_URL`，且受監管的 Bifrost
-執行個體正在執行時，`getBifrostRoutingConfig()`（位於 `routingBackend.ts` 中）會自動
-使用 `http://127.0.0.1:{port}` 作為中繼基底 URL。明確設定的 `BIFROST_BASE_URL` 環境變數
-一律具有優先權。
+**路由佈線：**當`BIFROST_BASE_URL`未設定且受監督的 Bifrost 實例正在執行時， `getBifrostRoutingConfig()` （在`routingBackend.ts`中）會自動使用`http://127.0.0.1:{port}`作為中繼基礎URL。顯式`BIFROST_BASE_URL` env 始終優先。
 
 ---
 
-### 4.5 Dario 端點（12 條路由）
+### 4.5 Dario端點（12條路線）
 
-其生命週期結構與其他服務相同（`install`、`start`、`stop`、`restart`、
-`update`、`status`、`auto-start`、`auto-restart-adopted`），另在 `admin/` 下提供由權杖保護的 OAuth
-控制平面：`admin/accounts`、`admin/import-from-omniroute`、
-`admin/login-start`、`admin/login-complete`（全部受 `DARIO_ADMIN_TOKEN` 保護）。
+與其他服務（`install`、 `start`、 `stop`、 `restart`、 `update`、 `status`、 `auto-start`、 `auto-restart-adopted`）相同的生命週期形狀，加上`admin/`下的令牌門控OAuth控制平面： `admin/accounts`、 `admin/import-from-omniroute`、 `admin/login-start`、 `admin/login-complete` （全部位於zqn （全部位於`DARIO_ADMIN_TOKEN`）。
 
-### 4.6 open-wa 端點（7 條路由）
+### 4.6 open-wa端點（7條路由）
 
-open-wa（`@open-wa/wa-automate`）會驅動無頭 Chromium 執行個體（透過
-Puppeteer）以自動化 WhatsApp Web。它採用與 Mux 相同的端點結構（目前尚無
-`rotate-key` 路由）。它僅由生命週期管理——不是路由目標，
-也沒有第 4 層執行器／提供者項目。
+open-wa (`@open-wa/wa-automate`) 驅動無頭 Chromium 實例（透過 Puppeteer）來自動化WhatsApp Web。它使用與 Mux 相同的端點形狀（還沒有`rotate-key`路由）。它只是生命週期管理的— ，不是路由目標，沒有第 4 層executor/provider條目。
 
-| 方法   | 路徑                              | 說明                                                  |
-| ------ | --------------------------------- | ----------------------------------------------------- |
-| `POST` | `/api/services/openwa/install`    | 從 npm 安裝 open-wa（`@open-wa/wa-automate`）         |
-| `POST` | `/api/services/openwa/start`      | 在連接埠 8323（預設）啟動 open-wa                     |
-| `POST` | `/api/services/openwa/stop`       | 停止 open-wa                                          |
-| `POST` | `/api/services/openwa/restart`    | 重新啟動 open-wa                                      |
-| `POST` | `/api/services/openwa/update`     | 更新至較新版本                                        |
-| `GET`  | `/api/services/openwa/status`     | 即時 + DB 狀態                                        |
-| `POST` | `/api/services/openwa/auto-start` | 切換自動啟動                                          |
-| `GET`  | `/api/services/openwa/logs`       | SSE 日誌尾端串流（透過共用的 `[name]/logs` 動態路由） |
+| 方法   | 小路                              | 描述                                          |
+| ------ | --------------------------------- | --------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | 從 npm (`@open-wa/wa-automate`) 安裝 open-wa  |
+| `POST` | `/api/services/openwa/start`      | 在連接埠 8323 上啟動 open-wa（預設）          |
+| `POST` | `/api/services/openwa/stop`       | 停止open-wa                                   |
+| `POST` | `/api/services/openwa/restart`    | 重啟open-wa                                   |
+| `POST` | `/api/services/openwa/update`     | 更新到新版本                                  |
+| `GET`  | `/api/services/openwa/status`     | 實時+ DB狀態                                  |
+| `POST` | `/api/services/openwa/auto-start` | 切換自動啟動                                  |
+| `GET`  | `/api/services/openwa/logs`       | SSE log tail（透過共享`[name]/logs`動態路由） |
 
-**API 金鑰：**以 `WA_KEY` 注入——open-wa 的通用 `WA_*` 前綴環境變數
-覆寫機制會將其對應至 `--key`/`-k` CLI 選項
-（`dist/cli/setup.js::envArgs()`，已對安裝的 4.76.0
-套件完成驗證）。由 `generateServiceApiKey()` 產生時會加上 `ow_` 前綴。open-wa
-會從 `key`/`api_key` HTTP 標頭讀回金鑰（而非 `Authorization:
-Bearer`）；`/api-docs*` 明確豁免於此檢查
-（`dist/cli/server.js` 中的 `setupAuthenticationLayer`），因此健康狀態探查
-不需要驗證標頭。
+**API鍵：**作為`WA_KEY` — open-wa 的通用`WA_*` -prefixed env 覆蓋注入將其映射到`--key`/`-k` CLI選項（`dist/cli/setup.js::envArgs()`，針對已安裝的 4.76.0 軟體包進行驗證）。由`generateServiceApiKey()`產生時帶有前綴`ow_` 。 open-wa 從`key`/`api_key` HTTP標頭（不是`Authorization: Bearer`）讀回密鑰； `/api-docs*`明確免除檢查（ `dist/cli/server.js`中的`setupAuthenticationLayer` ），因此運行狀況探測不需要 auth 標頭。
 
-**配對：**open-wa 是非官方工具，且與 WhatsApp 無關聯——
-已連線的號碼可能因 WhatsApp 自身的自動化偵測而面臨封鎖風險。
-首次啟動時，配對 QR 碼會輸出至 stdout，並透過
-現有的「日誌」面板/SSE 串流呈現——此整合目前尚無專用的 QR 圖像端點。
+**配對：** open-wa 是非官方的，與WhatsApp —無關，連接的號碼存在WhatsApp自身自動化檢測的封鎖風險。首次啟動時，配對QR程式碼會列印到 stdout 並透過現有日誌panel/SSE流—顯示，此整合中尚無專用的 QR 影像端點。
 
 ---
 
-### 4.7 LLMLingua 端點（8 個路由）
+### 4.7 LLMLingua端點（8條路由）
 
-LLMLingua 是包裝 `@atjsh/llmlingua-2` 的提示詞壓縮 sidecar（真正的
-ONNX 權杖分類模型，會在首次呼叫 `/compress` 時從 Hugging Face
-下載）。它使用與 Bifrost 相同的端點形式（無 API 金鑰——
-`needsApiKey: false`，它絕不處理憑證）。
+LLMLingua是一個封裝`@atjsh/llmlingua-2`提示壓縮 sidecar（真正的ONNX令牌分類模型，在第一次`/compress`呼叫時從 Hugging Face 下載）。它使用與 Bifrost 相同的端點形狀（沒有API key — `needsApiKey: false`，它從不處理憑證）。
 
-| 方法   | 路徑                                           | 說明                                                                           |
-| ------ | ---------------------------------------------- | ------------------------------------------------------------------------------ |
-| `POST` | `/api/services/llmlingua/install`              | 透過 npm 安裝 `@atjsh/llmlingua-2` + 對等相依套件，並寫入 sidecar 伺服器指令碼 |
-| `POST` | `/api/services/llmlingua/start`                | 在連接埠 20135（預設）啟動 sidecar                                             |
-| `POST` | `/api/services/llmlingua/stop`                 | 停止 sidecar                                                                   |
-| `POST` | `/api/services/llmlingua/restart`              | 重新啟動 sidecar                                                               |
-| `POST` | `/api/services/llmlingua/update`               | 更新至較新的套件版本                                                           |
-| `GET`  | `/api/services/llmlingua/status`               | 即時 + DB 狀態                                                                 |
-| `POST` | `/api/services/llmlingua/auto-start`           | 切換自動啟動                                                                   |
-| `POST` | `/api/services/llmlingua/auto-restart-adopted` | 切換已接管（預先存在）執行個體的自動重新啟動                                   |
-| `GET`  | `/api/services/llmlingua/logs`                 | SSE 日誌尾端串流（透過共用的 `[name]/logs` 動態路由）                          |
+| 方法   | 小路                                           | 描述                                                            |
+| ------ | ---------------------------------------------- | --------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | npm-install `@atjsh/llmlingua-2` + Peers，編寫sidecar伺服器腳本 |
+| `POST` | `/api/services/llmlingua/start`                | 在連接埠 20135 上啟動 sidecar（預設）                           |
+| `POST` | `/api/services/llmlingua/stop`                 | 停止邊車                                                        |
+| `POST` | `/api/services/llmlingua/restart`              | 重新啟動邊車                                                    |
+| `POST` | `/api/services/llmlingua/update`               | 更新到較新的軟體包版本                                          |
+| `GET`  | `/api/services/llmlingua/status`               | 實時+ DB狀態                                                    |
+| `POST` | `/api/services/llmlingua/auto-start`           | 切換自動啟動                                                    |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | 切換已採用（預先存在）實例的自動重啟                            |
+| `GET`  | `/api/services/llmlingua/logs`                 | SSE log tail（透過共享`[name]/logs`動態路由）                   |
 
-**Sidecar 合約：**伺服器指令碼公開 `GET /health`（立即回應——
-不會等待模型）和 `POST /compress`（`{ text, rate }` →
-`{ text, compressed, ratio }`）。模型會在首次呼叫
-`/compress` 時延遲載入。
+**邊車合約：**伺服器腳本公開`GET /health` （即時—不等待模型）和`POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`)。該模型在第一次`/compress`呼叫時延遲載入。
 
-**壓縮接線：**`open-sse/services/compression/engines/llmlingua/index.ts` 的
-`httpSidecarBackend` 會呼叫 `LLMLINGUA_BASE_URL`（預設為
-`http://127.0.0.1:20135`），且僅在 sidecar 的回應確實短於輸入時才接受該回應；
-任何失敗情況（未執行、逾時、無實質變更的回應）都會退回至處理程序內的
-工作者執行緒後端（`./worker.ts`）。
+**壓縮接線：** `open-sse/services/compression/engines/llmlingua/index.ts`的`httpSidecarBackend`呼叫`LLMLINGUA_BASE_URL` （預設`http://127.0.0.1:20135`），並且僅在嚴格短於輸入時接受 sidecar 的回應；任何失敗（未運行、超時、無操作回應）都會回退到進程內工作執行緒後端 (`./worker.ts`)。
 
 ---
 
-### 4.8 反向代理（9Router 儀表板嵌入）
+### 4.8 個單盒端點（8 個路由）
 
-儀表板透過位於以下位置的內部反向代理，將 9Router Web UI 嵌入 iframe：
+sing-box 具有與 Mux —相同的端點形狀，沒有`rotate-key`路由，沒有API鑰注入（ `bootstrap.ts`中的`needsApiKey: false` ）。它僅受生命週期管理：從來不是routing/LLM提供者。 `install()`下載固定版本（ `src/lib/services/installers/singbox.ts`中的`SINGBOX_PINNED_VERSION` ）的官方GitHub發行二進位檔案（`SagerNet/sing-box`），並在將其寫入磁碟之前，根據烘焙到同一檔案中的校驗和驗證其SHA256 —任何其他請求的版本都會被拒絕。
+
+| 方法   | 小路                                         | 描述                                          |
+| ------ | -------------------------------------------- | --------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | 下載+驗證固定的 single-box 版本               |
+| `POST` | `/api/services/singbox/start`                | 啟動唱盒（`sing-box run -c config.json`）     |
+| `POST` | `/api/services/singbox/stop`                 | 停止唱歌                                      |
+| `POST` | `/api/services/singbox/restart`              | 重啟唱機                                      |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall固定版本                   |
+| `GET`  | `/api/services/singbox/status`               | 實時+ DB狀態                                  |
+| `POST` | `/api/services/singbox/auto-start`           | 切換自動啟動                                  |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | 為已採用的（預先存在的）進程切換自動重啟      |
+| `GET`  | `/api/services/singbox/logs`                 | SSE log tail（透過共享`[name]/logs`動態路由） |
+
+**TPROXY接線：** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) 在`applyTproxy()`安裝TPROXY防火牆規則之前寫入`config.json`並啟動 Supervisor。如果主管遺失或無法到達`running`，它現在會以錯誤等級記錄（而不是默默地吞下失敗），以便操作員可以告訴應用了TPROXY規則，而背後沒有工作偵聽器。
+
+---
+
+### 4.9 反向代理（9Router儀表板嵌入）
+
+儀表板透過內部反向代理將 9Router web UI嵌入到 iframe 中：
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 ```
 
-此代理：
+這個代理：
 
-- 將請求轉送至 `http://127.0.0.1:{port}/{path}`（僅限迴路介面）
-- 移除傳入的 `cookie` 和 `authorization` 標頭（避免 OmniRoute 工作階段外洩）
-- 注入 `Authorization: Bearer {apiKey}` 以進行 9Router 驗證
-- 從回應中移除 `set-cookie`、`content-security-policy`、`x-frame-options`、`cross-origin-*`
-- 重寫 HTML 回應以注入 `<base href>`，並正規化絕對路徑（`/foo` → `/dashboard/.../embed/foo`）
+- 將請求轉送到`http://127.0.0.1:{port}/{path}` （僅環回）
+- 剝離傳入的`cookie`和`authorization`標頭（不會洩漏OmniRoute會話）
+- 注入`Authorization: Bearer {apiKey}`以進行 9Router 身份驗證
+- 從回應中刪除`set-cookie`、 `content-security-policy`、 `x-frame-options`、 `cross-origin-*`
+- 重寫HTML回應以注入`<base href>`並規範化絕對路徑 (`/foo` → `/dashboard/.../embed/foo`)
 
-嵌入式儀表板的 WebSocket 升級由專用連接埠上的配套伺服器處理
-（請參閱 `src/lib/services/embedWsProxy.ts`）。
+嵌入式儀表板的WebSocket升級由專用連接埠上的配套伺服器處理（請參閱`src/lib/services/embedWsProxy.ts`）。
 
-**安全性：**嵌入代理路由歸類於 `LOCAL_ONLY_API_PREFIXES`
-之下，且只能從迴路介面存取。即使攻擊者透過
-Cloudflare/Ngrok 通道取得 JWT，也無法代理至嵌入式服務。
+**安全：**嵌入代理路由屬於`LOCAL_ONLY_API_PREFIXES` ，只能從環回到達。透過Cloudflare/Ngrok隧道取得JWT的攻擊者無法代理到嵌入式服務。
 
 ---
 

@@ -250,19 +250,18 @@ MITM-ის ყველა საბოლოო წერტილი მო�
 
 ---
 
-## User-Agent-ის ჩანაცვლებები — გარემოს ცვლადები (`.env.example` სექცია 12)
+## მომხმარებლის აგენტი უგულებელყოფს — env vars (`.env.example` განყოფილება 12)
 
-| ცვლადი                   | ნაგულისხმევი მნიშვნელობა                                        |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| ცვლადი              | ნაგულისხმევი                                  |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-გამოიყენება `open-sse/executors/base.ts::buildHeaders()`-ის მიერ დინამიკური მოძიების მეშვეობით. **განაახლეთ ისინი, როდესაც პროვაიდერები CLI-ის ახალ ვერსიებს გამოუშვებენ** — მოძველებული UA სტრიქონები უარყოფილი იქნება, როგორც მოძველებული კლიენტები.
+მოხმარებული `open-sse/executors/base.ts::buildHeaders()` მიერ დინამიური საძიებო საშუალებით.** დაამარცხეთ ისინი, როდესაც პროვაიდერები ავრცელებენ CLI ახალ ვერსიებს** — შემორჩენილი UA სტრიქონები იწყებენ უარყოფას, როგორც მოძველებულ კლიენტებს.
 
 ## CLI-თან თავსებადობის რეჟიმის გადამრთველები (`.env.example`-ის სექცია 13)
 

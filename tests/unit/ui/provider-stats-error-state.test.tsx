@@ -4,9 +4,20 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 // Key-returning translator: the assertions below read stable i18n keys, not English copy.
-vi.mock("next-intl", () => ({
-  useTranslations: (namespace: string) => (key: string) => `${namespace}.${key}`,
-}));
+// Keep the translator stable between renders, as next-intl does in the app.
+vi.mock("next-intl", () => {
+  const translators = new Map<string, (key: string) => string>();
+  return {
+    useTranslations: (namespace: string) => {
+      let translate = translators.get(namespace);
+      if (!translate) {
+        translate = (key: string) => `${namespace}.${key}`;
+        translators.set(namespace, translate);
+      }
+      return translate;
+    },
+  };
+});
 
 const PAGE = "../../../src/app/(dashboard)/dashboard/provider-stats/page";
 const originalFetch = globalThis.fetch;
@@ -32,7 +43,7 @@ describe("ProviderStatsPage error-only state (KEA-7886 lote 9, review I1)", () =
     }) as unknown as typeof fetch;
 
     const { default: ProviderStatsPage } = await import(PAGE);
-    render(<ProviderStatsPage />);
+    const { rerender } = render(<ProviderStatsPage />);
 
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("providerStats.loadFailed");
@@ -41,6 +52,8 @@ describe("ProviderStatsPage error-only state (KEA-7886 lote 9, review I1)", () =
     fireEvent.click(screen.getByRole("button", { name: "common.close" }));
 
     await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+    rerender(<ProviderStatsPage />);
+    expect(screen.queryByRole("alert")).toBeNull();
     // The frame survives the dismissal: title plus the header's refresh (retry) button.
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("providerStats.title");
     const refresh = screen.getByRole("button", { name: "providerStats.refresh" });
@@ -51,5 +64,7 @@ describe("ProviderStatsPage error-only state (KEA-7886 lote 9, review I1)", () =
         (globalThis.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.length
       ).toBeGreaterThan(callsBefore)
     );
+    // Explicit refresh may show the same HTTP error again after dismissal.
+    await screen.findByRole("alert");
   });
 });

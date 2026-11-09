@@ -27,6 +27,14 @@ export interface CodePreviewProps extends Omit<ComponentProps<"section">, "onCop
   lines?: CodePreviewToken[][];
   copyLabel?: string;
   copiedLabel?: string;
+  /** Button text while a getCopyValue copy is pending. Defaults to "Copying…". */
+  copyingLabel?: string;
+  /** Screen-reader announcement after a successful copy. Defaults to "Code copied to clipboard". */
+  copiedAnnouncement?: string;
+  /** Visible error after a failed copy. Defaults depend on whether getCopyValue is set. */
+  copyErrorLabel?: string;
+  /** Accessible name of the code region. Defaults to "<language> code". */
+  codeLabel?: string;
   /** Resolve clipboard text only after a click; displayed source stays unchanged. */
   getCopyValue?: () => Promise<string>;
   /** Receives displayed code, never the private value returned by getCopyValue. */
@@ -45,6 +53,10 @@ export function CodePreview({
   lines,
   copyLabel = "Copy",
   copiedLabel = "Copied",
+  copyingLabel = "Copying…",
+  copiedAnnouncement = "Code copied to clipboard",
+  copyErrorLabel,
+  codeLabel,
   getCopyValue,
   onCopy,
   onCopyError,
@@ -129,10 +141,10 @@ export function CodePreview({
         </span>
         <button type="button" className="ci-code-preview__copy" onClick={copy} disabled={!rawCode || copying} aria-busy={copying || undefined} data-copied={copied || undefined}>
           {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-          {copying ? "Copying…" : copied ? copiedLabel : copyLabel}
+          {copying ? copyingLabel : copied ? copiedLabel : copyLabel}
         </button>
       </header>
-      <pre className="ci-code-preview__pre" tabIndex={0} aria-label={`${String(language || filename || "Code")} code`}>
+      <pre className="ci-code-preview__pre" tabIndex={0} aria-label={codeLabel ?? `${String(language || filename || "Code")} code`}>
         <code>
           {sourceLines.map((line, lineIndex) => (
             <span className="ci-code-preview__line" key={lineIndex}>
@@ -146,8 +158,8 @@ export function CodePreview({
           ))}
         </code>
       </pre>
-      {copyFailed && <p className="ci-code-preview__error" role="alert">{getCopyValue ? "Could not copy code. Please try again." : "Could not copy code. Select it and try again."}</p>}
-      <span className="ci-sr-only" aria-live="polite">{copied ? "Code copied to clipboard" : ""}</span>
+      {copyFailed && <p className="ci-code-preview__error" role="alert">{copyErrorLabel ?? (getCopyValue ? "Could not copy code. Please try again." : "Could not copy code. Select it and try again.")}</p>}
+      <span className="ci-sr-only" aria-live="polite">{copied ? copiedAnnouncement : ""}</span>
     </section>
   );
 }

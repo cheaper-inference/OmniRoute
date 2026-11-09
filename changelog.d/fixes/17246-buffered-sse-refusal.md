@@ -1,1 +1,0 @@
-- **fix(sse):** preserve refusal deltas in buffered OpenAI SSE. ([#17246](https://github.com/diegosouzapw/OmniRoute/pull/17246)) — thanks @pacocartones

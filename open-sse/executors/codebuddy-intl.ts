@@ -78,11 +78,55 @@ function writeHeader(
   obj[key || name] = value;
 }
 
+const CONVERSATION_HEADERS = [
+  "X-Conversation-ID",
+  "X-Conversation-Request-ID",
+  "X-Conversation-Message-ID",
+] as const;
+
+/** Headers carrying the caller's own session id (generic, Claude Code, opencode, Codex). */
+const CLIENT_SESSION_HEADERS = [
+  "x-session-id",
+  "x-claude-code-session-id",
+  "x-opencode-session",
+  "session_id",
+] as const;
+
+export interface ConversationHeaderOptions {
+  /** The inbound client request headers; their non-empty `X-Conversation-*` ids are kept. */
+  clientHeaders?: Record<string, string> | Headers | null;
+  /** The upstream account the request goes to; scopes session-derived conversation ids. */
+  connectionId?: string | null;
+}
+
+/**
+ * The caller's explicit session identity: a session header, else a body session field.
+ * Message text is deliberately NOT an identity — two unrelated chats that open with the
+ * same user message are different conversations.
+ */
+function clientSessionKey(clientHeaders: unknown, body: unknown): string | null {
+  for (const name of CLIENT_SESSION_HEADERS) {
+    const value = readHeader(clientHeaders, name);
+    if (value) return value;
+  }
+  const b = body && typeof body === "object" ? (body as Record<string, unknown>) : null;
+  for (const field of ["session_id", "prompt_cache_key", "conversation_id"]) {
+    const value = b?.[field];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return null;
+}
+
 /**
  * Attach the conversation-correlation family the gateway's channel verification
  * demands (HTTP 400 code 11128 "conversation id missing" without it). Values
  * that already exist and are non-empty are preserved, so a caller tracking its
- * own conversation keeps it; blank values count as absent.
+ * own conversation keeps it; blank values count as absent. Non-empty ids the
+ * client sent on the inbound request (`opts.clientHeaders`) are forwarded too.
+ *
+ * Without a client conversation id, the id is derived only from the client's
+ * explicit session identity, scoped to the upstream account (`opts.connectionId`);
+ * with none, every request gets a fresh id.
  *
  * All three of `X-Conversation-ID`, `X-Conversation-Request-ID` and
  * `X-Conversation-Message-ID` are required — verified A/B against the live
@@ -96,14 +140,27 @@ function writeHeader(
  */
 export function withConversationHeaders<T extends Record<string, string> | Headers>(
   headers: T,
-  body: unknown = null
+  body: unknown = null,
+  opts: ConversationHeaderOptions = {}
 ): T {
-  const correlation = resolveCorrelationContext(headers, body);
+  adoptClientConversationHeaders(headers, opts.clientHeaders);
+  const correlation = resolveCorrelationContext(headers, body, "conversation", opts);
   const family = buildCorrelationHeaders(correlation);
   for (const [name, value] of Object.entries(family)) {
     writeHeader(headers, name, value);
   }
   return headers;
+}
+
+/** Forward the non-empty `X-Conversation-*` ids the client sent, unless already set. */
+function adoptClientConversationHeaders(
+  headers: Record<string, string> | Headers | unknown,
+  clientHeaders: unknown
+): void {
+  for (const name of CONVERSATION_HEADERS) {
+    const supplied = readHeader(clientHeaders, name);
+    if (supplied && !readHeader(headers, name)) writeHeader(headers, name, supplied);
+  }
 }
 
 /**
@@ -116,11 +173,12 @@ export function withConversationHeaders<T extends Record<string, string> | Heade
 export function resolveCorrelationContext(
   headers: Record<string, string> | Headers | unknown,
   body: unknown = null,
-  purpose: AgentPurpose = "conversation"
+  purpose: AgentPurpose = "conversation",
+  opts: ConversationHeaderOptions = {}
 ): CodeBuddyOperationContext {
   const suppliedConversationId = readHeader(headers, "X-Conversation-ID");
   const root = createRootContext({
-    conversationId: suppliedConversationId || conversationKeyFromBody(body),
+    conversationId: suppliedConversationId || sessionConversationId(body, opts),
   });
 
   const op = createOperationContext(root, purpose, {
@@ -138,29 +196,15 @@ export function resolveCorrelationContext(
   return op;
 }
 
-/** Stable conversation key derived from the body, used when no header exists. */
-function conversationKeyFromBody(body: unknown): string | null {
-  const b = body && typeof body === "object" ? (body as Record<string, unknown>) : null;
-  const sessionKey =
-    (typeof b?.session_id === "string" && b.session_id) ||
-    (typeof b?.prompt_cache_key === "string" && b.prompt_cache_key) ||
-    (typeof b?.conversation_id === "string" && b.conversation_id) ||
-    null;
-  if (sessionKey) return stableUuidFrom(`cbai:${sessionKey}`);
-
-  const messages = Array.isArray(b?.messages)
-    ? (b?.messages as Array<Record<string, unknown>>)
-    : null;
-  const firstUser = messages ? messages.find((m) => m?.role === "user") : null;
-  const userText =
-    typeof firstUser?.content === "string"
-      ? firstUser.content
-      : Array.isArray(firstUser?.content)
-        ? (firstUser.content as Array<Record<string, unknown>>)
-            .map((part) => (part && typeof part.text === "string" ? part.text : ""))
-            .join("\n")
-        : "";
-  return userText ? stableUuidFrom(`cbai:${userText}`) : null;
+/**
+ * Stable conversation id derived from the client's explicit session identity, scoped to the
+ * upstream account. Without one it is null and the root context mints a fresh id, so two
+ * unrelated chats that open with the same message never share a conversation.
+ */
+function sessionConversationId(body: unknown, opts: ConversationHeaderOptions): string | null {
+  const sessionKey = clientSessionKey(opts.clientHeaders, body);
+  if (!sessionKey) return null;
+  return stableUuidFrom(opts.connectionId ? `${opts.connectionId}:${sessionKey}` : sessionKey);
 }
 
 /** Layer the captured CLI client profile and the correlation family onto headers. */
@@ -303,7 +347,14 @@ export class CodeBuddyIntlExecutor extends CodeBuddyBaseExecutor {
   ): Record<string, string> {
     const headers = super.buildHeaders(credentials, stream, clientHeaders, model, _health, body);
     try {
-      const correlation = resolveCorrelationContext(headers, body);
+      const conversationOptions = { clientHeaders, connectionId: credentials?.connectionId };
+      adoptClientConversationHeaders(headers, clientHeaders);
+      const correlation = resolveCorrelationContext(
+        headers,
+        body,
+        "conversation",
+        conversationOptions
+      );
       this.rememberAttempt(body, correlation);
       const op = this.peekOperation(body) ?? correlation;
       return applyCliProfile(headers, op);
@@ -339,7 +390,7 @@ export class CodeBuddyIntlExecutor extends CodeBuddyBaseExecutor {
     // CLI body contract: stream/stream_options/cache_retention + the serialized
     // harness metadata. Correlation ids come from the operation context that
     // buildHeaders() resolved for this SAME request body.
-    const operation = this.operationForBody(body);
+    const operation = this.operationForBody(body, credentials?.connectionId);
     return applyCliBody(out, { op: operation });
   }
 
@@ -378,15 +429,16 @@ export class CodeBuddyIntlExecutor extends CodeBuddyBaseExecutor {
    * them, but OmniRoute does not issue those calls yet — wiring them is a
    * separate feature, not a side effect of this one.
    */
-  private operationForBody(body: unknown): CodeBuddyOperationContext {
+  private operationForBody(body: unknown, connectionId?: string | null): CodeBuddyOperationContext {
+    const options = { connectionId };
     if (body && typeof body === "object") {
       const known = this.operations.get(body as object);
       if (known) return known;
-      const created = resolveCorrelationContext({}, body);
+      const created = resolveCorrelationContext({}, body, "conversation", options);
       this.operations.set(body as object, created);
       return created;
     }
-    return resolveCorrelationContext({}, body);
+    return resolveCorrelationContext({}, body, "conversation", options);
   }
 
   parseError(

@@ -30,6 +30,11 @@ async function twoRequestsAgainstLimitOne(env: Partial<Record<(typeof ENV_KEYS)[
   console.error = (...args: unknown[]) => {
     errorLogs.push(args.map(String).join(" "));
   };
+  // Both requests must land in the same fixed window. Each failed Redis call takes ~0.7 s, so
+  // on the real clock the pair could straddle a minute boundary and the second would be allowed.
+  const realDateNow = Date.now;
+  const now = realDateNow();
+  Date.now = () => now;
   const modulePath = path.join(process.cwd(), "src/shared/utils/rateLimiter.ts");
   const rateLimiter = await import(`${pathToFileURL(modulePath).href}?case=${Math.random()}`);
   try {
@@ -39,12 +44,13 @@ async function twoRequestsAgainstLimitOne(env: Partial<Record<(typeof ENV_KEYS)[
       await rateLimiter.checkRateLimit("key-1", rules),
     ];
     const tookRedisPath = errorLogs.some((line) => line.includes("Redis eval failed"));
-    return { results, tookRedisPath };
+    return { results, tookRedisPath, now };
   } finally {
     if (rateLimiter.isRedisConfigured()) {
       (await rateLimiter.getRedisClient()).disconnect();
     }
     console.error = originalConsoleError;
+    Date.now = realDateNow;
     for (const key of ENV_KEYS) {
       if (saved[key] === undefined) delete process.env[key];
       else process.env[key] = saved[key];
@@ -65,7 +71,7 @@ test("DISABLE_SQLITE_AUTO_BACKUP=true does not move a Redis deployment to the in
 });
 
 test("NODE_ENV=test still keeps the limiter in memory even with REDIS_URL set", async () => {
-  const { results, tookRedisPath } = await twoRequestsAgainstLimitOne({
+  const { results, tookRedisPath, now } = await twoRequestsAgainstLimitOne({
     REDIS_URL: "redis://127.0.0.1:1",
     NODE_ENV: "test",
   });
@@ -74,8 +80,8 @@ test("NODE_ENV=test still keeps the limiter in memory even with REDIS_URL set", 
   assert.equal(results[1].allowed, false);
   assert.equal(results[1].failedWindow, 60);
   assert.equal(typeof results[1].resetAt, "number");
-  assert.ok(results[1].resetAt! > Date.now());
-  assert.ok(results[1].resetAt! - Date.now() <= 60_000);
+  assert.ok(results[1].resetAt! > now);
+  assert.ok(results[1].resetAt! - now <= 60_000);
 });
 
 test("the Redis auth cache is not switched off by DISABLE_SQLITE_AUTO_BACKUP", () => {

@@ -446,7 +446,7 @@ Divisé en sous-répertoires spécialisés :
 
 ## 4. `open-sse/` — Espace de travail du moteur de streaming
 
-Espace de travail npm séparé publié sous le nom `@omniroute/open-sse`. Possède le traitement des demandes, les exécuteurs, les traducteurs, les services, le transformateur et le serveur MCP.
+Espace de travail npm séparé publié sous `@omniroute/open-sse`. Possède le traitement des demandes, les exécuteurs, les traducteurs, les services, le transformateur et le serveur MCP.
 
 ```
 open-sse/
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modules d'exécution de niveau supérieur (`*.ts` moins `base.ts`, `index.ts` et tests — le nombre de mesures `npm run check:docs-counts` ). Chaque classe d'exécuteur étend `BaseExecutor` (`base.ts`), directement ou via `DefaultExecutor` ou un autre exécuteur ; les modules restants sont des assistants par fournisseur (schémas d'outils, adaptateurs fetch/TTS, gestionnaires de bizarreries). Les exécuteurs testamentaires comprennent :
+159 modules d'exécution de niveau supérieur (`*.ts` moins `base.ts`, `index.ts` et tests — le nombre de mesures `npm run check:docs-counts` ). Chaque classe d'exécuteur étend `BaseExecutor` (`base.ts`), directement ou via `DefaultExecutor` ou un autre exécuteur ; les modules restants sont des assistants par fournisseur (schémas d'outils, adaptateurs fetch/TTS, gestionnaires de bizarreries). Les exécuteurs testamentaires comprennent :
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `opencode`, `nlpcloud`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (assistant d'identité partagée) et `index.ts` (registre).
 
-> Remarque : les fournisseurs non répertoriés ici sont servis par `default.ts` à l'aide de l'exécuteur générique compatible OpenAI. Le catalogue complet des fournisseurs (377 fournisseurs) réside dans `src/shared/constants/providers.ts`.
+> Remarque : les fournisseurs non répertoriés ici sont servis par `default.ts` à l'aide de l'exécuteur générique compatible OpenAI. Le catalogue complet des fournisseurs (381 fournisseurs) réside dans `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ Traduction en étoile (OpenAI est la plaque tournante).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Réponses API ↔ Convertisseur d'achèvements de chat (utilisé par la route fourre-tout `responses/` ).
+- `responsesTransformer.ts` — `TransformStream` -based Réponses API ↔ Chat Completions converter (utilisé par la route `responses/` fourre-tout).
 
 ### 4.5 `open-sse/services/`
 
@@ -519,7 +519,7 @@ Points forts (liste complète sous `open-sse/services/`) :
 | Mise en cache            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Intelligence de routage  | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Gestion du modèle        | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Compression              | `compression/` — câblage du moteur à compression complète                                                                                                                                                                                                |
+| Compression              | Câblage du moteur à compression complète `compression/` —                                                                                                                                                                                                |
 | Session de jeton +       | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Niveau/manifeste         | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / réseau              | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,16 +528,16 @@ Points forts (liste complète sous `open-sse/services/`) :
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 outils uniques** câblé en `server.ts` (45 canoniques dans la mémoire `schemas/tools.ts` +, les compétences, les compétences GitHub, le pool, la gamification, le plugin, Notion, Obsidian, les modules de corpus local et de compression — union comptée par `countUniqueMcpTools`).
+- **110 outils uniques** câblé en `server.ts` (45 canoniques dans la mémoire `schemas/tools.ts` +, compétences, compétences GitHub, pool, gamification, plugin, Notion, Obsidian, corpus local et modules de compression — union comptés par `countUniqueMcpTools`).
 - **3 transports** : stdio, HTTP Streamable, SSE.
-- **33 lunettes** appliqué au moment de l'exécution - liste de base dans `src/shared/constants/mcpScopes.ts`, l'ensemble complet est l'union des étendues déclarées par chaque module d'outil.
+- **33 lunettes** appliqué au moment de l'exécution de la liste de base — dans `src/shared/constants/mcpScopes.ts`, l'ensemble complet est l'union des étendues déclarées par chaque module d'outil.
 - Table d'audit : `mcp_tool_audit` (remplie par `audit.ts`).
 - Fichiers : `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus tests sous `__tests__/`.
 - Voir [MCP-SERVER.md](../frameworks/MCP-SERVER.md) pour le catalogue complet d'outils.
 
 ### 4.7 `open-sse/config/`
 
-Registres de fournisseurs (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), registres de modèles par format (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), assistants d'identité (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `toolCloaking.ts`, `cliFingerprints.ts`, `defaultThinkingSignature.ts`), `registryUtils.ts` assistants d'identification (`credentialLoader.ts`, `codexClient.ts`) et les adaptateurs cloud (`azureAi.ts`, `bedrock.ts`, zqx , `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`).
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

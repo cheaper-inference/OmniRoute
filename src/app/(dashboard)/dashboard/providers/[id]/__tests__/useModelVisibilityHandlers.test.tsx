@@ -7,6 +7,7 @@ import {
   useModelVisibilityHandlers,
   type UseModelVisibilityHandlersReturn,
 } from "../hooks/useModelVisibilityHandlers";
+import type { NotificationStore } from "@/store/notificationStore";
 
 type HookResult = UseModelVisibilityHandlersReturn;
 
@@ -15,12 +16,18 @@ const t = ((key: string) => key) as ((key: string) => string) & {
 };
 t.has = () => false;
 
+// The hook takes the notification store itself, so the stub has to satisfy the
+// whole interface, not just the four methods the tests assert on.
 const notify = {
+  notifications: [],
+  addNotification: vi.fn(),
+  removeNotification: vi.fn(),
+  clearAll: vi.fn(),
   success: vi.fn(),
   error: vi.fn(),
   warning: vi.fn(),
   info: vi.fn(),
-};
+} satisfies NotificationStore;
 
 const baseProps = {
   providerId: "anthropic-compatible-cc-test",
@@ -30,6 +37,7 @@ const baseProps = {
   fetchProviderModelMeta: vi.fn().mockResolvedValue(undefined),
   fetchAliases: vi.fn().mockResolvedValue(undefined),
   notify,
+  requestConfirm: vi.fn().mockResolvedValue(true),
   t,
   selectedConnection: { id: "conn-1", provider: "anthropic-compatible-cc-test" },
   providerNode: { id: "anthropic-compatible-cc-test" },
@@ -144,10 +152,6 @@ describe("useModelVisibilityHandlers", () => {
   });
 
   it("clears models for both storage alias and canonical providerId when they differ", async () => {
-    vi.stubGlobal(
-      "confirm",
-      vi.fn(() => true)
-    );
     const fetchMock = vi.mocked(fetch);
     fetchMock.mockResolvedValue({
       ok: true,
