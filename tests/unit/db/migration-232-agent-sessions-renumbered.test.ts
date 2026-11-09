@@ -1,6 +1,6 @@
 // Earlier #14833 builds shipped agent_sessions / usage_history.agent_session_id as 190/191,
-// 197/198, 198/199, 208/209 and 214/215 — slots upstream assigns to its own migrations. A
-// database that ran one of those builds must move its rows to 229/230, keep its sessions, and still receive
+// 197/198, 198/199, 208/209, 214/215 and 229/230 — slots upstream assigns to its own migrations. A
+// database that ran one of those builds must move its rows to 232/233, keep its sessions, and still receive
 // the upstream migrations of those slots (the runner treats a version as applied by number).
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -110,23 +110,39 @@ const HISTORICAL_BUILDS = [
       columns(db, "call_logs").includes("client_session_id") &&
       hasObject(db, "index", "idx_usage_history_billing_team_time"),
   },
+  {
+    sessions: "229",
+    usage: "230",
+    upstream: ["api_key_five_hour_limit", "call_logs_cache_write_tiers"],
+    undo: `
+      ALTER TABLE api_keys DROP COLUMN five_hour_usage_limit_usd;
+      ALTER TABLE call_logs DROP COLUMN tokens_cache_creation_5m;
+      ALTER TABLE call_logs DROP COLUMN tokens_cache_creation_1h;
+      ALTER TABLE call_logs DROP COLUMN cache_creation_tier_status;
+      ALTER TABLE call_logs DROP COLUMN cache_write_cost_usd;
+      ALTER TABLE call_logs DROP COLUMN cache_write_priced_tokens;
+    `,
+    restored: (db: Db) =>
+      columns(db, "api_keys").includes("five_hour_usage_limit_usd") &&
+      columns(db, "call_logs").includes("cache_write_priced_tokens"),
+  },
 ];
 
 for (const build of HISTORICAL_BUILDS) {
-  test(`agent-session migrations ${build.sessions}/${build.usage} move to 229/230 and free the slots for ${build.upstream.join(" + ")}`, () => {
+  test(`agent-session migrations ${build.sessions}/${build.usage} move to 232/233 and free the slots for ${build.upstream.join(" + ")}`, () => {
     const db = core.getDbInstance();
     const now = new Date().toISOString();
     db.prepare(
       "INSERT INTO agent_sessions (id, api_key_id, first_seen_at, last_seen_at, request_count) VALUES (?, ?, ?, ?, 3)"
     ).run("kept-session", "key-1", now, now);
     // Rewind the ledger to what that build left behind: its own names in the upstream slots,
-    // which never ran there, and nothing at 229/230.
+    // which never ran there, and nothing at 232/233.
     db.exec(`
       DELETE FROM _omniroute_migrations WHERE version IN ('${build.sessions}', '${build.usage}');
       UPDATE _omniroute_migrations SET version = '${build.sessions}'
-        WHERE version = '229' AND name = 'agent_sessions';
+        WHERE version = '232' AND name = 'agent_sessions';
       UPDATE _omniroute_migrations SET version = '${build.usage}'
-        WHERE version = '230' AND name = 'usage_history_agent_session_id';
+        WHERE version = '233' AND name = 'usage_history_agent_session_id';
       ${build.undo}
     `);
     assert.equal(build.restored(db), false);
@@ -135,14 +151,14 @@ for (const build of HISTORICAL_BUILDS) {
 
     const ledger = db
       .prepare(
-        "SELECT version, name FROM _omniroute_migrations WHERE version IN (?, ?, '229', '230') ORDER BY version"
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN (?, ?, '232', '233') ORDER BY version"
       )
       .all(build.sessions, build.usage);
     assert.deepEqual(ledger, [
       { version: build.sessions, name: build.upstream[0] },
       { version: build.usage, name: build.upstream[1] },
-      { version: "229", name: "agent_sessions" },
-      { version: "230", name: "usage_history_agent_session_id" },
+      { version: "232", name: "agent_sessions" },
+      { version: "233", name: "usage_history_agent_session_id" },
     ]);
     assert.equal(build.restored(db), true);
     assert.ok(columns(db, "usage_history").includes("agent_session_id"));

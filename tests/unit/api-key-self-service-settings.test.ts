@@ -1,5 +1,5 @@
 /**
- * Per-key self-service settings (migration 228) end to end on a temp SQLite DB:
+ * Per-key self-service settings (migration 231) end to end on a temp SQLite DB:
  * the DB module, the Zod schemas, the admin routes (GET/PUT
  * /api/keys/[id]/self-service, GET /api/keys, PATCH/DELETE /api/keys/[id]),
  * GET /v1/me/status auth via Bearer or x-api-key, and the policy merge into
@@ -71,13 +71,13 @@ function assertNoStackLeak(body: unknown) {
 
 // ──────────────── DB module ────────────────
 
-test("self-service migration 228 coexists with upstream attempt timing migration 194", () => {
+test("self-service migration 231 coexists with upstream attempt timing migration 194", () => {
   // Regression: stale stack children reused 194 and collided with upstream schema updates.
   const db = core.getDbInstance();
   const applied = db
     .prepare("SELECT version FROM _omniroute_migrations WHERE name = ?")
     .all("api_key_self_service_settings");
-  assert.deepEqual(applied, [{ version: "228" }]);
+  assert.deepEqual(applied, [{ version: "231" }]);
   const timingColumns = db.prepare("PRAGMA table_info(proxy_logs)").all() as { name: string }[];
   assert.ok(timingColumns.some((column) => column.name === "headers_ms"));
   assert.deepEqual(
@@ -98,7 +98,7 @@ test("historical self-service migration 194 upgrades without skipping upstream t
   db.exec(`
     DELETE FROM _omniroute_migrations WHERE version = '194';
     UPDATE _omniroute_migrations SET version = '194'
-      WHERE version = '228' AND name = 'api_key_self_service_settings';
+      WHERE version = '231' AND name = 'api_key_self_service_settings';
     ALTER TABLE proxy_logs DROP COLUMN headers_ms;
     ALTER TABLE proxy_logs DROP COLUMN first_chunk_ms;
   `);
@@ -109,12 +109,12 @@ test("historical self-service migration 194 upgrades without skipping upstream t
   assert.deepEqual(
     db
       .prepare(
-        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('194', '228') ORDER BY version"
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('194', '231') ORDER BY version"
       )
       .all(),
     [
       { version: "194", name: "proxy_logs_attempt_timing" },
-      { version: "228", name: "api_key_self_service_settings" },
+      { version: "231", name: "api_key_self_service_settings" },
     ]
   );
   const columns = db.prepare("PRAGMA table_info(proxy_logs)").all() as { name: string }[];
@@ -122,7 +122,7 @@ test("historical self-service migration 194 upgrades without skipping upstream t
   assert.ok(columns.some((column) => column.name === "first_chunk_ms"));
 });
 
-test("historical self-service migration 197 moves to 228 and frees the slot for proxy_subscription_core_config", async () => {
+test("historical self-service migration 197 moves to 231 and frees the slot for proxy_subscription_core_config", async () => {
   // Builds of this PR shipped the settings table as 197, which release/v3.8.52 assigns to
   // 197_proxy_subscription_core_config. Those databases must keep their settings and still
   // receive the upstream 197 columns.
@@ -134,7 +134,7 @@ test("historical self-service migration 197 moves to 228 and frees the slot for 
   db.exec(`
     DELETE FROM _omniroute_migrations WHERE version = '197';
     UPDATE _omniroute_migrations SET version = '197'
-      WHERE version = '228' AND name = 'api_key_self_service_settings';
+      WHERE version = '231' AND name = 'api_key_self_service_settings';
     ALTER TABLE proxy_subscriptions DROP COLUMN core_config_path;
     ALTER TABLE proxy_subscriptions DROP COLUMN selector_last_switch_kind;
   `);
@@ -145,12 +145,12 @@ test("historical self-service migration 197 moves to 228 and frees the slot for 
   assert.deepEqual(
     db
       .prepare(
-        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('197', '228') ORDER BY version"
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('197', '231') ORDER BY version"
       )
       .all(),
     [
       { version: "197", name: "proxy_subscription_core_config" },
-      { version: "228", name: "api_key_self_service_settings" },
+      { version: "231", name: "api_key_self_service_settings" },
     ]
   );
   const columns = db.prepare("PRAGMA table_info(proxy_subscriptions)").all() as {
@@ -160,7 +160,7 @@ test("historical self-service migration 197 moves to 228 and frees the slot for 
   assert.ok(columns.some((column) => column.name === "selector_last_switch_kind"));
 });
 
-test("historical self-service migration 207 moves to 228 and frees the slot for remove_opencode_free_provider", async () => {
+test("historical self-service migration 207 moves to 231 and frees the slot for remove_opencode_free_provider", async () => {
   // Later builds of this PR shipped the settings table as 207, which release/v3.8.53 assigns
   // to 207_remove_opencode_free_provider. That cleanup must still run on those databases.
   const db = core.getDbInstance();
@@ -171,7 +171,7 @@ test("historical self-service migration 207 moves to 228 and frees the slot for 
   db.exec(`
     DELETE FROM _omniroute_migrations WHERE version = '207';
     UPDATE _omniroute_migrations SET version = '207'
-      WHERE version = '228' AND name = 'api_key_self_service_settings';
+      WHERE version = '231' AND name = 'api_key_self_service_settings';
     INSERT INTO provider_connections (id, provider, auth_type, name, is_active, created_at, updated_at)
       VALUES ('keyless-free-connection', 'opencode', 'apikey', 'legacy', 1, datetime('now'), datetime('now'));
   `);
@@ -182,12 +182,12 @@ test("historical self-service migration 207 moves to 228 and frees the slot for 
   assert.deepEqual(
     db
       .prepare(
-        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('207', '228') ORDER BY version"
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('207', '231') ORDER BY version"
       )
       .all(),
     [
       { version: "207", name: "remove_opencode_free_provider" },
-      { version: "228", name: "api_key_self_service_settings" },
+      { version: "231", name: "api_key_self_service_settings" },
     ]
   );
   assert.equal(
@@ -196,7 +196,7 @@ test("historical self-service migration 207 moves to 228 and frees the slot for 
   );
 });
 
-test("historical self-service migration 213 moves to 228 and frees the slot for api_key_preferred_connections", async () => {
+test("historical self-service migration 213 moves to 231 and frees the slot for api_key_preferred_connections", async () => {
   // Builds of this PR on release/v3.8.53 shipped the settings table as 213, which the release
   // assigns to 213_api_key_preferred_connections (#13102). Those databases must keep their
   // settings and still receive the api_keys.preferred_connections column.
@@ -208,7 +208,7 @@ test("historical self-service migration 213 moves to 228 and frees the slot for 
   db.exec(`
     DELETE FROM _omniroute_migrations WHERE version = '213';
     UPDATE _omniroute_migrations SET version = '213'
-      WHERE version = '228' AND name = 'api_key_self_service_settings';
+      WHERE version = '231' AND name = 'api_key_self_service_settings';
     ALTER TABLE api_keys DROP COLUMN preferred_connections;
   `);
   const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
@@ -218,12 +218,12 @@ test("historical self-service migration 213 moves to 228 and frees the slot for 
   assert.deepEqual(
     db
       .prepare(
-        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('213', '228') ORDER BY version"
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('213', '231') ORDER BY version"
       )
       .all(),
     [
       { version: "213", name: "api_key_preferred_connections" },
-      { version: "228", name: "api_key_self_service_settings" },
+      { version: "231", name: "api_key_self_service_settings" },
     ]
   );
   const columns = db.prepare("PRAGMA table_info(api_keys)").all() as { name: string }[];
@@ -239,7 +239,7 @@ test("historical self-service migration 218 preserves settings and installs upst
   db.exec(`
     DELETE FROM _omniroute_migrations WHERE version = '218';
     UPDATE _omniroute_migrations SET version = '218'
-      WHERE version = '228' AND name = 'api_key_self_service_settings';
+      WHERE version = '231' AND name = 'api_key_self_service_settings';
     ALTER TABLE proxy_subscriptions DROP COLUMN mirror_urls;
   `);
   const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
@@ -249,16 +249,103 @@ test("historical self-service migration 218 preserves settings and installs upst
   assert.deepEqual(
     db
       .prepare(
-        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('218', '228') ORDER BY version"
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('218', '231') ORDER BY version"
       )
       .all(),
     [
       { version: "218", name: "proxy_subscription_mirror_urls" },
-      { version: "228", name: "api_key_self_service_settings" },
+      { version: "231", name: "api_key_self_service_settings" },
     ]
   );
   const columns = db.prepare("PRAGMA table_info(proxy_subscriptions)").all() as { name: string }[];
   assert.ok(columns.some((column) => column.name === "mirror_urls"));
+});
+
+test("historical self-service migration 228 moves to 231 and frees the slot for purge_orphaned_provider_catalogs", async () => {
+  // Builds of the stack shipped the settings table as 228, which release/v3.8.54 assigns to
+  // 228_purge_orphaned_provider_catalogs. Those databases keep their settings and still run
+  // the upstream purge.
+  const db = core.getDbInstance();
+  const saved = settingsDb.updateApiKeySelfServiceSettings("historical-228-key", {
+    sharedQuotaProviders: ["claude"],
+    anthropicRateLimitHeaders: "strip",
+  });
+  db.exec(`
+    DELETE FROM _omniroute_migrations WHERE version = '228';
+    UPDATE _omniroute_migrations SET version = '228'
+      WHERE version = '231' AND name = 'api_key_self_service_settings';
+    INSERT INTO key_value (namespace, key, value)
+      VALUES ('syncedAvailableModels', 'codex:missing-connection', '[]');
+  `);
+  const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
+  runMigrations(db);
+  settingsDb.clearApiKeySelfServiceSettingsCache();
+  assert.deepEqual(settingsDb.getApiKeySelfServiceSettings("historical-228-key"), saved);
+  assert.deepEqual(
+    db
+      .prepare(
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('228', '231') ORDER BY version"
+      )
+      .all(),
+    [
+      { version: "228", name: "purge_orphaned_provider_catalogs" },
+      { version: "231", name: "api_key_self_service_settings" },
+    ]
+  );
+  assert.equal(
+    db
+      .prepare("SELECT 1 FROM key_value WHERE namespace = ? AND key = ?")
+      .get("syncedAvailableModels", "codex:missing-connection"),
+    undefined
+  );
+});
+
+test("stack builds that shipped 229–231 move to 231–233 and free 229/230 for upstream", async () => {
+  // Earlier stack builds shipped api_key_self_service_settings, agent_sessions and
+  // usage_history_agent_session_id as 229/230/231. The 231 row must move out before the
+  // settings row moves into 231, and upstream 229/230 must still run.
+  const db = core.getDbInstance();
+  const saved = settingsDb.updateApiKeySelfServiceSettings("historical-229-key", {
+    sharedQuotaProviders: ["codex"],
+    anthropicRateLimitHeaders: "strip",
+  });
+  db.exec(`
+    DELETE FROM _omniroute_migrations WHERE version IN ('229', '230');
+    UPDATE _omniroute_migrations SET version = '229'
+      WHERE version = '231' AND name = 'api_key_self_service_settings';
+    UPDATE _omniroute_migrations SET version = '230'
+      WHERE version = '232' AND name = 'agent_sessions';
+    UPDATE _omniroute_migrations SET version = '231'
+      WHERE version = '233' AND name = 'usage_history_agent_session_id';
+    ALTER TABLE api_keys DROP COLUMN five_hour_usage_limit_usd;
+    ALTER TABLE call_logs DROP COLUMN tokens_cache_creation_5m;
+    ALTER TABLE call_logs DROP COLUMN tokens_cache_creation_1h;
+    ALTER TABLE call_logs DROP COLUMN cache_creation_tier_status;
+    ALTER TABLE call_logs DROP COLUMN cache_write_cost_usd;
+    ALTER TABLE call_logs DROP COLUMN cache_write_priced_tokens;
+  `);
+  const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
+  runMigrations(db);
+  settingsDb.clearApiKeySelfServiceSettingsCache();
+  assert.deepEqual(settingsDb.getApiKeySelfServiceSettings("historical-229-key"), saved);
+  assert.deepEqual(
+    db
+      .prepare(
+        "SELECT version, name FROM _omniroute_migrations WHERE version BETWEEN '229' AND '233' ORDER BY version"
+      )
+      .all(),
+    [
+      { version: "229", name: "api_key_five_hour_limit" },
+      { version: "230", name: "call_logs_cache_write_tiers" },
+      { version: "231", name: "api_key_self_service_settings" },
+      { version: "232", name: "agent_sessions" },
+      { version: "233", name: "usage_history_agent_session_id" },
+    ]
+  );
+  const apiKeyColumns = db.prepare("PRAGMA table_info(api_keys)").all() as { name: string }[];
+  assert.ok(apiKeyColumns.some((column) => column.name === "five_hour_usage_limit_usd"));
+  const callLogColumns = db.prepare("PRAGMA table_info(call_logs)").all() as { name: string }[];
+  assert.ok(callLogColumns.some((column) => column.name === "cache_write_priced_tokens"));
 });
 
 test("historical turn-node index migration 207 does not skip upstream provider cleanup", async () => {
