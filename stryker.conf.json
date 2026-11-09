@@ -417,6 +417,7 @@
       "tests/unit/embedding-account-cooldown-10347.test.ts",
       "tests/unit/embedding-cooldown-integration-10347.test.ts",
       "tests/unit/embeddings-auth.test.ts",
+      "tests/unit/embeddings-custom-node-429-cooldown.test.ts",
       "tests/unit/error-classification.test.ts",
       "tests/unit/error-message-sanitization.test.ts",
       "tests/unit/error-path-redaction-route-truncation-13144.test.ts",

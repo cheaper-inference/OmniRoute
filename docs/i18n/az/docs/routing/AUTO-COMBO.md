@@ -127,6 +127,27 @@ Avtomatik qiymətləndirmə hər sorğu üçün ən yaxşı provayderi/modeli se
 | `src/sse/handlers/chat.ts`                                | İnteqrasiya: auto prefiksi üzrə qısaqapanma              |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` sistem qeydi                     |
 
+## Saxlanmış Avtomatik kombinlər üçün hesab tərcihləri
+
+Ağıllı Avto redaktor isteğe bağlı təklif edir** Hesab üstünlükləri** bölmə. Hər bir əlaqə Üstünlüklü, Normal (standart), Ehtiyat və ya Xaric edilə bilər. Birdən çox əlaqə bir səviyyəni paylaşa bilər. Avtomatik birinci uyğun səviyyə daxilində scoring/router davranışını saxlayaraq seçir; uğursuz cəhdlər qalan konkret hesablara düşür, ehtiyatdan əvvəl normaldan əvvəl üstünlük verilir. İstisna edilən bağlantılar bu kombin tərəfindən heç vaxt istifadə edilmir.
+
+Parametr `config.accountPreferences` kimi saxlanılır, ID bağlantısı ilə açar:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Buraxılmış və ya boş xəritə mövcud marşrutu saxlayır. Tərcihlər deaktiv edilmiş əlaqələri aktivləşdirmir, API açarı girişi vermir, kvota ilə bloklanmış namizədləri bərpa etmir və ya büdcə yoxlamalarını keçmir. Hər cəhd onun konkret əlaqəsi ilə məhdudlaşır, ona görə də hesabın geri qaytarılması kombo marşrutlaşdırıcının arxasına keçə bilməz. Mövcud sessiya yaxınlığı uyğun hesabı saxlaya bilər; yerli növbəyə bağlı hesab istisna olmaqla, hesabları səssizcə dəyişmək əvəzinə dönən dayanacaqlar.
+
+Konfiqurasiya edilmiş üstünlüklər hesabdan xəbərdar olan Avto yolundan istifadə edir: bağlanmamış kontekst-keş, smart-pipeline, xaos və kölgə qısa yolları göndərilmir. Spekulyativ hedcinq bu sorğular üçün deaktiv edilib, ona görə də ehtiyat hesablar üstünlük verilən hesablarla yarışa bilməz. Digər kombinasiya strategiyaları bu parametri şərh etmir. Kombo-nun Avtomatikdən uzağa dəyişdirilməsi daha sonra geriyə keçid üçün yadda saxlanmış üstünlükləri saxlayır.
+
 ## Real Model Id-si ilə Uyğun Gələn Combo Adları
 
 `name` dəyəri prefikssiz model id-si ilə eyni olan combo (məsələn, `gpt-5.5`

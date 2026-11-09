@@ -129,6 +129,27 @@ A pontuação automática seleciona o melhor fornecedor/modelo para cada pedido
 | `src/sse/handlers/chat.ts`                                | Integração: curto-circuito do prefixo automático       |
 | `src/shared/constants/providers.ts`                       | Entrada de sistema `SYSTEM_PROVIDERS.auto`             |
 
+## Preferências de conta para combos automáticos guardados
+
+O editor Intelligent Auto oferece um opcional** Preferências da conta** secção. Cada ligação pode ser Preferencial, Normal (o predefinido), Reserva ou Eliminada. Várias ligações podem partilhar uma camada. A seleção automática ocorre no primeiro nível elegível, mantendo o seu comportamento scoring/router nesse local; as tentativas falhadas recaem nas restantes contas concretas, preferidas antes do normal antes da reserva. As ligações excluídas nunca são utilizadas por este combo.
+
+A configuração é guardada como `config.accountPreferences`, codificada pela ligação ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Um mapa omitido ou vazio mantém a rota existente. As preferências não permitem ligações desativadas, concedem acesso à chave API, restauram candidatos bloqueados por quotas ou ignoram verificações de orçamento. Cada tentativa é restrita à sua ligação concreta, pelo que o substituto da conta não pode saltar níveis atrás do router combinado. A afinidade de sessão existente pode manter uma conta elegível; eliminar a conta ligada a um turno nativo interrompe esse turno em vez de alterar as contas silenciosamente.
+
+As preferências configuradas utilizam o caminho automático com reconhecimento de conta: cache de contexto não ligado, pipeline inteligente, caos e atalhos de sombra não são despachados. A cobertura especulativa está desativada para estes pedidos, pelo que as contas de reserva não podem concorrer com as preferenciais. Outras estratégias de combinação não interpretam esta configuração. Alterar um combo para longe de Automático mantém as preferências guardadas para uma troca posterior.
+
 ## Nomes de combos que correspondem a um ID de modelo real
 
 Um combo cujo `name` é idêntico a um ID de modelo simples (por exemplo, um combo chamado

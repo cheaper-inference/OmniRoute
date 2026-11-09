@@ -127,6 +127,27 @@ Automatisk poängsättning väljer bästa leverantör/modell per begäran
 | `src/sse/handlers/chat.ts`                                | Integrering: genväg för automatiskt prefix  |
 | `src/shared/constants/providers.ts`                       | Systemposten `SYSTEM_PROVIDERS.auto`        |
 
+## Kontoinställningar för sparade automatiska kombinationer
+
+Den intelligenta automatiska editorn erbjuder ett tillval** Kontoinställningar** avsnitt. Varje anslutning kan vara Preferred, Normal (standard), Reservera eller Excluded. Flera anslutningar kan dela en nivå. Auto väljer inom den första kvalificerade nivån och behåller sitt scoring/router beteende där; misslyckade försök faller igenom till de återstående konkreta kontona, föredragna före normala före reserv. Undantagna anslutningar används aldrig av denna kombination.
+
+Inställningen lagras som `config.accountPreferences`, knappad av anslutningen ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+En utelämnad eller tom karta behåller befintlig rutt. Inställningar aktiverar inte inaktiverade anslutningar, beviljar inte API-nyckelåtkomst, återställer inte kvotblockerade kandidater eller kringgår budgetkontroller. Varje försök är begränsat till dess konkreta anslutning, så reservkonto kan inte hoppa nivåer bakom den kombinerade routern. Befintlig sessionsaffinitet kan behålla ett kvalificerat konto; exkludera kontot bundet till en inbyggd sväng stoppar den svängen istället för att tyst byta konto.
+
+Konfigurerade inställningar använder den kontomedvetna automatiska sökvägen: obunden kontextcache, smart-pipeline, kaos och skugggenvägar skickas inte. Spekulativ säkring är inaktiverad för dessa förfrågningar så reservkonton kan inte tävla mot föredragna. Andra kombinationsstrategier tolkar inte denna inställning. Om du ändrar en kombination från Auto behåller de sparade inställningarna för en senare byte tillbaka.
+
 ## Combo-namn som matchar ett verkligt modell-id
 
 En combo vars `name` är identiskt med ett fristående modell-id (t.ex. en combo med namnet

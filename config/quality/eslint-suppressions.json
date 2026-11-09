@@ -978,11 +978,6 @@
       "count": 1
     }
   },
-  "src/app/api/usage/analytics/route.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/app/api/v1/audio/speech/route.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -1245,11 +1240,6 @@
   },
   "src/lib/db/tokenLimits.ts": {
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/db/usageAnalytics/sources.ts": {
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
