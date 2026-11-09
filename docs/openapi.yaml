@@ -8827,58 +8827,6 @@ paths:
         "500":
           description: Internal server error
 
-  /api/settings/quota-alert-latch:
-    get:
-      tags: [Settings]
-      summary: Get the dedupe state of the opt-in dashboard quota alerts
-      description: Alert key -> the value that produced the alert (remaining percentage or credit expiry timestamp).
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: The stored latch
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal server error
-    put:
-      tags: [Settings]
-      summary: Replace the dedupe state of the opt-in dashboard quota alerts
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                latch:
-                  type: object
-                  maxProperties: 5000
-                  additionalProperties:
-                    type: number
-      responses:
-        "200":
-          description: The stored latch
-        "400":
-          description: Invalid JSON or latch
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal server error
-    delete:
-      tags: [Settings]
-      summary: Clear the dedupe state, so the next evaluation alerts on everything again
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: The latch is now empty
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal server error
   /api/settings/quota-store:
     get:
       tags: [Settings]

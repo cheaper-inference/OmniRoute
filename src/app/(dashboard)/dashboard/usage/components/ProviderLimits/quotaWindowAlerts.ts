@@ -308,8 +308,3 @@ export function selectConnectionsWithBankedCredits(
     )
     .map((connection) => connection.id);
 }
-
-export const QUOTA_ALERT_THRESHOLDS = {
-  critical: CRITICAL_REMAINING_PERCENT,
-  warning: WARNING_REMAINING_PERCENT,
-} as const;

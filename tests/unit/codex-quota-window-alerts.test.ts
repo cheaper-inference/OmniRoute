@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 
 const alerts =
   await import("../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/quotaWindowAlerts.ts");
+const parsing =
+  await import("../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/quotaParsing.ts");
 
 function quota(overrides: Record<string, unknown> = {}) {
   return {
@@ -195,9 +197,6 @@ test("keeps separate latches per connection and window", () => {
   assert.equal(found.length, 2);
   assert.notEqual(found[0].key, found[1].key);
 });
-
-const parsing =
-  await import("../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/quotaParsing.ts");
 
 /** Same shape `open-sse/services/codexUsageQuotas.ts` produces: no `remainingPercentage`. */
 function codexUsage(sessionUsedPercent: number) {
