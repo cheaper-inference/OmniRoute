@@ -1,15 +1,15 @@
 {
   "sources": {
     "AGENTS.md": {
-      "source_hash": "f21a458152407fe219bb564ad3709dbcdd7ec6958b4a5d5bb85241362fe232eb",
+      "source_hash": "a48922770c615cd50244f806401018a17703d6512f7a5a485851b7c8b0977fb7",
       "locales": {
         "bs": {
-          "source_hash": "f21a458152407fe219bb564ad3709dbcdd7ec6958b4a5d5bb85241362fe232eb",
-          "target_hash": "bde82d530538bc9bc1fba0cc7e62e3358a248ec79e380e5277ea3dc6d5c228e8",
+          "source_hash": "a48922770c615cd50244f806401018a17703d6512f7a5a485851b7c8b0977fb7",
+          "target_hash": "87f66b60e299148c137f76ab1a7dcd709bd00f058553867a394e1ca54ee87796",
           "section_hashes": [
             "fe5597d25ab9",
             "51077e57dcfb",
-            "e25c1eacc0d9",
+            "95d8e6d350df",
             "3e48c6879f08",
             "0b9c251e9fea",
             "e83f2fa5d97a",
@@ -29,7 +29,7 @@
             "f6624f38d27c",
             "92c9bfddd378"
           ],
-          "updated_at": "2026-11-09T00:27:23.862Z"
+          "updated_at": "2026-11-09T09:31:56.370Z"
         }
       }
     },
