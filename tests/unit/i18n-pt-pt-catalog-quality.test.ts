@@ -74,3 +74,12 @@ test("pt: 'Exclude' is translated as exclude, not delete", () => {
     assert.doesNotMatch(pt[key], /elimin/i, `${key} should not say "eliminar"`);
   }
 });
+
+test("pt: no Brazilian-only wording leaks back into the European Portuguese catalog", () => {
+  // PT-BR forms with an unambiguous PT-PT counterpart (a carregar / equipa / guardar / gerir / o senhor).
+  const brazilian = /\b(Carregando|Salvando|Excluindo|Equipe|Você|Salvar|Gerenciar)\b/;
+  const offenders = Object.entries(pt)
+    .filter(([, value]) => brazilian.test(value))
+    .map(([key, value]) => `${key}: ${value}`);
+  assert.deepEqual(offenders, []);
+});

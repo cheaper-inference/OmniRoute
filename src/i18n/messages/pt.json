@@ -6,7 +6,7 @@
     "normal": "Normal",
     "reserve": "Reserva",
     "excluded": "Excluída",
-    "loading": "Carregando contas…",
+    "loading": "A carregar contas…",
     "error": "Não foi possível carregar as contas. Reabra o editor para tentar novamente.",
     "missing": "Conta indisponível ({id})"
   },
@@ -10466,7 +10466,7 @@
     "noAccountsForTierFilter": "Nenhuma conta encontrada para filtro de nível",
     "tierAll": "Todos",
     "tierEnterprise": "Empresa",
-    "tierTeam": "Equipe",
+    "tierTeam": "Equipa",
     "tierBusiness": "Negócios",
     "tierUltra": "Ultra",
     "tierPro": "Pró",
