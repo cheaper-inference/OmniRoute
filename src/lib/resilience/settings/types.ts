@@ -277,7 +277,13 @@ export interface StreamThroughputWatchdogSettings {
   minUsefulBytes: number;
 }
 
+/** Controls sanitized timing of the real Antigravity physical HTTP sends. */
+export interface AntigravityTimingTelemetrySettings {
+  enabled: boolean;
+}
+
 export interface ResilienceSettings {
+  antigravityTimingTelemetry: AntigravityTimingTelemetrySettings;
   requestQueue: RequestQueueSettings;
   connectionCooldown: Record<AuthCategory, ConnectionCooldownProfileSettings>;
   providerBreaker: Record<AuthCategory, ProviderBreakerProfileSettings>;
@@ -295,6 +301,7 @@ export interface ResilienceSettings {
 }
 
 export interface ResilienceSettingsPatch {
+  antigravityTimingTelemetry?: Partial<AntigravityTimingTelemetrySettings>;
   requestQueue?: Partial<RequestQueueSettings>;
   connectionCooldown?: Partial<Record<AuthCategory, Partial<ConnectionCooldownProfileSettings>>>;
   providerBreaker?: Partial<Record<AuthCategory, Partial<ProviderBreakerProfileSettings>>>;

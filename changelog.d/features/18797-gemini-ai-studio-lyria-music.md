@@ -1,0 +1,1 @@
+- **feat(providers):** Gemini AI Studio Lyria 3 models (`lyria-3-pro-preview`, `lyria-3-clip-preview`, `lyria-3.5`) are callable through `POST /v1/music/generations` instead of being advertised as music and rejected with `400 Invalid music model` ([#18797](https://github.com/cheaper-inference/OmniRoute/pull/18797)) — thanks @LuisAlejandro

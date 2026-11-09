@@ -351,82 +351,82 @@ API Key: [si na dashboard]
 
 ---
 
-## 🚀 Mbugharị
+## 🚀 ọrụ
 
-### Nwụnye npm zuru ụwa ọnụ (A tụrụ aro)
+### Nwụnye npm zuru ụwa ọnụ (A kwadoro)
 
 ```bash
 npm install -g omniroute
 
-# Mepụta ndekọ nhazi
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Mepụta faịlụ .env (lee .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Bido sava
+# Start server
 omniroute
-# Ma ọ bụ jiri ọdụ ụgbọ mmiri nke gị:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI na-ebunye `.env` na-akpaghị aka site na `~/.omniroute/.env` ma ọ bụ `./.env`.
+CLI na-ebunye `.env` na-akpaghị aka site na `~/.omniroute/.env` ma ọ bụ `./.env`. A `./.env` na ndekọ na-arụ ọrụ nwere ike ịtọ naanị obere ndepụta ikike nke igodo (ọdụ ụgbọ mmiri, `REQUIRE_API_KEY`, ntọala mpaghara na agba); tinye ihe ọ bụla ọzọ na `~/.omniroute/.env`. Lee [nkwekọrịta mmalite CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Ọnọdụ tray
+### Ụdị tray
 
-Bido OmniRoute na tray sistemụ:
+Malite OmniRoute na tray sistemu:
 
 ```bash
 omniroute serve --tray
 ```
 
-Iwu ahụ ga-akwụsị mgbe sava na tray dị njikere.
+Iwu a na-alọghachi mgbe ihe nkesa na traị dị njikere.
 
-Sava ahụ na-aga n’ihu na-enweghị terminal.
+Ihe nkesa na-aga n'ihu na-enweghị ọnụ.
 
-Ọnọdụ tray na-akwado macOS, Windows, na nnọkọ Linux nwere eserese. Ọnọdụ tray anaghị emepe dashboard na-akpaghị aka.
+Ụdị tray na-akwado macOS, Windows, na eserese Linux sessions. Ụdị tray anaghị emeghe dashboard na-akpaghị aka.
 
 Jiri menu tray maka omume ndị a:
 
 - Mepee dashboard.
 - Mepee `/dashboard/logs`.
-- Gbanwee mbido akpaka.
+- Gbanwee mmalite akpaaka.
 - Kwụsị OmniRoute.
 
-Ejikọla `--tray` na nhọrọ ndị a:
+Ejikọtala `--tray` na nhọrọ ndị a:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Ọnọdụ ndị a chọrọ njikwa usoro dị iche iche.
+Ụdịdị ndị a chọrọ nwe usoro dị iche iche.
 
-Kwado ka ọ malite n'oge nbanye kọmputa na-esote:
+Kwado mmalite na nbanye igwe na-esote:
 
 ```bash
 omniroute autostart enable
 ```
 
-Mbido akpaka na-eji ọnọdụ tray na macOS, Windows, na nnọkọ Linux nwere eserese. Linux na-enweghị interface eserese na-eji ọrụ onye ọrụ systemd dịbu adị.
+Mmalite akpaaka na-eji ọnọdụ tray na macOS, Windows, na eserese Linux sessions. Linux enweghị isi na-eji ọrụ onye ọrụ sistemụ dị adị.
 
-Gbanyụọ mbido n'oge nbanye:
+Gbanyụọ mmalite na nbanye:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Iwepụ Nwụnye
+### Na-ewepụ
 
-Mgbe ị chọghịzi OmniRoute, anyị na-enye script abụọ ngwa ngwa maka iwepụ ya nke ọma:
+Mgbe ị na-achọkwaghị OmniRoute, anyị na-enye script abụọ ngwa ngwa maka mwepụ dị ọcha:
 
-| Iwu                      | Omume                                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Na-ewepụ ngwa sistemụ ahụ mana **na-edobe DB na nhazi gị** na `~/.omniroute`.            |
-| `npm run uninstall:full` | Na-ewepụ ngwa ahụ MA na-adịgide adịgide **na-ehichapụ nhazi, igodo, na database niile**. |
+| Iwu                      | Omume                                                                       |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `npm run uninstall`      | Na-ewepụ ngwa sistemụ mana** na-edobe DB na nhazi gị** na `~/.omniroute`.   |
+| `npm run uninstall:full` | Na-ewepu ngwa AND kpamkpam** na-ehichapụ nhazi, igodo na ọdụ data niile** . |
 
-> Rịba ama: Iji mee iwu ndị a, gaa na folda ọrụ OmniRoute (ọ bụrụ na i mere clone ya) wee mee ha. N’ụzọ ọzọ, ọ bụrụ na arụnyere ya n’ụwa niile, ị nwere ike naanị ime `npm uninstall -g omniroute`.
+> Mara: Iji mee iwu ndị a, gaa na nchekwa OmniRoute project (ọ bụrụ na i mechiri ya) wee mee ha. N'aka nke ọzọ, ọ bụrụ na arụnyere na ụwa niile, ị nwere ike ịgba ọsọ `npm uninstall -g omniroute`.
 
-### Mbugharị VPS
+### VPS ọrụ
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -442,21 +442,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Ma ọ bụ: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Mbugharị PM2 (Nchekwa Dị Ala)
+### PM2 n'ọrụ (Ebe nchekwa dị ala)
 
-Maka sava nwere RAM pere mpe, jiri nhọrọ oke nchekwa:
+Maka sava nwere oke RAM, jiri nhọrọ oke ebe nchekwa:
 
 ```bash
-# Jiri oke 512MB (ndabara)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Ma ọ bụ jiri oke nchekwa nke gị
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Ma ọ bụ jiri ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -485,30 +485,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Wuo image (ndabara = runner-cli nke etinyerela codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Ọnọdụ enwere ike ibugharị (a tụrụ aro)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Maka ọnọdụ ejikọtara na host nke nwere binary CLI, lee ngalaba Docker na akwụkwọ ndu ndị bụ isi.
+Maka ụdị agbakwunyere ndị ọbịa nwere ọnụọgụ abụọ CLI, lee ngalaba Docker na docs isi.
 
-### Void Linux (xbps-src)
+### Ihe efu Linux (xbps-src)
 
-Ndị ọrụ Void Linux nwere ike ịkwakọba ma wụnye OmniRoute n'ụzọ sistemụ site n’iji usoro cross-compilation `xbps-src`. Nke a na-eme ka owuwu standalone nke Node.js yana native bindings `better-sqlite3` ndị achọrọ rụọ ọrụ na-akpaghị aka.
+Ndị ọrụ Linux na-abaghị uru nwere ike wụnye OmniRoute site na iji usoro mkpokọta `xbps-src`. Nke a na-eme ka ụlọ Node.js kwụ ọtọ yana njide `better-sqlite3` achọrọ.
 
 <details>
-<summary><b>Lee template xbps-src</b></summary>
+<summary><b>Lelee ndebiri xbps-src</b></summary>
 
 ```bash
-# Faịlụ template maka 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Ọnụ ụzọ AI zuru ụwa ọnụ nwere routing nwere ọgụgụ isi maka ọtụtụ ndị na-enye LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -523,7 +523,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Chọpụta ụkpụrụ ụlọ CPU ezubere maka node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -532,29 +532,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Wụnye dependencies niile – mafere scripts
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Wuo standalone bundle nke Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Detuo static assets n'ime standalone
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kpọkọta native binding nke better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Tinye binding a kpọkọtara n'ime standalone bundle
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Wepụ sharp bundles ndị akọwapụtara maka ụkpụrụ ụlọ
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Detuo runtime dependencies nke pino nke static analysis nke Next.js hapụrụ:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -568,7 +568,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Gbochie post-install hook ihichapụ directories Next.js app router ndị tọgbọ chakoo
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -594,32 +594,32 @@ post_install() {
 
 </details>
 
-### Environment Variables
+### Mgbanwe gburugburu
 
-| Mgbanwe                                 | Ndabara                              | Nkọwa                                                                                                       |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Ihe nzuzo e ji abịanye aka na JWT (**gbanwee ya na production**)                                            |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Okwuntughe nbanye mbụ                                                                                       |
-| `DATA_DIR`                              | `~/.omniroute`                       | Ndekọ data (db, ojiji, ndekọ ihe omume)                                                                     |
-| `PORT`                                  | ndabara framework                    | Port ọrụ (`20128` n'ihe atụ)                                                                                |
-| `HOSTNAME`                              | ndabara framework                    | Host a ga-ejikọta na ya (ndabara Docker bụ `0.0.0.0`)                                                       |
-| `NODE_ENV`                              | ndabara runtime                      | Tọọ `production` maka mbugote                                                                               |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL ntọala ọha egosiri na dashboard ma mee ka sava nweta ya (na-anọchi `BASE_URL` ochie)                    |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL ntọala endpoint maka mmekọrịta cloud (na-anọchi `CLOUD_URL` ochie)                                      |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Ihe nzuzo HMAC maka igodo API ndị emepụtara                                                                 |
-| `REQUIRE_API_KEY`                       | `false`                              | Manye igodo API Bearer na `/v1/*`                                                                           |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Kwe ka ndị ọrụ dashboard akwadoro kpughee ụkpụrụ igodo API zuru ezu echekwara mgbe ha chọrọ                 |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Ugboro sava na-eme ka data Provider Limits echekwara ọhụrụ; bọtịnụ imegharị UI ka na-akpalite mmekọrịta aka |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Gbanyụọ snapshot SQLite akpaka tupu ide/mbubata/mweghachi; backup aka ka na-arụ ọrụ                         |
-| `APP_LOG_TO_FILE`                       | `true`                               | Na-eme ka mmepụta ndekọ ngwa na ndekọ nyocha gaa na diski                                                   |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Manye cookie nkwenye `Secure` (n'azụ HTTPS reverse proxy)                                                   |
-| `CLOUDFLARED_BIN`                       | edoghị ya                            | Jiri binary `cloudflared` dị adị kama nbudata a na-achịkwa                                                  |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Ụzọ mbufe maka Quick Tunnels a na-achịkwa (`http2`, `quic`, ma ọ bụ `auto`)                                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Oke heap Node.js na MB                                                                                      |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Ọnụọgụ ndenye kachasị na cache prompt                                                                       |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Ọnụọgụ ndenye kachasị na cache semantic                                                                     |
+| Na-agbanwe agbanwe                      | Ọdabara                  | Nkọwa                                                                                                                                      |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(Emepụtara akpaaka)_    | JWT mbinye aka na nzuzo — akpaaka emepụtara na ọsọ mbụ wee nọgide na `server.env`; tọọ ya n'ụzọ doro anya mgbe ndekọ data bụ nke ephemeral |
+| `INITIAL_PASSWORD`                      | _(Edobeghi)_             | Paswọdu nbanye mbụ. npm/source installs malite na `CHANGEME`: dochie ya. Ewepụghị: Ọkachamara nbanye                                       |
+| `DATA_DIR`                              | `~/.omniroute`           | Akwụkwọ ndekọ data (db, ojiji, ndekọ)                                                                                                      |
+| `PORT`                                  | ndabara ndabara          | Ọdụ ụgbọ mmiri (`20128` na atụ)                                                                                                            |
+| `HOSTNAME`                              | ndabara ndabara          | Jikọọ onye ọbịa (Docker ndabara na `0.0.0.0`)                                                                                              |
+| `NODE_ENV`                              | ndabara oge ojiri gaa    | Tọọ `production` maka ibuga                                                                                                                |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | URL ọha gbagoro na dashboard wee kpughee na sava (dochie `BASE_URL` nketa)                                                                 |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync endpoint base URL (dochie `CLOUD_URL` nketa)                                                                                    |
+| `API_KEY_SECRET`                        | _(Emepụtara akpaaka)_    | HMAC nzuzo maka igodo API emepụtara — akpaaka na agba nke mbụ wee nọgide na `server.env`                                                   |
+| `REQUIRE_API_KEY`                       | `false`                  | Manye igodo Bearer API na `/v1/*`                                                                                                          |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Kwe ka ndị ọrụ dashboard enwetara kpughee ụkpụrụ igodo API echekwara n'ụzọ zuru ezu mgbe achọrọ ya                                         |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Nweghachi ume ọhụrụ n'akụkụ nkesa maka data oke ndị na-enye ihe echekwara; bọtịnụ ume ọhụrụ UI ka na-ebute mmekọrịta akwụkwọ ntuziaka      |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Gbanyụọ ọnyà SQLite akpaka tupu writes/import/restore; nkwado ndabere akwụkwọ ntuziaka ka na-arụ ọrụ                                       |
+| `APP_LOG_TO_FILE`                       | `true`                   | Na-akwado ntinye ngwa na nyocha ndekọ na diski                                                                                             |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Kwado kuki `Secure` auth (n'azụ HTTPS proxy reverse)                                                                                       |
+| `CLOUDFLARED_BIN`                       | ịtọhapụ                  | Jiri ọnụọgụ abụọ `cloudflared` dị kama nbudata jikwaa                                                                                      |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Ụgbọ njem maka ọwara ngwa ngwa a na-achịkwa (`http2`, `quic`, ma ọ bụ `auto`)                                                              |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js oke oke na MB                                                                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Ntinye cache kacha ngwa ngwa                                                                                                               |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Ntinye cache semantic kacha                                                                                                                |
 
-Maka ntụaka zuru ezu gbasara mgbanwe gburugburu, lee [README](../README.md).
+Maka nrụtụ aka mgbanwe gburugburu ebe obibi zuru oke, lee [README](../README.md).
 
 ---
 
