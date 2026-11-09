@@ -516,6 +516,30 @@ export function validateProviderSpecificData(
     });
   }
 
+  // Zed Hosted: the optional Orb billing portal link (or bare portal token).
+  // A bare token is accepted, so no URL shape is enforced here; the usage
+  // fetcher validates it before any request and treats the whole value as a
+  // credential.
+  const billingPortalUrl = data.billingPortalUrl;
+  if (
+    billingPortalUrl !== undefined &&
+    billingPortalUrl !== null &&
+    typeof billingPortalUrl !== "string"
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.billingPortalUrl must be a string",
+      path: ["billingPortalUrl"],
+    });
+  }
+  if (typeof billingPortalUrl === "string" && billingPortalUrl.length > 4096) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.billingPortalUrl must be at most 4096 characters",
+      path: ["billingPortalUrl"],
+    });
+  }
+
   const newApiUserId = data.newApiUserId;
   if (newApiUserId !== undefined && newApiUserId !== null && typeof newApiUserId !== "string") {
     ctx.addIssue({
