@@ -453,6 +453,7 @@ test("KiroExecutor still reports a completion estimate without a context percent
   const executor = new KiroExecutor();
   const response = buildEventStreamResponse([
     buildEventFrame("assistantResponseEvent", { content: "z".repeat(400) }),
+    buildEventFrame("messageStopEvent", {}),
   ]);
 
   const chunks = parseSSEJsonChunks(

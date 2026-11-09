@@ -63,6 +63,7 @@ type KiroStreamState = {
   finishEmitted: boolean;
   startEmitted: boolean;
   stopSeen: boolean;
+  stopReason?: string;
   hasToolCalls: boolean;
   toolCallIndex: number;
   seenToolIds: Map<string, number>;
@@ -174,6 +175,34 @@ export function flushEmptyToolCallArgs(
   }
 }
 
+// Kiro puts the stop reason in a metadataEvent (or a Bedrock-style messageStopEvent).
+const KIRO_STOP_REASON_FINISH: Record<string, string> = {
+  TOOL_USE: "tool_calls",
+  MAX_TOKENS: "length",
+  MODEL_CONTEXT_WINDOW_EXCEEDED: "length",
+  CONTENT_FILTERED: "content_filter",
+  GUARDRAIL_INTERVENED: "content_filter",
+};
+
+function readKiroStopReason(payload: unknown): string | undefined {
+  const p = payload as JsonRecord | null | undefined;
+  const nested = (p?.metadataEvent ?? p?.messageStopEvent) as JsonRecord | undefined;
+  const value = p?.stopReason ?? nested?.stopReason;
+  return typeof value === "string" && value ? value.toUpperCase() : undefined;
+}
+
+// AWS EventStream reports an exception inside an HTTP 200 body. Unknown names stay 502 so
+// failover still runs.
+function kiroExceptionStatus(name: string): number {
+  if (/Throttling|ServiceQuotaExceeded/i.test(name)) return 429;
+  if (/Unauthorized/i.test(name)) return 401;
+  if (/AccessDenied/i.test(name)) return 403;
+  if (/Validation|InvalidModel/i.test(name)) return 400;
+  if (/ResourceNotFound/i.test(name)) return 404;
+  if (/Conflict/i.test(name)) return 409;
+  return 502;
+}
+
 function buildKiroFinishChunk(
   state: KiroStreamState,
   responseId: string,
@@ -190,7 +219,9 @@ function buildKiroFinishChunk(
       {
         index: 0,
         delta: {},
-        finish_reason: state.hasToolCalls ? "tool_calls" : "stop",
+        finish_reason:
+          KIRO_STOP_REASON_FINISH[state.stopReason ?? ""] ??
+          (state.hasToolCalls ? "tool_calls" : "stop"),
       },
     ],
   };
@@ -686,6 +717,26 @@ export class KiroExecutor extends BaseExecutor {
       controller.terminate();
     };
 
+    const failStream = (
+      controller: TransformStreamDefaultController,
+      status: number,
+      code: string,
+      message: string
+    ) => {
+      const error = {
+        error: {
+          message,
+          type: status === 400 ? "invalid_request_error" : "server_error",
+          code,
+          status_code: status,
+        },
+      };
+      state.finishEmitted = true;
+      controller.enqueue(encodeSse(`data: ${JSON.stringify(error)}\n\n`));
+      controller.enqueue(encodeSse("data: [DONE]\n\n"));
+      controller.terminate();
+    };
+
     const flushPendingWrapperToolCalls = (
       controller: TransformStreamDefaultController
     ): boolean => {
@@ -731,6 +782,21 @@ export class KiroExecutor extends BaseExecutor {
 
             const event = parseEventFrame(eventData);
             if (!event) continue;
+
+            // Before the start chunk: a first-frame exception must reach the readiness gate as an
+            // error-only frame (no role chunk to mark the stream ready), so the request fails over.
+            const exceptionName = event.headers[":exception-type"];
+            if (event.headers[":message-type"] === "exception" || exceptionName) {
+              const name = exceptionName || "UnknownException";
+              const detail = String(event.payload?.message ?? "").slice(0, 300);
+              failStream(
+                controller,
+                kiroExceptionStatus(name),
+                "kiro_stream_exception",
+                `Kiro stream exception ${name}${detail ? `: ${detail}` : ""}`
+              );
+              return;
+            }
 
             // Emit a role-only start chunk on the FIRST successfully-parsed AWS
             // EventStream frame. CodeWhisperer sends framing/metadata events before
@@ -1030,6 +1096,13 @@ export class KiroExecutor extends BaseExecutor {
               flushBufferedToolArgs(state, controller, { responseId, created, model });
               state.stopSeen = true;
             }
+            if (eventType === "messageStopEvent" || eventType === "metadataEvent") {
+              const stopReason = readKiroStopReason(event.payload);
+              if (stopReason) {
+                state.stopReason = stopReason;
+                state.stopSeen = true;
+              }
+            }
 
             // Handle contextUsageEvent to extract contextUsagePercentage
             if (eventType === "contextUsageEvent") {
@@ -1191,6 +1264,24 @@ export class KiroExecutor extends BaseExecutor {
             state.usage?.provider_credits === undefined
           ) {
             throw new Error("Kiro response ended without credit metering");
+          }
+
+          if (state.stopReason?.startsWith("MALFORMED")) {
+            failStream(controller, 502, "kiro_malformed_stop", `Kiro stopped: ${state.stopReason}`);
+            return;
+          }
+          // No stop event: the stream was cut. Kiro sends its accounting frames (metering,
+          // context usage, token usage) last, so one of them proves the answer finished;
+          // some accounts end there without any stop reason.
+          const sawTrailingFrame = state.hasMeteringEvent || state.hasContextUsage || !!state.usage;
+          if (!state.finishEmitted && !state.stopSeen && !sawTrailingFrame) {
+            failStream(
+              controller,
+              502,
+              "kiro_incomplete_stream",
+              "Kiro stream ended without a stop event"
+            );
+            return;
           }
 
           // Emit finish chunk if not already sent
