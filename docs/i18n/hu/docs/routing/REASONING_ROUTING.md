@@ -38,24 +38,19 @@ mezőből származik, és támogatja az `any` vagy `all` szerinti egyezést.
 Egy `connection` szabály csak akkor kerül kiértékelésre, ha egyetlen korai szabály sem nyert, és már
 kiválasztásra került egy konkrét szolgáltatói kapcsolat. Ez csak az erőfeszítést és a keretet módosíthatja.
 
-## Erőfeszítés és keret
+## Erőfeszítés és költségvetés
 
-A `sourceEffort` a következő értékeket fogadja el: `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` és
-`ultra`. A `missing` azt jelenti, hogy a kérés sem különálló erőfeszítési szintet, sem gondolkodási kapcsolót,
-sem gondolkodási keretet nem tartalmaz. Ezért a csak keretet tartalmazó jelzésre kizárólag az `any` illeszkedik.
+`sourceEffort` elfogadja `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` és `ultra`. `missing` azt jelenti, hogy a kérés nem tartalmaz sem diszkrét erőfeszítést, sem gondolkodási kapcsolót vagy gondolkodási költségvetést. A csak költségvetési jelet ezért csak `any` egyezik meg.
 
-Az `effortMode` három változattal rendelkezik:
+`effortMode` három változata van:
 
-- Az `inherit` megtartja a kliens erőfeszítési szintjét, miközben továbbra is lehetővé teszi a modell vagy a kombináció módosítását.
-- A `default` csak akkor állítja be a `targetEffort` értékét, ha nincs jelen explicit következtetési jelzés.
-- A `force` lecseréli a különálló erőfeszítési szintet a `targetEffort` értékére.
+- `inherit` megtartja az ügyfél erőfeszítéseit, miközben lehetővé teszi a modell vagy a kombináció változását.
+- `default` csak akkor állítja be `targetEffort`, ha nincs jelen kifejezett érvelési jel.
+- `force` a diszkrét erőfeszítést `targetEffort` re cseréli.
 
-Ettől függetlenül a `budgetAction` értéke `preserve`, `remove` vagy `set` lehet. A `force` a `none` értékkel együtt
-eltávolít minden felismert erőfeszítési és keretmezőt. A `none` és a `set` együttes használata érvénytelen.
+`budgetAction` egymástól függetlenül lehet `preserve`, `remove` vagy `set`. `force` `none` fel eltávolítja az összes felismert ráfordítási és költségvetési mezőt, majd beállítja `reasoning_effort: "none"`, mert egyes szolgáltatók bekapcsolják a gondolkodást, ha a mező nincs jelen. A szó szerinti `none` elutasító szolgáltatók kiszállításkor `open-sse/executors/base/reasoningEffort.ts` ban vannak módosítva. A parancskód leképezi `low`-re, kivéve a Válasz alakú kéréseket (`input` `messages` nélkül), ahol megtartja `none`. Cloudflare Workers AI (`cloudflare-ai`) esetén a `none` t elutasító modellek (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) `low` kapnak; más dolgozók AI modellek megtartják `none`. A mező eldobása itt nem lehetséges, mert egy hiányzó erőfeszítés a modell alapértelmezett szintjét futtatja. `none` `set` szel együtt érvénytelen.
 
-Az ismerten inkompatibilis modelleket célzó kérések az upstream hívás előtt elutasításra kerülnek. Kombinációs
-célok esetén az inkompatibilis bejegyzések eltávolításra kerülnek; ha egy sem marad, a kérés `400` állapotkóddal tér vissza.
-Az ismeretlen képességadatok figyelmeztetést eredményeznek, és a szabály aktív marad.
+Az ismert inkompatibilis modelleket célzó kérések a felfelé irányuló hívás előtt elutasításra kerülnek. Kombinált célok esetén az inkompatibilis bejegyzések törlődnek; ha egyik sem marad, a kérés `400` állapotot ad vissza. Az ismeretlen képességadatok figyelmeztetést adnak, és aktívan hagyják a szabályt.
 
 ## Biztonság és átviteli módok
 

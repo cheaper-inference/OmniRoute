@@ -65,10 +65,22 @@ export const THINKING_LEVEL_MAP: Record<string, number> = {
 
 export type Gemini38ThinkingLevel = "low" | "medium" | "high";
 
-/** Gemini 3.8 Flash, Gemini 4 Argon, and future thinking-level models (e.g. vertex/gemini-4-argon). */
-export function isGemini38Model(model: string): boolean {
-  return /(?:^|[\/])gemini-(?:3\.8|4)(?:$|[-.])/i.test(model);
+/**
+ * Gemini 3.8 Flash and every major version >= 4 (Gemini 4 Argon, future 5/6/10) speak
+ * thinkingLevel; major versions <= 3 only know the numeric thinkingBudget. Provider
+ * prefixes (vertex/, zed-hosted/) are fine; gemma-4-* is not a gemini- id, so it never matches.
+ */
+export function isGeminiThinkingLevelModel(model: string): boolean {
+  return /(?:^|[\/])gemini-(?:3\.8|[4-9]|[1-9]\d+)(?:$|[-.])/i.test(model);
 }
+
+/** Gemini major version >= 4 — these reject the numeric thinkingBudget off-switch (#18910). */
+export function isGemini4PlusModel(model: string): boolean {
+  return /(?:^|[\/])gemini-(?:[4-9]|[1-9]\d+)(?:$|[-.])/i.test(model);
+}
+
+/** @deprecated Pre-rename name of {@link isGeminiThinkingLevelModel}; kept for existing tests. */
+export const isGemini38Model = isGeminiThinkingLevelModel;
 
 export function gemini38ThinkingLevelFromBudget(
   model: string,
@@ -94,6 +106,8 @@ function clientAskedForThoughts(body: Record<string, unknown>): boolean {
 
 /**
  * Gemini 3.8 honors thinkingLevel, not a 3.7 numeric thinkingBudget.
+ * Gemini 4+ rejects the numeric budget off-switch, so there it becomes thinkingLevel "low";
+ * versions <= 3 keep { thinkingBudget: 0, includeThoughts: false }.
  * Omit includeThoughts unless the client asked - thoughts share maxOutputTokens.
  */
 export function gemini38ThinkingConfig(
@@ -104,6 +118,9 @@ export function gemini38ThinkingConfig(
   | { thinkingLevel: Gemini38ThinkingLevel; includeThoughts?: boolean }
   | { thinkingBudget: number; includeThoughts: boolean } {
   if (budget <= 0) {
+    if (isGemini4PlusModel(model)) {
+      return { thinkingLevel: "low" };
+    }
     return { thinkingBudget: 0, includeThoughts: false };
   }
   const thinkingConfig: {
