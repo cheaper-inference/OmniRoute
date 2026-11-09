@@ -1,1 +1,0 @@
-- **perf(db):** the once-a-minute recovery of stuck call-log detail writes uses a small partial index instead of scanning the whole call log table.
