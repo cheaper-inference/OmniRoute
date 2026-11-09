@@ -412,6 +412,52 @@ describe("resource pressure policy", () => {
     assert.equal(tracker.observe(make(1009, 0.36, 20)).severity, "normal");
   });
 
+  it("keeps a critical memory.high latch when a new memory.max event arrives", () => {
+    const tracker = createResourcePressureTracker({
+      ...fastThresholds,
+      sustainedSamplesRecovery: 1,
+    });
+    const sample = (
+      currentMb: number,
+      fileMb: number,
+      highEvents: number,
+      maxEvents: number
+    ): ResourceSignals => ({
+      ...baseSignals(),
+      cgroup: {
+        currentBytes: currentMb * MiB,
+        highBytes: 1_800 * MiB,
+        maxBytes: 2_300 * MiB,
+        fileBytes: fileMb * MiB,
+        events: { low: 0, high: highEvents, max: maxEvents, oom: 0, oom_kill: 0 },
+      },
+      psi: {
+        someAvg10: 0,
+        someAvg60: 0,
+        someAvg300: 0,
+        fullAvg10: 0,
+        fullAvg60: 0,
+        fullAvg300: 0,
+        psiSource: "cgroup",
+      },
+    });
+
+    // First produce a genuine critical cgroup.high state.
+    tracker.observe(sample(1_710, 100, 0, 0));
+    tracker.observe(sample(1_710, 100, 1, 0));
+    assert.equal(tracker.observe(sample(1_710, 100, 2, 0)).severity, "critical");
+
+    // The new sample is high (85% of memory.high, below criticalRatio).
+    // Although its working set is tiny, memory.max incremented. It must
+    // not make the recovery test ignore total memory and clear the latch.
+    const withMaxEvent = tracker.observe(sample(1_530, 1_000, 2, 1));
+    assert.equal(withMaxEvent.severity, "critical");
+    assert.equal(withMaxEvent.reason, "cgroup_high");
+
+    // The next stable sample can recover once the max counter stops rising.
+    assert.equal(tracker.observe(sample(1_530, 1_000, 2, 1)).severity, "normal");
+  });
+
   it("keeps snapshot state fields and bounded-cardinality values", () => {
     const tracker = createResourcePressureTracker(fastThresholds);
     const state: ResourcePressureState = tracker.observe(baseSignals());

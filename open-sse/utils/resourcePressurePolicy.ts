@@ -394,13 +394,19 @@ function isCacheDominatedHigh(
   return previousEvents?.max == null || events.max <= previousEvents.max;
 }
 
-function isRecovered(signals: ResourceSignals, thresholds: ResourcePressureThresholds): boolean {
+function isRecovered(
+  signals: ResourceSignals,
+  thresholds: ResourcePressureThresholds,
+  previousEvents: ThrottleCounters | null
+): boolean {
   const cgroupWorkingSetBytes = workingSetBytes(signals.cgroup);
   const ratios: Array<readonly [number | null, number | null]> = [
     [signals.v8.heapUsedBytes, signals.v8.heapLimitBytes],
     [cgroupWorkingSetBytes, signals.cgroup.maxBytes],
     [
-      isCacheDominatedHigh(signals, thresholds) ? cgroupWorkingSetBytes : signals.cgroup.currentBytes,
+      isCacheDominatedHigh(signals, thresholds, previousEvents)
+        ? cgroupWorkingSetBytes
+        : signals.cgroup.currentBytes,
       signals.cgroup.highBytes,
     ],
   ];
@@ -484,6 +490,9 @@ export function createResourcePressureTracker(
         previousEvents = currentEvents;
       }
 
+      // Preserve the previous counters for both classification and recovery.
+      // A new memory.max event must not release a critical latch early.
+      const recoveryPreviousEvents = previousEvents;
       const raw = oomEvent
         ? ({ severity: "critical", reason: "oom_event" } as const)
         : classifyAdaptiveResourcePressureWithHistory(signals, thresholds, previousEvents);
@@ -537,7 +546,7 @@ export function createResourcePressureTracker(
         pending = null;
         elevatedStreak = 0;
         recoveryStreak = 0;
-      } else if (isRecovered(signals, thresholds)) {
+      } else if (isRecovered(signals, thresholds, recoveryPreviousEvents)) {
         pending = null;
         elevatedStreak = 0;
         recoveryStreak += 1;
