@@ -7,6 +7,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Card, Button, CardSkeleton } from "@/shared/components";
+import FalNativeGate from "./components/FalNativeGate";
 import ProviderTosNotice from "@/shared/components/ProviderTosNotice";
 import {
   NOAUTH_PROVIDERS,
@@ -17,6 +18,7 @@ import {
   isClaudeCodeCompatibleProvider,
   supportsApiKeyOnFreeProvider,
   supportsDualAuthProvider,
+  supportsDeviceCodeLogin,
 } from "@/shared/constants/providers";
 import { getModelsByProviderId } from "@/shared/constants/models";
 import {
@@ -303,7 +305,11 @@ export default function ProviderDetailPageClient() {
     providerId === "copilot-m365-web" ||
     providerInfo?.toggleAuthType === "oauth" ||
     providerInfo?.toggleAuthType === "free" ||
-    oauthProviderId !== providerId;
+    oauthProviderId !== providerId ||
+    // A no-auth provider can still offer a dashboard sign-in: MiniMax Code
+    // takes an account code here and writes the credential into the local
+    // MiniMax Code profile.
+    supportsDeviceCodeLogin(providerId);
   const subscriptionRisk = providerInfo?.subscriptionRisk === true;
 
   // ── Phase 1t.3: connection gate + risk-notice modal state ───────────────
@@ -350,6 +356,12 @@ export default function ProviderDetailPageClient() {
     usesCuratedModelsOnly,
   ]);
   const isUpstreamProxyProvider = providerInfo?.category === "upstream-proxy";
+  // A no-auth provider can still offer a dashboard sign-in: MiniMax Code takes
+  // an account code here and writes the credential into the local MiniMax Code
+  // profile. Declared after the three flags it reads (const TDZ).
+  const showAccountRouting =
+    !isUpstreamProxyProvider &&
+    (!isFreeNoAuth || providerSupportsPat || supportsDeviceCodeLogin(providerId));
   const compatibleSupportsModelImport = compatibleProviderSupportsModelImport(providerId);
 
   const providerStorageAlias = isCompatible ? providerId : providerAlias;
@@ -646,7 +658,7 @@ export default function ProviderDetailPageClient() {
         />
       )}
       {!isUpstreamProxyProvider && <ProviderRetryDelaySelect providerId={providerId} />}
-      {!isUpstreamProxyProvider && (!isFreeNoAuth || providerSupportsPat) && (
+      {showAccountRouting && (
         <Card>
           <ProviderAccountRoutingCard
             providerKey={providerId}
@@ -811,6 +823,12 @@ export default function ProviderDetailPageClient() {
         </Card>
       )}
       {isUpstreamProxyProvider && <UpstreamProxyCard t={t} />}
+      {providerId === "fal-ai" && (
+        <FalNativeGate
+          key={selectedConnection?.id ?? connections[0]?.id ?? "none"}
+          connectionId={selectedConnection?.id ?? connections[0]?.id ?? null}
+        />
+      )}
 
       {/* Models — hidden for search providers (they don't have models) */}
       {!isSearchProvider && !isUpstreamProxyProvider && (

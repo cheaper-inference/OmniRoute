@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ፋይል                           | ዓላማ                              |
 | ----------------------------- | -------------------------------- |
-| `providerRegistry.ts`         | በ380 አቅራቢ ካታሎግ ላይ የውይይት-ሞዴል መዝገብ |
+| `providerRegistry.ts`         | በ382 አቅራቢ ካታሎግ ላይ የውይይት-ሞዴል መዝገብ |
 | `providerModels.ts`           | የሞዴል ተለዋጭ ስሞች፣ የቅርጸት ካርታ         |
 | `constants.ts`                | የጊዜ ማብቂያዎች፣ ገደቦች፣ የሁኔታ ኮዶች       |
 | `defaultThinkingSignature.ts` | ነባሪ Claude አስተሳሰብ ፊርማ            |

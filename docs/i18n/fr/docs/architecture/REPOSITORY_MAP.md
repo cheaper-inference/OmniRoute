@@ -183,7 +183,7 @@ src/
 | `quota/`                                            | Moteur de partage de quotas : `dimensions.ts` (types/Zod), `types.ts` ( interface QuotaStore ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — voir `docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                            | Client de catalogue de modèles gratuits de radar : `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — voir `docs/frameworks/RADAR.md`                                                                                                                                    |
 | `display/`                                          | aides au formatage UI (coût, latence, etc.)                                                                                                                                                                                                                                                                                        |
-| `embeddings/`                                       | Assistants du service d'intégration                                                                                                                                                                                                                                                                                                |
+| `embeddings/`                                       | Assistants de service d'intégration                                                                                                                                                                                                                                                                                                |
 | `env/`                                              | Analyse des variables d'environnement validation +                                                                                                                                                                                                                                                                                 |
 | `evals/`                                            | Framework d'évaluation (suites, runner, runtime) — voir `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                 |
 | `guardrails/`                                       | masqueur PII, injection rapide, pont de vision — voir `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Composant du tableau de bord API: adaptateurs sur `packages/ui-kit` — voir `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: noms d'icônes utilisés par les écrans → Composants Lucide (`<Icon>`)                                |
-| `constants/providers.ts`         | **380 prestataires** avec validation Zod (source de vérité)                                                     |
+| `constants/providers.ts`         | **382 prestataires** avec validation Zod (source de vérité)                                                     |
 | `constants/cliTools.ts`          | Registre d'outils CLI externe                                                                                   |
 | `constants/routingStrategies.ts` | **20 stratégies de routage** avec des priorités                                                                 |
 | `constants/publicApiRoutes.ts`   | Routes qui nécessitent une authentification du porteur (vs gestion)                                             |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Intégrations CLI externes + OmniRoute CLI interne                                                  |
 | `I18N.md`                   | architecture i18n, ajout d'une langue, 67 locales                                                  |
 | `UNINSTALL.md`              | Nettoyer les étapes de désinstallation                                                             |
-| `PROVIDER_REFERENCE.md`     | **Généré automatiquement** catalogue de 380 fournisseurs (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Généré automatiquement** catalogue de 382 fournisseurs (regen: `npm run gen:provider-reference`) |
 
 ### Analyses approfondies du sous-système
 

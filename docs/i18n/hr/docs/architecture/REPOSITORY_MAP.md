@@ -143,7 +143,7 @@ src/
 | `app/api/v1beta/`                                                            | API krajnje točke u stilu Gemini                                                                                                                                                                                                                                                                                          |
 | `app/api/playground/`                                                        | Playground Studio rute: `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET popis / POST stvoriti), `presets/[id]/` (GET / PUT / DELETE) — vidi `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                        |
 | `app/api/` (non-v1)                                                          | Management/admin rute (~ 60 direktorija: pružatelji, kombinacije, postavke, mcp, a2a, evals, memorija, vještine, webhookovi, usklađenost, otpornost, praćenje, tuneli, cli-alati itd.)                                                                                                                                    |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ruta (kontrola poslužitelja, agent state/DNS/mappings, obilaznica, cert, uzvodno-CA). LOCAL_ONLY + SPAWN_CAPABLE. Vidi `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                     |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ruta (kontrola poslužitelja, agent state/DNS/mappings, premosnica, certifikat, uzvodno-CA). LOCAL_ONLY + SPAWN_CAPABLE. Vidi `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                               |
 | `app/api/tools/traffic-inspector/`                                           | Prometni inspektor REST + WS API — 16 + ruta (zahtjevi, sesije, hostovi, načini snimanja, izvoz, ws). LOCAL_ONLY + SPAWN_CAPABLE. Vidi `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                         |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 ulazna točka (`POST /a2a`)                                                                                                                                                                                                                                                                               |
 | `app/.well-known/agent.json/`                                                | A2A kartica agenta (otkriće)                                                                                                                                                                                                                                                                                              |
@@ -167,7 +167,7 @@ src/
 
 | Modul                                    | Svrha                                                                                                                                                                                                                                                                                                                               |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | upravitelj zadataka protokola A2A, vještine (5), strujanje                                                                                                                                                                                                                                                                          |
+| `a2a/`                                   | A2A protokol task manager, vještine (5), streaming                                                                                                                                                                                                                                                                                  |
 | `acp/`                                   | CLI registar agenata (lokalno CLI otkriće — vidi `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                        |
 | `api/`                                   | Dijeljeni API pomagači (`requireManagementAuth`, provjera valjanosti)                                                                                                                                                                                                                                                               |
 | `auth/`                                  | Sesija, raspršivanje lozinke, provjera valjanosti tokena                                                                                                                                                                                                                                                                            |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponenta nadzorne ploče API: adapteri preko `packages/ui-kit` — vidi `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nazivi ikona koje koriste zasloni → Lucide komponente (`<Icon>`)                                |
-| `constants/providers.ts`         | **380 pružatelja usluga** sa Zod validacijom (izvor istine)                                                 |
+| `constants/providers.ts`         | **382 pružatelja usluga** sa Zod validacijom (izvor istine)                                                 |
 | `constants/cliTools.ts`          | Vanjski registar CLI alata                                                                                  |
 | `constants/routingStrategies.ts` | **20 strategija usmjeravanja** s prioritetima                                                               |
 | `constants/publicApiRoutes.ts`   | Rute koje zahtijevaju autorizaciju nositelja (nasuprot upravljanju).                                        |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Vanjske CLI integracije + Interne OmniRoute CLI                                            |
 | `I18N.md`                   | i18n arhitektura, dodavanje jezika, 67 jezika                                              |
 | `UNINSTALL.md`              | Čisti koraci deinstalacije                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 380 pružatelja (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 382 pružatelja (regen: `npm run gen:provider-reference`) |
 
 ### Podsustav dubokog ronjenja
 
@@ -458,7 +458,7 @@ open-sse/
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Lijevak                                   |
 | `PROXY_GUIDE.md`             | 4-razinski izlazni proxy + 1proxy tržište                                 |
 
-### Poddirektorije
+### Podimenici
 
 | Poddir                | Svrha                                                                                                                                                                                                                |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

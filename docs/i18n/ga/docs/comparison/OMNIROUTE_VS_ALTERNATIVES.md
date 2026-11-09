@@ -39,10 +39,10 @@ Comparáid oibiachtúil gnéithe le ródairí AI foinse oscailte coitianta.
 
 ## Nuair a roghnú OmniRoute
 
-- Tá tú féin-óstach agus ba mhaith leat** clúdach soláthraí uasta** (380 soláthraí, 155 iontráil free/no-auth )
+- Tá tú féin-óstach agus ba mhaith leat** clúdach soláthraí uasta** (382 soláthraí, 155 iontráil free/no-auth )
 - Ní mór duit a** freastalaí MCP ionsuite** ( uirlisí LLM, cuimhne, scileanna nochta mar uirlisí)
 - Ní mór duit** prótacal A2A** le haghaidh sreafaí oibre gníomhaire-go-ghníomhaire
-- Ba mhaith leat** stealth méarloirg** (JA3/JA4) chun braite trí CAPTCHAs in aghaidh an tsrutha a sheachaint
+- Ba mhaith leat** stealth méarloirg** (JA3/JA4) chun braite a sheachaint ag CAPTCHAs in aghaidh an tsrutha
 - Ní mór duit** gnéithe fiontair** (ráillí cosanta, evals, rian iniúchta) gan bille SaaS
 
 ## Cathain LiteLLM a roghnú

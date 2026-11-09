@@ -197,11 +197,11 @@ src/
 | `plugins/`                               | Registri plugin                                                                                                                                                                                                                                                                                                              |
 | `promptCache/`                           | Breakpoint cache cepat bergaya antropis                                                                                                                                                                                                                                                                                      |
 | `skills/`                                | Kerangka kerja keterampilan (pasar + bawaan + SkillsSH) — lihat `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                  |
-| `playground/`                            | Pembantu bersama Playground Studio: `codeExport.ts` ( generator curl/Python/TS ), `promptImprover.ts` (pembuat meta-prompt), `streamMetrics.ts` ( TTFT/TPS murni), `types.ts` (tabel harga) — lihat `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                   |
+| `playground/`                            | Playground Studio berbagi pembantu: `codeExport.ts` ( generator curl/Python/TS ), `promptImprover.ts` (pembuat meta-prompt), `streamMetrics.ts` ( TTFT/TPS murni), `types.ts` (tabel harga) — lihat `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                   |
 | `webhookDispatcher.ts`                   | HMAC pengiriman webhook — lihat `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Manajer terowongan — lihat `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                       |
 | `cloudSync.ts`, `initCloudSync.ts`       | Sinkronisasi cloud negara opsional                                                                                                                                                                                                                                                                                           |
-| `localDb.ts`                             | Ekspor ulang barel untuk modul db (tidak ada logika — hanya ekspor ulang)                                                                                                                                                                                                                                                    |
+| `localDb.ts`                             | Ekspor ulang barel untuk modul db (tidak ada logika — ekspor ulang saja)                                                                                                                                                                                                                                                     |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Minta cache idempotensi +                                                                                                                                                                                                                                                                                                    |
 | (~ 30 lebih banyak file tingkat atas)    | Pembantu khusus (logEnv, modelsDevSync, piiSanitizer, dll.)                                                                                                                                                                                                                                                                  |
 
@@ -230,11 +230,11 @@ src/
 
 ### `src/server/`
 
-| Modul    | Tujuan                                                                                            |
-| -------- | ------------------------------------------------------------------------------------------------- |
-| `authz/` | Saluran otorisasi: `classify` → `policies` → `enforce` — lihat `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | konfigurasi CORS                                                                                  |
-| `auth/`  | Perangkat tengah sesi                                                                             |
+| Modul    | Tujuan                                                                                          |
+| -------- | ----------------------------------------------------------------------------------------------- |
+| `authz/` | Jalur otorisasi: `classify` → `policies` → `enforce` — lihat `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | konfigurasi CORS                                                                                |
+| `auth/`  | Perangkat tengah sesi                                                                           |
 
 ### `src/shared/`
 
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponen dasbor API: adaptor melalui `packages/ui-kit` — lihat `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nama ikon yang digunakan oleh layar → Komponen Lucide (`<Icon>`)                        |
-| `constants/providers.ts`         | **380 penyedia** dengan validasi Zod (sumber kebenaran)                                             |
+| `constants/providers.ts`         | **382 penyedia** dengan validasi Zod (sumber kebenaran)                                             |
 | `constants/cliTools.ts`          | Registri alat CLI eksternal                                                                         |
 | `constants/routingStrategies.ts` | **20 strategi perutean** dengan prioritas                                                           |
 | `constants/publicApiRoutes.ts`   | Rute yang memerlukan autentikasi Pembawa (vs manajemen).                                            |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrasi CLI eksternal + OmniRoute CLI internal                                          |
 | `I18N.md`                   | arsitektur i18n, menambahkan bahasa, 67 lokal                                             |
 | `UNINSTALL.md`              | Bersihkan langkah-langkah uninstall                                                       |
-| `PROVIDER_REFERENCE.md`     | **Dibuat secara otomatis** katalog 380 penyedia (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Dibuat secara otomatis** katalog 382 penyedia (regen: `npm run gen:provider-reference`) |
 
 ### Penyelaman mendalam subsistem
 

@@ -197,7 +197,7 @@ src/
 | `plugins/`                               | 插件注册表                                                                                                                                                                                                                                                                                                |
 | `promptCache/`                           | 人类风格的提示缓存断点                                                                                                                                                                                                                                                                                    |
 | `skills/`                                | 技能框架（内置+市场+ SkillsSH） —参见`docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                          |
-| `playground/`                            | Playground Studio 共享助手： `codeExport.ts` （curl/Python/TS生成器）、 `promptImprover.ts` （元提示生成器）、 `streamMetrics.ts` （纯TTFT/TPS）、 `types.ts` （定价表） —参见`docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                      |
+| `playground/`                            | Playground Studio 共享助手： `codeExport.ts` （curl/Python/TS生成器）、 `promptImprover.ts` （元提示构建器）、 `streamMetrics.ts` （纯TTFT/TPS）、 `types.ts` （定价表） —参见`docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                      |
 | `webhookDispatcher.ts`                   | HMAC webhook 传递—参见`docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                       |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | 隧道管理者—见`docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                  |
 | `cloudSync.ts`, `initCloudSync.ts`       | 可选的状态云同步                                                                                                                                                                                                                                                                                          |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------- |
 | `components/`                    | 仪表板组件API： `packages/ui-kit`上的适配器—请参阅`docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`：屏幕使用的图标名称→ Lucide 组件 (`<Icon>`)                                 |
-| `constants/providers.ts`         | **380 家提供者**通过Zod验证（事实来源）                                                |
+| `constants/providers.ts`         | **382 家提供者**通过Zod验证（事实来源）                                                |
 | `constants/cliTools.ts`          | 外部CLI工具注册表                                                                      |
 | `constants/routingStrategies.ts` | **20种路由策略**有优先事项                                                             |
 | `constants/publicApiRoutes.ts`   | 需要承载（与管理）身份验证的路由                                                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 外部CLI集成+内部OmniRoute CLI                                            |
 | `I18N.md`                   | i18n 架构，添加语言，67 个语言环境                                       |
 | `UNINSTALL.md`              | 干净卸载步骤                                                             |
-| `PROVIDER_REFERENCE.md`     | **自动生成**380 家提供者目录（regen： `npm run gen:provider-reference`） |
+| `PROVIDER_REFERENCE.md`     | **自动生成**382 家提供者目录（regen： `npm run gen:provider-reference`） |
 
 ### 子系统深入研究
 

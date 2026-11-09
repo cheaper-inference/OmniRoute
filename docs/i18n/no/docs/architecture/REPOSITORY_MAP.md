@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard komponent API: adaptere over `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnavn som brukes av skjermene → Lucide-komponenter (`<Icon>`)                       |
-| `constants/providers.ts`         | **380 tilbydere** med Zod -validering (kilde til sannhet)                                          |
+| `constants/providers.ts`         | **382 tilbydere** med Zod -validering (kilde til sannhet)                                          |
 | `constants/cliTools.ts`          | Eksternt CLI -verktøyregister                                                                      |
 | `constants/routingStrategies.ts` | **20 rutingstrategier** med prioriteringer                                                         |
 | `constants/publicApiRoutes.ts`   | Ruter som krever bærer (mot administrasjon) autentisering                                          |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI -integrasjoner + Intern OmniRoute CLI                                      |
 | `I18N.md`                   | i18n-arkitektur, legger til et språk, 67 lokaliteter                                    |
 | `UNINSTALL.md`              | Rengjør avinstalleringstrinn                                                            |
-| `PROVIDER_REFERENCE.md`     | **Autogenerert** katalog med 380 leverandører (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Autogenerert** katalog med 382 leverandører (regen: `npm run gen:provider-reference`) |
 
 ### Delsystem dypdykk
 
@@ -423,7 +423,7 @@ open-sse/
 | `AGENT_PROTOCOLS_GUIDE.md`                  | Samlet guide: A2A vs ACP vs Cloud Agents                              |
 | `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules orkestrering                              |
 | `SKILLS.md`                                 | Ferdighetsrammeverk (innebygd + marketplace + SkillsSH + sandbox)     |
-| `RADAR.md`                                  | Radar gratismodellkatalogoverlegg (`RADAR_ENABLED`, av som standard)  |
+| `RADAR.md`                                  | Radar gratis modellkatalogoverlegg (`RADAR_ENABLED`, av som standard) |
 | `MEMORY.md`                                 | Minnesystem (SQLite FTS5 + Qdrant)                                    |
 | `EVALS.md`                                  | Evalrammeverk (suiter, runs, rubrikker)                               |
 | `GUARDRAILS.md`                             | PII -masker, rask injeksjon, synsbro                                  |
@@ -437,13 +437,13 @@ open-sse/
 
 ### Komprimering
 
-| Dok                             | Hensikt                                    |
-| ------------------------------- | ------------------------------------------ |
-| `COMPRESSION_GUIDE.md`          | Oversikt over kompresjonsmoduser + veikart |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK -motorer, registerkontrakt   |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON skjema              |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Beholdning per språk regelpakke            |
-| `RTK_COMPRESSION.md`            | RTK deklarativ rørledning (56 filtre)      |
+| Dok                             | Hensikt                                      |
+| ------------------------------- | -------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Oversikt over komprimeringsmoduser + veikart |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK -motorer, registerkontrakt     |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON skjema                |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Beholdning per språk regelpakke              |
+| `RTK_COMPRESSION.md`            | RTK deklarativ rørledning (56 filtre)        |
 
 ### Utplassering
 

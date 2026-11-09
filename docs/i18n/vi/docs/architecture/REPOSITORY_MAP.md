@@ -190,7 +190,7 @@ src/
 | `jobs/`                                  | Công việc nền (giống như cron)                                                                                                                                                                                                                                                                                                 |
 | `memory/`                                | Bộ nhớ đàm thoại (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant cấp 2) — xem `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                        |
 | `memory/embedding/`                      | Lớp nhúng đa nguồn: `index.ts` (trình phân giải), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (kế hoạch 21)                                                                                                                                                                                 |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 trình bao bọc — KNN brute-force + lai RRF (FTS5 +, k = 60). Lazy-init, xuống cấp một cách duyên dáng khi không có sqlite-vec. (kế hoạch 21)                                                                                                                                                                  |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 trình bao bọc — KNN brute-force + lai RRF ( vector FTS5 +, k = 60). Lazy-init, xuống cấp một cách duyên dáng khi không có sqlite-vec. (kế hoạch 21)                                                                                                                                                          |
 | `memory/reindex.ts`                      | `runReindexBatch()` — xử lý ký ức với `needs_reindex=1` ở chế độ nền; được gọi bằng `POST /api/memory/reindex` và đường dẫn lấp đầy lười biếng. (kế hoạch 21)                                                                                                                                                                  |
 | `monitoring/`                            | Kiểm tra tình trạng, phát thải số liệu                                                                                                                                                                                                                                                                                         |
 | `oauth/`                                 | luồng OAuth/import cho 22 mô-đun nhà cung cấp (agy, antiGravity, claude, cline, codebuddy-cn, codex, con trỏ, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                     |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Thành phần bảng điều khiển API: bộ điều hợp trên `packages/ui-kit` — xem `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: tên biểu tượng được sử dụng bởi màn hình → Các thành phần Lucide (`<Icon>`)                       |
-| `constants/providers.ts`         | **380 nhà cung cấp** với xác nhận Zod (nguồn sự thật)                                                         |
+| `constants/providers.ts`         | **382 nhà cung cấp** với xác nhận Zod (nguồn sự thật)                                                         |
 | `constants/cliTools.ts`          | Đăng ký công cụ CLI bên ngoài                                                                                 |
 | `constants/routingStrategies.ts` | **20 chiến lược định tuyến** với những ưu tiên                                                                |
 | `constants/publicApiRoutes.ts`   | Các tuyến yêu cầu xác thực Bearer (so với quản lý)                                                            |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Tích hợp CLI bên ngoài + CLIOmniRoute bộ                                                     |
 | `I18N.md`                   | Kiến trúc i18n, thêm ngôn ngữ, 67 ngôn ngữ                                                   |
 | `UNINSTALL.md`              | Làm sạch các bước gỡ cài đặt                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Được tạo tự động** danh mục của 380 nhà cung cấp (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Được tạo tự động** danh mục của 382 nhà cung cấp (regen: `npm run gen:provider-reference`) |
 
 ### Tìm hiểu sâu về hệ thống con
 

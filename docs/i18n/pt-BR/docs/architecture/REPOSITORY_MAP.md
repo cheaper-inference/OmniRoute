@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Componente do painel API: adaptadores sobre `packages/ui-kit` — consulte `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nomes de ícones usados pelas telas → componentes Lucide (`<Icon>`)                                |
-| `constants/providers.ts`         | **380 provedores** com validação Zod (fonte da verdade)                                                       |
+| `constants/providers.ts`         | **382 provedores** com validação Zod (fonte da verdade)                                                       |
 | `constants/cliTools.ts`          | Registro externo da ferramenta CLI                                                                            |
 | `constants/routingStrategies.ts` | **20 estratégias de roteamento** com prioridades                                                              |
 | `constants/publicApiRoutes.ts`   | Rotas que exigem autenticação do portador (vs gerenciamento)                                                  |
@@ -395,24 +395,24 @@ open-sse/
 
 ### Guias de nível superior
 
-| Doutor                      | Propósito                                                                                         |
-| --------------------------- | ------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Arquitetura de alto nível, mapa de subsistemas, superfície do painel                              |
-| `CODEBASE_DOCUMENTATION.md` | Referência de engenharia: diretórios, módulos, convenções                                         |
-| `FEATURES.md`               | Matriz de recursos com destaques da v3.8                                                          |
-| `USER_GUIDE.md`             | Manual do usuário final (configuração, modelos, combos, CLIs, áudio, etc.)                        |
-| `API_REFERENCE.md`          | referência de endpoint API com modelo de autenticação                                             |
-| `openapi.yaml`              | Especificação OpenAPI 3.0 (121 caminhos)                                                          |
-| `SETUP_GUIDE.md`            | Métodos de instalação (npm, npx, Docker, Electron, Termux, fonte)                                 |
-| `ENVIRONMENT.md`            | Todos os env vars (~ 800 documentados, ~ 3.050 linhas `.env.example`)                             |
-| `TROUBLESHOOTING.md`        | Erros comuns, problemas conhecidos + v3.8.0                                                       |
-| `RELEASE_CHECKLIST.md`      | Fluxo de liberação completo (habilidades, husky, commits convencionais, implantação)              |
-| `COVERAGE_PLAN.md`          | Metas de cobertura e estado atual                                                                 |
-| `FREE_TIERS.md`             | Provedores de nível gratuito selecionados (48 + grátis + 11 OAuth)                                |
-| `CLI-TOOLS.md`              | Integrações CLI externas + OmniRoute interno CLI                                                  |
-| `I18N.md`                   | Arquitetura i18n, adicionando um idioma, 67 localidades                                           |
-| `UNINSTALL.md`              | Limpe as etapas de desinstalação                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Gerado automaticamente** catálogo de 380 fornecedores (regen: `npm run gen:provider-reference`) |
+| Doutor                      | Propósito                                                                                       |
+| --------------------------- | ----------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Arquitetura de alto nível, mapa de subsistemas, superfície do painel                            |
+| `CODEBASE_DOCUMENTATION.md` | Referência de engenharia: diretórios, módulos, convenções                                       |
+| `FEATURES.md`               | Matriz de recursos com destaques da v3.8                                                        |
+| `USER_GUIDE.md`             | Manual do usuário final (configuração, modelos, combos, CLIs, áudio, etc.)                      |
+| `API_REFERENCE.md`          | referência de endpoint API com modelo de autenticação                                           |
+| `openapi.yaml`              | Especificação OpenAPI 3.0 (121 caminhos)                                                        |
+| `SETUP_GUIDE.md`            | Métodos de instalação (npm, npx, Docker, Electron, Termux, fonte)                               |
+| `ENVIRONMENT.md`            | Todos os env vars (~ 800 documentados, ~ 3.050 linhas `.env.example`)                           |
+| `TROUBLESHOOTING.md`        | Erros comuns, problemas conhecidos + v3.8.0                                                     |
+| `RELEASE_CHECKLIST.md`      | Fluxo de liberação completo (habilidades, husky, commits convencionais, implantação)            |
+| `COVERAGE_PLAN.md`          | Metas de cobertura e estado atual                                                               |
+| `FREE_TIERS.md`             | Provedores de nível gratuito selecionados (48 + grátis + 11 OAuth)                              |
+| `CLI-TOOLS.md`              | Integrações CLI externas + OmniRoute interno CLI                                                |
+| `I18N.md`                   | Arquitetura i18n, adicionando um idioma, 67 localidades                                         |
+| `UNINSTALL.md`              | Limpe as etapas de desinstalação                                                                |
+| `PROVIDER_REFERENCE.md`     | **Gerado automaticamente** catálogo de 381 provedores (regen: `npm run gen:provider-reference`) |
 
 ### Aprofundamentos do subsistema
 

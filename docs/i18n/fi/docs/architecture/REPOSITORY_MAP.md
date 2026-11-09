@@ -193,7 +193,7 @@ src/
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 kääre — KNN brute-force + hybrid RRF (FTS5 + vektori, k = 60). Lazy-init, hajoaa sulavasti, kun sqlite-vec ei ole käytettävissä. (suunnitelma 21)                                                                                                                                                       |
 | `memory/reindex.ts`                      | `runReindexBatch()` — käsittelee muistoja `needs_reindex=1` taustalla; kutsutaan nimellä `POST /api/memory/reindex` ja lazy-backfill polku. (suunnitelma 21)                                                                                                                                                              |
 | `monitoring/`                            | Terveystarkastukset, mittauspäästöt                                                                                                                                                                                                                                                                                       |
-| `oauth/`                                 | OAuth/import virtaa 22 toimittajamoduulille (agy, antigravity, claude, cline, codebuddy-cn, codex, kohdistin, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-koodaus, traqo, xaue- oference, kiro, xaioference zed-isännöity, zed)                                              |
+| `oauth/`                                 | OAuth/import virtaa 22 toimittajamoduulille (agy, antigravity, claude, cline, codebuddy-cn, codex, kohdistin, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-koodaus, traqo, xau-oference, kiro, xaioference zed-isännöity, zed)                                                |
 | `plugins/`                               | Lisäosien rekisteri                                                                                                                                                                                                                                                                                                       |
 | `promptCache/`                           | Antrooppiset välimuistin keskeytyskohdat                                                                                                                                                                                                                                                                                  |
 | `skills/`                                | Taitokehys (sisäänrakennettu + -markkinapaikka + SkillsSH) — katso `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                            |
@@ -238,23 +238,23 @@ src/
 
 ### `src/shared/`
 
-| Moduuli                          | Tarkoitus                                                                                                    |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `components/`                    | Kojelaudan komponentti API: sovittimet `packages/ui-kit` — n yli, katso `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: näyttöjen käyttämät kuvakkeiden nimet → Lucide - komponentit (`<Icon>`)                          |
-| `constants/providers.ts`         | **380 palveluntarjoajaa** Zod -validaatiolla (totuuden lähde)                                                |
-| `constants/cliTools.ts`          | Ulkoinen CLI -työkalurekisteri                                                                               |
-| `constants/routingStrategies.ts` | **20 reititysstrategiaa** prioriteettien kanssa                                                              |
-| `constants/publicApiRoutes.ts`   | Reitit, jotka vaativat siirtotietodennuksen (vs. hallinta).                                                  |
-| `constants/upstreamHeaders.ts`   | Ylävirran pyyntöjen otsikon estoluettelo                                                                     |
-| `validation/schemas.ts`          | ~ 80 Zod -skeemaa (yksi totuuden lähde API -sopimuksille)                                                    |
-| `validation/helpers.ts`          | Zod -validointiapuohjelmat (`validateBody` jne.)                                                             |
-| `types/`                         | Jaetut TS tyypit                                                                                             |
-| `contracts/`                     | Julkiset API -sopimukset ( `files:` kuluttaa `package.json`:ssä)                                             |
-| `utils/circuitBreaker.ts`        | Palveluntarjoajan katkaisija (katso `docs/architecture/RESILIENCE_GUIDE.md`)                                 |
-| `utils/apiAuth.ts`               | API -avaimen validointi, laajuuden tarkistus                                                                 |
-| `utils/fetchTimeout.ts`          | Timeout/abort -kääreet noutoa varten                                                                         |
-| `utils/releaseNotes.ts`          | Suljettu v2/legacy -ilmoitusten jäsennys, lokalisointi ja ID poistaminen                                     |
+| Moduuli                          | Tarkoitus                                                                                                  |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `components/`                    | Kojelaudan komponentti API: sovittimet `packages/ui-kit` — yli, katso `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: näyttöjen käyttämät kuvakkeiden nimet → Lucide - komponentit (`<Icon>`)                        |
+| `constants/providers.ts`         | **381 palveluntarjoajaa** Zod -validaatiolla (totuuden lähde)                                              |
+| `constants/cliTools.ts`          | Ulkoinen CLI -työkalurekisteri                                                                             |
+| `constants/routingStrategies.ts` | **20 reititysstrategiaa** prioriteettien kanssa                                                            |
+| `constants/publicApiRoutes.ts`   | Reitit, jotka vaativat siirtotietodennuksen (vs. hallinta).                                                |
+| `constants/upstreamHeaders.ts`   | Ylävirran pyyntöjen otsikon estoluettelo                                                                   |
+| `validation/schemas.ts`          | ~ 80 Zod -skeemaa (yksi totuuden lähde API -sopimuksille)                                                  |
+| `validation/helpers.ts`          | Zod -validointiapuohjelmat (`validateBody` jne.)                                                           |
+| `types/`                         | Jaetut TS tyypit                                                                                           |
+| `contracts/`                     | Julkiset API -sopimukset ( `files:` kuluttaa `package.json`:ssä)                                           |
+| `utils/circuitBreaker.ts`        | Palveluntarjoajan katkaisija (katso `docs/architecture/RESILIENCE_GUIDE.md`)                               |
+| `utils/apiAuth.ts`               | API -avaimen validointi, laajuuden tarkistus                                                               |
+| `utils/fetchTimeout.ts`          | Timeout/abort -kääreet noutoa varten                                                                       |
+| `utils/releaseNotes.ts`          | Suljettu v2/legacy -ilmoitusten jäsentäjä, lokalisointi ja ID poistaminen                                  |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Ulkoiset CLI -integraatiot + Sisäiset OmniRoute CLI                                                |
 | `I18N.md`                   | i18n-arkkitehtuuri, kielen lisääminen, 67 aluetta                                                  |
 | `UNINSTALL.md`              | Puhdista asennuksen poistovaiheet                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Luotu automaattisesti** 380 palveluntarjoajan luettelo (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Luotu automaattisesti** 382 palveluntarjoajan luettelo (regen: `npm run gen:provider-reference`) |
 
 ### Alajärjestelmän syväsukellukset
 
@@ -422,7 +422,7 @@ open-sse/
 | `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 taitoa, REST auttajat, agenttikortti                           |
 | `AGENT_PROTOCOLS_GUIDE.md`                  | Yhtenäinen opas: A2A vs ACP vs Cloud Agents                                          |
 | `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules -orkesteri                                               |
-| `SKILLS.md`                                 | Skills-kehys (sisäänrakennettu + Marketplace + SkillsSH + sandbox)                   |
+| `SKILLS.md`                                 | Taitokehys (sisäänrakennettu + Marketplace + SkillsSH + sandbox)                     |
 | `RADAR.md`                                  | Tutka ilmaisen mallin luettelon peittokuva (`RADAR_ENABLED`, oletuksena pois päältä) |
 | `MEMORY.md`                                 | Muistijärjestelmä (SQLite FTS5 + Qdrant)                                             |
 | `EVALS.md`                                  | Eval-kehys (sviitit, runot, rubriikit)                                               |

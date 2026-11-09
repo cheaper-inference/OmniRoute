@@ -13,9 +13,9 @@
 
 ## Apa Itu
 
-OmniRoute mendaftarkan 380 pembekal, termasuk 155 entri katalog yang ditanda**free/no-auth** (no-auth, free-tier OAuth, atau free-tier API key — lihat [Panduan Peringkat Percuma](../getting-started/FREE-TIERS-GUIDE.md) dan [direktori Tahap Percuma](../reference/FREE_TIERS.md) penuh ). Tangkapan: pembekal percuma berbeza-beza dalam kualiti model. Pembekal tanpa pengesahan yang menyediakan model sempadan jauh lebih berguna daripada penyedia yang menyediakan model lama yang kecil.
+OmniRoute mendaftarkan 382 pembekal, termasuk 155 entri katalog yang ditanda**free/no-auth** (no-auth, free-tier OAuth, atau free-tier API key — lihat [Panduan Peringkat Percuma](../getting-started/FREE-TIERS-GUIDE.md) dan [direktori Tahap Percuma](../reference/FREE_TIERS.md) penuh ). Tangkapan: pembekal percuma berbeza-beza dalam kualiti model. Pembekal tanpa pengesahan yang menyediakan model sempadan jauh lebih berguna daripada penyedia yang menyediakan model lama yang kecil.
 
-**Kedudukan Pembekal Percuma** jawapan"** pembekal percuma manakah yang memberikan saya model terbaik?** " dengan menyertai setiap katalog pembekal percuma dengan** skor kualiti bersumberkan orang ramai** daripada** Arena AI papan pendahulu** (human-preference ELO, idea yang sama di sebalik arena chatbot LMArena ). Penyedia kemudian diberi kedudukan berdasarkan kekuatan mereka** model percuma terbaik** .
+**Kedudukan Pembekal Percuma** jawapan"** pembekal percuma yang manakah memberikan saya model terbaik?** " dengan menyertai setiap katalog penyedia percuma dengan** skor kualiti bersumberkan orang ramai** daripada** Arena AI papan pendahulu** (human-preference ELO, idea yang sama di sebalik arena chatbot LMArena ). Penyedia kemudian diberi kedudukan berdasarkan kekuatan mereka** model percuma terbaik** .
 
 Kedudukan dikira daripada tiga sumber sebenar:
 

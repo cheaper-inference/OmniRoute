@@ -242,19 +242,19 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponen papan pemuka API: penyesuai atas `packages/ui-kit` — lihat `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nama ikon yang digunakan oleh skrin komponen Lucide → (`<Icon>`)                             |
-| `constants/providers.ts`         | **380 pembekal** dengan pengesahan Zod (sumber kebenaran)                                                |
+| `constants/providers.ts`         | **382 pembekal** dengan pengesahan Zod (sumber kebenaran)                                                |
 | `constants/cliTools.ts`          | Pendaftaran alat CLI luaran                                                                              |
 | `constants/routingStrategies.ts` | **20 strategi laluan** dengan keutamaan                                                                  |
 | `constants/publicApiRoutes.ts`   | Laluan yang memerlukan pengesahan Pembawa (vs pengurusan).                                               |
 | `constants/upstreamHeaders.ts`   | Senarai penafian pengepala untuk permintaan huluan                                                       |
-| `validation/schemas.ts`          | ~ 80 Zod skema (sumber tunggal kebenaran untuk kontrak API )                                             |
+| `validation/schemas.ts`          | skema ~ 80 Zod (sumber tunggal kebenaran untuk kontrak API )                                             |
 | `validation/helpers.ts`          | pembantu pengesahan Zod (`validateBody`, dsb.)                                                           |
 | `types/`                         | Jenis TS yang dikongsi                                                                                   |
 | `contracts/`                     | Kontrak API awam (digunakan oleh `files:` dalam `package.json`)                                          |
 | `utils/circuitBreaker.ts`        | Pemutus litar pembekal (lihat `docs/architecture/RESILIENCE_GUIDE.md`)                                   |
 | `utils/apiAuth.ts`               | pengesahan kunci API, semakan skop                                                                       |
 | `utils/fetchTimeout.ts`          | pembalut Timeout/abort untuk pengambilan hulu                                                            |
-| `utils/releaseNotes.ts`          | Penghuraian pengumuman v2/legacy tertutup, penyetempatan dan pemecatan ID                                |
+| `utils/releaseNotes.ts`          | Penghurai pengumuman v2/legacy tertutup, penyetempatan dan pemecatan ID                                  |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Penyepaduan CLI luaran + OmniRoute CLI                                                     |
 | `I18N.md`                   | seni bina i18n, menambah bahasa, 67 tempat                                                 |
 | `UNINSTALL.md`              | Bersihkan langkah nyahpasang                                                               |
-| `PROVIDER_REFERENCE.md`     | **Dijana secara automatik** katalog 380 pembekal (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Dijana secara automatik** katalog 382 pembekal (regen: `npm run gen:provider-reference`) |
 
 ### Penyelaman dalam subsistem
 

@@ -13,6 +13,14 @@ const { buildSelfLoopHeaders, mayForwardSelfLoopCredential, UnsafeSelfLoopTarget
 const ORIGINAL_KEY = process.env.OMNIROUTE_API_KEY;
 process.env.OMNIROUTE_API_KEY = "sk-env-self-loop-target";
 
+/**
+ * Occurrences of `literal` in `text`. A plain text search over rendered output (task records,
+ * an inspected error): the text is not a URL, so there is no hostname to parse and compare.
+ */
+function occurrences(text: string, literal: string): number {
+  return text.split(literal).length - 1;
+}
+
 test.after(() => {
   if (ORIGINAL_KEY === undefined) delete process.env.OMNIROUTE_API_KEY;
   else process.env.OMNIROUTE_API_KEY = ORIGINAL_KEY;
@@ -120,8 +128,8 @@ test("UnsafeSelfLoopTargetError keeps the configured URL out of the error", () =
     (err: unknown) => {
       assert.ok(err instanceof UnsafeSelfLoopTargetError);
       const shown = inspect(err, { depth: 6 });
-      assert.ok(!shown.includes("s3cret"), shown);
-      assert.ok(!shown.includes("gw.example.com"), shown);
+      assert.equal(occurrences(shown, "s3cret"), 0, shown);
+      assert.equal(occurrences(shown, "gw.example.com"), 0, shown);
       return true;
     }
   );

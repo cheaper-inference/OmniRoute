@@ -193,7 +193,7 @@ src/
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ಹೊದಿಕೆ — KNN ಬ್ರೂಟ್-ಫೋರ್ಸ್ + ಹೈಬ್ರಿಡ್ RRF (FTS5 + ವೆಕ್ಟರ್, k = 60). Lazy-init, sqlite-vec ಲಭ್ಯವಿಲ್ಲದಿದ್ದಾಗ ಆಕರ್ಷಕವಾಗಿ ಕ್ಷೀಣಿಸುತ್ತದೆ. (ಯೋಜನೆ 21)                                                                                                                                                 |
 | `memory/reindex.ts`                      | `runReindexBatch()` — ಹಿನ್ನಲೆಯಲ್ಲಿ `needs_reindex=1` ನೊಂದಿಗೆ ನೆನಪುಗಳನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುತ್ತದೆ; `POST /api/memory/reindex` ಮತ್ತು ಲೇಜಿ-ಬ್ಯಾಕ್ಫಿಲ್ ಮಾರ್ಗದಿಂದ ಕರೆಯಲಾಗುತ್ತದೆ. (ಯೋಜನೆ 21)                                                                                                                               |
 | `monitoring/`                            | ಆರೋಗ್ಯ ತಪಾಸಣೆ, ಮೆಟ್ರಿಕ್ಸ್ ಹೊರಸೂಸುವಿಕೆ                                                                                                                                                                                                                                                                             |
-| `oauth/`                                 | OAuth/import 22 ಪ್ರೊವೈಡರ್ ಮಾಡ್ಯೂಲ್ಗಳಿಗೆ ಹರಿಯುತ್ತದೆ (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kirood, openference, xai-auth, zed-ಹೋಸ್ಟ್, zed)                                                |
+| `oauth/`                                 | OAuth/import 22 ಪ್ರೊವೈಡರ್ ಮಾಡ್ಯೂಲ್ಗಳಿಗಾಗಿ ಹರಿಯುತ್ತದೆ (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kirood, openference, xai-auth, zed-ಹೋಸ್ಟ್, zed)                                              |
 | `plugins/`                               | ಪ್ಲಗಿನ್ ನೋಂದಾವಣೆ                                                                                                                                                                                                                                                                                                  |
 | `promptCache/`                           | ಆಂಥ್ರೊಪಿಕ್ ಶೈಲಿಯ ಪ್ರಾಂಪ್ಟ್ ಕ್ಯಾಷ್ ಬ್ರೇಕ್ಪಾಯಿಂಟ್ಗಳು                                                                                                                                                                                                                                                                |
 | `skills/`                                | ಕೌಶಲ್ಯಗಳ ಚೌಕಟ್ಟು (ಅಂತರ್ನಿರ್ಮಿತ + ಮಾರುಕಟ್ಟೆ ಸ್ಥಳ + SkillsSH) — ನೋಡಿ `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                    |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಘಟಕ API: `packages/ui-kit` — ಮೇಲಿನ ಅಡಾಪ್ಟರುಗಳು `docs/architecture/DESIGN_SYSTEM.md` ನೋಡಿ |
 | `constants/iconMap.ts`           | `ICON_MAP`: ಪರದೆಗಳಿಂದ ಬಳಸಲಾಗುವ ಐಕಾನ್ ಹೆಸರುಗಳು → ಲುಸೈಡ್ ಘಟಕಗಳು (`<Icon>`)                              |
-| `constants/providers.ts`         | **380 ಪೂರೈಕೆದಾರರು** Zod ಮೌಲ್ಯೀಕರಣದೊಂದಿಗೆ (ಸತ್ಯದ ಮೂಲ)                                                  |
+| `constants/providers.ts`         | **382 ಪೂರೈಕೆದಾರರು** Zod ಮೌಲ್ಯೀಕರಣದೊಂದಿಗೆ (ಸತ್ಯದ ಮೂಲ)                                                  |
 | `constants/cliTools.ts`          | ಬಾಹ್ಯ CLI ಟೂಲ್ ರಿಜಿಸ್ಟ್ರಿ                                                                             |
 | `constants/routingStrategies.ts` | **20 ರೂಟಿಂಗ್ ತಂತ್ರಗಳು** ಆದ್ಯತೆಗಳೊಂದಿಗೆ                                                                |
 | `constants/publicApiRoutes.ts`   | ಬೇರರ್ (ವಿರುದ್ಧ ನಿರ್ವಹಣೆ) ದೃಢೀಕರಣದ ಅಗತ್ಯವಿರುವ ಮಾರ್ಗಗಳು                                                 |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ಬಾಹ್ಯ CLI ಸಂಯೋಜನೆಗಳು + ಆಂತರಿಕ OmniRoute CLI                                              |
 | `I18N.md`                   | i18n ಆರ್ಕಿಟೆಕ್ಚರ್, ಒಂದು ಭಾಷೆಯನ್ನು ಸೇರಿಸುವುದು, 67 ಲೊಕೇಲ್ಗಳು                               |
 | `UNINSTALL.md`              | ಅನ್ಇನ್ಸ್ಟಾಲ್ ಹಂತಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ                                                      |
-| `PROVIDER_REFERENCE.md`     | **ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ** 380 ಪೂರೈಕೆದಾರರ ಕ್ಯಾಟಲಾಗ್ (ರೀಜೆನ್: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ** 382 ಪೂರೈಕೆದಾರರ ಕ್ಯಾಟಲಾಗ್ (ರೀಜೆನ್: `npm run gen:provider-reference`) |
 
 ### ಉಪವ್ಯವಸ್ಥೆಯ ಡೀಪ್-ಡೈವ್ಸ್
 
@@ -439,10 +439,10 @@ open-sse/
 
 | ಡಾಕ್                            | ಉದ್ದೇಶ                                      |
 | ------------------------------- | ------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | ಕಂಪ್ರೆಷನ್ ಮೋಡ್ಗಳ ಅವಲೋಕನ + ರೋಡ್ಮ್ಯಾಪ್        |
+| `COMPRESSION_GUIDE.md`          | ಸಂಕೋಚನ ವಿಧಾನಗಳ ಅವಲೋಕನ + ಮಾರ್ಗಸೂಚಿ           |
 | `COMPRESSION_ENGINES.md`        | ಕೇವ್ಮ್ಯಾನ್ + RTK ಎಂಜಿನ್ಗಳು, ನೋಂದಾವಣೆ ಒಪ್ಪಂದ |
-| `COMPRESSION_RULES_FORMAT.md`   | ಕೇವ್ಮ್ಯಾನ್ ನಿಯಮ ಪ್ಯಾಕ್ JSON ಸ್ಕೀಮಾ          |
-| `COMPRESSION_LANGUAGE_PACKS.md` | ಪ್ರತಿ ಭಾಷೆಯ ನಿಯಮ ಪ್ಯಾಕ್ ದಾಸ್ತಾನು            |
+| `COMPRESSION_RULES_FORMAT.md`   | ಗುಹಾನಿವಾಸಿ ನಿಯಮ ಪ್ಯಾಕ್ JSON ಸ್ಕೀಮಾ          |
+| `COMPRESSION_LANGUAGE_PACKS.md` | ಪ್ರತಿ-ಭಾಷೆಯ ನಿಯಮ ಪ್ಯಾಕ್ ದಾಸ್ತಾನು            |
 | `RTK_COMPRESSION.md`            | RTK ಡಿಕ್ಲೇರೇಟಿವ್ ಪೈಪ್ಲೈನ್ (56 ಫಿಲ್ಟರ್ಗಳು)   |
 
 ### ನಿಯೋಜನೆ

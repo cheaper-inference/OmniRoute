@@ -167,7 +167,7 @@ src/
 
 | Modul                                    | Maqsad                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A protokoli vazifa menejeri, ko'nikmalar (5), oqim                                                                                                                                                                                                                                                                      |
+| `a2a/`                                   | A2A protokoli topshiriq menejeri, ko'nikmalar (5), oqim                                                                                                                                                                                                                                                                   |
 | `acp/`                                   | CLI Agent registri (mahalliy CLI kashfiyoti — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` qarang)                                                                                                                                                                                                                          |
 | `api/`                                   | Umumiy API yordamchilari (`requireManagementAuth`, tekshirish)                                                                                                                                                                                                                                                            |
 | `auth/`                                  | Seans, parolni xeshlash, tokenni tekshirish                                                                                                                                                                                                                                                                               |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Boshqaruv paneli komponenti API: `packages/ui-kit` — ustidagi adapterlar `docs/architecture/DESIGN_SYSTEM.md` qarang |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlar tomonidan ishlatiladigan piktogramma nomlari → Lucide komponentlari (`<Icon>`)                  |
-| `constants/providers.ts`         | **380 ta provayder** Zod validation bilan (haqiqat manbai)                                                           |
+| `constants/providers.ts`         | **382 ta provayder** Zod validation bilan (haqiqat manbai)                                                           |
 | `constants/cliTools.ts`          | Tashqi CLI vositalari reestri                                                                                        |
 | `constants/routingStrategies.ts` | **20 marshrutlash strategiyasi** ustuvorliklar bilan                                                                 |
 | `constants/publicApiRoutes.ts`   | Bearer (boshqaruvga qarshi) autentsiyasi talab qilinadigan marshrutlar                                               |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Tashqi CLI integratsiyalari + Ichki OmniRoute CLI                                                |
 | `I18N.md`                   | i18n arxitekturasi, til qoʻshish, 67 ta mahalliy til                                             |
 | `UNINSTALL.md`              | O'chirish bosqichlarini tozalang                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Avtomatik yaratilgan** 380 ta provayderlar katalogi (regen: `npm run gen:provider-reference`)  |
+| `PROVIDER_REFERENCE.md`     | **Avtomatik yaratilgan** 382 ta provayderlar katalogi (regen: `npm run gen:provider-reference`)  |
 
 ### Quyi tizim chuqur sho'ng'idi
 
@@ -442,7 +442,7 @@ open-sse/
 | `COMPRESSION_GUIDE.md`          | Siqish rejimlarining umumiy ko'rinishi + yo'l xaritasi  |
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK dvigatellari, ro'yxatga olish shartnomasi |
 | `COMPRESSION_RULES_FORMAT.md`   | G'or odami qoidalari to'plami JSON sxemasi              |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Har bir til uchun qoidalar toʻplami inventarizatsiyasi  |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Har bir til uchun qoidalar to'plami inventarizatsiyasi  |
 | `RTK_COMPRESSION.md`            | RTK deklarativ quvur liniyasi (56 filtr)                |
 
 ### Joylashtirish

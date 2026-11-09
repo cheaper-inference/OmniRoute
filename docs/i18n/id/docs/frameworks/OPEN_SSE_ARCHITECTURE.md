@@ -488,9 +488,9 @@ Ini menangani:
 
 | Mengajukan                      | Tujuan                                              |
 | ------------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`           | Registri model obrolan melalui katalog penyedia 380 |
+| `providerRegistry.ts`           | Registri model obrolan melalui katalog penyedia 382 |
 | `providerModels.ts`             | Alias model, pemetaan format                        |
-| `constants.ts`                  | Batas waktu, batasan, kode status                   |
+| `constants.ts`                  | Batas waktu, batas, kode status                     |
 | `defaultThinkingSignature.ts`   | Tanda tangan pemikiran Claude default               |
 | `modelStrip.ts` (dalam layanan) | Pengupasan lapangan per penyedia                    |
 

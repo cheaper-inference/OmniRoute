@@ -169,7 +169,7 @@ src/
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                   | oluṣakoso iṣẹ ilana ilana A2A, awọn ọgbọn (5), ṣiṣanwọle                                                                                                                                                                                                                                                                |
 | `acp/`                                   | CLI Iforukọsilẹ Aṣoju (awari CLI agbegbe — wo `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                               |
-| `api/`                                   | Awọn oluranlọwọ API ti o pin (`requireManagementAuth`, afọwọsi)                                                                                                                                                                                                                                                         |
+| `api/`                                   | Awọn oluranlọwọ API pinpin (`requireManagementAuth`, afọwọsi)                                                                                                                                                                                                                                                           |
 | `auth/`                                  | Ikoni, ọrọigbaniwọle hashing, àmi afọwọsi                                                                                                                                                                                                                                                                               |
 | `batches/`                               | OpenAI Batches API handlers                                                                                                                                                                                                                                                                                             |
 | `catalog/`                               | Katalogi olupese Zod afọwọsi + agbara ipinnu                                                                                                                                                                                                                                                                            |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dasibodu paati API: awọn oluyipada lori `packages/ui-kit` — wo `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: aami awọn orukọ ti a lo nipasẹ awọn iboju → Lucide irinše (`<Icon>`)                    |
-| `constants/providers.ts`         | **380 olupese** pẹlu afọwọsi Zod (orisun otitọ)                                                     |
+| `constants/providers.ts`         | **382 olupese** pẹlu afọwọsi Zod (orisun otitọ)                                                     |
 | `constants/cliTools.ts`          | Iforukọsilẹ irinṣẹ CLI ita                                                                          |
 | `constants/routingStrategies.ts` | **20 afisona ogbon** pẹlu ayo                                                                       |
 | `constants/publicApiRoutes.ts`   | Awọn ipa-ọna ti o nilo Olutọju (la iṣakoso) auth                                                    |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Awọn akojọpọ CLI ita + Ti abẹnu OmniRoute CLI                                                   |
 | `I18N.md`                   | i18n faaji, fifi a ede, 67 locales                                                              |
 | `UNINSTALL.md`              | Nu aifi si awọn igbesẹ                                                                          |
-| `PROVIDER_REFERENCE.md`     | **Ti ipilẹṣẹ laifọwọyi** katalogi ti awọn olupese 380 (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Ti ipilẹṣẹ laifọwọyi** katalogi ti awọn olupese 382 (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem jin-dives
 

@@ -161,9 +161,9 @@ OmniRoute memperlihatkan 6 keterampilan A2A yang dihubungkan ke `src/lib/a2a/tas
 | Penemuan Penyedia | `provider-discovery` | Mencantumkan penyedia terinstal dengan kemampuan, tanda tingkat gratis, status OAuth                                                                              | penyedia, penemuan              | “Penyedia apa saja yang tersedia?”             |
 | Analisis Biaya    | `cost-analysis`      | Memperkirakan biaya request/conversation berdasarkan katalog + penggunaan terkini                                                                                 | biaya, penggunaan               | "Perkirakan biaya untuk percakapan ini"        |
 | Laporan Kesehatan | `health-report`      | Agregat pemutus sirkuit, cooldown, status penguncian per penyedia                                                                                                 | kesehatan, ketahanan            | "Tampilkan status kesehatan semua penyedia"    |
-| Daftar Kemampuan  | `list-capabilities`  | Mengembalikan katalog Keahlian Agen 45 entri lengkap (23 API + 21 CLI + 1 config) sebagai tabel penurunan harga dengan SKILL.md URLs mentah untuk injeksi konteks | katalog, penemuan, keterampilan | "Daftar semua kemampuan OmniRoute "            |
+| Daftar Kemampuan  | `list-capabilities`  | Mengembalikan 45 entri katalog Keahlian Agen lengkap (23 API + 21 CLI + 1 config) sebagai tabel penurunan harga dengan SKILL.md URLs mentah untuk injeksi konteks | katalog, penemuan, keterampilan | "Daftar semua kemampuan OmniRoute "            |
 
-> Kartu Agen harus tetap selaras dengan katalog penyedia 380 langsung; jumlah penyedia dan metadata free/no-auth bersumber dari registri runtime.
+> Kartu Agen harus tetap selaras dengan katalog penyedia 382 langsung; jumlah penyedia dan metadata free/no-auth bersumber dari registri runtime.
 
 ### `list-capabilities` Detail Keterampilan
 
@@ -182,18 +182,26 @@ Setiap baris menyertakan kolom `rawUrl` sehingga agen dapat segera mengambil SKI
 
 ## REST API (tambahan)
 
-Endpoint JSON-RPC `/a2a` adalah titik masuk A2A kanonis. Endpoint REST di bawah ini menyediakan akses tambahan untuk dasbor dan alat eksternal:
+Titik akhir JSON-RPC `/a2a` adalah titik masuk A2A kanonik. Titik akhir REST di bawah menyediakan akses tambahan untuk dasbor dan peralatan eksternal:
 
-| Endpoint                     | Metode | Deskripsi                                                  | Autentikasi                                  |
-| :--------------------------- | :----- | :--------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET    | Status server, skill yang terdaftar                        | (publik)                                     |
-| `/api/a2a/tasks`             | GET    | Daftar tugas dengan filter                                 | manajemen                                    |
-| `/api/a2a/tasks/[id]`        | GET    | Dapatkan tugas berdasarkan ID                              | manajemen                                    |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Batalkan tugas yang sedang berjalan                        | manajemen                                    |
-| `/.well-known/agent.json`    | GET    | Agent Card (penemuan A2A)                                  | (publik, di-cache selama 3600 detik)         |
-| `/api/a2a/tasks`             | POST   | Delegasi masuk ke armada OmniConductor (Conductor PRD RF5) | Bearer vs `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Titik akhir                  | Metode | Keterangan                                                 | Penulis                                                                                                 |
+| :--------------------------- | :----- | :--------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
+| `/api/a2a/status`            | GET    | Status server, keterampilan terdaftar                      | (publik)                                                                                                |
+| `/api/a2a/tasks`             | GET    | Buat daftar tugas dengan filter                            | manajemen atau kunci API (lihat di bawah)                                                               |
+| `/api/a2a/tasks/[id]`        | GET    | Dapatkan tugas dengan ID                                   | manajemen atau kunci API (lihat di bawah)                                                               |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Batalkan tugas yang sedang berjalan                        | manajemen atau kunci API (lihat di bawah)                                                               |
+| `/.well-known/agent.json`    | GET    | Kartu Agen (penemuan A2A )                                 | (publik, cache 3600an)                                                                                  |
+| `/api/a2a/tasks`             | POST   | Delegasi masuk ke armada OmniConductor (Konduktor PRD RF5) | sama seperti `GET`, ditambah `OMNIROUTE_API_KEY` jika disetel saat `REQUIRE_API_KEY` mati; `a2aEnabled` |
 
-**Delegasi Conductor masuk (`POST /api/a2a/tasks`):** agen A2A eksternal mendelegasikan pekerjaan pemrograman ke armada OmniConductor melalui OmniRoute. Isi: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — hanya skill armada Conductor (yang diumumkan pada Agent Card) yang dapat didelegasikan; `metadata.conductor.repo.url` wajib diisi (armada bekerja pada repositori git). Rute ini menerjemahkan permintaan menjadi `POST /v1/tasks` milik hub menggunakan `CONDUCTOR_ORCHESTRATOR_TOKEN` sisi server (dengan fallback `CONDUCTOR_HUB_TOKEN`) dan mengembalikan `201 { conductor_task_id, state: "submitted" }`; status tugas mengalir kembali melalui cermin SSE→A2A (RF1) dan dapat dilihat melalui `GET /api/a2a/tasks?skill=conductor`.
+Siapa yang dapat mengakses rute `/api/a2a/tasks*` bergantung pada login dan pengaturan kunci API:
+
+- `requireLogin=true` (default): middleware hanya menerima kredensial manajemen (sesi dasbor, kunci `manage` -scope API, token akses `oma_` ) dan `OMNIROUTE_API_KEY`. Kunci inferensi biasa mendapat `403`. Di header `Authorization` middleware hanya menggunakan `OMNIROUTE_API_KEY` sebagai `Bearer <key>`; kunci kosong atau tab setelahnya `Bearer` mendapat `401`.
+- `requireLogin=false`, atau jendela loopback sebelum orientasi: dengan `REQUIRE_API_KEY=true` kunci OmniRoute API atau kredensial manajemen apa pun yang valid diterima dan penelepon anonim mendapatkan `401`; dengan `REQUIRE_API_KEY` off rute terbuka.
+- `POST /api/a2a/tasks` juga memerlukan `OMNIROUTE_API_KEY` di header `Authorization` ketika variabel tersebut disetel dan `REQUIRE_API_KEY` tidak aktif. Header lain, seperti `x-api-key`, tidak dihitung di sana. Dengan login nonaktif atau sebelum orientasi, kunci diteruskan dengan atau tanpa awalan `Bearer` ; dengan login aktif, hanya `Bearer <key>` yang bisa melewati middleware.
+
+Jika kredensial diperlukan, token `read` -scope `oma_` hanya berfungsi untuk `GET`.
+
+**Delegasi Konduktor Masuk (`POST /api/a2a/tasks`):** agen A2A eksternal mendelegasikan pekerjaan pengkodean ke armada OmniConductor melalui OmniRoute. Isi: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — saja Keahlian armada Konduktor (yang diumumkan di Kartu Agen) dapat didelegasikan; `metadata.conductor.repo.url` diperlukan (armada bekerja pada repo git). Rute diterjemahkan ke `POST /v1/tasks` hub menggunakan `CONDUCTOR_ORCHESTRATOR_TOKEN` sisi server (fallback `CONDUCTOR_HUB_TOKEN`) dan mengembalikan `201 { conductor_task_id, state: "submitted" }`; status tugas mengalir kembali melalui cermin SSE→A2A (RF1) dan terlihat melalui `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
@@ -201,21 +209,21 @@ Endpoint JSON-RPC `/a2a` adalah titik masuk A2A kanonis. Endpoint REST di bawah 
 
 1. **Buat file keterampilan:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Ekspor fungsi async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti bentuk skill yang ada seperti `smartRouting.ts`.
+   Ekspor fungsi async `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Ikuti bentuk skill yang ada seperti `smartRouting.ts`. Jika keterampilan memanggil kembali OmniRoute melalui HTTP, buat header dengan `buildSelfLoopHeaders(caller)` dari `src/lib/a2a/selfLoopAuth.ts` sehingga panggilan berjalan dengan kunci pemanggil A2A, bukan `OMNIROUTE_API_KEY`, dan teruskan `redirect: "error"` ke `fetch` sehingga pengalihan tidak pernah mendapatkan kuncinya. Pembantu hanya membuat header; setiap keahlian menetapkan kebijakan pengalihan itu sendiri. Itu melempar `UnsafeSelfLoopTargetError` daripada melampirkan kunci ketika URL dasar yang diselesaikan adalah http biasa di luar jaringan pribadi (loopback, nama wadah atau layanan, dan alamat pribadi baik-baik saja) atau memegang kredensial, jadi keterampilan yang menelan panggilan yang ditolak harus menampilkan kembali kesalahan itu.
 
 2. **Daftarkan pengendali:** di `src/lib/a2a/taskExecution.ts`, tambahkan entri ke `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...existing skills
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Ekspos di Kartu Agen:** di `src/lib/a2a/agentCardMetadata.ts` (dibagikan oleh `/.well-known/agent.json` dan `/.well-known/agent-card.json`), tambahkan ke array `skills` :
+3. **Eksposur di Kartu Agen:** di `src/lib/a2a/agentCardMetadata.ts` (dibagikan oleh `/.well-known/agent.json` dan `/.well-known/agent-card.json`), tambahkan ke array `skills` :
 
    ```json
    {

@@ -195,9 +195,9 @@ Za detaljnu konfiguraciju pojedinačnih alata (Claude Code, Codex CLI, Cursor, C
 
 ## Podešavanje protokola (MCP + A2A)
 
-### MCP podešavanje (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
-Pokrenite MCP transport u stdio režimu:
+Pokrenite MCP transport u stdio modu:
 
 ```bash
 omniroute --mcp
@@ -206,28 +206,28 @@ omniroute --mcp
 Preporučeni tok validacije:
 
 ```bash
-# 1. Pokrenite MCP server
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Iz vašeg MCP klijenta, pozovite:
-omniroute_get_health        # Trebalo bi vratiti zdravlje sistema
-omniroute_list_combos       # Trebalo bi vratiti aktivne kombinacije
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Ili pokrenite puni E2E paket testova:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Konfiguracija MCP klijenta
+#### MCP konfiguracija klijenta
 
-**Claude Code:**
+**Claude kod:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Dodajte u svoje MCP postavke:
+Dodajte svojim MCP postavkama (stdio, sa ključem tako da pozivalac ima principala):
 
 ```json
 {
@@ -235,17 +235,24 @@ Dodajte u svoje MCP postavke:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Kompletna MCP dokumentacija:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 alata, IDE konfiguracije, Python/TS/Go klijenti.
+Ili, kada je `mcpTransport` `streamable-http` (postavite ga na `/dashboard/mcp` ili sa `omniroute mcp enable --transport streamable-http`), usmjerite klijentov daljinski MCP server na `http://localhost:20128/api/mcp/stream`.
 
-### A2A podešavanje (Agent-to-Agent protokol)
+Ključ putuje kao `Authorization: Bearer <api-key>` (pogledajte [MCP Server → Daljinski pristup](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) za udaljene hostove; udaljenom ključu je potreban `mcp:connect` plus njegove read/write opsege).
 
-Verifikujte Agent karticu:
+**Kompletna MCP dokumentacija:** [MCP server README](../../open-sse/mcp-server/README.md) — 110 alati, IDE konfiguracije, Python/TS/Go klijenti. Referenca operatera za alate za kompresiju CCR/dedup (markeri, preduvjeti, opsezi po alatu, paginacija pri preuzimanju, dijagnostika): [Motori kompresije → Preduvjeti / vodič za operatera](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A postavljanje (protokol agent-to-agent)
+
+Potvrdite karticu agenta:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -318,12 +325,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Predložak za Void Linux (xbps-src)
+## Void Linux (xbps-src) predložak
 
-Korisnici Void Linuxa mogu izgraditi izvorni paket koristeći `xbps-src`. Sačuvajte ovaj blok kao `srcpkgs/omniroute/template`:
+Za korisnike Void Linux, možete napraviti izvorni paket koristeći `xbps-src`. Sačuvajte ovaj blok kao `srcpkgs/omniroute/template`:
 
 ```bash
-# Datoteka predloška za 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -334,7 +341,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Ponovo generišite kontrolni zbir za svako izdanje pomoću:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

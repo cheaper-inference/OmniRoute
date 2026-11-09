@@ -147,7 +147,7 @@ src/
 | `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 + ruta (zahtjevi, sesije, hostovi, načini snimanja, izvoz, ws). LOCAL_ONLY + SPAWN_CAPABLE. Vidi `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                          |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 ulazna tačka (`POST /a2a`)                                                                                                                                                                                                                                                                               |
 | `app/.well-known/agent.json/`                                                | A2A Agent Card (otkriće)                                                                                                                                                                                                                                                                                                  |
-| `app/(dashboard)/dashboard/`                                                 | UI stranice na kontrolnoj tabli (50 + odjeljaka, ~ 118 page.tsx datoteka: dobavljači, kombinacije, postavke, memorija, vještine, webhookovi, evaluacije, revizija, serija, keš, troškovi, zdravlje, sistem, aktivnost, itd.)                                                                                              |
+| `app/(dashboard)/dashboard/`                                                 | UI stranice na kontrolnoj tabli (50 + odjeljaka, ~ 118 page.tsx datoteka: dobavljači, kombinacije, postavke, memorija, vještine, webhookovi, evals, revizija, serija, keš, troškovi, zdravlje, sistem, aktivnost, itd.)                                                                                                   |
 | `app/(dashboard)/dashboard/search-tools/`                                    | Alati za pretragu Studio UI (3 tabs: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — vidi `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                         |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plan 21): `page.tsx` (ljuska s 3 kartice), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge kontrolna tabla — serverska kartica, 9 agentskih kartica, čarobnjak za podešavanje, mapiranje modela, lista za obilazak. i18n PT-BR + EN. Vidi `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                              |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Komponenta kontrolne table API: adapteri preko `packages/ui-kit` — vidi `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nazivi ikona koje koriste ekrani → Lucide komponente (`<Icon>`)                                  |
-| `constants/providers.ts`         | **380 provajdera** sa Zod validacijom (izvor istine)                                                         |
+| `constants/providers.ts`         | **381 provajder** sa Zod validacijom (izvor istine)                                                          |
 | `constants/cliTools.ts`          | Eksterni registar CLI alata                                                                                  |
 | `constants/routingStrategies.ts` | **20 strategija rutiranja** sa prioritetima                                                                  |
 | `constants/publicApiRoutes.ts`   | Rute koje zahtijevaju nositelj (u odnosu na upravljanje) auth                                                |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI integracije + Interne OmniRoute CLI                                           |
 | `I18N.md`                   | i18n arhitektura, dodavanje jezika, 67 lokaliteta                                          |
 | `UNINSTALL.md`              | Čisti koraci deinstaliranja                                                                |
-| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 380 provajdera (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 382 provajdera (regen: `npm run gen:provider-reference`) |
 
 ### Dubinski zaroni podsistema
 
@@ -425,7 +425,7 @@ open-sse/
 | `SKILLS.md`                                 | Okvir vještina (ugrađeni + marketplace + SkillsSH + sandbox)                                           |
 | `RADAR.md`                                  | Preklapanje kataloga slobodnog radarskog modela (`RADAR_ENABLED`, isključeno prema zadanim postavkama) |
 | `MEMORY.md`                                 | Memorijski sistem (SQLite FTS5 + Qdrant)                                                               |
-| `EVALS.md`                                  | Eval okvir (apartmani, trčanja, rubrike)                                                               |
+| `EVALS.md`                                  | Eval okvir (apartmani, runde, rubrike)                                                                 |
 | `GUARDRAILS.md`                             | PII masker, brza injekcija, most za vid                                                                |
 | `COMPLIANCE.md`                             | Dnevnik revizije, zadržavanje, noLog opt-out                                                           |
 | `WEBHOOKS.md`                               | Dostava webhook-a s potpisom HMAC-a                                                                    |

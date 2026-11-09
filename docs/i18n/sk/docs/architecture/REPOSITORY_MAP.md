@@ -154,7 +154,7 @@ src/
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Stránka ovládacieho panela Traffic Inspector — rozdelenie DevTools, 7 kariet s podrobnosťami, 4 prepínače režimu snímania, záznam relácie, zafarbenie kontextu. i18n PT-BR + EN. Pozri `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                     |
 | `app/(dashboard)/dashboard/activity/`                                        | Stránka informačného kanála aktivity (skupina B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — pozri `docs/architecture/MONITORING_SECTIONS.md`                                                                                       |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Stránka zdieľania kvót (skupina B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                    |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Stránka konfigurácie plánu poskytovateľa (skupina B): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvótové dimenzie na pripojenie prepísania                                                                                                                                                                      |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfiguračná stránka plánu poskytovateľa (skupina B): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvótové dimenzie na pripojenie prepísania                                                                                                                                                                      |
 | `app/docs/`                                                                  | Vložený prehliadač dokumentácie (vykresľuje `docs/*.md`)                                                                                                                                                                                                                                                           |
 | `app/landing/`                                                               | Marketingová vstupná stránka                                                                                                                                                                                                                                                                                       |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Stránky súvisiace s autorizáciou                                                                                                                                                                                                                                                                                   |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponent palubnej dosky API: adaptéry cez `packages/ui-kit` — pozri `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: názvy ikon používané obrazovkami → komponenty Lucide (`<Icon>`)                               |
-| `constants/providers.ts`         | **380 poskytovateľov** s overením Zod (zdroj pravdy)                                                      |
+| `constants/providers.ts`         | **382 poskytovateľov** s overením Zod (zdroj pravdy)                                                      |
 | `constants/cliTools.ts`          | Externý register nástrojov CLI                                                                            |
 | `constants/routingStrategies.ts` | **20 stratégií smerovania** s prioritami                                                                  |
 | `constants/publicApiRoutes.ts`   | Trasy, ktoré vyžadujú overenie nositeľa (v porovnaní so správou).                                         |
@@ -395,7 +395,7 @@ open-sse/
 
 ### Sprievodcovia na najvyššej úrovni
 
-| Doc                         | Účel                                                                                            |
+| Docentom sa stal doc        | Účel                                                                                            |
 | --------------------------- | ----------------------------------------------------------------------------------------------- |
 | `ARCHITECTURE.md`           | Architektúra na vysokej úrovni, mapa subsystému, povrch palubnej dosky                          |
 | `CODEBASE_DOCUMENTATION.md` | Technická referencia: adresáre, moduly, konvencie                                               |
@@ -412,11 +412,11 @@ open-sse/
 | `CLI-TOOLS.md`              | Externé integrácie CLI + Interné OmniRoute CLI                                                  |
 | `I18N.md`                   | architektúra i18n, pridanie jazyka, 67 miestnych nastavení                                      |
 | `UNINSTALL.md`              | Čisté kroky odinštalovania                                                                      |
-| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalóg 380 poskytovateľov (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalóg 382 poskytovateľov (regen: `npm run gen:provider-reference`) |
 
 ### Subsystém hĺbkové ponory
 
-| Doc                                        | Účel                                                                               |
+| Docentom sa stal doc                       | Účel                                                                               |
 | ------------------------------------------ | ---------------------------------------------------------------------------------- |
 | `MCP-SERVER.md`                            | server MCP : 110 nástrojov, 3 prenosy, 33 rozsahov, koncové body REST              |
 | `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 zručností, pomocníci REST, karta agenta                      |
@@ -437,7 +437,7 @@ open-sse/
 
 ### Kompresia
 
-| Doc                             | Účel                                            |
+| Docentom sa stal doc            | Účel                                            |
 | ------------------------------- | ----------------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Prehľad kompresných režimov + roadmap           |
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK motory, registračná zmluva        |
@@ -447,7 +447,7 @@ open-sse/
 
 ### Nasadenie
 
-| Doc                          | Účel                                                               |
+| Docentom sa stal doc         | Účel                                                               |
 | ---------------------------- | ------------------------------------------------------------------ |
 | `DOCKER_GUIDE.md`            | zostava Docker, profily (base/cli/host/cliproxyapi), sajdkár Redis |
 | `VM_DEPLOYMENT_GUIDE.md`     | Všeobecné nasadenie VM/VPS (Ubuntu/Debian + nginx + systemd)       |

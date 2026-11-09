@@ -39,7 +39,7 @@ Paragun oġġettiv tal-karatteristiċi ma' routers tal-AI open-source popolari.
 
 ## Meta tagħżel OmniRoute
 
-- Inti tospita lilek innifsek u trid** kopertura massima tal-fornitur** (380 fornitur, 155 entrati fil-katalgu free/no-auth )
+- Inti tospita lilek innifsek u trid** kopertura massima tal-fornitur** (382 fornitur, 155 entrati fil-katalgu free/no-auth )
 - Għandek bżonn a** server MCP mibni** (għodod LLM, memorja, ħiliet esposti bħala għodda)
 - Għandek bżonn**A2A protokoll** għal flussi tax-xogħol minn aġent għal aġent
 - Trid** stealth tal-marki tas-swaba'** (JA3/JA4) biex tevita skoperta minn upstream CAPTCHAs

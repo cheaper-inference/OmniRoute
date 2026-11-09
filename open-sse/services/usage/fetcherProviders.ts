@@ -122,6 +122,8 @@ export const USAGE_FETCHER_PROVIDERS = [
   "cpl",
   // Cloudflare Workers AI daily neurons (GraphQL Analytics aiInferenceAdaptiveGroups)
   "cloudflare-ai",
+  // Zed Hosted Models USD credit from an optional Orb billing portal link
+  "zed-hosted",
 ] as const;
 
 export type UsageFetcherProvider = (typeof USAGE_FETCHER_PROVIDERS)[number];

@@ -8,79 +8,78 @@
 
 _கடைசியாகப் புதுப்பிக்கப்பட்டது: 2026-06-28_
 
-## நிர்வாகச் சுருக்கம்
+## நிர்வாக சுருக்கம்
 
-OmniRoute என்பது Next.js அடிப்படையில் உருவாக்கப்பட்ட உள்ளக AI routing gateway மற்றும் dashboard ஆகும்.  
-இது ஒரே OpenAI-இணக்கமான endpoint (`/v1/*`)ஐ வழங்கி, translation, fallback, token refresh மற்றும் usage tracking ஆகியவற்றுடன் பல upstream providers வழியாக traffic-ஐ வழிமாற்றுகிறது.
+OmniRoute என்பது Next.js இல் கட்டப்பட்ட உள்ளூர் AI ரூட்டிங் கேட்வே மற்றும் டாஷ்போர்டு ஆகும். இது ஒற்றை OpenAI-இணக்கமான இறுதிப்புள்ளியை வழங்குகிறது (`/v1/*`) மற்றும் பல அப்ஸ்ட்ரீம் வழங்குநர்கள் முழுவதும் டிராஃபிக்கை மொழிபெயர்ப்பு, ஃபால்பேக், டோக்கன் ரெஃப்ரெஷ் மற்றும் யூஸ் ட்ராக்கிங் மூலம் வழிநடத்துகிறது.
 
 முக்கிய திறன்கள்:
 
-- CLI/tools க்கான OpenAI-இணக்கமான API surface (381 providers, 159 executor modules)
-- Provider வடிவங்களுக்கு இடையிலான request/response translation
-- Model combo fallback (பல மாதிரிகளைக் கொண்ட sequence)
-- Structured combo steps (`provider + model + connection`), `compositeTiers` மூலம் runtime ordering
-- Account-level fallback (ஒவ்வொரு provider-க்கும் பல accounts)
-- Main chat path-இல் quota preflight மற்றும் quota-aware P2C account selection
-- OAuth + API-key provider connection management (27 OAuth provider modules)
-- `/v1/embeddings` வழியாக embedding generation (18 providers)
-- `/v1/images/generations` வழியாக image generation (10+ providers, 20+ models)
-- `/v1/audio/transcriptions` வழியாக audio transcription (18 providers)
-- `/v1/audio/speech` வழியாக text-to-speech (24 built-in providers)
-- `/v1/videos/generations` வழியாக video generation (ComfyUI + SD WebUI)
-- `/v1/music/generations` வழியாக music generation (ComfyUI)
-- `/v1/search` வழியாக web search (20 providers)
-- `/v1/moderations` வழியாக moderations
-- `/v1/rerank` வழியாக reranking
-- Reasoning models க்கான think tag parsing (`<think>...</think>`)
-- Strict OpenAI SDK compatibility க்கான response sanitization
-- Cross-provider compatibility க்கான role normalization (developer→system, system→user)
-- Structured output conversion (json_schema → Gemini responseSchema)
-- Providers, keys, aliases, combos, settings, pricing ஆகியவற்றுக்கான local persistence (122 DB modules)
-- Usage/cost tracking மற்றும் request logging
-- Multi-device/state sync க்கான விருப்ப cloud sync
-- API access control க்கான IP allowlist/blocklist
-- Thinking budget management (passthrough/auto/custom/adaptive)
-- Global system prompt injection
-- Session tracking மற்றும் fingerprinting
-- Provider-specific profiles உடன் ஒவ்வொரு account-க்குமான enhanced rate limiting
-- Provider resilience க்கான circuit breaker pattern
-- Mutex locking மூலம் anti-thundering herd protection
-- Signature-based request deduplication cache
-- Domain layer: cost rules, fallback policy, lockout policy
-- Context Relay: account rotation continuity க்கான session handoff summaries
-- Domain state persistence (fallbacks, budgets, lockouts, circuit breakers க்கான SQLite write-through cache)
-- மையப்படுத்தப்பட்ட request evaluation க்கான policy engine (lockout → budget → fallback)
-- p50/p95/p99 latency aggregation உடன் request telemetry
-- `combo_execution_key` / `combo_step_id` மூலம் combo target telemetry மற்றும் historical combo target health
-- End-to-end tracing க்கான Correlation ID (X-Request-Id)
-- API key ஒன்றுக்கு opt-out வசதியுடன் compliance audit logging
-- LLM quality assurance க்கான Eval framework
-- நிகழ்நேர provider circuit breaker status உடன் health dashboard
-- 3 transports (stdio/SSE/Streamable HTTP) கொண்ட MCP Server (129 tools)
-- Skills மற்றும் task lifecycle உடன் A2A Server (JSON-RPC 2.0 + SSE)
-- Memory system (extraction, injection, retrieval, summarization)
-- Skills system (registry, executor, sandbox, built-in skills)
-- Certificate management மற்றும் DNS handling உடன் MITM proxy
-- Prompt injection guard middleware
-- Caveman, RTK, stacked pipelines, compression combos, language packs மற்றும் analytics உடன் prompt compression pipeline
-- ACP (Agent Communication Protocol) registry
-- Modular OAuth providers (`src/lib/oauth/providers/` கீழ் 22 தனிப்பட்ட modules)
-- Uninstall/full-uninstall scripts
-- OAuth environment repair action
-- OpenAI-இணக்கமான WS clients க்கான WebSocket bridge (`/v1/ws`)
-- Sync token management (issue/revoke, ETag-versioned config bundle download)
-- GLM Thinking (`glmt`) first-class provider preset
-- Hybrid token counting (provider-side `/messages/count_tokens` மற்றும் estimation fallback)
-- Model alias auto-seeding (startup-இல் 30+ cross-proxy dialect normalizations)
-- SSRF guard, private URL blocking மற்றும் configurable retry உடன் safe outbound fetch
-- Configurable `requestRetry` மற்றும் `maxRetryIntervalSec` உடன் cooldown-aware chat retries
-- Startup-இல் Zod மூலம் runtime environment validation
-- Pagination, provider CRUD events மற்றும் SSRF-blocked validation logging உடன் compliance audit v2
+- CLI/tools க்கான OpenAI-இணக்கமான API மேற்பரப்பு (382 வழங்குநர்கள், 159 எக்ஸிகியூட்டர் தொகுதிகள்)
+- வழங்குநர் வடிவங்களில்Request/response மொழிபெயர்ப்பு
+- மாடல் காம்போ ஃபால்பேக் (பல மாதிரி வரிசை)
+- `compositeTiers` மூலம் இயக்க நேர வரிசைப்படுத்துதலுடன் கட்டமைக்கப்பட்ட சேர்க்கை படிகள் (`provider + model + connection`).
+- கணக்கு நிலை பின்னடைவு (ஒவ்வொரு வழங்குநருக்கும் பல கணக்குகள்)
+- முதன்மை அரட்டைப் பாதையில் ஒதுக்கீடு முன்விமானம் மற்றும் கோட்டா-அறிவு P2C கணக்குத் தேர்வு
+- OAuth + API-விசை வழங்குநர் இணைப்பு மேலாண்மை (27 OAuth வழங்குநர் தொகுதிகள்)
+- `/v1/embeddings` வழியாக உற்பத்தியை உட்பொதித்தல் (18 வழங்குநர்கள்)
+- `/v1/images/generations` வழியாக படத்தை உருவாக்குதல் (10 + வழங்குநர்கள், 20 + மாதிரிகள்)
+- `/v1/audio/transcriptions` வழியாக ஆடியோ டிரான்ஸ்கிரிப்ஷன் (18 வழங்குநர்கள்)
+- `/v1/audio/speech` வழியாக உரையிலிருந்து பேச்சு (24 உள்ளமைக்கப்பட்ட வழங்குநர்கள்)
+- `/v1/videos/generations` வழியாக வீடியோ உருவாக்கம் (ComfyUI + SD WebUI)
+- `/v1/music/generations` (ComfyUI) வழியாக இசை உருவாக்கம்
+- `/v1/search` வழியாக இணையத் தேடல் (20 வழங்குநர்கள்)
+- `/v1/moderations` வழியாக மதிப்பாய்வு
+- `/v1/rerank` வழியாக மறுவரிசைப்படுத்துதல்
+- பகுத்தறிவு மாதிரிகளுக்கு டேக் பாகுபடுத்துதல் (`<think>...</think>`) பற்றி யோசிக்கவும்
+- கடுமையான OpenAI SDK இணக்கத்தன்மைக்கான பதில் சுத்திகரிப்பு
+- குறுக்கு வழங்குநர் இணக்கத்தன்மைக்கான பங்கு இயல்பாக்கம் (டெவலப்பர்→ அமைப்பு, கணினி→ பயனர்)
+- கட்டமைக்கப்பட்ட வெளியீட்டு மாற்றம் (json_schema → Gemini responseSchema)
+- வழங்குநர்கள், விசைகள், மாற்றுப்பெயர்கள், சேர்க்கைகள், அமைப்புகள், விலை நிர்ணயம் (122 DB தொகுதிகள்) ஆகியவற்றிற்கான உள்ளூர் நிலைத்தன்மை
+- Usage/cost கண்காணிப்பு மற்றும் கோரிக்கை பதிவு
+- multi-device/state ஒத்திசைவுக்கான விருப்ப கிளவுட் ஒத்திசைவு
+- API அணுகல் கட்டுப்பாட்டிற்கான IP allowlist/blocklist
+- சிந்தனை பட்ஜெட் மேலாண்மை (passthrough/auto/custom/adaptive)
+- குளோபல் சிஸ்டம் உடனடி ஊசி
+- அமர்வு கண்காணிப்பு மற்றும் கைரேகை
+- வழங்குநர்-குறிப்பிட்ட சுயவிவரங்களுடன் ஒவ்வொரு கணக்கிற்கும் மேம்படுத்தப்பட்ட விகிதம் வரம்பு
+- வழங்குநரின் நெகிழ்ச்சிக்கான சர்க்யூட் பிரேக்கர் பேட்டர்ன்
+- மியூடெக்ஸ் பூட்டுடன் கூடிய இடி எதிர்ப்பு மந்தை பாதுகாப்பு
+- கையொப்ப அடிப்படையிலான கோரிக்கை விலக்கு தற்காலிக சேமிப்பு
+- டொமைன் லேயர்: செலவு விதிகள், ஃபால்பேக் பாலிசி, லாக்அவுட் பாலிசி
+- சூழல் ரிலே: கணக்கு சுழற்சி தொடர்ச்சிக்கான அமர்வு கையேடு சுருக்கங்கள்
+- டொமைன் ஸ்டேட் பெர்சிஸ்டன்ஸ் (SQLite ரைட்-த்ரூ கேச் ஃபால்பேக்குகள், பட்ஜெட்கள், லாக்அவுட்கள், சர்க்யூட் பிரேக்கர்ஸ்)
+- மையப்படுத்தப்பட்ட கோரிக்கை மதிப்பீட்டிற்கான கொள்கை இயந்திரம் (லாக்அவுட் → பட்ஜெட் → ஃபால்பேக்)
+- p50/p95/p99 லேட்டன்சி திரட்டலுடன் டெலிமெட்ரியைக் கோரவும்
+- `combo_execution_key` / `combo_step_id` வழியாக காம்போ டார்கெட் டெலிமெட்ரி மற்றும் ஹிஸ்டரிகல் காம்போ டார்கெட் ஹெல்த்
+- எண்ட்-டு-எண்ட் டிரேசிங்கிற்கான தொடர்பு ID (X-Request-Id).
+- API விசைக்கு விலகல் மூலம் இணக்க தணிக்கை உள்நுழைவு
+- LLM தர உத்தரவாதத்திற்கான Eval கட்டமைப்பு
+- நிகழ்நேர வழங்குநர் சர்க்யூட் பிரேக்கர் நிலையுடன் ஹெல்த் டேஷ்போர்டு
+- MCP சேவையகம் (129 கருவிகள்) 3 போக்குவரத்துகள் (stdio/SSE/Streamable HTTP)
+- A2A சர்வர் (JSON-RPC 2.0 + SSE) திறன்கள் மற்றும் பணி வாழ்க்கை சுழற்சி
+- நினைவக அமைப்பு (பிரித்தெடுத்தல், ஊசி, மீட்டெடுப்பு, சுருக்கம்)
+- திறன் அமைப்பு (பதிவகம், செயல்படுத்துபவர், சாண்ட்பாக்ஸ், உள்ளமைக்கப்பட்ட திறன்கள்)
+- சான்றிதழ் மேலாண்மை மற்றும் DNS கையாளுதலுடன்MITM ப்ராக்ஸி
+- உடனடி ஊசி பாதுகாப்பு மிடில்வேர்
+- கேவ்மேன், RTK, அடுக்கப்பட்ட பைப்லைன்கள், கம்ப்ரஷன் காம்போஸ், மொழி தொகுப்புகள் மற்றும் பகுப்பாய்வுகளுடன் உடனடி சுருக்க பைப்லைன்
+- ACP (ஏஜென்ட் கம்யூனிகேஷன் புரோட்டோகால்) பதிவேடு
+- மாடுலர் OAuth வழங்குநர்கள் ( `src/lib/oauth/providers/` இன் கீழ் 22 தனிப்பட்ட தொகுதிகள்)
+- Uninstall/full-uninstall ஸ்கிரிப்டுகள்
+- OAuth சுற்றுச்சூழல் பழுது நடவடிக்கை
+- OpenAI-இணக்கமான WS கிளையண்டுகளுக்கான WebSocket பிரிட்ஜ் (`/v1/ws`)
+- ஒத்திசைவு டோக்கன் மேலாண்மை (issue/revoke, ETag-பதிப்புள்ள கட்டமைப்பு தொகுப்பு பதிவிறக்கம்)
+- GLM சிந்தனை (`glmt`) முதல்-வகுப்பு வழங்குநர் முன்னமைவு
+- கலப்பின டோக்கன் எண்ணிக்கை (மதிப்பீட்டு வீழ்ச்சியுடன் வழங்குநர் பக்க `/messages/count_tokens` )
+- மாடல் அலியாஸ் ஆட்டோ-சீடிங் (30 + குறுக்கு-ப்ராக்ஸி பேச்சுவழக்கு இயல்பாக்கம் தொடக்கத்தில்)
+- SSRF காவலர், தனிப்பட்ட URL தடுப்பு மற்றும் உள்ளமைக்கக்கூடிய மறுமுயற்சியுடன் பாதுகாப்பான வெளிச்செல்லும் பெறுதல்
+- உள்ளமைக்கக்கூடிய `requestRetry` மற்றும் `maxRetryIntervalSec` உடன் Cooldown-aware அரட்டை மீண்டும் முயற்சிக்கிறது
+- தொடக்கத்தில் Zod உடன் இயக்க நேர சூழல் சரிபார்ப்பு
+- பேஜினேஷன், வழங்குநர் CRUD நிகழ்வுகள் மற்றும் SSRF-தடுக்கப்பட்ட சரிபார்ப்பு பதிவுகளுடன் இணக்க தணிக்கை v2
 
-முதன்மை runtime model:
+முதன்மை இயக்க நேர மாதிரி:
 
-- `src/app/api/*` கீழுள்ள Next.js app routes dashboard APIs மற்றும் compatibility APIs இரண்டையும் செயல்படுத்துகின்றன
-- `src/sse/*` + `open-sse/*` இல் உள்ள shared SSE/routing core provider execution, translation, streaming, fallback மற்றும் usage ஆகியவற்றைக் கையாளுகிறது
+- `src/app/api/*` இன் கீழ் உள்ள Next.js பயன்பாட்டு வழிகள் டாஷ்போர்டு APIs மற்றும் இணக்கத்தன்மை APIs இரண்டையும் செயல்படுத்துகின்றன
+- `src/sse/*` + `open-sse/*` இல் பகிரப்பட்ட SSE/routing கோர், வழங்குநரின் செயல்படுத்தல், மொழிபெயர்ப்பு, ஸ்ட்ரீமிங், ஃபால்பேக் மற்றும் பயன்பாடு ஆகியவற்றைக் கையாளுகிறது.
 
 ## குறிப்பு வரைபடங்கள்
 
@@ -362,7 +361,7 @@ OmniRoute நிறுவவும், மேற்பார்வையிட�
 
 ஆட்டோ காம்போ நிலையான சேர்க்கை வரையறையை நம்பாமல், கோரிக்கை நேரத்தில் ரூட்டிங் இலக்குகளை மாறும் வகையில் மதிப்பெண்கள் மற்றும் தேர்வு செய்கிறது. இது `auto/*` மாதிரி முன்னொட்டு குடும்பத்தை இயக்குகிறது.
 
-- எஞ்சின் நுழைவு: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- என்ஜின் நுழைவு: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
 - தீர்வு: `src/domain/comboResolver.ts` ( `auto/` முன்னொட்டைத் தானாகக் கண்டறிதல்)
 - டாஷ்போர்டு: `/dashboard/auto-combo`
 - டெலிமெட்ரி: `auto_combo_decisions` SQLite அட்டவணை
@@ -383,7 +382,7 @@ OmniRoute நிறுவவும், மேற்பார்வையிட�
 
 - தொகுதி ரூட்: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, மேலும் `agents/` இன் கீழ் ஒரு ஏஜென்ட் துணை அடைவுகள்)
 - ஒரு முகவர் செயலாக்கங்கள்: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- பொது முனைப்புள்ளிகள்: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- பொது இறுதிப்புள்ளிகள்: `/api/v1/agents/tasks/*` (list/create/get/cancel)
 - மேலாண்மை முடிவுப் புள்ளிகள்: `/api/cloud/*` (ஒதுக்கீடு, நிலை, தொகுதி)
 - டாஷ்போர்டு: `/dashboard/cloud-agents`
 - சேமிப்பு: `cloud_agent_tasks` அட்டவணை
@@ -395,11 +394,11 @@ OmniRoute நிறுவவும், மேற்பார்வையிட�
 கார்ட்ரெயில்ஸ் தொகுதி என்பது PII, உடனடி ஊசி மற்றும் பாதுகாப்பற்ற பார்வை உள்ளடக்கத்திற்கான கோரிக்கைகள் மற்றும் பதில்களை ஆய்வு செய்யும் சூடான-மறுஏற்றக்கூடிய மிடில்வேர் அடுக்கு ஆகும். மீறல்கள் HTTP உடன் கோரிக்கையை குறுகிய சுற்று** 503** மேலும் ஒரு கட்டமைக்கப்பட்ட பிழைக் குறியீடு, கீழ்நிலை அழைப்பாளர்களை மீண்டும் முயற்சிக்க அல்லது கிளைக்க அனுமதிக்கிறது.
 
 - தொகுதி ரூட்: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- ஹாட் ரீலோட்: பதிவேட்டில் உள்ளமைவு மாற்றங்கள் மற்றும் சங்கிலியை மீண்டும் உருவாக்குகிறது
+- சூடான மறுஏற்றம்: பதிவேட்டில் உள்ளமைவு மாற்றங்கள் மற்றும் சங்கிலியை மீண்டும் உருவாக்குகிறது
 - வயர்-இன் புள்ளிகள்: அரட்டை கையாளுபவர் நுழைவு, பட உருவாக்கம் கையாளுபவர், பதில் சானிடைசர்
-- HTTP ஒப்பந்தம்: மீறல்கள் `error.code = "GUARDRAIL_VIOLATION"` உடன் `503` ஆக இருக்கும்
+- HTTP ஒப்பந்தம்: மீறல்கள் மேற்பரப்பில் `503` உடன் `error.code = "GUARDRAIL_VIOLATION"`
 
-விதிகளை உருவாக்குதல் மற்றும் த்ரெஷோல்ட் டியூனிங்கிற்கு, [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) பார்க்கவும்.
+விதிகளை எழுதுதல் மற்றும் த்ரெஷோல்ட் டியூனிங்கிற்கு, [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) பார்க்கவும்.
 
 ### D. டொமைன் லேயர்
 
@@ -410,13 +409,13 @@ OmniRoute நிறுவவும், மேற்பார்வையிட�
 - பின்னடைவு கொள்கை: `src/domain/fallbackPolicy.ts`
 - பூட்டுதல் கொள்கை: `src/domain/lockoutPolicy.ts`
 - குறிச்சொல் அடிப்படையிலான ரூட்டிங்: `src/domain/tagRouter.ts`
-- காம்போ ரிசல்வர்: `src/domain/comboResolver.ts` —, காம்போ பெயர்கள், ஆட்டோ/\* முன்னொட்டுகள் மற்றும் வைல்டு கார்டு மாதிரி இலக்குகளை உறுதியான செயலாக்கத் திட்டங்களுக்குத் தீர்க்கிறது
+- காம்போ ரிசல்வர்: `src/domain/comboResolver.ts` — காம்போ பெயர்கள், ஆட்டோ/\* முன்னொட்டுகள் மற்றும் வைல்டு கார்டு மாதிரி இலக்குகளை உறுதியான செயலாக்கத் திட்டங்களுக்குத் தீர்க்கிறது
 - Connection/model விதி இணைப்பான்: `src/domain/connectionModelRules.ts`
 - மாதிரி கிடைக்கும் ஸ்னாப்ஷாட்கள்: `src/domain/modelAvailability.ts`
 - வழங்குநர் காலாவதி கண்காணிப்பு: `src/domain/providerExpiration.ts`
-- ஒதுக்கீடு கேச்: `src/domain/quotaCache.ts`
+- ஒதுக்கீடு கேச்: `src/domain/quotaCache.ts`. வழங்குநர்கள் ஒதுக்கீட்டு சாளரங்களைச் சேர்த்தல் மற்றும் அகற்றுதல் (சில திட்டங்களுக்குOpenAI 5-மணிநேர Codex சாளரத்தை கைவிட்டது), எனவே வழங்குநரின் அடாப்டரைப் படிக்கும் பயன்பாடு முழுமையானது (`quotasComplete`, பார்க்க `src/lib/usage/usageReading.ts`) என்பது கணக்கின் முழு சாளரத் தொகுப்பாகும்: ஒரு சாளரம் முன்பு அறியப்பட்ட ஆனால் அதில் இல்லாத ஒரு சாளரம் ஓய்வுபெற்றது, தற்காலிக சேமிப்பில், ரெஸ்டெண்ட்ஸ் ரெக்கார்ட் ரெக்கார்டில், Codex `quota_snapshots` நிலை மற்றும் Claude இன் செறிவூட்டல் வாளிகளில். பகுதி சான்றுகள் (பதிலளிப்பு தலைப்புகள், பழைய பிரதிகள்) அது கொண்டு செல்லும் சாளரங்களை மட்டுமே புதுப்பிக்கும்.
 - சிதைவு நிலை: `src/domain/degradation.ts`
-- கட்டமைப்பு தணிக்கை: `src/domain/configAudit.ts`
+- உள்ளமைவு தணிக்கை: `src/domain/configAudit.ts`
 - OmniRoute பதில் மெட்டாடேட்டா பில்டர்: `src/domain/omnirouteResponseMeta.ts`
 - மதிப்பீட்டு துணை அமைப்பு: `src/domain/assessment/` — கால மதிப்பீட்டு வேலைகள்
 
@@ -425,7 +424,7 @@ OmniRoute நிறுவவும், மேற்பார்வையிட�
 அங்கீகார பைப்லைன் ஒவ்வொரு உள்வரும் கோரிக்கையை வகைப்படுத்துகிறது மற்றும் அனுப்புவதற்கு முன் பொருத்தமான கொள்கை சங்கிலியைப் பயன்படுத்துகிறது.
 
 - குழாய் நுழைவு: `src/server/authz/pipeline.ts`
-- கோரிக்கை வகைப்படுத்தி: `src/server/authz/classify.ts` — மேலாண்மை வழிகளில் இருந்து பொது இணக்கத்தன்மை வழிகளை வேறுபடுத்துகிறது
+- கோரிக்கை வகைப்படுத்தி: `src/server/authz/classify.ts` — பொது இணக்கத்தன்மை வழிகளை மேலாண்மை வழிகளில் இருந்து வேறுபடுத்துகிறது
 - பொது வழி இருப்பு: `src/shared/constants/publicApiRoutes.ts`
 - கொள்கைகள்: `src/server/authz/policies/` — தொகுக்கக்கூடிய கணிப்புகள் (`requireApiKey`, `requireManagement`, `requireFreshAuth`, முதலியன)
 - தலைப்பு பயன்பாடுகள்: `src/server/authz/headers.ts`
@@ -436,7 +435,7 @@ OmniRoute நிறுவவும், மேற்பார்வையிட�
 
 முழு வழி வகைப்பாடு விதிகளுக்கு, [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) பார்க்கவும்.
 
-### F. பணிப்பாய்வு FSM மற்றும் Task-Aware Router
+### F. ஒர்க்ஃப்ளோ FSM மற்றும் Task-Aware Router
 
 கண்டறியப்பட்ட பணிப்பாய்வு நிலை (திட்டமிடுதல், செயல்படுத்துதல், மதிப்பாய்வு) மற்றும் பின்னணி-பணி தொடர்பு ஆகியவற்றின் அடிப்படையில் நேரடி போக்குவரத்திற்கு காம்போ தேர்வுக்கு மேலே அடுக்கப்பட்ட வரையறுக்கப்பட்ட-நிலை-இயந்திரம் இயக்கப்படும் திசைவி.
 

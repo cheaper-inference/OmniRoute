@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponenta palubní desky API: adaptéry přes `packages/ui-kit` — viz `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: názvy ikon používané obrazovkami → komponenty Lucide (`<Icon>`)                              |
-| `constants/providers.ts`         | **380 poskytovatelů** s ověřením Zod (zdroj pravdy)                                                      |
+| `constants/providers.ts`         | **382 poskytovatelů** s ověřením Zod (zdroj pravdy)                                                      |
 | `constants/cliTools.ts`          | Externí registr nástrojů CLI                                                                             |
 | `constants/routingStrategies.ts` | **20 směrovacích strategií** s prioritami                                                                |
 | `constants/publicApiRoutes.ts`   | Cesty, které vyžadují ověření nosiče (vs. management).                                                   |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externí integrace CLI + Vnitřní OmniRoute CLI                                                  |
 | `I18N.md`                   | architektura i18n, přidání jazyka, 67 lokalit                                                  |
 | `UNINSTALL.md`              | Čisté kroky odinstalace                                                                        |
-| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalog 380 poskytovatelů (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalog 382 poskytovatelů (regen: `npm run gen:provider-reference`) |
 
 ### Subsystém hloubkové ponory
 

@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Account preferences",
+    "description": "Prefer multiple accounts or keep them in reserve for this combo. Auto routing ranks accounts within each tier. Unlisted accounts are normal. Permissions, quota limits and existing turn bindings still apply.",
+    "preferred": "Preferred",
+    "normal": "Normal",
+    "reserve": "Reserve",
+    "excluded": "Excluded",
+    "loading": "Loading accounts…",
+    "error": "Could not load accounts. Reopen the editor to retry.",
+    "missing": "Unavailable account ({id})"
+  },
   "teamCosts": {
     "title": "Team costs",
     "subtitle": "Manage shared soft budgets and catalog cost estimates.",
@@ -5799,6 +5810,7 @@
     "filterError": "Error",
     "filterBanned": "Banned",
     "filterCreditsExhausted": "Credits Exhausted",
+    "filterVerificationRequired": "Needs verification",
     "accountSearchPlaceholder": "Search accounts…",
     "noFilteredConnections": "No connections match the current filter.",
     "failedSetAlias": "Failed to set alias",
@@ -8076,6 +8088,11 @@
     "pricingShowingProviders": "Showing {visible} of {total}",
     "pricingFilteredFrom": "(filtered from {count})",
     "pricingShowMoreProviders": "Show {count} more ({remaining} remaining)",
+    "pricingView": "View",
+    "pricingViewByProvider": "By provider",
+    "pricingViewCompare": "Compare models",
+    "pricingUnpriced": "Unpriced",
+    "pricingCompareEmpty": "No model is offered by more than one of these providers. Search for a model to see single offers.",
     "modelOverridesTitle": "Model Overrides",
     "modelOverridesDesc": "Override provider/model capabilities used by routing and request shaping. Targets use the same provider/model form as combos.",
     "searchModelOverrideTargets": "Search provider/model...",
@@ -11878,7 +11895,10 @@
     "copilotPolicyAcknowledge": "I understand — Connect",
     "tabPasteSetupToken": "Setup Token",
     "claudeSetupTokenDescription": "Run `claude setup-token` in a terminal and paste the token it prints. It is valid for one year and has no refresh token. OmniRoute sends one test request to Anthropic before saving it.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Refresh Token",
+    "antigravityRefreshTokenDescription": "Paste your Google OAuth refresh token for Antigravity. OmniRoute validates and exchanges it before saving.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Connect Cursor",
@@ -14718,6 +14738,8 @@
     "usdUsageQuotaDescription": "Blocks this key with a 400 API error after its local USD spend reaches the configured daily or weekly quota.",
     "dailyQuotaUsd": "Daily quota (USD)",
     "weeklyQuotaUsd": "Weekly quota (USD)",
+    "fiveHourQuotaUsd": "5-hour quota (USD)",
+    "fiveHourQuotaHint": "Rolling window: each request's spend counts for 5 hours, then frees up.",
     "quotaWindowDescription": "Weekly quota follows the cached Claude weekly reset when available; otherwise it falls back to a rolling 7 day window. Daily quota uses the Fortaleza calendar day.",
     "apiKeyUsdQuota": "API key USD quota",
     "apiKeyUsdQuotaDescription": "When enabled, @@om-usage returns daily quota, weekly quota, daily spend, and weekly spend in USD. Weekly follows the cached Claude reset when available.",
@@ -16134,5 +16156,28 @@
     "greetingFallbackName": "there",
     "errNoReply": "⚠️ No reply from gateway.",
     "btnSend": "Send"
+  },
+  "falNative": {
+    "title": "Fal native models",
+    "description": "Discover an endpoint, load its schema, and run its documented inputs. Queue status and native streaming remain separate.",
+    "connectionRequired": "Add a Fal API key connection first.",
+    "category": "Category",
+    "endpoint": "Endpoint ID",
+    "reasoning": "Reasoning control",
+    "input": "Native JSON input (arrays retain their order)",
+    "transport": "Transport",
+    "run": "Run model",
+    "job": "Saved job ID",
+    "register": "Register endpoint or schema override",
+    "schema": "OpenAPI 3 schema",
+    "download": "Download artifact",
+    "newGeneration": "New generation",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: the upstream job may still be running. Recover the original receipt before starting another generation.",
+    "recover": "Recover original submission",
+    "recoveryRecord": "Saved submission",
+    "recoveryMismatch": "Recovery requires the original connection and an exactly matching draft after reload. No new request was sent.",
+    "recoveryHelp": "Recovery reuses the original payload and key. After reload, restore the exact endpoint, connection, transport and input. New generation starts a separate billable request. Up to 20 receipts are kept in this tab.",
+    "streamIncomplete": "The stream ended without a complete final event. Upstream completion is unknown.",
+    "streamError": "The upstream stream reported an error. Received files remain available."
   }
 }

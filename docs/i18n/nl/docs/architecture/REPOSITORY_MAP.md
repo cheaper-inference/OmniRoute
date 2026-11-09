@@ -242,13 +242,13 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboardcomponent API: adapters over `packages/ui-kit` — zie `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: pictogramnamen gebruikt door de schermen → Lucide-componenten (`<Icon>`)               |
-| `constants/providers.ts`         | **380 aanbieders** met Zod -validatie (bron van waarheid)                                          |
+| `constants/providers.ts`         | **382 aanbieders** met Zod -validatie (bron van waarheid)                                          |
 | `constants/cliTools.ts`          | Extern CLI toolregister                                                                            |
 | `constants/routingStrategies.ts` | **20 routeringsstrategieën** met prioriteiten                                                      |
 | `constants/publicApiRoutes.ts`   | Routes waarvoor Bearer-authenticatie (vs. management) vereist is                                   |
 | `constants/upstreamHeaders.ts`   | Header-weigerlijst voor upstream-aanvragen                                                         |
 | `validation/schemas.ts`          | ~ 80 Zod schema's (enkele bron van waarheid voor API contracten)                                   |
-| `validation/helpers.ts`          | Zod -validatiehelpers (`validateBody`, enz.)                                                       |
+| `validation/helpers.ts`          | Zod -validatiehelpers (`validateBody`, etc.)                                                       |
 | `types/`                         | Gedeelde TS typen                                                                                  |
 | `contracts/`                     | Publieke API contracten (geconsumeerd door `files:` in `package.json`)                             |
 | `utils/circuitBreaker.ts`        | Leverancier stroomonderbreker (zie `docs/architecture/RESILIENCE_GUIDE.md`)                        |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externe CLI -integraties + Interne OmniRoute CLI                                                   |
 | `I18N.md`                   | i18n-architectuur, een taal toegevoegd, 67 locales                                                 |
 | `UNINSTALL.md`              | Reinig de verwijderingsstappen                                                                     |
-| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerd** catalogus van 380 aanbieders (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerd** catalogus van 382 aanbieders (regen: `npm run gen:provider-reference`) |
 
 ### Subsysteem diepe duiken
 

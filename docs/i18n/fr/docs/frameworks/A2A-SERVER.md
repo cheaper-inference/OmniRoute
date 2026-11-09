@@ -163,7 +163,7 @@ OmniRoute expose 6 compétences A2A câblées dans `src/lib/a2a/taskExecution.ts
 | Rapport de santé          | `health-report`      | Disjoncteur d'agrégats, temps de recharge, état de verrouillage par fournisseur                                                                                                              | santé, résilience                  | "Afficher l'état de santé de tous les prestataires" |
 | Capacités de liste        | `list-capabilities`  | Renvoie le catalogue complet de compétences d'agent à 45 entrées (configuration 23 API + 21 CLI + 1) sous forme de tableau de démarques avec SKILL.md URLs brut pour l'injection de contexte | catalogue, découverte, compétences | "Liste toutes les fonctionnalités OmniRoute "       |
 
-> La carte d'agent doit rester alignée sur le catalogue en direct du fournisseur 380 ; le nombre de fournisseurs et les métadonnées free/no-auth proviennent du registre d'exécution.
+> La carte d'agent doit rester alignée sur le catalogue en direct du fournisseur 382 ; le nombre de fournisseurs et les métadonnées free/no-auth proviennent du registre d'exécution.
 
 ### Détail de la compétence `list-capabilities`
 
@@ -180,20 +180,28 @@ Chaque ligne comprend la colonne `rawUrl` afin que les agents puissent immédiat
 
 ---
 
-## API REST (auxiliaire)
+## REST API (auxiliaire)
 
-Le point de terminaison JSON-RPC `/a2a` est le point d’entrée A2A canonique. Les points de terminaison REST ci-dessous fournissent un accès auxiliaire pour les tableaux de bord et les outils externes :
+Le point de terminaison JSON-RPC `/a2a` est le point d'entrée canonique A2A. Les points de terminaison REST ci-dessous fournissent un accès auxiliaire aux tableaux de bord et aux outils externes :
 
-| Point de terminaison         | Méthode | Description                                                       | Authentification                               |
-| :--------------------------- | :------ | :---------------------------------------------------------------- | :--------------------------------------------- |
-| `/api/a2a/status`            | GET     | État du serveur, compétences enregistrées                         | (public)                                       |
-| `/api/a2a/tasks`             | GET     | Répertorier les tâches avec des filtres                           | gestion                                        |
-| `/api/a2a/tasks/[id]`        | GET     | Obtenir une tâche par ID                                          | gestion                                        |
-| `/api/a2a/tasks/[id]/cancel` | POST    | Annuler une tâche en cours d’exécution                            | gestion                                        |
-| `/.well-known/agent.json`    | GET     | Carte d’agent (découverte A2A)                                    | (public, mise en cache pendant 3600 s)         |
-| `/api/a2a/tasks`             | POST    | Délégation entrante à la flotte OmniConductor (PRD Conductor RF5) | Bearer avec `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Point de terminaison         | Méthode | Description                                                              | Authentification                                                                                                     |
+| :--------------------------- | :------ | :----------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET     | Statut du serveur, compétences enregistrées                              | (publique)                                                                                                           |
+| `/api/a2a/tasks`             | GET     | Répertorier les tâches avec des filtres                                  | clé de gestion ou API (voir ci-dessous)                                                                              |
+| `/api/a2a/tasks/[id]`        | GET     | Obtenir la tâche par ID                                                  | clé de gestion ou API (voir ci-dessous)                                                                              |
+| `/api/a2a/tasks/[id]/cancel` | POST    | Annuler la tâche en cours                                                | clé de gestion ou API (voir ci-dessous)                                                                              |
+| `/.well-known/agent.json`    | GET     | Carte d'agent (découverte A2A )                                          | (public, 3600 mis en cache)                                                                                          |
+| `/api/a2a/tasks`             | POST    | Délégation entrante à la flotte OmniConductor (Chef d'orchestre PRD RF5) | identique à `GET`, plus `OMNIROUTE_API_KEY` s'il est défini alors que `REQUIRE_API_KEY` est désactivé ; `a2aEnabled` |
 
-**Délégation Conductor entrante (`POST /api/a2a/tasks`) :** les agents A2A externes délèguent des tâches de développement à la flotte OmniConductor par l’intermédiaire d’OmniRoute. Corps : `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — seules les compétences de la flotte Conductor (celles annoncées dans la carte d’agent) peuvent faire l’objet d’une délégation ; `metadata.conductor.repo.url` est requis (la flotte travaille sur des dépôts git). La route traduit la requête en `POST /v1/tasks` du hub en utilisant le `CONDUCTOR_ORCHESTRATOR_TOKEN` côté serveur (avec `CONDUCTOR_HUB_TOKEN` comme solution de repli) et renvoie `201 { conductor_task_id, state: "submitted" }` ; les états des tâches sont retransmis par le miroir SSE→A2A (RF1) et sont visibles via `GET /api/a2a/tasks?skill=conductor`.
+Qui accède aux routes `/api/a2a/tasks*` dépend des paramètres de connexion et de la clé API :
+
+- `requireLogin=true` (par défaut) : le middleware n'admet que les informations d'identification de gestion (session de tableau de bord, clé `manage` -scope API, jeton d'accès `oma_` ) et `OMNIROUTE_API_KEY`. Une simple clé d'inférence obtient `403`. Dans l'en-tête `Authorization`, le middleware prend uniquement `OMNIROUTE_API_KEY` comme `Bearer <key>`; une clé nue ou un onglet après `Bearer` obtient `401`.
+- `requireLogin=false`, ou la fenêtre de bouclage avant l'intégration : avec `REQUIRE_API_KEY=true` toute clé OmniRoute API valide ou identifiant de gestion est accepté et les appelants anonymes obtiennent `401`; avec `REQUIRE_API_KEY` off les itinéraires sont ouverts.
+- `POST /api/a2a/tasks` nécessite en outre `OMNIROUTE_API_KEY` dans l'en-tête `Authorization` lorsque cette variable est définie et `REQUIRE_API_KEY` est désactivé. Les autres en-têtes, tels que `x-api-key`, n'y comptent pas. Avec la connexion désactivée ou avant l'intégration, la clé passe avec ou sans préfixe `Bearer` ; avec la connexion activée, seul `Bearer <key>` dépasse le middleware.
+
+Lorsqu'un identifiant est requis, un jeton `read` -scope `oma_` ne fonctionne que pour `GET`.
+
+**Délégation de conducteur entrant (`POST /api/a2a/tasks`) :** les agents A2A externes délèguent le travail de codage à la flotte OmniConductor via OmniRoute. Corps : `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — seules les compétences de la flotte de conducteur (celles annoncées sur la carte d'agent) sont délégables ; `metadata.conductor.repo.url` est requis (la flotte fonctionne sur les dépôts git). La route se traduit par le `POST /v1/tasks` du hub en utilisant le `CONDUCTOR_ORCHESTRATOR_TOKEN` côté serveur (repli `CONDUCTOR_HUB_TOKEN`) et renvoie `201 { conductor_task_id, state: "submitted" }`; les états de tâche reviennent à travers le miroir SSE→A2A (RF1) et sont visibles via `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
@@ -201,16 +209,16 @@ Le point de terminaison JSON-RPC `/a2a` est le point d’entrée A2A canonique. 
 
 1. **Créer un fichier de compétences :** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportez une fonction asynchrone `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Suivez la forme des compétences existantes telles que `smartRouting.ts`.
+   Exportez une fonction asynchrone `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Suivez la forme des compétences existantes telles que `smartRouting.ts`. Si la compétence rappelle OmniRoute via HTTP, créez les en-têtes avec `buildSelfLoopHeaders(caller)` à partir de `src/lib/a2a/selfLoopAuth.ts` afin que l'appel s'exécute avec la clé de l'appelant A2A, pas `OMNIROUTE_API_KEY`, et transmettez `redirect: "error"` à `fetch` afin qu'une redirection n'obtienne jamais la clé. L'assistant crée uniquement les en-têtes ; chaque compétence définit elle-même la politique de redirection. Il lance `UnsafeSelfLoopTargetError` plutôt que d'attacher une clé lorsque le URL de base résolu est un simple http en dehors du réseau privé (le bouclage, un nom de conteneur ou de service et des adresses privées conviennent) ou contient des informations d'identification, donc une compétence qui avale les appels rejetés doit renvoyer cette erreur.
 
 2. **Gestionnaire de registre :** dans `src/lib/a2a/taskExecution.ts`, ajoutez une entrée à `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...existing skills
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```

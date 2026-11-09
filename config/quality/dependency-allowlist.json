@@ -1,6 +1,7 @@
 {
   "_comment": "Allowlist anti-slopsquatting (check-deps.mjs). Toda dep nova exige adicao EXPLICITA aqui apos verificar que e legitima.",
   "_justifications": {
+    "@msgpack/msgpack": "Official MessagePack JavaScript implementation (msgpack/msgpack-javascript, ISC), required by Fal's documented specialized realtime protocol. Version 3.1.3 name, repository, license and SHA-512 tarball integrity verified against the npm registry on 2026-11-03 for PR #18849; no additional runtime dependency is introduced by this correction.",
     "@agentclientprotocol/sdk": "Official Agent Client Protocol TypeScript SDK (agentclientprotocol/typescript-sdk, Apache-2.0). Exact 1.4.0 registry tarball and integrity verified for the registered native Gemini ACP launcher.",
     "@fontsource/ibm-plex-mono": "Self-hosted Keak type ramp for the vendored CI UI Kit (fontsource, OFL fonts; same no-CDN reasoning as Material Symbols #3695). KEA-7886 — CI UI Kit runtime dependency.",
     "@fontsource/instrument-serif": "Self-hosted Keak type ramp for the vendored CI UI Kit (fontsource, OFL fonts; same no-CDN reasoning as Material Symbols #3695). KEA-7886 — CI UI Kit runtime dependency.",
@@ -46,6 +47,7 @@
     "@lobehub/icons",
     "@modelcontextprotocol/sdk",
     "@monaco-editor/react",
+    "@msgpack/msgpack",
     "@ngrok/ngrok",
     "@opencode-ai/plugin",
     "@opencode/plugin",

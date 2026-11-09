@@ -144,7 +144,7 @@ src/
 | `app/api/playground/`                                                        | پلے گراؤنڈ اسٹوڈیو کے راستے: `improve-prompt/` (POST — LLM پرامپٹ ری رائٹر)، `presets/` (GET فہرست / POST تخلیق کریں)، `presets/[id]/` (GET / PUT / DELETE) — دیکھیں `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                       |
 | `app/api/` (non-v1)                                                          | Management/admin روٹس (~ 60 ڈائریکٹریز: پرووائیڈرز، کومبوز، سیٹنگز، ایم سی پی، اے 2 اے، ایولز، میموری، اسکلز، ویب ہکس، کمپلائنس، لچک، مانیٹرنگ، ٹنل، کلی ٹولز وغیرہ)                                                                                                                                              |
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 راستے (سرور کنٹرول، ایجنٹ state/DNS/mappings، بائی پاس، سرٹیفکیٹ، upstream-CA)۔ LOCAL_ONLY + SPAWN_CAPABLE `docs/frameworks/AGENTBRIDGE.md §7` دیکھیں۔                                                                                                                                  |
-| `app/api/tools/traffic-inspector/`                                           | ٹریفک انسپکٹر REST + WS API — 16 + راستے (درخواستیں، سیشنز، میزبان، کیپچر موڈز، ایکسپورٹ، ڈبلیو ایس)۔ LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` دیکھیں۔                                                                                                                               |
+| `app/api/tools/traffic-inspector/`                                           | ٹریفک انسپکٹر REST + WS API — 16 + راستے (درخواستیں، سیشنز، میزبان، کیپچر موڈز، ایکسپورٹ، ڈبلیو ایس)۔ LOCAL_ONLY + SPAWN_CAPABLE `docs/frameworks/TRAFFIC_INSPECTOR.md §8` دیکھیں۔                                                                                                                                |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 انٹری پوائنٹ (`POST /a2a`)                                                                                                                                                                                                                                                                       |
 | `app/.well-known/agent.json/`                                                | A2A ایجنٹ کارڈ (دریافت)                                                                                                                                                                                                                                                                                           |
 | `app/(dashboard)/dashboard/`                                                 | ڈیش بورڈ UI صفحات (50 + سیکشنز، ~ 118 page.tsx فائلیں: فراہم کنندگان، کومبوز، ترتیبات، میموری، مہارت، ویب ہکس، ایولز، آڈٹ، بیچ، کیش، اخراجات، صحت، نظام، سرگرمی، وغیرہ)                                                                                                                                           |
@@ -192,12 +192,12 @@ src/
 | `memory/embedding/`                      | ملٹی سورس ایمبیڈنگ پرت: `index.ts` (ریزولوور)، `remote.ts`، `staticPotion.ts`، `transformersLocal.ts`، `cache.ts`، `types.ts` (پلان 21)                                                                                                                                                                          |
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + ہائبرڈ RRF (FTS5 + vector, k = 60)۔ Lazy-init، sqlite-vec دستیاب نہ ہونے پر خوبصورتی سے تنزلی کرتا ہے۔ (پلان نمبر 21)                                                                                                                                              |
 | `memory/reindex.ts`                      | `runReindexBatch()` — پس منظر میں `needs_reindex=1` کے ساتھ یادوں پر کارروائی کرتا ہے۔ `POST /api/memory/reindex` اور lazy-backfill path کے ذریعے کہا جاتا ہے۔ (پلان نمبر 21)                                                                                                                                    |
-| `monitoring/`                            | صحت کی جانچ پڑتال، میٹرکس کا اخراج                                                                                                                                                                                                                                                                               |
-| `oauth/`                                 | OAuth/import 22 فراہم کنندگان کے ماڈیولز (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi, kimi, kimio- xai-oauth, zed-hosted, zed)                                                                       |
+| `monitoring/`                            | صحت کی جانچ، میٹرکس کا اخراج                                                                                                                                                                                                                                                                                     |
+| `oauth/`                                 | OAuth/import 22 فراہم کنندگان کے ماڈیولز (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimio, kimio, kimio- xai-oauth, zed-hosted, zed)                                                                     |
 | `plugins/`                               | پلگ ان رجسٹری                                                                                                                                                                                                                                                                                                    |
 | `promptCache/`                           | انتھروپک طرز کے پرامپٹ کیش بریک پوائنٹس                                                                                                                                                                                                                                                                          |
 | `skills/`                                | ہنر کا فریم ورک (بلٹ ان + مارکیٹ پلیس + SkillsSH) — دیکھیں `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                           |
-| `playground/`                            | پلے گراؤنڈ اسٹوڈیو نے مددگار مددگار: `codeExport.ts` (curl/Python/TS جنریٹر)، `promptImprover.ts` (meta-prompt بلڈر)، `streamMetrics.ts` (خالص TTFT/TPS)، `types.ts` (قیمتوں کا ٹیبل) — دیکھیں `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                            |
+| `playground/`                            | پلے گراؤنڈ اسٹوڈیو نے مددگار مددگار: `codeExport.ts` (curl/Python/TS جنریٹر)، `promptImprover.ts` (میٹا پرامپٹ بلڈر)، `streamMetrics.ts` (خالص TTFT/TPS)، `types.ts` (قیمتوں کا ٹیبل) — دیکھیں `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                            |
 | `webhookDispatcher.ts`                   | HMAC ویب ہک ڈیلیوری — دیکھیں `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                       |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | ٹنل مینیجرز — `docs/ops/TUNNELS_GUIDE.md` دیکھیں                                                                                                                                                                                                                                                                 |
 | `cloudSync.ts`, `initCloudSync.ts`       | ریاست کا اختیاری کلاؤڈ سنک                                                                                                                                                                                                                                                                                       |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------- |
 | `components/`                    | ڈیش بورڈ جزو API: اڈاپٹر اوور `packages/ui-kit` — دیکھیں `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: اسکرینز کے ذریعے استعمال ہونے والے آئیکن کے نام → Lucide اجزاء (`<Icon>`)         |
-| `constants/providers.ts`         | **380 فراہم کرنے والے** Zod توثیق کے ساتھ (سچائی کا ذریعہ)                                    |
+| `constants/providers.ts`         | **382 فراہم کرنے والے** Zod توثیق کے ساتھ (سچائی کا ذریعہ)                                    |
 | `constants/cliTools.ts`          | بیرونی CLI ٹول رجسٹری                                                                         |
 | `constants/routingStrategies.ts` | **20 روٹنگ کی حکمت عملی** ترجیحات کے ساتھ                                                     |
 | `constants/publicApiRoutes.ts`   | وہ راستے جن کے لیے بیئرر (بمقابلہ مینجمنٹ) تصنیف کی ضرورت ہوتی ہے۔                            |
@@ -391,28 +391,28 @@ open-sse/
 
 ---
 
-## `docs/` — عوامی دستاویزی (7 روٹ فائلیں + 17 ذیلی ڈائریس)
+## `docs/` — عوامی دستاویزی (7 روٹ فائلز + 17 ذیلی ڈائری
 
 ### اعلی درجے کے رہنما
 
-| ڈاکٹر                       | مقصد                                                                                                  |
-| --------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | اعلیٰ سطحی فن تعمیر، ذیلی نظام کا نقشہ، ڈیش بورڈ کی سطح                                               |
-| `CODEBASE_DOCUMENTATION.md` | انجینئرنگ حوالہ: ڈائریکٹریز، ماڈیولز، کنونشنز                                                         |
-| `FEATURES.md`               | v3.8 ہائی لائٹس کے ساتھ فیچر میٹرکس                                                                   |
-| `USER_GUIDE.md`             | اینڈ یوزر مینوئل (سیٹ اپ، ماڈلز، کومبوز، CLIs، آڈیو، وغیرہ)                                           |
-| `API_REFERENCE.md`          | auth ماڈل کے ساتھ API اینڈ پوائنٹ کا حوالہ                                                            |
-| `openapi.yaml`              | OpenAPI 3.0 spec (121 راستے)                                                                          |
-| `SETUP_GUIDE.md`            | انسٹال کرنے کے طریقے (npm، npx، Docker، Electron، Termux، ماخذ)                                       |
-| `ENVIRONMENT.md`            | تمام env vars (~ 800 دستاویزی، ~ 3,050 لائنیں `.env.example`)                                         |
-| `TROUBLESHOOTING.md`        | عام غلطیاں + v3.8.0 معلوم مسائل                                                                       |
-| `RELEASE_CHECKLIST.md`      | مکمل رہائی کا بہاؤ (مہارت، ہسکی، روایتی کمٹ، تعیناتی)                                                 |
-| `COVERAGE_PLAN.md`          | کوریج کے اہداف اور موجودہ حالت                                                                        |
-| `FREE_TIERS.md`             | کیوریٹڈ فری ٹائر فراہم کنندگان (48 + مفت + 11 OAuth)                                                  |
-| `CLI-TOOLS.md`              | بیرونی CLI انضمام + اندرونی OmniRoute CLI                                                             |
-| `I18N.md`                   | i18n فن تعمیر، ایک زبان کا اضافہ، 67 لوکیلز                                                           |
-| `UNINSTALL.md`              | ان انسٹال کے مراحل کو صاف کریں۔                                                                       |
-| `PROVIDER_REFERENCE.md`     | **خود کار طریقے سے تیار کردہ** 380 فراہم کنندگان کی فہرست ( regen : `npm run gen:provider-reference`) |
+| ڈاکٹر                       | مقصد                                                                                         |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | اعلیٰ سطحی فن تعمیر، ذیلی نظام کا نقشہ، ڈیش بورڈ کی سطح                                      |
+| `CODEBASE_DOCUMENTATION.md` | انجینئرنگ حوالہ: ڈائریکٹریز، ماڈیولز، کنونشنز                                                |
+| `FEATURES.md`               | v3.8 ہائی لائٹس کے ساتھ فیچر میٹرکس                                                          |
+| `USER_GUIDE.md`             | اینڈ یوزر مینوئل (سیٹ اپ، ماڈلز، کومبوز، CLIs، آڈیو، وغیرہ)                                  |
+| `API_REFERENCE.md`          | auth ماڈل کے ساتھ API اینڈ پوائنٹ کا حوالہ                                                   |
+| `openapi.yaml`              | OpenAPI 3.0 spec (121 راستے)                                                                 |
+| `SETUP_GUIDE.md`            | انسٹال کرنے کے طریقے (npm، npx، Docker، Electron، Termux، ماخذ)                              |
+| `ENVIRONMENT.md`            | تمام env vars (~ 800 دستاویزی، ~ 3,050 لائنیں `.env.example`)                                |
+| `TROUBLESHOOTING.md`        | عام غلطیاں + v3.8.0 معلوم مسائل                                                              |
+| `RELEASE_CHECKLIST.md`      | مکمل رہائی کا بہاؤ (مہارت، ہسکی، روایتی کمٹ، تعیناتی)                                        |
+| `COVERAGE_PLAN.md`          | کوریج کے اہداف اور موجودہ حالت                                                               |
+| `FREE_TIERS.md`             | کیوریٹڈ فری ٹائر فراہم کنندگان (48 + مفت + 11 OAuth)                                         |
+| `CLI-TOOLS.md`              | بیرونی CLI انضمام + اندرونی OmniRoute CLI                                                    |
+| `I18N.md`                   | i18n فن تعمیر، ایک زبان کا اضافہ، 67 لوکیلز                                                  |
+| `UNINSTALL.md`              | ان انسٹال کے مراحل کو صاف کریں۔                                                              |
+| `PROVIDER_REFERENCE.md`     | **خود بخود تیار کردہ** 381 فراہم کنندگان کی فہرست ( regen: `npm run gen:provider-reference`) |
 
 ### سب سسٹم گہرے غوطے
 

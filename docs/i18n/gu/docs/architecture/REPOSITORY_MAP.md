@@ -201,7 +201,7 @@ src/
 | `webhookDispatcher.ts`                   | HMAC વેબહૂક ડિલિવરી — જુઓ `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                            |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | ટનલ મેનેજરો — `docs/ops/TUNNELS_GUIDE.md` જુઓ                                                                                                                                                                                                                                                                      |
 | `cloudSync.ts`, `initCloudSync.ts`       | રાજ્યનું વૈકલ્પિક ક્લાઉડ સિંક                                                                                                                                                                                                                                                                                      |
-| `localDb.ts`                             | ડીબી મોડ્યુલ્સ માટે બેરલ ફરીથી નિકાસ કરો (ફક્ત કોઈ તર્ક — પુન: નિકાસ નહીં)                                                                                                                                                                                                                                         |
+| `localDb.ts`                             | ડીબી મોડ્યુલો માટે બેરલને ફરીથી નિકાસ કરો (ફક્ત કોઈ તર્ક — પુન: નિકાસ નહીં)                                                                                                                                                                                                                                        |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | કેશીંગ + idempotency માટે વિનંતી કરો                                                                                                                                                                                                                                                                               |
 | (~ 30 વધુ ઉચ્ચ-સ્તરની ફાઇલો)             | વિશિષ્ટ સહાયકો (logEnv, modelsDevSync, piiSanitizer, વગેરે)                                                                                                                                                                                                                                                        |
 
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------- |
 | `components/`                    | ડેશબોર્ડ ઘટક API: `packages/ui-kit` — એડેપ્ટર જુઓ `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: સ્ક્રીનો દ્વારા ઉપયોગમાં લેવાતા આઇકોન નામો → લ્યુસાઇડ ઘટકો (`<Icon>`)      |
-| `constants/providers.ts`         | **380 પ્રદાતાઓ** Zod માન્યતા સાથે (સત્યનો સ્ત્રોત)                                     |
+| `constants/providers.ts`         | **382 પ્રદાતાઓ** Zod માન્યતા સાથે (સત્યનો સ્ત્રોત)                                     |
 | `constants/cliTools.ts`          | બાહ્ય CLI ટૂલ રજિસ્ટ્રી                                                                |
 | `constants/routingStrategies.ts` | **20 રૂટીંગ વ્યૂહરચના** પ્રાથમિકતાઓ સાથે                                               |
 | `constants/publicApiRoutes.ts`   | રૂટ્સ કે જેને બેરર (વિ મેનેજમેન્ટ) ઓથની જરૂર હોય છે                                    |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | બાહ્ય CLI એકીકરણ + આંતરિક OmniRoute CLI                                      |
 | `I18N.md`                   | i18n આર્કિટેક્ચર, એક ભાષા ઉમેરીને, 67 લોકેલ                                  |
 | `UNINSTALL.md`              | અનઇન્સ્ટોલ કરવાના પગલાં સાફ કરો                                              |
-| `PROVIDER_REFERENCE.md`     | **ઓટો-જનરેટ** 380 પ્રદાતાઓની સૂચિ ( regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ઓટો-જનરેટ** 382 પ્રદાતાઓની સૂચિ ( regen: `npm run gen:provider-reference`) |
 
 ### સબસિસ્ટમ ડીપ-ડાઈવ્સ
 
@@ -458,7 +458,7 @@ open-sse/
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale ફનલ                                 |
 | `PROXY_GUIDE.md`             | 4-સ્તરની આઉટબાઉન્ડ પ્રોક્સી + 1proxy માર્કેટપ્લેસ                   |
 
-### સબડાયરેક્ટરીઝ
+### પેટા નિર્દેશિકાઓ
 
 | સબડીર                 | હેતુ                                                                                                                                                                                                  |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

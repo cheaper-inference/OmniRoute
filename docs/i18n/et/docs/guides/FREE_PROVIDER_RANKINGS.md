@@ -12,7 +12,7 @@
 
 ## Mis see on
 
-OmniRoute registreerib 380 pakkujat, sealhulgas on märgitud 155 kataloogikirjet**free/no-auth** (no-auth, free-tier OAuth või vabataseme API klahv — vt [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) ja täielikku [Free Tiersi kataloogi](../reference/FREE_TIERS.md) ). Konks: tasuta pakkujate mudeli kvaliteet on väga erinev. Autentimata teenusepakkuja, mis teenindab piirimudelit, on palju kasulikum kui see, mis teenindab väikest pärandmudelit.
+OmniRoute registreerib 382 pakkujat, sealhulgas on märgitud 155 kataloogikirjet**free/no-auth** (no-auth, free-tier OAuth või vabataseme API klahv — vt [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) ja täielikku [Free Tiersi kataloogi](../reference/FREE_TIERS.md) ). Konks: tasuta pakkujate mudeli kvaliteet on väga erinev. Autentimata teenusepakkuja, mis teenindab piirimudelit, on palju kasulikum kui see, mis teenindab väikest pärandmudelit.
 
 **Tasuta pakkujate edetabel** vastused"** milline tasuta pakkuja annab mulle parima mudeli?** ", liitudes iga tasuta pakkuja kataloogiga** rahvahulgast hangitud kvaliteediskoorid** alates** Arena AI edetabel** (inimeste eelistus ELO, sama idee LMArena chatbot areeni taga). Seejärel järjestatakse pakkujad nende tugevuse järgi** parim tasuta mudel** .
 

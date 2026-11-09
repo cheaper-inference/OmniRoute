@@ -281,106 +281,96 @@ Seotud mehhanismid jäävad eraldi:
 
 ## 3. Mudeli lukustus
 
-**Ulatus:** teenusepakkuja + ühendus + mudel kolmik.
+**Ulatus:** pakkuja + ühenduse + mudeli kolmik.
 
-**Võtme ulatus staatuse järgi:** ebaõnnestunud staatus otsustab, millise võtme alla lukustus kirjutatakse (`resolveLockoutScope()` failis `open-sse/services/accountFallback/exactModelLock.ts`):
+**Olekujärgne ulatus:** tõrke põhjustanud olek määrab, millisesse võtmesse lukustus kirjutatakse
+(`resolveLockoutScope()` asukohas `open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — kvoodi- või õigustesignaal — lukusta **kvoodipere**:
-  codexi puhul kogu `codex` / `spark` ulatus (kõik ühenduse `gpt-5*` mudelid),
-  teiste teenusepakkujate puhul `getQuotaScopedModelForProvider()`.
-- `404` lukustab üksiku mudeli ennast (`getModelLockKey()` kitsendab `not_found` staatuse).
-- Iga muu staatus — `5xx` transpordi-/serverivead ja OmniRoute'i enda
-  kvaliteedivalideerimisest sünteesitud `502` — lukustab ainult **täpse**
-  teenusepakkuja/ühenduse/mudeli kolmiku. Katkine voog ühel mudelil ei ole tõend
-  konto kvoodi kohta; enne seda reeglit eemaldas üks tühi vastus mudelil
-  `codex/gpt-5.6-luna` kõik selle ühenduse `gpt-5*` mudelid marsruutimisest
-  2–30 minutiks (eskleeruvalt), kuigi kvoot oli puutumata.
-- Kutsuja selgesõnaline `scope` valik võidab alati (Antigravity edastab `"exact"`).
+- `429` / `403` / `402` — kvoodi- või õigussignaal — lukustatakse **kvoodipere**:
+  codexi puhul kogu `codex` / `spark`-ulatus (ühenduse kõik `gpt-5*` mudelid), teiste pakkujate puhul `getQuotaScopedModelForProvider()`.
+- `404` lukustab palja mudeli (`getModelLockKey()` kitsendab väärtusele `not_found`).
+- Mis tahes muu olek — `5xx` transpordi-/serveritõrked ja OmniRoute’i enda kvaliteedi valideerimise põhjal sünteesitud
+  `502` — lukustab ainult **täpse** pakkuja/ühenduse/mudeli kolmiku. Ühe mudeli vigane voog ei anna teavet konto kvoodi kohta; enne seda reeglit eemaldas üks tühi vastus mudelil
+  `codex/gpt-5.6-luna` selle ühenduse kõik `gpt-5*` mudelid marsruutimisest 2–30 minutiks (eskaleerudes), samal ajal kui selle kvoot jäi puutumata.
+- Kutsuja sõnaselge `scope`-valik on alati ülimuslik (Antigravity edastab väärtuse `"exact"`).
 
-**Eesmärk:** vältida kogu ühenduse keelamist, kui ainult üks mudel pole saadaval või on kvoodipiiratud.
+**Eesmärk:** vältida terve ühenduse keelamist olukorras, kus saadaval pole või kvoodipiiranguga on ainult üks mudel.
 
 **Näited:**
 
-- Mudelipõhise kvoodiga teenusepakkujad, mis tagastavad 429
-- Kohalikud teenusepakkujad, mis tagastavad ühe puuduva mudeli jaoks 404
-- Pakkujapõhised režiimi/mudeli õiguste vead (nt Groki režiimid)
+- Mudelipõhised kvoodipakkujad, mis tagastavad `429`
+- Kohalikud pakkujad, mis tagastavad ühe puuduva mudeli korral `404`
+- Pakkujaspetsiifilised režiimi-/mudeliõiguste tõrked (nt Groki režiimid)
 
-**Implementatsioon:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
+**Teostus:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
-### Mudeli jahutuste töölaud (v3.8.0)
+### Mudelite jahtumiste juhtpaneel (v3.8.0)
 
-Kasutajaliides: Seaded → Mudeli jahutused (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+Kasutajaliides: Settings → Model Cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-Loetleb aktiivsed lukustused koos: teenusepakkuja, ühendus, mudel, põhjus, expiresAt. Operaatorid saavad mudeli kaardilt käsitsi uuesti lubada.
+Loetleb aktiivsed lukustused järgmiste andmetega: pakkuja, ühendus, mudel, põhjus, expiresAt. Operaatorid saavad kaardilt mudeli käsitsi uuesti lubada.
 
 **REST API:**
 
-- `GET /api/resilience/model-cooldowns` — loetleb aktiivsed lukustused
+- `GET /api/resilience/model-cooldowns` — aktiivsete lukustuste loend
 - `DELETE /api/resilience/model-cooldowns` — käsitsi uuesti lubamine. Keha: `{provider, connection, model}`. Autentimine: management.
 
-### Jahutuste haldur
+### Jahtumiste haldur
 
-Kasutajaliides: Jälgimine → Jahutuste haldur (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+Kasutajaliides: Monitoring → Cooldown Manager (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
 
-Üks leht kõigi ühenduste jaoks, mis on ajutisel põhjusel marsruutimisest väljas,
-selle asemel et avada iga teenusepakkuja leht eraldi. See loetleb ühenduste
-jahutused, mudeli lukustused ja lõppolekud, tühjendab neid ühenduse kaupa, valiku
-või teenusepakkuja kõigi ühenduste jaoks ning võimaldab redigeerida kõige
-sagedamini häälestatud jahutusreegleid: `streamStallCooldown.enabled` ning OAuth /
-API-võtme `connectionCooldown` põhijahutust ja maksimaalseid backoff'i samme
-(salvestatakse läbi `PATCH /api/resilience`). Lõppolekud (`banned`, `expired`,
-`credits_exhausted`) on loetletud, kuid neid ei tühjendata siin kunagi.
+Üks leht iga ühenduse jaoks, mis on ajutisel põhjusel marsruutimisest väljas, selle asemel et avada iga pakkuja leht eraldi. See loetleb ühenduste jahtumised, mudelite lukustused ja lõppolekud, eemaldab need ühenduse, valiku või pakkuja kõigi ühenduste kaupa ning muudab enim häälestatud jahtumisreegleid: `streamStallCooldown.enabled` ja OAuthi-/API-võtme `connectionCooldown`-i algset jahtumisaega ning maksimaalseid tagasipöördumise samme (salvestatakse `PATCH /api/resilience` kaudu). Lõppolekud (`banned`, `expired`, `credits_exhausted`) on loetletud, kuid neid siin kunagi ei eemaldata.
+
+Sama lehe kaart **Error cooldown rules** muudab operaatori tõrjereegleid
+(`settings.providerErrorRules`) ja pakkujakohaseid kõikehõlmavaid vaikeväärtusi
+(`settings.providerErrorDefaults`) `PATCH /api/settings` kaudu — sobitamise kohta vaadake jaotise §7 alajaotist „Operaatori deklareeritud reeglid“. Kestused on Default (selgesõnaline jahtumine puudub), 30 min,
+1 h, 5 h, 24 h või kohandatud 1 kuni 43 200 minutini (30 päeva).
 
 **REST API** (`src/lib/resilience/cooldownManager.ts`, autentimine: management):
 
-- `GET /api/resilience/cooldowns[?provider=]` — ühendused koos staatuse, järelejäänud
-  jahutuse, backoff'i taseme, viimase veatüübi ja mudeli lukustustega (ilma mandaatideta)
+- `GET /api/resilience/cooldowns[?provider=]` — oleku, allesjäänud jahtumise, tagasipöördumise taseme,
+  viimase tõrketüübi ja mudelite lukustustega ühendused (mandaate ei tagastata)
 - `POST /api/resilience/cooldowns` — keha `{connectionIds: string[]}` või
   `{all: true, provider?}`; tagastab `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
-### Lukustuse seadete kasutajaliides + õnnestumistega vähenev taastumine (v3.8.23)
+### Lukustuse seadete kasutajaliides + eduka päringu põhine taandumisega taastumine (v3.8.23)
 
-Mudeli lukustus muutus alati sees olevast kõvakodeeritud käitumisest täielikult
-seadistatavaks, vabatahtlikult sisselülitatavaks funktsiooniks, millel on oma
-seadete kaart ja iseparanev taastumistee.
+Mudeli lukustus muutus alati sisse lülitatud kõvakodeeritud käitumisest täielikult seadistatavaks,
+vaikimisi välja lülitatud funktsiooniks, millel on oma seadete kaart ja isetaastuv taastetee.
 
-**Seadete kaart:** Seaded → Mudeli lukustus
+**Seadete kaart:** Settings → Model Lockout
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-See **erineb** ülalolevast kirjutuskaitstud `ModelCooldownsCard`-ist (mis ainult
-_loetleb_ aktiivseid lukustusi) — uus kaart _seadistab parameetreid_.
-Vaikeväärtused asuvad `DEFAULT_MODEL_LOCKOUT_SETTINGS`-is
+See on **eraldiseisev** eespool kirjeldatud kirjutuskaitstud `ModelCooldownsCard` (mis ainult
+_loetleb_ aktiivseid lukustusi) — uus kaart _seadistab parameetreid_. Vaikeväärtused asuvad failis
+`DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
-| Seade                   | Vaikimisi                        | Tähendus                                                        |
-| ----------------------- | -------------------------------- | --------------------------------------------------------------- |
-| `enabled`               | `false`                          | Pealüliti — mudeli lukustus on **vaikimisi väljas**.            |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Ülesvoolu staatused, mida loetakse mudeliulatuslikuks veaks.    |
-| `baseCooldownMs`        | `120_000` (120 s)                | Esialgne lukustuse kestus esimese vea korral.                   |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | Eskaleeritud jahutuse ülempiir.                                 |
-| `maxBackoffSteps`       | `10`                             | Maksimaalne eksponentsiaalse backoff'i eskaleerimissammude arv. |
-| `useExponentialBackoff` | `true`                           | Kas korduvad vead eskaleerivad jahutust eksponentsiaalselt.     |
+| Seade                   | Vaikeväärtus                     | Tähendus                                                             |
+| ----------------------- | -------------------------------- | -------------------------------------------------------------------- |
+| `enabled`               | `false`                          | Põhilüliti — mudeli lukustus on **vaikimisi välja lülitatud**.       |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Ülemteenuse olekud, mida käsitletakse mudelipõhise tõrkena.          |
+| `baseCooldownMs`        | `120_000` (120 s)                | Esmase tõrke algne lukustuse kestus.                                 |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Eskaleerunud jahtumise ülempiir.                                     |
+| `maxBackoffSteps`       | `10`                             | Eksponentsiaalse tagasipöördumise eskaleerimise sammude maksimumarv. |
+| `useExponentialBackoff` | `true`                           | Kas korduvad tõrked eskaleerivad jahtumist eksponentsiaalselt.       |
 
-Seaded salvestuvad tavalisse seadete hoidlasse ja valideeritakse vastupidavuse
-seadete skeemiga; kaart piirab `baseCooldownMs`/`maxCooldownMs`
-(kus `maxCooldownMs ≥ baseCooldownMs`) ja `maxBackoffSteps` väärtusi.
+Seaded säilitatakse tavapärase seadetehoidla kaudu ja valideeritakse vastupidavusseadete skeemi abil; kaart piirab
+`baseCooldownMs`/`maxCooldownMs` väärtusi (tingimusel `maxCooldownMs ≥ baseCooldownMs`) ja
+`maxBackoffSteps` väärtust.
 
-**Õnnestumistega vähenev taastumine:** taastumine **ei ole** pelgalt taimeri
-aegumine. Terve vastus vähendab mudeli vealoendit tagasi, nii et akna keskel
-taastunud mudel lõpetab eskaleerumise (ja tühjendatakse) enne, kui selle taimer
-aeguks. Eduka combo-sihi korral kutsub `open-sse/services/combo.ts` funktsiooni
-`decayModelFailureCount()` (`open-sse/services/accountFallback.ts`), mis
-**poolitab** salvestatud `failureCount` väärtuse (`Math.floor(failureCount / 2)`);
-kui see jõuab `0`-ni, kustutatakse lukustuse kirje täielikult. Kolbbfunktsioon
-`recordModelLockoutFailure()` suurendab loendit (ja eskaleerib jahutust)
-eskaleerimisakna sees toimunud vigade korral. See õnnestumistel põhinev
-vähenemine on lisaks tavalisele taimeri aegumisele — kumbki tee võib mudeli
-uuesti lubada.
+**Edul põhinev taandumisega taastumine:** taastumine ei toimu **ainult** taimeri aegumise kaudu. Terve
+vastus vähendab mudeli tõrgete arvu, nii et vahepeal taastunud mudel lõpetab eskaleerumise
+(ja lukustus eemaldatakse) enne taimeri aegumist. Eduka kombinatsiooni sihtmärgi korral kutsub
+`open-sse/services/combo.ts` välja `decayModelFailureCount()`
+(`open-sse/services/accountFallback.ts`), mis **poolitab** salvestatud
+`failureCount` väärtuse (`Math.floor(failureCount / 2)`); kui väärtus jõuab `0`-ni, kustutatakse lukustuskirje täielikult. Selle vastand `recordModelLockoutFailure()` suurendab tõrgete korral arvu
+(ja eskaleerib jahtumist) eskaleerimisakna sees. See edul põhinev taandumine täiendab tavalist taimeri aegumist —
+kumbki tee võib mudeli uuesti lubada.
 
-**Olek:** lukustusi hoitakse **mälus** (protsessipõhised `Map`-id
-`ModelLockoutEntry`-dega, võtmeks `provider:connectionId:model`, täpse ulatuse
-lukkudel `provider:connectionId:exact:model`), neid ei salvestata
-andmebaasi — need kaovad taaskäivitusel. _Seaded_ salvestatakse; aktiivne
-lukustuse _olek_ on efemeerne.
+**Olekord:** lukustused on **mälus** (protsessipõhistes `Map`-ides, mille võtmeteks on
+`ModelLockoutEntry`-d kujul `provider:connectionId:model`, täpse ulatusega lukud kujul
+`provider:connectionId:exact:model`), mitte andmebaasi salvestatud
+— taaskäivitamisel lähevad need kaotsi. _Seaded_ salvestatakse püsivalt; aktiivne lukustuse _olek_ on ajutine.
 
 ---
 
@@ -584,256 +574,256 @@ Kui see on lubatud, rakendatakse valvekatkestus ainult aktiivsele ülesvoolu kat
 
 ---
 
-## 7. Ülesvoolu staatuse ümbertõlgendamine (valestaatusega kvoodivead)
+## 7. Ülesvoolu oleku ümbermääratlemine (valesti teatatud kvoodivead)
 
-**Ulatus:** üks ülesvoolu lüüs, mis teatab ajutisest kvoodi ammendumisest vale HTTP staatusega.
+**Ulatus:** üks ülesvoolu lüüs, mis teatab ajutisest kvoodi ammendumisest vale HTTP-olekuga.
 
-**Eesmärk:** korrigeerida eksitav staatus ENNE klassifitseerimist, et allavoolu tarbijad (fallback-mootor, combo-agregatsioon, kliendile suunatud vastus) näeksid tõrke tegelikku kordatavat olemust.
+**Eesmärk:** parandada eksitav olek ENNE klassifitseerimist, et allavoolu tarbijad (varumootor, kombinatsioonide koondamine, kliendile suunatud vastus) näeksid tõrke tegelikku uuesti proovimise võimalust.
 
-Mõned lüüsid signaliseerivad AJUTIST kvoodi ammendumist mitte-kordatava HTTP
-staatusega. `agentrouter.org` tagastab `403` (mõnikord `400`) hiinakeelse
-kehaga (`用户额度不足` / `额度不足`) standardse `429` asemel. Kliendid nagu
-Claude Code käsitlevad `403` kui püsid viga ja katkestavad seansi, ning ilma
-korrigeerimiseta klassifitseeriks fallback-mootor selle kui `AUTH_ERROR`,
-mitte kvoodisündmusena.
+Mõned lüüsid annavad AJUTISEST kvoodi ammendumisest teada mitteuuesti-proovitava HTTP-olekuga. `agentrouter.org` tagastab standardse `429` asemel `403` (mõnikord `400`) koos hiinakeelse kehaga
+(`用户额度不足` / `额度不足`). Kliendid nagu Claude
+Code käsitlevad `403`-i püsiva veana ja katkestavad seansi ning ilma paranduseta
+klassifitseeriks varumootor selle `AUTH_ERROR`-iks, mitte kvoodisündmuseks.
 
 **Teostus:**
 
-- Register + sobitaja: `open-sse/config/upstreamStatusRestatement.ts` —
-  teenusepakkujapõhine reeglite loend (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`), mida sobitatakse `applyStatusRestatement()` kaudu.
-- Väljakutsekoht: `providerFailure:` plokk failis `open-sse/handlers/chatCore.ts`
-  (umbes real 3654), vahetult pärast seda, kui `parseUpstreamError()` parsib
-  vea-HTTP-staatusega ülesvoolu vastuse (`!providerResponse.ok`), ja enne mis
-  tahes klassifitseerimise käivitamist, et iga allavoolu tarbija näeks
-  korrigeeritud staatust. `200` SSE-voo sisse manustatud vead läbivad eraldi,
-  hilisema vooparsimise tee ja see hook neid täna **ei** kata — teadaolev
-  piirang, mida agentrouteri valestaatuse jaoks (mis avaldub
-  vea-HTTP-staatusena) pole veel vaja.
-- Korduskelmidus: `429` kuulub `RETRY_AFTER_ELIGIBLE_STATUSES` hulka
-  (`open-sse/services/combo/unavailableRetryGate.ts`), seega kannab
-  ümbertõlgendatud viga reaalset kordusakent, selle asemel et avalduda
-  surnud `403`-na.
-- Sünteetiline `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
-  on ainult see, mida ümbertõlgendatud vastus **kliendile** ütleb; see ise ei
-  ole ühenduse sisemine cooldowni/lockouti kestus — seda määrab eraldi see
-  mehhanism, mis ümbertõlgendatud viga tegelikult käsitleb (Connection
-  Cooldowni eskaleeruv backoff, §2, alus `3s` API-võtme pakkujatele; või
-  Model Lockout, §3, mudelikohtse kvoodi pakkujatele nagu agentrouter).
-  Ruuter võib sisemiselt korduskõlbulikuks muutuda varem kui 60s aken, mida
-  ta kliendile kuulutab — taotluslik varu, mitte viga.
+- Register + sobitaja: `open-sse/config/upstreamStatusRestatement.ts` — pakkujate kaupa reeglite loend (`{id, fromStatuses, toStatus, textMarkers, excludeMarkers, defaultRetryAfterMs}`), millele rakendatakse sobitust funktsiooni `applyStatusRestatement()` kaudu.
+- Väljakutsekoht: `open-sse/handlers/chatCore.ts`-i plokk
+  `providerFailure:` (umbes real 3654), kohe pärast seda, kui
+  `parseUpstreamError()` töötleb ülesvoolu vastust, mille HTTP-olek näitab viga
+  (`!providerResponse.ok`), ja enne mis tahes klassifitseerimise käivitamist, et iga allavoolu tarbija näeks parandatud olekut. `200` SSE-voo sisse põimitud vead läbivad eraldi hilisema voo töötlemise tee ja **ei ole** praegu selle haagi poolt kaetud — teadaolev piirang, mida pole agentrouteri vale oleku puhul veel vaja, sest selle viga avaldub veaga HTTP-olekuna.
+- Uuesti proovimise sobivus: `429` kuulub loendisse `RETRY_AFTER_ELIGIBLE_STATUSES` (`open-sse/services/combo/unavailableRetryGate.ts`), seega kannab ümbermääratud viga tegelikku uuesti proovimise akent, selle asemel et avalduda surnud `403`-na.
+- Sünteetiline `60s` väärtus `defaultRetryAfterMs`-i jaoks (`upstreamStatusRestatement.ts`) on ainult see, mida ümbermääratud vastus ütleb **kliendile**; see ei ole ühenduse sisemine jahutus-/lukustusperiood — seda juhib eraldi mehhanism, mis ümbermääratud viga tegelikult käsitleb (Connection Cooldowni astmeliselt kasvav tagasipöördumise viivitus, §2, API-võtmega pakkujate baasväärtus `3s`; või Model Lockout, §3, mudelipõhise kvoodiga pakkujate (nt agentrouter) puhul). Marsruuter võib sisemiselt uuesti proovimiseks sobivaks muutuda varem kui kliendile reklaamitav `60s` aken — see on tahtlik varu, mitte viga.
 
-Püsid vigu (agentrouteri `无权访问模型` — sellele mudelile pole juurdepääsu)
-EI tõlgendata KUNAGI ümber: `excludeMarkers` paneb reeglile veto isegi siis,
-kui `textMarkers` tabab, nii et viga säilitab oma algse staatuse ja miski ei
-korda seda lõputult. Vastava teenusepakkuja klassifitseerimisreegliga
+Püsivaid vigu (agentrouteri `无权访问模型` — sellele mudelile puudub juurdepääs) ei määrata KUNAGI ümber: `excludeMarkers` tühistab reegli isegi siis, kui `textMarkers` sobivad, mistõttu viga säilitab algse oleku ja miski ei proovi seda lõputult uuesti. Sobivat pakkuja klassifitseerimisreeglit
 (`agentrouter-model-access-denied` failis `open-sse/config/providerErrorRules.ts`:
-`reason: "auth_error"`, `scope: "model"`, deklareeritud alus-cooldown `6h`)
-konsulteerib `checkFallbackError` (`open-sse/services/accountFallback.ts`)
-_enne_ üldise apikey-kategooria `FORBIDDEN` varajast tagastust, piiritletuna
-`honorsRuleLockScope(provider)` tingimusega (#10334 — praegu ainult
-agentrouteri jaoks `HONORS_RULE_LOCK_SCOPE_PROVIDERS` lubaloendi kaudu failis
-`providerErrorRules.ts`). Reegli deklareeritud 6h cooldown voolab edasi kui
-`fallbackResult.baseCooldownMs`, kuid see söödab endiselt olemasolevat
-mudelikohtse kvoodi lockouti teed (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, mida #10334 ei muutnud peale cooldowni
-allika): see kärbitakse operaatori `mlSettings.maxCooldownMs` piirini
-(vaikeväärtus `1_800_000ms` / 30min), nagu iga teinegi mudeli lockout, ja
-_püsistatud lockouti põhjus_ jääb olemasolevaks kõvakodeeritud
-`"forbidden"`-iks, mitte reegli `"auth_error"`-ks — otsast lõpuni austatakse
-ainult cooldowni kestust, mitte põhjuse sõnet. Ühendus ise jääb aktiivseks;
-sama ühenduse sõsarmudelid jäävad puutumata.
+`reason: "auth_error"`, `scope: "model"`, deklareeritud `6h` baasjahutus)
+kasutab `checkFallbackError` (`open-sse/services/accountFallback.ts`)
+_enne_ üldist apikey-kategooria `FORBIDDEN` varajast tagastust, tingimusel
+`honorsRuleLockScope(provider)` (#10334 — praegu ainult agentrouteri puhul `providerErrorRules.ts`-is oleva `HONORS_RULE_LOCK_SCOPE_PROVIDERS` lubatud loendi kaudu). Reeglis deklareeritud 6-tunnine jahutus liigub edasi väärtusena `fallbackResult.baseCooldownMs`, kuid see suunatakse endiselt olemasolevasse mudelipõhise kvoodi lukustuse teesse (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, mida #10334 ei muutnud, välja arvatud jahutuse allikas): see piiratakse operaatori `mlSettings.maxCooldownMs` väärtusega (vaikimisi `1_800_000ms` / 30 minutit), nagu kõik muud mudelilukustused, ning _püsiv lukustuse põhjus_ jääb olemasolevaks kõvakodeeritud väärtuseks `"forbidden"`, mitte reegli väärtuseks `"auth_error"` — kogu ahelas võetakse arvesse ainult jahutuse kestust, mitte põhjusestringi. Ühendus ise jääb aktiivseks; sama ühenduse sõsarmudeleid see ei mõjuta.
 
-Ümbertõlgendatud kvoodivead (`额度不足`) jõuavad tootmises teenusepakkuja
-reeglini (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`,
-`scope: "connection"`, oma deklareeritud cooldownita — kehtib püsivuskihi
-skaleeritud backoffi vaikeväärtus). Alates #10334 TARBITAKSE `scope` välja
-`ProviderErrorRuleMatch`-il otsast lõpuni, kuid **ainult** teenusepakkujate
-puhul, kes kuuluvad `HONORS_RULE_LOCK_SCOPE_PROVIDERS` lubaloendisse
-(`providerErrorRules.ts` — täna ainult `"agentrouter"`, piiritletuna
-`honorsRuleLockScope()` kaudu). Kõigi teiste teenusepakkujate puhul jääb
-`scope` informatiivseks, täpselt nagu enne #10334. `checkFallbackError` toob
-sobitatud reegli scope'i pinnale kui `fallbackResult.ruleScope`;
-`isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) on
-jagatud valvur, mis kinnitab, et `ruleScope` on tõeliselt ohutu austada
-ühenduseülase, iseterveneva signaalina (scope `"connection"`, põhjus
-`quota_exhausted`, kunagi `permanent`, kunagi `creditsExhausted` — kaitse
-tulevase reegli vastu, mis seoks scope'i `"connection"` püsi
-kontoseisundiga). Seda kutsuvad kaks tarbijat:
+Ümbermääratud kvoodivead (`额度不足`) jõuavad tootmises pakkuja reeglini
+(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
+"connection"`, ilma oma deklareeritud jahutuseta — rakendub püsivuskihi skaleeritud tagasipöördumise vaikeviivitus). Alates versioonist #10334 kasutatakse `scope`-i
+`ProviderErrorRuleMatch`-is kogu töövoos, kuid **ainult** pakkujate puhul, kes kuuluvad loendisse `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` —
+praegu ainult `"agentrouter"`, tingimusel `honorsRuleLockScope()` kaudu). Kõigi
+teiste pakkujate puhul jääb `scope` informatiivseks, täpselt nii nagu enne versiooni #10334.
+`checkFallbackError` annab sobitatud reegli ulatuse edasi väärtusena
+`fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`) on jagatud kaitse, mis kinnitab, et
+`ruleScope`-i on tõepoolest ohutu käsitleda ühenduseülese, isetaastuva signaalina (ulatus `"connection"`, põhjus `quota_exhausted`, mitte kunagi `permanent`, mitte kunagi `creditsExhausted` — kaitse juhuks, kui tulevases reeglis seotakse ulatus
+`"connection"` püsiva konto olekuga). Seda kutsuvad kaks tarbijat:
 
 - **Püsivus** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  selle asemel, et langeda läbilaskepakkuja **mudelikohtase** lukustuse
-  harusse (agentrouter on `passthroughModels: true` → `hasPerModelQuota()`
-  tagastab `true`), rakendab see **ajutist ühenduse jahutusaega** —
-  `testStatus: "unavailable"` + `rateLimitedUntil`, mitte kunagi lõplikku
-  olekut (`credits_exhausted`/`banned`/`expired`) — nii et ühendus taastub
-  iseenesest, kui jahutusaeg möödub, selle asemel et nõuda mandaadi käsitsi
-  lähtestamist. Jäetakse vahele ühenduste puhul, millel on
-  `disableCooling: true` (#2997): see loobumine läheb hoopis üle
-  mudelikohtasesse lukustusse (dokumenteeritud kompromiss — vt haru kohal
-  olevat koodikommentaari).
-- **Sama päringu kombo suunamine** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): sama kaitse märgib
-  ühenduse mälus olevasse `exhaustedConnections` hulka, võtmena
-  `${provider}:${connectionId}`. See jätab vahele ainult SAMA PÄRINGU
-  allesjäänud eesmärgi, mis _ise juba kannab täpselt seda `connectionId`'d_
-  oma eesmärgiobjektil (`getExhaustedTargetSkipReason()`,
+  selle asemel et langeda passthrough-pakkuja **mudelipõhise** lukustuse
+  harusse (`agentrouter` on `passthroughModels: true` → `hasPerModelQuota()`
+  tagastab `true`), rakendab see **ajutise ühenduse jahutusperioodi** —
+  `testStatus: "unavailable"` + `rateLimitedUntil`, mitte kunagi lõplikku olekut
+  (`credits_exhausted`/`banned`/`expired`) — nii taastub ühendus pärast
+  jahutusperioodi lõppu ise, selle asemel et nõuda mandaatide käsitsi
+  lähtestamist.
+  Ühenduste puhul, millel on `disableCooling: true` (#2997), jäetakse see vahele:
+  see loobumisvalik liigub hoopis mudelipõhise lukustuse juurde (dokumenteeritud
+  kompromiss — vt haru kohal olevat koodikommentaari).
+- **Sama päringu kombineeritud marsruutimine** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): sama kaitse märgib ühenduse
+  mälusisesesse komplekti `exhaustedConnections`, mille võti on
+  `${provider}:${connectionId}`. See jätab vahele ainult allesjäänud SAMA
+  PÄRINGU sihtmärgi, mille enda sihiobjekt juba sisaldab täpselt seda
+  `connectionId`-d (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` enne `exhaustedConnections` otsingut) — tavaline
-  mudeliloendi kombo, kus sõsareesmärgid ei kanna oma kinnitatud
-  `connectionId`'d ja üks neist lahendatakse alles iga saatmise korral
-  vastuse `X-OmniRoute-Selected-Connection-Id` päise põhjal, ei taba kunagi
-  seda võtmekattuvust. Selle levinud juhu puhul EI OLE tegelik kaitse
-  allesjäänud haru vastu, mis taaskasutaks just ammendatud kontot, see hulk
-  — see on eespool kirjeldatud püsikiht (ühenduse `rateLimitedUntil` on nüüd
-  tulevikus) koos sama kaitsega, mis surub alla
-  `transientRateLimitedProviders` selle tõrke jaoks (vt jaotist
-  "Kaheastmeline disain" ja koodikommentaari
-  `isAgentrouterConnectionQuotaScope` haru kohta failis
-  `targetExhaustion.ts`): kui see hulk jäetakse märgistamata, siis `combo.ts`
-  `allowRateLimitedConnection` sunnitud lubamine
-  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) EI rakendu pakkuja
-  allesjäänud harude jaoks, nii et mandaadivaliku `rateLimitedUntil` filtrit
-  (`src/sse/services/auth.ts:1238`) järgitakse tavapäraselt ja allesjäänud
-  haru kas valib teise, endiselt sobiva agentrouteri ühenduse või
-  ebaõnnestub, kuna mandaate pole saadaval — see ei suru end jõuga tagasi
-  ühendusele, mille see haru just jahutas.
+connectionId)` enne `exhaustedConnections`-i otsingut) — tavaline
+  mudeliloendiga kombineeritud marsruut, kus sõsersihtmärgid ei sisalda enda
+  `connectionId`-d ja üks neist lahendatakse iga väljasaatmise korral vastuse
+  `X-OmniRoute-Selected-Connection-Id` päisest, ei jõua kunagi selle võtme
+  vasteni. Selle tavapärase juhu korral EI OLE allesjäänud haru äsja
+  ammendatud konto taaskasutamise tegelik kaitse see komplekt — selleks on
+  hoopis ülal kirjeldatud püsivuskiht (ühenduse `rateLimitedUntil` on nüüd
+  tulevikus) koos sellega, et sama kaitse surub tõrke korral alla
+  `transientRateLimitedProviders`-i (vt jaotist „Kaheastmeline ülesehitus” ja
+  koodikommentaari `targetExhaustion.ts`-i
+  `isAgentrouterConnectionQuotaScope`-haru juures): kuna komplekti ei märgita,
+  EI rakendu `combo.ts`-i `allowRateLimitedConnection` sundlubamine
+  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) pakkuja ülejäänud
+  harude puhul, mistõttu mandaadi valiku `rateLimitedUntil`-i filter
+  (`src/sse/services/auth.ts:1238`) toimib tavapäraselt ning allesjäänud haru
+  valib kas mõne muu, endiselt sobiliku agentrouteri ühenduse või nurjub,
+  kuna sobivaid mandaate pole — see ei sunni end tagasi ühendusele, mille see
+  haru just jahutusperioodile määras.
 
-### Kaheastmeline disain: staatuse ümbersõnastamine, seejärel klassifitseerimine
+### Kaheastmeline ülesehitus: oleku ümberjutustus, seejärel klassifitseerimine
 
-Staatuse ümbersõnastamine (`upstreamStatusRestatement.ts`) ja pakkuja
-klassifitseerimisreeglid (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) on eraldi registrid, mis mõlemad kasutavad
-võtmetena pakkuja id'd ja tekstimarkereid, kuid nad käivituvad erinevates
-kohtades ja teenivad erinevaid eesmärke: ümbersõnastamine kirjutab HTTP
-staatuse ümber varajases etapis failis `chatCore.ts`;
-klassifitseerimisreeglid valivad varumehhanismi `reason` ja lukustavad
-`scope` (`model` / `provider` / `connection`) funktsiooni
-`checkFallbackError()` sees (`open-sse/services/accountFallback.ts`).
+Oleku ümberjutustuse (`upstreamStatusRestatement.ts`) ja pakkuja
+klassifitseerimise reeglid (`open-sse/config/providerErrorRules.ts`,
+`providerRuleRegistry`) on eraldi registrid, mis kasutavad mõlemad võtmena
+pakkuja ID-d ja tekstimarkereid, kuid käivituvad eri kohtades ja täidavad eri
+eesmärke: ümberjutustus kirjutab HTTP-oleku varakult `chatCore.ts`-is ümber;
+klassifitseerimisreeglid valivad varuvariandi `reason` ja lukustuse `scope`
+(`model` / `provider` / `connection`) `checkFallbackError()`-i sees
+(`open-sse/services/accountFallback.ts`).
 
-Klassifitseerimisreeglid näevad täielikku vea**teksti** (vajalik
-kehatekksti markerite nagu `额度不足` sobitamiseks) ainult nende pakkujate
-puhul, kes on loetletud `FULL_TEXT_RULE_PROVIDERS` lubatud loendis failis
-`providerErrorRules.ts` — praegu ainult `"agentrouter"`. Iga teise
-**sisseehitatud kataloogi** pakkuja puhul annab `checkFallbackError`
-funktsioonile `getProviderErrorRuleMatch` ainult struktureeritud vea
-(`{code, type}`), mis on piisav päise-/staatuse-/koodipõhiste reeglite
-jaoks, kuid pime kehatekksti markerite suhtes. Abifunktsioon
-`resolveRuleMatchBody()` teeb selle valiku: täielik veatekkst lubatud
-loendis olevatele pakkujatele, struktureeritud viga ülejäänutele.
-**Sisseehitatud** pakkuja lisamine `FULL_TEXT_RULE_PROVIDERS` nimekirja on
-selgesõnaline pakkujakohtane nõusolek — see on olemas selleks, et iga
-nimekirjas mitteoleva pakkuja vaikimisi tee jääks baidi-haaval muutumatuks.
+Klassifitseerimisreeglid näevad täielikku vea **teksti** (seda on vaja kehas
+olevate markerite, näiteks `额度不足`, sobitamiseks) nende pakkujate puhul, kes
+on loetletud faili `providerErrorRules.ts`
+`FULL_TEXT_RULE_PROVIDERS` lubatud loendis — praegu ainult `"agentrouter"`.
+Kõigi teiste **sisseehitatud kataloogi** pakkujate puhul annab
+`checkFallbackError` funktsioonile `getProviderErrorRuleMatch` edasi ainult
+struktureeritud vea (`{code, type}`), millest piisab päise-, oleku- ja
+koodipõhiste reeglite jaoks, kuid mitte kehateksti markerite jaoks.
+Abifunktsioon `resolveRuleMatchBody()` teeb selle valiku: lubatud loendis
+olevate pakkujate puhul täielik veatekst, muul juhul struktureeritud viga.
+**Sisseehitatud** pakkuja lisamine loendisse `FULL_TEXT_RULE_PROVIDERS` on
+selgesõnaline pakkujapõhine lubamine — see on olemas selleks, et iga loendis
+mitte oleva pakkuja vaikekäik jääks bait-baidilt muutumatuks.
 
-Reegli `scope` (`model` / `provider` / `connection`) on
-`FULL_TEXT_RULE_PROVIDERS` nimekirjast eraldi nõusolek: `checkFallbackError`
-toob selle esile ainult kui `fallbackResult.ruleScope`, ja allavoolu
-tarbijad austavad seda millegi muuna kui informatiivse sildina ainult
-nende pakkujate puhul, kes on `HONORS_RULE_LOCK_SCOPE_PROVIDERS` lubatud
-loendis samas failis (juhitav läbi `honorsRuleLockScope()` — täna ainult
-`"agentrouter"`). Vaata eespool jaotist "Ümbersõnastatud kvoodivead", et
-näha, mida `scope: "connection"` kattuvus tegelikult teeb, kui pakkuja on
-selles lubatud loendis.
+Reegli `scope` (`model` / `provider` / `connection`) on eraldi lubamine
+valikust `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` avaldab selle
+ainult kujul `fallbackResult.ruleScope` ning järgnevad tarbijad arvestavad
+sellega muuna kui informatiivse sildiga ainult nende pakkujate puhul, kes on
+samas failis loetletud `HONORS_RULE_LOCK_SCOPE_PROVIDERS` lubatud loendis
+(läbi `honorsRuleLockScope()` — praegu ainult `"agentrouter"`). Vt ülal
+jaotist „Kvoodivigade ümberjutustus”, et näha, mida teeb
+`scope: "connection"` vaste tegelikult pärast pakkuja sellesse lubatud
+loendisse lisamist.
 
-**#11104 — operaatori deklareeritud reeglid mööduvad mõlemast lubatud
-loendist.** Operaator saab deklareerida pakkujakohtase reegli käitusajal
-läbi `settings.providerErrorRules`
-(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`),
-ilma seda faili muutmata. Operaatori reegli paigutamine
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` lubatud
-loendite taha — loendite taha, mis on mõeldud kaitsma sisseehitatud
-kataloogireeglite **vaikimisi** käitumist — muudaks seadistuste mehhanismi
-toimetuks iga pakkuja jaoks peale nende, kes on seal juba loetletud, kuna
-reegli deklareerimine on juba operaatori selgesõnaline nõusolek.
-`resolveRuleMatchBody()` ja `honorsRuleLockScope()` kontrollivad mõlemad
-kõigepealt `hasOperatorRuleForProvider()`: pakkuja, kellel on operaatori
-reegel, saab toore veatekksti ja tema deklareeritud `scope`'i austatakse,
-sõltumata sellest, kas ta esineb ka kummaski lubatud loendis.
+**#11104 — operaatori deklareeritud reeglid mööduvad mõlemast lubatud loendist.**
+Operaator saab käitusaegse pakkujapõhise reegli deklareerida seadistuse kaudu
+`settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
+ilma seda faili muutmata. Operaatori reegli piiramine
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS`-iga — need loendid
+on mõeldud sisseehitatud kataloogireeglite **vaikekäitumise** kaitsmiseks —
+muudaks seadistusmehhanismi iga pakkuja puhul peale juba loetletud pakkujate
+toimimatuks, sest reegli deklareerimine on juba operaatori selgesõnaline
+lubamine. Nii `resolveRuleMatchBody()` kui ka `honorsRuleLockScope()` kontrollivad
+esmalt `hasOperatorRuleForProvider()`-it: operaatori reegliga pakkuja saab
+toorveateksti ja tema deklareeritud `scope`-i järgitakse olenemata sellest,
+kas pakkuja esineb ühes või mõlemas lubatud loendis.
 
-**Teadaolev puudujääk — `providerRuleRegistry` poole ei pöörduta kunagi
-HTTP 400 puhul.** `checkFallbackError` funktsiooni `BAD_REQUEST` haru
-klassifitseerib staatuse 400 täielikult omaenda mustrimassiivide kaudu
-(`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS` jne failis
-`accountFallback.ts`) ja tagastab enne, kui jõutakse selle kohal olevasse
-`configuredRule`/`getProviderErrorRuleMatch` harusse. Sisseehitatud
-kataloogireegel (või operaatori reegel) väärtusega `status: 400` on
-süntaktiliselt kehtiv, kuid ei käivitu kunagi. Ükski olemasolev reegel ei
-sihi täna staatust 400, seega ei mõjuta see midagi tootmiskeskkonnas —
-kuid tulevane 400 reegel nõuab, et seda haru kõigepealt muudetaks, mis on
-suurem muudatus kui reegli lisamine (see klassifitseerib 400 ümber iga
-pakkuja jaoks, kes juba tugineb mustrimassiivi käitumisele) ja jääb
-väljapoole ühe pakkuja reegli lisamise ulatust.
+**Operaatori deklareeritud reeglid** (`OperatorProviderErrorRule`): igal reeglil
+on valikuline `status` ja valikuline `match` (veateksti lihtne,
+tõstutundetu alamstring, mitte kunagi RegExp, mistõttu ei saa see põhjustada
+ReDoS-i) ning määratud peab olema vähemalt üks neist kahest. Kui mõlemad on
+määratud, kasutatakse nende vahel tingimust AND; välja puudumine sobitub
+kõigega, seega `{match: "insufficient_quota"}` sobitub mis tahes olekuga,
+mis seda koodi sisaldab. Võidab esimene sobiv reegel. `cooldownMs` lubab
+väärtuse kuni 30 päeva; reegleid võib kokku olla kõige rohkem 50.
 
-### Uue kvooti valesti esitava värava lisamine
+**Kõikehõlmavad vaikeväärtused** (`settings.providerErrorDefaults`, lubatav, määratakse
+`setOperatorProviderErrorDefaults` kaudu): `{[provider]: {cooldownMs, scope?, reason?}}`,
+kus `cooldownMs` on 1 minutist kuni 30 päevani. Vaikeväärtust rakendatakse ainult siis,
+kui ükski operaatori reegel ega sisseehitatud kataloogireegel ei sobinud, ning ainult
+402, 403, 408, 429 ja 5xx vigadele. Päringu kuju vead (400, 404, 409, 413, 422) ja
+paljad 401-d säilitavad oma senise käsitluse. Kui `reason` pole sõnaselgelt määratud,
+tuleneb põhjus olekust samamoodi nagu `classifyError` puhul. Vaikeväärtuse deklareerimine
+loetakse `hasOperatorRuleForProvider()` jaoks operaatori reegliks, seega järgitakse selle
+`scope`-i (vaikimisi `"connection"`). Vaikeväärtuse tegelik ooteaeg on pikem väärtusest
+`cooldownMs` ja teenusepakkuja enda korduskatse vihjest (`Retry-After`,
+`x-ratelimit-reset` või kehas olev lähtestamisvihje — sama vihje, mida mootor järgib, kui
+ühenduse ooteaja seadistus "use upstream retry hints" on sisse lülitatud), mistõttu võib
+vaikeväärtus lühikest ülesvoolu vihjet pikendada, kuid ei lühenda kunagi tegelikku
+lähtestamist. Sõnaselge operaatori reegel säilitab täpselt oma `cooldownMs`-i. Ei reegel
+ega vaikeväärtus möödu ühenduse ooteaja kaitsetest `markAccountUnavailable`-is: aktiivset,
+pikemat ooteaega ei lühendata ning lõplikku olekut ei kirjutata üle. Sisseehitatud
+tekstidetektorid, mis käivituvad `checkFallbackError`-is varem (krediidid ammendatud,
+päevane kvoot, konto deaktiveeritud), jäävad oma fraaside puhul endiselt eelisjärjekorda.
 
-1. Registreeri üks reeglimassiiv registris `statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`). Hoia `textMarkers`
-   pakkujapõhisena; ära kunagi taaskasuta üldiseid ingliskeelseid fraase,
-   mis kattuvad `CREDITS_EXHAUSTED_SIGNALS`-iga
+**Teadaolev puudujääk — `providerRuleRegistry`-it ei kontrollita HTTP 400 puhul.**
+`checkFallbackError`-i `BAD_REQUEST` haru klassifitseerib oleku 400 täielikult oma
+mustrimassiivide (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS` jne failis `accountFallback.ts`) kaudu ning tagastab tulemuse
+enne, kui jõutakse ülal asuva `configuredRule`/`getProviderErrorRuleMatch` haruni.
+Sisseehitatud kataloogireegel (või operaatori reegel) väärtusega `status: 400` on
+süntaktiliselt korrektne, kuid ei käivitu kunagi. Ükski olemasolev reegel ei sihi praegu
+400-d, seega tootmises midagi ei mõjuta — kuid tulevase 400 reegli jaoks tuleb esmalt
+seda haru muuta. See on suurem muudatus kui ühe reegli lisamine (see klassifitseerib 400
+ümber kõigi teenusepakkujate puhul, kes juba tuginevad massiivipõhisele käitumisele) ning
+jääb ühe teenusepakkuja reegli lisamise ulatusest välja.
+
+### Uue kvooti valesti esitava lüüsi lisamine
+
+1. Registreerige üks reeglimassiiv `statusRestatementRegistry`-is
+   (`open-sse/config/upstreamStatusRestatement.ts`). Hoidke `textMarkers`-id
+   teenusepakkujapõhistena; ärge taaskasutage üldisi ingliskeelseid fraase, mis võivad
+   sattuda konflikti `CREDITS_EXHAUSTED_SIGNALS`-iga
    (`open-sse/services/accountFallback.ts`).
-2. Soovi korral registreeri klassifitseerimisreeglid failis
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`), et
-   valida õige lukustuse ulatus (`connection` kontoülese kvoodi jaoks,
-   `model` mudelipõhiste vigade jaoks). See samm jõustub tootmises ainult
-   nende pakkujate puhul, kelle reeglid vajavad täielikku veateksti (keha
-   märgendid): lisa pakkuja id samas failis `FULL_TEXT_RULE_PROVIDERS`-sse —
-   vastasel juhul annab `checkFallbackError` reeglile alati vaid
-   struktureeritud `{code, type}` vea ja kehatekstipõhine reegel ei sobi
-   kunagi tegeliku liiklusega. Reeglid, mis sobivad puhtalt
-   `status`/`headers` põhjal (nagu Opencode'i või Minimaxi omad), ei vaja
-   seda sisselülitust. Eraldi: kui reegel deklareerib
-   `scope: "connection"` ja eesmärk on tegelik ühenduseülene jahtumine koos
-   sama päringu kombo vahelejätmisega (mitte lihtsalt informatiivne silt),
-   lisa pakkuja id samas failis `HONORS_RULE_LOCK_SCOPE_PROVIDERS`-sse —
-   just see juhib `isAgentrouterConnectionQuotaScope()`-laadset tarbimist
-   `markAccountUnavailable()`-s (`src/sse/services/auth.ts`) ja
-   `applyComboTargetExhaustion()`-s
-   (`open-sse/services/combo/targetExhaustion.ts`); ilma selleta liigub
-   `scope` endiselt läbi `fallbackResult.ruleScope`, kuid miski ei reageeri
-   sellele.
-3. Lisa ühiktestid, mis peegeldavad
+2. Soovi korral registreerige klassifitseerimisreeglid
+   `open-sse/config/providerErrorRules.ts`-is (`providerRuleRegistry`), et valida õige
+   lukustuse ulatus (`connection` kontot hõlmava kvoodi puhul, `model` mudelipõhiste
+   vigade puhul). See samm jõustub tootmises ainult nende teenusepakkujate puhul, kelle
+   reeglid vajavad kogu veateksti (kehamarkerid): lisage teenusepakkuja ID samas failis
+   `FULL_TEXT_RULE_PROVIDERS`-isse — vastasel juhul edastab `checkFallbackError` reeglile
+   ainult struktureeritud `{code, type}` vea ning kehateksti reegel ei sobitu aktiivse
+   liiklusega kunagi. Ainult `status`-i/`headers`-ite põhjal sobituvad reeglid (nagu
+   Opencode'i või Minimax'i omad) seda lubamist ei vaja. Eraldi, kui reegel deklareerib
+   `scope: "connection"` ja eesmärk on tegelik kogu ühendust hõlmav ooteaeg koos sama
+   päringu kombinatsiooni vahelejätmisega (mitte ainult informatiivne silt), lisage
+   teenusepakkuja ID samas failis `HONORS_RULE_LOCK_SCOPE_PROVIDERS`-isse — see määrab,
+   kas `isAgentrouterConnectionQuotaScope()`-i laadset kasutust lubatakse
+   `markAccountUnavailable()`-is (`src/sse/services/auth.ts`) ja
+   `applyComboTargetExhaustion()`-is
+   (`open-sse/services/combo/targetExhaustion.ts`); ilma selleta liigub `scope`
+   endiselt läbi `fallbackResult.ruleScope`-i, kuid miski ei rakenda seda.
+3. Lisage ühiktestid, mis peegeldavad faile
    `tests/unit/upstream-status-restatement.test.ts` ja
-   `tests/unit/agentrouter-error-rules.test.ts` (sealhulgas
-   mitte-permanent- ja mitte-creditsExhausted-kaitsekontrollid ning — kui
-   pakkuja vajab lubanimekirja — test, mis kinnitab, et
-   `resolveRuleMatchBody()` tagastab täisteksti ainult selle pakkuja
-   jaoks).
+   `tests/unit/agentrouter-error-rules.test.ts` (kaasa arvatud
+   not-permanent / not-creditsExhausted kaitsed ning — kui teenusepakkuja vajab
+   lubatud loendit — test, mis kinnitab, et `resolveRuleMatchBody()` tagastab kogu teksti
+   ainult selle teenusepakkuja puhul).
 
-Muudatusi `chatCore.ts`-s, `classifyError`-s ega kombos pole vaja.
+`chatCore.ts`, `classifyError`-i ega kombinatsiooni jaoks pole muudatusi vaja.
 
-#### Väljuv-IP-põhine lukustus (#10880)
+#### Egress-koppadega lukustus (#10880)
 
-`EGRESS_BUCKETED_LOCK_PROVIDERS`-s olevaid pakkujaid (opencode'i perekond)
-käsitletakse IP-põhise ülesvooluna (opencode'i tasuta tase on IP-põhine,
-mitte kontopõhine — vt #9611): olekukoodiga 429 klassifitseeritud
-`quota_exhausted` **või** `rate_limit_exceeded` jahutab maha kõik
-lubanimekirjas oleva perekonna ühendused, mille viimati teada olev
-väljuv-IP ühtib ebaõnnestunud ühenduse omaga, enne kui rotatsioon saab neid
-proovida
-— vältides N-1 garanteeritult ebaõnnestuvat ülesvoolukutset (sama muster
-nagu #10460/#10525). `rate_limit_exceeded` on kaasatud teadlikult:
-`markAccountUnavailable` teel ei sobi opencode'i-spetsiifilised reeglid
-kunagi (`checkFallbackError`-le ei anta päiseid ega keha, opencode pole
-`FULL_TEXT_RULE_PROVIDERS`-s), seega klassifitseeritakse 429, mille keha
-kannab tellimuse kvoodi teksti ("monthly usage limit reached"),
-kvooditeksti tagavaralahenduse (`buildSubscriptionQuotaFallback`,
-`accountFallback.ts`; 1h jahtumine) poolt kui `quota_exhausted`, enne kui
-`status_429` reeglini üldse jõutakse — samas kui kvooditekstita 429
-(tavaline kiiruspiirang) klassifitseeritakse `status_429` reegli kaudu kui
-`rate_limit_exceeded` ja jahutab ikkagi IP-perekonna maha. Lubanimekirjas
-oleva pakkuja jaoks on IP-põhine kiiruspiirang sama signaal kui ammendunud
-kvoot. Tegelikud piirangud:
+`EGRESS_BUCKETED_LOCK_PROVIDERS`-is olevate teenusepakkujate (opencode'i perekond)
+puhul käsitletakse ülesvoolu teenusepakkujat IP-põhiste koppadega teenusepakkujana
+(opencode'i tasuta tase on IP-, mitte kontopõhine — vt #9611): oleku-429, mis on
+klassifitseeritud väärtuseks `quota_exhausted` **või** `rate_limit_exceeded`, jahutab enne
+rotatsiooni alustamist kõiki lubatud perekonna ühendusi, mille viimane teadaolev
+väljamineku IP vastab tõrkunud ühenduse omale
+— vältides N-1 garanteeritult ebaõnnestuvat ülesvoolu kutset (sama kujuga nagu
+#10460/#10525). `rate_limit_exceeded` on sihilikult kaasatud: teel
+`markAccountUnavailable`-isse ei sobitu opencode'i-põhised reeglid kunagi
+(`checkFallbackError`-ile ei edastata päiseid/keha, opencode ei kuulu
+`FULL_TEXT_RULE_PROVIDERS`-isse), seega klassifitseeritakse tellimuse kvoodi teksti
+("monthly usage limit reached") sisaldav 429 kvooditeksti varuvariandi
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; 1 tunni pikkune ooteaeg) kaudu
+väärtuseks `quota_exhausted` enne, kui `status_429` reeglini jõutakse — samal ajal kui
+kvooditekstita 429 (tavaline kiiruse piiramine) klassifitseeritakse `status_429` reegli
+kaudu väärtuseks `rate_limit_exceeded` ning IP-perekond jahutatakse endiselt. Lubatud
+teenusepakkuja puhul on IP-põhine kiirusepiirang sama signaal mis ammendatud kvoot.
+Ausad piirangud:
 
-- **Parima pingutuse põhimõte (best-effort)**: lukk lahendab ühenduse viimati teadaoleva `egress_ip` tabelist `proxy_logs` (24 h aken, sünkroonne, ilma vahemäluta). Külma vahemälu korral (egress-IP-d pole kunagi sondeeritud) või kui rida puudub → haru jahutab ebaõnnestunud ühenduse ikkagi (salvestatakse nagu praegu), lihtsalt ühtegi kaasühendust ei lukustata.
-- **Mitte kunagi lõplik**: jahutus on uuenev kvoodiaken (`testStatus: "unavailable"`); IP-tasandi signaalist ei tuletata kunagi püsivat olekut. `disableCooling`-ühendused jätavad haru täielikult vahele.
-- **Luku granulaarsus muutub lubatud loendis oleva perekonna jaoks**: tegemist on skoobi muudatusega, mitte ainult kaasühenduse optimeerimisega. opencode on `passthroughModels`-pakkuja, seega tekitas 429 enne seda haru mudelipõhise (per-MODEL) blokeeringu; nüüd tekitab see ühenduse jahutuse — kaasa arvatud operaatori puhul, kes kasutab ainult ühte ühendust ilma ühegi kaasühenduseta. Täpselt sellise granulaarsuse deklareerib opencode'i reeglitabel juba õigena (`scope: "connection"`, `providerErrorRules.ts`), mida siiani pole täidetud, sest opencode ei kuulu hulka `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Haru kirjutab ebaõnnestunud ühenduse jahutuse + `backoffLevel`-i ise, peegeldades ühenduse-skoobiga agentrouteri haru, ja tagastab — mudelipõhise blokini ja alloleva üldise teeni ei jõuta kunagi.
-- **Combo kaasa arvatud**: nagu agentrouteri haru, ignoreerib see skoop teadlikult `persistUnavailableState`/`isCombo` alandust, mida combo-kutsuja 429-le rakendab. Mudelipõhine blokeering pole selle skoobi nõrgem vorm, vaid vale ühik: see ei ütle midagi ammendunud IP kohta, seega combo-rotatsioon jätkaks ühe garanteeritult ebaõnnestuva päringu põletamist iga kaasühenduse kohta.
-- **Kaasühenduse ohutus**: kaasühendust, mis on juba lõplikus olekus (banned/credits_exhausted) või juba pikemas jahutuses, ei kirjutata kunagi üle.
-- **Eksklusiivne lubatud loend**: `EGRESS_BUCKETED_LOCK_PROVIDERS` laiendamine on omaniku selgesõnaline otsus; üldist ühendamist pole (muster #10334/#10419). Kaasühenduse päring seob sama lubatud loendi, selle asemel et seda SQL-literaalina korrata, nii et selle laiendamine jääb üherealiseks muudatuseks.
-- **Egress-IP rotatsioon, mõlemas suunas**: otsinguaken (24 h) on palju laiem kui egress-IP vahemälu TTL (5 min), seega "viimati teadaolev IP" on ajalugu, mitte praegune olek. Kui ühenduse proksi on akna sees roteerunud, võib lukk **mööda minna** tõeliselt jagatud IP-st (salvestatud IP on uus, ammendamata) — ja sümmeetriliselt võib see **jahutada kaasühendust, mis on vahepeal ammendunud IP-st eemale roteerunud**. Teine juhtum maksab sellele kaasühendusele ühe jahutusakna; mõlemad on ajaloopõhise otsingu aktsepteeritud parima-pingutuse piirangud.
-- **Kulu**: kaks piiratud läbivaatust tabelis `proxy_logs` (akna järgi filtreeritud indeksi `idx_pl_timestamp` kaudu), ainult 429 sagedusel. Uut indeksit pole (migratsioon 134 YAGNI). Mõõdetud keskmise suurusega tegeliku liiklusega andmebaasi koopia peal; suure läbilaskevõimega instants hoiab samas aknas proportsionaalselt rohkem ridu.
-
----
+- **Parimal võimalikul viisil**: lukk lahendab ühenduse viimase teadaoleva `egress_ip` väärtuse
+  tabelist `proxy_logs` (24 tunni aken, sünkroonne, vahemäluta). Külm vahemälu
+  (egress-IP-d pole kunagi kontrollitud) või rea puudumine → tõrkuvat ühendust jahutatakse endiselt
+  haru kaudu (salvestatakse nagu praegu), ainult ühtegi kaasühendust ei lukustata.
+- **Mitte kunagi lõplik**: jahutus on uuenev kvoodiaken
+  (`testStatus: "unavailable"`); püsivat olekut ei tuletata kunagi IP-taseme signaalist.
+  `disableCooling`-iga ühendused jätavad haru täielikult vahele.
+- **Lukustuse detailsus muutub lubatud loendis oleva perekonna jaoks**: see on ulatuse muutus, mitte ainult kaasühenduste optimeerimine. opencode on `passthroughModels`
+  pakkuja, seega tekitas 429 enne seda haru mudelipõhise lukustuse; nüüd tekitab see ühenduse jahutuse — ka operaatori puhul, kes käitab üksikut ühendust ilma ühegi kaasühenduseta. See on detailsus, mille opencode'i reeglitabel juba õigeks tunnistab (`scope: "connection"`,
+  `providerErrorRules.ts`), kuid mida seni ei ole kunagi rakendatud, sest opencode ei kuulu hulka `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Haru kirjutab tõrkuva
+  ühenduse jahutuse + `backoffLevel` väärtuse ise, peegeldades
+  ühenduse ulatusega agentrouteri haru, ja tagastab tulemuse — mudelipõhise blokeeringu ning alloleva üldise tee juurde ei jõuta kunagi.
+- **Kombod on kaasatud**: nagu agentrouteri harus, eirab ulatus sihilikult 429 puhul combo-kutsuja rakendatavat
+  `persistUnavailableState`/`isCombo` alandamist. Mudelipõhine lukustus ei ole selle ulatuse nõrgem vorm, vaid
+  vale üksus: see ei ütle midagi ammendatud IP kohta, mistõttu combo rotatsioon jätkaks iga kaasühenduse kohta ühe kindlalt ebaõnnestuvale kõne tegemist.
+- **Kaasühenduste turvalisus**: juba lõplikus olekus olevat kaasühendust (banned/credits_exhausted)
+  või juba pikemas jahutuses olevat kaasühendust ei kirjutata kunagi üle.
+- **Eksklusiivne lubatud loend**: `EGRESS_BUCKETED_LOCK_PROVIDERS` laiendamine on
+  omaniku selgesõnaline otsus; üldist ühendamist ei tehta (muster #10334/#10419). Kaasühenduste päring seob
+  sama lubatud loendi, selle asemel et seda SQL-i literaalina korrata, seega selle laiendamine jääb ühe rea muudatuseks.
+- **Egress-IP rotatsioon mõlemas suunas**: otsinguaken (24 tundi) on egress-IP vahemälu TTL-ist (5 minutit) palju
+  laiem, seega „viimane teadaolev IP” on ajalugu,
+  mitte praegune olek. Kui ühenduse proksi roteerus akna jooksul, võib lukustus
+  **tegelikult jagatud IP-st mööda vaadata** (salvestatud IP on uus,
+  ammendamata IP) — ja sümmeetriliselt võib see **jahutada kaasühendust, mis on ammendatud IP-st
+  vahepeal eemale roteerunud**. Teine juhtum maksab sellele kaasühendusele ühe
+  jahutusakna; mõlemad on ajaloopõhise otsingu aktsepteeritud parimal võimalikul viisil piirangud.
+- **Kulu**: kaks piiratud `proxy_logs`-i läbivaatust (akna järgi filtreeritud `idx_pl_timestamp` kaudu), ainult 429 sagedusega. Uut indeksit ei lisata (migratsioon 134
+  YAGNI). Mõõdetud mõõduka suurusega tegeliku liiklusega andmebaasi koopial; suure läbilaskevõimega eksemplar sisaldab samas aknas proportsionaalselt rohkem ridu.
 
 ## Muud tõrkekindluse funktsioonid
 
