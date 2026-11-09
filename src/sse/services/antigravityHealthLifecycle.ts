@@ -29,13 +29,17 @@ function scheduleHealthProbeIdle(
   onExpired: () => void,
   releaseReader: () => void
 ): ReturnType<typeof setTimeout> {
-  return setTimeout(() => {
-    onExpired();
-    controller()?.error(new Error("Antigravity recovery probe stream idle timeout"));
-    void reader.cancel("Antigravity recovery probe stream idle timeout")
-      .catch(() => {})
-      .finally(releaseReader);
-  }, Math.max(1, Math.floor(timeoutMs)));
+  return setTimeout(
+    () => {
+      onExpired();
+      controller()?.error(new Error("Antigravity recovery probe stream idle timeout"));
+      void reader
+        .cancel("Antigravity recovery probe stream idle timeout")
+        .catch(() => {})
+        .finally(releaseReader);
+    },
+    Math.max(1, Math.floor(timeoutMs))
+  );
 }
 
 export function holdAntigravityHealthThroughResponse(
@@ -66,14 +70,31 @@ export function holdAntigravityHealthThroughResponse(
     attempt.finish(outcome);
   };
   const releaseReader = () => {
-    try { reader.releaseLock(); } catch { /* A pending cancel still owns the read. */ }
+    try {
+      reader.releaseLock();
+    } catch {
+      /* A pending cancel still owns the read. */
+    }
   };
   const armProbeIdle = () => {
-    if (!attempt.probe || settled || !Number.isFinite(probeIdleTimeoutMs) ||
-        probeIdleTimeoutMs <= 0) return;
+    if (
+      !attempt.probe ||
+      settled ||
+      !Number.isFinite(probeIdleTimeoutMs) ||
+      probeIdleTimeoutMs <= 0
+    )
+      return;
     clearIdle();
-    idleTimer = scheduleHealthProbeIdle(probeIdleTimeoutMs, reader, () => streamController,
-      () => { expired = true; finish("ignored"); }, releaseReader);
+    idleTimer = scheduleHealthProbeIdle(
+      probeIdleTimeoutMs,
+      reader,
+      () => streamController,
+      () => {
+        expired = true;
+        finish("ignored");
+      },
+      releaseReader
+    );
   };
   const body = new ReadableStream<Uint8Array>({
     start(controller) {
@@ -106,7 +127,11 @@ export function holdAntigravityHealthThroughResponse(
     async cancel(reason) {
       if (expired) return;
       finish("ignored");
-      try { await reader.cancel(reason); } finally { releaseReader(); }
+      try {
+        await reader.cancel(reason);
+      } finally {
+        releaseReader();
+      }
     },
   });
   const wrapped = new Response(body, {
@@ -115,8 +140,5 @@ export function holdAntigravityHealthThroughResponse(
     headers: response.headers,
   });
   // Routing and local-limit provenance is attached to Response identity, not headers.
-  return inheritResponsePolicies(
-    response,
-    inheritTrustedLocalRateLimitResponse(response, wrapped)
-  );
+  return inheritResponsePolicies(response, inheritTrustedLocalRateLimitResponse(response, wrapped));
 }

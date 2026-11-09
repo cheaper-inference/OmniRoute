@@ -30,7 +30,10 @@ export const ANTIGRAVITY_HEALTH_POLICY = Object.freeze({
 });
 
 export function normalizeAntigravityHealthModel(model: string): string {
-  const id = model.trim().replace(/^(?:antigravity|agy)\//i, "").toLowerCase();
+  const id = model
+    .trim()
+    .replace(/^(?:antigravity|agy)\//i, "")
+    .toLowerCase();
   // Never retain arbitrary request content in diagnostic state.
   return /^[a-z0-9_.:-]{1,160}$/.test(id) ? resolveAntigravityModelId(id) : "unknown";
 }
@@ -50,7 +53,9 @@ export class AntigravityHealthTracker {
   }
 
   private trim(entry: Entry): void {
-    entry.samples = entry.samples.filter((sample) => sample.at > this.now() - ANTIGRAVITY_HEALTH_POLICY.windowMs);
+    entry.samples = entry.samples.filter(
+      (sample) => sample.at > this.now() - ANTIGRAVITY_HEALTH_POLICY.windowMs
+    );
     if (entry.samples.length === 0) entry.consecutiveTimeouts = 0;
   }
 
@@ -62,21 +67,33 @@ export class AntigravityHealthTracker {
       return existing;
     }
     for (const [id, entry] of this.entries) {
-      if (entry.inflight === 0 && this.now() - entry.touched > ANTIGRAVITY_HEALTH_POLICY.idleTtlMs) {
+      if (
+        entry.inflight === 0 &&
+        this.now() - entry.touched > ANTIGRAVITY_HEALTH_POLICY.idleTtlMs
+      ) {
         this.entries.delete(id);
       }
     }
     if (this.entries.size >= ANTIGRAVITY_HEALTH_POLICY.maxEntries) {
       // Never evict an in-flight probe: it would allow a second probe for the same pair.
-      const idle = [...this.entries].filter(([, entry]) => entry.inflight === 0)
+      const idle = [...this.entries]
+        .filter(([, entry]) => entry.inflight === 0)
         .sort((a, b) => a[1].touched - b[1].touched)[0];
       if (!idle) return null;
       this.entries.delete(idle[0]);
     }
     const entry: Entry = {
-      connectionId, model: normalizeAntigravityHealthModel(model), samples: [],
-      consecutiveTimeouts: 0, until: 0, backoff: 0, recoverySuccesses: 0,
-      generation: 0, probe: false, inflight: 0, touched: this.now(),
+      connectionId,
+      model: normalizeAntigravityHealthModel(model),
+      samples: [],
+      consecutiveTimeouts: 0,
+      until: 0,
+      backoff: 0,
+      recoverySuccesses: 0,
+      generation: 0,
+      probe: false,
+      inflight: 0,
+      touched: this.now(),
     };
     this.entries.set(key, entry);
     return entry;
@@ -90,7 +107,7 @@ export class AntigravityHealthTracker {
   ): T[] {
     // A bare model can be replaced by each connection's own defaultModel.
     // Evaluate health against the model this connection will actually dispatch.
-    const modelFor = (connection: T) => typeof model === "string" ? model : model(connection);
+    const modelFor = (connection: T) => (typeof model === "string" ? model : model(connection));
     const healthy: T[] = [];
     const due: T[] = [];
     const open: T[] = [];
@@ -104,17 +121,24 @@ export class AntigravityHealthTracker {
     if (healthy.length || due.length) return [...healthy, ...due];
     // Availability escape hatch: one real request to the earliest quarantined pair.
     // begin() enforces a single probe even when selectors race.
-    return open.sort((a, b) =>
-      this.entries.get(this.key(a.id, modelFor(a)))!.until -
-      this.entries.get(this.key(b.id, modelFor(b)))!.until
-    ).slice(0, 1);
+    return open
+      .sort(
+        (a, b) =>
+          this.entries.get(this.key(a.id, modelFor(a)))!.until -
+          this.entries.get(this.key(b.id, modelFor(b)))!.until
+      )
+      .slice(0, 1);
   }
 
   remainingCooldownMs(connectionId: string, model: string): number {
     return Math.max(0, (this.entries.get(this.key(connectionId, model))?.until ?? 0) - this.now());
   }
 
-  begin(connectionId: string, model: string, allowEarlyProbe = false): AntigravityHealthAttempt | null {
+  begin(
+    connectionId: string,
+    model: string,
+    allowEarlyProbe = false
+  ): AntigravityHealthAttempt | null {
     const entry = this.get(connectionId, model);
     // Capacity overflow fails open without allocating unbounded state.
     if (!entry) return { probe: false, finish() {} };
@@ -155,9 +179,11 @@ export class AntigravityHealthTracker {
           return;
         }
         const timeouts = entry.samples.filter((sample) => sample.outcome === "timeout").length;
-        if (entry.samples.length >= ANTIGRAVITY_HEALTH_POLICY.minSamples &&
+        if (
+          entry.samples.length >= ANTIGRAVITY_HEALTH_POLICY.minSamples &&
           (timeouts / entry.samples.length >= ANTIGRAVITY_HEALTH_POLICY.timeoutRatio ||
-            entry.consecutiveTimeouts >= ANTIGRAVITY_HEALTH_POLICY.consecutiveTimeouts)) {
+            entry.consecutiveTimeouts >= ANTIGRAVITY_HEALTH_POLICY.consecutiveTimeouts)
+        ) {
           this.quarantine(entry);
         }
       },
@@ -166,29 +192,47 @@ export class AntigravityHealthTracker {
 
   private quarantine(entry: Entry): void {
     entry.backoff = Math.min(5, entry.backoff + 1);
-    entry.until = this.now() + Math.min(ANTIGRAVITY_HEALTH_POLICY.maxCooldownMs,
-      ANTIGRAVITY_HEALTH_POLICY.baseCooldownMs * 2 ** (entry.backoff - 1));
+    entry.until =
+      this.now() +
+      Math.min(
+        ANTIGRAVITY_HEALTH_POLICY.maxCooldownMs,
+        ANTIGRAVITY_HEALTH_POLICY.baseCooldownMs * 2 ** (entry.backoff - 1)
+      );
     entry.recoverySuccesses = 0;
     entry.generation++;
     entry.probe = false;
   }
 
   snapshot(connectionId?: string) {
-    return [...this.entries.values()].filter((entry) => !connectionId || entry.connectionId === connectionId)
-      .filter((entry) => entry.inflight > 0 || this.now() - entry.touched <= ANTIGRAVITY_HEALTH_POLICY.idleTtlMs)
+    return [...this.entries.values()]
+      .filter((entry) => !connectionId || entry.connectionId === connectionId)
+      .filter(
+        (entry) =>
+          entry.inflight > 0 || this.now() - entry.touched <= ANTIGRAVITY_HEALTH_POLICY.idleTtlMs
+      )
       .map((entry) => {
         this.trim(entry);
         const timeouts = entry.samples.filter((sample) => sample.outcome === "timeout").length;
         return {
-          connectionId: entry.connectionId, model: entry.model,
-          state: entry.probe ? "probing" : entry.backoff === 0 ? "healthy" : entry.until > this.now() ? "quarantined" : "half_open",
+          connectionId: entry.connectionId,
+          model: entry.model,
+          state: entry.probe
+            ? "probing"
+            : entry.backoff === 0
+              ? "healthy"
+              : entry.until > this.now()
+                ? "quarantined"
+                : "half_open",
           reason: entry.backoff > 0 ? "pre_response_timeout_rate" : null,
-          samples: entry.samples.length, timeouts,
-          transportFailures: entry.samples.filter((sample) => sample.outcome === "transport").length,
+          samples: entry.samples.length,
+          timeouts,
+          transportFailures: entry.samples.filter((sample) => sample.outcome === "transport")
+            .length,
           timeoutRatio: entry.samples.length ? timeouts / entry.samples.length : 0,
           consecutiveTimeouts: entry.consecutiveTimeouts,
           cooldownRemainingMs: Math.max(0, entry.until - this.now()),
-          backoffLevel: entry.backoff, recoverySuccesses: entry.recoverySuccesses,
+          backoffLevel: entry.backoff,
+          recoverySuccesses: entry.recoverySuccesses,
           inflight: entry.inflight,
         };
       });
@@ -201,8 +245,7 @@ export function isAntigravityAdaptiveHealthEnabled(
   configuredEnabled?: boolean
 ): boolean {
   if (provider !== "antigravity" && provider !== "agy") return false;
-  return configuredEnabled ??
-    process.env.OMNIROUTE_ANTIGRAVITY_ADAPTIVE_HEALTH_ENABLED === "true";
+  return configuredEnabled ?? process.env.OMNIROUTE_ANTIGRAVITY_ADAPTIVE_HEALTH_ENABLED === "true";
 }
 
 export const antigravityHealth = new AntigravityHealthTracker();

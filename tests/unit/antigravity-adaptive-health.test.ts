@@ -62,7 +62,9 @@ test("exactly one half-open probe, two successes to recover, stale successes fen
   assert.equal(tracker.snapshot()[0].state, "quarantined");
   assert.equal(tracker.begin("a", MODEL), null);
   now += 30_001;
-  const tickets = await Promise.all(Array.from({ length: 10 }, async () => tracker.begin("a", MODEL)));
+  const tickets = await Promise.all(
+    Array.from({ length: 10 }, async () => tracker.begin("a", MODEL))
+  );
   assert.equal(tickets.filter(Boolean).length, 1);
   tickets.find(Boolean)!.finish("success");
   assert.equal(tracker.snapshot()[0].state, "half_open");
@@ -131,7 +133,10 @@ test("finished useful SSE counts once, error-only SSE counts zero", async () => 
     ["success", 'data: {"choices":[{"delta":{"content":"ok"}}]}\n\n'],
     ["error", 'data: {"error":{"message":"upstream failed"}}\n\n'],
   ]) {
-    const response = holdAntigravityHealthThroughResponse(new Response(data), tracker.begin(id, MODEL)!);
+    const response = holdAntigravityHealthThroughResponse(
+      new Response(data),
+      tracker.begin(id, MODEL)!
+    );
     await response.text();
   }
   assert.equal(tracker.snapshot("success")[0].samples, 1);
@@ -196,8 +201,7 @@ test("an idle recovery stream releases its probe without inventing a success", a
 });
 
 test("adaptive health follows each connection's dispatched legacy default model", async () => {
-  const { resolveBareModelToConnectionDefault } =
-    await import("../../open-sse/services/model.ts");
+  const { resolveBareModelToConnectionDefault } = await import("../../open-sse/services/model.ts");
   const prior = process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
   try {
     process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = "true";
