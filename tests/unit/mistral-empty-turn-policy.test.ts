@@ -85,3 +85,58 @@ test("getModelNormalizeToolCallId defaults to true for mistral provider and fals
   await new Promise((resolve) => setTimeout(resolve, 50));
   core.resetDbInstance();
 });
+
+test("mergeModelCompatOverride retains normalizeToolCallId: false as only setting and supports unsetting", async () => {
+  const core = await import("../../src/lib/db/core.ts");
+  const modelsDb = await import("../../src/lib/db/models.ts");
+
+  core.resetDbInstance();
+
+  // 1. Explicit normalizeToolCallId: false as the ONLY setting on a compat override row
+  modelsDb.mergeModelCompatOverride("mistral", "compat-only-model", {
+    normalizeToolCallId: false,
+  });
+
+  const overrides = modelsDb.getModelCompatOverrides("mistral");
+  const row = overrides.find((o) => o.id === "compat-only-model");
+  assert.ok(
+    row,
+    "compat row must be preserved even when normalizeToolCallId: false is its only property"
+  );
+  assert.equal(row.normalizeToolCallId, false);
+  assert.equal(modelsDb.getModelNormalizeToolCallId("mistral", "compat-only-model"), false);
+
+  // 2. Unsetting via null reverts to provider default (true for Mistral)
+  modelsDb.mergeModelCompatOverride("mistral", "compat-only-model", {
+    normalizeToolCallId: null,
+  });
+  assert.equal(modelsDb.getModelNormalizeToolCallId("mistral", "compat-only-model"), true);
+
+  // 3. Write-then-read path for an imported custom-model row
+  await modelsDb.addCustomModel(
+    "mistral",
+    "imported-mistral-model",
+    "imported-mistral-model",
+    "imported",
+    "chat-completions",
+    ["chat"],
+    undefined,
+    {},
+    undefined,
+    undefined,
+    undefined,
+    { endpointCapabilitySource: "defaulted" }
+  );
+
+  // Default lookup on imported row without explicit normalizeToolCallId yields Mistral default (true)
+  assert.equal(modelsDb.getModelNormalizeToolCallId("mistral", "imported-mistral-model"), true);
+
+  // Explicit update on imported row to false takes precedence
+  await modelsDb.updateCustomModel("mistral", "imported-mistral-model", {
+    normalizeToolCallId: false,
+  });
+  assert.equal(modelsDb.getModelNormalizeToolCallId("mistral", "imported-mistral-model"), false);
+
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  core.resetDbInstance();
+});

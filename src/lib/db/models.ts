@@ -968,7 +968,14 @@ function getCustomModelRow(providerId: string, modelId: string): JsonRecord | nu
  * Whether the given provider/model has "normalize tool call id" (9-char Mistral-style) enabled.
  * Custom model row wins; otherwise {@link getModelCompatOverrides}.
  * When `sourceFormat` is one of `openai` | `openai-responses` | `claude`, per-protocol
- * `compatByProtocol[sourceFormat].normalizeToolCallId` overrides the legacy top-level flag.
+ * `compatByProtocol[sourceFormat].normalizeToolCallId` overrides legacy top-level flag.
+ * If neither custom model nor compat override sets an explicit value, defaults to true for
+ * provider "mistral" (whose API enforces 9-character alphanumeric IDs) and false for all other providers.
+ *
+ * @param providerId - Target provider identifier (e.g. "mistral", "openai").
+ * @param modelId - Target model identifier.
+ * @param sourceFormat - Client source format key (e.g. "openai", "claude").
+ * @returns Whether tool call ID normalization to 9-char alphanumeric format is enabled.
  */
 export function getModelNormalizeToolCallId(
   providerId: string,
