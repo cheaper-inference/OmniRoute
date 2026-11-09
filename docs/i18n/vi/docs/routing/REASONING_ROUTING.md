@@ -38,24 +38,19 @@ và hỗ trợ chế độ khớp `any` hoặc `all`.
 Quy tắc `connection` chỉ được đánh giá khi không có quy tắc sớm nào thắng và một kết nối provider cụ thể
 đã được chọn. Quy tắc này chỉ có thể thay đổi mức độ nỗ lực và ngân sách.
 
-## Mức độ nỗ lực và ngân sách
+## Nỗ lực và ngân sách
 
-`sourceEffort` chấp nhận `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` và
-`ultra`. `missing` có nghĩa là request không chứa mức độ nỗ lực rời rạc, nút bật/tắt thinking
-hoặc ngân sách thinking. Do đó, tín hiệu chỉ có ngân sách chỉ khớp với `any`.
+`sourceEffort` chấp nhận `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` và `ultra`. `missing` có nghĩa là yêu cầu không chứa nỗ lực riêng biệt hay chuyển đổi tư duy hoặc ngân sách suy nghĩ. Do đó, tín hiệu chỉ dành cho ngân sách chỉ được khớp với `any`.
 
 `effortMode` có ba biến thể:
 
-- `inherit` giữ nguyên mức độ nỗ lực của client trong khi vẫn cho phép thay đổi model hoặc combo.
-- `default` chỉ đặt `targetEffort` khi không có tín hiệu suy luận tường minh.
-- `force` thay thế mức độ nỗ lực rời rạc bằng `targetEffort`.
+- `inherit` giữ nỗ lực của khách hàng trong khi vẫn cho phép thay đổi mô hình hoặc kết hợp.
+- `default` chỉ đặt `targetEffort` khi không có tín hiệu suy luận rõ ràng.
+- `force` thay thế nỗ lực riêng biệt bằng `targetEffort`.
 
-Độc lập với cơ chế trên, `budgetAction` có thể là `preserve`, `remove` hoặc `set`. `force` với `none` sẽ xóa
-tất cả trường mức độ nỗ lực và ngân sách được nhận diện. `none` kết hợp với `set` là không hợp lệ.
+Một cách độc lập, `budgetAction` có thể là `preserve`, `remove` hoặc `set`. `force` với `none` sẽ xóa tất cả các trường ngân sách và nỗ lực đã được công nhận, sau đó đặt `reasoning_effort: "none"`, vì một số nhà cung cấp bật chế độ suy nghĩ khi không có trường này. Các nhà cung cấp từ chối `none` theo nghĩa đen sẽ được điều chỉnh khi gửi đi trong `open-sse/executors/base/reasoningEffort.ts`. Mã Lệnh ánh xạ nó tới `low`, ngoại trừ các yêu cầu có hình Phản hồi (`input` không có `messages`), trong đó nó giữ `none`. Trên Cloudflare Workers AI (`cloudflare-ai`), các mô hình từ chối `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) nhận được `low`; các mô hình AI Công nhân khác giữ `none`. Việc loại bỏ trường không phải là một tùy chọn ở đó vì nỗ lực vắng mặt sẽ chạy cấp mặc định của mô hình. `none` cùng với `set` không hợp lệ.
 
-Các request nhắm đến những model đã biết là không tương thích sẽ bị từ chối trước lệnh gọi upstream. Đối với
-mục tiêu combo, các mục không tương thích sẽ bị loại bỏ; nếu không còn mục nào, request sẽ trả về trạng thái `400`.
-Dữ liệu khả năng không xác định sẽ tạo cảnh báo và quy tắc vẫn được kích hoạt.
+Các yêu cầu nhắm mục tiêu đến các mô hình không tương thích đã biết sẽ bị từ chối trước lệnh gọi ngược dòng. Đối với các mục tiêu kết hợp, các mục không tương thích sẽ bị xóa; nếu không còn gì, yêu cầu sẽ trả về trạng thái `400`. Dữ liệu về khả năng không xác định tạo ra cảnh báo và để quy tắc hoạt động.
 
 ## Bảo mật và phương thức truyền tải
 
