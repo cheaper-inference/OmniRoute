@@ -941,6 +941,11 @@ async function testApiKeyConnection(connection: any, allowLocalSpawn = true) {
       apiKey: connection.apiKey,
       providerSpecificData: connection.providerSpecificData,
       allowLocalSpawn,
+      credentials: {
+        accessToken: connection.accessToken,
+        refreshToken: connection.refreshToken,
+        expiresAt: connection.expiresAt,
+      },
     })
   );
 
