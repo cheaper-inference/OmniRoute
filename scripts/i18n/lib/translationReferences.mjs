@@ -322,23 +322,39 @@ function targetDeclaration(node, checker) {
   return symbol?.declarations?.[0];
 }
 
+// Keep one bounded node index per immutable Program. Gathering syntax does not
+// bind JSX targets; that work remains lazy in jsxCallers(). Publish only a fully
+// traversed index, and never share nodes or symbols across base/head Programs.
+function indexedSourceNodes(context) {
+  if (context.nodeIndex) return context.nodeIndex;
+  const callsByFile = new Map();
+  const jsxNodes = [];
+  for (const [file, source] of context.sources) {
+    const calls = [];
+    function visit(node) {
+      context.budget?.check(true);
+      if (ts.isCallExpression(node)) calls.push(node);
+      if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) jsxNodes.push(node);
+      ts.forEachChild(node, visit);
+    }
+    visit(source);
+    callsByFile.set(file, calls);
+  }
+  context.nodeIndex = { callsByFile, jsxNodes };
+  return context.nodeIndex;
+}
+
 function jsxCallers(context, component) {
   if (!context.jsxCallers) {
     context.jsxCallers = new Map();
-    for (const source of context.sources.values()) {
-      function visit(node) {
-        context.budget?.check(true);
-        if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
-          const target = targetDeclaration(node.tagName, context.checker);
-          if (target) {
-            const callers = context.jsxCallers.get(target) || [];
-            callers.push(node);
-            context.jsxCallers.set(target, callers);
-          }
-        }
-        ts.forEachChild(node, visit);
+    for (const node of indexedSourceNodes(context).jsxNodes) {
+      context.budget?.check(true);
+      const target = targetDeclaration(node.tagName, context.checker);
+      if (target) {
+        const callers = context.jsxCallers.get(target) || [];
+        callers.push(node);
+        context.jsxCallers.set(target, callers);
       }
-      visit(source);
     }
   }
   return context.jsxCallers.get(component) || [];
@@ -601,7 +617,7 @@ function references(files, targets, budget, existingContext) {
   for (const file of targets) {
     const source = sources.get(file);
     if (!source) continue;
-    function visit(node) {
+    for (const node of indexedSourceNodes(context).callsByFile.get(file) || []) {
       budget.check(true);
       if (ts.isCallExpression(node)) {
         const wrapped = wrapperCall(node.expression, checker);
@@ -662,9 +678,7 @@ function references(files, targets, budget, existingContext) {
           result.push({ file, reason: "WRAPPER_CONTRACT_CHANGED", expression: printed(node) });
         }
       }
-      ts.forEachChild(node, visit);
     }
-    visit(source);
   }
   return result;
 }
