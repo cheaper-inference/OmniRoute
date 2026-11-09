@@ -48,7 +48,6 @@
 // from the barrel — 245.
 // TypeSafe System One (#15278, non-chat `typesafe` credential provider) adds one specialty-media entry — 249.
 // ainetcafe (#13862, OpenAI-compatible gateway) adds one apikey/gateways entry — 253.
-// cheapaimodel (OpenAI-compatible gateway) adds one apikey/gateways entry — 254.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
