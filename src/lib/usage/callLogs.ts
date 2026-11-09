@@ -182,15 +182,11 @@ async function resolveAccountName(connectionId: string | null | undefined) {
   }
 
   try {
-    const { getProviderConnections } = await import("@/lib/db/providers");
-    const connections = await getProviderConnections();
-    const conn = connections.find((item) => item.id === connectionId);
+    // Point lookup of the label columns: no full-table proxy rebuild, no credential decrypt.
+    const { getProviderConnectionDisplayMetadata } = await import("@/lib/db/providers");
+    const [conn] = getProviderConnectionDisplayMetadata([connectionId]);
     if (conn) {
-      account = pickDisplayValue(
-        [toStringOrNull(conn.name), toStringOrNull(conn.email)],
-        true,
-        account
-      );
+      account = pickDisplayValue([conn.name, conn.email], true, account);
     }
   } catch {
     // Best-effort lookup only.

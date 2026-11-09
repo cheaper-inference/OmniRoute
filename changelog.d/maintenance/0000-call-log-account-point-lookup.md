@@ -1,0 +1,1 @@
+- **perf(call-logs):** Saving a call log looks up the account label by connection id instead of rebuilding every provider connection.
