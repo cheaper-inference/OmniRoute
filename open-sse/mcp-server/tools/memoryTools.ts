@@ -1,12 +1,23 @@
 import { z } from "zod";
-import { retrieveMemories } from "@/lib/memory/retrieval";
-import { createMemory, deleteMemory, listMemories } from "@/lib/memory/store";
-import { MemoryType } from "@/lib/memory/types";
-import {
-  getMemorySettings,
-  toMemoryRetrievalConfig,
-  DEFAULT_MEMORY_SETTINGS,
-} from "@/lib/memory/settings";
+import type { MemoryType as MemoryTypeT } from "@/lib/memory/types";
+// Lazy-loaded: the memory store/retrieval chain pulls in qdrant + embeddings
+// (~58 MB retained heap at import). Loaded on first memory tool invocation.
+async function loadMemoryModules() {
+  const [retrieval, store, settings] = await Promise.all([
+    import("@/lib/memory/retrieval"),
+    import("@/lib/memory/store"),
+    import("@/lib/memory/settings"),
+  ]);
+  return {
+    retrieveMemories: retrieval.retrieveMemories,
+    createMemory: store.createMemory,
+    deleteMemory: store.deleteMemory,
+    listMemories: store.listMemories,
+    getMemorySettings: settings.getMemorySettings,
+    toMemoryRetrievalConfig: settings.toMemoryRetrievalConfig,
+    DEFAULT_MEMORY_SETTINGS: settings.DEFAULT_MEMORY_SETTINGS,
+  };
+}
 import { resolveMcpToolOwnerId } from "../mcpCallerIdentity.ts";
 import type { McpToolExtraLike } from "../scopeEnforcement.ts";
 
@@ -58,12 +69,13 @@ export const memoryTools = {
     scopes: ["read:memory"],
     inputSchema: MemorySearchSchema,
     handler: async (args: z.infer<typeof MemorySearchSchema>, extra?: McpToolExtraLike) => {
+      const M = await loadMemoryModules();
       const apiKeyId = await resolveMemoryOwnerId(args.apiKeyId, extra);
       // Plan 21 D16/Bug#7 fix: even on the error path the fallback must
-      // respect DEFAULT_MEMORY_SETTINGS.strategy instead of hardcoding "exact".
+      // respect M.DEFAULT_MEMORY_SETTINGS.strategy instead of hardcoding "exact".
       const memorySettings =
-        (await getMemorySettings().catch(() => null)) ?? DEFAULT_MEMORY_SETTINGS;
-      const baseConfig = toMemoryRetrievalConfig(memorySettings, {
+        (await M.getMemorySettings().catch(() => null)) ?? M.DEFAULT_MEMORY_SETTINGS;
+      const baseConfig = M.toMemoryRetrievalConfig(memorySettings, {
         query: args.query,
       });
 
@@ -72,10 +84,10 @@ export const memoryTools = {
         enabled: true,
         maxTokens:
           args.maxTokens ??
-          (memorySettings.enabled ? memorySettings.maxTokens : DEFAULT_MEMORY_SETTINGS.maxTokens),
+          (memorySettings.enabled ? memorySettings.maxTokens : M.DEFAULT_MEMORY_SETTINGS.maxTokens),
       };
 
-      const memories = await retrieveMemories(apiKeyId, config);
+      const memories = await M.retrieveMemories(apiKeyId, config);
 
       const filtered = args.type ? memories.filter((m) => m.type === args.type) : memories;
 
@@ -98,11 +110,12 @@ export const memoryTools = {
     scopes: ["write:memory"],
     inputSchema: MemoryAddSchema,
     handler: async (args: z.infer<typeof MemoryAddSchema>, extra?: McpToolExtraLike) => {
+      const M = await loadMemoryModules();
       const apiKeyId = await resolveMemoryOwnerId(args.apiKeyId, extra);
-      const memory = await createMemory({
+      const memory = await M.createMemory({
         apiKeyId,
         sessionId: args.sessionId || "",
-        type: args.type as MemoryType,
+        type: args.type as MemoryTypeT,
         key: args.key,
         content: args.content,
         metadata: args.metadata || {},
@@ -125,10 +138,11 @@ export const memoryTools = {
     scopes: ["write:memory"],
     inputSchema: MemoryClearSchema,
     handler: async (args: z.infer<typeof MemoryClearSchema>, extra?: McpToolExtraLike) => {
+      const M = await loadMemoryModules();
       const apiKeyId = await resolveMemoryOwnerId(args.apiKeyId, extra);
-      const result = await listMemories({
+      const result = await M.listMemories({
         apiKeyId,
-        type: args.type as MemoryType | undefined,
+        type: args.type as MemoryTypeT | undefined,
       });
       const existingMemories = Array.isArray(result)
         ? result
@@ -144,7 +158,7 @@ export const memoryTools = {
 
       let deletedCount = 0;
       for (const memory of toDelete) {
-        await deleteMemory(memory.id);
+        await M.deleteMemory(memory.id);
         deletedCount++;
       }
 
