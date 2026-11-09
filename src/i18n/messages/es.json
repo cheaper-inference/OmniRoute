@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Preferencias de cuentas",
+    "description": "Marca varias cuentas como preferidas o déjalas como reserva para esta combinación. El enrutamiento automático ordena las cuentas dentro de cada nivel. Las cuentas no incluidas son normales. Los permisos, los límites de cuota y las vinculaciones existentes a turnos siguen aplicándose.",
+    "preferred": "Preferidas",
+    "normal": "Normales",
+    "reserve": "Reserva",
+    "excluded": "Excluidas",
+    "loading": "Cargando cuentas…",
+    "error": "No se pudieron cargar las cuentas. Vuelve a abrir el editor para intentarlo de nuevo.",
+    "missing": "Cuenta no disponible ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Modo de servicio de Codex para esta clave de API",
     "description": "Se aplica a las solicitudes de Codex, incluidos los modelos de Codex dentro de las combinaciones. Los modos forzados prevalecen sobre el cliente, la configuración global y los valores predeterminados de conexión. Los demás proveedores no se ven afectados.",
@@ -5722,6 +5733,7 @@
     "filterError": "Error",
     "filterBanned": "Bloqueado",
     "filterCreditsExhausted": "Créditos agotados",
+    "filterVerificationRequired": "Requiere verificación",
     "accountSearchPlaceholder": "Buscar cuentas…",
     "noFilteredConnections": "Ninguna conexión coincide con el filtro actual.",
     "failedSetAlias": "No se pudo establecer el alias",
@@ -14635,6 +14647,8 @@
     "usdUsageQuotaDescription": "Bloquea esta clave con un error 400 de la API cuando su gasto local en USD alcanza la cuota diaria o semanal configurada.",
     "dailyQuotaUsd": "Cuota diaria (USD)",
     "weeklyQuotaUsd": "Cuota semanal (USD)",
+    "fiveHourQuotaUsd": "Cuota de 5 horas (USD)",
+    "fiveHourQuotaHint": "Ventana móvil: el gasto de cada solicitud cuenta durante 5 horas y luego se libera.",
     "quotaWindowDescription": "La cuota semanal sigue el restablecimiento semanal de Claude almacenado en caché cuando está disponible; de lo contrario, utiliza una ventana móvil de 7 días. La cuota diaria utiliza el día natural de Fortaleza.",
     "apiKeyUsdQuota": "Cuota en USD de la clave de API",
     "apiKeyUsdQuotaDescription": "Cuando está habilitado, @@om-usage devuelve la cuota diaria, la cuota semanal, el gasto diario y el gasto semanal en USD. El cálculo semanal sigue el restablecimiento de Claude almacenado en caché cuando está disponible.",

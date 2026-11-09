@@ -12,6 +12,7 @@ interface UsageCostRow {
   cacheReadTokens: number | null;
   cacheCreationTokens: number | null;
   reasoningTokens: number | null;
+  oldestTimestamp: string | null;
 }
 
 /** Cost snapshots take precedence over token repricing, without double charging. */
@@ -31,7 +32,8 @@ export function getApiKeySpendRows(apiKeyId: string, sinceIso: string): UsageCos
         COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END), 0) as completionTokens,
         COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END), 0) as cacheReadTokens,
         COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as cacheCreationTokens,
-        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END), 0) as reasoningTokens
+        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END), 0) as reasoningTokens,
+        MIN(timestamp) as oldestTimestamp
       FROM usage_history
       WHERE api_key_id = @apiKeyId
         AND timestamp >= @sinceIso

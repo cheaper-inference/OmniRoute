@@ -22,8 +22,10 @@ const costRules = await import("../../src/domain/costRules.ts");
 const stt = await import("../../src/app/api/v1/audio/transcriptions/route.ts");
 const tts = await import("../../src/app/api/v1/audio/speech/route.ts");
 const images = await import("../../src/app/api/v1/images/generations/route.ts");
-const { priceMediaRequest, normalizeMediaUsage, safelyRecordMedia } =
+const { priceMediaRequest, normalizeMediaUsage, safelyRecordMedia, recordMediaRequest } =
   await import("../../src/lib/usage/mediaRequestAccounting.ts");
+const { getApiKeyUsageLimitStatus } = await import("../../src/lib/usage/apiKeyUsageLimits.ts");
+const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
 const originalFetch = globalThis.fetch;
 
 async function reset() {
@@ -79,6 +81,91 @@ async function ledger(key: string) {
     .prepare("SELECT * FROM request_cost_ledger WHERE api_key_id=? ORDER BY id")
     .all(key) as Array<Record<string, unknown>>;
 }
+
+test("migrated media billing counts stored charges once in five-hour budgets after tariff changes", async () => {
+  const { connection, key } = await seed("openrouter", "synthetic-stt", {
+    input: 100,
+    output: 100,
+  });
+  await updatePricing({
+    openrouter: {
+      "synthetic-tts": { output_cost_per_character: 0.001 },
+      "synthetic-image": { output_cost_per_image: 0.02 },
+    },
+  });
+  const now = Date.now();
+  const spentAt = new Date(now - 2 * 60 * 60 * 1000).toISOString();
+  const requests = [
+    {
+      model: "synthetic-stt",
+      unit: "second" as const,
+      quantity: 2,
+      endpoint: "/v1/audio/transcriptions",
+      usage: { input_tokens: 1_000_000, cost: 0.05 },
+    },
+    {
+      model: "synthetic-tts",
+      unit: "character" as const,
+      quantity: 10,
+      endpoint: "/v1/audio/speech",
+    },
+    {
+      model: "synthetic-image",
+      unit: "image" as const,
+      quantity: 2,
+      endpoint: "/v1/images/generations",
+    },
+  ];
+  for (const request of requests) {
+    const bill = await priceMediaRequest({ provider: "openrouter", ...request });
+    await recordMediaRequest(
+      {
+        provider: "openrouter",
+        model: request.model,
+        endpoint: request.endpoint,
+        apiKeyId: key.id,
+        connectionId: connection.id,
+        startTime: now,
+        requestId: `synthetic-migration-${request.unit}`,
+      },
+      bill
+    );
+  }
+  const db = core.getDbInstance();
+  db.prepare("UPDATE usage_history SET timestamp = ? WHERE api_key_id = ?").run(spentAt, key.id);
+  await updatePricing({
+    openrouter: {
+      "synthetic-stt": { input: 1000, output: 1000 },
+      "synthetic-tts": { output_cost_per_character: 1 },
+      "synthetic-image": { output_cost_per_image: 2 },
+    },
+  });
+  const status = await getApiKeyUsageLimitStatus(
+    { id: key.id, usageLimitEnabled: true, fiveHourUsageLimitUsd: 0.09, allowedConnections: null },
+    { now: () => now }
+  );
+  near(status.fiveHourSpentUsd, 0.1);
+  assert.equal(status.fiveHourExceeded, true);
+  assert.equal(status.fiveHourResetAtIso, new Date(now + 3 * 60 * 60 * 1000).toISOString());
+  const rows = await getUsageHistory();
+  assert.equal(rows.length, 3);
+  assert.equal((await ledger(key.id)).length, 3);
+  near(costRules.checkBudget(key.id).periodUsed, 0.1);
+  assert.deepEqual(
+    db
+      .prepare(
+        "SELECT version, name FROM _omniroute_migrations WHERE version >= '228' ORDER BY version"
+      )
+      .all(),
+    [
+      { version: "228", name: "purge_orphaned_provider_catalogs" },
+      { version: "229", name: "api_key_five_hour_limit" },
+      { version: "230", name: "call_logs_cache_write_tiers" },
+      { version: "231", name: "usage_history_calculated_cost" },
+    ]
+  );
+  assert.equal(runMigrations(db), 0);
+});
 
 test("STT records upstream dollars and measured seconds without changing the transcript", async () => {
   const { connection, key } = await seed("openrouter", "mistralai/voxtral-mini-transcribe-3-0", {

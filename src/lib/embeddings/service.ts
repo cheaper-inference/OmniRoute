@@ -40,6 +40,7 @@ import { isPrivateHost, isCloudMetadataHost } from "@/shared/network/outboundUrl
 import { embeddingSuccessResponse } from "./billing";
 import { resolveLocalSyncedEndpointRoute } from "@/lib/providerModels/syncedEndpointRouting";
 import { resolveAlibabaProviderEmbeddingUrl } from "@/shared/constants/alibabaProviderRegions";
+import { ensureCopilotEmbeddingToken } from "./copilotToken";
 
 /**
  * A local server (llama.cpp, LM Studio, …) embeds with whatever model it loaded and
@@ -506,6 +507,9 @@ export async function createEmbeddingResponse(
     );
     if (connectionBaseUrl) providerConfig = { ...providerConfig, baseUrl: connectionBaseUrl };
   }
+
+  // GitHub Copilot: renew or mint the exchanged copilotToken before dispatch.
+  credentials = await ensureCopilotEmbeddingToken(providerConfig, provider, credentials);
 
   // #474: when the request used a bare model name (no "/" — e.g. an alias that
   // resolved to "auto") and the selected connection declares a defaultModel,

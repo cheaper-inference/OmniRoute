@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Preferenzi tal-kontijiet",
+    "description": "Agħżel diversi kontijiet bħala preferuti jew żommhom bħala riżerva għal din il-konfigurazzjoni tar-rotta. Ir-rotta awtomatika tikklassifika l-kontijiet f’kull kategorija. Il-kontijiet mhux elenkati jitqiesu normali. Il-permessi, il-limiti tal-kwota u r-rabtiet eżistenti mat-turni jibqgħu japplikaw.",
+    "preferred": "Preferut",
+    "normal": "Normali",
+    "reserve": "Riżerva",
+    "excluded": "Eskluż",
+    "loading": "Qed jitgħabbew il-kontijiet…",
+    "error": "Ma setgħux jitgħabbew il-kontijiet. Iftaħ mill-ġdid l-editur biex terġa’ tipprova.",
+    "missing": "Kont mhux disponibbli ({id})"
+  },
   "teamCosts": {
     "title": "Spejjeż tat-tim",
     "subtitle": "Immaniġġja baġits artab maqsuma u stimi tal-ispiża tal-katalgu.",
@@ -5799,6 +5810,7 @@
     "filterError": "Żball",
     "filterBanned": "Ipprojbit",
     "filterCreditsExhausted": "Il-krediti ġew eżawriti",
+    "filterVerificationRequired": "Teħtieġ verifika",
     "accountSearchPlaceholder": "Fittex fil-kontijiet…",
     "noFilteredConnections": "L-ebda konnessjoni ma taqbel mal-filtru attwali.",
     "failedSetAlias": "Ma rnexxiex l-issettjar tal-isem alternattiv",
@@ -14712,6 +14724,8 @@
     "usdUsageQuotaDescription": "Jimblokka din iċ-ċavetta bi żball API 400 wara li l-infiq lokali tagħha f'USD jilħaq il-kwota kkonfigurata ta' kuljum jew ta' kull ġimgħa.",
     "dailyQuotaUsd": "Kwota ta' kuljum (USD)",
     "weeklyQuotaUsd": "Kwota ta' kull ġimgħa (USD)",
+    "fiveHourQuotaUsd": "Kwota ta' 5 sigħat (USD)",
+    "fiveHourQuotaHint": "Tieqa li timxi: l-infiq ta' kull talba jgħodd għal 5 sigħat, imbagħad jinħeles.",
     "quotaWindowDescription": "Il-kwota ta' kull ġimgħa ssegwi r-reset ta' kull ġimgħa ta' Claude miżmum fil-cache meta dan ikun disponibbli; inkella tuża perjodu mobbli ta' 7 ijiem. Il-kwota ta' kuljum tuża l-jum kalendarju ta' Fortaleza.",
     "apiKeyUsdQuota": "Kwota f'USD taċ-ċavetta API",
     "apiKeyUsdQuotaDescription": "Meta tkun attivata, @@om-usage jirritorna l-kwota ta' kuljum, il-kwota ta' kull ġimgħa, l-infiq ta' kuljum u l-infiq ta' kull ġimgħa f'USD. Il-kwota ta' kull ġimgħa ssegwi r-reset ta' Claude miżmum fil-cache meta dan ikun disponibbli.",

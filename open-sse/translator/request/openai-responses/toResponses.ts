@@ -628,6 +628,10 @@ export function openaiToOpenAIResponsesRequest(
         // Responses clients never carry this marker, so they keep their
         // encrypted-reasoning continuity.
         result[REASONING_SUMMARY_OPT_OUT_MARKER] = true;
+      } else if (credentialRecord._provider === "mistral") {
+        // Effort is all the chat client asked for, and the defaults below are
+        // OpenAI extras that nothing shows Mistral's preview endpoint accepts.
+        result.reasoning = { effort };
       } else {
         result.reasoning = { effort, summary: DEFAULT_RESPONSES_REASONING_SUMMARY };
         defaultedReasoningSummary = true;

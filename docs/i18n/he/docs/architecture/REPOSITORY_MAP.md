@@ -183,7 +183,7 @@ src/
 | `quota/`                                 | מנוע שיתוף מכסות: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore interface), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — see `docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                 | לקוח קטלוג דגם חופשי של מכ"ם: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — see `docs/frameworks/RADAR.md`                                                                                                                                           |
 | `display/`                               | עוזרי עיצוב UI (עלות, חביון וכו')                                                                                                                                                                                                                                                                                   |
-| `embeddings/`                            | עוזרי שירותי הטבעה                                                                                                                                                                                                                                                                                                  |
+| `embeddings/`                            | עוזרי שירות ההטבעות                                                                                                                                                                                                                                                                                                 |
 | `env/`                                   | ניתוח משתנה Env אימות +                                                                                                                                                                                                                                                                                             |
 | `evals/`                                 | Eval framework (סוויטות, ראנר, ריצה) — see `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                               |
 | `guardrails/`                            | PII masker, הזרקה מהירה, גשר ראייה — ראה `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                              |
@@ -242,12 +242,12 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `components/`                    | רכיב לוח המחוונים API: מתאמים מעל `packages/ui-kit` — ראה `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: שמות סמלים המשמשים את המסכים רכיבי → Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **380 ספקים** עם אימות Zod (מקור האמת)                                                         |
+| `constants/providers.ts`         | **381 ספקים** עם אימות Zod (מקור האמת)                                                         |
 | `constants/cliTools.ts`          | רישום כלי CLI חיצוני                                                                           |
 | `constants/routingStrategies.ts` | **20 אסטרטגיות ניתוב** עם סדרי עדיפויות                                                        |
 | `constants/publicApiRoutes.ts`   | מסלולים הדורשים אישור נושאת (לעומת ניהול).                                                     |
 | `constants/upstreamHeaders.ts`   | רשימת דחיית כותרות לבקשות במעלה הזרם                                                           |
-| `validation/schemas.ts`          | סכימות ~ 80 Zod (מקור יחיד של אמת לחוזי API )                                                  |
+| `validation/schemas.ts`          | סכימות ~ 80 Zod (מקור יחיד של אמת עבור חוזי API )                                              |
 | `validation/helpers.ts`          | עוזרי אימות Zod (`validateBody` וכו')                                                          |
 | `types/`                         | סוגי TS משותפים                                                                                |
 | `contracts/`                     | חוזי API ציבוריים (נצרך על ידי `files:` ב- `package.json`)                                     |
@@ -412,28 +412,28 @@ open-sse/
 | `CLI-TOOLS.md`              | שילובי CLI חיצוניים + פנימי OmniRoute CLI                                      |
 | `I18N.md`                   | ארכיטקטורת i18n, הוספת שפה, 67 מקומות                                          |
 | `UNINSTALL.md`              | נקה את שלבי הסרת ההתקנה                                                        |
-| `PROVIDER_REFERENCE.md`     | **נוצר אוטומטית** קטלוג של 380 ספקים (Regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **נוצר אוטומטית** קטלוג של 381 ספקים (Regen: `npm run gen:provider-reference`) |
 
 ### צלילות עמוקות של תת-מערכת
 
-| דוק                                         | מַטָרָה                                                                    |
-| ------------------------------------------- | -------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | שרת MCP : 110 כלים, 3 העברות, 33 היקפים, נקודות קצה REST                   |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 כישורים, עוזרי REST, כרטיס סוכן                      |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | מדריך מאוחד: A2A vs ACP vs Cloud Agents                                    |
-| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules                                                |
-| `SKILLS.md`                                 | מסגרת מיומנויות (ארגז חול מובנה + marketplace + SkillsSH + )               |
-| `RADAR.md`                                  | שכבת-על של קטלוג דגמים חופשיים של מכ"ם (`RADAR_ENABLED`, כבוי כברירת מחדל) |
-| `MEMORY.md`                                 | מערכת זיכרון (SQLite FTS5 + Qdrant)                                        |
-| `EVALS.md`                                  | Eval framework (סוויטות, ריצות, רובריקות)                                  |
-| `GUARDRAILS.md`                             | מסכת PII, הזרקה מהירה, גשר ראייה                                           |
-| `COMPLIANCE.md`                             | יומן ביקורת, שימור, ביטול הסכמה noLog                                      |
-| `WEBHOOKS.md`                               | משלוח אינטרנטי חתום על ידי HMAC                                            |
-| `REASONING_REPLAY.md`                       | מטמון memory/SQLite היברידי עבור `reasoning_content`                       |
-| `AUTHZ_GUIDE.md`                            | צינור הרשאות (`classify` → `policies` → `enforce`)                         |
-| `RESILIENCE_GUIDE.md`                       | נעילה של מפסק מעגל + cooldown דגם +                                        |
-| `docs/security/STEALTH_GUIDE.md` (גיט בלבד) | טביעת אצבע TLS (JA3/JA4), Claude Code CCH, MITM cert                       |
-| `AUTO-COMBO.md`                             | מנוע משולב אוטומטי (ניקוד של 16 גורמים, חבילות של 6 מצבים, מפעל וירטואלי)  |
+| דוק                                         | מַטָרָה                                                                   |
+| ------------------------------------------- | ------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | שרת MCP : 110 כלים, 3 העברות, 33 היקפים, נקודות קצה REST                  |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 כישורים, עוזרי REST, כרטיס סוכן                     |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | מדריך מאוחד: A2A vs ACP vs Cloud Agents                                   |
+| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules                                               |
+| `SKILLS.md`                                 | מסגרת מיומנויות (ארגז חול מובנה + marketplace + SkillsSH + )              |
+| `RADAR.md`                                  | שכבת-על של קטלוג דגם רדאר (`RADAR_ENABLED`, כבוי כברירת מחדל)             |
+| `MEMORY.md`                                 | מערכת זיכרון (SQLite FTS5 + Qdrant)                                       |
+| `EVALS.md`                                  | Eval framework (סוויטות, ריצות, רובריקות)                                 |
+| `GUARDRAILS.md`                             | מסכת PII, הזרקה מהירה, גשר ראייה                                          |
+| `COMPLIANCE.md`                             | יומן ביקורת, שימור, ביטול הסכמה noLog                                     |
+| `WEBHOOKS.md`                               | משלוח אינטרנטי חתום על ידי HMAC                                           |
+| `REASONING_REPLAY.md`                       | מטמון memory/SQLite היברידי עבור `reasoning_content`                      |
+| `AUTHZ_GUIDE.md`                            | צינור הרשאות (`classify` → `policies` → `enforce`)                        |
+| `RESILIENCE_GUIDE.md`                       | נעילה של מפסק מעגל + cooldown דגם +                                       |
+| `docs/security/STEALTH_GUIDE.md` (גיט בלבד) | טביעת אצבע TLS (JA3/JA4), Claude Code CCH, MITM cert                      |
+| `AUTO-COMBO.md`                             | מנוע משולב אוטומטי (ניקוד של 16 גורמים, חבילות של 6 מצבים, מפעל וירטואלי) |
 
 ### דְחִיסָה
 

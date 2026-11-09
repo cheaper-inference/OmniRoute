@@ -2,7 +2,7 @@ import { getDbInstance } from "@/lib/db/core";
 import { getApiKeySpendRows } from "@/lib/db/apiKeySpend";
 import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 import { getProviderQuotaWindowStartIso } from "@/lib/db/quotaResetEvents";
-import { sumSearchLedgerSpendSince } from "@/lib/db/costLedger";
+import { getOldestSearchLedgerSpendSince, sumSearchLedgerSpendSince } from "@/lib/db/costLedger";
 import { calculateCostDetailed } from "./costCalculator";
 import { isAnthropicMessagesRequest } from "@/shared/utils/anthropicErrorEnvelope";
 
@@ -24,6 +24,7 @@ import {
 const FORTALEZA_UTC_OFFSET_MS = 3 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+export const FIVE_HOUR_WINDOW_MS = 5 * 60 * 60 * 1000;
 
 export interface ApiKeyUsageLimitMetadata {
   id: string;
@@ -32,6 +33,7 @@ export interface ApiKeyUsageLimitMetadata {
   usageLimitEnabled?: boolean;
   dailyUsageLimitUsd?: number | null;
   weeklyUsageLimitUsd?: number | null;
+  fiveHourUsageLimitUsd?: number | null;
 }
 
 export interface ApiKeyUsageLimitStatus {
@@ -68,6 +70,22 @@ export interface ApiKeyUsageLimitStatus {
   weeklyPricingFailure?: boolean;
   /** Effective UNPRICED_USAGE_BUDGET_POLICY used to compute `*Exceeded`. */
   unpricedUsagePolicy?: UnpricedUsageBudgetPolicy;
+  /**
+   * Rolling 5-hour window (mirrors the Claude/Codex session window), enforced with the
+   * same unpriced/pricing-failure rules as daily and weekly. Spend frees up as requests
+   * older than 5 h age out, so the reset is the oldest in-window spend + 5 h (now + 5 h
+   * when the window is empty). That frees the oldest spend only: a key far over its limit
+   * can still be over it at that instant, and is then told the next reset. Only queried
+   * when a 5 h limit is configured.
+   */
+  fiveHourLimitUsd?: number | null;
+  fiveHourSpentUsd?: number;
+  fiveHourWindowStartIso?: string;
+  fiveHourResetAtIso?: string | null;
+  fiveHourExceeded?: boolean;
+  fiveHourHasUnpricedUsage?: boolean;
+  fiveHourUnpricedModels?: string[];
+  fiveHourPricingFailure?: boolean;
 }
 
 export interface ApiKeyUsageLimitDeps {
@@ -472,11 +490,29 @@ interface ApiKeyUsdSpend {
    * Always blocks a limited window, independent of UNPRICED_USAGE_BUDGET_POLICY.
    */
   hasPricingFailure: boolean;
+  /** Oldest counted usage_history row in the window; only the 5 h reset reads it. */
+  oldestUsageAtIso: string | null;
+}
+
+const EMPTY_SPEND: ApiKeyUsdSpend = {
+  totalUsd: 0,
+  hasUnpricedUsage: false,
+  unpricedModels: [],
+  hasPricingFailure: false,
+  oldestUsageAtIso: null,
+};
+
+/** Oldest row across the groups the total counts; a group without provider/model is skipped. */
+function getOldestCountedUsageIso(rows: ReturnType<typeof getApiKeySpendRows>): string | null {
+  const oldestTimes = rows
+    .filter((row) => row.provider && row.model)
+    .map((row) => Date.parse(row.oldestTimestamp ?? ""))
+    .filter(Number.isFinite);
+  return oldestTimes.length > 0 ? new Date(Math.min(...oldestTimes)).toISOString() : null;
 }
 
 async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promise<ApiKeyUsdSpend> {
-  if (!apiKeyId)
-    return { totalUsd: 0, hasUnpricedUsage: false, unpricedModels: [], hasPricingFailure: false };
+  if (!apiKeyId) return EMPTY_SPEND;
   const rows = getApiKeySpendRows(apiKeyId, sinceIso);
 
   let total = 0;
@@ -533,6 +569,58 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
     hasUnpricedUsage: unpriced.size > 0,
     unpricedModels: [...unpriced].sort(),
     hasPricingFailure,
+    oldestUsageAtIso: getOldestCountedUsageIso(rows),
+  };
+}
+
+interface FiveHourWindow {
+  windowStartIso: string;
+  resetAtIso: string | null;
+  spend: ApiKeyUsdSpend;
+}
+
+async function getFiveHourWindow(
+  apiKeyId: string,
+  limitUsd: number | null,
+  nowMs: number
+): Promise<FiveHourWindow> {
+  const windowStartIso = new Date(nowMs - FIVE_HOUR_WINDOW_MS).toISOString();
+  // Skipped without a 5 h limit: no extra usage_history scan per request.
+  if (limitUsd === null) return { windowStartIso, resetAtIso: null, spend: EMPTY_SPEND };
+
+  const spend = await getApiKeyUsdSpendSince(apiKeyId, windowStartIso);
+  // Web search spend counts toward the window but lives in the ledger, so it ages out too.
+  const oldestMs = Math.min(
+    ...[spend.oldestUsageAtIso, getOldestSearchLedgerSpendSince(apiKeyId, windowStartIso)]
+      .map((iso) => Date.parse(iso ?? ""))
+      .filter(Number.isFinite)
+  );
+  const resetMs = Number.isFinite(oldestMs) ? oldestMs : nowMs;
+  return {
+    windowStartIso,
+    resetAtIso: new Date(resetMs + FIVE_HOUR_WINDOW_MS).toISOString(),
+    spend,
+  };
+}
+
+/** 5 h status fields, with the same unpriced and pricing-failure rules as daily/weekly. */
+function fiveHourStatusFields(
+  window: FiveHourWindow,
+  limitUsd: number | null,
+  enabled: boolean,
+  failClosed: boolean
+) {
+  const { totalUsd, hasUnpricedUsage, unpricedModels, hasPricingFailure } = window.spend;
+  const blocksOnUnknown = hasPricingFailure || (failClosed && hasUnpricedUsage);
+  return {
+    fiveHourLimitUsd: limitUsd,
+    fiveHourSpentUsd: totalUsd,
+    fiveHourWindowStartIso: window.windowStartIso,
+    fiveHourResetAtIso: window.resetAtIso,
+    fiveHourExceeded: enabled && limitUsd !== null && (totalUsd >= limitUsd || blocksOnUnknown),
+    fiveHourHasUnpricedUsage: hasUnpricedUsage,
+    fiveHourUnpricedModels: unpricedModels,
+    fiveHourPricingFailure: hasPricingFailure,
   };
 }
 
@@ -557,11 +645,13 @@ export async function getApiKeyUsageLimitStatus(
       : getRollingWeekStartIso(now);
   const dailyLimitUsd = normalizeLimitUsd(metadata.dailyUsageLimitUsd);
   const weeklyLimitUsd = normalizeLimitUsd(metadata.weeklyUsageLimitUsd);
+  const fiveHourLimitUsd = normalizeLimitUsd(metadata.fiveHourUsageLimitUsd);
   const enabled = metadata.usageLimitEnabled === true;
 
-  const [dailySpend, weeklySpend] = await Promise.all([
+  const [dailySpend, weeklySpend, fiveHour] = await Promise.all([
     getApiKeyUsdSpendSince(metadata.id, dailyWindowStartIso),
     getApiKeyUsdSpendSince(metadata.id, weeklyWindowStartIso),
+    getFiveHourWindow(metadata.id, fiveHourLimitUsd, now),
   ]);
   const dailySpentUsd = dailySpend.totalUsd;
   const weeklySpentUsd = weeklySpend.totalUsd;
@@ -607,7 +697,39 @@ export async function getApiKeyUsageLimitStatus(
     dailyPricingFailure: dailySpend.hasPricingFailure,
     weeklyPricingFailure: weeklySpend.hasPricingFailure,
     unpricedUsagePolicy,
+    ...fiveHourStatusFields(fiveHour, fiveHourLimitUsd, enabled, failClosed),
   };
+}
+
+function hasFiveHourLimit(status: ApiKeyUsageLimitStatus): boolean {
+  return typeof status.fiveHourLimitUsd === "number" && status.fiveHourLimitUsd > 0;
+}
+
+function fiveHourTextLines(status: ApiKeyUsageLimitStatus, now: number): string[] {
+  if (!hasFiveHourLimit(status)) return [];
+  const spentUsd = status.fiveHourSpentUsd ?? 0;
+  return [
+    "5-hour quota",
+    formatUsd(status.fiveHourLimitUsd ?? null),
+    "5-hour spent",
+    formatUsd(spentUsd),
+    "5-hour used",
+    formatUsagePercent(getUsagePercent(spentUsd, status.fiveHourLimitUsd ?? null)),
+    `Resets in ${formatResetIn(status.fiveHourResetAtIso ?? null, now)}`,
+    "",
+  ];
+}
+
+function fiveHourPercentLines(status: ApiKeyUsageLimitStatus, now: number): string[] {
+  if (!hasFiveHourLimit(status)) return [];
+  return [
+    "5-hour",
+    formatLeftPercent(
+      getUsagePercent(status.fiveHourSpentUsd ?? 0, status.fiveHourLimitUsd ?? null)
+    ),
+    `⏱ reset in ${formatResetIn(status.fiveHourResetAtIso ?? null, now)}`,
+    "",
+  ];
 }
 
 export function buildApiKeyUsageLimitText(
@@ -615,6 +737,7 @@ export function buildApiKeyUsageLimitText(
   now = Date.now()
 ): string {
   return [
+    ...fiveHourTextLines(status, now),
     "Daily quota",
     formatUsd(status.dailyLimitUsd),
     "Daily spent",
@@ -638,6 +761,7 @@ export function buildApiKeyUsageLimitPercentText(
   now = Date.now()
 ): string {
   return [
+    ...fiveHourPercentLines(status, now),
     "Daily",
     formatLeftPercent(getUsagePercent(status.dailySpentUsd, status.dailyLimitUsd)),
     `⏱ reset in ${formatResetIn(status.dailyResetAtIso, now)}`,
@@ -646,6 +770,63 @@ export function buildApiKeyUsageLimitPercentText(
     formatLeftPercent(getUsagePercent(status.weeklySpentUsd, status.weeklyLimitUsd)),
     `⏱ reset in ${formatResetIn(status.weeklyResetAtIso, now)}`,
   ].join("\n");
+}
+
+interface UsageWindowView {
+  label: "daily" | "weekly" | "5-hour";
+  exceeded: boolean;
+  limit: number | null;
+  spent: number;
+  resetAtIso: string | null;
+  models: string[] | undefined;
+  failed: boolean;
+}
+
+/** Every per-key window, in the order they are reported when several are over. */
+function usageWindowViews(status: ApiKeyUsageLimitStatus): UsageWindowView[] {
+  return [
+    {
+      label: "daily",
+      exceeded: status.dailyExceeded,
+      limit: status.dailyLimitUsd,
+      spent: status.dailySpentUsd,
+      resetAtIso: status.dailyResetAtIso,
+      models: status.dailyUnpricedModels,
+      failed: status.dailyPricingFailure === true,
+    },
+    {
+      label: "weekly",
+      exceeded: status.weeklyExceeded,
+      limit: status.weeklyLimitUsd,
+      spent: status.weeklySpentUsd,
+      resetAtIso: status.weeklyResetAtIso,
+      models: status.weeklyUnpricedModels,
+      failed: status.weeklyPricingFailure === true,
+    },
+    {
+      label: "5-hour",
+      exceeded: status.fiveHourExceeded === true,
+      limit: status.fiveHourLimitUsd ?? null,
+      spent: status.fiveHourSpentUsd ?? 0,
+      resetAtIso: status.fiveHourResetAtIso ?? null,
+      models: status.fiveHourUnpricedModels,
+      failed: status.fiveHourPricingFailure === true,
+    },
+  ];
+}
+
+/**
+ * A window is over on priced spend when its spend alone reaches the limit, as
+ * opposed to being exceeded only because of unpriced or unknown usage.
+ */
+function isPricedOverLimit(window: UsageWindowView): boolean {
+  return window.exceeded && window.limit !== null && window.spent >= window.limit;
+}
+
+/** "daily", "daily and weekly", "daily, weekly and 5-hour". */
+function joinWindowLabels(labels: string[]): string {
+  if (labels.length < 2) return labels.join("");
+  return `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}`;
 }
 
 const MAX_UNPRICED_MODELS_IN_MESSAGE = 3;
@@ -668,25 +849,8 @@ function formatUnpricedModelList(models: string[] | undefined): string {
  * quota message.
  */
 function buildUnpricedUsageBlockedMessage(status: ApiKeyUsageLimitStatus): string | null {
-  const windows = [
-    {
-      label: "daily",
-      exceeded: status.dailyExceeded,
-      limit: status.dailyLimitUsd,
-      spent: status.dailySpentUsd,
-      models: status.dailyUnpricedModels,
-      failed: status.dailyPricingFailure === true,
-    },
-    {
-      label: "weekly",
-      exceeded: status.weeklyExceeded,
-      limit: status.weeklyLimitUsd,
-      spent: status.weeklySpentUsd,
-      models: status.weeklyUnpricedModels,
-      failed: status.weeklyPricingFailure === true,
-    },
-  ];
-  const pricedOverage = windows.some((w) => w.exceeded && w.limit !== null && w.spent >= w.limit);
+  const windows = usageWindowViews(status);
+  const pricedOverage = windows.some(isPricedOverLimit);
   if (pricedOverage) return null;
   const failedWindow = windows.find((w) => w.exceeded && w.limit !== null && w.failed);
   if (failedWindow) {
@@ -696,40 +860,35 @@ function buildUnpricedUsageBlockedMessage(status: ApiKeyUsageLimitStatus): strin
     (w) => w.exceeded && w.limit !== null && (w.models?.length ?? 0) > 0
   );
   if (!blocked) return null;
-  const bothBlocked = status.dailyExceeded && status.weeklyExceeded;
-  const label = bothBlocked ? "daily and weekly" : blocked.label;
-  const models = bothBlocked
-    ? [
-        ...new Set([...(status.dailyUnpricedModels ?? []), ...(status.weeklyUnpricedModels ?? [])]),
-      ].sort()
-    : blocked.models;
+  const exceededWindows = windows.filter((w) => w.exceeded);
+  const label =
+    exceededWindows.length > 1
+      ? joinWindowLabels(exceededWindows.map((w) => w.label))
+      : blocked.label;
+  const models =
+    exceededWindows.length > 1
+      ? [...new Set(exceededWindows.flatMap((w) => w.models ?? []))].sort()
+      : blocked.models;
   // A second blocking window can outlive the first one's reset. Missing
   // pricing also needs an operator action, so no reset is a recovery promise.
   return `This API key's ${label} usage includes models with no configured price (${formatUnpricedModelList(models)}), so its usage quota cannot be enforced. Ask an administrator to add pricing for these models.`;
 }
 
 /**
- * A window is over on priced spend when its spend alone reaches the limit, as
- * opposed to being exceeded only because of unpriced or unknown usage.
- */
-function isPricedOverLimit(exceeded: boolean, limit: number | null, spent: number): boolean {
-  return exceeded && limit !== null && spent >= limit;
-}
-
-/**
  * Report the window that is genuinely over on priced spend first; a window that
  * is exceeded only because of unpriced/unknown usage must not mask it.
  */
-function shouldReportDailyWindow(status: ApiKeyUsageLimitStatus): boolean {
-  if (isPricedOverLimit(status.dailyExceeded, status.dailyLimitUsd, status.dailySpentUsd)) {
-    return true;
+function selectReportedWindow(status: ApiKeyUsageLimitStatus): UsageWindowView | null {
+  const windows = usageWindowViews(status);
+  return windows.find(isPricedOverLimit) ?? windows.find((w) => w.exceeded) ?? null;
+}
+
+function buildNextStep(reported: UsageWindowView, others: UsageWindowView[], now: number): string {
+  if (others.length === 0) {
+    return `Resets in ${formatResetIn(reported.resetAtIso, now)}. Choose another allowed model after reset.`;
   }
-  const weeklyOver = isPricedOverLimit(
-    status.weeklyExceeded,
-    status.weeklyLimitUsd,
-    status.weeklySpentUsd
-  );
-  return !weeklyOver && status.dailyExceeded;
+  const blockers = others.length === 1 ? "window also blocks" : "windows also block";
+  return `The ${joinWindowLabels(others.map((w) => w.label))} ${blockers} this key; its ${reported.label} reset alone will not restore access.`;
 }
 
 function buildUsageLimitExceededMessage(
@@ -740,28 +899,15 @@ function buildUsageLimitExceededMessage(
   const unpricedMessage = buildUnpricedUsageBlockedMessage(status);
   if (unpricedMessage) return unpricedMessage;
   const showUsd = options.showUsd !== false;
-  const bothBlocked = status.dailyExceeded && status.weeklyExceeded;
-  if (shouldReportDailyWindow(status) && status.dailyLimitUsd !== null) {
-    const percent = formatUsagePercent(getUsagePercent(status.dailySpentUsd, status.dailyLimitUsd));
-    const nextStep = bothBlocked
-      ? "The weekly window also blocks this key; its daily reset alone will not restore access."
-      : `Resets in ${formatResetIn(status.dailyResetAtIso, now)}. Choose another allowed model after reset.`;
+  const reported = selectReportedWindow(status);
+  if (reported && reported.limit !== null) {
+    const percent = formatUsagePercent(getUsagePercent(reported.spent, reported.limit));
+    const others = usageWindowViews(status).filter((w) => w.exceeded && w.label !== reported.label);
+    const nextStep = buildNextStep(reported, others, now);
     if (!showUsd) {
-      return `This API key reached its daily usage quota (${percent}). ${nextStep}`;
+      return `This API key reached its ${reported.label} usage quota (${percent}). ${nextStep}`;
     }
-    return `This API key reached its daily USD usage quota (${formatUsd(status.dailySpentUsd)} of ${formatUsd(status.dailyLimitUsd)}, ${percent}). ${nextStep}`;
-  }
-  if (status.weeklyExceeded && status.weeklyLimitUsd !== null) {
-    const percent = formatUsagePercent(
-      getUsagePercent(status.weeklySpentUsd, status.weeklyLimitUsd)
-    );
-    const nextStep = bothBlocked
-      ? "The daily window also blocks this key; its weekly reset alone will not restore access."
-      : `Resets in ${formatResetIn(status.weeklyResetAtIso, now)}. Choose another allowed model after reset.`;
-    if (!showUsd) {
-      return `This API key reached its weekly usage quota (${percent}). ${nextStep}`;
-    }
-    return `This API key reached its weekly USD usage quota (${formatUsd(status.weeklySpentUsd)} of ${formatUsd(status.weeklyLimitUsd)}, ${percent}). ${nextStep}`;
+    return `This API key reached its ${reported.label} USD usage quota (${formatUsd(reported.spent)} of ${formatUsd(reported.limit)}, ${percent}). ${nextStep}`;
   }
   return showUsd
     ? "This API key reached its USD usage quota. Choose another allowed model or wait for quota reset."
@@ -780,14 +926,11 @@ export function buildApiKeyUsageLimitRejection(
   );
   // A reset is only actionable if that single priced window caused the
   // rejection. Another blocked window (or missing pricing) may outlive it.
+  const severalWindowsBlocked = usageWindowViews(status).filter((w) => w.exceeded).length > 1;
   const trippedResetAtIso =
-    unpricedMessage || (status.dailyExceeded && status.weeklyExceeded)
+    unpricedMessage || severalWindowsBlocked
       ? null
-      : status.dailyExceeded && shouldReportDailyWindow(status)
-        ? status.dailyResetAtIso
-        : status.weeklyExceeded
-          ? status.weeklyResetAtIso
-          : null;
+      : (selectReportedWindow(status)?.resetAtIso ?? null);
   if (isAnthropicMessagesRequest(request)) {
     // Claude Code treats a non-400 /v1/messages error as an auth failure and triggers
     // a re-login prompt — this branch's status MUST stay 400 (see the "does not trigger
@@ -831,7 +974,12 @@ export async function buildApiKeyUsageLimitPolicyRejection(
   metadata: ApiKeyUsageLimitMetadata
 ): Promise<Response | null> {
   const status = await getApiKeyUsageLimitStatus(metadata);
-  if (!status.enabled || (!status.dailyExceeded && !status.weeklyExceeded)) return null;
+  if (
+    !status.enabled ||
+    (!status.dailyExceeded && !status.weeklyExceeded && !status.fiveHourExceeded)
+  ) {
+    return null;
+  }
   return buildApiKeyUsageLimitRejection(request, status, Date.now(), {
     showUsd: false,
   });
