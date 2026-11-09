@@ -415,7 +415,7 @@ export default function MemorySkillsTab() {
             {/* Strategy selector */}
             <RadioGroup
               aria-label={t("strategy")}
-              orientation="horizontal"
+              columns={3}
               value={config.strategy}
               onValueChange={(next) => save({ strategy: next as "recent" | "semantic" | "hybrid" })}
               disabled={loading || saving}
@@ -787,7 +787,7 @@ export default function MemorySkillsTab() {
 
         <RadioGroup
           aria-label={t("memorySkillsActiveSkillsProvider")}
-          orientation="horizontal"
+          columns={2}
           value={skillsProvider}
           onValueChange={(next) => saveSkillsProvider(next as SkillsProvider)}
           disabled={skillsProviderSaving}
