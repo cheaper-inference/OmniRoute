@@ -1,0 +1,1 @@
+- **perf(sse):** rate-limit protection no longer runs a background timer for each connection that has no requests-per-minute cap, which removes idle wakeups.
