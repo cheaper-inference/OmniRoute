@@ -7906,6 +7906,7 @@
     "systemActor": "系統",
     "ipAccessControl": "IP訪問控制",
     "ipAccessControlDesc": "阻止或允許特定 IP 地址",
+    "ipAccessMode": "存取模式",
     "ipModeDisabled": "已停用",
     "ipModeBlacklist": "黑名單",
     "ipModeWhitelist": "白名單",

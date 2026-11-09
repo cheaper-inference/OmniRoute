@@ -63,9 +63,10 @@ const P = await import("../../src/shared/constants/providers.ts");
 // Token Harbor (#16315) adds one apikey/gateways entry — 253.
 // Runcrate (#18061) adds one apikey/inference-hosts entry — 254.
 // Gisoo (#18112) adds one apikey/gateways entry — 255.
-// EmpirioLabs AI (#17209) adds one apikey entry in its own extract, apikey/empiriolabs.ts: 256.
-// Obscurify.ai (#18463) adds one apikey/gateways entry — 257.
-const APIKEY_PROVIDER_COUNT = 257;
+// deAPI adds one apikey/specialty-media entry — 256.
+// EmpirioLabs AI (#17209) adds one apikey entry in its own extract, apikey/empiriolabs.ts: 257.
+// Obscurify.ai (#18463) adds one apikey/gateways entry — 258.
+const APIKEY_PROVIDER_COUNT = 258;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [

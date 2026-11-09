@@ -639,6 +639,8 @@ export default function SidebarTab() {
 
           <RadioGroup
             label={getSettingsLabel("sidebarPresets", "Presets")}
+            columns={5}
+            minItemWidth="11rem"
             description={getSettingsLabel(
               "sidebarPresetsDesc",
               "Start from a role-based layout. Any change after applying a preset switches to Custom."
@@ -660,22 +662,20 @@ export default function SidebarTab() {
               }
             }}
           >
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {SIDEBAR_PRESETS.map((preset) => (
-                <RadioGroupItem
-                  key={preset.id}
-                  card
-                  value={preset.id}
-                  label={
-                    <span className="inline-flex items-center gap-1.5">
-                      <Icon name={preset.icon} size={18} fill={activePreset === preset.id} />
-                      {presetLabels[preset.id]}
-                    </span>
-                  }
-                  description={presetDescriptions[preset.id]}
-                />
-              ))}
-            </div>
+            {SIDEBAR_PRESETS.map((preset) => (
+              <RadioGroupItem
+                key={preset.id}
+                card
+                value={preset.id}
+                label={
+                  <span className="inline-flex items-center gap-1.5">
+                    <Icon name={preset.icon} size={18} fill={activePreset === preset.id} />
+                    {presetLabels[preset.id]}
+                  </span>
+                }
+                description={presetDescriptions[preset.id]}
+              />
+            ))}
           </RadioGroup>
 
           {/* Confirm preset */}
