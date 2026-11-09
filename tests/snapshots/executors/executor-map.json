@@ -355,11 +355,6 @@
       "configSource": "glmt",
       "provider": "glmt"
     },
-    "grok-bot": {
-      "className": "GrokBotExecutor",
-      "configSource": "grok-bot",
-      "provider": "grok-bot"
-    },
     "grok-cli": {
       "className": "GrokCliExecutor",
       "configSource": "grok-cli",
@@ -444,6 +439,16 @@
       "className": "MaxAiExecutor",
       "configSource": "maxai",
       "provider": "maxai"
+    },
+    "minimax-code": {
+      "className": "MinimaxCodeExecutor",
+      "configSource": "<custom-config>",
+      "provider": "minimax-code"
+    },
+    "mmcode": {
+      "className": "MinimaxCodeExecutor",
+      "configSource": "<custom-config>",
+      "provider": "minimax-code"
     },
     "moonshot": {
       "className": "MoonshotExecutor",
@@ -706,6 +711,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 141,
+  "keyCount": 142,
   "sharedInstances": []
 }

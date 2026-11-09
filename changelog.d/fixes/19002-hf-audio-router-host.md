@@ -1,0 +1,1 @@
+- **fix(sse):** Hugging Face speech-to-text and text-to-speech requests now go to the Inference Providers router (`router.huggingface.co/hf-inference`) instead of the retired `api-inference.huggingface.co` host, which no longer resolves. ([#19002](https://github.com/cheaper-inference/OmniRoute/pull/19002))

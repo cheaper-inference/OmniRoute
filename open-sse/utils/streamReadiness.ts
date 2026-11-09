@@ -48,9 +48,42 @@ export type StreamReadinessResult =
       upstreamDiagnostic?: string;
       code: string;
       type: string;
+      /**
+       * Arrival moment of the most recent RAW upstream chunk (keepalive pings
+       * included) within the readiness window, on STREAM_READINESS_TIMEOUT
+       * results only: null = zero bytes ever arrived (upstream fully silent);
+       * an epoch-ms value = transport alive but no content event. Pure
+       * telemetry — no routing or retry decision reads it.
+       */
+      anyByteAt?: number | null;
       /** An actual upstream rejection, not a readiness stall eligible for a probe retry. */
       upstreamFailure?: true;
     };
+
+/** Response-header carrier for the anyByteAt telemetry signal (see the type
+ * above). "none" = zero bytes ever arrived; an epoch-ms number = the most
+ * recent raw-chunk arrival. Lets external tooling (curl, dashboards, retries)
+ * read the distinction straight off the 504 without touching the result object. */
+export const ANY_BYTE_AT_HEADER = "X-OmniRoute-Any-Byte-At";
+
+export function buildAnyByteAtHeader(anyByteAt: number | null): Record<string, string> {
+  return { [ANY_BYTE_AT_HEADER]: anyByteAt === null ? "none" : String(anyByteAt) };
+}
+
+/** Log-line suffix naming which readiness-timeout shape occurred (see anyByteAt). */
+function describeSilence(lastChunkAt: number | null): string {
+  return lastChunkAt === null
+    ? "ZERO raw bytes received (upstream went fully silent)"
+    : "raw bytes received but no content event (transport alive, upstream stalled)";
+}
+
+export function parseAnyByteAtHeader(header: string | null | undefined): number | null | undefined {
+  if (header == null || header === "") return undefined;
+  if (header === "none") return null;
+  const parsed = Number(header);
+  if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  return undefined;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -704,7 +737,8 @@ function createErrorResponse(
   message: string,
   code: string,
   type: string,
-  upstreamDiagnostic?: string
+  upstreamDiagnostic?: string,
+  extraHeaders?: Record<string, string>
 ): Response {
   return new Response(
     JSON.stringify(
@@ -715,7 +749,7 @@ function createErrorResponse(
         { code, type }
       )
     ),
-    { status, headers: { "Content-Type": "application/json" } }
+    { status, headers: { "Content-Type": "application/json", ...extraHeaders } }
   );
 }
 
@@ -876,6 +910,14 @@ export async function ensureStreamReadiness(
     upstreamErrorFields: null,
   };
   const startedAt = Date.now();
+  // Arrival moment of the most recent RAW upstream chunk (keepalive pings
+  // included). Strictly per-call: a module-level stamp would let one stream's
+  // chunks mark every concurrent stream as "bytes arrived", so a genuinely
+  // silent hang could inherit a sibling request's timestamp and masquerade as
+  // a transport-alive stall. Surfaced on the timeout result (`anyByteAt`) and
+  // on the 504 (`X-OmniRoute-Any-Byte-At`) so operators can tell the two
+  // failure shapes apart at a glance.
+  let lastChunkAt: number | null = null;
   const effectiveTimeoutMs = Math.max(0, Math.floor(options.timeoutMs));
   // Hard ceiling: the deadline may extend on liveness signals (bytes arriving),
   // but never past this absolute maximum.  When maxTimeoutMs is omitted the
@@ -932,7 +974,7 @@ export async function ensureStreamReadiness(
         const reason = timeoutReason();
         options.log?.warn?.(
           "STREAM",
-          `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
+          `${reason} (${options.provider || "provider"}/${options.model || "unknown"}) — ${describeSilence(lastChunkAt)}`
         );
         await reader.cancel(reason).catch(() => {});
         return {
@@ -941,11 +983,14 @@ export async function ensureStreamReadiness(
           classificationReason: reason,
           code: "STREAM_READINESS_TIMEOUT",
           type: "stream_timeout",
+          anyByteAt: lastChunkAt,
           response: createErrorResponse(
             HTTP_STATUS.GATEWAY_TIMEOUT,
             reason,
             "STREAM_READINESS_TIMEOUT",
-            "stream_timeout"
+            "stream_timeout",
+            undefined,
+            buildAnyByteAtHeader(lastChunkAt)
           ),
         };
       }
@@ -1003,7 +1048,7 @@ export async function ensureStreamReadiness(
         const reason = timeoutReason();
         options.log?.warn?.(
           "STREAM",
-          `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
+          `${reason} (${options.provider || "provider"}/${options.model || "unknown"}) — ${describeSilence(lastChunkAt)}`
         );
         await reader.cancel(reason).catch(() => {});
         return {
@@ -1012,11 +1057,14 @@ export async function ensureStreamReadiness(
           classificationReason: reason,
           code: "STREAM_READINESS_TIMEOUT",
           type: "stream_timeout",
+          anyByteAt: lastChunkAt,
           response: createErrorResponse(
             HTTP_STATUS.GATEWAY_TIMEOUT,
             reason,
             "STREAM_READINESS_TIMEOUT",
-            "stream_timeout"
+            "stream_timeout",
+            undefined,
+            buildAnyByteAtHeader(lastChunkAt)
           ),
         };
       }
@@ -1132,6 +1180,7 @@ export async function ensureStreamReadiness(
 
       if (!readResult.value) continue;
       chunks.push(readResult.value);
+      lastChunkAt = Date.now();
       const decodedChunk = decoder.decode(readResult.value, { stream: true });
       bufferedBytes += readResult.value.byteLength;
       contentWatcher?.note(decodedChunk);

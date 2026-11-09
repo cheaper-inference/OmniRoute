@@ -41,29 +41,29 @@ Soʻrov ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ## Nimalar qayd etiladi
 
-`usage.ts` xizmati har bir soʻrov uchun **foydalanish hodisasi**ni qayd etadi:
+`usage.ts` xizmati har bir soʻrov uchun **foydalanish hodisasini** qayd etadi:
 
-| Maydon             | Tur     | Manba                                                             |
-| ------------------ | ------- | ----------------------------------------------------------------- |
-| `id`               | string  | Yozuv yaratilganda hosil qilinadigan UUID                         |
-| `apiKeyId`         | string  | Soʻrovni boshlagan API kaliti                                     |
-| `provider`         | string  | Provayder IDsi (openai, anthropic va hokazo)                      |
-| `model`            | string  | Model IDsi (gpt-5, claude-opus-4-6 va hokazo)                     |
-| `comboId`          | string? | Combo orqali yoʻnaltirilgan boʻlsa, combo IDsi                    |
-| `promptTokens`     | number  | Yuqori oqim javobidan                                             |
-| `completionTokens` | number  | Yuqori oqim javobidan                                             |
-| `cachedTokens`     | number  | Keshga mos kelgan tokenlar (Anthropic prompt keshlashi va hokazo) |
-| `totalTokens`      | number  | prompt + yakuniy javob                                            |
-| `costUsd`          | number  | Narxlash maʼlumotlari asosida hisoblanadi                         |
-| `latencyMs`        | number  | Soʻrovning boshidan oxirigacha davomiyligi                        |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`        |
-| `errorClass`       | string? | status != success boʻlsa, xato klassi                             |
-| `timestamp`        | string  | ISO 8601 UTC                                                      |
-| `metadata`         | object  | Plagin tomonidan kiritilgan maxsus maʼlumotlar                    |
+| Maydon             | Tur     | Manba                                                               |
+| ------------------ | ------- | ------------------------------------------------------------------- |
+| `id`               | satr    | Qayd etish vaqtida yaratilgan UUID                                  |
+| `apiKeyId`         | satr    | Soʻrovni boshlagan API kaliti                                       |
+| `provider`         | satr    | Provayder IDsi (openai, anthropic va boshqalar)                     |
+| `model`            | satr    | Model IDsi (gpt-5, claude-opus-4-6 va boshqalar)                    |
+| `comboId`          | satr?   | Kombo orqali yoʻnaltirilgan boʻlsa, kombo IDsi                      |
+| `promptTokens`     | son     | Yuqori oqimdagi javobdan                                            |
+| `completionTokens` | son     | Yuqori oqimdagi javobdan                                            |
+| `cachedTokens`     | son     | Keshdan topilgan tokenlar (Anthropic prompt keshlashi va boshqalar) |
+| `totalTokens`      | son     | Prompt + javob                                                      |
+| `costUsd`          | son     | Narx maʼlumotlari asosida hisoblanadi                               |
+| `latencyMs`        | son     | Soʻrovning boshidan oxirigacha davomiyligi                          |
+| `status`           | sanalma | `success`, `error`, `rate_limited`, `timeout`, `cancelled`          |
+| `errorClass`       | satr?   | Holat success boʻlmasa, xato sinfi                                  |
+| `timestamp`        | satr    | ISO 8601 UTC                                                        |
+| `metadata`         | obyekt  | Plagin kiritgan maxsus maʼlumotlar                                  |
 
 ### Tokenlar qayerdan olinadi
 
-Tokenlar yuqori oqim provayderi javobidan **javob ishlov beruvchisi**da ajratib olinadi:
+Tokenlar yuqori oqimdagi provayder javobidan **javobni qayta ishlovchi** ichida ajratib olinadi:
 
 ```ts
 // open-sse/handlers/chatCore.ts faylidan
@@ -75,15 +75,45 @@ const usage = response.usage || {
 };
 ```
 
-Foydalanish maʼlumotlarini qaytarmaydigan provayderlar (ayrim veb-cookie provayderlari) uchun OmniRoute tokenlarni `har bir token uchun ~4 ta belgi` evristikasi yordamida **taxmin qiladi** (`open-sse/services/autoCombo/pipelineRouter.ts` fayliga qarang).
+Foydalanish maʼlumotlarini qaytarmaydigan provayderlar (ayrim veb-cookie provayderlari) uchun OmniRoute `~4 chars per token` evristikasi yordamida tokenlar sonini **taxmin qiladi** (`open-sse/services/autoCombo/pipelineRouter.ts` fayliga qarang).
 
 ### Keshlangan tokenlar
 
-OmniRoute `cached_tokens`ni `prompt_tokens`dan alohida kuzatadi, chunki:
+OmniRoute `cached_tokens` ni `prompt_tokens` dan alohida kuzatadi, chunki:
 
-- Anthropic prompt keshlashida keshlangan tokenlar uchun kamaytirilgan tarif olinadi (odatdagi tarifning 10%i)
-- Ayrim provayderlar boshqacha narxlanishi kerak boʻlgan `cache_read_input_tokens`ni qaytaradi
-- Tahlil **keshga mos kelish koeffitsiyenti**ni koʻrsatishi mumkin = `cached_tokens / prompt_tokens`
+- Anthropic prompt keshlashi keshlangan tokenlar uchun pasaytirilgan tarifni qoʻllaydi (odatdagi tarifning 10%i)
+- Ayrim provayderlar boshqa tarifda hisoblanishi kerak boʻlgan `cache_read_input_tokens` ni qaytaradi
+- Tahlillarda **keshdan topilish ulushi** = `cached_tokens / prompt_tokens` koʻrsatilishi mumkin
+
+### Keshga yozish darajalari diagnostikasi
+
+Tahlillar boshqaruv panelidagi prompt keshi holati paneli provayder bildirgan
+5 daqiqalik va 1 soatlik keshga yozishlarni farqlaydi. Anthropic’ning
+`usage.cache_creation.ephemeral_5m_input_tokens` va
+`usage.cache_creation.ephemeral_1h_input_tokens` qiymatlari oqimli va
+oqimsiz foydalanish maʼlumotlarini oʻgirish davomida saqlanadi va chaqiruv jurnali xulosalari bilan birga yozib qoʻyiladi. Jami
+keshga yozish miqdori bu toifalarga ikkinchi marta qoʻshilmaydi.
+
+Faqat umumiy yozish hisoblagichi mavjud boʻlgan chaqiruvlarning, jumladan eski yozuvlarning darajasi
+nomaʼlum hisoblanadi. Qisman taqsimotda ajratilmagan qoldiq nomaʼlumligicha qoladi; yaroqsiz yoki
+oʻzaro zid hisoblagichlarga indamay TTL tayinlash oʻrniga, ular belgilab qoʻyiladi. Soʻrov tomonidagi
+TTL belgilari haq undirilgan darajani tasdiqlamaydi.
+
+Paneldagi API ekvivalentidagi taxminiy yozish xarajati butun soʻrovni emas, faqat
+bildirilgan va narxi mavjud darajalarni qamrab oladi. Claude/Anthropic modellarining oʻz narxlash tizimida u
+5 daqiqalik yozishlar uchun kirish tarifining 1.25 baravarini va 1 soatlik yozishlar uchun kirish tarifining ikki baravarini qoʻllaydi. Mavjud boʻlmagan
+narx nol emas, mavjud emas deb hisoblanadi. Har bir yangi chaqiruv jurnalga qayd etilganda narxlar saqlanadi;
+tarixiy yozuvlar qayta narxlanmaydi. Shu sababli obuna hisoblarida
+API ekvivalentidagi taxminiy xarajat boʻlishi mumkin, ammo bu miqdor pul xarajati sifatida undirilmaydi yoki obuna
+kvotasidan sarflanmaydi. Mavjud kvota, budjet va provayder hisobiga aynan mos xarajat hisob-kitoblari oʻzgarmaydi.
+
+Bu diagnostika mavjud cheklangan hajmdagi kesh holati xulosasi va chaqiruv jurnali
+yozuvlarini saqlash mexanizmidan foydalanadi. U soʻrovlarning standart TTL qiymatlarini, yoʻnaltirishni yoki hisob tanlashni oʻzgartirmaydi.
+Provayderga yuborish chegarasida mijoz soʻragan TTL bilan amalda yuboriladigan TTLni qayd etish
+keyinga qoldirilgan; bu panel amalda yuboriladigan TTLni emas, kvitansiyadagi darajalarni koʻrsatadi.
+
+Amalga oshirish: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` va `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -122,35 +152,35 @@ Narxlash maʼlumotlari mavjud boʻlmagan modellar uchun OmniRoute ichki oʻrtach
 
 ---
 
-## Sana oraligʻi boʻyicha jamlash
+## Sana oraligʻi boʻyicha agregatsiya
 
 `usageAnalytics.ts` moduli xom foydalanish maʼlumotlaridan boshqaruv paneli vidjetlarini hisoblaydi. U 7 ta vaqt oraligʻini qoʻllab-quvvatlaydi:
 
-| Oraliq   | Davr                                       | Foydalanish holati                        |
+| Oraliq   | Davr                                       | Qoʻllanish holati                         |
 | -------- | ------------------------------------------ | ----------------------------------------- |
-| `1d`     | Oxirgi 24 soat                             | Soatlik xarajat keskin oʻsishini aniqlash |
-| `7d`     | Oxirgi 7 kun                               | Haftalik tahlil                           |
+| `1d`     | Oxirgi 24 soat                             | Soatlik xarajat keskin oshishini aniqlash |
+| `7d`     | Oxirgi 7 kun                               | Haftalik koʻrib chiqish                   |
 | `30d`    | Oxirgi 30 kun                              | Oylik hisob-kitob                         |
 | `90d`    | Oxirgi 90 kun                              | Choraklik tahlil                          |
 | `ytd`    | Joriy yilning 1-yanvaridan boshlab         | Yillik budjetni kuzatish                  |
-| `all`    | Barcha vaqt                                | Umumiy statistika                         |
+| `all`    | Butun davr                                 | Butun davr statistikasi                   |
 | `custom` | Foydalanuvchi belgilagan boshlanish/tugash | Auditlar, maxsus soʻrovlar                |
 
 ### Hisoblanadigan boshqaruv paneli vidjetlari
 
 Har qanday sana oraligʻi uchun tahlil qatlami quyidagilarni hisoblaydi:
 
-| Vidjet                        | Tavsif                                                             |
-| ----------------------------- | ------------------------------------------------------------------ |
-| **Xulosa kartalari**          | Jami soʻrovlar, jami xarajat, jami tokenlar, muvaffaqiyat darajasi |
-| **Kunlik trend grafigi**      | Kunlik xarajat va tokenlar, model boʻyicha qatlamlangan            |
-| **Faollik issiqlik xaritasi** | Kun soati × hafta kuni toʻri, rang = soʻrovlar soni                |
-| **Modellar kesimi**           | Model boʻyicha xarajatlarning doiraviy diagrammasi                 |
-| **Provayderlar kesimi**       | Provayder boʻyicha soʻrovlarning ustunli diagrammasi               |
-| **Eng faol API kalitlari**    | Xarajat boʻyicha eng yuqori 10 ta kalit jadvali                    |
-| **Xatolar tahlili**           | Vaqt davomida xatolar darajasi, asosiy xato sinflari               |
+| Vidjet                                 | Tavsif                                                                 |
+| -------------------------------------- | ---------------------------------------------------------------------- |
+| **Umumiy koʻrsatkich kartalari**       | Jami soʻrovlar, jami xarajat, jami tokenlar, muvaffaqiyat ulushi       |
+| **Kunlik tendensiya diagrammasi**      | Kunlik xarajat + tokenlar, modellar boʻyicha ustma-ust joylashtirilgan |
+| **Faollik issiqlik xaritasi**          | Kun soati × hafta kuni kataklari, rang = soʻrovlar soni                |
+| **Modellar boʻyicha taqsimot**         | Modellar boʻyicha xarajatlarning doiraviy diagrammasi                  |
+| **Provayderlar boʻyicha taqsimot**     | Provayderlar boʻyicha soʻrovlarning ustunli diagrammasi                |
+| **Eng yuqori xarajatli API kalitlari** | Xarajat boʻyicha eng yuqori 10 ta kalit jadvali                        |
+| **Xatolar tahlili**                    | Vaqt davomida xatolar ulushi, eng koʻp uchraydigan xato toifalari      |
 
-### Dasturiy kirish
+### Dasturiy foydalanish
 
 ````ts
 import { computeAnalytics } from "@/lib/usageAnalytics";
@@ -170,59 +200,59 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ---
 
-## Kvotani qoʻllash
+## Kvota cheklovlarini qoʻllash
 
-Har bir API kaliti uchun kvota ikki joyda qoʻllanadi:
+Har bir API kaliti uchun kvota ikki joyda nazorat qilinadi:
 
-1. **Yumshoq cheklov** (`quotaWarnAt`): foydalanish belgilangan chegaradan oshganda boshqaruv panelida ogohlantirish koʻrsatiladi
-2. **Qatʼiy cheklov** (`quotaLimit`): chegaradan oshganda soʻrov HTTP 429 bilan rad etiladi
+1. **Yumshoq chegara** (`quotaWarnAt`): foydalanish belgilangan chegaradan oshganda boshqaruv panelida ogohlantirish
+2. **Qatʼiy chegara** (`quotaLimit`): chegaradan oshganda soʻrov HTTP 429 bilan rad etiladi
 
 ### Sozlash
 
 ```ts
 // Har bir API kaliti uchun
 await updateApiKey(keyId, {
-  quotaWarnAt: 5_00,    // $5.00 — ogohlantirishni ko‘rsatish
+  quotaWarnAt: 5_00,    // $5.00 — ogohlantirish koʻrsatish
   quotaLimit: 10_00,    // $10.00 — qatʼiy toʻxtatish
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
 
-### Qoʻllash jarayoni
+### Cheklovni qoʻllash jarayoni
 
 ```
-Soʻrov ──▶ quotaCheck()
+Request ──▶ quotaCheck()
               │
-              ├── Cheklov doirasidami?  ──▶ ruxsat berish
+              ├── Within limit?  ──▶ allow
               │
-              └── Cheklovdan oshganmi?  ──▶ 429 Juda koʻp soʻrov
-                                            Retry-After sarlavhasi bilan
+              └── Over limit?  ──▶ 429 Too Many Requests
+                                   with Retry-After header
 ```
 
-### Kvota oniy tasvirlari
+### Kvota holati nusxalari
 
-`quotaSnapshots` jadvali tendensiyalarni tahlil qilish uchun **tarixiy kvota holatini** saqlaydi:
+`quotaSnapshots` jadvali tendensiyalarni tahlil qilish uchun **kvotaning tarixiy holatini** saqlaydi:
 
 | Maydon | Tavsif |
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Kuzatilayotgan kalit |
 | `window` | "day" | "week" | "month" |
-| `used` | Ushbu oynada sarflangan xarajat (sentlarda) |
-| `limit` | Cheklov (sentlarda) |
-| `resetAt` | Oyna qayta tiklanadigan vaqt |
-| `createdAt` | Oniy tasvir olingan vaqt |
+| `used` | Ushbu davrda sarflangan xarajat (sent) |
+| `limit` | Chegara (sent) |
+| `resetAt` | Davr qachon qayta boshlanishi |
+| `createdAt` | Holat nusxasi qachon olingani |
 
-Oniy tasvirlar xarajati > 0 boʻlgan **har bir soʻrovda** olinadi va quyidagilar uchun ishlatiladi:
+Holat nusxalari xarajati > 0 boʻlgan **har bir soʻrovda** olinadi va quyidagilar uchun ishlatiladi:
 
-- Boshqaruv panelida kvota jarayoni indikatorini koʻrsatish
-- 30 kunlik kvota tendensiyasi grafiklarini koʻrsatish
-- Foydalanish cheklovga yaqinlashganda ogohlantirishlarni ishga tushirish
+- Boshqaruv panelida kvota sarfi indikatorini koʻrsatish
+- 30 kunlik kvota tendensiyasi diagrammalarini koʻrsatish
+- Foydalanish chegaraga yaqinlashganda ogohlantirishlarni ishga tushirish
 
 ---
 
 ## REST API
 
-### Foydalanish yozuvlari roʻyxatini olish
+### Foydalanish yozuvlarini roʻyxatlash
 
 ```bash
 GET /api/usage?range=7d&limit=100
@@ -273,12 +303,7 @@ Javob:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -289,9 +314,9 @@ Javob:
 
 ### Foydalanish tahlilini soʻrash
 
-Foydalanish maʼlumotlariga toʻgʻridan-toʻgʻri REST eksport soʻnggi nuqtalari orqali emas, boshqaruv paneli yoki MCP vositalari orqali kiriladi. Mavjud tahlillar:
+Foydalanish maʼlumotlariga bevosita REST eksport endpointlari orqali emas, balki boshqaruv paneli yoki MCP vositalari orqali kiriladi. Mavjud tahliliy imkoniyatlar:
 
-- **`/api/usage/analytics`** — jamlangan foydalanish koʻrsatkichlari (model, provayder yoki kalit boʻyicha guruhlash)
+- **`/api/usage/analytics`** — jamlangan foydalanish koʻrsatkichlari (model, provayder, kalit boʻyicha guruhlash)
 - **`/api/usage/quota`** — har bir API kaliti uchun joriy kvota holati
 - **`/api/usage/history`** — soʻrovlar tarixi jurnallari
 
@@ -299,14 +324,14 @@ Foydalanish maʼlumotlariga toʻgʻridan-toʻgʻri REST eksport soʻnggi nuqtala
 
 ## MCP vositalari
 
-Ikki MCP vositasi foydalanish maʼlumotlarini agentlarga taqdim etadi (`open-sse/mcp-server/tools/` ga qarang):
+Ikkita MCP vositasi agentlarga foydalanish maʼlumotlarini taqdim etadi (`open-sse/mcp-server/tools/` ga qarang):
 
-| Vosita                  | Tavsif                                                                 |
-| ----------------------- | ---------------------------------------------------------------------- |
-| `omniroute_cost_report` | Berilgan davr uchun har bir kalit boʻyicha xarajat hisobotini yaratadi |
-| `omniroute_check_quota` | API kalitining joriy kvota holatini qaytaradi                          |
+| Vosita                  | Tavsif                                                                    |
+| ----------------------- | ------------------------------------------------------------------------- |
+| `omniroute_cost_report` | Berilgan davr uchun har bir kalit boʻyicha xarajatlar hisobotini yaratadi |
+| `omniroute_check_quota` | API kaliti uchun joriy kvota holatini qaytaradi                           |
 
-Agentni chaqirish misoli:
+Agent chaqiruviga misol:
 
 ```json
 {
@@ -317,57 +342,57 @@ Agentni chaqirish misoli:
 
 ---
 
-## Saqlash va tozalash
+## Saqlash muddati va tozalash
 
-Foydalanish maʼlumotlari har bir soʻrov uchun taxminan 1–10 KB ga oshadi. Katta miqyosda bu sezilarli boʻlishi mumkin.
+Foydalanish maʼlumotlari har bir soʻrov uchun ~1-10KB ga ortadi. Katta miqyosda bu sezilarli hajmni tashkil qilishi mumkin.
 
-### Saqlash sozlamalari
+### Saqlash muddati sozlamalari
 
-Foydalanish tarixi UI ichidagi Database Settings orqali yoki `/api/settings/database` orqali sozlanadi.
+Foydalanish tarixini saqlash muddati foydalanuvchi interfeysidagi Maʼlumotlar bazasi sozlamalari yoki `/api/settings/database` orqali sozlanadi.
 
-Standart holatda foydalanish tarixi **90 kun** saqlanadi.
+Odatiy holatda foydalanish tarixi **90 kun** saqlanadi.
 
 ### Tozalash
 
-Eski yozuvlar `src/lib/db/cleanup.ts` orqali tozalanadi:
+Eski yozuvlar `src/lib/db/cleanup.ts` tomonidan tozalanadi:
 
-- Fon cron jarayoni tomonidan ishga tushiriladi
-- Sozlangan `usageHistory` saqlash muddatidan eski yozuvlarni `usage_history` jadvalidan oʻchiradi
+- Fondagi cron jarayoni tomonidan ishga tushiriladi
+- `usage_history` jadvalidan yoshi sozlangan `usageHistory` saqlash muddatidan oshgan yozuvlarni oʻchiradi
 
-### Xotira hajmini baholash
+### Saqlash hajmini hisoblash
 
-| Soʻrovlar tezligi        | 30 kunlik xotira | 90 kunlik xotira |
-| ------------------------ | ---------------- | ---------------- |
-| Kuniga 100 ta soʻrov     | ~3MB             | ~9MB             |
-| Kuniga 1,000 ta soʻrov   | ~30MB            | ~90MB            |
-| Kuniga 10,000 ta soʻrov  | ~300MB           | ~900MB           |
-| Kuniga 100,000 ta soʻrov | ~3GB             | ~9GB             |
+| Soʻrovlar tezligi     | 30 kunlik saqlash hajmi | 90 kunlik saqlash hajmi |
+| --------------------- | ----------------------- | ----------------------- |
+| Kuniga 100 soʻrov     | ~3MB                    | ~9MB                    |
+| Kuniga 1,000 soʻrov   | ~30MB                   | ~90MB                   |
+| Kuniga 10,000 soʻrov  | ~300MB                  | ~900MB                  |
+| Kuniga 100,000 soʻrov | ~3GB                    | ~9GB                    |
 
-Juda yuqori trafik uchun quyidagilarni koʻrib chiqing:
+Juda yuqori trafikda quyidagilarni koʻrib chiqing:
 
-- Database Settings orqali saqlash muddatini qisqartirish
+- Maʼlumotlar bazasi sozlamalari orqali saqlash muddatini qisqartirish
 - Xom yozuvlar oʻrniga `aggregated_metrics` dan foydalanish (faqat tahlil uchun)
 
 ---
 
-## Xarajatlarni optimallashtirish boʻyicha maslahatlar
+## Xarajatlarni optimallashtirish bo‘yicha maslahatlar
 
-### 1. Toʻgʻri modeldan foydalaning
+### 1. To‘g‘ri modeldan foydalaning
 
 ```bash
-# Tezkor javob — arzon + tezkor variantdan foydalaning
+# Tezkor javob — arzon va tez modeldan foydalaning
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Murakkab vazifa — sifatli variantdan foydalaning
+# Murakkab vazifa — sifatli modeldan foydalaning
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
 ### 2. Keshlashni yoqing
 
-Anthropic prompt keshlashi **takroriy kontekst xarajatining 90% ini tejaydi**:
+Anthropic promptlarini keshlash **takroriy kontekst xarajatlarining 90% ini tejaydi**:
 
 ```ts
-// Keshlash avtomatik amalga oshiriladi — ayni katta tizim promptini kiriting
+// Keshlash avtomatik ishlaydi — shunchaki bir xil katta tizim promptini kiriting
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // Avtomatik ravishda keshlanadi
@@ -377,7 +402,7 @@ const response = await openai.chat({
 
 ### 3. Siqishdan foydalaning
 
-RTK + Caveman siqishi **vositalar koʻp ishlatiladigan seanslarda 15–95% tejaydi**:
+RTK + Caveman siqishi **vositalar ko‘p ishlatiladigan seanslarda xarajatlarning 15-95% ini tejaydi**:
 
 ```ts
 const config = {
@@ -388,17 +413,17 @@ const config = {
 };
 ```
 
-### 4. Har bir kalit uchun kvotalarni belgilang
+### 4. Har bir kalit uchun kvotalar belgilang
 
-Nazoratdan tashqari xarajatlarning oldini olish uchun har doim `quotaLimit` ni belgilang:
+Xarajatlarning nazoratsiz oshib ketishining oldini olish uchun har doim `quotaLimit` ni belgilang:
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Oyiga $10 limit
 ```
 
-### 5. Eng koʻp isteʼmol qiluvchilarni tekshiring
+### 5. Eng ko‘p sarflovchilarni tekshiring
 
-API kaliti boʻyicha guruhlash va xarajat boʻyicha saralash uchun boshqaruv paneli yoki **`/api/usage/analytics`** dan foydalaning:
+API kaliti bo‘yicha guruhlash va xarajat bo‘yicha saralash uchun boshqaruv paneli yoki **`/api/usage/analytics`** dan foydalaning:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -411,27 +436,27 @@ GET /api/usage/analytics?groupBy=apiKey
 ### "Xarajat kutilganidan yuqori"
 
 1. **`/api/usage/analytics?groupBy=model`** ni tekshiring — qimmat modelni toping
-2. **`/api/usage/analytics?groupBy=apiKey`** ni tekshiring — koʻp isteʼmol qiluvchini toping
-3. Narxlar haqidagi maʼlumotlar yangiligini tekshiring: `POST /api/pricing/sync`
+2. **`/api/usage/analytics?groupBy=apiKey`** ni tekshiring — eng ko‘p sarflovchini toping
+3. Narx ma’lumotlari yangilanganini tekshiring: `POST /api/pricing/sync`
 
-### "Yozuvlar yoʻq"
+### "Yozuvlar yo‘q"
 
-- Dashboard → Database → Cleanup ostidagi DB saqlash sozlamalarini tekshiring — eski yozuvlar davriy tozalash vazifasi (`src/lib/db/cleanup.ts`) tomonidan oʻchiriladi
-- `src/lib/db/usage*.ts` ichidagi xatolarni tekshiring — DB ga yozishdagi xatolar jurnalga yoziladi, ammo koʻrsatilmaydi
-- Soʻrov haqiqatan ham `chatCore` ga yetib borganini tekshiring — kombinatsiyalangan marshrutlashni tekshiring
+- Boshqaruv paneli → Ma’lumotlar bazasi → Tozalash bo‘limidagi ma’lumotlar bazasida saqlash sozlamalarini tekshiring — eski yozuvlar davriy tozalash vazifasi tomonidan o‘chiriladi (`src/lib/db/cleanup.ts`)
+- `src/lib/db/usage*.ts` dagi xatolarni tekshiring — ma’lumotlar bazasiga yozishdagi xatolar jurnalga qayd etiladi, ammo ko‘rsatilmaydi
+- So‘rov haqiqatan ham `chatCore` ga yetib borganini tekshiring — kombinatsiyali yo‘naltirishni tekshiring
 
-### "Kvota qoʻllanmayapti"
+### "Kvota qo‘llanmayapti"
 
 - Kalitning `quotaLimit` sozlamasini tekshiring
-- `quotaWindow` toʻgʻri sozlanganini tekshiring
-- `quotaSnapshots` yozuvlarini qidiring — ular har bir soʻrovda yaratilishi kerak
+- `quotaWindow` to‘g‘ri o‘rnatilganini tekshiring
+- `quotaSnapshots` yozuvlarini qidiring — ular har bir so‘rovda yaratilishi kerak
 
 ---
 
 ## Shuningdek qarang
 
 - [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Foydalanish jadvallari sxemasi
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — narxlarni sinxronlash muhit oʻzgaruvchilari
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — `auto/fast`, `auto/cheap` xarajatni qanday kamaytiradi
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Toʻliq `/api/usage/*` maʼlumotnomasi
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Narxlarni sinxronlash uchun muhit o‘zgaruvchilari
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — `auto/fast`, `auto/cheap` xarajatlarni qanday kamaytiradi
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — `/api/usage/*` bo‘yicha to‘liq ma’lumotnoma
 - Manba: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`
