@@ -486,13 +486,13 @@ U quyidagilarni boshqaradi:
 
 `open-sse/config/` konfiguratsiya qatlamini saqlaydi:
 
-| Fayl                          | Maqsad                                              |
-| ----------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`         | 380 provayder katalogi bo'yicha chat-model registri |
-| `providerModels.ts`           | Model taxalluslari, formatni xaritalash             |
-| `constants.ts`                | Vaqt tugashi, chegaralar, holat kodlari             |
-| `defaultThinkingSignature.ts` | Standart Claude fikrlash imzosi                     |
-| `modelStrip.ts` (xizmatlarda) | Har bir provayder uchun maydonni tozalash           |
+| Fayl                          | Maqsad                                             |
+| ----------------------------- | -------------------------------------------------- |
+| `providerRegistry.ts`         | 381-provayder katalogi bo'yicha chat-model reestri |
+| `providerModels.ts`           | Model taxalluslari, formatni xaritalash            |
+| `constants.ts`                | Vaqt tugashi, chegaralar, holat kodlari            |
+| `defaultThinkingSignature.ts` | Standart Claude fikrlash imzosi                    |
+| `modelStrip.ts` (xizmatlarda) | Har bir provayder uchun maydonni tozalash          |
 
 ### Provayder reestri sxemasi
 

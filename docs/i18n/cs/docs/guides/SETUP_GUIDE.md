@@ -191,9 +191,9 @@ Podrobnou konfiguraci jednotlivých nástrojů (Claude Code, Codex CLI, Cursor, 
 
 ---
 
-## Nastavení protokolů (MCP + A2A)
+## Nastavení protokolu (MCP + A2A)
 
-### Nastavení MCP (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
 Spusťte transport MCP v režimu stdio:
 
@@ -204,28 +204,28 @@ omniroute --mcp
 Doporučený postup ověření:
 
 ```bash
-# 1. Spusťte server MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Z klienta MCP zavolejte:
-omniroute_get_health        # Mělo by vrátit stav systému
-omniroute_list_combos       # Mělo by vrátit aktivní kombinace
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Nebo spusťte úplnou sadu testů E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Konfigurace klienta MCP
 
-**Claude Code:**
+**Claude kód:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Přidejte do nastavení MCP:
+Přidejte do nastavení MCP (stdio, s klíčem, aby měl volající hlavní):
 
 ```json
 {
@@ -233,15 +233,22 @@ Přidejte do nastavení MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Úplná dokumentace MCP:** [README serveru MCP](../../open-sse/mcp-server/README.md) — 110 nástrojů, konfigurace IDE, klienti pro Python/TS/Go.
+Nebo, když je `mcpTransport` `streamable-http` (nastavte jej na `/dashboard/mcp` nebo pomocí `omniroute mcp enable --transport streamable-http`), nasměrujte položku vzdáleného serveru MCP klienta na `http://localhost:20128/api/mcp/stream`.
 
-### Nastavení A2A (protokol Agent-to-Agent)
+Klíč se pohybuje jako `Authorization: Bearer <api-key>` (viz [MCP Server → Vzdálený přístup](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) pro vzdálené hostitele; vzdálený klíč potřebuje `mcp:connect` plus jeho rozsahy read/write ).
+
+**Kompletní dokumentace MCP :** [MCP Server nástroje README](../../open-sse/mcp-server/README.md) — 110, konfigurace IDE, klienti Python/TS/Go. Reference operátora pro nástroje komprese CCR/dedup (značky, předpoklady, rozsahy jednotlivých nástrojů, stránkování vyhledávání, diagnostika): [Compression Engines → Předpoklady / příručka operátora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Setup (Protokol Agent-to-Agent)
 
 Ověřte kartu agenta:
 
@@ -249,7 +256,7 @@ Ověřte kartu agenta:
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Odešlete úlohu:
+Odeslat úkol:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Úplná dokumentace A2A:** [README serveru A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, dovednosti, streamování, životní cyklus úloh.
+**Kompletní dokumentace A2A :** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, dovednosti, streamování, životní cyklus úkolů.
 
 ---
 
@@ -316,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Šablona pro Void Linux (xbps-src)
+## Void Linux (xbps-src) šablona
 
-Uživatelé Void Linuxu mohou sestavit nativní balíček pomocí `xbps-src`. Uložte tento blok jako `srcpkgs/omniroute/template`:
+Pro uživatele Void Linux můžete vytvořit nativní balíček pomocí `xbps-src`. Uložte tento blok jako `srcpkgs/omniroute/template`:
 
 ```bash
-# Soubor šablony pro „omniroute“
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Pro každé vydání znovu vygenerujte kontrolní součet pomocí:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

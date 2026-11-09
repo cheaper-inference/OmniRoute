@@ -150,15 +150,15 @@ Ayarlar → Güvenlik bölümünden kaydedilir; operatör etkinleştirene kadar 
 
 ## Rota Sınıfları
 
-`src/server/authz/types.ts` üç sınıf tanımlar; deterministik olarak sınıflandırılamayan her rota `MANAGEMENT` sınıfına geri döner.
+`src/server/authz/types.ts` üç sınıfı tanımlar; Belirleyici olarak sınıflandırılamayan herhangi bir rota `MANAGEMENT` geri döner.
 
-| Sınıf        | Açıklama                                                                                                                                                | Gerekli kimlik doğrulama                                       |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `PUBLIC`     | Açıkça güvenli rotalar — giriş, çıkış, durum, başlatma, sağlık ve başlangıç kurulumu uç noktaları.                                                      | Yok                                                            |
-| `CLIENT_API` | Model sunum uç noktaları — `/api/v1/*`, `/api/v1beta/*` ve takma adlar: `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Etkin `REQUIRE_API_KEY` özellik bayrağı açıksa Bearer anahtarı |
-| `MANAGEMENT` | Kontrol paneli sayfaları, ayarlar, sağlayıcılar, anahtarlar, yönetim ve tanılama uç noktaları.                                                          | Kontrol paneli oturumu VEYA `manage` kapsamlı Bearer           |
+| Sınıf        | Tanım                                                                                                                                                         | Yetkilendirme gerekli                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `PUBLIC`     | Açıkça güvenli rotalar — giriş, çıkış, durum, sağlık, başlangıç önyüklemesi.                                                                                  | Hiçbiri                                                                         |
+| `CLIENT_API` | Model hizmet veren uç noktalar — `/api/v1/*`, `/api/v1beta/*` ve `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*` takma adları. | Etkili `REQUIRE_API_KEY` özellik bayrağı etkinleştirildiğinde taşıyıcı anahtarı |
+| `MANAGEMENT` | Kontrol paneli sayfaları, ayarlar, sağlayıcılar, anahtarlar, yönetici ve teşhis uç noktaları.                                                                 | `manage` kapsamına sahip kontrol paneli oturumu OR Taşıyıcısı                   |
 
-Bazı `MANAGEMENT` işlemleri **yalnızca operatöre** özeldir: `manage` anahtarı yetmez. Saklanan kimlik bilgilerini dışa aktarmak (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), canlı verilerin üzerine bir yedeği geri yüklemek (`dryRun=true` dahil `POST /api/db-backups/import`, kimlikle geri yükleme `POST /api/db-backups` ve `POST /api/settings/import-json`) ve geri yükleme noktalarını yok etmek (`DELETE /api/db-backups` temizliği ve `PATCH /api/db-backups`, çünkü kalıcı hale getirdiği saklama süresi her yedeklemeden sonraki otomatik temizliği yönetir) bir kontrol paneli oturumu, yerel CLI öznesi veya devre dışı bırakılmış giriş gerektirir. Senkronizasyon token'ı üretmek (`POST /api/sync/tokens`) ve `admin` CLI erişim token'ı basmak (`POST /api/cli/tokens`) her giriş modunda kontrol paneli oturumu veya yerel CLI öznesi gerektirir. Her kapsamdaki API anahtarları ve `oma_` erişim token'ları operatör kimlik bilgisi değildir: gerektiğinde `403` alırlar. Denetim `src/lib/api/operatorCredential.ts` içinde yapılır (`resolveOperatorCredential()` / `requireOperatorCredential()`). Giriş ayarlarını değiştirmek de yalnızca operatöre özeldir: `POST /api/settings/require-login` (yönetim şifresini ayarlama / `requireLogin` değiştirme), bir şifre var olduktan sonra yalnızca bu kimlik bilgilerini kabul eder — ilk kurulum önyükleme penceresi (henüz şifre yoksa) değişmez — ve bir kontrol paneli oturumunun şifreyi değiştirmek için `currentPassword` göndermesi gerekir (eksik veya yanlışsa `403`, `settings.update_failed` olarak denetlenir). Yerel CLI ve girişi devre dışı bırakılmış bir örnek kurtarma yolunu korur ve şifreyi onsuz ayarlayabilir; çünkü ikisi de veri dizinine sahip ana makineye bağlıdır.
+Birkaç `MANAGEMENT` eylemi** yalnızca operatör** : `manage` anahtarı yeterli değil. Saklanan kimlik bilgilerini dışarı aktarmak (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), canlı veriler üzerinden bir yedeği geri yüklemek (`POST /api/db-backups/import` dahil `dryRun=true`, `POST /api/db-backups` kimliğe göre geri yükleme, `POST /api/settings/import-json`), geri yükleme noktalarını yok etmek (`DELETE /api/db-backups` temizleme ve `PATCH /api/db-backups` çünkü devam eden saklama her yedeklemeden sonra otomatik budamayı tetikler) bir kontrol paneli oturumu, yerel CLI konusu veya oturum açmanın devre dışı bırakılmasını gerektirir. Bir senkronizasyon belirteci (`POST /api/sync/tokens`) vermek ve bir `admin` CLI erişim belirtecini (`POST /api/cli/tokens`) basmak, her oturum açma modunda bir kontrol paneli oturumu veya yerel CLI konusu gerektirir. Herhangi bir kapsamın API anahtarları ve `oma_` erişim belirteçleri, operatör kimlik bilgileri değildir: gerektiğinde `403` alırlar. Çek `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) içinde yaşıyor. Oturum açma ayarlarının değiştirilmesi de yalnızca operatöre yöneliktir: `POST /api/settings/require-login` (yönetim şifresini ayarlayın / `requireLogin` değiştirin) yalnızca bir şifre mevcut olduğunda bu kimlik bilgilerini kabul eder — ilk çalıştırma önyükleme penceresi (henüz şifre yok) değiştirilmedi — ve bir kontrol paneli oturumunun şifreyi değiştirmek için `currentPassword` göndermesi gerekir ( eksik veya yanlış olduğunda `403`, `settings.update_failed` olarak denetlenir). Yerel CLI ve oturum açma özelliği devre dışı bırakılmış bir örnek, kurtarma yolunu korur ve her ikisi de veri dizininin sahibi olan ana bilgisayara bağlı olduğundan, bu yol olmadan bir parola belirleyebilir.
 
 ## Boru hattı
 
@@ -191,51 +191,47 @@ Başarılı bir politika `AuthSubject` `kind ∈ { client_api_key, dashboard_ses
 
 ## Genel Rotalar Listesi
 
-`src/shared/constants/publicApiRoutes.ts` açık izin listesidir:
+`src/shared/constants/publicApiRoutes.ts` açık izin verilenler listesidir:
 
-Liste **biçime** göre bölünmüştür ve bu bölünme kritik öneme sahiptir (GHSA-74g9-q8f6-793h): bir ön ek
-`startsWith()` ile eşleştirilir; bu nedenle başındaki karakterleri paylaşan tüm bitişik yollarla da eşleşir.
-`/api/usage/om-usage` ön ek olarak `/api/usage/om-usage<anything>` ifadesini PUBLIC olarak işaretler ve Next bunu
-`/api/usage/[connectionId]` rotasına çözümler — kendi kimlik doğrulaması olmayan bir işleyici.
+Liste şu şekilde bölünmüştür:** şekil** ve bölme yük taşır (GHSA-74g9-q8f6-793h): bir önek `startsWith()` ile eşleştirilir, böylece baş karakterlerini paylaşan her bitişik yolla da eşleşir. `/api/usage/om-usage` `/api/usage/om-usage<anything>` PUBLIC olarak işaretlenmiş bir önek olarak kullanır ve Next, bunu kendi kimlik doğrulaması olmayan bir işleyici olan `/api/usage/[connectionId]` — çözümler.
 
 ```ts
-// Gerçek alt ağaçlar. Her girişin "/" ile BİTMESİ ZORUNLUDUR (birim testiyle doğrulanır).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify içinde CLIENT_API olarak ele alınır, "kimlik doğrulamasız genel" olarak değil
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Yalnızca tekil rotalar, TAM OLARAK eşleştirilir (sonunda eğik çizgi olsun veya olmasın).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // isteğe bağlı TOTP için giriş adımı 2; MFA-beklemede çerezi gerekir
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS origin gevşetmesini de alan, salt okunur tekil rotalar.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS gevşetmesi OLMADAN salt okunur tekil rota.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Salt okunur rotalar yalnızca güvenli yöntemler için geneldir. Not: `classifyRoute()`, PUBLIC kapsamına düşen rotalardan `/api/v1/*` ve `/api/v1beta/*` rotalarını hariç tutar — bunlar her zaman `CLIENT_API` olduğundan Bearer anahtarı politikası yine uygulanır.
+Salt okunur rotalar herkese açıktır** sadece** Güvenli yöntemler için. Not: `classifyRoute()` `/api/v1/*` ve `/api/v1beta/*` PUBLIC geçiş — hariç tutar; bunlar her zaman `CLIENT_API`, dolayısıyla Taşıyıcı anahtar politikası hala geçerlidir.
 
 ## Yeni Bir Rota Ekleme
 
@@ -299,15 +295,15 @@ Katalog ve eşleştirme kuralları (aynı dize veya `*` ile biten verilmiş bir 
 
 `oma_live_…` belirteçlerinde `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) tarafından sıralanır. Bu sıralama yalnızca erişim belirteci kimlik bilgisi için geçerlidir. Bkz. [Yönetim Kimlik Doğrulaması](../guides/MANAGEMENT-AUTH.md).
 
-## Kimlik Doğrulama Gerekli Anahtarı
+## Kimlik Doğrulaması Gerekli Geçiş
 
-`src/shared/utils/apiAuth.ts` içindeki `isAuthRequired()`, bir istek için **herhangi bir** kimlik doğrulamanın zorunlu olup olmadığını belirler:
+`src/shared/utils/apiAuth.ts` `isAuthRequired()` karar verir** herhangi** auth bir istek için uygulanır:
 
-- `settings.requireLogin === false` → kimlik doğrulama genel olarak kapalıdır; ancak her zaman korunan katman ([Rota Koruma Katmanları](../security/ROUTE_GUARD_TIERS.md)) ve kabul edilen bir kimlik bilgisini veren çağrılar bunun dışındadır. Bunlar, girişin açık olduğu durumdaki ile aynı kimlik bilgisini ister: senkronizasyon token'ları vermek, her kapsamda CLI erişim token'ları basmak ve `manage`/`admin` kapsamlı API anahtarı oluşturmak, bu kapsamı bir anahtara vermek veya böyle bir anahtarı yeniden üretmek/göstermek (`src/lib/api/requireManagementAuth.ts` içindeki `requireCredentialForManagementScopedKey()`). Çıkarım amaçlı anahtarlar açık kalır.
-- Yönetim şifresi yok **ve** `INITIAL_PASSWORD` ortam değişkeni yok → önyükleme modu: kurulum sihirbazına ve loopback isteklerine izin verilir, ancak dışarıdan gelen ağ isteklerinin yine kimlik bilgisi gerekir.
-- Herhangi bir veritabanı hatası → kapalı durumda başarısız olur (güvenli varsayılan).
+- `settings.requireLogin === false` → kimlik doğrulaması, her zaman korunan katman (bkz. [Rota Koruma Katmanları](../security/ROUTE_GUARD_TIERS.md) ) ve oturum açma sırasındakiyle aynı kimlik bilgilerine ihtiyaç duyan, kabul ettiği bir kimlik bilgisini dağıtan çağrılar dışında genel olarak devre dışıdır: senkronizasyon belirteçleri yayınlama, herhangi bir kapsamda CLI erişim belirteçlerini basma ve `manage`/`admin` kapsamıyla bir API anahtarı oluşturma, bu kapsamı bir anahtara verme veya böyle bir anahtarı yeniden oluşturma veya açığa çıkarma (`requireCredentialForManagementScopedKey()` ) `src/lib/api/requireManagementAuth.ts`). Yalnızca çıkarım anahtarları açık kalır. Korumalı bir özellik bayrağı (`REQUIRE_API_KEY`, diğer Güvenlik bayrakları ve [Özellik Bayraklarında](../reference/FEATURE_FLAGS.md#rest-api) listelenen SSRF / TLS / MCP-scope / sandbox bayrakları) yazmak ve PII maskeleme ayarlarını (`PUT /api/settings/pii`) kaydetmek de bir kimlik bilgisi gerektirmeye devam eder.
+- Şifre yapılandırılmadı** Ve** no `INITIAL_PASSWORD` env var → önyükleme modu, ekleme sihirbazına ve geridöngü isteklerine izin verir, ancak açığa çıkan ağ isteklerinin yine de kimlik bilgilerine ihtiyacı vardır. İstisna: korumalı bir özellik bayrağı yazmak ve PII maskeleme ayarlarını (`PUT /api/settings/pii`) kaydetmek, geri döngüden bile bir kimlik bilgisi gerektirir, bu nedenle geri döngü tek başına burada yeterli değildir.
+- Herhangi bir DB hatası → kapatılamaz (varsayılan olarak güvenlidir).
 
-İstemci API anahtarı zorlaması, doğrudan `process.env.REQUIRE_API_KEY` okumak yerine `src/shared/utils/featureFlags.ts` içindeki `isRequireApiKeyEnabled()` fonksiyonunu kullanır. Bu, dağıtılmış örnekler için önemlidir: Kontrol Paneli → Özellik Bayrakları içinde `REQUIRE_API_KEY` değiştirmek bir DB geçersiz kılma kaydeder ve `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ve bu yardımcıyı paylaşan diğer istemci API kimlik denetimlerini anında etkiler. Özellik bayrağı deposu okunamıyorsa istemci API kimlik doğrulaması kapalı duruma geçer ve bir anahtar ister.
+İstemci API anahtar uygulaması, doğrudan `process.env.REQUIRE_API_KEY` okumasını değil, `src/shared/utils/featureFlags.ts` `isRequireApiKeyEnabled()` kullanır. Bu, konuşlandırılan örnekler için önemlidir: Kontrol Paneli → Özellik Bayraklarında `REQUIRE_API_KEY` değiştirmek, bir DB geçersiz kılmayı depolar ve `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ve bu yardımcıyı paylaşan diğer istemci API kimlik doğrulama kontrollerini anında etkiler. Özellik bayrağı deposu okunamıyorsa istemci API kimlik doğrulaması başarısız olur ve bir anahtar gerektirir.
 
 ## Uyumluluğu Bozan Değişiklik — v3.8.0
 
