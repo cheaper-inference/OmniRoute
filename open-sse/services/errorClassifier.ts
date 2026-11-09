@@ -589,6 +589,9 @@ export function classifyProviderError(
       bodyStr.includes("accessNotConfigured") ||
       bodyStr.includes("PERMISSION_DENIED") ||
       /\bit is disabled\b/i.test(bodyStr) ||
+      // The request named a cache the project does not hold. The client sent a bad
+      // cachedContent id; the credential is fine, so it must not fall through to FORBIDDEN.
+      bodyStr.toLowerCase().includes("cachedcontent not found") ||
       isCloudCodeProvider;
     if (recoverableProject403) {
       return PROVIDER_ERROR_TYPES.PROJECT_ROUTE_ERROR;
