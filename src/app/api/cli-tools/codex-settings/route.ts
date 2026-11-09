@@ -138,6 +138,17 @@ const toToml = (parsed: Record<string, any>) => {
   return lines.join("\n") + "\n";
 };
 
+// A root openai_base_url is OmniRoute's only when it equals the base_url OmniRoute wrote into
+// [model_providers.omniroute] (or is about to write). Any other value is the user's own route.
+const trimUrl = (url: unknown) => (typeof url === "string" ? url.trim().replace(/\/+$/, "") : null);
+const deleteOwnedRootUrl = (parsed: Record<string, any>, ...ownedUrls: string[]) => {
+  const current = trimUrl(parsed._root.openai_base_url);
+  const owned = [parsed._sections["model_providers.omniroute"]?.base_url, ...ownedUrls];
+  if (current !== null && owned.some((url) => trimUrl(url) === current)) {
+    delete parsed._root.openai_base_url;
+  }
+};
+
 // Read current config.toml
 const readConfig = async () => {
   try {
@@ -284,6 +295,9 @@ export async function POST(request: Request) {
     const effectiveWireApi = wireApi ?? "responses";
     const normalizedBaseUrl = normalizeCodexBaseUrl(baseUrl, effectiveWireApi);
 
+    // Read the previous OmniRoute URL before the provider section is replaced below.
+    deleteOwnedRootUrl(parsed, normalizedBaseUrl);
+
     // Always create a custom provider to reliably pass wire_api and use OMNIROUTE_API_KEY
     parsed._root.model_provider = "omniroute";
     parsed._sections["model_providers.omniroute"] = {
@@ -292,7 +306,6 @@ export async function POST(request: Request) {
       wire_api: effectiveWireApi,
       env_key: "OPENAI_API_KEY",
     };
-    delete parsed._root.openai_base_url;
 
     // Process model aliases into notice.model_migrations
     if (modelMappings && Object.keys(modelMappings).length > 0) {
@@ -385,7 +398,7 @@ export async function DELETE(request: Request) {
     migrateCodexFeatureFlags(parsed);
 
     // Remove OmniRoute related root fields
-    delete parsed._root.openai_base_url;
+    deleteOwnedRootUrl(parsed);
 
     if (parsed._root.model_provider === "omniroute") {
       delete parsed._root.model;
