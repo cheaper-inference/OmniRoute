@@ -87,10 +87,11 @@ export function PlaygroundStudio() {
 
       {/* Main content area: tab content + config pane */}
       {/* Below md the pane stacks under the tab content (#18071): a side column at 390 px
-          left the chat ~100 px wide. */}
+          left the chat ~100 px wide. Stacked, the tab content keeps a 10rem minimum (the pane
+          shrinks and scrolls instead) and scrolls itself, since ApiTab has no height of its own. */}
       <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
         {/* Tab content */}
-        <div className="min-h-0 flex-1 overflow-hidden">
+        <div className="min-h-40 flex-1 overflow-y-auto md:min-h-0 md:overflow-hidden">
           {effectiveTab === "chat" && (
             <ChatTab configState={configState} onMetricsUpdate={handleMetricsUpdate} />
           )}

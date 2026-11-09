@@ -461,7 +461,7 @@ describe("EndpointPageClient", () => {
           jsonResponse({
             cloudEnabled: false,
             cloudConfigured: false,
-            hideEndpointCloudflaredTunnel: true,
+            hideEndpointCloudflaredTunnel: false,
             hideEndpointTailscaleFunnel: false,
             hideEndpointNgrokTunnel: false,
           })
@@ -470,6 +470,11 @@ describe("EndpointPageClient", () => {
       if (path === "/api/network/info") {
         return Promise.resolve(
           jsonResponse({ lanUrls: [], tailscaleIpUrl: "http://100.64.0.7:20128" })
+        );
+      }
+      if (path === "/api/tunnels/cloudflared") {
+        return Promise.resolve(
+          jsonResponse({ phase: "stopped", supported: true, installed: true, running: false })
         );
       }
       if (path === "/api/tunnels/tailscale") {
@@ -561,14 +566,19 @@ describe("EndpointPageClient", () => {
     renderEndpointPage();
     await waitForText("Unsupported");
     await waitForText("Needs Auth");
+    await waitForText("Stopped");
 
     const chips = Array.from(document.querySelectorAll('[data-slot="badge"]'));
-    const unsupported = chips.find((el) => el.textContent === "Unsupported");
-    const needsAuth = chips.find((el) => el.textContent === "Needs Auth");
-    expect(unsupported?.getAttribute("data-tone")).toBe("warning");
-    expect(needsAuth?.getAttribute("data-tone")).toBe("warning");
-    // The hand-tinted warning chip (axe contrast node) is gone.
-    expect(document.querySelector('[class*="border-warning/30"]')).toBeNull();
+    const toneOf = (label: string) =>
+      chips.find((el) => el.textContent === label)?.getAttribute("data-tone");
+    expect(toneOf("Unsupported")).toBe("warning"); // Tailscale
+    expect(toneOf("Needs Auth")).toBe("warning"); // ngrok
+    expect(toneOf("Stopped")).toBe("neutral"); // Cloudflare
+    // The phase chips no longer carry the hand-tinted classes (axe contrast node).
+    for (const label of ["Unsupported", "Needs Auth", "Stopped"]) {
+      const chip = chips.find((el) => el.textContent === label);
+      expect(chip?.className).not.toMatch(/border-(warning|border)\/\d+|bg-warning\/10/);
+    }
   });
 
   it("does not load compression settings on the Endpoint page", async () => {

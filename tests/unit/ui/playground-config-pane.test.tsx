@@ -146,9 +146,14 @@ describe("StudioConfigPane", () => {
     expect(classes).toContain("border-t");
     expect(classes).toContain("md:border-t-0");
     expect(classes).toContain("md:border-l");
-    // Stacked, the pane must not take the whole viewport from the chat above it.
+    // Stacked, the pane must not take the whole viewport from the chat above it: it is capped
+    // and may shrink (and scroll) so the tab content keeps its minimum height.
     expect(classes).toContain("max-h-[45vh]");
     expect(classes).toContain("md:max-h-none");
+    expect(classes).toContain("min-h-0");
+    expect(classes).toContain("shrink");
+    expect(classes).not.toContain("shrink-0");
+    expect(classes).toContain("md:shrink-0");
   });
 
   it("keeps the collapsed rail as a full-width strip below md (#18071)", () => {

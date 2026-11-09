@@ -196,9 +196,14 @@ describe("PlaygroundStudio", () => {
     const classes = (main?.className ?? "").split(/\s+/);
     expect(classes).toContain("flex-col");
     expect(classes).toContain("md:flex-row");
-    // The tab content keeps the free height of the stacked column (min-h-0 lets it shrink).
+    // Stacked, the tab content keeps a usable minimum height on short screens and scrolls
+    // (ApiTab has no height of its own); from md it is the clipped flex column it was before.
     const content = main?.firstElementChild;
-    expect((content?.className ?? "").split(/\s+/)).toContain("min-h-0");
+    const contentClasses = (content?.className ?? "").split(/\s+/);
+    expect(contentClasses).toContain("min-h-40");
+    expect(contentClasses).toContain("overflow-y-auto");
+    expect(contentClasses).toContain("md:min-h-0");
+    expect(contentClasses).toContain("md:overflow-hidden");
   });
 
   it("defaults to Chat tab as active", () => {

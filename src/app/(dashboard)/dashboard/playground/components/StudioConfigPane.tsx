@@ -167,7 +167,7 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
 
   return (
     <aside
-      className="flex max-h-[45vh] w-full shrink-0 flex-col overflow-y-auto border-t border-border bg-bg-alt md:max-h-none md:w-72 md:border-t-0 md:border-l"
+      className="flex max-h-[45vh] min-h-0 w-full shrink flex-col overflow-y-auto border-t border-border bg-bg-alt md:max-h-none md:w-72 md:shrink-0 md:border-t-0 md:border-l"
       aria-label={tp("configPane")}
     >
       {/* Header */}
