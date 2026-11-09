@@ -1,1 +1,0 @@
-- **fix(sse):** Combo set retries now return 499 immediately when the request is already cancelled and release abort listeners when retry delays expire. Zero-delay retries still yield before dispatching again.

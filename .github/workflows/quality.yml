@@ -13,8 +13,12 @@ on:
     types: [checks_requested]
   workflow_dispatch:
 
+  # A description edit on a Mergify queue draft (Mergify writes its queue summary there, and
+  # the Blacksmith app appends its footer, ~4 edits in the first 30 s) gets its own group and
+  # skips the matrix: in the shared group it cancelled the candidate's real run, and Mergify
+  # dequeued the PR on the cancelled checks ("checks interrupted", #18853/#18858 on 2026-11-03).
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && format('-queue-edit-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -32,6 +36,7 @@ jobs:
   # path filters share existence reasons: code / docs / i18n / workflow.
   changes:
     name: Change Classification
+    if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     runs-on: ubuntu-latest
     outputs:
       code: ${{ steps.classify.outputs.code }}
@@ -515,8 +520,13 @@ jobs:
         run: npm run check:agent-skills-sync
 
   admission-verdict:
-    name: Gate / Quality
-    if: ${{ always() }}
+    # A queue-draft edit run must not leave a check named "Gate / Quality" on the draft: Mergify
+    # read that skipped check as a finished non-success and dequeued the PR (#18961 on
+    # 2026-11-04) before the real run reported. Every other run keeps the exact name.
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / Quality (queue-draft edit)' || 'Gate / Quality' }}
+    # Runs on every candidate; only a Mergify queue-draft description edit skips it (see the
+    # workflow concurrency note): that draft is never what branch protection merges.
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:

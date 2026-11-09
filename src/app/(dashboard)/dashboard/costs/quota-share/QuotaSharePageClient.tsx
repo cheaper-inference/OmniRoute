@@ -11,6 +11,8 @@ import { Skeleton } from "@/shared/components/Loading";
 import Select from "@/shared/components/Select";
 import Icon from "@/shared/components/Icon";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
+import { useNotificationStore } from "@/store/notificationStore";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { maskEmailLikeValue } from "@/shared/utils/maskEmail";
 import type { QuotaPool } from "@/lib/quota/dimensions";
 
@@ -134,6 +136,8 @@ function PoolCardWithUsage({
 export default function QuotaSharePageClient() {
   const t = useTranslations("quotaShare");
   const { pools, loading, mutate } = usePools();
+  const notifyError = useNotificationStore((s) => s.error);
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
 
   // LS → DB migration hook (B22) — runs once, idempotent
@@ -274,7 +278,7 @@ export default function QuotaSharePageClient() {
   // pools (HTTP 409) and protects the seed "group-demo"; surface both to the user.
   const handleDeleteGroup = useCallback(async () => {
     if (selectedGroupId === "all" || selectedGroupId === "group-demo") return;
-    if (!confirm(t("deleteGroupConfirm"))) return;
+    if (!(await requestConfirm(t("deleteGroupConfirm")))) return;
     try {
       const res = await fetch(`/api/quota/groups/${selectedGroupId}`, { method: "DELETE" });
       if (res.ok) {
@@ -282,12 +286,12 @@ export default function QuotaSharePageClient() {
         await fetchGroups();
         await mutate();
       } else if (res.status === 409) {
-        alert(t("deleteGroupHasPools"));
+        notifyError(t("deleteGroupHasPools"));
       }
     } catch {
       // fail open
     }
-  }, [selectedGroupId, fetchGroups, mutate, t]);
+  }, [selectedGroupId, fetchGroups, mutate, t, requestConfirm, notifyError]);
 
   // ── Derived ──────────────────────────────────────────────────────────────
 
@@ -392,7 +396,7 @@ export default function QuotaSharePageClient() {
    */
   const handleRemovePool = useCallback(
     async (id: string) => {
-      if (!confirm(t("removeConfirm"))) return;
+      if (!(await requestConfirm(t("removeConfirm")))) return;
       setRemoveError(null);
       try {
         const res = await fetch(`/api/quota/pools/${id}`, { method: "DELETE" });
@@ -411,7 +415,7 @@ export default function QuotaSharePageClient() {
       }
       await mutate();
     },
-    [mutate, t]
+    [mutate, t, requestConfirm]
   );
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -732,6 +736,7 @@ export default function QuotaSharePageClient() {
         groups={groups}
         selectedGroupId={selectedGroupId}
       />
+      {confirmDialog}
     </div>
   );
 }

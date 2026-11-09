@@ -67,37 +67,30 @@ HAR decodează data expirării JWT-ului și afișează durata de viață rămas�
 
 ## Durata de viață și reîmprospătarea tokenului
 
-`access_token` are o durată scurtă de viață (de obicei **~75 de minute**). După expirare, furnizorul
-raportează o eroare de conexiune și trebuie să capturați din nou acreditarea.
+`access_token` are o durată de viață scurtă (de obicei **~75 de minute**). Fără un token de reîmprospătare utilizabil, trebuie să capturați din nou acreditarea după expirare.
 
-### Reîmprospătarea automată cu `refreshToken`
+### Reîmprospătare automată cu `refreshToken`
 
-Pentru a evita recapturarea manuală, puteți stoca un token de reîmprospătare Microsoft în
-**Advanced Settings → providerSpecificData** pentru conexiune:
+În dialogul **Adăugare conexiune** sau **Editare conexiune** al furnizorului Microsoft 365, deschideți
+**Setări avansate → Token de reîmprospătare (opțional)**. Lipiți un token OAuth de reîmprospătare Microsoft pentru domeniul `substrate.office.com/sydney` și salvați. Câmpul este mascat și nu este completat niciodată în prealabil cu tokenul stocat. La editare, lăsați-l necompletat pentru a păstra tokenul existent; lipiți un token nou pentru a-l înlocui.
 
-| Câmp           | Descriere                                                                             |
-| -------------- | ------------------------------------------------------------------------------------- |
-| `refreshToken` | Token de reîmprospătare Microsoft OAuth pentru domeniul `substrate.office.com/sydney` |
-| `tier`         | `individual` (implicit), `edu` sau `enterprise`                                       |
-
-Obțineți tokenul de reîmprospătare dintr-un flux Microsoft bazat pe cod de dispozitiv sau cod de autorizare
-cu domeniul `substrate.office.com/sydney`. Când `refreshToken` este setat, OmniRoute
-reîmprospătează în prealabil `access_token` înaintea fiecărei solicitări, astfel încât să nu fie necesar să
-îl capturați din nou după fiecare expirare de ~75 de minute.
+Obțineți tokenul de reîmprospătare printr-un flux Microsoft cu cod de dispozitiv sau cod de autorizare, cu domeniul `substrate.office.com/sydney`; tabloul de bord nu îl obține în locul dvs.
+Când este configurat un token de reîmprospătare, OmniRoute verifică `access_token` înaintea solicitărilor
+și îl reîmprospătează numai atunci când este necesar. O reîmprospătare reușită persistă, de asemenea, tokenul de reîmprospătare rotit, evitând recapturarea manuală cât timp tokenul de reîmprospătare rămâne valid.
 
 Dacă `refreshToken` nu este setat, trebuie să capturați din nou manual acreditarea WebSocket
 după fiecare expirare.
 
 ### Selectarea nivelului
 
-| Nivel        | Alias        | Interfață                              |
-| ------------ | ------------ | -------------------------------------- |
-| `individual` | _(implicit)_ | M365 Copilot pentru consumatori        |
-| `edu`        | `included`   | M365 Copilot pentru educație           |
-| `enterprise` | `work`       | M365 Copilot pentru mediul profesional |
+| Nivel        | Alias        | Suprafață                           |
+| ------------ | ------------ | ----------------------------------- |
+| `individual` | _(implicit)_ | Copilot M365 pentru consumatori     |
+| `edu`        | `included`   | Copilot M365 pentru educație        |
+| `enterprise` | `work`       | Copilot M365 pentru mediul de lucru |
 
-Setați nivelul în **Advanced Settings → providerSpecificData → tier**. Nivelul influențează
-rutarea BizChat și accesul la modele.
+Setați nivelul în **Setări avansate → Nivel Copilot**. Nivelul afectează
+direcționarea BizChat și accesul la modele.
 
 ## Model de securitate
 
@@ -110,32 +103,27 @@ rutarea BizChat și accesul la modele.
 - Tokenul de reîmprospătare acordă acces pe termen lung la interfața BizChat. Stocați-l cu
   aceeași grijă ca pe o cheie API.
 
-## Depanare
+## Depanarea problemelor
 
 ### Autentificarea eșuează imediat
 
-- Verificați dacă ați copiat din **URL-ul WebSocket**, nu dintr-o solicitare XHR/Fetch. Datele de
-  autentificare se află în parametrul de interogare `access_token` al conexiunii Chathub WebSocket
-  — nu într-un antet `Authorization: Bearer`.
-- Asigurați-vă că `chathubPath` include întregul segment `<oid>@<tenant>` din calea
-  URL-ului.
+- Verificați că ați copiat din **URL-ul WebSocket**, nu dintr-o solicitare XHR/Fetch. Credentialul se află în parametrul de interogare `access_token` al conexiunii WebSocket Chathub — nu într-un antet `Authorization: Bearer`.
+- Asigurați-vă că `chathubPath` include segmentul complet `<oid>@<tenant>` din calea URL-ului.
 
 ### Tokenul expiră după aproximativ 75 de minute
 
-Acest lucru este normal. Fără un `refreshToken`, tokenul de acces are o durată scurtă de viață. Puteți fie:
+Acest lucru este normal. Fără un `refreshToken`, tokenul de acces are o durată de viață scurtă. Puteți:
 
-- Să capturați din nou datele de autentificare din DevTools, fie
-- Să configurați un `refreshToken` în Setări avansate pentru reîmprospătare automată.
+- Să capturați din nou credentialul din DevTools sau
+- Să configurați **Setări avansate → Token de reîmprospătare (opțional)** în fereastra de dialog Adăugare sau editare conexiune pentru reîmprospătare automată.
 
-### Testarea conexiunii reușește, dar chatul returnează 401
+### Testarea conexiunii reușește, dar conversația returnează 401
 
-Este posibil ca tokenul să fi expirat între validare și prima solicitare. Capturați din nou
-date de autentificare actualizate.
+Este posibil ca tokenul să fi expirat între validare și prima solicitare. Capturați din nou un credential valid.
 
 ### Copilot nu apare în lista de furnizori
 
-Asigurați-vă că `copilot-m365-web` este activat în **Tablou de bord → Furnizori**. Este posibil ca furnizorul
-să fie ascuns în mod implicit în anumite niveluri.
+Asigurați-vă că `copilot-m365-web` este activat în **Tablou de bord → Furnizori**. Furnizorul poate fi ascuns în mod implicit în anumite niveluri de abonament.
 
 ## Referințe
 

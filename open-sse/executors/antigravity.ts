@@ -1,3 +1,4 @@
+import { selectHttpResponse } from "../utils/providerHttpAttempts.ts";
 import crypto, { randomUUID } from "crypto";
 import { isAntigravityPreResponseTimeout } from "../services/antigravityTimeout.ts";
 import {
@@ -1255,7 +1256,13 @@ export class AntigravityExecutor extends BaseExecutor {
         headers: [["Content-Type", "application/json"]],
       });
 
-      return { response: syntheticResponse, url, headers, transformedBody };
+      return {
+        response: syntheticResponse,
+        upstreamHttpSelection: selectHttpResponse(response),
+        url,
+        headers,
+        transformedBody,
+      };
     };
 
     return collect();

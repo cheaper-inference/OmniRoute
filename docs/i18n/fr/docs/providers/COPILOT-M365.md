@@ -65,39 +65,39 @@ HAR décode la date d’expiration du JWT et affiche la durée de validité rest
 > **Ne validez jamais dans un dépôt une véritable exportation HAR, un jeton d’accès ou un jeton d’actualisation.** Les valeurs utilisées dans les tests et
 > la documentation doivent toujours être des valeurs substitutives.
 
-## Durée de validité et actualisation du jeton
+## Durée de vie et actualisation du jeton
 
-La durée de validité de `access_token` est limitée (généralement **environ 75 minutes**). Après son expiration, le fournisseur
-signale une erreur de connexion et vous devez récupérer à nouveau l’identifiant de connexion.
+L’`access_token` est de courte durée (généralement **~75 minutes**). Sans
+jeton d’actualisation utilisable, vous devez capturer à nouveau l’identifiant
+après son expiration.
 
 ### Actualisation automatique avec `refreshToken`
 
-Pour éviter de devoir récupérer manuellement l’identifiant, vous pouvez stocker un jeton d’actualisation Microsoft dans les
-**Paramètres avancés → providerSpecificData** de la connexion :
+Dans la boîte de dialogue **Ajouter une connexion** ou **Modifier la connexion** du fournisseur Microsoft 365, ouvrez
+**Paramètres avancés → Jeton d’actualisation (facultatif)**. Collez un jeton d’actualisation OAuth Microsoft
+pour l’étendue `substrate.office.com/sydney`, puis enregistrez. La saisie est masquée et le jeton enregistré
+n’est jamais prérempli. Lors d’une modification, laissez le champ vide pour conserver le jeton existant ;
+collez un nouveau jeton pour le remplacer.
 
-| Champ          | Description                                                                        |
-| -------------- | ---------------------------------------------------------------------------------- |
-| `refreshToken` | Jeton d’actualisation Microsoft OAuth pour la portée `substrate.office.com/sydney` |
-| `tier`         | `individual` (par défaut), `edu` ou `enterprise`                                   |
+Obtenez le jeton d’actualisation via un flux de code d’appareil ou de code d’autorisation Microsoft
+avec l’étendue `substrate.office.com/sydney` ; le tableau de bord ne l’acquiert pas pour vous.
+Lorsqu’un jeton d’actualisation est configuré, OmniRoute vérifie l’`access_token` avant les requêtes
+et ne l’actualise que lorsque cela est nécessaire. Une actualisation réussie conserve également le jeton
+d’actualisation renouvelé, ce qui évite une nouvelle capture manuelle tant que le jeton d’actualisation reste valide.
 
-Obtenez le jeton d’actualisation à partir d’un flux Microsoft de code d’appareil ou de code d’autorisation
-utilisant la portée `substrate.office.com/sydney`. Lorsque `refreshToken` est défini, OmniRoute
-actualise de manière préventive `access_token` avant chaque requête. Vous n’avez donc pas besoin de
-récupérer à nouveau l’identifiant après chaque expiration d’environ 75 minutes.
-
-Si `refreshToken` n’est pas défini, vous devez récupérer manuellement l’identifiant de connexion WebSocket
-après chaque expiration.
+Si `refreshToken` n’est pas défini, vous devez capturer à nouveau manuellement l’identifiant
+WebSocket après chaque expiration.
 
 ### Sélection du niveau
 
-| Niveau       | Alias          | Interface                    |
-| ------------ | -------------- | ---------------------------- |
-| `individual` | _(par défaut)_ | M365 Copilot grand public    |
-| `edu`        | `included`     | M365 Copilot Éducation       |
-| `enterprise` | `work`         | M365 Copilot pour le travail |
+| Niveau       | Alias          | Interface                     |
+| ------------ | -------------- | ----------------------------- |
+| `individual` | _(par défaut)_ | Copilot M365 grand public     |
+| `edu`        | `included`     | Copilot M365 pour l’éducation |
+| `enterprise` | `work`         | Copilot M365 professionnel    |
 
-Définissez le niveau dans **Paramètres avancés → providerSpecificData → tier**. Le niveau affecte
-le routage de BizChat et l’accès aux modèles.
+Définissez le niveau dans **Paramètres avancés → Niveau Copilot**. Le niveau a une incidence
+sur le routage BizChat et l’accès aux modèles.
 
 ## Modèle de sécurité
 
@@ -114,28 +114,23 @@ le routage de BizChat et l’accès aux modèles.
 
 ### L’authentification échoue immédiatement
 
-- Vérifiez que vous avez copié les informations depuis l’**URL WebSocket**, et non depuis une requête XHR/Fetch. Les
-  identifiants se trouvent dans le paramètre de requête `access_token` de la connexion WebSocket
-  Chathub — et non dans un en-tête `Authorization: Bearer`.
-- Assurez-vous que `chathubPath` inclut le segment `<oid>@<tenant>` complet provenant du chemin de
-  l’URL.
+- Vérifiez que vous avez copié depuis l’**URL WebSocket**, et non depuis une requête XHR/Fetch. L’identifiant se trouve dans le paramètre de requête `access_token` de la connexion WebSocket Chathub — et non dans un en-tête `Authorization: Bearer`.
+- Vérifiez que `chathubPath` inclut le segment `<oid>@<tenant>` complet du chemin d’URL.
 
 ### Le jeton expire après environ 75 minutes
 
-Ce comportement est attendu. Sans `refreshToken`, le jeton d’accès a une courte durée de vie. Vous pouvez :
+C’est prévu. Sans `refreshToken`, le jeton d’accès a une durée de vie courte. Vous pouvez :
 
-- Récupérer de nouveau les identifiants depuis DevTools, ou
-- Configurer un `refreshToken` dans les paramètres avancés afin d’activer l’actualisation automatique.
+- Recapturer l’identifiant depuis les outils de développement, ou
+- Configurer **Paramètres avancés → Jeton d’actualisation (facultatif)** dans la boîte de dialogue d’ajout ou de modification de la connexion pour activer l’actualisation automatique.
 
 ### Le test de connexion réussit, mais le chat renvoie une erreur 401
 
-Le jeton a peut-être expiré entre la validation et la première requête. Récupérez de nouveau des
-identifiants valides.
+Le jeton a peut-être expiré entre la validation et la première requête. Recapturez un identifiant à jour.
 
 ### Copilot n’apparaît pas dans la liste des fournisseurs
 
-Assurez-vous que `copilot-m365-web` est activé dans **Tableau de bord → Fournisseurs**. Le fournisseur peut
-être masqué par défaut dans certaines offres.
+Vérifiez que `copilot-m365-web` est activé dans **Tableau de bord → Fournisseurs**. Le fournisseur peut être masqué par défaut dans certains niveaux d’abonnement.
 
 ## Références
 

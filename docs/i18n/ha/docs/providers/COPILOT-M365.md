@@ -66,37 +66,35 @@ HAR yana fassara lokacin ƙarewar JWT kuma yana nuna ragowar tsawon rayuwar toke
 
 ## Tsawon rayuwar token da sabuntawa
 
-`access_token` yana da ɗan gajeren wa'adin aiki (yawanci **~minti 75**). Bayan ya ƙare, mai samarwar
-zai bayar da rahoton kuskuren haɗi kuma dole ne ka sake samun bayanan shaidar.
+`access_token` yana da ɗan gajeren rayuwa (yawanci **kimanin mintuna 75**). Idan babu
+token ɗin sabuntawa mai aiki, dole ne ka sake samo takardun tantancewa bayan ya ƙare.
 
 ### Sabuntawa ta atomatik da `refreshToken`
 
-Domin kauce wa sake samun bayanan da hannu, za ka iya adana Microsoft refresh token a cikin
-**Advanced Settings → providerSpecificData** na haɗin:
+A cikin maganganun **Ƙara haɗi** ko **Gyara haɗi** na mai samar da Microsoft 365, buɗe
+**Saitunan ci gaba → Token ɗin sabuntawa (na zaɓi)**. Manna token ɗin sabuntawar Microsoft OAuth
+mai amfani da scope na `substrate.office.com/sydney` sannan ka adana. Ana ɓoye abin da aka shigar kuma ba a taɓa cike shi da token ɗin da aka adana ba. Lokacin gyarawa, bar shi babu komai don riƙe token ɗin da yake akwai;
+manna sabon token don maye gurbinsa.
 
-| Fili           | Bayani                                                                |
-| -------------- | --------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth refresh token na iyakar `substrate.office.com/sydney` |
-| `tier`         | `individual` (tsoho), `edu`, ko `enterprise`                          |
+Samo token ɗin sabuntawa daga tsarin lambar na'ura ko tsarin lambar izini na Microsoft da aka
+ƙayyade zuwa `substrate.office.com/sydney`; dashboard ɗin ba ya samo shi a madadinka.
+Idan an saita token ɗin sabuntawa, OmniRoute yana duba `access_token` kafin buƙatu
+kuma yana sabunta shi ne kawai lokacin da ake buƙatar sabuntawa. Sabuntawar da ta yi nasara
+kuma tana adana sabon token ɗin sabuntawa, wanda ke kawar da buƙatar sake samowa da hannu matuƙar token ɗin sabuntawar yana nan yana aiki.
 
-Samo refresh token daga tsarin Microsoft device-code ko authorization-code
-wanda aka iyakance zuwa `substrate.office.com/sydney`. Idan an saita `refreshToken`, OmniRoute
-yana sabunta `access_token` kafin kowace buƙata, don haka ba sai ka
-sake samun sa bayan duk lokacin ƙarewar ~minti 75 ba.
-
-Idan ba a saita `refreshToken` ba, dole ne ka sake samun bayanan shaidar WebSocket da hannu
-bayan duk lokacin ƙarewa.
+Idan ba a saita `refreshToken` ba, dole ne ka sake samo takardun tantancewar WebSocket da hannu
+bayan kowace ƙarewa.
 
 ### Zaɓin mataki
 
-| Mataki       | Laƙabi     | Fuska                       |
-| ------------ | ---------- | --------------------------- |
-| `individual` | _(tsoho)_  | M365 Copilot na masu amfani |
-| `edu`        | `included` | M365 Copilot na ilimi       |
-| `enterprise` | `work`     | M365 Copilot don aiki       |
+| Mataki       | Laƙabi     | Yanayin aiki             |
+| ------------ | ---------- | ------------------------ |
+| `individual` | _(tsoho)_  | Consumer M365 Copilot    |
+| `edu`        | `included` | Copilot na M365 na Ilimi |
+| `enterprise` | `work`     | M365 Copilot don Aiki    |
 
-Saita matakin a **Advanced Settings → providerSpecificData → tier**. Matakin yana tasiri
-kan hanyar zirga-zirgar BizChat da damar amfani da model.
+Saita matakin a **Saitunan ci gaba → Matakin Copilot**. Matakin yana shafar
+tushen BizChat da damar yin amfani da samfura.
 
 ## Tsarin tsaro
 
@@ -105,27 +103,31 @@ kan hanyar zirga-zirgar BizChat da damar amfani da model.
 - Access token ɗin JWT ne mai ɗan gajeren lokacin aiki. Ɗauke shi kamar kalmar sirri: kada a commit, a log, ko a raba shi.
 - Refresh token ɗin yana ba da damar shiga BizChat na dogon lokaci. Ajiye shi da irin kulawar da ake bai wa API key.
 
-## Magance matsaloli
+## Shirya matsaloli
 
-### Tantancewa tana gaza nan take
+### Tabbatarwa tana kasa nan take
 
-- Tabbatar cewa ka kwafi daga **WebSocket URL**, ba daga buƙatar XHR/Fetch ba. Bayanan shaidar suna cikin query parameter na `access_token` na haɗin Chathub WebSocket — ba cikin header na `Authorization: Bearer` ba.
+- Tabbatar cewa ka kwafa daga **WebSocket URL**, ba daga buƙatar XHR/Fetch ba. Bayanai
+  na tantancewa suna cikin sigar `access_token` ta query parameter na haɗin Chathub
+  WebSocket — ba cikin kanun `Authorization: Bearer` ba.
 - Tabbatar cewa `chathubPath` ya ƙunshi cikakken ɓangaren `<oid>@<tenant>` daga hanyar URL.
 
-### Token yana ƙarewa bayan ~75 minutes
+### Token ya ƙare bayan kusan mintuna 75
 
-Wannan abin tsammani ne. Idan babu `refreshToken`, access token ɗin yana da ɗan gajeren lokacin aiki. Yi ɗaya daga cikin waɗannan:
+Wannan abu ne da ake tsammani. Ba tare da `refreshToken` ba, access token yana da ɗan gajeren lokaci. Ko dai:
 
-- Sake samo bayanan shaidar daga DevTools, ko
-- Saita `refreshToken` a Advanced Settings domin sabuntawa ta atomatik.
+- Sake kama bayanan tantancewa daga DevTools, ko
+- Sanya **Advanced Settings → Refresh token (optional)** a cikin taga ta haɗin Add ko Edit
+  domin sabuntawa ta atomatik.
 
-### Test Connection ya yi nasara amma chat yana mayar da 401
+### Haɗin gwaji ya yi nasara amma tattaunawa ta dawo da 401
 
-Mai yiwuwa token ɗin ya ƙare tsakanin lokacin tabbatarwa da buƙata ta farko. Sake samo sabbin bayanan shaidar.
+Wataƙila token ɗin ya ƙare tsakanin tabbatarwa da buƙatar farko. Sake kama sabbin bayanan tantancewa.
 
-### Copilot ba ya bayyana a jerin masu samarwa
+### Copilot ba ya bayyana cikin jerin masu samarwa
 
-Tabbatar cewa an kunna `copilot-m365-web` a **Dashboard → Providers**. Ana iya ɓoye mai samarwar ta tsohuwa a wasu matakai.
+Tabbatar cewa an kunna `copilot-m365-web` a cikin **Dashboard → Providers**. Mai samarwar na iya
+ɓoye ta tsohuwa a wasu matakan sabis.
 
 ## Manazarta
 

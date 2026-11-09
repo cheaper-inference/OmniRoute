@@ -66,7 +66,7 @@ describe("Input adapter → kit Field + Input", () => {
     expect(marker?.getAttribute("aria-hidden")).toBe("true");
   });
 
-  it("forwards a ref to the native <input> (CommandPalette focuses it)", () => {
+  it("forwards a ref to the native <input>", () => {
     const ref = React.createRef<HTMLInputElement>();
     render(<Input id="q" aria-label="Query" ref={ref} />);
     expect(ref.current).toBeInstanceOf(HTMLInputElement);
