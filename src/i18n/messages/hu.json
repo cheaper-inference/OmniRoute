@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Fiókbeállítások",
+    "description": "Több fiókot is előnyben részesíthet, vagy tartalékként tarthat ennél a kombinációnál. Az automatikus útválasztás rangsorolja a fiókokat az egyes kategóriákon belül. A listán nem szereplő fiókok normálként működnek. A jogosultságok, a kvótakorlátok és a meglévő körhöz rendelések továbbra is érvényesek.",
+    "preferred": "Előnyben részesített",
+    "normal": "Normál",
+    "reserve": "Tartalék",
+    "excluded": "Kizárt",
+    "loading": "Fiókok betöltése…",
+    "error": "Nem sikerült betölteni a fiókokat. Az újrapróbálkozáshoz nyissa meg újra a szerkesztőt.",
+    "missing": "Nem elérhető fiók ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Codex szolgáltatási mód ehhez az API-kulcshoz",
     "description": "A Codex-kérésekre vonatkozik, beleértve a kombinációkon belüli Codex-modelleket is. A kényszerített módok felülbírálják a kliens, a globális beállítások és a kapcsolat alapértelmezéseit. Más szolgáltatók változatlanok maradnak.",
@@ -14636,6 +14647,8 @@
     "usdUsageQuotaDescription": "Letiltja ezt a kulcsot egy 400-as API-hibával, miután a helyi USD-költése eléri a beállított napi vagy heti kvótát.",
     "dailyQuotaUsd": "Napi kvóta (USD)",
     "weeklyQuotaUsd": "Heti kvóta (USD)",
+    "fiveHourQuotaUsd": "5 órás kvóta (USD)",
+    "fiveHourQuotaHint": "Gördülő ablak: minden kérés költsége 5 órán át számít, utána felszabadul.",
     "quotaWindowDescription": "A heti kvóta a gyorsítótárazott Claude heti visszaállítást követi, ha elérhető; ellenkező esetben egy gördülő 7 napos időszakra vált vissza. A napi kvóta a Fortaleza naptári napot használja.",
     "apiKeyUsdQuota": "API-kulcs USD kvótája",
     "apiKeyUsdQuotaDescription": "Ha engedélyezve van, a(z) @@om-usage visszaadja a napi kvótát, a heti kvótát, a napi költést és a heti költést USD-ben. A heti a gyorsítótárazott Claude visszaállítást követi, ha elérhető.",

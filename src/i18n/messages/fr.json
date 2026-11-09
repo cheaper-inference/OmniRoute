@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Préférences des comptes",
+    "description": "Définissez plusieurs comptes comme prioritaires ou gardez-les en réserve pour cette configuration. Le routage automatique classe les comptes au sein de chaque niveau. Les comptes non répertoriés restent normaux. Les autorisations, les limites de quota et les associations de tour existantes continuent de s’appliquer.",
+    "preferred": "Prioritaire",
+    "normal": "Normal",
+    "reserve": "En réserve",
+    "excluded": "Exclu",
+    "loading": "Chargement des comptes…",
+    "error": "Impossible de charger les comptes. Rouvrez l’éditeur pour réessayer.",
+    "missing": "Compte indisponible ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Mode de service Codex pour cette clé API",
     "description": "S’applique aux requêtes Codex, y compris aux modèles Codex au sein des combinaisons. Les modes forcés remplacent les paramètres du client, les paramètres globaux et les valeurs par défaut de la connexion. Les autres fournisseurs restent inchangés.",
@@ -14636,6 +14647,8 @@
     "usdUsageQuotaDescription": "Bloque cette clé avec une erreur API 400 lorsque ses dépenses locales en USD atteignent le quota quotidien ou hebdomadaire configuré.",
     "dailyQuotaUsd": "Quota quotidien (USD)",
     "weeklyQuotaUsd": "Quota hebdomadaire (USD)",
+    "fiveHourQuotaUsd": "Quota sur 5 heures (USD)",
+    "fiveHourQuotaHint": "Fenêtre glissante : la dépense de chaque requête compte pendant 5 heures, puis se libère.",
     "quotaWindowDescription": "Le quota hebdomadaire suit la réinitialisation hebdomadaire de Claude mise en cache lorsqu'elle est disponible ; sinon, il bascule sur une fenêtre glissante de 7 jours. Le quota quotidien utilise le jour calendaire de Fortaleza.",
     "apiKeyUsdQuota": "Quota en USD de la clé API",
     "apiKeyUsdQuotaDescription": "Lorsqu'il est activé, @@om-usage renvoie le quota quotidien, le quota hebdomadaire, les dépenses quotidiennes et les dépenses hebdomadaires en USD. Le quota hebdomadaire suit la réinitialisation de Claude mise en cache lorsqu'elle est disponible.",

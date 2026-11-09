@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Àwọn ààyò àkọọ́lẹ̀",
+    "description": "Yan ọ̀pọ̀ àkọọ́lẹ̀ gẹ́gẹ́ bí èyí tí a ó lò kọ́kọ́, tàbí pa wọ́n mọ́ sí ìpamọ́ fún ìṣètò ìtọ́sọ́nà yìí. Ìtọ́sọ́nà aládàáṣiṣẹ́ máa ń ṣe ìṣètò àwọn àkọọ́lẹ̀ nínú ẹ̀ka kọ̀ọ̀kan. Àwọn àkọọ́lẹ̀ tí kò sí nínú àkójọ yóò ṣiṣẹ́ déédéé. Àwọn àṣẹ, ààlà ìpín àti àwọn ìdè àkọọ́lẹ̀ tó ti wà fún ìyípo ṣì kan náà.",
+    "preferred": "Èyí tí a ó lò kọ́kọ́",
+    "normal": "Déédéé",
+    "reserve": "Ìpamọ́",
+    "excluded": "A kò ní lò",
+    "loading": "Ń ṣí àwọn àkọọ́lẹ̀…",
+    "error": "A kò lè ṣí àwọn àkọọ́lẹ̀. Ṣí olóòtú náà lẹ́ẹ̀kan sí i láti tún gbìyànjú.",
+    "missing": "Àkọọ́lẹ̀ kò sí ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Ìpo iṣẹ́ Codex fún kọ́kọ́rọ́ API yìí",
     "description": "Ó kan àwọn ìbéèrè Codex, pẹ̀lú àwọn àwòṣe Codex inú àwọn àkójọpọ̀. Àwọn ìpo tí a fi tipátipá yan máa borí ètò oníbàárà, àwọn ètò àgbáyé àti àwọn àiyípadà ìbẹ̀rẹ̀ ìsopọ̀. Àwọn olùpèsè mìíràn kò ní yí padà.",
@@ -14636,6 +14647,8 @@
     "usdUsageQuotaDescription": "Yóò dí kọ́kọ́rọ́ yìí pẹ̀lú àṣìṣe API 400 lẹ́yìn tí ìnáwó USD àdúgbò rẹ̀ bá dé ìwọ̀n ojoojúmọ́ tàbí ọ̀sọ̀ọ̀sẹ̀ tí a ṣètò.",
     "dailyQuotaUsd": "Ìwọ̀n ojoojúmọ́ (USD)",
     "weeklyQuotaUsd": "Ìwọ̀n ọ̀sọ̀ọ̀sẹ̀ (USD)",
+    "fiveHourQuotaUsd": "Ìwọ̀n wákàtí 5 (USD)",
+    "fiveHourQuotaHint": "Fèrèsé tí ń yí: a máa ń ka ìnáwó ìbéèrè kọ̀ọ̀kan fún wákàtí 5, lẹ́yìn náà a tú u sílẹ̀.",
     "quotaWindowDescription": "Ìwọ̀n ọ̀sọ̀ọ̀sẹ̀ ń tẹ̀lé àtúntò ọ̀sọ̀ọ̀sẹ̀ Claude tí a fi pamọ́ sínú kaṣe nígbà tó bá wà; bí kò bá sí, yóò lo àkókò ọjọ́ 7 tó ń yípo. Ìwọ̀n ojoojúmọ́ ń lo ọjọ́ kàlẹ́ńdà Fortaleza.",
     "apiKeyUsdQuota": "Ìwọ̀n USD fún kọ́kọ́rọ́ API",
     "apiKeyUsdQuotaDescription": "Nígbà tí a bá mú un ṣiṣẹ́, @@om-usage máa ń dá ìwọ̀n ojoojúmọ́, ìwọ̀n ọ̀sọ̀ọ̀sẹ̀, ìnáwó ojoojúmọ́ àti ìnáwó ọ̀sọ̀ọ̀sẹ̀ padà ní USD. Ìwọ̀n ọ̀sọ̀ọ̀sẹ̀ ń tẹ̀lé àtúntò Claude tí a fi pamọ́ sínú kaṣe nígbà tó bá wà.",
